@@ -1,177 +1,148 @@
-﻿using System;
 using System.Collections.Generic;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld
-{
-	// Token: 0x02002251 RID: 8785
-	public class CompAbilityEffect_Neuroquake : CompAbilityEffect
-	{
-		// Token: 0x17001D47 RID: 7495
-		// (get) Token: 0x0600BFB5 RID: 49077 RVA: 0x00378F6C File Offset: 0x0037716C
-		public new CompProperties_AbilityNeuroquake Props
-		{
-			get
-			{
-				return (CompProperties_AbilityNeuroquake)this.props;
-			}
-		}
+namespace RimWorld;
 
-		// Token: 0x0600BFB6 RID: 49078 RVA: 0x00378F7C File Offset: 0x0037717C
-		public override void Apply(LocalTargetInfo target, LocalTargetInfo dest)
+public class CompAbilityEffect_Neuroquake : CompAbilityEffect
+{
+	private Dictionary<Faction, Pair<bool, Pawn>> affectedFactions;
+
+	private List<Pawn> giveMentalStateTo = new List<Pawn>();
+
+	private static List<IntVec3> cachedRadiusCells = new List<IntVec3>();
+
+	private static IntVec3? cachedRadiusCellsTarget = null;
+
+	private static Map cachedRadiusCellsMap = null;
+
+	public new CompProperties_AbilityNeuroquake Props => (CompProperties_AbilityNeuroquake)props;
+
+	public override void Apply(LocalTargetInfo target, LocalTargetInfo dest)
+	{
+		if (affectedFactions == null)
 		{
-			if (this.affectedFactions == null)
+			affectedFactions = new Dictionary<Faction, Pair<bool, Pawn>>();
+		}
+		else
+		{
+			affectedFactions.Clear();
+		}
+		giveMentalStateTo.Clear();
+		foreach (Pawn item in parent.pawn.Map.mapPawns.AllPawnsSpawned)
+		{
+			if (CanApplyEffects(item) && !item.Fogged())
 			{
-				this.affectedFactions = new Dictionary<Faction, Pair<bool, Pawn>>();
-			}
-			else
-			{
-				this.affectedFactions.Clear();
-			}
-			this.giveMentalStateTo.Clear();
-			foreach (Pawn pawn in this.parent.pawn.Map.mapPawns.AllPawnsSpawned)
-			{
-				if (this.CanApplyEffects(pawn) && !pawn.Fogged())
+				bool flag = !item.Spawned || item.Position.InHorDistOf(parent.pawn.Position, parent.def.EffectRadius) || !item.Position.InHorDistOf(parent.pawn.Position, Props.mentalStateRadius);
+				AffectGoodwill(item.HomeFaction, !flag, item);
+				if (!flag)
 				{
-					bool flag = !pawn.Spawned || pawn.Position.InHorDistOf(this.parent.pawn.Position, this.parent.def.EffectRadius) || !pawn.Position.InHorDistOf(this.parent.pawn.Position, this.Props.mentalStateRadius);
-					this.AffectGoodwill(pawn.HomeFaction, !flag, pawn);
-					if (!flag)
-					{
-						this.giveMentalStateTo.Add(pawn);
-					}
-					else
-					{
-						this.GiveNeuroquakeThought(pawn);
-					}
-				}
-			}
-			foreach (Map map in Find.Maps)
-			{
-				if (map != this.parent.pawn.Map && Find.WorldGrid.TraversalDistanceBetween(map.Tile, this.parent.pawn.Map.Tile, true, this.Props.worldRangeTiles + 1, false) <= this.Props.worldRangeTiles)
-				{
-					foreach (Pawn p in map.mapPawns.AllPawns)
-					{
-						if (this.CanApplyEffects(p))
-						{
-							this.GiveNeuroquakeThought(p);
-						}
-					}
-				}
-			}
-			foreach (Caravan caravan in Find.WorldObjects.Caravans)
-			{
-				if (Find.WorldGrid.TraversalDistanceBetween(caravan.Tile, this.parent.pawn.Map.Tile, true, this.Props.worldRangeTiles + 1, false) <= this.Props.worldRangeTiles)
-				{
-					foreach (Pawn p2 in caravan.pawns)
-					{
-						if (this.CanApplyEffects(p2))
-						{
-							this.GiveNeuroquakeThought(p2);
-						}
-					}
-				}
-			}
-			foreach (Pawn pawn2 in this.giveMentalStateTo)
-			{
-				MentalStateDef def;
-				if (!pawn2.RaceProps.IsMechanoid)
-				{
-					def = MentalStateDefOf.Berserk;
+					giveMentalStateTo.Add(item);
 				}
 				else
 				{
-					def = MentalStateDefOf.BerserkMechanoid;
+					GiveNeuroquakeThought(item);
 				}
-				CompAbilityEffect_GiveMentalState.TryGiveMentalState(def, pawn2, this.parent.def, StatDefOf.PsychicSensitivity, this.parent.pawn, false);
-				RestUtility.WakeUp(pawn2, true);
 			}
-			foreach (Faction faction in Find.FactionManager.AllFactions)
+		}
+		foreach (Map map in Find.Maps)
+		{
+			if (map == parent.pawn.Map || Find.WorldGrid.TraversalDistanceBetween(map.Tile, parent.pawn.Map.Tile, passImpassable: true, Props.worldRangeTiles + 1) > Props.worldRangeTiles)
 			{
-				if (!faction.IsPlayer && !faction.defeated && !faction.HostileTo(Faction.OfPlayer))
+				continue;
+			}
+			foreach (Pawn allPawn in map.mapPawns.AllPawns)
+			{
+				if (CanApplyEffects(allPawn))
 				{
-					this.AffectGoodwill(faction, false, null);
+					GiveNeuroquakeThought(allPawn);
 				}
 			}
-			if (this.parent.pawn.Faction == Faction.OfPlayer)
+		}
+		foreach (Caravan caravan in Find.WorldObjects.Caravans)
+		{
+			if (Find.WorldGrid.TraversalDistanceBetween(caravan.Tile, parent.pawn.Map.Tile, passImpassable: true, Props.worldRangeTiles + 1) > Props.worldRangeTiles)
 			{
-				foreach (KeyValuePair<Faction, Pair<bool, Pawn>> keyValuePair in this.affectedFactions)
+				continue;
+			}
+			foreach (Pawn pawn in caravan.pawns)
+			{
+				if (CanApplyEffects(pawn))
 				{
-					Faction key = keyValuePair.Key;
-					bool first = keyValuePair.Value.First;
-					Pawn second = keyValuePair.Value.Second;
-					int goodwillChange = first ? this.Props.goodwillImpactForBerserk : this.Props.goodwillImpactForNeuroquake;
-					Faction.OfPlayer.TryAffectGoodwillWith(key, goodwillChange, true, true, HistoryEventDefOf.UsedHarmfulAbility, null);
+					GiveNeuroquakeThought(pawn);
 				}
 			}
-			base.Apply(target, dest);
-			this.affectedFactions.Clear();
-			this.giveMentalStateTo.Clear();
 		}
-
-		// Token: 0x0600BFB7 RID: 49079 RVA: 0x00379448 File Offset: 0x00377648
-		private void AffectGoodwill(Faction faction, bool gaveMentalBreak, Pawn p = null)
+		foreach (Pawn item2 in giveMentalStateTo)
 		{
-			Pair<bool, Pawn> pair;
-			if (faction != null && !faction.IsPlayer && !faction.HostileTo(Faction.OfPlayer) && (p == null || !p.IsSlaveOfColony) && (!this.affectedFactions.TryGetValue(faction, out pair) || (!pair.First && gaveMentalBreak)))
+			MentalStateDef mentalStateDef = null;
+			mentalStateDef = (item2.RaceProps.IsMechanoid ? MentalStateDefOf.BerserkMechanoid : MentalStateDefOf.Berserk);
+			CompAbilityEffect_GiveMentalState.TryGiveMentalState(mentalStateDef, item2, parent.def, StatDefOf.PsychicSensitivity, parent.pawn);
+			RestUtility.WakeUp(item2);
+		}
+		foreach (Faction allFaction in Find.FactionManager.AllFactions)
+		{
+			if (!allFaction.IsPlayer && !allFaction.defeated && !allFaction.HostileTo(Faction.OfPlayer))
 			{
-				this.affectedFactions[faction] = new Pair<bool, Pawn>(gaveMentalBreak, p);
+				AffectGoodwill(allFaction, gaveMentalBreak: false);
 			}
 		}
-
-		// Token: 0x0600BFB8 RID: 49080 RVA: 0x003794A9 File Offset: 0x003776A9
-		private void GiveNeuroquakeThought(Pawn p)
+		if (parent.pawn.Faction == Faction.OfPlayer)
 		{
-			Pawn_NeedsTracker needs = p.needs;
-			if (needs == null)
+			foreach (KeyValuePair<Faction, Pair<bool, Pawn>> affectedFaction in affectedFactions)
 			{
-				return;
+				Faction key = affectedFaction.Key;
+				bool first = affectedFaction.Value.First;
+				_ = affectedFaction.Value.Second;
+				int goodwillChange = (first ? Props.goodwillImpactForBerserk : Props.goodwillImpactForNeuroquake);
+				Faction.OfPlayer.TryAffectGoodwillWith(key, goodwillChange, canSendMessage: true, canSendHostilityLetter: true, HistoryEventDefOf.UsedHarmfulAbility, null);
 			}
-			Need_Mood mood = needs.mood;
-			if (mood == null)
-			{
-				return;
-			}
-			mood.thoughts.memories.TryGainMemory(ThoughtDefOf.NeuroquakeEcho, null, null);
 		}
+		base.Apply(target, dest);
+		affectedFactions.Clear();
+		giveMentalStateTo.Clear();
+	}
 
-		// Token: 0x0600BFB9 RID: 49081 RVA: 0x003794D6 File Offset: 0x003776D6
-		private bool CanApplyEffects(Pawn p)
+	private void AffectGoodwill(Faction faction, bool gaveMentalBreak, Pawn p = null)
+	{
+		if (faction != null && !faction.IsPlayer && !faction.HostileTo(Faction.OfPlayer) && (p == null || !p.IsSlaveOfColony) && (!affectedFactions.TryGetValue(faction, out var value) || (!value.First && gaveMentalBreak)))
 		{
-			return !p.kindDef.isBoss && (!p.Dead && !p.Suspended) && p.GetStatValue(StatDefOf.PsychicSensitivity, true, -1) > float.Epsilon;
+			affectedFactions[faction] = new Pair<bool, Pawn>(gaveMentalBreak, p);
 		}
+	}
 
-		// Token: 0x0600BFBA RID: 49082 RVA: 0x00379510 File Offset: 0x00377710
-		public override void OnGizmoUpdate()
+	private void GiveNeuroquakeThought(Pawn p)
+	{
+		p.needs?.mood?.thoughts.memories.TryGainMemory(ThoughtDefOf.NeuroquakeEcho);
+	}
+
+	private bool CanApplyEffects(Pawn p)
+	{
+		if (p.kindDef.isBoss)
 		{
-			if (CompAbilityEffect_Neuroquake.cachedRadiusCellsTarget == null || CompAbilityEffect_Neuroquake.cachedRadiusCellsTarget.Value == this.parent.pawn.Position || CompAbilityEffect_Neuroquake.cachedRadiusCellsMap != this.parent.pawn.Map)
+			return false;
+		}
+		if (!p.Dead && !p.Suspended)
+		{
+			return p.GetStatValue(StatDefOf.PsychicSensitivity) > float.Epsilon;
+		}
+		return false;
+	}
+
+	public override void OnGizmoUpdate()
+	{
+		if (!cachedRadiusCellsTarget.HasValue || cachedRadiusCellsTarget.Value == parent.pawn.Position || cachedRadiusCellsMap != parent.pawn.Map)
+		{
+			cachedRadiusCells.Clear();
+			foreach (IntVec3 allCell in parent.pawn.Map.AllCells)
 			{
-				CompAbilityEffect_Neuroquake.cachedRadiusCells.Clear();
-				foreach (IntVec3 item in this.parent.pawn.Map.AllCells)
+				if (allCell.InHorDistOf(parent.pawn.Position, Props.mentalStateRadius))
 				{
-					if (item.InHorDistOf(this.parent.pawn.Position, this.Props.mentalStateRadius))
-					{
-						CompAbilityEffect_Neuroquake.cachedRadiusCells.Add(item);
-					}
+					cachedRadiusCells.Add(allCell);
 				}
-				CompAbilityEffect_Neuroquake.cachedRadiusCellsTarget = new IntVec3?(this.parent.pawn.Position);
 			}
-			GenDraw.DrawFieldEdges(CompAbilityEffect_Neuroquake.cachedRadiusCells, 2900);
+			cachedRadiusCellsTarget = parent.pawn.Position;
 		}
-
-		// Token: 0x0400837C RID: 33660
-		private Dictionary<Faction, Pair<bool, Pawn>> affectedFactions;
-
-		// Token: 0x0400837D RID: 33661
-		private List<Pawn> giveMentalStateTo = new List<Pawn>();
-
-		// Token: 0x0400837E RID: 33662
-		private static List<IntVec3> cachedRadiusCells = new List<IntVec3>();
-
-		// Token: 0x0400837F RID: 33663
-		private static IntVec3? cachedRadiusCellsTarget = null;
-
-		// Token: 0x04008380 RID: 33664
-		private static Map cachedRadiusCellsMap = null;
+		GenDraw.DrawFieldEdges(cachedRadiusCells);
 	}
 }

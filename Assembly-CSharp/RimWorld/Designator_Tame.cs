@@ -1,137 +1,228 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Designator_Tame : Designator
 {
-	// Token: 0x020030C7 RID: 12487
-	public class Designator_Tame : Designator
+	[CompilerGenerated]
+	private sealed class _003CTameablesInCell_003Ed__11 : IEnumerable<Pawn>, IEnumerable, IEnumerator<Pawn>, IEnumerator, IDisposable
 	{
-		// Token: 0x17002D6D RID: 11629
-		// (get) Token: 0x06011885 RID: 71813 RVA: 0x00508D5F File Offset: 0x00506F5F
-		protected override DesignationDef Designation
+		private int _003C_003E1__state;
+
+		private Pawn _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private IntVec3 c;
+
+		public IntVec3 _003C_003E3__c;
+
+		public Designator_Tame _003C_003E4__this;
+
+		private List<Thing> _003CthingList_003E5__2;
+
+		private int _003Ci_003E5__3;
+
+		Pawn IEnumerator<Pawn>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return DesignationDefOf.Tame;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002D6E RID: 11630
-		// (get) Token: 0x06011886 RID: 71814 RVA: 0x00501A2B File Offset: 0x004FFC2B
-		public override DrawStyleCategoryDef DrawStyleCategory
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return DrawStyleCategoryDefOf.FilledRectangle;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06011887 RID: 71815 RVA: 0x00508D68 File Offset: 0x00506F68
-		public Designator_Tame()
+		[DebuggerHidden]
+		public _003CTameablesInCell_003Ed__11(int _003C_003E1__state)
 		{
-			this.defaultLabel = "DesignatorTame".Translate();
-			this.defaultDesc = "DesignatorTameDesc".Translate();
-			this.icon = ContentFinder<Texture2D>.Get("UI/Designators/Tame", true);
-			this.soundDragSustain = SoundDefOf.Designate_DragStandard;
-			this.soundDragChanged = SoundDefOf.Designate_DragStandard_Changed;
-			this.useMouseIcon = true;
-			this.soundSucceeded = SoundDefOf.Designate_Tame;
-			this.hotKey = KeyBindingDefOf.Misc4;
-			this.tutorTag = "Tame";
-			this.showReverseDesignatorDisabledReason = true;
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x06011888 RID: 71816 RVA: 0x00508E06 File Offset: 0x00507006
-		public override AcceptanceReport CanDesignateCell(IntVec3 c)
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			if (!c.InBounds(base.Map))
-			{
-				return false;
-			}
-			if (!this.TameablesInCell(c).Any<Pawn>())
-			{
-				return "MessageMustDesignateTameable".Translate();
-			}
-			return true;
+			_003CthingList_003E5__2 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x06011889 RID: 71817 RVA: 0x00508E44 File Offset: 0x00507044
-		public override void DesignateSingleCell(IntVec3 loc)
+		private bool MoveNext()
 		{
-			foreach (Pawn t in this.TameablesInCell(loc))
+			int num = _003C_003E1__state;
+			Designator_Tame designator_Tame = _003C_003E4__this;
+			if (num != 0)
 			{
-				this.DesignateThing(t);
-			}
-		}
-
-		// Token: 0x0601188A RID: 71818 RVA: 0x00508E94 File Offset: 0x00507094
-		public override AcceptanceReport CanDesignateThing(Thing t)
-		{
-			Pawn pawn = t as Pawn;
-			if (pawn == null)
-			{
-				return false;
-			}
-			if (!TameUtility.CanTame(pawn))
-			{
-				return false;
-			}
-			if (pawn.health.hediffSet.HasHediff(HediffDefOf.Scaria, false))
-			{
-				return "CantTameScaria".Translate();
-			}
-			return base.Map.designationManager.DesignationOn(pawn, this.Designation) == null;
-		}
-
-		// Token: 0x0601188B RID: 71819 RVA: 0x00508F08 File Offset: 0x00507108
-		protected override void FinalizeDesignationSucceeded()
-		{
-			base.FinalizeDesignationSucceeded();
-			using (IEnumerator<PawnKindDef> enumerator = (from p in this.justDesignated
-			select p.kindDef).Distinct<PawnKindDef>().GetEnumerator())
-			{
-				while (enumerator.MoveNext())
+				if (num != 1)
 				{
-					PawnKindDef kind = enumerator.Current;
-					TameUtility.ShowDesignationWarnings(this.justDesignated.First((Pawn x) => x.kindDef == kind), true);
+					return false;
 				}
+				_003C_003E1__state = -1;
+				goto IL_00a3;
 			}
-			this.justDesignated.Clear();
-			PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.AnimalTaming, KnowledgeAmount.Total);
-		}
-
-		// Token: 0x0601188C RID: 71820 RVA: 0x00508FBC File Offset: 0x005071BC
-		public override void DesignateThing(Thing t)
-		{
-			base.Map.designationManager.RemoveAllDesignationsOn(t, false);
-			base.Map.designationManager.AddDesignation(new Designation(t, this.Designation, null));
-			this.justDesignated.Add((Pawn)t);
-		}
-
-		// Token: 0x0601188D RID: 71821 RVA: 0x0050900E File Offset: 0x0050720E
-		private IEnumerable<Pawn> TameablesInCell(IntVec3 c)
-		{
-			if (c.Fogged(base.Map))
+			_003C_003E1__state = -1;
+			if (c.Fogged(designator_Tame.Map))
 			{
-				yield break;
+				return false;
 			}
-			List<Thing> thingList = c.GetThingList(base.Map);
-			int num;
-			for (int i = 0; i < thingList.Count; i = num + 1)
+			_003CthingList_003E5__2 = c.GetThingList(designator_Tame.Map);
+			_003Ci_003E5__3 = 0;
+			goto IL_00b3;
+			IL_00b3:
+			if (_003Ci_003E5__3 < _003CthingList_003E5__2.Count)
 			{
-				if (this.CanDesignateThing(thingList[i]).Accepted)
+				if (designator_Tame.CanDesignateThing(_003CthingList_003E5__2[_003Ci_003E5__3]).Accepted)
 				{
-					yield return (Pawn)thingList[i];
+					_003C_003E2__current = (Pawn)_003CthingList_003E5__2[_003Ci_003E5__3];
+					_003C_003E1__state = 1;
+					return true;
 				}
-				num = i;
+				goto IL_00a3;
 			}
-			yield break;
+			return false;
+			IL_00a3:
+			_003Ci_003E5__3++;
+			goto IL_00b3;
 		}
 
-		// Token: 0x0400B4FD RID: 46333
-		private readonly List<Pawn> justDesignated = new List<Pawn>();
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Pawn> IEnumerable<Pawn>.GetEnumerator()
+		{
+			_003CTameablesInCell_003Ed__11 _003CTameablesInCell_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CTameablesInCell_003Ed__ = this;
+			}
+			else
+			{
+				_003CTameablesInCell_003Ed__ = new _003CTameablesInCell_003Ed__11(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CTameablesInCell_003Ed__.c = _003C_003E3__c;
+			return _003CTameablesInCell_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Pawn>)this).GetEnumerator();
+		}
+	}
+
+	private readonly List<Pawn> justDesignated = new List<Pawn>();
+
+	protected override DesignationDef Designation => DesignationDefOf.Tame;
+
+	public override DrawStyleCategoryDef DrawStyleCategory => DrawStyleCategoryDefOf.FilledRectangle;
+
+	public Designator_Tame()
+	{
+		defaultLabel = "DesignatorTame".Translate();
+		defaultDesc = "DesignatorTameDesc".Translate();
+		icon = ContentFinder<Texture2D>.Get("UI/Designators/Tame");
+		soundDragSustain = SoundDefOf.Designate_DragStandard;
+		soundDragChanged = SoundDefOf.Designate_DragStandard_Changed;
+		useMouseIcon = true;
+		soundSucceeded = SoundDefOf.Designate_Tame;
+		hotKey = KeyBindingDefOf.Misc4;
+		tutorTag = "Tame";
+		showReverseDesignatorDisabledReason = true;
+	}
+
+	public override AcceptanceReport CanDesignateCell(IntVec3 c)
+	{
+		if (!c.InBounds(base.Map))
+		{
+			return false;
+		}
+		if (!TameablesInCell(c).Any())
+		{
+			return "MessageMustDesignateTameable".Translate();
+		}
+		return true;
+	}
+
+	public override void DesignateSingleCell(IntVec3 loc)
+	{
+		foreach (Pawn item in TameablesInCell(loc))
+		{
+			DesignateThing(item);
+		}
+	}
+
+	public override AcceptanceReport CanDesignateThing(Thing t)
+	{
+		if (!(t is Pawn pawn))
+		{
+			return false;
+		}
+		if (!TameUtility.CanTame(pawn))
+		{
+			return false;
+		}
+		if (pawn.health.hediffSet.HasHediff(HediffDefOf.Scaria))
+		{
+			return "CantTameScaria".Translate();
+		}
+		return base.Map.designationManager.DesignationOn(pawn, Designation) == null;
+	}
+
+	protected override void FinalizeDesignationSucceeded()
+	{
+		base.FinalizeDesignationSucceeded();
+		foreach (PawnKindDef kind in justDesignated.Select((Pawn p) => p.kindDef).Distinct())
+		{
+			TameUtility.ShowDesignationWarnings(justDesignated.First((Pawn x) => x.kindDef == kind));
+		}
+		justDesignated.Clear();
+		PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.AnimalTaming, KnowledgeAmount.Total);
+	}
+
+	public override void DesignateThing(Thing t)
+	{
+		base.Map.designationManager.RemoveAllDesignationsOn(t);
+		base.Map.designationManager.AddDesignation(new Designation(t, Designation));
+		justDesignated.Add((Pawn)t);
+	}
+
+	[IteratorStateMachine(typeof(_003CTameablesInCell_003Ed__11))]
+	private IEnumerable<Pawn> TameablesInCell(IntVec3 c)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CTameablesInCell_003Ed__11(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__c = c
+		};
 	}
 }

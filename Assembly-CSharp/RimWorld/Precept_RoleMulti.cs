@@ -1,193 +1,295 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Precept_RoleMulti : Precept_Role
 {
-	// Token: 0x02002812 RID: 10258
-	public class Precept_RoleMulti : Precept_Role
+	[CompilerGenerated]
+	private sealed class _003CChosenPawns_003Ed__2 : IEnumerable<Pawn>, IEnumerable, IEnumerator<Pawn>, IEnumerator, IDisposable
 	{
-		// Token: 0x0600E065 RID: 57445 RVA: 0x0041E583 File Offset: 0x0041C783
-		public override IEnumerable<Pawn> ChosenPawns()
+		private int _003C_003E1__state;
+
+		private Pawn _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Precept_RoleMulti _003C_003E4__this;
+
+		private List<IdeoRoleInstance>.Enumerator _003C_003E7__wrap1;
+
+		Pawn IEnumerator<Pawn>.Current
 		{
-			foreach (IdeoRoleInstance ideoRoleInstance in this.chosenPawns)
+			[DebuggerHidden]
+			get
 			{
-				yield return ideoRoleInstance.pawn;
+				return _003C_003E2__current;
 			}
-			List<IdeoRoleInstance>.Enumerator enumerator = default(List<IdeoRoleInstance>.Enumerator);
-			yield break;
-			yield break;
 		}
 
-		// Token: 0x0600E066 RID: 57446 RVA: 0x00002C42 File Offset: 0x00000E42
-		public override Pawn ChosenPawnSingle()
+		object IEnumerator.Current
 		{
-			return null;
-		}
-
-		// Token: 0x0600E067 RID: 57447 RVA: 0x0041E593 File Offset: 0x0041C793
-		public override void Init(Ideo ideo, FactionDef generatingFor = null)
-		{
-			base.Init(ideo, generatingFor);
-			this.active = true;
-		}
-
-		// Token: 0x0600E068 RID: 57448 RVA: 0x0041E5A4 File Offset: 0x0041C7A4
-		public override void Assign(Pawn p, bool addThoughts)
-		{
-			if (!this.IsAssigned(p))
+			[DebuggerHidden]
+			get
 			{
-				IdeoRoleInstance ideoRoleInstance = this.chosenPawnsCache.FirstOrDefault((IdeoRoleInstance c) => c.pawn == p);
-				if (ideoRoleInstance != null)
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CChosenPawns_003Ed__2(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
 				{
-					this.chosenPawnsCache.Remove(ideoRoleInstance);
-					this.chosenPawns.Add(ideoRoleInstance);
 				}
-				else
+				finally
 				{
-					this.chosenPawns.Add(new IdeoRoleInstance(this)
-					{
-						pawn = p
-					});
-					this.FillOrUpdateAbilities();
-				}
-				base.Notify_PawnAssigned(p);
-			}
-		}
-
-		// Token: 0x0600E069 RID: 57449 RVA: 0x0041E634 File Offset: 0x0041C834
-		public override void FillOrUpdateAbilities()
-		{
-			foreach (IdeoRoleInstance ideoRoleInstance in this.chosenPawns)
-			{
-				ideoRoleInstance.abilities = base.FillOrUpdateAbilityList(ideoRoleInstance.pawn, ideoRoleInstance.abilities);
-			}
-		}
-
-		// Token: 0x0600E06A RID: 57450 RVA: 0x0041E698 File Offset: 0x0041C898
-		public override List<Ability> AbilitiesFor(Pawn p)
-		{
-			for (int i = 0; i < this.chosenPawns.Count; i++)
-			{
-				if (this.chosenPawns[i].pawn == p)
-				{
-					return this.chosenPawns[i].abilities;
+					_003C_003Em__Finally1();
 				}
 			}
-			return null;
+			_003C_003E7__wrap1 = default(List<IdeoRoleInstance>.Enumerator);
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x0600E06B RID: 57451 RVA: 0x0041E6E4 File Offset: 0x0041C8E4
-		public override bool IsAssigned(Pawn p)
+		private bool MoveNext()
 		{
-			for (int i = 0; i < this.chosenPawns.Count; i++)
+			try
 			{
-				if (this.chosenPawns[i].pawn == p)
+				int num = _003C_003E1__state;
+				Precept_RoleMulti precept_RoleMulti = _003C_003E4__this;
+				switch (num)
 				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = precept_RoleMulti.chosenPawns.GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 1:
+					_003C_003E1__state = -3;
+					break;
+				}
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					IdeoRoleInstance current = _003C_003E7__wrap1.Current;
+					_003C_003E2__current = current.pawn;
+					_003C_003E1__state = 1;
 					return true;
 				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = default(List<IdeoRoleInstance>.Enumerator);
+				return false;
 			}
-			return false;
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
 		}
 
-		// Token: 0x0600E06C RID: 57452 RVA: 0x0041E720 File Offset: 0x0041C920
-		public override void Unassign(Pawn p, bool generateThoughts)
+		bool IEnumerator.MoveNext()
 		{
-			if (!this.IsAssigned(p))
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap1/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Pawn> IEnumerable<Pawn>.GetEnumerator()
+		{
+			_003CChosenPawns_003Ed__2 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				return;
+				_003C_003E1__state = 0;
+				result = this;
 			}
-			IdeoRoleInstance ideoRoleInstance = this.chosenPawns.FirstOrDefault((IdeoRoleInstance c) => c.pawn == p);
+			else
+			{
+				result = new _003CChosenPawns_003Ed__2(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Pawn>)this).GetEnumerator();
+		}
+	}
+
+	public List<IdeoRoleInstance> chosenPawns = new List<IdeoRoleInstance>();
+
+	private List<IdeoRoleInstance> chosenPawnsCache = new List<IdeoRoleInstance>();
+
+	private List<IdeoRoleInstance> pawnsToRemove = new List<IdeoRoleInstance>();
+
+	[IteratorStateMachine(typeof(_003CChosenPawns_003Ed__2))]
+	public override IEnumerable<Pawn> ChosenPawns()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CChosenPawns_003Ed__2(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override Pawn ChosenPawnSingle()
+	{
+		return null;
+	}
+
+	public override void Init(Ideo ideo, FactionDef generatingFor = null)
+	{
+		base.Init(ideo, generatingFor);
+		active = true;
+	}
+
+	public override void Assign(Pawn p, bool addThoughts)
+	{
+		if (!IsAssigned(p))
+		{
+			IdeoRoleInstance ideoRoleInstance = chosenPawnsCache.FirstOrDefault((IdeoRoleInstance c) => c.pawn == p);
 			if (ideoRoleInstance != null)
 			{
-				this.chosenPawns.Remove(ideoRoleInstance);
-				this.chosenPawnsCache.Add(ideoRoleInstance);
-				Pawn_NeedsTracker needs = p.needs;
-				if (needs != null)
-				{
-					Need_Mood mood = needs.mood;
-					if (mood != null)
-					{
-						ThoughtHandler thoughts = mood.thoughts;
-						if (thoughts != null)
-						{
-							MemoryThoughtHandler memories = thoughts.memories;
-							if (memories != null)
-							{
-								memories.TryGainMemory(ThoughtMaker.MakeThought(ThoughtDefOf.IdeoRoleLost, this), null);
-							}
-						}
-					}
-				}
-				base.Notify_PawnUnassigned(p);
+				chosenPawnsCache.Remove(ideoRoleInstance);
+				chosenPawns.Add(ideoRoleInstance);
 			}
-		}
-
-		// Token: 0x0600E06D RID: 57453 RVA: 0x0041E7CC File Offset: 0x0041C9CC
-		public override void RecacheActivity()
-		{
-			this.pawnsToRemove.Clear();
-			foreach (IdeoRoleInstance ideoRoleInstance in this.chosenPawns)
+			else
 			{
-				if (ideoRoleInstance.pawn == null || !base.ValidatePawn(ideoRoleInstance.pawn))
+				chosenPawns.Add(new IdeoRoleInstance(this)
 				{
-					this.pawnsToRemove.Add(ideoRoleInstance);
-				}
-			}
-			foreach (IdeoRoleInstance ideoRoleInstance2 in this.pawnsToRemove)
-			{
-				this.Unassign(ideoRoleInstance2.pawn, false);
-				if (this.chosenPawns.Contains(ideoRoleInstance2))
-				{
-					this.chosenPawns.Remove(ideoRoleInstance2);
-				}
-			}
-		}
-
-		// Token: 0x0600E06E RID: 57454 RVA: 0x0041E8A8 File Offset: 0x0041CAA8
-		public override void ExposeData()
-		{
-			base.ExposeData();
-			if (!GameDataSaveLoader.IsSavingOrLoadingExternalIdeo)
-			{
-				Scribe_Collections.Look<IdeoRoleInstance>(ref this.chosenPawns, "chosenPawns", LookMode.Deep, new object[]
-				{
-					this
+					pawn = p
 				});
-				Scribe_Collections.Look<IdeoRoleInstance>(ref this.chosenPawnsCache, "chosenPawnsCache", LookMode.Deep, new object[]
-				{
-					this
-				});
+				FillOrUpdateAbilities();
 			}
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
-			{
-				this.chosenPawns.RemoveAll((IdeoRoleInstance c) => c.pawn == null || !base.ValidatePawn(c.pawn));
-				this.chosenPawnsCache.RemoveAll((IdeoRoleInstance c) => c.pawn == null);
-				foreach (IdeoRoleInstance ideoRoleInstance in this.chosenPawns)
-				{
-					ideoRoleInstance.sourceRole = this;
-				}
-			}
+			Notify_PawnAssigned(p);
 		}
+	}
 
-		// Token: 0x0600E06F RID: 57455 RVA: 0x0041E988 File Offset: 0x0041CB88
-		public override void CopyTo(Precept precept)
+	public override void FillOrUpdateAbilities()
+	{
+		foreach (IdeoRoleInstance chosenPawn in chosenPawns)
 		{
-			base.CopyTo(precept);
-			Precept_RoleMulti precept_RoleMulti = (Precept_RoleMulti)precept;
-			precept_RoleMulti.chosenPawns.Clear();
-			precept_RoleMulti.chosenPawns.AddRange(this.chosenPawns);
-			precept_RoleMulti.chosenPawnsCache.Clear();
-			precept_RoleMulti.chosenPawnsCache.AddRange(this.chosenPawnsCache);
+			chosenPawn.abilities = FillOrUpdateAbilityList(chosenPawn.pawn, chosenPawn.abilities);
 		}
+	}
 
-		// Token: 0x040096EA RID: 38634
-		public List<IdeoRoleInstance> chosenPawns = new List<IdeoRoleInstance>();
+	public override List<Ability> AbilitiesFor(Pawn p)
+	{
+		for (int i = 0; i < chosenPawns.Count; i++)
+		{
+			if (chosenPawns[i].pawn == p)
+			{
+				return chosenPawns[i].abilities;
+			}
+		}
+		return null;
+	}
 
-		// Token: 0x040096EB RID: 38635
-		private List<IdeoRoleInstance> chosenPawnsCache = new List<IdeoRoleInstance>();
+	public override bool IsAssigned(Pawn p)
+	{
+		for (int i = 0; i < chosenPawns.Count; i++)
+		{
+			if (chosenPawns[i].pawn == p)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
 
-		// Token: 0x040096EC RID: 38636
-		private List<IdeoRoleInstance> pawnsToRemove = new List<IdeoRoleInstance>();
+	public override void Unassign(Pawn p, bool generateThoughts)
+	{
+		if (IsAssigned(p))
+		{
+			IdeoRoleInstance ideoRoleInstance = chosenPawns.FirstOrDefault((IdeoRoleInstance c) => c.pawn == p);
+			if (ideoRoleInstance != null)
+			{
+				chosenPawns.Remove(ideoRoleInstance);
+				chosenPawnsCache.Add(ideoRoleInstance);
+				p.needs?.mood?.thoughts?.memories?.TryGainMemory(ThoughtMaker.MakeThought(ThoughtDefOf.IdeoRoleLost, this));
+				Notify_PawnUnassigned(p);
+			}
+		}
+	}
+
+	public override void RecacheActivity()
+	{
+		pawnsToRemove.Clear();
+		foreach (IdeoRoleInstance chosenPawn in chosenPawns)
+		{
+			if (chosenPawn.pawn == null || !ValidatePawn(chosenPawn.pawn))
+			{
+				pawnsToRemove.Add(chosenPawn);
+			}
+		}
+		foreach (IdeoRoleInstance item in pawnsToRemove)
+		{
+			Unassign(item.pawn, generateThoughts: false);
+			if (chosenPawns.Contains(item))
+			{
+				chosenPawns.Remove(item);
+			}
+		}
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		if (!GameDataSaveLoader.IsSavingOrLoadingExternalIdeo)
+		{
+			Scribe_Collections.Look(ref chosenPawns, "chosenPawns", LookMode.Deep, this);
+			Scribe_Collections.Look(ref chosenPawnsCache, "chosenPawnsCache", LookMode.Deep, this);
+		}
+		if (Scribe.mode != LoadSaveMode.PostLoadInit)
+		{
+			return;
+		}
+		chosenPawns.RemoveAll((IdeoRoleInstance c) => c.pawn == null || !ValidatePawn(c.pawn));
+		chosenPawnsCache.RemoveAll((IdeoRoleInstance c) => c.pawn == null);
+		foreach (IdeoRoleInstance chosenPawn in chosenPawns)
+		{
+			chosenPawn.sourceRole = this;
+		}
+	}
+
+	public override void CopyTo(Precept precept)
+	{
+		base.CopyTo(precept);
+		Precept_RoleMulti obj = (Precept_RoleMulti)precept;
+		obj.chosenPawns.Clear();
+		obj.chosenPawns.AddRange(chosenPawns);
+		obj.chosenPawnsCache.Clear();
+		obj.chosenPawnsCache.AddRange(chosenPawnsCache);
 	}
 }

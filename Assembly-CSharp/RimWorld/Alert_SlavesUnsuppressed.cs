@@ -1,57 +1,47 @@
-﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Alert_SlavesUnsuppressed : Alert
 {
-	// Token: 0x02003003 RID: 12291
-	public class Alert_SlavesUnsuppressed : Alert
+	private List<Pawn> targetsResult = new List<Pawn>();
+
+	public List<Pawn> Targets
 	{
-		// Token: 0x17002CD6 RID: 11478
-		// (get) Token: 0x060114D2 RID: 70866 RVA: 0x004F5C50 File Offset: 0x004F3E50
-		public List<Pawn> Targets
+		get
 		{
-			get
+			targetsResult.Clear();
+			List<Map> maps = Find.Maps;
+			for (int i = 0; i < maps.Count; i++)
 			{
-				this.targetsResult.Clear();
-				List<Map> maps = Find.Maps;
-				for (int i = 0; i < maps.Count; i++)
+				foreach (Pawn item in maps[i].mapPawns.FreeColonistsSpawned)
 				{
-					foreach (Pawn pawn in maps[i].mapPawns.FreeColonistsSpawned)
+					if (!item.Suspended && item.IsSlave && item.needs.TryGetNeed(out Need_Suppression need) && need.IsHigh)
 					{
-						Need_Suppression need_Suppression;
-						if (!pawn.Suspended && pawn.IsSlave && pawn.needs.TryGetNeed<Need_Suppression>(out need_Suppression) && need_Suppression.IsHigh)
-						{
-							this.targetsResult.Add(pawn);
-						}
+						targetsResult.Add(item);
 					}
 				}
-				return this.targetsResult;
 			}
+			return targetsResult;
 		}
+	}
 
-		// Token: 0x060114D3 RID: 70867 RVA: 0x004F5D04 File Offset: 0x004F3F04
-		public Alert_SlavesUnsuppressed()
-		{
-			this.defaultLabel = "SlavesUnsuppressedLabel".Translate();
-			this.defaultExplanation = "SlavesUnsuppressedDesc".Translate();
-			this.defaultPriority = AlertPriority.High;
-			this.requireIdeology = true;
-		}
+	public Alert_SlavesUnsuppressed()
+	{
+		defaultLabel = "SlavesUnsuppressedLabel".Translate();
+		defaultExplanation = "SlavesUnsuppressedDesc".Translate();
+		defaultPriority = AlertPriority.High;
+		requireIdeology = true;
+	}
 
-		// Token: 0x060114D4 RID: 70868 RVA: 0x004F5D5A File Offset: 0x004F3F5A
-		public override AlertReport GetReport()
-		{
-			return AlertReport.CulpritsAre(this.Targets);
-		}
+	public override AlertReport GetReport()
+	{
+		return AlertReport.CulpritsAre(Targets);
+	}
 
-		// Token: 0x060114D5 RID: 70869 RVA: 0x004F5D67 File Offset: 0x004F3F67
-		public override TaggedString GetExplanation()
-		{
-			return "SlavesUnsuppressedDesc".Translate(this.Targets[0]);
-		}
-
-		// Token: 0x0400B356 RID: 45910
-		private List<Pawn> targetsResult = new List<Pawn>();
+	public override TaggedString GetExplanation()
+	{
+		return "SlavesUnsuppressedDesc".Translate(Targets[0]);
 	}
 }

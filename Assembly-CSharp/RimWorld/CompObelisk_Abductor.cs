@@ -1,368 +1,312 @@
-﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompObelisk_Abductor : CompObelisk_ExplodingSpawner
 {
-	// Token: 0x02002D85 RID: 11653
-	public class CompObelisk_Abductor : CompObelisk_ExplodingSpawner
+	private int cooldownTick;
+
+	private Map labyrinthMap;
+
+	private int nextTeleportTick;
+
+	private int lastTeleportTick;
+
+	private int interactSkipTick;
+
+	private int colonists;
+
+	private int others;
+
+	private Pawn instigator;
+
+	private Dictionary<Pawn, Effecter> effects = new Dictionary<Pawn, Effecter>();
+
+	private Effecter buildingEffecter;
+
+	private List<Pawn> teleporting = new List<Pawn>();
+
+	private LabyrinthMapComponent mapComp;
+
+	private bool generating;
+
+	private const int LabyrinthSize = 90;
+
+	private const int LastTeleportExplosionDelay = 180;
+
+	private const int InteractSkipDelayTicks = 240;
+
+	private const int ActivityTeleportDelayTicks = 240;
+
+	private const float ColonistFactor = 0.5f;
+
+	private const float OtherFactor = 0.2f;
+
+	private const float HostilePointsFactor = 0.15f;
+
+	private static readonly FloatRange CooldownDaysRange = new FloatRange(15f, 80f);
+
+	private static readonly IntRange TeleportDelayTicksRange = new IntRange(10, 30);
+
+	private static readonly List<Pawn> tmpRemoveEffectors = new List<Pawn>();
+
+	public LabyrinthMapComponent Labyrinth => mapComp ?? (mapComp = labyrinthMap.GetComponent<LabyrinthMapComponent>());
+
+	public override void TriggerInteractionEffect(Pawn interactor, bool triggeredByPlayer = false)
 	{
-		// Token: 0x170029BC RID: 10684
-		// (get) Token: 0x0601061B RID: 67099 RVA: 0x004B9BBC File Offset: 0x004B7DBC
-		public LabyrinthMapComponent Labyrinth
+		if (!triggeredByPlayer)
 		{
-			get
+			if (GenTicks.TicksGame < cooldownTick)
 			{
-				LabyrinthMapComponent result;
-				if ((result = this.mapComp) == null)
-				{
-					result = (this.mapComp = this.labyrinthMap.GetComponent<LabyrinthMapComponent>());
-				}
-				return result;
+				return;
+			}
+			cooldownTick = GenTicks.TicksGame + Mathf.RoundToInt(CooldownDaysRange.RandomInRange * 60000f);
+		}
+		if (labyrinthMap != null)
+		{
+			Labyrinth.TeleportToLabyrinth(interactor);
+			SendTriggeredLetter(interactor);
+			return;
+		}
+		instigator = interactor;
+		interactor.stances.stunner.StunFor(240, null, addBattleLog: false, showMote: false);
+		interactSkipTick = GenTicks.TicksGame + 240;
+		effects[interactor] = EffecterDefOf.AbductWarmup_Pawn.SpawnAttached(interactor, interactor.MapHeld);
+		if (buildingEffecter == null)
+		{
+			buildingEffecter = EffecterDefOf.AbductWarmup_Monolith.SpawnAttached(parent, parent.MapHeld);
+		}
+		Find.TickManager.slower.SignalForceNormalSpeedShort();
+		SendDisappearingLetter(interactor);
+	}
+
+	public override void OnActivityActivated()
+	{
+		base.OnActivityActivated();
+		Find.LetterStack.ReceiveLetter("ObeliskAbductorLetterLabel".Translate(), "ObeliskAbductorLetter".Translate(), LetterDefOf.ThreatBig, parent);
+		pointsRemaining *= 0.15f;
+		int num = 0;
+		int num2 = 0;
+		foreach (Pawn item in parent.MapHeld.mapPawns.AllPawnsSpawned)
+		{
+			if (IsValidColonist(item))
+			{
+				num++;
+			}
+			else if (IsValidOther(item))
+			{
+				num2++;
 			}
 		}
-
-		// Token: 0x0601061C RID: 67100 RVA: 0x004B9BE8 File Offset: 0x004B7DE8
-		public override void TriggerInteractionEffect(Pawn interactor, bool triggeredByPlayer = false)
+		colonists = Mathf.Max(Mathf.FloorToInt((float)num * 0.5f), 1);
+		others = Mathf.Max(Mathf.FloorToInt((float)num2 * 0.2f), 1);
+		foreach (Pawn item2 in parent.MapHeld.mapPawns.AllPawnsSpawned)
 		{
-			if (!triggeredByPlayer)
+			if (IsValidColonist(item2) && colonists > 0)
 			{
-				if (GenTicks.TicksGame < this.cooldownTick)
+				colonists--;
+				teleporting.Add(item2);
+				item2.stances.stunner.StunFor(2400, null, addBattleLog: false, showMote: false);
+				effects[item2] = EffecterDefOf.AbductWarmup_Pawn.SpawnAttached(item2, item2.MapHeld);
+				if (buildingEffecter == null)
 				{
-					return;
-				}
-				this.cooldownTick = GenTicks.TicksGame + Mathf.RoundToInt(CompObelisk_Abductor.CooldownDaysRange.RandomInRange * 60000f);
-			}
-			if (this.labyrinthMap != null)
-			{
-				this.Labyrinth.TeleportToLabyrinth(interactor);
-				CompObelisk_Abductor.SendTriggeredLetter(interactor);
-				return;
-			}
-			this.instigator = interactor;
-			interactor.stances.stunner.StunFor(240, null, false, false, false);
-			this.interactSkipTick = GenTicks.TicksGame + 240;
-			this.effects[interactor] = EffecterDefOf.AbductWarmup_Pawn.SpawnAttached(interactor, interactor.MapHeld, 1f);
-			if (this.buildingEffecter == null)
-			{
-				this.buildingEffecter = EffecterDefOf.AbductWarmup_Monolith.SpawnAttached(this.parent, this.parent.MapHeld, 1f);
-			}
-			Find.TickManager.slower.SignalForceNormalSpeedShort();
-			CompObelisk_Abductor.SendDisappearingLetter(interactor);
-		}
-
-		// Token: 0x0601061D RID: 67101 RVA: 0x004B9CDC File Offset: 0x004B7EDC
-		public override void OnActivityActivated()
-		{
-			base.OnActivityActivated();
-			Find.LetterStack.ReceiveLetter("ObeliskAbductorLetterLabel".Translate(), "ObeliskAbductorLetter".Translate(), LetterDefOf.ThreatBig, this.parent, null, null, null, null, 0, true);
-			this.pointsRemaining *= 0.15f;
-			int num = 0;
-			int num2 = 0;
-			foreach (Pawn pawn in this.parent.MapHeld.mapPawns.AllPawnsSpawned)
-			{
-				if (CompObelisk_Abductor.IsValidColonist(pawn))
-				{
-					num++;
-				}
-				else if (CompObelisk_Abductor.IsValidOther(pawn))
-				{
-					num2++;
+					buildingEffecter = EffecterDefOf.AbductWarmup_Monolith.SpawnAttached(parent, parent.MapHeld);
 				}
 			}
-			this.colonists = Mathf.Max(Mathf.FloorToInt((float)num * 0.5f), 1);
-			this.others = Mathf.Max(Mathf.FloorToInt((float)num2 * 0.2f), 1);
-			foreach (Pawn pawn2 in this.parent.MapHeld.mapPawns.AllPawnsSpawned)
+			else if (IsValidOther(item2) && others > 0)
 			{
-				if (CompObelisk_Abductor.IsValidColonist(pawn2) && this.colonists > 0)
-				{
-					this.colonists--;
-					this.teleporting.Add(pawn2);
-					pawn2.stances.stunner.StunFor(2400, null, false, false, false);
-					this.effects[pawn2] = EffecterDefOf.AbductWarmup_Pawn.SpawnAttached(pawn2, pawn2.MapHeld, 1f);
-					if (this.buildingEffecter == null)
-					{
-						this.buildingEffecter = EffecterDefOf.AbductWarmup_Monolith.SpawnAttached(this.parent, this.parent.MapHeld, 1f);
-					}
-				}
-				else if (CompObelisk_Abductor.IsValidOther(pawn2) && this.others > 0)
-				{
-					this.others--;
-					this.teleporting.Add(pawn2);
-				}
-			}
-			this.instigator = null;
-			this.nextTeleportTick = GenTicks.TicksGame + 240;
-			this.lastTeleportTick = this.nextTeleportTick;
-		}
-
-		// Token: 0x0601061E RID: 67102 RVA: 0x004B9F0C File Offset: 0x004B810C
-		public override void CompTick()
-		{
-			base.CompTick();
-			if (this.interactSkipTick != 0 && GenTicks.TicksGame >= this.interactSkipTick)
-			{
-				this.interactSkipTick = 0;
-				if (this.labyrinthMap == null)
-				{
-					this.GenerateLabyrinth(this.instigator);
-				}
-				CompObelisk_Abductor.SendTriggeredLetter(this.instigator);
-				this.instigator = null;
-			}
-			this.VFXTick();
-			if (this.activated)
-			{
-				this.ActivatedTick();
+				others--;
+				teleporting.Add(item2);
 			}
 		}
+		instigator = null;
+		nextTeleportTick = GenTicks.TicksGame + 240;
+		lastTeleportTick = nextTeleportTick;
+	}
 
-		// Token: 0x0601061F RID: 67103 RVA: 0x004B9F78 File Offset: 0x004B8178
-		private void VFXTick()
+	public override void CompTick()
+	{
+		base.CompTick();
+		if (interactSkipTick != 0 && GenTicks.TicksGame >= interactSkipTick)
 		{
-			foreach (KeyValuePair<Pawn, Effecter> keyValuePair in this.effects)
+			interactSkipTick = 0;
+			if (labyrinthMap == null)
 			{
-				Pawn pawn;
-				Effecter effecter;
-				keyValuePair.Deconstruct(out pawn, out effecter);
-				Pawn pawn2 = pawn;
-				Effecter effecter2 = effecter;
-				if (pawn2.Map == this.parent.Map)
-				{
-					effecter2.EffectTick(pawn2, pawn2);
-				}
-				else
-				{
-					effecter2.Cleanup();
-					CompObelisk_Abductor.tmpRemoveEffectors.Add(pawn2);
-				}
+				GenerateLabyrinth(instigator);
 			}
-			this.effects.RemoveRange(CompObelisk_Abductor.tmpRemoveEffectors);
-			CompObelisk_Abductor.tmpRemoveEffectors.Clear();
-			if (this.effects.Count == 0 && this.buildingEffecter != null)
+			SendTriggeredLetter(instigator);
+			instigator = null;
+		}
+		VFXTick();
+		if (activated)
+		{
+			ActivatedTick();
+		}
+	}
+
+	private void VFXTick()
+	{
+		foreach (var (pawn2, effecter2) in effects)
+		{
+			if (pawn2.Map == parent.Map)
 			{
-				this.buildingEffecter.Cleanup();
-				this.buildingEffecter = null;
+				effecter2.EffectTick(pawn2, pawn2);
+				continue;
+			}
+			effecter2.Cleanup();
+			tmpRemoveEffectors.Add(pawn2);
+		}
+		effects.RemoveRange(tmpRemoveEffectors);
+		tmpRemoveEffectors.Clear();
+		if (effects.Count == 0 && buildingEffecter != null)
+		{
+			buildingEffecter.Cleanup();
+			buildingEffecter = null;
+		}
+	}
+
+	private void ActivatedTick()
+	{
+		if (explodeTick > 0 || GenTicks.TicksGame < nextTeleportTick)
+		{
+			return;
+		}
+		if (labyrinthMap == null && !generating)
+		{
+			lastTeleportTick = GenTicks.TicksGame;
+			GenerateLabyrinth(null);
+			return;
+		}
+		if (labyrinthMap == null)
+		{
+			nextTeleportTick = GenTicks.TicksGame + TeleportDelayTicksRange.RandomInRange;
+			lastTeleportTick = GenTicks.TicksGame;
+			return;
+		}
+		nextTeleportTick = GenTicks.TicksGame + TeleportDelayTicksRange.RandomInRange;
+		if (explodeTick < 0 && GenTicks.TicksGame >= lastTeleportTick + 180)
+		{
+			PrepareExplosion();
+		}
+		for (int num = teleporting.Count - 1; num >= 0; num--)
+		{
+			if (teleporting[num].DestroyedOrNull())
+			{
+				teleporting.RemoveAt(num);
 			}
 		}
-
-		// Token: 0x06010620 RID: 67104 RVA: 0x004BA050 File Offset: 0x004B8250
-		private void ActivatedTick()
+		if (!teleporting.Empty())
 		{
-			if (this.explodeTick > 0)
+			Pawn pawn = teleporting.RandomElement();
+			teleporting.Remove(pawn);
+			if (IsValidColonist(pawn))
 			{
-				return;
+				colonists--;
 			}
-			if (GenTicks.TicksGame < this.nextTeleportTick)
+			else if (IsValidHostile(pawn))
 			{
-				return;
-			}
-			if (this.labyrinthMap == null && !this.generating)
-			{
-				this.lastTeleportTick = GenTicks.TicksGame;
-				this.GenerateLabyrinth(null);
-				return;
-			}
-			if (this.labyrinthMap == null)
-			{
-				this.nextTeleportTick = GenTicks.TicksGame + CompObelisk_Abductor.TeleportDelayTicksRange.RandomInRange;
-				this.lastTeleportTick = GenTicks.TicksGame;
-				return;
-			}
-			this.nextTeleportTick = GenTicks.TicksGame + CompObelisk_Abductor.TeleportDelayTicksRange.RandomInRange;
-			if (this.explodeTick < 0 && GenTicks.TicksGame >= this.lastTeleportTick + 180)
-			{
-				base.PrepareExplosion();
-			}
-			for (int i = this.teleporting.Count - 1; i >= 0; i--)
-			{
-				if (this.teleporting[i].DestroyedOrNull())
-				{
-					this.teleporting.RemoveAt(i);
-				}
-			}
-			if (this.teleporting.Empty<Pawn>())
-			{
-				return;
-			}
-			Pawn pawn = this.teleporting.RandomElement<Pawn>();
-			this.teleporting.Remove(pawn);
-			if (CompObelisk_Abductor.IsValidColonist(pawn))
-			{
-				this.colonists--;
-			}
-			else if (CompObelisk_Abductor.IsValidHostile(pawn))
-			{
-				this.pointsRemaining -= pawn.kindDef.combatPower;
+				pointsRemaining -= pawn.kindDef.combatPower;
 			}
 			else
 			{
-				this.others--;
+				others--;
 			}
-			this.Labyrinth.TeleportToLabyrinth(pawn);
-			this.lastTeleportTick = GenTicks.TicksGame;
+			Labyrinth.TeleportToLabyrinth(pawn);
+			lastTeleportTick = GenTicks.TicksGame;
 			pawn.stances.stunner.StopStun();
 		}
+	}
 
-		// Token: 0x06010621 RID: 67105 RVA: 0x004BA1D0 File Offset: 0x004B83D0
-		private void GenerateLabyrinth(Pawn interactor)
+	private void GenerateLabyrinth(Pawn interactor)
+	{
+		generating = true;
+		LongEventHandler.QueueLongEvent(delegate
 		{
-			this.generating = true;
-			LongEventHandler.QueueLongEvent(delegate()
-			{
-				this.labyrinthMap = PocketMapUtility.GeneratePocketMap(new IntVec3(90, 1, 90), MapGeneratorDefOf.Labyrinth, null, this.parent.MapHeld);
-				this.labyrinthMap.GetComponent<LabyrinthMapComponent>().abductorObelisk = (Building)this.parent;
-			}, "GeneratingLabyrinth", true, new Action<Exception>(GameAndMapInitExceptionHandlers.ErrorWhileGeneratingMap), false, false, delegate()
-			{
-				this.generating = false;
-				if (interactor != null)
-				{
-					this.Labyrinth.TeleportToLabyrinth(interactor);
-				}
-				CameraJumper.TryJump(interactor, CameraJumper.MovementMode.Cut);
-			});
-		}
-
-		// Token: 0x06010622 RID: 67106 RVA: 0x004BA22C File Offset: 0x004B842C
-		public override void PostDestroy(DestroyMode mode, Map previousMap)
+			labyrinthMap = PocketMapUtility.GeneratePocketMap(new IntVec3(90, 1, 90), MapGeneratorDefOf.Labyrinth, null, parent.MapHeld);
+			LabyrinthMapComponent component = labyrinthMap.GetComponent<LabyrinthMapComponent>();
+			component.abductorObelisk = (Building)parent;
+			component.sourceMap = parent.Map;
+		}, "GeneratingLabyrinth", doAsynchronously: true, GameAndMapInitExceptionHandlers.ErrorWhileGeneratingMap, showExtraUIInfo: false, forceHideUI: false, delegate
 		{
-			base.PostDestroy(mode, previousMap);
-			if (this.labyrinthMap == null)
+			generating = false;
+			if (interactor != null)
 			{
-				return;
+				Labyrinth.TeleportToLabyrinth(interactor);
 			}
-			if (this.labyrinthMap.mapPawns.AnyColonistSpawned || this.labyrinthMap.mapPawns.SlavesOfColonySpawned.Any<Pawn>())
-			{
-				return;
-			}
-			PocketMapUtility.DestroyPocketMap(this.labyrinthMap);
-			this.Notify_MapDestroyed();
-		}
+			CameraJumper.TryJump(interactor, CameraJumper.MovementMode.Cut);
+		});
+	}
 
-		// Token: 0x06010623 RID: 67107 RVA: 0x004BA285 File Offset: 0x004B8485
-		public void Notify_MapDestroyed()
+	public override void PostDestroy(DestroyMode mode, Map previousMap)
+	{
+		base.PostDestroy(mode, previousMap);
+		if (labyrinthMap != null && !labyrinthMap.mapPawns.AnyColonistSpawned && !labyrinthMap.mapPawns.SlavesOfColonySpawned.Any())
 		{
-			this.labyrinthMap = null;
-			this.mapComp = null;
+			PocketMapUtility.DestroyPocketMap(labyrinthMap);
+			Notify_MapDestroyed();
 		}
+	}
 
-		// Token: 0x06010624 RID: 67108 RVA: 0x004BA298 File Offset: 0x004B8498
-		public override void PostExposeData()
+	public void Notify_MapDestroyed()
+	{
+		labyrinthMap = null;
+		mapComp = null;
+	}
+
+	public override void PostExposeData()
+	{
+		base.PostExposeData();
+		Scribe_Values.Look(ref cooldownTick, "cooldownTick", 0);
+		Scribe_Values.Look(ref nextTeleportTick, "nextTeleport", 0);
+		Scribe_Values.Look(ref lastTeleportTick, "lastTeleport", 0);
+		Scribe_Values.Look(ref interactSkipTick, "interactSendTick", 0);
+		Scribe_Values.Look(ref colonists, "colonists", 0);
+		Scribe_Values.Look(ref others, "others", 0);
+		Scribe_Collections.Look(ref teleporting, "teleporting", LookMode.Reference);
+		Scribe_References.Look(ref labyrinthMap, "labyrinthMap");
+		Scribe_References.Look(ref instigator, "storedInstigator");
+	}
+
+	private static bool IsValidColonist(Pawn pawn)
+	{
+		if (!pawn.IsColonist && !pawn.IsSlaveOfColony)
 		{
-			base.PostExposeData();
-			Scribe_Values.Look<int>(ref this.cooldownTick, "cooldownTick", 0, false);
-			Scribe_Values.Look<int>(ref this.nextTeleportTick, "nextTeleport", 0, false);
-			Scribe_Values.Look<int>(ref this.lastTeleportTick, "lastTeleport", 0, false);
-			Scribe_Values.Look<int>(ref this.interactSkipTick, "interactSendTick", 0, false);
-			Scribe_Values.Look<int>(ref this.colonists, "colonists", 0, false);
-			Scribe_Values.Look<int>(ref this.others, "others", 0, false);
-			Scribe_Collections.Look<Pawn>(ref this.teleporting, "teleporting", LookMode.Reference, Array.Empty<object>());
-			Scribe_References.Look<Map>(ref this.labyrinthMap, "labyrinthMap", false);
-			Scribe_References.Look<Pawn>(ref this.instigator, "storedInstigator", false);
+			return pawn.IsPrisonerOfColony;
 		}
+		return true;
+	}
 
-		// Token: 0x06010625 RID: 67109 RVA: 0x004BA34F File Offset: 0x004B854F
-		private static bool IsValidColonist(Pawn pawn)
+	private static bool IsValidHostile(Pawn pawn)
+	{
+		if (pawn.HostileTo(Faction.OfPlayer))
 		{
-			return pawn.IsColonist || pawn.IsSlaveOfColony || pawn.IsPrisonerOfColony;
+			return !pawn.IsOnHoldingPlatform;
 		}
+		return false;
+	}
 
-		// Token: 0x06010626 RID: 67110 RVA: 0x004BA369 File Offset: 0x004B8569
-		private static bool IsValidHostile(Pawn pawn)
+	private static bool IsValidOther(Pawn pawn)
+	{
+		if (!pawn.IsAnimal)
 		{
-			return pawn.HostileTo(Faction.OfPlayer) && !pawn.IsOnHoldingPlatform;
+			return pawn.IsColonyMech;
 		}
+		return true;
+	}
 
-		// Token: 0x06010627 RID: 67111 RVA: 0x004BA383 File Offset: 0x004B8583
-		private static bool IsValidOther(Pawn pawn)
-		{
-			return pawn.IsAnimal || pawn.IsColonyMech;
-		}
+	private static void SendDisappearingLetter(Pawn interactor)
+	{
+		TaggedString label = "ObeliskAbductedDisappearingLetterLabel".Translate(interactor.Named("PAWN"));
+		TaggedString text = "ObeliskAbductedDisappearingLetter".Translate(interactor.Named("PAWN"));
+		Find.LetterStack.ReceiveLetter(label, text, LetterDefOf.ThreatBig, interactor);
+	}
 
-		// Token: 0x06010628 RID: 67112 RVA: 0x004BA398 File Offset: 0x004B8598
-		private static void SendDisappearingLetter(Pawn interactor)
-		{
-			TaggedString label = "ObeliskAbductedDisappearingLetterLabel".Translate(interactor.Named("PAWN"));
-			TaggedString text = "ObeliskAbductedDisappearingLetter".Translate(interactor.Named("PAWN"));
-			Find.LetterStack.ReceiveLetter(label, text, LetterDefOf.ThreatBig, interactor, null, null, null, null, 0, true);
-		}
-
-		// Token: 0x06010629 RID: 67113 RVA: 0x004BA3F0 File Offset: 0x004B85F0
-		private static void SendTriggeredLetter(Pawn interactor)
-		{
-			TaggedString label = "ObeliskAbductedLetterLabel".Translate(interactor.Named("PAWN"));
-			TaggedString text = "ObeliskAbductedLetter".Translate(interactor.Named("PAWN"));
-			Find.LetterStack.ReceiveLetter(label, text, LetterDefOf.NeutralEvent, interactor, null, null, null, null, 0, true);
-		}
-
-		// Token: 0x0400AAE0 RID: 43744
-		private int cooldownTick;
-
-		// Token: 0x0400AAE1 RID: 43745
-		private Map labyrinthMap;
-
-		// Token: 0x0400AAE2 RID: 43746
-		private int nextTeleportTick;
-
-		// Token: 0x0400AAE3 RID: 43747
-		private int lastTeleportTick;
-
-		// Token: 0x0400AAE4 RID: 43748
-		private int interactSkipTick;
-
-		// Token: 0x0400AAE5 RID: 43749
-		private int colonists;
-
-		// Token: 0x0400AAE6 RID: 43750
-		private int others;
-
-		// Token: 0x0400AAE7 RID: 43751
-		private Pawn instigator;
-
-		// Token: 0x0400AAE8 RID: 43752
-		private Dictionary<Pawn, Effecter> effects = new Dictionary<Pawn, Effecter>();
-
-		// Token: 0x0400AAE9 RID: 43753
-		private Effecter buildingEffecter;
-
-		// Token: 0x0400AAEA RID: 43754
-		private List<Pawn> teleporting = new List<Pawn>();
-
-		// Token: 0x0400AAEB RID: 43755
-		private LabyrinthMapComponent mapComp;
-
-		// Token: 0x0400AAEC RID: 43756
-		private bool generating;
-
-		// Token: 0x0400AAED RID: 43757
-		private const int LabyrinthSize = 90;
-
-		// Token: 0x0400AAEE RID: 43758
-		private const int LastTeleportExplosionDelay = 180;
-
-		// Token: 0x0400AAEF RID: 43759
-		private const int InteractSkipDelayTicks = 240;
-
-		// Token: 0x0400AAF0 RID: 43760
-		private const int ActivityTeleportDelayTicks = 240;
-
-		// Token: 0x0400AAF1 RID: 43761
-		private const float ColonistFactor = 0.5f;
-
-		// Token: 0x0400AAF2 RID: 43762
-		private const float OtherFactor = 0.2f;
-
-		// Token: 0x0400AAF3 RID: 43763
-		private const float HostilePointsFactor = 0.15f;
-
-		// Token: 0x0400AAF4 RID: 43764
-		private static readonly FloatRange CooldownDaysRange = new FloatRange(15f, 80f);
-
-		// Token: 0x0400AAF5 RID: 43765
-		private static readonly IntRange TeleportDelayTicksRange = new IntRange(10, 30);
-
-		// Token: 0x0400AAF6 RID: 43766
-		private static readonly List<Pawn> tmpRemoveEffectors = new List<Pawn>();
+	private static void SendTriggeredLetter(Pawn interactor)
+	{
+		TaggedString label = "ObeliskAbductedLetterLabel".Translate(interactor.Named("PAWN"));
+		TaggedString text = "ObeliskAbductedLetter".Translate(interactor.Named("PAWN"));
+		Find.LetterStack.ReceiveLetter(label, text, LetterDefOf.NeutralEvent, interactor);
 	}
 }

@@ -1,73 +1,178 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_RemoveMechlink : JobDriver
 {
-	// Token: 0x020012F5 RID: 4853
-	public class JobDriver_RemoveMechlink : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__6 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x170012B6 RID: 4790
-		// (get) Token: 0x0600770C RID: 30476 RVA: 0x00243608 File Offset: 0x00241808
-		protected Corpse Corpse
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_RemoveMechlink _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (Corpse)this.job.GetTarget(TargetIndex.A).Thing;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600770D RID: 30477 RVA: 0x0024362E File Offset: 0x0024182E
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		object IEnumerator.Current
 		{
-			return this.pawn.Reserve(this.Corpse, this.job, 1, -1, null, errorOnFailed, false);
-		}
-
-		// Token: 0x0600770E RID: 30478 RVA: 0x00243651 File Offset: 0x00241851
-		public override string GetReport()
-		{
-			return "ReportRemovingMechlink".Translate(HediffDefOf.MechlinkImplant.label);
-		}
-
-		// Token: 0x0600770F RID: 30479 RVA: 0x00243671 File Offset: 0x00241871
-		protected override IEnumerable<Toil> MakeNewToils()
-		{
-			if (!ModLister.CheckBiotech("Remove mechlink"))
+			[DebuggerHidden]
+			get
 			{
-				yield break;
+				return _003C_003E2__current;
 			}
-			this.FailOnDestroyedOrNull(TargetIndex.A);
-			this.FailOn(() => !this.Corpse.InnerPawn.health.hediffSet.HasHediff(HediffDefOf.MechlinkImplant, false));
-			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch, false);
-			Toil toil = Toils_General.Wait(300, TargetIndex.A).WithProgressBarToilDelay(TargetIndex.A, false, -0.5f).WithEffect(() => EffecterDefOf.Surgery, TargetIndex.A, null).PlaySustainerOrSound(SoundDefOf.Recipe_Surgery, 1f).PlaySoundAtEnd(SoundDefOf.Mechlink_Removed);
-			toil.handlingFacing = true;
-			yield return toil;
-			Toil toil2 = ToilMaker.MakeToil("MakeNewToils");
-			toil2.initAction = delegate()
+		}
+
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__6(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_RemoveMechlink CS_0024_003C_003E8__locals6 = _003C_003E4__this;
+			switch (num)
 			{
-				Pawn innerPawn = this.Corpse.InnerPawn;
-				List<Hediff> hediffs = innerPawn.health.hediffSet.hediffs;
-				for (int i = hediffs.Count - 1; i >= 0; i--)
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (!ModLister.CheckBiotech("Remove mechlink"))
 				{
-					if (hediffs[i].def == HediffDefOf.MechlinkImplant)
-					{
-						innerPawn.health.RemoveHediff(hediffs[i]);
-					}
+					return false;
 				}
-				Mechlink mechlink = (Mechlink)ThingMaker.MakeThing(ThingDefOf.Mechlink, null);
-				mechlink.sentMechsToPlayer = (innerPawn.IsColonist || innerPawn.IsPrisoner || innerPawn.IsSlave || innerPawn.IsQuestLodger());
-				GenPlace.TryPlaceThing(mechlink, this.Corpse.Position, base.Map, ThingPlaceMode.Near, null, null, null, 1);
-			};
-			toil2.defaultCompleteMode = ToilCompleteMode.Instant;
-			yield return toil2;
-			yield break;
+				CS_0024_003C_003E8__locals6.FailOnDestroyedOrNull(TargetIndex.A);
+				CS_0024_003C_003E8__locals6.FailOn(() => !CS_0024_003C_003E8__locals6.Corpse.InnerPawn.health.hediffSet.HasHediff(HediffDefOf.MechlinkImplant));
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+			{
+				_003C_003E1__state = -1;
+				Toil toil2 = Toils_General.Wait(300, TargetIndex.A).WithProgressBarToilDelay(TargetIndex.A).WithEffect(() => EffecterDefOf.Surgery, TargetIndex.A, null)
+					.PlaySustainerOrSound(SoundDefOf.Recipe_Surgery)
+					.PlaySoundAtEnd(SoundDefOf.Mechlink_Removed);
+				toil2.handlingFacing = true;
+				_003C_003E2__current = toil2;
+				_003C_003E1__state = 2;
+				return true;
+			}
+			case 2:
+			{
+				_003C_003E1__state = -1;
+				Toil toil = ToilMaker.MakeToil("MakeNewToils");
+				toil.initAction = delegate
+				{
+					Pawn innerPawn = CS_0024_003C_003E8__locals6.Corpse.InnerPawn;
+					List<Hediff> hediffs = innerPawn.health.hediffSet.hediffs;
+					for (int num2 = hediffs.Count - 1; num2 >= 0; num2--)
+					{
+						if (hediffs[num2].def == HediffDefOf.MechlinkImplant)
+						{
+							innerPawn.health.RemoveHediff(hediffs[num2]);
+						}
+					}
+					Mechlink obj = (Mechlink)ThingMaker.MakeThing(ThingDefOf.Mechlink);
+					obj.sentMechsToPlayer = innerPawn.IsColonist || innerPawn.IsPrisoner || innerPawn.IsSlave || innerPawn.IsQuestLodger();
+					GenPlace.TryPlaceThing(obj, CS_0024_003C_003E8__locals6.Corpse.Position, CS_0024_003C_003E8__locals6.Map, ThingPlaceMode.Near, null, null, null);
+				};
+				toil.defaultCompleteMode = ToilCompleteMode.Instant;
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 3;
+				return true;
+			}
+			case 3:
+				_003C_003E1__state = -1;
+				return false;
+			}
 		}
 
-		// Token: 0x0400513F RID: 20799
-		private const TargetIndex CorpseInd = TargetIndex.A;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x04005140 RID: 20800
-		public const int RemoveTicks = 300;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__6 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__6(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private const TargetIndex CorpseInd = TargetIndex.A;
+
+	public const int RemoveTicks = 300;
+
+	protected Corpse Corpse => (Corpse)job.GetTarget(TargetIndex.A).Thing;
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return pawn.Reserve(Corpse, job, 1, -1, null, errorOnFailed);
+	}
+
+	public override string GetReport()
+	{
+		return "ReportRemovingMechlink".Translate(HediffDefOf.MechlinkImplant.label);
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__6))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__6(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

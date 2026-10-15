@@ -1,113 +1,261 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+[StaticConstructorOnStartup]
+public static class HostilityResponseModeUtility
 {
-	// Token: 0x020024EF RID: 9455
-	[StaticConstructorOnStartup]
-	public static class HostilityResponseModeUtility
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass9_0
 	{
-		// Token: 0x0600CE97 RID: 52887 RVA: 0x003CAB6F File Offset: 0x003C8D6F
-		public static Texture2D GetIcon(this HostilityResponseMode response)
+		public Pawn p;
+	}
+
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass9_1
+	{
+		public HostilityResponseMode response;
+
+		public _003C_003Ec__DisplayClass9_0 CS_0024_003C_003E8__locals1;
+
+		internal void _003CDrawResponseButton_GenerateMenu_003Eb__0()
 		{
-			switch (response)
+			CS_0024_003C_003E8__locals1.p.playerSettings.hostilityResponse = response;
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CDrawResponseButton_GenerateMenu_003Ed__9 : IEnumerable<Widgets.DropdownMenuElement<HostilityResponseMode>>, IEnumerable, IEnumerator<Widgets.DropdownMenuElement<HostilityResponseMode>>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Widgets.DropdownMenuElement<HostilityResponseMode> _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private Pawn p;
+
+		public Pawn _003C_003E3__p;
+
+		private _003C_003Ec__DisplayClass9_0 _003C_003E8__1;
+
+		private IEnumerator _003C_003E7__wrap1;
+
+		Widgets.DropdownMenuElement<HostilityResponseMode> IEnumerator<Widgets.DropdownMenuElement<HostilityResponseMode>>.Current
+		{
+			[DebuggerHidden]
+			get
 			{
-			case HostilityResponseMode.Ignore:
-				return HostilityResponseModeUtility.IgnoreIcon;
-			case HostilityResponseMode.Attack:
-				return HostilityResponseModeUtility.AttackIcon;
-			case HostilityResponseMode.Flee:
-				return HostilityResponseModeUtility.FleeIcon;
-			default:
-				return BaseContent.BadTex;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600CE98 RID: 52888 RVA: 0x003CAB9C File Offset: 0x003C8D9C
-		public static HostilityResponseMode GetNextResponse(Pawn pawn)
+		object IEnumerator.Current
 		{
-			switch (pawn.playerSettings.hostilityResponse)
+			[DebuggerHidden]
+			get
 			{
-			case HostilityResponseMode.Ignore:
-				if (pawn.WorkTagIsDisabled(WorkTags.Violent))
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CDrawResponseButton_GenerateMenu_003Ed__9(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
 				{
-					return HostilityResponseMode.Flee;
 				}
-				return HostilityResponseMode.Attack;
-			case HostilityResponseMode.Attack:
-				return HostilityResponseMode.Flee;
-			case HostilityResponseMode.Flee:
-				return HostilityResponseMode.Ignore;
-			default:
-				return HostilityResponseMode.Ignore;
-			}
-		}
-
-		// Token: 0x0600CE99 RID: 52889 RVA: 0x003CABDB File Offset: 0x003C8DDB
-		public static string GetLabel(this HostilityResponseMode response)
-		{
-			return ("HostilityResponseMode_" + response.ToString()).Translate();
-		}
-
-		// Token: 0x0600CE9A RID: 52890 RVA: 0x003CAC00 File Offset: 0x003C8E00
-		public static void DrawResponseButton(Rect rect, Pawn pawn, bool paintable)
-		{
-			Widgets.Dropdown<Pawn, HostilityResponseMode>(rect, pawn, HostilityResponseModeUtility.IconColor, new Func<Pawn, HostilityResponseMode>(HostilityResponseModeUtility.DrawResponseButton_GetResponse), new Func<Pawn, IEnumerable<Widgets.DropdownMenuElement<HostilityResponseMode>>>(HostilityResponseModeUtility.DrawResponseButton_GenerateMenu), null, pawn.playerSettings.hostilityResponse.GetIcon(), null, null, delegate()
-			{
-				PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.HostilityResponse, KnowledgeAmount.SpecificInteraction);
-			}, paintable, new float?(4f));
-			UIHighlighter.HighlightOpportunity(rect, "HostilityResponse");
-			if (Mouse.IsOver(rect))
-			{
-				TooltipHandler.TipRegion(rect, "HostilityReponseTip".Translate() + "\n\n" + "HostilityResponseCurrentMode".Translate() + ": " + pawn.playerSettings.hostilityResponse.GetLabel());
-			}
-		}
-
-		// Token: 0x0600CE9B RID: 52891 RVA: 0x003CACCE File Offset: 0x003C8ECE
-		private static HostilityResponseMode DrawResponseButton_GetResponse(Pawn pawn)
-		{
-			return pawn.playerSettings.hostilityResponse;
-		}
-
-		// Token: 0x0600CE9C RID: 52892 RVA: 0x003CACDB File Offset: 0x003C8EDB
-		private static IEnumerable<Widgets.DropdownMenuElement<HostilityResponseMode>> DrawResponseButton_GenerateMenu(Pawn p)
-		{
-			using (IEnumerator enumerator = Enum.GetValues(typeof(HostilityResponseMode)).GetEnumerator())
-			{
-				while (enumerator.MoveNext())
+				finally
 				{
-					HostilityResponseMode response = (HostilityResponseMode)enumerator.Current;
-					if (response != HostilityResponseMode.Attack || !p.WorkTagIsDisabled(WorkTags.Violent))
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E8__1 = null;
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				switch (_003C_003E1__state)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E8__1 = new _003C_003Ec__DisplayClass9_0();
+					_003C_003E8__1.p = p;
+					_003C_003E7__wrap1 = Enum.GetValues(typeof(HostilityResponseMode)).GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 1:
+					_003C_003E1__state = -3;
+					break;
+				}
+				while (_003C_003E7__wrap1.MoveNext())
+				{
+					_003C_003Ec__DisplayClass9_1 CS_0024_003C_003E8__locals7 = new _003C_003Ec__DisplayClass9_1
 					{
-						yield return new Widgets.DropdownMenuElement<HostilityResponseMode>
+						CS_0024_003C_003E8__locals1 = _003C_003E8__1,
+						response = (HostilityResponseMode)_003C_003E7__wrap1.Current
+					};
+					if (CS_0024_003C_003E8__locals7.response != HostilityResponseMode.Attack || !CS_0024_003C_003E8__locals7.CS_0024_003C_003E8__locals1.p.WorkTagIsDisabled(WorkTags.Violent))
+					{
+						_003C_003E2__current = new Widgets.DropdownMenuElement<HostilityResponseMode>
 						{
-							option = new FloatMenuOption(response.GetLabel(), delegate()
+							option = new FloatMenuOption(CS_0024_003C_003E8__locals7.response.GetLabel(), delegate
 							{
-								p.playerSettings.hostilityResponse = response;
-							}, response.GetIcon(), Color.white, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0, HorizontalJustification.Left, false),
-							payload = response
+								CS_0024_003C_003E8__locals7.CS_0024_003C_003E8__locals1.p.playerSettings.hostilityResponse = CS_0024_003C_003E8__locals7.response;
+							}, CS_0024_003C_003E8__locals7.response.GetIcon(), Color.white),
+							payload = CS_0024_003C_003E8__locals7.response
 						};
+						_003C_003E1__state = 1;
+						return true;
 					}
 				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = null;
+				return false;
 			}
-			IEnumerator enumerator = null;
-			yield break;
-			yield break;
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
 		}
 
-		// Token: 0x04008C91 RID: 35985
-		private static readonly Texture2D IgnoreIcon = ContentFinder<Texture2D>.Get("UI/Icons/HostilityResponse/Ignore", true);
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x04008C92 RID: 35986
-		private static readonly Texture2D AttackIcon = ContentFinder<Texture2D>.Get("UI/Icons/HostilityResponse/Attack", true);
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 is IDisposable disposable)
+			{
+				disposable.Dispose();
+			}
+		}
 
-		// Token: 0x04008C93 RID: 35987
-		private static readonly Texture2D FleeIcon = ContentFinder<Texture2D>.Get("UI/Icons/HostilityResponse/Flee", true);
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04008C94 RID: 35988
-		private static readonly Color IconColor = new Color(0.84f, 0.84f, 0.84f);
+		[DebuggerHidden]
+		IEnumerator<Widgets.DropdownMenuElement<HostilityResponseMode>> IEnumerable<Widgets.DropdownMenuElement<HostilityResponseMode>>.GetEnumerator()
+		{
+			_003CDrawResponseButton_GenerateMenu_003Ed__9 _003CDrawResponseButton_GenerateMenu_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CDrawResponseButton_GenerateMenu_003Ed__ = this;
+			}
+			else
+			{
+				_003CDrawResponseButton_GenerateMenu_003Ed__ = new _003CDrawResponseButton_GenerateMenu_003Ed__9(0);
+			}
+			_003CDrawResponseButton_GenerateMenu_003Ed__.p = _003C_003E3__p;
+			return _003CDrawResponseButton_GenerateMenu_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Widgets.DropdownMenuElement<HostilityResponseMode>>)this).GetEnumerator();
+		}
+	}
+
+	private static readonly Texture2D IgnoreIcon = ContentFinder<Texture2D>.Get("UI/Icons/HostilityResponse/Ignore");
+
+	private static readonly Texture2D AttackIcon = ContentFinder<Texture2D>.Get("UI/Icons/HostilityResponse/Attack");
+
+	private static readonly Texture2D FleeIcon = ContentFinder<Texture2D>.Get("UI/Icons/HostilityResponse/Flee");
+
+	private static readonly Color IconColor = new Color(0.84f, 0.84f, 0.84f);
+
+	public static Texture2D GetIcon(this HostilityResponseMode response)
+	{
+		return response switch
+		{
+			HostilityResponseMode.Ignore => IgnoreIcon, 
+			HostilityResponseMode.Attack => AttackIcon, 
+			HostilityResponseMode.Flee => FleeIcon, 
+			_ => BaseContent.BadTex, 
+		};
+	}
+
+	public static HostilityResponseMode GetNextResponse(Pawn pawn)
+	{
+		switch (pawn.playerSettings.hostilityResponse)
+		{
+		case HostilityResponseMode.Ignore:
+			if (pawn.WorkTagIsDisabled(WorkTags.Violent))
+			{
+				return HostilityResponseMode.Flee;
+			}
+			return HostilityResponseMode.Attack;
+		case HostilityResponseMode.Attack:
+			return HostilityResponseMode.Flee;
+		case HostilityResponseMode.Flee:
+			return HostilityResponseMode.Ignore;
+		default:
+			return HostilityResponseMode.Ignore;
+		}
+	}
+
+	public static string GetLabel(this HostilityResponseMode response)
+	{
+		return ("HostilityResponseMode_" + response).Translate();
+	}
+
+	public static void DrawResponseButton(Rect rect, Pawn pawn, bool paintable)
+	{
+		Widgets.Dropdown(rect, pawn, IconColor, DrawResponseButton_GetResponse, DrawResponseButton_GenerateMenu, null, pawn.playerSettings.hostilityResponse.GetIcon(), null, null, delegate
+		{
+			PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.HostilityResponse, KnowledgeAmount.SpecificInteraction);
+		}, paintable, 4f);
+		UIHighlighter.HighlightOpportunity(rect, "HostilityResponse");
+		if (Mouse.IsOver(rect))
+		{
+			TooltipHandler.TipRegion(rect, "HostilityReponseTip".Translate() + "\n\n" + "HostilityResponseCurrentMode".Translate() + ": " + pawn.playerSettings.hostilityResponse.GetLabel());
+		}
+	}
+
+	private static HostilityResponseMode DrawResponseButton_GetResponse(Pawn pawn)
+	{
+		return pawn.playerSettings.hostilityResponse;
+	}
+
+	[IteratorStateMachine(typeof(_003CDrawResponseButton_GenerateMenu_003Ed__9))]
+	private static IEnumerable<Widgets.DropdownMenuElement<HostilityResponseMode>> DrawResponseButton_GenerateMenu(Pawn p)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CDrawResponseButton_GenerateMenu_003Ed__9(-2)
+		{
+			_003C_003E3__p = p
+		};
 	}
 }

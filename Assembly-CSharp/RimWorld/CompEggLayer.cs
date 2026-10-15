@@ -1,207 +1,295 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompEggLayer : ThingComp
 {
-	// Token: 0x02002C6F RID: 11375
-	public class CompEggLayer : ThingComp
+	[CompilerGenerated]
+	private sealed class _003CCompGetGizmosExtra_003Ed__20 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x17002832 RID: 10290
-		// (get) Token: 0x0600FF12 RID: 65298 RVA: 0x0049F008 File Offset: 0x0049D208
-		private bool Active
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompEggLayer _003C_003E4__this;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				Pawn pawn = this.parent as Pawn;
-				return (!this.Props.eggLayFemaleOnly || pawn == null || pawn.gender == Gender.Female) && (pawn == null || pawn.ageTracker.CurLifeStage.milkable) && !pawn.Sterile() && (!ModsConfig.AnomalyActive || !pawn.IsShambler);
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002833 RID: 10291
-		// (get) Token: 0x0600FF13 RID: 65299 RVA: 0x0049F06F File Offset: 0x0049D26F
-		public bool CanLayNow
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.Active && this.eggProgress >= 1f;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002834 RID: 10292
-		// (get) Token: 0x0600FF14 RID: 65300 RVA: 0x0049F08B File Offset: 0x0049D28B
-		public bool FullyFertilized
+		[DebuggerHidden]
+		public _003CCompGetGizmosExtra_003Ed__20(int _003C_003E1__state)
 		{
-			get
-			{
-				return this.fertilizationCount >= this.Props.eggFertilizationCountMax;
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x17002835 RID: 10293
-		// (get) Token: 0x0600FF15 RID: 65301 RVA: 0x0049F0A3 File Offset: 0x0049D2A3
-		private bool ProgressStoppedBecauseUnfertilized
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			get
-			{
-				return this.Props.eggProgressUnfertilizedMax < 1f && this.fertilizationCount == 0 && this.eggProgress >= this.Props.eggProgressUnfertilizedMax;
-			}
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x17002836 RID: 10294
-		// (get) Token: 0x0600FF16 RID: 65302 RVA: 0x0049F0D7 File Offset: 0x0049D2D7
-		public CompProperties_EggLayer Props
+		private bool MoveNext()
 		{
-			get
+			int num = _003C_003E1__state;
+			CompEggLayer CS_0024_003C_003E8__locals1 = _003C_003E4__this;
+			switch (num)
 			{
-				return (CompProperties_EggLayer)this.props;
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (DebugSettings.ShowDevGizmos)
+				{
+					_003C_003E2__current = new Command_Action
+					{
+						defaultLabel = "DEV: LayEgg",
+						action = delegate
+						{
+							CS_0024_003C_003E8__locals1.eggProgress = 1f;
+						}
+					};
+					_003C_003E1__state = 1;
+					return true;
+				}
+				break;
+			case 1:
+				_003C_003E1__state = -1;
+				break;
 			}
+			return false;
 		}
 
-		// Token: 0x0600FF17 RID: 65303 RVA: 0x0049F0E4 File Offset: 0x0049D2E4
-		public override void PostExposeData()
+		bool IEnumerator.MoveNext()
 		{
-			base.PostExposeData();
-			Scribe_Values.Look<float>(ref this.eggProgress, "eggProgress", 0f, false);
-			Scribe_Values.Look<int>(ref this.fertilizationCount, "fertilizationCount", 0, false);
-			Scribe_References.Look<Pawn>(ref this.fertilizedBy, "fertilizedBy", false);
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0600FF18 RID: 65304 RVA: 0x0049F130 File Offset: 0x0049D330
-		public override void CompTick()
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			if (!this.parent.IsHashIntervalTick(2500))
-			{
-				return;
-			}
-			if (!this.Active)
-			{
-				return;
-			}
-			float num = 2500f / (this.Props.eggLayIntervalDays * 60000f);
-			Pawn pawn = this.parent as Pawn;
-			if (pawn != null)
-			{
-				num *= PawnUtility.BodyResourceGrowthSpeed(pawn);
-			}
-			this.eggProgress += num;
-			if (this.eggProgress > 1f)
-			{
-				this.eggProgress = 1f;
-			}
-			if (this.ProgressStoppedBecauseUnfertilized)
-			{
-				this.eggProgress = this.Props.eggProgressUnfertilizedMax;
-			}
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x0600FF19 RID: 65305 RVA: 0x0049F1C8 File Offset: 0x0049D3C8
-		public void Fertilize(Pawn male)
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
 		{
-			this.fertilizationCount = this.Props.eggFertilizationCountMax;
-			this.fertilizedBy = male;
-		}
-
-		// Token: 0x0600FF1A RID: 65306 RVA: 0x0049F1E2 File Offset: 0x0049D3E2
-		public ThingDef NextEggType()
-		{
-			if (this.fertilizationCount > 0)
+			_003CCompGetGizmosExtra_003Ed__20 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				return this.Props.eggFertilizedDef;
-			}
-			return this.Props.eggUnfertilizedDef;
-		}
-
-		// Token: 0x0600FF1B RID: 65307 RVA: 0x0049F204 File Offset: 0x0049D404
-		public virtual Thing ProduceEgg()
-		{
-			if (!this.Active)
-			{
-				string str = "LayEgg while not Active: ";
-				ThingWithComps parent = this.parent;
-				Log.Error(str + ((parent != null) ? parent.ToString() : null));
-			}
-			this.eggProgress = 0f;
-			int randomInRange = this.Props.eggCountRange.RandomInRange;
-			if (randomInRange == 0)
-			{
-				return null;
-			}
-			Thing thing;
-			if (this.fertilizationCount > 0)
-			{
-				thing = ThingMaker.MakeThing(this.Props.eggFertilizedDef, null);
-				this.fertilizationCount = Mathf.Max(0, this.fertilizationCount - randomInRange);
+				_003C_003E1__state = 0;
+				result = this;
 			}
 			else
 			{
-				thing = ThingMaker.MakeThing(this.Props.eggUnfertilizedDef, null);
-			}
-			thing.stackCount = randomInRange;
-			CompHatcher compHatcher = thing.TryGetComp<CompHatcher>();
-			if (compHatcher != null)
-			{
-				compHatcher.hatcheeFaction = this.parent.Faction;
-				Pawn pawn = this.parent as Pawn;
-				if (pawn != null)
+				result = new _003CCompGetGizmosExtra_003Ed__20(0)
 				{
-					compHatcher.hatcheeParent = pawn;
-				}
-				if (this.fertilizedBy != null)
-				{
-					compHatcher.otherParent = this.fertilizedBy;
-				}
-			}
-			return thing;
-		}
-
-		// Token: 0x0600FF1C RID: 65308 RVA: 0x0049F2F0 File Offset: 0x0049D4F0
-		public override string CompInspectStringExtra()
-		{
-			if (!this.Active)
-			{
-				return null;
-			}
-			string text = "EggProgress".Translate() + ": " + this.eggProgress.ToStringPercent();
-			if (this.fertilizationCount > 0)
-			{
-				text += "\n" + "Fertilized".Translate();
-			}
-			else if (this.ProgressStoppedBecauseUnfertilized)
-			{
-				text += "\n" + "ProgressStoppedUntilFertilized".Translate();
-			}
-			return text;
-		}
-
-		// Token: 0x0600FF1D RID: 65309 RVA: 0x0049F385 File Offset: 0x0049D585
-		public override IEnumerable<Gizmo> CompGetGizmosExtra()
-		{
-			if (DebugSettings.ShowDevGizmos)
-			{
-				yield return new Command_Action
-				{
-					defaultLabel = "DEV: LayEgg",
-					action = delegate()
-					{
-						this.eggProgress = 1f;
-					}
+					_003C_003E4__this = _003C_003E4__this
 				};
 			}
-			yield break;
+			return result;
 		}
 
-		// Token: 0x0400A702 RID: 42754
-		private const int EggTickInterval = 2500;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x0400A703 RID: 42755
-		private float eggProgress;
+	private const int EggTickInterval = 2500;
 
-		// Token: 0x0400A704 RID: 42756
-		private int fertilizationCount;
+	private float eggProgress;
 
-		// Token: 0x0400A705 RID: 42757
-		private Pawn fertilizedBy;
+	private int fertilizationCount;
+
+	private Pawn fertilizedBy;
+
+	private bool Active
+	{
+		get
+		{
+			Pawn pawn = parent as Pawn;
+			if (Props.eggLayFemaleOnly && pawn != null && pawn.gender != Gender.Female)
+			{
+				return false;
+			}
+			if (pawn != null && !pawn.ageTracker.CurLifeStage.milkable)
+			{
+				return false;
+			}
+			if (pawn.Sterile())
+			{
+				return false;
+			}
+			if (ModsConfig.AnomalyActive && pawn.IsShambler)
+			{
+				return false;
+			}
+			return true;
+		}
+	}
+
+	public bool CanLayNow
+	{
+		get
+		{
+			if (Active)
+			{
+				return eggProgress >= 1f;
+			}
+			return false;
+		}
+	}
+
+	public bool FullyFertilized => fertilizationCount >= Props.eggFertilizationCountMax;
+
+	private bool ProgressStoppedBecauseUnfertilized
+	{
+		get
+		{
+			if (Props.eggProgressUnfertilizedMax < 1f && fertilizationCount == 0)
+			{
+				return eggProgress >= Props.eggProgressUnfertilizedMax;
+			}
+			return false;
+		}
+	}
+
+	public CompProperties_EggLayer Props => (CompProperties_EggLayer)props;
+
+	public override void PostExposeData()
+	{
+		base.PostExposeData();
+		Scribe_Values.Look(ref eggProgress, "eggProgress", 0f);
+		Scribe_Values.Look(ref fertilizationCount, "fertilizationCount", 0);
+		Scribe_References.Look(ref fertilizedBy, "fertilizedBy");
+	}
+
+	public override void CompTick()
+	{
+		if (parent.IsHashIntervalTick(2500) && Active)
+		{
+			float num = 2500f / (Props.eggLayIntervalDays * 60000f);
+			if (parent is Pawn pawn)
+			{
+				num *= PawnUtility.BodyResourceGrowthSpeed(pawn);
+			}
+			eggProgress += num;
+			if (eggProgress > 1f)
+			{
+				eggProgress = 1f;
+			}
+			if (ProgressStoppedBecauseUnfertilized)
+			{
+				eggProgress = Props.eggProgressUnfertilizedMax;
+			}
+		}
+	}
+
+	public void Fertilize(Pawn male)
+	{
+		fertilizationCount = Props.eggFertilizationCountMax;
+		fertilizedBy = male;
+	}
+
+	public ThingDef NextEggType()
+	{
+		if (fertilizationCount > 0)
+		{
+			return Props.eggFertilizedDef;
+		}
+		return Props.eggUnfertilizedDef;
+	}
+
+	public virtual Thing ProduceEgg()
+	{
+		if (!Active)
+		{
+			Log.Error("LayEgg while not Active: " + parent);
+		}
+		eggProgress = 0f;
+		int randomInRange = Props.eggCountRange.RandomInRange;
+		if (randomInRange == 0)
+		{
+			return null;
+		}
+		Thing thing = null;
+		if (fertilizationCount > 0)
+		{
+			thing = ThingMaker.MakeThing(Props.eggFertilizedDef);
+			fertilizationCount = Mathf.Max(0, fertilizationCount - randomInRange);
+		}
+		else
+		{
+			thing = ThingMaker.MakeThing(Props.eggUnfertilizedDef);
+		}
+		thing.stackCount = randomInRange;
+		CompHatcher compHatcher = thing.TryGetComp<CompHatcher>();
+		if (compHatcher != null)
+		{
+			compHatcher.hatcheeFaction = parent.Faction;
+			if (parent is Pawn hatcheeParent)
+			{
+				compHatcher.hatcheeParent = hatcheeParent;
+			}
+			if (fertilizedBy != null)
+			{
+				compHatcher.otherParent = fertilizedBy;
+			}
+		}
+		return thing;
+	}
+
+	public override string CompInspectStringExtra()
+	{
+		if (!Active)
+		{
+			return null;
+		}
+		string text = "EggProgress".Translate() + ": " + eggProgress.ToStringPercent();
+		if (fertilizationCount > 0)
+		{
+			text += "\n" + "Fertilized".Translate();
+		}
+		else if (ProgressStoppedBecauseUnfertilized)
+		{
+			text += "\n" + "ProgressStoppedUntilFertilized".Translate();
+		}
+		return text;
+	}
+
+	[IteratorStateMachine(typeof(_003CCompGetGizmosExtra_003Ed__20))]
+	public override IEnumerable<Gizmo> CompGetGizmosExtra()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CCompGetGizmosExtra_003Ed__20(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

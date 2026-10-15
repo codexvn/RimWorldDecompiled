@@ -1,34 +1,120 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class ThoughtWorker_Precept_NoPsychicRituals : ThoughtWorker_Precept, IPreceptCompDescriptionArgs
 {
-	// Token: 0x0200183B RID: 6203
-	public class ThoughtWorker_Precept_NoPsychicRituals : ThoughtWorker_Precept, IPreceptCompDescriptionArgs
+	[CompilerGenerated]
+	private sealed class _003CGetDescriptionArgs_003Ed__2 : IEnumerable<NamedArgument>, IEnumerable, IEnumerator<NamedArgument>, IEnumerator, IDisposable
 	{
-		// Token: 0x06008F46 RID: 36678 RVA: 0x002A5724 File Offset: 0x002A3924
-		protected override ThoughtState ShouldHaveThought(Pawn p)
+		private int _003C_003E1__state;
+
+		private NamedArgument _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		NamedArgument IEnumerator<NamedArgument>.Current
 		{
-			if (!ModsConfig.AnomalyActive)
+			[DebuggerHidden]
+			get
 			{
-				return false;
+				return _003C_003E2__current;
 			}
-			if (!p.IsColonist)
-			{
-				return false;
-			}
-			return Find.TickManager.TicksGame > Find.IdeoManager.lastPsychicRitualPerformedTick + 360000;
 		}
 
-		// Token: 0x06008F47 RID: 36679 RVA: 0x002A5764 File Offset: 0x002A3964
-		public IEnumerable<NamedArgument> GetDescriptionArgs()
+		object IEnumerator.Current
 		{
-			yield return 360000.ToStringTicksToPeriod(true, false, true, true, false).Named("DURATION");
-			yield break;
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x04005C27 RID: 23591
-		public const int TicksSinceLastPsychicRitualActiveTicks = 360000;
+		[DebuggerHidden]
+		public _003CGetDescriptionArgs_003Ed__2(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			switch (_003C_003E1__state)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = 360000.ToStringTicksToPeriod().Named("DURATION");
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<NamedArgument> IEnumerable<NamedArgument>.GetEnumerator()
+		{
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				return this;
+			}
+			return new _003CGetDescriptionArgs_003Ed__2(0);
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<NamedArgument>)this).GetEnumerator();
+		}
+	}
+
+	public const int TicksSinceLastPsychicRitualActiveTicks = 360000;
+
+	protected override ThoughtState ShouldHaveThought(Pawn p)
+	{
+		if (!ModsConfig.AnomalyActive)
+		{
+			return false;
+		}
+		if (!p.IsColonist)
+		{
+			return false;
+		}
+		return Find.TickManager.TicksGame > Find.IdeoManager.lastPsychicRitualPerformedTick + 360000;
+	}
+
+	[IteratorStateMachine(typeof(_003CGetDescriptionArgs_003Ed__2))]
+	public IEnumerable<NamedArgument> GetDescriptionArgs()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetDescriptionArgs_003Ed__2(-2);
 	}
 }

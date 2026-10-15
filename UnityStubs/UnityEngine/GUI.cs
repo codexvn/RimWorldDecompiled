@@ -120,6 +120,10 @@ public class GUI
 
 	private static string _pendingFocusName;
 
+	private static readonly HashSet<int> _fieldsDrawnThisPass = new HashSet<int>();
+
+	private static bool _focusMovedThisPass;
+
 	private static int _selectAllOnFocusId;
 
 	private static int _nextNamedControlId = int.MinValue;
@@ -1011,6 +1015,7 @@ public class GUI
 		bool num = _nextControlName != null && _pendingFocusName == _nextControlName;
 		int num2 = ConsumeNextControlName() ?? ControlIdFor(rect);
 		TrackControlWindow(num2);
+		_fieldsDrawnThisPass.Add(num2);
 		int fontIndex = style?.FontIndex ?? 1;
 		if (num || _selectAllOnFocusId == num2)
 		{
@@ -1385,49 +1390,66 @@ public class GUI
 			DrawBorder(rect, color * color2, be);
 		}
 		Color textColor = ContentTint * ((style == null) ? new Color(0.92f, 0.92f, 0.92f, 1f) : (focused ? style.focused.textColor : style.normal.textColor));
+		int num = Mathf.Clamp(_caretIndex, 0, text.Length);
+		int num2 = Mathf.Clamp(SelMin, 0, text.Length);
+		int num3 = Mathf.Clamp(SelMax, 0, text.Length);
+		int num4 = -1;
+		int num5 = -1;
+		if (focused && ImeComposition.Active)
+		{
+			string text2 = ImeComposition.Text;
+			text = text.Remove(num2, num3 - num2).Insert(num2, text2);
+			num4 = num2;
+			num5 = num2 + text2.Length;
+			num = (num2 = (num3 = num4 + ImeComposition.Cursor));
+		}
 		if (multiline)
 		{
-			DrawTextAreaContent(rect, text, fontIndex, focused, style, textColor, be);
+			DrawTextAreaContent(rect, text, fontIndex, focused, style, textColor, be, num, num2, num3, num4, num5);
 			return;
 		}
 		Rect rect2 = TextFieldTextRect(rect, multiline: false, style);
-		int index = Mathf.Clamp(_caretIndex, 0, text.Length);
-		float num = CaretX(text, fontIndex, index, be);
-		float num2 = AlignOffsetX(rect2.width, text, fontIndex, alignment, be);
+		float num6 = CaretX(text, fontIndex, num, be);
+		float num7 = AlignOffsetX(rect2.width, text, fontIndex, alignment, be);
 		TextAnchor anchor = (TextAnchor)((int)alignment / 3 * 3);
-		float num3 = 0f;
+		float num8 = 0f;
 		if (focused)
 		{
-			float num4 = CaretX(text, fontIndex, text.Length, be);
-			if (num - _textScrollX > rect2.width - 2f)
+			float num9 = CaretX(text, fontIndex, text.Length, be);
+			if (num6 - _textScrollX > rect2.width - 2f)
 			{
-				_textScrollX = num - rect2.width + 2f;
+				_textScrollX = num6 - rect2.width + 2f;
 			}
-			if (num - _textScrollX < 0f)
+			if (num6 - _textScrollX < 0f)
 			{
-				_textScrollX = num;
+				_textScrollX = num6;
 			}
-			_textScrollX = Mathf.Clamp(_textScrollX, 0f, Mathf.Max(0f, num4 - rect2.width + 2f));
-			num3 = _textScrollX;
+			_textScrollX = Mathf.Clamp(_textScrollX, 0f, Mathf.Max(0f, num9 - rect2.width + 2f));
+			num8 = _textScrollX;
 		}
-		int num5 = Mathf.Clamp(SelMin, 0, text.Length);
-		int num6 = Mathf.Clamp(SelMax, 0, text.Length);
 		be.PushClipRect(rect2);
-		if (focused && num6 > num5)
+		if (focused && num3 > num2)
 		{
-			float num7 = CaretX(text, fontIndex, num5, be);
-			float num8 = CaretX(text, fontIndex, num6, be);
-			be.FillRect(new Rect(rect2.x + num2 + num7 - num3, rect.y + 3f, Mathf.Max(1f, num8 - num7), Mathf.Max(2f, rect.height - 6f)), new Color(0.3f, 0.45f, 0.75f, 0.55f));
+			float num10 = CaretX(text, fontIndex, num2, be);
+			float num11 = CaretX(text, fontIndex, num3, be);
+			be.FillRect(new Rect(rect2.x + num7 + num10 - num8, rect.y + 3f, Mathf.Max(1f, num11 - num10), Mathf.Max(2f, rect.height - 6f)), new Color(0.3f, 0.45f, 0.75f, 0.55f));
 		}
-		be.DrawText(new Rect(rect2.x + num2 - num3, rect.y, rect2.width, rect.height), text, fontIndex, 0f, FontStyle.Normal, anchor, wordWrap: false, textColor);
+		be.DrawText(new Rect(rect2.x + num7 - num8, rect.y, rect2.width, rect.height), text, fontIndex, 0f, FontStyle.Normal, anchor, wordWrap: false, textColor);
+		if (num5 > num4)
+		{
+			float num12 = CaretX(text, fontIndex, num4, be);
+			float num13 = CaretX(text, fontIndex, num5, be);
+			be.FillRect(new Rect(rect2.x + num7 + num12 - num8, rect.yMax - 4f, Mathf.Max(1f, num13 - num12), 1f), textColor);
+		}
 		if (focused)
 		{
-			be.FillRect(new Rect(rect2.x + num2 + num - num3, rect.y + 3f, 1.5f, Mathf.Max(2f, rect.height - 6f)), new Color(0.92f, 0.92f, 0.92f, 0.9f));
+			be.FillRect(new Rect(rect2.x + num7 + num6 - num8, rect.y + 3f, 1.5f, Mathf.Max(2f, rect.height - 6f)), new Color(0.92f, 0.92f, 0.92f, 0.9f));
+			ImeComposition.SetCandidatePos(be.GuiToScreenPoint(new Vector2(rect2.x + num7 + num6 - num8, rect.yMax - 3f)));
 		}
 		be.PopClipRect();
 	}
 
-	private static void DrawTextAreaContent(Rect rect, string text, int fontIndex, bool focused, GUIStyle style, Color textColor, IGuiBackend be)
+	private static void DrawTextAreaContent(Rect rect, string text, int fontIndex, bool focused, GUIStyle style, Color textColor, IGuiBackend be, int caret, int selA, int selB, int compA, int compB)
 	{
 		Rect rect2 = TextFieldTextRect(rect, multiline: true, style);
 		float num = TextAreaWrapWidth(rect2, style);
@@ -1437,7 +1459,7 @@ public class GUI
 		float lineHeight = 0f;
 		if (focused)
 		{
-			vector = be.TextCursorPos(fontIndex, 0f, FontStyle.Normal, text, num, Mathf.Clamp(_caretIndex, 0, text.Length), out lineHeight);
+			vector = be.TextCursorPos(fontIndex, 0f, FontStyle.Normal, text, num, caret, out lineHeight);
 			if (vector.y + lineHeight - _textScrollY > rect2.height)
 			{
 				_textScrollY = vector.y + lineHeight - rect2.height;
@@ -1463,20 +1485,27 @@ public class GUI
 			}
 		}
 		be.PushClipRect(rect2);
-		int num4 = Mathf.Clamp(SelMin, 0, text.Length);
-		int num5 = Mathf.Clamp(SelMax, 0, text.Length);
-		if (focused && num5 > num4)
+		if (focused && selB > selA)
 		{
-			be.TextSelectionRects(fontIndex, 0f, FontStyle.Normal, text, num, num4, num5, _selectionRects);
+			be.TextSelectionRects(fontIndex, 0f, FontStyle.Normal, text, num, selA, selB, _selectionRects);
 			foreach (Rect selectionRect in _selectionRects)
 			{
 				be.FillRect(new Rect(rect2.x + selectionRect.x - num2, rect2.y + selectionRect.y - num3, selectionRect.width, selectionRect.height), new Color(0.3f, 0.45f, 0.75f, 0.55f));
 			}
 		}
 		be.DrawText(new Rect(rect2.x - num2, rect2.y - num3, rect2.width + num2, rect2.height + num3), text, fontIndex, 0f, FontStyle.Normal, TextAnchor.UpperLeft, num > 0f, textColor);
+		if (compB > compA)
+		{
+			be.TextSelectionRects(fontIndex, 0f, FontStyle.Normal, text, num, compA, compB, _selectionRects);
+			foreach (Rect selectionRect2 in _selectionRects)
+			{
+				be.FillRect(new Rect(rect2.x + selectionRect2.x - num2, rect2.y + selectionRect2.y + selectionRect2.height - 1f - num3, selectionRect2.width, 1f), textColor);
+			}
+		}
 		if (focused)
 		{
 			be.FillRect(new Rect(rect2.x + vector.x - num2, rect2.y + vector.y - num3, 1.5f, lineHeight), new Color(0.92f, 0.92f, 0.92f, 0.9f));
+			ImeComposition.SetCandidatePos(be.GuiToScreenPoint(new Vector2(rect2.x + vector.x - num2, rect2.y + vector.y + lineHeight - num3)));
 		}
 		be.PopClipRect();
 	}
@@ -1788,6 +1817,7 @@ public class GUI
 				_selectAllOnFocusId = value;
 			}
 			GUIUtility.keyboardControl = value;
+			_focusMovedThisPass = true;
 			if (_currentWindowId != int.MinValue)
 			{
 				_idToWindowId[value] = _currentWindowId;
@@ -1822,6 +1852,32 @@ public class GUI
 	}
 
 	public static void ProcessPendingWindows()
+	{
+		try
+		{
+			RunPendingWindows();
+		}
+		finally
+		{
+			DropFocusOfUndrawnField();
+		}
+	}
+
+	private static void DropFocusOfUndrawnField()
+	{
+		Event current = Event.current;
+		if (current != null && current.rawType == EventType.repaint)
+		{
+			if (GUIUtility.keyboardControl != 0 && !_focusMovedThisPass && !_fieldsDrawnThisPass.Contains(GUIUtility.keyboardControl))
+			{
+				GUIUtility.keyboardControl = 0;
+			}
+			_focusMovedThisPass = false;
+		}
+		_fieldsDrawnThisPass.Clear();
+	}
+
+	private static void RunPendingWindows()
 	{
 		int focusedControlWindowId = GetFocusedControlWindowId();
 		if (focusedControlWindowId != int.MinValue && IndexOfPendingWindow(focusedControlWindowId) < 0)

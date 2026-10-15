@@ -1,89 +1,221 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class LordToil_WaitForItems : LordToil, IWaitForItemsLordToil
 {
-	// Token: 0x02001731 RID: 5937
-	public class LordToil_WaitForItems : LordToil, IWaitForItemsLordToil
+	[CompilerGenerated]
+	private sealed class _003CExtraFloatMenuOptions_003Ed__12 : IEnumerable<FloatMenuOption>, IEnumerable, IEnumerator<FloatMenuOption>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700157E RID: 5502
-		// (get) Token: 0x06008BA1 RID: 35745 RVA: 0x002996BB File Offset: 0x002978BB
-		public bool HasAllRequestedItems
+		private int _003C_003E1__state;
+
+		private FloatMenuOption _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public LordToil_WaitForItems _003C_003E4__this;
+
+		private Pawn requester;
+
+		public Pawn _003C_003E3__requester;
+
+		private Pawn current;
+
+		public Pawn _003C_003E3__current;
+
+		private IEnumerator<FloatMenuOption> _003C_003E7__wrap1;
+
+		FloatMenuOption IEnumerator<FloatMenuOption>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.CountRemaining <= 0;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700157F RID: 5503
-		// (get) Token: 0x06008BA2 RID: 35746 RVA: 0x002996C9 File Offset: 0x002978C9
-		public int CountRemaining
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return GiveItemsToPawnUtility.GetCountRemaining(this.target, this.requestedThingDef, this.requestedThingCount);
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06008BA3 RID: 35747 RVA: 0x002996E2 File Offset: 0x002978E2
-		public LordToil_WaitForItems(Pawn target, ThingDef thingDef, int amount, IntVec3 waitSpot)
+		[DebuggerHidden]
+		public _003CExtraFloatMenuOptions_003Ed__12(int _003C_003E1__state)
 		{
-			this.waitSpot = waitSpot;
-			this.target = target;
-			this.requestedThingDef = thingDef;
-			this.requestedThingCount = amount;
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x06008BA4 RID: 35748 RVA: 0x00299708 File Offset: 0x00297908
-		public override void UpdateAllDuties()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			for (int i = 0; i < this.lord.ownedPawns.Count; i++)
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				this.lord.ownedPawns[i].mindState.duty = new PawnDuty(DutyDefOf.WanderClose_NoNeeds, this.waitSpot, 10f);
-			}
-		}
-
-		// Token: 0x06008BA5 RID: 35749 RVA: 0x00299765 File Offset: 0x00297965
-		public override void DrawPawnGUIOverlay(Pawn pawn)
-		{
-			if (pawn == this.target)
-			{
-				pawn.Map.overlayDrawer.DrawOverlay(pawn, OverlayTypes.QuestionMark);
-			}
-		}
-
-		// Token: 0x06008BA6 RID: 35750 RVA: 0x00299783 File Offset: 0x00297983
-		public override IEnumerable<FloatMenuOption> ExtraFloatMenuOptions(Pawn requester, Pawn current)
-		{
-			if (this.target == requester)
-			{
-				foreach (FloatMenuOption floatMenuOption in GiveItemsToPawnUtility.GetFloatMenuOptionsForPawn(requester, current, this.requestedThingDef, this.requestedThingCount))
+				try
 				{
-					yield return floatMenuOption;
 				}
-				IEnumerator<FloatMenuOption> enumerator = null;
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
 			}
-			yield break;
-			yield break;
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x04005AB4 RID: 23220
-		public IntVec3 waitSpot;
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				LordToil_WaitForItems lordToil_WaitForItems = _003C_003E4__this;
+				if (num != 0)
+				{
+					if (num != 1)
+					{
+						return false;
+					}
+					_003C_003E1__state = -3;
+				}
+				else
+				{
+					_003C_003E1__state = -1;
+					if (lordToil_WaitForItems.target != requester)
+					{
+						goto IL_00a3;
+					}
+					_003C_003E7__wrap1 = GiveItemsToPawnUtility.GetFloatMenuOptionsForPawn(requester, current, lordToil_WaitForItems.requestedThingDef, lordToil_WaitForItems.requestedThingCount).GetEnumerator();
+					_003C_003E1__state = -3;
+				}
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					FloatMenuOption floatMenuOption = _003C_003E7__wrap1.Current;
+					_003C_003E2__current = floatMenuOption;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = null;
+				goto IL_00a3;
+				IL_00a3:
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
 
-		// Token: 0x04005AB5 RID: 23221
-		public Pawn target;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x04005AB6 RID: 23222
-		public ThingDef requestedThingDef;
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
 
-		// Token: 0x04005AB7 RID: 23223
-		public int requestedThingCount;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04005AB8 RID: 23224
-		private const float WanderRadius = 10f;
+		[DebuggerHidden]
+		IEnumerator<FloatMenuOption> IEnumerable<FloatMenuOption>.GetEnumerator()
+		{
+			_003CExtraFloatMenuOptions_003Ed__12 _003CExtraFloatMenuOptions_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CExtraFloatMenuOptions_003Ed__ = this;
+			}
+			else
+			{
+				_003CExtraFloatMenuOptions_003Ed__ = new _003CExtraFloatMenuOptions_003Ed__12(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CExtraFloatMenuOptions_003Ed__.requester = _003C_003E3__requester;
+			_003CExtraFloatMenuOptions_003Ed__.current = _003C_003E3__current;
+			return _003CExtraFloatMenuOptions_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<FloatMenuOption>)this).GetEnumerator();
+		}
+	}
+
+	public IntVec3 waitSpot;
+
+	public Pawn target;
+
+	public ThingDef requestedThingDef;
+
+	public int requestedThingCount;
+
+	private const float WanderRadius = 10f;
+
+	public bool HasAllRequestedItems => CountRemaining <= 0;
+
+	public int CountRemaining => GiveItemsToPawnUtility.GetCountRemaining(target, requestedThingDef, requestedThingCount);
+
+	public LordToil_WaitForItems(Pawn target, ThingDef thingDef, int amount, IntVec3 waitSpot)
+	{
+		this.waitSpot = waitSpot;
+		this.target = target;
+		requestedThingDef = thingDef;
+		requestedThingCount = amount;
+	}
+
+	public override void UpdateAllDuties()
+	{
+		for (int i = 0; i < lord.ownedPawns.Count; i++)
+		{
+			lord.ownedPawns[i].mindState.duty = new PawnDuty(DutyDefOf.WanderClose_NoNeeds, waitSpot, 10f);
+		}
+	}
+
+	public override void DrawPawnGUIOverlay(Pawn pawn)
+	{
+		if (pawn == target)
+		{
+			pawn.Map.overlayDrawer.DrawOverlay(pawn, OverlayTypes.QuestionMark);
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CExtraFloatMenuOptions_003Ed__12))]
+	public override IEnumerable<FloatMenuOption> ExtraFloatMenuOptions(Pawn requester, Pawn current)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CExtraFloatMenuOptions_003Ed__12(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__requester = requester,
+			_003C_003E3__current = current
+		};
 	}
 }

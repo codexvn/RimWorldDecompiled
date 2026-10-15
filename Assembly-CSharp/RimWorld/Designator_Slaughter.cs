@@ -1,132 +1,227 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Designator_Slaughter : Designator
 {
-	// Token: 0x020030BC RID: 12476
-	public class Designator_Slaughter : Designator
+	[CompilerGenerated]
+	private sealed class _003CSlaughterablesInCell_003Ed__11 : IEnumerable<Pawn>, IEnumerable, IEnumerator<Pawn>, IEnumerator, IDisposable
 	{
-		// Token: 0x17002D63 RID: 11619
-		// (get) Token: 0x06011848 RID: 71752 RVA: 0x00507F98 File Offset: 0x00506198
-		protected override DesignationDef Designation
+		private int _003C_003E1__state;
+
+		private Pawn _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private IntVec3 c;
+
+		public IntVec3 _003C_003E3__c;
+
+		public Designator_Slaughter _003C_003E4__this;
+
+		private List<Thing> _003CthingList_003E5__2;
+
+		private int _003Ci_003E5__3;
+
+		Pawn IEnumerator<Pawn>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return DesignationDefOf.Slaughter;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002D64 RID: 11620
-		// (get) Token: 0x06011849 RID: 71753 RVA: 0x00501A2B File Offset: 0x004FFC2B
-		public override DrawStyleCategoryDef DrawStyleCategory
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return DrawStyleCategoryDefOf.FilledRectangle;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0601184A RID: 71754 RVA: 0x00507FA0 File Offset: 0x005061A0
-		public Designator_Slaughter()
+		[DebuggerHidden]
+		public _003CSlaughterablesInCell_003Ed__11(int _003C_003E1__state)
 		{
-			this.defaultLabel = "DesignatorSlaughter".Translate();
-			this.defaultDesc = "DesignatorSlaughterDesc".Translate();
-			this.icon = ContentFinder<Texture2D>.Get("UI/Designators/Slaughter", true);
-			this.soundDragSustain = SoundDefOf.Designate_DragStandard;
-			this.soundDragChanged = SoundDefOf.Designate_DragStandard_Changed;
-			this.useMouseIcon = true;
-			this.soundSucceeded = SoundDefOf.Designate_Slaughter;
-			this.hotKey = KeyBindingDefOf.Misc7;
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x0601184B RID: 71755 RVA: 0x0050802C File Offset: 0x0050622C
-		public override AcceptanceReport CanDesignateCell(IntVec3 c)
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			if (!c.InBounds(base.Map))
+			_003CthingList_003E5__2 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			Designator_Slaughter designator_Slaughter = _003C_003E4__this;
+			if (num != 0)
+			{
+				if (num != 1)
+				{
+					return false;
+				}
+				_003C_003E1__state = -1;
+				goto IL_00a3;
+			}
+			_003C_003E1__state = -1;
+			if (c.Fogged(designator_Slaughter.Map))
 			{
 				return false;
 			}
-			if (!this.SlaughterablesInCell(c).Any<Pawn>())
+			_003CthingList_003E5__2 = c.GetThingList(designator_Slaughter.Map);
+			_003Ci_003E5__3 = 0;
+			goto IL_00b3;
+			IL_00b3:
+			if (_003Ci_003E5__3 < _003CthingList_003E5__2.Count)
 			{
-				return "MessageMustDesignateSlaughterable".Translate();
-			}
-			return true;
-		}
-
-		// Token: 0x0601184C RID: 71756 RVA: 0x00508068 File Offset: 0x00506268
-		public override void DesignateSingleCell(IntVec3 loc)
-		{
-			foreach (Pawn t in this.SlaughterablesInCell(loc))
-			{
-				this.DesignateThing(t);
-			}
-		}
-
-		// Token: 0x0601184D RID: 71757 RVA: 0x005080B8 File Offset: 0x005062B8
-		public override AcceptanceReport CanDesignateThing(Thing t)
-		{
-			Pawn pawn = t as Pawn;
-			if (pawn != null && pawn.IsAnimal && pawn.Faction == Faction.OfPlayer && base.Map.designationManager.DesignationOn(pawn, this.Designation) == null && !pawn.InAggroMentalState)
-			{
-				return true;
+				if (designator_Slaughter.CanDesignateThing(_003CthingList_003E5__2[_003Ci_003E5__3]).Accepted)
+				{
+					_003C_003E2__current = (Pawn)_003CthingList_003E5__2[_003Ci_003E5__3];
+					_003C_003E1__state = 1;
+					return true;
+				}
+				goto IL_00a3;
 			}
 			return false;
+			IL_00a3:
+			_003Ci_003E5__3++;
+			goto IL_00b3;
 		}
 
-		// Token: 0x0601184E RID: 71758 RVA: 0x00508114 File Offset: 0x00506314
-		public override void DesignateThing(Thing t)
+		bool IEnumerator.MoveNext()
 		{
-			base.Map.designationManager.AddDesignation(new Designation(t, this.Designation, null));
-			this.justDesignated.Add((Pawn)t);
-			Designation designation = base.Map.designationManager.DesignationOn(t, DesignationDefOf.ReleaseAnimalToWild);
-			if (designation != null)
-			{
-				base.Map.designationManager.RemoveDesignation(designation);
-			}
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0601184F RID: 71759 RVA: 0x00508180 File Offset: 0x00506380
-		protected override void FinalizeDesignationSucceeded()
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			base.FinalizeDesignationSucceeded();
-			for (int i = 0; i < this.justDesignated.Count; i++)
-			{
-				this.ShowDesignationWarnings(this.justDesignated[i]);
-			}
-			this.justDesignated.Clear();
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x06011850 RID: 71760 RVA: 0x005081C6 File Offset: 0x005063C6
-		private IEnumerable<Pawn> SlaughterablesInCell(IntVec3 c)
+		[DebuggerHidden]
+		IEnumerator<Pawn> IEnumerable<Pawn>.GetEnumerator()
 		{
-			if (c.Fogged(base.Map))
+			_003CSlaughterablesInCell_003Ed__11 _003CSlaughterablesInCell_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				yield break;
+				_003C_003E1__state = 0;
+				_003CSlaughterablesInCell_003Ed__ = this;
 			}
-			List<Thing> thingList = c.GetThingList(base.Map);
-			int num;
-			for (int i = 0; i < thingList.Count; i = num + 1)
+			else
 			{
-				if (this.CanDesignateThing(thingList[i]).Accepted)
+				_003CSlaughterablesInCell_003Ed__ = new _003CSlaughterablesInCell_003Ed__11(0)
 				{
-					yield return (Pawn)thingList[i];
-				}
-				num = i;
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
-			yield break;
+			_003CSlaughterablesInCell_003Ed__.c = _003C_003E3__c;
+			return _003CSlaughterablesInCell_003Ed__;
 		}
 
-		// Token: 0x06011851 RID: 71761 RVA: 0x005081DD File Offset: 0x005063DD
-		private void ShowDesignationWarnings(Pawn pawn)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			SlaughterDesignatorUtility.CheckWarnAboutBondedAnimal(pawn);
-			SlaughterDesignatorUtility.CheckWarnAboutVeneratedAnimal(pawn);
+			return ((IEnumerable<Pawn>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x0400B4EA RID: 46314
-		private readonly List<Pawn> justDesignated = new List<Pawn>();
+	private readonly List<Pawn> justDesignated = new List<Pawn>();
+
+	protected override DesignationDef Designation => DesignationDefOf.Slaughter;
+
+	public override DrawStyleCategoryDef DrawStyleCategory => DrawStyleCategoryDefOf.FilledRectangle;
+
+	public Designator_Slaughter()
+	{
+		defaultLabel = "DesignatorSlaughter".Translate();
+		defaultDesc = "DesignatorSlaughterDesc".Translate();
+		icon = ContentFinder<Texture2D>.Get("UI/Designators/Slaughter");
+		soundDragSustain = SoundDefOf.Designate_DragStandard;
+		soundDragChanged = SoundDefOf.Designate_DragStandard_Changed;
+		useMouseIcon = true;
+		soundSucceeded = SoundDefOf.Designate_Slaughter;
+		hotKey = KeyBindingDefOf.Misc7;
+	}
+
+	public override AcceptanceReport CanDesignateCell(IntVec3 c)
+	{
+		if (!c.InBounds(base.Map))
+		{
+			return false;
+		}
+		if (!SlaughterablesInCell(c).Any())
+		{
+			return "MessageMustDesignateSlaughterable".Translate();
+		}
+		return true;
+	}
+
+	public override void DesignateSingleCell(IntVec3 loc)
+	{
+		foreach (Pawn item in SlaughterablesInCell(loc))
+		{
+			DesignateThing(item);
+		}
+	}
+
+	public override AcceptanceReport CanDesignateThing(Thing t)
+	{
+		if (t is Pawn { IsAnimal: not false } pawn && pawn.Faction == Faction.OfPlayer && base.Map.designationManager.DesignationOn(pawn, Designation) == null && !pawn.InAggroMentalState)
+		{
+			return true;
+		}
+		return false;
+	}
+
+	public override void DesignateThing(Thing t)
+	{
+		base.Map.designationManager.AddDesignation(new Designation(t, Designation));
+		justDesignated.Add((Pawn)t);
+		Designation designation = base.Map.designationManager.DesignationOn(t, DesignationDefOf.ReleaseAnimalToWild);
+		if (designation != null)
+		{
+			base.Map.designationManager.RemoveDesignation(designation);
+		}
+	}
+
+	protected override void FinalizeDesignationSucceeded()
+	{
+		base.FinalizeDesignationSucceeded();
+		for (int i = 0; i < justDesignated.Count; i++)
+		{
+			ShowDesignationWarnings(justDesignated[i]);
+		}
+		justDesignated.Clear();
+	}
+
+	[IteratorStateMachine(typeof(_003CSlaughterablesInCell_003Ed__11))]
+	private IEnumerable<Pawn> SlaughterablesInCell(IntVec3 c)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CSlaughterablesInCell_003Ed__11(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__c = c
+		};
+	}
+
+	private void ShowDesignationWarnings(Pawn pawn)
+	{
+		SlaughterDesignatorUtility.CheckWarnAboutBondedAnimal(pawn);
+		SlaughterDesignatorUtility.CheckWarnAboutVeneratedAnimal(pawn);
 	}
 }

@@ -1,110 +1,251 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class QuestPart_GameCondition : QuestPart
 {
-	// Token: 0x02001CFC RID: 7420
-	public class QuestPart_GameCondition : QuestPart
+	[CompilerGenerated]
+	private sealed class _003Cget_QuestLookTargets_003Ed__6 : IEnumerable<GlobalTargetInfo>, IEnumerable, IEnumerator<GlobalTargetInfo>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001992 RID: 6546
-		// (get) Token: 0x0600A5B4 RID: 42420 RVA: 0x002F7117 File Offset: 0x002F5317
-		public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+		private int _003C_003E1__state;
+
+		private GlobalTargetInfo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public QuestPart_GameCondition _003C_003E4__this;
+
+		private IEnumerator<GlobalTargetInfo> _003C_003E7__wrap1;
+
+		GlobalTargetInfo IEnumerator<GlobalTargetInfo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				foreach (GlobalTargetInfo globalTargetInfo in base.QuestLookTargets)
-				{
-					yield return globalTargetInfo;
-				}
-				IEnumerator<GlobalTargetInfo> enumerator = null;
-				if (this.mapParent != null)
-				{
-					yield return this.mapParent;
-				}
-				yield break;
-				yield break;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600A5B5 RID: 42421 RVA: 0x002F7128 File Offset: 0x002F5328
-		public override void Notify_QuestSignalReceived(Signal signal)
+		object IEnumerator.Current
 		{
-			base.Notify_QuestSignalReceived(signal);
-			if (signal.tag == this.inSignal && (this.targetWorld || this.mapParent != null) && this.gameCondition != null)
+			[DebuggerHidden]
+			get
 			{
-				this.gameCondition.quest = this.quest;
-				if (this.targetWorld)
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003Cget_QuestLookTargets_003Ed__6(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
 				{
-					Find.World.gameConditionManager.RegisterCondition(this.gameCondition);
 				}
-				else
+				finally
 				{
-					Map map = this.mapParent.Map ?? Find.AnyPlayerHomeMap;
-					if (!this.gameCondition.CanApplyOnMap(map))
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				QuestPart_GameCondition questPart_GameCondition = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((QuestPart)questPart_GameCondition).QuestLookTargets.GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 2:
 					{
-						bool flag = false;
-						foreach (Map map2 in Current.Game.PlayerHomeMaps)
-						{
-							if (this.gameCondition.CanApplyOnMap(map2))
-							{
-								map = map2;
-								flag = true;
-								break;
-							}
-						}
-						if (!flag)
-						{
-							return;
-						}
+						_003C_003E1__state = -1;
+						break;
 					}
-					map.gameConditionManager.RegisterCondition(this.gameCondition);
+					IL_006f:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						GlobalTargetInfo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (questPart_GameCondition.mapParent != null)
+					{
+						_003C_003E2__current = questPart_GameCondition.mapParent;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
 				}
-				if (this.sendStandardLetter)
-				{
-					Find.LetterStack.ReceiveLetter(this.gameCondition.LabelCap, this.gameCondition.LetterText, this.gameCondition.def.letterDef, LookTargets.Invalid, null, this.quest, null, null, 0, true);
-				}
-				this.gameCondition = null;
+				return false;
 			}
-		}
-
-		// Token: 0x0600A5B6 RID: 42422 RVA: 0x002F7284 File Offset: 0x002F5484
-		public override void ExposeData()
-		{
-			base.ExposeData();
-			Scribe_Values.Look<string>(ref this.inSignal, "inSignal", null, false);
-			Scribe_Deep.Look<GameCondition>(ref this.gameCondition, "gameCondition", Array.Empty<object>());
-			Scribe_Values.Look<bool>(ref this.targetWorld, "targetWorld", false, false);
-			Scribe_References.Look<MapParent>(ref this.mapParent, "mapParent", false);
-			Scribe_Values.Look<bool>(ref this.sendStandardLetter, "sendStandardLetter", true, false);
-		}
-
-		// Token: 0x0600A5B7 RID: 42423 RVA: 0x002F72F4 File Offset: 0x002F54F4
-		public override void AssignDebugData()
-		{
-			base.AssignDebugData();
-			this.inSignal = "DebugSignal" + Rand.Int.ToString();
-			if (Find.AnyPlayerHomeMap != null)
+			catch
 			{
-				this.gameCondition = GameConditionMaker.MakeCondition(GameConditionDefOf.ColdSnap, Rand.RangeInclusive(2500, 7500));
-				this.mapParent = Find.RandomPlayerHomeMap.Parent;
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x0400727B RID: 29307
-		public string inSignal;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x0400727C RID: 29308
-		public GameCondition gameCondition;
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
 
-		// Token: 0x0400727D RID: 29309
-		public bool targetWorld;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x0400727E RID: 29310
-		public MapParent mapParent;
+		[DebuggerHidden]
+		IEnumerator<GlobalTargetInfo> IEnumerable<GlobalTargetInfo>.GetEnumerator()
+		{
+			_003Cget_QuestLookTargets_003Ed__6 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_QuestLookTargets_003Ed__6(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x0400727F RID: 29311
-		public bool sendStandardLetter = true;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<GlobalTargetInfo>)this).GetEnumerator();
+		}
+	}
+
+	public string inSignal;
+
+	public GameCondition gameCondition;
+
+	public bool targetWorld;
+
+	public MapParent mapParent;
+
+	public bool sendStandardLetter = true;
+
+	public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+	{
+		[IteratorStateMachine(typeof(_003Cget_QuestLookTargets_003Ed__6))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_QuestLookTargets_003Ed__6(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public override void Notify_QuestSignalReceived(Signal signal)
+	{
+		base.Notify_QuestSignalReceived(signal);
+		if (!(signal.tag == inSignal) || (!targetWorld && mapParent == null) || gameCondition == null)
+		{
+			return;
+		}
+		gameCondition.quest = quest;
+		if (targetWorld)
+		{
+			Find.World.gameConditionManager.RegisterCondition(gameCondition);
+		}
+		else
+		{
+			Map map = mapParent.Map ?? quest.TryFindNewSuitableMapParentForRetarget()?.Map ?? Find.AnyPlayerHomeMap;
+			if (!gameCondition.CanApplyOnMap(map))
+			{
+				bool flag = false;
+				foreach (Map playerHomeMap in Current.Game.PlayerHomeMaps)
+				{
+					if (gameCondition.CanApplyOnMap(playerHomeMap))
+					{
+						map = playerHomeMap;
+						flag = true;
+						break;
+					}
+				}
+				if (!flag)
+				{
+					return;
+				}
+			}
+			map.gameConditionManager.RegisterCondition(gameCondition);
+		}
+		if (sendStandardLetter)
+		{
+			Find.LetterStack.ReceiveLetter(gameCondition.LabelCap, gameCondition.LetterText, gameCondition.def.letterDef, LookTargets.Invalid, null, quest);
+		}
+		gameCondition = null;
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref inSignal, "inSignal");
+		Scribe_Deep.Look(ref gameCondition, "gameCondition");
+		Scribe_Values.Look(ref targetWorld, "targetWorld", defaultValue: false);
+		Scribe_References.Look(ref mapParent, "mapParent");
+		Scribe_Values.Look(ref sendStandardLetter, "sendStandardLetter", defaultValue: true);
+	}
+
+	public override void AssignDebugData()
+	{
+		base.AssignDebugData();
+		inSignal = "DebugSignal" + Rand.Int;
+		if (Find.AnyPlayerHomeMap != null)
+		{
+			gameCondition = GameConditionMaker.MakeCondition(GameConditionDefOf.ColdSnap, Rand.RangeInclusive(2500, 7500));
+			mapParent = Find.RandomPlayerHomeMap.Parent;
+		}
 	}
 }

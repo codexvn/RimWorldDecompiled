@@ -1,111 +1,275 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_CleanFilth : JobDriver
 {
-	// Token: 0x0200123B RID: 4667
-	public class JobDriver_CleanFilth : JobDriver
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass7_0
 	{
-		// Token: 0x170011C9 RID: 4553
-		// (get) Token: 0x0600722B RID: 29227 RVA: 0x00233B00 File Offset: 0x00231D00
-		private Filth Filth
+		public JobDriver_CleanFilth _003C_003E4__this;
+
+		public Toil clean;
+
+		internal void _003CMakeNewToils_003Eb__0()
 		{
-			get
+			_003C_003E4__this.cleaningWorkDone = 0f;
+			_003C_003E4__this.totalCleaningWorkDone = 0f;
+			_003C_003E4__this.totalCleaningWorkRequired = _003C_003E4__this.Filth.def.filth.cleaningWorkToReduceThickness * (float)_003C_003E4__this.Filth.thickness;
+		}
+
+		internal void _003CMakeNewToils_003Eb__1(int delta)
+		{
+			Filth filth = _003C_003E4__this.Filth;
+			float statValueAbstract = filth.Position.GetTerrain(filth.Map).GetStatValueAbstract(StatDefOf.CleaningTimeFactor);
+			float num = _003C_003E4__this.pawn.GetStatValue(StatDefOf.CleaningSpeed) * (float)delta;
+			if (statValueAbstract != 0f)
 			{
-				return (Filth)this.job.GetTarget(TargetIndex.A).Thing;
+				num /= statValueAbstract;
+			}
+			_003C_003E4__this.cleaningWorkDone += num;
+			_003C_003E4__this.totalCleaningWorkDone += num;
+			if (_003C_003E4__this.cleaningWorkDone > filth.def.filth.cleaningWorkToReduceThickness)
+			{
+				filth.ThinFilth();
+				_003C_003E4__this.cleaningWorkDone = 0f;
+				if (filth.Destroyed)
+				{
+					clean.actor.records.Increment(RecordDefOf.MessesCleaned);
+					_003C_003E4__this.ReadyForNextToil();
+				}
 			}
 		}
 
-		// Token: 0x0600722C RID: 29228 RVA: 0x00233B26 File Offset: 0x00231D26
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		internal float _003CMakeNewToils_003Eb__2()
 		{
-			this.pawn.ReserveAsManyAsPossible(this.job.GetTargetQueue(TargetIndex.A), this.job, 1, -1, null);
-			return true;
+			return _003C_003E4__this.totalCleaningWorkDone / _003C_003E4__this.totalCleaningWorkRequired;
 		}
 
-		// Token: 0x0600722D RID: 29229 RVA: 0x00233B49 File Offset: 0x00231D49
-		protected override IEnumerable<Toil> MakeNewToils()
+		internal SoundDef _003CMakeNewToils_003Eb__3()
 		{
-			Toil initExtractTargetFromQueue = Toils_JobTransforms.ClearDespawnedNullOrForbiddenQueuedTargets(TargetIndex.A, null);
-			yield return initExtractTargetFromQueue;
-			yield return Toils_JobTransforms.SucceedOnNoTargetInQueue(TargetIndex.A);
-			yield return Toils_JobTransforms.ExtractNextTargetFromQueue(TargetIndex.A, true);
-			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch, false).JumpIfDespawnedOrNullOrForbidden(TargetIndex.A, initExtractTargetFromQueue).JumpIfOutsideHomeArea(TargetIndex.A, initExtractTargetFromQueue);
-			Toil clean = ToilMaker.MakeToil("MakeNewToils");
-			clean.initAction = delegate()
+			ThingDef def = _003C_003E4__this.Filth.def;
+			if (!def.filth.cleaningSound.NullOrUndefined())
 			{
-				this.cleaningWorkDone = 0f;
-				this.totalCleaningWorkDone = 0f;
-				this.totalCleaningWorkRequired = this.Filth.def.filth.cleaningWorkToReduceThickness * (float)this.Filth.thickness;
-			};
-			clean.tickIntervalAction = delegate(int delta)
+				return def.filth.cleaningSound;
+			}
+			return SoundDefOf.Interact_CleanFilth;
+		}
+
+		internal bool _003CMakeNewToils_003Eb__4()
+		{
+			return clean.actor.jobs.curJob.GetTarget(TargetIndex.A).Thing?.Destroyed ?? false;
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__7 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_CleanFilth _003C_003E4__this;
+
+		private _003C_003Ec__DisplayClass7_0 _003C_003E8__1;
+
+		private Toil _003CinitExtractTargetFromQueue_003E5__2;
+
+		Toil IEnumerator<Toil>.Current
+		{
+			[DebuggerHidden]
+			get
 			{
-				Filth filth = this.Filth;
-				float statValueAbstract = filth.Position.GetTerrain(filth.Map).GetStatValueAbstract(StatDefOf.CleaningTimeFactor, null);
-				float num = this.pawn.GetStatValue(StatDefOf.CleaningSpeed, true, -1) * (float)delta;
-				if (statValueAbstract != 0f)
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__7(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E8__1 = null;
+			_003CinitExtractTargetFromQueue_003E5__2 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			switch (_003C_003E1__state)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E8__1 = new _003C_003Ec__DisplayClass7_0();
+				_003C_003E8__1._003C_003E4__this = _003C_003E4__this;
+				_003CinitExtractTargetFromQueue_003E5__2 = Toils_JobTransforms.ClearDespawnedNullOrForbiddenQueuedTargets(TargetIndex.A);
+				_003C_003E2__current = _003CinitExtractTargetFromQueue_003E5__2;
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_JobTransforms.SucceedOnNoTargetInQueue(TargetIndex.A);
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_JobTransforms.ExtractNextTargetFromQueue(TargetIndex.A);
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch).JumpIfDespawnedOrNullOrForbidden(TargetIndex.A, _003CinitExtractTargetFromQueue_003E5__2).JumpIfOutsideHomeArea(TargetIndex.A, _003CinitExtractTargetFromQueue_003E5__2);
+				_003C_003E1__state = 4;
+				return true;
+			case 4:
+				_003C_003E1__state = -1;
+				_003C_003E8__1.clean = ToilMaker.MakeToil("MakeNewToils");
+				_003C_003E8__1.clean.initAction = delegate
 				{
-					num /= statValueAbstract;
-				}
-				this.cleaningWorkDone += num;
-				this.totalCleaningWorkDone += num;
-				if (this.cleaningWorkDone > filth.def.filth.cleaningWorkToReduceThickness)
+					_003C_003E8__1._003C_003E4__this.cleaningWorkDone = 0f;
+					_003C_003E8__1._003C_003E4__this.totalCleaningWorkDone = 0f;
+					_003C_003E8__1._003C_003E4__this.totalCleaningWorkRequired = _003C_003E8__1._003C_003E4__this.Filth.def.filth.cleaningWorkToReduceThickness * (float)_003C_003E8__1._003C_003E4__this.Filth.thickness;
+				};
+				_003C_003E8__1.clean.tickIntervalAction = delegate(int delta)
 				{
-					filth.ThinFilth();
-					this.cleaningWorkDone = 0f;
-					if (filth.Destroyed)
+					Filth filth = _003C_003E8__1._003C_003E4__this.Filth;
+					float statValueAbstract = filth.Position.GetTerrain(filth.Map).GetStatValueAbstract(StatDefOf.CleaningTimeFactor);
+					float num = _003C_003E8__1._003C_003E4__this.pawn.GetStatValue(StatDefOf.CleaningSpeed) * (float)delta;
+					if (statValueAbstract != 0f)
 					{
-						clean.actor.records.Increment(RecordDefOf.MessesCleaned);
-						this.ReadyForNextToil();
-						return;
+						num /= statValueAbstract;
 					}
-				}
-			};
-			clean.defaultCompleteMode = ToilCompleteMode.Never;
-			clean.WithEffect(EffecterDefOf.Clean, TargetIndex.A, null);
-			clean.WithProgressBar(TargetIndex.A, () => this.totalCleaningWorkDone / this.totalCleaningWorkRequired, true, -0.5f, false);
-			clean.PlaySustainerOrSound(delegate()
-			{
-				ThingDef def = this.Filth.def;
-				if (!def.filth.cleaningSound.NullOrUndefined())
+					_003C_003E8__1._003C_003E4__this.cleaningWorkDone = _003C_003E8__1._003C_003E4__this.cleaningWorkDone + num;
+					_003C_003E8__1._003C_003E4__this.totalCleaningWorkDone = _003C_003E8__1._003C_003E4__this.totalCleaningWorkDone + num;
+					if (_003C_003E8__1._003C_003E4__this.cleaningWorkDone > filth.def.filth.cleaningWorkToReduceThickness)
+					{
+						filth.ThinFilth();
+						_003C_003E8__1._003C_003E4__this.cleaningWorkDone = 0f;
+						if (filth.Destroyed)
+						{
+							_003C_003E8__1.clean.actor.records.Increment(RecordDefOf.MessesCleaned);
+							_003C_003E8__1._003C_003E4__this.ReadyForNextToil();
+						}
+					}
+				};
+				_003C_003E8__1.clean.defaultCompleteMode = ToilCompleteMode.Never;
+				_003C_003E8__1.clean.WithEffect(EffecterDefOf.Clean, TargetIndex.A, null);
+				_003C_003E8__1.clean.WithProgressBar(TargetIndex.A, () => _003C_003E8__1._003C_003E4__this.totalCleaningWorkDone / _003C_003E8__1._003C_003E4__this.totalCleaningWorkRequired, interpolateBetweenActorAndTarget: true);
+				_003C_003E8__1.clean.PlaySustainerOrSound(delegate
 				{
-					return def.filth.cleaningSound;
-				}
-				return SoundDefOf.Interact_CleanFilth;
-			}, 1f);
-			clean.JumpIfDespawnedOrNullOrForbidden(TargetIndex.A, initExtractTargetFromQueue);
-			clean.JumpIfOutsideHomeArea(TargetIndex.A, initExtractTargetFromQueue);
-			clean.JumpIf(delegate
-			{
-				Thing thing = clean.actor.jobs.curJob.GetTarget(TargetIndex.A).Thing;
-				return thing != null && thing.Destroyed;
-			}, initExtractTargetFromQueue);
-			yield return clean;
-			yield return Toils_Jump.Jump(initExtractTargetFromQueue);
-			yield break;
+					ThingDef def = _003C_003E8__1._003C_003E4__this.Filth.def;
+					return (!def.filth.cleaningSound.NullOrUndefined()) ? def.filth.cleaningSound : SoundDefOf.Interact_CleanFilth;
+				});
+				_003C_003E8__1.clean.JumpIfDespawnedOrNullOrForbidden(TargetIndex.A, _003CinitExtractTargetFromQueue_003E5__2);
+				_003C_003E8__1.clean.JumpIfOutsideHomeArea(TargetIndex.A, _003CinitExtractTargetFromQueue_003E5__2);
+				_003C_003E8__1.clean.JumpIf(() => _003C_003E8__1.clean.actor.jobs.curJob.GetTarget(TargetIndex.A).Thing?.Destroyed ?? false, _003CinitExtractTargetFromQueue_003E5__2);
+				_003C_003E2__current = _003C_003E8__1.clean;
+				_003C_003E1__state = 5;
+				return true;
+			case 5:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Jump.Jump(_003CinitExtractTargetFromQueue_003E5__2);
+				_003C_003E1__state = 6;
+				return true;
+			case 6:
+				_003C_003E1__state = -1;
+				return false;
+			}
 		}
 
-		// Token: 0x0600722E RID: 29230 RVA: 0x00233B5C File Offset: 0x00231D5C
-		public override void ExposeData()
+		bool IEnumerator.MoveNext()
 		{
-			base.ExposeData();
-			Scribe_Values.Look<float>(ref this.cleaningWorkDone, "cleaningWorkDone", 0f, false);
-			Scribe_Values.Look<float>(ref this.totalCleaningWorkDone, "totalCleaningWorkDone", 0f, false);
-			Scribe_Values.Look<float>(ref this.totalCleaningWorkRequired, "totalCleaningWorkRequired", 0f, false);
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x04004EF9 RID: 20217
-		private float cleaningWorkDone;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04004EFA RID: 20218
-		private float totalCleaningWorkDone;
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__7 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__7(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x04004EFB RID: 20219
-		private float totalCleaningWorkRequired;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x04004EFC RID: 20220
-		private const TargetIndex FilthInd = TargetIndex.A;
+	private float cleaningWorkDone;
+
+	private float totalCleaningWorkDone;
+
+	private float totalCleaningWorkRequired;
+
+	private const TargetIndex FilthInd = TargetIndex.A;
+
+	private Filth Filth => (Filth)job.GetTarget(TargetIndex.A).Thing;
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		pawn.ReserveAsManyAsPossible(job.GetTargetQueue(TargetIndex.A), job);
+		return true;
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__7))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__7(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref cleaningWorkDone, "cleaningWorkDone", 0f);
+		Scribe_Values.Look(ref totalCleaningWorkDone, "totalCleaningWorkDone", 0f);
+		Scribe_Values.Look(ref totalCleaningWorkRequired, "totalCleaningWorkRequired", 0f);
 	}
 }

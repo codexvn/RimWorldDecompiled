@@ -1,86 +1,231 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class QuestPart_CameraJump : QuestPart
 {
-	// Token: 0x02001C17 RID: 7191
-	public class QuestPart_CameraJump : QuestPart
+	[CompilerGenerated]
+	private sealed class _003Cget_QuestLookTargets_003Ed__5 : IEnumerable<GlobalTargetInfo>, IEnumerable, IEnumerator<GlobalTargetInfo>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700189C RID: 6300
-		// (get) Token: 0x0600A021 RID: 40993 RVA: 0x002E2979 File Offset: 0x002E0B79
-		public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+		private int _003C_003E1__state;
+
+		private GlobalTargetInfo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public QuestPart_CameraJump _003C_003E4__this;
+
+		private IEnumerator<GlobalTargetInfo> _003C_003E7__wrap1;
+
+		GlobalTargetInfo IEnumerator<GlobalTargetInfo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				foreach (GlobalTargetInfo globalTargetInfo in base.QuestLookTargets)
-				{
-					yield return globalTargetInfo;
-				}
-				IEnumerator<GlobalTargetInfo> enumerator = null;
-				GlobalTargetInfo globalTargetInfo2 = this.lookTargets.TryGetPrimaryTarget();
-				if (globalTargetInfo2.IsValid)
-				{
-					yield return globalTargetInfo2;
-				}
-				yield break;
-				yield break;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600A022 RID: 40994 RVA: 0x002E298C File Offset: 0x002E0B8C
-		public override void Notify_QuestSignalReceived(Signal signal)
+		object IEnumerator.Current
 		{
-			base.Notify_QuestSignalReceived(signal);
-			if (signal.tag == this.inSignal)
+			[DebuggerHidden]
+			get
 			{
-				LookTargets lookTargets = this.lookTargets;
-				if (this.getLookTargetsFromSignal && !lookTargets.IsValid())
-				{
-					SignalArgsUtility.TryGetLookTargets(signal.args, "SUBJECT", out lookTargets);
-				}
-				if (lookTargets.IsValid())
-				{
-					if (this.select)
-					{
-						CameraJumper.TryJumpAndSelect(lookTargets.TryGetPrimaryTarget(), CameraJumper.MovementMode.Pan);
-						return;
-					}
-					CameraJumper.TryJump(lookTargets.TryGetPrimaryTarget(), CameraJumper.MovementMode.Pan);
-				}
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600A023 RID: 40995 RVA: 0x002E2A08 File Offset: 0x002E0C08
-		public override void ExposeData()
+		[DebuggerHidden]
+		public _003Cget_QuestLookTargets_003Ed__5(int _003C_003E1__state)
 		{
-			base.ExposeData();
-			Scribe_Values.Look<string>(ref this.inSignal, "inSignal", null, false);
-			Scribe_Deep.Look<LookTargets>(ref this.lookTargets, "lookTargets", Array.Empty<object>());
-			Scribe_Values.Look<bool>(ref this.getLookTargetsFromSignal, "getLookTargetsFromSignal", true, false);
-			Scribe_Values.Look<bool>(ref this.select, "select", true, false);
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x0600A024 RID: 40996 RVA: 0x002E2A68 File Offset: 0x002E0C68
-		public override void AssignDebugData()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			base.AssignDebugData();
-			this.inSignal = "DebugSignal" + Rand.Int.ToString();
-			this.lookTargets = Find.Maps.SelectMany((Map x) => x.mapPawns.FreeColonistsSpawned).RandomElementWithFallback(null);
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x04006EBE RID: 28350
-		public string inSignal;
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				QuestPart_CameraJump questPart_CameraJump = _003C_003E4__this;
+				GlobalTargetInfo globalTargetInfo;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((QuestPart)questPart_CameraJump).QuestLookTargets.GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0071;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0071;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_0071:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						GlobalTargetInfo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					globalTargetInfo = questPart_CameraJump.lookTargets.TryGetPrimaryTarget();
+					if (globalTargetInfo.IsValid)
+					{
+						_003C_003E2__current = globalTargetInfo;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
 
-		// Token: 0x04006EBF RID: 28351
-		public LookTargets lookTargets;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x04006EC0 RID: 28352
-		public bool getLookTargetsFromSignal = true;
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
 
-		// Token: 0x04006EC1 RID: 28353
-		public bool select = true;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<GlobalTargetInfo> IEnumerable<GlobalTargetInfo>.GetEnumerator()
+		{
+			_003Cget_QuestLookTargets_003Ed__5 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_QuestLookTargets_003Ed__5(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<GlobalTargetInfo>)this).GetEnumerator();
+		}
+	}
+
+	public string inSignal;
+
+	public LookTargets lookTargets;
+
+	public bool getLookTargetsFromSignal = true;
+
+	public bool select = true;
+
+	public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+	{
+		[IteratorStateMachine(typeof(_003Cget_QuestLookTargets_003Ed__5))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_QuestLookTargets_003Ed__5(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public override void Notify_QuestSignalReceived(Signal signal)
+	{
+		base.Notify_QuestSignalReceived(signal);
+		if (!(signal.tag == inSignal))
+		{
+			return;
+		}
+		LookTargets lookTargets = this.lookTargets;
+		if (getLookTargetsFromSignal && !lookTargets.IsValid())
+		{
+			SignalArgsUtility.TryGetLookTargets(signal.args, "SUBJECT", out lookTargets);
+		}
+		if (lookTargets.IsValid())
+		{
+			if (select)
+			{
+				CameraJumper.TryJumpAndSelect(lookTargets.TryGetPrimaryTarget());
+			}
+			else
+			{
+				CameraJumper.TryJump(lookTargets.TryGetPrimaryTarget());
+			}
+		}
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref inSignal, "inSignal");
+		Scribe_Deep.Look(ref lookTargets, "lookTargets");
+		Scribe_Values.Look(ref getLookTargetsFromSignal, "getLookTargetsFromSignal", defaultValue: true);
+		Scribe_Values.Look(ref select, "select", defaultValue: true);
+	}
+
+	public override void AssignDebugData()
+	{
+		base.AssignDebugData();
+		inSignal = "DebugSignal" + Rand.Int;
+		lookTargets = Find.Maps.SelectMany((Map x) => x.mapPawns.FreeColonistsSpawned).RandomElementWithFallback();
 	}
 }

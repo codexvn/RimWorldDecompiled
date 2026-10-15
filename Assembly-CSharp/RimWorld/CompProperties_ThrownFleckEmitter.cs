@@ -1,60 +1,153 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompProperties_ThrownFleckEmitter : CompProperties
 {
-	// Token: 0x02002E92 RID: 11922
-	public class CompProperties_ThrownFleckEmitter : CompProperties
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__12 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x06010CAA RID: 68778 RVA: 0x004D5B0D File Offset: 0x004D3D0D
-		public CompProperties_ThrownFleckEmitter()
-		{
-			this.compClass = typeof(CompThrownFleckEmitter);
-		}
+		private int _003C_003E1__state;
 
-		// Token: 0x06010CAB RID: 68779 RVA: 0x004D5B49 File Offset: 0x004D3D49
-		public override IEnumerable<string> ConfigErrors(ThingDef parentDef)
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompProperties_ThrownFleckEmitter _003C_003E4__this;
+
+		string IEnumerator<string>.Current
 		{
-			if (this.fleck == null)
+			[DebuggerHidden]
+			get
 			{
-				yield return "CompThrownFleckEmitter must have a fleck assigned.";
+				return _003C_003E2__current;
 			}
-			yield break;
 		}
 
-		// Token: 0x0400AECA RID: 44746
-		public FleckDef fleck;
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
 
-		// Token: 0x0400AECB RID: 44747
-		public Vector3 offsetMin;
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__12(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
 
-		// Token: 0x0400AECC RID: 44748
-		public Vector3 offsetMax;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
 
-		// Token: 0x0400AECD RID: 44749
-		public int emissionInterval = -1;
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			CompProperties_ThrownFleckEmitter compProperties_ThrownFleckEmitter = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (compProperties_ThrownFleckEmitter.fleck == null)
+				{
+					_003C_003E2__current = "CompThrownFleckEmitter must have a fleck assigned.";
+					_003C_003E1__state = 1;
+					return true;
+				}
+				break;
+			case 1:
+				_003C_003E1__state = -1;
+				break;
+			}
+			return false;
+		}
 
-		// Token: 0x0400AECE RID: 44750
-		public int burstCount = 1;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x0400AECF RID: 44751
-		public Color colorA = Color.white;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x0400AED0 RID: 44752
-		public Color colorB = Color.white;
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__12 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__12(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x0400AED1 RID: 44753
-		public FloatRange scale;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x0400AED2 RID: 44754
-		public FloatRange rotationRate;
+	public FleckDef fleck;
 
-		// Token: 0x0400AED3 RID: 44755
-		public FloatRange velocityX;
+	public Vector3 offsetMin;
 
-		// Token: 0x0400AED4 RID: 44756
-		public FloatRange velocityY;
+	public Vector3 offsetMax;
+
+	public int emissionInterval = -1;
+
+	public int burstCount = 1;
+
+	public Color colorA = Color.white;
+
+	public Color colorB = Color.white;
+
+	public FloatRange scale;
+
+	public FloatRange rotationRate;
+
+	public FloatRange velocityX;
+
+	public FloatRange velocityY;
+
+	public CompProperties_ThrownFleckEmitter()
+	{
+		compClass = typeof(CompThrownFleckEmitter);
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__12))]
+	public override IEnumerable<string> ConfigErrors(ThingDef parentDef)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__12(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

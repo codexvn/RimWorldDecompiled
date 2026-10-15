@@ -1,78 +1,201 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_EmptyThingContainer : JobDriver
 {
-	// Token: 0x02001257 RID: 4695
-	public class JobDriver_EmptyThingContainer : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__7 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x170011E8 RID: 4584
-		// (get) Token: 0x060072DC RID: 29404 RVA: 0x00235DF4 File Offset: 0x00233FF4
-		protected virtual PathEndMode ContainerPathEndMode
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_EmptyThingContainer _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (!this.job.GetTarget(TargetIndex.A).Thing.def.hasInteractionCell)
-				{
-					return PathEndMode.Touch;
-				}
-				return PathEndMode.InteractionCell;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x060072DD RID: 29405 RVA: 0x00235E24 File Offset: 0x00234024
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		object IEnumerator.Current
 		{
-			return this.pawn.Reserve(this.job.GetTarget(TargetIndex.A), this.job, 1, -1, this.job.def.containerReservationLayer, errorOnFailed, false) && this.pawn.Reserve(this.job.GetTarget(TargetIndex.C), this.job, 1, -1, null, errorOnFailed, false);
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x060072DE RID: 29406 RVA: 0x00235E8A File Offset: 0x0023408A
-		protected override IEnumerable<Toil> MakeNewToils()
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__7(int _003C_003E1__state)
 		{
-			yield return Toils_Goto.GotoThing(TargetIndex.A, this.ContainerPathEndMode, false).FailOnDespawnedNullOrForbidden(TargetIndex.A).FailOnSomeonePhysicallyInteracting(TargetIndex.A).FailOn(delegate()
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_EmptyThingContainer CS_0024_003C_003E8__locals8 = _003C_003E4__this;
+			switch (num)
 			{
-				CompThingContainer compThingContainer;
-				return this.job.GetTarget(TargetIndex.A).Thing.TryGetComp(out compThingContainer) && compThingContainer.Empty;
-			});
-			yield return Toils_General.WaitWhileExtractingContents(TargetIndex.A, TargetIndex.B, 120);
-			yield return Toils_General.Do(delegate
+			default:
+				return false;
+			case 0:
 			{
-				if (base.TargetThingA.TryGetInnerInteractableThingOwner().TryDropAll(this.pawn.Position, this.pawn.Map, ThingPlaceMode.Near, null, null, true))
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.A, CS_0024_003C_003E8__locals8.ContainerPathEndMode).FailOnDespawnedNullOrForbidden(TargetIndex.A).FailOnSomeonePhysicallyInteracting(TargetIndex.A)
+					.FailOn(() => CS_0024_003C_003E8__locals8.job.GetTarget(TargetIndex.A).Thing.TryGetComp(out CompThingContainer comp) && comp.Empty);
+				_003C_003E1__state = 1;
+				return true;
+			}
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.WaitWhileExtractingContents(TargetIndex.A, TargetIndex.B, 120);
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.Do(delegate
 				{
-					CompThingContainer compThingContainer = base.TargetThingA.TryGetComp<CompThingContainer>();
-					if (compThingContainer == null)
+					if (CS_0024_003C_003E8__locals8.TargetThingA.TryGetInnerInteractableThingOwner().TryDropAll(CS_0024_003C_003E8__locals8.pawn.Position, CS_0024_003C_003E8__locals8.pawn.Map, ThingPlaceMode.Near))
 					{
-						return;
+						CS_0024_003C_003E8__locals8.TargetThingA.TryGetComp<CompThingContainer>()?.Props.dropEffecterDef?.Spawn(CS_0024_003C_003E8__locals8.TargetThingA, CS_0024_003C_003E8__locals8.Map).Cleanup();
 					}
-					EffecterDef dropEffecterDef = compThingContainer.Props.dropEffecterDef;
-					if (dropEffecterDef == null)
-					{
-						return;
-					}
-					dropEffecterDef.Spawn(base.TargetThingA, base.Map, 1f).Cleanup();
-				}
-			});
-			yield return Toils_Reserve.Reserve(TargetIndex.B, 1, -1, null, false);
-			yield return Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.Touch, false).FailOnDespawnedNullOrForbidden(TargetIndex.B).FailOnSomeonePhysicallyInteracting(TargetIndex.B);
-			yield return Toils_Haul.StartCarryThing(TargetIndex.B, false, true, false, true, false);
-			Toil toil = Toils_Haul.CarryHauledThingToCell(TargetIndex.C, PathEndMode.ClosestTouch);
-			yield return toil;
-			yield return Toils_Haul.PlaceHauledThingInCell(TargetIndex.C, null, true, true);
-			yield break;
+				});
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Reserve.Reserve(TargetIndex.B);
+				_003C_003E1__state = 4;
+				return true;
+			case 4:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.Touch).FailOnDespawnedNullOrForbidden(TargetIndex.B).FailOnSomeonePhysicallyInteracting(TargetIndex.B);
+				_003C_003E1__state = 5;
+				return true;
+			case 5:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Haul.StartCarryThing(TargetIndex.B, putRemainderInQueue: false, subtractNumTakenFromJobCount: true);
+				_003C_003E1__state = 6;
+				return true;
+			case 6:
+			{
+				_003C_003E1__state = -1;
+				Toil toil = Toils_Haul.CarryHauledThingToCell(TargetIndex.C);
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 7;
+				return true;
+			}
+			case 7:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Haul.PlaceHauledThingInCell(TargetIndex.C, null, storageMode: true, tryStoreInSameStorageIfSpotCantHoldWholeStack: true);
+				_003C_003E1__state = 8;
+				return true;
+			case 8:
+				_003C_003E1__state = -1;
+				return false;
+			}
 		}
 
-		// Token: 0x04004F49 RID: 20297
-		protected const TargetIndex ContainerInd = TargetIndex.A;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x04004F4A RID: 20298
-		protected const TargetIndex ContentsInd = TargetIndex.B;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04004F4B RID: 20299
-		protected const TargetIndex StoreCellInd = TargetIndex.C;
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__7 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__7(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x04004F4C RID: 20300
-		private const int OpenTicks = 120;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	protected const TargetIndex ContainerInd = TargetIndex.A;
+
+	protected const TargetIndex ContentsInd = TargetIndex.B;
+
+	protected const TargetIndex StoreCellInd = TargetIndex.C;
+
+	private const int OpenTicks = 120;
+
+	protected virtual PathEndMode ContainerPathEndMode
+	{
+		get
+		{
+			if (!job.GetTarget(TargetIndex.A).Thing.def.hasInteractionCell)
+			{
+				return PathEndMode.Touch;
+			}
+			return PathEndMode.InteractionCell;
+		}
+	}
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		Pawn p = pawn;
+		LocalTargetInfo target = job.GetTarget(TargetIndex.A);
+		Job obj = job;
+		bool errorOnFailed2 = errorOnFailed;
+		if (p.Reserve(target, obj, 1, -1, job.def.containerReservationLayer, errorOnFailed2))
+		{
+			return pawn.Reserve(job.GetTarget(TargetIndex.C), job, 1, -1, null, errorOnFailed);
+		}
+		return false;
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__7))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__7(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

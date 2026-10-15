@@ -1,49 +1,191 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_Flick : JobDriver
 {
-	// Token: 0x02001283 RID: 4739
-	public class JobDriver_Flick : JobDriver
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass1_0
 	{
-		// Token: 0x060073F3 RID: 29683 RVA: 0x001E06E3 File Offset: 0x001DE8E3
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		public JobDriver_Flick _003C_003E4__this;
+
+		public Toil finalize;
+
+		internal bool _003CMakeNewToils_003Eb__0()
 		{
-			return this.pawn.Reserve(this.job.targetA, this.job, 1, -1, null, errorOnFailed, false);
+			if (_003C_003E4__this.Map.designationManager.DesignationOn(_003C_003E4__this.TargetThingA, DesignationDefOf.Flick) != null)
+			{
+				return false;
+			}
+			return true;
 		}
 
-		// Token: 0x060073F4 RID: 29684 RVA: 0x0023920F File Offset: 0x0023740F
-		protected override IEnumerable<Toil> MakeNewToils()
+		internal void _003CMakeNewToils_003Eb__1()
 		{
-			this.FailOnDespawnedOrNull(TargetIndex.A);
-			this.FailOn(() => this.Map.designationManager.DesignationOn(this.TargetThingA, DesignationDefOf.Flick) == null);
-			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch, false);
-			yield return Toils_General.Wait(15, TargetIndex.None).FailOnCannotTouch(TargetIndex.A, PathEndMode.Touch);
-			Toil finalize = ToilMaker.MakeToil("MakeNewToils");
-			finalize.initAction = delegate()
+			Pawn actor = finalize.actor;
+			ThingWithComps thingWithComps = (ThingWithComps)actor.CurJob.targetA.Thing;
+			for (int i = 0; i < thingWithComps.AllComps.Count; i++)
 			{
-				Pawn actor = finalize.actor;
-				ThingWithComps thingWithComps = (ThingWithComps)actor.CurJob.targetA.Thing;
-				for (int i = 0; i < thingWithComps.AllComps.Count; i++)
+				if (thingWithComps.AllComps[i] is CompFlickable compFlickable && compFlickable.WantsFlick())
 				{
-					CompFlickable compFlickable = thingWithComps.AllComps[i] as CompFlickable;
-					if (compFlickable != null && compFlickable.WantsFlick())
-					{
-						compFlickable.DoFlick();
-					}
+					compFlickable.DoFlick();
 				}
-				actor.records.Increment(RecordDefOf.SwitchesFlicked);
-				Designation designation = this.Map.designationManager.DesignationOn(thingWithComps, DesignationDefOf.Flick);
-				if (designation != null)
-				{
-					designation.Delete();
-				}
-			};
-			finalize.defaultCompleteMode = ToilCompleteMode.Instant;
-			yield return finalize;
-			yield break;
+			}
+			actor.records.Increment(RecordDefOf.SwitchesFlicked);
+			_003C_003E4__this.Map.designationManager.DesignationOn(thingWithComps, DesignationDefOf.Flick)?.Delete();
 		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__1 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_Flick _003C_003E4__this;
+
+		private _003C_003Ec__DisplayClass1_0 _003C_003E8__1;
+
+		Toil IEnumerator<Toil>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__1(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E8__1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_Flick f = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E8__1 = new _003C_003Ec__DisplayClass1_0();
+				_003C_003E8__1._003C_003E4__this = _003C_003E4__this;
+				f.FailOnDespawnedOrNull(TargetIndex.A);
+				f.FailOn(() => _003C_003E8__1._003C_003E4__this.Map.designationManager.DesignationOn(_003C_003E8__1._003C_003E4__this.TargetThingA, DesignationDefOf.Flick) == null);
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.Wait(15).FailOnCannotTouch(TargetIndex.A, PathEndMode.Touch);
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				_003C_003E8__1.finalize = ToilMaker.MakeToil("MakeNewToils");
+				_003C_003E8__1.finalize.initAction = delegate
+				{
+					Pawn actor = _003C_003E8__1.finalize.actor;
+					ThingWithComps thingWithComps = (ThingWithComps)actor.CurJob.targetA.Thing;
+					for (int i = 0; i < thingWithComps.AllComps.Count; i++)
+					{
+						if (thingWithComps.AllComps[i] is CompFlickable compFlickable && compFlickable.WantsFlick())
+						{
+							compFlickable.DoFlick();
+						}
+					}
+					actor.records.Increment(RecordDefOf.SwitchesFlicked);
+					_003C_003E8__1._003C_003E4__this.Map.designationManager.DesignationOn(thingWithComps, DesignationDefOf.Flick)?.Delete();
+				};
+				_003C_003E8__1.finalize.defaultCompleteMode = ToilCompleteMode.Instant;
+				_003C_003E2__current = _003C_003E8__1.finalize;
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__1 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__1(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return pawn.Reserve(job.targetA, job, 1, -1, null, errorOnFailed);
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__1))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__1(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

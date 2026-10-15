@@ -1,266 +1,374 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
+using System.Linq;
+using System.Threading.Tasks;
+using Brutal.VulkanApi;
 using RimWorld;
 using UnityEngine;
+using Waylith.Graphics;
+using Waylith.Logging;
+using Waylith.Rendering;
 
-namespace Verse
+namespace Verse;
+
+public static class GlobalTextureAtlasManager
 {
-	// Token: 0x020007F6 RID: 2038
-	public static class GlobalTextureAtlasManager
+	public static bool rebakeAtlas = false;
+
+	private static List<PawnTextureAtlas> pawnTextureAtlases = new List<PawnTextureAtlas>();
+
+	private static List<StaticTextureAtlas> staticTextureAtlases = new List<StaticTextureAtlas>();
+
+	private static HashSet<UnityEngine.Texture2D> evictableSources = new HashSet<UnityEngine.Texture2D>();
+
+	private static HashSet<Waylith.Rendering.Texture2D> evictableCores = new HashSet<Waylith.Rendering.Texture2D>();
+
+	private static readonly List<Task> pendingCacheWrites = new List<Task>();
+
+	private static Dictionary<TextureAtlasGroupKey, (List<UnityEngine.Texture2D>, HashSet<UnityEngine.Texture2D>)> buildQueue = new Dictionary<TextureAtlasGroupKey, (List<UnityEngine.Texture2D>, HashSet<UnityEngine.Texture2D>)>();
+
+	private static Dictionary<UnityEngine.Texture2D, UnityEngine.Texture2D> buildQueueMasks = new Dictionary<UnityEngine.Texture2D, UnityEngine.Texture2D>();
+
+	private static bool AtlasSourceEvictionEnabled => !GenCommandLine.CommandLineArgPassed("noEvictAtlasSources");
+
+	internal static bool AtlasCompressionEnabled
 	{
-		// Token: 0x0600340D RID: 13325 RVA: 0x0011118D File Offset: 0x0010F38D
-		public static void ClearStaticAtlasBuildQueue()
+		get
 		{
-			GlobalTextureAtlasManager.buildQueue.Clear();
-		}
-
-		// Token: 0x0600340E RID: 13326 RVA: 0x0011119C File Offset: 0x0010F39C
-		public static bool TryInsertStatic(TextureAtlasGroup group, Texture2D texture, Texture2D mask = null)
-		{
-			if (texture.width >= 512 || texture.height >= 512)
+			if (Prefs.TextureCompression && TextureCompressionSettings.Enabled)
 			{
-				return false;
+				return !GenCommandLine.CommandLineArgPassed("noCompressAtlases");
 			}
-			if (mask != null && (texture.width != mask.width || texture.height != mask.height))
-			{
-				Log.Warning(string.Concat(new string[]
-				{
-					"Texture ",
-					texture.name,
-					" has dimensions of ",
-					texture.width.ToString(),
-					" x ",
-					texture.height.ToString(),
-					", but its mask has ",
-					mask.width.ToString(),
-					" x ",
-					mask.height.ToString(),
-					". This is not supported, texture will be excluded from atlas"
-				}));
-				return false;
-			}
-			TextureAtlasGroupKey key = new TextureAtlasGroupKey
-			{
-				group = group,
-				hasMask = (mask != null)
-			};
-			ValueTuple<List<Texture2D>, HashSet<Texture2D>> valueTuple;
-			if (!GlobalTextureAtlasManager.buildQueue.TryGetValue(key, out valueTuple))
-			{
-				valueTuple = new ValueTuple<List<Texture2D>, HashSet<Texture2D>>(new List<Texture2D>(), new HashSet<Texture2D>());
-				GlobalTextureAtlasManager.buildQueue.Add(key, valueTuple);
-			}
-			if (valueTuple.Item2.Add(texture))
-			{
-				valueTuple.Item1.Add(texture);
-			}
-			if (mask != null)
-			{
-				if (GlobalTextureAtlasManager.buildQueueMasks.ContainsKey(texture))
-				{
-					if (GlobalTextureAtlasManager.buildQueueMasks[texture] != mask)
-					{
-						Log.Error(string.Concat(new string[]
-						{
-							"Same texture with 2 different masks inserted into texture atlas manager (",
-							texture.name,
-							") - ",
-							mask.name,
-							" | ",
-							GlobalTextureAtlasManager.buildQueueMasks[texture].name,
-							"!"
-						}));
-					}
-				}
-				else
-				{
-					GlobalTextureAtlasManager.buildQueueMasks.Add(texture, mask);
-				}
-			}
-			return true;
-		}
-
-		// Token: 0x0600340F RID: 13327 RVA: 0x00111378 File Offset: 0x0010F578
-		public static void BakeStaticAtlases()
-		{
-			BuildingsDamageSectionLayerUtility.TryInsertIntoAtlas();
-			MinifiedThing.TryInsertIntoAtlas();
-			GlobalTextureAtlasManager.<>c__DisplayClass7_0 CS$<>8__locals1;
-			CS$<>8__locals1.pixels = 0;
-			CS$<>8__locals1.currentBatch = new List<Texture2D>();
-			foreach (KeyValuePair<TextureAtlasGroupKey, ValueTuple<List<Texture2D>, HashSet<Texture2D>>> keyValuePair in GlobalTextureAtlasManager.buildQueue)
-			{
-				foreach (Texture2D texture2D in keyValuePair.Value.Item1)
-				{
-					int num = texture2D.width * texture2D.height;
-					if (num + CS$<>8__locals1.pixels > StaticTextureAtlas.MaxPixelsPerAtlas)
-					{
-						GlobalTextureAtlasManager.<BakeStaticAtlases>g__FlushBatch|7_0(keyValuePair.Key, ref CS$<>8__locals1);
-					}
-					CS$<>8__locals1.pixels += num;
-					CS$<>8__locals1.currentBatch.Add(texture2D);
-				}
-				GlobalTextureAtlasManager.<BakeStaticAtlases>g__FlushBatch|7_0(keyValuePair.Key, ref CS$<>8__locals1);
-			}
-		}
-
-		// Token: 0x06003410 RID: 13328 RVA: 0x00111484 File Offset: 0x0010F684
-		public static bool TryGetStaticTile(TextureAtlasGroup group, Texture2D texture, out StaticTextureAtlasTile tile, bool ignoreFoundInOtherAtlas = false)
-		{
-			foreach (StaticTextureAtlas staticTextureAtlas in GlobalTextureAtlasManager.staticTextureAtlases)
-			{
-				if (staticTextureAtlas.groupKey.group == group && staticTextureAtlas.TryGetTile(texture, out tile))
-				{
-					return true;
-				}
-			}
-			foreach (StaticTextureAtlas staticTextureAtlas2 in GlobalTextureAtlasManager.staticTextureAtlases)
-			{
-				if (staticTextureAtlas2.TryGetTile(texture, out tile))
-				{
-					if (!ignoreFoundInOtherAtlas)
-					{
-						Log.Warning(string.Concat(new string[]
-						{
-							"Found texture ",
-							texture.name,
-							" in another atlas group than requested (found in ",
-							staticTextureAtlas2.groupKey.ToString(),
-							", requested in ",
-							group.ToString(),
-							")!"
-						}));
-					}
-					return true;
-				}
-			}
-			tile = null;
 			return false;
 		}
+	}
 
-		// Token: 0x06003411 RID: 13329 RVA: 0x001115A4 File Offset: 0x0010F7A4
-		public static bool TryGetPawnFrameSet(Pawn pawn, out PawnTextureAtlasFrameSet frameSet, out bool createdNew, bool allowCreatingNew = true)
+	public static void ClearStaticAtlasBuildQueue()
+	{
+		buildQueue.Clear();
+	}
+
+	public static bool TryInsertStatic(TextureAtlasGroup group, UnityEngine.Texture2D texture, UnityEngine.Texture2D mask = null)
+	{
+		if (texture.width >= 512 || texture.height >= 512)
 		{
-			using (List<PawnTextureAtlas>.Enumerator enumerator = GlobalTextureAtlasManager.pawnTextureAtlases.GetEnumerator())
-			{
-				while (enumerator.MoveNext())
-				{
-					if (enumerator.Current.TryGetFrameSet(pawn, out frameSet, out createdNew))
-					{
-						return true;
-					}
-				}
-			}
-			if (allowCreatingNew)
-			{
-				PawnTextureAtlas pawnTextureAtlas = new PawnTextureAtlas();
-				GlobalTextureAtlasManager.pawnTextureAtlases.Add(pawnTextureAtlas);
-				return pawnTextureAtlas.TryGetFrameSet(pawn, out frameSet, out createdNew);
-			}
-			createdNew = false;
-			frameSet = null;
 			return false;
 		}
-
-		// Token: 0x06003412 RID: 13330 RVA: 0x00111624 File Offset: 0x0010F824
-		public static bool TryMarkPawnFrameSetDirty(Pawn pawn)
+		if (mask != null && (texture.width != mask.width || texture.height != mask.height))
 		{
-			PawnTextureAtlasFrameSet pawnTextureAtlasFrameSet;
-			bool flag;
-			if (!GlobalTextureAtlasManager.TryGetPawnFrameSet(pawn, out pawnTextureAtlasFrameSet, out flag, false))
-			{
-				return false;
-			}
-			for (int i = 0; i < pawnTextureAtlasFrameSet.isDirty.Length; i++)
-			{
-				pawnTextureAtlasFrameSet.isDirty[i] = true;
-			}
-			return true;
+			Log.Warning("Texture " + texture.name + " has dimensions of " + texture.width + " x " + texture.height + ", but its mask has " + mask.width + " x " + mask.height + ". This is not supported, texture will be excluded from atlas");
+			return false;
 		}
-
-		// Token: 0x06003413 RID: 13331 RVA: 0x00111660 File Offset: 0x0010F860
-		public static void GlobalTextureAtlasManagerUpdate()
+		TextureAtlasGroupKey textureAtlasGroupKey = default(TextureAtlasGroupKey);
+		textureAtlasGroupKey.group = group;
+		textureAtlasGroupKey.hasMask = mask != null;
+		TextureAtlasGroupKey key = textureAtlasGroupKey;
+		if (!buildQueue.TryGetValue(key, out var value))
 		{
-			if (GlobalTextureAtlasManager.rebakeAtlas)
-			{
-				GlobalTextureAtlasManager.FreeAllRuntimeAtlases();
-				PortraitsCache.Clear();
-				GlobalTextureAtlasManager.rebakeAtlas = false;
-			}
-			foreach (PawnTextureAtlas pawnTextureAtlas in GlobalTextureAtlasManager.pawnTextureAtlases)
-			{
-				pawnTextureAtlas.GC();
-			}
+			value = (new List<UnityEngine.Texture2D>(), new HashSet<UnityEngine.Texture2D>());
+			buildQueue.Add(key, value);
 		}
-
-		// Token: 0x06003414 RID: 13332 RVA: 0x001116C8 File Offset: 0x0010F8C8
-		public static void FreeAllRuntimeAtlases()
+		if (value.Item2.Add(texture))
 		{
-			foreach (PawnTextureAtlas pawnTextureAtlas in GlobalTextureAtlasManager.pawnTextureAtlases)
-			{
-				pawnTextureAtlas.Destroy();
-			}
-			GlobalTextureAtlasManager.pawnTextureAtlases.Clear();
+			value.Item1.Add(texture);
 		}
-
-		// Token: 0x06003415 RID: 13333 RVA: 0x00111724 File Offset: 0x0010F924
-		public static void DumpPawnAtlases(string folder)
+		if (mask != null)
 		{
-			foreach (PawnTextureAtlas pawnTextureAtlas in GlobalTextureAtlasManager.pawnTextureAtlases)
+			if (buildQueueMasks.ContainsKey(texture))
 			{
-				TextureAtlasHelper.WriteDebugPNG(pawnTextureAtlas.RawTexture, folder + "\\dump_" + pawnTextureAtlas.RawTexture.GetInstanceID().ToString() + ".png");
-			}
-			Log.Message("Atlases have been dumped to " + folder);
-		}
-
-		// Token: 0x06003416 RID: 13334 RVA: 0x001117B0 File Offset: 0x0010F9B0
-		public static void DumpStaticAtlases(string folder)
-		{
-			foreach (StaticTextureAtlas staticTextureAtlas in GlobalTextureAtlasManager.staticTextureAtlases)
-			{
-				TextureAtlasHelper.WriteDebugPNG(staticTextureAtlas.ColorTexture, folder + "\\" + staticTextureAtlas.ColorTexture.name + ".png");
-				if (staticTextureAtlas.MaskTexture != null)
+				if (buildQueueMasks[texture] != mask)
 				{
-					TextureAtlasHelper.WriteDebugPNG(staticTextureAtlas.MaskTexture, folder + "\\" + staticTextureAtlas.MaskTexture.name + ".png");
+					Log.Error("Same texture with 2 different masks inserted into texture atlas manager (" + texture.name + ") - " + mask.name + " | " + buildQueueMasks[texture].name + "!");
 				}
 			}
-			Log.Message("Atlases have been dumped to " + folder);
+			else
+			{
+				buildQueueMasks.Add(texture, mask);
+			}
 		}
+		return true;
+	}
 
-		// Token: 0x06003418 RID: 13336 RVA: 0x00111898 File Offset: 0x0010FA98
-		[CompilerGenerated]
-		internal static void <BakeStaticAtlases>g__FlushBatch|7_0(TextureAtlasGroupKey groupKey, ref GlobalTextureAtlasManager.<>c__DisplayClass7_0 A_1)
+	public static void BakeStaticAtlases()
+	{
+		BuildingsDamageSectionLayerUtility.TryInsertIntoAtlas();
+		MinifiedThing.TryInsertIntoAtlas();
+		int pixels = 0;
+		List<UnityEngine.Texture2D> currentBatch = new List<UnityEngine.Texture2D>();
+		try
+		{
+			foreach (KeyValuePair<TextureAtlasGroupKey, (List<UnityEngine.Texture2D>, HashSet<UnityEngine.Texture2D>)> item in buildQueue.OrderBy<KeyValuePair<TextureAtlasGroupKey, (List<UnityEngine.Texture2D>, HashSet<UnityEngine.Texture2D>)>, string>((KeyValuePair<TextureAtlasGroupKey, (List<UnityEngine.Texture2D>, HashSet<UnityEngine.Texture2D>)> g) => g.Key.ToString(), StringComparer.Ordinal))
+			{
+				item.Value.Item1.Sort((UnityEngine.Texture2D a, UnityEngine.Texture2D b) => string.CompareOrdinal(a.CoreTexture?.SourcePath ?? a.name, b.CoreTexture?.SourcePath ?? b.name));
+				foreach (UnityEngine.Texture2D item2 in item.Value.Item1)
+				{
+					int num = (item2.width + 8) * (item2.height + 8);
+					if (num + pixels > StaticTextureAtlas.MaxPixelsPerAtlas)
+					{
+						FlushBatch(item.Key);
+					}
+					pixels += num;
+					currentBatch.Add(item2);
+				}
+				FlushBatch(item.Key);
+			}
+		}
+		finally
+		{
+			evictableSources = (from texture in staticTextureAtlases.SelectMany((StaticTextureAtlas atlas) => atlas.Members)
+				where texture != null
+				select texture).ToHashSet();
+			evictableCores = (from texture in evictableSources
+				select texture.CoreTexture into core
+				where core != null
+				select core).ToHashSet();
+			Waylith.Rendering.Texture2D.EndDeferredLoading(LeavesSourceEvicted);
+		}
+		DrainCacheWrites();
+		VerboseLog.Log($"Static atlases: {staticTextureAtlases.Count} pages, {staticTextureAtlases.Count((StaticTextureAtlas atlas) => atlas.AdoptedFromCache)} loaded from cache, page limit {StaticTextureAtlas.MaxPagePixels / 1048576} Mpx.");
+		EvictAtlasSourceTextures();
+		void FlushBatch(TextureAtlasGroupKey groupKey)
 		{
 			StaticTextureAtlas staticTextureAtlas = new StaticTextureAtlas(groupKey);
-			foreach (Texture2D texture2D in A_1.currentBatch)
+			foreach (UnityEngine.Texture2D item3 in currentBatch)
 			{
-				Texture2D mask;
-				if (!groupKey.hasMask || !GlobalTextureAtlasManager.buildQueueMasks.TryGetValue(texture2D, out mask))
+				if (!groupKey.hasMask || !buildQueueMasks.TryGetValue(item3, out var value))
 				{
-					mask = null;
+					value = null;
 				}
-				staticTextureAtlas.Insert(texture2D, mask);
+				staticTextureAtlas.Insert(item3, value);
 			}
-			staticTextureAtlas.Bake(false);
-			GlobalTextureAtlasManager.staticTextureAtlases.Add(staticTextureAtlas);
-			A_1.pixels = 0;
-			A_1.currentBatch.Clear();
+			staticTextureAtlas.Bake();
+			CompressAtlas(staticTextureAtlas);
+			staticTextureAtlases.Add(staticTextureAtlas);
+			if (AtlasSourceEvictionEnabled)
+			{
+				staticTextureAtlas.EvictSourceTextures();
+			}
+			GpuTextureService.RetireDeferredDisposalsAfterIdle();
+			pixels = 0;
+			currentBatch.Clear();
 		}
+	}
 
-		// Token: 0x04002748 RID: 10056
-		public static bool rebakeAtlas = false;
+	public static bool LeavesSourceEvicted(UnityEngine.Texture2D texture)
+	{
+		if (AtlasSourceEvictionEnabled)
+		{
+			return evictableSources.Contains(texture);
+		}
+		return false;
+	}
 
-		// Token: 0x04002749 RID: 10057
-		private static List<PawnTextureAtlas> pawnTextureAtlases = new List<PawnTextureAtlas>();
+	public static bool LeavesSourceEvicted(Waylith.Rendering.Texture2D texture)
+	{
+		if (AtlasSourceEvictionEnabled)
+		{
+			return evictableCores.Contains(texture);
+		}
+		return false;
+	}
 
-		// Token: 0x0400274A RID: 10058
-		private static List<StaticTextureAtlas> staticTextureAtlases = new List<StaticTextureAtlas>();
+	private static void CompressAtlas(StaticTextureAtlas atlas)
+	{
+		if (!AtlasCompressionEnabled)
+		{
+			return;
+		}
+		using (new DeepProfilerScope("Compress atlas textures"))
+		{
+			BcEncodeTarget target = TextureCompressionSettings.Target;
+			float quality = TextureCompressionSettings.Quality;
+			CompressAtlasPage(atlas.ColorTexture, atlas.CacheKey(mask: false), target, quality);
+			CompressAtlasPage(atlas.MaskTexture, atlas.CacheKey(mask: true), target, quality);
+		}
+	}
 
-		// Token: 0x0400274B RID: 10059
-		private static Dictionary<TextureAtlasGroupKey, ValueTuple<List<Texture2D>, HashSet<Texture2D>>> buildQueue = new Dictionary<TextureAtlasGroupKey, ValueTuple<List<Texture2D>, HashSet<Texture2D>>>();
+	private static void CompressAtlasPage(UnityEngine.Texture2D page, string cacheKey, BcEncodeTarget target, float quality)
+	{
+		Waylith.Rendering.Texture2D texture2D = page?.CoreTexture;
+		if (texture2D?.CpuData == null || TexturePixelData.IsBlockCompressed(texture2D.CpuData.Format))
+		{
+			return;
+		}
+		if (cacheKey != null && GpuTextureService.TryLoadKeyedTextureCache(cacheKey, out var loadedTexture) && texture2D.TryAdoptCompressed(in loadedTexture))
+		{
+			ReleaseCpuLevels(texture2D);
+		}
+		else if (!TryEncodeOnGpu(page, cacheKey, target, quality) && texture2D.CompressInPlace(target, quality))
+		{
+			if (cacheKey != null)
+			{
+				QueueCacheWrite(GpuTextureService.BeginWriteKeyedTextureCache(cacheKey, texture2D));
+			}
+			ReleaseCpuLevels(texture2D);
+		}
+	}
 
-		// Token: 0x0400274C RID: 10060
-		private static Dictionary<Texture2D, Texture2D> buildQueueMasks = new Dictionary<Texture2D, Texture2D>();
+	private static bool TryEncodeOnGpu(UnityEngine.Texture2D page, string cacheKey, BcEncodeTarget target, float quality)
+	{
+		Waylith.Rendering.Texture2D coreTexture = page.CoreTexture;
+		if (target == BcEncodeTarget.Bc7)
+		{
+			TexturePixelData cpuData = coreTexture.CpuData;
+			if (cpuData != null && !cpuData.HasData && coreTexture.GpuResource != null && TextureBlockEncoder.CanEncodeBc7Fast)
+			{
+				GpuTextureAllocation gpuTextureAllocation = GpuTextureService.CreateEmptyTexture2D(page.name, page.width, page.height, coreTexture.MipCount, TexturePixelData.ToVkFormat(LoadedTextureFormat.Bc7), VkImageUsageFlags.None, GpuMemoryCategory.Atlas);
+				byte[][] array = ((gpuTextureAllocation == null) ? null : TextureBlockEncoder.TryEncodeBc7Fast(coreTexture.GpuResource, gpuTextureAllocation, page.width, page.height, coreTexture.MipCount, quality));
+				if (array == null)
+				{
+					gpuTextureAllocation?.Dispose();
+					return false;
+				}
+				coreTexture.AdoptEncodedImage(gpuTextureAllocation, LoadedTextureFormat.Bc7, array.Length);
+				if (cacheKey != null)
+				{
+					QueueCacheWrite(GpuTextureService.BeginWriteKeyedTextureCache(cacheKey, new LoadedTextureData(page.width, page.height, array.Length, LoadedTextureFormat.Bc7, array, Opaque: false, null)));
+				}
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private static void ReleaseCpuLevels(Waylith.Rendering.Texture2D core)
+	{
+		core.CpuData?.ReleaseTracked();
+		core.CpuData?.Release();
+	}
+
+	private static void QueueCacheWrite(Task write)
+	{
+		if (!write.IsCompleted)
+		{
+			pendingCacheWrites.Add(write);
+		}
+	}
+
+	private static void DrainCacheWrites()
+	{
+		if (pendingCacheWrites.Count != 0)
+		{
+			using (new DeepProfilerScope("Atlas cache write drain"))
+			{
+				Task.WaitAll(pendingCacheWrites.ToArray());
+			}
+			pendingCacheWrites.Clear();
+		}
+	}
+
+	public static void EvictAtlasSourceTextures()
+	{
+		if (!AtlasSourceEvictionEnabled)
+		{
+			return;
+		}
+		foreach (StaticTextureAtlas staticTextureAtlase in staticTextureAtlases)
+		{
+			staticTextureAtlase.EvictSourceTextures();
+		}
+		GpuTextureService.RetireDeferredDisposalsAfterIdle();
+	}
+
+	public static bool TryGetStaticTile(TextureAtlasGroup group, UnityEngine.Texture2D texture, out StaticTextureAtlasTile tile, bool ignoreFoundInOtherAtlas = false)
+	{
+		foreach (StaticTextureAtlas staticTextureAtlase in staticTextureAtlases)
+		{
+			if (staticTextureAtlase.groupKey.group == group && staticTextureAtlase.TryGetTile(texture, out tile))
+			{
+				return true;
+			}
+		}
+		foreach (StaticTextureAtlas staticTextureAtlase2 in staticTextureAtlases)
+		{
+			if (staticTextureAtlase2.TryGetTile(texture, out tile))
+			{
+				if (!ignoreFoundInOtherAtlas)
+				{
+					Log.Warning("Found texture " + texture.name + " in another atlas group than requested (found in " + staticTextureAtlase2.groupKey.ToString() + ", requested in " + group.ToString() + ")!");
+				}
+				return true;
+			}
+		}
+		tile = null;
+		return false;
+	}
+
+	public static bool TryGetPawnFrameSet(Pawn pawn, out PawnTextureAtlasFrameSet frameSet, out bool createdNew, bool allowCreatingNew = true)
+	{
+		foreach (PawnTextureAtlas pawnTextureAtlase in pawnTextureAtlases)
+		{
+			if (pawnTextureAtlase.TryGetFrameSet(pawn, out frameSet, out createdNew))
+			{
+				return true;
+			}
+		}
+		if (allowCreatingNew)
+		{
+			PawnTextureAtlas pawnTextureAtlas = new PawnTextureAtlas();
+			pawnTextureAtlases.Add(pawnTextureAtlas);
+			return pawnTextureAtlas.TryGetFrameSet(pawn, out frameSet, out createdNew);
+		}
+		createdNew = false;
+		frameSet = null;
+		return false;
+	}
+
+	public static bool TryMarkPawnFrameSetDirty(Pawn pawn)
+	{
+		if (!TryGetPawnFrameSet(pawn, out var frameSet, out var _, allowCreatingNew: false))
+		{
+			return false;
+		}
+		for (int i = 0; i < frameSet.isDirty.Length; i++)
+		{
+			frameSet.isDirty[i] = true;
+		}
+		return true;
+	}
+
+	public static void GlobalTextureAtlasManagerUpdate()
+	{
+		if (rebakeAtlas)
+		{
+			FreeAllRuntimeAtlases();
+			PortraitsCache.Clear();
+			rebakeAtlas = false;
+		}
+		foreach (PawnTextureAtlas pawnTextureAtlase in pawnTextureAtlases)
+		{
+			pawnTextureAtlase.GC();
+		}
+	}
+
+	public static void FreeAllRuntimeAtlases()
+	{
+		foreach (PawnTextureAtlas pawnTextureAtlase in pawnTextureAtlases)
+		{
+			pawnTextureAtlase.Destroy();
+		}
+		pawnTextureAtlases.Clear();
+	}
+
+	public static void DumpPawnAtlases(string folder)
+	{
+		foreach (PawnTextureAtlas pawnTextureAtlase in pawnTextureAtlases)
+		{
+			TextureAtlasHelper.WriteDebugPNG(pawnTextureAtlase.RawTexture, folder + "\\dump_" + pawnTextureAtlase.RawTexture.GetInstanceID() + ".png");
+		}
+		Log.Message("Atlases have been dumped to " + folder);
+	}
+
+	public static void DumpStaticAtlases(string folder)
+	{
+		foreach (StaticTextureAtlas staticTextureAtlase in staticTextureAtlases)
+		{
+			TextureAtlasHelper.WriteDebugPNG(staticTextureAtlase.ColorTexture, folder + "\\" + staticTextureAtlase.ColorTexture.name + ".png");
+			if (staticTextureAtlase.MaskTexture != null)
+			{
+				TextureAtlasHelper.WriteDebugPNG(staticTextureAtlase.MaskTexture, folder + "\\" + staticTextureAtlase.MaskTexture.name + ".png");
+			}
+		}
+		Log.Message("Atlases have been dumped to " + folder);
 	}
 }

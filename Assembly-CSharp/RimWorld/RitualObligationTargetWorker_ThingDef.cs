@@ -1,64 +1,300 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class RitualObligationTargetWorker_ThingDef : RitualObligationTargetFilter
 {
-	// Token: 0x020026E3 RID: 9955
-	public class RitualObligationTargetWorker_ThingDef : RitualObligationTargetFilter
+	[CompilerGenerated]
+	private sealed class _003CGetTargetInfos_003Ed__4 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x0600DA3B RID: 55867 RVA: 0x00408B0F File Offset: 0x00406D0F
-		public RitualObligationTargetWorker_ThingDef()
-		{
-		}
+		private int _003C_003E1__state;
 
-		// Token: 0x0600DA3C RID: 55868 RVA: 0x00408B17 File Offset: 0x00406D17
-		public RitualObligationTargetWorker_ThingDef(RitualObligationTargetFilterDef def) : base(def)
-		{
-		}
+		private string _003C_003E2__current;
 
-		// Token: 0x0600DA3D RID: 55869 RVA: 0x00408B20 File Offset: 0x00406D20
-		public override IEnumerable<TargetInfo> GetTargets(RitualObligation obligation, Map map)
+		private int _003C_003El__initialThreadId;
+
+		public RitualObligationTargetWorker_ThingDef _003C_003E4__this;
+
+		private int _003Ci_003E5__2;
+
+		string IEnumerator<string>.Current
 		{
-			if (this.def.thingDefs.NullOrEmpty<ThingDef>())
+			[DebuggerHidden]
+			get
 			{
-				yield break;
+				return _003C_003E2__current;
 			}
-			int num;
-			for (int i = 0; i < this.def.thingDefs.Count; i = num + 1)
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
 			{
-				ThingDef def = this.def.thingDefs[i];
-				List<Thing> things = map.listerThings.ThingsOfDef(def);
-				for (int j = 0; j < things.Count; j = num + 1)
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetTargetInfos_003Ed__4(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			RitualObligationTargetWorker_ThingDef ritualObligationTargetWorker_ThingDef = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003Ci_003E5__2 = 0;
+				break;
+			case 1:
+				_003C_003E1__state = -1;
+				_003Ci_003E5__2++;
+				break;
+			}
+			if (_003Ci_003E5__2 < ritualObligationTargetWorker_ThingDef.def.thingDefs.Count)
+			{
+				_003C_003E2__current = ritualObligationTargetWorker_ThingDef.def.thingDefs[_003Ci_003E5__2].label;
+				_003C_003E1__state = 1;
+				return true;
+			}
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CGetTargetInfos_003Ed__4 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CGetTargetInfos_003Ed__4(0)
 				{
-					if (base.CanUseTarget(things[j], obligation).canUse)
-					{
-						yield return things[j];
-					}
-					num = j;
-				}
-				things = null;
-				num = i;
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
-			yield break;
+			return result;
 		}
 
-		// Token: 0x0600DA3E RID: 55870 RVA: 0x00408B40 File Offset: 0x00406D40
-		protected override RitualTargetUseReport CanUseTargetInternal(TargetInfo target, RitualObligation obligation)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return target.HasThing && this.def.thingDefs.Contains(target.Thing.def) && (!this.def.colonistThingsOnly || (target.Thing.Faction != null && target.Thing.Faction.IsPlayer));
+			return ((IEnumerable<string>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x0600DA3F RID: 55871 RVA: 0x00408BAE File Offset: 0x00406DAE
-		public override IEnumerable<string> GetTargetInfos(RitualObligation obligation)
+	[CompilerGenerated]
+	private sealed class _003CGetTargets_003Ed__2 : IEnumerable<TargetInfo>, IEnumerable, IEnumerator<TargetInfo>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private TargetInfo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public RitualObligationTargetWorker_ThingDef _003C_003E4__this;
+
+		private Map map;
+
+		public Map _003C_003E3__map;
+
+		private RitualObligation obligation;
+
+		public RitualObligation _003C_003E3__obligation;
+
+		private int _003Ci_003E5__2;
+
+		private List<Thing> _003Cthings_003E5__3;
+
+		private int _003Cj_003E5__4;
+
+		TargetInfo IEnumerator<TargetInfo>.Current
 		{
-			int num;
-			for (int i = 0; i < this.def.thingDefs.Count; i = num + 1)
+			[DebuggerHidden]
+			get
 			{
-				yield return this.def.thingDefs[i].label;
-				num = i;
+				return _003C_003E2__current;
 			}
-			yield break;
 		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetTargets_003Ed__2(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003Cthings_003E5__3 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			RitualObligationTargetWorker_ThingDef ritualObligationTargetWorker_ThingDef = _003C_003E4__this;
+			if (num != 0)
+			{
+				if (num != 1)
+				{
+					return false;
+				}
+				_003C_003E1__state = -1;
+				goto IL_00cd;
+			}
+			_003C_003E1__state = -1;
+			if (ritualObligationTargetWorker_ThingDef.def.thingDefs.NullOrEmpty())
+			{
+				return false;
+			}
+			_003Ci_003E5__2 = 0;
+			goto IL_0107;
+			IL_00dd:
+			if (_003Cj_003E5__4 < _003Cthings_003E5__3.Count)
+			{
+				if (ritualObligationTargetWorker_ThingDef.CanUseTarget(_003Cthings_003E5__3[_003Cj_003E5__4], obligation).canUse)
+				{
+					_003C_003E2__current = _003Cthings_003E5__3[_003Cj_003E5__4];
+					_003C_003E1__state = 1;
+					return true;
+				}
+				goto IL_00cd;
+			}
+			_003Cthings_003E5__3 = null;
+			_003Ci_003E5__2++;
+			goto IL_0107;
+			IL_00cd:
+			_003Cj_003E5__4++;
+			goto IL_00dd;
+			IL_0107:
+			if (_003Ci_003E5__2 < ritualObligationTargetWorker_ThingDef.def.thingDefs.Count)
+			{
+				ThingDef def = ritualObligationTargetWorker_ThingDef.def.thingDefs[_003Ci_003E5__2];
+				_003Cthings_003E5__3 = map.listerThings.ThingsOfDef(def);
+				_003Cj_003E5__4 = 0;
+				goto IL_00dd;
+			}
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<TargetInfo> IEnumerable<TargetInfo>.GetEnumerator()
+		{
+			_003CGetTargets_003Ed__2 _003CGetTargets_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CGetTargets_003Ed__ = this;
+			}
+			else
+			{
+				_003CGetTargets_003Ed__ = new _003CGetTargets_003Ed__2(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CGetTargets_003Ed__.obligation = _003C_003E3__obligation;
+			_003CGetTargets_003Ed__.map = _003C_003E3__map;
+			return _003CGetTargets_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<TargetInfo>)this).GetEnumerator();
+		}
+	}
+
+	public RitualObligationTargetWorker_ThingDef()
+	{
+	}
+
+	public RitualObligationTargetWorker_ThingDef(RitualObligationTargetFilterDef def)
+		: base(def)
+	{
+	}
+
+	[IteratorStateMachine(typeof(_003CGetTargets_003Ed__2))]
+	public override IEnumerable<TargetInfo> GetTargets(RitualObligation obligation, Map map)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetTargets_003Ed__2(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__obligation = obligation,
+			_003C_003E3__map = map
+		};
+	}
+
+	protected override RitualTargetUseReport CanUseTargetInternal(TargetInfo target, RitualObligation obligation)
+	{
+		return target.HasThing && def.thingDefs.Contains(target.Thing.def) && (!def.colonistThingsOnly || (target.Thing.Faction != null && target.Thing.Faction.IsPlayer));
+	}
+
+	[IteratorStateMachine(typeof(_003CGetTargetInfos_003Ed__4))]
+	public override IEnumerable<string> GetTargetInfos(RitualObligation obligation)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetTargetInfos_003Ed__4(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

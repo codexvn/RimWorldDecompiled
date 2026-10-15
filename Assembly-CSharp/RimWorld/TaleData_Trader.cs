@@ -1,106 +1,215 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.Grammar;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class TaleData_Trader : TaleData
 {
-	// Token: 0x0200291C RID: 10524
-	public class TaleData_Trader : TaleData
+	[CompilerGenerated]
+	private sealed class _003CGetRules_003Ed__6 : IEnumerable<Rule>, IEnumerable, IEnumerator<Rule>, IEnumerator, IDisposable
 	{
-		// Token: 0x170022F9 RID: 8953
-		// (get) Token: 0x0600E63B RID: 58939 RVA: 0x004328A3 File Offset: 0x00430AA3
-		private bool IsPawn
+		private int _003C_003E1__state;
+
+		private Rule _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public TaleData_Trader _003C_003E4__this;
+
+		private string prefix;
+
+		public string _003C_003E3__prefix;
+
+		private string _003CnameShortIndefinite_003E5__2;
+
+		Rule IEnumerator<Rule>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.pawnID >= 0;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600E63C RID: 58940 RVA: 0x004328B1 File Offset: 0x00430AB1
-		public override void ExposeData()
+		object IEnumerator.Current
 		{
-			Scribe_Values.Look<string>(ref this.name, "name", null, false);
-			Scribe_Values.Look<int>(ref this.pawnID, "pawnID", -1, false);
-			Scribe_Values.Look<Gender>(ref this.gender, "gender", Gender.Male, false);
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x0600E63D RID: 58941 RVA: 0x004328E9 File Offset: 0x00430AE9
-		public override IEnumerable<Rule> GetRules(string prefix, Dictionary<string, string> constants = null)
+		[DebuggerHidden]
+		public _003CGetRules_003Ed__6(int _003C_003E1__state)
 		{
-			string output;
-			if (this.IsPawn)
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003CnameShortIndefinite_003E5__2 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			TaleData_Trader taleData_Trader = _003C_003E4__this;
+			switch (num)
 			{
-				output = this.name;
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = new Rule_String(output: (!taleData_Trader.IsPawn) ? Find.ActiveLanguageWorker.WithIndefiniteArticle(taleData_Trader.name) : taleData_Trader.name, keyword: prefix + "_nameFull");
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				if (taleData_Trader.IsPawn)
+				{
+					_003CnameShortIndefinite_003E5__2 = taleData_Trader.name;
+				}
+				else
+				{
+					_003CnameShortIndefinite_003E5__2 = Find.ActiveLanguageWorker.WithIndefiniteArticle(taleData_Trader.name);
+				}
+				_003C_003E2__current = new Rule_String(prefix + "_indefinite", _003CnameShortIndefinite_003E5__2);
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = new Rule_String(prefix + "_nameIndef", _003CnameShortIndefinite_003E5__2);
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+				_003C_003E1__state = -1;
+				_003CnameShortIndefinite_003E5__2 = null;
+				if (taleData_Trader.IsPawn)
+				{
+					_003CnameShortIndefinite_003E5__2 = taleData_Trader.name;
+				}
+				else
+				{
+					_003CnameShortIndefinite_003E5__2 = Find.ActiveLanguageWorker.WithDefiniteArticle(taleData_Trader.name);
+				}
+				_003C_003E2__current = new Rule_String(prefix + "_definite", _003CnameShortIndefinite_003E5__2);
+				_003C_003E1__state = 4;
+				return true;
+			case 4:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = new Rule_String(prefix + "_nameDef", _003CnameShortIndefinite_003E5__2);
+				_003C_003E1__state = 5;
+				return true;
+			case 5:
+				_003C_003E1__state = -1;
+				_003CnameShortIndefinite_003E5__2 = null;
+				_003C_003E2__current = new Rule_String(prefix + "_pronoun", taleData_Trader.gender.GetPronoun());
+				_003C_003E1__state = 6;
+				return true;
+			case 6:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = new Rule_String(prefix + "_possessive", taleData_Trader.gender.GetPossessive());
+				_003C_003E1__state = 7;
+				return true;
+			case 7:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Rule> IEnumerable<Rule>.GetEnumerator()
+		{
+			_003CGetRules_003Ed__6 _003CGetRules_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CGetRules_003Ed__ = this;
 			}
 			else
 			{
-				output = Find.ActiveLanguageWorker.WithIndefiniteArticle(this.name, false, false);
+				_003CGetRules_003Ed__ = new _003CGetRules_003Ed__6(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
-			yield return new Rule_String(prefix + "_nameFull", output);
-			string nameShortIndefinite;
-			if (this.IsPawn)
-			{
-				nameShortIndefinite = this.name;
-			}
-			else
-			{
-				nameShortIndefinite = Find.ActiveLanguageWorker.WithIndefiniteArticle(this.name, false, false);
-			}
-			yield return new Rule_String(prefix + "_indefinite", nameShortIndefinite);
-			yield return new Rule_String(prefix + "_nameIndef", nameShortIndefinite);
-			nameShortIndefinite = null;
-			if (this.IsPawn)
-			{
-				nameShortIndefinite = this.name;
-			}
-			else
-			{
-				nameShortIndefinite = Find.ActiveLanguageWorker.WithDefiniteArticle(this.name, false, false);
-			}
-			yield return new Rule_String(prefix + "_definite", nameShortIndefinite);
-			yield return new Rule_String(prefix + "_nameDef", nameShortIndefinite);
-			nameShortIndefinite = null;
-			yield return new Rule_String(prefix + "_pronoun", this.gender.GetPronoun());
-			yield return new Rule_String(prefix + "_possessive", this.gender.GetPossessive());
-			yield break;
+			_003CGetRules_003Ed__.prefix = _003C_003E3__prefix;
+			return _003CGetRules_003Ed__;
 		}
 
-		// Token: 0x0600E63E RID: 58942 RVA: 0x00432900 File Offset: 0x00430B00
-		public static TaleData_Trader GenerateFrom(ITrader trader)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			TaleData_Trader taleData_Trader = new TaleData_Trader();
-			taleData_Trader.name = trader.TraderName;
-			Pawn pawn = trader as Pawn;
-			if (pawn != null)
-			{
-				taleData_Trader.pawnID = pawn.thingIDNumber;
-				taleData_Trader.gender = pawn.gender;
-			}
-			return taleData_Trader;
+			return ((IEnumerable<Rule>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x0600E63F RID: 58943 RVA: 0x00432944 File Offset: 0x00430B44
-		public static TaleData_Trader GenerateRandom()
+	public string name;
+
+	public int pawnID = -1;
+
+	public Gender gender = Gender.Male;
+
+	private bool IsPawn => pawnID >= 0;
+
+	public override void ExposeData()
+	{
+		Scribe_Values.Look(ref name, "name");
+		Scribe_Values.Look(ref pawnID, "pawnID", -1);
+		Scribe_Values.Look(ref gender, "gender", Gender.Male);
+	}
+
+	[IteratorStateMachine(typeof(_003CGetRules_003Ed__6))]
+	public override IEnumerable<Rule> GetRules(string prefix, Dictionary<string, string> constants = null)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetRules_003Ed__6(-2)
 		{
-			PawnKindDef pawnKindDef = (from d in DefDatabase<PawnKindDef>.AllDefs
-			where d.trader
-			select d).RandomElement<PawnKindDef>();
-			Pawn pawn = PawnGenerator.GeneratePawn(pawnKindDef, FactionUtility.DefaultFactionFrom(pawnKindDef.defaultFactionDef), null);
-			pawn.mindState.wantsToTradeWithColony = true;
-			PawnComponentsUtility.AddAndRemoveDynamicComponents(pawn, true);
-			return TaleData_Trader.GenerateFrom(pawn);
+			_003C_003E4__this = this,
+			_003C_003E3__prefix = prefix
+		};
+	}
+
+	public static TaleData_Trader GenerateFrom(ITrader trader)
+	{
+		TaleData_Trader taleData_Trader = new TaleData_Trader();
+		taleData_Trader.name = trader.TraderName;
+		if (trader is Pawn pawn)
+		{
+			taleData_Trader.pawnID = pawn.thingIDNumber;
+			taleData_Trader.gender = pawn.gender;
 		}
+		return taleData_Trader;
+	}
 
-		// Token: 0x04009A05 RID: 39429
-		public string name;
-
-		// Token: 0x04009A06 RID: 39430
-		public int pawnID = -1;
-
-		// Token: 0x04009A07 RID: 39431
-		public Gender gender = Gender.Male;
+	public static TaleData_Trader GenerateRandom()
+	{
+		PawnKindDef pawnKindDef = DefDatabase<PawnKindDef>.AllDefs.Where((PawnKindDef d) => d.trader).RandomElement();
+		Pawn pawn = PawnGenerator.GeneratePawn(pawnKindDef, FactionUtility.DefaultFactionFrom(pawnKindDef.defaultFactionDef), null);
+		pawn.mindState.wantsToTradeWithColony = true;
+		PawnComponentsUtility.AddAndRemoveDynamicComponents(pawn, actAsIfSpawned: true);
+		return GenerateFrom(pawn);
 	}
 }

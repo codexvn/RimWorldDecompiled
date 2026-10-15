@@ -1,96 +1,227 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class QuestPart_ThingsProduced : QuestPartActivable
 {
-	// Token: 0x02001CC1 RID: 7361
-	public class QuestPart_ThingsProduced : QuestPartActivable
+	[CompilerGenerated]
+	private sealed class _003Cget_Hyperlinks_003Ed__7 : IEnumerable<Dialog_InfoCard.Hyperlink>, IEnumerable, IEnumerator<Dialog_InfoCard.Hyperlink>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700193D RID: 6461
-		// (get) Token: 0x0600A404 RID: 41988 RVA: 0x002F09C8 File Offset: 0x002EEBC8
-		public override string DescriptionPart
+		private int _003C_003E1__state;
+
+		private Dialog_InfoCard.Hyperlink _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public QuestPart_ThingsProduced _003C_003E4__this;
+
+		private IEnumerator<Dialog_InfoCard.Hyperlink> _003C_003E7__wrap1;
+
+		Dialog_InfoCard.Hyperlink IEnumerator<Dialog_InfoCard.Hyperlink>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return "ThingsProduced".Translate().CapitalizeFirst() + ": " + this.produced.ToString() + " / " + this.count.ToString();
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700193E RID: 6462
-		// (get) Token: 0x0600A405 RID: 41989 RVA: 0x002F0A16 File Offset: 0x002EEC16
-		public override IEnumerable<Dialog_InfoCard.Hyperlink> Hyperlinks
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				foreach (Dialog_InfoCard.Hyperlink hyperlink in base.Hyperlinks)
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003Cget_Hyperlinks_003Ed__7(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
 				{
-					yield return hyperlink;
 				}
-				IEnumerator<Dialog_InfoCard.Hyperlink> enumerator = null;
-				yield return new Dialog_InfoCard.Hyperlink(this.def, -1);
-				yield break;
-				yield break;
-			}
-		}
-
-		// Token: 0x0600A406 RID: 41990 RVA: 0x002F0A26 File Offset: 0x002EEC26
-		protected override void Enable(SignalArgs receivedArgs)
-		{
-			base.Enable(receivedArgs);
-			this.produced = 0;
-		}
-
-		// Token: 0x0600A407 RID: 41991 RVA: 0x002F0A38 File Offset: 0x002EEC38
-		public override void Notify_ThingsProduced(Pawn actor, List<Thing> things)
-		{
-			base.Notify_ThingsProduced(actor, things);
-			if (base.State == QuestPartState.Enabled)
-			{
-				for (int i = 0; i < things.Count; i++)
+				finally
 				{
-					Thing innerIfMinified = things[i].GetInnerIfMinified();
-					if (innerIfMinified.def == this.def && innerIfMinified.Stuff == this.stuff)
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				QuestPart_ThingsProduced questPart_ThingsProduced = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((QuestPart)questPart_ThingsProduced).Hyperlinks.GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 2:
 					{
-						this.produced += things[i].stackCount;
+						_003C_003E1__state = -1;
+						return false;
 					}
+					IL_006f:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Dialog_InfoCard.Hyperlink current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					_003C_003E2__current = new Dialog_InfoCard.Hyperlink(questPart_ThingsProduced.def);
+					_003C_003E1__state = 2;
+					return true;
 				}
-				if (this.produced >= this.count)
-				{
-					this.produced = this.count;
-					base.Complete();
-				}
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x0600A408 RID: 41992 RVA: 0x002F0ACC File Offset: 0x002EECCC
-		public override void ExposeData()
+		bool IEnumerator.MoveNext()
 		{
-			base.ExposeData();
-			Scribe_Defs.Look<ThingDef>(ref this.def, "def");
-			Scribe_Defs.Look<ThingDef>(ref this.stuff, "stuff");
-			Scribe_Values.Look<int>(ref this.count, "count", 0, false);
-			Scribe_Values.Look<int>(ref this.produced, "produced", 0, false);
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0600A409 RID: 41993 RVA: 0x002F0B23 File Offset: 0x002EED23
-		public override void AssignDebugData()
+		private void _003C_003Em__Finally1()
 		{
-			base.AssignDebugData();
-			this.def = ThingDefOf.MealSimple;
-			this.count = 10;
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
 		}
 
-		// Token: 0x0400714C RID: 29004
-		public ThingDef def;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x0400714D RID: 29005
-		public ThingDef stuff;
+		[DebuggerHidden]
+		IEnumerator<Dialog_InfoCard.Hyperlink> IEnumerable<Dialog_InfoCard.Hyperlink>.GetEnumerator()
+		{
+			_003Cget_Hyperlinks_003Ed__7 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_Hyperlinks_003Ed__7(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x0400714E RID: 29006
-		public int count;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Dialog_InfoCard.Hyperlink>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x0400714F RID: 29007
-		private int produced;
+	public ThingDef def;
+
+	public ThingDef stuff;
+
+	public int count;
+
+	private int produced;
+
+	public override string DescriptionPart => string.Concat("ThingsProduced".Translate().CapitalizeFirst() + ": ", produced.ToString(), " / ", count.ToString());
+
+	public override IEnumerable<Dialog_InfoCard.Hyperlink> Hyperlinks
+	{
+		[IteratorStateMachine(typeof(_003Cget_Hyperlinks_003Ed__7))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_Hyperlinks_003Ed__7(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	protected override void Enable(SignalArgs receivedArgs)
+	{
+		base.Enable(receivedArgs);
+		produced = 0;
+	}
+
+	public override void Notify_ThingsProduced(Pawn actor, List<Thing> things)
+	{
+		base.Notify_ThingsProduced(actor, things);
+		if (base.State != QuestPartState.Enabled)
+		{
+			return;
+		}
+		for (int i = 0; i < things.Count; i++)
+		{
+			Thing innerIfMinified = things[i].GetInnerIfMinified();
+			if (innerIfMinified.def == def && innerIfMinified.Stuff == stuff)
+			{
+				produced += things[i].stackCount;
+			}
+		}
+		if (produced >= count)
+		{
+			produced = count;
+			Complete();
+		}
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Defs.Look(ref def, "def");
+		Scribe_Defs.Look(ref stuff, "stuff");
+		Scribe_Values.Look(ref count, "count", 0);
+		Scribe_Values.Look(ref produced, "produced", 0);
+	}
+
+	public override void AssignDebugData()
+	{
+		base.AssignDebugData();
+		def = ThingDefOf.MealSimple;
+		count = 10;
 	}
 }

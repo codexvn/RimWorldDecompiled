@@ -1,22 +1,103 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class IngestionOutcomeDoer_UseThing : IngestionOutcomeDoer
 {
-	// Token: 0x020019AD RID: 6573
-	public class IngestionOutcomeDoer_UseThing : IngestionOutcomeDoer
+	[CompilerGenerated]
+	private sealed class _003CSpecialDisplayStats_003Ed__1 : IEnumerable<StatDrawEntry>, IEnumerable, IEnumerator<StatDrawEntry>, IEnumerator, IDisposable
 	{
-		// Token: 0x060094B9 RID: 38073 RVA: 0x002BA56B File Offset: 0x002B876B
-		protected override void DoIngestionOutcomeSpecial(Pawn pawn, Thing ingested, int ingestedCount)
+		private int _003C_003E1__state;
+
+		private StatDrawEntry _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		StatDrawEntry IEnumerator<StatDrawEntry>.Current
 		{
-			ingested.TryGetComp<CompUsable>().UsedBy(pawn);
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x060094BA RID: 38074 RVA: 0x002BA579 File Offset: 0x002B8779
-		public override IEnumerable<StatDrawEntry> SpecialDisplayStats(ThingDef parentDef)
+		object IEnumerator.Current
 		{
-			yield break;
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
+
+		[DebuggerHidden]
+		public _003CSpecialDisplayStats_003Ed__1(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			if (_003C_003E1__state != 0)
+			{
+				return false;
+			}
+			_003C_003E1__state = -1;
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<StatDrawEntry> IEnumerable<StatDrawEntry>.GetEnumerator()
+		{
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				return this;
+			}
+			return new _003CSpecialDisplayStats_003Ed__1(0);
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<StatDrawEntry>)this).GetEnumerator();
+		}
+	}
+
+	protected override void DoIngestionOutcomeSpecial(Pawn pawn, Thing ingested, int ingestedCount)
+	{
+		ingested.TryGetComp<CompUsable>().UsedBy(pawn);
+	}
+
+	[IteratorStateMachine(typeof(_003CSpecialDisplayStats_003Ed__1))]
+	public override IEnumerable<StatDrawEntry> SpecialDisplayStats(ThingDef parentDef)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CSpecialDisplayStats_003Ed__1(-2);
 	}
 }

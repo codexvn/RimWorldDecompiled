@@ -1,55 +1,157 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class StorytellerComp_GauranlenPodSpawn : StorytellerComp
 {
-	// Token: 0x02001E46 RID: 7750
-	public class StorytellerComp_GauranlenPodSpawn : StorytellerComp
+	[CompilerGenerated]
+	private sealed class _003CMakeIntervalIncidents_003Ed__2 : IEnumerable<FiringIncident>, IEnumerable, IEnumerator<FiringIncident>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001A46 RID: 6726
-		// (get) Token: 0x0600AC63 RID: 44131 RVA: 0x00314396 File Offset: 0x00312596
-		protected StorytellerCompProperties_GauranlenPodSpawn Props
+		private int _003C_003E1__state;
+
+		private FiringIncident _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public StorytellerComp_GauranlenPodSpawn _003C_003E4__this;
+
+		private IIncidentTarget target;
+
+		public IIncidentTarget _003C_003E3__target;
+
+		FiringIncident IEnumerator<FiringIncident>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (StorytellerCompProperties_GauranlenPodSpawn)this.props;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600AC64 RID: 44132 RVA: 0x003143A3 File Offset: 0x003125A3
-		public override IEnumerable<FiringIncident> MakeIntervalIncidents(IIncidentTarget target)
+		object IEnumerator.Current
 		{
-			if (!ModsConfig.IdeologyActive || this.Props.daysBetweenPodSpawns == 0f || Faction.OfPlayer.ideos == null)
+			[DebuggerHidden]
+			get
 			{
-				yield break;
+				return _003C_003E2__current;
 			}
-			if ((float)GenDate.DaysPassed < this.Props.minDaysPassed)
+		}
+
+		[DebuggerHidden]
+		public _003CMakeIntervalIncidents_003Ed__2(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			StorytellerComp_GauranlenPodSpawn storytellerComp_GauranlenPodSpawn = _003C_003E4__this;
+			switch (num)
 			{
-				yield break;
-			}
-			int num = 1;
-			if (this.Props.countdownFactorAnyConnectors > 1)
+			default:
+				return false;
+			case 0:
 			{
-				using (IEnumerator<Ideo> enumerator = Faction.OfPlayer.ideos.AllIdeos.GetEnumerator())
+				_003C_003E1__state = -1;
+				if (!ModsConfig.IdeologyActive || storytellerComp_GauranlenPodSpawn.Props.daysBetweenPodSpawns == 0f || Faction.OfPlayer.ideos == null)
 				{
-					while (enumerator.MoveNext())
+					return false;
+				}
+				if ((float)GenDate.DaysPassed < storytellerComp_GauranlenPodSpawn.Props.minDaysPassed)
+				{
+					return false;
+				}
+				int num2 = 1;
+				if (storytellerComp_GauranlenPodSpawn.Props.countdownFactorAnyConnectors > 1)
+				{
+					foreach (Ideo allIdeo in Faction.OfPlayer.ideos.AllIdeos)
 					{
-						if (enumerator.Current.HasMeme(MemeDefOf.TreeConnection))
+						if (allIdeo.HasMeme(MemeDefOf.TreeConnection))
 						{
-							num = this.Props.countdownFactorAnyConnectors;
+							num2 = storytellerComp_GauranlenPodSpawn.Props.countdownFactorAnyConnectors;
 							break;
 						}
 					}
 				}
+				Find.IdeoManager.ticksToNextGauranlenSpawn -= 1000 * num2;
+				if (Find.IdeoManager.ticksToNextGauranlenSpawn <= 0)
+				{
+					Find.IdeoManager.ticksToNextGauranlenSpawn = (int)(storytellerComp_GauranlenPodSpawn.Props.daysBetweenPodSpawns * 60000f);
+					_003C_003E2__current = new FiringIncident(storytellerComp_GauranlenPodSpawn.Props.incident, storytellerComp_GauranlenPodSpawn, storytellerComp_GauranlenPodSpawn.GenerateParms(storytellerComp_GauranlenPodSpawn.Props.incident.category, target));
+					_003C_003E1__state = 1;
+					return true;
+				}
+				break;
 			}
-			Find.IdeoManager.ticksToNextGauranlenSpawn -= 1000 * num;
-			if (Find.IdeoManager.ticksToNextGauranlenSpawn <= 0)
-			{
-				Find.IdeoManager.ticksToNextGauranlenSpawn = (int)(this.Props.daysBetweenPodSpawns * 60000f);
-				yield return new FiringIncident(this.Props.incident, this, this.GenerateParms(this.Props.incident.category, target));
+			case 1:
+				_003C_003E1__state = -1;
+				break;
 			}
-			yield break;
+			return false;
 		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<FiringIncident> IEnumerable<FiringIncident>.GetEnumerator()
+		{
+			_003CMakeIntervalIncidents_003Ed__2 _003CMakeIntervalIncidents_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CMakeIntervalIncidents_003Ed__ = this;
+			}
+			else
+			{
+				_003CMakeIntervalIncidents_003Ed__ = new _003CMakeIntervalIncidents_003Ed__2(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CMakeIntervalIncidents_003Ed__.target = _003C_003E3__target;
+			return _003CMakeIntervalIncidents_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<FiringIncident>)this).GetEnumerator();
+		}
+	}
+
+	protected StorytellerCompProperties_GauranlenPodSpawn Props => (StorytellerCompProperties_GauranlenPodSpawn)props;
+
+	[IteratorStateMachine(typeof(_003CMakeIntervalIncidents_003Ed__2))]
+	public override IEnumerable<FiringIncident> MakeIntervalIncidents(IIncidentTarget target)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeIntervalIncidents_003Ed__2(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__target = target
+		};
 	}
 }

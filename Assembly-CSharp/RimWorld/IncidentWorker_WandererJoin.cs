@@ -1,95 +1,78 @@
-﻿using System;
 using System.Linq;
+using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class IncidentWorker_WandererJoin : IncidentWorker
 {
-	// Token: 0x02001DE3 RID: 7651
-	public class IncidentWorker_WandererJoin : IncidentWorker
+	private const float RelationWithColonistWeight = 20f;
+
+	protected override bool CanFireNowSub(IncidentParms parms)
 	{
-		// Token: 0x0600AA8B RID: 43659 RVA: 0x0030C4B4 File Offset: 0x0030A6B4
-		protected override bool CanFireNowSub(IncidentParms parms)
+		if (!base.CanFireNowSub(parms))
 		{
-			if (!base.CanFireNowSub(parms))
-			{
-				return false;
-			}
-			Map map = (Map)parms.target;
-			return this.CanSpawnJoiner(map);
+			return false;
 		}
+		Map map = (Map)parms.target;
+		return CanSpawnJoiner(map);
+	}
 
-		// Token: 0x0600AA8C RID: 43660 RVA: 0x0030C4E0 File Offset: 0x0030A6E0
-		public virtual Pawn GeneratePawn()
+	public virtual Pawn GeneratePawn(Map map)
+	{
+		Gender? gender = null;
+		if (def.pawnFixedGender != 0)
 		{
-			Gender? gender = null;
-			if (this.def.pawnFixedGender != Gender.None)
-			{
-				gender = new Gender?(this.def.pawnFixedGender);
-			}
-			Ideo ideo = null;
-			if (ModsConfig.IdeologyActive)
-			{
-				if (!(from i in Find.IdeoManager.IdeosListForReading
-				where !Faction.OfPlayer.ideos.Has(i)
-				select i).TryRandomElementByWeight((Ideo x) => IdeoUtility.IdeoChangeToWeight(null, x), out ideo))
-				{
-					(from i in Find.IdeoManager.IdeosListForReading
-					where !Faction.OfPlayer.ideos.IsPrimary(i)
-					select i).TryRandomElementByWeight((Ideo x) => IdeoUtility.IdeoChangeToWeight(null, x), out ideo);
-				}
-			}
-			PawnKindDef pawnKind = this.def.pawnKind;
-			Faction ofPlayer = Faction.OfPlayer;
-			PawnGenerationContext context = PawnGenerationContext.NonPlayer;
-			bool pawnMustBeCapableOfViolence = this.def.pawnMustBeCapableOfViolence;
-			Gender? fixedGender = gender;
-			Ideo fixedIdeo = ideo;
-			return PawnGenerator.GeneratePawn(new PawnGenerationRequest(pawnKind, ofPlayer, context, null, true, false, false, true, pawnMustBeCapableOfViolence, 20f, false, true, false, true, true, false, false, false, false, 0f, 0f, null, 1f, null, null, null, null, null, null, null, fixedGender, null, null, null, fixedIdeo, false, false, false, false, null, null, null, null, null, 0f, DevelopmentalStage.Adult, null, null, null, false, false, false, -1, 0, false));
+			gender = def.pawnFixedGender;
 		}
-
-		// Token: 0x0600AA8D RID: 43661 RVA: 0x0030C678 File Offset: 0x0030A878
-		public virtual bool CanSpawnJoiner(Map map)
+		Ideo result = null;
+		if (ModsConfig.IdeologyActive && !Find.IdeoManager.IdeosListForReading.Where((Ideo i) => !Faction.OfPlayer.ideos.Has(i)).TryRandomElementByWeight((Ideo x) => IdeoUtility.IdeoChangeToWeight(null, x), out result))
 		{
-			IntVec3 intVec;
-			return this.TryFindEntryCell(map, out intVec);
+			Find.IdeoManager.IdeosListForReading.Where((Ideo i) => !Faction.OfPlayer.ideos.IsPrimary(i)).TryRandomElementByWeight((Ideo x) => IdeoUtility.IdeoChangeToWeight(null, x), out result);
 		}
+		PawnKindDef pawnKind = def.pawnKind;
+		Faction ofPlayer = Faction.OfPlayer;
+		PlanetTile? tile = map?.Tile;
+		bool pawnMustBeCapableOfViolence = def.pawnMustBeCapableOfViolence;
+		Gender? fixedGender = gender;
+		Ideo fixedIdeo = result;
+		return PawnGenerator.GeneratePawn(new PawnGenerationRequest(pawnKind, ofPlayer, PawnGenerationContext.NonPlayer, tile, forceGenerateNewPawn: true, allowDead: false, allowDowned: false, canGeneratePawnRelations: true, pawnMustBeCapableOfViolence, 20f, forceAddFreeWarmLayerIfNeeded: false, allowGay: true, allowPregnant: false, allowFood: true, allowAddictions: true, inhabitant: false, certainlyBeenInCryptosleep: false, forceRedressWorldPawnIfFormerColonist: false, worldPawnFactionDoesntMatter: false, 0f, 0f, null, 1f, null, null, null, null, null, null, null, fixedGender, null, null, null, fixedIdeo, forceNoIdeo: false, forceNoBackstory: false, forbidAnyTitle: false, forceDead: false, null, null, null, null, null, 0f, DevelopmentalStage.Adult, null, null, null));
+	}
 
-		// Token: 0x0600AA8E RID: 43662 RVA: 0x0030C690 File Offset: 0x0030A890
-		public virtual void SpawnJoiner(Map map, Pawn pawn)
+	public virtual bool CanSpawnJoiner(Map map)
+	{
+		IntVec3 cell;
+		return TryFindEntryCell(map, out cell);
+	}
+
+	public virtual void SpawnJoiner(Map map, Pawn pawn)
+	{
+		TryFindEntryCell(map, out var cell);
+		GenSpawn.Spawn(pawn, cell, map);
+	}
+
+	protected override bool TryExecuteWorker(IncidentParms parms)
+	{
+		Map map = (Map)parms.target;
+		if (!CanSpawnJoiner(map))
 		{
-			IntVec3 loc;
-			this.TryFindEntryCell(map, out loc);
-			GenSpawn.Spawn(pawn, loc, map, WipeMode.Vanish);
+			return false;
 		}
-
-		// Token: 0x0600AA8F RID: 43663 RVA: 0x0030C6B4 File Offset: 0x0030A8B4
-		protected override bool TryExecuteWorker(IncidentParms parms)
+		Pawn pawn = GeneratePawn(map);
+		SpawnJoiner(map, pawn);
+		if (def.pawnHediff != null)
 		{
-			Map map = (Map)parms.target;
-			if (!this.CanSpawnJoiner(map))
-			{
-				return false;
-			}
-			Pawn pawn = this.GeneratePawn();
-			this.SpawnJoiner(map, pawn);
-			if (this.def.pawnHediff != null)
-			{
-				pawn.health.AddHediff(this.def.pawnHediff, null, null, null);
-			}
-			TaggedString baseLetterText = (this.def.pawnHediff != null) ? this.def.letterText.Formatted(pawn.Named("PAWN"), this.def.pawnHediff.Named("HEDIFF")).AdjustedFor(pawn, "PAWN", true) : this.def.letterText.Formatted(pawn.Named("PAWN")).AdjustedFor(pawn, "PAWN", true);
-			TaggedString baseLetterLabel = this.def.letterLabel.Formatted(pawn.Named("PAWN")).AdjustedFor(pawn, "PAWN", true);
-			PawnRelationUtility.TryAppendRelationsWithColonistsInfo(ref baseLetterText, ref baseLetterLabel, pawn);
-			base.SendStandardLetter(baseLetterLabel, baseLetterText, LetterDefOf.PositiveEvent, parms, pawn, Array.Empty<NamedArgument>());
-			return true;
+			pawn.health.AddHediff(def.pawnHediff, null, null);
 		}
+		TaggedString text = ((def.pawnHediff != null) ? def.letterText.Formatted(pawn.Named("PAWN"), NamedArgumentUtility.Named(def.pawnHediff, "HEDIFF")).AdjustedFor(pawn) : def.letterText.Formatted(pawn.Named("PAWN")).AdjustedFor(pawn));
+		TaggedString title = def.letterLabel.Formatted(pawn.Named("PAWN")).AdjustedFor(pawn);
+		PawnRelationUtility.TryAppendRelationsWithColonistsInfo(ref text, ref title, pawn);
+		SendStandardLetter(title, text, LetterDefOf.PositiveEvent, parms, pawn);
+		return true;
+	}
 
-		// Token: 0x0600AA90 RID: 43664 RVA: 0x0030C7E4 File Offset: 0x0030A9E4
-		private bool TryFindEntryCell(Map map, out IntVec3 cell)
-		{
-			return CellFinder.TryFindRandomEdgeCellWith((IntVec3 c) => map.reachability.CanReachColony(c) && !c.Fogged(map), map, CellFinder.EdgeRoadChance_Neutral, out cell);
-		}
-
-		// Token: 0x04007590 RID: 30096
-		private const float RelationWithColonistWeight = 20f;
+	private bool TryFindEntryCell(Map map, out IntVec3 cell)
+	{
+		return CellFinder.TryFindRandomEdgeCellWith((IntVec3 c) => map.reachability.CanReachColony(c) && !c.Fogged(map), map, CellFinder.EdgeRoadChance_Neutral, out cell);
 	}
 }

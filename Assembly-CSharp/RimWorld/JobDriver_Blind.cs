@@ -1,107 +1,242 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 using Verse.Sound;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_Blind : JobDriver
 {
-	// Token: 0x0200119B RID: 4507
-	public class JobDriver_Blind : JobDriver
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass6_0
 	{
-		// Token: 0x17001113 RID: 4371
-		// (get) Token: 0x06006E38 RID: 28216 RVA: 0x00226BD8 File Offset: 0x00224DD8
-		protected Pawn Target
+		public Pawn target;
+
+		public JobDriver_Blind _003C_003E4__this;
+
+		internal void _003CMakeNewToils_003Eb__0()
 		{
+			Blind(target, _003C_003E4__this.pawn);
+			CreateHistoryEventDef(target);
+			SoundDefOf.Execute_Cut.PlayOneShot(target);
+			if (target.RaceProps.BloodDef == null)
+			{
+				return;
+			}
+			CellRect cellRect = new CellRect(target.PositionHeld.x - 1, target.PositionHeld.z - 1, 3, 3);
+			for (int i = 0; i < 3; i++)
+			{
+				IntVec3 randomCell = cellRect.RandomCell;
+				if (randomCell.InBounds(_003C_003E4__this.Map) && GenSight.LineOfSight(randomCell, target.PositionHeld, _003C_003E4__this.Map))
+				{
+					FilthMaker.TryMakeFilth(randomCell, target.MapHeld, target.RaceProps.BloodDef, target.LabelIndefinite());
+				}
+			}
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__6 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_Blind _003C_003E4__this;
+
+		private _003C_003Ec__DisplayClass6_0 _003C_003E8__1;
+
+		private Toil _003Cscarify_003E5__2;
+
+		Toil IEnumerator<Toil>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				return (Pawn)this.job.GetTarget(TargetIndex.A).Thing;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06006E39 RID: 28217 RVA: 0x00226C00 File Offset: 0x00224E00
-		public static void Blind(Pawn pawn, Pawn doer)
+		object IEnumerator.Current
 		{
-			Lord lord = pawn.GetLord();
-			IEnumerable<BodyPartRecord> enumerable = from p in pawn.health.hediffSet.GetNotMissingParts(BodyPartHeight.Undefined, BodyPartDepth.Undefined, null, null)
-			where p.def == BodyPartDefOf.Eye
-			select p;
-			if (lord != null)
+			[DebuggerHidden]
+			get
 			{
-				LordJob_Ritual_Mutilation lordJob_Ritual_Mutilation = lord.LordJob as LordJob_Ritual_Mutilation;
-				if (lordJob_Ritual_Mutilation != null && enumerable.Count<BodyPartRecord>() == 1)
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__6(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E8__1 = null;
+			_003Cscarify_003E5__2 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_Blind jobDriver_Blind = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E8__1 = new _003C_003Ec__DisplayClass6_0();
+				_003C_003E8__1._003C_003E4__this = _003C_003E4__this;
+				if (!ModLister.CheckIdeology("Scarify"))
 				{
-					lordJob_Ritual_Mutilation.mutilatedPawns.Add(pawn);
+					return false;
 				}
-			}
-			foreach (BodyPartRecord bodyPartRecord in enumerable)
-			{
-				if (bodyPartRecord.def == BodyPartDefOf.Eye)
+				jobDriver_Blind.FailOnDespawnedOrNull(TargetIndex.A);
+				_003C_003E8__1.target = jobDriver_Blind.Target;
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.ClosestTouch);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.Wait(35);
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				_003Cscarify_003E5__2 = ToilMaker.MakeToil("MakeNewToils");
+				_003Cscarify_003E5__2.initAction = delegate
 				{
-					pawn.TakeDamage(new DamageInfo(DamageDefOf.SurgicalCut, 99999f, 999f, -1f, null, bodyPartRecord, null, DamageInfo.SourceCategory.ThingOrUnknown, null, true, true, QualityCategory.Normal, true, false));
-					break;
-				}
-			}
-			if (pawn.Dead)
-			{
-				ThoughtUtility.GiveThoughtsForPawnExecuted(pawn, doer, PawnExecutionKind.GenericBrutal);
-			}
-		}
-
-		// Token: 0x06006E3A RID: 28218 RVA: 0x00226CF4 File Offset: 0x00224EF4
-		public static void CreateHistoryEventDef(Pawn pawn)
-		{
-			if (PawnUtility.IsBiologicallyBlind(pawn))
-			{
-				Find.HistoryEventsManager.RecordEvent(new HistoryEvent(HistoryEventDefOf.GotBlinded, pawn.Named(HistoryEventArgsNames.Doer)), true);
-			}
-		}
-
-		// Token: 0x06006E3B RID: 28219 RVA: 0x00226D1E File Offset: 0x00224F1E
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
-		{
-			return this.pawn.Reserve(this.Target, this.job, 1, -1, null, errorOnFailed, false);
-		}
-
-		// Token: 0x06006E3C RID: 28220 RVA: 0x00226D41 File Offset: 0x00224F41
-		protected override IEnumerable<Toil> MakeNewToils()
-		{
-			if (!ModLister.CheckIdeology("Scarify"))
-			{
-				yield break;
-			}
-			this.FailOnDespawnedOrNull(TargetIndex.A);
-			Pawn target = this.Target;
-			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.ClosestTouch, false);
-			yield return Toils_General.Wait(35, TargetIndex.None);
-			Toil scarify = ToilMaker.MakeToil("MakeNewToils");
-			scarify.initAction = delegate()
-			{
-				JobDriver_Blind.Blind(target, this.pawn);
-				JobDriver_Blind.CreateHistoryEventDef(target);
-				SoundDefOf.Execute_Cut.PlayOneShot(target);
-				if (target.RaceProps.BloodDef != null)
-				{
-					CellRect cellRect = new CellRect(target.PositionHeld.x - 1, target.PositionHeld.z - 1, 3, 3);
-					for (int i = 0; i < 3; i++)
+					Blind(_003C_003E8__1.target, _003C_003E8__1._003C_003E4__this.pawn);
+					CreateHistoryEventDef(_003C_003E8__1.target);
+					SoundDefOf.Execute_Cut.PlayOneShot(_003C_003E8__1.target);
+					if (_003C_003E8__1.target.RaceProps.BloodDef != null)
 					{
-						IntVec3 randomCell = cellRect.RandomCell;
-						if (randomCell.InBounds(this.Map) && GenSight.LineOfSight(randomCell, target.PositionHeld, this.Map))
+						CellRect cellRect = new CellRect(_003C_003E8__1.target.PositionHeld.x - 1, _003C_003E8__1.target.PositionHeld.z - 1, 3, 3);
+						for (int i = 0; i < 3; i++)
 						{
-							FilthMaker.TryMakeFilth(randomCell, target.MapHeld, target.RaceProps.BloodDef, target.LabelIndefinite(), 1, FilthSourceFlags.None);
+							IntVec3 randomCell = cellRect.RandomCell;
+							if (randomCell.InBounds(_003C_003E8__1._003C_003E4__this.Map) && GenSight.LineOfSight(randomCell, _003C_003E8__1.target.PositionHeld, _003C_003E8__1._003C_003E4__this.Map))
+							{
+								FilthMaker.TryMakeFilth(randomCell, _003C_003E8__1.target.MapHeld, _003C_003E8__1.target.RaceProps.BloodDef, _003C_003E8__1.target.LabelIndefinite());
+							}
 						}
 					}
-				}
-			};
-			scarify.defaultCompleteMode = ToilCompleteMode.Instant;
-			yield return Toils_General.Wait(120, TargetIndex.None);
-			yield return scarify;
-			yield break;
+				};
+				_003Cscarify_003E5__2.defaultCompleteMode = ToilCompleteMode.Instant;
+				_003C_003E2__current = Toils_General.Wait(120);
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = _003Cscarify_003E5__2;
+				_003C_003E1__state = 4;
+				return true;
+			case 4:
+				_003C_003E1__state = -1;
+				return false;
+			}
 		}
 
-		// Token: 0x04004D00 RID: 19712
-		private const TargetIndex TargetPawnIndex = TargetIndex.A;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__6 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__6(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private const TargetIndex TargetPawnIndex = TargetIndex.A;
+
+	protected Pawn Target => (Pawn)job.GetTarget(TargetIndex.A).Thing;
+
+	public static void Blind(Pawn pawn, Pawn doer)
+	{
+		Lord lord = pawn.GetLord();
+		IEnumerable<BodyPartRecord> enumerable = from p in pawn.health.hediffSet.GetNotMissingParts()
+			where p.def == BodyPartDefOf.Eye
+			select p;
+		if (lord != null && lord.LordJob is LordJob_Ritual_Mutilation lordJob_Ritual_Mutilation && enumerable.Count() == 1)
+		{
+			lordJob_Ritual_Mutilation.mutilatedPawns.Add(pawn);
+		}
+		foreach (BodyPartRecord item in enumerable)
+		{
+			if (item.def == BodyPartDefOf.Eye)
+			{
+				pawn.TakeDamage(new DamageInfo(DamageDefOf.SurgicalCut, 99999f, 999f, -1f, null, item));
+				break;
+			}
+		}
+		if (pawn.Dead)
+		{
+			ThoughtUtility.GiveThoughtsForPawnExecuted(pawn, doer, PawnExecutionKind.GenericBrutal);
+		}
+	}
+
+	public static void CreateHistoryEventDef(Pawn pawn)
+	{
+		if (PawnUtility.IsBiologicallyBlind(pawn))
+		{
+			Find.HistoryEventsManager.RecordEvent(new HistoryEvent(HistoryEventDefOf.GotBlinded, pawn.Named(HistoryEventArgsNames.Doer)));
+		}
+	}
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return pawn.Reserve(Target, job, 1, -1, null, errorOnFailed);
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__6))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__6(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

@@ -1,134 +1,227 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class NameBank
 {
-	// Token: 0x02002351 RID: 9041
-	public class NameBank
+	[CompilerGenerated]
+	private sealed class _003Cget_AllNameLists_003Ed__5 : IEnumerable<List<string>>, IEnumerable, IEnumerator<List<string>>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001DDF RID: 7647
-		// (get) Token: 0x0600C434 RID: 50228 RVA: 0x00390862 File Offset: 0x0038EA62
-		private IEnumerable<List<string>> AllNameLists
+		private int _003C_003E1__state;
+
+		private List<string> _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public NameBank _003C_003E4__this;
+
+		private int _003Ci_003E5__2;
+
+		private int _003Cj_003E5__3;
+
+		List<string> IEnumerator<List<string>>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				int num;
-				for (int i = 0; i < NameBank.numGenders; i = num + 1)
-				{
-					for (int j = 0; j < NameBank.numSlots; j = num + 1)
-					{
-						yield return this.names[i, j];
-						num = j;
-					}
-					num = i;
-				}
-				yield break;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600C435 RID: 50229 RVA: 0x00390874 File Offset: 0x0038EA74
-		public NameBank(PawnNameCategory ID)
+		object IEnumerator.Current
 		{
-			this.nameType = ID;
-			this.names = new List<string>[NameBank.numGenders, NameBank.numSlots];
-			for (int i = 0; i < NameBank.numGenders; i++)
+			[DebuggerHidden]
+			get
 			{
-				for (int j = 0; j < NameBank.numSlots; j++)
-				{
-					this.names[i, j] = new List<string>();
-				}
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600C436 RID: 50230 RVA: 0x003908D8 File Offset: 0x0038EAD8
-		public void ErrorCheck()
+		[DebuggerHidden]
+		public _003Cget_AllNameLists_003Ed__5(int _003C_003E1__state)
 		{
-			foreach (List<string> list in this.AllNameLists)
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			NameBank nameBank = _003C_003E4__this;
+			if (num != 0)
 			{
-				foreach (string str in (from x in list
+				if (num != 1)
+				{
+					return false;
+				}
+				_003C_003E1__state = -1;
+				_003Cj_003E5__3++;
+				goto IL_006d;
+			}
+			_003C_003E1__state = -1;
+			_003Ci_003E5__2 = 0;
+			goto IL_008a;
+			IL_006d:
+			if (_003Cj_003E5__3 < numSlots)
+			{
+				_003C_003E2__current = nameBank.names[_003Ci_003E5__2, _003Cj_003E5__3];
+				_003C_003E1__state = 1;
+				return true;
+			}
+			_003Ci_003E5__2++;
+			goto IL_008a;
+			IL_008a:
+			if (_003Ci_003E5__2 < numGenders)
+			{
+				_003Cj_003E5__3 = 0;
+				goto IL_006d;
+			}
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<List<string>> IEnumerable<List<string>>.GetEnumerator()
+		{
+			_003Cget_AllNameLists_003Ed__5 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_AllNameLists_003Ed__5(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<List<string>>)this).GetEnumerator();
+		}
+	}
+
+	public PawnNameCategory nameType;
+
+	private List<string>[,] names;
+
+	private static readonly int numGenders = Enum.GetValues(typeof(Gender)).Length;
+
+	private static readonly int numSlots = Enum.GetValues(typeof(PawnNameSlot)).Length;
+
+	private IEnumerable<List<string>> AllNameLists
+	{
+		[IteratorStateMachine(typeof(_003Cget_AllNameLists_003Ed__5))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_AllNameLists_003Ed__5(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public NameBank(PawnNameCategory ID)
+	{
+		nameType = ID;
+		names = new List<string>[numGenders, numSlots];
+		for (int i = 0; i < numGenders; i++)
+		{
+			for (int j = 0; j < numSlots; j++)
+			{
+				names[i, j] = new List<string>();
+			}
+		}
+	}
+
+	public void ErrorCheck()
+	{
+		foreach (List<string> allNameList in AllNameLists)
+		{
+			foreach (string item in (from x in allNameList
 				group x by x into g
-				where g.Count<string>() > 1
-				select g.Key).ToList<string>())
-				{
-					Log.Error("Duplicated name: " + str);
-				}
-				foreach (string text in list)
-				{
-					if (text.Trim() != text)
-					{
-						Log.Error("Trimmable whitespace on name: [" + text + "]");
-					}
-				}
-			}
-		}
-
-		// Token: 0x0600C437 RID: 50231 RVA: 0x00390A5C File Offset: 0x0038EC5C
-		private List<string> NamesFor(PawnNameSlot slot, Gender gender)
-		{
-			return this.names[(int)gender, (int)slot];
-		}
-
-		// Token: 0x0600C438 RID: 50232 RVA: 0x00390A6C File Offset: 0x0038EC6C
-		public void AddNames(PawnNameSlot slot, Gender gender, IEnumerable<string> namesToAdd)
-		{
-			foreach (string item in namesToAdd)
+				where g.Count() > 1
+				select g.Key).ToList())
 			{
-				this.NamesFor(slot, gender).Add(item);
+				Log.Error("Duplicated name: " + item);
 			}
-		}
-
-		// Token: 0x0600C439 RID: 50233 RVA: 0x00390ABC File Offset: 0x0038ECBC
-		public void AddNamesFromFile(PawnNameSlot slot, Gender gender, string fileName)
-		{
-			this.AddNames(slot, gender, GenFile.LinesFromFile("Names/" + fileName));
-		}
-
-		// Token: 0x0600C43A RID: 50234 RVA: 0x00390AD8 File Offset: 0x0038ECD8
-		public string GetName(PawnNameSlot slot, Gender gender = Gender.None, bool checkIfAlreadyUsed = true)
-		{
-			List<string> list = this.NamesFor(slot, gender);
-			int num = 0;
-			if (list.Count == 0)
+			foreach (string item2 in allNameList)
 			{
-				Log.Error(string.Concat(new string[]
+				if (item2.Trim() != item2)
 				{
-					"Name list for gender=",
-					gender.ToString(),
-					" slot=",
-					slot.ToString(),
-					" is empty."
-				}));
-				return "Errorname";
-			}
-			string text;
-			for (;;)
-			{
-				text = list.RandomElement<string>();
-				if (checkIfAlreadyUsed && !NameUseChecker.NameWordIsUsed(text))
-				{
-					break;
-				}
-				num++;
-				if (num > 50)
-				{
-					return text;
+					Log.Error("Trimmable whitespace on name: [" + item2 + "]");
 				}
 			}
-			return text;
 		}
+	}
 
-		// Token: 0x040085C8 RID: 34248
-		public PawnNameCategory nameType;
+	private List<string> NamesFor(PawnNameSlot slot, Gender gender)
+	{
+		return names[(uint)gender, (uint)slot];
+	}
 
-		// Token: 0x040085C9 RID: 34249
-		private List<string>[,] names;
+	public void AddNames(PawnNameSlot slot, Gender gender, IEnumerable<string> namesToAdd)
+	{
+		foreach (string item in namesToAdd)
+		{
+			NamesFor(slot, gender).Add(item);
+		}
+	}
 
-		// Token: 0x040085CA RID: 34250
-		private static readonly int numGenders = Enum.GetValues(typeof(Gender)).Length;
+	public void AddNamesFromFile(PawnNameSlot slot, Gender gender, string fileName)
+	{
+		AddNames(slot, gender, GenFile.LinesFromFile("Names/" + fileName));
+	}
 
-		// Token: 0x040085CB RID: 34251
-		private static readonly int numSlots = Enum.GetValues(typeof(PawnNameSlot)).Length;
+	public string GetName(PawnNameSlot slot, Gender gender = Gender.None, bool checkIfAlreadyUsed = true)
+	{
+		List<string> list = NamesFor(slot, gender);
+		int num = 0;
+		if (list.Count == 0)
+		{
+			Log.Error("Name list for gender=" + gender.ToString() + " slot=" + slot.ToString() + " is empty.");
+			return "Errorname";
+		}
+		string text;
+		do
+		{
+			text = list.RandomElement();
+			if (checkIfAlreadyUsed && !NameUseChecker.NameWordIsUsed(text))
+			{
+				return text;
+			}
+			num++;
+		}
+		while (num <= 50);
+		return text;
 	}
 }

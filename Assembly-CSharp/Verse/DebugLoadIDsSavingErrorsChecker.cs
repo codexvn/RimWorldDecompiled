@@ -1,185 +1,150 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
-namespace Verse
+namespace Verse;
+
+public class DebugLoadIDsSavingErrorsChecker
 {
-	// Token: 0x0200085A RID: 2138
-	public class DebugLoadIDsSavingErrorsChecker
+	private struct ReferencedObject : IEquatable<ReferencedObject>
 	{
-		// Token: 0x060035FE RID: 13822 RVA: 0x001203A9 File Offset: 0x0011E5A9
-		public void Clear()
+		public string loadID;
+
+		public string label;
+
+		public ReferencedObject(string loadID, string label)
 		{
-			if (!Prefs.DevMode)
-			{
-				return;
-			}
-			this.deepSaved.Clear();
-			this.deepSavedInfo.Clear();
-			this.referenced.Clear();
+			this.loadID = loadID;
+			this.label = label;
 		}
 
-		// Token: 0x060035FF RID: 13823 RVA: 0x001203D4 File Offset: 0x0011E5D4
-		public void CheckForErrorsAndClear()
+		public override bool Equals(object obj)
 		{
-			if (!Prefs.DevMode)
+			if (!(obj is ReferencedObject))
 			{
-				return;
+				return false;
 			}
-			if (!Scribe.saver.savingForDebug)
-			{
-				foreach (DebugLoadIDsSavingErrorsChecker.ReferencedObject referencedObject in this.referenced)
-				{
-					if (!this.deepSaved.Contains(referencedObject.loadID))
-					{
-						Log.Warning(string.Concat(new string[]
-						{
-							"Object with load ID ",
-							referencedObject.loadID,
-							" is referenced (xml node name: ",
-							referencedObject.label,
-							") but is not deep-saved. This will cause errors during loading."
-						}));
-					}
-				}
-			}
-			this.Clear();
+			return Equals((ReferencedObject)obj);
 		}
 
-		// Token: 0x06003600 RID: 13824 RVA: 0x00120488 File Offset: 0x0011E688
-		public void RegisterDeepSaved(object obj, string label)
+		public bool Equals(ReferencedObject other)
 		{
-			if (!Prefs.DevMode)
+			if (loadID == other.loadID)
 			{
-				return;
+				return label == other.label;
 			}
-			if (Scribe.mode != LoadSaveMode.Saving)
+			return false;
+		}
+
+		public override int GetHashCode()
+		{
+			return Gen.HashCombine(Gen.HashCombine(0, loadID), label);
+		}
+
+		public static bool operator ==(ReferencedObject lhs, ReferencedObject rhs)
+		{
+			return lhs.Equals(rhs);
+		}
+
+		public static bool operator !=(ReferencedObject lhs, ReferencedObject rhs)
+		{
+			return !(lhs == rhs);
+		}
+	}
+
+	private HashSet<string> deepSaved = new HashSet<string>();
+
+	private Dictionary<string, string> deepSavedInfo = new Dictionary<string, string>();
+
+	private HashSet<ReferencedObject> referenced = new HashSet<ReferencedObject>();
+
+	public void Clear()
+	{
+		if (Prefs.DevMode)
+		{
+			deepSaved.Clear();
+			deepSavedInfo.Clear();
+			referenced.Clear();
+		}
+	}
+
+	public void CheckForErrorsAndClear()
+	{
+		if (!Prefs.DevMode)
+		{
+			return;
+		}
+		if (!Scribe.saver.savingForDebug)
+		{
+			foreach (ReferencedObject item in referenced)
 			{
-				Log.Error("Registered " + ((obj != null) ? obj.ToString() : null) + ", but current mode is " + Scribe.mode.ToString());
-				return;
-			}
-			if (obj == null)
-			{
-				return;
-			}
-			ILoadReferenceable loadReferenceable = obj as ILoadReferenceable;
-			if (loadReferenceable != null)
-			{
-				try
+				if (!deepSaved.Contains(item.loadID))
 				{
-					string uniqueLoadID = loadReferenceable.GetUniqueLoadID();
-					if (!this.deepSaved.Add(uniqueLoadID))
-					{
-						Log.Warning(string.Concat(new string[]
-						{
-							"DebugLoadIDsSavingErrorsChecker error: tried to register deep-saved object with loadID ",
-							uniqueLoadID,
-							", but it's already here. label=",
-							label,
-							" (not cleared after the previous save? different objects have the same load ID? the same object is deep-saved twice?)"
-						}));
-						string str;
-						if (this.deepSavedInfo.TryGetValue(uniqueLoadID, out str))
-						{
-							Type type = loadReferenceable.GetType();
-							Log.Warning(((type != null) ? type.ToString() : null) + " was already deepsaved at " + str + ".");
-						}
-					}
-					else
-					{
-						this.deepSavedInfo.Add(uniqueLoadID, Scribe.saver.CurPath);
-					}
-				}
-				catch (Exception ex)
-				{
-					string str2 = "Error in GetUniqueLoadID(): ";
-					Exception ex2 = ex;
-					Log.Error(str2 + ((ex2 != null) ? ex2.ToString() : null));
+					Log.Warning("Object with load ID " + item.loadID + " is referenced (xml node name: " + item.label + ") but is not deep-saved. This will cause errors during loading.");
 				}
 			}
 		}
+		Clear();
+	}
 
-		// Token: 0x06003601 RID: 13825 RVA: 0x001205AC File Offset: 0x0011E7AC
-		public void RegisterReferenced(ILoadReferenceable obj, string label)
+	public void RegisterDeepSaved(object obj, string label)
+	{
+		if (!Prefs.DevMode)
 		{
-			if (!Prefs.DevMode)
-			{
-				return;
-			}
-			if (Scribe.mode != LoadSaveMode.Saving)
-			{
-				Log.Error("Registered " + ((obj != null) ? obj.ToString() : null) + ", but current mode is " + Scribe.mode.ToString());
-				return;
-			}
-			if (obj == null)
+			return;
+		}
+		if (Scribe.mode != LoadSaveMode.Saving)
+		{
+			Log.Error("Registered " + obj?.ToString() + ", but current mode is " + Scribe.mode);
+		}
+		else
+		{
+			if (obj == null || !(obj is ILoadReferenceable loadReferenceable))
 			{
 				return;
 			}
 			try
 			{
-				this.referenced.Add(new DebugLoadIDsSavingErrorsChecker.ReferencedObject(obj.GetUniqueLoadID(), label));
+				string uniqueLoadID = loadReferenceable.GetUniqueLoadID();
+				if (!deepSaved.Add(uniqueLoadID))
+				{
+					Log.Warning("DebugLoadIDsSavingErrorsChecker error: tried to register deep-saved object with loadID " + uniqueLoadID + ", but it's already here. label=" + label + " (not cleared after the previous save? different objects have the same load ID? the same object is deep-saved twice?)");
+					if (deepSavedInfo.TryGetValue(uniqueLoadID, out var value))
+					{
+						Log.Warning(loadReferenceable.GetType()?.ToString() + " was already deepsaved at " + value + ".");
+					}
+				}
+				else
+				{
+					deepSavedInfo.Add(uniqueLoadID, Scribe.saver.CurPath);
+				}
 			}
 			catch (Exception ex)
 			{
-				string str = "Error in GetUniqueLoadID(): ";
-				Exception ex2 = ex;
-				Log.Error(str + ((ex2 != null) ? ex2.ToString() : null));
+				Log.Error("Error in GetUniqueLoadID(): " + ex);
 			}
 		}
+	}
 
-		// Token: 0x040028B4 RID: 10420
-		private HashSet<string> deepSaved = new HashSet<string>();
-
-		// Token: 0x040028B5 RID: 10421
-		private Dictionary<string, string> deepSavedInfo = new Dictionary<string, string>();
-
-		// Token: 0x040028B6 RID: 10422
-		private HashSet<DebugLoadIDsSavingErrorsChecker.ReferencedObject> referenced = new HashSet<DebugLoadIDsSavingErrorsChecker.ReferencedObject>();
-
-		// Token: 0x0200085B RID: 2139
-		private struct ReferencedObject : IEquatable<DebugLoadIDsSavingErrorsChecker.ReferencedObject>
+	public void RegisterReferenced(ILoadReferenceable obj, string label)
+	{
+		if (!Prefs.DevMode)
 		{
-			// Token: 0x06003603 RID: 13827 RVA: 0x00120675 File Offset: 0x0011E875
-			public ReferencedObject(string loadID, string label)
+			return;
+		}
+		if (Scribe.mode != LoadSaveMode.Saving)
+		{
+			Log.Error("Registered " + obj?.ToString() + ", but current mode is " + Scribe.mode);
+		}
+		else if (obj != null)
+		{
+			try
 			{
-				this.loadID = loadID;
-				this.label = label;
+				referenced.Add(new ReferencedObject(obj.GetUniqueLoadID(), label));
 			}
-
-			// Token: 0x06003604 RID: 13828 RVA: 0x00120685 File Offset: 0x0011E885
-			public override bool Equals(object obj)
+			catch (Exception ex)
 			{
-				return obj is DebugLoadIDsSavingErrorsChecker.ReferencedObject && this.Equals((DebugLoadIDsSavingErrorsChecker.ReferencedObject)obj);
+				Log.Error("Error in GetUniqueLoadID(): " + ex);
 			}
-
-			// Token: 0x06003605 RID: 13829 RVA: 0x0012069D File Offset: 0x0011E89D
-			public bool Equals(DebugLoadIDsSavingErrorsChecker.ReferencedObject other)
-			{
-				return this.loadID == other.loadID && this.label == other.label;
-			}
-
-			// Token: 0x06003606 RID: 13830 RVA: 0x001206C5 File Offset: 0x0011E8C5
-			public override int GetHashCode()
-			{
-				return Gen.HashCombine<string>(Gen.HashCombine<string>(0, this.loadID), this.label);
-			}
-
-			// Token: 0x06003607 RID: 13831 RVA: 0x001206DE File Offset: 0x0011E8DE
-			public static bool operator ==(DebugLoadIDsSavingErrorsChecker.ReferencedObject lhs, DebugLoadIDsSavingErrorsChecker.ReferencedObject rhs)
-			{
-				return lhs.Equals(rhs);
-			}
-
-			// Token: 0x06003608 RID: 13832 RVA: 0x001206E8 File Offset: 0x0011E8E8
-			public static bool operator !=(DebugLoadIDsSavingErrorsChecker.ReferencedObject lhs, DebugLoadIDsSavingErrorsChecker.ReferencedObject rhs)
-			{
-				return !(lhs == rhs);
-			}
-
-			// Token: 0x040028B7 RID: 10423
-			public string loadID;
-
-			// Token: 0x040028B8 RID: 10424
-			public string label;
 		}
 	}
 }

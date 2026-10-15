@@ -1,89 +1,208 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class ChoiceLetter_RansomDemand : ChoiceLetter
 {
-	// Token: 0x02003378 RID: 13176
-	public class ChoiceLetter_RansomDemand : ChoiceLetter
+	[CompilerGenerated]
+	private sealed class _003Cget_Choices_003Ed__5 : IEnumerable<DiaOption>, IEnumerable, IEnumerator<DiaOption>, IEnumerator, IDisposable
 	{
-		// Token: 0x17003059 RID: 12377
-		// (get) Token: 0x0601285D RID: 75869 RVA: 0x0057742C File Offset: 0x0057562C
-		public override IEnumerable<DiaOption> Choices
+		private int _003C_003E1__state;
+
+		private DiaOption _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public ChoiceLetter_RansomDemand _003C_003E4__this;
+
+		DiaOption IEnumerator<DiaOption>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (base.ArchivedOnly)
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003Cget_Choices_003Ed__5(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			ChoiceLetter_RansomDemand CS_0024_003C_003E8__locals26 = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+			{
+				_003C_003E1__state = -1;
+				if (CS_0024_003C_003E8__locals26.ArchivedOnly)
 				{
-					yield return base.Option_Close;
-					yield break;
+					_003C_003E2__current = CS_0024_003C_003E8__locals26.Option_Close;
+					_003C_003E1__state = 1;
+					return true;
 				}
-				DiaOption diaOption = new DiaOption("RansomDemand_Accept".Translate());
-				diaOption.action = delegate()
+				DiaOption diaOption = new DiaOption("RansomDemand_Accept".Translate())
 				{
-					this.faction.kidnapped.RemoveKidnappedPawn(this.kidnapped);
-					Find.WorldPawns.RemovePawn(this.kidnapped);
-					IntVec3 intVec;
-					if (this.faction.def.techLevel < TechLevel.Industrial)
+					action = delegate
 					{
-						if (!CellFinder.TryFindRandomEdgeCellWith((IntVec3 c) => c.Standable(this.map) && this.map.reachability.CanReachColony(c), this.map, CellFinder.EdgeRoadChance_Friendly, out intVec) && !CellFinder.TryFindRandomEdgeCellWith((IntVec3 c) => c.Standable(this.map), this.map, CellFinder.EdgeRoadChance_Friendly, out intVec))
+						CS_0024_003C_003E8__locals26.faction.kidnapped.RemoveKidnappedPawn(CS_0024_003C_003E8__locals26.kidnapped);
+						Find.WorldPawns.RemovePawn(CS_0024_003C_003E8__locals26.kidnapped);
+						IntVec3 result;
+						if ((int)CS_0024_003C_003E8__locals26.faction.def.techLevel < 4)
 						{
-							Log.Warning("Could not find any edge cell.");
-							intVec = DropCellFinder.TradeDropSpot(this.map);
+							if (!CellFinder.TryFindRandomEdgeCellWith((IntVec3 c) => c.Standable(CS_0024_003C_003E8__locals26.map) && CS_0024_003C_003E8__locals26.map.reachability.CanReachColony(c), CS_0024_003C_003E8__locals26.map, CellFinder.EdgeRoadChance_Friendly, out result) && !CellFinder.TryFindRandomEdgeCellWith((IntVec3 c) => c.Standable(CS_0024_003C_003E8__locals26.map), CS_0024_003C_003E8__locals26.map, CellFinder.EdgeRoadChance_Friendly, out result))
+							{
+								Log.Warning("Could not find any edge cell.");
+								result = DropCellFinder.TradeDropSpot(CS_0024_003C_003E8__locals26.map);
+							}
+							GenSpawn.Spawn(CS_0024_003C_003E8__locals26.kidnapped, result, CS_0024_003C_003E8__locals26.map);
 						}
-						GenSpawn.Spawn(this.kidnapped, intVec, this.map, WipeMode.Vanish);
-					}
-					else
-					{
-						intVec = DropCellFinder.TradeDropSpot(this.map);
-						TradeUtility.SpawnDropPod(intVec, this.map, this.kidnapped);
-					}
-					CameraJumper.TryJump(intVec, this.map, CameraJumper.MovementMode.Pan);
-					TradeUtility.LaunchSilver(this.map, this.fee);
-					Find.LetterStack.RemoveLetter(this);
+						else
+						{
+							result = DropCellFinder.TradeDropSpot(CS_0024_003C_003E8__locals26.map);
+							TradeUtility.SpawnDropPod(result, CS_0024_003C_003E8__locals26.map, CS_0024_003C_003E8__locals26.kidnapped);
+						}
+						CameraJumper.TryJump(result, CS_0024_003C_003E8__locals26.map);
+						TradeUtility.LaunchSilver(CS_0024_003C_003E8__locals26.map, CS_0024_003C_003E8__locals26.fee);
+						Find.LetterStack.RemoveLetter(CS_0024_003C_003E8__locals26);
+					},
+					resolveTree = true
 				};
-				diaOption.resolveTree = true;
-				if (!TradeUtility.ColonyHasEnoughSilver(this.map, this.fee))
+				if (!TradeUtility.ColonyHasEnoughSilver(CS_0024_003C_003E8__locals26.map, CS_0024_003C_003E8__locals26.fee))
 				{
-					diaOption.Disable("NeedSilverLaunchable".Translate(this.fee.ToString()));
+					diaOption.Disable("NeedSilverLaunchable".Translate(CS_0024_003C_003E8__locals26.fee.ToString()));
 				}
-				yield return diaOption;
-				yield return base.Option_Reject;
-				yield return base.Option_Postpone;
-				yield break;
+				_003C_003E2__current = diaOption;
+				_003C_003E1__state = 2;
+				return true;
+			}
+			case 1:
+				_003C_003E1__state = -1;
+				return false;
+			case 2:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = CS_0024_003C_003E8__locals26.Option_Reject;
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = CS_0024_003C_003E8__locals26.Option_Postpone;
+				_003C_003E1__state = 4;
+				return true;
+			case 4:
+				_003C_003E1__state = -1;
+				return false;
 			}
 		}
 
-		// Token: 0x1700305A RID: 12378
-		// (get) Token: 0x0601285E RID: 75870 RVA: 0x0057743C File Offset: 0x0057563C
-		public override bool CanShowInLetterStack
+		bool IEnumerator.MoveNext()
 		{
-			get
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<DiaOption> IEnumerable<DiaOption>.GetEnumerator()
+		{
+			_003Cget_Choices_003Ed__5 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				return base.CanShowInLetterStack && Find.Maps.Contains(this.map) && this.faction.kidnapped.KidnappedPawnsListForReading.Contains(this.kidnapped);
+				_003C_003E1__state = 0;
+				result = this;
 			}
+			else
+			{
+				result = new _003Cget_Choices_003Ed__5(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
 		}
 
-		// Token: 0x0601285F RID: 75871 RVA: 0x00577478 File Offset: 0x00575678
-		public override void ExposeData()
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			base.ExposeData();
-			Scribe_References.Look<Map>(ref this.map, "map", false);
-			Scribe_References.Look<Faction>(ref this.faction, "faction", false);
-			Scribe_References.Look<Pawn>(ref this.kidnapped, "kidnapped", false);
-			Scribe_Values.Look<int>(ref this.fee, "fee", 0, false);
+			return ((IEnumerable<DiaOption>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x0400C071 RID: 49265
-		public Map map;
+	public Map map;
 
-		// Token: 0x0400C072 RID: 49266
-		public Faction faction;
+	public Faction faction;
 
-		// Token: 0x0400C073 RID: 49267
-		public Pawn kidnapped;
+	public Pawn kidnapped;
 
-		// Token: 0x0400C074 RID: 49268
-		public int fee;
+	public int fee;
+
+	public override IEnumerable<DiaOption> Choices
+	{
+		[IteratorStateMachine(typeof(_003Cget_Choices_003Ed__5))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_Choices_003Ed__5(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public override bool CanShowInLetterStack
+	{
+		get
+		{
+			if (!base.CanShowInLetterStack)
+			{
+				return false;
+			}
+			if (!Find.Maps.Contains(map))
+			{
+				return false;
+			}
+			return faction.kidnapped.KidnappedPawnsListForReading.Contains(kidnapped);
+		}
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_References.Look(ref map, "map");
+		Scribe_References.Look(ref faction, "faction");
+		Scribe_References.Look(ref kidnapped, "kidnapped");
+		Scribe_Values.Look(ref fee, "fee", 0);
 	}
 }

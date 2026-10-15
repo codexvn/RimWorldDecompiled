@@ -1,173 +1,303 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public abstract class Building_Enterable : Building, IThingHolder, ISuspendableThingHolder, ISearchableContents
 {
-	// Token: 0x020029FA RID: 10746
-	public abstract class Building_Enterable : Building, IThingHolder, ISuspendableThingHolder, ISearchableContents
+	[CompilerGenerated]
+	private sealed class _003CGetGizmos_003Ed__24 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x170024B3 RID: 9395
-		// (get) Token: 0x0600ED64 RID: 60772 RVA: 0x0044E3C3 File Offset: 0x0044C5C3
-		public bool Working
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Building_Enterable _003C_003E4__this;
+
+		private IEnumerator<Gizmo> _003C_003E7__wrap1;
+
+		private IEnumerator<Thing> _003C_003E7__wrap2;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.startTick >= 0;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170024B4 RID: 9396
-		// (get) Token: 0x0600ED65 RID: 60773 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public virtual bool IsContentsSuspended
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return true;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170024B5 RID: 9397
-		// (get) Token: 0x0600ED66 RID: 60774 RVA: 0x0044E3D1 File Offset: 0x0044C5D1
-		public bool AnyAcceptablePawns
+		[DebuggerHidden]
+		public _003CGetGizmos_003Ed__24(int _003C_003E1__state)
 		{
-			get
-			{
-				return base.Spawned && base.Map.mapPawns.AllPawnsSpawned.Any((Pawn x) => this.CanAcceptPawn(x));
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x170024B6 RID: 9398
-		// (get) Token: 0x0600ED67 RID: 60775 RVA: 0x0044E3FE File Offset: 0x0044C5FE
-		public ThingOwner SearchableContents
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			get
+			switch (_003C_003E1__state)
 			{
-				return this.innerContainer;
-			}
-		}
-
-		// Token: 0x170024B7 RID: 9399
-		// (get) Token: 0x0600ED68 RID: 60776 RVA: 0x0044E406 File Offset: 0x0044C606
-		// (set) Token: 0x0600ED69 RID: 60777 RVA: 0x0044E40E File Offset: 0x0044C60E
-		public Pawn SelectedPawn
-		{
-			get
-			{
-				return this.selectedPawn;
-			}
-			set
-			{
-				this.selectedPawn = value;
-			}
-		}
-
-		// Token: 0x0600ED6A RID: 60778 RVA: 0x0044E417 File Offset: 0x0044C617
-		public Building_Enterable()
-		{
-			this.innerContainer = new ThingOwner<Thing>(this);
-		}
-
-		// Token: 0x0600ED6B RID: 60779
-		public abstract AcceptanceReport CanAcceptPawn(Pawn p);
-
-		// Token: 0x0600ED6C RID: 60780
-		public abstract void TryAcceptPawn(Pawn p);
-
-		// Token: 0x170024B8 RID: 9400
-		// (get) Token: 0x0600ED6D RID: 60781
-		public abstract Vector3 PawnDrawOffset { get; }
-
-		// Token: 0x0600ED6E RID: 60782 RVA: 0x0044E432 File Offset: 0x0044C632
-		public override void DeSpawn(DestroyMode mode = DestroyMode.Vanish)
-		{
-			if (mode != DestroyMode.WillReplace)
-			{
-				this.innerContainer.TryDropAll(base.Position, base.Map, ThingPlaceMode.Near, null, null, true);
-			}
-			base.DeSpawn(mode);
-		}
-
-		// Token: 0x0600ED6F RID: 60783 RVA: 0x0044E45B File Offset: 0x0044C65B
-		public void GetChildHolders(List<IThingHolder> outChildren)
-		{
-			ThingOwnerUtility.AppendThingHoldersFromThings(outChildren, this.GetDirectlyHeldThings());
-		}
-
-		// Token: 0x0600ED70 RID: 60784 RVA: 0x0044E3FE File Offset: 0x0044C5FE
-		public ThingOwner GetDirectlyHeldThings()
-		{
-			return this.innerContainer;
-		}
-
-		// Token: 0x0600ED71 RID: 60785 RVA: 0x0044E469 File Offset: 0x0044C669
-		protected virtual void SelectPawn(Pawn pawn)
-		{
-			this.selectedPawn = pawn;
-			if (pawn.IsPrisonerOfColony)
-			{
-				return;
-			}
-			if (pawn.Downed)
-			{
-				return;
-			}
-			pawn.jobs.TryTakeOrderedJob(JobMaker.MakeJob(JobDefOf.EnterBuilding, this), new JobTag?(JobTag.Misc), false);
-		}
-
-		// Token: 0x0600ED72 RID: 60786 RVA: 0x0044E4A8 File Offset: 0x0044C6A8
-		public override void DrawExtraSelectionOverlays()
-		{
-			base.DrawExtraSelectionOverlays();
-			if (!this.Working && this.selectedPawn != null && this.selectedPawn.Map == base.Map)
-			{
-				GenDraw.DrawLineBetween(this.TrueCenter(), this.selectedPawn.TrueCenter());
-			}
-		}
-
-		// Token: 0x0600ED73 RID: 60787 RVA: 0x0044E4F4 File Offset: 0x0044C6F4
-		public override IEnumerable<Gizmo> GetGizmos()
-		{
-			foreach (Gizmo gizmo in base.GetGizmos())
-			{
-				yield return gizmo;
-			}
-			IEnumerator<Gizmo> enumerator = null;
-			foreach (Thing item in ((IEnumerable<Thing>)this.innerContainer))
-			{
-				Gizmo gizmo2 = Building.SelectContainedItemGizmo(this, item);
-				if (gizmo2 != null)
+			case -3:
+			case 1:
+				try
 				{
-					yield return gizmo2;
 				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+				break;
+			case -4:
+			case 2:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally2();
+				}
+				break;
 			}
-			IEnumerator<Thing> enumerator2 = null;
-			yield break;
-			yield break;
+			_003C_003E7__wrap1 = null;
+			_003C_003E7__wrap2 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x0600ED74 RID: 60788 RVA: 0x0044E504 File Offset: 0x0044C704
-		public override void ExposeData()
+		private bool MoveNext()
 		{
-			base.ExposeData();
-			Scribe_Deep.Look<ThingOwner>(ref this.innerContainer, "innerContainer", new object[]
+			try
 			{
-				this
-			});
-			Scribe_Values.Look<int>(ref this.startTick, "startTick", -1, false);
-			Scribe_References.Look<Pawn>(ref this.selectedPawn, "selectedPawn", false);
+				int num = _003C_003E1__state;
+				Building_Enterable building_Enterable = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((Building)building_Enterable).GetGizmos().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0072;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0072;
+				case 2:
+					{
+						_003C_003E1__state = -4;
+						break;
+					}
+					IL_0072:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Gizmo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					_003C_003E7__wrap2 = ((IEnumerable<Thing>)building_Enterable.innerContainer).GetEnumerator();
+					_003C_003E1__state = -4;
+					break;
+				}
+				while (_003C_003E7__wrap2.MoveNext())
+				{
+					Thing current2 = _003C_003E7__wrap2.Current;
+					Gizmo gizmo = Building.SelectContainedItemGizmo(building_Enterable, current2);
+					if (gizmo != null)
+					{
+						_003C_003E2__current = gizmo;
+						_003C_003E1__state = 2;
+						return true;
+					}
+				}
+				_003C_003Em__Finally2();
+				_003C_003E7__wrap2 = null;
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
 		}
 
-		// Token: 0x04009D28 RID: 40232
-		public ThingOwner innerContainer;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x04009D29 RID: 40233
-		protected Pawn selectedPawn;
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
 
-		// Token: 0x04009D2A RID: 40234
-		protected int startTick = -1;
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap2 != null)
+			{
+				_003C_003E7__wrap2.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CGetGizmos_003Ed__24 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CGetGizmos_003Ed__24(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	public ThingOwner innerContainer;
+
+	protected Pawn selectedPawn;
+
+	protected int startTick = -1;
+
+	public bool Working => startTick >= 0;
+
+	public virtual bool IsContentsSuspended => true;
+
+	public bool AnyAcceptablePawns
+	{
+		get
+		{
+			if (!base.Spawned)
+			{
+				return false;
+			}
+			return base.Map.mapPawns.AllPawnsSpawned.Any((Pawn x) => CanAcceptPawn(x));
+		}
+	}
+
+	public ThingOwner SearchableContents => innerContainer;
+
+	public Pawn SelectedPawn
+	{
+		get
+		{
+			return selectedPawn;
+		}
+		set
+		{
+			selectedPawn = value;
+		}
+	}
+
+	public abstract Vector3 PawnDrawOffset { get; }
+
+	public Building_Enterable()
+	{
+		innerContainer = new ThingOwner<Thing>(this);
+	}
+
+	public abstract AcceptanceReport CanAcceptPawn(Pawn p);
+
+	public abstract void TryAcceptPawn(Pawn p);
+
+	public override void DeSpawn(DestroyMode mode = DestroyMode.Vanish)
+	{
+		if (mode != DestroyMode.WillReplace)
+		{
+			innerContainer.TryDropAll(base.Position, base.Map, ThingPlaceMode.Near);
+		}
+		base.DeSpawn(mode);
+	}
+
+	public void GetChildHolders(List<IThingHolder> outChildren)
+	{
+		ThingOwnerUtility.AppendThingHoldersFromThings(outChildren, GetDirectlyHeldThings());
+	}
+
+	public ThingOwner GetDirectlyHeldThings()
+	{
+		return innerContainer;
+	}
+
+	protected virtual void SelectPawn(Pawn pawn)
+	{
+		selectedPawn = pawn;
+		if (!pawn.IsPrisonerOfColony && !pawn.Downed)
+		{
+			pawn.jobs.TryTakeOrderedJob(JobMaker.MakeJob(JobDefOf.EnterBuilding, this), JobTag.Misc);
+		}
+	}
+
+	public override void DrawExtraSelectionOverlays()
+	{
+		base.DrawExtraSelectionOverlays();
+		if (!Working && selectedPawn != null && selectedPawn.Map == base.Map)
+		{
+			GenDraw.DrawLineBetween(this.TrueCenter(), selectedPawn.TrueCenter());
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CGetGizmos_003Ed__24))]
+	public override IEnumerable<Gizmo> GetGizmos()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetGizmos_003Ed__24(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Deep.Look(ref innerContainer, "innerContainer", this);
+		Scribe_Values.Look(ref startTick, "startTick", -1);
+		Scribe_References.Look(ref selectedPawn, "selectedPawn");
 	}
 }

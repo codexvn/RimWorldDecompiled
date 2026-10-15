@@ -1,51 +1,141 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class ExpectationDef : Def
 {
-	// Token: 0x02001A22 RID: 6690
-	public class ExpectationDef : Def
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__9 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001708 RID: 5896
-		// (get) Token: 0x060096D1 RID: 38609 RVA: 0x002C19D3 File Offset: 0x002BFBD3
-		public bool WealthTriggered
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public ExpectationDef _003C_003E4__this;
+
+		string IEnumerator<string>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.maxMapWealth >= 0f;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x060096D2 RID: 38610 RVA: 0x002C19E5 File Offset: 0x002BFBE5
-		public override IEnumerable<string> ConfigErrors()
+		object IEnumerator.Current
 		{
-			if (this.order < 0)
+			[DebuggerHidden]
+			get
 			{
-				yield return "order not defined";
+				return _003C_003E2__current;
 			}
-			yield break;
 		}
 
-		// Token: 0x04006359 RID: 25433
-		public int order = -1;
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__9(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
 
-		// Token: 0x0400635A RID: 25434
-		public int thoughtStage = -1;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
 
-		// Token: 0x0400635B RID: 25435
-		public float maxMapWealth = -1f;
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			ExpectationDef expectationDef = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (expectationDef.order < 0)
+				{
+					_003C_003E2__current = "order not defined";
+					_003C_003E1__state = 1;
+					return true;
+				}
+				break;
+			case 1:
+				_003C_003E1__state = -1;
+				break;
+			}
+			return false;
+		}
 
-		// Token: 0x0400635C RID: 25436
-		public float joyToleranceDropPerDay;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x0400635D RID: 25437
-		public float ritualQualityOffset;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x0400635E RID: 25438
-		public int joyKindsNeeded;
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__9 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__9(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x0400635F RID: 25439
-		public bool forRoles;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	public int order = -1;
+
+	public int thoughtStage = -1;
+
+	public float maxMapWealth = -1f;
+
+	public float joyToleranceDropPerDay;
+
+	public float ritualQualityOffset;
+
+	public int joyKindsNeeded;
+
+	public bool forRoles;
+
+	public bool WealthTriggered => maxMapWealth >= 0f;
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__9))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__9(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

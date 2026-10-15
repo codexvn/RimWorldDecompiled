@@ -1,266 +1,420 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Pawn_AbilityTracker : IExposable
 {
-	// Token: 0x0200249C RID: 9372
-	public class Pawn_AbilityTracker : IExposable
+	[CompilerGenerated]
+	private sealed class _003CGetGizmos_003Ed__13 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001EF8 RID: 7928
-		// (get) Token: 0x0600CB42 RID: 52034 RVA: 0x003B8C14 File Offset: 0x003B6E14
-		public List<Ability> AllAbilitiesForReading
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Pawn_AbilityTracker _003C_003E4__this;
+
+		private bool _003CvisiblePrimary_003E5__2;
+
+		private List<Ability>.Enumerator _003C_003E7__wrap2;
+
+		private Ability _003Ca_003E5__4;
+
+		private bool _003CvisibleSecondary_003E5__5;
+
+		private IEnumerator<Command> _003C_003E7__wrap5;
+
+		private IEnumerator<Gizmo> _003C_003E7__wrap6;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.allAbilitiesCachedDirty)
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetGizmos_003Ed__13(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if ((uint)(num - -5) <= 2u || (uint)(num - 1) <= 1u)
+			{
+				try
 				{
-					this.allAbilitiesCached.Clear();
-					this.allAbilitiesCached.AddRange(this.abilities);
-					if (this.pawn.health != null)
+					switch (num)
 					{
-						foreach (Hediff hediff in this.pawn.health.hediffSet.hediffs)
+					case -4:
+					case 1:
+						try
 						{
-							if (!hediff.def.abilities.NullOrEmpty<AbilityDef>())
+						}
+						finally
+						{
+							_003C_003Em__Finally2();
+						}
+						break;
+					case -5:
+					case 2:
+						try
+						{
+						}
+						finally
+						{
+							_003C_003Em__Finally3();
+						}
+						break;
+					}
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap2 = default(List<Ability>.Enumerator);
+			_003Ca_003E5__4 = null;
+			_003C_003E7__wrap5 = null;
+			_003C_003E7__wrap6 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				Pawn_AbilityTracker pawn_AbilityTracker = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003CvisiblePrimary_003E5__2 = pawn_AbilityTracker.pawn.IsColonistPlayerControlled || pawn_AbilityTracker.pawn.IsColonyMechPlayerControlled || pawn_AbilityTracker.pawn.IsColonySubhumanPlayerControlled || pawn_AbilityTracker.pawn.IsColonyAnimal;
+					_003C_003E7__wrap2 = pawn_AbilityTracker.AllAbilitiesForReading.GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0206;
+				case 1:
+					_003C_003E1__state = -4;
+					goto IL_0183;
+				case 2:
+					{
+						_003C_003E1__state = -5;
+						goto IL_01e5;
+					}
+					IL_0183:
+					if (_003C_003E7__wrap5.MoveNext())
+					{
+						Command current = _003C_003E7__wrap5.Current;
+						if (current is Command_Ability command_Ability)
+						{
+							command_Ability.devGizmo = !_003CvisiblePrimary_003E5__2 && !_003CvisibleSecondary_003E5__5 && DebugSettings.ShowDevGizmos;
+						}
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally2();
+					_003C_003E7__wrap5 = null;
+					goto IL_019d;
+					IL_019d:
+					_003C_003E7__wrap6 = _003Ca_003E5__4.GetGizmosExtra().GetEnumerator();
+					_003C_003E1__state = -5;
+					goto IL_01e5;
+					IL_01e5:
+					if (_003C_003E7__wrap6.MoveNext())
+					{
+						Gizmo current2 = _003C_003E7__wrap6.Current;
+						_003C_003E2__current = current2;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					_003C_003Em__Finally3();
+					_003C_003E7__wrap6 = null;
+					_003Ca_003E5__4 = null;
+					goto IL_0206;
+					IL_0206:
+					if (_003C_003E7__wrap2.MoveNext())
+					{
+						_003Ca_003E5__4 = _003C_003E7__wrap2.Current;
+						if (_003CvisiblePrimary_003E5__2 || DebugSettings.ShowDevGizmos)
+						{
+							_003CvisibleSecondary_003E5__5 = (pawn_AbilityTracker.pawn.Drafted || _003Ca_003E5__4.def.displayGizmoWhileUndrafted) && _003Ca_003E5__4.GizmosVisible();
+							if (_003CvisibleSecondary_003E5__5 || (!pawn_AbilityTracker.pawn.IsColonistPlayerControlled && !pawn_AbilityTracker.pawn.IsColonyMechPlayerControlled && DebugSettings.ShowDevGizmos))
 							{
-								this.allAbilitiesCached.AddRange(hediff.AllAbilitiesForReading);
+								_003C_003E7__wrap5 = _003Ca_003E5__4.GetGizmos().GetEnumerator();
+								_003C_003E1__state = -4;
+								goto IL_0183;
 							}
 						}
+						goto IL_019d;
 					}
-					if (this.pawn.equipment != null)
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap2 = default(List<Ability>.Enumerator);
+					return false;
+				}
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap2/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -3;
+			if (_003C_003E7__wrap5 != null)
+			{
+				_003C_003E7__wrap5.Dispose();
+			}
+		}
+
+		private void _003C_003Em__Finally3()
+		{
+			_003C_003E1__state = -3;
+			if (_003C_003E7__wrap6 != null)
+			{
+				_003C_003E7__wrap6.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CGetGizmos_003Ed__13 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CGetGizmos_003Ed__13(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	public Pawn pawn;
+
+	public List<Ability> abilities = new List<Ability>();
+
+	private bool allAbilitiesCachedDirty = true;
+
+	private List<Ability> allAbilitiesCached = new List<Ability>();
+
+	private readonly List<Ability> tmpAbilities = new List<Ability>();
+
+	public List<Ability> AllAbilitiesForReading
+	{
+		get
+		{
+			if (allAbilitiesCachedDirty)
+			{
+				allAbilitiesCached.Clear();
+				allAbilitiesCached.AddRange(abilities);
+				if (pawn.health != null)
+				{
+					foreach (Hediff hediff in pawn.health.hediffSet.hediffs)
 					{
-						ThingWithComps primary = this.pawn.equipment.Primary;
-						CompEquippableAbility compEquippableAbility = (primary != null) ? primary.TryGetComp<CompEquippableAbility>() : null;
-						if (compEquippableAbility != null && compEquippableAbility.AbilityForReading != null)
+						if (!hediff.def.abilities.NullOrEmpty())
 						{
-							this.allAbilitiesCached.Add(compEquippableAbility.AbilityForReading);
+							allAbilitiesCached.AddRange(hediff.AllAbilitiesForReading);
 						}
 					}
-					if (this.pawn.apparel != null)
+				}
+				if (pawn.equipment != null)
+				{
+					CompEquippableAbility compEquippableAbility = pawn.equipment.Primary?.TryGetComp<CompEquippableAbility>();
+					if (compEquippableAbility != null && compEquippableAbility.AbilityForReading != null)
 					{
-						foreach (Apparel apparel in this.pawn.apparel.WornApparel)
+						allAbilitiesCached.Add(compEquippableAbility.AbilityForReading);
+					}
+				}
+				if (pawn.apparel != null)
+				{
+					foreach (Apparel item in pawn.apparel.WornApparel)
+					{
+						allAbilitiesCached.AddRange(item.AllAbilitiesForReading);
+					}
+				}
+				if (ModsConfig.AnomalyActive && pawn.IsMutant)
+				{
+					allAbilitiesCached.AddRange(pawn.mutant.AllAbilitiesForReading);
+				}
+				if (pawn.royalty != null)
+				{
+					allAbilitiesCached.AddRange(pawn.royalty.AllAbilitiesForReading);
+				}
+				if (ModsConfig.IdeologyActive)
+				{
+					Precept_Role precept_Role = pawn.Ideo?.GetRole(pawn);
+					if (precept_Role != null && precept_Role.Active && !precept_Role.AbilitiesFor(pawn).NullOrEmpty())
+					{
+						foreach (Ability item2 in precept_Role.AbilitiesFor(pawn))
 						{
-							this.allAbilitiesCached.AddRange(apparel.AllAbilitiesForReading);
-						}
-					}
-					if (ModsConfig.AnomalyActive && this.pawn.IsMutant)
-					{
-						this.allAbilitiesCached.AddRange(this.pawn.mutant.AllAbilitiesForReading);
-					}
-					if (this.pawn.royalty != null)
-					{
-						this.allAbilitiesCached.AddRange(this.pawn.royalty.AllAbilitiesForReading);
-					}
-					if (ModsConfig.IdeologyActive)
-					{
-						Ideo ideo = this.pawn.Ideo;
-						Precept_Role precept_Role = (ideo != null) ? ideo.GetRole(this.pawn) : null;
-						if (precept_Role != null && precept_Role.Active && !precept_Role.AbilitiesFor(this.pawn).NullOrEmpty<Ability>())
-						{
-							foreach (Ability ability in precept_Role.AbilitiesFor(this.pawn))
+							bool flag = false;
+							if (!item2.def.requiredMemes.NullOrEmpty())
 							{
-								bool flag = false;
-								if (!ability.def.requiredMemes.NullOrEmpty<MemeDef>())
+								foreach (MemeDef requiredMeme in item2.def.requiredMemes)
 								{
-									foreach (MemeDef item in ability.def.requiredMemes)
+									if (!pawn.Ideo.memes.Contains(requiredMeme))
 									{
-										if (!this.pawn.Ideo.memes.Contains(item))
-										{
-											flag = true;
-											break;
-										}
+										flag = true;
+										break;
 									}
 								}
-								if (!flag)
-								{
-									this.allAbilitiesCached.Add(ability);
-								}
 							}
-						}
-					}
-					if (ModsConfig.AnomalyActive && this.pawn.IsMutant && this.pawn.mutant.Def.abilityWhitelist.Any<AbilityDef>())
-					{
-						this.allAbilitiesCached = (from a in this.allAbilitiesCached
-						where this.pawn.mutant.Def.abilityWhitelist.Contains(a.def)
-						select a).ToList<Ability>();
-					}
-					this.allAbilitiesCached.SortBy(delegate(Ability a)
-					{
-						AbilityCategoryDef category = a.def.category;
-						if (category == null)
-						{
-							return 0;
-						}
-						return category.displayOrder;
-					}, (Ability a) => a.def.displayOrder, (Ability a) => a.def.level);
-					this.allAbilitiesCachedDirty = false;
-				}
-				return this.allAbilitiesCached;
-			}
-		}
-
-		// Token: 0x0600CB43 RID: 52035 RVA: 0x003B8FB4 File Offset: 0x003B71B4
-		public Pawn_AbilityTracker(Pawn pawn)
-		{
-			this.pawn = pawn;
-		}
-
-		// Token: 0x0600CB44 RID: 52036 RVA: 0x003B8FEC File Offset: 0x003B71EC
-		public void AbilitiesTick()
-		{
-			for (int i = 0; i < this.AllAbilitiesForReading.Count; i++)
-			{
-				this.AllAbilitiesForReading[i].AbilityTick();
-			}
-		}
-
-		// Token: 0x0600CB45 RID: 52037 RVA: 0x003B9020 File Offset: 0x003B7220
-		public void GainAbility(AbilityDef def)
-		{
-			if (!this.abilities.Any((Ability a) => a.def == def))
-			{
-				this.abilities.Add(AbilityUtility.MakeAbility(def, this.pawn));
-			}
-			this.Notify_TemporaryAbilitiesChanged();
-		}
-
-		// Token: 0x0600CB46 RID: 52038 RVA: 0x003B9078 File Offset: 0x003B7278
-		public void RemoveAbility(AbilityDef def)
-		{
-			Ability ability = this.abilities.FirstOrDefault((Ability x) => x.def == def);
-			if (ability != null)
-			{
-				this.abilities.Remove(ability);
-			}
-			this.Notify_TemporaryAbilitiesChanged();
-		}
-
-		// Token: 0x0600CB47 RID: 52039 RVA: 0x003B90C0 File Offset: 0x003B72C0
-		public Ability GetAbility(AbilityDef def, bool includeTemporary = false)
-		{
-			List<Ability> list = includeTemporary ? this.AllAbilitiesForReading : this.abilities;
-			for (int i = 0; i < list.Count; i++)
-			{
-				if (list[i].def == def)
-				{
-					return list[i];
-				}
-			}
-			return null;
-		}
-
-		// Token: 0x0600CB48 RID: 52040 RVA: 0x003B9108 File Offset: 0x003B7308
-		public List<Ability> AICastableAbilities(LocalTargetInfo target, bool offensive)
-		{
-			this.tmpAbilities.Clear();
-			foreach (Ability ability in this.AllAbilitiesForReading)
-			{
-				bool flag = true;
-				if (this.pawn.IsAnimal)
-				{
-					Faction faction = this.pawn.Faction;
-					if (faction != null && faction.IsPlayer && this.pawn.RaceProps.specialTrainables != null)
-					{
-						foreach (TrainableDef trainableDef in this.pawn.RaceProps.specialTrainables)
-						{
-							if (trainableDef.enablesAbility == ability.def)
+							if (!flag)
 							{
-								Pawn_TrainingTracker training = this.pawn.training;
-								if (training != null && training.HasLearned(trainableDef))
-								{
-									flag = false;
-									break;
-								}
+								allAbilitiesCached.Add(item2);
 							}
 						}
 					}
 				}
-				if (flag && ability.def.ai_IsOffensive == offensive && (ability.AICanTargetNow(target) || ability.AICanTargetNow(this.pawn)))
+				if (ModsConfig.AnomalyActive && pawn.IsMutant && pawn.mutant.Def.abilityWhitelist.Any())
 				{
-					this.tmpAbilities.Add(ability);
+					allAbilitiesCached = allAbilitiesCached.Where((Ability a) => pawn.mutant.Def.abilityWhitelist.Contains(a.def)).ToList();
 				}
+				allAbilitiesCached.SortBy((Ability a) => a.def.category?.displayOrder ?? 0, (Ability a) => a.def.displayOrder, (Ability a) => a.def.level);
+				allAbilitiesCachedDirty = false;
 			}
-			return this.tmpAbilities;
+			return allAbilitiesCached;
 		}
+	}
 
-		// Token: 0x0600CB49 RID: 52041 RVA: 0x003B9258 File Offset: 0x003B7458
-		public IEnumerable<Gizmo> GetGizmos()
+	public Pawn_AbilityTracker(Pawn pawn)
+	{
+		this.pawn = pawn;
+	}
+
+	public void AbilitiesTick()
+	{
+		for (int i = 0; i < AllAbilitiesForReading.Count; i++)
 		{
-			bool visiblePrimary = this.pawn.IsColonistPlayerControlled || this.pawn.IsColonyMechPlayerControlled || this.pawn.IsColonySubhumanPlayerControlled;
-			foreach (Ability a in this.AllAbilitiesForReading)
-			{
-				if (!visiblePrimary && this.pawn.training != null && this.pawn.RaceProps.specialTrainables != null)
-				{
-					foreach (TrainableDef trainableDef in this.pawn.RaceProps.specialTrainables)
-					{
-						if (trainableDef.enablesAbility == a.def && this.pawn.training.HasLearned(trainableDef))
-						{
-							visiblePrimary = true;
-						}
-					}
-				}
-				if (visiblePrimary || DebugSettings.ShowDevGizmos)
-				{
-					bool visibleSecondary = (this.pawn.Drafted || a.def.displayGizmoWhileUndrafted) && a.GizmosVisible();
-					if (visibleSecondary || (!this.pawn.IsColonistPlayerControlled && !this.pawn.IsColonyMechPlayerControlled && DebugSettings.ShowDevGizmos))
-					{
-						foreach (Command command in a.GetGizmos())
-						{
-							Command_Ability command_Ability = command as Command_Ability;
-							if (command_Ability != null)
-							{
-								command_Ability.devGizmo = (!visiblePrimary && !visibleSecondary && DebugSettings.ShowDevGizmos);
-							}
-							yield return command;
-						}
-						IEnumerator<Command> enumerator3 = null;
-					}
-				}
-				foreach (Gizmo gizmo in a.GetGizmosExtra())
-				{
-					yield return gizmo;
-				}
-				IEnumerator<Gizmo> enumerator4 = null;
-				a = null;
-			}
-			List<Ability>.Enumerator enumerator = default(List<Ability>.Enumerator);
-			yield break;
-			yield break;
+			AllAbilitiesForReading[i].AbilityTick();
 		}
+	}
 
-		// Token: 0x0600CB4A RID: 52042 RVA: 0x003B9268 File Offset: 0x003B7468
-		public void Notify_TemporaryAbilitiesChanged()
+	public void GainAbility(AbilityDef def)
+	{
+		if (!abilities.Any((Ability a) => a.def == def))
 		{
-			this.allAbilitiesCachedDirty = true;
+			abilities.Add(AbilityUtility.MakeAbility(def, pawn));
 		}
+		Notify_TemporaryAbilitiesChanged();
+	}
 
-		// Token: 0x0600CB4B RID: 52043 RVA: 0x003B9274 File Offset: 0x003B7474
-		public void ExposeData()
+	public void RemoveAbility(AbilityDef def)
+	{
+		Ability ability = abilities.FirstOrDefault((Ability x) => x.def == def);
+		if (ability != null)
 		{
-			Scribe_Collections.Look<Ability>(ref this.abilities, "abilities", LookMode.Deep, new object[]
+			abilities.Remove(ability);
+		}
+		Notify_TemporaryAbilitiesChanged();
+	}
+
+	public Ability GetAbility(AbilityDef def, bool includeTemporary = false)
+	{
+		List<Ability> list = (includeTemporary ? AllAbilitiesForReading : abilities);
+		for (int i = 0; i < list.Count; i++)
+		{
+			if (list[i].def == def)
 			{
-				this.pawn
-			});
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
-			{
-				this.abilities.RemoveAll((Ability a) => a.def == null || a.def == AbilityDefOf.Speech);
+				return list[i];
 			}
 		}
+		return null;
+	}
 
-		// Token: 0x04008AA6 RID: 35494
-		public Pawn pawn;
+	public List<Ability> AICastableAbilities(LocalTargetInfo target, bool offensive)
+	{
+		tmpAbilities.Clear();
+		foreach (Ability item in AllAbilitiesForReading)
+		{
+			if (item.def.ai_IsOffensive == offensive && (item.AICanTargetNow(target) || item.AICanTargetNow(pawn)))
+			{
+				tmpAbilities.Add(item);
+			}
+		}
+		return tmpAbilities;
+	}
 
-		// Token: 0x04008AA7 RID: 35495
-		public List<Ability> abilities = new List<Ability>();
+	[IteratorStateMachine(typeof(_003CGetGizmos_003Ed__13))]
+	public IEnumerable<Gizmo> GetGizmos()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetGizmos_003Ed__13(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
 
-		// Token: 0x04008AA8 RID: 35496
-		private bool allAbilitiesCachedDirty = true;
+	public void Notify_TemporaryAbilitiesChanged()
+	{
+		allAbilitiesCachedDirty = true;
+	}
 
-		// Token: 0x04008AA9 RID: 35497
-		private List<Ability> allAbilitiesCached = new List<Ability>();
-
-		// Token: 0x04008AAA RID: 35498
-		private readonly List<Ability> tmpAbilities = new List<Ability>();
+	public void ExposeData()
+	{
+		Scribe_Collections.Look(ref abilities, "abilities", LookMode.Deep, pawn);
+		if (Scribe.mode == LoadSaveMode.PostLoadInit)
+		{
+			abilities.RemoveAll((Ability a) => a.def == null || a.def == AbilityDefOf.Speech);
+		}
 	}
 }

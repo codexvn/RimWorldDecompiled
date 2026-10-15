@@ -16,8 +16,6 @@ internal sealed class ImGuiTextMeshProBackend : ITextMeshProBackend
 
 		public readonly Dictionary<char, TmpGlyphMetrics> glyphs = new Dictionary<char, TmpGlyphMetrics>();
 
-		public string characters = string.Empty;
-
 		public char sentinel;
 	}
 
@@ -38,6 +36,19 @@ internal sealed class ImGuiTextMeshProBackend : ITextMeshProBackend
 	private Texture2D? atlasTexture;
 
 	private int atlasVersion;
+
+	private static readonly Lazy<string> AllCharacters = new Lazy<string>(delegate
+	{
+		StringBuilder stringBuilder = new StringBuilder(65536);
+		for (int i = 32; i <= 65535; i++)
+		{
+			if (!char.IsSurrogate((char)i))
+			{
+				stringBuilder.Append((char)i);
+			}
+		}
+		return stringBuilder.ToString();
+	});
 
 	public float BakePixelSize => 48f;
 
@@ -81,14 +92,12 @@ internal sealed class ImGuiTextMeshProBackend : ITextMeshProBackend
 			descent = descent,
 			lineHeight = ascent - descent
 		};
-		StringBuilder stringBuilder = new StringBuilder();
-		BakeRange(fontBaked, fontData, stringBuilder, 32, 126);
-		BakeRange(fontBaked, fontData, stringBuilder, 160, 255);
-		fontData.characters = stringBuilder.ToString();
+		BakeRange(fontBaked, fontData, 32, 126);
+		BakeRange(fontBaked, fontData, 160, 255);
 		return fontData;
 	}
 
-	private static void BakeRange(ImFontBakedPtr baked, FontData data, StringBuilder sb, int lo, int hi)
+	private static void BakeRange(ImFontBakedPtr baked, FontData data, int lo, int hi)
 	{
 		for (int i = lo; i <= hi; i++)
 		{
@@ -114,7 +123,6 @@ internal sealed class ImGuiTextMeshProBackend : ITextMeshProBackend
 					u1 = imFontGlyphPtr.U1,
 					v1 = imFontGlyphPtr.V1
 				};
-				sb.Append(c);
 				if (data.sentinel == '\0' && x2 > x && y2 > y)
 				{
 					data.sentinel = c;
@@ -193,7 +201,7 @@ internal sealed class ImGuiTextMeshProBackend : ITextMeshProBackend
 
 	public string GetCharacters(int fontIndex)
 	{
-		return Get(fontIndex)?.characters ?? string.Empty;
+		return AllCharacters.Value;
 	}
 
 	public unsafe void TryCaptureAtlas(ImFontAtlasPtr atlas)

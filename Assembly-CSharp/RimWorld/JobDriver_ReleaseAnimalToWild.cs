@@ -1,96 +1,242 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_ReleaseAnimalToWild : JobDriver
 {
-	// Token: 0x02001127 RID: 4391
-	public class JobDriver_ReleaseAnimalToWild : JobDriver
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass6_0
 	{
-		// Token: 0x17001087 RID: 4231
-		// (get) Token: 0x06006B18 RID: 27416 RVA: 0x0021B747 File Offset: 0x00219947
-		protected Pawn Animal
+		public Toil toil;
+
+		public JobDriver_ReleaseAnimalToWild _003C_003E4__this;
+
+		internal void _003CMakeNewToils_003Eb__6()
 		{
+			Pawn actor = toil.actor;
+			if (!TryFindClosestOutsideCell(actor.Position, actor.Map, TraverseParms.For(actor), actor, out var cell))
+			{
+				_003C_003E4__this.EndJobWith(JobCondition.Incompletable);
+			}
+			else
+			{
+				actor.pather.StartPath(cell, PathEndMode.OnCell);
+			}
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__6 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_ReleaseAnimalToWild _003C_003E4__this;
+
+		private _003C_003Ec__DisplayClass6_0 _003C_003E8__1;
+
+		private Toil _003CwaitToil_003E5__2;
+
+		Toil IEnumerator<Toil>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				return (Pawn)this.job.targetA.Thing;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06006B19 RID: 27417 RVA: 0x0021C1D0 File Offset: 0x0021A3D0
-		public static bool TryFindClosestOutsideCell(IntVec3 root, Map map, TraverseParms traverseParms, Pawn pawn, out IntVec3 cell)
+		object IEnumerator.Current
 		{
-			cell = default(IntVec3);
-			Region region;
-			if (CellFinder.TryFindClosestRegionWith(root.GetRegion(map, RegionType.Set_Passable), traverseParms, (Region r) => r.District.TouchesMapEdge, 99999, out region, RegionType.Set_Passable))
+			[DebuggerHidden]
+			get
 			{
-				float num = float.PositiveInfinity;
-				foreach (IntVec3 intVec in region.Cells)
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__6(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E8__1 = null;
+			_003CwaitToil_003E5__2 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_ReleaseAnimalToWild CS_0024_003C_003E8__locals14 = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				CS_0024_003C_003E8__locals14.FailOn(() => CS_0024_003C_003E8__locals14.Animal.Dead);
+				CS_0024_003C_003E8__locals14.FailOn(() => CS_0024_003C_003E8__locals14.Animal.Faction != Faction.OfPlayer);
+				CS_0024_003C_003E8__locals14.FailOn(() => CS_0024_003C_003E8__locals14.Animal.InAggroMentalState);
+				CS_0024_003C_003E8__locals14.FailOn(() => CS_0024_003C_003E8__locals14.Animal.MapHeld.designationManager.DesignationOn(CS_0024_003C_003E8__locals14.Animal, DesignationDefOf.ReleaseAnimalToWild) == null);
+				_003C_003E2__current = Toils_Reserve.Reserve(TargetIndex.A);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.OnCell);
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				_003CwaitToil_003E5__2 = Toils_General.WaitWith(TargetIndex.A, 180).WithProgressBarToilDelay(TargetIndex.A);
+				_003C_003E2__current = Toils_Jump.JumpIf(_003CwaitToil_003E5__2, () => CS_0024_003C_003E8__locals14.Animal.Position.GetRegion(CS_0024_003C_003E8__locals14.Map).District.TouchesMapEdge);
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+				_003C_003E1__state = -1;
+				_003C_003E8__1 = new _003C_003Ec__DisplayClass6_0();
+				_003C_003E8__1._003C_003E4__this = CS_0024_003C_003E8__locals14;
+				_003C_003E2__current = Toils_Haul.StartCarryThing(TargetIndex.A);
+				_003C_003E1__state = 4;
+				return true;
+			case 4:
+				_003C_003E1__state = -1;
+				_003C_003E8__1.toil = ToilMaker.MakeToil("MakeNewToils");
+				_003C_003E8__1.toil.initAction = delegate
 				{
-					if (intVec.Standable(map) && (pawn == null || !intVec.IsForbidden(pawn)))
+					Pawn actor = _003C_003E8__1.toil.actor;
+					if (!TryFindClosestOutsideCell(actor.Position, actor.Map, TraverseParms.For(actor), actor, out var cell))
 					{
-						float num2 = (float)intVec.DistanceToSquared(root);
-						if (num2 < num)
-						{
-							num = num2;
-							cell = intVec;
-						}
+						_003C_003E8__1._003C_003E4__this.EndJobWith(JobCondition.Incompletable);
+					}
+					else
+					{
+						actor.pather.StartPath(cell, PathEndMode.OnCell);
+					}
+				};
+				_003C_003E8__1.toil.defaultCompleteMode = ToilCompleteMode.PatherArrival;
+				_003C_003E2__current = _003C_003E8__1.toil;
+				_003C_003E1__state = 5;
+				return true;
+			case 5:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Haul.PlaceHauledThingInCell(TargetIndex.A, null, storageMode: false);
+				_003C_003E1__state = 6;
+				return true;
+			case 6:
+				_003C_003E1__state = -1;
+				_003C_003E8__1 = null;
+				_003C_003E2__current = _003CwaitToil_003E5__2;
+				_003C_003E1__state = 7;
+				return true;
+			case 7:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.Do(delegate
+				{
+					ReleaseAnimalToWildUtility.DoReleaseAnimal(CS_0024_003C_003E8__locals14.Animal, CS_0024_003C_003E8__locals14.pawn);
+				});
+				_003C_003E1__state = 8;
+				return true;
+			case 8:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__6 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__6(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private const TargetIndex AnimalInd = TargetIndex.A;
+
+	private const int WaitForTicks = 180;
+
+	protected Pawn Animal => (Pawn)job.targetA.Thing;
+
+	public static bool TryFindClosestOutsideCell(IntVec3 root, Map map, TraverseParms traverseParms, Pawn pawn, out IntVec3 cell)
+	{
+		cell = default(IntVec3);
+		if (CellFinder.TryFindClosestRegionWith(root.GetRegion(map), traverseParms, (Region r) => r.District.TouchesMapEdge, 99999, out var result))
+		{
+			float num = float.PositiveInfinity;
+			foreach (IntVec3 cell2 in result.Cells)
+			{
+				if (cell2.Standable(map) && (pawn == null || !cell2.IsForbidden(pawn)))
+				{
+					float num2 = cell2.DistanceToSquared(root);
+					if (num2 < num)
+					{
+						num = num2;
+						cell = cell2;
 					}
 				}
-				return num != float.PositiveInfinity;
 			}
-			return false;
+			return num != float.PositiveInfinity;
 		}
+		return false;
+	}
 
-		// Token: 0x06006B1A RID: 27418 RVA: 0x001D81A7 File Offset: 0x001D63A7
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return pawn.Reserve(job.GetTarget(TargetIndex.A), job, 1, -1, null, errorOnFailed);
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__6))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__6(-2)
 		{
-			return this.pawn.Reserve(this.job.GetTarget(TargetIndex.A), this.job, 1, -1, null, errorOnFailed, false);
-		}
-
-		// Token: 0x06006B1B RID: 27419 RVA: 0x0021C29C File Offset: 0x0021A49C
-		protected override IEnumerable<Toil> MakeNewToils()
-		{
-			this.FailOn(() => this.Animal.Dead);
-			this.FailOn(() => this.Animal.Faction != Faction.OfPlayer);
-			this.FailOn(() => this.Animal.InAggroMentalState);
-			this.FailOn(() => this.Animal.MapHeld.designationManager.DesignationOn(this.Animal, DesignationDefOf.ReleaseAnimalToWild) == null);
-			yield return Toils_Reserve.Reserve(TargetIndex.A, 1, -1, null, false);
-			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.OnCell, false);
-			Toil waitToil = Toils_General.WaitWith(TargetIndex.A, 180, false, false, false, TargetIndex.None, PathEndMode.Touch).WithProgressBarToilDelay(TargetIndex.A, false, -0.5f);
-			yield return Toils_Jump.JumpIf(waitToil, () => this.Animal.Position.GetRegion(base.Map, RegionType.Set_Passable).District.TouchesMapEdge);
-			JobDriver_ReleaseAnimalToWild.<>c__DisplayClass6_0 CS$<>8__locals1 = new JobDriver_ReleaseAnimalToWild.<>c__DisplayClass6_0();
-			CS$<>8__locals1.<>4__this = this;
-			yield return Toils_Haul.StartCarryThing(TargetIndex.A, false, false, false, true, false);
-			CS$<>8__locals1.toil = ToilMaker.MakeToil("MakeNewToils");
-			CS$<>8__locals1.toil.initAction = delegate()
-			{
-				Pawn actor = CS$<>8__locals1.toil.actor;
-				IntVec3 c;
-				if (!JobDriver_ReleaseAnimalToWild.TryFindClosestOutsideCell(actor.Position, actor.Map, TraverseParms.For(actor, Danger.Deadly, TraverseMode.ByPawn, false, false, false, true), actor, out c))
-				{
-					CS$<>8__locals1.<>4__this.EndJobWith(JobCondition.Incompletable);
-					return;
-				}
-				actor.pather.StartPath(c, PathEndMode.OnCell);
-			};
-			CS$<>8__locals1.toil.defaultCompleteMode = ToilCompleteMode.PatherArrival;
-			yield return CS$<>8__locals1.toil;
-			yield return Toils_Haul.PlaceHauledThingInCell(TargetIndex.A, null, false, false);
-			CS$<>8__locals1 = null;
-			yield return waitToil;
-			yield return Toils_General.Do(delegate
-			{
-				ReleaseAnimalToWildUtility.DoReleaseAnimal(this.Animal, this.pawn);
-			});
-			yield break;
-		}
-
-		// Token: 0x04004B81 RID: 19329
-		private const TargetIndex AnimalInd = TargetIndex.A;
-
-		// Token: 0x04004B82 RID: 19330
-		private const int WaitForTicks = 180;
+			_003C_003E4__this = this
+		};
 	}
 }

@@ -1,122 +1,274 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_ConstructFinishFrame : JobDriver, IBuildableDriver
 {
-	// Token: 0x0200116A RID: 4458
-	public class JobDriver_ConstructFinishFrame : JobDriver, IBuildableDriver
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass8_0
 	{
-		// Token: 0x170010D6 RID: 4310
-		// (get) Token: 0x06006D12 RID: 27922 RVA: 0x0022354C File Offset: 0x0022174C
-		private Frame Frame
+		public Toil build;
+
+		public JobDriver_ConstructFinishFrame _003C_003E4__this;
+
+		internal void _003CMakeNewToils_003Eb__0()
 		{
-			get
+			GenClamor.DoClamor(build.actor, 15f, ClamorDefOf.Construction);
+		}
+
+		internal void _003CMakeNewToils_003Eb__1(int delta)
+		{
+			Pawn actor = build.actor;
+			Frame frame = _003C_003E4__this.Frame;
+			if (frame.resourceContainer.Count > 0 && actor.skills != null)
 			{
-				return (Frame)this.job.GetTarget(TargetIndex.A).Thing;
+				actor.skills.Learn(SkillDefOf.Construction, 0.25f * (float)delta);
+			}
+			actor.rotationTracker.FaceTarget(_003C_003E4__this.IsBuildingAttachment ? GenConstruct.GetWallAttachedTo(frame) : frame);
+			float num = actor.GetStatValue(StatDefOf.ConstructionSpeed) * 1.7f * (float)delta;
+			if (frame.Stuff != null)
+			{
+				num *= frame.Stuff.GetStatValueAbstract(StatDefOf.ConstructionSpeedFactor);
+			}
+			float workToBuild = frame.WorkToBuild;
+			if (actor.Faction == Faction.OfPlayer)
+			{
+				float statValue = actor.GetStatValue(StatDefOf.ConstructSuccessChance);
+				if (!TutorSystem.TutorialMode && Rand.Value < 1f - Mathf.Pow(statValue, num / workToBuild))
+				{
+					frame.FailConstruction(actor);
+					_003C_003E4__this.ReadyForNextToil();
+					return;
+				}
+			}
+			if (frame.def.entityDefToBuild is TerrainDef)
+			{
+				_003C_003E4__this.Map.snowGrid.SetDepth(frame.Position, 0f);
+				_003C_003E4__this.Map.sandGrid?.SetDepth(frame.Position, 0f);
+			}
+			frame.workDone += num;
+			if (frame.workDone >= workToBuild)
+			{
+				frame.CompleteConstruction(actor);
+				_003C_003E4__this.ReadyForNextToil();
 			}
 		}
 
-		// Token: 0x170010D7 RID: 4311
-		// (get) Token: 0x06006D13 RID: 27923 RVA: 0x00223574 File Offset: 0x00221774
-		private bool IsBuildingAttachment
+		internal EffecterDef _003CMakeNewToils_003Eb__2()
 		{
+			return ((Frame)build.actor.jobs.curJob.GetTarget(TargetIndex.A).Thing).ConstructionEffect;
+		}
+
+		internal bool _003CMakeNewToils_003Eb__3()
+		{
+			return !GenConstruct.CanConstruct(_003C_003E4__this.Frame, _003C_003E4__this.pawn);
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__8 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_ConstructFinishFrame _003C_003E4__this;
+
+		private _003C_003Ec__DisplayClass8_0 _003C_003E8__1;
+
+		Toil IEnumerator<Toil>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				ThingDef thingDef = GenConstruct.BuiltDefOf(this.Frame.def) as ThingDef;
-				BuildingProperties buildingProperties = (thingDef != null) ? thingDef.building : null;
-				return buildingProperties != null && buildingProperties.isAttachment;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06006D14 RID: 27924 RVA: 0x001E06E3 File Offset: 0x001DE8E3
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		object IEnumerator.Current
 		{
-			return this.pawn.Reserve(this.job.targetA, this.job, 1, -1, null, errorOnFailed, false);
-		}
-
-		// Token: 0x06006D15 RID: 27925 RVA: 0x002235AE File Offset: 0x002217AE
-		public bool TryGetBuildableRect(out CellRect rect)
-		{
-			rect = this.Frame.OccupiedRect();
-			return true;
-		}
-
-		// Token: 0x06006D16 RID: 27926 RVA: 0x002235C2 File Offset: 0x002217C2
-		protected override IEnumerable<Toil> MakeNewToils()
-		{
-			if (this.IsBuildingAttachment)
+			[DebuggerHidden]
+			get
 			{
-				yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.OnCell, false).FailOnDespawnedNullOrForbidden(TargetIndex.A);
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__8(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E8__1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_ConstructFinishFrame jobDriver_ConstructFinishFrame = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E8__1 = new _003C_003Ec__DisplayClass8_0();
+				_003C_003E8__1._003C_003E4__this = _003C_003E4__this;
+				if (jobDriver_ConstructFinishFrame.IsBuildingAttachment)
+				{
+					_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.OnCell).FailOnDespawnedNullOrForbidden(TargetIndex.A);
+					_003C_003E1__state = 1;
+					return true;
+				}
+				_003C_003E2__current = Toils_Goto.GotoBuild(TargetIndex.A).FailOnDespawnedNullOrForbidden(TargetIndex.A);
+				_003C_003E1__state = 2;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				goto IL_0099;
+			case 2:
+				_003C_003E1__state = -1;
+				goto IL_0099;
+			case 3:
+				{
+					_003C_003E1__state = -1;
+					return false;
+				}
+				IL_0099:
+				_003C_003E8__1.build = ToilMaker.MakeToil("MakeNewToils");
+				_003C_003E8__1.build.initAction = delegate
+				{
+					GenClamor.DoClamor(_003C_003E8__1.build.actor, 15f, ClamorDefOf.Construction);
+				};
+				_003C_003E8__1.build.tickIntervalAction = delegate(int delta)
+				{
+					Pawn actor = _003C_003E8__1.build.actor;
+					Frame frame = _003C_003E8__1._003C_003E4__this.Frame;
+					if (frame.resourceContainer.Count > 0 && actor.skills != null)
+					{
+						actor.skills.Learn(SkillDefOf.Construction, 0.25f * (float)delta);
+					}
+					actor.rotationTracker.FaceTarget(_003C_003E8__1._003C_003E4__this.IsBuildingAttachment ? GenConstruct.GetWallAttachedTo(frame) : frame);
+					float num2 = actor.GetStatValue(StatDefOf.ConstructionSpeed) * 1.7f * (float)delta;
+					if (frame.Stuff != null)
+					{
+						num2 *= frame.Stuff.GetStatValueAbstract(StatDefOf.ConstructionSpeedFactor);
+					}
+					float workToBuild = frame.WorkToBuild;
+					if (actor.Faction == Faction.OfPlayer)
+					{
+						float statValue = actor.GetStatValue(StatDefOf.ConstructSuccessChance);
+						if (!TutorSystem.TutorialMode && Rand.Value < 1f - Mathf.Pow(statValue, num2 / workToBuild))
+						{
+							frame.FailConstruction(actor);
+							_003C_003E8__1._003C_003E4__this.ReadyForNextToil();
+							return;
+						}
+					}
+					if (frame.def.entityDefToBuild is TerrainDef)
+					{
+						_003C_003E8__1._003C_003E4__this.Map.snowGrid.SetDepth(frame.Position, 0f);
+						_003C_003E8__1._003C_003E4__this.Map.sandGrid?.SetDepth(frame.Position, 0f);
+					}
+					frame.workDone += num2;
+					if (frame.workDone >= workToBuild)
+					{
+						frame.CompleteConstruction(actor);
+						_003C_003E8__1._003C_003E4__this.ReadyForNextToil();
+					}
+				};
+				_003C_003E8__1.build.WithEffect(() => ((Frame)_003C_003E8__1.build.actor.jobs.curJob.GetTarget(TargetIndex.A).Thing).ConstructionEffect, TargetIndex.A, null);
+				_003C_003E8__1.build.FailOnDespawnedNullOrForbidden(TargetIndex.A);
+				_003C_003E8__1.build.FailOn(() => !GenConstruct.CanConstruct(_003C_003E8__1._003C_003E4__this.Frame, _003C_003E8__1._003C_003E4__this.pawn));
+				_003C_003E8__1.build.defaultCompleteMode = ToilCompleteMode.Delay;
+				_003C_003E8__1.build.defaultDuration = 5000;
+				_003C_003E8__1.build.activeSkill = () => SkillDefOf.Construction;
+				_003C_003E8__1.build.handlingFacing = true;
+				_003C_003E2__current = _003C_003E8__1.build;
+				_003C_003E1__state = 3;
+				return true;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__8 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
 			}
 			else
 			{
-				yield return Toils_Goto.GotoBuild(TargetIndex.A).FailOnDespawnedNullOrForbidden(TargetIndex.A);
+				result = new _003CMakeNewToils_003Ed__8(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
-			Toil build = ToilMaker.MakeToil("MakeNewToils");
-			build.initAction = delegate()
-			{
-				GenClamor.DoClamor(build.actor, 15f, ClamorDefOf.Construction);
-			};
-			build.tickIntervalAction = delegate(int delta)
-			{
-				Pawn actor = build.actor;
-				Frame frame = this.Frame;
-				if (frame.resourceContainer.Count > 0 && actor.skills != null)
-				{
-					actor.skills.Learn(SkillDefOf.Construction, 0.25f * (float)delta, false, false);
-				}
-				actor.rotationTracker.FaceTarget(this.IsBuildingAttachment ? GenConstruct.GetWallAttachedTo(frame) : frame);
-				float num = actor.GetStatValue(StatDefOf.ConstructionSpeed, true, -1) * 1.7f * (float)delta;
-				if (frame.Stuff != null)
-				{
-					num *= frame.Stuff.GetStatValueAbstract(StatDefOf.ConstructionSpeedFactor, null);
-				}
-				float workToBuild = frame.WorkToBuild;
-				if (actor.Faction == Faction.OfPlayer)
-				{
-					float statValue = actor.GetStatValue(StatDefOf.ConstructSuccessChance, true, -1);
-					if (!TutorSystem.TutorialMode && Rand.Value < 1f - Mathf.Pow(statValue, num / workToBuild))
-					{
-						frame.FailConstruction(actor);
-						this.ReadyForNextToil();
-						return;
-					}
-				}
-				if (frame.def.entityDefToBuild is TerrainDef)
-				{
-					this.Map.snowGrid.SetDepth(frame.Position, 0f);
-					SandGrid sandGrid = this.Map.sandGrid;
-					if (sandGrid != null)
-					{
-						sandGrid.SetDepth(frame.Position, 0f);
-					}
-				}
-				frame.workDone += num;
-				if (frame.workDone >= workToBuild)
-				{
-					frame.CompleteConstruction(actor);
-					this.ReadyForNextToil();
-					return;
-				}
-			};
-			build.WithEffect(() => ((Frame)build.actor.jobs.curJob.GetTarget(TargetIndex.A).Thing).ConstructionEffect, TargetIndex.A, null);
-			build.FailOnDespawnedNullOrForbidden(TargetIndex.A);
-			build.FailOn(() => !GenConstruct.CanConstruct(this.Frame, this.pawn, true, false, null));
-			build.defaultCompleteMode = ToilCompleteMode.Delay;
-			build.defaultDuration = 5000;
-			build.activeSkill = (() => SkillDefOf.Construction);
-			build.handlingFacing = true;
-			yield return build;
-			yield break;
+			return result;
 		}
 
-		// Token: 0x04004C79 RID: 19577
-		private const int JobEndInterval = 5000;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x04004C7A RID: 19578
-		private const TargetIndex BuildingInd = TargetIndex.A;
+	private const int JobEndInterval = 5000;
+
+	private const TargetIndex BuildingInd = TargetIndex.A;
+
+	private Frame Frame => (Frame)job.GetTarget(TargetIndex.A).Thing;
+
+	private bool IsBuildingAttachment => ((GenConstruct.BuiltDefOf(Frame.def) as ThingDef)?.building)?.isAttachment ?? false;
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return pawn.Reserve(job.targetA, job, 1, -1, null, errorOnFailed);
+	}
+
+	public bool TryGetBuildableRect(out CellRect rect)
+	{
+		rect = Frame.OccupiedRect();
+		return true;
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__8))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__8(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

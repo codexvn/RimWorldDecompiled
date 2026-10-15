@@ -1,686 +1,697 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Verse;
 using Verse.AI.Group;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Pawn_MutantTracker : IExposable, IVerbOwner
 {
-	// Token: 0x02002466 RID: 9318
-	public class Pawn_MutantTracker : IExposable, IVerbOwner
+	public struct ThinkTrees
 	{
-		// Token: 0x17001E83 RID: 7811
-		// (get) Token: 0x0600CA04 RID: 51716 RVA: 0x003B25B9 File Offset: 0x003B07B9
-		public MutantDef Def
+		public ThinkTreeDef main;
+
+		public ThinkTreeDef constant;
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGetGizmos_003Ed__49 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Pawn_MutantTracker _003C_003E4__this;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.def;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001E84 RID: 7812
-		// (get) Token: 0x0600CA05 RID: 51717 RVA: 0x003B25C1 File Offset: 0x003B07C1
-		public bool HasTurned
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.hasTurned;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001E85 RID: 7813
-		// (get) Token: 0x0600CA06 RID: 51718 RVA: 0x003B25C9 File Offset: 0x003B07C9
-		public bool IsPassive
+		[DebuggerHidden]
+		public _003CGetGizmos_003Ed__49(int _003C_003E1__state)
 		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			Pawn_MutantTracker pawn_MutantTracker = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+			{
+				_003C_003E1__state = -1;
+				Gizmo gizmo = AnomalyUtility.OpenCodexGizmo(pawn_MutantTracker.pawn);
+				if (gizmo != null)
+				{
+					_003C_003E2__current = gizmo;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				break;
+			}
+			case 1:
+				_003C_003E1__state = -1;
+				break;
+			}
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CGetGizmos_003Ed__49 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CGetGizmos_003Ed__49(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CSpecialDisplayStats_003Ed__50 : IEnumerable<StatDrawEntry>, IEnumerable, IEnumerator<StatDrawEntry>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private StatDrawEntry _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Pawn_MutantTracker _003C_003E4__this;
+
+		StatDrawEntry IEnumerator<StatDrawEntry>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				return this.def.passive;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001E86 RID: 7814
-		// (get) Token: 0x0600CA07 RID: 51719 RVA: 0x003B25D6 File Offset: 0x003B07D6
-		public Hediff Hediff
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.mutantHediff;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001E87 RID: 7815
-		// (get) Token: 0x0600CA08 RID: 51720 RVA: 0x003B25DE File Offset: 0x003B07DE
-		public List<Verb> AllVerbs
+		[DebuggerHidden]
+		public _003CSpecialDisplayStats_003Ed__50(int _003C_003E1__state)
 		{
-			get
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			Pawn_MutantTracker pawn_MutantTracker = _003C_003E4__this;
+			switch (num)
 			{
-				return this.verbTracker.AllVerbs;
-			}
-		}
-
-		// Token: 0x17001E88 RID: 7816
-		// (get) Token: 0x0600CA09 RID: 51721 RVA: 0x003B25EB File Offset: 0x003B07EB
-		public VerbTracker VerbTracker
-		{
-			get
-			{
-				return this.verbTracker;
-			}
-		}
-
-		// Token: 0x17001E89 RID: 7817
-		// (get) Token: 0x0600CA0A RID: 51722 RVA: 0x003B25F3 File Offset: 0x003B07F3
-		public List<VerbProperties> VerbProperties
-		{
-			get
-			{
-				return this.Def.verbs;
-			}
-		}
-
-		// Token: 0x17001E8A RID: 7818
-		// (get) Token: 0x0600CA0B RID: 51723 RVA: 0x003B2600 File Offset: 0x003B0800
-		public List<Tool> Tools
-		{
-			get
-			{
-				return this.Def.tools;
-			}
-		}
-
-		// Token: 0x17001E8B RID: 7819
-		// (get) Token: 0x0600CA0C RID: 51724 RVA: 0x0036EC81 File Offset: 0x0036CE81
-		public ImplementOwnerTypeDef ImplementOwnerTypeDef
-		{
-			get
-			{
-				return ImplementOwnerTypeDefOf.NativeVerb;
-			}
-		}
-
-		// Token: 0x17001E8C RID: 7820
-		// (get) Token: 0x0600CA0D RID: 51725 RVA: 0x003B260D File Offset: 0x003B080D
-		public Thing ConstantCaster
-		{
-			get
-			{
-				return this.pawn;
-			}
-		}
-
-		// Token: 0x0600CA0E RID: 51726 RVA: 0x003B2615 File Offset: 0x003B0815
-		public string UniqueVerbOwnerID()
-		{
-			return this.pawn.GetUniqueLoadID() + "_mutant";
-		}
-
-		// Token: 0x0600CA0F RID: 51727 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public bool VerbsStillUsableBy(Pawn p)
-		{
-			return true;
-		}
-
-		// Token: 0x17001E8D RID: 7821
-		// (get) Token: 0x0600CA10 RID: 51728 RVA: 0x003B262C File Offset: 0x003B082C
-		public List<Ability> AllAbilitiesForReading
-		{
-			get
-			{
-				if (this.abilities == null)
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (pawn_MutantTracker.pawn.TryGetComp<CompProducesBioferrite>() != null)
 				{
-					this.abilities = new List<Ability>();
-					foreach (AbilityDef abilityDef in this.def.abilities)
-					{
-						this.abilities.Add(AbilityUtility.MakeAbility(abilityDef, this.pawn));
-					}
+					return false;
 				}
-				return this.abilities;
-			}
-		}
-
-		// Token: 0x0600CA11 RID: 51729 RVA: 0x003B26B0 File Offset: 0x003B08B0
-		public Pawn_MutantTracker(Pawn pawn, MutantDef def, RotStage rotStage)
-		{
-			this.pawn = pawn;
-			this.def = def;
-			this.rotStage = rotStage;
-			this.verbTracker = new VerbTracker(this);
-			this.originalFaction = pawn.HomeFaction;
-			if (pawn.RaceProps.Humanlike)
-			{
-				Ideo ideo;
-				if ((ideo = pawn.Ideo) == null)
+				if (pawn_MutantTracker.def.producesBioferrite)
 				{
-					Faction faction = pawn.Faction;
-					Ideo ideo2;
-					if (faction == null)
-					{
-						ideo2 = null;
-					}
-					else
-					{
-						FactionIdeosTracker ideos = faction.ideos;
-						ideo2 = ((ideos != null) ? ideos.PrimaryIdeo : null);
-					}
-					ideo = (ideo2 ?? Find.IdeoManager.IdeosListForReading.RandomElement<Ideo>());
+					StatDrawEntry statDrawEntry = CompProducesBioferrite.BioferriteStatDrawEntry(pawn_MutantTracker.pawn);
+					statDrawEntry.overridesHideStats = true;
+					_003C_003E2__current = statDrawEntry;
+					_003C_003E1__state = 1;
+					return true;
 				}
-				this.originalIdeo = ideo;
-				Faction faction2;
-				if ((faction2 = this.originalFaction) == null)
-				{
-					if ((faction2 = Find.FactionManager.AllFactionsVisible.FirstOrDefault((Faction f) => f.def == FactionDefOf.OutlanderCivil)) == null)
-					{
-						if ((faction2 = Find.FactionManager.AllFactionsVisible.FirstOrDefault((Faction f) => f.def == FactionDefOf.OutlanderRough)) == null)
-						{
-							faction2 = (from f in Find.FactionManager.AllFactionsListForReading
-							where !f.IsPlayer && f.def.humanlikeFaction && !f.Hidden && !f.temporary
-							select f).RandomElement<Faction>();
-						}
-					}
-				}
-				this.originalFaction = faction2;
+				break;
+			case 1:
+				_003C_003E1__state = -1;
+				break;
 			}
+			return false;
 		}
 
-		// Token: 0x0600CA12 RID: 51730 RVA: 0x003B27EB File Offset: 0x003B09EB
-		public Pawn_MutantTracker(Pawn pawn)
+		bool IEnumerator.MoveNext()
 		{
-			this.pawn = pawn;
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0600CA13 RID: 51731 RVA: 0x003B27FC File Offset: 0x003B09FC
-		public Pawn_MutantTracker.ThinkTrees GetThinkTrees()
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			return new Pawn_MutantTracker.ThinkTrees
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<StatDrawEntry> IEnumerable<StatDrawEntry>.GetEnumerator()
+		{
+			_003CSpecialDisplayStats_003Ed__50 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				main = this.def.thinkTree,
-				constant = this.def.thinkTreeConstant
-			};
-		}
-
-		// Token: 0x0600CA14 RID: 51732 RVA: 0x003B2836 File Offset: 0x003B0A36
-		public void MutantTrackerTick()
-		{
-			this.verbTracker.VerbsTick();
-		}
-
-		// Token: 0x0600CA15 RID: 51733 RVA: 0x003B2844 File Offset: 0x003B0A44
-		public void MutantTrackerTickInterval(int delta)
-		{
-			if (!this.pawn.Drawer.renderer.HasAnimation && this.Def.standingAnimation != null)
-			{
-				this.pawn.Drawer.renderer.SetAnimation(this.Def.standingAnimation);
+				_003C_003E1__state = 0;
+				result = this;
 			}
-			if (this.pawn.Spawned && this.pawn.GetPosture() == PawnPosture.Standing)
+			else
 			{
-				if (this.rotStage == RotStage.Rotting && Rand.MTBEventOccurs(5f, 2500f, 1f))
+				result = new _003CSpecialDisplayStats_003Ed__50(0)
 				{
-					FilthMaker.TryMakeFilth(this.pawn.PositionHeld, this.pawn.MapHeld, ThingDefOf.Filth_CorpseBile, this.pawn.LabelIndefinite(), 1, FilthSourceFlags.None);
-				}
-				float summaryHealthPercent = this.pawn.health.summaryHealth.SummaryHealthPercent;
-				if (!this.Def.canBleed && this.Def.bloodDef != null && this.rotStage != RotStage.Dessicated && summaryHealthPercent < 1f && Rand.MTBEventOccurs(Pawn_MutantTracker.DropBloodMTBSecondsFromHealthPctCurve.Evaluate(summaryHealthPercent), 60f, 1f))
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<StatDrawEntry>)this).GetEnumerator();
+		}
+	}
+
+	private const float RottenDropCorpseBileMTBHours = 5f;
+
+	private static readonly SimpleCurve DropBloodMTBSecondsFromHealthPctCurve = new SimpleCurve
+	{
+		new CurvePoint(0f, 5f),
+		new CurvePoint(1f, 120f)
+	};
+
+	private Pawn pawn;
+
+	private MutantDef def;
+
+	public RotStage rotStage;
+
+	private bool hasTurned;
+
+	private Hediff mutantHediff;
+
+	public VerbTracker verbTracker;
+
+	private Faction originalFaction;
+
+	private Ideo originalIdeo;
+
+	private List<Ability> abilities;
+
+	public MutantDef Def => def;
+
+	public bool HasTurned => hasTurned;
+
+	public bool IsPassive => def.passive;
+
+	public Hediff Hediff => mutantHediff;
+
+	public List<Verb> AllVerbs => verbTracker.AllVerbs;
+
+	public VerbTracker VerbTracker => verbTracker;
+
+	public List<VerbProperties> VerbProperties => Def.verbs;
+
+	public List<Tool> Tools => Def.tools;
+
+	public ImplementOwnerTypeDef ImplementOwnerTypeDef => ImplementOwnerTypeDefOf.NativeVerb;
+
+	public Thing ConstantCaster => pawn;
+
+	public List<Ability> AllAbilitiesForReading
+	{
+		get
+		{
+			if (abilities == null)
+			{
+				abilities = new List<Ability>();
+				foreach (AbilityDef ability in def.abilities)
 				{
-					this.pawn.health.DropBloodFilth();
+					abilities.Add(AbilityUtility.MakeAbility(ability, pawn));
 				}
 			}
-			if (this.Def.hediffGivers != null && this.pawn.IsHashIntervalTick(60, delta))
+			return abilities;
+		}
+	}
+
+	public string UniqueVerbOwnerID()
+	{
+		return pawn.GetUniqueLoadID() + "_mutant";
+	}
+
+	public bool VerbsStillUsableBy(Pawn p)
+	{
+		return true;
+	}
+
+	public Pawn_MutantTracker(Pawn pawn, MutantDef def, RotStage rotStage)
+	{
+		this.pawn = pawn;
+		this.def = def;
+		this.rotStage = rotStage;
+		verbTracker = new VerbTracker(this);
+		originalFaction = pawn.HomeFaction;
+		if (pawn.RaceProps.Humanlike)
+		{
+			originalIdeo = pawn.Ideo ?? pawn.Faction?.ideos?.PrimaryIdeo ?? Find.IdeoManager.IdeosListForReading.RandomElement();
+			originalFaction = originalFaction ?? Find.FactionManager.AllFactionsVisible.FirstOrDefault((Faction f) => f.def == FactionDefOf.OutlanderCivil) ?? Find.FactionManager.AllFactionsVisible.FirstOrDefault((Faction f) => f.def == FactionDefOf.OutlanderRough) ?? Find.FactionManager.AllFactionsListForReading.Where((Faction f) => !f.IsPlayer && f.def.humanlikeFaction && !f.Hidden && !f.temporary).RandomElement();
+		}
+	}
+
+	public Pawn_MutantTracker(Pawn pawn)
+	{
+		this.pawn = pawn;
+	}
+
+	public ThinkTrees GetThinkTrees()
+	{
+		ThinkTrees result = default(ThinkTrees);
+		result.main = def.thinkTree;
+		result.constant = def.thinkTreeConstant;
+		return result;
+	}
+
+	public void MutantTrackerTick()
+	{
+		verbTracker.VerbsTick();
+	}
+
+	public void MutantTrackerTickInterval(int delta)
+	{
+		if (!pawn.Drawer.renderer.HasAnimation && Def.standingAnimation != null)
+		{
+			pawn.Drawer.renderer.SetAnimation(Def.standingAnimation);
+		}
+		if (pawn.Spawned && pawn.GetPosture() == PawnPosture.Standing)
+		{
+			if (rotStage == RotStage.Rotting && Rand.MTBEventOccurs(5f, 2500f, 1f))
 			{
-				for (int i = 0; i < this.Def.hediffGivers.Count; i++)
+				FilthMaker.TryMakeFilth(pawn.PositionHeld, pawn.MapHeld, ThingDefOf.Filth_CorpseBile, pawn.LabelIndefinite());
+			}
+			float summaryHealthPercent = pawn.health.summaryHealth.SummaryHealthPercent;
+			if (!Def.canBleed && Def.bloodDef != null && rotStage != RotStage.Dessicated && summaryHealthPercent < 1f && Rand.MTBEventOccurs(DropBloodMTBSecondsFromHealthPctCurve.Evaluate(summaryHealthPercent), 60f, 1f))
+			{
+				pawn.health.DropBloodFilth();
+			}
+		}
+		if (Def.hediffGivers != null && pawn.IsHashIntervalTick(60, delta))
+		{
+			for (int i = 0; i < Def.hediffGivers.Count; i++)
+			{
+				Def.hediffGivers[i].OnIntervalPassed(pawn, mutantHediff);
+			}
+		}
+	}
+
+	public void Turn(bool clearLord = false)
+	{
+		if (hasTurned)
+		{
+			Log.Error("Tried to turn mutant " + pawn?.ToString() + " again");
+			return;
+		}
+		hasTurned = true;
+		if (def.hediff != null)
+		{
+			mutantHediff = pawn.health.GetOrAddHediff(def.hediff, null, null);
+		}
+		if (!def.givesHediffs.NullOrEmpty())
+		{
+			HealthUtility.AddStartingHediffs(pawn, def.givesHediffs);
+		}
+		if (def.terminatePregnancy)
+		{
+			PregnancyUtility.ForceEndPregnancy(pawn, preventLetter: true);
+		}
+		if (pawn.caller == null)
+		{
+			pawn.caller = new Pawn_CallTracker(pawn);
+		}
+		pawn.needs?.AddOrRemoveNeedsAsAppropriate();
+		pawn.Notify_DisabledWorkTypesChanged();
+		if (def.disablesIdeo)
+		{
+			pawn.ideo?.SetIdeo(null);
+		}
+		pawn.guest?.SetGuestStatus(null);
+		if (pawn.royalty != null)
+		{
+			pawn.royalty.Notify_PawnKilled();
+			pawn.royalty.UpdateAvailableAbilities();
+		}
+		pawn.playerSettings?.ResetMedicalCare();
+		if (pawn.Spawned)
+		{
+			pawn.Map.attackTargetsCache.UpdateTarget(pawn);
+		}
+		if (clearLord)
+		{
+			pawn.GetLord()?.Notify_PawnLost(pawn, PawnLostCondition.Killed, null);
+		}
+		if (!Def.passive && pawn.playerSettings != null)
+		{
+			pawn.playerSettings.hostilityResponse = HostilityResponseMode.Attack;
+		}
+		pawn.ownership.UnclaimAll();
+		if (pawn.Faction != null && pawn.Faction.IsPlayer)
+		{
+			BillUtility.Notify_ColonistUnavailable(pawn);
+		}
+		QuestUtility.SendQuestTargetSignals(pawn.questTags, "BecameMutant", pawn.Named("SUBJECT"));
+		Find.QuestManager.Notify_PawnKilled(pawn, null);
+		if (ModsConfig.BiotechActive && MechanitorUtility.IsMechanitor(pawn))
+		{
+			Find.History.Notify_MechanitorDied();
+		}
+		if (Def.relativeTurnedThought != null)
+		{
+			foreach (Pawn item in PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive)
+			{
+				if (item.needs != null && item.RaceProps.IsFlesh && item.needs.mood != null && (item.relations.OpinionOf(pawn) >= 20 || item.relations.FamilyByBlood.Contains(pawn)))
 				{
-					this.Def.hediffGivers[i].OnIntervalPassed(this.pawn, this.mutantHediff);
+					item.needs.mood.thoughts.memories.TryGainMemory(Def.relativeTurnedThought, pawn);
 				}
 			}
 		}
-
-		// Token: 0x0600CA16 RID: 51734 RVA: 0x003B29CC File Offset: 0x003B0BCC
-		public void Turn(bool clearLord = false)
+		pawn.genes?.Reset();
+		pawn.abilities?.Notify_TemporaryAbilitiesChanged();
+		if (pawn.outfits != null)
 		{
-			if (this.hasTurned)
-			{
-				string str = "Tried to turn mutant ";
-				Pawn pawn = this.pawn;
-				Log.Error(str + ((pawn != null) ? pawn.ToString() : null) + " again");
-				return;
-			}
-			this.hasTurned = true;
-			if (this.def.hediff != null)
-			{
-				this.mutantHediff = this.pawn.health.GetOrAddHediff(this.def.hediff, null, null, null);
-			}
-			if (!this.def.givesHediffs.NullOrEmpty<StartingHediff>())
-			{
-				HealthUtility.AddStartingHediffs(this.pawn, this.def.givesHediffs);
-			}
-			if (this.def.terminatePregnancy)
-			{
-				PregnancyUtility.ForceEndPregnancy(this.pawn, true);
-			}
-			if (this.pawn.caller == null)
-			{
-				this.pawn.caller = new Pawn_CallTracker(this.pawn);
-			}
-			Pawn_NeedsTracker needs = this.pawn.needs;
-			if (needs != null)
-			{
-				needs.AddOrRemoveNeedsAsAppropriate();
-			}
-			this.pawn.Notify_DisabledWorkTypesChanged();
-			if (this.def.disablesIdeo)
-			{
-				Pawn_IdeoTracker ideo = this.pawn.ideo;
-				if (ideo != null)
-				{
-					ideo.SetIdeo(null);
-				}
-			}
-			Pawn_GuestTracker guest = this.pawn.guest;
-			if (guest != null)
-			{
-				guest.SetGuestStatus(null, GuestStatus.Guest);
-			}
-			if (this.pawn.royalty != null)
-			{
-				this.pawn.royalty.Notify_PawnKilled();
-				this.pawn.royalty.UpdateAvailableAbilities();
-			}
-			Pawn_PlayerSettings playerSettings = this.pawn.playerSettings;
-			if (playerSettings != null)
-			{
-				playerSettings.ResetMedicalCare();
-			}
-			if (this.pawn.Spawned)
-			{
-				this.pawn.Map.attackTargetsCache.UpdateTarget(this.pawn);
-			}
-			if (clearLord)
-			{
-				Lord lord = this.pawn.GetLord();
-				if (lord != null)
-				{
-					lord.Notify_PawnLost(this.pawn, PawnLostCondition.Killed, null);
-				}
-			}
-			if (!this.Def.passive && this.pawn.playerSettings != null)
-			{
-				this.pawn.playerSettings.hostilityResponse = HostilityResponseMode.Attack;
-			}
-			this.pawn.ownership.UnclaimAll();
-			if (this.pawn.Faction != null && this.pawn.Faction.IsPlayer)
-			{
-				BillUtility.Notify_ColonistUnavailable(this.pawn);
-			}
-			QuestUtility.SendQuestTargetSignals(this.pawn.questTags, "BecameMutant", this.pawn.Named("SUBJECT"));
-			Find.QuestManager.Notify_PawnKilled(this.pawn, null);
-			if (ModsConfig.BiotechActive && MechanitorUtility.IsMechanitor(this.pawn))
-			{
-				Find.History.Notify_MechanitorDied();
-			}
-			if (this.Def.relativeTurnedThought != null)
-			{
-				foreach (Pawn pawn2 in PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive)
-				{
-					if (pawn2.needs != null && pawn2.RaceProps.IsFlesh && pawn2.needs.mood != null && (pawn2.relations.OpinionOf(this.pawn) >= 20 || pawn2.relations.FamilyByBlood.Contains(this.pawn)))
-					{
-						pawn2.needs.mood.thoughts.memories.TryGainMemory(this.Def.relativeTurnedThought, this.pawn, null);
-					}
-				}
-			}
-			Pawn_GeneTracker genes = this.pawn.genes;
-			if (genes != null)
-			{
-				genes.Reset();
-			}
-			Pawn_AbilityTracker pawn_AbilityTracker = this.pawn.abilities;
-			if (pawn_AbilityTracker != null)
-			{
-				pawn_AbilityTracker.Notify_TemporaryAbilitiesChanged();
-			}
-			if (this.pawn.outfits != null)
-			{
-				this.pawn.outfits.CurrentApparelPolicy = null;
-			}
-			if (this.pawn.foodRestriction != null)
-			{
-				this.pawn.foodRestriction.CurrentFoodPolicy = null;
-			}
-			if (this.pawn.drugs != null)
-			{
-				this.pawn.drugs.CurrentPolicy = null;
-			}
-			if (this.pawn.reading != null)
-			{
-				this.pawn.reading.CurrentPolicy = null;
-			}
-			this.HandleEquipment();
-			this.ResolveGraphics();
-			this.pawn.Drawer.renderer.SetAnimation(this.Def.standingAnimation);
-			if (Current.ProgramState == ProgramState.Playing)
-			{
-				Find.ColonistBar.MarkColonistsDirty();
-			}
-			if (this.def.codexEntry != null)
-			{
-				Find.EntityCodex.SetDiscovered(this.def.codexEntry, this.pawn.def, this.pawn);
-			}
-			if (this.def.clearsEgo)
-			{
-				this.pawn.everLostEgo = true;
-			}
+			pawn.outfits.CurrentApparelPolicy = null;
 		}
-
-		// Token: 0x0600CA17 RID: 51735 RVA: 0x003B2E5C File Offset: 0x003B105C
-		public void Revert(bool beingKilled = false)
+		if (pawn.foodRestriction != null)
 		{
-			if (!this.hasTurned)
-			{
-				string str = "Tried to revert mutant ";
-				Pawn pawn = this.pawn;
-				Log.Error(str + ((pawn != null) ? pawn.ToString() : null) + " who hasn't turned");
-				return;
-			}
-			this.hasTurned = false;
-			this.pawn.mutant = null;
-			if (this.mutantHediff != null)
-			{
-				HediffComp_DisappearsAndKills hediffComp_DisappearsAndKills = this.mutantHediff.TryGetComp<HediffComp_DisappearsAndKills>();
-				if (hediffComp_DisappearsAndKills != null)
-				{
-					hediffComp_DisappearsAndKills.disabled = true;
-				}
-				this.pawn.health.RemoveHediff(this.mutantHediff);
-			}
-			foreach (StartingHediff startingHediff in this.def.givesHediffs)
-			{
-				Hediff hediff;
-				if (this.pawn.health.hediffSet.TryGetHediff(startingHediff.def, out hediff))
-				{
-					this.pawn.health.RemoveHediff(hediff);
-				}
-			}
-			Pawn_NeedsTracker needs = this.pawn.needs;
-			if (needs != null)
-			{
-				needs.AddOrRemoveNeedsAsAppropriate();
-			}
-			this.pawn.Notify_DisabledWorkTypesChanged();
-			if (this.pawn.Faction != this.originalFaction)
-			{
-				this.pawn.SetFaction(this.originalFaction, null);
-			}
-			Pawn_IdeoTracker ideo = this.pawn.ideo;
-			if (ideo != null)
-			{
-				ideo.SetIdeo(this.originalIdeo);
-			}
-			if (this.pawn.royalty != null)
-			{
-				if (!beingKilled)
-				{
-					this.pawn.royalty.Notify_Resurrected();
-				}
-				this.pawn.royalty.UpdateAvailableAbilities();
-			}
-			this.pawn.Drawer.renderer.SetAnimation(null);
-			this.abilities = null;
-			Pawn_AbilityTracker pawn_AbilityTracker = this.pawn.abilities;
-			if (pawn_AbilityTracker != null)
-			{
-				pawn_AbilityTracker.Notify_TemporaryAbilitiesChanged();
-			}
-			Pawn_GeneTracker genes = this.pawn.genes;
-			if (genes != null)
-			{
-				genes.Reset();
-			}
-			this.pawn.Drawer.renderer.SetAllGraphicsDirty();
+			pawn.foodRestriction.CurrentFoodPolicy = null;
+		}
+		if (pawn.drugs != null)
+		{
+			pawn.drugs.CurrentPolicy = null;
+		}
+		if (pawn.reading != null)
+		{
+			pawn.reading.CurrentPolicy = null;
+		}
+		HandleEquipment();
+		ResolveGraphics();
+		pawn.Drawer.renderer.SetAnimation(Def.standingAnimation);
+		if (Current.ProgramState == ProgramState.Playing)
+		{
 			Find.ColonistBar.MarkColonistsDirty();
 		}
-
-		// Token: 0x0600CA18 RID: 51736 RVA: 0x003B3050 File Offset: 0x003B1250
-		private void ResolveGraphics()
+		if (def.codexEntry != null)
 		{
-			if (!this.Def.forcedHeadTypes.NullOrEmpty<HeadTypeDef>())
-			{
-				this.pawn.story.TryGetRandomHeadFromSet(this.Def.forcedHeadTypes);
-			}
-			if (this.Def.hairTagFilter != null)
-			{
-				this.pawn.story.hairDef = PawnStyleItemChooser.RandomHairFor(this.pawn);
-			}
-			if (this.Def.beardTagFilter != null)
-			{
-				this.pawn.style.beardDef = PawnStyleItemChooser.RandomBeardFor(this.pawn);
-			}
-			if (this.Def.hairColorOverride != null)
-			{
-				this.pawn.story.HairColor = this.Def.hairColorOverride.Value;
-			}
-			this.pawn.Drawer.renderer.SetAllGraphicsDirty();
+			Find.EntityCodex.SetDiscovered(def.codexEntry, pawn.def, pawn);
 		}
-
-		// Token: 0x0600CA19 RID: 51737 RVA: 0x003B3124 File Offset: 0x003B1324
-		private void HandleEquipment()
+		if (def.clearsEgo)
 		{
-			Pawn_EquipmentTracker equipment = this.pawn.equipment;
-			if (((equipment != null) ? equipment.Primary : null) != null)
+			pawn.everLostEgo = true;
+		}
+	}
+
+	public void Revert(bool beingKilled = false)
+	{
+		if (!hasTurned)
+		{
+			Log.Error("Tried to revert mutant " + pawn?.ToString() + " who hasn't turned");
+			return;
+		}
+		hasTurned = false;
+		pawn.mutant = null;
+		if (mutantHediff != null)
+		{
+			HediffComp_DisappearsAndKills hediffComp_DisappearsAndKills = mutantHediff.TryGetComp<HediffComp_DisappearsAndKills>();
+			if (hediffComp_DisappearsAndKills != null)
 			{
-				ThingWithComps thingWithComps;
-				this.pawn.equipment.TryDropEquipment(this.pawn.equipment.Primary, out thingWithComps, this.pawn.PositionHeld, true);
+				hediffComp_DisappearsAndKills.disabled = true;
 			}
-			if (this.pawn.apparel != null)
+			pawn.health.RemoveHediff(mutantHediff);
+		}
+		foreach (StartingHediff givesHediff in def.givesHediffs)
+		{
+			if (pawn.health.hediffSet.TryGetHediff(givesHediff.def, out var hediff))
 			{
-				if (this.def.disableApparel)
-				{
-					if (this.pawn.MapHeld != null)
-					{
-						this.pawn.apparel.DropAll(this.pawn.Position, true, true, null);
-					}
-					else
-					{
-						this.pawn.apparel.DestroyAll(DestroyMode.Vanish);
-					}
-				}
-				if (this.def.isConsideredCorpse)
-				{
-					foreach (Apparel apparel in this.pawn.apparel.WornApparel)
-					{
-						if (apparel.def.apparel.careIfWornByCorpse)
-						{
-							apparel.WornByCorpse = true;
-						}
-					}
-				}
+				pawn.health.RemoveHediff(hediff);
 			}
 		}
-
-		// Token: 0x0600CA1A RID: 51738 RVA: 0x003B3244 File Offset: 0x003B1444
-		public bool HediffGiversCanGive(HediffDef hediffDef)
+		pawn.needs?.AddOrRemoveNeedsAsAppropriate();
+		pawn.Notify_DisabledWorkTypesChanged();
+		if (pawn.Faction != originalFaction)
 		{
-			if (this.Def.preventIllnesses && hediffDef.chronic)
-			{
-				return false;
-			}
-			List<HediffDef> removesHediffs = this.Def.removesHediffs;
-			return removesHediffs == null || !removesHediffs.Contains(hediffDef);
+			pawn.SetFaction(originalFaction);
 		}
-
-		// Token: 0x0600CA1B RID: 51739 RVA: 0x003B327A File Offset: 0x003B147A
-		public void Notify_Downed()
+		pawn.ideo?.SetIdeo(originalIdeo);
+		if (pawn.royalty != null)
 		{
-			this.pawn.Drawer.renderer.SetAnimation(null);
+			if (!beingKilled)
+			{
+				pawn.royalty.Notify_Resurrected();
+			}
+			pawn.royalty.UpdateAvailableAbilities();
 		}
+		pawn.Drawer.renderer.SetAnimation(null);
+		abilities = null;
+		pawn.abilities?.Notify_TemporaryAbilitiesChanged();
+		pawn.genes?.Reset();
+		pawn.Drawer.renderer.SetAllGraphicsDirty();
+		Find.ColonistBar.MarkColonistsDirty();
+	}
 
-		// Token: 0x0600CA1C RID: 51740 RVA: 0x003B3294 File Offset: 0x003B1494
-		public void Notify_Died(Corpse corpse, DamageInfo? dinfo, Hediff hediff = null)
+	private void ResolveGraphics()
+	{
+		if (!Def.forcedHeadTypes.NullOrEmpty())
 		{
-			if (this.def.isConsideredCorpse)
-			{
-				if (this.rotStage == RotStage.Fresh)
-				{
-					this.rotStage = RotStage.Rotting;
-				}
-				CompRottable compRottable = (corpse != null) ? corpse.GetComp<CompRottable>() : null;
-				if (compRottable != null)
-				{
-					compRottable.RotImmediately(this.rotStage);
-				}
-			}
-			if (this.pawn.Faction == Faction.OfPlayer && this.def.deathLetter != null)
-			{
-				TaggedString label = "Death".Translate(this.pawn.LabelShortCap) + ": " + this.pawn.LabelShortCap;
-				TaggedString text = this.def.deathLetter + " " + HealthUtility.GetDiedLetterText(this.pawn, dinfo, hediff) + "\n\n" + this.def.deathLetterExtra;
-				Find.LetterStack.ReceiveLetter(label, text, LetterDefOf.Death, corpse, null, null, null, null, 0, true);
-			}
+			pawn.story.TryGetRandomHeadFromSet(Def.forcedHeadTypes);
 		}
-
-		// Token: 0x0600CA1D RID: 51741 RVA: 0x003B3394 File Offset: 0x003B1594
-		public void Notify_Spawned(bool respawningAfterLoad)
+		if (Def.hairTagFilter != null)
 		{
-			this.pawn.Map.attackTargetsCache.UpdateTarget(this.pawn);
-			if (this.pawn.Faction == Faction.OfPlayer && this.Def == MutantDefOf.Ghoul)
-			{
-				LessonAutoActivator.TeachOpportunity(ConceptDefOf.ColonyGhouls, OpportunityType.GoodToKnow);
-			}
+			pawn.story.hairDef = PawnStyleItemChooser.RandomHairFor(pawn);
 		}
-
-		// Token: 0x0600CA1E RID: 51742 RVA: 0x003B33E6 File Offset: 0x003B15E6
-		public IEnumerable<Gizmo> GetGizmos()
+		if (Def.beardTagFilter != null)
 		{
-			Gizmo gizmo = AnomalyUtility.OpenCodexGizmo(this.pawn);
-			if (gizmo != null)
-			{
-				yield return gizmo;
-			}
-			yield break;
+			pawn.style.beardDef = PawnStyleItemChooser.RandomBeardFor(pawn);
 		}
-
-		// Token: 0x0600CA1F RID: 51743 RVA: 0x003B33F6 File Offset: 0x003B15F6
-		public IEnumerable<StatDrawEntry> SpecialDisplayStats()
+		if (Def.hairColorOverride.HasValue)
 		{
-			if (this.pawn.TryGetComp<CompProducesBioferrite>() != null)
-			{
-				yield break;
-			}
-			if (this.def.producesBioferrite)
-			{
-				StatDrawEntry statDrawEntry = CompProducesBioferrite.BioferriteStatDrawEntry(this.pawn);
-				statDrawEntry.overridesHideStats = true;
-				yield return statDrawEntry;
-			}
-			yield break;
+			pawn.story.HairColor = Def.hairColorOverride.Value;
 		}
+		pawn.Drawer.renderer.SetAllGraphicsDirty();
+	}
 
-		// Token: 0x0600CA20 RID: 51744 RVA: 0x003B3408 File Offset: 0x003B1608
-		public string GetInspectString()
+	private void HandleEquipment()
+	{
+		if (pawn.equipment?.Primary != null)
 		{
-			StringBuilder stringBuilder = new StringBuilder();
-			if (this.def.showJobReport && this.pawn.Faction == Faction.OfPlayer)
-			{
-				string jobReport = this.pawn.GetJobReport();
-				if (!jobReport.NullOrEmpty())
-				{
-					stringBuilder.AppendLineIfNotEmpty();
-					stringBuilder.Append(jobReport);
-				}
-			}
-			return stringBuilder.ToString();
+			pawn.equipment.TryDropEquipment(pawn.equipment.Primary, out var _, pawn.PositionHeld);
 		}
-
-		// Token: 0x0600CA21 RID: 51745 RVA: 0x003B3464 File Offset: 0x003B1664
-		public void ExposeData()
+		if (pawn.apparel == null)
 		{
-			if (Scribe.mode == LoadSaveMode.Saving)
+			return;
+		}
+		if (def.disableApparel)
+		{
+			if (pawn.MapHeld != null)
 			{
-				if (this.originalFaction != null && !Find.FactionManager.AllFactions.Contains(this.originalFaction))
-				{
-					this.originalFaction = null;
-				}
-				if (this.originalIdeo != null && !Find.IdeoManager.IdeosListForReading.Contains(this.originalIdeo))
-				{
-					this.originalIdeo = null;
-				}
+				pawn.apparel.DropAll(pawn.Position);
 			}
-			Scribe_Defs.Look<MutantDef>(ref this.def, "shamblerType");
-			Scribe_Values.Look<RotStage>(ref this.rotStage, "rotStage", RotStage.Fresh, false);
-			Scribe_Values.Look<bool>(ref this.hasTurned, "hasTurned", false, false);
-			Scribe_References.Look<Hediff>(ref this.mutantHediff, "mutantHediff", false);
-			Scribe_Deep.Look<VerbTracker>(ref this.verbTracker, "verbTracker", new object[]
+			else
 			{
-				this
-			});
-			Scribe_References.Look<Faction>(ref this.originalFaction, "originalFaction", false);
-			Scribe_References.Look<Ideo>(ref this.originalIdeo, "originalIdeo", false);
-			Scribe_Collections.Look<Ability>(ref this.abilities, "abilities", LookMode.Deep, Array.Empty<object>());
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
-			{
-				if (this.abilities != null)
-				{
-					foreach (Ability ability in this.abilities)
-					{
-						ability.pawn = this.pawn;
-						ability.verb.caster = this.pawn;
-					}
-				}
-				if (this.verbTracker == null)
-				{
-					this.verbTracker = new VerbTracker(this);
-				}
+				pawn.apparel.DestroyAll();
 			}
 		}
-
-		// Token: 0x04008984 RID: 35204
-		private const float RottenDropCorpseBileMTBHours = 5f;
-
-		// Token: 0x04008985 RID: 35205
-		private static readonly SimpleCurve DropBloodMTBSecondsFromHealthPctCurve = new SimpleCurve
+		if (!def.isConsideredCorpse)
 		{
+			return;
+		}
+		foreach (Apparel item in pawn.apparel.WornApparel)
+		{
+			if (item.def.apparel.careIfWornByCorpse)
 			{
-				new CurvePoint(0f, 5f),
-				true
-			},
-			{
-				new CurvePoint(1f, 120f),
-				true
+				item.WornByCorpse = true;
 			}
+		}
+	}
+
+	public bool HediffGiversCanGive(HediffDef hediffDef)
+	{
+		if (Def.preventIllnesses && hediffDef.chronic)
+		{
+			return false;
+		}
+		List<HediffDef> removesHediffs = Def.removesHediffs;
+		if (removesHediffs != null && removesHediffs.Contains(hediffDef))
+		{
+			return false;
+		}
+		return true;
+	}
+
+	public void Notify_Downed()
+	{
+		pawn.Drawer.renderer.SetAnimation(null);
+	}
+
+	public void Notify_Died(Corpse corpse, DamageInfo? dinfo, Hediff hediff = null)
+	{
+		if (def.isConsideredCorpse)
+		{
+			if (rotStage == RotStage.Fresh)
+			{
+				rotStage = RotStage.Rotting;
+			}
+			(corpse?.GetComp<CompRottable>())?.RotImmediately(rotStage);
+		}
+		if (pawn.Faction == Faction.OfPlayer && def.deathLetter != null)
+		{
+			TaggedString label = "Death".Translate(pawn.LabelShortCap) + ": " + pawn.LabelShortCap;
+			TaggedString text = def.deathLetter + " " + HealthUtility.GetDiedLetterText(pawn, dinfo, hediff) + "\n\n" + def.deathLetterExtra;
+			Find.LetterStack.ReceiveLetter(label, text, LetterDefOf.Death, corpse);
+		}
+	}
+
+	public void Notify_Spawned(bool respawningAfterLoad)
+	{
+		pawn.Map.attackTargetsCache.UpdateTarget(pawn);
+		if (pawn.Faction == Faction.OfPlayer && Def == MutantDefOf.Ghoul)
+		{
+			LessonAutoActivator.TeachOpportunity(ConceptDefOf.ColonyGhouls, OpportunityType.GoodToKnow);
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CGetGizmos_003Ed__49))]
+	public IEnumerable<Gizmo> GetGizmos()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetGizmos_003Ed__49(-2)
+		{
+			_003C_003E4__this = this
 		};
+	}
 
-		// Token: 0x04008986 RID: 35206
-		private Pawn pawn;
-
-		// Token: 0x04008987 RID: 35207
-		private MutantDef def;
-
-		// Token: 0x04008988 RID: 35208
-		public RotStage rotStage;
-
-		// Token: 0x04008989 RID: 35209
-		private bool hasTurned;
-
-		// Token: 0x0400898A RID: 35210
-		private Hediff mutantHediff;
-
-		// Token: 0x0400898B RID: 35211
-		public VerbTracker verbTracker;
-
-		// Token: 0x0400898C RID: 35212
-		private Faction originalFaction;
-
-		// Token: 0x0400898D RID: 35213
-		private Ideo originalIdeo;
-
-		// Token: 0x0400898E RID: 35214
-		private List<Ability> abilities;
-
-		// Token: 0x02002467 RID: 9319
-		public struct ThinkTrees
+	[IteratorStateMachine(typeof(_003CSpecialDisplayStats_003Ed__50))]
+	public IEnumerable<StatDrawEntry> SpecialDisplayStats()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CSpecialDisplayStats_003Ed__50(-2)
 		{
-			// Token: 0x0400898F RID: 35215
-			public ThinkTreeDef main;
+			_003C_003E4__this = this
+		};
+	}
 
-			// Token: 0x04008990 RID: 35216
-			public ThinkTreeDef constant;
+	public string GetInspectString()
+	{
+		StringBuilder stringBuilder = new StringBuilder();
+		if (def.showJobReport && pawn.Faction == Faction.OfPlayer)
+		{
+			string jobReport = pawn.GetJobReport();
+			if (!jobReport.NullOrEmpty())
+			{
+				stringBuilder.AppendLineIfNotEmpty();
+				stringBuilder.Append(jobReport);
+			}
+		}
+		return stringBuilder.ToString();
+	}
+
+	public void ExposeData()
+	{
+		if (Scribe.mode == LoadSaveMode.Saving)
+		{
+			if (originalFaction != null && !Find.FactionManager.AllFactions.Contains(originalFaction))
+			{
+				originalFaction = null;
+			}
+			if (originalIdeo != null && !Find.IdeoManager.IdeosListForReading.Contains(originalIdeo))
+			{
+				originalIdeo = null;
+			}
+		}
+		Scribe_Defs.Look(ref def, "shamblerType");
+		Scribe_Values.Look(ref rotStage, "rotStage", RotStage.Fresh);
+		Scribe_Values.Look(ref hasTurned, "hasTurned", defaultValue: false);
+		Scribe_References.Look(ref mutantHediff, "mutantHediff");
+		Scribe_Deep.Look(ref verbTracker, "verbTracker", this);
+		Scribe_References.Look(ref originalFaction, "originalFaction");
+		Scribe_References.Look(ref originalIdeo, "originalIdeo");
+		Scribe_Collections.Look(ref abilities, "abilities", LookMode.Deep);
+		if (Scribe.mode != LoadSaveMode.PostLoadInit)
+		{
+			return;
+		}
+		if (abilities != null)
+		{
+			foreach (Ability ability in abilities)
+			{
+				ability.pawn = pawn;
+				ability.verb.caster = pawn;
+			}
+		}
+		if (verbTracker == null)
+		{
+			verbTracker = new VerbTracker(this);
 		}
 	}
 }

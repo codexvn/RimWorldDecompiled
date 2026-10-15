@@ -1,157 +1,304 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Designator_MechControlGroup : Designator
 {
-	// Token: 0x020030A5 RID: 12453
-	public class Designator_MechControlGroup : Designator
+	[CompilerGenerated]
+	private sealed class _003Cget_SelectedControlGroups_003Ed__2 : IEnumerable<MechanitorControlGroup>, IEnumerable, IEnumerator<MechanitorControlGroup>, IEnumerator, IDisposable
 	{
-		// Token: 0x17002D40 RID: 11584
-		// (get) Token: 0x060117A8 RID: 71592 RVA: 0x0050510F File Offset: 0x0050330F
-		public static IEnumerable<MechanitorControlGroup> SelectedControlGroups
+		private int _003C_003E1__state;
+
+		private MechanitorControlGroup _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private List<Pawn>.Enumerator _003C_003E7__wrap1;
+
+		private List<MechanitorControlGroup>.Enumerator _003C_003E7__wrap2;
+
+		MechanitorControlGroup IEnumerator<MechanitorControlGroup>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				Designator_MechControlGroup.tmpControlGroups.Clear();
-				foreach (Pawn pawn in Find.Selector.SelectedPawns)
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003Cget_SelectedControlGroups_003Ed__2(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if ((uint)(num - -4) <= 1u || num == 1)
+			{
+				try
 				{
-					if (pawn != null)
+					if (num == -4 || num == 1)
 					{
-						Pawn pawn2 = pawn;
-						if (pawn2.IsColonyMech)
+						try
 						{
-							Pawn overseer = pawn.GetOverseer();
-							foreach (MechanitorControlGroup mechanitorControlGroup in overseer.mechanitor.controlGroups)
-							{
-								if (mechanitorControlGroup != null && Designator_MechControlGroup.tmpControlGroups.Add(mechanitorControlGroup))
-								{
-									yield return mechanitorControlGroup;
-								}
-							}
-							List<MechanitorControlGroup>.Enumerator enumerator2 = default(List<MechanitorControlGroup>.Enumerator);
+						}
+						finally
+						{
+							_003C_003Em__Finally2();
 						}
 					}
 				}
-				List<Pawn>.Enumerator enumerator = default(List<Pawn>.Enumerator);
-				yield break;
-				yield break;
-			}
-		}
-
-		// Token: 0x060117A9 RID: 71593 RVA: 0x00505118 File Offset: 0x00503318
-		public Designator_MechControlGroup()
-		{
-			this.defaultLabel = "DesignatorMechControlGroup".Translate() + "...";
-			this.defaultDesc = "DesignatorMechControlGroupDesc".Translate();
-			this.icon = ContentFinder<Texture2D>.Get("UI/Gizmos/MechControlGroup", true);
-			this.showReverseDesignatorDisabledReason = true;
-		}
-
-		// Token: 0x060117AA RID: 71594 RVA: 0x00505178 File Offset: 0x00503378
-		public override AcceptanceReport CanDesignateCell(IntVec3 c)
-		{
-			if (!c.InBounds(base.Map))
-			{
-				return false;
-			}
-			foreach (Thing t in c.GetThingList(base.Map))
-			{
-				if (this.CanDesignateThing(t).Accepted)
+				finally
 				{
-					return true;
+					_003C_003Em__Finally1();
 				}
 			}
-			return false;
+			_003C_003E7__wrap1 = default(List<Pawn>.Enumerator);
+			_003C_003E7__wrap2 = default(List<MechanitorControlGroup>.Enumerator);
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x060117AB RID: 71595 RVA: 0x00505204 File Offset: 0x00503404
-		public override AcceptanceReport CanDesignateThing(Thing t)
+		private bool MoveNext()
 		{
-			Pawn pawn = t as Pawn;
-			if (pawn == null || !pawn.IsColonyMech || pawn.GetOverseer() == null)
+			try
 			{
-				return false;
-			}
-			Pawn pawn2 = null;
-			foreach (Pawn pawn3 in Find.Selector.SelectedPawns)
-			{
-				Pawn overseer = pawn3.GetOverseer();
-				if (pawn2 != null && pawn2 != overseer)
+				int num = _003C_003E1__state;
+				if (num != 0)
 				{
+					if (num != 1)
+					{
+						return false;
+					}
+					_003C_003E1__state = -4;
+					goto IL_00cd;
+				}
+				_003C_003E1__state = -1;
+				tmpControlGroups.Clear();
+				_003C_003E7__wrap1 = Find.Selector.SelectedPawns.GetEnumerator();
+				_003C_003E1__state = -3;
+				goto IL_00ec;
+				IL_00cd:
+				while (_003C_003E7__wrap2.MoveNext())
+				{
+					MechanitorControlGroup current = _003C_003E7__wrap2.Current;
+					if (current != null && tmpControlGroups.Add(current))
+					{
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+				}
+				_003C_003Em__Finally2();
+				_003C_003E7__wrap2 = default(List<MechanitorControlGroup>.Enumerator);
+				goto IL_00ec;
+				IL_00ec:
+				Pawn current2;
+				while (true)
+				{
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						current2 = _003C_003E7__wrap1.Current;
+						if (current2 != null)
+						{
+							Pawn pawn = current2;
+							if (pawn.IsColonyMech)
+							{
+								break;
+							}
+						}
+						continue;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = default(List<Pawn>.Enumerator);
 					return false;
 				}
-				pawn2 = overseer;
+				Pawn overseer = current2.GetOverseer();
+				_003C_003E7__wrap2 = overseer.mechanitor.controlGroups.GetEnumerator();
+				_003C_003E1__state = -4;
+				goto IL_00cd;
 			}
-			AcceptanceReport canControlMechs = pawn2.mechanitor.CanControlMechs;
-			if (canControlMechs)
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap1/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -3;
+			((IDisposable)_003C_003E7__wrap2/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<MechanitorControlGroup> IEnumerable<MechanitorControlGroup>.GetEnumerator()
+		{
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				return this;
+			}
+			return new _003Cget_SelectedControlGroups_003Ed__2(0);
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<MechanitorControlGroup>)this).GetEnumerator();
+		}
+	}
+
+	private static readonly HashSet<MechanitorControlGroup> tmpControlGroups = new HashSet<MechanitorControlGroup>();
+
+	private static List<MechanitorControlGroup> tmpSelectedControlGroups = new List<MechanitorControlGroup>();
+
+	public static IEnumerable<MechanitorControlGroup> SelectedControlGroups
+	{
+		[IteratorStateMachine(typeof(_003Cget_SelectedControlGroups_003Ed__2))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_SelectedControlGroups_003Ed__2(-2);
+		}
+	}
+
+	public Designator_MechControlGroup()
+	{
+		defaultLabel = "DesignatorMechControlGroup".Translate() + "...";
+		defaultDesc = "DesignatorMechControlGroupDesc".Translate();
+		icon = ContentFinder<Texture2D>.Get("UI/Gizmos/MechControlGroup");
+		showReverseDesignatorDisabledReason = true;
+	}
+
+	public override AcceptanceReport CanDesignateCell(IntVec3 c)
+	{
+		if (!c.InBounds(base.Map))
+		{
+			return false;
+		}
+		foreach (Thing thing in c.GetThingList(base.Map))
+		{
+			if (CanDesignateThing(thing).Accepted)
 			{
 				return true;
 			}
+		}
+		return false;
+	}
+
+	public override AcceptanceReport CanDesignateThing(Thing t)
+	{
+		if (!(t is Pawn { IsColonyMech: not false } pawn) || pawn.GetOverseer() == null)
+		{
+			return false;
+		}
+		Pawn pawn2 = null;
+		foreach (Pawn selectedPawn in Find.Selector.SelectedPawns)
+		{
+			Pawn overseer = selectedPawn.GetOverseer();
+			if (pawn2 != null && pawn2 != overseer)
+			{
+				return false;
+			}
+			pawn2 = overseer;
+		}
+		AcceptanceReport canControlMechs = pawn2.mechanitor.CanControlMechs;
+		if (!canControlMechs)
+		{
 			if (!canControlMechs.Reason.NullOrEmpty())
 			{
 				return ("DisabledCommand".Translate() + ": " + canControlMechs.Reason).Colorize(ColorLibrary.RedReadable);
 			}
 			return false;
 		}
+		return true;
+	}
 
-		// Token: 0x060117AC RID: 71596 RVA: 0x005052F4 File Offset: 0x005034F4
-		public override void DesignateThing(Thing t)
+	public override void DesignateThing(Thing t)
+	{
+		ProcessInput(null);
+	}
+
+	private bool CanAssignToControlGroup(Pawn pawn, MechanitorControlGroup group)
+	{
+		Pawn overseer = pawn.GetOverseer();
+		if (overseer != null)
 		{
-			this.ProcessInput(null);
+			return group.Tracker.Pawn == overseer;
 		}
+		return false;
+	}
 
-		// Token: 0x060117AD RID: 71597 RVA: 0x00505300 File Offset: 0x00503500
-		private bool CanAssignToControlGroup(Pawn pawn, MechanitorControlGroup group)
+	public override void ProcessInput(Event ev)
+	{
+		tmpSelectedControlGroups.Clear();
+		tmpSelectedControlGroups.AddRange(SelectedControlGroups);
+		List<FloatMenuOption> list = new List<FloatMenuOption>();
+		for (int i = 0; i < tmpSelectedControlGroups.Count; i++)
 		{
-			Pawn overseer = pawn.GetOverseer();
-			return overseer != null && group.Tracker.Pawn == overseer;
-		}
-
-		// Token: 0x060117AE RID: 71598 RVA: 0x00505328 File Offset: 0x00503528
-		public override void ProcessInput(Event ev)
-		{
-			Designator_MechControlGroup.tmpSelectedControlGroups.Clear();
-			Designator_MechControlGroup.tmpSelectedControlGroups.AddRange(Designator_MechControlGroup.SelectedControlGroups);
-			List<FloatMenuOption> list = new List<FloatMenuOption>();
-			for (int i = 0; i < Designator_MechControlGroup.tmpSelectedControlGroups.Count; i++)
+			MechanitorControlGroup selected = tmpSelectedControlGroups[i];
+			if (Find.Selector.SelectedPawns.All((Pawn p) => p.GetMechControlGroup() == selected))
 			{
-				MechanitorControlGroup selected = Designator_MechControlGroup.tmpSelectedControlGroups[i];
-				if (Find.Selector.SelectedPawns.All((Pawn p) => p.GetMechControlGroup() == selected))
-				{
-					FloatMenuOption item = new FloatMenuOption("CannotAssignMechToControlGroup".Translate(selected.Index) + " (" + selected.WorkMode.LabelCap.ToString() + ")" + ": " + "AssignMechAlreadyAssigned".Translate(), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-					list.Add(item);
-				}
-				else
-				{
-					FloatMenuOption item2 = new FloatMenuOption("AssignMechToControlGroup".Translate(selected.Index) + " (" + selected.WorkMode.LabelCap.ToString() + ")", delegate()
-					{
-						foreach (Pawn pawn in Find.Selector.SelectedPawns)
-						{
-							if (this.CanAssignToControlGroup(pawn, selected))
-							{
-								selected.Assign(pawn);
-							}
-						}
-					}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-					list.Add(item2);
-				}
+				FloatMenuOption item = new FloatMenuOption("CannotAssignMechToControlGroup".Translate(selected.Index) + " (" + selected.WorkMode.LabelCap.ToString() + ")" + ": " + "AssignMechAlreadyAssigned".Translate(), null);
+				list.Add(item);
+				continue;
 			}
-			Find.WindowStack.Add(new FloatMenu(list));
-			Designator_MechControlGroup.tmpSelectedControlGroups.Clear();
+			FloatMenuOption item2 = new FloatMenuOption("AssignMechToControlGroup".Translate(selected.Index) + " (" + selected.WorkMode.LabelCap.ToString() + ")", delegate
+			{
+				foreach (Pawn selectedPawn in Find.Selector.SelectedPawns)
+				{
+					if (CanAssignToControlGroup(selectedPawn, selected))
+					{
+						selected.Assign(selectedPawn);
+					}
+				}
+			});
+			list.Add(item2);
 		}
+		Find.WindowStack.Add(new FloatMenu(list));
+		tmpSelectedControlGroups.Clear();
+	}
 
-		// Token: 0x060117AF RID: 71599 RVA: 0x000026EA File Offset: 0x000008EA
-		public override void SelectedUpdate()
-		{
-		}
-
-		// Token: 0x0400B4BE RID: 46270
-		private static readonly HashSet<MechanitorControlGroup> tmpControlGroups = new HashSet<MechanitorControlGroup>();
-
-		// Token: 0x0400B4BF RID: 46271
-		private static List<MechanitorControlGroup> tmpSelectedControlGroups = new List<MechanitorControlGroup>();
+	public override void SelectedUpdate()
+	{
 	}
 }

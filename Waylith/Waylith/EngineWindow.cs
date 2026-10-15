@@ -40,6 +40,12 @@ public static class EngineWindow
 
 	public static int TargetFrameRate { get; set; } = -1;
 
+	public static int PreferredMonitor { get; private set; } = -1;
+
+	public static string[] MonitorNames { get; internal set; } = Array.Empty<string>();
+
+	public static event Action<int>? PreferredMonitorChanged;
+
 	public static event Action<VSyncMode>? VSyncModeChanged;
 
 	public static event Action<int, int>? ResolutionChanged;
@@ -51,6 +57,15 @@ public static class EngineWindow
 	public static void SetVSyncMode(VSyncMode mode)
 	{
 		EngineWindow.VSyncModeChanged?.Invoke(mode);
+	}
+
+	public static void SetPreferredMonitor(int index)
+	{
+		if (PreferredMonitor != index)
+		{
+			PreferredMonitor = index;
+			EngineWindow.PreferredMonitorChanged?.Invoke(index);
+		}
 	}
 
 	public static void SetWindowedPosition(int x, int y)

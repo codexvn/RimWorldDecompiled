@@ -316,6 +316,20 @@ public class WindowRenderContext : RenderContext
 		return true;
 	}
 
+	public bool IsSurfaceExtentZero()
+	{
+		VkExtent2D currentExtent = base.PhysicalDevice.GetSurfaceCapabilitiesKHR(surface).CurrentExtent;
+		if (currentExtent.Width == -1)
+		{
+			return IsFramebufferMinimized();
+		}
+		if (currentExtent.Width > 0)
+		{
+			return currentExtent.Height <= 0;
+		}
+		return true;
+	}
+
 	protected FrameResources[] CreateFrameResources()
 	{
 		Span<VkImage> span = stackalloc VkImage[base.Device.GetSwapchainImagesKHR_Count(swapchain)];

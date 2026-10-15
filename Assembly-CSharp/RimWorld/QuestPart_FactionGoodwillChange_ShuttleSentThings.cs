@@ -1,141 +1,447 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class QuestPart_FactionGoodwillChange_ShuttleSentThings : QuestPartActivable
 {
-	// Token: 0x02001CE2 RID: 7394
-	public class QuestPart_FactionGoodwillChange_ShuttleSentThings : QuestPartActivable
+	[CompilerGenerated]
+	private sealed class _003Cget_InvolvedFactions_003Ed__10 : IEnumerable<Faction>, IEnumerable, IEnumerator<Faction>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700196E RID: 6510
-		// (get) Token: 0x0600A4F0 RID: 42224 RVA: 0x002F3E93 File Offset: 0x002F2093
-		public override IEnumerable<Faction> InvolvedFactions
+		private int _003C_003E1__state;
+
+		private Faction _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public QuestPart_FactionGoodwillChange_ShuttleSentThings _003C_003E4__this;
+
+		private IEnumerator<Faction> _003C_003E7__wrap1;
+
+		Faction IEnumerator<Faction>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				foreach (Faction faction in base.InvolvedFactions)
-				{
-					yield return faction;
-				}
-				IEnumerator<Faction> enumerator = null;
-				if (this.faction != null)
-				{
-					yield return this.faction;
-				}
-				yield break;
-				yield break;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700196F RID: 6511
-		// (get) Token: 0x0600A4F1 RID: 42225 RVA: 0x002F3EA3 File Offset: 0x002F20A3
-		public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				foreach (GlobalTargetInfo globalTargetInfo in base.QuestLookTargets)
-				{
-					yield return globalTargetInfo;
-				}
-				IEnumerator<GlobalTargetInfo> enumerator = null;
-				foreach (Thing t in this.things)
-				{
-					yield return t;
-				}
-				List<Thing>.Enumerator enumerator2 = default(List<Thing>.Enumerator);
-				yield break;
-				yield break;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600A4F2 RID: 42226 RVA: 0x002F3EB4 File Offset: 0x002F20B4
-		protected override void ProcessQuestSignal(Signal signal)
+		[DebuggerHidden]
+		public _003Cget_InvolvedFactions_003Ed__10(int _003C_003E1__state)
 		{
-			base.ProcessQuestSignal(signal);
-			List<Thing> list;
-			if (this.inSignalsShuttleSent.Contains(signal.tag) && signal.args.TryGetArg<List<Thing>>("SENT", out list))
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				int num = 0;
-				for (int i = 0; i < this.things.Count; i++)
+				try
 				{
-					if (!list.Contains(this.things[i]))
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				QuestPart_FactionGoodwillChange_ShuttleSentThings questPart_FactionGoodwillChange_ShuttleSentThings = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((QuestPart)questPart_FactionGoodwillChange_ShuttleSentThings).InvolvedFactions.GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 2:
 					{
-						num++;
+						_003C_003E1__state = -1;
+						break;
 					}
+					IL_006f:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Faction current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (questPart_FactionGoodwillChange_ShuttleSentThings.faction != null)
+					{
+						_003C_003E2__current = questPart_FactionGoodwillChange_ShuttleSentThings.faction;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
 				}
-				this.TryAffectGoodwill(num * this.changeNotOnShuttle);
-				base.Complete();
+				return false;
 			}
-			if (signal.tag == this.inSignalShuttleDestroyed)
+			catch
 			{
-				this.TryAffectGoodwill(this.things.Count * this.changeNotOnShuttle);
-				base.Complete();
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x0600A4F3 RID: 42227 RVA: 0x002F3F65 File Offset: 0x002F2165
-		public override void Cleanup()
+		bool IEnumerator.MoveNext()
 		{
-			if (base.State == QuestPartState.Enabled)
-			{
-				this.TryAffectGoodwill(this.things.Count * this.changeNotOnShuttle);
-			}
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0600A4F4 RID: 42228 RVA: 0x002F3F88 File Offset: 0x002F2188
-		private void TryAffectGoodwill(int goodwillChange)
+		private void _003C_003Em__Finally1()
 		{
-			if (goodwillChange != 0)
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				Faction.OfPlayer.TryAffectGoodwillWith(this.faction, goodwillChange, this.canSendMessage, this.canSendHostilityLetter, this.historyEvent, null);
+				_003C_003E7__wrap1.Dispose();
 			}
 		}
 
-		// Token: 0x0600A4F5 RID: 42229 RVA: 0x002F3FC8 File Offset: 0x002F21C8
-		public override void ExposeData()
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			base.ExposeData();
-			Scribe_Collections.Look<string>(ref this.inSignalsShuttleSent, "inSignalsShuttleSent", LookMode.Value, Array.Empty<object>());
-			Scribe_Values.Look<int>(ref this.changeNotOnShuttle, "changeNotOnShuttle", 0, false);
-			Scribe_References.Look<Faction>(ref this.faction, "faction", false);
-			Scribe_Values.Look<bool>(ref this.canSendMessage, "canSendMessage", true, false);
-			Scribe_Values.Look<bool>(ref this.canSendHostilityLetter, "canSendHostilityLetter", true, false);
-			Scribe_Values.Look<string>(ref this.reason, "reason", null, false);
-			Scribe_Collections.Look<Thing>(ref this.things, "things", LookMode.Reference, Array.Empty<object>());
-			Scribe_Values.Look<string>(ref this.inSignalShuttleDestroyed, "inSignalShuttleDestroyed", null, false);
-			Scribe_Defs.Look<HistoryEventDef>(ref this.historyEvent, "historyEvent");
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Faction> IEnumerable<Faction>.GetEnumerator()
+		{
+			_003Cget_InvolvedFactions_003Ed__10 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				this.things.RemoveAll((Thing x) => x == null);
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_InvolvedFactions_003Ed__10(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Faction>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003Cget_QuestLookTargets_003Ed__12 : IEnumerable<GlobalTargetInfo>, IEnumerable, IEnumerator<GlobalTargetInfo>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private GlobalTargetInfo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public QuestPart_FactionGoodwillChange_ShuttleSentThings _003C_003E4__this;
+
+		private IEnumerator<GlobalTargetInfo> _003C_003E7__wrap1;
+
+		private List<Thing>.Enumerator _003C_003E7__wrap2;
+
+		GlobalTargetInfo IEnumerator<GlobalTargetInfo>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x040071EC RID: 29164
-		public List<string> inSignalsShuttleSent = new List<string>();
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
 
-		// Token: 0x040071ED RID: 29165
-		public string inSignalShuttleDestroyed;
+		[DebuggerHidden]
+		public _003Cget_QuestLookTargets_003Ed__12(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
 
-		// Token: 0x040071EE RID: 29166
-		public int changeNotOnShuttle;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			switch (_003C_003E1__state)
+			{
+			case -3:
+			case 1:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+				break;
+			case -4:
+			case 2:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally2();
+				}
+				break;
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E7__wrap2 = default(List<Thing>.Enumerator);
+			_003C_003E1__state = -2;
+		}
 
-		// Token: 0x040071EF RID: 29167
-		public Faction faction;
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				QuestPart_FactionGoodwillChange_ShuttleSentThings questPart_FactionGoodwillChange_ShuttleSentThings = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((QuestPart)questPart_FactionGoodwillChange_ShuttleSentThings).QuestLookTargets.GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0072;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0072;
+				case 2:
+					{
+						_003C_003E1__state = -4;
+						break;
+					}
+					IL_0072:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						GlobalTargetInfo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					_003C_003E7__wrap2 = questPart_FactionGoodwillChange_ShuttleSentThings.things.GetEnumerator();
+					_003C_003E1__state = -4;
+					break;
+				}
+				if (_003C_003E7__wrap2.MoveNext())
+				{
+					Thing current2 = _003C_003E7__wrap2.Current;
+					_003C_003E2__current = current2;
+					_003C_003E1__state = 2;
+					return true;
+				}
+				_003C_003Em__Finally2();
+				_003C_003E7__wrap2 = default(List<Thing>.Enumerator);
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
 
-		// Token: 0x040071F0 RID: 29168
-		public bool canSendMessage = true;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x040071F1 RID: 29169
-		public bool canSendHostilityLetter = true;
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
 
-		// Token: 0x040071F2 RID: 29170
-		public string reason;
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap2/*cast due to .constrained prefix*/).Dispose();
+		}
 
-		// Token: 0x040071F3 RID: 29171
-		public List<Thing> things = new List<Thing>();
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x040071F4 RID: 29172
-		public HistoryEventDef historyEvent;
+		[DebuggerHidden]
+		IEnumerator<GlobalTargetInfo> IEnumerable<GlobalTargetInfo>.GetEnumerator()
+		{
+			_003Cget_QuestLookTargets_003Ed__12 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_QuestLookTargets_003Ed__12(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<GlobalTargetInfo>)this).GetEnumerator();
+		}
+	}
+
+	public List<string> inSignalsShuttleSent = new List<string>();
+
+	public string inSignalShuttleDestroyed;
+
+	public int changeNotOnShuttle;
+
+	public Faction faction;
+
+	public bool canSendMessage = true;
+
+	public bool canSendHostilityLetter = true;
+
+	public string reason;
+
+	public List<Thing> things = new List<Thing>();
+
+	public HistoryEventDef historyEvent;
+
+	public override IEnumerable<Faction> InvolvedFactions
+	{
+		[IteratorStateMachine(typeof(_003Cget_InvolvedFactions_003Ed__10))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_InvolvedFactions_003Ed__10(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+	{
+		[IteratorStateMachine(typeof(_003Cget_QuestLookTargets_003Ed__12))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_QuestLookTargets_003Ed__12(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	protected override void ProcessQuestSignal(Signal signal)
+	{
+		base.ProcessQuestSignal(signal);
+		if (inSignalsShuttleSent.Contains(signal.tag) && signal.args.TryGetArg("SENT", out List<Thing> arg))
+		{
+			int num = 0;
+			for (int i = 0; i < things.Count; i++)
+			{
+				if (!arg.Contains(things[i]))
+				{
+					num++;
+				}
+			}
+			TryAffectGoodwill(num * changeNotOnShuttle);
+			Complete();
+		}
+		if (signal.tag == inSignalShuttleDestroyed)
+		{
+			TryAffectGoodwill(things.Count * changeNotOnShuttle);
+			Complete();
+		}
+	}
+
+	public override void Cleanup()
+	{
+		if (base.State == QuestPartState.Enabled)
+		{
+			TryAffectGoodwill(things.Count * changeNotOnShuttle);
+		}
+	}
+
+	private void TryAffectGoodwill(int goodwillChange)
+	{
+		if (goodwillChange != 0)
+		{
+			Faction.OfPlayer.TryAffectGoodwillWith(faction, goodwillChange, canSendMessage, canSendHostilityLetter, historyEvent, null);
+		}
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Collections.Look(ref inSignalsShuttleSent, "inSignalsShuttleSent", LookMode.Value);
+		Scribe_Values.Look(ref changeNotOnShuttle, "changeNotOnShuttle", 0);
+		Scribe_References.Look(ref faction, "faction");
+		Scribe_Values.Look(ref canSendMessage, "canSendMessage", defaultValue: true);
+		Scribe_Values.Look(ref canSendHostilityLetter, "canSendHostilityLetter", defaultValue: true);
+		Scribe_Values.Look(ref reason, "reason");
+		Scribe_Collections.Look(ref things, "things", LookMode.Reference);
+		Scribe_Values.Look(ref inSignalShuttleDestroyed, "inSignalShuttleDestroyed");
+		Scribe_Defs.Look(ref historyEvent, "historyEvent");
+		if (Scribe.mode == LoadSaveMode.PostLoadInit)
+		{
+			things.RemoveAll((Thing x) => x == null);
+		}
 	}
 }

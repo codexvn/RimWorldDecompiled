@@ -1,67 +1,190 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class StockGeneratorUtility
 {
-	// Token: 0x02002F77 RID: 12151
-	public class StockGeneratorUtility
+	[CompilerGenerated]
+	private sealed class _003CTryMakeForStock_003Ed__0 : IEnumerable<Thing>, IEnumerable, IEnumerator<Thing>, IEnumerator, IDisposable
 	{
-		// Token: 0x060111E2 RID: 70114 RVA: 0x004E975A File Offset: 0x004E795A
-		public static IEnumerable<Thing> TryMakeForStock(ThingDef thingDef, int count, Faction faction)
+		private int _003C_003E1__state;
+
+		private Thing _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private ThingDef thingDef;
+
+		public ThingDef _003C_003E3__thingDef;
+
+		private Faction faction;
+
+		public Faction _003C_003E3__faction;
+
+		private int count;
+
+		public int _003C_003E3__count;
+
+		private int _003Ci_003E5__2;
+
+		Thing IEnumerator<Thing>.Current
 		{
-			if (thingDef.MadeFromStuff || thingDef.tradeNeverStack || thingDef.tradeNeverGenerateStacked)
+			[DebuggerHidden]
+			get
 			{
-				int num;
-				for (int i = 0; i < count; i = num + 1)
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CTryMakeForStock_003Ed__0(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			switch (_003C_003E1__state)
+			{
+			default:
+				return false;
+			case 0:
+			{
+				_003C_003E1__state = -1;
+				if (thingDef.MadeFromStuff || thingDef.tradeNeverStack || thingDef.tradeNeverGenerateStacked)
 				{
-					Thing thing = StockGeneratorUtility.TryMakeForStockSingle(thingDef, 1, faction);
-					if (thing != null)
-					{
-						yield return thing;
-					}
-					num = i;
+					_003Ci_003E5__2 = 0;
+					goto IL_008f;
 				}
+				Thing thing = TryMakeForStockSingle(thingDef, count, faction);
+				if (thing != null)
+				{
+					_003C_003E2__current = thing;
+					_003C_003E1__state = 2;
+					return true;
+				}
+				break;
+			}
+			case 1:
+				_003C_003E1__state = -1;
+				goto IL_007f;
+			case 2:
+				{
+					_003C_003E1__state = -1;
+					break;
+				}
+				IL_008f:
+				if (_003Ci_003E5__2 < count)
+				{
+					Thing thing2 = TryMakeForStockSingle(thingDef, 1, faction);
+					if (thing2 != null)
+					{
+						_003C_003E2__current = thing2;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					goto IL_007f;
+				}
+				break;
+				IL_007f:
+				_003Ci_003E5__2++;
+				goto IL_008f;
+			}
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Thing> IEnumerable<Thing>.GetEnumerator()
+		{
+			_003CTryMakeForStock_003Ed__0 _003CTryMakeForStock_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CTryMakeForStock_003Ed__ = this;
 			}
 			else
 			{
-				Thing thing2 = StockGeneratorUtility.TryMakeForStockSingle(thingDef, count, faction);
-				if (thing2 != null)
-				{
-					yield return thing2;
-				}
+				_003CTryMakeForStock_003Ed__ = new _003CTryMakeForStock_003Ed__0(0);
 			}
-			yield break;
+			_003CTryMakeForStock_003Ed__.thingDef = _003C_003E3__thingDef;
+			_003CTryMakeForStock_003Ed__.count = _003C_003E3__count;
+			_003CTryMakeForStock_003Ed__.faction = _003C_003E3__faction;
+			return _003CTryMakeForStock_003Ed__;
 		}
 
-		// Token: 0x060111E3 RID: 70115 RVA: 0x004E9778 File Offset: 0x004E7978
-		public static Thing TryMakeForStockSingle(ThingDef thingDef, int stackCount, Faction faction)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			if (stackCount <= 0)
-			{
-				return null;
-			}
-			if (!thingDef.tradeability.TraderCanSell())
-			{
-				string str = "Tried to make non-trader-sellable thing for trader stock: ";
-				ThingDef thingDef2 = thingDef;
-				Log.Error(str + ((thingDef2 != null) ? thingDef2.ToString() : null));
-				return null;
-			}
-			ThingDef stuff = null;
-			if (thingDef.MadeFromStuff)
-			{
-				if (!(from x in GenStuff.AllowedStuffsFor(thingDef, TechLevel.Undefined, true)
-				where !PawnWeaponGenerator.IsDerpWeapon(thingDef, x)
-				select x).TryRandomElementByWeight((ThingDef x) => x.stuffProps.commonality, out stuff))
-				{
-					stuff = GenStuff.RandomStuffByCommonalityFor(thingDef, TechLevel.Undefined);
-				}
-			}
-			Thing thing = ThingMaker.MakeThing(thingDef, stuff);
-			thing.stackCount = stackCount;
-			return thing;
+			return ((IEnumerable<Thing>)this).GetEnumerator();
 		}
+	}
+
+	[IteratorStateMachine(typeof(_003CTryMakeForStock_003Ed__0))]
+	public static IEnumerable<Thing> TryMakeForStock(ThingDef thingDef, int count, Faction faction)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CTryMakeForStock_003Ed__0(-2)
+		{
+			_003C_003E3__thingDef = thingDef,
+			_003C_003E3__count = count,
+			_003C_003E3__faction = faction
+		};
+	}
+
+	public static Thing TryMakeForStockSingle(ThingDef thingDef, int stackCount, Faction faction)
+	{
+		if (stackCount <= 0)
+		{
+			return null;
+		}
+		if (!thingDef.tradeability.TraderCanSell())
+		{
+			Log.Error("Tried to make non-trader-sellable thing for trader stock: " + thingDef);
+			return null;
+		}
+		ThingDef result = null;
+		if (thingDef.MadeFromStuff && !(from x in GenStuff.AllowedStuffsFor(thingDef, TechLevel.Undefined, checkAllowedInStuffGeneration: true)
+			where !PawnWeaponGenerator.IsDerpWeapon(thingDef, x)
+			select x).TryRandomElementByWeight((ThingDef x) => x.stuffProps.commonality, out result))
+		{
+			result = GenStuff.RandomStuffByCommonalityFor(thingDef);
+		}
+		Thing thing = ThingMaker.MakeThing(thingDef, result);
+		thing.stackCount = stackCount;
+		return thing;
 	}
 }

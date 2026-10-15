@@ -1,234 +1,329 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_StudyInteract : JobDriver
 {
-	// Token: 0x0200131B RID: 4891
-	public class JobDriver_StudyInteract : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__13 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x170012E8 RID: 4840
-		// (get) Token: 0x0600780C RID: 30732 RVA: 0x0023071F File Offset: 0x0022E91F
-		private Building_HoldingPlatform Platform
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_StudyInteract _003C_003E4__this;
+
+		private bool _003CtargetIsPawn_003E5__2;
+
+		private Toil _003CfindAdjacentCell_003E5__3;
+
+		private Toil _003CgoToAdjacentCell_003E5__4;
+
+		private Toil _003CstudyToil_003E5__5;
+
+		private Toil _003CfinishInteraction_003E5__6;
+
+		private int _003Cinteractions_003E5__7;
+
+		private int _003Ci_003E5__8;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return base.TargetThingA as Building_HoldingPlatform;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170012E9 RID: 4841
-		// (get) Token: 0x0600780D RID: 30733 RVA: 0x00246583 File Offset: 0x00244783
-		private Thing ThingToStudy
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				Building_HoldingPlatform platform = this.Platform;
-				return ((platform != null) ? platform.HeldPawn : null) ?? base.TargetThingA;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170012EA RID: 4842
-		// (get) Token: 0x0600780E RID: 30734 RVA: 0x002465A1 File Offset: 0x002447A1
-		private CompStudiable StudyComp
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__13(int _003C_003E1__state)
 		{
-			get
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003CfindAdjacentCell_003E5__3 = null;
+			_003CgoToAdjacentCell_003E5__4 = null;
+			_003CstudyToil_003E5__5 = null;
+			_003CfinishInteraction_003E5__6 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_StudyInteract CS_0024_003C_003E8__locals32 = _003C_003E4__this;
+			Toil toil;
+			switch (num)
 			{
-				Thing thingToStudy = this.ThingToStudy;
-				if (thingToStudy == null)
+			default:
+				return false;
+			case 0:
+			{
+				_003C_003E1__state = -1;
+				_003CtargetIsPawn_003E5__2 = CS_0024_003C_003E8__locals32.TargetThingA is Pawn;
+				CS_0024_003C_003E8__locals32.FailOnDespawnedNullOrForbidden(TargetIndex.A);
+				CS_0024_003C_003E8__locals32.FailOn(() => (CS_0024_003C_003E8__locals32.StudyComp == null || !CS_0024_003C_003E8__locals32.StudyComp.CurrentlyStudiable()) ? true : false);
+				CS_0024_003C_003E8__locals32.AddFinishAction(delegate
 				{
-					return null;
-				}
-				return thingToStudy.TryGetComp<CompStudiable>();
-			}
-		}
-
-		// Token: 0x0600780F RID: 30735 RVA: 0x002465B4 File Offset: 0x002447B4
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
-		{
-			if (this.Platform != null)
-			{
-				return this.pawn.Reserve(this.Platform, this.job, 1, -1, null, errorOnFailed, false) && this.pawn.Reserve(this.ThingToStudy, this.job, 1, -1, null, errorOnFailed, false);
-			}
-			return this.pawn.Reserve(base.TargetThingA, this.job, 1, -1, null, errorOnFailed, false);
-		}
-
-		// Token: 0x06007810 RID: 30736 RVA: 0x00246631 File Offset: 0x00244831
-		protected override IEnumerable<Toil> MakeNewToils()
-		{
-			bool targetIsPawn = base.TargetThingA is Pawn;
-			this.FailOnDespawnedNullOrForbidden(TargetIndex.A);
-			this.FailOn(() => this.StudyComp == null || !this.StudyComp.CurrentlyStudiable());
-			base.AddFinishAction(delegate(JobCondition jobCondition)
-			{
-				if (this.StudyComp != null)
+					if (CS_0024_003C_003E8__locals32.StudyComp != null)
+					{
+						CS_0024_003C_003E8__locals32.StudyComp.studyInteractions += CS_0024_003C_003E8__locals32.studyInteractions;
+					}
+				});
+				StatDef stat = ((CS_0024_003C_003E8__locals32.Platform != null) ? StatDefOf.EntityStudyRate : StatDefOf.ResearchSpeed);
+				int num2 = Mathf.RoundToInt(600f / CS_0024_003C_003E8__locals32.pawn.GetStatValue(stat));
+				if (_003CtargetIsPawn_003E5__2 || CS_0024_003C_003E8__locals32.Platform != null)
 				{
-					this.StudyComp.studyInteractions += this.studyInteractions;
+					num2 *= 2;
 				}
-			});
-			StatDef stat = (this.Platform != null) ? StatDefOf.EntityStudyRate : StatDefOf.ResearchSpeed;
-			int num = Mathf.RoundToInt(600f / this.pawn.GetStatValue(stat, true, -1));
-			if (targetIsPawn || this.Platform != null)
-			{
-				num *= 2;
+				_003CfindAdjacentCell_003E5__3 = Toils_General.Do(delegate
+				{
+					IntVec3 adjacentInteractionCell = SocialInteractionUtility.GetAdjacentInteractionCell(CS_0024_003C_003E8__locals32.pawn, CS_0024_003C_003E8__locals32.job.GetTarget(TargetIndex.A).Thing, CS_0024_003C_003E8__locals32.job.playerForced);
+					CS_0024_003C_003E8__locals32.pawn.Map.pawnDestinationReservationManager.Reserve(CS_0024_003C_003E8__locals32.pawn, CS_0024_003C_003E8__locals32.job, adjacentInteractionCell);
+					CS_0024_003C_003E8__locals32.job.targetB = adjacentInteractionCell;
+				});
+				_003CgoToAdjacentCell_003E5__4 = Toils_Goto.GotoCell(TargetIndex.B, PathEndMode.OnCell);
+				if (_003CtargetIsPawn_003E5__2)
+				{
+					_003CstudyToil_003E5__5 = CS_0024_003C_003E8__locals32.StudyPawn(TargetIndex.A, num2);
+				}
+				else
+				{
+					_003CstudyToil_003E5__5 = Toils_General.WaitWith(TargetIndex.A, num2, useProgressBar: true, maintainPosture: false, maintainSleep: false, TargetIndex.A);
+					_003CstudyToil_003E5__5.AddPreTickIntervalAction(delegate(int delta)
+					{
+						CS_0024_003C_003E8__locals32.ThingToStudy.TryGetComp<CompObelisk>()?.Notify_InteractedTick(CS_0024_003C_003E8__locals32.pawn, delta);
+					});
+				}
+				_003CstudyToil_003E5__5.AddPreTickIntervalAction(delegate(int delta)
+				{
+					CS_0024_003C_003E8__locals32.pawn.skills.Learn(SkillDefOf.Intellectual, 0.1f * (float)delta);
+				});
+				_003CstudyToil_003E5__5.activeSkill = () => SkillDefOf.Intellectual;
+				if (CS_0024_003C_003E8__locals32.StudyComp.KnowledgeCategory != null)
+				{
+					_003CstudyToil_003E5__5.WithEffect(() => EffecterDefOf.StudyHoraxian, CS_0024_003C_003E8__locals32.TargetThingA, null);
+				}
+				_003CfinishInteraction_003E5__6 = ToilMaker.MakeToil("Interaction finish");
+				_003CfinishInteraction_003E5__6.initAction = CS_0024_003C_003E8__locals32.DoStudyInteraction;
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch);
+				_003C_003E1__state = 1;
+				return true;
 			}
-			Toil findAdjacentCell = Toils_General.Do(delegate
+			case 1:
+				_003C_003E1__state = -1;
+				_003Cinteractions_003E5__7 = 5 - CS_0024_003C_003E8__locals32.StudyComp.studyInteractions;
+				_003Ci_003E5__8 = 0;
+				goto IL_02a2;
+			case 2:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = _003CgoToAdjacentCell_003E5__4;
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+				_003C_003E1__state = -1;
+				goto IL_0258;
+			case 4:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = _003CfinishInteraction_003E5__6;
+				_003C_003E1__state = 5;
+				return true;
+			case 5:
+				_003C_003E1__state = -1;
+				_003Ci_003E5__8++;
+				goto IL_02a2;
+			case 6:
+				{
+					_003C_003E1__state = -1;
+					return false;
+				}
+				IL_02a2:
+				if (_003Ci_003E5__8 < _003Cinteractions_003E5__7)
+				{
+					if (!_003CtargetIsPawn_003E5__2 && _003Ci_003E5__8 > 0)
+					{
+						_003C_003E2__current = _003CfindAdjacentCell_003E5__3;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					goto IL_0258;
+				}
+				toil = ToilMaker.MakeToil("Study finish");
+				toil.initAction = delegate
+				{
+					CS_0024_003C_003E8__locals32.studyInteractions = 0;
+					CS_0024_003C_003E8__locals32.StudyComp.studyInteractions = 0;
+					CS_0024_003C_003E8__locals32.StudyComp.lastStudiedTick = Find.TickManager.TicksGame;
+					if (ModsConfig.AnomalyActive && CS_0024_003C_003E8__locals32.ThingToStudy is Pawn pawn && (!pawn.RaceProps.Humanlike || pawn.IsMutant))
+					{
+						TaleRecorder.RecordTale(TaleDefOf.StudiedEntity, CS_0024_003C_003E8__locals32.pawn, pawn);
+					}
+				};
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 6;
+				return true;
+				IL_0258:
+				_003C_003E2__current = _003CstudyToil_003E5__5;
+				_003C_003E1__state = 4;
+				return true;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__13 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				IntVec3 adjacentInteractionCell = SocialInteractionUtility.GetAdjacentInteractionCell(this.pawn, this.job.GetTarget(TargetIndex.A).Thing, this.job.playerForced);
-				this.pawn.Map.pawnDestinationReservationManager.Reserve(this.pawn, this.job, adjacentInteractionCell);
-				this.job.targetB = adjacentInteractionCell;
-			});
-			Toil goToAdjacentCell = Toils_Goto.GotoCell(TargetIndex.B, PathEndMode.OnCell);
-			Toil studyToil;
-			if (targetIsPawn)
-			{
-				studyToil = this.StudyPawn(TargetIndex.A, num);
+				_003C_003E1__state = 0;
+				result = this;
 			}
 			else
 			{
-				studyToil = Toils_General.WaitWith(TargetIndex.A, num, true, false, false, TargetIndex.A, PathEndMode.Touch);
-				studyToil.AddPreTickIntervalAction(delegate(int delta)
+				result = new _003CMakeNewToils_003Ed__13(0)
 				{
-					CompObelisk compObelisk = this.ThingToStudy.TryGetComp<CompObelisk>();
-					if (compObelisk == null)
-					{
-						return;
-					}
-					compObelisk.Notify_InteractedTick(this.pawn, delta);
-				});
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
-			studyToil.AddPreTickIntervalAction(delegate(int delta)
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private const TargetIndex ThingToStudyIndex = TargetIndex.A;
+
+	private const TargetIndex AdjacentCellIndex = TargetIndex.B;
+
+	private const int BaseDurationTicks = 600;
+
+	private const int PawnTargetStudyDurationFactor = 2;
+
+	public const float ElectroharvesterFactor = 0.5f;
+
+	private int studyInteractions;
+
+	private Building_HoldingPlatform Platform => base.TargetThingA as Building_HoldingPlatform;
+
+	private Thing ThingToStudy => Platform?.HeldPawn ?? base.TargetThingA;
+
+	private CompStudiable StudyComp => ThingToStudy?.TryGetComp<CompStudiable>();
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		if (Platform != null)
+		{
+			if (pawn.Reserve(Platform, job, 1, -1, null, errorOnFailed))
 			{
-				this.pawn.skills.Learn(SkillDefOf.Intellectual, 0.1f * (float)delta, false, false);
-			});
-			studyToil.activeSkill = (() => SkillDefOf.Intellectual);
-			if (this.StudyComp.KnowledgeCategory != null)
-			{
-				studyToil.WithEffect(() => EffecterDefOf.StudyHoraxian, base.TargetThingA, null);
+				return pawn.Reserve(ThingToStudy, job, 1, -1, null, errorOnFailed);
 			}
-			Toil finishInteraction = ToilMaker.MakeToil("Interaction finish");
-			finishInteraction.initAction = new Action(this.DoStudyInteraction);
-			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch, false);
-			int interactions = 5 - this.StudyComp.studyInteractions;
-			int num2;
-			for (int i = 0; i < interactions; i = num2 + 1)
+			return false;
+		}
+		return pawn.Reserve(base.TargetThingA, job, 1, -1, null, errorOnFailed);
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__13))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__13(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	private Toil StudyPawn(TargetIndex pawnIndex, int duration)
+	{
+		Toil study = ToilMaker.MakeToil("Study pawn");
+		study.initAction = delegate
+		{
+			Pawn actor = study.actor;
+			actor.pather.StopDead();
+			if (actor.CurJob.GetTarget(pawnIndex).Thing is Pawn recipient)
 			{
-				if (!targetIsPawn && i > 0)
-				{
-					yield return findAdjacentCell;
-					yield return goToAdjacentCell;
-				}
-				yield return studyToil;
-				yield return finishInteraction;
-				num2 = i;
+				PawnUtility.ForceWait(recipient, duration, study.actor);
+				actor.interactions.TryInteractWith(recipient, InteractionDefOf.PrisonerStudyAnomaly);
 			}
-			Toil toil = ToilMaker.MakeToil("Study finish");
-			toil.initAction = delegate()
-			{
-				this.studyInteractions = 0;
-				this.StudyComp.studyInteractions = 0;
-				this.StudyComp.lastStudiedTick = Find.TickManager.TicksGame;
-				if (ModsConfig.AnomalyActive)
-				{
-					Pawn pawn = this.ThingToStudy as Pawn;
-					if (pawn != null && (!pawn.RaceProps.Humanlike || pawn.IsMutant))
-					{
-						TaleRecorder.RecordTale(TaleDefOf.StudiedEntity, new object[]
-						{
-							this.pawn,
-							pawn
-						});
-					}
-				}
-			};
-			yield return toil;
-			yield break;
-		}
-
-		// Token: 0x06007811 RID: 30737 RVA: 0x00246644 File Offset: 0x00244844
-		private Toil StudyPawn(TargetIndex pawnIndex, int duration)
+		};
+		study.tickIntervalAction = delegate
 		{
-			Toil study = ToilMaker.MakeToil("Study pawn");
-			study.initAction = delegate()
-			{
-				Pawn actor = study.actor;
-				actor.pather.StopDead();
-				Pawn pawn = actor.CurJob.GetTarget(pawnIndex).Thing as Pawn;
-				if (pawn != null)
-				{
-					PawnUtility.ForceWait(pawn, duration, study.actor, false, false);
-					actor.interactions.TryInteractWith(pawn, InteractionDefOf.PrisonerStudyAnomaly);
-				}
-			};
-			study.tickIntervalAction = delegate(int delta)
-			{
-				study.actor.rotationTracker.FaceTarget(study.actor.CurJob.GetTarget(pawnIndex));
-			};
-			study.handlingFacing = true;
-			study.defaultCompleteMode = ToilCompleteMode.Delay;
-			study.defaultDuration = duration;
-			study.WithProgressBarToilDelay(pawnIndex, false, -0.5f);
-			return study;
-		}
+			study.actor.rotationTracker.FaceTarget(study.actor.CurJob.GetTarget(pawnIndex));
+		};
+		study.handlingFacing = true;
+		study.defaultCompleteMode = ToilCompleteMode.Delay;
+		study.defaultDuration = duration;
+		study.WithProgressBarToilDelay(pawnIndex);
+		return study;
+	}
 
-		// Token: 0x06007812 RID: 30738 RVA: 0x002466EC File Offset: 0x002448EC
-		private void DoStudyInteraction()
+	private void DoStudyInteraction()
+	{
+		float anomalyKnowledgeAmount = 0f;
+		if (ModsConfig.AnomalyActive)
 		{
-			float anomalyKnowledgeAmount = 0f;
-			if (ModsConfig.AnomalyActive)
-			{
-				anomalyKnowledgeAmount = this.StudyComp.AdjustedAnomalyKnowledgePerStudy * this.pawn.GetStatValue(StatDefOf.StudyEfficiency, true, -1);
-			}
-			this.StudyComp.Study(this.pawn, 0.87f, anomalyKnowledgeAmount);
-			this.studyInteractions++;
-			if (ModsConfig.AnomalyActive)
-			{
-				Pawn pawn = this.ThingToStudy as Pawn;
-				if (pawn != null)
-				{
-					pawn.mindState.lastAssignedInteractTime = Find.TickManager.TicksGame;
-					pawn.mindState.interactionsToday++;
-				}
-			}
+			anomalyKnowledgeAmount = StudyComp.AdjustedAnomalyKnowledgePerStudy * base.pawn.GetStatValue(StatDefOf.StudyEfficiency);
 		}
-
-		// Token: 0x06007813 RID: 30739 RVA: 0x00246788 File Offset: 0x00244988
-		public override bool? IsSameJobAs(Job j)
+		StudyComp.Study(base.pawn, 0.87f, anomalyKnowledgeAmount);
+		studyInteractions++;
+		if (ModsConfig.AnomalyActive && ThingToStudy is Pawn pawn)
 		{
-			return new bool?(j.targetA == base.TargetThingA);
+			pawn.mindState.lastAssignedInteractTime = Find.TickManager.TicksGame;
+			pawn.mindState.interactionsToday++;
 		}
+	}
 
-		// Token: 0x06007814 RID: 30740 RVA: 0x002467A5 File Offset: 0x002449A5
-		protected override string ReportStringProcessed(string str)
-		{
-			return JobUtility.GetResolvedJobReport(str, this.ThingToStudy);
-		}
+	public override bool? IsSameJobAs(Job j)
+	{
+		return j.targetA == base.TargetThingA;
+	}
 
-		// Token: 0x06007815 RID: 30741 RVA: 0x002467B8 File Offset: 0x002449B8
-		public override void ExposeData()
-		{
-			base.ExposeData();
-			Scribe_Values.Look<int>(ref this.studyInteractions, "studyInteractions", 0, false);
-		}
+	protected override string ReportStringProcessed(string str)
+	{
+		return JobUtility.GetResolvedJobReport(str, ThingToStudy);
+	}
 
-		// Token: 0x040051AB RID: 20907
-		private const TargetIndex ThingToStudyIndex = TargetIndex.A;
-
-		// Token: 0x040051AC RID: 20908
-		private const TargetIndex AdjacentCellIndex = TargetIndex.B;
-
-		// Token: 0x040051AD RID: 20909
-		private const int BaseDurationTicks = 600;
-
-		// Token: 0x040051AE RID: 20910
-		private const int PawnTargetStudyDurationFactor = 2;
-
-		// Token: 0x040051AF RID: 20911
-		public const float ElectroharvesterFactor = 0.5f;
-
-		// Token: 0x040051B0 RID: 20912
-		private int studyInteractions;
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref studyInteractions, "studyInteractions", 0);
 	}
 }

@@ -1,156 +1,99 @@
-﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class StoryWatcher_Adaptation : IExposable
 {
-	// Token: 0x02001E87 RID: 7815
-	public class StoryWatcher_Adaptation : IExposable
+	private float adaptDays;
+
+	private List<Pawn> pawnsJustDownedThisTick = new List<Pawn>();
+
+	private const int UpdateInterval = 30000;
+
+	public float TotalThreatPointsFactor => StorytellerDef.pointsFactorFromAdaptDays.Evaluate(adaptDays);
+
+	public float AdaptDays => adaptDays;
+
+	private int Population => PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_FreeColonists.Count();
+
+	private StorytellerDef StorytellerDef => Find.Storyteller.def;
+
+	public void Notify_PawnEvent(Pawn p, AdaptationEvent ev, DamageInfo? dinfo = null)
 	{
-		// Token: 0x17001A83 RID: 6787
-		// (get) Token: 0x0600AD82 RID: 44418 RVA: 0x003186F7 File Offset: 0x003168F7
-		public float TotalThreatPointsFactor
+		if (!p.RaceProps.Humanlike || !p.IsColonist || p.IsPrisoner)
 		{
-			get
+			return;
+		}
+		if (ev == AdaptationEvent.Downed)
+		{
+			if (dinfo.HasValue && dinfo.Value.Def.ExternalViolenceFor(p))
 			{
-				return this.StorytellerDef.pointsFactorFromAdaptDays.Evaluate(this.adaptDays);
+				pawnsJustDownedThisTick.Add(p);
 			}
 		}
-
-		// Token: 0x17001A84 RID: 6788
-		// (get) Token: 0x0600AD83 RID: 44419 RVA: 0x0031870F File Offset: 0x0031690F
-		public float AdaptDays
+		else
 		{
-			get
-			{
-				return this.adaptDays;
-			}
+			ResolvePawnEvent(p, ev);
 		}
+	}
 
-		// Token: 0x17001A85 RID: 6789
-		// (get) Token: 0x0600AD84 RID: 44420 RVA: 0x00318717 File Offset: 0x00316917
-		private int Population
+	private void ResolvePawnEvent(Pawn p, AdaptationEvent ev)
+	{
+		float num;
+		if (ev == AdaptationEvent.Downed)
 		{
-			get
-			{
-				return PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_FreeColonists.Count<Pawn>();
-			}
+			num = StorytellerDef.adaptDaysLossFromColonistViolentlyDownedByPopulation.Evaluate(Population);
 		}
-
-		// Token: 0x17001A86 RID: 6790
-		// (get) Token: 0x0600AD85 RID: 44421 RVA: 0x00317C10 File Offset: 0x00315E10
-		private StorytellerDef StorytellerDef
+		else
 		{
-			get
+			if (pawnsJustDownedThisTick.Contains(p))
 			{
-				return Find.Storyteller.def;
+				pawnsJustDownedThisTick.Remove(p);
 			}
+			int num2 = Population - 1;
+			num = StorytellerDef.adaptDaysLossFromColonistLostByPostPopulation.Evaluate(num2);
 		}
-
-		// Token: 0x0600AD86 RID: 44422 RVA: 0x00318724 File Offset: 0x00316924
-		public void Notify_PawnEvent(Pawn p, AdaptationEvent ev, DamageInfo? dinfo = null)
+		if (DebugViewSettings.writeStoryteller)
 		{
-			if (!p.RaceProps.Humanlike || !p.IsColonist || p.IsPrisoner)
-			{
-				return;
-			}
-			if (ev != AdaptationEvent.Downed)
-			{
-				this.ResolvePawnEvent(p, ev);
-				return;
-			}
-			if (dinfo == null || !dinfo.Value.Def.ExternalViolenceFor(p))
-			{
-				return;
-			}
-			this.pawnsJustDownedThisTick.Add(p);
+			Log.Message("Adaptation event: " + p?.ToString() + " " + ev.ToString() + ". Loss: " + num.ToString("F1") + " from " + adaptDays.ToString("F1"));
 		}
+		adaptDays = Mathf.Max(StorytellerDef.adaptDaysMin, adaptDays - num);
+	}
 
-		// Token: 0x0600AD87 RID: 44423 RVA: 0x00318788 File Offset: 0x00316988
-		private void ResolvePawnEvent(Pawn p, AdaptationEvent ev)
+	public void AdaptationWatcherTick()
+	{
+		for (int i = 0; i < pawnsJustDownedThisTick.Count; i++)
 		{
-			float num;
-			if (ev == AdaptationEvent.Downed)
-			{
-				num = this.StorytellerDef.adaptDaysLossFromColonistViolentlyDownedByPopulation.Evaluate((float)this.Population);
-			}
-			else
-			{
-				if (this.pawnsJustDownedThisTick.Contains(p))
-				{
-					this.pawnsJustDownedThisTick.Remove(p);
-				}
-				int num2 = this.Population - 1;
-				num = this.StorytellerDef.adaptDaysLossFromColonistLostByPostPopulation.Evaluate((float)num2);
-			}
-			if (DebugViewSettings.writeStoryteller)
-			{
-				Log.Message(string.Concat(new string[]
-				{
-					"Adaptation event: ",
-					(p != null) ? p.ToString() : null,
-					" ",
-					ev.ToString(),
-					". Loss: ",
-					num.ToString("F1"),
-					" from ",
-					this.adaptDays.ToString("F1")
-				}));
-			}
-			this.adaptDays = Mathf.Max(this.StorytellerDef.adaptDaysMin, this.adaptDays - num);
+			ResolvePawnEvent(pawnsJustDownedThisTick[i], AdaptationEvent.Downed);
 		}
-
-		// Token: 0x0600AD88 RID: 44424 RVA: 0x00318880 File Offset: 0x00316A80
-		public void AdaptationWatcherTick()
+		pawnsJustDownedThisTick.Clear();
+		if (Find.TickManager.TicksGame % 30000 == 0 && (!(adaptDays >= 0f) || !((float)GenDate.DaysPassedSinceSettle < StorytellerDef.adaptDaysGameStartGraceDays)))
 		{
-			for (int i = 0; i < this.pawnsJustDownedThisTick.Count; i++)
+			float num = 0.5f * StorytellerDef.adaptDaysGrowthRateCurve.Evaluate(adaptDays);
+			if (adaptDays > 0f)
 			{
-				this.ResolvePawnEvent(this.pawnsJustDownedThisTick[i], AdaptationEvent.Downed);
+				num *= Find.Storyteller.difficulty.adaptationGrowthRateFactorOverZero;
 			}
-			this.pawnsJustDownedThisTick.Clear();
-			if (Find.TickManager.TicksGame % 30000 == 0)
-			{
-				if (this.adaptDays >= 0f && (float)GenDate.DaysPassedSinceSettle < this.StorytellerDef.adaptDaysGameStartGraceDays)
-				{
-					return;
-				}
-				float num = 0.5f * this.StorytellerDef.adaptDaysGrowthRateCurve.Evaluate(this.adaptDays);
-				if (this.adaptDays > 0f)
-				{
-					num *= Find.Storyteller.difficulty.adaptationGrowthRateFactorOverZero;
-				}
-				this.adaptDays += num;
-				this.adaptDays = Mathf.Min(this.adaptDays, this.StorytellerDef.adaptDaysMax);
-			}
+			adaptDays += num;
+			adaptDays = Mathf.Min(adaptDays, StorytellerDef.adaptDaysMax);
 		}
+	}
 
-		// Token: 0x0600AD89 RID: 44425 RVA: 0x0031895D File Offset: 0x00316B5D
-		public void ExposeData()
-		{
-			Scribe_Values.Look<float>(ref this.adaptDays, "adaptDays", 0f, false);
-		}
+	public void ExposeData()
+	{
+		Scribe_Values.Look(ref adaptDays, "adaptDays", 0f);
+	}
 
-		// Token: 0x0600AD8A RID: 44426 RVA: 0x00318975 File Offset: 0x00316B75
-		public void Debug_OffsetAdaptDays(float days)
-		{
-			this.adaptDays += days;
-		}
+	public void Debug_OffsetAdaptDays(float days)
+	{
+		adaptDays += days;
+	}
 
-		// Token: 0x0600AD8B RID: 44427 RVA: 0x00318985 File Offset: 0x00316B85
-		public void ResetAdaptDays()
-		{
-			this.adaptDays = 0f;
-		}
-
-		// Token: 0x0400776A RID: 30570
-		private float adaptDays;
-
-		// Token: 0x0400776B RID: 30571
-		private List<Pawn> pawnsJustDownedThisTick = new List<Pawn>();
-
-		// Token: 0x0400776C RID: 30572
-		private const int UpdateInterval = 30000;
+	public void ResetAdaptDays()
+	{
+		adaptDays = 0f;
 	}
 }

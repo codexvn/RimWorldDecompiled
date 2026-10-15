@@ -1,376 +1,654 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using UnityEngine;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_PrepareCaravan_GatherItems : JobDriver
 {
-	// Token: 0x02001142 RID: 4418
-	public class JobDriver_PrepareCaravan_GatherItems : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToilsCarry_003Ed__17 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x170010A1 RID: 4257
-		// (get) Token: 0x06006BCA RID: 27594 RVA: 0x0021E158 File Offset: 0x0021C358
-		public Thing ToHaul
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_PrepareCaravan_GatherItems _003C_003E4__this;
+
+		private Toil _003Creserve_003E5__2;
+
+		private bool _003CinInventory_003E5__3;
+
+		private Toil _003CfindCarrier_003E5__4;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.job.GetTarget(TargetIndex.A).Thing;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170010A2 RID: 4258
-		// (get) Token: 0x06006BCB RID: 27595 RVA: 0x0021E17C File Offset: 0x0021C37C
-		public Pawn Carrier
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (Pawn)this.job.GetTarget(TargetIndex.B).Thing;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170010A3 RID: 4259
-		// (get) Token: 0x06006BCC RID: 27596 RVA: 0x0021E1A2 File Offset: 0x0021C3A2
-		private List<TransferableOneWay> Transferables
+		[DebuggerHidden]
+		public _003CMakeNewToilsCarry_003Ed__17(int _003C_003E1__state)
 		{
-			get
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003Creserve_003E5__2 = null;
+			_003CfindCarrier_003E5__4 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_PrepareCaravan_GatherItems CS_0024_003C_003E8__locals13 = _003C_003E4__this;
+			switch (num)
 			{
-				return ((LordJob_FormAndSendCaravan)this.job.lord.LordJob).transferables;
-			}
-		}
-
-		// Token: 0x170010A4 RID: 4260
-		// (get) Token: 0x06006BCD RID: 27597 RVA: 0x0021E1C0 File Offset: 0x0021C3C0
-		private TransferableOneWay Transferable
-		{
-			get
-			{
-				TransferableOneWay transferableOneWay = TransferableUtility.TransferableMatchingDesperate(this.ToHaul, this.Transferables, TransferAsOneMode.PodsOrCaravanPacking);
-				if (transferableOneWay != null)
-				{
-					return transferableOneWay;
-				}
-				throw new InvalidOperationException("Could not find any matching transferable.");
-			}
-		}
-
-		// Token: 0x06006BCE RID: 27598 RVA: 0x0021E1EF File Offset: 0x0021C3EF
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
-		{
-			return this.pawn.Reserve(this.ToHaul, this.job, 1, -1, null, errorOnFailed, false);
-		}
-
-		// Token: 0x06006BCF RID: 27599 RVA: 0x0021E214 File Offset: 0x0021C414
-		protected override IEnumerable<Toil> MakeNewToils()
-		{
-			if (this.gatherState == PrepareCaravanGatherState.Unset)
-			{
-				this.gatherState = ((!this.pawn.IsFormingCaravan() || (MassUtility.IsOverEncumbered(this.pawn) && !this.pawn.inventory.HasAnyUnpackedCaravanItems)) ? PrepareCaravanGatherState.Carry : PrepareCaravanGatherState.Haul);
-			}
-			if (this.gatherState == PrepareCaravanGatherState.Carry)
-			{
-				return this.MakeNewToilsCarry();
-			}
-			return this.MakeNewToilsHaulInInventory();
-		}
-
-		// Token: 0x06006BD0 RID: 27600 RVA: 0x0021E275 File Offset: 0x0021C475
-		private IEnumerable<Toil> MakeNewToilsCarry()
-		{
-			this.FailOn(() => !base.Map.lordManager.lords.Contains(this.job.lord));
-			Toil reserve = Toils_Reserve.Reserve(TargetIndex.A, 1, -1, null, false).FailOnDestroyedOrNull(TargetIndex.A);
-			yield return reserve;
-			bool inInventory = HaulAIUtility.IsInHaulableInventory(this.ToHaul);
-			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch, inInventory);
-			yield return this.DetermineNumToHaul(null);
-			yield return Toils_Haul.StartCarryThing(TargetIndex.A, false, true, false, true, inInventory);
-			yield return this.AddCarriedThingToTransferables();
-			yield return Toils_Haul.CheckForGetOpportunityDuplicate(reserve, TargetIndex.A, TargetIndex.None, true, (Thing x) => this.Transferable.things.Contains(x));
-			Toil findCarrier = this.FindCarrier();
-			yield return findCarrier;
-			yield return Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.Touch, false).JumpIf(() => !JobDriver_PrepareCaravan_GatherItems.IsUsableCarrier(this.Carrier, this.pawn, true), findCarrier);
-			yield return Toils_General.Wait(25, TargetIndex.None).JumpIf(() => !JobDriver_PrepareCaravan_GatherItems.IsUsableCarrier(this.Carrier, this.pawn, true), findCarrier).WithProgressBarToilDelay(TargetIndex.B, false, -0.5f);
-			yield return this.PlaceTargetInCarrierInventory();
-			yield break;
-		}
-
-		// Token: 0x06006BD1 RID: 27601 RVA: 0x0021E285 File Offset: 0x0021C485
-		private IEnumerable<Toil> MakeNewToilsHaulInInventory()
-		{
-			this.FailOn(() => !base.Map.lordManager.lords.Contains(this.job.lord));
-			bool inInventory = HaulAIUtility.IsInHaulableInventory(this.ToHaul);
-			Toil reserve = Toils_Reserve.Reserve(TargetIndex.A, 1, -1, null, false).FailOnDestroyedOrNull(TargetIndex.A);
-			Toil findCarrier = this.FindCarrier();
-			yield return reserve;
-			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch, inInventory).JumpIf(new Func<bool>(this.IsFinishedCollectingItems), findCarrier);
-			yield return this.DetermineNumToHaul(findCarrier);
-			yield return Toils_Haul.StartCarryThing(TargetIndex.A, false, true, false, true, inInventory);
-			yield return this.AddCarriedThingToTransferables();
-			yield return Toils_General.Wait(25, TargetIndex.None).WithProgressBarToilDelay(TargetIndex.B, false, -0.5f);
-			yield return this.HaulCaravanItemInInventory(reserve);
-			yield return findCarrier;
-			yield return Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.Touch, false).JumpIf(() => !JobDriver_PrepareCaravan_GatherItems.IsUsableCarrier(this.Carrier, this.pawn, true), findCarrier);
-			yield return Toils_General.Wait(25, TargetIndex.None).JumpIf(() => !JobDriver_PrepareCaravan_GatherItems.IsUsableCarrier(this.Carrier, this.pawn, true), findCarrier).WithProgressBarToilDelay(TargetIndex.B, false, -0.5f);
-			yield return this.AddHauledItemsToCarrier(findCarrier);
-			yield break;
-		}
-
-		// Token: 0x06006BD2 RID: 27602 RVA: 0x0021E298 File Offset: 0x0021C498
-		private Toil DetermineNumToHaul(Toil findCarrier = null)
-		{
-			Toil toil = ToilMaker.MakeToil("DetermineNumToHaul");
-			toil.initAction = delegate()
-			{
-				int num = GatherItemsForCaravanUtility.CountLeftToTransfer(this.pawn, this.Transferable, this.job.lord);
-				if (this.pawn.carryTracker.CarriedThing != null)
-				{
-					num -= this.pawn.carryTracker.CarriedThing.stackCount;
-				}
-				if (num > 0)
-				{
-					this.job.count = num;
-					return;
-				}
-				if (findCarrier == null || !this.pawn.inventory.HasAnyUnpackedCaravanItems)
-				{
-					this.pawn.jobs.EndCurrentJob(JobCondition.Succeeded, true, true);
-					return;
-				}
-				this.pawn.jobs.curDriver.JumpToToil(findCarrier);
-			};
-			toil.defaultCompleteMode = ToilCompleteMode.Instant;
-			toil.atomicWithPrevious = true;
-			return toil;
-		}
-
-		// Token: 0x06006BD3 RID: 27603 RVA: 0x0021E2E3 File Offset: 0x0021C4E3
-		private Toil AddCarriedThingToTransferables()
-		{
-			Toil toil = ToilMaker.MakeToil("AddCarriedThingToTransferables");
-			toil.initAction = delegate()
-			{
-				TransferableOneWay transferable = this.Transferable;
-				if (!transferable.things.Contains(this.pawn.carryTracker.CarriedThing))
-				{
-					transferable.things.Add(this.pawn.carryTracker.CarriedThing);
-				}
-			};
-			toil.defaultCompleteMode = ToilCompleteMode.Instant;
-			toil.atomicWithPrevious = true;
-			return toil;
-		}
-
-		// Token: 0x06006BD4 RID: 27604 RVA: 0x0021E30F File Offset: 0x0021C50F
-		private Toil FindCarrier()
-		{
-			Toil toil = ToilMaker.MakeToil("FindCarrier");
-			toil.initAction = delegate()
-			{
-				Pawn pawn = this.FindBestCarrier(true);
-				if (pawn == null)
-				{
-					bool flag = this.pawn.GetLord() == this.job.lord;
-					if (flag && !MassUtility.IsOverEncumbered(this.pawn))
-					{
-						pawn = this.pawn;
-					}
-					else
-					{
-						pawn = this.FindBestCarrier(false);
-						if (pawn == null)
-						{
-							if (flag)
-							{
-								pawn = this.pawn;
-							}
-							else
-							{
-								IEnumerable<Pawn> source = from x in this.job.lord.ownedPawns
-								where JobDriver_PrepareCaravan_GatherItems.IsUsableCarrier(x, this.pawn, true)
-								select x;
-								if (!source.Any<Pawn>())
-								{
-									base.EndJobWith(JobCondition.Incompletable);
-									return;
-								}
-								pawn = source.RandomElement<Pawn>();
-							}
-						}
-					}
-				}
-				this.job.SetTarget(TargetIndex.B, pawn);
-			};
-			return toil;
-		}
-
-		// Token: 0x06006BD5 RID: 27605 RVA: 0x0021E32D File Offset: 0x0021C52D
-		private bool IsFinishedCollectingItems()
-		{
-			return MassUtility.IsOverEncumbered(this.pawn) || (this.pickedUpFirstItemTicks > -1 && Find.TickManager.TicksGame > this.pickedUpFirstItemTicks + 7500);
-		}
-
-		// Token: 0x06006BD6 RID: 27606 RVA: 0x0021E364 File Offset: 0x0021C564
-		private Toil HaulCaravanItemInInventory(Toil reserve)
-		{
-			Toil toil = ToilMaker.MakeToil("HaulCaravanItemInInventory");
-			toil.initAction = delegate()
-			{
-				if (this.pickedUpFirstItemTicks == -1)
-				{
-					this.pickedUpFirstItemTicks = Find.TickManager.TicksGame;
-				}
-				this.Transferable.AdjustTo(Mathf.Max(this.Transferable.CountToTransfer - this.pawn.carryTracker.CarriedThing.stackCount, 0));
-				this.pawn.inventory.AddHauledCaravanItem(this.pawn.carryTracker.CarriedThing);
-				if (!this.IsFinishedCollectingItems())
-				{
-					this.SetNewHaulTargetAndJumpToReserve(reserve);
-				}
-			};
-			return toil;
-		}
-
-		// Token: 0x06006BD7 RID: 27607 RVA: 0x0021E3A4 File Offset: 0x0021C5A4
-		private void SetNewHaulTargetAndJumpToReserve(Toil reserve)
-		{
-			if (this.CheckToilLoopBackstop())
-			{
-				Thing thing = GatherItemsForCaravanUtility.FindThingToHaul(this.pawn, this.pawn.GetLord());
-				if (thing != null)
-				{
-					this.job.SetTarget(TargetIndex.A, thing);
-					this.pawn.jobs.curDriver.JumpToToil(reserve);
-				}
-			}
-		}
-
-		// Token: 0x06006BD8 RID: 27608 RVA: 0x0021E3FC File Offset: 0x0021C5FC
-		private Toil AddHauledItemsToCarrier(Toil findCarrier)
-		{
-			Toil toil = ToilMaker.MakeToil("AddHauledItemsToCarrier");
-			toil.initAction = delegate()
-			{
-				if (this.Carrier == this.pawn)
-				{
-					this.pawn.inventory.ClearHaulingCaravanCache();
-					return;
-				}
-				this.pawn.inventory.TransferCaravanItemsToCarrier(this.Carrier.inventory);
-				if (this.pawn.inventory.HasAnyUnpackedCaravanItems && this.CheckToilLoopBackstop())
-				{
-					this.pawn.jobs.curDriver.JumpToToil(findCarrier);
-				}
-			};
-			return toil;
-		}
-
-		// Token: 0x06006BD9 RID: 27609 RVA: 0x0021E43C File Offset: 0x0021C63C
-		private bool CheckToilLoopBackstop()
-		{
-			int num = this.toilLoops + 1;
-			this.toilLoops = num;
-			if (num > 500)
-			{
-				Log.Error("Prepare caravan gather items job for pawn " + this.pawn.Label + " looped through toils too many times");
-				base.EndJobWith(JobCondition.Errored);
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				CS_0024_003C_003E8__locals13.FailOn(() => !CS_0024_003C_003E8__locals13.Map.lordManager.lords.Contains(CS_0024_003C_003E8__locals13.job.lord));
+				_003Creserve_003E5__2 = Toils_Reserve.Reserve(TargetIndex.A).FailOnDestroyedOrNull(TargetIndex.A);
+				_003C_003E2__current = _003Creserve_003E5__2;
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003CinInventory_003E5__3 = HaulAIUtility.IsInHaulableInventory(CS_0024_003C_003E8__locals13.ToHaul);
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch, _003CinInventory_003E5__3);
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = CS_0024_003C_003E8__locals13.DetermineNumToHaul();
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Haul.StartCarryThing(TargetIndex.A, putRemainderInQueue: false, subtractNumTakenFromJobCount: true, failIfStackCountLessThanJobCount: false, reserve: true, _003CinInventory_003E5__3);
+				_003C_003E1__state = 4;
+				return true;
+			case 4:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = CS_0024_003C_003E8__locals13.AddCarriedThingToTransferables();
+				_003C_003E1__state = 5;
+				return true;
+			case 5:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Haul.CheckForGetOpportunityDuplicate(_003Creserve_003E5__2, TargetIndex.A, TargetIndex.None, takeFromValidStorage: true, (Thing x) => CS_0024_003C_003E8__locals13.Transferable.things.Contains(x));
+				_003C_003E1__state = 6;
+				return true;
+			case 6:
+				_003C_003E1__state = -1;
+				_003CfindCarrier_003E5__4 = CS_0024_003C_003E8__locals13.FindCarrier();
+				_003C_003E2__current = _003CfindCarrier_003E5__4;
+				_003C_003E1__state = 7;
+				return true;
+			case 7:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.Touch).JumpIf(() => !IsUsableCarrier(CS_0024_003C_003E8__locals13.Carrier, CS_0024_003C_003E8__locals13.pawn, allowColonists: true), _003CfindCarrier_003E5__4);
+				_003C_003E1__state = 8;
+				return true;
+			case 8:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.Wait(25).JumpIf(() => !IsUsableCarrier(CS_0024_003C_003E8__locals13.Carrier, CS_0024_003C_003E8__locals13.pawn, allowColonists: true), _003CfindCarrier_003E5__4).WithProgressBarToilDelay(TargetIndex.B);
+				_003C_003E1__state = 9;
+				return true;
+			case 9:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = CS_0024_003C_003E8__locals13.PlaceTargetInCarrierInventory();
+				_003C_003E1__state = 10;
+				return true;
+			case 10:
+				_003C_003E1__state = -1;
 				return false;
 			}
-			return true;
 		}
 
-		// Token: 0x06006BDA RID: 27610 RVA: 0x0021E48B File Offset: 0x0021C68B
-		private Toil PlaceTargetInCarrierInventory()
+		bool IEnumerator.MoveNext()
 		{
-			Toil toil = ToilMaker.MakeToil("PlaceTargetInCarrierInventory");
-			toil.initAction = delegate()
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToilsCarry_003Ed__17 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				Pawn_CarryTracker carryTracker = this.pawn.carryTracker;
-				Thing carriedThing = carryTracker.CarriedThing;
-				if (carryTracker.innerContainer.Count == 0)
-				{
-					carryTracker.pawn.Drawer.renderer.SetAllGraphicsDirty();
-				}
-				this.Transferable.AdjustTo(Mathf.Max(this.Transferable.CountToTransfer - carriedThing.stackCount, 0));
-				Thing thing;
-				carryTracker.innerContainer.TryTransferToContainer(carriedThing, this.Carrier.inventory.innerContainer, carriedThing.stackCount, out thing, true);
-				CompForbiddable compForbiddable = (thing != null) ? thing.TryGetComp<CompForbiddable>() : null;
-				if (compForbiddable != null)
-				{
-					compForbiddable.Forbidden = false;
-				}
-			};
-			return toil;
-		}
-
-		// Token: 0x06006BDB RID: 27611 RVA: 0x0021E4AC File Offset: 0x0021C6AC
-		public static bool IsUsableCarrier(Pawn p, Pawn forPawn, bool allowColonists)
-		{
-			return p.IsFormingCaravan() && (p == forPawn || (!p.DestroyedOrNull() && p.Spawned && !p.inventory.UnloadEverything && forPawn.CanReach(p, PathEndMode.Touch, Danger.Deadly, false, false, TraverseMode.ByPawn) && ((allowColonists && p.IsColonist) || ((p.RaceProps.packAnimal || p.HostFaction == Faction.OfPlayer) && !p.IsBurning() && !p.Downed && !MassUtility.IsOverEncumbered(p)))));
-		}
-
-		// Token: 0x06006BDC RID: 27612 RVA: 0x0021E540 File Offset: 0x0021C740
-		private float GetCarrierScore(Pawn p)
-		{
-			float lengthHorizontal = (p.Position - this.pawn.Position).LengthHorizontal;
-			float num = MassUtility.EncumbrancePercent(p);
-			return 1f - num - lengthHorizontal / 10f * 0.2f;
-		}
-
-		// Token: 0x06006BDD RID: 27613 RVA: 0x0021E588 File Offset: 0x0021C788
-		private Pawn FindBestCarrier(bool onlyAnimals)
-		{
-			Lord lord = this.job.lord;
-			Pawn pawn = null;
-			float num = 0f;
-			if (lord != null)
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
 			{
-				for (int i = 0; i < lord.ownedPawns.Count; i++)
+				result = new _003CMakeNewToilsCarry_003Ed__17(0)
 				{
-					Pawn pawn2 = lord.ownedPawns[i];
-					if (pawn2 != this.pawn && (!onlyAnimals || pawn2.RaceProps.Animal) && JobDriver_PrepareCaravan_GatherItems.IsUsableCarrier(pawn2, this.pawn, false))
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToilsHaulInInventory_003Ed__18 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_PrepareCaravan_GatherItems _003C_003E4__this;
+
+		private bool _003CinInventory_003E5__2;
+
+		private Toil _003Creserve_003E5__3;
+
+		private Toil _003CfindCarrier_003E5__4;
+
+		Toil IEnumerator<Toil>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CMakeNewToilsHaulInInventory_003Ed__18(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003Creserve_003E5__3 = null;
+			_003CfindCarrier_003E5__4 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_PrepareCaravan_GatherItems CS_0024_003C_003E8__locals14 = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				CS_0024_003C_003E8__locals14.FailOn(() => !CS_0024_003C_003E8__locals14.Map.lordManager.lords.Contains(CS_0024_003C_003E8__locals14.job.lord));
+				_003CinInventory_003E5__2 = HaulAIUtility.IsInHaulableInventory(CS_0024_003C_003E8__locals14.ToHaul);
+				_003Creserve_003E5__3 = Toils_Reserve.Reserve(TargetIndex.A).FailOnDestroyedOrNull(TargetIndex.A);
+				_003CfindCarrier_003E5__4 = CS_0024_003C_003E8__locals14.FindCarrier();
+				_003C_003E2__current = _003Creserve_003E5__3;
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch, _003CinInventory_003E5__2).JumpIf(CS_0024_003C_003E8__locals14.IsFinishedCollectingItems, _003CfindCarrier_003E5__4);
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = CS_0024_003C_003E8__locals14.DetermineNumToHaul(_003CfindCarrier_003E5__4);
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Haul.StartCarryThing(TargetIndex.A, putRemainderInQueue: false, subtractNumTakenFromJobCount: true, failIfStackCountLessThanJobCount: false, reserve: true, _003CinInventory_003E5__2);
+				_003C_003E1__state = 4;
+				return true;
+			case 4:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = CS_0024_003C_003E8__locals14.AddCarriedThingToTransferables();
+				_003C_003E1__state = 5;
+				return true;
+			case 5:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.Wait(25).WithProgressBarToilDelay(TargetIndex.B);
+				_003C_003E1__state = 6;
+				return true;
+			case 6:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = CS_0024_003C_003E8__locals14.HaulCaravanItemInInventory(_003Creserve_003E5__3);
+				_003C_003E1__state = 7;
+				return true;
+			case 7:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = _003CfindCarrier_003E5__4;
+				_003C_003E1__state = 8;
+				return true;
+			case 8:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.Touch).JumpIf(() => !IsUsableCarrier(CS_0024_003C_003E8__locals14.Carrier, CS_0024_003C_003E8__locals14.pawn, allowColonists: true), _003CfindCarrier_003E5__4);
+				_003C_003E1__state = 9;
+				return true;
+			case 9:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.Wait(25).JumpIf(() => !IsUsableCarrier(CS_0024_003C_003E8__locals14.Carrier, CS_0024_003C_003E8__locals14.pawn, allowColonists: true), _003CfindCarrier_003E5__4).WithProgressBarToilDelay(TargetIndex.B);
+				_003C_003E1__state = 10;
+				return true;
+			case 10:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = CS_0024_003C_003E8__locals14.AddHauledItemsToCarrier(_003CfindCarrier_003E5__4);
+				_003C_003E1__state = 11;
+				return true;
+			case 11:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToilsHaulInInventory_003Ed__18 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToilsHaulInInventory_003Ed__18(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private int pickedUpFirstItemTicks = -1;
+
+	private int toilLoops;
+
+	private PrepareCaravanGatherState gatherState;
+
+	private const TargetIndex ToHaulInd = TargetIndex.A;
+
+	private const TargetIndex CarrierInd = TargetIndex.B;
+
+	private const int MaxTicksGatherItems = 7500;
+
+	private const int LoopBackstop = 500;
+
+	public Thing ToHaul => job.GetTarget(TargetIndex.A).Thing;
+
+	public Pawn Carrier => (Pawn)job.GetTarget(TargetIndex.B).Thing;
+
+	private List<TransferableOneWay> Transferables => ((LordJob_FormAndSendCaravan)job.lord.LordJob).transferables;
+
+	private TransferableOneWay Transferable
+	{
+		get
+		{
+			TransferableOneWay transferableOneWay = TransferableUtility.TransferableMatchingDesperate(ToHaul, Transferables, TransferAsOneMode.PodsOrCaravanPacking);
+			if (transferableOneWay != null)
+			{
+				return transferableOneWay;
+			}
+			throw new InvalidOperationException("Could not find any matching transferable.");
+		}
+	}
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return pawn.Reserve(ToHaul, job, 1, -1, null, errorOnFailed);
+	}
+
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		if (gatherState == PrepareCaravanGatherState.Unset)
+		{
+			gatherState = ((pawn.IsFormingCaravan() && (!MassUtility.IsOverEncumbered(pawn) || pawn.inventory.HasAnyUnpackedCaravanItems)) ? PrepareCaravanGatherState.Haul : PrepareCaravanGatherState.Carry);
+		}
+		if (gatherState == PrepareCaravanGatherState.Carry)
+		{
+			return MakeNewToilsCarry();
+		}
+		return MakeNewToilsHaulInInventory();
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToilsCarry_003Ed__17))]
+	private IEnumerable<Toil> MakeNewToilsCarry()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToilsCarry_003Ed__17(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToilsHaulInInventory_003Ed__18))]
+	private IEnumerable<Toil> MakeNewToilsHaulInInventory()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToilsHaulInInventory_003Ed__18(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	private Toil DetermineNumToHaul(Toil findCarrier = null)
+	{
+		Toil toil = ToilMaker.MakeToil("DetermineNumToHaul");
+		toil.initAction = delegate
+		{
+			int num = GatherItemsForCaravanUtility.CountLeftToTransfer(pawn, Transferable, job.lord);
+			if (pawn.carryTracker.CarriedThing != null)
+			{
+				num -= pawn.carryTracker.CarriedThing.stackCount;
+			}
+			if (num <= 0)
+			{
+				if (findCarrier == null || !pawn.inventory.HasAnyUnpackedCaravanItems)
+				{
+					pawn.jobs.EndCurrentJob(JobCondition.Succeeded);
+				}
+				else
+				{
+					pawn.jobs.curDriver.JumpToToil(findCarrier);
+				}
+			}
+			else
+			{
+				job.count = num;
+			}
+		};
+		toil.defaultCompleteMode = ToilCompleteMode.Instant;
+		toil.atomicWithPrevious = true;
+		return toil;
+	}
+
+	private Toil AddCarriedThingToTransferables()
+	{
+		Toil toil = ToilMaker.MakeToil("AddCarriedThingToTransferables");
+		toil.initAction = delegate
+		{
+			TransferableOneWay transferable = Transferable;
+			if (!transferable.things.Contains(pawn.carryTracker.CarriedThing))
+			{
+				transferable.things.Add(pawn.carryTracker.CarriedThing);
+			}
+		};
+		toil.defaultCompleteMode = ToilCompleteMode.Instant;
+		toil.atomicWithPrevious = true;
+		return toil;
+	}
+
+	private Toil FindCarrier()
+	{
+		Toil toil = ToilMaker.MakeToil("FindCarrier");
+		toil.initAction = delegate
+		{
+			Pawn pawn = FindBestCarrier(onlyAnimals: true);
+			if (pawn == null)
+			{
+				bool flag = base.pawn.GetLord() == job.lord;
+				if (flag && !MassUtility.IsOverEncumbered(base.pawn))
+				{
+					pawn = base.pawn;
+				}
+				else
+				{
+					pawn = FindBestCarrier(onlyAnimals: false);
+					if (pawn == null)
 					{
-						float carrierScore = this.GetCarrierScore(pawn2);
-						if (pawn == null || carrierScore > num)
+						if (flag)
 						{
-							pawn = pawn2;
-							num = carrierScore;
+							pawn = base.pawn;
+						}
+						else
+						{
+							IEnumerable<Pawn> source = job.lord.ownedPawns.Where((Pawn x) => IsUsableCarrier(x, base.pawn, allowColonists: true));
+							if (!source.Any())
+							{
+								EndJobWith(JobCondition.Incompletable);
+								return;
+							}
+							pawn = source.RandomElement();
 						}
 					}
 				}
 			}
-			return pawn;
-		}
+			job.SetTarget(TargetIndex.B, pawn);
+		};
+		return toil;
+	}
 
-		// Token: 0x06006BDE RID: 27614 RVA: 0x0021E614 File Offset: 0x0021C814
-		public override void ExposeData()
+	private bool IsFinishedCollectingItems()
+	{
+		if (!MassUtility.IsOverEncumbered(pawn))
 		{
-			base.ExposeData();
-			Scribe_Values.Look<int>(ref this.pickedUpFirstItemTicks, "pickedUpFirstItemTicks", 0, false);
-			Scribe_Values.Look<int>(ref this.toilLoops, "toilLoops", 0, false);
-			Scribe_Values.Look<PrepareCaravanGatherState>(ref this.gatherState, "gatherState", PrepareCaravanGatherState.Unset, false);
+			if (pickedUpFirstItemTicks > -1)
+			{
+				return Find.TickManager.TicksGame > pickedUpFirstItemTicks + 7500;
+			}
+			return false;
 		}
+		return true;
+	}
 
-		// Token: 0x04004BC2 RID: 19394
-		private int pickedUpFirstItemTicks = -1;
+	private Toil HaulCaravanItemInInventory(Toil reserve)
+	{
+		Toil toil = ToilMaker.MakeToil("HaulCaravanItemInInventory");
+		toil.initAction = delegate
+		{
+			if (pickedUpFirstItemTicks == -1)
+			{
+				pickedUpFirstItemTicks = Find.TickManager.TicksGame;
+			}
+			Transferable.AdjustTo(Mathf.Max(Transferable.CountToTransfer - pawn.carryTracker.CarriedThing.stackCount, 0));
+			pawn.inventory.AddHauledCaravanItem(pawn.carryTracker.CarriedThing);
+			if (!IsFinishedCollectingItems())
+			{
+				SetNewHaulTargetAndJumpToReserve(reserve);
+			}
+		};
+		return toil;
+	}
 
-		// Token: 0x04004BC3 RID: 19395
-		private int toilLoops;
+	private void SetNewHaulTargetAndJumpToReserve(Toil reserve)
+	{
+		if (CheckToilLoopBackstop())
+		{
+			Thing thing = GatherItemsForCaravanUtility.FindThingToHaul(pawn, pawn.GetLord());
+			if (thing != null)
+			{
+				job.SetTarget(TargetIndex.A, thing);
+				pawn.jobs.curDriver.JumpToToil(reserve);
+			}
+		}
+	}
 
-		// Token: 0x04004BC4 RID: 19396
-		private PrepareCaravanGatherState gatherState;
+	private Toil AddHauledItemsToCarrier(Toil findCarrier)
+	{
+		Toil toil = ToilMaker.MakeToil("AddHauledItemsToCarrier");
+		toil.initAction = delegate
+		{
+			if (Carrier == pawn)
+			{
+				pawn.inventory.ClearHaulingCaravanCache();
+			}
+			else
+			{
+				pawn.inventory.TransferCaravanItemsToCarrier(Carrier.inventory);
+				if (pawn.inventory.HasAnyUnpackedCaravanItems && CheckToilLoopBackstop())
+				{
+					pawn.jobs.curDriver.JumpToToil(findCarrier);
+				}
+			}
+		};
+		return toil;
+	}
 
-		// Token: 0x04004BC5 RID: 19397
-		private const TargetIndex ToHaulInd = TargetIndex.A;
+	private bool CheckToilLoopBackstop()
+	{
+		if (++toilLoops > 500)
+		{
+			Log.Error("Prepare caravan gather items job for pawn " + pawn.Label + " looped through toils too many times");
+			EndJobWith(JobCondition.Errored);
+			return false;
+		}
+		return true;
+	}
 
-		// Token: 0x04004BC6 RID: 19398
-		private const TargetIndex CarrierInd = TargetIndex.B;
+	private Toil PlaceTargetInCarrierInventory()
+	{
+		Toil toil = ToilMaker.MakeToil("PlaceTargetInCarrierInventory");
+		toil.initAction = delegate
+		{
+			Pawn_CarryTracker carryTracker = pawn.carryTracker;
+			Thing carriedThing = carryTracker.CarriedThing;
+			if (carryTracker.innerContainer.Count == 0)
+			{
+				carryTracker.pawn.Drawer.renderer.SetAllGraphicsDirty();
+			}
+			Transferable.AdjustTo(Mathf.Max(Transferable.CountToTransfer - carriedThing.stackCount, 0));
+			carryTracker.innerContainer.TryTransferToContainer(carriedThing, Carrier.inventory.innerContainer, carriedThing.stackCount, out var resultingTransferredItem);
+			CompForbiddable compForbiddable = resultingTransferredItem?.TryGetComp<CompForbiddable>();
+			if (compForbiddable != null)
+			{
+				compForbiddable.Forbidden = false;
+			}
+		};
+		return toil;
+	}
 
-		// Token: 0x04004BC7 RID: 19399
-		private const int MaxTicksGatherItems = 7500;
+	public static bool IsUsableCarrier(Pawn p, Pawn forPawn, bool allowColonists)
+	{
+		if (!p.IsFormingCaravan())
+		{
+			return false;
+		}
+		if (p == forPawn)
+		{
+			return true;
+		}
+		if (p.DestroyedOrNull() || !p.Spawned || p.inventory.UnloadEverything || !forPawn.CanReach(p, PathEndMode.Touch, Danger.Deadly))
+		{
+			return false;
+		}
+		if (allowColonists && p.IsColonist)
+		{
+			return true;
+		}
+		if ((p.RaceProps.packAnimal || p.HostFaction == Faction.OfPlayer) && !p.IsBurning() && !p.Downed)
+		{
+			return !MassUtility.IsOverEncumbered(p);
+		}
+		return false;
+	}
 
-		// Token: 0x04004BC8 RID: 19400
-		private const int LoopBackstop = 500;
+	private float GetCarrierScore(Pawn p)
+	{
+		float lengthHorizontal = (p.Position - pawn.Position).LengthHorizontal;
+		float num = MassUtility.EncumbrancePercent(p);
+		return 1f - num - lengthHorizontal / 10f * 0.2f;
+	}
+
+	private Pawn FindBestCarrier(bool onlyAnimals)
+	{
+		Lord lord = job.lord;
+		Pawn pawn = null;
+		float num = 0f;
+		if (lord != null)
+		{
+			for (int i = 0; i < lord.ownedPawns.Count; i++)
+			{
+				Pawn pawn2 = lord.ownedPawns[i];
+				if (pawn2 != base.pawn && (!onlyAnimals || pawn2.RaceProps.Animal) && IsUsableCarrier(pawn2, base.pawn, allowColonists: false))
+				{
+					float carrierScore = GetCarrierScore(pawn2);
+					if (pawn == null || carrierScore > num)
+					{
+						pawn = pawn2;
+						num = carrierScore;
+					}
+				}
+			}
+		}
+		return pawn;
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref pickedUpFirstItemTicks, "pickedUpFirstItemTicks", 0);
+		Scribe_Values.Look(ref toilLoops, "toilLoops", 0);
+		Scribe_Values.Look(ref gatherState, "gatherState", PrepareCaravanGatherState.Unset);
 	}
 }

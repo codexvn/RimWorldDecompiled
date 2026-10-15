@@ -290,7 +290,7 @@ internal sealed class ImguiDispatch
 		KeyCode[] controlKeys = ControlKeys;
 		foreach (KeyCode keyCode in controlKeys)
 		{
-			if (RawKeys.GetKeyDownOrRepeat(keyCode))
+			if (RawKeys.GetKeyDownOrRepeat(keyCode) && (!OperatingSystem.IsWindows() || !WindowsImeBridge.Consumed(keyCode)))
 			{
 				RunKeyPass(keyCode, '\0', physMouse, mods);
 			}

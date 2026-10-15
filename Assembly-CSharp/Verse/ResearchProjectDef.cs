@@ -1,896 +1,946 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using RimWorld;
 using UnityEngine;
 using Verse.Grammar;
 
-namespace Verse
+namespace Verse;
+
+public class ResearchProjectDef : Def
 {
-	// Token: 0x020002D1 RID: 721
-	public class ResearchProjectDef : Def
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__91 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700030C RID: 780
-		// (get) Token: 0x060011AC RID: 4524 RVA: 0x00052B6B File Offset: 0x00050D6B
-		public float ResearchViewX
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public ResearchProjectDef _003C_003E4__this;
+
+		private List<ResearchProjectDef> _003CrpDefs_003E5__2;
+
+		private IEnumerator<string> _003C_003E7__wrap2;
+
+		private int _003Ci_003E5__4;
+
+		private List<ThingDef>.Enumerator _003C_003E7__wrap4;
+
+		string IEnumerator<string>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.x;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700030D RID: 781
-		// (get) Token: 0x060011AD RID: 4525 RVA: 0x00052B73 File Offset: 0x00050D73
-		public float ResearchViewY
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.y;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700030E RID: 782
-		// (get) Token: 0x060011AE RID: 4526 RVA: 0x00052B7B File Offset: 0x00050D7B
-		public float CostApparent
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__91(int _003C_003E1__state)
 		{
-			get
-			{
-				return this.Cost * this.CostFactor(Faction.OfPlayer.def.techLevel);
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x1700030F RID: 783
-		// (get) Token: 0x060011AF RID: 4527 RVA: 0x00052B99 File Offset: 0x00050D99
-		public float ProgressReal
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			get
+			switch (_003C_003E1__state)
 			{
-				return Find.ResearchManager.GetProgress(this);
-			}
-		}
-
-		// Token: 0x17000310 RID: 784
-		// (get) Token: 0x060011B0 RID: 4528 RVA: 0x00052BA6 File Offset: 0x00050DA6
-		public float ProgressApparent
-		{
-			get
-			{
-				return this.ProgressReal * this.CostFactor(Faction.OfPlayer.def.techLevel);
-			}
-		}
-
-		// Token: 0x17000311 RID: 785
-		// (get) Token: 0x060011B1 RID: 4529 RVA: 0x00052BC4 File Offset: 0x00050DC4
-		public string ProgressApparentString
-		{
-			get
-			{
-				string format = (this.baseCost > 0f) ? "F0" : "F2";
-				return this.ProgressApparent.ToString(format);
-			}
-		}
-
-		// Token: 0x17000312 RID: 786
-		// (get) Token: 0x060011B2 RID: 4530 RVA: 0x00052BFA File Offset: 0x00050DFA
-		public float ProgressPercent
-		{
-			get
-			{
-				return Mathf.Clamp01(this.ProgressReal / this.Cost);
-			}
-		}
-
-		// Token: 0x17000313 RID: 787
-		// (get) Token: 0x060011B3 RID: 4531 RVA: 0x00052C0E File Offset: 0x00050E0E
-		public bool IsFinished
-		{
-			get
-			{
-				return this.ProgressReal >= this.Cost;
-			}
-		}
-
-		// Token: 0x17000314 RID: 788
-		// (get) Token: 0x060011B4 RID: 4532 RVA: 0x00052C21 File Offset: 0x00050E21
-		public float Cost
-		{
-			get
-			{
-				if (this.baseCost <= 0f)
+			case -3:
+			case 1:
+				try
 				{
-					return this.knowledgeCost;
 				}
-				return this.baseCost;
-			}
-		}
-
-		// Token: 0x17000315 RID: 789
-		// (get) Token: 0x060011B5 RID: 4533 RVA: 0x00040924 File Offset: 0x0003EB24
-		public override TaggedString LabelCap
-		{
-			get
-			{
-				if (this.label.NullOrEmpty())
+				finally
 				{
-					return null;
+					_003C_003Em__Finally1();
 				}
-				if (this.cachedLabelCap.NullOrEmpty())
+				break;
+			case -4:
+			case 8:
+				try
 				{
-					this.cachedLabelCap = this.label.CapitalizeFirst();
 				}
-				return this.cachedLabelCap;
-			}
-		}
-
-		// Token: 0x17000316 RID: 790
-		// (get) Token: 0x060011B6 RID: 4534 RVA: 0x00052C3D File Offset: 0x00050E3D
-		public string Description
-		{
-			get
-			{
-				return this.description;
-			}
-		}
-
-		// Token: 0x17000317 RID: 791
-		// (get) Token: 0x060011B7 RID: 4535 RVA: 0x00052C45 File Offset: 0x00050E45
-		public bool IsHidden
-		{
-			get
-			{
-				return !this.IsFinished && ModsConfig.AnomalyActive && Find.EntityCodex.Hidden(this);
-			}
-		}
-
-		// Token: 0x17000318 RID: 792
-		// (get) Token: 0x060011B8 RID: 4536 RVA: 0x00052C64 File Offset: 0x00050E64
-		public bool CanStartNow
-		{
-			get
-			{
-				return !this.IsFinished && this.PrerequisitesCompleted && this.TechprintRequirementMet && (this.requiredResearchBuilding == null || this.PlayerHasAnyAppropriateResearchBench) && this.PlayerMechanitorRequirementMet && this.AnalyzedThingsRequirementsMet && !this.IsHidden && this.InspectionRequirementsMet;
-			}
-		}
-
-		// Token: 0x17000319 RID: 793
-		// (get) Token: 0x060011B9 RID: 4537 RVA: 0x00052CBC File Offset: 0x00050EBC
-		public bool PrerequisitesCompleted
-		{
-			get
-			{
-				if (this.prerequisites != null)
+				finally
 				{
-					for (int i = 0; i < this.prerequisites.Count; i++)
+					_003C_003Em__Finally2();
+				}
+				break;
+			}
+			_003CrpDefs_003E5__2 = null;
+			_003C_003E7__wrap2 = null;
+			_003C_003E7__wrap4 = default(List<ThingDef>.Enumerator);
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				ResearchProjectDef researchProjectDef = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap2 = ((Def)researchProjectDef).ConfigErrors().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0092;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0092;
+				case 2:
+					_003C_003E1__state = -1;
+					goto IL_00dc;
+				case 3:
+					_003C_003E1__state = -1;
+					goto IL_0116;
+				case 4:
+					_003C_003E1__state = -1;
+					goto IL_014b;
+				case 5:
+					_003C_003E1__state = -1;
+					goto IL_0181;
+				case 6:
+					_003C_003E1__state = -1;
+					goto IL_02ba;
+				case 7:
+					_003C_003E1__state = -1;
+					goto IL_0312;
+				case 8:
+					_003C_003E1__state = -4;
+					goto IL_03b0;
+				case 9:
+					_003C_003E1__state = -1;
+					goto IL_0402;
+				case 10:
 					{
-						if (!this.prerequisites[i].IsFinished)
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_0092:
+					if (_003C_003E7__wrap2.MoveNext())
+					{
+						string current = _003C_003E7__wrap2.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap2 = null;
+					if (researchProjectDef.techLevel == TechLevel.Undefined && researchProjectDef.knowledgeCategory == null)
+					{
+						_003C_003E2__current = "techLevel is Undefined";
+						_003C_003E1__state = 2;
+						return true;
+					}
+					goto IL_00dc;
+					IL_0181:
+					_003CrpDefs_003E5__2 = DefDatabase<ResearchProjectDef>.AllDefsListForReading;
+					_003Ci_003E5__4 = 0;
+					goto IL_02cc;
+					IL_02ba:
+					_003Ci_003E5__4++;
+					goto IL_02cc;
+					IL_0402:
+					if (researchProjectDef.baseCost > 0f && researchProjectDef.knowledgeCost > 0f)
+					{
+						_003C_003E2__current = "baseCost and knowledgeCost are both defined. This is unsupported.";
+						_003C_003E1__state = 10;
+						return true;
+					}
+					break;
+					IL_00dc:
+					if (researchProjectDef.ResearchViewX < 0f || researchProjectDef.ResearchViewY < 0f)
+					{
+						_003C_003E2__current = "researchViewX and/or researchViewY not set";
+						_003C_003E1__state = 3;
+						return true;
+					}
+					goto IL_0116;
+					IL_0312:
+					if (!researchProjectDef.requiredAnalyzed.NullOrEmpty())
+					{
+						_003C_003E7__wrap4 = researchProjectDef.requiredAnalyzed.GetEnumerator();
+						_003C_003E1__state = -4;
+						goto IL_03b0;
+					}
+					goto IL_03cf;
+					IL_0116:
+					if (researchProjectDef.techprintCount == 0 && !researchProjectDef.heldByFactionCategoryTags.NullOrEmpty())
+					{
+						_003C_003E2__current = "requires no techprints but has heldByFactionCategoryTags.";
+						_003C_003E1__state = 4;
+						return true;
+					}
+					goto IL_014b;
+					IL_03b0:
+					while (_003C_003E7__wrap4.MoveNext())
+					{
+						ThingDef current2 = _003C_003E7__wrap4.Current;
+						if (!current2.HasAssignableCompFrom(typeof(CompAnalyzable)))
 						{
-							return false;
-						}
-					}
-				}
-				if (this.hiddenPrerequisites != null)
-				{
-					for (int j = 0; j < this.hiddenPrerequisites.Count; j++)
-					{
-						if (!this.hiddenPrerequisites[j].IsFinished)
-						{
-							return false;
-						}
-					}
-				}
-				return true;
-			}
-		}
-
-		// Token: 0x1700031A RID: 794
-		// (get) Token: 0x060011BA RID: 4538 RVA: 0x00052D30 File Offset: 0x00050F30
-		public int TechprintCount
-		{
-			get
-			{
-				if (!ModLister.RoyaltyInstalled)
-				{
-					return 0;
-				}
-				return this.techprintCount;
-			}
-		}
-
-		// Token: 0x1700031B RID: 795
-		// (get) Token: 0x060011BB RID: 4539 RVA: 0x00052D41 File Offset: 0x00050F41
-		public int TechprintsApplied
-		{
-			get
-			{
-				return Find.ResearchManager.GetTechprints(this);
-			}
-		}
-
-		// Token: 0x1700031C RID: 796
-		// (get) Token: 0x060011BC RID: 4540 RVA: 0x00052D4E File Offset: 0x00050F4E
-		public bool TechprintRequirementMet
-		{
-			get
-			{
-				return this.TechprintCount <= 0 || Find.ResearchManager.GetTechprints(this) >= this.TechprintCount;
-			}
-		}
-
-		// Token: 0x1700031D RID: 797
-		// (get) Token: 0x060011BD RID: 4541 RVA: 0x00052D70 File Offset: 0x00050F70
-		public ThingDef Techprint
-		{
-			get
-			{
-				if (this.TechprintCount <= 0)
-				{
-					return null;
-				}
-				if (this.cachedTechprint == null)
-				{
-					this.cachedTechprint = DefDatabase<ThingDef>.AllDefs.FirstOrDefault(delegate(ThingDef x)
-					{
-						CompProperties_Techprint compProperties = x.GetCompProperties<CompProperties_Techprint>();
-						return compProperties != null && compProperties.project == this;
-					});
-					if (this.cachedTechprint == null)
-					{
-						Log.ErrorOnce("Could not find techprint for research project " + ((this != null) ? this.ToString() : null), (int)this.shortHash ^ 873231450);
-					}
-				}
-				return this.cachedTechprint;
-			}
-		}
-
-		// Token: 0x1700031E RID: 798
-		// (get) Token: 0x060011BE RID: 4542 RVA: 0x00052DE2 File Offset: 0x00050FE2
-		public int RequiredAnalyzedThingCount
-		{
-			get
-			{
-				List<ThingDef> list = this.requiredAnalyzed;
-				if (list == null)
-				{
-					return 0;
-				}
-				return list.Count;
-			}
-		}
-
-		// Token: 0x1700031F RID: 799
-		// (get) Token: 0x060011BF RID: 4543 RVA: 0x00052DF8 File Offset: 0x00050FF8
-		public int AnalyzedThingsCompleted
-		{
-			get
-			{
-				if (this.requiredAnalyzed.NullOrEmpty<ThingDef>())
-				{
-					return 0;
-				}
-				int num = 0;
-				for (int i = 0; i < this.requiredAnalyzed.Count; i++)
-				{
-					AnalysisManager analysisManager = Find.AnalysisManager;
-					CompProperties_CompAnalyzableUnlockResearch compProperties = this.requiredAnalyzed[i].GetCompProperties<CompProperties_CompAnalyzableUnlockResearch>();
-					AnalysisDetails analysisDetails;
-					analysisManager.TryGetAnalysisProgress((compProperties != null) ? compProperties.analysisID : -1, out analysisDetails);
-					if (analysisDetails != null && analysisDetails.Satisfied)
-					{
-						num++;
-					}
-				}
-				return num;
-			}
-		}
-
-		// Token: 0x17000320 RID: 800
-		// (get) Token: 0x060011C0 RID: 4544 RVA: 0x00052E66 File Offset: 0x00051066
-		public bool AnalyzedThingsRequirementsMet
-		{
-			get
-			{
-				return this.RequiredAnalyzedThingCount <= 0 || this.AnalyzedThingsCompleted >= this.RequiredAnalyzedThingCount;
-			}
-		}
-
-		// Token: 0x17000321 RID: 801
-		// (get) Token: 0x060011C1 RID: 4545 RVA: 0x00052E84 File Offset: 0x00051084
-		public bool InspectionRequirementsMet
-		{
-			get
-			{
-				return !ModsConfig.OdysseyActive || !this.requireGravEngineInspected || Find.ResearchManager.gravEngineInspected;
-			}
-		}
-
-		// Token: 0x17000322 RID: 802
-		// (get) Token: 0x060011C2 RID: 4546 RVA: 0x00052EA4 File Offset: 0x000510A4
-		public List<Def> UnlockedDefs
-		{
-			get
-			{
-				if (this.cachedUnlockedDefs == null)
-				{
-					this.cachedUnlockedDefs = (from x in (from x in (from x in DefDatabase<RecipeDef>.AllDefs
-					where x.researchPrerequisite == this || (x.researchPrerequisites != null && x.researchPrerequisites.Contains(this))
-					select x).SelectMany((RecipeDef x) => from y in x.products
-					select y.thingDef)
-					orderby x.label
-					select x).Concat(from x in DefDatabase<ThingDef>.AllDefs
-					where x.researchPrerequisites != null && x.researchPrerequisites.Contains(this)
-					orderby x.label
-					select x).Concat(from x in DefDatabase<ThingDef>.AllDefs
-					where x.plant != null && x.plant.sowResearchPrerequisites != null && x.plant.sowResearchPrerequisites.Contains(this)
-					orderby x.label
-					select x).Concat(from x in DefDatabase<TerrainDef>.AllDefs
-					where x.researchPrerequisites != null && x.researchPrerequisites.Contains(this)
-					orderby x.label
-					select x).Concat(from x in DefDatabase<RecipeDef>.AllDefs
-					where x.IsSurgery && x.researchPrerequisites != null && x.researchPrerequisites.Contains(this)
-					orderby x.label
-					select x).Concat(from x in DefDatabase<PsychicRitualDef>.AllDefs
-					where x.researchPrerequisite == this
-					select x)
-					orderby x.label
-					select x).Distinct<Def>().ToList<Def>();
-				}
-				return this.cachedUnlockedDefs;
-			}
-		}
-
-		// Token: 0x17000323 RID: 803
-		// (get) Token: 0x060011C3 RID: 4547 RVA: 0x0005306C File Offset: 0x0005126C
-		public List<Dialog_InfoCard.Hyperlink> InfoCardHyperlinks
-		{
-			get
-			{
-				if (this.cachedHyperlinks == null)
-				{
-					this.cachedHyperlinks = new List<Dialog_InfoCard.Hyperlink>();
-					List<Def> unlockedDefs = this.UnlockedDefs;
-					if (unlockedDefs != null)
-					{
-						for (int i = 0; i < unlockedDefs.Count; i++)
-						{
-							this.cachedHyperlinks.Add(new Dialog_InfoCard.Hyperlink(unlockedDefs[i], -1));
-						}
-					}
-				}
-				return this.cachedHyperlinks;
-			}
-		}
-
-		// Token: 0x17000324 RID: 804
-		// (get) Token: 0x060011C4 RID: 4548 RVA: 0x000530C8 File Offset: 0x000512C8
-		public bool PlayerHasAnyAppropriateResearchBench
-		{
-			get
-			{
-				List<Map> maps = Find.Maps;
-				for (int i = 0; i < maps.Count; i++)
-				{
-					List<Building> allBuildingsColonist = maps[i].listerBuildings.allBuildingsColonist;
-					for (int j = 0; j < allBuildingsColonist.Count; j++)
-					{
-						Building_ResearchBench building_ResearchBench = allBuildingsColonist[j] as Building_ResearchBench;
-						if (building_ResearchBench != null && this.CanBeResearchedAt(building_ResearchBench, true))
-						{
+							_003C_003E2__current = "requires analyzing " + current2.label + " but " + current2.label + " cannot be analyzed.";
+							_003C_003E1__state = 8;
 							return true;
 						}
 					}
-				}
-				return false;
-			}
-		}
-
-		// Token: 0x17000325 RID: 805
-		// (get) Token: 0x060011C5 RID: 4549 RVA: 0x0005312F File Offset: 0x0005132F
-		public bool PlayerMechanitorRequirementMet
-		{
-			get
-			{
-				return !ModsConfig.BiotechActive || !this.requiresMechanitor || MechanitorUtility.AnyMechanitorInPlayerFaction();
-			}
-		}
-
-		// Token: 0x060011C6 RID: 4550 RVA: 0x00053147 File Offset: 0x00051347
-		public override void ResolveReferences()
-		{
-			base.ResolveReferences();
-			if (this.tab == null)
-			{
-				this.tab = ResearchTabDefOf.Main;
-			}
-		}
-
-		// Token: 0x060011C7 RID: 4551 RVA: 0x00053162 File Offset: 0x00051362
-		public override IEnumerable<string> ConfigErrors()
-		{
-			foreach (string text in base.ConfigErrors())
-			{
-				yield return text;
-			}
-			IEnumerator<string> enumerator = null;
-			if (this.techLevel == TechLevel.Undefined && this.knowledgeCategory == null)
-			{
-				yield return "techLevel is Undefined";
-			}
-			if (this.ResearchViewX < 0f || this.ResearchViewY < 0f)
-			{
-				yield return "researchViewX and/or researchViewY not set";
-			}
-			if (this.techprintCount == 0 && !this.heldByFactionCategoryTags.NullOrEmpty<string>())
-			{
-				yield return "requires no techprints but has heldByFactionCategoryTags.";
-			}
-			if (this.techprintCount > 0 && this.heldByFactionCategoryTags.NullOrEmpty<string>())
-			{
-				yield return "requires techprints but has no heldByFactionCategoryTags.";
-			}
-			List<ResearchProjectDef> rpDefs = DefDatabase<ResearchProjectDef>.AllDefsListForReading;
-			int num3;
-			for (int i = 0; i < rpDefs.Count; i = num3 + 1)
-			{
-				if (rpDefs[i] != this && rpDefs[i].tab == this.tab && rpDefs[i].ResearchViewX == this.ResearchViewX && rpDefs[i].ResearchViewY == this.ResearchViewY)
-				{
-					string[] array = new string[9];
-					array[0] = "same research view coords and tab as ";
-					int num = 1;
-					ResearchProjectDef researchProjectDef = rpDefs[i];
-					array[num] = ((researchProjectDef != null) ? researchProjectDef.ToString() : null);
-					array[2] = ": ";
-					array[3] = this.ResearchViewX.ToString();
-					array[4] = ", ";
-					array[5] = this.ResearchViewY.ToString();
-					array[6] = "(";
-					int num2 = 7;
-					ResearchTabDef researchTabDef = this.tab;
-					array[num2] = ((researchTabDef != null) ? researchTabDef.ToString() : null);
-					array[8] = ")";
-					yield return string.Concat(array);
-				}
-				num3 = i;
-			}
-			if (!ModLister.RoyaltyInstalled && this.techprintCount > 0)
-			{
-				yield return "defines techprintCount, but techprints are a Royalty-specific game system and only work with Royalty installed.";
-			}
-			if (!this.requiredAnalyzed.NullOrEmpty<ThingDef>())
-			{
-				foreach (ThingDef thingDef in this.requiredAnalyzed)
-				{
-					if (!thingDef.HasAssignableCompFrom(typeof(CompAnalyzable)))
+					_003C_003Em__Finally2();
+					_003C_003E7__wrap4 = default(List<ThingDef>.Enumerator);
+					goto IL_03cf;
+					IL_014b:
+					if (researchProjectDef.techprintCount > 0 && researchProjectDef.heldByFactionCategoryTags.NullOrEmpty())
 					{
-						yield return string.Concat(new string[]
+						_003C_003E2__current = "requires techprints but has no heldByFactionCategoryTags.";
+						_003C_003E1__state = 5;
+						return true;
+					}
+					goto IL_0181;
+					IL_02cc:
+					if (_003Ci_003E5__4 < _003CrpDefs_003E5__2.Count)
+					{
+						if (_003CrpDefs_003E5__2[_003Ci_003E5__4] != researchProjectDef && _003CrpDefs_003E5__2[_003Ci_003E5__4].tab == researchProjectDef.tab && _003CrpDefs_003E5__2[_003Ci_003E5__4].ResearchViewX == researchProjectDef.ResearchViewX && _003CrpDefs_003E5__2[_003Ci_003E5__4].ResearchViewY == researchProjectDef.ResearchViewY)
 						{
-							"requires analyzing ",
-							thingDef.label,
-							" but ",
-							thingDef.label,
-							" cannot be analyzed."
-						});
+							_003C_003E2__current = "same research view coords and tab as " + _003CrpDefs_003E5__2[_003Ci_003E5__4]?.ToString() + ": " + researchProjectDef.ResearchViewX + ", " + researchProjectDef.ResearchViewY + "(" + researchProjectDef.tab?.ToString() + ")";
+							_003C_003E1__state = 6;
+							return true;
+						}
+						goto IL_02ba;
 					}
+					if (!ModLister.RoyaltyInstalled && researchProjectDef.techprintCount > 0)
+					{
+						_003C_003E2__current = "defines techprintCount, but techprints are a Royalty-specific game system and only work with Royalty installed.";
+						_003C_003E1__state = 7;
+						return true;
+					}
+					goto IL_0312;
+					IL_03cf:
+					if (researchProjectDef.knowledgeCost > 0f && researchProjectDef.knowledgeCategory == null)
+					{
+						_003C_003E2__current = "has knowledge cost, but no knowledge category.";
+						_003C_003E1__state = 9;
+						return true;
+					}
+					goto IL_0402;
 				}
-				List<ThingDef>.Enumerator enumerator2 = default(List<ThingDef>.Enumerator);
-			}
-			if (this.knowledgeCost > 0f && this.knowledgeCategory == null)
-			{
-				yield return "has knowledge cost, but no knowledge category.";
-			}
-			if (this.baseCost > 0f && this.knowledgeCost > 0f)
-			{
-				yield return "baseCost and knowledgeCost are both defined. This is unsupported.";
-			}
-			yield break;
-			yield break;
-		}
-
-		// Token: 0x060011C8 RID: 4552 RVA: 0x00053172 File Offset: 0x00051372
-		public override void PostLoad()
-		{
-			base.PostLoad();
-			if (!ModLister.RoyaltyInstalled)
-			{
-				this.techprintCount = 0;
-			}
-			if (!ModLister.BiotechInstalled)
-			{
-				this.requiredAnalyzed = null;
-			}
-		}
-
-		// Token: 0x060011C9 RID: 4553 RVA: 0x00053198 File Offset: 0x00051398
-		public string GetTip()
-		{
-			string text = this.LabelCap.Colorize(ColoredText.TipSectionTitleColor);
-			if (this.ProgressReal > 0f && !this.IsFinished)
-			{
-				text = string.Concat(new string[]
-				{
-					text,
-					" (",
-					this.ProgressApparentString,
-					" / ",
-					this.CostApparent.ToString("F0"),
-					")"
-				});
-			}
-			if (this.cachedDescription == null)
-			{
-				this.cachedDescription = this.Description;
-				if (this.TechprintCount > 0)
-				{
-					this.cachedDescription = this.cachedDescription + "\n\n" + ("RequiredTechprintTip".Translate() + ": " + this.Techprint.LabelCap).ToString();
-				}
-				if (this.RequiredAnalyzedThingCount > 0)
-				{
-					string[] array = new string[5];
-					array[0] = this.cachedDescription;
-					array[1] = "\n\n";
-					array[2] = "StudyRequirementTip".Translate().ToString();
-					array[3] = ": ";
-					array[4] = (from t in this.requiredAnalyzed
-					select t.label).ToCommaList(true, false).CapitalizeFirst();
-					this.cachedDescription = string.Concat(array);
-				}
-				if (this.modContentPack != null && !this.modContentPack.IsCoreMod)
-				{
-					Color color = this.modContentPack.IsOfficialMod ? ModLister.GetExpansionWithIdentifier(this.modContentPack.PackageId.ToLower()).primaryColor : ColoredText.SubtleGrayColor;
-					this.cachedDescription = this.cachedDescription + "\n\n" + ("Stat_Source_Label".Translate().ToString() + ": " + this.modContentPack.Name).Colorize(color);
-				}
-			}
-			return text + "\n" + this.cachedDescription;
-		}
-
-		// Token: 0x060011CA RID: 4554 RVA: 0x000533A4 File Offset: 0x000515A4
-		public float CostFactor(TechLevel researcherTechLevel)
-		{
-			if (this.techLevel == TechLevel.Undefined)
-			{
-				return 1f;
-			}
-			TechLevel techLevel = (TechLevel)Mathf.Min((int)this.techLevel, 4);
-			if (researcherTechLevel >= techLevel)
-			{
-				return 1f;
-			}
-			int num = (int)(techLevel - researcherTechLevel);
-			return 1f + (float)num * 0.5f;
-		}
-
-		// Token: 0x060011CB RID: 4555 RVA: 0x000533E9 File Offset: 0x000515E9
-		public bool HasTag(ResearchProjectTagDef tag)
-		{
-			return this.tags != null && this.tags.Contains(tag);
-		}
-
-		// Token: 0x060011CC RID: 4556 RVA: 0x00053404 File Offset: 0x00051604
-		public bool CanBeResearchedAt(Building_ResearchBench bench, bool ignoreResearchBenchPowerStatus)
-		{
-			if (this.requiredResearchBuilding != null && bench.def != this.requiredResearchBuilding)
-			{
 				return false;
 			}
-			if (!ignoreResearchBenchPowerStatus)
+			catch
 			{
-				CompPowerTrader comp = bench.GetComp<CompPowerTrader>();
-				if (comp != null && !comp.PowerOn)
-				{
-					return false;
-				}
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
-			if (!this.requiredResearchFacilities.NullOrEmpty<ThingDef>())
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap2 != null)
 			{
-				CompAffectedByFacilities affectedByFacilities = bench.TryGetComp<CompAffectedByFacilities>();
-				if (affectedByFacilities == null)
+				_003C_003E7__wrap2.Dispose();
+			}
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap4/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__91 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__91(0)
 				{
-					return false;
-				}
-				List<Thing> linkedFacilitiesListForReading = affectedByFacilities.LinkedFacilitiesListForReading;
-				int i;
-				Predicate<Thing> <>9__0;
-				int j;
-				for (i = 0; i < this.requiredResearchFacilities.Count; i = j + 1)
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	public float baseCost;
+
+	public List<ResearchProjectDef> prerequisites;
+
+	public List<ResearchProjectDef> hiddenPrerequisites;
+
+	public TechLevel techLevel;
+
+	public List<ResearchProjectDef> requiredByThis;
+
+	private List<ResearchMod> researchMods;
+
+	public ThingDef requiredResearchBuilding;
+
+	public List<ThingDef> requiredResearchFacilities;
+
+	public List<ResearchProjectTagDef> tags;
+
+	public ResearchTabDef tab;
+
+	public float researchViewX = 1f;
+
+	public float researchViewY = 1f;
+
+	[MustTranslate]
+	public string discoveredLetterTitle;
+
+	[MustTranslate]
+	public string discoveredLetterText;
+
+	public DifficultyConditionConfig discoveredLetterDisabledWhen = new DifficultyConditionConfig();
+
+	public int techprintCount;
+
+	public float techprintCommonality = 1f;
+
+	public float techprintMarketValue = 1000f;
+
+	[NoTranslate]
+	public List<string> heldByFactionCategoryTags;
+
+	public DifficultyConditionConfig hideWhen = new DifficultyConditionConfig();
+
+	public bool requiresMechanitor;
+
+	public List<ThingDef> requiredAnalyzed;
+
+	public bool recalculatePower;
+
+	public KnowledgeCategoryDef knowledgeCategory;
+
+	public float knowledgeCost;
+
+	public ConceptDef teachConcept;
+
+	public RulePack generalRules;
+
+	public bool requireGravEngineInspected;
+
+	[MustTranslate]
+	public List<string> customUnlockTexts;
+
+	[Unsaved(false)]
+	private float x = 1f;
+
+	[Unsaved(false)]
+	private float y = 1f;
+
+	[Unsaved(false)]
+	private bool positionModified;
+
+	[Unsaved(false)]
+	private ThingDef cachedTechprint;
+
+	[Unsaved(false)]
+	private List<Def> cachedUnlockedDefs;
+
+	[Unsaved(false)]
+	private List<Dialog_InfoCard.Hyperlink> cachedHyperlinks;
+
+	[Unsaved(false)]
+	private string cachedDescription;
+
+	public const TechLevel MaxEffectiveTechLevel = TechLevel.Industrial;
+
+	private const float ResearchCostFactorPerTechLevelDiff = 0.5f;
+
+	public float ResearchViewX => x;
+
+	public float ResearchViewY => y;
+
+	public float CostApparent => Cost * CostFactor(Faction.OfPlayer.def.techLevel);
+
+	public float ProgressReal => Find.ResearchManager.GetProgress(this);
+
+	public float ProgressApparent => ProgressReal * CostFactor(Faction.OfPlayer.def.techLevel);
+
+	public string ProgressApparentString
+	{
+		get
+		{
+			string text = ((baseCost > 0f) ? "F0" : "F2");
+			return ProgressApparent.ToString(text);
+		}
+	}
+
+	public float ProgressPercent => Mathf.Clamp01(ProgressReal / Cost);
+
+	public bool IsFinished => ProgressReal >= Cost;
+
+	public float Cost
+	{
+		get
+		{
+			if (!(baseCost > 0f))
+			{
+				return knowledgeCost;
+			}
+			return baseCost;
+		}
+	}
+
+	public override TaggedString LabelCap
+	{
+		get
+		{
+			if (label.NullOrEmpty())
+			{
+				return null;
+			}
+			if (cachedLabelCap.NullOrEmpty())
+			{
+				cachedLabelCap = label.CapitalizeFirst();
+			}
+			return cachedLabelCap;
+		}
+	}
+
+	public string Description => description;
+
+	public bool IsHidden
+	{
+		get
+		{
+			if (!IsFinished && ModsConfig.AnomalyActive)
+			{
+				return Find.EntityCodex.Hidden(this);
+			}
+			return false;
+		}
+	}
+
+	public bool CanStartNow
+	{
+		get
+		{
+			if (!IsFinished && PrerequisitesCompleted && TechprintRequirementMet && (requiredResearchBuilding == null || PlayerHasAnyAppropriateResearchBench) && PlayerMechanitorRequirementMet && AnalyzedThingsRequirementsMet && !IsHidden)
+			{
+				return InspectionRequirementsMet;
+			}
+			return false;
+		}
+	}
+
+	public bool PrerequisitesCompleted
+	{
+		get
+		{
+			if (prerequisites != null)
+			{
+				for (int i = 0; i < prerequisites.Count; i++)
 				{
-					List<Thing> list = linkedFacilitiesListForReading;
-					Predicate<Thing> match;
-					if ((match = <>9__0) == null)
-					{
-						match = (<>9__0 = ((Thing x) => x.def == this.requiredResearchFacilities[i] && affectedByFacilities.IsFacilityActive(x)));
-					}
-					if (list.Find(match) == null)
+					if (!prerequisites[i].IsFinished)
 					{
 						return false;
 					}
-					j = i;
+				}
+			}
+			if (hiddenPrerequisites != null)
+			{
+				for (int j = 0; j < hiddenPrerequisites.Count; j++)
+				{
+					if (!hiddenPrerequisites[j].IsFinished)
+					{
+						return false;
+					}
 				}
 			}
 			return true;
 		}
+	}
 
-		// Token: 0x060011CD RID: 4557 RVA: 0x000534D4 File Offset: 0x000516D4
-		public bool AnyOtherVisiblePrerequisitesCompleted(ResearchProjectDef prerequisite)
+	public int TechprintCount
+	{
+		get
 		{
-			if (this.prerequisites == null)
+			if (!ModLister.RoyaltyInstalled)
+			{
+				return 0;
+			}
+			return techprintCount;
+		}
+	}
+
+	public int TechprintsApplied => Find.ResearchManager.GetTechprints(this);
+
+	public bool TechprintRequirementMet
+	{
+		get
+		{
+			if (TechprintCount > 0 && Find.ResearchManager.GetTechprints(this) < TechprintCount)
 			{
 				return false;
 			}
-			for (int i = 0; i < this.prerequisites.Count; i++)
+			return true;
+		}
+	}
+
+	public ThingDef Techprint
+	{
+		get
+		{
+			if (TechprintCount <= 0)
 			{
-				if (this.prerequisites[i] != prerequisite && this.prerequisites[i].IsFinished)
+				return null;
+			}
+			if (cachedTechprint == null)
+			{
+				cachedTechprint = DefDatabase<ThingDef>.AllDefs.FirstOrDefault(delegate(ThingDef x)
 				{
-					return true;
+					CompProperties_Techprint compProperties = x.GetCompProperties<CompProperties_Techprint>();
+					return compProperties != null && compProperties.project == this;
+				});
+				if (cachedTechprint == null)
+				{
+					Log.ErrorOnce("Could not find techprint for research project " + this, shortHash ^ 0x340C745A);
+				}
+			}
+			return cachedTechprint;
+		}
+	}
+
+	public int RequiredAnalyzedThingCount => requiredAnalyzed?.Count ?? 0;
+
+	public int AnalyzedThingsCompleted
+	{
+		get
+		{
+			if (requiredAnalyzed.NullOrEmpty())
+			{
+				return 0;
+			}
+			int num = 0;
+			for (int i = 0; i < requiredAnalyzed.Count; i++)
+			{
+				Find.AnalysisManager.TryGetAnalysisProgress(requiredAnalyzed[i].GetCompProperties<CompProperties_CompAnalyzableUnlockResearch>()?.analysisID ?? (-1), out var details);
+				if (details != null && details.Satisfied)
+				{
+					num++;
+				}
+			}
+			return num;
+		}
+	}
+
+	public bool AnalyzedThingsRequirementsMet
+	{
+		get
+		{
+			if (RequiredAnalyzedThingCount > 0)
+			{
+				return AnalyzedThingsCompleted >= RequiredAnalyzedThingCount;
+			}
+			return true;
+		}
+	}
+
+	public bool InspectionRequirementsMet
+	{
+		get
+		{
+			if (ModsConfig.OdysseyActive && requireGravEngineInspected)
+			{
+				return Find.ResearchManager.gravEngineInspected;
+			}
+			return true;
+		}
+	}
+
+	public List<Def> UnlockedDefs
+	{
+		get
+		{
+			if (cachedUnlockedDefs == null)
+			{
+				cachedUnlockedDefs = (from x in (from x in DefDatabase<RecipeDef>.AllDefs.Where((RecipeDef x) => x.researchPrerequisite == this || (x.researchPrerequisites != null && x.researchPrerequisites.Contains(this))).SelectMany((RecipeDef x) => ((IEnumerable<ThingDefCountClass>)x.products).Select((Func<ThingDefCountClass, Def>)((ThingDefCountClass y) => y.thingDef)))
+						orderby x.label
+						select x).Concat(from x in DefDatabase<ThingDef>.AllDefs
+						where x.researchPrerequisites != null && x.researchPrerequisites.Contains(this)
+						orderby x.label
+						select x).Concat(from x in DefDatabase<ThingDef>.AllDefs
+						where x.plant != null && x.plant.sowResearchPrerequisites != null && x.plant.sowResearchPrerequisites.Contains(this)
+						orderby x.label
+						select x).Concat(from x in DefDatabase<TerrainDef>.AllDefs
+						where x.researchPrerequisites != null && x.researchPrerequisites.Contains(this)
+						orderby x.label
+						select x)
+						.Concat(from x in DefDatabase<RecipeDef>.AllDefs
+							where x.IsSurgery && x.researchPrerequisites != null && x.researchPrerequisites.Contains(this)
+							orderby x.label
+							select x)
+						.Concat(DefDatabase<PsychicRitualDef>.AllDefs.Where((PsychicRitualDef x) => x.researchPrerequisite == this))
+					orderby x.label
+					select x).Distinct().ToList();
+			}
+			return cachedUnlockedDefs;
+		}
+	}
+
+	public List<Dialog_InfoCard.Hyperlink> InfoCardHyperlinks
+	{
+		get
+		{
+			if (cachedHyperlinks == null)
+			{
+				cachedHyperlinks = new List<Dialog_InfoCard.Hyperlink>();
+				List<Def> unlockedDefs = UnlockedDefs;
+				if (unlockedDefs != null)
+				{
+					for (int i = 0; i < unlockedDefs.Count; i++)
+					{
+						cachedHyperlinks.Add(new Dialog_InfoCard.Hyperlink(unlockedDefs[i]));
+					}
+				}
+			}
+			return cachedHyperlinks;
+		}
+	}
+
+	public bool PlayerHasAnyAppropriateResearchBench
+	{
+		get
+		{
+			List<Map> maps = Find.Maps;
+			for (int i = 0; i < maps.Count; i++)
+			{
+				List<Building> allBuildingsColonist = maps[i].listerBuildings.allBuildingsColonist;
+				for (int j = 0; j < allBuildingsColonist.Count; j++)
+				{
+					if (allBuildingsColonist[j] is Building_ResearchBench bench && CanBeResearchedAt(bench, ignoreResearchBenchPowerStatus: true))
+					{
+						return true;
+					}
 				}
 			}
 			return false;
 		}
+	}
 
-		// Token: 0x060011CE RID: 4558 RVA: 0x00053528 File Offset: 0x00051728
-		public void ReapplyAllMods()
+	public bool PlayerMechanitorRequirementMet
+	{
+		get
 		{
-			if (this.researchMods != null)
+			if (!ModsConfig.BiotechActive || !requiresMechanitor)
 			{
-				for (int i = 0; i < this.researchMods.Count; i++)
+				return true;
+			}
+			return MechanitorUtility.AnyMechanitorInPlayerFaction();
+		}
+	}
+
+	public override void ResolveReferences()
+	{
+		base.ResolveReferences();
+		if (tab == null)
+		{
+			tab = ResearchTabDefOf.Main;
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__91))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__91(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override void PostLoad()
+	{
+		base.PostLoad();
+		if (!ModLister.RoyaltyInstalled)
+		{
+			techprintCount = 0;
+		}
+		if (!ModLister.BiotechInstalled)
+		{
+			requiredAnalyzed = null;
+		}
+	}
+
+	public string GetTip()
+	{
+		string text = LabelCap.Colorize(ColoredText.TipSectionTitleColor);
+		if (ProgressReal > 0f && !IsFinished)
+		{
+			text = text + " (" + ProgressApparentString + " / " + CostApparent.ToString("F0") + ")";
+		}
+		if (cachedDescription == null)
+		{
+			cachedDescription = Description;
+			if (TechprintCount > 0)
+			{
+				cachedDescription = cachedDescription + "\n\n" + ("RequiredTechprintTip".Translate() + ": " + Techprint.LabelCap).ToString();
+			}
+			if (RequiredAnalyzedThingCount > 0)
+			{
+				cachedDescription = cachedDescription + "\n\n" + "StudyRequirementTip".Translate().ToString() + ": " + requiredAnalyzed.Select((ThingDef t) => t.label).ToCommaList(useAnd: true).CapitalizeFirst();
+			}
+			if (modContentPack != null && !modContentPack.IsCoreMod)
+			{
+				Color color = (modContentPack.IsOfficialMod ? ModLister.GetExpansionWithIdentifier(modContentPack.PackageId.ToLower()).primaryColor : ColoredText.SubtleGrayColor);
+				cachedDescription = cachedDescription + "\n\n" + ("Stat_Source_Label".Translate().ToString() + ": " + modContentPack.Name).Colorize(color);
+			}
+		}
+		return text + "\n" + cachedDescription;
+	}
+
+	public float CostFactor(TechLevel researcherTechLevel)
+	{
+		if (this.techLevel == TechLevel.Undefined)
+		{
+			return 1f;
+		}
+		TechLevel techLevel = (TechLevel)Mathf.Min((int)this.techLevel, 4);
+		if ((int)researcherTechLevel >= (int)techLevel)
+		{
+			return 1f;
+		}
+		int num = techLevel - researcherTechLevel;
+		return 1f + (float)num * 0.5f;
+	}
+
+	public bool HasTag(ResearchProjectTagDef tag)
+	{
+		if (tags == null)
+		{
+			return false;
+		}
+		return tags.Contains(tag);
+	}
+
+	public bool CanBeResearchedAt(Building_ResearchBench bench, bool ignoreResearchBenchPowerStatus)
+	{
+		if (requiredResearchBuilding != null && bench.def != requiredResearchBuilding)
+		{
+			return false;
+		}
+		if (!ignoreResearchBenchPowerStatus)
+		{
+			CompPowerTrader comp = bench.GetComp<CompPowerTrader>();
+			if (comp != null && !comp.PowerOn)
+			{
+				return false;
+			}
+		}
+		if (!requiredResearchFacilities.NullOrEmpty())
+		{
+			CompAffectedByFacilities affectedByFacilities = bench.TryGetComp<CompAffectedByFacilities>();
+			if (affectedByFacilities == null)
+			{
+				return false;
+			}
+			List<Thing> linkedFacilitiesListForReading = affectedByFacilities.LinkedFacilitiesListForReading;
+			int i;
+			for (i = 0; i < requiredResearchFacilities.Count; i++)
+			{
+				if (linkedFacilitiesListForReading.Find((Thing x) => x.def == requiredResearchFacilities[i] && affectedByFacilities.IsFacilityActive(x)) == null)
 				{
-					try
-					{
-						this.researchMods[i].Apply();
-					}
-					catch (Exception ex)
-					{
-						string str = "Exception applying research mod for project ";
-						string str2 = (this != null) ? this.ToString() : null;
-						string str3 = ": ";
-						Exception ex2 = ex;
-						Log.Error(str + str2 + str3 + ((ex2 != null) ? ex2.ToString() : null));
-					}
+					return false;
 				}
 			}
 		}
+		return true;
+	}
 
-		// Token: 0x060011CF RID: 4559 RVA: 0x000535A8 File Offset: 0x000517A8
-		public static ResearchProjectDef Named(string defName)
+	public bool AnyOtherVisiblePrerequisitesCompleted(ResearchProjectDef prerequisite)
+	{
+		if (prerequisites == null)
 		{
-			return DefDatabase<ResearchProjectDef>.GetNamed(defName, true);
+			return false;
 		}
-
-		// Token: 0x060011D0 RID: 4560 RVA: 0x000535B4 File Offset: 0x000517B4
-		public static void GenerateNonOverlappingCoordinates()
+		for (int i = 0; i < prerequisites.Count; i++)
 		{
-			foreach (ResearchProjectDef researchProjectDef in DefDatabase<ResearchProjectDef>.AllDefsListForReading)
+			if (prerequisites[i] != prerequisite && prerequisites[i].IsFinished)
 			{
-				researchProjectDef.x = researchProjectDef.researchViewX;
-				researchProjectDef.y = researchProjectDef.researchViewY;
+				return true;
 			}
-			int num = 0;
-			do
+		}
+		return false;
+	}
+
+	public void ReapplyAllMods()
+	{
+		if (researchMods == null)
+		{
+			return;
+		}
+		for (int i = 0; i < researchMods.Count; i++)
+		{
+			try
 			{
-				bool flag = false;
-				foreach (ResearchProjectDef researchProjectDef2 in DefDatabase<ResearchProjectDef>.AllDefsListForReading)
+				researchMods[i].Apply();
+			}
+			catch (Exception ex)
+			{
+				Log.Error("Exception applying research mod for project " + this?.ToString() + ": " + ex);
+			}
+		}
+	}
+
+	public static ResearchProjectDef Named(string defName)
+	{
+		return DefDatabase<ResearchProjectDef>.GetNamed(defName);
+	}
+
+	public static void GenerateNonOverlappingCoordinates()
+	{
+		foreach (ResearchProjectDef item in DefDatabase<ResearchProjectDef>.AllDefsListForReading)
+		{
+			item.x = item.researchViewX;
+			item.y = item.researchViewY;
+		}
+		int num = 0;
+		while (true)
+		{
+			bool flag = false;
+			foreach (ResearchProjectDef item2 in DefDatabase<ResearchProjectDef>.AllDefsListForReading)
+			{
+				foreach (ResearchProjectDef item3 in DefDatabase<ResearchProjectDef>.AllDefsListForReading)
 				{
-					foreach (ResearchProjectDef researchProjectDef3 in DefDatabase<ResearchProjectDef>.AllDefsListForReading)
+					if (item2 == item3 || item2.tab != item3.tab)
 					{
-						if (researchProjectDef2 != researchProjectDef3 && researchProjectDef2.tab == researchProjectDef3.tab)
+						continue;
+					}
+					bool num2 = Mathf.Abs(item2.x - item3.x) < 0.5f;
+					bool flag2 = Mathf.Abs(item2.y - item3.y) < 0.25f;
+					if (num2 && flag2)
+					{
+						flag = true;
+						if (item2.x <= item3.x)
 						{
-							bool flag2 = Mathf.Abs(researchProjectDef2.x - researchProjectDef3.x) < 0.5f;
-							bool flag3 = Mathf.Abs(researchProjectDef2.y - researchProjectDef3.y) < 0.25f;
-							if (flag2 && flag3)
-							{
-								flag = true;
-								if (researchProjectDef2.x <= researchProjectDef3.x)
-								{
-									researchProjectDef2.x -= 0.1f;
-									researchProjectDef3.x += 0.1f;
-								}
-								else
-								{
-									researchProjectDef2.x += 0.1f;
-									researchProjectDef3.x -= 0.1f;
-								}
-								if (researchProjectDef2.y <= researchProjectDef3.y)
-								{
-									researchProjectDef2.y -= 0.1f;
-									researchProjectDef3.y += 0.1f;
-								}
-								else
-								{
-									researchProjectDef2.y += 0.1f;
-									researchProjectDef3.y -= 0.1f;
-								}
-								researchProjectDef2.x += 0.001f;
-								researchProjectDef2.y += 0.001f;
-								researchProjectDef3.x -= 0.001f;
-								researchProjectDef3.y -= 0.001f;
-								ResearchProjectDef.ClampInCoordinateLimits(researchProjectDef2);
-								ResearchProjectDef.ClampInCoordinateLimits(researchProjectDef3);
-							}
+							item2.x -= 0.1f;
+							item3.x += 0.1f;
 						}
+						else
+						{
+							item2.x += 0.1f;
+							item3.x -= 0.1f;
+						}
+						if (item2.y <= item3.y)
+						{
+							item2.y -= 0.1f;
+							item3.y += 0.1f;
+						}
+						else
+						{
+							item2.y += 0.1f;
+							item3.y -= 0.1f;
+						}
+						item2.x += 0.001f;
+						item2.y += 0.001f;
+						item3.x -= 0.001f;
+						item3.y -= 0.001f;
+						ClampInCoordinateLimits(item2);
+						ClampInCoordinateLimits(item3);
 					}
 				}
-				if (!flag)
-				{
-					return;
-				}
-				num++;
 			}
-			while (num <= 200);
-			Log.Error("Couldn't relax research project coordinates apart after " + 200.ToString() + " passes.");
-		}
-
-		// Token: 0x060011D1 RID: 4561 RVA: 0x0005385C File Offset: 0x00051A5C
-		private static void ClampInCoordinateLimits(ResearchProjectDef rp)
-		{
-			if (rp.x < 0f)
-			{
-				rp.x = 0f;
-			}
-			if (rp.y < 0f)
-			{
-				rp.y = 0f;
-			}
-			if (rp.y > 6.5f)
-			{
-				rp.y = 6.5f;
-			}
-		}
-
-		// Token: 0x060011D2 RID: 4562 RVA: 0x000538B4 File Offset: 0x00051AB4
-		public void Debug_ApplyPositionDelta(Vector2 delta)
-		{
-			bool flag = Mathf.Abs(delta.x) > 0.01f;
-			bool flag2 = Mathf.Abs(delta.y) > 0.01f;
 			if (flag)
 			{
-				this.x += delta.x;
+				num++;
+				if (num > 200)
+				{
+					Log.Error("Couldn't relax research project coordinates apart after " + 200 + " passes.");
+					break;
+				}
+				continue;
 			}
-			if (flag2)
-			{
-				this.y += delta.y;
-			}
-			if (flag || flag2)
-			{
-				this.positionModified = true;
-			}
+			break;
 		}
+	}
 
-		// Token: 0x060011D3 RID: 4563 RVA: 0x00053920 File Offset: 0x00051B20
-		public void Debug_SnapPositionData()
+	private static void ClampInCoordinateLimits(ResearchProjectDef rp)
+	{
+		if (rp.x < 0f)
 		{
-			this.x = Mathf.Round(this.x * 2f) / 2f;
-			this.y = Mathf.Round(this.y * 10f) / 10f;
-			ResearchProjectDef.ClampInCoordinateLimits(this);
+			rp.x = 0f;
 		}
-
-		// Token: 0x060011D4 RID: 4564 RVA: 0x0005396D File Offset: 0x00051B6D
-		public bool Debug_IsPositionModified()
+		if (rp.y < 0f)
 		{
-			return this.positionModified;
+			rp.y = 0f;
 		}
+		if (rp.y > 6.5f)
+		{
+			rp.y = 6.5f;
+		}
+	}
 
-		// Token: 0x04000FF5 RID: 4085
-		public float baseCost;
+	public void Debug_ApplyPositionDelta(Vector2 delta)
+	{
+		bool num = Mathf.Abs(delta.x) > 0.01f;
+		bool flag = Mathf.Abs(delta.y) > 0.01f;
+		if (num)
+		{
+			x += delta.x;
+		}
+		if (flag)
+		{
+			y += delta.y;
+		}
+		if (num || flag)
+		{
+			positionModified = true;
+		}
+	}
 
-		// Token: 0x04000FF6 RID: 4086
-		public List<ResearchProjectDef> prerequisites;
+	public void Debug_SnapPositionData()
+	{
+		x = Mathf.Round(x * 2f) / 2f;
+		y = Mathf.Round(y * 10f) / 10f;
+		ClampInCoordinateLimits(this);
+	}
 
-		// Token: 0x04000FF7 RID: 4087
-		public List<ResearchProjectDef> hiddenPrerequisites;
-
-		// Token: 0x04000FF8 RID: 4088
-		public TechLevel techLevel;
-
-		// Token: 0x04000FF9 RID: 4089
-		public List<ResearchProjectDef> requiredByThis;
-
-		// Token: 0x04000FFA RID: 4090
-		private List<ResearchMod> researchMods;
-
-		// Token: 0x04000FFB RID: 4091
-		public ThingDef requiredResearchBuilding;
-
-		// Token: 0x04000FFC RID: 4092
-		public List<ThingDef> requiredResearchFacilities;
-
-		// Token: 0x04000FFD RID: 4093
-		public List<ResearchProjectTagDef> tags;
-
-		// Token: 0x04000FFE RID: 4094
-		public ResearchTabDef tab;
-
-		// Token: 0x04000FFF RID: 4095
-		public float researchViewX = 1f;
-
-		// Token: 0x04001000 RID: 4096
-		public float researchViewY = 1f;
-
-		// Token: 0x04001001 RID: 4097
-		[MustTranslate]
-		public string discoveredLetterTitle;
-
-		// Token: 0x04001002 RID: 4098
-		[MustTranslate]
-		public string discoveredLetterText;
-
-		// Token: 0x04001003 RID: 4099
-		public DifficultyConditionConfig discoveredLetterDisabledWhen = new DifficultyConditionConfig();
-
-		// Token: 0x04001004 RID: 4100
-		public int techprintCount;
-
-		// Token: 0x04001005 RID: 4101
-		public float techprintCommonality = 1f;
-
-		// Token: 0x04001006 RID: 4102
-		public float techprintMarketValue = 1000f;
-
-		// Token: 0x04001007 RID: 4103
-		[NoTranslate]
-		public List<string> heldByFactionCategoryTags;
-
-		// Token: 0x04001008 RID: 4104
-		public DifficultyConditionConfig hideWhen = new DifficultyConditionConfig();
-
-		// Token: 0x04001009 RID: 4105
-		public bool requiresMechanitor;
-
-		// Token: 0x0400100A RID: 4106
-		public List<ThingDef> requiredAnalyzed;
-
-		// Token: 0x0400100B RID: 4107
-		public bool recalculatePower;
-
-		// Token: 0x0400100C RID: 4108
-		public KnowledgeCategoryDef knowledgeCategory;
-
-		// Token: 0x0400100D RID: 4109
-		public float knowledgeCost;
-
-		// Token: 0x0400100E RID: 4110
-		public ConceptDef teachConcept;
-
-		// Token: 0x0400100F RID: 4111
-		public RulePack generalRules;
-
-		// Token: 0x04001010 RID: 4112
-		public bool requireGravEngineInspected;
-
-		// Token: 0x04001011 RID: 4113
-		[MustTranslate]
-		public List<string> customUnlockTexts;
-
-		// Token: 0x04001012 RID: 4114
-		[Unsaved(false)]
-		private float x = 1f;
-
-		// Token: 0x04001013 RID: 4115
-		[Unsaved(false)]
-		private float y = 1f;
-
-		// Token: 0x04001014 RID: 4116
-		[Unsaved(false)]
-		private bool positionModified;
-
-		// Token: 0x04001015 RID: 4117
-		[Unsaved(false)]
-		private ThingDef cachedTechprint;
-
-		// Token: 0x04001016 RID: 4118
-		[Unsaved(false)]
-		private List<Def> cachedUnlockedDefs;
-
-		// Token: 0x04001017 RID: 4119
-		[Unsaved(false)]
-		private List<Dialog_InfoCard.Hyperlink> cachedHyperlinks;
-
-		// Token: 0x04001018 RID: 4120
-		[Unsaved(false)]
-		private string cachedDescription;
-
-		// Token: 0x04001019 RID: 4121
-		public const TechLevel MaxEffectiveTechLevel = TechLevel.Industrial;
-
-		// Token: 0x0400101A RID: 4122
-		private const float ResearchCostFactorPerTechLevelDiff = 0.5f;
+	public bool Debug_IsPositionModified()
+	{
+		return positionModified;
 	}
 }

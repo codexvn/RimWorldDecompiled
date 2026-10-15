@@ -1,9 +1,5 @@
-﻿using System;
+namespace Verse;
 
-namespace Verse
+public class Command_Settle : Command_Action
 {
-	// Token: 0x02000B89 RID: 2953
-	public class Command_Settle : Command_Action
-	{
-	}
 }

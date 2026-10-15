@@ -1,435 +1,1126 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using RimWorld;
 
-namespace Verse
+namespace Verse;
+
+public class DesignationCategoryDef : Def
 {
-	// Token: 0x0200026B RID: 619
-	public class DesignationCategoryDef : Def
+	public struct BuildablePreceptBuilding
 	{
-		// Token: 0x1700029B RID: 667
-		// (get) Token: 0x06000FB9 RID: 4025 RVA: 0x0004A647 File Offset: 0x00048847
-		public IEnumerable<Designator> ResolvedAllowedDesignators
+		private BuildableDef buildable;
+
+		private Precept_Building precept;
+
+		public BuildableDef Buildable => buildable;
+
+		public Precept_Building Precept => precept;
+
+		public BuildablePreceptBuilding(BuildableDef buildable, Precept_Building precept)
 		{
+			this.buildable = buildable;
+			this.precept = precept;
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003C_003Cget_AllIdeoDesignators_003Eg__GetDesignatorsFromStyleCategory_007C18_2_003Ed : IEnumerable<Designator>, IEnumerable, IEnumerator<Designator>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Designator _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private StyleCategoryDef categoryDef;
+
+		public StyleCategoryDef _003C_003E3__categoryDef;
+
+		public DesignationCategoryDef _003C_003E4__this;
+
+		private int _003Cj_003E5__2;
+
+		Designator IEnumerator<Designator>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				GameRules rules = Current.Game.Rules;
-				int num;
-				for (int i = 0; i < this.resolvedDesignators.Count; i = num + 1)
-				{
-					Designator designator = this.resolvedDesignators[i];
-					if (rules == null || rules.DesignatorAllowed(designator))
-					{
-						yield return designator;
-					}
-					num = i;
-				}
-				foreach (Designator designator2 in this.AllIdeoDesignators)
-				{
-					yield return designator2;
-				}
-				IEnumerator<Designator> enumerator = null;
-				yield break;
-				yield break;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700029C RID: 668
-		// (get) Token: 0x06000FBA RID: 4026 RVA: 0x0004A657 File Offset: 0x00048857
-		public List<Designator> AllResolvedDesignators
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.resolvedDesignators;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700029D RID: 669
-		// (get) Token: 0x06000FBB RID: 4027 RVA: 0x0004A65F File Offset: 0x0004885F
-		public IEnumerable<Designator> AllIdeoDesignators
+		[DebuggerHidden]
+		public _003C_003Cget_AllIdeoDesignators_003Eg__GetDesignatorsFromStyleCategory_007C18_2_003Ed(int _003C_003E1__state)
 		{
-			get
-			{
-				if (ModsConfig.IdeologyActive)
-				{
-					if (this.cachedPlayerFaction != Faction.OfPlayer)
-					{
-						this.ideoBuildingDesignatorsCached.Clear();
-						this.ideoDropdownsCached.Clear();
-						this.cachedPlayerFaction = Faction.OfPlayer;
-					}
-					foreach (Ideo ideo in Faction.OfPlayer.ideos.AllIdeos)
-					{
-						int num;
-						for (int i = 0; i < ideo.PreceptsListForReading.Count; i = num + 1)
-						{
-							Precept precept = ideo.PreceptsListForReading[i];
-							bool flag = precept is Precept_Building;
-							bool flag2 = precept is Precept_RitualSeat;
-							if (flag || flag2)
-							{
-								Precept_ThingDef precept_ThingDef = (Precept_ThingDef)precept;
-								if (precept_ThingDef.ThingDef.designationCategory == this)
-								{
-									yield return this.<get_AllIdeoDesignators>g__GetCachedDesignator|18_0(precept_ThingDef.ThingDef, precept_ThingDef as Precept_Building);
-								}
-							}
-							num = i;
-						}
-						for (int i = 0; i < ideo.thingStyleCategories.Count; i = num + 1)
-						{
-							ThingStyleCategoryWithPriority thingStyleCategoryWithPriority = ideo.thingStyleCategories[i];
-							foreach (Designator designator in this.<get_AllIdeoDesignators>g__GetDesignatorsFromStyleCategory|18_2(thingStyleCategoryWithPriority.category))
-							{
-								yield return designator;
-							}
-							IEnumerator<Designator> enumerator2 = null;
-							num = i;
-						}
-						for (int i = 0; i < ideo.memes.Count; i = num + 1)
-						{
-							MemeDef meme = ideo.memes[i];
-							if (meme.addDesignators != null)
-							{
-								for (int j = 0; j < meme.addDesignators.Count; j = num + 1)
-								{
-									if (meme.addDesignators[j].designationCategory == this)
-									{
-										yield return this.<get_AllIdeoDesignators>g__GetCachedDesignator|18_0(meme.addDesignators[j], null);
-									}
-									num = j;
-								}
-							}
-							if (meme.addDesignatorGroups != null)
-							{
-								for (int j = 0; j < meme.addDesignatorGroups.Count; j = num + 1)
-								{
-									Designator_Dropdown designator_Dropdown = this.<get_AllIdeoDesignators>g__GetCachedDropdown|18_1(meme.addDesignatorGroups[j]);
-									if (designator_Dropdown != null)
-									{
-										yield return designator_Dropdown;
-									}
-									num = j;
-								}
-							}
-							meme = null;
-							num = i;
-						}
-						ideo = null;
-					}
-					IEnumerator<Ideo> enumerator = null;
-					if (Find.IdeoManager.classicMode)
-					{
-						foreach (StyleCategoryDef categoryDef in Find.IdeoManager.selectedStyleCategories)
-						{
-							foreach (Designator designator2 in this.<get_AllIdeoDesignators>g__GetDesignatorsFromStyleCategory|18_2(categoryDef))
-							{
-								yield return designator2;
-							}
-							IEnumerator<Designator> enumerator2 = null;
-						}
-						List<StyleCategoryDef>.Enumerator enumerator3 = default(List<StyleCategoryDef>.Enumerator);
-					}
-				}
-				yield break;
-				yield break;
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x1700029E RID: 670
-		// (get) Token: 0x06000FBC RID: 4028 RVA: 0x0004A66F File Offset: 0x0004886F
-		public IEnumerable<Designator> AllResolvedAndIdeoDesignators
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			get
-			{
-				foreach (Designator designator in this.resolvedDesignators)
-				{
-					yield return designator;
-				}
-				List<Designator>.Enumerator enumerator = default(List<Designator>.Enumerator);
-				foreach (Designator designator2 in this.AllIdeoDesignators)
-				{
-					yield return designator2;
-				}
-				IEnumerator<Designator> enumerator2 = null;
-				yield break;
-				yield break;
-			}
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x1700029F RID: 671
-		// (get) Token: 0x06000FBD RID: 4029 RVA: 0x0004A680 File Offset: 0x00048880
-		public bool Visible
+		private bool MoveNext()
 		{
-			get
+			int num = _003C_003E1__state;
+			DesignationCategoryDef designationCategoryDef = _003C_003E4__this;
+			Designator_Dropdown designator_Dropdown;
+			switch (num)
 			{
-				if (DebugSettings.godMode)
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (categoryDef.addDesignators != null)
 				{
+					_003Cj_003E5__2 = 0;
+					goto IL_00a3;
+				}
+				goto IL_00bb;
+			case 1:
+				_003C_003E1__state = -1;
+				goto IL_0093;
+			case 2:
+				{
+					_003C_003E1__state = -1;
+					goto IL_0108;
+				}
+				IL_00a3:
+				if (_003Cj_003E5__2 < categoryDef.addDesignators.Count)
+				{
+					if (categoryDef.addDesignators[_003Cj_003E5__2].designationCategory == designationCategoryDef)
+					{
+						_003C_003E2__current = designationCategoryDef._003Cget_AllIdeoDesignators_003Eg__GetCachedDesignator_007C18_0(categoryDef.addDesignators[_003Cj_003E5__2]);
+						_003C_003E1__state = 1;
+						return true;
+					}
+					goto IL_0093;
+				}
+				goto IL_00bb;
+				IL_0118:
+				if (_003Cj_003E5__2 >= categoryDef.addDesignatorGroups.Count)
+				{
+					break;
+				}
+				designator_Dropdown = designationCategoryDef._003Cget_AllIdeoDesignators_003Eg__GetCachedDropdown_007C18_1(categoryDef.addDesignatorGroups[_003Cj_003E5__2]);
+				if (designator_Dropdown != null)
+				{
+					_003C_003E2__current = designator_Dropdown;
+					_003C_003E1__state = 2;
 					return true;
 				}
-				if (ModsConfig.AnomalyActive && Find.Anomaly.HighestLevelReached < this.minMonolithLevel && Find.Anomaly.GenerateMonolith)
+				goto IL_0108;
+				IL_0108:
+				_003Cj_003E5__2++;
+				goto IL_0118;
+				IL_0093:
+				_003Cj_003E5__2++;
+				goto IL_00a3;
+				IL_00bb:
+				if (categoryDef.addDesignatorGroups == null)
 				{
-					return false;
+					break;
 				}
-				if (this.researchPrerequisites == null)
+				_003Cj_003E5__2 = 0;
+				goto IL_0118;
+			}
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Designator> IEnumerable<Designator>.GetEnumerator()
+		{
+			_003C_003Cget_AllIdeoDesignators_003Eg__GetDesignatorsFromStyleCategory_007C18_2_003Ed _003C_003Cget_AllIdeoDesignators_003Eg__GetDesignatorsFromStyleCategory_007C18_2_003Ed;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003C_003Cget_AllIdeoDesignators_003Eg__GetDesignatorsFromStyleCategory_007C18_2_003Ed = this;
+			}
+			else
+			{
+				_003C_003Cget_AllIdeoDesignators_003Eg__GetDesignatorsFromStyleCategory_007C18_2_003Ed = new _003C_003Cget_AllIdeoDesignators_003Eg__GetDesignatorsFromStyleCategory_007C18_2_003Ed(0)
 				{
-					return true;
-				}
-				using (List<ResearchProjectDef>.Enumerator enumerator = this.researchPrerequisites.GetEnumerator())
-				{
-					while (enumerator.MoveNext())
-					{
-						if (!enumerator.Current.IsFinished)
-						{
-							return false;
-						}
-					}
-				}
-				return true;
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003C_003Cget_AllIdeoDesignators_003Eg__GetDesignatorsFromStyleCategory_007C18_2_003Ed.categoryDef = _003C_003E3__categoryDef;
+			return _003C_003Cget_AllIdeoDesignators_003Eg__GetDesignatorsFromStyleCategory_007C18_2_003Ed;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Designator>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003Cget_AllIdeoDesignators_003Ed__18 : IEnumerable<Designator>, IEnumerable, IEnumerator<Designator>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Designator _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public DesignationCategoryDef _003C_003E4__this;
+
+		private IEnumerator<Ideo> _003C_003E7__wrap1;
+
+		private Ideo _003Cideo_003E5__3;
+
+		private int _003Ci_003E5__4;
+
+		private IEnumerator<Designator> _003C_003E7__wrap4;
+
+		private MemeDef _003Cmeme_003E5__6;
+
+		private int _003Cj_003E5__7;
+
+		private List<StyleCategoryDef>.Enumerator _003C_003E7__wrap7;
+
+		Designator IEnumerator<Designator>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06000FBE RID: 4030 RVA: 0x0004A714 File Offset: 0x00048914
-		public override void ResolveReferences()
+		object IEnumerator.Current
 		{
-			base.ResolveReferences();
-			LongEventHandler.ExecuteWhenFinished(delegate
+			[DebuggerHidden]
+			get
 			{
-				this.ResolveDesignators();
-			});
-			this.cachedHighlightClosedTag = "DesignationCategoryButton-" + this.defName + "-Closed";
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x06000FBF RID: 4031 RVA: 0x0004A748 File Offset: 0x00048948
-		private void ResolveDesignators()
+		[DebuggerHidden]
+		public _003Cget_AllIdeoDesignators_003Ed__18(int _003C_003E1__state)
 		{
-			this.resolvedDesignators.Clear();
-			foreach (Type type in this.specialDesignatorClasses)
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			switch (num)
 			{
-				Designator designator = null;
+			case -4:
+			case -3:
+			case 1:
+			case 2:
+			case 3:
+			case 4:
 				try
 				{
-					designator = (Designator)Activator.CreateInstance(type);
-					designator.isOrder = true;
-				}
-				catch (Exception ex)
-				{
-					string[] array = new string[6];
-					array[0] = "DesignationCategoryDef";
-					array[1] = this.defName;
-					array[2] = " could not instantiate special designator from class ";
-					int num = 3;
-					Type type2 = type;
-					array[num] = ((type2 != null) ? type2.ToString() : null);
-					array[4] = ".\n Exception: \n";
-					array[5] = ex.ToString();
-					Log.Error(string.Concat(array));
-				}
-				if (designator != null)
-				{
-					this.resolvedDesignators.Add(designator);
-				}
-			}
-			IEnumerable<BuildableDef> enumerable = from tDef in DefDatabase<TerrainDef>.AllDefs.Cast<BuildableDef>().Concat(DefDatabase<ThingDef>.AllDefs.Cast<BuildableDef>())
-			where tDef.designationCategory == this && tDef.canGenerateDefaultDesignator
-			select tDef;
-			Dictionary<DesignatorDropdownGroupDef, Designator_Dropdown> dictionary = new Dictionary<DesignatorDropdownGroupDef, Designator_Dropdown>();
-			foreach (BuildableDef buildableDef in enumerable)
-			{
-				if (buildableDef.designatorDropdown != null)
-				{
-					if (!dictionary.ContainsKey(buildableDef.designatorDropdown))
+					if (num == -4 || num == 2)
 					{
-						dictionary[buildableDef.designatorDropdown] = new Designator_Dropdown();
-						dictionary[buildableDef.designatorDropdown].Order = buildableDef.uiOrder;
-						this.resolvedDesignators.Add(dictionary[buildableDef.designatorDropdown]);
+						try
+						{
+						}
+						finally
+						{
+							_003C_003Em__Finally2();
+						}
 					}
-					dictionary[buildableDef.designatorDropdown].Add(new Designator_Build(buildableDef));
 				}
-				else
+				finally
 				{
-					this.resolvedDesignators.Add(new Designator_Build(buildableDef));
+					_003C_003Em__Finally1();
 				}
-			}
-		}
-
-		// Token: 0x06000FC0 RID: 4032 RVA: 0x0004A918 File Offset: 0x00048B18
-		public void DirtyCache()
-		{
-			this.ideoBuildingDesignatorsCached.Clear();
-			this.ideoDropdownsCached.Clear();
-		}
-
-		// Token: 0x06000FC1 RID: 4033 RVA: 0x0004A930 File Offset: 0x00048B30
-		private static bool RequirementSatisfied(string requirement)
-		{
-			if (!ModLister.HasActiveModWithName(requirement))
-			{
-				ResearchProjectDef namedSilentFail = DefDatabase<ResearchProjectDef>.GetNamedSilentFail(requirement);
-				return namedSilentFail != null && namedSilentFail.IsFinished;
-			}
-			return true;
-		}
-
-		// Token: 0x06000FC3 RID: 4035 RVA: 0x0004A984 File Offset: 0x00048B84
-		[CompilerGenerated]
-		private Designator <get_AllIdeoDesignators>g__GetCachedDesignator|18_0(BuildableDef def, Precept_Building buildingPrecept = null)
-		{
-			DesignationCategoryDef.BuildablePreceptBuilding key = new DesignationCategoryDef.BuildablePreceptBuilding(def, buildingPrecept);
-			Designator designator;
-			if (!this.ideoBuildingDesignatorsCached.TryGetValue(key, out designator))
-			{
-				Designator_Build designator_Build = new Designator_Build(def);
-				designator = designator_Build;
-				if (buildingPrecept != null)
+				break;
+			case -6:
+			case -5:
+			case 5:
+				try
 				{
-					designator_Build.sourcePrecept = buildingPrecept;
-				}
-				this.ideoBuildingDesignatorsCached[key] = designator;
-			}
-			return designator;
-		}
-
-		// Token: 0x06000FC4 RID: 4036 RVA: 0x0004A9CC File Offset: 0x00048BCC
-		[CompilerGenerated]
-		private Designator_Dropdown <get_AllIdeoDesignators>g__GetCachedDropdown|18_1(DesignatorDropdownGroupDef group)
-		{
-			Designator_Dropdown result;
-			if (!this.ideoDropdownsCached.TryGetValue(group, out result))
-			{
-				IEnumerable<BuildableDef> enumerable = from tDef in DefDatabase<TerrainDef>.AllDefs.Cast<BuildableDef>().Concat(DefDatabase<ThingDef>.AllDefs.Cast<BuildableDef>())
-				where tDef.designationCategory == this && !tDef.canGenerateDefaultDesignator && tDef.designatorDropdown == @group
-				select tDef;
-				if (!enumerable.Any<BuildableDef>())
-				{
-					this.ideoDropdownsCached[group] = null;
-					return this.ideoDropdownsCached[group];
-				}
-				foreach (BuildableDef buildableDef in enumerable)
-				{
-					if (!this.ideoDropdownsCached.ContainsKey(buildableDef.designatorDropdown))
+					if (num == -6 || num == 5)
 					{
-						this.ideoDropdownsCached[buildableDef.designatorDropdown] = new Designator_Dropdown();
-						this.ideoDropdownsCached[buildableDef.designatorDropdown].Order = buildableDef.uiOrder;
+						try
+						{
+						}
+						finally
+						{
+							_003C_003Em__Finally4();
+						}
 					}
-					this.ideoDropdownsCached[buildableDef.designatorDropdown].Add(new Designator_Build(buildableDef));
 				}
-				result = this.ideoDropdownsCached[group];
+				finally
+				{
+					_003C_003Em__Finally3();
+				}
+				break;
+			}
+			_003C_003E7__wrap1 = null;
+			_003Cideo_003E5__3 = null;
+			_003C_003E7__wrap4 = null;
+			_003Cmeme_003E5__6 = null;
+			_003C_003E7__wrap7 = default(List<StyleCategoryDef>.Enumerator);
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				DesignationCategoryDef designationCategoryDef = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					if (!ModsConfig.IdeologyActive)
+					{
+						break;
+					}
+					if (designationCategoryDef.cachedPlayerFaction != Faction.OfPlayer)
+					{
+						designationCategoryDef.ideoBuildingDesignatorsCached.Clear();
+						designationCategoryDef.ideoDropdownsCached.Clear();
+						designationCategoryDef.cachedPlayerFaction = Faction.OfPlayer;
+					}
+					_003C_003E7__wrap1 = Faction.OfPlayer.ideos.AllIdeos.GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0397;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0132;
+				case 2:
+					_003C_003E1__state = -4;
+					goto IL_01d0;
+				case 3:
+					_003C_003E1__state = -3;
+					goto IL_02af;
+				case 4:
+					_003C_003E1__state = -3;
+					goto IL_0332;
+				case 5:
+					{
+						_003C_003E1__state = -6;
+						goto IL_0434;
+					}
+					IL_01fc:
+					if (_003Ci_003E5__4 < _003Cideo_003E5__3.thingStyleCategories.Count)
+					{
+						ThingStyleCategoryWithPriority thingStyleCategoryWithPriority = _003Cideo_003E5__3.thingStyleCategories[_003Ci_003E5__4];
+						_003C_003E7__wrap4 = designationCategoryDef._003Cget_AllIdeoDesignators_003Eg__GetDesignatorsFromStyleCategory_007C18_2(thingStyleCategoryWithPriority.category).GetEnumerator();
+						_003C_003E1__state = -4;
+						goto IL_01d0;
+					}
+					_003Ci_003E5__4 = 0;
+					goto IL_0375;
+					IL_0375:
+					if (_003Ci_003E5__4 < _003Cideo_003E5__3.memes.Count)
+					{
+						_003Cmeme_003E5__6 = _003Cideo_003E5__3.memes[_003Ci_003E5__4];
+						if (_003Cmeme_003E5__6.addDesignators != null)
+						{
+							_003Cj_003E5__7 = 0;
+							goto IL_02c1;
+						}
+						goto IL_02dc;
+					}
+					_003Cideo_003E5__3 = null;
+					goto IL_0397;
+					IL_0332:
+					_003Cj_003E5__7++;
+					goto IL_0344;
+					IL_0397:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						_003Cideo_003E5__3 = _003C_003E7__wrap1.Current;
+						_003Ci_003E5__4 = 0;
+						goto IL_0144;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (!Find.IdeoManager.classicMode)
+					{
+						break;
+					}
+					_003C_003E7__wrap7 = Find.IdeoManager.selectedStyleCategories.GetEnumerator();
+					_003C_003E1__state = -5;
+					goto IL_044e;
+					IL_035c:
+					_003Cmeme_003E5__6 = null;
+					_003Ci_003E5__4++;
+					goto IL_0375;
+					IL_0132:
+					_003Ci_003E5__4++;
+					goto IL_0144;
+					IL_044e:
+					if (_003C_003E7__wrap7.MoveNext())
+					{
+						StyleCategoryDef current = _003C_003E7__wrap7.Current;
+						_003C_003E7__wrap4 = designationCategoryDef._003Cget_AllIdeoDesignators_003Eg__GetDesignatorsFromStyleCategory_007C18_2(current).GetEnumerator();
+						_003C_003E1__state = -6;
+						goto IL_0434;
+					}
+					_003C_003Em__Finally3();
+					_003C_003E7__wrap7 = default(List<StyleCategoryDef>.Enumerator);
+					break;
+					IL_02c1:
+					if (_003Cj_003E5__7 < _003Cmeme_003E5__6.addDesignators.Count)
+					{
+						if (_003Cmeme_003E5__6.addDesignators[_003Cj_003E5__7].designationCategory == designationCategoryDef)
+						{
+							_003C_003E2__current = designationCategoryDef._003Cget_AllIdeoDesignators_003Eg__GetCachedDesignator_007C18_0(_003Cmeme_003E5__6.addDesignators[_003Cj_003E5__7]);
+							_003C_003E1__state = 3;
+							return true;
+						}
+						goto IL_02af;
+					}
+					goto IL_02dc;
+					IL_0434:
+					if (_003C_003E7__wrap4.MoveNext())
+					{
+						Designator current2 = _003C_003E7__wrap4.Current;
+						_003C_003E2__current = current2;
+						_003C_003E1__state = 5;
+						return true;
+					}
+					_003C_003Em__Finally4();
+					_003C_003E7__wrap4 = null;
+					goto IL_044e;
+					IL_0344:
+					if (_003Cj_003E5__7 < _003Cmeme_003E5__6.addDesignatorGroups.Count)
+					{
+						Designator_Dropdown designator_Dropdown = designationCategoryDef._003Cget_AllIdeoDesignators_003Eg__GetCachedDropdown_007C18_1(_003Cmeme_003E5__6.addDesignatorGroups[_003Cj_003E5__7]);
+						if (designator_Dropdown != null)
+						{
+							_003C_003E2__current = designator_Dropdown;
+							_003C_003E1__state = 4;
+							return true;
+						}
+						goto IL_0332;
+					}
+					goto IL_035c;
+					IL_02af:
+					_003Cj_003E5__7++;
+					goto IL_02c1;
+					IL_01d0:
+					if (_003C_003E7__wrap4.MoveNext())
+					{
+						Designator current3 = _003C_003E7__wrap4.Current;
+						_003C_003E2__current = current3;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					_003C_003Em__Finally2();
+					_003C_003E7__wrap4 = null;
+					_003Ci_003E5__4++;
+					goto IL_01fc;
+					IL_0144:
+					if (_003Ci_003E5__4 < _003Cideo_003E5__3.PreceptsListForReading.Count)
+					{
+						Precept precept = _003Cideo_003E5__3.PreceptsListForReading[_003Ci_003E5__4];
+						bool flag = precept is Precept_Building;
+						bool flag2 = precept is Precept_RitualSeat;
+						if (flag || flag2)
+						{
+							Precept_ThingDef precept_ThingDef = (Precept_ThingDef)precept;
+							if (precept_ThingDef.ThingDef.designationCategory == designationCategoryDef)
+							{
+								_003C_003E2__current = designationCategoryDef._003Cget_AllIdeoDesignators_003Eg__GetCachedDesignator_007C18_0(precept_ThingDef.ThingDef, precept_ThingDef as Precept_Building);
+								_003C_003E1__state = 1;
+								return true;
+							}
+						}
+						goto IL_0132;
+					}
+					_003Ci_003E5__4 = 0;
+					goto IL_01fc;
+					IL_02dc:
+					if (_003Cmeme_003E5__6.addDesignatorGroups != null)
+					{
+						_003Cj_003E5__7 = 0;
+						goto IL_0344;
+					}
+					goto IL_035c;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -3;
+			if (_003C_003E7__wrap4 != null)
+			{
+				_003C_003E7__wrap4.Dispose();
+			}
+		}
+
+		private void _003C_003Em__Finally3()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap7/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		private void _003C_003Em__Finally4()
+		{
+			_003C_003E1__state = -5;
+			if (_003C_003E7__wrap4 != null)
+			{
+				_003C_003E7__wrap4.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Designator> IEnumerable<Designator>.GetEnumerator()
+		{
+			_003Cget_AllIdeoDesignators_003Ed__18 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_AllIdeoDesignators_003Ed__18(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
 			return result;
 		}
 
-		// Token: 0x06000FC5 RID: 4037 RVA: 0x0004AB0C File Offset: 0x00048D0C
-		[CompilerGenerated]
-		private IEnumerable<Designator> <get_AllIdeoDesignators>g__GetDesignatorsFromStyleCategory|18_2(StyleCategoryDef categoryDef)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			if (categoryDef.addDesignators != null)
+			return ((IEnumerable<Designator>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003Cget_AllResolvedAndIdeoDesignators_003Ed__20 : IEnumerable<Designator>, IEnumerable, IEnumerator<Designator>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Designator _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public DesignationCategoryDef _003C_003E4__this;
+
+		private List<Designator>.Enumerator _003C_003E7__wrap1;
+
+		private IEnumerator<Designator> _003C_003E7__wrap2;
+
+		Designator IEnumerator<Designator>.Current
+		{
+			[DebuggerHidden]
+			get
 			{
-				int num;
-				for (int i = 0; i < categoryDef.addDesignators.Count; i = num + 1)
-				{
-					if (categoryDef.addDesignators[i].designationCategory == this)
-					{
-						yield return this.<get_AllIdeoDesignators>g__GetCachedDesignator|18_0(categoryDef.addDesignators[i], null);
-					}
-					num = i;
-				}
+				return _003C_003E2__current;
 			}
-			if (categoryDef.addDesignatorGroups != null)
-			{
-				int num;
-				for (int i = 0; i < categoryDef.addDesignatorGroups.Count; i = num + 1)
-				{
-					Designator_Dropdown designator_Dropdown = this.<get_AllIdeoDesignators>g__GetCachedDropdown|18_1(categoryDef.addDesignatorGroups[i]);
-					if (designator_Dropdown != null)
-					{
-						yield return designator_Dropdown;
-					}
-					num = i;
-				}
-			}
-			yield break;
 		}
 
-		// Token: 0x04000C07 RID: 3079
-		public List<Type> specialDesignatorClasses = new List<Type>();
-
-		// Token: 0x04000C08 RID: 3080
-		public int order;
-
-		// Token: 0x04000C09 RID: 3081
-		public bool showPowerGrid;
-
-		// Token: 0x04000C0A RID: 3082
-		public List<ResearchProjectDef> researchPrerequisites;
-
-		// Token: 0x04000C0B RID: 3083
-		public int minMonolithLevel;
-
-		// Token: 0x04000C0C RID: 3084
-		public int? preferredColumn;
-
-		// Token: 0x04000C0D RID: 3085
-		[Unsaved(false)]
-		private List<Designator> resolvedDesignators = new List<Designator>();
-
-		// Token: 0x04000C0E RID: 3086
-		[Unsaved(false)]
-		public KeyBindingCategoryDef bindingCatDef;
-
-		// Token: 0x04000C0F RID: 3087
-		[Unsaved(false)]
-		public string cachedHighlightClosedTag;
-
-		// Token: 0x04000C10 RID: 3088
-		[Unsaved(false)]
-		private Dictionary<DesignationCategoryDef.BuildablePreceptBuilding, Designator> ideoBuildingDesignatorsCached = new Dictionary<DesignationCategoryDef.BuildablePreceptBuilding, Designator>();
-
-		// Token: 0x04000C11 RID: 3089
-		[Unsaved(false)]
-		private Dictionary<DesignatorDropdownGroupDef, Designator_Dropdown> ideoDropdownsCached = new Dictionary<DesignatorDropdownGroupDef, Designator_Dropdown>();
-
-		// Token: 0x04000C12 RID: 3090
-		[Unsaved(false)]
-		private Faction cachedPlayerFaction;
-
-		// Token: 0x0200026C RID: 620
-		public struct BuildablePreceptBuilding
+		object IEnumerator.Current
 		{
-			// Token: 0x170002A0 RID: 672
-			// (get) Token: 0x06000FC8 RID: 4040 RVA: 0x0004AB3E File Offset: 0x00048D3E
-			public BuildableDef Buildable
+			[DebuggerHidden]
+			get
 			{
-				get
-				{
-					return this.buildable;
-				}
+				return _003C_003E2__current;
 			}
-
-			// Token: 0x170002A1 RID: 673
-			// (get) Token: 0x06000FC9 RID: 4041 RVA: 0x0004AB46 File Offset: 0x00048D46
-			public Precept_Building Precept
-			{
-				get
-				{
-					return this.precept;
-				}
-			}
-
-			// Token: 0x06000FCA RID: 4042 RVA: 0x0004AB4E File Offset: 0x00048D4E
-			public BuildablePreceptBuilding(BuildableDef buildable, Precept_Building precept)
-			{
-				this.buildable = buildable;
-				this.precept = precept;
-			}
-
-			// Token: 0x04000C13 RID: 3091
-			private BuildableDef buildable;
-
-			// Token: 0x04000C14 RID: 3092
-			private Precept_Building precept;
 		}
+
+		[DebuggerHidden]
+		public _003Cget_AllResolvedAndIdeoDesignators_003Ed__20(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			switch (_003C_003E1__state)
+			{
+			case -3:
+			case 1:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+				break;
+			case -4:
+			case 2:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally2();
+				}
+				break;
+			}
+			_003C_003E7__wrap1 = default(List<Designator>.Enumerator);
+			_003C_003E7__wrap2 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				DesignationCategoryDef designationCategoryDef = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = designationCategoryDef.resolvedDesignators.GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0072;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0072;
+				case 2:
+					{
+						_003C_003E1__state = -4;
+						break;
+					}
+					IL_0072:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Designator current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = default(List<Designator>.Enumerator);
+					_003C_003E7__wrap2 = designationCategoryDef.AllIdeoDesignators.GetEnumerator();
+					_003C_003E1__state = -4;
+					break;
+				}
+				if (_003C_003E7__wrap2.MoveNext())
+				{
+					Designator current2 = _003C_003E7__wrap2.Current;
+					_003C_003E2__current = current2;
+					_003C_003E1__state = 2;
+					return true;
+				}
+				_003C_003Em__Finally2();
+				_003C_003E7__wrap2 = null;
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap1/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap2 != null)
+			{
+				_003C_003E7__wrap2.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Designator> IEnumerable<Designator>.GetEnumerator()
+		{
+			_003Cget_AllResolvedAndIdeoDesignators_003Ed__20 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_AllResolvedAndIdeoDesignators_003Ed__20(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Designator>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003Cget_ResolvedAllowedDesignators_003Ed__14 : IEnumerable<Designator>, IEnumerable, IEnumerator<Designator>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Designator _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public DesignationCategoryDef _003C_003E4__this;
+
+		private GameRules _003Crules_003E5__2;
+
+		private int _003Ci_003E5__3;
+
+		private IEnumerator<Designator> _003C_003E7__wrap3;
+
+		Designator IEnumerator<Designator>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003Cget_ResolvedAllowedDesignators_003Ed__14(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 2)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003Crules_003E5__2 = null;
+			_003C_003E7__wrap3 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				DesignationCategoryDef designationCategoryDef = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003Crules_003E5__2 = Current.Game.Rules;
+					_003Ci_003E5__3 = 0;
+					goto IL_009d;
+				case 1:
+					_003C_003E1__state = -1;
+					goto IL_008b;
+				case 2:
+					{
+						_003C_003E1__state = -3;
+						break;
+					}
+					IL_009d:
+					if (_003Ci_003E5__3 < designationCategoryDef.resolvedDesignators.Count)
+					{
+						Designator d = designationCategoryDef.resolvedDesignators[_003Ci_003E5__3];
+						if (_003Crules_003E5__2 == null || _003Crules_003E5__2.DesignatorAllowed(d))
+						{
+							_003C_003E2__current = d;
+							_003C_003E1__state = 1;
+							return true;
+						}
+						goto IL_008b;
+					}
+					_003C_003E7__wrap3 = designationCategoryDef.AllIdeoDesignators.GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+					IL_008b:
+					_003Ci_003E5__3++;
+					goto IL_009d;
+				}
+				if (_003C_003E7__wrap3.MoveNext())
+				{
+					Designator current = _003C_003E7__wrap3.Current;
+					_003C_003E2__current = current;
+					_003C_003E1__state = 2;
+					return true;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap3 = null;
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap3 != null)
+			{
+				_003C_003E7__wrap3.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Designator> IEnumerable<Designator>.GetEnumerator()
+		{
+			_003Cget_ResolvedAllowedDesignators_003Ed__14 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_ResolvedAllowedDesignators_003Ed__14(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Designator>)this).GetEnumerator();
+		}
+	}
+
+	public List<Type> specialDesignatorClasses = new List<Type>();
+
+	public int order;
+
+	public bool showPowerGrid;
+
+	public List<ResearchProjectDef> researchPrerequisites;
+
+	public int minMonolithLevel;
+
+	public int? preferredColumn;
+
+	[Unsaved(false)]
+	private List<Designator> resolvedDesignators = new List<Designator>();
+
+	[Unsaved(false)]
+	public KeyBindingCategoryDef bindingCatDef;
+
+	[Unsaved(false)]
+	public string cachedHighlightClosedTag;
+
+	[Unsaved(false)]
+	private Dictionary<BuildablePreceptBuilding, Designator> ideoBuildingDesignatorsCached = new Dictionary<BuildablePreceptBuilding, Designator>();
+
+	[Unsaved(false)]
+	private Dictionary<DesignatorDropdownGroupDef, Designator_Dropdown> ideoDropdownsCached = new Dictionary<DesignatorDropdownGroupDef, Designator_Dropdown>();
+
+	[Unsaved(false)]
+	private Faction cachedPlayerFaction;
+
+	public IEnumerable<Designator> ResolvedAllowedDesignators
+	{
+		[IteratorStateMachine(typeof(_003Cget_ResolvedAllowedDesignators_003Ed__14))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_ResolvedAllowedDesignators_003Ed__14(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public List<Designator> AllResolvedDesignators => resolvedDesignators;
+
+	public IEnumerable<Designator> AllIdeoDesignators
+	{
+		[IteratorStateMachine(typeof(_003Cget_AllIdeoDesignators_003Ed__18))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_AllIdeoDesignators_003Ed__18(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public IEnumerable<Designator> AllResolvedAndIdeoDesignators
+	{
+		[IteratorStateMachine(typeof(_003Cget_AllResolvedAndIdeoDesignators_003Ed__20))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_AllResolvedAndIdeoDesignators_003Ed__20(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public bool Visible
+	{
+		get
+		{
+			if (DebugSettings.godMode)
+			{
+				return true;
+			}
+			if (ModsConfig.AnomalyActive && Find.Anomaly.HighestLevelReached < minMonolithLevel && Find.Anomaly.GenerateMonolith)
+			{
+				return false;
+			}
+			if (researchPrerequisites == null)
+			{
+				return true;
+			}
+			foreach (ResearchProjectDef researchPrerequisite in researchPrerequisites)
+			{
+				if (!researchPrerequisite.IsFinished)
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+	}
+
+	public override void ResolveReferences()
+	{
+		base.ResolveReferences();
+		LongEventHandler.ExecuteWhenFinished(delegate
+		{
+			ResolveDesignators();
+		});
+		cachedHighlightClosedTag = "DesignationCategoryButton-" + defName + "-Closed";
+	}
+
+	private void ResolveDesignators()
+	{
+		resolvedDesignators.Clear();
+		foreach (Type specialDesignatorClass in specialDesignatorClasses)
+		{
+			Designator designator = null;
+			try
+			{
+				designator = (Designator)Activator.CreateInstance(specialDesignatorClass);
+				designator.isOrder = true;
+			}
+			catch (Exception ex)
+			{
+				Log.Error("DesignationCategoryDef" + defName + " could not instantiate special designator from class " + specialDesignatorClass?.ToString() + ".\n Exception: \n" + ex.ToString());
+			}
+			if (designator != null)
+			{
+				resolvedDesignators.Add(designator);
+			}
+		}
+		IEnumerable<BuildableDef> enumerable = from tDef in DefDatabase<TerrainDef>.AllDefs.Cast<BuildableDef>().Concat(DefDatabase<ThingDef>.AllDefs.Cast<BuildableDef>())
+			where tDef.designationCategory == this && tDef.canGenerateDefaultDesignator
+			select tDef;
+		Dictionary<DesignatorDropdownGroupDef, Designator_Dropdown> dictionary = new Dictionary<DesignatorDropdownGroupDef, Designator_Dropdown>();
+		foreach (BuildableDef item in enumerable)
+		{
+			if (item.designatorDropdown != null)
+			{
+				if (!dictionary.ContainsKey(item.designatorDropdown))
+				{
+					dictionary[item.designatorDropdown] = new Designator_Dropdown();
+					dictionary[item.designatorDropdown].Order = item.uiOrder;
+					resolvedDesignators.Add(dictionary[item.designatorDropdown]);
+				}
+				dictionary[item.designatorDropdown].Add(new Designator_Build(item));
+			}
+			else
+			{
+				resolvedDesignators.Add(new Designator_Build(item));
+			}
+		}
+	}
+
+	public void DirtyCache()
+	{
+		ideoBuildingDesignatorsCached.Clear();
+		ideoDropdownsCached.Clear();
+	}
+
+	private static bool RequirementSatisfied(string requirement)
+	{
+		if (!ModLister.HasActiveModWithName(requirement))
+		{
+			return DefDatabase<ResearchProjectDef>.GetNamedSilentFail(requirement)?.IsFinished ?? false;
+		}
+		return true;
+	}
+
+	[CompilerGenerated]
+	private Designator _003Cget_AllIdeoDesignators_003Eg__GetCachedDesignator_007C18_0(BuildableDef def, Precept_Building buildingPrecept = null)
+	{
+		BuildablePreceptBuilding key = new BuildablePreceptBuilding(def, buildingPrecept);
+		if (!ideoBuildingDesignatorsCached.TryGetValue(key, out var value))
+		{
+			Designator_Build designator_Build = new Designator_Build(def);
+			value = designator_Build;
+			if (buildingPrecept != null)
+			{
+				designator_Build.sourcePrecept = buildingPrecept;
+			}
+			ideoBuildingDesignatorsCached[key] = value;
+		}
+		return value;
+	}
+
+	[CompilerGenerated]
+	private Designator_Dropdown _003Cget_AllIdeoDesignators_003Eg__GetCachedDropdown_007C18_1(DesignatorDropdownGroupDef group)
+	{
+		if (!ideoDropdownsCached.TryGetValue(group, out var value))
+		{
+			IEnumerable<BuildableDef> enumerable = from tDef in DefDatabase<TerrainDef>.AllDefs.Cast<BuildableDef>().Concat(DefDatabase<ThingDef>.AllDefs.Cast<BuildableDef>())
+				where tDef.designationCategory == this && !tDef.canGenerateDefaultDesignator && tDef.designatorDropdown == @group
+				select tDef;
+			if (!enumerable.Any())
+			{
+				ideoDropdownsCached[group] = null;
+				return ideoDropdownsCached[group];
+			}
+			foreach (BuildableDef item in enumerable)
+			{
+				if (!ideoDropdownsCached.ContainsKey(item.designatorDropdown))
+				{
+					ideoDropdownsCached[item.designatorDropdown] = new Designator_Dropdown();
+					ideoDropdownsCached[item.designatorDropdown].Order = item.uiOrder;
+				}
+				ideoDropdownsCached[item.designatorDropdown].Add(new Designator_Build(item));
+			}
+			return ideoDropdownsCached[group];
+		}
+		return value;
+	}
+
+	[IteratorStateMachine(typeof(_003C_003Cget_AllIdeoDesignators_003Eg__GetDesignatorsFromStyleCategory_007C18_2_003Ed))]
+	[CompilerGenerated]
+	private IEnumerable<Designator> _003Cget_AllIdeoDesignators_003Eg__GetDesignatorsFromStyleCategory_007C18_2(StyleCategoryDef categoryDef)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003C_003Cget_AllIdeoDesignators_003Eg__GetDesignatorsFromStyleCategory_007C18_2_003Ed(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__categoryDef = categoryDef
+		};
 	}
 }

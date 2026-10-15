@@ -1,275 +1,369 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using LudeonTK;
 using RimWorld;
 using UnityEngine;
 using Verse.Grammar;
 
-namespace Verse
+namespace Verse;
+
+public class BattleLogEntry_MeleeCombat : LogEntry_DamageResult
 {
-	// Token: 0x0200032B RID: 811
-	public class BattleLogEntry_MeleeCombat : LogEntry_DamageResult
+	[CompilerGenerated]
+	private sealed class _003CGetConcerns_003Ed__20 : IEnumerable<Thing>, IEnumerable, IEnumerator<Thing>, IEnumerator, IDisposable
 	{
-		// Token: 0x170003E6 RID: 998
-		// (get) Token: 0x06001442 RID: 5186 RVA: 0x0005F2DD File Offset: 0x0005D4DD
-		private string InitiatorName
+		private int _003C_003E1__state;
+
+		private Thing _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public BattleLogEntry_MeleeCombat _003C_003E4__this;
+
+		Thing IEnumerator<Thing>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.initiator == null)
-				{
-					return "null";
-				}
-				return this.initiator.LabelShort;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170003E7 RID: 999
-		// (get) Token: 0x06001443 RID: 5187 RVA: 0x0005F2F8 File Offset: 0x0005D4F8
-		private string RecipientName
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.recipientPawn == null)
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetConcerns_003Ed__20(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			BattleLogEntry_MeleeCombat battleLogEntry_MeleeCombat = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (battleLogEntry_MeleeCombat.initiator != null)
 				{
-					return "null";
+					_003C_003E2__current = battleLogEntry_MeleeCombat.initiator;
+					_003C_003E1__state = 1;
+					return true;
 				}
-				return this.recipientPawn.LabelShort;
-			}
-		}
-
-		// Token: 0x170003E8 RID: 1000
-		// (get) Token: 0x06001444 RID: 5188 RVA: 0x0005F313 File Offset: 0x0005D513
-		// (set) Token: 0x06001445 RID: 5189 RVA: 0x0005F31B File Offset: 0x0005D51B
-		public RulePackDef RuleDef
-		{
-			get
-			{
-				return this.ruleDef;
-			}
-			set
-			{
-				this.ruleDef = value;
-				base.ResetCache();
-			}
-		}
-
-		// Token: 0x06001446 RID: 5190 RVA: 0x0005E7E9 File Offset: 0x0005C9E9
-		public BattleLogEntry_MeleeCombat() : base(null)
-		{
-		}
-
-		// Token: 0x06001447 RID: 5191 RVA: 0x0005F32C File Offset: 0x0005D52C
-		public BattleLogEntry_MeleeCombat(RulePackDef ruleDef, bool alwaysShowInCompact, Pawn initiator, Thing recipient, ImplementOwnerTypeDef implementType, string toolLabel, ThingDef ownerEquipmentDef = null, HediffDef ownerHediffDef = null, LogEntryDef def = null) : base(def)
-		{
-			this.ruleDef = ruleDef;
-			this.alwaysShowInCompact = alwaysShowInCompact;
-			this.initiator = initiator;
-			this.implementType = implementType;
-			this.ownerEquipmentDef = ownerEquipmentDef;
-			this.ownerHediffDef = ownerHediffDef;
-			this.toolLabel = toolLabel;
-			if (recipient is Pawn)
-			{
-				this.recipientPawn = (recipient as Pawn);
-			}
-			else if (recipient != null)
-			{
-				this.recipientThing = recipient.def;
-			}
-			if (ownerEquipmentDef != null && ownerHediffDef != null)
-			{
-				Log.ErrorOnce(string.Format("Combat log owned by both equipment {0} and hediff {1}, may produce unexpected results", ownerEquipmentDef.label, ownerHediffDef.label), 96474669);
-			}
-		}
-
-		// Token: 0x06001448 RID: 5192 RVA: 0x0005F3C9 File Offset: 0x0005D5C9
-		public override bool Concerns(Thing t)
-		{
-			return t == this.initiator || t == this.recipientPawn;
-		}
-
-		// Token: 0x06001449 RID: 5193 RVA: 0x0005F3DF File Offset: 0x0005D5DF
-		public override IEnumerable<Thing> GetConcerns()
-		{
-			if (this.initiator != null)
-			{
-				yield return this.initiator;
-			}
-			if (this.recipientPawn != null)
-			{
-				yield return this.recipientPawn;
-			}
-			yield break;
-		}
-
-		// Token: 0x0600144A RID: 5194 RVA: 0x0005F3F0 File Offset: 0x0005D5F0
-		public override bool CanBeClickedFromPOV(Thing pov)
-		{
-			return (pov == this.initiator && this.recipientPawn != null && CameraJumper.CanJump(this.recipientPawn)) || (pov == this.recipientPawn && CameraJumper.CanJump(this.initiator));
-		}
-
-		// Token: 0x0600144B RID: 5195 RVA: 0x0005F440 File Offset: 0x0005D640
-		public override void ClickedFromPOV(Thing pov)
-		{
-			if (pov == this.initiator && this.recipientPawn != null)
-			{
-				CameraJumper.TryJumpAndSelect(this.recipientPawn, CameraJumper.MovementMode.Pan);
-				return;
-			}
-			if (pov == this.recipientPawn)
-			{
-				CameraJumper.TryJumpAndSelect(this.initiator, CameraJumper.MovementMode.Pan);
-				return;
-			}
-			if (this.recipientPawn != null)
-			{
-				throw new NotImplementedException();
-			}
-		}
-
-		// Token: 0x0600144C RID: 5196 RVA: 0x0005F49C File Offset: 0x0005D69C
-		public override Texture2D IconFromPOV(Thing pov)
-		{
-			if (this.damagedParts.NullOrEmpty<BodyPartRecord>())
-			{
-				return this.def.iconMissTex;
-			}
-			if (this.deflected)
-			{
-				return this.def.iconMissTex;
-			}
-			if (pov == null || pov == this.recipientPawn)
-			{
-				return this.def.iconDamagedTex;
-			}
-			if (pov == this.initiator)
-			{
-				return this.def.iconDamagedFromInstigatorTex;
-			}
-			return this.def.iconDamagedTex;
-		}
-
-		// Token: 0x0600144D RID: 5197 RVA: 0x0005F50E File Offset: 0x0005D70E
-		protected override BodyDef DamagedBody()
-		{
-			if (this.recipientPawn == null)
-			{
-				return null;
-			}
-			return this.recipientPawn.RaceProps.body;
-		}
-
-		// Token: 0x0600144E RID: 5198 RVA: 0x0005F52C File Offset: 0x0005D72C
-		protected override GrammarRequest GenerateGrammarRequest()
-		{
-			GrammarRequest result = base.GenerateGrammarRequest();
-			result.Rules.AddRange(GrammarUtility.RulesForPawn("INITIATOR", this.initiator, result.Constants, true, true));
-			if (this.recipientPawn != null)
-			{
-				result.Rules.AddRange(GrammarUtility.RulesForPawn("RECIPIENT", this.recipientPawn, result.Constants, true, true));
-			}
-			else if (this.recipientThing != null)
-			{
-				result.Rules.AddRange(GrammarUtility.RulesForDef("RECIPIENT", this.recipientThing));
-			}
-			result.Includes.Add(this.ruleDef);
-			if (!this.toolLabel.NullOrEmpty())
-			{
-				result.Rules.Add(new Rule_String("TOOL_label", this.toolLabel));
-				result.Rules.Add(new Rule_String("TOOL_definite", Find.ActiveLanguageWorker.WithDefiniteArticle(this.toolLabel, false, false)));
-				result.Rules.Add(new Rule_String("TOOL_indefinite", Find.ActiveLanguageWorker.WithIndefiniteArticle(this.toolLabel, false, false)));
-				result.Constants["TOOL_gender"] = LanguageDatabase.activeLanguage.ResolveGender(this.toolLabel, null, Gender.Male).ToString();
-			}
-			if (this.implementType != null && !this.implementType.implementOwnerRuleName.NullOrEmpty())
-			{
-				if (this.ownerEquipmentDef != null)
+				goto IL_004d;
+			case 1:
+				_003C_003E1__state = -1;
+				goto IL_004d;
+			case 2:
 				{
-					result.Rules.AddRange(GrammarUtility.RulesForDef(this.implementType.implementOwnerRuleName, this.ownerEquipmentDef));
+					_003C_003E1__state = -1;
+					break;
 				}
-				else if (this.ownerHediffDef != null)
+				IL_004d:
+				if (battleLogEntry_MeleeCombat.recipientPawn != null)
 				{
-					result.Rules.AddRange(GrammarUtility.RulesForDef(this.implementType.implementOwnerRuleName, this.ownerHediffDef));
+					_003C_003E2__current = battleLogEntry_MeleeCombat.recipientPawn;
+					_003C_003E1__state = 2;
+					return true;
 				}
+				break;
 			}
-			if (this.initiator != null && this.initiator.skills != null)
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Thing> IEnumerable<Thing>.GetEnumerator()
+		{
+			_003CGetConcerns_003Ed__20 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				result.Constants["INITIATOR_skill"] = this.initiator.skills.GetSkill(SkillDefOf.Melee).Level.ToStringCached();
+				_003C_003E1__state = 0;
+				result = this;
 			}
-			if (this.recipientPawn != null && this.recipientPawn.skills != null)
+			else
 			{
-				result.Constants["RECIPIENT_skill"] = this.recipientPawn.skills.GetSkill(SkillDefOf.Melee).Level.ToStringCached();
-			}
-			if (this.implementType != null && !this.implementType.implementOwnerTypeValue.NullOrEmpty())
-			{
-				result.Constants["IMPLEMENTOWNER_type"] = this.implementType.implementOwnerTypeValue;
+				result = new _003CGetConcerns_003Ed__20(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
 			return result;
 		}
 
-		// Token: 0x0600144F RID: 5199 RVA: 0x0005F7A8 File Offset: 0x0005D9A8
-		public override bool ShowInCompactView()
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return this.alwaysShowInCompact || Rand.ChanceSeeded(BattleLogEntry_MeleeCombat.DisplayChanceOnMiss, this.logID);
+			return ((IEnumerable<Thing>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x06001450 RID: 5200 RVA: 0x0005F7C4 File Offset: 0x0005D9C4
-		public override void ExposeData()
-		{
-			base.ExposeData();
-			Scribe_Defs.Look<RulePackDef>(ref this.ruleDef, "ruleDef");
-			Scribe_Values.Look<bool>(ref this.alwaysShowInCompact, "alwaysShowInCompact", false, false);
-			Scribe_References.Look<Pawn>(ref this.initiator, "initiator", true);
-			Scribe_References.Look<Pawn>(ref this.recipientPawn, "recipientPawn", true);
-			Scribe_Defs.Look<ThingDef>(ref this.recipientThing, "recipientThing");
-			Scribe_Defs.Look<ImplementOwnerTypeDef>(ref this.implementType, "implementType");
-			Scribe_Defs.Look<ThingDef>(ref this.ownerEquipmentDef, "ownerDef");
-			Scribe_Values.Look<string>(ref this.toolLabel, "toolLabel", null, false);
-			BackCompatibility.PostExposeData(this);
-		}
+	private RulePackDef ruleDef;
 
-		// Token: 0x06001451 RID: 5201 RVA: 0x0005F863 File Offset: 0x0005DA63
-		public override string ToString()
+	private Pawn initiator;
+
+	private Pawn recipientPawn;
+
+	private ThingDef recipientThing;
+
+	private ImplementOwnerTypeDef implementType;
+
+	private ThingDef ownerEquipmentDef;
+
+	private HediffDef ownerHediffDef;
+
+	private string toolLabel;
+
+	public bool alwaysShowInCompact;
+
+	[TweakValue("LogFilter", 0f, 1f)]
+	private static float DisplayChanceOnMiss = 0.5f;
+
+	private string InitiatorName
+	{
+		get
 		{
-			return string.Concat(new string[]
+			if (initiator == null)
 			{
-				this.ruleDef.defName,
-				": ",
-				this.InitiatorName,
-				"->",
-				this.RecipientName
-			});
+				return "null";
+			}
+			return initiator.LabelShort;
 		}
+	}
 
-		// Token: 0x04001315 RID: 4885
-		private RulePackDef ruleDef;
+	private string RecipientName
+	{
+		get
+		{
+			if (recipientPawn == null)
+			{
+				return "null";
+			}
+			return recipientPawn.LabelShort;
+		}
+	}
 
-		// Token: 0x04001316 RID: 4886
-		private Pawn initiator;
+	public RulePackDef RuleDef
+	{
+		get
+		{
+			return ruleDef;
+		}
+		set
+		{
+			ruleDef = value;
+			ResetCache();
+		}
+	}
 
-		// Token: 0x04001317 RID: 4887
-		private Pawn recipientPawn;
+	public BattleLogEntry_MeleeCombat()
+	{
+	}
 
-		// Token: 0x04001318 RID: 4888
-		private ThingDef recipientThing;
+	public BattleLogEntry_MeleeCombat(RulePackDef ruleDef, bool alwaysShowInCompact, Pawn initiator, Thing recipient, ImplementOwnerTypeDef implementType, string toolLabel, ThingDef ownerEquipmentDef = null, HediffDef ownerHediffDef = null, LogEntryDef def = null)
+		: base(def)
+	{
+		this.ruleDef = ruleDef;
+		this.alwaysShowInCompact = alwaysShowInCompact;
+		this.initiator = initiator;
+		this.implementType = implementType;
+		this.ownerEquipmentDef = ownerEquipmentDef;
+		this.ownerHediffDef = ownerHediffDef;
+		this.toolLabel = toolLabel;
+		if (recipient is Pawn)
+		{
+			recipientPawn = recipient as Pawn;
+		}
+		else if (recipient != null)
+		{
+			recipientThing = recipient.def;
+		}
+		if (ownerEquipmentDef != null && ownerHediffDef != null)
+		{
+			Log.ErrorOnce($"Combat log owned by both equipment {ownerEquipmentDef.label} and hediff {ownerHediffDef.label}, may produce unexpected results", 96474669);
+		}
+	}
 
-		// Token: 0x04001319 RID: 4889
-		private ImplementOwnerTypeDef implementType;
+	public override bool Concerns(Thing t)
+	{
+		if (t != initiator)
+		{
+			return t == recipientPawn;
+		}
+		return true;
+	}
 
-		// Token: 0x0400131A RID: 4890
-		private ThingDef ownerEquipmentDef;
+	[IteratorStateMachine(typeof(_003CGetConcerns_003Ed__20))]
+	public override IEnumerable<Thing> GetConcerns()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetConcerns_003Ed__20(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
 
-		// Token: 0x0400131B RID: 4891
-		private HediffDef ownerHediffDef;
+	public override bool CanBeClickedFromPOV(Thing pov)
+	{
+		if (pov != initiator || recipientPawn == null || !CameraJumper.CanJump(recipientPawn))
+		{
+			if (pov == recipientPawn)
+			{
+				return CameraJumper.CanJump(initiator);
+			}
+			return false;
+		}
+		return true;
+	}
 
-		// Token: 0x0400131C RID: 4892
-		private string toolLabel;
+	public override void ClickedFromPOV(Thing pov)
+	{
+		if (pov == initiator && recipientPawn != null)
+		{
+			CameraJumper.TryJumpAndSelect(recipientPawn);
+		}
+		else if (pov == recipientPawn)
+		{
+			CameraJumper.TryJumpAndSelect(initiator);
+		}
+		else if (recipientPawn != null)
+		{
+			throw new NotImplementedException();
+		}
+	}
 
-		// Token: 0x0400131D RID: 4893
-		public bool alwaysShowInCompact;
+	public override Texture2D IconFromPOV(Thing pov)
+	{
+		if (damagedParts.NullOrEmpty())
+		{
+			return def.iconMissTex;
+		}
+		if (deflected)
+		{
+			return def.iconMissTex;
+		}
+		if (pov == null || pov == recipientPawn)
+		{
+			return def.iconDamagedTex;
+		}
+		if (pov == initiator)
+		{
+			return def.iconDamagedFromInstigatorTex;
+		}
+		return def.iconDamagedTex;
+	}
 
-		// Token: 0x0400131E RID: 4894
-		[TweakValue("LogFilter", 0f, 1f)]
-		private static float DisplayChanceOnMiss = 0.5f;
+	protected override BodyDef DamagedBody()
+	{
+		if (recipientPawn == null)
+		{
+			return null;
+		}
+		return recipientPawn.RaceProps.body;
+	}
+
+	protected override GrammarRequest GenerateGrammarRequest()
+	{
+		GrammarRequest result = base.GenerateGrammarRequest();
+		result.Rules.AddRange(GrammarUtility.RulesForPawn("INITIATOR", initiator, result.Constants));
+		if (recipientPawn != null)
+		{
+			result.Rules.AddRange(GrammarUtility.RulesForPawn("RECIPIENT", recipientPawn, result.Constants));
+		}
+		else if (recipientThing != null)
+		{
+			result.Rules.AddRange(GrammarUtility.RulesForDef("RECIPIENT", recipientThing));
+		}
+		result.Includes.Add(ruleDef);
+		if (!toolLabel.NullOrEmpty())
+		{
+			result.Rules.Add(new Rule_String("TOOL_label", toolLabel));
+			result.Rules.Add(new Rule_String("TOOL_definite", Find.ActiveLanguageWorker.WithDefiniteArticle(toolLabel)));
+			result.Rules.Add(new Rule_String("TOOL_indefinite", Find.ActiveLanguageWorker.WithIndefiniteArticle(toolLabel)));
+			result.Constants["TOOL_gender"] = LanguageDatabase.activeLanguage.ResolveGender(toolLabel).ToString();
+		}
+		if (implementType != null && !implementType.implementOwnerRuleName.NullOrEmpty())
+		{
+			if (ownerEquipmentDef != null)
+			{
+				result.Rules.AddRange(GrammarUtility.RulesForDef(implementType.implementOwnerRuleName, ownerEquipmentDef));
+			}
+			else if (ownerHediffDef != null)
+			{
+				result.Rules.AddRange(GrammarUtility.RulesForDef(implementType.implementOwnerRuleName, ownerHediffDef));
+			}
+		}
+		if (initiator != null && initiator.skills != null)
+		{
+			result.Constants["INITIATOR_skill"] = initiator.skills.GetSkill(SkillDefOf.Melee).Level.ToStringCached();
+		}
+		if (recipientPawn != null && recipientPawn.skills != null)
+		{
+			result.Constants["RECIPIENT_skill"] = recipientPawn.skills.GetSkill(SkillDefOf.Melee).Level.ToStringCached();
+		}
+		if (implementType != null && !implementType.implementOwnerTypeValue.NullOrEmpty())
+		{
+			result.Constants["IMPLEMENTOWNER_type"] = implementType.implementOwnerTypeValue;
+		}
+		return result;
+	}
+
+	public override bool ShowInCompactView()
+	{
+		if (alwaysShowInCompact)
+		{
+			return true;
+		}
+		return Rand.ChanceSeeded(DisplayChanceOnMiss, logID);
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Defs.Look(ref ruleDef, "ruleDef");
+		Scribe_Values.Look(ref alwaysShowInCompact, "alwaysShowInCompact", defaultValue: false);
+		Scribe_References.Look(ref initiator, "initiator", saveDestroyedThings: true);
+		Scribe_References.Look(ref recipientPawn, "recipientPawn", saveDestroyedThings: true);
+		Scribe_Defs.Look(ref recipientThing, "recipientThing");
+		Scribe_Defs.Look(ref implementType, "implementType");
+		Scribe_Defs.Look(ref ownerEquipmentDef, "ownerDef");
+		Scribe_Values.Look(ref toolLabel, "toolLabel");
+		BackCompatibility.PostExposeData(this);
+	}
+
+	public override string ToString()
+	{
+		return ruleDef.defName + ": " + InitiatorName + "->" + RecipientName;
 	}
 }

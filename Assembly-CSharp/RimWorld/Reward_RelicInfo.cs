@@ -1,66 +1,161 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.Grammar;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Reward_RelicInfo : Reward
 {
-	// Token: 0x0200369B RID: 13979
-	public class Reward_RelicInfo : Reward
+	[CompilerGenerated]
+	private sealed class _003Cget_StackElements_003Ed__3 : IEnumerable<GenUI.AnonymousStackElement>, IEnumerable, IEnumerator<GenUI.AnonymousStackElement>, IEnumerator, IDisposable
 	{
-		// Token: 0x17003203 RID: 12803
-		// (get) Token: 0x0601368B RID: 79499 RVA: 0x005C4D97 File Offset: 0x005C2F97
-		public override IEnumerable<GenUI.AnonymousStackElement> StackElements
+		private int _003C_003E1__state;
+
+		private GenUI.AnonymousStackElement _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Reward_RelicInfo _003C_003E4__this;
+
+		GenUI.AnonymousStackElement IEnumerator<GenUI.AnonymousStackElement>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				yield return QuestPartUtility.GetStandardRewardStackElement("Reward_RelicInfoLabel".Translate(this.relic.Label), delegate(Rect rect)
-				{
-					this.relic.DrawIcon(rect);
-				}, () => this.GetDescription(default(RewardsGeneratorParams)).CapitalizeFirst() + ".", delegate()
-				{
-					Quest quest = this.quest;
-					if (((quest != null) ? quest.parent : null) != null)
-					{
-						Find.MainTabsRoot.SetCurrentTab(MainButtonDefOf.Quests, true);
-						((MainTabWindow_Quests)MainButtonDefOf.Quests.TabWindow).Select(this.quest.parent);
-					}
-				});
-				yield break;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0601368C RID: 79500 RVA: 0x00066B11 File Offset: 0x00064D11
-		public override void InitFromValue(float rewardValue, RewardsGeneratorParams parms, out float valueActuallyUsed)
+		object IEnumerator.Current
 		{
-			throw new NotImplementedException();
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x0601368D RID: 79501 RVA: 0x00066B11 File Offset: 0x00064D11
-		public override IEnumerable<QuestPart> GenerateQuestParts(int index, RewardsGeneratorParams parms, string customLetterLabel, string customLetterText, RulePack customLetterLabelRules, RulePack customLetterTextRules)
+		[DebuggerHidden]
+		public _003Cget_StackElements_003Ed__3(int _003C_003E1__state)
 		{
-			throw new NotImplementedException();
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x0601368E RID: 79502 RVA: 0x005C4DA7 File Offset: 0x005C2FA7
-		public override string GetDescription(RewardsGeneratorParams parms)
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			return "Reward_RelicInfo".Translate(this.relic.Label);
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x0601368F RID: 79503 RVA: 0x005C4DC8 File Offset: 0x005C2FC8
-		public override void ExposeData()
+		private bool MoveNext()
 		{
-			base.ExposeData();
-			Scribe_References.Look<Precept_Relic>(ref this.relic, "relic", false);
-			Scribe_References.Look<Quest>(ref this.quest, "quest", false);
+			int num = _003C_003E1__state;
+			Reward_RelicInfo CS_0024_003C_003E8__locals5 = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = QuestPartUtility.GetStandardRewardStackElement("Reward_RelicInfoLabel".Translate(CS_0024_003C_003E8__locals5.relic.Label), delegate(Rect rect)
+				{
+					CS_0024_003C_003E8__locals5.relic.DrawIcon(rect);
+				}, () => CS_0024_003C_003E8__locals5.GetDescription(default(RewardsGeneratorParams)).CapitalizeFirst() + ".", delegate
+				{
+					if (CS_0024_003C_003E8__locals5.quest?.parent != null)
+					{
+						Find.MainTabsRoot.SetCurrentTab(MainButtonDefOf.Quests);
+						((MainTabWindow_Quests)MainButtonDefOf.Quests.TabWindow).Select(CS_0024_003C_003E8__locals5.quest.parent);
+					}
+				});
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				return false;
+			}
 		}
 
-		// Token: 0x0400D732 RID: 55090
-		public Precept_Relic relic;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x0400D733 RID: 55091
-		public Quest quest;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<GenUI.AnonymousStackElement> IEnumerable<GenUI.AnonymousStackElement>.GetEnumerator()
+		{
+			_003Cget_StackElements_003Ed__3 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_StackElements_003Ed__3(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<GenUI.AnonymousStackElement>)this).GetEnumerator();
+		}
+	}
+
+	public Precept_Relic relic;
+
+	public Quest quest;
+
+	public override IEnumerable<GenUI.AnonymousStackElement> StackElements
+	{
+		[IteratorStateMachine(typeof(_003Cget_StackElements_003Ed__3))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_StackElements_003Ed__3(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public override void InitFromValue(float rewardValue, RewardsGeneratorParams parms, out float valueActuallyUsed)
+	{
+		throw new NotImplementedException();
+	}
+
+	public override IEnumerable<QuestPart> GenerateQuestParts(int index, RewardsGeneratorParams parms, string customLetterLabel, string customLetterText, RulePack customLetterLabelRules, RulePack customLetterTextRules)
+	{
+		throw new NotImplementedException();
+	}
+
+	public override string GetDescription(RewardsGeneratorParams parms)
+	{
+		return "Reward_RelicInfo".Translate(relic.Label);
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_References.Look(ref relic, "relic");
+		Scribe_References.Look(ref quest, "quest");
 	}
 }

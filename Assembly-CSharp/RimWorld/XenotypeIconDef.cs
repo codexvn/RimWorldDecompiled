@@ -1,49 +1,194 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class XenotypeIconDef : Def
 {
-	// Token: 0x02001B37 RID: 6967
-	public class XenotypeIconDef : Def
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__4 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x170017F6 RID: 6134
-		// (get) Token: 0x06009BA3 RID: 39843 RVA: 0x002D2540 File Offset: 0x002D0740
-		public Texture2D Icon
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public XenotypeIconDef _003C_003E4__this;
+
+		private IEnumerator<string> _003C_003E7__wrap1;
+
+		string IEnumerator<string>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.cachedIcon == null)
-				{
-					this.cachedIcon = ContentFinder<Texture2D>.Get(this.texPath, true);
-				}
-				return this.cachedIcon;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06009BA4 RID: 39844 RVA: 0x002D2568 File Offset: 0x002D0768
-		public override IEnumerable<string> ConfigErrors()
+		object IEnumerator.Current
 		{
-			foreach (string text in base.ConfigErrors())
+			[DebuggerHidden]
+			get
 			{
-				yield return text;
+				return _003C_003E2__current;
 			}
-			IEnumerator<string> enumerator = null;
-			if (this.texPath.NullOrEmpty())
-			{
-				yield return "texPath is empty";
-			}
-			yield break;
-			yield break;
 		}
 
-		// Token: 0x04006C13 RID: 27667
-		[NoTranslate]
-		public string texPath;
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__4(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
 
-		// Token: 0x04006C14 RID: 27668
-		[Unsaved(false)]
-		private Texture2D cachedIcon;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				XenotypeIconDef xenotypeIconDef = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((Def)xenotypeIconDef).ConfigErrors().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_006f:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (xenotypeIconDef.texPath.NullOrEmpty())
+					{
+						_003C_003E2__current = "texPath is empty";
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__4 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__4(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	[NoTranslate]
+	public string texPath;
+
+	[Unsaved(false)]
+	private Texture2D cachedIcon;
+
+	public Texture2D Icon
+	{
+		get
+		{
+			if (cachedIcon == null)
+			{
+				cachedIcon = ContentFinder<Texture2D>.Get(texPath);
+			}
+			return cachedIcon;
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__4))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__4(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

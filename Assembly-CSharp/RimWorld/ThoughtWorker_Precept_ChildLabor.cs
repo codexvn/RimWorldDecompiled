@@ -1,36 +1,31 @@
-﻿using System;
 using Verse;
 
-namespace RimWorld
-{
-	// Token: 0x0200182D RID: 6189
-	public abstract class ThoughtWorker_Precept_ChildLabor : ThoughtWorker_Precept
-	{
-		// Token: 0x170015CF RID: 5583
-		// (get) Token: 0x06008F22 RID: 36642
-		protected abstract TimeAssignmentDef AssignmentDef { get; }
+namespace RimWorld;
 
-		// Token: 0x06008F23 RID: 36643 RVA: 0x002A5004 File Offset: 0x002A3204
-		protected override ThoughtState ShouldHaveThought(Pawn p)
+public abstract class ThoughtWorker_Precept_ChildLabor : ThoughtWorker_Precept
+{
+	protected abstract TimeAssignmentDef AssignmentDef { get; }
+
+	protected override ThoughtState ShouldHaveThought(Pawn p)
+	{
+		if (!ModsConfig.IdeologyActive || !ModsConfig.BiotechActive)
 		{
-			if (!ModsConfig.IdeologyActive || !ModsConfig.BiotechActive)
+			return ThoughtState.Inactive;
+		}
+		foreach (Pawn item in p.MapHeld.mapPawns.SpawnedPawnsInFaction(Faction.OfPlayer))
+		{
+			if (!item.RaceProps.Humanlike || !item.DevelopmentalStage.Child() || item.timetable == null)
 			{
-				return ThoughtState.Inactive;
+				continue;
 			}
-			foreach (Pawn pawn in p.MapHeld.mapPawns.SpawnedPawnsInFaction(Faction.OfPlayer))
+			for (int i = 0; i < 24; i++)
 			{
-				if (pawn.RaceProps.Humanlike && pawn.DevelopmentalStage.Child() && pawn.timetable != null)
+				if (item.timetable.GetAssignment(i) == AssignmentDef)
 				{
-					for (int i = 0; i < 24; i++)
-					{
-						if (pawn.timetable.GetAssignment(i) == this.AssignmentDef)
-						{
-							return true;
-						}
-					}
+					return true;
 				}
 			}
-			return false;
 		}
+		return false;
 	}
 }

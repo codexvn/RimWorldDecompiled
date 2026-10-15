@@ -1,72 +1,170 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using RimWorld;
 
-namespace Verse
+namespace Verse;
+
+public class AbilityCompProperties
 {
-	// Token: 0x0200018B RID: 395
-	public class AbilityCompProperties
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__8 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x170001B5 RID: 437
-		// (get) Token: 0x06000B3B RID: 2875 RVA: 0x00002501 File Offset: 0x00000701
-		public virtual bool OverridesPsyfocusCost
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public AbilityCompProperties _003C_003E4__this;
+
+		private AbilityDef parentDef;
+
+		public AbilityDef _003C_003E3__parentDef;
+
+		private int _003Ci_003E5__2;
+
+		string IEnumerator<string>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__8(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			AbilityCompProperties abilityCompProperties = _003C_003E4__this;
+			switch (num)
+			{
+			default:
 				return false;
-			}
-		}
-
-		// Token: 0x170001B6 RID: 438
-		// (get) Token: 0x06000B3C RID: 2876 RVA: 0x00035AD7 File Offset: 0x00033CD7
-		public virtual FloatRange PsyfocusCostRange
-		{
-			get
-			{
-				return FloatRange.ZeroToOne;
-			}
-		}
-
-		// Token: 0x170001B7 RID: 439
-		// (get) Token: 0x06000B3D RID: 2877 RVA: 0x00035ADE File Offset: 0x00033CDE
-		public virtual string PsyfocusCostExplanation
-		{
-			get
-			{
-				return "";
-			}
-		}
-
-		// Token: 0x06000B3E RID: 2878 RVA: 0x00035AE5 File Offset: 0x00033CE5
-		public virtual IEnumerable<string> ExtraStatSummary()
-		{
-			return Enumerable.Empty<string>();
-		}
-
-		// Token: 0x06000B3F RID: 2879 RVA: 0x00035AEC File Offset: 0x00033CEC
-		public virtual IEnumerable<string> ConfigErrors(AbilityDef parentDef)
-		{
-			if (this.compClass == null)
-			{
-				yield return "compClass is null";
-			}
-			int num;
-			for (int i = 0; i < parentDef.comps.Count; i = num + 1)
-			{
-				if (parentDef.comps[i] != this && parentDef.comps[i].compClass == this.compClass)
+			case 0:
+				_003C_003E1__state = -1;
+				if (abilityCompProperties.compClass == null)
 				{
-					string str = "two comps with same compClass: ";
-					Type type = this.compClass;
-					yield return str + ((type != null) ? type.ToString() : null);
+					_003C_003E2__current = "compClass is null";
+					_003C_003E1__state = 1;
+					return true;
 				}
-				num = i;
+				goto IL_0052;
+			case 1:
+				_003C_003E1__state = -1;
+				goto IL_0052;
+			case 2:
+				{
+					_003C_003E1__state = -1;
+					goto IL_00d1;
+				}
+				IL_0052:
+				_003Ci_003E5__2 = 0;
+				goto IL_00e1;
+				IL_00e1:
+				if (_003Ci_003E5__2 < parentDef.comps.Count)
+				{
+					if (parentDef.comps[_003Ci_003E5__2] != abilityCompProperties && parentDef.comps[_003Ci_003E5__2].compClass == abilityCompProperties.compClass)
+					{
+						_003C_003E2__current = "two comps with same compClass: " + abilityCompProperties.compClass;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					goto IL_00d1;
+				}
+				return false;
+				IL_00d1:
+				_003Ci_003E5__2++;
+				goto IL_00e1;
 			}
-			yield break;
 		}
 
-		// Token: 0x04000672 RID: 1650
-		[TranslationHandle]
-		public Type compClass;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__8 _003CConfigErrors_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CConfigErrors_003Ed__ = this;
+			}
+			else
+			{
+				_003CConfigErrors_003Ed__ = new _003CConfigErrors_003Ed__8(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CConfigErrors_003Ed__.parentDef = _003C_003E3__parentDef;
+			return _003CConfigErrors_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	[TranslationHandle]
+	public Type compClass;
+
+	public virtual bool OverridesPsyfocusCost => false;
+
+	public virtual FloatRange PsyfocusCostRange => FloatRange.ZeroToOne;
+
+	public virtual string PsyfocusCostExplanation => "";
+
+	public virtual IEnumerable<string> ExtraStatSummary()
+	{
+		return Enumerable.Empty<string>();
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__8))]
+	public virtual IEnumerable<string> ConfigErrors(AbilityDef parentDef)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__8(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__parentDef = parentDef
+		};
 	}
 }

@@ -1,122 +1,270 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_GiveToPawn : JobDriver
 {
-	// Token: 0x02001288 RID: 4744
-	public class JobDriver_GiveToPawn : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__9 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700121C RID: 4636
-		// (get) Token: 0x06007411 RID: 29713 RVA: 0x002396DC File Offset: 0x002378DC
-		private Thing Item
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_GiveToPawn _003C_003E4__this;
+
+		private Toil _003CsetItemTarget_003E5__2;
+
+		private Toil _003Creserve_003E5__3;
+
+		private Toil _003CcheckForDuplicates_003E5__4;
+
+		private Toil _003ChaulToContainer_003E5__5;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.job.GetTarget(TargetIndex.A).Thing;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700121D RID: 4637
-		// (get) Token: 0x06007412 RID: 29714 RVA: 0x00239700 File Offset: 0x00237900
-		private Pawn Receiver
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.job.GetTarget(TargetIndex.B).Pawn;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700121E RID: 4638
-		// (get) Token: 0x06007413 RID: 29715 RVA: 0x00239721 File Offset: 0x00237921
-		public int CountBeingHauled
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__9(int _003C_003E1__state)
 		{
-			get
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003CsetItemTarget_003E5__2 = null;
+			_003Creserve_003E5__3 = null;
+			_003CcheckForDuplicates_003E5__4 = null;
+			_003ChaulToContainer_003E5__5 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_GiveToPawn CS_0024_003C_003E8__locals13 = _003C_003E4__this;
+			switch (num)
 			{
-				if (this.pawn.carryTracker.CarriedThing == null)
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				CS_0024_003C_003E8__locals13.FailOnDestroyedNullOrForbidden(TargetIndex.B);
+				CS_0024_003C_003E8__locals13.FailOn(() => !GiveItemsToPawnUtility.IsWaitingForItems(CS_0024_003C_003E8__locals13.Receiver));
+				_003CsetItemTarget_003E5__2 = CS_0024_003C_003E8__locals13.SetItemTarget();
+				_003C_003E2__current = _003CsetItemTarget_003E5__2;
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003Creserve_003E5__3 = Toils_Reserve.Reserve(TargetIndex.A).FailOnDespawnedOrNull(TargetIndex.A);
+				_003C_003E2__current = _003Creserve_003E5__3;
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = CS_0024_003C_003E8__locals13.DetermineNumToHaul();
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.ClosestTouch).FailOnDespawnedNullOrForbidden(TargetIndex.A);
+				_003C_003E1__state = 4;
+				return true;
+			case 4:
+				_003C_003E1__state = -1;
+				_003CcheckForDuplicates_003E5__4 = Toils_Haul.CheckForGetOpportunityDuplicate(_003Creserve_003E5__3, TargetIndex.A, TargetIndex.None, takeFromValidStorage: true, (Thing x) => x.def == CS_0024_003C_003E8__locals13.Item.def);
+				_003ChaulToContainer_003E5__5 = Toils_Haul.CarryHauledThingToContainer();
+				_003C_003E2__current = Toils_Jump.JumpIf(_003ChaulToContainer_003E5__5, () => GiveItemsToPawnUtility.ItemCountLeftToCollect(CS_0024_003C_003E8__locals13.Receiver) <= 0);
+				_003C_003E1__state = 5;
+				return true;
+			case 5:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Haul.StartCarryThing(TargetIndex.A);
+				_003C_003E1__state = 6;
+				return true;
+			case 6:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Jump.JumpIf(_003ChaulToContainer_003E5__5, () => GiveItemsToPawnUtility.ItemCountLeftToCollect(CS_0024_003C_003E8__locals13.Receiver) <= 0);
+				_003C_003E1__state = 7;
+				return true;
+			case 7:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = _003CcheckForDuplicates_003E5__4;
+				_003C_003E1__state = 8;
+				return true;
+			case 8:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = _003ChaulToContainer_003E5__5;
+				_003C_003E1__state = 9;
+				return true;
+			case 9:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Interpersonal.WaitToBeAbleToInteract(CS_0024_003C_003E8__locals13.pawn);
+				_003C_003E1__state = 10;
+				return true;
+			case 10:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Interpersonal.GotoInteractablePosition(TargetIndex.B);
+				_003C_003E1__state = 11;
+				return true;
+			case 11:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Haul.DepositHauledThingInContainer(TargetIndex.B, TargetIndex.A);
+				_003C_003E1__state = 12;
+				return true;
+			case 12:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Jump.JumpIf(_003CsetItemTarget_003E5__2, () => GiveItemsToPawnUtility.ItemCountLeftToCollect(CS_0024_003C_003E8__locals13.Receiver) > 0);
+				_003C_003E1__state = 13;
+				return true;
+			case 13:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.Do(delegate
 				{
-					return 0;
-				}
-				return this.pawn.carryTracker.CarriedThing.stackCount;
+					QuestUtility.SendQuestTargetSignals(CS_0024_003C_003E8__locals13.Receiver.questTags, "ReceivedItems", CS_0024_003C_003E8__locals13.pawn.Named("GIVER"), CS_0024_003C_003E8__locals13.Receiver.Named("RECEIVER"));
+				});
+				_003C_003E1__state = 14;
+				return true;
+			case 14:
+				_003C_003E1__state = -1;
+				return false;
 			}
 		}
 
-		// Token: 0x06007414 RID: 29716 RVA: 0x0023974C File Offset: 0x0023794C
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		bool IEnumerator.MoveNext()
 		{
-			return this.pawn.Reserve(this.Item, this.job, 1, -1, null, errorOnFailed, false);
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x06007415 RID: 29717 RVA: 0x0023976F File Offset: 0x0023796F
-		protected override IEnumerable<Toil> MakeNewToils()
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			this.FailOnDestroyedNullOrForbidden(TargetIndex.B);
-			this.FailOn(() => !GiveItemsToPawnUtility.IsWaitingForItems(this.Receiver));
-			Toil setItemTarget = this.SetItemTarget();
-			yield return setItemTarget;
-			Toil reserve = Toils_Reserve.Reserve(TargetIndex.A, 1, -1, null, false).FailOnDespawnedOrNull(TargetIndex.A);
-			yield return reserve;
-			yield return this.DetermineNumToHaul();
-			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.ClosestTouch, false).FailOnDespawnedNullOrForbidden(TargetIndex.A);
-			Toil checkForDuplicates = Toils_Haul.CheckForGetOpportunityDuplicate(reserve, TargetIndex.A, TargetIndex.None, true, (Thing x) => x.def == this.Item.def);
-			Toil haulToContainer = Toils_Haul.CarryHauledThingToContainer();
-			yield return Toils_Jump.JumpIf(haulToContainer, () => GiveItemsToPawnUtility.ItemCountLeftToCollect(this.Receiver) <= 0);
-			yield return Toils_Haul.StartCarryThing(TargetIndex.A, false, false, false, true, false);
-			yield return Toils_Jump.JumpIf(haulToContainer, () => GiveItemsToPawnUtility.ItemCountLeftToCollect(this.Receiver) <= 0);
-			yield return checkForDuplicates;
-			yield return haulToContainer;
-			yield return Toils_Interpersonal.WaitToBeAbleToInteract(this.pawn);
-			yield return Toils_Interpersonal.GotoInteractablePosition(TargetIndex.B);
-			yield return Toils_Haul.DepositHauledThingInContainer(TargetIndex.B, TargetIndex.A, null);
-			yield return Toils_Jump.JumpIf(setItemTarget, () => GiveItemsToPawnUtility.ItemCountLeftToCollect(this.Receiver) > 0);
-			yield return Toils_General.Do(delegate
-			{
-				QuestUtility.SendQuestTargetSignals(this.Receiver.questTags, "ReceivedItems", this.pawn.Named("GIVER"), this.Receiver.Named("RECEIVER"));
-			});
-			yield break;
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x06007416 RID: 29718 RVA: 0x0023977F File Offset: 0x0023797F
-		private Toil DetermineNumToHaul()
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
 		{
-			Toil toil = ToilMaker.MakeToil("DetermineNumToHaul");
-			toil.initAction = delegate()
+			_003CMakeNewToils_003Ed__9 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				int num = GiveItemsToPawnUtility.ItemCountLeftToCollect(this.Receiver);
-				if (num <= 0)
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__9(0)
 				{
-					this.pawn.jobs.EndCurrentJob(JobCondition.Succeeded, true, true);
-					return;
-				}
-				this.job.count = num;
-			};
-			toil.defaultCompleteMode = ToilCompleteMode.Instant;
-			toil.atomicWithPrevious = true;
-			return toil;
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
 		}
 
-		// Token: 0x06007417 RID: 29719 RVA: 0x002397AB File Offset: 0x002379AB
-		private Toil SetItemTarget()
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			Toil toil = ToilMaker.MakeToil("SetItemTarget");
-			toil.initAction = delegate()
-			{
-				Thing thing = GiveItemsToPawnUtility.FindItemToGive(this.pawn, this.Item.def);
-				if (thing == null)
-				{
-					this.pawn.jobs.EndCurrentJob(JobCondition.Incompletable, true, true);
-					return;
-				}
-				this.job.SetTarget(TargetIndex.A, thing);
-			};
-			return toil;
+			return ((IEnumerable<Toil>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x04004FDD RID: 20445
-		private const TargetIndex ItemInd = TargetIndex.A;
+	private const TargetIndex ItemInd = TargetIndex.A;
 
-		// Token: 0x04004FDE RID: 20446
-		private const TargetIndex PawnInd = TargetIndex.B;
+	private const TargetIndex PawnInd = TargetIndex.B;
+
+	private Thing Item => job.GetTarget(TargetIndex.A).Thing;
+
+	private Pawn Receiver => job.GetTarget(TargetIndex.B).Pawn;
+
+	public int CountBeingHauled
+	{
+		get
+		{
+			if (pawn.carryTracker.CarriedThing == null)
+			{
+				return 0;
+			}
+			return pawn.carryTracker.CarriedThing.stackCount;
+		}
+	}
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return pawn.Reserve(Item, job, 1, -1, null, errorOnFailed);
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__9))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__9(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	private Toil DetermineNumToHaul()
+	{
+		Toil toil = ToilMaker.MakeToil("DetermineNumToHaul");
+		toil.initAction = delegate
+		{
+			int num = GiveItemsToPawnUtility.ItemCountLeftToCollect(Receiver);
+			if (num <= 0)
+			{
+				pawn.jobs.EndCurrentJob(JobCondition.Succeeded);
+			}
+			else
+			{
+				job.count = num;
+			}
+		};
+		toil.defaultCompleteMode = ToilCompleteMode.Instant;
+		toil.atomicWithPrevious = true;
+		return toil;
+	}
+
+	private Toil SetItemTarget()
+	{
+		Toil toil = ToilMaker.MakeToil("SetItemTarget");
+		toil.initAction = delegate
+		{
+			Thing thing = GiveItemsToPawnUtility.FindItemToGive(pawn, Item.def);
+			if (thing == null)
+			{
+				pawn.jobs.EndCurrentJob(JobCondition.Incompletable);
+			}
+			else
+			{
+				job.SetTarget(TargetIndex.A, thing);
+			}
+		};
+		return toil;
 	}
 }

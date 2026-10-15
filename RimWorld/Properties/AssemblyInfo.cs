@@ -5,11 +5,12 @@ using System.Runtime.Versioning;
 using System.Security;
 using System.Security.Permissions;
 
-[assembly: AssemblyCompany("RimWorld")]
+[assembly: AssemblyCompany("Ludeon Studios")]
 [assembly: AssemblyConfiguration("PublishSteam")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
-[assembly: AssemblyInformationalVersion("1.0.0+0b3189ec09db06392340f97f0c714adf8bb8a0b5")]
+[assembly: AssemblyCopyright("Copyright Ludeon Studios.")]
+[assembly: AssemblyFileVersion("1.7.4979.109")]
+[assembly: AssemblyInformationalVersion("1.7.4979.109+3371aa813f094502f90e4ee3eea5bb083186c034")]
 [assembly: AssemblyProduct("RimWorld")]
 [assembly: AssemblyTitle("RimWorld")]
-[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyVersion("1.7.4979.109")]
 [module: RefSafetyRules(11)]

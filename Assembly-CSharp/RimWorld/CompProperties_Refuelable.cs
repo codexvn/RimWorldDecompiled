@@ -1,233 +1,496 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompProperties_Refuelable : CompProperties
 {
-	// Token: 0x02002DDA RID: 11738
-	public class CompProperties_Refuelable : CompProperties
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__41 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x17002A25 RID: 10789
-		// (get) Token: 0x06010820 RID: 67616 RVA: 0x004C298B File Offset: 0x004C0B8B
-		public string FuelLabel
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompProperties_Refuelable _003C_003E4__this;
+
+		private ThingDef parentDef;
+
+		public ThingDef _003C_003E3__parentDef;
+
+		private IEnumerator<string> _003C_003E7__wrap1;
+
+		string IEnumerator<string>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.fuelLabel.NullOrEmpty())
-				{
-					return "Fuel".TranslateSimple();
-				}
-				return this.fuelLabel;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002A26 RID: 10790
-		// (get) Token: 0x06010821 RID: 67617 RVA: 0x004C29AB File Offset: 0x004C0BAB
-		public string FuelGizmoLabel
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.fuelGizmoLabel.NullOrEmpty())
-				{
-					return "Fuel".TranslateSimple();
-				}
-				return this.fuelGizmoLabel;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002A27 RID: 10791
-		// (get) Token: 0x06010822 RID: 67618 RVA: 0x004C29CC File Offset: 0x004C0BCC
-		public Texture2D FuelIcon
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__41(int _003C_003E1__state)
 		{
-			get
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				if (this.fuelIcon == null)
+				try
 				{
-					if (!this.fuelIconPath.NullOrEmpty())
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				CompProperties_Refuelable compProperties_Refuelable = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((CompProperties)compProperties_Refuelable).ConfigErrors(parentDef).GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_007c;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_007c;
+				case 2:
+					_003C_003E1__state = -1;
+					goto IL_00cb;
+				case 3:
 					{
-						this.fuelIcon = ContentFinder<Texture2D>.Get(this.fuelIconPath, true);
+						_003C_003E1__state = -1;
+						break;
 					}
-					else
+					IL_007c:
+					if (_003C_003E7__wrap1.MoveNext())
 					{
-						ThingDef thingDef;
-						if (this.fuelFilter.AnyAllowedDef != null)
-						{
-							thingDef = this.fuelFilter.AnyAllowedDef;
-						}
-						else
-						{
-							thingDef = ThingDefOf.Chemfuel;
-						}
-						this.fuelIcon = thingDef.uiIcon;
+						string current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
 					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (compProperties_Refuelable.destroyOnNoFuel && compProperties_Refuelable.initialFuelPercent <= 0f)
+					{
+						_003C_003E2__current = "Refuelable component has destroyOnNoFuel, but initialFuelPercent <= 0";
+						_003C_003E1__state = 2;
+						return true;
+					}
+					goto IL_00cb;
+					IL_00cb:
+					if ((!compProperties_Refuelable.consumeFuelOnlyWhenUsed || compProperties_Refuelable.fuelConsumptionPerTickInRain > 0f) && parentDef.tickerType != TickerType.Normal)
+					{
+						_003C_003E2__current = $"Refuelable component set to consume fuel per tick, but parent tickertype is {parentDef.tickerType} instead of {1}";
+						_003C_003E1__state = 3;
+						return true;
+					}
+					break;
 				}
-				return this.fuelIcon;
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x17002A28 RID: 10792
-		// (get) Token: 0x06010823 RID: 67619 RVA: 0x004C2A3B File Offset: 0x004C0C3B
-		public float FuelMultiplierCurrentDifficulty
+		bool IEnumerator.MoveNext()
 		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__41 _003CConfigErrors_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CConfigErrors_003Ed__ = this;
+			}
+			else
+			{
+				_003CConfigErrors_003Ed__ = new _003CConfigErrors_003Ed__41(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CConfigErrors_003Ed__.parentDef = _003C_003E3__parentDef;
+			return _003CConfigErrors_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CSpecialDisplayStats_003Ed__42 : IEnumerable<StatDrawEntry>, IEnumerable, IEnumerator<StatDrawEntry>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private StatDrawEntry _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompProperties_Refuelable _003C_003E4__this;
+
+		private StatRequest req;
+
+		public StatRequest _003C_003E3__req;
+
+		private IEnumerator<StatDrawEntry> _003C_003E7__wrap1;
+
+		StatDrawEntry IEnumerator<StatDrawEntry>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.factorByDifficulty)
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CSpecialDisplayStats_003Ed__42(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
 				{
-					Storyteller storyteller = Find.Storyteller;
-					if (((storyteller != null) ? storyteller.difficulty : null) != null)
-					{
-						return this.fuelMultiplier / Find.Storyteller.difficulty.maintenanceCostFactor;
-					}
 				}
-				return this.fuelMultiplier;
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
 			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x06010824 RID: 67620 RVA: 0x004C2A78 File Offset: 0x004C0C78
-		public CompProperties_Refuelable()
+		private bool MoveNext()
 		{
-			this.compClass = typeof(CompRefuelable);
+			try
+			{
+				int num = _003C_003E1__state;
+				CompProperties_Refuelable compProperties_Refuelable = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((CompProperties)compProperties_Refuelable).SpecialDisplayStats(req).GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0078;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0078;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_0078:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						StatDrawEntry current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (((ThingDef)req.Def).building.IsTurret)
+					{
+						_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.Building, "ShotsBeforeRearm".Translate(), ((int)compProperties_Refuelable.fuelCapacity).ToString(), "ShotsBeforeRearmExplanation".Translate(), 3171);
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
 		}
 
-		// Token: 0x06010825 RID: 67621 RVA: 0x004C2AE3 File Offset: 0x004C0CE3
-		public override void ResolveReferences(ThingDef parentDef)
+		bool IEnumerator.MoveNext()
 		{
-			base.ResolveReferences(parentDef);
-			this.fuelFilter.ResolveReferences();
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x06010826 RID: 67622 RVA: 0x004C2AF7 File Offset: 0x004C0CF7
-		public override IEnumerable<string> ConfigErrors(ThingDef parentDef)
+		private void _003C_003Em__Finally1()
 		{
-			foreach (string text in base.ConfigErrors(parentDef))
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				yield return text;
+				_003C_003E7__wrap1.Dispose();
 			}
-			IEnumerator<string> enumerator = null;
-			if (this.destroyOnNoFuel && this.initialFuelPercent <= 0f)
-			{
-				yield return "Refuelable component has destroyOnNoFuel, but initialFuelPercent <= 0";
-			}
-			if ((!this.consumeFuelOnlyWhenUsed || this.fuelConsumptionPerTickInRain > 0f) && parentDef.tickerType != TickerType.Normal)
-			{
-				yield return string.Format("Refuelable component set to consume fuel per tick, but parent tickertype is {0} instead of {1}", parentDef.tickerType, TickerType.Normal);
-			}
-			yield break;
-			yield break;
 		}
 
-		// Token: 0x06010827 RID: 67623 RVA: 0x004C2B0E File Offset: 0x004C0D0E
-		public override IEnumerable<StatDrawEntry> SpecialDisplayStats(StatRequest req)
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			foreach (StatDrawEntry statDrawEntry in base.SpecialDisplayStats(req))
-			{
-				yield return statDrawEntry;
-			}
-			IEnumerator<StatDrawEntry> enumerator = null;
-			if (((ThingDef)req.Def).building.IsTurret)
-			{
-				yield return new StatDrawEntry(StatCategoryDefOf.Building, "ShotsBeforeRearm".Translate(), ((int)this.fuelCapacity).ToString(), "ShotsBeforeRearmExplanation".Translate(), 3171, null, null, false, false);
-			}
-			yield break;
-			yield break;
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x0400AC25 RID: 44069
-		public float fuelConsumptionRate = 1f;
+		[DebuggerHidden]
+		IEnumerator<StatDrawEntry> IEnumerable<StatDrawEntry>.GetEnumerator()
+		{
+			_003CSpecialDisplayStats_003Ed__42 _003CSpecialDisplayStats_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CSpecialDisplayStats_003Ed__ = this;
+			}
+			else
+			{
+				_003CSpecialDisplayStats_003Ed__ = new _003CSpecialDisplayStats_003Ed__42(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CSpecialDisplayStats_003Ed__.req = _003C_003E3__req;
+			return _003CSpecialDisplayStats_003Ed__;
+		}
 
-		// Token: 0x0400AC26 RID: 44070
-		public float fuelCapacity = 2f;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<StatDrawEntry>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x0400AC27 RID: 44071
-		public float initialFuelPercent;
+	public float fuelConsumptionRate = 1f;
 
-		// Token: 0x0400AC28 RID: 44072
-		public float autoRefuelPercent = 0.3f;
+	public float fuelCapacity = 2f;
 
-		// Token: 0x0400AC29 RID: 44073
-		public float fuelConsumptionPerTickInRain;
+	public float initialFuelPercent;
 
-		// Token: 0x0400AC2A RID: 44074
-		public ThingFilter fuelFilter;
+	public float autoRefuelPercent = 0.3f;
 
-		// Token: 0x0400AC2B RID: 44075
-		public bool destroyOnNoFuel;
+	public float fuelConsumptionPerTickInRain;
 
-		// Token: 0x0400AC2C RID: 44076
-		public bool consumeFuelOnlyWhenUsed;
+	public ThingFilter fuelFilter;
 
-		// Token: 0x0400AC2D RID: 44077
-		public bool consumeFuelOnlyWhenPowered;
+	public bool destroyOnNoFuel;
 
-		// Token: 0x0400AC2E RID: 44078
-		public bool showFuelGizmo;
+	public bool consumeFuelOnlyWhenUsed;
 
-		// Token: 0x0400AC2F RID: 44079
-		public bool initialAllowAutoRefuel = true;
+	public bool consumeFuelOnlyWhenPowered;
 
-		// Token: 0x0400AC30 RID: 44080
-		public bool showAllowAutoRefuelToggle;
+	public bool showFuelGizmo;
 
-		// Token: 0x0400AC31 RID: 44081
-		public bool allowRefuelIfNotEmpty = true;
+	public bool initialAllowAutoRefuel = true;
 
-		// Token: 0x0400AC32 RID: 44082
-		public bool fuelIsMortarBarrel;
+	public bool showAllowAutoRefuelToggle;
 
-		// Token: 0x0400AC33 RID: 44083
-		public bool targetFuelLevelConfigurable;
+	public bool allowRefuelIfNotEmpty = true;
 
-		// Token: 0x0400AC34 RID: 44084
-		public float initialConfigurableTargetFuelLevel;
+	public bool fuelIsMortarBarrel;
 
-		// Token: 0x0400AC35 RID: 44085
-		public bool drawOutOfFuelOverlay = true;
+	public bool targetFuelLevelConfigurable;
 
-		// Token: 0x0400AC36 RID: 44086
-		public float minimumFueledThreshold;
+	public float initialConfigurableTargetFuelLevel;
 
-		// Token: 0x0400AC37 RID: 44087
-		public bool drawFuelGaugeInMap;
+	public bool drawOutOfFuelOverlay = true;
 
-		// Token: 0x0400AC38 RID: 44088
-		public bool atomicFueling;
+	public float minimumFueledThreshold;
 
-		// Token: 0x0400AC39 RID: 44089
-		private float fuelMultiplier = 1f;
+	public bool drawFuelGaugeInMap;
 
-		// Token: 0x0400AC3A RID: 44090
-		public bool factorByDifficulty;
+	public bool atomicFueling;
 
-		// Token: 0x0400AC3B RID: 44091
-		[MustTranslate]
-		public string fuelLabel;
+	private float fuelMultiplier = 1f;
 
-		// Token: 0x0400AC3C RID: 44092
-		[MustTranslate]
-		public string fuelGizmoLabel;
+	public bool factorByDifficulty;
 
-		// Token: 0x0400AC3D RID: 44093
-		[MustTranslate]
-		public string outOfFuelMessage;
+	[MustTranslate]
+	public string fuelLabel;
 
-		// Token: 0x0400AC3E RID: 44094
-		[NoTranslate]
-		public string fuelIconPath;
+	[MustTranslate]
+	public string fuelGizmoLabel;
 
-		// Token: 0x0400AC3F RID: 44095
-		public bool externalTicking;
+	[MustTranslate]
+	public string outOfFuelMessage;
 
-		// Token: 0x0400AC40 RID: 44096
-		public bool hideGizmosIfNotPlayerFaction;
+	[NoTranslate]
+	public string fuelIconPath;
 
-		// Token: 0x0400AC41 RID: 44097
-		public bool functionsInVacuum = true;
+	public bool externalTicking;
 
-		// Token: 0x0400AC42 RID: 44098
-		public bool canEjectFuel;
+	public bool hideGizmosIfNotPlayerFaction;
 
-		// Token: 0x0400AC43 RID: 44099
-		private Texture2D fuelIcon;
+	public bool functionsInVacuum = true;
+
+	public bool canEjectFuel;
+
+	private Texture2D fuelIcon;
+
+	public string FuelLabel
+	{
+		get
+		{
+			if (fuelLabel.NullOrEmpty())
+			{
+				return "Fuel".TranslateSimple();
+			}
+			return fuelLabel;
+		}
+	}
+
+	public string FuelGizmoLabel
+	{
+		get
+		{
+			if (fuelGizmoLabel.NullOrEmpty())
+			{
+				return "Fuel".TranslateSimple();
+			}
+			return fuelGizmoLabel;
+		}
+	}
+
+	public Texture2D FuelIcon
+	{
+		get
+		{
+			if (fuelIcon == null)
+			{
+				if (!fuelIconPath.NullOrEmpty())
+				{
+					fuelIcon = ContentFinder<Texture2D>.Get(fuelIconPath);
+				}
+				else
+				{
+					ThingDef thingDef = ((fuelFilter.AnyAllowedDef == null) ? ThingDefOf.Chemfuel : fuelFilter.AnyAllowedDef);
+					fuelIcon = thingDef.uiIcon;
+				}
+			}
+			return fuelIcon;
+		}
+	}
+
+	public float FuelMultiplierCurrentDifficulty
+	{
+		get
+		{
+			if (factorByDifficulty && Find.Storyteller?.difficulty != null)
+			{
+				return fuelMultiplier / Find.Storyteller.difficulty.maintenanceCostFactor;
+			}
+			return fuelMultiplier;
+		}
+	}
+
+	public CompProperties_Refuelable()
+	{
+		compClass = typeof(CompRefuelable);
+	}
+
+	public override void ResolveReferences(ThingDef parentDef)
+	{
+		base.ResolveReferences(parentDef);
+		fuelFilter.ResolveReferences();
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__41))]
+	public override IEnumerable<string> ConfigErrors(ThingDef parentDef)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__41(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__parentDef = parentDef
+		};
+	}
+
+	[IteratorStateMachine(typeof(_003CSpecialDisplayStats_003Ed__42))]
+	public override IEnumerable<StatDrawEntry> SpecialDisplayStats(StatRequest req)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CSpecialDisplayStats_003Ed__42(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__req = req
+		};
 	}
 }

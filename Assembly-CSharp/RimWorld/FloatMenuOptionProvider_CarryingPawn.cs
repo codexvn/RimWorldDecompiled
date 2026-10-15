@@ -1,277 +1,378 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class FloatMenuOptionProvider_CarryingPawn : FloatMenuOptionProvider
 {
-	// Token: 0x020032C6 RID: 12998
-	public class FloatMenuOptionProvider_CarryingPawn : FloatMenuOptionProvider
+	[CompilerGenerated]
+	private sealed class _003CGetOptionsFor_003Ed__9 : IEnumerable<FloatMenuOption>, IEnumerable, IEnumerator<FloatMenuOption>, IEnumerator, IDisposable
 	{
-		// Token: 0x17002F48 RID: 12104
-		// (get) Token: 0x060124C1 RID: 74945 RVA: 0x000028E7 File Offset: 0x00000AE7
-		protected override bool Drafted
+		private int _003C_003E1__state;
+
+		private FloatMenuOption _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private FloatMenuContext context;
+
+		public FloatMenuContext _003C_003E3__context;
+
+		public FloatMenuOptionProvider_CarryingPawn _003C_003E4__this;
+
+		private Thing clickedThing;
+
+		public Thing _003C_003E3__clickedThing;
+
+		private Pawn _003CcarriedPawn_003E5__2;
+
+		FloatMenuOption IEnumerator<FloatMenuOption>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return true;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002F49 RID: 12105
-		// (get) Token: 0x060124C2 RID: 74946 RVA: 0x00002501 File Offset: 0x00000701
-		protected override bool Undrafted
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return false;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002F4A RID: 12106
-		// (get) Token: 0x060124C3 RID: 74947 RVA: 0x00002501 File Offset: 0x00000701
-		protected override bool Multiselect
+		[DebuggerHidden]
+		public _003CGetOptionsFor_003Ed__9(int _003C_003E1__state)
 		{
-			get
-			{
-				return false;
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x17002F4B RID: 12107
-		// (get) Token: 0x060124C4 RID: 74948 RVA: 0x000028E7 File Offset: 0x00000AE7
-		protected override bool RequiresManipulation
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			get
-			{
-				return true;
-			}
+			_003CcarriedPawn_003E5__2 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x060124C5 RID: 74949 RVA: 0x00563D2B File Offset: 0x00561F2B
-		protected override bool AppliesInt(FloatMenuContext context)
+		private bool MoveNext()
 		{
-			return context.FirstSelectedPawn.IsCarryingPawn(null);
-		}
-
-		// Token: 0x060124C6 RID: 74950 RVA: 0x00563D39 File Offset: 0x00561F39
-		public override IEnumerable<FloatMenuOption> GetOptionsFor(Thing clickedThing, FloatMenuContext context)
-		{
-			Pawn carriedPawn = (Pawn)context.FirstSelectedPawn.carryTracker.CarriedThing;
-			FloatMenuOption floatMenuOption;
-			FloatMenuOption floatMenuOption2;
-			if (this.Capture(clickedThing, context, carriedPawn, out floatMenuOption))
+			int num = _003C_003E1__state;
+			FloatMenuOptionProvider_CarryingPawn floatMenuOptionProvider_CarryingPawn = _003C_003E4__this;
+			FloatMenuOption option3;
+			FloatMenuOption option4;
+			FloatMenuOption option5;
+			switch (num)
 			{
-				yield return floatMenuOption;
-			}
-			else if (this.CarryToBed(clickedThing, context, carriedPawn, out floatMenuOption2))
-			{
-				yield return floatMenuOption2;
-			}
-			FloatMenuOption floatMenuOption3;
-			if (this.CarryToTransporter(clickedThing, context, carriedPawn, out floatMenuOption3))
-			{
-				yield return floatMenuOption3;
-			}
-			FloatMenuOption floatMenuOption4;
-			if (this.CarryToCasket(clickedThing, context, carriedPawn, out floatMenuOption4))
-			{
-				yield return floatMenuOption4;
-			}
-			FloatMenuOption floatMenuOption5;
-			if (ModsConfig.AnomalyActive && this.CaptureEntity(clickedThing, context, carriedPawn, out floatMenuOption5))
-			{
-				yield return floatMenuOption5;
-			}
-			yield break;
-		}
-
-		// Token: 0x060124C7 RID: 74951 RVA: 0x00563D58 File Offset: 0x00561F58
-		private bool CarryToBed(Thing clickedThing, FloatMenuContext context, Pawn carriedPawn, out FloatMenuOption option)
-		{
-			option = null;
-			if (carriedPawn.IsPrisonerOfColony)
-			{
+			default:
 				return false;
-			}
-			if (!RestUtility.IsValidBedFor(clickedThing, carriedPawn, context.FirstSelectedPawn, false, true, true, carriedPawn.GuestStatus))
+			case 0:
 			{
-				return false;
-			}
-			if (context.FirstSelectedPawn.HostileTo(carriedPawn))
-			{
-				option = new FloatMenuOption("CannotPlaceIn".Translate(carriedPawn, clickedThing) + ": " + "CarriedPawnHostile".Translate().CapitalizeFirst(), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-				return true;
-			}
-			if (!context.FirstSelectedPawn.CanReach(clickedThing, PathEndMode.ClosestTouch, Danger.Deadly, false, false, TraverseMode.ByPawn))
-			{
-				option = new FloatMenuOption("CannotPlaceIn".Translate(carriedPawn, clickedThing) + ": " + "NoPath".Translate().CapitalizeFirst(), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-				return true;
-			}
-			option = FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("PlaceIn".Translate(carriedPawn, clickedThing), delegate()
-			{
-				clickedThing.SetForbidden(false, false);
-				Job job = JobMaker.MakeJob(JobDefOf.TakeDownedPawnToBedDrafted, context.FirstSelectedPawn.carryTracker.CarriedThing, clickedThing);
-				job.count = 1;
-				context.FirstSelectedPawn.jobs.TryTakeOrderedJob(job, new JobTag?(JobTag.Misc), false);
-			}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0), context.FirstSelectedPawn, clickedThing, "ReservedBy", null);
-			return true;
-		}
-
-		// Token: 0x060124C8 RID: 74952 RVA: 0x00563EF4 File Offset: 0x005620F4
-		private bool Capture(Thing clickedThing, FloatMenuContext context, Pawn carriedPawn, out FloatMenuOption option)
-		{
-			option = null;
-			if (!carriedPawn.CanBeCaptured())
-			{
-				return false;
-			}
-			if (!RestUtility.IsValidBedFor(clickedThing, carriedPawn, context.FirstSelectedPawn, false, true, true, new GuestStatus?(GuestStatus.Prisoner)))
-			{
-				return false;
-			}
-			if (!context.FirstSelectedPawn.CanReach(clickedThing, PathEndMode.ClosestTouch, Danger.Deadly, false, false, TraverseMode.ByPawn))
-			{
-				option = new FloatMenuOption("CannotPlaceIn".Translate(carriedPawn, clickedThing) + ": " + "NoPath".Translate().CapitalizeFirst(), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-				return true;
-			}
-			TaggedString taggedString = "Capture".Translate(carriedPawn.LabelCap, carriedPawn);
-			if (!carriedPawn.guest.Recruitable)
-			{
-				taggedString += string.Format(" ({0})", "Unrecruitable".Translate());
-			}
-			if (carriedPawn.Faction != null && carriedPawn.Faction != Faction.OfPlayer && !carriedPawn.Faction.Hidden && !carriedPawn.Faction.HostileTo(Faction.OfPlayer) && !carriedPawn.IsPrisonerOfColony)
-			{
-				taggedString += string.Format(": {0}", "AngersFaction".Translate().CapitalizeFirst());
-			}
-			option = FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption(taggedString, delegate()
-			{
-				clickedThing.SetForbidden(false, false);
-				Job job = JobMaker.MakeJob(JobDefOf.CarryToPrisonerBedDrafted, context.FirstSelectedPawn.carryTracker.CarriedThing, clickedThing);
-				job.count = 1;
-				context.FirstSelectedPawn.jobs.TryTakeOrderedJob(job, new JobTag?(JobTag.Misc), false);
-			}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0), context.FirstSelectedPawn, clickedThing, "ReservedBy", null);
-			return true;
-		}
-
-		// Token: 0x060124C9 RID: 74953 RVA: 0x005640B8 File Offset: 0x005622B8
-		private bool CarryToTransporter(Thing clickedThing, FloatMenuContext context, Pawn carriedPawn, out FloatMenuOption option)
-		{
-			option = null;
-			CompTransporter transporter;
-			if (!clickedThing.TryGetComp(out transporter))
-			{
-				return false;
-			}
-			if (!context.FirstSelectedPawn.CanReach(clickedThing, PathEndMode.ClosestTouch, Danger.Deadly, false, false, TraverseMode.ByPawn))
-			{
-				option = new FloatMenuOption("CannotPlaceIn".Translate(carriedPawn, clickedThing) + ": " + "NoPath".Translate().CapitalizeFirst(), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-				return true;
-			}
-			if (transporter.Shuttle != null)
-			{
-				if (!transporter.Shuttle.IsAllowedNow(carriedPawn))
+				_003C_003E1__state = -1;
+				_003CcarriedPawn_003E5__2 = (Pawn)context.FirstSelectedPawn.carryTracker.CarriedThing;
+				if (floatMenuOptionProvider_CarryingPawn.Capture(clickedThing, context, _003CcarriedPawn_003E5__2, out var option))
 				{
-					return false;
-				}
-				if (!transporter.Shuttle.IsPlayerShuttle && !transporter.LeftToLoadContains(carriedPawn))
-				{
-					option = new FloatMenuOption("CannotPlaceIn".Translate(carriedPawn, clickedThing) + ": " + "NotPartOfLaunchGroup".Translate(), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
+					_003C_003E2__current = option;
+					_003C_003E1__state = 1;
 					return true;
 				}
-			}
-			option = FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("PlaceIn".Translate(carriedPawn, clickedThing), delegate()
-			{
-				if (!transporter.LoadingInProgressOrReadyToLaunch)
+				if (floatMenuOptionProvider_CarryingPawn.CarryToBed(clickedThing, context, _003CcarriedPawn_003E5__2, out var option2))
 				{
-					TransporterUtility.InitiateLoading(Gen.YieldSingle<CompTransporter>(transporter));
+					_003C_003E2__current = option2;
+					_003C_003E1__state = 2;
+					return true;
 				}
-				Job job = JobMaker.MakeJob(JobDefOf.HaulToTransporter, carriedPawn, clickedThing);
-				job.ignoreForbidden = true;
-				job.count = 1;
-				context.FirstSelectedPawn.jobs.TryTakeOrderedJob(job, new JobTag?(JobTag.Misc), false);
-			}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0), context.FirstSelectedPawn, clickedThing, "ReservedBy", null);
-			return true;
-		}
-
-		// Token: 0x060124CA RID: 74954 RVA: 0x00564284 File Offset: 0x00562484
-		private bool CarryToCasket(Thing clickedThing, FloatMenuContext context, Pawn carriedPawn, out FloatMenuOption option)
-		{
-			option = null;
-			Building_CryptosleepCasket casket = clickedThing as Building_CryptosleepCasket;
-			if (casket == null)
-			{
-				return false;
+				goto IL_00be;
 			}
-			if (!context.FirstSelectedPawn.CanReach(clickedThing, PathEndMode.ClosestTouch, Danger.Deadly, false, false, TraverseMode.ByPawn))
-			{
-				option = new FloatMenuOption("CannotPlaceIn".Translate(carriedPawn, casket) + ": " + "NoPath".Translate().CapitalizeFirst(), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-				return true;
-			}
-			if (casket.HasAnyContents)
-			{
-				option = new FloatMenuOption("CannotPlaceIn".Translate(carriedPawn, casket) + ": " + "CryptosleepCasketOccupied".Translate(), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-				return true;
-			}
-			if (carriedPawn.IsQuestLodger())
-			{
-				option = new FloatMenuOption("CannotPlaceIn".Translate(carriedPawn, casket) + ": " + "CryptosleepCasketGuestsNotAllowed".Translate(), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-				return true;
-			}
-			if (carriedPawn.GetExtraHostFaction(null) != null)
-			{
-				option = new FloatMenuOption("CannotPlaceIn".Translate(carriedPawn, casket) + ": " + "CryptosleepCasketGuestPrisonersNotAllowed".Translate(), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-				return true;
-			}
-			option = FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("PlaceIn".Translate(carriedPawn, casket), delegate()
-			{
-				Job job = JobMaker.MakeJob(JobDefOf.CarryToCryptosleepCasketDrafted, carriedPawn, casket);
-				job.count = 1;
-				job.playerForced = true;
-				context.FirstSelectedPawn.jobs.TryTakeOrderedJob(job, new JobTag?(JobTag.Misc), false);
-			}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0), context.FirstSelectedPawn, casket, "ReservedBy", null);
-			return true;
-		}
-
-		// Token: 0x060124CB RID: 74955 RVA: 0x005644C8 File Offset: 0x005626C8
-		private bool CaptureEntity(Thing clickedThing, FloatMenuContext context, Pawn carriedPawn, out FloatMenuOption option)
-		{
-			option = null;
-			CompHoldingPlatformTarget compHoldingPlatformTarget;
-			if (!carriedPawn.TryGetComp(out compHoldingPlatformTarget) || !compHoldingPlatformTarget.CanBeCaptured || !compHoldingPlatformTarget.StudiedAtHoldingPlatform)
-			{
-				return false;
-			}
-			CompEntityHolder compEntityHolder;
-			if (!clickedThing.TryGetComp(out compEntityHolder) || !compEntityHolder.Available)
-			{
-				return false;
-			}
-			if (!context.FirstSelectedPawn.CanReach(clickedThing, PathEndMode.ClosestTouch, Danger.Deadly, false, false, TraverseMode.ByPawn))
-			{
-				option = new FloatMenuOption("CannotPlaceIn".Translate(carriedPawn, clickedThing) + ": " + "NoPath".Translate().CapitalizeFirst(), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-				return true;
-			}
-			TaggedString taggedString = "Capture".Translate(carriedPawn.LabelCap, carriedPawn);
-			if (!clickedThing.SafelyContains(carriedPawn))
-			{
-				float statValue = carriedPawn.GetStatValue(StatDefOf.MinimumContainmentStrength, true, -1);
-				taggedString += string.Format(" ({0} {1:F0}, {2} {3:F0})", new object[]
+			case 1:
+				_003C_003E1__state = -1;
+				goto IL_00be;
+			case 2:
+				_003C_003E1__state = -1;
+				goto IL_00be;
+			case 3:
+				_003C_003E1__state = -1;
+				goto IL_00f1;
+			case 4:
+				_003C_003E1__state = -1;
+				goto IL_0125;
+			case 5:
 				{
-					"FloatMenuContainmentStrength".Translate().ToLower(),
-					compEntityHolder.ContainmentStrength,
-					"FloatMenuContainmentRequires".Translate(carriedPawn).ToLower(),
-					statValue
-				});
+					_003C_003E1__state = -1;
+					break;
+				}
+				IL_0125:
+				if (ModsConfig.AnomalyActive && floatMenuOptionProvider_CarryingPawn.CaptureEntity(clickedThing, context, _003CcarriedPawn_003E5__2, out option3))
+				{
+					_003C_003E2__current = option3;
+					_003C_003E1__state = 5;
+					return true;
+				}
+				break;
+				IL_00f1:
+				if (floatMenuOptionProvider_CarryingPawn.CarryToCasket(clickedThing, context, _003CcarriedPawn_003E5__2, out option4))
+				{
+					_003C_003E2__current = option4;
+					_003C_003E1__state = 4;
+					return true;
+				}
+				goto IL_0125;
+				IL_00be:
+				if (floatMenuOptionProvider_CarryingPawn.CarryToTransporter(clickedThing, context, _003CcarriedPawn_003E5__2, out option5))
+				{
+					_003C_003E2__current = option5;
+					_003C_003E1__state = 3;
+					return true;
+				}
+				goto IL_00f1;
 			}
-			option = FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption(taggedString, delegate()
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<FloatMenuOption> IEnumerable<FloatMenuOption>.GetEnumerator()
+		{
+			_003CGetOptionsFor_003Ed__9 _003CGetOptionsFor_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				clickedThing.SetForbidden(false, false);
-				Job job = JobMaker.MakeJob(JobDefOf.CarryToEntityHolderAlreadyHolding, clickedThing, context.FirstSelectedPawn.carryTracker.CarriedThing);
-				job.count = 1;
-				context.FirstSelectedPawn.jobs.TryTakeOrderedJob(job, new JobTag?(JobTag.Misc), false);
-			}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0), context.FirstSelectedPawn, clickedThing, "ReservedBy", null);
+				_003C_003E1__state = 0;
+				_003CGetOptionsFor_003Ed__ = this;
+			}
+			else
+			{
+				_003CGetOptionsFor_003Ed__ = new _003CGetOptionsFor_003Ed__9(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CGetOptionsFor_003Ed__.clickedThing = _003C_003E3__clickedThing;
+			_003CGetOptionsFor_003Ed__.context = _003C_003E3__context;
+			return _003CGetOptionsFor_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<FloatMenuOption>)this).GetEnumerator();
+		}
+	}
+
+	protected override bool Drafted => true;
+
+	protected override bool Undrafted => false;
+
+	protected override bool Multiselect => false;
+
+	protected override bool RequiresManipulation => true;
+
+	protected override bool AppliesInt(FloatMenuContext context)
+	{
+		return context.FirstSelectedPawn.IsCarryingPawn();
+	}
+
+	[IteratorStateMachine(typeof(_003CGetOptionsFor_003Ed__9))]
+	public override IEnumerable<FloatMenuOption> GetOptionsFor(Thing clickedThing, FloatMenuContext context)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetOptionsFor_003Ed__9(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__clickedThing = clickedThing,
+			_003C_003E3__context = context
+		};
+	}
+
+	private bool CarryToBed(Thing clickedThing, FloatMenuContext context, Pawn carriedPawn, out FloatMenuOption option)
+	{
+		option = null;
+		if (carriedPawn.IsPrisonerOfColony)
+		{
+			return false;
+		}
+		if (!RestUtility.IsValidBedFor(clickedThing, carriedPawn, context.FirstSelectedPawn, checkSocialProperness: false, allowMedBedEvenIfSetToNoCare: true, ignoreOtherReservations: true, carriedPawn.GuestStatus))
+		{
+			return false;
+		}
+		if (context.FirstSelectedPawn.HostileTo(carriedPawn))
+		{
+			option = new FloatMenuOption("CannotPlaceIn".Translate(carriedPawn, clickedThing) + ": " + "CarriedPawnHostile".Translate().CapitalizeFirst(), null);
 			return true;
 		}
+		if (!context.FirstSelectedPawn.CanReach(clickedThing, PathEndMode.ClosestTouch, Danger.Deadly))
+		{
+			option = new FloatMenuOption("CannotPlaceIn".Translate(carriedPawn, clickedThing) + ": " + "NoPath".Translate().CapitalizeFirst(), null);
+			return true;
+		}
+		option = FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("PlaceIn".Translate(carriedPawn, clickedThing), delegate
+		{
+			clickedThing.SetForbidden(value: false, warnOnFail: false);
+			Job job = JobMaker.MakeJob(JobDefOf.TakeDownedPawnToBedDrafted, context.FirstSelectedPawn.carryTracker.CarriedThing, clickedThing);
+			job.count = 1;
+			context.FirstSelectedPawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
+		}), context.FirstSelectedPawn, clickedThing);
+		return true;
+	}
+
+	private bool Capture(Thing clickedThing, FloatMenuContext context, Pawn carriedPawn, out FloatMenuOption option)
+	{
+		option = null;
+		if (!carriedPawn.CanBeCaptured())
+		{
+			return false;
+		}
+		if (!RestUtility.IsValidBedFor(clickedThing, carriedPawn, context.FirstSelectedPawn, checkSocialProperness: false, allowMedBedEvenIfSetToNoCare: true, ignoreOtherReservations: true, GuestStatus.Prisoner))
+		{
+			return false;
+		}
+		if (!context.FirstSelectedPawn.CanReach(clickedThing, PathEndMode.ClosestTouch, Danger.Deadly))
+		{
+			option = new FloatMenuOption("CannotPlaceIn".Translate(carriedPawn, clickedThing) + ": " + "NoPath".Translate().CapitalizeFirst(), null);
+			return true;
+		}
+		TaggedString taggedString = "Capture".Translate(carriedPawn.LabelCap, carriedPawn);
+		if (!carriedPawn.guest.Recruitable)
+		{
+			taggedString += $" ({"Unrecruitable".Translate()})";
+		}
+		if (carriedPawn.Faction != null && carriedPawn.Faction != Faction.OfPlayer && !carriedPawn.Faction.Hidden && !carriedPawn.Faction.HostileTo(Faction.OfPlayer) && !carriedPawn.IsPrisonerOfColony)
+		{
+			taggedString += $": {"AngersFaction".Translate().CapitalizeFirst()}";
+		}
+		option = FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption(taggedString, delegate
+		{
+			clickedThing.SetForbidden(value: false, warnOnFail: false);
+			Job job = JobMaker.MakeJob(JobDefOf.CarryToPrisonerBedDrafted, context.FirstSelectedPawn.carryTracker.CarriedThing, clickedThing);
+			job.count = 1;
+			context.FirstSelectedPawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
+		}), context.FirstSelectedPawn, clickedThing);
+		return true;
+	}
+
+	private bool CarryToTransporter(Thing clickedThing, FloatMenuContext context, Pawn carriedPawn, out FloatMenuOption option)
+	{
+		option = null;
+		if (!clickedThing.TryGetComp(out CompTransporter transporter))
+		{
+			return false;
+		}
+		if (!context.FirstSelectedPawn.CanReach(clickedThing, PathEndMode.ClosestTouch, Danger.Deadly))
+		{
+			option = new FloatMenuOption("CannotPlaceIn".Translate(carriedPawn, clickedThing) + ": " + "NoPath".Translate().CapitalizeFirst(), null);
+			return true;
+		}
+		if (transporter.Shuttle != null)
+		{
+			if (!transporter.Shuttle.IsAllowedNow(carriedPawn))
+			{
+				return false;
+			}
+			if (!transporter.Shuttle.IsPlayerShuttle && !transporter.LeftToLoadContains(carriedPawn))
+			{
+				option = new FloatMenuOption("CannotPlaceIn".Translate(carriedPawn, clickedThing) + ": " + "NotPartOfLaunchGroup".Translate(), null);
+				return true;
+			}
+		}
+		option = FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("PlaceIn".Translate(carriedPawn, clickedThing), delegate
+		{
+			if (!transporter.LoadingInProgressOrReadyToLaunch)
+			{
+				TransporterUtility.InitiateLoading(Gen.YieldSingle(transporter));
+			}
+			Job job = JobMaker.MakeJob(JobDefOf.HaulToTransporter, carriedPawn, clickedThing);
+			job.ignoreForbidden = true;
+			job.count = 1;
+			context.FirstSelectedPawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
+		}), context.FirstSelectedPawn, clickedThing);
+		return true;
+	}
+
+	private bool CarryToCasket(Thing clickedThing, FloatMenuContext context, Pawn carriedPawn, out FloatMenuOption option)
+	{
+		option = null;
+		Building_CryptosleepCasket casket = clickedThing as Building_CryptosleepCasket;
+		if (casket == null)
+		{
+			return false;
+		}
+		if (!context.FirstSelectedPawn.CanReach(clickedThing, PathEndMode.ClosestTouch, Danger.Deadly))
+		{
+			option = new FloatMenuOption("CannotPlaceIn".Translate(carriedPawn, casket) + ": " + "NoPath".Translate().CapitalizeFirst(), null);
+			return true;
+		}
+		if (casket.HasAnyContents)
+		{
+			option = new FloatMenuOption("CannotPlaceIn".Translate(carriedPawn, casket) + ": " + "CryptosleepCasketOccupied".Translate(), null);
+			return true;
+		}
+		if (carriedPawn.IsQuestLodger())
+		{
+			option = new FloatMenuOption("CannotPlaceIn".Translate(carriedPawn, casket) + ": " + "CryptosleepCasketGuestsNotAllowed".Translate(), null);
+			return true;
+		}
+		if (carriedPawn.GetExtraHostFaction() != null)
+		{
+			option = new FloatMenuOption("CannotPlaceIn".Translate(carriedPawn, casket) + ": " + "CryptosleepCasketGuestPrisonersNotAllowed".Translate(), null);
+			return true;
+		}
+		option = FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("PlaceIn".Translate(carriedPawn, casket), delegate
+		{
+			Job job = JobMaker.MakeJob(JobDefOf.CarryToCryptosleepCasketDrafted, carriedPawn, casket);
+			job.count = 1;
+			job.playerForced = true;
+			context.FirstSelectedPawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
+		}), context.FirstSelectedPawn, casket);
+		return true;
+	}
+
+	private bool CaptureEntity(Thing clickedThing, FloatMenuContext context, Pawn carriedPawn, out FloatMenuOption option)
+	{
+		option = null;
+		if (!carriedPawn.TryGetComp<CompHoldingPlatformTarget>(out var comp) || !comp.CanBeCaptured || !comp.StudiedAtHoldingPlatform)
+		{
+			return false;
+		}
+		if (!clickedThing.TryGetComp(out CompEntityHolder comp2) || !comp2.Available)
+		{
+			return false;
+		}
+		if (!context.FirstSelectedPawn.CanReach(clickedThing, PathEndMode.ClosestTouch, Danger.Deadly))
+		{
+			option = new FloatMenuOption("CannotPlaceIn".Translate(carriedPawn, clickedThing) + ": " + "NoPath".Translate().CapitalizeFirst(), null);
+			return true;
+		}
+		TaggedString taggedString = "Capture".Translate(carriedPawn.LabelCap, carriedPawn);
+		if (!clickedThing.SafelyContains(carriedPawn))
+		{
+			float statValue = carriedPawn.GetStatValue(StatDefOf.MinimumContainmentStrength);
+			taggedString += $" ({"FloatMenuContainmentStrength".Translate().ToLower()} {comp2.ContainmentStrength:F0}, {"FloatMenuContainmentRequires".Translate(carriedPawn).ToLower()} {statValue:F0})";
+		}
+		option = FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption(taggedString, delegate
+		{
+			clickedThing.SetForbidden(value: false, warnOnFail: false);
+			Job job = JobMaker.MakeJob(JobDefOf.CarryToEntityHolderAlreadyHolding, clickedThing, context.FirstSelectedPawn.carryTracker.CarriedThing);
+			job.count = 1;
+			context.FirstSelectedPawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
+		}), context.FirstSelectedPawn, clickedThing);
+		return true;
 	}
 }

@@ -1,135 +1,298 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class QuestPart_JoinPlayer : QuestPart
 {
-	// Token: 0x02001CF0 RID: 7408
-	public class QuestPart_JoinPlayer : QuestPart
+	[CompilerGenerated]
+	private sealed class _003Cget_QuestLookTargets_003Ed__7 : IEnumerable<GlobalTargetInfo>, IEnumerable, IEnumerator<GlobalTargetInfo>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001985 RID: 6533
-		// (get) Token: 0x0600A56B RID: 42347 RVA: 0x002F5DC3 File Offset: 0x002F3FC3
-		public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+		private int _003C_003E1__state;
+
+		private GlobalTargetInfo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public QuestPart_JoinPlayer _003C_003E4__this;
+
+		private IEnumerator<GlobalTargetInfo> _003C_003E7__wrap1;
+
+		private IEnumerator<Pawn> _003C_003E7__wrap2;
+
+		GlobalTargetInfo IEnumerator<GlobalTargetInfo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				foreach (GlobalTargetInfo globalTargetInfo in base.QuestLookTargets)
-				{
-					yield return globalTargetInfo;
-				}
-				IEnumerator<GlobalTargetInfo> enumerator = null;
-				if (this.mapParent != null)
-				{
-					yield return this.mapParent;
-				}
-				foreach (Pawn t in PawnsArriveQuestPartUtility.GetQuestLookTargets(this.pawns))
-				{
-					yield return t;
-				}
-				IEnumerator<Pawn> enumerator2 = null;
-				yield break;
-				yield break;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001986 RID: 6534
-		// (get) Token: 0x0600A56C RID: 42348 RVA: 0x002F5DD3 File Offset: 0x002F3FD3
-		public override bool IncreasesPopulation
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return PawnsArriveQuestPartUtility.IncreasesPopulation(this.pawns, this.joinPlayer, this.makePrisoners);
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600A56D RID: 42349 RVA: 0x002F5DEC File Offset: 0x002F3FEC
-		public override void Notify_QuestSignalReceived(Signal signal)
+		[DebuggerHidden]
+		public _003Cget_QuestLookTargets_003Ed__7(int _003C_003E1__state)
 		{
-			base.Notify_QuestSignalReceived(signal);
-			if (signal.tag == this.inSignal)
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			switch (_003C_003E1__state)
 			{
-				this.pawns.RemoveAll((Pawn x) => x.Destroyed);
-				if (this.joinPlayer)
+			case -3:
+			case 1:
+				try
 				{
-					using (List<Pawn>.Enumerator enumerator = this.pawns.GetEnumerator())
-					{
-						while (enumerator.MoveNext())
-						{
-							Pawn pawn = enumerator.Current;
-							if (pawn.IsColonist || pawn.IsPrisonerOfColony || pawn.IsSlaveOfColony)
-							{
-								RecruitUtility.Recruit(pawn, Faction.OfPlayer, null);
-							}
-							else if (pawn.Faction != Faction.OfPlayer)
-							{
-								pawn.SetFaction(Faction.OfPlayer, null);
-							}
-						}
-						return;
-					}
 				}
-				if (this.makePrisoners)
+				finally
 				{
-					for (int i = 0; i < this.pawns.Count; i++)
-					{
-						if (this.pawns[i].RaceProps.Humanlike)
-						{
-							if (!this.pawns[i].IsPrisonerOfColony)
-							{
-								this.pawns[i].guest.SetGuestStatus(Faction.OfPlayer, GuestStatus.Prisoner);
-							}
-							HealthUtility.TryAnesthetize(this.pawns[i]);
-						}
-					}
+					_003C_003Em__Finally1();
 				}
+				break;
+			case -4:
+			case 3:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally2();
+				}
+				break;
 			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E7__wrap2 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x0600A56E RID: 42350 RVA: 0x002F5F44 File Offset: 0x002F4144
-		public override bool QuestPartReserves(Pawn p)
+		private bool MoveNext()
 		{
-			return this.pawns.Contains(p);
-		}
-
-		// Token: 0x0600A56F RID: 42351 RVA: 0x002F5F52 File Offset: 0x002F4152
-		public override void ReplacePawnReferences(Pawn replace, Pawn with)
-		{
-			this.pawns.Replace(replace, with);
-		}
-
-		// Token: 0x0600A570 RID: 42352 RVA: 0x002F5F64 File Offset: 0x002F4164
-		public override void ExposeData()
-		{
-			base.ExposeData();
-			Scribe_Values.Look<string>(ref this.inSignal, "inSignal", null, false);
-			Scribe_Values.Look<string>(ref this.outSignalResult, "outSignalResult", null, false);
-			Scribe_References.Look<MapParent>(ref this.mapParent, "mapParent", false);
-			Scribe_Collections.Look<Pawn>(ref this.pawns, "pawns", LookMode.Reference, Array.Empty<object>());
-			Scribe_Values.Look<bool>(ref this.joinPlayer, "joinPlayer", false, false);
-			Scribe_Values.Look<bool>(ref this.makePrisoners, "makePrisoners", false, false);
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+			try
 			{
-				this.pawns.RemoveAll((Pawn x) => x == null);
+				int num = _003C_003E1__state;
+				QuestPart_JoinPlayer questPart_JoinPlayer = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((QuestPart)questPart_JoinPlayer).QuestLookTargets.GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0076;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0076;
+				case 2:
+					_003C_003E1__state = -1;
+					goto IL_00bb;
+				case 3:
+					{
+						_003C_003E1__state = -4;
+						break;
+					}
+					IL_0076:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						GlobalTargetInfo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (questPart_JoinPlayer.mapParent != null)
+					{
+						_003C_003E2__current = questPart_JoinPlayer.mapParent;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					goto IL_00bb;
+					IL_00bb:
+					_003C_003E7__wrap2 = PawnsArriveQuestPartUtility.GetQuestLookTargets(questPart_JoinPlayer.pawns).GetEnumerator();
+					_003C_003E1__state = -4;
+					break;
+				}
+				if (_003C_003E7__wrap2.MoveNext())
+				{
+					Pawn current2 = _003C_003E7__wrap2.Current;
+					_003C_003E2__current = current2;
+					_003C_003E1__state = 3;
+					return true;
+				}
+				_003C_003Em__Finally2();
+				_003C_003E7__wrap2 = null;
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x04007245 RID: 29253
-		public string inSignal;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x04007246 RID: 29254
-		public string outSignalResult;
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
 
-		// Token: 0x04007247 RID: 29255
-		public List<Pawn> pawns = new List<Pawn>();
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap2 != null)
+			{
+				_003C_003E7__wrap2.Dispose();
+			}
+		}
 
-		// Token: 0x04007248 RID: 29256
-		public bool joinPlayer;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04007249 RID: 29257
-		public bool makePrisoners;
+		[DebuggerHidden]
+		IEnumerator<GlobalTargetInfo> IEnumerable<GlobalTargetInfo>.GetEnumerator()
+		{
+			_003Cget_QuestLookTargets_003Ed__7 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_QuestLookTargets_003Ed__7(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x0400724A RID: 29258
-		public MapParent mapParent;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<GlobalTargetInfo>)this).GetEnumerator();
+		}
+	}
+
+	public string inSignal;
+
+	public string outSignalResult;
+
+	public List<Pawn> pawns = new List<Pawn>();
+
+	public bool joinPlayer;
+
+	public bool makePrisoners;
+
+	public MapParent mapParent;
+
+	public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+	{
+		[IteratorStateMachine(typeof(_003Cget_QuestLookTargets_003Ed__7))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_QuestLookTargets_003Ed__7(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public override bool IncreasesPopulation => PawnsArriveQuestPartUtility.IncreasesPopulation(pawns, joinPlayer, makePrisoners);
+
+	public override void Notify_QuestSignalReceived(Signal signal)
+	{
+		base.Notify_QuestSignalReceived(signal);
+		if (!(signal.tag == inSignal))
+		{
+			return;
+		}
+		pawns.RemoveAll((Pawn x) => x.Destroyed);
+		if (joinPlayer)
+		{
+			foreach (Pawn pawn in pawns)
+			{
+				if (pawn.IsColonist || pawn.IsPrisonerOfColony || pawn.IsSlaveOfColony)
+				{
+					RecruitUtility.Recruit(pawn, Faction.OfPlayer);
+				}
+				else if (pawn.Faction != Faction.OfPlayer)
+				{
+					pawn.SetFaction(Faction.OfPlayer);
+				}
+			}
+			return;
+		}
+		if (!makePrisoners)
+		{
+			return;
+		}
+		for (int i = 0; i < pawns.Count; i++)
+		{
+			if (pawns[i].RaceProps.Humanlike)
+			{
+				if (!pawns[i].IsPrisonerOfColony)
+				{
+					pawns[i].guest.SetGuestStatus(Faction.OfPlayer, GuestStatus.Prisoner);
+				}
+				HealthUtility.TryAnesthetize(pawns[i]);
+			}
+		}
+	}
+
+	public override bool QuestPartReserves(Pawn p)
+	{
+		return pawns.Contains(p);
+	}
+
+	public override void ReplacePawnReferences(Pawn replace, Pawn with)
+	{
+		pawns.Replace(replace, with);
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref inSignal, "inSignal");
+		Scribe_Values.Look(ref outSignalResult, "outSignalResult");
+		Scribe_References.Look(ref mapParent, "mapParent");
+		Scribe_Collections.Look(ref pawns, "pawns", LookMode.Reference);
+		Scribe_Values.Look(ref joinPlayer, "joinPlayer", defaultValue: false);
+		Scribe_Values.Look(ref makePrisoners, "makePrisoners", defaultValue: false);
+		if (Scribe.mode == LoadSaveMode.PostLoadInit)
+		{
+			pawns.RemoveAll((Pawn x) => x == null);
+		}
 	}
 }

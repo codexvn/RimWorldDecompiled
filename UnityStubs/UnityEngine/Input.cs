@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
+using UnityStubs.Gui;
 using UnityStubs.Internal;
 
 namespace UnityEngine;
@@ -52,7 +53,7 @@ public class Input
 		["\\"] = KeyCode.Backslash
 	};
 
-	public static string compositionString => string.Empty;
+	public static string compositionString => ImeComposition.Text;
 
 	public static Vector3 mousePosition
 	{
@@ -101,15 +102,19 @@ public class Input
 	{
 		set
 		{
-			StubWarner.LogStub("compositionCursorPos", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\Input.cs", 137);
+			ImeComposition.SetCandidatePos(GuiBackend.Current?.GuiToScreenPoint(value) ?? value);
 		}
 	}
 
 	public static IMECompositionMode imeCompositionMode
 	{
+		get
+		{
+			return ImeComposition.Mode;
+		}
 		set
 		{
-			StubWarner.LogStub("imeCompositionMode", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\Input.cs", 139);
+			ImeComposition.Mode = value;
 		}
 	}
 

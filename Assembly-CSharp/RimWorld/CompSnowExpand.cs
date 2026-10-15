@@ -1,111 +1,96 @@
-﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 using Verse.Noise;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompSnowExpand : ThingComp
 {
-	// Token: 0x02002E1F RID: 11807
-	public class CompSnowExpand : ThingComp
+	private float snowRadius;
+
+	private ModuleBase snowNoise;
+
+	private const float MaxOutdoorTemp = 10f;
+
+	private static HashSet<IntVec3> reachableCells = new HashSet<IntVec3>();
+
+	public CompProperties_SnowExpand Props => (CompProperties_SnowExpand)props;
+
+	public override void PostExposeData()
 	{
-		// Token: 0x17002A9B RID: 10907
-		// (get) Token: 0x06010A10 RID: 68112 RVA: 0x004CBCCE File Offset: 0x004C9ECE
-		public CompProperties_SnowExpand Props
-		{
-			get
-			{
-				return (CompProperties_SnowExpand)this.props;
-			}
-		}
+		Scribe_Values.Look(ref snowRadius, "snowRadius", 0f);
+	}
 
-		// Token: 0x06010A11 RID: 68113 RVA: 0x004CBCDB File Offset: 0x004C9EDB
-		public override void PostExposeData()
+	public override void CompTick()
+	{
+		if (parent.Spawned && parent.IsHashIntervalTick(Props.expandInterval))
 		{
-			Scribe_Values.Look<float>(ref this.snowRadius, "snowRadius", 0f, false);
+			TryExpandSnow();
 		}
+	}
 
-		// Token: 0x06010A12 RID: 68114 RVA: 0x004CBCF3 File Offset: 0x004C9EF3
-		public override void CompTick()
+	private void TryExpandSnow()
+	{
+		if (parent.Map.mapTemperature.OutdoorTemp > 10f)
 		{
-			if (!this.parent.Spawned)
-			{
-				return;
-			}
-			if (this.parent.IsHashIntervalTick(this.Props.expandInterval))
-			{
-				this.TryExpandSnow();
-			}
+			snowRadius = 0f;
+			return;
 		}
-
-		// Token: 0x06010A13 RID: 68115 RVA: 0x004CBD24 File Offset: 0x004C9F24
-		private void TryExpandSnow()
+		if (snowNoise == null)
 		{
-			if (this.parent.Map.mapTemperature.OutdoorTemp > 10f)
+			snowNoise = new Perlin(0.054999999701976776, 2.0, 0.5, 5, Rand.Range(0, 651431), QualityMode.Medium);
+		}
+		if (snowRadius < 8f)
+		{
+			snowRadius += 1.3f;
+		}
+		else if (snowRadius < 17f)
+		{
+			snowRadius += 0.7f;
+		}
+		else if (snowRadius < 30f)
+		{
+			snowRadius += 0.4f;
+		}
+		else
+		{
+			snowRadius += 0.1f;
+		}
+		snowRadius = Mathf.Min(snowRadius, Props.maxRadius);
+		CellRect occupiedRect = parent.OccupiedRect();
+		reachableCells.Clear();
+		parent.Map.floodFiller.FloodFill(parent.Position, delegate(IntVec3 x)
+		{
+			if ((float)x.DistanceToSquared(parent.Position) > snowRadius * snowRadius)
 			{
-				this.snowRadius = 0f;
-				return;
+				return false;
 			}
-			if (this.snowNoise == null)
+			return occupiedRect.Contains(x) || !x.Filled(parent.Map);
+		}, delegate(IntVec3 x)
+		{
+			reachableCells.Add(x);
+		});
+		int num = GenRadial.NumCellsInRadius(snowRadius);
+		for (int i = 0; i < num; i++)
+		{
+			IntVec3 intVec = parent.Position + GenRadial.RadialPattern[i];
+			if (intVec.InBounds(parent.Map) && reachableCells.Contains(intVec))
 			{
-				this.snowNoise = new Perlin(0.054999999701976776, 2.0, 0.5, 5, Rand.Range(0, 651431), QualityMode.Medium);
-			}
-			if (this.snowRadius < 8f)
-			{
-				this.snowRadius += 1.3f;
-			}
-			else if (this.snowRadius < 17f)
-			{
-				this.snowRadius += 0.7f;
-			}
-			else if (this.snowRadius < 30f)
-			{
-				this.snowRadius += 0.4f;
-			}
-			else
-			{
-				this.snowRadius += 0.1f;
-			}
-			this.snowRadius = Mathf.Min(this.snowRadius, this.Props.maxRadius);
-			CellRect occupiedRect = this.parent.OccupiedRect();
-			CompSnowExpand.reachableCells.Clear();
-			this.parent.Map.floodFiller.FloodFill(this.parent.Position, (IntVec3 x) => (float)x.DistanceToSquared(this.parent.Position) <= this.snowRadius * this.snowRadius && (occupiedRect.Contains(x) || !x.Filled(this.parent.Map)), delegate(IntVec3 x)
-			{
-				CompSnowExpand.reachableCells.Add(x);
-			}, int.MaxValue, false, null);
-			int num = GenRadial.NumCellsInRadius(this.snowRadius);
-			for (int i = 0; i < num; i++)
-			{
-				IntVec3 intVec = this.parent.Position + GenRadial.RadialPattern[i];
-				if (intVec.InBounds(this.parent.Map) && CompSnowExpand.reachableCells.Contains(intVec))
+				float value = snowNoise.GetValue(intVec);
+				value += 1f;
+				value *= 0.5f;
+				if (value < 0.1f)
 				{
-					float num2 = this.snowNoise.GetValue(intVec);
-					num2 += 1f;
-					num2 *= 0.5f;
-					if (num2 < 0.1f)
-					{
-						num2 = 0.1f;
-					}
-					if (this.parent.Map.snowGrid.GetDepth(intVec) <= num2)
-					{
-						float lengthHorizontal = (intVec - this.parent.Position).LengthHorizontal;
-						float num3 = 1f - lengthHorizontal / this.snowRadius;
-						this.parent.Map.snowGrid.AddDepth(intVec, num3 * this.Props.addAmount * num2);
-					}
+					value = 0.1f;
+				}
+				if (!(parent.Map.snowGrid.GetDepth(intVec) > value))
+				{
+					float lengthHorizontal = (intVec - parent.Position).LengthHorizontal;
+					float num2 = 1f - lengthHorizontal / snowRadius;
+					parent.Map.snowGrid.AddDepth(intVec, num2 * Props.addAmount * value);
 				}
 			}
 		}
-
-		// Token: 0x0400AD4E RID: 44366
-		private float snowRadius;
-
-		// Token: 0x0400AD4F RID: 44367
-		private ModuleBase snowNoise;
-
-		// Token: 0x0400AD50 RID: 44368
-		private const float MaxOutdoorTemp = 10f;
-
-		// Token: 0x0400AD51 RID: 44369
-		private static HashSet<IntVec3> reachableCells = new HashSet<IntVec3>();
 	}
 }

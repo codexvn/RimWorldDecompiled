@@ -1,76 +1,207 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_Research : JobDriver
 {
-	// Token: 0x020012FF RID: 4863
-	public class JobDriver_Research : JobDriver
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass6_0
 	{
-		// Token: 0x170012C1 RID: 4801
-		// (get) Token: 0x0600774B RID: 30539 RVA: 0x00244093 File Offset: 0x00242293
-		private ResearchProjectDef Project
+		public Toil research;
+
+		public JobDriver_Research _003C_003E4__this;
+
+		internal void _003CMakeNewToils_003Eb__0(int delta)
 		{
+			Pawn actor = research.actor;
+			float statValue = actor.GetStatValue(StatDefOf.ResearchSpeed);
+			statValue *= _003C_003E4__this.TargetThingA.GetStatValue(StatDefOf.ResearchSpeedFactor);
+			Find.ResearchManager.ResearchPerformed(statValue * (float)delta, actor);
+			actor.skills.Learn(SkillDefOf.Intellectual, 0.1f * (float)delta);
+			actor.GainComfortFromCellIfPossible(delta, chairsOnly: true);
+		}
+
+		internal bool _003CMakeNewToils_003Eb__1()
+		{
+			return _003C_003E4__this.Project == null;
+		}
+
+		internal bool _003CMakeNewToils_003Eb__2()
+		{
+			return !_003C_003E4__this.Project.CanBeResearchedAt(_003C_003E4__this.ResearchBench, ignoreResearchBenchPowerStatus: false);
+		}
+
+		internal float _003CMakeNewToils_003Eb__3()
+		{
+			return _003C_003E4__this.Project?.ProgressPercent ?? 0f;
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__6 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_Research _003C_003E4__this;
+
+		private _003C_003Ec__DisplayClass6_0 _003C_003E8__1;
+
+		Toil IEnumerator<Toil>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				return Find.ResearchManager.GetProject(null);
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170012C2 RID: 4802
-		// (get) Token: 0x0600774C RID: 30540 RVA: 0x002440A0 File Offset: 0x002422A0
-		private Building_ResearchBench ResearchBench
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (Building_ResearchBench)base.TargetThingA;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600774D RID: 30541 RVA: 0x002440B0 File Offset: 0x002422B0
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__6(int _003C_003E1__state)
 		{
-			return this.pawn.Reserve(this.ResearchBench, this.job, 1, -1, null, errorOnFailed, false) && (!this.ResearchBench.def.hasInteractionCell || this.pawn.ReserveSittableOrSpot(this.ResearchBench.InteractionCell, this.job, errorOnFailed));
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x0600774E RID: 30542 RVA: 0x00244113 File Offset: 0x00242313
-		protected override IEnumerable<Toil> MakeNewToils()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			this.FailOnDespawnedNullOrForbidden(TargetIndex.A);
-			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.InteractionCell, false);
-			Toil research = ToilMaker.MakeToil("MakeNewToils");
-			research.tickIntervalAction = delegate(int delta)
+			_003C_003E8__1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_Research f = _003C_003E4__this;
+			switch (num)
 			{
-				Pawn actor = research.actor;
-				float num = actor.GetStatValue(StatDefOf.ResearchSpeed, true, -1);
-				num *= this.TargetThingA.GetStatValue(StatDefOf.ResearchSpeedFactor, true, -1);
-				Find.ResearchManager.ResearchPerformed(num * (float)delta, actor);
-				actor.skills.Learn(SkillDefOf.Intellectual, 0.1f * (float)delta, false, false);
-				actor.GainComfortFromCellIfPossible(delta, true);
-			};
-			research.FailOn(() => this.Project == null);
-			research.FailOn(() => !this.Project.CanBeResearchedAt(this.ResearchBench, false));
-			research.FailOnCannotTouch(TargetIndex.A, PathEndMode.InteractionCell);
-			research.WithEffect(EffecterDefOf.Research, TargetIndex.A, null);
-			research.WithProgressBar(TargetIndex.A, delegate
-			{
-				ResearchProjectDef project = this.Project;
-				if (project == null)
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E8__1 = new _003C_003Ec__DisplayClass6_0();
+				_003C_003E8__1._003C_003E4__this = _003C_003E4__this;
+				f.FailOnDespawnedNullOrForbidden(TargetIndex.A);
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.InteractionCell);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E8__1.research = ToilMaker.MakeToil("MakeNewToils");
+				_003C_003E8__1.research.tickIntervalAction = delegate(int delta)
 				{
-					return 0f;
-				}
-				return project.ProgressPercent;
-			}, false, -0.5f, false);
-			research.defaultCompleteMode = ToilCompleteMode.Delay;
-			research.defaultDuration = 4000;
-			research.activeSkill = (() => SkillDefOf.Intellectual);
-			yield return research;
-			yield return Toils_General.Wait(2, TargetIndex.None);
-			yield break;
+					Pawn actor = _003C_003E8__1.research.actor;
+					float statValue = actor.GetStatValue(StatDefOf.ResearchSpeed);
+					statValue *= _003C_003E8__1._003C_003E4__this.TargetThingA.GetStatValue(StatDefOf.ResearchSpeedFactor);
+					Find.ResearchManager.ResearchPerformed(statValue * (float)delta, actor);
+					actor.skills.Learn(SkillDefOf.Intellectual, 0.1f * (float)delta);
+					actor.GainComfortFromCellIfPossible(delta, chairsOnly: true);
+				};
+				_003C_003E8__1.research.FailOn(() => _003C_003E8__1._003C_003E4__this.Project == null);
+				_003C_003E8__1.research.FailOn(() => !_003C_003E8__1._003C_003E4__this.Project.CanBeResearchedAt(_003C_003E8__1._003C_003E4__this.ResearchBench, ignoreResearchBenchPowerStatus: false));
+				_003C_003E8__1.research.FailOnCannotTouch(TargetIndex.A, PathEndMode.InteractionCell);
+				_003C_003E8__1.research.WithEffect(EffecterDefOf.Research, TargetIndex.A, null);
+				_003C_003E8__1.research.WithProgressBar(TargetIndex.A, () => _003C_003E8__1._003C_003E4__this.Project?.ProgressPercent ?? 0f);
+				_003C_003E8__1.research.defaultCompleteMode = ToilCompleteMode.Delay;
+				_003C_003E8__1.research.defaultDuration = 4000;
+				_003C_003E8__1.research.activeSkill = () => SkillDefOf.Intellectual;
+				_003C_003E2__current = _003C_003E8__1.research;
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.Wait(2);
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+				_003C_003E1__state = -1;
+				return false;
+			}
 		}
 
-		// Token: 0x04005157 RID: 20823
-		private const int JobEndInterval = 4000;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__6 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__6(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private const int JobEndInterval = 4000;
+
+	private ResearchProjectDef Project => Find.ResearchManager.GetProject();
+
+	private Building_ResearchBench ResearchBench => (Building_ResearchBench)base.TargetThingA;
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		if (pawn.Reserve(ResearchBench, job, 1, -1, null, errorOnFailed))
+		{
+			if (ResearchBench.def.hasInteractionCell)
+			{
+				return pawn.ReserveSittableOrSpot(ResearchBench.InteractionCell, job, errorOnFailed);
+			}
+			return true;
+		}
+		return false;
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__6))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__6(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

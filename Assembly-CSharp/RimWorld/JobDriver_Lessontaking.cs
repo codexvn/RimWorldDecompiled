@@ -1,105 +1,191 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_Lessontaking : JobDriver
 {
-	// Token: 0x02001202 RID: 4610
-	public class JobDriver_Lessontaking : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__8 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700117A RID: 4474
-		// (get) Token: 0x0600709F RID: 28831 RVA: 0x00229653 File Offset: 0x00227853
-		private Thing Desk
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_Lessontaking _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return base.TargetThingA;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700117B RID: 4475
-		// (get) Token: 0x060070A0 RID: 28832 RVA: 0x000024F4 File Offset: 0x000006F4
-		private Pawn Teacher
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (Pawn)base.TargetThingB;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x060070A1 RID: 28833 RVA: 0x0022EDB3 File Offset: 0x0022CFB3
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__8(int _003C_003E1__state)
 		{
-			return this.pawn.ReserveSittableOrSpot(SchoolUtility.DeskSpotStudent(this.Desk), this.job, errorOnFailed);
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x060070A2 RID: 28834 RVA: 0x0022EDD2 File Offset: 0x0022CFD2
-		protected override IEnumerable<Toil> MakeNewToils()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			this.FailOnDespawnedNullOrForbidden(TargetIndex.A);
-			this.FailOnChildLearningConditions<JobDriver_Lessontaking>();
-			this.FailOn(delegate()
-			{
-				if (this.Teacher == null)
-				{
-					int num = this.waitingForTeacherTicks + 1;
-					this.waitingForTeacherTicks = num;
-					return num > 5000;
-				}
-				this.waitingForTeacherTicks = 0;
-				Pawn_JobTracker jobs = this.Teacher.jobs;
-				Job job = (jobs != null) ? jobs.curJob : null;
-				return job == null || job.def != JobDefOf.Lessongiving || job.GetTarget(TargetIndex.B).Pawn != this.pawn || job.GetTarget(TargetIndex.A).Thing != this.Desk;
-			});
-			yield return Toils_Goto.GotoCell(SchoolUtility.DeskSpotStudent(this.Desk), PathEndMode.OnCell);
-			Toil toil = ToilMaker.MakeToil("MakeNewToils");
-			toil.tickIntervalAction = delegate(int delta)
-			{
-				this.pawn.GainComfortFromCellIfPossible(delta, false);
-				this.isReadyToLearn = true;
-				this.pawn.rotationTracker.FaceTarget(this.Desk);
-				LearningUtility.LearningTickCheckEnd(this.pawn, delta, false);
-			};
-			toil.handlingFacing = true;
-			toil.defaultCompleteMode = ToilCompleteMode.Never;
-			toil.socialMode = RandomSocialMode.Off;
-			yield return toil;
-			yield break;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x060070A3 RID: 28835 RVA: 0x0022EDE4 File Offset: 0x0022CFE4
-		public override string GetReport()
+		private bool MoveNext()
 		{
-			string text = this.ReportStringProcessed(this.job.def.reportString);
-			if (this.Teacher != null)
+			int num = _003C_003E1__state;
+			JobDriver_Lessontaking CS_0024_003C_003E8__locals15 = _003C_003E4__this;
+			switch (num)
 			{
-				text += " " + "ReportTakingLessonFrom".Translate(this.Teacher.Named("TEACHER"));
-				Pawn_JobTracker jobs = this.Teacher.jobs;
-				JobDriver_Lessongiving jobDriver_Lessongiving = ((jobs != null) ? jobs.curDriver : null) as JobDriver_Lessongiving;
-				if (jobDriver_Lessongiving != null && jobDriver_Lessongiving.taughtSkill != null)
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				CS_0024_003C_003E8__locals15.FailOnDespawnedNullOrForbidden(TargetIndex.A);
+				CS_0024_003C_003E8__locals15.FailOnChildLearningConditions();
+				CS_0024_003C_003E8__locals15.FailOn(delegate
 				{
-					text = text + " (" + jobDriver_Lessongiving.taughtSkill.label + ")";
-				}
+					if (CS_0024_003C_003E8__locals15.Teacher == null)
+					{
+						if (++CS_0024_003C_003E8__locals15.waitingForTeacherTicks > 5000)
+						{
+							return true;
+						}
+						return false;
+					}
+					CS_0024_003C_003E8__locals15.waitingForTeacherTicks = 0;
+					Job job = CS_0024_003C_003E8__locals15.Teacher.jobs?.curJob;
+					return (job == null || job.def != JobDefOf.Lessongiving || job.GetTarget(TargetIndex.B).Pawn != CS_0024_003C_003E8__locals15.pawn || job.GetTarget(TargetIndex.A).Thing != CS_0024_003C_003E8__locals15.Desk) ? true : false;
+				});
+				_003C_003E2__current = Toils_Goto.GotoCell(SchoolUtility.DeskSpotStudent(CS_0024_003C_003E8__locals15.Desk), PathEndMode.OnCell);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+			{
+				_003C_003E1__state = -1;
+				Toil toil = ToilMaker.MakeToil("MakeNewToils");
+				toil.tickIntervalAction = delegate(int delta)
+				{
+					CS_0024_003C_003E8__locals15.pawn.GainComfortFromCellIfPossible(delta);
+					CS_0024_003C_003E8__locals15.isReadyToLearn = true;
+					CS_0024_003C_003E8__locals15.pawn.rotationTracker.FaceTarget(CS_0024_003C_003E8__locals15.Desk);
+					LearningUtility.LearningTickCheckEnd(CS_0024_003C_003E8__locals15.pawn, delta);
+				};
+				toil.handlingFacing = true;
+				toil.defaultCompleteMode = ToilCompleteMode.Never;
+				toil.socialMode = RandomSocialMode.Off;
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 2;
+				return true;
 			}
-			return text;
+			case 2:
+				_003C_003E1__state = -1;
+				return false;
+			}
 		}
 
-		// Token: 0x060070A4 RID: 28836 RVA: 0x0022EE85 File Offset: 0x0022D085
-		public override void ExposeData()
+		bool IEnumerator.MoveNext()
 		{
-			base.ExposeData();
-			Scribe_Values.Look<bool>(ref this.isReadyToLearn, "isReadyToLearn", false, false);
-			Scribe_Values.Look<int>(ref this.waitingForTeacherTicks, "waitForTeacherTicks", 0, false);
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x04004E39 RID: 20025
-		public const int TicksWaitForTeacher = 5000;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04004E3A RID: 20026
-		public bool isReadyToLearn;
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__8 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__8(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x04004E3B RID: 20027
-		public int waitingForTeacherTicks;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	public const int TicksWaitForTeacher = 5000;
+
+	public bool isReadyToLearn;
+
+	public int waitingForTeacherTicks;
+
+	private Thing Desk => base.TargetThingA;
+
+	private Pawn Teacher => (Pawn)base.TargetThingB;
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return pawn.ReserveSittableOrSpot(SchoolUtility.DeskSpotStudent(Desk), job, errorOnFailed);
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__8))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__8(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override string GetReport()
+	{
+		string text = ReportStringProcessed(job.def.reportString);
+		if (Teacher != null)
+		{
+			text += " " + "ReportTakingLessonFrom".Translate(Teacher.Named("TEACHER"));
+			if (Teacher.jobs?.curDriver is JobDriver_Lessongiving { taughtSkill: not null } jobDriver_Lessongiving)
+			{
+				text = text + " (" + jobDriver_Lessongiving.taughtSkill.label + ")";
+			}
+		}
+		return text;
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref isReadyToLearn, "isReadyToLearn", defaultValue: false);
+		Scribe_Values.Look(ref waitingForTeacherTicks, "waitForTeacherTicks", 0);
 	}
 }

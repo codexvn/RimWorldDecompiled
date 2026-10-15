@@ -1,264 +1,273 @@
-﻿using System;
+using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
+using Brutal.Logging;
 using LudeonTK;
 using UnityEngine;
+using Waylith.UnityCompat;
 
-namespace Verse
+namespace Verse;
+
+public static class Log
 {
-	// Token: 0x0200013E RID: 318
-	public static class Log
+	public class LogLock : IDisposable
 	{
-		// Token: 0x17000176 RID: 374
-		// (get) Token: 0x060009AB RID: 2475 RVA: 0x0002DB15 File Offset: 0x0002BD15
-		public static IEnumerable<LogMessage> Messages
+		public LogLock()
 		{
-			get
-			{
-				return Log.messageQueue.Messages;
-			}
+			logDisablers = Interlocked.Increment(ref logDisablers);
 		}
 
-		// Token: 0x17000177 RID: 375
-		// (get) Token: 0x060009AC RID: 2476 RVA: 0x0002DB21 File Offset: 0x0002BD21
-		private static bool PreventLogging
+		public void Dispose()
 		{
-			get
-			{
-				return Log.reachedMaxMessagesLimit || Log.logDisablers > 0;
-			}
+			logDisablers = Interlocked.Decrement(ref logDisablers);
 		}
+	}
 
-		// Token: 0x060009AD RID: 2477 RVA: 0x0002DB34 File Offset: 0x0002BD34
-		public static Log.LogLock LockMessages()
-		{
-			return new Log.LogLock();
-		}
+	private static LogMessageQueue messageQueue;
 
-		// Token: 0x060009AE RID: 2478 RVA: 0x0002DB3C File Offset: 0x0002BD3C
-		public static void ResetMessageCount()
+	private static ConcurrentQueue<LogMessage> offThreadMessages;
+
+	private static HashSet<int> usedKeys;
+
+	public static bool openOnMessage;
+
+	private static bool currentlyLoggingError;
+
+	private static int messageCount;
+
+	private static bool reachedMaxMessagesLimit;
+
+	private static object logLock;
+
+	private static int logDisablers;
+
+	private static readonly LogCategory logCategory;
+
+	private const int StopLoggingAtMessageCount = 10000;
+
+	public static IEnumerable<LogMessage> Messages
+	{
+		get
 		{
-			object obj = Log.logLock;
-			lock (obj)
+			if (IsMainThread)
 			{
-				Log.messageCount = 0;
-				if (Log.reachedMaxMessagesLimit)
+				lock (logLock)
 				{
-					Debug.unityLogger.logEnabled = true;
-					Log.reachedMaxMessagesLimit = false;
-					Log.Message("Message logging is now once again on.");
+					DrainOffThreadMessages();
+				}
+			}
+			return messageQueue.Messages;
+		}
+	}
+
+	private static bool IsMainThread => UnityRuntime.Current?.App.MainThreadId == Environment.CurrentManagedThreadId;
+
+	private static bool PreventLogging
+	{
+		get
+		{
+			if (!reachedMaxMessagesLimit)
+			{
+				return logDisablers > 0;
+			}
+			return true;
+		}
+	}
+
+	public static LogLock LockMessages()
+	{
+		return new LogLock();
+	}
+
+	static Log()
+	{
+		messageQueue = new LogMessageQueue();
+		offThreadMessages = new ConcurrentQueue<LogMessage>();
+		usedKeys = new HashSet<int>();
+		openOnMessage = false;
+		logLock = new object();
+		logCategory = LogCategory.Make("Verse");
+		Application.logMessageReceivedThreaded += Notify_LogMessageReceived;
+	}
+
+	public static void ResetMessageCount()
+	{
+		lock (logLock)
+		{
+			messageCount = 0;
+			if (reachedMaxMessagesLimit)
+			{
+				Debug.unityLogger.logEnabled = true;
+				reachedMaxMessagesLimit = false;
+				Message("Message logging is now once again on.");
+			}
+		}
+	}
+
+	public static void Message(string text)
+	{
+		lock (logLock)
+		{
+			if (!PreventLogging)
+			{
+				logCategory.Info(text, "Message", "D:\\Workspaces\\rimworld-builds\\Assets\\Scripts\\LudeonTK\\Utility\\Log\\Log.cs", 91);
+				PostMessage();
+			}
+		}
+	}
+
+	public static void Message(object obj)
+	{
+		Message(obj.ToString());
+	}
+
+	public static void Warning(string text)
+	{
+		lock (logLock)
+		{
+			if (!PreventLogging)
+			{
+				logCategory.Warning(text, "Warning", "D:\\Workspaces\\rimworld-builds\\Assets\\Scripts\\LudeonTK\\Utility\\Log\\Log.cs", 108);
+				PostMessage();
+				if (Prefs.OpenLogOnWarnings)
+				{
+					TryOpenLogWindow();
 				}
 			}
 		}
+	}
 
-		// Token: 0x060009AF RID: 2479 RVA: 0x0002DBA0 File Offset: 0x0002BDA0
-		public static void Message(string text)
+	public static void WarningOnce(string text, int key)
+	{
+		lock (logLock)
 		{
-			object obj = Log.logLock;
-			lock (obj)
+			if (!PreventLogging && usedKeys.Add(key))
 			{
-				if (!Log.PreventLogging)
+				Warning(text);
+			}
+		}
+	}
+
+	public static void Error(string text)
+	{
+		lock (logLock)
+		{
+			if (PreventLogging)
+			{
+				return;
+			}
+			logCategory.Error(text, "Error", "D:\\Workspaces\\rimworld-builds\\Assets\\Scripts\\LudeonTK\\Utility\\Log\\Log.cs", 137);
+			if (currentlyLoggingError)
+			{
+				return;
+			}
+			currentlyLoggingError = true;
+			try
+			{
+				if (DebugSettings.pauseOnError && Current.ProgramState == ProgramState.Playing)
 				{
-					bool flag2;
-					Log.messageQueue.Enqueue(new LogMessage(LogMessageType.Message, text, StackTraceUtility.ExtractStackTrace()), out flag2);
-					if (!flag2)
-					{
-						Debug.Log(text);
-						Log.PostMessage();
-					}
+					Find.TickManager.Pause();
+				}
+				PostMessage();
+			}
+			catch (Exception ex)
+			{
+				logCategory.Error("An error occurred while logging an error: " + ex, "Error", "D:\\Workspaces\\rimworld-builds\\Assets\\Scripts\\LudeonTK\\Utility\\Log\\Log.cs", 151);
+			}
+			finally
+			{
+				currentlyLoggingError = false;
+			}
+		}
+	}
+
+	public static void ErrorOnce(string text, int key)
+	{
+		lock (logLock)
+		{
+			if (!PreventLogging && usedKeys.Add(key))
+			{
+				Error(text);
+			}
+		}
+	}
+
+	public static void Clear()
+	{
+		lock (logLock)
+		{
+			EditWindow_Log.ClearSelectedMessage();
+			messageQueue.Clear();
+			offThreadMessages.Clear();
+			ResetMessageCount();
+		}
+	}
+
+	public static void TryOpenLogWindow()
+	{
+		if (StaticConstructorOnStartupUtility.coreStaticAssetsLoaded || UnityData.IsInMainThread)
+		{
+			EditWindow_Log.TryAutoOpen();
+		}
+	}
+
+	private static void PostMessage()
+	{
+		if (openOnMessage)
+		{
+			TryOpenLogWindow();
+			EditWindow_Log.SelectLastMessage(expandDetailsPane: true);
+		}
+	}
+
+	private static void Notify_LogMessageReceived(string text, string stackTrace, LogType type)
+	{
+		lock (logLock)
+		{
+			if (!PreventLogging)
+			{
+				int num = type switch
+				{
+					LogType.Log => 0, 
+					LogType.Warning => 1, 
+					_ => 2, 
+				};
+				LogMessage logMessage = new LogMessage((LogMessageType)num, text, stackTrace);
+				if (IsMainThread)
+				{
+					DrainOffThreadMessages();
+					messageQueue.Enqueue(logMessage);
+				}
+				else
+				{
+					offThreadMessages.Enqueue(logMessage);
+				}
+				if (num == 2 && (!PlayDataLoader.Loaded || Prefs.DevMode))
+				{
+					TryOpenLogWindow();
 				}
 			}
 		}
+	}
 
-		// Token: 0x060009B0 RID: 2480 RVA: 0x0002DC0C File Offset: 0x0002BE0C
-		public static void Message(object obj)
+	private static void DrainOffThreadMessages()
+	{
+		LogMessage result;
+		while (offThreadMessages.TryDequeue(out result))
 		{
-			Log.Message(obj.ToString());
+			messageQueue.Enqueue(result);
 		}
+	}
 
-		// Token: 0x060009B1 RID: 2481 RVA: 0x0002DC1C File Offset: 0x0002BE1C
-		public static void Warning(string text)
+	public static void Notify_MessageReceivedThreadedInternal(string msg, string stackTrace, LogType type)
+	{
+		if (++messageCount == 10000)
 		{
-			object obj = Log.logLock;
-			lock (obj)
-			{
-				if (!Log.PreventLogging)
-				{
-					bool flag2;
-					Log.messageQueue.Enqueue(new LogMessage(LogMessageType.Warning, text, StackTraceUtility.ExtractStackTrace()), out flag2);
-					if (!flag2)
-					{
-						Debug.LogWarning(text);
-						Log.PostMessage();
-						if (Prefs.OpenLogOnWarnings)
-						{
-							Log.TryOpenLogWindow();
-						}
-					}
-				}
-			}
-		}
-
-		// Token: 0x060009B2 RID: 2482 RVA: 0x0002DC94 File Offset: 0x0002BE94
-		public static void WarningOnce(string text, int key)
-		{
-			object obj = Log.logLock;
-			lock (obj)
-			{
-				if (!Log.PreventLogging)
-				{
-					if (Log.usedKeys.Add(key))
-					{
-						Log.Warning(text);
-					}
-				}
-			}
-		}
-
-		// Token: 0x060009B3 RID: 2483 RVA: 0x0002DCEC File Offset: 0x0002BEEC
-		public static void Error(string text)
-		{
-			object obj = Log.logLock;
-			lock (obj)
-			{
-				if (!Log.PreventLogging)
-				{
-					if (!Log.currentlyLoggingError)
-					{
-						Log.currentlyLoggingError = true;
-						try
-						{
-							if (DebugSettings.pauseOnError && Current.ProgramState == ProgramState.Playing)
-							{
-								Find.TickManager.Pause();
-							}
-							bool flag2;
-							Log.messageQueue.Enqueue(new LogMessage(LogMessageType.Error, text, StackTraceUtility.ExtractStackTrace()), out flag2);
-							if (flag2)
-							{
-								return;
-							}
-							Log.PostMessage();
-							if (!PlayDataLoader.Loaded || Prefs.DevMode)
-							{
-								Log.TryOpenLogWindow();
-							}
-						}
-						catch (Exception ex)
-						{
-							string str = "An error occurred while logging an error: ";
-							Exception ex2 = ex;
-							Debug.LogError(str + ((ex2 != null) ? ex2.ToString() : null));
-						}
-						finally
-						{
-							Log.currentlyLoggingError = false;
-						}
-					}
-					Debug.LogError(text);
-				}
-			}
-		}
-
-		// Token: 0x060009B4 RID: 2484 RVA: 0x0002DDD4 File Offset: 0x0002BFD4
-		public static void ErrorOnce(string text, int key)
-		{
-			object obj = Log.logLock;
-			lock (obj)
-			{
-				if (!Log.PreventLogging)
-				{
-					if (Log.usedKeys.Add(key))
-					{
-						Log.Error(text);
-					}
-				}
-			}
-		}
-
-		// Token: 0x060009B5 RID: 2485 RVA: 0x0002DE2C File Offset: 0x0002C02C
-		public static void Clear()
-		{
-			object obj = Log.logLock;
-			lock (obj)
-			{
-				EditWindow_Log.ClearSelectedMessage();
-				Log.messageQueue.Clear();
-				Log.ResetMessageCount();
-			}
-		}
-
-		// Token: 0x060009B6 RID: 2486 RVA: 0x0002DE7C File Offset: 0x0002C07C
-		public static void TryOpenLogWindow()
-		{
-			if (StaticConstructorOnStartupUtility.coreStaticAssetsLoaded || UnityData.IsInMainThread)
-			{
-				EditWindow_Log.TryAutoOpen();
-			}
-		}
-
-		// Token: 0x060009B7 RID: 2487 RVA: 0x0002DE91 File Offset: 0x0002C091
-		private static void PostMessage()
-		{
-			if (Log.openOnMessage)
-			{
-				Log.TryOpenLogWindow();
-				EditWindow_Log.SelectLastMessage(true);
-			}
-		}
-
-		// Token: 0x060009B8 RID: 2488 RVA: 0x0002DEA5 File Offset: 0x0002C0A5
-		public static void Notify_MessageReceivedThreadedInternal(string msg, string stackTrace, LogType type)
-		{
-			if (++Log.messageCount == 10000)
-			{
-				Log.Warning("Reached max messages limit. Stopping logging to avoid spam.");
-				Log.reachedMaxMessagesLimit = true;
-				Debug.unityLogger.logEnabled = false;
-			}
-		}
-
-		// Token: 0x040004DD RID: 1245
-		private static LogMessageQueue messageQueue = new LogMessageQueue();
-
-		// Token: 0x040004DE RID: 1246
-		private static HashSet<int> usedKeys = new HashSet<int>();
-
-		// Token: 0x040004DF RID: 1247
-		public static bool openOnMessage = false;
-
-		// Token: 0x040004E0 RID: 1248
-		private static bool currentlyLoggingError;
-
-		// Token: 0x040004E1 RID: 1249
-		private static int messageCount;
-
-		// Token: 0x040004E2 RID: 1250
-		private static bool reachedMaxMessagesLimit;
-
-		// Token: 0x040004E3 RID: 1251
-		private static object logLock = new object();
-
-		// Token: 0x040004E4 RID: 1252
-		private static int logDisablers;
-
-		// Token: 0x040004E5 RID: 1253
-		private const int StopLoggingAtMessageCount = 10000;
-
-		// Token: 0x0200013F RID: 319
-		public class LogLock : IDisposable
-		{
-			// Token: 0x060009BA RID: 2490 RVA: 0x0002DEFC File Offset: 0x0002C0FC
-			public LogLock()
-			{
-				Log.logDisablers = Interlocked.Increment(ref Log.logDisablers);
-			}
-
-			// Token: 0x060009BB RID: 2491 RVA: 0x0002DF13 File Offset: 0x0002C113
-			public void Dispose()
-			{
-				Log.logDisablers = Interlocked.Decrement(ref Log.logDisablers);
-			}
+			Warning("Reached max messages limit. Stopping logging to avoid spam.");
+			Notify_LogMessageReceived("Reached max messages limit. Stopping logging to avoid spam.", StackTraceUtility.ExtractStackTrace(), LogType.Warning);
+			reachedMaxMessagesLimit = true;
+			Debug.unityLogger.logEnabled = false;
 		}
 	}
 }

@@ -1,51 +1,199 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompProperties_BiosculpterPod : CompProperties
 {
-	// Token: 0x02002C0D RID: 11277
-	public class CompProperties_BiosculpterPod : CompProperties
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__7 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x0600FCB9 RID: 64697 RVA: 0x004946C3 File Offset: 0x004928C3
-		public CompProperties_BiosculpterPod()
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompProperties_BiosculpterPod _003C_003E4__this;
+
+		private ThingDef parentDef;
+
+		public ThingDef _003C_003E3__parentDef;
+
+		private IEnumerator<string> _003C_003E7__wrap1;
+
+		string IEnumerator<string>.Current
 		{
-			this.compClass = typeof(CompBiosculpterPod);
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x0600FCBA RID: 64698 RVA: 0x004946DB File Offset: 0x004928DB
-		public override IEnumerable<string> ConfigErrors(ThingDef parentDef)
+		object IEnumerator.Current
 		{
-			foreach (string text in base.ConfigErrors(parentDef))
+			[DebuggerHidden]
+			get
 			{
-				yield return text;
+				return _003C_003E2__current;
 			}
-			IEnumerator<string> enumerator = null;
-			if (parentDef.tickerType != TickerType.Normal)
-			{
-				yield return base.GetType().Name + " requires parent ticker type Normal";
-			}
-			yield break;
-			yield break;
 		}
 
-		// Token: 0x0400A59E RID: 42398
-		public SoundDef enterSound;
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__7(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
 
-		// Token: 0x0400A59F RID: 42399
-		public SoundDef exitSound;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
 
-		// Token: 0x0400A5A0 RID: 42400
-		public EffecterDef operatingEffecter;
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				CompProperties_BiosculpterPod compProperties_BiosculpterPod = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((CompProperties)compProperties_BiosculpterPod).ConfigErrors(parentDef).GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0075;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0075;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_0075:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (parentDef.tickerType != TickerType.Normal)
+					{
+						_003C_003E2__current = compProperties_BiosculpterPod.GetType().Name + " requires parent ticker type Normal";
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
 
-		// Token: 0x0400A5A1 RID: 42401
-		public EffecterDef readyEffecter;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x0400A5A2 RID: 42402
-		public Color selectCycleColor;
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
 
-		// Token: 0x0400A5A3 RID: 42403
-		public float biotunedCycleSpeedFactor;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__7 _003CConfigErrors_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CConfigErrors_003Ed__ = this;
+			}
+			else
+			{
+				_003CConfigErrors_003Ed__ = new _003CConfigErrors_003Ed__7(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CConfigErrors_003Ed__.parentDef = _003C_003E3__parentDef;
+			return _003CConfigErrors_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	public SoundDef enterSound;
+
+	public SoundDef exitSound;
+
+	public EffecterDef operatingEffecter;
+
+	public EffecterDef readyEffecter;
+
+	public Color selectCycleColor;
+
+	public float biotunedCycleSpeedFactor;
+
+	public CompProperties_BiosculpterPod()
+	{
+		compClass = typeof(CompBiosculpterPod);
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__7))]
+	public override IEnumerable<string> ConfigErrors(ThingDef parentDef)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__7(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__parentDef = parentDef
+		};
 	}
 }

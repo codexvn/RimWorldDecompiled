@@ -1,308 +1,389 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld;
 using UnityEngine;
+using UnityStubs;
 
-namespace Verse
+namespace Verse;
+
+public class GraphicData
 {
-	// Token: 0x02000242 RID: 578
-	public class GraphicData
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__47 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x17000267 RID: 615
-		// (get) Token: 0x06000ED4 RID: 3796 RVA: 0x00045763 File Offset: 0x00043963
-		public bool Linked
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public GraphicData _003C_003E4__this;
+
+		private ThingDef thingDef;
+
+		public ThingDef _003C_003E3__thingDef;
+
+		string IEnumerator<string>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.linkType > LinkDrawerType.None;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17000268 RID: 616
-		// (get) Token: 0x06000ED5 RID: 3797 RVA: 0x0004576E File Offset: 0x0004396E
-		public Graphic Graphic
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.cachedGraphic == null)
-				{
-					this.Init();
-				}
-				return this.cachedGraphic;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06000ED6 RID: 3798 RVA: 0x00045784 File Offset: 0x00043984
-		public void ExplicitlyInitCachedGraphic()
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__47(int _003C_003E1__state)
 		{
-			this.cachedGraphic = this.Graphic;
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x06000ED7 RID: 3799 RVA: 0x00045794 File Offset: 0x00043994
-		public void CopyFrom(GraphicData other)
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			this.texPath = other.texPath;
-			this.maskPath = other.maskPath;
-			this.graphicClass = other.graphicClass;
-			this.shaderType = other.shaderType;
-			this.color = other.color;
-			this.colorTwo = other.colorTwo;
-			this.drawSize = other.drawSize;
-			this.drawOffset = other.drawOffset;
-			this.drawOffsetNorth = other.drawOffsetNorth;
-			this.drawOffsetEast = other.drawOffsetEast;
-			this.drawOffsetSouth = other.drawOffsetSouth;
-			this.drawOffsetWest = other.drawOffsetWest;
-			this.attachments = other.attachments;
-			this.onGroundRandomRotateAngle = other.onGroundRandomRotateAngle;
-			this.drawRotated = other.drawRotated;
-			this.allowFlip = other.allowFlip;
-			this.flipExtraRotation = other.flipExtraRotation;
-			this.shadowData = other.shadowData;
-			this.damageData = other.damageData;
-			this.linkType = other.linkType;
-			this.linkFlags = other.linkFlags;
-			this.asymmetricLink = other.asymmetricLink;
-			this.allowAtlasing = other.allowAtlasing;
-			this.renderInstanced = other.renderInstanced;
-			this.renderQueue = other.renderQueue;
-			this.ignoreThingDrawColor = other.ignoreThingDrawColor;
-			this.maxSnS = other.maxSnS;
-			this.offsetSnS = other.offsetSnS;
-			this.cachedGraphic = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x06000ED8 RID: 3800 RVA: 0x000458F8 File Offset: 0x00043AF8
-		private void Init()
+		private bool MoveNext()
 		{
-			if (this.graphicClass == null)
+			int num = _003C_003E1__state;
+			GraphicData graphicData = _003C_003E4__this;
+			switch (num)
 			{
-				this.cachedGraphic = null;
-				return;
-			}
-			ShaderTypeDef cutout = this.shaderType;
-			if (cutout == null)
-			{
-				cutout = ShaderTypeDefOf.Cutout;
-			}
-			Shader shader = cutout.Shader;
-			this.cachedGraphic = GraphicDatabase.Get(this.graphicClass, this.texPath, shader, this.drawSize, this.color, this.colorTwo, this, this.shaderParameters, this.maskPath);
-			if (this.onGroundRandomRotateAngle > 0.01f)
-			{
-				this.cachedGraphic = new Graphic_RandomRotated(this.cachedGraphic, this.onGroundRandomRotateAngle);
-			}
-			if (this.Linked)
-			{
-				this.cachedGraphic = GraphicUtility.WrapLinked(this.cachedGraphic, this.linkType);
-			}
-		}
-
-		// Token: 0x06000ED9 RID: 3801 RVA: 0x000459AC File Offset: 0x00043BAC
-		public void ResolveReferencesSpecial()
-		{
-			if (this.damageData != null)
-			{
-				this.damageData.ResolveReferencesSpecial();
-			}
-		}
-
-		// Token: 0x06000EDA RID: 3802 RVA: 0x000459C4 File Offset: 0x00043BC4
-		public Vector3 DrawOffsetForRot(Rot4 rot)
-		{
-			switch (rot.AsInt)
-			{
-			case 0:
-			{
-				Vector3? vector = this.drawOffsetNorth;
-				if (vector == null)
-				{
-					return this.drawOffset;
-				}
-				return vector.GetValueOrDefault();
-			}
-			case 1:
-			{
-				Vector3? vector = this.drawOffsetEast;
-				if (vector == null)
-				{
-					return this.drawOffset;
-				}
-				return vector.GetValueOrDefault();
-			}
-			case 2:
-			{
-				Vector3? vector = this.drawOffsetSouth;
-				if (vector == null)
-				{
-					return this.drawOffset;
-				}
-				return vector.GetValueOrDefault();
-			}
-			case 3:
-			{
-				Vector3? vector = this.drawOffsetWest;
-				if (vector == null)
-				{
-					return this.drawOffset;
-				}
-				return vector.GetValueOrDefault();
-			}
 			default:
-				return this.drawOffset;
-			}
-		}
-
-		// Token: 0x06000EDB RID: 3803 RVA: 0x00045A74 File Offset: 0x00043C74
-		public Graphic GraphicColoredFor(Thing t)
-		{
-			if (this.ignoreThingDrawColor || (t.DrawColor.IndistinguishableFrom(this.Graphic.Color) && t.DrawColorTwo.IndistinguishableFrom(this.Graphic.ColorTwo)))
-			{
-				return this.Graphic;
-			}
-			return this.Graphic.GetColoredVersion(this.Graphic.Shader, t.DrawColor, t.DrawColorTwo);
-		}
-
-		// Token: 0x06000EDC RID: 3804 RVA: 0x00045AE2 File Offset: 0x00043CE2
-		internal IEnumerable<string> ConfigErrors(ThingDef thingDef)
-		{
-			if (this.graphicClass == null)
-			{
-				yield return "graphicClass is null";
-			}
-			if (this.texPath.NullOrEmpty())
-			{
-				yield return "texPath is null or empty";
-			}
-			if (thingDef != null)
-			{
-				if (thingDef.drawerType == DrawerType.RealtimeOnly && this.Linked)
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (graphicData.graphicClass == null)
 				{
-					yield return "does not add to map mesh but has a link drawer. Link drawers can only work on the map mesh.";
+					_003C_003E2__current = "graphicClass is null";
+					_003C_003E1__state = 1;
+					return true;
 				}
-				if (!thingDef.rotatable && (this.drawOffsetNorth != null || this.drawOffsetEast != null || this.drawOffsetSouth != null || this.drawOffsetWest != null))
+				goto IL_0062;
+			case 1:
+				_003C_003E1__state = -1;
+				goto IL_0062;
+			case 2:
+				_003C_003E1__state = -1;
+				goto IL_008a;
+			case 3:
+				_003C_003E1__state = -1;
+				goto IL_00c6;
+			case 4:
+				_003C_003E1__state = -1;
+				goto IL_0122;
+			case 5:
+				_003C_003E1__state = -1;
+				goto IL_0192;
+			case 6:
 				{
-					yield return "not rotatable but has rotational draw offset(s).";
+					_003C_003E1__state = -1;
+					break;
 				}
+				IL_0062:
+				if (graphicData.texPath.NullOrEmpty())
+				{
+					_003C_003E2__current = "texPath is null or empty";
+					_003C_003E1__state = 2;
+					return true;
+				}
+				goto IL_008a;
+				IL_00c6:
+				if (!thingDef.rotatable && (graphicData.drawOffsetNorth.HasValue || graphicData.drawOffsetEast.HasValue || graphicData.drawOffsetSouth.HasValue || graphicData.drawOffsetWest.HasValue))
+				{
+					_003C_003E2__current = "not rotatable but has rotational draw offset(s).";
+					_003C_003E1__state = 4;
+					return true;
+				}
+				goto IL_0122;
+				IL_008a:
+				if (thingDef != null)
+				{
+					if (thingDef.drawerType == DrawerType.RealtimeOnly && graphicData.Linked)
+					{
+						_003C_003E2__current = "does not add to map mesh but has a link drawer. Link drawers can only work on the map mesh.";
+						_003C_003E1__state = 3;
+						return true;
+					}
+					goto IL_00c6;
+				}
+				goto IL_0122;
+				IL_0192:
+				if (graphicData.linkType == LinkDrawerType.Asymmetric != (graphicData.asymmetricLink != null))
+				{
+					_003C_003E2__current = "linkType=Asymmetric requires <asymmetricLink> and vice versa";
+					_003C_003E1__state = 6;
+					return true;
+				}
+				break;
+				IL_0122:
+				if ((graphicData.shaderType == ShaderTypeDefOf.Cutout || graphicData.shaderType == ShaderTypeDefOf.CutoutComplex) && thingDef.mote != null && (thingDef.mote.fadeInTime > 0f || thingDef.mote.fadeOutTime > 0f))
+				{
+					_003C_003E2__current = "mote fades but uses cutout shader type. It will abruptly disappear when opacity falls under the cutout threshold.";
+					_003C_003E1__state = 5;
+					return true;
+				}
+				goto IL_0192;
 			}
-			if ((this.shaderType == ShaderTypeDefOf.Cutout || this.shaderType == ShaderTypeDefOf.CutoutComplex) && thingDef.mote != null && (thingDef.mote.fadeInTime > 0f || thingDef.mote.fadeOutTime > 0f))
-			{
-				yield return "mote fades but uses cutout shader type. It will abruptly disappear when opacity falls under the cutout threshold.";
-			}
-			if (this.linkType == LinkDrawerType.Asymmetric != (this.asymmetricLink != null))
-			{
-				yield return "linkType=Asymmetric requires <asymmetricLink> and vice versa";
-			}
-			yield break;
+			return false;
 		}
 
-		// Token: 0x040009DD RID: 2525
-		[NoTranslate]
-		public string name;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x040009DE RID: 2526
-		[NoTranslate]
-		public string texPath;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x040009DF RID: 2527
-		[NoTranslate]
-		public string maskPath;
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__47 _003CConfigErrors_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CConfigErrors_003Ed__ = this;
+			}
+			else
+			{
+				_003CConfigErrors_003Ed__ = new _003CConfigErrors_003Ed__47(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CConfigErrors_003Ed__.thingDef = _003C_003E3__thingDef;
+			return _003CConfigErrors_003Ed__;
+		}
 
-		// Token: 0x040009E0 RID: 2528
-		public Type graphicClass;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x040009E1 RID: 2529
-		public ShaderTypeDef shaderType;
+	[NoTranslate]
+	public string name;
 
-		// Token: 0x040009E2 RID: 2530
-		public List<ShaderParameter> shaderParameters;
+	[NoTranslate]
+	public string texPath;
 
-		// Token: 0x040009E3 RID: 2531
-		public Color color = Color.white;
+	[NoTranslate]
+	public string maskPath;
 
-		// Token: 0x040009E4 RID: 2532
-		public Color colorTwo = Color.white;
+	public Type graphicClass;
 
-		// Token: 0x040009E5 RID: 2533
-		public Vector2 drawSize = Vector2.one;
+	public ShaderTypeDef shaderType;
 
-		// Token: 0x040009E6 RID: 2534
-		public Vector3 drawOffset = Vector3.zero;
+	public List<ShaderParameter> shaderParameters;
 
-		// Token: 0x040009E7 RID: 2535
-		public Vector3? drawOffsetNorth;
+	public bool textureRepeats;
 
-		// Token: 0x040009E8 RID: 2536
-		public Vector3? drawOffsetEast;
+	public bool borderMipMaps;
 
-		// Token: 0x040009E9 RID: 2537
-		public Vector3? drawOffsetSouth;
+	public Color color = Color.white;
 
-		// Token: 0x040009EA RID: 2538
-		public Vector3? drawOffsetWest;
+	public Color colorTwo = Color.white;
 
-		// Token: 0x040009EB RID: 2539
-		public float onGroundRandomRotateAngle;
+	public Vector2 drawSize = Vector2.one;
 
-		// Token: 0x040009EC RID: 2540
-		public bool drawRotated = true;
+	public Vector3 drawOffset = Vector3.zero;
 
-		// Token: 0x040009ED RID: 2541
-		public bool allowFlip = true;
+	public Vector3? drawOffsetNorth;
 
-		// Token: 0x040009EE RID: 2542
-		public float flipExtraRotation;
+	public Vector3? drawOffsetEast;
 
-		// Token: 0x040009EF RID: 2543
-		public bool renderInstanced;
+	public Vector3? drawOffsetSouth;
 
-		// Token: 0x040009F0 RID: 2544
-		public bool allowAtlasing = true;
+	public Vector3? drawOffsetWest;
 
-		// Token: 0x040009F1 RID: 2545
-		public int renderQueue;
+	public float onGroundRandomRotateAngle;
 
-		// Token: 0x040009F2 RID: 2546
-		public float overlayOpacity;
+	public bool drawRotated = true;
 
-		// Token: 0x040009F3 RID: 2547
-		public List<GraphicData> attachments;
+	public bool allowFlip = true;
 
-		// Token: 0x040009F4 RID: 2548
-		public List<AttachPoint> attachPoints;
+	public float flipExtraRotation;
 
-		// Token: 0x040009F5 RID: 2549
-		public bool addTopAltitudeBias;
+	public bool renderInstanced;
 
-		// Token: 0x040009F6 RID: 2550
-		public bool ignoreThingDrawColor;
+	public bool allowAtlasing = true;
 
-		// Token: 0x040009F7 RID: 2551
-		public Vector2 maxSnS;
+	public int renderQueue;
 
-		// Token: 0x040009F8 RID: 2552
-		public Vector2 offsetSnS;
+	public float overlayOpacity;
 
-		// Token: 0x040009F9 RID: 2553
-		public ShadowData shadowData;
+	public List<GraphicData> attachments;
 
-		// Token: 0x040009FA RID: 2554
-		public DamageGraphicData damageData;
+	public List<AttachPoint> attachPoints;
 
-		// Token: 0x040009FB RID: 2555
-		public LinkDrawerType linkType;
+	public bool addTopAltitudeBias;
 
-		// Token: 0x040009FC RID: 2556
-		public LinkFlags linkFlags;
+	public bool ignoreThingDrawColor;
 
-		// Token: 0x040009FD RID: 2557
-		public AsymmetricLinkData asymmetricLink;
+	public Vector2 maxSnS;
 
-		// Token: 0x040009FE RID: 2558
-		[NoTranslate]
-		public string cornerOverlayPath;
+	public Vector2 offsetSnS;
 
-		// Token: 0x040009FF RID: 2559
-		[Unsaved(false)]
-		private Graphic cachedGraphic;
+	public ShadowData shadowData;
+
+	public DamageGraphicData damageData;
+
+	public LinkDrawerType linkType;
+
+	public LinkFlags linkFlags;
+
+	public AsymmetricLinkData asymmetricLink;
+
+	[NoTranslate]
+	public string cornerOverlayPath;
+
+	[Unsaved(false)]
+	private Graphic cachedGraphic;
+
+	public bool Linked => linkType != LinkDrawerType.None;
+
+	public Graphic Graphic
+	{
+		get
+		{
+			if (cachedGraphic == null)
+			{
+				Init();
+			}
+			return cachedGraphic;
+		}
+	}
+
+	public void ExplicitlyInitCachedGraphic()
+	{
+		cachedGraphic = Graphic;
+	}
+
+	public void CopyFrom(GraphicData other)
+	{
+		texPath = other.texPath;
+		maskPath = other.maskPath;
+		graphicClass = other.graphicClass;
+		shaderType = other.shaderType;
+		textureRepeats = other.textureRepeats;
+		borderMipMaps = other.borderMipMaps;
+		color = other.color;
+		colorTwo = other.colorTwo;
+		drawSize = other.drawSize;
+		drawOffset = other.drawOffset;
+		drawOffsetNorth = other.drawOffsetNorth;
+		drawOffsetEast = other.drawOffsetEast;
+		drawOffsetSouth = other.drawOffsetSouth;
+		drawOffsetWest = other.drawOffsetWest;
+		attachments = other.attachments;
+		onGroundRandomRotateAngle = other.onGroundRandomRotateAngle;
+		drawRotated = other.drawRotated;
+		allowFlip = other.allowFlip;
+		flipExtraRotation = other.flipExtraRotation;
+		shadowData = other.shadowData;
+		damageData = other.damageData;
+		linkType = other.linkType;
+		linkFlags = other.linkFlags;
+		asymmetricLink = other.asymmetricLink;
+		allowAtlasing = other.allowAtlasing;
+		renderInstanced = other.renderInstanced;
+		renderQueue = other.renderQueue;
+		ignoreThingDrawColor = other.ignoreThingDrawColor;
+		maxSnS = other.maxSnS;
+		offsetSnS = other.offsetSnS;
+		cornerOverlayPath = other.cornerOverlayPath;
+		cachedGraphic = null;
+	}
+
+	private void Init()
+	{
+		if (graphicClass == null)
+		{
+			cachedGraphic = null;
+			return;
+		}
+		ShaderTypeDef cutout = shaderType;
+		if (cutout == null)
+		{
+			cutout = ShaderTypeDefOf.Cutout;
+		}
+		Shader shader = cutout.Shader;
+		if (borderMipMaps)
+		{
+			ImportDefaults.BorderMipMaps(texPath);
+		}
+		cachedGraphic = GraphicDatabase.Get(graphicClass, texPath, shader, drawSize, color, colorTwo, this, shaderParameters, maskPath);
+		if (textureRepeats && cachedGraphic.MatSingle?.mainTexture != null)
+		{
+			cachedGraphic.MatSingle.mainTexture.wrapMode = TextureWrapMode.Repeat;
+		}
+		if (onGroundRandomRotateAngle > 0.01f)
+		{
+			cachedGraphic = new Graphic_RandomRotated(cachedGraphic, onGroundRandomRotateAngle);
+		}
+		if (Linked)
+		{
+			cachedGraphic = GraphicUtility.WrapLinked(cachedGraphic, linkType);
+		}
+	}
+
+	public void ResolveReferencesSpecial()
+	{
+		if (damageData != null)
+		{
+			damageData.ResolveReferencesSpecial();
+		}
+	}
+
+	public Vector3 DrawOffsetForRot(Rot4 rot)
+	{
+		return rot.AsInt switch
+		{
+			0 => drawOffsetNorth ?? drawOffset, 
+			1 => drawOffsetEast ?? drawOffset, 
+			2 => drawOffsetSouth ?? drawOffset, 
+			3 => drawOffsetWest ?? drawOffset, 
+			_ => drawOffset, 
+		};
+	}
+
+	public Graphic GraphicColoredFor(Thing t)
+	{
+		if (ignoreThingDrawColor || (t.DrawColor.IndistinguishableFrom(Graphic.Color) && t.DrawColorTwo.IndistinguishableFrom(Graphic.ColorTwo)))
+		{
+			return Graphic;
+		}
+		return Graphic.GetColoredVersion(Graphic.Shader, t.DrawColor, t.DrawColorTwo);
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__47))]
+	internal IEnumerable<string> ConfigErrors(ThingDef thingDef)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__47(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__thingDef = thingDef
+		};
 	}
 }

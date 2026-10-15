@@ -1,177 +1,410 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_BottleFeedBaby : JobDriver_FeedBaby
 {
-	// Token: 0x0200114C RID: 4428
-	public class JobDriver_BottleFeedBaby : JobDriver_FeedBaby
+	[CompilerGenerated]
+	private sealed class _003CFeedBaby_003Ed__14 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x170010AC RID: 4268
-		// (get) Token: 0x06006C3A RID: 27706 RVA: 0x001D95FF File Offset: 0x001D77FF
-		protected Thing BabyFood
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_BottleFeedBaby _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return base.TargetThingB;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170010AD RID: 4269
-		// (get) Token: 0x06006C3B RID: 27707 RVA: 0x00220897 File Offset: 0x0021EA97
-		protected LocalTargetInfo BabyFoodTarget
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return base.TargetB;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170010AE RID: 4270
-		// (get) Token: 0x06006C3C RID: 27708 RVA: 0x0022089F File Offset: 0x0021EA9F
-		// (set) Token: 0x06006C3D RID: 27709 RVA: 0x002208A7 File Offset: 0x0021EAA7
-		protected override Toil FeedingToil { get; set; }
-
-		// Token: 0x06006C3E RID: 27710 RVA: 0x002208B0 File Offset: 0x0021EAB0
-		protected override IEnumerable<Toil> MakeNewToils()
+		[DebuggerHidden]
+		public _003CFeedBaby_003Ed__14(int _003C_003E1__state)
 		{
-			base.AddFailCondition(() => !this.pawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation));
-			Toil failIfNoBabyFoodInInventory = this.FailIfNoBabyFoodInInventory();
-			yield return Toils_Jump.JumpIf(failIfNoBabyFoodInInventory, () => !this.BabyFoodTarget.IsValid || this.pawn.inventory.Contains(this.BabyFood));
-			yield return Toils_Ingest.ReserveFoodFromStackForIngesting(TargetIndex.B, base.Baby).FailOnDestroyedNullOrForbidden(TargetIndex.B);
-			yield return Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.ClosestTouch, false).FailOnDestroyedNullOrForbidden(TargetIndex.B);
-			yield return Toils_Haul.TakeToInventory(TargetIndex.B, delegate(Thing babyFood)
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_BottleFeedBaby jobDriver_BottleFeedBaby = _003C_003E4__this;
+			switch (num)
 			{
-				int b = FoodUtility.WillIngestStackCountOf(base.Baby, babyFood.def, FoodUtility.NutritionForEater(base.Baby, babyFood));
-				return Mathf.Min(babyFood.stackCount, b);
-			}).FailOnDestroyedNullOrForbidden(TargetIndex.B);
-			yield return failIfNoBabyFoodInInventory;
-			foreach (Toil toil in base.MakeNewToils())
-			{
-				yield return toil;
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = jobDriver_BottleFeedBaby.FeedBabyFoodFromInventory();
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				return false;
 			}
-			IEnumerator<Toil> enumerator = null;
-			yield break;
-			yield break;
 		}
 
-		// Token: 0x06006C3F RID: 27711 RVA: 0x002208C0 File Offset: 0x0021EAC0
-		private Toil FailIfNoBabyFoodInInventory()
+		bool IEnumerator.MoveNext()
 		{
-			Toil toil = ToilMaker.MakeToil("FailIfNoBabyFoodInInventory");
-			toil.FailOn(() => FoodUtility.BestFoodInInventory(this.pawn, base.Baby, FoodPreferability.NeverForNutrition, FoodPreferability.MealLavish, 0f, false, false) == null);
-			return toil;
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x06006C40 RID: 27712 RVA: 0x002208DF File Offset: 0x0021EADF
-		protected override IEnumerable<Toil> FeedBaby()
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			yield return this.FeedBabyFoodFromInventory();
-			yield break;
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x06006C41 RID: 27713 RVA: 0x002208F0 File Offset: 0x0021EAF0
-		private Toil FeedBabyFoodFromInventory()
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
 		{
-			this.FeedingToil = ToilMaker.MakeToil("FeedBabyFoodFromInventory");
-			this.FeedingToil.initAction = delegate()
+			_003CFeedBaby_003Ed__14 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				this.initialNutritionNeeded = base.Baby.needs.food.NutritionWanted;
-				this.initialFoodPercentage = base.Baby.needs.food.CurLevelPercentage;
-				base.Baby.jobs.StartJob(ChildcareUtility.MakeBabySuckleJob(this.pawn), JobCondition.InterruptForced, null, false, true, null, null, false, false, null, false, true, false);
-			};
-			this.FeedingToil.tickIntervalAction = delegate(int delta)
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
 			{
-				float num = base.Baby.needs.food.MaxLevel / 5000f;
-				float num2 = Mathf.Min(base.Baby.needs.food.NutritionWanted, num * (float)delta);
-				this.bottleNutrition += num2;
-				this.totalBottleNutrition += num2;
-				this.pawn.GainComfortFromCellIfPossible(delta, false);
-				Pawn_IdeoTracker ideo = base.Baby.ideo;
-				if (ideo != null)
+				result = new _003CFeedBaby_003Ed__14(0)
 				{
-					ideo.IncreaseIdeoExposureIfBabyTick(this.pawn.Ideo, 1);
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__12 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_BottleFeedBaby _003C_003E4__this;
+
+		private Toil _003CfailIfNoBabyFoodInInventory_003E5__2;
+
+		private IEnumerator<Toil> _003C_003E7__wrap2;
+
+		Toil IEnumerator<Toil>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__12(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 6)
+			{
+				try
+				{
 				}
-				if (!this.pawn.Downed && this.pawn.Rotation == Rot4.North)
+				finally
 				{
-					this.pawn.Rotation = Rot4.East;
+					_003C_003Em__Finally1();
 				}
-				for (;;)
+			}
+			_003CfailIfNoBabyFoodInInventory_003E5__2 = null;
+			_003C_003E7__wrap2 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				JobDriver_BottleFeedBaby CS_0024_003C_003E8__locals10 = _003C_003E4__this;
+				switch (num)
 				{
-					Thing thing = FoodUtility.BestFoodInInventory(this.pawn, base.Baby, FoodPreferability.NeverForNutrition, FoodPreferability.MealLavish, 0f, false, false);
-					if (thing == null)
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					CS_0024_003C_003E8__locals10.AddFailCondition(() => !CS_0024_003C_003E8__locals10.pawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation));
+					_003CfailIfNoBabyFoodInInventory_003E5__2 = CS_0024_003C_003E8__locals10.FailIfNoBabyFoodInInventory();
+					_003C_003E2__current = Toils_Jump.JumpIf(_003CfailIfNoBabyFoodInInventory_003E5__2, () => !CS_0024_003C_003E8__locals10.BabyFoodTarget.IsValid || CS_0024_003C_003E8__locals10.pawn.inventory.Contains(CS_0024_003C_003E8__locals10.BabyFood));
+					_003C_003E1__state = 1;
+					return true;
+				case 1:
+					_003C_003E1__state = -1;
+					_003C_003E2__current = Toils_Ingest.ReserveFoodFromStackForIngesting(TargetIndex.B, CS_0024_003C_003E8__locals10.Baby).FailOnDestroyedNullOrForbidden(TargetIndex.B);
+					_003C_003E1__state = 2;
+					return true;
+				case 2:
+					_003C_003E1__state = -1;
+					_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.ClosestTouch).FailOnDestroyedNullOrForbidden(TargetIndex.B);
+					_003C_003E1__state = 3;
+					return true;
+				case 3:
+					_003C_003E1__state = -1;
+					_003C_003E2__current = Toils_Haul.TakeToInventory(TargetIndex.B, delegate(Thing babyFood)
+					{
+						int b = FoodUtility.WillIngestStackCountOf(CS_0024_003C_003E8__locals10.Baby, babyFood.def, FoodUtility.NutritionForEater(CS_0024_003C_003E8__locals10.Baby, babyFood));
+						return Mathf.Min(babyFood.stackCount, b);
+					}).FailOnDestroyedNullOrForbidden(TargetIndex.B);
+					_003C_003E1__state = 4;
+					return true;
+				case 4:
+					_003C_003E1__state = -1;
+					_003C_003E2__current = _003CfailIfNoBabyFoodInInventory_003E5__2;
+					_003C_003E1__state = 5;
+					return true;
+				case 5:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap2 = ((JobDriver_FeedBaby)CS_0024_003C_003E8__locals10).MakeNewToils().GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 6:
+					_003C_003E1__state = -3;
+					break;
+				}
+				if (_003C_003E7__wrap2.MoveNext())
+				{
+					Toil current = _003C_003E7__wrap2.Current;
+					_003C_003E2__current = current;
+					_003C_003E1__state = 6;
+					return true;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap2 = null;
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap2 != null)
+			{
+				_003C_003E7__wrap2.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__12 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__12(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	protected const TargetIndex BabyFoodInd = TargetIndex.B;
+
+	private float bottleNutrition;
+
+	private float totalBottleNutrition;
+
+	private float initialNutritionNeeded;
+
+	protected Thing BabyFood => base.TargetThingB;
+
+	protected LocalTargetInfo BabyFoodTarget => base.TargetB;
+
+	protected override Toil FeedingToil { get; set; }
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__12))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__12(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	private Toil FailIfNoBabyFoodInInventory()
+	{
+		Toil toil = ToilMaker.MakeToil("FailIfNoBabyFoodInInventory");
+		toil.FailOn(() => FoodUtility.BestFoodInInventory(pawn, base.Baby) == null);
+		return toil;
+	}
+
+	[IteratorStateMachine(typeof(_003CFeedBaby_003Ed__14))]
+	protected override IEnumerable<Toil> FeedBaby()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CFeedBaby_003Ed__14(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	private Toil FeedBabyFoodFromInventory()
+	{
+		FeedingToil = ToilMaker.MakeToil("FeedBabyFoodFromInventory");
+		FeedingToil.initAction = delegate
+		{
+			initialNutritionNeeded = base.Baby.needs.food.NutritionWanted;
+			initialFoodPercentage = base.Baby.needs.food.CurLevelPercentage;
+			base.Baby.jobs.StartJob(ChildcareUtility.MakeBabySuckleJob(pawn), JobCondition.InterruptForced, null, resumeCurJobAfterwards: false, cancelBusyStances: true, null, null, fromQueue: false, canReturnCurJobToPool: false, null);
+		};
+		FeedingToil.tickIntervalAction = delegate(int delta)
+		{
+			float num = base.Baby.needs.food.MaxLevel / 5000f;
+			float num2 = Mathf.Min(base.Baby.needs.food.NutritionWanted, num * (float)delta);
+			bottleNutrition += num2;
+			totalBottleNutrition += num2;
+			pawn.GainComfortFromCellIfPossible(delta);
+			base.Baby.ideo?.IncreaseIdeoExposureIfBabyTick(pawn.Ideo);
+			if (!pawn.Downed && pawn.Rotation == Rot4.North)
+			{
+				pawn.Rotation = Rot4.East;
+			}
+			while (true)
+			{
+				Thing thing = FoodUtility.BestFoodInInventory(pawn, base.Baby);
+				if (thing == null)
+				{
+					ReadyForNextToil();
+					break;
+				}
+				if (bottleNutrition >= base.Baby.needs.food.NutritionWanted)
+				{
+					float num3 = thing.Ingested(base.Baby, bottleNutrition);
+					base.Baby.records.AddTo(RecordDefOf.NutritionEaten, num3);
+					bottleNutrition -= num3;
+					base.Baby.needs.food.CurLevel = Mathf.Clamp(base.Baby.needs.food.CurLevel + num3, 0f, base.Baby.needs.food.MaxLevel);
+					if (base.Baby.needs.food.CurLevel >= base.Baby.needs.food.MaxLevel)
+					{
+						ReadyForNextToil();
+						break;
+					}
+				}
+				else
+				{
+					float num4 = FoodUtility.NutritionForEater(base.Baby, thing);
+					if (!(bottleNutrition >= num4))
 					{
 						break;
 					}
-					if (this.bottleNutrition >= base.Baby.needs.food.NutritionWanted)
-					{
-						float num3 = thing.Ingested(base.Baby, this.bottleNutrition);
-						base.Baby.records.AddTo(RecordDefOf.NutritionEaten, num3);
-						this.bottleNutrition -= num3;
-						base.Baby.needs.food.CurLevel = Mathf.Clamp(base.Baby.needs.food.CurLevel + num3, 0f, base.Baby.needs.food.MaxLevel);
-						if (base.Baby.needs.food.CurLevel >= base.Baby.needs.food.MaxLevel)
-						{
-							goto Block_6;
-						}
-					}
-					else
-					{
-						float num4 = FoodUtility.NutritionForEater(base.Baby, thing);
-						if (this.bottleNutrition < num4)
-						{
-							return;
-						}
-						float num5 = thing.Ingested(base.Baby, num4);
-						base.Baby.records.AddTo(RecordDefOf.NutritionEaten, num5);
-						this.bottleNutrition -= num5;
-						base.Baby.needs.food.CurLevel = Mathf.Clamp(base.Baby.needs.food.CurLevel + num5, 0f, base.Baby.needs.food.MaxLevel);
-					}
+					float num5 = thing.Ingested(base.Baby, num4);
+					base.Baby.records.AddTo(RecordDefOf.NutritionEaten, num5);
+					bottleNutrition -= num5;
+					base.Baby.needs.food.CurLevel = Mathf.Clamp(base.Baby.needs.food.CurLevel + num5, 0f, base.Baby.needs.food.MaxLevel);
 				}
-				base.ReadyForNextToil();
-				return;
-				Block_6:
-				base.ReadyForNextToil();
-			};
-			this.FeedingToil.AddFinishAction(delegate
-			{
-				if (base.Baby.needs != null && base.Baby.needs.food.CurLevelPercentage - this.initialFoodPercentage > 0.6f)
-				{
-					base.Baby.needs.mood.thoughts.memories.TryGainMemory(ThoughtDefOf.FedMe, this.pawn, null);
-					this.pawn.needs.mood.thoughts.memories.TryGainMemory(ThoughtDefOf.FedBaby, base.Baby, null);
-				}
-				if (base.Baby.CurJobDef == JobDefOf.BabySuckle)
-				{
-					base.Baby.jobs.EndCurrentJob(JobCondition.Succeeded, true, true);
-				}
-			});
-			this.FeedingToil.handlingFacing = true;
-			this.FeedingToil.WithProgressBar(TargetIndex.A, () => this.totalBottleNutrition / this.initialNutritionNeeded, false, -0.5f, false);
-			this.FeedingToil.defaultCompleteMode = ToilCompleteMode.Never;
-			this.FeedingToil.WithEffect(EffecterDefOf.Breastfeeding, TargetIndex.A, null);
-			return this.FeedingToil;
-		}
-
-		// Token: 0x06006C42 RID: 27714 RVA: 0x002209AC File Offset: 0x0021EBAC
-		public override void ExposeData()
+			}
+		};
+		FeedingToil.AddFinishAction(delegate
 		{
-			base.ExposeData();
-			Scribe_Values.Look<float>(ref this.bottleNutrition, "bottleNutrition", 0f, false);
-			Scribe_Values.Look<float>(ref this.totalBottleNutrition, "totalBottleNutrition", 0f, false);
-			Scribe_Values.Look<float>(ref this.initialNutritionNeeded, "initialNutritionNeeded", 0f, false);
-		}
+			if (base.Baby.needs != null && base.Baby.needs.food.CurLevelPercentage - initialFoodPercentage > 0.6f)
+			{
+				base.Baby.needs.mood.thoughts.memories.TryGainMemory(ThoughtDefOf.FedMe, pawn);
+				pawn.needs.mood.thoughts.memories.TryGainMemory(ThoughtDefOf.FedBaby, base.Baby);
+			}
+			if (base.Baby.CurJobDef == JobDefOf.BabySuckle)
+			{
+				base.Baby.jobs.EndCurrentJob(JobCondition.Succeeded);
+			}
+		});
+		FeedingToil.handlingFacing = true;
+		FeedingToil.WithProgressBar(TargetIndex.A, () => totalBottleNutrition / initialNutritionNeeded);
+		FeedingToil.defaultCompleteMode = ToilCompleteMode.Never;
+		FeedingToil.WithEffect(EffecterDefOf.Breastfeeding, TargetIndex.A, null);
+		return FeedingToil;
+	}
 
-		// Token: 0x04004C1E RID: 19486
-		protected const TargetIndex BabyFoodInd = TargetIndex.B;
-
-		// Token: 0x04004C20 RID: 19488
-		private float bottleNutrition;
-
-		// Token: 0x04004C21 RID: 19489
-		private float totalBottleNutrition;
-
-		// Token: 0x04004C22 RID: 19490
-		private float initialNutritionNeeded;
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref bottleNutrition, "bottleNutrition", 0f);
+		Scribe_Values.Look(ref totalBottleNutrition, "totalBottleNutrition", 0f);
+		Scribe_Values.Look(ref initialNutritionNeeded, "initialNutritionNeeded", 0f);
 	}
 }

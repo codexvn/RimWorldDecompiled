@@ -1,104 +1,200 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_EnterPortal : JobDriver
 {
-	// Token: 0x02001265 RID: 4709
-	public class JobDriver_EnterPortal : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__5 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x170011F5 RID: 4597
-		// (get) Token: 0x0600732C RID: 29484 RVA: 0x00236DCF File Offset: 0x00234FCF
-		public MapPortal MapPortal
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_EnterPortal _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return base.TargetThingA as MapPortal;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600732D RID: 29485 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		object IEnumerator.Current
 		{
-			return true;
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x0600732E RID: 29486 RVA: 0x00236DDC File Offset: 0x00234FDC
-		protected override IEnumerable<Toil> MakeNewToils()
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__5(int _003C_003E1__state)
 		{
-			this.FailOnDespawnedOrNull(this.PortalInd);
-			this.FailOn(delegate()
-			{
-				string text;
-				return !((MapPortal)base.TargetThingA).IsEnterable(out text);
-			});
-			yield return Toils_Goto.GotoThing(this.PortalInd, PathEndMode.Touch, false);
-			Toil toil = Toils_General.Wait(90, TargetIndex.None).FailOnCannotTouch(this.PortalInd, PathEndMode.Touch).WithProgressBarToilDelay(this.PortalInd, true, -0.5f);
-			Toil toil2 = toil;
-			toil2.tickIntervalAction = (Action<int>)Delegate.Combine(toil2.tickIntervalAction, new Action<int>(delegate(int delta)
-			{
-				this.pawn.rotationTracker.FaceTarget(base.TargetA);
-			}));
-			toil.handlingFacing = true;
-			yield return toil;
-			Toil toil3 = ToilMaker.MakeToil("MakeNewToils");
-			toil3.initAction = delegate()
-			{
-				MapPortal mapPortal = base.TargetThingA as MapPortal;
-				Map otherMap = mapPortal.GetOtherMap();
-				IntVec3 intVec = mapPortal.GetDestinationLocation();
-				if (!intVec.Standable(otherMap))
-				{
-					intVec = CellFinder.StandableCellNear(intVec, otherMap, 5f, null);
-				}
-				if (intVec == IntVec3.Invalid)
-				{
-					Messages.Message("UnableToEnterPortal".Translate(base.TargetThingA.Label), base.TargetThingA, MessageTypeDefOf.NegativeEvent, true);
-					return;
-				}
-				bool flag = false;
-				bool fireAtWill = false;
-				if (this.pawn.IsPlayerControlled)
-				{
-					flag = this.pawn.Drafted;
-					fireAtWill = this.pawn.drafter.FireAtWill;
-				}
-				this.pawn.DeSpawnOrDeselect(DestroyMode.Vanish);
-				GenSpawn.Spawn(this.pawn, intVec, otherMap, Rot4.Random, WipeMode.Vanish, false, false);
-				mapPortal.OnEntered(this.pawn);
-				if (this.pawn.inventory != null)
-				{
-					this.pawn.inventory.UnloadEverything = !otherMap.IsPocketMap;
-				}
-				if (this.pawn.IsPlayerControlled && (flag || mapPortal.AutoDraftOnEnter))
-				{
-					this.pawn.drafter.Drafted = true;
-					this.pawn.drafter.FireAtWill = fireAtWill;
-				}
-				Pawn_CarryTracker carryTracker = this.pawn.carryTracker;
-				if (((carryTracker != null) ? carryTracker.CarriedThing : null) != null && !this.pawn.Drafted)
-				{
-					Thing thing;
-					this.pawn.carryTracker.TryDropCarriedThing(this.pawn.Position, ThingPlaceMode.Direct, out thing, null);
-				}
-				this.pawn.mindState.priorityWork.ClearPrioritizedWorkAndJobQueue();
-				Lord lord = this.pawn.GetLord();
-				if (lord == null)
-				{
-					return;
-				}
-				lord.Notify_PawnLost(this.pawn, PawnLostCondition.ExitedMap, null);
-			};
-			yield return toil3;
-			yield break;
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x04004F79 RID: 20345
-		private TargetIndex PortalInd = TargetIndex.A;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
 
-		// Token: 0x04004F7A RID: 20346
-		private const int EnterDelay = 90;
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_EnterPortal CS_0024_003C_003E8__locals30 = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+			{
+				_003C_003E1__state = -1;
+				CS_0024_003C_003E8__locals30.FailOnDespawnedOrNull(CS_0024_003C_003E8__locals30.PortalInd);
+				CS_0024_003C_003E8__locals30.FailOn(() => !((MapPortal)CS_0024_003C_003E8__locals30.TargetThingA).IsEnterable(out var _));
+				_003C_003E2__current = Toils_Goto.GotoThing(CS_0024_003C_003E8__locals30.PortalInd, PathEndMode.Touch);
+				_003C_003E1__state = 1;
+				return true;
+			}
+			case 1:
+			{
+				_003C_003E1__state = -1;
+				Toil toil2 = Toils_General.Wait(90).FailOnCannotTouch(CS_0024_003C_003E8__locals30.PortalInd, PathEndMode.Touch).WithProgressBarToilDelay(CS_0024_003C_003E8__locals30.PortalInd, interpolateBetweenActorAndTarget: true);
+				toil2.tickIntervalAction = (Action<int>)Delegate.Combine(toil2.tickIntervalAction, (Action<int>)delegate
+				{
+					CS_0024_003C_003E8__locals30.pawn.rotationTracker.FaceTarget(CS_0024_003C_003E8__locals30.TargetA);
+				});
+				toil2.handlingFacing = true;
+				_003C_003E2__current = toil2;
+				_003C_003E1__state = 2;
+				return true;
+			}
+			case 2:
+			{
+				_003C_003E1__state = -1;
+				Toil toil = ToilMaker.MakeToil("MakeNewToils");
+				toil.initAction = delegate
+				{
+					MapPortal mapPortal = CS_0024_003C_003E8__locals30.TargetThingA as MapPortal;
+					Map otherMap = mapPortal.GetOtherMap();
+					IntVec3 intVec = mapPortal.GetDestinationLocation();
+					if (!intVec.Standable(otherMap))
+					{
+						intVec = CellFinder.StandableCellNear(intVec, otherMap, 5f);
+					}
+					if (intVec == IntVec3.Invalid)
+					{
+						Messages.Message("UnableToEnterPortal".Translate(CS_0024_003C_003E8__locals30.TargetThingA.Label), CS_0024_003C_003E8__locals30.TargetThingA, MessageTypeDefOf.NegativeEvent);
+					}
+					else
+					{
+						bool flag = false;
+						bool fireAtWill = false;
+						if (CS_0024_003C_003E8__locals30.pawn.IsPlayerControlled)
+						{
+							flag = CS_0024_003C_003E8__locals30.pawn.Drafted;
+							fireAtWill = CS_0024_003C_003E8__locals30.pawn.drafter.FireAtWill;
+						}
+						CS_0024_003C_003E8__locals30.pawn.DeSpawnOrDeselect();
+						GenSpawn.Spawn(CS_0024_003C_003E8__locals30.pawn, intVec, otherMap, Rot4.Random);
+						mapPortal.OnEntered(CS_0024_003C_003E8__locals30.pawn);
+						if (CS_0024_003C_003E8__locals30.pawn.inventory != null)
+						{
+							CS_0024_003C_003E8__locals30.pawn.inventory.UnloadEverything = !otherMap.IsPocketMap;
+						}
+						if (CS_0024_003C_003E8__locals30.pawn.IsPlayerControlled && (flag || mapPortal.AutoDraftOnEnter))
+						{
+							CS_0024_003C_003E8__locals30.pawn.drafter.Drafted = true;
+							CS_0024_003C_003E8__locals30.pawn.drafter.FireAtWill = fireAtWill;
+						}
+						if (CS_0024_003C_003E8__locals30.pawn.carryTracker?.CarriedThing != null && !CS_0024_003C_003E8__locals30.pawn.Drafted)
+						{
+							CS_0024_003C_003E8__locals30.pawn.carryTracker.TryDropCarriedThing(CS_0024_003C_003E8__locals30.pawn.Position, ThingPlaceMode.Direct, out var _);
+						}
+						CS_0024_003C_003E8__locals30.pawn.mindState.priorityWork.ClearPrioritizedWorkAndJobQueue();
+						CS_0024_003C_003E8__locals30.pawn.GetLord()?.Notify_PawnLost(CS_0024_003C_003E8__locals30.pawn, PawnLostCondition.ExitedMap, null);
+					}
+				};
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 3;
+				return true;
+			}
+			case 3:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__5 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__5(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private TargetIndex PortalInd = TargetIndex.A;
+
+	private const int EnterDelay = 90;
+
+	public MapPortal MapPortal => base.TargetThingA as MapPortal;
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return true;
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__5))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__5(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

@@ -1,718 +1,795 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
+using Unity.Collections;
 using Unity.Profiling;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public static class GravshipUtility
 {
-	// Token: 0x0200365D RID: 13917
-	public static class GravshipUtility
+	[CompilerGenerated]
+	private sealed class _003CGetGenSteps_003Ed__35 : IEnumerable<GenStepWithParams>, IEnumerable, IEnumerator<GenStepWithParams>, IEnumerator, IDisposable
 	{
-		// Token: 0x170031D2 RID: 12754
-		// (get) Token: 0x0601352D RID: 79149 RVA: 0x005BEEF8 File Offset: 0x005BD0F8
-		public static bool ShowConnectedSubstructure
+		private int _003C_003E1__state;
+
+		private GenStepWithParams _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private Gravship gravship;
+
+		public Gravship _003C_003E3__gravship;
+
+		GenStepWithParams IEnumerator<GenStepWithParams>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (!ModsConfig.OdysseyActive)
-				{
-					return false;
-				}
-				Designator selectedDesignator = Find.DesignatorManager.SelectedDesignator;
-				if (selectedDesignator is Designator_Install)
-				{
-					return false;
-				}
-				Designator_Place designator_Place = selectedDesignator as Designator_Place;
-				if (designator_Place != null)
-				{
-					TerrainDef terrainDef = designator_Place.PlacingDef as TerrainDef;
-					if (terrainDef != null && terrainDef.IsSubstructure)
-					{
-						return true;
-					}
-					ThingDef thingDef = designator_Place.PlacingDef as ThingDef;
-					if (thingDef != null && thingDef.GetCompProperties<CompProperties_SubstructureFootprint>() != null)
-					{
-						return true;
-					}
-				}
-				foreach (object obj in Find.Selector.SelectedObjects)
-				{
-					Thing thing = obj as Thing;
-					CompSubstructureFootprint compSubstructureFootprint;
-					if (thing != null && thing.TryGetComp(out compSubstructureFootprint) && compSubstructureFootprint.Valid && compSubstructureFootprint.DisplaySubstructureOverlay)
-					{
-						return true;
-					}
-				}
-				return false;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0601352E RID: 79150 RVA: 0x005BEFD4 File Offset: 0x005BD1D4
-		public static bool PlayerHasGravEngine()
+		object IEnumerator.Current
 		{
-			if (!ModsConfig.OdysseyActive)
+			[DebuggerHidden]
+			get
 			{
-				return false;
+				return _003C_003E2__current;
 			}
-			if (Find.CurrentGravship != null)
+		}
+
+		[DebuggerHidden]
+		public _003CGetGenSteps_003Ed__35(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			switch (_003C_003E1__state)
 			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = new GenStepWithParams
+				{
+					def = GenStepDefOf.ReserveGravshipArea,
+					parms = new GenStepParams
+					{
+						gravship = gravship
+					}
+				};
+				_003C_003E1__state = 1;
 				return true;
-			}
-			bool result;
-			using (GravshipUtility.PlayerHasGravEngineMarker.Auto())
-			{
-				using (List<Map>.Enumerator enumerator = Find.Maps.GetEnumerator())
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = new GenStepWithParams
 				{
-					while (enumerator.MoveNext())
+					def = GenStepDefOf.GravshipMarker,
+					parms = new GenStepParams
 					{
-						if (GravshipUtility.PlayerHasGravEngine(enumerator.Current))
-						{
-							return true;
-						}
+						gravship = gravship
 					}
-				}
-				foreach (WorldObject worldObject in Find.WorldObjects.AllWorldObjects)
-				{
-					if (worldObject.Faction != null && worldObject.Faction.IsPlayer && !(worldObject is MapParent))
-					{
-						IThingHolder thingHolder = worldObject as IThingHolder;
-						if (thingHolder != null)
-						{
-							using (List<Thing>.Enumerator enumerator3 = ThingOwnerUtility.GetAllThingsRecursively(thingHolder, true).GetEnumerator())
-							{
-								while (enumerator3.MoveNext())
-								{
-									if (enumerator3.Current.GetInnerIfMinified().def == ThingDefOf.GravEngine)
-									{
-										return true;
-									}
-								}
-							}
-						}
-					}
-				}
-				result = false;
+				};
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				return false;
 			}
-			return result;
 		}
 
-		// Token: 0x0601352F RID: 79151 RVA: 0x005BF130 File Offset: 0x005BD330
-		public static Thing GetPlayerGravEngine(Map map)
+		bool IEnumerator.MoveNext()
 		{
-			if (!ModsConfig.OdysseyActive)
-			{
-				return null;
-			}
-			ThingDef def = ThingDefOf.GravEngine;
-			Thing thing = map.listerThings.ThingsOfDef(def).FirstOrDefault<Thing>();
-			if (thing == null)
-			{
-				thing = map.listerThings.ThingsOfDef(def.minifiedDef).FirstOrDefault<Thing>().GetInnerIfMinified();
-			}
-			if (thing == null)
-			{
-				List<Thing> list = new List<Thing>();
-				ThingOwnerUtility.GetAllThingsRecursively<Thing>(map, ThingRequest.ForDef(def.minifiedDef), list, true, null, false);
-				Thing thing2 = list.Find(delegate(Thing t)
-				{
-					Thing innerIfMinified = t.GetInnerIfMinified();
-					return ((innerIfMinified != null) ? innerIfMinified.def : null) == def;
-				});
-				if (thing2 != null)
-				{
-					thing = thing2.GetInnerIfMinified();
-				}
-			}
-			return thing;
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x06013530 RID: 79152 RVA: 0x005BF1D3 File Offset: 0x005BD3D3
-		public static bool PlayerHasGravEngine(Map map)
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			return ModsConfig.OdysseyActive && GravshipUtility.GetPlayerGravEngine(map) != null;
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x06013531 RID: 79153 RVA: 0x005BF1E8 File Offset: 0x005BD3E8
-		public static bool TryGetNameOfGravshipOnMap(Map map, out string name)
+		[DebuggerHidden]
+		IEnumerator<GenStepWithParams> IEnumerable<GenStepWithParams>.GetEnumerator()
 		{
-			name = null;
-			if (!ModsConfig.OdysseyActive || map == null || !GravshipUtility.PlayerHasGravEngine(map))
+			_003CGetGenSteps_003Ed__35 _003CGetGenSteps_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				return false;
+				_003C_003E1__state = 0;
+				_003CGetGenSteps_003Ed__ = this;
 			}
-			Building_GravEngine building_GravEngine = GravshipUtility.GetPlayerGravEngine(map) as Building_GravEngine;
-			if (building_GravEngine == null)
+			else
 			{
-				return false;
+				_003CGetGenSteps_003Ed__ = new _003CGetGenSteps_003Ed__35(0);
 			}
-			if (building_GravEngine.nameHidden)
-			{
-				return false;
-			}
-			name = building_GravEngine.RenamableLabel;
-			return true;
+			_003CGetGenSteps_003Ed__.gravship = _003C_003E3__gravship;
+			return _003CGetGenSteps_003Ed__;
 		}
 
-		// Token: 0x06013532 RID: 79154 RVA: 0x005BF230 File Offset: 0x005BD430
-		public static void GetConnectedSubstructure(Building_GravEngine engine, HashSet<IntVec3> cells, int maxCells, bool requireInsideFootprint = true)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			cells.Clear();
-			if (!ModsConfig.OdysseyActive)
-			{
-				return;
-			}
-			if (!engine.Spawned)
-			{
-				Log.Error("Tried to get connected substructure for an unspawned engine.");
-				return;
-			}
-			List<Thing> footprintMakers = engine.Map.listerThings.ThingsInGroup(ThingRequestGroup.SubstructureFootprint);
-			engine.Map.floodFiller.FloodFill(engine.Position, delegate(IntVec3 x)
-			{
-				if (x.InBounds(engine.Map))
-				{
-					TerrainDef terrainDef = engine.Map.terrainGrid.FoundationAt(x);
-					if (terrainDef != null && terrainDef.IsSubstructure)
-					{
-						return !requireInsideFootprint || GravshipUtility.InsideFootprint(x, engine.Map, footprintMakers, null);
-					}
-				}
-				return false;
-			}, delegate(IntVec3 x)
-			{
-				cells.Add(x);
-				return false;
-			}, maxCells, false, null);
+			return ((IEnumerable<GenStepWithParams>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x06013533 RID: 79155 RVA: 0x005BF2DC File Offset: 0x005BD4DC
-		public static bool InsideFootprint(IntVec3 loc, Map map, List<Thing> footprintMakers = null, Thing thingToExclude = null)
+	private static List<ThingDef> allShipComponents;
+
+	public static bool generatingGravship = false;
+
+	public static readonly Color ConnectedSubstructureColor = ColorLibrary.Cyan;
+
+	public static readonly Color DisconnectedSubstructureColor = ColorLibrary.Red;
+
+	private const float MinFuelCost = 50f;
+
+	private static readonly ProfilerMarker PlayerHasGravEngineMarker = new ProfilerMarker("PlayerHasGravEngine()");
+
+	private static int lastCachedEngineTick = -1;
+
+	private static readonly Dictionary<Map, Building_GravEngine> tmpMapToGravship = new Dictionary<Map, Building_GravEngine>();
+
+	private static readonly List<PlanetLayerConnection> connections = new List<PlanetLayerConnection>();
+
+	private static PlanetTile cachedOrigin;
+
+	private static PlanetTile cachedDest;
+
+	private static float cachedCost;
+
+	private static float cachedLayerCost;
+
+	private static PlanetLayer cachedOriginLayer;
+
+	private static PlanetLayer cachedDestLayer;
+
+	private static bool cachedResult;
+
+	private static int cachedDistance;
+
+	private static readonly SimpleCurve LaunchCooldownFromQualityCurve = new SimpleCurve
+	{
+		new CurvePoint(0f, 600000f),
+		new CurvePoint(0.25f, 300000f),
+		new CurvePoint(0.5f, 120000f),
+		new CurvePoint(0.8f, 30000f),
+		new CurvePoint(1f, 20000f)
+	};
+
+	private static readonly SimpleCurve NegativeLandingOutcomeFromQualityCurve = new SimpleCurve
+	{
+		new CurvePoint(0f, 1f),
+		new CurvePoint(0.5f, 0.25f),
+		new CurvePoint(1f, 0.02f)
+	};
+
+	public static bool ShowConnectedSubstructure
+	{
+		get
 		{
 			if (!ModsConfig.OdysseyActive)
 			{
 				return false;
 			}
-			if (footprintMakers == null)
+			Designator selectedDesignator = Find.DesignatorManager.SelectedDesignator;
+			if (selectedDesignator is Designator_Install)
 			{
-				footprintMakers = map.listerThings.ThingsInGroup(ThingRequestGroup.SubstructureFootprint);
+				return false;
 			}
-			foreach (Thing thing in footprintMakers)
+			if (selectedDesignator is Designator_Place designator_Place)
 			{
-				CompSubstructureFootprint compSubstructureFootprint;
-				if (thing.Spawned && thing.TryGetComp(out compSubstructureFootprint) && compSubstructureFootprint.Valid && loc.InHorDistOf(thing.Position, compSubstructureFootprint.Props.radius) && (thingToExclude == null || thing != thingToExclude))
+				if (designator_Place.PlacingDef is TerrainDef { IsSubstructure: not false })
+				{
+					return true;
+				}
+				if (designator_Place.PlacingDef is ThingDef thingDef && thingDef.GetCompProperties<CompProperties_SubstructureFootprint>() != null)
+				{
+					return true;
+				}
+			}
+			foreach (object selectedObject in Find.Selector.SelectedObjects)
+			{
+				if (selectedObject is Thing thing && thing.TryGetComp(out CompSubstructureFootprint comp) && comp.Valid && comp.DisplaySubstructureOverlay)
 				{
 					return true;
 				}
 			}
 			return false;
 		}
+	}
 
-		// Token: 0x06013534 RID: 79156 RVA: 0x005BF380 File Offset: 0x005BD580
-		public static void PreLaunchConfirmation(Building_GravEngine engine, Action launchAction)
+	public static bool PlayerHasGravEngine()
+	{
+		if (!ModsConfig.OdysseyActive)
 		{
-			if (!ModsConfig.OdysseyActive)
+			return false;
+		}
+		if (Find.CurrentGravship != null)
+		{
+			return true;
+		}
+		using (PlayerHasGravEngineMarker.Auto())
+		{
+			foreach (Map map in Find.Maps)
 			{
-				return;
-			}
-			TaggedString taggedString = "ConfirmGravEngineLaunch".Translate();
-			List<Pawn> list = new List<Pawn>();
-			List<Pawn> list2 = new List<Pawn>();
-			List<Thing> list3 = new List<Thing>();
-			List<Pawn> list4 = new List<Pawn>();
-			foreach (Pawn pawn in engine.Map.mapPawns.AllPawns)
-			{
-				if (pawn.Faction == Faction.OfPlayer && (!engine.ValidSubstructureAt(pawn.PositionHeld) || pawn.ParentHolder is ActiveTransporterInfo))
+				if (PlayerHasGravEngine(map))
 				{
-					if (pawn.RaceProps.Humanlike)
+					return true;
+				}
+			}
+			foreach (WorldObject allWorldObject in Find.WorldObjects.AllWorldObjects)
+			{
+				if (allWorldObject.Faction == null || !allWorldObject.Faction.IsPlayer || allWorldObject is MapParent || !(allWorldObject is IThingHolder holder))
+				{
+					continue;
+				}
+				foreach (Thing item in ThingOwnerUtility.GetAllThingsRecursively(holder))
+				{
+					if (item.GetInnerIfMinified().def == ThingDefOf.GravEngine)
 					{
-						list.Add(pawn);
-					}
-					else
-					{
-						list2.Add(pawn);
+						return true;
 					}
 				}
-				if (GravshipUtility.ConsideredKidnapped(engine, pawn))
-				{
-					list4.Add(pawn);
-				}
 			}
-			foreach (Pawn pawn2 in engine.Map.mapPawns.PrisonersOfColony)
+			return false;
+		}
+	}
+
+	[Obsolete]
+	public static Thing GetPlayerGravEngine(Map map)
+	{
+		return GetPlayerGravEngine_NewTemp(map);
+	}
+
+	public static Building_GravEngine GetPlayerGravEngine_NewTemp(Map map)
+	{
+		if (!ModsConfig.OdysseyActive)
+		{
+			return null;
+		}
+		if (Find.TickManager.TicksGame != lastCachedEngineTick)
+		{
+			tmpMapToGravship.Clear();
+		}
+		if (tmpMapToGravship.TryGetValue(map, out var value))
+		{
+			return value;
+		}
+		ThingDef def = ThingDefOf.GravEngine;
+		Building_GravEngine building_GravEngine = map.listerThings.ThingsOfDef(def).FirstOrDefault() as Building_GravEngine;
+		if (building_GravEngine == null)
+		{
+			building_GravEngine = map.listerThings.ThingsOfDef(def.minifiedDef).FirstOrDefault().GetInnerIfMinified() as Building_GravEngine;
+		}
+		if (building_GravEngine == null)
+		{
+			List<Thing> list = new List<Thing>();
+			ThingOwnerUtility.GetAllThingsRecursively(map, ThingRequest.ForDef(def.minifiedDef), list, allowUnreal: true, null, alsoGetSpawnedThings: false);
+			Thing thing = list.Find((Thing t) => t.GetInnerIfMinified()?.def == def);
+			if (thing != null)
 			{
-				if (!engine.ValidSubstructureAt(pawn2.PositionHeld) && !list.Contains(pawn2))
-				{
-					list.Add(pawn2);
-				}
+				building_GravEngine = thing.GetInnerIfMinified() as Building_GravEngine;
 			}
-			if (list.Count > 0)
+		}
+		tmpMapToGravship[map] = building_GravEngine;
+		lastCachedEngineTick = Find.TickManager.TicksGame;
+		return building_GravEngine;
+	}
+
+	public static bool PlayerHasGravEngine(Map map)
+	{
+		if (!ModsConfig.OdysseyActive)
+		{
+			return false;
+		}
+		return GetPlayerGravEngine_NewTemp(map) != null;
+	}
+
+	public static bool TryGetNameOfGravshipOnMap(Map map, out string name)
+	{
+		name = null;
+		if (!ModsConfig.OdysseyActive || map == null || !PlayerHasGravEngine(map))
+		{
+			return false;
+		}
+		Building_GravEngine playerGravEngine_NewTemp = GetPlayerGravEngine_NewTemp(map);
+		if (playerGravEngine_NewTemp == null)
+		{
+			return false;
+		}
+		if (playerGravEngine_NewTemp.nameHidden)
+		{
+			return false;
+		}
+		name = playerGravEngine_NewTemp.RenamableLabel;
+		return true;
+	}
+
+	public static void GetConnectedSubstructure(Building_GravEngine engine, HashSet<IntVec3> cells, int maxCells, bool requireInsideFootprint = true)
+	{
+		cells.Clear();
+		if (!ModsConfig.OdysseyActive)
+		{
+			return;
+		}
+		if (!engine.Spawned)
+		{
+			Log.Error("Tried to get connected substructure for an unspawned engine.");
+			return;
+		}
+		List<Thing> footprintMakers = engine.Map.listerThings.ThingsInGroup(ThingRequestGroup.SubstructureFootprint);
+		engine.Map.floodFiller.FloodFill(engine.Position, delegate(IntVec3 x)
+		{
+			if (x.InBounds(engine.Map))
 			{
-				TaggedString t = taggedString;
-				string[] array = new string[5];
-				array[0] = "\n\n";
-				array[1] = ("GravEngineWarning".Translate() + ": ").Colorize(ColorLibrary.RedReadable);
-				array[2] = "PeopleWillBeLeftBehind".Translate().Resolve();
-				array[3] = ":\n";
-				array[4] = (from p in list
-				select p.NameFullColored.Resolve()).ToLineList("  - ", true);
-				taggedString = t + string.Concat(array);
-			}
-			if (list2.Count > 0)
-			{
-				TaggedString t2 = taggedString;
-				string[] array2 = new string[5];
-				array2[0] = "\n\n";
-				array2[1] = ("GravEngineWarning".Translate() + ": ").Colorize(ColorLibrary.RedReadable);
-				array2[2] = "AnimalsWillBeLeftBehind".Translate().Resolve();
-				array2[3] = ":\n";
-				array2[4] = (from p in list2
-				select p.NameFullColored.Resolve()).ToLineList("  - ", true);
-				taggedString = t2 + string.Concat(array2);
-			}
-			if (list4.Count > 0)
-			{
-				TaggedString t3 = taggedString;
-				string[] array3 = new string[5];
-				array3[0] = "\n\n";
-				array3[1] = ("GravEngineWarning".Translate() + ": ").Colorize(ColorLibrary.RedReadable);
-				array3[2] = "PawnsKidnappedOnGravship".Translate().Resolve();
-				array3[3] = ":\n";
-				array3[4] = (from p in list4
-				select p.NameFullColored.Resolve()).ToLineList("  - ", true);
-				taggedString = t3 + string.Concat(array3);
-			}
-			foreach (IntVec3 c in engine.AllConnectedSubstructure)
-			{
-				Building edifice = c.GetEdifice(engine.Map);
-				if (edifice != null && edifice.def.Size != IntVec2.One && !engine.OnValidSubstructure(edifice) && !list3.Contains(edifice))
-				{
-					list3.Add(edifice);
-				}
-			}
-			if (list3.Count > 0)
-			{
-				TaggedString t4 = taggedString;
-				string[] array4 = new string[5];
-				array4[0] = "\n\n";
-				array4[1] = ("GravEngineWarning".Translate() + ": ").Colorize(ColorLibrary.RedReadable);
-				array4[2] = "BuildingsWillBeLeftBehind".Translate().Resolve();
-				array4[3] = ":\n";
-				array4[4] = (from b in list3
-				select b.LabelShort).ToLineList("  - ", true);
-				taggedString = t4 + string.Concat(array4);
-			}
-			HashSet<string> hashSet = new HashSet<string>();
-			foreach (IntVec3 intVec in engine.Map.AllCells)
-			{
-				TerrainDef terrainDef = engine.Map.terrainGrid.FoundationAt(intVec);
+				TerrainDef terrainDef = engine.Map.terrainGrid.FoundationAt(x);
 				if (terrainDef != null && terrainDef.IsSubstructure)
 				{
-					if (!GravshipUtility.InsideFootprint(intVec, engine.Map, null, null))
+					if (requireInsideFootprint)
 					{
-						hashSet.Add("SubstructureOutsideFootprint".Translate());
+						return InsideFootprint(x, engine.Map, footprintMakers);
 					}
-					if (!engine.ValidSubstructureAt(intVec))
-					{
-						hashSet.Add("DisconnectedSubstructure".Translate());
-					}
-					RoofDef roofDef = engine.Map.roofGrid.RoofAt(intVec);
-					if (roofDef != null && roofDef.isThickRoof)
-					{
-						hashSet.Add("SubstructureUnderRockRoof".Translate());
-					}
+					return true;
 				}
 			}
-			if (hashSet.Count > 0)
-			{
-				taggedString += "\n\n" + ("GravEngineWarning".Translate() + ": ").Colorize(ColorLibrary.RedReadable) + "SubstructureWillBeLeftBehind".Translate() + ":\n" + hashSet.ToLineList("  - ", true);
-			}
-			Find.WindowStack.Add(new Dialog_MessageBox(taggedString, null, launchAction, "Cancel".Translate(), delegate()
-			{
-			}, null, true, launchAction, null, WindowLayer.Dialog));
-		}
-
-		// Token: 0x06013535 RID: 79157 RVA: 0x005BF94C File Offset: 0x005BDB4C
-		public static void TravelTo(Gravship gravship, PlanetTile oldTile, PlanetTile newTile)
+			return false;
+		}, delegate(IntVec3 x)
 		{
-			if (!ModsConfig.OdysseyActive)
+			cells.Add(x);
+			return false;
+		}, maxCells);
+	}
+
+	public static bool InsideFootprint(IntVec3 loc, Map map, List<Thing> footprintMakers = null, Thing thingToExclude = null)
+	{
+		if (!ModsConfig.OdysseyActive)
+		{
+			return false;
+		}
+		if (footprintMakers == null)
+		{
+			footprintMakers = map.listerThings.ThingsInGroup(ThingRequestGroup.SubstructureFootprint);
+		}
+		foreach (Thing footprintMaker in footprintMakers)
+		{
+			if (footprintMaker.Spawned && footprintMaker.TryGetComp(out CompSubstructureFootprint comp) && comp.Valid && loc.InHorDistOf(footprintMaker.Position, comp.Props.radius) && (thingToExclude == null || footprintMaker != thingToExclude))
 			{
-				return;
+				return true;
 			}
+		}
+		return false;
+	}
+
+	public static void PreLaunchConfirmation(Building_GravEngine engine, Action launchAction)
+	{
+		if (!ModsConfig.OdysseyActive)
+		{
+			return;
+		}
+		TaggedString text = "ConfirmGravEngineLaunch".Translate();
+		List<Pawn> list = new List<Pawn>();
+		List<Pawn> list2 = new List<Pawn>();
+		List<Thing> list3 = new List<Thing>();
+		List<Pawn> list4 = new List<Pawn>();
+		foreach (Pawn allPawn in engine.Map.mapPawns.AllPawns)
+		{
+			if (allPawn.Faction == Faction.OfPlayer && (!engine.ValidSubstructureAt(allPawn.PositionHeld) || allPawn.ParentHolder is ActiveTransporterInfo))
+			{
+				if (allPawn.RaceProps.Humanlike)
+				{
+					list.Add(allPawn);
+				}
+				else
+				{
+					list2.Add(allPawn);
+				}
+			}
+			if (ConsideredKidnapped(engine, allPawn))
+			{
+				list4.Add(allPawn);
+			}
+		}
+		foreach (Pawn item in engine.Map.mapPawns.PrisonersOfColony)
+		{
+			if (!engine.ValidSubstructureAt(item.PositionHeld) && !list.Contains(item))
+			{
+				list.Add(item);
+			}
+		}
+		if (list.Count > 0)
+		{
+			text += "\n\n" + ("GravEngineWarning".Translate() + ": ").Colorize(ColorLibrary.RedReadable) + "PeopleWillBeLeftBehind".Translate().Resolve() + ":\n" + list.Select((Pawn p) => p.NameFullColored.Resolve()).ToLineList("  - ", capitalizeItems: true);
+		}
+		if (list2.Count > 0)
+		{
+			text += "\n\n" + ("GravEngineWarning".Translate() + ": ").Colorize(ColorLibrary.RedReadable) + "AnimalsWillBeLeftBehind".Translate().Resolve() + ":\n" + list2.Select((Pawn p) => p.NameFullColored.Resolve()).ToLineList("  - ", capitalizeItems: true);
+		}
+		if (list4.Count > 0)
+		{
+			text += "\n\n" + ("GravEngineWarning".Translate() + ": ").Colorize(ColorLibrary.RedReadable) + "PawnsKidnappedOnGravship".Translate().Resolve() + ":\n" + list4.Select((Pawn p) => p.NameFullColored.Resolve()).ToLineList("  - ", capitalizeItems: true);
+		}
+		foreach (IntVec3 item2 in engine.AllConnectedSubstructure)
+		{
+			Building edifice = item2.GetEdifice(engine.Map);
+			if (edifice != null && edifice.def.Size != IntVec2.One && !engine.OnValidSubstructure(edifice) && !list3.Contains(edifice))
+			{
+				list3.Add(edifice);
+			}
+		}
+		if (list3.Count > 0)
+		{
+			text += "\n\n" + ("GravEngineWarning".Translate() + ": ").Colorize(ColorLibrary.RedReadable) + "BuildingsWillBeLeftBehind".Translate().Resolve() + ":\n" + list3.Select((Thing b) => b.LabelShort).ToLineList("  - ", capitalizeItems: true);
+		}
+		HashSet<string> hashSet = new HashSet<string>();
+		foreach (IntVec3 allCell in engine.Map.AllCells)
+		{
+			TerrainDef terrainDef = engine.Map.terrainGrid.FoundationAt(allCell);
+			if (terrainDef != null && terrainDef.IsSubstructure)
+			{
+				if (!InsideFootprint(allCell, engine.Map))
+				{
+					hashSet.Add("SubstructureOutsideFootprint".Translate());
+				}
+				if (!engine.ValidSubstructureAt(allCell))
+				{
+					hashSet.Add("DisconnectedSubstructure".Translate());
+				}
+				RoofDef roofDef = engine.Map.roofGrid.RoofAt(allCell);
+				if (roofDef != null && roofDef.isThickRoof)
+				{
+					hashSet.Add("SubstructureUnderRockRoof".Translate());
+				}
+			}
+		}
+		if (hashSet.Count > 0)
+		{
+			text += "\n\n" + ("GravEngineWarning".Translate() + ": ").Colorize(ColorLibrary.RedReadable) + "SubstructureWillBeLeftBehind".Translate() + ":\n" + hashSet.ToLineList("  - ", capitalizeItems: true);
+		}
+		Find.WindowStack.Add(new Dialog_MessageBox(text, null, launchAction, "Cancel".Translate(), delegate
+		{
+		}, null, buttonADestructive: true, launchAction));
+	}
+
+	public static void TravelTo(Gravship gravship, PlanetTile oldTile, PlanetTile newTile)
+	{
+		if (ModsConfig.OdysseyActive)
+		{
 			gravship.SetFaction(gravship.Engine.Faction);
 			if (oldTile.Layer != newTile.Layer)
 			{
-				oldTile = newTile.Layer.GetClosestTile(oldTile);
+				oldTile = newTile.Layer.GetClosestTile_NewTemp(oldTile);
 			}
 			gravship.Tile = oldTile;
 			gravship.destinationTile = newTile;
 			Find.WorldObjects.Add(gravship);
-			CameraJumper.TryJump(gravship, CameraJumper.MovementMode.Pan);
+			CameraJumper.TryJump(gravship);
 		}
+	}
 
-		// Token: 0x06013536 RID: 79158 RVA: 0x005BF9B8 File Offset: 0x005BDBB8
-		public static Gravship GenerateGravship(Building_GravEngine engine)
+	public static Gravship GenerateGravship(Building_GravEngine engine)
+	{
+		if (!ModsConfig.OdysseyActive)
 		{
-			if (!ModsConfig.OdysseyActive)
-			{
-				return null;
-			}
-			GravshipUtility.generatingGravship = true;
-			Map map = engine.Map;
-			IntVec3[] array = engine.ValidSubstructure.ToArray<IntVec3>();
-			Gravship gravship = new Gravship(engine);
-			gravship = (WorldObjectMaker.MakeWorldObject(WorldObjectDefOf.Gravship, gravship) as Gravship);
-			Current.Game.Gravship = gravship;
-			List<Thing> list = gravship.Things.ToList<Thing>();
-			list.SortByDescending(new Func<Thing, int>(GravshipUtility.ThingSpawnPriority));
-			foreach (Thing thing in list)
-			{
-				thing.PreSwapMap();
-			}
-			foreach (Thing thing2 in list)
-			{
-				if (thing2.Spawned)
-				{
-					thing2.DeSpawn(DestroyMode.WillReplace);
-				}
-			}
-			foreach (Pawn pawn in gravship.Pawns)
-			{
-				pawn.PreSwapMap();
-				if (pawn.Spawned)
-				{
-					pawn.DeSpawn(DestroyMode.WillReplace);
-				}
-			}
-			ulong dirtyFlags = MapMeshFlagDefOf.Terrain | MapMeshFlagDefOf.Roofs | MapMeshFlagDefOf.Snow | MapMeshFlagDefOf.Sand | MapMeshFlagDefOf.Gas;
-			for (int i = 0; i < array.Length; i++)
-			{
-				IntVec3 intVec = array[i];
-				int index = map.cellIndices.CellToIndex(intVec);
-				map.terrainGrid.RemoveGravshipTerrainUnsafe(intVec, index);
-				map.roofGrid.RemoveRoofUnsafe(index);
-				map.areaManager.BuildRoof[index] = false;
-				map.areaManager.NoRoof[index] = false;
-				map.glowGrid.DirtyCell(intVec);
-				map.snowGrid.DepthGrid_Unsafe[index] = 0f;
-				map.sandGrid.DepthGrid_Unsafe[index] = 0f;
-				map.gasGrid.ClearCellUnsafe(intVec);
-				foreach (Designation des in map.designationManager.AllDesignationsAt(intVec))
-				{
-					map.designationManager.RemoveDesignation(des);
-				}
-				IntVec2 cell2D = intVec.ToIntVec2;
-				Predicate<IFleck> <>9__0;
-				foreach (FleckSystem fleckSystem in map.flecks.Systems)
-				{
-					Predicate<IFleck> shouldRemove;
-					if ((shouldRemove = <>9__0) == null)
-					{
-						shouldRemove = (<>9__0 = ((IFleck fleck) => fleck.GetPosition().ToIntVec2() == cell2D));
-					}
-					fleckSystem.RemoveAllFlecks(shouldRemove);
-				}
-				map.mapDrawer.MapMeshDirty(intVec, dirtyFlags, true, false);
-				map.pathing.RecalculatePerceivedPathCostAt(intVec);
-			}
-			map.roofGrid.Drawer.SetDirty();
-			GravshipUtility.generatingGravship = false;
-			return gravship;
+			return null;
 		}
-
-		// Token: 0x06013537 RID: 79159 RVA: 0x005BFD00 File Offset: 0x005BDF00
-		public static void AbandonMap(Map map)
+		generatingGravship = true;
+		Map map = engine.Map;
+		IntVec3[] array = engine.ValidSubstructure.ToArray();
+		Gravship obj = new Gravship(engine);
+		obj = WorldObjectMaker.MakeWorldObject(WorldObjectDefOf.Gravship, obj) as Gravship;
+		Current.Game.Gravship = obj;
+		List<Thing> list = obj.Things.ToList();
+		list.SortByDescending(ThingSpawnPriority);
+		foreach (Thing item in list)
 		{
-			if (!ModLister.CheckOdyssey("Gravship"))
-			{
-				return;
-			}
-			List<Pawn> list = map.mapPawns.AllPawnsSpawned.ToList<Pawn>();
-			PawnDiedOrDownedThoughtsUtility.TryGiveThoughts(list, PawnDiedOrDownedThoughtsKind.Lost);
-			for (int i = list.Count - 1; i >= 0; i--)
-			{
-				list[i].Notify_LeftBehind();
-				if (list[i].Spawned)
-				{
-					list[i].DeSpawn(DestroyMode.Vanish);
-				}
-				if (!list[i].Destroyed)
-				{
-					list[i].DestroyOrPassToWorld(DestroyMode.Vanish);
-				}
-			}
-			map.Parent.Abandon(true);
+			item.PreSwapMap();
 		}
-
-		// Token: 0x06013538 RID: 79160 RVA: 0x005BFD94 File Offset: 0x005BDF94
-		public static void ArriveExistingMap(Gravship gravship)
+		foreach (Thing item2 in list)
 		{
-			GravshipUtility.<>c__DisplayClass18_0 CS$<>8__locals1 = new GravshipUtility.<>c__DisplayClass18_0();
-			if (!ModsConfig.OdysseyActive)
+			if (item2.Spawned)
 			{
-				return;
+				item2.DeSpawn(DestroyMode.WillReplace);
 			}
-			GravshipUtility.<>c__DisplayClass18_0 CS$<>8__locals2 = CS$<>8__locals1;
-			MapParent mapParent = Find.WorldObjects.MapParentAt(gravship.destinationTile);
-			CS$<>8__locals2.map = ((mapParent != null) ? mapParent.Map : null);
-			if (CS$<>8__locals1.map == null)
-			{
-				Log.Error(string.Format("Tried to arrive gravship {0} at tile {1} but no map exists there.", gravship.Label, gravship.destinationTile));
-				return;
-			}
-			Find.GravshipController.landingMap = CS$<>8__locals1.map;
-			GravshipLandingMarker gravshipLandingMarker = ThingMaker.MakeThing(ThingDefOf.GravshipLandingMarker, null) as GravshipLandingMarker;
-			gravshipLandingMarker.gravship = gravship;
-			gravshipLandingMarker.CacheCells();
-			Find.GravshipController.Notify_LandingAreaConfirmationStarted(gravshipLandingMarker);
-			Find.WorldObjects.Remove(gravship);
-			LongEventHandler.ExecuteWhenFinished(delegate
-			{
-				if (Prefs.PauseOnLoad)
-				{
-					Find.TickManager.CurTimeSpeed = TimeSpeed.Paused;
-				}
-				CameraJumper.TryJump(CS$<>8__locals1.map.Center, CS$<>8__locals1.map, CameraJumper.MovementMode.Cut);
-				Find.DesignatorManager.Select(Find.GravshipController.MoveDesignator());
-			});
 		}
-
-		// Token: 0x06013539 RID: 79161 RVA: 0x005BFE50 File Offset: 0x005BE050
-		public static void ArriveNewMap(Gravship gravship)
+		foreach (Pawn pawn in obj.Pawns)
 		{
-			if (!ModsConfig.OdysseyActive)
+			pawn.PreSwapMap();
+			if (pawn.Spawned)
 			{
-				return;
+				pawn.DeSpawn(DestroyMode.WillReplace);
 			}
-			PlanetTile destinationTile = gravship.destinationTile;
-			MapParent mapParent = Find.WorldObjects.MapParentAt(destinationTile);
-			if (mapParent == null)
+		}
+		ulong dirtyFlags = (ulong)MapMeshFlagDefOf.Terrain | (ulong)MapMeshFlagDefOf.Roofs | (ulong)MapMeshFlagDefOf.Snow | (ulong)MapMeshFlagDefOf.Sand | (ulong)MapMeshFlagDefOf.Gas;
+		for (int i = 0; i < array.Length; i++)
+		{
+			IntVec3 intVec = array[i];
+			int index = map.cellIndices.CellToIndex(intVec);
+			map.terrainGrid.RemoveGravshipTerrainUnsafe(intVec, index);
+			map.roofGrid.RemoveRoofUnsafe(index);
+			map.areaManager.BuildRoof[index] = false;
+			map.areaManager.NoRoof[index] = false;
+			map.glowGrid.DirtyCell(intVec);
+			NativeArray<float> depthGrid_Unsafe = map.snowGrid.DepthGrid_Unsafe;
+			depthGrid_Unsafe[index] = 0f;
+			NativeArray<float> depthGrid_Unsafe2 = map.sandGrid.DepthGrid_Unsafe;
+			depthGrid_Unsafe2[index] = 0f;
+			map.gasGrid.ClearCellUnsafe(intVec);
+			foreach (Designation item3 in map.designationManager.AllDesignationsAt(intVec))
 			{
-				if (destinationTile.LayerDef.DefaultWorldObject == WorldObjectDefOf.Settlement)
-				{
-					mapParent = SettleUtility.AddNewHome(destinationTile, Faction.OfPlayer);
-				}
-				else
-				{
-					mapParent = (MapParent)WorldObjectMaker.MakeWorldObject(destinationTile.LayerDef.DefaultWorldObject);
-					mapParent.Tile = destinationTile;
-					Find.WorldObjects.Add(mapParent);
-				}
-				if (mapParent.def.canHaveFaction && mapParent.Faction == null)
-				{
-					mapParent.SetFaction(Faction.OfPlayer);
-				}
-				mapParent.Tile = destinationTile;
-				Settlement settlement = mapParent as Settlement;
-				if (settlement != null)
-				{
-					settlement.Name = "GravshipLandingSite".Translate(gravship.Label).CapitalizeFirst();
-					settlement.namedByPlayer = true;
-				}
+				map.designationManager.RemoveDesignation(item3);
 			}
-			else if (mapParent.def.canHaveFaction && mapParent.Faction == null)
+			IntVec2 cell2D = intVec.ToIntVec2;
+			foreach (FleckSystem system in map.flecks.Systems)
 			{
-				mapParent.SetFaction(Faction.OfPlayer);
+				system.RemoveAllFlecks((IFleck fleck) => fleck.GetPosition().ToIntVec2() == cell2D);
 			}
-			IntVec3 intVec = Find.World.info.initialMapSize;
-			if (mapParent.def.overrideMapSize != null)
+			map.mapDrawer.MapMeshDirty(intVec, dirtyFlags, regenAdjacentCells: true, regenAdjacentSections: false);
+			map.pathing.RecalculatePerceivedPathCostAt(intVec);
+		}
+		RoofCollapseCellsFinder.CheckAndRemoveCollpsingRoofs(map);
+		map.roofGrid.Drawer.SetDirty();
+		generatingGravship = false;
+		return obj;
+	}
+
+	public static void AbandonMap(Map map)
+	{
+		if (!ModLister.CheckOdyssey("Gravship"))
+		{
+			return;
+		}
+		List<Pawn> list = map.mapPawns.AllPawnsSpawned.ToList();
+		PawnDiedOrDownedThoughtsUtility.TryGiveThoughts(list, PawnDiedOrDownedThoughtsKind.Lost);
+		for (int num = list.Count - 1; num >= 0; num--)
+		{
+			list[num].Notify_LeftBehind();
+			if (list[num].Spawned)
 			{
-				intVec = mapParent.def.overrideMapSize.Value;
+				list[num].DeSpawn();
 			}
-			else if (mapParent.def.canResizeToGravship)
+			if (!list[num].Destroyed)
 			{
-				intVec.x = Mathf.RoundToInt(Mathf.Ceil((float)gravship.Bounds.maxX / 100f) * 100f);
-				intVec.z = Mathf.RoundToInt(Mathf.Ceil((float)gravship.Bounds.maxZ / 100f) * 100f);
-				intVec.y = 1;
+				list[num].DestroyOrPassToWorld();
 			}
-			Site site = mapParent as Site;
-			if (site != null)
+		}
+		map.Parent.Abandon(wasGravshipLaunch: true);
+	}
+
+	public static void ArriveExistingMap(Gravship gravship)
+	{
+		if (!ModsConfig.OdysseyActive)
+		{
+			return;
+		}
+		Map map = Find.WorldObjects.MapParentAt(gravship.destinationTile)?.Map;
+		if (map == null)
+		{
+			Log.Error($"Tried to arrive gravship {gravship.Label} at tile {gravship.destinationTile} but no map exists there.");
+			return;
+		}
+		Find.GravshipController.landingMap = map;
+		GravshipLandingMarker gravshipLandingMarker = ThingMaker.MakeThing(ThingDefOf.GravshipLandingMarker) as GravshipLandingMarker;
+		gravshipLandingMarker.gravship = gravship;
+		gravshipLandingMarker.CacheCells();
+		Find.GravshipController.Notify_LandingAreaConfirmationStarted(gravshipLandingMarker);
+		Find.WorldObjects.Remove(gravship);
+		LongEventHandler.ExecuteWhenFinished(delegate
+		{
+			if (Prefs.PauseOnLoad)
 			{
-				IntVec3 preferredMapSize = site.PreferredMapSize;
-				intVec = new IntVec3(Mathf.Max(intVec.x, preferredMapSize.x), Mathf.Max(intVec.y, preferredMapSize.y), Mathf.Max(intVec.z, preferredMapSize.z));
-				if (site.MainSitePartDef.minMapSize != null)
-				{
-					IntVec3 value = site.MainSitePartDef.minMapSize.Value;
-					intVec = new IntVec3(Mathf.Max(intVec.x, value.x), Mathf.Max(intVec.y, value.y), Mathf.Max(intVec.z, value.z));
-				}
+				Find.TickManager.CurTimeSpeed = TimeSpeed.Paused;
 			}
-			Map orGenerateMap = GetOrGenerateMapUtility.GetOrGenerateMap(destinationTile, intVec, mapParent.def, GravshipUtility.GetGenSteps(gravship), false);
-			bool flag;
-			if (!(orGenerateMap.Parent is Settlement))
+			CameraJumper.TryJump(map.Center, map, CameraJumper.MovementMode.Cut);
+			Find.DesignatorManager.Select(Find.GravshipController.MoveDesignator());
+		});
+	}
+
+	public static void ArriveNewMap(Gravship gravship)
+	{
+		if (!ModsConfig.OdysseyActive)
+		{
+			return;
+		}
+		PlanetTile destinationTile = gravship.destinationTile;
+		MapParent mapParent = Find.WorldObjects.MapParentAt(destinationTile);
+		if (mapParent == null)
+		{
+			if (destinationTile.LayerDef.DefaultWorldObject == destinationTile.LayerDef.SettlementWorldObjectDef)
 			{
-				Site site2 = orGenerateMap.Parent as Site;
-				if (site2 != null)
-				{
-					flag = site2.parts.All((SitePart part) => part.def.considerEnteringAsAttack);
-				}
-				else
-				{
-					flag = false;
-				}
+				mapParent = SettleUtility.AddNewHome(destinationTile, Faction.OfPlayer);
 			}
 			else
 			{
-				flag = true;
+				mapParent = (MapParent)WorldObjectMaker.MakeWorldObject(destinationTile.LayerDef.DefaultWorldObject);
+				mapParent.Tile = destinationTile;
+				Find.WorldObjects.Add(mapParent);
 			}
-			if (flag && orGenerateMap.Parent.Faction != null && orGenerateMap.Parent.Faction != Faction.OfPlayer)
+			if (mapParent.def.canHaveFaction && mapParent.Faction == null)
 			{
-				Find.TickManager.Notify_GeneratedPotentiallyHostileMap();
-				TaggedString label = "LetterLabelGravshipEnteredEnemyBase".Translate();
-				TaggedString text = "LetterGravshipEnteredEnemyBase".Translate(orGenerateMap.Parent.Label.ApplyTag(TagType.Settlement, orGenerateMap.Parent.Faction.GetUniqueLoadID())).CapitalizeFirst();
-				SettlementUtility.AffectRelationsOnAttacked(orGenerateMap.Parent, ref text);
-				PawnRelationUtility.Notify_PawnsSeenByPlayer_Letter(from p in orGenerateMap.mapPawns.AllPawns
-				where !gravship.ContainsPawn(p)
-				select p, ref label, ref text, "LetterRelatedPawnsSettlement".Translate(Faction.OfPlayer.def.pawnsPlural), true, true);
-				Find.LetterStack.ReceiveLetter(label, text, LetterDefOf.NeutralEvent, null, 0, true);
-				Find.GoodwillSituationManager.RecalculateAll(true);
+				mapParent.SetFaction(Faction.OfPlayer);
 			}
-			if (gravship.Spawned)
+			mapParent.Tile = destinationTile;
+			if (mapParent is Settlement settlement)
 			{
-				Find.WorldObjects.Remove(gravship);
+				settlement.Name = "GravshipLandingSite".Translate(gravship.Label).CapitalizeFirst();
+				settlement.namedByPlayer = true;
 			}
-			TaleRecorder.RecordTale(TaleDefOf.TileSettled, Array.Empty<object>()).customLabel = "NewSettlement".Translate();
-			if (Find.IdeoManager != null)
-			{
-				Find.IdeoManager.lastResettledTick = GenTicks.TicksGame;
-			}
-			LongEventHandler.ExecuteWhenFinished(delegate
-			{
-				if (Prefs.PauseOnLoad)
-				{
-					Find.TickManager.DoSingleTick();
-					Find.TickManager.CurTimeSpeed = TimeSpeed.Paused;
-				}
-				CameraJumper.TryJump(gravship.Engine, CameraJumper.MovementMode.Cut);
-				Find.CameraDriver.shaker.DoShake(0.1f, 180);
-			});
 		}
-
-		// Token: 0x0601353A RID: 79162 RVA: 0x005C0290 File Offset: 0x005BE490
-		public static int ThingSpawnPriority(Thing a)
+		else if (mapParent.def.canHaveFaction && mapParent.Faction == null)
 		{
-			if (!ModLister.CheckOdyssey("Gravship thing spawn priority"))
-			{
-				return 0;
-			}
-			if (a is Building_Bed)
-			{
-				return 20;
-			}
-			BuildingProperties building = a.def.building;
-			if (building != null && building.isAttachment)
-			{
-				return 10;
-			}
-			if (a.def.category == ThingCategory.Item)
-			{
-				return 20;
-			}
-			return a.def.gravshipSpawnPriority;
+			mapParent.SetFaction(Faction.OfPlayer);
 		}
-
-		// Token: 0x0601353B RID: 79163 RVA: 0x005C02F0 File Offset: 0x005BE4F0
-		public static bool TryGetPathFuelCost(PlanetTile from, PlanetTile to, out float cost, out int distance, float fuelPerTile = 10f, float fuelFactor = 1f)
+		IntVec3 size = Find.World.info.initialMapSize;
+		if (mapParent.def.overrideMapSize.HasValue)
 		{
-			cost = 0f;
-			distance = 0;
-			if (!ModLister.CheckOdyssey("Gravship path fuel cost"))
-			{
-				return false;
-			}
-			if (GravshipUtility.cachedOrigin == from && GravshipUtility.cachedDest == to)
-			{
-				cost = GravshipUtility.cachedCost;
-				distance = GravshipUtility.cachedDistance;
-				return GravshipUtility.cachedResult;
-			}
-			GravshipUtility.cachedOrigin = from;
-			GravshipUtility.cachedDest = to;
-			GravshipUtility.cachedCost = (cost = 0f);
-			GravshipUtility.cachedDistance = (distance = 0);
-			if (from.Layer != to.Layer)
-			{
-				if (GravshipUtility.cachedOriginLayer == from.Layer && GravshipUtility.cachedDestLayer == to.Layer)
-				{
-					cost += GravshipUtility.cachedLayerCost;
-				}
-				else
-				{
-					float num;
-					if (!from.Layer.TryGetPath(to.Layer, GravshipUtility.connections, out num, 2147483647))
-					{
-						return GravshipUtility.cachedResult = false;
-					}
-					GravshipUtility.cachedOriginLayer = to.Layer;
-					GravshipUtility.cachedDestLayer = from.Layer;
-					cost += (GravshipUtility.cachedLayerCost = num);
-					GravshipUtility.connections.Clear();
-				}
-				from = to.Layer.GetClosestTile(from);
-			}
-			GravshipUtility.cachedDistance = (distance = Find.WorldGrid.TraversalDistanceBetween(from, to, true, int.MaxValue, false));
-			cost += (float)distance * to.LayerDef.rangeDistanceFactor * (fuelPerTile * fuelFactor);
-			GravshipUtility.cachedCost = (cost = Mathf.Max(cost, 50f));
-			return GravshipUtility.cachedResult = true;
+			size = mapParent.def.overrideMapSize.Value;
 		}
-
-		// Token: 0x0601353C RID: 79164 RVA: 0x005C0460 File Offset: 0x005BE660
-		public static int MaxDistForFuel(float fuel, PlanetLayer fromLayer, PlanetLayer toLayer, float fuelPerTile = 10f, float fuelFactor = 1f)
+		else if (mapParent.def.canResizeToGravship)
 		{
-			if (fromLayer != toLayer)
-			{
-				if (GravshipUtility.cachedOriginLayer == fromLayer && GravshipUtility.cachedDestLayer == toLayer)
-				{
-					fuel -= GravshipUtility.cachedLayerCost;
-				}
-				else
-				{
-					float num;
-					if (!fromLayer.TryGetPath(toLayer, GravshipUtility.connections, out num, 2147483647))
-					{
-						return 0;
-					}
-					GravshipUtility.cachedOriginLayer = toLayer;
-					GravshipUtility.cachedDestLayer = fromLayer;
-					fuel -= (GravshipUtility.cachedLayerCost = num);
-					GravshipUtility.connections.Clear();
-				}
-			}
-			return Mathf.FloorToInt(fuel / (toLayer.Def.rangeDistanceFactor * (fuelPerTile * fuelFactor)));
+			size.x = Mathf.RoundToInt(Mathf.Ceil((float)gravship.Bounds.maxX / 100f) * 100f);
+			size.z = Mathf.RoundToInt(Mathf.Ceil((float)gravship.Bounds.maxZ / 100f) * 100f);
+			size.y = 1;
 		}
-
-		// Token: 0x0601353D RID: 79165 RVA: 0x005C04DB File Offset: 0x005BE6DB
-		private static IEnumerable<GenStepWithParams> GetGenSteps(Gravship gravship)
+		if (mapParent is Site { PreferredMapSize: var preferredMapSize } site)
 		{
-			yield return new GenStepWithParams
+			size = new IntVec3(Mathf.Max(size.x, preferredMapSize.x), Mathf.Max(size.y, preferredMapSize.y), Mathf.Max(size.z, preferredMapSize.z));
+			if (site.MainSitePartDef.minMapSize.HasValue)
 			{
-				def = GenStepDefOf.ReserveGravshipArea,
-				parms = new GenStepParams
-				{
-					gravship = gravship
-				}
-			};
-			yield return new GenStepWithParams
-			{
-				def = GenStepDefOf.GravshipMarker,
-				parms = new GenStepParams
-				{
-					gravship = gravship
-				}
-			};
-			yield break;
-		}
-
-		// Token: 0x0601353E RID: 79166 RVA: 0x005C04EC File Offset: 0x005BE6EC
-		public static void SettleTile(Map map)
-		{
-			if (!ModLister.CheckOdyssey("Gravship settle tile"))
-			{
-				return;
+				IntVec3 value = site.MainSitePartDef.minMapSize.Value;
+				size = new IntVec3(Mathf.Max(size.x, value.x), Mathf.Max(size.y, value.y), Mathf.Max(size.z, value.z));
 			}
+		}
+		Map orGenerateMap = GetOrGenerateMapUtility.GetOrGenerateMap(destinationTile, size, mapParent.def, GetGenSteps(gravship));
+		if ((orGenerateMap.Parent is Settlement || (orGenerateMap.Parent is Site site2 && site2.parts.All((SitePart part) => part.def.considerEnteringAsAttack))) && orGenerateMap.Parent.Faction != null && orGenerateMap.Parent.Faction != Faction.OfPlayer)
+		{
+			Find.TickManager.Notify_GeneratedPotentiallyHostileMap();
+			TaggedString letterLabel = "LetterLabelGravshipEnteredEnemyBase".Translate();
+			TaggedString letterText = "LetterGravshipEnteredEnemyBase".Translate(orGenerateMap.Parent.Label.ApplyTag(TagType.Settlement, orGenerateMap.Parent.Faction.GetUniqueLoadID())).CapitalizeFirst();
+			SettlementUtility.AffectRelationsOnAttacked(orGenerateMap.Parent, ref letterText);
+			PawnRelationUtility.Notify_PawnsSeenByPlayer_Letter(orGenerateMap.mapPawns.AllPawns.Where((Pawn p) => !gravship.ContainsPawn(p)), ref letterLabel, ref letterText, "LetterRelatedPawnsSettlement".Translate(Faction.OfPlayer.def.pawnsPlural), informEvenIfSeenBefore: true);
+			Find.LetterStack.ReceiveLetter(letterLabel, letterText, LetterDefOf.NeutralEvent);
+			Find.GoodwillSituationManager.RecalculateAll(canSendHostilityChangedLetter: true);
+		}
+		if (gravship.Spawned)
+		{
+			Find.WorldObjects.Remove(gravship);
+		}
+		TaleRecorder.RecordTale(TaleDefOf.TileSettled).customLabel = "NewSettlement".Translate();
+		if (Find.IdeoManager != null)
+		{
+			Find.IdeoManager.lastResettledTick = GenTicks.TicksGame;
+		}
+		LongEventHandler.ExecuteWhenFinished(delegate
+		{
+			if (Prefs.PauseOnLoad)
+			{
+				Find.TickManager.DoSingleTick();
+				Find.TickManager.CurTimeSpeed = TimeSpeed.Paused;
+			}
+			CameraJumper.TryJump(gravship.Engine, CameraJumper.MovementMode.Cut);
+			Find.CameraDriver.shaker.DoShake(0.1f, 180);
+		});
+	}
+
+	public static int ThingSpawnPriority(Thing a)
+	{
+		if (!ModLister.CheckOdyssey("Gravship thing spawn priority"))
+		{
+			return 0;
+		}
+		if (a is Building_Bed)
+		{
+			return 20;
+		}
+		BuildingProperties building = a.def.building;
+		if (building != null && building.isAttachment)
+		{
+			return 10;
+		}
+		if (a.def.category == ThingCategory.Item)
+		{
+			return 20;
+		}
+		return a.def.gravshipSpawnPriority;
+	}
+
+	public static bool TryGetPathFuelCost(PlanetTile from, PlanetTile to, out float cost, out int distance, float fuelPerTile = 10f, float fuelFactor = 1f)
+	{
+		cost = 0f;
+		distance = 0;
+		if (!ModLister.CheckOdyssey("Gravship path fuel cost"))
+		{
+			return false;
+		}
+		if (cachedOrigin == from && cachedDest == to)
+		{
+			cost = cachedCost;
+			distance = cachedDistance;
+			return cachedResult;
+		}
+		cachedOrigin = from;
+		cachedDest = to;
+		cachedCost = (cost = 0f);
+		cachedDistance = (distance = 0);
+		if (from.Layer != to.Layer)
+		{
+			if (cachedOriginLayer == from.Layer && cachedDestLayer == to.Layer)
+			{
+				cost += cachedLayerCost;
+			}
+			else
+			{
+				if (!from.Layer.TryGetPath(to.Layer, connections, out var cost2))
+				{
+					return cachedResult = false;
+				}
+				cachedOriginLayer = to.Layer;
+				cachedDestLayer = from.Layer;
+				cost += (cachedLayerCost = cost2);
+				connections.Clear();
+			}
+			from = to.Layer.GetClosestTile_NewTemp(from);
+		}
+		cachedDistance = (distance = Find.WorldGrid.TraversalDistanceBetween(from, to));
+		cost += (float)distance * to.LayerDef.rangeDistanceFactor * (fuelPerTile * fuelFactor);
+		cachedCost = (cost = Mathf.Max(cost, 50f));
+		return cachedResult = true;
+	}
+
+	public static int MaxDistForFuel(float fuel, PlanetLayer fromLayer, PlanetLayer toLayer, float fuelPerTile = 10f, float fuelFactor = 1f)
+	{
+		if (fromLayer != toLayer)
+		{
+			if (cachedOriginLayer == fromLayer && cachedDestLayer == toLayer)
+			{
+				fuel -= cachedLayerCost;
+			}
+			else
+			{
+				if (!fromLayer.TryGetPath(toLayer, connections, out var cost))
+				{
+					return 0;
+				}
+				cachedOriginLayer = toLayer;
+				cachedDestLayer = fromLayer;
+				fuel -= (cachedLayerCost = cost);
+				connections.Clear();
+			}
+		}
+		return Mathf.FloorToInt(fuel / (toLayer.Def.rangeDistanceFactor * (fuelPerTile * fuelFactor)));
+	}
+
+	[IteratorStateMachine(typeof(_003CGetGenSteps_003Ed__35))]
+	private static IEnumerable<GenStepWithParams> GetGenSteps(Gravship gravship)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetGenSteps_003Ed__35(-2)
+		{
+			_003C_003E3__gravship = gravship
+		};
+	}
+
+	public static void SettleTile(Map map)
+	{
+		if (ModLister.CheckOdyssey("Gravship settle tile"))
+		{
 			MapParent parent = map.Parent;
 			Settlement settlement = SettleUtility.AddNewHome(map.Tile, Faction.OfPlayer);
 			map.info.parent = settlement;
@@ -723,144 +800,229 @@ namespace RimWorld
 				parent.Destroy();
 			}
 			settlement.Notify_MyMapSettled(map);
-			Settlement settlement2 = parent as Settlement;
-			if (settlement2 != null)
+			if (parent is Settlement mapParent)
 			{
-				TaggedString taggedString = "";
-				SettlementUtility.AffectRelationsOnAttacked(settlement2, ref taggedString);
+				TaggedString letterText = "";
+				SettlementUtility.AffectRelationsOnAttacked(mapParent, ref letterText);
 			}
 		}
+	}
 
-		// Token: 0x0601353F RID: 79167 RVA: 0x005C056C File Offset: 0x005BE76C
-		public static bool ConsideredKidnapped(Building_GravEngine engine, Pawn pawn)
+	public static bool ConsideredKidnapped(Building_GravEngine engine, Pawn pawn)
+	{
+		if (!ModsConfig.OdysseyActive)
 		{
-			return ModsConfig.OdysseyActive && engine.ValidSubstructureAt(pawn.PositionHeld) && pawn.Faction != Faction.OfPlayer && !pawn.IsPlayerControlled && !pawn.IsPrisonerOfColony && !pawn.IsSlaveOfColony && !pawn.Faction.HostileTo(Faction.OfPlayer) && pawn.Faction != null;
+			return false;
 		}
-
-		// Token: 0x06013540 RID: 79168 RVA: 0x005C05D6 File Offset: 0x005BE7D6
-		public static float LaunchCooldownFromQuality(float quality)
+		if (!engine.ValidSubstructureAt(pawn.PositionHeld))
 		{
-			return GravshipUtility.LaunchCooldownFromQualityCurve.Evaluate(quality);
+			return false;
 		}
-
-		// Token: 0x06013541 RID: 79169 RVA: 0x005C05E3 File Offset: 0x005BE7E3
-		public static float NegativeLandingOutcomeFromQuality(float quality)
+		if (pawn.Faction == Faction.OfPlayer || pawn.IsPlayerControlled || pawn.IsPrisonerOfColony || pawn.IsSlaveOfColony)
 		{
-			return GravshipUtility.NegativeLandingOutcomeFromQualityCurve.Evaluate(quality);
+			return false;
 		}
-
-		// Token: 0x06013542 RID: 79170 RVA: 0x005C05F0 File Offset: 0x005BE7F0
-		public static bool IsOnboardGravship(IntVec3 cell, Building_GravEngine engine, Pawn pawn = null, bool desperate = false)
+		if (pawn.Faction.HostileTo(Faction.OfPlayer) || pawn.Faction == null)
 		{
-			return ModsConfig.OdysseyActive && (pawn == null || cell.InAllowedArea(pawn)) && (desperate || !cell.GetRoom(engine.Map).PsychologicallyOutdoors) && engine.ValidSubstructure.Contains(cell);
+			return false;
 		}
+		return true;
+	}
 
-		// Token: 0x06013543 RID: 79171 RVA: 0x005C0630 File Offset: 0x005BE830
-		public static bool TryFindSpotOnGravship(Pawn pawn, Building_GravEngine engine, out IntVec3 spot)
+	public static float LaunchCooldownFromQuality(float quality)
+	{
+		return LaunchCooldownFromQualityCurve.Evaluate(quality);
+	}
+
+	public static float NegativeLandingOutcomeFromQuality(float quality)
+	{
+		return NegativeLandingOutcomeFromQualityCurve.Evaluate(quality);
+	}
+
+	public static bool IsOnboardGravship(IntVec3 cell, Building_GravEngine engine, Pawn pawn = null, bool desperate = false)
+	{
+		return IsOnboardGravship_NewTemp(cell, engine, pawn, desperate);
+	}
+
+	public static bool IsOnboardGravship_NewTemp(IntVec3 cell, Building_GravEngine engine, Pawn pawn = null, bool desperate = false, bool respectAllowedAreas = true)
+	{
+		if (!ModsConfig.OdysseyActive)
 		{
-			GravshipUtility.<>c__DisplayClass40_0 CS$<>8__locals1 = new GravshipUtility.<>c__DisplayClass40_0();
-			CS$<>8__locals1.engine = engine;
-			spot = IntVec3.Invalid;
-			bool desperate = false;
-			if (!ModsConfig.OdysseyActive)
+			return false;
+		}
+		if (respectAllowedAreas && pawn != null && !cell.InAllowedArea(pawn))
+		{
+			return false;
+		}
+		if (!desperate && cell.GetRoom(engine.Map).PsychologicallyOutdoors)
+		{
+			return false;
+		}
+		return engine.ValidSubstructure.Contains(cell);
+	}
+
+	public static bool TryFindSpotOnGravship(Pawn pawn, Building_GravEngine engine, out IntVec3 spot)
+	{
+		spot = IntVec3.Invalid;
+		bool desperate2 = false;
+		if (!ModsConfig.OdysseyActive)
+		{
+			return false;
+		}
+		List<IntVec3> tmpWorkingCellList = new List<IntVec3>();
+		TraverseParms traverseParms2 = TraverseParms.For(TraverseMode.PassDoors);
+		Region region2 = ClosestShipRegion(pawn.Position, pawn.MapHeld, pawn, traverseParms2);
+		if (region2 == null)
+		{
+			desperate2 = true;
+			region2 = ClosestShipRegion(pawn.Position, pawn.MapHeld, pawn, traverseParms2, desperate: true);
+		}
+		if (region2 != null && TryGetAllowedCellInRegion(region2, pawn, out spot, desperate2))
+		{
+			return true;
+		}
+		return false;
+		Region ClosestShipRegion(IntVec3 root, Map map, Pawn pawn, TraverseParms traverseParms, bool desperate = false)
+		{
+			RegionType regionType = RegionType.Set_Passable;
+			Region region3 = root.GetRegion(map, regionType);
+			if (region3 == null)
 			{
-				return false;
+				return null;
 			}
-			CS$<>8__locals1.tmpWorkingCellList = new List<IntVec3>();
-			Region region = CS$<>8__locals1.<TryFindSpotOnGravship>g__ClosestShipRegion|0(pawn.Position, pawn.MapHeld, pawn, TraverseParms.For(pawn, Danger.Deadly, TraverseMode.ByPawn, false, false, false, true), false);
-			if (region == null)
+			RegionEntryPredicate entryCondition = (Region _, Region r) => r.Allows(traverseParms, isDestination: false);
+			Region foundReg = null;
+			RegionProcessor regionProcessor = delegate(Region r)
 			{
-				desperate = true;
-				region = CS$<>8__locals1.<TryFindSpotOnGravship>g__ClosestShipRegion|0(pawn.Position, pawn.MapHeld, pawn, TraverseParms.For(pawn, Danger.Deadly, TraverseMode.ByPawn, false, false, false, true), true);
-			}
-			return region != null && CS$<>8__locals1.<TryFindSpotOnGravship>g__TryGetAllowedCellInRegion|1(region, pawn, out spot, desperate);
+				if (r.IsDoorway)
+				{
+					return false;
+				}
+				if (!TryGetAllowedCellInRegion(r, pawn, out var _, desperate))
+				{
+					return false;
+				}
+				foundReg = r;
+				return true;
+			};
+			RegionTraverser.BreadthFirstTraverse(region3, entryCondition, regionProcessor, 9999, regionType);
+			return foundReg;
 		}
-
-		// Token: 0x0400D66F RID: 54895
-		private static List<ThingDef> allShipComponents;
-
-		// Token: 0x0400D670 RID: 54896
-		public static bool generatingGravship = false;
-
-		// Token: 0x0400D671 RID: 54897
-		public static readonly Color ConnectedSubstructureColor = ColorLibrary.Cyan;
-
-		// Token: 0x0400D672 RID: 54898
-		public static readonly Color DisconnectedSubstructureColor = ColorLibrary.Red;
-
-		// Token: 0x0400D673 RID: 54899
-		private const float MinFuelCost = 50f;
-
-		// Token: 0x0400D674 RID: 54900
-		private static readonly ProfilerMarker PlayerHasGravEngineMarker = new ProfilerMarker("PlayerHasGravEngine()");
-
-		// Token: 0x0400D675 RID: 54901
-		private static readonly List<PlanetLayerConnection> connections = new List<PlanetLayerConnection>();
-
-		// Token: 0x0400D676 RID: 54902
-		private static PlanetTile cachedOrigin;
-
-		// Token: 0x0400D677 RID: 54903
-		private static PlanetTile cachedDest;
-
-		// Token: 0x0400D678 RID: 54904
-		private static float cachedCost;
-
-		// Token: 0x0400D679 RID: 54905
-		private static float cachedLayerCost;
-
-		// Token: 0x0400D67A RID: 54906
-		private static PlanetLayer cachedOriginLayer;
-
-		// Token: 0x0400D67B RID: 54907
-		private static PlanetLayer cachedDestLayer;
-
-		// Token: 0x0400D67C RID: 54908
-		private static bool cachedResult;
-
-		// Token: 0x0400D67D RID: 54909
-		private static int cachedDistance;
-
-		// Token: 0x0400D67E RID: 54910
-		private static readonly SimpleCurve LaunchCooldownFromQualityCurve = new SimpleCurve
+		bool TryGetAllowedCellInRegion(Region region, Pawn pawn, out IntVec3 cell, bool desperate = false)
 		{
+			cell = IntVec3.Invalid;
+			for (int i = 0; i < 10; i++)
 			{
-				new CurvePoint(0f, 600000f),
-				true
-			},
-			{
-				new CurvePoint(0.25f, 300000f),
-				true
-			},
-			{
-				new CurvePoint(0.5f, 120000f),
-				true
-			},
-			{
-				new CurvePoint(0.8f, 30000f),
-				true
-			},
-			{
-				new CurvePoint(1f, 20000f),
-				true
+				IntVec3 randomCell = region.RandomCell;
+				if (IsOnboardGravship_NewTemp(randomCell, engine, pawn, desperate, respectAllowedAreas: false))
+				{
+					cell = randomCell;
+					return true;
+				}
 			}
-		};
+			foreach (IntVec3 item in region.Cells.InRandomOrder(tmpWorkingCellList))
+			{
+				if (IsOnboardGravship_NewTemp(item, engine, pawn, desperate, respectAllowedAreas: false))
+				{
+					cell = item;
+					return true;
+				}
+			}
+			return false;
+		}
+	}
 
-		// Token: 0x0400D67F RID: 54911
-		private static readonly SimpleCurve NegativeLandingOutcomeFromQualityCurve = new SimpleCurve
+	public static bool TryFindSpotOffGravship(Pawn pawn, Building_GravEngine engine, out IntVec3 spot)
+	{
+		spot = IntVec3.Invalid;
+		if (!ModsConfig.OdysseyActive)
 		{
+			return false;
+		}
+		List<IntVec3> tmpWorkingCellList = new List<IntVec3>();
+		Region region2 = ClosestNonShipRegion(pawn.Position, pawn.MapHeld, pawn, TraverseParms.For(pawn));
+		if (region2 != null && TryGetAllowedCellInRegion(region2, pawn, out spot))
+		{
+			return true;
+		}
+		return false;
+		Region ClosestNonShipRegion(IntVec3 root, Map map, Pawn pawn, TraverseParms traverseParms)
+		{
+			RegionType regionType = RegionType.Set_Passable;
+			Region region3 = root.GetRegion(map, regionType);
+			if (region3 == null)
 			{
-				new CurvePoint(0f, 1f),
-				true
-			},
-			{
-				new CurvePoint(0.5f, 0.25f),
-				true
-			},
-			{
-				new CurvePoint(1f, 0.02f),
-				true
+				return null;
 			}
-		};
+			RegionEntryPredicate entryCondition = (Region _, Region r) => r.Allows(traverseParms, isDestination: false);
+			Region foundReg = null;
+			RegionProcessor regionProcessor = delegate(Region r)
+			{
+				if (r.IsDoorway)
+				{
+					return false;
+				}
+				if (!TryGetAllowedCellInRegion(r, pawn, out var _))
+				{
+					return false;
+				}
+				foundReg = r;
+				return true;
+			};
+			RegionTraverser.BreadthFirstTraverse(region3, entryCondition, regionProcessor, 9999, regionType);
+			return foundReg;
+		}
+		bool TryGetAllowedCellInRegion(Region region, Pawn pawn, out IntVec3 cell)
+		{
+			cell = IntVec3.Invalid;
+			for (int i = 0; i < 10; i++)
+			{
+				IntVec3 randomCell = region.RandomCell;
+				if (!IsOnboardGravship_NewTemp(randomCell, engine, pawn, desperate: true, respectAllowedAreas: false))
+				{
+					cell = randomCell;
+					return true;
+				}
+			}
+			foreach (IntVec3 item in region.Cells.InRandomOrder(tmpWorkingCellList))
+			{
+				if (!IsOnboardGravship_NewTemp(item, engine, pawn, desperate: true, respectAllowedAreas: false))
+				{
+					cell = item;
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+
+	public static void UpdateBillDestinations(Map map)
+	{
+		foreach (Bill item in BillUtility.MapBills(map))
+		{
+			foreach (StorageGroup item2 in map.storageGroups.StorageGroupsForReading)
+			{
+				if (!(item.GetSlotGroup() is StorageGroup storageGroup) || !(storageGroup.RenamableLabel == item2.RenamableLabel))
+				{
+					continue;
+				}
+				item.SetStoreMode(BillStoreModeDefOf.SpecificStockpile, item2);
+				goto IL_012a;
+			}
+			foreach (Zone allZone in map.zoneManager.AllZones)
+			{
+				if (!(allZone is Zone_Stockpile zone_Stockpile) || !(item.GetSlotGroup() is SlotGroup { parent: Zone parent }) || !(parent.RenamableLabel == allZone.RenamableLabel))
+				{
+					continue;
+				}
+				item.SetStoreMode(BillStoreModeDefOf.SpecificStockpile, zone_Stockpile.GetSlotGroup());
+				goto IL_012a;
+			}
+			if (item.GetStoreMode() == BillStoreModeDefOf.SpecificStockpile)
+			{
+				item.SetStoreMode(BillStoreModeDefOf.DropOnFloor);
+			}
+			IL_012a:;
+		}
 	}
 }

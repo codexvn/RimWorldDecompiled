@@ -1,288 +1,354 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class StorageGroup : IExposable, ILoadReferenceable, IStoreSettingsParent, ISlotGroup, IRenameable
 {
-	// Token: 0x020029B5 RID: 10677
-	public class StorageGroup : IExposable, ILoadReferenceable, IStoreSettingsParent, ISlotGroup, IRenameable
+	[CompilerGenerated]
+	private sealed class _003Cget_HeldThings_003Ed__29 : IEnumerable<Thing>, IEnumerable, IEnumerator<Thing>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700243C RID: 9276
-		// (get) Token: 0x0600EB59 RID: 60249 RVA: 0x00446223 File Offset: 0x00444423
-		// (set) Token: 0x0600EB5A RID: 60250 RVA: 0x00446235 File Offset: 0x00444435
-		public string RenamableLabel
-		{
-			get
-			{
-				return this.label ?? this.BaseLabel;
-			}
-			set
-			{
-				this.label = value;
-			}
-		}
+		private int _003C_003E1__state;
 
-		// Token: 0x1700243D RID: 9277
-		// (get) Token: 0x0600EB5B RID: 60251 RVA: 0x0044623E File Offset: 0x0044443E
-		public string BaseLabel
+		private Thing _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public StorageGroup _003C_003E4__this;
+
+		private List<IStorageGroupMember>.Enumerator _003C_003E7__wrap1;
+
+		private IEnumerator<Thing> _003C_003E7__wrap2;
+
+		Thing IEnumerator<Thing>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return "StorageGroup".Translate();
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700243E RID: 9278
-		// (get) Token: 0x0600EB5C RID: 60252 RVA: 0x0044624F File Offset: 0x0044444F
-		public string GroupingLabel
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return "GroupPlural".Translate();
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700243F RID: 9279
-		// (get) Token: 0x0600EB5D RID: 60253 RVA: 0x00446260 File Offset: 0x00444460
-		public int GroupingOrder
+		[DebuggerHidden]
+		public _003Cget_HeldThings_003Ed__29(int _003C_003E1__state)
 		{
-			get
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if ((uint)(num - -4) <= 1u || num == 1)
 			{
-				return -100;
-			}
-		}
-
-		// Token: 0x17002440 RID: 9280
-		// (get) Token: 0x0600EB5E RID: 60254 RVA: 0x00446264 File Offset: 0x00444464
-		public string InspectLabel
-		{
-			get
-			{
-				return this.RenamableLabel;
-			}
-		}
-
-		// Token: 0x17002441 RID: 9281
-		// (get) Token: 0x0600EB5F RID: 60255 RVA: 0x0044626C File Offset: 0x0044446C
-		public Map Map
-		{
-			get
-			{
-				return this.map;
-			}
-		}
-
-		// Token: 0x17002442 RID: 9282
-		// (get) Token: 0x0600EB60 RID: 60256 RVA: 0x00446274 File Offset: 0x00444474
-		public int MemberCount
-		{
-			get
-			{
-				return this.members.Count;
-			}
-		}
-
-		// Token: 0x17002443 RID: 9283
-		// (get) Token: 0x0600EB61 RID: 60257 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public bool StorageTabVisible
-		{
-			get
-			{
-				return true;
-			}
-		}
-
-		// Token: 0x0600EB62 RID: 60258 RVA: 0x00446281 File Offset: 0x00444481
-		public StorageGroup()
-		{
-		}
-
-		// Token: 0x0600EB63 RID: 60259 RVA: 0x00446294 File Offset: 0x00444494
-		public StorageGroup(Map map, string label = null)
-		{
-			this.map = map;
-			this.settings = new StorageSettings(this);
-			this.RenamableLabel = (label ?? StorageGroupManager.NewStorageName(this.BaseLabel));
-		}
-
-		// Token: 0x17002444 RID: 9284
-		// (get) Token: 0x0600EB64 RID: 60260 RVA: 0x004462D0 File Offset: 0x004444D0
-		StorageSettings ISlotGroup.Settings
-		{
-			get
-			{
-				return this.GetStoreSettings();
-			}
-		}
-
-		// Token: 0x17002445 RID: 9285
-		// (get) Token: 0x0600EB65 RID: 60261 RVA: 0x000FD030 File Offset: 0x000FB230
-		StorageGroup ISlotGroup.StorageGroup
-		{
-			get
-			{
-				return this;
-			}
-		}
-
-		// Token: 0x17002446 RID: 9286
-		// (get) Token: 0x0600EB66 RID: 60262 RVA: 0x004462D8 File Offset: 0x004444D8
-		public IEnumerable<Thing> HeldThings
-		{
-			get
-			{
-				foreach (IStorageGroupMember storageGroupMember in this.members)
+				try
 				{
-					ISlotGroupParent slotGroupParent = storageGroupMember as ISlotGroupParent;
-					if (slotGroupParent != null)
+					if (num == -4 || num == 1)
 					{
-						foreach (Thing thing in slotGroupParent.GetSlotGroup().HeldThings)
+						try
 						{
-							yield return thing;
 						}
-						IEnumerator<Thing> enumerator2 = null;
+						finally
+						{
+							_003C_003Em__Finally2();
+						}
 					}
 				}
-				List<IStorageGroupMember>.Enumerator enumerator = default(List<IStorageGroupMember>.Enumerator);
-				yield break;
-				yield break;
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
 			}
+			_003C_003E7__wrap1 = default(List<IStorageGroupMember>.Enumerator);
+			_003C_003E7__wrap2 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x17002447 RID: 9287
-		// (get) Token: 0x0600EB67 RID: 60263 RVA: 0x004462E8 File Offset: 0x004444E8
-		public List<IntVec3> CellsList
+		private bool MoveNext()
 		{
-			get
+			try
 			{
-				StorageGroup.tmpCellsList.Clear();
-				foreach (IStorageGroupMember storageGroupMember in this.members)
+				int num = _003C_003E1__state;
+				StorageGroup storageGroup = _003C_003E4__this;
+				if (num != 0)
 				{
-					ISlotGroupParent slotGroupParent = storageGroupMember as ISlotGroupParent;
-					if (slotGroupParent != null)
+					if (num != 1)
 					{
-						StorageGroup.tmpCellsList.AddRange(slotGroupParent.GetSlotGroup().CellsList);
+						return false;
 					}
+					_003C_003E1__state = -4;
+					goto IL_009a;
 				}
-				return StorageGroup.tmpCellsList;
-			}
-		}
-
-		// Token: 0x17002448 RID: 9288
-		// (get) Token: 0x0600EB68 RID: 60264 RVA: 0x00446360 File Offset: 0x00444560
-		public List<IHaulSource> HaulSourcesList
-		{
-			get
-			{
-				StorageGroup.tmpHaulSourceList.Clear();
-				foreach (IStorageGroupMember storageGroupMember in this.members)
+				_003C_003E1__state = -1;
+				_003C_003E7__wrap1 = storageGroup.members.GetEnumerator();
+				_003C_003E1__state = -3;
+				goto IL_00b4;
+				IL_009a:
+				if (_003C_003E7__wrap2.MoveNext())
 				{
-					IHaulSource haulSource = storageGroupMember as IHaulSource;
-					if (haulSource != null)
+					Thing current = _003C_003E7__wrap2.Current;
+					_003C_003E2__current = current;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				_003C_003Em__Finally2();
+				_003C_003E7__wrap2 = null;
+				goto IL_00b4;
+				IL_00b4:
+				ISlotGroupParent slotGroupParent;
+				do
+				{
+					if (_003C_003E7__wrap1.MoveNext())
 					{
-						StorageGroup.tmpHaulSourceList.Add(haulSource);
+						slotGroupParent = _003C_003E7__wrap1.Current as ISlotGroupParent;
+						continue;
 					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = default(List<IStorageGroupMember>.Enumerator);
+					return false;
 				}
-				return StorageGroup.tmpHaulSourceList;
+				while (slotGroupParent == null);
+				_003C_003E7__wrap2 = slotGroupParent.GetSlotGroup().HeldThings.GetEnumerator();
+				_003C_003E1__state = -4;
+				goto IL_009a;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x0600EB69 RID: 60265 RVA: 0x004463D0 File Offset: 0x004445D0
-		public void InitFrom(IStorageGroupMember member)
+		bool IEnumerator.MoveNext()
 		{
-			this.settings.CopyFrom(member.StoreSettings);
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0600EB6A RID: 60266 RVA: 0x004463E4 File Offset: 0x004445E4
-		public void RemoveMember(IStorageGroupMember member, bool removeIfEmpty = true)
+		private void _003C_003Em__Finally1()
 		{
-			if (this.members.Remove(member))
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap1/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -3;
+			if (_003C_003E7__wrap2 != null)
 			{
-				IStoreSettingsParent storeSettingsParent = member as IStoreSettingsParent;
-				if (storeSettingsParent != null)
+				_003C_003E7__wrap2.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Thing> IEnumerable<Thing>.GetEnumerator()
+		{
+			_003Cget_HeldThings_003Ed__29 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_HeldThings_003Ed__29(0)
 				{
-					storeSettingsParent.Notify_SettingsChanged();
-				}
-				if (removeIfEmpty)
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Thing>)this).GetEnumerator();
+		}
+	}
+
+	public int loadID;
+
+	private Map map;
+
+	[LoadAlias("buildings")]
+	public List<IStorageGroupMember> members = new List<IStorageGroupMember>();
+
+	private StorageSettings settings;
+
+	private string label;
+
+	private static readonly List<IntVec3> tmpCellsList = new List<IntVec3>(128);
+
+	private static readonly List<IHaulSource> tmpHaulSourceList = new List<IHaulSource>(64);
+
+	public string RenamableLabel
+	{
+		get
+		{
+			return label ?? BaseLabel;
+		}
+		set
+		{
+			label = value;
+		}
+	}
+
+	public string BaseLabel => "StorageGroup".Translate();
+
+	public string GroupingLabel => "GroupPlural".Translate();
+
+	public int GroupingOrder => -100;
+
+	public string InspectLabel => RenamableLabel;
+
+	public Map Map => map;
+
+	public int MemberCount => members.Count;
+
+	public bool StorageTabVisible => true;
+
+	StorageSettings ISlotGroup.Settings => GetStoreSettings();
+
+	StorageGroup ISlotGroup.StorageGroup => this;
+
+	public IEnumerable<Thing> HeldThings
+	{
+		[IteratorStateMachine(typeof(_003Cget_HeldThings_003Ed__29))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_HeldThings_003Ed__29(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public List<IntVec3> CellsList
+	{
+		get
+		{
+			tmpCellsList.Clear();
+			foreach (IStorageGroupMember member in members)
+			{
+				if (member is ISlotGroupParent slotGroupParent)
 				{
-					this.map.storageGroups.Notify_MemberRemoved(this);
+					tmpCellsList.AddRange(slotGroupParent.GetSlotGroup().CellsList);
 				}
-				BillUtility.Notify_ISlotGroupRemoved(this);
 			}
+			return tmpCellsList;
 		}
+	}
 
-		// Token: 0x0600EB6B RID: 60267 RVA: 0x00446429 File Offset: 0x00444629
-		public StorageSettings GetStoreSettings()
+	public List<IHaulSource> HaulSourcesList
+	{
+		get
 		{
-			return this.settings;
-		}
-
-		// Token: 0x0600EB6C RID: 60268 RVA: 0x00446431 File Offset: 0x00444631
-		public StorageSettings GetParentStoreSettings()
-		{
-			if (this.members.Any<IStorageGroupMember>())
+			tmpHaulSourceList.Clear();
+			foreach (IStorageGroupMember member in members)
 			{
-				return this.members[0].ParentStoreSettings;
-			}
-			return null;
-		}
-
-		// Token: 0x0600EB6D RID: 60269 RVA: 0x00446454 File Offset: 0x00444654
-		public void Notify_SettingsChanged()
-		{
-			foreach (IStorageGroupMember storageGroupMember in this.members)
-			{
-				ISlotGroupParent slotGroupParent = storageGroupMember as ISlotGroupParent;
-				if (slotGroupParent != null)
+				if (member is IHaulSource item)
 				{
-					slotGroupParent.Notify_SettingsChanged();
+					tmpHaulSourceList.Add(item);
 				}
 			}
+			return tmpHaulSourceList;
 		}
+	}
 
-		// Token: 0x0600EB6E RID: 60270 RVA: 0x004464B0 File Offset: 0x004446B0
-		public string GetUniqueLoadID()
+	public StorageGroup()
+	{
+	}
+
+	public StorageGroup(Map map, string label = null)
+	{
+		this.map = map;
+		settings = new StorageSettings(this);
+		RenamableLabel = label ?? StorageGroupManager.NewStorageName(BaseLabel);
+	}
+
+	public void InitFrom(IStorageGroupMember member)
+	{
+		settings.CopyFrom(member.StoreSettings);
+	}
+
+	public void RemoveMember(IStorageGroupMember member, bool removeIfEmpty = true)
+	{
+		if (members.Remove(member))
 		{
-			return "StorageGroup_" + this.loadID.ToString();
+			if (member is IStoreSettingsParent storeSettingsParent)
+			{
+				storeSettingsParent.Notify_SettingsChanged();
+			}
+			if (removeIfEmpty)
+			{
+				map.storageGroups.Notify_MemberRemoved(this);
+			}
+			BillUtility.Notify_ISlotGroupRemoved(this);
 		}
+	}
 
-		// Token: 0x0600EB6F RID: 60271 RVA: 0x004464C8 File Offset: 0x004446C8
-		public void ExposeData()
+	public StorageSettings GetStoreSettings()
+	{
+		return settings;
+	}
+
+	public StorageSettings GetParentStoreSettings()
+	{
+		if (members.Any())
 		{
-			Scribe_Values.Look<int>(ref this.loadID, "loadID", 0, false);
-			Scribe_Values.Look<string>(ref this.label, "label", null, false);
-			Scribe_References.Look<Map>(ref this.map, "map", false);
-			Scribe_Collections.Look<IStorageGroupMember>(ref this.members, "members", LookMode.Reference, Array.Empty<object>());
-			Scribe_Deep.Look<StorageSettings>(ref this.settings, "settings", new object[]
+			return members[0].ParentStoreSettings;
+		}
+		return null;
+	}
+
+	public void Notify_SettingsChanged()
+	{
+		foreach (IStorageGroupMember member in members)
+		{
+			if (member is ISlotGroupParent slotGroupParent)
 			{
-				this
-			});
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
-			{
-				this.members.RemoveAll((IStorageGroupMember x) => x == null);
+				slotGroupParent.Notify_SettingsChanged();
 			}
 		}
+	}
 
-		// Token: 0x04009C35 RID: 39989
-		public int loadID;
+	public string GetUniqueLoadID()
+	{
+		return "StorageGroup_" + loadID;
+	}
 
-		// Token: 0x04009C36 RID: 39990
-		private Map map;
-
-		// Token: 0x04009C37 RID: 39991
-		[LoadAlias("buildings")]
-		public List<IStorageGroupMember> members = new List<IStorageGroupMember>();
-
-		// Token: 0x04009C38 RID: 39992
-		private StorageSettings settings;
-
-		// Token: 0x04009C39 RID: 39993
-		private string label;
-
-		// Token: 0x04009C3A RID: 39994
-		private static readonly List<IntVec3> tmpCellsList = new List<IntVec3>(128);
-
-		// Token: 0x04009C3B RID: 39995
-		private static readonly List<IHaulSource> tmpHaulSourceList = new List<IHaulSource>(64);
+	public void ExposeData()
+	{
+		Scribe_Values.Look(ref loadID, "loadID", 0);
+		Scribe_Values.Look(ref label, "label");
+		Scribe_References.Look(ref map, "map");
+		Scribe_Collections.Look(ref members, "members", LookMode.Reference);
+		Scribe_Deep.Look(ref settings, "settings", this);
+		if (Scribe.mode == LoadSaveMode.PostLoadInit)
+		{
+			members.RemoveAll((IStorageGroupMember x) => x == null);
+		}
 	}
 }

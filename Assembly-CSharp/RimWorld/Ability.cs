@@ -1,5 +1,7 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -10,1547 +12,1757 @@ using Verse.AI;
 using Verse.AI.Group;
 using Verse.Sound;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Ability : IVerbOwner, IExposable, ILoadReferenceable
 {
-	// Token: 0x020021DA RID: 8666
-	public class Ability : IVerbOwner, IExposable, ILoadReferenceable
+	[CompilerGenerated]
+	private sealed class _003CGetAffectedTargets_003Ed__81 : IEnumerable<LocalTargetInfo>, IEnumerable, IEnumerator<LocalTargetInfo>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001CE2 RID: 7394
-		// (get) Token: 0x0600BD76 RID: 48502 RVA: 0x0036EC3B File Offset: 0x0036CE3B
-		public Verb verb
+		private int _003C_003E1__state;
+
+		private LocalTargetInfo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Ability _003C_003E4__this;
+
+		private LocalTargetInfo target;
+
+		public LocalTargetInfo _003C_003E3__target;
+
+		private IEnumerator<LocalTargetInfo> _003C_003E7__wrap1;
+
+		LocalTargetInfo IEnumerator<LocalTargetInfo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.verbTracker.PrimaryVerb;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600BD77 RID: 48503 RVA: 0x0036EC48 File Offset: 0x0036CE48
-		public string UniqueVerbOwnerID()
+		object IEnumerator.Current
 		{
-			return this.GetUniqueLoadID();
-		}
-
-		// Token: 0x0600BD78 RID: 48504 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public bool VerbsStillUsableBy(Pawn p)
-		{
-			return true;
-		}
-
-		// Token: 0x17001CE3 RID: 7395
-		// (get) Token: 0x0600BD79 RID: 48505 RVA: 0x0036EC50 File Offset: 0x0036CE50
-		// (set) Token: 0x0600BD7A RID: 48506 RVA: 0x0036EC58 File Offset: 0x0036CE58
-		public List<Tool> Tools { get; private set; }
-
-		// Token: 0x17001CE4 RID: 7396
-		// (get) Token: 0x0600BD7B RID: 48507 RVA: 0x0036EC61 File Offset: 0x0036CE61
-		public Thing ConstantCaster
-		{
+			[DebuggerHidden]
 			get
 			{
-				return this.pawn;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001CE5 RID: 7397
-		// (get) Token: 0x0600BD7C RID: 48508 RVA: 0x0036EC69 File Offset: 0x0036CE69
-		public List<VerbProperties> VerbProperties
+		[DebuggerHidden]
+		public _003CGetAffectedTargets_003Ed__81(int _003C_003E1__state)
 		{
-			get
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				return new List<VerbProperties>
+				try
 				{
-					this.def.verbProperties
-				};
-			}
-		}
-
-		// Token: 0x17001CE6 RID: 7398
-		// (get) Token: 0x0600BD7D RID: 48509 RVA: 0x0036EC81 File Offset: 0x0036CE81
-		public ImplementOwnerTypeDef ImplementOwnerTypeDef
-		{
-			get
-			{
-				return ImplementOwnerTypeDefOf.NativeVerb;
-			}
-		}
-
-		// Token: 0x17001CE7 RID: 7399
-		// (get) Token: 0x0600BD7E RID: 48510 RVA: 0x0036EC88 File Offset: 0x0036CE88
-		public int CooldownTicksRemaining
-		{
-			get
-			{
-				if (this.inCooldown)
-				{
-					return Mathf.Max(this.cooldownEndTick - GenTicks.TicksGame, 0);
 				}
-				return 0;
-			}
-		}
-
-		// Token: 0x17001CE8 RID: 7400
-		// (get) Token: 0x0600BD7F RID: 48511 RVA: 0x0036ECA6 File Offset: 0x0036CEA6
-		public int CooldownTicksTotal
-		{
-			get
-			{
-				return this.cooldownDuration;
-			}
-		}
-
-		// Token: 0x17001CE9 RID: 7401
-		// (get) Token: 0x0600BD80 RID: 48512 RVA: 0x0036ECAE File Offset: 0x0036CEAE
-		public bool UsesCharges
-		{
-			get
-			{
-				return this.maxCharges > 0;
-			}
-		}
-
-		// Token: 0x17001CEA RID: 7402
-		// (get) Token: 0x0600BD81 RID: 48513 RVA: 0x0036ECB9 File Offset: 0x0036CEB9
-		// (set) Token: 0x0600BD82 RID: 48514 RVA: 0x0036ECC1 File Offset: 0x0036CEC1
-		public int RemainingCharges
-		{
-			get
-			{
-				return this.charges;
-			}
-			set
-			{
-				this.charges = value;
-			}
-		}
-
-		// Token: 0x17001CEB RID: 7403
-		// (get) Token: 0x0600BD83 RID: 48515 RVA: 0x0036ECCA File Offset: 0x0036CECA
-		public string GizmoExtraLabel
-		{
-			get
-			{
-				if (!this.UsesCharges)
+				finally
 				{
-					return null;
+					_003C_003Em__Finally1();
 				}
-				return string.Format("{0} / {1}", this.charges, this.maxCharges);
 			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x17001CEC RID: 7404
-		// (get) Token: 0x0600BD84 RID: 48516 RVA: 0x0036ECF6 File Offset: 0x0036CEF6
-		public VerbTracker VerbTracker
+		private bool MoveNext()
 		{
-			get
+			try
 			{
-				if (this.verbTracker == null)
+				int num = _003C_003E1__state;
+				Ability ability = _003C_003E4__this;
+				switch (num)
 				{
-					this.verbTracker = new VerbTracker(this);
-				}
-				return this.verbTracker;
-			}
-		}
-
-		// Token: 0x17001CED RID: 7405
-		// (get) Token: 0x0600BD85 RID: 48517 RVA: 0x0036ED14 File Offset: 0x0036CF14
-		public bool HasCooldown
-		{
-			get
-			{
-				return this.def.cooldownTicksRange != default(IntRange) || (this.def.groupDef != null && this.def.groupDef.cooldownTicks > 0) || this.def.hasExternallyHandledCooldown;
-			}
-		}
-
-		// Token: 0x17001CEE RID: 7406
-		// (get) Token: 0x0600BD86 RID: 48518 RVA: 0x0036ED69 File Offset: 0x0036CF69
-		public bool OnCooldown
-		{
-			get
-			{
-				return this.HasCooldown && this.inCooldown;
-			}
-		}
-
-		// Token: 0x17001CEF RID: 7407
-		// (get) Token: 0x0600BD87 RID: 48519 RVA: 0x0036ED7C File Offset: 0x0036CF7C
-		public virtual AcceptanceReport CanCast
-		{
-			get
-			{
-				if (!this.comps.NullOrEmpty<AbilityComp>())
-				{
-					for (int i = 0; i < this.comps.Count; i++)
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					if (ability.def.HasAreaOfEffect && ability.def.canUseAoeToGetTargets)
 					{
-						if (!this.comps[i].CanCast)
-						{
-							return false;
-						}
+						_003C_003E7__wrap1 = (from t in GenRadial.RadialDistinctThingsAround(target.Cell, ability.pawn.Map, ability.def.EffectRadius, useCenter: true).Where(ability.ValidAOEAffectedTarget)
+							select new LocalTargetInfo(t)).GetEnumerator();
+						_003C_003E1__state = -3;
+						goto IL_00e5;
 					}
-				}
-				if (this.inCooldown)
-				{
-					return this.def.cooldownPerCharge && this.charges > 0;
-				}
-				if (this.UsesCharges)
-				{
-					return this.charges > 0;
-				}
-				if (this.pawn.MapHeld != null)
-				{
-					if (this.pawn.MapHeld.IsPocketMap)
+					_003C_003E2__current = target;
+					_003C_003E1__state = 2;
+					return true;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_00e5;
+				case 2:
 					{
-						if (this.VerbProperties.Any((VerbProperties vp) => !vp.useableInPocketMaps))
-						{
-							return "CannotUseReason_PocketMap".Translate(this.pawn.MapHeld.generatorDef.label);
-						}
+						_003C_003E1__state = -1;
+						break;
 					}
-					if (this.pawn.MapHeld.Biome.inVacuum)
+					IL_00e5:
+					if (_003C_003E7__wrap1.MoveNext())
 					{
-						if (this.VerbProperties.Any((VerbProperties vp) => !vp.useableInVacuum))
-						{
-							return "CannotFunctionInVacuum".Translate();
-						}
+						LocalTargetInfo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
 					}
-					PlanetTile tile = this.pawn.MapHeld.Tile;
-					if (this.LayerPreventsCast(this.pawn.MapHeld.Tile))
-					{
-						PlanetLayerDef layerDef = tile.LayerDef;
-						return "CannotPerformPlanetLayer".Translate(layerDef.gerundLabel.Named("GERUND"), layerDef.label.Named("LAYER"));
-					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					break;
 				}
-				return true;
-			}
-		}
-
-		// Token: 0x0600BD88 RID: 48520 RVA: 0x0036EF38 File Offset: 0x0036D138
-		private bool LayerPreventsCast(PlanetTile tile)
-		{
-			if (!tile.Valid)
-			{
 				return false;
 			}
-			foreach (VerbProperties verbProperties in this.VerbProperties)
+			catch
 			{
-				if (!verbProperties.layerWhitelist.NullOrEmpty<PlanetLayerDef>() && !verbProperties.layerWhitelist.Contains(tile.LayerDef))
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<LocalTargetInfo> IEnumerable<LocalTargetInfo>.GetEnumerator()
+		{
+			_003CGetAffectedTargets_003Ed__81 _003CGetAffectedTargets_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CGetAffectedTargets_003Ed__ = this;
+			}
+			else
+			{
+				_003CGetAffectedTargets_003Ed__ = new _003CGetAffectedTargets_003Ed__81(0)
 				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CGetAffectedTargets_003Ed__.target = _003C_003E3__target;
+			return _003CGetAffectedTargets_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<LocalTargetInfo>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGetGizmos_003Ed__102 : IEnumerable<Command>, IEnumerable, IEnumerator<Command>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Command _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Ability _003C_003E4__this;
+
+		Command IEnumerator<Command>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetGizmos_003Ed__102(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			Ability CS_0024_003C_003E8__locals15 = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (CS_0024_003C_003E8__locals15.gizmo == null)
+				{
+					CS_0024_003C_003E8__locals15.gizmo = (Command)Activator.CreateInstance(CS_0024_003C_003E8__locals15.def.gizmoClass, CS_0024_003C_003E8__locals15, CS_0024_003C_003E8__locals15.pawn);
+					CS_0024_003C_003E8__locals15.gizmo.Order = CS_0024_003C_003E8__locals15.def.uiOrder;
+				}
+				if (!CS_0024_003C_003E8__locals15.pawn.Drafted || CS_0024_003C_003E8__locals15.def.showWhenDrafted)
+				{
+					_003C_003E2__current = CS_0024_003C_003E8__locals15.gizmo;
+					_003C_003E1__state = 1;
 					return true;
 				}
-				if (!verbProperties.layerBlacklist.NullOrEmpty<PlanetLayerDef>() && verbProperties.layerBlacklist.Contains(tile.LayerDef))
+				goto IL_00ab;
+			case 1:
+				_003C_003E1__state = -1;
+				goto IL_00ab;
+			case 2:
 				{
+					_003C_003E1__state = -1;
+					break;
+				}
+				IL_00ab:
+				if (DebugSettings.ShowDevGizmos && CS_0024_003C_003E8__locals15.inCooldown && CS_0024_003C_003E8__locals15.CanCooldown)
+				{
+					_003C_003E2__current = new Command_Action
+					{
+						defaultLabel = "DEV: Reset cooldown",
+						action = delegate
+						{
+							CS_0024_003C_003E8__locals15.inCooldown = false;
+							CS_0024_003C_003E8__locals15.charges = CS_0024_003C_003E8__locals15.maxCharges;
+						}
+					};
+					_003C_003E1__state = 2;
 					return true;
 				}
+				break;
 			}
 			return false;
 		}
 
-		// Token: 0x17001CF0 RID: 7408
-		// (get) Token: 0x0600BD89 RID: 48521 RVA: 0x0036EFDC File Offset: 0x0036D1DC
-		public bool Casting
+		bool IEnumerator.MoveNext()
 		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Command> IEnumerable<Command>.GetEnumerator()
+		{
+			_003CGetGizmos_003Ed__102 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CGetGizmos_003Ed__102(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Command>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGetGizmosExtra_003Ed__103 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Ability _003C_003E4__this;
+
+		private List<AbilityComp>.Enumerator _003C_003E7__wrap1;
+
+		private IEnumerator<Gizmo> _003C_003E7__wrap2;
+
+		Gizmo IEnumerator<Gizmo>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				if (!this.verb.WarmingUp)
-				{
-					Pawn_JobTracker jobs = this.pawn.jobs;
-					if (!(((jobs != null) ? jobs.curDriver : null) is JobDriver_CastAbilityWorld) || this.pawn.CurJob.ability != this)
-					{
-						Pawn pawn = this.pawn;
-						return ((pawn != null) ? pawn.CurJobDef : null) != null && this.pawn.CurJobDef.abilityCasting && this.pawn.CurJob.ability == this;
-					}
-				}
-				return true;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001CF1 RID: 7409
-		// (get) Token: 0x0600BD8A RID: 48522 RVA: 0x0036F064 File Offset: 0x0036D264
-		public bool CanCooldown
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (!this.HasCooldown)
-				{
-					return false;
-				}
-				if (this.def.waitForJobEnd)
-				{
-					Pawn_JobTracker jobs = this.pawn.jobs;
-					JobDef jobDef;
-					if (jobs == null)
-					{
-						jobDef = null;
-					}
-					else
-					{
-						Job curJob = jobs.curJob;
-						jobDef = ((curJob != null) ? curJob.def : null);
-					}
-					return jobDef != this.def.jobDef;
-				}
-				return true;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001CF2 RID: 7410
-		// (get) Token: 0x0600BD8B RID: 48523 RVA: 0x0036F0C0 File Offset: 0x0036D2C0
-		public virtual string Tooltip
+		[DebuggerHidden]
+		public _003CGetGizmosExtra_003Ed__103(int _003C_003E1__state)
 		{
-			get
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if ((uint)(num - -4) <= 1u || num == 1)
 			{
-				string text = this.def.GetTooltip(this.pawn);
-				if (this.UsesCharges)
+				try
 				{
-					if (this.def.cooldownPerCharge)
+					if (num == -4 || num == 1)
 					{
-						text = text + "\n\n" + "Uses".Translate().ToString() + string.Format(": {0} / {1}", this.charges, this.maxCharges);
-					}
-					else
-					{
-						text = text + "\n\n" + "Charges".Translate().ToString() + string.Format(": {0} / {1}", this.charges, this.maxCharges);
-					}
-				}
-				if (this.EffectComps != null)
-				{
-					foreach (CompAbilityEffect compAbilityEffect in this.EffectComps)
-					{
-						string text2 = compAbilityEffect.ExtraTooltipPart();
-						if (!text2.NullOrEmpty())
+						try
 						{
-							text = text + "\n\n" + text2;
+						}
+						finally
+						{
+							_003C_003Em__Finally2();
 						}
 					}
 				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = default(List<AbilityComp>.Enumerator);
+			_003C_003E7__wrap2 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				Ability ability = _003C_003E4__this;
+				if (num != 0)
+				{
+					if (num != 1)
+					{
+						return false;
+					}
+					_003C_003E1__state = -4;
+					goto IL_0098;
+				}
+				_003C_003E1__state = -1;
+				if (ability.comps != null)
+				{
+					_003C_003E7__wrap1 = ability.comps.GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_00b2;
+				}
+				goto IL_00d1;
+				IL_0098:
+				if (_003C_003E7__wrap2.MoveNext())
+				{
+					Gizmo current = _003C_003E7__wrap2.Current;
+					_003C_003E2__current = current;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				_003C_003Em__Finally2();
+				_003C_003E7__wrap2 = null;
+				goto IL_00b2;
+				IL_00b2:
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					AbilityComp current2 = _003C_003E7__wrap1.Current;
+					_003C_003E7__wrap2 = current2.CompGetGizmosExtra().GetEnumerator();
+					_003C_003E1__state = -4;
+					goto IL_0098;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = default(List<AbilityComp>.Enumerator);
+				goto IL_00d1;
+				IL_00d1:
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap1/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -3;
+			if (_003C_003E7__wrap2 != null)
+			{
+				_003C_003E7__wrap2.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CGetGizmosExtra_003Ed__103 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CGetGizmosExtra_003Ed__103(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	public int Id = -1;
+
+	public Pawn pawn;
+
+	public AbilityDef def;
+
+	public List<AbilityComp> comps;
+
+	protected Command gizmo;
+
+	private VerbTracker verbTracker;
+
+	private bool inCooldown;
+
+	private int cooldownDuration;
+
+	private int cooldownEndTick;
+
+	private Mote warmupMote;
+
+	private Effecter warmupEffecter;
+
+	private Sustainer soundCast;
+
+	private bool wasCastingOnPrevTick;
+
+	private int charges;
+
+	public int maxCharges;
+
+	public int lastCastTick = -99999;
+
+	public Precept sourcePrecept;
+
+	private List<PreCastAction> preCastActions = new List<PreCastAction>();
+
+	private List<Tuple<Effecter, TargetInfo, TargetInfo>> maintainedEffecters = new List<Tuple<Effecter, TargetInfo, TargetInfo>>();
+
+	private List<Mote> customWarmupMotes = new List<Mote>();
+
+	private bool needToRecacheWarmupMotes = true;
+
+	private List<CompAbilityEffect> effectComps;
+
+	private readonly List<LocalTargetInfo> affectedTargetsCached = new List<LocalTargetInfo>();
+
+	private TargetInfo verbTargetInfoTmp = null;
+
+	public Verb verb => verbTracker.PrimaryVerb;
+
+	public List<Tool> Tools { get; private set; }
+
+	public Thing ConstantCaster => pawn;
+
+	public List<VerbProperties> VerbProperties => new List<VerbProperties> { def.verbProperties };
+
+	public ImplementOwnerTypeDef ImplementOwnerTypeDef => ImplementOwnerTypeDefOf.NativeVerb;
+
+	public int CooldownTicksRemaining
+	{
+		get
+		{
+			if (inCooldown)
+			{
+				return Mathf.Max(cooldownEndTick - GenTicks.TicksGame, 0);
+			}
+			return 0;
+		}
+	}
+
+	public int CooldownTicksTotal => cooldownDuration;
+
+	public bool UsesCharges => maxCharges > 0;
+
+	public int RemainingCharges
+	{
+		get
+		{
+			return charges;
+		}
+		set
+		{
+			charges = value;
+		}
+	}
+
+	public string GizmoExtraLabel
+	{
+		get
+		{
+			if (!UsesCharges)
+			{
+				return null;
+			}
+			return $"{charges} / {maxCharges}";
+		}
+	}
+
+	public VerbTracker VerbTracker
+	{
+		get
+		{
+			if (verbTracker == null)
+			{
+				verbTracker = new VerbTracker(this);
+			}
+			return verbTracker;
+		}
+	}
+
+	public bool HasCooldown
+	{
+		get
+		{
+			if (!(def.cooldownTicksRange != default(IntRange)) && (def.groupDef == null || def.groupDef.cooldownTicks <= 0))
+			{
+				return def.hasExternallyHandledCooldown;
+			}
+			return true;
+		}
+	}
+
+	public bool OnCooldown
+	{
+		get
+		{
+			if (HasCooldown)
+			{
+				return inCooldown;
+			}
+			return false;
+		}
+	}
+
+	public virtual AcceptanceReport CanCast
+	{
+		get
+		{
+			if (!comps.NullOrEmpty())
+			{
+				for (int i = 0; i < comps.Count; i++)
+				{
+					if (!comps[i].CanCast)
+					{
+						return false;
+					}
+				}
+			}
+			if (inCooldown)
+			{
+				return def.cooldownPerCharge && charges > 0;
+			}
+			if (UsesCharges)
+			{
+				return charges > 0;
+			}
+			if (pawn.MapHeld != null)
+			{
+				if (pawn.MapHeld.IsPocketMap && VerbProperties.Any((VerbProperties vp) => !vp.useableInPocketMaps))
+				{
+					return "CannotUseReason_PocketMap".Translate(pawn.MapHeld.generatorDef.label);
+				}
+				if (pawn.MapHeld.Biome.inVacuum && VerbProperties.Any((VerbProperties vp) => !vp.useableInVacuum))
+				{
+					return "CannotFunctionInVacuum".Translate();
+				}
+				PlanetTile tile = pawn.MapHeld.Tile;
+				if (LayerPreventsCast(pawn.MapHeld.Tile))
+				{
+					PlanetLayerDef layerDef = tile.LayerDef;
+					return "CannotPerformPlanetLayer".Translate(layerDef.gerundLabel.Named("GERUND"), layerDef.label.Named("LAYER"));
+				}
+			}
+			return true;
+		}
+	}
+
+	public bool Casting
+	{
+		get
+		{
+			if (!verb.WarmingUp && (!(pawn.jobs?.curDriver is JobDriver_CastAbilityWorld) || pawn.CurJob.ability != this))
+			{
+				if (pawn?.CurJobDef != null && pawn.CurJobDef.abilityCasting)
+				{
+					return pawn.CurJob.ability == this;
+				}
+				return false;
+			}
+			return true;
+		}
+	}
+
+	public bool CanCooldown
+	{
+		get
+		{
+			if (HasCooldown)
+			{
+				if (def.waitForJobEnd)
+				{
+					return pawn.jobs?.curJob?.def != def.jobDef;
+				}
+				return true;
+			}
+			return false;
+		}
+	}
+
+	public virtual string Tooltip
+	{
+		get
+		{
+			string text = def.GetTooltip(pawn);
+			if (UsesCharges)
+			{
+				text = ((!def.cooldownPerCharge) ? (text + "\n\n" + "Charges".Translate().ToString() + $": {charges} / {maxCharges}") : (text + "\n\n" + "Uses".Translate().ToString() + $": {charges} / {maxCharges}"));
+			}
+			if (EffectComps != null)
+			{
+				foreach (CompAbilityEffect effectComp in EffectComps)
+				{
+					string text2 = effectComp.ExtraTooltipPart();
+					if (!text2.NullOrEmpty())
+					{
+						text = text + "\n\n" + text2;
+					}
+				}
+			}
+			return text;
+		}
+	}
+
+	public virtual bool CanQueueCast
+	{
+		get
+		{
+			if (!CanCast)
+			{
+				return false;
+			}
+			if (pawn.jobs == null)
+			{
+				return false;
+			}
+			int num = 0;
+			foreach (Job item in pawn.jobs.AllJobs())
+			{
+				if (SameForQueueing(item))
+				{
+					num++;
+					if (!UsesCharges || num >= charges)
+					{
+						return false;
+					}
+				}
+			}
+			return true;
+			bool SameForQueueing(Job j)
+			{
+				if (j.verbToUse != verb)
+				{
+					if (def.groupDef != null && j.ability != null)
+					{
+						return j.ability.def.groupDef == def.groupDef;
+					}
+					return false;
+				}
+				return true;
+			}
+		}
+	}
+
+	public List<CompAbilityEffect> EffectComps
+	{
+		get
+		{
+			if (effectComps == null)
+			{
+				IEnumerable<CompAbilityEffect> enumerable = CompsOfType<CompAbilityEffect>();
+				effectComps = ((enumerable == null) ? new List<CompAbilityEffect>() : enumerable.ToList());
+			}
+			return effectComps;
+		}
+	}
+
+	public string UniqueVerbOwnerID()
+	{
+		return GetUniqueLoadID();
+	}
+
+	public bool VerbsStillUsableBy(Pawn p)
+	{
+		return true;
+	}
+
+	private bool LayerPreventsCast(PlanetTile tile)
+	{
+		if (!tile.Valid)
+		{
+			return false;
+		}
+		foreach (VerbProperties verbProperty in VerbProperties)
+		{
+			if (!verbProperty.layerWhitelist.NullOrEmpty() && !verbProperty.layerWhitelist.Contains(tile.LayerDef))
+			{
+				return true;
+			}
+			if (!verbProperty.layerBlacklist.NullOrEmpty() && verbProperty.layerBlacklist.Contains(tile.LayerDef))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public Ability()
+	{
+	}
+
+	public Ability(Pawn pawn)
+	{
+		this.pawn = pawn;
+	}
+
+	public Ability(Pawn pawn, Precept sourcePrecept)
+	{
+		this.pawn = pawn;
+		this.sourcePrecept = sourcePrecept;
+	}
+
+	public Ability(Pawn pawn, AbilityDef def)
+	{
+		this.pawn = pawn;
+		this.def = def;
+		Initialize();
+	}
+
+	public Ability(Pawn pawn, Precept sourcePrecept, AbilityDef def)
+	{
+		this.pawn = pawn;
+		this.def = def;
+		this.sourcePrecept = sourcePrecept;
+		Initialize();
+	}
+
+	public virtual bool CanApplyOn(LocalTargetInfo target)
+	{
+		if (effectComps != null)
+		{
+			foreach (CompAbilityEffect effectComp in effectComps)
+			{
+				if (!effectComp.CanApplyOn(target, null))
+				{
+					return false;
+				}
+			}
+		}
+		if (!def.verbProperties.targetable && def.verbProperties.targetParams.canTargetSelf)
+		{
+			return target == pawn;
+		}
+		return true;
+	}
+
+	public virtual bool CanApplyOn(GlobalTargetInfo target)
+	{
+		if (EffectComps != null)
+		{
+			foreach (CompAbilityEffect effectComp in EffectComps)
+			{
+				if (!effectComp.CanApplyOn(target))
+				{
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	public virtual bool AICanTargetNow(LocalTargetInfo target)
+	{
+		if (!def.aiCanUse || !CanCast)
+		{
+			return false;
+		}
+		if (!CanApplyOn(target))
+		{
+			return false;
+		}
+		if (EffectComps != null)
+		{
+			foreach (CompAbilityEffect effectComp in EffectComps)
+			{
+				if (!effectComp.AICanTargetNow(target))
+				{
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	public virtual LocalTargetInfo AIGetAOETarget()
+	{
+		if (def.ai_SearchAOEForTargets)
+		{
+			foreach (Thing item in GenRadial.RadialDistinctThingsAround(pawn.Position, pawn.Map, verb.EffectiveRange, useCenter: true))
+			{
+				if (!ValidAOEAffectedTarget(item))
+				{
+					continue;
+				}
+				bool flag = true;
+				foreach (CompAbilityEffect effectComp in EffectComps)
+				{
+					if (!effectComp.AICanTargetNow(item))
+					{
+						flag = false;
+						break;
+					}
+				}
+				if (flag)
+				{
+					return item;
+				}
+			}
+		}
+		return LocalTargetInfo.Invalid;
+	}
+
+	public Window ConfirmationDialog(LocalTargetInfo target, Action action)
+	{
+		if (EffectComps != null)
+		{
+			foreach (CompAbilityEffect effectComp in effectComps)
+			{
+				Window window = effectComp.ConfirmationDialog(target, action);
+				if (window != null)
+				{
+					return window;
+				}
+			}
+		}
+		if (!def.confirmationDialogText.NullOrEmpty())
+		{
+			return Dialog_MessageBox.CreateConfirmation(def.confirmationDialogText.Formatted(pawn.Named("PAWN")), action);
+		}
+		return null;
+	}
+
+	public Window ConfirmationDialog(GlobalTargetInfo target, Action action)
+	{
+		if (EffectComps != null)
+		{
+			foreach (CompAbilityEffect effectComp in EffectComps)
+			{
+				Window window = effectComp.ConfirmationDialog(target, action);
+				if (window != null)
+				{
+					return window;
+				}
+			}
+		}
+		if (!def.confirmationDialogText.NullOrEmpty())
+		{
+			return Dialog_MessageBox.CreateConfirmation(def.confirmationDialogText.Formatted(pawn.Named("PAWN")), action);
+		}
+		return null;
+	}
+
+	protected virtual void PreActivate(LocalTargetInfo? target)
+	{
+		if (UsesCharges)
+		{
+			charges--;
+		}
+		if (HasCooldown)
+		{
+			if (def.groupDef != null)
+			{
+				int num = (def.overrideGroupCooldown ? def.cooldownTicksRange.RandomInRange : def.groupDef.cooldownTicks);
+				foreach (Ability item in this.pawn.abilities.AllAbilitiesForReading)
+				{
+					item.Notify_GroupStartedCooldown(def.groupDef, num);
+				}
+				if (this.pawn.Ideo != null)
+				{
+					foreach (Precept_Ritual item2 in this.pawn.Ideo.PreceptsListForReading.OfType<Precept_Ritual>())
+					{
+						if (item2.def.useCooldownFromAbilityGroupDef == def.groupDef)
+						{
+							item2.Notify_CooldownFromAbilityStarted(num);
+						}
+					}
+				}
+			}
+			else if (UsesCharges)
+			{
+				if (def.cooldownPerCharge)
+				{
+					if (charges < maxCharges && CooldownTicksRemaining == 0)
+					{
+						StartCooldown(def.cooldownTicksRange.RandomInRange);
+					}
+				}
+				else if (charges <= 0)
+				{
+					StartCooldown(def.cooldownTicksRange.RandomInRange);
+				}
+			}
+			else
+			{
+				StartCooldown(def.cooldownTicksRange.RandomInRange);
+			}
+		}
+		if (ConstantCaster is Pawn pawn)
+		{
+			pawn.equipment?.Notify_AbilityUsed(this);
+		}
+		if (def.writeCombatLog)
+		{
+			Find.BattleLog.Add(new BattleLogEntry_AbilityUsed(this.pawn, target?.Thing, def, RulePackDefOf.Event_AbilityUsed));
+		}
+		customWarmupMotes.Clear();
+	}
+
+	public virtual bool Activate(LocalTargetInfo target, LocalTargetInfo dest)
+	{
+		PreActivate(target);
+		if (def.hostile && pawn.mindState != null)
+		{
+			pawn.mindState.lastCombatantTick = Find.TickManager.TicksGame;
+		}
+		if (EffectComps.Any())
+		{
+			affectedTargetsCached.Clear();
+			affectedTargetsCached.AddRange(GetAffectedTargets(target));
+			ApplyEffects(EffectComps, affectedTargetsCached, dest);
+		}
+		preCastActions.Clear();
+		return true;
+	}
+
+	public virtual bool Activate(GlobalTargetInfo target)
+	{
+		PreActivate(null);
+		if (def.hostile && pawn.mindState != null)
+		{
+			pawn.mindState.lastCombatantTick = Find.TickManager.TicksGame;
+		}
+		if (EffectComps.Any())
+		{
+			ApplyEffects(EffectComps, target);
+		}
+		preCastActions.Clear();
+		return true;
+	}
+
+	[IteratorStateMachine(typeof(_003CGetAffectedTargets_003Ed__81))]
+	public IEnumerable<LocalTargetInfo> GetAffectedTargets(LocalTargetInfo target)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetAffectedTargets_003Ed__81(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__target = target
+		};
+	}
+
+	private bool ValidAOEAffectedTarget(Thing target)
+	{
+		if (!verb.targetParams.CanTarget(target))
+		{
+			return false;
+		}
+		if (target.Fogged())
+		{
+			return false;
+		}
+		for (int i = 0; i < EffectComps.Count; i++)
+		{
+			if (!EffectComps[i].Valid((LocalTargetInfo)target, throwMessages: false))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public virtual void QueueCastingJob(LocalTargetInfo target, LocalTargetInfo destination)
+	{
+		if (!CanQueueCast || !CanApplyOn(target))
+		{
+			return;
+		}
+		if (verb.verbProps.nonInterruptingSelfCast)
+		{
+			verb.TryStartCastOn(verb.Caster);
+			return;
+		}
+		ShowCastingConfirmationIfNeeded(target, delegate
+		{
+			needToRecacheWarmupMotes = true;
+			pawn.jobs.TryTakeOrderedJob(GetJob(target, destination), JobTag.Misc);
+		});
+	}
+
+	public virtual Job GetJob(LocalTargetInfo target, LocalTargetInfo destination)
+	{
+		Job job = JobMaker.MakeJob(def.jobDef ?? JobDefOf.CastAbilityOnThing);
+		job.verbToUse = verb;
+		job.targetA = target;
+		job.targetB = destination;
+		job.ability = this;
+		needToRecacheWarmupMotes = true;
+		return job;
+	}
+
+	public virtual void QueueCastingJob(GlobalTargetInfo target)
+	{
+		if (!CanQueueCast || !CanApplyOn(target))
+		{
+			return;
+		}
+		ShowCastingConfirmationIfNeeded(target, delegate
+		{
+			if (!pawn.IsCaravanMember())
+			{
+				Job job = JobMaker.MakeJob(def.jobDef ?? JobDefOf.CastAbilityOnWorldTile);
+				job.verbToUse = verb;
+				job.globalTarget = target;
+				job.ability = this;
+				needToRecacheWarmupMotes = true;
+				pawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
+			}
+			else
+			{
+				Activate(target);
+			}
+		});
+	}
+
+	private void ShowCastingConfirmationIfNeeded(LocalTargetInfo target, Action cast)
+	{
+		Window window = ConfirmationDialog(target, cast);
+		if (window == null)
+		{
+			cast();
+		}
+		else
+		{
+			Find.WindowStack.Add(window);
+		}
+	}
+
+	private void ShowCastingConfirmationIfNeeded(GlobalTargetInfo target, Action cast)
+	{
+		Window window = ConfirmationDialog(target, cast);
+		if (window == null)
+		{
+			cast();
+		}
+		else
+		{
+			Find.WindowStack.Add(window);
+		}
+	}
+
+	public bool ValidateGlobalTarget(GlobalTargetInfo target)
+	{
+		for (int i = 0; i < EffectComps.Count; i++)
+		{
+			if (!EffectComps[i].Valid(target, throwMessages: true))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public virtual bool GizmoDisabled(out string reason)
+	{
+		if (CanCooldown && OnCooldown && (!def.cooldownPerCharge || charges == 0))
+		{
+			reason = "AbilityOnCooldown".Translate(CooldownTicksRemaining.ToStringTicksToPeriod()).Resolve();
+			return true;
+		}
+		if (UsesCharges && charges <= 0)
+		{
+			reason = "AbilityNoCharges".Translate();
+			return true;
+		}
+		if (!comps.NullOrEmpty())
+		{
+			for (int i = 0; i < comps.Count; i++)
+			{
+				if (comps[i].GizmoDisabled(out reason))
+				{
+					return true;
+				}
+			}
+		}
+		AcceptanceReport canCast = CanCast;
+		if (!canCast.Accepted)
+		{
+			reason = canCast.Reason;
+			return true;
+		}
+		Lord lord = pawn.GetLord();
+		if (lord != null)
+		{
+			AcceptanceReport acceptanceReport = lord.AbilityAllowed(this);
+			if (!acceptanceReport)
+			{
+				reason = acceptanceReport.Reason;
+				return true;
+			}
+		}
+		if (!pawn.Drafted && def.disableGizmoWhileUndrafted && pawn.GetCaravan() == null && !DebugSettings.ShowDevGizmos)
+		{
+			reason = "AbilityDisabledUndrafted".Translate();
+			return true;
+		}
+		if (pawn.DevelopmentalStage.Baby())
+		{
+			reason = "IsIncapped".Translate(pawn.LabelShort, pawn);
+			return true;
+		}
+		if (pawn.Downed)
+		{
+			reason = "CommandDisabledUnconscious".TranslateWithBackup("CommandCallRoyalAidUnconscious").Formatted(pawn);
+			return true;
+		}
+		if (pawn.Deathresting)
+		{
+			reason = "CommandDisabledDeathresting".Translate(pawn);
+			return true;
+		}
+		if (def.casterMustBeCapableOfViolence && pawn.WorkTagIsDisabled(WorkTags.Violent))
+		{
+			reason = "IsIncapableOfViolence".Translate(pawn.LabelShort, pawn);
+			return true;
+		}
+		if (!CanQueueCast)
+		{
+			reason = "AbilityAlreadyQueued".Translate();
+			return true;
+		}
+		reason = null;
+		return false;
+	}
+
+	public virtual void AbilityTick()
+	{
+		VerbTracker.VerbsTick();
+		if (def.emittedFleck != null && Casting && pawn.IsHashIntervalTick(def.emissionInterval))
+		{
+			FleckMaker.ThrowMetaIcon(verb.CurrentTarget.Cell, pawn.Map, def.emittedFleck, 0.75f);
+		}
+		MoteTick();
+		EffectersTick();
+		WarmupTick();
+		CastingTick();
+		SoundTick();
+		CooldownTick();
+		if (!comps.NullOrEmpty())
+		{
+			for (int i = 0; i < comps.Count; i++)
+			{
+				comps[i].CompTick();
+			}
+		}
+		if (wasCastingOnPrevTick && !Casting)
+		{
+			lastCastTick = Find.TickManager.TicksGame;
+		}
+		wasCastingOnPrevTick = Casting;
+	}
+
+	private void MoteTick()
+	{
+		if ((def.warmupMote == null && def.WarmupMoteSocialSymbol == null) || !Casting)
+		{
+			return;
+		}
+		Vector3 vector = pawn.DrawPos + def.moteDrawOffset;
+		vector += (verb.CurrentTarget.CenterVector3 - vector) * def.moteOffsetAmountTowardsTarget;
+		if (warmupMote == null || warmupMote.Destroyed)
+		{
+			if (def.WarmupMoteSocialSymbol == null)
+			{
+				if (def.warmupMote.thingClass != typeof(MoteAttached))
+				{
+					warmupMote = MoteMaker.MakeStaticMote(vector, pawn.Map, def.warmupMote);
+				}
+				else
+				{
+					warmupMote = MoteMaker.MakeAttachedOverlay((verb.CurrentTarget.Thing as Corpse) ?? verb.CurrentTarget.Thing, def.warmupMote, Vector3.zero);
+				}
+			}
+			else
+			{
+				warmupMote = MoteMaker.MakeInteractionBubble(pawn, verb.CurrentTarget.Pawn, ThingDefOf.Mote_Speech, def.WarmupMoteSocialSymbol, null);
+			}
+		}
+		else
+		{
+			if (!(warmupMote is MoteAttached))
+			{
+				warmupMote.exactPosition = vector;
+			}
+			warmupMote.Maintain();
+		}
+	}
+
+	private void EffectersTick()
+	{
+		for (int num = maintainedEffecters.Count - 1; num >= 0; num--)
+		{
+			Effecter item = maintainedEffecters[num].Item1;
+			if (item.ticksLeft > 0)
+			{
+				TargetInfo item2 = maintainedEffecters[num].Item2;
+				TargetInfo item3 = maintainedEffecters[num].Item3;
+				item.EffectTick(item2, item3);
+				item.ticksLeft--;
+			}
+			else
+			{
+				item.Cleanup();
+				maintainedEffecters.RemoveAt(num);
+			}
+		}
+	}
+
+	private void CooldownTick()
+	{
+		if (!inCooldown || !CanCooldown || CooldownTicksRemaining > 0)
+		{
+			return;
+		}
+		inCooldown = false;
+		if (UsesCharges && def.cooldownPerCharge)
+		{
+			charges = Mathf.Min(++charges, maxCharges);
+			if (charges < maxCharges)
+			{
+				StartCooldown(def.cooldownTicksRange.RandomInRange);
+			}
+		}
+		if (PawnUtility.ShouldSendNotificationAbout(pawn))
+		{
+			if (def.sendLetterOnCooldownComplete)
+			{
+				Find.LetterStack.ReceiveLetter("AbilityReadyLabel".Translate(def.LabelCap), "AbilityReadyText".Translate(pawn, def.label), LetterDefOf.NeutralEvent, new LookTargets(pawn));
+			}
+			if (def.sendMessageOnCooldownComplete && !pawn.IsPrisoner)
+			{
+				Messages.Message("AbilityReadyLabel".Translate(def.LabelCap, pawn.Named("PAWN")), pawn, MessageTypeDefOf.NeutralEvent);
+			}
+		}
+		if (def.groupDef != null && def.groupDef.sendMessageOnCooldownComplete && MessagesRepeatAvoider.MessageShowAllowed(def.groupDef.label + "_offcooldown", 1f))
+		{
+			string text = (from a in pawn.abilities.AllAbilitiesForReading
+				where a.def.groupDef == def.groupDef
+				select a.def.label).ToCommaList();
+			Messages.Message("AbilitiesReadyLabel".Translate(text, pawn.Named("PAWN")), pawn, MessageTypeDefOf.NeutralEvent);
+		}
+	}
+
+	private void CastingTick()
+	{
+		if (!Casting)
+		{
+			if (warmupEffecter != null)
+			{
+				warmupEffecter.Cleanup();
+				warmupEffecter = null;
+			}
+			return;
+		}
+		SetupWarmupEffecter(verb.CurrentTarget);
+		warmupEffecter?.EffectTick(verbTargetInfoTmp, verbTargetInfoTmp);
+		if (needToRecacheWarmupMotes && !EffectComps.NullOrEmpty() && verb.CurrentTarget.Thing != null)
+		{
+			customWarmupMotes.Clear();
+			foreach (CompAbilityEffect effectComp in effectComps)
+			{
+				foreach (Mote item in effectComp.CustomWarmupMotes(verb.CurrentTarget))
+				{
+					customWarmupMotes.Add(item);
+				}
+			}
+			needToRecacheWarmupMotes = false;
+		}
+		foreach (Mote customWarmupMote in customWarmupMotes)
+		{
+			customWarmupMote.Maintain();
+		}
+	}
+
+	private void WarmupTick()
+	{
+		if (!verb.WarmingUp)
+		{
+			return;
+		}
+		if (!(def.targetWorldCell ? CanApplyOn(pawn.CurJob.globalTarget) : CanApplyOn(verb.CurrentTarget)) && def.targetRequired)
+		{
+			if (def.targetWorldCell)
+			{
+				pawn.jobs.EndCurrentJob(JobCondition.Incompletable);
+			}
+			verb.WarmupStance?.Interrupt();
+			verb.Reset();
+			customWarmupMotes.Clear();
+			preCastActions.Clear();
+			return;
+		}
+		for (int num = preCastActions.Count - 1; num >= 0; num--)
+		{
+			if (preCastActions[num].ticksAwayFromCast >= verb.WarmupTicksLeft)
+			{
+				preCastActions[num].action(verb.CurrentTarget, verb.CurrentDestination);
+				preCastActions.RemoveAt(num);
+			}
+		}
+	}
+
+	private void SoundTick()
+	{
+		if (!pawn.Spawned || !Casting)
+		{
+			return;
+		}
+		if (def.warmupSound != null)
+		{
+			if (soundCast == null || soundCast.Ended)
+			{
+				soundCast = def.warmupSound.TrySpawnSustainer(SoundInfo.InMap(new TargetInfo(pawn.Position, pawn.Map), MaintenanceType.PerTick));
+			}
+			else
+			{
+				soundCast.Maintain();
+			}
+		}
+		if (!wasCastingOnPrevTick && def.warmupStartSound != null)
+		{
+			def.warmupStartSound.PlayOneShot(new TargetInfo(pawn.Position, pawn.Map));
+		}
+		if (def.warmupPreEndSound != null && verb.WarmupTicksLeft == def.warmupPreEndSoundSeconds.SecondsToTicks())
+		{
+			def.warmupPreEndSound.PlayOneShot(new TargetInfo(pawn.Position, pawn.Map));
+		}
+	}
+
+	private void SetupWarmupEffecter(LocalTargetInfo target)
+	{
+		if (warmupEffecter != null || def.warmupEffecter == null)
+		{
+			return;
+		}
+		if (!def.useAverageTargetPositionForWarmupEffecter || EffectComps.NullOrEmpty())
+		{
+			if (target.Thing != null)
+			{
+				warmupEffecter = def.warmupEffecter.SpawnAttached(target.Thing, pawn.MapHeld);
+				verbTargetInfoTmp = target.Thing;
+			}
+			else
+			{
+				warmupEffecter = def.warmupEffecter.Spawn(target.Cell, pawn.MapHeld);
+				verbTargetInfoTmp = new TargetInfo(target.Cell, pawn.MapHeld);
+			}
+		}
+		else
+		{
+			Vector3 zero = Vector3.zero;
+			IEnumerable<LocalTargetInfo> affectedTargets = GetAffectedTargets(target);
+			foreach (LocalTargetInfo item in affectedTargets)
+			{
+				zero += item.Cell.ToVector3Shifted();
+			}
+			zero /= (float)affectedTargets.Count();
+			warmupEffecter = def.warmupEffecter.Spawn(zero.ToIntVec3(), pawn.MapHeld);
+			verbTargetInfoTmp = new TargetInfo(zero.ToIntVec3(), pawn.MapHeld);
+		}
+		warmupEffecter.Trigger(verbTargetInfoTmp, verbTargetInfoTmp);
+	}
+
+	public void Notify_StartedCasting()
+	{
+		for (int i = 0; i < EffectComps.Count; i++)
+		{
+			preCastActions.AddRange(EffectComps[i].GetPreCastActions());
+		}
+	}
+
+	public void DrawEffectPreviews(LocalTargetInfo target)
+	{
+		for (int i = 0; i < EffectComps.Count; i++)
+		{
+			EffectComps[i].DrawEffectPreview(target);
+		}
+	}
+
+	public bool GizmosVisible()
+	{
+		if (!EffectComps.NullOrEmpty())
+		{
+			foreach (CompAbilityEffect effectComp in EffectComps)
+			{
+				if (effectComp.ShouldHideGizmo)
+				{
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	[IteratorStateMachine(typeof(_003CGetGizmos_003Ed__102))]
+	public virtual IEnumerable<Command> GetGizmos()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetGizmos_003Ed__102(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	[IteratorStateMachine(typeof(_003CGetGizmosExtra_003Ed__103))]
+	public virtual IEnumerable<Gizmo> GetGizmosExtra()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetGizmosExtra_003Ed__103(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public string GetInspectString()
+	{
+		if (comps.NullOrEmpty())
+		{
+			return null;
+		}
+		StringBuilder stringBuilder = new StringBuilder();
+		for (int i = 0; i < comps.Count; i++)
+		{
+			string text = comps[i].CompInspectStringExtra();
+			if (!text.NullOrEmpty())
+			{
+				if (stringBuilder.Length != 0)
+				{
+					stringBuilder.AppendLine();
+				}
+				stringBuilder.Append(text);
+			}
+		}
+		return stringBuilder.ToString();
+	}
+
+	private void ApplyEffects(IEnumerable<CompAbilityEffect> effects, List<LocalTargetInfo> targets, LocalTargetInfo dest)
+	{
+		foreach (LocalTargetInfo target in targets)
+		{
+			ApplyEffects(effects, target, dest);
+		}
+		foreach (CompAbilityEffect effect in effects)
+		{
+			effect.PostApplied(targets, pawn.MapHeld);
+		}
+	}
+
+	public void StartCooldown(int ticks)
+	{
+		inCooldown = true;
+		cooldownEndTick = GenTicks.TicksGame + ticks;
+		cooldownDuration = ticks;
+		if (!def.cooldownPerCharge)
+		{
+			charges = maxCharges;
+		}
+	}
+
+	public void ResetCooldown()
+	{
+		inCooldown = false;
+	}
+
+	public void Notify_GroupStartedCooldown(AbilityGroupDef group, int ticks)
+	{
+		if (group == def.groupDef)
+		{
+			StartCooldown(ticks);
+		}
+	}
+
+	protected virtual void ApplyEffects(IEnumerable<CompAbilityEffect> effects, LocalTargetInfo target, LocalTargetInfo dest)
+	{
+		foreach (CompAbilityEffect effect in effects)
+		{
+			effect.Apply(target, dest);
+		}
+	}
+
+	protected virtual void ApplyEffects(IEnumerable<CompAbilityEffect> effects, GlobalTargetInfo target)
+	{
+		foreach (CompAbilityEffect effect in effects)
+		{
+			effect.Apply(target);
+		}
+	}
+
+	public virtual void OnGizmoUpdate()
+	{
+		foreach (CompAbilityEffect effectComp in EffectComps)
+		{
+			effectComp.OnGizmoUpdate();
+		}
+	}
+
+	public IEnumerable<T> CompsOfType<T>() where T : AbilityComp
+	{
+		return comps?.Where((AbilityComp c) => c is T).Cast<T>();
+	}
+
+	public T CompOfType<T>() where T : AbilityComp
+	{
+		return comps?.FirstOrDefault((AbilityComp c) => c is T) as T;
+	}
+
+	public void Initialize()
+	{
+		if (def.comps.Any())
+		{
+			comps = new List<AbilityComp>();
+			for (int i = 0; i < def.comps.Count; i++)
+			{
+				AbilityComp abilityComp = null;
+				try
+				{
+					abilityComp = (AbilityComp)Activator.CreateInstance(def.comps[i].compClass);
+					abilityComp.parent = this;
+					comps.Add(abilityComp);
+					abilityComp.Initialize(def.comps[i]);
+				}
+				catch (Exception ex)
+				{
+					Log.Error("Could not instantiate or initialize an AbilityComp: " + ex);
+					comps.Remove(abilityComp);
+				}
+			}
+		}
+		if (Id == -1)
+		{
+			Id = Find.UniqueIDsManager.GetNextAbilityID();
+		}
+		if (VerbTracker.PrimaryVerb is IAbilityVerb abilityVerb)
+		{
+			abilityVerb.Ability = this;
+		}
+		if (def.charges > 0)
+		{
+			maxCharges = def.charges;
+			charges = maxCharges;
+		}
+	}
+
+	public float FinalPsyfocusCost(LocalTargetInfo target)
+	{
+		if (def.AnyCompOverridesPsyfocusCost)
+		{
+			foreach (AbilityComp comp in comps)
+			{
+				if (comp.props.OverridesPsyfocusCost)
+				{
+					return comp.PsyfocusCostForTarget(target);
+				}
+			}
+		}
+		return def.PsyfocusCost;
+	}
+
+	public float HemogenCost()
+	{
+		if (comps != null)
+		{
+			foreach (AbilityComp comp in comps)
+			{
+				if (comp is CompAbilityEffect_HemogenCost compAbilityEffect_HemogenCost)
+				{
+					return compAbilityEffect_HemogenCost.Props.hemogenCost;
+				}
+			}
+		}
+		return 0f;
+	}
+
+	public TaggedString WorldMapExtraLabel(GlobalTargetInfo t)
+	{
+		foreach (CompAbilityEffect effectComp in EffectComps)
+		{
+			string text = effectComp.WorldMapExtraLabel(t);
+			if (text != null)
+			{
 				return text;
 			}
 		}
+		return null;
+	}
 
-		// Token: 0x17001CF3 RID: 7411
-		// (get) Token: 0x0600BD8C RID: 48524 RVA: 0x0036F1E4 File Offset: 0x0036D3E4
-		public virtual bool CanQueueCast
+	public void AddEffecterToMaintain(Effecter eff, IntVec3 pos, int ticks, Map map = null)
+	{
+		eff.ticksLeft = ticks;
+		TargetInfo targetInfo = new TargetInfo(pos, map ?? pawn.Map);
+		maintainedEffecters.Add(new Tuple<Effecter, TargetInfo, TargetInfo>(eff, targetInfo, targetInfo));
+	}
+
+	public void AddEffecterToMaintain(Effecter eff, IntVec3 posA, IntVec3 posB, int ticks, Map map = null)
+	{
+		eff.ticksLeft = ticks;
+		TargetInfo item = new TargetInfo(posA, map ?? pawn.Map);
+		TargetInfo item2 = new TargetInfo(posB, map ?? pawn.Map);
+		maintainedEffecters.Add(new Tuple<Effecter, TargetInfo, TargetInfo>(eff, item, item2));
+	}
+
+	public virtual void ExposeData()
+	{
+		Scribe_Defs.Look(ref def, "def");
+		if (def == null)
 		{
-			get
+			return;
+		}
+		Scribe_Values.Look(ref Id, "Id", -1);
+		if (Scribe.mode == LoadSaveMode.LoadingVars)
+		{
+			if (Id == -1)
 			{
-				if (!this.CanCast)
-				{
-					return false;
-				}
-				if (this.pawn.jobs == null)
-				{
-					return false;
-				}
-				int num = 0;
-				foreach (Job j in this.pawn.jobs.AllJobs())
-				{
-					if (this.<get_CanQueueCast>g__SameForQueueing|63_0(j))
-					{
-						num++;
-						if (!this.UsesCharges || num >= this.charges)
-						{
-							return false;
-						}
-					}
-				}
-				return true;
+				Id = Find.UniqueIDsManager.GetNextAbilityID();
+			}
+			Initialize();
+		}
+		Scribe_References.Look(ref sourcePrecept, "sourcePrecept");
+		Scribe_Deep.Look(ref verbTracker, "verbTracker", this);
+		Scribe_Values.Look(ref inCooldown, "inCooldown", defaultValue: false);
+		Scribe_Values.Look(ref cooldownEndTick, "cooldownEndTick", 0);
+		Scribe_Values.Look(ref cooldownDuration, "cooldownDuration", 0);
+		Scribe_Values.Look(ref maxCharges, "maxCharges", def.charges);
+		Scribe_Values.Look(ref charges, "charges", def.charges);
+		Scribe_Values.Look(ref lastCastTick, "lastCastTick", -99999);
+		ExposeBackCompatability();
+		if (comps != null)
+		{
+			for (int i = 0; i < comps.Count; i++)
+			{
+				comps[i].PostExposeData();
 			}
 		}
+	}
 
-		// Token: 0x17001CF4 RID: 7412
-		// (get) Token: 0x0600BD8D RID: 48525 RVA: 0x0036F27C File Offset: 0x0036D47C
-		public List<CompAbilityEffect> EffectComps
+	private void ExposeBackCompatability()
+	{
+		int value = 0;
+		int value2 = 0;
+		Scribe_Values.Look(ref value, "cooldownTicks", 0);
+		Scribe_Values.Look(ref value2, "cooldownTicksDuration", 0);
+		if (Scribe.mode == LoadSaveMode.LoadingVars && value != 0 && value2 != 0)
 		{
-			get
-			{
-				if (this.effectComps == null)
-				{
-					IEnumerable<CompAbilityEffect> enumerable = this.CompsOfType<CompAbilityEffect>();
-					this.effectComps = ((enumerable == null) ? new List<CompAbilityEffect>() : enumerable.ToList<CompAbilityEffect>());
-				}
-				return this.effectComps;
-			}
+			inCooldown = true;
+			cooldownDuration = value2;
+			cooldownEndTick = GenTicks.TicksGame + value;
 		}
-
-		// Token: 0x0600BD8E RID: 48526 RVA: 0x0036F2B4 File Offset: 0x0036D4B4
-		public Ability()
-		{
-		}
-
-		// Token: 0x0600BD8F RID: 48527 RVA: 0x0036F318 File Offset: 0x0036D518
-		public Ability(Pawn pawn)
-		{
-			this.pawn = pawn;
-		}
-
-		// Token: 0x0600BD90 RID: 48528 RVA: 0x0036F384 File Offset: 0x0036D584
-		public Ability(Pawn pawn, Precept sourcePrecept)
-		{
-			this.pawn = pawn;
-			this.sourcePrecept = sourcePrecept;
-		}
-
-		// Token: 0x0600BD91 RID: 48529 RVA: 0x0036F3F8 File Offset: 0x0036D5F8
-		public Ability(Pawn pawn, AbilityDef def)
-		{
-			this.pawn = pawn;
-			this.def = def;
-			this.Initialize();
-		}
-
-		// Token: 0x0600BD92 RID: 48530 RVA: 0x0036F470 File Offset: 0x0036D670
-		public Ability(Pawn pawn, Precept sourcePrecept, AbilityDef def)
-		{
-			this.pawn = pawn;
-			this.def = def;
-			this.sourcePrecept = sourcePrecept;
-			this.Initialize();
-		}
-
-		// Token: 0x0600BD93 RID: 48531 RVA: 0x0036F4F0 File Offset: 0x0036D6F0
-		public virtual bool CanApplyOn(LocalTargetInfo target)
-		{
-			if (this.effectComps != null)
-			{
-				using (List<CompAbilityEffect>.Enumerator enumerator = this.effectComps.GetEnumerator())
-				{
-					while (enumerator.MoveNext())
-					{
-						if (!enumerator.Current.CanApplyOn(target, null))
-						{
-							return false;
-						}
-					}
-				}
-			}
-			return this.def.verbProperties.targetable || !this.def.verbProperties.targetParams.canTargetSelf || target == this.pawn;
-		}
-
-		// Token: 0x0600BD94 RID: 48532 RVA: 0x0036F594 File Offset: 0x0036D794
-		public virtual bool CanApplyOn(GlobalTargetInfo target)
-		{
-			if (this.EffectComps != null)
-			{
-				using (List<CompAbilityEffect>.Enumerator enumerator = this.EffectComps.GetEnumerator())
-				{
-					while (enumerator.MoveNext())
-					{
-						if (!enumerator.Current.CanApplyOn(target))
-						{
-							return false;
-						}
-					}
-				}
-				return true;
-			}
-			return true;
-		}
-
-		// Token: 0x0600BD95 RID: 48533 RVA: 0x0036F5F8 File Offset: 0x0036D7F8
-		public virtual bool AICanTargetNow(LocalTargetInfo target)
-		{
-			if (!this.def.aiCanUse || !this.CanCast)
-			{
-				return false;
-			}
-			if (!this.CanApplyOn(target))
-			{
-				return false;
-			}
-			if (this.EffectComps != null)
-			{
-				using (List<CompAbilityEffect>.Enumerator enumerator = this.EffectComps.GetEnumerator())
-				{
-					while (enumerator.MoveNext())
-					{
-						if (!enumerator.Current.AICanTargetNow(target))
-						{
-							return false;
-						}
-					}
-				}
-				return true;
-			}
-			return true;
-		}
-
-		// Token: 0x0600BD96 RID: 48534 RVA: 0x0036F684 File Offset: 0x0036D884
-		public virtual LocalTargetInfo AIGetAOETarget()
-		{
-			if (this.def.ai_SearchAOEForTargets)
-			{
-				foreach (Thing thing in GenRadial.RadialDistinctThingsAround(this.pawn.Position, this.pawn.Map, this.verb.EffectiveRange, true))
-				{
-					if (this.ValidAOEAffectedTarget(thing))
-					{
-						bool flag = true;
-						using (List<CompAbilityEffect>.Enumerator enumerator2 = this.EffectComps.GetEnumerator())
-						{
-							while (enumerator2.MoveNext())
-							{
-								if (!enumerator2.Current.AICanTargetNow(thing))
-								{
-									flag = false;
-									break;
-								}
-							}
-						}
-						if (flag)
-						{
-							return thing;
-						}
-					}
-				}
-			}
-			return LocalTargetInfo.Invalid;
-		}
-
-		// Token: 0x0600BD97 RID: 48535 RVA: 0x0036F768 File Offset: 0x0036D968
-		public Window ConfirmationDialog(LocalTargetInfo target, Action action)
-		{
-			if (this.EffectComps != null)
-			{
-				foreach (CompAbilityEffect compAbilityEffect in this.effectComps)
-				{
-					Window window = compAbilityEffect.ConfirmationDialog(target, action);
-					if (window != null)
-					{
-						return window;
-					}
-				}
-			}
-			if (!this.def.confirmationDialogText.NullOrEmpty())
-			{
-				return Dialog_MessageBox.CreateConfirmation(this.def.confirmationDialogText.Formatted(this.pawn.Named("PAWN")), action, false, null, WindowLayer.Dialog);
-			}
-			return null;
-		}
-
-		// Token: 0x0600BD98 RID: 48536 RVA: 0x0036F80C File Offset: 0x0036DA0C
-		public Window ConfirmationDialog(GlobalTargetInfo target, Action action)
-		{
-			if (this.EffectComps != null)
-			{
-				foreach (CompAbilityEffect compAbilityEffect in this.EffectComps)
-				{
-					Window window = compAbilityEffect.ConfirmationDialog(target, action);
-					if (window != null)
-					{
-						return window;
-					}
-				}
-			}
-			if (!this.def.confirmationDialogText.NullOrEmpty())
-			{
-				return Dialog_MessageBox.CreateConfirmation(this.def.confirmationDialogText.Formatted(this.pawn.Named("PAWN")), action, false, null, WindowLayer.Dialog);
-			}
-			return null;
-		}
-
-		// Token: 0x0600BD99 RID: 48537 RVA: 0x0036F8B0 File Offset: 0x0036DAB0
-		protected virtual void PreActivate(LocalTargetInfo? target)
-		{
-			if (this.UsesCharges)
-			{
-				this.charges--;
-			}
-			if (this.HasCooldown)
-			{
-				if (this.def.groupDef != null)
-				{
-					int num = this.def.overrideGroupCooldown ? this.def.cooldownTicksRange.RandomInRange : this.def.groupDef.cooldownTicks;
-					foreach (Ability ability in this.pawn.abilities.AllAbilitiesForReading)
-					{
-						ability.Notify_GroupStartedCooldown(this.def.groupDef, num);
-					}
-					if (this.pawn.Ideo == null)
-					{
-						goto IL_191;
-					}
-					using (IEnumerator<Precept_Ritual> enumerator2 = this.pawn.Ideo.PreceptsListForReading.OfType<Precept_Ritual>().GetEnumerator())
-					{
-						while (enumerator2.MoveNext())
-						{
-							Precept_Ritual precept_Ritual = enumerator2.Current;
-							if (precept_Ritual.def.useCooldownFromAbilityGroupDef == this.def.groupDef)
-							{
-								precept_Ritual.Notify_CooldownFromAbilityStarted(num);
-							}
-						}
-						goto IL_191;
-					}
-				}
-				if (this.UsesCharges)
-				{
-					if (this.def.cooldownPerCharge)
-					{
-						if (this.charges < this.maxCharges && this.CooldownTicksRemaining == 0)
-						{
-							this.StartCooldown(this.def.cooldownTicksRange.RandomInRange);
-						}
-					}
-					else if (this.charges <= 0)
-					{
-						this.StartCooldown(this.def.cooldownTicksRange.RandomInRange);
-					}
-				}
-				else
-				{
-					this.StartCooldown(this.def.cooldownTicksRange.RandomInRange);
-				}
-			}
-			IL_191:
-			Pawn pawn = this.ConstantCaster as Pawn;
-			if (pawn != null)
-			{
-				Pawn_EquipmentTracker equipment = pawn.equipment;
-				if (equipment != null)
-				{
-					equipment.Notify_AbilityUsed(this);
-				}
-			}
-			if (this.def.writeCombatLog)
-			{
-				Find.BattleLog.Add(new BattleLogEntry_AbilityUsed(this.pawn, (target != null) ? target.GetValueOrDefault().Thing : null, this.def, RulePackDefOf.Event_AbilityUsed));
-			}
-			this.customWarmupMotes.Clear();
-		}
-
-		// Token: 0x0600BD9A RID: 48538 RVA: 0x0036FAE0 File Offset: 0x0036DCE0
-		public virtual bool Activate(LocalTargetInfo target, LocalTargetInfo dest)
-		{
-			this.PreActivate(new LocalTargetInfo?(target));
-			if (this.def.hostile && this.pawn.mindState != null)
-			{
-				this.pawn.mindState.lastCombatantTick = Find.TickManager.TicksGame;
-			}
-			if (this.EffectComps.Any<CompAbilityEffect>())
-			{
-				this.affectedTargetsCached.Clear();
-				this.affectedTargetsCached.AddRange(this.GetAffectedTargets(target));
-				this.ApplyEffects(this.EffectComps, this.affectedTargetsCached, dest);
-			}
-			this.preCastActions.Clear();
-			return true;
-		}
-
-		// Token: 0x0600BD9B RID: 48539 RVA: 0x0036FB78 File Offset: 0x0036DD78
-		public virtual bool Activate(GlobalTargetInfo target)
-		{
-			this.PreActivate(null);
-			if (this.def.hostile && this.pawn.mindState != null)
-			{
-				this.pawn.mindState.lastCombatantTick = Find.TickManager.TicksGame;
-			}
-			if (this.EffectComps.Any<CompAbilityEffect>())
-			{
-				this.ApplyEffects(this.EffectComps, target);
-			}
-			this.preCastActions.Clear();
-			return true;
-		}
-
-		// Token: 0x0600BD9C RID: 48540 RVA: 0x0036FBEE File Offset: 0x0036DDEE
-		public IEnumerable<LocalTargetInfo> GetAffectedTargets(LocalTargetInfo target)
-		{
-			if (this.def.HasAreaOfEffect && this.def.canUseAoeToGetTargets)
-			{
-				foreach (LocalTargetInfo localTargetInfo in from t in GenRadial.RadialDistinctThingsAround(target.Cell, this.pawn.Map, this.def.EffectRadius, true).Where(new Func<Thing, bool>(this.ValidAOEAffectedTarget))
-				select new LocalTargetInfo(t))
-				{
-					yield return localTargetInfo;
-				}
-				IEnumerator<LocalTargetInfo> enumerator = null;
-			}
-			else
-			{
-				yield return target;
-			}
-			yield break;
-			yield break;
-		}
-
-		// Token: 0x0600BD9D RID: 48541 RVA: 0x0036FC08 File Offset: 0x0036DE08
-		private bool ValidAOEAffectedTarget(Thing target)
-		{
-			if (!this.verb.targetParams.CanTarget(target, null))
-			{
-				return false;
-			}
-			if (target.Fogged())
-			{
-				return false;
-			}
-			for (int i = 0; i < this.EffectComps.Count; i++)
-			{
-				if (!this.EffectComps[i].Valid(target, false))
-				{
-					return false;
-				}
-			}
-			return true;
-		}
-
-		// Token: 0x0600BD9E RID: 48542 RVA: 0x0036FC70 File Offset: 0x0036DE70
-		public virtual void QueueCastingJob(LocalTargetInfo target, LocalTargetInfo destination)
-		{
-			if (!this.CanQueueCast || !this.CanApplyOn(target))
-			{
-				return;
-			}
-			if (this.verb.verbProps.nonInterruptingSelfCast)
-			{
-				this.verb.TryStartCastOn(this.verb.Caster, false, true, false, false);
-				return;
-			}
-			this.ShowCastingConfirmationIfNeeded(target, delegate()
-			{
-				this.needToRecacheWarmupMotes = true;
-				this.pawn.jobs.TryTakeOrderedJob(this.GetJob(target, destination), new JobTag?(JobTag.Misc), false);
-			});
-		}
-
-		// Token: 0x0600BD9F RID: 48543 RVA: 0x0036FCFC File Offset: 0x0036DEFC
-		public virtual Job GetJob(LocalTargetInfo target, LocalTargetInfo destination)
-		{
-			Job job = JobMaker.MakeJob(this.def.jobDef ?? JobDefOf.CastAbilityOnThing);
-			job.verbToUse = this.verb;
-			job.targetA = target;
-			job.targetB = destination;
-			job.ability = this;
-			this.needToRecacheWarmupMotes = true;
-			return job;
-		}
-
-		// Token: 0x0600BDA0 RID: 48544 RVA: 0x0036FD4C File Offset: 0x0036DF4C
-		public virtual void QueueCastingJob(GlobalTargetInfo target)
-		{
-			if (!this.CanQueueCast || !this.CanApplyOn(target))
-			{
-				return;
-			}
-			this.ShowCastingConfirmationIfNeeded(target, delegate()
-			{
-				if (!this.pawn.IsCaravanMember())
-				{
-					Job job = JobMaker.MakeJob(this.def.jobDef ?? JobDefOf.CastAbilityOnWorldTile);
-					job.verbToUse = this.verb;
-					job.globalTarget = target;
-					job.ability = this;
-					this.needToRecacheWarmupMotes = true;
-					this.pawn.jobs.TryTakeOrderedJob(job, new JobTag?(JobTag.Misc), false);
-					return;
-				}
-				this.Activate(target);
-			});
-		}
-
-		// Token: 0x0600BDA1 RID: 48545 RVA: 0x0036FD9C File Offset: 0x0036DF9C
-		private void ShowCastingConfirmationIfNeeded(LocalTargetInfo target, Action cast)
-		{
-			Window window = this.ConfirmationDialog(target, cast);
-			if (window == null)
-			{
-				cast();
-				return;
-			}
-			Find.WindowStack.Add(window);
-		}
-
-		// Token: 0x0600BDA2 RID: 48546 RVA: 0x0036FDC8 File Offset: 0x0036DFC8
-		private void ShowCastingConfirmationIfNeeded(GlobalTargetInfo target, Action cast)
-		{
-			Window window = this.ConfirmationDialog(target, cast);
-			if (window == null)
-			{
-				cast();
-				return;
-			}
-			Find.WindowStack.Add(window);
-		}
-
-		// Token: 0x0600BDA3 RID: 48547 RVA: 0x0036FDF4 File Offset: 0x0036DFF4
-		public bool ValidateGlobalTarget(GlobalTargetInfo target)
-		{
-			for (int i = 0; i < this.EffectComps.Count; i++)
-			{
-				if (!this.EffectComps[i].Valid(target, true))
-				{
-					return false;
-				}
-			}
-			return true;
-		}
-
-		// Token: 0x0600BDA4 RID: 48548 RVA: 0x0036FE30 File Offset: 0x0036E030
-		public virtual bool GizmoDisabled(out string reason)
-		{
-			if (this.CanCooldown && this.OnCooldown && (!this.def.cooldownPerCharge || this.charges == 0))
-			{
-				reason = "AbilityOnCooldown".Translate(this.CooldownTicksRemaining.ToStringTicksToPeriod(true, false, true, true, false)).Resolve();
-				return true;
-			}
-			if (this.UsesCharges && this.charges <= 0)
-			{
-				reason = "AbilityNoCharges".Translate();
-				return true;
-			}
-			if (!this.comps.NullOrEmpty<AbilityComp>())
-			{
-				for (int i = 0; i < this.comps.Count; i++)
-				{
-					if (this.comps[i].GizmoDisabled(out reason))
-					{
-						return true;
-					}
-				}
-			}
-			AcceptanceReport canCast = this.CanCast;
-			if (!canCast.Accepted)
-			{
-				reason = canCast.Reason;
-				return true;
-			}
-			Lord lord = this.pawn.GetLord();
-			if (lord != null)
-			{
-				AcceptanceReport report = lord.AbilityAllowed(this);
-				if (!report)
-				{
-					reason = report.Reason;
-					return true;
-				}
-			}
-			if (!this.pawn.Drafted && this.def.disableGizmoWhileUndrafted && this.pawn.GetCaravan() == null && !DebugSettings.ShowDevGizmos)
-			{
-				reason = "AbilityDisabledUndrafted".Translate();
-				return true;
-			}
-			if (this.pawn.DevelopmentalStage.Baby())
-			{
-				reason = "IsIncapped".Translate(this.pawn.LabelShort, this.pawn);
-				return true;
-			}
-			if (this.pawn.Downed)
-			{
-				reason = "CommandDisabledUnconscious".TranslateWithBackup("CommandCallRoyalAidUnconscious").Formatted(this.pawn);
-				return true;
-			}
-			if (this.pawn.Deathresting)
-			{
-				reason = "CommandDisabledDeathresting".Translate(this.pawn);
-				return true;
-			}
-			if (this.def.casterMustBeCapableOfViolence && this.pawn.WorkTagIsDisabled(WorkTags.Violent))
-			{
-				reason = "IsIncapableOfViolence".Translate(this.pawn.LabelShort, this.pawn);
-				return true;
-			}
-			if (!this.CanQueueCast)
-			{
-				reason = "AbilityAlreadyQueued".Translate();
-				return true;
-			}
-			reason = null;
-			return false;
-		}
-
-		// Token: 0x0600BDA5 RID: 48549 RVA: 0x00370080 File Offset: 0x0036E280
-		public virtual void AbilityTick()
-		{
-			this.VerbTracker.VerbsTick();
-			if (this.def.emittedFleck != null && this.Casting && this.pawn.IsHashIntervalTick(this.def.emissionInterval))
-			{
-				FleckMaker.ThrowMetaIcon(this.verb.CurrentTarget.Cell, this.pawn.Map, this.def.emittedFleck, 0.75f);
-			}
-			this.MoteTick();
-			this.EffectersTick();
-			this.WarmupTick();
-			this.CastingTick();
-			this.SoundTick();
-			this.CooldownTick();
-			if (!this.comps.NullOrEmpty<AbilityComp>())
-			{
-				for (int i = 0; i < this.comps.Count; i++)
-				{
-					this.comps[i].CompTick();
-				}
-			}
-			if (this.wasCastingOnPrevTick && !this.Casting)
-			{
-				this.lastCastTick = Find.TickManager.TicksGame;
-			}
-			this.wasCastingOnPrevTick = this.Casting;
-		}
-
-		// Token: 0x0600BDA6 RID: 48550 RVA: 0x0037017C File Offset: 0x0036E37C
-		private void MoteTick()
-		{
-			if ((this.def.warmupMote == null && this.def.WarmupMoteSocialSymbol == null) || !this.Casting)
-			{
-				return;
-			}
-			Vector3 vector = this.pawn.DrawPos + this.def.moteDrawOffset;
-			vector += (this.verb.CurrentTarget.CenterVector3 - vector) * this.def.moteOffsetAmountTowardsTarget;
-			if (this.warmupMote != null && !this.warmupMote.Destroyed)
-			{
-				if (!(this.warmupMote is MoteAttached))
-				{
-					this.warmupMote.exactPosition = vector;
-				}
-				this.warmupMote.Maintain();
-				return;
-			}
-			if (!(this.def.WarmupMoteSocialSymbol == null))
-			{
-				this.warmupMote = MoteMaker.MakeInteractionBubble(this.pawn, this.verb.CurrentTarget.Pawn, ThingDefOf.Mote_Speech, this.def.WarmupMoteSocialSymbol, null);
-				return;
-			}
-			if (this.def.warmupMote.thingClass != typeof(MoteAttached))
-			{
-				this.warmupMote = MoteMaker.MakeStaticMote(vector, this.pawn.Map, this.def.warmupMote, 1f, false, 0f);
-				return;
-			}
-			this.warmupMote = MoteMaker.MakeAttachedOverlay((this.verb.CurrentTarget.Thing as Corpse) ?? this.verb.CurrentTarget.Thing, this.def.warmupMote, Vector3.zero, 1f, -1f);
-		}
-
-		// Token: 0x0600BDA7 RID: 48551 RVA: 0x00370334 File Offset: 0x0036E534
-		private void EffectersTick()
-		{
-			for (int i = this.maintainedEffecters.Count - 1; i >= 0; i--)
-			{
-				Effecter item = this.maintainedEffecters[i].Item1;
-				if (item.ticksLeft > 0)
-				{
-					TargetInfo item2 = this.maintainedEffecters[i].Item2;
-					TargetInfo item3 = this.maintainedEffecters[i].Item3;
-					item.EffectTick(item2, item3);
-					item.ticksLeft--;
-				}
-				else
-				{
-					item.Cleanup();
-					this.maintainedEffecters.RemoveAt(i);
-				}
-			}
-		}
-
-		// Token: 0x0600BDA8 RID: 48552 RVA: 0x003703C4 File Offset: 0x0036E5C4
-		private void CooldownTick()
-		{
-			if (!this.inCooldown || !this.CanCooldown || this.CooldownTicksRemaining > 0)
-			{
-				return;
-			}
-			this.inCooldown = false;
-			if (this.UsesCharges && this.def.cooldownPerCharge)
-			{
-				int a2 = this.charges + 1;
-				this.charges = a2;
-				this.charges = Mathf.Min(a2, this.maxCharges);
-				if (this.charges < this.maxCharges)
-				{
-					this.StartCooldown(this.def.cooldownTicksRange.RandomInRange);
-				}
-			}
-			if (PawnUtility.ShouldSendNotificationAbout(this.pawn))
-			{
-				if (this.def.sendLetterOnCooldownComplete)
-				{
-					Find.LetterStack.ReceiveLetter("AbilityReadyLabel".Translate(this.def.LabelCap), "AbilityReadyText".Translate(this.pawn, this.def.label), LetterDefOf.NeutralEvent, new LookTargets(this.pawn), null, null, null, null, 0, true);
-				}
-				if (this.def.sendMessageOnCooldownComplete && !this.pawn.IsPrisoner)
-				{
-					Messages.Message("AbilityReadyLabel".Translate(this.def.LabelCap, this.pawn.Named("PAWN")), this.pawn, MessageTypeDefOf.NeutralEvent, true);
-				}
-			}
-			if (this.def.groupDef != null && this.def.groupDef.sendMessageOnCooldownComplete && MessagesRepeatAvoider.MessageShowAllowed(this.def.groupDef.label + "_offcooldown", 1f))
-			{
-				string value = (from a in this.pawn.abilities.AllAbilitiesForReading
-				where a.def.groupDef == this.def.groupDef
-				select a.def.label).ToCommaList(false, false);
-				Messages.Message("AbilitiesReadyLabel".Translate(value, this.pawn.Named("PAWN")), this.pawn, MessageTypeDefOf.NeutralEvent, true);
-			}
-		}
-
-		// Token: 0x0600BDA9 RID: 48553 RVA: 0x00370600 File Offset: 0x0036E800
-		private void CastingTick()
-		{
-			if (!this.Casting)
-			{
-				if (this.warmupEffecter != null)
-				{
-					this.warmupEffecter.Cleanup();
-					this.warmupEffecter = null;
-				}
-				return;
-			}
-			this.SetupWarmupEffecter(this.verb.CurrentTarget);
-			Effecter effecter = this.warmupEffecter;
-			if (effecter != null)
-			{
-				effecter.EffectTick(this.verbTargetInfoTmp, this.verbTargetInfoTmp);
-			}
-			if (this.needToRecacheWarmupMotes && !this.EffectComps.NullOrEmpty<CompAbilityEffect>() && this.verb.CurrentTarget.Thing != null)
-			{
-				this.customWarmupMotes.Clear();
-				foreach (CompAbilityEffect compAbilityEffect in this.effectComps)
-				{
-					foreach (Mote item in compAbilityEffect.CustomWarmupMotes(this.verb.CurrentTarget))
-					{
-						this.customWarmupMotes.Add(item);
-					}
-				}
-				this.needToRecacheWarmupMotes = false;
-			}
-			foreach (Mote mote in this.customWarmupMotes)
-			{
-				mote.Maintain();
-			}
-		}
-
-		// Token: 0x0600BDAA RID: 48554 RVA: 0x0037076C File Offset: 0x0036E96C
-		private void WarmupTick()
-		{
-			if (!this.verb.WarmingUp)
-			{
-				return;
-			}
-			if (!(this.def.targetWorldCell ? this.CanApplyOn(this.pawn.CurJob.globalTarget) : this.CanApplyOn(this.verb.CurrentTarget)) && this.def.targetRequired)
-			{
-				if (this.def.targetWorldCell)
-				{
-					this.pawn.jobs.EndCurrentJob(JobCondition.Incompletable, true, true);
-				}
-				Stance_Warmup warmupStance = this.verb.WarmupStance;
-				if (warmupStance != null)
-				{
-					warmupStance.Interrupt();
-				}
-				this.verb.Reset();
-				this.customWarmupMotes.Clear();
-				this.preCastActions.Clear();
-				return;
-			}
-			for (int i = this.preCastActions.Count - 1; i >= 0; i--)
-			{
-				if (this.preCastActions[i].ticksAwayFromCast >= this.verb.WarmupTicksLeft)
-				{
-					this.preCastActions[i].action(this.verb.CurrentTarget, this.verb.CurrentDestination);
-					this.preCastActions.RemoveAt(i);
-				}
-			}
-		}
-
-		// Token: 0x0600BDAB RID: 48555 RVA: 0x00370894 File Offset: 0x0036EA94
-		private void SoundTick()
-		{
-			if (!this.pawn.Spawned || !this.Casting)
-			{
-				return;
-			}
-			if (this.def.warmupSound != null)
-			{
-				if (this.soundCast == null || this.soundCast.Ended)
-				{
-					this.soundCast = this.def.warmupSound.TrySpawnSustainer(SoundInfo.InMap(new TargetInfo(this.pawn.Position, this.pawn.Map, false), MaintenanceType.PerTick));
-				}
-				else
-				{
-					this.soundCast.Maintain();
-				}
-			}
-			if (!this.wasCastingOnPrevTick && this.def.warmupStartSound != null)
-			{
-				this.def.warmupStartSound.PlayOneShot(new TargetInfo(this.pawn.Position, this.pawn.Map, false));
-			}
-			if (this.def.warmupPreEndSound != null && this.verb.WarmupTicksLeft == this.def.warmupPreEndSoundSeconds.SecondsToTicks())
-			{
-				this.def.warmupPreEndSound.PlayOneShot(new TargetInfo(this.pawn.Position, this.pawn.Map, false));
-			}
-		}
-
-		// Token: 0x0600BDAC RID: 48556 RVA: 0x003709C0 File Offset: 0x0036EBC0
-		private void SetupWarmupEffecter(LocalTargetInfo target)
-		{
-			if (this.warmupEffecter != null || this.def.warmupEffecter == null)
-			{
-				return;
-			}
-			if (!this.def.useAverageTargetPositionForWarmupEffecter || this.EffectComps.NullOrEmpty<CompAbilityEffect>())
-			{
-				if (target.Thing != null)
-				{
-					this.warmupEffecter = this.def.warmupEffecter.SpawnAttached(target.Thing, this.pawn.MapHeld, 1f);
-					this.verbTargetInfoTmp = target.Thing;
-				}
-				else
-				{
-					this.warmupEffecter = this.def.warmupEffecter.Spawn(target.Cell, this.pawn.MapHeld, 1f);
-					this.verbTargetInfoTmp = new TargetInfo(target.Cell, this.pawn.MapHeld, false);
-				}
-			}
-			else
-			{
-				Vector3 vector = Vector3.zero;
-				IEnumerable<LocalTargetInfo> affectedTargets = this.GetAffectedTargets(target);
-				foreach (LocalTargetInfo localTargetInfo in affectedTargets)
-				{
-					vector += localTargetInfo.Cell.ToVector3Shifted();
-				}
-				vector /= (float)affectedTargets.Count<LocalTargetInfo>();
-				this.warmupEffecter = this.def.warmupEffecter.Spawn(vector.ToIntVec3(), this.pawn.MapHeld, 1f);
-				this.verbTargetInfoTmp = new TargetInfo(vector.ToIntVec3(), this.pawn.MapHeld, false);
-			}
-			this.warmupEffecter.Trigger(this.verbTargetInfoTmp, this.verbTargetInfoTmp, -1);
-		}
-
-		// Token: 0x0600BDAD RID: 48557 RVA: 0x00370B68 File Offset: 0x0036ED68
-		public void Notify_StartedCasting()
-		{
-			for (int i = 0; i < this.EffectComps.Count; i++)
-			{
-				this.preCastActions.AddRange(this.EffectComps[i].GetPreCastActions());
-			}
-		}
-
-		// Token: 0x0600BDAE RID: 48558 RVA: 0x00370BA8 File Offset: 0x0036EDA8
-		public void DrawEffectPreviews(LocalTargetInfo target)
-		{
-			for (int i = 0; i < this.EffectComps.Count; i++)
-			{
-				this.EffectComps[i].DrawEffectPreview(target);
-			}
-		}
-
-		// Token: 0x0600BDAF RID: 48559 RVA: 0x00370BE0 File Offset: 0x0036EDE0
-		public bool GizmosVisible()
-		{
-			if (!this.EffectComps.NullOrEmpty<CompAbilityEffect>())
-			{
-				using (List<CompAbilityEffect>.Enumerator enumerator = this.EffectComps.GetEnumerator())
-				{
-					while (enumerator.MoveNext())
-					{
-						if (enumerator.Current.ShouldHideGizmo)
-						{
-							return false;
-						}
-					}
-				}
-				return true;
-			}
-			return true;
-		}
-
-		// Token: 0x0600BDB0 RID: 48560 RVA: 0x00370C48 File Offset: 0x0036EE48
-		public virtual IEnumerable<Command> GetGizmos()
-		{
-			if (this.gizmo == null)
-			{
-				this.gizmo = (Command)Activator.CreateInstance(this.def.gizmoClass, new object[]
-				{
-					this,
-					this.pawn
-				});
-				this.gizmo.Order = this.def.uiOrder;
-			}
-			if (!this.pawn.Drafted || this.def.showWhenDrafted)
-			{
-				yield return this.gizmo;
-			}
-			if (DebugSettings.ShowDevGizmos && this.inCooldown && this.CanCooldown)
-			{
-				yield return new Command_Action
-				{
-					defaultLabel = "DEV: Reset cooldown",
-					action = delegate()
-					{
-						this.inCooldown = false;
-						this.charges = this.maxCharges;
-					}
-				};
-			}
-			yield break;
-		}
-
-		// Token: 0x0600BDB1 RID: 48561 RVA: 0x00370C58 File Offset: 0x0036EE58
-		public virtual IEnumerable<Gizmo> GetGizmosExtra()
-		{
-			if (this.comps != null)
-			{
-				foreach (AbilityComp abilityComp in this.comps)
-				{
-					foreach (Gizmo gizmo in abilityComp.CompGetGizmosExtra())
-					{
-						yield return gizmo;
-					}
-					IEnumerator<Gizmo> enumerator2 = null;
-				}
-				List<AbilityComp>.Enumerator enumerator = default(List<AbilityComp>.Enumerator);
-			}
-			yield break;
-			yield break;
-		}
-
-		// Token: 0x0600BDB2 RID: 48562 RVA: 0x00370C68 File Offset: 0x0036EE68
-		public string GetInspectString()
-		{
-			if (this.comps.NullOrEmpty<AbilityComp>())
-			{
-				return null;
-			}
-			StringBuilder stringBuilder = new StringBuilder();
-			for (int i = 0; i < this.comps.Count; i++)
-			{
-				string text = this.comps[i].CompInspectStringExtra();
-				if (!text.NullOrEmpty())
-				{
-					if (stringBuilder.Length != 0)
-					{
-						stringBuilder.AppendLine();
-					}
-					stringBuilder.Append(text);
-				}
-			}
-			return stringBuilder.ToString();
-		}
-
-		// Token: 0x0600BDB3 RID: 48563 RVA: 0x00370CD8 File Offset: 0x0036EED8
-		private void ApplyEffects(IEnumerable<CompAbilityEffect> effects, List<LocalTargetInfo> targets, LocalTargetInfo dest)
-		{
-			foreach (LocalTargetInfo target in targets)
-			{
-				this.ApplyEffects(effects, target, dest);
-			}
-			foreach (CompAbilityEffect compAbilityEffect in effects)
-			{
-				compAbilityEffect.PostApplied(targets, this.pawn.MapHeld);
-			}
-		}
-
-		// Token: 0x0600BDB4 RID: 48564 RVA: 0x00370D68 File Offset: 0x0036EF68
-		public void StartCooldown(int ticks)
-		{
-			this.inCooldown = true;
-			this.cooldownEndTick = GenTicks.TicksGame + ticks;
-			this.cooldownDuration = ticks;
-			if (!this.def.cooldownPerCharge)
-			{
-				this.charges = this.maxCharges;
-			}
-		}
-
-		// Token: 0x0600BDB5 RID: 48565 RVA: 0x00370D9E File Offset: 0x0036EF9E
-		public void ResetCooldown()
-		{
-			this.inCooldown = false;
-		}
-
-		// Token: 0x0600BDB6 RID: 48566 RVA: 0x00370DA7 File Offset: 0x0036EFA7
-		public void Notify_GroupStartedCooldown(AbilityGroupDef group, int ticks)
-		{
-			if (group == this.def.groupDef)
-			{
-				this.StartCooldown(ticks);
-			}
-		}
-
-		// Token: 0x0600BDB7 RID: 48567 RVA: 0x00370DC0 File Offset: 0x0036EFC0
-		protected virtual void ApplyEffects(IEnumerable<CompAbilityEffect> effects, LocalTargetInfo target, LocalTargetInfo dest)
-		{
-			foreach (CompAbilityEffect compAbilityEffect in effects)
-			{
-				compAbilityEffect.Apply(target, dest);
-			}
-		}
-
-		// Token: 0x0600BDB8 RID: 48568 RVA: 0x00370E08 File Offset: 0x0036F008
-		protected virtual void ApplyEffects(IEnumerable<CompAbilityEffect> effects, GlobalTargetInfo target)
-		{
-			foreach (CompAbilityEffect compAbilityEffect in effects)
-			{
-				compAbilityEffect.Apply(target);
-			}
-		}
-
-		// Token: 0x0600BDB9 RID: 48569 RVA: 0x00370E50 File Offset: 0x0036F050
-		public virtual void OnGizmoUpdate()
-		{
-			foreach (CompAbilityEffect compAbilityEffect in this.EffectComps)
-			{
-				compAbilityEffect.OnGizmoUpdate();
-			}
-		}
-
-		// Token: 0x0600BDBA RID: 48570 RVA: 0x00370EA0 File Offset: 0x0036F0A0
-		public IEnumerable<T> CompsOfType<T>() where T : AbilityComp
-		{
-			List<AbilityComp> list = this.comps;
-			if (list == null)
-			{
-				return null;
-			}
-			return (from c in list
-			where c is T
-			select c).Cast<T>();
-		}
-
-		// Token: 0x0600BDBB RID: 48571 RVA: 0x00370ED7 File Offset: 0x0036F0D7
-		public T CompOfType<T>() where T : AbilityComp
-		{
-			List<AbilityComp> list = this.comps;
-			object obj;
-			if (list == null)
-			{
-				obj = null;
-			}
-			else
-			{
-				obj = list.FirstOrDefault((AbilityComp c) => c is T);
-			}
-			return obj as T;
-		}
-
-		// Token: 0x0600BDBC RID: 48572 RVA: 0x00370F14 File Offset: 0x0036F114
-		public void Initialize()
-		{
-			if (this.def.comps.Any<AbilityCompProperties>())
-			{
-				this.comps = new List<AbilityComp>();
-				for (int i = 0; i < this.def.comps.Count; i++)
-				{
-					AbilityComp abilityComp = null;
-					try
-					{
-						abilityComp = (AbilityComp)Activator.CreateInstance(this.def.comps[i].compClass);
-						abilityComp.parent = this;
-						this.comps.Add(abilityComp);
-						abilityComp.Initialize(this.def.comps[i]);
-					}
-					catch (Exception ex)
-					{
-						string str = "Could not instantiate or initialize an AbilityComp: ";
-						Exception ex2 = ex;
-						Log.Error(str + ((ex2 != null) ? ex2.ToString() : null));
-						this.comps.Remove(abilityComp);
-					}
-				}
-			}
-			if (this.Id == -1)
-			{
-				this.Id = Find.UniqueIDsManager.GetNextAbilityID();
-			}
-			IAbilityVerb abilityVerb = this.VerbTracker.PrimaryVerb as IAbilityVerb;
-			if (abilityVerb != null)
-			{
-				abilityVerb.Ability = this;
-			}
-			if (this.def.charges > 0)
-			{
-				this.maxCharges = this.def.charges;
-				this.charges = this.maxCharges;
-			}
-		}
-
-		// Token: 0x0600BDBD RID: 48573 RVA: 0x0037104C File Offset: 0x0036F24C
-		public float FinalPsyfocusCost(LocalTargetInfo target)
-		{
-			if (this.def.AnyCompOverridesPsyfocusCost)
-			{
-				foreach (AbilityComp abilityComp in this.comps)
-				{
-					if (abilityComp.props.OverridesPsyfocusCost)
-					{
-						return abilityComp.PsyfocusCostForTarget(target);
-					}
-				}
-			}
-			return this.def.PsyfocusCost;
-		}
-
-		// Token: 0x0600BDBE RID: 48574 RVA: 0x003710CC File Offset: 0x0036F2CC
-		public float HemogenCost()
-		{
-			if (this.comps != null)
-			{
-				foreach (AbilityComp abilityComp in this.comps)
-				{
-					CompAbilityEffect_HemogenCost compAbilityEffect_HemogenCost = abilityComp as CompAbilityEffect_HemogenCost;
-					if (compAbilityEffect_HemogenCost != null)
-					{
-						return compAbilityEffect_HemogenCost.Props.hemogenCost;
-					}
-				}
-			}
-			return 0f;
-		}
-
-		// Token: 0x0600BDBF RID: 48575 RVA: 0x00371140 File Offset: 0x0036F340
-		public TaggedString WorldMapExtraLabel(GlobalTargetInfo t)
-		{
-			foreach (CompAbilityEffect compAbilityEffect in this.EffectComps)
-			{
-				string text = compAbilityEffect.WorldMapExtraLabel(t);
-				if (text != null)
-				{
-					return text;
-				}
-			}
-			return null;
-		}
-
-		// Token: 0x0600BDC0 RID: 48576 RVA: 0x003711A8 File Offset: 0x0036F3A8
-		public void AddEffecterToMaintain(Effecter eff, IntVec3 pos, int ticks, Map map = null)
-		{
-			eff.ticksLeft = ticks;
-			TargetInfo targetInfo = new TargetInfo(pos, map ?? this.pawn.Map, false);
-			this.maintainedEffecters.Add(new Tuple<Effecter, TargetInfo, TargetInfo>(eff, targetInfo, targetInfo));
-		}
-
-		// Token: 0x0600BDC1 RID: 48577 RVA: 0x003711EC File Offset: 0x0036F3EC
-		public void AddEffecterToMaintain(Effecter eff, IntVec3 posA, IntVec3 posB, int ticks, Map map = null)
-		{
-			eff.ticksLeft = ticks;
-			TargetInfo item = new TargetInfo(posA, map ?? this.pawn.Map, false);
-			TargetInfo item2 = new TargetInfo(posB, map ?? this.pawn.Map, false);
-			this.maintainedEffecters.Add(new Tuple<Effecter, TargetInfo, TargetInfo>(eff, item, item2));
-		}
-
-		// Token: 0x0600BDC2 RID: 48578 RVA: 0x00371248 File Offset: 0x0036F448
-		public virtual void ExposeData()
-		{
-			Scribe_Defs.Look<AbilityDef>(ref this.def, "def");
-			if (this.def == null)
-			{
-				return;
-			}
-			Scribe_Values.Look<int>(ref this.Id, "Id", -1, false);
-			if (Scribe.mode == LoadSaveMode.LoadingVars)
-			{
-				if (this.Id == -1)
-				{
-					this.Id = Find.UniqueIDsManager.GetNextAbilityID();
-				}
-				this.Initialize();
-			}
-			Scribe_References.Look<Precept>(ref this.sourcePrecept, "sourcePrecept", false);
-			Scribe_Deep.Look<VerbTracker>(ref this.verbTracker, "verbTracker", new object[]
-			{
-				this
-			});
-			Scribe_Values.Look<bool>(ref this.inCooldown, "inCooldown", false, false);
-			Scribe_Values.Look<int>(ref this.cooldownEndTick, "cooldownEndTick", 0, false);
-			Scribe_Values.Look<int>(ref this.cooldownDuration, "cooldownDuration", 0, false);
-			Scribe_Values.Look<int>(ref this.maxCharges, "maxCharges", this.def.charges, false);
-			Scribe_Values.Look<int>(ref this.charges, "charges", this.def.charges, false);
-			Scribe_Values.Look<int>(ref this.lastCastTick, "lastCastTick", -99999, false);
-			this.ExposeBackCompatability();
-			if (this.comps != null)
-			{
-				for (int i = 0; i < this.comps.Count; i++)
-				{
-					this.comps[i].PostExposeData();
-				}
-			}
-		}
-
-		// Token: 0x0600BDC3 RID: 48579 RVA: 0x0037138C File Offset: 0x0036F58C
-		private void ExposeBackCompatability()
-		{
-			int num = 0;
-			int num2 = 0;
-			Scribe_Values.Look<int>(ref num, "cooldownTicks", 0, false);
-			Scribe_Values.Look<int>(ref num2, "cooldownTicksDuration", 0, false);
-			if (Scribe.mode == LoadSaveMode.LoadingVars && num != 0 && num2 != 0)
-			{
-				this.inCooldown = true;
-				this.cooldownDuration = num2;
-				this.cooldownEndTick = GenTicks.TicksGame + num;
-			}
-		}
-
-		// Token: 0x0600BDC4 RID: 48580 RVA: 0x003713E2 File Offset: 0x0036F5E2
-		public string GetUniqueLoadID()
-		{
-			return "Ability_" + this.Id.ToString();
-		}
-
-		// Token: 0x0600BDC5 RID: 48581 RVA: 0x003713FC File Offset: 0x0036F5FC
-		[CompilerGenerated]
-		private bool <get_CanQueueCast>g__SameForQueueing|63_0(Job j)
-		{
-			return j.verbToUse == this.verb || (this.def.groupDef != null && j.ability != null && j.ability.def.groupDef == this.def.groupDef);
-		}
-
-		// Token: 0x04008267 RID: 33383
-		public int Id = -1;
-
-		// Token: 0x04008268 RID: 33384
-		public Pawn pawn;
-
-		// Token: 0x04008269 RID: 33385
-		public AbilityDef def;
-
-		// Token: 0x0400826A RID: 33386
-		public List<AbilityComp> comps;
-
-		// Token: 0x0400826B RID: 33387
-		protected Command gizmo;
-
-		// Token: 0x0400826C RID: 33388
-		private VerbTracker verbTracker;
-
-		// Token: 0x0400826D RID: 33389
-		private bool inCooldown;
-
-		// Token: 0x0400826E RID: 33390
-		private int cooldownDuration;
-
-		// Token: 0x0400826F RID: 33391
-		private int cooldownEndTick;
-
-		// Token: 0x04008270 RID: 33392
-		private Mote warmupMote;
-
-		// Token: 0x04008271 RID: 33393
-		private Effecter warmupEffecter;
-
-		// Token: 0x04008272 RID: 33394
-		private Sustainer soundCast;
-
-		// Token: 0x04008273 RID: 33395
-		private bool wasCastingOnPrevTick;
-
-		// Token: 0x04008274 RID: 33396
-		private int charges;
-
-		// Token: 0x04008275 RID: 33397
-		public int maxCharges;
-
-		// Token: 0x04008276 RID: 33398
-		public int lastCastTick = -99999;
-
-		// Token: 0x04008277 RID: 33399
-		public Precept sourcePrecept;
-
-		// Token: 0x04008278 RID: 33400
-		private List<PreCastAction> preCastActions = new List<PreCastAction>();
-
-		// Token: 0x04008279 RID: 33401
-		private List<Tuple<Effecter, TargetInfo, TargetInfo>> maintainedEffecters = new List<Tuple<Effecter, TargetInfo, TargetInfo>>();
-
-		// Token: 0x0400827A RID: 33402
-		private List<Mote> customWarmupMotes = new List<Mote>();
-
-		// Token: 0x0400827B RID: 33403
-		private bool needToRecacheWarmupMotes = true;
-
-		// Token: 0x0400827C RID: 33404
-		private List<CompAbilityEffect> effectComps;
-
-		// Token: 0x0400827E RID: 33406
-		private readonly List<LocalTargetInfo> affectedTargetsCached = new List<LocalTargetInfo>();
-
-		// Token: 0x0400827F RID: 33407
-		private TargetInfo verbTargetInfoTmp = null;
+	}
+
+	public string GetUniqueLoadID()
+	{
+		return "Ability_" + Id;
 	}
 }

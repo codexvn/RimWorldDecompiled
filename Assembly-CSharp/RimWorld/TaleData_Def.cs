@@ -1,57 +1,171 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.Grammar;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class TaleData_Def : TaleData
 {
-	// Token: 0x02002913 RID: 10515
-	public class TaleData_Def : TaleData
+	[CompilerGenerated]
+	private sealed class _003CGetRules_003Ed__4 : IEnumerable<Rule>, IEnumerable, IEnumerator<Rule>, IEnumerator, IDisposable
 	{
-		// Token: 0x0600E608 RID: 58888 RVA: 0x0043196C File Offset: 0x0042FB6C
-		public override void ExposeData()
+		private int _003C_003E1__state;
+
+		private Rule _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public TaleData_Def _003C_003E4__this;
+
+		private string prefix;
+
+		public string _003C_003E3__prefix;
+
+		Rule IEnumerator<Rule>.Current
 		{
-			if (Scribe.mode == LoadSaveMode.Saving)
+			[DebuggerHidden]
+			get
 			{
-				this.tmpDefName = ((this.def != null) ? this.def.defName : null);
-				this.tmpDefType = ((this.def != null) ? this.def.GetType() : null);
-			}
-			Scribe_Values.Look<string>(ref this.tmpDefName, "defName", null, false);
-			Scribe_Values.Look<Type>(ref this.tmpDefType, "defType", null, false);
-			if (Scribe.mode == LoadSaveMode.LoadingVars && this.tmpDefName != null)
-			{
-				this.def = GenDefDatabase.GetDef(this.tmpDefType, BackCompatibility.BackCompatibleDefName(this.tmpDefType, this.tmpDefName, false, null), true);
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600E609 RID: 58889 RVA: 0x00431A12 File Offset: 0x0042FC12
-		public override IEnumerable<Rule> GetRules(string prefix, Dictionary<string, string> constants = null)
+		object IEnumerator.Current
 		{
-			if (this.def != null)
+			[DebuggerHidden]
+			get
 			{
-				yield return new Rule_String(prefix + "_label", this.def.label);
-				yield return new Rule_String(prefix + "_definite", Find.ActiveLanguageWorker.WithDefiniteArticle(this.def.label, false, false));
-				yield return new Rule_String(prefix + "_indefinite", Find.ActiveLanguageWorker.WithIndefiniteArticle(this.def.label, false, false));
+				return _003C_003E2__current;
 			}
-			yield break;
 		}
 
-		// Token: 0x0600E60A RID: 58890 RVA: 0x00431A29 File Offset: 0x0042FC29
-		public static TaleData_Def GenerateFrom(Def def)
+		[DebuggerHidden]
+		public _003CGetRules_003Ed__4(int _003C_003E1__state)
 		{
-			return new TaleData_Def
-			{
-				def = def
-			};
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x040099CB RID: 39371
-		public Def def;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
 
-		// Token: 0x040099CC RID: 39372
-		private string tmpDefName;
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			TaleData_Def taleData_Def = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (taleData_Def.def != null)
+				{
+					_003C_003E2__current = new Rule_String(prefix + "_label", taleData_Def.def.label);
+					_003C_003E1__state = 1;
+					return true;
+				}
+				break;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = new Rule_String(prefix + "_definite", Find.ActiveLanguageWorker.WithDefiniteArticle(taleData_Def.def.label));
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = new Rule_String(prefix + "_indefinite", Find.ActiveLanguageWorker.WithIndefiniteArticle(taleData_Def.def.label));
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+				_003C_003E1__state = -1;
+				break;
+			}
+			return false;
+		}
 
-		// Token: 0x040099CD RID: 39373
-		private Type tmpDefType;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Rule> IEnumerable<Rule>.GetEnumerator()
+		{
+			_003CGetRules_003Ed__4 _003CGetRules_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CGetRules_003Ed__ = this;
+			}
+			else
+			{
+				_003CGetRules_003Ed__ = new _003CGetRules_003Ed__4(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CGetRules_003Ed__.prefix = _003C_003E3__prefix;
+			return _003CGetRules_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Rule>)this).GetEnumerator();
+		}
+	}
+
+	public Def def;
+
+	private string tmpDefName;
+
+	private Type tmpDefType;
+
+	public override void ExposeData()
+	{
+		if (Scribe.mode == LoadSaveMode.Saving)
+		{
+			tmpDefName = ((def != null) ? def.defName : null);
+			tmpDefType = ((def != null) ? def.GetType() : null);
+		}
+		Scribe_Values.Look(ref tmpDefName, "defName");
+		Scribe_Values.Look(ref tmpDefType, "defType");
+		if (Scribe.mode == LoadSaveMode.LoadingVars && tmpDefName != null)
+		{
+			def = GenDefDatabase.GetDef(tmpDefType, BackCompatibility.BackCompatibleDefName(tmpDefType, tmpDefName));
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CGetRules_003Ed__4))]
+	public override IEnumerable<Rule> GetRules(string prefix, Dictionary<string, string> constants = null)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetRules_003Ed__4(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__prefix = prefix
+		};
+	}
+
+	public static TaleData_Def GenerateFrom(Def def)
+	{
+		return new TaleData_Def
+		{
+			def = def
+		};
 	}
 }

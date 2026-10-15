@@ -1,124 +1,104 @@
-﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Page_ConfigureFluidIdeo : Page_ConfigureIdeo
 {
-	// Token: 0x0200327E RID: 12926
-	public class Page_ConfigureFluidIdeo : Page_ConfigureIdeo
+	public override void PostOpen()
 	{
-		// Token: 0x060122F4 RID: 74484 RVA: 0x00555E60 File Offset: 0x00554060
-		public override void PostOpen()
-		{
-			FactionIdeosTracker ideos = Faction.OfPlayer.ideos;
-			IdeoUIUtility.selected = ((ideos != null) ? ideos.PrimaryIdeo : null);
-			base.PostOpen();
-		}
+		IdeoUIUtility.selected = Faction.OfPlayer.ideos?.PrimaryIdeo;
+		base.PostOpen();
+	}
 
-		// Token: 0x060122F5 RID: 74485 RVA: 0x00555E84 File Offset: 0x00554084
-		public override void DoIdeos(Rect rect)
+	public override void DoIdeos(Rect rect)
+	{
+		IdeoUIUtility.DoIdeoListAndDetails(GetMainRect(rect), ref scrollPosition_ideoList, ref scrollViewHeight_ideoList, ref scrollPosition_ideoDetails, ref scrollViewHeight_ideoDetails, editMode: true, showCreateIdeoButton: false, null, null, null, forArchonexusRestart: false, null, loadFluidOrNpcIdeo);
+		void loadFluidOrNpcIdeo(Ideo loadedIdeo)
 		{
-			IdeoUIUtility.DoIdeoListAndDetails(base.GetMainRect(rect, 0f, false), ref this.scrollPosition_ideoList, ref this.scrollViewHeight_ideoList, ref this.scrollPosition_ideoDetails, ref this.scrollViewHeight_ideoDetails, true, false, null, null, null, false, null, new Action<Ideo>(this.<DoIdeos>g__loadFluidOrNpcIdeo|1_0), false, true, null);
-		}
-
-		// Token: 0x060122F6 RID: 74486 RVA: 0x00555ED1 File Offset: 0x005540D1
-		private void SetLoadedIdeo(Ideo loadedIdeo)
-		{
-			this.ideo = loadedIdeo;
-			IdeoUIUtility.MakeLoadedIdeoPrimary(loadedIdeo);
-			this.ideo.Fluid = true;
-		}
-
-		// Token: 0x060122F7 RID: 74487 RVA: 0x00555EEC File Offset: 0x005540EC
-		private bool TryFindIncompatibleMemes(Ideo ideo, out List<MemeDef> memes)
-		{
-			memes = null;
-			if (ideo.memes.Count((MemeDef m) => m.category == MemeCategory.Normal) > IdeoFoundation.MemeCountRangeFluidAbsolute.max)
+			List<Faction> factionsWithIdeo = Find.IdeoManager.GetFactionsWithIdeo(IdeoUIUtility.selected, onlyPrimary: true, onlyNpcFactions: true);
+			if (factionsWithIdeo.Count == 0)
 			{
-				return true;
-			}
-			for (int i = 0; i < ideo.memes.Count; i++)
-			{
-				if (!IdeoUtility.IsMemeAllowedForInitialFluidIdeo(ideo.memes[i]))
+				loadedIdeo.Fluid = true;
+				if (TryFindIncompatibleMemes(loadedIdeo, out var memes))
 				{
-					if (memes == null)
+					TaggedString text = "ConfirmChangeMemesForFluidIdeo".Translate();
+					if (!memes.NullOrEmpty())
 					{
-						memes = new List<MemeDef>();
+						string text2 = memes.Select((MemeDef m) => m.LabelCap.Resolve()).ToLineList("- ");
+						text += " " + "ConfirmIncompatibleMemes".Translate() + ":\n\n" + text2;
 					}
-					memes.Add(ideo.memes[i]);
+					text += "\n\n" + "ConfirmChangeMemesForFluidIdeoContinue".Translate();
+					Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation(text, delegate
+					{
+						loadedIdeo.memes.RemoveAll((MemeDef m) => m.category == MemeCategory.Normal);
+						loadedIdeo.ClearPrecepts();
+						Find.WindowStack.Add(new Dialog_ChooseMemes(loadedIdeo, MemeCategory.Normal, initialSelection: true, delegate
+						{
+							SetLoadedIdeo(loadedIdeo);
+						}));
+					}));
 				}
-			}
-			return memes != null && memes.Count > 0;
-		}
-
-		// Token: 0x060122F8 RID: 74488 RVA: 0x00555F8C File Offset: 0x0055418C
-		public override void Notify_ClosedChooseMemesDialog()
-		{
-			if (this.ideo != null)
-			{
-				if (!this.ideo.memes.Any((MemeDef x) => x.category == MemeCategory.Normal) && this.prev != null)
+				else
 				{
-					this.DoBack();
+					SetLoadedIdeo(loadedIdeo);
 				}
 			}
-		}
-
-		// Token: 0x060122FA RID: 74490 RVA: 0x00555FE8 File Offset: 0x005541E8
-		[CompilerGenerated]
-		private void <DoIdeos>g__loadFluidOrNpcIdeo|1_0(Ideo loadedIdeo)
-		{
-			List<Faction> factionsWithIdeo = Find.IdeoManager.GetFactionsWithIdeo(IdeoUIUtility.selected, true, true);
-			if (factionsWithIdeo.Count != 0)
+			else
 			{
 				if (!Find.IdeoManager.IdeosListForReading.Contains(loadedIdeo))
 				{
 					Find.IdeoManager.Add(loadedIdeo);
 				}
 				IdeoUIUtility.SetSelected(loadedIdeo);
-				foreach (Faction faction in factionsWithIdeo)
+				foreach (Faction item in factionsWithIdeo)
 				{
-					faction.ideos.SetPrimary(loadedIdeo);
+					item.ideos.SetPrimary(loadedIdeo);
 				}
 				Find.IdeoManager.RemoveUnusedStartingIdeos();
-				return;
 			}
-			loadedIdeo.Fluid = true;
-			List<MemeDef> list;
-			if (this.TryFindIncompatibleMemes(loadedIdeo, out list))
+		}
+	}
+
+	private void SetLoadedIdeo(Ideo loadedIdeo)
+	{
+		ideo = loadedIdeo;
+		IdeoUIUtility.MakeLoadedIdeoPrimary(loadedIdeo);
+		ideo.Fluid = true;
+	}
+
+	private bool TryFindIncompatibleMemes(Ideo ideo, out List<MemeDef> memes)
+	{
+		memes = null;
+		if (ideo.memes.Count((MemeDef m) => m.category == MemeCategory.Normal) > IdeoFoundation.MemeCountRangeFluidAbsolute.max)
+		{
+			return true;
+		}
+		for (int i = 0; i < ideo.memes.Count; i++)
+		{
+			if (!IdeoUtility.IsMemeAllowedForInitialFluidIdeo(ideo.memes[i]))
 			{
-				TaggedString taggedString = "ConfirmChangeMemesForFluidIdeo".Translate();
-				if (!list.NullOrEmpty<MemeDef>())
+				if (memes == null)
 				{
-					string t = (from m in list
-					select m.LabelCap.Resolve()).ToLineList("- ", false);
-					taggedString += " " + "ConfirmIncompatibleMemes".Translate() + ":\n\n" + t;
+					memes = new List<MemeDef>();
 				}
-				taggedString += "\n\n" + "ConfirmChangeMemesForFluidIdeoContinue".Translate();
-				Action <>9__4;
-				Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation(taggedString, delegate()
-				{
-					loadedIdeo.memes.RemoveAll((MemeDef m) => m.category == MemeCategory.Normal);
-					loadedIdeo.ClearPrecepts();
-					WindowStack windowStack = Find.WindowStack;
-					Ideo loadedIdeo2 = loadedIdeo;
-					MemeCategory memeCategory = MemeCategory.Normal;
-					bool initialSelection = true;
-					Action done;
-					if ((done = <>9__4) == null)
-					{
-						done = (<>9__4 = delegate()
-						{
-							this.SetLoadedIdeo(loadedIdeo);
-						});
-					}
-					windowStack.Add(new Dialog_ChooseMemes(loadedIdeo2, memeCategory, initialSelection, done, null, false));
-				}, false, null, WindowLayer.Dialog));
-				return;
+				memes.Add(ideo.memes[i]);
 			}
-			this.SetLoadedIdeo(loadedIdeo);
+		}
+		if (memes != null)
+		{
+			return memes.Count > 0;
+		}
+		return false;
+	}
+
+	public override void Notify_ClosedChooseMemesDialog()
+	{
+		if (ideo != null && !ideo.memes.Any((MemeDef x) => x.category == MemeCategory.Normal) && prev != null)
+		{
+			DoBack();
 		}
 	}
 }

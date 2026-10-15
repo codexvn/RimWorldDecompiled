@@ -1,113 +1,277 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class QuestPart_Leave : QuestPart
 {
-	// Token: 0x02001C55 RID: 7253
-	public class QuestPart_Leave : QuestPart
+	[CompilerGenerated]
+	private sealed class _003Cget_QuestLookTargets_003Ed__7 : IEnumerable<GlobalTargetInfo>, IEnumerable, IEnumerator<GlobalTargetInfo>, IEnumerator, IDisposable
 	{
-		// Token: 0x170018D9 RID: 6361
-		// (get) Token: 0x0600A18C RID: 41356 RVA: 0x002E6DDF File Offset: 0x002E4FDF
-		public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+		private int _003C_003E1__state;
+
+		private GlobalTargetInfo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public QuestPart_Leave _003C_003E4__this;
+
+		private IEnumerator<GlobalTargetInfo> _003C_003E7__wrap1;
+
+		private IEnumerator<Pawn> _003C_003E7__wrap2;
+
+		GlobalTargetInfo IEnumerator<GlobalTargetInfo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				foreach (GlobalTargetInfo globalTargetInfo in base.QuestLookTargets)
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003Cget_QuestLookTargets_003Ed__7(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			switch (_003C_003E1__state)
+			{
+			case -3:
+			case 1:
+				try
 				{
-					yield return globalTargetInfo;
 				}
-				IEnumerator<GlobalTargetInfo> enumerator = null;
-				foreach (Pawn t in PawnsArriveQuestPartUtility.GetQuestLookTargets(this.pawns))
+				finally
 				{
-					yield return t;
+					_003C_003Em__Finally1();
 				}
-				IEnumerator<Pawn> enumerator2 = null;
-				yield break;
-				yield break;
-			}
-		}
-
-		// Token: 0x0600A18D RID: 41357 RVA: 0x002E6DF0 File Offset: 0x002E4FF0
-		public override void Notify_QuestSignalReceived(Signal signal)
-		{
-			base.Notify_QuestSignalReceived(signal);
-			Pawn item;
-			if (signal.tag == this.inSignalRemovePawn && signal.args.TryGetArg<Pawn>("SUBJECT", out item) && this.pawns.Contains(item))
-			{
-				this.pawns.Remove(item);
-			}
-			if (signal.tag == this.inSignal)
-			{
-				LeaveQuestPartUtility.MakePawnsLeave(this.pawns, this.sendStandardLetter, this.quest, this.wakeUp);
-			}
-		}
-
-		// Token: 0x0600A18E RID: 41358 RVA: 0x002E6E77 File Offset: 0x002E5077
-		public override void Cleanup()
-		{
-			base.Cleanup();
-			if (this.leaveOnCleanup)
-			{
-				LeaveQuestPartUtility.MakePawnsLeave(this.pawns, this.sendStandardLetter, this.quest, this.wakeUp);
-			}
-		}
-
-		// Token: 0x0600A18F RID: 41359 RVA: 0x002E6EA4 File Offset: 0x002E50A4
-		public override void ExposeData()
-		{
-			base.ExposeData();
-			Scribe_Values.Look<string>(ref this.inSignal, "inSignal", null, false);
-			Scribe_Collections.Look<Pawn>(ref this.pawns, "pawns", LookMode.Reference, Array.Empty<object>());
-			Scribe_Values.Look<bool>(ref this.sendStandardLetter, "sendStandardLetter", true, false);
-			Scribe_Values.Look<bool>(ref this.leaveOnCleanup, "leaveOnCleanup", false, false);
-			Scribe_Values.Look<string>(ref this.inSignalRemovePawn, "inSignalRemovePawn", null, false);
-			Scribe_Values.Look<bool>(ref this.wakeUp, "wakeUp", false, false);
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
-			{
-				this.pawns.RemoveAll((Pawn x) => x == null);
-			}
-		}
-
-		// Token: 0x0600A190 RID: 41360 RVA: 0x002E6F5C File Offset: 0x002E515C
-		public override void AssignDebugData()
-		{
-			base.AssignDebugData();
-			this.inSignal = "DebugSignal" + Rand.Int.ToString();
-			if (Find.AnyPlayerHomeMap != null)
-			{
-				Map randomPlayerHomeMap = Find.RandomPlayerHomeMap;
-				if (randomPlayerHomeMap.mapPawns.FreeColonistsCount != 0)
+				break;
+			case -4:
+			case 2:
+				try
 				{
-					this.pawns.Add(randomPlayerHomeMap.mapPawns.FreeColonists.First<Pawn>());
 				}
+				finally
+				{
+					_003C_003Em__Finally2();
+				}
+				break;
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E7__wrap2 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				QuestPart_Leave questPart_Leave = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((QuestPart)questPart_Leave).QuestLookTargets.GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0072;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0072;
+				case 2:
+					{
+						_003C_003E1__state = -4;
+						break;
+					}
+					IL_0072:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						GlobalTargetInfo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					_003C_003E7__wrap2 = PawnsArriveQuestPartUtility.GetQuestLookTargets(questPart_Leave.pawns).GetEnumerator();
+					_003C_003E1__state = -4;
+					break;
+				}
+				if (_003C_003E7__wrap2.MoveNext())
+				{
+					Pawn current2 = _003C_003E7__wrap2.Current;
+					_003C_003E2__current = current2;
+					_003C_003E1__state = 2;
+					return true;
+				}
+				_003C_003Em__Finally2();
+				_003C_003E7__wrap2 = null;
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x0600A191 RID: 41361 RVA: 0x002E6FC1 File Offset: 0x002E51C1
-		public override void ReplacePawnReferences(Pawn replace, Pawn with)
+		bool IEnumerator.MoveNext()
 		{
-			this.pawns.Replace(replace, with);
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x04006F9E RID: 28574
-		public string inSignal;
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
 
-		// Token: 0x04006F9F RID: 28575
-		public List<Pawn> pawns = new List<Pawn>();
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap2 != null)
+			{
+				_003C_003E7__wrap2.Dispose();
+			}
+		}
 
-		// Token: 0x04006FA0 RID: 28576
-		public bool sendStandardLetter = true;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04006FA1 RID: 28577
-		public bool leaveOnCleanup = true;
+		[DebuggerHidden]
+		IEnumerator<GlobalTargetInfo> IEnumerable<GlobalTargetInfo>.GetEnumerator()
+		{
+			_003Cget_QuestLookTargets_003Ed__7 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_QuestLookTargets_003Ed__7(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x04006FA2 RID: 28578
-		public string inSignalRemovePawn;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<GlobalTargetInfo>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x04006FA3 RID: 28579
-		public bool wakeUp;
+	public string inSignal;
+
+	public List<Pawn> pawns = new List<Pawn>();
+
+	public bool sendStandardLetter = true;
+
+	public bool leaveOnCleanup = true;
+
+	public string inSignalRemovePawn;
+
+	public bool wakeUp;
+
+	public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+	{
+		[IteratorStateMachine(typeof(_003Cget_QuestLookTargets_003Ed__7))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_QuestLookTargets_003Ed__7(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public override void Notify_QuestSignalReceived(Signal signal)
+	{
+		base.Notify_QuestSignalReceived(signal);
+		if (signal.tag == inSignalRemovePawn && signal.args.TryGetArg("SUBJECT", out Pawn arg) && pawns.Contains(arg))
+		{
+			pawns.Remove(arg);
+		}
+		if (signal.tag == inSignal)
+		{
+			LeaveQuestPartUtility.MakePawnsLeave(pawns, sendStandardLetter, quest, wakeUp);
+		}
+	}
+
+	public override void Cleanup()
+	{
+		base.Cleanup();
+		if (leaveOnCleanup)
+		{
+			LeaveQuestPartUtility.MakePawnsLeave(pawns, sendStandardLetter, quest, wakeUp);
+		}
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref inSignal, "inSignal");
+		Scribe_Collections.Look(ref pawns, "pawns", LookMode.Reference);
+		Scribe_Values.Look(ref sendStandardLetter, "sendStandardLetter", defaultValue: true);
+		Scribe_Values.Look(ref leaveOnCleanup, "leaveOnCleanup", defaultValue: false);
+		Scribe_Values.Look(ref inSignalRemovePawn, "inSignalRemovePawn");
+		Scribe_Values.Look(ref wakeUp, "wakeUp", defaultValue: false);
+		if (Scribe.mode == LoadSaveMode.PostLoadInit)
+		{
+			pawns.RemoveAll((Pawn x) => x == null);
+		}
+	}
+
+	public override void AssignDebugData()
+	{
+		base.AssignDebugData();
+		inSignal = "DebugSignal" + Rand.Int;
+		if (Find.AnyPlayerHomeMap != null)
+		{
+			Map randomPlayerHomeMap = Find.RandomPlayerHomeMap;
+			if (randomPlayerHomeMap.mapPawns.FreeColonistsCount != 0)
+			{
+				pawns.Add(randomPlayerHomeMap.mapPawns.FreeColonists.First());
+			}
+		}
+	}
+
+	public override void ReplacePawnReferences(Pawn replace, Pawn with)
+	{
+		pawns.Replace(replace, with);
 	}
 }

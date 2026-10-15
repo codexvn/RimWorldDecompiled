@@ -1,30 +1,31 @@
-﻿using System;
 using System.Text;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class StatPart_EnvironmentalEffects : StatPart
 {
-	// Token: 0x020036F6 RID: 14070
-	public class StatPart_EnvironmentalEffects : StatPart
+	private float factorOffsetUnroofed;
+
+	private float factorOffsetOutdoors;
+
+	private float protectedByEdificeFactor;
+
+	public override void TransformValue(StatRequest req, ref float val)
 	{
-		// Token: 0x06013830 RID: 79920 RVA: 0x005CA318 File Offset: 0x005C8518
-		public override void TransformValue(StatRequest req, ref float val)
+		float num = 0f;
+		if (ActiveFor(req.Thing))
 		{
-			float num = 0f;
-			if (!this.ActiveFor(req.Thing))
-			{
-				return;
-			}
 			Thing thing = req.Thing;
 			if (!thing.Position.Roofed(thing.Map))
 			{
-				num += this.factorOffsetUnroofed;
+				num += factorOffsetUnroofed;
 			}
-			Room room = thing.GetRoom(RegionType.Set_All);
+			Room room = thing.GetRoom();
 			if (room != null && room.UsesOutdoorTemperature)
 			{
-				num += this.factorOffsetOutdoors;
+				num += factorOffsetOutdoors;
 			}
 			TerrainDef terrain = thing.Position.GetTerrain(thing.Map);
 			if (terrain != null && terrain.extraDeteriorationFactor != 0f)
@@ -37,58 +38,51 @@ namespace RimWorld
 			}
 			if (SteadyEnvironmentEffects.ProtectedByEdifice(thing.Position, thing.Map))
 			{
-				num *= this.protectedByEdificeFactor;
+				num *= protectedByEdificeFactor;
 			}
 			val *= num;
 		}
+	}
 
-		// Token: 0x06013831 RID: 79921 RVA: 0x005CA400 File Offset: 0x005C8600
-		public override string ExplanationPart(StatRequest req)
+	public override string ExplanationPart(StatRequest req)
+	{
+		if (!ActiveFor(req.Thing))
 		{
-			if (!this.ActiveFor(req.Thing))
-			{
-				return null;
-			}
-			Thing thing = req.Thing;
-			StringBuilder stringBuilder = new StringBuilder();
-			if (!thing.Position.Roofed(thing.Map))
-			{
-				stringBuilder.AppendLine("DeterioratingUnroofed".Translate().CapitalizeFirst() + (": +" + this.factorOffsetUnroofed.ToStringPercent()));
-			}
-			Room room = thing.GetRoom(RegionType.Set_All);
-			if (room != null && room.UsesOutdoorTemperature)
-			{
-				stringBuilder.AppendLine("DeterioratingOutdoors".Translate().CapitalizeFirst() + (": +" + this.factorOffsetOutdoors.ToStringPercent()));
-			}
-			TerrainDef terrain = thing.Position.GetTerrain(thing.Map);
-			if (terrain != null && terrain.extraDeteriorationFactor != 0f)
-			{
-				stringBuilder.AppendLine(terrain.LabelCap + (": +" + terrain.extraDeteriorationFactor.ToStringPercent()));
-			}
-			if (!thing.Position.Roofed(thing.Map) && thing.Map.weatherManager.RainRate > 0f)
-			{
-				stringBuilder.AppendLine("DeterioratingRaining".Translate().CapitalizeFirst() + (": x" + Mathf.Lerp(1f, 5f, thing.Map.weatherManager.RainRate).ToStringPercent()));
-			}
-			if (SteadyEnvironmentEffects.ProtectedByEdifice(thing.Position, thing.Map))
-			{
-				stringBuilder.AppendLine("Protected".Translate().CapitalizeFirst() + (": x" + this.protectedByEdificeFactor.ToStringPercent()));
-			}
-			return stringBuilder.ToString();
+			return null;
 		}
-
-		// Token: 0x06013832 RID: 79922 RVA: 0x005CA5E1 File Offset: 0x005C87E1
-		private bool ActiveFor(Thing t)
+		Thing thing = req.Thing;
+		StringBuilder stringBuilder = new StringBuilder();
+		if (!thing.Position.Roofed(thing.Map))
 		{
-			return t != null && t.Spawned && t.def.deteriorateFromEnvironmentalEffects;
+			stringBuilder.AppendLine("DeterioratingUnroofed".Translate().CapitalizeFirst() + (": +" + factorOffsetUnroofed.ToStringPercent()));
 		}
+		Room room = thing.GetRoom();
+		if (room != null && room.UsesOutdoorTemperature)
+		{
+			stringBuilder.AppendLine("DeterioratingOutdoors".Translate().CapitalizeFirst() + (": +" + factorOffsetOutdoors.ToStringPercent()));
+		}
+		TerrainDef terrain = thing.Position.GetTerrain(thing.Map);
+		if (terrain != null && terrain.extraDeteriorationFactor != 0f)
+		{
+			stringBuilder.AppendLine(terrain.LabelCap + (": +" + terrain.extraDeteriorationFactor.ToStringPercent()));
+		}
+		if (!thing.Position.Roofed(thing.Map) && thing.Map.weatherManager.RainRate > 0f)
+		{
+			stringBuilder.AppendLine("DeterioratingRaining".Translate().CapitalizeFirst() + (": x" + Mathf.Lerp(1f, 5f, thing.Map.weatherManager.RainRate).ToStringPercent()));
+		}
+		if (SteadyEnvironmentEffects.ProtectedByEdifice(thing.Position, thing.Map))
+		{
+			stringBuilder.AppendLine("Protected".Translate().CapitalizeFirst() + (": x" + protectedByEdificeFactor.ToStringPercent()));
+		}
+		return stringBuilder.ToString();
+	}
 
-		// Token: 0x0400D89B RID: 55451
-		private float factorOffsetUnroofed;
-
-		// Token: 0x0400D89C RID: 55452
-		private float factorOffsetOutdoors;
-
-		// Token: 0x0400D89D RID: 55453
-		private float protectedByEdificeFactor;
+	private bool ActiveFor(Thing t)
+	{
+		if (t != null && t.Spawned)
+		{
+			return t.def.deteriorateFromEnvironmentalEffects;
+		}
+		return false;
 	}
 }

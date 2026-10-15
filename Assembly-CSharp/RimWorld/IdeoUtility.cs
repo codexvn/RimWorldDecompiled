@@ -1,5 +1,7 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using RimWorld.Planet;
@@ -7,971 +9,1036 @@ using UnityEngine;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public static class IdeoUtility
 {
-	// Token: 0x02002622 RID: 9762
-	public static class IdeoUtility
+	[CompilerGenerated]
+	private sealed class _003CAllColonistsWithCharityPrecept_003Ed__17 : IEnumerable<Pawn>, IEnumerable, IEnumerator<Pawn>, IEnumerator, IDisposable
 	{
-		// Token: 0x0600D5EA RID: 54762 RVA: 0x003F76EC File Offset: 0x003F58EC
-		public static void Notify_HistoryEvent(HistoryEvent ev, bool canApplySelfTookThoughts = true)
+		private int _003C_003E1__state;
+
+		private Pawn _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private List<Pawn> _003Ccolonists_003E5__2;
+
+		private IEnumerator<Ideo> _003C_003E7__wrap2;
+
+		private Ideo _003Cideo_003E5__4;
+
+		private List<Precept> _003Cprecepts_003E5__5;
+
+		private int _003Cj_003E5__6;
+
+		private int _003Ci_003E5__7;
+
+		Pawn IEnumerator<Pawn>.Current
 		{
-			IdeoUtility.<>c__DisplayClass1_0 CS$<>8__locals1;
-			CS$<>8__locals1.ev = ev;
-			if (CS$<>8__locals1.ev.args.TryGetArg<Pawn>(HistoryEventArgsNames.Doer, out CS$<>8__locals1.pawn))
+			[DebuggerHidden]
+			get
 			{
-				if (CS$<>8__locals1.pawn.Ideo != null)
-				{
-					CS$<>8__locals1.pawn.Ideo.Notify_MemberTookAction(CS$<>8__locals1.ev, canApplySelfTookThoughts);
-				}
-				if (CS$<>8__locals1.pawn.IsCaravanMember())
-				{
-					Caravan caravan = CS$<>8__locals1.pawn.GetCaravan();
-					for (int i = 0; i < caravan.pawns.Count; i++)
-					{
-						IdeoUtility.<Notify_HistoryEvent>g__CheckKnows|1_0(caravan.pawns[i], ref CS$<>8__locals1);
-					}
-				}
-				else if (CS$<>8__locals1.pawn.Spawned)
-				{
-					IReadOnlyList<Pawn> allPawnsSpawned = CS$<>8__locals1.pawn.Map.mapPawns.AllPawnsSpawned;
-					for (int j = 0; j < allPawnsSpawned.Count; j++)
-					{
-						IdeoUtility.<Notify_HistoryEvent>g__CheckKnows|1_0(allPawnsSpawned[j], ref CS$<>8__locals1);
-					}
-				}
-			}
-			else
-			{
-				List<Pawn> allMapsCaravansAndTravellingTransporters_Alive_FreeColonists = PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_FreeColonists;
-				for (int k = 0; k < allMapsCaravansAndTravellingTransporters_Alive_FreeColonists.Count; k++)
-				{
-					Pawn pawn = allMapsCaravansAndTravellingTransporters_Alive_FreeColonists[k];
-					if (pawn.Ideo != null)
-					{
-						pawn.Ideo.Notify_MemberKnows(CS$<>8__locals1.ev, pawn);
-					}
-				}
-			}
-			foreach (Ideo ideo in Faction.OfPlayer.ideos.AllIdeos)
-			{
-				List<Precept> preceptsListForReading = ideo.PreceptsListForReading;
-				for (int l = 0; l < preceptsListForReading.Count; l++)
-				{
-					preceptsListForReading[l].Notify_HistoryEvent(CS$<>8__locals1.ev);
-				}
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600D5EB RID: 54763 RVA: 0x003F7898 File Offset: 0x003F5A98
-		public static bool DoerWillingToDo(this HistoryEvent ev)
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CAllColonistsWithCharityPrecept_003Ed__17(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003Ccolonists_003E5__2 = null;
+			_003C_003E7__wrap2 = null;
+			_003Cideo_003E5__4 = null;
+			_003Cprecepts_003E5__5 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				if (num != 0)
+				{
+					if (num != 1)
+					{
+						return false;
+					}
+					_003C_003E1__state = -3;
+					goto IL_0103;
+				}
+				_003C_003E1__state = -1;
+				if (!ModsConfig.IdeologyActive)
+				{
+					return false;
+				}
+				_003Ccolonists_003E5__2 = PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_FreeColonists;
+				_003C_003E7__wrap2 = Faction.OfPlayer.ideos.AllIdeos.GetEnumerator();
+				_003C_003E1__state = -3;
+				goto IL_015a;
+				IL_0113:
+				if (_003Ci_003E5__7 < _003Ccolonists_003E5__2.Count)
+				{
+					if (_003Ccolonists_003E5__2[_003Ci_003E5__7].Ideo == _003Cideo_003E5__4)
+					{
+						_003C_003E2__current = _003Ccolonists_003E5__2[_003Ci_003E5__7];
+						_003C_003E1__state = 1;
+						return true;
+					}
+					goto IL_0103;
+				}
+				goto IL_0126;
+				IL_0136:
+				if (_003Cj_003E5__6 < _003Cprecepts_003E5__5.Count)
+				{
+					if (_003Cprecepts_003E5__5[_003Cj_003E5__6].def.issue == IssueDefOf.Charity)
+					{
+						_003Ci_003E5__7 = 0;
+						goto IL_0113;
+					}
+					goto IL_0126;
+				}
+				_003Cprecepts_003E5__5 = null;
+				_003Cideo_003E5__4 = null;
+				goto IL_015a;
+				IL_0126:
+				_003Cj_003E5__6++;
+				goto IL_0136;
+				IL_0103:
+				_003Ci_003E5__7++;
+				goto IL_0113;
+				IL_015a:
+				if (_003C_003E7__wrap2.MoveNext())
+				{
+					_003Cideo_003E5__4 = _003C_003E7__wrap2.Current;
+					_003Cprecepts_003E5__5 = _003Cideo_003E5__4.PreceptsListForReading;
+					_003Cj_003E5__6 = 0;
+					goto IL_0136;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap2 = null;
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap2 != null)
+			{
+				_003C_003E7__wrap2.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Pawn> IEnumerable<Pawn>.GetEnumerator()
+		{
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				return this;
+			}
+			return new _003CAllColonistsWithCharityPrecept_003Ed__17(0);
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Pawn>)this).GetEnumerator();
+		}
+	}
+
+	public const int MinFluidIdeoNormalMemes = 1;
+
+	private static HashSet<Room> tmpCheckRooms = new HashSet<Room>();
+
+	private static List<TreeSighting> tmpTreeSightings = new List<TreeSighting>();
+
+	public static void Notify_HistoryEvent(HistoryEvent ev, bool canApplySelfTookThoughts = true)
+	{
+		if (ev.args.TryGetArg(HistoryEventArgsNames.Doer, out Pawn pawn))
+		{
+			if (pawn.Ideo != null)
+			{
+				pawn.Ideo.Notify_MemberTookAction(ev, canApplySelfTookThoughts);
+			}
+			if (pawn.IsCaravanMember())
+			{
+				Caravan caravan = pawn.GetCaravan();
+				for (int i = 0; i < caravan.pawns.Count; i++)
+				{
+					CheckKnows(caravan.pawns[i]);
+				}
+			}
+			else if (pawn.Spawned)
+			{
+				IReadOnlyList<Pawn> allPawnsSpawned = pawn.Map.mapPawns.AllPawnsSpawned;
+				for (int j = 0; j < allPawnsSpawned.Count; j++)
+				{
+					CheckKnows(allPawnsSpawned[j]);
+				}
+			}
+		}
+		else
+		{
+			List<Pawn> allMapsCaravansAndTravellingTransporters_Alive_FreeColonists = PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_FreeColonists;
+			for (int k = 0; k < allMapsCaravansAndTravellingTransporters_Alive_FreeColonists.Count; k++)
+			{
+				Pawn pawn2 = allMapsCaravansAndTravellingTransporters_Alive_FreeColonists[k];
+				if (pawn2.Ideo != null)
+				{
+					pawn2.Ideo.Notify_MemberKnows(ev, pawn2);
+				}
+			}
+		}
+		foreach (Ideo allIdeo in Faction.OfPlayer.ideos.AllIdeos)
+		{
+			List<Precept> preceptsListForReading = allIdeo.PreceptsListForReading;
+			for (int l = 0; l < preceptsListForReading.Count; l++)
+			{
+				preceptsListForReading[l].Notify_HistoryEvent(ev);
+			}
+		}
+		void CheckKnows(Pawn p)
+		{
+			if (p != pawn && p.Ideo != null)
+			{
+				p.Ideo.Notify_MemberKnows(ev, p);
+			}
+		}
+	}
+
+	public static bool DoerWillingToDo(this HistoryEvent ev)
+	{
+		Pawn arg = ev.args.GetArg<Pawn>(HistoryEventArgsNames.Doer);
+		if (arg?.Ideo != null)
+		{
+			return arg.Ideo.MemberWillingToDo(ev);
+		}
+		return true;
+	}
+
+	public static bool DoerWillingToDo(HistoryEventDef def, Pawn pawn)
+	{
+		return new HistoryEvent(def, pawn.Named(HistoryEventArgsNames.Doer)).DoerWillingToDo();
+	}
+
+	public static bool Notify_PawnAboutToDo(this HistoryEvent ev, string messageKey = "MessagePawnUnwillingToDoDueToIdeo")
+	{
+		if (!ev.DoerWillingToDo())
 		{
 			Pawn arg = ev.args.GetArg<Pawn>(HistoryEventArgsNames.Doer);
-			return ((arg != null) ? arg.Ideo : null) == null || arg.Ideo.MemberWillingToDo(ev);
-		}
-
-		// Token: 0x0600D5EC RID: 54764 RVA: 0x003F78D3 File Offset: 0x003F5AD3
-		public static bool DoerWillingToDo(HistoryEventDef def, Pawn pawn)
-		{
-			return new HistoryEvent(def, pawn.Named(HistoryEventArgsNames.Doer)).DoerWillingToDo();
-		}
-
-		// Token: 0x0600D5ED RID: 54765 RVA: 0x003F78EC File Offset: 0x003F5AEC
-		public static bool Notify_PawnAboutToDo(this HistoryEvent ev, string messageKey = "MessagePawnUnwillingToDoDueToIdeo")
-		{
-			if (!ev.DoerWillingToDo())
-			{
-				Pawn arg = ev.args.GetArg<Pawn>(HistoryEventArgsNames.Doer);
-				Messages.Message(messageKey.Translate(arg), arg, MessageTypeDefOf.RejectInput, false);
-				return false;
-			}
-			return true;
-		}
-
-		// Token: 0x0600D5EE RID: 54766 RVA: 0x003F7938 File Offset: 0x003F5B38
-		public static bool Notify_PawnAboutToDo(this HistoryEvent ev, out FloatMenuOption opt, string baseText)
-		{
-			if (!ev.DoerWillingToDo())
-			{
-				opt = new FloatMenuOption(baseText + ": " + "IdeoligionForbids".Translate(), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-				return false;
-			}
-			opt = null;
-			return true;
-		}
-
-		// Token: 0x0600D5EF RID: 54767 RVA: 0x003F7986 File Offset: 0x003F5B86
-		public static bool Notify_PawnAboutToDo_Job(this HistoryEvent ev)
-		{
-			if (!ev.DoerWillingToDo())
-			{
-				JobFailReason.Is("IdeoligionForbids".Translate(), null);
-				return false;
-			}
-			return true;
-		}
-
-		// Token: 0x0600D5F0 RID: 54768 RVA: 0x003F79A8 File Offset: 0x003F5BA8
-		public static List<MemeDef> GenerateRandomMemes(IdeoGenerationParms parms)
-		{
-			return IdeoUtility.GenerateRandomMemes(parms.forNewFluidIdeo ? IdeoFoundation.MemeCountRangeFluidAbsolute.RandomInRange : IdeoFoundation.MemeCountRangeNPCInitial.RandomInRange, parms);
-		}
-
-		// Token: 0x0600D5F1 RID: 54769 RVA: 0x003F79E0 File Offset: 0x003F5BE0
-		private static bool CanAdd(MemeDef meme, List<MemeDef> memes, FactionDef forFaction = null, bool forNewFluidIdeo = false)
-		{
-			if (memes.Contains(meme))
-			{
-				return false;
-			}
-			if (forFaction != null && !IdeoUtility.IsMemeAllowedFor(meme, forFaction))
-			{
-				return false;
-			}
-			if (forNewFluidIdeo && !IdeoUtility.IsMemeAllowedForInitialFluidIdeo(meme))
-			{
-				return false;
-			}
-			for (int i = 0; i < memes.Count; i++)
-			{
-				for (int j = 0; j < meme.exclusionTags.Count; j++)
-				{
-					if (memes[i].exclusionTags.Contains(meme.exclusionTags[j]))
-					{
-						return false;
-					}
-				}
-			}
-			return true;
-		}
-
-		// Token: 0x0600D5F2 RID: 54770 RVA: 0x003F7A5C File Offset: 0x003F5C5C
-		public static List<MemeDef> GenerateRandomMemes(int count, IdeoGenerationParms parms)
-		{
-			FactionDef forFaction = parms.forFaction;
-			bool forPlayerFaction = forFaction != null && forFaction.isPlayer;
-			List<MemeDef> memes = new List<MemeDef>();
-			bool flag = false;
-			if (forFaction != null && forFaction.requiredMemes != null)
-			{
-				for (int i = 0; i < forFaction.requiredMemes.Count; i++)
-				{
-					memes.Add(forFaction.requiredMemes[i]);
-					if (forFaction.requiredMemes[i].category == MemeCategory.Normal)
-					{
-						count--;
-					}
-					else if (forFaction.requiredMemes[i].category == MemeCategory.Structure)
-					{
-						flag = true;
-					}
-				}
-			}
-			if (parms.forcedMemes != null)
-			{
-				using (List<MemeDef>.Enumerator enumerator = parms.forcedMemes.GetEnumerator())
-				{
-					while (enumerator.MoveNext())
-					{
-						if (enumerator.Current.category == MemeCategory.Structure)
-						{
-							flag = true;
-							break;
-						}
-					}
-				}
-			}
-			if (forFaction != null && forFaction.structureMemeWeights != null && !flag)
-			{
-				MemeWeight memeWeight;
-				MemeWeight memeWeight2;
-				if ((from x in forFaction.structureMemeWeights
-				where IdeoUtility.CanAdd(x.meme, memes, forFaction, parms.forNewFluidIdeo) && (forPlayerFaction || !IdeoUtility.AnyIdeoHas(x.meme))
-				select x).TryRandomElementByWeight((MemeWeight x) => x.selectionWeight * x.meme.randomizationSelectionWeightFactor, out memeWeight))
-				{
-					memes.Add(memeWeight.meme);
-					flag = true;
-				}
-				else if ((from x in forFaction.structureMemeWeights
-				where IdeoUtility.CanAdd(x.meme, memes, forFaction, parms.forNewFluidIdeo)
-				select x).TryRandomElementByWeight((MemeWeight x) => x.selectionWeight * x.meme.randomizationSelectionWeightFactor, out memeWeight2))
-				{
-					memes.Add(memeWeight2.meme);
-					flag = true;
-				}
-			}
-			if (!flag)
-			{
-				MemeDef item;
-				MemeDef item2;
-				if ((from x in DefDatabase<MemeDef>.AllDefs
-				where x.category == MemeCategory.Structure && IdeoUtility.CanAdd(x, memes, forFaction, parms.forNewFluidIdeo) && (forPlayerFaction || !IdeoUtility.AnyIdeoHas(x))
-				select x).TryRandomElement(out item))
-				{
-					memes.Add(item);
-				}
-				else if ((from x in DefDatabase<MemeDef>.AllDefs
-				where x.category == MemeCategory.Structure && IdeoUtility.CanAdd(x, memes, forFaction, parms.forNewFluidIdeo)
-				select x).TryRandomElementByWeight((MemeDef x) => x.randomizationSelectionWeightFactor, out item2))
-				{
-					memes.Add(item2);
-				}
-			}
-			if (parms.forcedMemes != null)
-			{
-				memes.AddRange(parms.forcedMemes);
-				return memes;
-			}
-			Func<MemeDef, bool> <>9__7;
-			Func<MemeDef, bool> <>9__9;
-			for (int j = 0; j < count; j++)
-			{
-				IEnumerable<MemeDef> allDefs = DefDatabase<MemeDef>.AllDefs;
-				Func<MemeDef, bool> predicate;
-				if ((predicate = <>9__7) == null)
-				{
-					predicate = (<>9__7 = ((MemeDef x) => x.category == MemeCategory.Normal && IdeoUtility.CanAdd(x, memes, forFaction, parms.forNewFluidIdeo) && (forPlayerFaction || !IdeoUtility.AnyIdeoHas(x)) && (parms.disallowedMemes == null || !parms.disallowedMemes.Contains(x))));
-				}
-				MemeDef item3;
-				if (allDefs.Where(predicate).TryRandomElementByWeight((MemeDef x) => x.randomizationSelectionWeightFactor, out item3))
-				{
-					memes.Add(item3);
-				}
-				else
-				{
-					IEnumerable<MemeDef> allDefs2 = DefDatabase<MemeDef>.AllDefs;
-					Func<MemeDef, bool> predicate2;
-					if ((predicate2 = <>9__9) == null)
-					{
-						predicate2 = (<>9__9 = ((MemeDef x) => x.category == MemeCategory.Normal && IdeoUtility.CanAdd(x, memes, forFaction, parms.forNewFluidIdeo) && (parms.disallowedMemes == null || !parms.disallowedMemes.Contains(x))));
-					}
-					MemeDef item4;
-					if (allDefs2.Where(predicate2).TryRandomElementByWeight((MemeDef x) => x.randomizationSelectionWeightFactor, out item4))
-					{
-						memes.Add(item4);
-					}
-				}
-			}
-			return memes;
-		}
-
-		// Token: 0x0600D5F3 RID: 54771 RVA: 0x003F7DEC File Offset: 0x003F5FEC
-		public static List<MemeDef> RandomizeNormalMemes(int count, List<MemeDef> previousMemes, FactionDef forFaction = null, bool forNewFluidIdeo = false)
-		{
-			List<MemeDef> memes = new List<MemeDef>();
-			foreach (MemeDef memeDef in previousMemes)
-			{
-				if (memeDef.category != MemeCategory.Normal)
-				{
-					memes.Add(memeDef);
-				}
-			}
-			if (forFaction != null && forFaction.requiredMemes != null)
-			{
-				for (int i = 0; i < forFaction.requiredMemes.Count; i++)
-				{
-					MemeDef memeDef2 = forFaction.requiredMemes[i];
-					if (memeDef2.category == MemeCategory.Normal)
-					{
-						memes.Add(memeDef2);
-						count--;
-					}
-				}
-			}
-			Func<MemeDef, bool> <>9__0;
-			for (int j = 0; j < count; j++)
-			{
-				IEnumerable<MemeDef> allDefs = DefDatabase<MemeDef>.AllDefs;
-				Func<MemeDef, bool> predicate;
-				if ((predicate = <>9__0) == null)
-				{
-					predicate = (<>9__0 = ((MemeDef x) => x.category == MemeCategory.Normal && IdeoUtility.CanAdd(x, memes, forFaction, forNewFluidIdeo)));
-				}
-				MemeDef item;
-				if (allDefs.Where(predicate).TryRandomElement(out item))
-				{
-					memes.Add(item);
-				}
-			}
-			return memes;
-		}
-
-		// Token: 0x0600D5F4 RID: 54772 RVA: 0x003F7F1C File Offset: 0x003F611C
-		public static List<MemeDef> RandomizeNormalMemesForReforming(int maxMemes, List<MemeDef> existingMemes, FactionDef forFaction = null)
-		{
-			List<MemeDef> memes = new List<MemeDef>();
-			memes.AddRange(existingMemes);
-			int num = memes.Count((MemeDef m) => m.category == MemeCategory.Normal);
-			MemeDef item;
-			if (num > 1 && (num >= maxMemes || Rand.Bool))
-			{
-				memes.Remove((from m in memes
-				where m.category == MemeCategory.Normal
-				select m).RandomElement<MemeDef>());
-			}
-			else if (num < maxMemes && (from x in DefDatabase<MemeDef>.AllDefs
-			where x.category == MemeCategory.Normal && IdeoUtility.CanAdd(x, memes, forFaction, false)
-			select x).TryRandomElement(out item))
-			{
-				memes.Add(item);
-			}
-			return memes;
-		}
-
-		// Token: 0x0600D5F5 RID: 54773 RVA: 0x003F7FFC File Offset: 0x003F61FC
-		public static List<MemeDef> RandomizeStructureMeme(List<MemeDef> previousMemes, FactionDef forFaction = null)
-		{
-			List<MemeDef> memes = new List<MemeDef>();
-			foreach (MemeDef memeDef in previousMemes)
-			{
-				if (memeDef.category != MemeCategory.Structure)
-				{
-					memes.Add(memeDef);
-				}
-			}
-			bool flag = false;
-			if (forFaction != null && forFaction.requiredMemes != null)
-			{
-				for (int i = 0; i < forFaction.requiredMemes.Count; i++)
-				{
-					MemeDef memeDef2 = forFaction.requiredMemes[i];
-					if (memeDef2.category == MemeCategory.Structure)
-					{
-						memes.Add(memeDef2);
-						flag = true;
-					}
-				}
-			}
-			MemeDef item;
-			if (!flag && (from x in DefDatabase<MemeDef>.AllDefs
-			where x.category == MemeCategory.Structure && IdeoUtility.CanAdd(x, memes, forFaction, false)
-			select x).TryRandomElement(out item))
-			{
-				memes.Add(item);
-			}
-			return memes;
-		}
-
-		// Token: 0x0600D5F6 RID: 54774 RVA: 0x003F810C File Offset: 0x003F630C
-		private static bool AnyIdeoHas(MemeDef meme)
-		{
-			if (Find.World == null)
-			{
-				return false;
-			}
-			List<Ideo> ideosListForReading = Find.IdeoManager.IdeosListForReading;
-			for (int i = 0; i < ideosListForReading.Count; i++)
-			{
-				if (ideosListForReading[i].memes.Contains(meme))
-				{
-					return true;
-				}
-			}
+			Messages.Message(messageKey.Translate(arg), arg, MessageTypeDefOf.RejectInput, historical: false);
 			return false;
 		}
+		return true;
+	}
 
-		// Token: 0x0600D5F7 RID: 54775 RVA: 0x003F8158 File Offset: 0x003F6358
-		public static bool CanUseIdeo(FactionDef factionDef, Ideo ideo, IdeoGenerationParms parms)
+	public static bool Notify_PawnAboutToDo(this HistoryEvent ev, out FloatMenuOption opt, string baseText)
+	{
+		if (!ev.DoerWillingToDo())
 		{
-			if (factionDef.allowedCultures != null && !factionDef.allowedCultures.Contains(ideo.culture))
+			opt = new FloatMenuOption(baseText + ": " + "IdeoligionForbids".Translate(), null);
+			return false;
+		}
+		opt = null;
+		return true;
+	}
+
+	public static bool Notify_PawnAboutToDo_Job(this HistoryEvent ev)
+	{
+		if (!ev.DoerWillingToDo())
+		{
+			JobFailReason.Is("IdeoligionForbids".Translate());
+			return false;
+		}
+		return true;
+	}
+
+	public static List<MemeDef> GenerateRandomMemes(IdeoGenerationParms parms)
+	{
+		return GenerateRandomMemes(parms.forNewFluidIdeo ? IdeoFoundation.MemeCountRangeFluidAbsolute.RandomInRange : IdeoFoundation.MemeCountRangeNPCInitial.RandomInRange, parms);
+	}
+
+	private static bool CanAdd(MemeDef meme, List<MemeDef> memes, FactionDef forFaction = null, bool forNewFluidIdeo = false)
+	{
+		if (memes.Contains(meme))
+		{
+			return false;
+		}
+		if (forFaction != null && !IsMemeAllowedFor(meme, forFaction))
+		{
+			return false;
+		}
+		if (forNewFluidIdeo && !IsMemeAllowedForInitialFluidIdeo(meme))
+		{
+			return false;
+		}
+		for (int i = 0; i < memes.Count; i++)
+		{
+			for (int j = 0; j < meme.exclusionTags.Count; j++)
 			{
-				return false;
-			}
-			if (factionDef.requiredMemes != null)
-			{
-				for (int i = 0; i < factionDef.requiredMemes.Count; i++)
-				{
-					if (!ideo.memes.Contains(factionDef.requiredMemes[i]))
-					{
-						return false;
-					}
-				}
-			}
-			for (int j = 0; j < ideo.memes.Count; j++)
-			{
-				if (!IdeoUtility.IsMemeAllowedFor(ideo.memes[j], factionDef))
+				if (memes[i].exclusionTags.Contains(meme.exclusionTags[j]))
 				{
 					return false;
 				}
 			}
-			Predicate<PreceptApparelRequirement> <>9__5;
-			return (parms.disallowedPrecepts == null || !ideo.PreceptsListForReading.Any((Precept p) => parms.disallowedPrecepts.Contains(p.def))) && (parms.forcedMemes == null || ideo.memes.Any(new Predicate<MemeDef>(parms.forcedMemes.Contains))) && (parms.disallowedMemes == null || !ideo.memes.Any(new Predicate<MemeDef>(parms.disallowedMemes.Contains))) && (parms.styles == null || parms.styles.All((StyleCategoryDef style) => ideo.thingStyleCategories.Any((ThingStyleCategoryWithPriority inner) => inner.category == style))) && !ideo.PreceptsListForReading.OfType<Precept_Ritual>().Any((Precept_Ritual p) => !RitualPatternDef.CanUseWithTechLevel(factionDef.techLevel, p.minTechLevel, p.maxTechLevel)) && !ideo.PreceptsListForReading.OfType<Precept_Role>().Any(delegate(Precept_Role p)
+		}
+		return true;
+	}
+
+	public static List<MemeDef> GenerateRandomMemes(int count, IdeoGenerationParms parms)
+	{
+		FactionDef forFaction = parms.forFaction;
+		bool forPlayerFaction = forFaction != null && forFaction.isPlayer;
+		List<MemeDef> memes = new List<MemeDef>();
+		bool flag = false;
+		if (forFaction != null && forFaction.requiredMemes != null)
+		{
+			for (int i = 0; i < forFaction.requiredMemes.Count; i++)
 			{
-				if (!p.apparelRequirements.NullOrEmpty<PreceptApparelRequirement>())
+				memes.Add(forFaction.requiredMemes[i]);
+				if (forFaction.requiredMemes[i].category == MemeCategory.Normal)
 				{
-					List<PreceptApparelRequirement> apparelRequirements = p.apparelRequirements;
-					Predicate<PreceptApparelRequirement> predicate;
-					if ((predicate = <>9__5) == null)
-					{
-						predicate = (<>9__5 = ((PreceptApparelRequirement req) => !req.Compatible(ideo, factionDef)));
-					}
-					return apparelRequirements.Any(predicate);
+					count--;
 				}
+				else if (forFaction.requiredMemes[i].category == MemeCategory.Structure)
+				{
+					flag = true;
+				}
+			}
+		}
+		if (parms.forcedMemes != null)
+		{
+			foreach (MemeDef forcedMeme in parms.forcedMemes)
+			{
+				if (forcedMeme.category == MemeCategory.Structure)
+				{
+					flag = true;
+					break;
+				}
+			}
+		}
+		if (forFaction != null && forFaction.structureMemeWeights != null && !flag)
+		{
+			MemeWeight result2;
+			if (forFaction.structureMemeWeights.Where((MemeWeight x) => CanAdd(x.meme, memes, forFaction, parms.forNewFluidIdeo) && (forPlayerFaction || !AnyIdeoHas(x.meme))).TryRandomElementByWeight((MemeWeight x) => x.selectionWeight * x.meme.randomizationSelectionWeightFactor, out var result))
+			{
+				memes.Add(result.meme);
+				flag = true;
+			}
+			else if (forFaction.structureMemeWeights.Where((MemeWeight x) => CanAdd(x.meme, memes, forFaction, parms.forNewFluidIdeo)).TryRandomElementByWeight((MemeWeight x) => x.selectionWeight * x.meme.randomizationSelectionWeightFactor, out result2))
+			{
+				memes.Add(result2.meme);
+				flag = true;
+			}
+		}
+		if (!flag)
+		{
+			MemeDef result4;
+			if (DefDatabase<MemeDef>.AllDefs.Where((MemeDef x) => x.category == MemeCategory.Structure && CanAdd(x, memes, forFaction, parms.forNewFluidIdeo) && (forPlayerFaction || !AnyIdeoHas(x))).TryRandomElement(out var result3))
+			{
+				memes.Add(result3);
+			}
+			else if (DefDatabase<MemeDef>.AllDefs.Where((MemeDef x) => x.category == MemeCategory.Structure && CanAdd(x, memes, forFaction, parms.forNewFluidIdeo)).TryRandomElementByWeight((MemeDef x) => x.randomizationSelectionWeightFactor, out result4))
+			{
+				memes.Add(result4);
+			}
+		}
+		if (parms.forcedMemes != null)
+		{
+			memes.AddRange(parms.forcedMemes);
+			return memes;
+		}
+		for (int j = 0; j < count; j++)
+		{
+			MemeDef result6;
+			if (DefDatabase<MemeDef>.AllDefs.Where((MemeDef x) => x.category == MemeCategory.Normal && CanAdd(x, memes, forFaction, parms.forNewFluidIdeo) && (forPlayerFaction || !AnyIdeoHas(x)) && (parms.disallowedMemes == null || !parms.disallowedMemes.Contains(x))).TryRandomElementByWeight((MemeDef x) => x.randomizationSelectionWeightFactor, out var result5))
+			{
+				memes.Add(result5);
+			}
+			else if (DefDatabase<MemeDef>.AllDefs.Where((MemeDef x) => x.category == MemeCategory.Normal && CanAdd(x, memes, forFaction, parms.forNewFluidIdeo) && (parms.disallowedMemes == null || !parms.disallowedMemes.Contains(x))).TryRandomElementByWeight((MemeDef x) => x.randomizationSelectionWeightFactor, out result6))
+			{
+				memes.Add(result6);
+			}
+		}
+		return memes;
+	}
+
+	public static List<MemeDef> RandomizeNormalMemes(int count, List<MemeDef> previousMemes, FactionDef forFaction = null, bool forNewFluidIdeo = false)
+	{
+		List<MemeDef> memes = new List<MemeDef>();
+		foreach (MemeDef previousMeme in previousMemes)
+		{
+			if (previousMeme.category != 0)
+			{
+				memes.Add(previousMeme);
+			}
+		}
+		if (forFaction != null && forFaction.requiredMemes != null)
+		{
+			for (int i = 0; i < forFaction.requiredMemes.Count; i++)
+			{
+				MemeDef memeDef = forFaction.requiredMemes[i];
+				if (memeDef.category == MemeCategory.Normal)
+				{
+					memes.Add(memeDef);
+					count--;
+				}
+			}
+		}
+		for (int j = 0; j < count; j++)
+		{
+			if (DefDatabase<MemeDef>.AllDefs.Where((MemeDef x) => x.category == MemeCategory.Normal && CanAdd(x, memes, forFaction, forNewFluidIdeo)).TryRandomElement(out var result))
+			{
+				memes.Add(result);
+			}
+		}
+		return memes;
+	}
+
+	public static List<MemeDef> RandomizeNormalMemesForReforming(int maxMemes, List<MemeDef> existingMemes, FactionDef forFaction = null)
+	{
+		List<MemeDef> memes = new List<MemeDef>();
+		memes.AddRange(existingMemes);
+		int num = memes.Count((MemeDef m) => m.category == MemeCategory.Normal);
+		MemeDef result;
+		if (num > 1 && (num >= maxMemes || Rand.Bool))
+		{
+			memes.Remove(memes.Where((MemeDef m) => m.category == MemeCategory.Normal).RandomElement());
+		}
+		else if (num < maxMemes && DefDatabase<MemeDef>.AllDefs.Where((MemeDef x) => x.category == MemeCategory.Normal && CanAdd(x, memes, forFaction)).TryRandomElement(out result))
+		{
+			memes.Add(result);
+		}
+		return memes;
+	}
+
+	public static List<MemeDef> RandomizeStructureMeme(List<MemeDef> previousMemes, FactionDef forFaction = null)
+	{
+		List<MemeDef> memes = new List<MemeDef>();
+		foreach (MemeDef previousMeme in previousMemes)
+		{
+			if (previousMeme.category != MemeCategory.Structure)
+			{
+				memes.Add(previousMeme);
+			}
+		}
+		bool flag = false;
+		if (forFaction != null && forFaction.requiredMemes != null)
+		{
+			for (int i = 0; i < forFaction.requiredMemes.Count; i++)
+			{
+				MemeDef memeDef = forFaction.requiredMemes[i];
+				if (memeDef.category == MemeCategory.Structure)
+				{
+					memes.Add(memeDef);
+					flag = true;
+				}
+			}
+		}
+		if (!flag && DefDatabase<MemeDef>.AllDefs.Where((MemeDef x) => x.category == MemeCategory.Structure && CanAdd(x, memes, forFaction)).TryRandomElement(out var result))
+		{
+			memes.Add(result);
+		}
+		return memes;
+	}
+
+	private static bool AnyIdeoHas(MemeDef meme)
+	{
+		if (Find.World == null)
+		{
+			return false;
+		}
+		List<Ideo> ideosListForReading = Find.IdeoManager.IdeosListForReading;
+		for (int i = 0; i < ideosListForReading.Count; i++)
+		{
+			if (ideosListForReading[i].memes.Contains(meme))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static bool CanUseIdeo(FactionDef factionDef, Ideo ideo, IdeoGenerationParms parms)
+	{
+		if (factionDef.allowedCultures != null && !factionDef.allowedCultures.Contains(ideo.culture))
+		{
+			return false;
+		}
+		if (factionDef.requiredMemes != null)
+		{
+			for (int i = 0; i < factionDef.requiredMemes.Count; i++)
+			{
+				if (!ideo.memes.Contains(factionDef.requiredMemes[i]))
+				{
+					return false;
+				}
+			}
+		}
+		for (int j = 0; j < ideo.memes.Count; j++)
+		{
+			if (!IsMemeAllowedFor(ideo.memes[j], factionDef))
+			{
 				return false;
-			});
-		}
-
-		// Token: 0x0600D5F8 RID: 54776 RVA: 0x003F834C File Offset: 0x003F654C
-		public static bool IsMemeAllowedFor(MemeDef meme, FactionDef faction)
-		{
-			return (faction.structureMemeWeights != null && meme.category == MemeCategory.Structure && faction.structureMemeWeights.Any((MemeWeight x) => x.meme == meme && x.selectionWeight != 0f)) || ((meme.category != MemeCategory.Normal || meme.allowDuringTutorial || !faction.classicIdeo) && (faction.disallowedMemes == null || !faction.disallowedMemes.Contains(meme)) && ((faction.requiredMemes != null && faction.requiredMemes.Contains(meme)) || ((faction.allowedMemes == null || faction.allowedMemes.Contains(meme)) && (meme.factionWhitelist == null || meme.factionWhitelist.Contains(faction)))));
-		}
-
-		// Token: 0x0600D5F9 RID: 54777 RVA: 0x003F8438 File Offset: 0x003F6638
-		public static bool PlayerHasPreceptForBuilding(ThingDef buildingDef)
-		{
-			using (IEnumerator<Ideo> enumerator = Faction.OfPlayer.ideos.AllIdeos.GetEnumerator())
-			{
-				while (enumerator.MoveNext())
-				{
-					if (enumerator.Current.HasPreceptForBuilding(buildingDef))
-					{
-						return true;
-					}
-				}
 			}
+		}
+		if (parms.disallowedPrecepts != null && ideo.PreceptsListForReading.Any((Precept p) => parms.disallowedPrecepts.Contains(p.def)))
+		{
 			return false;
 		}
-
-		// Token: 0x0600D5FA RID: 54778 RVA: 0x003F8498 File Offset: 0x003F6698
-		public static IEnumerable<Pawn> AllColonistsWithCharityPrecept()
+		if (parms.forcedMemes != null && !ideo.memes.Any(parms.forcedMemes.Contains))
 		{
-			if (!ModsConfig.IdeologyActive)
-			{
-				yield break;
-			}
-			List<Pawn> colonists = PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_FreeColonists;
-			foreach (Ideo ideo in Faction.OfPlayer.ideos.AllIdeos)
-			{
-				List<Precept> precepts = ideo.PreceptsListForReading;
-				int num;
-				for (int i = 0; i < precepts.Count; i = num + 1)
-				{
-					if (precepts[i].def.issue == IssueDefOf.Charity)
-					{
-						for (int j = 0; j < colonists.Count; j = num + 1)
-						{
-							if (colonists[j].Ideo == ideo)
-							{
-								yield return colonists[j];
-							}
-							num = j;
-						}
-					}
-					num = i;
-				}
-				precepts = null;
-				ideo = null;
-			}
-			IEnumerator<Ideo> enumerator = null;
-			yield break;
-			yield break;
-		}
-
-		// Token: 0x0600D5FB RID: 54779 RVA: 0x003F84A4 File Offset: 0x003F66A4
-		public static bool AnyColonistWithRanchingIssue()
-		{
-			foreach (Ideo ideo in Faction.OfPlayer.ideos.AllIdeos)
-			{
-				List<Precept> preceptsListForReading = ideo.PreceptsListForReading;
-				for (int i = 0; i < preceptsListForReading.Count; i++)
-				{
-					if (preceptsListForReading[i].def.issue == IssueDefOf.Ranching)
-					{
-						return true;
-					}
-				}
-			}
 			return false;
 		}
-
-		// Token: 0x0600D5FC RID: 54780 RVA: 0x003F8528 File Offset: 0x003F6728
-		public static void Notify_PlayerRaidedSomeone(IEnumerable<Pawn> allRaiders)
+		if (parms.disallowedMemes != null && ideo.memes.Any(parms.disallowedMemes.Contains))
 		{
-			if (allRaiders.EnumerableNullOrEmpty<Pawn>())
-			{
-				return;
-			}
-			allRaiders = from p in allRaiders
-			where !p.Dead
-			select p;
-			Find.History.Notify_PlayerRaidedSomeone();
-			if (ModsConfig.IdeologyActive)
-			{
-				foreach (Pawn arg in allRaiders)
-				{
-					HistoryEvent historyEvent = new HistoryEvent(HistoryEventDefOf.Raided, arg.Named(HistoryEventArgsNames.Doer));
-					Find.HistoryEventsManager.RecordEvent(historyEvent, true);
-				}
-				Find.HistoryEventsManager.RecordEvent(new HistoryEvent(HistoryEventDefOf.PlayerRaidedSomeone), true);
-			}
-		}
-
-		// Token: 0x0600D5FD RID: 54781 RVA: 0x003F85E4 File Offset: 0x003F67E4
-		public static void Notify_QuestCleanedUp(Quest quest, QuestState state)
-		{
-			if (state == QuestState.EndedOfferExpired || state == QuestState.EndedFailed)
-			{
-				if (quest.root.failedOrExpiredHistoryEvent != null)
-				{
-					Find.HistoryEventsManager.RecordEvent(new HistoryEvent(quest.root.failedOrExpiredHistoryEvent), true);
-				}
-				if (quest.charity && ModsConfig.IdeologyActive && IdeoUtility.AllColonistsWithCharityPrecept().Any<Pawn>())
-				{
-					TaggedString taggedString = "MessageCharityEventRefused".Translate();
-					if (!quest.hidden)
-					{
-						taggedString += ": " + "MessageCharityQuestEndedFailed".Translate(quest.name);
-					}
-					Messages.Message(taggedString, null, MessageTypeDefOf.NegativeEvent, (!quest.hidden) ? quest : null, true);
-					return;
-				}
-			}
-			else if (state == QuestState.EndedSuccess)
-			{
-				if (quest.root.successHistoryEvent != null)
-				{
-					Find.HistoryEventsManager.RecordEvent(new HistoryEvent(quest.root.successHistoryEvent, quest.Named(HistoryEventArgsNames.Quest)), true);
-				}
-				if (quest.charity && ModsConfig.IdeologyActive && IdeoUtility.AllColonistsWithCharityPrecept().Any<Pawn>())
-				{
-					TaggedString taggedString2 = "MessageCharityEventFulfilled".Translate();
-					if (!quest.hidden)
-					{
-						taggedString2 += ": " + "MessageCharityQuestEndedSuccess".Translate(quest.name);
-					}
-					Messages.Message(taggedString2, null, MessageTypeDefOf.PositiveEvent, (!quest.hidden) ? quest : null, true);
-				}
-			}
-		}
-
-		// Token: 0x0600D5FE RID: 54782 RVA: 0x003F874C File Offset: 0x003F694C
-		public static float GetStyleDominanceFromCellsCenteredOn(IntVec3 center, IntVec3 rootCell, Map map, Ideo ideo)
-		{
-			IdeoUtility.<>c__DisplayClass22_0 CS$<>8__locals1;
-			CS$<>8__locals1.map = map;
-			bool flag = false;
-			float num = 0f;
-			IdeoUtility.GetJoinedRooms(rootCell, CS$<>8__locals1.map, IdeoUtility.tmpCheckRooms);
-			if (!IdeoUtility.tmpCheckRooms.Any<Room>())
-			{
-				return num;
-			}
-			int num2 = GenRadial.NumCellsInRadius(24.9f);
-			for (int i = 0; i < num2; i++)
-			{
-				IntVec3 c = center + GenRadial.RadialPattern[i];
-				if (IdeoUtility.<GetStyleDominanceFromCellsCenteredOn>g__CellIsValid|22_0(c, ref CS$<>8__locals1))
-				{
-					if (flag)
-					{
-						CS$<>8__locals1.map.debugDrawer.FlashCell(c, 0.1f, "d", 50);
-					}
-					TerrainDef terrain = c.GetTerrain(CS$<>8__locals1.map);
-					if (ideo.cachedPossibleBuildables.Contains(terrain))
-					{
-						num += terrain.GetStatValueAbstract(StatDefOf.StyleDominance, null);
-					}
-					else if (!terrain.canGenerateDefaultDesignator)
-					{
-						num -= terrain.GetStatValueAbstract(StatDefOf.StyleDominance, null);
-					}
-					foreach (Thing t in c.GetThingList(CS$<>8__locals1.map))
-					{
-						num += IdeoUtility.GetStyleDominance(t, ideo);
-					}
-				}
-			}
-			IdeoUtility.tmpCheckRooms.Clear();
-			return num;
-		}
-
-		// Token: 0x0600D5FF RID: 54783 RVA: 0x003F8894 File Offset: 0x003F6A94
-		private static void GetJoinedRooms(IntVec3 rootCell, Map map, HashSet<Room> rooms)
-		{
-			Room room = rootCell.GetRoom(map);
-			if (room == null)
-			{
-				return;
-			}
-			rooms.Clear();
-			rooms.Add(room);
-			if (room.IsDoorway)
-			{
-				foreach (Region region in room.FirstRegion.Neighbors)
-				{
-					if (!rooms.Contains(region.Room))
-					{
-						rooms.Add(region.Room);
-					}
-				}
-			}
-		}
-
-		// Token: 0x0600D600 RID: 54784 RVA: 0x003F891C File Offset: 0x003F6B1C
-		public static bool ThingSatisfiesIdeo(Thing thing, Ideo ideo)
-		{
-			return IdeoUtility.GetStyleDominance(thing, ideo) > 0f;
-		}
-
-		// Token: 0x0600D601 RID: 54785 RVA: 0x003F892C File Offset: 0x003F6B2C
-		private static float GetStyleDominance(Thing t, Ideo ideo)
-		{
-			float statValue = t.GetStatValue(StatDefOf.StyleDominance, true, -1);
-			CompRelicContainer compRelicContainer = t.TryGetComp<CompRelicContainer>();
-			if (compRelicContainer != null && compRelicContainer.Full)
-			{
-				ThingWithComps thingWithComps = compRelicContainer.ContainedThing as ThingWithComps;
-				CompStyleable compStyleable = (thingWithComps != null) ? thingWithComps.compStyleable : null;
-				bool flag;
-				if (compStyleable == null)
-				{
-					flag = (null != null);
-				}
-				else
-				{
-					Precept_ThingStyle sourcePrecept = compStyleable.SourcePrecept;
-					flag = (((sourcePrecept != null) ? sourcePrecept.ideo : null) != null);
-				}
-				if (flag)
-				{
-					if (compStyleable.SourcePrecept.ideo == ideo)
-					{
-						return statValue;
-					}
-					return -statValue;
-				}
-			}
-			ThingStyleDef styleDef = t.GetStyleDef();
-			if (styleDef != null)
-			{
-				if (ideo.GetStyleFor(t.def) == styleDef)
-				{
-					return statValue;
-				}
-				return -statValue;
-			}
-			else
-			{
-				if (t.def.canGenerateDefaultDesignator)
-				{
-					return 0f;
-				}
-				if (ideo.cachedPossibleBuildables.Contains(t.def) || (t.StyleSourcePrecept != null && ideo.PreceptsListForReading.Contains(t.StyleSourcePrecept)))
-				{
-					return statValue;
-				}
-				return -statValue;
-			}
-		}
-
-		// Token: 0x0600D602 RID: 54786 RVA: 0x003F8A04 File Offset: 0x003F6C04
-		public static List<TreeSighting> TreeSightingsNearPawn(IntVec3 rootCell, Map map, Ideo ideo)
-		{
-			IdeoUtility.tmpTreeSightings.Clear();
-			int num = GenRadial.NumCellsInRadius(11.9f);
-			for (int i = 0; i < num; i++)
-			{
-				IntVec3 intVec = rootCell + GenRadial.RadialPattern[i];
-				if (intVec.InBounds(map) && !intVec.Fogged(map) && GenSight.LineOfSight(rootCell, intVec, map))
-				{
-					foreach (Thing thing in intVec.GetThingList(map))
-					{
-						Plant plant = thing as Plant;
-						if (plant != null && plant.def.plant.IsTree)
-						{
-							IdeoUtility.tmpTreeSightings.Add(new TreeSighting(thing, Find.TickManager.TicksGame));
-						}
-					}
-				}
-			}
-			return IdeoUtility.tmpTreeSightings;
-		}
-
-		// Token: 0x0600D603 RID: 54787 RVA: 0x003F8AE8 File Offset: 0x003F6CE8
-		public static bool IdeoCausesHumanMeatCravings(this Ideo ideo)
-		{
-			return ideo.cachedPossibleSituationalThoughts.Contains(ThoughtDefOf.NoRecentHumanMeat_Preferred) || ideo.cachedPossibleSituationalThoughts.Contains(ThoughtDefOf.NoRecentHumanMeat_RequiredStrong) || ideo.cachedPossibleSituationalThoughts.Contains(ThoughtDefOf.NoRecentHumanMeat_RequiredRavenous);
-		}
-
-		// Token: 0x0600D604 RID: 54788 RVA: 0x003F8B20 File Offset: 0x003F6D20
-		public static bool IdeoPrefersNudity(this Ideo ideo)
-		{
-			using (List<Precept>.Enumerator enumerator = ideo.PreceptsListForReading.GetEnumerator())
-			{
-				while (enumerator.MoveNext())
-				{
-					if (enumerator.Current.def.prefersNudity)
-					{
-						return true;
-					}
-				}
-			}
 			return false;
 		}
-
-		// Token: 0x0600D605 RID: 54789 RVA: 0x003F8B80 File Offset: 0x003F6D80
-		public static bool IdeoPrefersNudityForGender(this Ideo ideo, Gender gender)
+		if (parms.styles != null && !parms.styles.All((StyleCategoryDef style) => ideo.thingStyleCategories.Any((ThingStyleCategoryWithPriority inner) => inner.category == style)))
 		{
-			foreach (Precept precept in ideo.PreceptsListForReading)
+			return false;
+		}
+		if (ideo.PreceptsListForReading.OfType<Precept_Ritual>().Any((Precept_Ritual p) => !RitualPatternDef.CanUseWithTechLevel(factionDef.techLevel, p.minTechLevel, p.maxTechLevel)))
+		{
+			return false;
+		}
+		if (ideo.PreceptsListForReading.OfType<Precept_Role>().Any((Precept_Role p) => !p.apparelRequirements.NullOrEmpty() && p.apparelRequirements.Any((PreceptApparelRequirement req) => !req.Compatible(ideo, factionDef))))
+		{
+			return false;
+		}
+		return true;
+	}
+
+	public static bool IsMemeAllowedFor(MemeDef meme, FactionDef faction)
+	{
+		if (faction.structureMemeWeights != null && meme.category == MemeCategory.Structure && faction.structureMemeWeights.Any((MemeWeight x) => x.meme == meme && x.selectionWeight != 0f))
+		{
+			return true;
+		}
+		if (faction.forcedMemes != null)
+		{
+			return faction.forcedMemes.Contains(meme);
+		}
+		if (faction.requiredMemes != null && faction.requiredMemes.Contains(meme))
+		{
+			return true;
+		}
+		if (meme.category == MemeCategory.Normal && !meme.allowDuringTutorial && faction.classicIdeo)
+		{
+			return false;
+		}
+		if (faction.disallowedMemes != null && faction.disallowedMemes.Contains(meme))
+		{
+			return false;
+		}
+		if (faction.allowedMemes != null && !faction.allowedMemes.Contains(meme))
+		{
+			return false;
+		}
+		if (meme.factionWhitelist != null && !meme.factionWhitelist.Contains(faction))
+		{
+			return false;
+		}
+		return true;
+	}
+
+	public static bool PlayerHasPreceptForBuilding(ThingDef buildingDef)
+	{
+		foreach (Ideo allIdeo in Faction.OfPlayer.ideos.AllIdeos)
+		{
+			if (allIdeo.HasPreceptForBuilding(buildingDef))
 			{
-				if (precept.def.prefersNudity && (precept.def.genderPrefersNudity == Gender.None || precept.def.genderPrefersNudity == gender))
+				return true;
+			}
+		}
+		return false;
+	}
+
+	[IteratorStateMachine(typeof(_003CAllColonistsWithCharityPrecept_003Ed__17))]
+	public static IEnumerable<Pawn> AllColonistsWithCharityPrecept()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CAllColonistsWithCharityPrecept_003Ed__17(-2);
+	}
+
+	public static bool AnyColonistWithRanchingIssue()
+	{
+		foreach (Ideo allIdeo in Faction.OfPlayer.ideos.AllIdeos)
+		{
+			List<Precept> preceptsListForReading = allIdeo.PreceptsListForReading;
+			for (int i = 0; i < preceptsListForReading.Count; i++)
+			{
+				if (preceptsListForReading[i].def.issue == IssueDefOf.Ranching)
 				{
 					return true;
 				}
 			}
-			return false;
 		}
+		return false;
+	}
 
-		// Token: 0x0600D606 RID: 54790 RVA: 0x003F8BFC File Offset: 0x003F6DFC
-		public static bool IdeoApprovesOfSlavery(this Ideo ideo)
+	public static void Notify_PlayerRaidedSomeone(IEnumerable<Pawn> allRaiders)
+	{
+		if (allRaiders.EnumerableNullOrEmpty())
 		{
-			using (List<Precept>.Enumerator enumerator = ideo.PreceptsListForReading.GetEnumerator())
-			{
-				while (enumerator.MoveNext())
-				{
-					if (enumerator.Current.def.approvesOfSlavery)
-					{
-						return true;
-					}
-				}
-			}
-			return false;
+			return;
 		}
-
-		// Token: 0x0600D607 RID: 54791 RVA: 0x003F8C5C File Offset: 0x003F6E5C
-		public static bool IdeoPrefersDarkness(this Ideo ideo)
+		allRaiders = allRaiders.Where((Pawn p) => !p.Dead);
+		Find.History.Notify_PlayerRaidedSomeone();
+		if (!ModsConfig.IdeologyActive)
 		{
-			using (List<Precept>.Enumerator enumerator = ideo.PreceptsListForReading.GetEnumerator())
-			{
-				while (enumerator.MoveNext())
-				{
-					if (enumerator.Current.def.prefersDarkness)
-					{
-						return true;
-					}
-				}
-			}
-			return false;
+			return;
 		}
-
-		// Token: 0x0600D608 RID: 54792 RVA: 0x003F8CBC File Offset: 0x003F6EBC
-		public static bool IdeoApprovesOfBlindness(this Ideo ideo)
+		foreach (Pawn allRaider in allRaiders)
 		{
-			using (List<Precept>.Enumerator enumerator = ideo.PreceptsListForReading.GetEnumerator())
-			{
-				while (enumerator.MoveNext())
-				{
-					if (enumerator.Current.def.approvesOfBlindness)
-					{
-						return true;
-					}
-				}
-			}
-			return false;
+			HistoryEvent historyEvent = new HistoryEvent(HistoryEventDefOf.Raided, allRaider.Named(HistoryEventArgsNames.Doer));
+			Find.HistoryEventsManager.RecordEvent(historyEvent);
 		}
+		Find.HistoryEventsManager.RecordEvent(new HistoryEvent(HistoryEventDefOf.PlayerRaidedSomeone));
+	}
 
-		// Token: 0x0600D609 RID: 54793 RVA: 0x003F8D1C File Offset: 0x003F6F1C
-		public static void Notify_NewColonyStarted()
+	public static void Notify_QuestCleanedUp(Quest quest, QuestState state)
+	{
+		switch (state)
 		{
-			foreach (Ideo ideo in Faction.OfPlayer.ideos.AllIdeos)
+		case QuestState.EndedOfferExpired:
+		case QuestState.EndedFailed:
+			if (quest.root.failedOrExpiredHistoryEvent != null)
 			{
-				ideo.relicsCollected = false;
+				Find.HistoryEventsManager.RecordEvent(new HistoryEvent(quest.root.failedOrExpiredHistoryEvent));
 			}
-			foreach (Ideo ideo2 in Faction.OfPlayer.ideos.AllIdeos)
+			if (quest.charity && ModsConfig.IdeologyActive && AllColonistsWithCharityPrecept().Any())
 			{
-				foreach (Precept precept in ideo2.PreceptsListForReading)
+				TaggedString taggedString2 = "MessageCharityEventRefused".Translate();
+				if (!quest.hidden)
 				{
-					Precept_Relic precept_Relic = precept as Precept_Relic;
-					if (precept_Relic != null)
-					{
-						precept_Relic.Notify_NewColonyStarted();
-					}
+					taggedString2 += ": " + "MessageCharityQuestEndedFailed".Translate(quest.name);
 				}
+				Messages.Message(taggedString2, null, MessageTypeDefOf.NegativeEvent, (!quest.hidden) ? quest : null);
 			}
+			break;
+		case QuestState.EndedSuccess:
+			if (quest.root.successHistoryEvent != null)
+			{
+				Find.HistoryEventsManager.RecordEvent(new HistoryEvent(quest.root.successHistoryEvent, quest.Named(HistoryEventArgsNames.Quest)));
+			}
+			if (quest.charity && ModsConfig.IdeologyActive && AllColonistsWithCharityPrecept().Any())
+			{
+				TaggedString taggedString = "MessageCharityEventFulfilled".Translate();
+				if (!quest.hidden)
+				{
+					taggedString += ": " + "MessageCharityQuestEndedSuccess".Translate(quest.name);
+				}
+				Messages.Message(taggedString, null, MessageTypeDefOf.PositiveEvent, (!quest.hidden) ? quest : null);
+			}
+			break;
 		}
+	}
 
-		// Token: 0x0600D60A RID: 54794 RVA: 0x003F8DF8 File Offset: 0x003F6FF8
-		public static Pawn FindFirstPawnWithLeaderRole(Caravan caravan)
+	public static float GetStyleDominanceFromCellsCenteredOn(IntVec3 center, IntVec3 rootCell, Map map, Ideo ideo)
+	{
+		bool flag = false;
+		float num = 0f;
+		GetJoinedRooms(rootCell, map, tmpCheckRooms);
+		if (!tmpCheckRooms.Any())
 		{
-			List<Pawn> pawnsListForReading = caravan.PawnsListForReading;
-			for (int i = 0; i < pawnsListForReading.Count; i++)
-			{
-				Pawn pawn = pawnsListForReading[i];
-				if (pawn.Ideo != null)
-				{
-					Precept_Role role = pawn.Ideo.GetRole(pawn);
-					if (role != null && role.def.leaderRole)
-					{
-						return pawn;
-					}
-				}
-			}
-			return null;
-		}
-
-		// Token: 0x0600D60B RID: 54795 RVA: 0x003F8E4D File Offset: 0x003F704D
-		public static Ideo MakeEmptyIdeo()
-		{
-			Ideo ideo = IdeoGenerator.MakeIdeo(DefDatabase<IdeoFoundationDef>.AllDefs.RandomElement<IdeoFoundationDef>());
-			ideo.foundation.RandomizeIcon();
-			return ideo;
-		}
-
-		// Token: 0x0600D60C RID: 54796 RVA: 0x003F8E6C File Offset: 0x003F706C
-		public static Color? GetIdeoColorForBuilding(ThingDef def, Faction faction)
-		{
-			if (def.building.useIdeoColor && faction != null && faction.ideos != null)
-			{
-				Ideo ideo = null;
-				Predicate<ThingStyleCategoryWithPriority> <>9__0;
-				foreach (Ideo ideo2 in faction.ideos.AllIdeos)
-				{
-					if (def.dominantStyleCategory != null)
-					{
-						List<ThingStyleCategoryWithPriority> thingStyleCategories = ideo2.thingStyleCategories;
-						Predicate<ThingStyleCategoryWithPriority> predicate;
-						if ((predicate = <>9__0) == null)
-						{
-							predicate = (<>9__0 = ((ThingStyleCategoryWithPriority sc) => sc.category == def.dominantStyleCategory));
-						}
-						if (thingStyleCategories.Any(predicate))
-						{
-							ideo = ideo2;
-							break;
-						}
-					}
-					using (List<MemeDef>.Enumerator enumerator2 = ideo2.memes.GetEnumerator())
-					{
-						while (enumerator2.MoveNext())
-						{
-							if (enumerator2.Current.AllDesignatorBuildables.Contains(def))
-							{
-								ideo = ideo2;
-								break;
-							}
-						}
-					}
-					if (ideo != null)
-					{
-						break;
-					}
-				}
-				ideo = (ideo ?? faction.ideos.PrimaryIdeo);
-				if (ideo != null)
-				{
-					return new Color?(ideo.Color);
-				}
-			}
-			return null;
-		}
-
-		// Token: 0x0600D60D RID: 54797 RVA: 0x003F8FB4 File Offset: 0x003F71B4
-		public static bool IsMemeAllowedForInitialFluidIdeo(MemeDef memeDef)
-		{
-			return memeDef.impact <= 2;
-		}
-
-		// Token: 0x0600D60E RID: 54798 RVA: 0x003F8FC2 File Offset: 0x003F71C2
-		public static bool CountsAsNonNPCForPrecepts(this Pawn pawn)
-		{
-			return pawn.IsColonist || pawn.IsPrisonerOfColony || pawn.IsSlaveOfColony;
-		}
-
-		// Token: 0x0600D60F RID: 54799 RVA: 0x003F8FDC File Offset: 0x003F71DC
-		public static float IdeoChangeToWeight(Pawn pawn, Ideo ideo)
-		{
-			if (ModsConfig.AnomalyActive && ideo == Find.IdeoManager.Horaxian)
-			{
-				return 0f;
-			}
-			if (pawn == null)
-			{
-				return 1f;
-			}
-			if (ideo == pawn.Ideo)
-			{
-				return 0f;
-			}
-			float num = 1f;
-			if (pawn.Faction != null)
-			{
-				foreach (Pawn pawn2 in PawnsFinder.AllMaps_SpawnedPawnsInFaction(pawn.Faction))
-				{
-					if (pawn2.ideo != null && pawn2.Ideo == ideo)
-					{
-						num += 1f;
-						break;
-					}
-				}
-				foreach (Faction faction in Find.FactionManager.AllFactionsVisible)
-				{
-					if (faction != pawn.Faction && faction.RelationKindWith(pawn.Faction) == FactionRelationKind.Ally && faction.ideos.IsPrimary(ideo))
-					{
-						num += 1f;
-						break;
-					}
-				}
-			}
-			if (pawn.Spawned)
-			{
-				using (IEnumerator<Pawn> enumerator3 = pawn.Map.mapPawns.AllPawnsSpawned.GetEnumerator())
-				{
-					while (enumerator3.MoveNext())
-					{
-						Pawn pawn3 = enumerator3.Current;
-						if (pawn3.Faction != null && pawn3.ideo != null && pawn3.Ideo == ideo && (pawn3.Faction == pawn.Faction || !pawn3.Faction.HostileTo(pawn.Faction)))
-						{
-							num += 1f;
-							break;
-						}
-					}
-					return num;
-				}
-			}
-			Caravan caravan = pawn.GetCaravan();
-			if (caravan != null)
-			{
-				foreach (Pawn pawn4 in caravan.PawnsListForReading)
-				{
-					if (pawn4.ideo != null && pawn4.Ideo == ideo)
-					{
-						num += 1f;
-						break;
-					}
-				}
-			}
 			return num;
 		}
-
-		// Token: 0x0600D611 RID: 54801 RVA: 0x003F920E File Offset: 0x003F740E
-		[CompilerGenerated]
-		internal static void <Notify_HistoryEvent>g__CheckKnows|1_0(Pawn p, ref IdeoUtility.<>c__DisplayClass1_0 A_1)
+		int num2 = GenRadial.NumCellsInRadius(24.9f);
+		for (int i = 0; i < num2; i++)
 		{
-			if (p != A_1.pawn && p.Ideo != null)
+			IntVec3 c2 = center + GenRadial.RadialPattern[i];
+			if (!CellIsValid(c2))
 			{
-				p.Ideo.Notify_MemberKnows(A_1.ev, p);
+				continue;
+			}
+			if (flag)
+			{
+				map.debugDrawer.FlashCell(c2, 0.1f, "d");
+			}
+			TerrainDef terrain = c2.GetTerrain(map);
+			if (ideo.cachedPossibleBuildables.Contains(terrain))
+			{
+				num += terrain.GetStatValueAbstract(StatDefOf.StyleDominance);
+			}
+			else if (!terrain.canGenerateDefaultDesignator)
+			{
+				num -= terrain.GetStatValueAbstract(StatDefOf.StyleDominance);
+			}
+			foreach (Thing thing in c2.GetThingList(map))
+			{
+				num += GetStyleDominance(thing, ideo);
 			}
 		}
-
-		// Token: 0x0600D612 RID: 54802 RVA: 0x003F9234 File Offset: 0x003F7434
-		[CompilerGenerated]
-		internal static bool <GetStyleDominanceFromCellsCenteredOn>g__CellIsValid|22_0(IntVec3 c, ref IdeoUtility.<>c__DisplayClass22_0 A_1)
+		tmpCheckRooms.Clear();
+		return num;
+		bool CellIsValid(IntVec3 c)
 		{
-			if (!c.InBounds(A_1.map) || c.Fogged(A_1.map))
+			if (!c.InBounds(map) || c.Fogged(map))
 			{
 				return false;
 			}
-			Room room = c.GetRoom(A_1.map);
-			return room != null && IdeoUtility.tmpCheckRooms.Contains(room);
+			Room room = c.GetRoom(map);
+			if (room == null)
+			{
+				return false;
+			}
+			return tmpCheckRooms.Contains(room);
 		}
+	}
 
-		// Token: 0x0400917C RID: 37244
-		public const int MinFluidIdeoNormalMemes = 1;
+	private static void GetJoinedRooms(IntVec3 rootCell, Map map, HashSet<Room> rooms)
+	{
+		Room room = rootCell.GetRoom(map);
+		if (room == null)
+		{
+			return;
+		}
+		rooms.Clear();
+		rooms.Add(room);
+		if (!room.IsDoorway)
+		{
+			return;
+		}
+		foreach (Region neighbor in room.FirstRegion.Neighbors)
+		{
+			if (!rooms.Contains(neighbor.Room))
+			{
+				rooms.Add(neighbor.Room);
+			}
+		}
+	}
 
-		// Token: 0x0400917D RID: 37245
-		private static HashSet<Room> tmpCheckRooms = new HashSet<Room>();
+	public static bool ThingSatisfiesIdeo(Thing thing, Ideo ideo)
+	{
+		return GetStyleDominance(thing, ideo) > 0f;
+	}
 
-		// Token: 0x0400917E RID: 37246
-		private static List<TreeSighting> tmpTreeSightings = new List<TreeSighting>();
+	private static float GetStyleDominance(Thing t, Ideo ideo)
+	{
+		float statValue = t.GetStatValue(StatDefOf.StyleDominance);
+		CompRelicContainer compRelicContainer = t.TryGetComp<CompRelicContainer>();
+		if (compRelicContainer != null && compRelicContainer.Full)
+		{
+			CompStyleable compStyleable = (compRelicContainer.ContainedThing as ThingWithComps)?.compStyleable;
+			if (compStyleable?.SourcePrecept?.ideo != null)
+			{
+				if (compStyleable.SourcePrecept.ideo == ideo)
+				{
+					return statValue;
+				}
+				return 0f - statValue;
+			}
+		}
+		ThingStyleDef styleDef = t.GetStyleDef();
+		if (styleDef != null)
+		{
+			if (ideo.GetStyleFor(t.def) == styleDef)
+			{
+				return statValue;
+			}
+			return 0f - statValue;
+		}
+		if (!t.def.canGenerateDefaultDesignator)
+		{
+			if (ideo.cachedPossibleBuildables.Contains(t.def) || (t.StyleSourcePrecept != null && ideo.PreceptsListForReading.Contains(t.StyleSourcePrecept)))
+			{
+				return statValue;
+			}
+			return 0f - statValue;
+		}
+		return 0f;
+	}
+
+	public static List<TreeSighting> TreeSightingsNearPawn(IntVec3 rootCell, Map map, Ideo ideo)
+	{
+		tmpTreeSightings.Clear();
+		int num = GenRadial.NumCellsInRadius(11.9f);
+		for (int i = 0; i < num; i++)
+		{
+			IntVec3 intVec = rootCell + GenRadial.RadialPattern[i];
+			if (!intVec.InBounds(map) || intVec.Fogged(map) || !GenSight.LineOfSight(rootCell, intVec, map))
+			{
+				continue;
+			}
+			foreach (Thing thing in intVec.GetThingList(map))
+			{
+				if (thing is Plant plant && plant.def.plant.IsTree)
+				{
+					tmpTreeSightings.Add(new TreeSighting(thing, Find.TickManager.TicksGame));
+				}
+			}
+		}
+		return tmpTreeSightings;
+	}
+
+	public static bool IdeoCausesHumanMeatCravings(this Ideo ideo)
+	{
+		if (!ideo.cachedPossibleSituationalThoughts.Contains(ThoughtDefOf.NoRecentHumanMeat_Preferred) && !ideo.cachedPossibleSituationalThoughts.Contains(ThoughtDefOf.NoRecentHumanMeat_RequiredStrong))
+		{
+			return ideo.cachedPossibleSituationalThoughts.Contains(ThoughtDefOf.NoRecentHumanMeat_RequiredRavenous);
+		}
+		return true;
+	}
+
+	public static bool IdeoPrefersNudity(this Ideo ideo)
+	{
+		foreach (Precept item in ideo.PreceptsListForReading)
+		{
+			if (item.def.prefersNudity)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static bool IdeoPrefersNudityForGender(this Ideo ideo, Gender gender)
+	{
+		foreach (Precept item in ideo.PreceptsListForReading)
+		{
+			if (item.def.prefersNudity && (item.def.genderPrefersNudity == Gender.None || item.def.genderPrefersNudity == gender))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static bool IdeoApprovesOfSlavery(this Ideo ideo)
+	{
+		foreach (Precept item in ideo.PreceptsListForReading)
+		{
+			if (item.def.approvesOfSlavery)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static bool IdeoPrefersDarkness(this Ideo ideo)
+	{
+		foreach (Precept item in ideo.PreceptsListForReading)
+		{
+			if (item.def.prefersDarkness)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static bool IdeoApprovesOfBlindness(this Ideo ideo)
+	{
+		foreach (Precept item in ideo.PreceptsListForReading)
+		{
+			if (item.def.approvesOfBlindness)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static void Notify_NewColonyStarted()
+	{
+		foreach (Ideo allIdeo in Faction.OfPlayer.ideos.AllIdeos)
+		{
+			allIdeo.relicsCollected = false;
+		}
+		foreach (Ideo allIdeo2 in Faction.OfPlayer.ideos.AllIdeos)
+		{
+			foreach (Precept item in allIdeo2.PreceptsListForReading)
+			{
+				if (item is Precept_Relic precept_Relic)
+				{
+					precept_Relic.Notify_NewColonyStarted();
+				}
+			}
+		}
+	}
+
+	public static Pawn FindFirstPawnWithLeaderRole(Caravan caravan)
+	{
+		List<Pawn> pawnsListForReading = caravan.PawnsListForReading;
+		for (int i = 0; i < pawnsListForReading.Count; i++)
+		{
+			Pawn pawn = pawnsListForReading[i];
+			if (pawn.Ideo != null)
+			{
+				Precept_Role role = pawn.Ideo.GetRole(pawn);
+				if (role != null && role.def.leaderRole)
+				{
+					return pawn;
+				}
+			}
+		}
+		return null;
+	}
+
+	public static Ideo MakeEmptyIdeo()
+	{
+		Ideo ideo = IdeoGenerator.MakeIdeo(DefDatabase<IdeoFoundationDef>.AllDefs.RandomElement());
+		ideo.foundation.RandomizeIcon();
+		return ideo;
+	}
+
+	public static Color? GetIdeoColorForBuilding(ThingDef def, Faction faction)
+	{
+		if (def.building.useIdeoColor && faction != null && faction.ideos != null)
+		{
+			Ideo ideo = null;
+			foreach (Ideo allIdeo in faction.ideos.AllIdeos)
+			{
+				if (def.dominantStyleCategory != null && allIdeo.thingStyleCategories.Any((ThingStyleCategoryWithPriority sc) => sc.category == def.dominantStyleCategory))
+				{
+					ideo = allIdeo;
+					break;
+				}
+				foreach (MemeDef meme in allIdeo.memes)
+				{
+					if (meme.AllDesignatorBuildables.Contains(def))
+					{
+						ideo = allIdeo;
+						break;
+					}
+				}
+				if (ideo != null)
+				{
+					break;
+				}
+			}
+			ideo = ideo ?? faction.ideos.PrimaryIdeo;
+			if (ideo != null)
+			{
+				return ideo.Color;
+			}
+		}
+		return null;
+	}
+
+	public static bool IsMemeAllowedForInitialFluidIdeo(MemeDef memeDef)
+	{
+		return memeDef.impact <= 2;
+	}
+
+	public static bool CountsAsNonNPCForPrecepts(this Pawn pawn)
+	{
+		if (!pawn.IsColonist && !pawn.IsPrisonerOfColony)
+		{
+			return pawn.IsSlaveOfColony;
+		}
+		return true;
+	}
+
+	public static float IdeoChangeToWeight(Pawn pawn, Ideo ideo)
+	{
+		if (ModsConfig.AnomalyActive && ideo == Find.IdeoManager.Horaxian)
+		{
+			return 0f;
+		}
+		if (pawn == null)
+		{
+			return 1f;
+		}
+		if (ideo == pawn.Ideo)
+		{
+			return 0f;
+		}
+		float num = 1f;
+		if (pawn.Faction != null)
+		{
+			foreach (Pawn item in PawnsFinder.AllMaps_SpawnedPawnsInFaction(pawn.Faction))
+			{
+				if (item.ideo != null && item.Ideo == ideo)
+				{
+					num += 1f;
+					break;
+				}
+			}
+			foreach (Faction item2 in Find.FactionManager.AllFactionsVisible)
+			{
+				if (item2 != pawn.Faction && item2.RelationKindWith(pawn.Faction) == FactionRelationKind.Ally && item2.ideos.IsPrimary(ideo))
+				{
+					num += 1f;
+					break;
+				}
+			}
+		}
+		if (pawn.Spawned)
+		{
+			foreach (Pawn item3 in pawn.Map.mapPawns.AllPawnsSpawned)
+			{
+				if (item3.Faction != null && item3.ideo != null && item3.Ideo == ideo && (item3.Faction == pawn.Faction || !item3.Faction.HostileTo(pawn.Faction)))
+				{
+					num += 1f;
+					break;
+				}
+			}
+		}
+		else
+		{
+			Caravan caravan = pawn.GetCaravan();
+			if (caravan != null)
+			{
+				foreach (Pawn item4 in caravan.PawnsListForReading)
+				{
+					if (item4.ideo != null && item4.Ideo == ideo)
+					{
+						num += 1f;
+						break;
+					}
+				}
+			}
+		}
+		return num;
 	}
 }

@@ -1,497 +1,676 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using UnityEngine;
 using Verse;
 using Verse.AI;
 using Verse.Sound;
 
-namespace RimWorld
+namespace RimWorld;
+
+[StaticConstructorOnStartup]
+public class Building_MechCharger : Building
 {
-	// Token: 0x02002A31 RID: 10801
-	[StaticConstructorOnStartup]
-	public class Building_MechCharger : Building
+	[CompilerGenerated]
+	private sealed class _003CGetGizmos_003Ed__46 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700253E RID: 9534
-		// (get) Token: 0x0600EF93 RID: 61331 RVA: 0x00458B94 File Offset: 0x00456D94
-		public CompPowerTrader Power
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Building_MechCharger _003C_003E4__this;
+
+		private IEnumerator<Gizmo> _003C_003E7__wrap1;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.TryGetComp<CompPowerTrader>();
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700253F RID: 9535
-		// (get) Token: 0x0600EF94 RID: 61332 RVA: 0x00458B9C File Offset: 0x00456D9C
-		public bool IsPowered
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.Power.PowerOn;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002540 RID: 9536
-		// (get) Token: 0x0600EF95 RID: 61333 RVA: 0x00458BA9 File Offset: 0x00456DA9
-		public bool IsFullOfWaste
+		[DebuggerHidden]
+		public _003CGetGizmos_003Ed__46(int _003C_003E1__state)
 		{
-			get
-			{
-				return this.wasteProduced >= (float)this.WasteProducedPerChargingCycle && this.Container.innerContainer.Any;
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x17002541 RID: 9537
-		// (get) Token: 0x0600EF96 RID: 61334 RVA: 0x00458BCC File Offset: 0x00456DCC
-		private CompWasteProducer WasteProducer
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			get
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				if (this.wasteProducer == null)
+				try
 				{
-					this.wasteProducer = base.GetComp<CompWasteProducer>();
 				}
-				return this.wasteProducer;
-			}
-		}
-
-		// Token: 0x17002542 RID: 9538
-		// (get) Token: 0x0600EF97 RID: 61335 RVA: 0x00458BE8 File Offset: 0x00456DE8
-		public CompThingContainer Container
-		{
-			get
-			{
-				if (this.container == null)
+				finally
 				{
-					this.container = base.GetComp<CompThingContainer>();
+					_003C_003Em__Finally1();
 				}
-				return this.container;
 			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x17002543 RID: 9539
-		// (get) Token: 0x0600EF98 RID: 61336 RVA: 0x00458C04 File Offset: 0x00456E04
-		public GenDraw.FillableBarRequest BarDrawData
+		private bool MoveNext()
 		{
-			get
+			try
 			{
-				return this.def.building.BarDrawDataFor(base.Rotation);
-			}
-		}
-
-		// Token: 0x17002544 RID: 9540
-		// (get) Token: 0x0600EF99 RID: 61337 RVA: 0x00458C1C File Offset: 0x00456E1C
-		private Material WireMaterial
-		{
-			get
-			{
-				if (this.wireMaterial == null)
+				int num = _003C_003E1__state;
+				Building_MechCharger CS_0024_003C_003E8__locals13 = _003C_003E4__this;
+				switch (num)
 				{
-					this.wireMaterial = MaterialPool.MatFrom("Other/BundledWires", ShaderDatabase.Transparent, Color.white);
-				}
-				return this.wireMaterial;
-			}
-		}
-
-		// Token: 0x17002545 RID: 9541
-		// (get) Token: 0x0600EF9A RID: 61338 RVA: 0x00458C4C File Offset: 0x00456E4C
-		private bool IsAttachedToMech
-		{
-			get
-			{
-				return this.currentlyChargingMech != null && this.wireExtensionTicks >= 70;
-			}
-		}
-
-		// Token: 0x17002546 RID: 9542
-		// (get) Token: 0x0600EF9B RID: 61339 RVA: 0x00458C65 File Offset: 0x00456E65
-		private int WasteProducedPerChargingCycle
-		{
-			get
-			{
-				return this.Container.Props.stackLimit;
-			}
-		}
-
-		// Token: 0x17002547 RID: 9543
-		// (get) Token: 0x0600EF9C RID: 61340 RVA: 0x00458C77 File Offset: 0x00456E77
-		private float WasteProducedPercentFull
-		{
-			get
-			{
-				return this.wasteProduced / (float)this.WasteProducedPerChargingCycle;
-			}
-		}
-
-		// Token: 0x17002548 RID: 9544
-		// (get) Token: 0x0600EF9D RID: 61341 RVA: 0x00458C87 File Offset: 0x00456E87
-		private float WasteProducedPerTick
-		{
-			get
-			{
-				return this.currentlyChargingMech.GetStatValue(StatDefOf.WastepacksPerRecharge, true, -1) * (0.00083333335f / this.currentlyChargingMech.needs.energy.MaxLevel);
-			}
-		}
-
-		// Token: 0x17002549 RID: 9545
-		// (get) Token: 0x0600EF9E RID: 61342 RVA: 0x00458CB7 File Offset: 0x00456EB7
-		public Pawn CurrentlyChargingMech
-		{
-			get
-			{
-				return this.currentlyChargingMech;
-			}
-		}
-
-		// Token: 0x0600EF9F RID: 61343 RVA: 0x00458CBF File Offset: 0x00456EBF
-		public override void PostPostMake()
-		{
-			if (!ModLister.CheckBiotech("Mech recharger"))
-			{
-				this.Destroy(DestroyMode.Vanish);
-				return;
-			}
-			base.PostPostMake();
-		}
-
-		// Token: 0x0600EFA0 RID: 61344 RVA: 0x00458CDC File Offset: 0x00456EDC
-		public bool CanPawnChargeCurrently(Pawn pawn)
-		{
-			if (this.Power.PowerNet == null)
-			{
-				return false;
-			}
-			if (this.IsFullOfWaste)
-			{
-				return false;
-			}
-			if (!this.IsCompatibleWithCharger(pawn.kindDef))
-			{
-				return false;
-			}
-			if (this.IsPowered)
-			{
-				if (this.currentlyChargingMech == null)
-				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((Building)CS_0024_003C_003E8__locals13).GetGizmos().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0082;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0082;
+				case 2:
+					_003C_003E1__state = -1;
+					_003C_003E2__current = new Command_Action
+					{
+						action = delegate
+						{
+							CS_0024_003C_003E8__locals13.wasteProduced += 0.25f * (float)CS_0024_003C_003E8__locals13.WasteProducedPerChargingCycle;
+							CS_0024_003C_003E8__locals13.wasteProduced = Mathf.Clamp(CS_0024_003C_003E8__locals13.wasteProduced, 0f, CS_0024_003C_003E8__locals13.WasteProducedPerChargingCycle);
+						},
+						defaultLabel = "DEV: Waste +25%"
+					};
+					_003C_003E1__state = 3;
 					return true;
-				}
-				if (this.currentlyChargingMech == pawn)
-				{
+				case 3:
+					_003C_003E1__state = -1;
+					_003C_003E2__current = new Command_Action
+					{
+						action = delegate
+						{
+							CS_0024_003C_003E8__locals13.wasteProduced = 0f;
+						},
+						defaultLabel = "DEV: Waste 0%"
+					};
+					_003C_003E1__state = 4;
 					return true;
+				case 4:
+					_003C_003E1__state = -1;
+					if (!CS_0024_003C_003E8__locals13.Container.innerContainer.Any)
+					{
+						_003C_003E2__current = new Command_Action
+						{
+							action = CS_0024_003C_003E8__locals13.GenerateWastePack,
+							defaultLabel = "DEV: Generate waste"
+						};
+						_003C_003E1__state = 5;
+						return true;
+					}
+					goto IL_01a9;
+				case 5:
+					_003C_003E1__state = -1;
+					goto IL_01a9;
+				case 6:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_0082:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Gizmo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (DebugSettings.ShowDevGizmos)
+					{
+						_003C_003E2__current = new Command_Action
+						{
+							action = delegate
+							{
+								CS_0024_003C_003E8__locals13.wasteProduced = CS_0024_003C_003E8__locals13.WasteProducedPerChargingCycle;
+							},
+							defaultLabel = "DEV: Waste 100%"
+						};
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
+					IL_01a9:
+					if (CS_0024_003C_003E8__locals13.currentlyChargingMech != null)
+					{
+						_003C_003E2__current = new Command_Action
+						{
+							action = delegate
+							{
+								CS_0024_003C_003E8__locals13.currentlyChargingMech.needs.TryGetNeed(out Need_MechEnergy need);
+								need.CurLevelPercentage = 1f;
+							},
+							defaultLabel = "DEV: Charge 100%"
+						};
+						_003C_003E1__state = 6;
+						return true;
+					}
+					break;
 				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CGetGizmos_003Ed__46 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CGetGizmos_003Ed__46(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CSpecialDisplayStats_003Ed__53 : IEnumerable<StatDrawEntry>, IEnumerable, IEnumerator<StatDrawEntry>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private StatDrawEntry _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Building_MechCharger _003C_003E4__this;
+
+		StatDrawEntry IEnumerator<StatDrawEntry>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CSpecialDisplayStats_003Ed__53(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			Building_MechCharger building_MechCharger = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+			{
+				_003C_003E1__state = -1;
+				IEnumerable<PawnKindDef> source = DefDatabase<PawnKindDef>.AllDefs.Where(building_MechCharger.IsCompatibleWithCharger);
+				string text = source.Select((PawnKindDef pk) => pk.LabelCap.Resolve()).ToLineList("  - ");
+				_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.Basics, "StatsReport_RechargerWeightClass".Translate(), building_MechCharger.def.building.requiredMechWeightClasses.Select((MechWeightClassDef w) => w.label).ToCommaList().CapitalizeFirst(), "StatsReport_RechargerWeightClass_Desc".Translate() + ": " + "\n\n" + text, 99999, null, source.Select((PawnKindDef pk) => new Dialog_InfoCard.Hyperlink(pk.race)));
+				_003C_003E1__state = 1;
+				return true;
+			}
+			case 1:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<StatDrawEntry> IEnumerable<StatDrawEntry>.GetEnumerator()
+		{
+			_003CSpecialDisplayStats_003Ed__53 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CSpecialDisplayStats_003Ed__53(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<StatDrawEntry>)this).GetEnumerator();
+		}
+	}
+
+	private Pawn currentlyChargingMech;
+
+	private float wasteProduced;
+
+	private int wireExtensionTicks = 70;
+
+	private CompWasteProducer wasteProducer;
+
+	private CompThingContainer container;
+
+	private Sustainer sustainerCharging;
+
+	private Mote moteCharging;
+
+	private Mote moteCablePulse;
+
+	public const float ChargePerDay = 50f;
+
+	private const float ChargePerTick = 0.00083333335f;
+
+	private static readonly Material WasteBarFilledMat = SolidColorMaterials.SimpleSolidColorMaterial(new Color(0.9f, 0.85f, 0.2f));
+
+	private static readonly Material WasteBarUnfilledMat = SolidColorMaterials.SimpleSolidColorMaterial(new Color(0.3f, 0.3f, 0.3f, 1f));
+
+	private const int TicksToExtendWire = 70;
+
+	private const float MinWireExtension = 0.32f;
+
+	private Material wireMaterial;
+
+	public CompPowerTrader Power => this.TryGetComp<CompPowerTrader>();
+
+	public bool IsPowered => Power.PowerOn;
+
+	public bool IsFullOfWaste
+	{
+		get
+		{
+			if (wasteProduced >= (float)WasteProducedPerChargingCycle)
+			{
+				return Container.innerContainer.Any;
 			}
 			return false;
 		}
+	}
 
-		// Token: 0x0600EFA1 RID: 61345 RVA: 0x00458D30 File Offset: 0x00456F30
-		public bool IsCompatibleWithCharger(PawnKindDef kindDef)
+	private CompWasteProducer WasteProducer
+	{
+		get
 		{
-			return Building_MechCharger.IsCompatibleWithCharger(this.def, kindDef);
+			if (wasteProducer == null)
+			{
+				wasteProducer = GetComp<CompWasteProducer>();
+			}
+			return wasteProducer;
 		}
+	}
 
-		// Token: 0x0600EFA2 RID: 61346 RVA: 0x00458D3E File Offset: 0x00456F3E
-		public static bool IsCompatibleWithCharger(ThingDef chargerDef, PawnKindDef kindDef)
+	public CompThingContainer Container
+	{
+		get
 		{
-			return Building_MechCharger.IsCompatibleWithCharger(chargerDef, kindDef.race);
+			if (container == null)
+			{
+				container = GetComp<CompThingContainer>();
+			}
+			return container;
 		}
+	}
 
-		// Token: 0x0600EFA3 RID: 61347 RVA: 0x00458D4C File Offset: 0x00456F4C
-		public static bool IsCompatibleWithCharger(ThingDef chargerDef, ThingDef mechRace)
+	public GenDraw.FillableBarRequest BarDrawData => def.building.BarDrawDataFor(base.Rotation);
+
+	private Material WireMaterial
+	{
+		get
 		{
-			return mechRace.race.IsMechanoid && mechRace.GetCompProperties<CompProperties_OverseerSubject>() != null && mechRace.race.mechWeightClass != null && chargerDef.building.requiredMechWeightClasses.NotNullAndContains(mechRace.race.mechWeightClass);
+			if (wireMaterial == null)
+			{
+				wireMaterial = MaterialPool.MatFrom("Other/BundledWires", ShaderDatabase.Transparent, Color.white);
+			}
+			return wireMaterial;
 		}
+	}
 
-		// Token: 0x0600EFA4 RID: 61348 RVA: 0x00458D98 File Offset: 0x00456F98
-		protected override void Tick()
+	private bool IsAttachedToMech
+	{
+		get
 		{
-			base.Tick();
-			if (this.currentlyChargingMech != null && (this.currentlyChargingMech.CurJobDef != JobDefOf.MechCharge || this.currentlyChargingMech.CurJob.targetA.Thing != this))
+			if (currentlyChargingMech != null)
 			{
-				Log.Warning("Mech did not clean up his charging job properly");
-				this.StopCharging();
+				return wireExtensionTicks >= 70;
 			}
-			if (this.currentlyChargingMech != null && this.Power.PowerOn)
+			return false;
+		}
+	}
+
+	private int WasteProducedPerChargingCycle => Container.Props.stackLimit;
+
+	private float WasteProducedPercentFull => wasteProduced / (float)WasteProducedPerChargingCycle;
+
+	private float WasteProducedPerTick => currentlyChargingMech.GetStatValue(StatDefOf.WastepacksPerRecharge) * (0.00083333335f / currentlyChargingMech.needs.energy.MaxLevel);
+
+	public Pawn CurrentlyChargingMech => currentlyChargingMech;
+
+	public override void PostPostMake()
+	{
+		if (!ModLister.CheckBiotech("Mech recharger"))
+		{
+			Destroy();
+		}
+		else
+		{
+			base.PostPostMake();
+		}
+	}
+
+	public bool CanPawnChargeCurrently(Pawn pawn)
+	{
+		if (Power.PowerNet == null)
+		{
+			return false;
+		}
+		if (IsFullOfWaste)
+		{
+			return false;
+		}
+		if (!IsCompatibleWithCharger(pawn.kindDef))
+		{
+			return false;
+		}
+		if (IsPowered)
+		{
+			if (currentlyChargingMech == null)
 			{
-				this.currentlyChargingMech.needs.energy.CurLevel += 0.00083333335f;
-				this.wasteProduced += this.WasteProducedPerTick;
-				this.wasteProduced = Mathf.Clamp(this.wasteProduced, 0f, (float)this.WasteProducedPerChargingCycle);
-				if (this.wasteProduced >= (float)this.WasteProducedPerChargingCycle && !this.Container.innerContainer.Any)
-				{
-					this.wasteProduced = 0f;
-					this.GenerateWastePack();
-				}
-				if (this.moteCablePulse == null || this.moteCablePulse.Destroyed)
-				{
-					this.moteCablePulse = MoteMaker.MakeInteractionOverlay(ThingDefOf.Mote_ChargingCablesPulse, this, new TargetInfo(this.InteractionCell, base.Map, false));
-				}
-				Mote mote = this.moteCablePulse;
-				if (mote != null)
-				{
-					mote.Maintain();
-				}
+				return true;
 			}
-			if (this.currentlyChargingMech != null && this.Power.PowerOn && this.IsAttachedToMech)
+			if (currentlyChargingMech == pawn)
 			{
-				if (this.sustainerCharging == null)
-				{
-					this.sustainerCharging = SoundDefOf.MechChargerCharging.TrySpawnSustainer(SoundInfo.InMap(this, MaintenanceType.None));
-				}
-				this.sustainerCharging.Maintain();
-				if (this.moteCharging == null || this.moteCharging.Destroyed)
-				{
-					this.moteCharging = MoteMaker.MakeAttachedOverlay(this.currentlyChargingMech, ThingDefOf.Mote_MechCharging, Vector3.zero, 1f, -1f);
-				}
-				Mote mote2 = this.moteCharging;
-				if (mote2 != null)
-				{
-					mote2.Maintain();
-				}
-			}
-			else if (this.sustainerCharging != null && (this.currentlyChargingMech == null || !this.Power.PowerOn))
-			{
-				this.sustainerCharging.End();
-				this.sustainerCharging = null;
-			}
-			if (this.wireExtensionTicks < 70)
-			{
-				this.wireExtensionTicks++;
+				return true;
 			}
 		}
+		return false;
+	}
 
-		// Token: 0x0600EFA5 RID: 61349 RVA: 0x00458FBF File Offset: 0x004571BF
-		public void GenerateWastePack()
+	public bool IsCompatibleWithCharger(PawnKindDef kindDef)
+	{
+		return IsCompatibleWithCharger(def, kindDef);
+	}
+
+	public static bool IsCompatibleWithCharger(ThingDef chargerDef, PawnKindDef kindDef)
+	{
+		return IsCompatibleWithCharger(chargerDef, kindDef.race);
+	}
+
+	public static bool IsCompatibleWithCharger(ThingDef chargerDef, ThingDef mechRace)
+	{
+		if (mechRace.race.IsMechanoid && mechRace.GetCompProperties<CompProperties_OverseerSubject>() != null && mechRace.race.mechWeightClass != null)
 		{
-			this.WasteProducer.ProduceWaste(this.WasteProducedPerChargingCycle);
-			EffecterDefOf.MechChargerWasteProduced.Spawn(base.Position, base.Map, 1f).Cleanup();
+			return chargerDef.building.requiredMechWeightClasses.NotNullAndContains(mechRace.race.mechWeightClass);
 		}
+		return false;
+	}
 
-		// Token: 0x0600EFA6 RID: 61350 RVA: 0x00458FF2 File Offset: 0x004571F2
-		public override IEnumerable<Gizmo> GetGizmos()
+	protected override void Tick()
+	{
+		base.Tick();
+		if (currentlyChargingMech != null && (currentlyChargingMech.CurJobDef != JobDefOf.MechCharge || currentlyChargingMech.CurJob.targetA.Thing != this))
 		{
-			foreach (Gizmo gizmo in base.GetGizmos())
-			{
-				yield return gizmo;
-			}
-			IEnumerator<Gizmo> enumerator = null;
-			if (DebugSettings.ShowDevGizmos)
-			{
-				yield return new Command_Action
-				{
-					action = delegate()
-					{
-						this.wasteProduced = (float)this.WasteProducedPerChargingCycle;
-					},
-					defaultLabel = "DEV: Waste 100%"
-				};
-				yield return new Command_Action
-				{
-					action = delegate()
-					{
-						this.wasteProduced += 0.25f * (float)this.WasteProducedPerChargingCycle;
-						this.wasteProduced = Mathf.Clamp(this.wasteProduced, 0f, (float)this.WasteProducedPerChargingCycle);
-					},
-					defaultLabel = "DEV: Waste +25%"
-				};
-				yield return new Command_Action
-				{
-					action = delegate()
-					{
-						this.wasteProduced = 0f;
-					},
-					defaultLabel = "DEV: Waste 0%"
-				};
-				if (!this.Container.innerContainer.Any)
-				{
-					yield return new Command_Action
-					{
-						action = new Action(this.GenerateWastePack),
-						defaultLabel = "DEV: Generate waste"
-					};
-				}
-				if (this.currentlyChargingMech != null)
-				{
-					yield return new Command_Action
-					{
-						action = delegate()
-						{
-							Need_MechEnergy need_MechEnergy;
-							this.currentlyChargingMech.needs.TryGetNeed<Need_MechEnergy>(out need_MechEnergy);
-							need_MechEnergy.CurLevelPercentage = 1f;
-						},
-						defaultLabel = "DEV: Charge 100%"
-					};
-				}
-			}
-			yield break;
-			yield break;
+			Log.Warning("Mech did not clean up his charging job properly");
+			StopCharging();
 		}
-
-		// Token: 0x0600EFA7 RID: 61351 RVA: 0x00459004 File Offset: 0x00457204
-		public void StartCharging(Pawn mech)
+		if (currentlyChargingMech != null && Power.PowerOn)
 		{
-			if (!ModLister.CheckBiotech("Mech charging"))
+			currentlyChargingMech.needs.energy.CurLevel += 0.00083333335f;
+			wasteProduced += WasteProducedPerTick;
+			wasteProduced = Mathf.Clamp(wasteProduced, 0f, WasteProducedPerChargingCycle);
+			if (wasteProduced >= (float)WasteProducedPerChargingCycle && !Container.innerContainer.Any)
 			{
-				return;
+				wasteProduced = 0f;
+				GenerateWastePack();
 			}
-			if (this.currentlyChargingMech != null)
+			if (moteCablePulse == null || moteCablePulse.Destroyed)
+			{
+				moteCablePulse = MoteMaker.MakeInteractionOverlay(ThingDefOf.Mote_ChargingCablesPulse, this, new TargetInfo(InteractionCell, base.Map));
+			}
+			moteCablePulse?.Maintain();
+		}
+		if (currentlyChargingMech != null && Power.PowerOn && IsAttachedToMech)
+		{
+			if (sustainerCharging == null)
+			{
+				sustainerCharging = SoundDefOf.MechChargerCharging.TrySpawnSustainer(SoundInfo.InMap(this));
+			}
+			sustainerCharging.Maintain();
+			if (moteCharging == null || moteCharging.Destroyed)
+			{
+				moteCharging = MoteMaker.MakeAttachedOverlay(currentlyChargingMech, ThingDefOf.Mote_MechCharging, Vector3.zero);
+			}
+			moteCharging?.Maintain();
+		}
+		else if (sustainerCharging != null && (currentlyChargingMech == null || !Power.PowerOn))
+		{
+			sustainerCharging.End();
+			sustainerCharging = null;
+		}
+		if (wireExtensionTicks < 70)
+		{
+			wireExtensionTicks++;
+		}
+	}
+
+	public void GenerateWastePack()
+	{
+		WasteProducer.ProduceWaste(WasteProducedPerChargingCycle);
+		EffecterDefOf.MechChargerWasteProduced.Spawn(base.Position, base.Map).Cleanup();
+	}
+
+	[IteratorStateMachine(typeof(_003CGetGizmos_003Ed__46))]
+	public override IEnumerable<Gizmo> GetGizmos()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetGizmos_003Ed__46(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public void StartCharging(Pawn mech)
+	{
+		if (ModLister.CheckBiotech("Mech charging"))
+		{
+			if (currentlyChargingMech != null)
 			{
 				Log.Error("Tried charging on already charging mech charger!");
 				return;
 			}
 			if (!mech.IsColonyMech)
 			{
-				mech.jobs.EndCurrentJob(JobCondition.Incompletable, true, true);
+				mech.jobs.EndCurrentJob(JobCondition.Incompletable);
 				return;
 			}
-			this.currentlyChargingMech = mech;
+			currentlyChargingMech = mech;
 			mech.needs.energy.currentCharger = this;
-			this.wireExtensionTicks = 0;
+			wireExtensionTicks = 0;
 			SoundDefOf.MechChargerStart.PlayOneShot(this);
 		}
+	}
 
-		// Token: 0x0600EFA8 RID: 61352 RVA: 0x00459078 File Offset: 0x00457278
-		public void StopCharging()
+	public void StopCharging()
+	{
+		if (currentlyChargingMech == null)
 		{
-			if (this.currentlyChargingMech == null)
-			{
-				Log.Error("Tried stopping charging on currently not charging mech charger!");
-				return;
-			}
-			if (this.currentlyChargingMech.needs.energy != null)
-			{
-				this.currentlyChargingMech.needs.energy.currentCharger = null;
-			}
-			this.currentlyChargingMech = null;
-			this.wireExtensionTicks = 0;
+			Log.Error("Tried stopping charging on currently not charging mech charger!");
+			return;
 		}
-
-		// Token: 0x0600EFA9 RID: 61353 RVA: 0x004590D0 File Offset: 0x004572D0
-		public override void DeSpawn(DestroyMode mode = DestroyMode.Vanish)
+		if (currentlyChargingMech.needs.energy != null)
 		{
-			if (base.BeingTransportedOnGravship)
-			{
-				base.DeSpawn(mode);
-				return;
-			}
-			if (this.currentlyChargingMech != null && mode != DestroyMode.WillReplace)
-			{
-				Messages.Message("MessageMechChargerDestroyedMechGoesBerserk".Translate(this.currentlyChargingMech.Named("PAWN")), new LookTargets(this.currentlyChargingMech), MessageTypeDefOf.NegativeEvent, true);
-				this.currentlyChargingMech.mindState.mentalStateHandler.TryStartMentalState(MentalStateDefOf.BerserkMechanoid, null, false, false, false, null, false, false, false);
-			}
-			this.WasteProducer.ProduceWaste(Mathf.CeilToInt(this.wasteProduced));
+			currentlyChargingMech.needs.energy.currentCharger = null;
+		}
+		currentlyChargingMech = null;
+		wireExtensionTicks = 0;
+	}
+
+	public override void DeSpawn(DestroyMode mode = DestroyMode.Vanish)
+	{
+		if (base.BeingTransportedOnGravship)
+		{
 			base.DeSpawn(mode);
+			return;
 		}
-
-		// Token: 0x0600EFAA RID: 61354 RVA: 0x00459170 File Offset: 0x00457370
-		protected override void DrawAt(Vector3 drawLoc, bool flip = false)
+		if (currentlyChargingMech != null && mode != DestroyMode.WillReplace)
 		{
-			base.DrawAt(drawLoc, flip);
-			GenDraw.FillableBarRequest barDrawData = this.BarDrawData;
-			barDrawData.center = this.DrawPos + Vector3.up * 0.1f;
-			barDrawData.fillPercent = this.WasteProducedPercentFull;
-			barDrawData.filledMat = Building_MechCharger.WasteBarFilledMat;
-			barDrawData.unfilledMat = Building_MechCharger.WasteBarUnfilledMat;
-			barDrawData.rotation = base.Rotation;
-			GenDraw.DrawFillableBar(barDrawData);
-			Vector3 a = drawLoc;
-			float num = this.EaseInOutQuart((float)this.wireExtensionTicks / 70f);
-			if (this.currentlyChargingMech == null)
-			{
-				num = 1f - num;
-			}
-			num = Mathf.Max(num, 0.32f);
-			Vector3 b = Vector3.Lerp(drawLoc, this.InteractionCell.ToVector3Shifted(), num);
-			b.y = AltitudeLayer.BuildingOnTop.AltitudeFor();
-			a.y = AltitudeLayer.BuildingOnTop.AltitudeFor();
-			GenDraw.DrawLineBetween(a, b, this.WireMaterial, 1f);
+			Messages.Message("MessageMechChargerDestroyedMechGoesBerserk".Translate(currentlyChargingMech.Named("PAWN")), new LookTargets(currentlyChargingMech), MessageTypeDefOf.NegativeEvent);
+			currentlyChargingMech.mindState.mentalStateHandler.TryStartMentalState(MentalStateDefOf.BerserkMechanoid);
 		}
+		WasteProducer.ProduceWaste(Mathf.CeilToInt(wasteProduced));
+		base.DeSpawn(mode);
+	}
 
-		// Token: 0x0600EFAB RID: 61355 RVA: 0x0045925C File Offset: 0x0045745C
-		private float EaseInOutQuart(float val)
+	protected override void DrawAt(Vector3 drawLoc, bool flip = false)
+	{
+		base.DrawAt(drawLoc, flip);
+		GenDraw.FillableBarRequest barDrawData = BarDrawData;
+		barDrawData.center = DrawPos + Vector3.up * 0.1f;
+		barDrawData.fillPercent = WasteProducedPercentFull;
+		barDrawData.filledMat = WasteBarFilledMat;
+		barDrawData.unfilledMat = WasteBarUnfilledMat;
+		barDrawData.rotation = base.Rotation;
+		GenDraw.DrawFillableBar(barDrawData);
+		Vector3 a = drawLoc;
+		float num = EaseInOutQuart((float)wireExtensionTicks / 70f);
+		if (currentlyChargingMech == null)
 		{
-			if ((double)val >= 0.5)
-			{
-				return 1f - Mathf.Pow(-2f * val + 2f, 4f) / 2f;
-			}
-			return 8f * val * val * val * val;
+			num = 1f - num;
 		}
+		num = Mathf.Max(num, 0.32f);
+		Vector3 b = Vector3.Lerp(drawLoc, InteractionCell.ToVector3Shifted(), num);
+		b.y = AltitudeLayer.BuildingOnTop.AltitudeFor();
+		a.y = AltitudeLayer.BuildingOnTop.AltitudeFor();
+		GenDraw.DrawLineBetween(a, b, WireMaterial, 1f);
+	}
 
-		// Token: 0x0600EFAC RID: 61356 RVA: 0x0045929C File Offset: 0x0045749C
-		public override string GetInspectString()
+	private float EaseInOutQuart(float val)
+	{
+		if (!((double)val < 0.5))
 		{
-			StringBuilder stringBuilder = new StringBuilder();
-			stringBuilder.Append(base.GetInspectString());
-			stringBuilder.AppendLineIfNotEmpty();
-			stringBuilder.Append("WasteLevel".Translate() + ": " + this.WasteProducedPercentFull.ToStringPercent());
-			return stringBuilder.ToString();
+			return 1f - Mathf.Pow(-2f * val + 2f, 4f) / 2f;
 		}
+		return 8f * val * val * val * val;
+	}
 
-		// Token: 0x0600EFAD RID: 61357 RVA: 0x004592F7 File Offset: 0x004574F7
-		public override IEnumerable<StatDrawEntry> SpecialDisplayStats()
+	public override string GetInspectString()
+	{
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.Append(base.GetInspectString());
+		stringBuilder.AppendLineIfNotEmpty();
+		stringBuilder.Append("WasteLevel".Translate() + ": " + WasteProducedPercentFull.ToStringPercent());
+		return stringBuilder.ToString();
+	}
+
+	[IteratorStateMachine(typeof(_003CSpecialDisplayStats_003Ed__53))]
+	public override IEnumerable<StatDrawEntry> SpecialDisplayStats()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CSpecialDisplayStats_003Ed__53(-2)
 		{
-			IEnumerable<PawnKindDef> source = DefDatabase<PawnKindDef>.AllDefs.Where(new Func<PawnKindDef, bool>(this.IsCompatibleWithCharger));
-			string t = (from pk in source
-			select pk.LabelCap.Resolve()).ToLineList("  - ", false);
-			yield return new StatDrawEntry(StatCategoryDefOf.Basics, "StatsReport_RechargerWeightClass".Translate(), (from w in this.def.building.requiredMechWeightClasses
-			select w.label).ToCommaList(false, false).CapitalizeFirst(), "StatsReport_RechargerWeightClass_Desc".Translate() + ": " + "\n\n" + t, 99999, null, from pk in source
-			select new Dialog_InfoCard.Hyperlink(pk.race, -1), false, false);
-			yield break;
-		}
+			_003C_003E4__this = this
+		};
+	}
 
-		// Token: 0x0600EFAE RID: 61358 RVA: 0x00459308 File Offset: 0x00457508
-		public override void ExposeData()
-		{
-			base.ExposeData();
-			Scribe_References.Look<Pawn>(ref this.currentlyChargingMech, "currentlyChargingMech", false);
-			Scribe_Values.Look<float>(ref this.wasteProduced, "wasteProduced", 0f, false);
-			Scribe_Values.Look<int>(ref this.wireExtensionTicks, "wireExtensionTicks", 0, false);
-		}
-
-		// Token: 0x04009E47 RID: 40519
-		private Pawn currentlyChargingMech;
-
-		// Token: 0x04009E48 RID: 40520
-		private float wasteProduced;
-
-		// Token: 0x04009E49 RID: 40521
-		private int wireExtensionTicks = 70;
-
-		// Token: 0x04009E4A RID: 40522
-		private CompWasteProducer wasteProducer;
-
-		// Token: 0x04009E4B RID: 40523
-		private CompThingContainer container;
-
-		// Token: 0x04009E4C RID: 40524
-		private Sustainer sustainerCharging;
-
-		// Token: 0x04009E4D RID: 40525
-		private Mote moteCharging;
-
-		// Token: 0x04009E4E RID: 40526
-		private Mote moteCablePulse;
-
-		// Token: 0x04009E4F RID: 40527
-		public const float ChargePerDay = 50f;
-
-		// Token: 0x04009E50 RID: 40528
-		private const float ChargePerTick = 0.00083333335f;
-
-		// Token: 0x04009E51 RID: 40529
-		private static readonly Material WasteBarFilledMat = SolidColorMaterials.SimpleSolidColorMaterial(new Color(0.9f, 0.85f, 0.2f), false);
-
-		// Token: 0x04009E52 RID: 40530
-		private static readonly Material WasteBarUnfilledMat = SolidColorMaterials.SimpleSolidColorMaterial(new Color(0.3f, 0.3f, 0.3f, 1f), false);
-
-		// Token: 0x04009E53 RID: 40531
-		private const int TicksToExtendWire = 70;
-
-		// Token: 0x04009E54 RID: 40532
-		private const float MinWireExtension = 0.32f;
-
-		// Token: 0x04009E55 RID: 40533
-		private Material wireMaterial;
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_References.Look(ref currentlyChargingMech, "currentlyChargingMech");
+		Scribe_Values.Look(ref wasteProduced, "wasteProduced", 0f);
+		Scribe_Values.Look(ref wireExtensionTicks, "wireExtensionTicks", 0);
 	}
 }

@@ -1,128 +1,250 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class QuestPart_ShuttleDelay : QuestPart_Delay
 {
-	// Token: 0x02001BD9 RID: 7129
-	public class QuestPart_ShuttleDelay : QuestPart_Delay
+	[CompilerGenerated]
+	private sealed class _003Cget_QuestLookTargets_003Ed__3 : IEnumerable<GlobalTargetInfo>, IEnumerable, IEnumerator<GlobalTargetInfo>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001860 RID: 6240
-		// (get) Token: 0x06009EBC RID: 40636 RVA: 0x002DE4AD File Offset: 0x002DC6AD
-		public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+		private int _003C_003E1__state;
+
+		private GlobalTargetInfo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public QuestPart_ShuttleDelay _003C_003E4__this;
+
+		private IEnumerator<GlobalTargetInfo> _003C_003E7__wrap1;
+
+		private int _003Ci_003E5__3;
+
+		GlobalTargetInfo IEnumerator<GlobalTargetInfo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				foreach (GlobalTargetInfo globalTargetInfo in base.QuestLookTargets)
-				{
-					yield return globalTargetInfo;
-				}
-				IEnumerator<GlobalTargetInfo> enumerator = null;
-				int num;
-				for (int i = 0; i < this.lodgers.Count; i = num + 1)
-				{
-					yield return this.lodgers[i];
-					num = i;
-				}
-				yield break;
-				yield break;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001861 RID: 6241
-		// (get) Token: 0x06009EBD RID: 40637 RVA: 0x002DE4BD File Offset: 0x002DC6BD
-		public override AlertReport AlertReport
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (!this.alert || base.State != QuestPartState.Enabled)
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003Cget_QuestLookTargets_003Ed__3(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
 				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				QuestPart_ShuttleDelay questPart_ShuttleDelay = _003C_003E4__this;
+				switch (num)
+				{
+				default:
 					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((QuestPart_Delay)questPart_ShuttleDelay).QuestLookTargets.GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0072;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0072;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						_003Ci_003E5__3++;
+						break;
+					}
+					IL_0072:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						GlobalTargetInfo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					_003Ci_003E5__3 = 0;
+					break;
 				}
-				return AlertReport.CulpritsAre(this.lodgers);
-			}
-		}
-
-		// Token: 0x17001862 RID: 6242
-		// (get) Token: 0x06009EBE RID: 40638 RVA: 0x002DE4E2 File Offset: 0x002DC6E2
-		public override bool AlertCritical
-		{
-			get
-			{
-				return base.TicksLeft < 60000;
-			}
-		}
-
-		// Token: 0x17001863 RID: 6243
-		// (get) Token: 0x06009EBF RID: 40639 RVA: 0x002DE4F1 File Offset: 0x002DC6F1
-		public override string AlertLabel
-		{
-			get
-			{
-				return "QuestPartShuttleArriveDelay".Translate(base.TicksLeft.ToStringTicksToPeriodVerbose(true, true));
-			}
-		}
-
-		// Token: 0x17001864 RID: 6244
-		// (get) Token: 0x06009EC0 RID: 40640 RVA: 0x002DE514 File Offset: 0x002DC714
-		public override string AlertExplanation
-		{
-			get
-			{
-				if (this.quest.hidden)
+				if (_003Ci_003E5__3 < questPart_ShuttleDelay.lodgers.Count)
 				{
-					return "QuestPartShuttleArriveDelayDescHidden".Translate(base.TicksLeft.ToStringTicksToPeriodVerbose(true, true).Colorize(ColoredText.DateTimeColor));
+					_003C_003E2__current = questPart_ShuttleDelay.lodgers[_003Ci_003E5__3];
+					_003C_003E1__state = 2;
+					return true;
 				}
-				return "QuestPartShuttleArriveDelayDesc".Translate(this.quest.name, base.TicksLeft.ToStringTicksToPeriodVerbose(true, true).Colorize(ColoredText.DateTimeColor), (from p in this.lodgers
-				select p.LabelShort).ToLineList("- ", false));
+				return false;
 			}
-		}
-
-		// Token: 0x06009EC1 RID: 40641 RVA: 0x002DE5D0 File Offset: 0x002DC7D0
-		public override string ExtraInspectString(ISelectable target)
-		{
-			Pawn pawn = target as Pawn;
-			if (pawn != null && this.lodgers.Contains(pawn))
+			catch
 			{
-				return "ShuttleDelayInspectString".Translate(base.TicksLeft.ToStringTicksToPeriod(true, false, true, true, false));
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
-			return null;
 		}
 
-		// Token: 0x06009EC2 RID: 40642 RVA: 0x002DE61C File Offset: 0x002DC81C
-		public override void ExposeData()
+		bool IEnumerator.MoveNext()
 		{
-			base.ExposeData();
-			Scribe_Collections.Look<Pawn>(ref this.lodgers, "lodgers", LookMode.Reference, Array.Empty<object>());
-			Scribe_Values.Look<bool>(ref this.alert, "alert", false, false);
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				this.lodgers.RemoveAll((Pawn x) => x == null);
+				_003C_003E7__wrap1.Dispose();
 			}
 		}
 
-		// Token: 0x06009EC3 RID: 40643 RVA: 0x002DE68A File Offset: 0x002DC88A
-		public override void AssignDebugData()
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			base.AssignDebugData();
-			if (Find.AnyPlayerHomeMap != null)
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<GlobalTargetInfo> IEnumerable<GlobalTargetInfo>.GetEnumerator()
+		{
+			_003Cget_QuestLookTargets_003Ed__3 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				this.lodgers.AddRange(Find.RandomPlayerHomeMap.mapPawns.FreeColonists);
+				_003C_003E1__state = 0;
+				result = this;
 			}
+			else
+			{
+				result = new _003Cget_QuestLookTargets_003Ed__3(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
 		}
 
-		// Token: 0x06009EC4 RID: 40644 RVA: 0x002DE6B3 File Offset: 0x002DC8B3
-		public override void ReplacePawnReferences(Pawn replace, Pawn with)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			this.lodgers.Replace(replace, with);
+			return ((IEnumerable<GlobalTargetInfo>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x04006DDC RID: 28124
-		public List<Pawn> lodgers = new List<Pawn>();
+	public List<Pawn> lodgers = new List<Pawn>();
 
-		// Token: 0x04006DDD RID: 28125
-		public bool alert;
+	public bool alert;
+
+	public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+	{
+		[IteratorStateMachine(typeof(_003Cget_QuestLookTargets_003Ed__3))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_QuestLookTargets_003Ed__3(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public override AlertReport AlertReport
+	{
+		get
+		{
+			if (!alert || base.State != QuestPartState.Enabled)
+			{
+				return false;
+			}
+			return AlertReport.CulpritsAre(lodgers);
+		}
+	}
+
+	public override bool AlertCritical => base.TicksLeft < 60000;
+
+	public override string AlertLabel => "QuestPartShuttleArriveDelay".Translate(base.TicksLeft.ToStringTicksToPeriodVerbose());
+
+	public override string AlertExplanation
+	{
+		get
+		{
+			if (quest.hidden)
+			{
+				return "QuestPartShuttleArriveDelayDescHidden".Translate(base.TicksLeft.ToStringTicksToPeriodVerbose().Colorize(ColoredText.DateTimeColor));
+			}
+			return "QuestPartShuttleArriveDelayDesc".Translate(quest.name, base.TicksLeft.ToStringTicksToPeriodVerbose().Colorize(ColoredText.DateTimeColor), lodgers.Select((Pawn p) => p.LabelShort).ToLineList("- "));
+		}
+	}
+
+	public override string ExtraInspectString(ISelectable target)
+	{
+		if (target is Pawn item && lodgers.Contains(item))
+		{
+			return "ShuttleDelayInspectString".Translate(base.TicksLeft.ToStringTicksToPeriod());
+		}
+		return null;
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Collections.Look(ref lodgers, "lodgers", LookMode.Reference);
+		Scribe_Values.Look(ref alert, "alert", defaultValue: false);
+		if (Scribe.mode == LoadSaveMode.PostLoadInit)
+		{
+			lodgers.RemoveAll((Pawn x) => x == null);
+		}
+	}
+
+	public override void AssignDebugData()
+	{
+		base.AssignDebugData();
+		if (Find.AnyPlayerHomeMap != null)
+		{
+			lodgers.AddRange(Find.RandomPlayerHomeMap.mapPawns.FreeColonists);
+		}
+	}
+
+	public override void ReplacePawnReferences(Pawn replace, Pawn with)
+	{
+		lodgers.Replace(replace, with);
 	}
 }

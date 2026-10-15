@@ -222,12 +222,6 @@ public sealed class MapRenderFeature : IRenderFeature, IDisposable
 		}
 	}
 
-	private static readonly int CameraYawId = UnityEngine.Shader.PropertyToID("_CameraYaw");
-
-	private static readonly int CameraPitchId = UnityEngine.Shader.PropertyToID("_CameraPitch");
-
-	private static readonly int SwayHeadId = UnityEngine.Shader.PropertyToID("_SwayHead");
-
 	private static readonly int WaterOutputTexId = UnityEngine.Shader.PropertyToID("_WaterOutputTex");
 
 	private static readonly UnityEngine.Color MapBackgroundSkyMultiplier = new UnityEngine.Color(0.13f, 0.13f, 0.13f, 1f);
@@ -281,8 +275,8 @@ public sealed class MapRenderFeature : IRenderFeature, IDisposable
 		}
 		CameraView view = CameraViewFactory.GetView(camera);
 		MeshDrawCommand[] commands = meshDrawSubmissionSnapshot.Commands;
-		List<FinalDrawItem> list = new List<FinalDrawItem>(meshDrawSubmissionSnapshot.CommandCount);
-		List<FinalDrawItem> list2 = new List<FinalDrawItem>();
+		List<FinalDrawItem> list = MeshDrawFrame.RentList();
+		List<FinalDrawItem> list2 = MeshDrawFrame.RentList();
 		List<SceneGrabPoint> sceneGrabs = null;
 		GlobalShaderState.SetTexture(WaterOutputTexId, waterDepthTargets.Output);
 		UnityBuiltinGlobals.Publish(camera, view.View, view.ViewProjection);
@@ -318,9 +312,6 @@ public sealed class MapRenderFeature : IRenderFeature, IDisposable
 		{
 			sunDirection = new System.Numerics.Vector3(value.x, value.y, value.z);
 		}
-		UnityEngine.Shader.TryGetGlobalFloat(CameraYawId, out var value2);
-		UnityEngine.Shader.TryGetGlobalFloat(CameraPitchId, out var value3);
-		UnityEngine.Shader.TryGetGlobalFloat(SwayHeadId, out var value4);
 		System.Numerics.Vector4 backgroundColor = System.Numerics.Vector4.Zero;
 		SkyManager skyManager = Find.CurrentMap?.skyManager;
 		if (skyManager != null)
@@ -330,9 +321,6 @@ public sealed class MapRenderFeature : IRenderFeature, IDisposable
 		}
 		return new MeshDrawFrame(timing.FrameNumber, view, list, list2, sunDirection)
 		{
-			CameraYaw = value2,
-			CameraPitch = value3,
-			SwayHead = value4,
 			BackgroundColor = backgroundColor,
 			SceneGrabs = sceneGrabs,
 			PreserveSceneColor = (Find.World?.renderer != null && WorldRendererUtility.WorldBackgroundNow && Find.WorldCamera != null)

@@ -1,62 +1,241 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.Grammar;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Tale_SinglePawnAndThing : Tale_SinglePawn
 {
-	// Token: 0x02002938 RID: 10552
-	public class Tale_SinglePawnAndThing : Tale_SinglePawn
+	[CompilerGenerated]
+	private sealed class _003CSpecialTextGenerationRules_003Ed__5 : IEnumerable<Rule>, IEnumerable, IEnumerator<Rule>, IEnumerator, IDisposable
 	{
-		// Token: 0x0600E70C RID: 59148 RVA: 0x0043530F File Offset: 0x0043350F
-		public Tale_SinglePawnAndThing()
-		{
-		}
+		private int _003C_003E1__state;
 
-		// Token: 0x0600E70D RID: 59149 RVA: 0x0043560B File Offset: 0x0043380B
-		public Tale_SinglePawnAndThing(Pawn pawn, Thing item) : base(pawn)
-		{
-			this.thingData = TaleData_Thing.GenerateFrom(item);
-		}
+		private Rule _003C_003E2__current;
 
-		// Token: 0x0600E70E RID: 59150 RVA: 0x00435620 File Offset: 0x00433820
-		public override bool Concerns(Thing th)
-		{
-			return base.Concerns(th) || th.thingIDNumber == this.thingData.thingID;
-		}
+		private int _003C_003El__initialThreadId;
 
-		// Token: 0x0600E70F RID: 59151 RVA: 0x00435640 File Offset: 0x00433840
-		public override void ExposeData()
-		{
-			base.ExposeData();
-			Scribe_Deep.Look<TaleData_Thing>(ref this.thingData, "thingData", Array.Empty<object>());
-		}
+		public Tale_SinglePawnAndThing _003C_003E4__this;
 
-		// Token: 0x0600E710 RID: 59152 RVA: 0x0043565D File Offset: 0x0043385D
-		protected override IEnumerable<Rule> SpecialTextGenerationRules(Dictionary<string, string> outConstants)
+		private Dictionary<string, string> outConstants;
+
+		public Dictionary<string, string> _003C_003E3__outConstants;
+
+		private IEnumerator<Rule> _003C_003E7__wrap1;
+
+		Rule IEnumerator<Rule>.Current
 		{
-			foreach (Rule rule in base.SpecialTextGenerationRules(outConstants))
+			[DebuggerHidden]
+			get
 			{
-				yield return rule;
+				return _003C_003E2__current;
 			}
-			IEnumerator<Rule> enumerator = null;
-			foreach (Rule rule2 in this.thingData.GetRules("THING", null))
-			{
-				yield return rule2;
-			}
-			enumerator = null;
-			yield break;
-			yield break;
 		}
 
-		// Token: 0x0600E711 RID: 59153 RVA: 0x00435674 File Offset: 0x00433874
-		public override void GenerateTestData()
+		object IEnumerator.Current
 		{
-			base.GenerateTestData();
-			this.thingData = TaleData_Thing.GenerateRandom();
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x04009A69 RID: 39529
-		public TaleData_Thing thingData;
+		[DebuggerHidden]
+		public _003CSpecialTextGenerationRules_003Ed__5(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			switch (_003C_003E1__state)
+			{
+			case -3:
+			case 1:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+				break;
+			case -4:
+			case 2:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally2();
+				}
+				break;
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				Tale_SinglePawnAndThing tale_SinglePawnAndThing = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((Tale_SinglePawn)tale_SinglePawnAndThing).SpecialTextGenerationRules(outConstants).GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0078;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0078;
+				case 2:
+					{
+						_003C_003E1__state = -4;
+						break;
+					}
+					IL_0078:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Rule current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					_003C_003E7__wrap1 = tale_SinglePawnAndThing.thingData.GetRules("THING").GetEnumerator();
+					_003C_003E1__state = -4;
+					break;
+				}
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					Rule current2 = _003C_003E7__wrap1.Current;
+					_003C_003E2__current = current2;
+					_003C_003E1__state = 2;
+					return true;
+				}
+				_003C_003Em__Finally2();
+				_003C_003E7__wrap1 = null;
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Rule> IEnumerable<Rule>.GetEnumerator()
+		{
+			_003CSpecialTextGenerationRules_003Ed__5 _003CSpecialTextGenerationRules_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CSpecialTextGenerationRules_003Ed__ = this;
+			}
+			else
+			{
+				_003CSpecialTextGenerationRules_003Ed__ = new _003CSpecialTextGenerationRules_003Ed__5(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CSpecialTextGenerationRules_003Ed__.outConstants = _003C_003E3__outConstants;
+			return _003CSpecialTextGenerationRules_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Rule>)this).GetEnumerator();
+		}
+	}
+
+	public TaleData_Thing thingData;
+
+	public Tale_SinglePawnAndThing()
+	{
+	}
+
+	public Tale_SinglePawnAndThing(Pawn pawn, Thing item)
+		: base(pawn)
+	{
+		thingData = TaleData_Thing.GenerateFrom(item);
+	}
+
+	public override bool Concerns(Thing th)
+	{
+		if (!base.Concerns(th))
+		{
+			return th.thingIDNumber == thingData.thingID;
+		}
+		return true;
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Deep.Look(ref thingData, "thingData");
+	}
+
+	[IteratorStateMachine(typeof(_003CSpecialTextGenerationRules_003Ed__5))]
+	protected override IEnumerable<Rule> SpecialTextGenerationRules(Dictionary<string, string> outConstants)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CSpecialTextGenerationRules_003Ed__5(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__outConstants = outConstants
+		};
+	}
+
+	public override void GenerateTestData()
+	{
+		base.GenerateTestData();
+		thingData = TaleData_Thing.GenerateRandom();
 	}
 }

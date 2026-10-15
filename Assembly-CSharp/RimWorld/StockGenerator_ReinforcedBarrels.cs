@@ -1,40 +1,184 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class StockGenerator_ReinforcedBarrels : StockGenerator
 {
-	// Token: 0x02002F82 RID: 12162
-	public class StockGenerator_ReinforcedBarrels : StockGenerator
+	[CompilerGenerated]
+	private sealed class _003CGenerateThings_003Ed__0 : IEnumerable<Thing>, IEnumerable, IEnumerator<Thing>, IEnumerator, IDisposable
 	{
-		// Token: 0x06011214 RID: 70164 RVA: 0x004E9D53 File Offset: 0x004E7F53
-		public override IEnumerable<Thing> GenerateThings(PlanetTile forTile, Faction faction = null)
+		private int _003C_003E1__state;
+
+		private Thing _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public StockGenerator_ReinforcedBarrels _003C_003E4__this;
+
+		private Faction faction;
+
+		public Faction _003C_003E3__faction;
+
+		private IEnumerator<Thing> _003C_003E7__wrap1;
+
+		Thing IEnumerator<Thing>.Current
 		{
-			if (Find.Storyteller.difficulty.classicMortars)
+			[DebuggerHidden]
+			get
 			{
-				yield break;
+				return _003C_003E2__current;
 			}
-			foreach (Thing thing in StockGeneratorUtility.TryMakeForStock(ThingDefOf.ReinforcedBarrel, base.RandomCountOf(ThingDefOf.ReinforcedBarrel), faction))
-			{
-				yield return thing;
-			}
-			IEnumerator<Thing> enumerator = null;
-			yield break;
-			yield break;
 		}
 
-		// Token: 0x06011215 RID: 70165 RVA: 0x004E9D6A File Offset: 0x004E7F6A
-		public override bool HandlesThingDef(ThingDef thingDef)
+		object IEnumerator.Current
 		{
-			return thingDef == ThingDefOf.ReinforcedBarrel;
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x06011216 RID: 70166 RVA: 0x00035AE5 File Offset: 0x00033CE5
-		public override IEnumerable<string> ConfigErrors(TraderKindDef parentDef)
+		[DebuggerHidden]
+		public _003CGenerateThings_003Ed__0(int _003C_003E1__state)
 		{
-			return Enumerable.Empty<string>();
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				StockGenerator_ReinforcedBarrels stockGenerator_ReinforcedBarrels = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					if (Find.Storyteller.difficulty.classicMortars)
+					{
+						return false;
+					}
+					_003C_003E7__wrap1 = StockGeneratorUtility.TryMakeForStock(ThingDefOf.ReinforcedBarrel, stockGenerator_ReinforcedBarrels.RandomCountOf(ThingDefOf.ReinforcedBarrel), faction).GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 1:
+					_003C_003E1__state = -3;
+					break;
+				}
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					Thing current = _003C_003E7__wrap1.Current;
+					_003C_003E2__current = current;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = null;
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Thing> IEnumerable<Thing>.GetEnumerator()
+		{
+			_003CGenerateThings_003Ed__0 _003CGenerateThings_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CGenerateThings_003Ed__ = this;
+			}
+			else
+			{
+				_003CGenerateThings_003Ed__ = new _003CGenerateThings_003Ed__0(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CGenerateThings_003Ed__.faction = _003C_003E3__faction;
+			return _003CGenerateThings_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Thing>)this).GetEnumerator();
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CGenerateThings_003Ed__0))]
+	public override IEnumerable<Thing> GenerateThings(PlanetTile forTile, Faction faction = null)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGenerateThings_003Ed__0(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__faction = faction
+		};
+	}
+
+	public override bool HandlesThingDef(ThingDef thingDef)
+	{
+		return thingDef == ThingDefOf.ReinforcedBarrel;
+	}
+
+	public override IEnumerable<string> ConfigErrors(TraderKindDef parentDef)
+	{
+		return Enumerable.Empty<string>();
 	}
 }

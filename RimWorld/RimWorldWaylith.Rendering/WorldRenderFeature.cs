@@ -354,8 +354,8 @@ public sealed class WorldRenderFeature : IRenderFeature, IDisposable
 			CameraView view = CameraViewFactory.GetView(camera);
 			UnityBuiltinGlobals.Publish(camera, view.View, view.ViewProjection);
 			int num = ((camera == worldCamera) ? (camera.cullingMask | worldTextMask) : camera.cullingMask);
-			List<FinalDrawItem> list = new List<FinalDrawItem>();
-			List<FinalDrawItem> list2 = new List<FinalDrawItem>();
+			List<FinalDrawItem> list = MeshDrawFrame.RentList();
+			List<FinalDrawItem> list2 = MeshDrawFrame.RentList();
 			List<SceneGrabPoint> sceneGrabs = null;
 			depthOrder.Compute(commands, meshDrawSubmissionSnapshot.CommandCount, view.View);
 			for (int j = 0; j < meshDrawSubmissionSnapshot.CommandCount; j++)

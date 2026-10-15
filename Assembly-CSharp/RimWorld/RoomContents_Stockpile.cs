@@ -1,149 +1,123 @@
-﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class RoomContents_Stockpile : RoomContentsWorker
 {
-	// Token: 0x02001F1E RID: 7966
-	public class RoomContents_Stockpile : RoomContentsWorker
+	private static readonly List<string> WeaponTags = new List<string> { "IndustrialGunAdvanced", "SpacerGun", "RangedHeavy" };
+
+	public override void FillRoom(Map map, LayoutRoom room, Faction faction, float? threatPoints = null)
 	{
-		// Token: 0x0600B020 RID: 45088 RVA: 0x00322F68 File Offset: 0x00321168
-		public override void FillRoom(Map map, LayoutRoom room, Faction faction, float? threatPoints = null)
+		RoomGenUtility.GenerateRows(ThingDefOf.Shelf, room, map, ThingDefOf.Steel);
+		if (((map.listerThings.ThingsOfDef(ThingDefOf.AncientHatchExit).FirstOrDefault() as PocketMapExit)?.entrance ?? PocketMapUtility.currentlyGeneratingPortal) is AncientHatch ancientHatch)
 		{
-			RoomGenUtility.GenerateRows(ThingDefOf.Shelf, room, map, ThingDefOf.Steel);
-			PocketMapExit pocketMapExit = map.listerThings.ThingsOfDef(ThingDefOf.AncientHatchExit).FirstOrDefault<Thing>() as PocketMapExit;
-			AncientHatch ancientHatch = (((pocketMapExit != null) ? pocketMapExit.entrance : null) ?? PocketMapUtility.currentlyGeneratingPortal) as AncientHatch;
-			if (ancientHatch != null)
+			switch (ancientHatch.stockpileType)
 			{
-				switch (ancientHatch.stockpileType)
-				{
-				case TileMutatorWorker_Stockpile.StockpileType.Medicine:
-					this.GenerateItems(map, room, ThingDefOf.MedicineUltratech, new IntRange(5, 10));
-					this.GenerateItems(map, room, ThingDefOf.MedicineIndustrial, new IntRange(30, 60));
-					break;
-				case TileMutatorWorker_Stockpile.StockpileType.Chemfuel:
-					this.GenerateItems(map, room, ThingDefOf.Chemfuel, new IntRange(750, 1200));
-					break;
-				case TileMutatorWorker_Stockpile.StockpileType.Component:
-					this.GenerateItems(map, room, ThingDefOf.ComponentIndustrial, new IntRange(25, 50));
-					this.GenerateItems(map, room, ThingDefOf.ComponentSpacer, new IntRange(2, 3));
-					break;
-				case TileMutatorWorker_Stockpile.StockpileType.Weapons:
-					this.GenerateWeapons(map, room, new IntRange(2, 3));
-					break;
-				case TileMutatorWorker_Stockpile.StockpileType.Gravcore:
-					this.GenerateItems(map, room, ThingDefOf.Gravcore, IntRange.One);
-					this.GenerateItems(map, room, ThingDefOf.GravlitePanel, new IntRange(150, 200));
-					break;
-				case TileMutatorWorker_Stockpile.StockpileType.Drugs:
-					this.GenerateItems(map, room, ThingDefOf.SmokeleafJoint, new IntRange(5, 20));
-					this.GenerateItems(map, room, ThingDefOf.Flake, new IntRange(25, 100));
-					this.GenerateItems(map, room, ThingDefOf.Yayo, new IntRange(25, 60));
-					this.GenerateItems(map, room, ThingDefOf.GoJuice, new IntRange(-10, 10));
-					this.GenerateItems(map, room, ThingDefOf.WakeUp, new IntRange(-10, 10));
-					this.GenerateItems(map, room, ThingDefOf.Luciferium, new IntRange(5, 15));
-					break;
-				}
-			}
-			LayoutRoomDef layoutRoomDef = room.defs.FirstOrDefault((LayoutRoomDef x) => x.thingSetMakerDef != null);
-			ThingSetMakerDef thingSetMakerDef = (layoutRoomDef != null) ? layoutRoomDef.thingSetMakerDef : null;
-			if (thingSetMakerDef != null)
-			{
-				ThingSetMakerParams parms = default(ThingSetMakerParams);
-				parms.totalMarketValueRange = new FloatRange?(new FloatRange(2200f));
-				List<Thing> items = thingSetMakerDef.root.Generate(parms);
-				this.GenerateItems(map, room, items);
-			}
-			base.FillRoom(map, room, faction, threatPoints);
-		}
-
-		// Token: 0x0600B021 RID: 45089 RVA: 0x003231B0 File Offset: 0x003213B0
-		private void GenerateItems(Map map, LayoutRoom room, List<Thing> items)
-		{
-			int num = 999;
-			while (items.Count > 0 && num-- > 0)
-			{
-				Thing itemToSpawn = items.Last<Thing>();
-				items.Remove(itemToSpawn);
-				IntVec3 loc;
-				if (!room.TryGetRandomCellInRoom(map, out loc, 0, 0, (IntVec3 c) => this.ShelfValidator(map, c, itemToSpawn.def), true))
-				{
-					break;
-				}
-				GenSpawn.Spawn(itemToSpawn, loc, map, WipeMode.Vanish).SetForbidden(true, true);
+			case TileMutatorWorker_Stockpile.StockpileType.Medicine:
+				GenerateItems(map, room, ThingDefOf.MedicineUltratech, new IntRange(5, 10));
+				GenerateItems(map, room, ThingDefOf.MedicineIndustrial, new IntRange(30, 60));
+				break;
+			case TileMutatorWorker_Stockpile.StockpileType.Chemfuel:
+				GenerateItems(map, room, ThingDefOf.Chemfuel, new IntRange(750, 1200));
+				break;
+			case TileMutatorWorker_Stockpile.StockpileType.Component:
+				GenerateItems(map, room, ThingDefOf.ComponentIndustrial, new IntRange(25, 50));
+				GenerateItems(map, room, ThingDefOf.ComponentSpacer, new IntRange(2, 3));
+				break;
+			case TileMutatorWorker_Stockpile.StockpileType.Weapons:
+				GenerateWeapons(map, room, new IntRange(2, 3));
+				break;
+			case TileMutatorWorker_Stockpile.StockpileType.Gravcore:
+				GenerateItems(map, room, ThingDefOf.Gravcore, IntRange.One);
+				GenerateItems(map, room, ThingDefOf.GravlitePanel, new IntRange(150, 200));
+				break;
+			case TileMutatorWorker_Stockpile.StockpileType.Drugs:
+				GenerateItems(map, room, ThingDefOf.SmokeleafJoint, new IntRange(5, 20));
+				GenerateItems(map, room, ThingDefOf.Flake, new IntRange(25, 100));
+				GenerateItems(map, room, ThingDefOf.Yayo, new IntRange(25, 60));
+				GenerateItems(map, room, ThingDefOf.GoJuice, new IntRange(-10, 10));
+				GenerateItems(map, room, ThingDefOf.WakeUp, new IntRange(-10, 10));
+				GenerateItems(map, room, ThingDefOf.Luciferium, new IntRange(5, 15));
+				break;
 			}
 		}
-
-		// Token: 0x0600B022 RID: 45090 RVA: 0x00323254 File Offset: 0x00321454
-		private void GenerateItems(Map map, LayoutRoom room, ThingDef itemDef, IntRange countRange)
+		ThingSetMakerDef thingSetMakerDef = room.defs.FirstOrDefault((LayoutRoomDef x) => x.thingSetMakerDef != null)?.thingSetMakerDef;
+		if (thingSetMakerDef != null)
 		{
-			int num = countRange.RandomInRange;
-			int num2 = 99;
-			Func<IntVec3, bool> <>9__0;
-			while (num > 0 && num2-- > 0)
-			{
-				Map map2 = map;
-				int contractedBy = 0;
-				int padding = 0;
-				Func<IntVec3, bool> validator;
-				if ((validator = <>9__0) == null)
-				{
-					validator = (<>9__0 = ((IntVec3 c) => this.ShelfValidator(map, c, itemDef)));
-				}
-				IntVec3 loc;
-				if (!room.TryGetRandomCellInRoom(map2, out loc, contractedBy, padding, validator, true))
-				{
-					break;
-				}
-				int num3 = Rand.Range(1, Mathf.Min(countRange.max / 4, itemDef.stackLimit));
-				num3 = Mathf.Min(num3, num);
-				Thing thing = GenSpawn.Spawn(ThingMaker.MakeThing(itemDef, null), loc, map, WipeMode.Vanish);
-				thing.stackCount = num3;
-				thing.SetForbidden(true, true);
-				num -= num3;
-			}
+			ThingSetMakerParams parms = default(ThingSetMakerParams);
+			parms.totalMarketValueRange = new FloatRange(2200f);
+			List<Thing> items = thingSetMakerDef.root.Generate(parms);
+			GenerateItems(map, room, items);
 		}
+		base.FillRoom(map, room, faction, threatPoints);
+	}
 
-		// Token: 0x0600B023 RID: 45091 RVA: 0x00323328 File Offset: 0x00321528
-		private void GenerateWeapons(Map map, LayoutRoom room, IntRange countRange)
+	private void GenerateItems(Map map, LayoutRoom room, List<Thing> items)
+	{
+		int num = 999;
+		while (items.Count > 0 && num-- > 0)
 		{
-			int num = countRange.RandomInRange;
-			int num2 = 999;
-			while (num > 0 && num2-- > 0)
+			Thing itemToSpawn = items.Last();
+			items.Remove(itemToSpawn);
+			if (room.TryGetRandomCellInRoom(map, out var cell, 0, 0, (IntVec3 c) => ShelfValidator(map, c, itemToSpawn.def), ignoreBuildings: true))
 			{
-				Thing weapon;
-				if (EquipmentUtility.TryGenerateWeaponByTag(RoomContents_Stockpile.WeaponTags.RandomElement<string>(), out weapon, 99999f) && !weapon.HasThingCategory(ThingCategoryDefOf.WeaponsUnique))
+				GenSpawn.Spawn(itemToSpawn, cell, map).SetForbidden(value: true);
+				continue;
+			}
+			break;
+		}
+	}
+
+	private void GenerateItems(Map map, LayoutRoom room, ThingDef itemDef, IntRange countRange)
+	{
+		int num = countRange.RandomInRange;
+		int num2 = 99;
+		IntVec3 cell;
+		while (num > 0 && num2-- > 0 && room.TryGetRandomCellInRoom(map, out cell, 0, 0, (IntVec3 c) => ShelfValidator(map, c, itemDef), ignoreBuildings: true))
+		{
+			int a = Rand.Range(1, Mathf.Min(countRange.max / 4, itemDef.stackLimit));
+			a = Mathf.Min(a, num);
+			Thing thing = GenSpawn.Spawn(ThingMaker.MakeThing(itemDef), cell, map);
+			thing.stackCount = a;
+			thing.SetForbidden(value: true);
+			num -= a;
+		}
+	}
+
+	private void GenerateWeapons(Map map, LayoutRoom room, IntRange countRange)
+	{
+		int num = countRange.RandomInRange;
+		int num2 = 999;
+		while (num > 0 && num2-- > 0)
+		{
+			if (EquipmentUtility.TryGenerateWeaponByTag(WeaponTags.RandomElement(), out var weapon) && !weapon.HasThingCategory(ThingCategoryDefOf.WeaponsUnique))
+			{
+				if (weapon.TryGetComp(out CompQuality comp))
 				{
-					CompQuality compQuality;
-					if (weapon.TryGetComp(out compQuality))
-					{
-						compQuality.SetQuality(QualityUtility.GenerateFromGaussian(1f, QualityCategory.Legendary, QualityCategory.Excellent, QualityCategory.Excellent), new ArtGenerationContext?(ArtGenerationContext.Outsider));
-					}
-					IntVec3 loc;
-					if (room.TryGetRandomCellInRoom(map, out loc, 0, 0, (IntVec3 c) => this.ShelfValidator(map, c, weapon.def), true))
-					{
-						GenSpawn.Spawn(weapon, loc, map, WipeMode.Vanish).SetForbidden(true, true);
-						num--;
-					}
+					comp.SetQuality(QualityUtility.GenerateFromGaussian(1f, QualityCategory.Legendary, QualityCategory.Excellent, QualityCategory.Excellent), ArtGenerationContext.Outsider);
+				}
+				if (room.TryGetRandomCellInRoom(map, out var cell, 0, 0, (IntVec3 c) => ShelfValidator(map, c, weapon.def), ignoreBuildings: true))
+				{
+					GenSpawn.Spawn(weapon, cell, map).SetForbidden(value: true);
+					num--;
 				}
 			}
 		}
+	}
 
-		// Token: 0x0600B024 RID: 45092 RVA: 0x0032341C File Offset: 0x0032161C
-		private bool ShelfValidator(Map map, IntVec3 c, ThingDef itemDef)
+	private bool ShelfValidator(Map map, IntVec3 c, ThingDef itemDef)
+	{
+		if (!(c.GetFirstThing(map, ThingDefOf.Shelf) is Building_Storage building_Storage))
 		{
-			Building_Storage building_Storage = c.GetFirstThing(map, ThingDefOf.Shelf) as Building_Storage;
-			return building_Storage != null && building_Storage.SpaceRemainingFor(itemDef) != 0;
+			return false;
 		}
-
-		// Token: 0x040078B3 RID: 30899
-		private static readonly List<string> WeaponTags = new List<string>
+		if (building_Storage.SpaceRemainingFor(itemDef) == 0)
 		{
-			"IndustrialGunAdvanced",
-			"SpacerGun",
-			"RangedHeavy"
-		};
+			return false;
+		}
+		return true;
 	}
 }

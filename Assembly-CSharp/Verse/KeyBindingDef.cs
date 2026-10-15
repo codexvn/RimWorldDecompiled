@@ -1,125 +1,161 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Verse
+namespace Verse;
+
+public class KeyBindingDef : Def
 {
-	// Token: 0x0200029C RID: 668
-	public class KeyBindingDef : Def
+	public KeyBindingCategoryDef category;
+
+	public KeyCode defaultKeyCodeA;
+
+	public KeyCode defaultKeyCodeB;
+
+	public bool devModeOnly;
+
+	public List<KeyBindingDef> ignoreConflictsWith;
+
+	[NoTranslate]
+	public List<string> extraConflictTags;
+
+	public KeyCode MainKey
 	{
-		// Token: 0x170002C8 RID: 712
-		// (get) Token: 0x0600109D RID: 4253 RVA: 0x0004EAB8 File Offset: 0x0004CCB8
-		public KeyCode MainKey
+		get
 		{
-			get
+			if (KeyPrefs.KeyPrefsData.keyPrefs.TryGetValue(this, out var value))
 			{
-				KeyBindingData keyBindingData;
-				if (KeyPrefs.KeyPrefsData.keyPrefs.TryGetValue(this, out keyBindingData))
+				if (value.keyBindingA != 0)
 				{
-					if (keyBindingData.keyBindingA != KeyCode.None)
-					{
-						return keyBindingData.keyBindingA;
-					}
-					if (keyBindingData.keyBindingB != KeyCode.None)
-					{
-						return keyBindingData.keyBindingB;
-					}
+					return value.keyBindingA;
 				}
-				return KeyCode.None;
+				if (value.keyBindingB != 0)
+				{
+					return value.keyBindingB;
+				}
 			}
+			return KeyCode.None;
 		}
+	}
 
-		// Token: 0x170002C9 RID: 713
-		// (get) Token: 0x0600109E RID: 4254 RVA: 0x0004EAF8 File Offset: 0x0004CCF8
-		public string MainKeyLabel
+	public string MainKeyLabel => MainKey.ToStringReadable();
+
+	public bool KeyDownEvent
+	{
+		get
 		{
-			get
+			if (Event.current.type == EventType.keyDown && Event.current.keyCode != 0 && KeyPrefs.KeyPrefsData.keyPrefs.TryGetValue(this, out var value))
 			{
-				return this.MainKey.ToStringReadable();
+				if (value.keyBindingA != KeyCode.LeftApple && value.keyBindingA != KeyCode.RightApple && value.keyBindingB != KeyCode.LeftApple && value.keyBindingB != KeyCode.RightApple && Event.current.command)
+				{
+					return false;
+				}
+				if (Find.WindowStack.AnySearchWidgetFocused)
+				{
+					return false;
+				}
+				if (Event.current.keyCode != value.keyBindingA)
+				{
+					return Event.current.keyCode == value.keyBindingB;
+				}
+				return true;
 			}
+			return false;
 		}
+	}
 
-		// Token: 0x170002CA RID: 714
-		// (get) Token: 0x0600109F RID: 4255 RVA: 0x0004EB08 File Offset: 0x0004CD08
-		public bool KeyDownEvent
+	public bool IsDownEvent
+	{
+		get
 		{
-			get
+			if (Event.current == null)
 			{
-				KeyBindingData keyBindingData;
-				return Event.current.type == EventType.KeyDown && Event.current.keyCode != KeyCode.None && KeyPrefs.KeyPrefsData.keyPrefs.TryGetValue(this, out keyBindingData) && (keyBindingData.keyBindingA == KeyCode.LeftMeta || keyBindingData.keyBindingA == KeyCode.RightMeta || keyBindingData.keyBindingB == KeyCode.LeftMeta || keyBindingData.keyBindingB == KeyCode.RightMeta || !Event.current.command) && !Find.WindowStack.AnySearchWidgetFocused && (Event.current.keyCode == keyBindingData.keyBindingA || Event.current.keyCode == keyBindingData.keyBindingB);
+				return false;
 			}
+			if (!KeyPrefs.KeyPrefsData.keyPrefs.TryGetValue(this, out var value))
+			{
+				return false;
+			}
+			if (Find.WindowStack.AnySearchWidgetFocused)
+			{
+				return false;
+			}
+			if (KeyDownEvent)
+			{
+				return true;
+			}
+			if (Event.current.shift && (value.keyBindingA == KeyCode.LeftShift || value.keyBindingA == KeyCode.RightShift || value.keyBindingB == KeyCode.LeftShift || value.keyBindingB == KeyCode.RightShift))
+			{
+				return true;
+			}
+			if (Event.current.control && (value.keyBindingA == KeyCode.LeftControl || value.keyBindingA == KeyCode.RightControl || value.keyBindingB == KeyCode.LeftControl || value.keyBindingB == KeyCode.RightControl))
+			{
+				return true;
+			}
+			if (Event.current.alt && (value.keyBindingA == KeyCode.LeftAlt || value.keyBindingA == KeyCode.RightAlt || value.keyBindingB == KeyCode.LeftAlt || value.keyBindingB == KeyCode.RightAlt))
+			{
+				return true;
+			}
+			if (Event.current.command && (value.keyBindingA == KeyCode.LeftApple || value.keyBindingA == KeyCode.RightApple || value.keyBindingB == KeyCode.LeftApple || value.keyBindingB == KeyCode.RightApple))
+			{
+				return true;
+			}
+			return IsDown;
 		}
+	}
 
-		// Token: 0x170002CB RID: 715
-		// (get) Token: 0x060010A0 RID: 4256 RVA: 0x0004EBC0 File Offset: 0x0004CDC0
-		public bool IsDownEvent
+	public bool JustPressed
+	{
+		get
 		{
-			get
+			if (KeyPrefs.KeyPrefsData.keyPrefs.TryGetValue(this, out var value))
 			{
-				KeyBindingData keyBindingData;
-				return Event.current != null && KeyPrefs.KeyPrefsData.keyPrefs.TryGetValue(this, out keyBindingData) && !Find.WindowStack.AnySearchWidgetFocused && (this.KeyDownEvent || (Event.current.shift && (keyBindingData.keyBindingA == KeyCode.LeftShift || keyBindingData.keyBindingA == KeyCode.RightShift || keyBindingData.keyBindingB == KeyCode.LeftShift || keyBindingData.keyBindingB == KeyCode.RightShift)) || (Event.current.control && (keyBindingData.keyBindingA == KeyCode.LeftControl || keyBindingData.keyBindingA == KeyCode.RightControl || keyBindingData.keyBindingB == KeyCode.LeftControl || keyBindingData.keyBindingB == KeyCode.RightControl)) || (Event.current.alt && (keyBindingData.keyBindingA == KeyCode.LeftAlt || keyBindingData.keyBindingA == KeyCode.RightAlt || keyBindingData.keyBindingB == KeyCode.LeftAlt || keyBindingData.keyBindingB == KeyCode.RightAlt)) || (Event.current.command && (keyBindingData.keyBindingA == KeyCode.LeftMeta || keyBindingData.keyBindingA == KeyCode.RightMeta || keyBindingData.keyBindingB == KeyCode.LeftMeta || keyBindingData.keyBindingB == KeyCode.RightMeta)) || this.IsDown);
+				if (Find.WindowStack.AnySearchWidgetFocused)
+				{
+					return false;
+				}
+				if (!Input.GetKeyDown(value.keyBindingA))
+				{
+					return Input.GetKeyDown(value.keyBindingB);
+				}
+				return true;
 			}
+			return false;
 		}
+	}
 
-		// Token: 0x170002CC RID: 716
-		// (get) Token: 0x060010A1 RID: 4257 RVA: 0x0004ED14 File Offset: 0x0004CF14
-		public bool JustPressed
+	public bool IsDown
+	{
+		get
 		{
-			get
+			if (KeyPrefs.KeyPrefsData.keyPrefs.TryGetValue(this, out var value))
 			{
-				KeyBindingData keyBindingData;
-				return KeyPrefs.KeyPrefsData.keyPrefs.TryGetValue(this, out keyBindingData) && !Find.WindowStack.AnySearchWidgetFocused && (Input.GetKeyDown(keyBindingData.keyBindingA) || Input.GetKeyDown(keyBindingData.keyBindingB));
+				if (Find.WindowStack.AnySearchWidgetFocused)
+				{
+					return false;
+				}
+				if (!Input.GetKey(value.keyBindingA))
+				{
+					return Input.GetKey(value.keyBindingB);
+				}
+				return true;
 			}
+			return false;
 		}
+	}
 
-		// Token: 0x170002CD RID: 717
-		// (get) Token: 0x060010A2 RID: 4258 RVA: 0x0004ED60 File Offset: 0x0004CF60
-		public bool IsDown
+	public KeyCode GetDefaultKeyCode(KeyPrefs.BindingSlot slot)
+	{
+		return slot switch
 		{
-			get
-			{
-				KeyBindingData keyBindingData;
-				return KeyPrefs.KeyPrefsData.keyPrefs.TryGetValue(this, out keyBindingData) && !Find.WindowStack.AnySearchWidgetFocused && (Input.GetKey(keyBindingData.keyBindingA) || Input.GetKey(keyBindingData.keyBindingB));
-			}
-		}
+			KeyPrefs.BindingSlot.A => defaultKeyCodeA, 
+			KeyPrefs.BindingSlot.B => defaultKeyCodeB, 
+			_ => throw new InvalidOperationException(), 
+		};
+	}
 
-		// Token: 0x060010A3 RID: 4259 RVA: 0x0004EDAB File Offset: 0x0004CFAB
-		public KeyCode GetDefaultKeyCode(KeyPrefs.BindingSlot slot)
-		{
-			if (slot == KeyPrefs.BindingSlot.A)
-			{
-				return this.defaultKeyCodeA;
-			}
-			if (slot == KeyPrefs.BindingSlot.B)
-			{
-				return this.defaultKeyCodeB;
-			}
-			throw new InvalidOperationException();
-		}
-
-		// Token: 0x060010A4 RID: 4260 RVA: 0x0004EDC7 File Offset: 0x0004CFC7
-		public static KeyBindingDef Named(string name)
-		{
-			return DefDatabase<KeyBindingDef>.GetNamedSilentFail(name);
-		}
-
-		// Token: 0x04000DCD RID: 3533
-		public KeyBindingCategoryDef category;
-
-		// Token: 0x04000DCE RID: 3534
-		public KeyCode defaultKeyCodeA;
-
-		// Token: 0x04000DCF RID: 3535
-		public KeyCode defaultKeyCodeB;
-
-		// Token: 0x04000DD0 RID: 3536
-		public bool devModeOnly;
-
-		// Token: 0x04000DD1 RID: 3537
-		public List<KeyBindingDef> ignoreConflictsWith;
-
-		// Token: 0x04000DD2 RID: 3538
-		[NoTranslate]
-		public List<string> extraConflictTags;
+	public static KeyBindingDef Named(string name)
+	{
+		return DefDatabase<KeyBindingDef>.GetNamedSilentFail(name);
 	}
 }

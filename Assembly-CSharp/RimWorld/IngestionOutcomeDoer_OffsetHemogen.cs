@@ -1,31 +1,134 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class IngestionOutcomeDoer_OffsetHemogen : IngestionOutcomeDoer
 {
-	// Token: 0x020019AB RID: 6571
-	public class IngestionOutcomeDoer_OffsetHemogen : IngestionOutcomeDoer
+	[CompilerGenerated]
+	private sealed class _003CSpecialDisplayStats_003Ed__2 : IEnumerable<StatDrawEntry>, IEnumerable, IEnumerator<StatDrawEntry>, IEnumerator, IDisposable
 	{
-		// Token: 0x060094AE RID: 38062 RVA: 0x002BA417 File Offset: 0x002B8617
-		protected override void DoIngestionOutcomeSpecial(Pawn pawn, Thing ingested, int ingestedCount)
-		{
-			GeneUtility.OffsetHemogen(pawn, this.offset * (float)ingestedCount, true);
-		}
+		private int _003C_003E1__state;
 
-		// Token: 0x060094AF RID: 38063 RVA: 0x002BA429 File Offset: 0x002B8629
-		public override IEnumerable<StatDrawEntry> SpecialDisplayStats(ThingDef parentDef)
+		private StatDrawEntry _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public IngestionOutcomeDoer_OffsetHemogen _003C_003E4__this;
+
+		StatDrawEntry IEnumerator<StatDrawEntry>.Current
 		{
-			if (ModsConfig.BiotechActive)
+			[DebuggerHidden]
+			get
 			{
-				string str = (this.offset >= 0f) ? "+" : string.Empty;
-				yield return new StatDrawEntry(StatCategoryDefOf.BasicsNonPawnImportant, "Hemogen".Translate().CapitalizeFirst(), str + Mathf.RoundToInt(this.offset * 100f).ToString(), "HemogenDesc".Translate(), 1000, null, null, false, false);
+				return _003C_003E2__current;
 			}
-			yield break;
 		}
 
-		// Token: 0x04006091 RID: 24721
-		public float offset;
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CSpecialDisplayStats_003Ed__2(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			IngestionOutcomeDoer_OffsetHemogen ingestionOutcomeDoer_OffsetHemogen = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (ModsConfig.BiotechActive)
+				{
+					string text = ((ingestionOutcomeDoer_OffsetHemogen.offset >= 0f) ? "+" : string.Empty);
+					_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.BasicsNonPawnImportant, "Hemogen".Translate().CapitalizeFirst(), text + Mathf.RoundToInt(ingestionOutcomeDoer_OffsetHemogen.offset * 100f), "HemogenDesc".Translate(), 1000);
+					_003C_003E1__state = 1;
+					return true;
+				}
+				break;
+			case 1:
+				_003C_003E1__state = -1;
+				break;
+			}
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<StatDrawEntry> IEnumerable<StatDrawEntry>.GetEnumerator()
+		{
+			_003CSpecialDisplayStats_003Ed__2 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CSpecialDisplayStats_003Ed__2(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<StatDrawEntry>)this).GetEnumerator();
+		}
+	}
+
+	public float offset;
+
+	protected override void DoIngestionOutcomeSpecial(Pawn pawn, Thing ingested, int ingestedCount)
+	{
+		GeneUtility.OffsetHemogen(pawn, offset * (float)ingestedCount);
+	}
+
+	[IteratorStateMachine(typeof(_003CSpecialDisplayStats_003Ed__2))]
+	public override IEnumerable<StatDrawEntry> SpecialDisplayStats(ThingDef parentDef)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CSpecialDisplayStats_003Ed__2(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

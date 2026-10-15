@@ -1,66 +1,209 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
-namespace Verse
+namespace Verse;
+
+public class HediffCompProperties_CauseMentalState : HediffCompProperties
 {
-	// Token: 0x0200068E RID: 1678
-	public class HediffCompProperties_CauseMentalState : HediffCompProperties
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__12 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x06002A54 RID: 10836 RVA: 0x000DEF4A File Offset: 0x000DD14A
-		public HediffCompProperties_CauseMentalState()
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public HediffCompProperties_CauseMentalState _003C_003E4__this;
+
+		private HediffDef parentDef;
+
+		public HediffDef _003C_003E3__parentDef;
+
+		private IEnumerator<string> _003C_003E7__wrap1;
+
+		string IEnumerator<string>.Current
 		{
-			this.compClass = typeof(HediffComp_CauseMentalState);
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x06002A55 RID: 10837 RVA: 0x000DEF69 File Offset: 0x000DD169
-		public override IEnumerable<string> ConfigErrors(HediffDef parentDef)
+		object IEnumerator.Current
 		{
-			foreach (string text in base.ConfigErrors(parentDef))
+			[DebuggerHidden]
+			get
 			{
-				yield return text;
+				return _003C_003E2__current;
 			}
-			IEnumerator<string> enumerator = null;
-			if (this.endMentalStateOnCure && this.removeOnTriggered)
-			{
-				yield return "hediff comp cause mental state has both endMentalStateOnCure and removeOnTriggered enabled which are mutually exclusive. Did you forget to disable endMentalStateOnCure?";
-			}
-			yield break;
-			yield break;
 		}
 
-		// Token: 0x0400224D RID: 8781
-		public MentalStateDef animalMentalState;
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__12(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
 
-		// Token: 0x0400224E RID: 8782
-		public MentalStateDef animalMentalStateAlias;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
 
-		// Token: 0x0400224F RID: 8783
-		public MentalStateDef humanMentalState;
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				HediffCompProperties_CauseMentalState hediffCompProperties_CauseMentalState = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((HediffCompProperties)hediffCompProperties_CauseMentalState).ConfigErrors(parentDef).GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0075;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0075;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_0075:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (hediffCompProperties_CauseMentalState.endMentalStateOnCure && hediffCompProperties_CauseMentalState.removeOnTriggered)
+					{
+						_003C_003E2__current = "hediff comp cause mental state has both endMentalStateOnCure and removeOnTriggered enabled which are mutually exclusive. Did you forget to disable endMentalStateOnCure?";
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
 
-		// Token: 0x04002250 RID: 8784
-		[MustTranslate]
-		public string overrideLetterLabel;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x04002251 RID: 8785
-		[MustTranslate]
-		public string overrideLetterDesc;
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
 
-		// Token: 0x04002252 RID: 8786
-		public LetterDef letterDef;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04002253 RID: 8787
-		public float mtbDaysToCauseMentalState;
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__12 _003CConfigErrors_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CConfigErrors_003Ed__ = this;
+			}
+			else
+			{
+				_003CConfigErrors_003Ed__ = new _003CConfigErrors_003Ed__12(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CConfigErrors_003Ed__.parentDef = _003C_003E3__parentDef;
+			return _003CConfigErrors_003Ed__;
+		}
 
-		// Token: 0x04002254 RID: 8788
-		public float minSeverity;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x04002255 RID: 8789
-		public bool endMentalStateOnCure = true;
+	public MentalStateDef animalMentalState;
 
-		// Token: 0x04002256 RID: 8790
-		public bool removeOnTriggered;
+	public MentalStateDef animalMentalStateAlias;
 
-		// Token: 0x04002257 RID: 8791
-		public bool forced;
+	public MentalStateDef humanMentalState;
+
+	[MustTranslate]
+	public string overrideLetterLabel;
+
+	[MustTranslate]
+	public string overrideLetterDesc;
+
+	public LetterDef letterDef;
+
+	public float mtbDaysToCauseMentalState;
+
+	public float minSeverity;
+
+	public bool endMentalStateOnCure = true;
+
+	public bool removeOnTriggered;
+
+	public bool forced;
+
+	public HediffCompProperties_CauseMentalState()
+	{
+		compClass = typeof(HediffComp_CauseMentalState);
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__12))]
+	public override IEnumerable<string> ConfigErrors(HediffDef parentDef)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__12(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__parentDef = parentDef
+		};
 	}
 }

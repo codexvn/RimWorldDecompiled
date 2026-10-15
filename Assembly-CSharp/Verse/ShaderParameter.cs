@@ -1,115 +1,97 @@
-﻿using System;
 using System.Xml;
 using UnityEngine;
 
-namespace Verse
+namespace Verse;
+
+public class ShaderParameter
 {
-	// Token: 0x02000162 RID: 354
-	public class ShaderParameter
+	private enum Type
 	{
-		// Token: 0x06000A87 RID: 2695 RVA: 0x00031C58 File Offset: 0x0002FE58
-		public void Apply(Material mat)
+		Float,
+		Vector,
+		Matrix,
+		Texture
+	}
+
+	[NoTranslate]
+	private string name;
+
+	private Vector4 value;
+
+	private Texture2D valueTex;
+
+	private Type type;
+
+	public void Apply(Material mat)
+	{
+		switch (type)
 		{
-			switch (this.type)
+		case Type.Float:
+			mat.SetFloat(name, value.x);
+			break;
+		case Type.Vector:
+			mat.SetVector(name, value);
+			break;
+		case Type.Texture:
+			if (valueTex == null)
 			{
-			case ShaderParameter.Type.Float:
-				mat.SetFloat(this.name, this.value.x);
-				return;
-			case ShaderParameter.Type.Vector:
-				mat.SetVector(this.name, this.value);
-				return;
-			case ShaderParameter.Type.Matrix:
-				break;
-			case ShaderParameter.Type.Texture:
-				if (this.valueTex == null)
-				{
-					Log.ErrorOnce("Texture for " + this.name + " is not yet loaded; file may be invalid, or main thread may not have loaded it yet", 27929440);
-				}
-				mat.SetTexture(this.name, this.valueTex);
-				break;
-			default:
-				return;
+				Log.ErrorOnce("Texture for " + name + " is not yet loaded; file may be invalid, or main thread may not have loaded it yet", 27929440);
 			}
+			mat.SetTexture(name, valueTex);
+			break;
+		case Type.Matrix:
+			break;
 		}
+	}
 
-		// Token: 0x06000A88 RID: 2696 RVA: 0x00031CF0 File Offset: 0x0002FEF0
-		public void Apply(MaterialPropertyBlock block)
+	public void Apply(MaterialPropertyBlock block)
+	{
+		switch (type)
 		{
-			switch (this.type)
+		case Type.Float:
+			block.SetFloat(name, value.x);
+			break;
+		case Type.Vector:
+			block.SetVector(name, value);
+			break;
+		case Type.Texture:
+			if (valueTex == null)
 			{
-			case ShaderParameter.Type.Float:
-				block.SetFloat(this.name, this.value.x);
-				return;
-			case ShaderParameter.Type.Vector:
-				block.SetVector(this.name, this.value);
-				return;
-			case ShaderParameter.Type.Matrix:
-				break;
-			case ShaderParameter.Type.Texture:
-				if (this.valueTex == null)
-				{
-					Log.ErrorOnce("Texture for " + this.name + " is not yet loaded; file may be invalid, or main thread may not have loaded it yet", 27929440);
-				}
-				block.SetTexture(this.name, this.valueTex);
-				break;
-			default:
-				return;
+				Log.ErrorOnce("Texture for " + name + " is not yet loaded; file may be invalid, or main thread may not have loaded it yet", 27929440);
 			}
+			block.SetTexture(name, valueTex);
+			break;
+		case Type.Matrix:
+			break;
 		}
+	}
 
-		// Token: 0x06000A89 RID: 2697 RVA: 0x00031D88 File Offset: 0x0002FF88
-		public void LoadDataFromXmlCustom(XmlNode xmlRoot)
+	public void LoadDataFromXmlCustom(XmlNode xmlRoot)
+	{
+		if (xmlRoot.ChildNodes.Count != 1)
 		{
-			if (xmlRoot.ChildNodes.Count != 1)
-			{
-				Log.Error("Misconfigured ShaderParameter: " + xmlRoot.OuterXml);
-				return;
-			}
-			this.name = xmlRoot.Name;
-			string valstr = xmlRoot.FirstChild.Value;
-			if (!valstr.NullOrEmpty() && valstr[0] == '(')
-			{
-				this.value = ParseHelper.FromStringVector4Adaptive(valstr);
-				this.type = ShaderParameter.Type.Vector;
-				return;
-			}
-			if (!valstr.NullOrEmpty() && valstr[0] == '/')
-			{
-				LongEventHandler.ExecuteWhenFinished(delegate
-				{
-					this.valueTex = ContentFinder<Texture2D>.Get(valstr.TrimStart('/'), true);
-				});
-				this.type = ShaderParameter.Type.Texture;
-				return;
-			}
-			this.value = Vector4.one * ParseHelper.FromString<float>(valstr);
-			this.type = ShaderParameter.Type.Float;
+			Log.Error("Misconfigured ShaderParameter: " + xmlRoot.OuterXml);
+			return;
 		}
-
-		// Token: 0x04000582 RID: 1410
-		[NoTranslate]
-		private string name;
-
-		// Token: 0x04000583 RID: 1411
-		private Vector4 value;
-
-		// Token: 0x04000584 RID: 1412
-		private Texture2D valueTex;
-
-		// Token: 0x04000585 RID: 1413
-		private ShaderParameter.Type type;
-
-		// Token: 0x02000163 RID: 355
-		private enum Type
+		name = xmlRoot.Name;
+		string valstr = xmlRoot.FirstChild.Value;
+		if (!valstr.NullOrEmpty() && valstr[0] == '(')
 		{
-			// Token: 0x04000587 RID: 1415
-			Float,
-			// Token: 0x04000588 RID: 1416
-			Vector,
-			// Token: 0x04000589 RID: 1417
-			Matrix,
-			// Token: 0x0400058A RID: 1418
-			Texture
+			value = ParseHelper.FromStringVector4Adaptive(valstr);
+			type = Type.Vector;
+		}
+		else if (!valstr.NullOrEmpty() && valstr[0] == '/')
+		{
+			LongEventHandler.ExecuteWhenFinished(delegate
+			{
+				valueTex = ContentFinder<Texture2D>.Get(valstr.TrimStart('/'));
+			});
+			type = Type.Texture;
+		}
+		else
+		{
+			value = Vector4.one * ParseHelper.FromString<float>(valstr);
+			type = Type.Float;
 		}
 	}
 }

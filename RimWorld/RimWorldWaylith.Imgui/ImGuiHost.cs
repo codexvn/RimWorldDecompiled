@@ -406,7 +406,8 @@ internal sealed class ImGuiHost : IDisposable
 		}
 		try
 		{
-			byte[] array = File.ReadAllBytes(path);
+			byte[] data;
+			byte[] array = (ContentPack.TryReadFile(path, out data) ? data : File.ReadAllBytes(path));
 			void* ptr = ImGui.MemAlloc((nuint)array.Length);
 			array.CopyTo(new Span<byte>(ptr, array.Length));
 			value = ((nint)ptr, array.Length);

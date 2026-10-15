@@ -1,111 +1,290 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompProperties_Facility : CompProperties
 {
-	// Token: 0x0200196B RID: 6507
-	public class CompProperties_Facility : CompProperties
+	[CompilerGenerated]
+	private sealed class _003CSpecialDisplayStats_003Ed__14 : IEnumerable<StatDrawEntry>, IEnumerable, IEnumerator<StatDrawEntry>, IEnumerator, IDisposable
 	{
-		// Token: 0x060093C4 RID: 37828 RVA: 0x002B73E7 File Offset: 0x002B55E7
-		public CompProperties_Facility()
+		private int _003C_003E1__state;
+
+		private StatDrawEntry _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompProperties_Facility _003C_003E4__this;
+
+		private StatRequest req;
+
+		public StatRequest _003C_003E3__req;
+
+		private IEnumerator<StatDrawEntry> _003C_003E7__wrap1;
+
+		private List<StatModifier>.Enumerator _003C_003E7__wrap2;
+
+		StatDrawEntry IEnumerator<StatDrawEntry>.Current
 		{
-			this.compClass = typeof(CompFacility);
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x060093C5 RID: 37829 RVA: 0x002B7420 File Offset: 0x002B5620
-		public override void ResolveReferences(ThingDef parentDef)
+		object IEnumerator.Current
 		{
-			this.linkableBuildings = new List<ThingDef>();
-			List<ThingDef> allDefsListForReading = DefDatabase<ThingDef>.AllDefsListForReading;
-			for (int i = 0; i < allDefsListForReading.Count; i++)
+			[DebuggerHidden]
+			get
 			{
-				CompProperties_AffectedByFacilities compProperties = allDefsListForReading[i].GetCompProperties<CompProperties_AffectedByFacilities>();
-				if (compProperties != null && compProperties.linkableFacilities != null)
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CSpecialDisplayStats_003Ed__14(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			switch (_003C_003E1__state)
+			{
+			case -3:
+			case 1:
+				try
 				{
-					for (int j = 0; j < compProperties.linkableFacilities.Count; j++)
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+				break;
+			case -4:
+			case 2:
+			case 3:
+			case 4:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally2();
+				}
+				break;
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E7__wrap2 = default(List<StatModifier>.Enumerator);
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				CompProperties_Facility compProperties_Facility = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((CompProperties)compProperties_Facility).SpecialDisplayStats(req).GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0080;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0080;
+				case 2:
+					_003C_003E1__state = -4;
+					break;
+				case 3:
+					_003C_003E1__state = -4;
+					break;
+				case 4:
 					{
-						if (compProperties.linkableFacilities[j] == parentDef)
+						_003C_003E1__state = -4;
+						break;
+					}
+					IL_0080:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						StatDrawEntry current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (compProperties_Facility.statOffsets == null)
+					{
+						return false;
+					}
+					_003C_003E7__wrap2 = compProperties_Facility.statOffsets.GetEnumerator();
+					_003C_003E1__state = -4;
+					break;
+				}
+				while (_003C_003E7__wrap2.MoveNext())
+				{
+					StatModifier current2 = _003C_003E7__wrap2.Current;
+					if (ModsConfig.AnomalyActive && current2.stat == StatDefOf.ContainmentStrength)
+					{
+						_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.Containment, "StatsReport_ContainmentStrengthOffset".Translate(), current2.value.ToString("F1"), "StatsReport_ContainmentStrengthOffset_Desc".Translate(), 500);
+						_003C_003E1__state = 2;
+						return true;
+					}
+					if (ModsConfig.OdysseyActive)
+					{
+						if (current2.stat == StatDefOf.GravshipRange)
 						{
-							this.linkableBuildings.Add(allDefsListForReading[i]);
-							break;
+							_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.Building, "StatsReport_GravshipRangeOffset".Translate(), current2.value.ToString("F0"), "StatsReport_GravshipRangeOffset_Desc".Translate(), 500);
+							_003C_003E1__state = 3;
+							return true;
+						}
+						if (current2.stat == StatDefOf.SubstructureSupport)
+						{
+							StatDef substructureSupport = StatDefOf.SubstructureSupport;
+							_003C_003E2__current = new StatDrawEntry(substructureSupport.category, substructureSupport.LabelCap, current2.value.ToStringByStyle(ToStringStyle.Integer, ToStringNumberSense.Offset), substructureSupport.description, substructureSupport.displayPriorityInCategory);
+							_003C_003E1__state = 4;
+							return true;
 						}
 					}
 				}
+				_003C_003Em__Finally2();
+				_003C_003E7__wrap2 = default(List<StatModifier>.Enumerator);
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x060093C6 RID: 37830 RVA: 0x002B74A0 File Offset: 0x002B56A0
-		public override IEnumerable<StatDrawEntry> SpecialDisplayStats(StatRequest req)
+		bool IEnumerator.MoveNext()
 		{
-			foreach (StatDrawEntry statDrawEntry in base.SpecialDisplayStats(req))
-			{
-				yield return statDrawEntry;
-			}
-			IEnumerator<StatDrawEntry> enumerator = null;
-			if (this.statOffsets == null)
-			{
-				yield break;
-			}
-			foreach (StatModifier statModifier in this.statOffsets)
-			{
-				if (ModsConfig.AnomalyActive && statModifier.stat == StatDefOf.ContainmentStrength)
-				{
-					yield return new StatDrawEntry(StatCategoryDefOf.Containment, "StatsReport_ContainmentStrengthOffset".Translate(), statModifier.value.ToString("F1"), "StatsReport_ContainmentStrengthOffset_Desc".Translate(), 500, null, null, false, false);
-				}
-				else if (ModsConfig.OdysseyActive)
-				{
-					if (statModifier.stat == StatDefOf.GravshipRange)
-					{
-						yield return new StatDrawEntry(StatCategoryDefOf.Building, "StatsReport_GravshipRangeOffset".Translate(), statModifier.value.ToString("F0"), "StatsReport_GravshipRangeOffset_Desc".Translate(), 500, null, null, false, false);
-					}
-					else if (statModifier.stat == StatDefOf.SubstructureSupport)
-					{
-						StatDef substructureSupport = StatDefOf.SubstructureSupport;
-						yield return new StatDrawEntry(substructureSupport.category, substructureSupport.LabelCap, statModifier.value.ToStringByStyle(ToStringStyle.Integer, ToStringNumberSense.Offset), substructureSupport.description, substructureSupport.displayPriorityInCategory, null, null, false, false);
-					}
-				}
-			}
-			List<StatModifier>.Enumerator enumerator2 = default(List<StatModifier>.Enumerator);
-			yield break;
-			yield break;
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x04005F41 RID: 24385
-		[Unsaved(false)]
-		public List<ThingDef> linkableBuildings;
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
 
-		// Token: 0x04005F42 RID: 24386
-		public List<StatModifier> statOffsets;
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap2/*cast due to .constrained prefix*/).Dispose();
+		}
 
-		// Token: 0x04005F43 RID: 24387
-		public int maxSimultaneous = 1;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04005F44 RID: 24388
-		public bool mustBePlacedAdjacent;
+		[DebuggerHidden]
+		IEnumerator<StatDrawEntry> IEnumerable<StatDrawEntry>.GetEnumerator()
+		{
+			_003CSpecialDisplayStats_003Ed__14 _003CSpecialDisplayStats_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CSpecialDisplayStats_003Ed__ = this;
+			}
+			else
+			{
+				_003CSpecialDisplayStats_003Ed__ = new _003CSpecialDisplayStats_003Ed__14(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CSpecialDisplayStats_003Ed__.req = _003C_003E3__req;
+			return _003CSpecialDisplayStats_003Ed__;
+		}
 
-		// Token: 0x04005F45 RID: 24389
-		public bool mustBePlacedAdjacentCardinalToBedHead;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<StatDrawEntry>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x04005F46 RID: 24390
-		public bool mustBePlacedAdjacentCardinalToAndFacingBedHead;
+	[Unsaved(false)]
+	public List<ThingDef> linkableBuildings;
 
-		// Token: 0x04005F47 RID: 24391
-		public bool mustBePlacedFacingThingLinear;
+	public List<StatModifier> statOffsets;
 
-		// Token: 0x04005F48 RID: 24392
-		public bool canLinkToMedBedsOnly;
+	public int maxSimultaneous = 1;
 
-		// Token: 0x04005F49 RID: 24393
-		public float maxDistance = 8f;
+	public bool mustBePlacedAdjacent;
 
-		// Token: 0x04005F4A RID: 24394
-		public float minDistance;
+	public bool mustBePlacedAdjacentCardinalToBedHead;
 
-		// Token: 0x04005F4B RID: 24395
-		public bool showMaxSimultaneous = true;
+	public bool mustBePlacedAdjacentCardinalToAndFacingBedHead;
 
-		// Token: 0x04005F4C RID: 24396
-		public bool requiresLOS = true;
+	public bool mustBePlacedFacingThingLinear;
+
+	public bool canLinkToMedBedsOnly;
+
+	public float maxDistance = 8f;
+
+	public float minDistance;
+
+	public bool showMaxSimultaneous = true;
+
+	public bool requiresLOS = true;
+
+	public CompProperties_Facility()
+	{
+		compClass = typeof(CompFacility);
+	}
+
+	public override void ResolveReferences(ThingDef parentDef)
+	{
+		linkableBuildings = new List<ThingDef>();
+		List<ThingDef> allDefsListForReading = DefDatabase<ThingDef>.AllDefsListForReading;
+		for (int i = 0; i < allDefsListForReading.Count; i++)
+		{
+			CompProperties_AffectedByFacilities compProperties = allDefsListForReading[i].GetCompProperties<CompProperties_AffectedByFacilities>();
+			if (compProperties == null || compProperties.linkableFacilities == null)
+			{
+				continue;
+			}
+			for (int j = 0; j < compProperties.linkableFacilities.Count; j++)
+			{
+				if (compProperties.linkableFacilities[j] == parentDef)
+				{
+					linkableBuildings.Add(allDefsListForReading[i]);
+					break;
+				}
+			}
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CSpecialDisplayStats_003Ed__14))]
+	public override IEnumerable<StatDrawEntry> SpecialDisplayStats(StatRequest req)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CSpecialDisplayStats_003Ed__14(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__req = req
+		};
 	}
 }

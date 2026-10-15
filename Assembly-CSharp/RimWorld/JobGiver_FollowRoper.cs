@@ -1,49 +1,34 @@
-﻿using System;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
-{
-	// Token: 0x0200148B RID: 5259
-	public class JobGiver_FollowRoper : ThinkNode_JobGiver
-	{
-		// Token: 0x06007E7E RID: 32382 RVA: 0x0026111C File Offset: 0x0025F31C
-		protected override Job TryGiveJob(Pawn pawn)
-		{
-			Pawn pawn2;
-			if (pawn == null)
-			{
-				pawn2 = null;
-			}
-			else
-			{
-				Pawn_RopeTracker roping = pawn.roping;
-				pawn2 = ((roping != null) ? roping.RopedByPawn : null);
-			}
-			Pawn pawn3 = pawn2;
-			if (pawn3 == null)
-			{
-				return null;
-			}
-			if (!(pawn3.jobs.curDriver is JobDriver_RopeToDestination))
-			{
-				return null;
-			}
-			if (!pawn3.CurJob.GetTarget(TargetIndex.B).Cell.IsValid)
-			{
-				return null;
-			}
-			if (!pawn3.Spawned || !pawn.CanReach(pawn3, PathEndMode.Touch, Danger.Deadly, false, false, TraverseMode.ByPawn))
-			{
-				return null;
-			}
-			Job job = JobMaker.MakeJob(JobDefOf.FollowRoper, pawn3);
-			job.expiryInterval = 140;
-			job.checkOverrideOnExpire = true;
-			return job;
-		}
+namespace RimWorld;
 
-		// Token: 0x040054D5 RID: 21717
-		private const int FollowJobExpireInterval = 140;
+public class JobGiver_FollowRoper : ThinkNode_JobGiver
+{
+	private const int FollowJobExpireInterval = 140;
+
+	protected override Job TryGiveJob(Pawn pawn)
+	{
+		Pawn pawn2 = pawn?.roping?.RopedByPawn;
+		if (pawn2 == null)
+		{
+			return null;
+		}
+		if (!(pawn2.jobs.curDriver is JobDriver_RopeToDestination))
+		{
+			return null;
+		}
+		if (!pawn2.CurJob.GetTarget(TargetIndex.B).Cell.IsValid)
+		{
+			return null;
+		}
+		if (!pawn2.Spawned || !pawn.CanReach(pawn2, PathEndMode.Touch, Danger.Deadly))
+		{
+			return null;
+		}
+		Job job = JobMaker.MakeJob(JobDefOf.FollowRoper, pawn2);
+		job.expiryInterval = 140;
+		job.checkOverrideOnExpire = true;
+		return job;
 	}
 }

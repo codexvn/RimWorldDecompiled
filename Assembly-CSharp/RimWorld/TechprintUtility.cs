@@ -1,129 +1,135 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using LudeonTK;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public static class TechprintUtility
 {
-	// Token: 0x02002FA3 RID: 12195
-	public static class TechprintUtility
+	public static IEnumerable<ResearchProjectDef> GetResearchProjectsNeedingTechprintsNow(Faction faction, List<ThingDef> alreadyGeneratedTechprints = null, float maxMarketValue = float.MaxValue)
 	{
-		// Token: 0x060112C2 RID: 70338 RVA: 0x004EC0F8 File Offset: 0x004EA2F8
-		public static IEnumerable<ResearchProjectDef> GetResearchProjectsNeedingTechprintsNow(Faction faction, List<ThingDef> alreadyGeneratedTechprints = null, float maxMarketValue = 3.4028235E+38f)
+		return DefDatabase<ResearchProjectDef>.AllDefsListForReading.Where(delegate(ResearchProjectDef p)
 		{
-			return DefDatabase<ResearchProjectDef>.AllDefsListForReading.Where(delegate(ResearchProjectDef p)
+			if (p.TechprintCount == 0)
 			{
-				if (p.TechprintCount == 0)
-				{
-					return false;
-				}
-				if (p.IsFinished || p.TechprintRequirementMet)
-				{
-					return false;
-				}
-				if (faction != null && (p.heldByFactionCategoryTags == null || !p.heldByFactionCategoryTags.Contains(faction.def.categoryTag)))
-				{
-					return false;
-				}
-				if (maxMarketValue != 3.4028235E+38f && p.Techprint.BaseMarketValue > maxMarketValue)
-				{
-					return false;
-				}
-				if (alreadyGeneratedTechprints != null)
-				{
-					CompProperties_Techprint compProperties = p.Techprint.GetCompProperties<CompProperties_Techprint>();
-					if (compProperties != null)
-					{
-						int num = compProperties.project.TechprintCount - compProperties.project.TechprintsApplied;
-						int num2 = 0;
-						for (int i = 0; i < alreadyGeneratedTechprints.Count; i++)
-						{
-							if (alreadyGeneratedTechprints[i] == p.Techprint)
-							{
-								num2++;
-							}
-						}
-						if (num2 >= num)
-						{
-							return false;
-						}
-					}
-				}
-				return true;
-			});
-		}
-
-		// Token: 0x060112C3 RID: 70339 RVA: 0x004EC136 File Offset: 0x004EA336
-		public static float GetSelectionWeight(ResearchProjectDef project)
-		{
-			return project.techprintCommonality * (project.PrerequisitesCompleted ? 1f : 0.02f);
-		}
-
-		// Token: 0x060112C4 RID: 70340 RVA: 0x004EC154 File Offset: 0x004EA354
-		public static bool TryGetTechprintDefToGenerate(Faction faction, out ThingDef result, List<ThingDef> alreadyGeneratedTechprints = null, float maxMarketValue = 3.4028235E+38f)
-		{
-			ResearchProjectDef researchProjectDef;
-			if (!TechprintUtility.GetResearchProjectsNeedingTechprintsNow(faction, alreadyGeneratedTechprints, maxMarketValue).TryRandomElementByWeight(new Func<ResearchProjectDef, float>(TechprintUtility.GetSelectionWeight), out researchProjectDef))
-			{
-				result = null;
 				return false;
 			}
-			result = researchProjectDef.Techprint;
-			return true;
-		}
-
-		// Token: 0x060112C5 RID: 70341 RVA: 0x004EC18C File Offset: 0x004EA38C
-		[DebugOutput]
-		public static void TechprintsFromFactions()
-		{
-			StringBuilder stringBuilder = new StringBuilder();
-			stringBuilder.AppendLine("Techprints generated from these factions:");
-			foreach (Faction faction in from fa in Find.FactionManager.AllFactions
-			where fa.def.humanlikeFaction && !fa.Hidden
-			select fa)
+			if (p.IsFinished || p.TechprintRequirementMet)
 			{
-				stringBuilder.AppendLine(faction.Name);
-				for (int i = 0; i < 30; i++)
+				return false;
+			}
+			if (faction != null && (p.heldByFactionCategoryTags == null || !p.heldByFactionCategoryTags.Contains(faction.def.categoryTag)))
+			{
+				return false;
+			}
+			if (maxMarketValue != float.MaxValue && p.Techprint.BaseMarketValue > maxMarketValue)
+			{
+				return false;
+			}
+			if (alreadyGeneratedTechprints != null)
+			{
+				CompProperties_Techprint compProperties = p.Techprint.GetCompProperties<CompProperties_Techprint>();
+				if (compProperties != null)
 				{
-					ThingDef thingDef;
-					if (!TechprintUtility.TryGetTechprintDefToGenerate(faction, out thingDef, null, 3.4028235E+38f))
+					int num = compProperties.project.TechprintCount - compProperties.project.TechprintsApplied;
+					int num2 = 0;
+					for (int i = 0; i < alreadyGeneratedTechprints.Count; i++)
 					{
-						stringBuilder.AppendLine("    none possible");
-						break;
+						if (alreadyGeneratedTechprints[i] == p.Techprint)
+						{
+							num2++;
+						}
 					}
-					stringBuilder.AppendLine("    " + thingDef.LabelCap);
+					if (num2 >= num)
+					{
+						return false;
+					}
 				}
 			}
-			Log.Message(stringBuilder.ToString());
-		}
+			return true;
+		});
+	}
 
-		// Token: 0x060112C6 RID: 70342 RVA: 0x004EC270 File Offset: 0x004EA470
-		[DebugOutput]
-		public static void TechprintsFromFactionsChances()
+	[Obsolete]
+	public static float GetSelectionWeight(ResearchProjectDef project)
+	{
+		return GetSelectionWeight_NewTemp(project);
+	}
+
+	public static float GetSelectionWeight_NewTemp(ResearchProjectDef project, bool weightForPlayerNeed = true)
+	{
+		if (!weightForPlayerNeed)
 		{
-			List<FloatMenuOption> list = new List<FloatMenuOption>();
-			foreach (Faction localFac2 in from fa in Find.FactionManager.AllFactions
-			where fa.def.humanlikeFaction && !fa.Hidden
-			select fa)
-			{
-				Faction localFac = localFac2;
-				list.Add(new FloatMenuOption(localFac.Name + " (" + localFac.def.defName + ")", delegate()
-				{
-					List<TableDataGetter<ResearchProjectDef>> list2 = new List<TableDataGetter<ResearchProjectDef>>();
-					list2.Add(new TableDataGetter<ResearchProjectDef>("defName", (ResearchProjectDef d) => d.defName));
-					IEnumerable<ResearchProjectDef> researchProjectsNeedingTechprintsNow = TechprintUtility.GetResearchProjectsNeedingTechprintsNow(localFac, null, float.MaxValue);
-					if (researchProjectsNeedingTechprintsNow.Any<ResearchProjectDef>())
-					{
-						float sum = researchProjectsNeedingTechprintsNow.Sum((ResearchProjectDef x) => TechprintUtility.GetSelectionWeight(x));
-						list2.Add(new TableDataGetter<ResearchProjectDef>("chance", (ResearchProjectDef x) => (TechprintUtility.GetSelectionWeight(x) / sum).ToStringPercent()));
-						list2.Add(new TableDataGetter<ResearchProjectDef>("weight", (ResearchProjectDef x) => TechprintUtility.GetSelectionWeight(x).ToString("0.###")));
-					}
-					DebugTables.MakeTablesDialog<ResearchProjectDef>(researchProjectsNeedingTechprintsNow, list2.ToArray());
-				}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0));
-			}
-			Find.WindowStack.Add(new FloatMenu(list));
+			return project.techprintCommonality;
 		}
+		return project.techprintCommonality * (project.PrerequisitesCompleted ? 1f : 0.02f);
+	}
+
+	[Obsolete]
+	public static bool TryGetTechprintDefToGenerate(Faction faction, out ThingDef result, List<ThingDef> alreadyGeneratedTechprints = null, float maxMarketValue = float.MaxValue)
+	{
+		return TryGetTechprintDefToGenerate_NewTemp(faction, out result, alreadyGeneratedTechprints, maxMarketValue);
+	}
+
+	public static bool TryGetTechprintDefToGenerate_NewTemp(Faction faction, out ThingDef result, List<ThingDef> alreadyGeneratedTechprints = null, float maxMarketValue = float.MaxValue, bool weightForPlayerNeed = true)
+	{
+		if (!GetResearchProjectsNeedingTechprintsNow(faction, alreadyGeneratedTechprints, maxMarketValue).TryRandomElementByWeight((ResearchProjectDef p) => GetSelectionWeight_NewTemp(p, weightForPlayerNeed), out var result2))
+		{
+			result = null;
+			return false;
+		}
+		result = result2.Techprint;
+		return true;
+	}
+
+	[DebugOutput]
+	public static void TechprintsFromFactions()
+	{
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.AppendLine("Techprints generated from these factions:");
+		foreach (Faction item in Find.FactionManager.AllFactions.Where((Faction fa) => fa.def.humanlikeFaction && !fa.Hidden))
+		{
+			stringBuilder.AppendLine(item.Name);
+			for (int i = 0; i < 30; i++)
+			{
+				if (TryGetTechprintDefToGenerate_NewTemp(item, out var result))
+				{
+					stringBuilder.AppendLine("    " + result.LabelCap);
+					continue;
+				}
+				stringBuilder.AppendLine("    none possible");
+				break;
+			}
+		}
+		Log.Message(stringBuilder.ToString());
+	}
+
+	[DebugOutput]
+	public static void TechprintsFromFactionsChances()
+	{
+		List<FloatMenuOption> list = new List<FloatMenuOption>();
+		foreach (Faction item in Find.FactionManager.AllFactions.Where((Faction fa) => fa.def.humanlikeFaction && !fa.Hidden))
+		{
+			Faction localFac = item;
+			list.Add(new FloatMenuOption(localFac.Name + " (" + localFac.def.defName + ")", delegate
+			{
+				List<TableDataGetter<ResearchProjectDef>> list2 = new List<TableDataGetter<ResearchProjectDef>>
+				{
+					new TableDataGetter<ResearchProjectDef>("defName", (ResearchProjectDef d) => d.defName)
+				};
+				IEnumerable<ResearchProjectDef> researchProjectsNeedingTechprintsNow = GetResearchProjectsNeedingTechprintsNow(localFac);
+				if (researchProjectsNeedingTechprintsNow.Any())
+				{
+					float sum = researchProjectsNeedingTechprintsNow.Sum((ResearchProjectDef x) => GetSelectionWeight_NewTemp(x));
+					list2.Add(new TableDataGetter<ResearchProjectDef>("chance", (ResearchProjectDef x) => (GetSelectionWeight_NewTemp(x) / sum).ToStringPercent()));
+					list2.Add(new TableDataGetter<ResearchProjectDef>("weight", (ResearchProjectDef x) => GetSelectionWeight_NewTemp(x).ToString("0.###")));
+				}
+				DebugTables.MakeTablesDialog(researchProjectsNeedingTechprintsNow, list2.ToArray());
+			}));
+		}
+		Find.WindowStack.Add(new FloatMenu(list));
 	}
 }

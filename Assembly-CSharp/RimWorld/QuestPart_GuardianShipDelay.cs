@@ -1,109 +1,357 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class QuestPart_GuardianShipDelay : QuestPartActivable
 {
-	// Token: 0x02001C48 RID: 7240
-	public class QuestPart_GuardianShipDelay : QuestPartActivable
+	[CompilerGenerated]
+	private sealed class _003CExtraGizmos_003Ed__10 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x170018C4 RID: 6340
-		// (get) Token: 0x0600A128 RID: 41256 RVA: 0x002E5CA6 File Offset: 0x002E3EA6
-		public int TicksLeft
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private ISelectable target;
+
+		public ISelectable _003C_003E3__target;
+
+		public QuestPart_GuardianShipDelay _003C_003E4__this;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (base.State != QuestPartState.Enabled)
-				{
-					return 0;
-				}
-				return this.delayTicks - this.ticksPassed;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170018C5 RID: 6341
-		// (get) Token: 0x0600A129 RID: 41257 RVA: 0x002E5CC0 File Offset: 0x002E3EC0
-		public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				foreach (GlobalTargetInfo globalTargetInfo in base.QuestLookTargets)
-				{
-					yield return globalTargetInfo;
-				}
-				IEnumerator<GlobalTargetInfo> enumerator = null;
-				if (this.pawn != null)
-				{
-					yield return this.pawn;
-				}
-				yield break;
-				yield break;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600A12A RID: 41258 RVA: 0x002E5CD0 File Offset: 0x002E3ED0
-		protected override void Enable(SignalArgs receivedArgs)
+		[DebuggerHidden]
+		public _003CExtraGizmos_003Ed__10(int _003C_003E1__state)
 		{
-			base.Enable(receivedArgs);
-			this.ticksPassed = 0;
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x0600A12B RID: 41259 RVA: 0x002E5CE0 File Offset: 0x002E3EE0
-		public override void QuestPartTick()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			base.QuestPartTick();
-			if (!this.pawn.DestroyedOrNull() && !this.pawn.Suspended)
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			QuestPart_GuardianShipDelay questPart_GuardianShipDelay = _003C_003E4__this;
+			switch (num)
 			{
-				this.ticksPassed++;
-				if (this.ticksPassed >= this.delayTicks)
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (target == questPart_GuardianShipDelay.pawn)
 				{
-					base.Complete();
+					if (questPart_GuardianShipDelay.gizmo == null)
+					{
+						questPart_GuardianShipDelay.gizmo = new GuardianShipGizmo(questPart_GuardianShipDelay);
+					}
+					_003C_003E2__current = questPart_GuardianShipDelay.gizmo;
+					_003C_003E1__state = 1;
+					return true;
 				}
+				break;
+			case 1:
+				_003C_003E1__state = -1;
+				break;
 			}
+			return false;
 		}
 
-		// Token: 0x0600A12C RID: 41260 RVA: 0x002E5D2F File Offset: 0x002E3F2F
-		public override IEnumerable<Gizmo> ExtraGizmos(ISelectable target)
+		bool IEnumerator.MoveNext()
 		{
-			if (target == this.pawn)
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CExtraGizmos_003Ed__10 _003CExtraGizmos_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				if (this.gizmo == null)
-				{
-					this.gizmo = new GuardianShipGizmo(this);
-				}
-				yield return this.gizmo;
+				_003C_003E1__state = 0;
+				_003CExtraGizmos_003Ed__ = this;
 			}
-			yield break;
+			else
+			{
+				_003CExtraGizmos_003Ed__ = new _003CExtraGizmos_003Ed__10(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CExtraGizmos_003Ed__.target = _003C_003E3__target;
+			return _003CExtraGizmos_003Ed__;
 		}
 
-		// Token: 0x0600A12D RID: 41261 RVA: 0x002E5D46 File Offset: 0x002E3F46
-		public override void ExposeData()
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			base.ExposeData();
-			Scribe_References.Look<Pawn>(ref this.pawn, "pawn", false);
-			Scribe_Values.Look<int>(ref this.delayTicks, "delayTicks", 0, false);
-			Scribe_Values.Look<int>(ref this.ticksPassed, "ticksPassed", 0, false);
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x0600A12E RID: 41262 RVA: 0x002E5D83 File Offset: 0x002E3F83
-		public override void AssignDebugData()
+	[CompilerGenerated]
+	private sealed class _003Cget_QuestLookTargets_003Ed__7 : IEnumerable<GlobalTargetInfo>, IEnumerable, IEnumerator<GlobalTargetInfo>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private GlobalTargetInfo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public QuestPart_GuardianShipDelay _003C_003E4__this;
+
+		private IEnumerator<GlobalTargetInfo> _003C_003E7__wrap1;
+
+		GlobalTargetInfo IEnumerator<GlobalTargetInfo>.Current
 		{
-			base.AssignDebugData();
-			this.pawn = PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_FreeColonists.RandomElement<Pawn>();
-			this.delayTicks = Rand.RangeInclusive(833, 2500);
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x04006F66 RID: 28518
-		public Pawn pawn;
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
 
-		// Token: 0x04006F67 RID: 28519
-		public int delayTicks;
+		[DebuggerHidden]
+		public _003Cget_QuestLookTargets_003Ed__7(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
 
-		// Token: 0x04006F68 RID: 28520
-		public int ticksPassed;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
 
-		// Token: 0x04006F69 RID: 28521
-		private Gizmo gizmo;
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				QuestPart_GuardianShipDelay questPart_GuardianShipDelay = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((QuestPart)questPart_GuardianShipDelay).QuestLookTargets.GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_006f:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						GlobalTargetInfo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (questPart_GuardianShipDelay.pawn != null)
+					{
+						_003C_003E2__current = questPart_GuardianShipDelay.pawn;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<GlobalTargetInfo> IEnumerable<GlobalTargetInfo>.GetEnumerator()
+		{
+			_003Cget_QuestLookTargets_003Ed__7 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_QuestLookTargets_003Ed__7(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<GlobalTargetInfo>)this).GetEnumerator();
+		}
+	}
+
+	public Pawn pawn;
+
+	public int delayTicks;
+
+	public int ticksPassed;
+
+	private Gizmo gizmo;
+
+	public int TicksLeft
+	{
+		get
+		{
+			if (base.State != QuestPartState.Enabled)
+			{
+				return 0;
+			}
+			return delayTicks - ticksPassed;
+		}
+	}
+
+	public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+	{
+		[IteratorStateMachine(typeof(_003Cget_QuestLookTargets_003Ed__7))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_QuestLookTargets_003Ed__7(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	protected override void Enable(SignalArgs receivedArgs)
+	{
+		base.Enable(receivedArgs);
+		ticksPassed = 0;
+	}
+
+	public override void QuestPartTick()
+	{
+		base.QuestPartTick();
+		if (!pawn.DestroyedOrNull() && !pawn.Suspended)
+		{
+			ticksPassed++;
+			if (ticksPassed >= delayTicks)
+			{
+				Complete();
+			}
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CExtraGizmos_003Ed__10))]
+	public override IEnumerable<Gizmo> ExtraGizmos(ISelectable target)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CExtraGizmos_003Ed__10(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__target = target
+		};
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_References.Look(ref pawn, "pawn");
+		Scribe_Values.Look(ref delayTicks, "delayTicks", 0);
+		Scribe_Values.Look(ref ticksPassed, "ticksPassed", 0);
+	}
+
+	public override void AssignDebugData()
+	{
+		base.AssignDebugData();
+		pawn = PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_FreeColonists.RandomElement();
+		delayTicks = Rand.RangeInclusive(833, 2500);
 	}
 }

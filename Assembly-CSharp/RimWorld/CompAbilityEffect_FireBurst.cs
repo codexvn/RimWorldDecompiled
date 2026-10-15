@@ -1,78 +1,158 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompAbilityEffect_FireBurst : CompAbilityEffect
 {
-	// Token: 0x02002224 RID: 8740
-	public class CompAbilityEffect_FireBurst : CompAbilityEffect
+	[CompilerGenerated]
+	private sealed class _003CGetPreCastActions_003Ed__5 : IEnumerable<PreCastAction>, IEnumerable, IEnumerator<PreCastAction>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001D29 RID: 7465
-		// (get) Token: 0x0600BF13 RID: 48915 RVA: 0x00376B36 File Offset: 0x00374D36
-		private new CompProperties_AbilityFireBurst Props
+		private int _003C_003E1__state;
+
+		private PreCastAction _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompAbilityEffect_FireBurst _003C_003E4__this;
+
+		PreCastAction IEnumerator<PreCastAction>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (CompProperties_AbilityFireBurst)this.props;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001D2A RID: 7466
-		// (get) Token: 0x0600BF14 RID: 48916 RVA: 0x00375CA4 File Offset: 0x00373EA4
-		private Pawn Pawn
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.parent.pawn;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600BF15 RID: 48917 RVA: 0x00376B44 File Offset: 0x00374D44
-		public override void Apply(LocalTargetInfo target, LocalTargetInfo dest)
+		[DebuggerHidden]
+		public _003CGetPreCastActions_003Ed__5(int _003C_003E1__state)
 		{
-			GenExplosion.DoExplosion(this.Pawn.Position, this.Pawn.MapHeld, this.Props.radius, DamageDefOf.Flame, this.Pawn, -1, -1f, null, null, null, null, ThingDefOf.Filth_Fuel, 1f, 1, null, null, 255, false, null, 0f, 1, 1f, false, null, null, null, false, 0.6f, 0f, true, null, 1f, null, null, null, null);
-			base.Apply(target, dest);
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x0600BF16 RID: 48918 RVA: 0x00376BED File Offset: 0x00374DED
-		public override IEnumerable<PreCastAction> GetPreCastActions()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			yield return new PreCastAction
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			CompAbilityEffect_FireBurst CS_0024_003C_003E8__locals5 = _003C_003E4__this;
+			switch (num)
 			{
-				action = delegate(LocalTargetInfo a, LocalTargetInfo b)
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = new PreCastAction
 				{
-					this.parent.AddEffecterToMaintain(EffecterDefOf.Fire_Burst.Spawn(this.parent.pawn.Position, this.parent.pawn.Map, 1f), this.parent.pawn.Position, 17, this.parent.pawn.Map);
-				},
-				ticksAwayFromCast = 17
-			};
-			yield break;
-		}
-
-		// Token: 0x0600BF17 RID: 48919 RVA: 0x00376C00 File Offset: 0x00374E00
-		public override bool AICanTargetNow(LocalTargetInfo target)
-		{
-			if (this.Pawn.Faction == Faction.OfPlayer)
-			{
+					action = delegate
+					{
+						CS_0024_003C_003E8__locals5.parent.AddEffecterToMaintain(EffecterDefOf.Fire_Burst.Spawn(CS_0024_003C_003E8__locals5.parent.pawn.Position, CS_0024_003C_003E8__locals5.parent.pawn.Map), CS_0024_003C_003E8__locals5.parent.pawn.Position, 17, CS_0024_003C_003E8__locals5.parent.pawn.Map);
+					},
+					ticksAwayFromCast = 17
+				};
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
 				return false;
 			}
-			if (target.HasThing)
-			{
-				Pawn pawn = target.Thing as Pawn;
-				if (pawn != null)
-				{
-					return pawn.TargetCurrentlyAimingAt == this.Pawn;
-				}
-			}
-			return false;
 		}
 
-		// Token: 0x0600BF18 RID: 48920 RVA: 0x00376C52 File Offset: 0x00374E52
-		public override void CompTickInterval(int delta)
+		bool IEnumerator.MoveNext()
 		{
-			if (this.parent.Casting)
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<PreCastAction> IEnumerable<PreCastAction>.GetEnumerator()
+		{
+			_003CGetPreCastActions_003Ed__5 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				FireBurstUtility.ThrowFuelTick(this.Pawn.Position, this.Props.radius, this.Pawn.Map);
+				_003C_003E1__state = 0;
+				result = this;
 			}
+			else
+			{
+				result = new _003CGetPreCastActions_003Ed__5(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<PreCastAction>)this).GetEnumerator();
+		}
+	}
+
+	private new CompProperties_AbilityFireBurst Props => (CompProperties_AbilityFireBurst)props;
+
+	private Pawn Pawn => parent.pawn;
+
+	public override void Apply(LocalTargetInfo target, LocalTargetInfo dest)
+	{
+		GenExplosion.DoExplosion(Pawn.Position, Pawn.MapHeld, Props.radius, DamageDefOf.Flame, Pawn, -1, -1f, null, null, null, null, ThingDefOf.Filth_Fuel, 1f, 1, null, null, 255, applyDamageToExplosionCellsNeighbors: false, null, 0f, 1, 1f, damageFalloff: false, null, null, null, doVisualEffects: false, 0.6f);
+		base.Apply(target, dest);
+	}
+
+	[IteratorStateMachine(typeof(_003CGetPreCastActions_003Ed__5))]
+	public override IEnumerable<PreCastAction> GetPreCastActions()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetPreCastActions_003Ed__5(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override bool AICanTargetNow(LocalTargetInfo target)
+	{
+		if (Pawn.Faction == Faction.OfPlayer)
+		{
+			return false;
+		}
+		if (target.HasThing && target.Thing is Pawn pawn)
+		{
+			return pawn.TargetCurrentlyAimingAt == Pawn;
+		}
+		return false;
+	}
+
+	public override void CompTickInterval(int delta)
+	{
+		if (parent.Casting)
+		{
+			FireBurstUtility.ThrowFuelTick(Pawn.Position, Props.radius, Pawn.Map);
 		}
 	}
 }

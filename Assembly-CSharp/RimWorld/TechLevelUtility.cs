@@ -1,69 +1,68 @@
-﻿using System;
+using System;
 using Verse;
 
-namespace RimWorld
-{
-	// Token: 0x02001E8C RID: 7820
-	public static class TechLevelUtility
-	{
-		// Token: 0x0600AD9B RID: 44443 RVA: 0x00318DFC File Offset: 0x00316FFC
-		public static string ToStringHuman(this TechLevel tl)
-		{
-			switch (tl)
-			{
-			case TechLevel.Undefined:
-				return "Undefined".Translate();
-			case TechLevel.Animal:
-				return "TechLevel_Animal".Translate();
-			case TechLevel.Neolithic:
-				return "TechLevel_Neolithic".Translate();
-			case TechLevel.Medieval:
-				return "TechLevel_Medieval".Translate();
-			case TechLevel.Industrial:
-				return "TechLevel_Industrial".Translate();
-			case TechLevel.Spacer:
-				return "TechLevel_Spacer".Translate();
-			case TechLevel.Ultra:
-				return "TechLevel_Ultra".Translate();
-			case TechLevel.Archotech:
-				return "TechLevel_Archotech".Translate();
-			default:
-				throw new NotImplementedException();
-			}
-		}
+namespace RimWorld;
 
-		// Token: 0x0600AD9C RID: 44444 RVA: 0x00318EBC File Offset: 0x003170BC
-		public static bool CanSpawnWithEquipmentFrom(this TechLevel pawnLevel, TechLevel gearLevel)
+public static class TechLevelUtility
+{
+	public static string ToStringHuman(this TechLevel tl)
+	{
+		return tl switch
 		{
-			if (gearLevel == TechLevel.Undefined)
+			TechLevel.Undefined => "Undefined".Translate(), 
+			TechLevel.Animal => "TechLevel_Animal".Translate(), 
+			TechLevel.Neolithic => "TechLevel_Neolithic".Translate(), 
+			TechLevel.Medieval => "TechLevel_Medieval".Translate(), 
+			TechLevel.Industrial => "TechLevel_Industrial".Translate(), 
+			TechLevel.Spacer => "TechLevel_Spacer".Translate(), 
+			TechLevel.Ultra => "TechLevel_Ultra".Translate(), 
+			TechLevel.Archotech => "TechLevel_Archotech".Translate(), 
+			_ => throw new NotImplementedException(), 
+		};
+	}
+
+	public static bool CanSpawnWithEquipmentFrom(this TechLevel pawnLevel, TechLevel gearLevel)
+	{
+		if (gearLevel == TechLevel.Undefined)
+		{
+			return false;
+		}
+		switch (pawnLevel)
+		{
+		case TechLevel.Undefined:
+			return false;
+		case TechLevel.Neolithic:
+			return (int)gearLevel <= 2;
+		case TechLevel.Medieval:
+			return (int)gearLevel <= 3;
+		case TechLevel.Industrial:
+			return gearLevel == TechLevel.Industrial;
+		case TechLevel.Spacer:
+			if (gearLevel != TechLevel.Spacer)
 			{
-				return false;
-			}
-			switch (pawnLevel)
-			{
-			case TechLevel.Undefined:
-				return false;
-			case TechLevel.Neolithic:
-				return gearLevel <= TechLevel.Neolithic;
-			case TechLevel.Medieval:
-				return gearLevel <= TechLevel.Medieval;
-			case TechLevel.Industrial:
 				return gearLevel == TechLevel.Industrial;
-			case TechLevel.Spacer:
-				return gearLevel == TechLevel.Spacer || gearLevel == TechLevel.Industrial;
-			case TechLevel.Ultra:
-				return gearLevel == TechLevel.Ultra || gearLevel == TechLevel.Spacer;
-			case TechLevel.Archotech:
-				return gearLevel == TechLevel.Archotech;
 			}
-			Log.Error("Unknown tech levels " + pawnLevel.ToString() + ", " + gearLevel.ToString());
+			return true;
+		case TechLevel.Ultra:
+			if (gearLevel != TechLevel.Ultra)
+			{
+				return gearLevel == TechLevel.Spacer;
+			}
+			return true;
+		case TechLevel.Archotech:
+			return gearLevel == TechLevel.Archotech;
+		default:
+			Log.Error("Unknown tech levels " + pawnLevel.ToString() + ", " + gearLevel);
 			return true;
 		}
+	}
 
-		// Token: 0x0600AD9D RID: 44445 RVA: 0x00318F57 File Offset: 0x00317157
-		public static bool IsNeolithicOrWorse(this TechLevel techLevel)
+	public static bool IsNeolithicOrWorse(this TechLevel techLevel)
+	{
+		if (techLevel == TechLevel.Undefined)
 		{
-			return techLevel != TechLevel.Undefined && techLevel <= TechLevel.Neolithic;
+			return false;
 		}
+		return (int)techLevel <= 2;
 	}
 }

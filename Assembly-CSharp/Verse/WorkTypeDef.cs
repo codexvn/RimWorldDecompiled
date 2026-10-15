@@ -1,144 +1,273 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using RimWorld;
 using UnityEngine;
 
-namespace Verse
+namespace Verse;
+
+public class WorkTypeDef : Def
 {
-	// Token: 0x02000318 RID: 792
-	public class WorkTypeDef : Def
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__18 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x170003D1 RID: 977
-		// (get) Token: 0x060013BD RID: 5053 RVA: 0x0005D72B File Offset: 0x0005B92B
-		public bool VisibleCurrently
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public WorkTypeDef _003C_003E4__this;
+
+		private IEnumerator<string> _003C_003E7__wrap1;
+
+		string IEnumerator<string>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.cachedFrameVisibleCurrently == -1 || this.cachedFrameVisibleCurrently < Time.frameCount - 30)
-				{
-					this.cachedVisibleCurrently = this.VisibleNow(null, null);
-					this.cachedFrameVisibleCurrently = Time.frameCount;
-				}
-				return this.cachedVisibleCurrently;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x060013BE RID: 5054 RVA: 0x0005D768 File Offset: 0x0005B968
-		public bool VisibleNow(Pawn ignorePawn = null, Pawn alsoCheckPawn = null)
+		object IEnumerator.Current
 		{
-			if (!this.visible)
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__18(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				WorkTypeDef workTypeDef = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((Def)workTypeDef).ConfigErrors().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_006f:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (workTypeDef.naturalPriority < 0 || workTypeDef.naturalPriority > 10000)
+					{
+						_003C_003E2__current = "naturalPriority is " + workTypeDef.naturalPriority + ", but it must be between 0 and 10000";
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__18 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__18(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	public WorkTags workTags;
+
+	[MustTranslate]
+	public string labelShort;
+
+	[MustTranslate]
+	public string pawnLabel;
+
+	[MustTranslate]
+	public string gerundLabel;
+
+	[MustTranslate]
+	public string verb;
+
+	public bool visible = true;
+
+	public bool visibleOnlyWithChildrenInColony;
+
+	public int naturalPriority;
+
+	public bool alwaysStartActive;
+
+	public bool requireCapableColonist;
+
+	public List<SkillDef> relevantSkills = new List<SkillDef>();
+
+	public bool disabledForSlaves;
+
+	[Unsaved(false)]
+	public List<WorkGiverDef> workGiversByPriority = new List<WorkGiverDef>();
+
+	[Unsaved(false)]
+	private bool cachedVisibleCurrently;
+
+	[Unsaved(false)]
+	private int cachedFrameVisibleCurrently = -1;
+
+	public bool VisibleCurrently
+	{
+		get
+		{
+			if (cachedFrameVisibleCurrently == -1 || cachedFrameVisibleCurrently < Time.frameCount - 30)
+			{
+				cachedVisibleCurrently = VisibleNow();
+				cachedFrameVisibleCurrently = Time.frameCount;
+			}
+			return cachedVisibleCurrently;
+		}
+	}
+
+	public bool VisibleNow(Pawn ignorePawn = null, Pawn alsoCheckPawn = null)
+	{
+		if (!visible)
+		{
+			return false;
+		}
+		if (visibleOnlyWithChildrenInColony)
+		{
+			bool flag = false;
+			foreach (Pawn item in PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_OfPlayerFaction)
+			{
+				if (item.RaceProps.Humanlike && item != ignorePawn && item.DevelopmentalStage.Juvenile())
+				{
+					flag = true;
+					break;
+				}
+			}
+			if (alsoCheckPawn != null && alsoCheckPawn.DevelopmentalStage.Juvenile())
+			{
+				flag = true;
+			}
+			if (!flag)
 			{
 				return false;
 			}
-			if (this.visibleOnlyWithChildrenInColony)
-			{
-				bool flag = false;
-				foreach (Pawn pawn in PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_OfPlayerFaction)
-				{
-					if (pawn.RaceProps.Humanlike && pawn != ignorePawn && pawn.DevelopmentalStage.Juvenile())
-					{
-						flag = true;
-						break;
-					}
-				}
-				if (alsoCheckPawn != null && alsoCheckPawn.DevelopmentalStage.Juvenile())
-				{
-					flag = true;
-				}
-				if (!flag)
-				{
-					return false;
-				}
-			}
-			return true;
 		}
+		return true;
+	}
 
-		// Token: 0x060013BF RID: 5055 RVA: 0x0005D804 File Offset: 0x0005BA04
-		public override IEnumerable<string> ConfigErrors()
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__18))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__18(-2)
 		{
-			foreach (string text in base.ConfigErrors())
-			{
-				yield return text;
-			}
-			IEnumerator<string> enumerator = null;
-			if (this.naturalPriority < 0 || this.naturalPriority > 10000)
-			{
-				yield return "naturalPriority is " + this.naturalPriority.ToString() + ", but it must be between 0 and 10000";
-			}
-			yield break;
-			yield break;
-		}
+			_003C_003E4__this = this
+		};
+	}
 
-		// Token: 0x060013C0 RID: 5056 RVA: 0x0005D814 File Offset: 0x0005BA14
-		public override void ResolveReferences()
-		{
-			base.ResolveReferences();
-			foreach (WorkGiverDef item in from d in DefDatabase<WorkGiverDef>.AllDefs
+	public override void ResolveReferences()
+	{
+		base.ResolveReferences();
+		foreach (WorkGiverDef item in from d in DefDatabase<WorkGiverDef>.AllDefs
 			where d.workType == this
 			orderby d.priorityInType descending
 			select d)
-			{
-				this.workGiversByPriority.Add(item);
-			}
-		}
-
-		// Token: 0x060013C1 RID: 5057 RVA: 0x0005D8A0 File Offset: 0x0005BAA0
-		public override int GetHashCode()
 		{
-			return Gen.HashCombine<string>(this.defName.GetHashCode(), this.gerundLabel);
+			workGiversByPriority.Add(item);
 		}
+	}
 
-		// Token: 0x040012CC RID: 4812
-		public WorkTags workTags;
-
-		// Token: 0x040012CD RID: 4813
-		[MustTranslate]
-		public string labelShort;
-
-		// Token: 0x040012CE RID: 4814
-		[MustTranslate]
-		public string pawnLabel;
-
-		// Token: 0x040012CF RID: 4815
-		[MustTranslate]
-		public string gerundLabel;
-
-		// Token: 0x040012D0 RID: 4816
-		[MustTranslate]
-		public string verb;
-
-		// Token: 0x040012D1 RID: 4817
-		public bool visible = true;
-
-		// Token: 0x040012D2 RID: 4818
-		public bool visibleOnlyWithChildrenInColony;
-
-		// Token: 0x040012D3 RID: 4819
-		public int naturalPriority;
-
-		// Token: 0x040012D4 RID: 4820
-		public bool alwaysStartActive;
-
-		// Token: 0x040012D5 RID: 4821
-		public bool requireCapableColonist;
-
-		// Token: 0x040012D6 RID: 4822
-		public List<SkillDef> relevantSkills = new List<SkillDef>();
-
-		// Token: 0x040012D7 RID: 4823
-		public bool disabledForSlaves;
-
-		// Token: 0x040012D8 RID: 4824
-		[Unsaved(false)]
-		public List<WorkGiverDef> workGiversByPriority = new List<WorkGiverDef>();
-
-		// Token: 0x040012D9 RID: 4825
-		[Unsaved(false)]
-		private bool cachedVisibleCurrently;
-
-		// Token: 0x040012DA RID: 4826
-		[Unsaved(false)]
-		private int cachedFrameVisibleCurrently = -1;
+	public override int GetHashCode()
+	{
+		return Gen.HashCombine(defName.GetHashCode(), gerundLabel);
 	}
 }

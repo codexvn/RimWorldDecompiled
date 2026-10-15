@@ -1,60 +1,44 @@
-﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class GenStep_BurntPatches : GenStep
 {
-	// Token: 0x02001FA1 RID: 8097
-	public class GenStep_BurntPatches : GenStep
+	private static readonly IntRange PatchCountRange = new IntRange(0, 2);
+
+	private static readonly IntRange PatchSizeRange = new IntRange(50, 200);
+
+	public override int SeedPart => 823478234;
+
+	public override void Generate(Map map, GenStepParams parms)
 	{
-		// Token: 0x17001B3B RID: 6971
-		// (get) Token: 0x0600B2D5 RID: 45781 RVA: 0x0033383C File Offset: 0x00331A3C
-		public override int SeedPart
+		int randomInRange = PatchCountRange.RandomInRange;
+		for (int i = 0; i < randomInRange; i++)
 		{
-			get
-			{
-				return 823478234;
-			}
+			GeneratePatch(map);
 		}
+	}
 
-		// Token: 0x0600B2D6 RID: 45782 RVA: 0x00333844 File Offset: 0x00331A44
-		public override void Generate(Map map, GenStepParams parms)
+	private void GeneratePatch(Map map)
+	{
+		if (!RCellFinder.TryFindRandomCellNearWith(map.Center, (IntVec3 c) => c.Standable(map), map, out var result, 30))
 		{
-			int randomInRange = GenStep_BurntPatches.PatchCountRange.RandomInRange;
-			for (int i = 0; i < randomInRange; i++)
-			{
-				this.GeneratePatch(map);
-			}
+			return;
 		}
-
-		// Token: 0x0600B2D7 RID: 45783 RVA: 0x00333874 File Offset: 0x00331A74
-		private void GeneratePatch(Map map)
+		foreach (IntVec3 item in GridShapeMaker.IrregularLump(result, map, PatchSizeRange.RandomInRange))
 		{
-			IntVec3 center;
-			if (!RCellFinder.TryFindRandomCellNearWith(map.Center, (IntVec3 c) => c.Standable(map), map, out center, 30, 2147483647))
+			List<Thing> thingList = item.GetThingList(map);
+			for (int num = thingList.Count - 1; num >= 0; num--)
 			{
-				return;
-			}
-			foreach (IntVec3 c2 in GridShapeMaker.IrregularLump(center, map, GenStep_BurntPatches.PatchSizeRange.RandomInRange, null))
-			{
-				List<Thing> thingList = c2.GetThingList(map);
-				for (int i = thingList.Count - 1; i >= 0; i--)
+				Thing thing = thingList[num];
+				if (thing.def.IsPlant)
 				{
-					Thing thing = thingList[i];
-					if (thing.def.IsPlant)
-					{
-						thing.Kill(new DamageInfo?(new DamageInfo(DamageDefOf.Flame, 9999f, 0f, -1f, null, null, null, DamageInfo.SourceCategory.ThingOrUnknown, null, true, true, QualityCategory.Normal, true, false)), null);
-					}
+					thing.Kill(new DamageInfo(DamageDefOf.Flame, 9999f));
 				}
-				map.snowGrid.SetDepth(c2, 0f);
-				FilthMaker.TryMakeFilth(c2, map, ThingDefOf.Filth_Ash, 1, FilthSourceFlags.None, true);
 			}
+			map.snowGrid.SetDepth(item, 0f);
+			FilthMaker.TryMakeFilth(item, map, ThingDefOf.Filth_Ash);
 		}
-
-		// Token: 0x04007A74 RID: 31348
-		private static readonly IntRange PatchCountRange = new IntRange(0, 2);
-
-		// Token: 0x04007A75 RID: 31349
-		private static readonly IntRange PatchSizeRange = new IntRange(50, 200);
 	}
 }

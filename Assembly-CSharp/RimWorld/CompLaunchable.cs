@@ -1,456 +1,1026 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+[StaticConstructorOnStartup]
+public class CompLaunchable : ThingComp
 {
-	// Token: 0x02002D0C RID: 11532
-	[StaticConstructorOnStartup]
-	public class CompLaunchable : ThingComp
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass48_0
 	{
-		// Token: 0x17002918 RID: 10520
-		// (get) Token: 0x06010339 RID: 66361 RVA: 0x004AF1B0 File Offset: 0x004AD3B0
-		public CompProperties_Launchable Props
+		public Action<PlanetTile, TransportersArrivalAction> launchAction;
+
+		public PlanetTile tile;
+
+		public bool isShuttle;
+
+		internal void _003CGetTransportersFloatMenuOptionsAt_003Eb__0()
 		{
+			launchAction(tile, new TransportersArrivalAction_FormCaravan(isShuttle ? "MessageShuttleArrived" : "MessageTransportPodsArrived"));
+		}
+
+		internal void _003CGetTransportersFloatMenuOptionsAt_003Eb__1()
+		{
+			launchAction(tile, null);
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass50_0
+	{
+		public Action<PlanetTile, TransportersArrivalAction> launchAction;
+
+		public PlanetTile tile;
+
+		internal void _003CGetOptionsForTile_003Eb__0()
+		{
+			launchAction(tile, new TransportersArrivalAction_FormCaravan("MessageShuttleArrived"));
+		}
+
+		internal void _003CGetOptionsForTile_003Eb__1()
+		{
+			launchAction(tile, null);
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CCompGetGizmosExtra_003Ed__36 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompLaunchable _003C_003E4__this;
+
+		private IEnumerator<Gizmo> _003C_003E7__wrap1;
+
+		Gizmo IEnumerator<Gizmo>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				return (CompProperties_Launchable)this.props;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002919 RID: 10521
-		// (get) Token: 0x0601033A RID: 66362 RVA: 0x004AF1C0 File Offset: 0x004AD3C0
-		protected CompTransporter Transporter
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				CompTransporter result;
-				if ((result = this.cachedCompTransporter) == null)
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CCompGetGizmosExtra_003Ed__36(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
 				{
-					result = (this.cachedCompTransporter = this.parent.GetComp<CompTransporter>());
 				}
-				return result;
-			}
-		}
-
-		// Token: 0x1700291A RID: 10522
-		// (get) Token: 0x0601033B RID: 66363 RVA: 0x004AF1EC File Offset: 0x004AD3EC
-		public virtual CompRefuelable Refuelable
-		{
-			get
-			{
-				CompRefuelable result;
-				if ((result = this.cachedCompRefuelable) == null)
+				finally
 				{
-					result = (this.cachedCompRefuelable = this.parent.GetComp<CompRefuelable>());
+					_003C_003Em__Finally1();
 				}
-				return result;
 			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x1700291B RID: 10523
-		// (get) Token: 0x0601033C RID: 66364 RVA: 0x004AF218 File Offset: 0x004AD418
-		private CompShuttle Shuttle
+		private bool MoveNext()
 		{
-			get
+			try
 			{
-				CompShuttle result;
-				if ((result = this.cachedCompShuttle) == null)
+				int num = _003C_003E1__state;
+				CompLaunchable CS_0024_003C_003E8__locals11 = _003C_003E4__this;
+				CompTransporter transporter;
+				Command_Action command_Action;
+				AcceptanceReport acceptanceReport;
+				switch (num)
 				{
-					result = (this.cachedCompShuttle = this.parent.GetComp<CompShuttle>());
-				}
-				return result;
-			}
-		}
-
-		// Token: 0x1700291C RID: 10524
-		// (get) Token: 0x0601033D RID: 66365 RVA: 0x004AF243 File Offset: 0x004AD443
-		protected List<CompTransporter> TransportersInGroup
-		{
-			get
-			{
-				return this.Transporter.TransportersInGroup(this.parent.Map);
-			}
-		}
-
-		// Token: 0x1700291D RID: 10525
-		// (get) Token: 0x0601033E RID: 66366 RVA: 0x004AF25B File Offset: 0x004AD45B
-		private bool AnyInGroupHasAnythingLeftToLoad
-		{
-			get
-			{
-				return this.Transporter.AnyInGroupHasAnythingLeftToLoad;
-			}
-		}
-
-		// Token: 0x1700291E RID: 10526
-		// (get) Token: 0x0601033F RID: 66367 RVA: 0x004AF268 File Offset: 0x004AD468
-		private Thing FirstThingLeftToLoadInGroup
-		{
-			get
-			{
-				return this.Transporter.FirstThingLeftToLoadInGroup;
-			}
-		}
-
-		// Token: 0x1700291F RID: 10527
-		// (get) Token: 0x06010340 RID: 66368 RVA: 0x004AF275 File Offset: 0x004AD475
-		public virtual float FuelLevel
-		{
-			get
-			{
-				return this.Refuelable.Fuel;
-			}
-		}
-
-		// Token: 0x17002920 RID: 10528
-		// (get) Token: 0x06010341 RID: 66369 RVA: 0x004AF282 File Offset: 0x004AD482
-		public virtual float MaxFuelLevel
-		{
-			get
-			{
-				return this.Refuelable.Props.fuelCapacity;
-			}
-		}
-
-		// Token: 0x17002921 RID: 10529
-		// (get) Token: 0x06010342 RID: 66370 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public virtual bool RequiresFuelingPort
-		{
-			get
-			{
-				return true;
-			}
-		}
-
-		// Token: 0x17002922 RID: 10530
-		// (get) Token: 0x06010343 RID: 66371 RVA: 0x004AF294 File Offset: 0x004AD494
-		private bool AnyInGroupIsUnderRoof
-		{
-			get
-			{
-				List<CompTransporter> transportersInGroup = this.TransportersInGroup;
-				for (int i = 0; i < transportersInGroup.Count; i++)
-				{
-					if (transportersInGroup[i].parent.Position.Roofed(this.parent.Map))
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((ThingComp)CS_0024_003C_003E8__locals11).CompGetGizmosExtra().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0078;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0078;
+				case 2:
+					_003C_003E1__state = -1;
+					if (DebugSettings.ShowDevGizmos)
 					{
+						_003C_003E2__current = new Command_Action
+						{
+							defaultLabel = "DEV: End cooldown",
+							action = delegate
+							{
+								CS_0024_003C_003E8__locals11.lastLaunchTick = Find.TickManager.TicksGame - CS_0024_003C_003E8__locals11.Props.cooldownTicks;
+							}
+						};
+						_003C_003E1__state = 3;
 						return true;
 					}
+					break;
+				case 3:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_0078:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Gizmo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					transporter = CS_0024_003C_003E8__locals11.Transporter;
+					if (transporter != null && !transporter.Groupable)
+					{
+						int num2 = 0;
+						foreach (object selectedObject in Find.Selector.SelectedObjects)
+						{
+							if (selectedObject is ThingWithComps thing && thing.HasComp<CompTransporter>())
+							{
+								num2++;
+							}
+						}
+						if (num2 > 1)
+						{
+							return false;
+						}
+					}
+					command_Action = new Command_Action
+					{
+						defaultLabel = "CommandLaunchGroup".Translate(),
+						defaultDesc = "CommandLaunchGroupDesc".Translate(),
+						icon = LaunchCommandTex,
+						alsoClickIfOtherInGroupClicked = false,
+						action = delegate
+						{
+							if (CS_0024_003C_003E8__locals11.AnyInGroupHasAnythingLeftToLoad)
+							{
+								TaggedString text = "ConfirmSendNotCompletelyLoadedLaunchable".Translate() + ":\n";
+								text += CS_0024_003C_003E8__locals11.Transporter.leftToLoad.Select((TransferableOneWay x) => x.AnyThing.LabelCap).ToLineList(" -");
+								text += "\n\n" + "ConfirmSendLaunchAnyway".Translate();
+								Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation(text, delegate
+								{
+									CS_0024_003C_003E8__locals11.StartChoosingDestination(CS_0024_003C_003E8__locals11.TryLaunch, null);
+								}));
+							}
+							else
+							{
+								CS_0024_003C_003E8__locals11.StartChoosingDestination(CS_0024_003C_003E8__locals11.TryLaunch, null);
+							}
+						}
+					};
+					acceptanceReport = CS_0024_003C_003E8__locals11.CanLaunch(null);
+					if (!acceptanceReport.Accepted)
+					{
+						command_Action.Disable(acceptanceReport.Reason);
+					}
+					_003C_003E2__current = command_Action;
+					_003C_003E1__state = 2;
+					return true;
 				}
 				return false;
 			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
 		}
 
-		// Token: 0x17002923 RID: 10531
-		// (get) Token: 0x06010344 RID: 66372 RVA: 0x004AF2E0 File Offset: 0x004AD4E0
-		private bool AllLaunchablesInGroupHaveFuelForLaunch
+		bool IEnumerator.MoveNext()
 		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CCompGetGizmosExtra_003Ed__36 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CCompGetGizmosExtra_003Ed__36(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGetOptionsForTile_003Ed__50 : IEnumerable<FloatMenuOption>, IEnumerable, IEnumerator<FloatMenuOption>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private FloatMenuOption _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private Action<PlanetTile, TransportersArrivalAction> launchAction;
+
+		public Action<PlanetTile, TransportersArrivalAction> _003C_003E3__launchAction;
+
+		private PlanetTile tile;
+
+		public PlanetTile _003C_003E3__tile;
+
+		private IEnumerable<IThingHolder> pods;
+
+		public IEnumerable<IThingHolder> _003C_003E3__pods;
+
+		private _003C_003Ec__DisplayClass50_0 _003C_003E8__1;
+
+		private bool _003Canything_003E5__2;
+
+		private List<WorldObject> _003CworldObjects_003E5__3;
+
+		private int _003Ci_003E5__4;
+
+		private IEnumerator<FloatMenuOption> _003C_003E7__wrap4;
+
+		FloatMenuOption IEnumerator<FloatMenuOption>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				foreach (CompTransporter compTransporter in this.TransportersInGroup)
-				{
-					if (compTransporter.Launchable.FuelLevel < compTransporter.Launchable.Props.minFuelCost)
-					{
-						return false;
-					}
-					if (compTransporter.Launchable.RequiresFuelingPort && !compTransporter.Launchable.Refuelable.HasFuel)
-					{
-						return false;
-					}
-				}
-				return true;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002924 RID: 10532
-		// (get) Token: 0x06010345 RID: 66373 RVA: 0x004AF374 File Offset: 0x004AD574
-		private float MinFuelLevelInGroup
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				List<CompTransporter> transportersInGroup = this.TransportersInGroup;
-				float num = 0f;
-				bool flag = false;
-				foreach (CompTransporter compTransporter in transportersInGroup)
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetOptionsForTile_003Ed__50(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 2)
+			{
+				try
 				{
-					float fuelLevel = compTransporter.Launchable.FuelLevel;
-					if (!flag || fuelLevel < num)
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E8__1 = null;
+			_003CworldObjects_003E5__3 = null;
+			_003C_003E7__wrap4 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				switch (_003C_003E1__state)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E8__1 = new _003C_003Ec__DisplayClass50_0();
+					_003C_003E8__1.launchAction = launchAction;
+					_003C_003E8__1.tile = tile;
+					_003Canything_003E5__2 = false;
+					if (TransportersArrivalAction_FormCaravan.CanFormCaravanAt(pods, _003C_003E8__1.tile) && !Find.WorldObjects.AnySettlementBaseAt(_003C_003E8__1.tile) && !Find.WorldObjects.AnySiteAt(_003C_003E8__1.tile))
 					{
-						num = fuelLevel;
-						flag = true;
+						_003Canything_003E5__2 = true;
+						_003C_003E2__current = new FloatMenuOption("FormCaravanHere".Translate(), delegate
+						{
+							_003C_003E8__1.launchAction(_003C_003E8__1.tile, new TransportersArrivalAction_FormCaravan("MessageShuttleArrived"));
+						});
+						_003C_003E1__state = 1;
+						return true;
 					}
+					goto IL_00fb;
+				case 1:
+					_003C_003E1__state = -1;
+					goto IL_00fb;
+				case 2:
+					_003C_003E1__state = -3;
+					goto IL_01ae;
+				case 3:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_01ae:
+					if (_003C_003E7__wrap4.MoveNext())
+					{
+						FloatMenuOption current = _003C_003E7__wrap4.Current;
+						_003Canything_003E5__2 = true;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap4 = null;
+					goto IL_01c8;
+					IL_01c8:
+					_003Ci_003E5__4++;
+					goto IL_01d8;
+					IL_00fb:
+					_003CworldObjects_003E5__3 = Find.WorldObjects.AllWorldObjects;
+					_003Ci_003E5__4 = 0;
+					goto IL_01d8;
+					IL_01d8:
+					if (_003Ci_003E5__4 < _003CworldObjects_003E5__3.Count)
+					{
+						if (!(_003CworldObjects_003E5__3[_003Ci_003E5__4].Tile != _003C_003E8__1.tile))
+						{
+							_003C_003E7__wrap4 = _003CworldObjects_003E5__3[_003Ci_003E5__4].GetShuttleFloatMenuOptions(pods, _003C_003E8__1.launchAction).GetEnumerator();
+							_003C_003E1__state = -3;
+							goto IL_01ae;
+						}
+						goto IL_01c8;
+					}
+					if (!_003Canything_003E5__2 && !Find.World.Impassable(_003C_003E8__1.tile))
+					{
+						_003C_003E2__current = new FloatMenuOption("TransportPodsContentsWillBeLost".Translate(), delegate
+						{
+							_003C_003E8__1.launchAction(_003C_003E8__1.tile, null);
+						});
+						_003C_003E1__state = 3;
+						return true;
+					}
+					break;
 				}
-				if (flag)
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap4 != null)
+			{
+				_003C_003E7__wrap4.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<FloatMenuOption> IEnumerable<FloatMenuOption>.GetEnumerator()
+		{
+			_003CGetOptionsForTile_003Ed__50 _003CGetOptionsForTile_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CGetOptionsForTile_003Ed__ = this;
+			}
+			else
+			{
+				_003CGetOptionsForTile_003Ed__ = new _003CGetOptionsForTile_003Ed__50(0);
+			}
+			_003CGetOptionsForTile_003Ed__.tile = _003C_003E3__tile;
+			_003CGetOptionsForTile_003Ed__.pods = _003C_003E3__pods;
+			_003CGetOptionsForTile_003Ed__.launchAction = _003C_003E3__launchAction;
+			return _003CGetOptionsForTile_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<FloatMenuOption>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGetTransportersFloatMenuOptionsAt_003Ed__48 : IEnumerable<FloatMenuOption>, IEnumerable, IEnumerator<FloatMenuOption>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private FloatMenuOption _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private Action<PlanetTile, TransportersArrivalAction> launchAction;
+
+		public Action<PlanetTile, TransportersArrivalAction> _003C_003E3__launchAction;
+
+		private PlanetTile tile;
+
+		public PlanetTile _003C_003E3__tile;
+
+		private bool isShuttle;
+
+		public bool _003C_003E3__isShuttle;
+
+		public CompLaunchable _003C_003E4__this;
+
+		private _003C_003Ec__DisplayClass48_0 _003C_003E8__1;
+
+		private bool _003Canything_003E5__2;
+
+		private List<WorldObject> _003CworldObjects_003E5__3;
+
+		private int _003Ci_003E5__4;
+
+		private IEnumerator<FloatMenuOption> _003C_003E7__wrap4;
+
+		FloatMenuOption IEnumerator<FloatMenuOption>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetTransportersFloatMenuOptionsAt_003Ed__48(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			switch (_003C_003E1__state)
+			{
+			case -3:
+			case 2:
+				try
 				{
-					return num;
 				}
-				return 0f;
-			}
-		}
-
-		// Token: 0x06010346 RID: 66374 RVA: 0x004AF3E8 File Offset: 0x004AD5E8
-		public override void PostExposeData()
-		{
-			base.PostExposeData();
-			Scribe_Values.Look<int>(ref this.lastLaunchTick, "lastLaunchTick", 0, false);
-		}
-
-		// Token: 0x06010347 RID: 66375 RVA: 0x004AF404 File Offset: 0x004AD604
-		public override void CompTick()
-		{
-			if (!this.Props.cooldownEndedMessage.NullOrEmpty() && this.lastLaunchTick > 0 && this.lastLaunchTick + this.Props.cooldownTicks == Find.TickManager.TicksGame)
-			{
-				Messages.Message(this.Props.cooldownEndedMessage.Formatted(this.parent.LabelCap), this.parent, MessageTypeDefOf.NeutralEvent, false);
-			}
-		}
-
-		// Token: 0x06010348 RID: 66376 RVA: 0x004AF488 File Offset: 0x004AD688
-		public virtual AcceptanceReport CanLaunch(float? overrideFuelLevel = null)
-		{
-			if (!this.Transporter.LoadingInProgressOrReadyToLaunch)
-			{
-				return "CommandLaunchGroupFailNotLoaded".Translate();
-			}
-			if (this.parent.Spawned && this.AnyInGroupIsUnderRoof)
-			{
-				return "CommandLaunchGroupFailUnderRoof".Translate();
-			}
-			if (overrideFuelLevel != null)
-			{
-				float? num = overrideFuelLevel;
-				float minFuelCost = this.Props.minFuelCost;
-				if (num.GetValueOrDefault() < minFuelCost & num != null)
+				finally
 				{
-					return "CommandLaunchGroupFailNoFuel".Translate();
+					_003C_003Em__Finally1();
+				}
+				break;
+			case -4:
+			case 3:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally2();
+				}
+				break;
+			}
+			_003C_003E8__1 = null;
+			_003CworldObjects_003E5__3 = null;
+			_003C_003E7__wrap4 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				CompLaunchable compLaunchable = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E8__1 = new _003C_003Ec__DisplayClass48_0();
+					_003C_003E8__1.launchAction = launchAction;
+					_003C_003E8__1.tile = tile;
+					_003C_003E8__1.isShuttle = isShuttle;
+					_003Canything_003E5__2 = false;
+					if (TransportersArrivalAction_FormCaravan.CanFormCaravanAt(compLaunchable.TransportersInGroup, _003C_003E8__1.tile) && !Find.WorldObjects.AnySettlementBaseAt(_003C_003E8__1.tile) && !Find.WorldObjects.AnySiteAt(_003C_003E8__1.tile))
+					{
+						_003Canything_003E5__2 = true;
+						_003C_003E2__current = new FloatMenuOption("FormCaravanHere".Translate(), delegate
+						{
+							_003C_003E8__1.launchAction(_003C_003E8__1.tile, new TransportersArrivalAction_FormCaravan(_003C_003E8__1.isShuttle ? "MessageShuttleArrived" : "MessageTransportPodsArrived"));
+						});
+						_003C_003E1__state = 1;
+						return true;
+					}
+					goto IL_0117;
+				case 1:
+					_003C_003E1__state = -1;
+					goto IL_0117;
+				case 2:
+					_003C_003E1__state = -3;
+					goto IL_01da;
+				case 3:
+					_003C_003E1__state = -4;
+					goto IL_0267;
+				case 4:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_01da:
+					if (_003C_003E7__wrap4.MoveNext())
+					{
+						FloatMenuOption current = _003C_003E7__wrap4.Current;
+						_003Canything_003E5__2 = true;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap4 = null;
+					goto IL_0281;
+					IL_0281:
+					_003Ci_003E5__4++;
+					goto IL_0293;
+					IL_0267:
+					if (_003C_003E7__wrap4.MoveNext())
+					{
+						FloatMenuOption current2 = _003C_003E7__wrap4.Current;
+						_003Canything_003E5__2 = true;
+						_003C_003E2__current = current2;
+						_003C_003E1__state = 3;
+						return true;
+					}
+					_003C_003Em__Finally2();
+					_003C_003E7__wrap4 = null;
+					goto IL_0281;
+					IL_0117:
+					_003CworldObjects_003E5__3 = Find.WorldObjects.AllWorldObjects;
+					_003Ci_003E5__4 = 0;
+					goto IL_0293;
+					IL_0293:
+					if (_003Ci_003E5__4 < _003CworldObjects_003E5__3.Count)
+					{
+						if (!(_003CworldObjects_003E5__3[_003Ci_003E5__4].Tile != _003C_003E8__1.tile))
+						{
+							if (_003C_003E8__1.isShuttle)
+							{
+								_003C_003E7__wrap4 = _003CworldObjects_003E5__3[_003Ci_003E5__4].GetShuttleFloatMenuOptions(compLaunchable.TransportersInGroup, _003C_003E8__1.launchAction).GetEnumerator();
+								_003C_003E1__state = -3;
+								goto IL_01da;
+							}
+							_003C_003E7__wrap4 = _003CworldObjects_003E5__3[_003Ci_003E5__4].GetTransportersFloatMenuOptions(compLaunchable.TransportersInGroup, _003C_003E8__1.launchAction).GetEnumerator();
+							_003C_003E1__state = -4;
+							goto IL_0267;
+						}
+						goto IL_0281;
+					}
+					if (!_003Canything_003E5__2 && !Find.World.Impassable(_003C_003E8__1.tile))
+					{
+						_003C_003E2__current = new FloatMenuOption("TransportPodsContentsWillBeLost".Translate(), delegate
+						{
+							_003C_003E8__1.launchAction(_003C_003E8__1.tile, null);
+						});
+						_003C_003E1__state = 4;
+						return true;
+					}
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap4 != null)
+			{
+				_003C_003E7__wrap4.Dispose();
+			}
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap4 != null)
+			{
+				_003C_003E7__wrap4.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<FloatMenuOption> IEnumerable<FloatMenuOption>.GetEnumerator()
+		{
+			_003CGetTransportersFloatMenuOptionsAt_003Ed__48 _003CGetTransportersFloatMenuOptionsAt_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CGetTransportersFloatMenuOptionsAt_003Ed__ = this;
+			}
+			else
+			{
+				_003CGetTransportersFloatMenuOptionsAt_003Ed__ = new _003CGetTransportersFloatMenuOptionsAt_003Ed__48(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CGetTransportersFloatMenuOptionsAt_003Ed__.tile = _003C_003E3__tile;
+			_003CGetTransportersFloatMenuOptionsAt_003Ed__.launchAction = _003C_003E3__launchAction;
+			_003CGetTransportersFloatMenuOptionsAt_003Ed__.isShuttle = _003C_003E3__isShuttle;
+			return _003CGetTransportersFloatMenuOptionsAt_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<FloatMenuOption>)this).GetEnumerator();
+		}
+	}
+
+	public int lastLaunchTick = -1;
+
+	private CompTransporter cachedCompTransporter;
+
+	private CompRefuelable cachedCompRefuelable;
+
+	private CompShuttle cachedCompShuttle;
+
+	public static readonly Texture2D TargeterMouseAttachment = ContentFinder<Texture2D>.Get("UI/Overlays/LaunchableMouseAttachment");
+
+	public static readonly Texture2D LaunchCommandTex = ContentFinder<Texture2D>.Get("UI/Commands/LaunchShip");
+
+	private PlanetTile cachedClosest;
+
+	private PlanetTile cachedOrigin;
+
+	private PlanetLayer cachedLayer;
+
+	public CompProperties_Launchable Props => (CompProperties_Launchable)props;
+
+	protected CompTransporter Transporter => cachedCompTransporter ?? (cachedCompTransporter = parent.GetComp<CompTransporter>());
+
+	public virtual CompRefuelable Refuelable => cachedCompRefuelable ?? (cachedCompRefuelable = parent.GetComp<CompRefuelable>());
+
+	private CompShuttle Shuttle => cachedCompShuttle ?? (cachedCompShuttle = parent.GetComp<CompShuttle>());
+
+	protected List<CompTransporter> TransportersInGroup => Transporter.TransportersInGroup(parent.Map);
+
+	private bool AnyInGroupHasAnythingLeftToLoad => Transporter.AnyInGroupHasAnythingLeftToLoad;
+
+	private Thing FirstThingLeftToLoadInGroup => Transporter.FirstThingLeftToLoadInGroup;
+
+	public virtual float FuelLevel => Refuelable.Fuel;
+
+	public virtual float MaxFuelLevel => Refuelable.Props.fuelCapacity;
+
+	public virtual bool RequiresFuelingPort => true;
+
+	private bool AnyInGroupIsUnderRoof
+	{
+		get
+		{
+			List<CompTransporter> transportersInGroup = TransportersInGroup;
+			for (int i = 0; i < transportersInGroup.Count; i++)
+			{
+				if (transportersInGroup[i].parent.Position.Roofed(parent.Map))
+				{
+					return true;
 				}
 			}
-			else if (!this.AllLaunchablesInGroupHaveFuelForLaunch)
+			return false;
+		}
+	}
+
+	private bool AllLaunchablesInGroupHaveFuelForLaunch
+	{
+		get
+		{
+			foreach (CompTransporter item in TransportersInGroup)
 			{
-				return "CommandLaunchGroupFailNoFuel".Translate();
-			}
-			if (this.Transporter.OverMassCapacity)
-			{
-				return "CommandLaunchGroupFailOverMassCapacity".Translate() + ": " + "MassUsageString".Translate(this.Transporter.MassUsage.ToString("F0"), this.Transporter.MassCapacity.ToString("F0"));
-			}
-			int num2 = this.Props.cooldownTicks - Find.TickManager.TicksGame + this.lastLaunchTick;
-			if (this.Props.cooldownTicks > 0 && this.lastLaunchTick > 0 && num2 > 0)
-			{
-				return "CommandLaunchGroupCooldown".Translate() + " (" + num2.ToStringTicksToPeriod(true, false, true, true, false) + ")";
-			}
-			if (this.Shuttle != null)
-			{
-				return this.Shuttle.CanLaunch;
+				if (item.Launchable.FuelLevel < item.Launchable.Props.minFuelCost)
+				{
+					return false;
+				}
+				if (item.Launchable.RequiresFuelingPort && !item.Launchable.Refuelable.HasFuel)
+				{
+					return false;
+				}
 			}
 			return true;
 		}
+	}
 
-		// Token: 0x06010349 RID: 66377 RVA: 0x004AF624 File Offset: 0x004AD824
-		public int MaxLaunchDistanceEver(PlanetLayer layer)
+	private float MinFuelLevelInGroup
+	{
+		get
 		{
-			if (!this.Transporter.LoadingInProgressOrReadyToLaunch)
+			List<CompTransporter> transportersInGroup = TransportersInGroup;
+			float num = 0f;
+			bool flag = false;
+			foreach (CompTransporter item in transportersInGroup)
 			{
-				return 0;
+				float fuelLevel = item.Launchable.FuelLevel;
+				if (!flag || fuelLevel < num)
+				{
+					num = fuelLevel;
+					flag = true;
+				}
 			}
-			int num = this.MaxLaunchDistanceAtFuelLevel(this.MaxFuelLevel, layer);
-			if (this.Props.fixedLaunchDistanceMax >= 0)
+			if (flag)
 			{
-				num = Mathf.Min(num, Mathf.RoundToInt((float)this.Props.fixedLaunchDistanceMax / layer.Def.rangeDistanceFactor));
+				return num;
 			}
-			return num;
+			return 0f;
 		}
+	}
 
-		// Token: 0x0601034A RID: 66378 RVA: 0x004AF681 File Offset: 0x004AD881
-		public override IEnumerable<Gizmo> CompGetGizmosExtra()
+	public override void PostExposeData()
+	{
+		base.PostExposeData();
+		Scribe_Values.Look(ref lastLaunchTick, "lastLaunchTick", 0);
+	}
+
+	public override void CompTick()
+	{
+		if (!Props.cooldownEndedMessage.NullOrEmpty() && lastLaunchTick > 0 && lastLaunchTick + Props.cooldownTicks == Find.TickManager.TicksGame)
 		{
-			foreach (Gizmo gizmo in base.CompGetGizmosExtra())
-			{
-				yield return gizmo;
-			}
-			IEnumerator<Gizmo> enumerator = null;
-			CompTransporter transporter = this.Transporter;
-			if (transporter != null && !transporter.Groupable)
-			{
-				int num = 0;
-				foreach (object obj in Find.Selector.SelectedObjects)
-				{
-					ThingWithComps thingWithComps = obj as ThingWithComps;
-					if (thingWithComps != null && thingWithComps.HasComp<CompTransporter>())
-					{
-						num++;
-					}
-				}
-				if (num > 1)
-				{
-					yield break;
-				}
-			}
-			Command_Action command_Action = new Command_Action
-			{
-				defaultLabel = "CommandLaunchGroup".Translate(),
-				defaultDesc = "CommandLaunchGroupDesc".Translate(),
-				icon = CompLaunchable.LaunchCommandTex,
-				alsoClickIfOtherInGroupClicked = false,
-				action = delegate()
-				{
-					if (this.AnyInGroupHasAnythingLeftToLoad)
-					{
-						TaggedString taggedString = "ConfirmSendNotCompletelyLoadedLaunchable".Translate() + ":\n";
-						taggedString += (from x in this.Transporter.leftToLoad
-						select x.AnyThing.LabelCap).ToLineList(" -", false);
-						taggedString += "\n\n" + "ConfirmSendLaunchAnyway".Translate();
-						Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation(taggedString, delegate()
-						{
-							this.StartChoosingDestination(new Action<PlanetTile, TransportersArrivalAction>(this.TryLaunch), null);
-						}, false, null, WindowLayer.Dialog));
-						return;
-					}
-					this.StartChoosingDestination(new Action<PlanetTile, TransportersArrivalAction>(this.TryLaunch), null);
-				}
-			};
-			AcceptanceReport acceptanceReport = this.CanLaunch(null);
-			if (!acceptanceReport.Accepted)
-			{
-				command_Action.Disable(acceptanceReport.Reason);
-			}
-			yield return command_Action;
-			if (DebugSettings.ShowDevGizmos)
-			{
-				yield return new Command_Action
-				{
-					defaultLabel = "DEV: End cooldown",
-					action = delegate()
-					{
-						this.lastLaunchTick = Find.TickManager.TicksGame - this.Props.cooldownTicks;
-					}
-				};
-			}
-			yield break;
-			yield break;
+			Messages.Message(Props.cooldownEndedMessage.Formatted(parent.LabelCap), parent, MessageTypeDefOf.NeutralEvent, historical: false);
 		}
+	}
 
-		// Token: 0x0601034B RID: 66379 RVA: 0x004AF694 File Offset: 0x004AD894
-		public override string CompInspectStringExtra()
+	public virtual AcceptanceReport CanLaunch(float? overrideFuelLevel = null)
+	{
+		if (!Transporter.LoadingInProgressOrReadyToLaunch)
 		{
-			if (!this.Transporter.LoadingInProgressOrReadyToLaunch)
+			return "CommandLaunchGroupFailNotLoaded".Translate();
+		}
+		if (parent.Spawned && AnyInGroupIsUnderRoof)
+		{
+			return "CommandLaunchGroupFailUnderRoof".Translate();
+		}
+		if (overrideFuelLevel.HasValue)
+		{
+			if (overrideFuelLevel < Props.minFuelCost)
 			{
-				return null;
+				return "CommandLaunchGroupFailNoFuel".Translate();
 			}
-			if (this.Refuelable != null && !this.Refuelable.HasFuel)
+		}
+		else if (!AllLaunchablesInGroupHaveFuelForLaunch)
+		{
+			return "CommandLaunchGroupFailNoFuel".Translate();
+		}
+		if (Transporter.OverMassCapacity)
+		{
+			return "CommandLaunchGroupFailOverMassCapacity".Translate() + ": " + "MassUsageString".Translate(Transporter.MassUsage.ToString("F0"), Transporter.MassCapacity.ToString("F0"));
+		}
+		int num = Props.cooldownTicks - Find.TickManager.TicksGame + lastLaunchTick;
+		if (Props.cooldownTicks > 0 && lastLaunchTick > 0 && num > 0)
+		{
+			return "CommandLaunchGroupCooldown".Translate() + " (" + num.ToStringTicksToPeriod() + ")";
+		}
+		if (Shuttle != null)
+		{
+			return Shuttle.CanLaunch;
+		}
+		return true;
+	}
+
+	public int MaxLaunchDistanceEver(PlanetLayer layer)
+	{
+		if (!Transporter.LoadingInProgressOrReadyToLaunch)
+		{
+			return 0;
+		}
+		int num = MaxLaunchDistanceAtFuelLevel(MaxFuelLevel, layer);
+		if (Props.fixedLaunchDistanceMax >= 0)
+		{
+			num = Mathf.Min(num, Mathf.RoundToInt((float)Props.fixedLaunchDistanceMax / layer.Def.rangeDistanceFactor));
+		}
+		return num;
+	}
+
+	[IteratorStateMachine(typeof(_003CCompGetGizmosExtra_003Ed__36))]
+	public override IEnumerable<Gizmo> CompGetGizmosExtra()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CCompGetGizmosExtra_003Ed__36(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override string CompInspectStringExtra()
+	{
+		if (Transporter.LoadingInProgressOrReadyToLaunch)
+		{
+			if (Refuelable != null && !Refuelable.HasFuel)
 			{
 				return "NotReadyForLaunch".Translate() + ": " + "NotAllLaunchablesInGroupHaveAnyFuel".Translate().CapitalizeFirst() + ".";
 			}
-			if (this.AnyInGroupHasAnythingLeftToLoad)
+			if (AnyInGroupHasAnythingLeftToLoad)
 			{
 				return "NotReadyForLaunch".Translate() + ": " + "LaunchableInGroupHasSomethingLeftToLoad".Translate().CapitalizeFirst() + ".";
 			}
-			if (!this.AllLaunchablesInGroupHaveFuelForLaunch)
+			if (!AllLaunchablesInGroupHaveFuelForLaunch)
 			{
 				return "NotReadyForLaunch".Translate() + ": " + "NotAllLaunchablesInGroupHaveAnyFuel".Translate().CapitalizeFirst() + ".";
 			}
-			int num = this.Props.cooldownTicks - Find.TickManager.TicksGame + this.lastLaunchTick;
-			if (this.Props.cooldownTicks > 0 && this.lastLaunchTick > 0 && num > 0)
+			int num = Props.cooldownTicks - Find.TickManager.TicksGame + lastLaunchTick;
+			if (Props.cooldownTicks > 0 && lastLaunchTick > 0 && num > 0)
 			{
-				return "NotReadyForLaunch".Translate() + ": " + "CommandLaunchGroupCooldown".Translate() + " (" + num.ToStringTicksToPeriod(true, false, true, true, false) + ")";
+				return "NotReadyForLaunch".Translate() + ": " + "CommandLaunchGroupCooldown".Translate() + " (" + num.ToStringTicksToPeriod() + ")";
 			}
 			return "ReadyForLaunch".Translate();
 		}
+		return null;
+	}
 
-		// Token: 0x0601034C RID: 66380 RVA: 0x004AF820 File Offset: 0x004ADA20
-		public void StartChoosingDestination(Action<PlanetTile, TransportersArrivalAction> launchAction, float? overrideFuelLevel = null)
+	public void StartChoosingDestination(Action<PlanetTile, TransportersArrivalAction> launchAction, float? overrideFuelLevel = null)
+	{
+		PlanetTile tile = parent.Tile;
+		CameraJumper.TryJump(CameraJumper.GetWorldTarget(new GlobalTargetInfo(tile)));
+		Find.WorldSelector.ClearSelection();
+		Find.WorldTargeter.BeginTargeting((GlobalTargetInfo t) => ChoseWorldTarget(t, launchAction, overrideFuelLevel), canTargetTiles: true, TargeterMouseAttachment, !CaravanShuttleUtility.IsCaravanShuttle(Transporter), delegate
 		{
-			PlanetTile tile = this.parent.Tile;
-			CameraJumper.TryJump(CameraJumper.GetWorldTarget(new GlobalTargetInfo(tile)), CameraJumper.MovementMode.Pan);
-			Find.WorldSelector.ClearSelection();
-			Find.WorldTargeter.BeginTargeting((GlobalTargetInfo t) => this.ChoseWorldTarget(t, launchAction, overrideFuelLevel), true, CompLaunchable.TargeterMouseAttachment, !CaravanShuttleUtility.IsCaravanShuttle(this.Transporter), delegate
+			PlanetTile planetTile;
+			if (cachedLayer != Find.WorldSelector.SelectedLayer || cachedOrigin != tile)
 			{
-				PlanetTile planetTile;
-				if (this.cachedLayer != Find.WorldSelector.SelectedLayer || this.cachedOrigin != tile)
+				cachedLayer = Find.WorldSelector.SelectedLayer;
+				cachedOrigin = tile;
+				planetTile = (cachedClosest = Find.WorldSelector.SelectedLayer.GetClosestTile_NewTemp(tile));
+			}
+			else
+			{
+				planetTile = cachedClosest;
+			}
+			int num = MaxLaunchDistanceEver(planetTile.Layer);
+			GenDraw.DrawWorldRadiusRing(planetTile, num, CompPilotConsole.GetThrusterRadiusMat(planetTile));
+			if (Refuelable != null)
+			{
+				int num2 = MaxLaunchDistanceAtFuelLevel(FuelLevel, PlanetLayer.Selected);
+				if (num2 < num)
 				{
-					this.cachedLayer = Find.WorldSelector.SelectedLayer;
-					this.cachedOrigin = tile;
-					planetTile = (this.cachedClosest = Find.WorldSelector.SelectedLayer.GetClosestTile(tile));
+					GenDraw.DrawWorldRadiusRing(planetTile, num2, CompPilotConsole.GetFuelRadiusMat(planetTile));
 				}
-				else
-				{
-					planetTile = this.cachedClosest;
-				}
-				int num = this.MaxLaunchDistanceEver(planetTile.Layer);
-				GenDraw.DrawWorldRadiusRing(planetTile, num, CompPilotConsole.GetThrusterRadiusMat(planetTile));
-				if (this.Refuelable != null)
-				{
-					int num2 = GravshipUtility.MaxDistForFuel(this.FuelLevel, planetTile.Layer, PlanetLayer.Selected, this.Props.fuelPerTile, 1f);
-					if (num2 < num)
-					{
-						GenDraw.DrawWorldRadiusRing(planetTile, num2, CompPilotConsole.GetFuelRadiusMat(planetTile));
-					}
-				}
-			}, (GlobalTargetInfo target) => CompLaunchable.TargetingLabelGetter(target, tile, this.MaxLaunchDistanceEver(this.cachedClosest.Layer), this.TransportersInGroup, launchAction, this, overrideFuelLevel), null, new PlanetTile?(tile), true);
+			}
+		}, (GlobalTargetInfo target) => TargetingLabelGetter(target, tile, MaxLaunchDistanceEver(cachedClosest.Layer), TransportersInGroup, launchAction, this, overrideFuelLevel), null, tile, showCancelButton: true);
+	}
+
+	private bool ChoseWorldTarget(GlobalTargetInfo target, Action<PlanetTile, TransportersArrivalAction> launchAction, float? overrideFuelLevel = null)
+	{
+		if (!Transporter.LoadingInProgressOrReadyToLaunch)
+		{
+			return true;
 		}
+		cachedClosest = (cachedOrigin = PlanetTile.Invalid);
+		cachedLayer = null;
+		PlanetTile tile = parent.Tile;
+		return ChoseWorldTarget(target, tile, TransportersInGroup, MaxLaunchDistanceEver(target.Tile.Layer), launchAction, this, overrideFuelLevel);
+	}
 
-		// Token: 0x0601034D RID: 66381 RVA: 0x004AF8C8 File Offset: 0x004ADAC8
-		private bool ChoseWorldTarget(GlobalTargetInfo target, Action<PlanetTile, TransportersArrivalAction> launchAction, float? overrideFuelLevel = null)
+	public void TryLaunch(PlanetTile destinationTile, TransportersArrivalAction arrivalAction)
+	{
+		if (!parent.Spawned)
 		{
-			if (!this.Transporter.LoadingInProgressOrReadyToLaunch)
-			{
-				return true;
-			}
-			this.cachedClosest = (this.cachedOrigin = PlanetTile.Invalid);
-			this.cachedLayer = null;
-			PlanetTile tile = this.parent.Tile;
-			return CompLaunchable.ChoseWorldTarget(target, tile, this.TransportersInGroup, this.MaxLaunchDistanceEver(target.Tile.Layer), launchAction, this, overrideFuelLevel);
+			Log.Error($"Tried to launch {parent}, but it's unspawned.");
+			return;
 		}
-
-		// Token: 0x0601034E RID: 66382 RVA: 0x004AF930 File Offset: 0x004ADB30
-		public void TryLaunch(PlanetTile destinationTile, TransportersArrivalAction arrivalAction)
+		List<CompTransporter> transportersInGroup = TransportersInGroup;
+		if (transportersInGroup == null)
 		{
-			if (!this.parent.Spawned)
-			{
-				Log.Error(string.Format("Tried to launch {0}, but it's unspawned.", this.parent));
-				return;
-			}
-			List<CompTransporter> transportersInGroup = this.TransportersInGroup;
-			if (transportersInGroup == null)
-			{
-				Log.Error(string.Format("Tried to launch {0}, but it's not in any group.", this.parent));
-				return;
-			}
-			if (!this.CanLaunch(null))
+			Log.Error($"Tried to launch {parent}, but it's not in any group.");
+		}
+		else
+		{
+			if (!CanLaunch(null))
 			{
 				return;
 			}
-			Map map = this.parent.Map;
-			int num = Find.WorldGrid.TraversalDistanceBetween(map.Tile, destinationTile, true, int.MaxValue, true);
+			Map map = parent.Map;
+			int num = Find.WorldGrid.TraversalDistanceBetween(map.Tile, destinationTile, passImpassable: true, int.MaxValue, canTraverseLayers: true);
 			Current.Game.CurrentMap = map;
-			if (num > this.MaxLaunchDistanceAtFuelLevel(this.MinFuelLevelInGroup, destinationTile.Layer))
+			if (num > MaxLaunchDistanceAtFuelLevel(MinFuelLevelInGroup, destinationTile.Layer))
 			{
 				return;
 			}
-			this.Transporter.TryRemoveLord(map);
-			int groupID = this.Transporter.groupID;
-			float amount = Mathf.Max(this.FuelNeededToLaunchAtDist((float)num, destinationTile.Layer), 1f);
-			this.lastLaunchTick = Find.TickManager.TicksGame;
+			Transporter.TryRemoveLord(map);
+			int groupID = Transporter.groupID;
+			float amount = Mathf.Max(FuelNeededToLaunchAtDist(num, destinationTile.Layer), 1f);
+			lastLaunchTick = Find.TickManager.TicksGame;
 			for (int i = 0; i < transportersInGroup.Count; i++)
 			{
 				CompTransporter compTransporter = transportersInGroup[i];
 				CompRefuelable refuelable = compTransporter.Launchable.Refuelable;
-				if (refuelable != null)
-				{
-					refuelable.ConsumeFuel(amount);
-				}
+				refuelable?.ConsumeFuel(amount);
 				ThingOwner directlyHeldThings = compTransporter.GetDirectlyHeldThings();
-				ActiveTransporter activeTransporter = (ActiveTransporter)ThingMaker.MakeThing(this.Props.activeTransporterDef ?? ThingDefOf.ActiveDropPod, null);
+				ActiveTransporter activeTransporter = (ActiveTransporter)ThingMaker.MakeThing(Props.activeTransporterDef ?? ThingDefOf.ActiveDropPod);
 				activeTransporter.Contents = new ActiveTransporterInfo();
-				activeTransporter.Contents.innerContainer.TryAddRangeOrTransfer(directlyHeldThings, true, true);
-				activeTransporter.Contents.sentTransporterDef = this.parent.def;
-				activeTransporter.Rotation = this.parent.Rotation;
-				FlyShipLeaving flyShipLeaving = (FlyShipLeaving)SkyfallerMaker.MakeSkyfaller(this.Props.skyfallerLeaving ?? ThingDefOf.DropPodLeaving, activeTransporter);
-				flyShipLeaving.groupID = groupID;
-				flyShipLeaving.destinationTile = destinationTile;
-				flyShipLeaving.arrivalAction = arrivalAction;
-				flyShipLeaving.worldObjectDef = (this.Props.worldObjectDef ?? WorldObjectDefOf.TravellingTransporters);
+				activeTransporter.Contents.innerContainer.TryAddRangeOrTransfer(directlyHeldThings, canMergeWithExistingStacks: true, destroyLeftover: true);
+				activeTransporter.Contents.sentTransporterDef = parent.def;
+				activeTransporter.Rotation = parent.Rotation;
+				FlyShipLeaving obj = (FlyShipLeaving)SkyfallerMaker.MakeSkyfaller(Props.skyfallerLeaving ?? ThingDefOf.DropPodLeaving, activeTransporter);
+				obj.groupID = groupID;
+				obj.destinationTile = destinationTile;
+				obj.arrivalAction = arrivalAction;
+				obj.worldObjectDef = Props.worldObjectDef ?? WorldObjectDefOf.TravellingTransporters;
 				if (compTransporter.parent.HasComp<CompShuttle>())
 				{
 					activeTransporter.Contents.SetShuttle(compTransporter.parent);
@@ -458,357 +1028,231 @@ namespace RimWorld
 				else
 				{
 					compTransporter.CleanUpLoadingVars(map);
-					compTransporter.parent.Destroy(DestroyMode.Vanish);
+					compTransporter.parent.Destroy();
 				}
-				GenSpawn.Spawn(flyShipLeaving, compTransporter.parent.Position, map, WipeMode.Vanish);
-				INotifyLaunchableLaunch notifyLaunchableLaunch = ((refuelable != null) ? refuelable.parent : null) as INotifyLaunchableLaunch;
-				if (notifyLaunchableLaunch != null)
+				GenSpawn.Spawn(obj, compTransporter.parent.Position, map);
+				if (refuelable?.parent is INotifyLaunchableLaunch notifyLaunchableLaunch)
 				{
 					notifyLaunchableLaunch.Notify_LaunchableLaunched(compTransporter.Launchable);
 				}
 			}
 			CameraJumper.TryHideWorld();
 		}
+	}
 
-		// Token: 0x0601034F RID: 66383 RVA: 0x004AFB9B File Offset: 0x004ADD9B
-		public void Notify_FuelingPortSourceDeSpawned()
+	public void Notify_FuelingPortSourceDeSpawned()
+	{
+		if (Transporter.CancelLoad())
 		{
-			if (this.Transporter.CancelLoad())
-			{
-				Messages.Message("MessageTransportersLoadCanceled_FuelingPortGiverDeSpawned".Translate(), this.parent, MessageTypeDefOf.NegativeEvent, true);
-			}
+			Messages.Message("MessageTransportersLoadCanceled_FuelingPortGiverDeSpawned".Translate(), parent, MessageTypeDefOf.NegativeEvent);
 		}
+	}
 
-		// Token: 0x06010350 RID: 66384 RVA: 0x004AFBD0 File Offset: 0x004ADDD0
-		public int MaxLaunchDistanceAtFuelLevel(float fuelLevel)
+	public int MaxLaunchDistanceAtFuelLevel(float fuelLevel)
+	{
+		return MaxLaunchDistanceAtFuelLevel(fuelLevel, parent.Tile.Layer);
+	}
+
+	public int MaxLaunchDistanceAtFuelLevel(float fuelLevel, PlanetLayer layer)
+	{
+		if (fuelLevel < Props.minFuelCost)
 		{
-			if (this.Props.fixedLaunchDistanceMax >= 0)
-			{
-				return this.Props.fixedLaunchDistanceMax;
-			}
-			return this.MaxLaunchDistanceAtFuelLevel(fuelLevel, this.parent.Tile.Layer);
+			return 0;
 		}
-
-		// Token: 0x06010351 RID: 66385 RVA: 0x004AFC14 File Offset: 0x004ADE14
-		public int MaxLaunchDistanceAtFuelLevel(float fuelLevel, PlanetLayer layer)
+		int num = Mathf.FloorToInt(fuelLevel / (Props.fuelPerTile * layer.Def.rangeDistanceFactor));
+		if (num <= 0)
 		{
-			if (this.Props.fixedLaunchDistanceMax >= 0)
-			{
-				return this.Props.fixedLaunchDistanceMax;
-			}
-			if (fuelLevel < this.Props.minFuelCost)
-			{
-				return 0;
-			}
-			return Mathf.FloorToInt(fuelLevel / (this.Props.fuelPerTile * layer.Def.rangeDistanceFactor));
+			num = int.MaxValue;
 		}
-
-		// Token: 0x06010352 RID: 66386 RVA: 0x004AFC6C File Offset: 0x004ADE6C
-		public float FuelNeededToLaunchAtDist(float dist, PlanetLayer layer)
+		if (Props.fixedLaunchDistanceMax >= 0)
 		{
-			float num = dist * (this.Props.fuelPerTile * layer.Def.rangeDistanceFactor);
-			if (this.Props.minFuelCost > 0f && num < this.Props.minFuelCost)
-			{
-				return this.Props.minFuelCost;
-			}
-			return num;
+			num = Mathf.Min(num, Mathf.RoundToInt((float)Props.fixedLaunchDistanceMax / layer.Def.rangeDistanceFactor));
 		}
+		return num;
+	}
 
-		// Token: 0x06010353 RID: 66387 RVA: 0x004AFCC0 File Offset: 0x004ADEC0
-		private IEnumerable<FloatMenuOption> GetTransportersFloatMenuOptionsAt(PlanetTile tile, Action<PlanetTile, TransportersArrivalAction> launchAction, bool isShuttle)
+	public float FuelNeededToLaunchAtDist(float dist, PlanetLayer layer)
+	{
+		float num = dist * (Props.fuelPerTile * layer.Def.rangeDistanceFactor);
+		if (Props.minFuelCost > 0f && num < Props.minFuelCost)
 		{
-			bool anything = false;
-			if (TransportersArrivalAction_FormCaravan.CanFormCaravanAt(this.TransportersInGroup, tile) && !Find.WorldObjects.AnySettlementBaseAt(tile) && !Find.WorldObjects.AnySiteAt(tile))
-			{
-				anything = true;
-				yield return new FloatMenuOption("FormCaravanHere".Translate(), delegate()
-				{
-					launchAction(tile, new TransportersArrivalAction_FormCaravan(isShuttle ? "MessageShuttleArrived" : "MessageTransportPodsArrived"));
-				}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-			}
-			List<WorldObject> worldObjects = Find.WorldObjects.AllWorldObjects;
-			int num;
-			for (int i = 0; i < worldObjects.Count; i = num + 1)
-			{
-				if (!(worldObjects[i].Tile != tile))
-				{
-					if (isShuttle)
-					{
-						foreach (FloatMenuOption floatMenuOption in worldObjects[i].GetShuttleFloatMenuOptions(this.TransportersInGroup, launchAction))
-						{
-							anything = true;
-							yield return floatMenuOption;
-						}
-						IEnumerator<FloatMenuOption> enumerator = null;
-					}
-					else
-					{
-						foreach (FloatMenuOption floatMenuOption2 in worldObjects[i].GetTransportersFloatMenuOptions(this.TransportersInGroup, launchAction))
-						{
-							anything = true;
-							yield return floatMenuOption2;
-						}
-						IEnumerator<FloatMenuOption> enumerator = null;
-					}
-				}
-				num = i;
-			}
-			if (!anything && !Find.World.Impassable(tile))
-			{
-				yield return new FloatMenuOption("TransportPodsContentsWillBeLost".Translate(), delegate()
-				{
-					launchAction(tile, null);
-				}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-			}
-			yield break;
-			yield break;
+			return Props.minFuelCost;
 		}
+		return num;
+	}
 
-		// Token: 0x06010354 RID: 66388 RVA: 0x004AFCE8 File Offset: 0x004ADEE8
-		public static bool ChoseWorldTarget(GlobalTargetInfo target, PlanetTile tile, IEnumerable<IThingHolder> pods, int maxLaunchDistance, Action<PlanetTile, TransportersArrivalAction> launchAction, CompLaunchable launchable, float? overrideFuelLevel = null)
+	[IteratorStateMachine(typeof(_003CGetTransportersFloatMenuOptionsAt_003Ed__48))]
+	private IEnumerable<FloatMenuOption> GetTransportersFloatMenuOptionsAt(PlanetTile tile, Action<PlanetTile, TransportersArrivalAction> launchAction, bool isShuttle)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetTransportersFloatMenuOptionsAt_003Ed__48(-2)
 		{
-			if (!target.IsValid)
+			_003C_003E4__this = this,
+			_003C_003E3__tile = tile,
+			_003C_003E3__launchAction = launchAction,
+			_003C_003E3__isShuttle = isShuttle
+		};
+	}
+
+	public static bool ChoseWorldTarget(GlobalTargetInfo target, PlanetTile tile, IEnumerable<IThingHolder> pods, int maxLaunchDistance, Action<PlanetTile, TransportersArrivalAction> launchAction, CompLaunchable launchable, float? overrideFuelLevel = null)
+	{
+		if (!target.IsValid)
+		{
+			Messages.Message("MessageTransportPodsDestinationIsInvalid".Translate(), MessageTypeDefOf.RejectInput, historical: false);
+			return false;
+		}
+		if (target.HasWorldObject && !target.WorldObject.def.validLaunchTarget)
+		{
+			Messages.Message("MessageWorldObjectIsInvalid".Translate(target.WorldObject.Named("OBJECT")), MessageTypeDefOf.RejectInput, historical: false);
+			return false;
+		}
+		if (ModsConfig.OdysseyActive && target.HasWorldObject && target.WorldObject.RequiresSignalJammerToReach)
+		{
+			Messages.Message("TransportPodDestinationRequiresSignalJammer".Translate(), MessageTypeDefOf.RejectInput, historical: false);
+			return false;
+		}
+		float fuelLevel = overrideFuelLevel ?? launchable?.FuelLevel ?? (-1f);
+		int num = Find.WorldGrid.TraversalDistanceBetween(tile, target.Tile, passImpassable: true, int.MaxValue, canTraverseLayers: true);
+		float num2 = ((float?)launchable?.MaxLaunchDistanceAtFuelLevel(fuelLevel, target.Tile.Layer)) ?? (-1f);
+		float fuelRequired = launchable?.FuelNeededToLaunchAtDist(num, target.Tile.Layer) ?? (-1f);
+		if (maxLaunchDistance >= 0 && num > maxLaunchDistance)
+		{
+			Messages.Message("TransportPodDestinationBeyondMaximumRange".Translate(), MessageTypeDefOf.RejectInput, historical: false);
+			return false;
+		}
+		if (num2 >= 0f && (float)num > num2)
+		{
+			Messages.Message("TransportPodNotEnoughFuel".Translate(), MessageTypeDefOf.RejectInput, historical: false);
+			return false;
+		}
+		bool flag = launchable?.Shuttle != null;
+		List<FloatMenuOption> list = ((launchable != null) ? launchable.GetTransportersFloatMenuOptionsAt(target.Tile, launchAction, flag) : GetOptionsForTile(target.Tile, pods, launchAction)).ToList();
+		if (!list.Any())
+		{
+			if (Find.World.Impassable(target.Tile))
 			{
-				Messages.Message("MessageTransportPodsDestinationIsInvalid".Translate(), MessageTypeDefOf.RejectInput, false);
+				Messages.Message("MessageTransportPodsDestinationIsInvalid".Translate(), MessageTypeDefOf.RejectInput, historical: false);
 				return false;
 			}
-			if (target.HasWorldObject && !target.WorldObject.def.validLaunchTarget)
+			if (flag && fuelLevel < fuelRequired * 2f)
 			{
-				Messages.Message("MessageWorldObjectIsInvalid".Translate(target.WorldObject.Named("OBJECT")), MessageTypeDefOf.RejectInput, false);
-				return false;
-			}
-			if (ModsConfig.OdysseyActive && target.HasWorldObject && target.WorldObject.RequiresSignalJammerToReach)
-			{
-				Messages.Message("TransportPodDestinationRequiresSignalJammer".Translate(), MessageTypeDefOf.RejectInput, false);
-				return false;
-			}
-			float fuelLevel = overrideFuelLevel ?? ((launchable != null) ? launchable.FuelLevel : -1f);
-			int num = Find.WorldGrid.TraversalDistanceBetween(tile, target.Tile, true, int.MaxValue, true);
-			int? num2 = (launchable != null) ? new int?(launchable.MaxLaunchDistanceAtFuelLevel(fuelLevel, target.Tile.Layer)) : null;
-			float num3 = (num2 != null) ? ((float)num2.GetValueOrDefault()) : -1f;
-			float fuelRequired = (launchable != null) ? launchable.FuelNeededToLaunchAtDist((float)num, target.Tile.Layer) : -1f;
-			if (num3 >= 0f && (float)num > num3)
-			{
-				Messages.Message("TransportPodNotEnoughFuel".Translate(), MessageTypeDefOf.RejectInput, false);
-				return false;
-			}
-			if (maxLaunchDistance >= 0 && num > maxLaunchDistance)
-			{
-				Messages.Message("TransportPodDestinationBeyondMaximumRange".Translate(), MessageTypeDefOf.RejectInput, false);
-				return false;
-			}
-			bool flag = ((launchable != null) ? launchable.Shuttle : null) != null;
-			List<FloatMenuOption> list = ((launchable != null) ? launchable.GetTransportersFloatMenuOptionsAt(target.Tile, launchAction, flag) : CompLaunchable.GetOptionsForTile(target.Tile, pods, launchAction)).ToList<FloatMenuOption>();
-			if (!list.Any<FloatMenuOption>())
-			{
-				if (Find.World.Impassable(target.Tile))
+				WorldObject worldObject = target.WorldObject;
+				if (worldObject == null || worldObject.Faction?.IsPlayer != true)
 				{
-					Messages.Message("MessageTransportPodsDestinationIsInvalid".Translate(), MessageTypeDefOf.RejectInput, false);
-					return false;
-				}
-				if (flag && fuelLevel < fuelRequired * 2f)
-				{
-					WorldObject worldObject = target.WorldObject;
-					bool flag2;
-					if (worldObject == null)
+					Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("ConfirmShuttleNotEnoughFuelToReturn".Translate(fuelLevel, fuelRequired * 2f), delegate
 					{
-						flag2 = true;
-					}
-					else
-					{
-						Faction faction = worldObject.Faction;
-						bool? flag3 = (faction != null) ? new bool?(faction.IsPlayer) : null;
-						bool flag4 = true;
-						flag2 = !(flag3.GetValueOrDefault() == flag4 & flag3 != null);
-					}
-					if (flag2)
-					{
-						Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("ConfirmShuttleNotEnoughFuelToReturn".Translate(fuelLevel, fuelRequired * 2f), delegate()
-						{
-							launchAction(target.Tile, null);
-						}, false, null, WindowLayer.Dialog));
-						return true;
-					}
-				}
-				launchAction(target.Tile, null);
-				return true;
-			}
-			else
-			{
-				if (flag && fuelLevel < fuelRequired * 2f)
-				{
-					WorldObject worldObject2 = target.WorldObject;
-					bool flag5;
-					if (worldObject2 == null)
-					{
-						flag5 = true;
-					}
-					else
-					{
-						Faction faction2 = worldObject2.Faction;
-						bool? flag3 = (faction2 != null) ? new bool?(faction2.IsPlayer) : null;
-						bool flag4 = true;
-						flag5 = !(flag3.GetValueOrDefault() == flag4 & flag3 != null);
-					}
-					if (flag5)
-					{
-						for (int i = 0; i < list.Count; i++)
-						{
-							Action oldAction = list[i].action;
-							list[i].action = delegate()
-							{
-								Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("ConfirmShuttleNotEnoughFuelToReturn".Translate(fuelLevel, fuelRequired * 2f), oldAction, false, null, WindowLayer.Dialog));
-							};
-						}
-					}
-				}
-				if (list.Count != 1)
-				{
-					Find.WindowStack.Add(new FloatMenu(list));
-					return false;
-				}
-				if (!list.First<FloatMenuOption>().Disabled)
-				{
-					list.First<FloatMenuOption>().action();
+						launchAction(target.Tile, null);
+					}));
 					return true;
 				}
-				return false;
 			}
+			launchAction(target.Tile, null);
+			return true;
 		}
-
-		// Token: 0x06010355 RID: 66389 RVA: 0x004B0139 File Offset: 0x004AE339
-		public static IEnumerable<FloatMenuOption> GetOptionsForTile(PlanetTile tile, IEnumerable<IThingHolder> pods, Action<PlanetTile, TransportersArrivalAction> launchAction)
+		if (flag && fuelLevel < fuelRequired * 2f)
 		{
-			bool anything = false;
-			if (TransportersArrivalAction_FormCaravan.CanFormCaravanAt(pods, tile) && !Find.WorldObjects.AnySettlementBaseAt(tile) && !Find.WorldObjects.AnySiteAt(tile))
+			WorldObject worldObject2 = target.WorldObject;
+			if (worldObject2 == null || worldObject2.Faction?.IsPlayer != true)
 			{
-				anything = true;
-				yield return new FloatMenuOption("FormCaravanHere".Translate(), delegate()
+				for (int i = 0; i < list.Count; i++)
 				{
-					launchAction(tile, new TransportersArrivalAction_FormCaravan("MessageShuttleArrived"));
-				}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-			}
-			List<WorldObject> worldObjects = Find.WorldObjects.AllWorldObjects;
-			int num;
-			for (int i = 0; i < worldObjects.Count; i = num + 1)
-			{
-				if (!(worldObjects[i].Tile != tile))
-				{
-					foreach (FloatMenuOption floatMenuOption in worldObjects[i].GetShuttleFloatMenuOptions(pods, launchAction))
+					Action oldAction = list[i].action;
+					list[i].action = delegate
 					{
-						anything = true;
-						yield return floatMenuOption;
-					}
-					IEnumerator<FloatMenuOption> enumerator = null;
+						Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("ConfirmShuttleNotEnoughFuelToReturn".Translate(fuelLevel, fuelRequired * 2f), oldAction));
+					};
 				}
-				num = i;
 			}
-			if (!anything && !Find.World.Impassable(tile))
-			{
-				yield return new FloatMenuOption("TransportPodsContentsWillBeLost".Translate(), delegate()
-				{
-					launchAction(tile, null);
-				}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-			}
-			yield break;
-			yield break;
 		}
-
-		// Token: 0x06010356 RID: 66390 RVA: 0x004B0158 File Offset: 0x004AE358
-		public static TaggedString TargetingLabelGetter(GlobalTargetInfo target, PlanetTile tile, int maxLaunchDistance, IEnumerable<IThingHolder> pods, Action<PlanetTile, TransportersArrivalAction> launchAction, CompLaunchable launchable, float? overrideFuelLevel = null)
+		if (list.Count == 1)
 		{
-			if (!target.IsValid)
+			if (!list.First().Disabled)
 			{
-				return null;
+				list.First().action();
+				return true;
 			}
-			if (target.Tile.Layer != tile.Layer && !tile.Layer.HasConnectionPathTo(target.Tile.Layer))
+			return false;
+		}
+		Find.WindowStack.Add(new FloatMenu(list));
+		return false;
+	}
+
+	[IteratorStateMachine(typeof(_003CGetOptionsForTile_003Ed__50))]
+	public static IEnumerable<FloatMenuOption> GetOptionsForTile(PlanetTile tile, IEnumerable<IThingHolder> pods, Action<PlanetTile, TransportersArrivalAction> launchAction)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetOptionsForTile_003Ed__50(-2)
+		{
+			_003C_003E3__tile = tile,
+			_003C_003E3__pods = pods,
+			_003C_003E3__launchAction = launchAction
+		};
+	}
+
+	public static TaggedString TargetingLabelGetter(GlobalTargetInfo target, PlanetTile tile, int maxLaunchDistance, IEnumerable<IThingHolder> pods, Action<PlanetTile, TransportersArrivalAction> launchAction, CompLaunchable launchable, float? overrideFuelLevel = null)
+	{
+		if (!target.IsValid)
+		{
+			return null;
+		}
+		if (target.Tile.Layer != tile.Layer && !tile.Layer.HasConnectionPathTo(target.Tile.Layer))
+		{
+			GUI.color = ColorLibrary.RedReadable;
+			return "TransportPodDestinationNoPath".Translate(target.Tile.Layer.Def.Named("LAYER"));
+		}
+		if (ModsConfig.OdysseyActive)
+		{
+			WorldObject worldObject = Find.World.worldObjects.WorldObjectAt<WorldObject>(target.Tile);
+			if (worldObject != null && worldObject.RequiresSignalJammerToReach)
 			{
 				GUI.color = ColorLibrary.RedReadable;
-				return "TransportPodDestinationNoPath".Translate(target.Tile.Layer.Def.Named("LAYER"));
+				return "TransportPodDestinationRequiresSignalJammer".Translate();
 			}
-			if (ModsConfig.OdysseyActive)
+		}
+		int num = Find.WorldGrid.TraversalDistanceBetween(tile, target.Tile, passImpassable: true, maxLaunchDistance, canTraverseLayers: true);
+		if (maxLaunchDistance > 0 && num > maxLaunchDistance)
+		{
+			GUI.color = ColorLibrary.RedReadable;
+			return "TransportPodDestinationBeyondMaximumRange".Translate();
+		}
+		bool flag = launchable?.Shuttle != null;
+		string text = "";
+		if (flag)
+		{
+			float num2 = overrideFuelLevel ?? launchable.FuelLevel;
+			float num3 = launchable.FuelNeededToLaunchAtDist(num, target.Tile.Layer);
+			text = $"{"Cost".Translate().CapitalizeFirst()}: {"FuelAmount".Translate(num3, ThingDefOf.Chemfuel)}";
+			if (num3 > num2)
 			{
-				WorldObject worldObject = Find.World.worldObjects.WorldObjectAt<WorldObject>(target.Tile);
-				if (worldObject != null && worldObject.RequiresSignalJammerToReach)
-				{
-					GUI.color = ColorLibrary.RedReadable;
-					return "TransportPodDestinationRequiresSignalJammer".Translate();
-				}
+				text = (text + $" ({"TransportPodNotEnoughFuel".Translate()})").Colorize(ColorLibrary.RedReadable);
 			}
-			int num = Find.WorldGrid.TraversalDistanceBetween(tile, target.Tile, true, maxLaunchDistance, true);
-			if (maxLaunchDistance > 0 && num > maxLaunchDistance)
+		}
+		if (target.HasWorldObject && !target.WorldObject.def.validLaunchTarget)
+		{
+			return string.Empty;
+		}
+		IEnumerable<FloatMenuOption> source = ((launchable != null) ? launchable.GetTransportersFloatMenuOptionsAt(target.Tile, launchAction, flag) : GetOptionsForTile(target.Tile, pods, launchAction));
+		if (!source.Any())
+		{
+			return string.Empty;
+		}
+		if (source.Count() == 1)
+		{
+			if (source.First().Disabled)
 			{
 				GUI.color = ColorLibrary.RedReadable;
-				return "TransportPodDestinationBeyondMaximumRange".Translate();
 			}
-			bool flag = ((launchable != null) ? launchable.Shuttle : null) != null;
-			string text = "";
-			if (flag)
-			{
-				float num2 = overrideFuelLevel ?? launchable.FuelLevel;
-				float num3 = launchable.FuelNeededToLaunchAtDist((float)num, target.Tile.Layer);
-				text = string.Format("{0}: {1}", "Cost".Translate().CapitalizeFirst(), "FuelAmount".Translate(num3, ThingDefOf.Chemfuel));
-				if (num3 > num2)
-				{
-					text = (text + string.Format(" ({0})", "TransportPodNotEnoughFuel".Translate())).Colorize(ColorLibrary.RedReadable);
-				}
-			}
-			if (target.HasWorldObject && !target.WorldObject.def.validLaunchTarget)
-			{
-				return string.Empty;
-			}
-			IEnumerable<FloatMenuOption> source = (launchable != null) ? launchable.GetTransportersFloatMenuOptionsAt(target.Tile, launchAction, flag) : CompLaunchable.GetOptionsForTile(target.Tile, pods, launchAction);
-			if (!source.Any<FloatMenuOption>())
-			{
-				return string.Empty;
-			}
-			if (source.Count<FloatMenuOption>() == 1)
-			{
-				if (source.First<FloatMenuOption>().Disabled)
-				{
-					GUI.color = ColorLibrary.RedReadable;
-				}
-				return source.First<FloatMenuOption>().Label + "\n" + text;
-			}
-			MapParent mapParent = target.WorldObject as MapParent;
-			if (mapParent != null)
-			{
-				return "ClickToSeeAvailableOrders_WorldObject".Translate(mapParent.LabelCap) + "\n" + text;
-			}
-			return "ClickToSeeAvailableOrders_Empty".Translate() + "\n" + text;
+			return source.First().Label + "\n" + text;
 		}
-
-		// Token: 0x06010357 RID: 66391 RVA: 0x004B040F File Offset: 0x004AE60F
-		public void Notify_Arrived()
+		if (target.WorldObject is MapParent mapParent)
 		{
-			this.lastLaunchTick = Find.TickManager.TicksGame;
+			return "ClickToSeeAvailableOrders_WorldObject".Translate(mapParent.LabelCap) + "\n" + text;
 		}
+		return "ClickToSeeAvailableOrders_Empty".Translate() + "\n" + text;
+	}
 
-		// Token: 0x0400A933 RID: 43315
-		public int lastLaunchTick = -1;
-
-		// Token: 0x0400A934 RID: 43316
-		private CompTransporter cachedCompTransporter;
-
-		// Token: 0x0400A935 RID: 43317
-		private CompRefuelable cachedCompRefuelable;
-
-		// Token: 0x0400A936 RID: 43318
-		private CompShuttle cachedCompShuttle;
-
-		// Token: 0x0400A937 RID: 43319
-		public static readonly Texture2D TargeterMouseAttachment = ContentFinder<Texture2D>.Get("UI/Overlays/LaunchableMouseAttachment", true);
-
-		// Token: 0x0400A938 RID: 43320
-		public static readonly Texture2D LaunchCommandTex = ContentFinder<Texture2D>.Get("UI/Commands/LaunchShip", true);
-
-		// Token: 0x0400A939 RID: 43321
-		private PlanetTile cachedClosest;
-
-		// Token: 0x0400A93A RID: 43322
-		private PlanetTile cachedOrigin;
-
-		// Token: 0x0400A93B RID: 43323
-		private PlanetLayer cachedLayer;
+	public void Notify_Arrived()
+	{
+		lastLaunchTick = Find.TickManager.TicksGame;
 	}
 }

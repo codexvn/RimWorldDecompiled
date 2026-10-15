@@ -1,47 +1,34 @@
-﻿using System;
 using RimWorld;
 using Verse.AI;
 
-namespace Verse
+namespace Verse;
+
+public class HediffComp_ReactOnDamage : HediffComp
 {
-	// Token: 0x020006F4 RID: 1780
-	public class HediffComp_ReactOnDamage : HediffComp
+	public HediffCompProperties_ReactOnDamage Props => (HediffCompProperties_ReactOnDamage)props;
+
+	public override void Notify_PawnPostApplyDamage(DamageInfo dinfo, float totalDamageDealt)
 	{
-		// Token: 0x170007B7 RID: 1975
-		// (get) Token: 0x06002BC9 RID: 11209 RVA: 0x000E4354 File Offset: 0x000E2554
-		public HediffCompProperties_ReactOnDamage Props
+		if (Props.damageDefIncoming == dinfo.Def)
 		{
-			get
-			{
-				return (HediffCompProperties_ReactOnDamage)this.props;
-			}
+			React();
 		}
+	}
 
-		// Token: 0x06002BCA RID: 11210 RVA: 0x000E4361 File Offset: 0x000E2561
-		public override void Notify_PawnPostApplyDamage(DamageInfo dinfo, float totalDamageDealt)
+	private void React()
+	{
+		if (Props.createHediff != null)
 		{
-			if (this.Props.damageDefIncoming == dinfo.Def)
+			BodyPartRecord part = parent.Part;
+			if (Props.createHediffOn != null)
 			{
-				this.React();
+				part = parent.pawn.RaceProps.body.AllParts.FirstOrFallback((BodyPartRecord p) => p.def == Props.createHediffOn);
 			}
+			parent.pawn.health.AddHediff(Props.createHediff, part, null);
 		}
-
-		// Token: 0x06002BCB RID: 11211 RVA: 0x000E4380 File Offset: 0x000E2580
-		private void React()
+		if (Props.vomit)
 		{
-			if (this.Props.createHediff != null)
-			{
-				BodyPartRecord part = this.parent.Part;
-				if (this.Props.createHediffOn != null)
-				{
-					part = this.parent.pawn.RaceProps.body.AllParts.FirstOrFallback((BodyPartRecord p) => p.def == this.Props.createHediffOn, null);
-				}
-				this.parent.pawn.health.AddHediff(this.Props.createHediff, part, null, null);
-			}
-			if (this.Props.vomit)
-			{
-				this.parent.pawn.jobs.StartJob(JobMaker.MakeJob(JobDefOf.Vomit), JobCondition.InterruptForced, null, true, true, null, null, false, false, null, false, true, false);
-			}
+			parent.pawn.jobs.StartJob(JobMaker.MakeJob(JobDefOf.Vomit), JobCondition.InterruptForced, null, resumeCurJobAfterwards: true, cancelBusyStances: true, null, null, fromQueue: false, canReturnCurJobToPool: false, null);
 		}
 	}
 }

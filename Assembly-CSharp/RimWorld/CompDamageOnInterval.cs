@@ -1,107 +1,180 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompDamageOnInterval : ThingComp
 {
-	// Token: 0x02002C4C RID: 11340
-	public class CompDamageOnInterval : ThingComp
+	[CompilerGenerated]
+	private sealed class _003CCompGetGizmosExtra_003Ed__8 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x17002809 RID: 10249
-		// (get) Token: 0x0600FE46 RID: 65094 RVA: 0x0049BB4B File Offset: 0x00499D4B
-		public CompProperties_DamageOnInterval Props
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompDamageOnInterval _003C_003E4__this;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (CompProperties_DamageOnInterval)this.props;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600FE47 RID: 65095 RVA: 0x0049BB58 File Offset: 0x00499D58
-		public override void Initialize(CompProperties props)
+		object IEnumerator.Current
 		{
-			base.Initialize(props);
-			this.ticksToDamage = this.Props.ticksBetweenDamage;
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x0600FE48 RID: 65096 RVA: 0x0049BB72 File Offset: 0x00499D72
-		public override void PostExposeData()
+		[DebuggerHidden]
+		public _003CCompGetGizmosExtra_003Ed__8(int _003C_003E1__state)
 		{
-			base.PostExposeData();
-			Scribe_Values.Look<int>(ref this.ticksToDamage, "ticksToPlantHarm", 0, false);
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x0600FE49 RID: 65097 RVA: 0x0049BB8C File Offset: 0x00499D8C
-		public override void CompTick()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			if (!this.parent.Spawned)
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			CompDamageOnInterval @object = _003C_003E4__this;
+			switch (num)
 			{
-				return;
-			}
-			if (this.Props.startHitPointsPercent > 0f && (float)this.parent.HitPoints > this.Props.startHitPointsPercent * (float)this.parent.MaxHitPoints)
-			{
-				return;
-			}
-			this.ticksToDamage--;
-			if (this.ticksToDamage <= 0)
-			{
-				this.ticksToDamage = this.Props.ticksBetweenDamage;
-				this.Damage();
-			}
-			EffecterDef effecterDef = null;
-			foreach (DamageEffectStage damageEffectStage in this.Props.effectStages)
-			{
-				if (damageEffectStage.minHitPointsPercent * (float)this.parent.MaxHitPoints > (float)this.parent.HitPoints)
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (DebugSettings.ShowDevGizmos)
 				{
-					effecterDef = damageEffectStage.effecterDef;
-				}
-			}
-			if (effecterDef != null)
-			{
-				EffecterDef effecterDef2 = effecterDef;
-				Effecter effecter = this.effecter;
-				if (effecterDef2 != ((effecter != null) ? effecter.def : null))
-				{
-					Effecter effecter2 = this.effecter;
-					if (effecter2 != null)
+					_003C_003E2__current = new Command_Action
 					{
-						effecter2.Cleanup();
-					}
-					this.effecter = effecterDef.SpawnAttached(this.parent, this.parent.MapHeld, 1f);
+						defaultLabel = "DEV: Damage",
+						action = @object.Damage
+					};
+					_003C_003E1__state = 1;
+					return true;
 				}
+				break;
+			case 1:
+				_003C_003E1__state = -1;
+				break;
 			}
-			Effecter effecter3 = this.effecter;
-			if (effecter3 == null)
-			{
-				return;
-			}
-			effecter3.EffectTick(this.parent, this.parent);
+			return false;
 		}
 
-		// Token: 0x0600FE4A RID: 65098 RVA: 0x0049BCF0 File Offset: 0x00499EF0
-		public void Damage()
+		bool IEnumerator.MoveNext()
 		{
-			this.parent.TakeDamage(new DamageInfo(this.Props.damageDef ?? DamageDefOf.Deterioration, this.Props.damage, 0f, -1f, null, null, null, DamageInfo.SourceCategory.ThingOrUnknown, null, true, true, QualityCategory.Normal, true, false));
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0600FE4B RID: 65099 RVA: 0x0049BD41 File Offset: 0x00499F41
-		public override IEnumerable<Gizmo> CompGetGizmosExtra()
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			if (DebugSettings.ShowDevGizmos)
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CCompGetGizmosExtra_003Ed__8 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				yield return new Command_Action
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CCompGetGizmosExtra_003Ed__8(0)
 				{
-					defaultLabel = "DEV: Damage",
-					action = new Action(this.Damage)
+					_003C_003E4__this = _003C_003E4__this
 				};
 			}
-			yield break;
+			return result;
 		}
 
-		// Token: 0x0400A6AA RID: 42666
-		private int ticksToDamage;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x0400A6AB RID: 42667
-		private Effecter effecter;
+	private int ticksToDamage;
+
+	private Effecter effecter;
+
+	public CompProperties_DamageOnInterval Props => (CompProperties_DamageOnInterval)props;
+
+	public override void Initialize(CompProperties props)
+	{
+		base.Initialize(props);
+		ticksToDamage = Props.ticksBetweenDamage;
+	}
+
+	public override void PostExposeData()
+	{
+		base.PostExposeData();
+		Scribe_Values.Look(ref ticksToDamage, "ticksToPlantHarm", 0);
+	}
+
+	public override void CompTick()
+	{
+		if (!parent.Spawned || (Props.startHitPointsPercent > 0f && (float)parent.HitPoints > Props.startHitPointsPercent * (float)parent.MaxHitPoints))
+		{
+			return;
+		}
+		ticksToDamage--;
+		if (ticksToDamage <= 0)
+		{
+			ticksToDamage = Props.ticksBetweenDamage;
+			Damage();
+		}
+		EffecterDef effecterDef = null;
+		foreach (DamageEffectStage effectStage in Props.effectStages)
+		{
+			if (effectStage.minHitPointsPercent * (float)parent.MaxHitPoints > (float)parent.HitPoints)
+			{
+				effecterDef = effectStage.effecterDef;
+			}
+		}
+		if (effecterDef != null && effecterDef != effecter?.def)
+		{
+			effecter?.Cleanup();
+			effecter = effecterDef.SpawnAttached(parent, parent.MapHeld);
+		}
+		effecter?.EffectTick(parent, parent);
+	}
+
+	public void Damage()
+	{
+		parent.TakeDamage(new DamageInfo(Props.damageDef ?? DamageDefOf.Deterioration, Props.damage));
+	}
+
+	[IteratorStateMachine(typeof(_003CCompGetGizmosExtra_003Ed__8))]
+	public override IEnumerable<Gizmo> CompGetGizmosExtra()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CCompGetGizmosExtra_003Ed__8(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

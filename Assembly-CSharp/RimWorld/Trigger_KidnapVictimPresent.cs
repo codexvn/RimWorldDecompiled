@@ -1,64 +1,48 @@
-﻿using System;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Trigger_KidnapVictimPresent : Trigger
 {
-	// Token: 0x02001764 RID: 5988
-	public class Trigger_KidnapVictimPresent : Trigger
+	private const int CheckInterval = 120;
+
+	private const int MinTicksSinceDamage = 300;
+
+	private TriggerData_PawnCycleInd Data => (TriggerData_PawnCycleInd)data;
+
+	public Trigger_KidnapVictimPresent()
 	{
-		// Token: 0x17001597 RID: 5527
-		// (get) Token: 0x06008C83 RID: 35971 RVA: 0x0029C975 File Offset: 0x0029AB75
-		private TriggerData_PawnCycleInd Data
+		data = new TriggerData_PawnCycleInd();
+	}
+
+	public override bool ActivateOn(Lord lord, TriggerSignal signal)
+	{
+		if (signal.type == TriggerSignalType.Tick && Find.TickManager.TicksGame % 120 == 0)
 		{
-			get
+			if (data == null || !(data is TriggerData_PawnCycleInd))
 			{
-				return (TriggerData_PawnCycleInd)this.data;
+				BackCompatibility.TriggerDataPawnCycleIndNull(this);
 			}
-		}
-
-		// Token: 0x06008C84 RID: 35972 RVA: 0x0029C982 File Offset: 0x0029AB82
-		public Trigger_KidnapVictimPresent()
-		{
-			this.data = new TriggerData_PawnCycleInd();
-		}
-
-		// Token: 0x06008C85 RID: 35973 RVA: 0x0029C998 File Offset: 0x0029AB98
-		public override bool ActivateOn(Lord lord, TriggerSignal signal)
-		{
-			if (signal.type == TriggerSignalType.Tick && Find.TickManager.TicksGame % 120 == 0)
+			if (Find.TickManager.TicksGame - lord.lastPawnHarmTick > 300)
 			{
-				if (this.data == null || !(this.data is TriggerData_PawnCycleInd))
+				TriggerData_PawnCycleInd triggerData_PawnCycleInd = Data;
+				triggerData_PawnCycleInd.pawnCycleInd++;
+				if (triggerData_PawnCycleInd.pawnCycleInd >= lord.ownedPawns.Count)
 				{
-					BackCompatibility.TriggerDataPawnCycleIndNull(this);
+					triggerData_PawnCycleInd.pawnCycleInd = 0;
 				}
-				if (Find.TickManager.TicksGame - lord.lastPawnHarmTick > 300)
+				if (lord.ownedPawns.Any())
 				{
-					TriggerData_PawnCycleInd data = this.Data;
-					data.pawnCycleInd++;
-					if (data.pawnCycleInd >= lord.ownedPawns.Count)
+					Pawn pawn = lord.ownedPawns[triggerData_PawnCycleInd.pawnCycleInd];
+					if (pawn.Spawned && !pawn.Downed && pawn.MentalStateDef == null && KidnapAIUtility.TryFindGoodKidnapVictim(pawn, 8f, out var _) && !GenAI.InDangerousCombat(pawn))
 					{
-						data.pawnCycleInd = 0;
-					}
-					if (lord.ownedPawns.Any<Pawn>())
-					{
-						Pawn pawn = lord.ownedPawns[data.pawnCycleInd];
-						Pawn pawn2;
-						if (pawn.Spawned && !pawn.Downed && pawn.MentalStateDef == null && KidnapAIUtility.TryFindGoodKidnapVictim(pawn, 8f, out pawn2, null) && !GenAI.InDangerousCombat(pawn))
-						{
-							return true;
-						}
+						return true;
 					}
 				}
 			}
-			return false;
 		}
-
-		// Token: 0x04005B54 RID: 23380
-		private const int CheckInterval = 120;
-
-		// Token: 0x04005B55 RID: 23381
-		private const int MinTicksSinceDamage = 300;
+		return false;
 	}
 }

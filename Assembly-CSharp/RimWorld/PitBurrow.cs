@@ -1,164 +1,282 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.AI.Group;
 using Verse.Sound;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class PitBurrow : Crater
 {
-	// Token: 0x02002B0D RID: 11021
-	public class PitBurrow : Crater
+	[CompilerGenerated]
+	private sealed class _003CGetGizmos_003Ed__14 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700267E RID: 9854
-		// (get) Token: 0x0600F611 RID: 62993 RVA: 0x00475E20 File Offset: 0x00474020
-		protected override EffecterDef FilledInEffecter
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public PitBurrow _003C_003E4__this;
+
+		private IEnumerator<Gizmo> _003C_003E7__wrap1;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return EffecterDefOf.ImpactSmallDustCloud;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700267F RID: 9855
-		// (get) Token: 0x0600F612 RID: 62994 RVA: 0x00477253 File Offset: 0x00475453
-		protected override SoundDef FilledInSound
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return SoundDefOf.PitBurrow_Collapse;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600F613 RID: 62995 RVA: 0x0047725C File Offset: 0x0047545C
-		public override void SpawnSetup(Map map, bool respawningAfterLoad)
+		[DebuggerHidden]
+		public _003CGetGizmos_003Ed__14(int _003C_003E1__state)
 		{
-			if (!ModLister.CheckAnomaly("Pit burrow"))
-			{
-				this.Destroy(DestroyMode.Vanish);
-				return;
-			}
-			base.SpawnSetup(map, respawningAfterLoad);
-			if (respawningAfterLoad)
-			{
-				return;
-			}
-			this.collapseTick = Find.TickManager.TicksGame + PitBurrow.CollapseTicksRange.RandomInRange;
-			if (this.emergingFleshbeasts.NullOrEmpty<Pawn>())
-			{
-				return;
-			}
-			this.FlushSpawnQueue();
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x0600F614 RID: 62996 RVA: 0x004772BC File Offset: 0x004754BC
-		private void FlushSpawnQueue()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			CellRect cellRect = GenAdj.OccupiedRect(base.Position, Rot4.North, ThingDefOf.PitBurrow.Size).ContractedBy(2);
-			List<PawnFlyer> list = new List<PawnFlyer>();
-			List<IntVec3> list2 = new List<IntVec3>();
-			foreach (Pawn pawn in this.emergingFleshbeasts)
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				IntVec3 randomCell = cellRect.RandomCell;
-				GenSpawn.Spawn(pawn, randomCell, base.Map, WipeMode.Vanish);
-				IntVec3 intVec;
-				if (CellFinder.TryFindRandomCellNear(base.Position, base.Map, this.def.size.x / 2 + 1, (IntVec3 c) => !c.Fogged(base.Map) && c.Walkable(base.Map) && !c.Impassable(base.Map), out intVec, -1))
+				try
 				{
-					pawn.rotationTracker.FaceCell(intVec);
-					list.Add(PawnFlyer.MakeFlyer(ThingDefOf.PawnFlyer_Stun, pawn, intVec, null, null, false, new Vector3?(randomCell.ToVector3() + new Vector3(0f, 0f, -1f)), null, default(LocalTargetInfo)));
-					list2.Add(randomCell);
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
 				}
 			}
-			if (list2.Count == 0)
-			{
-				return;
-			}
-			SpawnRequest spawnRequest = new SpawnRequest(list.Cast<Thing>().ToList<Thing>(), list2, 1, 1f, null);
-			spawnRequest.initialDelay = this.emergeDelay;
-			if (this.assaultColony)
-			{
-				spawnRequest.lord = LordMaker.MakeNewLord(Faction.OfEntities, new LordJob_FleshbeastAssault(), base.Map, null);
-			}
-			base.Map.deferredSpawner.AddRequest(spawnRequest, true);
-			SoundDefOf.Pawn_Fleshbeast_EmergeFromPitGate.PlayOneShot(this);
-			this.emergingFleshbeasts.Clear();
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x0600F615 RID: 62997 RVA: 0x00477470 File Offset: 0x00475670
-		protected override void Tick()
+		private bool MoveNext()
 		{
-			base.Tick();
-			if (Find.TickManager.TicksGame > this.collapseTick)
+			try
 			{
-				Messages.Message("MessagePitBurrowCollapsed".Translate(), new TargetInfo(base.Position, base.Map, false), MessageTypeDefOf.NeutralEvent, false);
-				this.Collapse();
-			}
-		}
-
-		// Token: 0x0600F616 RID: 62998 RVA: 0x004774CC File Offset: 0x004756CC
-		private void Collapse()
-		{
-			EffecterDefOf.ImpactSmallDustCloud.Spawn(base.Position, base.Map, 1f).Cleanup();
-			this.FillIn();
-		}
-
-		// Token: 0x0600F617 RID: 62999 RVA: 0x004774F4 File Offset: 0x004756F4
-		public override IEnumerable<Gizmo> GetGizmos()
-		{
-			foreach (Gizmo gizmo in base.GetGizmos())
-			{
-				yield return gizmo;
-			}
-			IEnumerator<Gizmo> enumerator = null;
-			if (DebugSettings.ShowDevGizmos)
-			{
-				yield return new Command_Action
+				int num = _003C_003E1__state;
+				PitBurrow CS_0024_003C_003E8__locals5 = _003C_003E4__this;
+				switch (num)
 				{
-					action = delegate()
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((Crater)CS_0024_003C_003E8__locals5).GetGizmos().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 2:
 					{
-						if (this.emergingFleshbeasts == null)
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_006f:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Gizmo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (!DebugSettings.ShowDevGizmos)
+					{
+						break;
+					}
+					_003C_003E2__current = new Command_Action
+					{
+						action = delegate
 						{
-							this.emergingFleshbeasts = new List<Pawn>();
-						}
-						PawnKindDef fingerspike = PawnKindDefOf.Fingerspike;
-						Pawn item = PawnGenerator.GeneratePawn(fingerspike, FactionUtility.DefaultFactionFrom(fingerspike.defaultFactionDef), null);
-						this.emergingFleshbeasts.Add(item);
-						this.FlushSpawnQueue();
-					},
-					defaultLabel = "DEV: Spawn Fleshbeast"
+							if (CS_0024_003C_003E8__locals5.emergingFleshbeasts == null)
+							{
+								CS_0024_003C_003E8__locals5.emergingFleshbeasts = new List<Pawn>();
+							}
+							PawnKindDef fingerspike = PawnKindDefOf.Fingerspike;
+							Pawn item = PawnGenerator.GeneratePawn(fingerspike, FactionUtility.DefaultFactionFrom(fingerspike.defaultFactionDef), null);
+							CS_0024_003C_003E8__locals5.emergingFleshbeasts.Add(item);
+							CS_0024_003C_003E8__locals5.FlushSpawnQueue();
+						},
+						defaultLabel = "DEV: Spawn Fleshbeast"
+					};
+					_003C_003E1__state = 2;
+					return true;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CGetGizmos_003Ed__14 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CGetGizmos_003Ed__14(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
 				};
 			}
-			yield break;
-			yield break;
+			return result;
 		}
 
-		// Token: 0x0600F618 RID: 63000 RVA: 0x00477504 File Offset: 0x00475704
-		public override void ExposeData()
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			base.ExposeData();
-			Scribe_Values.Look<int>(ref this.emergeDelay, "emergeDelay", 0, false);
-			Scribe_Collections.Look<Pawn>(ref this.emergingFleshbeasts, "emergingFleshbeasts", LookMode.Deep, Array.Empty<object>());
-			Scribe_Values.Look<bool>(ref this.assaultColony, "assaultColony", true, false);
-			Scribe_Values.Look<int>(ref this.collapseTick, "collapseTick", 0, false);
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x0400A1F9 RID: 41465
-		public List<Pawn> emergingFleshbeasts;
+	public List<Pawn> emergingFleshbeasts;
 
-		// Token: 0x0400A1FA RID: 41466
-		public int emergeDelay;
+	public int emergeDelay;
 
-		// Token: 0x0400A1FB RID: 41467
-		public bool assaultColony = true;
+	public bool assaultColony = true;
 
-		// Token: 0x0400A1FC RID: 41468
-		private int collapseTick;
+	private int collapseTick;
 
-		// Token: 0x0400A1FD RID: 41469
-		private const int SpawnIntervalSeconds = 1;
+	private const int SpawnIntervalSeconds = 1;
 
-		// Token: 0x0400A1FE RID: 41470
-		private static readonly IntRange CollapseTicksRange = new IntRange(720000, 1200000);
+	private static readonly IntRange CollapseTicksRange = new IntRange(720000, 1200000);
+
+	protected override EffecterDef FilledInEffecter => EffecterDefOf.ImpactSmallDustCloud;
+
+	protected override SoundDef FilledInSound => SoundDefOf.PitBurrow_Collapse;
+
+	public override void SpawnSetup(Map map, bool respawningAfterLoad)
+	{
+		if (!ModLister.CheckAnomaly("Pit burrow"))
+		{
+			Destroy();
+			return;
+		}
+		base.SpawnSetup(map, respawningAfterLoad);
+		if (!respawningAfterLoad)
+		{
+			collapseTick = Find.TickManager.TicksGame + CollapseTicksRange.RandomInRange;
+			if (!emergingFleshbeasts.NullOrEmpty())
+			{
+				FlushSpawnQueue();
+			}
+		}
+	}
+
+	private void FlushSpawnQueue()
+	{
+		CellRect cellRect = GenAdj.OccupiedRect(base.Position, Rot4.North, ThingDefOf.PitBurrow.Size).ContractedBy(2);
+		List<PawnFlyer> list = new List<PawnFlyer>();
+		List<IntVec3> list2 = new List<IntVec3>();
+		foreach (Pawn emergingFleshbeast in emergingFleshbeasts)
+		{
+			IntVec3 randomCell = cellRect.RandomCell;
+			GenSpawn.Spawn(emergingFleshbeast, randomCell, base.Map);
+			if (CellFinder.TryFindRandomCellNear(base.Position, base.Map, def.size.x / 2 + 1, (IntVec3 c) => !c.Fogged(base.Map) && c.Walkable(base.Map) && !c.Impassable(base.Map), out var result))
+			{
+				emergingFleshbeast.rotationTracker.FaceCell(result);
+				list.Add(PawnFlyer.MakeFlyer(ThingDefOf.PawnFlyer_Stun, emergingFleshbeast, result, null, null, flyWithCarriedThing: false, randomCell.ToVector3() + new Vector3(0f, 0f, -1f)));
+				list2.Add(randomCell);
+			}
+		}
+		if (list2.Count != 0)
+		{
+			SpawnRequest spawnRequest = new SpawnRequest(list.Cast<Thing>().ToList(), list2, 1, 1f);
+			spawnRequest.initialDelay = emergeDelay;
+			if (assaultColony)
+			{
+				spawnRequest.lord = LordMaker.MakeNewLord(Faction.OfEntities, new LordJob_FleshbeastAssault(), base.Map);
+			}
+			base.Map.deferredSpawner.AddRequest(spawnRequest);
+			SoundDefOf.Pawn_Fleshbeast_EmergeFromPitGate.PlayOneShot(this);
+			emergingFleshbeasts.Clear();
+		}
+	}
+
+	protected override void Tick()
+	{
+		base.Tick();
+		if (Find.TickManager.TicksGame > collapseTick)
+		{
+			Messages.Message("MessagePitBurrowCollapsed".Translate(), new TargetInfo(base.Position, base.Map), MessageTypeDefOf.NeutralEvent, historical: false);
+			Collapse();
+		}
+	}
+
+	private void Collapse()
+	{
+		EffecterDefOf.ImpactSmallDustCloud.Spawn(base.Position, base.Map).Cleanup();
+		FillIn();
+	}
+
+	[IteratorStateMachine(typeof(_003CGetGizmos_003Ed__14))]
+	public override IEnumerable<Gizmo> GetGizmos()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetGizmos_003Ed__14(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref emergeDelay, "emergeDelay", 0);
+		Scribe_Collections.Look(ref emergingFleshbeasts, "emergingFleshbeasts", LookMode.Deep);
+		Scribe_Values.Look(ref assaultColony, "assaultColony", defaultValue: true);
+		Scribe_Values.Look(ref collapseTick, "collapseTick", 0);
 	}
 }

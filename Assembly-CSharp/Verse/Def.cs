@@ -1,270 +1,569 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using RimWorld;
 
-namespace Verse
+namespace Verse;
+
+public class Def : Editable, IEquatable<Def>
 {
-	// Token: 0x020001F7 RID: 503
-	public class Def : Editable, IEquatable<Def>
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass23_0
 	{
-		// Token: 0x17000212 RID: 530
-		// (get) Token: 0x06000D7F RID: 3455 RVA: 0x00040924 File Offset: 0x0003EB24
-		public virtual TaggedString LabelCap
+		public Def _003C_003E4__this;
+
+		public int i;
+
+		public Func<DefHyperlink, bool> _003C_003E9__1;
+
+		internal bool _003CConfigErrors_003Eb__1(DefHyperlink h)
 		{
+			return h.def == _003C_003E4__this.descriptionHyperlinks[i].def;
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__23 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Def _003C_003E4__this;
+
+		private _003C_003Ec__DisplayClass23_0 _003C_003E8__1;
+
+		private int _003Ci_003E5__2;
+
+		private IEnumerator<string> _003C_003E7__wrap2;
+
+		string IEnumerator<string>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.label.NullOrEmpty())
-				{
-					return null;
-				}
-				if (this.cachedLabelCap.NullOrEmpty())
-				{
-					this.cachedLabelCap = this.label.CapitalizeFirst();
-				}
-				return this.cachedLabelCap;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06000D81 RID: 3457 RVA: 0x0004099F File Offset: 0x0003EB9F
-		public virtual IEnumerable<StatDrawEntry> SpecialDisplayStats(StatRequest req)
+		object IEnumerator.Current
 		{
-			if (this.modContentPack != null && !this.modContentPack.IsCoreMod)
+			[DebuggerHidden]
+			get
 			{
-				TaggedString t = this.modContentPack.IsOfficialMod ? "Stat_Source_OfficialExpansionReport".Translate() : "Stat_Source_ModReport".Translate();
-				yield return new StatDrawEntry(StatCategoryDefOf.Source, "Stat_Source_Label".Translate(), this.modContentPack.Name, t + ": " + this.modContentPack.Name, 90000, null, null, false, true);
+				return _003C_003E2__current;
 			}
-			yield break;
 		}
 
-		// Token: 0x06000D82 RID: 3458 RVA: 0x000409B0 File Offset: 0x0003EBB0
-		public override void ResolveReferences()
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__23(int _003C_003E1__state)
 		{
-			base.ResolveReferences();
-			if (this.modExtensions != null)
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 4)
 			{
-				for (int i = 0; i < this.modExtensions.Count; i++)
+				try
 				{
-					this.modExtensions[i].ResolveReferences(this);
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
 				}
 			}
+			_003C_003E8__1 = null;
+			_003C_003E7__wrap2 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x06000D83 RID: 3459 RVA: 0x000409F3 File Offset: 0x0003EBF3
-		public override IEnumerable<string> ConfigErrors()
+		private bool MoveNext()
 		{
-			if (this.defName == "UnnamedDef")
+			try
 			{
-				Type type = base.GetType();
-				yield return ((type != null) ? type.ToString() : null) + " lacks defName. Label=" + this.label;
-			}
-			if (this.defName == "null")
-			{
-				yield return "defName cannot be the string 'null'.";
-			}
-			if (!Def.AllowedDefNamesRegex.IsMatch(this.defName))
-			{
-				yield return "defName " + this.defName + " should only contain letters, numbers, underscores, or dashes.";
-			}
-			if (this.modExtensions != null)
-			{
-				int num;
-				for (int j = 0; j < this.modExtensions.Count; j = num)
+				int num = _003C_003E1__state;
+				Def def = _003C_003E4__this;
+				int num2;
+				switch (num)
 				{
-					foreach (string text in this.modExtensions[j].ConfigErrors())
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E8__1 = new _003C_003Ec__DisplayClass23_0();
+					_003C_003E8__1._003C_003E4__this = _003C_003E4__this;
+					if (def.defName == "UnnamedDef")
 					{
-						yield return text;
+						_003C_003E2__current = def.GetType()?.ToString() + " lacks defName. Label=" + def.label;
+						_003C_003E1__state = 1;
+						return true;
 					}
-					IEnumerator<string> enumerator = null;
-					num = j + 1;
-				}
-			}
-			if (this.description != null)
-			{
-				if (this.description == "")
-				{
-					yield return "empty description";
-				}
-				if (char.IsWhiteSpace(this.description[0]))
-				{
-					yield return "description has leading whitespace";
-				}
-				if (char.IsWhiteSpace(this.description[this.description.Length - 1]))
-				{
-					yield return "description has trailing whitespace";
-				}
-			}
-			if (this.descriptionHyperlinks != null && this.descriptionHyperlinks.Count > 0)
-			{
-				if (this.descriptionHyperlinks.RemoveAll((DefHyperlink x) => x.def == null) != 0)
-				{
-					Log.Warning("Some descriptionHyperlinks in " + this.defName + " had null def.");
-				}
-				int i;
-				Func<DefHyperlink, bool> <>9__1;
-				int num;
-				for (i = this.descriptionHyperlinks.Count - 1; i > 0; i = num - 1)
-				{
-					IEnumerable<DefHyperlink> enumerable = this.descriptionHyperlinks;
-					Func<DefHyperlink, bool> predicate;
-					if ((predicate = <>9__1) == null)
+					goto IL_00b5;
+				case 1:
+					_003C_003E1__state = -1;
+					goto IL_00b5;
+				case 2:
+					_003C_003E1__state = -1;
+					goto IL_00e7;
+				case 3:
+					_003C_003E1__state = -1;
+					goto IL_0129;
+				case 4:
+					_003C_003E1__state = -3;
+					goto IL_0194;
+				case 5:
+					_003C_003E1__state = -1;
+					goto IL_0213;
+				case 6:
+					_003C_003E1__state = -1;
+					goto IL_0246;
+				case 7:
+					_003C_003E1__state = -1;
+					goto IL_0285;
+				case 8:
+					_003C_003E1__state = -1;
+					goto IL_03b3;
+				case 9:
 					{
-						predicate = (<>9__1 = ((DefHyperlink h) => h.def == this.descriptionHyperlinks[i].def));
+						_003C_003E1__state = -1;
+						break;
 					}
-					if (enumerable.FirstIndexOf(predicate) < i)
+					IL_03cf:
+					if (_003C_003E8__1.i > 0)
 					{
-						yield return string.Concat(new string[]
+						if (def.descriptionHyperlinks.FirstIndexOf((DefHyperlink h) => h.def == _003C_003E8__1._003C_003E4__this.descriptionHyperlinks[_003C_003E8__1.i].def) < _003C_003E8__1.i)
 						{
-							"Hyperlink to ",
-							this.descriptionHyperlinks[i].def.defName,
-							" more than once on ",
-							this.defName,
-							" description"
-						});
+							_003C_003E2__current = "Hyperlink to " + def.descriptionHyperlinks[_003C_003E8__1.i].def.defName + " more than once on " + def.defName + " description";
+							_003C_003E1__state = 8;
+							return true;
+						}
+						goto IL_03b3;
 					}
-					num = i;
+					goto IL_03e0;
+					IL_01d6:
+					if (def.description != null)
+					{
+						if (def.description == "")
+						{
+							_003C_003E2__current = "empty description";
+							_003C_003E1__state = 5;
+							return true;
+						}
+						goto IL_0213;
+					}
+					goto IL_0285;
+					IL_03b3:
+					num2 = _003C_003E8__1.i;
+					_003C_003E8__1.i = num2 - 1;
+					goto IL_03cf;
+					IL_0285:
+					if (def.descriptionHyperlinks != null && def.descriptionHyperlinks.Count > 0)
+					{
+						if (def.descriptionHyperlinks.RemoveAll((DefHyperlink x) => x.def == null) != 0)
+						{
+							Log.Warning("Some descriptionHyperlinks in " + def.defName + " had null def.");
+						}
+						_003C_003E8__1.i = def.descriptionHyperlinks.Count - 1;
+						goto IL_03cf;
+					}
+					goto IL_03e0;
+					IL_00b5:
+					if (def.defName == "null")
+					{
+						_003C_003E2__current = "defName cannot be the string 'null'.";
+						_003C_003E1__state = 2;
+						return true;
+					}
+					goto IL_00e7;
+					IL_03e0:
+					if (def.label != null && !def.ignoreIllegalLabelCharacterConfigError && DisallowedLabelCharsRegex.IsMatch(def.label))
+					{
+						_003C_003E2__current = "label contains illegal character(s): \"[]{}\". This can cause issues during grammar resolution. If this was intended, you can use the \"ignoreIllegalLabelCharacterConfigError\" flag.";
+						_003C_003E1__state = 9;
+						return true;
+					}
+					break;
+					IL_00e7:
+					if (!AllowedDefNamesRegex.IsMatch(def.defName))
+					{
+						_003C_003E2__current = "defName " + def.defName + " should only contain letters, numbers, underscores, or dashes.";
+						_003C_003E1__state = 3;
+						return true;
+					}
+					goto IL_0129;
+					IL_0213:
+					if (char.IsWhiteSpace(def.description[0]))
+					{
+						_003C_003E2__current = "description has leading whitespace";
+						_003C_003E1__state = 6;
+						return true;
+					}
+					goto IL_0246;
+					IL_0129:
+					if (def.modExtensions != null)
+					{
+						_003Ci_003E5__2 = 0;
+						goto IL_01c0;
+					}
+					goto IL_01d6;
+					IL_01c0:
+					if (_003Ci_003E5__2 < def.modExtensions.Count)
+					{
+						_003C_003E7__wrap2 = def.modExtensions[_003Ci_003E5__2].ConfigErrors().GetEnumerator();
+						_003C_003E1__state = -3;
+						goto IL_0194;
+					}
+					goto IL_01d6;
+					IL_0246:
+					if (char.IsWhiteSpace(def.description[def.description.Length - 1]))
+					{
+						_003C_003E2__current = "description has trailing whitespace";
+						_003C_003E1__state = 7;
+						return true;
+					}
+					goto IL_0285;
+					IL_0194:
+					if (_003C_003E7__wrap2.MoveNext())
+					{
+						string current = _003C_003E7__wrap2.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 4;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap2 = null;
+					num2 = _003Ci_003E5__2 + 1;
+					_003Ci_003E5__2 = num2;
+					goto IL_01c0;
 				}
+				return false;
 			}
-			if (this.label != null && !this.ignoreIllegalLabelCharacterConfigError && Def.DisallowedLabelCharsRegex.IsMatch(this.label))
+			catch
 			{
-				yield return "label contains illegal character(s): \"[]{}\". This can cause issues during grammar resolution. If this was intended, you can use the \"ignoreIllegalLabelCharacterConfigError\" flag.";
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
-			yield break;
-			yield break;
 		}
 
-		// Token: 0x06000D84 RID: 3460 RVA: 0x000026EA File Offset: 0x000008EA
-		public virtual void PostSetIndices()
+		bool IEnumerator.MoveNext()
 		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x06000D85 RID: 3461 RVA: 0x00040A03 File Offset: 0x0003EC03
-		public virtual void ClearCachedData()
+		private void _003C_003Em__Finally1()
 		{
-			this.cachedLabelCap = null;
-		}
-
-		// Token: 0x06000D86 RID: 3462 RVA: 0x00040A11 File Offset: 0x0003EC11
-		public override string ToString()
-		{
-			return this.defName;
-		}
-
-		// Token: 0x06000D87 RID: 3463 RVA: 0x00040A19 File Offset: 0x0003EC19
-		public void ResolveDefNameHash()
-		{
-			this.defNameHash = this.defName.GetHashCode();
-		}
-
-		// Token: 0x06000D88 RID: 3464 RVA: 0x00040A2C File Offset: 0x0003EC2C
-		public override int GetHashCode()
-		{
-			return this.defNameHash;
-		}
-
-		// Token: 0x06000D89 RID: 3465 RVA: 0x00040A34 File Offset: 0x0003EC34
-		public T GetModExtension<T>() where T : DefModExtension
-		{
-			if (this.modExtensions == null)
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap2 != null)
 			{
-				return default(T);
+				_003C_003E7__wrap2.Dispose();
 			}
-			for (int i = 0; i < this.modExtensions.Count; i++)
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__23 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				if (this.modExtensions[i] is T)
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__23(0)
 				{
-					return this.modExtensions[i] as T;
-				}
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
-			return default(T);
+			return result;
 		}
 
-		// Token: 0x06000D8A RID: 3466 RVA: 0x00040A9C File Offset: 0x0003EC9C
-		public bool HasModExtension<T>() where T : DefModExtension
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return this.GetModExtension<T>() != null;
+			return ((IEnumerable<string>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x06000D8B RID: 3467 RVA: 0x00040AAC File Offset: 0x0003ECAC
-		public bool Equals(Def other)
+	[CompilerGenerated]
+	private sealed class _003CSpecialDisplayStats_003Ed__19 : IEnumerable<StatDrawEntry>, IEnumerable, IEnumerator<StatDrawEntry>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private StatDrawEntry _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Def _003C_003E4__this;
+
+		StatDrawEntry IEnumerator<StatDrawEntry>.Current
 		{
-			return other != null && other.defNameHash == this.defNameHash && other.GetType() == base.GetType();
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x040007CD RID: 1997
-		[Description("The name of this Def. It is used as an identifier by the game code.")]
-		[NoTranslate]
-		public string defName = "UnnamedDef";
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
 
-		// Token: 0x040007CE RID: 1998
-		[Description("A human-readable label used to identify this in game.")]
-		[DefaultValue(null)]
-		[MustTranslate]
-		public string label;
+		[DebuggerHidden]
+		public _003CSpecialDisplayStats_003Ed__19(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
 
-		// Token: 0x040007CF RID: 1999
-		[Description("A human-readable description given when the Def is inspected by players.")]
-		[DefaultValue(null)]
-		[MustTranslate]
-		public string description;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
 
-		// Token: 0x040007D0 RID: 2000
-		[XmlInheritanceAllowDuplicateNodes]
-		public List<DefHyperlink> descriptionHyperlinks;
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			Def def = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (def.modContentPack != null && !def.modContentPack.IsCoreMod)
+				{
+					TaggedString taggedString = (def.modContentPack.IsOfficialMod ? "Stat_Source_OfficialExpansionReport".Translate() : "Stat_Source_ModReport".Translate());
+					_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.Source, "Stat_Source_Label".Translate(), def.modContentPack.Name, taggedString + ": " + def.modContentPack.Name, 90000, null, null, forceUnfinalizedMode: false, overridesHideStats: true);
+					_003C_003E1__state = 1;
+					return true;
+				}
+				break;
+			case 1:
+				_003C_003E1__state = -1;
+				break;
+			}
+			return false;
+		}
 
-		// Token: 0x040007D1 RID: 2001
-		[Description("Disables config error checking. Intended for mod use. (Be careful!)")]
-		[DefaultValue(false)]
-		[MustTranslate]
-		public bool ignoreConfigErrors;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x040007D2 RID: 2002
-		public bool ignoreIllegalLabelCharacterConfigError;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x040007D3 RID: 2003
-		[Description("Mod-specific data. Not used by core game code.")]
-		[DefaultValue(null)]
-		public List<DefModExtension> modExtensions;
+		[DebuggerHidden]
+		IEnumerator<StatDrawEntry> IEnumerable<StatDrawEntry>.GetEnumerator()
+		{
+			_003CSpecialDisplayStats_003Ed__19 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CSpecialDisplayStats_003Ed__19(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x040007D4 RID: 2004
-		[Unsaved(false)]
-		public ushort shortHash;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<StatDrawEntry>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x040007D5 RID: 2005
-		[Unsaved(false)]
-		public ushort index = ushort.MaxValue;
+	[Description("The name of this Def. It is used as an identifier by the game code.")]
+	[NoTranslate]
+	public string defName = "UnnamedDef";
 
-		// Token: 0x040007D6 RID: 2006
-		[Unsaved(false)]
-		public ModContentPack modContentPack;
+	[Description("A human-readable label used to identify this in game.")]
+	[DefaultValue(null)]
+	[MustTranslate]
+	public string label;
 
-		// Token: 0x040007D7 RID: 2007
-		[Unsaved(false)]
-		public string fileName;
+	[Description("A human-readable description given when the Def is inspected by players.")]
+	[DefaultValue(null)]
+	[MustTranslate]
+	public string description;
 
-		// Token: 0x040007D8 RID: 2008
-		[Unsaved(false)]
-		public int defNameHash;
+	[XmlInheritanceAllowDuplicateNodes]
+	public List<DefHyperlink> descriptionHyperlinks;
 
-		// Token: 0x040007D9 RID: 2009
-		[Unsaved(false)]
-		protected TaggedString cachedLabelCap = null;
+	[Description("Disables config error checking. Intended for mod use. (Be careful!)")]
+	[DefaultValue(false)]
+	[MustTranslate]
+	public bool ignoreConfigErrors;
 
-		// Token: 0x040007DA RID: 2010
-		[Unsaved(false)]
-		public bool generated;
+	public bool ignoreIllegalLabelCharacterConfigError;
 
-		// Token: 0x040007DB RID: 2011
-		[Unsaved(false)]
-		public ushort debugRandomId = (ushort)Rand.RangeInclusive(0, 65535);
+	[Description("Mod-specific data. Not used by core game code.")]
+	[DefaultValue(null)]
+	public List<DefModExtension> modExtensions;
 
-		// Token: 0x040007DC RID: 2012
-		public const string DefaultDefName = "UnnamedDef";
+	[Unsaved(false)]
+	public ushort shortHash;
 
-		// Token: 0x040007DD RID: 2013
-		private static readonly Regex AllowedDefNamesRegex = new Regex("^[a-zA-Z0-9\\-_]*$");
+	[Unsaved(false)]
+	public ushort index = ushort.MaxValue;
 
-		// Token: 0x040007DE RID: 2014
-		private static readonly Regex DisallowedLabelCharsRegex = new Regex("\\[|\\]|\\{|\\}");
+	[Unsaved(false)]
+	public ModContentPack modContentPack;
+
+	[Unsaved(false)]
+	public string fileName;
+
+	[Unsaved(false)]
+	public int defNameHash;
+
+	[Unsaved(false)]
+	protected TaggedString cachedLabelCap = null;
+
+	[Unsaved(false)]
+	public bool generated;
+
+	[Unsaved(false)]
+	public ushort debugRandomId = (ushort)Rand.RangeInclusive(0, 65535);
+
+	public const string DefaultDefName = "UnnamedDef";
+
+	private static readonly Regex AllowedDefNamesRegex = new Regex("^[a-zA-Z0-9\\-_]*$");
+
+	private static readonly Regex DisallowedLabelCharsRegex = new Regex("\\[|\\]|\\{|\\}");
+
+	public virtual TaggedString LabelCap
+	{
+		get
+		{
+			if (label.NullOrEmpty())
+			{
+				return null;
+			}
+			if (cachedLabelCap.NullOrEmpty())
+			{
+				cachedLabelCap = label.CapitalizeFirst();
+			}
+			return cachedLabelCap;
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CSpecialDisplayStats_003Ed__19))]
+	public virtual IEnumerable<StatDrawEntry> SpecialDisplayStats(StatRequest req)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CSpecialDisplayStats_003Ed__19(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override void ResolveReferences()
+	{
+		base.ResolveReferences();
+		if (modExtensions != null)
+		{
+			for (int i = 0; i < modExtensions.Count; i++)
+			{
+				modExtensions[i].ResolveReferences(this);
+			}
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__23))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__23(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public virtual void PostSetIndices()
+	{
+	}
+
+	public virtual void ClearCachedData()
+	{
+		cachedLabelCap = null;
+	}
+
+	public override string ToString()
+	{
+		return defName;
+	}
+
+	public void ResolveDefNameHash()
+	{
+		defNameHash = defName.GetHashCode();
+	}
+
+	public override int GetHashCode()
+	{
+		return defNameHash;
+	}
+
+	public T GetModExtension<T>() where T : DefModExtension
+	{
+		if (modExtensions == null)
+		{
+			return null;
+		}
+		for (int i = 0; i < modExtensions.Count; i++)
+		{
+			if (modExtensions[i] is T)
+			{
+				return modExtensions[i] as T;
+			}
+		}
+		return null;
+	}
+
+	public bool HasModExtension<T>() where T : DefModExtension
+	{
+		return GetModExtension<T>() != null;
+	}
+
+	public bool Equals(Def other)
+	{
+		if (other != null && other.defNameHash == defNameHash)
+		{
+			return other.GetType() == GetType();
+		}
+		return false;
 	}
 }

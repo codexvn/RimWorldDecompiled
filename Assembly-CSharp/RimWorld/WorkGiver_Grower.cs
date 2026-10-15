@@ -1,91 +1,253 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public abstract class WorkGiver_Grower : WorkGiver_Scanner
 {
-	// Token: 0x020015CC RID: 5580
-	public abstract class WorkGiver_Grower : WorkGiver_Scanner
+	[CompilerGenerated]
+	private sealed class _003CPotentialWorkCellsGlobal_003Ed__4 : IEnumerable<IntVec3>, IEnumerable, IEnumerator<IntVec3>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001432 RID: 5170
-		// (get) Token: 0x060083DD RID: 33757 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public override bool AllowUnreachable
+		private int _003C_003E1__state;
+
+		private IntVec3 _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private Pawn pawn;
+
+		public Pawn _003C_003E3__pawn;
+
+		public WorkGiver_Grower _003C_003E4__this;
+
+		private Danger _003CmaxDanger_003E5__2;
+
+		private List<Building> _003CbList_003E5__3;
+
+		private List<Zone> _003CzonesList_003E5__4;
+
+		private int _003Ci_003E5__5;
+
+		private CellRect.Enumerator _003C_003E7__wrap5;
+
+		private Zone_Growing _003CgrowZone_003E5__7;
+
+		private int _003Cj_003E5__8;
+
+		IntVec3 IEnumerator<IntVec3>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return true;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x060083DE RID: 33758 RVA: 0x000028E7 File Offset: 0x00000AE7
-		protected virtual bool ExtraRequirements(IPlantToGrowSettable settable, Pawn pawn)
+		object IEnumerator.Current
 		{
-			return true;
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x060083DF RID: 33759 RVA: 0x00278C97 File Offset: 0x00276E97
-		public override IEnumerable<IntVec3> PotentialWorkCellsGlobal(Pawn pawn)
+		[DebuggerHidden]
+		public _003CPotentialWorkCellsGlobal_003Ed__4(int _003C_003E1__state)
 		{
-			Danger maxDanger = pawn.NormalMaxDanger();
-			List<Building> bList = pawn.Map.listerBuildings.allBuildingsColonist;
-			int num;
-			for (int i = 0; i < bList.Count; i = num + 1)
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				Building_PlantGrower building_PlantGrower = bList[i] as Building_PlantGrower;
-				if (building_PlantGrower != null && this.ExtraRequirements(building_PlantGrower, pawn) && !building_PlantGrower.IsForbidden(pawn) && pawn.CanReach(building_PlantGrower, PathEndMode.OnCell, maxDanger, false, false, TraverseMode.ByPawn) && !building_PlantGrower.IsBurning())
+				try
 				{
-					foreach (IntVec3 intVec in building_PlantGrower.OccupiedRect())
-					{
-						yield return intVec;
-					}
-					WorkGiver_Grower.wantedPlantDef = null;
 				}
-				num = i;
-			}
-			WorkGiver_Grower.wantedPlantDef = null;
-			List<Zone> zonesList = pawn.Map.zoneManager.AllZones;
-			for (int i = 0; i < zonesList.Count; i = num + 1)
-			{
-				Zone_Growing growZone = zonesList[i] as Zone_Growing;
-				if (growZone != null)
+				finally
 				{
-					if (growZone.cells.Count == 0)
+					_003C_003Em__Finally1();
+				}
+			}
+			_003CbList_003E5__3 = null;
+			_003CzonesList_003E5__4 = null;
+			_003CgrowZone_003E5__7 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				WorkGiver_Grower workGiver_Grower = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003CmaxDanger_003E5__2 = pawn.NormalMaxDanger();
+					_003CbList_003E5__3 = pawn.Map.listerBuildings.allBuildingsColonist;
+					_003Ci_003E5__5 = 0;
+					goto IL_0140;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0115;
+				case 2:
 					{
-						string str = "Grow zone has 0 cells: ";
-						Zone_Growing zone_Growing = growZone;
-						Log.ErrorOnce(str + ((zone_Growing != null) ? zone_Growing.ToString() : null), -563487);
+						_003C_003E1__state = -1;
+						_003Cj_003E5__8++;
+						goto IL_0284;
 					}
-					else if (this.ExtraRequirements(growZone, pawn) && !growZone.ContainsStaticFire && pawn.CanReach(growZone.Cells[0], PathEndMode.OnCell, maxDanger, false, false, TraverseMode.ByPawn))
+					IL_0140:
+					if (_003Ci_003E5__5 < _003CbList_003E5__3.Count)
 					{
-						for (int j = 0; j < growZone.cells.Count; j = num + 1)
+						if (_003CbList_003E5__3[_003Ci_003E5__5] is Building_PlantGrower building_PlantGrower && workGiver_Grower.ExtraRequirements(building_PlantGrower, pawn) && !building_PlantGrower.IsForbidden(pawn) && pawn.CanReach(building_PlantGrower, PathEndMode.OnCell, _003CmaxDanger_003E5__2) && !building_PlantGrower.IsBurning())
 						{
-							yield return growZone.cells[j];
-							num = j;
+							_003C_003E7__wrap5 = building_PlantGrower.OccupiedRect().GetEnumerator();
+							_003C_003E1__state = -3;
+							goto IL_0115;
 						}
-						WorkGiver_Grower.wantedPlantDef = null;
-						growZone = null;
+						goto IL_012e;
 					}
+					wantedPlantDef = null;
+					_003CzonesList_003E5__4 = pawn.Map.zoneManager.AllZones;
+					_003Ci_003E5__5 = 0;
+					goto IL_02bb;
+					IL_0115:
+					if (_003C_003E7__wrap5.MoveNext())
+					{
+						IntVec3 current = _003C_003E7__wrap5.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					wantedPlantDef = null;
+					goto IL_012e;
+					IL_02bb:
+					if (_003Ci_003E5__5 < _003CzonesList_003E5__4.Count)
+					{
+						_003CgrowZone_003E5__7 = _003CzonesList_003E5__4[_003Ci_003E5__5] as Zone_Growing;
+						if (_003CgrowZone_003E5__7 != null)
+						{
+							if (_003CgrowZone_003E5__7.cells.Count == 0)
+							{
+								Log.ErrorOnce("Grow zone has 0 cells: " + _003CgrowZone_003E5__7, -563487);
+							}
+							else if (workGiver_Grower.ExtraRequirements(_003CgrowZone_003E5__7, pawn) && !_003CgrowZone_003E5__7.ContainsStaticFire && pawn.CanReach(_003CgrowZone_003E5__7.Cells[0], PathEndMode.OnCell, _003CmaxDanger_003E5__2))
+							{
+								_003Cj_003E5__8 = 0;
+								goto IL_0284;
+							}
+						}
+						goto IL_02a9;
+					}
+					wantedPlantDef = null;
+					return false;
+					IL_0284:
+					if (_003Cj_003E5__8 < _003CgrowZone_003E5__7.cells.Count)
+					{
+						_003C_003E2__current = _003CgrowZone_003E5__7.cells[_003Cj_003E5__8];
+						_003C_003E1__state = 2;
+						return true;
+					}
+					wantedPlantDef = null;
+					_003CgrowZone_003E5__7 = null;
+					goto IL_02a9;
+					IL_012e:
+					_003Ci_003E5__5++;
+					goto IL_0140;
+					IL_02a9:
+					_003Ci_003E5__5++;
+					goto IL_02bb;
 				}
-				num = i;
 			}
-			WorkGiver_Grower.wantedPlantDef = null;
-			yield break;
-			yield break;
-		}
-
-		// Token: 0x060083E0 RID: 33760 RVA: 0x00278CB0 File Offset: 0x00276EB0
-		public static ThingDef CalculateWantedPlantDef(IntVec3 c, Map map)
-		{
-			IPlantToGrowSettable plantToGrowSettable = c.GetPlantToGrowSettable(map);
-			if (plantToGrowSettable == null)
+			catch
 			{
-				return null;
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
-			return plantToGrowSettable.GetPlantDefToGrow();
 		}
 
-		// Token: 0x040056FA RID: 22266
-		protected static ThingDef wantedPlantDef;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap5/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<IntVec3> IEnumerable<IntVec3>.GetEnumerator()
+		{
+			_003CPotentialWorkCellsGlobal_003Ed__4 _003CPotentialWorkCellsGlobal_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CPotentialWorkCellsGlobal_003Ed__ = this;
+			}
+			else
+			{
+				_003CPotentialWorkCellsGlobal_003Ed__ = new _003CPotentialWorkCellsGlobal_003Ed__4(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CPotentialWorkCellsGlobal_003Ed__.pawn = _003C_003E3__pawn;
+			return _003CPotentialWorkCellsGlobal_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<IntVec3>)this).GetEnumerator();
+		}
+	}
+
+	protected static ThingDef wantedPlantDef;
+
+	public override bool AllowUnreachable => true;
+
+	protected virtual bool ExtraRequirements(IPlantToGrowSettable settable, Pawn pawn)
+	{
+		return true;
+	}
+
+	[IteratorStateMachine(typeof(_003CPotentialWorkCellsGlobal_003Ed__4))]
+	public override IEnumerable<IntVec3> PotentialWorkCellsGlobal(Pawn pawn)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CPotentialWorkCellsGlobal_003Ed__4(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__pawn = pawn
+		};
+	}
+
+	public static ThingDef CalculateWantedPlantDef(IntVec3 c, Map map)
+	{
+		return c.GetPlantToGrowSettable(map)?.GetPlantDefToGrow();
 	}
 }

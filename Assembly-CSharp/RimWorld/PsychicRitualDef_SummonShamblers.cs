@@ -1,58 +1,213 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI.Group;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class PsychicRitualDef_SummonShamblers : PsychicRitualDef_InvocationCircle
 {
-	// Token: 0x020016AB RID: 5803
-	public class PsychicRitualDef_SummonShamblers : PsychicRitualDef_InvocationCircle
+	[CompilerGenerated]
+	private sealed class _003CBlockingIssues_003Ed__3 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x060088C8 RID: 35016 RVA: 0x0028CB9F File Offset: 0x0028AD9F
-		public override List<PsychicRitualToil> CreateToils(PsychicRitual psychicRitual, PsychicRitualGraph graph)
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public PsychicRitualDef_SummonShamblers _003C_003E4__this;
+
+		private PsychicRitualRoleAssignments assignments;
+
+		public PsychicRitualRoleAssignments _003C_003E3__assignments;
+
+		private Map map;
+
+		public Map _003C_003E3__map;
+
+		private IEnumerator<string> _003C_003E7__wrap1;
+
+		string IEnumerator<string>.Current
 		{
-			List<PsychicRitualToil> list = base.CreateToils(psychicRitual, graph);
-			list.Add(new PsychicRitualToil_SummonShamblers(this.InvokerRole, this.combatPointsFromQualityRange));
-			return list;
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x060088C9 RID: 35017 RVA: 0x0028CBC0 File Offset: 0x0028ADC0
-		public override IEnumerable<string> BlockingIssues(PsychicRitualRoleAssignments assignments, Map map)
+		object IEnumerator.Current
 		{
-			foreach (string text in base.BlockingIssues(assignments, map))
+			[DebuggerHidden]
+			get
 			{
-				yield return text;
+				return _003C_003E2__current;
 			}
-			IEnumerator<string> enumerator = null;
-			if (!this.shamblersAllowed)
-			{
-				yield return "NoNearbyShamblers".Translate();
-			}
-			yield break;
-			yield break;
 		}
 
-		// Token: 0x060088CA RID: 35018 RVA: 0x0028CBE0 File Offset: 0x0028ADE0
-		public override void InitializeCast(Map map)
+		[DebuggerHidden]
+		public _003CBlockingIssues_003Ed__3(int _003C_003E1__state)
 		{
-			base.InitializeCast(map);
-			int num = 0;
-			bool flag = false;
-			while (!flag && num < 5)
-			{
-				IntVec3 root;
-				RCellFinder.TryFindRandomPawnEntryCell(out root, map, CellFinder.EdgeRoadChance_Hostile, false, null);
-				IntVec3 intVec;
-				flag = RCellFinder.TryFindTravelDestFrom(root, map, out intVec);
-				num++;
-			}
-			this.shamblersAllowed = (map.Biome != BiomeDefOf.Undercave && flag);
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x0400593B RID: 22843
-		private FloatRange combatPointsFromQualityRange;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
 
-		// Token: 0x0400593C RID: 22844
-		private bool shamblersAllowed;
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				PsychicRitualDef_SummonShamblers psychicRitualDef_SummonShamblers = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((PsychicRitualDef_InvocationCircle)psychicRitualDef_SummonShamblers).BlockingIssues(assignments, map).GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_007b;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_007b;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_007b:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (!psychicRitualDef_SummonShamblers.shamblersAllowed)
+					{
+						_003C_003E2__current = "NoNearbyShamblers".Translate();
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CBlockingIssues_003Ed__3 _003CBlockingIssues_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CBlockingIssues_003Ed__ = this;
+			}
+			else
+			{
+				_003CBlockingIssues_003Ed__ = new _003CBlockingIssues_003Ed__3(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CBlockingIssues_003Ed__.assignments = _003C_003E3__assignments;
+			_003CBlockingIssues_003Ed__.map = _003C_003E3__map;
+			return _003CBlockingIssues_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	private FloatRange combatPointsFromQualityRange;
+
+	private bool shamblersAllowed;
+
+	public override List<PsychicRitualToil> CreateToils(PsychicRitual psychicRitual, PsychicRitualGraph graph)
+	{
+		List<PsychicRitualToil> list = base.CreateToils(psychicRitual, graph);
+		list.Add(new PsychicRitualToil_SummonShamblers(InvokerRole, combatPointsFromQualityRange));
+		return list;
+	}
+
+	[IteratorStateMachine(typeof(_003CBlockingIssues_003Ed__3))]
+	public override IEnumerable<string> BlockingIssues(PsychicRitualRoleAssignments assignments, Map map)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CBlockingIssues_003Ed__3(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__assignments = assignments,
+			_003C_003E3__map = map
+		};
+	}
+
+	public override void InitializeCast(Map map)
+	{
+		base.InitializeCast(map);
+		int num = 0;
+		bool flag = false;
+		while (!flag && num < 5)
+		{
+			RCellFinder.TryFindRandomPawnEntryCell(out var result, map, CellFinder.EdgeRoadChance_Hostile);
+			flag = RCellFinder.TryFindTravelDestFrom(result, map, out var _);
+			num++;
+		}
+		shamblersAllowed = map.Biome != BiomeDefOf.Undercave && flag;
 	}
 }

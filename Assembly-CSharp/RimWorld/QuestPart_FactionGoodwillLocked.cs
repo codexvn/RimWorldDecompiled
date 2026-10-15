@@ -1,67 +1,229 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class QuestPart_FactionGoodwillLocked : QuestPartActivable
 {
-	// Token: 0x02001BC5 RID: 7109
-	public class QuestPart_FactionGoodwillLocked : QuestPartActivable
+	[CompilerGenerated]
+	private sealed class _003Cget_InvolvedFactions_003Ed__3 : IEnumerable<Faction>, IEnumerable, IEnumerator<Faction>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700184C RID: 6220
-		// (get) Token: 0x06009E41 RID: 40513 RVA: 0x002DCAAD File Offset: 0x002DACAD
-		public override IEnumerable<Faction> InvolvedFactions
+		private int _003C_003E1__state;
+
+		private Faction _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public QuestPart_FactionGoodwillLocked _003C_003E4__this;
+
+		private IEnumerator<Faction> _003C_003E7__wrap1;
+
+		Faction IEnumerator<Faction>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				foreach (Faction faction in base.InvolvedFactions)
-				{
-					yield return faction;
-				}
-				IEnumerator<Faction> enumerator = null;
-				if (this.faction1 != null)
-				{
-					yield return this.faction1;
-				}
-				if (this.faction2 != null)
-				{
-					yield return this.faction2;
-				}
-				yield break;
-				yield break;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06009E42 RID: 40514 RVA: 0x002DCABD File Offset: 0x002DACBD
-		public override void Notify_FactionRemoved(Faction faction)
+		object IEnumerator.Current
 		{
-			if (faction == this.faction1)
+			[DebuggerHidden]
+			get
 			{
-				this.faction1 = null;
+				return _003C_003E2__current;
 			}
-			if (faction == this.faction2)
+		}
+
+		[DebuggerHidden]
+		public _003Cget_InvolvedFactions_003Ed__3(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				this.faction2 = null;
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				QuestPart_FactionGoodwillLocked questPart_FactionGoodwillLocked = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((QuestPart)questPart_FactionGoodwillLocked).InvolvedFactions.GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0073;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0073;
+				case 2:
+					_003C_003E1__state = -1;
+					goto IL_00b3;
+				case 3:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_0073:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Faction current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (questPart_FactionGoodwillLocked.faction1 != null)
+					{
+						_003C_003E2__current = questPart_FactionGoodwillLocked.faction1;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					goto IL_00b3;
+					IL_00b3:
+					if (questPart_FactionGoodwillLocked.faction2 != null)
+					{
+						_003C_003E2__current = questPart_FactionGoodwillLocked.faction2;
+						_003C_003E1__state = 3;
+						return true;
+					}
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x06009E43 RID: 40515 RVA: 0x002DCADF File Offset: 0x002DACDF
-		public bool AppliesTo(Faction a, Faction b)
+		bool IEnumerator.MoveNext()
 		{
-			return base.State == QuestPartState.Enabled && ((this.faction1 == a && this.faction2 == b) || (this.faction1 == b && this.faction2 == a));
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x06009E44 RID: 40516 RVA: 0x002DCB14 File Offset: 0x002DAD14
-		public override void ExposeData()
+		private void _003C_003Em__Finally1()
 		{
-			base.ExposeData();
-			Scribe_References.Look<Faction>(ref this.faction1, "faction1", false);
-			Scribe_References.Look<Faction>(ref this.faction2, "faction2", false);
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
 		}
 
-		// Token: 0x04006D92 RID: 28050
-		public Faction faction1;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04006D93 RID: 28051
-		public Faction faction2;
+		[DebuggerHidden]
+		IEnumerator<Faction> IEnumerable<Faction>.GetEnumerator()
+		{
+			_003Cget_InvolvedFactions_003Ed__3 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_InvolvedFactions_003Ed__3(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Faction>)this).GetEnumerator();
+		}
+	}
+
+	public Faction faction1;
+
+	public Faction faction2;
+
+	public override IEnumerable<Faction> InvolvedFactions
+	{
+		[IteratorStateMachine(typeof(_003Cget_InvolvedFactions_003Ed__3))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_InvolvedFactions_003Ed__3(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public override void Notify_FactionRemoved(Faction faction)
+	{
+		if (faction == faction1)
+		{
+			faction1 = null;
+		}
+		if (faction == faction2)
+		{
+			faction2 = null;
+		}
+	}
+
+	public bool AppliesTo(Faction a, Faction b)
+	{
+		if (base.State != QuestPartState.Enabled)
+		{
+			return false;
+		}
+		if (faction1 != a || faction2 != b)
+		{
+			if (faction1 == b)
+			{
+				return faction2 == a;
+			}
+			return false;
+		}
+		return true;
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_References.Look(ref faction1, "faction1");
+		Scribe_References.Look(ref faction2, "faction2");
 	}
 }

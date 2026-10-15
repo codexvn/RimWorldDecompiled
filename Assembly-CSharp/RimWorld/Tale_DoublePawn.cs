@@ -1,136 +1,363 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.Grammar;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Tale_DoublePawn : Tale
 {
-	// Token: 0x0200292D RID: 10541
-	public class Tale_DoublePawn : Tale
+	[CompilerGenerated]
+	private sealed class _003CSpecialTextGenerationRules_003Ed__11 : IEnumerable<Rule>, IEnumerable, IEnumerator<Rule>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700230A RID: 8970
-		// (get) Token: 0x0600E6B1 RID: 59057 RVA: 0x0043449B File Offset: 0x0043269B
-		public override Pawn DominantPawn
+		private int _003C_003E1__state;
+
+		private Rule _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Tale_DoublePawn _003C_003E4__this;
+
+		private Dictionary<string, string> outConstants;
+
+		public Dictionary<string, string> _003C_003E3__outConstants;
+
+		private IEnumerator<Rule> _003C_003E7__wrap1;
+
+		Rule IEnumerator<Rule>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.firstPawnData.pawn;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700230B RID: 8971
-		// (get) Token: 0x0600E6B2 RID: 59058 RVA: 0x004344A8 File Offset: 0x004326A8
-		public override string ShortSummary
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				string str = this.def.LabelCap + ": ";
-				Name name = this.firstPawnData.name;
-				string text = str + ((name != null) ? name.ToString() : null);
-				if (this.secondPawnData != null)
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CSpecialTextGenerationRules_003Ed__11(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			switch (_003C_003E1__state)
+			{
+			case -3:
+			case 1:
+				try
 				{
-					string str2 = text;
-					string str3 = ", ";
-					Name name2 = this.secondPawnData.name;
-					text = str2 + str3 + ((name2 != null) ? name2.ToString() : null);
 				}
-				return text;
-			}
-		}
-
-		// Token: 0x0600E6B3 RID: 59059 RVA: 0x00434518 File Offset: 0x00432718
-		public Tale_DoublePawn()
-		{
-		}
-
-		// Token: 0x0600E6B4 RID: 59060 RVA: 0x00434520 File Offset: 0x00432720
-		public Tale_DoublePawn(Pawn firstPawn, Pawn secondPawn)
-		{
-			this.firstPawnData = TaleData_Pawn.GenerateFrom(firstPawn);
-			if (secondPawn != null)
-			{
-				this.secondPawnData = TaleData_Pawn.GenerateFrom(secondPawn);
-			}
-			if (firstPawn.SpawnedOrAnyParentSpawned)
-			{
-				this.surroundings = TaleData_Surroundings.GenerateFrom(firstPawn.PositionHeld, firstPawn.MapHeld);
-			}
-		}
-
-		// Token: 0x0600E6B5 RID: 59061 RVA: 0x0043456D File Offset: 0x0043276D
-		public override bool Concerns(Thing th)
-		{
-			return (this.secondPawnData != null && this.secondPawnData.pawn == th) || base.Concerns(th) || this.firstPawnData.pawn == th;
-		}
-
-		// Token: 0x0600E6B6 RID: 59062 RVA: 0x004345A0 File Offset: 0x004327A0
-		public override void Notify_FactionRemoved(Faction faction)
-		{
-			if (this.firstPawnData.faction == faction)
-			{
-				this.firstPawnData.faction = null;
-			}
-			if (this.secondPawnData != null && this.secondPawnData.faction == faction)
-			{
-				this.secondPawnData.faction = null;
-			}
-		}
-
-		// Token: 0x0600E6B7 RID: 59063 RVA: 0x004345DE File Offset: 0x004327DE
-		public override void ExposeData()
-		{
-			base.ExposeData();
-			Scribe_Deep.Look<TaleData_Pawn>(ref this.firstPawnData, "firstPawnData", Array.Empty<object>());
-			Scribe_Deep.Look<TaleData_Pawn>(ref this.secondPawnData, "secondPawnData", Array.Empty<object>());
-		}
-
-		// Token: 0x0600E6B8 RID: 59064 RVA: 0x00434610 File Offset: 0x00432810
-		protected override IEnumerable<Rule> SpecialTextGenerationRules(Dictionary<string, string> outConstants = null)
-		{
-			if (this.def.firstPawnSymbol.NullOrEmpty() || this.def.secondPawnSymbol.NullOrEmpty())
-			{
-				TaleDef def = this.def;
-				Log.Error(((def != null) ? def.ToString() : null) + " uses DoublePawn tale class but firstPawnSymbol and secondPawnSymbol are not both set");
-			}
-			foreach (Rule rule in this.firstPawnData.GetRules("ANYPAWN", null))
-			{
-				yield return rule;
-			}
-			IEnumerator<Rule> enumerator = null;
-			foreach (Rule rule2 in this.firstPawnData.GetRules(this.def.firstPawnSymbol, outConstants))
-			{
-				yield return rule2;
-			}
-			enumerator = null;
-			if (this.secondPawnData != null)
-			{
-				foreach (Rule rule3 in this.firstPawnData.GetRules("ANYPAWN", null))
+				finally
 				{
-					yield return rule3;
+					_003C_003Em__Finally1();
 				}
-				enumerator = null;
-				foreach (Rule rule4 in this.secondPawnData.GetRules(this.def.secondPawnSymbol, outConstants))
+				break;
+			case -4:
+			case 2:
+				try
 				{
-					yield return rule4;
 				}
-				enumerator = null;
+				finally
+				{
+					_003C_003Em__Finally2();
+				}
+				break;
+			case -5:
+			case 3:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally3();
+				}
+				break;
+			case -6:
+			case 4:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally4();
+				}
+				break;
 			}
-			yield break;
-			yield break;
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x0600E6B9 RID: 59065 RVA: 0x00434627 File Offset: 0x00432827
-		public override void GenerateTestData()
+		private bool MoveNext()
 		{
-			base.GenerateTestData();
-			this.firstPawnData = TaleData_Pawn.GenerateRandom(false);
-			this.secondPawnData = TaleData_Pawn.GenerateRandom(false);
+			try
+			{
+				int num = _003C_003E1__state;
+				Tale_DoublePawn tale_DoublePawn = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					if (tale_DoublePawn.def.firstPawnSymbol.NullOrEmpty() || tale_DoublePawn.def.secondPawnSymbol.NullOrEmpty())
+					{
+						Log.Error(tale_DoublePawn.def?.ToString() + " uses DoublePawn tale class but firstPawnSymbol and secondPawnSymbol are not both set");
+					}
+					_003C_003E7__wrap1 = tale_DoublePawn.firstPawnData.GetRules("ANYPAWN").GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_00ca;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_00ca;
+				case 2:
+					_003C_003E1__state = -4;
+					goto IL_0140;
+				case 3:
+					_003C_003E1__state = -5;
+					goto IL_01b6;
+				case 4:
+					{
+						_003C_003E1__state = -6;
+						goto IL_0229;
+					}
+					IL_01b6:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Rule current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 3;
+						return true;
+					}
+					_003C_003Em__Finally3();
+					_003C_003E7__wrap1 = null;
+					_003C_003E7__wrap1 = tale_DoublePawn.secondPawnData.GetRules(tale_DoublePawn.def.secondPawnSymbol, outConstants).GetEnumerator();
+					_003C_003E1__state = -6;
+					goto IL_0229;
+					IL_00ca:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Rule current2 = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current2;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					_003C_003E7__wrap1 = tale_DoublePawn.firstPawnData.GetRules(tale_DoublePawn.def.firstPawnSymbol, outConstants).GetEnumerator();
+					_003C_003E1__state = -4;
+					goto IL_0140;
+					IL_0229:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Rule current3 = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current3;
+						_003C_003E1__state = 4;
+						return true;
+					}
+					_003C_003Em__Finally4();
+					_003C_003E7__wrap1 = null;
+					break;
+					IL_0140:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Rule current4 = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current4;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					_003C_003Em__Finally2();
+					_003C_003E7__wrap1 = null;
+					if (tale_DoublePawn.secondPawnData == null)
+					{
+						break;
+					}
+					_003C_003E7__wrap1 = tale_DoublePawn.firstPawnData.GetRules("ANYPAWN").GetEnumerator();
+					_003C_003E1__state = -5;
+					goto IL_01b6;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
 		}
 
-		// Token: 0x04009A40 RID: 39488
-		public TaleData_Pawn firstPawnData;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x04009A41 RID: 39489
-		public TaleData_Pawn secondPawnData;
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		private void _003C_003Em__Finally3()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		private void _003C_003Em__Finally4()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Rule> IEnumerable<Rule>.GetEnumerator()
+		{
+			_003CSpecialTextGenerationRules_003Ed__11 _003CSpecialTextGenerationRules_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CSpecialTextGenerationRules_003Ed__ = this;
+			}
+			else
+			{
+				_003CSpecialTextGenerationRules_003Ed__ = new _003CSpecialTextGenerationRules_003Ed__11(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CSpecialTextGenerationRules_003Ed__.outConstants = _003C_003E3__outConstants;
+			return _003CSpecialTextGenerationRules_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Rule>)this).GetEnumerator();
+		}
+	}
+
+	public TaleData_Pawn firstPawnData;
+
+	public TaleData_Pawn secondPawnData;
+
+	public override Pawn DominantPawn => firstPawnData.pawn;
+
+	public override string ShortSummary
+	{
+		get
+		{
+			string text = string.Concat(def.LabelCap + ": ", firstPawnData.name?.ToString());
+			if (secondPawnData != null)
+			{
+				text = text + ", " + secondPawnData.name;
+			}
+			return text;
+		}
+	}
+
+	public Tale_DoublePawn()
+	{
+	}
+
+	public Tale_DoublePawn(Pawn firstPawn, Pawn secondPawn)
+	{
+		firstPawnData = TaleData_Pawn.GenerateFrom(firstPawn);
+		if (secondPawn != null)
+		{
+			secondPawnData = TaleData_Pawn.GenerateFrom(secondPawn);
+		}
+		if (firstPawn.SpawnedOrAnyParentSpawned)
+		{
+			surroundings = TaleData_Surroundings.GenerateFrom(firstPawn.PositionHeld, firstPawn.MapHeld);
+		}
+	}
+
+	public override bool Concerns(Thing th)
+	{
+		if (secondPawnData != null && secondPawnData.pawn == th)
+		{
+			return true;
+		}
+		if (!base.Concerns(th))
+		{
+			return firstPawnData.pawn == th;
+		}
+		return true;
+	}
+
+	public override void Notify_FactionRemoved(Faction faction)
+	{
+		if (firstPawnData.faction == faction)
+		{
+			firstPawnData.faction = null;
+		}
+		if (secondPawnData != null && secondPawnData.faction == faction)
+		{
+			secondPawnData.faction = null;
+		}
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Deep.Look(ref firstPawnData, "firstPawnData");
+		Scribe_Deep.Look(ref secondPawnData, "secondPawnData");
+	}
+
+	[IteratorStateMachine(typeof(_003CSpecialTextGenerationRules_003Ed__11))]
+	protected override IEnumerable<Rule> SpecialTextGenerationRules(Dictionary<string, string> outConstants = null)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CSpecialTextGenerationRules_003Ed__11(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__outConstants = outConstants
+		};
+	}
+
+	public override void GenerateTestData()
+	{
+		base.GenerateTestData();
+		firstPawnData = TaleData_Pawn.GenerateRandom();
+		secondPawnData = TaleData_Pawn.GenerateRandom();
 	}
 }

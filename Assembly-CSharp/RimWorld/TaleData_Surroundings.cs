@@ -1,129 +1,265 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using Verse;
 using Verse.Grammar;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class TaleData_Surroundings : TaleData
 {
-	// Token: 0x02002917 RID: 10519
-	public class TaleData_Surroundings : TaleData
+	[CompilerGenerated]
+	private sealed class _003CGetRules_003Ed__12 : IEnumerable<Rule>, IEnumerable, IEnumerator<Rule>, IEnumerator, IDisposable
 	{
-		// Token: 0x170022F4 RID: 8948
-		// (get) Token: 0x0600E61C RID: 58908 RVA: 0x00431F5D File Offset: 0x0043015D
-		public bool Outdoors
+		private int _003C_003E1__state;
+
+		private Rule _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public TaleData_Surroundings _003C_003E4__this;
+
+		private RoomStatScoreStage _003Cimpressiveness_003E5__2;
+
+		private RoomStatScoreStage _003Cbeauty_003E5__3;
+
+		private RoomStatScoreStage _003Ccleanliness_003E5__4;
+
+		Rule IEnumerator<Rule>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.weather != null;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600E61D RID: 58909 RVA: 0x00431F68 File Offset: 0x00430168
-		public override void ExposeData()
+		object IEnumerator.Current
 		{
-			Scribe_Values.Look<PlanetTile>(ref this.tile, "tile", default(PlanetTile), false);
-			Scribe_Values.Look<float>(ref this.temperature, "temperature", 0f, false);
-			Scribe_Values.Look<float>(ref this.snowDepth, "snowDepth", 0f, false);
-			Scribe_Defs.Look<WeatherDef>(ref this.weather, "weather");
-			Scribe_Defs.Look<RoomRoleDef>(ref this.roomRole, "roomRole");
-			Scribe_Defs.Look<BiomeDef>(ref this.biome, "biome");
-			Scribe_Values.Look<float>(ref this.roomImpressiveness, "roomImpressiveness", 0f, false);
-			Scribe_Values.Look<float>(ref this.roomBeauty, "roomBeauty", 0f, false);
-			Scribe_Values.Look<float>(ref this.roomCleanliness, "roomCleanliness", 0f, false);
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x0600E61E RID: 58910 RVA: 0x0043202D File Offset: 0x0043022D
-		public override IEnumerable<Rule> GetRules(Dictionary<string, string> constants = null)
+		[DebuggerHidden]
+		public _003CGetRules_003Ed__12(int _003C_003E1__state)
 		{
-			if (this.biome == null)
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003Cimpressiveness_003E5__2 = null;
+			_003Cbeauty_003E5__3 = null;
+			_003Ccleanliness_003E5__4 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			TaleData_Surroundings taleData_Surroundings = _003C_003E4__this;
+			switch (num)
 			{
-				yield return new Rule_String("BIOME", Find.WorldGrid[this.tile].PrimaryBiome.label);
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (taleData_Surroundings.biome == null)
+				{
+					_003C_003E2__current = new Rule_String("BIOME", Find.WorldGrid[taleData_Surroundings.tile].PrimaryBiome.label);
+					_003C_003E1__state = 1;
+					return true;
+				}
+				_003C_003E2__current = new Rule_String("BIOME", taleData_Surroundings.biome.label);
+				_003C_003E1__state = 2;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				goto IL_00bc;
+			case 2:
+				_003C_003E1__state = -1;
+				goto IL_00bc;
+			case 3:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = new Rule_String("ROOM_roleDefinite", Find.ActiveLanguageWorker.WithDefiniteArticle(taleData_Surroundings.roomRole.label));
+				_003C_003E1__state = 4;
+				return true;
+			case 4:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = new Rule_String("ROOM_roleIndefinite", Find.ActiveLanguageWorker.WithIndefiniteArticle(taleData_Surroundings.roomRole.label));
+				_003C_003E1__state = 5;
+				return true;
+			case 5:
+				_003C_003E1__state = -1;
+				_003Cimpressiveness_003E5__2 = RoomStatDefOf.Impressiveness.GetScoreStage(taleData_Surroundings.roomImpressiveness);
+				_003Cbeauty_003E5__3 = RoomStatDefOf.Beauty.GetScoreStage(taleData_Surroundings.roomBeauty);
+				_003Ccleanliness_003E5__4 = RoomStatDefOf.Cleanliness.GetScoreStage(taleData_Surroundings.roomCleanliness);
+				_003C_003E2__current = new Rule_String("ROOM_impressiveness", _003Cimpressiveness_003E5__2.label);
+				_003C_003E1__state = 6;
+				return true;
+			case 6:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = new Rule_String("ROOM_impressivenessIndefinite", Find.ActiveLanguageWorker.WithIndefiniteArticle(_003Cimpressiveness_003E5__2.label));
+				_003C_003E1__state = 7;
+				return true;
+			case 7:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = new Rule_String("ROOM_beauty", _003Cbeauty_003E5__3.label);
+				_003C_003E1__state = 8;
+				return true;
+			case 8:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = new Rule_String("ROOM_beautyIndefinite", Find.ActiveLanguageWorker.WithIndefiniteArticle(_003Cbeauty_003E5__3.label));
+				_003C_003E1__state = 9;
+				return true;
+			case 9:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = new Rule_String("ROOM_cleanliness", _003Ccleanliness_003E5__4.label);
+				_003C_003E1__state = 10;
+				return true;
+			case 10:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = new Rule_String("ROOM_cleanlinessIndefinite", Find.ActiveLanguageWorker.WithIndefiniteArticle(_003Ccleanliness_003E5__4.label));
+				_003C_003E1__state = 11;
+				return true;
+			case 11:
+				{
+					_003C_003E1__state = -1;
+					_003Cimpressiveness_003E5__2 = null;
+					_003Cbeauty_003E5__3 = null;
+					_003Ccleanliness_003E5__4 = null;
+					break;
+				}
+				IL_00bc:
+				if (taleData_Surroundings.roomRole != null && taleData_Surroundings.roomRole != RoomRoleDefOf.None)
+				{
+					_003C_003E2__current = new Rule_String("ROOM_role", taleData_Surroundings.roomRole.label);
+					_003C_003E1__state = 3;
+					return true;
+				}
+				break;
+			}
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Rule> IEnumerable<Rule>.GetEnumerator()
+		{
+			_003CGetRules_003Ed__12 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
 			}
 			else
 			{
-				yield return new Rule_String("BIOME", this.biome.label);
-			}
-			if (this.roomRole != null && this.roomRole != RoomRoleDefOf.None)
-			{
-				yield return new Rule_String("ROOM_role", this.roomRole.label);
-				yield return new Rule_String("ROOM_roleDefinite", Find.ActiveLanguageWorker.WithDefiniteArticle(this.roomRole.label, false, false));
-				yield return new Rule_String("ROOM_roleIndefinite", Find.ActiveLanguageWorker.WithIndefiniteArticle(this.roomRole.label, false, false));
-				RoomStatScoreStage impressiveness = RoomStatDefOf.Impressiveness.GetScoreStage(this.roomImpressiveness);
-				RoomStatScoreStage beauty = RoomStatDefOf.Beauty.GetScoreStage(this.roomBeauty);
-				RoomStatScoreStage cleanliness = RoomStatDefOf.Cleanliness.GetScoreStage(this.roomCleanliness);
-				yield return new Rule_String("ROOM_impressiveness", impressiveness.label);
-				yield return new Rule_String("ROOM_impressivenessIndefinite", Find.ActiveLanguageWorker.WithIndefiniteArticle(impressiveness.label, false, false));
-				yield return new Rule_String("ROOM_beauty", beauty.label);
-				yield return new Rule_String("ROOM_beautyIndefinite", Find.ActiveLanguageWorker.WithIndefiniteArticle(beauty.label, false, false));
-				yield return new Rule_String("ROOM_cleanliness", cleanliness.label);
-				yield return new Rule_String("ROOM_cleanlinessIndefinite", Find.ActiveLanguageWorker.WithIndefiniteArticle(cleanliness.label, false, false));
-				impressiveness = null;
-				beauty = null;
-				cleanliness = null;
-			}
-			yield break;
-		}
-
-		// Token: 0x0600E61F RID: 58911 RVA: 0x00432040 File Offset: 0x00430240
-		public static TaleData_Surroundings GenerateFrom(IntVec3 c, Map map)
-		{
-			TaleData_Surroundings taleData_Surroundings = new TaleData_Surroundings
-			{
-				tile = map.Tile,
-				biome = map.Biome
-			};
-			Room roomOrAdjacent = c.GetRoomOrAdjacent(map, RegionType.Set_All);
-			if (roomOrAdjacent != null)
-			{
-				if (roomOrAdjacent.PsychologicallyOutdoors)
+				result = new _003CGetRules_003Ed__12(0)
 				{
-					taleData_Surroundings.weather = map.weatherManager.CurWeatherPerceived;
-				}
-				taleData_Surroundings.roomRole = roomOrAdjacent.Role;
-				taleData_Surroundings.roomImpressiveness = roomOrAdjacent.GetStat(RoomStatDefOf.Impressiveness);
-				taleData_Surroundings.roomBeauty = roomOrAdjacent.GetStat(RoomStatDefOf.Beauty);
-				taleData_Surroundings.roomCleanliness = roomOrAdjacent.GetStat(RoomStatDefOf.Cleanliness);
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
-			if (!GenTemperature.TryGetTemperatureForCell(c, map, out taleData_Surroundings.temperature))
-			{
-				taleData_Surroundings.temperature = 21f;
-			}
-			taleData_Surroundings.snowDepth = map.snowGrid.GetDepth(c);
-			return taleData_Surroundings;
+			return result;
 		}
 
-		// Token: 0x0600E620 RID: 58912 RVA: 0x004320FD File Offset: 0x004302FD
-		public static TaleData_Surroundings GenerateRandom(Map map)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return TaleData_Surroundings.GenerateFrom(CellFinder.RandomCell(map), map);
+			return ((IEnumerable<Rule>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x040099E7 RID: 39399
-		public PlanetTile tile;
+	public PlanetTile tile;
 
-		// Token: 0x040099E8 RID: 39400
-		public BiomeDef biome;
+	public BiomeDef biome;
 
-		// Token: 0x040099E9 RID: 39401
-		public float temperature;
+	public float temperature;
 
-		// Token: 0x040099EA RID: 39402
-		public float snowDepth;
+	public float snowDepth;
 
-		// Token: 0x040099EB RID: 39403
-		public WeatherDef weather;
+	public WeatherDef weather;
 
-		// Token: 0x040099EC RID: 39404
-		public RoomRoleDef roomRole;
+	public RoomRoleDef roomRole;
 
-		// Token: 0x040099ED RID: 39405
-		public float roomImpressiveness;
+	public float roomImpressiveness;
 
-		// Token: 0x040099EE RID: 39406
-		public float roomBeauty;
+	public float roomBeauty;
 
-		// Token: 0x040099EF RID: 39407
-		public float roomCleanliness;
+	public float roomCleanliness;
+
+	public bool Outdoors => weather != null;
+
+	public override void ExposeData()
+	{
+		Scribe_Values.Look(ref tile, "tile");
+		Scribe_Values.Look(ref temperature, "temperature", 0f);
+		Scribe_Values.Look(ref snowDepth, "snowDepth", 0f);
+		Scribe_Defs.Look(ref weather, "weather");
+		Scribe_Defs.Look(ref roomRole, "roomRole");
+		Scribe_Defs.Look(ref biome, "biome");
+		Scribe_Values.Look(ref roomImpressiveness, "roomImpressiveness", 0f);
+		Scribe_Values.Look(ref roomBeauty, "roomBeauty", 0f);
+		Scribe_Values.Look(ref roomCleanliness, "roomCleanliness", 0f);
+	}
+
+	[IteratorStateMachine(typeof(_003CGetRules_003Ed__12))]
+	public override IEnumerable<Rule> GetRules(Dictionary<string, string> constants = null)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetRules_003Ed__12(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public static TaleData_Surroundings GenerateFrom(IntVec3 c, Map map)
+	{
+		TaleData_Surroundings taleData_Surroundings = new TaleData_Surroundings
+		{
+			tile = map.Tile,
+			biome = map.Biome
+		};
+		Room roomOrAdjacent = c.GetRoomOrAdjacent(map, RegionType.Set_All);
+		if (roomOrAdjacent != null)
+		{
+			if (roomOrAdjacent.PsychologicallyOutdoors)
+			{
+				taleData_Surroundings.weather = map.weatherManager.CurWeatherPerceived;
+			}
+			taleData_Surroundings.roomRole = roomOrAdjacent.Role;
+			taleData_Surroundings.roomImpressiveness = roomOrAdjacent.GetStat(RoomStatDefOf.Impressiveness);
+			taleData_Surroundings.roomBeauty = roomOrAdjacent.GetStat(RoomStatDefOf.Beauty);
+			taleData_Surroundings.roomCleanliness = roomOrAdjacent.GetStat(RoomStatDefOf.Cleanliness);
+		}
+		if (!GenTemperature.TryGetTemperatureForCell(c, map, out taleData_Surroundings.temperature))
+		{
+			taleData_Surroundings.temperature = 21f;
+		}
+		taleData_Surroundings.snowDepth = map.snowGrid.GetDepth(c);
+		return taleData_Surroundings;
+	}
+
+	public static TaleData_Surroundings GenerateRandom(Map map)
+	{
+		return GenerateFrom(CellFinder.RandomCell(map), map);
 	}
 }

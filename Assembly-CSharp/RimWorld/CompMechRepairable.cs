@@ -1,50 +1,146 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompMechRepairable : ThingComp
 {
-	// Token: 0x02002D46 RID: 11590
-	public class CompMechRepairable : ThingComp
+	[CompilerGenerated]
+	private sealed class _003CCompGetGizmosExtra_003Ed__3 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x17002966 RID: 10598
-		// (get) Token: 0x06010481 RID: 66689 RVA: 0x004B4AD7 File Offset: 0x004B2CD7
-		public CompProperties_MechRepairable Props
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompMechRepairable _003C_003E4__this;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (CompProperties_MechRepairable)this.props;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06010482 RID: 66690 RVA: 0x004B4AE4 File Offset: 0x004B2CE4
-		public override IEnumerable<Gizmo> CompGetGizmosExtra()
+		object IEnumerator.Current
 		{
-			if (this.parent.Faction == Faction.OfPlayer)
+			[DebuggerHidden]
+			get
 			{
-				Command_Toggle command_Toggle = new Command_Toggle();
-				command_Toggle.defaultLabel = "CommandAutoRepair".Translate();
-				command_Toggle.defaultDesc = "CommandAutoRepairDesc".Translate();
-				command_Toggle.icon = ContentFinder<Texture2D>.Get("UI/Gizmos/AutoRepair", true);
-				command_Toggle.isActive = (() => this.autoRepair);
-				Command_Toggle command_Toggle2 = command_Toggle;
-				command_Toggle2.toggleAction = (Action)Delegate.Combine(command_Toggle2.toggleAction, new Action(delegate()
-				{
-					this.autoRepair = !this.autoRepair;
-				}));
-				yield return command_Toggle;
+				return _003C_003E2__current;
 			}
-			yield break;
 		}
 
-		// Token: 0x06010483 RID: 66691 RVA: 0x004B4AF4 File Offset: 0x004B2CF4
-		public override void PostExposeData()
+		[DebuggerHidden]
+		public _003CCompGetGizmosExtra_003Ed__3(int _003C_003E1__state)
 		{
-			Scribe_Values.Look<bool>(ref this.autoRepair, "autoRepair", false, false);
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x0400AA13 RID: 43539
-		public bool autoRepair;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			CompMechRepairable CS_0024_003C_003E8__locals4 = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (CS_0024_003C_003E8__locals4.parent.Faction == Faction.OfPlayer)
+				{
+					Command_Toggle command_Toggle = new Command_Toggle
+					{
+						defaultLabel = "CommandAutoRepair".Translate(),
+						defaultDesc = "CommandAutoRepairDesc".Translate(),
+						icon = ContentFinder<Texture2D>.Get("UI/Gizmos/AutoRepair"),
+						isActive = () => CS_0024_003C_003E8__locals4.autoRepair
+					};
+					command_Toggle.toggleAction = (Action)Delegate.Combine(command_Toggle.toggleAction, (Action)delegate
+					{
+						CS_0024_003C_003E8__locals4.autoRepair = !CS_0024_003C_003E8__locals4.autoRepair;
+					});
+					_003C_003E2__current = command_Toggle;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				break;
+			case 1:
+				_003C_003E1__state = -1;
+				break;
+			}
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CCompGetGizmosExtra_003Ed__3 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CCompGetGizmosExtra_003Ed__3(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	public bool autoRepair;
+
+	public CompProperties_MechRepairable Props => (CompProperties_MechRepairable)props;
+
+	[IteratorStateMachine(typeof(_003CCompGetGizmosExtra_003Ed__3))]
+	public override IEnumerable<Gizmo> CompGetGizmosExtra()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CCompGetGizmosExtra_003Ed__3(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override void PostExposeData()
+	{
+		Scribe_Values.Look(ref autoRepair, "autoRepair", defaultValue: false);
 	}
 }

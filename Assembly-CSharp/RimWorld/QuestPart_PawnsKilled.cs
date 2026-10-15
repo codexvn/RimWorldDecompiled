@@ -1,102 +1,232 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class QuestPart_PawnsKilled : QuestPartActivable
 {
-	// Token: 0x02001C74 RID: 7284
-	public class QuestPart_PawnsKilled : QuestPartActivable
+	[CompilerGenerated]
+	private sealed class _003Cget_InvolvedFactions_003Ed__9 : IEnumerable<Faction>, IEnumerable, IEnumerator<Faction>, IEnumerator, IDisposable
 	{
-		// Token: 0x170018F1 RID: 6385
-		// (get) Token: 0x0600A253 RID: 41555 RVA: 0x002EAA0C File Offset: 0x002E8C0C
-		public override string DescriptionPart
+		private int _003C_003E1__state;
+
+		private Faction _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public QuestPart_PawnsKilled _003C_003E4__this;
+
+		private IEnumerator<Faction> _003C_003E7__wrap1;
+
+		Faction IEnumerator<Faction>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return "PawnsKilled".Translate(GenLabel.BestKindLabel(this.race.race.AnyPawnKind, Gender.None, true, -1)).CapitalizeFirst() + ": " + this.killed.ToString() + " / " + this.count.ToString();
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170018F2 RID: 6386
-		// (get) Token: 0x0600A254 RID: 41556 RVA: 0x002EAA77 File Offset: 0x002E8C77
-		public override IEnumerable<Faction> InvolvedFactions
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				foreach (Faction faction in base.InvolvedFactions)
-				{
-					yield return faction;
-				}
-				IEnumerator<Faction> enumerator = null;
-				if (this.requiredInstigatorFaction != null)
-				{
-					yield return this.requiredInstigatorFaction;
-				}
-				yield break;
-				yield break;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600A255 RID: 41557 RVA: 0x002EAA87 File Offset: 0x002E8C87
-		protected override void Enable(SignalArgs receivedArgs)
+		[DebuggerHidden]
+		public _003Cget_InvolvedFactions_003Ed__9(int _003C_003E1__state)
 		{
-			base.Enable(receivedArgs);
-			this.killed = 0;
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x0600A256 RID: 41558 RVA: 0x002EAA98 File Offset: 0x002E8C98
-		public override void Notify_PawnKilled(Pawn pawn, DamageInfo? dinfo)
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			base.Notify_PawnKilled(pawn, dinfo);
-			if (base.State == QuestPartState.Enabled && pawn.def == this.race && (this.requiredInstigatorFaction == null || (dinfo != null && (dinfo.Value.Instigator == null || dinfo.Value.Instigator.Faction == this.requiredInstigatorFaction))))
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				this.killed++;
-				Find.SignalManager.SendSignal(new Signal(this.outSignalPawnKilled, false));
-				if (this.killed >= this.count)
+				try
 				{
-					base.Complete();
 				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				QuestPart_PawnsKilled questPart_PawnsKilled = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((QuestPart)questPart_PawnsKilled).InvolvedFactions.GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_006f:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Faction current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (questPart_PawnsKilled.requiredInstigatorFaction != null)
+					{
+						_003C_003E2__current = questPart_PawnsKilled.requiredInstigatorFaction;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x0600A257 RID: 41559 RVA: 0x002EAB40 File Offset: 0x002E8D40
-		public override void ExposeData()
+		bool IEnumerator.MoveNext()
 		{
-			base.ExposeData();
-			Scribe_Defs.Look<ThingDef>(ref this.race, "race");
-			Scribe_References.Look<Faction>(ref this.requiredInstigatorFaction, "requiredInstigatorFaction", false);
-			Scribe_References.Look<MapParent>(ref this.mapParent, "mapParent", false);
-			Scribe_Values.Look<int>(ref this.count, "count", 0, false);
-			Scribe_Values.Look<int>(ref this.killed, "killed", 0, false);
-			Scribe_Values.Look<string>(ref this.outSignalPawnKilled, "outSignalPawnKilled", null, false);
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0600A258 RID: 41560 RVA: 0x002EABBB File Offset: 0x002E8DBB
-		public override void AssignDebugData()
+		private void _003C_003Em__Finally1()
 		{
-			base.AssignDebugData();
-			this.race = ThingDefOf.Muffalo;
-			this.requiredInstigatorFaction = Faction.OfPlayer;
-			this.count = 10;
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
 		}
 
-		// Token: 0x0400702D RID: 28717
-		public ThingDef race;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x0400702E RID: 28718
-		public Faction requiredInstigatorFaction;
+		[DebuggerHidden]
+		IEnumerator<Faction> IEnumerable<Faction>.GetEnumerator()
+		{
+			_003Cget_InvolvedFactions_003Ed__9 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_InvolvedFactions_003Ed__9(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x0400702F RID: 28719
-		public int count;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Faction>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x04007030 RID: 28720
-		public MapParent mapParent;
+	public ThingDef race;
 
-		// Token: 0x04007031 RID: 28721
-		public string outSignalPawnKilled;
+	public Faction requiredInstigatorFaction;
 
-		// Token: 0x04007032 RID: 28722
-		private int killed;
+	public int count;
+
+	public MapParent mapParent;
+
+	public string outSignalPawnKilled;
+
+	private int killed;
+
+	public override string DescriptionPart => string.Concat("PawnsKilled".Translate(GenLabel.BestKindLabel(race.race.AnyPawnKind, Gender.None, plural: true)).CapitalizeFirst() + ": ", killed.ToString(), " / ", count.ToString());
+
+	public override IEnumerable<Faction> InvolvedFactions
+	{
+		[IteratorStateMachine(typeof(_003Cget_InvolvedFactions_003Ed__9))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_InvolvedFactions_003Ed__9(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	protected override void Enable(SignalArgs receivedArgs)
+	{
+		base.Enable(receivedArgs);
+		killed = 0;
+	}
+
+	public override void Notify_PawnKilled(Pawn pawn, DamageInfo? dinfo)
+	{
+		base.Notify_PawnKilled(pawn, dinfo);
+		if (base.State == QuestPartState.Enabled && pawn.def == race && (requiredInstigatorFaction == null || (dinfo.HasValue && (dinfo.Value.Instigator == null || dinfo.Value.Instigator.Faction == requiredInstigatorFaction))))
+		{
+			killed++;
+			Find.SignalManager.SendSignal(new Signal(outSignalPawnKilled));
+			if (killed >= count)
+			{
+				Complete();
+			}
+		}
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Defs.Look(ref race, "race");
+		Scribe_References.Look(ref requiredInstigatorFaction, "requiredInstigatorFaction");
+		Scribe_References.Look(ref mapParent, "mapParent");
+		Scribe_Values.Look(ref count, "count", 0);
+		Scribe_Values.Look(ref killed, "killed", 0);
+		Scribe_Values.Look(ref outSignalPawnKilled, "outSignalPawnKilled");
+	}
+
+	public override void AssignDebugData()
+	{
+		base.AssignDebugData();
+		race = ThingDefOf.Muffalo;
+		requiredInstigatorFaction = Faction.OfPlayer;
+		count = 10;
 	}
 }

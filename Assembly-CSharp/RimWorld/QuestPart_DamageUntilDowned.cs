@@ -1,86 +1,230 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class QuestPart_DamageUntilDowned : QuestPart
 {
-	// Token: 0x02001C1E RID: 7198
-	public class QuestPart_DamageUntilDowned : QuestPart
+	[CompilerGenerated]
+	private sealed class _003Cget_QuestLookTargets_003Ed__4 : IEnumerable<GlobalTargetInfo>, IEnumerable, IEnumerator<GlobalTargetInfo>, IEnumerator, IDisposable
 	{
-		// Token: 0x170018A3 RID: 6307
-		// (get) Token: 0x0600A04E RID: 41038 RVA: 0x002E3404 File Offset: 0x002E1604
-		public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+		private int _003C_003E1__state;
+
+		private GlobalTargetInfo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public QuestPart_DamageUntilDowned _003C_003E4__this;
+
+		private IEnumerator<GlobalTargetInfo> _003C_003E7__wrap1;
+
+		private int _003Ci_003E5__3;
+
+		GlobalTargetInfo IEnumerator<GlobalTargetInfo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				foreach (GlobalTargetInfo globalTargetInfo in base.QuestLookTargets)
-				{
-					yield return globalTargetInfo;
-				}
-				IEnumerator<GlobalTargetInfo> enumerator = null;
-				int num;
-				for (int i = 0; i < this.pawns.Count; i = num + 1)
-				{
-					yield return this.pawns[i];
-					num = i;
-				}
-				yield break;
-				yield break;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600A04F RID: 41039 RVA: 0x002E3414 File Offset: 0x002E1614
-		public override void Notify_QuestSignalReceived(Signal signal)
+		object IEnumerator.Current
 		{
-			base.Notify_QuestSignalReceived(signal);
-			if (signal.tag == this.inSignal)
+			[DebuggerHidden]
+			get
 			{
-				for (int i = 0; i < this.pawns.Count; i++)
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003Cget_QuestLookTargets_003Ed__4(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
 				{
-					if (!this.pawns[i].DestroyedOrNull())
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				QuestPart_DamageUntilDowned questPart_DamageUntilDowned = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((QuestPart)questPart_DamageUntilDowned).QuestLookTargets.GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0072;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0072;
+				case 2:
 					{
-						HealthUtility.DamageUntilDowned(this.pawns[i], this.allowBleedingWounds, null, null, null);
+						_003C_003E1__state = -1;
+						_003Ci_003E5__3++;
+						break;
 					}
+					IL_0072:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						GlobalTargetInfo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					_003Ci_003E5__3 = 0;
+					break;
 				}
+				if (_003Ci_003E5__3 < questPart_DamageUntilDowned.pawns.Count)
+				{
+					_003C_003E2__current = questPart_DamageUntilDowned.pawns[_003Ci_003E5__3];
+					_003C_003E1__state = 2;
+					return true;
+				}
+				return false;
 			}
-		}
-
-		// Token: 0x0600A050 RID: 41040 RVA: 0x002E3480 File Offset: 0x002E1680
-		public override void ExposeData()
-		{
-			base.ExposeData();
-			Scribe_Collections.Look<Pawn>(ref this.pawns, "pawns", LookMode.Reference, Array.Empty<object>());
-			Scribe_Values.Look<string>(ref this.inSignal, "inSignal", null, false);
-			Scribe_Values.Look<bool>(ref this.allowBleedingWounds, "allowBleedingWounds", false, false);
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+			catch
 			{
-				this.pawns.RemoveAll((Pawn x) => x == null);
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x0600A051 RID: 41041 RVA: 0x002E3500 File Offset: 0x002E1700
-		public override void AssignDebugData()
+		bool IEnumerator.MoveNext()
 		{
-			base.AssignDebugData();
-			this.inSignal = "DebugSignal" + Rand.Int.ToString();
-			this.pawns.Add(PawnsFinder.AllMaps_FreeColonists.FirstOrDefault<Pawn>());
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0600A052 RID: 41042 RVA: 0x002E3545 File Offset: 0x002E1745
-		public override void ReplacePawnReferences(Pawn replace, Pawn with)
+		private void _003C_003Em__Finally1()
 		{
-			this.pawns.Replace(replace, with);
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
 		}
 
-		// Token: 0x04006ED7 RID: 28375
-		public List<Pawn> pawns = new List<Pawn>();
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04006ED8 RID: 28376
-		public string inSignal;
+		[DebuggerHidden]
+		IEnumerator<GlobalTargetInfo> IEnumerable<GlobalTargetInfo>.GetEnumerator()
+		{
+			_003Cget_QuestLookTargets_003Ed__4 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_QuestLookTargets_003Ed__4(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x04006ED9 RID: 28377
-		public bool allowBleedingWounds = true;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<GlobalTargetInfo>)this).GetEnumerator();
+		}
+	}
+
+	public List<Pawn> pawns = new List<Pawn>();
+
+	public string inSignal;
+
+	public bool allowBleedingWounds = true;
+
+	public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+	{
+		[IteratorStateMachine(typeof(_003Cget_QuestLookTargets_003Ed__4))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_QuestLookTargets_003Ed__4(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public override void Notify_QuestSignalReceived(Signal signal)
+	{
+		base.Notify_QuestSignalReceived(signal);
+		if (!(signal.tag == inSignal))
+		{
+			return;
+		}
+		for (int i = 0; i < pawns.Count; i++)
+		{
+			if (!pawns[i].DestroyedOrNull())
+			{
+				HealthUtility.DamageUntilDowned(pawns[i], allowBleedingWounds);
+			}
+		}
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Collections.Look(ref pawns, "pawns", LookMode.Reference);
+		Scribe_Values.Look(ref inSignal, "inSignal");
+		Scribe_Values.Look(ref allowBleedingWounds, "allowBleedingWounds", defaultValue: false);
+		if (Scribe.mode == LoadSaveMode.PostLoadInit)
+		{
+			pawns.RemoveAll((Pawn x) => x == null);
+		}
+	}
+
+	public override void AssignDebugData()
+	{
+		base.AssignDebugData();
+		inSignal = "DebugSignal" + Rand.Int;
+		pawns.Add(PawnsFinder.AllMaps_FreeColonists.FirstOrDefault());
+	}
+
+	public override void ReplacePawnReferences(Pawn replace, Pawn with)
+	{
+		pawns.Replace(replace, with);
 	}
 }

@@ -1,115 +1,213 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_PlantSeed : JobDriver
 {
-	// Token: 0x02001359 RID: 4953
-	public class JobDriver_PlantSeed : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__9 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700132A RID: 4906
-		// (get) Token: 0x06007985 RID: 31109 RVA: 0x0024B144 File Offset: 0x00249344
-		private IntVec3 PlantCell
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_PlantSeed _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.job.GetTarget(TargetIndex.B).Cell;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700132B RID: 4907
-		// (get) Token: 0x06007986 RID: 31110 RVA: 0x0024B168 File Offset: 0x00249368
-		private CompPlantable PlantableComp
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.job.GetTarget(TargetIndex.A).Thing.TryGetComp<CompPlantable>();
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06007987 RID: 31111 RVA: 0x0022C53B File Offset: 0x0022A73B
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__9(int _003C_003E1__state)
 		{
-			return this.pawn.Reserve(this.job.targetA, this.job, 1, 1, null, errorOnFailed, false);
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x06007988 RID: 31112 RVA: 0x0024B18E File Offset: 0x0024938E
-		protected override IEnumerable<Toil> MakeNewToils()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			this.FailOn(() => PlantUtility.AdjacentSowBlocker(this.job.plantDefToSow, this.PlantCell, base.Map) != null || !this.job.plantDefToSow.CanEverPlantAt(this.PlantCell, base.Map, false, false) || !this.PlantableComp.PlantCells.Contains(this.PlantCell));
-			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch, false);
-			yield return Toils_General.Do(delegate
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_PlantSeed CS_0024_003C_003E8__locals29 = _003C_003E4__this;
+			switch (num)
 			{
-				LocalTargetInfo target = this.job.GetTarget(TargetIndex.A);
-				if (target.HasThing && target.Thing.stackCount > this.job.count)
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				CS_0024_003C_003E8__locals29.FailOn(() => PlantUtility.AdjacentSowBlocker(CS_0024_003C_003E8__locals29.job.plantDefToSow, CS_0024_003C_003E8__locals29.PlantCell, CS_0024_003C_003E8__locals29.Map) != null || !CS_0024_003C_003E8__locals29.job.plantDefToSow.CanEverPlantAt(CS_0024_003C_003E8__locals29.PlantCell, CS_0024_003C_003E8__locals29.Map, canWipePlantsExceptTree: false, checkMapTemperature: false) || !CS_0024_003C_003E8__locals29.PlantableComp.PlantCells.Contains(CS_0024_003C_003E8__locals29.PlantCell));
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.Do(delegate
 				{
-					this.job.SetTarget(TargetIndex.C, target.Thing);
-				}
-			});
-			yield return Toils_Haul.StartCarryThing(TargetIndex.A, false, false, false, true, false);
-			yield return Toils_General.Do(delegate
-			{
-				LocalTargetInfo target = this.job.GetTarget(TargetIndex.C);
-				if (target.IsValid && target.HasThing)
-				{
-					CompPlantable compPlantable = target.Thing.TryGetComp<CompPlantable>();
-					if (compPlantable != null)
+					LocalTargetInfo target = CS_0024_003C_003E8__locals29.job.GetTarget(TargetIndex.A);
+					if (target.HasThing && target.Thing.stackCount > CS_0024_003C_003E8__locals29.job.count)
 					{
-						compPlantable.Notify_SeedRemovedFromStackForPlantingAt(this.PlantCell);
+						CS_0024_003C_003E8__locals29.job.SetTarget(TargetIndex.C, target.Thing);
 					}
-				}
-				CompPlantable plantableComp = this.PlantableComp;
-				if (plantableComp == null)
+				});
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Haul.StartCarryThing(TargetIndex.A);
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.Do(delegate
 				{
-					return;
-				}
-				plantableComp.Notify_RemovedFromStackForPlantingAt(this.PlantCell);
-			});
-			yield return Toils_Haul.CarryHauledThingToCell(TargetIndex.B, PathEndMode.Touch);
-			Toil toil = ToilMaker.MakeToil("MakeNewToils");
-			toil.tickIntervalAction = delegate(int delta)
+					LocalTargetInfo target2 = CS_0024_003C_003E8__locals29.job.GetTarget(TargetIndex.C);
+					if (target2.IsValid && target2.HasThing)
+					{
+						target2.Thing.TryGetComp<CompPlantable>()?.Notify_SeedRemovedFromStackForPlantingAt(CS_0024_003C_003E8__locals29.PlantCell);
+					}
+					CS_0024_003C_003E8__locals29.PlantableComp?.Notify_RemovedFromStackForPlantingAt(CS_0024_003C_003E8__locals29.PlantCell);
+				});
+				_003C_003E1__state = 4;
+				return true;
+			case 4:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Haul.CarryHauledThingToCell(TargetIndex.B, PathEndMode.Touch);
+				_003C_003E1__state = 5;
+				return true;
+			case 5:
 			{
-				this.sowWorkDone += this.pawn.GetStatValue(StatDefOf.PlantWorkSpeed, true, -1) * (float)delta;
-				if (this.pawn.skills != null)
+				_003C_003E1__state = -1;
+				Toil toil = ToilMaker.MakeToil("MakeNewToils");
+				toil.tickIntervalAction = delegate(int delta)
 				{
-					this.pawn.skills.Learn(SkillDefOf.Plants, 0.085f * (float)delta, false, false);
-				}
-				if (this.sowWorkDone >= this.job.plantDefToSow.plant.sowWork)
+					CS_0024_003C_003E8__locals29.sowWorkDone += CS_0024_003C_003E8__locals29.pawn.GetStatValue(StatDefOf.PlantWorkSpeed) * (float)delta;
+					if (CS_0024_003C_003E8__locals29.pawn.skills != null)
+					{
+						CS_0024_003C_003E8__locals29.pawn.skills.Learn(SkillDefOf.Plants, 0.085f * (float)delta);
+					}
+					if (CS_0024_003C_003E8__locals29.sowWorkDone >= CS_0024_003C_003E8__locals29.job.plantDefToSow.plant.sowWork)
+					{
+						CS_0024_003C_003E8__locals29.ReadyForNextToil();
+					}
+				};
+				toil.defaultCompleteMode = ToilCompleteMode.Never;
+				toil.WithEffect(EffecterDefOf.Sow, TargetIndex.B, null);
+				toil.PlaySustainerOrSound(() => SoundDefOf.Interact_Sow);
+				toil.WithProgressBar(TargetIndex.B, () => CS_0024_003C_003E8__locals29.sowWorkDone / CS_0024_003C_003E8__locals29.job.plantDefToSow.plant.sowWork, interpolateBetweenActorAndTarget: true);
+				toil.activeSkill = () => SkillDefOf.Plants;
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 6;
+				return true;
+			}
+			case 6:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.Do(delegate
 				{
-					base.ReadyForNextToil();
-				}
-			};
-			toil.defaultCompleteMode = ToilCompleteMode.Never;
-			toil.WithEffect(EffecterDefOf.Sow, TargetIndex.B, null);
-			toil.PlaySustainerOrSound(() => SoundDefOf.Interact_Sow, 1f);
-			toil.WithProgressBar(TargetIndex.B, () => this.sowWorkDone / this.job.plantDefToSow.plant.sowWork, true, -0.5f, false);
-			toil.activeSkill = (() => SkillDefOf.Plants);
-			yield return toil;
-			yield return Toils_General.Do(delegate
-			{
-				this.PlantableComp.DoPlant(this.pawn, this.PlantCell, this.pawn.Map);
-			});
-			yield break;
+					CS_0024_003C_003E8__locals29.PlantableComp.DoPlant(CS_0024_003C_003E8__locals29.pawn, CS_0024_003C_003E8__locals29.PlantCell, CS_0024_003C_003E8__locals29.pawn.Map);
+				});
+				_003C_003E1__state = 7;
+				return true;
+			case 7:
+				_003C_003E1__state = -1;
+				return false;
+			}
 		}
 
-		// Token: 0x06007989 RID: 31113 RVA: 0x0024B19E File Offset: 0x0024939E
-		public override void ExposeData()
+		bool IEnumerator.MoveNext()
 		{
-			base.ExposeData();
-			Scribe_Values.Look<float>(ref this.sowWorkDone, "sowWorkDone", 0f, false);
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0400526D RID: 21101
-		private float sowWorkDone;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x0400526E RID: 21102
-		private const TargetIndex SeedIndex = TargetIndex.A;
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__9 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__9(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x0400526F RID: 21103
-		private const TargetIndex PlantCellIndex = TargetIndex.B;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x04005270 RID: 21104
-		private const TargetIndex OldSeedStackIndex = TargetIndex.C;
+	private float sowWorkDone;
+
+	private const TargetIndex SeedIndex = TargetIndex.A;
+
+	private const TargetIndex PlantCellIndex = TargetIndex.B;
+
+	private const TargetIndex OldSeedStackIndex = TargetIndex.C;
+
+	private IntVec3 PlantCell => job.GetTarget(TargetIndex.B).Cell;
+
+	private CompPlantable PlantableComp => job.GetTarget(TargetIndex.A).Thing.TryGetComp<CompPlantable>();
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return pawn.Reserve(job.targetA, job, 1, 1, null, errorOnFailed);
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__9))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__9(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref sowWorkDone, "sowWorkDone", 0f);
 	}
 }

@@ -1,179 +1,453 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class QuestPart_RandomRaid : QuestPart
 {
-	// Token: 0x02001D03 RID: 7427
-	public class QuestPart_RandomRaid : QuestPart
+	[CompilerGenerated]
+	private sealed class _003Cget_InvolvedFactions_003Ed__17 : IEnumerable<Faction>, IEnumerable, IEnumerator<Faction>, IEnumerator, IDisposable
 	{
-		// Token: 0x170019A0 RID: 6560
-		// (get) Token: 0x0600A5F0 RID: 42480 RVA: 0x002F8147 File Offset: 0x002F6347
-		public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+		private int _003C_003E1__state;
+
+		private Faction _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public QuestPart_RandomRaid _003C_003E4__this;
+
+		private IEnumerator<Faction> _003C_003E7__wrap1;
+
+		Faction IEnumerator<Faction>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				foreach (GlobalTargetInfo globalTargetInfo in base.QuestLookTargets)
-				{
-					yield return globalTargetInfo;
-				}
-				IEnumerator<GlobalTargetInfo> enumerator = null;
-				if (this.mapParent != null)
-				{
-					yield return this.mapParent;
-				}
-				yield break;
-				yield break;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170019A1 RID: 6561
-		// (get) Token: 0x0600A5F1 RID: 42481 RVA: 0x002F8157 File Offset: 0x002F6357
-		public override IEnumerable<Faction> InvolvedFactions
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				foreach (Faction faction in base.InvolvedFactions)
-				{
-					yield return faction;
-				}
-				IEnumerator<Faction> enumerator = null;
-				if (this.faction != null)
-				{
-					yield return this.faction;
-				}
-				yield break;
-				yield break;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600A5F2 RID: 42482 RVA: 0x002F8168 File Offset: 0x002F6368
-		public override void Notify_QuestSignalReceived(Signal signal)
+		[DebuggerHidden]
+		public _003Cget_InvolvedFactions_003Ed__17(int _003C_003E1__state)
 		{
-			base.Notify_QuestSignalReceived(signal);
-			if (this.fallbackToPlayerHomeMap && (this.mapParent == null || !this.mapParent.HasMap) && Find.AnyPlayerHomeMap != null)
-			{
-				this.mapParent = Find.AnyPlayerHomeMap.Parent;
-			}
-			if (signal.tag == this.inSignal && this.mapParent != null && this.mapParent.HasMap)
-			{
-				IncidentParms incidentParms = new IncidentParms();
-				incidentParms.forced = true;
-				incidentParms.quest = this.quest;
-				incidentParms.target = this.mapParent.Map;
-				incidentParms.points = (this.useCurrentThreatPoints ? (StorytellerUtility.DefaultThreatPointsNow(this.mapParent.Map) * this.currentThreatPointsFactor) : this.pointsRange.RandomInRange);
-				incidentParms.faction = this.faction;
-				incidentParms.customLetterLabel = signal.args.GetFormattedText(this.customLetterLabel);
-				incidentParms.customLetterText = signal.args.GetFormattedText(this.customLetterText).Resolve();
-				incidentParms.attackTargets = this.attackTargets;
-				incidentParms.generateFightersOnly = this.generateFightersOnly;
-				incidentParms.sendLetter = this.sendLetter;
-				if (this.arrivalMode != null)
-				{
-					incidentParms.raidArrivalMode = this.arrivalMode;
-				}
-				IncidentDef incidentDef;
-				if (this.faction == null || this.faction.HostileTo(Faction.OfPlayer))
-				{
-					incidentDef = IncidentDefOf.RaidEnemy;
-				}
-				else
-				{
-					incidentDef = IncidentDefOf.RaidFriendly;
-				}
-				if (this.raidStrategy != null)
-				{
-					incidentParms.raidStrategy = this.raidStrategy;
-				}
-				if (this.faction != null)
-				{
-					incidentParms.points = Mathf.Max(incidentParms.points, this.faction.def.MinPointsToGeneratePawnGroup(PawnGroupKindDefOf.Combat, null));
-				}
-				if (incidentDef.Worker.CanFireNow(incidentParms))
-				{
-					incidentDef.Worker.TryExecute(incidentParms);
-				}
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x0600A5F3 RID: 42483 RVA: 0x002F8350 File Offset: 0x002F6550
-		public override void ExposeData()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			base.ExposeData();
-			Scribe_Values.Look<string>(ref this.inSignal, "inSignal", null, false);
-			Scribe_References.Look<MapParent>(ref this.mapParent, "mapParent", false);
-			Scribe_Values.Look<FloatRange>(ref this.pointsRange, "pointsRange", default(FloatRange), false);
-			Scribe_References.Look<Faction>(ref this.faction, "faction", false);
-			Scribe_Values.Look<bool>(ref this.useCurrentThreatPoints, "useCurrentThreatPoints", false, false);
-			Scribe_Values.Look<float>(ref this.currentThreatPointsFactor, "currentThreatPointsFactor", 1f, false);
-			Scribe_Defs.Look<PawnsArrivalModeDef>(ref this.arrivalMode, "arrivalMode");
-			Scribe_Values.Look<string>(ref this.customLetterLabel, "customLetterLabel", null, false);
-			Scribe_Values.Look<string>(ref this.customLetterText, "customLetterText", null, false);
-			Scribe_Defs.Look<RaidStrategyDef>(ref this.raidStrategy, "raidStrategy");
-			Scribe_Collections.Look<Thing>(ref this.attackTargets, "attackTargets", LookMode.Reference, Array.Empty<object>());
-			Scribe_Values.Look<bool>(ref this.generateFightersOnly, "generateFightersOnly", false, false);
-			Scribe_Values.Look<bool>(ref this.sendLetter, "sendLetter", true, false);
-			Scribe_Values.Look<bool>(ref this.fallbackToPlayerHomeMap, "fallbackToPlayerHomeMap", false, false);
-			if (Scribe.mode == LoadSaveMode.PostLoadInit && this.attackTargets != null)
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				this.attackTargets.RemoveAll((Thing x) => x == null);
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
 			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x0600A5F4 RID: 42484 RVA: 0x002F84A4 File Offset: 0x002F66A4
-		public override void AssignDebugData()
+		private bool MoveNext()
 		{
-			base.AssignDebugData();
-			this.inSignal = "DebugSignal" + Rand.Int.ToString();
-			if (Find.AnyPlayerHomeMap != null)
+			try
 			{
-				this.mapParent = Find.RandomPlayerHomeMap.Parent;
-				this.pointsRange = new FloatRange(500f, 1500f);
+				int num = _003C_003E1__state;
+				QuestPart_RandomRaid questPart_RandomRaid = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((QuestPart)questPart_RandomRaid).InvolvedFactions.GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_006f:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Faction current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (questPart_RandomRaid.faction != null)
+					{
+						_003C_003E2__current = questPart_RandomRaid.faction;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x040072A4 RID: 29348
-		public string inSignal;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x040072A5 RID: 29349
-		public MapParent mapParent;
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
 
-		// Token: 0x040072A6 RID: 29350
-		public FloatRange pointsRange;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x040072A7 RID: 29351
-		public Faction faction;
+		[DebuggerHidden]
+		IEnumerator<Faction> IEnumerable<Faction>.GetEnumerator()
+		{
+			_003Cget_InvolvedFactions_003Ed__17 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_InvolvedFactions_003Ed__17(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x040072A8 RID: 29352
-		public bool useCurrentThreatPoints;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Faction>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x040072A9 RID: 29353
-		public float currentThreatPointsFactor = 1f;
+	[CompilerGenerated]
+	private sealed class _003Cget_QuestLookTargets_003Ed__15 : IEnumerable<GlobalTargetInfo>, IEnumerable, IEnumerator<GlobalTargetInfo>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
 
-		// Token: 0x040072AA RID: 29354
-		public PawnsArrivalModeDef arrivalMode;
+		private GlobalTargetInfo _003C_003E2__current;
 
-		// Token: 0x040072AB RID: 29355
-		public RaidStrategyDef raidStrategy;
+		private int _003C_003El__initialThreadId;
 
-		// Token: 0x040072AC RID: 29356
-		public string customLetterLabel;
+		public QuestPart_RandomRaid _003C_003E4__this;
 
-		// Token: 0x040072AD RID: 29357
-		public string customLetterText;
+		private IEnumerator<GlobalTargetInfo> _003C_003E7__wrap1;
 
-		// Token: 0x040072AE RID: 29358
-		public List<Thing> attackTargets;
+		GlobalTargetInfo IEnumerator<GlobalTargetInfo>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
 
-		// Token: 0x040072AF RID: 29359
-		public bool generateFightersOnly;
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
 
-		// Token: 0x040072B0 RID: 29360
-		public bool fallbackToPlayerHomeMap;
+		[DebuggerHidden]
+		public _003Cget_QuestLookTargets_003Ed__15(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
 
-		// Token: 0x040072B1 RID: 29361
-		public bool sendLetter = true;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				QuestPart_RandomRaid questPart_RandomRaid = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((QuestPart)questPart_RandomRaid).QuestLookTargets.GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_006f:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						GlobalTargetInfo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (questPart_RandomRaid.mapParent != null)
+					{
+						_003C_003E2__current = questPart_RandomRaid.mapParent;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<GlobalTargetInfo> IEnumerable<GlobalTargetInfo>.GetEnumerator()
+		{
+			_003Cget_QuestLookTargets_003Ed__15 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_QuestLookTargets_003Ed__15(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<GlobalTargetInfo>)this).GetEnumerator();
+		}
+	}
+
+	public string inSignal;
+
+	public MapParent mapParent;
+
+	public FloatRange pointsRange;
+
+	public Faction faction;
+
+	public bool useCurrentThreatPoints;
+
+	public float currentThreatPointsFactor = 1f;
+
+	public PawnsArrivalModeDef arrivalMode;
+
+	public RaidStrategyDef raidStrategy;
+
+	public string customLetterLabel;
+
+	public string customLetterText;
+
+	public List<Thing> attackTargets;
+
+	public bool generateFightersOnly;
+
+	public bool fallbackToPlayerHomeMap;
+
+	public bool sendLetter = true;
+
+	public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+	{
+		[IteratorStateMachine(typeof(_003Cget_QuestLookTargets_003Ed__15))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_QuestLookTargets_003Ed__15(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public override IEnumerable<Faction> InvolvedFactions
+	{
+		[IteratorStateMachine(typeof(_003Cget_InvolvedFactions_003Ed__17))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_InvolvedFactions_003Ed__17(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public override void Notify_QuestSignalReceived(Signal signal)
+	{
+		base.Notify_QuestSignalReceived(signal);
+		if (fallbackToPlayerHomeMap && (this.mapParent == null || !this.mapParent.HasMap || !quest.IsParentSuitableForQuest(this.mapParent)))
+		{
+			MapParent mapParent = quest.TryFindNewSuitableMapParentForRetarget() ?? Find.AnyPlayerHomeMap.Parent;
+			if (mapParent != null)
+			{
+				this.mapParent = mapParent;
+			}
+		}
+		if (signal.tag == inSignal && this.mapParent != null && this.mapParent.HasMap)
+		{
+			IncidentParms incidentParms = new IncidentParms();
+			incidentParms.forced = true;
+			incidentParms.quest = quest;
+			incidentParms.target = this.mapParent.Map;
+			incidentParms.points = (useCurrentThreatPoints ? (StorytellerUtility.DefaultThreatPointsNow(this.mapParent.Map) * currentThreatPointsFactor) : pointsRange.RandomInRange);
+			incidentParms.faction = faction;
+			incidentParms.customLetterLabel = signal.args.GetFormattedText(customLetterLabel);
+			incidentParms.customLetterText = signal.args.GetFormattedText(customLetterText).Resolve();
+			incidentParms.attackTargets = attackTargets;
+			incidentParms.generateFightersOnly = generateFightersOnly;
+			incidentParms.sendLetter = sendLetter;
+			if (arrivalMode != null)
+			{
+				incidentParms.raidArrivalMode = arrivalMode;
+			}
+			IncidentDef incidentDef = ((faction != null && !faction.HostileTo(Faction.OfPlayer)) ? IncidentDefOf.RaidFriendly : IncidentDefOf.RaidEnemy);
+			if (raidStrategy != null)
+			{
+				incidentParms.raidStrategy = raidStrategy;
+			}
+			if (faction != null)
+			{
+				incidentParms.points = Mathf.Max(incidentParms.points, faction.def.MinPointsToGeneratePawnGroup(PawnGroupKindDefOf.Combat));
+			}
+			if (incidentDef.Worker.CanFireNow(incidentParms))
+			{
+				incidentDef.Worker.TryExecute(incidentParms);
+			}
+		}
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref inSignal, "inSignal");
+		Scribe_References.Look(ref mapParent, "mapParent");
+		Scribe_Values.Look(ref pointsRange, "pointsRange");
+		Scribe_References.Look(ref faction, "faction");
+		Scribe_Values.Look(ref useCurrentThreatPoints, "useCurrentThreatPoints", defaultValue: false);
+		Scribe_Values.Look(ref currentThreatPointsFactor, "currentThreatPointsFactor", 1f);
+		Scribe_Defs.Look(ref arrivalMode, "arrivalMode");
+		Scribe_Values.Look(ref customLetterLabel, "customLetterLabel");
+		Scribe_Values.Look(ref customLetterText, "customLetterText");
+		Scribe_Defs.Look(ref raidStrategy, "raidStrategy");
+		Scribe_Collections.Look(ref attackTargets, "attackTargets", LookMode.Reference);
+		Scribe_Values.Look(ref generateFightersOnly, "generateFightersOnly", defaultValue: false);
+		Scribe_Values.Look(ref sendLetter, "sendLetter", defaultValue: true);
+		Scribe_Values.Look(ref fallbackToPlayerHomeMap, "fallbackToPlayerHomeMap", defaultValue: false);
+		if (Scribe.mode == LoadSaveMode.PostLoadInit && attackTargets != null)
+		{
+			attackTargets.RemoveAll((Thing x) => x == null);
+		}
+	}
+
+	public override void AssignDebugData()
+	{
+		base.AssignDebugData();
+		inSignal = "DebugSignal" + Rand.Int;
+		if (Find.AnyPlayerHomeMap != null)
+		{
+			mapParent = Find.RandomPlayerHomeMap.Parent;
+			pointsRange = new FloatRange(500f, 1500f);
+		}
 	}
 }

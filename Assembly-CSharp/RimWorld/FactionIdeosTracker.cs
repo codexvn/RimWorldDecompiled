@@ -1,386 +1,426 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
-using UnityEngine;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class FactionIdeosTracker : IExposable
 {
-	// Token: 0x02002589 RID: 9609
-	public class FactionIdeosTracker : IExposable
+	[CompilerGenerated]
+	private sealed class _003Cget_AllIdeos_003Ed__12 : IEnumerable<Ideo>, IEnumerable, IEnumerator<Ideo>, IEnumerator, IDisposable
 	{
-		// Token: 0x17002066 RID: 8294
-		// (get) Token: 0x0600D26B RID: 53867 RVA: 0x003DFD63 File Offset: 0x003DDF63
-		public List<Ideo> IdeosMinorListForReading
+		private int _003C_003E1__state;
+
+		private Ideo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public FactionIdeosTracker _003C_003E4__this;
+
+		private int _003Ci_003E5__2;
+
+		Ideo IEnumerator<Ideo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.ideosMinor;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002067 RID: 8295
-		// (get) Token: 0x0600D26C RID: 53868 RVA: 0x003DFD6B File Offset: 0x003DDF6B
-		public Ideo PrimaryIdeo
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.primaryIdeo;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002068 RID: 8296
-		// (get) Token: 0x0600D26D RID: 53869 RVA: 0x003DFD73 File Offset: 0x003DDF73
-		public IEnumerable<Ideo> AllIdeos
+		[DebuggerHidden]
+		public _003Cget_AllIdeos_003Ed__12(int _003C_003E1__state)
 		{
-			get
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			FactionIdeosTracker factionIdeosTracker = _003C_003E4__this;
+			switch (num)
 			{
-				if (this.primaryIdeo != null)
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (factionIdeosTracker.primaryIdeo != null)
 				{
-					yield return this.primaryIdeo;
+					_003C_003E2__current = factionIdeosTracker.primaryIdeo;
+					_003C_003E1__state = 1;
+					return true;
 				}
-				int num;
-				for (int i = 0; i < this.ideosMinor.Count; i = num + 1)
+				goto IL_004d;
+			case 1:
+				_003C_003E1__state = -1;
+				goto IL_004d;
+			case 2:
 				{
-					yield return this.ideosMinor[i];
-					num = i;
+					_003C_003E1__state = -1;
+					_003Ci_003E5__2++;
+					break;
 				}
-				yield break;
+				IL_004d:
+				_003Ci_003E5__2 = 0;
+				break;
 			}
-		}
-
-		// Token: 0x17002069 RID: 8297
-		// (get) Token: 0x0600D26E RID: 53870 RVA: 0x003DFD83 File Offset: 0x003DDF83
-		public CultureDef PrimaryCulture
-		{
-			get
+			if (_003Ci_003E5__2 < factionIdeosTracker.ideosMinor.Count)
 			{
-				if (this.PrimaryIdeo == null)
-				{
-					return null;
-				}
-				return this.PrimaryIdeo.culture;
-			}
-		}
-
-		// Token: 0x1700206A RID: 8298
-		// (get) Token: 0x0600D26F RID: 53871 RVA: 0x003DFD9C File Offset: 0x003DDF9C
-		public Ideo FluidIdeo
-		{
-			get
-			{
-				if (this.primaryIdeo != null && this.primaryIdeo.Fluid)
-				{
-					return this.primaryIdeo;
-				}
-				for (int i = 0; i < this.ideosMinor.Count; i++)
-				{
-					if (this.ideosMinor[i].Fluid)
-					{
-						return this.ideosMinor[i];
-					}
-				}
-				return null;
-			}
-		}
-
-		// Token: 0x0600D270 RID: 53872 RVA: 0x003DFDFC File Offset: 0x003DDFFC
-		public FactionIdeosTracker(Faction faction)
-		{
-			this.faction = faction;
-		}
-
-		// Token: 0x0600D271 RID: 53873 RVA: 0x003DFE16 File Offset: 0x003DE016
-		public FactionIdeosTracker()
-		{
-		}
-
-		// Token: 0x0600D272 RID: 53874 RVA: 0x003DFE29 File Offset: 0x003DE029
-		public bool Has(Ideo ideo)
-		{
-			return ideo == this.primaryIdeo || this.ideosMinor.Contains(ideo);
-		}
-
-		// Token: 0x0600D273 RID: 53875 RVA: 0x003DFE44 File Offset: 0x003DE044
-		public bool HasAnyIdeoWithMeme(MemeDef meme)
-		{
-			if (this.primaryIdeo.memes.Contains(meme))
-			{
+				_003C_003E2__current = factionIdeosTracker.ideosMinor[_003Ci_003E5__2];
+				_003C_003E1__state = 2;
 				return true;
 			}
-			using (List<Ideo>.Enumerator enumerator = this.ideosMinor.GetEnumerator())
-			{
-				while (enumerator.MoveNext())
-				{
-					if (enumerator.Current.memes.Contains(meme))
-					{
-						return true;
-					}
-				}
-			}
 			return false;
 		}
 
-		// Token: 0x0600D274 RID: 53876 RVA: 0x003DFEB8 File Offset: 0x003DE0B8
-		public bool IsPrimary(Ideo ideo)
+		bool IEnumerator.MoveNext()
 		{
-			return ideo == this.primaryIdeo;
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0600D275 RID: 53877 RVA: 0x003DFEC3 File Offset: 0x003DE0C3
-		public bool IsMinor(Ideo ideo)
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			return this.ideosMinor.Contains(ideo);
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x0600D276 RID: 53878 RVA: 0x003DFED1 File Offset: 0x003DE0D1
-		public void Notify_MemberGainedOrLost()
+		[DebuggerHidden]
+		IEnumerator<Ideo> IEnumerable<Ideo>.GetEnumerator()
 		{
-			if (this.faction.IsPlayer)
+			_003Cget_AllIdeos_003Ed__12 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				this.RecalculateIdeosBasedOnPlayerPawns();
+				_003C_003E1__state = 0;
+				result = this;
 			}
-		}
-
-		// Token: 0x0600D277 RID: 53879 RVA: 0x003DFEE6 File Offset: 0x003DE0E6
-		public void Notify_ColonistChangedIdeo()
-		{
-			this.RecalculateIdeosBasedOnPlayerPawns();
-		}
-
-		// Token: 0x0600D278 RID: 53880 RVA: 0x003DFEF0 File Offset: 0x003DE0F0
-		public void RecalculateIdeosBasedOnPlayerPawns()
-		{
-			if (!ModsConfig.IdeologyActive)
+			else
 			{
-				return;
-			}
-			if (Current.ProgramState != ProgramState.Playing || Find.WindowStack.IsOpen<Dialog_ConfigureIdeo>())
-			{
-				return;
-			}
-			this.ideosMinor.Clear();
-			List<Pawn> allMapsCaravansAndTravellingTransporters_Alive_FreeColonists = PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_FreeColonists;
-			FactionIdeosTracker.tmpPlayerIdeos.Clear();
-			for (int i = 0; i < allMapsCaravansAndTravellingTransporters_Alive_FreeColonists.Count; i++)
-			{
-				if (allMapsCaravansAndTravellingTransporters_Alive_FreeColonists[i].HomeFaction == Faction.OfPlayer)
+				result = new _003Cget_AllIdeos_003Ed__12(0)
 				{
-					Ideo ideo = allMapsCaravansAndTravellingTransporters_Alive_FreeColonists[i].Ideo;
-					if (ideo != null)
-					{
-						FactionIdeosTracker.tmpPlayerIdeos.Increment(ideo);
-					}
-				}
-			}
-			int num = 0;
-			Ideo ideo2 = null;
-			foreach (KeyValuePair<Ideo, int> keyValuePair in FactionIdeosTracker.tmpPlayerIdeos)
-			{
-				if (keyValuePair.Value > num)
-				{
-					num = keyValuePair.Value;
-					ideo2 = keyValuePair.Key;
-				}
-			}
-			if (ideo2 != null && num > FactionIdeosTracker.tmpPlayerIdeos.TryGetValue(this.primaryIdeo, 0))
-			{
-				if (this.primaryIdeo != null)
-				{
-					Find.LetterStack.ReceiveLetter("LetterLabelNewPrimaryIdeo".Translate(this.primaryIdeo.Named("OLDIDEO"), ideo2.Named("NEWIDEO")), "LetterNewPrimaryIdeo".Translate(this.primaryIdeo.Named("OLDIDEO"), ideo2.Named("NEWIDEO"), Faction.OfPlayer.Named("FACTION")), LetterDefOf.NeutralEvent, null, 0, true);
-					this.primaryIdeo.Notify_NotPrimaryAnymore(ideo2);
-				}
-				if (this.primaryIdeo != null && ideo2.ColonistBelieverCountCached < Ideo.MinBelieversToEnableObligations)
-				{
-					Find.LetterStack.ReceiveLetter("LetterTitleObligationsActivated".Translate(ideo2), "LetterTitleObligationsActivatedIdeoBecameMajor".Translate(ideo2.Named("IDEO")), LetterDefOf.NeutralEvent, null, 0, true);
-				}
-				this.primaryIdeo = ideo2;
-			}
-			foreach (KeyValuePair<Ideo, int> keyValuePair2 in FactionIdeosTracker.tmpPlayerIdeos)
-			{
-				if (keyValuePair2.Key != this.primaryIdeo && !this.ideosMinor.Contains(keyValuePair2.Key))
-				{
-					this.ideosMinor.Add(keyValuePair2.Key);
-				}
-			}
-			FactionIdeosTracker.tmpPlayerIdeos.Clear();
-		}
-
-		// Token: 0x0600D279 RID: 53881 RVA: 0x003E0140 File Offset: 0x003DE340
-		public void SetPrimary(Ideo ideo)
-		{
-			this.primaryIdeo = ideo;
-		}
-
-		// Token: 0x0600D27A RID: 53882 RVA: 0x003E014C File Offset: 0x003DE34C
-		public void ChooseOrGenerateIdeo(IdeoGenerationParms parms)
-		{
-			this.primaryIdeo = null;
-			this.ideosMinor.Clear();
-			if (!ModsConfig.IdeologyActive || parms.forceNoExpansionIdeo)
-			{
-				Ideo ideo = IdeoGenerator.GenerateNoExpansionIdeo((!this.faction.def.allowedCultures.NullOrEmpty<CultureDef>()) ? this.faction.def.allowedCultures[0] : DefDatabase<CultureDef>.AllDefs.RandomElement<CultureDef>(), parms);
-				this.primaryIdeo = ideo;
-				Find.IdeoManager.Add(ideo);
-				return;
-			}
-			if (parms.fixedIdeo)
-			{
-				Ideo ideo2 = IdeoGenerator.MakeFixedIdeo(parms);
-				ideo2.primaryFactionColor = new Color?(this.faction.Color);
-				this.primaryIdeo = ideo2;
-				Find.IdeoManager.Add(ideo2);
-				return;
-			}
-			if (Find.IdeoManager.classicMode && Faction.OfPlayer != null && Faction.OfPlayer.ideos.PrimaryIdeo != null)
-			{
-				this.primaryIdeo = Faction.OfPlayer.ideos.PrimaryIdeo;
-				return;
-			}
-			if (!Rand.Chance(0.2f))
-			{
-				if (Find.IdeoManager.IdeosListForReading.Count((Ideo i) => !i.solid) < 10 && !this.faction.def.hidden)
-				{
-					goto IL_18C;
-				}
-			}
-			Ideo ideo3;
-			if ((from x in Find.IdeoManager.IdeosListForReading
-			where IdeoUtility.CanUseIdeo(this.faction.def, x, parms) && !x.solid
-			select x).TryRandomElement(out ideo3))
-			{
-				this.primaryIdeo = ideo3;
-				return;
-			}
-			IL_18C:
-			Ideo ideo4 = IdeoGenerator.GenerateIdeo(parms);
-			ideo4.primaryFactionColor = new Color?(this.faction.Color);
-			this.primaryIdeo = ideo4;
-			Find.IdeoManager.Add(ideo4);
-		}
-
-		// Token: 0x0600D27B RID: 53883 RVA: 0x003E031E File Offset: 0x003DE51E
-		public Ideo GetRandomIdeoForNewPawn()
-		{
-			return this.AllIdeos.RandomElementByWeightWithFallback(delegate(Ideo x)
-			{
-				if (!this.IsPrimary(x))
-				{
-					return 1f;
-				}
-				return 4f;
-			}, null);
-		}
-
-		// Token: 0x0600D27C RID: 53884 RVA: 0x003E0338 File Offset: 0x003DE538
-		public Precept GetPrecept(PreceptDef precept)
-		{
-			foreach (Ideo ideo in this.AllIdeos)
-			{
-				foreach (Precept precept2 in ideo.PreceptsListForReading)
-				{
-					if (precept2.def == precept)
-					{
-						return precept2;
-					}
-				}
-			}
-			return null;
-		}
-
-		// Token: 0x0600D27D RID: 53885 RVA: 0x003E03C8 File Offset: 0x003DE5C8
-		public bool AnyPreceptWithRequiredScars()
-		{
-			using (IEnumerator<Ideo> enumerator = this.AllIdeos.GetEnumerator())
-			{
-				while (enumerator.MoveNext())
-				{
-					if (enumerator.Current.RequiredScars > 0)
-					{
-						return true;
-					}
-				}
-			}
-			return false;
-		}
-
-		// Token: 0x0600D27E RID: 53886 RVA: 0x003E041C File Offset: 0x003DE61C
-		public static IdeoGenerationParms IdeoGenerationParmsForFaction_BackCompatibility(FactionDef factionDef, bool forceNoExpansion = false)
-		{
-			IdeoGenerationParms result = new IdeoGenerationParms(factionDef, forceNoExpansion, null, null, null, false, false, false, false, "", null, null, false, "", false);
-			if (factionDef.isPlayer)
-			{
-				result.disallowedPrecepts = (from x in DefDatabase<PreceptDef>.AllDefs
-				where x.impact == PreceptImpact.High
-				select x).ToList<PreceptDef>();
-				result.disallowedMemes = (from x in DefDatabase<MemeDef>.AllDefs
-				where !x.allowDuringTutorial
-				select x).ToList<MemeDef>();
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
 			return result;
 		}
 
-		// Token: 0x0600D27F RID: 53887 RVA: 0x003E04BA File Offset: 0x003DE6BA
-		public void RemoveAll()
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			this.primaryIdeo = null;
-			this.ideosMinor.Clear();
+			return ((IEnumerable<Ideo>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x0600D280 RID: 53888 RVA: 0x003E04D0 File Offset: 0x003DE6D0
-		public void ExposeData()
+	private Faction faction;
+
+	private Ideo primaryIdeo;
+
+	private List<Ideo> ideosMinor = new List<Ideo>();
+
+	private const float MajorIdeoSelectionWeight = 4f;
+
+	private const float MinorIdeoSelectionWeight = 1f;
+
+	private const float ChanceToReuseExistingIdeo = 0.2f;
+
+	private const int MaxIdeos = 10;
+
+	private static Dictionary<Ideo, int> tmpPlayerIdeos = new Dictionary<Ideo, int>();
+
+	public List<Ideo> IdeosMinorListForReading => ideosMinor;
+
+	public Ideo PrimaryIdeo => primaryIdeo;
+
+	public IEnumerable<Ideo> AllIdeos
+	{
+		[IteratorStateMachine(typeof(_003Cget_AllIdeos_003Ed__12))]
+		get
 		{
-			Scribe_References.Look<Ideo>(ref this.primaryIdeo, "primaryIdeo", false);
-			Scribe_Collections.Look<Ideo>(ref this.ideosMinor, "ideosMinor", LookMode.Reference, Array.Empty<object>());
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_AllIdeos_003Ed__12(-2)
 			{
-				if (this.ideosMinor.RemoveAll((Ideo x) => x == null) != 0)
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public CultureDef PrimaryCulture
+	{
+		get
+		{
+			if (PrimaryIdeo == null)
+			{
+				return null;
+			}
+			return PrimaryIdeo.culture;
+		}
+	}
+
+	public Ideo FluidIdeo
+	{
+		get
+		{
+			if (primaryIdeo != null && primaryIdeo.Fluid)
+			{
+				return primaryIdeo;
+			}
+			for (int i = 0; i < ideosMinor.Count; i++)
+			{
+				if (ideosMinor[i].Fluid)
 				{
-					Log.Error("Some ideoligion references were null after loading.");
+					return ideosMinor[i];
 				}
-				if (this.primaryIdeo == null)
+			}
+			return null;
+		}
+	}
+
+	public FactionIdeosTracker(Faction faction)
+	{
+		this.faction = faction;
+	}
+
+	public FactionIdeosTracker()
+	{
+	}
+
+	public bool Has(Ideo ideo)
+	{
+		if (ideo != primaryIdeo)
+		{
+			return ideosMinor.Contains(ideo);
+		}
+		return true;
+	}
+
+	public bool HasAnyIdeoWithMeme(MemeDef meme)
+	{
+		if (primaryIdeo.memes.Contains(meme))
+		{
+			return true;
+		}
+		foreach (Ideo item in ideosMinor)
+		{
+			if (item.memes.Contains(meme))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public bool IsPrimary(Ideo ideo)
+	{
+		return ideo == primaryIdeo;
+	}
+
+	public bool IsMinor(Ideo ideo)
+	{
+		return ideosMinor.Contains(ideo);
+	}
+
+	public void Notify_MemberGainedOrLost()
+	{
+		if (faction.IsPlayer)
+		{
+			RecalculateIdeosBasedOnPlayerPawns();
+		}
+	}
+
+	public void Notify_ColonistChangedIdeo()
+	{
+		RecalculateIdeosBasedOnPlayerPawns();
+	}
+
+	public void RecalculateIdeosBasedOnPlayerPawns()
+	{
+		if (!ModsConfig.IdeologyActive || Current.ProgramState != ProgramState.Playing || Find.WindowStack.IsOpen<Dialog_ConfigureIdeo>())
+		{
+			return;
+		}
+		ideosMinor.Clear();
+		List<Pawn> allMapsCaravansAndTravellingTransporters_Alive_FreeColonists = PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_FreeColonists;
+		tmpPlayerIdeos.Clear();
+		for (int i = 0; i < allMapsCaravansAndTravellingTransporters_Alive_FreeColonists.Count; i++)
+		{
+			if (allMapsCaravansAndTravellingTransporters_Alive_FreeColonists[i].HomeFaction == Faction.OfPlayer)
+			{
+				Ideo ideo = allMapsCaravansAndTravellingTransporters_Alive_FreeColonists[i].Ideo;
+				if (ideo != null)
 				{
-					Log.Error("Faction had no ideoligions after loading. Adding random one.");
-					Ideo ideo;
-					if (Find.IdeoManager.IdeosListForReading.TryRandomElement(out ideo))
-					{
-						this.primaryIdeo = ideo;
-					}
-				}
-				if (this.primaryIdeo != null && this.primaryIdeo.createdFromNoExpansionGame && ModsConfig.IdeologyActive)
-				{
-					IdeoFoundationDef ideoFoundationDef = DefDatabase<IdeoFoundationDef>.AllDefs.RandomElement<IdeoFoundationDef>();
-					this.primaryIdeo.foundation = (IdeoFoundation)Activator.CreateInstance(ideoFoundationDef.foundationClass);
-					this.primaryIdeo.foundation.def = ideoFoundationDef;
-					this.primaryIdeo.foundation.ideo = this.primaryIdeo;
-					this.primaryIdeo.foundation.Init(FactionIdeosTracker.IdeoGenerationParmsForFaction_BackCompatibility(this.faction.def, false));
-					this.primaryIdeo.createdFromNoExpansionGame = false;
+					tmpPlayerIdeos.Increment(ideo);
 				}
 			}
 		}
+		int num = 0;
+		Ideo ideo2 = null;
+		foreach (KeyValuePair<Ideo, int> tmpPlayerIdeo in tmpPlayerIdeos)
+		{
+			if (tmpPlayerIdeo.Value > num)
+			{
+				num = tmpPlayerIdeo.Value;
+				ideo2 = tmpPlayerIdeo.Key;
+			}
+		}
+		if (ideo2 != null && num > tmpPlayerIdeos.TryGetValue(primaryIdeo, 0))
+		{
+			if (primaryIdeo != null)
+			{
+				Find.LetterStack.ReceiveLetter("LetterLabelNewPrimaryIdeo".Translate(primaryIdeo.Named("OLDIDEO"), ideo2.Named("NEWIDEO")), "LetterNewPrimaryIdeo".Translate(primaryIdeo.Named("OLDIDEO"), ideo2.Named("NEWIDEO"), Faction.OfPlayer.Named("FACTION")), LetterDefOf.NeutralEvent);
+				primaryIdeo.Notify_NotPrimaryAnymore(ideo2);
+			}
+			if (primaryIdeo != null && ideo2.ColonistBelieverCountCached < Ideo.MinBelieversToEnableObligations)
+			{
+				Find.LetterStack.ReceiveLetter("LetterTitleObligationsActivated".Translate(ideo2), "LetterTitleObligationsActivatedIdeoBecameMajor".Translate(ideo2.Named("IDEO")), LetterDefOf.NeutralEvent);
+			}
+			primaryIdeo = ideo2;
+		}
+		foreach (KeyValuePair<Ideo, int> tmpPlayerIdeo2 in tmpPlayerIdeos)
+		{
+			if (tmpPlayerIdeo2.Key != primaryIdeo && !ideosMinor.Contains(tmpPlayerIdeo2.Key))
+			{
+				ideosMinor.Add(tmpPlayerIdeo2.Key);
+			}
+		}
+		tmpPlayerIdeos.Clear();
+	}
 
-		// Token: 0x04008EEB RID: 36587
-		private Faction faction;
+	public void SetPrimary(Ideo ideo)
+	{
+		primaryIdeo = ideo;
+	}
 
-		// Token: 0x04008EEC RID: 36588
-		private Ideo primaryIdeo;
+	public void ChooseOrGenerateIdeo(IdeoGenerationParms parms)
+	{
+		primaryIdeo = null;
+		ideosMinor.Clear();
+		Ideo result;
+		if (!ModsConfig.IdeologyActive || parms.forceNoExpansionIdeo)
+		{
+			Ideo ideo = (primaryIdeo = IdeoGenerator.GenerateNoExpansionIdeo((!faction.def.allowedCultures.NullOrEmpty()) ? faction.def.allowedCultures[0] : DefDatabase<CultureDef>.AllDefs.RandomElement(), parms));
+			Find.IdeoManager.Add(ideo);
+		}
+		else if (parms.fixedIdeo)
+		{
+			Ideo ideo2 = IdeoGenerator.MakeFixedIdeo(parms);
+			ideo2.primaryFactionColor = faction.Color;
+			primaryIdeo = ideo2;
+			Find.IdeoManager.Add(ideo2);
+		}
+		else if (Find.IdeoManager.classicMode && Faction.OfPlayer != null && Faction.OfPlayer.ideos.PrimaryIdeo != null)
+		{
+			primaryIdeo = Faction.OfPlayer.ideos.PrimaryIdeo;
+		}
+		else if ((Rand.Chance(0.2f) || Find.IdeoManager.IdeosListForReading.Count((Ideo i) => !i.solid) >= 10 || faction.def.hidden) && Find.IdeoManager.IdeosListForReading.Where((Ideo x) => IdeoUtility.CanUseIdeo(faction.def, x, parms) && !x.solid).TryRandomElement(out result))
+		{
+			primaryIdeo = result;
+		}
+		else
+		{
+			Ideo ideo3 = IdeoGenerator.GenerateIdeo(parms);
+			ideo3.primaryFactionColor = faction.Color;
+			primaryIdeo = ideo3;
+			Find.IdeoManager.Add(ideo3);
+		}
+	}
 
-		// Token: 0x04008EED RID: 36589
-		private List<Ideo> ideosMinor = new List<Ideo>();
+	public Ideo GetRandomIdeoForNewPawn()
+	{
+		return AllIdeos.RandomElementByWeightWithFallback((Ideo x) => (!IsPrimary(x)) ? 1f : 4f);
+	}
 
-		// Token: 0x04008EEE RID: 36590
-		private const float MajorIdeoSelectionWeight = 4f;
+	public Precept GetPrecept(PreceptDef precept)
+	{
+		foreach (Ideo allIdeo in AllIdeos)
+		{
+			foreach (Precept item in allIdeo.PreceptsListForReading)
+			{
+				if (item.def == precept)
+				{
+					return item;
+				}
+			}
+		}
+		return null;
+	}
 
-		// Token: 0x04008EEF RID: 36591
-		private const float MinorIdeoSelectionWeight = 1f;
+	public bool AnyPreceptWithRequiredScars()
+	{
+		foreach (Ideo allIdeo in AllIdeos)
+		{
+			if (allIdeo.RequiredScars > 0)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
 
-		// Token: 0x04008EF0 RID: 36592
-		private const float ChanceToReuseExistingIdeo = 0.2f;
+	public static IdeoGenerationParms IdeoGenerationParmsForFaction_BackCompatibility(FactionDef factionDef, bool forceNoExpansion = false)
+	{
+		IdeoGenerationParms result = new IdeoGenerationParms(factionDef, forceNoExpansion);
+		if (factionDef.isPlayer)
+		{
+			result.disallowedPrecepts = DefDatabase<PreceptDef>.AllDefs.Where((PreceptDef x) => x.impact == PreceptImpact.High).ToList();
+			result.disallowedMemes = DefDatabase<MemeDef>.AllDefs.Where((MemeDef x) => !x.allowDuringTutorial).ToList();
+		}
+		return result;
+	}
 
-		// Token: 0x04008EF1 RID: 36593
-		private const int MaxIdeos = 10;
+	public void RemoveAll()
+	{
+		primaryIdeo = null;
+		ideosMinor.Clear();
+	}
 
-		// Token: 0x04008EF2 RID: 36594
-		private static Dictionary<Ideo, int> tmpPlayerIdeos = new Dictionary<Ideo, int>();
+	public void ExposeData()
+	{
+		Scribe_References.Look(ref primaryIdeo, "primaryIdeo");
+		Scribe_Collections.Look(ref ideosMinor, "ideosMinor", LookMode.Reference);
+		if (Scribe.mode != LoadSaveMode.PostLoadInit)
+		{
+			return;
+		}
+		if (ideosMinor.RemoveAll((Ideo x) => x == null) != 0)
+		{
+			Log.Error("Some ideoligion references were null after loading.");
+		}
+		if (primaryIdeo == null)
+		{
+			Log.Error("Faction had no ideoligions after loading. Adding random one.");
+			if (Find.IdeoManager.IdeosListForReading.TryRandomElement(out var result))
+			{
+				primaryIdeo = result;
+			}
+		}
+		if (primaryIdeo != null && primaryIdeo.createdFromNoExpansionGame && ModsConfig.IdeologyActive)
+		{
+			IdeoFoundationDef ideoFoundationDef = DefDatabase<IdeoFoundationDef>.AllDefs.RandomElement();
+			primaryIdeo.foundation = (IdeoFoundation)Activator.CreateInstance(ideoFoundationDef.foundationClass);
+			primaryIdeo.foundation.def = ideoFoundationDef;
+			primaryIdeo.foundation.ideo = primaryIdeo;
+			primaryIdeo.foundation.Init(IdeoGenerationParmsForFaction_BackCompatibility(faction.def));
+			primaryIdeo.createdFromNoExpansionGame = false;
+		}
 	}
 }

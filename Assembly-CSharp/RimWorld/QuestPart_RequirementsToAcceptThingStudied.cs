@@ -1,49 +1,150 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class QuestPart_RequirementsToAcceptThingStudied : QuestPart_RequirementsToAccept
 {
-	// Token: 0x02001C96 RID: 7318
-	public class QuestPart_RequirementsToAcceptThingStudied : QuestPart_RequirementsToAccept
+	[CompilerGenerated]
+	private sealed class _003Cget_QuestLookTargets_003Ed__2 : IEnumerable<GlobalTargetInfo>, IEnumerable, IEnumerator<GlobalTargetInfo>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001910 RID: 6416
-		// (get) Token: 0x0600A308 RID: 41736 RVA: 0x002ED5B2 File Offset: 0x002EB7B2
-		public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+		private int _003C_003E1__state;
+
+		private GlobalTargetInfo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public QuestPart_RequirementsToAcceptThingStudied _003C_003E4__this;
+
+		GlobalTargetInfo IEnumerator<GlobalTargetInfo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				Thing thing = this.thing;
-				CompStudiable compStudiable = (thing != null) ? thing.TryGetComp<CompStudiable>() : null;
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003Cget_QuestLookTargets_003Ed__2(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			QuestPart_RequirementsToAcceptThingStudied questPart_RequirementsToAcceptThingStudied = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+			{
+				_003C_003E1__state = -1;
+				CompStudiable compStudiable = questPart_RequirementsToAcceptThingStudied.thing?.TryGetComp<CompStudiable>();
 				if (compStudiable != null && !compStudiable.Completed)
 				{
-					yield return this.thing;
+					_003C_003E2__current = questPart_RequirementsToAcceptThingStudied.thing;
+					_003C_003E1__state = 1;
+					return true;
 				}
-				yield break;
+				break;
 			}
+			case 1:
+				_003C_003E1__state = -1;
+				break;
+			}
+			return false;
 		}
 
-		// Token: 0x0600A309 RID: 41737 RVA: 0x002ED5C4 File Offset: 0x002EB7C4
-		public override AcceptanceReport CanAccept()
+		bool IEnumerator.MoveNext()
 		{
-			Thing thing = this.thing;
-			CompStudiable compStudiable = (thing != null) ? thing.TryGetComp<CompStudiable>() : null;
-			if (compStudiable != null && !compStudiable.Completed)
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<GlobalTargetInfo> IEnumerable<GlobalTargetInfo>.GetEnumerator()
+		{
+			_003Cget_QuestLookTargets_003Ed__2 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				return new AcceptanceReport("QuestRequiredThingStudied".Translate(this.thing));
+				_003C_003E1__state = 0;
+				result = this;
 			}
-			return true;
+			else
+			{
+				result = new _003Cget_QuestLookTargets_003Ed__2(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
 		}
 
-		// Token: 0x0600A30A RID: 41738 RVA: 0x002ED615 File Offset: 0x002EB815
-		public override void ExposeData()
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			base.ExposeData();
-			Scribe_References.Look<Thing>(ref this.thing, "thing", false);
+			return ((IEnumerable<GlobalTargetInfo>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x040070B5 RID: 28853
-		public Thing thing;
+	public Thing thing;
+
+	public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+	{
+		[IteratorStateMachine(typeof(_003Cget_QuestLookTargets_003Ed__2))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_QuestLookTargets_003Ed__2(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public override AcceptanceReport CanAccept()
+	{
+		CompStudiable compStudiable = thing?.TryGetComp<CompStudiable>();
+		if (compStudiable != null && !compStudiable.Completed)
+		{
+			return new AcceptanceReport("QuestRequiredThingStudied".Translate(thing));
+		}
+		return true;
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_References.Look(ref thing, "thing");
 	}
 }

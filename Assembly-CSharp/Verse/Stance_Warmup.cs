@@ -1,285 +1,224 @@
-﻿using System;
 using System.Collections.Generic;
 using RimWorld;
 using UnityEngine;
 using Verse.Sound;
 
-namespace Verse
+namespace Verse;
+
+public class Stance_Warmup : Stance_Busy
 {
-	// Token: 0x020007F1 RID: 2033
-	public class Stance_Warmup : Stance_Busy
+	private Sustainer sustainer;
+
+	protected Effecter effecter;
+
+	private Mote aimLineMote;
+
+	private Mote aimChargeMote;
+
+	private Mote aimTargetMote;
+
+	private bool targetStartedDowned;
+
+	private bool drawAimPie = true;
+
+	private bool needsReInitAfterLoad;
+
+	public Stance_Warmup()
 	{
-		// Token: 0x060033F2 RID: 13298 RVA: 0x0011074B File Offset: 0x0010E94B
-		public Stance_Warmup()
-		{
-		}
+	}
 
-		// Token: 0x060033F3 RID: 13299 RVA: 0x0011075C File Offset: 0x0010E95C
-		public Stance_Warmup(int ticks, LocalTargetInfo focusTarg, Verb verb) : base(ticks, focusTarg, verb)
+	public Stance_Warmup(int ticks, LocalTargetInfo focusTarg, Verb verb)
+		: base(ticks, focusTarg, verb)
+	{
+		if (focusTarg.HasThing && focusTarg.Thing is Pawn pawn)
 		{
-			if (focusTarg.HasThing)
+			targetStartedDowned = pawn.Downed;
+			if (pawn.apparel != null && (!(verb is Verb_CastAbility verb_CastAbility) || verb_CastAbility.Ability.def.hostile))
 			{
-				Pawn pawn = focusTarg.Thing as Pawn;
-				if (pawn != null)
+				for (int i = 0; i < pawn.apparel.WornApparelCount; i++)
 				{
-					this.targetStartedDowned = pawn.Downed;
-					if (pawn.apparel != null)
+					List<ThingComp> allComps = pawn.apparel.WornApparel[i].AllComps;
+					for (int j = 0; j < allComps.Count; j++)
 					{
-						Verb_CastAbility verb_CastAbility = verb as Verb_CastAbility;
-						if (verb_CastAbility == null || verb_CastAbility.Ability.def.hostile)
+						if (allComps[j] is CompShield compShield)
 						{
-							for (int i = 0; i < pawn.apparel.WornApparelCount; i++)
-							{
-								List<ThingComp> allComps = pawn.apparel.WornApparel[i].AllComps;
-								for (int j = 0; j < allComps.Count; j++)
-								{
-									CompShield compShield = allComps[j] as CompShield;
-									if (compShield != null)
-									{
-										compShield.KeepDisplaying();
-									}
-								}
-							}
+							compShield.KeepDisplaying();
 						}
 					}
 				}
 			}
-			this.InitEffects(false);
-			this.drawAimPie = (verb != null && verb.verbProps.drawAimPie);
 		}
+		InitEffects();
+		drawAimPie = verb?.verbProps.drawAimPie ?? false;
+	}
 
-		// Token: 0x060033F4 RID: 13300 RVA: 0x00110844 File Offset: 0x0010EA44
-		public void InitEffects(bool afterReload = false)
+	public void InitEffects(bool afterReload = false)
+	{
+		if (verb == null)
 		{
-			if (this.verb == null)
+			return;
+		}
+		VerbProperties verbProps = verb.verbProps;
+		if (verbProps.soundAiming != null)
+		{
+			SoundInfo info = SoundInfo.InMap(verb.caster, MaintenanceType.PerTick);
+			if (verb.CasterIsPawn)
 			{
+				info.pitchFactor = 1f / verb.CasterPawn.GetStatValue(StatDefOf.AimingDelayFactor);
+			}
+			sustainer = verbProps.soundAiming.TrySpawnSustainer(info);
+		}
+		if (verbProps.warmupEffecter != null && verb.Caster != null)
+		{
+			effecter = verbProps.warmupEffecter.Spawn(verb.Caster, verb.Caster.Map);
+			effecter.Trigger(verb.Caster, focusTarg.ToTargetInfo(verb.Caster.Map));
+		}
+		if (verb.Caster == null)
+		{
+			return;
+		}
+		Map map = verb.Caster.Map;
+		if (verbProps.aimingLineMote != null)
+		{
+			Vector3 vector = TargetPos();
+			IntVec3 cell = vector.ToIntVec3();
+			aimLineMote = MoteMaker.MakeInteractionOverlay(verbProps.aimingLineMote, verb.Caster, new TargetInfo(cell, map), Vector3.zero, vector - cell.ToVector3Shifted());
+			if (afterReload)
+			{
+				aimLineMote?.ForceSpawnTick(startedTick);
+			}
+		}
+		if (verbProps.aimingChargeMote != null)
+		{
+			aimChargeMote = MoteMaker.MakeStaticMote(verb.Caster.DrawPos, map, verbProps.aimingChargeMote, 1f, makeOffscreen: true);
+			if (afterReload)
+			{
+				aimChargeMote?.ForceSpawnTick(startedTick);
+			}
+		}
+		if (verbProps.aimingTargetMote != null)
+		{
+			aimTargetMote = MoteMaker.MakeStaticMote(focusTarg.CenterVector3, map, verbProps.aimingTargetMote, 1f, makeOffscreen: true);
+			if (aimTargetMote != null)
+			{
+				aimTargetMote.exactRotation = AimDir().ToAngleFlat();
+				if (afterReload)
+				{
+					aimTargetMote.ForceSpawnTick(startedTick);
+				}
+			}
+		}
+		if (verbProps.aimingTargetEffecter != null)
+		{
+			effecter = verbProps.aimingTargetEffecter.Spawn(new TargetInfo(verb.Caster), focusTarg.ToTargetInfo(map));
+		}
+	}
+
+	private Vector3 TargetPos()
+	{
+		VerbProperties verbProps = verb.verbProps;
+		Vector3 result = focusTarg.CenterVector3;
+		if (verbProps.aimingLineMoteFixedLength.HasValue)
+		{
+			result = verb.Caster.DrawPos + AimDir() * verbProps.aimingLineMoteFixedLength.Value;
+		}
+		return result;
+	}
+
+	private Vector3 AimDir()
+	{
+		Vector3 result = focusTarg.CenterVector3 - verb.Caster.DrawPos;
+		result.y = 0f;
+		result.Normalize();
+		return result;
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref targetStartedDowned, "targetStartDowned", defaultValue: false);
+		Scribe_Values.Look(ref drawAimPie, "drawAimPie", defaultValue: false);
+		if (Scribe.mode == LoadSaveMode.PostLoadInit)
+		{
+			needsReInitAfterLoad = true;
+		}
+	}
+
+	public override void StanceDraw()
+	{
+		if (drawAimPie && Find.Selector.IsSelected(stanceTracker.pawn))
+		{
+			GenDraw.DrawAimPie(stanceTracker.pawn, focusTarg, (int)((float)ticksLeft * pieSizeFactor), 0.2f);
+		}
+	}
+
+	public override void StanceTick()
+	{
+		if (needsReInitAfterLoad)
+		{
+			InitEffects(afterReload: true);
+			needsReInitAfterLoad = false;
+		}
+		if (sustainer != null && !sustainer.Ended)
+		{
+			sustainer.Maintain();
+		}
+		effecter?.EffectTick(verb.Caster, focusTarg.ToTargetInfo(verb.Caster.Map));
+		Vector3 vector = AimDir();
+		float exactRotation = vector.AngleFlat();
+		bool stunned = stanceTracker.stunner.Stunned;
+		if (aimLineMote != null)
+		{
+			aimLineMote.paused = stunned;
+			aimLineMote.Maintain();
+			Vector3 vector2 = TargetPos();
+			IntVec3 cell = vector2.ToIntVec3();
+			((MoteDualAttached)aimLineMote).UpdateTargets(verb.Caster, new TargetInfo(cell, verb.Caster.Map), Vector3.zero, vector2 - cell.ToVector3Shifted());
+		}
+		if (aimTargetMote != null)
+		{
+			aimTargetMote.paused = stunned;
+			aimTargetMote.exactPosition = focusTarg.CenterVector3;
+			aimTargetMote.exactRotation = exactRotation;
+			aimTargetMote?.Maintain();
+		}
+		if (aimChargeMote != null)
+		{
+			aimChargeMote.paused = stunned;
+			aimChargeMote.exactRotation = exactRotation;
+			aimChargeMote.exactPosition = verb.Caster.Position.ToVector3Shifted() + vector * verb.verbProps.aimingChargeMoteOffset;
+			aimChargeMote?.Maintain();
+		}
+		if (!stanceTracker.stunner.Stunned)
+		{
+			if (!targetStartedDowned && focusTarg.HasThing && focusTarg.Thing is Pawn && ((Pawn)focusTarg.Thing).Downed)
+			{
+				stanceTracker.SetStance(new Stance_Mobile());
 				return;
 			}
-			VerbProperties verbProps = this.verb.verbProps;
-			if (verbProps.soundAiming != null)
+			if (focusTarg.HasThing && (!focusTarg.Thing.Spawned || verb == null || !verb.CanHitTargetFrom(base.Pawn.Position, focusTarg)))
 			{
-				SoundInfo info = SoundInfo.InMap(this.verb.caster, MaintenanceType.PerTick);
-				if (this.verb.CasterIsPawn)
-				{
-					info.pitchFactor = 1f / this.verb.CasterPawn.GetStatValue(StatDefOf.AimingDelayFactor, true, -1);
-				}
-				this.sustainer = verbProps.soundAiming.TrySpawnSustainer(info);
-			}
-			if (verbProps.warmupEffecter != null && this.verb.Caster != null)
-			{
-				this.effecter = verbProps.warmupEffecter.Spawn(this.verb.Caster, this.verb.Caster.Map, 1f);
-				this.effecter.Trigger(this.verb.Caster, this.focusTarg.ToTargetInfo(this.verb.Caster.Map), -1);
-			}
-			if (this.verb.Caster != null)
-			{
-				Map map = this.verb.Caster.Map;
-				if (verbProps.aimingLineMote != null)
-				{
-					Vector3 vector = this.TargetPos();
-					IntVec3 cell = vector.ToIntVec3();
-					this.aimLineMote = MoteMaker.MakeInteractionOverlay(verbProps.aimingLineMote, this.verb.Caster, new TargetInfo(cell, map, false), Vector3.zero, vector - cell.ToVector3Shifted());
-					if (afterReload)
-					{
-						Mote mote = this.aimLineMote;
-						if (mote != null)
-						{
-							mote.ForceSpawnTick(this.startedTick);
-						}
-					}
-				}
-				if (verbProps.aimingChargeMote != null)
-				{
-					this.aimChargeMote = MoteMaker.MakeStaticMote(this.verb.Caster.DrawPos, map, verbProps.aimingChargeMote, 1f, true, 0f);
-					if (afterReload)
-					{
-						Mote mote2 = this.aimChargeMote;
-						if (mote2 != null)
-						{
-							mote2.ForceSpawnTick(this.startedTick);
-						}
-					}
-				}
-				if (verbProps.aimingTargetMote != null)
-				{
-					this.aimTargetMote = MoteMaker.MakeStaticMote(this.focusTarg.CenterVector3, map, verbProps.aimingTargetMote, 1f, true, 0f);
-					if (this.aimTargetMote != null)
-					{
-						this.aimTargetMote.exactRotation = this.AimDir().ToAngleFlat();
-						if (afterReload)
-						{
-							this.aimTargetMote.ForceSpawnTick(this.startedTick);
-						}
-					}
-				}
-				if (verbProps.aimingTargetEffecter != null)
-				{
-					this.effecter = verbProps.aimingTargetEffecter.Spawn(new TargetInfo(this.verb.Caster), this.focusTarg.ToTargetInfo(map), 1f);
-				}
-			}
-		}
-
-		// Token: 0x060033F5 RID: 13301 RVA: 0x00110AC0 File Offset: 0x0010ECC0
-		private Vector3 TargetPos()
-		{
-			VerbProperties verbProps = this.verb.verbProps;
-			Vector3 result = this.focusTarg.CenterVector3;
-			if (verbProps.aimingLineMoteFixedLength != null)
-			{
-				result = this.verb.Caster.DrawPos + this.AimDir() * verbProps.aimingLineMoteFixedLength.Value;
-			}
-			return result;
-		}
-
-		// Token: 0x060033F6 RID: 13302 RVA: 0x00110B20 File Offset: 0x0010ED20
-		private Vector3 AimDir()
-		{
-			Vector3 result = this.focusTarg.CenterVector3 - this.verb.Caster.DrawPos;
-			result.y = 0f;
-			result.Normalize();
-			return result;
-		}
-
-		// Token: 0x060033F7 RID: 13303 RVA: 0x00110B62 File Offset: 0x0010ED62
-		public override void ExposeData()
-		{
-			base.ExposeData();
-			Scribe_Values.Look<bool>(ref this.targetStartedDowned, "targetStartDowned", false, false);
-			Scribe_Values.Look<bool>(ref this.drawAimPie, "drawAimPie", false, false);
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
-			{
-				this.needsReInitAfterLoad = true;
-			}
-		}
-
-		// Token: 0x060033F8 RID: 13304 RVA: 0x00110BA0 File Offset: 0x0010EDA0
-		public override void StanceDraw()
-		{
-			if (this.drawAimPie && Find.Selector.IsSelected(this.stanceTracker.pawn))
-			{
-				GenDraw.DrawAimPie(this.stanceTracker.pawn, this.focusTarg, (int)((float)this.ticksLeft * this.pieSizeFactor), 0.2f);
-			}
-		}
-
-		// Token: 0x060033F9 RID: 13305 RVA: 0x00110BF8 File Offset: 0x0010EDF8
-		public override void StanceTick()
-		{
-			if (this.needsReInitAfterLoad)
-			{
-				this.InitEffects(true);
-				this.needsReInitAfterLoad = false;
-			}
-			if (this.sustainer != null && !this.sustainer.Ended)
-			{
-				this.sustainer.Maintain();
-			}
-			Effecter effecter = this.effecter;
-			if (effecter != null)
-			{
-				effecter.EffectTick(this.verb.Caster, this.focusTarg.ToTargetInfo(this.verb.Caster.Map));
-			}
-			Vector3 vector = this.AimDir();
-			float exactRotation = vector.AngleFlat();
-			bool stunned = this.stanceTracker.stunner.Stunned;
-			if (this.aimLineMote != null)
-			{
-				this.aimLineMote.paused = stunned;
-				this.aimLineMote.Maintain();
-				Vector3 vector2 = this.TargetPos();
-				IntVec3 cell = vector2.ToIntVec3();
-				((MoteDualAttached)this.aimLineMote).UpdateTargets(this.verb.Caster, new TargetInfo(cell, this.verb.Caster.Map, false), Vector3.zero, vector2 - cell.ToVector3Shifted());
-			}
-			if (this.aimTargetMote != null)
-			{
-				this.aimTargetMote.paused = stunned;
-				this.aimTargetMote.exactPosition = this.focusTarg.CenterVector3;
-				this.aimTargetMote.exactRotation = exactRotation;
-				Mote mote = this.aimTargetMote;
-				if (mote != null)
-				{
-					mote.Maintain();
-				}
-			}
-			if (this.aimChargeMote != null)
-			{
-				this.aimChargeMote.paused = stunned;
-				this.aimChargeMote.exactRotation = exactRotation;
-				this.aimChargeMote.exactPosition = this.verb.Caster.Position.ToVector3Shifted() + vector * this.verb.verbProps.aimingChargeMoteOffset;
-				Mote mote2 = this.aimChargeMote;
-				if (mote2 != null)
-				{
-					mote2.Maintain();
-				}
-			}
-			if (!this.stanceTracker.stunner.Stunned)
-			{
-				if (!this.targetStartedDowned && this.focusTarg.HasThing && this.focusTarg.Thing is Pawn && ((Pawn)this.focusTarg.Thing).Downed)
-				{
-					this.stanceTracker.SetStance(new Stance_Mobile());
-					return;
-				}
-				if (this.focusTarg.HasThing && (!this.focusTarg.Thing.Spawned || this.verb == null || !this.verb.CanHitTargetFrom(base.Pawn.Position, this.focusTarg)))
-				{
-					this.stanceTracker.SetStance(new Stance_Mobile());
-					return;
-				}
-				if (this.focusTarg == base.Pawn.mindState.enemyTarget)
-				{
-					base.Pawn.mindState.Notify_EngagedTarget();
-				}
-			}
-			base.StanceTick();
-		}
-
-		// Token: 0x060033FA RID: 13306 RVA: 0x00110EB7 File Offset: 0x0010F0B7
-		public void Interrupt()
-		{
-			base.Expire();
-			Effecter effecter = this.effecter;
-			if (effecter == null)
-			{
+				stanceTracker.SetStance(new Stance_Mobile());
 				return;
 			}
-			effecter.Cleanup();
-		}
-
-		// Token: 0x060033FB RID: 13307 RVA: 0x00110ECF File Offset: 0x0010F0CF
-		protected override void Expire()
-		{
-			Verb verb = this.verb;
-			if (verb != null)
+			if (focusTarg == base.Pawn.mindState.enemyTarget)
 			{
-				verb.WarmupComplete();
+				base.Pawn.mindState.Notify_EngagedTarget();
 			}
-			Effecter effecter = this.effecter;
-			if (effecter != null)
-			{
-				effecter.Cleanup();
-			}
-			base.Expire();
 		}
+		base.StanceTick();
+	}
 
-		// Token: 0x04002733 RID: 10035
-		private Sustainer sustainer;
+	public void Interrupt()
+	{
+		base.Expire();
+		effecter?.Cleanup();
+	}
 
-		// Token: 0x04002734 RID: 10036
-		protected Effecter effecter;
-
-		// Token: 0x04002735 RID: 10037
-		private Mote aimLineMote;
-
-		// Token: 0x04002736 RID: 10038
-		private Mote aimChargeMote;
-
-		// Token: 0x04002737 RID: 10039
-		private Mote aimTargetMote;
-
-		// Token: 0x04002738 RID: 10040
-		private bool targetStartedDowned;
-
-		// Token: 0x04002739 RID: 10041
-		private bool drawAimPie = true;
-
-		// Token: 0x0400273A RID: 10042
-		private bool needsReInitAfterLoad;
+	protected override void Expire()
+	{
+		verb?.WarmupComplete();
+		effecter?.Cleanup();
+		base.Expire();
 	}
 }

@@ -1,50 +1,192 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
-{
-	// Token: 0x02002799 RID: 10137
-	public abstract class RitualPosition_ThingDef : RitualPosition_NearbyThing
-	{
-		// Token: 0x170021EC RID: 8684
-		// (get) Token: 0x0600DE0C RID: 56844
-		protected abstract ThingDef ThingDef { get; }
+namespace RimWorld;
 
-		// Token: 0x0600DE0D RID: 56845 RVA: 0x00415710 File Offset: 0x00413910
-		public override IEnumerable<Thing> CandidateThings(LordJob_Ritual ritual)
+public abstract class RitualPosition_ThingDef : RitualPosition_NearbyThing
+{
+	[CompilerGenerated]
+	private sealed class _003CCandidateThings_003Ed__2 : IEnumerable<Thing>, IEnumerable, IEnumerator<Thing>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Thing _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private LordJob_Ritual ritual;
+
+		public LordJob_Ritual _003C_003E3__ritual;
+
+		public RitualPosition_ThingDef _003C_003E4__this;
+
+		private List<Thing>.Enumerator _003C_003E7__wrap1;
+
+		Thing IEnumerator<Thing>.Current
 		{
-			foreach (Thing thing in ritual.Map.listerThings.ThingsOfDef(this.ThingDef))
+			[DebuggerHidden]
+			get
 			{
-				if (thing.Position.InHorDistOf(ritual.selectedTarget.Cell, 50f))
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CCandidateThings_003Ed__2(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
 				{
-					yield return thing;
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
 				}
 			}
-			List<Thing>.Enumerator enumerator = default(List<Thing>.Enumerator);
-			yield break;
-			yield break;
+			_003C_003E7__wrap1 = default(List<Thing>.Enumerator);
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x0600DE0E RID: 56846 RVA: 0x00415728 File Offset: 0x00413928
-		public override IntVec3 PositionForThing(Thing t)
+		private bool MoveNext()
 		{
-			return t.Position + t.Rotation.Opposite.FacingCell;
+			try
+			{
+				int num = _003C_003E1__state;
+				RitualPosition_ThingDef ritualPosition_ThingDef = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ritual.Map.listerThings.ThingsOfDef(ritualPosition_ThingDef.ThingDef).GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 1:
+					_003C_003E1__state = -3;
+					break;
+				}
+				while (_003C_003E7__wrap1.MoveNext())
+				{
+					Thing current = _003C_003E7__wrap1.Current;
+					if (current.Position.InHorDistOf(ritual.selectedTarget.Cell, 50f))
+					{
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = default(List<Thing>.Enumerator);
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
 		}
 
-		// Token: 0x0600DE0F RID: 56847 RVA: 0x00415758 File Offset: 0x00413958
-		public override bool IsUsableThing(Thing thing, IntVec3 spot, TargetInfo ritualTarget)
+		bool IEnumerator.MoveNext()
 		{
-			IntVec3 c = this.PositionForThing(thing);
-			Map map = ritualTarget.Map;
-			Building edifice = c.GetEdifice(map);
-			return c.Standable(map) && (edifice == null || edifice.def.Fillage == FillCategory.None) && base.IsUsableThing(thing, spot, ritualTarget);
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0600DE10 RID: 56848 RVA: 0x0041579F File Offset: 0x0041399F
-		protected override Rot4 FacingDir(Thing t)
+		private void _003C_003Em__Finally1()
 		{
-			return t.Rotation;
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap1/*cast due to .constrained prefix*/).Dispose();
 		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Thing> IEnumerable<Thing>.GetEnumerator()
+		{
+			_003CCandidateThings_003Ed__2 _003CCandidateThings_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CCandidateThings_003Ed__ = this;
+			}
+			else
+			{
+				_003CCandidateThings_003Ed__ = new _003CCandidateThings_003Ed__2(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CCandidateThings_003Ed__.ritual = _003C_003E3__ritual;
+			return _003CCandidateThings_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Thing>)this).GetEnumerator();
+		}
+	}
+
+	protected abstract ThingDef ThingDef { get; }
+
+	[IteratorStateMachine(typeof(_003CCandidateThings_003Ed__2))]
+	public override IEnumerable<Thing> CandidateThings(LordJob_Ritual ritual)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CCandidateThings_003Ed__2(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__ritual = ritual
+		};
+	}
+
+	public override IntVec3 PositionForThing(Thing t)
+	{
+		return t.Position + t.Rotation.Opposite.FacingCell;
+	}
+
+	public override bool IsUsableThing(Thing thing, IntVec3 spot, TargetInfo ritualTarget)
+	{
+		IntVec3 c = PositionForThing(thing);
+		Map map = ritualTarget.Map;
+		Building edifice = c.GetEdifice(map);
+		if (!c.Standable(map) || (edifice != null && edifice.def.Fillage != 0))
+		{
+			return false;
+		}
+		return base.IsUsableThing(thing, spot, ritualTarget);
+	}
+
+	protected override Rot4 FacingDir(Thing t)
+	{
+		return t.Rotation;
 	}
 }

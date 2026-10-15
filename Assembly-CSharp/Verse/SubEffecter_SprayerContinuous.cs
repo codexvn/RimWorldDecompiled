@@ -1,36 +1,28 @@
-﻿using System;
+namespace Verse;
 
-namespace Verse
+public class SubEffecter_SprayerContinuous : SubEffecter_Sprayer
 {
-	// Token: 0x02000CC0 RID: 3264
-	public class SubEffecter_SprayerContinuous : SubEffecter_Sprayer
+	private int ticksUntilMote;
+
+	private int moteCount;
+
+	public SubEffecter_SprayerContinuous(SubEffecterDef def, Effecter parent)
+		: base(def, parent)
 	{
-		// Token: 0x0600537B RID: 21371 RVA: 0x001AE9BE File Offset: 0x001ACBBE
-		public SubEffecter_SprayerContinuous(SubEffecterDef def, Effecter parent) : base(def, parent)
-		{
-			this.ticksUntilMote = def.initialDelayTicks;
-		}
+		ticksUntilMote = def.initialDelayTicks;
+	}
 
-		// Token: 0x0600537C RID: 21372 RVA: 0x001AE9D4 File Offset: 0x001ACBD4
-		public override void SubEffectTick(TargetInfo A, TargetInfo B)
+	public override void SubEffectTick(TargetInfo A, TargetInfo B)
+	{
+		if (moteCount < def.maxMoteCount)
 		{
-			if (this.moteCount >= this.def.maxMoteCount)
+			ticksUntilMote--;
+			if (ticksUntilMote <= 0)
 			{
-				return;
-			}
-			this.ticksUntilMote--;
-			if (this.ticksUntilMote <= 0)
-			{
-				base.MakeMote(A, B, -1);
-				this.ticksUntilMote = this.def.ticksBetweenMotes;
-				this.moteCount++;
+				MakeMote(A, B);
+				ticksUntilMote = def.ticksBetweenMotes;
+				moteCount++;
 			}
 		}
-
-		// Token: 0x04003C3F RID: 15423
-		private int ticksUntilMote;
-
-		// Token: 0x04003C40 RID: 15424
-		private int moteCount;
 	}
 }

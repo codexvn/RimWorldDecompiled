@@ -1,305 +1,407 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
 
-namespace RimWorld
+namespace RimWorld;
+
+public abstract class CompPower : ThingComp
 {
-	// Token: 0x02002134 RID: 8500
-	public abstract class CompPower : ThingComp
+	[CompilerGenerated]
+	private sealed class _003CCompGetGizmosExtra_003Ed__21 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001C2E RID: 7214
-		// (get) Token: 0x0600B976 RID: 47478 RVA: 0x0035834D File Offset: 0x0035654D
-		public bool TransmitsPowerNow
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompPower _003C_003E4__this;
+
+		private IEnumerator<Gizmo> _003C_003E7__wrap1;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return ((Building)this.parent).TransmitsPowerNow;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001C2F RID: 7215
-		// (get) Token: 0x0600B977 RID: 47479 RVA: 0x0035835F File Offset: 0x0035655F
-		public PowerNet PowerNet
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.transNet != null)
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CCompGetGizmosExtra_003Ed__21(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
 				{
-					return this.transNet;
 				}
-				if (this.connectParent != null)
+				finally
 				{
-					return this.connectParent.transNet;
+					_003C_003Em__Finally1();
 				}
-				return null;
 			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x17001C30 RID: 7216
-		// (get) Token: 0x0600B978 RID: 47480 RVA: 0x00358385 File Offset: 0x00356585
-		public CompProperties_Power Props
+		private bool MoveNext()
 		{
-			get
+			try
 			{
-				return (CompProperties_Power)this.props;
-			}
-		}
-
-		// Token: 0x0600B979 RID: 47481 RVA: 0x00358392 File Offset: 0x00356592
-		public virtual void ResetPowerVars()
-		{
-			this.transNet = null;
-			this.connectParent = null;
-			this.connectChildren = null;
-			CompPower.recentlyConnectedNets.Clear();
-			CompPower.lastManualReconnector = null;
-		}
-
-		// Token: 0x0600B97A RID: 47482 RVA: 0x000026EA File Offset: 0x000008EA
-		public virtual void SetUpPowerVars()
-		{
-		}
-
-		// Token: 0x0600B97B RID: 47483 RVA: 0x003583BC File Offset: 0x003565BC
-		public override void PostExposeData()
-		{
-			Thing thing = null;
-			if (Scribe.mode == LoadSaveMode.Saving && this.connectParent != null)
-			{
-				thing = this.connectParent.parent;
-			}
-			Scribe_References.Look<Thing>(ref thing, "parentThing", false);
-			if (thing != null)
-			{
-				this.connectParent = ((ThingWithComps)thing).GetComp<CompPower>();
-			}
-			if (Scribe.mode == LoadSaveMode.PostLoadInit && this.connectParent != null)
-			{
-				this.ConnectToTransmitter(this.connectParent, true);
-			}
-		}
-
-		// Token: 0x0600B97C RID: 47484 RVA: 0x00358428 File Offset: 0x00356628
-		public override void PostSpawnSetup(bool respawningAfterLoad)
-		{
-			base.PostSpawnSetup(respawningAfterLoad);
-			if (this.Props.transmitsPower || this.parent.def.ConnectToPower)
-			{
-				this.parent.Map.mapDrawer.MapMeshDirty(this.parent.Position, MapMeshFlagDefOf.PowerGrid, true, false);
-				if (this.Props.transmitsPower)
+				int num = _003C_003E1__state;
+				CompPower CS_0024_003C_003E8__locals4 = _003C_003E4__this;
+				switch (num)
 				{
-					this.parent.Map.powerNetManager.Notify_TransmitterSpawned(this);
-				}
-				if (this.parent.def.ConnectToPower)
-				{
-					this.parent.Map.powerNetManager.Notify_ConnectorWantsConnect(this);
-				}
-				this.SetUpPowerVars();
-			}
-		}
-
-		// Token: 0x0600B97D RID: 47485 RVA: 0x003584D8 File Offset: 0x003566D8
-		public override void PostSwapMap()
-		{
-			if (this.connectParent != null && !this.connectParent.parent.Spawned)
-			{
-				this.LostConnectParent();
-			}
-		}
-
-		// Token: 0x0600B97E RID: 47486 RVA: 0x003584FC File Offset: 0x003566FC
-		public override void PostDeSpawn(Map map, DestroyMode mode = DestroyMode.Vanish)
-		{
-			if (this.Props.transmitsPower || this.parent.def.ConnectToPower)
-			{
-				if (mode != DestroyMode.WillReplace || this.parent.BeingTransportedOnGravship)
-				{
-					if (this.Props.transmitsPower)
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((ThingComp)CS_0024_003C_003E8__locals4).CompGetGizmosExtra().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0072;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0072;
+				case 2:
 					{
-						if (this.connectChildren != null)
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_0072:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Gizmo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (CS_0024_003C_003E8__locals4.connectParent != null && CS_0024_003C_003E8__locals4.parent.Faction == Faction.OfPlayer)
+					{
+						_003C_003E2__current = new Command_Action
 						{
-							for (int i = 0; i < this.connectChildren.Count; i++)
+							action = delegate
 							{
-								this.connectChildren[i].LostConnectParent();
-							}
-						}
-						map.powerNetManager.Notify_TransmitterDespawned(this);
+								SoundDefOf.Tick_Tiny.PlayOneShotOnCamera();
+								CS_0024_003C_003E8__locals4.TryManualReconnect();
+							},
+							hotKey = KeyBindingDefOf.Misc2,
+							defaultDesc = "CommandTryReconnectDesc".Translate(),
+							icon = ContentFinder<Texture2D>.Get("UI/Commands/TryReconnect"),
+							defaultLabel = "CommandTryReconnectLabel".Translate()
+						};
+						_003C_003E1__state = 2;
+						return true;
 					}
-					if (this.parent.def.ConnectToPower)
-					{
-						map.powerNetManager.Notify_ConnectorDespawned(this);
-					}
+					break;
 				}
-				map.mapDrawer.MapMeshDirty(this.parent.Position, MapMeshFlagDefOf.PowerGrid, true, false);
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x0600B97F RID: 47487 RVA: 0x003585C4 File Offset: 0x003567C4
-		public virtual void LostConnectParent()
+		bool IEnumerator.MoveNext()
 		{
-			this.connectParent = null;
-			if (this.parent.Spawned)
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				this.parent.Map.powerNetManager.Notify_ConnectorWantsConnect(this);
+				_003C_003E7__wrap1.Dispose();
 			}
 		}
 
-		// Token: 0x0600B980 RID: 47488 RVA: 0x003585F0 File Offset: 0x003567F0
-		public override void PostPrintOnto(SectionLayer layer)
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			base.PostPrintOnto(layer);
-			if (this.connectParent != null && this.connectParent.parent.def != ThingDefOf.HiddenConduit)
-			{
-				PowerNetGraphics.PrintWirePieceConnecting(layer, this.parent, this.connectParent.parent, false);
-			}
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x0600B981 RID: 47489 RVA: 0x00358630 File Offset: 0x00356830
-		public override void CompPrintForPowerGrid(SectionLayer layer)
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
 		{
-			if (this.TransmitsPowerNow)
+			_003CCompGetGizmosExtra_003Ed__21 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				PowerOverlayMats.LinkedOverlayGraphic.Print(layer, this.parent, 0f);
+				_003C_003E1__state = 0;
+				result = this;
 			}
-			Thing thing = this.parent;
-			Building building = this.parent as Building;
-			if (building != null && building.def.building.isAttachment)
+			else
 			{
-				thing = (GenConstruct.GetWallAttachedTo(this.parent) ?? this.parent);
-			}
-			if (this.parent.def.ConnectToPower)
-			{
-				PowerNetGraphics.PrintOverlayConnectorBaseFor(layer, thing);
-			}
-			if (this.connectParent != null)
-			{
-				PowerNetGraphics.PrintWirePieceConnecting(layer, thing, this.connectParent.parent, true);
-			}
-		}
-
-		// Token: 0x0600B982 RID: 47490 RVA: 0x003586CD File Offset: 0x003568CD
-		public override IEnumerable<Gizmo> CompGetGizmosExtra()
-		{
-			foreach (Gizmo gizmo in base.CompGetGizmosExtra())
-			{
-				yield return gizmo;
-			}
-			IEnumerator<Gizmo> enumerator = null;
-			if (this.connectParent != null && this.parent.Faction == Faction.OfPlayer)
-			{
-				yield return new Command_Action
+				result = new _003CCompGetGizmosExtra_003Ed__21(0)
 				{
-					action = delegate()
-					{
-						SoundDefOf.Tick_Tiny.PlayOneShotOnCamera(null);
-						this.TryManualReconnect(true);
-					},
-					hotKey = KeyBindingDefOf.Misc2,
-					defaultDesc = "CommandTryReconnectDesc".Translate(),
-					icon = ContentFinder<Texture2D>.Get("UI/Commands/TryReconnect", true),
-					defaultLabel = "CommandTryReconnectLabel".Translate()
+					_003C_003E4__this = _003C_003E4__this
 				};
 			}
-			yield break;
-			yield break;
+			return result;
 		}
 
-		// Token: 0x0600B983 RID: 47491 RVA: 0x003586E0 File Offset: 0x003568E0
-		public void TryManualReconnect(bool dispayVisuals = true)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			if (CompPower.lastManualReconnector != this)
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	public PowerNet transNet;
+
+	public CompPower connectParent;
+
+	public List<CompPower> connectChildren;
+
+	private static List<PowerNet> recentlyConnectedNets = new List<PowerNet>();
+
+	private static CompPower lastManualReconnector = null;
+
+	public static readonly float WattsToWattDaysPerTick = 1.6666667E-05f;
+
+	public bool TransmitsPowerNow => ((Building)parent).TransmitsPowerNow;
+
+	public PowerNet PowerNet
+	{
+		get
+		{
+			if (transNet != null)
 			{
-				CompPower.recentlyConnectedNets.Clear();
-				CompPower.lastManualReconnector = this;
+				return transNet;
 			}
-			if (this.PowerNet != null)
+			if (connectParent != null)
 			{
-				CompPower.recentlyConnectedNets.Add(this.PowerNet);
+				return connectParent.transNet;
 			}
-			IntVec3 connectorPos = this.parent.def.building.isAttachment ? GenConstruct.GetWallAttachedTo(this.parent).Position : this.parent.Position;
-			CompPower compPower = PowerConnectionMaker.BestTransmitterForConnector(connectorPos, this.parent.Map, CompPower.recentlyConnectedNets);
-			if (compPower == null)
+			return null;
+		}
+	}
+
+	public CompProperties_Power Props => (CompProperties_Power)props;
+
+	public virtual void ResetPowerVars()
+	{
+		transNet = null;
+		connectParent = null;
+		connectChildren = null;
+		recentlyConnectedNets.Clear();
+		lastManualReconnector = null;
+	}
+
+	public virtual void SetUpPowerVars()
+	{
+	}
+
+	public override void PostExposeData()
+	{
+		Thing refee = null;
+		if (Scribe.mode == LoadSaveMode.Saving && connectParent != null)
+		{
+			refee = connectParent.parent;
+		}
+		Scribe_References.Look(ref refee, "parentThing");
+		if (refee != null)
+		{
+			connectParent = ((ThingWithComps)refee).GetComp<CompPower>();
+		}
+		if (Scribe.mode == LoadSaveMode.PostLoadInit && connectParent != null)
+		{
+			ConnectToTransmitter(connectParent, reconnectingAfterLoading: true);
+		}
+	}
+
+	public override void PostSpawnSetup(bool respawningAfterLoad)
+	{
+		base.PostSpawnSetup(respawningAfterLoad);
+		if (Props.transmitsPower || parent.def.ConnectToPower)
+		{
+			parent.Map.mapDrawer.MapMeshDirty(parent.Position, MapMeshFlagDefOf.PowerGrid, regenAdjacentCells: true, regenAdjacentSections: false);
+			if (Props.transmitsPower)
 			{
-				CompPower.recentlyConnectedNets.Clear();
-				compPower = PowerConnectionMaker.BestTransmitterForConnector(connectorPos, this.parent.Map, null);
+				parent.Map.powerNetManager.Notify_TransmitterSpawned(this);
 			}
-			if (compPower != null)
+			if (parent.def.ConnectToPower)
 			{
-				PowerConnectionMaker.DisconnectFromPowerNet(this);
-				this.ConnectToTransmitter(compPower, false);
-				if (dispayVisuals)
+				parent.Map.powerNetManager.Notify_ConnectorWantsConnect(this);
+			}
+			SetUpPowerVars();
+		}
+	}
+
+	public override void PostSwapMap()
+	{
+		if (connectParent != null && !connectParent.parent.Spawned)
+		{
+			LostConnectParent();
+		}
+	}
+
+	public override void PostDeSpawn(Map map, DestroyMode mode = DestroyMode.Vanish)
+	{
+		if (!Props.transmitsPower && !parent.def.ConnectToPower)
+		{
+			return;
+		}
+		if (mode != DestroyMode.WillReplace || parent.BeingTransportedOnGravship)
+		{
+			if (Props.transmitsPower)
+			{
+				if (connectChildren != null)
 				{
-					for (int i = 0; i < 5; i++)
+					for (int i = 0; i < connectChildren.Count; i++)
 					{
-						FleckMaker.ThrowMetaPuff(compPower.parent.Position.ToVector3Shifted(), compPower.parent.Map);
+						connectChildren[i].LostConnectParent();
 					}
 				}
-				this.parent.Map.mapDrawer.MapMeshDirty(this.parent.Position, MapMeshFlagDefOf.PowerGrid);
-				this.parent.Map.mapDrawer.MapMeshDirty(this.parent.Position, MapMeshFlagDefOf.Things);
+				map.powerNetManager.Notify_TransmitterDespawned(this);
+			}
+			if (parent.def.ConnectToPower)
+			{
+				map.powerNetManager.Notify_ConnectorDespawned(this);
 			}
 		}
+		map.mapDrawer.MapMeshDirty(parent.Position, MapMeshFlagDefOf.PowerGrid, regenAdjacentCells: true, regenAdjacentSections: false);
+	}
 
-		// Token: 0x0600B984 RID: 47492 RVA: 0x00358824 File Offset: 0x00356A24
-		public void ConnectToTransmitter(CompPower transmitter, bool reconnectingAfterLoading = false)
+	public virtual void LostConnectParent()
+	{
+		connectParent = null;
+		if (parent.Spawned)
 		{
-			if (this.connectParent != null && (!reconnectingAfterLoading || this.connectParent != transmitter))
+			parent.Map.powerNetManager.Notify_ConnectorWantsConnect(this);
+		}
+	}
+
+	public override void PostPrintOnto(SectionLayer layer)
+	{
+		base.PostPrintOnto(layer);
+		if (connectParent != null && connectParent.parent.def != ThingDefOf.HiddenConduit)
+		{
+			PowerNetGraphics.PrintWirePieceConnecting(layer, parent, connectParent.parent, forPowerOverlay: false);
+		}
+	}
+
+	public override void CompPrintForPowerGrid(SectionLayer layer)
+	{
+		if (TransmitsPowerNow)
+		{
+			PowerOverlayMats.LinkedOverlayGraphic.Print(layer, parent, 0f);
+		}
+		Thing thing = parent;
+		if (parent is Building building && building.def.building.isAttachment)
+		{
+			thing = GenConstruct.GetWallAttachedTo(parent) ?? parent;
+		}
+		if (parent.def.ConnectToPower)
+		{
+			PowerNetGraphics.PrintOverlayConnectorBaseFor(layer, thing);
+		}
+		if (connectParent != null)
+		{
+			PowerNetGraphics.PrintWirePieceConnecting(layer, thing, connectParent.parent, forPowerOverlay: true);
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CCompGetGizmosExtra_003Ed__21))]
+	public override IEnumerable<Gizmo> CompGetGizmosExtra()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CCompGetGizmosExtra_003Ed__21(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public void TryManualReconnect(bool dispayVisuals = true)
+	{
+		if (lastManualReconnector != this)
+		{
+			recentlyConnectedNets.Clear();
+			lastManualReconnector = this;
+		}
+		if (PowerNet != null)
+		{
+			recentlyConnectedNets.Add(PowerNet);
+		}
+		IntVec3 connectorPos = (parent.def.building.isAttachment ? GenConstruct.GetWallAttachedTo(parent).Position : parent.Position);
+		CompPower compPower = PowerConnectionMaker.BestTransmitterForConnector(connectorPos, parent.Map, recentlyConnectedNets);
+		if (compPower == null)
+		{
+			recentlyConnectedNets.Clear();
+			compPower = PowerConnectionMaker.BestTransmitterForConnector(connectorPos, parent.Map);
+		}
+		if (compPower == null)
+		{
+			return;
+		}
+		PowerConnectionMaker.DisconnectFromPowerNet(this);
+		ConnectToTransmitter(compPower);
+		if (dispayVisuals)
+		{
+			for (int i = 0; i < 5; i++)
 			{
-				string[] array = new string[7];
-				array[0] = "Tried to connect ";
-				array[1] = ((this != null) ? this.ToString() : null);
-				array[2] = " to transmitter ";
-				array[3] = ((transmitter != null) ? transmitter.ToString() : null);
-				array[4] = " but it's already connected to ";
-				int num = 5;
-				CompPower compPower = this.connectParent;
-				array[num] = ((compPower != null) ? compPower.ToString() : null);
-				array[6] = ".";
-				Log.Error(string.Concat(array));
-				return;
+				FleckMaker.ThrowMetaPuff(compPower.parent.Position.ToVector3Shifted(), compPower.parent.Map);
 			}
-			this.connectParent = transmitter;
-			if (this.connectParent.connectChildren == null)
+		}
+		parent.Map.mapDrawer.MapMeshDirty(parent.Position, MapMeshFlagDefOf.PowerGrid);
+		parent.Map.mapDrawer.MapMeshDirty(parent.Position, MapMeshFlagDefOf.Things);
+	}
+
+	public void ConnectToTransmitter(CompPower transmitter, bool reconnectingAfterLoading = false)
+	{
+		if (connectParent != null && (!reconnectingAfterLoading || connectParent != transmitter))
+		{
+			Log.Error("Tried to connect " + this?.ToString() + " to transmitter " + transmitter?.ToString() + " but it's already connected to " + connectParent?.ToString() + ".");
+		}
+		else
+		{
+			connectParent = transmitter;
+			if (connectParent.connectChildren == null)
 			{
-				this.connectParent.connectChildren = new List<CompPower>();
+				connectParent.connectChildren = new List<CompPower>();
 			}
 			transmitter.connectChildren.Add(this);
-			PowerNet powerNet = this.PowerNet;
-			if (powerNet != null)
-			{
-				powerNet.RegisterConnector(this);
-			}
+			PowerNet?.RegisterConnector(this);
 		}
+	}
 
-		// Token: 0x0600B985 RID: 47493 RVA: 0x003588EC File Offset: 0x00356AEC
-		public override string CompInspectStringExtra()
+	public override string CompInspectStringExtra()
+	{
+		if (PowerNet == null)
 		{
-			if (this.PowerNet == null)
-			{
-				return "PowerNotConnected".Translate();
-			}
-			string value = (this.PowerNet.CurrentEnergyGainRate() / CompPower.WattsToWattDaysPerTick).ToString("F0");
-			string value2 = this.PowerNet.CurrentStoredEnergy().ToString("F0");
-			return "PowerConnectedRateStored".Translate(value, value2);
+			return "PowerNotConnected".Translate();
 		}
-
-		// Token: 0x04007FE1 RID: 32737
-		public PowerNet transNet;
-
-		// Token: 0x04007FE2 RID: 32738
-		public CompPower connectParent;
-
-		// Token: 0x04007FE3 RID: 32739
-		public List<CompPower> connectChildren;
-
-		// Token: 0x04007FE4 RID: 32740
-		private static List<PowerNet> recentlyConnectedNets = new List<PowerNet>();
-
-		// Token: 0x04007FE5 RID: 32741
-		private static CompPower lastManualReconnector = null;
-
-		// Token: 0x04007FE6 RID: 32742
-		public static readonly float WattsToWattDaysPerTick = 1.6666667E-05f;
+		string text = (PowerNet.CurrentEnergyGainRate() / WattsToWattDaysPerTick).ToString("F0");
+		string text2 = PowerNet.CurrentStoredEnergy().ToString("F0");
+		return "PowerConnectedRateStored".Translate(text, text2);
 	}
 }

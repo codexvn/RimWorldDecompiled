@@ -1,7 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text;
 using RimWorld.Planet;
 using UnityEngine;
@@ -9,1775 +8,1534 @@ using Verse;
 using Verse.AI;
 using Verse.Sound;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Dialog_FormCaravan : Window
 {
-	// Token: 0x02003177 RID: 12663
-	public class Dialog_FormCaravan : Window
+	private enum Tab
 	{
-		// Token: 0x17002E39 RID: 11833
-		// (get) Token: 0x06011CD4 RID: 72916 RVA: 0x00527DE9 File Offset: 0x00525FE9
-		public PlanetTile CurrentTile
-		{
-			get
-			{
-				return this.map.Tile;
-			}
-		}
+		Pawns,
+		Items,
+		TravelSupplies
+	}
 
-		// Token: 0x17002E3A RID: 11834
-		// (get) Token: 0x06011CD5 RID: 72917 RVA: 0x00526A3B File Offset: 0x00524C3B
-		public override Vector2 InitialSize
-		{
-			get
-			{
-				return new Vector2(1024f, (float)UI.screenHeight);
-			}
-		}
+	private readonly Map map;
 
-		// Token: 0x17002E3B RID: 11835
-		// (get) Token: 0x06011CD6 RID: 72918 RVA: 0x00006AAC File Offset: 0x00004CAC
-		protected override float Margin
-		{
-			get
-			{
-				return 0f;
-			}
-		}
+	private readonly bool reform;
 
-		// Token: 0x17002E3C RID: 11836
-		// (get) Token: 0x06011CD7 RID: 72919 RVA: 0x00527DF6 File Offset: 0x00525FF6
-		private bool AutoStripSpawnedCorpses
-		{
-			get
-			{
-				return this.reform;
-			}
-		}
+	private readonly Action onClosed;
 
-		// Token: 0x17002E3D RID: 11837
-		// (get) Token: 0x06011CD8 RID: 72920 RVA: 0x00527DF6 File Offset: 0x00525FF6
-		private bool ListPlayerPawnsInventorySeparately
-		{
-			get
-			{
-				return this.reform;
-			}
-		}
+	private readonly bool canChooseRoute;
 
-		// Token: 0x17002E3E RID: 11838
-		// (get) Token: 0x06011CD9 RID: 72921 RVA: 0x00527DFE File Offset: 0x00525FFE
-		private BiomeDef Biome
-		{
-			get
-			{
-				return this.map.Biome;
-			}
-		}
+	private readonly bool mapAboutToBeRemoved;
 
-		// Token: 0x17002E3F RID: 11839
-		// (get) Token: 0x06011CDA RID: 72922 RVA: 0x00527E0B File Offset: 0x0052600B
-		private bool MustChooseRoute
-		{
-			get
-			{
-				return this.canChooseRoute && (!this.reform || this.map.Parent is Settlement);
-			}
-		}
+	public bool choosingRoute;
 
-		// Token: 0x17002E40 RID: 11840
-		// (get) Token: 0x06011CDB RID: 72923 RVA: 0x00527E34 File Offset: 0x00526034
-		private bool ShowCancelButton
+	private bool thisWindowInstanceEverOpened;
+
+	public List<TransferableOneWay> transferables;
+
+	private TransferableOneWayWidget pawnsTransfer;
+
+	private TransferableOneWayWidget itemsTransfer;
+
+	private TransferableOneWayWidget travelSuppliesTransfer;
+
+	private Tab tab;
+
+	private float lastMassFlashTime = -9999f;
+
+	private PlanetTile startingTile = PlanetTile.Invalid;
+
+	private PlanetTile destinationTile = PlanetTile.Invalid;
+
+	private readonly IntVec3 designatedMeetingPoint = IntVec3.Invalid;
+
+	private bool massUsageDirty = true;
+
+	private float cachedMassUsage;
+
+	private bool massCapacityDirty = true;
+
+	private float cachedMassCapacity;
+
+	private string cachedMassCapacityExplanation;
+
+	private bool tilesPerDayDirty = true;
+
+	private float cachedTilesPerDay;
+
+	private string cachedTilesPerDayExplanation;
+
+	private bool daysWorthOfFoodDirty = true;
+
+	private (float days, float tillRot) cachedDaysWorthOfFood;
+
+	private bool foragedFoodPerDayDirty = true;
+
+	private (ThingDef food, float perDay) cachedForagedFoodPerDay;
+
+	private string cachedForagedFoodPerDayExplanation;
+
+	private bool visibilityDirty = true;
+
+	private float cachedVisibility;
+
+	private string cachedVisibilityExplanation;
+
+	private bool ticksToArriveDirty = true;
+
+	private int cachedTicksToArrive;
+
+	private bool autoSelectTravelSupplies;
+
+	private const int AutoMedicinePerColonist = 2;
+
+	private const float TitleRectHeight = 35f;
+
+	private const float BottomAreaHeight = 55f;
+
+	private const float AutoSelectCheckBoxHeight = 35f;
+
+	private const float AdjustedTravelTimeFactor = 0.35f;
+
+	private const float MaxDaysWorthOfFoodToShowWarningDialog = 5f;
+
+	private static readonly Vector2 BottomButtonSize = new Vector2(160f, 40f);
+
+	private static FloatRange ExtraFoodDaysRange = new FloatRange(1f, 5f);
+
+	private static readonly List<TabRecord> tabsList = new List<TabRecord>();
+
+	private static readonly List<ThingCount> tmpFood = new List<ThingCount>();
+
+	private static readonly List<Pawn> tmpPawns = new List<Pawn>();
+
+	private static readonly List<Pawn> tmpPawnsToTransfer = new List<Pawn>();
+
+	private static readonly List<Thing> tmpPackingSpots = new List<Thing>();
+
+	private static readonly List<(PlanetTile tile, int ticks)> tmpTicksToArrive = new List<(PlanetTile, int)>();
+
+	private static readonly Dictionary<Pawn, float> tmpPawnNutritionDays = new Dictionary<Pawn, float>();
+
+	private static readonly List<TransferableOneWay> tmpBeds = new List<TransferableOneWay>();
+
+	private static Dictionary<Thing, int> cachedTicksToRot = new Dictionary<Thing, int>();
+
+	public PlanetTile CurrentTile => map.Tile;
+
+	public override Vector2 InitialSize => new Vector2(1024f, UI.screenHeight);
+
+	protected override float Margin => 0f;
+
+	private bool AutoStripSpawnedCorpses => reform;
+
+	private bool ListPlayerPawnsInventorySeparately => reform;
+
+	private BiomeDef Biome => map.Biome;
+
+	private bool MustChooseRoute
+	{
+		get
 		{
-			get
+			if (canChooseRoute)
 			{
-				if (!this.mapAboutToBeRemoved)
+				if (reform)
 				{
-					return true;
+					return map.Parent is Settlement;
 				}
-				bool flag = false;
-				for (int i = 0; i < this.transferables.Count; i++)
+				return true;
+			}
+			return false;
+		}
+	}
+
+	private bool ShowCancelButton
+	{
+		get
+		{
+			if (!mapAboutToBeRemoved)
+			{
+				return true;
+			}
+			bool flag = false;
+			for (int i = 0; i < transferables.Count; i++)
+			{
+				if (transferables[i].AnyThing is Pawn { IsColonist: not false, Downed: false })
 				{
-					Pawn pawn = this.transferables[i].AnyThing as Pawn;
-					if (pawn != null && pawn.IsColonist && !pawn.Downed)
+					flag = true;
+					break;
+				}
+			}
+			if (!flag)
+			{
+				return true;
+			}
+			return false;
+		}
+	}
+
+	private IgnorePawnsInventoryMode IgnoreInventoryMode
+	{
+		get
+		{
+			if (!ListPlayerPawnsInventorySeparately)
+			{
+				return IgnorePawnsInventoryMode.IgnoreIfAssignedToUnload;
+			}
+			return IgnorePawnsInventoryMode.IgnoreIfAssignedToUnloadOrPlayerPawn;
+		}
+	}
+
+	public float MassUsage
+	{
+		get
+		{
+			if (massUsageDirty)
+			{
+				massUsageDirty = false;
+				cachedMassUsage = CollectionsMassCalculator.MassUsageTransferables(transferables, IgnoreInventoryMode, includePawnsMass: false, AutoStripSpawnedCorpses);
+			}
+			return cachedMassUsage;
+		}
+	}
+
+	public float MassCapacity
+	{
+		get
+		{
+			if (massCapacityDirty)
+			{
+				massCapacityDirty = false;
+				StringBuilder stringBuilder = new StringBuilder();
+				cachedMassCapacity = CollectionsMassCalculator.CapacityTransferables(transferables, stringBuilder);
+				cachedMassCapacityExplanation = stringBuilder.ToString();
+			}
+			return cachedMassCapacity;
+		}
+	}
+
+	private float TilesPerDay
+	{
+		get
+		{
+			if (tilesPerDayDirty)
+			{
+				tilesPerDayDirty = false;
+				StringBuilder stringBuilder = new StringBuilder();
+				cachedTilesPerDay = TilesPerDayCalculator.ApproxTilesPerDay(transferables, MassUsage, MassCapacity, CurrentTile, startingTile, isShuttle: false, stringBuilder);
+				cachedTilesPerDayExplanation = stringBuilder.ToString();
+			}
+			return cachedTilesPerDay;
+		}
+	}
+
+	private (float days, float tillRot) DaysWorthOfFood
+	{
+		get
+		{
+			if (daysWorthOfFoodDirty)
+			{
+				daysWorthOfFoodDirty = false;
+				float item;
+				float item2;
+				if (destinationTile.Valid)
+				{
+					using WorldPath path = CurrentTile.Layer.Pather.FindPath(CurrentTile, destinationTile, null);
+					int ticksPerMove = CaravanTicksPerMoveUtility.GetTicksPerMove(new CaravanTicksPerMoveUtility.CaravanInfo(this));
+					item = DaysWorthOfFoodCalculator.ApproxDaysWorthOfFood(transferables, CurrentTile, IgnoreInventoryMode, Faction.OfPlayer, path, 0f, ticksPerMove);
+					item2 = DaysUntilRotCalculator.ApproxDaysUntilRot(transferables, CurrentTile, IgnoreInventoryMode, path, 0f, ticksPerMove);
+				}
+				else
+				{
+					item = DaysWorthOfFoodCalculator.ApproxDaysWorthOfFood(transferables, CurrentTile, IgnoreInventoryMode, Faction.OfPlayer);
+					item2 = DaysUntilRotCalculator.ApproxDaysUntilRot(transferables, CurrentTile, IgnoreInventoryMode);
+				}
+				cachedDaysWorthOfFood = (days: item, tillRot: item2);
+			}
+			return cachedDaysWorthOfFood;
+		}
+	}
+
+	private (ThingDef food, float perDay) ForagedFoodPerDay
+	{
+		get
+		{
+			if (foragedFoodPerDayDirty)
+			{
+				foragedFoodPerDayDirty = false;
+				StringBuilder stringBuilder = new StringBuilder();
+				cachedForagedFoodPerDay = ForagedFoodPerDayCalculator.ForagedFoodPerDay(transferables, Biome, Faction.OfPlayer, stringBuilder);
+				cachedForagedFoodPerDayExplanation = stringBuilder.ToString();
+			}
+			return cachedForagedFoodPerDay;
+		}
+	}
+
+	private float Visibility
+	{
+		get
+		{
+			if (visibilityDirty)
+			{
+				visibilityDirty = false;
+				StringBuilder stringBuilder = new StringBuilder();
+				cachedVisibility = CaravanVisibilityCalculator.Visibility(transferables, stringBuilder);
+				cachedVisibilityExplanation = stringBuilder.ToString();
+			}
+			return cachedVisibility;
+		}
+	}
+
+	private int TicksToArrive
+	{
+		get
+		{
+			if (!destinationTile.Valid)
+			{
+				return 0;
+			}
+			if (ticksToArriveDirty)
+			{
+				ticksToArriveDirty = false;
+				using WorldPath path = CurrentTile.Layer.Pather.FindPath(CurrentTile, destinationTile, null);
+				cachedTicksToArrive = CaravanArrivalTimeEstimator.EstimatedTicksToArrive(CurrentTile, destinationTile, path, 0f, CaravanTicksPerMoveUtility.GetTicksPerMove(new CaravanTicksPerMoveUtility.CaravanInfo(this)), Find.TickManager.TicksAbs);
+			}
+			return cachedTicksToArrive;
+		}
+	}
+
+	private bool MostFoodWillRotSoon
+	{
+		get
+		{
+			float num = 0f;
+			float num2 = 0f;
+			for (int i = 0; i < transferables.Count; i++)
+			{
+				TransferableOneWay transferableOneWay = transferables[i];
+				if (transferableOneWay.HasAnyThing && transferableOneWay.CountToTransfer > 0 && transferableOneWay.ThingDef.IsNutritionGivingIngestible && !(transferableOneWay.AnyThing is Corpse))
+				{
+					float num3 = 600f;
+					CompRottable compRottable = transferableOneWay.AnyThing.TryGetComp<CompRottable>();
+					if (compRottable != null)
 					{
-						flag = true;
-						break;
+						num3 = (float)DaysUntilRotCalculator.ApproxTicksUntilRot_AssumeTimePassesBy(compRottable, CurrentTile) / 60000f;
+					}
+					float num4 = transferableOneWay.ThingDef.GetStatValueAbstract(StatDefOf.Nutrition) * (float)transferableOneWay.CountToTransfer;
+					if (num3 < 5f)
+					{
+						num += num4;
+					}
+					else
+					{
+						num2 += num4;
 					}
 				}
-				return !flag;
 			}
-		}
-
-		// Token: 0x17002E41 RID: 11841
-		// (get) Token: 0x06011CDC RID: 72924 RVA: 0x00527E97 File Offset: 0x00526097
-		private IgnorePawnsInventoryMode IgnoreInventoryMode
-		{
-			get
+			if (num == 0f && num2 == 0f)
 			{
-				if (!this.ListPlayerPawnsInventorySeparately)
-				{
-					return IgnorePawnsInventoryMode.IgnoreIfAssignedToUnload;
-				}
-				return IgnorePawnsInventoryMode.IgnoreIfAssignedToUnloadOrPlayerPawn;
+				return false;
 			}
+			return num / (num + num2) >= 0.75f;
 		}
+	}
 
-		// Token: 0x17002E42 RID: 11842
-		// (get) Token: 0x06011CDD RID: 72925 RVA: 0x00527EA4 File Offset: 0x005260A4
-		public float MassUsage
+	public Dialog_FormCaravan(Map map, bool reform = false, Action onClosed = null, bool mapAboutToBeRemoved = false, IntVec3? designatedMeetingPoint = null)
+	{
+		this.map = map;
+		this.reform = reform;
+		this.onClosed = onClosed;
+		this.mapAboutToBeRemoved = mapAboutToBeRemoved;
+		this.designatedMeetingPoint = designatedMeetingPoint ?? IntVec3.Invalid;
+		canChooseRoute = !reform || !map.retainedCaravanData.HasDestinationTile;
+		closeOnAccept = true;
+		closeOnCancel = !reform;
+		autoSelectTravelSupplies = !reform;
+		forcePause = true;
+		absorbInputAroundWindow = true;
+	}
+
+	public override void PostOpen()
+	{
+		base.PostOpen();
+		choosingRoute = false;
+		if (!thisWindowInstanceEverOpened)
 		{
-			get
-			{
-				if (this.massUsageDirty)
-				{
-					this.massUsageDirty = false;
-					this.cachedMassUsage = CollectionsMassCalculator.MassUsageTransferables(this.transferables, this.IgnoreInventoryMode, false, this.AutoStripSpawnedCorpses);
-				}
-				return this.cachedMassUsage;
-			}
+			thisWindowInstanceEverOpened = true;
+			CalculateAndRecacheTransferables();
+			PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.FormCaravan, KnowledgeAmount.Total);
+			Find.WorldRoutePlanner.Start(this);
 		}
+	}
 
-		// Token: 0x17002E43 RID: 11843
-		// (get) Token: 0x06011CDE RID: 72926 RVA: 0x00527EDC File Offset: 0x005260DC
-		public float MassCapacity
+	public override void PostClose()
+	{
+		base.PostClose();
+		if (onClosed != null && !choosingRoute)
 		{
-			get
-			{
-				if (this.massCapacityDirty)
-				{
-					this.massCapacityDirty = false;
-					StringBuilder stringBuilder = new StringBuilder();
-					this.cachedMassCapacity = CollectionsMassCalculator.CapacityTransferables(this.transferables, stringBuilder);
-					this.cachedMassCapacityExplanation = stringBuilder.ToString();
-				}
-				return this.cachedMassCapacity;
-			}
+			onClosed();
 		}
+	}
 
-		// Token: 0x17002E44 RID: 11844
-		// (get) Token: 0x06011CDF RID: 72927 RVA: 0x00527F24 File Offset: 0x00526124
-		private float TilesPerDay
+	public void Notify_NoLongerChoosingRoute()
+	{
+		choosingRoute = false;
+		if (!Find.WindowStack.IsOpen(this) && onClosed != null)
 		{
-			get
-			{
-				if (this.tilesPerDayDirty)
-				{
-					this.tilesPerDayDirty = false;
-					StringBuilder stringBuilder = new StringBuilder();
-					this.cachedTilesPerDay = TilesPerDayCalculator.ApproxTilesPerDay(this.transferables, this.MassUsage, this.MassCapacity, this.CurrentTile, this.startingTile, false, stringBuilder);
-					this.cachedTilesPerDayExplanation = stringBuilder.ToString();
-				}
-				return this.cachedTilesPerDay;
-			}
+			onClosed();
 		}
+	}
 
-		// Token: 0x17002E45 RID: 11845
-		// (get) Token: 0x06011CE0 RID: 72928 RVA: 0x00527F84 File Offset: 0x00526184
-		[TupleElementNames(new string[]
+	public override void DoWindowContents(Rect inRect)
+	{
+		Rect rect = new Rect(0f, 0f, inRect.width, 35f);
+		Text.Font = GameFont.Medium;
+		Text.Anchor = TextAnchor.MiddleCenter;
+		Widgets.Label(rect, (reform ? "ReformCaravan" : "FormCaravan").Translate());
+		Text.Font = GameFont.Small;
+		Text.Anchor = TextAnchor.UpperLeft;
+		CaravanUIUtility.DrawCaravanInfo(new CaravanUIUtility.CaravanInfo(MassUsage, MassCapacity, cachedMassCapacityExplanation, TilesPerDay, cachedTilesPerDayExplanation, DaysWorthOfFood, ForagedFoodPerDay, cachedForagedFoodPerDayExplanation, Visibility, cachedVisibilityExplanation), null, CurrentTile, (!destinationTile.Valid) ? ((int?)null) : new int?(TicksToArrive), lastMassFlashTime, new Rect(12f, 35f, inRect.width - 24f, 40f), lerpMassColor: true, (!destinationTile.Valid) ? ((TaggedString)null) : ("\n" + "DaysWorthOfFoodTooltip_OnlyFirstWaypoint".Translate()));
+		tabsList.Clear();
+		tabsList.Add(new TabRecord("PawnsTab".Translate(), delegate
 		{
-			"days",
-			"tillRot"
-		})]
-		private ValueTuple<float, float> DaysWorthOfFood
+			tab = Tab.Pawns;
+		}, tab == Tab.Pawns));
+		tabsList.Add(new TabRecord("ItemsTab".Translate(), delegate
 		{
-			[return: TupleElementNames(new string[]
-			{
-				"days",
-				"tillRot"
-			})]
-			get
-			{
-				if (this.daysWorthOfFoodDirty)
-				{
-					this.daysWorthOfFoodDirty = false;
-					float item;
-					float item2;
-					if (this.destinationTile.Valid)
-					{
-						using (WorldPath worldPath = this.CurrentTile.Layer.Pather.FindPath(this.CurrentTile, this.destinationTile, null, null))
-						{
-							int ticksPerMove = CaravanTicksPerMoveUtility.GetTicksPerMove(new CaravanTicksPerMoveUtility.CaravanInfo(this), null);
-							item = DaysWorthOfFoodCalculator.ApproxDaysWorthOfFood(this.transferables, this.CurrentTile, this.IgnoreInventoryMode, Faction.OfPlayer, worldPath, 0f, ticksPerMove);
-							item2 = DaysUntilRotCalculator.ApproxDaysUntilRot(this.transferables, this.CurrentTile, this.IgnoreInventoryMode, worldPath, 0f, ticksPerMove);
-							goto IL_F1;
-						}
-					}
-					item = DaysWorthOfFoodCalculator.ApproxDaysWorthOfFood(this.transferables, this.CurrentTile, this.IgnoreInventoryMode, Faction.OfPlayer, null, 0f, 3300);
-					item2 = DaysUntilRotCalculator.ApproxDaysUntilRot(this.transferables, this.CurrentTile, this.IgnoreInventoryMode, null, 0f, 3300);
-					IL_F1:
-					this.cachedDaysWorthOfFood = new ValueTuple<float, float>(item, item2);
-				}
-				return this.cachedDaysWorthOfFood;
-			}
+			tab = Tab.Items;
+		}, tab == Tab.Items));
+		tabsList.Add(new TabRecord("TravelSupplies".Translate(), delegate
+		{
+			tab = Tab.TravelSupplies;
+		}, tab == Tab.TravelSupplies));
+		inRect.yMin += 119f;
+		Widgets.DrawMenuSection(inRect);
+		TabDrawer.DrawTabs(inRect, tabsList);
+		tabsList.Clear();
+		inRect = inRect.ContractedBy(17f);
+		inRect.height += 17f;
+		Widgets.BeginGroup(inRect);
+		Rect rect2 = inRect.AtZero();
+		DoBottomButtons(rect2);
+		Rect rect3 = rect2;
+		rect3.yMax -= 76f;
+		bool anythingChanged = false;
+		switch (tab)
+		{
+		case Tab.Pawns:
+			pawnsTransfer.OnGUI(rect3, out anythingChanged);
+			break;
+		case Tab.Items:
+			itemsTransfer.OnGUI(rect3, out anythingChanged);
+			break;
+		case Tab.TravelSupplies:
+			travelSuppliesTransfer.extraHeaderSpace = 35f;
+			travelSuppliesTransfer.OnGUI(rect3, out anythingChanged);
+			DrawAutoSelectCheckbox(rect3, ref anythingChanged);
+			break;
 		}
-
-		// Token: 0x17002E46 RID: 11846
-		// (get) Token: 0x06011CE1 RID: 72929 RVA: 0x005280A8 File Offset: 0x005262A8
-		[TupleElementNames(new string[]
+		if (anythingChanged)
 		{
-			"food",
-			"perDay"
-		})]
-		private ValueTuple<ThingDef, float> ForagedFoodPerDay
-		{
-			[return: TupleElementNames(new string[]
-			{
-				"food",
-				"perDay"
-			})]
-			get
-			{
-				if (this.foragedFoodPerDayDirty)
-				{
-					this.foragedFoodPerDayDirty = false;
-					StringBuilder stringBuilder = new StringBuilder();
-					this.cachedForagedFoodPerDay = ForagedFoodPerDayCalculator.ForagedFoodPerDay(this.transferables, this.Biome, Faction.OfPlayer, stringBuilder);
-					this.cachedForagedFoodPerDayExplanation = stringBuilder.ToString();
-				}
-				return this.cachedForagedFoodPerDay;
-			}
+			Notify_TransferablesChanged();
 		}
+		Widgets.EndGroup();
+	}
 
-		// Token: 0x17002E47 RID: 11847
-		// (get) Token: 0x06011CE2 RID: 72930 RVA: 0x005280FC File Offset: 0x005262FC
-		private float Visibility
+	public void DrawAutoSelectCheckbox(Rect rect, ref bool anythingChanged)
+	{
+		rect.yMin += 37f;
+		rect.height = 35f;
+		bool num = autoSelectTravelSupplies;
+		Widgets.CheckboxLabeled(rect, "AutomaticallySelectTravelSupplies".Translate(), ref autoSelectTravelSupplies, disabled: false, null, null, placeCheckboxNearText: true);
+		travelSuppliesTransfer.readOnly = autoSelectTravelSupplies;
+		if (num != autoSelectTravelSupplies)
 		{
-			get
-			{
-				if (this.visibilityDirty)
-				{
-					this.visibilityDirty = false;
-					StringBuilder stringBuilder = new StringBuilder();
-					this.cachedVisibility = CaravanVisibilityCalculator.Visibility(this.transferables, stringBuilder);
-					this.cachedVisibilityExplanation = stringBuilder.ToString();
-				}
-				return this.cachedVisibility;
-			}
+			anythingChanged = true;
 		}
+	}
 
-		// Token: 0x17002E48 RID: 11848
-		// (get) Token: 0x06011CE3 RID: 72931 RVA: 0x00528144 File Offset: 0x00526344
-		private int TicksToArrive
+	public override bool CausesMessageBackground()
+	{
+		return true;
+	}
+
+	public void Notify_ChoseRoute(PlanetTile destinationTile)
+	{
+		this.destinationTile = destinationTile;
+		startingTile = CaravanExitMapUtility.BestExitTileToGoTo(destinationTile, map);
+		ticksToArriveDirty = true;
+		daysWorthOfFoodDirty = true;
+		soundAppear.PlayOneShotOnCamera();
+		if (autoSelectTravelSupplies)
 		{
-			get
-			{
-				if (!this.destinationTile.Valid)
-				{
-					return 0;
-				}
-				if (this.ticksToArriveDirty)
-				{
-					this.ticksToArriveDirty = false;
-					using (WorldPath worldPath = this.CurrentTile.Layer.Pather.FindPath(this.CurrentTile, this.destinationTile, null, null))
-					{
-						this.cachedTicksToArrive = CaravanArrivalTimeEstimator.EstimatedTicksToArrive(this.CurrentTile, this.destinationTile, worldPath, 0f, CaravanTicksPerMoveUtility.GetTicksPerMove(new CaravanTicksPerMoveUtility.CaravanInfo(this), null), Find.TickManager.TicksAbs);
-					}
-				}
-				return this.cachedTicksToArrive;
-			}
+			SelectApproximateBestTravelSupplies();
 		}
+	}
 
-		// Token: 0x17002E49 RID: 11849
-		// (get) Token: 0x06011CE4 RID: 72932 RVA: 0x005281EC File Offset: 0x005263EC
-		private bool MostFoodWillRotSoon
+	private void AddToTransferables(Thing t, bool setToTransferMax = false)
+	{
+		TransferableOneWay transferableOneWay = TransferableUtility.TransferableMatching(t, transferables, TransferAsOneMode.PodsOrCaravanPacking);
+		if (transferableOneWay == null)
 		{
-			get
-			{
-				float num = 0f;
-				float num2 = 0f;
-				for (int i = 0; i < this.transferables.Count; i++)
-				{
-					TransferableOneWay transferableOneWay = this.transferables[i];
-					if (transferableOneWay.HasAnyThing && transferableOneWay.CountToTransfer > 0 && transferableOneWay.ThingDef.IsNutritionGivingIngestible && !(transferableOneWay.AnyThing is Corpse))
-					{
-						float num3 = 600f;
-						CompRottable compRottable = transferableOneWay.AnyThing.TryGetComp<CompRottable>();
-						if (compRottable != null)
-						{
-							num3 = (float)DaysUntilRotCalculator.ApproxTicksUntilRot_AssumeTimePassesBy(compRottable, this.CurrentTile, null) / 60000f;
-						}
-						float num4 = transferableOneWay.ThingDef.GetStatValueAbstract(StatDefOf.Nutrition, null) * (float)transferableOneWay.CountToTransfer;
-						if (num3 < 5f)
-						{
-							num += num4;
-						}
-						else
-						{
-							num2 += num4;
-						}
-					}
-				}
-				return (num != 0f || num2 != 0f) && num / (num + num2) >= 0.75f;
-			}
+			transferableOneWay = new TransferableOneWay();
+			transferables.Add(transferableOneWay);
 		}
-
-		// Token: 0x06011CE5 RID: 72933 RVA: 0x005282DC File Offset: 0x005264DC
-		public Dialog_FormCaravan(Map map, bool reform = false, Action onClosed = null, bool mapAboutToBeRemoved = false, IntVec3? designatedMeetingPoint = null) : base(null)
+		if (transferableOneWay.things.Contains(t))
 		{
-			this.map = map;
-			this.reform = reform;
-			this.onClosed = onClosed;
-			this.mapAboutToBeRemoved = mapAboutToBeRemoved;
-			this.designatedMeetingPoint = (designatedMeetingPoint ?? IntVec3.Invalid);
-			this.canChooseRoute = (!reform || !map.retainedCaravanData.HasDestinationTile);
-			this.closeOnAccept = true;
-			this.closeOnCancel = !reform;
-			this.autoSelectTravelSupplies = !reform;
-			this.forcePause = true;
-			this.absorbInputAroundWindow = true;
+			Log.Error("Tried to add the same thing twice to TransferableOneWay: " + t);
+			return;
 		}
-
-		// Token: 0x06011CE6 RID: 72934 RVA: 0x005283CD File Offset: 0x005265CD
-		public override void PostOpen()
+		transferableOneWay.things.Add(t);
+		if (setToTransferMax)
 		{
-			base.PostOpen();
-			this.choosingRoute = false;
-			if (!this.thisWindowInstanceEverOpened)
+			transferableOneWay.AdjustTo(transferableOneWay.CountToTransfer + t.stackCount);
+		}
+	}
+
+	private void DoBottomButtons(Rect rect)
+	{
+		Rect rect2 = new Rect(rect.width - BottomButtonSize.x, rect.height - 55f - 17f, BottomButtonSize.x, BottomButtonSize.y);
+		if (Widgets.ButtonText(rect2, "Send".Translate(), drawBackground: true, doMouseoverSound: true, active: true, null))
+		{
+			TrySend();
+		}
+		if (ShowCancelButton && Widgets.ButtonText(new Rect(0f, rect2.y, BottomButtonSize.x, BottomButtonSize.y), "CancelButton".Translate(), drawBackground: true, doMouseoverSound: true, active: true, null))
+		{
+			Close();
+		}
+		if (Widgets.ButtonText(new Rect(rect.width / 2f - BottomButtonSize.x - 8.5f, rect2.y, BottomButtonSize.x, BottomButtonSize.y), "ResetButton".Translate(), drawBackground: true, doMouseoverSound: true, active: true, null))
+		{
+			SoundDefOf.Tick_Low.PlayOneShotOnCamera();
+			CalculateAndRecacheTransferables();
+		}
+		if (canChooseRoute)
+		{
+			if (Widgets.ButtonText(new Rect(rect.width / 2f + 8.5f, rect2.y, BottomButtonSize.x, BottomButtonSize.y), "ChangeRouteButton".Translate(), drawBackground: true, doMouseoverSound: true, active: true, null))
 			{
-				this.thisWindowInstanceEverOpened = true;
-				this.CalculateAndRecacheTransferables();
-				PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.FormCaravan, KnowledgeAmount.Total);
+				soundClose.PlayOneShotOnCamera();
 				Find.WorldRoutePlanner.Start(this);
 			}
-		}
-
-		// Token: 0x06011CE7 RID: 72935 RVA: 0x00528407 File Offset: 0x00526607
-		public override void PostClose()
-		{
-			base.PostClose();
-			if (this.onClosed != null && !this.choosingRoute)
+			if (destinationTile.Valid)
 			{
-				this.onClosed();
+				Rect rect3 = rect2;
+				rect3.y += rect2.height + 4f;
+				rect3.height = 200f;
+				rect3.xMin -= 200f;
+				Text.Anchor = TextAnchor.UpperRight;
+				Widgets.Label(rect3, "CaravanEstimatedDaysToDestination".Translate(((float)TicksToArrive / 60000f).ToString("0.#")));
+				Text.Anchor = TextAnchor.UpperLeft;
 			}
 		}
-
-		// Token: 0x06011CE8 RID: 72936 RVA: 0x0052842A File Offset: 0x0052662A
-		public void Notify_NoLongerChoosingRoute()
+		if (Prefs.DevMode)
 		{
-			this.choosingRoute = false;
-			if (!Find.WindowStack.IsOpen(this) && this.onClosed != null)
+			float width = 200f;
+			float height = BottomButtonSize.y / 2f;
+			if (Widgets.ButtonText(new Rect(0f, rect2.yMax + 4f, width, height), "DEV: Send instantly", drawBackground: true, doMouseoverSound: true, active: true, null) && DebugTryFormCaravanInstantly())
 			{
-				this.onClosed();
+				SoundDefOf.Tick_High.PlayOneShotOnCamera();
+				Close(doCloseSound: false);
+			}
+			if (Widgets.ButtonText(new Rect(204f, rect2.yMax + 4f, width, height), "DEV: Select everything", drawBackground: true, doMouseoverSound: true, active: true, null))
+			{
+				SoundDefOf.Tick_High.PlayOneShotOnCamera();
+				SetToSendEverything();
 			}
 		}
+	}
 
-		// Token: 0x06011CE9 RID: 72937 RVA: 0x00528454 File Offset: 0x00526654
-		public override void DoWindowContents(Rect inRect)
+	private void TrySend()
+	{
+		if (reform)
 		{
-			Rect rect = new Rect(0f, 0f, inRect.width, 35f);
-			Text.Font = GameFont.Medium;
-			Text.Anchor = TextAnchor.MiddleCenter;
-			Widgets.Label(rect, (this.reform ? "ReformCaravan" : "FormCaravan").Translate());
-			Text.Font = GameFont.Small;
-			Text.Anchor = TextAnchor.UpperLeft;
-			CaravanUIUtility.DrawCaravanInfo(new CaravanUIUtility.CaravanInfo(this.MassUsage, this.MassCapacity, this.cachedMassCapacityExplanation, this.TilesPerDay, this.cachedTilesPerDayExplanation, this.DaysWorthOfFood, this.ForagedFoodPerDay, this.cachedForagedFoodPerDayExplanation, this.Visibility, this.cachedVisibilityExplanation, -1f, -1f, null), null, this.CurrentTile, (!this.destinationTile.Valid) ? null : new int?(this.TicksToArrive), this.lastMassFlashTime, new Rect(12f, 35f, inRect.width - 24f, 40f), true, (!this.destinationTile.Valid) ? null : ("\n" + "DaysWorthOfFoodTooltip_OnlyFirstWaypoint".Translate()), false, true);
-			Dialog_FormCaravan.tabsList.Clear();
-			Dialog_FormCaravan.tabsList.Add(new TabRecord("PawnsTab".Translate(), delegate()
+			if (TryReformCaravan())
 			{
-				this.tab = Dialog_FormCaravan.Tab.Pawns;
-			}, this.tab == Dialog_FormCaravan.Tab.Pawns));
-			Dialog_FormCaravan.tabsList.Add(new TabRecord("ItemsTab".Translate(), delegate()
-			{
-				this.tab = Dialog_FormCaravan.Tab.Items;
-			}, this.tab == Dialog_FormCaravan.Tab.Items));
-			Dialog_FormCaravan.tabsList.Add(new TabRecord("TravelSupplies".Translate(), delegate()
-			{
-				this.tab = Dialog_FormCaravan.Tab.TravelSupplies;
-			}, this.tab == Dialog_FormCaravan.Tab.TravelSupplies));
-			inRect.yMin += 119f;
-			Widgets.DrawMenuSection(inRect);
-			TabDrawer.DrawTabs<TabRecord>(inRect, Dialog_FormCaravan.tabsList, 200f);
-			Dialog_FormCaravan.tabsList.Clear();
-			inRect = inRect.ContractedBy(17f);
-			inRect.height += 17f;
-			Widgets.BeginGroup(inRect);
-			Rect rect2 = inRect.AtZero();
-			this.DoBottomButtons(rect2);
-			Rect rect3 = rect2;
-			rect3.yMax -= 76f;
-			bool flag = false;
-			switch (this.tab)
-			{
-			case Dialog_FormCaravan.Tab.Pawns:
-				this.pawnsTransfer.OnGUI(rect3, out flag);
-				break;
-			case Dialog_FormCaravan.Tab.Items:
-				this.itemsTransfer.OnGUI(rect3, out flag);
-				break;
-			case Dialog_FormCaravan.Tab.TravelSupplies:
-				this.travelSuppliesTransfer.extraHeaderSpace = 35f;
-				this.travelSuppliesTransfer.OnGUI(rect3, out flag);
-				this.DrawAutoSelectCheckbox(rect3, ref flag);
-				break;
+				SoundDefOf.Tick_High.PlayOneShotOnCamera();
+				Close(doCloseSound: false);
 			}
-			if (flag)
-			{
-				this.Notify_TransferablesChanged();
-			}
-			Widgets.EndGroup();
+			return;
 		}
-
-		// Token: 0x06011CEA RID: 72938 RVA: 0x00528724 File Offset: 0x00526924
-		public void DrawAutoSelectCheckbox(Rect rect, ref bool anythingChanged)
+		List<string> list = new List<string>();
+		List<Pawn> pawns = TransferableUtility.GetPawnsFromTransferables(transferables);
+		(float, float) daysWorthOfFood = DaysWorthOfFood;
+		if (daysWorthOfFood.Item1 < 5f)
 		{
-			rect.yMin += 37f;
-			rect.height = 35f;
-			bool flag = this.autoSelectTravelSupplies;
-			Widgets.CheckboxLabeled(rect, "AutomaticallySelectTravelSupplies".Translate(), ref this.autoSelectTravelSupplies, false, null, null, true, false);
-			this.travelSuppliesTransfer.readOnly = this.autoSelectTravelSupplies;
-			if (flag != this.autoSelectTravelSupplies)
+			list.Add((daysWorthOfFood.Item1 < 0.1f) ? "DaysWorthOfFoodWarningDialog_NoFood".Translate().ToString() : "DaysWorthOfFoodWarningDialog".Translate(daysWorthOfFood.Item1.ToString("0.#")).Resolve());
+		}
+		else if (MostFoodWillRotSoon)
+		{
+			list.Add("CaravanFoodWillRotSoonWarningDialog".Translate());
+		}
+		if (!pawns.Any((Pawn pawn) => CaravanUtility.IsOwner(pawn, Faction.OfPlayer) && !pawn.skills.GetSkill(SkillDefOf.Social).TotallyDisabled))
+		{
+			list.Add("CaravanIncapableOfSocial".Translate());
+		}
+		if (ShouldShowWarningForUndesirableFood())
+		{
+			list.Add("DaysWorthOfFoodDietWarningDialog".Translate());
+		}
+		if (ShouldShowWarningForMechWithoutMechanitor())
+		{
+			list.Add("CaravanLacksMechMechanitorWarning".Translate());
+		}
+		if (ModsConfig.BiotechActive)
+		{
+			IEnumerable<Pawn> source = pawns.Where((Pawn x) => (x.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.PsychicBond) is Hediff_PsychicBond hediff_PsychicBond && ThoughtWorker_PsychicBondProximity.NearPsychicBondedPerson(x, hediff_PsychicBond) && !pawns.Contains(hediff_PsychicBond.target)) ? true : false);
+			if (source.Any())
 			{
-				anythingChanged = true;
+				list.Add("PsychicBondDistanceWillBeActive_Caravan".Translate().ToString() + ":\n" + source.Select((Pawn x) => x.NameFullColored.Resolve() + " (" + "Partner".Translate((x.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.PsychicBond) as Hediff_PsychicBond).target).Resolve() + ")").ToLineList("  - ", capitalizeItems: true));
 			}
 		}
-
-		// Token: 0x06011CEB RID: 72939 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public override bool CausesMessageBackground()
+		if (list.Count > 0)
 		{
-			return true;
-		}
-
-		// Token: 0x06011CEC RID: 72940 RVA: 0x00528794 File Offset: 0x00526994
-		public void Notify_ChoseRoute(PlanetTile destinationTile)
-		{
-			this.destinationTile = destinationTile;
-			this.startingTile = CaravanExitMapUtility.BestExitTileToGoTo(destinationTile, this.map);
-			this.ticksToArriveDirty = true;
-			this.daysWorthOfFoodDirty = true;
-			this.soundAppear.PlayOneShotOnCamera(null);
-			if (this.autoSelectTravelSupplies)
+			if (!CheckForErrors(pawns))
 			{
-				this.SelectApproximateBestTravelSupplies();
-			}
-		}
-
-		// Token: 0x06011CED RID: 72941 RVA: 0x005287E4 File Offset: 0x005269E4
-		private void AddToTransferables(Thing t, bool setToTransferMax = false)
-		{
-			TransferableOneWay transferableOneWay = TransferableUtility.TransferableMatching<TransferableOneWay>(t, this.transferables, TransferAsOneMode.PodsOrCaravanPacking);
-			if (transferableOneWay == null)
-			{
-				transferableOneWay = new TransferableOneWay();
-				this.transferables.Add(transferableOneWay);
-			}
-			if (transferableOneWay.things.Contains(t))
-			{
-				Log.Error("Tried to add the same thing twice to TransferableOneWay: " + ((t != null) ? t.ToString() : null));
 				return;
 			}
-			transferableOneWay.things.Add(t);
-			if (setToTransferMax)
+			string text = string.Concat(string.Concat(list.Select((string str) => str + "\n\n").ToArray()), "CaravanAreYouSure".Translate().ToString());
+			Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation(text, delegate
 			{
-				transferableOneWay.AdjustTo(transferableOneWay.CountToTransfer + t.stackCount);
-			}
+				if (TryFormAndSendCaravan())
+				{
+					Close(doCloseSound: false);
+				}
+			}));
 		}
-
-		// Token: 0x06011CEE RID: 72942 RVA: 0x00528864 File Offset: 0x00526A64
-		private void DoBottomButtons(Rect rect)
+		else if (TryFormAndSendCaravan())
 		{
-			Rect rect2 = new Rect(rect.width - Dialog_FormCaravan.BottomButtonSize.x, rect.height - 55f - 17f, Dialog_FormCaravan.BottomButtonSize.x, Dialog_FormCaravan.BottomButtonSize.y);
-			if (Widgets.ButtonText(rect2, "Send".Translate(), true, true, true, null))
-			{
-				this.TrySend();
-			}
-			if (this.ShowCancelButton && Widgets.ButtonText(new Rect(0f, rect2.y, Dialog_FormCaravan.BottomButtonSize.x, Dialog_FormCaravan.BottomButtonSize.y), "CancelButton".Translate(), true, true, true, null))
-			{
-				this.Close(true);
-			}
-			if (Widgets.ButtonText(new Rect(rect.width / 2f - Dialog_FormCaravan.BottomButtonSize.x - 8.5f, rect2.y, Dialog_FormCaravan.BottomButtonSize.x, Dialog_FormCaravan.BottomButtonSize.y), "ResetButton".Translate(), true, true, true, null))
-			{
-				SoundDefOf.Tick_Low.PlayOneShotOnCamera(null);
-				this.CalculateAndRecacheTransferables();
-			}
-			if (this.canChooseRoute)
-			{
-				if (Widgets.ButtonText(new Rect(rect.width / 2f + 8.5f, rect2.y, Dialog_FormCaravan.BottomButtonSize.x, Dialog_FormCaravan.BottomButtonSize.y), "ChangeRouteButton".Translate(), true, true, true, null))
-				{
-					this.soundClose.PlayOneShotOnCamera(null);
-					Find.WorldRoutePlanner.Start(this);
-				}
-				if (this.destinationTile.Valid)
-				{
-					Rect rect3 = rect2;
-					rect3.y += rect2.height + 4f;
-					rect3.height = 200f;
-					rect3.xMin -= 200f;
-					Text.Anchor = TextAnchor.UpperRight;
-					Widgets.Label(rect3, "CaravanEstimatedDaysToDestination".Translate(((float)this.TicksToArrive / 60000f).ToString("0.#")));
-					Text.Anchor = TextAnchor.UpperLeft;
-				}
-			}
-			if (Prefs.DevMode)
-			{
-				float width = 200f;
-				float height = Dialog_FormCaravan.BottomButtonSize.y / 2f;
-				if (Widgets.ButtonText(new Rect(0f, rect2.yMax + 4f, width, height), "DEV: Send instantly", true, true, true, null) && this.DebugTryFormCaravanInstantly())
-				{
-					SoundDefOf.Tick_High.PlayOneShotOnCamera(null);
-					this.Close(false);
-				}
-				if (Widgets.ButtonText(new Rect(204f, rect2.yMax + 4f, width, height), "DEV: Select everything", true, true, true, null))
-				{
-					SoundDefOf.Tick_High.PlayOneShotOnCamera(null);
-					this.SetToSendEverything();
-				}
-			}
+			SoundDefOf.Tick_High.PlayOneShotOnCamera();
+			Close(doCloseSound: false);
 		}
+	}
 
-		// Token: 0x06011CEF RID: 72943 RVA: 0x00528B50 File Offset: 0x00526D50
-		private void TrySend()
+	private void CalculateAndRecacheTransferables()
+	{
+		transferables = new List<TransferableOneWay>();
+		AddPawnsToTransferables();
+		AddItemsToTransferables();
+		CaravanUIUtility.CreateCaravanTransferableWidgets(transferables, out pawnsTransfer, out itemsTransfer, out travelSuppliesTransfer, "FormCaravanColonyThingCountTip".Translate(), IgnoreInventoryMode, () => MassCapacity - MassUsage, AutoStripSpawnedCorpses, CurrentTile, mapAboutToBeRemoved);
+		Notify_TransferablesChanged();
+	}
+
+	private bool DebugTryFormCaravanInstantly()
+	{
+		List<Pawn> pawnsFromTransferables = TransferableUtility.GetPawnsFromTransferables(transferables);
+		if (!pawnsFromTransferables.Any((Pawn x) => CaravanUtility.IsOwner(x, Faction.OfPlayer)))
 		{
-			if (this.reform)
+			if (ModsConfig.IdeologyActive)
 			{
-				if (this.TryReformCaravan())
-				{
-					SoundDefOf.Tick_High.PlayOneShotOnCamera(null);
-					this.Close(false);
-					return;
-				}
+				Messages.Message("CaravanMustHaveAtLeastOneNonSlaveColonist".Translate(), MessageTypeDefOf.RejectInput, historical: false);
 			}
 			else
 			{
-				List<string> list = new List<string>();
-				List<Pawn> pawns = TransferableUtility.GetPawnsFromTransferables(this.transferables);
-				ValueTuple<float, float> daysWorthOfFood = this.DaysWorthOfFood;
-				if (daysWorthOfFood.Item1 < 5f)
-				{
-					list.Add((daysWorthOfFood.Item1 < 0.1f) ? "DaysWorthOfFoodWarningDialog_NoFood".Translate().ToString() : "DaysWorthOfFoodWarningDialog".Translate(daysWorthOfFood.Item1.ToString("0.#")).Resolve());
-				}
-				else if (this.MostFoodWillRotSoon)
-				{
-					list.Add("CaravanFoodWillRotSoonWarningDialog".Translate());
-				}
-				if (!pawns.Any((Pawn pawn) => CaravanUtility.IsOwner(pawn, Faction.OfPlayer) && !pawn.skills.GetSkill(SkillDefOf.Social).TotallyDisabled))
-				{
-					list.Add("CaravanIncapableOfSocial".Translate());
-				}
-				if (this.ShouldShowWarningForUndesirableFood())
-				{
-					list.Add("DaysWorthOfFoodDietWarningDialog".Translate());
-				}
-				if (this.ShouldShowWarningForMechWithoutMechanitor())
-				{
-					list.Add("CaravanLacksMechMechanitorWarning".Translate());
-				}
-				if (ModsConfig.BiotechActive)
-				{
-					IEnumerable<Pawn> source = pawns.Where(delegate(Pawn x)
-					{
-						Hediff_PsychicBond hediff_PsychicBond = x.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.PsychicBond, false) as Hediff_PsychicBond;
-						return hediff_PsychicBond != null && ThoughtWorker_PsychicBondProximity.NearPsychicBondedPerson(x, hediff_PsychicBond) && !pawns.Contains(hediff_PsychicBond.target);
-					});
-					if (source.Any<Pawn>())
-					{
-						list.Add("PsychicBondDistanceWillBeActive_Caravan".Translate().ToString() + ":\n" + (from x in source
-						select x.NameFullColored.Resolve() + " (" + "Partner".Translate((x.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.PsychicBond, false) as Hediff_PsychicBond).target).Resolve() + ")").ToLineList("  - ", true));
-					}
-				}
-				if (list.Count > 0)
-				{
-					if (this.CheckForErrors(pawns))
-					{
-						string str2 = string.Concat((from str in list
-						select str + "\n\n").ToArray<string>()) + "CaravanAreYouSure".Translate().ToString();
-						Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation(str2, delegate()
-						{
-							if (this.TryFormAndSendCaravan())
-							{
-								this.Close(false);
-							}
-						}, false, null, WindowLayer.Dialog));
-						return;
-					}
-				}
-				else if (this.TryFormAndSendCaravan())
-				{
-					SoundDefOf.Tick_High.PlayOneShotOnCamera(null);
-					this.Close(false);
-				}
+				Messages.Message("CaravanMustHaveAtLeastOneColonist".Translate(), MessageTypeDefOf.RejectInput, historical: false);
 			}
+			return false;
 		}
-
-		// Token: 0x06011CF0 RID: 72944 RVA: 0x00528DD0 File Offset: 0x00526FD0
-		private void CalculateAndRecacheTransferables()
+		AddItemsFromTransferablesToRandomInventories(pawnsFromTransferables);
+		PlanetTile directionTile = startingTile;
+		if (!directionTile.Valid)
 		{
-			this.transferables = new List<TransferableOneWay>();
-			this.AddPawnsToTransferables();
-			this.AddItemsToTransferables();
-			CaravanUIUtility.CreateCaravanTransferableWidgets(this.transferables, out this.pawnsTransfer, out this.itemsTransfer, out this.travelSuppliesTransfer, "FormCaravanColonyThingCountTip".Translate(), this.IgnoreInventoryMode, () => this.MassCapacity - this.MassUsage, this.AutoStripSpawnedCorpses, this.CurrentTile, this.mapAboutToBeRemoved);
-			this.Notify_TransferablesChanged();
+			directionTile = CaravanExitMapUtility.RandomBestExitTileFrom(map);
 		}
-
-		// Token: 0x06011CF1 RID: 72945 RVA: 0x00528E4C File Offset: 0x0052704C
-		private bool DebugTryFormCaravanInstantly()
+		if (!directionTile.Valid)
 		{
-			List<Pawn> pawnsFromTransferables = TransferableUtility.GetPawnsFromTransferables(this.transferables);
-			if (!pawnsFromTransferables.Any((Pawn x) => CaravanUtility.IsOwner(x, Faction.OfPlayer)))
+			directionTile = CurrentTile;
+		}
+		CaravanFormingUtility.FormAndCreateCaravan(pawnsFromTransferables, Faction.OfPlayer, CurrentTile, directionTile, destinationTile);
+		return true;
+	}
+
+	private bool TryFormAndSendCaravan()
+	{
+		List<Pawn> pawns = TransferableUtility.GetPawnsFromTransferables(transferables);
+		if (!CheckForErrors(pawns))
+		{
+			return false;
+		}
+		IntVec3 root = pawns.Aggregate(IntVec3.Zero, (IntVec3 acc, Pawn p) => acc + p.Position) / pawns.Count;
+		Direction8Way direction8WayFromTo = Find.WorldGrid.GetDirection8WayFromTo(CurrentTile, startingTile);
+		if (!RCellFinder.TryFindClosestEdgeCellTo(root, map, out var exitSpot) && !TryFindExitSpot(pawns, reachableForEveryColonist: true, out exitSpot))
+		{
+			if (!TryFindExitSpot(pawns, reachableForEveryColonist: false, out exitSpot))
 			{
-				if (ModsConfig.IdeologyActive)
-				{
-					Messages.Message("CaravanMustHaveAtLeastOneNonSlaveColonist".Translate(), MessageTypeDefOf.RejectInput, false);
-				}
-				else
-				{
-					Messages.Message("CaravanMustHaveAtLeastOneColonist".Translate(), MessageTypeDefOf.RejectInput, false);
-				}
+				Messages.Message("CaravanCouldNotFindExitSpot".Translate(direction8WayFromTo.LabelShort()), MessageTypeDefOf.RejectInput, historical: false);
 				return false;
 			}
-			this.AddItemsFromTransferablesToRandomInventories(pawnsFromTransferables);
-			PlanetTile directionTile = this.startingTile;
-			if (!directionTile.Valid)
-			{
-				directionTile = CaravanExitMapUtility.RandomBestExitTileFrom(this.map);
-			}
-			if (!directionTile.Valid)
-			{
-				directionTile = this.CurrentTile;
-			}
-			CaravanFormingUtility.FormAndCreateCaravan(pawnsFromTransferables, Faction.OfPlayer, this.CurrentTile, directionTile, this.destinationTile);
-			return true;
+			Messages.Message("CaravanCouldNotFindReachableExitSpot".Translate(direction8WayFromTo.LabelShort()), new GlobalTargetInfo(exitSpot, map), MessageTypeDefOf.CautionInput, historical: false);
 		}
-
-		// Token: 0x06011CF2 RID: 72946 RVA: 0x00528F18 File Offset: 0x00527118
-		private bool TryFormAndSendCaravan()
+		IntVec3 meetingPoint = designatedMeetingPoint;
+		if (meetingPoint == IntVec3.Invalid && !TryFindRandomPackingSpot(exitSpot, out meetingPoint))
 		{
-			List<Pawn> pawns = TransferableUtility.GetPawnsFromTransferables(this.transferables);
-			if (!this.CheckForErrors(pawns))
-			{
-				return false;
-			}
-			IntVec3 root = pawns.Aggregate(IntVec3.Zero, (IntVec3 acc, Pawn p) => acc + p.Position) / pawns.Count;
-			Direction8Way direction8WayFromTo = Find.WorldGrid.GetDirection8WayFromTo(this.CurrentTile, this.startingTile);
-			IntVec3 exitSpot;
-			if (!RCellFinder.TryFindClosestEdgeCellTo(root, this.map, out exitSpot) && !this.TryFindExitSpot(pawns, true, out exitSpot))
-			{
-				if (!this.TryFindExitSpot(pawns, false, out exitSpot))
-				{
-					Messages.Message("CaravanCouldNotFindExitSpot".Translate(direction8WayFromTo.LabelShort()), MessageTypeDefOf.RejectInput, false);
-					return false;
-				}
-				Messages.Message("CaravanCouldNotFindReachableExitSpot".Translate(direction8WayFromTo.LabelShort()), new GlobalTargetInfo(exitSpot, this.map, false), MessageTypeDefOf.CautionInput, false);
-			}
-			IntVec3 meetingPoint = this.designatedMeetingPoint;
-			if (meetingPoint == IntVec3.Invalid && !this.TryFindRandomPackingSpot(exitSpot, out meetingPoint))
-			{
-				Messages.Message("CaravanCouldNotFindPackingSpot".Translate(direction8WayFromTo.LabelShort()), new GlobalTargetInfo(exitSpot, this.map, false), MessageTypeDefOf.RejectInput, false);
-				return false;
-			}
-			Pawn pawn = pawns.Find((Pawn ropee) => AnimalPenUtility.NeedsToBeManagedByRope(ropee) && !pawns.Any((Pawn roper) => roper.IsColonist && GatherAnimalsAndSlavesForCaravanUtility.CanRoperTakeAnimalToDest(roper, ropee, exitSpot) && GatherAnimalsAndSlavesForCaravanUtility.CanRoperTakeAnimalToDest(roper, ropee, meetingPoint)));
-			if (pawn != null)
-			{
-				Messages.Message("CaravanRoamerCannotReachSpots".Translate(pawn.LabelShort, pawn), pawn, MessageTypeDefOf.CautionInput, false);
-				return false;
-			}
-			CaravanFormingUtility.StartFormingCaravan((from x in pawns
-			where !x.Downed
-			select x).ToList<Pawn>(), (from x in pawns
-			where x.Downed
-			select x).ToList<Pawn>(), Faction.OfPlayer, this.transferables, meetingPoint, exitSpot, this.startingTile, this.destinationTile);
-			Messages.Message("CaravanFormationProcessStarted".Translate(), pawns[0], MessageTypeDefOf.PositiveEvent, false);
-			if (ModsConfig.BiotechActive)
-			{
-				if (pawns.Any((Pawn p) => p.RaceProps.IsMechanoid))
-				{
-					LessonAutoActivator.TeachOpportunity(ConceptDefOf.MechsInCaravans, OpportunityType.GoodToKnow);
-				}
-			}
-			return true;
+			Messages.Message("CaravanCouldNotFindPackingSpot".Translate(direction8WayFromTo.LabelShort()), new GlobalTargetInfo(exitSpot, map), MessageTypeDefOf.RejectInput, historical: false);
+			return false;
 		}
-
-		// Token: 0x06011CF3 RID: 72947 RVA: 0x005291F4 File Offset: 0x005273F4
-		private bool TryReformCaravan()
+		Pawn pawn = pawns.Find((Pawn ropee) => AnimalPenUtility.NeedsToBeManagedByRope(ropee) && !pawns.Any((Pawn roper) => roper.IsColonist && GatherAnimalsAndSlavesForCaravanUtility.CanRoperTakeAnimalToDest(roper, ropee, exitSpot) && GatherAnimalsAndSlavesForCaravanUtility.CanRoperTakeAnimalToDest(roper, ropee, meetingPoint)));
+		if (pawn != null)
 		{
-			List<Pawn> pawnsFromTransferables = TransferableUtility.GetPawnsFromTransferables(this.transferables);
-			if (!this.CheckForErrors(pawnsFromTransferables))
-			{
-				return false;
-			}
-			this.AddItemsFromTransferablesToRandomInventories(pawnsFromTransferables);
-			Caravan caravan = CaravanExitMapUtility.ExitMapAndCreateCaravan(pawnsFromTransferables, Faction.OfPlayer, this.CurrentTile, this.CurrentTile, this.destinationTile, false);
-			this.map.Parent.CheckRemoveMapNow();
-			TaggedString taggedString = "MessageReformedCaravan".Translate();
-			if (caravan.pather.Moving && caravan.pather.ArrivalAction != null)
-			{
-				taggedString += " " + "MessageFormedCaravan_Orders".Translate() + ": " + caravan.pather.ArrivalAction.Label + ".";
-			}
-			Messages.Message(taggedString, caravan, MessageTypeDefOf.TaskCompletion, false);
-			return true;
+			Messages.Message("CaravanRoamerCannotReachSpots".Translate(pawn.LabelShort, pawn), pawn, MessageTypeDefOf.CautionInput, historical: false);
+			return false;
 		}
-
-		// Token: 0x06011CF4 RID: 72948 RVA: 0x005292D0 File Offset: 0x005274D0
-		private void AddItemsFromTransferablesToRandomInventories(List<Pawn> pawns)
+		CaravanFormingUtility.StartFormingCaravan(pawns.Where((Pawn x) => !x.Downed).ToList(), pawns.Where((Pawn x) => x.Downed).ToList(), Faction.OfPlayer, transferables, meetingPoint, exitSpot, startingTile, destinationTile);
+		Messages.Message("CaravanFormationProcessStarted".Translate(), pawns[0], MessageTypeDefOf.PositiveEvent, historical: false);
+		if (ModsConfig.BiotechActive && pawns.Any((Pawn p) => p.RaceProps.IsMechanoid))
 		{
-			this.transferables.RemoveAll((TransferableOneWay x) => x.AnyThing is Pawn);
-			if (this.ListPlayerPawnsInventorySeparately)
+			LessonAutoActivator.TeachOpportunity(ConceptDefOf.MechsInCaravans, OpportunityType.GoodToKnow);
+		}
+		return true;
+	}
+
+	private bool TryReformCaravan()
+	{
+		List<Pawn> pawnsFromTransferables = TransferableUtility.GetPawnsFromTransferables(transferables);
+		if (!CheckForErrors(pawnsFromTransferables))
+		{
+			return false;
+		}
+		AddItemsFromTransferablesToRandomInventories(pawnsFromTransferables);
+		Caravan caravan = CaravanExitMapUtility.ExitMapAndCreateCaravan(pawnsFromTransferables, Faction.OfPlayer, CurrentTile, CurrentTile, destinationTile, sendMessage: false);
+		map.Parent.CheckRemoveMapNow();
+		TaggedString taggedString = "MessageReformedCaravan".Translate();
+		if (caravan.pather.Moving && caravan.pather.ArrivalAction != null)
+		{
+			taggedString += " " + "MessageFormedCaravan_Orders".Translate() + ": " + caravan.pather.ArrivalAction.Label + ".";
+		}
+		Messages.Message(taggedString, caravan, MessageTypeDefOf.TaskCompletion, historical: false);
+		return true;
+	}
+
+	private void AddItemsFromTransferablesToRandomInventories(List<Pawn> pawns)
+	{
+		transferables.RemoveAll((TransferableOneWay x) => x.AnyThing is Pawn);
+		if (ListPlayerPawnsInventorySeparately)
+		{
+			for (int i = 0; i < pawns.Count; i++)
 			{
-				for (int i = 0; i < pawns.Count; i++)
+				if (CanListInventorySeparately(pawns[i]))
 				{
-					if (Dialog_FormCaravan.CanListInventorySeparately(pawns[i]))
+					ThingOwner<Thing> innerContainer = pawns[i].inventory.innerContainer;
+					for (int num = innerContainer.Count - 1; num >= 0; num--)
 					{
-						ThingOwner<Thing> innerContainer = pawns[i].inventory.innerContainer;
-						for (int j = innerContainer.Count - 1; j >= 0; j--)
-						{
-							this.RemoveCarriedItemFromTransferablesOrDrop(innerContainer[j], pawns[i], this.transferables);
-						}
-					}
-				}
-				for (int k = 0; k < this.transferables.Count; k++)
-				{
-					if (this.transferables[k].things.Any((Thing x) => !x.Spawned))
-					{
-						this.transferables[k].things.SortBy((Thing x) => x.Spawned);
+						RemoveCarriedItemFromTransferablesOrDrop(innerContainer[num], pawns[i], transferables);
 					}
 				}
 			}
-			Action<Thing, IThingHolder> <>9__3;
-			for (int l = 0; l < this.transferables.Count; l++)
+			for (int j = 0; j < transferables.Count; j++)
 			{
-				if (!(this.transferables[l].AnyThing is Corpse))
+				if (transferables[j].things.Any((Thing x) => !x.Spawned))
 				{
-					List<Thing> things = this.transferables[l].things;
-					int countToTransfer = this.transferables[l].CountToTransfer;
-					Action<Thing, IThingHolder> transferred;
-					if ((transferred = <>9__3) == null)
-					{
-						transferred = (<>9__3 = delegate(Thing splitPiece, IThingHolder originalHolder)
-						{
-							if (splitPiece.Faction != null && splitPiece.Faction != Faction.OfPlayer)
-							{
-								splitPiece.SetFactionDirect(Faction.OfPlayer);
-							}
-							Thing item = splitPiece.TryMakeMinified();
-							CaravanInventoryUtility.FindPawnToMoveInventoryTo(item, pawns, null, null).inventory.TryAddAndUnforbid(item);
-						});
-					}
-					TransferableUtility.Transfer(things, countToTransfer, transferred);
-				}
-			}
-			Action<Thing, int> <>9__4;
-			for (int m = 0; m < this.transferables.Count; m++)
-			{
-				if (this.transferables[m].AnyThing is Corpse)
-				{
-					List<Thing> things2 = this.transferables[m].things;
-					int countToTransfer2 = this.transferables[m].CountToTransfer;
-					Action<Thing, int> transfer;
-					if ((transfer = <>9__4) == null)
-					{
-						transfer = (<>9__4 = delegate(Thing originalThing, int numToTake)
-						{
-							if (this.AutoStripSpawnedCorpses)
-							{
-								Corpse corpse = originalThing as Corpse;
-								if (corpse != null && corpse.Spawned)
-								{
-									corpse.Strip(true);
-								}
-							}
-							Thing item = originalThing.SplitOff(numToTake);
-							CaravanInventoryUtility.FindPawnToMoveInventoryTo(item, pawns, null, null).inventory.TryAddAndUnforbid(item);
-						});
-					}
-					TransferableUtility.TransferNoSplit(things2, countToTransfer2, transfer, true, true);
+					transferables[j].things.SortBy((Thing x) => x.Spawned);
 				}
 			}
 		}
-
-		// Token: 0x06011CF5 RID: 72949 RVA: 0x00529520 File Offset: 0x00527720
-		private bool CheckForErrors(List<Pawn> pawns)
+		for (int k = 0; k < transferables.Count; k++)
 		{
-			if (this.MustChooseRoute && !this.destinationTile.Valid)
+			if (transferables[k].AnyThing is Corpse)
 			{
-				Messages.Message("MessageMustChooseRouteFirst".Translate(), MessageTypeDefOf.RejectInput, false);
-				return false;
+				continue;
 			}
-			if (!this.reform && !this.startingTile.Valid)
+			TransferableUtility.Transfer(transferables[k].things, transferables[k].CountToTransfer, delegate(Thing splitPiece, IThingHolder originalHolder)
 			{
-				Messages.Message("MessageNoValidExitTile".Translate(), MessageTypeDefOf.RejectInput, false);
-				return false;
-			}
-			if (!pawns.Any((Pawn x) => CaravanUtility.IsOwner(x, Faction.OfPlayer) && !x.Downed))
-			{
-				if (ModsConfig.IdeologyActive)
+				if (splitPiece.Faction != null && splitPiece.Faction != Faction.OfPlayer)
 				{
-					Messages.Message("CaravanMustHaveAtLeastOneNonSlaveColonist".Translate(), MessageTypeDefOf.RejectInput, false);
+					splitPiece.SetFactionDirect(Faction.OfPlayer);
 				}
-				else
-				{
-					Messages.Message("CaravanMustHaveAtLeastOneColonist".Translate(), MessageTypeDefOf.RejectInput, false);
-				}
-				return false;
-			}
-			if (!this.reform && this.MassUsage > this.MassCapacity)
-			{
-				this.FlashMass();
-				Messages.Message("TooBigCaravanMassUsage".Translate(), MessageTypeDefOf.RejectInput, false);
-				return false;
-			}
-			for (int i = 0; i < this.transferables.Count; i++)
-			{
-				if (this.transferables[i].ThingDef.category == ThingCategory.Item)
-				{
-					int countToTransfer = this.transferables[i].CountToTransfer;
-					int num = 0;
-					if (countToTransfer > 0)
-					{
-						for (int j = 0; j < this.transferables[i].things.Count; j++)
-						{
-							Thing t = this.transferables[i].things[j];
-							if (!t.Spawned || pawns.Any((Pawn x) => x.IsColonist && x.CanReach(t, PathEndMode.Touch, Danger.Deadly, false, false, TraverseMode.ByPawn)))
-							{
-								num += t.stackCount;
-								if (num >= countToTransfer)
-								{
-									break;
-								}
-							}
-						}
-						if (num < countToTransfer)
-						{
-							if (countToTransfer == 1)
-							{
-								Messages.Message("CaravanItemIsUnreachableSingle".Translate(this.transferables[i].ThingDef.label), MessageTypeDefOf.RejectInput, false);
-							}
-							else
-							{
-								Messages.Message("CaravanItemIsUnreachableMulti".Translate(countToTransfer, this.transferables[i].ThingDef.label), MessageTypeDefOf.RejectInput, false);
-							}
-							return false;
-						}
-					}
-				}
-			}
-			return true;
+				Thing item = splitPiece.TryMakeMinified();
+				CaravanInventoryUtility.FindPawnToMoveInventoryTo(item, pawns, null).inventory.TryAddAndUnforbid(item);
+			});
 		}
-
-		// Token: 0x06011CF6 RID: 72950 RVA: 0x0052977C File Offset: 0x0052797C
-		private bool ShouldShowWarningForUndesirableFood()
+		for (int l = 0; l < transferables.Count; l++)
 		{
-			Dialog_FormCaravan.tmpFood.Clear();
-			Dialog_FormCaravan.tmpPawns.Clear();
+			if (!(transferables[l].AnyThing is Corpse))
+			{
+				continue;
+			}
+			TransferableUtility.TransferNoSplit(transferables[l].things, transferables[l].CountToTransfer, delegate(Thing originalThing, int numToTake)
+			{
+				if (AutoStripSpawnedCorpses && originalThing is Corpse { Spawned: not false } corpse)
+				{
+					corpse.Strip();
+				}
+				Thing item2 = originalThing.SplitOff(numToTake);
+				CaravanInventoryUtility.FindPawnToMoveInventoryTo(item2, pawns, null).inventory.TryAddAndUnforbid(item2);
+			});
+		}
+	}
+
+	private bool CheckForErrors(List<Pawn> pawns)
+	{
+		if (MustChooseRoute && !destinationTile.Valid)
+		{
+			Messages.Message("MessageMustChooseRouteFirst".Translate(), MessageTypeDefOf.RejectInput, historical: false);
+			return false;
+		}
+		if (!reform && !startingTile.Valid)
+		{
+			Messages.Message("MessageNoValidExitTile".Translate(), MessageTypeDefOf.RejectInput, historical: false);
+			return false;
+		}
+		if (!pawns.Any((Pawn x) => CaravanUtility.IsOwner(x, Faction.OfPlayer) && !x.Downed))
+		{
+			if (ModsConfig.IdeologyActive)
+			{
+				Messages.Message("CaravanMustHaveAtLeastOneNonSlaveColonist".Translate(), MessageTypeDefOf.RejectInput, historical: false);
+			}
+			else
+			{
+				Messages.Message("CaravanMustHaveAtLeastOneColonist".Translate(), MessageTypeDefOf.RejectInput, historical: false);
+			}
+			return false;
+		}
+		if (!reform && MassUsage > MassCapacity)
+		{
+			FlashMass();
+			Messages.Message("TooBigCaravanMassUsage".Translate(), MessageTypeDefOf.RejectInput, historical: false);
+			return false;
+		}
+		for (int i = 0; i < transferables.Count; i++)
+		{
+			if (transferables[i].ThingDef.category != ThingCategory.Item)
+			{
+				continue;
+			}
+			int countToTransfer = transferables[i].CountToTransfer;
 			int num = 0;
-			foreach (TransferableOneWay transferableOneWay in this.transferables)
+			if (countToTransfer <= 0)
 			{
-				if (transferableOneWay.HasAnyThing)
-				{
-					if (transferableOneWay.AnyThing is Pawn)
-					{
-						for (int i = 0; i < transferableOneWay.CountToTransfer; i++)
-						{
-							Pawn pawn = (Pawn)transferableOneWay.things[i];
-							if (!InventoryCalculatorsUtility.ShouldIgnoreInventoryOf(pawn, this.IgnoreInventoryMode))
-							{
-								ThingOwner<Thing> innerContainer = pawn.inventory.innerContainer;
-								int j = 0;
-								int count = innerContainer.Count;
-								while (j < count)
-								{
-									Thing thing = innerContainer[j];
-									if (thing.def.IsNutritionGivingIngestible && ThingDefOf.Human.race.CanEverEat(thing))
-									{
-										Dialog_FormCaravan.tmpFood.Add(new ThingCount(thing, thing.stackCount, false));
-										num += thing.stackCount;
-									}
-									j++;
-								}
-							}
-							if (pawn.RaceProps.Humanlike)
-							{
-								Pawn_NeedsTracker needs = pawn.needs;
-								if (((needs != null) ? needs.food : null) != null)
-								{
-									Dialog_FormCaravan.tmpPawns.Add(pawn);
-								}
-							}
-						}
-					}
-					else if (transferableOneWay.ThingDef.IsNutritionGivingIngestible && ThingDefOf.Human.race.CanEverEat(transferableOneWay.AnyThing) && transferableOneWay.CountToTransfer > 0)
-					{
-						Dialog_FormCaravan.tmpFood.Add(new ThingCount(transferableOneWay.AnyThing, transferableOneWay.CountToTransfer, true));
-						num += transferableOneWay.CountToTransfer;
-					}
-				}
+				continue;
 			}
-			int num2 = 0;
-			foreach (ThingCount thingCount in Dialog_FormCaravan.tmpFood)
+			for (int j = 0; j < transferables[i].things.Count; j++)
 			{
-				foreach (Pawn pawn2 in Dialog_FormCaravan.tmpPawns)
+				Thing t = transferables[i].things[j];
+				if (!t.Spawned || pawns.Any((Pawn x) => x.IsColonist && x.CanReach(t, PathEndMode.Touch, Danger.Deadly)))
 				{
-					if (FoodUtility.WillGiveNegativeThoughts(thingCount.Thing, pawn2))
+					num += t.stackCount;
+					if (num >= countToTransfer)
 					{
-						num2 += thingCount.Count;
 						break;
 					}
 				}
 			}
-			return (double)((float)num2 / (float)num) >= 0.5;
-		}
-
-		// Token: 0x06011CF7 RID: 72951 RVA: 0x00529A08 File Offset: 0x00527C08
-		private bool ShouldShowWarningForMechWithoutMechanitor()
-		{
-			if (!ModsConfig.BiotechActive)
+			if (num < countToTransfer)
 			{
+				if (countToTransfer == 1)
+				{
+					Messages.Message("CaravanItemIsUnreachableSingle".Translate(transferables[i].ThingDef.label), MessageTypeDefOf.RejectInput, historical: false);
+				}
+				else
+				{
+					Messages.Message("CaravanItemIsUnreachableMulti".Translate(countToTransfer, transferables[i].ThingDef.label), MessageTypeDefOf.RejectInput, historical: false);
+				}
 				return false;
 			}
-			Dialog_FormCaravan.tmpPawnsToTransfer.Clear();
-			foreach (TransferableOneWay transferableOneWay in this.transferables)
+		}
+		return true;
+	}
+
+	private bool ShouldShowWarningForUndesirableFood()
+	{
+		tmpFood.Clear();
+		tmpPawns.Clear();
+		int num = 0;
+		foreach (TransferableOneWay transferable in transferables)
+		{
+			if (!transferable.HasAnyThing)
 			{
-				if (transferableOneWay.HasAnyThing && transferableOneWay.AnyThing is Pawn)
+				continue;
+			}
+			if (transferable.AnyThing is Pawn)
+			{
+				for (int i = 0; i < transferable.CountToTransfer; i++)
 				{
-					for (int i = 0; i < transferableOneWay.CountToTransfer; i++)
+					Pawn pawn = (Pawn)transferable.things[i];
+					if (!InventoryCalculatorsUtility.ShouldIgnoreInventoryOf(pawn, IgnoreInventoryMode))
 					{
-						Dialog_FormCaravan.tmpPawnsToTransfer.Add((Pawn)transferableOneWay.things[i]);
+						ThingOwner<Thing> innerContainer = pawn.inventory.innerContainer;
+						int j = 0;
+						for (int count = innerContainer.Count; j < count; j++)
+						{
+							Thing thing = innerContainer[j];
+							if (thing.def.IsNutritionGivingIngestible && ThingDefOf.Human.race.CanEverEat(thing))
+							{
+								tmpFood.Add(new ThingCount(thing, thing.stackCount));
+								num += thing.stackCount;
+							}
+						}
+					}
+					if (pawn.RaceProps.Humanlike && pawn.needs?.food != null)
+					{
+						tmpPawns.Add(pawn);
 					}
 				}
 			}
-			for (int j = 0; j < Dialog_FormCaravan.tmpPawnsToTransfer.Count; j++)
+			else if (transferable.ThingDef.IsNutritionGivingIngestible && ThingDefOf.Human.race.CanEverEat(transferable.AnyThing) && transferable.CountToTransfer > 0)
 			{
-				Pawn pawn = Dialog_FormCaravan.tmpPawnsToTransfer[j];
-				if (pawn.IsColonyMech && MechanitorUtility.EverControllable(pawn))
+				tmpFood.Add(new ThingCount(transferable.AnyThing, transferable.CountToTransfer, ignoreStackLimit: true));
+				num += transferable.CountToTransfer;
+			}
+		}
+		int num2 = 0;
+		foreach (ThingCount item in tmpFood)
+		{
+			foreach (Pawn tmpPawn in tmpPawns)
+			{
+				if (FoodUtility.WillGiveNegativeThoughts(item.Thing, tmpPawn))
 				{
-					Pawn overseer = pawn.GetOverseer();
-					if (overseer != null && !Dialog_FormCaravan.tmpPawnsToTransfer.Contains(overseer))
-					{
-						Dialog_FormCaravan.tmpPawnsToTransfer.Clear();
-						return true;
-					}
+					num2 += item.Count;
+					break;
 				}
 			}
-			Dialog_FormCaravan.tmpPawnsToTransfer.Clear();
+		}
+		return (double)((float)num2 / (float)num) >= 0.5;
+	}
+
+	private bool ShouldShowWarningForMechWithoutMechanitor()
+	{
+		if (!ModsConfig.BiotechActive)
+		{
 			return false;
 		}
-
-		// Token: 0x06011CF8 RID: 72952 RVA: 0x00529B10 File Offset: 0x00527D10
-		private bool TryFindExitSpot(List<Pawn> pawns, bool reachableForEveryColonist, out IntVec3 spot)
+		tmpPawnsToTransfer.Clear();
+		foreach (TransferableOneWay transferable in transferables)
 		{
-			Rot4 rot;
-			Rot4 rot2;
-			CaravanExitMapUtility.GetExitMapEdges(Find.WorldGrid, this.CurrentTile, this.startingTile, out rot, out rot2);
-			return (rot != Rot4.Invalid && this.TryFindExitSpot(pawns, reachableForEveryColonist, rot, out spot)) || (rot2 != Rot4.Invalid && this.TryFindExitSpot(pawns, reachableForEveryColonist, rot2, out spot)) || this.TryFindExitSpot(pawns, reachableForEveryColonist, rot.Rotated(RotationDirection.Clockwise), out spot) || this.TryFindExitSpot(pawns, reachableForEveryColonist, rot.Rotated(RotationDirection.Counterclockwise), out spot);
-		}
-
-		// Token: 0x06011CF9 RID: 72953 RVA: 0x00529B90 File Offset: 0x00527D90
-		private bool TryFindExitSpot(List<Pawn> pawns, bool reachableForEveryColonist, Rot4 exitDirection, out IntVec3 spot)
-		{
-			Dialog_FormCaravan.<>c__DisplayClass102_0 CS$<>8__locals1 = new Dialog_FormCaravan.<>c__DisplayClass102_0();
-			CS$<>8__locals1.<>4__this = this;
-			CS$<>8__locals1.pawns = pawns;
-			if (!this.startingTile.Valid)
+			if (transferable.HasAnyThing && transferable.AnyThing is Pawn)
 			{
-				Log.Error("Can't find exit spot because startingTile is not set.");
-				spot = IntVec3.Invalid;
-				return false;
-			}
-			if (reachableForEveryColonist)
-			{
-				return CellFinder.TryFindRandomEdgeCellWith(delegate(IntVec3 x)
+				for (int i = 0; i < transferable.CountToTransfer; i++)
 				{
-					if (!base.<TryFindExitSpot>g__Validator|0(x))
+					tmpPawnsToTransfer.Add((Pawn)transferable.things[i]);
+				}
+			}
+		}
+		for (int j = 0; j < tmpPawnsToTransfer.Count; j++)
+		{
+			Pawn pawn = tmpPawnsToTransfer[j];
+			if (pawn.IsColonyMech && MechanitorUtility.EverControllable(pawn))
+			{
+				Pawn overseer = pawn.GetOverseer();
+				if (overseer != null && !tmpPawnsToTransfer.Contains(overseer))
+				{
+					tmpPawnsToTransfer.Clear();
+					return true;
+				}
+			}
+		}
+		tmpPawnsToTransfer.Clear();
+		return false;
+	}
+
+	private bool TryFindExitSpot(List<Pawn> pawns, bool reachableForEveryColonist, out IntVec3 spot)
+	{
+		CaravanExitMapUtility.GetExitMapEdges(Find.WorldGrid, CurrentTile, startingTile, out var primary, out var secondary);
+		if ((!(primary != Rot4.Invalid) || !TryFindExitSpot(pawns, reachableForEveryColonist, primary, out spot)) && (!(secondary != Rot4.Invalid) || !TryFindExitSpot(pawns, reachableForEveryColonist, secondary, out spot)) && !TryFindExitSpot(pawns, reachableForEveryColonist, primary.Rotated(RotationDirection.Clockwise), out spot))
+		{
+			return TryFindExitSpot(pawns, reachableForEveryColonist, primary.Rotated(RotationDirection.Counterclockwise), out spot);
+		}
+		return true;
+	}
+
+	private bool TryFindExitSpot(List<Pawn> pawns, bool reachableForEveryColonist, Rot4 exitDirection, out IntVec3 spot)
+	{
+		if (!startingTile.Valid)
+		{
+			Log.Error("Can't find exit spot because startingTile is not set.");
+			spot = IntVec3.Invalid;
+			return false;
+		}
+		if (reachableForEveryColonist)
+		{
+			return CellFinder.TryFindRandomEdgeCellWith(delegate(IntVec3 x)
+			{
+				if (!Validator(x))
+				{
+					return false;
+				}
+				for (int i = 0; i < pawns.Count; i++)
+				{
+					if (pawns[i].IsColonist && !pawns[i].Downed && !pawns[i].CanReach(x, PathEndMode.Touch, Danger.Deadly))
 					{
 						return false;
 					}
-					for (int j = 0; j < CS$<>8__locals1.pawns.Count; j++)
-					{
-						if (CS$<>8__locals1.pawns[j].IsColonist && !CS$<>8__locals1.pawns[j].Downed && !CS$<>8__locals1.pawns[j].CanReach(x, PathEndMode.Touch, Danger.Deadly, false, false, TraverseMode.ByPawn))
-						{
-							return false;
-						}
-					}
-					return true;
-				}, this.map, exitDirection, CellFinder.EdgeRoadChance_Always, out spot);
-			}
-			IntVec3 intVec = IntVec3.Invalid;
-			int num = -1;
-			foreach (IntVec3 intVec2 in CellRect.WholeMap(this.map).GetEdgeCells(exitDirection).InRandomOrder(null))
-			{
-				if (CS$<>8__locals1.<TryFindExitSpot>g__Validator|0(intVec2))
-				{
-					int num2 = 0;
-					for (int i = 0; i < CS$<>8__locals1.pawns.Count; i++)
-					{
-						if (CS$<>8__locals1.pawns[i].IsColonist && !CS$<>8__locals1.pawns[i].Downed && CS$<>8__locals1.pawns[i].CanReach(intVec2, PathEndMode.Touch, Danger.Deadly, false, false, TraverseMode.ByPawn))
-						{
-							num2++;
-						}
-					}
-					if (num2 > num)
-					{
-						num = num2;
-						intVec = intVec2;
-					}
 				}
-			}
-			spot = intVec;
-			return intVec.IsValid;
-		}
-
-		// Token: 0x06011CFA RID: 72954 RVA: 0x00529CE8 File Offset: 0x00527EE8
-		private bool TryFindRandomPackingSpot(IntVec3 exitSpot, out IntVec3 packingSpot)
-		{
-			Dialog_FormCaravan.tmpPackingSpots.Clear();
-			List<Thing> list = this.map.listerThings.ThingsOfDef(ThingDefOf.CaravanPackingSpot);
-			TraverseParms traverseParams = TraverseParms.For(TraverseMode.PassDoors, Danger.Deadly, false, false, false, true, false);
-			for (int i = 0; i < list.Count; i++)
-			{
-				if (this.map.reachability.CanReach(exitSpot, list[i], PathEndMode.OnCell, traverseParams))
-				{
-					Dialog_FormCaravan.tmpPackingSpots.Add(list[i]);
-				}
-			}
-			if (Dialog_FormCaravan.tmpPackingSpots.Any<Thing>())
-			{
-				Thing thing = Dialog_FormCaravan.tmpPackingSpots.RandomElement<Thing>();
-				Dialog_FormCaravan.tmpPackingSpots.Clear();
-				packingSpot = thing.Position;
 				return true;
-			}
-			return RCellFinder.TryFindRandomSpotJustOutsideColony(exitSpot, this.map, out packingSpot);
+			}, map, exitDirection, CellFinder.EdgeRoadChance_Always, out spot);
 		}
-
-		// Token: 0x06011CFB RID: 72955 RVA: 0x00529DA4 File Offset: 0x00527FA4
-		private void AddPawnsToTransferables()
+		IntVec3 intVec = IntVec3.Invalid;
+		int num = -1;
+		foreach (IntVec3 item in CellRect.WholeMap(map).GetEdgeCells(exitDirection).InRandomOrder())
 		{
-			List<Pawn> list = Dialog_FormCaravan.AllSendablePawns(this.map, this.reform);
-			for (int i = 0; i < list.Count; i++)
+			if (!Validator(item))
 			{
-				bool setToTransferMax = (this.reform || this.mapAboutToBeRemoved) && !CaravanUtility.ShouldAutoCapture(list[i], Faction.OfPlayer);
-				this.AddToTransferables(list[i], setToTransferMax);
-				Pawn_CarryTracker carryTracker = list[i].carryTracker;
-				Thing thing = (carryTracker != null) ? carryTracker.CarriedThing : null;
-				if (thing != null)
+				continue;
+			}
+			int num2 = 0;
+			for (int j = 0; j < pawns.Count; j++)
+			{
+				if (pawns[j].IsColonist && !pawns[j].Downed && pawns[j].CanReach(item, PathEndMode.Touch, Danger.Deadly))
 				{
-					this.AddToTransferables(thing, setToTransferMax);
+					num2++;
 				}
 			}
-		}
-
-		// Token: 0x06011CFC RID: 72956 RVA: 0x00529E30 File Offset: 0x00528030
-		private void AddItemsToTransferables()
-		{
-			List<Thing> list = CaravanFormingUtility.AllReachableColonyItems(this.map, this.reform, this.reform, this.reform);
-			for (int i = 0; i < list.Count; i++)
+			if (num2 > num)
 			{
-				this.AddToTransferables(list[i], false);
-			}
-			if (this.AutoStripSpawnedCorpses)
-			{
-				for (int j = 0; j < list.Count; j++)
-				{
-					if (list[j].Spawned)
-					{
-						this.TryAddCorpseInventoryAndGearToTransferables(list[j]);
-					}
-				}
-			}
-			if (this.ListPlayerPawnsInventorySeparately)
-			{
-				List<Pawn> list2 = Dialog_FormCaravan.AllSendablePawns(this.map, this.reform);
-				for (int k = 0; k < list2.Count; k++)
-				{
-					if (Dialog_FormCaravan.CanListInventorySeparately(list2[k]))
-					{
-						ThingOwner<Thing> innerContainer = list2[k].inventory.innerContainer;
-						for (int l = 0; l < innerContainer.Count; l++)
-						{
-							this.AddToTransferables(innerContainer[l], true);
-							if (this.AutoStripSpawnedCorpses && innerContainer[l].Spawned)
-							{
-								this.TryAddCorpseInventoryAndGearToTransferables(innerContainer[l]);
-							}
-						}
-					}
-				}
+				num = num2;
+				intVec = item;
 			}
 		}
-
-		// Token: 0x06011CFD RID: 72957 RVA: 0x00529F50 File Offset: 0x00528150
-		private void TryAddCorpseInventoryAndGearToTransferables(Thing potentiallyCorpse)
+		spot = intVec;
+		return intVec.IsValid;
+		bool Validator(IntVec3 x)
 		{
-			Corpse corpse = potentiallyCorpse as Corpse;
-			if (corpse != null)
+			if (!x.Fogged(map))
 			{
-				this.AddCorpseInventoryAndGearToTransferables(corpse);
+				return x.Standable(map);
+			}
+			return false;
+		}
+	}
+
+	private bool TryFindRandomPackingSpot(IntVec3 exitSpot, out IntVec3 packingSpot)
+	{
+		tmpPackingSpots.Clear();
+		List<Thing> list = map.listerThings.ThingsOfDef(ThingDefOf.CaravanPackingSpot);
+		TraverseParms traverseParams = TraverseParms.For(TraverseMode.PassDoors);
+		for (int i = 0; i < list.Count; i++)
+		{
+			if (map.reachability.CanReach(exitSpot, list[i], PathEndMode.OnCell, traverseParams))
+			{
+				tmpPackingSpots.Add(list[i]);
 			}
 		}
-
-		// Token: 0x06011CFE RID: 72958 RVA: 0x00529F70 File Offset: 0x00528170
-		private void AddCorpseInventoryAndGearToTransferables(Corpse corpse)
+		if (tmpPackingSpots.Any())
 		{
-			Pawn_InventoryTracker inventory = corpse.InnerPawn.inventory;
-			Pawn_ApparelTracker apparel = corpse.InnerPawn.apparel;
-			Pawn_EquipmentTracker equipment = corpse.InnerPawn.equipment;
-			for (int i = 0; i < inventory.innerContainer.Count; i++)
+			Thing thing = tmpPackingSpots.RandomElement();
+			tmpPackingSpots.Clear();
+			packingSpot = thing.Position;
+			return true;
+		}
+		return RCellFinder.TryFindRandomSpotJustOutsideColony(exitSpot, map, out packingSpot);
+	}
+
+	private void AddPawnsToTransferables()
+	{
+		List<Pawn> list = AllSendablePawns(map, reform);
+		for (int i = 0; i < list.Count; i++)
+		{
+			bool setToTransferMax = (reform || mapAboutToBeRemoved) && !CaravanUtility.ShouldAutoCapture(list[i], Faction.OfPlayer);
+			AddToTransferables(list[i], setToTransferMax);
+			Thing thing = list[i].carryTracker?.CarriedThing;
+			if (thing != null)
 			{
-				if (Dialog_FormCaravan.<AddCorpseInventoryAndGearToTransferables>g__CanAdd|108_0(inventory.innerContainer[i]))
-				{
-					this.AddToTransferables(inventory.innerContainer[i], false);
-				}
+				AddToTransferables(thing, setToTransferMax);
 			}
-			if (apparel != null)
+		}
+	}
+
+	private void AddItemsToTransferables()
+	{
+		List<Thing> list = CaravanFormingUtility.AllReachableColonyItems(map, reform, reform, reform);
+		for (int i = 0; i < list.Count; i++)
+		{
+			AddToTransferables(list[i]);
+		}
+		if (AutoStripSpawnedCorpses)
+		{
+			for (int j = 0; j < list.Count; j++)
 			{
-				List<Apparel> wornApparel = apparel.WornApparel;
-				for (int j = 0; j < wornApparel.Count; j++)
+				if (list[j].Spawned)
 				{
-					if (Dialog_FormCaravan.<AddCorpseInventoryAndGearToTransferables>g__CanAdd|108_0(wornApparel[j]))
-					{
-						this.AddToTransferables(wornApparel[j], false);
-					}
-				}
-			}
-			if (equipment != null)
-			{
-				List<ThingWithComps> allEquipmentListForReading = equipment.AllEquipmentListForReading;
-				for (int k = 0; k < allEquipmentListForReading.Count; k++)
-				{
-					if (Dialog_FormCaravan.<AddCorpseInventoryAndGearToTransferables>g__CanAdd|108_0(allEquipmentListForReading[k]))
-					{
-						this.AddToTransferables(allEquipmentListForReading[k], false);
-					}
+					TryAddCorpseInventoryAndGearToTransferables(list[j]);
 				}
 			}
 		}
-
-		// Token: 0x06011CFF RID: 72959 RVA: 0x0052A060 File Offset: 0x00528260
-		private void RemoveCarriedItemFromTransferablesOrDrop(Thing carried, Pawn carrier, List<TransferableOneWay> transferables)
+		if (!ListPlayerPawnsInventorySeparately)
 		{
-			TransferableOneWay transferableOneWay = TransferableUtility.TransferableMatchingDesperate(carried, transferables, TransferAsOneMode.PodsOrCaravanPacking);
-			int num;
-			if (transferableOneWay == null)
+			return;
+		}
+		List<Pawn> list2 = AllSendablePawns(map, reform);
+		for (int k = 0; k < list2.Count; k++)
+		{
+			if (!CanListInventorySeparately(list2[k]))
 			{
-				num = carried.stackCount;
+				continue;
 			}
-			else if (transferableOneWay.CountToTransfer >= carried.stackCount)
+			ThingOwner<Thing> innerContainer = list2[k].inventory.innerContainer;
+			for (int l = 0; l < innerContainer.Count; l++)
 			{
-				transferableOneWay.AdjustBy(-carried.stackCount);
-				transferableOneWay.things.Remove(carried);
-				num = 0;
+				AddToTransferables(innerContainer[l], setToTransferMax: true);
+				if (AutoStripSpawnedCorpses && innerContainer[l].Spawned)
+				{
+					TryAddCorpseInventoryAndGearToTransferables(innerContainer[l]);
+				}
+			}
+		}
+	}
+
+	private void TryAddCorpseInventoryAndGearToTransferables(Thing potentiallyCorpse)
+	{
+		if (potentiallyCorpse is Corpse corpse)
+		{
+			AddCorpseInventoryAndGearToTransferables(corpse);
+		}
+	}
+
+	private void AddCorpseInventoryAndGearToTransferables(Corpse corpse)
+	{
+		Pawn_InventoryTracker inventory = corpse.InnerPawn.inventory;
+		Pawn_ApparelTracker apparel = corpse.InnerPawn.apparel;
+		Pawn_EquipmentTracker equipment = corpse.InnerPawn.equipment;
+		for (int i = 0; i < inventory.innerContainer.Count; i++)
+		{
+			if (CanAdd(inventory.innerContainer[i]))
+			{
+				AddToTransferables(inventory.innerContainer[i]);
+			}
+		}
+		if (apparel != null)
+		{
+			List<Apparel> wornApparel = apparel.WornApparel;
+			for (int j = 0; j < wornApparel.Count; j++)
+			{
+				if (CanAdd(wornApparel[j]))
+				{
+					AddToTransferables(wornApparel[j]);
+				}
+			}
+		}
+		if (equipment == null)
+		{
+			return;
+		}
+		List<ThingWithComps> allEquipmentListForReading = equipment.AllEquipmentListForReading;
+		for (int k = 0; k < allEquipmentListForReading.Count; k++)
+		{
+			if (CanAdd(allEquipmentListForReading[k]))
+			{
+				AddToTransferables(allEquipmentListForReading[k]);
+			}
+		}
+		static bool CanAdd(Thing thing)
+		{
+			if (!thing.def.destroyOnDrop)
+			{
+				return thing.GetInnerIfMinified().def.canLoadIntoCaravan;
+			}
+			return false;
+		}
+	}
+
+	private void RemoveCarriedItemFromTransferablesOrDrop(Thing carried, Pawn carrier, List<TransferableOneWay> transferables)
+	{
+		TransferableOneWay transferableOneWay = TransferableUtility.TransferableMatchingDesperate(carried, transferables, TransferAsOneMode.PodsOrCaravanPacking);
+		int num;
+		if (transferableOneWay == null)
+		{
+			num = carried.stackCount;
+		}
+		else if (transferableOneWay.CountToTransfer >= carried.stackCount)
+		{
+			transferableOneWay.AdjustBy(-carried.stackCount);
+			transferableOneWay.things.Remove(carried);
+			num = 0;
+		}
+		else
+		{
+			num = carried.stackCount - transferableOneWay.CountToTransfer;
+			transferableOneWay.AdjustTo(0);
+		}
+		if (num > 0)
+		{
+			Thing thing = carried.SplitOff(num);
+			if (carrier.SpawnedOrAnyParentSpawned)
+			{
+				GenPlace.TryPlaceThing(thing, carrier.PositionHeld, carrier.MapHeld, ThingPlaceMode.Near, null, null, null);
 			}
 			else
 			{
-				num = carried.stackCount - transferableOneWay.CountToTransfer;
-				transferableOneWay.AdjustTo(0);
-			}
-			if (num > 0)
-			{
-				Thing thing = carried.SplitOff(num);
-				if (carrier.SpawnedOrAnyParentSpawned)
-				{
-					GenPlace.TryPlaceThing(thing, carrier.PositionHeld, carrier.MapHeld, ThingPlaceMode.Near, null, null, null, 1);
-					return;
-				}
-				thing.Destroy(DestroyMode.Vanish);
+				thing.Destroy();
 			}
 		}
+	}
 
-		// Token: 0x06011D00 RID: 72960 RVA: 0x0052A0FF File Offset: 0x005282FF
-		private void FlashMass()
+	private void FlashMass()
+	{
+		lastMassFlashTime = Time.time;
+	}
+
+	public static bool CanListInventorySeparately(Pawn p)
+	{
+		if (p.Faction != Faction.OfPlayer)
 		{
-			this.lastMassFlashTime = Time.time;
+			return p.HostFaction == Faction.OfPlayer;
 		}
+		return true;
+	}
 
-		// Token: 0x06011D01 RID: 72961 RVA: 0x0052A10C File Offset: 0x0052830C
-		public static bool CanListInventorySeparately(Pawn p)
+	private void SetToSendEverything()
+	{
+		for (int i = 0; i < transferables.Count; i++)
 		{
-			return p.Faction == Faction.OfPlayer || p.HostFaction == Faction.OfPlayer;
+			transferables[i].AdjustTo(transferables[i].GetMaximumToTransfer());
 		}
+		Notify_TransferablesChanged();
+	}
 
-		// Token: 0x06011D02 RID: 72962 RVA: 0x0052A12C File Offset: 0x0052832C
-		private void SetToSendEverything()
+	private void Notify_TransferablesChanged()
+	{
+		if (autoSelectTravelSupplies)
 		{
-			for (int i = 0; i < this.transferables.Count; i++)
-			{
-				this.transferables[i].AdjustTo(this.transferables[i].GetMaximumToTransfer());
-			}
-			this.Notify_TransferablesChanged();
+			SelectApproximateBestTravelSupplies();
 		}
-
-		// Token: 0x06011D03 RID: 72963 RVA: 0x0052A178 File Offset: 0x00528378
-		private void Notify_TransferablesChanged()
+		if (ModsConfig.BiotechActive)
 		{
-			if (this.autoSelectTravelSupplies)
+			foreach (TransferableOneWay transferable in transferables)
 			{
-				this.SelectApproximateBestTravelSupplies();
-			}
-			if (ModsConfig.BiotechActive)
-			{
-				foreach (TransferableOneWay transferableOneWay in this.transferables)
+				for (int i = 0; i < transferable.things.Count; i++)
 				{
-					for (int i = 0; i < transferableOneWay.things.Count; i++)
+					if (!transferable.IsThing || !(transferable.things[i] is Pawn { IsColonyMech: not false } pawn))
 					{
-						if (transferableOneWay.IsThing)
-						{
-							Pawn pawn = transferableOneWay.things[i] as Pawn;
-							if (pawn != null && pawn.IsColonyMech)
-							{
-								Pawn overseer = pawn.GetOverseer();
-								if (overseer != null && pawn.GetMechControlGroup().WorkMode == MechWorkModeDefOf.Escort)
-								{
-									bool flag = false;
-									foreach (TransferableOneWay transferableOneWay2 in this.transferables)
-									{
-										if (transferableOneWay2.IsThing && transferableOneWay2.things.Contains(overseer) && transferableOneWay2.CountToTransferToDestination > 0)
-										{
-											flag = true;
-											break;
-										}
-									}
-									if (flag && transferableOneWay.CountToTransferToDestination <= 0)
-									{
-										Messages.Message("MessageCaravanAddingEscortingMech".Translate(pawn.Named("MECH"), overseer.Named("OVERSEER")), pawn, MessageTypeDefOf.RejectInput, false);
-										transferableOneWay.ForceToDestination(1);
-									}
-									if (!flag && transferableOneWay.CountToTransferToDestination > 0)
-									{
-										Messages.Message("MessageCaravanRemovingEscortingMech".Translate(pawn.Named("MECH"), overseer.Named("OVERSEER")), pawn, MessageTypeDefOf.RejectInput, false);
-										transferableOneWay.ForceToDestination(0);
-									}
-								}
-							}
-						}
+						continue;
 					}
-				}
-			}
-			this.massUsageDirty = true;
-			this.massCapacityDirty = true;
-			this.tilesPerDayDirty = true;
-			this.daysWorthOfFoodDirty = true;
-			this.foragedFoodPerDayDirty = true;
-			this.visibilityDirty = true;
-			this.ticksToArriveDirty = true;
-		}
-
-		// Token: 0x06011D04 RID: 72964 RVA: 0x0052A398 File Offset: 0x00528598
-		private void SelectApproximateBestTravelSupplies()
-		{
-			this.daysWorthOfFoodDirty = true;
-			this.massUsageDirty = true;
-			this.massCapacityDirty = true;
-			List<TransferableOneWay> list = (from x in this.transferables
-			where x.HasAnyThing && x.ThingDef.category != ThingCategory.Pawn && !x.ThingDef.thingCategories.NullOrEmpty<ThingCategoryDef>() && x.ThingDef.thingCategories.Contains(ThingCategoryDefOf.Medicine)
-			select x).ToList<TransferableOneWay>();
-			List<TransferableOneWay> list2 = (from x in this.transferables
-			where x.HasAnyThing && x.ThingDef.IsIngestible && !x.ThingDef.IsDrug && !x.ThingDef.IsCorpse
-			select x).ToList<TransferableOneWay>();
-			IEnumerable<TransferableOneWay> enumerable = Enumerable.Empty<TransferableOneWay>();
-			if (ModsConfig.BiotechActive)
-			{
-				enumerable = from x in this.transferables
-				where x.ThingDef == ThingDefOf.HemogenPack
-				select x;
-			}
-			Dialog_FormCaravan.tmpBeds.Clear();
-			for (int i = 0; i < this.transferables.Count; i++)
-			{
-				for (int j = 0; j < this.transferables[i].things.Count; j++)
-				{
-					Thing thing = this.transferables[i].things[j];
-					for (int k = 0; k < thing.stackCount; k++)
+					Pawn overseer = pawn.GetOverseer();
+					if (overseer == null || pawn.GetMechControlGroup().WorkMode != MechWorkModeDefOf.Escort)
 					{
-						Building_Bed building_Bed = thing.GetInnerIfMinified() as Building_Bed;
-						if (building_Bed != null && building_Bed.def.building.bed_caravansCanUse)
-						{
-							for (int l = 0; l < building_Bed.SleepingSlotsCount; l++)
-							{
-								Dialog_FormCaravan.tmpBeds.Add(this.transferables[i]);
-							}
-						}
+						continue;
 					}
-				}
-			}
-			Dialog_FormCaravan.tmpBeds.SortByDescending((TransferableOneWay x) => x.AnyThing.GetInnerIfMinified().GetStatValue(StatDefOf.BedRestEffectiveness, true, -1));
-			foreach (TransferableOneWay transferableOneWay in list)
-			{
-				transferableOneWay.AdjustTo(0);
-			}
-			foreach (TransferableOneWay transferableOneWay2 in list2)
-			{
-				transferableOneWay2.AdjustTo(0);
-			}
-			foreach (TransferableOneWay transferableOneWay3 in Dialog_FormCaravan.tmpBeds)
-			{
-				transferableOneWay3.AdjustTo(0);
-			}
-			foreach (TransferableOneWay transferableOneWay4 in enumerable)
-			{
-				transferableOneWay4.AdjustTo(0);
-			}
-			List<Pawn> pawnsFromTransferables = TransferableUtility.GetPawnsFromTransferables(this.transferables);
-			if (!pawnsFromTransferables.Any<Pawn>())
-			{
-				return;
-			}
-			pawnsFromTransferables.SortByDescending((Pawn x) => x.RaceProps.Humanlike);
-			foreach (Pawn pawn in pawnsFromTransferables)
-			{
-				TransferableOneWay transferableOneWay5 = this.BestBedFor(pawn);
-				if (transferableOneWay5 != null)
-				{
-					Dialog_FormCaravan.tmpBeds.Remove(transferableOneWay5);
-					if (transferableOneWay5.CanAdjustBy(1).Accepted)
+					bool flag = false;
+					foreach (TransferableOneWay transferable2 in transferables)
 					{
-						this.AddOneIfMassAllows(transferableOneWay5);
-					}
-				}
-				if (!pawn.AnimalOrWildMan() && (pawn.guest == null || !pawn.guest.IsPrisoner) && (!ModsConfig.BiotechActive || !pawn.IsColonyMech))
-				{
-					for (int m = 0; m < 2; m++)
-					{
-						Transferable transferable = this.BestMedicineItemFor(pawn, list);
-						if (transferable != null)
+						if (transferable2.IsThing && transferable2.things.Contains(overseer) && transferable2.CountToTransferToDestination > 0)
 						{
-							this.AddOneIfMassAllows(transferable);
-						}
-					}
-				}
-			}
-			if (!this.destinationTile.Valid || !DaysWorthOfFoodCalculator.AnyFoodEatingPawn(pawnsFromTransferables) || !list2.Any<TransferableOneWay>())
-			{
-				return;
-			}
-			try
-			{
-				Dialog_FormCaravan.<>c__DisplayClass117_0 CS$<>8__locals1;
-				CS$<>8__locals1.path = this.CurrentTile.Layer.Pather.FindPath(this.CurrentTile, this.destinationTile, null, null);
-				try
-				{
-					CS$<>8__locals1.ticksPerMove = CaravanTicksPerMoveUtility.GetTicksPerMove(new CaravanTicksPerMoveUtility.CaravanInfo(this), null);
-					CaravanArrivalTimeEstimator.EstimatedTicksToArriveToEvery(this.CurrentTile, this.destinationTile, CS$<>8__locals1.path, 0f, CS$<>8__locals1.ticksPerMove, Find.TickManager.TicksAbs, Dialog_FormCaravan.tmpTicksToArrive);
-					float num = (float)Dialog_FormCaravan.tmpTicksToArrive.Last<ValueTuple<PlanetTile, int>>().Item2 / 60000f;
-					float num2 = num + Dialog_FormCaravan.ExtraFoodDaysRange.ClampToRange(num * 0.35f);
-					foreach (Pawn pawn2 in pawnsFromTransferables)
-					{
-						if (ModsConfig.BiotechActive && !pawn2.AnimalOrWildMan() && !pawn2.IsPrisoner && pawn2.genes != null && num >= 0.5f && enumerable.Any<TransferableOneWay>() && pawn2.genes.GetFirstGeneOfType<Gene_Hemogen>() != null)
-						{
-							int num3 = Mathf.CeilToInt(num / 2f);
-							for (int n = 0; n < num3; n++)
-							{
-								Transferable hemogenPack = this.GetHemogenPack(enumerable);
-								if (hemogenPack != null)
-								{
-									this.AddOneIfMassAllows(hemogenPack);
-								}
-							}
-						}
-						if (VirtualPlantsUtility.CanEverEatVirtualPlants(pawn2))
-						{
-							for (float num4 = 0f; num4 < num; num4 += 0.25f)
-							{
-								int ticksAbs = Find.TickManager.TicksGame + (int)(60000f * num4);
-								if (VirtualPlantsUtility.EnvironmentAllowsEatingVirtualPlantsAt(CaravanArrivalTimeEstimator.TileIllBeInAt(ticksAbs, Dialog_FormCaravan.tmpTicksToArrive, Find.TickManager.TicksGame), ticksAbs))
-								{
-									Dialog_FormCaravan.tmpPawnNutritionDays.SetOrAdd(pawn2, 0.25f);
-								}
-							}
-						}
-					}
-					float num5 = this.<SelectApproximateBestTravelSupplies>g__DaysOfFood|117_5(ref CS$<>8__locals1);
-					Dialog_FormCaravan.cachedTicksToRot.Clear();
-					while (num5 < num2 && this.MassUsage < this.MassCapacity)
-					{
-						bool flag = false;
-						foreach (Pawn pawn3 in pawnsFromTransferables)
-						{
-							if (pawn3.RaceProps.EatsFood && pawn3.needs.food != null && pawn3.needs.food.MaxLevel > 0f && pawn3.needs.food.FoodFallPerTick != 0f && Dialog_FormCaravan.tmpPawnNutritionDays.TryGetValue(pawn3, 0f) < num2)
-							{
-								Transferable transferable2 = this.BestFoodItemFor(pawn3, list2, Dialog_FormCaravan.tmpTicksToArrive);
-								if (transferable2 != null && this.AddFoodItem(pawn3, transferable2, num2))
-								{
-									flag = true;
-								}
-							}
-						}
-						if (!flag)
-						{
+							flag = true;
 							break;
 						}
-						num5 = this.<SelectApproximateBestTravelSupplies>g__DaysOfFood|117_5(ref CS$<>8__locals1);
+					}
+					if (flag && transferable.CountToTransferToDestination <= 0)
+					{
+						Messages.Message("MessageCaravanAddingEscortingMech".Translate(pawn.Named("MECH"), overseer.Named("OVERSEER")), pawn, MessageTypeDefOf.RejectInput, historical: false);
+						transferable.ForceToDestination(1);
+					}
+					if (!flag && transferable.CountToTransferToDestination > 0)
+					{
+						Messages.Message("MessageCaravanRemovingEscortingMech".Translate(pawn.Named("MECH"), overseer.Named("OVERSEER")), pawn, MessageTypeDefOf.RejectInput, historical: false);
+						transferable.ForceToDestination(0);
 					}
 				}
-				finally
+			}
+		}
+		massUsageDirty = true;
+		massCapacityDirty = true;
+		tilesPerDayDirty = true;
+		daysWorthOfFoodDirty = true;
+		foragedFoodPerDayDirty = true;
+		visibilityDirty = true;
+		ticksToArriveDirty = true;
+	}
+
+	private void SelectApproximateBestTravelSupplies()
+	{
+		daysWorthOfFoodDirty = true;
+		massUsageDirty = true;
+		massCapacityDirty = true;
+		List<TransferableOneWay> list = transferables.Where((TransferableOneWay x) => x.HasAnyThing && x.ThingDef.category != ThingCategory.Pawn && !x.ThingDef.thingCategories.NullOrEmpty() && x.ThingDef.thingCategories.Contains(ThingCategoryDefOf.Medicine)).ToList();
+		List<TransferableOneWay> list2 = transferables.Where((TransferableOneWay x) => x.HasAnyThing && x.ThingDef.IsIngestible && !x.ThingDef.IsDrug && !x.ThingDef.IsCorpse).ToList();
+		IEnumerable<TransferableOneWay> enumerable = Enumerable.Empty<TransferableOneWay>();
+		if (ModsConfig.BiotechActive)
+		{
+			enumerable = transferables.Where((TransferableOneWay x) => x.ThingDef == ThingDefOf.HemogenPack);
+		}
+		tmpBeds.Clear();
+		for (int i = 0; i < transferables.Count; i++)
+		{
+			for (int j = 0; j < transferables[i].things.Count; j++)
+			{
+				Thing thing = transferables[i].things[j];
+				for (int k = 0; k < thing.stackCount; k++)
 				{
-					if (CS$<>8__locals1.path != null)
+					if (thing.GetInnerIfMinified() is Building_Bed building_Bed && building_Bed.def.building.bed_caravansCanUse)
 					{
-						((IDisposable)CS$<>8__locals1.path).Dispose();
+						for (int l = 0; l < building_Bed.SleepingSlotsCount; l++)
+						{
+							tmpBeds.Add(transferables[i]);
+						}
 					}
+				}
+			}
+		}
+		tmpBeds.SortByDescending((TransferableOneWay x) => x.AnyThing.GetInnerIfMinified().GetStatValue(StatDefOf.BedRestEffectiveness));
+		foreach (TransferableOneWay item in list)
+		{
+			item.AdjustTo(0);
+		}
+		foreach (TransferableOneWay item2 in list2)
+		{
+			item2.AdjustTo(0);
+		}
+		foreach (TransferableOneWay tmpBed in tmpBeds)
+		{
+			tmpBed.AdjustTo(0);
+		}
+		foreach (TransferableOneWay item3 in enumerable)
+		{
+			item3.AdjustTo(0);
+		}
+		List<Pawn> pawnsFromTransferables = TransferableUtility.GetPawnsFromTransferables(transferables);
+		if (!pawnsFromTransferables.Any())
+		{
+			return;
+		}
+		pawnsFromTransferables.SortByDescending((Pawn x) => x.RaceProps.Humanlike);
+		foreach (Pawn item4 in pawnsFromTransferables)
+		{
+			TransferableOneWay transferableOneWay = BestBedFor(item4);
+			if (transferableOneWay != null)
+			{
+				tmpBeds.Remove(transferableOneWay);
+				if (transferableOneWay.CanAdjustBy(1).Accepted)
+				{
+					AddOneIfMassAllows(transferableOneWay);
+				}
+			}
+			if (item4.AnimalOrWildMan() || (item4.guest != null && item4.guest.IsPrisoner) || (ModsConfig.BiotechActive && item4.IsColonyMech))
+			{
+				continue;
+			}
+			for (int m = 0; m < 2; m++)
+			{
+				Transferable transferable = BestMedicineItemFor(item4, list);
+				if (transferable != null)
+				{
+					AddOneIfMassAllows(transferable);
+				}
+			}
+		}
+		if (!destinationTile.Valid || !DaysWorthOfFoodCalculator.AnyFoodEatingPawn(pawnsFromTransferables) || !list2.Any())
+		{
+			return;
+		}
+		try
+		{
+			WorldPath path = CurrentTile.Layer.Pather.FindPath(CurrentTile, destinationTile, null);
+			int ticksPerMove;
+			try
+			{
+				ticksPerMove = CaravanTicksPerMoveUtility.GetTicksPerMove(new CaravanTicksPerMoveUtility.CaravanInfo(this));
+				CaravanArrivalTimeEstimator.EstimatedTicksToArriveToEvery(CurrentTile, destinationTile, path, 0f, ticksPerMove, Find.TickManager.TicksAbs, tmpTicksToArrive);
+				float num = (float)tmpTicksToArrive.Last().ticks / 60000f;
+				float num2 = num + ExtraFoodDaysRange.ClampToRange(num * 0.35f);
+				foreach (Pawn item5 in pawnsFromTransferables)
+				{
+					if (ModsConfig.BiotechActive && !item5.AnimalOrWildMan() && !item5.IsPrisoner && item5.genes != null && num >= 0.5f && enumerable.Any() && item5.genes.GetFirstGeneOfType<Gene_Hemogen>() != null)
+					{
+						int num3 = Mathf.CeilToInt(num / 2f);
+						for (int n = 0; n < num3; n++)
+						{
+							Transferable hemogenPack = GetHemogenPack(enumerable);
+							if (hemogenPack != null)
+							{
+								AddOneIfMassAllows(hemogenPack);
+							}
+						}
+					}
+					if (!VirtualPlantsUtility.CanEverEatVirtualPlants(item5))
+					{
+						continue;
+					}
+					for (float num4 = 0f; num4 < num; num4 += 0.25f)
+					{
+						int ticksAbs = Find.TickManager.TicksGame + (int)(60000f * num4);
+						if (VirtualPlantsUtility.EnvironmentAllowsEatingVirtualPlantsAt(CaravanArrivalTimeEstimator.TileIllBeInAt(ticksAbs, tmpTicksToArrive, Find.TickManager.TicksGame), ticksAbs))
+						{
+							tmpPawnNutritionDays.SetOrAdd(item5, 0.25f);
+						}
+					}
+				}
+				float num5 = DaysOfFood();
+				cachedTicksToRot.Clear();
+				while (num5 < num2 && MassUsage < MassCapacity)
+				{
+					bool flag = false;
+					foreach (Pawn item6 in pawnsFromTransferables)
+					{
+						if (item6.RaceProps.EatsFood && item6.needs.food != null && !(item6.needs.food.MaxLevel <= 0f) && item6.needs.food.FoodFallPerTick != 0f && !(tmpPawnNutritionDays.TryGetValue(item6, 0f) >= num2))
+						{
+							Transferable transferable2 = BestFoodItemFor(item6, list2, tmpTicksToArrive);
+							if (transferable2 != null && AddFoodItem(item6, transferable2, num2))
+							{
+								flag = true;
+							}
+						}
+					}
+					if (!flag)
+					{
+						break;
+					}
+					num5 = DaysOfFood();
 				}
 			}
 			finally
 			{
-				Dialog_FormCaravan.tmpTicksToArrive.Clear();
-				Dialog_FormCaravan.tmpPawnNutritionDays.Clear();
-				this.daysWorthOfFoodDirty = true;
-				this.massUsageDirty = true;
-				this.massCapacityDirty = true;
+				if (path != null)
+				{
+					((IDisposable)path).Dispose();
+				}
+			}
+			float DaysOfFood()
+			{
+				return DaysWorthOfFoodCalculator.ApproxDaysWorthOfFood(transferables, CurrentTile, IgnoreInventoryMode, Faction.OfPlayer, path, 0f, ticksPerMove);
 			}
 		}
-
-		// Token: 0x06011D05 RID: 72965 RVA: 0x0052AB00 File Offset: 0x00528D00
-		private bool AddFoodItem(Pawn pawn, Transferable transferable, float tripDays)
+		finally
 		{
-			int num = transferable.GetMaximumToTransfer() - transferable.CountToTransfer;
-			if (num <= 0)
-			{
-				return false;
-			}
-			float num2 = Dialog_FormCaravan.tmpPawnNutritionDays.TryGetValue(pawn, 0f);
-			float num3 = pawn.needs.food.FoodFallPerTickAssumingCategory(HungerCategory.Fed, true) * 60000f;
-			float statValueAbstract = transferable.ThingDef.GetStatValueAbstract(StatDefOf.Nutrition, null);
-			int num4 = Mathf.Min(num, Mathf.CeilToInt((tripDays - num2) * num3 / statValueAbstract));
-			if (num4 <= 0 || !transferable.CanAdjustBy(num4).Accepted)
-			{
-				return false;
-			}
-			int destination = transferable.CountToTransfer + Mathf.Min(num4, Mathf.FloorToInt((this.MassCapacity - this.MassUsage) / transferable.ThingDef.BaseMass));
-			transferable.AdjustTo(destination);
-			Dialog_FormCaravan.tmpPawnNutritionDays.SetOrAdd(pawn, num2 + num3 / (statValueAbstract * (float)num4));
-			this.daysWorthOfFoodDirty = true;
-			this.massUsageDirty = true;
-			return true;
+			tmpTicksToArrive.Clear();
+			tmpPawnNutritionDays.Clear();
+			daysWorthOfFoodDirty = true;
+			massUsageDirty = true;
+			massCapacityDirty = true;
 		}
+	}
 
-		// Token: 0x06011D06 RID: 72966 RVA: 0x0052ABE4 File Offset: 0x00528DE4
-		private bool AddOneIfMassAllows(Transferable transferable)
+	private bool AddFoodItem(Pawn pawn, Transferable transferable, float tripDays)
+	{
+		int num = transferable.GetMaximumToTransfer() - transferable.CountToTransfer;
+		if (num <= 0)
 		{
-			if (transferable.CanAdjustBy(1).Accepted && this.MassUsage + transferable.ThingDef.BaseMass < this.MassCapacity)
-			{
-				transferable.AdjustBy(1);
-				this.massUsageDirty = true;
-				return true;
-			}
 			return false;
 		}
-
-		// Token: 0x06011D07 RID: 72967 RVA: 0x0052AC30 File Offset: 0x00528E30
-		private TransferableOneWay BestBedFor(Pawn pawn)
+		float num2 = tmpPawnNutritionDays.TryGetValue(pawn, 0f);
+		float num3 = pawn.needs.food.FoodFallPerTickAssumingCategory(HungerCategory.Fed, ignoreMalnutrition: true) * 60000f;
+		float statValueAbstract = transferable.ThingDef.GetStatValueAbstract(StatDefOf.Nutrition);
+		int num4 = Mathf.Min(num, Mathf.CeilToInt((tripDays - num2) * num3 / statValueAbstract));
+		if (num4 <= 0 || !transferable.CanAdjustBy(num4).Accepted)
 		{
-			if (ModsConfig.BiotechActive && pawn.IsColonyMech)
-			{
-				return null;
-			}
-			Pawn_NeedsTracker needs = pawn.needs;
-			if (((needs != null) ? needs.rest : null) == null)
-			{
-				return null;
-			}
-			for (int i = 0; i < Dialog_FormCaravan.tmpBeds.Count; i++)
-			{
-				Thing innerIfMinified = Dialog_FormCaravan.tmpBeds[i].AnyThing.GetInnerIfMinified();
-				if (RestUtility.CanUseBedEver(pawn, innerIfMinified.def))
-				{
-					return Dialog_FormCaravan.tmpBeds[i];
-				}
-			}
+			return false;
+		}
+		int destination = transferable.CountToTransfer + Mathf.Min(num4, Mathf.FloorToInt((MassCapacity - MassUsage) / transferable.ThingDef.BaseMass));
+		transferable.AdjustTo(destination);
+		tmpPawnNutritionDays.SetOrAdd(pawn, num2 + num3 / (statValueAbstract * (float)num4));
+		daysWorthOfFoodDirty = true;
+		massUsageDirty = true;
+		return true;
+	}
+
+	private bool AddOneIfMassAllows(Transferable transferable)
+	{
+		if (transferable.CanAdjustBy(1).Accepted && MassUsage + transferable.ThingDef.BaseMass < MassCapacity)
+		{
+			transferable.AdjustBy(1);
+			massUsageDirty = true;
+			return true;
+		}
+		return false;
+	}
+
+	private TransferableOneWay BestBedFor(Pawn pawn)
+	{
+		if (ModsConfig.BiotechActive && pawn.IsColonyMech)
+		{
 			return null;
 		}
-
-		// Token: 0x06011D08 RID: 72968 RVA: 0x0052ACAC File Offset: 0x00528EAC
-		private Transferable BestFoodItemFor(Pawn pawn, List<TransferableOneWay> food, [TupleElementNames(new string[]
+		if (pawn.needs?.rest == null)
 		{
-			"tile",
-			"ticks"
-		})] List<ValueTuple<PlanetTile, int>> ticksToArrive)
-		{
-			Transferable result = null;
-			float num = 0f;
-			for (int i = 0; i < food.Count; i++)
-			{
-				TransferableOneWay transferableOneWay = food[i];
-				if (transferableOneWay.CanAdjustBy(1).Accepted)
-				{
-					float foodScore = this.GetFoodScore(pawn, transferableOneWay.AnyThing, ticksToArrive);
-					if (foodScore > num)
-					{
-						result = transferableOneWay;
-						num = foodScore;
-					}
-				}
-			}
-			return result;
-		}
-
-		// Token: 0x06011D09 RID: 72969 RVA: 0x0052AD08 File Offset: 0x00528F08
-		private float GetFoodScore(Pawn pawn, Thing food, [TupleElementNames(new string[]
-		{
-			"tile",
-			"ticks"
-		})] List<ValueTuple<PlanetTile, int>> ticksToArrive)
-		{
-			if (!CaravanPawnsNeedsUtility.CanEatForNutritionEver(food.def, pawn))
-			{
-				return 0f;
-			}
-			float num = CaravanPawnsNeedsUtility.GetFoodScore(food.def, pawn, food.GetStatValue(StatDefOf.Nutrition, true, 1));
-			if (FoodUtility.WillGiveNegativeThoughts(food, pawn))
-			{
-				num *= 0.4f;
-			}
-			if (ModsConfig.BiotechActive && food.def == ThingDefOf.BabyFood && !pawn.DevelopmentalStage.Baby())
-			{
-				num *= 0.1f;
-			}
-			int num2;
-			if (!Dialog_FormCaravan.cachedTicksToRot.TryGetValue(food, out num2))
-			{
-				if (food.TryGetComp<CompRottable>() != null)
-				{
-					num2 = DaysUntilRotCalculator.ApproxTicksUntilRot_AssumeTimePassesBy(food.TryGetComp<CompRottable>(), this.CurrentTile, ticksToArrive);
-				}
-				else
-				{
-					num2 = -1;
-				}
-				Dialog_FormCaravan.cachedTicksToRot[food] = num2;
-			}
-			if (num2 >= 0 && num2 < ticksToArrive.Last<ValueTuple<PlanetTile, int>>().Item2)
-			{
-				num *= 0.1f;
-			}
-			return num;
-		}
-
-		// Token: 0x06011D0A RID: 72970 RVA: 0x0052ADD4 File Offset: 0x00528FD4
-		private Transferable BestMedicineItemFor(Pawn pawn, IEnumerable<TransferableOneWay> medicine)
-		{
-			Transferable transferable = null;
-			float num = 0f;
-			foreach (TransferableOneWay transferableOneWay in medicine)
-			{
-				Thing anyThing = transferableOneWay.AnyThing;
-				if (transferableOneWay.CanAdjustBy(1).Accepted && pawn.playerSettings.medCare.AllowsMedicine(anyThing.def))
-				{
-					float statValue = anyThing.GetStatValue(StatDefOf.MedicalPotency, true, -1);
-					if (transferable == null || statValue > num)
-					{
-						transferable = transferableOneWay;
-						num = statValue;
-					}
-				}
-			}
-			return transferable;
-		}
-
-		// Token: 0x06011D0B RID: 72971 RVA: 0x0052AE70 File Offset: 0x00529070
-		private Transferable GetHemogenPack(IEnumerable<TransferableOneWay> hemogen)
-		{
-			foreach (TransferableOneWay transferableOneWay in hemogen)
-			{
-				if (transferableOneWay.CanAdjustBy(1).Accepted)
-				{
-					return transferableOneWay;
-				}
-			}
 			return null;
 		}
-
-		// Token: 0x06011D0C RID: 72972 RVA: 0x0052AECC File Offset: 0x005290CC
-		public static List<Pawn> AllSendablePawns(Map map, bool reform)
+		for (int i = 0; i < tmpBeds.Count; i++)
 		{
-			return CaravanFormingUtility.AllSendablePawns(map, true, reform, reform, reform, false, -1);
+			Thing innerIfMinified = tmpBeds[i].AnyThing.GetInnerIfMinified();
+			if (RestUtility.CanUseBedEver(pawn, innerIfMinified.def))
+			{
+				return tmpBeds[i];
+			}
 		}
+		return null;
+	}
 
-		// Token: 0x06011D0D RID: 72973 RVA: 0x0052AEDA File Offset: 0x005290DA
-		public override void OnAcceptKeyPressed()
+	private Transferable BestFoodItemFor(Pawn pawn, List<TransferableOneWay> food, List<(PlanetTile tile, int ticks)> ticksToArrive)
+	{
+		Transferable result = null;
+		float num = 0f;
+		for (int i = 0; i < food.Count; i++)
 		{
-			this.TrySend();
+			TransferableOneWay transferableOneWay = food[i];
+			if (transferableOneWay.CanAdjustBy(1).Accepted)
+			{
+				float foodScore = GetFoodScore(pawn, transferableOneWay.AnyThing, ticksToArrive);
+				if (foodScore > num)
+				{
+					result = transferableOneWay;
+					num = foodScore;
+				}
+			}
 		}
+		return result;
+	}
 
-		// Token: 0x06011D14 RID: 72980 RVA: 0x0052AFAE File Offset: 0x005291AE
-		[CompilerGenerated]
-		internal static bool <AddCorpseInventoryAndGearToTransferables>g__CanAdd|108_0(Thing thing)
+	private float GetFoodScore(Pawn pawn, Thing food, List<(PlanetTile tile, int ticks)> ticksToArrive)
+	{
+		if (!CaravanPawnsNeedsUtility.CanEatForNutritionEver(food.def, pawn))
 		{
-			return !thing.def.destroyOnDrop && thing.GetInnerIfMinified().def.canLoadIntoCaravan;
+			return 0f;
 		}
-
-		// Token: 0x06011D15 RID: 72981 RVA: 0x0052AFCF File Offset: 0x005291CF
-		[CompilerGenerated]
-		private float <SelectApproximateBestTravelSupplies>g__DaysOfFood|117_5(ref Dialog_FormCaravan.<>c__DisplayClass117_0 A_1)
+		float num = CaravanPawnsNeedsUtility.GetFoodScore(food.def, pawn, food.GetStatValue(StatDefOf.Nutrition, applyPostProcess: true, 1));
+		if (FoodUtility.WillGiveNegativeThoughts(food, pawn))
 		{
-			return DaysWorthOfFoodCalculator.ApproxDaysWorthOfFood(this.transferables, this.CurrentTile, this.IgnoreInventoryMode, Faction.OfPlayer, A_1.path, 0f, A_1.ticksPerMove);
+			num *= 0.4f;
 		}
-
-		// Token: 0x0400B7FB RID: 47099
-		private readonly Map map;
-
-		// Token: 0x0400B7FC RID: 47100
-		private readonly bool reform;
-
-		// Token: 0x0400B7FD RID: 47101
-		private readonly Action onClosed;
-
-		// Token: 0x0400B7FE RID: 47102
-		private readonly bool canChooseRoute;
-
-		// Token: 0x0400B7FF RID: 47103
-		private readonly bool mapAboutToBeRemoved;
-
-		// Token: 0x0400B800 RID: 47104
-		public bool choosingRoute;
-
-		// Token: 0x0400B801 RID: 47105
-		private bool thisWindowInstanceEverOpened;
-
-		// Token: 0x0400B802 RID: 47106
-		public List<TransferableOneWay> transferables;
-
-		// Token: 0x0400B803 RID: 47107
-		private TransferableOneWayWidget pawnsTransfer;
-
-		// Token: 0x0400B804 RID: 47108
-		private TransferableOneWayWidget itemsTransfer;
-
-		// Token: 0x0400B805 RID: 47109
-		private TransferableOneWayWidget travelSuppliesTransfer;
-
-		// Token: 0x0400B806 RID: 47110
-		private Dialog_FormCaravan.Tab tab;
-
-		// Token: 0x0400B807 RID: 47111
-		private float lastMassFlashTime = -9999f;
-
-		// Token: 0x0400B808 RID: 47112
-		private PlanetTile startingTile = PlanetTile.Invalid;
-
-		// Token: 0x0400B809 RID: 47113
-		private PlanetTile destinationTile = PlanetTile.Invalid;
-
-		// Token: 0x0400B80A RID: 47114
-		private readonly IntVec3 designatedMeetingPoint = IntVec3.Invalid;
-
-		// Token: 0x0400B80B RID: 47115
-		private bool massUsageDirty = true;
-
-		// Token: 0x0400B80C RID: 47116
-		private float cachedMassUsage;
-
-		// Token: 0x0400B80D RID: 47117
-		private bool massCapacityDirty = true;
-
-		// Token: 0x0400B80E RID: 47118
-		private float cachedMassCapacity;
-
-		// Token: 0x0400B80F RID: 47119
-		private string cachedMassCapacityExplanation;
-
-		// Token: 0x0400B810 RID: 47120
-		private bool tilesPerDayDirty = true;
-
-		// Token: 0x0400B811 RID: 47121
-		private float cachedTilesPerDay;
-
-		// Token: 0x0400B812 RID: 47122
-		private string cachedTilesPerDayExplanation;
-
-		// Token: 0x0400B813 RID: 47123
-		private bool daysWorthOfFoodDirty = true;
-
-		// Token: 0x0400B814 RID: 47124
-		[TupleElementNames(new string[]
+		if (ModsConfig.BiotechActive && food.def == ThingDefOf.BabyFood && !pawn.DevelopmentalStage.Baby())
 		{
-			"days",
-			"tillRot"
-		})]
-		private ValueTuple<float, float> cachedDaysWorthOfFood;
-
-		// Token: 0x0400B815 RID: 47125
-		private bool foragedFoodPerDayDirty = true;
-
-		// Token: 0x0400B816 RID: 47126
-		[TupleElementNames(new string[]
-		{
-			"food",
-			"perDay"
-		})]
-		private ValueTuple<ThingDef, float> cachedForagedFoodPerDay;
-
-		// Token: 0x0400B817 RID: 47127
-		private string cachedForagedFoodPerDayExplanation;
-
-		// Token: 0x0400B818 RID: 47128
-		private bool visibilityDirty = true;
-
-		// Token: 0x0400B819 RID: 47129
-		private float cachedVisibility;
-
-		// Token: 0x0400B81A RID: 47130
-		private string cachedVisibilityExplanation;
-
-		// Token: 0x0400B81B RID: 47131
-		private bool ticksToArriveDirty = true;
-
-		// Token: 0x0400B81C RID: 47132
-		private int cachedTicksToArrive;
-
-		// Token: 0x0400B81D RID: 47133
-		private bool autoSelectTravelSupplies;
-
-		// Token: 0x0400B81E RID: 47134
-		private const int AutoMedicinePerColonist = 2;
-
-		// Token: 0x0400B81F RID: 47135
-		private const float TitleRectHeight = 35f;
-
-		// Token: 0x0400B820 RID: 47136
-		private const float BottomAreaHeight = 55f;
-
-		// Token: 0x0400B821 RID: 47137
-		private const float AutoSelectCheckBoxHeight = 35f;
-
-		// Token: 0x0400B822 RID: 47138
-		private const float AdjustedTravelTimeFactor = 0.35f;
-
-		// Token: 0x0400B823 RID: 47139
-		private const float MaxDaysWorthOfFoodToShowWarningDialog = 5f;
-
-		// Token: 0x0400B824 RID: 47140
-		private static readonly Vector2 BottomButtonSize = new Vector2(160f, 40f);
-
-		// Token: 0x0400B825 RID: 47141
-		private static FloatRange ExtraFoodDaysRange = new FloatRange(1f, 5f);
-
-		// Token: 0x0400B826 RID: 47142
-		private static readonly List<TabRecord> tabsList = new List<TabRecord>();
-
-		// Token: 0x0400B827 RID: 47143
-		private static readonly List<ThingCount> tmpFood = new List<ThingCount>();
-
-		// Token: 0x0400B828 RID: 47144
-		private static readonly List<Pawn> tmpPawns = new List<Pawn>();
-
-		// Token: 0x0400B829 RID: 47145
-		private static readonly List<Pawn> tmpPawnsToTransfer = new List<Pawn>();
-
-		// Token: 0x0400B82A RID: 47146
-		private static readonly List<Thing> tmpPackingSpots = new List<Thing>();
-
-		// Token: 0x0400B82B RID: 47147
-		[TupleElementNames(new string[]
-		{
-			"tile",
-			"ticks"
-		})]
-		private static readonly List<ValueTuple<PlanetTile, int>> tmpTicksToArrive = new List<ValueTuple<PlanetTile, int>>();
-
-		// Token: 0x0400B82C RID: 47148
-		private static readonly Dictionary<Pawn, float> tmpPawnNutritionDays = new Dictionary<Pawn, float>();
-
-		// Token: 0x0400B82D RID: 47149
-		private static readonly List<TransferableOneWay> tmpBeds = new List<TransferableOneWay>();
-
-		// Token: 0x0400B82E RID: 47150
-		private static Dictionary<Thing, int> cachedTicksToRot = new Dictionary<Thing, int>();
-
-		// Token: 0x02003178 RID: 12664
-		private enum Tab
-		{
-			// Token: 0x0400B830 RID: 47152
-			Pawns,
-			// Token: 0x0400B831 RID: 47153
-			Items,
-			// Token: 0x0400B832 RID: 47154
-			TravelSupplies
+			num *= 0.1f;
 		}
+		if (!cachedTicksToRot.TryGetValue(food, out var value))
+		{
+			value = ((food.TryGetComp<CompRottable>() == null) ? (-1) : DaysUntilRotCalculator.ApproxTicksUntilRot_AssumeTimePassesBy(food.TryGetComp<CompRottable>(), CurrentTile, ticksToArrive));
+			cachedTicksToRot[food] = value;
+		}
+		if (value >= 0 && value < ticksToArrive.Last().ticks)
+		{
+			num *= 0.1f;
+		}
+		return num;
+	}
+
+	private Transferable BestMedicineItemFor(Pawn pawn, IEnumerable<TransferableOneWay> medicine)
+	{
+		Transferable transferable = null;
+		float num = 0f;
+		foreach (TransferableOneWay item in medicine)
+		{
+			Thing anyThing = item.AnyThing;
+			if (item.CanAdjustBy(1).Accepted && pawn.playerSettings.medCare.AllowsMedicine(anyThing.def))
+			{
+				float statValue = anyThing.GetStatValue(StatDefOf.MedicalPotency);
+				if (transferable == null || statValue > num)
+				{
+					transferable = item;
+					num = statValue;
+				}
+			}
+		}
+		return transferable;
+	}
+
+	private Transferable GetHemogenPack(IEnumerable<TransferableOneWay> hemogen)
+	{
+		foreach (TransferableOneWay item in hemogen)
+		{
+			if (item.CanAdjustBy(1).Accepted)
+			{
+				return item;
+			}
+		}
+		return null;
+	}
+
+	public static List<Pawn> AllSendablePawns(Map map, bool reform)
+	{
+		return CaravanFormingUtility.AllSendablePawns(map, allowEvenIfDowned: true, reform, reform, reform);
+	}
+
+	public override void OnAcceptKeyPressed()
+	{
+		TrySend();
 	}
 }

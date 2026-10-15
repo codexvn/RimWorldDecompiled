@@ -1,20 +1,13 @@
-﻿using System;
+namespace RimWorld;
 
-namespace RimWorld
+public class CompProperties_AbilityChunkskip : CompProperties_AbilityEffect
 {
-	// Token: 0x020021FC RID: 8700
-	public class CompProperties_AbilityChunkskip : CompProperties_AbilityEffect
+	public int chunkCount;
+
+	public float scatterRadius;
+
+	public CompProperties_AbilityChunkskip()
 	{
-		// Token: 0x0600BE7F RID: 48767 RVA: 0x00373BEA File Offset: 0x00371DEA
-		public CompProperties_AbilityChunkskip()
-		{
-			this.compClass = typeof(CompAbilityEffect_Chunkskip);
-		}
-
-		// Token: 0x040082DB RID: 33499
-		public int chunkCount;
-
-		// Token: 0x040082DC RID: 33500
-		public float scatterRadius;
+		compClass = typeof(CompAbilityEffect_Chunkskip);
 	}
 }

@@ -1,31 +1,149 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class KnowledgeCategoryDef : Def
 {
-	// Token: 0x02001A60 RID: 6752
-	public class KnowledgeCategoryDef : Def
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__6 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x060097B8 RID: 38840 RVA: 0x002C4E6F File Offset: 0x002C306F
-		public override IEnumerable<string> ConfigErrors()
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public KnowledgeCategoryDef _003C_003E4__this;
+
+		string IEnumerator<string>.Current
 		{
-			if (this.overflowCategory == this)
+			[DebuggerHidden]
+			get
 			{
-				yield return "overflowCategory is this category.";
+				return _003C_003E2__current;
 			}
-			yield break;
 		}
 
-		// Token: 0x04006514 RID: 25876
-		public KnowledgeCategoryDef overflowCategory;
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
 
-		// Token: 0x04006515 RID: 25877
-		public Color color;
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__6(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
 
-		// Token: 0x04006516 RID: 25878
-		[NoTranslate]
-		public string texPath;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			KnowledgeCategoryDef knowledgeCategoryDef = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (knowledgeCategoryDef.overflowCategory == knowledgeCategoryDef)
+				{
+					_003C_003E2__current = "overflowCategory is this category.";
+					_003C_003E1__state = 1;
+					return true;
+				}
+				break;
+			case 1:
+				_003C_003E1__state = -1;
+				break;
+			}
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__6 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__6(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	public KnowledgeCategoryDef overflowCategory;
+
+	public Color color;
+
+	[NoTranslate]
+	public string texPath;
+
+	[Unsaved(false)]
+	private Texture2D texInt;
+
+	public Texture2D Tex => texInt;
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__6))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__6(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override void PostLoad()
+	{
+		if (!texPath.NullOrEmpty())
+		{
+			LongEventHandler.ExecuteWhenFinished(delegate
+			{
+				texInt = ContentFinder<Texture2D>.Get(texPath);
+			});
+		}
 	}
 }

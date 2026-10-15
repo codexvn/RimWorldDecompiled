@@ -1,220 +1,311 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_BuildCubeSculpture : JobDriver
 {
-	// Token: 0x020011CF RID: 4559
-	public class JobDriver_BuildCubeSculpture : JobDriver
+	private enum CubeMaterial
 	{
-		// Token: 0x06006F6F RID: 28527 RVA: 0x001E06E3 File Offset: 0x001DE8E3
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
-		{
-			return this.pawn.Reserve(this.job.targetA, this.job, 1, -1, null, errorOnFailed, false);
-		}
+		Dirt,
+		Stone,
+		Sand,
+		Scrap
+	}
 
-		// Token: 0x06006F70 RID: 28528 RVA: 0x0022B101 File Offset: 0x00229301
-		public override string GetReport()
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__7 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_BuildCubeSculpture _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
 		{
-			if (base.CurToilIndex == 0)
+			[DebuggerHidden]
+			get
 			{
-				return "ReportBuildingCubeEnroute".Translate();
+				return _003C_003E2__current;
 			}
-			return this.job.def.reportString.Formatted(this.GetMaterialString());
 		}
 
-		// Token: 0x06006F71 RID: 28529 RVA: 0x0022B140 File Offset: 0x00229340
-		protected override IEnumerable<Toil> MakeNewToils()
+		object IEnumerator.Current
 		{
-			Toil toil = Toils_Goto.Goto(TargetIndex.A, PathEndMode.OnCell);
-			toil.AddFinishAction(new Action(this.CacheGroundType));
-			yield return toil;
-			Toil toil2 = Toils_General.Wait(5000, TargetIndex.None);
-			toil2.WithProgressBar(TargetIndex.A, () => this.workDone / 5000f, false, -0.5f, false);
-			toil2.WithEffect(new Func<EffecterDef>(this.GetSculptureEffecter), TargetIndex.A, null);
-			toil2.activeSkill = (() => SkillDefOf.Construction);
-			toil2.handlingFacing = true;
-			toil2.tickIntervalAction = delegate(int delta)
+			[DebuggerHidden]
+			get
 			{
-				this.pawn.rotationTracker.FaceTarget(base.TargetA);
-				float num = 1.7f;
-				if (this.pawn.skills != null)
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__7(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_BuildCubeSculpture CS_0024_003C_003E8__locals15 = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+			{
+				_003C_003E1__state = -1;
+				Toil toil2 = Toils_Goto.Goto(TargetIndex.A, PathEndMode.OnCell);
+				toil2.AddFinishAction(CS_0024_003C_003E8__locals15.CacheGroundType);
+				_003C_003E2__current = toil2;
+				_003C_003E1__state = 1;
+				return true;
+			}
+			case 1:
+			{
+				_003C_003E1__state = -1;
+				Toil toil = Toils_General.Wait(5000);
+				toil.WithProgressBar(TargetIndex.A, () => CS_0024_003C_003E8__locals15.workDone / 5000f);
+				toil.WithEffect(CS_0024_003C_003E8__locals15.GetSculptureEffecter, TargetIndex.A, null);
+				toil.activeSkill = () => SkillDefOf.Construction;
+				toil.handlingFacing = true;
+				toil.tickIntervalAction = delegate(int delta)
 				{
-					this.pawn.skills.Learn(SkillDefOf.Construction, 0.25f * (float)delta, false, false);
-					if (!this.pawn.skills.GetSkill(SkillDefOf.Construction).TotallyDisabled)
+					CS_0024_003C_003E8__locals15.pawn.rotationTracker.FaceTarget(CS_0024_003C_003E8__locals15.TargetA);
+					float num2 = 1.7f;
+					if (CS_0024_003C_003E8__locals15.pawn.skills != null)
 					{
-						num *= this.pawn.GetStatValue(StatDefOf.ConstructionSpeed, true, -1);
+						CS_0024_003C_003E8__locals15.pawn.skills.Learn(SkillDefOf.Construction, 0.25f * (float)delta);
+						if (!CS_0024_003C_003E8__locals15.pawn.skills.GetSkill(SkillDefOf.Construction).TotallyDisabled)
+						{
+							num2 *= CS_0024_003C_003E8__locals15.pawn.GetStatValue(StatDefOf.ConstructionSpeed);
+						}
 					}
-				}
-				if (this.pawn.Stuff != null)
+					if (CS_0024_003C_003E8__locals15.pawn.Stuff != null)
+					{
+						num2 *= CS_0024_003C_003E8__locals15.pawn.Stuff.GetStatValueAbstract(StatDefOf.ConstructionSpeedFactor);
+					}
+					CS_0024_003C_003E8__locals15.workDone += num2 * (float)delta;
+					if (CS_0024_003C_003E8__locals15.workDone >= 5000f)
+					{
+						CS_0024_003C_003E8__locals15.ReadyForNextToil();
+					}
+				};
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 2;
+				return true;
+			}
+			case 2:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.Do(CS_0024_003C_003E8__locals15.PlaceAndFinish);
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__7 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__7(0)
 				{
-					num *= this.pawn.Stuff.GetStatValueAbstract(StatDefOf.ConstructionSpeedFactor, null);
-				}
-				this.workDone += num * (float)delta;
-				if (this.workDone >= 5000f)
-				{
-					base.ReadyForNextToil();
-				}
-			};
-			yield return toil2;
-			yield return Toils_General.Do(new Action(this.PlaceAndFinish));
-			yield break;
-		}
-
-		// Token: 0x06006F72 RID: 28530 RVA: 0x0022B150 File Offset: 0x00229350
-		private void CacheGroundType()
-		{
-			TerrainDef terrainDef = this.pawn.MapHeld.terrainGrid.TerrainAt(base.TargetA.Cell);
-			if (terrainDef == null)
-			{
-				this.cubeMaterial = JobDriver_BuildCubeSculpture.CubeMaterial.Scrap;
-				return;
-			}
-			if (terrainDef.categoryType == TerrainDef.TerrainCategoryType.Soil)
-			{
-				this.cubeMaterial = JobDriver_BuildCubeSculpture.CubeMaterial.Dirt;
-				return;
-			}
-			if (terrainDef.categoryType == TerrainDef.TerrainCategoryType.Stone)
-			{
-				this.cubeMaterial = JobDriver_BuildCubeSculpture.CubeMaterial.Stone;
-				return;
-			}
-			if (terrainDef.categoryType == TerrainDef.TerrainCategoryType.Sand)
-			{
-				this.cubeMaterial = JobDriver_BuildCubeSculpture.CubeMaterial.Sand;
-				return;
-			}
-			this.cubeMaterial = JobDriver_BuildCubeSculpture.CubeMaterial.Scrap;
-		}
-
-		// Token: 0x06006F73 RID: 28531 RVA: 0x0022B1C8 File Offset: 0x002293C8
-		private void PlaceAndFinish()
-		{
-			Thing thing = GenSpawn.Spawn(this.GetSculptureThing(), base.TargetA.Cell, this.pawn.MapHeld, WipeMode.Vanish);
-			thing.SetFaction(Faction.OfPlayer, null);
-			CompQuality compQuality = thing.TryGetComp<CompQuality>();
-			if (compQuality != null)
-			{
-				compQuality.SetQuality(QualityUtility.GenerateQualityCreatedByPawn(this.pawn, SkillDefOf.Construction, false), new ArtGenerationContext?(ArtGenerationContext.Colony));
-				QualityUtility.SendCraftNotification(thing, this.pawn);
-			}
-			CompArt compArt = thing.TryGetComp<CompArt>();
-			if (compArt != null)
-			{
-				if (compQuality == null)
-				{
-					compArt.InitializeArt(ArtGenerationContext.Colony);
-				}
-				compArt.JustCreatedBy(this.pawn);
-			}
-			Hediff_CubeInterest hediff_CubeInterest;
-			if (this.pawn.health.hediffSet.TryGetHediff<Hediff_CubeInterest>(out hediff_CubeInterest))
-			{
-				hediff_CubeInterest.Notify_BuiltSculpture(thing);
-			}
-			if (this.pawn.InMentalState && this.pawn.MentalStateDef == MentalStateDefOf.CubeSculpting)
-			{
-				this.pawn.MentalState.RecoverFromState();
-			}
-		}
-
-		// Token: 0x06006F74 RID: 28532 RVA: 0x0022B2AC File Offset: 0x002294AC
-		private Thing GetSculptureThing()
-		{
-			ThingDef def = null;
-			if (this.cubeMaterial == JobDriver_BuildCubeSculpture.CubeMaterial.Dirt)
-			{
-				def = ThingDefOf.DirtCubeSculpture;
-			}
-			else if (this.cubeMaterial == JobDriver_BuildCubeSculpture.CubeMaterial.Stone)
-			{
-				def = ThingDefOf.StoneCubeSculpture;
-			}
-			else if (this.cubeMaterial == JobDriver_BuildCubeSculpture.CubeMaterial.Sand)
-			{
-				def = ThingDefOf.SandCubeSculpture;
-			}
-			else if (this.cubeMaterial == JobDriver_BuildCubeSculpture.CubeMaterial.Scrap)
-			{
-				def = ThingDefOf.ScrapCubeSculpture;
-			}
-			return ThingMaker.MakeThing(def, null);
-		}
-
-		// Token: 0x06006F75 RID: 28533 RVA: 0x0022B304 File Offset: 0x00229504
-		private EffecterDef GetSculptureEffecter()
-		{
-			EffecterDef result = null;
-			if (this.cubeMaterial == JobDriver_BuildCubeSculpture.CubeMaterial.Dirt)
-			{
-				result = EffecterDefOf.ConstructDirt;
-			}
-			else if (this.cubeMaterial == JobDriver_BuildCubeSculpture.CubeMaterial.Stone)
-			{
-				result = EffecterDefOf.ConstructDirt;
-			}
-			else if (this.cubeMaterial == JobDriver_BuildCubeSculpture.CubeMaterial.Sand)
-			{
-				result = EffecterDefOf.ConstructDirt;
-			}
-			else if (this.cubeMaterial == JobDriver_BuildCubeSculpture.CubeMaterial.Scrap)
-			{
-				result = EffecterDefOf.ConstructMetal;
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
 			return result;
 		}
 
-		// Token: 0x06006F76 RID: 28534 RVA: 0x0022B358 File Offset: 0x00229558
-		private string GetMaterialString()
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			switch (this.cubeMaterial)
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private CubeMaterial cubeMaterial = CubeMaterial.Scrap;
+
+	private float workDone;
+
+	private const TargetIndex Target = TargetIndex.A;
+
+	private const int BuildTimeTicks = 5000;
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return pawn.Reserve(job.targetA, job, 1, -1, null, errorOnFailed);
+	}
+
+	public override string GetReport()
+	{
+		if (base.CurToilIndex == 0)
+		{
+			return "ReportBuildingCubeEnroute".Translate();
+		}
+		return job.def.reportString.Formatted(GetMaterialString());
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__7))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__7(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	private void CacheGroundType()
+	{
+		TerrainDef terrainDef = pawn.MapHeld.terrainGrid.TerrainAt(base.TargetA.Cell);
+		if (terrainDef == null)
+		{
+			cubeMaterial = CubeMaterial.Scrap;
+		}
+		else if (terrainDef.categoryType == TerrainDef.TerrainCategoryType.Soil)
+		{
+			cubeMaterial = CubeMaterial.Dirt;
+		}
+		else if (terrainDef.categoryType == TerrainDef.TerrainCategoryType.Stone)
+		{
+			cubeMaterial = CubeMaterial.Stone;
+		}
+		else if (terrainDef.categoryType == TerrainDef.TerrainCategoryType.Sand)
+		{
+			cubeMaterial = CubeMaterial.Sand;
+		}
+		else
+		{
+			cubeMaterial = CubeMaterial.Scrap;
+		}
+	}
+
+	private void PlaceAndFinish()
+	{
+		Thing thing = GenSpawn.Spawn(GetSculptureThing(), base.TargetA.Cell, pawn.MapHeld);
+		thing.SetFaction(Faction.OfPlayer);
+		CompQuality compQuality = thing.TryGetComp<CompQuality>();
+		if (compQuality != null)
+		{
+			compQuality.SetQuality(QualityUtility.GenerateQualityCreatedByPawn(pawn, SkillDefOf.Construction, consumeInspiration: false), ArtGenerationContext.Colony);
+			QualityUtility.SendCraftNotification(thing, pawn);
+		}
+		CompArt compArt = thing.TryGetComp<CompArt>();
+		if (compArt != null)
+		{
+			if (compQuality == null)
 			{
-			case JobDriver_BuildCubeSculpture.CubeMaterial.Dirt:
-				return "CubeMaterialDirt".Translate();
-			case JobDriver_BuildCubeSculpture.CubeMaterial.Stone:
-				return "CubeMaterialStone".Translate();
-			case JobDriver_BuildCubeSculpture.CubeMaterial.Sand:
-				return "CubeMaterialSand".Translate();
-			case JobDriver_BuildCubeSculpture.CubeMaterial.Scrap:
-				return "CubeMaterialScrap".Translate();
-			default:
-				return "CubeMaterialScrap".Translate();
+				compArt.InitializeArt(ArtGenerationContext.Colony);
 			}
+			compArt.JustCreatedBy(pawn);
 		}
-
-		// Token: 0x06006F77 RID: 28535 RVA: 0x0022B3D3 File Offset: 0x002295D3
-		public override void ExposeData()
+		if (pawn.health.hediffSet.TryGetHediff<Hediff_CubeInterest>(out var hediff))
 		{
-			base.ExposeData();
-			Scribe_Values.Look<JobDriver_BuildCubeSculpture.CubeMaterial>(ref this.cubeMaterial, "cubeMaterial", JobDriver_BuildCubeSculpture.CubeMaterial.Dirt, false);
-			Scribe_Values.Look<float>(ref this.workDone, "workDone", 0f, false);
+			hediff.Notify_BuiltSculpture(thing);
 		}
-
-		// Token: 0x04004DB2 RID: 19890
-		private JobDriver_BuildCubeSculpture.CubeMaterial cubeMaterial = JobDriver_BuildCubeSculpture.CubeMaterial.Scrap;
-
-		// Token: 0x04004DB3 RID: 19891
-		private float workDone;
-
-		// Token: 0x04004DB4 RID: 19892
-		private const TargetIndex Target = TargetIndex.A;
-
-		// Token: 0x04004DB5 RID: 19893
-		private const int BuildTimeTicks = 5000;
-
-		// Token: 0x020011D0 RID: 4560
-		private enum CubeMaterial
+		if (pawn.InMentalState && pawn.MentalStateDef == MentalStateDefOf.CubeSculpting)
 		{
-			// Token: 0x04004DB7 RID: 19895
-			Dirt,
-			// Token: 0x04004DB8 RID: 19896
-			Stone,
-			// Token: 0x04004DB9 RID: 19897
-			Sand,
-			// Token: 0x04004DBA RID: 19898
-			Scrap
+			pawn.MentalState.RecoverFromState();
 		}
+	}
+
+	private Thing GetSculptureThing()
+	{
+		ThingDef def = null;
+		if (cubeMaterial == CubeMaterial.Dirt)
+		{
+			def = ThingDefOf.DirtCubeSculpture;
+		}
+		else if (cubeMaterial == CubeMaterial.Stone)
+		{
+			def = ThingDefOf.StoneCubeSculpture;
+		}
+		else if (cubeMaterial == CubeMaterial.Sand)
+		{
+			def = ThingDefOf.SandCubeSculpture;
+		}
+		else if (cubeMaterial == CubeMaterial.Scrap)
+		{
+			def = ThingDefOf.ScrapCubeSculpture;
+		}
+		return ThingMaker.MakeThing(def);
+	}
+
+	private EffecterDef GetSculptureEffecter()
+	{
+		EffecterDef result = null;
+		if (cubeMaterial == CubeMaterial.Dirt)
+		{
+			result = EffecterDefOf.ConstructDirt;
+		}
+		else if (cubeMaterial == CubeMaterial.Stone)
+		{
+			result = EffecterDefOf.ConstructDirt;
+		}
+		else if (cubeMaterial == CubeMaterial.Sand)
+		{
+			result = EffecterDefOf.ConstructDirt;
+		}
+		else if (cubeMaterial == CubeMaterial.Scrap)
+		{
+			result = EffecterDefOf.ConstructMetal;
+		}
+		return result;
+	}
+
+	private string GetMaterialString()
+	{
+		return cubeMaterial switch
+		{
+			CubeMaterial.Dirt => "CubeMaterialDirt".Translate(), 
+			CubeMaterial.Stone => "CubeMaterialStone".Translate(), 
+			CubeMaterial.Sand => "CubeMaterialSand".Translate(), 
+			CubeMaterial.Scrap => "CubeMaterialScrap".Translate(), 
+			_ => "CubeMaterialScrap".Translate(), 
+		};
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref cubeMaterial, "cubeMaterial", CubeMaterial.Dirt);
+		Scribe_Values.Look(ref workDone, "workDone", 0f);
 	}
 }

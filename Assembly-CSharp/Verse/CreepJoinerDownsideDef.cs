@@ -1,73 +1,207 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld;
 
-namespace Verse
+namespace Verse;
+
+public class CreepJoinerDownsideDef : CreepJoinerBaseDef
 {
-	// Token: 0x02000224 RID: 548
-	public class CreepJoinerDownsideDef : CreepJoinerBaseDef
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__15 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x06000E80 RID: 3712 RVA: 0x00043D15 File Offset: 0x00041F15
-		public override IEnumerable<string> ConfigErrors()
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CreepJoinerDownsideDef _003C_003E4__this;
+
+		private IEnumerator<string> _003C_003E7__wrap1;
+
+		string IEnumerator<string>.Current
 		{
-			foreach (string text in base.ConfigErrors())
+			[DebuggerHidden]
+			get
 			{
-				yield return text;
+				return _003C_003E2__current;
 			}
-			IEnumerator<string> enumerator = null;
-			if (this.triggerMtbDays != 0f && this.triggersAfterDays != FloatRange.Zero)
-			{
-				yield return "cannot use both triggerMtbDays and triggersAfterDays fields, use one or neither.";
-			}
-			yield break;
-			yield break;
 		}
 
-		// Token: 0x040008F6 RID: 2294
-		public bool repeats;
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
 
-		// Token: 0x040008F7 RID: 2295
-		public bool hasLetter;
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__15(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
 
-		// Token: 0x040008F8 RID: 2296
-		[MustTranslate]
-		public string letterLabel;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
 
-		// Token: 0x040008F9 RID: 2297
-		[MustTranslate]
-		public string letterDesc;
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				CreepJoinerDownsideDef creepJoinerDownsideDef = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((Def)creepJoinerDownsideDef).ConfigErrors().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_006f:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (creepJoinerDownsideDef.triggerMtbDays != 0f && creepJoinerDownsideDef.triggersAfterDays != FloatRange.Zero)
+					{
+						_003C_003E2__current = "cannot use both triggerMtbDays and triggersAfterDays fields, use one or neither.";
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
 
-		// Token: 0x040008FA RID: 2298
-		public LetterDef letterDef;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x040008FB RID: 2299
-		public List<BackstoryTrait> traits = new List<BackstoryTrait>();
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
 
-		// Token: 0x040008FC RID: 2300
-		public List<HediffDef> hediffs = new List<HediffDef>();
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x040008FD RID: 2301
-		public FloatRange triggersAfterDays = FloatRange.Zero;
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__15 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__15(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x040008FE RID: 2302
-		public List<AbilityDef> abilities = new List<AbilityDef>();
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x040008FF RID: 2303
-		public float triggerMtbDays;
+	public bool repeats;
 
-		// Token: 0x04000900 RID: 2304
-		public FloatRange triggerMinDays = FloatRange.Zero;
+	public bool hasLetter;
 
-		// Token: 0x04000901 RID: 2305
-		public bool canOccurWhenImprisoned;
+	[MustTranslate]
+	public string letterLabel;
 
-		// Token: 0x04000902 RID: 2306
-		public bool canOccurWhileDowned = true;
+	[MustTranslate]
+	public string letterDesc;
 
-		// Token: 0x04000903 RID: 2307
-		public bool mustBeConscious;
+	public LetterDef letterDef;
 
-		// Token: 0x04000904 RID: 2308
-		public Type workerType;
+	public List<BackstoryTrait> traits = new List<BackstoryTrait>();
+
+	public List<HediffDef> hediffs = new List<HediffDef>();
+
+	public FloatRange triggersAfterDays = FloatRange.Zero;
+
+	public List<AbilityDef> abilities = new List<AbilityDef>();
+
+	public float triggerMtbDays;
+
+	public FloatRange triggerMinDays = FloatRange.Zero;
+
+	public bool canOccurWhenImprisoned;
+
+	public bool canOccurWhileDowned = true;
+
+	public bool mustBeConscious;
+
+	public Type workerType;
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__15))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__15(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

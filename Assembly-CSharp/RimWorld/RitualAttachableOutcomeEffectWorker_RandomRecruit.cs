@@ -1,35 +1,30 @@
-﻿using System;
 using System.Collections.Generic;
+using RimWorld.Planet;
 using RimWorld.QuestGen;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class RitualAttachableOutcomeEffectWorker_RandomRecruit : RitualAttachableOutcomeEffectWorker
 {
-	// Token: 0x02002690 RID: 9872
-	public class RitualAttachableOutcomeEffectWorker_RandomRecruit : RitualAttachableOutcomeEffectWorker
+	public const float RecruitChance = 0.5f;
+
+	public override void Apply(Dictionary<Pawn, int> totalPresence, LordJob_Ritual jobRitual, RitualOutcomePossibility outcome, out string extraOutcomeDesc, ref LookTargets letterLookTargets)
 	{
-		// Token: 0x0600D8E3 RID: 55523 RVA: 0x00404500 File Offset: 0x00402700
-		public override void Apply(Dictionary<Pawn, int> totalPresence, LordJob_Ritual jobRitual, RitualOutcomePossibility outcome, out string extraOutcomeDesc, ref LookTargets letterLookTargets)
+		if (Rand.Chance(0.5f))
 		{
-			if (Rand.Chance(0.5f))
-			{
-				Slate slate = new Slate();
-				slate.Set<Map>("map", jobRitual.Map, false);
-				Slate slate2 = slate;
-				string name = "overridePawnGenParams";
-				PawnKindDef villager = PawnKindDefOf.Villager;
-				Faction faction = null;
-				PawnGenerationContext context = PawnGenerationContext.NonPlayer;
-				Ideo ideo = jobRitual.Ritual.ideo;
-				slate2.Set<PawnGenerationRequest>(name, new PawnGenerationRequest(villager, faction, context, null, true, false, false, true, false, 20f, false, true, false, true, true, false, false, false, false, 0f, 0f, null, 1f, null, null, null, null, null, null, null, null, null, null, null, ideo, false, false, false, false, null, null, null, null, null, 0f, DevelopmentalStage.Adult, null, null, null, false, false, false, -1, 0, false), false);
-				QuestUtility.GenerateQuestAndMakeAvailable(QuestScriptDefOf.WandererJoins, slate);
-				extraOutcomeDesc = this.def.letterInfoText;
-				return;
-			}
+			Slate slate = new Slate();
+			slate.Set("map", jobRitual.Map);
+			PawnKindDef villager = PawnKindDefOf.Villager;
+			PlanetTile? tile = jobRitual.Map.Tile;
+			Ideo ideo = jobRitual.Ritual.ideo;
+			slate.Set("overridePawnGenParams", new PawnGenerationRequest(villager, null, PawnGenerationContext.NonPlayer, tile, forceGenerateNewPawn: true, allowDead: false, allowDowned: false, canGeneratePawnRelations: true, mustBeCapableOfViolence: false, 20f, forceAddFreeWarmLayerIfNeeded: false, allowGay: true, allowPregnant: false, allowFood: true, allowAddictions: true, inhabitant: false, certainlyBeenInCryptosleep: false, forceRedressWorldPawnIfFormerColonist: false, worldPawnFactionDoesntMatter: false, 0f, 0f, null, 1f, null, null, null, null, null, null, null, null, null, null, null, ideo, forceNoIdeo: false, forceNoBackstory: false, forbidAnyTitle: false, forceDead: false, null, null, null, null, null, 0f, DevelopmentalStage.Adult, null, null, null));
+			QuestUtility.GenerateQuestAndMakeAvailable(QuestScriptDefOf.WandererJoins, slate);
+			extraOutcomeDesc = def.letterInfoText;
+		}
+		else
+		{
 			extraOutcomeDesc = null;
 		}
-
-		// Token: 0x04009307 RID: 37639
-		public const float RecruitChance = 0.5f;
 	}
 }

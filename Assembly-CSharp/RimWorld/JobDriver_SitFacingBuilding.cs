@@ -1,74 +1,172 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_SitFacingBuilding : JobDriver
 {
-	// Token: 0x020011EC RID: 4588
-	public class JobDriver_SitFacingBuilding : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__5 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700115F RID: 4447
-		// (get) Token: 0x0600700F RID: 28687 RVA: 0x0022D15B File Offset: 0x0022B35B
-		private Building Building
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_SitFacingBuilding _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (Building)base.TargetThingA;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06007010 RID: 28688 RVA: 0x0022D168 File Offset: 0x0022B368
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		object IEnumerator.Current
 		{
-			return this.pawn.Reserve(this.job.targetA, this.job, this.job.def.joyMaxParticipants, 0, null, errorOnFailed, false) && this.pawn.ReserveSittableOrSpot(this.job.targetB.Cell, this.job, errorOnFailed);
-		}
-
-		// Token: 0x06007011 RID: 28689 RVA: 0x0022D1CB File Offset: 0x0022B3CB
-		protected override IEnumerable<Toil> MakeNewToils()
-		{
-			this.EndOnDespawnedOrNull(this.BuildingIndex, JobCondition.Incompletable);
-			yield return Toils_Goto.Goto(this.SeatIndex, PathEndMode.OnCell);
-			Toil toil = ToilMaker.MakeToil("MakeNewToils");
-			toil.tickIntervalAction = delegate(int delta)
+			[DebuggerHidden]
+			get
 			{
-				this.pawn.rotationTracker.FaceTarget(this.Building);
-				this.pawn.GainComfortFromCellIfPossible(delta, false);
-				Pawn pawn = this.pawn;
-				Building building = this.Building;
-				JoyUtility.JoyTickCheckEnd(pawn, delta, this.job.doUntilGatheringEnded ? JoyTickFullJoyAction.None : JoyTickFullJoyAction.EndJob, 1f, building);
-			};
-			toil.handlingFacing = true;
-			toil.defaultCompleteMode = ToilCompleteMode.Delay;
-			toil.defaultDuration = (this.job.doUntilGatheringEnded ? this.job.expiryInterval : this.job.def.joyDuration);
-			toil.AddFinishAction(delegate
-			{
-				JoyUtility.TryGainRecRoomThought(this.pawn);
-			});
-			this.ModifyPlayToil(toil);
-			yield return toil;
-			yield break;
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x06007012 RID: 28690 RVA: 0x000026EA File Offset: 0x000008EA
-		protected virtual void ModifyPlayToil(Toil toil)
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__5(int _003C_003E1__state)
 		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x06007013 RID: 28691 RVA: 0x0022D1DC File Offset: 0x0022B3DC
-		public override object[] TaleParameters()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			return new object[]
-			{
-				this.pawn,
-				base.TargetA.Thing.def
-			};
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x04004E05 RID: 19973
-		private readonly TargetIndex BuildingIndex = TargetIndex.A;
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_SitFacingBuilding CS_0024_003C_003E8__locals14 = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				CS_0024_003C_003E8__locals14.EndOnDespawnedOrNull(CS_0024_003C_003E8__locals14.BuildingIndex);
+				_003C_003E2__current = Toils_Goto.Goto(CS_0024_003C_003E8__locals14.SeatIndex, PathEndMode.OnCell);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+			{
+				_003C_003E1__state = -1;
+				Toil toil = ToilMaker.MakeToil("MakeNewToils");
+				toil.tickIntervalAction = delegate(int delta)
+				{
+					CS_0024_003C_003E8__locals14.pawn.rotationTracker.FaceTarget(CS_0024_003C_003E8__locals14.Building);
+					CS_0024_003C_003E8__locals14.pawn.GainComfortFromCellIfPossible(delta);
+					JoyUtility.JoyTickCheckEnd(CS_0024_003C_003E8__locals14.pawn, delta, joySource: CS_0024_003C_003E8__locals14.Building, fullJoyAction: CS_0024_003C_003E8__locals14.job.doUntilGatheringEnded ? JoyTickFullJoyAction.None : JoyTickFullJoyAction.EndJob);
+				};
+				toil.handlingFacing = true;
+				toil.defaultCompleteMode = ToilCompleteMode.Delay;
+				toil.defaultDuration = (CS_0024_003C_003E8__locals14.job.doUntilGatheringEnded ? CS_0024_003C_003E8__locals14.job.expiryInterval : CS_0024_003C_003E8__locals14.job.def.joyDuration);
+				toil.AddFinishAction(delegate
+				{
+					JoyUtility.TryGainRecRoomThought(CS_0024_003C_003E8__locals14.pawn);
+				});
+				CS_0024_003C_003E8__locals14.ModifyPlayToil(toil);
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 2;
+				return true;
+			}
+			case 2:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
 
-		// Token: 0x04004E06 RID: 19974
-		private readonly TargetIndex SeatIndex = TargetIndex.B;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__5 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__5(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private readonly TargetIndex BuildingIndex = TargetIndex.A;
+
+	private readonly TargetIndex SeatIndex = TargetIndex.B;
+
+	private Building Building => (Building)base.TargetThingA;
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		if (pawn.Reserve(job.targetA, job, job.def.joyMaxParticipants, 0, null, errorOnFailed))
+		{
+			return pawn.ReserveSittableOrSpot(job.targetB.Cell, job, errorOnFailed);
+		}
+		return false;
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__5))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__5(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	protected virtual void ModifyPlayToil(Toil toil)
+	{
+	}
+
+	public override object[] TaleParameters()
+	{
+		return new object[2]
+		{
+			pawn,
+			base.TargetA.Thing.def
+		};
 	}
 }

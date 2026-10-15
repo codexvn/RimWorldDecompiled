@@ -1,70 +1,42 @@
-﻿using System;
 using System.Text;
 using RimWorld.Utility;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class StatPart_ReloadMarketValue : StatPart
 {
-	// Token: 0x0200371B RID: 14107
-	public class StatPart_ReloadMarketValue : StatPart
+	public override void TransformValue(StatRequest req, ref float val)
 	{
-		// Token: 0x060138E9 RID: 80105 RVA: 0x005CCAFF File Offset: 0x005CACFF
-		public override void TransformValue(StatRequest req, ref float val)
-		{
-			StatPart_ReloadMarketValue.TransformAndExplain(req, ref val, null);
-		}
+		TransformAndExplain(req, ref val, null);
+	}
 
-		// Token: 0x060138EA RID: 80106 RVA: 0x005CCB0C File Offset: 0x005CAD0C
-		public override string ExplanationPart(StatRequest req)
-		{
-			float num = 1f;
-			StringBuilder stringBuilder = new StringBuilder();
-			StatPart_ReloadMarketValue.TransformAndExplain(req, ref num, stringBuilder);
-			return stringBuilder.ToString().TrimEndNewlines();
-		}
+	public override string ExplanationPart(StatRequest req)
+	{
+		float val = 1f;
+		StringBuilder stringBuilder = new StringBuilder();
+		TransformAndExplain(req, ref val, stringBuilder);
+		return stringBuilder.ToString().TrimEndNewlines();
+	}
 
-		// Token: 0x060138EB RID: 80107 RVA: 0x005CCB3C File Offset: 0x005CAD3C
-		private static void TransformAndExplain(StatRequest req, ref float val, StringBuilder explanation)
+	private static void TransformAndExplain(StatRequest req, ref float val, StringBuilder explanation)
+	{
+		IReloadableComp reloadableComp = req.Thing?.TryGetComp<CompApparelReloadable>();
+		IReloadableComp reloadableComp2 = reloadableComp ?? req.Thing?.TryGetComp<CompEquippableAbilityReloadable>();
+		if (reloadableComp2 != null && reloadableComp2.RemainingCharges != reloadableComp2.MaxCharges)
 		{
-			Thing thing = req.Thing;
-			IReloadableComp reloadableComp = (thing != null) ? thing.TryGetComp<CompApparelReloadable>() : null;
-			IReloadableComp reloadableComp2;
-			if ((reloadableComp2 = reloadableComp) == null)
+			if (reloadableComp2.AmmoDef != null)
 			{
-				Thing thing2 = req.Thing;
-				reloadableComp2 = ((thing2 != null) ? thing2.TryGetComp<CompEquippableAbilityReloadable>() : null);
-			}
-			IReloadableComp reloadableComp3 = reloadableComp2;
-			if (reloadableComp3 == null)
-			{
-				return;
-			}
-			if (reloadableComp3.RemainingCharges == reloadableComp3.MaxCharges)
-			{
-				return;
-			}
-			if (reloadableComp3.AmmoDef != null)
-			{
-				int num = reloadableComp3.MaxAmmoNeeded(true);
-				float num2 = -reloadableComp3.AmmoDef.BaseMarketValue * (float)num;
+				int num = reloadableComp2.MaxAmmoNeeded(allowForcedReload: true);
+				float num2 = (0f - reloadableComp2.AmmoDef.BaseMarketValue) * (float)num;
 				val += num2;
-				if (explanation != null)
-				{
-					explanation.AppendLine("StatsReport_ReloadMarketValue".Translate(reloadableComp3.AmmoDef.Named("AMMO"), num.Named("COUNT")) + ": " + num2.ToStringMoneyOffset(null));
-				}
+				explanation?.AppendLine("StatsReport_ReloadMarketValue".Translate(NamedArgumentUtility.Named(reloadableComp2.AmmoDef, "AMMO"), num.Named("COUNT")) + ": " + num2.ToStringMoneyOffset());
 			}
-			else
+			else if (reloadableComp2 is CompApparelVerbOwner_Charged compApparelVerbOwner_Charged && compApparelVerbOwner_Charged.Props.destroyOnEmpty)
 			{
-				CompApparelVerbOwner_Charged compApparelVerbOwner_Charged = reloadableComp3 as CompApparelVerbOwner_Charged;
-				if (compApparelVerbOwner_Charged != null && compApparelVerbOwner_Charged.Props.destroyOnEmpty)
-				{
-					float num3 = (float)reloadableComp3.RemainingCharges / (float)reloadableComp3.MaxCharges;
-					if (explanation != null)
-					{
-						explanation.AppendLine("StatsReport_ReloadRemainingChargesMultipler".Translate(compApparelVerbOwner_Charged.Props.ChargeNounArgument, reloadableComp3.LabelRemaining) + ": x" + num3.ToStringPercent());
-					}
-					val *= num3;
-				}
+				float num3 = (float)reloadableComp2.RemainingCharges / (float)reloadableComp2.MaxCharges;
+				explanation?.AppendLine("StatsReport_ReloadRemainingChargesMultipler".Translate(compApparelVerbOwner_Charged.Props.ChargeNounArgument, reloadableComp2.LabelRemaining) + ": x" + num3.ToStringPercent());
+				val *= num3;
 			}
 			if (val < 0f)
 			{

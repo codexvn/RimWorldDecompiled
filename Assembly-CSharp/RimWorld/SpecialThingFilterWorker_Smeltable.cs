@@ -1,27 +1,29 @@
-﻿using System;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class SpecialThingFilterWorker_Smeltable : SpecialThingFilterWorker
 {
-	// Token: 0x020036C2 RID: 14018
-	public class SpecialThingFilterWorker_Smeltable : SpecialThingFilterWorker
+	public override bool Matches(Thing t)
 	{
-		// Token: 0x0601376E RID: 79726 RVA: 0x005C8DCF File Offset: 0x005C6FCF
-		public override bool Matches(Thing t)
+		if (!CanEverMatch(t.def))
 		{
-			return this.CanEverMatch(t.def) && t.Smeltable;
+			return false;
 		}
+		return t.Smeltable;
+	}
 
-		// Token: 0x0601376F RID: 79727 RVA: 0x005C8DE7 File Offset: 0x005C6FE7
-		public override bool CanEverMatch(ThingDef def)
-		{
-			return def.smeltable;
-		}
+	public override bool CanEverMatch(ThingDef def)
+	{
+		return def.smeltable;
+	}
 
-		// Token: 0x06013770 RID: 79728 RVA: 0x005C8DEF File Offset: 0x005C6FEF
-		public override bool AlwaysMatches(ThingDef def)
+	public override bool AlwaysMatches(ThingDef def)
+	{
+		if (def.smeltable)
 		{
-			return def.smeltable && !def.MadeFromStuff;
+			return !def.MadeFromStuff;
 		}
+		return false;
 	}
 }

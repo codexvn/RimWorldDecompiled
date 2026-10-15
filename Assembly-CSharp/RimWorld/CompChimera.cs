@@ -1,132 +1,251 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI.Group;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompChimera : ThingComp
 {
-	// Token: 0x02002C45 RID: 11333
-	public class CompChimera : ThingComp
+	[CompilerGenerated]
+	private sealed class _003CCompGetGizmosExtra_003Ed__9 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x17002801 RID: 10241
-		// (get) Token: 0x0600FE25 RID: 65061 RVA: 0x0049B538 File Offset: 0x00499738
-		public CompProperties_Chimera Props
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompChimera _003C_003E4__this;
+
+		private IEnumerator<Gizmo> _003C_003E7__wrap1;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (CompProperties_Chimera)this.props;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002802 RID: 10242
-		// (get) Token: 0x0600FE26 RID: 65062 RVA: 0x0049B545 File Offset: 0x00499745
-		public Pawn Pawn
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (Pawn)this.parent;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600FE27 RID: 65063 RVA: 0x0049B554 File Offset: 0x00499754
-		public override void PostPostApplyDamage(DamageInfo dinfo, float totalDamageDealt)
+		[DebuggerHidden]
+		public _003CCompGetGizmosExtra_003Ed__9(int _003C_003E1__state)
 		{
-			if (this.Pawn.Dead)
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				return;
-			}
-			this.totalDamageTaken += totalDamageDealt;
-			if (!this.Pawn.Dead && this.totalDamageTaken > 0f && !this.Pawn.health.hediffSet.HasHediff(HediffDefOf.RageSpeed, false) && !this.Pawn.health.Downed)
-			{
-				this.Pawn.health.AddHediff(HediffMaker.MakeHediff(HediffDefOf.RageSpeed, this.Pawn, null), null, null, null);
-				if (this.Pawn.Spawned)
+				try
 				{
-					EffecterDefOf.ChimeraRage.Spawn(this.Pawn.Position, this.Pawn.Map, 1f).Cleanup();
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
 				}
 			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x0600FE28 RID: 65064 RVA: 0x0049B630 File Offset: 0x00499830
-		public override void Notify_Downed()
+		private bool MoveNext()
 		{
-			Hediff firstHediffOfDef = this.Pawn.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.RageSpeed, false);
-			if (firstHediffOfDef != null)
+			try
 			{
-				this.Pawn.health.RemoveHediff(firstHediffOfDef);
-			}
-		}
-
-		// Token: 0x0600FE29 RID: 65065 RVA: 0x0049B670 File Offset: 0x00499870
-		public override void CompTickRare()
-		{
-			base.CompTickRare();
-			if (this.Pawn.Dead)
-			{
-				return;
-			}
-			if (this.Pawn.health.summaryHealth.SummaryHealthPercent >= this.Props.rageEndHealthPercentThreshold)
-			{
-				Hediff firstHediffOfDef = this.Pawn.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.RageSpeed, false);
-				if (firstHediffOfDef != null)
+				int num = _003C_003E1__state;
+				CompChimera CS_0024_003C_003E8__locals5 = _003C_003E4__this;
+				switch (num)
 				{
-					this.Pawn.health.RemoveHediff(firstHediffOfDef);
-					this.totalDamageTaken = 0f;
-				}
-			}
-		}
-
-		// Token: 0x0600FE2A RID: 65066 RVA: 0x0049B6EE File Offset: 0x004998EE
-		public Thought_MemoryObservation GiveObservedThought(Pawn observer)
-		{
-			Thought_MemoryObservation_Chimera thought_MemoryObservation_Chimera = (Thought_MemoryObservation_Chimera)ThoughtMaker.MakeThought(ThoughtDefOf.Chimera);
-			thought_MemoryObservation_Chimera.Target = this.Pawn;
-			return thought_MemoryObservation_Chimera;
-		}
-
-		// Token: 0x0600FE2B RID: 65067 RVA: 0x0049B70B File Offset: 0x0049990B
-		public override IEnumerable<Gizmo> CompGetGizmosExtra()
-		{
-			foreach (Gizmo gizmo in base.CompGetGizmosExtra())
-			{
-				yield return gizmo;
-			}
-			IEnumerator<Gizmo> enumerator = null;
-			if (DebugSettings.ShowDevGizmos)
-			{
-				yield return new Command_Action
-				{
-					defaultLabel = "DEV: Switch stalk/attack mode",
-					action = delegate()
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((ThingComp)CS_0024_003C_003E8__locals5).CompGetGizmosExtra().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 2:
 					{
-						Lord lord = this.Pawn.GetLord();
-						if (lord == null)
-						{
-							lord = LordMaker.MakeNewLord(Faction.OfEntities, new LordJob_ChimeraAssault(), this.Pawn.Map, new List<Pawn>
-							{
-								this.Pawn
-							});
-							this.Pawn.SetFaction(Faction.OfEntities, null);
-						}
-						LordJob_ChimeraAssault lordJob_ChimeraAssault = lord.LordJob as LordJob_ChimeraAssault;
-						if (lordJob_ChimeraAssault != null)
-						{
-							lordJob_ChimeraAssault.SwitchMode();
-						}
+						_003C_003E1__state = -1;
+						break;
 					}
+					IL_006f:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Gizmo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (!DebugSettings.ShowDevGizmos)
+					{
+						break;
+					}
+					_003C_003E2__current = new Command_Action
+					{
+						defaultLabel = "DEV: Switch stalk/attack mode",
+						action = delegate
+						{
+							Lord lord = CS_0024_003C_003E8__locals5.Pawn.GetLord();
+							if (lord == null)
+							{
+								lord = LordMaker.MakeNewLord(Faction.OfEntities, new LordJob_ChimeraAssault(), CS_0024_003C_003E8__locals5.Pawn.Map, new List<Pawn> { CS_0024_003C_003E8__locals5.Pawn });
+								CS_0024_003C_003E8__locals5.Pawn.SetFaction(Faction.OfEntities);
+							}
+							if (lord.LordJob is LordJob_ChimeraAssault lordJob_ChimeraAssault)
+							{
+								lordJob_ChimeraAssault.SwitchMode();
+							}
+						}
+					};
+					_003C_003E1__state = 2;
+					return true;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CCompGetGizmosExtra_003Ed__9 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CCompGetGizmosExtra_003Ed__9(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
 				};
 			}
-			yield break;
-			yield break;
+			return result;
 		}
 
-		// Token: 0x0600FE2C RID: 65068 RVA: 0x0049B71B File Offset: 0x0049991B
-		public override void PostExposeData()
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			base.PostExposeData();
-			Scribe_Values.Look<float>(ref this.totalDamageTaken, "totalDamageTaken", 0f, false);
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x0400A698 RID: 42648
-		private float totalDamageTaken;
+	private float totalDamageTaken;
+
+	public CompProperties_Chimera Props => (CompProperties_Chimera)props;
+
+	public Pawn Pawn => (Pawn)parent;
+
+	public override void PostPostApplyDamage(DamageInfo dinfo, float totalDamageDealt)
+	{
+		if (Pawn.Dead)
+		{
+			return;
+		}
+		totalDamageTaken += totalDamageDealt;
+		if (!Pawn.Dead && totalDamageTaken > 0f && !Pawn.health.hediffSet.HasHediff(HediffDefOf.RageSpeed) && !Pawn.health.Downed)
+		{
+			Pawn.health.AddHediff(HediffMaker.MakeHediff(HediffDefOf.RageSpeed, Pawn), null, null);
+			if (Pawn.Spawned)
+			{
+				EffecterDefOf.ChimeraRage.Spawn(Pawn.Position, Pawn.Map).Cleanup();
+			}
+		}
+	}
+
+	public override void Notify_Downed()
+	{
+		Hediff firstHediffOfDef = Pawn.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.RageSpeed);
+		if (firstHediffOfDef != null)
+		{
+			Pawn.health.RemoveHediff(firstHediffOfDef);
+		}
+	}
+
+	public override void CompTickRare()
+	{
+		base.CompTickRare();
+		if (!Pawn.Dead && Pawn.health.summaryHealth.SummaryHealthPercent >= Props.rageEndHealthPercentThreshold)
+		{
+			Hediff firstHediffOfDef = Pawn.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.RageSpeed);
+			if (firstHediffOfDef != null)
+			{
+				Pawn.health.RemoveHediff(firstHediffOfDef);
+				totalDamageTaken = 0f;
+			}
+		}
+	}
+
+	public Thought_MemoryObservation GiveObservedThought(Pawn observer)
+	{
+		Thought_MemoryObservation_Chimera obj = (Thought_MemoryObservation_Chimera)ThoughtMaker.MakeThought(ThoughtDefOf.Chimera);
+		obj.Target = Pawn;
+		return obj;
+	}
+
+	[IteratorStateMachine(typeof(_003CCompGetGizmosExtra_003Ed__9))]
+	public override IEnumerable<Gizmo> CompGetGizmosExtra()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CCompGetGizmosExtra_003Ed__9(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override void PostExposeData()
+	{
+		base.PostExposeData();
+		Scribe_Values.Look(ref totalDamageTaken, "totalDamageTaken", 0f);
 	}
 }

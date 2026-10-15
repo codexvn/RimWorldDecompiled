@@ -1,9 +1,5 @@
-﻿using System;
+namespace RimWorld;
 
-namespace RimWorld
+public class CompProperties_AbilityGiveHediffPsychic : CompProperties_AbilityGiveHediff
 {
-	// Token: 0x0200223A RID: 8762
-	public class CompProperties_AbilityGiveHediffPsychic : CompProperties_AbilityGiveHediff
-	{
-	}
 }

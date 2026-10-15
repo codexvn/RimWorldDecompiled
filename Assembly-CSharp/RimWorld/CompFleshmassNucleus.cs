@@ -1,251 +1,334 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompFleshmassNucleus : ThingComp, IActivity, IRoofCollapseAlert
 {
-	// Token: 0x02002C9B RID: 11419
-	public class CompFleshmassNucleus : ThingComp, IActivity, IRoofCollapseAlert
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass21_0
 	{
-		// Token: 0x17002882 RID: 10370
-		// (get) Token: 0x06010060 RID: 65632 RVA: 0x004A3FCD File Offset: 0x004A21CD
-		public CompProperties_FleshmassNucleus Props
+		public int ticks;
+
+		public CompFleshmassNucleus _003C_003E4__this;
+
+		internal void _003CCompGetGizmosExtra_003Eb__1()
 		{
+			_003C_003E4__this.debugNextMeatTick = GenTicks.TicksGame + ticks;
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass21_1
+	{
+		public int ticks;
+
+		public CompFleshmassNucleus _003C_003E4__this;
+
+		internal void _003CCompGetGizmosExtra_003Eb__3()
+		{
+			_003C_003E4__this.debugActiveTick = GenTicks.TicksGame + ticks;
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CCompGetGizmosExtra_003Ed__21 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompFleshmassNucleus _003C_003E4__this;
+
+		Gizmo IEnumerator<Gizmo>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				return (CompProperties_FleshmassNucleus)this.props;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002883 RID: 10371
-		// (get) Token: 0x06010061 RID: 65633 RVA: 0x004A3FDC File Offset: 0x004A21DC
-		public CompActivity Activity
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				CompActivity result;
-				if ((result = this.activityComp) == null)
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CCompGetGizmosExtra_003Ed__21(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			CompFleshmassNucleus CS_0024_003C_003E8__locals5 = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (!DebugSettings.ShowDevGizmos)
 				{
-					result = (this.activityComp = this.Pawn.TryGetComp<CompActivity>());
+					return false;
 				}
-				return result;
-			}
-		}
-
-		// Token: 0x17002884 RID: 10372
-		// (get) Token: 0x06010062 RID: 65634 RVA: 0x0049B545 File Offset: 0x00499745
-		public Pawn Pawn
-		{
-			get
-			{
-				return (Pawn)this.parent;
-			}
-		}
-
-		// Token: 0x06010063 RID: 65635 RVA: 0x004A4007 File Offset: 0x004A2207
-		public override void PostExposeData()
-		{
-			base.PostExposeData();
-			Scribe_Values.Look<int>(ref this.minNextFireTick, "minNextFireTick", 0, false);
-		}
-
-		// Token: 0x06010064 RID: 65636 RVA: 0x004A4024 File Offset: 0x004A2224
-		public override void PostPostMake()
-		{
-			this.minNextFireTick = GenTicks.TicksGame + CompFleshmassNucleus.InitialMeatDelayRange.RandomInRange;
-		}
-
-		// Token: 0x06010065 RID: 65637 RVA: 0x004A404C File Offset: 0x004A224C
-		public override void CompTick()
-		{
-			if (this.debugNextMeatTick > 0 && GenTicks.TicksGame == this.debugNextMeatTick)
-			{
-				this.CreateMeat();
-			}
-			if (this.debugActiveTick > 0 && GenTicks.TicksGame == this.debugActiveTick)
-			{
-				this.Activity.EnterActiveState();
-			}
-			if (GenTicks.TicksGame < this.minNextFireTick)
-			{
-				return;
-			}
-			if (Rand.MTBEventOccurs(1f, 60000f, 1f))
-			{
-				this.CreateMeat();
-			}
-		}
-
-		// Token: 0x06010066 RID: 65638 RVA: 0x004A40C0 File Offset: 0x004A22C0
-		public override void Notify_Downed()
-		{
-			this.Pawn.Kill(null, null);
-		}
-
-		// Token: 0x06010067 RID: 65639 RVA: 0x004A40E4 File Offset: 0x004A22E4
-		private void CreateMeat()
-		{
-			this.minNextFireTick = GenTicks.TicksGame + 15000;
-			int num = Mathf.CeilToInt(this.Props.activityMeatPerDayCurve.Evaluate(this.Activity.ActivityLevel));
-			int randomInRange = CompFleshmassNucleus.MeatClumpRange.RandomInRange;
-			for (int i = 0; i < randomInRange; i++)
-			{
-				IntVec3 dropCell;
-				if (CellFinder.TryRandomClosewalkCellNear(this.Pawn.PositionHeld, this.Pawn.MapHeld, 3, out dropCell, null))
+				_003C_003E2__current = new Command_Action
 				{
-					Thing thing = ThingMaker.MakeThing(ThingDefOf.Meat_Twisted, null);
-					thing.stackCount = Rand.RangeInclusive(20, num - 20 * (randomInRange - i - 1));
-					Thing thing2;
-					GenDrop.TryDropSpawn(thing, dropCell, this.Pawn.MapHeld, ThingPlaceMode.Near, out thing2, null, null, true);
-				}
-			}
-			EffecterDefOf.MeatExplosion.Spawn(this.Pawn.PositionHeld, this.Pawn.MapHeld, 1f).Cleanup();
-		}
-
-		// Token: 0x06010068 RID: 65640 RVA: 0x004A41C3 File Offset: 0x004A23C3
-		public override IEnumerable<Gizmo> CompGetGizmosExtra()
-		{
-			if (!DebugSettings.ShowDevGizmos)
-			{
-				yield break;
-			}
-			yield return new Command_Action
-			{
-				defaultLabel = "DEV: Create meat",
-				action = delegate()
-				{
-					List<FloatMenuOption> list = new List<FloatMenuOption>();
-					for (int i = 10; i >= 0; i--)
+					defaultLabel = "DEV: Create meat",
+					action = delegate
 					{
-						int ticks = i * 60;
-						list.Add(new FloatMenuOption(i.ToString() + "s", delegate()
+						List<FloatMenuOption> list2 = new List<FloatMenuOption>();
+						for (int num2 = 10; num2 >= 0; num2--)
 						{
-							this.debugNextMeatTick = GenTicks.TicksGame + ticks;
-						}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0));
+							_003C_003Ec__DisplayClass21_0 CS_0024_003C_003E8__locals8 = new _003C_003Ec__DisplayClass21_0
+							{
+								_003C_003E4__this = CS_0024_003C_003E8__locals5,
+								ticks = num2 * 60
+							};
+							list2.Add(new FloatMenuOption(num2 + "s", delegate
+							{
+								CS_0024_003C_003E8__locals8._003C_003E4__this.debugNextMeatTick = GenTicks.TicksGame + CS_0024_003C_003E8__locals8.ticks;
+							}));
+						}
+						Find.WindowStack.Add(new FloatMenu(list2));
 					}
-					Find.WindowStack.Add(new FloatMenu(list));
-				}
-			};
-			yield return new Command_Action
-			{
-				defaultLabel = "DEV: Go active in...",
-				action = delegate()
+				};
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = new Command_Action
 				{
-					List<FloatMenuOption> list = new List<FloatMenuOption>();
-					for (int i = 0; i <= 5; i++)
+					defaultLabel = "DEV: Go active in...",
+					action = delegate
 					{
-						int ticks = i * 60;
-						list.Add(new FloatMenuOption(i.ToString() + "s", delegate()
+						List<FloatMenuOption> list = new List<FloatMenuOption>();
+						for (int i = 0; i <= 5; i++)
 						{
-							this.debugActiveTick = GenTicks.TicksGame + ticks;
-						}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0));
+							_003C_003Ec__DisplayClass21_1 CS_0024_003C_003E8__locals4 = new _003C_003Ec__DisplayClass21_1
+							{
+								_003C_003E4__this = CS_0024_003C_003E8__locals5,
+								ticks = i * 60
+							};
+							list.Add(new FloatMenuOption(i + "s", delegate
+							{
+								CS_0024_003C_003E8__locals4._003C_003E4__this.debugActiveTick = GenTicks.TicksGame + CS_0024_003C_003E8__locals4.ticks;
+							}));
+						}
+						Find.WindowStack.Add(new FloatMenu(list));
 					}
-					Find.WindowStack.Add(new FloatMenu(list));
-				}
-			};
-			yield break;
+				};
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				return false;
+			}
 		}
 
-		// Token: 0x06010069 RID: 65641 RVA: 0x004A41D4 File Offset: 0x004A23D4
-		public void OnActivityActivated()
+		bool IEnumerator.MoveNext()
 		{
-			IntVec3 positionHeld = this.Pawn.PositionHeld;
-			Map mapHeld = this.Pawn.MapHeld;
-			FleshbeastUtility.MeatSplatter(10, positionHeld, mapHeld, FleshbeastUtility.MeatExplosionSize.Large);
-			this.Pawn.Destroy(DestroyMode.Vanish);
-			float threatPoints = StorytellerUtility.DefaultThreatPointsNow(mapHeld) * 0.5f;
-			Building_FleshmassHeart building_FleshmassHeart = (Building_FleshmassHeart)ThingMaker.MakeThing(ThingDefOf.FleshmassHeart, null);
-			building_FleshmassHeart.Comp.threatPoints = threatPoints;
-			building_FleshmassHeart.SetFaction(Faction.OfEntities, null);
-			GenSpawn.Spawn(building_FleshmassHeart, positionHeld, mapHeld, WipeMode.Vanish);
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0601006A RID: 65642 RVA: 0x000026EA File Offset: 0x000008EA
-		public void OnPassive()
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x0601006B RID: 65643 RVA: 0x00002501 File Offset: 0x00000701
-		public bool ShouldGoPassive()
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
 		{
-			return false;
-		}
-
-		// Token: 0x0601006C RID: 65644 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public bool CanBeSuppressed()
-		{
-			return true;
-		}
-
-		// Token: 0x0601006D RID: 65645 RVA: 0x004A4250 File Offset: 0x004A2450
-		public bool CanActivate()
-		{
-			using (IEnumerator<IntVec3> enumerator = GenAdj.CellsOccupiedBy(this.Pawn.PositionHeld, Rot4.South, new IntVec2(2, 2)).GetEnumerator())
+			_003CCompGetGizmosExtra_003Ed__21 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				while (enumerator.MoveNext())
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CCompGetGizmosExtra_003Ed__21(0)
 				{
-					if (!enumerator.Current.SupportsStructureType(this.Pawn.MapHeld, ThingDefOf.FleshmassHeart.terrainAffordanceNeeded))
-					{
-						return false;
-					}
-				}
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
-			return true;
+			return result;
 		}
 
-		// Token: 0x0601006E RID: 65646 RVA: 0x00002C42 File Offset: 0x00000E42
-		public string ActivityTooltipExtra()
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return null;
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x0601006F RID: 65647 RVA: 0x004A42D0 File Offset: 0x004A24D0
-		public RoofCollapseResponse Notify_OnBeforeRoofCollapse()
+	private int minNextFireTick;
+
+	private CompActivity activityComp;
+
+	private int debugNextMeatTick = -1;
+
+	private int debugActiveTick = -1;
+
+	private static readonly IntRange InitialMeatDelayRange = new IntRange(5000, 12500);
+
+	private static readonly IntRange MeatClumpRange = new IntRange(3, 6);
+
+	private const int MinRefireTicks = 15000;
+
+	private const int MeatDaysMTB = 1;
+
+	private const int MinMeatPerStack = 20;
+
+	private const float HeartPointsFactor = 0.5f;
+
+	public CompProperties_FleshmassNucleus Props => (CompProperties_FleshmassNucleus)props;
+
+	public CompActivity Activity => activityComp ?? (activityComp = Pawn.TryGetComp<CompActivity>());
+
+	public Pawn Pawn => (Pawn)parent;
+
+	public override void PostExposeData()
+	{
+		base.PostExposeData();
+		Scribe_Values.Look(ref minNextFireTick, "minNextFireTick", 0);
+	}
+
+	public override void PostPostMake()
+	{
+		minNextFireTick = GenTicks.TicksGame + InitialMeatDelayRange.RandomInRange;
+	}
+
+	public override void CompTick()
+	{
+		if (debugNextMeatTick > 0 && GenTicks.TicksGame == debugNextMeatTick)
 		{
-			IntVec3 cell;
-			if (RCellFinder.TryFindRandomCellNearWith(this.Pawn.Position, (IntVec3 c) => CompFleshmassNucleus.IsValidCell(c, this.Pawn.MapHeld), this.Pawn.MapHeld, out cell, 10, 2147483647))
+			CreateMeat();
+		}
+		if (debugActiveTick > 0 && GenTicks.TicksGame == debugActiveTick)
+		{
+			Activity.EnterActiveState();
+		}
+		if (GenTicks.TicksGame >= minNextFireTick && Rand.MTBEventOccurs(1f, 60000f, 1f))
+		{
+			CreateMeat();
+		}
+	}
+
+	public override void Notify_Downed()
+	{
+		Pawn.Kill(null);
+	}
+
+	private void CreateMeat()
+	{
+		minNextFireTick = GenTicks.TicksGame + 15000;
+		int num = Mathf.CeilToInt(Props.activityMeatPerDayCurve.Evaluate(Activity.ActivityLevel));
+		int randomInRange = MeatClumpRange.RandomInRange;
+		for (int i = 0; i < randomInRange; i++)
+		{
+			if (CellFinder.TryRandomClosewalkCellNear(Pawn.PositionHeld, Pawn.MapHeld, 3, out var result))
 			{
-				SkipUtility.SkipTo(this.Pawn, cell, this.Pawn.MapHeld);
-				this.Activity.AdjustActivity(this.Props.activityOnRoofCollapsed);
+				Thing thing = ThingMaker.MakeThing(ThingDefOf.Meat_Twisted);
+				thing.stackCount = Rand.RangeInclusive(20, num - 20 * (randomInRange - i - 1));
+				GenDrop.TryDropSpawn(thing, result, Pawn.MapHeld, ThingPlaceMode.Near, out var _);
 			}
-			return RoofCollapseResponse.RemoveThing;
 		}
+		EffecterDefOf.MeatExplosion.Spawn(Pawn.PositionHeld, Pawn.MapHeld).Cleanup();
+	}
 
-		// Token: 0x06010070 RID: 65648 RVA: 0x004A433E File Offset: 0x004A253E
-		private static bool IsValidCell(IntVec3 cell, Map map)
+	[IteratorStateMachine(typeof(_003CCompGetGizmosExtra_003Ed__21))]
+	public override IEnumerable<Gizmo> CompGetGizmosExtra()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CCompGetGizmosExtra_003Ed__21(-2)
 		{
-			return cell.InBounds(map) && cell.Walkable(map);
+			_003C_003E4__this = this
+		};
+	}
+
+	public void OnActivityActivated()
+	{
+		IntVec3 positionHeld = Pawn.PositionHeld;
+		Map mapHeld = Pawn.MapHeld;
+		FleshbeastUtility.MeatSplatter(10, positionHeld, mapHeld, FleshbeastUtility.MeatExplosionSize.Large);
+		Pawn.Destroy();
+		float threatPoints = StorytellerUtility.DefaultThreatPointsNow(mapHeld) * 0.5f;
+		Building_FleshmassHeart obj = (Building_FleshmassHeart)ThingMaker.MakeThing(ThingDefOf.FleshmassHeart);
+		obj.Comp.threatPoints = threatPoints;
+		obj.SetFaction(Faction.OfEntities);
+		GenSpawn.Spawn(obj, positionHeld, mapHeld);
+	}
+
+	public void OnPassive()
+	{
+	}
+
+	public bool ShouldGoPassive()
+	{
+		return false;
+	}
+
+	public bool CanBeSuppressed()
+	{
+		return true;
+	}
+
+	public bool CanActivate()
+	{
+		foreach (IntVec3 item in GenAdj.CellsOccupiedBy(Pawn.PositionHeld, Rot4.South, new IntVec2(2, 2)))
+		{
+			if (!item.SupportsStructureType(Pawn.MapHeld, ThingDefOf.FleshmassHeart.terrainAffordanceNeeded))
+			{
+				return false;
+			}
 		}
+		return true;
+	}
 
-		// Token: 0x0400A795 RID: 42901
-		private int minNextFireTick;
+	public string ActivityTooltipExtra()
+	{
+		return null;
+	}
 
-		// Token: 0x0400A796 RID: 42902
-		private CompActivity activityComp;
+	public RoofCollapseResponse Notify_OnBeforeRoofCollapse()
+	{
+		if (RCellFinder.TryFindRandomCellNearWith(Pawn.Position, (IntVec3 c) => IsValidCell(c, Pawn.MapHeld), Pawn.MapHeld, out var result, 10))
+		{
+			SkipUtility.SkipTo(Pawn, result, Pawn.MapHeld);
+			Activity.AdjustActivity(Props.activityOnRoofCollapsed);
+		}
+		return RoofCollapseResponse.RemoveThing;
+	}
 
-		// Token: 0x0400A797 RID: 42903
-		private int debugNextMeatTick = -1;
-
-		// Token: 0x0400A798 RID: 42904
-		private int debugActiveTick = -1;
-
-		// Token: 0x0400A799 RID: 42905
-		private static readonly IntRange InitialMeatDelayRange = new IntRange(5000, 12500);
-
-		// Token: 0x0400A79A RID: 42906
-		private static readonly IntRange MeatClumpRange = new IntRange(3, 6);
-
-		// Token: 0x0400A79B RID: 42907
-		private const int MinRefireTicks = 15000;
-
-		// Token: 0x0400A79C RID: 42908
-		private const int MeatDaysMTB = 1;
-
-		// Token: 0x0400A79D RID: 42909
-		private const int MinMeatPerStack = 20;
-
-		// Token: 0x0400A79E RID: 42910
-		private const float HeartPointsFactor = 0.5f;
+	private static bool IsValidCell(IntVec3 cell, Map map)
+	{
+		if (cell.InBounds(map))
+		{
+			return cell.Walkable(map);
+		}
+		return false;
 	}
 }

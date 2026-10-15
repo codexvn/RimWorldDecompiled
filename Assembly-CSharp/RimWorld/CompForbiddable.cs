@@ -1,179 +1,261 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompForbiddable : ThingComp
 {
-	// Token: 0x02002CA6 RID: 11430
-	public class CompForbiddable : ThingComp
+	[CompilerGenerated]
+	private sealed class _003CCompGetGizmosExtra_003Ed__14 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700288D RID: 10381
-		// (get) Token: 0x060100AE RID: 65710 RVA: 0x004A5021 File Offset: 0x004A3221
-		public CompProperties_Forbiddable Props
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompForbiddable _003C_003E4__this;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (CompProperties_Forbiddable)this.props;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700288E RID: 10382
-		// (get) Token: 0x060100AF RID: 65711 RVA: 0x004A502E File Offset: 0x004A322E
-		// (set) Token: 0x060100B0 RID: 65712 RVA: 0x004A5038 File Offset: 0x004A3238
-		public bool Forbidden
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.forbiddenInt;
-			}
-			set
-			{
-				if (value == this.forbiddenInt)
-				{
-					return;
-				}
-				this.forbiddenInt = value;
-				if (this.parent.Spawned)
-				{
-					if (this.forbiddenInt)
-					{
-						this.parent.Map.listerHaulables.Notify_Forbidden(this.parent);
-						this.parent.Map.listerMergeables.Notify_Forbidden(this.parent);
-					}
-					else
-					{
-						this.parent.Map.listerHaulables.Notify_Unforbidden(this.parent);
-						this.parent.Map.listerMergeables.Notify_Unforbidden(this.parent);
-					}
-					if (this.parent is Building_Door)
-					{
-						this.parent.Map.reachability.ClearCache();
-					}
-				}
-				this.UpdateOverlayHandle();
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700288F RID: 10383
-		// (get) Token: 0x060100B1 RID: 65713 RVA: 0x004A5104 File Offset: 0x004A3304
-		private OverlayTypes MyOverlayType
+		[DebuggerHidden]
+		public _003CCompGetGizmosExtra_003Ed__14(int _003C_003E1__state)
 		{
-			get
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			CompForbiddable CS_0024_003C_003E8__locals12 = _003C_003E4__this;
+			switch (num)
 			{
-				if (this.parent is Blueprint || this.parent is Frame)
+			default:
+				return false;
+			case 0:
+			{
+				_003C_003E1__state = -1;
+				if (CS_0024_003C_003E8__locals12.parent is Building && !CS_0024_003C_003E8__locals12.Props.allowNonPlayer && CS_0024_003C_003E8__locals12.parent.Faction != Faction.OfPlayer)
 				{
-					if (this.parent.def.size.x > 1 || this.parent.def.size.z > 1)
-					{
-						return OverlayTypes.ForbiddenBig;
-					}
-					return OverlayTypes.Forbidden;
+					return false;
+				}
+				if (CS_0024_003C_003E8__locals12.parent.SpawnedParentOrMe is Building building && CS_0024_003C_003E8__locals12.parent != building)
+				{
+					return false;
+				}
+				Command_Toggle command_Toggle = new Command_Toggle
+				{
+					hotKey = KeyBindingDefOf.Command_ItemForbid,
+					icon = TexCommand.ForbidOff,
+					isActive = () => !CS_0024_003C_003E8__locals12.Forbidden,
+					defaultLabel = "CommandAllow".TranslateWithBackup("DesignatorUnforbid"),
+					activateIfAmbiguous = false
+				};
+				if (CS_0024_003C_003E8__locals12.forbiddenInt)
+				{
+					command_Toggle.defaultDesc = "CommandForbiddenDesc".TranslateWithBackup("DesignatorUnforbidDesc");
 				}
 				else
 				{
-					if (this.parent.def.category == ThingCategory.Building)
-					{
-						return OverlayTypes.ForbiddenBig;
-					}
-					return OverlayTypes.Forbidden;
+					command_Toggle.defaultDesc = "CommandNotForbiddenDesc".TranslateWithBackup("DesignatorForbidDesc");
 				}
+				if (CS_0024_003C_003E8__locals12.parent.def.IsDoor)
+				{
+					command_Toggle.tutorTag = "ToggleForbidden-Door";
+					command_Toggle.toggleAction = delegate
+					{
+						CS_0024_003C_003E8__locals12.Forbidden = !CS_0024_003C_003E8__locals12.Forbidden;
+						PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.ForbiddingDoors, KnowledgeAmount.SpecificInteraction);
+					};
+				}
+				else
+				{
+					command_Toggle.tutorTag = "ToggleForbidden";
+					command_Toggle.toggleAction = delegate
+					{
+						CS_0024_003C_003E8__locals12.Forbidden = !CS_0024_003C_003E8__locals12.Forbidden;
+						PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.Forbidding, KnowledgeAmount.SpecificInteraction);
+					};
+				}
+				_003C_003E2__current = command_Toggle;
+				_003C_003E1__state = 1;
+				return true;
+			}
+			case 1:
+				_003C_003E1__state = -1;
+				return false;
 			}
 		}
 
-		// Token: 0x060100B2 RID: 65714 RVA: 0x004A5178 File Offset: 0x004A3378
-		private void UpdateOverlayHandle()
+		bool IEnumerator.MoveNext()
 		{
-			if (!this.parent.Spawned)
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CCompGetGizmosExtra_003Ed__14 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CCompGetGizmosExtra_003Ed__14(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	private bool forbiddenInt;
+
+	private OverlayHandle? overlayHandle;
+
+	public CompProperties_Forbiddable Props => (CompProperties_Forbiddable)props;
+
+	public bool Forbidden
+	{
+		get
+		{
+			return forbiddenInt;
+		}
+		set
+		{
+			if (value == forbiddenInt)
 			{
 				return;
 			}
-			this.parent.Map.overlayDrawer.Disable(this.parent, ref this.overlayHandle);
-			if (this.parent.Spawned && this.forbiddenInt)
+			forbiddenInt = value;
+			if (parent.Spawned)
 			{
-				this.overlayHandle = new OverlayHandle?(this.parent.Map.overlayDrawer.Enable(this.parent, this.MyOverlayType));
-			}
-		}
-
-		// Token: 0x060100B3 RID: 65715 RVA: 0x004A51F5 File Offset: 0x004A33F5
-		public override void PostPostMake()
-		{
-			base.PostPostMake();
-			if (this.Props.forbidOnMake)
-			{
-				this.forbiddenInt = true;
-				this.parent.SetForbidden(true, true);
-			}
-		}
-
-		// Token: 0x060100B4 RID: 65716 RVA: 0x004A521E File Offset: 0x004A341E
-		public override void PostSpawnSetup(bool respawningAfterLoad)
-		{
-			this.UpdateOverlayHandle();
-		}
-
-		// Token: 0x060100B5 RID: 65717 RVA: 0x004A5226 File Offset: 0x004A3426
-		public override void PostExposeData()
-		{
-			Scribe_Values.Look<bool>(ref this.forbiddenInt, "forbidden", false, false);
-		}
-
-		// Token: 0x060100B6 RID: 65718 RVA: 0x004A523A File Offset: 0x004A343A
-		public override void PostSplitOff(Thing piece)
-		{
-			piece.SetForbidden(this.forbiddenInt, true);
-		}
-
-		// Token: 0x060100B7 RID: 65719 RVA: 0x004A5249 File Offset: 0x004A3449
-		public override IEnumerable<Gizmo> CompGetGizmosExtra()
-		{
-			if (this.parent is Building && !this.Props.allowNonPlayer && this.parent.Faction != Faction.OfPlayer)
-			{
-				yield break;
-			}
-			Building building = this.parent.SpawnedParentOrMe as Building;
-			if (building != null && this.parent != building)
-			{
-				yield break;
-			}
-			Command_Toggle command_Toggle = new Command_Toggle();
-			command_Toggle.hotKey = KeyBindingDefOf.Command_ItemForbid;
-			command_Toggle.icon = TexCommand.ForbidOff;
-			command_Toggle.isActive = (() => !this.Forbidden);
-			command_Toggle.defaultLabel = "CommandAllow".TranslateWithBackup("DesignatorUnforbid");
-			command_Toggle.activateIfAmbiguous = false;
-			if (this.forbiddenInt)
-			{
-				command_Toggle.defaultDesc = "CommandForbiddenDesc".TranslateWithBackup("DesignatorUnforbidDesc");
-			}
-			else
-			{
-				command_Toggle.defaultDesc = "CommandNotForbiddenDesc".TranslateWithBackup("DesignatorForbidDesc");
-			}
-			if (this.parent.def.IsDoor)
-			{
-				command_Toggle.tutorTag = "ToggleForbidden-Door";
-				command_Toggle.toggleAction = delegate()
+				if (forbiddenInt)
 				{
-					this.Forbidden = !this.Forbidden;
-					PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.ForbiddingDoors, KnowledgeAmount.SpecificInteraction);
-				};
-			}
-			else
-			{
-				command_Toggle.tutorTag = "ToggleForbidden";
-				command_Toggle.toggleAction = delegate()
+					parent.Map.listerHaulables.Notify_Forbidden(parent);
+					parent.Map.listerMergeables.Notify_Forbidden(parent);
+				}
+				else
 				{
-					this.Forbidden = !this.Forbidden;
-					PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.Forbidding, KnowledgeAmount.SpecificInteraction);
-				};
+					parent.Map.listerHaulables.Notify_Unforbidden(parent);
+					parent.Map.listerMergeables.Notify_Unforbidden(parent);
+				}
+				if (parent is Building_Door)
+				{
+					parent.Map.reachability.ClearCache();
+				}
 			}
-			yield return command_Toggle;
-			yield break;
+			UpdateOverlayHandle();
 		}
+	}
 
-		// Token: 0x0400A7BF RID: 42943
-		private bool forbiddenInt;
+	private OverlayTypes MyOverlayType
+	{
+		get
+		{
+			if (parent is Blueprint || parent is Frame)
+			{
+				if (parent.def.size.x > 1 || parent.def.size.z > 1)
+				{
+					return OverlayTypes.ForbiddenBig;
+				}
+				return OverlayTypes.Forbidden;
+			}
+			if (parent.def.category == ThingCategory.Building)
+			{
+				return OverlayTypes.ForbiddenBig;
+			}
+			return OverlayTypes.Forbidden;
+		}
+	}
 
-		// Token: 0x0400A7C0 RID: 42944
-		private OverlayHandle? overlayHandle;
+	private void UpdateOverlayHandle()
+	{
+		if (parent.Spawned)
+		{
+			parent.Map.overlayDrawer.Disable(parent, ref overlayHandle);
+			if (parent.Spawned && forbiddenInt)
+			{
+				overlayHandle = parent.Map.overlayDrawer.Enable(parent, MyOverlayType);
+			}
+		}
+	}
+
+	public override void PostPostMake()
+	{
+		base.PostPostMake();
+		if (Props.forbidOnMake)
+		{
+			forbiddenInt = true;
+			parent.SetForbidden(value: true);
+		}
+	}
+
+	public override void PostSpawnSetup(bool respawningAfterLoad)
+	{
+		UpdateOverlayHandle();
+	}
+
+	public override void PostExposeData()
+	{
+		Scribe_Values.Look(ref forbiddenInt, "forbidden", defaultValue: false);
+	}
+
+	public override void PostSplitOff(Thing piece)
+	{
+		piece.SetForbidden(forbiddenInt);
+	}
+
+	[IteratorStateMachine(typeof(_003CCompGetGizmosExtra_003Ed__14))]
+	public override IEnumerable<Gizmo> CompGetGizmosExtra()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CCompGetGizmosExtra_003Ed__14(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

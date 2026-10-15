@@ -1,51 +1,147 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompProperties_SpawnerItems : CompProperties
 {
-	// Token: 0x02002E32 RID: 11826
-	public class CompProperties_SpawnerItems : CompProperties
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__7 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x17002AA8 RID: 10920
-		// (get) Token: 0x06010A68 RID: 68200 RVA: 0x004CD26D File Offset: 0x004CB46D
-		public IEnumerable<ThingDef> MatchingItems
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompProperties_SpawnerItems _003C_003E4__this;
+
+		private ThingDef parentDef;
+
+		public ThingDef _003C_003E3__parentDef;
+
+		string IEnumerator<string>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return from def in DefDatabase<ThingDef>.AllDefsListForReading
-				where def.BaseMarketValue <= this.approxMarketValuePerDay && ((def.IsStuff && this.stuffCategories.Any((StuffCategoryDef c) => def.stuffProps.categories.Contains(c))) || this.categories.Any((ThingCategoryDef c) => def.IsWithinCategory(c)))
-				select def;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06010A69 RID: 68201 RVA: 0x004CD285 File Offset: 0x004CB485
-		public CompProperties_SpawnerItems()
+		object IEnumerator.Current
 		{
-			this.compClass = typeof(CompSpawnerItems);
-		}
-
-		// Token: 0x06010A6A RID: 68202 RVA: 0x004CD2BE File Offset: 0x004CB4BE
-		public override IEnumerable<string> ConfigErrors(ThingDef parentDef)
-		{
-			if (this.MatchingItems.Count<ThingDef>() <= 0)
+			[DebuggerHidden]
+			get
 			{
-				yield return "Could not find any item that would be spawnable by " + parentDef.defName + " (CompSpawnerItems)!";
+				return _003C_003E2__current;
 			}
-			yield break;
 		}
 
-		// Token: 0x0400AD86 RID: 44422
-		public float approxMarketValuePerDay;
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__7(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
 
-		// Token: 0x0400AD87 RID: 44423
-		public int spawnInterval = 60000;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
 
-		// Token: 0x0400AD88 RID: 44424
-		public List<StuffCategoryDef> stuffCategories = new List<StuffCategoryDef>();
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			CompProperties_SpawnerItems compProperties_SpawnerItems = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (compProperties_SpawnerItems.MatchingItems.Count() <= 0)
+				{
+					_003C_003E2__current = "Could not find any item that would be spawnable by " + parentDef.defName + " (CompSpawnerItems)!";
+					_003C_003E1__state = 1;
+					return true;
+				}
+				break;
+			case 1:
+				_003C_003E1__state = -1;
+				break;
+			}
+			return false;
+		}
 
-		// Token: 0x0400AD89 RID: 44425
-		public List<ThingCategoryDef> categories = new List<ThingCategoryDef>();
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__7 _003CConfigErrors_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CConfigErrors_003Ed__ = this;
+			}
+			else
+			{
+				_003CConfigErrors_003Ed__ = new _003CConfigErrors_003Ed__7(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CConfigErrors_003Ed__.parentDef = _003C_003E3__parentDef;
+			return _003CConfigErrors_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	public float approxMarketValuePerDay;
+
+	public int spawnInterval = 60000;
+
+	public List<StuffCategoryDef> stuffCategories = new List<StuffCategoryDef>();
+
+	public List<ThingCategoryDef> categories = new List<ThingCategoryDef>();
+
+	public IEnumerable<ThingDef> MatchingItems => DefDatabase<ThingDef>.AllDefsListForReading.Where((ThingDef def) => def.BaseMarketValue <= approxMarketValuePerDay && ((def.IsStuff && stuffCategories.Any((StuffCategoryDef c) => def.stuffProps.categories.Contains(c))) || categories.Any((ThingCategoryDef c) => def.IsWithinCategory(c))));
+
+	public CompProperties_SpawnerItems()
+	{
+		compClass = typeof(CompSpawnerItems);
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__7))]
+	public override IEnumerable<string> ConfigErrors(ThingDef parentDef)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__7(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__parentDef = parentDef
+		};
 	}
 }

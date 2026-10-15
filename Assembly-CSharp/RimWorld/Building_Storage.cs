@@ -1,410 +1,646 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+[StaticConstructorOnStartup]
+public class Building_Storage : Building, ISlotGroupParent, IStoreSettingsParent, IHaulDestination, IStorageGroupMember, IHaulEnroute, ILoadReferenceable
 {
-	// Token: 0x020029A0 RID: 10656
-	[StaticConstructorOnStartup]
-	public class Building_Storage : Building, ISlotGroupParent, IStoreSettingsParent, IHaulDestination, IStorageGroupMember, IHaulEnroute, ILoadReferenceable
+	[CompilerGenerated]
+	private sealed class _003CAllSlotCells_003Ed__32 : IEnumerable<IntVec3>, IEnumerable, IEnumerator<IntVec3>, IEnumerator, IDisposable
 	{
-		// Token: 0x0600EAAB RID: 60075 RVA: 0x00444A02 File Offset: 0x00442C02
-		public Building_Storage()
-		{
-			this.slotGroup = new SlotGroup(this);
-		}
+		private int _003C_003E1__state;
 
-		// Token: 0x170023F6 RID: 9206
-		// (get) Token: 0x0600EAAC RID: 60076 RVA: 0x00444A16 File Offset: 0x00442C16
-		// (set) Token: 0x0600EAAD RID: 60077 RVA: 0x00444A1E File Offset: 0x00442C1E
-		StorageGroup IStorageGroupMember.Group
+		private IntVec3 _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Building_Storage _003C_003E4__this;
+
+		private IEnumerator<IntVec3> _003C_003E7__wrap1;
+
+		IntVec3 IEnumerator<IntVec3>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.storageGroup;
-			}
-			set
-			{
-				this.storageGroup = value;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170023F7 RID: 9207
-		// (get) Token: 0x0600EAAE RID: 60078 RVA: 0x00440FA7 File Offset: 0x0043F1A7
-		bool IStorageGroupMember.DrawConnectionOverlay
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return base.Spawned;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170023F8 RID: 9208
-		// (get) Token: 0x0600EAAF RID: 60079 RVA: 0x00440FAF File Offset: 0x0043F1AF
-		Map IStorageGroupMember.Map
+		[DebuggerHidden]
+		public _003CAllSlotCells_003Ed__32(int _003C_003E1__state)
 		{
-			get
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				return base.MapHeld;
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				Building_Storage building_Storage = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					if (!building_Storage.Spawned)
+					{
+						return false;
+					}
+					_003C_003E7__wrap1 = GenAdj.CellsOccupiedBy(building_Storage).GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 1:
+					_003C_003E1__state = -3;
+					break;
+				}
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					IntVec3 current = _003C_003E7__wrap1.Current;
+					_003C_003E2__current = current;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = null;
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x170023F9 RID: 9209
-		// (get) Token: 0x0600EAB0 RID: 60080 RVA: 0x00440FB7 File Offset: 0x0043F1B7
-		string IStorageGroupMember.StorageGroupTag
+		bool IEnumerator.MoveNext()
 		{
-			get
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				return this.def.building.storageGroupTag;
+				_003C_003E7__wrap1.Dispose();
 			}
 		}
 
-		// Token: 0x170023FA RID: 9210
-		// (get) Token: 0x0600EAB1 RID: 60081 RVA: 0x00444A27 File Offset: 0x00442C27
-		StorageSettings IStorageGroupMember.StoreSettings
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			get
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<IntVec3> IEnumerable<IntVec3>.GetEnumerator()
+		{
+			_003CAllSlotCells_003Ed__32 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				return this.GetStoreSettings();
+				_003C_003E1__state = 0;
+				result = this;
 			}
-		}
-
-		// Token: 0x170023FB RID: 9211
-		// (get) Token: 0x0600EAB2 RID: 60082 RVA: 0x00444A2F File Offset: 0x00442C2F
-		StorageSettings IStorageGroupMember.ParentStoreSettings
-		{
-			get
+			else
 			{
-				return this.GetParentStoreSettings();
-			}
-		}
-
-		// Token: 0x170023FC RID: 9212
-		// (get) Token: 0x0600EAB3 RID: 60083 RVA: 0x00444A37 File Offset: 0x00442C37
-		StorageSettings IStorageGroupMember.ThingStoreSettings
-		{
-			get
-			{
-				return this.settings;
-			}
-		}
-
-		// Token: 0x170023FD RID: 9213
-		// (get) Token: 0x0600EAB4 RID: 60084 RVA: 0x000028E7 File Offset: 0x00000AE7
-		bool IStorageGroupMember.DrawStorageTab
-		{
-			get
-			{
-				return true;
-			}
-		}
-
-		// Token: 0x170023FE RID: 9214
-		// (get) Token: 0x0600EAB5 RID: 60085 RVA: 0x00438FD7 File Offset: 0x004371D7
-		bool IStorageGroupMember.ShowRenameButton
-		{
-			get
-			{
-				return base.Faction == Faction.OfPlayer;
-			}
-		}
-
-		// Token: 0x170023FF RID: 9215
-		// (get) Token: 0x0600EAB6 RID: 60086 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public bool StorageTabVisible
-		{
-			get
-			{
-				return true;
-			}
-		}
-
-		// Token: 0x17002400 RID: 9216
-		// (get) Token: 0x0600EAB7 RID: 60087 RVA: 0x00444A3F File Offset: 0x00442C3F
-		public bool IgnoreStoredThingsBeauty
-		{
-			get
-			{
-				return this.def.building.ignoreStoredThingsBeauty;
-			}
-		}
-
-		// Token: 0x0600EAB8 RID: 60088 RVA: 0x00444A51 File Offset: 0x00442C51
-		public SlotGroup GetSlotGroup()
-		{
-			return this.slotGroup;
-		}
-
-		// Token: 0x0600EAB9 RID: 60089 RVA: 0x00444A59 File Offset: 0x00442C59
-		public virtual void Notify_ReceivedThing(Thing newItem)
-		{
-			if (base.Faction == Faction.OfPlayer && newItem.def.storedConceptLearnOpportunity != null)
-			{
-				LessonAutoActivator.TeachOpportunity(newItem.def.storedConceptLearnOpportunity, OpportunityType.GoodToKnow);
-			}
-		}
-
-		// Token: 0x0600EABA RID: 60090 RVA: 0x000026EA File Offset: 0x000008EA
-		public virtual void Notify_LostThing(Thing newItem)
-		{
-		}
-
-		// Token: 0x0600EABB RID: 60091 RVA: 0x00444A86 File Offset: 0x00442C86
-		public virtual IEnumerable<IntVec3> AllSlotCells()
-		{
-			if (!base.Spawned)
-			{
-				yield break;
-			}
-			foreach (IntVec3 intVec in GenAdj.CellsOccupiedBy(this))
-			{
-				yield return intVec;
-			}
-			IEnumerator<IntVec3> enumerator = null;
-			yield break;
-			yield break;
-		}
-
-		// Token: 0x0600EABC RID: 60092 RVA: 0x00444A98 File Offset: 0x00442C98
-		public List<IntVec3> AllSlotCellsList()
-		{
-			List<IntVec3> result;
-			if ((result = this.cachedOccupiedCells) == null)
-			{
-				result = (this.cachedOccupiedCells = this.AllSlotCells().ToList<IntVec3>());
+				result = new _003CAllSlotCells_003Ed__32(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
 			return result;
 		}
 
-		// Token: 0x0600EABD RID: 60093 RVA: 0x00444AC3 File Offset: 0x00442CC3
-		public StorageSettings GetStoreSettings()
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			if (this.storageGroup != null)
-			{
-				return this.storageGroup.GetStoreSettings();
-			}
-			return this.settings;
+			return ((IEnumerable<IntVec3>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x0600EABE RID: 60094 RVA: 0x00444AE0 File Offset: 0x00442CE0
-		public StorageSettings GetParentStoreSettings()
-		{
-			StorageSettings fixedStorageSettings = this.def.building.fixedStorageSettings;
-			if (fixedStorageSettings != null)
-			{
-				return fixedStorageSettings;
-			}
-			return StorageSettings.EverStorableFixedSettings();
-		}
+	[CompilerGenerated]
+	private sealed class _003CGetGizmos_003Ed__54 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
 
-		// Token: 0x0600EABF RID: 60095 RVA: 0x00444B08 File Offset: 0x00442D08
-		public void Notify_SettingsChanged()
-		{
-			if (base.Spawned && this.slotGroup != null)
-			{
-				base.Map.listerHaulables.Notify_SlotGroupChanged(this.slotGroup);
-			}
-		}
+		private Gizmo _003C_003E2__current;
 
-		// Token: 0x0600EAC0 RID: 60096 RVA: 0x00066AFC File Offset: 0x00064CFC
-		public string SlotYielderLabel()
-		{
-			return this.LabelCap;
-		}
+		private int _003C_003El__initialThreadId;
 
-		// Token: 0x17002401 RID: 9217
-		// (get) Token: 0x0600EAC1 RID: 60097 RVA: 0x00444B30 File Offset: 0x00442D30
-		public string GroupingLabel
+		public Building_Storage _003C_003E4__this;
+
+		private IEnumerator<Gizmo> _003C_003E7__wrap1;
+
+		private IEnumerator<Thing> _003C_003E7__wrap2;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.def.building.groupingLabel;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002402 RID: 9218
-		// (get) Token: 0x0600EAC2 RID: 60098 RVA: 0x00444B42 File Offset: 0x00442D42
-		public int GroupingOrder
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.def.building.groupingOrder;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002403 RID: 9219
-		// (get) Token: 0x0600EAC3 RID: 60099 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public bool HaulDestinationEnabled
+		[DebuggerHidden]
+		public _003CGetGizmos_003Ed__54(int _003C_003E1__state)
 		{
-			get
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			switch (_003C_003E1__state)
 			{
-				return true;
-			}
-		}
-
-		// Token: 0x0600EAC4 RID: 60100 RVA: 0x00444B54 File Offset: 0x00442D54
-		public bool Accepts(Thing t)
-		{
-			return this.GetStoreSettings().AllowedToAccept(t);
-		}
-
-		// Token: 0x0600EAC5 RID: 60101 RVA: 0x00444B64 File Offset: 0x00442D64
-		public int SpaceRemainingFor(ThingDef _)
-		{
-			return this.slotGroup.HeldThingsCount - this.def.building.maxItemsInCell * this.def.Size.Area;
-		}
-
-		// Token: 0x0600EAC6 RID: 60102 RVA: 0x00444BA4 File Offset: 0x00442DA4
-		public override void PostMake()
-		{
-			base.PostMake();
-			this.settings = new StorageSettings(this);
-			if (this.def.building.defaultStorageSettings != null)
-			{
-				this.settings.CopyFrom(this.def.building.defaultStorageSettings);
-			}
-		}
-
-		// Token: 0x0600EAC7 RID: 60103 RVA: 0x00444BF0 File Offset: 0x00442DF0
-		public override void SpawnSetup(Map map, bool respawningAfterLoad)
-		{
-			this.cachedOccupiedCells = null;
-			base.SpawnSetup(map, respawningAfterLoad);
-			if (this.storageGroup != null && map != this.storageGroup.Map)
-			{
-				StorageSettings storeSettings = this.storageGroup.GetStoreSettings();
-				this.storageGroup.RemoveMember(this, true);
-				this.storageGroup = null;
-				this.settings.CopyFrom(storeSettings);
-			}
-		}
-
-		// Token: 0x0600EAC8 RID: 60104 RVA: 0x00444C4E File Offset: 0x00442E4E
-		public override void DeSpawn(DestroyMode mode = DestroyMode.Vanish)
-		{
-			base.DeSpawn(mode);
-			this.cachedOccupiedCells = null;
-		}
-
-		// Token: 0x0600EAC9 RID: 60105 RVA: 0x00444C5E File Offset: 0x00442E5E
-		public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
-		{
-			base.Destroy(mode);
-			if (this.storageGroup != null)
-			{
-				StorageGroup storageGroup = this.storageGroup;
-				if (storageGroup != null)
+			case -3:
+			case 1:
+				try
 				{
-					storageGroup.RemoveMember(this, true);
 				}
-				this.storageGroup = null;
-			}
-			BillUtility.Notify_ISlotGroupRemoved(this.slotGroup);
-		}
-
-		// Token: 0x0600EACA RID: 60106 RVA: 0x00444C94 File Offset: 0x00442E94
-		public override void ExposeData()
-		{
-			base.ExposeData();
-			Scribe_Deep.Look<StorageSettings>(ref this.settings, "settings", new object[]
-			{
-				this
-			});
-			Scribe_References.Look<StorageGroup>(ref this.storageGroup, "storageGroup", false);
-			Scribe_Values.Look<string>(ref this.label, "label", null, false);
-		}
-
-		// Token: 0x0600EACB RID: 60107 RVA: 0x00444CE4 File Offset: 0x00442EE4
-		public override void DrawExtraSelectionOverlays()
-		{
-			base.DrawExtraSelectionOverlays();
-			StorageGroupUtility.DrawSelectionOverlaysFor(this);
-		}
-
-		// Token: 0x0600EACC RID: 60108 RVA: 0x00444CF4 File Offset: 0x00442EF4
-		public override string GetInspectString()
-		{
-			Building_Storage.sb.Clear();
-			Building_Storage.sb.Append(base.GetInspectString());
-			if (base.Spawned)
-			{
-				if (this.storageGroup != null)
+				finally
 				{
-					Building_Storage.sb.AppendLineIfNotEmpty();
-					Building_Storage.sb.Append(string.Format("{0}: {1} ", "StorageGroupLabel".Translate(), this.storageGroup.RenamableLabel.CapitalizeFirst()));
-					if (this.storageGroup.MemberCount > 1)
+					_003C_003Em__Finally1();
+				}
+				break;
+			case -4:
+			case 2:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally2();
+				}
+				break;
+			case -5:
+			case 3:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally3();
+				}
+				break;
+			case -6:
+			case 4:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally4();
+				}
+				break;
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E7__wrap2 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				Building_Storage building_Storage = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((Building)building_Storage).GetGizmos().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_007a;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_007a;
+				case 2:
+					_003C_003E1__state = -4;
+					goto IL_00df;
+				case 3:
+					_003C_003E1__state = -5;
+					goto IL_0155;
+				case 4:
 					{
-						Building_Storage.sb.Append(string.Format("({0})", "NumBuildings".Translate(this.storageGroup.MemberCount)));
+						_003C_003E1__state = -6;
+						goto IL_0231;
 					}
-					else
+					IL_007a:
+					if (_003C_003E7__wrap1.MoveNext())
 					{
-						Building_Storage.sb.Append(string.Format("({0})", "OneBuilding".Translate()));
+						Gizmo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
 					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					_003C_003E7__wrap1 = StorageSettingsClipboard.CopyPasteGizmosFor(building_Storage.GetStoreSettings()).GetEnumerator();
+					_003C_003E1__state = -4;
+					goto IL_00df;
+					IL_0155:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Gizmo current2 = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current2;
+						_003C_003E1__state = 3;
+						return true;
+					}
+					_003C_003Em__Finally3();
+					_003C_003E7__wrap1 = null;
+					if (Find.Selector.NumSelected != 1)
+					{
+						break;
+					}
+					_003C_003E7__wrap2 = building_Storage.slotGroup.HeldThings.GetEnumerator();
+					_003C_003E1__state = -6;
+					goto IL_0231;
+					IL_00df:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Gizmo current3 = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current3;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					_003C_003Em__Finally2();
+					_003C_003E7__wrap1 = null;
+					if (!building_Storage.StorageTabVisible || building_Storage.MapHeld == null)
+					{
+						break;
+					}
+					_003C_003E7__wrap1 = StorageGroupUtility.StorageGroupMemberGizmos(building_Storage).GetEnumerator();
+					_003C_003E1__state = -5;
+					goto IL_0155;
+					IL_0231:
+					if (_003C_003E7__wrap2.MoveNext())
+					{
+						Thing current4 = _003C_003E7__wrap2.Current;
+						_003C_003E2__current = ContainingSelectionUtility.CreateSelectStorageGizmo("CommandSelectStoredThing".Translate(current4), ("CommandSelectStoredThingDesc".Translate() + "\n\n" + current4.LabelCap.Colorize(ColoredText.TipSectionTitleColor) + "\n\n" + current4.GetInspectString()).Resolve(), current4, current4, groupable: false);
+						_003C_003E1__state = 4;
+						return true;
+					}
+					_003C_003Em__Finally4();
+					_003C_003E7__wrap2 = null;
+					break;
 				}
-				if (this.slotGroup.HeldThings.Any<Thing>())
-				{
-					Building_Storage.sb.AppendLineIfNotEmpty();
-					Building_Storage.sb.Append("StoresThings".Translate());
-					Building_Storage.sb.Append(": ");
-					Building_Storage.sb.Append((from x in this.slotGroup.HeldThings
-					select x.LabelShortCap).Distinct<string>().ToCommaList(false, false));
-					Building_Storage.sb.Append(".");
-				}
+				return false;
 			}
-			return Building_Storage.sb.ToString();
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
 		}
 
-		// Token: 0x0600EACD RID: 60109 RVA: 0x00444E84 File Offset: 0x00443084
-		public override IEnumerable<Gizmo> GetGizmos()
+		bool IEnumerator.MoveNext()
 		{
-			foreach (Gizmo gizmo in base.GetGizmos())
-			{
-				yield return gizmo;
-			}
-			IEnumerator<Gizmo> enumerator = null;
-			foreach (Gizmo gizmo2 in StorageSettingsClipboard.CopyPasteGizmosFor(this.GetStoreSettings()))
-			{
-				yield return gizmo2;
-			}
-			enumerator = null;
-			if (this.StorageTabVisible && base.MapHeld != null)
-			{
-				foreach (Gizmo gizmo3 in StorageGroupUtility.StorageGroupMemberGizmos(this))
-				{
-					yield return gizmo3;
-				}
-				enumerator = null;
-				if (Find.Selector.NumSelected == 1)
-				{
-					foreach (Thing thing in this.slotGroup.HeldThings)
-					{
-						yield return ContainingSelectionUtility.CreateSelectStorageGizmo("CommandSelectStoredThing".Translate(thing), ("CommandSelectStoredThingDesc".Translate() + "\n\n" + thing.LabelCap.Colorize(ColoredText.TipSectionTitleColor) + "\n\n" + thing.GetInspectString()).Resolve(), thing, thing, false);
-					}
-					IEnumerator<Thing> enumerator2 = null;
-				}
-			}
-			yield break;
-			yield break;
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x04009BFC RID: 39932
-		public StorageSettings settings;
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
 
-		// Token: 0x04009BFD RID: 39933
-		public StorageGroup storageGroup;
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
 
-		// Token: 0x04009BFE RID: 39934
-		public string label;
+		private void _003C_003Em__Finally3()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
 
-		// Token: 0x04009BFF RID: 39935
-		public SlotGroup slotGroup;
+		private void _003C_003Em__Finally4()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap2 != null)
+			{
+				_003C_003E7__wrap2.Dispose();
+			}
+		}
 
-		// Token: 0x04009C00 RID: 39936
-		private List<IntVec3> cachedOccupiedCells;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04009C01 RID: 39937
-		private static StringBuilder sb = new StringBuilder();
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CGetGizmos_003Ed__54 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CGetGizmos_003Ed__54(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	public StorageSettings settings;
+
+	public StorageGroup storageGroup;
+
+	public string label;
+
+	public SlotGroup slotGroup;
+
+	private List<IntVec3> cachedOccupiedCells;
+
+	private static StringBuilder sb = new StringBuilder();
+
+	StorageGroup IStorageGroupMember.Group
+	{
+		get
+		{
+			return storageGroup;
+		}
+		set
+		{
+			storageGroup = value;
+		}
+	}
+
+	bool IStorageGroupMember.DrawConnectionOverlay => base.Spawned;
+
+	Map IStorageGroupMember.Map => base.MapHeld;
+
+	string IStorageGroupMember.StorageGroupTag => def.building.storageGroupTag;
+
+	StorageSettings IStorageGroupMember.StoreSettings => GetStoreSettings();
+
+	StorageSettings IStorageGroupMember.ParentStoreSettings => GetParentStoreSettings();
+
+	StorageSettings IStorageGroupMember.ThingStoreSettings => settings;
+
+	bool IStorageGroupMember.DrawStorageTab => true;
+
+	bool IStorageGroupMember.ShowRenameButton => base.Faction == Faction.OfPlayer;
+
+	public bool StorageTabVisible => true;
+
+	public bool IgnoreStoredThingsBeauty => def.building.ignoreStoredThingsBeauty;
+
+	public string GroupingLabel => def.building.groupingLabel;
+
+	public int GroupingOrder => def.building.groupingOrder;
+
+	public bool HaulDestinationEnabled => true;
+
+	public Building_Storage()
+	{
+		slotGroup = new SlotGroup(this);
+	}
+
+	public SlotGroup GetSlotGroup()
+	{
+		return slotGroup;
+	}
+
+	public virtual void Notify_ReceivedThing(Thing newItem)
+	{
+		if (base.Faction == Faction.OfPlayer && newItem.def.storedConceptLearnOpportunity != null)
+		{
+			LessonAutoActivator.TeachOpportunity(newItem.def.storedConceptLearnOpportunity, OpportunityType.GoodToKnow);
+		}
+	}
+
+	public virtual void Notify_LostThing(Thing newItem)
+	{
+	}
+
+	[IteratorStateMachine(typeof(_003CAllSlotCells_003Ed__32))]
+	public virtual IEnumerable<IntVec3> AllSlotCells()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CAllSlotCells_003Ed__32(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public List<IntVec3> AllSlotCellsList()
+	{
+		return cachedOccupiedCells ?? (cachedOccupiedCells = AllSlotCells().ToList());
+	}
+
+	public StorageSettings GetStoreSettings()
+	{
+		if (storageGroup != null)
+		{
+			return storageGroup.GetStoreSettings();
+		}
+		return settings;
+	}
+
+	public StorageSettings GetParentStoreSettings()
+	{
+		StorageSettings fixedStorageSettings = def.building.fixedStorageSettings;
+		if (fixedStorageSettings != null)
+		{
+			return fixedStorageSettings;
+		}
+		return StorageSettings.EverStorableFixedSettings();
+	}
+
+	public void Notify_SettingsChanged()
+	{
+		if (base.Spawned && slotGroup != null)
+		{
+			base.Map.listerHaulables.Notify_SlotGroupChanged(slotGroup);
+		}
+	}
+
+	public string SlotYielderLabel()
+	{
+		return LabelCap;
+	}
+
+	public bool Accepts(Thing t)
+	{
+		return GetStoreSettings().AllowedToAccept(t);
+	}
+
+	public int SpaceRemainingFor(ThingDef _)
+	{
+		return slotGroup.HeldThingsCount - def.building.maxItemsInCell * def.Size.Area;
+	}
+
+	public override void PostMake()
+	{
+		base.PostMake();
+		settings = new StorageSettings(this);
+		if (def.building.defaultStorageSettings != null)
+		{
+			settings.CopyFrom(def.building.defaultStorageSettings);
+		}
+	}
+
+	public override void SpawnSetup(Map map, bool respawningAfterLoad)
+	{
+		cachedOccupiedCells = null;
+		base.SpawnSetup(map, respawningAfterLoad);
+		if (storageGroup != null && map != storageGroup.Map)
+		{
+			StorageSettings storeSettings = storageGroup.GetStoreSettings();
+			storageGroup.RemoveMember(this);
+			storageGroup = null;
+			settings.CopyFrom(storeSettings);
+		}
+	}
+
+	public override void DeSpawn(DestroyMode mode = DestroyMode.Vanish)
+	{
+		base.DeSpawn(mode);
+		cachedOccupiedCells = null;
+	}
+
+	public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
+	{
+		base.Destroy(mode);
+		if (storageGroup != null)
+		{
+			storageGroup?.RemoveMember(this);
+			storageGroup = null;
+		}
+		BillUtility.Notify_ISlotGroupRemoved(slotGroup);
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Deep.Look(ref settings, "settings", this);
+		Scribe_References.Look(ref storageGroup, "storageGroup");
+		Scribe_Values.Look(ref label, "label");
+	}
+
+	public override void DrawExtraSelectionOverlays()
+	{
+		base.DrawExtraSelectionOverlays();
+		StorageGroupUtility.DrawSelectionOverlaysFor(this);
+	}
+
+	public override string GetInspectString()
+	{
+		sb.Clear();
+		sb.Append(base.GetInspectString());
+		if (base.Spawned)
+		{
+			if (storageGroup != null)
+			{
+				sb.AppendLineIfNotEmpty();
+				sb.Append($"{"StorageGroupLabel".Translate()}: {storageGroup.RenamableLabel.CapitalizeFirst()} ");
+				if (storageGroup.MemberCount > 1)
+				{
+					sb.Append($"({"NumBuildings".Translate(storageGroup.MemberCount)})");
+				}
+				else
+				{
+					sb.Append($"({"OneBuilding".Translate()})");
+				}
+			}
+			if (slotGroup.HeldThings.Any())
+			{
+				sb.AppendLineIfNotEmpty();
+				sb.Append("StoresThings".Translate());
+				sb.Append(": ");
+				sb.Append(slotGroup.HeldThings.Select((Thing x) => x.LabelShortCap).Distinct().ToCommaList());
+				sb.Append(".");
+			}
+		}
+		return sb.ToString();
+	}
+
+	[IteratorStateMachine(typeof(_003CGetGizmos_003Ed__54))]
+	public override IEnumerable<Gizmo> GetGizmos()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetGizmos_003Ed__54(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

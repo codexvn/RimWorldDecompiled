@@ -1,142 +1,276 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using RimWorld.Planet;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Bill_ResurrectMech : Bill_Mech
 {
-	// Token: 0x02002A6C RID: 10860
-	public class Bill_ResurrectMech : Bill_Mech
+	[CompilerGenerated]
+	private sealed class _003CAllAvailableResurrectionCorpses_003Ed__7 : IEnumerable<Corpse>, IEnumerable, IEnumerator<Corpse>, IEnumerator, IDisposable
 	{
-		// Token: 0x170025C3 RID: 9667
-		// (get) Token: 0x0600F1AA RID: 61866 RVA: 0x00461B6C File Offset: 0x0045FD6C
-		public override float BandwidthCost
+		private int _003C_003E1__state;
+
+		private Corpse _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Bill_ResurrectMech _003C_003E4__this;
+
+		private Pawn pawn;
+
+		public Pawn _003C_003E3__pawn;
+
+		private List<Thing>.Enumerator _003C_003E7__wrap1;
+
+		Corpse IEnumerator<Corpse>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (base.Gestator.ActiveBill == this)
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CAllAvailableResurrectionCorpses_003Ed__7(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
 				{
-					Pawn gestatingMech = base.Gestator.GestatingMech;
-					if (gestatingMech != null)
-					{
-						return gestatingMech.GetStatValue(StatDefOf.BandwidthCost, true, -1);
-					}
-					Corpse resurrectingMechCorpse = base.Gestator.ResurrectingMechCorpse;
-					if (resurrectingMechCorpse != null)
-					{
-						return resurrectingMechCorpse.InnerPawn.GetStatValue(StatDefOf.BandwidthCost, true, -1);
-					}
 				}
-				return 0f;
-			}
-		}
-
-		// Token: 0x0600F1AB RID: 61867 RVA: 0x00461724 File Offset: 0x0045F924
-		public Bill_ResurrectMech()
-		{
-		}
-
-		// Token: 0x0600F1AC RID: 61868 RVA: 0x0046172C File Offset: 0x0045F92C
-		public Bill_ResurrectMech(RecipeDef recipe, Precept_ThingStyle precept = null) : base(recipe, precept)
-		{
-		}
-
-		// Token: 0x0600F1AD RID: 61869 RVA: 0x00461BCC File Offset: 0x0045FDCC
-		public override bool PawnAllowedToStartAnew(Pawn p)
-		{
-			if (!base.PawnAllowedToStartAnew(p))
-			{
-				return false;
-			}
-			if (base.State == FormingState.Gathering && base.Gestator.ResurrectingMechCorpse == null)
-			{
-				IEnumerable<Corpse> source = this.AllAvailableResurrectionCorpses(p);
-				if (source.Any<Corpse>() && !source.Any((Corpse c) => p.mechanitor.HasBandwidthToResurrect(c)))
+				finally
 				{
-					JobFailReason.Is("NotEnoughBandwidth".Translate(), null);
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = default(List<Thing>.Enumerator);
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				Bill_ResurrectMech bill_ResurrectMech = _003C_003E4__this;
+				switch (num)
+				{
+				default:
 					return false;
+				case 0:
+				{
+					_003C_003E1__state = -1;
+					List<Thing> list = bill_ResurrectMech.Map.listerThings.ThingsInGroup(ThingRequestGroup.Corpse);
+					_003C_003E7__wrap1 = list.GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
 				}
-			}
-			return true;
-		}
-
-		// Token: 0x0600F1AE RID: 61870 RVA: 0x00461C4C File Offset: 0x0045FE4C
-		public override Thing CreateProducts()
-		{
-			Pawn innerPawn = base.Gestator.ResurrectingMechCorpse.InnerPawn;
-			ResurrectionUtility.TryResurrect(innerPawn, new ResurrectionParams
-			{
-				dontSpawn = true
-			});
-			innerPawn.needs.energy.CurLevel = innerPawn.needs.energy.MaxLevel * 0.5f;
-			innerPawn.health.RemoveAllHediffs();
-			base.BoundPawn.relations.AddDirectRelation(PawnRelationDefOf.Overseer, innerPawn);
-			if (innerPawn.IsWorldPawn())
-			{
-				Find.WorldPawns.RemovePawn(innerPawn);
-			}
-			return innerPawn;
-		}
-
-		// Token: 0x0600F1AF RID: 61871 RVA: 0x00461CD8 File Offset: 0x0045FED8
-		public override bool IsFixedOrAllowedIngredient(Thing thing)
-		{
-			if (!base.IsFixedOrAllowedIngredient(thing))
-			{
+				case 1:
+					_003C_003E1__state = -3;
+					break;
+				}
+				while (_003C_003E7__wrap1.MoveNext())
+				{
+					Corpse corpse = (Corpse)_003C_003E7__wrap1.Current;
+					if (bill_ResurrectMech.recipe.fixedIngredientFilter.Allows(corpse) && !corpse.IsForbidden(pawn) && pawn.CanReach(corpse, PathEndMode.Touch, Danger.Deadly))
+					{
+						_003C_003E2__current = corpse;
+						_003C_003E1__state = 1;
+						return true;
+					}
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = default(List<Thing>.Enumerator);
 				return false;
 			}
-			Corpse corpse = thing as Corpse;
-			return corpse == null || corpse.InnerPawn.Faction == Faction.OfPlayer;
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
 		}
 
-		// Token: 0x0600F1B0 RID: 61872 RVA: 0x00461D0F File Offset: 0x0045FF0F
-		private IEnumerable<Corpse> AllAvailableResurrectionCorpses(Pawn pawn)
+		bool IEnumerator.MoveNext()
 		{
-			List<Thing> list = base.Map.listerThings.ThingsInGroup(ThingRequestGroup.Corpse);
-			foreach (Thing thing in list)
-			{
-				Corpse corpse = (Corpse)thing;
-				if (this.recipe.fixedIngredientFilter.Allows(corpse) && !corpse.IsForbidden(pawn) && pawn.CanReach(corpse, PathEndMode.Touch, Danger.Deadly, false, false, TraverseMode.ByPawn))
-				{
-					yield return corpse;
-				}
-			}
-			List<Thing>.Enumerator enumerator = default(List<Thing>.Enumerator);
-			yield break;
-			yield break;
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0600F1B1 RID: 61873 RVA: 0x00461D28 File Offset: 0x0045FF28
-		public override void AppendInspectionData(StringBuilder sb)
+		private void _003C_003Em__Finally1()
 		{
-			switch (base.State)
-			{
-			case FormingState.Gathering:
-				base.AppendCurrentIngredientCount(sb);
-				break;
-			case FormingState.Forming:
-			{
-				Building_MechGestator gestator = base.Gestator;
-				if (((gestator != null) ? gestator.ResurrectingMechCorpse : null) != null)
-				{
-					sb.AppendLine("ResurrectingMech".Translate(base.Gestator.ResurrectingMechCorpse.InnerPawn.LabelCap));
-				}
-				break;
-			}
-			case FormingState.Formed:
-			{
-				Building_MechGestator gestator2 = base.Gestator;
-				if (((gestator2 != null) ? gestator2.GestatingMech : null) != null && base.BoundPawn != null)
-				{
-					sb.AppendLine("ResurrectedMech".Translate(base.Gestator.GestatingMech.LabelCap, base.BoundPawn.Named("PAWN")) + " (" + "GestatedMechRequiresMechanitor".Translate(base.BoundPawn.Named("PAWN")) + ")");
-				}
-				break;
-			}
-			}
-			base.AppendInspectionData(sb);
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap1/*cast due to .constrained prefix*/).Dispose();
 		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Corpse> IEnumerable<Corpse>.GetEnumerator()
+		{
+			_003CAllAvailableResurrectionCorpses_003Ed__7 _003CAllAvailableResurrectionCorpses_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CAllAvailableResurrectionCorpses_003Ed__ = this;
+			}
+			else
+			{
+				_003CAllAvailableResurrectionCorpses_003Ed__ = new _003CAllAvailableResurrectionCorpses_003Ed__7(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CAllAvailableResurrectionCorpses_003Ed__.pawn = _003C_003E3__pawn;
+			return _003CAllAvailableResurrectionCorpses_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Corpse>)this).GetEnumerator();
+		}
+	}
+
+	public override float BandwidthCost
+	{
+		get
+		{
+			if (base.Gestator.ActiveBill == this)
+			{
+				Pawn gestatingMech = base.Gestator.GestatingMech;
+				if (gestatingMech != null)
+				{
+					return gestatingMech.GetStatValue(StatDefOf.BandwidthCost);
+				}
+				Corpse resurrectingMechCorpse = base.Gestator.ResurrectingMechCorpse;
+				if (resurrectingMechCorpse != null)
+				{
+					return resurrectingMechCorpse.InnerPawn.GetStatValue(StatDefOf.BandwidthCost);
+				}
+			}
+			return 0f;
+		}
+	}
+
+	public Bill_ResurrectMech()
+	{
+	}
+
+	public Bill_ResurrectMech(RecipeDef recipe, Precept_ThingStyle precept = null)
+		: base(recipe, precept)
+	{
+	}
+
+	public override bool PawnAllowedToStartAnew(Pawn p)
+	{
+		if (!base.PawnAllowedToStartAnew(p))
+		{
+			return false;
+		}
+		if (base.State == FormingState.Gathering && base.Gestator.ResurrectingMechCorpse == null)
+		{
+			IEnumerable<Corpse> source = AllAvailableResurrectionCorpses(p);
+			if (source.Any() && !source.Any((Corpse c) => p.mechanitor.HasBandwidthToResurrect(c)))
+			{
+				JobFailReason.Is("NotEnoughBandwidth".Translate());
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public override Thing CreateProducts()
+	{
+		Pawn innerPawn = base.Gestator.ResurrectingMechCorpse.InnerPawn;
+		ResurrectionUtility.TryResurrect(innerPawn, new ResurrectionParams
+		{
+			dontSpawn = true
+		});
+		innerPawn.needs.energy.CurLevel = innerPawn.needs.energy.MaxLevel * 0.5f;
+		innerPawn.health.RemoveAllHediffs();
+		base.BoundPawn.relations.AddDirectRelation(PawnRelationDefOf.Overseer, innerPawn);
+		if (innerPawn.IsWorldPawn())
+		{
+			Find.WorldPawns.RemovePawn(innerPawn);
+		}
+		return innerPawn;
+	}
+
+	public override bool IsFixedOrAllowedIngredient(Thing thing)
+	{
+		if (!base.IsFixedOrAllowedIngredient(thing))
+		{
+			return false;
+		}
+		if (thing is Corpse corpse && corpse.InnerPawn.Faction != Faction.OfPlayer)
+		{
+			return false;
+		}
+		return true;
+	}
+
+	[IteratorStateMachine(typeof(_003CAllAvailableResurrectionCorpses_003Ed__7))]
+	private IEnumerable<Corpse> AllAvailableResurrectionCorpses(Pawn pawn)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CAllAvailableResurrectionCorpses_003Ed__7(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__pawn = pawn
+		};
+	}
+
+	public override void AppendInspectionData(StringBuilder sb)
+	{
+		switch (base.State)
+		{
+		case FormingState.Gathering:
+			AppendCurrentIngredientCount(sb);
+			break;
+		case FormingState.Forming:
+			if (base.Gestator?.ResurrectingMechCorpse != null)
+			{
+				sb.AppendLine("ResurrectingMech".Translate(base.Gestator.ResurrectingMechCorpse.InnerPawn.LabelCap));
+			}
+			break;
+		case FormingState.Formed:
+			if (base.Gestator?.GestatingMech != null && base.BoundPawn != null)
+			{
+				sb.AppendLine("ResurrectedMech".Translate(base.Gestator.GestatingMech.LabelCap, base.BoundPawn.Named("PAWN")) + " (" + "GestatedMechRequiresMechanitor".Translate(base.BoundPawn.Named("PAWN")) + ")");
+			}
+			break;
+		}
+		base.AppendInspectionData(sb);
 	}
 }

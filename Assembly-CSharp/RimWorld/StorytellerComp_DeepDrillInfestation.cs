@@ -1,70 +1,177 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class StorytellerComp_DeepDrillInfestation : StorytellerComp
 {
-	// Token: 0x02001E39 RID: 7737
-	public class StorytellerComp_DeepDrillInfestation : StorytellerComp
+	[CompilerGenerated]
+	private sealed class _003CMakeIntervalIncidents_003Ed__5 : IEnumerable<FiringIncident>, IEnumerable, IEnumerator<FiringIncident>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001A3B RID: 6715
-		// (get) Token: 0x0600AC34 RID: 44084 RVA: 0x00313BCB File Offset: 0x00311DCB
-		protected StorytellerCompProperties_DeepDrillInfestation Props
+		private int _003C_003E1__state;
+
+		private FiringIncident _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private IIncidentTarget target;
+
+		public IIncidentTarget _003C_003E3__target;
+
+		public StorytellerComp_DeepDrillInfestation _003C_003E4__this;
+
+		private float _003Cmtb_003E5__2;
+
+		private int _003Ci_003E5__3;
+
+		FiringIncident IEnumerator<FiringIncident>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (StorytellerCompProperties_DeepDrillInfestation)this.props;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001A3C RID: 6716
-		// (get) Token: 0x0600AC35 RID: 44085 RVA: 0x00313BD8 File Offset: 0x00311DD8
-		private float DeepDrillInfestationMTBDaysPerDrill
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				Difficulty difficulty = Find.Storyteller.difficulty;
-				if (difficulty.deepDrillInfestationChanceFactor <= 0f)
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CMakeIntervalIncidents_003Ed__5(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			StorytellerComp_DeepDrillInfestation storytellerComp_DeepDrillInfestation = _003C_003E4__this;
+			if (num != 0)
+			{
+				if (num != 1)
 				{
-					return -1f;
+					return false;
 				}
-				return this.Props.baseMtbDaysPerDrill / difficulty.deepDrillInfestationChanceFactor;
+				_003C_003E1__state = -1;
+				goto IL_00ce;
 			}
-		}
-
-		// Token: 0x0600AC36 RID: 44086 RVA: 0x00313C15 File Offset: 0x00311E15
-		public override IEnumerable<FiringIncident> MakeIntervalIncidents(IIncidentTarget target)
-		{
+			_003C_003E1__state = -1;
 			Map map = (Map)target;
-			StorytellerComp_DeepDrillInfestation.tmpDrills.Clear();
-			DeepDrillInfestationIncidentUtility.GetUsableDeepDrills(map, StorytellerComp_DeepDrillInfestation.tmpDrills);
-			if (!StorytellerComp_DeepDrillInfestation.tmpDrills.Any<Thing>())
+			tmpDrills.Clear();
+			DeepDrillInfestationIncidentUtility.GetUsableDeepDrills(map, tmpDrills);
+			if (!tmpDrills.Any())
 			{
-				yield break;
+				return false;
 			}
-			float mtb = this.DeepDrillInfestationMTBDaysPerDrill;
-			if (mtb < 0f)
+			_003Cmtb_003E5__2 = storytellerComp_DeepDrillInfestation.DeepDrillInfestationMTBDaysPerDrill;
+			if (_003Cmtb_003E5__2 < 0f)
 			{
-				yield break;
+				return false;
 			}
-			int num;
-			for (int i = 0; i < StorytellerComp_DeepDrillInfestation.tmpDrills.Count; i = num + 1)
+			_003Ci_003E5__3 = 0;
+			goto IL_00e0;
+			IL_00e0:
+			if (_003Ci_003E5__3 < tmpDrills.Count)
 			{
-				if (Rand.MTBEventOccurs(mtb, 60000f, 1000f))
+				if (Rand.MTBEventOccurs(_003Cmtb_003E5__2, 60000f, 1000f))
 				{
-					IncidentParms parms = this.GenerateParms(IncidentCategoryDefOf.DeepDrillInfestation, target);
-					IncidentDef def;
-					if (base.UsableIncidentsInCategory(IncidentCategoryDefOf.DeepDrillInfestation, parms).TryRandomElement(out def))
+					IncidentParms parms = storytellerComp_DeepDrillInfestation.GenerateParms(IncidentCategoryDefOf.DeepDrillInfestation, target);
+					if (storytellerComp_DeepDrillInfestation.UsableIncidentsInCategory(IncidentCategoryDefOf.DeepDrillInfestation, parms).TryRandomElement(out var result))
 					{
-						yield return new FiringIncident(def, this, parms);
+						_003C_003E2__current = new FiringIncident(result, storytellerComp_DeepDrillInfestation, parms);
+						_003C_003E1__state = 1;
+						return true;
 					}
 				}
-				num = i;
+				goto IL_00ce;
 			}
-			yield break;
+			return false;
+			IL_00ce:
+			_003Ci_003E5__3++;
+			goto IL_00e0;
 		}
 
-		// Token: 0x04007667 RID: 30311
-		private static List<Thing> tmpDrills = new List<Thing>();
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<FiringIncident> IEnumerable<FiringIncident>.GetEnumerator()
+		{
+			_003CMakeIntervalIncidents_003Ed__5 _003CMakeIntervalIncidents_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CMakeIntervalIncidents_003Ed__ = this;
+			}
+			else
+			{
+				_003CMakeIntervalIncidents_003Ed__ = new _003CMakeIntervalIncidents_003Ed__5(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CMakeIntervalIncidents_003Ed__.target = _003C_003E3__target;
+			return _003CMakeIntervalIncidents_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<FiringIncident>)this).GetEnumerator();
+		}
+	}
+
+	private static List<Thing> tmpDrills = new List<Thing>();
+
+	protected StorytellerCompProperties_DeepDrillInfestation Props => (StorytellerCompProperties_DeepDrillInfestation)props;
+
+	private float DeepDrillInfestationMTBDaysPerDrill
+	{
+		get
+		{
+			Difficulty difficulty = Find.Storyteller.difficulty;
+			if (difficulty.deepDrillInfestationChanceFactor <= 0f)
+			{
+				return -1f;
+			}
+			return Props.baseMtbDaysPerDrill / difficulty.deepDrillInfestationChanceFactor;
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeIntervalIncidents_003Ed__5))]
+	public override IEnumerable<FiringIncident> MakeIntervalIncidents(IIncidentTarget target)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeIntervalIncidents_003Ed__5(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__target = target
+		};
 	}
 }

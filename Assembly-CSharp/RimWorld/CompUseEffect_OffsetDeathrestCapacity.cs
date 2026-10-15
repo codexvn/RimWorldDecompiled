@@ -1,62 +1,145 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompUseEffect_OffsetDeathrestCapacity : CompUseEffect
 {
-	// Token: 0x02002F68 RID: 12136
-	public class CompUseEffect_OffsetDeathrestCapacity : CompUseEffect
+	[CompilerGenerated]
+	private sealed class _003CSpecialDisplayStats_003Ed__4 : IEnumerable<StatDrawEntry>, IEnumerable, IEnumerator<StatDrawEntry>, IEnumerator, IDisposable
 	{
-		// Token: 0x17002C37 RID: 11319
-		// (get) Token: 0x06011193 RID: 70035 RVA: 0x004E8E51 File Offset: 0x004E7051
-		private CompProperties_UseEffectOffsetDeathrestCapacity Props
+		private int _003C_003E1__state;
+
+		private StatDrawEntry _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompUseEffect_OffsetDeathrestCapacity _003C_003E4__this;
+
+		StatDrawEntry IEnumerator<StatDrawEntry>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (CompProperties_UseEffectOffsetDeathrestCapacity)this.props;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06011194 RID: 70036 RVA: 0x004E8E5E File Offset: 0x004E705E
-		public override void DoEffect(Pawn user)
+		object IEnumerator.Current
 		{
-			if (!ModsConfig.BiotechActive)
+			[DebuggerHidden]
+			get
 			{
-				return;
+				return _003C_003E2__current;
 			}
+		}
+
+		[DebuggerHidden]
+		public _003CSpecialDisplayStats_003Ed__4(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			CompUseEffect_OffsetDeathrestCapacity compUseEffect_OffsetDeathrestCapacity = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (ModsConfig.BiotechActive)
+				{
+					_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.BasicsNonPawnImportant, "DeathrestCapacity".Translate().CapitalizeFirst(), compUseEffect_OffsetDeathrestCapacity.Props.offset.ToStringWithSign(), "DeathrestCapacityDesc".Translate(), 1010);
+					_003C_003E1__state = 1;
+					return true;
+				}
+				break;
+			case 1:
+				_003C_003E1__state = -1;
+				break;
+			}
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<StatDrawEntry> IEnumerable<StatDrawEntry>.GetEnumerator()
+		{
+			_003CSpecialDisplayStats_003Ed__4 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CSpecialDisplayStats_003Ed__4(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<StatDrawEntry>)this).GetEnumerator();
+		}
+	}
+
+	private CompProperties_UseEffectOffsetDeathrestCapacity Props => (CompProperties_UseEffectOffsetDeathrestCapacity)props;
+
+	public override void DoEffect(Pawn user)
+	{
+		if (ModsConfig.BiotechActive)
+		{
 			base.DoEffect(user);
-			Pawn_GeneTracker genes = user.genes;
-			if (genes == null)
-			{
-				return;
-			}
-			Gene_Deathrest firstGeneOfType = genes.GetFirstGeneOfType<Gene_Deathrest>();
-			if (firstGeneOfType == null)
-			{
-				return;
-			}
-			firstGeneOfType.OffsetCapacity(this.Props.offset, true);
+			user.genes?.GetFirstGeneOfType<Gene_Deathrest>()?.OffsetCapacity(Props.offset);
 		}
+	}
 
-		// Token: 0x06011195 RID: 70037 RVA: 0x004E8E95 File Offset: 0x004E7095
-		public override AcceptanceReport CanBeUsedBy(Pawn p)
+	public override AcceptanceReport CanBeUsedBy(Pawn p)
+	{
+		if (p.genes?.GetFirstGeneOfType<Gene_Deathrest>() == null)
 		{
-			Pawn_GeneTracker genes = p.genes;
-			if (((genes != null) ? genes.GetFirstGeneOfType<Gene_Deathrest>() : null) == null)
-			{
-				return "CannotDeathrest".Translate();
-			}
-			return base.CanBeUsedBy(p);
+			return "CannotDeathrest".Translate();
 		}
+		return base.CanBeUsedBy(p);
+	}
 
-		// Token: 0x06011196 RID: 70038 RVA: 0x004E8EC2 File Offset: 0x004E70C2
-		public override IEnumerable<StatDrawEntry> SpecialDisplayStats()
+	[IteratorStateMachine(typeof(_003CSpecialDisplayStats_003Ed__4))]
+	public override IEnumerable<StatDrawEntry> SpecialDisplayStats()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CSpecialDisplayStats_003Ed__4(-2)
 		{
-			if (ModsConfig.BiotechActive)
-			{
-				yield return new StatDrawEntry(StatCategoryDefOf.BasicsNonPawnImportant, "DeathrestCapacity".Translate().CapitalizeFirst(), this.Props.offset.ToStringWithSign(), "DeathrestCapacityDesc".Translate(), 1010, null, null, false, false);
-			}
-			yield break;
-		}
+			_003C_003E4__this = this
+		};
 	}
 }

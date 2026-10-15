@@ -1,383 +1,663 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld;
 
-namespace Verse
+namespace Verse;
+
+public sealed class ListerThings
 {
-	// Token: 0x0200044B RID: 1099
-	public sealed class ListerThings
+	[CompilerGenerated]
+	private sealed class _003CGetAllThings_003Ed__19 : IEnumerable<Thing>, IEnumerable, IEnumerator<Thing>, IEnumerator, IDisposable
 	{
-		// Token: 0x170004FA RID: 1274
-		// (get) Token: 0x06001C69 RID: 7273 RVA: 0x0008E7B5 File Offset: 0x0008C9B5
-		public List<Thing> AllThings
+		private int _003C_003E1__state;
+
+		private Thing _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public ListerThings _003C_003E4__this;
+
+		private Predicate<Thing> validator;
+
+		public Predicate<Thing> _003C_003E3__validator;
+
+		private bool lookInHaulSources;
+
+		public bool _003C_003E3__lookInHaulSources;
+
+		private List<Thing>.Enumerator _003C_003E7__wrap1;
+
+		private List<IHaulSource>.Enumerator _003C_003E7__wrap2;
+
+		private IEnumerator<Thing> _003C_003E7__wrap3;
+
+		Thing IEnumerator<Thing>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.listsByGroup[2];
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06001C6A RID: 7274 RVA: 0x0008E7C0 File Offset: 0x0008C9C0
-		public ListerThings(ListerThingsUse use, ThingListChangedCallbacks thingListChangedCallbacks = null)
+		object IEnumerator.Current
 		{
-			this.use = use;
-			this.thingListChangedCallbacks = thingListChangedCallbacks;
-			this.listsByGroup = new List<Thing>[ThingListGroupHelper.AllGroups.Length];
-			this.stateHashByGroup = new int[ThingListGroupHelper.AllGroups.Length];
-			this.haulSources = new List<IHaulSource>();
-			this.listsByGroup[2] = new List<Thing>();
-		}
-
-		// Token: 0x06001C6B RID: 7275 RVA: 0x0008E82D File Offset: 0x0008CA2D
-		public List<Thing> ThingsInGroup(ThingRequestGroup group)
-		{
-			return this.ThingsMatching(ThingRequest.ForGroup(group));
-		}
-
-		// Token: 0x06001C6C RID: 7276 RVA: 0x0008E83C File Offset: 0x0008CA3C
-		public int StateHashOfGroup(ThingRequestGroup group)
-		{
-			if (this.use == ListerThingsUse.Region && !group.StoreInRegion())
+			[DebuggerHidden]
+			get
 			{
-				Log.ErrorOnce("Tried to get state hash of group " + group.ToString() + " in a region, but this group is never stored in regions. Most likely a global query should have been used.", 1968738832);
-				return -1;
+				return _003C_003E2__current;
 			}
-			return Gen.HashCombineInt(85693994, this.stateHashByGroup[(int)group]);
 		}
 
-		// Token: 0x06001C6D RID: 7277 RVA: 0x0008E894 File Offset: 0x0008CA94
-		public List<Thing> ThingsOfDef(ThingDef def)
+		[DebuggerHidden]
+		public _003CGetAllThings_003Ed__19(int _003C_003E1__state)
 		{
-			if (def == ThingDefOf.MinifiedThing)
-			{
-				Log.ErrorOnce("Tried to get ThingsOfDef of MinifiedThing, use ThingsMatching(ThingRequest.ForGroup(ThingRequestGroup.MinifiedThing)) instead", 1927834012);
-			}
-			return this.ThingsMatching(ThingRequest.ForDef(def));
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x06001C6E RID: 7278 RVA: 0x0008E8B9 File Offset: 0x0008CAB9
-		public bool AnyThingWithDef(ThingDef def)
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			return this.listsByDef.ContainsKey(def) && this.listsByDef[def].Count > 0;
+			int num = _003C_003E1__state;
+			switch (num)
+			{
+			case -3:
+			case 1:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+				break;
+			case -5:
+			case -4:
+			case 2:
+				try
+				{
+					if (num == -5 || num == 2)
+					{
+						try
+						{
+						}
+						finally
+						{
+							_003C_003Em__Finally3();
+						}
+					}
+				}
+				finally
+				{
+					_003C_003Em__Finally2();
+				}
+				break;
+			}
+			_003C_003E7__wrap1 = default(List<Thing>.Enumerator);
+			_003C_003E7__wrap2 = default(List<IHaulSource>.Enumerator);
+			_003C_003E7__wrap3 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x06001C6F RID: 7279 RVA: 0x0008E8E0 File Offset: 0x0008CAE0
-		public List<Thing> ThingsMatching(ThingRequest req)
+		private bool MoveNext()
 		{
-			if (req.singleDef != null)
+			try
 			{
-				return this.listsByDef.GetValueOrDefault(req.singleDef, ListerThings.EmptyList);
+				int num = _003C_003E1__state;
+				ListerThings listerThings = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = listerThings.AllThings.GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0088;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0088;
+				case 2:
+					{
+						_003C_003E1__state = -5;
+						goto IL_013c;
+					}
+					IL_0088:
+					while (_003C_003E7__wrap1.MoveNext())
+					{
+						Thing current = _003C_003E7__wrap1.Current;
+						if (validator == null || validator(current))
+						{
+							_003C_003E2__current = current;
+							_003C_003E1__state = 1;
+							return true;
+						}
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = default(List<Thing>.Enumerator);
+					if (!lookInHaulSources)
+					{
+						return false;
+					}
+					_003C_003E7__wrap2 = listerThings.haulSources.GetEnumerator();
+					_003C_003E1__state = -4;
+					goto IL_0156;
+					IL_0156:
+					if (_003C_003E7__wrap2.MoveNext())
+					{
+						IHaulSource current2 = _003C_003E7__wrap2.Current;
+						_003C_003E7__wrap3 = ((IEnumerable<Thing>)current2.GetDirectlyHeldThings()).GetEnumerator();
+						_003C_003E1__state = -5;
+						goto IL_013c;
+					}
+					_003C_003Em__Finally2();
+					_003C_003E7__wrap2 = default(List<IHaulSource>.Enumerator);
+					return false;
+					IL_013c:
+					while (_003C_003E7__wrap3.MoveNext())
+					{
+						Thing current3 = _003C_003E7__wrap3.Current;
+						if (validator == null || validator(current3))
+						{
+							_003C_003E2__current = current3;
+							_003C_003E1__state = 2;
+							return true;
+						}
+					}
+					_003C_003Em__Finally3();
+					_003C_003E7__wrap3 = null;
+					goto IL_0156;
+				}
 			}
-			if (req.group == ThingRequestGroup.Undefined)
+			catch
 			{
-				string str = "Invalid ThingRequest ";
-				ThingRequest thingRequest = req;
-				throw new InvalidOperationException(str + thingRequest.ToString());
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
-			if (this.use == ListerThingsUse.Region && !req.group.StoreInRegion())
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap1/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap2/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		private void _003C_003Em__Finally3()
+		{
+			_003C_003E1__state = -4;
+			if (_003C_003E7__wrap3 != null)
+			{
+				_003C_003E7__wrap3.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Thing> IEnumerable<Thing>.GetEnumerator()
+		{
+			_003CGetAllThings_003Ed__19 _003CGetAllThings_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CGetAllThings_003Ed__ = this;
+			}
+			else
+			{
+				_003CGetAllThings_003Ed__ = new _003CGetAllThings_003Ed__19(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CGetAllThings_003Ed__.validator = _003C_003E3__validator;
+			_003CGetAllThings_003Ed__.lookInHaulSources = _003C_003E3__lookInHaulSources;
+			return _003CGetAllThings_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Thing>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGetThingsOfType_003Ed__18<T> : IEnumerable<T>, IEnumerable, IEnumerator<T>, IEnumerator, IDisposable where T : Thing
+	{
+		private int _003C_003E1__state;
+
+		private T _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public ListerThings _003C_003E4__this;
+
+		private List<Thing> _003Cthings_003E5__2;
+
+		private int _003Ci_003E5__3;
+
+		T IEnumerator<T>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetThingsOfType_003Ed__18(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003Cthings_003E5__2 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			ListerThings listerThings = _003C_003E4__this;
+			if (num != 0)
+			{
+				if (num != 1)
+				{
+					return false;
+				}
+				_003C_003E1__state = -1;
+				goto IL_0095;
+			}
+			_003C_003E1__state = -1;
+			if (typeof(T) == typeof(Thing))
+			{
+				Log.Error("Do not call this method with type 'Thing' directly, as it will return all things currently registered.");
+				return false;
+			}
+			_003Cthings_003E5__2 = listerThings.AllThings;
+			_003Ci_003E5__3 = 0;
+			goto IL_00a5;
+			IL_00a5:
+			if (_003Ci_003E5__3 < listerThings.AllThings.Count)
+			{
+				if (_003Cthings_003E5__2[_003Ci_003E5__3] is T val)
+				{
+					_003C_003E2__current = val;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				goto IL_0095;
+			}
+			return false;
+			IL_0095:
+			_003Ci_003E5__3++;
+			goto IL_00a5;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<T> IEnumerable<T>.GetEnumerator()
+		{
+			_003CGetThingsOfType_003Ed__18<T> result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CGetThingsOfType_003Ed__18<T>(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<T>)this).GetEnumerator();
+		}
+	}
+
+	private readonly Dictionary<ThingDef, List<Thing>> listsByDef = new Dictionary<ThingDef, List<Thing>>(ThingDefComparer.Instance);
+
+	private readonly List<Thing>[] listsByGroup;
+
+	private readonly List<IHaulSource> haulSources;
+
+	private readonly int[] stateHashByGroup;
+
+	public ListerThingsUse use;
+
+	public ThingListChangedCallbacks thingListChangedCallbacks;
+
+	private static readonly List<Thing> EmptyList = new List<Thing>();
+
+	private static readonly List<Thing> tmpThingsMatchingFilter = new List<Thing>(1024);
+
+	public List<Thing> AllThings => listsByGroup[2];
+
+	public ListerThings(ListerThingsUse use, ThingListChangedCallbacks thingListChangedCallbacks = null)
+	{
+		this.use = use;
+		this.thingListChangedCallbacks = thingListChangedCallbacks;
+		listsByGroup = new List<Thing>[ThingListGroupHelper.AllGroups.Length];
+		stateHashByGroup = new int[ThingListGroupHelper.AllGroups.Length];
+		haulSources = new List<IHaulSource>();
+		listsByGroup[2] = new List<Thing>();
+	}
+
+	public List<Thing> ThingsInGroup(ThingRequestGroup group)
+	{
+		return ThingsMatching(ThingRequest.ForGroup(group));
+	}
+
+	public int StateHashOfGroup(ThingRequestGroup group)
+	{
+		if (use == ListerThingsUse.Region && !group.StoreInRegion())
+		{
+			Log.ErrorOnce("Tried to get state hash of group " + group.ToString() + " in a region, but this group is never stored in regions. Most likely a global query should have been used.", 1968738832);
+			return -1;
+		}
+		return Gen.HashCombineInt(85693994, stateHashByGroup[(uint)group]);
+	}
+
+	public List<Thing> ThingsOfDef(ThingDef def)
+	{
+		if (def == ThingDefOf.MinifiedThing)
+		{
+			Log.ErrorOnce("Tried to get ThingsOfDef of MinifiedThing, use ThingsMatching(ThingRequest.ForGroup(ThingRequestGroup.MinifiedThing)) instead", 1927834012);
+		}
+		return ThingsMatching(ThingRequest.ForDef(def));
+	}
+
+	public bool AnyThingWithDef(ThingDef def)
+	{
+		if (listsByDef.ContainsKey(def))
+		{
+			return listsByDef[def].Count > 0;
+		}
+		return false;
+	}
+
+	public List<Thing> ThingsMatching(ThingRequest req)
+	{
+		if (req.singleDef != null)
+		{
+			return listsByDef.GetValueOrDefault(req.singleDef, EmptyList);
+		}
+		if (req.group != 0)
+		{
+			if (use == ListerThingsUse.Region && !req.group.StoreInRegion())
 			{
 				Log.ErrorOnce("Tried to get things in group " + req.group.ToString() + " in a region, but this group is never stored in regions. Most likely a global query should have been used.", 1968735132);
-				return ListerThings.EmptyList;
+				return EmptyList;
 			}
-			return this.listsByGroup[(int)req.group] ?? ListerThings.EmptyList;
+			return listsByGroup[(uint)req.group] ?? EmptyList;
 		}
+		ThingRequest thingRequest = req;
+		throw new InvalidOperationException("Invalid ThingRequest " + thingRequest.ToString());
+	}
 
-		// Token: 0x06001C70 RID: 7280 RVA: 0x0008E990 File Offset: 0x0008CB90
-		public List<Thing> ThingsMatchingFilter(ThingFilter filter)
+	public List<Thing> ThingsMatchingFilter(ThingFilter filter)
+	{
+		tmpThingsMatchingFilter.Clear();
+		foreach (ThingDef allowedThingDef in filter.AllowedThingDefs)
 		{
-			ListerThings.tmpThingsMatchingFilter.Clear();
-			foreach (ThingDef def in filter.AllowedThingDefs)
-			{
-				ListerThings.tmpThingsMatchingFilter.AddRange(this.ThingsOfDef(def));
-			}
-			return ListerThings.tmpThingsMatchingFilter;
+			tmpThingsMatchingFilter.AddRange(ThingsOfDef(allowedThingDef));
 		}
+		return tmpThingsMatchingFilter;
+	}
 
-		// Token: 0x06001C71 RID: 7281 RVA: 0x0008E9F8 File Offset: 0x0008CBF8
-		public void GetThingsOfType<T>(List<T> list) where T : Thing
+	public void GetThingsOfType<T>(List<T> list) where T : Thing
+	{
+		if (typeof(T) == typeof(Thing))
 		{
-			if (typeof(T) == typeof(Thing))
+			Log.Error("Do not call this method with type 'Thing' directly, as it will return all things currently registered.");
+			return;
+		}
+		List<Thing> allThings = AllThings;
+		for (int i = 0; i < AllThings.Count; i++)
+		{
+			if (allThings[i] is T item)
 			{
-				Log.Error("Do not call this method with type 'Thing' directly, as it will return all things currently registered.");
-				return;
+				list.Add(item);
 			}
-			List<Thing> allThings = this.AllThings;
-			for (int i = 0; i < this.AllThings.Count; i++)
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CGetThingsOfType_003Ed__18<>))]
+	public IEnumerable<T> GetThingsOfType<T>() where T : Thing
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetThingsOfType_003Ed__18<T>(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	[IteratorStateMachine(typeof(_003CGetAllThings_003Ed__19))]
+	public IEnumerable<Thing> GetAllThings(Predicate<Thing> validator = null, bool lookInHaulSources = false)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetAllThings_003Ed__19(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__validator = validator,
+			_003C_003E3__lookInHaulSources = lookInHaulSources
+		};
+	}
+
+	public void GetAllThings(in List<Thing> list, Predicate<Thing> validator = null, bool lookInHaulSources = false)
+	{
+		if (validator != null)
+		{
+			foreach (Thing allThing in AllThings)
 			{
-				T t = allThings[i] as T;
-				if (t != null)
+				if (validator(allThing))
 				{
-					list.Add(t);
+					list.Add(allThing);
 				}
 			}
 		}
-
-		// Token: 0x06001C72 RID: 7282 RVA: 0x0008EA69 File Offset: 0x0008CC69
-		public IEnumerable<T> GetThingsOfType<T>() where T : Thing
+		else
 		{
-			if (typeof(T) == typeof(Thing))
-			{
-				Log.Error("Do not call this method with type 'Thing' directly, as it will return all things currently registered.");
-				yield break;
-			}
-			List<Thing> things = this.AllThings;
-			int num;
-			for (int i = 0; i < this.AllThings.Count; i = num + 1)
-			{
-				T t = things[i] as T;
-				if (t != null)
-				{
-					yield return t;
-				}
-				num = i;
-			}
-			yield break;
+			list.AddRange(AllThings);
 		}
-
-		// Token: 0x06001C73 RID: 7283 RVA: 0x0008EA79 File Offset: 0x0008CC79
-		public IEnumerable<Thing> GetAllThings(Predicate<Thing> validator = null, bool lookInHaulSources = false)
+		if (!lookInHaulSources)
 		{
-			foreach (Thing thing in this.AllThings)
-			{
-				if (validator == null || validator(thing))
-				{
-					yield return thing;
-				}
-			}
-			List<Thing>.Enumerator enumerator = default(List<Thing>.Enumerator);
-			if (!lookInHaulSources)
-			{
-				yield break;
-			}
-			foreach (IHaulSource haulSource in this.haulSources)
-			{
-				foreach (Thing thing2 in ((IEnumerable<Thing>)haulSource.GetDirectlyHeldThings()))
-				{
-					if (validator == null || validator(thing2))
-					{
-						yield return thing2;
-					}
-				}
-				IEnumerator<Thing> enumerator3 = null;
-			}
-			List<IHaulSource>.Enumerator enumerator2 = default(List<IHaulSource>.Enumerator);
-			yield break;
-			yield break;
+			return;
 		}
-
-		// Token: 0x06001C74 RID: 7284 RVA: 0x0008EA98 File Offset: 0x0008CC98
-		public void GetAllThings(in List<Thing> list, Predicate<Thing> validator = null, bool lookInHaulSources = false)
+		foreach (IHaulSource haulSource in haulSources)
 		{
-			if (validator != null)
+			foreach (Thing item in (IEnumerable<Thing>)haulSource.GetDirectlyHeldThings())
 			{
-				using (List<Thing>.Enumerator enumerator = this.AllThings.GetEnumerator())
+				if (validator == null || validator(item))
 				{
-					while (enumerator.MoveNext())
-					{
-						Thing thing = enumerator.Current;
-						if (validator(thing))
-						{
-							list.Add(thing);
-						}
-					}
-					goto IL_50;
-				}
-			}
-			list.AddRange(this.AllThings);
-			IL_50:
-			if (!lookInHaulSources)
-			{
-				return;
-			}
-			foreach (IHaulSource haulSource in this.haulSources)
-			{
-				foreach (Thing thing2 in ((IEnumerable<Thing>)haulSource.GetDirectlyHeldThings()))
-				{
-					if (validator == null || validator(thing2))
-					{
-						list.Add(thing2);
-					}
+					list.Add(item);
 				}
 			}
 		}
+	}
 
-		// Token: 0x06001C75 RID: 7285 RVA: 0x0008EB90 File Offset: 0x0008CD90
-		public void GetAllThings(in List<Thing> list, ThingRequestGroup group, Predicate<Thing> validator = null, bool lookInHaulSources = false)
+	public void GetAllThings(in List<Thing> list, ThingRequestGroup group, Predicate<Thing> validator = null, bool lookInHaulSources = false)
+	{
+		if (validator != null)
 		{
-			if (validator != null)
+			foreach (Thing item in ThingsInGroup(group))
 			{
-				using (List<Thing>.Enumerator enumerator = this.ThingsInGroup(group).GetEnumerator())
+				if (validator(item))
 				{
-					while (enumerator.MoveNext())
-					{
-						Thing thing = enumerator.Current;
-						if (validator(thing))
-						{
-							list.Add(thing);
-						}
-					}
-					goto IL_52;
-				}
-			}
-			list.AddRange(this.ThingsInGroup(group));
-			IL_52:
-			if (!lookInHaulSources)
-			{
-				return;
-			}
-			foreach (IHaulSource haulSource in this.haulSources)
-			{
-				foreach (Thing thing2 in ((IEnumerable<Thing>)haulSource.GetDirectlyHeldThings()))
-				{
-					if (this.GroupIncludes(thing2, group) && (validator == null || validator(thing2)))
-					{
-						list.Add(thing2);
-					}
+					list.Add(item);
 				}
 			}
 		}
-
-		// Token: 0x06001C76 RID: 7286 RVA: 0x0008EC94 File Offset: 0x0008CE94
-		public bool Contains(Thing t)
+		else
 		{
-			return this.AllThings.Contains(t);
+			list.AddRange(ThingsInGroup(group));
 		}
-
-		// Token: 0x06001C77 RID: 7287 RVA: 0x0008ECA4 File Offset: 0x0008CEA4
-		public void Add(Thing t)
+		if (!lookInHaulSources)
 		{
-			if (!ListerThings.EverListable(t.def, this.use))
+			return;
+		}
+		foreach (IHaulSource haulSource in haulSources)
+		{
+			foreach (Thing item2 in (IEnumerable<Thing>)haulSource.GetDirectlyHeldThings())
 			{
-				return;
-			}
-			List<Thing> list;
-			if (!this.listsByDef.TryGetValue(t.def, out list))
-			{
-				list = new List<Thing>();
-				this.listsByDef.Add(t.def, list);
-			}
-			list.Add(t);
-			IHaulSource haulSource = t as IHaulSource;
-			if (haulSource != null)
-			{
-				this.haulSources.Add(haulSource);
-			}
-			foreach (ThingRequestGroup thingRequestGroup in ThingListGroupHelper.AllGroups)
-			{
-				if (this.GroupIncludes(t, thingRequestGroup))
+				if (GroupIncludes(item2, group) && (validator == null || validator(item2)))
 				{
-					List<Thing> list2 = this.listsByGroup[(int)thingRequestGroup];
-					if (list2 == null)
-					{
-						list2 = new List<Thing>();
-						this.listsByGroup[(int)thingRequestGroup] = list2;
-						this.stateHashByGroup[(int)thingRequestGroup] = 0;
-					}
-					list2.Add(t);
-					this.stateHashByGroup[(int)thingRequestGroup]++;
+					list.Add(item2);
 				}
 			}
-			ThingListChangedCallbacks thingListChangedCallbacks = this.thingListChangedCallbacks;
-			if (thingListChangedCallbacks == null)
-			{
-				return;
-			}
-			Action<Thing> onThingAdded = thingListChangedCallbacks.onThingAdded;
-			if (onThingAdded == null)
-			{
-				return;
-			}
-			onThingAdded(t);
 		}
+	}
 
-		// Token: 0x06001C78 RID: 7288 RVA: 0x0008ED93 File Offset: 0x0008CF93
-		private bool GroupIncludes(Thing thing, ThingRequestGroup group)
+	public bool Contains(Thing t)
+	{
+		return AllThings.Contains(t);
+	}
+
+	public void Add(Thing t)
+	{
+		if (!EverListable(t.def, use))
 		{
-			return (this.use != ListerThingsUse.Region || group.StoreInRegion()) && group.Includes(thing.def);
+			return;
 		}
-
-		// Token: 0x06001C79 RID: 7289 RVA: 0x0008EDB4 File Offset: 0x0008CFB4
-		public void Remove(Thing t)
+		if (!listsByDef.TryGetValue(t.def, out var value))
 		{
-			if (!ListerThings.EverListable(t.def, this.use))
+			value = new List<Thing>();
+			listsByDef.Add(t.def, value);
+		}
+		value.Add(t);
+		if (t is IHaulSource item)
+		{
+			haulSources.Add(item);
+		}
+		ThingRequestGroup[] allGroups = ThingListGroupHelper.AllGroups;
+		foreach (ThingRequestGroup thingRequestGroup in allGroups)
+		{
+			if (GroupIncludes(t, thingRequestGroup))
 			{
-				return;
-			}
-			List<Thing> list;
-			if (this.listsByDef.TryGetValue(t.def, out list))
-			{
-				list.Remove(t);
-			}
-			IHaulSource haulSource = t as IHaulSource;
-			if (haulSource != null)
-			{
-				this.haulSources.Remove(haulSource);
-			}
-			ThingRequestGroup[] allGroups = ThingListGroupHelper.AllGroups;
-			for (int i = 0; i < allGroups.Length; i++)
-			{
-				ThingRequestGroup thingRequestGroup = allGroups[i];
-				if ((this.use != ListerThingsUse.Region || thingRequestGroup.StoreInRegion()) && thingRequestGroup.Includes(t.def))
+				List<Thing> list = listsByGroup[(uint)thingRequestGroup];
+				if (list == null)
 				{
-					this.listsByGroup[i].Remove(t);
-					this.stateHashByGroup[(int)thingRequestGroup]++;
+					list = new List<Thing>();
+					listsByGroup[(uint)thingRequestGroup] = list;
+					stateHashByGroup[(uint)thingRequestGroup] = 0;
 				}
+				list.Add(t);
+				stateHashByGroup[(uint)thingRequestGroup]++;
 			}
-			ThingListChangedCallbacks thingListChangedCallbacks = this.thingListChangedCallbacks;
-			if (thingListChangedCallbacks == null)
-			{
-				return;
-			}
-			Action<Thing> onThingRemoved = thingListChangedCallbacks.onThingRemoved;
-			if (onThingRemoved == null)
-			{
-				return;
-			}
-			onThingRemoved(t);
 		}
+		thingListChangedCallbacks?.onThingAdded?.Invoke(t);
+	}
 
-		// Token: 0x06001C7A RID: 7290 RVA: 0x0008EE7F File Offset: 0x0008D07F
-		public static bool EverListable(ThingDef def, ListerThingsUse use)
+	private bool GroupIncludes(Thing thing, ThingRequestGroup group)
+	{
+		if (use == ListerThingsUse.Region && !group.StoreInRegion())
 		{
-			return (def.category != ThingCategory.Mote || (def.drawGUIOverlay && use != ListerThingsUse.Region)) && (def.category != ThingCategory.Projectile || use != ListerThingsUse.Region);
+			return false;
 		}
+		return group.Includes(thing.def);
+	}
 
-		// Token: 0x06001C7B RID: 7291 RVA: 0x0008EEAC File Offset: 0x0008D0AC
-		public void Clear()
+	public void Remove(Thing t)
+	{
+		if (!EverListable(t.def, use))
 		{
-			this.listsByDef.Clear();
-			for (int i = 0; i < this.listsByGroup.Length; i++)
+			return;
+		}
+		if (listsByDef.TryGetValue(t.def, out var value))
+		{
+			value.Remove(t);
+		}
+		if (t is IHaulSource item)
+		{
+			haulSources.Remove(item);
+		}
+		ThingRequestGroup[] allGroups = ThingListGroupHelper.AllGroups;
+		for (int i = 0; i < allGroups.Length; i++)
+		{
+			ThingRequestGroup thingRequestGroup = allGroups[i];
+			if ((use != ListerThingsUse.Region || thingRequestGroup.StoreInRegion()) && thingRequestGroup.Includes(t.def))
 			{
-				if (this.listsByGroup[i] != null)
-				{
-					this.listsByGroup[i].Clear();
-				}
-				this.stateHashByGroup[i] = 0;
+				listsByGroup[i].Remove(t);
+				stateHashByGroup[(uint)thingRequestGroup]++;
 			}
 		}
+		thingListChangedCallbacks?.onThingRemoved?.Invoke(t);
+	}
 
-		// Token: 0x04001857 RID: 6231
-		private readonly Dictionary<ThingDef, List<Thing>> listsByDef = new Dictionary<ThingDef, List<Thing>>(ThingDefComparer.Instance);
+	public static bool EverListable(ThingDef def, ListerThingsUse use)
+	{
+		if (def.category == ThingCategory.Mote && (!def.drawGUIOverlay || use == ListerThingsUse.Region))
+		{
+			return false;
+		}
+		if (def.category == ThingCategory.Projectile && use == ListerThingsUse.Region)
+		{
+			return false;
+		}
+		return true;
+	}
 
-		// Token: 0x04001858 RID: 6232
-		private readonly List<Thing>[] listsByGroup;
-
-		// Token: 0x04001859 RID: 6233
-		private readonly List<IHaulSource> haulSources;
-
-		// Token: 0x0400185A RID: 6234
-		private readonly int[] stateHashByGroup;
-
-		// Token: 0x0400185B RID: 6235
-		public ListerThingsUse use;
-
-		// Token: 0x0400185C RID: 6236
-		public ThingListChangedCallbacks thingListChangedCallbacks;
-
-		// Token: 0x0400185D RID: 6237
-		private static readonly List<Thing> EmptyList = new List<Thing>();
-
-		// Token: 0x0400185E RID: 6238
-		private static readonly List<Thing> tmpThingsMatchingFilter = new List<Thing>(1024);
+	public void Clear()
+	{
+		listsByDef.Clear();
+		for (int i = 0; i < listsByGroup.Length; i++)
+		{
+			if (listsByGroup[i] != null)
+			{
+				listsByGroup[i].Clear();
+			}
+			stateHashByGroup[i] = 0;
+		}
 	}
 }

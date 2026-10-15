@@ -1,85 +1,74 @@
-﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Alert_DisallowedBuildingInsideMonument : Alert_Critical
 {
-	// Token: 0x02002FCB RID: 12235
-	public class Alert_DisallowedBuildingInsideMonument : Alert_Critical
+	private List<Thing> disallowedBuildingsResult = new List<Thing>();
+
+	private List<Thing> DisallowedBuildings
 	{
-		// Token: 0x17002CB5 RID: 11445
-		// (get) Token: 0x060113E4 RID: 70628 RVA: 0x004F0CD4 File Offset: 0x004EEED4
-		private List<Thing> DisallowedBuildings
+		get
 		{
-			get
+			disallowedBuildingsResult.Clear();
+			List<Map> maps = Find.Maps;
+			for (int i = 0; i < maps.Count; i++)
 			{
-				this.disallowedBuildingsResult.Clear();
-				List<Map> maps = Find.Maps;
-				for (int i = 0; i < maps.Count; i++)
+				List<Thing> list = maps[i].listerThings.ThingsOfDef(ThingDefOf.MonumentMarker);
+				for (int j = 0; j < list.Count; j++)
 				{
-					List<Thing> list = maps[i].listerThings.ThingsOfDef(ThingDefOf.MonumentMarker);
-					for (int j = 0; j < list.Count; j++)
+					MonumentMarker monumentMarker = (MonumentMarker)list[j];
+					if (monumentMarker.AllDone)
 					{
-						MonumentMarker monumentMarker = (MonumentMarker)list[j];
-						if (monumentMarker.AllDone)
+						Thing firstDisallowedBuilding = monumentMarker.FirstDisallowedBuilding;
+						if (firstDisallowedBuilding != null)
 						{
-							Thing firstDisallowedBuilding = monumentMarker.FirstDisallowedBuilding;
-							if (firstDisallowedBuilding != null)
-							{
-								this.disallowedBuildingsResult.Add(firstDisallowedBuilding);
-							}
+							disallowedBuildingsResult.Add(firstDisallowedBuilding);
 						}
 					}
 				}
-				return this.disallowedBuildingsResult;
 			}
+			return disallowedBuildingsResult;
 		}
+	}
 
-		// Token: 0x17002CB6 RID: 11446
-		// (get) Token: 0x060113E5 RID: 70629 RVA: 0x004F0D64 File Offset: 0x004EEF64
-		private int MinTicksLeft
+	private int MinTicksLeft
+	{
+		get
 		{
-			get
+			int num = int.MaxValue;
+			List<Map> maps = Find.Maps;
+			for (int i = 0; i < maps.Count; i++)
 			{
-				int num = int.MaxValue;
-				List<Map> maps = Find.Maps;
-				for (int i = 0; i < maps.Count; i++)
+				List<Thing> list = maps[i].listerThings.ThingsOfDef(ThingDefOf.MonumentMarker);
+				for (int j = 0; j < list.Count; j++)
 				{
-					List<Thing> list = maps[i].listerThings.ThingsOfDef(ThingDefOf.MonumentMarker);
-					for (int j = 0; j < list.Count; j++)
+					MonumentMarker monumentMarker = (MonumentMarker)list[j];
+					if (monumentMarker.AllDone && monumentMarker.AnyDisallowedBuilding)
 					{
-						MonumentMarker monumentMarker = (MonumentMarker)list[j];
-						if (monumentMarker.AllDone && monumentMarker.AnyDisallowedBuilding)
-						{
-							num = Mathf.Min(num, 60000 - monumentMarker.ticksSinceDisallowedBuilding);
-						}
+						num = Mathf.Min(num, 60000 - monumentMarker.ticksSinceDisallowedBuilding);
 					}
 				}
-				return num;
 			}
+			return num;
 		}
+	}
 
-		// Token: 0x060113E6 RID: 70630 RVA: 0x004F0DF0 File Offset: 0x004EEFF0
-		public Alert_DisallowedBuildingInsideMonument()
-		{
-			this.defaultLabel = "DisallowedBuildingInsideMonument".Translate();
-			this.requireRoyalty = true;
-		}
+	public Alert_DisallowedBuildingInsideMonument()
+	{
+		defaultLabel = "DisallowedBuildingInsideMonument".Translate();
+		requireRoyalty = true;
+	}
 
-		// Token: 0x060113E7 RID: 70631 RVA: 0x004F0E1F File Offset: 0x004EF01F
-		public override AlertReport GetReport()
-		{
-			return AlertReport.CulpritsAre(this.DisallowedBuildings);
-		}
+	public override AlertReport GetReport()
+	{
+		return AlertReport.CulpritsAre(DisallowedBuildings);
+	}
 
-		// Token: 0x060113E8 RID: 70632 RVA: 0x004F0E2C File Offset: 0x004EF02C
-		public override TaggedString GetExplanation()
-		{
-			return "DisallowedBuildingInsideMonumentDesc".Translate(this.MinTicksLeft.ToStringTicksToPeriodVerbose(true, true));
-		}
-
-		// Token: 0x0400B2F6 RID: 45814
-		private List<Thing> disallowedBuildingsResult = new List<Thing>();
+	public override TaggedString GetExplanation()
+	{
+		return "DisallowedBuildingInsideMonumentDesc".Translate(MinTicksLeft.ToStringTicksToPeriodVerbose());
 	}
 }

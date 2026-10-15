@@ -37,6 +37,8 @@ public sealed class EngineApplicationOptions
 
 	public bool UseKosmicKrisp { get; set; }
 
+	public string? BundledVulkanLoaderPath { get; init; }
+
 	public string? PreferredGpuName { get; init; }
 
 	public string? PreferredGpuUuid { get; init; }

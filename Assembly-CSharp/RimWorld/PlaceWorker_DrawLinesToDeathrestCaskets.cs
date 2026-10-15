@@ -1,79 +1,67 @@
-﻿using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class PlaceWorker_DrawLinesToDeathrestCaskets : PlaceWorker
 {
-	// Token: 0x02003813 RID: 14355
-	public class PlaceWorker_DrawLinesToDeathrestCaskets : PlaceWorker
+	private static List<Thing> tmpLinkedThings = new List<Thing>();
+
+	public override void DrawGhost(ThingDef def, IntVec3 center, Rot4 rot, Color ghostCol, Thing thing = null)
 	{
-		// Token: 0x06013DC2 RID: 81346 RVA: 0x005E553C File Offset: 0x005E373C
-		public override void DrawGhost(ThingDef def, IntVec3 center, Rot4 rot, Color ghostCol, Thing thing = null)
+		if (!ModsConfig.BiotechActive)
 		{
-			if (!ModsConfig.BiotechActive)
+			return;
+		}
+		Room room = center.GetRoom(Find.CurrentMap);
+		if (room == null)
+		{
+			return;
+		}
+		foreach (Region region in room.Regions)
+		{
+			foreach (Thing item in region.ListerThings.ThingsInGroup(ThingRequestGroup.BuildingArtificial))
 			{
-				return;
-			}
-			Room room = center.GetRoom(Find.CurrentMap);
-			if (room == null)
-			{
-				return;
-			}
-			foreach (Region region in room.Regions)
-			{
-				foreach (Thing thing2 in region.ListerThings.ThingsInGroup(ThingRequestGroup.BuildingArtificial))
+				if (item.def == ThingDefOf.DeathrestCasket && GenSight.LineOfSight(center, item.OccupiedRect().CenterCell, Find.CurrentMap))
 				{
-					if (thing2.def == ThingDefOf.DeathrestCasket && GenSight.LineOfSight(center, thing2.OccupiedRect().CenterCell, Find.CurrentMap))
-					{
-						GenDraw.DrawLineBetween(center.ToVector3Shifted(), thing2.TrueCenter());
-					}
+					GenDraw.DrawLineBetween(center.ToVector3Shifted(), item.TrueCenter());
 				}
 			}
 		}
+	}
 
-		// Token: 0x06013DC3 RID: 81347 RVA: 0x005E561C File Offset: 0x005E381C
-		public override void DrawPlaceMouseAttachments(float curX, ref float curY, BuildableDef bdef, IntVec3 center, Rot4 rot)
+	public override void DrawPlaceMouseAttachments(float curX, ref float curY, BuildableDef bdef, IntVec3 center, Rot4 rot)
+	{
+		if (ModsConfig.BiotechActive)
 		{
-			PlaceWorker_DrawLinesToDeathrestCaskets.<>c__DisplayClass2_0 CS$<>8__locals1;
-			CS$<>8__locals1.curX = curX;
-			if (ModsConfig.BiotechActive)
+			tmpLinkedThings.Clear();
+			Room room = center.GetRoom(Find.CurrentMap);
+			if (room != null)
 			{
-				PlaceWorker_DrawLinesToDeathrestCaskets.tmpLinkedThings.Clear();
-				Room room = center.GetRoom(Find.CurrentMap);
-				if (room != null)
+				foreach (Region region in room.Regions)
 				{
-					foreach (Region region in room.Regions)
+					foreach (Thing item in region.ListerThings.ThingsInGroup(ThingRequestGroup.BuildingArtificial))
 					{
-						foreach (Thing thing in region.ListerThings.ThingsInGroup(ThingRequestGroup.BuildingArtificial))
+						if (!tmpLinkedThings.Contains(item) && item.def == ThingDefOf.DeathrestCasket && GenSight.LineOfSight(center, item.OccupiedRect().CenterCell, Find.CurrentMap))
 						{
-							if (!PlaceWorker_DrawLinesToDeathrestCaskets.tmpLinkedThings.Contains(thing) && thing.def == ThingDefOf.DeathrestCasket && GenSight.LineOfSight(center, thing.OccupiedRect().CenterCell, Find.CurrentMap))
+							tmpLinkedThings.Add(item);
+							if (tmpLinkedThings.Count == 1)
 							{
-								PlaceWorker_DrawLinesToDeathrestCaskets.tmpLinkedThings.Add(thing);
-								if (PlaceWorker_DrawLinesToDeathrestCaskets.tmpLinkedThings.Count == 1)
-								{
-									PlaceWorker_DrawLinesToDeathrestCaskets.<DrawPlaceMouseAttachments>g__DrawTextLine|2_0(ref curY, "FacilityPotentiallyLinkedTo".Translate() + ":", ref CS$<>8__locals1);
-								}
-								PlaceWorker_DrawLinesToDeathrestCaskets.<DrawPlaceMouseAttachments>g__DrawTextLine|2_0(ref curY, "  - " + thing.LabelCap, ref CS$<>8__locals1);
+								DrawTextLine(ref curY, "FacilityPotentiallyLinkedTo".Translate() + ":");
 							}
+							DrawTextLine(ref curY, "  - " + item.LabelCap);
 						}
 					}
 				}
 			}
-			base.DrawPlaceMouseAttachments(CS$<>8__locals1.curX, ref curY, bdef, center, rot);
 		}
-
-		// Token: 0x06013DC6 RID: 81350 RVA: 0x005E5790 File Offset: 0x005E3990
-		[CompilerGenerated]
-		internal static void <DrawPlaceMouseAttachments>g__DrawTextLine|2_0(ref float y, string text, ref PlaceWorker_DrawLinesToDeathrestCaskets.<>c__DisplayClass2_0 A_2)
+		base.DrawPlaceMouseAttachments(curX, ref curY, bdef, center, rot);
+		void DrawTextLine(ref float y, string text)
 		{
 			float lineHeight = Text.LineHeight;
-			Widgets.Label(new Rect(A_2.curX, y, 999f, lineHeight), text);
+			Widgets.Label(new Rect(curX, y, 999f, lineHeight), text);
 			y += lineHeight;
 		}
-
-		// Token: 0x0400DBB6 RID: 56246
-		private static List<Thing> tmpLinkedThings = new List<Thing>();
 	}
 }

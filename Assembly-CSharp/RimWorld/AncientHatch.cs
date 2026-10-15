@@ -1,259 +1,346 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Verse;
-using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+[StaticConstructorOnStartup]
+public class AncientHatch : MapPortal
 {
-	// Token: 0x02002AF3 RID: 10995
-	[StaticConstructorOnStartup]
-	public class AncientHatch : MapPortal
+	[CompilerGenerated]
+	private sealed class _003CGetExtraGenSteps_003Ed__10 : IEnumerable<GenStepWithParams>, IEnumerable, IEnumerator<GenStepWithParams>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700265A RID: 9818
-		// (get) Token: 0x0600F54A RID: 62794 RVA: 0x004746E0 File Offset: 0x004728E0
-		private CompHackable Hackable
+		private int _003C_003E1__state;
+
+		private GenStepWithParams _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public AncientHatch _003C_003E4__this;
+
+		GenStepWithParams IEnumerator<GenStepWithParams>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				CompHackable result;
-				if ((result = this.hackableInt) == null)
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetExtraGenSteps_003Ed__10(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			AncientHatch ancientHatch = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (ancientHatch.layout != null)
 				{
-					result = (this.hackableInt = base.GetComp<CompHackable>());
+					_003C_003E2__current = new GenStepWithParams(GenStepDefOf.AncientStockpile, new GenStepParams
+					{
+						layout = ancientHatch.layout
+					});
+					_003C_003E1__state = 1;
+					return true;
 				}
-				return result;
+				_003C_003E2__current = new GenStepWithParams(GenStepDefOf.AncientStockpile, default(GenStepParams));
+				_003C_003E1__state = 2;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				break;
+			case 2:
+				_003C_003E1__state = -1;
+				break;
 			}
+			return false;
 		}
 
-		// Token: 0x0600F54B RID: 62795 RVA: 0x00474706 File Offset: 0x00472906
-		public override void ExposeData()
+		bool IEnumerator.MoveNext()
 		{
-			base.ExposeData();
-			Scribe_Values.Look<TileMutatorWorker_Stockpile.StockpileType>(ref this.stockpileType, "stockpileType", TileMutatorWorker_Stockpile.StockpileType.Medicine, false);
-			Scribe_Defs.Look<LayoutDef>(ref this.layout, "layout");
-			Scribe_Values.Look<bool>(ref this.isSealed, "isSealed", false, false);
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0600F54C RID: 62796 RVA: 0x00474742 File Offset: 0x00472942
-		public override void SpawnSetup(Map map, bool respawningAfterLoad)
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			base.SpawnSetup(map, respawningAfterLoad);
-			this.openGraphicData = new GraphicData();
-			this.openGraphicData.CopyFrom(this.def.graphicData);
-			this.openGraphicData.texPath = "Things/Building/AncientHatch/AncientHatch_Open";
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x0600F54D RID: 62797 RVA: 0x00474780 File Offset: 0x00472980
-		public override void Print(SectionLayer layer)
+		[DebuggerHidden]
+		IEnumerator<GenStepWithParams> IEnumerable<GenStepWithParams>.GetEnumerator()
 		{
-			string text;
-			if (this.IsEnterable(out text))
+			_003CGetExtraGenSteps_003Ed__10 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				this.openGraphicData.Graphic.Print(layer, this, 0f);
-				return;
-			}
-			this.Graphic.Print(layer, this, 0f);
-		}
-
-		// Token: 0x0600F54E RID: 62798 RVA: 0x004747C1 File Offset: 0x004729C1
-		protected override IEnumerable<GenStepWithParams> GetExtraGenSteps()
-		{
-			if (this.layout != null)
-			{
-				yield return new GenStepWithParams(GenStepDefOf.AncientStockpile, new GenStepParams
-				{
-					layout = this.layout
-				});
+				_003C_003E1__state = 0;
+				result = this;
 			}
 			else
 			{
-				yield return new GenStepWithParams(GenStepDefOf.AncientStockpile, default(GenStepParams));
-			}
-			yield break;
-		}
-
-		// Token: 0x0600F54F RID: 62799 RVA: 0x004747D4 File Offset: 0x004729D4
-		public override bool IsEnterable(out string reason)
-		{
-			if (!this.Hackable.IsHacked)
-			{
-				reason = "Locked".Translate();
-				return false;
-			}
-			if (this.isSealed)
-			{
-				reason = "Sealed".Translate();
-				return false;
-			}
-			return base.IsEnterable(out reason);
-		}
-
-		// Token: 0x0600F550 RID: 62800 RVA: 0x00474823 File Offset: 0x00472A23
-		public void Seal()
-		{
-			if (!base.PocketMapExists)
-			{
-				Log.Error("Tried to seal ancient hatch but pocket map doesn't exist");
-				return;
-			}
-			PocketMapUtility.DestroyPocketMap(this.pocketMap);
-			base.DirtyMapMesh(base.Map);
-			this.isSealed = true;
-		}
-
-		// Token: 0x0600F551 RID: 62801 RVA: 0x00474858 File Offset: 0x00472A58
-		public override string GetInspectString()
-		{
-			StringBuilder stringBuilder = new StringBuilder(base.GetInspectString());
-			if (this.isSealed)
-			{
-				stringBuilder.AppendLineIfNotEmpty();
-				stringBuilder.Append("HatchSealed".Translate());
-			}
-			else if (this.Hackable.IsHacked)
-			{
-				stringBuilder.AppendLineIfNotEmpty();
-				stringBuilder.Append("HatchUnlocked".Translate());
-			}
-			return stringBuilder.ToString();
-		}
-
-		// Token: 0x0600F552 RID: 62802 RVA: 0x004748C8 File Offset: 0x00472AC8
-		public override IEnumerable<Gizmo> GetGizmos()
-		{
-			foreach (Gizmo gizmo in base.GetGizmos())
-			{
-				yield return gizmo;
-			}
-			IEnumerator<Gizmo> enumerator = null;
-			if (base.PocketMapExists)
-			{
-				yield return new Command_Action
+				result = new _003CGetExtraGenSteps_003Ed__10(0)
 				{
-					defaultLabel = "SealHatch".Translate(),
-					defaultDesc = "SealHatchDesc".Translate(),
-					icon = AncientHatch.SealHatchIcon.Texture,
-					action = delegate()
-					{
-						Find.Targeter.BeginTargeting(TargetingParameters.ForColonist(), delegate(LocalTargetInfo target)
-						{
-							string text = "";
-							List<Pawn> list = new List<Pawn>();
-							List<Pawn> list2 = new List<Pawn>();
-							foreach (Pawn pawn in base.PocketMap.mapPawns.AllPawns)
-							{
-								if (pawn.Faction == Faction.OfPlayer)
-								{
-									if (pawn.RaceProps.Humanlike)
-									{
-										list.Add(pawn);
-									}
-									else
-									{
-										list2.Add(pawn);
-									}
-								}
-							}
-							if (list.Count > 0)
-							{
-								string[] array = new string[6];
-								array[0] = text;
-								array[1] = "\n\n";
-								array[2] = ("GravEngineWarning".Translate() + ": ").Colorize(ColorLibrary.RedReadable);
-								array[3] = "PeopleWillBeLeftBehind".Translate().Resolve();
-								array[4] = ":\n";
-								array[5] = (from p in list
-								select p.NameFullColored.Resolve()).ToLineList("  - ", true);
-								text = string.Concat(array);
-							}
-							if (list2.Count > 0)
-							{
-								string[] array2 = new string[6];
-								array2[0] = text;
-								array2[1] = "\n\n";
-								array2[2] = ("GravEngineWarning".Translate() + ": ").Colorize(ColorLibrary.RedReadable);
-								array2[3] = "AnimalsWillBeLeftBehind".Translate().Resolve();
-								array2[4] = ":\n";
-								array2[5] = (from p in list2
-								select p.NameFullColored.Resolve()).ToLineList("  - ", true);
-								text = string.Concat(array2);
-							}
-							Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("ConfirmSealHatch".Translate(text), delegate()
-							{
-								Pawn pawn2 = target.Pawn;
-								if (pawn2 == null)
-								{
-									return;
-								}
-								pawn2.jobs.TryTakeOrderedJob(JobMaker.MakeJob(JobDefOf.Seal, this), new JobTag?(JobTag.Misc), false);
-							}, false, null, WindowLayer.Dialog));
-						}, delegate(LocalTargetInfo target)
-						{
-							Pawn pawn = target.Pawn;
-							if (pawn != null && pawn.IsColonistPlayerControlled)
-							{
-								GenDraw.DrawTargetHighlight(target);
-							}
-						}, (LocalTargetInfo target) => this.ValidateSealer(target).Accepted, null, null, AncientHatch.SealHatchIcon.Texture, true, delegate(LocalTargetInfo target)
-						{
-							AcceptanceReport acceptanceReport = this.ValidateSealer(target);
-							Pawn pawn = target.Pawn;
-							if (pawn != null && pawn.IsColonistPlayerControlled && !acceptanceReport.Accepted)
-							{
-								if (!acceptanceReport.Reason.NullOrEmpty())
-								{
-									Widgets.MouseAttachedLabel(("CannotChooseSealer".Translate() + ": " + acceptanceReport.Reason.CapitalizeFirst()).Colorize(ColorLibrary.RedReadable), 0f, 0f, null);
-									return;
-								}
-								Widgets.MouseAttachedLabel("CannotChooseSealer".Translate(), 0f, 0f, null);
-							}
-						}, null);
-					}
+					_003C_003E4__this = _003C_003E4__this
 				};
 			}
-			yield break;
-			yield break;
+			return result;
 		}
 
-		// Token: 0x0600F553 RID: 62803 RVA: 0x004748D8 File Offset: 0x00472AD8
-		private AcceptanceReport ValidateSealer(LocalTargetInfo target)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			Pawn pawn = target.Thing as Pawn;
-			if (pawn == null)
+			return ((IEnumerable<GenStepWithParams>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGetGizmos_003Ed__13 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public AncientHatch _003C_003E4__this;
+
+		private IEnumerator<Gizmo> _003C_003E7__wrap1;
+
+		Gizmo IEnumerator<Gizmo>.Current
+		{
+			[DebuggerHidden]
+			get
 			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetGizmos_003Ed__13(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				AncientHatch ancientHatch = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((MapPortal)ancientHatch).GetGizmos().GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 1:
+					_003C_003E1__state = -3;
+					break;
+				}
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					Gizmo current = _003C_003E7__wrap1.Current;
+					_003C_003E2__current = current;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = null;
 				return false;
 			}
-			if (!pawn.CanReach(this, PathEndMode.Touch, Danger.Deadly, false, false, TraverseMode.ByPawn))
+			catch
 			{
-				return "NoPath".Translate();
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
-			if (pawn.Downed)
-			{
-				return "DownedLower".Translate();
-			}
-			return true;
 		}
 
-		// Token: 0x0400A193 RID: 41363
-		public TileMutatorWorker_Stockpile.StockpileType stockpileType;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x0400A194 RID: 41364
-		public LayoutDef layout;
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
 
-		// Token: 0x0400A195 RID: 41365
-		private bool isSealed;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x0400A196 RID: 41366
-		private CompHackable hackableInt;
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CGetGizmos_003Ed__13 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CGetGizmos_003Ed__13(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x0400A197 RID: 41367
-		private GraphicData openGraphicData;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x0400A198 RID: 41368
-		public static CachedTexture SealHatchIcon = new CachedTexture("UI/Commands/SealHatch");
+	public TileMutatorWorker_Stockpile.StockpileType stockpileType;
 
-		// Token: 0x0400A199 RID: 41369
-		private const string OpenTexturePath = "Things/Building/AncientHatch/AncientHatch_Open";
+	public LayoutDef layout;
+
+	private CompHackable hackableInt;
+
+	private GraphicData openGraphicData;
+
+	private const string OpenTexturePath = "Things/Building/AncientHatch/AncientHatch_Open";
+
+	private CompHackable Hackable => hackableInt ?? (hackableInt = GetComp<CompHackable>());
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref stockpileType, "stockpileType", TileMutatorWorker_Stockpile.StockpileType.Medicine);
+		Scribe_Defs.Look(ref layout, "layout");
+	}
+
+	public override void SpawnSetup(Map map, bool respawningAfterLoad)
+	{
+		base.SpawnSetup(map, respawningAfterLoad);
+		openGraphicData = new GraphicData();
+		openGraphicData.CopyFrom(def.graphicData);
+		openGraphicData.texPath = "Things/Building/AncientHatch/AncientHatch_Open";
+	}
+
+	public override void Print(SectionLayer layer)
+	{
+		if (IsEnterable(out var _))
+		{
+			openGraphicData.Graphic.Print(layer, this, 0f);
+		}
+		else
+		{
+			Graphic.Print(layer, this, 0f);
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CGetExtraGenSteps_003Ed__10))]
+	protected override IEnumerable<GenStepWithParams> GetExtraGenSteps()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetExtraGenSteps_003Ed__10(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override bool IsEnterable(out string reason)
+	{
+		if (!Hackable.IsHacked)
+		{
+			reason = "Locked".Translate();
+			return false;
+		}
+		return base.IsEnterable(out reason);
+	}
+
+	public override string GetInspectString()
+	{
+		StringBuilder stringBuilder = new StringBuilder(base.GetInspectString());
+		if (Hackable.IsHacked)
+		{
+			stringBuilder.AppendLineIfNotEmpty();
+			stringBuilder.Append("HatchUnlocked".Translate());
+		}
+		return stringBuilder.ToString();
+	}
+
+	[IteratorStateMachine(typeof(_003CGetGizmos_003Ed__13))]
+	public override IEnumerable<Gizmo> GetGizmos()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetGizmos_003Ed__13(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

@@ -1,99 +1,225 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class GeneTemplateDef : Def
 {
-	// Token: 0x020018FB RID: 6395
-	public class GeneTemplateDef : Def
+	public enum GeneTemplateType
 	{
-		// Token: 0x06009158 RID: 37208 RVA: 0x002AC56E File Offset: 0x002AA76E
-		public override IEnumerable<string> ConfigErrors()
+		Skill,
+		Chemical
+	}
+
+	public class ChemicalBiostatOverride
+	{
+		public ChemicalDef chemical;
+
+		public int? biostatCpx;
+
+		public int? biostatMet;
+
+		public int? biostatArc;
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__17 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public GeneTemplateDef _003C_003E4__this;
+
+		private IEnumerator<string> _003C_003E7__wrap1;
+
+		string IEnumerator<string>.Current
 		{
-			foreach (string text in base.ConfigErrors())
+			[DebuggerHidden]
+			get
 			{
-				yield return text;
+				return _003C_003E2__current;
 			}
-			IEnumerator<string> enumerator = null;
-			if (!typeof(Gene).IsAssignableFrom(this.geneClass))
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
 			{
-				yield return "geneClass is not Gene or child thereof.";
+				return _003C_003E2__current;
 			}
-			yield break;
-			yield break;
 		}
 
-		// Token: 0x04005C7E RID: 23678
-		public Type geneClass = typeof(Gene);
-
-		// Token: 0x04005C7F RID: 23679
-		public int biostatCpx;
-
-		// Token: 0x04005C80 RID: 23680
-		public int biostatMet;
-
-		// Token: 0x04005C81 RID: 23681
-		public int aptitudeOffset;
-
-		// Token: 0x04005C82 RID: 23682
-		public float addictionChanceFactor = 1f;
-
-		// Token: 0x04005C83 RID: 23683
-		public PassionMod.PassionModType passionModType;
-
-		// Token: 0x04005C84 RID: 23684
-		public GeneTemplateDef.GeneTemplateType geneTemplateType;
-
-		// Token: 0x04005C85 RID: 23685
-		public float minAgeActive;
-
-		// Token: 0x04005C86 RID: 23686
-		public GeneCategoryDef displayCategory;
-
-		// Token: 0x04005C87 RID: 23687
-		public int displayOrderOffset;
-
-		// Token: 0x04005C88 RID: 23688
-		public float selectionWeight = 1f;
-
-		// Token: 0x04005C89 RID: 23689
-		public List<GeneTemplateDef.ChemicalBiostatOverride> chemicalBiostatOverrides;
-
-		// Token: 0x04005C8A RID: 23690
-		[MustTranslate]
-		public string labelShortAdj;
-
-		// Token: 0x04005C8B RID: 23691
-		[NoTranslate]
-		public string iconPath;
-
-		// Token: 0x04005C8C RID: 23692
-		[NoTranslate]
-		public string exclusionTagPrefix;
-
-		// Token: 0x020018FC RID: 6396
-		public enum GeneTemplateType
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__17(int _003C_003E1__state)
 		{
-			// Token: 0x04005C8E RID: 23694
-			Skill,
-			// Token: 0x04005C8F RID: 23695
-			Chemical
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x020018FD RID: 6397
-		public class ChemicalBiostatOverride
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			// Token: 0x04005C90 RID: 23696
-			public ChemicalDef chemical;
-
-			// Token: 0x04005C91 RID: 23697
-			public int? biostatCpx;
-
-			// Token: 0x04005C92 RID: 23698
-			public int? biostatMet;
-
-			// Token: 0x04005C93 RID: 23699
-			public int? biostatArc;
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				GeneTemplateDef geneTemplateDef = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((Def)geneTemplateDef).ConfigErrors().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_006f:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (!typeof(Gene).IsAssignableFrom(geneTemplateDef.geneClass))
+					{
+						_003C_003E2__current = "geneClass is not Gene or child thereof.";
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__17 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__17(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	public Type geneClass = typeof(Gene);
+
+	public int biostatCpx;
+
+	public int biostatMet;
+
+	public int aptitudeOffset;
+
+	public float addictionChanceFactor = 1f;
+
+	public PassionMod.PassionModType passionModType;
+
+	public GeneTemplateType geneTemplateType;
+
+	public float minAgeActive;
+
+	public GeneCategoryDef displayCategory;
+
+	public int displayOrderOffset;
+
+	public float selectionWeight = 1f;
+
+	public List<ChemicalBiostatOverride> chemicalBiostatOverrides;
+
+	[MustTranslate]
+	public string labelShortAdj;
+
+	[NoTranslate]
+	public string iconPath;
+
+	[NoTranslate]
+	public string exclusionTagPrefix;
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__17))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__17(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

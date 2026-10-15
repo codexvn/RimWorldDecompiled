@@ -1,71 +1,214 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class QuestPart_IsPrisoner : QuestPartActivable
 {
-	// Token: 0x02001BCF RID: 7119
-	public class QuestPart_IsPrisoner : QuestPartActivable
+	[CompilerGenerated]
+	private sealed class _003Cget_QuestLookTargets_003Ed__2 : IEnumerable<GlobalTargetInfo>, IEnumerable, IEnumerator<GlobalTargetInfo>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001856 RID: 6230
-		// (get) Token: 0x06009E80 RID: 40576 RVA: 0x002DD81F File Offset: 0x002DBA1F
-		public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+		private int _003C_003E1__state;
+
+		private GlobalTargetInfo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public QuestPart_IsPrisoner _003C_003E4__this;
+
+		private IEnumerator<GlobalTargetInfo> _003C_003E7__wrap1;
+
+		GlobalTargetInfo IEnumerator<GlobalTargetInfo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				foreach (GlobalTargetInfo globalTargetInfo in base.QuestLookTargets)
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003Cget_QuestLookTargets_003Ed__2(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
 				{
-					yield return globalTargetInfo;
 				}
-				IEnumerator<GlobalTargetInfo> enumerator = null;
-				if (this.pawn != null)
+				finally
 				{
-					yield return this.pawn;
+					_003C_003Em__Finally1();
 				}
-				yield break;
-				yield break;
 			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x06009E81 RID: 40577 RVA: 0x002DD82F File Offset: 0x002DBA2F
-		public override void QuestPartTick()
+		private bool MoveNext()
 		{
-			base.QuestPartTick();
-			if (this.pawn != null && this.pawn.IsPrisoner)
+			try
 			{
-				base.Complete(this.pawn.Named("SUBJECT"));
+				int num = _003C_003E1__state;
+				QuestPart_IsPrisoner questPart_IsPrisoner = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((QuestPart)questPart_IsPrisoner).QuestLookTargets.GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_006f:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						GlobalTargetInfo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (questPart_IsPrisoner.pawn != null)
+					{
+						_003C_003E2__current = questPart_IsPrisoner.pawn;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
+				}
+				return false;
 			}
-		}
-
-		// Token: 0x06009E82 RID: 40578 RVA: 0x002DD862 File Offset: 0x002DBA62
-		public override void ExposeData()
-		{
-			base.ExposeData();
-			Scribe_References.Look<Pawn>(ref this.pawn, "pawn", false);
-		}
-
-		// Token: 0x06009E83 RID: 40579 RVA: 0x002DD87B File Offset: 0x002DBA7B
-		public override void AssignDebugData()
-		{
-			base.AssignDebugData();
-			if (Find.AnyPlayerHomeMap != null)
+			catch
 			{
-				this.pawn = Find.RandomPlayerHomeMap.mapPawns.FreeColonists.FirstOrDefault<Pawn>();
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x06009E84 RID: 40580 RVA: 0x002DD8A4 File Offset: 0x002DBAA4
-		public override void ReplacePawnReferences(Pawn replace, Pawn with)
+		bool IEnumerator.MoveNext()
 		{
-			if (this.pawn == replace)
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				this.pawn = with;
+				_003C_003E7__wrap1.Dispose();
 			}
 		}
 
-		// Token: 0x04006DB9 RID: 28089
-		public Pawn pawn;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<GlobalTargetInfo> IEnumerable<GlobalTargetInfo>.GetEnumerator()
+		{
+			_003Cget_QuestLookTargets_003Ed__2 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_QuestLookTargets_003Ed__2(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<GlobalTargetInfo>)this).GetEnumerator();
+		}
+	}
+
+	public Pawn pawn;
+
+	public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+	{
+		[IteratorStateMachine(typeof(_003Cget_QuestLookTargets_003Ed__2))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_QuestLookTargets_003Ed__2(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public override void QuestPartTick()
+	{
+		base.QuestPartTick();
+		if (pawn != null && pawn.IsPrisoner)
+		{
+			Complete(pawn.Named("SUBJECT"));
+		}
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_References.Look(ref pawn, "pawn");
+	}
+
+	public override void AssignDebugData()
+	{
+		base.AssignDebugData();
+		if (Find.AnyPlayerHomeMap != null)
+		{
+			pawn = Find.RandomPlayerHomeMap.mapPawns.FreeColonists.FirstOrDefault();
+		}
+	}
+
+	public override void ReplacePawnReferences(Pawn replace, Pawn with)
+	{
+		if (pawn == replace)
+		{
+			pawn = with;
+		}
 	}
 }

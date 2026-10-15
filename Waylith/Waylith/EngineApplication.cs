@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
+using System.Runtime.Loader;
 using System.Threading;
 using Brutal;
 using Brutal.Collections;
@@ -169,6 +171,7 @@ public sealed class EngineApplication : IDisposable
 			Window = null;
 			return;
 		}
+		VulkanStartup.Prepare(Options);
 		if (Platform.IsMacOS)
 		{
 			setenv("MVK_CONFIG_USE_METAL_ARGUMENT_BUFFERS", "0", 1);
@@ -180,28 +183,9 @@ public sealed class EngineApplication : IDisposable
 			AddToPathVariable("VK_ADD_LAYER_PATH", Path.Combine(AppContext.BaseDirectory, "Resources", "vulkan", "explicit_layer.d"));
 			NativeLibrary.Load("vulkan.1", typeof(EngineApplication).Assembly, null);
 		}
-		if (Platform.IsLinux && !NativeLibrary.TryLoad("libvulkan.so", out var _))
+		if (Platform.IsLinux)
 		{
-			string path2 = Path.Combine(AppContext.BaseDirectory, "libvulkan.so");
-			if (!File.Exists(path2) && NativeLibrary.TryLoad("libvulkan.so.1", out var _))
-			{
-				string[] array = File.ReadAllLines("/proc/self/maps");
-				foreach (string text in array)
-				{
-					int num = text.IndexOf('/', StringComparison.Ordinal);
-					if (num > 0 && text.Substring(num).Contains("/libvulkan.so.1", StringComparison.Ordinal))
-					{
-						VerboseLog.Log("No libvulkan.so found on system. Creating symlink in working directory to " + text.Substring(num));
-						File.CreateSymbolicLink(path2, text.Substring(num));
-						string text2 = Path.Combine(AppContext.BaseDirectory, "runtimes/linux-x64/native/");
-						if (Directory.Exists(text2))
-						{
-							File.CreateSymbolicLink(Path.Combine(text2, "libvulkan.so"), text.Substring(num));
-						}
-						break;
-					}
-				}
-			}
+			AssemblyLoadContext.Default.ResolvingUnmanagedDll += (Assembly _, string name) => (!(name == "vulkan") || !NativeLibrary.TryLoad("libvulkan.so.1", out var handle)) ? IntPtr.Zero : handle;
 		}
 		try
 		{
@@ -238,7 +222,7 @@ public sealed class EngineApplication : IDisposable
 				}
 				else
 				{
-					RenderLog.Log.Warning("timeBeginPeriod(1) failed, target framerate may not work.", ".ctor", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\EngineApplication.cs", 238);
+					RenderLog.Log.Warning("timeBeginPeriod(1) failed, target framerate may not work.", ".ctor", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\EngineApplication.cs", 223);
 				}
 			}
 			Vulkan.EnumerateInstanceExtensionProperties_Count(default(ReadOnlySpan<byte>));
@@ -249,6 +233,7 @@ public sealed class EngineApplication : IDisposable
 			Glfw.WindowHint(GlfwWindowHint.ClientApi, 0);
 			Glfw.WindowHint((GlfwWindowHint)155649, Options.WaylandAppId);
 			Glfw.WindowHint(GlfwWindowHint.Visible, 0);
+			Glfw.WindowHint(GlfwWindowHint.AutoIconify, 0);
 			Glfw.WindowHint(GlfwWindowHint.Resizable, (!EngineWindow.SizeLocked) ? 1 : 0);
 			int2? initialWindowPosition = Options.InitialWindowPosition;
 			if (initialWindowPosition.HasValue)
@@ -272,7 +257,10 @@ public sealed class EngineApplication : IDisposable
 			EngineWindow.WindowPositionY = _windowedPosition.Y;
 			VerboseLog.Log("Window created.");
 			VerboseLog.Log("Creating Vulkan instance...");
+			VulkanStartup.VerifyBinding();
+			VulkanStartup.BeginInstanceCreation();
 			Instance instance = Waylith.Graphics.GraphicsDevice.CreateInstance(Options.Title, "Waylith", Options.DisallowFullscreenExclusive);
+			VulkanStartup.EndInstanceCreation();
 			VerboseLog.Log("Vulkan instance created.");
 			AudioBackend audioBackend2 = Options.AudioBackend;
 			if (audioBackend2 != null)
@@ -282,8 +270,10 @@ public sealed class EngineApplication : IDisposable
 				AudioBackend.Current = audioBackend2;
 			}
 			VerboseLog.Log("Creating Vulkan surface and graphics device...");
+			VulkanStartup.BeginInstanceCreation();
 			VkSurfaceKHR surface = CreateSurface(instance, Window);
 			GraphicsDevice = Waylith.Graphics.GraphicsDevice.Create(instance, surface, Options.FramesInFlight, new GpuPreference(Options.PreferredGpuName, Options.PreferredGpuUuid), Options.EnableVideoDecode, Options.DisallowFullscreenExclusive);
+			VulkanStartup.EndInstanceCreation();
 			VerboseLog.Log("Graphics device created.");
 			VerboseLog.Log("Creating window render context...");
 			RenderContext = new WindowRenderContext(GraphicsDevice, Window, surface, Options.ColorFormat, Options.DepthFormat, Options.PreferredPresentMode, Options.SampleCount, Options.FramesInFlight);
@@ -295,6 +285,13 @@ public sealed class EngineApplication : IDisposable
 			EngineWindow.WindowWidth = size2.X;
 			EngineWindow.WindowHeight = size2.Y;
 			EngineWindow.AvailableResolutions = EnumerateMonitorResolutions();
+			ReadOnlySpan<GlfwMonitor> monitors = Glfw.GetMonitors();
+			EngineWindow.MonitorNames = new string[monitors.Length];
+			for (int i = 0; i < monitors.Length; i++)
+			{
+				EngineWindow.MonitorNames[i] = monitors[i].Name ?? $"Monitor {i + 1}";
+			}
+			EngineWindow.PreferredMonitorChanged += OnPreferredMonitorChanged;
 			EngineWindow.VSyncModeChanged += delegate(VSyncMode mode)
 			{
 				RenderContext.SetVSyncMode(mode);
@@ -330,9 +327,16 @@ public sealed class EngineApplication : IDisposable
 				EngineWindow.Dpi = 96f * scale.Y;
 			}
 		}
-		catch
+		catch (Exception ex2)
 		{
-			Dispose();
+			try
+			{
+				Dispose();
+			}
+			catch (Exception ex)
+			{
+				VerboseLog.Log($"Cleanup after a failed engine construction threw: {ex.GetType().Name}: {ex.Message}. The original failure: {ex2.GetType().Name}: {ex2.Message}");
+			}
 			throw;
 		}
 		static void AddToPathVariable(string variable, string value)
@@ -552,7 +556,7 @@ public sealed class EngineApplication : IDisposable
 							message.AppendFormatted(num2 - valueOrDefault2, 0, "F1");
 							message.AppendLiteral(" s idle");
 						}
-						logCategory.Info(message, "RunLoop", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\EngineApplication.cs", 593);
+						logCategory.Info(message, "RunLoop", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\EngineApplication.cs", 597);
 					}
 					bool flag4 = !RenderContext.IsFramebufferMinimized() && (!Options.HideWindow || !IsWayland);
 					if (!flag4)
@@ -582,7 +586,7 @@ public sealed class EngineApplication : IDisposable
 								message.AppendFormatted((double)TextureResourceManager.PendingDisposalBytes / 1048576.0, 0, "F1");
 								message.AppendLiteral(" MiB of texture disposals pending");
 							}
-							logCategory2.Info(message, "RunLoop", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\EngineApplication.cs", 604);
+							logCategory2.Info(message, "RunLoop", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\EngineApplication.cs", 608);
 						}
 					}
 					if (flag4)
@@ -592,7 +596,12 @@ public sealed class EngineApplication : IDisposable
 						bool displayModeChangeRebuildRequested = _displayModeChangeRebuildRequested;
 						_displayModeChangeRebuildRequested = false;
 						bool flag6 = _renderThread.ConsumeResizeRequest() || RenderContext.HasFramebufferSizeMismatch() || displayModeChangeRebuildRequested;
-						if (flag5 || flag6)
+						if ((flag5 || flag6) && RenderContext.IsSurfaceExtentZero())
+						{
+							_renderThread.RequeueRebuild(flag5);
+							flag4 = false;
+						}
+						else if (flag5 || flag6)
 						{
 							using (FrameProfiler.Scope("RenderTargetRebuild"))
 							{
@@ -676,7 +685,7 @@ public sealed class EngineApplication : IDisposable
 		}
 		catch (Exception source)
 		{
-			RenderLog.Log.Error("!!!CRASH!!!", "RunLoop", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\EngineApplication.cs", 704);
+			RenderLog.Log.Error("!!!CRASH!!!", "RunLoop", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\EngineApplication.cs", 714);
 			exceptionDispatchInfo = ExceptionDispatchInfo.Capture(source);
 		}
 		finally
@@ -906,6 +915,63 @@ public sealed class EngineApplication : IDisposable
 		return Glfw.PrimaryMonitor;
 	}
 
+	private GlfwMonitor TargetMonitor()
+	{
+		GlfwMonitor monitor = Window.Monitor;
+		if (!monitor.IsNull())
+		{
+			return monitor;
+		}
+		if (IsWayland)
+		{
+			return Glfw.PrimaryMonitor;
+		}
+		ReadOnlySpan<GlfwMonitor> monitors = Glfw.GetMonitors();
+		GlfwMonitor result = Glfw.PrimaryMonitor;
+		long num = 0L;
+		for (int i = 0; i < monitors.Length; i++)
+		{
+			GlfwMonitor glfwMonitor = monitors[i];
+			int2 position = glfwMonitor.Position;
+			GlfwVidMode videoMode = glfwMonitor.VideoMode;
+			int num2 = System.Math.Min(_windowedPosition.X + _windowedSize.X, position.X + videoMode.Width) - System.Math.Max(_windowedPosition.X, position.X);
+			int num3 = System.Math.Min(_windowedPosition.Y + _windowedSize.Y, position.Y + videoMode.Height) - System.Math.Max(_windowedPosition.Y, position.Y);
+			if (num2 > 0 && num3 > 0)
+			{
+				long num4 = (long)num2 * (long)num3;
+				if (num4 > num)
+				{
+					num = num4;
+					result = glfwMonitor;
+				}
+			}
+		}
+		if (num <= 0)
+		{
+			return CurrentMonitor();
+		}
+		return result;
+	}
+
+	private GlfwMonitor ChosenMonitor()
+	{
+		ReadOnlySpan<GlfwMonitor> monitors = Glfw.GetMonitors();
+		int preferredMonitor = EngineWindow.PreferredMonitor;
+		if (preferredMonitor < 0 || preferredMonitor >= monitors.Length)
+		{
+			return TargetMonitor();
+		}
+		return monitors[preferredMonitor];
+	}
+
+	private void OnPreferredMonitorChanged(int index)
+	{
+		if (_windowShown && EngineWindow.DisplayMode != 0 && !_macNativeFullscreenActive)
+		{
+			SetDisplayMode(EngineWindow.DisplayMode);
+		}
+	}
+
 	private Resolution[] EnumerateMonitorResolutions()
 	{
 		GlfwMonitor glfwMonitor = CurrentMonitor();
@@ -937,14 +1003,15 @@ public sealed class EngineApplication : IDisposable
 			EngineWindow.AvailableResolutions = EnumerateMonitorResolutions();
 			return;
 		}
-		GlfwMonitor monitor = CurrentMonitor();
-		GlfwVidMode videoMode = monitor.VideoMode;
-		int2 position = monitor.Position;
 		if (EngineWindow.DisplayMode == DisplayMode.Windowed)
 		{
 			_windowedPosition = Window.Position;
 			_windowedSize = Window.Size;
 		}
+		GlfwMonitor monitor = ChosenMonitor();
+		GlfwVidMode videoMode = monitor.VideoMode;
+		int2 position = monitor.Position;
+		VerboseLog.Log($"Display mode {mode} (preferred monitor {EngineWindow.PreferredMonitor}): windowed rect {_windowedPosition.X},{_windowedPosition.Y} {_windowedSize.X}x{_windowedSize.Y} -> monitor '{monitor.Name}' at {position.X},{position.Y} {videoMode.Width}x{videoMode.Height}");
 		_applyingDisplayMode = true;
 		switch (mode)
 		{
@@ -969,7 +1036,7 @@ public sealed class EngineApplication : IDisposable
 			if (EngineWindow.DisplayMode == DisplayMode.ExclusiveFullscreen)
 			{
 				Window.SetWindowed(_windowedPosition, _windowedSize);
-				monitor = CurrentMonitor();
+				monitor = ChosenMonitor();
 				videoMode = monitor.VideoMode;
 				position = monitor.Position;
 			}
@@ -1194,10 +1261,7 @@ public sealed class EngineApplication : IDisposable
 	{
 		if (RenderContext.ConsumePresentModeChange())
 		{
-			_renderThread.WaitUntilIdle();
-			RenderContext.Rebuild();
-			FrameRenderer.NotifyRenderTargetRebuilt(RenderContext);
-			_renderThread.MarkRenderTargetRebuilt();
+			_displayModeChangeRebuildRequested = true;
 		}
 	}
 
@@ -1215,7 +1279,7 @@ public sealed class EngineApplication : IDisposable
 				message.AppendLiteral("): ");
 				message.AppendFormatted(description);
 			}
-			log.Error(message, "OnGlfwError", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\EngineApplication.cs", 1273);
+			log.Error(message, "OnGlfwError", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\EngineApplication.cs", 1328);
 		}
 	}
 

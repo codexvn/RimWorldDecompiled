@@ -1,161 +1,216 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompBiocodable : ThingComp
 {
-	// Token: 0x02002C0B RID: 11275
-	public class CompBiocodable : ThingComp
+	[CompilerGenerated]
+	private sealed class _003CSpecialDisplayStats_003Ed__21 : IEnumerable<StatDrawEntry>, IEnumerable, IEnumerator<StatDrawEntry>, IEnumerator, IDisposable
 	{
-		// Token: 0x170027B2 RID: 10162
-		// (get) Token: 0x0600FCA1 RID: 64673 RVA: 0x00494407 File Offset: 0x00492607
-		public bool Biocoded
+		private int _003C_003E1__state;
+
+		private StatDrawEntry _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompBiocodable _003C_003E4__this;
+
+		StatDrawEntry IEnumerator<StatDrawEntry>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.biocoded;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170027B3 RID: 10163
-		// (get) Token: 0x0600FCA2 RID: 64674 RVA: 0x0049440F File Offset: 0x0049260F
-		public Pawn CodedPawn
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.codedPawn;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170027B4 RID: 10164
-		// (get) Token: 0x0600FCA3 RID: 64675 RVA: 0x00494417 File Offset: 0x00492617
-		public string CodedPawnLabel
+		[DebuggerHidden]
+		public _003CSpecialDisplayStats_003Ed__21(int _003C_003E1__state)
 		{
-			get
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			CompBiocodable compBiocodable = _003C_003E4__this;
+			switch (num)
 			{
-				return this.codedPawnLabel;
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (compBiocodable.biocoded)
+				{
+					_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.BasicsNonPawn, "Stat_Thing_Biocoded_Name".Translate(), compBiocodable.codedPawnLabel, "Stat_Thing_Biocoded_Desc".Translate(), 1104);
+					_003C_003E1__state = 1;
+					return true;
+				}
+				break;
+			case 1:
+				_003C_003E1__state = -1;
+				break;
 			}
+			return false;
 		}
 
-		// Token: 0x170027B5 RID: 10165
-		// (get) Token: 0x0600FCA4 RID: 64676 RVA: 0x0049441F File Offset: 0x0049261F
-		public CompProperties_Biocodable Props
+		bool IEnumerator.MoveNext()
 		{
-			get
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<StatDrawEntry> IEnumerable<StatDrawEntry>.GetEnumerator()
+		{
+			_003CSpecialDisplayStats_003Ed__21 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				return (CompProperties_Biocodable)this.props;
+				_003C_003E1__state = 0;
+				result = this;
 			}
-		}
-
-		// Token: 0x170027B6 RID: 10166
-		// (get) Token: 0x0600FCA5 RID: 64677 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public virtual bool Biocodable
-		{
-			get
+			else
 			{
-				return true;
+				result = new _003CSpecialDisplayStats_003Ed__21(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
+			return result;
 		}
 
-		// Token: 0x0600FCA6 RID: 64678 RVA: 0x0049442C File Offset: 0x0049262C
-		public static bool IsBiocoded(Thing thing)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			CompBiocodable compBiocodable = thing.TryGetComp<CompBiocodable>();
-			return compBiocodable != null && compBiocodable.Biocoded;
+			return ((IEnumerable<StatDrawEntry>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x0600FCA7 RID: 64679 RVA: 0x0049444C File Offset: 0x0049264C
-		public static bool IsBiocodedFor(Thing thing, Pawn pawn)
+	protected bool biocoded;
+
+	protected string codedPawnLabel;
+
+	protected Pawn codedPawn;
+
+	public bool Biocoded => biocoded;
+
+	public Pawn CodedPawn => codedPawn;
+
+	public string CodedPawnLabel => codedPawnLabel;
+
+	public CompProperties_Biocodable Props => (CompProperties_Biocodable)props;
+
+	public virtual bool Biocodable => true;
+
+	public static bool IsBiocoded(Thing thing)
+	{
+		return thing.TryGetComp<CompBiocodable>()?.Biocoded ?? false;
+	}
+
+	public static bool IsBiocodedFor(Thing thing, Pawn pawn)
+	{
+		CompBiocodable compBiocodable = thing.TryGetComp<CompBiocodable>();
+		if (compBiocodable != null)
 		{
-			CompBiocodable compBiocodable = thing.TryGetComp<CompBiocodable>();
-			return compBiocodable != null && compBiocodable.CodedPawn == pawn;
+			return compBiocodable.CodedPawn == pawn;
 		}
+		return false;
+	}
 
-		// Token: 0x0600FCA8 RID: 64680 RVA: 0x0049446E File Offset: 0x0049266E
-		public virtual void CodeFor(Pawn p)
+	public virtual void CodeFor(Pawn p)
+	{
+		if (Biocodable)
 		{
-			if (!this.Biocodable)
-			{
-				return;
-			}
-			this.biocoded = true;
-			this.codedPawn = p;
-			this.codedPawnLabel = p.Name.ToStringFull;
-			this.OnCodedFor(p);
+			biocoded = true;
+			codedPawn = p;
+			codedPawnLabel = p.Name.ToStringFull;
+			OnCodedFor(p);
 		}
+	}
 
-		// Token: 0x0600FCA9 RID: 64681 RVA: 0x000026EA File Offset: 0x000008EA
-		protected virtual void OnCodedFor(Pawn p)
+	protected virtual void OnCodedFor(Pawn p)
+	{
+	}
+
+	public virtual void UnCode()
+	{
+		biocoded = false;
+		codedPawn = null;
+		codedPawnLabel = null;
+	}
+
+	public override void Notify_Equipped(Pawn pawn)
+	{
+		if (Biocodable && Props.biocodeOnEquip)
 		{
+			CodeFor(pawn);
 		}
+	}
 
-		// Token: 0x0600FCAA RID: 64682 RVA: 0x0049449F File Offset: 0x0049269F
-		public virtual void UnCode()
+	public override string TransformLabel(string label)
+	{
+		if (!biocoded)
 		{
-			this.biocoded = false;
-			this.codedPawn = null;
-			this.codedPawnLabel = null;
+			return label;
 		}
+		return "Biocoded".Translate(label, parent.def).Resolve();
+	}
 
-		// Token: 0x0600FCAB RID: 64683 RVA: 0x004944B6 File Offset: 0x004926B6
-		public override void Notify_Equipped(Pawn pawn)
+	public override string CompInspectStringExtra()
+	{
+		if (!biocoded)
 		{
-			if (this.Biocodable && this.Props.biocodeOnEquip)
-			{
-				this.CodeFor(pawn);
-			}
+			return string.Empty;
 		}
+		return "CodedFor".Translate(codedPawnLabel.ApplyTag(TagType.Name)).Resolve();
+	}
 
-		// Token: 0x0600FCAC RID: 64684 RVA: 0x004944D4 File Offset: 0x004926D4
-		public override string TransformLabel(string label)
+	[IteratorStateMachine(typeof(_003CSpecialDisplayStats_003Ed__21))]
+	public override IEnumerable<StatDrawEntry> SpecialDisplayStats()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CSpecialDisplayStats_003Ed__21(-2)
 		{
-			if (!this.biocoded)
-			{
-				return label;
-			}
-			return "Biocoded".Translate(label, this.parent.def).Resolve();
-		}
+			_003C_003E4__this = this
+		};
+	}
 
-		// Token: 0x0600FCAD RID: 64685 RVA: 0x00494514 File Offset: 0x00492714
-		public override string CompInspectStringExtra()
+	public override void PostExposeData()
+	{
+		base.PostExposeData();
+		Scribe_Values.Look(ref biocoded, "biocoded", defaultValue: false);
+		Scribe_Values.Look(ref codedPawnLabel, "biocodedPawnLabel");
+		if (Scribe.mode == LoadSaveMode.Saving && codedPawn != null && codedPawn.Discarded)
 		{
-			if (!this.biocoded)
-			{
-				return string.Empty;
-			}
-			return "CodedFor".Translate(this.codedPawnLabel.ApplyTag(TagType.Name, null)).Resolve();
+			codedPawn = null;
 		}
-
-		// Token: 0x0600FCAE RID: 64686 RVA: 0x00494553 File Offset: 0x00492753
-		public override IEnumerable<StatDrawEntry> SpecialDisplayStats()
-		{
-			if (this.biocoded)
-			{
-				yield return new StatDrawEntry(StatCategoryDefOf.BasicsNonPawn, "Stat_Thing_Biocoded_Name".Translate(), this.codedPawnLabel, "Stat_Thing_Biocoded_Desc".Translate(), 1104, null, null, false, false);
-			}
-			yield break;
-		}
-
-		// Token: 0x0600FCAF RID: 64687 RVA: 0x00494564 File Offset: 0x00492764
-		public override void PostExposeData()
-		{
-			base.PostExposeData();
-			Scribe_Values.Look<bool>(ref this.biocoded, "biocoded", false, false);
-			Scribe_Values.Look<string>(ref this.codedPawnLabel, "biocodedPawnLabel", null, false);
-			if (Scribe.mode == LoadSaveMode.Saving && this.codedPawn != null && this.codedPawn.Discarded)
-			{
-				this.codedPawn = null;
-			}
-			Scribe_References.Look<Pawn>(ref this.codedPawn, "codedPawn", true);
-		}
-
-		// Token: 0x0400A597 RID: 42391
-		protected bool biocoded;
-
-		// Token: 0x0400A598 RID: 42392
-		protected string codedPawnLabel;
-
-		// Token: 0x0400A599 RID: 42393
-		protected Pawn codedPawn;
+		Scribe_References.Look(ref codedPawn, "codedPawn", saveDestroyedThings: true);
 	}
 }

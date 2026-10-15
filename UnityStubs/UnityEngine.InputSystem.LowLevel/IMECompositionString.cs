@@ -1,22 +1,38 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using UnityStubs.Internal;
 
 namespace UnityEngine.InputSystem.LowLevel;
 
-[StructLayout(LayoutKind.Sequential, Size = 1)]
 public struct IMECompositionString : IEnumerable<char>, IEnumerable
 {
+	private readonly string characters;
+
+	public int Count => characters?.Length ?? 0;
+
+	public char this[int index] => characters[index];
+
+	public IMECompositionString(string characters)
+	{
+		this.characters = characters ?? "";
+	}
+
+	public override string ToString()
+	{
+		return characters ?? "";
+	}
+
+	public static implicit operator string(IMECompositionString s)
+	{
+		return s.ToString();
+	}
+
 	public IEnumerator<char> GetEnumerator()
 	{
-		StubWarner.LogStub("GetEnumerator", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\IMECompositionString.cs", 5);
-		return null;
+		return ((IEnumerable<char>)(characters ?? "")).GetEnumerator();
 	}
 
 	IEnumerator IEnumerable.GetEnumerator()
 	{
-		StubWarner.LogStub("GetEnumerator", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\IMECompositionString.cs", 6);
-		return null;
+		return GetEnumerator();
 	}
 }

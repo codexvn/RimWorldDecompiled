@@ -1,72 +1,160 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+[StaticConstructorOnStartup]
+public class CompPlantPreventCutting : ThingComp
 {
-	// Token: 0x02002DAB RID: 11691
-	[StaticConstructorOnStartup]
-	public class CompPlantPreventCutting : ThingComp
+	[CompilerGenerated]
+	private sealed class _003CCompGetGizmosExtra_003Ed__8 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x170029E6 RID: 10726
-		// (get) Token: 0x06010700 RID: 67328 RVA: 0x004BE3A1 File Offset: 0x004BC5A1
-		public CompProperties_PlantPreventCutting Props
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompPlantPreventCutting _003C_003E4__this;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (CompProperties_PlantPreventCutting)this.props;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170029E7 RID: 10727
-		// (get) Token: 0x06010701 RID: 67329 RVA: 0x004BE3AE File Offset: 0x004BC5AE
-		// (set) Token: 0x06010702 RID: 67330 RVA: 0x004BE3B8 File Offset: 0x004BC5B8
-		public bool PreventCutting
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.preventCutting;
-			}
-			set
-			{
-				this.preventCutting = value;
-				if (!this.preventCutting)
-				{
-					return;
-				}
-				this.parent.Map.designationManager.TryRemoveDesignationOn(this.parent, DesignationDefOf.CutPlant);
-				this.parent.Map.designationManager.TryRemoveDesignationOn(this.parent, DesignationDefOf.HarvestPlant);
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06010703 RID: 67331 RVA: 0x004BE415 File Offset: 0x004BC615
-		public override void PostExposeData()
+		[DebuggerHidden]
+		public _003CCompGetGizmosExtra_003Ed__8(int _003C_003E1__state)
 		{
-			Scribe_Values.Look<bool>(ref this.preventCutting, "canCut", false, false);
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x06010704 RID: 67332 RVA: 0x004BE429 File Offset: 0x004BC629
-		public override IEnumerable<Gizmo> CompGetGizmosExtra()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			yield return new Command_Toggle
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			CompPlantPreventCutting CS_0024_003C_003E8__locals3 = _003C_003E4__this;
+			switch (num)
 			{
-				defaultLabel = "PreventCutting".Translate(),
-				defaultDesc = "PreventCuttingDesc".Translate(),
-				toggleAction = delegate()
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = new Command_Toggle
 				{
-					this.PreventCutting = !this.preventCutting;
-				},
-				isActive = (() => this.preventCutting),
-				icon = CompPlantPreventCutting.IconTexture
-			};
-			yield break;
+					defaultLabel = "PreventCutting".Translate(),
+					defaultDesc = "PreventCuttingDesc".Translate(),
+					toggleAction = delegate
+					{
+						CS_0024_003C_003E8__locals3.PreventCutting = !CS_0024_003C_003E8__locals3.preventCutting;
+					},
+					isActive = () => CS_0024_003C_003E8__locals3.preventCutting,
+					icon = IconTexture
+				};
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				return false;
+			}
 		}
 
-		// Token: 0x0400AB79 RID: 43897
-		private bool preventCutting = true;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x0400AB7A RID: 43898
-		private static readonly Texture2D IconTexture = ContentFinder<Texture2D>.Get("UI/Designators/PreventCutting", true);
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CCompGetGizmosExtra_003Ed__8 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CCompGetGizmosExtra_003Ed__8(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	private bool preventCutting = true;
+
+	private static readonly Texture2D IconTexture = ContentFinder<Texture2D>.Get("UI/Designators/PreventCutting");
+
+	public CompProperties_PlantPreventCutting Props => (CompProperties_PlantPreventCutting)props;
+
+	public bool PreventCutting
+	{
+		get
+		{
+			return preventCutting;
+		}
+		set
+		{
+			preventCutting = value;
+			if (preventCutting)
+			{
+				parent.Map.designationManager.TryRemoveDesignationOn(parent, DesignationDefOf.CutPlant);
+				parent.Map.designationManager.TryRemoveDesignationOn(parent, DesignationDefOf.HarvestPlant);
+			}
+		}
+	}
+
+	public override void PostExposeData()
+	{
+		Scribe_Values.Look(ref preventCutting, "canCut", defaultValue: false);
+	}
+
+	[IteratorStateMachine(typeof(_003CCompGetGizmosExtra_003Ed__8))]
+	public override IEnumerable<Gizmo> CompGetGizmosExtra()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CCompGetGizmosExtra_003Ed__8(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

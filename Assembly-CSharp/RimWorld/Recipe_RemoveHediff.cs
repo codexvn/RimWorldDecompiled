@@ -1,98 +1,199 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Recipe_RemoveHediff : Recipe_Surgery
 {
-	// Token: 0x02002315 RID: 8981
-	public class Recipe_RemoveHediff : Recipe_Surgery
+	[CompilerGenerated]
+	private sealed class _003CGetPartsToApplyOn_003Ed__1 : IEnumerable<BodyPartRecord>, IEnumerable, IEnumerator<BodyPartRecord>, IEnumerator, IDisposable
 	{
-		// Token: 0x0600C307 RID: 49927 RVA: 0x003889C4 File Offset: 0x00386BC4
-		public override bool AvailableOnNow(Thing thing, BodyPartRecord part = null)
+		private int _003C_003E1__state;
+
+		private BodyPartRecord _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private Pawn pawn;
+
+		public Pawn _003C_003E3__pawn;
+
+		private RecipeDef recipe;
+
+		public RecipeDef _003C_003E3__recipe;
+
+		private List<Hediff> _003CallHediffs_003E5__2;
+
+		private int _003Ci_003E5__3;
+
+		BodyPartRecord IEnumerator<BodyPartRecord>.Current
 		{
-			if (!base.AvailableOnNow(thing, part))
+			[DebuggerHidden]
+			get
 			{
-				return false;
+				return _003C_003E2__current;
 			}
-			Pawn pawn = thing as Pawn;
-			if (pawn == null)
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
 			{
-				return false;
+				return _003C_003E2__current;
 			}
-			List<Hediff> hediffs = pawn.health.hediffSet.hediffs;
-			for (int i = 0; i < hediffs.Count; i++)
+		}
+
+		[DebuggerHidden]
+		public _003CGetPartsToApplyOn_003Ed__1(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003CallHediffs_003E5__2 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			if (num != 0)
 			{
-				if ((!this.recipe.targetsBodyPart || hediffs[i].Part != null) && hediffs[i].def == this.recipe.removesHediff && hediffs[i].Visible)
+				if (num != 1)
 				{
+					return false;
+				}
+				_003C_003E1__state = -1;
+				goto IL_00c0;
+			}
+			_003C_003E1__state = -1;
+			_003CallHediffs_003E5__2 = pawn.health.hediffSet.hediffs;
+			_003Ci_003E5__3 = 0;
+			goto IL_00d0;
+			IL_00c0:
+			_003Ci_003E5__3++;
+			goto IL_00d0;
+			IL_00d0:
+			if (_003Ci_003E5__3 < _003CallHediffs_003E5__2.Count)
+			{
+				if (_003CallHediffs_003E5__2[_003Ci_003E5__3].Part != null && _003CallHediffs_003E5__2[_003Ci_003E5__3].def == recipe.removesHediff && _003CallHediffs_003E5__2[_003Ci_003E5__3].Visible)
+				{
+					_003C_003E2__current = _003CallHediffs_003E5__2[_003Ci_003E5__3].Part;
+					_003C_003E1__state = 1;
 					return true;
 				}
+				goto IL_00c0;
 			}
 			return false;
 		}
 
-		// Token: 0x0600C308 RID: 49928 RVA: 0x00388A50 File Offset: 0x00386C50
-		public override IEnumerable<BodyPartRecord> GetPartsToApplyOn(Pawn pawn, RecipeDef recipe)
+		bool IEnumerator.MoveNext()
 		{
-			List<Hediff> allHediffs = pawn.health.hediffSet.hediffs;
-			int num;
-			for (int i = 0; i < allHediffs.Count; i = num + 1)
-			{
-				if (allHediffs[i].Part != null && allHediffs[i].def == recipe.removesHediff && allHediffs[i].Visible)
-				{
-					yield return allHediffs[i].Part;
-				}
-				num = i;
-			}
-			yield break;
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0600C309 RID: 49929 RVA: 0x00388A68 File Offset: 0x00386C68
-		public override void ApplyOnPawn(Pawn pawn, BodyPartRecord part, Pawn billDoer, List<Thing> ingredients, Bill bill)
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			if (billDoer != null)
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<BodyPartRecord> IEnumerable<BodyPartRecord>.GetEnumerator()
+		{
+			_003CGetPartsToApplyOn_003Ed__1 _003CGetPartsToApplyOn_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				if (base.CheckSurgeryFail(billDoer, pawn, ingredients, part, bill))
-				{
-					return;
-				}
-				TaleRecorder.RecordTale(TaleDefOf.DidSurgery, new object[]
-				{
-					billDoer,
-					pawn
-				});
-				if (PawnUtility.ShouldSendNotificationAbout(pawn) || PawnUtility.ShouldSendNotificationAbout(billDoer))
-				{
-					string text;
-					if (!this.recipe.successfullyRemovedHediffMessage.NullOrEmpty())
-					{
-						text = this.recipe.successfullyRemovedHediffMessage.Formatted(billDoer.LabelShort, pawn.LabelShort);
-					}
-					else
-					{
-						text = "MessageSuccessfullyRemovedHediff".Translate(billDoer.LabelShort, pawn.LabelShort, this.recipe.removesHediff.label.Named("HEDIFF"), billDoer.Named("SURGEON"), pawn.Named("PATIENT"));
-					}
-					Messages.Message(text, pawn, MessageTypeDefOf.PositiveEvent, true);
-				}
-			}
-			if (this.recipe.targetsBodyPart)
-			{
-				Hediff hediff = pawn.health.hediffSet.hediffs.Find((Hediff x) => x.def == this.recipe.removesHediff && x.Part == part && x.Visible);
-				if (hediff != null)
-				{
-					pawn.health.RemoveHediff(hediff);
-					return;
-				}
+				_003C_003E1__state = 0;
+				_003CGetPartsToApplyOn_003Ed__ = this;
 			}
 			else
 			{
-				for (int i = pawn.health.hediffSet.hediffs.Count - 1; i >= 0; i--)
-				{
-					Hediff hediff2 = pawn.health.hediffSet.hediffs[i];
-					if (hediff2.def == this.recipe.removesHediff && hediff2.Visible)
-					{
-						pawn.health.RemoveHediff(hediff2);
-					}
-				}
+				_003CGetPartsToApplyOn_003Ed__ = new _003CGetPartsToApplyOn_003Ed__1(0);
+			}
+			_003CGetPartsToApplyOn_003Ed__.pawn = _003C_003E3__pawn;
+			_003CGetPartsToApplyOn_003Ed__.recipe = _003C_003E3__recipe;
+			return _003CGetPartsToApplyOn_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<BodyPartRecord>)this).GetEnumerator();
+		}
+	}
+
+	public override bool AvailableOnNow(Thing thing, BodyPartRecord part = null)
+	{
+		if (!base.AvailableOnNow(thing, part))
+		{
+			return false;
+		}
+		if (!(thing is Pawn pawn))
+		{
+			return false;
+		}
+		List<Hediff> hediffs = pawn.health.hediffSet.hediffs;
+		for (int i = 0; i < hediffs.Count; i++)
+		{
+			if ((!recipe.targetsBodyPart || hediffs[i].Part != null) && hediffs[i].def == recipe.removesHediff && hediffs[i].Visible)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	[IteratorStateMachine(typeof(_003CGetPartsToApplyOn_003Ed__1))]
+	public override IEnumerable<BodyPartRecord> GetPartsToApplyOn(Pawn pawn, RecipeDef recipe)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetPartsToApplyOn_003Ed__1(-2)
+		{
+			_003C_003E3__pawn = pawn,
+			_003C_003E3__recipe = recipe
+		};
+	}
+
+	public override void ApplyOnPawn(Pawn pawn, BodyPartRecord part, Pawn billDoer, List<Thing> ingredients, Bill bill)
+	{
+		if (billDoer != null)
+		{
+			if (CheckSurgeryFail(billDoer, pawn, ingredients, part, bill))
+			{
+				return;
+			}
+			TaleRecorder.RecordTale(TaleDefOf.DidSurgery, billDoer, pawn);
+			if (PawnUtility.ShouldSendNotificationAbout(pawn) || PawnUtility.ShouldSendNotificationAbout(billDoer))
+			{
+				string text = (recipe.successfullyRemovedHediffMessage.NullOrEmpty() ? ((string)"MessageSuccessfullyRemovedHediff".Translate(billDoer.LabelShort, pawn.LabelShort, recipe.removesHediff.label.Named("HEDIFF"), billDoer.Named("SURGEON"), pawn.Named("PATIENT"))) : ((string)recipe.successfullyRemovedHediffMessage.Formatted(billDoer.LabelShort, pawn.LabelShort)));
+				Messages.Message(text, pawn, MessageTypeDefOf.PositiveEvent);
+			}
+		}
+		if (recipe.targetsBodyPart)
+		{
+			Hediff hediff = pawn.health.hediffSet.hediffs.Find((Hediff x) => x.def == recipe.removesHediff && x.Part == part && x.Visible);
+			if (hediff != null)
+			{
+				pawn.health.RemoveHediff(hediff);
+			}
+			return;
+		}
+		for (int num = pawn.health.hediffSet.hediffs.Count - 1; num >= 0; num--)
+		{
+			Hediff hediff2 = pawn.health.hediffSet.hediffs[num];
+			if (hediff2.def == recipe.removesHediff && hediff2.Visible)
+			{
+				pawn.health.RemoveHediff(hediff2);
 			}
 		}
 	}

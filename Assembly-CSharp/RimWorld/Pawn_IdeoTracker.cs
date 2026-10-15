@@ -1,555 +1,425 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Pawn_IdeoTracker : IExposable
 {
-	// Token: 0x020024C1 RID: 9409
-	public class Pawn_IdeoTracker : IExposable
+	public class IdeoExposureWeight : IExposable, IComparable<IdeoExposureWeight>
 	{
-		// Token: 0x17001F45 RID: 8005
-		// (get) Token: 0x0600CCC6 RID: 52422 RVA: 0x003C0BFF File Offset: 0x003BEDFF
-		public Ideo Ideo
-		{
-			get
-			{
-				return this.ideo;
-			}
-		}
+		public Ideo ideo;
 
-		// Token: 0x17001F46 RID: 8006
-		// (get) Token: 0x0600CCC7 RID: 52423 RVA: 0x003C0C07 File Offset: 0x003BEE07
-		public List<Ideo> PreviousIdeos
-		{
-			get
-			{
-				return this.previousIdeos;
-			}
-		}
+		public float exposure;
 
-		// Token: 0x17001F47 RID: 8007
-		// (get) Token: 0x0600CCC8 RID: 52424 RVA: 0x003C0C0F File Offset: 0x003BEE0F
-		// (set) Token: 0x0600CCC9 RID: 52425 RVA: 0x003C0C34 File Offset: 0x003BEE34
-		public float Certainty
-		{
-			get
-			{
-				if (this.pawn.DevelopmentalStage.Baby())
-				{
-					this.certaintyInt = 0f;
-				}
-				return this.certaintyInt;
-			}
-			private set
-			{
-				if (this.pawn.DevelopmentalStage.Baby())
-				{
-					this.certaintyInt = 0f;
-				}
-				else
-				{
-					this.certaintyInt = value;
-				}
-				this.certaintyInt = Mathf.Clamp01(this.certaintyInt);
-			}
-		}
-
-		// Token: 0x17001F48 RID: 8008
-		// (get) Token: 0x0600CCCA RID: 52426 RVA: 0x003C0C70 File Offset: 0x003BEE70
-		private float CertaintyChangeFactor
-		{
-			get
-			{
-				if (!ModsConfig.BiotechActive)
-				{
-					return 1f;
-				}
-				if (Pawn_IdeoTracker.pawnAgeCertaintyCurve == null)
-				{
-					Pawn_IdeoTracker.pawnAgeCertaintyCurve = new SimpleCurve
-					{
-						{
-							new CurvePoint(this.pawn.ageTracker.LifeStageMinAge(LifeStageDefOf.HumanlikeChild), 2f),
-							true
-						},
-						{
-							new CurvePoint(this.pawn.ageTracker.LifeStageMinAge(LifeStageDefOf.HumanlikeAdult), 1f),
-							true
-						}
-					};
-				}
-				return Pawn_IdeoTracker.pawnAgeCertaintyCurve.Evaluate(this.pawn.ageTracker.AgeBiologicalYearsFloat);
-			}
-		}
-
-		// Token: 0x17001F49 RID: 8009
-		// (get) Token: 0x0600CCCB RID: 52427 RVA: 0x003C0D01 File Offset: 0x003BEF01
-		public float CertaintyChangePerDay
-		{
-			get
-			{
-				if (this.pawn.needs.mood != null)
-				{
-					return ConversionTuning.CertaintyPerDayByMoodCurve.Evaluate(this.pawn.needs.mood.CurLevelPercentage);
-				}
-				return 0f;
-			}
-		}
-
-		// Token: 0x17001F4A RID: 8010
-		// (get) Token: 0x0600CCCC RID: 52428 RVA: 0x003C0D3A File Offset: 0x003BEF3A
-		public List<Pawn_IdeoTracker.IdeoExposureWeight> BabyIdeoExposureSorted
-		{
-			get
-			{
-				if (!this.IsBabyIdeoExposureSorted())
-				{
-					this.babyIdeoExposure.Sort();
-					this.isIdeoExposureSortDirty = false;
-				}
-				return this.babyIdeoExposure;
-			}
-		}
-
-		// Token: 0x17001F4B RID: 8011
-		// (get) Token: 0x0600CCCD RID: 52429 RVA: 0x003C0D5C File Offset: 0x003BEF5C
-		public float BabyIdeoExposureTotal
-		{
-			get
-			{
-				if (this.babyIdeoExposure.NullOrEmpty<Pawn_IdeoTracker.IdeoExposureWeight>())
-				{
-					return 0f;
-				}
-				float num = 0f;
-				foreach (Pawn_IdeoTracker.IdeoExposureWeight ideoExposureWeight in this.babyIdeoExposure)
-				{
-					num += ideoExposureWeight.exposure;
-				}
-				return num;
-			}
-		}
-
-		// Token: 0x0600CCCE RID: 52430 RVA: 0x003C0DCC File Offset: 0x003BEFCC
-		public Pawn_IdeoTracker(Pawn pawn)
-		{
-			this.pawn = pawn;
-			this.previousIdeos = new List<Ideo>();
-		}
-
-		// Token: 0x0600CCCF RID: 52431 RVA: 0x003C0DED File Offset: 0x003BEFED
-		public Pawn_IdeoTracker()
+		public IdeoExposureWeight()
 		{
 		}
 
-		// Token: 0x0600CCD0 RID: 52432 RVA: 0x003C0DFC File Offset: 0x003BEFFC
-		private float ApplyCertaintyChangeFactor(float certaintyOffset)
+		public IdeoExposureWeight(Ideo ideo, float exposure)
 		{
-			if (certaintyOffset <= 0f)
-			{
-				return certaintyOffset * this.CertaintyChangeFactor;
-			}
-			return certaintyOffset / this.CertaintyChangeFactor;
-		}
-
-		// Token: 0x0600CCD1 RID: 52433 RVA: 0x003C0E18 File Offset: 0x003BF018
-		public void IdeoTrackerTickInterval(int delta)
-		{
-			if (!this.pawn.Destroyed && !this.pawn.InMentalState && this.ideo != null && !Find.IdeoManager.classicMode && !this.pawn.Deathresting)
-			{
-				this.Certainty += this.ApplyCertaintyChangeFactor(this.CertaintyChangePerDay / 60000f) * (float)delta;
-			}
-			if (this.ideo != null && this.ideo.currentCacheId != this.lastCacheId)
-			{
-				this.lastCacheId = this.ideo.currentCacheId;
-				this.RecacheIdeoComponents();
-			}
-		}
-
-		// Token: 0x0600CCD2 RID: 52434 RVA: 0x003C0EB4 File Offset: 0x003BF0B4
-		public void SetIdeo(Ideo ideo)
-		{
-			if (this.ideo == ideo || this.pawn.DevelopmentalStage.Baby())
-			{
-				return;
-			}
-			if (this.ideo != null)
-			{
-				Find.HistoryEventsManager.RecordEvent(new HistoryEvent(HistoryEventDefOf.ChangedIdeo, this.pawn.Named(HistoryEventArgsNames.Doer)), true);
-			}
-			if (this.previousIdeos.Contains(ideo))
-			{
-				this.previousIdeos.Remove(ideo);
-			}
-			if (this.ideo != null)
-			{
-				this.previousIdeos.Add(this.ideo);
-			}
-			Ideo ideo2 = this.ideo;
-			if (this.pawn.Faction != null && this.pawn.Faction.IsPlayer)
-			{
-				Ideo ideo3 = this.ideo;
-				if (ideo3 != null)
-				{
-					ideo3.Notify_MemberLost(this.pawn, this.pawn.Map);
-				}
-				Ideo ideo4 = this.ideo;
-				if (ideo4 != null)
-				{
-					ideo4.RecacheColonistBelieverCount();
-				}
-			}
 			this.ideo = ideo;
-			this.Certainty = Mathf.Clamp01(ConversionTuning.InitialCertaintyRange.RandomInRange);
-			if (this.pawn.Faction != null && this.pawn.Faction.IsPlayer)
-			{
-				this.pawn.Faction.ideos.Notify_ColonistChangedIdeo();
-				if (ideo2 != null)
-				{
-					ideo2.RecacheColonistBelieverCount();
-				}
-				Ideo ideo5 = this.ideo;
-				if (ideo5 != null)
-				{
-					ideo5.RecacheColonistBelieverCount();
-				}
-			}
-			Ideo ideo6 = this.ideo;
-			if (ideo6 != null)
-			{
-				ideo6.Notify_MemberGained(this.pawn);
-			}
-			if (this.pawn.ownership.OwnedBed != null && this.pawn.ownership.OwnedBed.CompAssignableToPawn.IdeoligionForbids(this.pawn))
-			{
-				this.pawn.ownership.UnclaimBed();
-			}
-			SpouseRelationUtility.RemoveSpousesAsForbiddenByIdeo(this.pawn);
-			if (ideo != null && !ideo.MemberWillingToDo(new HistoryEvent(HistoryEventDefOf.Bonded)))
-			{
-				List<Pawn> list = new List<Pawn>();
-				List<DirectPawnRelation> directRelations = this.pawn.relations.DirectRelations;
-				for (int i = directRelations.Count - 1; i >= 0; i--)
-				{
-					DirectPawnRelation directPawnRelation = directRelations[i];
-					if (directPawnRelation.def == PawnRelationDefOf.Bond)
-					{
-						list.Add(directPawnRelation.otherPawn);
-						this.pawn.relations.RemoveDirectRelation(directPawnRelation);
-					}
-				}
-				if (list.Count > 0)
-				{
-					Find.LetterStack.ReceiveLetter("LetterBondRemoved".Translate(), "LetterBondRemovedDesc".Translate(ideo.Named("IDEO"), this.pawn.Named("PAWN"), (from b in list
-					select b.LabelCap).ToLineList(null, false).Named("BONDS")), LetterDefOf.NeutralEvent, new LookTargets(list.Concat(new Pawn[]
-					{
-						this.pawn
-					})), null, null, null, null, 0, true);
-				}
-			}
-			this.joinTick = Find.TickManager.TicksGame;
-			this.RecacheIdeoComponents();
-			Pawn_AgeTracker ageTracker = this.pawn.ageTracker;
-			if (ageTracker == null)
-			{
-				return;
-			}
-			ageTracker.Notify_IdeoChanged();
+			this.exposure = exposure;
 		}
 
-		// Token: 0x0600CCD3 RID: 52435 RVA: 0x003C11BC File Offset: 0x003BF3BC
-		private void RecacheIdeoComponents()
+		public int CompareTo(IdeoExposureWeight other)
 		{
-			Pawn_NeedsTracker needs = this.pawn.needs;
-			if (needs != null)
-			{
-				Need_Mood mood = needs.mood;
-				if (mood != null)
-				{
-					mood.thoughts.situational.Notify_SituationalThoughtsDirty();
-				}
-			}
-			Pawn_NeedsTracker needs2 = this.pawn.needs;
-			if (needs2 != null)
-			{
-				needs2.AddOrRemoveNeedsAsAppropriate();
-			}
-			Pawn_ApparelTracker apparel = this.pawn.apparel;
-			if (apparel != null)
-			{
-				apparel.Notify_IdeoChanged();
-			}
-			Pawn_AbilityTracker abilities = this.pawn.abilities;
-			if (abilities == null)
-			{
-				return;
-			}
-			abilities.Notify_TemporaryAbilitiesChanged();
+			return other.exposure.CompareTo(exposure);
 		}
 
-		// Token: 0x0600CCD4 RID: 52436 RVA: 0x003C1238 File Offset: 0x003BF438
-		public bool IdeoConversionAttempt(float certaintyReduction, Ideo initiatorIdeo, bool applyCertaintyFactor = true)
+		public void ExposeData()
 		{
-			if (!ModLister.CheckIdeology("Ideoligion conversion") || this.pawn.DevelopmentalStage.Baby())
-			{
-				return false;
-			}
-			if (Find.IdeoManager.classicMode)
-			{
-				return false;
-			}
-			float num = Mathf.Clamp01(this.Certainty + (applyCertaintyFactor ? this.ApplyCertaintyChangeFactor(-certaintyReduction) : (-certaintyReduction)));
-			if (this.pawn.Spawned)
-			{
-				string text = "Certainty".Translate() + "\n" + this.Certainty.ToStringPercent() + " -> " + num.ToStringPercent();
-				MoteMaker.ThrowText(this.pawn.DrawPos, this.pawn.Map, text, 8f);
-			}
-			this.Certainty = num;
-			if (this.Certainty <= 0f)
-			{
-				bool flag = this.PreviousIdeos.Contains(initiatorIdeo);
-				this.SetIdeo(initiatorIdeo);
-				this.Certainty = 0.5f;
-				initiatorIdeo.Notify_MemberGainedByConversion();
-				if (!flag)
-				{
-					Find.HistoryEventsManager.RecordEvent(new HistoryEvent(HistoryEventDefOf.ConvertedNewMember, this.pawn.Named(HistoryEventArgsNames.Doer), initiatorIdeo.Named(HistoryEventArgsNames.Ideo)), true);
-				}
-				return true;
-			}
-			return false;
+			Scribe_References.Look(ref ideo, "ideo");
+			Scribe_Values.Look(ref exposure, "exposure", 0f);
 		}
+	}
 
-		// Token: 0x0600CCD5 RID: 52437 RVA: 0x003C1369 File Offset: 0x003BF569
-		public void IncreaseIdeoExposureIfBabyTick(Ideo ideo, int ticks = 1)
+	private Pawn pawn;
+
+	public int joinTick;
+
+	private Ideo ideo;
+
+	private List<Ideo> previousIdeos;
+
+	private float certaintyInt;
+
+	private List<IdeoExposureWeight> babyIdeoExposure;
+
+	private bool isIdeoExposureSortDirty = true;
+
+	private int lastCacheId;
+
+	private const float ExposurePointsPerHour = 1f;
+
+	public const float ExposurePointsPerTick = 0.0004f;
+
+	private static SimpleCurve pawnAgeCertaintyCurve;
+
+	public Ideo Ideo => ideo;
+
+	public List<Ideo> PreviousIdeos => previousIdeos;
+
+	public float Certainty
+	{
+		get
 		{
-			this.IncreaseIdeoExposureIfBaby(ideo, (float)ticks * 0.0004f);
+			if (pawn.DevelopmentalStage.Baby())
+			{
+				certaintyInt = 0f;
+			}
+			return certaintyInt;
 		}
-
-		// Token: 0x0600CCD6 RID: 52438 RVA: 0x003C137C File Offset: 0x003BF57C
-		public void IncreaseIdeoExposureIfBaby(Ideo ideo, float exposure)
+		private set
 		{
-			if (!ModsConfig.BiotechActive || !ModsConfig.IdeologyActive || ideo == null || Find.IdeoManager.classicMode || !this.pawn.DevelopmentalStage.Baby())
+			if (pawn.DevelopmentalStage.Baby())
 			{
-				return;
-			}
-			if (ModsConfig.AnomalyActive && ideo == Find.IdeoManager.Horaxian)
-			{
-				return;
-			}
-			if (this.babyIdeoExposure == null)
-			{
-				this.babyIdeoExposure = new List<Pawn_IdeoTracker.IdeoExposureWeight>();
-			}
-			this.isIdeoExposureSortDirty = true;
-			foreach (Pawn_IdeoTracker.IdeoExposureWeight ideoExposureWeight in this.babyIdeoExposure)
-			{
-				if (ideoExposureWeight.ideo == ideo)
-				{
-					ideoExposureWeight.exposure += exposure;
-					return;
-				}
-			}
-			this.babyIdeoExposure.Add(new Pawn_IdeoTracker.IdeoExposureWeight(ideo, exposure));
-		}
-
-		// Token: 0x0600CCD7 RID: 52439 RVA: 0x003C1454 File Offset: 0x003BF654
-		private bool IsBabyIdeoExposureSorted()
-		{
-			if (this.babyIdeoExposure.NullOrEmpty<Pawn_IdeoTracker.IdeoExposureWeight>() || !this.isIdeoExposureSortDirty)
-			{
-				return true;
-			}
-			float exposure = this.babyIdeoExposure[0].exposure;
-			foreach (Pawn_IdeoTracker.IdeoExposureWeight ideoExposureWeight in this.babyIdeoExposure)
-			{
-				if (exposure < ideoExposureWeight.exposure)
-				{
-					return false;
-				}
-				exposure = ideoExposureWeight.exposure;
-			}
-			this.isIdeoExposureSortDirty = false;
-			return true;
-		}
-
-		// Token: 0x0600CCD8 RID: 52440 RVA: 0x003C14E8 File Offset: 0x003BF6E8
-		public bool TryJoinIdeoFromExposures()
-		{
-			if (this.Ideo != null)
-			{
-				return false;
-			}
-			Ideo ideo;
-			if (!this.babyIdeoExposure.NullOrEmpty<Pawn_IdeoTracker.IdeoExposureWeight>() && !Find.IdeoManager.classicMode)
-			{
-				Pawn_IdeoTracker.IdeoExposureWeight ideoExposureWeight;
-				this.babyIdeoExposure.TryRandomElementByWeight((Pawn_IdeoTracker.IdeoExposureWeight i) => i.exposure, out ideoExposureWeight);
-				ideo = ideoExposureWeight.ideo;
+				certaintyInt = 0f;
 			}
 			else
 			{
-				ideo = this.FallbackIdeo(null);
+				certaintyInt = value;
 			}
-			this.SetIdeo(ideo);
-			if (this.Ideo != null)
+			certaintyInt = Mathf.Clamp01(certaintyInt);
+		}
+	}
+
+	private float CertaintyChangeFactor
+	{
+		get
+		{
+			if (!ModsConfig.BiotechActive)
 			{
-				this.babyIdeoExposure = null;
-				return true;
+				return 1f;
 			}
+			if (pawnAgeCertaintyCurve == null)
+			{
+				pawnAgeCertaintyCurve = new SimpleCurve
+				{
+					new CurvePoint(pawn.ageTracker.LifeStageMinAge(LifeStageDefOf.HumanlikeChild), 2f),
+					new CurvePoint(pawn.ageTracker.LifeStageMinAge(LifeStageDefOf.HumanlikeAdult), 1f)
+				};
+			}
+			return pawnAgeCertaintyCurve.Evaluate(pawn.ageTracker.AgeBiologicalYearsFloat);
+		}
+	}
+
+	public float CertaintyChangePerDay
+	{
+		get
+		{
+			if (pawn.needs.mood != null)
+			{
+				return ConversionTuning.CertaintyPerDayByMoodCurve.Evaluate(pawn.needs.mood.CurLevelPercentage);
+			}
+			return 0f;
+		}
+	}
+
+	public List<IdeoExposureWeight> BabyIdeoExposureSorted
+	{
+		get
+		{
+			if (!IsBabyIdeoExposureSorted())
+			{
+				babyIdeoExposure.Sort();
+				isIdeoExposureSortDirty = false;
+			}
+			return babyIdeoExposure;
+		}
+	}
+
+	public float BabyIdeoExposureTotal
+	{
+		get
+		{
+			if (babyIdeoExposure.NullOrEmpty())
+			{
+				return 0f;
+			}
+			float num = 0f;
+			foreach (IdeoExposureWeight item in babyIdeoExposure)
+			{
+				num += item.exposure;
+			}
+			return num;
+		}
+	}
+
+	public Pawn_IdeoTracker(Pawn pawn)
+	{
+		this.pawn = pawn;
+		previousIdeos = new List<Ideo>();
+	}
+
+	public Pawn_IdeoTracker()
+	{
+	}
+
+	private float ApplyCertaintyChangeFactor(float certaintyOffset)
+	{
+		if (!(certaintyOffset > 0f))
+		{
+			return certaintyOffset * CertaintyChangeFactor;
+		}
+		return certaintyOffset / CertaintyChangeFactor;
+	}
+
+	public void IdeoTrackerTickInterval(int delta)
+	{
+		if (!pawn.Destroyed && !pawn.InMentalState && ideo != null && !Find.IdeoManager.classicMode && !pawn.Deathresting)
+		{
+			Certainty += ApplyCertaintyChangeFactor(CertaintyChangePerDay / 60000f) * (float)delta;
+		}
+		if (ideo != null && ideo.currentCacheId != lastCacheId)
+		{
+			lastCacheId = ideo.currentCacheId;
+			RecacheIdeoComponents();
+		}
+	}
+
+	public void SetIdeo(Ideo ideo)
+	{
+		if (this.ideo == ideo || pawn.DevelopmentalStage.Baby())
+		{
+			return;
+		}
+		if (this.ideo != null)
+		{
+			Find.HistoryEventsManager.RecordEvent(new HistoryEvent(HistoryEventDefOf.ChangedIdeo, pawn.Named(HistoryEventArgsNames.Doer)));
+		}
+		if (previousIdeos.Contains(ideo))
+		{
+			previousIdeos.Remove(ideo);
+		}
+		if (this.ideo != null)
+		{
+			previousIdeos.Add(this.ideo);
+		}
+		Ideo ideo2 = this.ideo;
+		if (pawn.Faction != null && pawn.Faction.IsPlayer)
+		{
+			this.ideo?.Notify_MemberLost(pawn, pawn.Map);
+			this.ideo?.RecacheColonistBelieverCount();
+		}
+		this.ideo = ideo;
+		Certainty = Mathf.Clamp01(ConversionTuning.InitialCertaintyRange.RandomInRange);
+		if (pawn.Faction != null && pawn.Faction.IsPlayer)
+		{
+			pawn.Faction.ideos.Notify_ColonistChangedIdeo();
+			ideo2?.RecacheColonistBelieverCount();
+			this.ideo?.RecacheColonistBelieverCount();
+		}
+		this.ideo?.Notify_MemberGained(pawn);
+		if (pawn.ownership.OwnedBed != null && pawn.ownership.OwnedBed.CompAssignableToPawn.IdeoligionForbids(pawn))
+		{
+			pawn.ownership.UnclaimBed();
+		}
+		SpouseRelationUtility.RemoveSpousesAsForbiddenByIdeo(pawn);
+		if (ideo != null && !ideo.MemberWillingToDo(new HistoryEvent(HistoryEventDefOf.Bonded)))
+		{
+			List<Pawn> list = new List<Pawn>();
+			List<DirectPawnRelation> directRelations = pawn.relations.DirectRelations;
+			for (int num = directRelations.Count - 1; num >= 0; num--)
+			{
+				DirectPawnRelation directPawnRelation = directRelations[num];
+				if (directPawnRelation.def == PawnRelationDefOf.Bond)
+				{
+					list.Add(directPawnRelation.otherPawn);
+					pawn.relations.RemoveDirectRelation(directPawnRelation);
+				}
+			}
+			if (list.Count > 0)
+			{
+				Find.LetterStack.ReceiveLetter("LetterBondRemoved".Translate(), "LetterBondRemovedDesc".Translate(ideo.Named("IDEO"), pawn.Named("PAWN"), list.Select((Pawn b) => b.LabelCap).ToLineList().Named("BONDS")), LetterDefOf.NeutralEvent, new LookTargets(list.Concat(new Pawn[1] { pawn })));
+			}
+		}
+		joinTick = Find.TickManager.TicksGame;
+		RecacheIdeoComponents();
+		pawn.ageTracker?.Notify_IdeoChanged();
+	}
+
+	private void RecacheIdeoComponents()
+	{
+		pawn.needs?.mood?.thoughts.situational.Notify_SituationalThoughtsDirty();
+		pawn.needs?.AddOrRemoveNeedsAsAppropriate();
+		pawn.apparel?.Notify_IdeoChanged();
+		pawn.abilities?.Notify_TemporaryAbilitiesChanged();
+	}
+
+	public bool IdeoConversionAttempt(float certaintyReduction, Ideo initiatorIdeo, bool applyCertaintyFactor = true)
+	{
+		if (!ModLister.CheckIdeology("Ideoligion conversion") || pawn.DevelopmentalStage.Baby())
+		{
 			return false;
 		}
-
-		// Token: 0x0600CCD9 RID: 52441 RVA: 0x003C156F File Offset: 0x003BF76F
-		public void Reassure(float certaintyGain)
+		if (Find.IdeoManager.classicMode)
 		{
-			this.OffsetCertainty(certaintyGain);
+			return false;
 		}
-
-		// Token: 0x0600CCDA RID: 52442 RVA: 0x003C1578 File Offset: 0x003BF778
-		public void OffsetCertainty(float offset)
+		float num = Mathf.Clamp01(Certainty + (applyCertaintyFactor ? ApplyCertaintyChangeFactor(0f - certaintyReduction) : (0f - certaintyReduction)));
+		if (pawn.Spawned)
 		{
-			if (!ModLister.CheckIdeology("Ideoligion certainty"))
+			string text = "Certainty".Translate() + "\n" + Certainty.ToStringPercent() + " -> " + num.ToStringPercent();
+			MoteMaker.ThrowText(pawn.DrawPos, pawn.Map, text, 8f);
+		}
+		Certainty = num;
+		if (Certainty <= 0f)
+		{
+			bool num2 = PreviousIdeos.Contains(initiatorIdeo);
+			SetIdeo(initiatorIdeo);
+			Certainty = 0.5f;
+			initiatorIdeo.Notify_MemberGainedByConversion();
+			if (!num2)
 			{
+				Find.HistoryEventsManager.RecordEvent(new HistoryEvent(HistoryEventDefOf.ConvertedNewMember, pawn.Named(HistoryEventArgsNames.Doer), initiatorIdeo.Named(HistoryEventArgsNames.Ideo)));
+			}
+			return true;
+		}
+		return false;
+	}
+
+	public void IncreaseIdeoExposureIfBabyTick(Ideo ideo, int ticks = 1)
+	{
+		IncreaseIdeoExposureIfBaby(ideo, (float)ticks * 0.0004f);
+	}
+
+	public void IncreaseIdeoExposureIfBaby(Ideo ideo, float exposure)
+	{
+		if (!ModsConfig.BiotechActive || !ModsConfig.IdeologyActive || ideo == null || Find.IdeoManager.classicMode || !pawn.DevelopmentalStage.Baby() || (ModsConfig.AnomalyActive && ideo == Find.IdeoManager.Horaxian))
+		{
+			return;
+		}
+		if (babyIdeoExposure == null)
+		{
+			babyIdeoExposure = new List<IdeoExposureWeight>();
+		}
+		isIdeoExposureSortDirty = true;
+		foreach (IdeoExposureWeight item in babyIdeoExposure)
+		{
+			if (item.ideo == ideo)
+			{
+				item.exposure += exposure;
 				return;
 			}
-			if (Find.IdeoManager.classicMode)
-			{
-				return;
-			}
-			float num = Mathf.Clamp01(this.Certainty + this.ApplyCertaintyChangeFactor(offset));
-			if (this.pawn.Spawned)
-			{
-				string text = "Certainty".Translate() + "\n" + this.Certainty.ToStringPercent() + " -> " + num.ToStringPercent();
-				MoteMaker.ThrowText(this.pawn.DrawPos, this.pawn.Map, text, 8f);
-			}
-			this.Certainty = num;
 		}
+		babyIdeoExposure.Add(new IdeoExposureWeight(ideo, exposure));
+	}
 
-		// Token: 0x0600CCDB RID: 52443 RVA: 0x003C1627 File Offset: 0x003BF827
-		public void Notify_IdeoRemoved(Ideo removedIdeo)
+	private bool IsBabyIdeoExposureSorted()
+	{
+		if (babyIdeoExposure.NullOrEmpty() || !isIdeoExposureSortDirty)
 		{
-			if (this.Ideo == removedIdeo)
-			{
-				this.SetIdeo(this.FallbackIdeo(removedIdeo));
-			}
-			if (this.previousIdeos.Contains(removedIdeo))
-			{
-				this.previousIdeos.Remove(removedIdeo);
-			}
+			return true;
 		}
-
-		// Token: 0x0600CCDC RID: 52444 RVA: 0x003C165C File Offset: 0x003BF85C
-		private Ideo FallbackIdeo(Ideo excludeIdeo = null)
+		float exposure = babyIdeoExposure[0].exposure;
+		foreach (IdeoExposureWeight item in babyIdeoExposure)
 		{
-			Faction faction = this.pawn.Faction;
-			if (((faction != null) ? faction.ideos : null) != null && this.pawn.Faction.ideos.PrimaryIdeo != excludeIdeo && this.pawn.Faction.ideos.PrimaryIdeo != null)
+			if (exposure < item.exposure)
 			{
-				return this.pawn.Faction.ideos.PrimaryIdeo;
+				return false;
 			}
-			return Find.IdeoManager.IdeosListForReading.RandomElement<Ideo>();
+			exposure = item.exposure;
 		}
+		isIdeoExposureSortDirty = false;
+		return true;
+	}
 
-		// Token: 0x0600CCDD RID: 52445 RVA: 0x003C16D6 File Offset: 0x003BF8D6
-		public void Debug_ReduceCertainty(float amt)
+	public bool TryJoinIdeoFromExposures()
+	{
+		if (Ideo != null)
 		{
-			this.Certainty -= amt;
+			return false;
 		}
-
-		// Token: 0x0600CCDE RID: 52446 RVA: 0x003C16E8 File Offset: 0x003BF8E8
-		public void ExposeData()
+		Ideo ideo;
+		if (!babyIdeoExposure.NullOrEmpty() && !Find.IdeoManager.classicMode)
 		{
-			Scribe_References.Look<Ideo>(ref this.ideo, "ideo", false);
-			Scribe_Collections.Look<Ideo>(ref this.previousIdeos, "previousIdeos", LookMode.Reference, Array.Empty<object>());
-			Scribe_Values.Look<float>(ref this.certaintyInt, "certainty", 0f, false);
-			Scribe_Values.Look<int>(ref this.joinTick, "joinTick", 0, false);
-			Scribe_Collections.Look<Pawn_IdeoTracker.IdeoExposureWeight>(ref this.babyIdeoExposure, "babyIdeoExposure", LookMode.Deep, Array.Empty<object>());
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
-			{
-				if (this.previousIdeos.RemoveAll((Ideo x) => x == null) != 0)
-				{
-					Log.Error("Removed null ideos");
-				}
-				if (this.Certainty <= 0f)
-				{
-					this.Certainty = Mathf.Clamp01(ConversionTuning.InitialCertaintyRange.RandomInRange);
-				}
-				if (this.Ideo == null && this.pawn.ShouldHaveIdeo)
-				{
-					Ideo arg = this.FallbackIdeo(null);
-					Log.Warning(string.Format("{0} did not have an ideo set; assigning fallback ideo {1}.", this.pawn.ToStringSafe<Pawn>(), arg));
-					this.SetIdeo(arg);
-				}
-			}
+			babyIdeoExposure.TryRandomElementByWeight((IdeoExposureWeight i) => i.exposure, out var result);
+			ideo = result.ideo;
 		}
-
-		// Token: 0x04008B7E RID: 35710
-		private Pawn pawn;
-
-		// Token: 0x04008B7F RID: 35711
-		public int joinTick;
-
-		// Token: 0x04008B80 RID: 35712
-		private Ideo ideo;
-
-		// Token: 0x04008B81 RID: 35713
-		private List<Ideo> previousIdeos;
-
-		// Token: 0x04008B82 RID: 35714
-		private float certaintyInt;
-
-		// Token: 0x04008B83 RID: 35715
-		private List<Pawn_IdeoTracker.IdeoExposureWeight> babyIdeoExposure;
-
-		// Token: 0x04008B84 RID: 35716
-		private bool isIdeoExposureSortDirty = true;
-
-		// Token: 0x04008B85 RID: 35717
-		private int lastCacheId;
-
-		// Token: 0x04008B86 RID: 35718
-		private const float ExposurePointsPerHour = 1f;
-
-		// Token: 0x04008B87 RID: 35719
-		public const float ExposurePointsPerTick = 0.0004f;
-
-		// Token: 0x04008B88 RID: 35720
-		private static SimpleCurve pawnAgeCertaintyCurve;
-
-		// Token: 0x020024C2 RID: 9410
-		public class IdeoExposureWeight : IExposable, IComparable<Pawn_IdeoTracker.IdeoExposureWeight>
+		else
 		{
-			// Token: 0x0600CCDF RID: 52447 RVA: 0x000024DF File Offset: 0x000006DF
-			public IdeoExposureWeight()
+			ideo = FallbackIdeo();
+		}
+		SetIdeo(ideo);
+		if (Ideo != null)
+		{
+			babyIdeoExposure = null;
+			return true;
+		}
+		return false;
+	}
+
+	public void Reassure(float certaintyGain)
+	{
+		OffsetCertainty(certaintyGain);
+	}
+
+	public void OffsetCertainty(float offset)
+	{
+		if (ModLister.CheckIdeology("Ideoligion certainty") && !Find.IdeoManager.classicMode)
+		{
+			float num = Mathf.Clamp01(Certainty + ApplyCertaintyChangeFactor(offset));
+			if (pawn.Spawned)
 			{
+				string text = "Certainty".Translate() + "\n" + Certainty.ToStringPercent() + " -> " + num.ToStringPercent();
+				MoteMaker.ThrowText(pawn.DrawPos, pawn.Map, text, 8f);
 			}
+			Certainty = num;
+		}
+	}
 
-			// Token: 0x0600CCE0 RID: 52448 RVA: 0x003C17FF File Offset: 0x003BF9FF
-			public IdeoExposureWeight(Ideo ideo, float exposure)
+	public void Notify_IdeoRemoved(Ideo removedIdeo)
+	{
+		if (Ideo == removedIdeo)
+		{
+			SetIdeo(FallbackIdeo(removedIdeo));
+		}
+		if (previousIdeos.Contains(removedIdeo))
+		{
+			previousIdeos.Remove(removedIdeo);
+		}
+	}
+
+	private Ideo FallbackIdeo(Ideo excludeIdeo = null)
+	{
+		if (pawn.Faction?.ideos != null && pawn.Faction.ideos.PrimaryIdeo != excludeIdeo && pawn.Faction.ideos.PrimaryIdeo != null)
+		{
+			return pawn.Faction.ideos.PrimaryIdeo;
+		}
+		return Find.IdeoManager.IdeosListForReading.RandomElement();
+	}
+
+	public void Debug_ReduceCertainty(float amt)
+	{
+		Certainty -= amt;
+	}
+
+	public void ExposeData()
+	{
+		Scribe_References.Look(ref ideo, "ideo");
+		Scribe_Collections.Look(ref previousIdeos, "previousIdeos", LookMode.Reference);
+		Scribe_Values.Look(ref certaintyInt, "certainty", 0f);
+		Scribe_Values.Look(ref joinTick, "joinTick", 0);
+		Scribe_Collections.Look(ref babyIdeoExposure, "babyIdeoExposure", LookMode.Deep);
+		if (Scribe.mode == LoadSaveMode.PostLoadInit)
+		{
+			if (previousIdeos.RemoveAll((Ideo x) => x == null) != 0)
 			{
-				this.ideo = ideo;
-				this.exposure = exposure;
+				Log.Error("Removed null ideos");
 			}
-
-			// Token: 0x0600CCE1 RID: 52449 RVA: 0x003C1815 File Offset: 0x003BFA15
-			public int CompareTo(Pawn_IdeoTracker.IdeoExposureWeight other)
+			if (Certainty <= 0f)
 			{
-				return other.exposure.CompareTo(this.exposure);
+				Certainty = Mathf.Clamp01(ConversionTuning.InitialCertaintyRange.RandomInRange);
 			}
-
-			// Token: 0x0600CCE2 RID: 52450 RVA: 0x003C1828 File Offset: 0x003BFA28
-			public void ExposeData()
+			if (Ideo == null && pawn.ShouldHaveIdeo)
 			{
-				Scribe_References.Look<Ideo>(ref this.ideo, "ideo", false);
-				Scribe_Values.Look<float>(ref this.exposure, "exposure", 0f, false);
+				Ideo value = FallbackIdeo();
+				Log.Warning($"{pawn.ToStringSafe()} did not have an ideo set; assigning fallback ideo {value}.");
+				SetIdeo(value);
 			}
-
-			// Token: 0x04008B89 RID: 35721
-			public Ideo ideo;
-
-			// Token: 0x04008B8A RID: 35722
-			public float exposure;
 		}
 	}
 }

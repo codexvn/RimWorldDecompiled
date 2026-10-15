@@ -1,103 +1,296 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class PreceptComp_UnwillingToDo : PreceptComp
 {
-	// Token: 0x02002643 RID: 9795
-	public class PreceptComp_UnwillingToDo : PreceptComp
+	[CompilerGenerated]
+	private sealed class _003CGetDescriptions_003Ed__7 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x170020D2 RID: 8402
-		// (get) Token: 0x0600D699 RID: 54937 RVA: 0x003FAB13 File Offset: 0x003F8D13
-		public override IEnumerable<TraitRequirement> TraitsAffecting
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public PreceptComp_UnwillingToDo _003C_003E4__this;
+
+		string IEnumerator<string>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.nullifyingTraits != null)
-				{
-					int num;
-					for (int i = 0; i < this.nullifyingTraits.Count; i = num + 1)
-					{
-						yield return this.nullifyingTraits[i];
-						num = i;
-					}
-				}
-				yield break;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600D69A RID: 54938 RVA: 0x003FAB24 File Offset: 0x003F8D24
-		public override bool MemberWillingToDo(HistoryEvent ev)
+		object IEnumerator.Current
 		{
-			if (this.eventDef != null && ev.def != this.eventDef)
+			[DebuggerHidden]
+			get
 			{
-				return true;
+				return _003C_003E2__current;
 			}
-			Pawn pawn;
-			if (!ev.args.TryGetArg<Pawn>(HistoryEventArgsNames.Doer, out pawn))
+		}
+
+		[DebuggerHidden]
+		public _003CGetDescriptions_003Ed__7(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			PreceptComp_UnwillingToDo preceptComp_UnwillingToDo = _003C_003E4__this;
+			switch (num)
 			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = "UnwillingToDoIdeoAction".Translate() + ": " + preceptComp_UnwillingToDo.eventDef.LabelCap;
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
 				return false;
 			}
-			if (!this.preceptDef.enabledForNPCFactions && pawn != null && !pawn.Faction.IsPlayer)
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CGetDescriptions_003Ed__7 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CGetDescriptions_003Ed__7(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003Cget_TraitsAffecting_003Ed__4 : IEnumerable<TraitRequirement>, IEnumerable, IEnumerator<TraitRequirement>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private TraitRequirement _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public PreceptComp_UnwillingToDo _003C_003E4__this;
+
+		private int _003Ci_003E5__2;
+
+		TraitRequirement IEnumerator<TraitRequirement>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003Cget_TraitsAffecting_003Ed__4(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			PreceptComp_UnwillingToDo preceptComp_UnwillingToDo = _003C_003E4__this;
+			if (num != 0)
+			{
+				if (num != 1)
+				{
+					return false;
+				}
+				_003C_003E1__state = -1;
+				_003Ci_003E5__2++;
+			}
+			else
+			{
+				_003C_003E1__state = -1;
+				if (preceptComp_UnwillingToDo.nullifyingTraits == null)
+				{
+					goto IL_0079;
+				}
+				_003Ci_003E5__2 = 0;
+			}
+			if (_003Ci_003E5__2 < preceptComp_UnwillingToDo.nullifyingTraits.Count)
+			{
+				_003C_003E2__current = preceptComp_UnwillingToDo.nullifyingTraits[_003Ci_003E5__2];
+				_003C_003E1__state = 1;
 				return true;
 			}
-			if (this.nullifyingTraits != null && ((pawn != null) ? pawn.story : null) != null)
-			{
-				for (int i = 0; i < this.nullifyingTraits.Count; i++)
-				{
-					if (this.nullifyingTraits[i].HasTrait(pawn))
-					{
-						return true;
-					}
-				}
-			}
-			if (this.nullifyingHediffs != null)
-			{
-				bool flag;
-				if (pawn == null)
-				{
-					flag = (null != null);
-				}
-				else
-				{
-					Pawn_HealthTracker health = pawn.health;
-					flag = (((health != null) ? health.hediffSet : null) != null);
-				}
-				if (flag)
-				{
-					for (int j = 0; j < this.nullifyingHediffs.Count; j++)
-					{
-						if (!pawn.health.hediffSet.HasHediff(this.nullifyingHediffs[j], false))
-						{
-							return true;
-						}
-					}
-				}
-			}
+			goto IL_0079;
+			IL_0079:
 			return false;
 		}
 
-		// Token: 0x0600D69B RID: 54939 RVA: 0x003FAC1B File Offset: 0x003F8E1B
-		public virtual string GetProhibitionText()
+		bool IEnumerator.MoveNext()
 		{
-			return this.description ?? this.eventDef.LabelCap;
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0600D69C RID: 54940 RVA: 0x003FAC37 File Offset: 0x003F8E37
-		public override IEnumerable<string> GetDescriptions()
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			yield return "UnwillingToDoIdeoAction".Translate() + ": " + this.eventDef.LabelCap;
-			yield break;
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x040091DC RID: 37340
-		public HistoryEventDef eventDef;
+		[DebuggerHidden]
+		IEnumerator<TraitRequirement> IEnumerable<TraitRequirement>.GetEnumerator()
+		{
+			_003Cget_TraitsAffecting_003Ed__4 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_TraitsAffecting_003Ed__4(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x040091DD RID: 37341
-		public List<TraitRequirement> nullifyingTraits;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<TraitRequirement>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x040091DE RID: 37342
-		public List<HediffDef> nullifyingHediffs;
+	public HistoryEventDef eventDef;
+
+	public List<TraitRequirement> nullifyingTraits;
+
+	public List<HediffDef> nullifyingHediffs;
+
+	public override IEnumerable<TraitRequirement> TraitsAffecting
+	{
+		[IteratorStateMachine(typeof(_003Cget_TraitsAffecting_003Ed__4))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_TraitsAffecting_003Ed__4(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public override bool MemberWillingToDo(HistoryEvent ev)
+	{
+		if (eventDef != null && ev.def != eventDef)
+		{
+			return true;
+		}
+		if (!ev.args.TryGetArg(HistoryEventArgsNames.Doer, out Pawn arg))
+		{
+			return false;
+		}
+		if (!preceptDef.enabledForNPCFactions && arg != null && !arg.Faction.IsPlayer)
+		{
+			return true;
+		}
+		if (nullifyingTraits != null && arg?.story != null)
+		{
+			for (int i = 0; i < nullifyingTraits.Count; i++)
+			{
+				if (nullifyingTraits[i].HasTrait(arg))
+				{
+					return true;
+				}
+			}
+		}
+		if (nullifyingHediffs != null && arg?.health?.hediffSet != null)
+		{
+			for (int j = 0; j < nullifyingHediffs.Count; j++)
+			{
+				if (!arg.health.hediffSet.HasHediff(nullifyingHediffs[j]))
+				{
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	public virtual string GetProhibitionText()
+	{
+		return description ?? ((string)eventDef.LabelCap);
+	}
+
+	[IteratorStateMachine(typeof(_003CGetDescriptions_003Ed__7))]
+	public override IEnumerable<string> GetDescriptions()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetDescriptions_003Ed__7(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

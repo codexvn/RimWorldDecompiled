@@ -1,59 +1,135 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompTargetable_SingleAnimal : CompTargetable
 {
-	// Token: 0x02002F24 RID: 12068
-	public class CompTargetable_SingleAnimal : CompTargetable
+	[CompilerGenerated]
+	private sealed class _003CGetTargets_003Ed__5 : IEnumerable<Thing>, IEnumerable, IEnumerator<Thing>, IEnumerator, IDisposable
 	{
-		// Token: 0x17002C04 RID: 11268
-		// (get) Token: 0x0601109C RID: 69788 RVA: 0x000028E7 File Offset: 0x00000AE7
-		protected override bool PlayerChoosesTarget
+		private int _003C_003E1__state;
+
+		private Thing _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private Thing targetChosenByPlayer;
+
+		public Thing _003C_003E3__targetChosenByPlayer;
+
+		Thing IEnumerator<Thing>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetTargets_003Ed__5(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			switch (_003C_003E1__state)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = targetChosenByPlayer;
+				_003C_003E1__state = 1;
 				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				return false;
 			}
 		}
 
-		// Token: 0x17002C05 RID: 11269
-		// (get) Token: 0x0601109D RID: 69789 RVA: 0x004E641E File Offset: 0x004E461E
-		public new CompProperties_Targetable_SingleAnimal Props
+		bool IEnumerator.MoveNext()
 		{
-			get
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Thing> IEnumerable<Thing>.GetEnumerator()
+		{
+			_003CGetTargets_003Ed__5 _003CGetTargets_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				return (CompProperties_Targetable_SingleAnimal)this.props;
+				_003C_003E1__state = 0;
+				_003CGetTargets_003Ed__ = this;
 			}
-		}
-
-		// Token: 0x0601109E RID: 69790 RVA: 0x004E642B File Offset: 0x004E462B
-		protected override TargetingParameters GetTargetingParameters()
-		{
-			return new TargetingParameters
+			else
 			{
-				canTargetPawns = true,
-				canTargetBuildings = false,
-				canTargetAnimals = true,
-				canTargetHumans = false,
-				canTargetMechs = false,
-				validator = delegate(TargetInfo target)
-				{
-					if (!this.Props.allowWildMan)
-					{
-						Pawn pawn = target.Thing as Pawn;
-						return pawn != null && !pawn.IsWildMan();
-					}
-					return true;
-				}
-			};
+				_003CGetTargets_003Ed__ = new _003CGetTargets_003Ed__5(0);
+			}
+			_003CGetTargets_003Ed__.targetChosenByPlayer = _003C_003E3__targetChosenByPlayer;
+			return _003CGetTargets_003Ed__;
 		}
 
-		// Token: 0x0601109F RID: 69791 RVA: 0x004E6467 File Offset: 0x004E4667
-		public override IEnumerable<Thing> GetTargets(Thing targetChosenByPlayer = null)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			yield return targetChosenByPlayer;
-			yield break;
+			return ((IEnumerable<Thing>)this).GetEnumerator();
 		}
+	}
+
+	protected override bool PlayerChoosesTarget => true;
+
+	public new CompProperties_Targetable_SingleAnimal Props => (CompProperties_Targetable_SingleAnimal)props;
+
+	protected override TargetingParameters GetTargetingParameters()
+	{
+		return new TargetingParameters
+		{
+			canTargetPawns = true,
+			canTargetBuildings = false,
+			canTargetAnimals = true,
+			canTargetHumans = false,
+			canTargetMechs = false,
+			validator = (TargetInfo target) => Props.allowWildMan || (target.Thing is Pawn p && !p.IsWildMan())
+		};
+	}
+
+	[IteratorStateMachine(typeof(_003CGetTargets_003Ed__5))]
+	public override IEnumerable<Thing> GetTargets(Thing targetChosenByPlayer = null)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetTargets_003Ed__5(-2)
+		{
+			_003C_003E3__targetChosenByPlayer = targetChosenByPlayer
+		};
 	}
 }

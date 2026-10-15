@@ -1,39 +1,149 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_InspectGravEngine : JobDriver
 {
-	// Token: 0x02001297 RID: 4759
-	public class JobDriver_InspectGravEngine : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__2 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x06007488 RID: 29832 RVA: 0x0022F6AD File Offset: 0x0022D8AD
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
-		{
-			return this.pawn.Reserve(base.TargetA, this.job, 1, -1, null, errorOnFailed, false);
-		}
+		private int _003C_003E1__state;
 
-		// Token: 0x06007489 RID: 29833 RVA: 0x0023B287 File Offset: 0x00239487
-		protected override IEnumerable<Toil> MakeNewToils()
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_InspectGravEngine _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
 		{
-			this.FailOnDespawnedOrNull(TargetIndex.A);
-			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch, false);
-			yield return Toils_General.WaitWith(TargetIndex.A, 240, true, false, false, TargetIndex.A, PathEndMode.Touch);
-			Toil toil = ToilMaker.MakeToil("MakeNewToils");
-			toil.initAction = delegate()
+			[DebuggerHidden]
+			get
 			{
-				Building_GravEngine building_GravEngine = base.TargetA.Thing as Building_GravEngine;
-				if (building_GravEngine != null)
-				{
-					building_GravEngine.Inspect(false);
-				}
-			};
-			yield return toil;
-			yield break;
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x0400500F RID: 20495
-		private const TargetIndex GravEngineIndex = TargetIndex.A;
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__2(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_InspectGravEngine CS_0024_003C_003E8__locals2 = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				CS_0024_003C_003E8__locals2.FailOnDespawnedOrNull(TargetIndex.A);
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.WaitWith(TargetIndex.A, 240, useProgressBar: true, maintainPosture: false, maintainSleep: false, TargetIndex.A);
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+			{
+				_003C_003E1__state = -1;
+				Toil toil = ToilMaker.MakeToil("MakeNewToils");
+				toil.initAction = delegate
+				{
+					if (CS_0024_003C_003E8__locals2.TargetA.Thing is Building_GravEngine building_GravEngine)
+					{
+						building_GravEngine.Inspect();
+					}
+				};
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 3;
+				return true;
+			}
+			case 3:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__2 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__2(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private const TargetIndex GravEngineIndex = TargetIndex.A;
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return pawn.Reserve(base.TargetA, job, 1, -1, null, errorOnFailed);
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__2))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__2(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

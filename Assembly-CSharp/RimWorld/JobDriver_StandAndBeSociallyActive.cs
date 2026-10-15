@@ -1,76 +1,192 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_StandAndBeSociallyActive : JobDriver
 {
-	// Token: 0x020011BD RID: 4541
-	public class JobDriver_StandAndBeSociallyActive : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__2 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x06006F0B RID: 28427 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_StandAndBeSociallyActive _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
 		{
-			return true;
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x06006F0C RID: 28428 RVA: 0x002293D3 File Offset: 0x002275D3
-		protected override IEnumerable<Toil> MakeNewToils()
+		object IEnumerator.Current
 		{
-			if (base.TargetLocA.IsValid)
+			[DebuggerHidden]
+			get
 			{
-				yield return Toils_Goto.GotoCell(base.TargetLocA, PathEndMode.OnCell);
+				return _003C_003E2__current;
 			}
-			Toil toil = ToilMaker.MakeToil("MakeNewToils");
-			toil.initAction = delegate()
+		}
+
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__2(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_StandAndBeSociallyActive CS_0024_003C_003E8__locals12 = _003C_003E4__this;
+			Toil toil;
+			switch (num)
 			{
-				this.pawn.pather.StopDead();
-			};
-			toil.tickIntervalAction = delegate(int delta)
-			{
-				this.pawn.pather.StopDead();
-				if (!this.job.forceMaintainFacing)
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (CS_0024_003C_003E8__locals12.TargetLocA.IsValid)
 				{
-					if (this.job.lookDirection != Direction8Way.Invalid)
+					_003C_003E2__current = CS_0024_003C_003E8__locals12.GetGotoToil();
+					_003C_003E1__state = 1;
+					return true;
+				}
+				goto IL_0055;
+			case 1:
+				_003C_003E1__state = -1;
+				goto IL_0055;
+			case 2:
+				{
+					_003C_003E1__state = -1;
+					return false;
+				}
+				IL_0055:
+				toil = ToilMaker.MakeToil("MakeNewToils");
+				toil.initAction = delegate
+				{
+					CS_0024_003C_003E8__locals12.pawn.pather.StopDead();
+				};
+				toil.tickIntervalAction = delegate(int delta)
+				{
+					CS_0024_003C_003E8__locals12.pawn.pather.StopDead();
+					if (!CS_0024_003C_003E8__locals12.job.forceMaintainFacing)
 					{
-						this.pawn.rotationTracker.Face(this.pawn.Position.ToVector3() + this.job.lookDirection.AsVector());
-					}
-					else
-					{
-						Pawn pawn = JobDriver_StandAndBeSociallyActive.FindClosePawn(this.pawn);
-						if (pawn != null)
+						if (CS_0024_003C_003E8__locals12.job.lookDirection != Direction8Way.Invalid)
 						{
-							this.pawn.rotationTracker.FaceCell(pawn.Position);
+							CS_0024_003C_003E8__locals12.pawn.rotationTracker.Face(CS_0024_003C_003E8__locals12.pawn.Position.ToVector3() + CS_0024_003C_003E8__locals12.job.lookDirection.AsVector());
+						}
+						else
+						{
+							Pawn pawn = FindClosePawn(CS_0024_003C_003E8__locals12.pawn);
+							if (pawn != null)
+							{
+								CS_0024_003C_003E8__locals12.pawn.rotationTracker.FaceCell(pawn.Position);
+							}
 						}
 					}
-				}
-				this.pawn.GainComfortFromCellIfPossible(delta, false);
-			};
-			toil.socialMode = RandomSocialMode.SuperActive;
-			toil.defaultCompleteMode = ToilCompleteMode.Never;
-			toil.handlingFacing = true;
-			yield return toil;
-			yield break;
+					CS_0024_003C_003E8__locals12.pawn.GainComfortFromCellIfPossible(delta);
+				};
+				toil.socialMode = RandomSocialMode.SuperActive;
+				toil.defaultCompleteMode = ToilCompleteMode.Never;
+				toil.handlingFacing = true;
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 2;
+				return true;
+			}
 		}
 
-		// Token: 0x06006F0D RID: 28429 RVA: 0x002293E4 File Offset: 0x002275E4
-		public static Pawn FindClosePawn(Pawn pawn)
+		bool IEnumerator.MoveNext()
 		{
-			IntVec3 position = pawn.Position;
-			Map map = pawn.Map;
-			for (int i = 0; i < 24; i++)
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__2 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				IntVec3 intVec = position + GenRadial.RadialPattern[i];
-				if (intVec.InBounds(map))
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__2(0)
 				{
-					Thing thing = intVec.GetThingList(map).Find((Thing x) => x is Pawn);
-					if (thing != null && thing != pawn && GenSight.LineOfSight(position, intVec, map))
-					{
-						return (Pawn)thing;
-					}
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return true;
+	}
+
+	protected virtual Toil GetGotoToil()
+	{
+		return Toils_Goto.GotoCell(base.TargetLocA, PathEndMode.OnCell);
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__2))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__2(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public static Pawn FindClosePawn(Pawn pawn)
+	{
+		IntVec3 position = pawn.Position;
+		Map map = pawn.Map;
+		for (int i = 0; i < 24; i++)
+		{
+			IntVec3 intVec = position + GenRadial.RadialPattern[i];
+			if (intVec.InBounds(map))
+			{
+				Thing thing = intVec.GetThingList(map).Find((Thing x) => x is Pawn);
+				if (thing != null && thing != pawn && GenSight.LineOfSight(position, intVec, map))
+				{
+					return (Pawn)thing;
 				}
 			}
-			return null;
 		}
+		return null;
 	}
 }

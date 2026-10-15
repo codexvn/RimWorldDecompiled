@@ -1,210 +1,251 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Precept_Weapon : Precept
 {
-	// Token: 0x02002675 RID: 9845
-	public class Precept_Weapon : Precept
+	[CompilerGenerated]
+	private sealed class _003CEditFloatMenuOptions_003Ed__20 : IEnumerable<FloatMenuOption>, IEnumerable, IEnumerator<FloatMenuOption>, IEnumerator, IDisposable
 	{
-		// Token: 0x17002121 RID: 8481
-		// (get) Token: 0x0600D819 RID: 55321 RVA: 0x00400998 File Offset: 0x003FEB98
-		public override string TipLabel
+		private int _003C_003E1__state;
+
+		private FloatMenuOption _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Precept_Weapon _003C_003E4__this;
+
+		FloatMenuOption IEnumerator<FloatMenuOption>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.def.issue.LabelCap + ": " + this.def.LabelCap;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002122 RID: 8482
-		// (get) Token: 0x0600D81A RID: 55322 RVA: 0x004009CC File Offset: 0x003FEBCC
-		public override string UIInfoFirstLine
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return "Noble".Translate().CapitalizeFirst() + ": " + this.noble.LabelCap;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002123 RID: 8483
-		// (get) Token: 0x0600D81B RID: 55323 RVA: 0x00400A0C File Offset: 0x003FEC0C
-		public override string UIInfoSecondLine
+		[DebuggerHidden]
+		public _003CEditFloatMenuOptions_003Ed__20(int _003C_003E1__state)
 		{
-			get
-			{
-				return "Despised".Translate().CapitalizeFirst() + ": " + this.despised.LabelCap;
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x17002124 RID: 8484
-		// (get) Token: 0x0600D81C RID: 55324 RVA: 0x000440FD File Offset: 0x000422FD
-		public override Color LabelColor
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			get
-			{
-				return Color.white;
-			}
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x17002125 RID: 8485
-		// (get) Token: 0x0600D81D RID: 55325 RVA: 0x00400A4A File Offset: 0x003FEC4A
-		protected HashSet<ThingDef> NobleWeapons
+		private bool MoveNext()
 		{
-			get
+			int num = _003C_003E1__state;
+			Precept_Weapon CS_0024_003C_003E8__locals3 = _003C_003E4__this;
+			switch (num)
 			{
-				if (this.nobleWeaponsCached.EnumerableNullOrEmpty<ThingDef>())
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = new FloatMenuOption("SwapNobleAndDespised".Translate(), delegate
 				{
-					this.nobleWeaponsCached = new HashSet<ThingDef>(from x in DefDatabase<ThingDef>.AllDefs
-					where x.IsWeapon && x.PlayerAcquirable && !x.weaponClasses.NullOrEmpty<WeaponClassDef>() && x.weaponClasses.Contains(this.noble)
-					select x);
-				}
-				return this.nobleWeaponsCached;
+					Gen.Swap(ref CS_0024_003C_003E8__locals3.noble, ref CS_0024_003C_003E8__locals3.despised);
+					CS_0024_003C_003E8__locals3.RecacheData();
+				});
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				return false;
 			}
 		}
 
-		// Token: 0x17002126 RID: 8486
-		// (get) Token: 0x0600D81E RID: 55326 RVA: 0x00400A80 File Offset: 0x003FEC80
-		protected HashSet<ThingDef> DespisedWeapons
+		bool IEnumerator.MoveNext()
 		{
-			get
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<FloatMenuOption> IEnumerable<FloatMenuOption>.GetEnumerator()
+		{
+			_003CEditFloatMenuOptions_003Ed__20 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				if (this.despisedWeaponsCached.EnumerableNullOrEmpty<ThingDef>())
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CEditFloatMenuOptions_003Ed__20(0)
 				{
-					this.despisedWeaponsCached = new HashSet<ThingDef>(from x in DefDatabase<ThingDef>.AllDefs
-					where x.IsWeapon && !x.weaponClasses.NullOrEmpty<WeaponClassDef>() && x.weaponClasses.Contains(this.despised)
-					select x);
-				}
-				return this.despisedWeaponsCached;
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
+			return result;
 		}
 
-		// Token: 0x0600D81F RID: 55327 RVA: 0x00400AB6 File Offset: 0x003FECB6
-		private void RecacheData()
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			this.nobleWeaponsCached = null;
-			this.despisedWeaponsCached = null;
-			this.iconWeapon = null;
-			this.ClearTipCache();
+			return ((IEnumerable<FloatMenuOption>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x0600D820 RID: 55328 RVA: 0x00400AD4 File Offset: 0x003FECD4
-		public override void DrawIcon(Rect rect)
+	public WeaponClassDef noble;
+
+	public WeaponClassDef despised;
+
+	[Unsaved(false)]
+	private ThingDef iconWeapon;
+
+	[Unsaved(false)]
+	private HashSet<ThingDef> nobleWeaponsCached;
+
+	[Unsaved(false)]
+	private HashSet<ThingDef> despisedWeaponsCached;
+
+	public override string TipLabel => def.issue.LabelCap + ": " + def.LabelCap;
+
+	public override string UIInfoFirstLine => "Noble".Translate().CapitalizeFirst() + ": " + noble.LabelCap;
+
+	public override string UIInfoSecondLine => "Despised".Translate().CapitalizeFirst() + ": " + despised.LabelCap;
+
+	public override Color LabelColor => Color.white;
+
+	protected HashSet<ThingDef> NobleWeapons
+	{
+		get
 		{
-			if (this.iconWeapon == null)
+			if (nobleWeaponsCached.EnumerableNullOrEmpty())
 			{
-				Rand.PushState(this.randomSeed);
-				this.iconWeapon = (from w in this.NobleWeapons
-				where !w.IsStuff
-				select w).RandomElementWithFallback(null);
-				Rand.PopState();
+				nobleWeaponsCached = new HashSet<ThingDef>(DefDatabase<ThingDef>.AllDefs.Where((ThingDef x) => x.IsWeapon && x.PlayerAcquirable && !x.weaponClasses.NullOrEmpty() && x.weaponClasses.Contains(noble)));
 			}
-			if (this.iconWeapon == null)
-			{
-				Rand.PushState(this.randomSeed);
-				this.iconWeapon = (from w in this.DespisedWeapons
-				where !w.IsStuff
-				select w).RandomElementWithFallback(null);
-				Rand.PopState();
-			}
-			Widgets.DefIcon(rect, this.iconWeapon, null, 1f, this.ideo.GetStyleFor(this.iconWeapon), false, null, null, null, 1f);
+			return nobleWeaponsCached;
 		}
+	}
 
-		// Token: 0x0600D821 RID: 55329 RVA: 0x00400BBC File Offset: 0x003FEDBC
-		public override string GetTip()
+	protected HashSet<ThingDef> DespisedWeapons
+	{
+		get
 		{
-			if (this.tipCached.NullOrEmpty())
+			if (despisedWeaponsCached.EnumerableNullOrEmpty())
 			{
-				string[] array = new string[9];
-				array[0] = base.GetTip();
-				array[1] = "\n\n";
-				array[2] = base.ColorizeDescTitle("Noble".Translate().CapitalizeFirst());
-				array[3] = ":\n";
-				array[4] = (from x in this.NobleWeapons
+				despisedWeaponsCached = new HashSet<ThingDef>(DefDatabase<ThingDef>.AllDefs.Where((ThingDef x) => x.IsWeapon && !x.weaponClasses.NullOrEmpty() && x.weaponClasses.Contains(despised)));
+			}
+			return despisedWeaponsCached;
+		}
+	}
+
+	private void RecacheData()
+	{
+		nobleWeaponsCached = null;
+		despisedWeaponsCached = null;
+		iconWeapon = null;
+		ClearTipCache();
+	}
+
+	public override void DrawIcon(Rect rect)
+	{
+		if (iconWeapon == null)
+		{
+			Rand.PushState(randomSeed);
+			iconWeapon = NobleWeapons.Where((ThingDef w) => !w.IsStuff).RandomElementWithFallback();
+			Rand.PopState();
+		}
+		if (iconWeapon == null)
+		{
+			Rand.PushState(randomSeed);
+			iconWeapon = DespisedWeapons.Where((ThingDef w) => !w.IsStuff).RandomElementWithFallback();
+			Rand.PopState();
+		}
+		Widgets.DefIcon(rect, iconWeapon, null, 1f, ideo.GetStyleFor(iconWeapon), drawPlaceholder: false, null, null, null);
+	}
+
+	public override string GetTip()
+	{
+		if (tipCached.NullOrEmpty())
+		{
+			tipCached = base.GetTip() + "\n\n" + ColorizeDescTitle("Noble".Translate().CapitalizeFirst()) + ":\n" + (from x in NobleWeapons
 				where x.canGenerateDefaultDesignator
-				select x.LabelCap.Resolve()).ToCommaList(false, false);
-				array[5] = "\n\n";
-				array[6] = base.ColorizeDescTitle("Despised".Translate().CapitalizeFirst());
-				array[7] = ":\n";
-				array[8] = (from x in this.DespisedWeapons
+				select x.LabelCap.Resolve()).ToCommaList() + "\n\n" + ColorizeDescTitle("Despised".Translate().CapitalizeFirst()) + ":\n" + (from x in DespisedWeapons
 				where x.canGenerateDefaultDesignator
-				select x.LabelCap.Resolve()).ToCommaList(false, false);
-				this.tipCached = string.Concat(array);
-			}
-			return this.tipCached;
+				select x.LabelCap.Resolve()).ToCommaList();
 		}
+		return tipCached;
+	}
 
-		// Token: 0x0600D822 RID: 55330 RVA: 0x00400D00 File Offset: 0x003FEF00
-		public override IEnumerable<FloatMenuOption> EditFloatMenuOptions()
+	[IteratorStateMachine(typeof(_003CEditFloatMenuOptions_003Ed__20))]
+	public override IEnumerable<FloatMenuOption> EditFloatMenuOptions()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CEditFloatMenuOptions_003Ed__20(-2)
 		{
-			yield return new FloatMenuOption("SwapNobleAndDespised".Translate(), delegate()
+			_003C_003E4__this = this
+		};
+	}
+
+	public IdeoWeaponDisposition GetDispositionForWeapon(ThingDef td)
+	{
+		if (NobleWeapons.Contains(td))
+		{
+			return IdeoWeaponDisposition.Noble;
+		}
+		if (DespisedWeapons.Contains(td))
+		{
+			return IdeoWeaponDisposition.Despised;
+		}
+		return IdeoWeaponDisposition.None;
+	}
+
+	public override bool CompatibleWith(Precept other)
+	{
+		Precept_Weapon wep = other as Precept_Weapon;
+		if (wep != null)
+		{
+			if (!NobleWeapons.Any((ThingDef x) => wep.DespisedWeapons.Contains(x)))
 			{
-				Gen.Swap<WeaponClassDef>(ref this.noble, ref this.despised);
-				this.RecacheData();
-			}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-			yield break;
-		}
-
-		// Token: 0x0600D823 RID: 55331 RVA: 0x00400D10 File Offset: 0x003FEF10
-		public IdeoWeaponDisposition GetDispositionForWeapon(ThingDef td)
-		{
-			if (this.NobleWeapons.Contains(td))
-			{
-				return IdeoWeaponDisposition.Noble;
+				return !DespisedWeapons.Any((ThingDef x) => wep.NobleWeapons.Contains(x));
 			}
-			if (this.DespisedWeapons.Contains(td))
-			{
-				return IdeoWeaponDisposition.Despised;
-			}
-			return IdeoWeaponDisposition.None;
+			return false;
 		}
+		return base.CompatibleWith(other);
+	}
 
-		// Token: 0x0600D824 RID: 55332 RVA: 0x00400D34 File Offset: 0x003FEF34
-		public override bool CompatibleWith(Precept other)
-		{
-			Precept_Weapon wep = other as Precept_Weapon;
-			if (wep != null)
-			{
-				return !this.NobleWeapons.Any((ThingDef x) => wep.DespisedWeapons.Contains(x)) && !this.DespisedWeapons.Any((ThingDef x) => wep.NobleWeapons.Contains(x));
-			}
-			return base.CompatibleWith(other);
-		}
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Defs.Look(ref noble, "noble");
+		Scribe_Defs.Look(ref despised, "despised");
+	}
 
-		// Token: 0x0600D825 RID: 55333 RVA: 0x00400D98 File Offset: 0x003FEF98
-		public override void ExposeData()
-		{
-			base.ExposeData();
-			Scribe_Defs.Look<WeaponClassDef>(ref this.noble, "noble");
-			Scribe_Defs.Look<WeaponClassDef>(ref this.despised, "despised");
-		}
-
-		// Token: 0x0600D826 RID: 55334 RVA: 0x00400DC0 File Offset: 0x003FEFC0
-		public override void CopyTo(Precept other)
-		{
-			base.CopyTo(other);
-			Precept_Weapon precept_Weapon = (Precept_Weapon)other;
-			precept_Weapon.noble = this.noble;
-			precept_Weapon.despised = this.despised;
-		}
-
-		// Token: 0x0400927D RID: 37501
-		public WeaponClassDef noble;
-
-		// Token: 0x0400927E RID: 37502
-		public WeaponClassDef despised;
-
-		// Token: 0x0400927F RID: 37503
-		[Unsaved(false)]
-		private ThingDef iconWeapon;
-
-		// Token: 0x04009280 RID: 37504
-		[Unsaved(false)]
-		private HashSet<ThingDef> nobleWeaponsCached;
-
-		// Token: 0x04009281 RID: 37505
-		[Unsaved(false)]
-		private HashSet<ThingDef> despisedWeaponsCached;
+	public override void CopyTo(Precept other)
+	{
+		base.CopyTo(other);
+		Precept_Weapon obj = (Precept_Weapon)other;
+		obj.noble = noble;
+		obj.despised = despised;
 	}
 }

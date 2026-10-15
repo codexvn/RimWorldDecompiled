@@ -1,80 +1,166 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompPolluteOverTime : ThingComp
 {
-	// Token: 0x02002DB0 RID: 11696
-	public class CompPolluteOverTime : ThingComp
+	[CompilerGenerated]
+	private sealed class _003CCompGetGizmosExtra_003Ed__7 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x170029EB RID: 10731
-		// (get) Token: 0x06010716 RID: 67350 RVA: 0x004BE5FC File Offset: 0x004BC7FC
-		private CompProperties_PolluteOverTime Props
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompPolluteOverTime _003C_003E4__this;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (CompProperties_PolluteOverTime)this.props;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170029EC RID: 10732
-		// (get) Token: 0x06010717 RID: 67351 RVA: 0x004BE609 File Offset: 0x004BC809
-		private int TicksToPolluteCell
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return 60000 / this.Props.cellsToPollutePerDay;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06010718 RID: 67352 RVA: 0x004BE61C File Offset: 0x004BC81C
-		public override void CompTick()
+		[DebuggerHidden]
+		public _003CCompGetGizmosExtra_003Ed__7(int _003C_003E1__state)
 		{
-			if (this.parent.Spawned && this.parent.IsHashIntervalTick(this.TicksToPolluteCell))
-			{
-				this.Pollute();
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x06010719 RID: 67353 RVA: 0x004BE644 File Offset: 0x004BC844
-		private void Pollute()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			if (!ModsConfig.BiotechActive)
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			CompPolluteOverTime @object = _003C_003E4__this;
+			switch (num)
 			{
-				return;
-			}
-			int num = GenRadial.NumCellsInRadius(GenRadial.MaxRadialPatternRadius - 1f);
-			for (int i = 0; i < num; i++)
-			{
-				IntVec3 intVec = this.parent.Position + GenRadial.RadialPattern[i];
-				if (!intVec.IsPolluted(this.parent.Map) && intVec.CanPollute(this.parent.Map))
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (DebugSettings.ShowDevGizmos)
 				{
-					intVec.Pollute(this.parent.Map, false);
-					this.parent.Map.effecterMaintainer.AddEffecterToMaintain(EffecterDefOf.CellPollution.Spawn(intVec, this.parent.Map, Vector3.zero, 1f), intVec, 45);
-					return;
+					_003C_003E2__current = new Command_Action
+					{
+						defaultLabel = "DEV: Pollute",
+						action = @object.Pollute
+					};
+					_003C_003E1__state = 1;
+					return true;
 				}
+				break;
+			case 1:
+				_003C_003E1__state = -1;
+				break;
 			}
+			return false;
 		}
 
-		// Token: 0x0601071A RID: 67354 RVA: 0x004BE709 File Offset: 0x004BC909
-		public override string CompInspectStringExtra()
+		bool IEnumerator.MoveNext()
 		{
-			return "TilePollution".Translate() + ": " + "CellsPerDay".Translate(this.Props.cellsToPollutePerDay);
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0601071B RID: 67355 RVA: 0x004BE743 File Offset: 0x004BC943
-		public override IEnumerable<Gizmo> CompGetGizmosExtra()
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			if (DebugSettings.ShowDevGizmos)
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CCompGetGizmosExtra_003Ed__7 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				yield return new Command_Action
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CCompGetGizmosExtra_003Ed__7(0)
 				{
-					defaultLabel = "DEV: Pollute",
-					action = new Action(this.Pollute)
+					_003C_003E4__this = _003C_003E4__this
 				};
 			}
-			yield break;
+			return result;
 		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	private CompProperties_PolluteOverTime Props => (CompProperties_PolluteOverTime)props;
+
+	private int TicksToPolluteCell => 60000 / Props.cellsToPollutePerDay;
+
+	public override void CompTick()
+	{
+		if (parent.Spawned && parent.IsHashIntervalTick(TicksToPolluteCell))
+		{
+			Pollute();
+		}
+	}
+
+	private void Pollute()
+	{
+		if (!ModsConfig.BiotechActive)
+		{
+			return;
+		}
+		int num = GenRadial.NumCellsInRadius(GenRadial.MaxRadialPatternRadius - 1f);
+		for (int i = 0; i < num; i++)
+		{
+			IntVec3 intVec = parent.Position + GenRadial.RadialPattern[i];
+			if (!intVec.IsPolluted(parent.Map) && intVec.CanPollute(parent.Map))
+			{
+				intVec.Pollute(parent.Map);
+				parent.Map.effecterMaintainer.AddEffecterToMaintain(EffecterDefOf.CellPollution.Spawn(intVec, parent.Map, Vector3.zero), intVec, 45);
+				break;
+			}
+		}
+	}
+
+	public override string CompInspectStringExtra()
+	{
+		return "TilePollution".Translate() + ": " + "CellsPerDay".Translate(Props.cellsToPollutePerDay);
+	}
+
+	[IteratorStateMachine(typeof(_003CCompGetGizmosExtra_003Ed__7))]
+	public override IEnumerable<Gizmo> CompGetGizmosExtra()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CCompGetGizmosExtra_003Ed__7(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

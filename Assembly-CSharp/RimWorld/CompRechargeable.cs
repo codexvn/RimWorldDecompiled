@@ -1,155 +1,236 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompRechargeable : ThingComp
 {
-	// Token: 0x02002DD8 RID: 11736
-	public class CompRechargeable : ThingComp
+	[CompilerGenerated]
+	private sealed class _003CCompGetGizmosExtra_003Ed__11 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x17002A21 RID: 10785
-		// (get) Token: 0x0601080D RID: 67597 RVA: 0x004C2573 File Offset: 0x004C0773
-		private CompProperties_Rechargeable Props
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompRechargeable _003C_003E4__this;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (CompProperties_Rechargeable)this.props;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002A22 RID: 10786
-		// (get) Token: 0x0601080E RID: 67598 RVA: 0x004C2580 File Offset: 0x004C0780
-		public bool Charged
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.ticksUntilCharged == 0;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0601080F RID: 67599 RVA: 0x004C258B File Offset: 0x004C078B
-		public override void Initialize(CompProperties props)
+		[DebuggerHidden]
+		public _003CCompGetGizmosExtra_003Ed__11(int _003C_003E1__state)
 		{
-			base.Initialize(props);
-			this.ticksUntilCharged = this.Props.ticksToRecharge;
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x06010810 RID: 67600 RVA: 0x004C25A5 File Offset: 0x004C07A5
-		public override void PostDeSpawn(Map map, DestroyMode mode = DestroyMode.WillReplace)
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			if (this.progressBar != null)
-			{
-				this.progressBar.Cleanup();
-				this.progressBar = null;
-			}
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x06010811 RID: 67601 RVA: 0x004C25C4 File Offset: 0x004C07C4
-		public override void CompTick()
+		private bool MoveNext()
 		{
-			base.CompTick();
-			if (this.compPowerCached == null)
+			int num = _003C_003E1__state;
+			CompRechargeable CS_0024_003C_003E8__locals7 = _003C_003E4__this;
+			switch (num)
 			{
-				this.compPowerCached = this.parent.TryGetComp<CompPowerTrader>();
-			}
-			if (this.ticksUntilCharged > 0 && this.compPowerCached.PowerOn)
-			{
-				if (this.ticksUntilCharged == 1 && this.Props.chargedSoundDef != null)
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (!DebugSettings.ShowDevGizmos)
 				{
-					this.Props.chargedSoundDef.PlayOneShot(new TargetInfo(this.parent.Position, this.parent.Map, false));
+					break;
 				}
-				this.ticksUntilCharged--;
-			}
-			if (!this.Charged && this.parent.Spawned)
-			{
-				if (this.progressBar == null)
+				if (!CS_0024_003C_003E8__locals7.Charged)
 				{
-					this.progressBar = EffecterDefOf.ProgressBarAlwaysVisible.Spawn();
-				}
-				this.progressBar.EffectTick(this.parent, TargetInfo.Invalid);
-				MoteProgressBar mote = ((SubEffecter_ProgressBar)this.progressBar.children[0]).mote;
-				if (mote != null)
-				{
-					mote.progress = 1f - Mathf.Clamp01((float)this.ticksUntilCharged / (float)this.Props.ticksToRecharge);
-					mote.offsetZ = -0.5f;
-					return;
-				}
-			}
-			else if (this.progressBar != null)
-			{
-				this.progressBar.Cleanup();
-				this.progressBar = null;
-			}
-		}
-
-		// Token: 0x06010812 RID: 67602 RVA: 0x004C2714 File Offset: 0x004C0914
-		public void Discharge()
-		{
-			this.ticksUntilCharged = this.Props.ticksToRecharge;
-			if (this.Props.dischargeSoundDef != null)
-			{
-				this.Props.dischargeSoundDef.PlayOneShot(new TargetInfo(this.parent.Position, this.parent.Map, false));
-			}
-		}
-
-		// Token: 0x06010813 RID: 67603 RVA: 0x004C2770 File Offset: 0x004C0970
-		public override IEnumerable<Gizmo> CompGetGizmosExtra()
-		{
-			if (DebugSettings.ShowDevGizmos)
-			{
-				if (!this.Charged)
-				{
-					yield return new Command_Action
+					_003C_003E2__current = new Command_Action
 					{
 						defaultLabel = "DEV: Recharge",
-						action = delegate()
+						action = delegate
 						{
-							if (this.Props.chargedSoundDef != null)
+							if (CS_0024_003C_003E8__locals7.Props.chargedSoundDef != null)
 							{
-								this.Props.chargedSoundDef.PlayOneShot(new TargetInfo(this.parent.Position, this.parent.Map, false));
+								CS_0024_003C_003E8__locals7.Props.chargedSoundDef.PlayOneShot(new TargetInfo(CS_0024_003C_003E8__locals7.parent.Position, CS_0024_003C_003E8__locals7.parent.Map));
 							}
-							this.ticksUntilCharged = 0;
+							CS_0024_003C_003E8__locals7.ticksUntilCharged = 0;
 						}
 					};
+					_003C_003E1__state = 1;
+					return true;
 				}
-				else
+				_003C_003E2__current = new Command_Action
 				{
-					yield return new Command_Action
-					{
-						defaultLabel = "DEV: Discharge",
-						action = new Action(this.Discharge)
-					};
-				}
+					defaultLabel = "DEV: Discharge",
+					action = CS_0024_003C_003E8__locals7.Discharge
+				};
+				_003C_003E1__state = 2;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				break;
+			case 2:
+				_003C_003E1__state = -1;
+				break;
 			}
-			yield break;
+			return false;
 		}
 
-		// Token: 0x06010814 RID: 67604 RVA: 0x004C2780 File Offset: 0x004C0980
-		public override string CompInspectStringExtra()
+		bool IEnumerator.MoveNext()
 		{
-			if (this.Charged)
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CCompGetGizmosExtra_003Ed__11 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				return "RechargeableReady".Translate() + ".";
+				_003C_003E1__state = 0;
+				result = this;
 			}
-			return "RechargeableCharging".Translate() + ": " + "DurationLeft".Translate(this.ticksUntilCharged.ToStringTicksToPeriod(true, true, true, true, false)) + ".";
+			else
+			{
+				result = new _003CCompGetGizmosExtra_003Ed__11(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
 		}
 
-		// Token: 0x06010815 RID: 67605 RVA: 0x004C27F6 File Offset: 0x004C09F6
-		public override void PostExposeData()
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			base.PostExposeData();
-			Scribe_Values.Look<int>(ref this.ticksUntilCharged, "ticksUntilCharged", 0, false);
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x0400AC1E RID: 44062
-		private int ticksUntilCharged;
+	private int ticksUntilCharged;
 
-		// Token: 0x0400AC1F RID: 44063
-		private Effecter progressBar;
+	private Effecter progressBar;
 
-		// Token: 0x0400AC20 RID: 44064
-		private CompPowerTrader compPowerCached;
+	private CompPowerTrader compPowerCached;
+
+	private CompProperties_Rechargeable Props => (CompProperties_Rechargeable)props;
+
+	public bool Charged => ticksUntilCharged == 0;
+
+	public override void Initialize(CompProperties props)
+	{
+		base.Initialize(props);
+		ticksUntilCharged = Props.ticksToRecharge;
+	}
+
+	public override void PostDeSpawn(Map map, DestroyMode mode = DestroyMode.WillReplace)
+	{
+		if (progressBar != null)
+		{
+			progressBar.Cleanup();
+			progressBar = null;
+		}
+	}
+
+	public override void CompTick()
+	{
+		base.CompTick();
+		if (compPowerCached == null)
+		{
+			compPowerCached = parent.TryGetComp<CompPowerTrader>();
+		}
+		if (ticksUntilCharged > 0 && compPowerCached.PowerOn)
+		{
+			if (ticksUntilCharged == 1 && Props.chargedSoundDef != null)
+			{
+				Props.chargedSoundDef.PlayOneShot(new TargetInfo(parent.Position, parent.Map));
+			}
+			ticksUntilCharged--;
+		}
+		if (!Charged && parent.Spawned)
+		{
+			if (progressBar == null)
+			{
+				progressBar = EffecterDefOf.ProgressBarAlwaysVisible.Spawn();
+			}
+			progressBar.EffectTick(parent, TargetInfo.Invalid);
+			MoteProgressBar mote = ((SubEffecter_ProgressBar)progressBar.children[0]).mote;
+			if (mote != null)
+			{
+				mote.progress = 1f - Mathf.Clamp01((float)ticksUntilCharged / (float)Props.ticksToRecharge);
+				mote.offsetZ = -0.5f;
+			}
+		}
+		else if (progressBar != null)
+		{
+			progressBar.Cleanup();
+			progressBar = null;
+		}
+	}
+
+	public void Discharge()
+	{
+		ticksUntilCharged = Props.ticksToRecharge;
+		if (Props.dischargeSoundDef != null)
+		{
+			Props.dischargeSoundDef.PlayOneShot(new TargetInfo(parent.Position, parent.Map));
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CCompGetGizmosExtra_003Ed__11))]
+	public override IEnumerable<Gizmo> CompGetGizmosExtra()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CCompGetGizmosExtra_003Ed__11(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override string CompInspectStringExtra()
+	{
+		if (Charged)
+		{
+			return "RechargeableReady".Translate() + ".";
+		}
+		return "RechargeableCharging".Translate() + ": " + "DurationLeft".Translate(ticksUntilCharged.ToStringTicksToPeriod(allowSeconds: true, shortForm: true)) + ".";
+	}
+
+	public override void PostExposeData()
+	{
+		base.PostExposeData();
+		Scribe_Values.Look(ref ticksUntilCharged, "ticksUntilCharged", 0);
 	}
 }

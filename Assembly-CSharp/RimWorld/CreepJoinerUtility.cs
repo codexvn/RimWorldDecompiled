@@ -1,233 +1,203 @@
-﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Verse;
 using Verse.AI.Group;
 
-namespace RimWorld
+namespace RimWorld;
+
+public static class CreepJoinerUtility
 {
-	// Token: 0x020022C9 RID: 8905
-	public static class CreepJoinerUtility
+	private static readonly List<CreepJoinerBaseDef> requires = new List<CreepJoinerBaseDef>();
+
+	private static readonly List<CreepJoinerBaseDef> exclude = new List<CreepJoinerBaseDef>();
+
+	private static readonly List<ICreepJoinerDef> temp = new List<ICreepJoinerDef>();
+
+	public static void GetCreepjoinerSpecifics(Map map, ref CreepJoinerFormKindDef form, ref CreepJoinerBenefitDef benefit, ref CreepJoinerDownsideDef downside, ref CreepJoinerAggressiveDef aggressive, ref CreepJoinerRejectionDef rejection)
 	{
-		// Token: 0x0600C1C6 RID: 49606 RVA: 0x003823A0 File Offset: 0x003805A0
-		public static void GetCreepjoinerSpecifics(Map map, ref CreepJoinerFormKindDef form, ref CreepJoinerBenefitDef benefit, ref CreepJoinerDownsideDef downside, ref CreepJoinerAggressiveDef aggressive, ref CreepJoinerRejectionDef rejection)
+		float combatPoints = StorytellerUtility.DefaultThreatPointsNow(map);
+		if (form == null)
 		{
-			float combatPoints = StorytellerUtility.DefaultThreatPointsNow(map);
-			if (form == null)
-			{
-				form = DefDatabase<CreepJoinerFormKindDef>.AllDefsListForReading.RandomElementByWeight((CreepJoinerFormKindDef x) => x.Weight);
-			}
-			CreepJoinerUtility.requires.AddRange(form.Requires);
-			CreepJoinerUtility.exclude.AddRange(form.Excludes);
-			if (benefit == null)
-			{
-				benefit = CreepJoinerUtility.GetRandom<CreepJoinerBenefitDef>(DefDatabase<CreepJoinerBenefitDef>.AllDefsListForReading, combatPoints, CreepJoinerUtility.requires, CreepJoinerUtility.exclude);
-			}
-			if (downside == null)
-			{
-				downside = CreepJoinerUtility.GetRandom<CreepJoinerDownsideDef>(DefDatabase<CreepJoinerDownsideDef>.AllDefsListForReading, combatPoints, CreepJoinerUtility.requires, CreepJoinerUtility.exclude);
-			}
-			if (aggressive == null)
-			{
-				aggressive = CreepJoinerUtility.GetRandom<CreepJoinerAggressiveDef>(DefDatabase<CreepJoinerAggressiveDef>.AllDefsListForReading, combatPoints, CreepJoinerUtility.requires, CreepJoinerUtility.exclude);
-			}
-			if (rejection == null)
-			{
-				rejection = CreepJoinerUtility.GetRandom<CreepJoinerRejectionDef>(DefDatabase<CreepJoinerRejectionDef>.AllDefsListForReading, combatPoints, CreepJoinerUtility.requires, CreepJoinerUtility.exclude);
-			}
-			CreepJoinerUtility.exclude.Clear();
-			CreepJoinerUtility.requires.Clear();
+			form = DefDatabase<CreepJoinerFormKindDef>.AllDefsListForReading.RandomElementByWeight((CreepJoinerFormKindDef x) => x.Weight);
 		}
-
-		// Token: 0x0600C1C7 RID: 49607 RVA: 0x0038248C File Offset: 0x0038068C
-		public static Pawn GenerateAndSpawn(Map map, float combatPoints)
+		requires.AddRange(form.Requires);
+		exclude.AddRange(form.Excludes);
+		if (benefit == null)
 		{
-			CreepJoinerFormKindDef creepJoinerFormKindDef = DefDatabase<CreepJoinerFormKindDef>.AllDefsListForReading.RandomElementByWeight((CreepJoinerFormKindDef x) => x.Weight);
-			CreepJoinerUtility.requires.AddRange(creepJoinerFormKindDef.Requires);
-			CreepJoinerUtility.exclude.AddRange(creepJoinerFormKindDef.Excludes);
-			CreepJoinerBenefitDef random = CreepJoinerUtility.GetRandom<CreepJoinerBenefitDef>(DefDatabase<CreepJoinerBenefitDef>.AllDefsListForReading, combatPoints, CreepJoinerUtility.requires, CreepJoinerUtility.exclude);
-			CreepJoinerDownsideDef random2 = CreepJoinerUtility.GetRandom<CreepJoinerDownsideDef>(DefDatabase<CreepJoinerDownsideDef>.AllDefsListForReading, combatPoints, CreepJoinerUtility.requires, CreepJoinerUtility.exclude);
-			CreepJoinerAggressiveDef random3 = CreepJoinerUtility.GetRandom<CreepJoinerAggressiveDef>(DefDatabase<CreepJoinerAggressiveDef>.AllDefsListForReading, combatPoints, CreepJoinerUtility.requires, CreepJoinerUtility.exclude);
-			CreepJoinerRejectionDef random4 = CreepJoinerUtility.GetRandom<CreepJoinerRejectionDef>(DefDatabase<CreepJoinerRejectionDef>.AllDefsListForReading, combatPoints, CreepJoinerUtility.requires, CreepJoinerUtility.exclude);
-			CreepJoinerUtility.exclude.Clear();
-			CreepJoinerUtility.requires.Clear();
-			return CreepJoinerUtility.GenerateAndSpawn(creepJoinerFormKindDef, random, random2, random3, random4, map);
+			benefit = GetRandom(DefDatabase<CreepJoinerBenefitDef>.AllDefsListForReading, combatPoints, requires, exclude);
 		}
-
-		// Token: 0x0600C1C8 RID: 49608 RVA: 0x0038255C File Offset: 0x0038075C
-		public static Pawn GenerateAndSpawn(CreepJoinerFormKindDef form, CreepJoinerBenefitDef benefit, CreepJoinerDownsideDef downside, CreepJoinerAggressiveDef aggressive, CreepJoinerRejectionDef rejection, Map map)
+		if (downside == null)
 		{
-			Pawn pawn = PawnGenerator.GeneratePawn(new PawnGenerationRequest(form, null, PawnGenerationContext.NonPlayer, null, true, false, false, true, false, 1f, false, true, true, true, true, false, false, false, false, 0f, 0f, null, 1f, null, null, null, null, null, null, null, null, null, null, null, null, false, false, false, false, null, null, null, null, null, 0f, DevelopmentalStage.Adult, null, null, null, true, false, false, -1, 0, false)
-			{
-				AllowedDevelopmentalStages = DevelopmentalStage.Adult,
-				ForceGenerateNewPawn = true,
-				AllowFood = true,
-				DontGiveWeapon = true,
-				OnlyUseForcedBackstories = form.fixedAdultBackstories.Any<BackstoryDef>(),
-				MaximumAgeTraits = 1,
-				MinimumAgeTraits = 1,
-				IsCreepJoiner = true,
-				ForceNoIdeoGear = true,
-				MustBeCapableOfViolence = true
-			});
-			Pawn_CreepJoinerTracker creepjoiner = pawn.creepjoiner;
-			creepjoiner.form = form;
-			creepjoiner.benefit = benefit;
-			creepjoiner.downside = downside;
-			creepjoiner.aggressive = aggressive;
-			creepjoiner.rejection = rejection;
-			CreepJoinerUtility.ApplyExtraTraits(pawn, benefit.traits);
-			CreepJoinerUtility.ApplyExtraTraits(pawn, downside.traits);
-			CreepJoinerUtility.ApplyExtraHediffs(pawn, benefit.hediffs);
-			CreepJoinerUtility.ApplyExtraHediffs(pawn, downside.hediffs);
-			CreepJoinerUtility.ApplySkillOverrides(pawn, benefit.skills);
-			CreepJoinerUtility.ApplyExtraAbilities(pawn, benefit.abilities);
-			CreepJoinerUtility.ApplyExtraAbilities(pawn, downside.abilities);
-			pawn.guest.Recruitable = false;
-			IntVec3 loc;
-			if (!RCellFinder.TryFindRandomPawnEntryCell(out loc, map, CellFinder.EdgeRoadChance_Friendly, false, (IntVec3 cell) => map.reachability.CanReachMapEdge(cell, TraverseParms.For(TraverseMode.PassDoors, Danger.Deadly, false, false, false, true, false))))
-			{
-				return null;
-			}
-			GenSpawn.Spawn(pawn, loc, map, WipeMode.Vanish);
-			IntVec3 idleSpot;
-			if (!RCellFinder.TryFindRandomSpotJustOutsideColony(pawn, out idleSpot))
-			{
-				return null;
-			}
-			LordMaker.MakeNewLord(pawn.Faction, new LordJob_CreepJoiner(idleSpot, pawn), map, null).AddPawn(pawn);
-			creepjoiner.Notify_Created();
-			return pawn;
+			downside = GetRandom(DefDatabase<CreepJoinerDownsideDef>.AllDefsListForReading, combatPoints, requires, exclude);
 		}
-
-		// Token: 0x0600C1C9 RID: 49609 RVA: 0x0038275C File Offset: 0x0038095C
-		private static void ApplySkillOverrides(Pawn pawn, List<CreepJoinerBenefitDef.SkillValue> skills)
+		if (aggressive == null)
 		{
-			foreach (CreepJoinerBenefitDef.SkillValue skillValue in skills)
+			aggressive = GetRandom(DefDatabase<CreepJoinerAggressiveDef>.AllDefsListForReading, combatPoints, requires, exclude);
+		}
+		if (rejection == null)
+		{
+			rejection = GetRandom(DefDatabase<CreepJoinerRejectionDef>.AllDefsListForReading, combatPoints, requires, exclude);
+		}
+		exclude.Clear();
+		requires.Clear();
+	}
+
+	public static Pawn GenerateAndSpawn(Map map, float combatPoints)
+	{
+		CreepJoinerFormKindDef creepJoinerFormKindDef = DefDatabase<CreepJoinerFormKindDef>.AllDefsListForReading.RandomElementByWeight((CreepJoinerFormKindDef x) => x.Weight);
+		requires.AddRange(creepJoinerFormKindDef.Requires);
+		exclude.AddRange(creepJoinerFormKindDef.Excludes);
+		CreepJoinerBenefitDef random = GetRandom(DefDatabase<CreepJoinerBenefitDef>.AllDefsListForReading, combatPoints, requires, exclude);
+		CreepJoinerDownsideDef random2 = GetRandom(DefDatabase<CreepJoinerDownsideDef>.AllDefsListForReading, combatPoints, requires, exclude);
+		CreepJoinerAggressiveDef random3 = GetRandom(DefDatabase<CreepJoinerAggressiveDef>.AllDefsListForReading, combatPoints, requires, exclude);
+		CreepJoinerRejectionDef random4 = GetRandom(DefDatabase<CreepJoinerRejectionDef>.AllDefsListForReading, combatPoints, requires, exclude);
+		exclude.Clear();
+		requires.Clear();
+		return GenerateAndSpawn(creepJoinerFormKindDef, random, random2, random3, random4, map);
+	}
+
+	public static Pawn GenerateAndSpawn(CreepJoinerFormKindDef form, CreepJoinerBenefitDef benefit, CreepJoinerDownsideDef downside, CreepJoinerAggressiveDef aggressive, CreepJoinerRejectionDef rejection, Map map)
+	{
+		PawnGenerationRequest request = new PawnGenerationRequest(form, null, PawnGenerationContext.NonPlayer, map.Tile, forceGenerateNewPawn: true, allowDead: false, allowDowned: false, canGeneratePawnRelations: true, mustBeCapableOfViolence: false, 1f, forceAddFreeWarmLayerIfNeeded: false, allowGay: true, allowPregnant: true, allowFood: true, allowAddictions: true, inhabitant: false, certainlyBeenInCryptosleep: false, forceRedressWorldPawnIfFormerColonist: false, worldPawnFactionDoesntMatter: false, 0f, 0f, null, 1f, null, null, null, null, null, null, null, null, null, null, null, null, forceNoIdeo: false, forceNoBackstory: false, forbidAnyTitle: false, forceDead: false, null, null, null, null, null, 0f, DevelopmentalStage.Adult, null, null, null, forceRecruitable: true);
+		request.AllowedDevelopmentalStages = DevelopmentalStage.Adult;
+		request.ForceGenerateNewPawn = true;
+		request.AllowFood = true;
+		request.DontGiveWeapon = true;
+		request.OnlyUseForcedBackstories = form.fixedAdultBackstories.Any();
+		request.MaximumAgeTraits = 1;
+		request.MinimumAgeTraits = 1;
+		request.IsCreepJoiner = true;
+		request.ForceNoIdeoGear = true;
+		request.MustBeCapableOfViolence = true;
+		request.CanGeneratePawnRelations = false;
+		Pawn pawn = PawnGenerator.GeneratePawn(request);
+		Pawn_CreepJoinerTracker creepjoiner = pawn.creepjoiner;
+		creepjoiner.form = form;
+		creepjoiner.benefit = benefit;
+		creepjoiner.downside = downside;
+		creepjoiner.aggressive = aggressive;
+		creepjoiner.rejection = rejection;
+		ApplyExtraTraits(pawn, benefit.traits);
+		ApplyExtraTraits(pawn, downside.traits);
+		ApplyExtraHediffs(pawn, benefit.hediffs);
+		ApplyExtraHediffs(pawn, downside.hediffs);
+		ApplySkillOverrides(pawn, benefit.skills);
+		ApplyExtraAbilities(pawn, benefit.abilities);
+		ApplyExtraAbilities(pawn, downside.abilities);
+		pawn.guest.Recruitable = false;
+		if (!RCellFinder.TryFindRandomPawnEntryCell(out var result, map, CellFinder.EdgeRoadChance_Friendly, allowFogged: false, (IntVec3 cell) => map.reachability.CanReachMapEdge(cell, TraverseParms.For(TraverseMode.PassDoors))))
+		{
+			return null;
+		}
+		GenSpawn.Spawn(pawn, result, map);
+		if (!RCellFinder.TryFindRandomSpotJustOutsideColony(pawn, out var result2))
+		{
+			return null;
+		}
+		LordMaker.MakeNewLord(pawn.Faction, new LordJob_CreepJoiner(result2, pawn), map).AddPawn(pawn);
+		creepjoiner.Notify_Created();
+		return pawn;
+	}
+
+	private static void ApplySkillOverrides(Pawn pawn, List<CreepJoinerBenefitDef.SkillValue> skills)
+	{
+		foreach (CreepJoinerBenefitDef.SkillValue skill2 in skills)
+		{
+			SkillRecord skill = pawn.skills.GetSkill(skill2.skill);
+			skill.Level = skill2.range.RandomInRange;
+			skill.xpSinceMidnight = 0f;
+			skill.xpSinceLastLevel = 0f;
+		}
+	}
+
+	private static void ApplyExtraTraits(Pawn pawn, List<BackstoryTrait> traits)
+	{
+		foreach (BackstoryTrait trait in traits)
+		{
+			if (!pawn.story.traits.HasTrait(trait.def))
 			{
-				SkillRecord skill = pawn.skills.GetSkill(skillValue.skill);
-				skill.Level = skillValue.range.RandomInRange;
-				skill.xpSinceMidnight = 0f;
-				skill.xpSinceLastLevel = 0f;
+				pawn.story.traits.GainTrait(new Trait(trait.def, trait.degree, forced: true));
 			}
 		}
+	}
 
-		// Token: 0x0600C1CA RID: 49610 RVA: 0x003827DC File Offset: 0x003809DC
-		private static void ApplyExtraTraits(Pawn pawn, List<BackstoryTrait> traits)
+	private static void ApplyExtraHediffs(Pawn pawn, List<HediffDef> hediffs)
+	{
+		foreach (HediffDef hediff in hediffs)
 		{
-			foreach (BackstoryTrait backstoryTrait in traits)
+			pawn.health.AddHediff(hediff, null, null);
+		}
+	}
+
+	private static void ApplyExtraAbilities(Pawn pawn, List<AbilityDef> abilities)
+	{
+		foreach (AbilityDef ability in abilities)
+		{
+			pawn.abilities.GainAbility(ability);
+		}
+	}
+
+	public static T GetRandom<T>(List<T> defs, float combatPoints, List<CreepJoinerBaseDef> requires, List<CreepJoinerBaseDef> exclude) where T : CreepJoinerBaseDef
+	{
+		T val;
+		if (requires.Empty() && exclude.Empty())
+		{
+			val = defs.Where((T x) => combatPoints >= x.MinCombatPoints && x.CanOccurRandomly).RandomElementByWeight((T x) => x.Weight);
+		}
+		else
+		{
+			bool flag = false;
+			foreach (T def in defs)
 			{
-				if (!pawn.story.traits.HasTrait(backstoryTrait.def))
+				if (!(combatPoints < def.MinCombatPoints) && def.CanOccurRandomly && requires.Contains(def))
 				{
-					pawn.story.traits.GainTrait(new Trait(backstoryTrait.def, backstoryTrait.degree, true), false);
+					flag = true;
+					break;
 				}
 			}
-		}
-
-		// Token: 0x0600C1CB RID: 49611 RVA: 0x00382860 File Offset: 0x00380A60
-		private static void ApplyExtraHediffs(Pawn pawn, List<HediffDef> hediffs)
-		{
-			foreach (HediffDef def in hediffs)
+			if (flag)
 			{
-				pawn.health.AddHediff(def, null, null, null);
-			}
-		}
-
-		// Token: 0x0600C1CC RID: 49612 RVA: 0x003828C0 File Offset: 0x00380AC0
-		private static void ApplyExtraAbilities(Pawn pawn, List<AbilityDef> abilities)
-		{
-			foreach (AbilityDef def in abilities)
-			{
-				pawn.abilities.GainAbility(def);
-			}
-		}
-
-		// Token: 0x0600C1CD RID: 49613 RVA: 0x00382914 File Offset: 0x00380B14
-		public static T GetRandom<T>(List<T> defs, float combatPoints, List<CreepJoinerBaseDef> requires, List<CreepJoinerBaseDef> exclude) where T : CreepJoinerBaseDef
-		{
-			T t;
-			if (requires.Empty<CreepJoinerBaseDef>() && exclude.Empty<CreepJoinerBaseDef>())
-			{
-				t = (from x in defs
-				where combatPoints >= x.MinCombatPoints && x.CanOccurRandomly
-				select x).RandomElementByWeight((T x) => x.Weight);
+				foreach (T def2 in defs)
+				{
+					if (!(combatPoints < def2.MinCombatPoints) && def2.CanOccurRandomly && requires.Contains(def2))
+					{
+						temp.Add(def2);
+					}
+				}
 			}
 			else
 			{
-				bool flag = false;
-				foreach (T t2 in defs)
+				foreach (T def3 in defs)
 				{
-					if (combatPoints >= t2.MinCombatPoints && t2.CanOccurRandomly && requires.Contains(t2))
+					if (combatPoints >= def3.MinCombatPoints && def3.CanOccurRandomly)
 					{
-						flag = true;
-						break;
+						temp.Add(def3);
 					}
 				}
-				if (flag)
-				{
-					using (List<T>.Enumerator enumerator = defs.GetEnumerator())
-					{
-						while (enumerator.MoveNext())
-						{
-							T t3 = enumerator.Current;
-							if (combatPoints >= t3.MinCombatPoints && t3.CanOccurRandomly && requires.Contains(t3))
-							{
-								CreepJoinerUtility.temp.Add(t3);
-							}
-						}
-						goto IL_189;
-					}
-				}
-				foreach (T t4 in defs)
-				{
-					if (combatPoints >= t4.MinCombatPoints && t4.CanOccurRandomly)
-					{
-						CreepJoinerUtility.temp.Add(t4);
-					}
-				}
-				IL_189:
-				for (int i = CreepJoinerUtility.temp.Count - 1; i >= 0; i--)
-				{
-					if (exclude.Contains(CreepJoinerUtility.temp[i]))
-					{
-						defs.RemoveAt(i);
-					}
-				}
-				if (CreepJoinerUtility.temp.Empty<ICreepJoinerDef>())
-				{
-					string text = (from x in defs
-					select x.label).ToCommaList(false, false);
-					string text2 = (from x in requires
-					select x.label).ToCommaList(false, false);
-					string text3 = (from x in exclude
-					select x.label).ToCommaList(false, false);
-					Log.Error(string.Format("Attempted to create creepjoiner but blacklist removed all possible whitelist; combatPoints = {0}, defs = ({1}), whitelist = ({2}), blacklist = ({3})", new object[]
-					{
-						combatPoints,
-						text,
-						text2,
-						text3
-					}));
-					t = defs.RandomElementByWeight((T x) => x.Weight);
-				}
-				else
-				{
-					t = (CreepJoinerUtility.temp.RandomElementByWeight((ICreepJoinerDef x) => x.Weight) as T);
-				}
-				CreepJoinerUtility.temp.Clear();
 			}
-			exclude.AddRange(t.Excludes);
-			requires.AddRange(t.Requires);
-			return t;
+			for (int num = temp.Count - 1; num >= 0; num--)
+			{
+				if (exclude.Contains(temp[num]))
+				{
+					defs.RemoveAt(num);
+				}
+			}
+			if (temp.Empty())
+			{
+				string value = defs.Select((T x) => x.label).ToCommaList();
+				string value2 = requires.Select((CreepJoinerBaseDef x) => x.label).ToCommaList();
+				string value3 = exclude.Select((CreepJoinerBaseDef x) => x.label).ToCommaList();
+				Log.Error($"Attempted to create creepjoiner but blacklist removed all possible whitelist; combatPoints = {combatPoints}, defs = ({value}), whitelist = ({value2}), blacklist = ({value3})");
+				val = defs.RandomElementByWeight((T x) => x.Weight);
+			}
+			else
+			{
+				val = temp.RandomElementByWeight((ICreepJoinerDef x) => x.Weight) as T;
+			}
+			temp.Clear();
 		}
-
-		// Token: 0x04008457 RID: 33879
-		private static readonly List<CreepJoinerBaseDef> requires = new List<CreepJoinerBaseDef>();
-
-		// Token: 0x04008458 RID: 33880
-		private static readonly List<CreepJoinerBaseDef> exclude = new List<CreepJoinerBaseDef>();
-
-		// Token: 0x04008459 RID: 33881
-		private static readonly List<ICreepJoinerDef> temp = new List<ICreepJoinerDef>();
+		exclude.AddRange(val.Excludes);
+		requires.AddRange(val.Requires);
+		return val;
 	}
 }

@@ -1,47 +1,37 @@
-﻿using System;
 using System.Text;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class ActivityWorker
 {
-	// Token: 0x02002B9F RID: 11167
-	public class ActivityWorker
+	public virtual float GetChangeRatePerDay(ThingWithComps thing)
 	{
-		// Token: 0x0600F998 RID: 63896 RVA: 0x0048991C File Offset: 0x00487B1C
-		public virtual float GetChangeRatePerDay(ThingWithComps thing)
+		CompActivity comp = thing.GetComp<CompActivity>();
+		if (!comp.IsDormant)
 		{
-			CompActivity comp = thing.GetComp<CompActivity>();
-			if (!comp.IsDormant)
-			{
-				return 0f;
-			}
-			return comp.Props.changePerDayBase;
+			return 0f;
 		}
+		return comp.Props.changePerDayBase;
+	}
 
-		// Token: 0x0600F999 RID: 63897 RVA: 0x0048994C File Offset: 0x00487B4C
-		public void GetInspectString(ThingWithComps thing, StringBuilder sb)
+	public void GetInspectString(ThingWithComps thing, StringBuilder sb)
+	{
+		CompActivity comp = thing.GetComp<CompActivity>();
+		sb.Append($"{"ActivityLevel".Translate()}: {comp.ActivityLevel.ToStringPercent("0")} ({GetChangeRatePerDay(thing).ToStringPercentSigned("0")} / {"day".Translate()})");
+	}
+
+	public virtual void GetSummary(ThingWithComps thing, StringBuilder sb)
+	{
+		CompActivity comp = thing.GetComp<CompActivity>();
+		sb.AppendLine("\n\n" + $"{"ActivityIncrease".Translate()}: {GetChangeRatePerDay(thing).ToStringPercent("0")} / {"day".Translate()}");
+		if (comp.State == ActivityState.Active)
 		{
-			CompActivity comp = thing.GetComp<CompActivity>();
-			sb.Append(string.Format("{0}: {1} ({2} / {3})", new object[]
-			{
-				"ActivityLevel".Translate(),
-				comp.ActivityLevel.ToStringPercent("0"),
-				this.GetChangeRatePerDay(thing).ToStringPercentSigned("0"),
-				"day".Translate()
-			}));
+			sb.Append($" - {"IsActive".Translate()}: x0");
 		}
-
-		// Token: 0x0600F99A RID: 63898 RVA: 0x004899C4 File Offset: 0x00487BC4
-		public virtual void GetSummary(ThingWithComps thing, StringBuilder sb)
+		else
 		{
-			CompActivity comp = thing.GetComp<CompActivity>();
-			sb.AppendLine("\n\n" + string.Format("{0}: {1} / {2}", "ActivityIncrease".Translate(), this.GetChangeRatePerDay(thing).ToStringPercent("0"), "day".Translate()));
-			if (comp.State == ActivityState.Active)
-			{
-				sb.Append(string.Format(" - {0}: x0", "IsActive".Translate()));
-				return;
-			}
-			sb.Append(string.Format(" - {0}: {1}", "BaseLevel".Translate(), comp.Props.changePerDayBase.ToStringPercent("0")));
+			sb.Append($" - {"BaseLevel".Translate()}: {comp.Props.changePerDayBase.ToStringPercent("0")}");
 		}
 	}
 }

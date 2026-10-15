@@ -1,46 +1,141 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompTargetable_SingleCorpse : CompTargetable
 {
-	// Token: 0x02002F26 RID: 12070
-	public class CompTargetable_SingleCorpse : CompTargetable
+	[CompilerGenerated]
+	private sealed class _003CGetTargets_003Ed__3 : IEnumerable<Thing>, IEnumerable, IEnumerator<Thing>, IEnumerator, IDisposable
 	{
-		// Token: 0x17002C08 RID: 11272
-		// (get) Token: 0x060110AA RID: 69802 RVA: 0x000028E7 File Offset: 0x00000AE7
-		protected override bool PlayerChoosesTarget
+		private int _003C_003E1__state;
+
+		private Thing _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private Thing targetChosenByPlayer;
+
+		public Thing _003C_003E3__targetChosenByPlayer;
+
+		Thing IEnumerator<Thing>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return true;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x060110AB RID: 69803 RVA: 0x004E6563 File Offset: 0x004E4763
-		protected override TargetingParameters GetTargetingParameters()
+		object IEnumerator.Current
 		{
-			return new TargetingParameters
+			[DebuggerHidden]
+			get
 			{
-				canTargetPawns = false,
-				canTargetBuildings = false,
-				canTargetItems = false,
-				canTargetCorpses = true,
-				mapObjectTargetsMustBeAutoAttackable = false
-			};
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x060110AC RID: 69804 RVA: 0x004E658D File Offset: 0x004E478D
-		public override IEnumerable<Thing> GetTargets(Thing targetChosenByPlayer = null)
+		[DebuggerHidden]
+		public _003CGetTargets_003Ed__3(int _003C_003E1__state)
 		{
-			yield return targetChosenByPlayer;
-			yield break;
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x060110AD RID: 69805 RVA: 0x004E659D File Offset: 0x004E479D
-		public override bool ValidateTarget(LocalTargetInfo target, bool showMessages = true)
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			return target.Thing is Corpse && base.ValidateTarget(target.Thing, showMessages);
+			_003C_003E1__state = -2;
 		}
+
+		private bool MoveNext()
+		{
+			switch (_003C_003E1__state)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = targetChosenByPlayer;
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Thing> IEnumerable<Thing>.GetEnumerator()
+		{
+			_003CGetTargets_003Ed__3 _003CGetTargets_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CGetTargets_003Ed__ = this;
+			}
+			else
+			{
+				_003CGetTargets_003Ed__ = new _003CGetTargets_003Ed__3(0);
+			}
+			_003CGetTargets_003Ed__.targetChosenByPlayer = _003C_003E3__targetChosenByPlayer;
+			return _003CGetTargets_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Thing>)this).GetEnumerator();
+		}
+	}
+
+	protected override bool PlayerChoosesTarget => true;
+
+	protected override TargetingParameters GetTargetingParameters()
+	{
+		return new TargetingParameters
+		{
+			canTargetPawns = false,
+			canTargetBuildings = false,
+			canTargetItems = false,
+			canTargetCorpses = true,
+			mapObjectTargetsMustBeAutoAttackable = false
+		};
+	}
+
+	[IteratorStateMachine(typeof(_003CGetTargets_003Ed__3))]
+	public override IEnumerable<Thing> GetTargets(Thing targetChosenByPlayer = null)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetTargets_003Ed__3(-2)
+		{
+			_003C_003E3__targetChosenByPlayer = targetChosenByPlayer
+		};
+	}
+
+	public override bool ValidateTarget(LocalTargetInfo target, bool showMessages = true)
+	{
+		if (target.Thing is Corpse)
+		{
+			return base.ValidateTarget(target.Thing, showMessages);
+		}
+		return false;
 	}
 }

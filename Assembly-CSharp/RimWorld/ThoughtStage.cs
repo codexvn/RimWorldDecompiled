@@ -1,120 +1,215 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class ThoughtStage
 {
-	// Token: 0x02001B0F RID: 6927
-	public class ThoughtStage
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__19 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x170017BC RID: 6076
-		// (get) Token: 0x06009AAC RID: 39596 RVA: 0x002CF067 File Offset: 0x002CD267
-		public string LabelCap
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public ThoughtStage _003C_003E4__this;
+
+		string IEnumerator<string>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.cachedLabelCap == null)
-				{
-					this.cachedLabelCap = this.label.CapitalizeFirst();
-				}
-				return this.cachedLabelCap;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170017BD RID: 6077
-		// (get) Token: 0x06009AAD RID: 39597 RVA: 0x002CF088 File Offset: 0x002CD288
-		public string LabelSocialCap
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.cachedLabelSocialCap == null)
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__19(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			ThoughtStage thoughtStage = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (!thoughtStage.labelSocial.NullOrEmpty() && thoughtStage.labelSocial == thoughtStage.label)
 				{
-					this.cachedLabelSocialCap = this.labelSocial.CapitalizeFirst();
+					_003C_003E2__current = "labelSocial is the same as label. labelSocial is unnecessary in this case";
+					_003C_003E1__state = 1;
+					return true;
 				}
-				return this.cachedLabelSocialCap;
-			}
-		}
-
-		// Token: 0x170017BE RID: 6078
-		// (get) Token: 0x06009AAE RID: 39598 RVA: 0x002CF0A9 File Offset: 0x002CD2A9
-		public string LabelAbstractCap
-		{
-			get
-			{
-				if (this.cachedLabelAbstractCap == null)
+				goto IL_0064;
+			case 1:
+				_003C_003E1__state = -1;
+				goto IL_0064;
+			case 2:
 				{
-					this.cachedLabelAbstractCap = ((this.labelAbstract != null) ? this.labelAbstract.CapitalizeFirst() : this.label.CapitalizeFirst());
+					_003C_003E1__state = -1;
+					break;
 				}
-				return this.cachedLabelAbstractCap;
+				IL_0064:
+				if (thoughtStage.baseMoodEffect != 0f && thoughtStage.description.NullOrEmpty())
+				{
+					_003C_003E2__current = "affects mood but doesn't have a description";
+					_003C_003E1__state = 2;
+					return true;
+				}
+				break;
 			}
+			return false;
 		}
 
-		// Token: 0x06009AAF RID: 39599 RVA: 0x002CF0DF File Offset: 0x002CD2DF
-		public void PostLoad()
+		bool IEnumerator.MoveNext()
 		{
-			this.untranslatedLabel = this.label;
-			this.untranslatedLabelSocial = this.labelSocial;
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x06009AB0 RID: 39600 RVA: 0x002CF0F9 File Offset: 0x002CD2F9
-		public IEnumerable<string> ConfigErrors()
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			if (!this.labelSocial.NullOrEmpty() && this.labelSocial == this.label)
-			{
-				yield return "labelSocial is the same as label. labelSocial is unnecessary in this case";
-			}
-			if (this.baseMoodEffect != 0f && this.description.NullOrEmpty())
-			{
-				yield return "affects mood but doesn't have a description";
-			}
-			yield break;
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x04006AA8 RID: 27304
-		[MustTranslate]
-		public string label;
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__19 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__19(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x04006AA9 RID: 27305
-		[MustTranslate]
-		public string labelSocial;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x04006AAA RID: 27306
-		[MustTranslate]
-		public string labelAbstract;
+	[MustTranslate]
+	public string label;
 
-		// Token: 0x04006AAB RID: 27307
-		[MustTranslate]
-		public string description;
+	[MustTranslate]
+	public string labelSocial;
 
-		// Token: 0x04006AAC RID: 27308
-		public float baseMoodEffect;
+	[MustTranslate]
+	public string labelAbstract;
 
-		// Token: 0x04006AAD RID: 27309
-		public float baseOpinionOffset;
+	[MustTranslate]
+	public string description;
 
-		// Token: 0x04006AAE RID: 27310
-		public bool visible = true;
+	public float baseMoodEffect;
 
-		// Token: 0x04006AAF RID: 27311
-		[Unsaved(false)]
-		private string cachedLabelCap;
+	public float baseOpinionOffset;
 
-		// Token: 0x04006AB0 RID: 27312
-		[Unsaved(false)]
-		private string cachedLabelSocialCap;
+	public bool visible = true;
 
-		// Token: 0x04006AB1 RID: 27313
-		[Unsaved(false)]
-		private string cachedLabelAbstractCap;
+	[Unsaved(false)]
+	private string cachedLabelCap;
 
-		// Token: 0x04006AB2 RID: 27314
-		[Unsaved(false)]
-		[TranslationHandle(Priority = 100)]
-		public string untranslatedLabel;
+	[Unsaved(false)]
+	private string cachedLabelSocialCap;
 
-		// Token: 0x04006AB3 RID: 27315
-		[Unsaved(false)]
-		[TranslationHandle]
-		public string untranslatedLabelSocial;
+	[Unsaved(false)]
+	private string cachedLabelAbstractCap;
+
+	[Unsaved(false)]
+	[TranslationHandle(Priority = 100)]
+	public string untranslatedLabel;
+
+	[Unsaved(false)]
+	[TranslationHandle]
+	public string untranslatedLabelSocial;
+
+	public string LabelCap
+	{
+		get
+		{
+			if (cachedLabelCap == null)
+			{
+				cachedLabelCap = label.CapitalizeFirst();
+			}
+			return cachedLabelCap;
+		}
+	}
+
+	public string LabelSocialCap
+	{
+		get
+		{
+			if (cachedLabelSocialCap == null)
+			{
+				cachedLabelSocialCap = labelSocial.CapitalizeFirst();
+			}
+			return cachedLabelSocialCap;
+		}
+	}
+
+	public string LabelAbstractCap
+	{
+		get
+		{
+			if (cachedLabelAbstractCap == null)
+			{
+				cachedLabelAbstractCap = ((labelAbstract != null) ? labelAbstract.CapitalizeFirst() : label.CapitalizeFirst());
+			}
+			return cachedLabelAbstractCap;
+		}
+	}
+
+	public void PostLoad()
+	{
+		untranslatedLabel = label;
+		untranslatedLabelSocial = labelSocial;
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__19))]
+	public IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__19(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

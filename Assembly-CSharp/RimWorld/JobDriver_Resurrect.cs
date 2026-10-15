@@ -1,113 +1,211 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.AI;
 using Verse.Sound;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_Resurrect : JobDriver
 {
-	// Token: 0x02001303 RID: 4867
-	public class JobDriver_Resurrect : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__9 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x170012C5 RID: 4805
-		// (get) Token: 0x06007760 RID: 30560 RVA: 0x00244454 File Offset: 0x00242654
-		private Corpse Corpse
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_Resurrect _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (Corpse)this.job.GetTarget(TargetIndex.A).Thing;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170012C6 RID: 4806
-		// (get) Token: 0x06007761 RID: 30561 RVA: 0x0024447C File Offset: 0x0024267C
-		private Thing Item
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.job.GetTarget(TargetIndex.B).Thing;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06007762 RID: 30562 RVA: 0x002444A0 File Offset: 0x002426A0
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__9(int _003C_003E1__state)
 		{
-			return this.pawn.Reserve(this.Corpse, this.job, 1, -1, null, errorOnFailed, false) && this.pawn.Reserve(this.Item, this.job, 1, -1, null, errorOnFailed, false);
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x06007763 RID: 30563 RVA: 0x002444F3 File Offset: 0x002426F3
-		protected override IEnumerable<Toil> MakeNewToils()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			yield return Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.Touch, false).FailOnDespawnedOrNull(TargetIndex.B).FailOnDespawnedOrNull(TargetIndex.A);
-			yield return Toils_Haul.StartCarryThing(TargetIndex.B, false, false, false, true, false);
-			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch, false).FailOnDespawnedOrNull(TargetIndex.A);
-			Toil toil = Toils_General.Wait(600, TargetIndex.None);
-			toil.WithProgressBarToilDelay(TargetIndex.A, false, -0.5f);
-			toil.FailOnDespawnedOrNull(TargetIndex.A);
-			toil.FailOnCannotTouch(TargetIndex.A, PathEndMode.Touch);
-			toil.tickAction = delegate()
-			{
-				CompUsable compUsable = this.Item.TryGetComp<CompUsable>();
-				if (compUsable != null && this.warmupMote == null && compUsable.Props.warmupMote != null)
-				{
-					this.warmupMote = MoteMaker.MakeAttachedOverlay(this.Corpse, compUsable.Props.warmupMote, Vector3.zero, 1f, -1f);
-				}
-				Mote mote = this.warmupMote;
-				if (mote == null)
-				{
-					return;
-				}
-				mote.Maintain();
-			};
-			yield return toil;
-			yield return Toils_General.Do(new Action(this.Resurrect));
-			yield break;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x06007764 RID: 30564 RVA: 0x00244504 File Offset: 0x00242704
-		private void Resurrect()
+		private bool MoveNext()
 		{
-			Pawn innerPawn = this.Corpse.InnerPawn;
-			CompTargetEffect_Resurrect compTargetEffect_Resurrect = this.Item.TryGetComp<CompTargetEffect_Resurrect>();
-			bool flag = true;
-			if (!compTargetEffect_Resurrect.Props.withSideEffects)
+			int num = _003C_003E1__state;
+			JobDriver_Resurrect CS_0024_003C_003E8__locals6 = _003C_003E4__this;
+			switch (num)
 			{
-				if (!ResurrectionUtility.TryResurrect(innerPawn, null))
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.Touch).FailOnDespawnedOrNull(TargetIndex.B).FailOnDespawnedOrNull(TargetIndex.A);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Haul.StartCarryThing(TargetIndex.B);
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch).FailOnDespawnedOrNull(TargetIndex.A);
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+			{
+				_003C_003E1__state = -1;
+				Toil toil = Toils_General.Wait(600);
+				toil.WithProgressBarToilDelay(TargetIndex.A);
+				toil.FailOnDespawnedOrNull(TargetIndex.A);
+				toil.FailOnCannotTouch(TargetIndex.A, PathEndMode.Touch);
+				toil.tickAction = delegate
 				{
-					flag = false;
-				}
+					CompUsable compUsable = CS_0024_003C_003E8__locals6.Item.TryGetComp<CompUsable>();
+					if (compUsable != null && CS_0024_003C_003E8__locals6.warmupMote == null && compUsable.Props.warmupMote != null)
+					{
+						CS_0024_003C_003E8__locals6.warmupMote = MoteMaker.MakeAttachedOverlay(CS_0024_003C_003E8__locals6.Corpse, compUsable.Props.warmupMote, Vector3.zero);
+					}
+					CS_0024_003C_003E8__locals6.warmupMote?.Maintain();
+				};
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 4;
+				return true;
 			}
-			else if (!ResurrectionUtility.TryResurrectWithSideEffects(innerPawn))
+			case 4:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.Do(CS_0024_003C_003E8__locals6.Resurrect);
+				_003C_003E1__state = 5;
+				return true;
+			case 5:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__9 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__9(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private const TargetIndex CorpseInd = TargetIndex.A;
+
+	private const TargetIndex ItemInd = TargetIndex.B;
+
+	private const int DurationTicks = 600;
+
+	private Mote warmupMote;
+
+	private Corpse Corpse => (Corpse)job.GetTarget(TargetIndex.A).Thing;
+
+	private Thing Item => job.GetTarget(TargetIndex.B).Thing;
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		if (pawn.Reserve(Corpse, job, 1, -1, null, errorOnFailed))
+		{
+			return pawn.Reserve(Item, job, 1, -1, null, errorOnFailed);
+		}
+		return false;
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__9))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__9(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	private void Resurrect()
+	{
+		Pawn innerPawn = Corpse.InnerPawn;
+		CompTargetEffect_Resurrect compTargetEffect_Resurrect = Item.TryGetComp<CompTargetEffect_Resurrect>();
+		bool flag = true;
+		if (!compTargetEffect_Resurrect.Props.withSideEffects)
+		{
+			if (!ResurrectionUtility.TryResurrect(innerPawn))
 			{
 				flag = false;
 			}
-			if (flag)
-			{
-				SoundDefOf.MechSerumUsed.PlayOneShot(SoundInfo.InMap(innerPawn, MaintenanceType.None));
-				Messages.Message("MessagePawnResurrected".Translate(innerPawn), innerPawn, MessageTypeDefOf.PositiveEvent, true);
-				if (compTargetEffect_Resurrect.Props.moteDef != null)
-				{
-					MoteMaker.MakeAttachedOverlay(innerPawn, compTargetEffect_Resurrect.Props.moteDef, Vector3.zero, 1f, -1f);
-				}
-				if (compTargetEffect_Resurrect.Props.addsHediff != null)
-				{
-					innerPawn.health.AddHediff(compTargetEffect_Resurrect.Props.addsHediff, null, null, null);
-				}
-			}
-			this.Item.SplitOff(1).Destroy(DestroyMode.Vanish);
 		}
-
-		// Token: 0x04005161 RID: 20833
-		private const TargetIndex CorpseInd = TargetIndex.A;
-
-		// Token: 0x04005162 RID: 20834
-		private const TargetIndex ItemInd = TargetIndex.B;
-
-		// Token: 0x04005163 RID: 20835
-		private const int DurationTicks = 600;
-
-		// Token: 0x04005164 RID: 20836
-		private Mote warmupMote;
+		else if (!ResurrectionUtility.TryResurrectWithSideEffects(innerPawn))
+		{
+			flag = false;
+		}
+		if (flag)
+		{
+			SoundDefOf.MechSerumUsed.PlayOneShot(SoundInfo.InMap(innerPawn));
+			Messages.Message("MessagePawnResurrected".Translate(innerPawn), innerPawn, MessageTypeDefOf.PositiveEvent);
+			if (compTargetEffect_Resurrect.Props.moteDef != null)
+			{
+				MoteMaker.MakeAttachedOverlay(innerPawn, compTargetEffect_Resurrect.Props.moteDef, Vector3.zero);
+			}
+			if (compTargetEffect_Resurrect.Props.addsHediff != null)
+			{
+				innerPawn.health.AddHediff(compTargetEffect_Resurrect.Props.addsHediff, null, null);
+			}
+		}
+		Item.SplitOff(1).Destroy();
 	}
 }

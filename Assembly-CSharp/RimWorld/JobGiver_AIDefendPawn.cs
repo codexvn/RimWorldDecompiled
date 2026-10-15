@@ -1,96 +1,84 @@
-﻿using System;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public abstract class JobGiver_AIDefendPawn : JobGiver_AIFightEnemy
 {
-	// Token: 0x020013FE RID: 5118
-	public abstract class JobGiver_AIDefendPawn : JobGiver_AIFightEnemy
+	private bool attackMeleeThreatEvenIfNotHostile;
+
+	public override ThinkNode DeepCopy(bool resolve = true)
 	{
-		// Token: 0x06007CC2 RID: 31938 RVA: 0x00259404 File Offset: 0x00257604
-		public override ThinkNode DeepCopy(bool resolve = true)
+		JobGiver_AIDefendPawn obj = (JobGiver_AIDefendPawn)base.DeepCopy(resolve);
+		obj.attackMeleeThreatEvenIfNotHostile = attackMeleeThreatEvenIfNotHostile;
+		return obj;
+	}
+
+	protected abstract Pawn GetDefendee(Pawn pawn);
+
+	protected override IntVec3 GetFlagPosition(Pawn pawn)
+	{
+		Pawn defendee = GetDefendee(pawn);
+		if (defendee.Spawned || defendee.CarriedBy != null)
 		{
-			JobGiver_AIDefendPawn jobGiver_AIDefendPawn = (JobGiver_AIDefendPawn)base.DeepCopy(resolve);
-			jobGiver_AIDefendPawn.attackMeleeThreatEvenIfNotHostile = this.attackMeleeThreatEvenIfNotHostile;
-			return jobGiver_AIDefendPawn;
+			return defendee.PositionHeld;
 		}
+		return IntVec3.Invalid;
+	}
 
-		// Token: 0x06007CC3 RID: 31939
-		protected abstract Pawn GetDefendee(Pawn pawn);
-
-		// Token: 0x06007CC4 RID: 31940 RVA: 0x00259420 File Offset: 0x00257620
-		protected override IntVec3 GetFlagPosition(Pawn pawn)
+	protected override Job TryGiveJob(Pawn pawn)
+	{
+		Pawn defendee = GetDefendee(pawn);
+		if (defendee == null)
 		{
-			Pawn defendee = this.GetDefendee(pawn);
-			if (defendee.Spawned || defendee.CarriedBy != null)
-			{
-				return defendee.PositionHeld;
-			}
-			return IntVec3.Invalid;
+			Log.Error(GetType()?.ToString() + " has null defendee. pawn=" + pawn.ToStringSafe());
+			return null;
 		}
-
-		// Token: 0x06007CC5 RID: 31941 RVA: 0x00259454 File Offset: 0x00257654
-		protected override Job TryGiveJob(Pawn pawn)
+		Pawn carriedBy = defendee.CarriedBy;
+		if (carriedBy != null)
 		{
-			Pawn defendee = this.GetDefendee(pawn);
-			if (defendee == null)
-			{
-				Type type = base.GetType();
-				Log.Error(((type != null) ? type.ToString() : null) + " has null defendee. pawn=" + pawn.ToStringSafe<Pawn>());
-				return null;
-			}
-			Pawn carriedBy = defendee.CarriedBy;
-			if (carriedBy != null)
-			{
-				if (!pawn.CanReach(carriedBy, PathEndMode.OnCell, Danger.Deadly, false, false, TraverseMode.ByPawn))
-				{
-					return null;
-				}
-			}
-			else if (!defendee.Spawned || !pawn.CanReach(defendee, PathEndMode.OnCell, Danger.Deadly, false, false, TraverseMode.ByPawn))
+			if (!pawn.CanReach(carriedBy, PathEndMode.OnCell, Danger.Deadly))
 			{
 				return null;
 			}
-			return base.TryGiveJob(pawn);
 		}
-
-		// Token: 0x06007CC6 RID: 31942 RVA: 0x002594D8 File Offset: 0x002576D8
-		protected override Thing FindAttackTarget(Pawn pawn)
+		else if (!defendee.Spawned || !pawn.CanReach(defendee, PathEndMode.OnCell, Danger.Deadly))
 		{
-			if (this.attackMeleeThreatEvenIfNotHostile)
-			{
-				Pawn defendee = this.GetDefendee(pawn);
-				if (defendee.Spawned && !defendee.InMentalState && defendee.mindState.meleeThreat != null && defendee.mindState.meleeThreat != pawn && defendee.mindState.MeleeThreatStillThreat && pawn.CanReach(defendee.mindState.meleeThreat, PathEndMode.Touch, Danger.Deadly, false, false, TraverseMode.ByPawn))
-				{
-					return defendee.mindState.meleeThreat;
-				}
-			}
-			return base.FindAttackTarget(pawn);
+			return null;
 		}
+		return base.TryGiveJob(pawn);
+	}
 
-		// Token: 0x06007CC7 RID: 31943 RVA: 0x00259560 File Offset: 0x00257760
-		protected override bool TryFindShootingPosition(Pawn pawn, out IntVec3 dest, Verb verbToUse = null)
+	protected override Thing FindAttackTarget(Pawn pawn)
+	{
+		if (attackMeleeThreatEvenIfNotHostile)
 		{
-			Verb verb = verbToUse ?? pawn.TryGetAttackVerb(null, !pawn.IsColonist, false);
-			if (verb == null)
+			Pawn defendee = GetDefendee(pawn);
+			if (defendee.Spawned && !defendee.InMentalState && defendee.mindState.meleeThreat != null && defendee.mindState.meleeThreat != pawn && defendee.mindState.MeleeThreatStillThreat && pawn.CanReach(defendee.mindState.meleeThreat, PathEndMode.Touch, Danger.Deadly))
 			{
-				dest = IntVec3.Invalid;
-				return false;
+				return defendee.mindState.meleeThreat;
 			}
-			return CastPositionFinder.TryFindCastPosition(new CastPositionRequest
-			{
-				caster = pawn,
-				target = pawn.mindState.enemyTarget,
-				verb = verb,
-				maxRangeFromTarget = 9999f,
-				locus = this.GetDefendee(pawn).PositionHeld,
-				maxRangeFromLocus = this.GetFlagRadius(pawn),
-				wantCoverFromTarget = (verb.EffectiveRange > 7f),
-				maxRegions = 50
-			}, out dest);
 		}
+		return base.FindAttackTarget(pawn);
+	}
 
-		// Token: 0x04005411 RID: 21521
-		private bool attackMeleeThreatEvenIfNotHostile;
+	protected override bool TryFindShootingPosition(Pawn pawn, out IntVec3 dest, Verb verbToUse = null)
+	{
+		Verb verb = verbToUse ?? pawn.TryGetAttackVerb(null, !pawn.IsColonist);
+		if (verb == null)
+		{
+			dest = IntVec3.Invalid;
+			return false;
+		}
+		CastPositionRequest newReq = default(CastPositionRequest);
+		newReq.caster = pawn;
+		newReq.target = pawn.mindState.enemyTarget;
+		newReq.verb = verb;
+		newReq.maxRangeFromTarget = 9999f;
+		newReq.locus = GetDefendee(pawn).PositionHeld;
+		newReq.maxRangeFromLocus = GetFlagRadius(pawn);
+		newReq.wantCoverFromTarget = verb.EffectiveRange > 7f;
+		newReq.maxRegions = 50;
+		return CastPositionFinder.TryFindCastPosition(newReq, out dest);
 	}
 }

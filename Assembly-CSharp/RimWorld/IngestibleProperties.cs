@@ -1,263 +1,521 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class IngestibleProperties
 {
-	// Token: 0x020019A0 RID: 6560
-	public class IngestibleProperties
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__44 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001688 RID: 5768
-		// (get) Token: 0x06009469 RID: 37993 RVA: 0x002B973A File Offset: 0x002B793A
-		public JoyKindDef JoyKind
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public IngestibleProperties _003C_003E4__this;
+
+		string IEnumerator<string>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.joyKind ?? JoyKindDefOf.Gluttonous;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001689 RID: 5769
-		// (get) Token: 0x0600946A RID: 37994 RVA: 0x002B974B File Offset: 0x002B794B
-		public bool HumanEdible
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (FoodTypeFlags.OmnivoreHuman & this.foodType) > FoodTypeFlags.None;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700168A RID: 5770
-		// (get) Token: 0x0600946B RID: 37995 RVA: 0x002B975C File Offset: 0x002B795C
-		public bool IsMeal
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__44(int _003C_003E1__state)
 		{
-			get
-			{
-				return this.preferability >= FoodPreferability.MealAwful && this.preferability <= FoodPreferability.MealLavish;
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x1700168B RID: 5771
-		// (get) Token: 0x0600946C RID: 37996 RVA: 0x002B9776 File Offset: 0x002B7976
-		public float CachedNutrition
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			get
-			{
-				if (this.cachedNutrition == -1f)
-				{
-					this.cachedNutrition = this.parent.GetStatValueAbstract(StatDefOf.Nutrition, null);
-				}
-				return this.cachedNutrition;
-			}
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x0600946D RID: 37997 RVA: 0x002B97A2 File Offset: 0x002B79A2
-		public IEnumerable<string> ConfigErrors()
+		private bool MoveNext()
 		{
-			if (this.preferability == FoodPreferability.Undefined)
+			int num = _003C_003E1__state;
+			IngestibleProperties ingestibleProperties = _003C_003E4__this;
+			switch (num)
 			{
-				yield return "undefined preferability";
-			}
-			if (this.foodType == FoodTypeFlags.None)
-			{
-				yield return "no foodType";
-			}
-			if (this.parent.GetStatValueAbstract(StatDefOf.Nutrition, null) == 0f && this.preferability != FoodPreferability.NeverForNutrition)
-			{
-				yield return "Nutrition == 0 but preferability is " + this.preferability.ToString() + " instead of " + FoodPreferability.NeverForNutrition.ToString();
-			}
-			if (!this.parent.IsCorpse && this.preferability > FoodPreferability.DesperateOnlyForHumanlikes && !this.parent.socialPropernessMatters && this.parent.EverHaulable)
-			{
-				yield return "ingestible preferability > DesperateOnlyForHumanlikes but socialPropernessMatters=false. This will cause bugs wherein wardens will look in prison cells for food to give to prisoners and so will repeatedly pick up and drop food inside the cell.";
-			}
-			if (this.joy > 0f && this.joyKind == null)
-			{
-				yield return "joy > 0 with no joy kind";
-			}
-			if (this.joy == 0f && this.joyKind != null)
-			{
-				string str = "joy is 0 but joyKind is ";
-				JoyKindDef joyKindDef = this.joyKind;
-				yield return str + ((joyKindDef != null) ? joyKindDef.ToString() : null);
-			}
-			yield break;
-		}
-
-		// Token: 0x0600946E RID: 37998 RVA: 0x002B97B4 File Offset: 0x002B79B4
-		public RoyalTitleDef MaxSatisfiedTitle()
-		{
-			return (from t in DefDatabase<FactionDef>.AllDefsListForReading.SelectMany((FactionDef f) => f.RoyalTitlesAwardableInSeniorityOrderForReading)
-			where t.foodRequirement.Defined && t.foodRequirement.Acceptable(this.parent)
-			orderby t.seniority descending
-			select t).FirstOrDefault<RoyalTitleDef>();
-		}
-
-		// Token: 0x0600946F RID: 37999 RVA: 0x002B9824 File Offset: 0x002B7A24
-		internal IEnumerable<StatDrawEntry> SpecialDisplayStats()
-		{
-			if (this.joy > 0f)
-			{
-				StatCategoryDef category = (this.drugCategory != DrugCategory.None) ? StatCategoryDefOf.Drug : StatCategoryDefOf.Basics;
-				yield return new StatDrawEntry(category, "Joy".Translate(), this.joy.ToStringPercent("F0") + " (" + this.JoyKind.label + ")", "Stat_Thing_Ingestible_Joy_Desc".Translate(), 4751, null, null, false, false);
-			}
-			if (this.HumanEdible && this.parent.GetStatValueAbstract(StatDefOf.Nutrition, null) > 0f)
-			{
-				RoyalTitleDef royalTitleDef = this.MaxSatisfiedTitle();
-				if (royalTitleDef != null)
-				{
-					yield return new StatDrawEntry(StatCategoryDefOf.Basics, "Stat_Thing_Ingestible_MaxSatisfiedTitle".Translate(), royalTitleDef.GetLabelCapForBothGenders(), "Stat_Thing_Ingestible_MaxSatisfiedTitle_Desc".Translate(), 4752, null, null, false, false);
-				}
-			}
-			if (this.drugCategory != DrugCategory.None)
-			{
-				yield return new StatDrawEntry(StatCategoryDefOf.Drug, "DrugCategory".Translate().CapitalizeFirst(), this.drugCategory.GetLabel().CapitalizeFirst(), "Stat_Thing_Drug_Category_Desc".Translate(), 2485, null, null, false, false);
-			}
-			if (this.outcomeDoers != null)
-			{
-				int num;
-				for (int i = 0; i < this.outcomeDoers.Count; i = num + 1)
-				{
-					foreach (StatDrawEntry statDrawEntry in this.outcomeDoers[i].SpecialDisplayStats(this.parent))
-					{
-						yield return statDrawEntry;
-					}
-					IEnumerator<StatDrawEntry> enumerator = null;
-					num = i;
-				}
-			}
-			yield break;
-			yield break;
-		}
-
-		// Token: 0x06009470 RID: 38000 RVA: 0x002B9834 File Offset: 0x002B7A34
-		private bool TryGetOutcomeDoer<T>(out T doer) where T : IngestionOutcomeDoer
-		{
-			doer = default(T);
-			if (this.outcomeDoers == null)
-			{
+			default:
 				return false;
-			}
-			foreach (IngestionOutcomeDoer ingestionOutcomeDoer in this.outcomeDoers)
-			{
-				T t = ingestionOutcomeDoer as T;
-				if (t != null)
+			case 0:
+				_003C_003E1__state = -1;
+				if (ingestibleProperties.preferability == FoodPreferability.Undefined)
 				{
-					doer = t;
+					_003C_003E2__current = "undefined preferability";
+					_003C_003E1__state = 1;
 					return true;
 				}
+				goto IL_005c;
+			case 1:
+				_003C_003E1__state = -1;
+				goto IL_005c;
+			case 2:
+				_003C_003E1__state = -1;
+				goto IL_007f;
+			case 3:
+				_003C_003E1__state = -1;
+				goto IL_00e5;
+			case 4:
+				_003C_003E1__state = -1;
+				goto IL_0130;
+			case 5:
+				_003C_003E1__state = -1;
+				goto IL_0160;
+			case 6:
+				{
+					_003C_003E1__state = -1;
+					break;
+				}
+				IL_00e5:
+				if (!ingestibleProperties.parent.IsCorpse && (int)ingestibleProperties.preferability > 3 && !ingestibleProperties.parent.socialPropernessMatters && ingestibleProperties.parent.EverHaulable)
+				{
+					_003C_003E2__current = "ingestible preferability > DesperateOnlyForHumanlikes but socialPropernessMatters=false. This will cause bugs wherein wardens will look in prison cells for food to give to prisoners and so will repeatedly pick up and drop food inside the cell.";
+					_003C_003E1__state = 4;
+					return true;
+				}
+				goto IL_0130;
+				IL_005c:
+				if (ingestibleProperties.foodType == FoodTypeFlags.None)
+				{
+					_003C_003E2__current = "no foodType";
+					_003C_003E1__state = 2;
+					return true;
+				}
+				goto IL_007f;
+				IL_007f:
+				if (ingestibleProperties.parent.GetStatValueAbstract(StatDefOf.Nutrition) == 0f && ingestibleProperties.preferability != FoodPreferability.NeverForNutrition)
+				{
+					_003C_003E2__current = "Nutrition == 0 but preferability is " + ingestibleProperties.preferability.ToString() + " instead of " + FoodPreferability.NeverForNutrition;
+					_003C_003E1__state = 3;
+					return true;
+				}
+				goto IL_00e5;
+				IL_0130:
+				if (ingestibleProperties.joy > 0f && ingestibleProperties.joyKind == null)
+				{
+					_003C_003E2__current = "joy > 0 with no joy kind";
+					_003C_003E1__state = 5;
+					return true;
+				}
+				goto IL_0160;
+				IL_0160:
+				if (ingestibleProperties.joy == 0f && ingestibleProperties.joyKind != null)
+				{
+					_003C_003E2__current = "joy is 0 but joyKind is " + ingestibleProperties.joyKind;
+					_003C_003E1__state = 6;
+					return true;
+				}
+				break;
 			}
 			return false;
 		}
 
-		// Token: 0x04006046 RID: 24646
-		[Unsaved(false)]
-		public ThingDef parent;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x04006047 RID: 24647
-		public int maxNumToIngestAtOnce;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04006048 RID: 24648
-		public int defaultNumToIngestAtOnce = 20;
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__44 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__44(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x04006049 RID: 24649
-		public List<IngestionOutcomeDoer> outcomeDoers;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x0400604A RID: 24650
-		public int baseIngestTicks = 500;
+	[CompilerGenerated]
+	private sealed class _003CSpecialDisplayStats_003Ed__46 : IEnumerable<StatDrawEntry>, IEnumerable, IEnumerator<StatDrawEntry>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
 
-		// Token: 0x0400604B RID: 24651
-		public float chairSearchRadius = 32f;
+		private StatDrawEntry _003C_003E2__current;
 
-		// Token: 0x0400604C RID: 24652
-		public bool useEatingSpeedStat = true;
+		private int _003C_003El__initialThreadId;
 
-		// Token: 0x0400604D RID: 24653
-		public bool babiesCanIngest;
+		public IngestibleProperties _003C_003E4__this;
 
-		// Token: 0x0400604E RID: 24654
-		public bool humanlikeOnly;
+		private int _003Ci_003E5__2;
 
-		// Token: 0x0400604F RID: 24655
-		public ThoughtDef tasteThought;
+		private IEnumerator<StatDrawEntry> _003C_003E7__wrap2;
 
-		// Token: 0x04006050 RID: 24656
-		public ThoughtDef specialThoughtDirect;
+		StatDrawEntry IEnumerator<StatDrawEntry>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
 
-		// Token: 0x04006051 RID: 24657
-		public ThoughtDef specialThoughtAsIngredient;
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
 
-		// Token: 0x04006052 RID: 24658
-		public HistoryEventDef ateEvent;
+		[DebuggerHidden]
+		public _003CSpecialDisplayStats_003Ed__46(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
 
-		// Token: 0x04006053 RID: 24659
-		public EffecterDef ingestEffect;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 4)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap2 = null;
+			_003C_003E1__state = -2;
+		}
 
-		// Token: 0x04006054 RID: 24660
-		public EffecterDef ingestEffectEat;
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				IngestibleProperties ingestibleProperties = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					if (ingestibleProperties.joy > 0f)
+					{
+						StatCategoryDef category = ((ingestibleProperties.drugCategory != 0) ? StatCategoryDefOf.Drug : StatCategoryDefOf.Basics);
+						_003C_003E2__current = new StatDrawEntry(category, "Joy".Translate(), ingestibleProperties.joy.ToStringPercent("F0") + " (" + ingestibleProperties.JoyKind.label + ")", "Stat_Thing_Ingestible_Joy_Desc".Translate(), 4751);
+						_003C_003E1__state = 1;
+						return true;
+					}
+					goto IL_00cd;
+				case 1:
+					_003C_003E1__state = -1;
+					goto IL_00cd;
+				case 2:
+					_003C_003E1__state = -1;
+					goto IL_014c;
+				case 3:
+					_003C_003E1__state = -1;
+					goto IL_01b9;
+				case 4:
+					{
+						_003C_003E1__state = -3;
+						goto IL_0229;
+					}
+					IL_0229:
+					if (_003C_003E7__wrap2.MoveNext())
+					{
+						StatDrawEntry current = _003C_003E7__wrap2.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 4;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap2 = null;
+					_003Ci_003E5__2++;
+					goto IL_0255;
+					IL_014c:
+					if (ingestibleProperties.drugCategory != 0)
+					{
+						_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.Drug, "DrugCategory".Translate().CapitalizeFirst(), ingestibleProperties.drugCategory.GetLabel().CapitalizeFirst(), "Stat_Thing_Drug_Category_Desc".Translate(), 2485);
+						_003C_003E1__state = 3;
+						return true;
+					}
+					goto IL_01b9;
+					IL_0255:
+					if (_003Ci_003E5__2 >= ingestibleProperties.outcomeDoers.Count)
+					{
+						break;
+					}
+					_003C_003E7__wrap2 = ingestibleProperties.outcomeDoers[_003Ci_003E5__2].SpecialDisplayStats(ingestibleProperties.parent).GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0229;
+					IL_00cd:
+					if (ingestibleProperties.HumanEdible && ingestibleProperties.parent.GetStatValueAbstract(StatDefOf.Nutrition) > 0f)
+					{
+						RoyalTitleDef royalTitleDef = ingestibleProperties.MaxSatisfiedTitle();
+						if (royalTitleDef != null)
+						{
+							_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.Basics, "Stat_Thing_Ingestible_MaxSatisfiedTitle".Translate(), royalTitleDef.GetLabelCapForBothGenders(), "Stat_Thing_Ingestible_MaxSatisfiedTitle_Desc".Translate(), 4752);
+							_003C_003E1__state = 2;
+							return true;
+						}
+					}
+					goto IL_014c;
+					IL_01b9:
+					if (ingestibleProperties.outcomeDoers == null)
+					{
+						break;
+					}
+					_003Ci_003E5__2 = 0;
+					goto IL_0255;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
 
-		// Token: 0x04006055 RID: 24661
-		public SoundDef ingestSound;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x04006056 RID: 24662
-		[MustTranslate]
-		public string ingestCommandString;
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap2 != null)
+			{
+				_003C_003E7__wrap2.Dispose();
+			}
+		}
 
-		// Token: 0x04006057 RID: 24663
-		[MustTranslate]
-		public string ingestReportString;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04006058 RID: 24664
-		[MustTranslate]
-		public string ingestReportStringEat;
+		[DebuggerHidden]
+		IEnumerator<StatDrawEntry> IEnumerable<StatDrawEntry>.GetEnumerator()
+		{
+			_003CSpecialDisplayStats_003Ed__46 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CSpecialDisplayStats_003Ed__46(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x04006059 RID: 24665
-		public HoldOffsetSet ingestHoldOffsetStanding;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<StatDrawEntry>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x0400605A RID: 24666
-		public bool ingestHoldUsesTable = true;
+	[Unsaved(false)]
+	public ThingDef parent;
 
-		// Token: 0x0400605B RID: 24667
-		public bool tableDesired = true;
+	public int maxNumToIngestAtOnce;
 
-		// Token: 0x0400605C RID: 24668
-		public bool showIngestFloatOption = true;
+	public int defaultNumToIngestAtOnce = 20;
 
-		// Token: 0x0400605D RID: 24669
-		public FoodTypeFlags foodType;
+	public List<IngestionOutcomeDoer> outcomeDoers;
 
-		// Token: 0x0400605E RID: 24670
-		public float joy;
+	public int baseIngestTicks = 500;
 
-		// Token: 0x0400605F RID: 24671
-		public JoyKindDef joyKind;
+	public float chairSearchRadius = 32f;
 
-		// Token: 0x04006060 RID: 24672
-		public ThingDef sourceDef;
+	public bool useEatingSpeedStat = true;
 
-		// Token: 0x04006061 RID: 24673
-		public FoodPreferability preferability;
+	public bool babiesCanIngest;
 
-		// Token: 0x04006062 RID: 24674
-		public bool nurseable;
+	public bool humanlikeOnly;
 
-		// Token: 0x04006063 RID: 24675
-		public float optimalityOffsetHumanlikes;
+	public bool nonDrugIngestibleWithoutFoodNeed;
 
-		// Token: 0x04006064 RID: 24676
-		public float optimalityOffsetFeedingAnimals;
+	public ThoughtDef tasteThought;
 
-		// Token: 0x04006065 RID: 24677
-		public DrugCategory drugCategory;
+	public ThoughtDef specialThoughtDirect;
 
-		// Token: 0x04006066 RID: 24678
-		public bool canAutoSelectAsFoodForCaravan = true;
+	public ThoughtDef specialThoughtAsIngredient;
 
-		// Token: 0x04006067 RID: 24679
-		public bool lowPriorityCaravanFood;
+	public HistoryEventDef ateEvent;
 
-		// Token: 0x04006068 RID: 24680
-		[Unsaved(false)]
-		private float cachedNutrition = -1f;
+	public EffecterDef ingestEffect;
+
+	public EffecterDef ingestEffectEat;
+
+	public SoundDef ingestSound;
+
+	[MustTranslate]
+	public string ingestCommandString;
+
+	[MustTranslate]
+	public string ingestReportString;
+
+	[MustTranslate]
+	public string ingestReportStringEat;
+
+	public HoldOffsetSet ingestHoldOffsetStanding;
+
+	public bool ingestHoldUsesTable = true;
+
+	public bool tableDesired = true;
+
+	public bool showIngestFloatOption = true;
+
+	public FoodTypeFlags foodType;
+
+	public float joy;
+
+	public JoyKindDef joyKind;
+
+	public ThingDef sourceDef;
+
+	public FoodPreferability preferability;
+
+	public bool nurseable;
+
+	public float optimalityOffsetHumanlikes;
+
+	public float optimalityOffsetFeedingAnimals;
+
+	public DrugCategory drugCategory;
+
+	public bool canAutoSelectAsFoodForCaravan = true;
+
+	public bool lowPriorityCaravanFood;
+
+	[Unsaved(false)]
+	private float cachedNutrition = -1f;
+
+	public JoyKindDef JoyKind => joyKind ?? JoyKindDefOf.Gluttonous;
+
+	public bool HumanEdible => (FoodTypeFlags.OmnivoreHuman & foodType) != 0;
+
+	public bool IsMeal
+	{
+		get
+		{
+			if ((int)preferability >= 7)
+			{
+				return (int)preferability <= 10;
+			}
+			return false;
+		}
+	}
+
+	public float CachedNutrition
+	{
+		get
+		{
+			if (cachedNutrition == -1f)
+			{
+				cachedNutrition = parent.GetStatValueAbstract(StatDefOf.Nutrition);
+			}
+			return cachedNutrition;
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__44))]
+	public IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__44(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public RoyalTitleDef MaxSatisfiedTitle()
+	{
+		return (from t in DefDatabase<FactionDef>.AllDefsListForReading.SelectMany((FactionDef f) => f.RoyalTitlesAwardableInSeniorityOrderForReading)
+			where t.foodRequirement.Defined && t.foodRequirement.Acceptable(parent)
+			orderby t.seniority descending
+			select t).FirstOrDefault();
+	}
+
+	[IteratorStateMachine(typeof(_003CSpecialDisplayStats_003Ed__46))]
+	internal IEnumerable<StatDrawEntry> SpecialDisplayStats()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CSpecialDisplayStats_003Ed__46(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	private bool TryGetOutcomeDoer<T>(out T doer) where T : IngestionOutcomeDoer
+	{
+		doer = null;
+		if (outcomeDoers == null)
+		{
+			return false;
+		}
+		foreach (IngestionOutcomeDoer outcomeDoer in outcomeDoers)
+		{
+			if (outcomeDoer is T val)
+			{
+				doer = val;
+				return true;
+			}
+		}
+		return false;
 	}
 }

@@ -1,292 +1,254 @@
-﻿using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Xml;
 using RimWorld;
 using Verse.Utility;
 
-namespace Verse
+namespace Verse;
+
+public class GenStep_ScatterGroupPrefabs : GenStep_Scatterer
 {
-	// Token: 0x020004A5 RID: 1189
-	public class GenStep_ScatterGroupPrefabs : GenStep_Scatterer
+	private struct PrefabSpawn
 	{
-		// Token: 0x17000592 RID: 1426
-		// (get) Token: 0x06001F1A RID: 7962 RVA: 0x000A307C File Offset: 0x000A127C
-		public override int SeedPart
+		public IntVec3 pos;
+
+		public Rot4 rotation;
+
+		public CellRect occupiedRect;
+
+		public PrefabDef def;
+
+		public ScatterGroup sourceGroup;
+	}
+
+	public class ScatterGroup
+	{
+		public PrefabDef prefab;
+
+		public float weight = 1f;
+
+		public int max = -1;
+
+		public bool indoorRuin;
+
+		public ThingDef filthDef;
+
+		public int filthExpandBy;
+
+		public float filthChance = 0.5f;
+
+		public void LoadDataFromXmlCustom(XmlNode xmlRoot)
 		{
-			get
+			XmlHelper.ParseElements(this, xmlRoot, "prefab", "weight");
+		}
+	}
+
+	public List<ScatterGroup> groups;
+
+	[Unsaved(false)]
+	private bool dontChooseIndoor;
+
+	private static readonly List<PrefabSpawn> tmpSpawns = new List<PrefabSpawn>();
+
+	private static readonly List<ScatterGroup> tmpScatterGroups = new List<ScatterGroup>();
+
+	private static readonly Dictionary<ScatterGroup, float> tmpWeightedPrefabsRandom = new Dictionary<ScatterGroup, float>();
+
+	private static readonly List<IntVec3> tmpCellsRandomOrderWorkingList = new List<IntVec3>();
+
+	private static readonly List<Rot4> tmpPossibleRotations = new List<Rot4>();
+
+	public override int SeedPart => 79797732;
+
+	public override void Generate(Map map, GenStepParams parms)
+	{
+		try
+		{
+			base.Generate(map, parms);
+		}
+		finally
+		{
+			dontChooseIndoor = false;
+			tmpSpawns.Clear();
+		}
+	}
+
+	private ScatterGroup GetGroup()
+	{
+		tmpScatterGroups.Clear();
+		foreach (ScatterGroup group in groups)
+		{
+			if ((!dontChooseIndoor || !group.indoorRuin) && (group.max <= 0 || tmpSpawns.Count((PrefabSpawn spawn) => spawn.def == group.prefab) < group.max))
 			{
-				return 79797732;
+				tmpScatterGroups.Add(group);
 			}
 		}
-
-		// Token: 0x06001F1B RID: 7963 RVA: 0x000A3084 File Offset: 0x000A1284
-		public override void Generate(Map map, GenStepParams parms)
+		if (tmpScatterGroups.Empty())
 		{
-			try
-			{
-				base.Generate(map, parms);
-			}
-			finally
-			{
-				this.dontChooseIndoor = false;
-				GenStep_ScatterGroupPrefabs.tmpSpawns.Clear();
-			}
+			return null;
 		}
-
-		// Token: 0x06001F1C RID: 7964 RVA: 0x000A30C0 File Offset: 0x000A12C0
-		private GenStep_ScatterGroupPrefabs.ScatterGroup GetGroup()
+		Rand.PushState(Gen.HashCombineInt(Find.World.info.Seed, usedSpots.Count));
+		try
 		{
-			GenStep_ScatterGroupPrefabs.tmpScatterGroups.Clear();
-			using (List<GenStep_ScatterGroupPrefabs.ScatterGroup>.Enumerator enumerator = this.groups.GetEnumerator())
-			{
-				while (enumerator.MoveNext())
-				{
-					GenStep_ScatterGroupPrefabs.ScatterGroup group = enumerator.Current;
-					if ((!this.dontChooseIndoor || !group.indoorRuin) && (group.max <= 0 || GenStep_ScatterGroupPrefabs.tmpSpawns.Count((GenStep_ScatterGroupPrefabs.PrefabSpawn spawn) => spawn.def == group.prefab) < group.max))
-					{
-						GenStep_ScatterGroupPrefabs.tmpScatterGroups.Add(group);
-					}
-				}
-			}
-			if (GenStep_ScatterGroupPrefabs.tmpScatterGroups.Empty<GenStep_ScatterGroupPrefabs.ScatterGroup>())
-			{
-				return null;
-			}
-			Rand.PushState(Gen.HashCombineInt(Find.World.info.Seed, this.usedSpots.Count));
-			GenStep_ScatterGroupPrefabs.ScatterGroup result;
-			try
-			{
-				result = GenStep_ScatterGroupPrefabs.tmpScatterGroups.RandomElementByWeight((GenStep_ScatterGroupPrefabs.ScatterGroup g) => g.weight);
-			}
-			finally
-			{
-				Rand.PopState();
-			}
-			return result;
+			return tmpScatterGroups.RandomElementByWeight((ScatterGroup g) => g.weight);
 		}
-
-		// Token: 0x06001F1D RID: 7965 RVA: 0x000A31E8 File Offset: 0x000A13E8
-		protected override bool TryFindScatterCell(Map map, out IntVec3 result)
+		finally
 		{
-			bool warnOnFail = this.warnOnFail;
-			this.warnOnFail = false;
-			try
+			Rand.PopState();
+		}
+	}
+
+	protected override bool TryFindScatterCell(Map map, out IntVec3 result)
+	{
+		bool flag = warnOnFail;
+		warnOnFail = false;
+		try
+		{
+			dontChooseIndoor = false;
+			ScatterGroup group = GetGroup();
+			if (group == null)
 			{
-				this.dontChooseIndoor = false;
-				GenStep_ScatterGroupPrefabs.ScatterGroup group = this.GetGroup();
-				if (group == null)
-				{
-					result = default(IntVec3);
-					return false;
-				}
-				if (group.indoorRuin)
-				{
-					if (base.TryFindScatterCell(map, out result))
-					{
-						return true;
-					}
-					this.dontChooseIndoor = true;
-				}
-				if (this.GetGroup() != null && base.TryFindScatterCell(map, out result))
+				result = default(IntVec3);
+				return false;
+			}
+			if (group.indoorRuin)
+			{
+				if (base.TryFindScatterCell(map, out result))
 				{
 					return true;
 				}
+				dontChooseIndoor = true;
 			}
-			finally
+			if (GetGroup() != null && base.TryFindScatterCell(map, out result))
 			{
-				this.warnOnFail = warnOnFail;
+				return true;
 			}
-			if (this.warnOnFail)
-			{
-				string[] array = new string[5];
-				array[0] = "Scatterer ";
-				array[1] = this.ToString();
-				array[2] = " from def ";
-				int num = 3;
-				GenStepDef def = this.def;
-				array[num] = ((def != null) ? def.defName : null);
-				array[4] = " could not find cell to generate at.";
-				Log.Warning(string.Concat(array));
-			}
-			result = default(IntVec3);
+		}
+		finally
+		{
+			warnOnFail = flag;
+		}
+		if (warnOnFail)
+		{
+			Log.Warning($"Scatterer {ToString()} from def {def?.defName} could not find cell to generate at.");
+		}
+		result = default(IntVec3);
+		return false;
+	}
+
+	private bool CalculateScatterInformation(IntVec3 loc, Map map, out PrefabSpawn details)
+	{
+		List<CellRect> usedRects = MapGenerator.GetOrGenerateVar<List<CellRect>>("UsedRects");
+		tmpScatterGroups.Clear();
+		ScatterGroup group = GetGroup();
+		if (group == null)
+		{
+			details = default(PrefabSpawn);
 			return false;
 		}
-
-		// Token: 0x06001F1E RID: 7966 RVA: 0x000A32C8 File Offset: 0x000A14C8
-		private bool CalculateScatterInformation(IntVec3 loc, Map map, out GenStep_ScatterGroupPrefabs.PrefabSpawn details)
+		bool flag = false;
+		foreach (ScatterGroup tmpScatterGroup in tmpScatterGroups)
 		{
-			GenStep_ScatterGroupPrefabs.<>c__DisplayClass14_0 CS$<>8__locals1;
-			CS$<>8__locals1.map = map;
-			CS$<>8__locals1.<>4__this = this;
-			CS$<>8__locals1.loc = loc;
-			CS$<>8__locals1.usedRects = MapGenerator.GetOrGenerateVar<List<CellRect>>("UsedRects");
-			GenStep_ScatterGroupPrefabs.tmpScatterGroups.Clear();
-			GenStep_ScatterGroupPrefabs.ScatterGroup group = this.GetGroup();
-			if (group == null)
+			WritePossibleRotations(tmpScatterGroup.prefab);
+			foreach (Rot4 tmpPossibleRotation in tmpPossibleRotations)
 			{
-				details = default(GenStep_ScatterGroupPrefabs.PrefabSpawn);
-				return false;
-			}
-			bool flag = false;
-			foreach (GenStep_ScatterGroupPrefabs.ScatterGroup scatterGroup in GenStep_ScatterGroupPrefabs.tmpScatterGroups)
-			{
-				GenStep_ScatterGroupPrefabs.<CalculateScatterInformation>g__WritePossibleRotations|14_1(scatterGroup.prefab);
-				foreach (Rot4 rot in GenStep_ScatterGroupPrefabs.tmpPossibleRotations)
+				if (CanSpawn(tmpScatterGroup.prefab, loc, tmpPossibleRotation))
 				{
-					if (this.<CalculateScatterInformation>g__CanSpawn|14_0(scatterGroup.prefab, CS$<>8__locals1.loc, rot, ref CS$<>8__locals1))
-					{
-						flag = true;
-						break;
-					}
-				}
-				if (flag)
-				{
+					flag = true;
 					break;
 				}
 			}
-			GenStep_ScatterGroupPrefabs.tmpWeightedPrefabsRandom.Clear();
-			foreach (GenStep_ScatterGroupPrefabs.ScatterGroup scatterGroup2 in GenStep_ScatterGroupPrefabs.tmpScatterGroups)
+			if (flag)
 			{
-				GenStep_ScatterGroupPrefabs.tmpWeightedPrefabsRandom.Add(scatterGroup2, scatterGroup2.weight * Rand.Value);
+				break;
 			}
-			GenStep_ScatterGroupPrefabs.tmpScatterGroups.SortByDescending((GenStep_ScatterGroupPrefabs.ScatterGroup e) => GenStep_ScatterGroupPrefabs.tmpWeightedPrefabsRandom[e]);
-			CellRect cellRect = CS$<>8__locals1.loc.RectAbout(new IntVec2(20, 20)).ClipInsideMap(CS$<>8__locals1.map);
-			using (List<GenStep_ScatterGroupPrefabs.ScatterGroup>.Enumerator enumerator = GenStep_ScatterGroupPrefabs.tmpScatterGroups.GetEnumerator())
-			{
-				while (enumerator.MoveNext())
-				{
-					GenStep_ScatterGroupPrefabs.ScatterGroup t = enumerator.Current;
-					if (t.max <= 0 || GenStep_ScatterGroupPrefabs.tmpSpawns.Count((GenStep_ScatterGroupPrefabs.PrefabSpawn spawn) => spawn.def == t.prefab) < t.max)
-					{
-						GenStep_ScatterGroupPrefabs.<CalculateScatterInformation>g__WritePossibleRotations|14_1(t.prefab);
-						foreach (IntVec3 intVec in cellRect.Cells.InRandomOrder(GenStep_ScatterGroupPrefabs.tmpCellsRandomOrderWorkingList))
-						{
-							foreach (Rot4 rot2 in GenStep_ScatterGroupPrefabs.tmpPossibleRotations)
-							{
-								CellRect occupiedRect = GenAdj.OccupiedRect(intVec, rot2, t.prefab.size);
-								if (this.<CalculateScatterInformation>g__CanSpawn|14_0(t.prefab, intVec, rot2, ref CS$<>8__locals1))
-								{
-									details = new GenStep_ScatterGroupPrefabs.PrefabSpawn
-									{
-										def = t.prefab,
-										occupiedRect = occupiedRect,
-										pos = intVec,
-										rotation = rot2,
-										sourceGroup = group
-									};
-									return true;
-								}
-							}
-						}
-					}
-				}
-			}
-			details = default(GenStep_ScatterGroupPrefabs.PrefabSpawn);
-			return false;
 		}
-
-		// Token: 0x06001F1F RID: 7967 RVA: 0x000A366C File Offset: 0x000A186C
-		protected override void ScatterAt(IntVec3 loc, Map map, GenStepParams parms, int count = 1)
+		tmpWeightedPrefabsRandom.Clear();
+		foreach (ScatterGroup tmpScatterGroup2 in tmpScatterGroups)
 		{
-			using (Rand.Block(map.NextGenSeed))
-			{
-				GenStep_ScatterGroupPrefabs.PrefabSpawn prefabSpawn;
-				if (!this.CalculateScatterInformation(loc, map, out prefabSpawn) && this.warnOnFail)
-				{
-					Log.Warning(string.Format("Tried scattering group from def {0} at {1} on map {2} which is an invalid location!", this.def.defName, loc, map));
-				}
-				else
-				{
-					if (PrefabUtility.CanSpawnPrefab(prefabSpawn.def, map, prefabSpawn.pos, prefabSpawn.rotation, true, 0))
-					{
-						PrefabUtility.SpawnPrefab(prefabSpawn.def, map, prefabSpawn.pos, prefabSpawn.rotation, null, null, null, null, false);
-						GenStep_ScatterGroupPrefabs.tmpSpawns.Add(prefabSpawn);
-					}
-					if (prefabSpawn.sourceGroup.filthDef != null)
-					{
-						foreach (IntVec3 c in prefabSpawn.occupiedRect.ExpandedBy(prefabSpawn.sourceGroup.filthExpandBy))
-						{
-							if (Rand.Chance(prefabSpawn.sourceGroup.filthChance) && c.InBounds(map))
-							{
-								FilthMaker.TryMakeFilth(c, map, prefabSpawn.sourceGroup.filthDef, 1, FilthSourceFlags.None, true);
-							}
-						}
-					}
-				}
-			}
+			tmpWeightedPrefabsRandom.Add(tmpScatterGroup2, tmpScatterGroup2.weight * Rand.Value);
 		}
-
-		// Token: 0x06001F20 RID: 7968 RVA: 0x000A37D0 File Offset: 0x000A19D0
-		protected override bool CanScatterAt(IntVec3 loc, Map map)
+		tmpScatterGroups.SortByDescending((ScatterGroup e) => tmpWeightedPrefabsRandom[e]);
+		CellRect cellRect = loc.RectAbout(new IntVec2(20, 20)).ClipInsideMap(map);
+		foreach (ScatterGroup t in tmpScatterGroups)
 		{
-			if (!base.CanScatterAt(loc, map))
+			if (t.max > 0 && tmpSpawns.Count((PrefabSpawn spawn) => spawn.def == t.prefab) >= t.max)
 			{
-				return false;
+				continue;
 			}
-			bool result;
-			using (Rand.Block(map.NextGenSeed))
+			WritePossibleRotations(t.prefab);
+			foreach (IntVec3 item in cellRect.Cells.InRandomOrder(tmpCellsRandomOrderWorkingList))
 			{
-				GenStep_ScatterGroupPrefabs.PrefabSpawn prefabSpawn;
-				result = this.CalculateScatterInformation(loc, map, out prefabSpawn);
+				foreach (Rot4 tmpPossibleRotation2 in tmpPossibleRotations)
+				{
+					CellRect occupiedRect = GenAdj.OccupiedRect(item, tmpPossibleRotation2, t.prefab.size);
+					if (CanSpawn(t.prefab, item, tmpPossibleRotation2))
+					{
+						details = new PrefabSpawn
+						{
+							def = t.prefab,
+							occupiedRect = occupiedRect,
+							pos = item,
+							rotation = tmpPossibleRotation2,
+							sourceGroup = group
+						};
+						return true;
+					}
+				}
 			}
-			return result;
 		}
-
-		// Token: 0x06001F23 RID: 7971 RVA: 0x000A3858 File Offset: 0x000A1A58
-		[CompilerGenerated]
-		private bool <CalculateScatterInformation>g__CanSpawn|14_0(PrefabDef prefab, IntVec3 cell, Rot4 rot, ref GenStep_ScatterGroupPrefabs.<>c__DisplayClass14_0 A_4)
+		details = default(PrefabSpawn);
+		return false;
+		bool CanSpawn(PrefabDef prefab, IntVec3 cell, Rot4 rot)
 		{
 			CellRect other = GenAdj.OccupiedRect(cell, rot, prefab.size);
-			if (!other.InBounds(A_4.map))
+			if (!other.InBounds(map))
 			{
 				return false;
 			}
-			foreach (GenStep_ScatterGroupPrefabs.PrefabSpawn prefabSpawn in GenStep_ScatterGroupPrefabs.tmpSpawns)
+			foreach (PrefabSpawn tmpSpawn in tmpSpawns)
 			{
-				CellRect occupiedRect = prefabSpawn.occupiedRect;
-				if (occupiedRect.Overlaps(other))
+				if (tmpSpawn.occupiedRect.Overlaps(other))
 				{
 					return false;
 				}
 			}
-			foreach (CellRect cellRect in A_4.usedRects)
+			foreach (CellRect item2 in usedRects)
 			{
-				if (cellRect.Overlaps(other))
+				if (item2.Overlaps(other))
 				{
 					return false;
 				}
 			}
-			foreach (IntVec3 c in other)
+			foreach (IntVec3 item3 in other)
 			{
-				if (!c.GetAffordances(A_4.map).Contains(TerrainAffordanceDefOf.Heavy))
+				if (!item3.GetAffordances(map).Contains(TerrainAffordanceDefOf.Heavy))
 				{
 					return false;
 				}
-				if (this.useFallback)
+				if (useFallback)
 				{
-					if (this.fallbackValidators != null)
+					if (fallbackValidators != null)
 					{
-						for (int i = 0; i < this.fallbackValidators.Count; i++)
+						for (int i = 0; i < fallbackValidators.Count; i++)
 						{
-							if (!this.fallbackValidators[i].Allows(A_4.loc, A_4.map))
+							if (!fallbackValidators[i].Allows(loc, map))
 							{
 								return false;
 							}
 						}
 					}
 				}
-				else if (this.validators != null)
+				else if (validators != null)
 				{
-					for (int j = 0; j < this.validators.Count; j++)
+					for (int j = 0; j < validators.Count; j++)
 					{
-						if (!this.validators[j].Allows(A_4.loc, A_4.map))
+						if (!validators[j].Allows(loc, map))
 						{
 							return false;
 						}
 					}
 				}
-				foreach (Thing thing in c.GetThingList(A_4.map))
+				foreach (Thing thing in item3.GetThingList(map))
 				{
 					if (thing.def.category == ThingCategory.Item || thing.def.category == ThingCategory.Pawn || thing.def.IsEdifice() || !thing.def.destroyable)
 					{
@@ -296,90 +258,55 @@ namespace Verse
 			}
 			return true;
 		}
-
-		// Token: 0x06001F24 RID: 7972 RVA: 0x000A3AEC File Offset: 0x000A1CEC
-		[CompilerGenerated]
-		internal static void <CalculateScatterInformation>g__WritePossibleRotations|14_1(PrefabDef prefab)
+		static void WritePossibleRotations(PrefabDef prefab)
 		{
-			GenStep_ScatterGroupPrefabs.tmpPossibleRotations.Clear();
-			foreach (Enum @enum in prefab.rotations.GetBitFlags())
+			tmpPossibleRotations.Clear();
+			foreach (RotEnum bitFlag in prefab.rotations.GetBitFlags())
 			{
-				RotEnum rot = (RotEnum)@enum;
-				GenStep_ScatterGroupPrefabs.tmpPossibleRotations.Add(rot);
+				tmpPossibleRotations.Add(bitFlag);
 			}
-			GenStep_ScatterGroupPrefabs.tmpPossibleRotations.Shuffle<Rot4>();
+			tmpPossibleRotations.Shuffle();
 		}
+	}
 
-		// Token: 0x04001AC1 RID: 6849
-		public List<GenStep_ScatterGroupPrefabs.ScatterGroup> groups;
-
-		// Token: 0x04001AC2 RID: 6850
-		[Unsaved(false)]
-		private bool dontChooseIndoor;
-
-		// Token: 0x04001AC3 RID: 6851
-		private static readonly List<GenStep_ScatterGroupPrefabs.PrefabSpawn> tmpSpawns = new List<GenStep_ScatterGroupPrefabs.PrefabSpawn>();
-
-		// Token: 0x04001AC4 RID: 6852
-		private static readonly List<GenStep_ScatterGroupPrefabs.ScatterGroup> tmpScatterGroups = new List<GenStep_ScatterGroupPrefabs.ScatterGroup>();
-
-		// Token: 0x04001AC5 RID: 6853
-		private static readonly Dictionary<GenStep_ScatterGroupPrefabs.ScatterGroup, float> tmpWeightedPrefabsRandom = new Dictionary<GenStep_ScatterGroupPrefabs.ScatterGroup, float>();
-
-		// Token: 0x04001AC6 RID: 6854
-		private static readonly List<IntVec3> tmpCellsRandomOrderWorkingList = new List<IntVec3>();
-
-		// Token: 0x04001AC7 RID: 6855
-		private static readonly List<Rot4> tmpPossibleRotations = new List<Rot4>();
-
-		// Token: 0x020004A6 RID: 1190
-		private struct PrefabSpawn
+	protected override void ScatterAt(IntVec3 loc, Map map, GenStepParams parms, int count = 1)
+	{
+		using (Rand.Block(map.NextGenSeed))
 		{
-			// Token: 0x04001AC8 RID: 6856
-			public IntVec3 pos;
-
-			// Token: 0x04001AC9 RID: 6857
-			public Rot4 rotation;
-
-			// Token: 0x04001ACA RID: 6858
-			public CellRect occupiedRect;
-
-			// Token: 0x04001ACB RID: 6859
-			public PrefabDef def;
-
-			// Token: 0x04001ACC RID: 6860
-			public GenStep_ScatterGroupPrefabs.ScatterGroup sourceGroup;
-		}
-
-		// Token: 0x020004A7 RID: 1191
-		public class ScatterGroup
-		{
-			// Token: 0x06001F25 RID: 7973 RVA: 0x000A3B68 File Offset: 0x000A1D68
-			public void LoadDataFromXmlCustom(XmlNode xmlRoot)
+			if (!CalculateScatterInformation(loc, map, out var details) && warnOnFail)
 			{
-				XmlHelper.ParseElements(this, xmlRoot, "prefab", "weight");
+				Log.Warning($"Tried scattering group from def {def.defName} at {loc} on map {map} which is an invalid location!");
+				return;
 			}
+			if (PrefabUtility.CanSpawnPrefab(details.def, map, details.pos, details.rotation))
+			{
+				PrefabUtility.SpawnPrefab(details.def, map, details.pos, details.rotation);
+				tmpSpawns.Add(details);
+			}
+			if (details.sourceGroup.filthDef == null)
+			{
+				return;
+			}
+			foreach (IntVec3 item in details.occupiedRect.ExpandedBy(details.sourceGroup.filthExpandBy))
+			{
+				if (Rand.Chance(details.sourceGroup.filthChance) && item.InBounds(map))
+				{
+					FilthMaker.TryMakeFilth(item, map, details.sourceGroup.filthDef);
+				}
+			}
+		}
+	}
 
-			// Token: 0x04001ACD RID: 6861
-			public PrefabDef prefab;
-
-			// Token: 0x04001ACE RID: 6862
-			public float weight = 1f;
-
-			// Token: 0x04001ACF RID: 6863
-			public int max = -1;
-
-			// Token: 0x04001AD0 RID: 6864
-			public bool indoorRuin;
-
-			// Token: 0x04001AD1 RID: 6865
-			public ThingDef filthDef;
-
-			// Token: 0x04001AD2 RID: 6866
-			public int filthExpandBy;
-
-			// Token: 0x04001AD3 RID: 6867
-			public float filthChance = 0.5f;
+	protected override bool CanScatterAt(IntVec3 loc, Map map)
+	{
+		if (!base.CanScatterAt(loc, map))
+		{
+			return false;
+		}
+		using (Rand.Block(map.NextGenSeed))
+		{
+			PrefabSpawn details;
+			return CalculateScatterInformation(loc, map, out details);
 		}
 	}
 }

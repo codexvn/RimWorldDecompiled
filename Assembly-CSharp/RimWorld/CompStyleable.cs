@@ -1,197 +1,295 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompStyleable : ThingComp
 {
-	// Token: 0x02002E6D RID: 11885
-	public class CompStyleable : ThingComp
+	[CompilerGenerated]
+	private sealed class _003CSpecialDisplayStats_003Ed__14 : IEnumerable<StatDrawEntry>, IEnumerable, IEnumerator<StatDrawEntry>, IEnumerator, IDisposable
 	{
-		// Token: 0x17002AF3 RID: 10995
-		// (get) Token: 0x06010BC2 RID: 68546 RVA: 0x004D2F72 File Offset: 0x004D1172
-		public Ideo Ideo
+		private int _003C_003E1__state;
+
+		private StatDrawEntry _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompStyleable _003C_003E4__this;
+
+		private IEnumerator<StatDrawEntry> _003C_003E7__wrap1;
+
+		StatDrawEntry IEnumerator<StatDrawEntry>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				Precept_ThingStyle precept_ThingStyle = this.SourcePrecept;
-				if (precept_ThingStyle == null)
-				{
-					return null;
-				}
-				return precept_ThingStyle.ideo;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002AF4 RID: 10996
-		// (get) Token: 0x06010BC3 RID: 68547 RVA: 0x004D2F88 File Offset: 0x004D1188
-		public StyleCategoryDef StyleCategoryDef
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.cachedStyleCategoryDef == null)
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CSpecialDisplayStats_003Ed__14(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 2)
+			{
+				try
 				{
-					bool flag = false;
-					foreach (StyleCategoryDef styleCategoryDef in DefDatabase<StyleCategoryDef>.AllDefs)
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				CompStyleable compStyleable = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					if (compStyleable.StyleCategoryDef != null)
 					{
-						for (int i = 0; i < styleCategoryDef.thingDefStyles.Count; i++)
-						{
-							if (styleCategoryDef.thingDefStyles[i].StyleDef == this.styleDef && styleCategoryDef.thingDefStyles[i].ThingDef == this.parent.def)
-							{
-								this.cachedStyleCategoryDef = styleCategoryDef;
-								flag = true;
-								break;
-							}
-						}
-						if (flag)
-						{
-							break;
-						}
+						_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.BasicsNonPawn, "Stat_Thing_StyleLabel".Translate(), compStyleable.StyleCategoryDef.LabelCap, "Stat_Thing_StyleDesc".Translate(), 1108);
+						_003C_003E1__state = 1;
+						return true;
 					}
+					goto IL_0092;
+				case 1:
+					_003C_003E1__state = -1;
+					goto IL_0092;
+				case 2:
+					{
+						_003C_003E1__state = -3;
+						goto IL_00e6;
+					}
+					IL_00e6:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						StatDrawEntry current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					break;
+					IL_0092:
+					if (compStyleable.SourcePrecept == null)
+					{
+						break;
+					}
+					_003C_003E7__wrap1 = compStyleable.SourcePrecept.SpecialDisplayStats(compStyleable.parent).GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_00e6;
 				}
-				return this.cachedStyleCategoryDef;
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x17002AF5 RID: 10997
-		// (get) Token: 0x06010BC4 RID: 68548 RVA: 0x004D3040 File Offset: 0x004D1240
-		// (set) Token: 0x06010BC5 RID: 68549 RVA: 0x004D3048 File Offset: 0x004D1248
-		public Precept_ThingStyle SourcePrecept
+		bool IEnumerator.MoveNext()
 		{
-			get
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				return this.sourcePrecept;
-			}
-			set
-			{
-				if (this.sourcePrecept == value)
-				{
-					return;
-				}
-				this.sourcePrecept = value;
-				if (this.parent.def.randomStyleChance > 0f)
-				{
-					return;
-				}
-				BuildableDef buildableDef = this.parent.def.IsBlueprint ? this.parent.def.entityDefToBuild : this.parent.def;
-				Precept_ThingStyle precept_ThingStyle = this.sourcePrecept;
-				StyleCategoryPair styleCategoryPair = (precept_ThingStyle != null) ? precept_ThingStyle.ideo.style.StyleForThingDef((ThingDef)buildableDef, this.sourcePrecept) : null;
-				this.cachedStyleCategoryDef = ((styleCategoryPair != null) ? styleCategoryPair.category : null);
-				if (this.cachedStyleCategoryDef != null)
-				{
-					this.styleDef = styleCategoryPair.styleDef;
-				}
+				_003C_003E7__wrap1.Dispose();
 			}
 		}
 
-		// Token: 0x06010BC6 RID: 68550 RVA: 0x004D30FD File Offset: 0x004D12FD
-		public override string TransformLabel(string label)
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			if (this.sourcePrecept != null)
-			{
-				label = this.sourcePrecept.TransformThingLabel(label);
-			}
-			return label;
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x06010BC7 RID: 68551 RVA: 0x004D3118 File Offset: 0x004D1318
-		public override string CompInspectStringExtra()
+		[DebuggerHidden]
+		IEnumerator<StatDrawEntry> IEnumerable<StatDrawEntry>.GetEnumerator()
 		{
-			string text = base.CompInspectStringExtra();
-			if (this.sourcePrecept == null)
+			_003CSpecialDisplayStats_003Ed__14 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				return text;
-			}
-			string text2 = this.sourcePrecept.InspectStringExtra(this.parent);
-			if (text2.NullOrEmpty())
-			{
-				return text;
-			}
-			if (!text.NullOrEmpty())
-			{
-				text += "\n";
-			}
-			return text + text2;
-		}
-
-		// Token: 0x06010BC8 RID: 68552 RVA: 0x004D3170 File Offset: 0x004D1370
-		public override void PostPostGeneratedForTrader(TraderKindDef trader, PlanetTile forTile, Faction forFaction)
-		{
-			StyleCategoryPair styleCategoryPair;
-			if (forFaction == null)
-			{
-				styleCategoryPair = null;
+				_003C_003E1__state = 0;
+				result = this;
 			}
 			else
 			{
-				FactionIdeosTracker ideos = forFaction.ideos;
-				if (ideos == null)
+				result = new _003CSpecialDisplayStats_003Ed__14(0)
 				{
-					styleCategoryPair = null;
-				}
-				else
-				{
-					Ideo primaryIdeo = ideos.PrimaryIdeo;
-					if (primaryIdeo == null)
-					{
-						styleCategoryPair = null;
-					}
-					else
-					{
-						IdeoStyleTracker style = primaryIdeo.style;
-						styleCategoryPair = ((style != null) ? style.StyleForThingDef(this.parent.def, null) : null);
-					}
-				}
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
-			StyleCategoryPair styleCategoryPair2 = styleCategoryPair;
-			if (styleCategoryPair2 != null)
-			{
-				this.parent.SetStyleDef(styleCategoryPair2.styleDef);
-			}
+			return result;
 		}
 
-		// Token: 0x06010BC9 RID: 68553 RVA: 0x004D31CE File Offset: 0x004D13CE
-		public override IEnumerable<StatDrawEntry> SpecialDisplayStats()
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			if (this.StyleCategoryDef != null)
-			{
-				yield return new StatDrawEntry(StatCategoryDefOf.BasicsNonPawn, "Stat_Thing_StyleLabel".Translate(), this.StyleCategoryDef.LabelCap, "Stat_Thing_StyleDesc".Translate(), 1108, null, null, false, false);
-			}
-			if (this.SourcePrecept != null)
-			{
-				foreach (StatDrawEntry statDrawEntry in this.SourcePrecept.SpecialDisplayStats(this.parent))
-				{
-					yield return statDrawEntry;
-				}
-				IEnumerator<StatDrawEntry> enumerator = null;
-			}
-			yield break;
-			yield break;
+			return ((IEnumerable<StatDrawEntry>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x06010BCA RID: 68554 RVA: 0x004D31E0 File Offset: 0x004D13E0
-		public override void PostExposeData()
+	private Precept_ThingStyle sourcePrecept;
+
+	public ThingStyleDef styleDef;
+
+	public bool everSeenByPlayer;
+
+	[Unsaved(false)]
+	public StyleCategoryDef cachedStyleCategoryDef;
+
+	public Ideo Ideo => SourcePrecept?.ideo;
+
+	public StyleCategoryDef StyleCategoryDef
+	{
+		get
 		{
-			if (Scribe.mode == LoadSaveMode.Saving && this.sourcePrecept != null && (this.sourcePrecept.ideo == null || !Find.IdeoManager.IdeosListForReading.Contains(this.sourcePrecept.ideo)))
+			if (cachedStyleCategoryDef == null)
 			{
-				this.sourcePrecept = null;
+				bool flag = false;
+				foreach (StyleCategoryDef allDef in DefDatabase<StyleCategoryDef>.AllDefs)
+				{
+					for (int i = 0; i < allDef.thingDefStyles.Count; i++)
+					{
+						if (allDef.thingDefStyles[i].StyleDef == styleDef && allDef.thingDefStyles[i].ThingDef == parent.def)
+						{
+							cachedStyleCategoryDef = allDef;
+							flag = true;
+							break;
+						}
+					}
+					if (flag)
+					{
+						break;
+					}
+				}
 			}
-			Scribe_References.Look<Precept_ThingStyle>(ref this.sourcePrecept, "sourcePrecept", false);
-			Scribe_Defs.Look<ThingStyleDef>(ref this.styleDef, "styleDef");
-			Scribe_Values.Look<bool>(ref this.everSeenByPlayer, "everSeenByPlayer", false, false);
+			return cachedStyleCategoryDef;
 		}
+	}
 
-		// Token: 0x0400AE6B RID: 44651
-		private Precept_ThingStyle sourcePrecept;
+	public Precept_ThingStyle SourcePrecept
+	{
+		get
+		{
+			return sourcePrecept;
+		}
+		set
+		{
+			if (sourcePrecept == value)
+			{
+				return;
+			}
+			sourcePrecept = value;
+			if (!(parent.def.randomStyleChance > 0f))
+			{
+				BuildableDef buildableDef = (parent.def.IsBlueprint ? parent.def.entityDefToBuild : parent.def);
+				StyleCategoryPair styleCategoryPair = sourcePrecept?.ideo.style.StyleForThingDef((ThingDef)buildableDef, sourcePrecept);
+				cachedStyleCategoryDef = styleCategoryPair?.category;
+				if (cachedStyleCategoryDef != null)
+				{
+					styleDef = styleCategoryPair.styleDef;
+				}
+			}
+		}
+	}
 
-		// Token: 0x0400AE6C RID: 44652
-		public ThingStyleDef styleDef;
+	public override string TransformLabel(string label)
+	{
+		if (sourcePrecept != null)
+		{
+			label = sourcePrecept.TransformThingLabel(label);
+		}
+		return label;
+	}
 
-		// Token: 0x0400AE6D RID: 44653
-		public bool everSeenByPlayer;
+	public override string CompInspectStringExtra()
+	{
+		string text = base.CompInspectStringExtra();
+		if (sourcePrecept == null)
+		{
+			return text;
+		}
+		string text2 = sourcePrecept.InspectStringExtra(parent);
+		if (text2.NullOrEmpty())
+		{
+			return text;
+		}
+		if (!text.NullOrEmpty())
+		{
+			text += "\n";
+		}
+		return text + text2;
+	}
 
-		// Token: 0x0400AE6E RID: 44654
-		[Unsaved(false)]
-		public StyleCategoryDef cachedStyleCategoryDef;
+	public override void PostPostGeneratedForTrader(TraderKindDef trader, PlanetTile forTile, Faction forFaction)
+	{
+		StyleCategoryPair styleCategoryPair = forFaction?.ideos?.PrimaryIdeo?.style?.StyleForThingDef(parent.def);
+		if (styleCategoryPair != null)
+		{
+			parent.SetStyleDef(styleCategoryPair.styleDef);
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CSpecialDisplayStats_003Ed__14))]
+	public override IEnumerable<StatDrawEntry> SpecialDisplayStats()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CSpecialDisplayStats_003Ed__14(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override void PostExposeData()
+	{
+		if (Scribe.mode == LoadSaveMode.Saving && sourcePrecept != null && (sourcePrecept.ideo == null || !Find.IdeoManager.IdeosListForReading.Contains(sourcePrecept.ideo)))
+		{
+			sourcePrecept = null;
+		}
+		Scribe_References.Look(ref sourcePrecept, "sourcePrecept");
+		Scribe_Defs.Look(ref styleDef, "styleDef");
+		Scribe_Values.Look(ref everSeenByPlayer, "everSeenByPlayer", defaultValue: false);
 	}
 }

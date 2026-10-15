@@ -1,101 +1,78 @@
-﻿using System;
 using System.Collections.Generic;
 using RimWorld;
 using UnityEngine;
 
-namespace Verse
+namespace Verse;
+
+public class AnimationWorker_RevenantHypnotise : AnimationWorker_Keyframes
 {
-	// Token: 0x020005E5 RID: 1509
-	public class AnimationWorker_RevenantHypnotise : AnimationWorker_Keyframes
+	private const float LensFlareScale = 0.7f;
+
+	private const float LensFlareAnimPeriod = 30f;
+
+	private const float Layer_AboveHead = 80f;
+
+	private const float PxToUnitScale = 100f;
+
+	private static readonly List<Vector3> EyePositionsPxNS = new List<Vector3>
 	{
-		// Token: 0x170006D5 RID: 1749
-		// (get) Token: 0x060026AF RID: 9903 RVA: 0x000CCCDB File Offset: 0x000CAEDB
-		private Material LensFlareMat
+		new Vector3(-8f, 0f, -3f),
+		new Vector3(12f, 0f, -5f),
+		new Vector3(6f, 0f, 12f)
+	};
+
+	private static readonly List<Vector3> EyePositionsPxEW = new List<Vector3>
+	{
+		new Vector3(19f, 0f, 9f),
+		new Vector3(18f, 0f, -7f)
+	};
+
+	private static readonly SimpleCurve LensFlareOpacity = new SimpleCurve
+	{
+		new CurvePoint(0f, 0.4f),
+		new CurvePoint(0.5f, 0.8f),
+		new CurvePoint(1f, 0.4f)
+	};
+
+	private Material lensFlareMat;
+
+	private Material LensFlareMat
+	{
+		get
 		{
-			get
+			if (lensFlareMat == null)
 			{
-				if (this.lensFlareMat == null)
-				{
-					this.lensFlareMat = MaterialPool.MatFrom("Things/Pawn/Revenant/Revenant_LensFlare", ShaderDatabase.MoteGlow);
-				}
-				return this.lensFlareMat;
+				lensFlareMat = MaterialPool.MatFrom("Things/Pawn/Revenant/Revenant_LensFlare", ShaderDatabase.MoteGlow);
 			}
+			return lensFlareMat;
 		}
+	}
 
-		// Token: 0x060026B0 RID: 9904 RVA: 0x000CCD08 File Offset: 0x000CAF08
-		public override void PostDraw(AnimationDef def, PawnRenderNode node, AnimationPart part, PawnDrawParms parms, Matrix4x4 matrix)
+	public override void PostDraw(AnimationDef def, PawnRenderNode node, AnimationPart part, PawnDrawParms parms, Matrix4x4 matrix)
+	{
+		foreach (Vector3 item in (parms.facing == Rot4.North || parms.facing == Rot4.South) ? EyePositionsPxNS : EyePositionsPxEW)
 		{
-			foreach (Vector3 a in ((parms.facing == Rot4.North || parms.facing == Rot4.South) ? AnimationWorker_RevenantHypnotise.EyePositionsPxNS : AnimationWorker_RevenantHypnotise.EyePositionsPxEW))
+			Vector3 current = item;
+			current.y = 1f;
+			if (parms.facing == Rot4.North || parms.facing == Rot4.West)
 			{
-				a.y = 1f;
-				if (parms.facing == Rot4.North || parms.facing == Rot4.West)
-				{
-					a.x *= -1f;
-				}
-				if (parms.facing == Rot4.North)
-				{
-					a.y = -1f;
-				}
-				float x = (float)(Find.TickManager.TicksGame - node.tree.animationStartTick) % 30f / 30f;
-				this.LensFlareMat.SetColor(ShaderPropertyIDs.Color, new Color(1f, 1f, 1f, AnimationWorker_RevenantHypnotise.LensFlareOpacity.Evaluate(x)));
-				GenDraw.DrawMeshNowOrLater(MeshPool.GridPlane(Vector2.one * 0.7f), matrix * Matrix4x4.Translate(a / 100f), this.LensFlareMat, parms.DrawNow, null);
+				current.x *= -1f;
 			}
-			Pawn pawn = node.tree.pawn.mindState.enemyTarget as Pawn;
-			if (pawn != null)
+			if (parms.facing == Rot4.North)
 			{
-				Rot4 rotation = (pawn.GetPosture() == PawnPosture.Standing) ? Rot4.North : pawn.Drawer.renderer.LayingFacing();
-				Vector3 b = pawn.Drawer.renderer.BaseHeadOffsetAt(rotation).RotatedBy(pawn.Drawer.renderer.BodyAngle(PawnRenderFlags.None));
-				Vector3 loc = (pawn.DrawPos + b).WithYOffset(PawnRenderUtility.AltitudeForLayer(80f));
-				Quaternion quat = Quaternion.Euler(Vector3.up * pawn.Drawer.renderer.BodyAngle(PawnRenderFlags.None));
-				GenDraw.DrawMeshNowOrLater(MeshPool.GridPlane(Vector2.one * 2f), loc, quat, this.LensFlareMat, parms.DrawNow);
+				current.y = -1f;
 			}
+			float x = (float)(Find.TickManager.TicksGame - node.tree.animationStartTick) % 30f / 30f;
+			LensFlareMat.SetColor(ShaderPropertyIDs.Color, new Color(1f, 1f, 1f, LensFlareOpacity.Evaluate(x)));
+			GenDraw.DrawMeshNowOrLater(MeshPool.GridPlane(Vector2.one * 0.7f), matrix * Matrix4x4.Translate(current / 100f), LensFlareMat, parms.DrawNow);
 		}
-
-		// Token: 0x04002006 RID: 8198
-		private const float LensFlareScale = 0.7f;
-
-		// Token: 0x04002007 RID: 8199
-		private const float LensFlareAnimPeriod = 30f;
-
-		// Token: 0x04002008 RID: 8200
-		private const float Layer_AboveHead = 80f;
-
-		// Token: 0x04002009 RID: 8201
-		private const float PxToUnitScale = 100f;
-
-		// Token: 0x0400200A RID: 8202
-		private static readonly List<Vector3> EyePositionsPxNS = new List<Vector3>
+		if (node.tree.pawn.mindState.enemyTarget is Pawn pawn)
 		{
-			new Vector3(-8f, 0f, -3f),
-			new Vector3(12f, 0f, -5f),
-			new Vector3(6f, 0f, 12f)
-		};
-
-		// Token: 0x0400200B RID: 8203
-		private static readonly List<Vector3> EyePositionsPxEW = new List<Vector3>
-		{
-			new Vector3(19f, 0f, 9f),
-			new Vector3(18f, 0f, -7f)
-		};
-
-		// Token: 0x0400200C RID: 8204
-		private static readonly SimpleCurve LensFlareOpacity = new SimpleCurve
-		{
-			{
-				new CurvePoint(0f, 0.4f),
-				true
-			},
-			{
-				new CurvePoint(0.5f, 0.8f),
-				true
-			},
-			{
-				new CurvePoint(1f, 0.4f),
-				true
-			}
-		};
-
-		// Token: 0x0400200D RID: 8205
-		private Material lensFlareMat;
+			Rot4 rotation = ((pawn.GetPosture() == PawnPosture.Standing) ? Rot4.North : pawn.Drawer.renderer.LayingFacing());
+			Vector3 vector = pawn.Drawer.renderer.BaseHeadOffsetAt(rotation).RotatedBy(pawn.Drawer.renderer.BodyAngle(PawnRenderFlags.None));
+			Vector3 loc = (pawn.DrawPos + vector).WithYOffset(PawnRenderUtility.AltitudeForLayer(80f));
+			Quaternion quat = Quaternion.Euler(Vector3.up * pawn.Drawer.renderer.BodyAngle(PawnRenderFlags.None));
+			GenDraw.DrawMeshNowOrLater(MeshPool.GridPlane(Vector2.one * 2f), loc, quat, LensFlareMat, parms.DrawNow);
+		}
 	}
 }

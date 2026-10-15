@@ -1,32 +1,28 @@
-﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class PlaceWorker_NextToHopperAccepter : PlaceWorker
 {
-	// Token: 0x020037E8 RID: 14312
-	public class PlaceWorker_NextToHopperAccepter : PlaceWorker
+	public override AcceptanceReport AllowsPlacing(BuildableDef checkingDef, IntVec3 loc, Rot4 rot, Map map, Thing thingToIgnore = null, Thing thing = null)
 	{
-		// Token: 0x06013D50 RID: 81232 RVA: 0x005E39B8 File Offset: 0x005E1BB8
-		public override AcceptanceReport AllowsPlacing(BuildableDef checkingDef, IntVec3 loc, Rot4 rot, Map map, Thing thingToIgnore = null, Thing thing = null)
+		for (int i = 0; i < 4; i++)
 		{
-			for (int i = 0; i < 4; i++)
+			IntVec3 c = loc + GenAdj.CardinalDirections[i];
+			if (!c.InBounds(map))
 			{
-				IntVec3 c = loc + GenAdj.CardinalDirections[i];
-				if (c.InBounds(map))
+				continue;
+			}
+			List<Thing> thingList = c.GetThingList(map);
+			for (int j = 0; j < thingList.Count; j++)
+			{
+				if (GenConstruct.BuiltDefOf(thingList[j].def) is ThingDef { building: not null } thingDef && thingDef.building.wantsHopperAdjacent)
 				{
-					List<Thing> thingList = c.GetThingList(map);
-					for (int j = 0; j < thingList.Count; j++)
-					{
-						ThingDef thingDef = GenConstruct.BuiltDefOf(thingList[j].def) as ThingDef;
-						if (thingDef != null && thingDef.building != null && thingDef.building.wantsHopperAdjacent)
-						{
-							return true;
-						}
-					}
+					return true;
 				}
 			}
-			return "MustPlaceNextToHopperAccepter".Translate();
 		}
+		return "MustPlaceNextToHopperAccepter".Translate();
 	}
 }

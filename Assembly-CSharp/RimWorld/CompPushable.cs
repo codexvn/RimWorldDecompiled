@@ -1,104 +1,298 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompPushable : ThingComp
 {
-	// Token: 0x02002DD0 RID: 11728
-	public class CompPushable : ThingComp
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass8_0
 	{
-		// Token: 0x17002A15 RID: 10773
-		// (get) Token: 0x060107E0 RID: 67552 RVA: 0x004C1F46 File Offset: 0x004C0146
-		public CompProperties_Pushable Props
+		public CompPushable _003C_003E4__this;
+
+		public Pawn selPawn;
+
+		public Action<LocalTargetInfo> _003C_003E9__1;
+
+		internal void _003CCompFloatMenuOptions_003Eb__0()
 		{
+			Find.Targeter.BeginTargeting(TargetingParameters.ForCell(), delegate(LocalTargetInfo target)
+			{
+				Job job = JobMaker.MakeJob(JobDefOf.HaulToCell, _003C_003E4__this.Pawn, target.Cell);
+				job.count = 1;
+				selPawn.jobs.StartJob(job, JobCondition.InterruptForced, null, resumeCurJobAfterwards: false, cancelBusyStances: true, null, null, fromQueue: false, canReturnCurJobToPool: false, null);
+			});
+		}
+
+		internal void _003CCompFloatMenuOptions_003Eb__1(LocalTargetInfo target)
+		{
+			Job job = JobMaker.MakeJob(JobDefOf.HaulToCell, _003C_003E4__this.Pawn, target.Cell);
+			job.count = 1;
+			selPawn.jobs.StartJob(job, JobCondition.InterruptForced, null, resumeCurJobAfterwards: false, cancelBusyStances: true, null, null, fromQueue: false, canReturnCurJobToPool: false, null);
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CCompFloatMenuOptions_003Ed__8 : IEnumerable<FloatMenuOption>, IEnumerable, IEnumerator<FloatMenuOption>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private FloatMenuOption _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompPushable _003C_003E4__this;
+
+		private Pawn selPawn;
+
+		public Pawn _003C_003E3__selPawn;
+
+		FloatMenuOption IEnumerator<FloatMenuOption>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				return (CompProperties_Pushable)this.props;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002A16 RID: 10774
-		// (get) Token: 0x060107E1 RID: 67553 RVA: 0x0049B545 File Offset: 0x00499745
-		public Pawn Pawn
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (Pawn)this.parent;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x060107E2 RID: 67554 RVA: 0x000026EA File Offset: 0x000008EA
-		public override void Notify_Killed(Map prevMap, DamageInfo? dinfo = null)
+		[DebuggerHidden]
+		public _003CCompFloatMenuOptions_003Ed__8(int _003C_003E1__state)
 		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x060107E3 RID: 67555 RVA: 0x004C1F53 File Offset: 0x004C0153
-		public override IEnumerable<FloatMenuOption> CompFloatMenuOptions(Pawn selPawn)
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			if (!this.canBePushed || !this.Props.givePushOption)
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			CompPushable compPushable = _003C_003E4__this;
+			switch (num)
 			{
-				yield break;
-			}
-			Action<LocalTargetInfo> <>9__1;
-			FloatMenuOption floatMenuOption = new FloatMenuOption("CommandPushTo".Translate(), delegate()
+			default:
+				return false;
+			case 0:
 			{
-				Targeter targeter = Find.Targeter;
-				TargetingParameters targetParams = TargetingParameters.ForCell();
-				Action<LocalTargetInfo> action;
-				if ((action = <>9__1) == null)
+				_003C_003E1__state = -1;
+				_003C_003Ec__DisplayClass8_0 CS_0024_003C_003E8__locals3 = new _003C_003Ec__DisplayClass8_0
 				{
-					action = (<>9__1 = delegate(LocalTargetInfo target)
-					{
-						Job job = JobMaker.MakeJob(JobDefOf.HaulToCell, this.Pawn, target.Cell);
-						job.count = 1;
-						selPawn.jobs.StartJob(job, JobCondition.InterruptForced, null, false, true, null, null, false, false, null, false, true, false);
-					});
+					_003C_003E4__this = _003C_003E4__this,
+					selPawn = selPawn
+				};
+				if (!compPushable.canBePushed || !compPushable.Props.givePushOption)
+				{
+					return false;
 				}
-				targeter.BeginTargeting(targetParams, action, null, null, null, true);
-			}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-			if (!selPawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation))
-			{
-				floatMenuOption.Label = string.Format("{0} ({1})", floatMenuOption.Label, "RequiredCapacity".Translate(PawnCapacityDefOf.Manipulation.label));
-				floatMenuOption.Disabled = true;
+				FloatMenuOption floatMenuOption = new FloatMenuOption("CommandPushTo".Translate(), delegate
+				{
+					Find.Targeter.BeginTargeting(TargetingParameters.ForCell(), delegate(LocalTargetInfo target)
+					{
+						Job job = JobMaker.MakeJob(JobDefOf.HaulToCell, CS_0024_003C_003E8__locals3._003C_003E4__this.Pawn, target.Cell);
+						job.count = 1;
+						CS_0024_003C_003E8__locals3.selPawn.jobs.StartJob(job, JobCondition.InterruptForced, null, resumeCurJobAfterwards: false, cancelBusyStances: true, null, null, fromQueue: false, canReturnCurJobToPool: false, null);
+					});
+				});
+				if (!CS_0024_003C_003E8__locals3.selPawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation))
+				{
+					floatMenuOption.Label = $"{floatMenuOption.Label} ({"RequiredCapacity".Translate(PawnCapacityDefOf.Manipulation.label)})";
+					floatMenuOption.Disabled = true;
+				}
+				_003C_003E2__current = floatMenuOption;
+				_003C_003E1__state = 1;
+				return true;
 			}
-			yield return floatMenuOption;
-			yield break;
+			case 1:
+				_003C_003E1__state = -1;
+				return false;
+			}
 		}
 
-		// Token: 0x060107E4 RID: 67556 RVA: 0x004C1F6C File Offset: 0x004C016C
-		public void OnStartedCarrying(Pawn pawn)
+		bool IEnumerator.MoveNext()
 		{
-			Vector3 v = (pawn.Position - this.Pawn.Position).ToVector3();
-			Vector2 vector = new Vector2(0f, -this.Props.offsetDistance).RotatedBy(v.AngleFlat());
-			this.drawPos = new Vector3(vector.x, 0f, -vector.y);
-			this.drawVel = Vector3.zero;
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x060107E5 RID: 67557 RVA: 0x004C1FE2 File Offset: 0x004C01E2
-		public override IEnumerable<Gizmo> CompGetGizmosExtra()
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			bool devMode = Prefs.DevMode;
-			yield break;
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x060107E6 RID: 67558 RVA: 0x004C1FEC File Offset: 0x004C01EC
-		public override void PostExposeData()
+		[DebuggerHidden]
+		IEnumerator<FloatMenuOption> IEnumerable<FloatMenuOption>.GetEnumerator()
 		{
-			base.PostExposeData();
-			Scribe_Values.Look<bool>(ref this.canBePushed, "canBePushed", false, false);
-			Scribe_Values.Look<Vector3>(ref this.drawPos, "drawPos", default(Vector3), false);
-			Scribe_Values.Look<Vector3>(ref this.drawVel, "drawVel", default(Vector3), false);
+			_003CCompFloatMenuOptions_003Ed__8 _003CCompFloatMenuOptions_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CCompFloatMenuOptions_003Ed__ = this;
+			}
+			else
+			{
+				_003CCompFloatMenuOptions_003Ed__ = new _003CCompFloatMenuOptions_003Ed__8(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CCompFloatMenuOptions_003Ed__.selPawn = _003C_003E3__selPawn;
+			return _003CCompFloatMenuOptions_003Ed__;
 		}
 
-		// Token: 0x0400AC01 RID: 44033
-		public bool canBePushed = true;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<FloatMenuOption>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x0400AC02 RID: 44034
-		public Vector3 drawPos;
+	[CompilerGenerated]
+	private sealed class _003CCompGetGizmosExtra_003Ed__10 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
 
-		// Token: 0x0400AC03 RID: 44035
-		public Vector3 drawVel;
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		Gizmo IEnumerator<Gizmo>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CCompGetGizmosExtra_003Ed__10(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			if (_003C_003E1__state != 0)
+			{
+				return false;
+			}
+			_003C_003E1__state = -1;
+			_ = Prefs.DevMode;
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				return this;
+			}
+			return new _003CCompGetGizmosExtra_003Ed__10(0);
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	public bool canBePushed = true;
+
+	public Vector3 drawPos;
+
+	public Vector3 drawVel;
+
+	public CompProperties_Pushable Props => (CompProperties_Pushable)props;
+
+	public Pawn Pawn => (Pawn)parent;
+
+	public override void Notify_Killed(Map prevMap, DamageInfo? dinfo = null)
+	{
+	}
+
+	[IteratorStateMachine(typeof(_003CCompFloatMenuOptions_003Ed__8))]
+	public override IEnumerable<FloatMenuOption> CompFloatMenuOptions(Pawn selPawn)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CCompFloatMenuOptions_003Ed__8(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__selPawn = selPawn
+		};
+	}
+
+	public void OnStartedCarrying(Pawn pawn)
+	{
+		Vector3 v = (pawn.Position - Pawn.Position).ToVector3();
+		Vector2 vector = new Vector2(0f, 0f - Props.offsetDistance).RotatedBy(v.AngleFlat());
+		drawPos = new Vector3(vector.x, 0f, 0f - vector.y);
+		drawVel = Vector3.zero;
+	}
+
+	[IteratorStateMachine(typeof(_003CCompGetGizmosExtra_003Ed__10))]
+	public override IEnumerable<Gizmo> CompGetGizmosExtra()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CCompGetGizmosExtra_003Ed__10(-2);
+	}
+
+	public override void PostExposeData()
+	{
+		base.PostExposeData();
+		Scribe_Values.Look(ref canBePushed, "canBePushed", defaultValue: false);
+		Scribe_Values.Look(ref drawPos, "drawPos");
+		Scribe_Values.Look(ref drawVel, "drawVel");
 	}
 }

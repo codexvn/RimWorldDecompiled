@@ -1,101 +1,195 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class ScenPart_PlayerFaction : ScenPart
 {
-	// Token: 0x020028D3 RID: 10451
-	public class ScenPart_PlayerFaction : ScenPart
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__8 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x0600E489 RID: 58505 RVA: 0x0042C02C File Offset: 0x0042A22C
-		public override void ExposeData()
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public ScenPart_PlayerFaction _003C_003E4__this;
+
+		string IEnumerator<string>.Current
 		{
-			base.ExposeData();
-			Scribe_Defs.Look<FactionDef>(ref this.factionDef, "factionDef");
-			if (Scribe.mode == LoadSaveMode.PostLoadInit && this.factionDef == null)
+			[DebuggerHidden]
+			get
 			{
-				this.Randomize();
-				Log.Error("ScenPart had null faction after loading. Changing to " + this.factionDef.ToStringSafe<FactionDef>());
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600E48A RID: 58506 RVA: 0x0042C080 File Offset: 0x0042A280
-		public override void DoEditInterface(Listing_ScenEdit listing)
+		object IEnumerator.Current
 		{
-			if (Widgets.ButtonText(listing.GetScenPartRect(this, ScenPart.RowHeight), this.factionDef.LabelCap, true, true, true, null))
+			[DebuggerHidden]
+			get
 			{
-				List<FloatMenuOption> list = new List<FloatMenuOption>();
-				foreach (FactionDef localFd2 in from d in DefDatabase<FactionDef>.AllDefs
-				where d.isPlayer
-				select d)
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__8(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			ScenPart_PlayerFaction scenPart_PlayerFaction = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (scenPart_PlayerFaction.factionDef == null)
 				{
-					FactionDef localFd = localFd2;
-					list.Add(new FloatMenuOption(localFd.LabelCap, delegate()
-					{
-						this.factionDef = localFd;
-					}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0));
+					_003C_003E2__current = "factionDef is null";
+					_003C_003E1__state = 1;
+					return true;
 				}
-				Find.WindowStack.Add(new FloatMenu(list));
+				break;
+			case 1:
+				_003C_003E1__state = -1;
+				break;
 			}
+			return false;
 		}
 
-		// Token: 0x0600E48B RID: 58507 RVA: 0x0042C180 File Offset: 0x0042A380
-		public override string Summary(Scenario scen)
+		bool IEnumerator.MoveNext()
 		{
-			return "ScenPart_PlayerFaction".Translate(this.factionDef.label);
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0600E48C RID: 58508 RVA: 0x0042C1A1 File Offset: 0x0042A3A1
-		public override void Randomize()
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			this.factionDef = (from fd in DefDatabase<FactionDef>.AllDefs
-			where fd.isPlayer
-			select fd).RandomElement<FactionDef>();
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x0600E48D RID: 58509 RVA: 0x0042C1D8 File Offset: 0x0042A3D8
-		public override void PostWorldGenerate()
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
 		{
-			Find.GameInitData.playerFaction = FactionGenerator.NewGeneratedFaction(new FactionGeneratorParms(this.factionDef, default(IdeoGenerationParms), null));
-			Find.FactionManager.Add(Find.GameInitData.playerFaction);
-		}
-
-		// Token: 0x0600E48E RID: 58510 RVA: 0x0042C228 File Offset: 0x0042A428
-		public override void PreMapGenerate()
-		{
-			Settlement settlement = (Settlement)WorldObjectMaker.MakeWorldObject(WorldObjectDefOf.Settlement);
-			settlement.SetFaction(Find.GameInitData.playerFaction);
-			settlement.Tile = Find.GameInitData.startingTile;
-			settlement.Name = SettlementNameGenerator.GenerateSettlementName(settlement, Find.GameInitData.playerFaction.def.playerInitialSettlementNameMaker);
-			Find.WorldObjects.Add(settlement);
-		}
-
-		// Token: 0x0600E48F RID: 58511 RVA: 0x0042C290 File Offset: 0x0042A490
-		public override void PostGameStart()
-		{
-			Find.GameInitData.playerFaction = null;
-			TaleRecorder.RecordTale(TaleDefOf.TileSettled, Array.Empty<object>()).customLabel = "NewSettlement".Translate();
-		}
-
-		// Token: 0x0600E490 RID: 58512 RVA: 0x0042C2C0 File Offset: 0x0042A4C0
-		public override IEnumerable<string> ConfigErrors()
-		{
-			if (this.factionDef == null)
+			_003CConfigErrors_003Ed__8 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				yield return "factionDef is null";
+				_003C_003E1__state = 0;
+				result = this;
 			}
-			yield break;
+			else
+			{
+				result = new _003CConfigErrors_003Ed__8(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
 		}
 
-		// Token: 0x0600E491 RID: 58513 RVA: 0x0042C2D0 File Offset: 0x0042A4D0
-		public override int GetHashCode()
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return base.GetHashCode() ^ ((this.factionDef != null) ? this.factionDef.GetHashCode() : 0);
+			return ((IEnumerable<string>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x040098F9 RID: 39161
-		internal FactionDef factionDef;
+	internal FactionDef factionDef;
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Defs.Look(ref factionDef, "factionDef");
+		if (Scribe.mode == LoadSaveMode.PostLoadInit && factionDef == null)
+		{
+			Randomize();
+			Log.Error("ScenPart had null faction after loading. Changing to " + factionDef.ToStringSafe());
+		}
+	}
+
+	public override void DoEditInterface(Listing_ScenEdit listing)
+	{
+		if (!Widgets.ButtonText(listing.GetScenPartRect(this, ScenPart.RowHeight), factionDef.LabelCap, drawBackground: true, doMouseoverSound: true, active: true, null))
+		{
+			return;
+		}
+		List<FloatMenuOption> list = new List<FloatMenuOption>();
+		foreach (FactionDef item in DefDatabase<FactionDef>.AllDefs.Where((FactionDef d) => d.isPlayer))
+		{
+			FactionDef localFd = item;
+			list.Add(new FloatMenuOption(localFd.LabelCap, delegate
+			{
+				factionDef = localFd;
+			}));
+		}
+		Find.WindowStack.Add(new FloatMenu(list));
+	}
+
+	public override string Summary(Scenario scen)
+	{
+		return "ScenPart_PlayerFaction".Translate(factionDef.label);
+	}
+
+	public override void Randomize()
+	{
+		factionDef = DefDatabase<FactionDef>.AllDefs.Where((FactionDef fd) => fd.isPlayer).RandomElement();
+	}
+
+	public override void PostWorldGenerate()
+	{
+		Find.GameInitData.playerFaction = FactionGenerator.NewGeneratedFaction(new FactionGeneratorParms(factionDef, default(IdeoGenerationParms), null));
+		Find.FactionManager.Add(Find.GameInitData.playerFaction);
+	}
+
+	public override void PreMapGenerate()
+	{
+		PlanetTile startingTile = Find.GameInitData.startingTile;
+		Settlement settlement = (Settlement)WorldObjectMaker.MakeWorldObject(startingTile.LayerDef.SettlementWorldObjectDef);
+		settlement.SetFaction(Find.GameInitData.playerFaction);
+		settlement.Tile = startingTile;
+		settlement.Name = SettlementNameGenerator.GenerateSettlementName(settlement, Find.GameInitData.playerFaction.def.playerInitialSettlementNameMaker);
+		Find.WorldObjects.Add(settlement);
+	}
+
+	public override void PostGameStart()
+	{
+		Find.GameInitData.playerFaction = null;
+		TaleRecorder.RecordTale(TaleDefOf.TileSettled).customLabel = "NewSettlement".Translate();
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__8))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__8(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override int GetHashCode()
+	{
+		return base.GetHashCode() ^ ((factionDef != null) ? factionDef.GetHashCode() : 0);
 	}
 }

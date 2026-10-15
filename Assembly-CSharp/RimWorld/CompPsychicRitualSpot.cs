@@ -1,178 +1,329 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Verse;
 using Verse.AI.Group;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompPsychicRitualSpot : ThingComp
 {
-	// Token: 0x02002DC6 RID: 11718
-	public class CompPsychicRitualSpot : ThingComp
+	[CompilerGenerated]
+	private sealed class _003CCompGetGizmosExtra_003Ed__12 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x17002A0D RID: 10765
-		// (get) Token: 0x060107A8 RID: 67496 RVA: 0x004C0F4E File Offset: 0x004BF14E
-		private bool Obstructed
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompPsychicRitualSpot _003C_003E4__this;
+
+		private IEnumerator<Gizmo> _003C_003E7__wrap1;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.obstructingThings.Count > 0;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002A0E RID: 10766
-		// (get) Token: 0x060107A9 RID: 67497 RVA: 0x004C0F5E File Offset: 0x004BF15E
-		public HashSet<IntVec3> OccupiedCells
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.occupiedCells;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x060107AA RID: 67498 RVA: 0x004C0F68 File Offset: 0x004BF168
-		public Lord GetLord()
+		[DebuggerHidden]
+		public _003CCompGetGizmosExtra_003Ed__12(int _003C_003E1__state)
 		{
-			Building building = this.parent as Building;
-			if (building != null)
-			{
-				return building.GetLord();
-			}
-			Pawn pawn = this.parent as Pawn;
-			if (pawn != null)
-			{
-				return pawn.GetLord();
-			}
-			Corpse corpse = this.parent as Corpse;
-			if (corpse != null)
-			{
-				return corpse.GetLord();
-			}
-			return null;
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x060107AB RID: 67499 RVA: 0x004C0FB8 File Offset: 0x004BF1B8
-		public PsychicRitual GetPsychicRitual()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			Lord lord = this.GetLord();
-			LordToil_PsychicRitual lordToil_PsychicRitual = ((lord != null) ? lord.CurLordToil : null) as LordToil_PsychicRitual;
-			if (lordToil_PsychicRitual == null)
+			switch (_003C_003E1__state)
 			{
-				return null;
-			}
-			return lordToil_PsychicRitual.RitualData.psychicRitual;
-		}
-
-		// Token: 0x060107AC RID: 67500 RVA: 0x004C0FE4 File Offset: 0x004BF1E4
-		public override void PostSpawnSetup(bool respawningAfterLoad)
-		{
-			base.PostSpawnSetup(respawningAfterLoad);
-			this.occupiedCells = new HashSet<IntVec3>(GenRadial.RadialCellsAround(this.parent.Position, (float)this.parent.def.Size.x + 0.9f, true));
-		}
-
-		// Token: 0x060107AD RID: 67501 RVA: 0x004C1030 File Offset: 0x004BF230
-		public override string CompInspectStringExtra()
-		{
-			StringBuilder stringBuilder = new StringBuilder(base.CompInspectStringExtra());
-			if (this.Obstructed)
-			{
-				stringBuilder.AppendInNewLine("PsychicRitualSpotObstructed".Translate());
-			}
-			Lord lord = this.GetLord();
-			if (lord != null)
-			{
-				LordToil_PsychicRitual lordToil_PsychicRitual = lord.CurLordToil as LordToil_PsychicRitual;
-				if (lordToil_PsychicRitual != null)
+			case -3:
+			case 1:
+				try
 				{
-					PsychicRitual psychicRitual = lordToil_PsychicRitual.RitualData.psychicRitual;
-					PsychicRitualToil psychicRitualToil = lordToil_PsychicRitual.RitualData.psychicRitualToil;
-					stringBuilder.AppendInNewLine(string.Format("{0}: {1}", "PsychicRitual".Translate().CapitalizeFirst(), psychicRitual.def.LabelCap));
-					stringBuilder.AppendInNewLine(psychicRitualToil.GetReport(psychicRitual, null).CapitalizeFirst().EndWithPeriod());
 				}
-			}
-			return stringBuilder.ToString();
-		}
-
-		// Token: 0x060107AE RID: 67502 RVA: 0x004C10F4 File Offset: 0x004BF2F4
-		public override void PostDrawExtraSelectionOverlays()
-		{
-			base.PostDrawExtraSelectionOverlays();
-			if (this.parent.Faction == Faction.OfPlayer)
-			{
-				foreach (Thing t in this.obstructingThings)
+				finally
 				{
-					GenDraw.DrawLineBetween(this.parent.TrueCenter(), t.TrueCenter(), SimpleColor.Red, 0.2f);
+					_003C_003Em__Finally1();
 				}
+				break;
+			case -4:
+			case 3:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally2();
+				}
+				break;
 			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x060107AF RID: 67503 RVA: 0x004C1174 File Offset: 0x004BF374
-		public override void CompTick()
+		private bool MoveNext()
 		{
-			base.CompTick();
-			this.obstructingThings.Clear();
-			foreach (IntVec3 c in this.occupiedCells)
+			try
 			{
-				List<Thing> list = this.parent.Map.thingGrid.ThingsListAt(c);
-				for (int i = 0; i < list.Count; i++)
+				int num = _003C_003E1__state;
+				CompPsychicRitualSpot compPsychicRitualSpot = _003C_003E4__this;
+				PsychicRitual psychicRitual;
+				switch (num)
 				{
-					if (list[i].def.passability != Traversability.Standable)
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((ThingComp)compPsychicRitualSpot).CompGetGizmosExtra().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_007c;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_007c;
+				case 2:
+					_003C_003E1__state = -1;
+					goto IL_015a;
+				case 3:
+					_003C_003E1__state = -4;
+					goto IL_0140;
+				case 4:
 					{
-						this.obstructingThings.Add(list[i]);
+						_003C_003E1__state = -1;
+						break;
 					}
+					IL_007c:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Gizmo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					psychicRitual = compPsychicRitualSpot.GetPsychicRitual();
+					if (psychicRitual != null)
+					{
+						_003C_003E2__current = PsychicRitualGizmo.CancelGizmo(psychicRitual);
+						_003C_003E1__state = 2;
+						return true;
+					}
+					_003C_003E7__wrap1 = PsychicRitualGizmo.GetGizmos(compPsychicRitualSpot.parent).GetEnumerator();
+					_003C_003E1__state = -4;
+					goto IL_0140;
+					IL_0140:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Gizmo current2 = _003C_003E7__wrap1.Current;
+						if (compPsychicRitualSpot.Obstructed)
+						{
+							current2.Disabled = true;
+							current2.disabledReason = "PsychicRitualAreaObstructed".Translate().CapitalizeFirst();
+						}
+						_003C_003E2__current = current2;
+						_003C_003E1__state = 3;
+						return true;
+					}
+					_003C_003Em__Finally2();
+					_003C_003E7__wrap1 = null;
+					goto IL_015a;
+					IL_015a:
+					if (DebugSettings.ShowDevGizmos)
+					{
+						Command_Action command_Action = new Command_Action
+						{
+							defaultLabel = "DEV: Reset psychic ritual cooldowns",
+							action = delegate
+							{
+								Find.PsychicRitualManager.ClearAllCooldowns();
+							}
+						};
+						_003C_003E2__current = command_Action;
+						_003C_003E1__state = 4;
+						return true;
+					}
+					break;
 				}
+				return false;
 			}
-			PsychicRitual psychicRitual = this.GetPsychicRitual();
-			if (psychicRitual != null && this.parent.Faction == Faction.OfPlayer && this.Obstructed)
+			catch
 			{
-				psychicRitual.CancelPsychicRitual("PsychicRitualAreaObstructed".Translate());
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x060107B0 RID: 67504 RVA: 0x004C1258 File Offset: 0x004BF458
-		public override IEnumerable<Gizmo> CompGetGizmosExtra()
+		bool IEnumerator.MoveNext()
 		{
-			foreach (Gizmo gizmo in base.CompGetGizmosExtra())
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				yield return gizmo;
+				_003C_003E7__wrap1.Dispose();
 			}
-			IEnumerator<Gizmo> enumerator = null;
-			PsychicRitual psychicRitual = this.GetPsychicRitual();
-			if (psychicRitual != null)
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				yield return PsychicRitualGizmo.CancelGizmo(psychicRitual);
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CCompGetGizmosExtra_003Ed__12 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
 			}
 			else
 			{
-				foreach (Gizmo gizmo2 in PsychicRitualGizmo.GetGizmos(this.parent))
+				result = new _003CCompGetGizmosExtra_003Ed__12(0)
 				{
-					if (this.Obstructed)
-					{
-						gizmo2.Disabled = true;
-						gizmo2.disabledReason = "PsychicRitualAreaObstructed".Translate().CapitalizeFirst();
-					}
-					yield return gizmo2;
-				}
-				enumerator = null;
-			}
-			if (DebugSettings.ShowDevGizmos)
-			{
-				Command_Action command_Action = new Command_Action();
-				command_Action.defaultLabel = "DEV: Reset psychic ritual cooldowns";
-				command_Action.action = delegate()
-				{
-					Find.PsychicRitualManager.ClearAllCooldowns();
+					_003C_003E4__this = _003C_003E4__this
 				};
-				Command_Action command_Action2 = command_Action;
-				yield return command_Action2;
 			}
-			yield break;
-			yield break;
+			return result;
 		}
 
-		// Token: 0x0400ABE1 RID: 44001
-		private List<Thing> obstructingThings = new List<Thing>();
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x0400ABE2 RID: 44002
-		private HashSet<IntVec3> occupiedCells;
+	private List<Thing> obstructingThings = new List<Thing>();
+
+	private HashSet<IntVec3> occupiedCells;
+
+	private bool Obstructed => obstructingThings.Count > 0;
+
+	public HashSet<IntVec3> OccupiedCells => occupiedCells;
+
+	public Lord GetLord()
+	{
+		if (parent is Building b)
+		{
+			return b.GetLord();
+		}
+		if (parent is Pawn p)
+		{
+			return p.GetLord();
+		}
+		if (parent is Corpse c)
+		{
+			return c.GetLord();
+		}
+		return null;
+	}
+
+	public PsychicRitual GetPsychicRitual()
+	{
+		return (GetLord()?.CurLordToil as LordToil_PsychicRitual)?.RitualData.psychicRitual;
+	}
+
+	public override void PostSpawnSetup(bool respawningAfterLoad)
+	{
+		base.PostSpawnSetup(respawningAfterLoad);
+		occupiedCells = new HashSet<IntVec3>(GenRadial.RadialCellsAround(parent.Position, (float)parent.def.Size.x + 0.9f, useCenter: true));
+	}
+
+	public override string CompInspectStringExtra()
+	{
+		StringBuilder stringBuilder = new StringBuilder(base.CompInspectStringExtra());
+		if (Obstructed)
+		{
+			stringBuilder.AppendInNewLine("PsychicRitualSpotObstructed".Translate());
+		}
+		Lord lord = GetLord();
+		if (lord != null && lord.CurLordToil is LordToil_PsychicRitual lordToil_PsychicRitual)
+		{
+			PsychicRitual psychicRitual = lordToil_PsychicRitual.RitualData.psychicRitual;
+			PsychicRitualToil psychicRitualToil = lordToil_PsychicRitual.RitualData.psychicRitualToil;
+			stringBuilder.AppendInNewLine($"{"PsychicRitual".Translate().CapitalizeFirst()}: {psychicRitual.def.LabelCap}");
+			stringBuilder.AppendInNewLine(psychicRitualToil.GetReport(psychicRitual, null).CapitalizeFirst().EndWithPeriod());
+		}
+		return stringBuilder.ToString();
+	}
+
+	public override void PostDrawExtraSelectionOverlays()
+	{
+		base.PostDrawExtraSelectionOverlays();
+		if (parent.Faction != Faction.OfPlayer)
+		{
+			return;
+		}
+		foreach (Thing obstructingThing in obstructingThings)
+		{
+			GenDraw.DrawLineBetween(parent.TrueCenter(), obstructingThing.TrueCenter(), SimpleColor.Red);
+		}
+	}
+
+	public override void CompTick()
+	{
+		base.CompTick();
+		obstructingThings.Clear();
+		foreach (IntVec3 occupiedCell in occupiedCells)
+		{
+			List<Thing> list = parent.Map.thingGrid.ThingsListAt(occupiedCell);
+			for (int i = 0; i < list.Count; i++)
+			{
+				if (list[i].def.passability != 0)
+				{
+					obstructingThings.Add(list[i]);
+				}
+			}
+		}
+		PsychicRitual psychicRitual = GetPsychicRitual();
+		if (psychicRitual != null && parent.Faction == Faction.OfPlayer && Obstructed)
+		{
+			psychicRitual.CancelPsychicRitual("PsychicRitualAreaObstructed".Translate());
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CCompGetGizmosExtra_003Ed__12))]
+	public override IEnumerable<Gizmo> CompGetGizmosExtra()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CCompGetGizmosExtra_003Ed__12(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

@@ -1,154 +1,295 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 using Verse.Sound;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_BestowingCeremony : JobDriver
 {
-	// Token: 0x02001224 RID: 4644
-	public class JobDriver_BestowingCeremony : JobDriver
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass15_0
 	{
-		// Token: 0x1700119F RID: 4511
-		// (get) Token: 0x06007170 RID: 29040 RVA: 0x00231140 File Offset: 0x0022F340
-		private Pawn Bestower
-		{
-			get
-			{
-				return base.TargetA.Pawn;
-			}
-		}
+		public JobDriver_BestowingCeremony _003C_003E4__this;
 
-		// Token: 0x170011A0 RID: 4512
-		// (get) Token: 0x06007171 RID: 29041 RVA: 0x0023115B File Offset: 0x0022F35B
-		private LordJob_BestowingCeremony CeremonyJob
-		{
-			get
-			{
-				return (LordJob_BestowingCeremony)this.Bestower.GetLord().LordJob;
-			}
-		}
+		public Toil waitToil;
 
-		// Token: 0x170011A1 RID: 4513
-		// (get) Token: 0x06007172 RID: 29042 RVA: 0x001E5D15 File Offset: 0x001E3F15
-		private LocalTargetInfo BestowSpot
+		internal bool _003CMakeNewToils_003Eb__0()
 		{
-			get
+			if (_003C_003E4__this.Bestower.GetLord() != null && _003C_003E4__this.Bestower.GetLord().CurLordToil != null)
 			{
-				return this.job.targetB;
-			}
-		}
-
-		// Token: 0x06007173 RID: 29043 RVA: 0x00231174 File Offset: 0x0022F374
-		public static bool AnalyzeThroneRoom(Pawn bestower, Pawn target)
-		{
-			RoyalTitleDef titleAwardedWhenUpdating = target.royalty.GetTitleAwardedWhenUpdating(bestower.Faction, target.royalty.GetFavor(bestower.Faction));
-			if (titleAwardedWhenUpdating != null && titleAwardedWhenUpdating.throneRoomRequirements != null)
-			{
-				using (List<RoomRequirement>.Enumerator enumerator = titleAwardedWhenUpdating.throneRoomRequirements.GetEnumerator())
-				{
-					while (enumerator.MoveNext())
-					{
-						if (!enumerator.Current.MetOrDisabled(bestower.GetRoom(RegionType.Set_All), target))
-						{
-							return false;
-						}
-					}
-				}
-				return true;
+				return !(_003C_003E4__this.Bestower.GetLord().CurLordToil is LordToil_BestowingCeremony_Perform);
 			}
 			return true;
 		}
 
-		// Token: 0x06007174 RID: 29044 RVA: 0x00231204 File Offset: 0x0022F404
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		internal void _003CMakeNewToils_003Eb__1()
 		{
-			this.Bestower.ClearAllReservations(true);
-			return this.pawn.Reserve(this.BestowSpot, this.job, 1, -1, null, errorOnFailed, false) && this.pawn.Reserve(this.Bestower, this.job, 1, -1, null, errorOnFailed, false);
+			Messages.Message("MessageBestowingCeremonyStarted".Translate(_003C_003E4__this.pawn.Named("PAWN")), _003C_003E4__this.Bestower, MessageTypeDefOf.PositiveEvent);
 		}
 
-		// Token: 0x06007175 RID: 29045 RVA: 0x0023125E File Offset: 0x0022F45E
-		protected override IEnumerable<Toil> MakeNewToils()
+		internal void _003CMakeNewToils_003Eb__2()
 		{
-			if (!ModLister.CheckRoyalty("Bestowing ceremony"))
+			if (!AnalyzeThroneRoom(_003C_003E4__this.Bestower, _003C_003E4__this.pawn))
 			{
-				yield break;
+				Messages.Message("BestowingCeremonyThroneroomRequirementsNotSatisfied".Translate(_003C_003E4__this.pawn.Named("PAWN"), _003C_003E4__this.pawn.royalty.GetTitleAwardedWhenUpdating(_003C_003E4__this.Bestower.Faction, _003C_003E4__this.pawn.royalty.GetFavor(_003C_003E4__this.Bestower.Faction)).label.Named("TITLE")), _003C_003E4__this.pawn, MessageTypeDefOf.NegativeEvent);
+				((LordJob_BestowingCeremony)_003C_003E4__this.Bestower.GetLord().LordJob).MakeCeremonyFail();
 			}
-			base.AddFailCondition(() => this.Bestower.GetLord() == null || this.Bestower.GetLord().CurLordToil == null || !(this.Bestower.GetLord().CurLordToil is LordToil_BestowingCeremony_Perform));
-			yield return Toils_Goto.GotoCell(TargetIndex.B, PathEndMode.OnCell);
-			Toil waitToil = Toils_General.Wait(5000, TargetIndex.None);
-			waitToil.AddPreInitAction(delegate
-			{
-				Messages.Message("MessageBestowingCeremonyStarted".Translate(this.pawn.Named("PAWN")), this.Bestower, MessageTypeDefOf.PositiveEvent, true);
-			});
-			waitToil.AddPreInitAction(delegate
-			{
-				if (!JobDriver_BestowingCeremony.AnalyzeThroneRoom(this.Bestower, this.pawn))
-				{
-					Messages.Message("BestowingCeremonyThroneroomRequirementsNotSatisfied".Translate(this.pawn.Named("PAWN"), this.pawn.royalty.GetTitleAwardedWhenUpdating(this.Bestower.Faction, this.pawn.royalty.GetFavor(this.Bestower.Faction)).label.Named("TITLE")), this.pawn, MessageTypeDefOf.NegativeEvent, true);
-					((LordJob_BestowingCeremony)this.Bestower.GetLord().LordJob).MakeCeremonyFail();
-				}
-			});
-			waitToil.AddPreInitAction(delegate
-			{
-				SoundDefOf.Bestowing_Start.PlayOneShot(this.pawn);
-			});
-			waitToil.tickAction = delegate()
-			{
-				this.pawn.rotationTracker.FaceTarget(this.Bestower);
-				if (this.mote == null || this.mote.Destroyed)
-				{
-					Vector3 loc = (this.pawn.TrueCenter() + this.Bestower.TrueCenter()) / 2f;
-					this.mote = MoteMaker.MakeStaticMote(loc, this.pawn.Map, ThingDefOf.Mote_Bestow, 1f, false, 0f);
-				}
-				Mote mote = this.mote;
-				if (mote != null)
-				{
-					mote.Maintain();
-				}
-				if ((this.sound == null || this.sound.Ended) && waitToil.actor.jobs.curDriver.ticksLeftThisToil <= 307)
-				{
-					this.sound = SoundDefOf.Bestowing_Warmup.TrySpawnSustainer(SoundInfo.InMap(new TargetInfo(this.pawn.Position, this.pawn.Map, false), MaintenanceType.PerTick));
-				}
-				if (this.sound != null)
-				{
-					this.sound.Maintain();
-				}
-			};
-			waitToil.handlingFacing = false;
-			waitToil.socialMode = RandomSocialMode.Off;
-			waitToil.WithProgressBarToilDelay(TargetIndex.A, false, -0.5f);
-			yield return waitToil;
-			yield return Toils_General.Do(delegate
-			{
-				this.CeremonyJob.FinishCeremony(this.pawn);
-				FleckMaker.Static((this.pawn.TrueCenter() + this.Bestower.TrueCenter()) / 2f, this.pawn.Map, FleckDefOf.PsycastAreaEffect, 2f);
-				SoundDefOf.Bestowing_Finished.PlayOneShot(this.pawn);
-			});
-			yield break;
 		}
 
-		// Token: 0x04004E98 RID: 20120
-		public const float WarmupSoundLength = 5.125f;
+		internal void _003CMakeNewToils_003Eb__3()
+		{
+			SoundDefOf.Bestowing_Start.PlayOneShot(_003C_003E4__this.pawn);
+		}
 
-		// Token: 0x04004E99 RID: 20121
-		public const int BestowTimeTicks = 5000;
+		internal void _003CMakeNewToils_003Eb__4()
+		{
+			_003C_003E4__this.pawn.rotationTracker.FaceTarget(_003C_003E4__this.Bestower);
+			if (_003C_003E4__this.mote == null || _003C_003E4__this.mote.Destroyed)
+			{
+				Vector3 loc = (_003C_003E4__this.pawn.TrueCenter() + _003C_003E4__this.Bestower.TrueCenter()) / 2f;
+				_003C_003E4__this.mote = MoteMaker.MakeStaticMote(loc, _003C_003E4__this.pawn.Map, ThingDefOf.Mote_Bestow);
+			}
+			_003C_003E4__this.mote?.Maintain();
+			if ((_003C_003E4__this.sound == null || _003C_003E4__this.sound.Ended) && waitToil.actor.jobs.curDriver.ticksLeftThisToil <= 307)
+			{
+				_003C_003E4__this.sound = SoundDefOf.Bestowing_Warmup.TrySpawnSustainer(SoundInfo.InMap(new TargetInfo(_003C_003E4__this.pawn.Position, _003C_003E4__this.pawn.Map), MaintenanceType.PerTick));
+			}
+			if (_003C_003E4__this.sound != null)
+			{
+				_003C_003E4__this.sound.Maintain();
+			}
+		}
 
-		// Token: 0x04004E9A RID: 20122
-		public const int PlayWarmupSoundAfterTicks = 307;
+		internal void _003CMakeNewToils_003Eb__5()
+		{
+			_003C_003E4__this.CeremonyJob.FinishCeremony(_003C_003E4__this.pawn);
+			FleckMaker.Static((_003C_003E4__this.pawn.TrueCenter() + _003C_003E4__this.Bestower.TrueCenter()) / 2f, _003C_003E4__this.pawn.Map, FleckDefOf.PsycastAreaEffect, 2f);
+			SoundDefOf.Bestowing_Finished.PlayOneShot(_003C_003E4__this.pawn);
+		}
+	}
 
-		// Token: 0x04004E9B RID: 20123
-		protected const TargetIndex BestowerInd = TargetIndex.A;
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__15 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
 
-		// Token: 0x04004E9C RID: 20124
-		protected const TargetIndex BestowSpotInd = TargetIndex.B;
+		private Toil _003C_003E2__current;
 
-		// Token: 0x04004E9D RID: 20125
-		private Mote mote;
+		private int _003C_003El__initialThreadId;
 
-		// Token: 0x04004E9E RID: 20126
-		private Sustainer sound;
+		public JobDriver_BestowingCeremony _003C_003E4__this;
+
+		private _003C_003Ec__DisplayClass15_0 _003C_003E8__1;
+
+		Toil IEnumerator<Toil>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__15(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E8__1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_BestowingCeremony jobDriver_BestowingCeremony = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E8__1 = new _003C_003Ec__DisplayClass15_0();
+				_003C_003E8__1._003C_003E4__this = _003C_003E4__this;
+				if (!ModLister.CheckRoyalty("Bestowing ceremony"))
+				{
+					return false;
+				}
+				jobDriver_BestowingCeremony.AddFailCondition(() => _003C_003E8__1._003C_003E4__this.Bestower.GetLord() == null || _003C_003E8__1._003C_003E4__this.Bestower.GetLord().CurLordToil == null || !(_003C_003E8__1._003C_003E4__this.Bestower.GetLord().CurLordToil is LordToil_BestowingCeremony_Perform));
+				_003C_003E2__current = Toils_Goto.GotoCell(TargetIndex.B, PathEndMode.OnCell);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E8__1.waitToil = Toils_General.Wait(5000);
+				_003C_003E8__1.waitToil.AddPreInitAction(delegate
+				{
+					Messages.Message("MessageBestowingCeremonyStarted".Translate(_003C_003E8__1._003C_003E4__this.pawn.Named("PAWN")), _003C_003E8__1._003C_003E4__this.Bestower, MessageTypeDefOf.PositiveEvent);
+				});
+				_003C_003E8__1.waitToil.AddPreInitAction(delegate
+				{
+					if (!AnalyzeThroneRoom(_003C_003E8__1._003C_003E4__this.Bestower, _003C_003E8__1._003C_003E4__this.pawn))
+					{
+						Messages.Message("BestowingCeremonyThroneroomRequirementsNotSatisfied".Translate(_003C_003E8__1._003C_003E4__this.pawn.Named("PAWN"), _003C_003E8__1._003C_003E4__this.pawn.royalty.GetTitleAwardedWhenUpdating(_003C_003E8__1._003C_003E4__this.Bestower.Faction, _003C_003E8__1._003C_003E4__this.pawn.royalty.GetFavor(_003C_003E8__1._003C_003E4__this.Bestower.Faction)).label.Named("TITLE")), _003C_003E8__1._003C_003E4__this.pawn, MessageTypeDefOf.NegativeEvent);
+						((LordJob_BestowingCeremony)_003C_003E8__1._003C_003E4__this.Bestower.GetLord().LordJob).MakeCeremonyFail();
+					}
+				});
+				_003C_003E8__1.waitToil.AddPreInitAction(delegate
+				{
+					SoundDefOf.Bestowing_Start.PlayOneShot(_003C_003E8__1._003C_003E4__this.pawn);
+				});
+				_003C_003E8__1.waitToil.tickAction = delegate
+				{
+					_003C_003E8__1._003C_003E4__this.pawn.rotationTracker.FaceTarget(_003C_003E8__1._003C_003E4__this.Bestower);
+					if (_003C_003E8__1._003C_003E4__this.mote == null || _003C_003E8__1._003C_003E4__this.mote.Destroyed)
+					{
+						Vector3 loc = (_003C_003E8__1._003C_003E4__this.pawn.TrueCenter() + _003C_003E8__1._003C_003E4__this.Bestower.TrueCenter()) / 2f;
+						_003C_003E8__1._003C_003E4__this.mote = MoteMaker.MakeStaticMote(loc, _003C_003E8__1._003C_003E4__this.pawn.Map, ThingDefOf.Mote_Bestow);
+					}
+					_003C_003E8__1._003C_003E4__this.mote?.Maintain();
+					if ((_003C_003E8__1._003C_003E4__this.sound == null || _003C_003E8__1._003C_003E4__this.sound.Ended) && _003C_003E8__1.waitToil.actor.jobs.curDriver.ticksLeftThisToil <= 307)
+					{
+						_003C_003E8__1._003C_003E4__this.sound = SoundDefOf.Bestowing_Warmup.TrySpawnSustainer(SoundInfo.InMap(new TargetInfo(_003C_003E8__1._003C_003E4__this.pawn.Position, _003C_003E8__1._003C_003E4__this.pawn.Map), MaintenanceType.PerTick));
+					}
+					if (_003C_003E8__1._003C_003E4__this.sound != null)
+					{
+						_003C_003E8__1._003C_003E4__this.sound.Maintain();
+					}
+				};
+				_003C_003E8__1.waitToil.handlingFacing = false;
+				_003C_003E8__1.waitToil.socialMode = RandomSocialMode.Off;
+				_003C_003E8__1.waitToil.WithProgressBarToilDelay(TargetIndex.A);
+				_003C_003E2__current = _003C_003E8__1.waitToil;
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.Do(delegate
+				{
+					_003C_003E8__1._003C_003E4__this.CeremonyJob.FinishCeremony(_003C_003E8__1._003C_003E4__this.pawn);
+					FleckMaker.Static((_003C_003E8__1._003C_003E4__this.pawn.TrueCenter() + _003C_003E8__1._003C_003E4__this.Bestower.TrueCenter()) / 2f, _003C_003E8__1._003C_003E4__this.pawn.Map, FleckDefOf.PsycastAreaEffect, 2f);
+					SoundDefOf.Bestowing_Finished.PlayOneShot(_003C_003E8__1._003C_003E4__this.pawn);
+				});
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__15 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__15(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	public const float WarmupSoundLength = 5.125f;
+
+	public const int BestowTimeTicks = 5000;
+
+	public const int PlayWarmupSoundAfterTicks = 307;
+
+	protected const TargetIndex BestowerInd = TargetIndex.A;
+
+	protected const TargetIndex BestowSpotInd = TargetIndex.B;
+
+	private Mote mote;
+
+	private Sustainer sound;
+
+	private Pawn Bestower => base.TargetA.Pawn;
+
+	private LordJob_BestowingCeremony CeremonyJob => (LordJob_BestowingCeremony)Bestower.GetLord().LordJob;
+
+	private LocalTargetInfo BestowSpot => job.targetB;
+
+	public static bool AnalyzeThroneRoom(Pawn bestower, Pawn target)
+	{
+		RoyalTitleDef titleAwardedWhenUpdating = target.royalty.GetTitleAwardedWhenUpdating(bestower.Faction, target.royalty.GetFavor(bestower.Faction));
+		if (titleAwardedWhenUpdating != null && titleAwardedWhenUpdating.throneRoomRequirements != null)
+		{
+			foreach (RoomRequirement throneRoomRequirement in titleAwardedWhenUpdating.throneRoomRequirements)
+			{
+				if (!throneRoomRequirement.MetOrDisabled(bestower.GetRoom(), target))
+				{
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		Bestower.ClearAllReservations();
+		if (pawn.Reserve(BestowSpot, job, 1, -1, null, errorOnFailed))
+		{
+			return pawn.Reserve(Bestower, job, 1, -1, null, errorOnFailed);
+		}
+		return false;
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__15))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__15(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

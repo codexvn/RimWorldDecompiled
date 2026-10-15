@@ -1,132 +1,250 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld;
 
-namespace Verse
+namespace Verse;
+
+public class JobDef : Def
 {
-	// Token: 0x02000299 RID: 665
-	public class JobDef : Def
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__37 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x0600108F RID: 4239 RVA: 0x0004E847 File Offset: 0x0004CA47
-		public override IEnumerable<string> ConfigErrors()
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDef _003C_003E4__this;
+
+		private IEnumerator<string> _003C_003E7__wrap1;
+
+		string IEnumerator<string>.Current
 		{
-			foreach (string text in base.ConfigErrors())
+			[DebuggerHidden]
+			get
 			{
-				yield return text;
+				return _003C_003E2__current;
 			}
-			IEnumerator<string> enumerator = null;
-			if (this.joySkill != null && this.joyXpPerTick == 0f)
-			{
-				yield return "funSkill is not null but funXpPerTick is zero";
-			}
-			yield break;
-			yield break;
 		}
 
-		// Token: 0x04000DA2 RID: 3490
-		public Type driverClass;
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
 
-		// Token: 0x04000DA3 RID: 3491
-		[MustTranslate]
-		public string reportString = "Doing something.";
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__37(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
 
-		// Token: 0x04000DA4 RID: 3492
-		public bool playerInterruptible = true;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
 
-		// Token: 0x04000DA5 RID: 3493
-		public bool forceCompleteBeforeNextJob;
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				JobDef jobDef = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((Def)jobDef).ConfigErrors().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_006f:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (jobDef.joySkill != null && jobDef.joyXpPerTick == 0f)
+					{
+						_003C_003E2__current = "funSkill is not null but funXpPerTick is zero";
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
 
-		// Token: 0x04000DA6 RID: 3494
-		public CheckJobOverrideOnDamageMode checkOverrideOnDamage = CheckJobOverrideOnDamageMode.Always;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x04000DA7 RID: 3495
-		public bool alwaysShowWeapon;
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
 
-		// Token: 0x04000DA8 RID: 3496
-		public bool neverShowWeapon;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04000DA9 RID: 3497
-		public bool suspendable = true;
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__37 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__37(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x04000DAA RID: 3498
-		public bool casualInterruptible = true;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x04000DAB RID: 3499
-		public bool allowOpportunisticPrefix;
+	public Type driverClass;
 
-		// Token: 0x04000DAC RID: 3500
-		public bool collideWithPawns;
+	[MustTranslate]
+	public string reportString = "Doing something.";
 
-		// Token: 0x04000DAD RID: 3501
-		public bool isIdle;
+	public bool playerInterruptible = true;
 
-		// Token: 0x04000DAE RID: 3502
-		public TaleDef taleOnCompletion;
+	public bool forceCompleteBeforeNextJob;
 
-		// Token: 0x04000DAF RID: 3503
-		public bool neverFleeFromEnemies;
+	public CheckJobOverrideOnDamageMode checkOverrideOnDamage = CheckJobOverrideOnDamageMode.Always;
 
-		// Token: 0x04000DB0 RID: 3504
-		public bool sleepCanInterrupt = true;
+	public bool alwaysShowWeapon;
 
-		// Token: 0x04000DB1 RID: 3505
-		public bool makeTargetPrisoner;
+	public bool neverShowWeapon;
 
-		// Token: 0x04000DB2 RID: 3506
-		public int waitAfterArriving;
+	public bool suspendable = true;
 
-		// Token: 0x04000DB3 RID: 3507
-		public bool carryThingAfterJob;
+	public bool casualInterruptible = true;
 
-		// Token: 0x04000DB4 RID: 3508
-		public bool dropThingBeforeJob = true;
+	public bool allowOpportunisticPrefix;
 
-		// Token: 0x04000DB5 RID: 3509
-		public bool isCrawlingIfDowned = true;
+	public bool collideWithPawns;
 
-		// Token: 0x04000DB6 RID: 3510
-		public bool alwaysShowReport;
+	public bool isIdle;
 
-		// Token: 0x04000DB7 RID: 3511
-		public bool abilityCasting;
+	public TaleDef taleOnCompletion;
 
-		// Token: 0x04000DB8 RID: 3512
-		public bool tryStartFlying;
+	public bool neverFleeFromEnemies;
 
-		// Token: 0x04000DB9 RID: 3513
-		public bool ifFlyingKeepFlying;
+	public bool sleepCanInterrupt = true;
 
-		// Token: 0x04000DBA RID: 3514
-		public float overrideFlyChance = -1f;
+	public bool makeTargetPrisoner;
 
-		// Token: 0x04000DBB RID: 3515
-		public bool displayAsAreaInFloatMenu = true;
+	public int waitAfterArriving;
 
-		// Token: 0x04000DBC RID: 3516
-		public int joyDuration = 4000;
+	public bool carryThingAfterJob;
 
-		// Token: 0x04000DBD RID: 3517
-		public int joyMaxParticipants = 1;
+	public bool dropThingBeforeJob = true;
 
-		// Token: 0x04000DBE RID: 3518
-		public float joyGainRate = 1f;
+	public bool isCrawlingIfDowned = true;
 
-		// Token: 0x04000DBF RID: 3519
-		public SkillDef joySkill;
+	public bool alwaysShowReport;
 
-		// Token: 0x04000DC0 RID: 3520
-		public float joyXpPerTick;
+	public bool abilityCasting;
 
-		// Token: 0x04000DC1 RID: 3521
-		public JoyKindDef joyKind;
+	public bool tryStartFlying;
 
-		// Token: 0x04000DC2 RID: 3522
-		public Rot4 faceDir = Rot4.Invalid;
+	public bool ifFlyingKeepFlying;
 
-		// Token: 0x04000DC3 RID: 3523
-		public int learningDuration = 20000;
+	public float overrideFlyChance = -1f;
 
-		// Token: 0x04000DC4 RID: 3524
-		public ReservationLayerDef containerReservationLayer;
+	public bool displayAsAreaInFloatMenu = true;
+
+	public bool ignoreFenceBlocked;
+
+	public int joyDuration = 4000;
+
+	public int joyMaxParticipants = 1;
+
+	public float joyGainRate = 1f;
+
+	public SkillDef joySkill;
+
+	public float joyXpPerTick;
+
+	public JoyKindDef joyKind;
+
+	public Rot4 faceDir = Rot4.Invalid;
+
+	public int learningDuration = 20000;
+
+	public ReservationLayerDef containerReservationLayer;
+
+	public bool boardingGravship;
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__37))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__37(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

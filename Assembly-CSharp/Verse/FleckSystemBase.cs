@@ -1,271 +1,359 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading;
 
-namespace Verse
+namespace Verse;
+
+public class FleckSystemBase<TFleck> : FleckSystem where TFleck : struct, IFleck
 {
-	// Token: 0x02000402 RID: 1026
-	public class FleckSystemBase<TFleck> : FleckSystem where TFleck : struct, IFleck
+	[CompilerGenerated]
+	private sealed class _003CEnumerateFlecks_003Ed__15 : IEnumerable<IFleck>, IEnumerable, IEnumerator<IFleck>, IEnumerator, IDisposable
 	{
-		// Token: 0x170004A4 RID: 1188
-		// (get) Token: 0x06001A06 RID: 6662 RVA: 0x00002501 File Offset: 0x00000701
-		protected virtual bool ParallelizedDrawing
+		private int _003C_003E1__state;
+
+		private IFleck _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public FleckSystemBase<TFleck> _003C_003E4__this;
+
+		private int _003Ci_003E5__2;
+
+		IFleck IEnumerator<IFleck>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CEnumerateFlecks_003Ed__15(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			FleckSystemBase<TFleck> fleckSystemBase = _003C_003E4__this;
+			switch (num)
+			{
+			default:
 				return false;
-			}
-		}
-
-		// Token: 0x06001A07 RID: 6663 RVA: 0x00083320 File Offset: 0x00081520
-		public FleckSystemBase(FleckManager parent) : base(parent)
-		{
-		}
-
-		// Token: 0x06001A08 RID: 6664 RVA: 0x00083360 File Offset: 0x00081560
-		public override void Update(float deltaTime)
-		{
-			try
-			{
-				for (int i = this.dataRealtime.Count - 1; i >= 0; i--)
+			case 0:
+				_003C_003E1__state = -1;
+				_003Ci_003E5__2 = fleckSystemBase.dataGametime.Count - 1;
+				goto IL_007a;
+			case 1:
+				_003C_003E1__state = -1;
+				_003Ci_003E5__2--;
+				goto IL_007a;
+			case 2:
 				{
-					TFleck value = this.dataRealtime[i];
-					if (value.TimeInterval(deltaTime, this.parent.parent))
-					{
-						this.tmpRemoveIndices.Add(i);
-					}
-					else
-					{
-						this.dataRealtime[i] = value;
-					}
+					_003C_003E1__state = -1;
+					_003Ci_003E5__2--;
+					break;
 				}
-				this.dataRealtime.RemoveBatchUnordered(this.tmpRemoveIndices);
-			}
-			finally
-			{
-				this.tmpRemoveIndices.Clear();
-			}
-		}
-
-		// Token: 0x06001A09 RID: 6665 RVA: 0x000833F8 File Offset: 0x000815F8
-		public override void Tick()
-		{
-			try
-			{
-				for (int i = this.dataGametime.Count - 1; i >= 0; i--)
+				IL_007a:
+				if (_003Ci_003E5__2 >= 0)
 				{
-					TFleck value = this.dataGametime[i];
-					if (value.TimeInterval(0.016666668f, this.parent.parent))
-					{
-						this.tmpRemoveIndices.Add(i);
-					}
-					else
-					{
-						this.dataGametime[i] = value;
-					}
+					_003C_003E2__current = fleckSystemBase.dataGametime[_003Ci_003E5__2];
+					_003C_003E1__state = 1;
+					return true;
 				}
-				this.dataGametime.RemoveBatchUnordered(this.tmpRemoveIndices);
+				_003Ci_003E5__2 = fleckSystemBase.dataRealtime.Count - 1;
+				break;
 			}
-			finally
+			if (_003Ci_003E5__2 >= 0)
 			{
-				this.tmpRemoveIndices.Clear();
+				_003C_003E2__current = fleckSystemBase.dataRealtime[_003Ci_003E5__2];
+				_003C_003E1__state = 2;
+				return true;
 			}
+			return false;
 		}
 
-		// Token: 0x06001A0A RID: 6666 RVA: 0x00083494 File Offset: 0x00081694
-		private static void DrawParallel(object state)
+		bool IEnumerator.MoveNext()
 		{
-			if (WorldComponent_GravshipController.GravshipRenderInProgess)
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<IFleck> IEnumerable<IFleck>.GetEnumerator()
+		{
+			_003CEnumerateFlecks_003Ed__15 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				return;
+				_003C_003E1__state = 0;
+				result = this;
 			}
-			FleckParallelizationInfo fleckParallelizationInfo = (FleckParallelizationInfo)state;
-			try
+			else
 			{
-				List<FleckThrown> list = (List<FleckThrown>)fleckParallelizationInfo.data;
-				for (int i = fleckParallelizationInfo.startIndex; i < fleckParallelizationInfo.endIndex; i++)
+				result = new _003CEnumerateFlecks_003Ed__15(0)
 				{
-					list[i].Draw(fleckParallelizationInfo.drawBatch);
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<IFleck>)this).GetEnumerator();
+		}
+	}
+
+	private List<TFleck> dataRealtime = new List<TFleck>();
+
+	private List<TFleck> dataGametime = new List<TFleck>();
+
+	private List<GenThreading.Slice> tmpParallelizationSlices = new List<GenThreading.Slice>();
+
+	private List<FleckParallelizationInfo> tmpParallelizationInfo = new List<FleckParallelizationInfo>();
+
+	private List<int> tmpRemoveIndices = new List<int>();
+
+	private WaitCallback CachedDrawParallelWaitCallback;
+
+	protected virtual bool ParallelizedDrawing => false;
+
+	public FleckSystemBase(FleckManager parent)
+		: base(parent)
+	{
+	}
+
+	public override void Update(float deltaTime)
+	{
+		try
+		{
+			for (int num = dataRealtime.Count - 1; num >= 0; num--)
+			{
+				TFleck value = dataRealtime[num];
+				if (value.TimeInterval(deltaTime, parent.parent))
+				{
+					tmpRemoveIndices.Add(num);
 				}
-			}
-			catch (Exception ex)
-			{
-				Log.Error(ex.ToString());
-			}
-			finally
-			{
-				fleckParallelizationInfo.doneEvent.Set();
-			}
-		}
-
-		// Token: 0x06001A0B RID: 6667 RVA: 0x00083520 File Offset: 0x00081720
-		public override void ForceDraw(DrawBatch drawBatch)
-		{
-			FleckSystemBase<TFleck>.<>c__DisplayClass12_0 CS$<>8__locals1;
-			CS$<>8__locals1.<>4__this = this;
-			CS$<>8__locals1.drawBatch = drawBatch;
-			foreach (FleckDef fleckDef in this.handledDefs)
-			{
-				if (fleckDef.graphicData != null)
+				else
 				{
-					fleckDef.graphicData.ExplicitlyInitCachedGraphic();
-				}
-				if (fleckDef.randomGraphics != null)
-				{
-					foreach (GraphicData graphicData in fleckDef.randomGraphics)
-					{
-						graphicData.ExplicitlyInitCachedGraphic();
-					}
-				}
-			}
-			if (this.ParallelizedDrawing)
-			{
-				if (this.CachedDrawParallelWaitCallback == null)
-				{
-					this.CachedDrawParallelWaitCallback = new WaitCallback(FleckSystemBase<TFleck>.DrawParallel);
-				}
-				FleckSystemBase<TFleck>.<>c__DisplayClass12_1 CS$<>8__locals2;
-				CS$<>8__locals2.parallelizationDegree = Environment.ProcessorCount;
-				this.<ForceDraw>g__Process|12_1(this.dataRealtime, ref CS$<>8__locals1, ref CS$<>8__locals2);
-				this.<ForceDraw>g__Process|12_1(this.dataGametime, ref CS$<>8__locals1, ref CS$<>8__locals2);
-				return;
-			}
-			this.<ForceDraw>g__Process|12_0(this.dataRealtime, ref CS$<>8__locals1);
-			this.<ForceDraw>g__Process|12_0(this.dataGametime, ref CS$<>8__locals1);
-		}
-
-		// Token: 0x06001A0C RID: 6668 RVA: 0x00083644 File Offset: 0x00081844
-		public override void CreateFleck(FleckCreationData creationData)
-		{
-			TFleck item = Activator.CreateInstance<TFleck>();
-			item.Setup(creationData);
-			if (creationData.def.realTime)
-			{
-				this.dataRealtime.Add(item);
-				return;
-			}
-			this.dataGametime.Add(item);
-		}
-
-		// Token: 0x06001A0D RID: 6669 RVA: 0x0008368C File Offset: 0x0008188C
-		public override void MergeWith(FleckSystem system)
-		{
-			FleckSystemBase<TFleck> fleckSystemBase = system as FleckSystemBase<TFleck>;
-			if (fleckSystemBase != null)
-			{
-				this.handledDefs.AddRangeUnique(fleckSystemBase.handledDefs);
-				this.dataRealtime.AddRange(fleckSystemBase.dataRealtime);
-				this.dataGametime.AddRange(fleckSystemBase.dataGametime);
-				return;
-			}
-			throw new NotImplementedException("FleckSystemBase does not yet support merging with " + system.GetType().Name);
-		}
-
-		// Token: 0x06001A0E RID: 6670 RVA: 0x000836F1 File Offset: 0x000818F1
-		public override IEnumerable<IFleck> EnumerateFlecks()
-		{
-			int num;
-			for (int i = this.dataGametime.Count - 1; i >= 0; i = num - 1)
-			{
-				yield return this.dataGametime[i];
-				num = i;
-			}
-			for (int i = this.dataRealtime.Count - 1; i >= 0; i = num - 1)
-			{
-				yield return this.dataRealtime[i];
-				num = i;
-			}
-			yield break;
-		}
-
-		// Token: 0x06001A0F RID: 6671 RVA: 0x00083704 File Offset: 0x00081904
-		public override void RemoveAllFlecks(Predicate<IFleck> shouldRemove)
-		{
-			for (int i = this.dataGametime.Count - 1; i >= 0; i--)
-			{
-				if (shouldRemove(this.dataGametime[i]))
-				{
-					this.dataGametime.RemoveAt(i);
+					dataRealtime[num] = value;
 				}
 			}
-			for (int j = this.dataRealtime.Count - 1; j >= 0; j--)
+			dataRealtime.RemoveBatchUnordered(tmpRemoveIndices);
+		}
+		finally
+		{
+			tmpRemoveIndices.Clear();
+		}
+	}
+
+	public override void Tick()
+	{
+		try
+		{
+			for (int num = dataGametime.Count - 1; num >= 0; num--)
 			{
-				if (shouldRemove(this.dataRealtime[j]))
+				TFleck value = dataGametime[num];
+				if (value.TimeInterval(1f / 60f, parent.parent))
 				{
-					this.dataRealtime.RemoveAt(j);
+					tmpRemoveIndices.Add(num);
+				}
+				else
+				{
+					dataGametime[num] = value;
 				}
 			}
+			dataGametime.RemoveBatchUnordered(tmpRemoveIndices);
 		}
-
-		// Token: 0x06001A10 RID: 6672 RVA: 0x000026EA File Offset: 0x000008EA
-		public override void ExposeData()
+		finally
 		{
+			tmpRemoveIndices.Clear();
 		}
+	}
 
-		// Token: 0x06001A11 RID: 6673 RVA: 0x0008378C File Offset: 0x0008198C
-		[CompilerGenerated]
-		private void <ForceDraw>g__Process|12_1(List<TFleck> data, ref FleckSystemBase<TFleck>.<>c__DisplayClass12_0 A_2, ref FleckSystemBase<TFleck>.<>c__DisplayClass12_1 A_3)
+	private static void DrawParallel(object state)
+	{
+		if (WorldComponent_GravshipController.GravshipRenderInProgess)
+		{
+			return;
+		}
+		FleckParallelizationInfo fleckParallelizationInfo = (FleckParallelizationInfo)state;
+		try
+		{
+			List<FleckThrown> list = (List<FleckThrown>)fleckParallelizationInfo.data;
+			for (int i = fleckParallelizationInfo.startIndex; i < fleckParallelizationInfo.endIndex; i++)
+			{
+				list[i].Draw(fleckParallelizationInfo.drawBatch);
+			}
+		}
+		catch (Exception ex)
+		{
+			Log.Error(ex.ToString());
+		}
+		finally
+		{
+			fleckParallelizationInfo.doneEvent.Set();
+		}
+	}
+
+	public override void ForceDraw(DrawBatch drawBatch)
+	{
+		foreach (FleckDef handledDef in handledDefs)
+		{
+			if (handledDef.graphicData != null)
+			{
+				handledDef.graphicData.ExplicitlyInitCachedGraphic();
+			}
+			if (handledDef.randomGraphics == null)
+			{
+				continue;
+			}
+			foreach (GraphicData randomGraphic in handledDef.randomGraphics)
+			{
+				randomGraphic.ExplicitlyInitCachedGraphic();
+			}
+		}
+		int parallelizationDegree;
+		if (ParallelizedDrawing)
+		{
+			if (CachedDrawParallelWaitCallback == null)
+			{
+				CachedDrawParallelWaitCallback = DrawParallel;
+			}
+			parallelizationDegree = Environment.ProcessorCount;
+			Process(dataRealtime);
+			Process(dataGametime);
+		}
+		else
+		{
+			Process(dataRealtime);
+			Process(dataGametime);
+		}
+		void Process(List<TFleck> data)
 		{
 			if (data.Count > 0)
 			{
 				try
 				{
-					this.tmpParallelizationSlices.Clear();
-					GenThreading.SliceWorkNoAlloc(0, data.Count, A_3.parallelizationDegree, this.tmpParallelizationSlices);
-					foreach (GenThreading.Slice slice in this.tmpParallelizationSlices)
+					tmpParallelizationSlices.Clear();
+					GenThreading.SliceWorkNoAlloc(0, data.Count, parallelizationDegree, tmpParallelizationSlices);
+					foreach (GenThreading.Slice tmpParallelizationSlice in tmpParallelizationSlices)
 					{
 						FleckParallelizationInfo parallelizationInfo = FleckUtility.GetParallelizationInfo();
-						parallelizationInfo.startIndex = slice.fromInclusive;
-						parallelizationInfo.endIndex = slice.toExclusive;
+						parallelizationInfo.startIndex = tmpParallelizationSlice.fromInclusive;
+						parallelizationInfo.endIndex = tmpParallelizationSlice.toExclusive;
 						parallelizationInfo.data = data;
-						ThreadPool.QueueUserWorkItem(this.CachedDrawParallelWaitCallback, parallelizationInfo);
-						this.tmpParallelizationInfo.Add(parallelizationInfo);
+						ThreadPool.QueueUserWorkItem(CachedDrawParallelWaitCallback, parallelizationInfo);
+						tmpParallelizationInfo.Add(parallelizationInfo);
 					}
-					foreach (FleckParallelizationInfo fleckParallelizationInfo in this.tmpParallelizationInfo)
+					foreach (FleckParallelizationInfo item in tmpParallelizationInfo)
 					{
-						fleckParallelizationInfo.doneEvent.WaitOne();
-						A_2.drawBatch.MergeWith(fleckParallelizationInfo.drawBatch);
+						item.doneEvent.WaitOne();
+						drawBatch.MergeWith(item.drawBatch);
 					}
 				}
 				finally
 				{
-					foreach (FleckParallelizationInfo info in this.tmpParallelizationInfo)
+					foreach (FleckParallelizationInfo item2 in tmpParallelizationInfo)
 					{
-						FleckUtility.ReturnParallelizationInfo(info);
+						FleckUtility.ReturnParallelizationInfo(item2);
 					}
-					this.tmpParallelizationInfo.Clear();
+					tmpParallelizationInfo.Clear();
 				}
 			}
 		}
-
-		// Token: 0x06001A12 RID: 6674 RVA: 0x000838F8 File Offset: 0x00081AF8
-		[CompilerGenerated]
-		private void <ForceDraw>g__Process|12_0(List<TFleck> data, ref FleckSystemBase<TFleck>.<>c__DisplayClass12_0 A_2)
+		void Process(List<TFleck> data)
 		{
-			for (int i = data.Count - 1; i >= 0; i--)
+			for (int num = data.Count - 1; num >= 0; num--)
 			{
-				TFleck tfleck = data[i];
-				tfleck.Draw(A_2.drawBatch);
+				data[num].Draw(drawBatch);
 			}
 		}
+	}
 
-		// Token: 0x040016FE RID: 5886
-		private List<TFleck> dataRealtime = new List<TFleck>();
+	public override void CreateFleck(FleckCreationData creationData)
+	{
+		TFleck item = new TFleck();
+		item.Setup(creationData);
+		if (creationData.def.realTime)
+		{
+			dataRealtime.Add(item);
+		}
+		else
+		{
+			dataGametime.Add(item);
+		}
+	}
 
-		// Token: 0x040016FF RID: 5887
-		private List<TFleck> dataGametime = new List<TFleck>();
+	public override void MergeWith(FleckSystem system)
+	{
+		if (system is FleckSystemBase<TFleck> fleckSystemBase)
+		{
+			handledDefs.AddRangeUnique(fleckSystemBase.handledDefs);
+			dataRealtime.AddRange(fleckSystemBase.dataRealtime);
+			dataGametime.AddRange(fleckSystemBase.dataGametime);
+			return;
+		}
+		throw new NotImplementedException("FleckSystemBase does not yet support merging with " + system.GetType().Name);
+	}
 
-		// Token: 0x04001700 RID: 5888
-		private List<GenThreading.Slice> tmpParallelizationSlices = new List<GenThreading.Slice>();
+	[IteratorStateMachine(typeof(FleckSystemBase<>._003CEnumerateFlecks_003Ed__15))]
+	public override IEnumerable<IFleck> EnumerateFlecks()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CEnumerateFlecks_003Ed__15(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
 
-		// Token: 0x04001701 RID: 5889
-		private List<FleckParallelizationInfo> tmpParallelizationInfo = new List<FleckParallelizationInfo>();
+	public override void RemoveAllFlecks(Predicate<IFleck> shouldRemove)
+	{
+		for (int num = dataGametime.Count - 1; num >= 0; num--)
+		{
+			if (shouldRemove(dataGametime[num]))
+			{
+				dataGametime.RemoveAt(num);
+			}
+		}
+		for (int num2 = dataRealtime.Count - 1; num2 >= 0; num2--)
+		{
+			if (shouldRemove(dataRealtime[num2]))
+			{
+				dataRealtime.RemoveAt(num2);
+			}
+		}
+	}
 
-		// Token: 0x04001702 RID: 5890
-		private List<int> tmpRemoveIndices = new List<int>();
-
-		// Token: 0x04001703 RID: 5891
-		private WaitCallback CachedDrawParallelWaitCallback;
+	public override void ExposeData()
+	{
 	}
 }

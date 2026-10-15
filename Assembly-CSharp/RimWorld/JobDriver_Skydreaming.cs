@@ -1,38 +1,146 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_Skydreaming : JobDriver
 {
-	// Token: 0x0200120C RID: 4620
-	public class JobDriver_Skydreaming : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__1 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x060070DA RID: 28890 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_Skydreaming _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
 		{
-			return true;
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x060070DB RID: 28891 RVA: 0x0022F867 File Offset: 0x0022DA67
-		protected override IEnumerable<Toil> MakeNewToils()
+		object IEnumerator.Current
 		{
-			this.FailOnChildLearningConditions<JobDriver_Skydreaming>();
-			yield return Toils_Goto.GotoCell(TargetIndex.A, PathEndMode.OnCell);
-			Toil toil = ToilMaker.MakeToil("MakeNewToils");
-			toil.initAction = delegate()
+			[DebuggerHidden]
+			get
 			{
-				this.pawn.jobs.posture = PawnPosture.LayingOnGroundFaceUp;
-			};
-			toil.tickIntervalAction = delegate(int delta)
-			{
-				LearningUtility.LearningTickCheckEnd(this.pawn, delta, false);
-			};
-			toil.defaultCompleteMode = ToilCompleteMode.Delay;
-			toil.defaultDuration = this.job.def.learningDuration;
-			toil.FailOn(() => this.pawn.Position.Roofed(this.pawn.Map));
-			yield return toil;
-			yield break;
+				return _003C_003E2__current;
+			}
 		}
+
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__1(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_Skydreaming CS_0024_003C_003E8__locals6 = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				CS_0024_003C_003E8__locals6.FailOnChildLearningConditions();
+				_003C_003E2__current = Toils_Goto.GotoCell(TargetIndex.A, PathEndMode.OnCell);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+			{
+				_003C_003E1__state = -1;
+				Toil toil = ToilMaker.MakeToil("MakeNewToils");
+				toil.initAction = delegate
+				{
+					CS_0024_003C_003E8__locals6.pawn.jobs.posture = PawnPosture.LayingOnGroundFaceUp;
+				};
+				toil.tickIntervalAction = delegate(int delta)
+				{
+					LearningUtility.LearningTickCheckEnd(CS_0024_003C_003E8__locals6.pawn, delta);
+				};
+				toil.defaultCompleteMode = ToilCompleteMode.Delay;
+				toil.defaultDuration = CS_0024_003C_003E8__locals6.job.def.learningDuration;
+				toil.FailOn(() => CS_0024_003C_003E8__locals6.pawn.Position.Roofed(CS_0024_003C_003E8__locals6.pawn.Map));
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 2;
+				return true;
+			}
+			case 2:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__1 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__1(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return true;
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__1))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__1(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

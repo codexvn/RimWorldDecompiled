@@ -1,321 +1,424 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using UnityEngine;
 using Verse;
-using Verse.AI.Group;
 
-namespace RimWorld
+namespace RimWorld;
+
+public abstract class Building_Trap : Building, IPathFindCostProvider
 {
-	// Token: 0x02002978 RID: 10616
-	public abstract class Building_Trap : Building, IPathFindCostProvider
+	[CompilerGenerated]
+	private sealed class _003CGetGizmos_003Ed__31 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700238B RID: 9099
-		// (get) Token: 0x0600E930 RID: 59696 RVA: 0x0043DA9B File Offset: 0x0043BC9B
-		private bool CanSetAutoRearm
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Building_Trap _003C_003E4__this;
+
+		private IEnumerator<Gizmo> _003C_003E7__wrap1;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return base.Faction == Faction.OfPlayer && this.def.blueprintDef != null && this.def.IsResearchFinished;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700238C RID: 9100
-		// (get) Token: 0x0600E931 RID: 59697 RVA: 0x0043E052 File Offset: 0x0043C252
-		public virtual bool ShouldShowTrapDamageStat { get; } = 1;
-
-		// Token: 0x1700238D RID: 9101
-		// (get) Token: 0x0600E932 RID: 59698 RVA: 0x0043E05C File Offset: 0x0043C25C
-		protected bool IsStunned
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (!this.triedGettingStunner)
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetGizmos_003Ed__31(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
 				{
-					CompStunnable comp = base.GetComp<CompStunnable>();
-					this.stunner = ((comp != null) ? comp.StunHandler : null);
-					this.triedGettingStunner = true;
 				}
-				StunHandler stunHandler = this.stunner;
-				return stunHandler != null && stunHandler.Stunned;
-			}
-		}
-
-		// Token: 0x0600E933 RID: 59699 RVA: 0x0043E0A4 File Offset: 0x0043C2A4
-		public override void ExposeData()
-		{
-			base.ExposeData();
-			Scribe_Values.Look<bool>(ref this.autoRearm, "autoRearm", false, false);
-			Scribe_Collections.Look<Pawn>(ref this.touchingPawns, "testees", LookMode.Reference, Array.Empty<object>());
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
-			{
-				if (this.touchingPawns.RemoveAll((Pawn x) => x == null) != 0)
+				finally
 				{
-					Log.Error("Removed null pawns from touchingPawns.");
+					_003C_003Em__Finally1();
 				}
 			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x0600E934 RID: 59700 RVA: 0x0043E11D File Offset: 0x0043C31D
-		public override void SpawnSetup(Map map, bool respawningAfterLoad)
+		private bool MoveNext()
 		{
-			base.SpawnSetup(map, respawningAfterLoad);
-			if (!respawningAfterLoad && !base.BeingTransportedOnGravship)
+			try
 			{
-				this.autoRearm = (this.CanSetAutoRearm && map.areaManager.Home[base.Position]);
-			}
-		}
-
-		// Token: 0x0600E935 RID: 59701 RVA: 0x0043E15C File Offset: 0x0043C35C
-		protected override void Tick()
-		{
-			if (base.Spawned && !this.IsStunned)
-			{
-				List<Thing> thingList = base.Position.GetThingList(base.Map);
-				for (int i = 0; i < thingList.Count; i++)
+				int num = _003C_003E1__state;
+				Building_Trap CS_0024_003C_003E8__locals5 = _003C_003E4__this;
+				switch (num)
 				{
-					Pawn pawn = thingList[i] as Pawn;
-					if (pawn != null && !pawn.Flying && !this.touchingPawns.Contains(pawn))
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((Building)CS_0024_003C_003E8__locals5).GetGizmos().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0072;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0072;
+				case 2:
 					{
-						this.touchingPawns.Add(pawn);
-						this.CheckSpring(pawn);
+						_003C_003E1__state = -1;
+						break;
 					}
-				}
-				for (int j = this.touchingPawns.Count - 1; j >= 0; j--)
-				{
-					Pawn pawn2 = this.touchingPawns[j];
-					if (pawn2 == null || !pawn2.Spawned || pawn2.Flying || pawn2.Position != base.Position)
+					IL_0072:
+					if (_003C_003E7__wrap1.MoveNext())
 					{
-						this.touchingPawns.Remove(pawn2);
+						Gizmo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
 					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (CS_0024_003C_003E8__locals5.CanSetAutoRearm)
+					{
+						_003C_003E2__current = new Command_Toggle
+						{
+							defaultLabel = "CommandAutoRearm".Translate(),
+							defaultDesc = "CommandAutoRearmDesc".Translate(),
+							hotKey = KeyBindingDefOf.Misc3,
+							icon = TexCommand.RearmTrap,
+							isActive = () => CS_0024_003C_003E8__locals5.autoRearm,
+							toggleAction = delegate
+							{
+								CS_0024_003C_003E8__locals5.autoRearm = !CS_0024_003C_003E8__locals5.autoRearm;
+							}
+						};
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
 				}
+				return false;
 			}
-			base.Tick();
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
 		}
 
-		// Token: 0x0600E936 RID: 59702 RVA: 0x0043E240 File Offset: 0x0043C440
-		private void CheckSpring(Pawn p)
+		bool IEnumerator.MoveNext()
 		{
-			if (Rand.Chance(this.SpringChance(p)))
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				Map map = base.Map;
-				this.Spring(p);
-				if (p.Faction == Faction.OfPlayer || p.HostFaction == Faction.OfPlayer)
-				{
-					Find.LetterStack.ReceiveLetter("LetterFriendlyTrapSprungLabel".Translate(p.LabelShort, p).CapitalizeFirst(), "LetterFriendlyTrapSprung".Translate(p.LabelShort, p).CapitalizeFirst(), LetterDefOf.NegativeEvent, new TargetInfo(base.Position, map, false), null, null, null, null, 0, true);
-				}
+				_003C_003E7__wrap1.Dispose();
 			}
 		}
 
-		// Token: 0x0600E937 RID: 59703 RVA: 0x0043E2F4 File Offset: 0x0043C4F4
-		protected virtual float SpringChance(Pawn p)
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			float num = 1f;
-			if (p.kindDef.immuneToTraps)
-			{
-				return 0f;
-			}
-			if (this.KnowsOfTrap(p))
-			{
-				if (p.Faction == null)
-				{
-					if (p.IsAnimal)
-					{
-						num = 0.2f;
-						num *= this.def.building.trapPeacefulWildAnimalsSpringChanceFactor;
-					}
-					else
-					{
-						num = 0.3f;
-					}
-				}
-				else if (p.Faction == base.Faction)
-				{
-					num = 0.005f;
-				}
-				else
-				{
-					num = 0f;
-				}
-			}
-			num *= this.GetStatValue(StatDefOf.TrapSpringChance, true, -1) * p.GetStatValue(StatDefOf.PawnTrapSpringChance, true, -1);
-			return Mathf.Clamp01(num);
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x0600E938 RID: 59704 RVA: 0x0043E398 File Offset: 0x0043C598
-		public bool KnowsOfTrap(Pawn p)
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
 		{
-			if (p.Faction != null && !p.Faction.HostileTo(base.Faction))
+			_003CGetGizmos_003Ed__31 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				return true;
+				_003C_003E1__state = 0;
+				result = this;
 			}
-			if (p.Faction == null && p.IsAnimal && !p.InAggroMentalState)
+			else
 			{
-				return true;
-			}
-			if (p.guest != null && p.guest.Released)
-			{
-				return true;
-			}
-			if (!p.IsPrisoner && base.Faction != null && p.HostFaction == base.Faction)
-			{
-				return true;
-			}
-			if (p.RaceProps.Humanlike && p.IsFormingCaravan())
-			{
-				return true;
-			}
-			if (p.IsPrisoner && p.guest.ShouldWaitInsteadOfEscaping && base.Faction == p.HostFaction)
-			{
-				return true;
-			}
-			if (p.Faction == null && p.RaceProps.Humanlike)
-			{
-				return true;
-			}
-			Lord lord = p.lord;
-			ILordAvoidTraps lordAvoidTraps = ((lord != null) ? lord.LordJob : null) as ILordAvoidTraps;
-			if (lordAvoidTraps != null)
-			{
-				Faction faction = p.Faction;
-				if (Rand.ValueAsync(HashCode.Combine<int, int>((faction != null) ? faction.loadID : p.lord.loadID, this.thingIDNumber)) < lordAvoidTraps.AvoidTrapRatio)
+				result = new _003CGetGizmos_003Ed__31(0)
 				{
-					return true;
-				}
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	private bool autoRearm;
+
+	private List<Pawn> touchingPawns = new List<Pawn>();
+
+	private StunHandler stunner;
+
+	private bool triedGettingStunner;
+
+	private const float KnowerSpringChanceFactorSameFaction = 0.005f;
+
+	private const float KnowerSpringChanceFactorWildAnimal = 0.2f;
+
+	private const float KnowerSpringChanceFactorFactionlessHuman = 0.3f;
+
+	private const float KnowerSpringChanceFactorOther = 0f;
+
+	private const ushort KnowerPathFindCost = 800;
+
+	private const ushort KnowerPathWalkCost = 40;
+
+	private bool CanSetAutoRearm
+	{
+		get
+		{
+			if (base.Faction == Faction.OfPlayer && def.blueprintDef != null)
+			{
+				return def.IsResearchFinished;
 			}
 			return false;
 		}
+	}
 
-		// Token: 0x0600E939 RID: 59705 RVA: 0x0043E4B8 File Offset: 0x0043C6B8
-		public CellRect GetOccupiedRect()
-		{
-			return this.OccupiedRect();
-		}
+	public virtual bool ShouldShowTrapDamageStat { get; } = true;
 
-		// Token: 0x0600E93A RID: 59706 RVA: 0x0043E4C0 File Offset: 0x0043C6C0
-		public ushort PathFindCostFor(Pawn p)
+	protected bool IsStunned
+	{
+		get
 		{
-			if (!this.KnowsOfTrap(p))
+			if (!triedGettingStunner)
 			{
-				return 0;
+				stunner = GetComp<CompStunnable>()?.StunHandler;
+				triedGettingStunner = true;
 			}
-			return 800;
+			return stunner?.Stunned ?? false;
 		}
+	}
 
-		// Token: 0x0600E93B RID: 59707 RVA: 0x0043E4D2 File Offset: 0x0043C6D2
-		public override ushort PathWalkCostFor(Pawn p)
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref autoRearm, "autoRearm", defaultValue: false);
+		Scribe_Collections.Look(ref touchingPawns, "testees", LookMode.Reference);
+		if (Scribe.mode == LoadSaveMode.PostLoadInit && touchingPawns.RemoveAll((Pawn x) => x == null) != 0)
 		{
-			if (!this.KnowsOfTrap(p))
+			Log.Error("Removed null pawns from touchingPawns.");
+		}
+	}
+
+	public override void SpawnSetup(Map map, bool respawningAfterLoad)
+	{
+		base.SpawnSetup(map, respawningAfterLoad);
+		if (!respawningAfterLoad && !base.BeingTransportedOnGravship)
+		{
+			autoRearm = CanSetAutoRearm && map.areaManager.Home[base.Position];
+		}
+	}
+
+	protected override void Tick()
+	{
+		if (base.Spawned && !IsStunned)
+		{
+			List<Thing> thingList = base.Position.GetThingList(base.Map);
+			for (int i = 0; i < thingList.Count; i++)
 			{
-				return 0;
-			}
-			return 40;
-		}
-
-		// Token: 0x0600E93C RID: 59708 RVA: 0x0043E4E1 File Offset: 0x0043C6E1
-		public override bool IsDangerousFor(Pawn p)
-		{
-			return this.KnowsOfTrap(p);
-		}
-
-		// Token: 0x0600E93D RID: 59709 RVA: 0x0043E4EC File Offset: 0x0043C6EC
-		public void Spring(Pawn p)
-		{
-			bool spawned = base.Spawned;
-			Map map = base.Map;
-			this.SpringSub(p);
-			if (this.def.building.trapDestroyOnSpring)
-			{
-				if (!base.Destroyed)
+				if (thingList[i] is Pawn { Flying: false } pawn && !touchingPawns.Contains(pawn))
 				{
-					this.Destroy(DestroyMode.Vanish);
+					touchingPawns.Add(pawn);
+					CheckSpring(pawn);
 				}
-				if (spawned)
+			}
+			for (int num = touchingPawns.Count - 1; num >= 0; num--)
+			{
+				Pawn pawn2 = touchingPawns[num];
+				if (pawn2 == null || !pawn2.Spawned || pawn2.Flying || pawn2.Position != base.Position)
 				{
-					this.CheckAutoRebuild(map);
+					touchingPawns.Remove(pawn2);
 				}
 			}
 		}
+		base.Tick();
+	}
 
-		// Token: 0x0600E93E RID: 59710 RVA: 0x0043E53C File Offset: 0x0043C73C
-		public override void Kill(DamageInfo? dinfo = null, Hediff exactCulprit = null)
+	private void CheckSpring(Pawn p)
+	{
+		if (Rand.Chance(SpringChance(p)))
 		{
-			bool spawned = base.Spawned;
 			Map map = base.Map;
-			base.Kill(dinfo, exactCulprit);
+			Spring(p);
+			if (p.Faction == Faction.OfPlayer || p.HostFaction == Faction.OfPlayer)
+			{
+				Find.LetterStack.ReceiveLetter("LetterFriendlyTrapSprungLabel".Translate(p.LabelShort, p).CapitalizeFirst(), "LetterFriendlyTrapSprung".Translate(p.LabelShort, p).CapitalizeFirst(), LetterDefOf.NegativeEvent, new TargetInfo(base.Position, map));
+			}
+		}
+	}
+
+	protected virtual float SpringChance(Pawn p)
+	{
+		float num = 1f;
+		if (p.kindDef.immuneToTraps)
+		{
+			return 0f;
+		}
+		if (KnowsOfTrap(p))
+		{
+			if (p.Faction != null)
+			{
+				num = ((p.Faction != base.Faction) ? 0f : 0.005f);
+			}
+			else if (p.IsAnimal)
+			{
+				num = 0.2f;
+				num *= def.building.trapPeacefulWildAnimalsSpringChanceFactor;
+			}
+			else
+			{
+				num = 0.3f;
+			}
+		}
+		num *= this.GetStatValue(StatDefOf.TrapSpringChance) * p.GetStatValue(StatDefOf.PawnTrapSpringChance);
+		return Mathf.Clamp01(num);
+	}
+
+	public bool KnowsOfTrap(Pawn p)
+	{
+		if (p.Faction != null && !p.Faction.HostileTo(base.Faction))
+		{
+			return true;
+		}
+		if (p.Faction == null && p.IsAnimal && !p.InAggroMentalState)
+		{
+			return true;
+		}
+		if (p.guest != null && p.guest.Released)
+		{
+			return true;
+		}
+		if (!p.IsPrisoner && base.Faction != null && p.HostFaction == base.Faction)
+		{
+			return true;
+		}
+		if (p.RaceProps.Humanlike && p.IsFormingCaravan())
+		{
+			return true;
+		}
+		if (p.pather.cachedReturningToCell && base.Faction == p.HostFaction)
+		{
+			return true;
+		}
+		if (p.Faction == null && p.RaceProps.Humanlike)
+		{
+			return true;
+		}
+		if (p.lord?.LordJob is ILordAvoidTraps lordAvoidTraps && Rand.ValueAsync(HashCode.Combine(p.Faction?.loadID ?? p.lord.loadID, thingIDNumber)) < lordAvoidTraps.AvoidTrapRatio)
+		{
+			return true;
+		}
+		return false;
+	}
+
+	public CellRect GetOccupiedRect()
+	{
+		return this.OccupiedRect();
+	}
+
+	public ushort PathFindCostFor(Pawn p)
+	{
+		if (!KnowsOfTrap(p))
+		{
+			return 0;
+		}
+		return 800;
+	}
+
+	public override ushort PathWalkCostFor(Pawn p)
+	{
+		if (!KnowsOfTrap(p))
+		{
+			return 0;
+		}
+		return 40;
+	}
+
+	public override bool IsDangerousFor(Pawn p)
+	{
+		return KnowsOfTrap(p);
+	}
+
+	public void Spring(Pawn p)
+	{
+		bool spawned = base.Spawned;
+		Map map = base.Map;
+		SpringSub(p);
+		if (def.building.trapDestroyOnSpring)
+		{
+			if (!base.Destroyed)
+			{
+				Destroy();
+			}
 			if (spawned)
 			{
-				this.CheckAutoRebuild(map);
+				CheckAutoRebuild(map);
 			}
 		}
+	}
 
-		// Token: 0x0600E93F RID: 59711
-		protected abstract void SpringSub(Pawn p);
-
-		// Token: 0x0600E940 RID: 59712 RVA: 0x0043E568 File Offset: 0x0043C768
-		private void CheckAutoRebuild(Map map)
+	public override void Kill(DamageInfo? dinfo = null, Hediff exactCulprit = null)
+	{
+		bool spawned = base.Spawned;
+		Map map = base.Map;
+		base.Kill(dinfo, exactCulprit);
+		if (spawned)
 		{
-			if (this.autoRearm && this.CanSetAutoRearm && map != null && GenConstruct.CanPlaceBlueprintAt(this.def, base.Position, base.Rotation, map, false, null, null, base.Stuff, false, false, false).Accepted)
-			{
-				GenConstruct.PlaceBlueprintForBuild(this.def, base.Position, map, base.Rotation, Faction.OfPlayer, base.Stuff, null, null, true);
-			}
+			CheckAutoRebuild(map);
 		}
+	}
 
-		// Token: 0x0600E941 RID: 59713 RVA: 0x0043E5DD File Offset: 0x0043C7DD
-		public override IEnumerable<Gizmo> GetGizmos()
+	protected abstract void SpringSub(Pawn p);
+
+	private void CheckAutoRebuild(Map map)
+	{
+		if (autoRearm && CanSetAutoRearm && map != null && GenConstruct.CanPlaceBlueprintAt(def, base.Position, base.Rotation, map, godMode: false, null, null, base.Stuff).Accepted)
 		{
-			foreach (Gizmo gizmo in base.GetGizmos())
-			{
-				yield return gizmo;
-			}
-			IEnumerator<Gizmo> enumerator = null;
-			if (this.CanSetAutoRearm)
-			{
-				yield return new Command_Toggle
-				{
-					defaultLabel = "CommandAutoRearm".Translate(),
-					defaultDesc = "CommandAutoRearmDesc".Translate(),
-					hotKey = KeyBindingDefOf.Misc3,
-					icon = TexCommand.RearmTrap,
-					isActive = (() => this.autoRearm),
-					toggleAction = delegate()
-					{
-						this.autoRearm = !this.autoRearm;
-					}
-				};
-			}
-			yield break;
-			yield break;
+			GenConstruct.PlaceBlueprintForBuild(def, base.Position, map, base.Rotation, Faction.OfPlayer, base.Stuff);
 		}
+	}
 
-		// Token: 0x04009B4F RID: 39759
-		private bool autoRearm;
-
-		// Token: 0x04009B50 RID: 39760
-		private List<Pawn> touchingPawns = new List<Pawn>();
-
-		// Token: 0x04009B51 RID: 39761
-		private StunHandler stunner;
-
-		// Token: 0x04009B52 RID: 39762
-		private bool triedGettingStunner;
-
-		// Token: 0x04009B53 RID: 39763
-		private const float KnowerSpringChanceFactorSameFaction = 0.005f;
-
-		// Token: 0x04009B54 RID: 39764
-		private const float KnowerSpringChanceFactorWildAnimal = 0.2f;
-
-		// Token: 0x04009B55 RID: 39765
-		private const float KnowerSpringChanceFactorFactionlessHuman = 0.3f;
-
-		// Token: 0x04009B56 RID: 39766
-		private const float KnowerSpringChanceFactorOther = 0f;
-
-		// Token: 0x04009B57 RID: 39767
-		private const ushort KnowerPathFindCost = 800;
-
-		// Token: 0x04009B58 RID: 39768
-		private const ushort KnowerPathWalkCost = 40;
+	[IteratorStateMachine(typeof(_003CGetGizmos_003Ed__31))]
+	public override IEnumerable<Gizmo> GetGizmos()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetGizmos_003Ed__31(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

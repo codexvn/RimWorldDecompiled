@@ -1,276 +1,342 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class ScenPart_PursuingMechanoids : ScenPart
 {
-	// Token: 0x020028DD RID: 10461
-	public class ScenPart_PursuingMechanoids : ScenPart
+	[CompilerGenerated]
+	private sealed class _003CGetAlerts_003Ed__34 : IEnumerable<Alert>, IEnumerable, IEnumerator<Alert>, IEnumerator, IDisposable
 	{
-		// Token: 0x170022B9 RID: 8889
-		// (get) Token: 0x0600E4B4 RID: 58548 RVA: 0x0042CC2C File Offset: 0x0042AE2C
-		private Alert_MechThreat AlertCached
+		private int _003C_003E1__state;
+
+		private Alert _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public ScenPart_PursuingMechanoids _003C_003E4__this;
+
+		Alert IEnumerator<Alert>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.Disabled)
-				{
-					return null;
-				}
-				if (this.cachedAlertMap != Find.CurrentMap)
-				{
-					this.alertCached = null;
-				}
-				if (this.alertCached != null)
-				{
-					return this.alertCached;
-				}
-				int num;
-				if (this.mapWarningTimers.TryGetValue(Find.CurrentMap, out num) && Find.TickManager.TicksGame > num)
-				{
-					this.alertCached = new Alert_MechThreat
-					{
-						raidTick = this.mapRaidTimers[Find.CurrentMap]
-					};
-					this.cachedAlertMap = Find.CurrentMap;
-				}
-				return this.alertCached;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170022BA RID: 8890
-		// (get) Token: 0x0600E4B5 RID: 58549 RVA: 0x0042CCB9 File Offset: 0x0042AEB9
-		private bool Disabled
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.questCompleted || !this.hasGravEngineCached;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170022BB RID: 8891
-		// (get) Token: 0x0600E4B6 RID: 58550 RVA: 0x0042CCCE File Offset: 0x0042AECE
-		public override bool OverrideDangerMusic
+		[DebuggerHidden]
+		public _003CGetAlerts_003Ed__34(int _003C_003E1__state)
 		{
-			get
-			{
-				return this.onStartMap;
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x0600E4B7 RID: 58551 RVA: 0x0042CCD8 File Offset: 0x0042AED8
-		public override void ExposeData()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			base.ExposeData();
-			if (Scribe.mode == LoadSaveMode.Saving)
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			ScenPart_PursuingMechanoids scenPart_PursuingMechanoids = _003C_003E4__this;
+			switch (num)
 			{
-				foreach (Map map in this.mapWarningTimers.Keys.ToList<Map>())
+			default:
+				return false;
+			case 0:
+			{
+				_003C_003E1__state = -1;
+				Map currentMap = Find.CurrentMap;
+				if (currentMap == null || !currentMap.IsPlayerHome)
 				{
-					if (((map != null) ? map.Parent : null) == null || map.Parent.Destroyed)
-					{
-						this.mapWarningTimers.Remove(map);
-						this.mapRaidTimers.Remove(map);
-					}
+					return false;
+				}
+				if (scenPart_PursuingMechanoids.AlertCached != null)
+				{
+					_003C_003E2__current = scenPart_PursuingMechanoids.AlertCached;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				break;
+			}
+			case 1:
+				_003C_003E1__state = -1;
+				break;
+			}
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Alert> IEnumerable<Alert>.GetEnumerator()
+		{
+			_003CGetAlerts_003Ed__34 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CGetAlerts_003Ed__34(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Alert>)this).GetEnumerator();
+		}
+	}
+
+	private bool onStartMap = true;
+
+	private Dictionary<Map, int> mapWarningTimers = new Dictionary<Map, int>();
+
+	private Dictionary<Map, int> mapRaidTimers = new Dictionary<Map, int>();
+
+	private bool questCompleted;
+
+	private const int InitialWarningDelay = 2700;
+
+	private const int InitialRaidDelay = 30000;
+
+	private static IntRange WarningDelayRange = new IntRange(840000, 960000);
+
+	private static IntRange RaidDelayRange = new IntRange(1080000, 2100000);
+
+	private const int TickInterval = 2500;
+
+	private const int SecondRaidDelay = 30000;
+
+	private Map cachedAlertMap;
+
+	private Alert_MechThreat alertCached;
+
+	private List<Map> tmpWarningKeys;
+
+	private List<int> tmpWarningValues;
+
+	private List<Map> tmpRaidKeys;
+
+	private List<int> tmpRaidValues;
+
+	private List<Map> tmpMaps = new List<Map>();
+
+	private Alert_MechThreat AlertCached
+	{
+		get
+		{
+			if (Disabled)
+			{
+				return null;
+			}
+			if (cachedAlertMap != Find.CurrentMap)
+			{
+				alertCached = null;
+			}
+			if (alertCached != null && Find.TickManager.TicksGame > TimerIntervalTick(alertCached.raidTick + 30000))
+			{
+				alertCached = null;
+			}
+			if (alertCached != null)
+			{
+				return alertCached;
+			}
+			if (mapWarningTimers.TryGetValue(Find.CurrentMap, out var value) && Find.TickManager.TicksGame > TimerIntervalTick(value) && mapRaidTimers.TryGetValue(Find.CurrentMap, out var value2) && Find.TickManager.TicksGame < TimerIntervalTick(value2 + 30000))
+			{
+				alertCached = new Alert_MechThreat
+				{
+					raidTick = mapRaidTimers[Find.CurrentMap]
+				};
+				cachedAlertMap = Find.CurrentMap;
+			}
+			return alertCached;
+		}
+	}
+
+	private bool Disabled => questCompleted;
+
+	public override bool OverrideDangerMusic => onStartMap;
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		if (Scribe.mode == LoadSaveMode.Saving)
+		{
+			foreach (Map item in mapWarningTimers.Keys.ToList())
+			{
+				if (item?.Parent == null || item.Parent.Destroyed)
+				{
+					mapWarningTimers.Remove(item);
+					mapRaidTimers.Remove(item);
 				}
 			}
-			Scribe_Values.Look<bool>(ref this.onStartMap, "initialMap", false, false);
-			Scribe_Collections.Look<Map, int>(ref this.mapWarningTimers, "mapWarningTimers", LookMode.Reference, LookMode.Value, ref this.tmpWarningKeys, ref this.tmpWarningValues, true, false, false);
-			Scribe_Collections.Look<Map, int>(ref this.mapRaidTimers, "mapRaidTimers", LookMode.Reference, LookMode.Value, ref this.tmpRaidKeys, ref this.tmpRaidValues, true, false, false);
-			Scribe_Values.Look<bool>(ref this.questCompleted, "questCompleted", false, false);
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
-			{
-				if (this.mapWarningTimers == null)
-				{
-					this.mapWarningTimers = new Dictionary<Map, int>();
-				}
-				if (this.mapRaidTimers == null)
-				{
-					this.mapRaidTimers = new Dictionary<Map, int>();
-				}
-			}
-			this.lastCheckedGravEngineTick = -999999;
 		}
-
-		// Token: 0x0600E4B8 RID: 58552 RVA: 0x0042CE10 File Offset: 0x0042B010
-		public override void PostWorldGenerate()
+		Scribe_Values.Look(ref onStartMap, "initialMap", defaultValue: false);
+		Scribe_Collections.Look(ref mapWarningTimers, "mapWarningTimers", LookMode.Reference, LookMode.Value, ref tmpWarningKeys, ref tmpWarningValues);
+		Scribe_Collections.Look(ref mapRaidTimers, "mapRaidTimers", LookMode.Reference, LookMode.Value, ref tmpRaidKeys, ref tmpRaidValues);
+		Scribe_Values.Look(ref questCompleted, "questCompleted", defaultValue: false);
+		if (Scribe.mode == LoadSaveMode.PostLoadInit)
 		{
-			this.onStartMap = true;
-			this.mapWarningTimers.Clear();
-			this.mapRaidTimers.Clear();
+			if (mapWarningTimers == null)
+			{
+				mapWarningTimers = new Dictionary<Map, int>();
+			}
+			if (mapRaidTimers == null)
+			{
+				mapRaidTimers = new Dictionary<Map, int>();
+			}
 		}
+	}
 
-		// Token: 0x0600E4B9 RID: 58553 RVA: 0x0042CE2F File Offset: 0x0042B02F
-		public override void PostMapGenerate(Map map)
+	public override void PostWorldGenerate()
+	{
+		onStartMap = true;
+		mapWarningTimers.Clear();
+		mapRaidTimers.Clear();
+	}
+
+	public override void PostMapGenerate(Map map)
+	{
+		if (onStartMap)
 		{
-			if (!map.IsPlayerHome)
-			{
-				return;
-			}
-			this.StartTimers(map);
-			this.lastCheckedGravEngineTick = -999999;
+			StartTimers(map);
+			onStartMap = false;
 		}
+	}
 
-		// Token: 0x0600E4BA RID: 58554 RVA: 0x0042CE4C File Offset: 0x0042B04C
-		public override void MapRemoved(Map map)
+	public override void PostGravshipLanded(Map map)
+	{
+		onStartMap = false;
+		StartTimers(map);
+	}
+
+	public override void MapRemoved(Map map)
+	{
+		if (mapWarningTimers.Remove(map))
 		{
-			if (this.mapWarningTimers.Remove(map))
-			{
-				this.mapRaidTimers.Remove(map);
-				this.onStartMap = false;
-			}
+			mapRaidTimers.Remove(map);
+			onStartMap = false;
 		}
+	}
 
-		// Token: 0x0600E4BB RID: 58555 RVA: 0x0042CE70 File Offset: 0x0042B070
-		public override void Tick()
+	private int TimerIntervalTick(int timer)
+	{
+		return (timer + 2500 - 1) / 2500 * 2500;
+	}
+
+	public override void Tick()
+	{
+		if (Find.TickManager.TicksGame % 2500 != 0)
 		{
-			if (Find.TickManager.TicksGame > this.lastCheckedGravEngineTick + 2500)
-			{
-				this.hasGravEngineCached = GravshipUtility.PlayerHasGravEngine();
-				this.lastCheckedGravEngineTick = Find.TickManager.TicksGame;
-			}
-			if (this.Disabled)
-			{
-				foreach (Map map in Find.Maps)
-				{
-					if (this.mapWarningTimers.ContainsKey(map))
-					{
-						Dictionary<Map, int> dictionary = this.mapWarningTimers;
-						Map key = map;
-						int num = dictionary[key];
-						dictionary[key] = num + 1;
-						Dictionary<Map, int> dictionary2 = this.mapRaidTimers;
-						key = map;
-						num = dictionary2[key];
-						dictionary2[key] = num + 1;
-					}
-				}
-				return;
-			}
-			foreach (Map map2 in this.mapWarningTimers.Keys)
-			{
-				if (Find.TickManager.TicksGame == this.mapWarningTimers[map2])
-				{
-					Thing t = map2.listerThings.ThingsOfDef(ThingDefOf.PilotConsole).FirstOrDefault<Thing>();
-					Find.LetterStack.ReceiveLetter("LetterLabelMechanoidThreat".Translate(), "LetterTextMechanoidThreat".Translate(), LetterDefOf.ThreatSmall, t, null, null, null, null, 0, true);
-				}
-			}
-			foreach (Map map3 in this.mapRaidTimers.Keys)
-			{
-				if (Find.TickManager.TicksGame >= this.mapRaidTimers[map3] && (Find.TickManager.TicksGame - this.mapRaidTimers[map3]) % 30000 == 0)
-				{
-					this.FireRaid(map3);
-				}
-			}
+			return;
 		}
-
-		// Token: 0x0600E4BC RID: 58556 RVA: 0x0042D060 File Offset: 0x0042B260
-		private void StartTimers(Map map)
+		tmpMaps.Clear();
+		tmpMaps.AddRange(mapWarningTimers.Keys);
+		foreach (Map tmpMap in tmpMaps)
 		{
-			if (map.generatorDef == MapGeneratorDefOf.Mechhive)
+			if (Disabled || GravshipUtility.GetPlayerGravEngine_NewTemp(tmpMap) == null)
 			{
-				return;
+				mapWarningTimers.Remove(tmpMap);
+				mapRaidTimers.Remove(tmpMap);
+				continue;
 			}
-			if (this.onStartMap)
+			if (Find.TickManager.TicksGame == TimerIntervalTick(mapWarningTimers[tmpMap]))
 			{
-				this.mapWarningTimers[map] = Find.TickManager.TicksGame + 2700;
-				this.mapRaidTimers[map] = Find.TickManager.TicksGame + 30000;
-				return;
+				Thing thing = tmpMap.listerThings.ThingsOfDef(ThingDefOf.PilotConsole).FirstOrDefault();
+				Find.LetterStack.ReceiveLetter("LetterLabelMechanoidThreat".Translate(), "LetterTextMechanoidThreat".Translate(), LetterDefOf.ThreatSmall, thing);
 			}
-			this.mapWarningTimers[map] = Find.TickManager.TicksGame + ScenPart_PursuingMechanoids.WarningDelayRange.RandomInRange;
-			this.mapRaidTimers[map] = Find.TickManager.TicksGame + ScenPart_PursuingMechanoids.RaidDelayRange.RandomInRange;
+			if (Find.TickManager.TicksGame == TimerIntervalTick(mapRaidTimers[tmpMap]))
+			{
+				FireRaid_NewTemp(tmpMap, 1.5f, 2000f);
+			}
+			if (Find.TickManager.TicksGame == TimerIntervalTick(mapRaidTimers[tmpMap] + 30000))
+			{
+				FireRaid_NewTemp(tmpMap, 2f, 8000f);
+			}
 		}
+	}
 
-		// Token: 0x0600E4BD RID: 58557 RVA: 0x0042D0FE File Offset: 0x0042B2FE
-		public void Notify_QuestCompleted()
+	private void StartTimers(Map map)
+	{
+		if (map.generatorDef != MapGeneratorDefOf.Mechhive)
 		{
-			this.questCompleted = true;
-		}
-
-		// Token: 0x0600E4BE RID: 58558 RVA: 0x0042D108 File Offset: 0x0042B308
-		private void FireRaid(Map map)
-		{
-			IncidentParms incidentParms = new IncidentParms();
-			incidentParms.forced = true;
-			incidentParms.target = map;
-			incidentParms.points = Mathf.Max(5000f, StorytellerUtility.DefaultThreatPointsNow(map) * 1.5f);
-			incidentParms.faction = Faction.OfMechanoids;
-			incidentParms.raidArrivalMode = PawnsArrivalModeDefOf.RandomDrop;
-			incidentParms.raidStrategy = RaidStrategyDefOf.ImmediateAttack;
-			IncidentDefOf.RaidEnemy.Worker.TryExecute(incidentParms);
-		}
-
-		// Token: 0x0600E4BF RID: 58559 RVA: 0x0042D177 File Offset: 0x0042B377
-		public override IEnumerable<Alert> GetAlerts()
-		{
-			Map currentMap = Find.CurrentMap;
-			if (currentMap == null || !currentMap.IsPlayerHome)
+			if (onStartMap)
 			{
-				yield break;
+				mapWarningTimers[map] = Find.TickManager.TicksGame + 2700;
+				mapRaidTimers[map] = Find.TickManager.TicksGame + 30000;
 			}
-			if (this.AlertCached != null)
+			else
 			{
-				yield return this.AlertCached;
+				mapWarningTimers[map] = Find.TickManager.TicksGame + WarningDelayRange.RandomInRange;
+				mapRaidTimers[map] = Find.TickManager.TicksGame + RaidDelayRange.RandomInRange;
 			}
-			yield break;
 		}
+	}
 
-		// Token: 0x0400990F RID: 39183
-		private bool onStartMap = true;
+	public void Notify_QuestCompleted()
+	{
+		questCompleted = true;
+	}
 
-		// Token: 0x04009910 RID: 39184
-		private Dictionary<Map, int> mapWarningTimers = new Dictionary<Map, int>();
+	private void FireRaid(Map map)
+	{
+		FireRaid_NewTemp(map, 1.5f, 5000f);
+	}
 
-		// Token: 0x04009911 RID: 39185
-		private Dictionary<Map, int> mapRaidTimers = new Dictionary<Map, int>();
+	private void FireRaid_NewTemp(Map map, float pointsMultiplier, float minPoints)
+	{
+		IncidentParms incidentParms = new IncidentParms();
+		incidentParms.forced = true;
+		incidentParms.target = map;
+		incidentParms.points = Mathf.Max(minPoints, StorytellerUtility.DefaultThreatPointsNow(map) * pointsMultiplier);
+		incidentParms.faction = Faction.OfMechanoids;
+		incidentParms.raidArrivalMode = PawnsArrivalModeDefOf.RandomDrop;
+		incidentParms.raidStrategy = RaidStrategyDefOf.ImmediateAttack;
+		IncidentDefOf.RaidEnemy.Worker.TryExecute(incidentParms);
+	}
 
-		// Token: 0x04009912 RID: 39186
-		private bool questCompleted;
-
-		// Token: 0x04009913 RID: 39187
-		private const int InitialWarningDelay = 2700;
-
-		// Token: 0x04009914 RID: 39188
-		private const int InitialRaidDelay = 30000;
-
-		// Token: 0x04009915 RID: 39189
-		private static IntRange WarningDelayRange = new IntRange(840000, 960000);
-
-		// Token: 0x04009916 RID: 39190
-		private static IntRange RaidDelayRange = new IntRange(1080000, 2100000);
-
-		// Token: 0x04009917 RID: 39191
-		private const int MinRaidPoints = 5000;
-
-		// Token: 0x04009918 RID: 39192
-		private const float RaidPointMultiplier = 1.5f;
-
-		// Token: 0x04009919 RID: 39193
-		private Map cachedAlertMap;
-
-		// Token: 0x0400991A RID: 39194
-		private Alert_MechThreat alertCached;
-
-		// Token: 0x0400991B RID: 39195
-		private bool hasGravEngineCached = true;
-
-		// Token: 0x0400991C RID: 39196
-		private int lastCheckedGravEngineTick = -999999;
-
-		// Token: 0x0400991D RID: 39197
-		private const int GravEngineCheckInterval = 2500;
-
-		// Token: 0x0400991E RID: 39198
-		private List<Map> tmpWarningKeys;
-
-		// Token: 0x0400991F RID: 39199
-		private List<int> tmpWarningValues;
-
-		// Token: 0x04009920 RID: 39200
-		private List<Map> tmpRaidKeys;
-
-		// Token: 0x04009921 RID: 39201
-		private List<int> tmpRaidValues;
+	[IteratorStateMachine(typeof(_003CGetAlerts_003Ed__34))]
+	public override IEnumerable<Alert> GetAlerts()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetAlerts_003Ed__34(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

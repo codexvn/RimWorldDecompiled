@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,172 +6,141 @@ using RimWorld;
 using UnityEngine;
 using Verse;
 
-// Token: 0x0200000F RID: 15
 public class LayoutWorkerComplex : LayoutWorker_Structure
 {
-	// Token: 0x06000037 RID: 55 RVA: 0x00002C2C File Offset: 0x00000E2C
-	public LayoutWorkerComplex(LayoutDef def) : base(def)
+	private static readonly FloatRange ThreatPointsFactorRange = new FloatRange(0.25f, 0.35f);
+
+	private static readonly List<Thing> tmpSpawnedThreatThings = new List<Thing>();
+
+	private static readonly IntRange MergeRange = new IntRange(1, 4);
+
+	private static readonly List<ComplexThreat> useableThreats = new List<ComplexThreat>();
+
+	private static readonly Dictionary<int, List<ComplexThreatDef>> usedThreatsByRoom = new Dictionary<int, List<ComplexThreatDef>>();
+
+	public new ComplexLayoutDef Def => (ComplexLayoutDef)base.Def;
+
+	public LayoutWorkerComplex(LayoutDef def)
+		: base(def)
 	{
 	}
 
-	// Token: 0x1700000F RID: 15
-	// (get) Token: 0x06000038 RID: 56 RVA: 0x00002C35 File Offset: 0x00000E35
-	public new ComplexLayoutDef Def
-	{
-		get
-		{
-			return (ComplexLayoutDef)base.Def;
-		}
-	}
-
-	// Token: 0x06000039 RID: 57 RVA: 0x00002C42 File Offset: 0x00000E42
 	public virtual Faction GetFixedHostileFactionForThreats()
 	{
 		return null;
 	}
 
-	// Token: 0x0600003A RID: 58 RVA: 0x000026EA File Offset: 0x000008EA
 	protected virtual void PreSpawnThreats(List<LayoutRoom> rooms, Map map, List<Thing> allSpawnedThings)
 	{
 	}
 
-	// Token: 0x0600003B RID: 59 RVA: 0x00002C48 File Offset: 0x00000E48
 	protected override StructureLayout GetStructureLayout(StructureGenParams parms, CellRect rect)
 	{
 		LayoutStructureSketch sketch = parms.sketch;
-		float areaPrunePercent = this.Def.areaPrunePercent;
-		int minRoomHeight = this.Def.minRoomHeight;
-		int minRoomWidth = this.Def.minRoomWidth;
-		int minRoomHeight2 = minRoomHeight;
-		float areaPrunePercent2 = areaPrunePercent;
-		bool canRemoveRooms = true;
-		bool generateDoors = false;
-		IntRange? maxMergeRoomsRange = new IntRange?(LayoutWorkerComplex.MergeRange);
-		return RoomLayoutGenerator.GenerateRandomLayout(sketch, rect, minRoomWidth, minRoomHeight2, areaPrunePercent2, canRemoveRooms, generateDoors, this.Def.corridorDef, 2, maxMergeRoomsRange, this.Def.corridorShapes, this.Def.canDisconnectRooms, false);
+		float areaPrunePercent = Def.areaPrunePercent;
+		int minRoomHeight = Def.minRoomHeight;
+		return RoomLayoutGenerator.GenerateRandomLayout(minRoomWidth: Def.minRoomWidth, minRoomHeight: minRoomHeight, areaPrunePercent: areaPrunePercent, canRemoveRooms: true, generateDoors: false, maxMergeRoomsRange: MergeRange, sketch: sketch, container: rect, corridor: Def.corridorDef, corridorExpansion: 2, corridorShapes: Def.corridorShapes, canDisconnectRooms: Def.canDisconnectRooms);
 	}
 
-	// Token: 0x0600003C RID: 60 RVA: 0x00002CB8 File Offset: 0x00000EB8
 	public override void Spawn(LayoutStructureSketch layoutStructureSketch, Map map, IntVec3 pos, float? threatPoints = null, List<Thing> allSpawnedThings = null, bool roofs = true, bool canReuseSketch = false, Faction faction = null)
 	{
 		List<Thing> list = allSpawnedThings ?? new List<Thing>();
 		base.Spawn(layoutStructureSketch, map, pos, threatPoints, list, roofs, canReuseSketch, faction);
 		List<LayoutRoom> rooms = layoutStructureSketch.structureLayout.Rooms;
-		LayoutWorkerComplex.SpawnThings(layoutStructureSketch, map, rooms, list);
-		if (threatPoints != null && !this.Def.threats.NullOrEmpty<ComplexThreat>())
+		SpawnThings(layoutStructureSketch, map, rooms, list);
+		if (threatPoints.HasValue && !Def.threats.NullOrEmpty())
 		{
-			this.PreSpawnThreats(rooms, map, list);
-			this.SpawnThreats(layoutStructureSketch, map, pos, threatPoints.Value, list, rooms);
+			PreSpawnThreats(rooms, map, list);
+			SpawnThreats(layoutStructureSketch, map, pos, threatPoints.Value, list, rooms);
 		}
-		this.PostSpawnStructure(rooms, map, list);
-		LayoutWorkerComplex.tmpSpawnedThreatThings.Clear();
+		PostSpawnStructure(rooms, map, list);
+		tmpSpawnedThreatThings.Clear();
 	}
 
-	// Token: 0x0600003D RID: 61 RVA: 0x00002D44 File Offset: 0x00000F44
 	private static void SpawnThings(LayoutStructureSketch layoutStructureSketch, Map map, List<LayoutRoom> rooms, List<Thing> spawnedThings)
 	{
-		if (layoutStructureSketch.thingsToSpawn.NullOrEmpty<Thing>())
+		if (layoutStructureSketch.thingsToSpawn.NullOrEmpty())
 		{
 			return;
 		}
 		HashSet<LayoutRoom> usedRooms = new HashSet<LayoutRoom>();
-		for (int i = layoutStructureSketch.thingsToSpawn.Count - 1; i >= 0; i--)
+		for (int num = layoutStructureSketch.thingsToSpawn.Count - 1; num >= 0; num--)
 		{
-			Thing thing = layoutStructureSketch.thingsToSpawn[i];
-			LayoutRoom layoutRoom;
-			Rot4 rot;
-			IntVec3 loc = LayoutWorker.FindBestSpawnLocation(rooms, thing.def, map, out layoutRoom, out rot, usedRooms);
+			Thing thing = layoutStructureSketch.thingsToSpawn[num];
+			LayoutRoom roomUsed;
+			Rot4 rotUsed;
+			IntVec3 loc = LayoutWorker.FindBestSpawnLocation(rooms, thing.def, map, out roomUsed, out rotUsed, usedRooms);
 			if (!loc.IsValid)
 			{
-				loc = LayoutWorker.FindBestSpawnLocation(rooms, thing.def, map, out layoutRoom, out rot, null);
+				loc = LayoutWorker.FindBestSpawnLocation(rooms, thing.def, map, out roomUsed, out rotUsed);
 			}
 			if (!loc.IsValid)
 			{
-				thing.Destroy(DestroyMode.Vanish);
-				layoutStructureSketch.thingsToSpawn.RemoveAt(i);
+				thing.Destroy();
+				layoutStructureSketch.thingsToSpawn.RemoveAt(num);
 			}
 			else
 			{
-				GenSpawn.Spawn(thing, loc, map, rot, WipeMode.Vanish, false, false);
+				GenSpawn.Spawn(thing, loc, map, rotUsed);
 				spawnedThings.Add(thing);
-				layoutStructureSketch.thingsToSpawn.RemoveAt(i);
+				layoutStructureSketch.thingsToSpawn.RemoveAt(num);
 				if (!layoutStructureSketch.thingDiscoveredMessage.NullOrEmpty())
 				{
-					string signalTag = "ThingDiscovered" + Find.UniqueIDsManager.GetNextSignalTagID().ToString();
-					foreach (CellRect rect in layoutRoom.rects)
+					string signalTag = "ThingDiscovered" + Find.UniqueIDsManager.GetNextSignalTagID();
+					foreach (CellRect rect in roomUsed.rects)
 					{
-						RectTrigger rectTrigger = (RectTrigger)ThingMaker.MakeThing(ThingDefOf.RectTrigger, null);
-						rectTrigger.signalTag = signalTag;
-						rectTrigger.Rect = rect;
-						GenSpawn.Spawn(rectTrigger, rect.CenterCell, map, WipeMode.Vanish);
+						RectTrigger obj = (RectTrigger)ThingMaker.MakeThing(ThingDefOf.RectTrigger);
+						obj.signalTag = signalTag;
+						obj.Rect = rect;
+						GenSpawn.Spawn(obj, rect.CenterCell, map);
 					}
-					SignalAction_Message signalAction_Message = (SignalAction_Message)ThingMaker.MakeThing(ThingDefOf.SignalAction_Message, null);
-					signalAction_Message.signalTag = signalTag;
-					signalAction_Message.message = layoutStructureSketch.thingDiscoveredMessage;
-					signalAction_Message.messageType = MessageTypeDefOf.PositiveEvent;
-					signalAction_Message.lookTargets = thing;
-					GenSpawn.Spawn(signalAction_Message, loc, map, WipeMode.Vanish);
+					SignalAction_Message obj2 = (SignalAction_Message)ThingMaker.MakeThing(ThingDefOf.SignalAction_Message);
+					obj2.signalTag = signalTag;
+					obj2.message = layoutStructureSketch.thingDiscoveredMessage;
+					obj2.messageType = MessageTypeDefOf.PositiveEvent;
+					obj2.lookTargets = thing;
+					GenSpawn.Spawn(obj2, loc, map);
 				}
 			}
 		}
 	}
 
-	// Token: 0x0600003E RID: 62 RVA: 0x00002EE8 File Offset: 0x000010E8
 	protected virtual void PostSpawnStructure(List<LayoutRoom> rooms, Map map, List<Thing> allSpawnedThings)
 	{
 		if (ModsConfig.IdeologyActive)
 		{
-			this.SpawnRoomRewards(rooms, map, allSpawnedThings);
-			LayoutWorkerComplex.SpawnCommsConsole(rooms, map);
+			SpawnRoomRewards(rooms, map, allSpawnedThings);
+			SpawnCommsConsole(rooms, map);
 		}
 	}
 
-	// Token: 0x0600003F RID: 63 RVA: 0x00002F04 File Offset: 0x00001104
 	private static void SpawnCommsConsole(List<LayoutRoom> rooms, Map map)
 	{
-		Func<IntVec3, bool> <>9__0;
-		foreach (LayoutRoom layoutRoom in rooms.InRandomOrder(null))
+		foreach (LayoutRoom item in rooms.InRandomOrder())
 		{
-			ThingDef commsConsole = ThingDefOf.CommsConsole;
-			Map map2 = map;
-			Rot4? rot = null;
-			int contractedBy = 1;
-			int padding = 0;
-			Func<IntVec3, bool> validator;
-			if ((validator = <>9__0) == null)
+			if (item.TryGetRandomCellInRoom(ThingDefOf.CommsConsole, map, out var cell, null, 1, 0, (IntVec3 c) => CanPlaceCommsConsoleAt(c, map)))
 			{
-				validator = (<>9__0 = ((IntVec3 c) => LayoutWorkerComplex.CanPlaceCommsConsoleAt(c, map)));
-			}
-			IntVec3 loc;
-			if (layoutRoom.TryGetRandomCellInRoom(commsConsole, map2, out loc, rot, contractedBy, padding, validator, false))
-			{
-				GenSpawn.Spawn(ThingDefOf.AncientCommsConsole, loc, map, WipeMode.Vanish);
+				GenSpawn.Spawn(ThingDefOf.AncientCommsConsole, cell, map);
 				break;
 			}
 		}
 	}
 
-	// Token: 0x06000040 RID: 64 RVA: 0x00002FB0 File Offset: 0x000011B0
 	private static bool CanPlaceCommsConsoleAt(IntVec3 cell, Map map)
 	{
-		using (CellRect.Enumerator enumerator = GenAdj.OccupiedRect(cell, Rot4.North, ThingDefOf.AncientCommsConsole.Size).ExpandedBy(1).GetEnumerator())
+		foreach (IntVec3 item in GenAdj.OccupiedRect(cell, Rot4.North, ThingDefOf.AncientCommsConsole.Size).ExpandedBy(1))
 		{
-			while (enumerator.MoveNext())
+			if (item.GetEdifice(map) != null)
 			{
-				if (enumerator.Current.GetEdifice(map) != null)
-				{
-					return false;
-				}
+				return false;
 			}
 		}
 		return true;
 	}
 
-	// Token: 0x06000041 RID: 65 RVA: 0x00003028 File Offset: 0x00001228
 	private void SpawnRoomRewards(List<LayoutRoom> rooms, Map map, List<Thing> allSpawnedThings)
 	{
-		LayoutWorkerComplex.<>c__DisplayClass14_0 CS$<>8__locals1 = new LayoutWorkerComplex.<>c__DisplayClass14_0();
-		CS$<>8__locals1.map = map;
-		if (this.Def.roomRewardCrateFactor <= 0f)
+		if (Def.roomRewardCrateFactor <= 0f)
 		{
 			return;
 		}
@@ -183,69 +152,67 @@ public class LayoutWorkerComplex : LayoutWorker_Structure
 				num++;
 			}
 		}
-		int num2 = Mathf.RoundToInt((float)rooms.Count * this.Def.roomRewardCrateFactor) - num;
+		int num2 = Mathf.RoundToInt((float)rooms.Count * Def.roomRewardCrateFactor) - num;
 		if (num2 <= 0)
 		{
 			return;
 		}
-		ThingSetMakerDef thingSetMakerDef = this.Def.rewardThingSetMakerDef ?? ThingSetMakerDefOf.Reward_ItemsStandard;
-		foreach (LayoutRoom layoutRoom in rooms.InRandomOrder(null))
+		ThingSetMakerDef thingSetMakerDef = Def.rewardThingSetMakerDef ?? ThingSetMakerDefOf.Reward_ItemsStandard;
+		foreach (LayoutRoom item in rooms.InRandomOrder())
 		{
-			if (layoutRoom.requiredDef == null)
+			if (item.requiredDef != null)
 			{
-				LayoutRoom layoutRoom2 = layoutRoom;
-				ThingDef ancientHermeticCrate = ThingDefOf.AncientHermeticCrate;
-				Map map2 = CS$<>8__locals1.map;
-				Func<IntVec3, bool> validator = new Func<IntVec3, bool>(CS$<>8__locals1.<SpawnRoomRewards>g__CanSpawnAt|0);
-				IntVec3 loc;
-				if (layoutRoom2.TryGetRandomCellInRoom(ancientHermeticCrate, map2, out loc, null, 2, 0, validator, false))
+				continue;
+			}
+			ThingDef ancientHermeticCrate = ThingDefOf.AncientHermeticCrate;
+			Map map2 = map;
+			Func<IntVec3, bool> validator = CanSpawnAt;
+			if (item.TryGetRandomCellInRoom(ancientHermeticCrate, map2, out var cell, null, 2, 0, validator))
+			{
+				Building_Crate building_Crate = (Building_Crate)GenSpawn.Spawn(ThingMaker.MakeThing(ThingDefOf.AncientHermeticCrate), cell, map, Rot4.South);
+				List<Thing> list = thingSetMakerDef.root.Generate(default(ThingSetMakerParams));
+				for (int num3 = list.Count - 1; num3 >= 0; num3--)
 				{
-					Building_Crate building_Crate = (Building_Crate)GenSpawn.Spawn(ThingMaker.MakeThing(ThingDefOf.AncientHermeticCrate, null), loc, CS$<>8__locals1.map, Rot4.South, WipeMode.Vanish, false, false);
-					List<Thing> list = thingSetMakerDef.root.Generate(default(ThingSetMakerParams));
-					for (int j = list.Count - 1; j >= 0; j--)
+					Thing thing = list[num3];
+					if (!building_Crate.TryAcceptThing(thing, allowSpecialEffects: false))
 					{
-						Thing thing = list[j];
-						if (!building_Crate.TryAcceptThing(thing, false))
-						{
-							thing.Destroy(DestroyMode.Vanish);
-						}
+						thing.Destroy();
 					}
-					num2--;
 				}
-				if (num2 <= 0)
-				{
-					break;
-				}
+				num2--;
+			}
+			if (num2 <= 0)
+			{
+				break;
 			}
 		}
+		bool CanSpawnAt(IntVec3 c)
+		{
+			return GenSpawn.CanSpawnAt(ThingDefOf.AncientHermeticCrate, c, map, Rot4.South, canWipeEdifices: false);
+		}
 	}
 
-	// Token: 0x06000042 RID: 66 RVA: 0x000031B8 File Offset: 0x000013B8
 	private static List<ComplexThreatDef> GetUsedThreats(LayoutRoom room)
 	{
-		int roomMergedLowestID = LayoutWorkerComplex.GetRoomMergedLowestID(room);
-		return LayoutWorkerComplex.usedThreatsByRoom[roomMergedLowestID];
+		int roomMergedLowestID = GetRoomMergedLowestID(room);
+		return usedThreatsByRoom[roomMergedLowestID];
 	}
 
-	// Token: 0x06000043 RID: 67 RVA: 0x000031D7 File Offset: 0x000013D7
 	private static bool TryGetRoomUsedThreats(LayoutRoom room, out List<ComplexThreatDef> threats)
 	{
-		return LayoutWorkerComplex.usedThreatsByRoom.TryGetValue(LayoutWorkerComplex.GetRoomMergedLowestID(room), out threats);
+		return usedThreatsByRoom.TryGetValue(GetRoomMergedLowestID(room), out threats);
 	}
 
-	// Token: 0x06000044 RID: 68 RVA: 0x000031EC File Offset: 0x000013EC
 	private static void AddUsedThreat(LayoutRoom room, ComplexThreatDef threat)
 	{
-		int roomMergedLowestID = LayoutWorkerComplex.GetRoomMergedLowestID(room);
-		List<ComplexThreatDef> list;
-		if (!LayoutWorkerComplex.usedThreatsByRoom.TryGetValue(roomMergedLowestID, out list))
+		int roomMergedLowestID = GetRoomMergedLowestID(room);
+		if (!usedThreatsByRoom.TryGetValue(roomMergedLowestID, out var value))
 		{
-			list = (LayoutWorkerComplex.usedThreatsByRoom[roomMergedLowestID] = new List<ComplexThreatDef>());
+			value = (usedThreatsByRoom[roomMergedLowestID] = new List<ComplexThreatDef>());
 		}
-		list.Add(threat);
+		value.Add(threat);
 	}
 
-	// Token: 0x06000045 RID: 69 RVA: 0x00003228 File Offset: 0x00001428
 	private static int GetRoomMergedLowestID(LayoutRoom room)
 	{
 		int loadId = room.loadId;
@@ -259,14 +226,13 @@ public class LayoutWorkerComplex : LayoutWorker_Structure
 		return loadId;
 	}
 
-	// Token: 0x06000046 RID: 70 RVA: 0x0000327C File Offset: 0x0000147C
 	private void SpawnThreats(LayoutStructureSketch structureSketch, Map map, IntVec3 center, float threatPoints, List<Thing> spawnedThings, List<LayoutRoom> rooms)
 	{
 		ComplexResolveParams threatParams = new ComplexResolveParams
 		{
 			map = map,
 			complexRect = structureSketch.layoutSketch.OccupiedRect.MovedBy(center),
-			hostileFaction = this.GetFixedHostileFactionForThreats(),
+			hostileFaction = GetFixedHostileFactionForThreats(),
 			allRooms = rooms,
 			points = threatPoints
 		};
@@ -274,86 +240,62 @@ public class LayoutWorkerComplex : LayoutWorker_Structure
 		if (DebugViewSettings.logComplexGenPoints)
 		{
 			stringBuilder = new StringBuilder();
-			stringBuilder.AppendLine("----- Logging points for " + this.Def.defName + ". -----");
-			stringBuilder.AppendLine(string.Format("Total threat points: {0}", threatPoints));
-			stringBuilder.AppendLine(string.Format("Room count: {0}", rooms.Count));
-			stringBuilder.AppendLine(string.Format("Approx points per room: {0}", threatParams.points));
+			stringBuilder.AppendLine("----- Logging points for " + Def.defName + ". -----");
+			stringBuilder.AppendLine($"Total threat points: {threatPoints}");
+			stringBuilder.AppendLine($"Room count: {rooms.Count}");
+			stringBuilder.AppendLine($"Approx points per room: {threatParams.points}");
 			if (threatParams.hostileFaction != null)
 			{
-				stringBuilder.AppendLine(string.Format("Faction: {0}", threatParams.hostileFaction));
+				stringBuilder.AppendLine($"Faction: {threatParams.hostileFaction}");
 			}
 		}
-		LayoutWorkerComplex.useableThreats.Clear();
-		LayoutWorkerComplex.usedThreatsByRoom.Clear();
-		LayoutWorkerComplex.useableThreats.AddRange(from t in this.Def.threats
-		where Rand.Chance(t.chancePerComplex)
-		select t);
+		useableThreats.Clear();
+		usedThreatsByRoom.Clear();
+		useableThreats.AddRange(Def.threats.Where((ComplexThreat t) => Rand.Chance(t.chancePerComplex)));
 		float num = 0f;
 		int num2 = 100;
 		while (num < threatPoints && num2 > 0)
 		{
 			num2--;
-			LayoutRoom room = rooms.RandomElement<LayoutRoom>();
+			LayoutRoom room = rooms.RandomElement();
 			threatParams.room = room;
 			threatParams.spawnedThings = spawnedThings;
 			float b = threatPoints - num;
-			threatParams.points = Mathf.Min(LayoutWorkerComplex.ThreatPointsFactorRange.RandomInRange * threatPoints, b);
-			ComplexThreat complexThreat;
-			if (LayoutWorkerComplex.useableThreats.Where(delegate(ComplexThreat t)
+			threatParams.points = Mathf.Min(ThreatPointsFactorRange.RandomInRange * threatPoints, b);
+			if (useableThreats.Where(delegate(ComplexThreat t)
 			{
-				int num4 = 0;
-				Predicate<ComplexThreatDef> <>9__4;
-				foreach (KeyValuePair<int, List<ComplexThreatDef>> keyValuePair in LayoutWorkerComplex.usedThreatsByRoom)
+				int num3 = 0;
+				foreach (KeyValuePair<int, List<ComplexThreatDef>> item in usedThreatsByRoom)
 				{
-					int num5;
-					List<ComplexThreatDef> list;
-					keyValuePair.Deconstruct(out num5, out list);
-					List<ComplexThreatDef> list2 = list;
-					int num6 = num4;
-					List<ComplexThreatDef> list3 = list2;
-					Predicate<ComplexThreatDef> predicate;
-					if ((predicate = <>9__4) == null)
-					{
-						predicate = (<>9__4 = ((ComplexThreatDef td) => td == t.def));
-					}
-					num4 = num6 + list3.Count(predicate);
+					item.Deconstruct(out var _, out var value);
+					List<ComplexThreatDef> list = value;
+					num3 += list.Count((ComplexThreatDef td) => td == t.def);
 				}
-				List<ComplexThreatDef> list4;
-				return num4 < t.maxPerComplex && (!LayoutWorkerComplex.TryGetRoomUsedThreats(room, out list4) || list4.Count((ComplexThreatDef td) => td == t.def) < t.maxPerRoom) && t.def.Worker.CanResolve(threatParams);
-			}).TryRandomElementByWeight((ComplexThreat t) => t.selectionWeight, out complexThreat))
+				if (num3 >= t.maxPerComplex)
+				{
+					return false;
+				}
+				List<ComplexThreatDef> threats;
+				return (!TryGetRoomUsedThreats(room, out threats) || threats.Count((ComplexThreatDef td) => td == t.def) < t.maxPerRoom) && t.def.Worker.CanResolve(threatParams);
+			}).TryRandomElementByWeight((ComplexThreat t) => t.selectionWeight, out var result))
 			{
 				if (stringBuilder != null)
 				{
 					stringBuilder.AppendLine();
-					stringBuilder.AppendLine("-> Resolving threat " + complexThreat.def.defName);
+					stringBuilder.AppendLine("-> Resolving threat " + result.def.defName);
 				}
-				float num3 = 0f;
-				complexThreat.def.Worker.Resolve(threatParams, ref num3, LayoutWorkerComplex.tmpSpawnedThreatThings, stringBuilder);
-				num += num3;
-				LayoutWorkerComplex.AddUsedThreat(room, complexThreat.def);
+				float threatPointsUsed = 0f;
+				result.def.Worker.Resolve(threatParams, ref threatPointsUsed, tmpSpawnedThreatThings, stringBuilder);
+				num += threatPointsUsed;
+				AddUsedThreat(room, result.def);
 			}
 		}
 		if (stringBuilder != null)
 		{
-			stringBuilder.AppendLine(string.Format("Total threat points spent: {0}", num));
+			stringBuilder.AppendLine($"Total threat points spent: {num}");
 			Log.Message(stringBuilder.ToString());
 		}
-		LayoutWorkerComplex.useableThreats.Clear();
-		LayoutWorkerComplex.usedThreatsByRoom.Clear();
+		useableThreats.Clear();
+		usedThreatsByRoom.Clear();
 	}
-
-	// Token: 0x04000011 RID: 17
-	private static readonly FloatRange ThreatPointsFactorRange = new FloatRange(0.25f, 0.35f);
-
-	// Token: 0x04000012 RID: 18
-	private static readonly List<Thing> tmpSpawnedThreatThings = new List<Thing>();
-
-	// Token: 0x04000013 RID: 19
-	private static readonly IntRange MergeRange = new IntRange(1, 4);
-
-	// Token: 0x04000014 RID: 20
-	private static readonly List<ComplexThreat> useableThreats = new List<ComplexThreat>();
-
-	// Token: 0x04000015 RID: 21
-	private static readonly Dictionary<int, List<ComplexThreatDef>> usedThreatsByRoom = new Dictionary<int, List<ComplexThreatDef>>();
 }

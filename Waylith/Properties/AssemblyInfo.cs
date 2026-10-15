@@ -13,7 +13,7 @@ using System.Security.Permissions;
 [assembly: AssemblyCompany("Waylith")]
 [assembly: AssemblyConfiguration("PublishSteam")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
-[assembly: AssemblyInformationalVersion("1.0.0+7fe204fee44db73636e69da408f2ed4005bd4843")]
+[assembly: AssemblyInformationalVersion("1.0.0+79565f7f16da795d1cc32364573f3cc64c919655")]
 [assembly: AssemblyProduct("Waylith")]
 [assembly: AssemblyTitle("Waylith")]
 [assembly: AssemblyVersion("1.0.0.0")]

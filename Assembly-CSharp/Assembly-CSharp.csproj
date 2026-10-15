@@ -1,33 +1,39 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{999573AD-A04D-4A0E-AD06-F1BC9FAC55BB}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <RootNamespace>Assembly-CSharp</RootNamespace>
     <AssemblyName>Assembly-CSharp</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <LangVersion>8</LangVersion>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <TargetFramework>netcoreapp1.0</TargetFramework>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  <PropertyGroup>
+    <LangVersion>12.0</LangVersion>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+  <PropertyGroup />
+  <ItemGroup />
+  <ItemGroup>
+    <Reference Include="UnityStubs">
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\UnityStubs.dll</HintPath>
+    </Reference>
+    <Reference Include="com.rlabrecque.steamworks.net">
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\com.rlabrecque.steamworks.net.dll</HintPath>
+    </Reference>
+    <Reference Include="Waylith">
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\Waylith.dll</HintPath>
+    </Reference>
+    <Reference Include="Brutal.Core.Logging">
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\Brutal.Core.Logging.dll</HintPath>
+    </Reference>
+    <Reference Include="Waylith.AssetBake">
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\Waylith.AssetBake.dll</HintPath>
+    </Reference>
+    <Reference Include="ISharpZipLib">
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\ISharpZipLib.dll</HintPath>
+    </Reference>
+    <Reference Include="Brutal.Vulkan">
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\Brutal.Vulkan.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>lease\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>

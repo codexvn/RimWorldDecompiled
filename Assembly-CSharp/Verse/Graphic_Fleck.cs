@@ -1,88 +1,63 @@
-﻿using System;
+using System;
 using UnityEngine;
 
-namespace Verse
+namespace Verse;
+
+[StaticConstructorOnStartup]
+public class Graphic_Fleck : Graphic_Single
 {
-	// Token: 0x02000895 RID: 2197
-	[StaticConstructorOnStartup]
-	public class Graphic_Fleck : Graphic_Single
+	protected virtual bool AllowInstancing => true;
+
+	public override void DrawWorker(Vector3 loc, Rot4 rot, ThingDef thingDef, Thing thing, float extraRotation)
 	{
-		// Token: 0x17000A2F RID: 2607
-		// (get) Token: 0x060037B2 RID: 14258 RVA: 0x000028E7 File Offset: 0x00000AE7
-		protected virtual bool AllowInstancing
-		{
-			get
-			{
-				return true;
-			}
-		}
+		throw new NotImplementedException();
+	}
 
-		// Token: 0x060037B3 RID: 14259 RVA: 0x00066B11 File Offset: 0x00064D11
-		public override void DrawWorker(Vector3 loc, Rot4 rot, ThingDef thingDef, Thing thing, float extraRotation)
+	public virtual void DrawFleck(FleckDrawData drawData, DrawBatch batch)
+	{
+		Color value;
+		if (drawData.overrideColor.HasValue)
 		{
-			throw new NotImplementedException();
+			value = drawData.overrideColor.Value;
 		}
-
-		// Token: 0x060037B4 RID: 14260 RVA: 0x00129A40 File Offset: 0x00127C40
-		public virtual void DrawFleck(FleckDrawData drawData, DrawBatch batch)
+		else
 		{
-			Color value;
-			if (drawData.overrideColor != null)
+			float alpha = drawData.alpha;
+			if (alpha <= 0f)
 			{
-				value = drawData.overrideColor.Value;
-			}
-			else
-			{
-				float alpha = drawData.alpha;
-				if (alpha <= 0f)
+				if (drawData.propertyBlock != null)
 				{
-					if (drawData.propertyBlock != null)
-					{
-						batch.ReturnPropertyBlock(drawData.propertyBlock);
-					}
-					return;
+					batch.ReturnPropertyBlock(drawData.propertyBlock);
 				}
-				value = base.Color * drawData.color;
-				value.a *= alpha;
+				return;
 			}
-			Vector3 scale = drawData.scale;
-			scale.x *= this.data.drawSize.x;
-			scale.z *= this.data.drawSize.y;
-			Mesh mesh = MeshPool.plane10;
-			float num = drawData.rotation;
-			if (scale.x < 0f && scale.y >= 0f)
-			{
-				scale.x = -scale.x;
-				mesh = MeshPool.plane10Flip;
-			}
-			else if (scale.x >= 0f && scale.y < 0f)
-			{
-				scale.y = -scale.y;
-				mesh = MeshPool.plane10Flip;
-				num += 180f;
-			}
-			Matrix4x4 matrix = default(Matrix4x4);
-			matrix.SetTRS(drawData.pos, Quaternion.AngleAxis(num, Vector3.up), scale);
-			Material matSingle = this.MatSingle;
-			batch.DrawMesh(mesh, matrix, matSingle, drawData.drawLayer, new Color?(value), this.data.renderInstanced && this.AllowInstancing, drawData.propertyBlock);
+			value = base.Color * drawData.color;
+			value.a *= alpha;
 		}
-
-		// Token: 0x060037B5 RID: 14261 RVA: 0x00129BBC File Offset: 0x00127DBC
-		public override string ToString()
+		Vector3 scale = drawData.scale;
+		scale.x *= data.drawSize.x;
+		scale.z *= data.drawSize.y;
+		Mesh mesh = MeshPool.plane10;
+		float num = drawData.rotation;
+		if (scale.x < 0f && scale.y >= 0f)
 		{
-			string[] array = new string[7];
-			array[0] = "Fleck(path=";
-			array[1] = this.path;
-			array[2] = ", shader=";
-			int num = 3;
-			Shader shader = base.Shader;
-			array[num] = ((shader != null) ? shader.ToString() : null);
-			array[4] = ", color=";
-			int num2 = 5;
-			Color color = this.color;
-			array[num2] = color.ToString();
-			array[6] = ", colorTwo=unsupported)";
-			return string.Concat(array);
+			scale.x = 0f - scale.x;
+			mesh = MeshPool.plane10Flip;
 		}
+		else if (scale.x >= 0f && scale.y < 0f)
+		{
+			scale.y = 0f - scale.y;
+			mesh = MeshPool.plane10Flip;
+			num += 180f;
+		}
+		Matrix4x4 matrix = default(Matrix4x4);
+		matrix.SetTRS(drawData.pos, Quaternion.AngleAxis(num, Vector3.up), scale);
+		Material matSingle = MatSingle;
+		batch.DrawMesh(mesh, matrix, matSingle, drawData.drawLayer, value, data.renderInstanced && AllowInstancing, drawData.propertyBlock);
+	}
+
+	public override string ToString()
+	{
+		return "Fleck(path=" + path + ", shader=" + base.Shader?.ToString() + ", color=" + color.ToString() + ", colorTwo=unsupported)";
 	}
 }

@@ -1,33 +1,118 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class ThoughtWorker_Precept_NoRecentHumanMeat : ThoughtWorker_Precept, IPreceptCompDescriptionArgs
 {
-	// Token: 0x0200180E RID: 6158
-	public class ThoughtWorker_Precept_NoRecentHumanMeat : ThoughtWorker_Precept, IPreceptCompDescriptionArgs
+	[CompilerGenerated]
+	private sealed class _003CGetDescriptionArgs_003Ed__2 : IEnumerable<NamedArgument>, IEnumerable, IEnumerator<NamedArgument>, IEnumerator, IDisposable
 	{
-		// Token: 0x06008EBE RID: 36542 RVA: 0x002A3EC8 File Offset: 0x002A20C8
-		protected override ThoughtState ShouldHaveThought(Pawn p)
+		private int _003C_003E1__state;
+
+		private NamedArgument _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		NamedArgument IEnumerator<NamedArgument>.Current
 		{
-			Pawn_NeedsTracker needs = p.needs;
-			if (((needs != null) ? needs.food : null) == null)
+			[DebuggerHidden]
+			get
 			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetDescriptionArgs_003Ed__2(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			switch (_003C_003E1__state)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = 8.Named("HUMANMEATREQUIREDINTERVAL");
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
 				return false;
 			}
-			int num = Mathf.Max(0, p.mindState.lastHumanMeatIngestedTick);
-			return Find.TickManager.TicksGame - num > 480000;
 		}
 
-		// Token: 0x06008EBF RID: 36543 RVA: 0x002A3F1A File Offset: 0x002A211A
-		public IEnumerable<NamedArgument> GetDescriptionArgs()
+		bool IEnumerator.MoveNext()
 		{
-			yield return 8.Named("HUMANMEATREQUIREDINTERVAL");
-			yield break;
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x04005C11 RID: 23569
-		public const int MinDaysSinceLastHumanMeatForThought = 8;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<NamedArgument> IEnumerable<NamedArgument>.GetEnumerator()
+		{
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				return this;
+			}
+			return new _003CGetDescriptionArgs_003Ed__2(0);
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<NamedArgument>)this).GetEnumerator();
+		}
+	}
+
+	public const int MinDaysSinceLastHumanMeatForThought = 8;
+
+	protected override ThoughtState ShouldHaveThought(Pawn p)
+	{
+		if (p.needs?.food == null)
+		{
+			return false;
+		}
+		int num = Mathf.Max(0, p.mindState.lastHumanMeatIngestedTick);
+		return Find.TickManager.TicksGame - num > 480000;
+	}
+
+	[IteratorStateMachine(typeof(_003CGetDescriptionArgs_003Ed__2))]
+	public IEnumerable<NamedArgument> GetDescriptionArgs()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetDescriptionArgs_003Ed__2(-2);
 	}
 }

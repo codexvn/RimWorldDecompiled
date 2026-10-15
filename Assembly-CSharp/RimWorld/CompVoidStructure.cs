@@ -1,180 +1,441 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.Sound;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompVoidStructure : CompInteractable
 {
-	// Token: 0x02002ECB RID: 11979
-	public class CompVoidStructure : CompInteractable
+	[CompilerGenerated]
+	private sealed class _003CCompFloatMenuOptions_003Ed__15 : IEnumerable<FloatMenuOption>, IEnumerable, IEnumerator<FloatMenuOption>, IEnumerator, IDisposable
 	{
-		// Token: 0x17002B99 RID: 11161
-		// (get) Token: 0x06010E91 RID: 69265 RVA: 0x004DE2D3 File Offset: 0x004DC4D3
-		protected virtual bool Activatable
+		private int _003C_003E1__state;
+
+		private FloatMenuOption _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompVoidStructure _003C_003E4__this;
+
+		private Pawn selPawn;
+
+		public Pawn _003C_003E3__selPawn;
+
+		private IEnumerator<FloatMenuOption> _003C_003E7__wrap1;
+
+		FloatMenuOption IEnumerator<FloatMenuOption>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return !this.activated;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002B9A RID: 11162
-		// (get) Token: 0x06010E92 RID: 69266 RVA: 0x004DE2DE File Offset: 0x004DC4DE
-		public override bool Active
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.activated;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002B9B RID: 11163
-		// (get) Token: 0x06010E93 RID: 69267 RVA: 0x004DE2E6 File Offset: 0x004DC4E6
-		protected virtual SoundDef AmbientSound
+		[DebuggerHidden]
+		public _003CCompFloatMenuOptions_003Ed__15(int _003C_003E1__state)
 		{
-			get
-			{
-				if (!this.Active)
-				{
-					return SoundDefOf.VoidStructure_AmbientPreActivate;
-				}
-				return SoundDefOf.VoidStructure_AmbientPostActivate;
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x06010E94 RID: 69268 RVA: 0x004DE2FC File Offset: 0x004DC4FC
-		public override void CompTick()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			base.CompTick();
-			if (this.Active && this.ambienceEffecter == null)
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				this.ambienceEffecter = EffecterDefOf.VoidStructureActivatedAmbience.Spawn(this.parent, this.parent.Map, 1f);
-			}
-			if (this.AmbientSound != null)
-			{
-				if (this.ambienceSustainer == null || this.ambienceSustainer.Ended)
+				try
 				{
-					this.ambienceSustainer = this.AmbientSound.TrySpawnSustainer(this.parent);
 				}
-				if (this.ambienceSustainer.def != this.AmbientSound)
+				finally
 				{
-					this.ambienceSustainer.End();
+					_003C_003Em__Finally1();
 				}
 			}
-			Effecter effecter = this.ambienceEffecter;
-			if (effecter == null)
-			{
-				return;
-			}
-			effecter.EffectTick(this.parent, this.parent);
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x06010E95 RID: 69269 RVA: 0x004DE3C4 File Offset: 0x004DC5C4
-		protected override void OnInteracted(Pawn caster)
+		private bool MoveNext()
 		{
-			this.parent.overrideGraphicIndex = new int?(1);
-			this.parent.DirtyMapMesh(this.parent.Map);
-			EffecterDefOf.VoidStructureActivated.Spawn(this.parent, this.parent.Map, 1f);
-			CompGlower comp = this.parent.GetComp<CompGlower>();
-			if (comp != null)
+			try
 			{
-				comp.GlowRadius = comp.Props.glowRadius + 1f;
-				comp.GlowColor = new ColorInt(240, 160, 184);
-			}
-			this.activated = true;
-		}
-
-		// Token: 0x06010E96 RID: 69270 RVA: 0x004DE460 File Offset: 0x004DC660
-		public override AcceptanceReport CanInteract(Pawn activateBy = null, bool checkOptionalItems = true)
-		{
-			if (!this.Activatable)
-			{
+				int num = _003C_003E1__state;
+				CompVoidStructure compVoidStructure = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					if (!compVoidStructure.Activatable)
+					{
+						return false;
+					}
+					_003C_003E7__wrap1 = ((CompInteractable)compVoidStructure).CompFloatMenuOptions(selPawn).GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 1:
+					_003C_003E1__state = -3;
+					break;
+				}
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					FloatMenuOption current = _003C_003E7__wrap1.Current;
+					_003C_003E2__current = current;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = null;
 				return false;
 			}
-			return base.CanInteract(activateBy, checkOptionalItems);
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
 		}
 
-		// Token: 0x06010E97 RID: 69271 RVA: 0x004DE479 File Offset: 0x004DC679
-		public void Reset()
+		bool IEnumerator.MoveNext()
 		{
-			this.activated = false;
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x06010E98 RID: 69272 RVA: 0x004DE484 File Offset: 0x004DC684
-		public override string CompInspectStringExtra()
+		private void _003C_003Em__Finally1()
 		{
-			if (this.Active)
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				return "Activated".Translate().CapitalizeFirst();
+				_003C_003E7__wrap1.Dispose();
 			}
-			if (!this.Activatable)
-			{
-				return "";
-			}
-			return base.CompInspectStringExtra();
 		}
 
-		// Token: 0x06010E99 RID: 69273 RVA: 0x004DE4C5 File Offset: 0x004DC6C5
-		public override IEnumerable<FloatMenuOption> CompFloatMenuOptions(Pawn selPawn)
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			if (!this.Activatable)
-			{
-				yield break;
-			}
-			foreach (FloatMenuOption floatMenuOption in base.CompFloatMenuOptions(selPawn))
-			{
-				yield return floatMenuOption;
-			}
-			IEnumerator<FloatMenuOption> enumerator = null;
-			yield break;
-			yield break;
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x06010E9A RID: 69274 RVA: 0x004DE4DC File Offset: 0x004DC6DC
-		public override IEnumerable<Gizmo> CompGetGizmosExtra()
+		[DebuggerHidden]
+		IEnumerator<FloatMenuOption> IEnumerable<FloatMenuOption>.GetEnumerator()
 		{
-			if (!this.Activatable)
+			_003CCompFloatMenuOptions_003Ed__15 _003CCompFloatMenuOptions_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				yield break;
+				_003C_003E1__state = 0;
+				_003CCompFloatMenuOptions_003Ed__ = this;
 			}
-			foreach (Gizmo gizmo in base.CompGetGizmosExtra())
+			else
 			{
-				yield return gizmo;
-			}
-			IEnumerator<Gizmo> enumerator = null;
-			if (DebugSettings.ShowDevGizmos)
-			{
-				Command_Action command_Action = new Command_Action
+				_003CCompFloatMenuOptions_003Ed__ = new _003CCompFloatMenuOptions_003Ed__15(0)
 				{
-					defaultLabel = "DEV: Activate",
-					action = delegate()
-					{
-						base.Interact(this.parent.Map.mapPawns.FreeColonistsSpawned.RandomElement<Pawn>(), true);
-					}
+					_003C_003E4__this = _003C_003E4__this
 				};
-				yield return command_Action;
 			}
-			yield break;
-			yield break;
+			_003CCompFloatMenuOptions_003Ed__.selPawn = _003C_003E3__selPawn;
+			return _003CCompFloatMenuOptions_003Ed__;
 		}
 
-		// Token: 0x06010E9B RID: 69275 RVA: 0x004DE4EC File Offset: 0x004DC6EC
-		public override void PostExposeData()
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			base.PostExposeData();
-			Scribe_Values.Look<bool>(ref this.activated, "activated", false, false);
+			return ((IEnumerable<FloatMenuOption>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CCompGetGizmosExtra_003Ed__16 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompVoidStructure _003C_003E4__this;
+
+		private IEnumerator<Gizmo> _003C_003E7__wrap1;
+
+		Gizmo IEnumerator<Gizmo>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x0400AFE7 RID: 45031
-		private const int ActiveGraphicIndex = 1;
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
 
-		// Token: 0x0400AFE8 RID: 45032
-		protected bool activated;
+		[DebuggerHidden]
+		public _003CCompGetGizmosExtra_003Ed__16(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
 
-		// Token: 0x0400AFE9 RID: 45033
-		private Sustainer ambienceSustainer;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
 
-		// Token: 0x0400AFEA RID: 45034
-		private Effecter ambienceEffecter;
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				CompVoidStructure CS_0024_003C_003E8__locals4 = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					if (!CS_0024_003C_003E8__locals4.Activatable)
+					{
+						return false;
+					}
+					_003C_003E7__wrap1 = ((CompInteractable)CS_0024_003C_003E8__locals4).CompGetGizmosExtra().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_007e;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_007e;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_007e:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Gizmo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (DebugSettings.ShowDevGizmos)
+					{
+						Command_Action command_Action = new Command_Action
+						{
+							defaultLabel = "DEV: Activate",
+							action = delegate
+							{
+								CS_0024_003C_003E8__locals4.Interact(CS_0024_003C_003E8__locals4.parent.Map.mapPawns.FreeColonistsSpawned.RandomElement(), force: true);
+							}
+						};
+						_003C_003E2__current = command_Action;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CCompGetGizmosExtra_003Ed__16 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CCompGetGizmosExtra_003Ed__16(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	private const int ActiveGraphicIndex = 1;
+
+	protected bool activated;
+
+	private Sustainer ambienceSustainer;
+
+	private Effecter ambienceEffecter;
+
+	protected virtual bool Activatable => !activated;
+
+	public override bool Active => activated;
+
+	protected virtual SoundDef AmbientSound
+	{
+		get
+		{
+			if (!Active)
+			{
+				return SoundDefOf.VoidStructure_AmbientPreActivate;
+			}
+			return SoundDefOf.VoidStructure_AmbientPostActivate;
+		}
+	}
+
+	public override void CompTick()
+	{
+		base.CompTick();
+		if (Active && ambienceEffecter == null)
+		{
+			ambienceEffecter = EffecterDefOf.VoidStructureActivatedAmbience.Spawn(parent, parent.Map);
+		}
+		if (AmbientSound != null)
+		{
+			if (ambienceSustainer == null || ambienceSustainer.Ended)
+			{
+				ambienceSustainer = AmbientSound.TrySpawnSustainer(parent);
+			}
+			if (ambienceSustainer.def != AmbientSound)
+			{
+				ambienceSustainer.End();
+			}
+		}
+		ambienceEffecter?.EffectTick(parent, parent);
+	}
+
+	protected override void OnInteracted(Pawn caster)
+	{
+		parent.overrideGraphicIndex = 1;
+		parent.DirtyMapMesh(parent.Map);
+		EffecterDefOf.VoidStructureActivated.Spawn(parent, parent.Map);
+		CompGlower comp = parent.GetComp<CompGlower>();
+		if (comp != null)
+		{
+			comp.GlowRadius = comp.Props.glowRadius + 1f;
+			comp.GlowColor = new ColorInt(240, 160, 184);
+		}
+		activated = true;
+	}
+
+	public override AcceptanceReport CanInteract(Pawn activateBy = null, bool checkOptionalItems = true)
+	{
+		if (!Activatable)
+		{
+			return false;
+		}
+		return base.CanInteract(activateBy, checkOptionalItems);
+	}
+
+	public void Reset()
+	{
+		activated = false;
+	}
+
+	public override string CompInspectStringExtra()
+	{
+		if (Active)
+		{
+			return "Activated".Translate().CapitalizeFirst();
+		}
+		if (!Activatable)
+		{
+			return "";
+		}
+		return base.CompInspectStringExtra();
+	}
+
+	[IteratorStateMachine(typeof(_003CCompFloatMenuOptions_003Ed__15))]
+	public override IEnumerable<FloatMenuOption> CompFloatMenuOptions(Pawn selPawn)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CCompFloatMenuOptions_003Ed__15(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__selPawn = selPawn
+		};
+	}
+
+	[IteratorStateMachine(typeof(_003CCompGetGizmosExtra_003Ed__16))]
+	public override IEnumerable<Gizmo> CompGetGizmosExtra()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CCompGetGizmosExtra_003Ed__16(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override void PostExposeData()
+	{
+		base.PostExposeData();
+		Scribe_Values.Look(ref activated, "activated", defaultValue: false);
 	}
 }

@@ -1,77 +1,161 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class ThoughtWorker_Precept_ResettledRecently : ThoughtWorker_Precept, IPreceptCompDescriptionArgs
 {
-	// Token: 0x0200183F RID: 6207
-	public class ThoughtWorker_Precept_ResettledRecently : ThoughtWorker_Precept, IPreceptCompDescriptionArgs
+	[CompilerGenerated]
+	private sealed class _003CGetDescriptionArgs_003Ed__5 : IEnumerable<NamedArgument>, IEnumerable, IEnumerator<NamedArgument>, IEnumerator, IDisposable
 	{
-		// Token: 0x170015D4 RID: 5588
-		// (get) Token: 0x06008F55 RID: 36693 RVA: 0x002A5857 File Offset: 0x002A3A57
-		public int TicksSinceLastResettle
+		private int _003C_003E1__state;
+
+		private NamedArgument _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public ThoughtWorker_Precept_ResettledRecently _003C_003E4__this;
+
+		NamedArgument IEnumerator<NamedArgument>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return GenTicks.TicksGame - Find.IdeoManager.lastResettledTick;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06008F56 RID: 36694 RVA: 0x002A5869 File Offset: 0x002A3A69
-		protected override ThoughtState ShouldHaveThought(Pawn p)
+		object IEnumerator.Current
 		{
-			if (!ModsConfig.OdysseyActive)
+			[DebuggerHidden]
+			get
 			{
-				return false;
+				return _003C_003E2__current;
 			}
-			if (!p.IsColonist)
-			{
-				return false;
-			}
-			return Find.TickManager.TicksGame > Find.IdeoManager.lastResettledTick;
 		}
 
-		// Token: 0x06008F57 RID: 36695 RVA: 0x002A58A4 File Offset: 0x002A3AA4
-		protected override ThoughtState CurrentStateInternal(Pawn p)
+		[DebuggerHidden]
+		public _003CGetDescriptionArgs_003Ed__5(int _003C_003E1__state)
 		{
-			if (!base.CurrentStateInternal(p).Active)
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			ThoughtWorker_Precept_ResettledRecently thoughtWorker_Precept_ResettledRecently = _003C_003E4__this;
+			switch (num)
 			{
-				return ThoughtState.Inactive;
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = thoughtWorker_Precept_ResettledRecently.TicksSinceLastResettle.ToStringTicksToPeriod().Named("DURATION");
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				return false;
 			}
-			float num = this.TicksSinceLastResettle.TicksToDays();
-			foreach (ValueTuple<int, int> valueTuple in ThoughtWorker_Precept_ResettledRecently.Levels)
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<NamedArgument> IEnumerable<NamedArgument>.GetEnumerator()
+		{
+			_003CGetDescriptionArgs_003Ed__5 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				int item = valueTuple.Item1;
-				int item2 = valueTuple.Item2;
-				if (num < (float)item)
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CGetDescriptionArgs_003Ed__5(0)
 				{
-					return (item2 < 0) ? ThoughtState.Inactive : ThoughtState.ActiveAtStage(item2);
-				}
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<NamedArgument>)this).GetEnumerator();
+		}
+	}
+
+	private static readonly List<(int day, int index)> Levels = new List<(int, int)>
+	{
+		(5, 0),
+		(10, 1),
+		(20, -1),
+		(30, 2),
+		(int.MaxValue, 3)
+	};
+
+	public int TicksSinceLastResettle => GenTicks.TicksGame - Find.IdeoManager.lastResettledTick;
+
+	protected override ThoughtState ShouldHaveThought(Pawn p)
+	{
+		if (!ModsConfig.OdysseyActive)
+		{
+			return false;
+		}
+		if (!p.IsColonist)
+		{
+			return false;
+		}
+		return Find.TickManager.TicksGame > Find.IdeoManager.lastResettledTick;
+	}
+
+	protected override ThoughtState CurrentStateInternal(Pawn p)
+	{
+		if (!base.CurrentStateInternal(p).Active)
+		{
 			return ThoughtState.Inactive;
 		}
-
-		// Token: 0x06008F58 RID: 36696 RVA: 0x002A5944 File Offset: 0x002A3B44
-		public IEnumerable<NamedArgument> GetDescriptionArgs()
+		float num = TicksSinceLastResettle.TicksToDays();
+		foreach (var (num2, num3) in Levels)
 		{
-			yield return this.TicksSinceLastResettle.ToStringTicksToPeriod(true, false, true, true, false).Named("DURATION");
-			yield break;
+			if (num < (float)num2)
+			{
+				return (num3 < 0) ? ThoughtState.Inactive : ThoughtState.ActiveAtStage(num3);
+			}
 		}
+		return ThoughtState.Inactive;
+	}
 
-		// Token: 0x04005C2B RID: 23595
-		[TupleElementNames(new string[]
+	[IteratorStateMachine(typeof(_003CGetDescriptionArgs_003Ed__5))]
+	public IEnumerable<NamedArgument> GetDescriptionArgs()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetDescriptionArgs_003Ed__5(-2)
 		{
-			"day",
-			"index"
-		})]
-		private static readonly List<ValueTuple<int, int>> Levels = new List<ValueTuple<int, int>>
-		{
-			new ValueTuple<int, int>(5, 0),
-			new ValueTuple<int, int>(10, 1),
-			new ValueTuple<int, int>(20, -1),
-			new ValueTuple<int, int>(30, 2),
-			new ValueTuple<int, int>(int.MaxValue, 3)
+			_003C_003E4__this = this
 		};
 	}
 }

@@ -1,590 +1,1663 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
 
-namespace RimWorld
+namespace RimWorld;
+
+public static class StatsReportUtility
 {
-	// Token: 0x02003246 RID: 12870
-	public static class StatsReportUtility
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass22_0
 	{
-		// Token: 0x17002EC3 RID: 11971
-		// (get) Token: 0x06012170 RID: 74096 RVA: 0x0054C122 File Offset: 0x0054A322
-		public static int SelectedStatIndex
+		public StatRequest statRequest;
+
+		public Func<StatDef, bool> _003C_003E9__0;
+
+		internal bool _003CStatsToDraw_003Eb__0(StatDef st)
 		{
+			return st.Worker.ShouldShowFor(statRequest);
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass25_0
+	{
+		public StatRequest statRequest;
+
+		public Func<StatDef, bool> _003C_003E9__0;
+
+		internal bool _003CStatsToDraw_003Eb__0(StatDef st)
+		{
+			return st.Worker.ShouldShowFor(statRequest);
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass26_0
+	{
+		public Thing thing;
+
+		public Func<StatDef, bool> _003C_003E9__0;
+
+		internal bool _003CStatsToDraw_003Eb__0(StatDef st)
+		{
+			return st.Worker.ShouldShowFor(StatRequest.For(thing));
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CStatsToDraw_003Ed__22 : IEnumerable<StatDrawEntry>, IEnumerable, IEnumerator<StatDrawEntry>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private StatDrawEntry _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private Def def;
+
+		public Def _003C_003E3__def;
+
+		private ThingDef stuff;
+
+		public ThingDef _003C_003E3__stuff;
+
+		private BuildableDef _003CeDef_003E5__2;
+
+		private IEnumerator<StatDef> _003C_003E7__wrap2;
+
+		private IEnumerator<StatDrawEntry> _003C_003E7__wrap3;
+
+		StatDrawEntry IEnumerator<StatDrawEntry>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				if (StatsReportUtility.cachedDrawEntries.NullOrEmpty<StatDrawEntry>() || StatsReportUtility.selectedEntry == null)
-				{
-					return -1;
-				}
-				return StatsReportUtility.cachedDrawEntries.IndexOf(StatsReportUtility.selectedEntry);
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002EC4 RID: 11972
-		// (get) Token: 0x06012171 RID: 74097 RVA: 0x0054C148 File Offset: 0x0054A348
-		public static QuickSearchWidget QuickSearchWidget
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return StatsReportUtility.quickSearchWidget;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06012172 RID: 74098 RVA: 0x0054C150 File Offset: 0x0054A350
-		public static void Reset()
+		[DebuggerHidden]
+		public _003CStatsToDraw_003Ed__22(int _003C_003E1__state)
 		{
-			StatsReportUtility.scrollPosition = default(Vector2);
-			StatsReportUtility.scrollPositionRightPanel = default(Vector2);
-			StatsReportUtility.selectedEntry = null;
-			StatsReportUtility.scrollPositioner.Arm(false);
-			StatsReportUtility.mousedOverEntry = null;
-			StatsReportUtility.cachedDrawEntries.Clear();
-			StatsReportUtility.cachedEntryValues.Clear();
-			StatsReportUtility.quickSearchWidget.Reset();
-			PermitsCardUtility.selectedPermit = null;
-			PermitsCardUtility.selectedFaction = ((ModLister.RoyaltyInstalled && Current.ProgramState == ProgramState.Playing) ? Faction.OfEmpire : null);
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x06012173 RID: 74099 RVA: 0x0054C1CC File Offset: 0x0054A3CC
-		public static void DrawStatsReport(Rect rect, Def def, ThingDef stuff)
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			if (StatsReportUtility.cachedDrawEntries.NullOrEmpty<StatDrawEntry>())
+			switch (_003C_003E1__state)
 			{
-				BuildableDef buildableDef = def as BuildableDef;
-				StatRequest req = (buildableDef != null) ? StatRequest.For(buildableDef, stuff, QualityCategory.Normal) : StatRequest.ForEmpty();
-				StatsReportUtility.cachedDrawEntries.AddRange(def.SpecialDisplayStats(req));
-				StatsReportUtility.cachedDrawEntries.AddRange(from r in StatsReportUtility.StatsToDraw(def, stuff)
-				where r.ShouldDisplay(null)
-				select r);
-				StatsReportUtility.FinalizeCachedDrawEntries(StatsReportUtility.cachedDrawEntries);
-			}
-			StatsReportUtility.DrawStatsWorker(rect, null, null);
-		}
-
-		// Token: 0x06012174 RID: 74100 RVA: 0x0054C258 File Offset: 0x0054A458
-		public static void DrawStatsReport(Rect rect, AbilityDef def)
-		{
-			if (StatsReportUtility.cachedDrawEntries.NullOrEmpty<StatDrawEntry>())
-			{
-				StatRequest req = StatRequest.ForEmpty();
-				StatsReportUtility.cachedDrawEntries.AddRange(def.SpecialDisplayStats(req));
-				StatsReportUtility.cachedDrawEntries.AddRange(from r in StatsReportUtility.StatsToDraw(def)
-				where r.ShouldDisplay(null)
-				select r);
-				StatsReportUtility.FinalizeCachedDrawEntries(StatsReportUtility.cachedDrawEntries);
-			}
-			StatsReportUtility.DrawStatsWorker(rect, null, null);
-		}
-
-		// Token: 0x06012175 RID: 74101 RVA: 0x0054C2D0 File Offset: 0x0054A4D0
-		public static void DrawStatsReport(Rect rect, Thing thing)
-		{
-			if (StatsReportUtility.cachedDrawEntries.NullOrEmpty<StatDrawEntry>())
-			{
-				StatsReportUtility.cachedDrawEntries.AddRange(thing.def.SpecialDisplayStats(StatRequest.For(thing)));
-				StatsReportUtility.cachedDrawEntries.AddRange(StatsReportUtility.StatsToDraw(thing));
-				StatsReportUtility.cachedDrawEntries.RemoveAll((StatDrawEntry de) => (de.stat != null && !de.stat.showNonAbstract) || !de.ShouldDisplay(thing));
-				StatsReportUtility.FinalizeCachedDrawEntries(StatsReportUtility.cachedDrawEntries);
-			}
-			StatsReportUtility.DrawStatsWorker(rect, thing, null);
-		}
-
-		// Token: 0x06012176 RID: 74102 RVA: 0x0054C360 File Offset: 0x0054A560
-		public static void DrawStatsReport(Rect rect, Hediff hediff)
-		{
-			if (StatsReportUtility.cachedDrawEntries.NullOrEmpty<StatDrawEntry>())
-			{
-				StatsReportUtility.cachedDrawEntries.AddRange(hediff.SpecialDisplayStats(StatRequest.ForEmpty()));
-				StatsReportUtility.cachedDrawEntries.AddRange(from r in StatsReportUtility.StatsToDraw(hediff.def, null)
-				where r.ShouldDisplay(null)
-				select r);
-				StatsReportUtility.FinalizeCachedDrawEntries(StatsReportUtility.cachedDrawEntries);
-			}
-			StatsReportUtility.DrawStatsWorker(rect, null, null);
-		}
-
-		// Token: 0x06012177 RID: 74103 RVA: 0x0054C3DC File Offset: 0x0054A5DC
-		public static void DrawStatsReport(Rect rect, WorldObject worldObject)
-		{
-			if (StatsReportUtility.cachedDrawEntries.NullOrEmpty<StatDrawEntry>())
-			{
-				StatsReportUtility.cachedDrawEntries.AddRange(worldObject.def.SpecialDisplayStats(StatRequest.ForEmpty()));
-				StatsReportUtility.cachedDrawEntries.AddRange(from r in StatsReportUtility.StatsToDraw(worldObject)
-				where r.ShouldDisplay(null)
-				select r);
-				StatsReportUtility.cachedDrawEntries.RemoveAll((StatDrawEntry de) => de.stat != null && !de.stat.showNonAbstract);
-				StatsReportUtility.FinalizeCachedDrawEntries(StatsReportUtility.cachedDrawEntries);
-			}
-			StatsReportUtility.DrawStatsWorker(rect, null, worldObject);
-		}
-
-		// Token: 0x06012178 RID: 74104 RVA: 0x0054C484 File Offset: 0x0054A684
-		public static void DrawStatsReport(Rect rect, RoyalTitleDef title, Faction faction, Pawn pawn = null)
-		{
-			if (StatsReportUtility.cachedDrawEntries.NullOrEmpty<StatDrawEntry>())
-			{
-				StatsReportUtility.cachedDrawEntries.AddRange(title.SpecialDisplayStats(StatRequest.For(title, faction, pawn)));
-				StatsReportUtility.cachedDrawEntries.AddRange(from r in StatsReportUtility.StatsToDraw(title, faction)
-				where r.ShouldDisplay(pawn)
-				select r);
-				StatsReportUtility.FinalizeCachedDrawEntries(StatsReportUtility.cachedDrawEntries);
-			}
-			StatsReportUtility.DrawStatsWorker(rect, null, null);
-		}
-
-		// Token: 0x06012179 RID: 74105 RVA: 0x0054C4FC File Offset: 0x0054A6FC
-		public static void DrawStatsReport(Rect rect, Faction faction)
-		{
-			if (StatsReportUtility.cachedDrawEntries.NullOrEmpty<StatDrawEntry>())
-			{
-				StatRequest req = StatRequest.ForEmpty();
-				StatsReportUtility.cachedDrawEntries.AddRange(faction.def.SpecialDisplayStats(req));
-				StatsReportUtility.cachedDrawEntries.AddRange(from r in StatsReportUtility.StatsToDraw(faction)
-				where r.ShouldDisplay(null)
-				select r);
-				StatsReportUtility.FinalizeCachedDrawEntries(StatsReportUtility.cachedDrawEntries);
-			}
-			StatsReportUtility.DrawStatsWorker(rect, null, null);
-		}
-
-		// Token: 0x0601217A RID: 74106 RVA: 0x0054C577 File Offset: 0x0054A777
-		private static IEnumerable<StatDrawEntry> StatsToDraw(Def def, ThingDef stuff)
-		{
-			yield return StatsReportUtility.DescriptionEntry(def);
-			BuildableDef eDef = def as BuildableDef;
-			if (eDef != null)
-			{
-				StatRequest statRequest = StatRequest.For(eDef, stuff, QualityCategory.Normal);
-				IEnumerable<StatDef> allDefs = DefDatabase<StatDef>.AllDefs;
-				Func<StatDef, bool> predicate;
-				Func<StatDef, bool> <>9__0;
-				if ((predicate = <>9__0) == null)
+			case -3:
+			case 2:
+				try
 				{
-					predicate = (<>9__0 = ((StatDef st) => st.Worker.ShouldShowFor(statRequest)));
 				}
-				foreach (StatDef statDef in allDefs.Where(predicate))
+				finally
 				{
-					yield return new StatDrawEntry(statDef.category, statDef, eDef.GetStatValueAbstract(statDef, stuff), StatRequest.For(eDef, stuff, QualityCategory.Normal), ToStringNumberSense.Undefined, null, false);
+					_003C_003Em__Finally1();
 				}
-				IEnumerator<StatDef> enumerator = null;
-			}
-			ThingDef thingDef = def as ThingDef;
-			if (thingDef != null && thingDef.IsStuff)
-			{
-				foreach (StatDrawEntry statDrawEntry in StatsReportUtility.StuffStats(thingDef))
+				break;
+			case -4:
+			case 3:
+				try
 				{
-					yield return statDrawEntry;
 				}
-				IEnumerator<StatDrawEntry> enumerator2 = null;
-			}
-			yield break;
-			yield break;
-		}
-
-		// Token: 0x0601217B RID: 74107 RVA: 0x0054C58E File Offset: 0x0054A78E
-		private static IEnumerable<StatDrawEntry> StatsToDraw(RoyalTitleDef title, Faction faction)
-		{
-			yield return StatsReportUtility.DescriptionEntry(title, faction);
-			yield break;
-		}
-
-		// Token: 0x0601217C RID: 74108 RVA: 0x0054C5A5 File Offset: 0x0054A7A5
-		private static IEnumerable<StatDrawEntry> StatsToDraw(Faction faction)
-		{
-			yield return StatsReportUtility.DescriptionEntry(faction);
-			yield break;
-		}
-
-		// Token: 0x0601217D RID: 74109 RVA: 0x0054C5B5 File Offset: 0x0054A7B5
-		private static IEnumerable<StatDrawEntry> StatsToDraw(AbilityDef def)
-		{
-			yield return StatsReportUtility.DescriptionEntry(def);
-			StatRequest statRequest = StatRequest.For(def, null);
-			IEnumerable<StatDef> allDefs = DefDatabase<StatDef>.AllDefs;
-			Func<StatDef, bool> <>9__0;
-			Func<StatDef, bool> predicate;
-			if ((predicate = <>9__0) == null)
-			{
-				predicate = (<>9__0 = ((StatDef st) => st.Worker.ShouldShowFor(statRequest)));
-			}
-			foreach (StatDef statDef in allDefs.Where(predicate))
-			{
-				yield return new StatDrawEntry(statDef.category, statDef, def.GetStatValueAbstract(statDef, null), StatRequest.For(def, null), ToStringNumberSense.Undefined, null, false);
-			}
-			IEnumerator<StatDef> enumerator = null;
-			yield break;
-			yield break;
-		}
-
-		// Token: 0x0601217E RID: 74110 RVA: 0x0054C5C5 File Offset: 0x0054A7C5
-		private static IEnumerable<StatDrawEntry> StatsToDraw(Thing thing)
-		{
-			yield return StatsReportUtility.DescriptionEntry(thing);
-			StatDrawEntry statDrawEntry = StatsReportUtility.QualityEntry(thing);
-			if (statDrawEntry != null)
-			{
-				yield return statDrawEntry;
-			}
-			IEnumerable<StatDef> allDefs = DefDatabase<StatDef>.AllDefs;
-			Func<StatDef, bool> <>9__0;
-			Func<StatDef, bool> predicate;
-			if ((predicate = <>9__0) == null)
-			{
-				predicate = (<>9__0 = ((StatDef st) => st.Worker.ShouldShowFor(StatRequest.For(thing))));
-			}
-			foreach (StatDef statDef in allDefs.Where(predicate))
-			{
-				if (!statDef.Worker.IsDisabledFor(thing))
+				finally
 				{
-					float statValue = thing.GetStatValue(statDef, true, -1);
-					if (statDef.showOnDefaultValue || statValue != statDef.defaultBaseValue)
+					_003C_003Em__Finally2();
+				}
+				break;
+			}
+			_003CeDef_003E5__2 = null;
+			_003C_003E7__wrap2 = null;
+			_003C_003E7__wrap3 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				switch (_003C_003E1__state)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E2__current = DescriptionEntry(def);
+					_003C_003E1__state = 1;
+					return true;
+				case 1:
+					_003C_003E1__state = -1;
+					_003CeDef_003E5__2 = def as BuildableDef;
+					if (_003CeDef_003E5__2 != null)
 					{
-						yield return new StatDrawEntry(statDef.category, statDef, statValue, StatRequest.For(thing), ToStringNumberSense.Undefined, null, false);
+						_003C_003Ec__DisplayClass22_0 CS_0024_003C_003E8__locals1 = new _003C_003Ec__DisplayClass22_0
+						{
+							statRequest = StatRequest.For(_003CeDef_003E5__2, stuff)
+						};
+						_003C_003E7__wrap2 = DefDatabase<StatDef>.AllDefs.Where((StatDef st) => st.Worker.ShouldShowFor(CS_0024_003C_003E8__locals1.statRequest)).GetEnumerator();
+						_003C_003E1__state = -3;
+						goto IL_0133;
 					}
-				}
-				else
-				{
-					yield return new StatDrawEntry(statDef.category, statDef);
-				}
-			}
-			IEnumerator<StatDef> enumerator = null;
-			if (thing.def.useHitPoints)
-			{
-				StatDrawEntry statDrawEntry2 = new StatDrawEntry(StatCategoryDefOf.BasicsImportant, "HitPointsBasic".Translate().CapitalizeFirst(), thing.HitPoints.ToString() + " / " + thing.MaxHitPoints.ToString(), "Stat_HitPoints_Desc".Translate(), 99998, null, null, false, false);
-				yield return statDrawEntry2;
-			}
-			foreach (StatDrawEntry statDrawEntry3 in thing.SpecialDisplayStats())
-			{
-				yield return statDrawEntry3;
-			}
-			IEnumerator<StatDrawEntry> enumerator2 = null;
-			if (thing.def.IsStuff)
-			{
-				foreach (StatDrawEntry statDrawEntry4 in StatsReportUtility.StuffStats(thing.def))
-				{
-					yield return statDrawEntry4;
-				}
-				enumerator2 = null;
-			}
-			yield break;
-			yield break;
-		}
-
-		// Token: 0x0601217F RID: 74111 RVA: 0x0054C5D5 File Offset: 0x0054A7D5
-		private static IEnumerable<StatDrawEntry> StatsToDraw(WorldObject worldObject)
-		{
-			yield return StatsReportUtility.DescriptionEntry(worldObject);
-			foreach (StatDrawEntry statDrawEntry in worldObject.SpecialDisplayStats)
-			{
-				yield return statDrawEntry;
-			}
-			IEnumerator<StatDrawEntry> enumerator = null;
-			yield break;
-			yield break;
-		}
-
-		// Token: 0x06012180 RID: 74112 RVA: 0x0054C5E5 File Offset: 0x0054A7E5
-		private static IEnumerable<StatDrawEntry> StuffStats(ThingDef stuffDef)
-		{
-			if (!stuffDef.stuffProps.statFactors.NullOrEmpty<StatModifier>())
-			{
-				int num;
-				for (int i = 0; i < stuffDef.stuffProps.statFactors.Count; i = num + 1)
-				{
-					yield return new StatDrawEntry(StatCategoryDefOf.StuffStatFactors, stuffDef.stuffProps.statFactors[i].stat, stuffDef.stuffProps.statFactors[i].value, StatRequest.ForEmpty(), ToStringNumberSense.Factor, null, false);
-					num = i;
-				}
-			}
-			if (!stuffDef.stuffProps.statFactorsQuality.NullOrEmpty<StatModifierQuality>())
-			{
-				foreach (StatModifierQuality statModifierQuality in stuffDef.stuffProps.statFactorsQuality)
-				{
-					yield return new StatDrawEntry(StatCategoryDefOf.StuffStatFactors, statModifierQuality.stat, statModifierQuality.ToStringAsFactorRange);
-				}
-				List<StatModifierQuality>.Enumerator enumerator = default(List<StatModifierQuality>.Enumerator);
-			}
-			if (!stuffDef.stuffProps.statOffsets.NullOrEmpty<StatModifier>())
-			{
-				int num;
-				for (int i = 0; i < stuffDef.stuffProps.statOffsets.Count; i = num + 1)
-				{
-					yield return new StatDrawEntry(StatCategoryDefOf.StuffStatOffsets, stuffDef.stuffProps.statOffsets[i].stat, stuffDef.stuffProps.statOffsets[i].value, StatRequest.ForEmpty(), ToStringNumberSense.Offset, null, false);
-					num = i;
-				}
-			}
-			if (!stuffDef.stuffProps.statOffsetsQuality.NullOrEmpty<StatModifierQuality>())
-			{
-				foreach (StatModifierQuality statModifierQuality2 in stuffDef.stuffProps.statOffsetsQuality)
-				{
-					yield return new StatDrawEntry(StatCategoryDefOf.StuffStatOffsets, statModifierQuality2.stat, statModifierQuality2.ToStringAsOffsetRange);
-				}
-				List<StatModifierQuality>.Enumerator enumerator = default(List<StatModifierQuality>.Enumerator);
-			}
-			yield break;
-			yield break;
-		}
-
-		// Token: 0x06012181 RID: 74113 RVA: 0x0054C5F8 File Offset: 0x0054A7F8
-		private static void FinalizeCachedDrawEntries(IEnumerable<StatDrawEntry> original)
-		{
-			StatsReportUtility.cachedDrawEntries = (from sd in original
-			orderby sd.category.displayOrder, sd.DisplayPriorityWithinCategory descending, sd.LabelCap
-			select sd).ToList<StatDrawEntry>();
-			StatsReportUtility.quickSearchWidget.noResultsMatched = !StatsReportUtility.cachedDrawEntries.Any<StatDrawEntry>();
-			foreach (StatDrawEntry statDrawEntry in StatsReportUtility.cachedDrawEntries)
-			{
-				StatsReportUtility.cachedEntryValues.Add(statDrawEntry.ValueString);
-			}
-			if (StatsReportUtility.selectedEntry != null)
-			{
-				StatsReportUtility.selectedEntry = StatsReportUtility.cachedDrawEntries.FirstOrDefault((StatDrawEntry e) => e.Same(StatsReportUtility.selectedEntry));
-			}
-			if (StatsReportUtility.quickSearchWidget.filter.Active)
-			{
-				foreach (StatDrawEntry sd2 in StatsReportUtility.cachedDrawEntries)
-				{
-					if (StatsReportUtility.Matches(sd2))
+					goto IL_014d;
+				case 2:
+					_003C_003E1__state = -3;
+					goto IL_0133;
+				case 3:
 					{
-						StatsReportUtility.selectedEntry = sd2;
-						StatsReportUtility.scrollPositioner.Arm(true);
+						_003C_003E1__state = -4;
+						goto IL_01a7;
+					}
+					IL_01a7:
+					if (_003C_003E7__wrap3.MoveNext())
+					{
+						StatDrawEntry current = _003C_003E7__wrap3.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 3;
+						return true;
+					}
+					_003C_003Em__Finally2();
+					_003C_003E7__wrap3 = null;
+					break;
+					IL_014d:
+					if (!(def is ThingDef { IsStuff: not false } thingDef))
+					{
 						break;
 					}
+					_003C_003E7__wrap3 = StuffStats(thingDef).GetEnumerator();
+					_003C_003E1__state = -4;
+					goto IL_01a7;
+					IL_0133:
+					if (_003C_003E7__wrap2.MoveNext())
+					{
+						StatDef current2 = _003C_003E7__wrap2.Current;
+						_003C_003E2__current = new StatDrawEntry(current2.category, current2, _003CeDef_003E5__2.GetStatValueAbstract(current2, stuff), StatRequest.For(_003CeDef_003E5__2, stuff), ToStringNumberSense.Undefined, null);
+						_003C_003E1__state = 2;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap2 = null;
+					goto IL_014d;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap2 != null)
+			{
+				_003C_003E7__wrap2.Dispose();
+			}
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap3 != null)
+			{
+				_003C_003E7__wrap3.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<StatDrawEntry> IEnumerable<StatDrawEntry>.GetEnumerator()
+		{
+			_003CStatsToDraw_003Ed__22 _003CStatsToDraw_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CStatsToDraw_003Ed__ = this;
+			}
+			else
+			{
+				_003CStatsToDraw_003Ed__ = new _003CStatsToDraw_003Ed__22(0);
+			}
+			_003CStatsToDraw_003Ed__.def = _003C_003E3__def;
+			_003CStatsToDraw_003Ed__.stuff = _003C_003E3__stuff;
+			return _003CStatsToDraw_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<StatDrawEntry>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CStatsToDraw_003Ed__23 : IEnumerable<StatDrawEntry>, IEnumerable, IEnumerator<StatDrawEntry>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private StatDrawEntry _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private RoyalTitleDef title;
+
+		public RoyalTitleDef _003C_003E3__title;
+
+		private Faction faction;
+
+		public Faction _003C_003E3__faction;
+
+		StatDrawEntry IEnumerator<StatDrawEntry>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CStatsToDraw_003Ed__23(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			switch (_003C_003E1__state)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = DescriptionEntry(title, faction);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<StatDrawEntry> IEnumerable<StatDrawEntry>.GetEnumerator()
+		{
+			_003CStatsToDraw_003Ed__23 _003CStatsToDraw_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CStatsToDraw_003Ed__ = this;
+			}
+			else
+			{
+				_003CStatsToDraw_003Ed__ = new _003CStatsToDraw_003Ed__23(0);
+			}
+			_003CStatsToDraw_003Ed__.title = _003C_003E3__title;
+			_003CStatsToDraw_003Ed__.faction = _003C_003E3__faction;
+			return _003CStatsToDraw_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<StatDrawEntry>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CStatsToDraw_003Ed__24 : IEnumerable<StatDrawEntry>, IEnumerable, IEnumerator<StatDrawEntry>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private StatDrawEntry _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private Faction faction;
+
+		public Faction _003C_003E3__faction;
+
+		StatDrawEntry IEnumerator<StatDrawEntry>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CStatsToDraw_003Ed__24(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			switch (_003C_003E1__state)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = DescriptionEntry(faction);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<StatDrawEntry> IEnumerable<StatDrawEntry>.GetEnumerator()
+		{
+			_003CStatsToDraw_003Ed__24 _003CStatsToDraw_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CStatsToDraw_003Ed__ = this;
+			}
+			else
+			{
+				_003CStatsToDraw_003Ed__ = new _003CStatsToDraw_003Ed__24(0);
+			}
+			_003CStatsToDraw_003Ed__.faction = _003C_003E3__faction;
+			return _003CStatsToDraw_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<StatDrawEntry>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CStatsToDraw_003Ed__25 : IEnumerable<StatDrawEntry>, IEnumerable, IEnumerator<StatDrawEntry>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private StatDrawEntry _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private AbilityDef def;
+
+		public AbilityDef _003C_003E3__def;
+
+		private _003C_003Ec__DisplayClass25_0 _003C_003E8__1;
+
+		private IEnumerator<StatDef> _003C_003E7__wrap1;
+
+		StatDrawEntry IEnumerator<StatDrawEntry>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CStatsToDraw_003Ed__25(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 2)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
 				}
 			}
+			_003C_003E8__1 = null;
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x06012182 RID: 74114 RVA: 0x0054C77C File Offset: 0x0054A97C
-		private static bool Matches(StatDrawEntry sd)
+		private bool MoveNext()
 		{
-			return StatsReportUtility.quickSearchWidget.filter.Matches(sd.LabelCap);
-		}
-
-		// Token: 0x06012183 RID: 74115 RVA: 0x0054C794 File Offset: 0x0054A994
-		private static StatDrawEntry DescriptionEntry(Def def)
-		{
-			return new StatDrawEntry(StatCategoryDefOf.BasicsImportant, "Description".Translate(), "", def.description, 99999, null, Dialog_InfoCard.DefsToHyperlinks(def.descriptionHyperlinks), false, false);
-		}
-
-		// Token: 0x06012184 RID: 74116 RVA: 0x0054C7D8 File Offset: 0x0054A9D8
-		private static StatDrawEntry DescriptionEntry(Faction faction)
-		{
-			return new StatDrawEntry(StatCategoryDefOf.BasicsImportant, "Description".Translate(), "", faction.GetReportText, 99999, null, Dialog_InfoCard.DefsToHyperlinks(faction.def.descriptionHyperlinks), false, false);
-		}
-
-		// Token: 0x06012185 RID: 74117 RVA: 0x0054C824 File Offset: 0x0054AA24
-		private static StatDrawEntry DescriptionEntry(RoyalTitleDef title, Faction faction)
-		{
-			return new StatDrawEntry(StatCategoryDefOf.BasicsImportant, "Description".Translate(), "", title.GetReportText(faction), 99999, null, Dialog_InfoCard.TitleDefsToHyperlinks(title.GetHyperlinks(faction)), false, false);
-		}
-
-		// Token: 0x06012186 RID: 74118 RVA: 0x0054C86C File Offset: 0x0054AA6C
-		private static StatDrawEntry DescriptionEntry(Thing thing)
-		{
-			return new StatDrawEntry(StatCategoryDefOf.BasicsImportant, "Description".Translate(), "", thing.DescriptionFlavor, 99999, null, Dialog_InfoCard.DefsToHyperlinks(thing.DescriptionHyperlinks), false, true);
-		}
-
-		// Token: 0x06012187 RID: 74119 RVA: 0x0054C8B0 File Offset: 0x0054AAB0
-		private static StatDrawEntry DescriptionEntry(WorldObject worldObject)
-		{
-			return new StatDrawEntry(StatCategoryDefOf.BasicsImportant, "Description".Translate(), "", worldObject.GetDescription(), 99999, null, null, false, false);
-		}
-
-		// Token: 0x06012188 RID: 74120 RVA: 0x0054C8EC File Offset: 0x0054AAEC
-		private static StatDrawEntry QualityEntry(Thing t)
-		{
-			QualityCategory cat;
-			if (!t.TryGetQuality(out cat))
+			try
 			{
-				return null;
+				switch (_003C_003E1__state)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E8__1 = new _003C_003Ec__DisplayClass25_0();
+					_003C_003E2__current = DescriptionEntry(def);
+					_003C_003E1__state = 1;
+					return true;
+				case 1:
+					_003C_003E1__state = -1;
+					_003C_003E8__1.statRequest = StatRequest.For(def);
+					_003C_003E7__wrap1 = DefDatabase<StatDef>.AllDefs.Where((StatDef st) => st.Worker.ShouldShowFor(_003C_003E8__1.statRequest)).GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 2:
+					_003C_003E1__state = -3;
+					break;
+				}
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					StatDef current = _003C_003E7__wrap1.Current;
+					_003C_003E2__current = new StatDrawEntry(current.category, current, def.GetStatValueAbstract(current), StatRequest.For(def), ToStringNumberSense.Undefined, null);
+					_003C_003E1__state = 2;
+					return true;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = null;
+				return false;
 			}
-			return new StatDrawEntry(StatCategoryDefOf.BasicsImportant, "Quality".Translate(), cat.GetLabel().CapitalizeFirst(), "QualityDescription".Translate(), 99999, null, null, false, false);
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
 		}
 
-		// Token: 0x06012189 RID: 74121 RVA: 0x0054C941 File Offset: 0x0054AB41
-		public static void SelectEntry(int index)
+		bool IEnumerator.MoveNext()
 		{
-			if (index < 0 || index > StatsReportUtility.cachedDrawEntries.Count)
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<StatDrawEntry> IEnumerable<StatDrawEntry>.GetEnumerator()
+		{
+			_003CStatsToDraw_003Ed__25 _003CStatsToDraw_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CStatsToDraw_003Ed__ = this;
+			}
+			else
+			{
+				_003CStatsToDraw_003Ed__ = new _003CStatsToDraw_003Ed__25(0);
+			}
+			_003CStatsToDraw_003Ed__.def = _003C_003E3__def;
+			return _003CStatsToDraw_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<StatDrawEntry>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CStatsToDraw_003Ed__26 : IEnumerable<StatDrawEntry>, IEnumerable, IEnumerator<StatDrawEntry>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private StatDrawEntry _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private Thing thing;
+
+		public Thing _003C_003E3__thing;
+
+		private _003C_003Ec__DisplayClass26_0 _003C_003E8__1;
+
+		private IEnumerator<StatDef> _003C_003E7__wrap1;
+
+		private IEnumerator<StatDrawEntry> _003C_003E7__wrap2;
+
+		StatDrawEntry IEnumerator<StatDrawEntry>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CStatsToDraw_003Ed__26(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			switch (_003C_003E1__state)
+			{
+			case -3:
+			case 3:
+			case 4:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+				break;
+			case -4:
+			case 6:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally2();
+				}
+				break;
+			case -5:
+			case 7:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally3();
+				}
+				break;
+			}
+			_003C_003E8__1 = null;
+			_003C_003E7__wrap1 = null;
+			_003C_003E7__wrap2 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				switch (_003C_003E1__state)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E8__1 = new _003C_003Ec__DisplayClass26_0();
+					_003C_003E8__1.thing = thing;
+					_003C_003E2__current = DescriptionEntry(_003C_003E8__1.thing);
+					_003C_003E1__state = 1;
+					return true;
+				case 1:
+				{
+					_003C_003E1__state = -1;
+					StatDrawEntry statDrawEntry = QualityEntry(_003C_003E8__1.thing);
+					if (statDrawEntry != null)
+					{
+						_003C_003E2__current = statDrawEntry;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					goto IL_00b2;
+				}
+				case 2:
+					_003C_003E1__state = -1;
+					goto IL_00b2;
+				case 3:
+					_003C_003E1__state = -3;
+					goto IL_01c6;
+				case 4:
+					_003C_003E1__state = -3;
+					goto IL_01c6;
+				case 5:
+					_003C_003E1__state = -1;
+					goto IL_0292;
+				case 6:
+					_003C_003E1__state = -4;
+					goto IL_02e2;
+				case 7:
+					{
+						_003C_003E1__state = -5;
+						goto IL_0365;
+					}
+					IL_0292:
+					_003C_003E7__wrap2 = _003C_003E8__1.thing.SpecialDisplayStats().GetEnumerator();
+					_003C_003E1__state = -4;
+					goto IL_02e2;
+					IL_00b2:
+					_003C_003E7__wrap1 = DefDatabase<StatDef>.AllDefs.Where((StatDef st) => st.Worker.ShouldShowFor(StatRequest.For(_003C_003E8__1.thing))).GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_01c6;
+					IL_02e2:
+					if (_003C_003E7__wrap2.MoveNext())
+					{
+						StatDrawEntry current = _003C_003E7__wrap2.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 6;
+						return true;
+					}
+					_003C_003Em__Finally2();
+					_003C_003E7__wrap2 = null;
+					if (!_003C_003E8__1.thing.def.IsStuff)
+					{
+						break;
+					}
+					_003C_003E7__wrap2 = StuffStats(_003C_003E8__1.thing.def).GetEnumerator();
+					_003C_003E1__state = -5;
+					goto IL_0365;
+					IL_01c6:
+					while (_003C_003E7__wrap1.MoveNext())
+					{
+						StatDef current2 = _003C_003E7__wrap1.Current;
+						if (!current2.Worker.IsDisabledFor(_003C_003E8__1.thing))
+						{
+							float statValue = _003C_003E8__1.thing.GetStatValue(current2);
+							if (current2.showOnDefaultValue || statValue != current2.defaultBaseValue)
+							{
+								_003C_003E2__current = new StatDrawEntry(current2.category, current2, statValue, StatRequest.For(_003C_003E8__1.thing), ToStringNumberSense.Undefined, null);
+								_003C_003E1__state = 3;
+								return true;
+							}
+							continue;
+						}
+						_003C_003E2__current = new StatDrawEntry(current2.category, current2);
+						_003C_003E1__state = 4;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (_003C_003E8__1.thing.def.useHitPoints)
+					{
+						StatDrawEntry statDrawEntry2 = new StatDrawEntry(StatCategoryDefOf.BasicsImportant, "HitPointsBasic".Translate().CapitalizeFirst(), _003C_003E8__1.thing.HitPoints + " / " + _003C_003E8__1.thing.MaxHitPoints, "Stat_HitPoints_Desc".Translate(), 99998);
+						_003C_003E2__current = statDrawEntry2;
+						_003C_003E1__state = 5;
+						return true;
+					}
+					goto IL_0292;
+					IL_0365:
+					if (_003C_003E7__wrap2.MoveNext())
+					{
+						StatDrawEntry current3 = _003C_003E7__wrap2.Current;
+						_003C_003E2__current = current3;
+						_003C_003E1__state = 7;
+						return true;
+					}
+					_003C_003Em__Finally3();
+					_003C_003E7__wrap2 = null;
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap2 != null)
+			{
+				_003C_003E7__wrap2.Dispose();
+			}
+		}
+
+		private void _003C_003Em__Finally3()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap2 != null)
+			{
+				_003C_003E7__wrap2.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<StatDrawEntry> IEnumerable<StatDrawEntry>.GetEnumerator()
+		{
+			_003CStatsToDraw_003Ed__26 _003CStatsToDraw_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CStatsToDraw_003Ed__ = this;
+			}
+			else
+			{
+				_003CStatsToDraw_003Ed__ = new _003CStatsToDraw_003Ed__26(0);
+			}
+			_003CStatsToDraw_003Ed__.thing = _003C_003E3__thing;
+			return _003CStatsToDraw_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<StatDrawEntry>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CStatsToDraw_003Ed__27 : IEnumerable<StatDrawEntry>, IEnumerable, IEnumerator<StatDrawEntry>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private StatDrawEntry _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private WorldObject worldObject;
+
+		public WorldObject _003C_003E3__worldObject;
+
+		private IEnumerator<StatDrawEntry> _003C_003E7__wrap1;
+
+		StatDrawEntry IEnumerator<StatDrawEntry>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CStatsToDraw_003Ed__27(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 2)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				switch (_003C_003E1__state)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E2__current = DescriptionEntry(worldObject);
+					_003C_003E1__state = 1;
+					return true;
+				case 1:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = worldObject.SpecialDisplayStats.GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 2:
+					_003C_003E1__state = -3;
+					break;
+				}
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					StatDrawEntry current = _003C_003E7__wrap1.Current;
+					_003C_003E2__current = current;
+					_003C_003E1__state = 2;
+					return true;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = null;
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<StatDrawEntry> IEnumerable<StatDrawEntry>.GetEnumerator()
+		{
+			_003CStatsToDraw_003Ed__27 _003CStatsToDraw_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CStatsToDraw_003Ed__ = this;
+			}
+			else
+			{
+				_003CStatsToDraw_003Ed__ = new _003CStatsToDraw_003Ed__27(0);
+			}
+			_003CStatsToDraw_003Ed__.worldObject = _003C_003E3__worldObject;
+			return _003CStatsToDraw_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<StatDrawEntry>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CStuffStats_003Ed__28 : IEnumerable<StatDrawEntry>, IEnumerable, IEnumerator<StatDrawEntry>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private StatDrawEntry _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private ThingDef stuffDef;
+
+		public ThingDef _003C_003E3__stuffDef;
+
+		private int _003Ci_003E5__2;
+
+		private List<StatModifierQuality>.Enumerator _003C_003E7__wrap2;
+
+		StatDrawEntry IEnumerator<StatDrawEntry>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CStuffStats_003Ed__28(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			switch (_003C_003E1__state)
+			{
+			case -3:
+			case 2:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+				break;
+			case -4:
+			case 4:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally2();
+				}
+				break;
+			}
+			_003C_003E7__wrap2 = default(List<StatModifierQuality>.Enumerator);
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				switch (_003C_003E1__state)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					if (!stuffDef.stuffProps.statFactors.NullOrEmpty())
+					{
+						_003Ci_003E5__2 = 0;
+						goto IL_00da;
+					}
+					goto IL_00fa;
+				case 1:
+					_003C_003E1__state = -1;
+					_003Ci_003E5__2++;
+					goto IL_00da;
+				case 2:
+					_003C_003E1__state = -3;
+					goto IL_017a;
+				case 3:
+					_003C_003E1__state = -1;
+					_003Ci_003E5__2++;
+					goto IL_0244;
+				case 4:
+					{
+						_003C_003E1__state = -4;
+						goto IL_02e1;
+					}
+					IL_0199:
+					if (!stuffDef.stuffProps.statOffsets.NullOrEmpty())
+					{
+						_003Ci_003E5__2 = 0;
+						goto IL_0244;
+					}
+					goto IL_0264;
+					IL_00da:
+					if (_003Ci_003E5__2 < stuffDef.stuffProps.statFactors.Count)
+					{
+						_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.StuffStatFactors, stuffDef.stuffProps.statFactors[_003Ci_003E5__2].stat, stuffDef.stuffProps.statFactors[_003Ci_003E5__2].value, StatRequest.ForEmpty(), ToStringNumberSense.Factor, null);
+						_003C_003E1__state = 1;
+						return true;
+					}
+					goto IL_00fa;
+					IL_00fa:
+					if (!stuffDef.stuffProps.statFactorsQuality.NullOrEmpty())
+					{
+						_003C_003E7__wrap2 = stuffDef.stuffProps.statFactorsQuality.GetEnumerator();
+						_003C_003E1__state = -3;
+						goto IL_017a;
+					}
+					goto IL_0199;
+					IL_0244:
+					if (_003Ci_003E5__2 < stuffDef.stuffProps.statOffsets.Count)
+					{
+						_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.StuffStatOffsets, stuffDef.stuffProps.statOffsets[_003Ci_003E5__2].stat, stuffDef.stuffProps.statOffsets[_003Ci_003E5__2].value, StatRequest.ForEmpty(), ToStringNumberSense.Offset, null);
+						_003C_003E1__state = 3;
+						return true;
+					}
+					goto IL_0264;
+					IL_017a:
+					if (_003C_003E7__wrap2.MoveNext())
+					{
+						StatModifierQuality current = _003C_003E7__wrap2.Current;
+						_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.StuffStatFactors, current.stat, current.ToStringAsFactorRange);
+						_003C_003E1__state = 2;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap2 = default(List<StatModifierQuality>.Enumerator);
+					goto IL_0199;
+					IL_02e1:
+					if (_003C_003E7__wrap2.MoveNext())
+					{
+						StatModifierQuality current2 = _003C_003E7__wrap2.Current;
+						_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.StuffStatOffsets, current2.stat, current2.ToStringAsOffsetRange);
+						_003C_003E1__state = 4;
+						return true;
+					}
+					_003C_003Em__Finally2();
+					_003C_003E7__wrap2 = default(List<StatModifierQuality>.Enumerator);
+					break;
+					IL_0264:
+					if (stuffDef.stuffProps.statOffsetsQuality.NullOrEmpty())
+					{
+						break;
+					}
+					_003C_003E7__wrap2 = stuffDef.stuffProps.statOffsetsQuality.GetEnumerator();
+					_003C_003E1__state = -4;
+					goto IL_02e1;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap2/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap2/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<StatDrawEntry> IEnumerable<StatDrawEntry>.GetEnumerator()
+		{
+			_003CStuffStats_003Ed__28 _003CStuffStats_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CStuffStats_003Ed__ = this;
+			}
+			else
+			{
+				_003CStuffStats_003Ed__ = new _003CStuffStats_003Ed__28(0);
+			}
+			_003CStuffStats_003Ed__.stuffDef = _003C_003E3__stuffDef;
+			return _003CStuffStats_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<StatDrawEntry>)this).GetEnumerator();
+		}
+	}
+
+	private static StatDrawEntry selectedEntry;
+
+	private static StatDrawEntry mousedOverEntry;
+
+	private static Vector2 scrollPosition;
+
+	private static ScrollPositioner scrollPositioner = new ScrollPositioner();
+
+	private static Vector2 scrollPositionRightPanel;
+
+	private static QuickSearchWidget quickSearchWidget = new QuickSearchWidget();
+
+	private static float listHeight;
+
+	private static float rightPanelHeight;
+
+	private static List<StatDrawEntry> cachedDrawEntries = new List<StatDrawEntry>();
+
+	private static List<string> cachedEntryValues = new List<string>();
+
+	public static int SelectedStatIndex
+	{
+		get
+		{
+			if (cachedDrawEntries.NullOrEmpty() || selectedEntry == null)
+			{
+				return -1;
+			}
+			return cachedDrawEntries.IndexOf(selectedEntry);
+		}
+	}
+
+	public static QuickSearchWidget QuickSearchWidget => quickSearchWidget;
+
+	public static void Reset()
+	{
+		scrollPosition = default(Vector2);
+		scrollPositionRightPanel = default(Vector2);
+		selectedEntry = null;
+		scrollPositioner.Arm(armed: false);
+		mousedOverEntry = null;
+		cachedDrawEntries.Clear();
+		cachedEntryValues.Clear();
+		quickSearchWidget.Reset();
+		PermitsCardUtility.selectedPermit = null;
+		PermitsCardUtility.selectedFaction = ((ModLister.RoyaltyInstalled && Current.ProgramState == ProgramState.Playing) ? Faction.OfEmpire : null);
+	}
+
+	public static void DrawStatsReport(Rect rect, Def def, ThingDef stuff)
+	{
+		if (cachedDrawEntries.NullOrEmpty())
+		{
+			StatRequest req = ((def is BuildableDef def2) ? StatRequest.For(def2, stuff) : StatRequest.ForEmpty());
+			cachedDrawEntries.AddRange(def.SpecialDisplayStats(req));
+			cachedDrawEntries.AddRange(from r in StatsToDraw(def, stuff)
+				where r.ShouldDisplay()
+				select r);
+			FinalizeCachedDrawEntries(cachedDrawEntries);
+		}
+		DrawStatsWorker(rect, null, null);
+	}
+
+	public static void DrawStatsReport(Rect rect, AbilityDef def)
+	{
+		if (cachedDrawEntries.NullOrEmpty())
+		{
+			StatRequest req = StatRequest.ForEmpty();
+			cachedDrawEntries.AddRange(def.SpecialDisplayStats(req));
+			cachedDrawEntries.AddRange(from r in StatsToDraw(def)
+				where r.ShouldDisplay()
+				select r);
+			FinalizeCachedDrawEntries(cachedDrawEntries);
+		}
+		DrawStatsWorker(rect, null, null);
+	}
+
+	public static void DrawStatsReport(Rect rect, Thing thing)
+	{
+		if (cachedDrawEntries.NullOrEmpty())
+		{
+			cachedDrawEntries.AddRange(thing.def.SpecialDisplayStats(StatRequest.For(thing)));
+			cachedDrawEntries.AddRange(StatsToDraw(thing));
+			cachedDrawEntries.RemoveAll((StatDrawEntry de) => (de.stat != null && !de.stat.showNonAbstract) || !de.ShouldDisplay(thing));
+			FinalizeCachedDrawEntries(cachedDrawEntries);
+		}
+		DrawStatsWorker(rect, thing, null);
+	}
+
+	public static void DrawStatsReport(Rect rect, Hediff hediff)
+	{
+		if (cachedDrawEntries.NullOrEmpty())
+		{
+			cachedDrawEntries.AddRange(hediff.SpecialDisplayStats(StatRequest.ForEmpty()));
+			cachedDrawEntries.AddRange(from r in StatsToDraw(hediff.def, null)
+				where r.ShouldDisplay()
+				select r);
+			FinalizeCachedDrawEntries(cachedDrawEntries);
+		}
+		DrawStatsWorker(rect, null, null);
+	}
+
+	public static void DrawStatsReport(Rect rect, WorldObject worldObject)
+	{
+		if (cachedDrawEntries.NullOrEmpty())
+		{
+			cachedDrawEntries.AddRange(worldObject.def.SpecialDisplayStats(StatRequest.ForEmpty()));
+			cachedDrawEntries.AddRange(from r in StatsToDraw(worldObject)
+				where r.ShouldDisplay()
+				select r);
+			cachedDrawEntries.RemoveAll((StatDrawEntry de) => de.stat != null && !de.stat.showNonAbstract);
+			FinalizeCachedDrawEntries(cachedDrawEntries);
+		}
+		DrawStatsWorker(rect, null, worldObject);
+	}
+
+	public static void DrawStatsReport(Rect rect, RoyalTitleDef title, Faction faction, Pawn pawn = null)
+	{
+		if (cachedDrawEntries.NullOrEmpty())
+		{
+			cachedDrawEntries.AddRange(title.SpecialDisplayStats(StatRequest.For(title, faction, pawn)));
+			cachedDrawEntries.AddRange(from r in StatsToDraw(title, faction)
+				where r.ShouldDisplay(pawn)
+				select r);
+			FinalizeCachedDrawEntries(cachedDrawEntries);
+		}
+		DrawStatsWorker(rect, null, null);
+	}
+
+	public static void DrawStatsReport(Rect rect, Faction faction)
+	{
+		if (cachedDrawEntries.NullOrEmpty())
+		{
+			StatRequest req = StatRequest.ForEmpty();
+			cachedDrawEntries.AddRange(faction.def.SpecialDisplayStats(req));
+			cachedDrawEntries.AddRange(from r in StatsToDraw(faction)
+				where r.ShouldDisplay()
+				select r);
+			FinalizeCachedDrawEntries(cachedDrawEntries);
+		}
+		DrawStatsWorker(rect, null, null);
+	}
+
+	[IteratorStateMachine(typeof(_003CStatsToDraw_003Ed__22))]
+	private static IEnumerable<StatDrawEntry> StatsToDraw(Def def, ThingDef stuff)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CStatsToDraw_003Ed__22(-2)
+		{
+			_003C_003E3__def = def,
+			_003C_003E3__stuff = stuff
+		};
+	}
+
+	[IteratorStateMachine(typeof(_003CStatsToDraw_003Ed__23))]
+	private static IEnumerable<StatDrawEntry> StatsToDraw(RoyalTitleDef title, Faction faction)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CStatsToDraw_003Ed__23(-2)
+		{
+			_003C_003E3__title = title,
+			_003C_003E3__faction = faction
+		};
+	}
+
+	[IteratorStateMachine(typeof(_003CStatsToDraw_003Ed__24))]
+	private static IEnumerable<StatDrawEntry> StatsToDraw(Faction faction)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CStatsToDraw_003Ed__24(-2)
+		{
+			_003C_003E3__faction = faction
+		};
+	}
+
+	[IteratorStateMachine(typeof(_003CStatsToDraw_003Ed__25))]
+	private static IEnumerable<StatDrawEntry> StatsToDraw(AbilityDef def)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CStatsToDraw_003Ed__25(-2)
+		{
+			_003C_003E3__def = def
+		};
+	}
+
+	[IteratorStateMachine(typeof(_003CStatsToDraw_003Ed__26))]
+	private static IEnumerable<StatDrawEntry> StatsToDraw(Thing thing)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CStatsToDraw_003Ed__26(-2)
+		{
+			_003C_003E3__thing = thing
+		};
+	}
+
+	[IteratorStateMachine(typeof(_003CStatsToDraw_003Ed__27))]
+	private static IEnumerable<StatDrawEntry> StatsToDraw(WorldObject worldObject)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CStatsToDraw_003Ed__27(-2)
+		{
+			_003C_003E3__worldObject = worldObject
+		};
+	}
+
+	[IteratorStateMachine(typeof(_003CStuffStats_003Ed__28))]
+	private static IEnumerable<StatDrawEntry> StuffStats(ThingDef stuffDef)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CStuffStats_003Ed__28(-2)
+		{
+			_003C_003E3__stuffDef = stuffDef
+		};
+	}
+
+	private static void FinalizeCachedDrawEntries(IEnumerable<StatDrawEntry> original)
+	{
+		cachedDrawEntries = (from sd in original
+			orderby sd.category.displayOrder, sd.DisplayPriorityWithinCategory descending, sd.LabelCap
+			select sd).ToList();
+		quickSearchWidget.noResultsMatched = !cachedDrawEntries.Any();
+		foreach (StatDrawEntry cachedDrawEntry in cachedDrawEntries)
+		{
+			cachedEntryValues.Add(cachedDrawEntry.ValueString);
+		}
+		if (selectedEntry != null)
+		{
+			selectedEntry = cachedDrawEntries.FirstOrDefault((StatDrawEntry e) => e.Same(selectedEntry));
+		}
+		if (!quickSearchWidget.filter.Active)
+		{
+			return;
+		}
+		foreach (StatDrawEntry cachedDrawEntry2 in cachedDrawEntries)
+		{
+			if (Matches(cachedDrawEntry2))
+			{
+				selectedEntry = cachedDrawEntry2;
+				scrollPositioner.Arm();
+				break;
+			}
+		}
+	}
+
+	private static bool Matches(StatDrawEntry sd)
+	{
+		return quickSearchWidget.filter.Matches(sd.LabelCap);
+	}
+
+	private static StatDrawEntry DescriptionEntry(Def def)
+	{
+		return new StatDrawEntry(StatCategoryDefOf.BasicsImportant, "Description".Translate(), "", def.description, 99999, null, Dialog_InfoCard.DefsToHyperlinks(def.descriptionHyperlinks));
+	}
+
+	private static StatDrawEntry DescriptionEntry(Faction faction)
+	{
+		return new StatDrawEntry(StatCategoryDefOf.BasicsImportant, "Description".Translate(), "", faction.GetReportText, 99999, null, Dialog_InfoCard.DefsToHyperlinks(faction.def.descriptionHyperlinks));
+	}
+
+	private static StatDrawEntry DescriptionEntry(RoyalTitleDef title, Faction faction)
+	{
+		return new StatDrawEntry(StatCategoryDefOf.BasicsImportant, "Description".Translate(), "", title.GetReportText(faction), 99999, null, Dialog_InfoCard.TitleDefsToHyperlinks(title.GetHyperlinks(faction)));
+	}
+
+	private static StatDrawEntry DescriptionEntry(Thing thing)
+	{
+		return new StatDrawEntry(StatCategoryDefOf.BasicsImportant, "Description".Translate(), "", thing.DescriptionFlavor, 99999, null, Dialog_InfoCard.DefsToHyperlinks(thing.DescriptionHyperlinks), forceUnfinalizedMode: false, overridesHideStats: true);
+	}
+
+	private static StatDrawEntry DescriptionEntry(WorldObject worldObject)
+	{
+		return new StatDrawEntry(StatCategoryDefOf.BasicsImportant, "Description".Translate(), "", worldObject.GetDescription(), 99999);
+	}
+
+	private static StatDrawEntry QualityEntry(Thing t)
+	{
+		if (!t.TryGetQuality(out var qc))
+		{
+			return null;
+		}
+		return new StatDrawEntry(StatCategoryDefOf.BasicsImportant, "Quality".Translate(), qc.GetLabel().CapitalizeFirst(), "QualityDescription".Translate(), 99999);
+	}
+
+	public static void SelectEntry(int index)
+	{
+		if (index >= 0 && index <= cachedDrawEntries.Count)
+		{
+			SelectEntry(cachedDrawEntries[index]);
+		}
+	}
+
+	public static void SelectEntry(StatDef stat, bool playSound = false)
+	{
+		foreach (StatDrawEntry cachedDrawEntry in cachedDrawEntries)
+		{
+			if (cachedDrawEntry.stat == stat)
+			{
+				SelectEntry(cachedDrawEntry, playSound);
 				return;
 			}
-			StatsReportUtility.SelectEntry(StatsReportUtility.cachedDrawEntries[index], true);
 		}
+		Messages.Message("MessageCannotSelectInvisibleStat".Translate(stat), MessageTypeDefOf.RejectInput, historical: false);
+	}
 
-		// Token: 0x0601218A RID: 74122 RVA: 0x0054C968 File Offset: 0x0054AB68
-		public static void SelectEntry(StatDef stat, bool playSound = false)
+	private static void SelectEntry(StatDrawEntry rec, bool playSound = true)
+	{
+		selectedEntry = rec;
+		if (playSound)
 		{
-			foreach (StatDrawEntry statDrawEntry in StatsReportUtility.cachedDrawEntries)
-			{
-				if (statDrawEntry.stat == stat)
-				{
-					StatsReportUtility.SelectEntry(statDrawEntry, playSound);
-					return;
-				}
-			}
-			Messages.Message("MessageCannotSelectInvisibleStat".Translate(stat), MessageTypeDefOf.RejectInput, false);
+			SoundDefOf.Tick_High.PlayOneShotOnCamera();
 		}
+	}
 
-		// Token: 0x0601218B RID: 74123 RVA: 0x0054C9E8 File Offset: 0x0054ABE8
-		private static void SelectEntry(StatDrawEntry rec, bool playSound = true)
+	private static void DrawStatsWorker(Rect rect, Thing optionalThing, WorldObject optionalWorldObject)
+	{
+		Rect rect2 = new Rect(rect);
+		rect2.width *= 0.5f;
+		Rect rect3 = new Rect(rect);
+		rect3.x = rect2.xMax;
+		rect3.width = rect.xMax - rect3.x;
+		scrollPositioner.ClearInterestRects();
+		Text.Font = GameFont.Small;
+		Rect viewRect = new Rect(0f, 0f, rect2.width - 16f, listHeight);
+		Widgets.BeginScrollView(rect2, ref scrollPosition, viewRect);
+		float curY = 0f;
+		string text = null;
+		mousedOverEntry = null;
+		for (int i = 0; i < cachedDrawEntries.Count; i++)
 		{
-			StatsReportUtility.selectedEntry = rec;
-			if (playSound)
+			StatDrawEntry ent = cachedDrawEntries[i];
+			if (ent.category.LabelCap != text)
 			{
-				SoundDefOf.Tick_High.PlayOneShotOnCamera(null);
+				Widgets.ListSeparator(ref curY, viewRect.width, ent.category.LabelCap);
+				text = ent.category.LabelCap;
 			}
-		}
-
-		// Token: 0x0601218C RID: 74124 RVA: 0x0054CA00 File Offset: 0x0054AC00
-		private static void DrawStatsWorker(Rect rect, Thing optionalThing, WorldObject optionalWorldObject)
-		{
-			Rect rect2 = new Rect(rect);
-			rect2.width *= 0.5f;
-			Rect rect3 = new Rect(rect);
-			rect3.x = rect2.xMax;
-			rect3.width = rect.xMax - rect3.x;
-			StatsReportUtility.scrollPositioner.ClearInterestRects();
-			Text.Font = GameFont.Small;
-			Rect viewRect = new Rect(0f, 0f, rect2.width - 16f, StatsReportUtility.listHeight);
-			Widgets.BeginScrollView(rect2, ref StatsReportUtility.scrollPosition, viewRect, true);
-			float num = 0f;
-			string b = null;
-			StatsReportUtility.mousedOverEntry = null;
-			for (int i = 0; i < StatsReportUtility.cachedDrawEntries.Count; i++)
+			bool highlightLabel = false;
+			bool lowlightLabel = false;
+			bool flag = selectedEntry == ent;
+			bool flag2 = false;
+			GUI.color = Color.white;
+			if (quickSearchWidget.filter.Active)
 			{
-				StatDrawEntry ent = StatsReportUtility.cachedDrawEntries[i];
-				if (ent.category.LabelCap != b)
+				if (Matches(ent))
 				{
-					Widgets.ListSeparator(ref num, viewRect.width, ent.category.LabelCap);
-					b = ent.category.LabelCap;
-				}
-				bool highlightLabel = false;
-				bool lowlightLabel = false;
-				bool flag = StatsReportUtility.selectedEntry == ent;
-				bool flag2 = false;
-				GUI.color = Color.white;
-				if (StatsReportUtility.quickSearchWidget.filter.Active)
-				{
-					if (StatsReportUtility.Matches(ent))
-					{
-						highlightLabel = true;
-						flag2 = true;
-					}
-					else
-					{
-						lowlightLabel = true;
-					}
-				}
-				Rect rect4 = new Rect(8f, num, viewRect.width - 8f, 30f);
-				num += ent.Draw(rect4.x, rect4.y, rect4.width, flag, highlightLabel, lowlightLabel, delegate
-				{
-					StatsReportUtility.SelectEntry(ent, true);
-				}, delegate
-				{
-					StatsReportUtility.mousedOverEntry = ent;
-				}, StatsReportUtility.scrollPosition, rect2, StatsReportUtility.cachedEntryValues[i]);
-				rect4.yMax = num;
-				if (flag || flag2)
-				{
-					StatsReportUtility.scrollPositioner.RegisterInterestRect(rect4);
-				}
-			}
-			StatsReportUtility.listHeight = num + 100f;
-			Widgets.EndScrollView();
-			StatsReportUtility.scrollPositioner.ScrollVertically(ref StatsReportUtility.scrollPosition, rect2.size);
-			Rect outRect = rect3.ContractedBy(10f);
-			StatDrawEntry statDrawEntry;
-			if ((statDrawEntry = StatsReportUtility.selectedEntry) == null)
-			{
-				statDrawEntry = (StatsReportUtility.mousedOverEntry ?? StatsReportUtility.cachedDrawEntries.FirstOrDefault<StatDrawEntry>());
-			}
-			StatDrawEntry statDrawEntry2 = statDrawEntry;
-			if (statDrawEntry2 != null)
-			{
-				Rect rect5 = new Rect(0f, 0f, outRect.width - 16f, StatsReportUtility.rightPanelHeight);
-				StatRequest statRequest;
-				if (statDrawEntry2.hasOptionalReq)
-				{
-					statRequest = statDrawEntry2.optionalReq;
-				}
-				else if (optionalThing != null)
-				{
-					statRequest = StatRequest.For(optionalThing);
+					highlightLabel = true;
+					flag2 = true;
 				}
 				else
 				{
-					statRequest = StatRequest.ForEmpty();
+					lowlightLabel = true;
 				}
-				string explanationText = statDrawEntry2.GetExplanationText(statRequest);
-				float num2 = 0f;
-				Widgets.BeginScrollView(outRect, ref StatsReportUtility.scrollPositionRightPanel, rect5, true);
-				Rect rect6 = rect5;
-				rect6.width -= 4f;
-				Widgets.Label(rect6, explanationText);
-				float num3 = Text.CalcHeight(explanationText, rect6.width) + 10f;
-				num2 += num3;
-				IEnumerable<Dialog_InfoCard.Hyperlink> hyperlinks = statDrawEntry2.GetHyperlinks(statRequest);
-				if (hyperlinks != null)
-				{
-					Rect rect7 = new Rect(rect6.x, rect6.y + num3, rect6.width, rect6.height - num3);
-					Color color = GUI.color;
-					GUI.color = Widgets.NormalOptionColor;
-					foreach (Dialog_InfoCard.Hyperlink hyperlink in hyperlinks)
-					{
-						float num4 = Text.CalcHeight(hyperlink.Label, rect7.width);
-						Rect rect8 = new Rect(rect7.x, rect7.y, rect7.width, num4);
-						string text = hyperlink.HasGeneOwnerThing ? hyperlink.Label : "ViewHyperlink".Translate(hyperlink.Label).ToString();
-						Widgets.HyperlinkWithIcon(rect8, hyperlink, text, 2f, 6f, null, false, null);
-						rect7.y += num4;
-						rect7.height -= num4;
-						num2 += num4;
-					}
-					GUI.color = color;
-				}
-				StatsReportUtility.rightPanelHeight = num2;
-				Widgets.EndScrollView();
+			}
+			Rect rect4 = new Rect(8f, curY, viewRect.width - 8f, 30f);
+			curY = (rect4.yMax = curY + ent.Draw(rect4.x, rect4.y, rect4.width, flag, highlightLabel, lowlightLabel, delegate
+			{
+				SelectEntry(ent);
+			}, delegate
+			{
+				mousedOverEntry = ent;
+			}, scrollPosition, rect2, cachedEntryValues[i]));
+			if (flag || flag2)
+			{
+				scrollPositioner.RegisterInterestRect(rect4);
 			}
 		}
-
-		// Token: 0x0601218D RID: 74125 RVA: 0x0054CE6C File Offset: 0x0054B06C
-		public static void Notify_QuickSearchChanged()
+		listHeight = curY + 100f;
+		Widgets.EndScrollView();
+		scrollPositioner.ScrollVertically(ref scrollPosition, rect2.size);
+		Rect outRect = rect3.ContractedBy(10f);
+		StatDrawEntry statDrawEntry = selectedEntry ?? mousedOverEntry ?? cachedDrawEntries.FirstOrDefault();
+		if (statDrawEntry == null)
 		{
-			StatsReportUtility.cachedDrawEntries.Clear();
-			StatsReportUtility.cachedEntryValues.Clear();
+			return;
 		}
+		Rect rect5 = new Rect(0f, 0f, outRect.width - 16f, rightPanelHeight);
+		StatRequest statRequest = (statDrawEntry.hasOptionalReq ? statDrawEntry.optionalReq : ((optionalThing == null) ? StatRequest.ForEmpty() : StatRequest.For(optionalThing)));
+		string explanationText = statDrawEntry.GetExplanationText(statRequest);
+		float num2 = 0f;
+		Widgets.BeginScrollView(outRect, ref scrollPositionRightPanel, rect5);
+		Rect rect6 = rect5;
+		rect6.width -= 4f;
+		Widgets.Label(rect6, explanationText);
+		float num3 = Text.CalcHeight(explanationText, rect6.width) + 10f;
+		num2 += num3;
+		IEnumerable<Dialog_InfoCard.Hyperlink> hyperlinks = statDrawEntry.GetHyperlinks(statRequest);
+		if (hyperlinks != null)
+		{
+			Rect rect7 = new Rect(rect6.x, rect6.y + num3, rect6.width, rect6.height - num3);
+			Color color = GUI.color;
+			GUI.color = Widgets.NormalOptionColor;
+			foreach (Dialog_InfoCard.Hyperlink item in hyperlinks)
+			{
+				float num4 = Text.CalcHeight(item.Label, rect7.width);
+				Widgets.HyperlinkWithIcon(new Rect(rect7.x, rect7.y, rect7.width, num4), text: item.HasGeneOwnerThing ? item.Label : "ViewHyperlink".Translate(item.Label).ToString(), hyperlink: item, iconMargin: 2f, textOffsetX: 6f, color: null);
+				rect7.y += num4;
+				rect7.height -= num4;
+				num2 += num4;
+			}
+			GUI.color = color;
+		}
+		rightPanelHeight = num2;
+		Widgets.EndScrollView();
+	}
 
-		// Token: 0x0400BBE2 RID: 48098
-		private static StatDrawEntry selectedEntry;
-
-		// Token: 0x0400BBE3 RID: 48099
-		private static StatDrawEntry mousedOverEntry;
-
-		// Token: 0x0400BBE4 RID: 48100
-		private static Vector2 scrollPosition;
-
-		// Token: 0x0400BBE5 RID: 48101
-		private static ScrollPositioner scrollPositioner = new ScrollPositioner();
-
-		// Token: 0x0400BBE6 RID: 48102
-		private static Vector2 scrollPositionRightPanel;
-
-		// Token: 0x0400BBE7 RID: 48103
-		private static QuickSearchWidget quickSearchWidget = new QuickSearchWidget();
-
-		// Token: 0x0400BBE8 RID: 48104
-		private static float listHeight;
-
-		// Token: 0x0400BBE9 RID: 48105
-		private static float rightPanelHeight;
-
-		// Token: 0x0400BBEA RID: 48106
-		private static List<StatDrawEntry> cachedDrawEntries = new List<StatDrawEntry>();
-
-		// Token: 0x0400BBEB RID: 48107
-		private static List<string> cachedEntryValues = new List<string>();
+	public static void Notify_QuickSearchChanged()
+	{
+		cachedDrawEntries.Clear();
+		cachedEntryValues.Clear();
 	}
 }

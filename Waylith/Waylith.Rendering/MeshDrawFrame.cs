@@ -10,6 +10,8 @@ public sealed class MeshDrawFrame : IDisposable
 {
 	private static readonly ConcurrentQueue<List<FinalDrawItem>> listPool = new ConcurrentQueue<List<FinalDrawItem>>();
 
+	private const int MaxPooledLists = 64;
+
 	private bool _disposed;
 
 	public CameraView View { get; }
@@ -21,16 +23,6 @@ public sealed class MeshDrawFrame : IDisposable
 	public List<FinalDrawItem> PersistentDraws { get; }
 
 	public Vector3 SunDirection { get; }
-
-	public float CameraYaw { get; init; }
-
-	public float CameraPitch { get; init; }
-
-	public float SwayHead { get; init; }
-
-	public float WindSpeed { get; init; }
-
-	public float BillboardPitchDelta { get; init; }
 
 	public IReadOnlyList<SceneGrabPoint>? SceneGrabs { get; init; }
 
@@ -67,6 +59,15 @@ public sealed class MeshDrawFrame : IDisposable
 		return result;
 	}
 
+	private static void ReturnList(List<FinalDrawItem> list)
+	{
+		list.Clear();
+		if (listPool.Count < 64)
+		{
+			listPool.Enqueue(list);
+		}
+	}
+
 	public void Dispose()
 	{
 		if (!_disposed)
@@ -78,10 +79,8 @@ public sealed class MeshDrawFrame : IDisposable
 			{
 				FinalDrawItem.Return(draws[i]);
 			}
-			draws.Clear();
-			listPool.Enqueue(draws);
-			PersistentDraws.Clear();
-			listPool.Enqueue(PersistentDraws);
+			ReturnList(draws);
+			ReturnList(PersistentDraws);
 		}
 	}
 }

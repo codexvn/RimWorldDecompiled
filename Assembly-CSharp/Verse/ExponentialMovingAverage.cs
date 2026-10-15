@@ -1,48 +1,39 @@
-﻿using System;
+namespace Verse;
 
-namespace Verse
+public class ExponentialMovingAverage
 {
-	// Token: 0x02000CC7 RID: 3271
-	public class ExponentialMovingAverage
+	private readonly float alpha;
+
+	private float average;
+
+	private bool initialized;
+
+	public ExponentialMovingAverage(float alpha)
 	{
-		// Token: 0x0600538C RID: 21388 RVA: 0x001AECFE File Offset: 0x001ACEFE
-		public ExponentialMovingAverage(float alpha)
+		this.alpha = alpha;
+	}
+
+	public void AddValue(float value)
+	{
+		if (!initialized)
 		{
-			this.alpha = alpha;
+			average = value;
+			initialized = true;
 		}
-
-		// Token: 0x0600538D RID: 21389 RVA: 0x001AED0D File Offset: 0x001ACF0D
-		public void AddValue(float value)
+		else
 		{
-			if (!this.initialized)
-			{
-				this.average = value;
-				this.initialized = true;
-				return;
-			}
-			this.average = this.alpha * value + (1f - this.alpha) * this.average;
+			average = alpha * value + (1f - alpha) * average;
 		}
+	}
 
-		// Token: 0x0600538E RID: 21390 RVA: 0x001AED48 File Offset: 0x001ACF48
-		public float GetAverage()
-		{
-			return this.average;
-		}
+	public float GetAverage()
+	{
+		return average;
+	}
 
-		// Token: 0x0600538F RID: 21391 RVA: 0x001AED50 File Offset: 0x001ACF50
-		public void Reset()
-		{
-			this.initialized = false;
-			this.average = 0f;
-		}
-
-		// Token: 0x04003C48 RID: 15432
-		private readonly float alpha;
-
-		// Token: 0x04003C49 RID: 15433
-		private float average;
-
-		// Token: 0x04003C4A RID: 15434
-		private bool initialized;
+	public void Reset()
+	{
+		initialized = false;
+		average = 0f;
 	}
 }

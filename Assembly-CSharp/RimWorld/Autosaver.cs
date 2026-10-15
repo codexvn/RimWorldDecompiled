@@ -1,100 +1,168 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.Profile;
 
-namespace RimWorld
+namespace RimWorld;
+
+public sealed class Autosaver
 {
-	// Token: 0x020034FE RID: 13566
-	public sealed class Autosaver
+	[CompilerGenerated]
+	private sealed class _003CAutoSaveNames_003Ed__10 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x170031A4 RID: 12708
-		// (get) Token: 0x060130F9 RID: 78073 RVA: 0x005A7474 File Offset: 0x005A5674
-		private float AutosaveIntervalDays
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private int _003Ci_003E5__2;
+
+		string IEnumerator<string>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				float num = Prefs.AutosaveIntervalDays;
-				if (Current.Game.Info.permadeathMode && num > 1f)
-				{
-					num = 1f;
-				}
-				return num;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170031A5 RID: 12709
-		// (get) Token: 0x060130FA RID: 78074 RVA: 0x005A74A7 File Offset: 0x005A56A7
-		private int AutosaveIntervalTicks
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return Mathf.RoundToInt(this.AutosaveIntervalDays * 60000f);
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x060130FB RID: 78075 RVA: 0x005A74BC File Offset: 0x005A56BC
-		public void AutosaverTick()
+		[DebuggerHidden]
+		public _003CAutoSaveNames_003Ed__10(int _003C_003E1__state)
 		{
-			this.ticksSinceSave++;
-			if (this.ticksSinceSave >= this.AutosaveIntervalTicks && !GameDataSaveLoader.SavingIsTemporarilyDisabled)
-			{
-				LongEventHandler.QueueLongEvent(new Action(this.DoAutosave), "Autosaving", false, null, true, false, null);
-				this.ticksSinceSave = 0;
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x060130FC RID: 78076 RVA: 0x005A7510 File Offset: 0x005A5710
-		public void DoAutosave()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			string fileName;
-			if (Current.Game.Info.permadeathMode)
-			{
-				fileName = Current.Game.Info.permadeathModeUniqueName;
-			}
-			else
-			{
-				fileName = this.NewAutosaveFileName();
-			}
-			GameDataSaveLoader.SaveGame(fileName);
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x060130FD RID: 78077 RVA: 0x001433EA File Offset: 0x001415EA
-		private void DoMemoryCleanup()
+		private bool MoveNext()
 		{
-			MemoryUtility.UnloadUnusedUnityAssets();
-		}
-
-		// Token: 0x060130FE RID: 78078 RVA: 0x005A7550 File Offset: 0x005A5750
-		private string NewAutosaveFileName()
-		{
-			string text = this.AutoSaveNames().FirstOrDefault((string name) => !SaveGameFilesUtility.SavedGameNamedExists(name));
-			if (text != null)
+			switch (_003C_003E1__state)
 			{
-				return text;
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003Ci_003E5__2 = 1;
+				break;
+			case 1:
+				_003C_003E1__state = -1;
+				_003Ci_003E5__2++;
+				break;
 			}
-			return this.AutoSaveNames().MinBy((string name) => new FileInfo(GenFilePaths.FilePathForSavedGame(name)).LastWriteTime);
-		}
-
-		// Token: 0x060130FF RID: 78079 RVA: 0x005A75B7 File Offset: 0x005A57B7
-		private IEnumerable<string> AutoSaveNames()
-		{
-			int num;
-			for (int i = 1; i <= Prefs.AutosavesCount; i = num + 1)
+			if (_003Ci_003E5__2 <= Prefs.AutosavesCount)
 			{
-				yield return "Autosave-" + i.ToString();
-				num = i;
+				_003C_003E2__current = "Autosave-" + _003Ci_003E5__2;
+				_003C_003E1__state = 1;
+				return true;
 			}
-			yield break;
+			return false;
 		}
 
-		// Token: 0x0400C5A1 RID: 50593
-		private int ticksSinceSave;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x0400C5A2 RID: 50594
-		public const float MaxPermadeathModeAutosaveInterval = 1f;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				return this;
+			}
+			return new _003CAutoSaveNames_003Ed__10(0);
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	private int ticksSinceSave;
+
+	public const float MaxPermadeathModeAutosaveInterval = 1f;
+
+	private float AutosaveIntervalDays
+	{
+		get
+		{
+			float num = Prefs.AutosaveIntervalDays;
+			if (Current.Game.Info.permadeathMode && num > 1f)
+			{
+				num = 1f;
+			}
+			return num;
+		}
+	}
+
+	private int AutosaveIntervalTicks => Mathf.RoundToInt(AutosaveIntervalDays * 60000f);
+
+	public void AutosaverTick()
+	{
+		ticksSinceSave++;
+		if (ticksSinceSave >= AutosaveIntervalTicks && !GameDataSaveLoader.SavingIsTemporarilyDisabled)
+		{
+			LongEventHandler.QueueLongEvent(DoAutosave, "Autosaving", doAsynchronously: false, null);
+			ticksSinceSave = 0;
+		}
+	}
+
+	public void DoAutosave()
+	{
+		string fileName = ((!Current.Game.Info.permadeathMode) ? NewAutosaveFileName() : Current.Game.Info.permadeathModeUniqueName);
+		GameDataSaveLoader.SaveGame(fileName);
+	}
+
+	private void DoMemoryCleanup()
+	{
+		MemoryUtility.UnloadUnusedUnityAssets();
+	}
+
+	private string NewAutosaveFileName()
+	{
+		string text = AutoSaveNames().FirstOrDefault((string name) => !SaveGameFilesUtility.SavedGameNamedExists(name));
+		if (text != null)
+		{
+			return text;
+		}
+		return AutoSaveNames().MinBy((string name) => new FileInfo(GenFilePaths.FilePathForSavedGame(name)).LastWriteTime);
+	}
+
+	[IteratorStateMachine(typeof(_003CAutoSaveNames_003Ed__10))]
+	private IEnumerable<string> AutoSaveNames()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CAutoSaveNames_003Ed__10(-2);
 	}
 }

@@ -1,147 +1,428 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+[StaticConstructorOnStartup]
+public class QuestPart_FactionGoodwillChange : QuestPart
 {
-	// Token: 0x02001CDF RID: 7391
-	[StaticConstructorOnStartup]
-	public class QuestPart_FactionGoodwillChange : QuestPart
+	[CompilerGenerated]
+	private sealed class _003Cget_InvolvedFactions_003Ed__12 : IEnumerable<Faction>, IEnumerable, IEnumerator<Faction>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001968 RID: 6504
-		// (get) Token: 0x0600A4D6 RID: 42198 RVA: 0x002F38C7 File Offset: 0x002F1AC7
-		public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+		private int _003C_003E1__state;
+
+		private Faction _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public QuestPart_FactionGoodwillChange _003C_003E4__this;
+
+		private IEnumerator<Faction> _003C_003E7__wrap1;
+
+		Faction IEnumerator<Faction>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				foreach (GlobalTargetInfo globalTargetInfo in base.QuestLookTargets)
-				{
-					yield return globalTargetInfo;
-				}
-				IEnumerator<GlobalTargetInfo> enumerator = null;
-				yield return this.lookTarget;
-				yield break;
-				yield break;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001969 RID: 6505
-		// (get) Token: 0x0600A4D7 RID: 42199 RVA: 0x002F38D7 File Offset: 0x002F1AD7
-		public override IEnumerable<Faction> InvolvedFactions
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				foreach (Faction faction in base.InvolvedFactions)
-				{
-					yield return faction;
-				}
-				IEnumerator<Faction> enumerator = null;
-				if (this.faction != null)
-				{
-					yield return this.faction;
-				}
-				yield break;
-				yield break;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600A4D8 RID: 42200 RVA: 0x002F38E8 File Offset: 0x002F1AE8
-		public override void Notify_QuestSignalReceived(Signal signal)
+		[DebuggerHidden]
+		public _003Cget_InvolvedFactions_003Ed__12(int _003C_003E1__state)
 		{
-			base.Notify_QuestSignalReceived(signal);
-			if (signal.tag == this.inSignal && this.faction != null && this.faction != Faction.OfPlayer)
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				if (this.lookTarget.IsValid)
+				try
 				{
-					GlobalTargetInfo globalTargetInfo = this.lookTarget;
 				}
-				else if (this.getLookTargetFromSignal)
+				finally
 				{
-					LookTargets lookTargets;
-					if (SignalArgsUtility.TryGetLookTargets(signal.args, "SUBJECT", out lookTargets))
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				QuestPart_FactionGoodwillChange questPart_FactionGoodwillChange = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((QuestPart)questPart_FactionGoodwillChange).InvolvedFactions.GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 2:
 					{
-						lookTargets.TryGetPrimaryTarget();
+						_003C_003E1__state = -1;
+						break;
 					}
-					else
+					IL_006f:
+					if (_003C_003E7__wrap1.MoveNext())
 					{
-						GlobalTargetInfo invalid = GlobalTargetInfo.Invalid;
+						Faction current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
 					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (questPart_FactionGoodwillChange.faction != null)
+					{
+						_003C_003E2__current = questPart_FactionGoodwillChange.faction;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
 				}
-				else
-				{
-					GlobalTargetInfo invalid2 = GlobalTargetInfo.Invalid;
-				}
-				FactionRelationKind playerRelationKind = this.faction.PlayerRelationKind;
-				int num = 0;
-				if (!signal.args.TryGetArg<int>("GOODWILL", out num))
-				{
-					num = this.change;
-				}
-				if (this.ensureMakesHostile)
-				{
-					num = Mathf.Min(num, Faction.OfPlayer.GoodwillToMakeHostile(this.faction));
-				}
-				Faction.OfPlayer.TryAffectGoodwillWith(this.faction, num, this.canSendMessage, this.canSendHostilityLetter, (num >= 0) ? (this.historyEvent ?? HistoryEventDefOf.QuestGoodwillReward) : this.historyEvent, null);
-				TaggedString t = "";
-				this.faction.TryAppendRelationKindChangedInfo(ref t, playerRelationKind, this.faction.PlayerRelationKind, null);
-				if (!t.NullOrEmpty())
-				{
-					t = "\n\n" + t;
-				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x0600A4D9 RID: 42201 RVA: 0x002F3A3C File Offset: 0x002F1C3C
-		public override void ExposeData()
+		bool IEnumerator.MoveNext()
 		{
-			base.ExposeData();
-			Scribe_Defs.Look<HistoryEventDef>(ref this.historyEvent, "historyEvent");
-			Scribe_Values.Look<string>(ref this.inSignal, "inSignal", null, false);
-			Scribe_Values.Look<int>(ref this.change, "change", 0, false);
-			Scribe_References.Look<Faction>(ref this.faction, "faction", false);
-			Scribe_Values.Look<bool>(ref this.canSendMessage, "canSendMessage", true, false);
-			Scribe_Values.Look<bool>(ref this.canSendHostilityLetter, "canSendHostilityLetter", true, false);
-			Scribe_Values.Look<bool>(ref this.getLookTargetFromSignal, "getLookTargetFromSignal", true, false);
-			Scribe_TargetInfo.Look(ref this.lookTarget, "lookTarget");
-			Scribe_Values.Look<bool>(ref this.ensureMakesHostile, "ensureMakesHostile", false, false);
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0600A4DA RID: 42202 RVA: 0x002F3AEC File Offset: 0x002F1CEC
-		public override void AssignDebugData()
+		private void _003C_003Em__Finally1()
 		{
-			base.AssignDebugData();
-			this.inSignal = "DebugSignal" + Rand.Int.ToString();
-			this.change = -15;
-			this.faction = Find.FactionManager.RandomNonHostileFaction(false, false, false, TechLevel.Undefined);
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
 		}
 
-		// Token: 0x040071D9 RID: 29145
-		public HistoryEventDef historyEvent;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x040071DA RID: 29146
-		public string inSignal;
+		[DebuggerHidden]
+		IEnumerator<Faction> IEnumerable<Faction>.GetEnumerator()
+		{
+			_003Cget_InvolvedFactions_003Ed__12 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_InvolvedFactions_003Ed__12(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x040071DB RID: 29147
-		public int change;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Faction>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x040071DC RID: 29148
-		public Faction faction;
+	[CompilerGenerated]
+	private sealed class _003Cget_QuestLookTargets_003Ed__10 : IEnumerable<GlobalTargetInfo>, IEnumerable, IEnumerator<GlobalTargetInfo>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
 
-		// Token: 0x040071DD RID: 29149
-		public bool canSendMessage = true;
+		private GlobalTargetInfo _003C_003E2__current;
 
-		// Token: 0x040071DE RID: 29150
-		public bool canSendHostilityLetter = true;
+		private int _003C_003El__initialThreadId;
 
-		// Token: 0x040071DF RID: 29151
-		public bool getLookTargetFromSignal = true;
+		public QuestPart_FactionGoodwillChange _003C_003E4__this;
 
-		// Token: 0x040071E0 RID: 29152
-		public GlobalTargetInfo lookTarget;
+		private IEnumerator<GlobalTargetInfo> _003C_003E7__wrap1;
 
-		// Token: 0x040071E1 RID: 29153
-		public bool ensureMakesHostile;
+		GlobalTargetInfo IEnumerator<GlobalTargetInfo>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003Cget_QuestLookTargets_003Ed__10(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				QuestPart_FactionGoodwillChange questPart_FactionGoodwillChange = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((QuestPart)questPart_FactionGoodwillChange).QuestLookTargets.GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						return false;
+					}
+					IL_006f:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						GlobalTargetInfo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					_003C_003E2__current = questPart_FactionGoodwillChange.lookTarget;
+					_003C_003E1__state = 2;
+					return true;
+				}
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<GlobalTargetInfo> IEnumerable<GlobalTargetInfo>.GetEnumerator()
+		{
+			_003Cget_QuestLookTargets_003Ed__10 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_QuestLookTargets_003Ed__10(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<GlobalTargetInfo>)this).GetEnumerator();
+		}
+	}
+
+	public HistoryEventDef historyEvent;
+
+	public string inSignal;
+
+	public int change;
+
+	public Faction faction;
+
+	public bool canSendMessage = true;
+
+	public bool canSendHostilityLetter = true;
+
+	public bool getLookTargetFromSignal = true;
+
+	public GlobalTargetInfo lookTarget;
+
+	public bool ensureMakesHostile;
+
+	public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+	{
+		[IteratorStateMachine(typeof(_003Cget_QuestLookTargets_003Ed__10))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_QuestLookTargets_003Ed__10(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public override IEnumerable<Faction> InvolvedFactions
+	{
+		[IteratorStateMachine(typeof(_003Cget_InvolvedFactions_003Ed__12))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_InvolvedFactions_003Ed__12(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public override void Notify_QuestSignalReceived(Signal signal)
+	{
+		base.Notify_QuestSignalReceived(signal);
+		if (!(signal.tag == inSignal) || faction == null || faction == Faction.OfPlayer)
+		{
+			return;
+		}
+		if (lookTarget.IsValid)
+		{
+			_ = lookTarget;
+		}
+		else if (getLookTargetFromSignal)
+		{
+			if (SignalArgsUtility.TryGetLookTargets(signal.args, "SUBJECT", out var lookTargets))
+			{
+				lookTargets.TryGetPrimaryTarget();
+			}
+			else
+			{
+				_ = GlobalTargetInfo.Invalid;
+			}
+		}
+		else
+		{
+			_ = GlobalTargetInfo.Invalid;
+		}
+		FactionRelationKind playerRelationKind = faction.PlayerRelationKind;
+		int arg = 0;
+		if (!signal.args.TryGetArg("GOODWILL", out arg))
+		{
+			arg = change;
+		}
+		if (ensureMakesHostile)
+		{
+			arg = Mathf.Min(arg, Faction.OfPlayer.GoodwillToMakeHostile(faction));
+		}
+		Faction.OfPlayer.TryAffectGoodwillWith(faction, arg, canSendMessage, canSendHostilityLetter, (arg >= 0) ? (historyEvent ?? HistoryEventDefOf.QuestGoodwillReward) : historyEvent, null);
+		TaggedString text = "";
+		faction.TryAppendRelationKindChangedInfo(ref text, playerRelationKind, faction.PlayerRelationKind);
+		if (!text.NullOrEmpty())
+		{
+			text = "\n\n" + text;
+		}
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Defs.Look(ref historyEvent, "historyEvent");
+		Scribe_Values.Look(ref inSignal, "inSignal");
+		Scribe_Values.Look(ref change, "change", 0);
+		Scribe_References.Look(ref faction, "faction");
+		Scribe_Values.Look(ref canSendMessage, "canSendMessage", defaultValue: true);
+		Scribe_Values.Look(ref canSendHostilityLetter, "canSendHostilityLetter", defaultValue: true);
+		Scribe_Values.Look(ref getLookTargetFromSignal, "getLookTargetFromSignal", defaultValue: true);
+		Scribe_TargetInfo.Look(ref lookTarget, "lookTarget");
+		Scribe_Values.Look(ref ensureMakesHostile, "ensureMakesHostile", defaultValue: false);
+	}
+
+	public override void AssignDebugData()
+	{
+		base.AssignDebugData();
+		inSignal = "DebugSignal" + Rand.Int;
+		change = -15;
+		faction = Find.FactionManager.RandomNonHostileFaction(allowHidden: false, allowDefeated: false, allowNonHumanlike: false);
 	}
 }

@@ -1,86 +1,183 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 using Verse.Sound;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_CarryGenepackToContainer : JobDriver
 {
-	// Token: 0x02001229 RID: 4649
-	public class JobDriver_CarryGenepackToContainer : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__10 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x170011A7 RID: 4519
-		// (get) Token: 0x06007194 RID: 29076 RVA: 0x00231A60 File Offset: 0x0022FC60
-		private Thing Container
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_CarryGenepackToContainer _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.job.GetTarget(TargetIndex.B).Thing;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170011A8 RID: 4520
-		// (get) Token: 0x06007195 RID: 29077 RVA: 0x00231A81 File Offset: 0x0022FC81
-		private CompGenepackContainer ContainerComp
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.Container.TryGetComp<CompGenepackContainer>();
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170011A9 RID: 4521
-		// (get) Token: 0x06007196 RID: 29078 RVA: 0x00231A90 File Offset: 0x0022FC90
-		private Genepack Genepack
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__10(int _003C_003E1__state)
 		{
-			get
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_CarryGenepackToContainer CS_0024_003C_003E8__locals12 = _003C_003E4__this;
+			switch (num)
 			{
-				return (Genepack)this.job.GetTarget(TargetIndex.A).Thing;
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (!ModLister.CheckBiotech("Genepack"))
+				{
+					return false;
+				}
+				CS_0024_003C_003E8__locals12.FailOn(delegate
+				{
+					CompGenepackContainer containerComp2 = CS_0024_003C_003E8__locals12.ContainerComp;
+					if (containerComp2 == null || containerComp2.Full)
+					{
+						return true;
+					}
+					return (!containerComp2.autoLoad && (!containerComp2.leftToLoad.Contains(CS_0024_003C_003E8__locals12.Genepack) || CS_0024_003C_003E8__locals12.Genepack.targetContainer != CS_0024_003C_003E8__locals12.Container)) ? true : false;
+				});
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.OnCell).FailOnDespawnedNullOrForbidden(TargetIndex.A);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Haul.StartCarryThing(TargetIndex.A, putRemainderInQueue: false, subtractNumTakenFromJobCount: true);
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Goto.Goto(TargetIndex.B, PathEndMode.Touch);
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+			{
+				_003C_003E1__state = -1;
+				Toil toil = Toils_General.Wait(30, TargetIndex.B).WithProgressBarToilDelay(TargetIndex.B).FailOnDespawnedOrNull(TargetIndex.B);
+				toil.handlingFacing = true;
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 4;
+				return true;
+			}
+			case 4:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Haul.DepositHauledThingInContainer(TargetIndex.B, TargetIndex.A, delegate
+				{
+					CS_0024_003C_003E8__locals12.Genepack.def.soundDrop.PlayOneShot(SoundInfo.InMap(CS_0024_003C_003E8__locals12.Container));
+					CS_0024_003C_003E8__locals12.Genepack.targetContainer = null;
+					CompGenepackContainer containerComp = CS_0024_003C_003E8__locals12.ContainerComp;
+					containerComp.leftToLoad.Remove(CS_0024_003C_003E8__locals12.Genepack);
+					MoteMaker.ThrowText(CS_0024_003C_003E8__locals12.Container.DrawPos, CS_0024_003C_003E8__locals12.pawn.Map, "InsertedThing".Translate($"{containerComp.innerContainer.Count} / {containerComp.Props.maxCapacity}"));
+				});
+				_003C_003E1__state = 5;
+				return true;
+			case 5:
+				_003C_003E1__state = -1;
+				return false;
 			}
 		}
 
-		// Token: 0x06007197 RID: 29079 RVA: 0x001D81A7 File Offset: 0x001D63A7
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		bool IEnumerator.MoveNext()
 		{
-			return this.pawn.Reserve(this.job.GetTarget(TargetIndex.A), this.job, 1, -1, null, errorOnFailed, false);
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x06007198 RID: 29080 RVA: 0x00231AB6 File Offset: 0x0022FCB6
-		protected override IEnumerable<Toil> MakeNewToils()
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			if (!ModLister.CheckBiotech("Genepack"))
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__10 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				yield break;
+				_003C_003E1__state = 0;
+				result = this;
 			}
-			this.FailOn(delegate()
+			else
 			{
-				CompGenepackContainer containerComp = this.ContainerComp;
-				return containerComp == null || containerComp.Full || (!containerComp.autoLoad && (!containerComp.leftToLoad.Contains(this.Genepack) || this.Genepack.targetContainer != this.Container));
-			});
-			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.OnCell, false).FailOnDespawnedNullOrForbidden(TargetIndex.A);
-			yield return Toils_Haul.StartCarryThing(TargetIndex.A, false, true, false, true, false);
-			yield return Toils_Goto.Goto(TargetIndex.B, PathEndMode.Touch);
-			Toil toil = Toils_General.Wait(30, TargetIndex.B).WithProgressBarToilDelay(TargetIndex.B, false, -0.5f).FailOnDespawnedOrNull(TargetIndex.B);
-			toil.handlingFacing = true;
-			yield return toil;
-			yield return Toils_Haul.DepositHauledThingInContainer(TargetIndex.B, TargetIndex.A, delegate
-			{
-				this.Genepack.def.soundDrop.PlayOneShot(SoundInfo.InMap(this.Container, MaintenanceType.None));
-				this.Genepack.targetContainer = null;
-				CompGenepackContainer containerComp = this.ContainerComp;
-				containerComp.leftToLoad.Remove(this.Genepack);
-				MoteMaker.ThrowText(this.Container.DrawPos, this.pawn.Map, "InsertedThing".Translate(string.Format("{0} / {1}", containerComp.innerContainer.Count, containerComp.Props.maxCapacity)), -1f);
-			});
-			yield break;
+				result = new _003CMakeNewToils_003Ed__10(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
 		}
 
-		// Token: 0x04004EAB RID: 20139
-		private const TargetIndex GenepackInd = TargetIndex.A;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x04004EAC RID: 20140
-		private const TargetIndex ContainerInd = TargetIndex.B;
+	private const TargetIndex GenepackInd = TargetIndex.A;
 
-		// Token: 0x04004EAD RID: 20141
-		private const int InsertTicks = 30;
+	private const TargetIndex ContainerInd = TargetIndex.B;
+
+	private const int InsertTicks = 30;
+
+	private Thing Container => job.GetTarget(TargetIndex.B).Thing;
+
+	private CompGenepackContainer ContainerComp => Container.TryGetComp<CompGenepackContainer>();
+
+	private Genepack Genepack => (Genepack)job.GetTarget(TargetIndex.A).Thing;
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return pawn.Reserve(job.GetTarget(TargetIndex.A), job, 1, -1, null, errorOnFailed);
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__10))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__10(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

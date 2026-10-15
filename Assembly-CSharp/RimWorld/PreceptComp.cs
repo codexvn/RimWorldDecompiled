@@ -1,72 +1,158 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public abstract class PreceptComp
 {
-	// Token: 0x02002630 RID: 9776
-	public abstract class PreceptComp
+	[CompilerGenerated]
+	private sealed class _003CGetDescriptions_003Ed__10 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x170020C1 RID: 8385
-		// (get) Token: 0x0600D640 RID: 54848 RVA: 0x003F9817 File Offset: 0x003F7A17
-		public virtual IEnumerable<TraitRequirement> TraitsAffecting
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public PreceptComp _003C_003E4__this;
+
+		string IEnumerator<string>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return Enumerable.Empty<TraitRequirement>();
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600D641 RID: 54849 RVA: 0x000026EA File Offset: 0x000008EA
-		public virtual void Notify_MemberTookAction(HistoryEvent ev, Precept precept, bool canApplySelfTookThoughts)
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x0600D642 RID: 54850 RVA: 0x000026EA File Offset: 0x000008EA
-		public virtual void Notify_MemberWitnessedAction(HistoryEvent ev, Precept precept, Pawn member)
+		[DebuggerHidden]
+		public _003CGetDescriptions_003Ed__10(int _003C_003E1__state)
 		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x0600D643 RID: 54851 RVA: 0x000026EA File Offset: 0x000008EA
-		public virtual void Notify_HistoryEvent(HistoryEvent ev, Precept precept)
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x0600D644 RID: 54852 RVA: 0x000026EA File Offset: 0x000008EA
-		public virtual void Notify_MemberGenerated(Pawn pawn, Precept precept, bool newborn, bool ignoreApparel = false)
+		private bool MoveNext()
 		{
+			int num = _003C_003E1__state;
+			PreceptComp preceptComp = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = preceptComp.description.CapitalizeFirst();
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				return false;
+			}
 		}
 
-		// Token: 0x0600D645 RID: 54853 RVA: 0x000026EA File Offset: 0x000008EA
-		public virtual void Notify_AddBedThoughts(Pawn pawn, Precept precept)
+		bool IEnumerator.MoveNext()
 		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0600D646 RID: 54854 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public virtual bool MemberWillingToDo(HistoryEvent ev)
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			return true;
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x0600D647 RID: 54855 RVA: 0x003F981E File Offset: 0x003F7A1E
-		public virtual IEnumerable<string> GetDescriptions()
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
 		{
-			yield return this.description.CapitalizeFirst();
-			yield break;
+			_003CGetDescriptions_003Ed__10 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CGetDescriptions_003Ed__10(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
 		}
 
-		// Token: 0x0600D648 RID: 54856 RVA: 0x00035AE5 File Offset: 0x00033CE5
-		public virtual IEnumerable<string> ConfigErrors(PreceptDef parent)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return Enumerable.Empty<string>();
+			return ((IEnumerable<string>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x040091AA RID: 37290
-		[MustTranslate]
-		public string description;
+	[MustTranslate]
+	public string description;
 
-		// Token: 0x040091AB RID: 37291
-		public PreceptDef preceptDef;
+	public PreceptDef preceptDef;
+
+	public virtual IEnumerable<TraitRequirement> TraitsAffecting => Enumerable.Empty<TraitRequirement>();
+
+	public virtual void Notify_MemberTookAction(HistoryEvent ev, Precept precept, bool canApplySelfTookThoughts)
+	{
+	}
+
+	public virtual void Notify_MemberWitnessedAction(HistoryEvent ev, Precept precept, Pawn member)
+	{
+	}
+
+	public virtual void Notify_HistoryEvent(HistoryEvent ev, Precept precept)
+	{
+	}
+
+	public virtual void Notify_MemberGenerated(Pawn pawn, Precept precept, bool newborn, bool ignoreApparel = false)
+	{
+	}
+
+	public virtual void Notify_AddBedThoughts(Pawn pawn, Precept precept)
+	{
+	}
+
+	public virtual bool MemberWillingToDo(HistoryEvent ev)
+	{
+		return true;
+	}
+
+	[IteratorStateMachine(typeof(_003CGetDescriptions_003Ed__10))]
+	public virtual IEnumerable<string> GetDescriptions()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetDescriptions_003Ed__10(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public virtual IEnumerable<string> ConfigErrors(PreceptDef parent)
+	{
+		return Enumerable.Empty<string>();
 	}
 }

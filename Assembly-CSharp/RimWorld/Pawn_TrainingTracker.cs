@@ -1,447 +1,534 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.AI;
 using Verse.Sound;
 
-namespace RimWorld
+namespace RimWorld;
+
+[StaticConstructorOnStartup]
+public class Pawn_TrainingTracker : IExposable
 {
-	// Token: 0x020024E9 RID: 9449
-	[StaticConstructorOnStartup]
-	public class Pawn_TrainingTracker : IExposable
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass25_0
 	{
-		// Token: 0x0600CE6E RID: 52846 RVA: 0x003C9D17 File Offset: 0x003C7F17
-		public Pawn_TrainingTracker(Pawn pawn)
-		{
-			this.pawn = pawn;
-			this.countDecayFrom = Find.TickManager.TicksGame;
-		}
+		public Pawn master;
 
-		// Token: 0x0600CE6F RID: 52847 RVA: 0x003C9D58 File Offset: 0x003C7F58
-		public void ExposeData()
+		public AcceptanceReport report;
+
+		public Pawn_TrainingTracker _003C_003E4__this;
+
+		internal void _003CGetGizmos_003Eb__0(LocalTargetInfo target)
 		{
-			Scribe_Deep.Look<DefMap<TrainableDef, bool>>(ref this.wantedTrainables, "wantedTrainables", Array.Empty<object>());
-			Scribe_Deep.Look<DefMap<TrainableDef, int>>(ref this.steps, "steps", Array.Empty<object>());
-			Scribe_Deep.Look<DefMap<TrainableDef, bool>>(ref this.learned, "learned", Array.Empty<object>());
-			Scribe_References.Look<Thing>(ref this.attackTarget, "attackTarget", false);
-			Scribe_Values.Look<int>(ref this.countDecayFrom, "countDecayFrom", 0, false);
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+			IEnumerable<Pawn> enumerable = Find.Selector.SelectedObjects.Where((object x) => x is Pawn pawn && (bool)CanDoAttackTarget(pawn)).Cast<Pawn>();
+			if (!target.Cell.InHorDistOf(master.Position, 25.9f))
 			{
-				BackCompatibility.PawnTrainingTrackerPostLoadInit(this, ref this.wantedTrainables, ref this.steps, ref this.learned);
+				Messages.Message("MessageNotInRangeOfMaster".Translate(), MessageTypeDefOf.RejectInput, historical: false);
+				return;
+			}
+			string failStr = null;
+			foreach (Pawn item in enumerable)
+			{
+				FloatMenuUtility.GetMeleeAttackAction(item, target, out failStr, ignoreControlled: true)?.Invoke();
+				item.training.attackTarget = target.Thing;
+				item.mindState.enemyTarget = target.Thing;
+			}
+			if (!failStr.NullOrEmpty())
+			{
+				Messages.Message(failStr, MessageTypeDefOf.RejectInput, historical: false);
 			}
 		}
 
-		// Token: 0x0600CE70 RID: 52848 RVA: 0x003C9DE7 File Offset: 0x003C7FE7
-		public bool GetWanted(TrainableDef td)
+		internal void _003CGetGizmos_003Eb__1(LocalTargetInfo _)
 		{
-			return this.wantedTrainables[td];
-		}
-
-		// Token: 0x0600CE71 RID: 52849 RVA: 0x003C9DF5 File Offset: 0x003C7FF5
-		private void SetWanted(TrainableDef td, bool wanted)
-		{
-			this.wantedTrainables[td] = wanted;
-		}
-
-		// Token: 0x0600CE72 RID: 52850 RVA: 0x003C9E04 File Offset: 0x003C8004
-		internal int GetSteps(TrainableDef td)
-		{
-			return this.steps[td];
-		}
-
-		// Token: 0x0600CE73 RID: 52851 RVA: 0x003C9E14 File Offset: 0x003C8014
-		public bool CanBeTrained(TrainableDef td)
-		{
-			if (this.steps[td] >= td.steps)
+			if (report.Accepted && _003C_003E4__this.pawn.playerSettings?.Master != null)
 			{
+				GenDraw.DrawRadiusRing(_003C_003E4__this.pawn.playerSettings.Master.Position, 25.9f);
+			}
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGetGizmos_003Ed__25 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Pawn_TrainingTracker _003C_003E4__this;
+
+		Gizmo IEnumerator<Gizmo>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetGizmos_003Ed__25(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			Pawn_TrainingTracker pawn_TrainingTracker = _003C_003E4__this;
+			switch (num)
+			{
+			default:
 				return false;
-			}
-			List<TrainableDef> prerequisites = td.prerequisites;
-			if (!prerequisites.NullOrEmpty<TrainableDef>())
+			case 0:
 			{
-				for (int i = 0; i < prerequisites.Count; i++)
+				_003C_003E1__state = -1;
+				_003C_003Ec__DisplayClass25_0 CS_0024_003C_003E8__locals9 = new _003C_003Ec__DisplayClass25_0
 				{
-					if (!this.HasLearned(prerequisites[i]) || this.CanBeTrained(prerequisites[i]))
-					{
-						return false;
-					}
+					_003C_003E4__this = _003C_003E4__this
+				};
+				if (!CanEverDoAttackTarget(pawn_TrainingTracker.pawn))
+				{
+					return false;
 				}
+				CS_0024_003C_003E8__locals9.master = pawn_TrainingTracker.pawn.playerSettings.Master;
+				CS_0024_003C_003E8__locals9.report = CanDoAttackTarget(pawn_TrainingTracker.pawn);
+				_003C_003E2__current = new Command_Target
+				{
+					defaultLabel = "AnimalAttackTarget".Translate(),
+					defaultDesc = "AnimalAttackTargetDesc".Translate(),
+					targetingParams = TargetingParameters.ForAttackAny(),
+					hotKey = KeyBindingDefOf.Misc2,
+					icon = AttackTargetTexture,
+					groupKey = (CS_0024_003C_003E8__locals9.report.Accepted ? 23452345 : (-1)),
+					action = delegate(LocalTargetInfo target)
+					{
+						IEnumerable<Pawn> enumerable = Find.Selector.SelectedObjects.Where((object x) => x is Pawn pawn2 && (bool)CanDoAttackTarget(pawn2)).Cast<Pawn>();
+						if (!target.Cell.InHorDistOf(CS_0024_003C_003E8__locals9.master.Position, 25.9f))
+						{
+							Messages.Message("MessageNotInRangeOfMaster".Translate(), MessageTypeDefOf.RejectInput, historical: false);
+						}
+						else
+						{
+							string failStr = null;
+							foreach (Pawn item in enumerable)
+							{
+								FloatMenuUtility.GetMeleeAttackAction(item, target, out failStr, ignoreControlled: true)?.Invoke();
+								item.training.attackTarget = target.Thing;
+								item.mindState.enemyTarget = target.Thing;
+							}
+							if (!failStr.NullOrEmpty())
+							{
+								Messages.Message(failStr, MessageTypeDefOf.RejectInput, historical: false);
+							}
+						}
+					},
+					Disabled = !CS_0024_003C_003E8__locals9.report.Accepted,
+					disabledReason = CS_0024_003C_003E8__locals9.report.Reason,
+					onUpdate = delegate
+					{
+						if (CS_0024_003C_003E8__locals9.report.Accepted && CS_0024_003C_003E8__locals9._003C_003E4__this.pawn.playerSettings?.Master != null)
+						{
+							GenDraw.DrawRadiusRing(CS_0024_003C_003E8__locals9._003C_003E4__this.pawn.playerSettings.Master.Position, 25.9f);
+						}
+					}
+				};
+				_003C_003E1__state = 1;
+				return true;
 			}
-			return true;
+			case 1:
+				_003C_003E1__state = -1;
+				if (pawn_TrainingTracker.attackTarget == null || pawn_TrainingTracker.pawn.jobs.curJob.def != JobDefOf.AttackMelee || !(pawn_TrainingTracker.pawn.jobs.curJob.targetA == pawn_TrainingTracker.attackTarget))
+				{
+					break;
+				}
+				_003C_003E2__current = new Command_Action
+				{
+					defaultLabel = "CancelAttack".Translate(),
+					defaultDesc = "CancelAttackDesc".Translate(),
+					icon = CancelIcon,
+					groupKey = 76547456,
+					action = delegate
+					{
+						foreach (Pawn item2 in Find.Selector.SelectedObjects.Where(delegate(object x)
+						{
+							Pawn pawn = x as Pawn;
+							return pawn?.training?.attackTarget != null && pawn.mindState.enemyTarget == pawn.training.attackTarget;
+						}).Cast<Pawn>())
+						{
+							item2.training.attackTarget = null;
+							item2.jobs.EndCurrentJob(JobCondition.InterruptForced);
+						}
+						SoundDefOf.Tick_Low.PlayOneShotOnCamera();
+					}
+				};
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				break;
+			}
+			return false;
 		}
 
-		// Token: 0x0600CE74 RID: 52852 RVA: 0x003C9E78 File Offset: 0x003C8078
-		public bool HasLearned(TrainableDef td)
+		bool IEnumerator.MoveNext()
 		{
-			TrainabilityDef trainability = TrainableUtility.GetTrainability(this.pawn);
-			if (td.requiredTrainability != null && trainability != null)
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CGetGizmos_003Ed__25 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				int intelligenceOrder = trainability.intelligenceOrder;
-				TrainabilityDef requiredTrainability = td.requiredTrainability;
-				int? num = (requiredTrainability != null) ? new int?(requiredTrainability.intelligenceOrder) : null;
-				if (intelligenceOrder < num.GetValueOrDefault() & num != null)
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CGetGizmos_003Ed__25(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	public Pawn pawn;
+
+	private DefMap<TrainableDef, bool> wantedTrainables = new DefMap<TrainableDef, bool>();
+
+	private DefMap<TrainableDef, int> steps = new DefMap<TrainableDef, int>();
+
+	private DefMap<TrainableDef, bool> learned = new DefMap<TrainableDef, bool>();
+
+	public Thing attackTarget;
+
+	private int countDecayFrom;
+
+	public const float AttackTargetRange = 25.9f;
+
+	public static readonly Texture2D AttackTargetTexture = ContentFinder<Texture2D>.Get("UI/Commands/AnimalAttack");
+
+	private static readonly Texture2D CancelIcon = ContentFinder<Texture2D>.Get("UI/Designators/Cancel");
+
+	public Pawn_TrainingTracker(Pawn pawn)
+	{
+		this.pawn = pawn;
+		countDecayFrom = Find.TickManager.TicksGame;
+	}
+
+	public void ExposeData()
+	{
+		Scribe_Deep.Look(ref wantedTrainables, "wantedTrainables");
+		Scribe_Deep.Look(ref steps, "steps");
+		Scribe_Deep.Look(ref learned, "learned");
+		Scribe_References.Look(ref attackTarget, "attackTarget");
+		Scribe_Values.Look(ref countDecayFrom, "countDecayFrom", 0);
+		if (Scribe.mode == LoadSaveMode.PostLoadInit)
+		{
+			BackCompatibility.PawnTrainingTrackerPostLoadInit(this, ref wantedTrainables, ref steps, ref learned);
+		}
+	}
+
+	public bool GetWanted(TrainableDef td)
+	{
+		return wantedTrainables[td];
+	}
+
+	private void SetWanted(TrainableDef td, bool wanted)
+	{
+		wantedTrainables[td] = wanted;
+	}
+
+	internal int GetSteps(TrainableDef td)
+	{
+		return steps[td];
+	}
+
+	public bool CanBeTrained(TrainableDef td)
+	{
+		if (steps[td] >= td.steps)
+		{
+			return false;
+		}
+		List<TrainableDef> prerequisites = td.prerequisites;
+		if (!prerequisites.NullOrEmpty())
+		{
+			for (int i = 0; i < prerequisites.Count; i++)
+			{
+				if (!HasLearned(prerequisites[i]) || CanBeTrained(prerequisites[i]))
 				{
 					return false;
 				}
 			}
-			return this.learned[td];
 		}
+		return true;
+	}
 
-		// Token: 0x0600CE75 RID: 52853 RVA: 0x003C9EE4 File Offset: 0x003C80E4
-		public AcceptanceReport CanAssignToTrain(TrainableDef td)
+	public bool HasLearned(TrainableDef td)
+	{
+		TrainabilityDef trainability = TrainableUtility.GetTrainability(pawn);
+		if (td.requiredTrainability != null && trainability != null && trainability.intelligenceOrder < td.requiredTrainability?.intelligenceOrder)
 		{
-			bool flag;
-			return this.CanAssignToTrain(td, out flag);
+			return false;
 		}
+		return learned[td];
+	}
 
-		// Token: 0x0600CE76 RID: 52854 RVA: 0x003C9EFA File Offset: 0x003C80FA
-		public AcceptanceReport CanAssignToTrain(TrainableDef td, out bool visible)
-		{
-			return Pawn_TrainingTracker.CanAssignToTrain(td, this.pawn.def, out visible, this.pawn);
-		}
+	public AcceptanceReport CanAssignToTrain(TrainableDef td)
+	{
+		bool visible;
+		return CanAssignToTrain(td, out visible);
+	}
 
-		// Token: 0x0600CE77 RID: 52855 RVA: 0x003C9F14 File Offset: 0x003C8114
-		public static AcceptanceReport CanAssignToTrain(TrainableDef td, ThingDef pawnDef, out bool visible, Pawn pawn = null)
+	public AcceptanceReport CanAssignToTrain(TrainableDef td, out bool visible)
+	{
+		return CanAssignToTrain(td, pawn.def, out visible, pawn);
+	}
+
+	public static AcceptanceReport CanAssignToTrain(TrainableDef td, ThingDef pawnDef, out bool visible, Pawn pawn = null)
+	{
+		if (pawnDef.race.untrainableTags != null)
 		{
-			if (pawnDef.race.untrainableTags != null)
+			for (int i = 0; i < pawnDef.race.untrainableTags.Count; i++)
 			{
-				for (int i = 0; i < pawnDef.race.untrainableTags.Count; i++)
-				{
-					if (td.MatchesTag(pawnDef.race.untrainableTags[i]))
-					{
-						visible = false;
-						return false;
-					}
-				}
-			}
-			if (ModsConfig.OdysseyActive && td.specialTrainable)
-			{
-				List<TrainableDef> specialTrainables = pawnDef.race.specialTrainables;
-				if (specialTrainables == null || !specialTrainables.Contains(td))
+				if (td.MatchesTag(pawnDef.race.untrainableTags[i]))
 				{
 					visible = false;
 					return false;
 				}
 			}
-			float num = (pawn != null) ? pawn.BodySize : pawnDef.race.baseBodySize;
-			string value = ((pawn != null) ? pawn.LabelShort : null) ?? pawnDef.label;
-			TrainabilityDef trainabilityDef = TrainableUtility.GetTrainability(pawn) ?? pawnDef.race.trainability;
-			if (pawnDef.race.trainableTags != null)
-			{
-				int j = 0;
-				while (j < pawnDef.race.trainableTags.Count)
-				{
-					if (td.MatchesTag(pawnDef.race.trainableTags[j]))
-					{
-						if (num < td.minBodySize)
-						{
-							visible = true;
-							return new AcceptanceReport("CannotTrainTooSmall".Translate(value).Resolve());
-						}
-						visible = true;
-						return true;
-					}
-					else
-					{
-						j++;
-					}
-				}
-			}
-			if (!td.defaultTrainable && !td.specialTrainable)
+		}
+		if (ModsConfig.OdysseyActive && td.specialTrainable)
+		{
+			List<TrainableDef> specialTrainables = pawnDef.race.specialTrainables;
+			if (specialTrainables == null || !specialTrainables.Contains(td))
 			{
 				visible = false;
 				return false;
 			}
-			if (num < td.minBodySize)
-			{
-				visible = true;
-				return new AcceptanceReport("CannotTrainTooSmall".Translate(value).Resolve());
-			}
-			if (td.requiredTrainability != null && trainabilityDef.intelligenceOrder < td.requiredTrainability.intelligenceOrder)
-			{
-				visible = true;
-				return new AcceptanceReport("CannotTrainNotSmartEnough".Translate(td.requiredTrainability.label).Resolve());
-			}
-			visible = true;
-			return true;
 		}
-
-		// Token: 0x0600CE78 RID: 52856 RVA: 0x003CA0F8 File Offset: 0x003C82F8
-		public TrainableDef NextTrainableToTrain()
+		float num = pawn?.BodySize ?? pawnDef.race.baseBodySize;
+		string text = pawn?.LabelShort ?? pawnDef.label;
+		TrainabilityDef trainabilityDef = TrainableUtility.GetTrainability(pawn) ?? pawnDef.race.trainability;
+		if (pawnDef.race.trainableTags != null)
 		{
-			List<TrainableDef> trainableDefsInListOrder = TrainableUtility.TrainableDefsInListOrder;
-			for (int i = 0; i < trainableDefsInListOrder.Count; i++)
+			for (int j = 0; j < pawnDef.race.trainableTags.Count; j++)
 			{
-				if (this.GetWanted(trainableDefsInListOrder[i]) && this.CanBeTrained(trainableDefsInListOrder[i]))
+				if (td.MatchesTag(pawnDef.race.trainableTags[j]))
 				{
-					return trainableDefsInListOrder[i];
-				}
-			}
-			return null;
-		}
-
-		// Token: 0x0600CE79 RID: 52857 RVA: 0x003CA144 File Offset: 0x003C8344
-		public void Train(TrainableDef td, Pawn trainer, bool complete = false)
-		{
-			if (complete)
-			{
-				this.steps[td] = td.steps;
-			}
-			else
-			{
-				DefMap<TrainableDef, int> defMap = this.steps;
-				int num = defMap[td];
-				defMap[td] = num + 1;
-			}
-			if (this.steps[td] >= td.steps)
-			{
-				this.learned[td] = true;
-				if (td == TrainableDefOf.Obedience && trainer != null && this.pawn.playerSettings != null && this.pawn.playerSettings.Master == null)
-				{
-					this.pawn.playerSettings.Master = trainer;
-				}
-			}
-		}
-
-		// Token: 0x0600CE7A RID: 52858 RVA: 0x003CA1E0 File Offset: 0x003C83E0
-		public void SetWantedRecursive(TrainableDef td, bool checkOn)
-		{
-			this.SetWanted(td, checkOn);
-			if (checkOn)
-			{
-				if (td.prerequisites != null)
-				{
-					for (int i = 0; i < td.prerequisites.Count; i++)
+					if (num < td.minBodySize)
 					{
-						this.SetWantedRecursive(td.prerequisites[i], true);
+						visible = true;
+						return new AcceptanceReport("CannotTrainTooSmall".Translate(text).Resolve());
 					}
-					return;
-				}
-			}
-			else
-			{
-				foreach (TrainableDef td2 in from t in DefDatabase<TrainableDef>.AllDefsListForReading
-				where t.prerequisites != null && t.prerequisites.Contains(td)
-				select t)
-				{
-					this.SetWantedRecursive(td2, false);
+					visible = true;
+					return true;
 				}
 			}
 		}
-
-		// Token: 0x0600CE7B RID: 52859 RVA: 0x003CA29C File Offset: 0x003C849C
-		public void TrainingTrackerTickRare()
+		if (!td.defaultTrainable && !td.specialTrainable)
 		{
-			if (this.pawn.Suspended)
+			visible = false;
+			return false;
+		}
+		if (num < td.minBodySize)
+		{
+			visible = true;
+			return new AcceptanceReport("CannotTrainTooSmall".Translate(text).Resolve());
+		}
+		if (td.requiredTrainability != null && trainabilityDef.intelligenceOrder < td.requiredTrainability.intelligenceOrder)
+		{
+			visible = true;
+			return new AcceptanceReport("CannotTrainNotSmartEnough".Translate(td.requiredTrainability.label).Resolve());
+		}
+		visible = true;
+		return true;
+	}
+
+	public TrainableDef NextTrainableToTrain()
+	{
+		List<TrainableDef> trainableDefsInListOrder = TrainableUtility.TrainableDefsInListOrder;
+		for (int i = 0; i < trainableDefsInListOrder.Count; i++)
+		{
+			if (GetWanted(trainableDefsInListOrder[i]) && CanBeTrained(trainableDefsInListOrder[i]))
 			{
-				this.countDecayFrom += 250;
+				return trainableDefsInListOrder[i];
+			}
+		}
+		return null;
+	}
+
+	public void Train(TrainableDef td, Pawn trainer, bool complete = false)
+	{
+		if (complete)
+		{
+			steps[td] = td.steps;
+		}
+		else
+		{
+			steps[td]++;
+		}
+		if (steps[td] >= td.steps)
+		{
+			learned[td] = true;
+			if (td == TrainableDefOf.Obedience && trainer != null && pawn.playerSettings != null && pawn.playerSettings.Master == null)
+			{
+				pawn.playerSettings.Master = trainer;
+			}
+		}
+	}
+
+	public void SetWantedRecursive(TrainableDef td, bool checkOn)
+	{
+		SetWanted(td, checkOn);
+		if (checkOn)
+		{
+			if (td.prerequisites != null)
+			{
+				for (int i = 0; i < td.prerequisites.Count; i++)
+				{
+					SetWantedRecursive(td.prerequisites[i], checkOn: true);
+				}
+			}
+			return;
+		}
+		foreach (TrainableDef item in DefDatabase<TrainableDef>.AllDefsListForReading.Where((TrainableDef t) => t.prerequisites != null && t.prerequisites.Contains(td)))
+		{
+			SetWantedRecursive(item, checkOn: false);
+		}
+	}
+
+	public void TrainingTrackerTickRare()
+	{
+		if (pawn.Suspended)
+		{
+			countDecayFrom += 250;
+		}
+		else if (!pawn.Spawned)
+		{
+			countDecayFrom += 250;
+		}
+		else if (steps[TrainableDefOf.Tameness] == 0)
+		{
+			countDecayFrom = Find.TickManager.TicksGame;
+		}
+		else
+		{
+			if (Find.TickManager.TicksGame < countDecayFrom + TrainableUtility.DegradationPeriodTicks(pawn) || pawn.RaceProps.animalType == AnimalType.Dryad)
+			{
 				return;
 			}
-			if (!this.pawn.Spawned)
+			TrainableDef trainableDef = (from kvp in steps
+				where kvp.Value > 0
+				select kvp.Key).Except(steps.Where((KeyValuePair<TrainableDef, int> kvp) => kvp.Value > 0 && kvp.Key.prerequisites != null).SelectMany((KeyValuePair<TrainableDef, int> kvp) => kvp.Key.prerequisites)).RandomElement();
+			if (trainableDef == TrainableDefOf.Tameness && !TrainableUtility.TamenessCanDecay(pawn))
 			{
-				this.countDecayFrom += 250;
+				countDecayFrom = Find.TickManager.TicksGame;
 				return;
 			}
-			if (this.steps[TrainableDefOf.Tameness] == 0)
-			{
-				this.countDecayFrom = Find.TickManager.TicksGame;
-				return;
-			}
-			if (Find.TickManager.TicksGame < this.countDecayFrom + TrainableUtility.DegradationPeriodTicks(this.pawn))
-			{
-				return;
-			}
-			if (this.pawn.RaceProps.animalType == AnimalType.Dryad)
-			{
-				return;
-			}
-			TrainableDef trainableDef = (from kvp in this.steps
-			where kvp.Value > 0
-			select kvp.Key).Except((from kvp in this.steps
-			where kvp.Value > 0 && kvp.Key.prerequisites != null
-			select kvp).SelectMany((KeyValuePair<TrainableDef, int> kvp) => kvp.Key.prerequisites)).RandomElement<TrainableDef>();
-			if (trainableDef == TrainableDefOf.Tameness && !TrainableUtility.TamenessCanDecay(this.pawn))
-			{
-				this.countDecayFrom = Find.TickManager.TicksGame;
-				return;
-			}
-			this.countDecayFrom = Find.TickManager.TicksGame;
-			DefMap<TrainableDef, int> defMap = this.steps;
+			countDecayFrom = Find.TickManager.TicksGame;
+			DefMap<TrainableDef, int> defMap = steps;
 			TrainableDef def = trainableDef;
 			int value = defMap[def] - 1;
 			defMap[def] = value;
-			if (this.steps[trainableDef] <= 0 && this.learned[trainableDef])
+			if (steps[trainableDef] > 0 || !learned[trainableDef])
 			{
-				this.learned[trainableDef] = false;
-				if (this.pawn.Faction == Faction.OfPlayer)
+				return;
+			}
+			learned[trainableDef] = false;
+			if (pawn.Faction == Faction.OfPlayer)
+			{
+				if (trainableDef == TrainableDefOf.Tameness)
 				{
-					if (trainableDef == TrainableDefOf.Tameness)
-					{
-						this.pawn.SetFaction(null, null);
-						Messages.Message("MessageAnimalReturnedWild".Translate(this.pawn.LabelShort, this.pawn), this.pawn, MessageTypeDefOf.NegativeEvent, true);
-						return;
-					}
-					Messages.Message("MessageAnimalLostSkill".Translate(this.pawn.LabelShort, trainableDef.LabelCap, this.pawn.Named("ANIMAL")), this.pawn, MessageTypeDefOf.NegativeEvent, true);
+					pawn.SetFaction(null);
+					Messages.Message("MessageAnimalReturnedWild".Translate(pawn.LabelShort, pawn), pawn, MessageTypeDefOf.NegativeEvent);
+				}
+				else
+				{
+					Messages.Message("MessageAnimalLostSkill".Translate(pawn.LabelShort, trainableDef.LabelCap, pawn.Named("ANIMAL")), pawn, MessageTypeDefOf.NegativeEvent);
 				}
 			}
 		}
+	}
 
-		// Token: 0x0600CE7C RID: 52860 RVA: 0x003CA520 File Offset: 0x003C8720
-		private static bool CanEverDoAttackTarget(Pawn pawn)
+	private static bool CanEverDoAttackTarget(Pawn pawn)
+	{
+		if (!ModsConfig.OdysseyActive)
 		{
-			if (!ModsConfig.OdysseyActive)
-			{
-				return false;
-			}
-			Pawn_TrainingTracker training = pawn.training;
-			return training != null && training.HasLearned(TrainableDefOf.AttackTarget);
+			return false;
 		}
+		return pawn.training?.HasLearned(TrainableDefOf.AttackTarget) ?? false;
+	}
 
-		// Token: 0x0600CE7D RID: 52861 RVA: 0x003CA544 File Offset: 0x003C8744
-		private static AcceptanceReport CanDoAttackTarget(Pawn pawn)
+	private static AcceptanceReport CanDoAttackTarget(Pawn pawn)
+	{
+		if (!CanEverDoAttackTarget(pawn))
 		{
-			if (!Pawn_TrainingTracker.CanEverDoAttackTarget(pawn))
-			{
-				return false;
-			}
-			if (pawn.playerSettings.Master == null)
-			{
-				return "NoMaster".Translate();
-			}
-			if (!pawn.playerSettings.Master.Spawned || pawn.playerSettings.Master.Map != pawn.Map)
-			{
-				return "MasterNotSpawned".Translate();
-			}
-			return true;
+			return false;
 		}
-
-		// Token: 0x0600CE7E RID: 52862 RVA: 0x003CA5BD File Offset: 0x003C87BD
-		public IEnumerable<Gizmo> GetGizmos()
+		if (pawn.playerSettings.Master == null)
 		{
-			if (!Pawn_TrainingTracker.CanEverDoAttackTarget(this.pawn))
-			{
-				yield break;
-			}
-			Pawn master = this.pawn.playerSettings.Master;
-			AcceptanceReport report = Pawn_TrainingTracker.CanDoAttackTarget(this.pawn);
-			yield return new Command_Target
-			{
-				defaultLabel = "AnimalAttackTarget".Translate(),
-				defaultDesc = "AnimalAttackTargetDesc".Translate(),
-				targetingParams = TargetingParameters.ForAttackAny(),
-				hotKey = KeyBindingDefOf.Misc2,
-				icon = Pawn_TrainingTracker.AttackTargetTexture,
-				groupKey = (report.Accepted ? 23452345 : -1),
-				action = delegate(LocalTargetInfo target)
-				{
-					IEnumerable<Pawn> enumerable = Find.Selector.SelectedObjects.Where(delegate(object x)
-					{
-						Pawn pawn2 = x as Pawn;
-						return pawn2 != null && Pawn_TrainingTracker.CanDoAttackTarget(pawn2);
-					}).Cast<Pawn>();
-					if (!target.Cell.InHorDistOf(master.Position, 25.9f))
-					{
-						Messages.Message("MessageNotInRangeOfMaster".Translate(), MessageTypeDefOf.RejectInput, false);
-						return;
-					}
-					string text = null;
-					foreach (Pawn pawn in enumerable)
-					{
-						Action meleeAttackAction = FloatMenuUtility.GetMeleeAttackAction(pawn, target, out text, true);
-						if (meleeAttackAction != null)
-						{
-							meleeAttackAction();
-						}
-						pawn.training.attackTarget = target.Thing;
-						pawn.mindState.enemyTarget = target.Thing;
-					}
-					if (!text.NullOrEmpty())
-					{
-						Messages.Message(text, MessageTypeDefOf.RejectInput, false);
-					}
-				},
-				Disabled = !report.Accepted,
-				disabledReason = report.Reason,
-				onUpdate = delegate(LocalTargetInfo _)
-				{
-					if (report.Accepted)
-					{
-						Pawn_PlayerSettings playerSettings = this.pawn.playerSettings;
-						if (((playerSettings != null) ? playerSettings.Master : null) != null)
-						{
-							GenDraw.DrawRadiusRing(this.pawn.playerSettings.Master.Position, 25.9f);
-						}
-					}
-				}
-			};
-			if (this.attackTarget != null && this.pawn.jobs.curJob.def == JobDefOf.AttackMelee && this.pawn.jobs.curJob.targetA == this.attackTarget)
-			{
-				Command_Action command_Action = new Command_Action();
-				command_Action.defaultLabel = "CancelAttack".Translate();
-				command_Action.defaultDesc = "CancelAttackDesc".Translate();
-				command_Action.icon = Pawn_TrainingTracker.CancelIcon;
-				command_Action.groupKey = 76547456;
-				command_Action.action = delegate()
-				{
-					foreach (Pawn pawn in Find.Selector.SelectedObjects.Where(delegate(object x)
-					{
-						Pawn pawn2 = x as Pawn;
-						bool flag;
-						if (pawn2 == null)
-						{
-							flag = (null != null);
-						}
-						else
-						{
-							Pawn_TrainingTracker training = pawn2.training;
-							flag = (((training != null) ? training.attackTarget : null) != null);
-						}
-						return flag && pawn2.mindState.enemyTarget == pawn2.training.attackTarget;
-					}).Cast<Pawn>())
-					{
-						pawn.training.attackTarget = null;
-						pawn.jobs.EndCurrentJob(JobCondition.InterruptForced, true, true);
-					}
-					SoundDefOf.Tick_Low.PlayOneShotOnCamera(null);
-				};
-				yield return command_Action;
-			}
-			yield break;
+			return "NoMaster".Translate();
 		}
-
-		// Token: 0x0600CE7F RID: 52863 RVA: 0x003CA5CD File Offset: 0x003C87CD
-		public void Debug_MakeDegradeHappenSoon()
+		if (!pawn.playerSettings.Master.Spawned || pawn.playerSettings.Master.Map != pawn.Map)
 		{
-			this.countDecayFrom = Find.TickManager.TicksGame - TrainableUtility.DegradationPeriodTicks(this.pawn) - 500;
+			return "MasterNotSpawned".Translate();
 		}
+		return true;
+	}
 
-		// Token: 0x04008C74 RID: 35956
-		public Pawn pawn;
+	[IteratorStateMachine(typeof(_003CGetGizmos_003Ed__25))]
+	public IEnumerable<Gizmo> GetGizmos()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetGizmos_003Ed__25(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
 
-		// Token: 0x04008C75 RID: 35957
-		private DefMap<TrainableDef, bool> wantedTrainables = new DefMap<TrainableDef, bool>();
-
-		// Token: 0x04008C76 RID: 35958
-		private DefMap<TrainableDef, int> steps = new DefMap<TrainableDef, int>();
-
-		// Token: 0x04008C77 RID: 35959
-		private DefMap<TrainableDef, bool> learned = new DefMap<TrainableDef, bool>();
-
-		// Token: 0x04008C78 RID: 35960
-		public Thing attackTarget;
-
-		// Token: 0x04008C79 RID: 35961
-		private int countDecayFrom;
-
-		// Token: 0x04008C7A RID: 35962
-		public const float AttackTargetRange = 25.9f;
-
-		// Token: 0x04008C7B RID: 35963
-		public static readonly Texture2D AttackTargetTexture = ContentFinder<Texture2D>.Get("UI/Commands/AnimalAttack", true);
-
-		// Token: 0x04008C7C RID: 35964
-		private static readonly Texture2D CancelIcon = ContentFinder<Texture2D>.Get("UI/Designators/Cancel", true);
+	public void Debug_MakeDegradeHappenSoon()
+	{
+		countDecayFrom = Find.TickManager.TicksGame - TrainableUtility.DegradationPeriodTicks(pawn) - 500;
 	}
 }

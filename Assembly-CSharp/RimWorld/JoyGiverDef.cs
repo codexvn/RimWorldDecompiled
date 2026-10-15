@@ -1,96 +1,216 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JoyGiverDef : Def
 {
-	// Token: 0x02001A5D RID: 6749
-	public class JoyGiverDef : Def
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__16 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001731 RID: 5937
-		// (get) Token: 0x060097A9 RID: 38825 RVA: 0x002C4AE2 File Offset: 0x002C2CE2
-		public JoyGiver Worker
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JoyGiverDef _003C_003E4__this;
+
+		private IEnumerator<string> _003C_003E7__wrap1;
+
+		string IEnumerator<string>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.workerInt == null)
-				{
-					this.workerInt = (JoyGiver)Activator.CreateInstance(this.giverClass);
-					this.workerInt.def = this;
-				}
-				return this.workerInt;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x060097AA RID: 38826 RVA: 0x002C4B14 File Offset: 0x002C2D14
-		public override IEnumerable<string> ConfigErrors()
+		object IEnumerator.Current
 		{
-			foreach (string text in base.ConfigErrors())
+			[DebuggerHidden]
+			get
 			{
-				yield return text;
+				return _003C_003E2__current;
 			}
-			IEnumerator<string> enumerator = null;
-			if (this.jobDef != null && this.jobDef.joyKind != this.joyKind)
-			{
-				string[] array = new string[6];
-				array[0] = "jobDef ";
-				int num = 1;
-				JobDef jobDef = this.jobDef;
-				array[num] = ((jobDef != null) ? jobDef.ToString() : null);
-				array[2] = " has joyKind ";
-				int num2 = 3;
-				JoyKindDef joyKindDef = this.jobDef.joyKind;
-				array[num2] = ((joyKindDef != null) ? joyKindDef.ToString() : null);
-				array[4] = " which does not match our joyKind ";
-				int num3 = 5;
-				JoyKindDef joyKindDef2 = this.joyKind;
-				array[num3] = ((joyKindDef2 != null) ? joyKindDef2.ToString() : null);
-				yield return string.Concat(array);
-			}
-			yield break;
-			yield break;
 		}
 
-		// Token: 0x040064FF RID: 25855
-		public Type giverClass;
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__16(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
 
-		// Token: 0x04006500 RID: 25856
-		public float baseChance;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
 
-		// Token: 0x04006501 RID: 25857
-		public bool requireChair = true;
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				JoyGiverDef joyGiverDef = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((Def)joyGiverDef).ConfigErrors().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0072;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0072;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_0072:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (joyGiverDef.jobDef != null && joyGiverDef.jobDef.joyKind != joyGiverDef.joyKind)
+					{
+						_003C_003E2__current = "jobDef " + joyGiverDef.jobDef?.ToString() + " has joyKind " + joyGiverDef.jobDef.joyKind?.ToString() + " which does not match our joyKind " + joyGiverDef.joyKind;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
 
-		// Token: 0x04006502 RID: 25858
-		public List<ThingDef> thingDefs;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x04006503 RID: 25859
-		public JobDef jobDef;
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
 
-		// Token: 0x04006504 RID: 25860
-		public bool desireSit = true;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04006505 RID: 25861
-		public float pctPawnsEverDo = 1f;
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__16 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__16(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x04006506 RID: 25862
-		public bool unroofedOnly;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x04006507 RID: 25863
-		public JoyKindDef joyKind;
+	public Type giverClass;
 
-		// Token: 0x04006508 RID: 25864
-		public List<PawnCapacityDef> requiredCapacities = new List<PawnCapacityDef>();
+	public float baseChance;
 
-		// Token: 0x04006509 RID: 25865
-		public bool canDoWhileInBed;
+	public bool requireChair = true;
 
-		// Token: 0x0400650A RID: 25866
-		public bool requiresEnjoyOutdoors;
+	public List<ThingDef> thingDefs;
 
-		// Token: 0x0400650B RID: 25867
-		public bool countsForRecRoom = true;
+	public JobDef jobDef;
 
-		// Token: 0x0400650C RID: 25868
-		private JoyGiver workerInt;
+	public bool desireSit = true;
+
+	public float pctPawnsEverDo = 1f;
+
+	public bool unroofedOnly;
+
+	public JoyKindDef joyKind;
+
+	public List<PawnCapacityDef> requiredCapacities = new List<PawnCapacityDef>();
+
+	public bool canDoWhileInBed;
+
+	public bool requiresEnjoyOutdoors;
+
+	public bool countsForRecRoom = true;
+
+	private JoyGiver workerInt;
+
+	public JoyGiver Worker
+	{
+		get
+		{
+			if (workerInt == null)
+			{
+				workerInt = (JoyGiver)Activator.CreateInstance(giverClass);
+				workerInt.def = this;
+			}
+			return workerInt;
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__16))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__16(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

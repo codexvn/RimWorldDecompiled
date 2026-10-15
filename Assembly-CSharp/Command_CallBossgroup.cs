@@ -1,110 +1,255 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using RimWorld;
-using RimWorld.Planet;
 using UnityEngine;
 using Verse;
 
-// Token: 0x02000045 RID: 69
 public class Command_CallBossgroup : Command
 {
-	// Token: 0x17000034 RID: 52
-	// (get) Token: 0x06000166 RID: 358 RVA: 0x00009812 File Offset: 0x00007A12
-	private IEnumerable<FloatMenuOption> FloatMenuOptions
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass3_0
 	{
-		get
+		public BossgroupDef bg;
+
+		public Command_CallBossgroup _003C_003E4__this;
+
+		internal void _003Cget_FloatMenuOptions_003Eb__0()
 		{
-			IEnumerable<BossgroupDef> allDefs = DefDatabase<BossgroupDef>.AllDefs;
-			using (IEnumerator<BossgroupDef> enumerator = allDefs.GetEnumerator())
-			{
-				while (enumerator.MoveNext())
-				{
-					BossgroupDef bg = enumerator.Current;
-					AcceptanceReport report = CallBossgroupUtility.BossgroupEverCallable(this.mechanitor.Pawn, bg, true);
-					if (!report)
-					{
-						yield return new FloatMenuOption("CannotSummon".Translate(bg.boss.kindDef.label) + ": " + report.Reason, null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-					}
-					else
-					{
-						yield return new FloatMenuOption("Summon".Translate(bg.boss.kindDef.label), delegate()
-						{
-							CallBossgroupUtility.TryStartSummonBossgroupJob(bg, this.mechanitor.Pawn, true);
-						}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-					}
-				}
-			}
-			IEnumerator<BossgroupDef> enumerator = null;
-			yield break;
-			yield break;
+			CallBossgroupUtility.TryStartSummonBossgroupJob(bg, _003C_003E4__this.mechanitor.Pawn);
 		}
 	}
 
-	// Token: 0x17000035 RID: 53
-	// (get) Token: 0x06000167 RID: 359 RVA: 0x00009824 File Offset: 0x00007A24
+	[CompilerGenerated]
+	private sealed class _003Cget_FloatMenuOptions_003Ed__3 : IEnumerable<FloatMenuOption>, IEnumerable, IEnumerator<FloatMenuOption>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private FloatMenuOption _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Command_CallBossgroup _003C_003E4__this;
+
+		private IEnumerator<BossgroupDef> _003C_003E7__wrap1;
+
+		FloatMenuOption IEnumerator<FloatMenuOption>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003Cget_FloatMenuOptions_003Ed__3(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || (uint)(num - 1) <= 1u)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				Command_CallBossgroup command_CallBossgroup = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+				{
+					_003C_003E1__state = -1;
+					IEnumerable<BossgroupDef> allDefs = DefDatabase<BossgroupDef>.AllDefs;
+					_003C_003E7__wrap1 = allDefs.GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				}
+				case 1:
+					_003C_003E1__state = -3;
+					break;
+				case 2:
+					_003C_003E1__state = -3;
+					break;
+				}
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					_003C_003Ec__DisplayClass3_0 CS_0024_003C_003E8__locals5 = new _003C_003Ec__DisplayClass3_0
+					{
+						_003C_003E4__this = command_CallBossgroup,
+						bg = _003C_003E7__wrap1.Current
+					};
+					AcceptanceReport acceptanceReport = CallBossgroupUtility.BossgroupEverCallable(command_CallBossgroup.mechanitor.Pawn, CS_0024_003C_003E8__locals5.bg);
+					if (!acceptanceReport)
+					{
+						_003C_003E2__current = new FloatMenuOption("CannotSummon".Translate(CS_0024_003C_003E8__locals5.bg.boss.kindDef.label) + ": " + acceptanceReport.Reason, null);
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003E2__current = new FloatMenuOption("Summon".Translate(CS_0024_003C_003E8__locals5.bg.boss.kindDef.label), delegate
+					{
+						CallBossgroupUtility.TryStartSummonBossgroupJob(CS_0024_003C_003E8__locals5.bg, CS_0024_003C_003E8__locals5._003C_003E4__this.mechanitor.Pawn);
+					});
+					_003C_003E1__state = 2;
+					return true;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = null;
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<FloatMenuOption> IEnumerable<FloatMenuOption>.GetEnumerator()
+		{
+			_003Cget_FloatMenuOptions_003Ed__3 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_FloatMenuOptions_003Ed__3(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<FloatMenuOption>)this).GetEnumerator();
+		}
+	}
+
+	private static readonly CachedTexture BossgroupTex = new CachedTexture("UI/Icons/SummonMechThreat");
+
+	private Pawn_MechanitorTracker mechanitor;
+
+	private IEnumerable<FloatMenuOption> FloatMenuOptions
+	{
+		[IteratorStateMachine(typeof(_003Cget_FloatMenuOptions_003Ed__3))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_FloatMenuOptions_003Ed__3(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
 	public override string DescPostfix
 	{
 		get
 		{
 			string text = "";
-			Dictionary<BossgroupDef, AcceptanceReport> source = DefDatabase<BossgroupDef>.AllDefs.ToDictionary((BossgroupDef b) => b, (BossgroupDef b) => CallBossgroupUtility.BossgroupEverCallable(this.mechanitor.Pawn, b, true));
-			foreach (KeyValuePair<BossgroupDef, AcceptanceReport> keyValuePair in from b in source
-			where b.Value
-			select b)
+			Dictionary<BossgroupDef, AcceptanceReport> source = DefDatabase<BossgroupDef>.AllDefs.ToDictionary((BossgroupDef b) => b, (BossgroupDef b) => CallBossgroupUtility.BossgroupEverCallable(mechanitor.Pawn, b));
+			foreach (KeyValuePair<BossgroupDef, AcceptanceReport> item in source.Where((KeyValuePair<BossgroupDef, AcceptanceReport> b) => b.Value))
 			{
-				text = text + "\n\n" + "ReadyToSummonThreat".Translate(keyValuePair.Key.boss.kindDef.label).Colorize(ColorLibrary.Green).CapitalizeFirst();
+				text = text + "\n\n" + "ReadyToSummonThreat".Translate(item.Key.boss.kindDef.label).Colorize(ColorLibrary.Green).CapitalizeFirst();
 			}
-			foreach (KeyValuePair<BossgroupDef, AcceptanceReport> keyValuePair2 in from b in source
-			where !b.Value
-			select b)
+			foreach (KeyValuePair<BossgroupDef, AcceptanceReport> item2 in source.Where((KeyValuePair<BossgroupDef, AcceptanceReport> b) => !b.Value))
 			{
-				text = text + "\n\n" + ("CannotSummon".Translate(keyValuePair2.Key.boss.kindDef.label) + ": " + keyValuePair2.Value.Reason).Colorize(ColorLibrary.RedReadable);
+				text = text + "\n\n" + ("CannotSummon".Translate(item2.Key.boss.kindDef.label) + ": " + item2.Value.Reason).Colorize(ColorLibrary.RedReadable);
 			}
 			return text;
 		}
 	}
 
-	// Token: 0x06000168 RID: 360 RVA: 0x000099B8 File Offset: 0x00007BB8
 	public Command_CallBossgroup(Pawn_MechanitorTracker mechanitor)
 	{
 		this.mechanitor = mechanitor;
-		this.defaultLabel = "CommandCallBossgroup".Translate();
-		this.defaultDesc = "CommandCallBossgroupDesc".Translate();
-		this.icon = Command_CallBossgroup.BossgroupTex.Texture;
+		defaultLabel = "CommandCallBossgroup".Translate();
+		defaultDesc = "CommandCallBossgroupDesc".Translate();
+		icon = BossgroupTex.Texture;
 	}
 
-	// Token: 0x06000169 RID: 361 RVA: 0x00009A0C File Offset: 0x00007C0C
 	public override GizmoResult GizmoOnGUI(Vector2 topLeft, float maxWidth, GizmoRenderParms parms)
 	{
-		this.disabled = this.IsDisabled(out this.disabledReason);
+		disabled = IsDisabled(out disabledReason);
 		return base.GizmoOnGUI(topLeft, maxWidth, parms);
 	}
 
-	// Token: 0x0600016A RID: 362 RVA: 0x00009A2C File Offset: 0x00007C2C
 	private bool IsDisabled(out string reason)
 	{
 		int lastBossgroupCalled = Find.BossgroupManager.lastBossgroupCalled;
 		int num = Find.TickManager.TicksGame - lastBossgroupCalled;
-		PlanetTile tile = this.mechanitor.Pawn.MapHeld.Tile;
 		if (Faction.OfMechanoids == null || Faction.OfMechanoids.deactivated)
 		{
 			reason = "MechsDisabled".Translate();
 			return true;
 		}
-		if (tile.Valid && tile.LayerDef.isSpace)
-		{
-			reason = "CannotPerformPlanetLayer".Translate(tile.LayerDef.gerundLabel.Named("GERUND"), tile.LayerDef.label.Named("LAYER")).Resolve();
-			return true;
-		}
-		if (!this.mechanitor.Pawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation))
+		if (!mechanitor.Pawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation))
 		{
 			reason = "Incapable".Translate().CapitalizeFirst();
 			return true;
 		}
 		if (num < 120000)
 		{
-			reason = "BossgroupAvailableIn".Translate((120000 - num).ToStringTicksToPeriod(true, false, true, true, false)).CapitalizeFirst();
+			reason = "BossgroupAvailableIn".Translate((120000 - num).ToStringTicksToPeriod()).CapitalizeFirst();
 			return true;
 		}
 		PawnKindDef pendingBossgroup = CallBossgroupUtility.GetPendingBossgroup();
@@ -113,7 +258,7 @@ public class Command_CallBossgroup : Command
 			reason = "BossgroupIncoming".Translate(pendingBossgroup.label).CapitalizeFirst();
 			return true;
 		}
-		if (this.FloatMenuOptions.All((FloatMenuOption f) => f.action == null))
+		if (FloatMenuOptions.All((FloatMenuOption f) => f.action == null))
 		{
 			reason = null;
 			return true;
@@ -122,18 +267,11 @@ public class Command_CallBossgroup : Command
 		return false;
 	}
 
-	// Token: 0x0600016B RID: 363 RVA: 0x00009BC4 File Offset: 0x00007DC4
 	public override void ProcessInput(Event ev)
 	{
 		base.ProcessInput(ev);
 		List<FloatMenuOption> list = new List<FloatMenuOption>();
-		list.AddRange(this.FloatMenuOptions);
+		list.AddRange(FloatMenuOptions);
 		Find.WindowStack.Add(new FloatMenu(list));
 	}
-
-	// Token: 0x040000B0 RID: 176
-	private static readonly CachedTexture BossgroupTex = new CachedTexture("UI/Icons/SummonMechThreat");
-
-	// Token: 0x040000B1 RID: 177
-	private Pawn_MechanitorTracker mechanitor;
 }

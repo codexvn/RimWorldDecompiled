@@ -1,217 +1,379 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class QuestPart_PawnsArrive : QuestPart
 {
-	// Token: 0x02001CF3 RID: 7411
-	public class QuestPart_PawnsArrive : QuestPart
+	[CompilerGenerated]
+	private sealed class _003Cget_QuestLookTargets_003Ed__12 : IEnumerable<GlobalTargetInfo>, IEnumerable, IEnumerator<GlobalTargetInfo>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001989 RID: 6537
-		// (get) Token: 0x0600A581 RID: 42369 RVA: 0x002F62A7 File Offset: 0x002F44A7
-		public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+		private int _003C_003E1__state;
+
+		private GlobalTargetInfo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public QuestPart_PawnsArrive _003C_003E4__this;
+
+		private IEnumerator<GlobalTargetInfo> _003C_003E7__wrap1;
+
+		private IEnumerator<Pawn> _003C_003E7__wrap2;
+
+		GlobalTargetInfo IEnumerator<GlobalTargetInfo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				foreach (GlobalTargetInfo globalTargetInfo in base.QuestLookTargets)
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003Cget_QuestLookTargets_003Ed__12(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			switch (_003C_003E1__state)
+			{
+			case -3:
+			case 1:
+				try
 				{
-					yield return globalTargetInfo;
 				}
-				IEnumerator<GlobalTargetInfo> enumerator = null;
-				if (this.mapParent != null)
+				finally
 				{
-					yield return this.mapParent;
+					_003C_003Em__Finally1();
 				}
-				if (this.addPawnsToLookTargets)
+				break;
+			case -4:
+			case 3:
+				try
 				{
-					foreach (Pawn t in PawnsArriveQuestPartUtility.GetQuestLookTargets(this.pawns))
+				}
+				finally
+				{
+					_003C_003Em__Finally2();
+				}
+				break;
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E7__wrap2 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				QuestPart_PawnsArrive questPart_PawnsArrive = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((QuestPart)questPart_PawnsArrive).QuestLookTargets.GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0076;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0076;
+				case 2:
+					_003C_003E1__state = -1;
+					goto IL_00be;
+				case 3:
 					{
-						yield return t;
+						_003C_003E1__state = -4;
+						goto IL_0113;
 					}
-					IEnumerator<Pawn> enumerator2 = null;
-				}
-				yield break;
-				yield break;
-			}
-		}
-
-		// Token: 0x1700198A RID: 6538
-		// (get) Token: 0x0600A582 RID: 42370 RVA: 0x002F62B7 File Offset: 0x002F44B7
-		public override bool IncreasesPopulation
-		{
-			get
-			{
-				return PawnsArriveQuestPartUtility.IncreasesPopulation(this.pawns, this.joinPlayer, false);
-			}
-		}
-
-		// Token: 0x0600A583 RID: 42371 RVA: 0x002F62CC File Offset: 0x002F44CC
-		public override void Notify_QuestSignalReceived(Signal signal)
-		{
-			base.Notify_QuestSignalReceived(signal);
-			if (signal.tag != this.inSignal)
-			{
-				return;
-			}
-			this.pawns.RemoveAll((Pawn x) => x.Destroyed);
-			if (this.mapParent == null || !this.mapParent.HasMap)
-			{
-				Map anyPlayerHomeMap = Find.AnyPlayerHomeMap;
-				this.mapParent = ((anyPlayerHomeMap != null) ? anyPlayerHomeMap.Parent : null);
-				if (this.spawnNear.IsValid)
-				{
-					this.spawnNear = IntVec3.Invalid;
-				}
-			}
-			if (this.mapParent == null || !this.mapParent.HasMap || !this.pawns.Any<Pawn>())
-			{
-				return;
-			}
-			for (int i = 0; i < this.pawns.Count; i++)
-			{
-				if (this.joinPlayer && this.pawns[i].Faction != Faction.OfPlayer)
-				{
-					this.pawns[i].SetFaction(Faction.OfPlayer, null);
-				}
-			}
-			IncidentParms incidentParms = new IncidentParms();
-			incidentParms.target = this.mapParent.Map;
-			incidentParms.spawnCenter = this.spawnNear;
-			PawnsArrivalModeDef pawnsArrivalModeDef = this.arrivalMode ?? PawnsArrivalModeDefOf.EdgeWalkIn;
-			if (!pawnsArrivalModeDef.Worker.CanUseOnMap(this.mapParent.Map))
-			{
-				foreach (PawnsArrivalModeDef pawnsArrivalModeDef2 in DefDatabase<PawnsArrivalModeDef>.AllDefsListForReading.InRandomOrder(null))
-				{
-					if (pawnsArrivalModeDef2.canBeBackup && pawnsArrivalModeDef2.Worker.CanUseOnMap(this.mapParent.Map))
+					IL_0076:
+					if (_003C_003E7__wrap1.MoveNext())
 					{
-						pawnsArrivalModeDef = pawnsArrivalModeDef2;
+						GlobalTargetInfo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (questPart_PawnsArrive.mapParent != null)
+					{
+						_003C_003E2__current = questPart_PawnsArrive.mapParent;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					goto IL_00be;
+					IL_0113:
+					if (_003C_003E7__wrap2.MoveNext())
+					{
+						Pawn current2 = _003C_003E7__wrap2.Current;
+						_003C_003E2__current = current2;
+						_003C_003E1__state = 3;
+						return true;
+					}
+					_003C_003Em__Finally2();
+					_003C_003E7__wrap2 = null;
+					break;
+					IL_00be:
+					if (!questPart_PawnsArrive.addPawnsToLookTargets)
+					{
 						break;
 					}
+					_003C_003E7__wrap2 = PawnsArriveQuestPartUtility.GetQuestLookTargets(questPart_PawnsArrive.pawns).GetEnumerator();
+					_003C_003E1__state = -4;
+					goto IL_0113;
 				}
+				return false;
 			}
-			if (!pawnsArrivalModeDef.Worker.CanUseOnMap(this.mapParent.Map))
+			catch
 			{
-				Log.Error(string.Format("Tried to do pawns arrive on map {0} but could not find a legal arrival mode, current method: {1}", this.mapParent.Map, pawnsArrivalModeDef.defName));
-				return;
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
-			pawnsArrivalModeDef.Worker.TryResolveRaidSpawnCenter(incidentParms);
-			pawnsArrivalModeDef.Worker.Arrive(this.pawns, incidentParms);
-			if (this.sendStandardLetter)
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				TaggedString taggedString;
-				TaggedString taggedString2;
-				if (this.joinPlayer && this.pawns.Count == 1 && this.pawns[0].RaceProps.Humanlike)
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap2 != null)
+			{
+				_003C_003E7__wrap2.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<GlobalTargetInfo> IEnumerable<GlobalTargetInfo>.GetEnumerator()
+		{
+			_003Cget_QuestLookTargets_003Ed__12 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_QuestLookTargets_003Ed__12(0)
 				{
-					taggedString = "LetterRefugeeJoins".Translate(this.pawns[0].Named("PAWN"));
-					taggedString2 = "LetterLabelRefugeeJoins".Translate(this.pawns[0].Named("PAWN"));
-					PawnRelationUtility.TryAppendRelationsWithColonistsInfo(ref taggedString, ref taggedString2, this.pawns[0]);
-				}
-				else
-				{
-					if (this.joinPlayer)
-					{
-						taggedString = "LetterPawnsArriveAndJoin".Translate(GenLabel.ThingsLabel(this.pawns.Cast<Thing>(), "  - "));
-						taggedString2 = "LetterLabelPawnsArriveAndJoin".Translate();
-					}
-					else
-					{
-						taggedString = "LetterPawnsArrive".Translate(GenLabel.ThingsLabel(this.pawns.Cast<Thing>(), "  - "));
-						taggedString2 = "LetterLabelPawnsArrive".Translate();
-					}
-					PawnRelationUtility.Notify_PawnsSeenByPlayer_Letter(this.pawns, ref taggedString2, ref taggedString, "LetterRelatedPawnsNeutralGroup".Translate(Faction.OfPlayer.def.pawnsPlural), true, true);
-				}
-				taggedString2 = (this.customLetterLabel.NullOrEmpty() ? taggedString2 : this.customLetterLabel.Formatted(taggedString2.Named("BASELABEL")));
-				taggedString = (this.customLetterText.NullOrEmpty() ? taggedString : this.customLetterText.Formatted(taggedString.Named("BASETEXT")));
-				Find.LetterStack.ReceiveLetter(taggedString2, taggedString, this.customLetterDef ?? LetterDefOf.PositiveEvent, this.pawns, null, this.quest, null, null, 0, true);
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
+			return result;
 		}
 
-		// Token: 0x0600A584 RID: 42372 RVA: 0x002F66AC File Offset: 0x002F48AC
-		public override void ExposeData()
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			base.ExposeData();
-			Scribe_Values.Look<string>(ref this.inSignal, "inSignal", null, false);
-			Scribe_Collections.Look<Pawn>(ref this.pawns, "pawns", LookMode.Reference, Array.Empty<object>());
-			Scribe_Defs.Look<PawnsArrivalModeDef>(ref this.arrivalMode, "arrivalMode");
-			Scribe_References.Look<MapParent>(ref this.mapParent, "mapParent", false);
-			Scribe_Values.Look<IntVec3>(ref this.spawnNear, "spawnNear", default(IntVec3), false);
-			Scribe_Values.Look<bool>(ref this.joinPlayer, "joinPlayer", false, false);
-			Scribe_Values.Look<bool>(ref this.addPawnsToLookTargets, "addPawnsToLookTargets", true, false);
-			Scribe_Values.Look<string>(ref this.customLetterLabel, "customLetterLabel", null, false);
-			Scribe_Values.Look<string>(ref this.customLetterText, "customLetterText", null, false);
-			Scribe_Defs.Look<LetterDef>(ref this.customLetterDef, "customLetterDef");
-			Scribe_Values.Look<bool>(ref this.sendStandardLetter, "sendStandardLetter", true, false);
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+			return ((IEnumerable<GlobalTargetInfo>)this).GetEnumerator();
+		}
+	}
+
+	public string inSignal;
+
+	public MapParent mapParent;
+
+	public List<Pawn> pawns = new List<Pawn>();
+
+	public PawnsArrivalModeDef arrivalMode;
+
+	public IntVec3 spawnNear = IntVec3.Invalid;
+
+	public bool joinPlayer;
+
+	public bool addPawnsToLookTargets = true;
+
+	public string customLetterText;
+
+	public string customLetterLabel;
+
+	public LetterDef customLetterDef;
+
+	public bool sendStandardLetter = true;
+
+	public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+	{
+		[IteratorStateMachine(typeof(_003Cget_QuestLookTargets_003Ed__12))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_QuestLookTargets_003Ed__12(-2)
 			{
-				this.pawns.RemoveAll((Pawn x) => x == null);
-			}
+				_003C_003E4__this = this
+			};
 		}
+	}
 
-		// Token: 0x0600A585 RID: 42373 RVA: 0x002F67C0 File Offset: 0x002F49C0
-		public override void AssignDebugData()
+	public override bool IncreasesPopulation => PawnsArriveQuestPartUtility.IncreasesPopulation(pawns, joinPlayer, makePrisoners: false);
+
+	public override void Notify_QuestSignalReceived(Signal signal)
+	{
+		base.Notify_QuestSignalReceived(signal);
+		if (signal.tag != inSignal)
 		{
-			base.AssignDebugData();
-			this.inSignal = "DebugSignal" + Rand.Int.ToString();
-			if (Find.AnyPlayerHomeMap != null)
+			return;
+		}
+		pawns.RemoveAll((Pawn x) => x.Destroyed);
+		if (mapParent == null || !mapParent.HasMap || !quest.IsParentSuitableForQuest(mapParent))
+		{
+			mapParent = quest.TryFindNewSuitableMapParentForRetarget();
+			if (spawnNear.IsValid)
 			{
-				Pawn pawn = PawnGenerator.GeneratePawn(new PawnGenerationRequest(PawnKindDefOf.SpaceRefugee, null, PawnGenerationContext.NonPlayer, null, false, false, false, true, false, 1f, false, true, false, true, true, false, false, false, false, 0f, 0f, null, 1f, null, null, null, null, null, null, null, null, null, null, null, null, false, false, false, false, null, null, null, null, null, 0f, DevelopmentalStage.Adult, null, null, null, false, false, false, -1, 0, false));
-				pawn.relations.everSeenByPlayer = true;
-				if (!pawn.IsWorldPawn())
-				{
-					Find.WorldPawns.PassToWorld(pawn, PawnDiscardDecideMode.Decide);
-				}
-				this.pawns.Add(pawn);
-				this.arrivalMode = PawnsArrivalModeDefOf.EdgeWalkIn;
-				this.mapParent = Find.RandomPlayerHomeMap.Parent;
-				this.joinPlayer = true;
+				spawnNear = IntVec3.Invalid;
 			}
 		}
-
-		// Token: 0x0600A586 RID: 42374 RVA: 0x002F68DD File Offset: 0x002F4ADD
-		public override bool QuestPartReserves(Pawn p)
+		if (mapParent == null || !mapParent.HasMap || !pawns.Any())
 		{
-			return this.pawns.Contains(p);
+			return;
 		}
-
-		// Token: 0x0600A587 RID: 42375 RVA: 0x002F68EB File Offset: 0x002F4AEB
-		public override void ReplacePawnReferences(Pawn replace, Pawn with)
+		for (int i = 0; i < pawns.Count; i++)
 		{
-			this.pawns.Replace(replace, with);
+			if (joinPlayer && pawns[i].Faction != Faction.OfPlayer)
+			{
+				pawns[i].SetFaction(Faction.OfPlayer);
+			}
 		}
+		IncidentParms incidentParms = new IncidentParms();
+		incidentParms.target = mapParent.Map;
+		incidentParms.spawnCenter = spawnNear;
+		PawnsArrivalModeDef pawnsArrivalModeDef = arrivalMode ?? PawnsArrivalModeDefOf.EdgeWalkIn;
+		if (!pawnsArrivalModeDef.Worker.CanUseOnMap(mapParent.Map))
+		{
+			foreach (PawnsArrivalModeDef item in DefDatabase<PawnsArrivalModeDef>.AllDefsListForReading.InRandomOrder())
+			{
+				if (item.canBeBackup && item.Worker.CanUseOnMap(mapParent.Map))
+				{
+					pawnsArrivalModeDef = item;
+					break;
+				}
+			}
+		}
+		if (!pawnsArrivalModeDef.Worker.CanUseOnMap(mapParent.Map))
+		{
+			Log.Error($"Tried to do pawns arrive on map {mapParent.Map} but could not find a legal arrival mode, current method: {pawnsArrivalModeDef.defName}");
+			return;
+		}
+		pawnsArrivalModeDef.Worker.TryResolveRaidSpawnCenter(incidentParms);
+		pawnsArrivalModeDef.Worker.Arrive(pawns, incidentParms);
+		if (!sendStandardLetter)
+		{
+			return;
+		}
+		TaggedString letterLabel;
+		TaggedString letterText;
+		if (joinPlayer && pawns.Count == 1 && pawns[0].RaceProps.Humanlike)
+		{
+			letterText = "LetterRefugeeJoins".Translate(pawns[0].Named("PAWN"));
+			letterLabel = "LetterLabelRefugeeJoins".Translate(pawns[0].Named("PAWN"));
+			PawnRelationUtility.TryAppendRelationsWithColonistsInfo(ref letterText, ref letterLabel, pawns[0]);
+		}
+		else
+		{
+			if (joinPlayer)
+			{
+				letterText = "LetterPawnsArriveAndJoin".Translate(GenLabel.ThingsLabel(pawns.Cast<Thing>()));
+				letterLabel = "LetterLabelPawnsArriveAndJoin".Translate();
+			}
+			else
+			{
+				letterText = "LetterPawnsArrive".Translate(GenLabel.ThingsLabel(pawns.Cast<Thing>()));
+				letterLabel = "LetterLabelPawnsArrive".Translate();
+			}
+			PawnRelationUtility.Notify_PawnsSeenByPlayer_Letter(pawns, ref letterLabel, ref letterText, "LetterRelatedPawnsNeutralGroup".Translate(Faction.OfPlayer.def.pawnsPlural), informEvenIfSeenBefore: true);
+		}
+		letterLabel = (customLetterLabel.NullOrEmpty() ? letterLabel : customLetterLabel.Formatted(letterLabel.Named("BASELABEL")));
+		letterText = (customLetterText.NullOrEmpty() ? letterText : customLetterText.Formatted(letterText.Named("BASETEXT")));
+		Find.LetterStack.ReceiveLetter(letterLabel, letterText, customLetterDef ?? LetterDefOf.PositiveEvent, pawns, null, quest);
+	}
 
-		// Token: 0x04007254 RID: 29268
-		public string inSignal;
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref inSignal, "inSignal");
+		Scribe_Collections.Look(ref pawns, "pawns", LookMode.Reference);
+		Scribe_Defs.Look(ref arrivalMode, "arrivalMode");
+		Scribe_References.Look(ref mapParent, "mapParent");
+		Scribe_Values.Look(ref spawnNear, "spawnNear");
+		Scribe_Values.Look(ref joinPlayer, "joinPlayer", defaultValue: false);
+		Scribe_Values.Look(ref addPawnsToLookTargets, "addPawnsToLookTargets", defaultValue: true);
+		Scribe_Values.Look(ref customLetterLabel, "customLetterLabel");
+		Scribe_Values.Look(ref customLetterText, "customLetterText");
+		Scribe_Defs.Look(ref customLetterDef, "customLetterDef");
+		Scribe_Values.Look(ref sendStandardLetter, "sendStandardLetter", defaultValue: true);
+		if (Scribe.mode == LoadSaveMode.PostLoadInit)
+		{
+			pawns.RemoveAll((Pawn x) => x == null);
+		}
+	}
 
-		// Token: 0x04007255 RID: 29269
-		public MapParent mapParent;
+	public override void AssignDebugData()
+	{
+		base.AssignDebugData();
+		inSignal = "DebugSignal" + Rand.Int;
+		if (Find.AnyPlayerHomeMap != null)
+		{
+			Pawn pawn = PawnGenerator.GeneratePawn(new PawnGenerationRequest(PawnKindDefOf.SpaceRefugee, null, PawnGenerationContext.NonPlayer, null, forceGenerateNewPawn: false, allowDead: false, allowDowned: false, canGeneratePawnRelations: true, mustBeCapableOfViolence: false, 1f, forceAddFreeWarmLayerIfNeeded: false, allowGay: true, allowPregnant: false, allowFood: true, allowAddictions: true, inhabitant: false, certainlyBeenInCryptosleep: false, forceRedressWorldPawnIfFormerColonist: false, worldPawnFactionDoesntMatter: false, 0f, 0f, null, 1f, null, null, null, null, null, null, null, null, null, null, null, null, forceNoIdeo: false, forceNoBackstory: false, forbidAnyTitle: false, forceDead: false, null, null, null, null, null, 0f, DevelopmentalStage.Adult, null, null, null));
+			pawn.relations.everSeenByPlayer = true;
+			if (!pawn.IsWorldPawn())
+			{
+				Find.WorldPawns.PassToWorld(pawn);
+			}
+			pawns.Add(pawn);
+			arrivalMode = PawnsArrivalModeDefOf.EdgeWalkIn;
+			mapParent = Find.RandomPlayerHomeMap.Parent;
+			joinPlayer = true;
+		}
+	}
 
-		// Token: 0x04007256 RID: 29270
-		public List<Pawn> pawns = new List<Pawn>();
+	public override bool QuestPartReserves(Pawn p)
+	{
+		return pawns.Contains(p);
+	}
 
-		// Token: 0x04007257 RID: 29271
-		public PawnsArrivalModeDef arrivalMode;
-
-		// Token: 0x04007258 RID: 29272
-		public IntVec3 spawnNear = IntVec3.Invalid;
-
-		// Token: 0x04007259 RID: 29273
-		public bool joinPlayer;
-
-		// Token: 0x0400725A RID: 29274
-		public bool addPawnsToLookTargets = true;
-
-		// Token: 0x0400725B RID: 29275
-		public string customLetterText;
-
-		// Token: 0x0400725C RID: 29276
-		public string customLetterLabel;
-
-		// Token: 0x0400725D RID: 29277
-		public LetterDef customLetterDef;
-
-		// Token: 0x0400725E RID: 29278
-		public bool sendStandardLetter = true;
+	public override void ReplacePawnReferences(Pawn replace, Pawn with)
+	{
+		pawns.Replace(replace, with);
 	}
 }

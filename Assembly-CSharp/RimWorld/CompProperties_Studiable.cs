@@ -1,110 +1,258 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompProperties_Studiable : CompProperties
 {
-	// Token: 0x02002E5B RID: 11867
-	public class CompProperties_Studiable : CompProperties
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__18 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x17002ACE RID: 10958
-		// (get) Token: 0x06010B40 RID: 68416 RVA: 0x004D0D77 File Offset: 0x004CEF77
-		public bool Completable
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompProperties_Studiable _003C_003E4__this;
+
+		private ThingDef parentDef;
+
+		public ThingDef _003C_003E3__parentDef;
+
+		private IEnumerator<string> _003C_003E7__wrap1;
+
+		string IEnumerator<string>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.studyAmountToComplete > 0f;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06010B41 RID: 68417 RVA: 0x004D0D86 File Offset: 0x004CEF86
-		public CompProperties_Studiable()
+		object IEnumerator.Current
 		{
-			this.compClass = typeof(CompStudiable);
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x06010B42 RID: 68418 RVA: 0x004D0DC2 File Offset: 0x004CEFC2
-		public override IEnumerable<string> ConfigErrors(ThingDef parentDef)
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__18(int _003C_003E1__state)
 		{
-			foreach (string text in base.ConfigErrors(parentDef))
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				yield return text;
-			}
-			IEnumerator<string> enumerator = null;
-			if (this.requiresHoldingPlatform && !typeof(Pawn).IsAssignableFrom(parentDef.thingClass))
-			{
-				yield return "requiresHoldingPlatform can only be used on Pawns";
-			}
-			if (this.requiresImprisonment && !typeof(Pawn).IsAssignableFrom(parentDef.thingClass))
-			{
-				yield return "requiresImprisonment can only be used on Pawns";
-			}
-			if (ModsConfig.AnomalyActive)
-			{
-				float? num = this.anomalyKnowledge;
-				float num2 = 0f;
-				if (num.GetValueOrDefault() > num2 & num != null)
+				try
 				{
-					if (this.knowledgeCategory == null && parentDef != ThingDefOf.VoidMonolith)
-					{
-						yield return "anomalyKnowledge is set but knowledgeCategory is not";
-					}
-					if (this.minMonolithLevelForStudy == 0)
-					{
-						yield return "anomalyKnowledge is set but minMonolithLevelForStudy is not";
-					}
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
 				}
 			}
-			yield break;
-			yield break;
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x0400AE20 RID: 44576
-		public int frequencyTicks = -1;
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				CompProperties_Studiable compProperties_Studiable = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((CompProperties)compProperties_Studiable).ConfigErrors(parentDef).GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0084;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0084;
+				case 2:
+					_003C_003E1__state = -1;
+					goto IL_00e2;
+				case 3:
+					_003C_003E1__state = -1;
+					goto IL_0126;
+				case 4:
+					_003C_003E1__state = -1;
+					goto IL_0183;
+				case 5:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_0084:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (compProperties_Studiable.requiresHoldingPlatform && !typeof(Pawn).IsAssignableFrom(parentDef.thingClass))
+					{
+						_003C_003E2__current = "requiresHoldingPlatform can only be used on Pawns";
+						_003C_003E1__state = 2;
+						return true;
+					}
+					goto IL_00e2;
+					IL_0183:
+					if (compProperties_Studiable.minMonolithLevelForStudy == 0)
+					{
+						_003C_003E2__current = "anomalyKnowledge is set but minMonolithLevelForStudy is not";
+						_003C_003E1__state = 5;
+						return true;
+					}
+					break;
+					IL_0126:
+					if (!ModsConfig.AnomalyActive || !(compProperties_Studiable.anomalyKnowledge > 0f))
+					{
+						break;
+					}
+					if (compProperties_Studiable.knowledgeCategory == null && parentDef != ThingDefOf.VoidMonolith)
+					{
+						_003C_003E2__current = "anomalyKnowledge is set but knowledgeCategory is not";
+						_003C_003E1__state = 4;
+						return true;
+					}
+					goto IL_0183;
+					IL_00e2:
+					if (compProperties_Studiable.requiresImprisonment && !typeof(Pawn).IsAssignableFrom(parentDef.thingClass))
+					{
+						_003C_003E2__current = "requiresImprisonment can only be used on Pawns";
+						_003C_003E1__state = 3;
+						return true;
+					}
+					goto IL_0126;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
 
-		// Token: 0x0400AE21 RID: 44577
-		public float studyAmountToComplete = -1f;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x0400AE22 RID: 44578
-		public bool showToggleGizmo;
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
 
-		// Token: 0x0400AE23 RID: 44579
-		public bool studyEnabledByDefault = true;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x0400AE24 RID: 44580
-		public bool canBeActivityDeactivated;
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__18 _003CConfigErrors_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CConfigErrors_003Ed__ = this;
+			}
+			else
+			{
+				_003CConfigErrors_003Ed__ = new _003CConfigErrors_003Ed__18(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CConfigErrors_003Ed__.parentDef = _003C_003E3__parentDef;
+			return _003CConfigErrors_003Ed__;
+		}
 
-		// Token: 0x0400AE25 RID: 44581
-		internal float? anomalyKnowledge;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x0400AE26 RID: 44582
-		internal KnowledgeCategoryDef knowledgeCategory;
+	public int frequencyTicks = -1;
 
-		// Token: 0x0400AE27 RID: 44583
-		public float knowledgeFactorOutdoors = 1f;
+	public float studyAmountToComplete = -1f;
 
-		// Token: 0x0400AE28 RID: 44584
-		public int minMonolithLevelForStudy;
+	public bool showToggleGizmo;
 
-		// Token: 0x0400AE29 RID: 44585
-		internal bool requiresHoldingPlatform;
+	public bool studyEnabledByDefault = true;
 
-		// Token: 0x0400AE2A RID: 44586
-		internal bool requiresImprisonment;
+	public bool canBeActivityDeactivated;
 
-		// Token: 0x0400AE2B RID: 44587
-		[MustTranslate]
-		public string completedLetterTitle;
+	internal float? anomalyKnowledge;
 
-		// Token: 0x0400AE2C RID: 44588
-		[MustTranslate]
-		public string completedLetterText;
+	internal KnowledgeCategoryDef knowledgeCategory;
 
-		// Token: 0x0400AE2D RID: 44589
-		[MustTranslate]
-		public string completedMessage;
+	public float knowledgeFactorOutdoors = 1f;
 
-		// Token: 0x0400AE2E RID: 44590
-		public LetterDef completedLetterDef;
+	public int minMonolithLevelForStudy;
+
+	internal bool requiresHoldingPlatform;
+
+	internal bool requiresImprisonment;
+
+	[MustTranslate]
+	public string completedLetterTitle;
+
+	[MustTranslate]
+	public string completedLetterText;
+
+	[MustTranslate]
+	public string completedMessage;
+
+	public LetterDef completedLetterDef;
+
+	public bool Completable => studyAmountToComplete > 0f;
+
+	public CompProperties_Studiable()
+	{
+		compClass = typeof(CompStudiable);
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__18))]
+	public override IEnumerable<string> ConfigErrors(ThingDef parentDef)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__18(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__parentDef = parentDef
+		};
 	}
 }

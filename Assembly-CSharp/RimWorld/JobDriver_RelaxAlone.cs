@@ -1,104 +1,204 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_RelaxAlone : JobDriver
 {
-	// Token: 0x020011EA RID: 4586
-	public class JobDriver_RelaxAlone : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__8 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700115B RID: 4443
-		// (get) Token: 0x06006FFD RID: 28669 RVA: 0x0022CDF0 File Offset: 0x0022AFF0
-		private bool FromBed
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_RelaxAlone _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.job.GetTarget(TargetIndex.A).Thing is Building_Bed;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700115C RID: 4444
-		// (get) Token: 0x06006FFE RID: 28670 RVA: 0x000028E7 File Offset: 0x00000AE7
-		protected virtual bool CanSleep
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__8(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_RelaxAlone CS_0024_003C_003E8__locals14 = _003C_003E4__this;
+			Toil toil;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (CS_0024_003C_003E8__locals14.FromBed)
+				{
+					CS_0024_003C_003E8__locals14.KeepLyingDown(TargetIndex.A);
+					_003C_003E2__current = Toils_Bed.ClaimBedIfNonMedical(TargetIndex.A);
+					_003C_003E1__state = 1;
+					return true;
+				}
+				_003C_003E2__current = Toils_Goto.GotoCell(TargetIndex.A, PathEndMode.OnCell);
+				_003C_003E1__state = 3;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Bed.GotoBed(TargetIndex.A);
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				toil = Toils_LayDown.LayDown(TargetIndex.A, hasBed: true, lookForOtherJobs: false, CS_0024_003C_003E8__locals14.CanSleep);
+				toil.AddFailCondition(() => !CS_0024_003C_003E8__locals14.pawn.Awake());
+				goto IL_00e0;
+			case 3:
+				_003C_003E1__state = -1;
+				toil = ToilMaker.MakeToil("MakeNewToils");
+				toil.initAction = delegate
+				{
+					CS_0024_003C_003E8__locals14.faceDir = (CS_0024_003C_003E8__locals14.job.def.faceDir.IsValid ? CS_0024_003C_003E8__locals14.job.def.faceDir : Rot4.Random);
+				};
+				toil.handlingFacing = true;
+				goto IL_00e0;
+			case 4:
+				{
+					_003C_003E1__state = -1;
+					return false;
+				}
+				IL_00e0:
+				toil.defaultCompleteMode = ToilCompleteMode.Delay;
+				toil.defaultDuration = CS_0024_003C_003E8__locals14.job.def.joyDuration;
+				toil.AddPreTickIntervalAction(delegate(int delta)
+				{
+					if (CS_0024_003C_003E8__locals14.faceDir.IsValid)
+					{
+						CS_0024_003C_003E8__locals14.pawn.rotationTracker.FaceCell(CS_0024_003C_003E8__locals14.pawn.Position + CS_0024_003C_003E8__locals14.faceDir.FacingCell);
+					}
+					CS_0024_003C_003E8__locals14.pawn.GainComfortFromCellIfPossible(delta);
+					JoyUtility.JoyTickCheckEnd(CS_0024_003C_003E8__locals14.pawn, delta);
+				});
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 4;
 				return true;
 			}
 		}
 
-		// Token: 0x06006FFF RID: 28671 RVA: 0x0022CE19 File Offset: 0x0022B019
-		public override bool CanBeginNowWhileLyingDown()
+		bool IEnumerator.MoveNext()
 		{
-			return this.FromBed && JobInBedUtility.InBedOrRestSpotNow(this.pawn, this.job.GetTarget(TargetIndex.A));
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x06007000 RID: 28672 RVA: 0x0022CE3C File Offset: 0x0022B03C
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			if (this.FromBed)
-			{
-				if (!this.pawn.Reserve(this.job.GetTarget(TargetIndex.A), this.job, ((Building_Bed)this.job.GetTarget(TargetIndex.A).Thing).SleepingSlotsCount, 0, null, errorOnFailed, false))
-				{
-					return false;
-				}
-			}
-			else if (!this.pawn.Reserve(this.job.GetTarget(TargetIndex.A), this.job, 1, -1, null, errorOnFailed, false))
-			{
-				return false;
-			}
-			return true;
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x06007001 RID: 28673 RVA: 0x0022CEBB File Offset: 0x0022B0BB
-		protected override IEnumerable<Toil> MakeNewToils()
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
 		{
-			Toil toil;
-			if (this.FromBed)
+			_003CMakeNewToils_003Ed__8 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				this.KeepLyingDown(TargetIndex.A);
-				yield return Toils_Bed.ClaimBedIfNonMedical(TargetIndex.A, TargetIndex.None);
-				yield return Toils_Bed.GotoBed(TargetIndex.A);
-				toil = Toils_LayDown.LayDown(TargetIndex.A, true, false, this.CanSleep, true, PawnPosture.LayingOnGroundNormal, false);
-				toil.AddFailCondition(() => !this.pawn.Awake());
+				_003C_003E1__state = 0;
+				result = this;
 			}
 			else
 			{
-				yield return Toils_Goto.GotoCell(TargetIndex.A, PathEndMode.OnCell);
-				toil = ToilMaker.MakeToil("MakeNewToils");
-				toil.initAction = delegate()
+				result = new _003CMakeNewToils_003Ed__8(0)
 				{
-					this.faceDir = (this.job.def.faceDir.IsValid ? this.job.def.faceDir : Rot4.Random);
+					_003C_003E4__this = _003C_003E4__this
 				};
-				toil.handlingFacing = true;
 			}
-			toil.defaultCompleteMode = ToilCompleteMode.Delay;
-			toil.defaultDuration = this.job.def.joyDuration;
-			toil.AddPreTickIntervalAction(delegate(int delta)
-			{
-				if (this.faceDir.IsValid)
-				{
-					this.pawn.rotationTracker.FaceCell(this.pawn.Position + this.faceDir.FacingCell);
-				}
-				this.pawn.GainComfortFromCellIfPossible(delta, false);
-				JoyUtility.JoyTickCheckEnd(this.pawn, delta, JoyTickFullJoyAction.EndJob, 1f, null);
-			});
-			yield return toil;
-			yield break;
+			return result;
 		}
 
-		// Token: 0x06007002 RID: 28674 RVA: 0x0022CECC File Offset: 0x0022B0CC
-		public override void ExposeData()
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			base.ExposeData();
-			Scribe_Values.Look<Rot4>(ref this.faceDir, "faceDir", default(Rot4), false);
+			return ((IEnumerable<Toil>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x04004DFF RID: 19967
-		protected Rot4 faceDir = Rot4.Invalid;
+	protected Rot4 faceDir = Rot4.Invalid;
 
-		// Token: 0x04004E00 RID: 19968
-		protected const TargetIndex SpotOrBedInd = TargetIndex.A;
+	protected const TargetIndex SpotOrBedInd = TargetIndex.A;
+
+	private bool FromBed => job.GetTarget(TargetIndex.A).Thing is Building_Bed;
+
+	protected virtual bool CanSleep => true;
+
+	public override bool CanBeginNowWhileLyingDown()
+	{
+		if (FromBed)
+		{
+			return JobInBedUtility.InBedOrRestSpotNow(pawn, job.GetTarget(TargetIndex.A));
+		}
+		return false;
+	}
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		if (FromBed)
+		{
+			if (!pawn.Reserve(job.GetTarget(TargetIndex.A), job, ((Building_Bed)job.GetTarget(TargetIndex.A).Thing).SleepingSlotsCount, 0, null, errorOnFailed))
+			{
+				return false;
+			}
+		}
+		else if (!pawn.Reserve(job.GetTarget(TargetIndex.A), job, 1, -1, null, errorOnFailed))
+		{
+			return false;
+		}
+		return true;
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__8))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__8(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref faceDir, "faceDir");
 	}
 }

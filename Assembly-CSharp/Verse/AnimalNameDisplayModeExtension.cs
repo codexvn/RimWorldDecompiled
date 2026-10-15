@@ -1,40 +1,36 @@
-﻿using System;
+using System;
 
-namespace Verse
+namespace Verse;
+
+public static class AnimalNameDisplayModeExtension
 {
-	// Token: 0x02000D4F RID: 3407
-	public static class AnimalNameDisplayModeExtension
+	public static string ToStringHuman(this AnimalNameDisplayMode mode)
 	{
-		// Token: 0x060056DF RID: 22239 RVA: 0x001BEE1C File Offset: 0x001BD01C
-		public static string ToStringHuman(this AnimalNameDisplayMode mode)
+		return mode switch
 		{
-			switch (mode)
-			{
-			case AnimalNameDisplayMode.None:
-				return "None".Translate();
-			case AnimalNameDisplayMode.TameNamed:
-				return "AnimalNameDisplayMode_TameNamed".Translate();
-			case AnimalNameDisplayMode.TameAll:
-				return "AnimalNameDisplayMode_TameAll".Translate();
-			default:
-				throw new NotImplementedException();
-			}
-		}
+			AnimalNameDisplayMode.None => "None".Translate(), 
+			AnimalNameDisplayMode.TameNamed => "AnimalNameDisplayMode_TameNamed".Translate(), 
+			AnimalNameDisplayMode.TameAll => "AnimalNameDisplayMode_TameAll".Translate(), 
+			_ => throw new NotImplementedException(), 
+		};
+	}
 
-		// Token: 0x060056E0 RID: 22240 RVA: 0x001BEE74 File Offset: 0x001BD074
-		public static bool ShouldDisplayAnimalName(this AnimalNameDisplayMode mode, Pawn animal)
+	public static bool ShouldDisplayAnimalName(this AnimalNameDisplayMode mode, Pawn animal)
+	{
+		switch (mode)
 		{
-			switch (mode)
+		case AnimalNameDisplayMode.None:
+			return false;
+		case AnimalNameDisplayMode.TameAll:
+			return animal.Name != null;
+		case AnimalNameDisplayMode.TameNamed:
+			if (animal.Name != null)
 			{
-			case AnimalNameDisplayMode.None:
-				return false;
-			case AnimalNameDisplayMode.TameNamed:
-				return animal.Name != null && !animal.Name.Numerical;
-			case AnimalNameDisplayMode.TameAll:
-				return animal.Name != null;
-			default:
-				throw new NotImplementedException(Prefs.AnimalNameMode.ToStringSafe<AnimalNameDisplayMode>());
+				return !animal.Name.Numerical;
 			}
+			return false;
+		default:
+			throw new NotImplementedException(Prefs.AnimalNameMode.ToStringSafe());
 		}
 	}
 }

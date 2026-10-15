@@ -1,200 +1,352 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Building_Grave : Building_CorpseCasket, INotifyHauledTo
 {
-	// Token: 0x02002A10 RID: 10768
-	public class Building_Grave : Building_CorpseCasket, INotifyHauledTo
+	[CompilerGenerated]
+	private sealed class _003CGetGizmos_003Ed__13 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x170024E9 RID: 9449
-		// (get) Token: 0x0600EE42 RID: 60994 RVA: 0x00452318 File Offset: 0x00450518
-		public Pawn AssignedPawn
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Building_Grave _003C_003E4__this;
+
+		private IEnumerator<Gizmo> _003C_003E7__wrap1;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.CompAssignableToPawn == null || !this.CompAssignableToPawn.AssignedPawnsForReading.Any<Pawn>())
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetGizmos_003Ed__13(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			switch (_003C_003E1__state)
+			{
+			case -3:
+			case 1:
+				try
 				{
-					return null;
 				}
-				return this.CompAssignableToPawn.AssignedPawnsForReading[0];
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+				break;
+			case -4:
+			case 2:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally2();
+				}
+				break;
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				Building_Grave building_Grave = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((Building_Casket)building_Grave).GetGizmos().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0072;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0072;
+				case 2:
+					{
+						_003C_003E1__state = -4;
+						goto IL_00dc;
+					}
+					IL_0072:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Gizmo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (!building_Grave.StorageTabVisible)
+					{
+						break;
+					}
+					_003C_003E7__wrap1 = StorageSettingsClipboard.CopyPasteGizmosFor(building_Grave.storageSettings).GetEnumerator();
+					_003C_003E1__state = -4;
+					goto IL_00dc;
+					IL_00dc:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Gizmo current2 = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current2;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					_003C_003Em__Finally2();
+					_003C_003E7__wrap1 = null;
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x170024EA RID: 9450
-		// (get) Token: 0x0600EE43 RID: 60995 RVA: 0x00452347 File Offset: 0x00450547
-		public CompAssignableToPawn_Grave CompAssignableToPawn
+		bool IEnumerator.MoveNext()
 		{
-			get
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				return base.GetComp<CompAssignableToPawn_Grave>();
+				_003C_003E7__wrap1.Dispose();
 			}
 		}
 
-		// Token: 0x170024EB RID: 9451
-		// (get) Token: 0x0600EE44 RID: 60996 RVA: 0x00452350 File Offset: 0x00450550
-		public override Graphic Graphic
+		private void _003C_003Em__Finally2()
 		{
-			get
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				if (!base.HasCorpse)
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CGetGizmos_003Ed__13 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CGetGizmos_003Ed__13(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	private Graphic cachedGraphicFull;
+
+	public Pawn AssignedPawn
+	{
+		get
+		{
+			if (CompAssignableToPawn == null || !CompAssignableToPawn.AssignedPawnsForReading.Any())
+			{
+				return null;
+			}
+			return CompAssignableToPawn.AssignedPawnsForReading[0];
+		}
+	}
+
+	public CompAssignableToPawn_Grave CompAssignableToPawn => GetComp<CompAssignableToPawn_Grave>();
+
+	public override Graphic Graphic
+	{
+		get
+		{
+			if (base.HasCorpse)
+			{
+				if (def.building.fullGraveGraphicData == null)
 				{
 					return base.Graphic;
 				}
-				if (this.def.building.fullGraveGraphicData == null)
+				if (cachedGraphicFull == null)
 				{
-					return base.Graphic;
+					cachedGraphicFull = def.building.fullGraveGraphicData.GraphicColoredFor(this);
 				}
-				if (this.cachedGraphicFull == null)
-				{
-					this.cachedGraphicFull = this.def.building.fullGraveGraphicData.GraphicColoredFor(this);
-				}
-				return this.cachedGraphicFull;
+				return cachedGraphicFull;
 			}
+			return base.Graphic;
 		}
+	}
 
-		// Token: 0x170024EC RID: 9452
-		// (get) Token: 0x0600EE45 RID: 60997 RVA: 0x004523AF File Offset: 0x004505AF
-		public override bool StorageTabVisible
+	public override bool StorageTabVisible
+	{
+		get
 		{
-			get
+			if (base.StorageTabVisible)
 			{
-				return base.StorageTabVisible && this.AssignedPawn == null;
+				return AssignedPawn == null;
+			}
+			return false;
+		}
+	}
+
+	public override void EjectContents()
+	{
+		base.EjectContents();
+		if (base.Spawned)
+		{
+			base.Map.mapDrawer.MapMeshDirty(base.Position, MapMeshFlagDefOf.Things);
+		}
+	}
+
+	public virtual void Notify_HauledTo(Pawn hauler, Thing thing, int count)
+	{
+		CompArt comp = GetComp<CompArt>();
+		if (comp != null && !comp.Active && hauler.RaceProps.Humanlike)
+		{
+			comp.JustCreatedBy(hauler);
+			comp.InitializeArt(base.Corpse.InnerPawn);
+		}
+		base.Map.mapDrawer.MapMeshDirty(base.Position, (ulong)MapMeshFlagDefOf.Buildings | (ulong)MapMeshFlagDefOf.Things);
+		hauler.records.Increment(RecordDefOf.CorpsesBuried);
+		TaleRecorder.RecordTale(TaleDefOf.BuriedCorpse, hauler, base.Corpse?.InnerPawn);
+	}
+
+	public override bool Accepts(Thing thing)
+	{
+		if (!base.Accepts(thing))
+		{
+			return false;
+		}
+		if (base.HasCorpse)
+		{
+			return false;
+		}
+		if (AssignedPawn != null)
+		{
+			if (!(thing is Corpse corpse))
+			{
+				return false;
+			}
+			if (corpse.InnerPawn != AssignedPawn)
+			{
+				return false;
 			}
 		}
-
-		// Token: 0x0600EE46 RID: 60998 RVA: 0x004523C4 File Offset: 0x004505C4
-		public override void EjectContents()
+		else if (!storageSettings.AllowedToAccept(thing))
 		{
-			base.EjectContents();
+			return false;
+		}
+		return true;
+	}
+
+	public override bool TryAcceptThing(Thing thing, bool allowSpecialEffects = true)
+	{
+		if (base.TryAcceptThing(thing, allowSpecialEffects))
+		{
+			if (thing is Corpse corpse && corpse.InnerPawn.ownership != null && corpse.InnerPawn.ownership.AssignedGrave != this)
+			{
+				corpse.InnerPawn.ownership.UnclaimGrave();
+			}
 			if (base.Spawned)
 			{
 				base.Map.mapDrawer.MapMeshDirty(base.Position, MapMeshFlagDefOf.Things);
 			}
-		}
-
-		// Token: 0x0600EE47 RID: 60999 RVA: 0x004523F4 File Offset: 0x004505F4
-		public virtual void Notify_HauledTo(Pawn hauler, Thing thing, int count)
-		{
-			CompArt comp = base.GetComp<CompArt>();
-			if (comp != null && !comp.Active && hauler.RaceProps.Humanlike)
-			{
-				comp.JustCreatedBy(hauler);
-				comp.InitializeArt(base.Corpse.InnerPawn);
-			}
-			base.Map.mapDrawer.MapMeshDirty(base.Position, MapMeshFlagDefOf.Buildings | MapMeshFlagDefOf.Things);
-			hauler.records.Increment(RecordDefOf.CorpsesBuried);
-			TaleDef buriedCorpse = TaleDefOf.BuriedCorpse;
-			object[] array = new object[2];
-			array[0] = hauler;
-			int num = 1;
-			Corpse corpse = base.Corpse;
-			array[num] = ((corpse != null) ? corpse.InnerPawn : null);
-			TaleRecorder.RecordTale(buriedCorpse, array);
-		}
-
-		// Token: 0x0600EE48 RID: 61000 RVA: 0x004524A0 File Offset: 0x004506A0
-		public override bool Accepts(Thing thing)
-		{
-			if (!base.Accepts(thing))
-			{
-				return false;
-			}
-			if (base.HasCorpse)
-			{
-				return false;
-			}
-			if (this.AssignedPawn != null)
-			{
-				Corpse corpse = thing as Corpse;
-				if (corpse == null)
-				{
-					return false;
-				}
-				if (corpse.InnerPawn != this.AssignedPawn)
-				{
-					return false;
-				}
-			}
-			else if (!this.storageSettings.AllowedToAccept(thing))
-			{
-				return false;
-			}
 			return true;
 		}
+		return false;
+	}
 
-		// Token: 0x0600EE49 RID: 61001 RVA: 0x004524F8 File Offset: 0x004506F8
-		public override bool TryAcceptThing(Thing thing, bool allowSpecialEffects = true)
+	[IteratorStateMachine(typeof(_003CGetGizmos_003Ed__13))]
+	public override IEnumerable<Gizmo> GetGizmos()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetGizmos_003Ed__13(-2)
 		{
-			if (base.TryAcceptThing(thing, allowSpecialEffects))
-			{
-				Corpse corpse = thing as Corpse;
-				if (corpse != null && corpse.InnerPawn.ownership != null && corpse.InnerPawn.ownership.AssignedGrave != this)
-				{
-					corpse.InnerPawn.ownership.UnclaimGrave();
-				}
-				if (base.Spawned)
-				{
-					base.Map.mapDrawer.MapMeshDirty(base.Position, MapMeshFlagDefOf.Things);
-				}
-				return true;
-			}
-			return false;
-		}
+			_003C_003E4__this = this
+		};
+	}
 
-		// Token: 0x0600EE4A RID: 61002 RVA: 0x00452575 File Offset: 0x00450775
-		public override IEnumerable<Gizmo> GetGizmos()
-		{
-			foreach (Gizmo gizmo in base.GetGizmos())
-			{
-				yield return gizmo;
-			}
-			IEnumerator<Gizmo> enumerator = null;
-			if (this.StorageTabVisible)
-			{
-				foreach (Gizmo gizmo2 in StorageSettingsClipboard.CopyPasteGizmosFor(this.storageSettings))
-				{
-					yield return gizmo2;
-				}
-				enumerator = null;
-			}
-			yield break;
-			yield break;
-		}
+	public override void Notify_ColorChanged()
+	{
+		base.Notify_ColorChanged();
+		cachedGraphicFull = null;
+	}
 
-		// Token: 0x0600EE4B RID: 61003 RVA: 0x00452585 File Offset: 0x00450785
-		public override void Notify_ColorChanged()
+	public override string GetInspectString()
+	{
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.Append(base.GetInspectString());
+		if (base.HasCorpse)
 		{
-			base.Notify_ColorChanged();
-			this.cachedGraphicFull = null;
-		}
-
-		// Token: 0x0600EE4C RID: 61004 RVA: 0x00452594 File Offset: 0x00450794
-		public override string GetInspectString()
-		{
-			StringBuilder stringBuilder = new StringBuilder();
-			stringBuilder.Append(base.GetInspectString());
-			if (base.HasCorpse)
+			if (base.Tile.Valid)
 			{
-				if (base.Tile.Valid)
-				{
-					string value = GenDate.DateFullStringAt((long)GenDate.TickGameToAbs(base.Corpse.timeOfDeath), Find.WorldGrid.LongLatOf(base.Tile));
-					stringBuilder.AppendLine();
-					stringBuilder.Append("DiedOn".Translate(value));
-				}
-			}
-			else if (this.AssignedPawn != null)
-			{
+				string text = GenDate.DateFullStringAt(GenDate.TickGameToAbs(base.Corpse.timeOfDeath), Find.WorldGrid.LongLatOf(base.Tile));
 				stringBuilder.AppendLine();
-				stringBuilder.Append("AssignedColonist".Translate());
-				stringBuilder.Append(": ");
-				stringBuilder.Append(this.AssignedPawn.LabelCap);
+				stringBuilder.Append("DiedOn".Translate(text));
 			}
-			return stringBuilder.ToString();
 		}
-
-		// Token: 0x04009D9A RID: 40346
-		private Graphic cachedGraphicFull;
+		else if (AssignedPawn != null)
+		{
+			stringBuilder.AppendLine();
+			stringBuilder.Append("AssignedColonist".Translate());
+			stringBuilder.Append(": ");
+			stringBuilder.Append(AssignedPawn.LabelCap);
+		}
+		return stringBuilder.ToString();
 	}
 }

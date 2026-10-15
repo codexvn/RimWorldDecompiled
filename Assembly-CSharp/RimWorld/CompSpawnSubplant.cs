@@ -1,210 +1,286 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 using Verse.Sound;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompSpawnSubplant : ThingComp
 {
-	// Token: 0x02002E4B RID: 11851
-	public class CompSpawnSubplant : ThingComp
+	[CompilerGenerated]
+	private sealed class _003CCompGetGizmosExtra_003Ed__17 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x17002ABD RID: 10941
-		// (get) Token: 0x06010ADA RID: 68314 RVA: 0x004CECD8 File Offset: 0x004CCED8
-		public CompProperties_SpawnSubplant Props
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompSpawnSubplant _003C_003E4__this;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (CompProperties_SpawnSubplant)this.props;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002ABE RID: 10942
-		// (get) Token: 0x06010ADB RID: 68315 RVA: 0x004CECE5 File Offset: 0x004CCEE5
-		public List<Thing> SubplantsForReading
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				this.Cleanup();
-				return this.subplants;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002ABF RID: 10943
-		// (get) Token: 0x06010ADC RID: 68316 RVA: 0x004CECF4 File Offset: 0x004CCEF4
-		private float ProgressMultiplier
+		[DebuggerHidden]
+		public _003CCompGetGizmosExtra_003Ed__17(int _003C_003E1__state)
 		{
-			get
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			CompSpawnSubplant CS_0024_003C_003E8__locals1 = _003C_003E4__this;
+			switch (num)
 			{
-				foreach (Pair<int, float> pair in CompSpawnSubplant.TicksToProgressMultipliers)
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (!Prefs.DevMode || !DebugSettings.godMode)
 				{
-					if (this.meditationTicksToday < pair.First)
-					{
-						return pair.Second;
-					}
+					return false;
 				}
-				return CompSpawnSubplant.TicksToProgressMultipliers.Last<Pair<int, float>>().Second;
+				_003C_003E2__current = new Command_Action
+				{
+					defaultLabel = "DEV: Add 100% progress",
+					action = delegate
+					{
+						CS_0024_003C_003E8__locals1.AddProgress(1f, ignoreMultiplier: true);
+					}
+				};
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				return false;
 			}
 		}
 
-		// Token: 0x06010ADD RID: 68317 RVA: 0x004CED6C File Offset: 0x004CCF6C
-		public void AddProgress(float progressPerTick, bool ignoreMultiplier = false)
+		bool IEnumerator.MoveNext()
 		{
-			if (!ModLister.CheckRoyalty("Subplant spawning"))
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CCompGetGizmosExtra_003Ed__17 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				return;
+				_003C_003E1__state = 0;
+				result = this;
 			}
+			else
+			{
+				result = new _003CCompGetGizmosExtra_003Ed__17(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	private float progressToNextSubplant;
+
+	private List<Thing> subplants = new List<Thing>();
+
+	private int meditationTicksToday;
+
+	public Action onGrassGrown;
+
+	private static readonly List<Pair<int, float>> TicksToProgressMultipliers = new List<Pair<int, float>>
+	{
+		new Pair<int, float>(30000, 1f),
+		new Pair<int, float>(60000, 0.5f),
+		new Pair<int, float>(120000, 0.25f),
+		new Pair<int, float>(240000, 0.15f)
+	};
+
+	public CompProperties_SpawnSubplant Props => (CompProperties_SpawnSubplant)props;
+
+	public List<Thing> SubplantsForReading
+	{
+		get
+		{
+			Cleanup();
+			return subplants;
+		}
+	}
+
+	private float ProgressMultiplier
+	{
+		get
+		{
+			foreach (Pair<int, float> ticksToProgressMultiplier in TicksToProgressMultipliers)
+			{
+				if (meditationTicksToday < ticksToProgressMultiplier.First)
+				{
+					return ticksToProgressMultiplier.Second;
+				}
+			}
+			return TicksToProgressMultipliers.Last().Second;
+		}
+	}
+
+	public void AddProgress(float progressPerTick, bool ignoreMultiplier = false)
+	{
+		if (ModLister.CheckRoyalty("Subplant spawning"))
+		{
 			if (!ignoreMultiplier)
 			{
-				progressPerTick *= this.ProgressMultiplier;
+				progressPerTick *= ProgressMultiplier;
 			}
-			this.progressToNextSubplant += progressPerTick * (1f + this.parent.GetStatValue(StatDefOf.MeditationPlantGrowthOffset, true, -1));
-			this.meditationTicksToday++;
-			this.TryGrowSubplants();
+			progressToNextSubplant += progressPerTick * (1f + parent.GetStatValue(StatDefOf.MeditationPlantGrowthOffset));
+			meditationTicksToday++;
+			TryGrowSubplants();
 		}
+	}
 
-		// Token: 0x06010ADE RID: 68318 RVA: 0x004CEDCE File Offset: 0x004CCFCE
-		public override void CompTickLong()
+	public override void CompTickLong()
+	{
+		if (GenLocalDate.DayTick(parent.Map) < 2000)
 		{
-			if (GenLocalDate.DayTick(this.parent.Map) < 2000)
+			meditationTicksToday = 0;
+		}
+	}
+
+	public void Cleanup()
+	{
+		subplants.RemoveAll((Thing p) => !p.Spawned);
+	}
+
+	public override string CompInspectStringExtra()
+	{
+		return string.Concat("TotalMeditationToday".Translate((meditationTicksToday / 2500).ToString() + "LetterHour".Translate(), ProgressMultiplier.ToStringPercent()) + "\n" + Props.subplant.LabelCap + ": ", SubplantsForReading.Count.ToString(), " (") + "ProgressToNextSubplant".Translate(progressToNextSubplant.ToStringPercent()) + ")";
+	}
+
+	private void TryGrowSubplants()
+	{
+		while (progressToNextSubplant >= 1f)
+		{
+			DoGrowSubplant();
+			progressToNextSubplant -= 1f;
+		}
+	}
+
+	private void DoGrowSubplant()
+	{
+		IntVec3 position = parent.Position;
+		for (int i = 0; i < 1000; i++)
+		{
+			IntVec3 intVec = position + GenRadial.RadialPattern[i];
+			if (!intVec.InBounds(parent.Map) || !WanderUtility.InSameRoom(position, intVec, parent.Map))
 			{
-				this.meditationTicksToday = 0;
+				continue;
 			}
-		}
-
-		// Token: 0x06010ADF RID: 68319 RVA: 0x004CEDEE File Offset: 0x004CCFEE
-		public void Cleanup()
-		{
-			this.subplants.RemoveAll((Thing p) => !p.Spawned);
-		}
-
-		// Token: 0x06010AE0 RID: 68320 RVA: 0x004CEE1C File Offset: 0x004CD01C
-		public override string CompInspectStringExtra()
-		{
-			return "TotalMeditationToday".Translate((this.meditationTicksToday / 2500).ToString() + "LetterHour".Translate(), this.ProgressMultiplier.ToStringPercent()) + "\n" + this.Props.subplant.LabelCap + ": " + this.SubplantsForReading.Count.ToString() + " (" + "ProgressToNextSubplant".Translate(this.progressToNextSubplant.ToStringPercent()) + ")";
-		}
-
-		// Token: 0x06010AE1 RID: 68321 RVA: 0x004CEEE4 File Offset: 0x004CD0E4
-		private void TryGrowSubplants()
-		{
-			while (this.progressToNextSubplant >= 1f)
+			bool flag = false;
+			List<Thing> thingList = intVec.GetThingList(parent.Map);
+			foreach (Thing item in thingList)
 			{
-				this.DoGrowSubplant();
-				this.progressToNextSubplant -= 1f;
-			}
-		}
-
-		// Token: 0x06010AE2 RID: 68322 RVA: 0x004CEF10 File Offset: 0x004CD110
-		private void DoGrowSubplant()
-		{
-			IntVec3 position = this.parent.Position;
-			for (int i = 0; i < 1000; i++)
-			{
-				IntVec3 intVec = position + GenRadial.RadialPattern[i];
-				if (intVec.InBounds(this.parent.Map) && WanderUtility.InSameRoom(position, intVec, this.parent.Map))
+				if (item.def == Props.subplant)
 				{
-					bool flag = false;
-					List<Thing> thingList = intVec.GetThingList(this.parent.Map);
-					foreach (Thing thing in thingList)
+					flag = true;
+					break;
+				}
+				if (Props.plantsToNotOverwrite.NullOrEmpty())
+				{
+					continue;
+				}
+				for (int j = 0; j < Props.plantsToNotOverwrite.Count; j++)
+				{
+					if (item.def == Props.plantsToNotOverwrite[j])
 					{
-						if (thing.def == this.Props.subplant)
-						{
-							flag = true;
-							break;
-						}
-						if (!this.Props.plantsToNotOverwrite.NullOrEmpty<ThingDef>())
-						{
-							for (int j = 0; j < this.Props.plantsToNotOverwrite.Count; j++)
-							{
-								if (thing.def == this.Props.plantsToNotOverwrite[j])
-								{
-									flag = true;
-									break;
-								}
-							}
-						}
-					}
-					if (!flag && this.Props.subplant.CanEverPlantAt(intVec, this.parent.Map, true, false))
-					{
-						for (int k = thingList.Count - 1; k >= 0; k--)
-						{
-							if (thingList[k].def.category == ThingCategory.Plant)
-							{
-								thingList[k].Destroy(DestroyMode.Vanish);
-							}
-						}
-						Plant plant = (Plant)GenSpawn.Spawn(this.Props.subplant, intVec, this.parent.Map, WipeMode.Vanish);
-						this.subplants.Add(plant);
-						if (this.Props.initialGrowthRange != null)
-						{
-							plant.Growth = this.Props.initialGrowthRange.Value.RandomInRange;
-						}
-						if (this.Props.spawnSound != null)
-						{
-							this.Props.spawnSound.PlayOneShot(new TargetInfo(this.parent));
-						}
-						Action action = this.onGrassGrown;
-						if (action == null)
-						{
-							return;
-						}
-						action();
-						return;
+						flag = true;
+						break;
 					}
 				}
 			}
-		}
-
-		// Token: 0x06010AE3 RID: 68323 RVA: 0x004CF140 File Offset: 0x004CD340
-		public override IEnumerable<Gizmo> CompGetGizmosExtra()
-		{
-			if (!Prefs.DevMode || !DebugSettings.godMode)
+			if (flag || !Props.subplant.CanEverPlantAt(intVec, parent.Map, canWipePlantsExceptTree: true, checkMapTemperature: false))
 			{
-				yield break;
+				continue;
 			}
-			yield return new Command_Action
+			for (int num = thingList.Count - 1; num >= 0; num--)
 			{
-				defaultLabel = "DEV: Add 100% progress",
-				action = delegate()
+				if (thingList[num].def.category == ThingCategory.Plant)
 				{
-					this.AddProgress(1f, true);
+					thingList[num].Destroy();
 				}
-			};
-			yield break;
-		}
-
-		// Token: 0x06010AE4 RID: 68324 RVA: 0x004CF150 File Offset: 0x004CD350
-		public override void PostExposeData()
-		{
-			Scribe_Values.Look<float>(ref this.progressToNextSubplant, "progressToNextSubplant", 0f, false);
-			Scribe_Collections.Look<Thing>(ref this.subplants, "subplants", LookMode.Reference, Array.Empty<object>());
-			Scribe_Values.Look<int>(ref this.meditationTicksToday, "meditationTicksToday", 0, false);
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
-			{
-				this.subplants.RemoveAll((Thing x) => x == null);
 			}
+			Plant plant = (Plant)GenSpawn.Spawn(Props.subplant, intVec, parent.Map);
+			subplants.Add(plant);
+			if (Props.initialGrowthRange.HasValue)
+			{
+				plant.Growth = Props.initialGrowthRange.Value.RandomInRange;
+			}
+			if (Props.spawnSound != null)
+			{
+				Props.spawnSound.PlayOneShot(new TargetInfo(parent));
+			}
+			onGrassGrown?.Invoke();
+			break;
 		}
+	}
 
-		// Token: 0x0400ADEB RID: 44523
-		private float progressToNextSubplant;
-
-		// Token: 0x0400ADEC RID: 44524
-		private List<Thing> subplants = new List<Thing>();
-
-		// Token: 0x0400ADED RID: 44525
-		private int meditationTicksToday;
-
-		// Token: 0x0400ADEE RID: 44526
-		public Action onGrassGrown;
-
-		// Token: 0x0400ADEF RID: 44527
-		private static readonly List<Pair<int, float>> TicksToProgressMultipliers = new List<Pair<int, float>>
+	[IteratorStateMachine(typeof(_003CCompGetGizmosExtra_003Ed__17))]
+	public override IEnumerable<Gizmo> CompGetGizmosExtra()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CCompGetGizmosExtra_003Ed__17(-2)
 		{
-			new Pair<int, float>(30000, 1f),
-			new Pair<int, float>(60000, 0.5f),
-			new Pair<int, float>(120000, 0.25f),
-			new Pair<int, float>(240000, 0.15f)
+			_003C_003E4__this = this
 		};
+	}
+
+	public override void PostExposeData()
+	{
+		Scribe_Values.Look(ref progressToNextSubplant, "progressToNextSubplant", 0f);
+		Scribe_Collections.Look(ref subplants, "subplants", LookMode.Reference);
+		Scribe_Values.Look(ref meditationTicksToday, "meditationTicksToday", 0);
+		if (Scribe.mode == LoadSaveMode.PostLoadInit)
+		{
+			subplants.RemoveAll((Thing x) => x == null);
+		}
 	}
 }

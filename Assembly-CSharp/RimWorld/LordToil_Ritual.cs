@@ -1,254 +1,217 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class LordToil_Ritual : LordToil_Gathering
 {
-	// Token: 0x02001741 RID: 5953
-	public class LordToil_Ritual : LordToil_Gathering
+	public Pawn organizer;
+
+	public LordJob_Ritual ritual;
+
+	public RitualStage stage;
+
+	public Action startAction;
+
+	public Action tickAction;
+
+	protected List<LocalTargetInfo> reservedThings = new List<LocalTargetInfo>();
+
+	private readonly List<CachedPawnRitualDuty> cachedDuties = new List<CachedPawnRitualDuty>();
+
+	private List<Pawn> tmpPawns = new List<Pawn>();
+
+	public List<LocalTargetInfo> ReservedThings => reservedThings;
+
+	public LordToil_Ritual(IntVec3 spot, LordJob_Ritual ritual, RitualStage stage, Pawn organizer)
+		: base(spot, null)
 	{
-		// Token: 0x17001589 RID: 5513
-		// (get) Token: 0x06008BE2 RID: 35810 RVA: 0x0029A3DB File Offset: 0x002985DB
-		public List<LocalTargetInfo> ReservedThings
+		this.stage = stage;
+		this.organizer = organizer;
+		this.ritual = ritual;
+	}
+
+	public override void Init()
+	{
+		base.Init();
+		startAction?.Invoke();
+	}
+
+	public override ThinkTreeDutyHook VoluntaryJoinDutyHookFor(Pawn p)
+	{
+		return ThinkTreeDutyHook.HighPriority;
+	}
+
+	public override void LordToilTick()
+	{
+		base.LordToilTick();
+		tickAction?.Invoke();
+	}
+
+	public override void UpdateAllDuties()
+	{
+		reservedThings.Clear();
+		cachedDuties.Clear();
+		LocalTargetInfo localTargetInfo = (LocalTargetInfo)ritual.selectedTarget;
+		IntVec3 intVec = IntVec3.Invalid;
+		tmpPawns = lord.ownedPawns.ToList();
+		for (int i = 0; i < tmpPawns.Count; i++)
 		{
-			get
+			Pawn pawn = tmpPawns[i];
+			DutyDef dutyDef = stage.defaultDuty;
+			IntVec3 cell = spot;
+			LocalTargetInfo secondFocus = LocalTargetInfo.Invalid;
+			Thing usedThing = null;
+			Rot4 overrideFacing = Rot4.Invalid;
+			if (ritual.assignments.PawnParticipating(pawn))
 			{
-				return this.reservedThings;
+				dutyDef = stage.GetDuty(pawn, null, ritual) ?? dutyDef;
+				PawnStagePosition pawnStagePosition = ritual.PawnPositionForStage(pawn, stage);
+				cell = pawnStagePosition.cell;
+				usedThing = pawnStagePosition.thing;
+				overrideFacing = pawnStagePosition.orientation;
+				TargetInfo targetInfo = ritual.SecondFocusForStage(stage, pawn);
+				secondFocus = ((targetInfo.Thing != null) ? new LocalTargetInfo(targetInfo.Thing) : ((LocalTargetInfo)targetInfo.Cell));
+			}
+			cachedDuties.Add(new CachedPawnRitualDuty
+			{
+				duty = dutyDef,
+				spot = cell,
+				usedThing = usedThing,
+				overrideFacing = overrideFacing,
+				secondFocus = secondFocus
+			});
+			if (dutyDef.ritualSpectateTarget)
+			{
+				intVec = cell;
 			}
 		}
-
-		// Token: 0x06008BE3 RID: 35811 RVA: 0x0029A3E4 File Offset: 0x002985E4
-		public LordToil_Ritual(IntVec3 spot, LordJob_Ritual ritual, RitualStage stage, Pawn organizer) : base(spot, null)
+		tmpPawns = lord.ownedPawns.ToList();
+		SortByDuty();
+		for (int j = 0; j < tmpPawns.Count; j++)
 		{
-			this.stage = stage;
-			this.organizer = organizer;
-			this.ritual = ritual;
-		}
-
-		// Token: 0x06008BE4 RID: 35812 RVA: 0x0029A430 File Offset: 0x00298630
-		public override void Init()
-		{
-			base.Init();
-			Action action = this.startAction;
-			if (action == null)
+			Pawn pawn2 = tmpPawns[j];
+			CachedPawnRitualDuty cachedPawnRitualDuty = cachedDuties[j];
+			IntVec3 intVec2 = cachedPawnRitualDuty.spot;
+			LocalTargetInfo secondFocus2 = cachedPawnRitualDuty.secondFocus;
+			Rot4 overrideFacing2 = cachedPawnRitualDuty.overrideFacing;
+			Thing usedThing2 = cachedPawnRitualDuty.usedThing;
+			PawnDuty pawnDuty = new PawnDuty(cachedPawnRitualDuty.duty, intVec2, secondFocus2, localTargetInfo);
+			pawnDuty.spectateRect = CellRect.CenteredOn(spot, 0);
+			Thing thing = localTargetInfo.Thing;
+			RitualFocusProperties ritualFocusProperties = thing?.def.ritualFocus;
+			if (ritualFocusProperties != null)
 			{
-				return;
+				pawnDuty.spectateRectAllowedSides = ritualFocusProperties.allowedSpectateSides;
+				pawnDuty.spectateDistance = ritualFocusProperties.spectateDistance;
 			}
-			action();
-		}
-
-		// Token: 0x06008BE5 RID: 35813 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public override ThinkTreeDutyHook VoluntaryJoinDutyHookFor(Pawn p)
-		{
-			return ThinkTreeDutyHook.HighPriority;
-		}
-
-		// Token: 0x06008BE6 RID: 35814 RVA: 0x0029A448 File Offset: 0x00298648
-		public override void LordToilTick()
-		{
-			base.LordToilTick();
-			Action action = this.tickAction;
-			if (action == null)
+			else
 			{
-				return;
+				pawnDuty.spectateDistance = new IntRange(2, 2);
 			}
-			action();
-		}
-
-		// Token: 0x06008BE7 RID: 35815 RVA: 0x0029A460 File Offset: 0x00298660
-		public override void UpdateAllDuties()
-		{
-			this.reservedThings.Clear();
-			this.cachedDuties.Clear();
-			LocalTargetInfo localTargetInfo = (LocalTargetInfo)this.ritual.selectedTarget;
-			IntVec3 intVec = IntVec3.Invalid;
-			this.tmpPawns = this.lord.ownedPawns.ToList<Pawn>();
-			for (int i = 0; i < this.tmpPawns.Count; i++)
+			if (stage.allowedSpectateSidesOverride != 0)
 			{
-				Pawn pawn = this.tmpPawns[i];
-				DutyDef dutyDef = this.stage.defaultDuty;
-				IntVec3 intVec2 = this.spot;
-				LocalTargetInfo secondFocus = LocalTargetInfo.Invalid;
-				Thing usedThing = null;
-				Rot4 overrideFacing = Rot4.Invalid;
-				if (this.ritual.assignments.PawnParticipating(pawn))
-				{
-					dutyDef = (this.stage.GetDuty(pawn, null, this.ritual) ?? dutyDef);
-					PawnStagePosition pawnStagePosition = this.ritual.PawnPositionForStage(pawn, this.stage);
-					intVec2 = pawnStagePosition.cell;
-					usedThing = pawnStagePosition.thing;
-					overrideFacing = pawnStagePosition.orientation;
-					TargetInfo targetInfo = this.ritual.SecondFocusForStage(this.stage, pawn);
-					secondFocus = ((targetInfo.Thing != null) ? new LocalTargetInfo(targetInfo.Thing) : targetInfo.Cell);
-				}
-				this.cachedDuties.Add(new CachedPawnRitualDuty
-				{
-					duty = dutyDef,
-					spot = intVec2,
-					usedThing = usedThing,
-					overrideFacing = overrideFacing,
-					secondFocus = secondFocus
-				});
-				if (dutyDef.ritualSpectateTarget)
-				{
-					intVec = intVec2;
-				}
+				pawnDuty.spectateRectAllowedSides = stage.allowedSpectateSidesOverride;
 			}
-			this.tmpPawns = this.lord.ownedPawns.ToList<Pawn>();
-			this.SortByDuty();
-			for (int j = 0; j < this.tmpPawns.Count; j++)
+			if (stage.spectateDistanceOverride != IntRange.Zero)
 			{
-				Pawn pawn2 = this.tmpPawns[j];
-				CachedPawnRitualDuty cachedPawnRitualDuty = this.cachedDuties[j];
-				IntVec3 spot = cachedPawnRitualDuty.spot;
-				LocalTargetInfo secondFocus2 = cachedPawnRitualDuty.secondFocus;
-				Rot4 overrideFacing2 = cachedPawnRitualDuty.overrideFacing;
-				Thing usedThing2 = cachedPawnRitualDuty.usedThing;
-				PawnDuty pawnDuty = new PawnDuty(cachedPawnRitualDuty.duty, spot, secondFocus2, localTargetInfo, -1f);
-				pawnDuty.spectateRect = CellRect.CenteredOn(this.spot, 0);
-				Thing thing = localTargetInfo.Thing;
-				RitualFocusProperties ritualFocusProperties = (thing != null) ? thing.def.ritualFocus : null;
-				if (ritualFocusProperties != null)
+				pawnDuty.spectateDistance = stage.spectateDistanceOverride;
+			}
+			if (thing != null)
+			{
+				pawnDuty.spectateRectAllowedSides = pawnDuty.spectateRectAllowedSides.Rotated(thing.Rotation);
+				pawnDuty.spectateRect = thing.OccupiedRect();
+			}
+			if (intVec.IsValid && intVec != intVec2)
+			{
+				pawnDuty.spectateRect = CellRect.CenteredOn(intVec, 0);
+			}
+			if (cachedPawnRitualDuty.overrideFacing.IsValid)
+			{
+				pawnDuty.spectateRect = CellRect.CenteredOn(intVec2 + overrideFacing2.FacingCell, 0);
+				pawnDuty.overrideFacing = cachedPawnRitualDuty.overrideFacing;
+			}
+			if (pawnDuty.spectateRectAllowedSides == SpectateRectSide.Horizontal)
+			{
+				pawnDuty.spectateRectPreferredSide = ((intVec.x < intVec2.x) ? SpectateRectSide.Right : SpectateRectSide.Left);
+			}
+			else if (pawnDuty.spectateRectAllowedSides == SpectateRectSide.Vertical)
+			{
+				pawnDuty.spectateRectPreferredSide = ((intVec.y >= intVec2.y) ? SpectateRectSide.Up : SpectateRectSide.Down);
+			}
+			else if (pawnDuty.spectateRectAllowedSides != SpectateRectSide.All && pawnDuty.spectateRectAllowedSides != 0)
+			{
+				pawnDuty.spectateRectPreferredSide = pawnDuty.spectateRectAllowedSides;
+			}
+			else
+			{
+				pawnDuty.spectateRectPreferredSide = SpectateRectSide.Down;
+			}
+			if (intVec2.IsValid && !reservedThings.Contains(intVec2))
+			{
+				reservedThings.Add(intVec2);
+			}
+			if (secondFocus2.IsValid && !reservedThings.Contains(secondFocus2))
+			{
+				reservedThings.Add(secondFocus2);
+			}
+			if (localTargetInfo.IsValid && !reservedThings.Contains(localTargetInfo))
+			{
+				reservedThings.Add(localTargetInfo);
+			}
+			if (!reservedThings.Contains(pawn2))
+			{
+				reservedThings.Add(pawn2);
+			}
+			foreach (Pawn item in ritual.pawnsDeathIgnored)
+			{
+				if (!reservedThings.Contains(item.Corpse))
 				{
-					pawnDuty.spectateRectAllowedSides = ritualFocusProperties.allowedSpectateSides;
-					pawnDuty.spectateDistance = ritualFocusProperties.spectateDistance;
-				}
-				else
-				{
-					pawnDuty.spectateDistance = new IntRange(2, 2);
-				}
-				if (this.stage.allowedSpectateSidesOverride != SpectateRectSide.None)
-				{
-					pawnDuty.spectateRectAllowedSides = this.stage.allowedSpectateSidesOverride;
-				}
-				if (this.stage.spectateDistanceOverride != IntRange.Zero)
-				{
-					pawnDuty.spectateDistance = this.stage.spectateDistanceOverride;
-				}
-				if (thing != null)
-				{
-					pawnDuty.spectateRectAllowedSides = pawnDuty.spectateRectAllowedSides.Rotated(thing.Rotation);
-					pawnDuty.spectateRect = thing.OccupiedRect();
-				}
-				if (intVec.IsValid && intVec != spot)
-				{
-					pawnDuty.spectateRect = CellRect.CenteredOn(intVec, 0);
-				}
-				if (cachedPawnRitualDuty.overrideFacing.IsValid)
-				{
-					pawnDuty.spectateRect = CellRect.CenteredOn(spot + overrideFacing2.FacingCell, 0);
-					pawnDuty.overrideFacing = cachedPawnRitualDuty.overrideFacing;
-				}
-				if (pawnDuty.spectateRectAllowedSides == SpectateRectSide.Horizontal)
-				{
-					pawnDuty.spectateRectPreferredSide = ((intVec.x < spot.x) ? SpectateRectSide.Right : SpectateRectSide.Left);
-				}
-				else if (pawnDuty.spectateRectAllowedSides == SpectateRectSide.Vertical)
-				{
-					pawnDuty.spectateRectPreferredSide = ((intVec.y < spot.y) ? SpectateRectSide.Down : SpectateRectSide.Up);
-				}
-				else if (pawnDuty.spectateRectAllowedSides != SpectateRectSide.All && pawnDuty.spectateRectAllowedSides != SpectateRectSide.None)
-				{
-					pawnDuty.spectateRectPreferredSide = pawnDuty.spectateRectAllowedSides;
-				}
-				else
-				{
-					pawnDuty.spectateRectPreferredSide = SpectateRectSide.Down;
-				}
-				if (spot.IsValid && !this.reservedThings.Contains(spot))
-				{
-					this.reservedThings.Add(spot);
-				}
-				if (secondFocus2.IsValid && !this.reservedThings.Contains(secondFocus2))
-				{
-					this.reservedThings.Add(secondFocus2);
-				}
-				if (localTargetInfo.IsValid && !this.reservedThings.Contains(localTargetInfo))
-				{
-					this.reservedThings.Add(localTargetInfo);
-				}
-				if (!this.reservedThings.Contains(pawn2))
-				{
-					this.reservedThings.Add(pawn2);
-				}
-				foreach (Pawn pawn3 in this.ritual.pawnsDeathIgnored)
-				{
-					if (!this.reservedThings.Contains(pawn3.Corpse))
-					{
-						this.reservedThings.Add(pawn3.Corpse);
-					}
-				}
-				if (usedThing2 != null && !this.ritual.usedThings.Contains(usedThing2))
-				{
-					this.ritual.usedThings.Add(usedThing2);
-				}
-				pawn2.mindState.duty = pawnDuty;
-				pawn2.mindState.priorityWork.ClearPrioritizedWorkAndJobQueue();
-				Pawn_JobTracker jobs = pawn2.jobs;
-				if (jobs != null)
-				{
-					jobs.CheckForJobOverride(0f, true);
+					reservedThings.Add(item.Corpse);
 				}
 			}
-		}
-
-		// Token: 0x06008BE8 RID: 35816 RVA: 0x0029A994 File Offset: 0x00298B94
-		private void SortByDuty()
-		{
-			HashSet<Pawn> hashSet = new HashSet<Pawn>(this.ritual.assignments.SpectatorsForReading);
-			int num = 0;
-			for (int i = 0; i < this.tmpPawns.Count; i++)
+			if (usedThing2 != null && !ritual.usedThings.Contains(usedThing2))
 			{
-				if (!hashSet.Contains(this.tmpPawns[i]))
+				ritual.usedThings.Add(usedThing2);
+			}
+			pawn2.mindState.duty = pawnDuty;
+			pawn2.mindState.priorityWork.ClearPrioritizedWorkAndJobQueue();
+			pawn2.jobs?.CheckForJobOverride();
+		}
+	}
+
+	private void SortByDuty()
+	{
+		HashSet<Pawn> hashSet = new HashSet<Pawn>(ritual.assignments.SpectatorsForReading);
+		int num = 0;
+		for (int i = 0; i < tmpPawns.Count; i++)
+		{
+			if (!hashSet.Contains(tmpPawns[i]))
+			{
+				if (i != num)
 				{
-					if (i != num)
-					{
-						List<Pawn> list = this.tmpPawns;
-						int index = i;
-						List<Pawn> list2 = this.tmpPawns;
-						int index2 = num;
-						Pawn value = this.tmpPawns[num];
-						Pawn value2 = this.tmpPawns[i];
-						list[index] = value;
-						list2[index2] = value2;
-						List<CachedPawnRitualDuty> list3 = this.cachedDuties;
-						index2 = i;
-						List<CachedPawnRitualDuty> list4 = this.cachedDuties;
-						index = num;
-						CachedPawnRitualDuty value3 = this.cachedDuties[num];
-						CachedPawnRitualDuty value4 = this.cachedDuties[i];
-						list3[index2] = value3;
-						list4[index] = value4;
-					}
-					num++;
+					List<Pawn> list = tmpPawns;
+					int index = i;
+					List<Pawn> list2 = tmpPawns;
+					int index2 = num;
+					Pawn value = tmpPawns[num];
+					Pawn value2 = tmpPawns[i];
+					list[index] = value;
+					list2[index2] = value2;
+					List<CachedPawnRitualDuty> list3 = cachedDuties;
+					index2 = i;
+					List<CachedPawnRitualDuty> list4 = cachedDuties;
+					index = num;
+					CachedPawnRitualDuty value3 = cachedDuties[num];
+					CachedPawnRitualDuty value4 = cachedDuties[i];
+					list3[index2] = value3;
+					list4[index] = value4;
 				}
+				num++;
 			}
 		}
-
-		// Token: 0x04005AEA RID: 23274
-		public Pawn organizer;
-
-		// Token: 0x04005AEB RID: 23275
-		public LordJob_Ritual ritual;
-
-		// Token: 0x04005AEC RID: 23276
-		public RitualStage stage;
-
-		// Token: 0x04005AED RID: 23277
-		public Action startAction;
-
-		// Token: 0x04005AEE RID: 23278
-		public Action tickAction;
-
-		// Token: 0x04005AEF RID: 23279
-		protected List<LocalTargetInfo> reservedThings = new List<LocalTargetInfo>();
-
-		// Token: 0x04005AF0 RID: 23280
-		private readonly List<CachedPawnRitualDuty> cachedDuties = new List<CachedPawnRitualDuty>();
-
-		// Token: 0x04005AF1 RID: 23281
-		private List<Pawn> tmpPawns = new List<Pawn>();
 	}
 }

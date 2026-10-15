@@ -1,105 +1,232 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public abstract class RitualObligationTargetFilter : IExposable
 {
-	// Token: 0x020026E1 RID: 9953
-	public abstract class RitualObligationTargetFilter : IExposable
+	[CompilerGenerated]
+	private sealed class _003CGetBlockingIssues_003Ed__10 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x0600DA25 RID: 55845 RVA: 0x000024DF File Offset: 0x000006DF
-		public RitualObligationTargetFilter()
-		{
-		}
+		private int _003C_003E1__state;
 
-		// Token: 0x0600DA26 RID: 55846 RVA: 0x0040888F File Offset: 0x00406A8F
-		public RitualObligationTargetFilter(RitualObligationTargetFilterDef def)
-		{
-			this.def = def;
-		}
+		private string _003C_003E2__current;
 
-		// Token: 0x0600DA27 RID: 55847 RVA: 0x0040889E File Offset: 0x00406A9E
-		public RitualTargetUseReport CanUseTarget(TargetInfo target, RitualObligation obligation)
+		private int _003C_003El__initialThreadId;
+
+		private RitualRoleAssignments assignments;
+
+		public RitualRoleAssignments _003C_003E3__assignments;
+
+		private TargetInfo target;
+
+		public TargetInfo _003C_003E3__target;
+
+		private List<RitualRole>.Enumerator _003C_003E7__wrap1;
+
+		string IEnumerator<string>.Current
 		{
-			if ((target.Thing != null && !target.Thing.Spawned) || Find.IdeoManager.GetActiveRitualOn(target.Thing) != null)
+			[DebuggerHidden]
+			get
 			{
-				return false;
+				return _003C_003E2__current;
 			}
-			return this.CanUseTargetInternal(target, obligation);
 		}
 
-		// Token: 0x0600DA28 RID: 55848
-		public abstract IEnumerable<TargetInfo> GetTargets(RitualObligation obligation, Map map);
-
-		// Token: 0x0600DA29 RID: 55849
-		protected abstract RitualTargetUseReport CanUseTargetInternal(TargetInfo target, RitualObligation obligation);
-
-		// Token: 0x0600DA2A RID: 55850 RVA: 0x00002C42 File Offset: 0x00000E42
-		public virtual List<string> MissingTargetBuilding(Ideo ideo)
+		object IEnumerator.Current
 		{
-			return null;
-		}
-
-		// Token: 0x0600DA2B RID: 55851 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public virtual bool ObligationTargetsValid(RitualObligation obligation)
-		{
-			return true;
-		}
-
-		// Token: 0x0600DA2C RID: 55852
-		public abstract IEnumerable<string> GetTargetInfos(RitualObligation obligation);
-
-		// Token: 0x0600DA2D RID: 55853 RVA: 0x004088DE File Offset: 0x00406ADE
-		public virtual IEnumerable<string> GetBlockingIssues(TargetInfo target, RitualRoleAssignments assignments)
-		{
-			foreach (RitualRole ritualRole in assignments.AllRolesForReading)
+			[DebuggerHidden]
+			get
 			{
-				if (ritualRole.mustBeAbleToReachTarget)
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetBlockingIssues_003Ed__10(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
 				{
-					Pawn pawn = assignments.FirstAssignedPawn(ritualRole);
-					if (pawn != null && !pawn.CanReach((LocalTargetInfo)target, PathEndMode.Touch, pawn.NormalMaxDanger(), false, false, TraverseMode.ByPawn))
-					{
-						yield return "RitualTargetUnreachable".Translate(ritualRole.LabelCap);
-					}
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
 				}
 			}
-			List<RitualRole>.Enumerator enumerator = default(List<RitualRole>.Enumerator);
-			yield break;
-			yield break;
+			_003C_003E7__wrap1 = default(List<RitualRole>.Enumerator);
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x0600DA2E RID: 55854 RVA: 0x00035ADE File Offset: 0x00033CDE
-		public virtual string LabelExtraPart(RitualObligation obligation)
+		private bool MoveNext()
 		{
-			return "";
+			try
+			{
+				switch (_003C_003E1__state)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = assignments.AllRolesForReading.GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 1:
+					_003C_003E1__state = -3;
+					break;
+				}
+				while (_003C_003E7__wrap1.MoveNext())
+				{
+					RitualRole current = _003C_003E7__wrap1.Current;
+					if (current.mustBeAbleToReachTarget)
+					{
+						Pawn pawn = assignments.FirstAssignedPawn(current);
+						if (pawn != null && !pawn.CanReach((LocalTargetInfo)target, PathEndMode.Touch, pawn.NormalMaxDanger()))
+						{
+							_003C_003E2__current = "RitualTargetUnreachable".Translate(current.LabelCap);
+							_003C_003E1__state = 1;
+							return true;
+						}
+					}
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = default(List<RitualRole>.Enumerator);
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
 		}
 
-		// Token: 0x0600DA2F RID: 55855 RVA: 0x004088F5 File Offset: 0x00406AF5
-		public virtual bool ShouldGrayOut(Pawn pawn, ILordJobAssignmentsManager<RitualRole> assignments, out TaggedString reason)
+		bool IEnumerator.MoveNext()
 		{
-			reason = TaggedString.Empty;
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap1/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CGetBlockingIssues_003Ed__10 _003CGetBlockingIssues_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CGetBlockingIssues_003Ed__ = this;
+			}
+			else
+			{
+				_003CGetBlockingIssues_003Ed__ = new _003CGetBlockingIssues_003Ed__10(0);
+			}
+			_003CGetBlockingIssues_003Ed__.target = _003C_003E3__target;
+			_003CGetBlockingIssues_003Ed__.assignments = _003C_003E3__assignments;
+			return _003CGetBlockingIssues_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	public Precept_Ritual parent;
+
+	public RitualObligationTargetFilterDef def;
+
+	public RitualObligationTargetFilter()
+	{
+	}
+
+	public RitualObligationTargetFilter(RitualObligationTargetFilterDef def)
+	{
+		this.def = def;
+	}
+
+	public RitualTargetUseReport CanUseTarget(TargetInfo target, RitualObligation obligation)
+	{
+		if ((target.Thing != null && !target.Thing.Spawned) || Find.IdeoManager.GetActiveRitualOn(target.Thing) != null)
+		{
 			return false;
 		}
+		return CanUseTargetInternal(target, obligation);
+	}
 
-		// Token: 0x0600DA30 RID: 55856 RVA: 0x00408903 File Offset: 0x00406B03
-		public virtual void CopyTo(RitualObligationTargetFilter other)
+	public abstract IEnumerable<TargetInfo> GetTargets(RitualObligation obligation, Map map);
+
+	protected abstract RitualTargetUseReport CanUseTargetInternal(TargetInfo target, RitualObligation obligation);
+
+	public virtual List<string> MissingTargetBuilding(Ideo ideo)
+	{
+		return null;
+	}
+
+	public virtual bool ObligationTargetsValid(RitualObligation obligation)
+	{
+		return true;
+	}
+
+	public abstract IEnumerable<string> GetTargetInfos(RitualObligation obligation);
+
+	[IteratorStateMachine(typeof(_003CGetBlockingIssues_003Ed__10))]
+	public virtual IEnumerable<string> GetBlockingIssues(TargetInfo target, RitualRoleAssignments assignments)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetBlockingIssues_003Ed__10(-2)
 		{
-			other.parent = this.parent;
-			other.def = this.def;
-		}
+			_003C_003E3__target = target,
+			_003C_003E3__assignments = assignments
+		};
+	}
 
-		// Token: 0x0600DA31 RID: 55857 RVA: 0x0040891D File Offset: 0x00406B1D
-		public virtual void ExposeData()
-		{
-			Scribe_Defs.Look<RitualObligationTargetFilterDef>(ref this.def, "def");
-			Scribe_References.Look<Precept_Ritual>(ref this.parent, "parent", false);
-		}
+	public virtual string LabelExtraPart(RitualObligation obligation)
+	{
+		return "";
+	}
 
-		// Token: 0x040093B2 RID: 37810
-		public Precept_Ritual parent;
+	public virtual bool ShouldGrayOut(Pawn pawn, ILordJobAssignmentsManager<RitualRole> assignments, out TaggedString reason)
+	{
+		reason = TaggedString.Empty;
+		return false;
+	}
 
-		// Token: 0x040093B3 RID: 37811
-		public RitualObligationTargetFilterDef def;
+	public virtual void CopyTo(RitualObligationTargetFilter other)
+	{
+		other.parent = parent;
+		other.def = def;
+	}
+
+	public virtual void ExposeData()
+	{
+		Scribe_Defs.Look(ref def, "def");
+		Scribe_References.Look(ref parent, "parent");
 	}
 }

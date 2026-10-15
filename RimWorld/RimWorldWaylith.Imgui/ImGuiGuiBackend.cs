@@ -73,6 +73,8 @@ internal sealed class ImGuiGuiBackend : IGuiBackend
 
 	private readonly List<(Rect rect, Vector2 origin)> openGroups = new List<(Rect, Vector2)>();
 
+	private const float MaxGuiCoordinate = 10000000f;
+
 	private readonly TextLayout textLayout;
 
 	private const uint GlyphColoredBit = 1u;
@@ -424,18 +426,31 @@ internal sealed class ImGuiGuiBackend : IGuiBackend
 		return new float2((m11 * num2 - m01 * num3) / num - offset.X, (m00 * num3 - m10 * num2) / num - offset.Y);
 	}
 
+	private static float Finite(float v)
+	{
+		if (!float.IsNaN(v))
+		{
+			return Math.Clamp(v, -10000000f, 10000000f);
+		}
+		return 0f;
+	}
+
 	private void ScreenBounds(Rect rect, out float2 min, out float2 max)
 	{
+		float x = Finite(rect.x);
+		float y = Finite(rect.y);
+		float x2 = Finite(rect.x + rect.width);
+		float y2 = Finite(rect.y + rect.height);
 		if (!rotated)
 		{
-			min = ToScreen(rect.x, rect.y);
-			max = ToScreen(rect.x + rect.width, rect.y + rect.height);
+			min = ToScreen(x, y);
+			max = ToScreen(x2, y2);
 			return;
 		}
-		float2 @float = ToScreen(rect.x, rect.y);
-		float2 float2 = ToScreen(rect.x + rect.width, rect.y);
-		float2 float3 = ToScreen(rect.x + rect.width, rect.y + rect.height);
-		float2 float4 = ToScreen(rect.x, rect.y + rect.height);
+		float2 @float = ToScreen(x, y);
+		float2 float2 = ToScreen(x2, y);
+		float2 float3 = ToScreen(x2, y2);
+		float2 float4 = ToScreen(x, y2);
 		min = new float2(MathF.Min(MathF.Min(@float.X, float2.X), MathF.Min(float3.X, float4.X)), MathF.Min(MathF.Min(@float.Y, float2.Y), MathF.Min(float3.Y, float4.Y)));
 		max = new float2(MathF.Max(MathF.Max(@float.X, float2.X), MathF.Max(float3.X, float4.X)), MathF.Max(MathF.Max(@float.Y, float2.Y), MathF.Max(float3.Y, float4.Y)));
 	}

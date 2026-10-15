@@ -1,329 +1,440 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class IncidentDef : Def
 {
-	// Token: 0x02001A52 RID: 6738
-	public class IncidentDef : Def
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__66 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001725 RID: 5925
-		// (get) Token: 0x06009774 RID: 38772 RVA: 0x002C37BB File Offset: 0x002C19BB
-		public bool ShouldIgnoreRecentWeighting
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public IncidentDef _003C_003E4__this;
+
+		private IEnumerator<string> _003C_003E7__wrap1;
+
+		string IEnumerator<string>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.ignoreRecentSelectionWeighting || this.category == IncidentCategoryDefOf.Special || this.category == IncidentCategoryDefOf.GiveQuest;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001726 RID: 5926
-		// (get) Token: 0x06009775 RID: 38773 RVA: 0x002C37E1 File Offset: 0x002C19E1
-		public IncidentWorker Worker
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.workerInt == null)
-				{
-					this.workerInt = (IncidentWorker)Activator.CreateInstance(this.workerClass);
-					this.workerInt.def = this;
-				}
-				return this.workerInt;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001727 RID: 5927
-		// (get) Token: 0x06009776 RID: 38774 RVA: 0x002C3814 File Offset: 0x002C1A14
-		public List<IncidentDef> RefireCheckIncidents
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__66(int _003C_003E1__state)
 		{
-			get
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				if (this.refireCheckTags == null)
+				try
 				{
-					return null;
 				}
-				if (this.cachedRefireCheckIncidents == null)
+				finally
 				{
-					this.cachedRefireCheckIncidents = new List<IncidentDef>();
-					List<IncidentDef> allDefsListForReading = DefDatabase<IncidentDef>.AllDefsListForReading;
-					for (int i = 0; i < allDefsListForReading.Count; i++)
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				IncidentDef incidentDef = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((Def)incidentDef).ConfigErrors().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0086;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0086;
+				case 2:
+					_003C_003E1__state = -1;
+					goto IL_00c8;
+				case 3:
+					_003C_003E1__state = -1;
+					goto IL_00fd;
+				case 4:
+					_003C_003E1__state = -1;
+					goto IL_0156;
+				case 5:
+					_003C_003E1__state = -1;
+					goto IL_0193;
+				case 6:
+					_003C_003E1__state = -1;
+					goto IL_01ca;
+				case 7:
 					{
-						if (this.ShouldDoRefireCheckWith(allDefsListForReading[i]))
-						{
-							this.cachedRefireCheckIncidents.Add(allDefsListForReading[i]);
-						}
+						_003C_003E1__state = -1;
+						break;
 					}
-				}
-				return this.cachedRefireCheckIncidents;
-			}
-		}
-
-		// Token: 0x17001728 RID: 5928
-		// (get) Token: 0x06009777 RID: 38775 RVA: 0x002C387C File Offset: 0x002C1A7C
-		public bool IsAnomalyIncident
-		{
-			get
-			{
-				return this.minAnomalyThreatLevel >= 0;
-			}
-		}
-
-		// Token: 0x06009778 RID: 38776 RVA: 0x002C388A File Offset: 0x002C1A8A
-		public static IncidentDef Named(string defName)
-		{
-			return DefDatabase<IncidentDef>.GetNamed(defName, true);
-		}
-
-		// Token: 0x06009779 RID: 38777 RVA: 0x002C3894 File Offset: 0x002C1A94
-		private bool ShouldDoRefireCheckWith(IncidentDef other)
-		{
-			if (other.tags == null)
-			{
-				return false;
-			}
-			if (other == this)
-			{
-				return false;
-			}
-			for (int i = 0; i < other.tags.Count; i++)
-			{
-				for (int j = 0; j < this.refireCheckTags.Count; j++)
-				{
-					if (other.tags[i] == this.refireCheckTags[j])
+					IL_0086:
+					if (_003C_003E7__wrap1.MoveNext())
 					{
+						string current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
 						return true;
 					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (incidentDef.category == null)
+					{
+						_003C_003E2__current = "category is undefined.";
+						_003C_003E1__state = 2;
+						return true;
+					}
+					goto IL_00c8;
+					IL_0193:
+					if (!incidentDef.allowedBiomes.NullOrEmpty() && !incidentDef.disallowedBiomes.NullOrEmpty())
+					{
+						_003C_003E2__current = "allowedBiomes (white list) and disallowedBiomes (black list) are both defined.";
+						_003C_003E1__state = 6;
+						return true;
+					}
+					goto IL_01ca;
+					IL_00c8:
+					if (incidentDef.targetTags == null || incidentDef.targetTags.Count == 0)
+					{
+						_003C_003E2__current = "no target type";
+						_003C_003E1__state = 3;
+						return true;
+					}
+					goto IL_00fd;
+					IL_0156:
+					if (incidentDef.TargetTagAllowed(IncidentTargetTagDefOf.World) && (incidentDef.allowedBiomes != null || incidentDef.disallowedBiomes != null))
+					{
+						_003C_003E2__current = "world-targeting incident has a biome restriction list";
+						_003C_003E1__state = 5;
+						return true;
+					}
+					goto IL_0193;
+					IL_00fd:
+					if (incidentDef.TargetTagAllowed(IncidentTargetTagDefOf.World) && incidentDef.targetTags.Any((IncidentTargetTagDef tt) => tt != IncidentTargetTagDefOf.World))
+					{
+						_003C_003E2__current = "allows world target type along with other targets. World targeting incidents should only target the world.";
+						_003C_003E1__state = 4;
+						return true;
+					}
+					goto IL_0156;
+					IL_01ca:
+					if (incidentDef.questScriptDef != null && incidentDef.questScriptDef.rootSelectionWeight != 0f)
+					{
+						_003C_003E2__current = "quest is run from both incident and random quest.";
+						_003C_003E1__state = 7;
+						return true;
+					}
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__66 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__66(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	public Type workerClass;
+
+	public IncidentCategoryDef category;
+
+	public List<IncidentTargetTagDef> targetTags;
+
+	public float baseChance;
+
+	public float baseChanceWithRoyalty = -1f;
+
+	public IncidentPopulationEffect populationEffect;
+
+	public int earliestDay;
+
+	public int minPopulation;
+
+	public bool requireColonistsPresent;
+
+	public float minRefireDays;
+
+	[Obsolete]
+	public int minDifficulty;
+
+	public DifficultyConditionConfig disabledWhen = new DifficultyConditionConfig();
+
+	public bool pointsScaleable;
+
+	public float minThreatPoints = float.MinValue;
+
+	public float maxThreatPoints = float.MaxValue;
+
+	public List<BiomeDef> allowedBiomes;
+
+	public List<BiomeDef> disallowedBiomes;
+
+	[NoTranslate]
+	public List<string> tags;
+
+	[NoTranslate]
+	public List<string> refireCheckTags;
+
+	public SimpleCurve chanceFactorByPopulationCurve;
+
+	public TaleDef tale;
+
+	public int minAnomalyThreatLevel = -1;
+
+	public int minGreatestPopulation = -1;
+
+	private bool ignoreRecentSelectionWeighting;
+
+	public bool hidden;
+
+	public List<PlanetLayerDef> layerWhitelist;
+
+	public List<PlanetLayerDef> layerBlacklist;
+
+	public bool canOccurOnAllPlanetLayers;
+
+	public EntityCodexEntryDef codexEntry;
+
+	[MustTranslate]
+	public string letterText;
+
+	[MustTranslate]
+	public string letterLabel;
+
+	public LetterDef letterDef;
+
+	public List<HediffDef> letterHyperlinkHediffDefs;
+
+	public bool letterSingularForm;
+
+	public PawnKindDef pawnKind;
+
+	public bool pawnMustBeCapableOfViolence;
+
+	public Gender pawnFixedGender;
+
+	public HediffDef pawnHediff;
+
+	public GameConditionDef gameCondition;
+
+	public FloatRange durationDays;
+
+	public HediffDef diseaseIncident;
+
+	public FloatRange diseaseVictimFractionRange = new FloatRange(0f, 0.49f);
+
+	public int diseaseMaxVictims = 99999;
+
+	public List<BiomeDiseaseRecord> diseaseBiomeRecords;
+
+	public List<BodyPartDef> diseasePartsToAffect;
+
+	[MustTranslate]
+	public string diseaseLethalLetterText;
+
+	public DevelopmentalStage diseaseDevelopmentStage = DevelopmentalStage.Baby | DevelopmentalStage.Child | DevelopmentalStage.Adult;
+
+	public ThingDef mechClusterBuilding;
+
+	public List<MTBByBiome> mtbDaysByBiome;
+
+	public QuestScriptDef questScriptDef;
+
+	public ThingDef treeDef;
+
+	public GenStepDef treeGenStepDef;
+
+	public string letterTextPlural;
+
+	public float treeGrowth;
+
+	[Unsaved(false)]
+	private IncidentWorker workerInt;
+
+	[Unsaved(false)]
+	private List<IncidentDef> cachedRefireCheckIncidents;
+
+	public bool ShouldIgnoreRecentWeighting
+	{
+		get
+		{
+			if (!ignoreRecentSelectionWeighting && category != IncidentCategoryDefOf.Special)
+			{
+				return category == IncidentCategoryDefOf.GiveQuest;
+			}
+			return true;
+		}
+	}
+
+	public IncidentWorker Worker
+	{
+		get
+		{
+			if (workerInt == null)
+			{
+				workerInt = (IncidentWorker)Activator.CreateInstance(workerClass);
+				workerInt.def = this;
+			}
+			return workerInt;
+		}
+	}
+
+	public List<IncidentDef> RefireCheckIncidents
+	{
+		get
+		{
+			if (refireCheckTags == null)
+			{
+				return null;
+			}
+			if (cachedRefireCheckIncidents == null)
+			{
+				cachedRefireCheckIncidents = new List<IncidentDef>();
+				List<IncidentDef> allDefsListForReading = DefDatabase<IncidentDef>.AllDefsListForReading;
+				for (int i = 0; i < allDefsListForReading.Count; i++)
+				{
+					if (ShouldDoRefireCheckWith(allDefsListForReading[i]))
+					{
+						cachedRefireCheckIncidents.Add(allDefsListForReading[i]);
+					}
 				}
 			}
+			return cachedRefireCheckIncidents;
+		}
+	}
+
+	public bool IsAnomalyIncident => minAnomalyThreatLevel >= 0;
+
+	public static IncidentDef Named(string defName)
+	{
+		return DefDatabase<IncidentDef>.GetNamed(defName);
+	}
+
+	private bool ShouldDoRefireCheckWith(IncidentDef other)
+	{
+		if (other.tags == null)
+		{
 			return false;
 		}
-
-		// Token: 0x0600977A RID: 38778 RVA: 0x002C38FF File Offset: 0x002C1AFF
-		public override IEnumerable<string> ConfigErrors()
+		if (other == this)
 		{
-			foreach (string text in base.ConfigErrors())
+			return false;
+		}
+		for (int i = 0; i < other.tags.Count; i++)
+		{
+			for (int j = 0; j < refireCheckTags.Count; j++)
 			{
-				yield return text;
-			}
-			IEnumerator<string> enumerator = null;
-			if (this.category == null)
-			{
-				yield return "category is undefined.";
-			}
-			if (this.targetTags == null || this.targetTags.Count == 0)
-			{
-				yield return "no target type";
-			}
-			if (this.TargetTagAllowed(IncidentTargetTagDefOf.World))
-			{
-				if (this.targetTags.Any((IncidentTargetTagDef tt) => tt != IncidentTargetTagDefOf.World))
+				if (other.tags[i] == refireCheckTags[j])
 				{
-					yield return "allows world target type along with other targets. World targeting incidents should only target the world.";
+					return true;
 				}
 			}
-			if (this.TargetTagAllowed(IncidentTargetTagDefOf.World) && (this.allowedBiomes != null || this.disallowedBiomes != null))
-			{
-				yield return "world-targeting incident has a biome restriction list";
-			}
-			if (!this.allowedBiomes.NullOrEmpty<BiomeDef>() && !this.disallowedBiomes.NullOrEmpty<BiomeDef>())
-			{
-				yield return "allowedBiomes (white list) and disallowedBiomes (black list) are both defined.";
-			}
-			if (this.questScriptDef != null && this.questScriptDef.rootSelectionWeight != 0f)
-			{
-				yield return "quest is run from both incident and random quest.";
-			}
-			yield break;
-			yield break;
 		}
+		return false;
+	}
 
-		// Token: 0x0600977B RID: 38779 RVA: 0x002C390F File Offset: 0x002C1B0F
-		public bool TargetTagAllowed(IncidentTargetTagDef target)
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__66))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__66(-2)
 		{
-			return this.targetTags.Contains(target);
-		}
+			_003C_003E4__this = this
+		};
+	}
 
-		// Token: 0x0600977C RID: 38780 RVA: 0x002C391D File Offset: 0x002C1B1D
-		public bool TargetAllowed(IIncidentTarget target)
-		{
-			return this.targetTags.Intersect(target.IncidentTargetTags()).Any<IncidentTargetTagDef>();
-		}
+	public bool TargetTagAllowed(IncidentTargetTagDef target)
+	{
+		return targetTags.Contains(target);
+	}
 
-		// Token: 0x04006488 RID: 25736
-		public Type workerClass;
-
-		// Token: 0x04006489 RID: 25737
-		public IncidentCategoryDef category;
-
-		// Token: 0x0400648A RID: 25738
-		public List<IncidentTargetTagDef> targetTags;
-
-		// Token: 0x0400648B RID: 25739
-		public float baseChance;
-
-		// Token: 0x0400648C RID: 25740
-		public float baseChanceWithRoyalty = -1f;
-
-		// Token: 0x0400648D RID: 25741
-		public IncidentPopulationEffect populationEffect;
-
-		// Token: 0x0400648E RID: 25742
-		public int earliestDay;
-
-		// Token: 0x0400648F RID: 25743
-		public int minPopulation;
-
-		// Token: 0x04006490 RID: 25744
-		public bool requireColonistsPresent;
-
-		// Token: 0x04006491 RID: 25745
-		public float minRefireDays;
-
-		// Token: 0x04006492 RID: 25746
-		[Obsolete]
-		public int minDifficulty;
-
-		// Token: 0x04006493 RID: 25747
-		public DifficultyConditionConfig disabledWhen = new DifficultyConditionConfig();
-
-		// Token: 0x04006494 RID: 25748
-		public bool pointsScaleable;
-
-		// Token: 0x04006495 RID: 25749
-		public float minThreatPoints = float.MinValue;
-
-		// Token: 0x04006496 RID: 25750
-		public float maxThreatPoints = float.MaxValue;
-
-		// Token: 0x04006497 RID: 25751
-		public List<BiomeDef> allowedBiomes;
-
-		// Token: 0x04006498 RID: 25752
-		public List<BiomeDef> disallowedBiomes;
-
-		// Token: 0x04006499 RID: 25753
-		[NoTranslate]
-		public List<string> tags;
-
-		// Token: 0x0400649A RID: 25754
-		[NoTranslate]
-		public List<string> refireCheckTags;
-
-		// Token: 0x0400649B RID: 25755
-		public SimpleCurve chanceFactorByPopulationCurve;
-
-		// Token: 0x0400649C RID: 25756
-		public TaleDef tale;
-
-		// Token: 0x0400649D RID: 25757
-		public int minAnomalyThreatLevel = -1;
-
-		// Token: 0x0400649E RID: 25758
-		public int minGreatestPopulation = -1;
-
-		// Token: 0x0400649F RID: 25759
-		private bool ignoreRecentSelectionWeighting;
-
-		// Token: 0x040064A0 RID: 25760
-		public bool hidden;
-
-		// Token: 0x040064A1 RID: 25761
-		public List<PlanetLayerDef> layerWhitelist;
-
-		// Token: 0x040064A2 RID: 25762
-		public List<PlanetLayerDef> layerBlacklist;
-
-		// Token: 0x040064A3 RID: 25763
-		public bool canOccurOnAllPlanetLayers;
-
-		// Token: 0x040064A4 RID: 25764
-		public EntityCodexEntryDef codexEntry;
-
-		// Token: 0x040064A5 RID: 25765
-		[MustTranslate]
-		public string letterText;
-
-		// Token: 0x040064A6 RID: 25766
-		[MustTranslate]
-		public string letterLabel;
-
-		// Token: 0x040064A7 RID: 25767
-		public LetterDef letterDef;
-
-		// Token: 0x040064A8 RID: 25768
-		public List<HediffDef> letterHyperlinkHediffDefs;
-
-		// Token: 0x040064A9 RID: 25769
-		public bool letterSingularForm;
-
-		// Token: 0x040064AA RID: 25770
-		public PawnKindDef pawnKind;
-
-		// Token: 0x040064AB RID: 25771
-		public bool pawnMustBeCapableOfViolence;
-
-		// Token: 0x040064AC RID: 25772
-		public Gender pawnFixedGender;
-
-		// Token: 0x040064AD RID: 25773
-		public HediffDef pawnHediff;
-
-		// Token: 0x040064AE RID: 25774
-		public GameConditionDef gameCondition;
-
-		// Token: 0x040064AF RID: 25775
-		public FloatRange durationDays;
-
-		// Token: 0x040064B0 RID: 25776
-		public HediffDef diseaseIncident;
-
-		// Token: 0x040064B1 RID: 25777
-		public FloatRange diseaseVictimFractionRange = new FloatRange(0f, 0.49f);
-
-		// Token: 0x040064B2 RID: 25778
-		public int diseaseMaxVictims = 99999;
-
-		// Token: 0x040064B3 RID: 25779
-		public List<BiomeDiseaseRecord> diseaseBiomeRecords;
-
-		// Token: 0x040064B4 RID: 25780
-		public List<BodyPartDef> diseasePartsToAffect;
-
-		// Token: 0x040064B5 RID: 25781
-		[MustTranslate]
-		public string diseaseLethalLetterText;
-
-		// Token: 0x040064B6 RID: 25782
-		public DevelopmentalStage diseaseDevelopmentStage = DevelopmentalStage.Baby | DevelopmentalStage.Child | DevelopmentalStage.Adult;
-
-		// Token: 0x040064B7 RID: 25783
-		public ThingDef mechClusterBuilding;
-
-		// Token: 0x040064B8 RID: 25784
-		public List<MTBByBiome> mtbDaysByBiome;
-
-		// Token: 0x040064B9 RID: 25785
-		public QuestScriptDef questScriptDef;
-
-		// Token: 0x040064BA RID: 25786
-		public ThingDef treeDef;
-
-		// Token: 0x040064BB RID: 25787
-		public GenStepDef treeGenStepDef;
-
-		// Token: 0x040064BC RID: 25788
-		public string letterTextPlural;
-
-		// Token: 0x040064BD RID: 25789
-		public float treeGrowth;
-
-		// Token: 0x040064BE RID: 25790
-		[Unsaved(false)]
-		private IncidentWorker workerInt;
-
-		// Token: 0x040064BF RID: 25791
-		[Unsaved(false)]
-		private List<IncidentDef> cachedRefireCheckIncidents;
+	public bool TargetAllowed(IIncidentTarget target)
+	{
+		return targetTags.Intersect(target.IncidentTargetTags()).Any();
 	}
 }

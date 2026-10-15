@@ -1,138 +1,323 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class TraderKindDef : Def
 {
-	// Token: 0x02001B14 RID: 6932
-	public class TraderKindDef : Def
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__15 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x170017CE RID: 6094
-		// (get) Token: 0x06009AD5 RID: 39637 RVA: 0x002CF878 File Offset: 0x002CDA78
-		public float CalculatedCommonality
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public TraderKindDef _003C_003E4__this;
+
+		private IEnumerator<string> _003C_003E7__wrap1;
+
+		private List<StockGenerator>.Enumerator _003C_003E7__wrap2;
+
+		string IEnumerator<string>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				float num = this.commonality;
-				if (this.commonalityMultFromPopulationIntent != null)
-				{
-					num *= this.commonalityMultFromPopulationIntent.Evaluate(StorytellerUtilityPopulation.PopulationIntent);
-				}
-				return num;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170017CF RID: 6095
-		// (get) Token: 0x06009AD6 RID: 39638 RVA: 0x002CF8A8 File Offset: 0x002CDAA8
-		public RoyalTitleDef TitleRequiredToTrade
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.permitRequiredForTrading != null)
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__15(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			switch (num)
+			{
+			case -3:
+			case 1:
+				try
 				{
-					RoyalTitleDef royalTitleDef = this.faction.RoyalTitlesAwardableInSeniorityOrderForReading.FirstOrDefault((RoyalTitleDef x) => x.permits != null && x.permits.Contains(this.permitRequiredForTrading));
-					if (royalTitleDef != null)
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+				break;
+			case -5:
+			case -4:
+			case 2:
+				try
+				{
+					if (num == -5 || num == 2)
 					{
-						return royalTitleDef;
+						try
+						{
+						}
+						finally
+						{
+							_003C_003Em__Finally3();
+						}
 					}
 				}
-				return null;
-			}
-		}
-
-		// Token: 0x06009AD7 RID: 39639 RVA: 0x002CF8E0 File Offset: 0x002CDAE0
-		public override void ResolveReferences()
-		{
-			base.ResolveReferences();
-			foreach (StockGenerator stockGenerator in this.stockGenerators)
-			{
-				stockGenerator.ResolveReferences(this);
-			}
-		}
-
-		// Token: 0x06009AD8 RID: 39640 RVA: 0x002CF938 File Offset: 0x002CDB38
-		public override IEnumerable<string> ConfigErrors()
-		{
-			foreach (string text in base.ConfigErrors())
-			{
-				yield return text;
-			}
-			IEnumerator<string> enumerator = null;
-			foreach (StockGenerator stockGenerator in this.stockGenerators)
-			{
-				foreach (string text2 in stockGenerator.ConfigErrors(this))
+				finally
 				{
-					yield return text2;
+					_003C_003Em__Finally2();
 				}
-				enumerator = null;
+				break;
 			}
-			List<StockGenerator>.Enumerator enumerator2 = default(List<StockGenerator>.Enumerator);
-			yield break;
-			yield break;
+			_003C_003E7__wrap1 = null;
+			_003C_003E7__wrap2 = default(List<StockGenerator>.Enumerator);
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x06009AD9 RID: 39641 RVA: 0x002CF948 File Offset: 0x002CDB48
-		public bool WillTrade(ThingDef td)
+		private bool MoveNext()
 		{
-			for (int i = 0; i < this.stockGenerators.Count; i++)
+			try
 			{
-				if (this.stockGenerators[i].HandlesThingDef(td))
+				int num = _003C_003E1__state;
+				TraderKindDef traderKindDef = _003C_003E4__this;
+				switch (num)
 				{
-					return true;
-				}
-			}
-			return false;
-		}
-
-		// Token: 0x06009ADA RID: 39642 RVA: 0x002CF984 File Offset: 0x002CDB84
-		public PriceType PriceTypeFor(ThingDef thingDef, TradeAction action)
-		{
-			if (thingDef == ThingDefOf.Silver)
-			{
-				return PriceType.Undefined;
-			}
-			if (action == TradeAction.PlayerBuys)
-			{
-				for (int i = 0; i < this.stockGenerators.Count; i++)
-				{
-					PriceType result;
-					if (this.stockGenerators[i].TryGetPriceType(thingDef, action, out result))
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((Def)traderKindDef).ConfigErrors().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0072;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0072;
+				case 2:
 					{
-						return result;
+						_003C_003E1__state = -5;
+						goto IL_00f9;
 					}
+					IL_0072:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					_003C_003E7__wrap2 = traderKindDef.stockGenerators.GetEnumerator();
+					_003C_003E1__state = -4;
+					goto IL_0113;
+					IL_0113:
+					if (_003C_003E7__wrap2.MoveNext())
+					{
+						StockGenerator current2 = _003C_003E7__wrap2.Current;
+						_003C_003E7__wrap1 = current2.ConfigErrors(traderKindDef).GetEnumerator();
+						_003C_003E1__state = -5;
+						goto IL_00f9;
+					}
+					_003C_003Em__Finally2();
+					_003C_003E7__wrap2 = default(List<StockGenerator>.Enumerator);
+					return false;
+					IL_00f9:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current3 = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current3;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					_003C_003Em__Finally3();
+					_003C_003E7__wrap1 = null;
+					goto IL_0113;
 				}
 			}
-			return PriceType.Normal;
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
 		}
 
-		// Token: 0x04006AF4 RID: 27380
-		public List<StockGenerator> stockGenerators = new List<StockGenerator>();
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x04006AF5 RID: 27381
-		public bool orbital;
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
 
-		// Token: 0x04006AF6 RID: 27382
-		public bool requestable = true;
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap2/*cast due to .constrained prefix*/).Dispose();
+		}
 
-		// Token: 0x04006AF7 RID: 27383
-		public bool hideThingsNotWillingToTrade;
+		private void _003C_003Em__Finally3()
+		{
+			_003C_003E1__state = -4;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
 
-		// Token: 0x04006AF8 RID: 27384
-		public float commonality = 1f;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04006AF9 RID: 27385
-		public string category;
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__15 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__15(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x04006AFA RID: 27386
-		public TradeCurrency tradeCurrency;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x04006AFB RID: 27387
-		public SimpleCurve commonalityMultFromPopulationIntent;
+	public List<StockGenerator> stockGenerators = new List<StockGenerator>();
 
-		// Token: 0x04006AFC RID: 27388
-		public FactionDef faction;
+	public bool orbital;
 
-		// Token: 0x04006AFD RID: 27389
-		public RoyalTitlePermitDef permitRequiredForTrading;
+	public bool requestable = true;
+
+	public bool hideThingsNotWillingToTrade;
+
+	public float commonality = 1f;
+
+	public string category;
+
+	public TradeCurrency tradeCurrency;
+
+	public SimpleCurve commonalityMultFromPopulationIntent;
+
+	public FactionDef faction;
+
+	public RoyalTitlePermitDef permitRequiredForTrading;
+
+	public float CalculatedCommonality
+	{
+		get
+		{
+			float num = commonality;
+			if (commonalityMultFromPopulationIntent != null)
+			{
+				num *= commonalityMultFromPopulationIntent.Evaluate(StorytellerUtilityPopulation.PopulationIntent);
+			}
+			return num;
+		}
+	}
+
+	public RoyalTitleDef TitleRequiredToTrade
+	{
+		get
+		{
+			if (permitRequiredForTrading != null)
+			{
+				RoyalTitleDef royalTitleDef = faction.RoyalTitlesAwardableInSeniorityOrderForReading.FirstOrDefault((RoyalTitleDef x) => x.permits != null && x.permits.Contains(permitRequiredForTrading));
+				if (royalTitleDef != null)
+				{
+					return royalTitleDef;
+				}
+			}
+			return null;
+		}
+	}
+
+	public override void ResolveReferences()
+	{
+		base.ResolveReferences();
+		foreach (StockGenerator stockGenerator in stockGenerators)
+		{
+			stockGenerator.ResolveReferences(this);
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__15))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__15(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public bool WillTrade(ThingDef td)
+	{
+		for (int i = 0; i < stockGenerators.Count; i++)
+		{
+			if (stockGenerators[i].HandlesThingDef(td))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public PriceType PriceTypeFor(ThingDef thingDef, TradeAction action)
+	{
+		if (thingDef == ThingDefOf.Silver)
+		{
+			return PriceType.Undefined;
+		}
+		if (action == TradeAction.PlayerBuys)
+		{
+			for (int i = 0; i < stockGenerators.Count; i++)
+			{
+				if (stockGenerators[i].TryGetPriceType(thingDef, action, out var priceType))
+				{
+					return priceType;
+				}
+			}
+		}
+		return PriceType.Normal;
 	}
 }

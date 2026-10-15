@@ -1,53 +1,183 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+[StaticConstructorOnStartup]
+public class Command_Hide_ZoneFishing : Command_Hide
 {
-	// Token: 0x020030E3 RID: 12515
-	[StaticConstructorOnStartup]
-	public class Command_Hide_ZoneFishing : Command_Hide
+	[CompilerGenerated]
+	private sealed class _003CGetHideOptions_003Ed__4 : IEnumerable<FloatMenuOption>, IEnumerable, IEnumerator<FloatMenuOption>, IEnumerator, IDisposable
 	{
-		// Token: 0x06011948 RID: 72008 RVA: 0x0050C61B File Offset: 0x0050A81B
-		public Command_Hide_ZoneFishing(IHideable hideable) : base(hideable)
-		{
-		}
+		private int _003C_003E1__state;
 
-		// Token: 0x06011949 RID: 72009 RVA: 0x0050C897 File Offset: 0x0050AA97
-		protected override IEnumerable<FloatMenuOption> GetOptions()
-		{
-			return Command_Hide_ZoneFishing.GetHideOptions();
-		}
+		private FloatMenuOption _003C_003E2__current;
 
-		// Token: 0x0601194A RID: 72010 RVA: 0x0050C89E File Offset: 0x0050AA9E
-		public static IEnumerable<FloatMenuOption> GetHideOptions()
+		private int _003C_003El__initialThreadId;
+
+		private IEnumerator<FloatMenuOption> _003C_003E7__wrap1;
+
+		FloatMenuOption IEnumerator<FloatMenuOption>.Current
 		{
-			yield return new FloatMenuOption("ShowAllZones".Translate(), delegate()
+			[DebuggerHidden]
+			get
 			{
-				Command_Hide.ToggleAll(false);
-			}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-			yield return new FloatMenuOption("HideAllZones".Translate(), delegate()
-			{
-				Command_Hide.ToggleAll(true);
-			}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-			if (Command_Hide_ZoneFishing.cachedIcon == null)
-			{
-				Command_Hide_ZoneFishing.cachedIcon = ContentFinder<Texture2D>.Get("UI/Designators/ZoneCreate_Fishing", true);
+				return _003C_003E2__current;
 			}
-			foreach (FloatMenuOption floatMenuOption in Command_Hide.ZoneTypeOptions<Zone_Fishing>("FishingGroup".Translate(), Command_Hide_ZoneFishing.cachedIcon))
-			{
-				yield return floatMenuOption;
-			}
-			IEnumerator<FloatMenuOption> enumerator = null;
-			yield break;
-			yield break;
 		}
 
-		// Token: 0x0400B547 RID: 46407
-		private const string IconTexPath = "UI/Designators/ZoneCreate_Fishing";
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
 
-		// Token: 0x0400B548 RID: 46408
-		private static Texture2D cachedIcon;
+		[DebuggerHidden]
+		public _003CGetHideOptions_003Ed__4(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 3)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				switch (_003C_003E1__state)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E2__current = new FloatMenuOption("ShowAllZones".Translate(), delegate
+					{
+						Command_Hide.ToggleAll(hidden: false);
+					});
+					_003C_003E1__state = 1;
+					return true;
+				case 1:
+					_003C_003E1__state = -1;
+					_003C_003E2__current = new FloatMenuOption("HideAllZones".Translate(), delegate
+					{
+						Command_Hide.ToggleAll(hidden: true);
+					});
+					_003C_003E1__state = 2;
+					return true;
+				case 2:
+					_003C_003E1__state = -1;
+					if ((object)cachedIcon == null)
+					{
+						cachedIcon = ContentFinder<Texture2D>.Get("UI/Designators/ZoneCreate_Fishing");
+					}
+					_003C_003E7__wrap1 = Command_Hide.ZoneTypeOptions<Zone_Fishing>("FishingGroup".Translate(), cachedIcon).GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 3:
+					_003C_003E1__state = -3;
+					break;
+				}
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					FloatMenuOption current = _003C_003E7__wrap1.Current;
+					_003C_003E2__current = current;
+					_003C_003E1__state = 3;
+					return true;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = null;
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<FloatMenuOption> IEnumerable<FloatMenuOption>.GetEnumerator()
+		{
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				return this;
+			}
+			return new _003CGetHideOptions_003Ed__4(0);
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<FloatMenuOption>)this).GetEnumerator();
+		}
+	}
+
+	private const string IconTexPath = "UI/Designators/ZoneCreate_Fishing";
+
+	private static Texture2D cachedIcon;
+
+	public Command_Hide_ZoneFishing(IHideable hideable)
+		: base(hideable)
+	{
+	}
+
+	protected override IEnumerable<FloatMenuOption> GetOptions()
+	{
+		return GetHideOptions();
+	}
+
+	[IteratorStateMachine(typeof(_003CGetHideOptions_003Ed__4))]
+	public static IEnumerable<FloatMenuOption> GetHideOptions()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetHideOptions_003Ed__4(-2);
 	}
 }

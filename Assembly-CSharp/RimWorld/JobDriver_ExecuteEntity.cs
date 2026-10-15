@@ -1,86 +1,166 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_ExecuteEntity : JobDriver
 {
-	// Token: 0x02001269 RID: 4713
-	public class JobDriver_ExecuteEntity : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__7 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x170011FC RID: 4604
-		// (get) Token: 0x0600734A RID: 29514 RVA: 0x00229653 File Offset: 0x00227853
-		private Thing Platform
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_ExecuteEntity _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return base.TargetThingA;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170011FD RID: 4605
-		// (get) Token: 0x0600734B RID: 29515 RVA: 0x002373B3 File Offset: 0x002355B3
-		private Pawn InnerPawn
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				Building_HoldingPlatform building_HoldingPlatform = this.Platform as Building_HoldingPlatform;
-				if (building_HoldingPlatform == null)
-				{
-					return null;
-				}
-				return building_HoldingPlatform.HeldPawn;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600734C RID: 29516 RVA: 0x002373CB File Offset: 0x002355CB
-		public override string GetReport()
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__7(int _003C_003E1__state)
 		{
-			return JobUtility.GetResolvedJobReport(this.job.def.reportString, this.InnerPawn, this.job.targetB, this.job.targetC);
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x0600734D RID: 29517 RVA: 0x00237403 File Offset: 0x00235603
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			return this.pawn.Reserve(this.Platform, this.job, 1, -1, null, errorOnFailed, false);
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x0600734E RID: 29518 RVA: 0x00237426 File Offset: 0x00235626
-		protected override IEnumerable<Toil> MakeNewToils()
+		private bool MoveNext()
 		{
-			this.FailOnDespawnedNullOrForbidden(TargetIndex.A);
-			this.FailOn(delegate()
+			int num = _003C_003E1__state;
+			JobDriver_ExecuteEntity CS_0024_003C_003E8__locals10 = _003C_003E4__this;
+			switch (num)
 			{
-				Pawn innerPawn = this.InnerPawn;
-				if (innerPawn == null || innerPawn.Destroyed)
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				CS_0024_003C_003E8__locals10.FailOnDespawnedNullOrForbidden(TargetIndex.A);
+				CS_0024_003C_003E8__locals10.FailOn(delegate
 				{
-					return true;
-				}
-				if (this.job.ignoreDesignations)
-				{
-					return false;
-				}
-				CompHoldingPlatformTarget compHoldingPlatformTarget = innerPawn.TryGetComp<CompHoldingPlatformTarget>();
-				return compHoldingPlatformTarget == null || compHoldingPlatformTarget.containmentMode != EntityContainmentMode.Execute;
-			});
-			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.ClosestTouch, false).FailOnSomeonePhysicallyInteracting(TargetIndex.A);
-			Toil toil = Toils_General.Do(delegate
+					Pawn innerPawn = CS_0024_003C_003E8__locals10.InnerPawn;
+					if (innerPawn == null || innerPawn.Destroyed)
+					{
+						return true;
+					}
+					if (CS_0024_003C_003E8__locals10.job.ignoreDesignations)
+					{
+						return false;
+					}
+					CompHoldingPlatformTarget compHoldingPlatformTarget = innerPawn.TryGetComp<CompHoldingPlatformTarget>();
+					return compHoldingPlatformTarget == null || compHoldingPlatformTarget.containmentMode != EntityContainmentMode.Execute;
+				});
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.ClosestTouch).FailOnSomeonePhysicallyInteracting(TargetIndex.A);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
 			{
-				Messages.Message("MessageEntityExecuted".Translate(this.pawn.Named("EXECUTIONER"), this.InnerPawn.Named("VICTIM")), this.pawn, MessageTypeDefOf.NeutralEvent, true);
-				ExecutionUtility.DoExecutionByCut(this.pawn, this.InnerPawn, 8, true);
-				MentalState mentalState = this.pawn.MentalState;
-				if (mentalState == null)
+				_003C_003E1__state = -1;
+				Toil toil = Toils_General.Do(delegate
 				{
-					return;
-				}
-				mentalState.Notify_SlaughteredTarget();
-			});
-			toil.activeSkill = (() => SkillDefOf.Melee);
-			yield return toil;
-			yield break;
+					Messages.Message("MessageEntityExecuted".Translate(CS_0024_003C_003E8__locals10.pawn.Named("EXECUTIONER"), CS_0024_003C_003E8__locals10.InnerPawn.Named("VICTIM")), CS_0024_003C_003E8__locals10.pawn, MessageTypeDefOf.NeutralEvent);
+					ExecutionUtility.DoExecutionByCut(CS_0024_003C_003E8__locals10.pawn, CS_0024_003C_003E8__locals10.InnerPawn);
+					CS_0024_003C_003E8__locals10.pawn.MentalState?.Notify_SlaughteredTarget();
+				});
+				toil.activeSkill = () => SkillDefOf.Melee;
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 2;
+				return true;
+			}
+			case 2:
+				_003C_003E1__state = -1;
+				return false;
+			}
 		}
 
-		// Token: 0x04004F84 RID: 20356
-		private const TargetIndex PlatformIndex = TargetIndex.A;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__7 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__7(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private const TargetIndex PlatformIndex = TargetIndex.A;
+
+	private Thing Platform => base.TargetThingA;
+
+	private Pawn InnerPawn => (Platform as Building_HoldingPlatform)?.HeldPawn;
+
+	public override string GetReport()
+	{
+		return JobUtility.GetResolvedJobReport(job.def.reportString, InnerPawn, job.targetB, job.targetC);
+	}
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return pawn.Reserve(Platform, job, 1, -1, null, errorOnFailed);
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__7))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__7(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

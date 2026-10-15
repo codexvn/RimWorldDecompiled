@@ -1,221 +1,552 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public abstract class JobDriver_InteractAnimal : JobDriver
 {
-	// Token: 0x02001120 RID: 4384
-	public abstract class JobDriver_InteractAnimal : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CFeedToils_003Ed__19 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700107F RID: 4223
-		// (get) Token: 0x06006AEC RID: 27372 RVA: 0x0021B747 File Offset: 0x00219947
-		protected Pawn Animal
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_InteractAnimal _003C_003E4__this;
+
+		private Toil _003CgotoAnimal_003E5__2;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (Pawn)this.job.targetA.Thing;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001080 RID: 4224
-		// (get) Token: 0x06006AED RID: 27373 RVA: 0x000028E7 File Offset: 0x00000AE7
-		protected virtual bool CanInteractNow
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CFeedToils_003Ed__19(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003CgotoAnimal_003E5__2 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_InteractAnimal CS_0024_003C_003E8__locals5 = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+			{
+				_003C_003E1__state = -1;
+				Toil toil = ToilMaker.MakeToil("FeedToils");
+				toil.initAction = delegate
+				{
+					CS_0024_003C_003E8__locals5.feedNutritionLeft = RequiredNutritionPerFeed(CS_0024_003C_003E8__locals5.Animal);
+				};
+				toil.defaultCompleteMode = ToilCompleteMode.Instant;
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 1;
 				return true;
 			}
+			case 1:
+				_003C_003E1__state = -1;
+				_003CgotoAnimal_003E5__2 = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch);
+				_003C_003E2__current = _003CgotoAnimal_003E5__2;
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = CS_0024_003C_003E8__locals5.StartFeedAnimal(TargetIndex.A);
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Ingest.FinalizeIngest(CS_0024_003C_003E8__locals5.Animal, TargetIndex.B);
+				_003C_003E1__state = 4;
+				return true;
+			case 4:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.PutCarriedThingInInventory();
+				_003C_003E1__state = 5;
+				return true;
+			case 5:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.ClearTarget(TargetIndex.B);
+				_003C_003E1__state = 6;
+				return true;
+			case 6:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Jump.JumpIf(_003CgotoAnimal_003E5__2, () => CS_0024_003C_003E8__locals5.feedNutritionLeft > 0f);
+				_003C_003E1__state = 7;
+				return true;
+			case 7:
+				_003C_003E1__state = -1;
+				return false;
+			}
 		}
 
-		// Token: 0x17001081 RID: 4225
-		// (get) Token: 0x06006AEE RID: 27374 RVA: 0x0021B75E File Offset: 0x0021995E
-		protected virtual bool CanFeedEver
+		bool IEnumerator.MoveNext()
 		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CFeedToils_003Ed__19 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CFeedToils_003Ed__19(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__17 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_InteractAnimal _003C_003E4__this;
+
+		private IEnumerator<Toil> _003C_003E7__wrap1;
+
+		Toil IEnumerator<Toil>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				Pawn animal = this.Animal;
-				object obj;
-				if (animal == null)
-				{
-					obj = null;
-				}
-				else
-				{
-					Pawn_NeedsTracker needs = animal.needs;
-					obj = ((needs != null) ? needs.food : null);
-				}
-				return obj != null;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06006AEF RID: 27375 RVA: 0x0021B781 File Offset: 0x00219981
-		public override void ExposeData()
+		object IEnumerator.Current
 		{
-			base.ExposeData();
-			Scribe_Values.Look<float>(ref this.feedNutritionLeft, "feedNutritionLeft", 0f, false);
-		}
-
-		// Token: 0x06006AF0 RID: 27376 RVA: 0x0021B79F File Offset: 0x0021999F
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
-		{
-			return this.pawn.Reserve(this.Animal, this.job, 1, -1, null, errorOnFailed, false);
-		}
-
-		// Token: 0x06006AF1 RID: 27377 RVA: 0x0021B7C2 File Offset: 0x002199C2
-		protected override IEnumerable<Toil> MakeNewToils()
-		{
-			this.FailOnDespawnedNullOrForbidden(TargetIndex.A);
-			this.FailOnDowned(TargetIndex.A);
-			this.FailOnNotCasualInterruptible(TargetIndex.A);
-			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch, false);
-			yield return Toils_Interpersonal.WaitToBeAbleToInteract(this.pawn);
-			yield return Toils_Interpersonal.GotoInteractablePosition(TargetIndex.A);
-			yield return this.TalkToAnimal(TargetIndex.A);
-			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch, false);
-			yield return Toils_Interpersonal.WaitToBeAbleToInteract(this.pawn);
-			yield return Toils_Interpersonal.GotoInteractablePosition(TargetIndex.A);
-			yield return this.TalkToAnimal(TargetIndex.A);
-			if (this.CanFeedEver)
+			[DebuggerHidden]
+			get
 			{
-				foreach (Toil toil in this.FeedToils())
-				{
-					yield return toil;
-				}
-				IEnumerator<Toil> enumerator = null;
+				return _003C_003E2__current;
 			}
-			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch, false);
-			yield return Toils_Interpersonal.WaitToBeAbleToInteract(this.pawn);
-			yield return Toils_Interpersonal.GotoInteractablePosition(TargetIndex.A);
-			yield return this.TalkToAnimal(TargetIndex.A);
-			if (this.CanFeedEver)
+		}
+
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__17(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			switch (_003C_003E1__state)
 			{
-				foreach (Toil toil2 in this.FeedToils())
+			case -3:
+			case 9:
+				try
 				{
-					yield return toil2;
 				}
-				IEnumerator<Toil> enumerator = null;
-			}
-			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch, false).FailOn(() => !this.CanInteractNow);
-			yield return Toils_Interpersonal.SetLastInteractTime(TargetIndex.A);
-			yield return Toils_Interpersonal.WaitToBeAbleToInteract(this.pawn);
-			yield return Toils_Interpersonal.GotoInteractablePosition(TargetIndex.A);
-			yield break;
-			yield break;
-		}
-
-		// Token: 0x06006AF2 RID: 27378 RVA: 0x0021B7D2 File Offset: 0x002199D2
-		public static float RequiredNutritionPerFeed(Pawn animal)
-		{
-			if (animal.needs.food == null)
-			{
-				return 0f;
-			}
-			return Mathf.Min(animal.needs.food.MaxLevel * 0.15f, 0.3f);
-		}
-
-		// Token: 0x06006AF3 RID: 27379 RVA: 0x0021B807 File Offset: 0x00219A07
-		private IEnumerable<Toil> FeedToils()
-		{
-			Toil toil = ToilMaker.MakeToil("FeedToils");
-			toil.initAction = delegate()
-			{
-				this.feedNutritionLeft = JobDriver_InteractAnimal.RequiredNutritionPerFeed(this.Animal);
-			};
-			toil.defaultCompleteMode = ToilCompleteMode.Instant;
-			yield return toil;
-			Toil gotoAnimal = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch, false);
-			yield return gotoAnimal;
-			yield return this.StartFeedAnimal(TargetIndex.A);
-			yield return Toils_Ingest.FinalizeIngest(this.Animal, TargetIndex.B);
-			yield return Toils_General.PutCarriedThingInInventory();
-			yield return Toils_General.ClearTarget(TargetIndex.B);
-			yield return Toils_Jump.JumpIf(gotoAnimal, () => this.feedNutritionLeft > 0f);
-			yield break;
-		}
-
-		// Token: 0x06006AF4 RID: 27380 RVA: 0x0021B818 File Offset: 0x00219A18
-		private Toil TalkToAnimal(TargetIndex tameeInd)
-		{
-			Toil toil = ToilMaker.MakeToil("TalkToAnimal");
-			toil.initAction = delegate()
-			{
-				Pawn actor = toil.GetActor();
-				Pawn recipient = (Pawn)((Thing)actor.CurJob.GetTarget(tameeInd));
-				actor.interactions.TryInteractWith(recipient, InteractionDefOf.AnimalChat);
-			};
-			toil.FailOn(() => !this.CanInteractNow);
-			toil.defaultCompleteMode = ToilCompleteMode.Delay;
-			toil.defaultDuration = 270;
-			toil.activeSkill = (() => SkillDefOf.Animals);
-			return toil;
-		}
-
-		// Token: 0x06006AF5 RID: 27381 RVA: 0x0021B8C4 File Offset: 0x00219AC4
-		private Toil StartFeedAnimal(TargetIndex tameeInd)
-		{
-			Toil toil = ToilMaker.MakeToil("StartFeedAnimal");
-			toil.initAction = delegate()
-			{
-				Pawn actor = toil.GetActor();
-				Pawn pawn = (Pawn)((Thing)actor.CurJob.GetTarget(tameeInd));
-				PawnUtility.ForceWait(pawn, 270, actor, false, false);
-				Thing thing = FoodUtility.BestFoodInInventory(actor, pawn, FoodPreferability.NeverForNutrition, FoodPreferability.RawTasty, 0f, false, false);
-				if (thing == null)
+				finally
 				{
-					actor.jobs.EndCurrentJob(JobCondition.Incompletable, true, true);
-					return;
+					_003C_003Em__Finally1();
 				}
+				break;
+			case -4:
+			case 14:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally2();
+				}
+				break;
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				JobDriver_InteractAnimal CS_0024_003C_003E8__locals15 = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					CS_0024_003C_003E8__locals15.FailOnDespawnedNullOrForbidden(TargetIndex.A);
+					CS_0024_003C_003E8__locals15.FailOnDowned(TargetIndex.A);
+					CS_0024_003C_003E8__locals15.FailOnNotCasualInterruptible(TargetIndex.A);
+					_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch);
+					_003C_003E1__state = 1;
+					return true;
+				case 1:
+					_003C_003E1__state = -1;
+					_003C_003E2__current = Toils_Interpersonal.WaitToBeAbleToInteract(CS_0024_003C_003E8__locals15.pawn);
+					_003C_003E1__state = 2;
+					return true;
+				case 2:
+					_003C_003E1__state = -1;
+					_003C_003E2__current = Toils_Interpersonal.GotoInteractablePosition(TargetIndex.A);
+					_003C_003E1__state = 3;
+					return true;
+				case 3:
+					_003C_003E1__state = -1;
+					_003C_003E2__current = CS_0024_003C_003E8__locals15.TalkToAnimal(TargetIndex.A);
+					_003C_003E1__state = 4;
+					return true;
+				case 4:
+					_003C_003E1__state = -1;
+					_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch);
+					_003C_003E1__state = 5;
+					return true;
+				case 5:
+					_003C_003E1__state = -1;
+					_003C_003E2__current = Toils_Interpersonal.WaitToBeAbleToInteract(CS_0024_003C_003E8__locals15.pawn);
+					_003C_003E1__state = 6;
+					return true;
+				case 6:
+					_003C_003E1__state = -1;
+					_003C_003E2__current = Toils_Interpersonal.GotoInteractablePosition(TargetIndex.A);
+					_003C_003E1__state = 7;
+					return true;
+				case 7:
+					_003C_003E1__state = -1;
+					_003C_003E2__current = CS_0024_003C_003E8__locals15.TalkToAnimal(TargetIndex.A);
+					_003C_003E1__state = 8;
+					return true;
+				case 8:
+					_003C_003E1__state = -1;
+					if (CS_0024_003C_003E8__locals15.CanFeedEver)
+					{
+						_003C_003E7__wrap1 = CS_0024_003C_003E8__locals15.FeedToils().GetEnumerator();
+						_003C_003E1__state = -3;
+						goto IL_01eb;
+					}
+					goto IL_0205;
+				case 9:
+					_003C_003E1__state = -3;
+					goto IL_01eb;
+				case 10:
+					_003C_003E1__state = -1;
+					_003C_003E2__current = Toils_Interpersonal.WaitToBeAbleToInteract(CS_0024_003C_003E8__locals15.pawn);
+					_003C_003E1__state = 11;
+					return true;
+				case 11:
+					_003C_003E1__state = -1;
+					_003C_003E2__current = Toils_Interpersonal.GotoInteractablePosition(TargetIndex.A);
+					_003C_003E1__state = 12;
+					return true;
+				case 12:
+					_003C_003E1__state = -1;
+					_003C_003E2__current = CS_0024_003C_003E8__locals15.TalkToAnimal(TargetIndex.A);
+					_003C_003E1__state = 13;
+					return true;
+				case 13:
+					_003C_003E1__state = -1;
+					if (CS_0024_003C_003E8__locals15.CanFeedEver)
+					{
+						_003C_003E7__wrap1 = CS_0024_003C_003E8__locals15.FeedToils().GetEnumerator();
+						_003C_003E1__state = -4;
+						goto IL_02e4;
+					}
+					goto IL_02fe;
+				case 14:
+					_003C_003E1__state = -4;
+					goto IL_02e4;
+				case 15:
+					_003C_003E1__state = -1;
+					_003C_003E2__current = Toils_Interpersonal.SetLastInteractTime(TargetIndex.A);
+					_003C_003E1__state = 16;
+					return true;
+				case 16:
+					_003C_003E1__state = -1;
+					_003C_003E2__current = Toils_Interpersonal.WaitToBeAbleToInteract(CS_0024_003C_003E8__locals15.pawn);
+					_003C_003E1__state = 17;
+					return true;
+				case 17:
+					_003C_003E1__state = -1;
+					_003C_003E2__current = Toils_Interpersonal.GotoInteractablePosition(TargetIndex.A);
+					_003C_003E1__state = 18;
+					return true;
+				case 18:
+					{
+						_003C_003E1__state = -1;
+						return false;
+					}
+					IL_02e4:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Toil current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 14;
+						return true;
+					}
+					_003C_003Em__Finally2();
+					_003C_003E7__wrap1 = null;
+					goto IL_02fe;
+					IL_02fe:
+					_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch).FailOn(() => !CS_0024_003C_003E8__locals15.CanInteractNow);
+					_003C_003E1__state = 15;
+					return true;
+					IL_01eb:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Toil current2 = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current2;
+						_003C_003E1__state = 9;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					goto IL_0205;
+					IL_0205:
+					_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch);
+					_003C_003E1__state = 10;
+					return true;
+				}
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__17 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__17(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	protected const TargetIndex AnimalInd = TargetIndex.A;
+
+	private const TargetIndex FoodHandInd = TargetIndex.B;
+
+	private const int FeedDuration = 270;
+
+	private const int TalkDuration = 270;
+
+	private const float NutritionPercentagePerFeed = 0.15f;
+
+	private const float MaxMinNutritionPerFeed = 0.3f;
+
+	public const int FeedCount = 2;
+
+	public const FoodPreferability MaxFoodPreferability = FoodPreferability.RawTasty;
+
+	private float feedNutritionLeft;
+
+	protected Pawn Animal => (Pawn)job.targetA.Thing;
+
+	protected virtual bool CanInteractNow => true;
+
+	protected virtual bool CanFeedEver => Animal?.needs?.food != null;
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref feedNutritionLeft, "feedNutritionLeft", 0f);
+	}
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return pawn.Reserve(Animal, job, 1, -1, null, errorOnFailed);
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__17))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__17(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public static float RequiredNutritionPerFeed(Pawn animal)
+	{
+		if (animal.needs.food == null)
+		{
+			return 0f;
+		}
+		return Mathf.Min(animal.needs.food.MaxLevel * 0.15f, 0.3f);
+	}
+
+	[IteratorStateMachine(typeof(_003CFeedToils_003Ed__19))]
+	private IEnumerable<Toil> FeedToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CFeedToils_003Ed__19(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	private Toil TalkToAnimal(TargetIndex tameeInd)
+	{
+		Toil toil = ToilMaker.MakeToil("TalkToAnimal");
+		toil.initAction = delegate
+		{
+			Pawn actor = toil.GetActor();
+			Pawn recipient = (Pawn)(Thing)actor.CurJob.GetTarget(tameeInd);
+			actor.interactions.TryInteractWith(recipient, InteractionDefOf.AnimalChat);
+		};
+		toil.FailOn(() => !CanInteractNow);
+		toil.defaultCompleteMode = ToilCompleteMode.Delay;
+		toil.defaultDuration = 270;
+		toil.activeSkill = () => SkillDefOf.Animals;
+		return toil;
+	}
+
+	private Toil StartFeedAnimal(TargetIndex tameeInd)
+	{
+		Toil toil = ToilMaker.MakeToil("StartFeedAnimal");
+		toil.initAction = delegate
+		{
+			Pawn actor = toil.GetActor();
+			Pawn pawn = (Pawn)(Thing)actor.CurJob.GetTarget(tameeInd);
+			PawnUtility.ForceWait(pawn, 270, actor);
+			Thing thing = FoodUtility.BestFoodInInventory(actor, pawn, FoodPreferability.NeverForNutrition, FoodPreferability.RawTasty);
+			if (thing == null)
+			{
+				actor.jobs.EndCurrentJob(JobCondition.Incompletable);
+			}
+			else
+			{
 				actor.mindState.lastInventoryRawFoodUseTick = Find.TickManager.TicksGame;
-				int num = FoodUtility.StackCountForNutrition(this.feedNutritionLeft, thing.GetStatValue(StatDefOf.Nutrition, true, -1));
+				int num = FoodUtility.StackCountForNutrition(feedNutritionLeft, thing.GetStatValue(StatDefOf.Nutrition));
 				int stackCount = thing.stackCount;
 				Thing thing2 = actor.inventory.innerContainer.Take(thing, Mathf.Min(num, stackCount));
 				actor.carryTracker.TryStartCarry(thing2);
 				actor.CurJob.SetTarget(TargetIndex.B, thing2);
-				float num2 = (float)thing2.stackCount * thing2.GetStatValue(StatDefOf.Nutrition, true, -1);
-				this.ticksLeftThisToil = Mathf.CeilToInt(270f * (num2 / JobDriver_InteractAnimal.RequiredNutritionPerFeed(pawn)));
+				float num2 = (float)thing2.stackCount * thing2.GetStatValue(StatDefOf.Nutrition);
+				ticksLeftThisToil = Mathf.CeilToInt(270f * (num2 / RequiredNutritionPerFeed(pawn)));
 				if (num <= stackCount)
 				{
-					this.feedNutritionLeft = 0f;
-					return;
+					feedNutritionLeft = 0f;
 				}
-				this.feedNutritionLeft -= num2;
-				if (this.feedNutritionLeft < 0.001f)
+				else
 				{
-					this.feedNutritionLeft = 0f;
+					feedNutritionLeft -= num2;
+					if (feedNutritionLeft < 0.001f)
+					{
+						feedNutritionLeft = 0f;
+					}
 				}
-			};
-			toil.defaultCompleteMode = ToilCompleteMode.Delay;
-			toil.activeSkill = (() => SkillDefOf.Animals);
-			return toil;
-		}
-
-		// Token: 0x04004B65 RID: 19301
-		protected const TargetIndex AnimalInd = TargetIndex.A;
-
-		// Token: 0x04004B66 RID: 19302
-		private const TargetIndex FoodHandInd = TargetIndex.B;
-
-		// Token: 0x04004B67 RID: 19303
-		private const int FeedDuration = 270;
-
-		// Token: 0x04004B68 RID: 19304
-		private const int TalkDuration = 270;
-
-		// Token: 0x04004B69 RID: 19305
-		private const float NutritionPercentagePerFeed = 0.15f;
-
-		// Token: 0x04004B6A RID: 19306
-		private const float MaxMinNutritionPerFeed = 0.3f;
-
-		// Token: 0x04004B6B RID: 19307
-		public const int FeedCount = 2;
-
-		// Token: 0x04004B6C RID: 19308
-		public const FoodPreferability MaxFoodPreferability = FoodPreferability.RawTasty;
-
-		// Token: 0x04004B6D RID: 19309
-		private float feedNutritionLeft;
+			}
+		};
+		toil.defaultCompleteMode = ToilCompleteMode.Delay;
+		toil.activeSkill = () => SkillDefOf.Animals;
+		return toil;
 	}
 }

@@ -1,117 +1,237 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Building_Throne : Building
 {
-	// Token: 0x02002A56 RID: 10838
-	public class Building_Throne : Building
+	[CompilerGenerated]
+	private sealed class _003CGetGizmos_003Ed__9 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700257B RID: 9595
-		// (get) Token: 0x0600F0BE RID: 61630 RVA: 0x0045D5A4 File Offset: 0x0045B7A4
-		public static IEnumerable<RoyalTitleDef> AllTitlesForThroneStature
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Building_Throne _003C_003E4__this;
+
+		private IEnumerator<Gizmo> _003C_003E7__wrap1;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return from title in DefDatabase<RoyalTitleDef>.AllDefsListForReading
-				where !title.throneRoomRequirements.NullOrEmpty<RoomRequirement>()
-				orderby title.seniority
-				select title;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700257C RID: 9596
-		// (get) Token: 0x0600F0BF RID: 61631 RVA: 0x0045D5FE File Offset: 0x0045B7FE
-		public Pawn AssignedPawn
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (!ModLister.CheckRoyalty("Throne"))
-				{
-					return null;
-				}
-				if (this.CompAssignableToPawn == null || !this.CompAssignableToPawn.AssignedPawnsForReading.Any<Pawn>())
-				{
-					return null;
-				}
-				return this.CompAssignableToPawn.AssignedPawnsForReading[0];
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700257D RID: 9597
-		// (get) Token: 0x0600F0C0 RID: 61632 RVA: 0x0045D63B File Offset: 0x0045B83B
-		public CompAssignableToPawn_Throne CompAssignableToPawn
+		[DebuggerHidden]
+		public _003CGetGizmos_003Ed__9(int _003C_003E1__state)
 		{
-			get
-			{
-				return base.GetComp<CompAssignableToPawn_Throne>();
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x1700257E RID: 9598
-		// (get) Token: 0x0600F0C1 RID: 61633 RVA: 0x0045D644 File Offset: 0x0045B844
-		public RoyalTitleDef TitleStature
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			get
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				Room room = this.GetRoom(RegionType.Set_All);
-				if (room == null || room.OutdoorsForWork)
+				try
 				{
-					return null;
 				}
-				RoyalTitleDef result = null;
-				foreach (RoyalTitleDef royalTitleDef in Building_Throne.AllTitlesForThroneStature)
+				finally
 				{
-					bool flag = true;
-					for (int i = 0; i < royalTitleDef.throneRoomRequirements.Count; i++)
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				Building_Throne building_Throne = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					if (!ModLister.CheckRoyalty("Throne"))
 					{
-						if (!(royalTitleDef.throneRoomRequirements[i] is RoomRequirement_HasAssignedThroneAnyOf) && !royalTitleDef.throneRoomRequirements[i].MetOrDisabled(room, null))
-						{
-							flag = false;
-							break;
-						}
+						return false;
 					}
-					if (!flag)
-					{
-						break;
-					}
-					result = royalTitleDef;
+					_003C_003E7__wrap1 = ((Building)building_Throne).GetGizmos().GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 1:
+					_003C_003E1__state = -3;
+					break;
 				}
-				return result;
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					Gizmo current = _003C_003E7__wrap1.Current;
+					_003C_003E2__current = current;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = null;
+				return false;
 			}
-		}
-
-		// Token: 0x0600F0C2 RID: 61634 RVA: 0x0045D6F4 File Offset: 0x0045B8F4
-		public override string GetInspectString()
-		{
-			string text = base.GetInspectString();
-			Room room = this.GetRoom(RegionType.Set_All);
-			Pawn p = (this.CompAssignableToPawn.AssignedPawnsForReading.Count == 1) ? this.CompAssignableToPawn.AssignedPawnsForReading[0] : null;
-			RoyalTitleDef titleStature = this.TitleStature;
-			text += "\n" + "ThroneMaxSatisfiedTitle".Translate() + ": " + ((titleStature == null) ? "None".Translate() : titleStature.GetLabelCapFor(p));
-			string text2 = RoomRoleWorker_ThroneRoom.Validate(room);
-			if (text2 != null)
+			catch
 			{
-				return text + "\n" + text2;
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
-			return text;
 		}
 
-		// Token: 0x0600F0C3 RID: 61635 RVA: 0x0045D7A0 File Offset: 0x0045B9A0
-		public override IEnumerable<Gizmo> GetGizmos()
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CGetGizmos_003Ed__9 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CGetGizmos_003Ed__9(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	public static IEnumerable<RoyalTitleDef> AllTitlesForThroneStature => from title in DefDatabase<RoyalTitleDef>.AllDefsListForReading
+		where !title.throneRoomRequirements.NullOrEmpty()
+		orderby title.seniority
+		select title;
+
+	public Pawn AssignedPawn
+	{
+		get
 		{
 			if (!ModLister.CheckRoyalty("Throne"))
 			{
-				yield break;
+				return null;
 			}
-			foreach (Gizmo gizmo in base.GetGizmos())
+			if (CompAssignableToPawn == null || !CompAssignableToPawn.AssignedPawnsForReading.Any())
 			{
-				yield return gizmo;
+				return null;
 			}
-			IEnumerator<Gizmo> enumerator = null;
-			yield break;
-			yield break;
+			return CompAssignableToPawn.AssignedPawnsForReading[0];
 		}
+	}
+
+	public CompAssignableToPawn_Throne CompAssignableToPawn => GetComp<CompAssignableToPawn_Throne>();
+
+	public RoyalTitleDef TitleStature
+	{
+		get
+		{
+			Room room = this.GetRoom();
+			if (room == null || room.OutdoorsForWork)
+			{
+				return null;
+			}
+			RoyalTitleDef result = null;
+			foreach (RoyalTitleDef item in AllTitlesForThroneStature)
+			{
+				bool flag = true;
+				for (int i = 0; i < item.throneRoomRequirements.Count; i++)
+				{
+					if (!(item.throneRoomRequirements[i] is RoomRequirement_HasAssignedThroneAnyOf) && !item.throneRoomRequirements[i].MetOrDisabled(room))
+					{
+						flag = false;
+						break;
+					}
+				}
+				if (flag)
+				{
+					result = item;
+					continue;
+				}
+				break;
+			}
+			return result;
+		}
+	}
+
+	public override string GetInspectString()
+	{
+		string inspectString = base.GetInspectString();
+		Room room = this.GetRoom();
+		Pawn p = ((CompAssignableToPawn.AssignedPawnsForReading.Count == 1) ? CompAssignableToPawn.AssignedPawnsForReading[0] : null);
+		RoyalTitleDef titleStature = TitleStature;
+		inspectString += "\n" + "ThroneMaxSatisfiedTitle".Translate() + ": " + ((titleStature == null) ? "None".Translate() : ((TaggedString)titleStature.GetLabelCapFor(p)));
+		string text = RoomRoleWorker_ThroneRoom.Validate(room);
+		if (text != null)
+		{
+			return inspectString + "\n" + text;
+		}
+		return inspectString;
+	}
+
+	[IteratorStateMachine(typeof(_003CGetGizmos_003Ed__9))]
+	public override IEnumerable<Gizmo> GetGizmos()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetGizmos_003Ed__9(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

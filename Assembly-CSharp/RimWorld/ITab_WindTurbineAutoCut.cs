@@ -1,129 +1,193 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class ITab_WindTurbineAutoCut : ITab
 {
-	// Token: 0x020033D8 RID: 13272
-	public class ITab_WindTurbineAutoCut : ITab
+	[CompilerGenerated]
+	private sealed class _003CHiddenSpecialThingFilters_003Ed__14 : IEnumerable<SpecialThingFilterDef>, IEnumerable, IEnumerator<SpecialThingFilterDef>, IEnumerator, IDisposable
 	{
-		// Token: 0x170030CF RID: 12495
-		// (get) Token: 0x06012A5A RID: 76378 RVA: 0x005848D4 File Offset: 0x00582AD4
-		public CompAutoCut AutoCut
+		private int _003C_003E1__state;
+
+		private SpecialThingFilterDef _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		SpecialThingFilterDef IEnumerator<SpecialThingFilterDef>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				Thing selThing = base.SelThing;
-				if (selThing == null)
-				{
-					return null;
-				}
-				return selThing.TryGetComp<CompAutoCut>();
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170030D0 RID: 12496
-		// (get) Token: 0x06012A5B RID: 76379 RVA: 0x005848E7 File Offset: 0x00582AE7
-		public override bool IsVisible
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.AutoCut != null;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06012A5C RID: 76380 RVA: 0x005848F2 File Offset: 0x00582AF2
-		public ITab_WindTurbineAutoCut()
+		[DebuggerHidden]
+		public _003CHiddenSpecialThingFilters_003Ed__14(int _003C_003E1__state)
 		{
-			this.size = ITab_WindTurbineAutoCut.WinSize;
-			this.labelKey = "TabWindTurbineAutoCut";
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x06012A5D RID: 76381 RVA: 0x0058491B File Offset: 0x00582B1B
-		public override void OnOpen()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			base.OnOpen();
-			this.plantFilterState.quickSearch.Reset();
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x06012A5E RID: 76382 RVA: 0x00584934 File Offset: 0x00582B34
-		protected override void FillTab()
+		private bool MoveNext()
 		{
-			CompAutoCut autoCut = this.AutoCut;
-			Rect rect = new Rect(0f, 0f, ITab_WindTurbineAutoCut.WinSize.x, ITab_WindTurbineAutoCut.WinSize.y).ContractedBy(10f);
-			Widgets.BeginGroup(rect);
-			float num = 0f;
-			this.DrawAutoCutOptions(ref num, rect.width, autoCut);
-			num += 4f;
-			this.DrawPlantFilter(ref num, rect.width, rect.height - num, autoCut);
-			Widgets.EndGroup();
-		}
-
-		// Token: 0x06012A5F RID: 76383 RVA: 0x005849B8 File Offset: 0x00582BB8
-		private void DrawPlantFilter(ref float curY, float width, float height, CompAutoCut autoCut)
-		{
-			Rect rect = new Rect(0f, curY, width, height);
-			ThingFilterUI.UIState state = this.plantFilterState;
-			ThingFilter autoCutFilter = autoCut.AutoCutFilter;
-			ThingFilter fixedAutoCutFilter = autoCut.GetFixedAutoCutFilter();
-			int openMask = 1;
-			IEnumerable<ThingDef> forceHiddenDefs = null;
-			Map map = autoCut.parent.Map;
-			ThingFilterUI.DoThingFilterConfigWindow(rect, state, autoCutFilter, fixedAutoCutFilter, openMask, forceHiddenDefs, this.HiddenSpecialThingFilters(), true, false, false, null, map);
-		}
-
-		// Token: 0x06012A60 RID: 76384 RVA: 0x00584A08 File Offset: 0x00582C08
-		private void DrawAutoCutOptions(ref float curY, float width, CompAutoCut autoCut)
-		{
-			Designator_PlantsCut designator_PlantsCut = Find.ReverseDesignatorDatabase.Get<Designator_PlantsCut>();
-			Rect position = new Rect(0f, curY, 24f, 24f);
-			Rect rect = new Rect(position.xMax + 4f, curY, width, 24f);
-			Rect rect2 = new Rect(0f, rect.yMax + 4f, 150f, 27f);
-			GUI.DrawTexture(position, designator_PlantsCut.icon);
-			Text.Font = GameFont.Tiny;
-			Widgets.CheckboxLabeled(rect, "WindTurbineAutoCut_EnabledCheckbox".Translate(), ref autoCut.autoCut, false, null, null, true, false);
-			Text.Font = GameFont.Small;
-			if (Widgets.ButtonText(rect2, "AutoCutNow".Translate(), true, true, true, null))
+			switch (_003C_003E1__state)
 			{
-				autoCut.DesignatePlantsToCut();
-				SoundDef soundSucceeded = designator_PlantsCut.soundSucceeded;
-				if (soundSucceeded != null)
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = SpecialThingFilterDefOf.AllowFresh;
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				if (ModsConfig.IdeologyActive)
 				{
-					soundSucceeded.PlayOneShotOnCamera(null);
+					_003C_003E2__current = SpecialThingFilterDefOf.AllowVegetarian;
+					_003C_003E1__state = 2;
+					return true;
 				}
+				break;
+			case 2:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = SpecialThingFilterDefOf.AllowCarnivore;
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = SpecialThingFilterDefOf.AllowCannibal;
+				_003C_003E1__state = 4;
+				return true;
+			case 4:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = SpecialThingFilterDefOf.AllowInsectMeat;
+				_003C_003E1__state = 5;
+				return true;
+			case 5:
+				_003C_003E1__state = -1;
+				break;
 			}
-			curY = rect2.yMax;
+			return false;
 		}
 
-		// Token: 0x06012A61 RID: 76385 RVA: 0x00584AF4 File Offset: 0x00582CF4
-		private IEnumerable<SpecialThingFilterDef> HiddenSpecialThingFilters()
+		bool IEnumerator.MoveNext()
 		{
-			yield return SpecialThingFilterDefOf.AllowFresh;
-			if (ModsConfig.IdeologyActive)
-			{
-				yield return SpecialThingFilterDefOf.AllowVegetarian;
-				yield return SpecialThingFilterDefOf.AllowCarnivore;
-				yield return SpecialThingFilterDefOf.AllowCannibal;
-				yield return SpecialThingFilterDefOf.AllowInsectMeat;
-			}
-			yield break;
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0400C1A0 RID: 49568
-		private static readonly Vector2 WinSize = new Vector2(300f, 480f);
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x0400C1A1 RID: 49569
-		private const int CutNowButtonWidth = 150;
+		[DebuggerHidden]
+		IEnumerator<SpecialThingFilterDef> IEnumerable<SpecialThingFilterDef>.GetEnumerator()
+		{
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				return this;
+			}
+			return new _003CHiddenSpecialThingFilters_003Ed__14(0);
+		}
 
-		// Token: 0x0400C1A2 RID: 49570
-		private const int CutNowButtonHeight = 27;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<SpecialThingFilterDef>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x0400C1A3 RID: 49571
-		private const float AutoCutRowHeight = 24f;
+	private static readonly Vector2 WinSize = new Vector2(300f, 480f);
 
-		// Token: 0x0400C1A4 RID: 49572
-		private ThingFilterUI.UIState plantFilterState = new ThingFilterUI.UIState();
+	private const int CutNowButtonWidth = 150;
+
+	private const int CutNowButtonHeight = 27;
+
+	private const float AutoCutRowHeight = 24f;
+
+	private ThingFilterUI.UIState plantFilterState = new ThingFilterUI.UIState();
+
+	public CompAutoCut AutoCut => base.SelThing?.TryGetComp<CompAutoCut>();
+
+	public override bool IsVisible => AutoCut != null;
+
+	public ITab_WindTurbineAutoCut()
+	{
+		size = WinSize;
+		labelKey = "TabWindTurbineAutoCut";
+	}
+
+	public override void OnOpen()
+	{
+		base.OnOpen();
+		plantFilterState.quickSearch.Reset();
+	}
+
+	protected override void FillTab()
+	{
+		CompAutoCut autoCut = AutoCut;
+		Rect rect = new Rect(0f, 0f, WinSize.x, WinSize.y).ContractedBy(10f);
+		Widgets.BeginGroup(rect);
+		float curY = 0f;
+		DrawAutoCutOptions(ref curY, rect.width, autoCut);
+		curY += 4f;
+		DrawPlantFilter(ref curY, rect.width, rect.height - curY, autoCut);
+		Widgets.EndGroup();
+	}
+
+	private void DrawPlantFilter(ref float curY, float width, float height, CompAutoCut autoCut)
+	{
+		ThingFilterUI.DoThingFilterConfigWindow(new Rect(0f, curY, width, height), plantFilterState, autoCut.AutoCutFilter, autoCut.GetFixedAutoCutFilter(), 1, null, map: autoCut.parent.Map, forceHiddenFilters: HiddenSpecialThingFilters(), forceHideHitPointsConfig: true);
+	}
+
+	private void DrawAutoCutOptions(ref float curY, float width, CompAutoCut autoCut)
+	{
+		Designator_PlantsCut designator_PlantsCut = Find.ReverseDesignatorDatabase.Get<Designator_PlantsCut>();
+		Rect position = new Rect(0f, curY, 24f, 24f);
+		Rect rect = new Rect(position.xMax + 4f, curY, width, 24f);
+		Rect rect2 = new Rect(0f, rect.yMax + 4f, 150f, 27f);
+		GUI.DrawTexture(position, designator_PlantsCut.icon);
+		Text.Font = GameFont.Tiny;
+		Widgets.CheckboxLabeled(rect, "WindTurbineAutoCut_EnabledCheckbox".Translate(), ref autoCut.autoCut, disabled: false, null, null, placeCheckboxNearText: true);
+		Text.Font = GameFont.Small;
+		if (Widgets.ButtonText(rect2, "AutoCutNow".Translate(), drawBackground: true, doMouseoverSound: true, active: true, null))
+		{
+			autoCut.DesignatePlantsToCut();
+			designator_PlantsCut.soundSucceeded?.PlayOneShotOnCamera();
+		}
+		curY = rect2.yMax;
+	}
+
+	[IteratorStateMachine(typeof(_003CHiddenSpecialThingFilters_003Ed__14))]
+	private IEnumerable<SpecialThingFilterDef> HiddenSpecialThingFilters()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CHiddenSpecialThingFilters_003Ed__14(-2);
 	}
 }

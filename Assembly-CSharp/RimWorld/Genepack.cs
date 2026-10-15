@@ -1,188 +1,312 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Genepack : GeneSetHolderBase
 {
-	// Token: 0x02002AE1 RID: 10977
-	public class Genepack : GeneSetHolderBase
+	[CompilerGenerated]
+	private sealed class _003CGetGizmos_003Ed__18 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700263B RID: 9787
-		// (get) Token: 0x0600F4AE RID: 62638 RVA: 0x004720AD File Offset: 0x004702AD
-		public override string LabelNoCount
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Genepack _003C_003E4__this;
+
+		private IEnumerator<Gizmo> _003C_003E7__wrap1;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.geneSet != null && this.geneSet.Label != "ERR")
-				{
-					return this.geneSet.Label;
-				}
-				return base.LabelNoCount;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700263C RID: 9788
-		// (get) Token: 0x0600F4AF RID: 62639 RVA: 0x004720E0 File Offset: 0x004702E0
-		private CompGenepackContainer ParentContainer
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				IThingHolder parentHolder = base.ParentHolder;
-				if (parentHolder != null)
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetGizmos_003Ed__18(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
 				{
-					CompGenepackContainer compGenepackContainer = parentHolder as CompGenepackContainer;
-					if (compGenepackContainer != null)
-					{
-						return compGenepackContainer;
-					}
 				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				Genepack CS_0024_003C_003E8__locals4 = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((GeneSetHolderBase)CS_0024_003C_003E8__locals4).GetGizmos().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0072;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0072;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						return false;
+					}
+					IL_0072:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Gizmo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					_003C_003E2__current = new Command_Toggle
+					{
+						defaultLabel = "GenepackAutoLoad".Translate(),
+						defaultDesc = "GenepackAutoLoadDesc".Translate(),
+						icon = IconTex.Texture,
+						isActive = () => CS_0024_003C_003E8__locals4.autoLoad,
+						toggleAction = delegate
+						{
+							CS_0024_003C_003E8__locals4.autoLoad = !CS_0024_003C_003E8__locals4.autoLoad;
+						}
+					};
+					_003C_003E1__state = 2;
+					return true;
+				}
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CGetGizmos_003Ed__18 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CGetGizmos_003Ed__18(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	public Thing targetContainer;
+
+	private float hpRecoveryPct;
+
+	private float deteriorationPct;
+
+	private bool autoLoad = true;
+
+	private const int HitPointRecoveryPerDayInGeneBankPerDay = 1;
+
+	private static readonly CachedTexture IconTex = new CachedTexture("UI/Gizmos/AutoLoadGenepack");
+
+	public override string LabelNoCount
+	{
+		get
+		{
+			if (geneSet != null && geneSet.Label != "ERR")
+			{
+				return geneSet.Label;
+			}
+			return base.LabelNoCount;
+		}
+	}
+
+	private CompGenepackContainer ParentContainer
+	{
+		get
+		{
+			IThingHolder parentHolder = base.ParentHolder;
+			if (parentHolder == null || !(parentHolder is CompGenepackContainer result))
+			{
 				return null;
 			}
+			return result;
 		}
+	}
 
-		// Token: 0x1700263D RID: 9789
-		// (get) Token: 0x0600F4B0 RID: 62640 RVA: 0x00472104 File Offset: 0x00470304
-		public bool Deteriorating
+	public bool Deteriorating
+	{
+		get
 		{
-			get
+			CompGenepackContainer parentContainer = ParentContainer;
+			if (parentContainer == null || !parentContainer.PowerOn)
 			{
-				CompGenepackContainer parentContainer = this.ParentContainer;
-				return parentContainer == null || !parentContainer.PowerOn;
+				return true;
 			}
+			return false;
 		}
+	}
 
-		// Token: 0x1700263E RID: 9790
-		// (get) Token: 0x0600F4B1 RID: 62641 RVA: 0x00472126 File Offset: 0x00470326
-		public bool AutoLoad
+	public bool AutoLoad => autoLoad;
+
+	public void Initialize(List<GeneDef> genes)
+	{
+		geneSet = new GeneSet();
+		foreach (GeneDef gene in genes)
 		{
-			get
-			{
-				return this.autoLoad;
-			}
+			geneSet.AddGene(gene);
 		}
+	}
 
-		// Token: 0x0600F4B2 RID: 62642 RVA: 0x00472130 File Offset: 0x00470330
-		public void Initialize(List<GeneDef> genes)
+	public override void PostMake()
+	{
+		if (!ModLister.CheckBiotech("genepack"))
 		{
-			this.geneSet = new GeneSet();
-			foreach (GeneDef gene in genes)
-			{
-				this.geneSet.AddGene(gene);
-			}
+			Destroy();
+			return;
 		}
+		base.PostMake();
+		geneSet = GeneUtility.GenerateGeneSet(null);
+	}
 
-		// Token: 0x0600F4B3 RID: 62643 RVA: 0x00472190 File Offset: 0x00470390
-		public override void PostMake()
+	public override void TickRare()
+	{
+		base.TickRare();
+		if (ParentContainer != null)
 		{
-			if (!ModLister.CheckBiotech("genepack"))
+			if (Deteriorating)
 			{
-				this.Destroy(DestroyMode.Vanish);
-				return;
-			}
-			base.PostMake();
-			this.geneSet = GeneUtility.GenerateGeneSet(null);
-		}
-
-		// Token: 0x0600F4B4 RID: 62644 RVA: 0x004721CC File Offset: 0x004703CC
-		public override void TickRare()
-		{
-			base.TickRare();
-			if (this.ParentContainer != null)
-			{
-				if (this.Deteriorating)
+				float statValue = this.GetStatValue(StatDefOf.DeteriorationRate);
+				if (statValue > 0.001f && base.ParentHolder != null)
 				{
-					float statValue = this.GetStatValue(StatDefOf.DeteriorationRate, true, -1);
-					if (statValue > 0.001f && base.ParentHolder != null)
+					deteriorationPct += statValue * 250f / 60000f;
+					if (deteriorationPct >= 1f)
 					{
-						this.deteriorationPct += statValue * 250f / 60000f;
-						if (this.deteriorationPct >= 1f)
-						{
-							this.deteriorationPct -= 1f;
-							SteadyEnvironmentEffects.DoDeteriorationDamage(this, base.PositionHeld, base.MapHeld, true);
-							return;
-						}
-					}
-				}
-				else if (this.HitPoints < base.MaxHitPoints)
-				{
-					this.hpRecoveryPct += 0.004166667f;
-					if (this.hpRecoveryPct >= 1f)
-					{
-						this.hpRecoveryPct -= 1f;
-						this.HitPoints++;
-						if (this.HitPoints == base.MaxHitPoints)
-						{
-							this.hpRecoveryPct = 0f;
-							return;
-						}
+						deteriorationPct -= 1f;
+						SteadyEnvironmentEffects.DoDeteriorationDamage(this, base.PositionHeld, base.MapHeld, sendMessage: true);
 					}
 				}
 			}
-			else if (base.Spawned && !this.autoLoad && this.targetContainer != null)
+			else
 			{
-				this.targetContainer = null;
-			}
-		}
-
-		// Token: 0x0600F4B5 RID: 62645 RVA: 0x004722EC File Offset: 0x004704EC
-		public override void DrawExtraSelectionOverlays()
-		{
-			base.DrawExtraSelectionOverlays();
-			if (this.targetContainer != null && this.targetContainer.Map == base.Map)
-			{
-				GenDraw.DrawLineBetween(this.DrawPos, this.targetContainer.DrawPos);
-			}
-		}
-
-		// Token: 0x0600F4B6 RID: 62646 RVA: 0x00472325 File Offset: 0x00470525
-		public override IEnumerable<Gizmo> GetGizmos()
-		{
-			foreach (Gizmo gizmo in base.GetGizmos())
-			{
-				yield return gizmo;
-			}
-			IEnumerator<Gizmo> enumerator = null;
-			yield return new Command_Toggle
-			{
-				defaultLabel = "GenepackAutoLoad".Translate(),
-				defaultDesc = "GenepackAutoLoadDesc".Translate(),
-				icon = Genepack.IconTex.Texture,
-				isActive = (() => this.autoLoad),
-				toggleAction = delegate()
+				if (HitPoints >= base.MaxHitPoints)
 				{
-					this.autoLoad = !this.autoLoad;
+					return;
 				}
-			};
-			yield break;
-			yield break;
+				hpRecoveryPct += 0.004166667f;
+				if (hpRecoveryPct >= 1f)
+				{
+					hpRecoveryPct -= 1f;
+					HitPoints++;
+					if (HitPoints == base.MaxHitPoints)
+					{
+						hpRecoveryPct = 0f;
+					}
+				}
+			}
 		}
-
-		// Token: 0x0600F4B7 RID: 62647 RVA: 0x00472338 File Offset: 0x00470538
-		public override void ExposeData()
+		else if (base.Spawned && !autoLoad && targetContainer != null)
 		{
-			base.ExposeData();
-			Scribe_References.Look<Thing>(ref this.targetContainer, "targetContainer", false);
-			Scribe_Values.Look<float>(ref this.hpRecoveryPct, "hpRecoveryPct", 0f, false);
-			Scribe_Values.Look<float>(ref this.deteriorationPct, "deteriorationPct", 0f, false);
-			Scribe_Values.Look<bool>(ref this.autoLoad, "autoLoad", true, false);
+			targetContainer = null;
 		}
+	}
 
-		// Token: 0x0400A143 RID: 41283
-		public Thing targetContainer;
+	public override void DrawExtraSelectionOverlays()
+	{
+		base.DrawExtraSelectionOverlays();
+		if (targetContainer != null && targetContainer.Map == base.Map)
+		{
+			GenDraw.DrawLineBetween(DrawPos, targetContainer.DrawPos);
+		}
+	}
 
-		// Token: 0x0400A144 RID: 41284
-		private float hpRecoveryPct;
+	[IteratorStateMachine(typeof(_003CGetGizmos_003Ed__18))]
+	public override IEnumerable<Gizmo> GetGizmos()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetGizmos_003Ed__18(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
 
-		// Token: 0x0400A145 RID: 41285
-		private float deteriorationPct;
-
-		// Token: 0x0400A146 RID: 41286
-		private bool autoLoad = true;
-
-		// Token: 0x0400A147 RID: 41287
-		private const int HitPointRecoveryPerDayInGeneBankPerDay = 1;
-
-		// Token: 0x0400A148 RID: 41288
-		private static readonly CachedTexture IconTex = new CachedTexture("UI/Gizmos/AutoLoadGenepack");
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_References.Look(ref targetContainer, "targetContainer");
+		Scribe_Values.Look(ref hpRecoveryPct, "hpRecoveryPct", 0f);
+		Scribe_Values.Look(ref deteriorationPct, "deteriorationPct", 0f);
+		Scribe_Values.Look(ref autoLoad, "autoLoad", defaultValue: true);
 	}
 }

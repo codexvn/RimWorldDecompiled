@@ -1,202 +1,992 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
-namespace Verse
+namespace Verse;
+
+public class ThingCategoryDef : Def
 {
-	// Token: 0x020002F5 RID: 757
-	public class ThingCategoryDef : Def
+	[CompilerGenerated]
+	private sealed class _003Cget_DescendantSpecialThingFilterDefs_003Ed__19 : IEnumerable<SpecialThingFilterDef>, IEnumerable, IEnumerator<SpecialThingFilterDef>, IEnumerator, IDisposable
 	{
-		// Token: 0x17000357 RID: 855
-		// (get) Token: 0x06001288 RID: 4744 RVA: 0x000564DB File Offset: 0x000546DB
-		public List<ThingDef> SortedChildThingDefs
+		private int _003C_003E1__state;
+
+		private SpecialThingFilterDef _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public ThingCategoryDef _003C_003E4__this;
+
+		private IEnumerator<ThingCategoryDef> _003C_003E7__wrap1;
+
+		private List<SpecialThingFilterDef>.Enumerator _003C_003E7__wrap2;
+
+		SpecialThingFilterDef IEnumerator<SpecialThingFilterDef>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.sortedChildThingDefsCached;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17000358 RID: 856
-		// (get) Token: 0x06001289 RID: 4745 RVA: 0x000564E3 File Offset: 0x000546E3
-		public IEnumerable<ThingCategoryDef> Parents
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.parent != null)
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003Cget_DescendantSpecialThingFilterDefs_003Ed__19(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if ((uint)(num - -4) <= 1u || num == 1)
+			{
+				try
 				{
-					yield return this.parent;
-					foreach (ThingCategoryDef thingCategoryDef in this.parent.Parents)
+					if (num == -4 || num == 1)
 					{
-						yield return thingCategoryDef;
+						try
+						{
+						}
+						finally
+						{
+							_003C_003Em__Finally2();
+						}
 					}
-					IEnumerator<ThingCategoryDef> enumerator = null;
 				}
-				yield break;
-				yield break;
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E7__wrap2 = default(List<SpecialThingFilterDef>.Enumerator);
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				ThingCategoryDef thingCategoryDef = _003C_003E4__this;
+				if (num != 0)
+				{
+					if (num != 1)
+					{
+						return false;
+					}
+					_003C_003E1__state = -4;
+					goto IL_008d;
+				}
+				_003C_003E1__state = -1;
+				_003C_003E7__wrap1 = thingCategoryDef.ThisAndChildCategoryDefs.GetEnumerator();
+				_003C_003E1__state = -3;
+				goto IL_00ac;
+				IL_008d:
+				if (_003C_003E7__wrap2.MoveNext())
+				{
+					SpecialThingFilterDef current = _003C_003E7__wrap2.Current;
+					_003C_003E2__current = current;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				_003C_003Em__Finally2();
+				_003C_003E7__wrap2 = default(List<SpecialThingFilterDef>.Enumerator);
+				goto IL_00ac;
+				IL_00ac:
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					ThingCategoryDef current2 = _003C_003E7__wrap1.Current;
+					_003C_003E7__wrap2 = current2.childSpecialFilters.GetEnumerator();
+					_003C_003E1__state = -4;
+					goto IL_008d;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = null;
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x17000359 RID: 857
-		// (get) Token: 0x0600128A RID: 4746 RVA: 0x000564F3 File Offset: 0x000546F3
-		public IEnumerable<ThingCategoryDef> ThisAndChildCategoryDefs
+		bool IEnumerator.MoveNext()
 		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -3;
+			((IDisposable)_003C_003E7__wrap2/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<SpecialThingFilterDef> IEnumerable<SpecialThingFilterDef>.GetEnumerator()
+		{
+			_003Cget_DescendantSpecialThingFilterDefs_003Ed__19 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_DescendantSpecialThingFilterDefs_003Ed__19(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<SpecialThingFilterDef>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003Cget_DescendantThingDefs_003Ed__17 : IEnumerable<ThingDef>, IEnumerable, IEnumerator<ThingDef>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private ThingDef _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public ThingCategoryDef _003C_003E4__this;
+
+		private IEnumerator<ThingCategoryDef> _003C_003E7__wrap1;
+
+		private List<ThingDef>.Enumerator _003C_003E7__wrap2;
+
+		ThingDef IEnumerator<ThingDef>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				yield return this;
-				foreach (ThingCategoryDef thingCategoryDef in this.childCategories)
-				{
-					foreach (ThingCategoryDef thingCategoryDef2 in thingCategoryDef.ThisAndChildCategoryDefs)
-					{
-						yield return thingCategoryDef2;
-					}
-					IEnumerator<ThingCategoryDef> enumerator2 = null;
-				}
-				List<ThingCategoryDef>.Enumerator enumerator = default(List<ThingCategoryDef>.Enumerator);
-				yield break;
-				yield break;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700035A RID: 858
-		// (get) Token: 0x0600128B RID: 4747 RVA: 0x00056503 File Offset: 0x00054703
-		public IEnumerable<ThingDef> DescendantThingDefs
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				foreach (ThingCategoryDef thingCategoryDef in this.ThisAndChildCategoryDefs)
-				{
-					foreach (ThingDef thingDef in thingCategoryDef.childThingDefs)
-					{
-						yield return thingDef;
-					}
-					List<ThingDef>.Enumerator enumerator2 = default(List<ThingDef>.Enumerator);
-				}
-				IEnumerator<ThingCategoryDef> enumerator = null;
-				yield break;
-				yield break;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700035B RID: 859
-		// (get) Token: 0x0600128C RID: 4748 RVA: 0x00056513 File Offset: 0x00054713
-		public IEnumerable<SpecialThingFilterDef> DescendantSpecialThingFilterDefs
+		[DebuggerHidden]
+		public _003Cget_DescendantThingDefs_003Ed__17(int _003C_003E1__state)
 		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if ((uint)(num - -4) <= 1u || num == 1)
+			{
+				try
+				{
+					if (num == -4 || num == 1)
+					{
+						try
+						{
+						}
+						finally
+						{
+							_003C_003Em__Finally2();
+						}
+					}
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E7__wrap2 = default(List<ThingDef>.Enumerator);
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				ThingCategoryDef thingCategoryDef = _003C_003E4__this;
+				if (num != 0)
+				{
+					if (num != 1)
+					{
+						return false;
+					}
+					_003C_003E1__state = -4;
+					goto IL_008d;
+				}
+				_003C_003E1__state = -1;
+				_003C_003E7__wrap1 = thingCategoryDef.ThisAndChildCategoryDefs.GetEnumerator();
+				_003C_003E1__state = -3;
+				goto IL_00ac;
+				IL_008d:
+				if (_003C_003E7__wrap2.MoveNext())
+				{
+					ThingDef current = _003C_003E7__wrap2.Current;
+					_003C_003E2__current = current;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				_003C_003Em__Finally2();
+				_003C_003E7__wrap2 = default(List<ThingDef>.Enumerator);
+				goto IL_00ac;
+				IL_00ac:
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					ThingCategoryDef current2 = _003C_003E7__wrap1.Current;
+					_003C_003E7__wrap2 = current2.childThingDefs.GetEnumerator();
+					_003C_003E1__state = -4;
+					goto IL_008d;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = null;
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -3;
+			((IDisposable)_003C_003E7__wrap2/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<ThingDef> IEnumerable<ThingDef>.GetEnumerator()
+		{
+			_003Cget_DescendantThingDefs_003Ed__17 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_DescendantThingDefs_003Ed__17(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<ThingDef>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003Cget_Parents_003Ed__13 : IEnumerable<ThingCategoryDef>, IEnumerable, IEnumerator<ThingCategoryDef>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private ThingCategoryDef _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public ThingCategoryDef _003C_003E4__this;
+
+		private IEnumerator<ThingCategoryDef> _003C_003E7__wrap1;
+
+		ThingCategoryDef IEnumerator<ThingCategoryDef>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				foreach (ThingCategoryDef thingCategoryDef in this.ThisAndChildCategoryDefs)
-				{
-					foreach (SpecialThingFilterDef specialThingFilterDef in thingCategoryDef.childSpecialFilters)
-					{
-						yield return specialThingFilterDef;
-					}
-					List<SpecialThingFilterDef>.Enumerator enumerator2 = default(List<SpecialThingFilterDef>.Enumerator);
-				}
-				IEnumerator<ThingCategoryDef> enumerator = null;
-				yield break;
-				yield break;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700035C RID: 860
-		// (get) Token: 0x0600128D RID: 4749 RVA: 0x00056523 File Offset: 0x00054723
-		public IEnumerable<SpecialThingFilterDef> ParentsSpecialThingFilterDefs
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				foreach (ThingCategoryDef thingCategoryDef in this.Parents)
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003Cget_Parents_003Ed__13(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 2)
+			{
+				try
 				{
-					foreach (SpecialThingFilterDef specialThingFilterDef in thingCategoryDef.childSpecialFilters)
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				ThingCategoryDef thingCategoryDef = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					if (thingCategoryDef.parent != null)
 					{
-						yield return specialThingFilterDef;
+						_003C_003E2__current = thingCategoryDef.parent;
+						_003C_003E1__state = 1;
+						return true;
 					}
-					List<SpecialThingFilterDef>.Enumerator enumerator2 = default(List<SpecialThingFilterDef>.Enumerator);
+					break;
+				case 1:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = thingCategoryDef.parent.Parents.GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_009a;
+				case 2:
+					{
+						_003C_003E1__state = -3;
+						goto IL_009a;
+					}
+					IL_009a:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						ThingCategoryDef current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					break;
 				}
-				IEnumerator<ThingCategoryDef> enumerator = null;
-				yield break;
-				yield break;
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x0600128E RID: 4750 RVA: 0x00056533 File Offset: 0x00054733
-		public bool ContainedInThisOrDescendant(ThingDef thingDef)
+		bool IEnumerator.MoveNext()
 		{
-			return this.allChildThingDefsCached.Contains(thingDef);
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0600128F RID: 4751 RVA: 0x00056544 File Offset: 0x00054744
-		public override void ResolveReferences()
+		private void _003C_003Em__Finally1()
 		{
-			base.ResolveReferences();
-			this.allChildThingDefsCached = new HashSet<ThingDef>();
-			foreach (ThingCategoryDef thingCategoryDef in this.ThisAndChildCategoryDefs)
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				foreach (ThingDef item in thingCategoryDef.childThingDefs)
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<ThingCategoryDef> IEnumerable<ThingCategoryDef>.GetEnumerator()
+		{
+			_003Cget_Parents_003Ed__13 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_Parents_003Ed__13(0)
 				{
-					this.allChildThingDefsCached.Add(item);
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<ThingCategoryDef>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003Cget_ParentsSpecialThingFilterDefs_003Ed__21 : IEnumerable<SpecialThingFilterDef>, IEnumerable, IEnumerator<SpecialThingFilterDef>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private SpecialThingFilterDef _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public ThingCategoryDef _003C_003E4__this;
+
+		private IEnumerator<ThingCategoryDef> _003C_003E7__wrap1;
+
+		private List<SpecialThingFilterDef>.Enumerator _003C_003E7__wrap2;
+
+		SpecialThingFilterDef IEnumerator<SpecialThingFilterDef>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003Cget_ParentsSpecialThingFilterDefs_003Ed__21(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if ((uint)(num - -4) <= 1u || num == 1)
+			{
+				try
+				{
+					if (num == -4 || num == 1)
+					{
+						try
+						{
+						}
+						finally
+						{
+							_003C_003Em__Finally2();
+						}
+					}
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
 				}
 			}
-			this.sortedChildThingDefsCached = (from n in this.childThingDefs
-			orderby n.label
-			select n).ToList<ThingDef>();
+			_003C_003E7__wrap1 = null;
+			_003C_003E7__wrap2 = default(List<SpecialThingFilterDef>.Enumerator);
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x06001290 RID: 4752 RVA: 0x00056618 File Offset: 0x00054818
-		public override void PostLoad()
+		private bool MoveNext()
 		{
-			this.treeNode = new TreeNode_ThingCategory(this);
-			if (!this.iconPath.NullOrEmpty())
+			try
 			{
-				LongEventHandler.ExecuteWhenFinished(delegate
+				int num = _003C_003E1__state;
+				ThingCategoryDef thingCategoryDef = _003C_003E4__this;
+				if (num != 0)
 				{
-					this.icon = ContentFinder<Texture2D>.Get(this.iconPath, true);
-				});
+					if (num != 1)
+					{
+						return false;
+					}
+					_003C_003E1__state = -4;
+					goto IL_008d;
+				}
+				_003C_003E1__state = -1;
+				_003C_003E7__wrap1 = thingCategoryDef.Parents.GetEnumerator();
+				_003C_003E1__state = -3;
+				goto IL_00ac;
+				IL_008d:
+				if (_003C_003E7__wrap2.MoveNext())
+				{
+					SpecialThingFilterDef current = _003C_003E7__wrap2.Current;
+					_003C_003E2__current = current;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				_003C_003Em__Finally2();
+				_003C_003E7__wrap2 = default(List<SpecialThingFilterDef>.Enumerator);
+				goto IL_00ac;
+				IL_00ac:
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					ThingCategoryDef current2 = _003C_003E7__wrap1.Current;
+					_003C_003E7__wrap2 = current2.childSpecialFilters.GetEnumerator();
+					_003C_003E1__state = -4;
+					goto IL_008d;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = null;
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x06001291 RID: 4753 RVA: 0x00056644 File Offset: 0x00054844
-		public static ThingCategoryDef Named(string defName)
+		bool IEnumerator.MoveNext()
 		{
-			return DefDatabase<ThingCategoryDef>.GetNamed(defName, true);
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x04001125 RID: 4389
-		public ThingCategoryDef parent;
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
 
-		// Token: 0x04001126 RID: 4390
-		[NoTranslate]
-		public string iconPath;
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -3;
+			((IDisposable)_003C_003E7__wrap2/*cast due to .constrained prefix*/).Dispose();
+		}
 
-		// Token: 0x04001127 RID: 4391
-		public bool resourceReadoutRoot;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04001128 RID: 4392
-		[Unsaved(false)]
-		public TreeNode_ThingCategory treeNode;
+		[DebuggerHidden]
+		IEnumerator<SpecialThingFilterDef> IEnumerable<SpecialThingFilterDef>.GetEnumerator()
+		{
+			_003Cget_ParentsSpecialThingFilterDefs_003Ed__21 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_ParentsSpecialThingFilterDefs_003Ed__21(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x04001129 RID: 4393
-		[Unsaved(false)]
-		public List<ThingCategoryDef> childCategories = new List<ThingCategoryDef>();
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<SpecialThingFilterDef>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x0400112A RID: 4394
-		[Unsaved(false)]
-		public List<ThingDef> childThingDefs = new List<ThingDef>();
+	[CompilerGenerated]
+	private sealed class _003Cget_ThisAndChildCategoryDefs_003Ed__15 : IEnumerable<ThingCategoryDef>, IEnumerable, IEnumerator<ThingCategoryDef>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
 
-		// Token: 0x0400112B RID: 4395
-		[Unsaved(false)]
-		private HashSet<ThingDef> allChildThingDefsCached;
+		private ThingCategoryDef _003C_003E2__current;
 
-		// Token: 0x0400112C RID: 4396
-		[Unsaved(false)]
-		private List<ThingDef> sortedChildThingDefsCached;
+		private int _003C_003El__initialThreadId;
 
-		// Token: 0x0400112D RID: 4397
-		[Unsaved(false)]
-		public List<SpecialThingFilterDef> childSpecialFilters = new List<SpecialThingFilterDef>();
+		public ThingCategoryDef _003C_003E4__this;
 
-		// Token: 0x0400112E RID: 4398
-		[Unsaved(false)]
-		public Texture2D icon = BaseContent.BadTex;
+		private List<ThingCategoryDef>.Enumerator _003C_003E7__wrap1;
+
+		private IEnumerator<ThingCategoryDef> _003C_003E7__wrap2;
+
+		ThingCategoryDef IEnumerator<ThingCategoryDef>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003Cget_ThisAndChildCategoryDefs_003Ed__15(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if ((uint)(num - -4) <= 1u || num == 2)
+			{
+				try
+				{
+					if (num == -4 || num == 2)
+					{
+						try
+						{
+						}
+						finally
+						{
+							_003C_003Em__Finally2();
+						}
+					}
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = default(List<ThingCategoryDef>.Enumerator);
+			_003C_003E7__wrap2 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				ThingCategoryDef thingCategoryDef = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E2__current = thingCategoryDef;
+					_003C_003E1__state = 1;
+					return true;
+				case 1:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = thingCategoryDef.childCategories.GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_00ce;
+				case 2:
+					{
+						_003C_003E1__state = -4;
+						goto IL_00b4;
+					}
+					IL_00ce:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						ThingCategoryDef current = _003C_003E7__wrap1.Current;
+						_003C_003E7__wrap2 = current.ThisAndChildCategoryDefs.GetEnumerator();
+						_003C_003E1__state = -4;
+						goto IL_00b4;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = default(List<ThingCategoryDef>.Enumerator);
+					return false;
+					IL_00b4:
+					if (_003C_003E7__wrap2.MoveNext())
+					{
+						ThingCategoryDef current2 = _003C_003E7__wrap2.Current;
+						_003C_003E2__current = current2;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					_003C_003Em__Finally2();
+					_003C_003E7__wrap2 = null;
+					goto IL_00ce;
+				}
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap1/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -3;
+			if (_003C_003E7__wrap2 != null)
+			{
+				_003C_003E7__wrap2.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<ThingCategoryDef> IEnumerable<ThingCategoryDef>.GetEnumerator()
+		{
+			_003Cget_ThisAndChildCategoryDefs_003Ed__15 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_ThisAndChildCategoryDefs_003Ed__15(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<ThingCategoryDef>)this).GetEnumerator();
+		}
+	}
+
+	public ThingCategoryDef parent;
+
+	[NoTranslate]
+	public string iconPath;
+
+	public bool resourceReadoutRoot;
+
+	[Unsaved(false)]
+	public TreeNode_ThingCategory treeNode;
+
+	[Unsaved(false)]
+	public List<ThingCategoryDef> childCategories = new List<ThingCategoryDef>();
+
+	[Unsaved(false)]
+	public List<ThingDef> childThingDefs = new List<ThingDef>();
+
+	[Unsaved(false)]
+	private HashSet<ThingDef> allChildThingDefsCached;
+
+	[Unsaved(false)]
+	private List<ThingDef> sortedChildThingDefsCached;
+
+	[Unsaved(false)]
+	public List<SpecialThingFilterDef> childSpecialFilters = new List<SpecialThingFilterDef>();
+
+	[Unsaved(false)]
+	public Texture2D icon = BaseContent.BadTex;
+
+	public List<ThingDef> SortedChildThingDefs => sortedChildThingDefsCached;
+
+	public IEnumerable<ThingCategoryDef> Parents
+	{
+		[IteratorStateMachine(typeof(_003Cget_Parents_003Ed__13))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_Parents_003Ed__13(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public IEnumerable<ThingCategoryDef> ThisAndChildCategoryDefs
+	{
+		[IteratorStateMachine(typeof(_003Cget_ThisAndChildCategoryDefs_003Ed__15))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_ThisAndChildCategoryDefs_003Ed__15(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public IEnumerable<ThingDef> DescendantThingDefs
+	{
+		[IteratorStateMachine(typeof(_003Cget_DescendantThingDefs_003Ed__17))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_DescendantThingDefs_003Ed__17(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public IEnumerable<SpecialThingFilterDef> DescendantSpecialThingFilterDefs
+	{
+		[IteratorStateMachine(typeof(_003Cget_DescendantSpecialThingFilterDefs_003Ed__19))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_DescendantSpecialThingFilterDefs_003Ed__19(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public IEnumerable<SpecialThingFilterDef> ParentsSpecialThingFilterDefs
+	{
+		[IteratorStateMachine(typeof(_003Cget_ParentsSpecialThingFilterDefs_003Ed__21))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_ParentsSpecialThingFilterDefs_003Ed__21(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public bool ContainedInThisOrDescendant(ThingDef thingDef)
+	{
+		return allChildThingDefsCached.Contains(thingDef);
+	}
+
+	public override void ResolveReferences()
+	{
+		base.ResolveReferences();
+		allChildThingDefsCached = new HashSet<ThingDef>();
+		foreach (ThingCategoryDef thisAndChildCategoryDef in ThisAndChildCategoryDefs)
+		{
+			foreach (ThingDef childThingDef in thisAndChildCategoryDef.childThingDefs)
+			{
+				allChildThingDefsCached.Add(childThingDef);
+			}
+		}
+		sortedChildThingDefsCached = childThingDefs.OrderBy((ThingDef n) => n.label).ToList();
+	}
+
+	public override void PostLoad()
+	{
+		treeNode = new TreeNode_ThingCategory(this);
+		if (!iconPath.NullOrEmpty())
+		{
+			LongEventHandler.ExecuteWhenFinished(delegate
+			{
+				icon = ContentFinder<Texture2D>.Get(iconPath);
+			});
+		}
+	}
+
+	public static ThingCategoryDef Named(string defName)
+	{
+		return DefDatabase<ThingCategoryDef>.GetNamed(defName);
 	}
 }

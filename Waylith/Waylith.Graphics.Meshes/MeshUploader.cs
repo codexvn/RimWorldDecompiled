@@ -590,7 +590,7 @@ public sealed class MeshUploader : IGpuMeshResourceOwner
 					PreferredProperties = VkMemoryPropertyFlags.DeviceLocalBit,
 					Priority = 1f
 				};
-				return vmaAllocator.AllocateBufferChecked(label, in bufferCreateInfo, in allocateCreateInfo);
+				return vmaAllocator.AllocateBufferChecked(label, in bufferCreateInfo, in allocateCreateInfo, anyMemoryOnRefusal: false);
 			}
 			catch (VmaAllocationException ex) when (ex.Result == VkResult.ErrorOutOfDeviceMemory)
 			{

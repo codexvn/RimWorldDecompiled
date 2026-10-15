@@ -1,167 +1,284 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse.Grammar;
 
-namespace Verse
+namespace Verse;
+
+public class RulePackDef : Def
 {
-	// Token: 0x020002DD RID: 733
-	public class RulePackDef : Def
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__17 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700032B RID: 811
-		// (get) Token: 0x0600120C RID: 4620 RVA: 0x00054264 File Offset: 0x00052464
-		public List<Rule> RulesPlusIncludes
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public RulePackDef _003C_003E4__this;
+
+		private IEnumerator<string> _003C_003E7__wrap1;
+
+		private int _003Ci_003E5__3;
+
+		string IEnumerator<string>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.cachedRules == null)
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__17(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
 				{
-					this.cachedRules = new List<Rule>();
-					if (this.rulePack != null)
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				RulePackDef rulePackDef = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((Def)rulePackDef).ConfigErrors().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0072;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0072;
+				case 2:
 					{
-						this.cachedRules.AddRange(this.rulePack.Rules);
+						_003C_003E1__state = -1;
+						goto IL_0111;
 					}
-					if (this.include != null)
+					IL_0072:
+					if (_003C_003E7__wrap1.MoveNext())
 					{
-						for (int i = 0; i < this.include.Count; i++)
-						{
-							this.cachedRules.AddRange(this.include[i].RulesPlusIncludes);
-						}
+						string current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
 					}
-				}
-				return this.cachedRules;
-			}
-		}
-
-		// Token: 0x1700032C RID: 812
-		// (get) Token: 0x0600120D RID: 4621 RVA: 0x000542E4 File Offset: 0x000524E4
-		public List<Rule> UntranslatedRulesPlusIncludes
-		{
-			get
-			{
-				if (this.cachedUntranslatedRules == null)
-				{
-					this.cachedUntranslatedRules = new List<Rule>();
-					if (this.rulePack != null)
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (rulePackDef.include == null)
 					{
-						this.cachedUntranslatedRules.AddRange(this.rulePack.UntranslatedRules);
+						break;
 					}
-					if (this.include != null)
+					_003Ci_003E5__3 = 0;
+					goto IL_0123;
+					IL_0111:
+					_003Ci_003E5__3++;
+					goto IL_0123;
+					IL_0123:
+					if (_003Ci_003E5__3 >= rulePackDef.include.Count)
 					{
-						for (int i = 0; i < this.include.Count; i++)
-						{
-							this.cachedUntranslatedRules.AddRange(this.include[i].UntranslatedRulesPlusIncludes);
-						}
+						break;
 					}
-				}
-				return this.cachedUntranslatedRules;
-			}
-		}
-
-		// Token: 0x1700032D RID: 813
-		// (get) Token: 0x0600120E RID: 4622 RVA: 0x00054362 File Offset: 0x00052562
-		public List<Rule> RulesImmediate
-		{
-			get
-			{
-				RulePack rulePack = this.rulePack;
-				if (rulePack == null)
-				{
-					return null;
-				}
-				return rulePack.Rules;
-			}
-		}
-
-		// Token: 0x1700032E RID: 814
-		// (get) Token: 0x0600120F RID: 4623 RVA: 0x00054375 File Offset: 0x00052575
-		public List<Rule> UntranslatedRulesImmediate
-		{
-			get
-			{
-				RulePack rulePack = this.rulePack;
-				if (rulePack == null)
-				{
-					return null;
-				}
-				return rulePack.UntranslatedRules;
-			}
-		}
-
-		// Token: 0x1700032F RID: 815
-		// (get) Token: 0x06001210 RID: 4624 RVA: 0x00054388 File Offset: 0x00052588
-		public string FirstRuleKeyword
-		{
-			get
-			{
-				List<Rule> rulesPlusIncludes = this.RulesPlusIncludes;
-				if (!rulesPlusIncludes.Any<Rule>())
-				{
-					return "none";
-				}
-				return rulesPlusIncludes[0].keyword;
-			}
-		}
-
-		// Token: 0x17000330 RID: 816
-		// (get) Token: 0x06001211 RID: 4625 RVA: 0x000543B8 File Offset: 0x000525B8
-		public string FirstUntranslatedRuleKeyword
-		{
-			get
-			{
-				List<Rule> untranslatedRulesPlusIncludes = this.UntranslatedRulesPlusIncludes;
-				if (!untranslatedRulesPlusIncludes.Any<Rule>())
-				{
-					return "none";
-				}
-				return untranslatedRulesPlusIncludes[0].keyword;
-			}
-		}
-
-		// Token: 0x06001212 RID: 4626 RVA: 0x000543E6 File Offset: 0x000525E6
-		public override IEnumerable<string> ConfigErrors()
-		{
-			foreach (string text in base.ConfigErrors())
-			{
-				yield return text;
-			}
-			IEnumerator<string> enumerator = null;
-			if (this.include != null)
-			{
-				int num;
-				for (int i = 0; i < this.include.Count; i = num + 1)
-				{
-					if (this.include[i].include != null && this.include[i].include.Contains(this))
+					if (rulePackDef.include[_003Ci_003E5__3].include != null && rulePackDef.include[_003Ci_003E5__3].include.Contains(rulePackDef))
 					{
-						yield return "includes other RulePackDef which includes it: " + this.include[i].defName;
+						_003C_003E2__current = "includes other RulePackDef which includes it: " + rulePackDef.include[_003Ci_003E5__3].defName;
+						_003C_003E1__state = 2;
+						return true;
 					}
-					num = i;
+					goto IL_0111;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__17 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__17(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	public List<RulePackDef> include;
+
+	private RulePack rulePack;
+
+	public bool directTestable;
+
+	[Unsaved(false)]
+	private List<Rule> cachedRules;
+
+	[Unsaved(false)]
+	private List<Rule> cachedUntranslatedRules;
+
+	public List<Rule> RulesPlusIncludes
+	{
+		get
+		{
+			if (cachedRules == null)
+			{
+				cachedRules = new List<Rule>();
+				if (rulePack != null)
+				{
+					cachedRules.AddRange(rulePack.Rules);
+				}
+				if (include != null)
+				{
+					for (int i = 0; i < include.Count; i++)
+					{
+						cachedRules.AddRange(include[i].RulesPlusIncludes);
+					}
 				}
 			}
-			yield break;
-			yield break;
+			return cachedRules;
 		}
+	}
 
-		// Token: 0x06001213 RID: 4627 RVA: 0x000543F6 File Offset: 0x000525F6
-		public static RulePackDef Named(string defName)
+	public List<Rule> UntranslatedRulesPlusIncludes
+	{
+		get
 		{
-			return DefDatabase<RulePackDef>.GetNamed(defName, true);
+			if (cachedUntranslatedRules == null)
+			{
+				cachedUntranslatedRules = new List<Rule>();
+				if (rulePack != null)
+				{
+					cachedUntranslatedRules.AddRange(rulePack.UntranslatedRules);
+				}
+				if (include != null)
+				{
+					for (int i = 0; i < include.Count; i++)
+					{
+						cachedUntranslatedRules.AddRange(include[i].UntranslatedRulesPlusIncludes);
+					}
+				}
+			}
+			return cachedUntranslatedRules;
 		}
+	}
 
-		// Token: 0x04001048 RID: 4168
-		public List<RulePackDef> include;
+	public List<Rule> RulesImmediate => rulePack?.Rules;
 
-		// Token: 0x04001049 RID: 4169
-		private RulePack rulePack;
+	public List<Rule> UntranslatedRulesImmediate => rulePack?.UntranslatedRules;
 
-		// Token: 0x0400104A RID: 4170
-		public bool directTestable;
+	public string FirstRuleKeyword
+	{
+		get
+		{
+			List<Rule> rulesPlusIncludes = RulesPlusIncludes;
+			if (!rulesPlusIncludes.Any())
+			{
+				return "none";
+			}
+			return rulesPlusIncludes[0].keyword;
+		}
+	}
 
-		// Token: 0x0400104B RID: 4171
-		[Unsaved(false)]
-		private List<Rule> cachedRules;
+	public string FirstUntranslatedRuleKeyword
+	{
+		get
+		{
+			List<Rule> untranslatedRulesPlusIncludes = UntranslatedRulesPlusIncludes;
+			if (!untranslatedRulesPlusIncludes.Any())
+			{
+				return "none";
+			}
+			return untranslatedRulesPlusIncludes[0].keyword;
+		}
+	}
 
-		// Token: 0x0400104C RID: 4172
-		[Unsaved(false)]
-		private List<Rule> cachedUntranslatedRules;
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__17))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__17(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public static RulePackDef Named(string defName)
+	{
+		return DefDatabase<RulePackDef>.GetNamed(defName);
 	}
 }

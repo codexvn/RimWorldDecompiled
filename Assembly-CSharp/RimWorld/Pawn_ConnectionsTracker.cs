@@ -1,188 +1,267 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Pawn_ConnectionsTracker : IExposable
 {
-	// Token: 0x020024B0 RID: 9392
-	public class Pawn_ConnectionsTracker : IExposable
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass10_0
 	{
-		// Token: 0x17001F18 RID: 7960
-		// (get) Token: 0x0600CBF8 RID: 52216 RVA: 0x003BC372 File Offset: 0x003BA572
-		public List<Thing> ConnectedThings
+		public Thing t;
+
+		internal void _003CGetGizmos_003Eb__1()
 		{
+			CameraJumper.TryJumpAndSelect(t);
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGetGizmos_003Ed__10 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Pawn_ConnectionsTracker _003C_003E4__this;
+
+		Gizmo IEnumerator<Gizmo>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				return this.connectedThings;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600CBF9 RID: 52217 RVA: 0x003BC37A File Offset: 0x003BA57A
-		public Pawn_ConnectionsTracker()
+		object IEnumerator.Current
 		{
-		}
-
-		// Token: 0x0600CBFA RID: 52218 RVA: 0x003BC38D File Offset: 0x003BA58D
-		public Pawn_ConnectionsTracker(Pawn pawn)
-		{
-			this.pawn = pawn;
-		}
-
-		// Token: 0x0600CBFB RID: 52219 RVA: 0x003BC3A7 File Offset: 0x003BA5A7
-		public void ConnectTo(Thing thing)
-		{
-			this.connectedThings.Add(thing);
-		}
-
-		// Token: 0x0600CBFC RID: 52220 RVA: 0x003BC3B8 File Offset: 0x003BA5B8
-		public void Notify_PawnKilled()
-		{
-			for (int i = this.connectedThings.Count - 1; i >= 0; i--)
+			[DebuggerHidden]
+			get
 			{
-				CompTreeConnection compTreeConnection = this.connectedThings[i].TryGetComp<CompTreeConnection>();
-				if (compTreeConnection != null)
-				{
-					compTreeConnection.Notify_PawnDied(this.pawn);
-				}
-				this.connectedThings.RemoveAt(i);
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600CBFD RID: 52221 RVA: 0x003BC40C File Offset: 0x003BA60C
-		public void Notify_ConnectedThingDestroyed(Thing thing)
+		[DebuggerHidden]
+		public _003CGetGizmos_003Ed__10(int _003C_003E1__state)
 		{
-			if (this.connectedThings.Remove(thing))
-			{
-				Pawn_NeedsTracker needs = this.pawn.needs;
-				bool flag;
-				if (needs == null)
-				{
-					flag = (null != null);
-				}
-				else
-				{
-					Need_Mood mood = needs.mood;
-					if (mood == null)
-					{
-						flag = (null != null);
-					}
-					else
-					{
-						ThoughtHandler thoughts = mood.thoughts;
-						flag = (((thoughts != null) ? thoughts.memories : null) != null);
-					}
-				}
-				if (flag)
-				{
-					this.pawn.needs.mood.thoughts.memories.TryGainMemory(ThoughtDefOf.ConnectedTreeDied, null, null);
-				}
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x0600CBFE RID: 52222 RVA: 0x003BC47E File Offset: 0x003BA67E
-		public void Notify_ConnectedThingLeftBehind(Thing thing)
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			this.connectedThings.Remove(thing);
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x0600CBFF RID: 52223 RVA: 0x003BC48D File Offset: 0x003BA68D
-		public IEnumerable<Gizmo> GetGizmos()
+		private bool MoveNext()
 		{
-			if (!this.connectedThings.Any<Thing>())
+			int num = _003C_003E1__state;
+			Pawn_ConnectionsTracker CS_0024_003C_003E8__locals19 = _003C_003E4__this;
+			switch (num)
 			{
-				yield break;
-			}
-			if (Find.Selector.SingleSelectedThing == this.pawn)
-			{
-				if (this.pawn.IsColonistPlayerControlled)
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (!CS_0024_003C_003E8__locals19.connectedThings.Any())
 				{
-					yield return new Command_Action
+					return false;
+				}
+				if (Find.Selector.SingleSelectedThing != CS_0024_003C_003E8__locals19.pawn)
+				{
+					break;
+				}
+				if (CS_0024_003C_003E8__locals19.pawn.IsColonistPlayerControlled)
+				{
+					_003C_003E2__current = new Command_Action
 					{
 						defaultLabel = "CommandSelectConnectedTree".Translate(),
-						onHover = new Action(this.DrawConnectionLines),
+						onHover = CS_0024_003C_003E8__locals19.DrawConnectionLines,
 						icon = Widgets.GetIconFor(ThingDefOf.Plant_TreeGauranlen, null, null, null),
-						action = delegate()
+						action = delegate
 						{
-							if (this.ConnectedThings.Count == 1)
+							if (CS_0024_003C_003E8__locals19.ConnectedThings.Count == 1)
 							{
-								CameraJumper.TryJumpAndSelect(this.ConnectedThings[0], CameraJumper.MovementMode.Pan);
-								return;
+								CameraJumper.TryJumpAndSelect(CS_0024_003C_003E8__locals19.ConnectedThings[0]);
 							}
-							if (this.ConnectedThings.Count > 1)
+							else if (CS_0024_003C_003E8__locals19.ConnectedThings.Count > 1)
 							{
 								List<FloatMenuOption> list = new List<FloatMenuOption>();
-								for (int i = 0; i < this.ConnectedThings.Count; i++)
+								for (int i = 0; i < CS_0024_003C_003E8__locals19.ConnectedThings.Count; i++)
 								{
-									Thing t = this.ConnectedThings[i];
-									string str = "NoCaste".Translate();
-									CompTreeConnection compTreeConnection = t.TryGetComp<CompTreeConnection>();
+									_003C_003Ec__DisplayClass10_0 CS_0024_003C_003E8__locals14 = new _003C_003Ec__DisplayClass10_0
+									{
+										t = CS_0024_003C_003E8__locals19.ConnectedThings[i]
+									};
+									string text = "NoCaste".Translate();
+									CompTreeConnection compTreeConnection = CS_0024_003C_003E8__locals14.t.TryGetComp<CompTreeConnection>();
 									if (compTreeConnection != null && compTreeConnection.Mode != null)
 									{
-										str = compTreeConnection.Mode.label;
+										text = compTreeConnection.Mode.label;
 									}
-									list.Add(new FloatMenuOption(t.LabelCap + " (" + str + ")", delegate()
+									list.Add(new FloatMenuOption(CS_0024_003C_003E8__locals14.t.LabelCap + " (" + text + ")", delegate
 									{
-										CameraJumper.TryJumpAndSelect(t, CameraJumper.MovementMode.Pan);
-									}, t.def, null, false, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0, null));
+										CameraJumper.TryJumpAndSelect(CS_0024_003C_003E8__locals14.t);
+									}, CS_0024_003C_003E8__locals14.t.def, null, forceBasicStyle: false, MenuOptionPriority.Default, null, null, 0f, null, null, playSelectionSound: true, 0, null));
 								}
-								if (list.Any<FloatMenuOption>())
+								if (list.Any())
 								{
 									Find.WindowStack.Add(new FloatMenu(list));
 								}
 							}
 						}
 					};
+					_003C_003E1__state = 1;
+					return true;
 				}
-				else if (this.pawn.Faction == Faction.OfPlayer && this.pawn.RaceProps.Dryad)
+				if (CS_0024_003C_003E8__locals19.pawn.Faction == Faction.OfPlayer && CS_0024_003C_003E8__locals19.pawn.RaceProps.Dryad)
 				{
-					yield return new Command_Toggle
+					_003C_003E2__current = new Command_Toggle
 					{
 						defaultLabel = "CommandHealInHealingPod".Translate(),
 						defaultDesc = "CommandHealInHealingPodDesc".Translate(ThingDefOf.DryadHealingPod.GetCompProperties<CompProperties_DryadCocoon>().daysToComplete.Named("DAYS")),
 						icon = Widgets.GetIconFor(ThingDefOf.DryadHealingPod, null, null, null),
-						isActive = (() => this.pawn.mindState.returnToHealingPod),
-						toggleAction = delegate()
+						isActive = () => CS_0024_003C_003E8__locals19.pawn.mindState.returnToHealingPod,
+						toggleAction = delegate
 						{
-							this.pawn.mindState.returnToHealingPod = !this.pawn.mindState.returnToHealingPod;
+							CS_0024_003C_003E8__locals19.pawn.mindState.returnToHealingPod = !CS_0024_003C_003E8__locals19.pawn.mindState.returnToHealingPod;
 						}
 					};
+					_003C_003E1__state = 2;
+					return true;
 				}
+				break;
+			case 1:
+				_003C_003E1__state = -1;
+				break;
+			case 2:
+				_003C_003E1__state = -1;
+				break;
 			}
-			yield break;
+			return false;
 		}
 
-		// Token: 0x0600CC00 RID: 52224 RVA: 0x003BC4A0 File Offset: 0x003BA6A0
-		private void DrawConnectionLines()
+		bool IEnumerator.MoveNext()
 		{
-			foreach (Thing t in this.ConnectedThings)
-			{
-				this.DrawConnectionLine(t);
-			}
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0600CC01 RID: 52225 RVA: 0x003BC4F4 File Offset: 0x003BA6F4
-		public void DrawConnectionLine(Thing t)
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			if (t.Spawned && t.Map == this.pawn.Map)
-			{
-				GenDraw.DrawLineBetween(this.pawn.TrueCenter(), t.TrueCenter(), SimpleColor.Orange, 0.2f);
-			}
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x0600CC02 RID: 52226 RVA: 0x003BC530 File Offset: 0x003BA730
-		public void ExposeData()
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
 		{
-			Scribe_Collections.Look<Thing>(ref this.connectedThings, "connectedThings", LookMode.Reference, Array.Empty<object>());
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+			_003CGetGizmos_003Ed__10 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				this.connectedThings.RemoveAll((Thing x) => x == null || x.Destroyed);
+				_003C_003E1__state = 0;
+				result = this;
 			}
+			else
+			{
+				result = new _003CGetGizmos_003Ed__10(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
 		}
 
-		// Token: 0x04008B12 RID: 35602
-		private Pawn pawn;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x04008B13 RID: 35603
-		private List<Thing> connectedThings = new List<Thing>();
+	private Pawn pawn;
+
+	private List<Thing> connectedThings = new List<Thing>();
+
+	public List<Thing> ConnectedThings => connectedThings;
+
+	public Pawn_ConnectionsTracker()
+	{
+	}
+
+	public Pawn_ConnectionsTracker(Pawn pawn)
+	{
+		this.pawn = pawn;
+	}
+
+	public void ConnectTo(Thing thing)
+	{
+		connectedThings.Add(thing);
+	}
+
+	public void Notify_PawnKilled()
+	{
+		for (int num = connectedThings.Count - 1; num >= 0; num--)
+		{
+			connectedThings[num].TryGetComp<CompTreeConnection>()?.Notify_PawnDied(pawn);
+			connectedThings.RemoveAt(num);
+		}
+	}
+
+	public void Notify_ConnectedThingDestroyed(Thing thing)
+	{
+		if (connectedThings.Remove(thing) && pawn.needs?.mood?.thoughts?.memories != null)
+		{
+			pawn.needs.mood.thoughts.memories.TryGainMemory(ThoughtDefOf.ConnectedTreeDied);
+		}
+	}
+
+	public void Notify_ConnectedThingLeftBehind(Thing thing)
+	{
+		connectedThings.Remove(thing);
+	}
+
+	[IteratorStateMachine(typeof(_003CGetGizmos_003Ed__10))]
+	public IEnumerable<Gizmo> GetGizmos()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetGizmos_003Ed__10(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	private void DrawConnectionLines()
+	{
+		foreach (Thing connectedThing in ConnectedThings)
+		{
+			DrawConnectionLine(connectedThing);
+		}
+	}
+
+	public void DrawConnectionLine(Thing t)
+	{
+		if (t.Spawned && t.Map == pawn.Map)
+		{
+			GenDraw.DrawLineBetween(pawn.TrueCenter(), t.TrueCenter(), SimpleColor.Orange);
+		}
+	}
+
+	public void ExposeData()
+	{
+		Scribe_Collections.Look(ref connectedThings, "connectedThings", LookMode.Reference);
+		if (Scribe.mode == LoadSaveMode.PostLoadInit)
+		{
+			connectedThings.RemoveAll((Thing x) => x?.Destroyed ?? true);
+		}
 	}
 }

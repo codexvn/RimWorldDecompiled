@@ -1,3048 +1,4210 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using RimWorld;
 using UnityEngine;
 using Verse.AI;
 
-namespace Verse
+namespace Verse;
+
+public class ThingDef : BuildableDef
 {
-	// Token: 0x02000301 RID: 769
-	public class ThingDef : BuildableDef
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass401_0
 	{
-		// Token: 0x17000367 RID: 871
-		// (get) Token: 0x060012C9 RID: 4809 RVA: 0x0005703E File Offset: 0x0005523E
-		public bool EverHaulable
+		public StatModifier statBase;
+
+		internal bool _003CConfigErrors_003Eb__4(StatModifier st)
 		{
+			return st.stat == statBase.stat;
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass401_1
+	{
+		public ThingCategoryDef cat;
+
+		internal bool _003CConfigErrors_003Eb__5(ThingCategoryDef c)
+		{
+			return c == cat;
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass401_2
+	{
+		public DamageMultiplier mult;
+
+		internal bool _003CConfigErrors_003Eb__6(DamageMultiplier m)
+		{
+			return m.damageDef == mult.damageDef;
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass401_3
+	{
+		public int i;
+
+		public ThingDef _003C_003E4__this;
+
+		internal bool _003CConfigErrors_003Eb__7(BodyPartRecord part)
+		{
+			return part.groups.Contains(_003C_003E4__this.tools[i].linkedBodyPartsGroup);
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass401_4
+	{
+		public Tool lhs;
+
+		internal bool _003CConfigErrors_003Eb__9(Tool rhs)
+		{
+			if (lhs != rhs)
+			{
+				return lhs.id == rhs.id;
+			}
+			return false;
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass407_0
+	{
+		public ThingDef p;
+
+		internal bool _003CSpecialDisplayStats_003Eb__9(Dialog_InfoCard.Hyperlink x)
+		{
+			return x.def == p;
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__401 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public ThingDef _003C_003E4__this;
+
+		private _003C_003Ec__DisplayClass401_3 _003C_003E8__1;
+
+		private IEnumerator<string> _003C_003E7__wrap1;
+
+		private List<StatModifier>.Enumerator _003C_003E7__wrap2;
+
+		private List<ThingDefCountClass>.Enumerator _003C_003E7__wrap3;
+
+		private List<DamageMultiplier>.Enumerator _003C_003E7__wrap4;
+
+		private int _003Ci_003E5__6;
+
+		private List<Tool>.Enumerator _003C_003E7__wrap6;
+
+		private List<ThingStyleChance>.Enumerator _003C_003E7__wrap7;
+
+		string IEnumerator<string>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				return this.alwaysHaulable || this.designateHaulable;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17000368 RID: 872
-		// (get) Token: 0x060012CA RID: 4810 RVA: 0x00057050 File Offset: 0x00055250
-		public bool EverPollutable
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return !this.building.isNaturalRock;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17000369 RID: 873
-		// (get) Token: 0x060012CB RID: 4811 RVA: 0x00057060 File Offset: 0x00055260
-		public float VolumePerUnit
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__401(int _003C_003E1__state)
 		{
-			get
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			switch (num)
 			{
-				if (this.smallVolume)
+			case -3:
+			case 1:
+				try
 				{
-					return 0.1f;
 				}
-				return 1f;
-			}
-		}
-
-		// Token: 0x1700036A RID: 874
-		// (get) Token: 0x060012CC RID: 4812 RVA: 0x00057075 File Offset: 0x00055275
-		public override IntVec2 Size
-		{
-			get
-			{
-				return this.size;
-			}
-		}
-
-		// Token: 0x1700036B RID: 875
-		// (get) Token: 0x060012CD RID: 4813 RVA: 0x0005707D File Offset: 0x0005527D
-		public bool DiscardOnDestroyed
-		{
-			get
-			{
-				return this.race == null;
-			}
-		}
-
-		// Token: 0x1700036C RID: 876
-		// (get) Token: 0x060012CE RID: 4814 RVA: 0x00057088 File Offset: 0x00055288
-		public int BaseMaxHitPoints
-		{
-			get
-			{
-				return Mathf.RoundToInt(this.GetStatValueAbstract(StatDefOf.MaxHitPoints, null));
-			}
-		}
-
-		// Token: 0x1700036D RID: 877
-		// (get) Token: 0x060012CF RID: 4815 RVA: 0x0005709B File Offset: 0x0005529B
-		public float BaseFlammability
-		{
-			get
-			{
-				return this.GetStatValueAbstract(StatDefOf.Flammability, null);
-			}
-		}
-
-		// Token: 0x1700036E RID: 878
-		// (get) Token: 0x060012D0 RID: 4816 RVA: 0x000570A9 File Offset: 0x000552A9
-		// (set) Token: 0x060012D1 RID: 4817 RVA: 0x000570B7 File Offset: 0x000552B7
-		public float BaseMarketValue
-		{
-			get
-			{
-				return this.GetStatValueAbstract(StatDefOf.MarketValue, null);
-			}
-			set
-			{
-				this.SetStatBaseValue(StatDefOf.MarketValue, value);
-			}
-		}
-
-		// Token: 0x1700036F RID: 879
-		// (get) Token: 0x060012D2 RID: 4818 RVA: 0x000570C5 File Offset: 0x000552C5
-		public float BaseMass
-		{
-			get
-			{
-				return this.GetStatValueAbstract(StatDefOf.Mass, null);
-			}
-		}
-
-		// Token: 0x17000370 RID: 880
-		// (get) Token: 0x060012D3 RID: 4819 RVA: 0x000570D4 File Offset: 0x000552D4
-		public int ArchonexusMaxAllowedCount
-		{
-			get
-			{
-				if (this.allowedArchonexusCount == -1)
+				finally
 				{
-					return Mathf.Min(new int[]
+					_003C_003Em__Finally1();
+				}
+				break;
+			case -4:
+			case 4:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally2();
+				}
+				break;
+			case -5:
+			case 5:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally3();
+				}
+				break;
+			case -6:
+			case 6:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally4();
+				}
+				break;
+			case -7:
+			case 13:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally5();
+				}
+				break;
+			case -8:
+			case 21:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally6();
+				}
+				break;
+			case -9:
+			case 40:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally7();
+				}
+				break;
+			case -10:
+			case 41:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally8();
+				}
+				break;
+			case -11:
+			case 43:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally9();
+				}
+				break;
+			case -12:
+			case 44:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally10();
+				}
+				break;
+			case -13:
+			case 45:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally11();
+				}
+				break;
+			case -14:
+			case 48:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally12();
+				}
+				break;
+			case -15:
+			case 49:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally13();
+				}
+				break;
+			case -17:
+			case -16:
+			case 51:
+				try
+				{
+					if (num == -17 || num == 51)
 					{
-						this.stackLimit,
-						25,
-						(this.BaseMass > 0f) ? ((int)(5f / this.BaseMass)) : 0,
-						(this.BaseMarketValue > 0f) ? ((int)(2000f / this.BaseMarketValue)) : 0
+						try
+						{
+						}
+						finally
+						{
+							_003C_003Em__Finally15();
+						}
+					}
+				}
+				finally
+				{
+					_003C_003Em__Finally14();
+				}
+				break;
+			case -18:
+			case 52:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally16();
+				}
+				break;
+			}
+			_003C_003E8__1 = null;
+			_003C_003E7__wrap1 = null;
+			_003C_003E7__wrap2 = default(List<StatModifier>.Enumerator);
+			_003C_003E7__wrap3 = default(List<ThingDefCountClass>.Enumerator);
+			_003C_003E7__wrap4 = default(List<DamageMultiplier>.Enumerator);
+			_003C_003E7__wrap6 = default(List<Tool>.Enumerator);
+			_003C_003E7__wrap7 = default(List<ThingStyleChance>.Enumerator);
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				ThingDef CS_0024_003C_003E8__locals164 = _003C_003E4__this;
+				ThingCategoryDef thingCategoryDef;
+				int num2;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((BuildableDef)CS_0024_003C_003E8__locals164).ConfigErrors().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_014c;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_014c;
+				case 2:
+					_003C_003E1__state = -1;
+					goto IL_019d;
+				case 3:
+					_003C_003E1__state = -1;
+					goto IL_0215;
+				case 4:
+					_003C_003E1__state = -4;
+					goto IL_0269;
+				case 5:
+					_003C_003E1__state = -5;
+					goto IL_02d7;
+				case 6:
+					_003C_003E1__state = -6;
+					goto IL_038e;
+				case 7:
+					_003C_003E1__state = -1;
+					goto IL_0405;
+				case 8:
+					_003C_003E1__state = -1;
+					goto IL_045a;
+				case 9:
+					_003C_003E1__state = -1;
+					goto IL_049a;
+				case 10:
+					_003C_003E1__state = -1;
+					goto IL_04c9;
+				case 11:
+					_003C_003E1__state = -1;
+					goto IL_050f;
+				case 12:
+					_003C_003E1__state = -1;
+					goto IL_0549;
+				case 13:
+					_003C_003E1__state = -7;
+					goto IL_05c4;
+				case 14:
+					_003C_003E1__state = -1;
+					goto IL_063d;
+				case 15:
+					_003C_003E1__state = -1;
+					goto IL_0670;
+				case 16:
+					_003C_003E1__state = -1;
+					goto IL_06a9;
+				case 17:
+					_003C_003E1__state = -1;
+					goto IL_06f6;
+				case 18:
+					_003C_003E1__state = -1;
+					goto IL_073b;
+				case 19:
+					_003C_003E1__state = -1;
+					goto IL_0782;
+				case 20:
+					_003C_003E1__state = -1;
+					goto IL_07b4;
+				case 21:
+					_003C_003E1__state = -8;
+					goto IL_085f;
+				case 22:
+					_003C_003E1__state = -1;
+					goto IL_08a3;
+				case 23:
+					_003C_003E1__state = -1;
+					goto IL_08d4;
+				case 24:
+					_003C_003E1__state = -1;
+					goto IL_090a;
+				case 25:
+					_003C_003E1__state = -1;
+					goto IL_0949;
+				case 26:
+					_003C_003E1__state = -1;
+					goto IL_0980;
+				case 27:
+					_003C_003E1__state = -1;
+					goto IL_09c4;
+				case 28:
+					_003C_003E1__state = -1;
+					goto IL_09f5;
+				case 29:
+					_003C_003E1__state = -1;
+					goto IL_0a50;
+				case 30:
+					_003C_003E1__state = -1;
+					goto IL_0a93;
+				case 31:
+					_003C_003E1__state = -1;
+					goto IL_0ac9;
+				case 32:
+					_003C_003E1__state = -1;
+					goto IL_0b08;
+				case 33:
+					_003C_003E1__state = -1;
+					goto IL_0b94;
+				case 34:
+					_003C_003E1__state = -1;
+					goto IL_0bd0;
+				case 35:
+					_003C_003E1__state = -1;
+					goto IL_0c17;
+				case 36:
+					_003C_003E1__state = -1;
+					goto IL_0c59;
+				case 37:
+					_003C_003E1__state = -1;
+					goto IL_0c8a;
+				case 38:
+					_003C_003E1__state = -1;
+					goto IL_0cc8;
+				case 39:
+					_003C_003E1__state = -1;
+					goto IL_0cff;
+				case 40:
+					_003C_003E1__state = -9;
+					goto IL_0daa;
+				case 41:
+					_003C_003E1__state = -10;
+					goto IL_0e44;
+				case 42:
+					_003C_003E1__state = -1;
+					goto IL_0ea2;
+				case 43:
+					_003C_003E1__state = -11;
+					goto IL_0ef7;
+				case 44:
+					_003C_003E1__state = -12;
+					goto IL_0f80;
+				case 45:
+					_003C_003E1__state = -13;
+					goto IL_101a;
+				case 46:
+					_003C_003E1__state = -1;
+					goto IL_1150;
+				case 47:
+					_003C_003E1__state = -1;
+					goto IL_11cf;
+				case 48:
+					_003C_003E1__state = -14;
+					goto IL_1223;
+				case 49:
+					_003C_003E1__state = -15;
+					goto IL_1291;
+				case 50:
+					_003C_003E1__state = -1;
+					goto IL_1305;
+				case 51:
+					_003C_003E1__state = -17;
+					goto IL_1375;
+				case 52:
+					_003C_003E1__state = -18;
+					goto IL_1412;
+				case 53:
+					_003C_003E1__state = -1;
+					goto IL_147e;
+				case 54:
+					_003C_003E1__state = -1;
+					goto IL_14b5;
+				case 55:
+					_003C_003E1__state = -1;
+					goto IL_14e8;
+				case 56:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_014c:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (CS_0024_003C_003E8__locals164.category != ThingCategory.Ethereal && CS_0024_003C_003E8__locals164.label.NullOrEmpty())
+					{
+						_003C_003E2__current = "no label";
+						_003C_003E1__state = 2;
+						return true;
+					}
+					goto IL_019d;
+					IL_116c:
+					if (_003C_003E8__1.i < CS_0024_003C_003E8__locals164.tools.Count)
+					{
+						if (CS_0024_003C_003E8__locals164.tools[_003C_003E8__1.i].linkedBodyPartsGroup != null && !CS_0024_003C_003E8__locals164.race.body.AllParts.Any((BodyPartRecord part) => part.groups.Contains(_003C_003E8__1._003C_003E4__this.tools[_003C_003E8__1.i].linkedBodyPartsGroup)))
+						{
+							_003C_003E2__current = "has tool with linkedBodyPartsGroup " + CS_0024_003C_003E8__locals164.tools[_003C_003E8__1.i].linkedBodyPartsGroup?.ToString() + " but body " + CS_0024_003C_003E8__locals164.race.body?.ToString() + " has no parts with that group.";
+							_003C_003E1__state = 46;
+							return true;
+						}
+						goto IL_1150;
+					}
+					_003C_003E8__1 = null;
+					goto IL_118e;
+					IL_14e8:
+					if (CS_0024_003C_003E8__locals164.Fillage != FillCategory.Full && CS_0024_003C_003E8__locals164.passability == Traversability.Impassable && !CS_0024_003C_003E8__locals164.IsDoor && CS_0024_003C_003E8__locals164.BuildableByPlayer && !CS_0024_003C_003E8__locals164.disableImpassableShotOverConfigError)
+					{
+						_003C_003E2__current = "impassable, player-buildable building that can be shot/seen over.";
+						_003C_003E1__state = 56;
+						return true;
+					}
+					break;
+					IL_019d:
+					if (CS_0024_003C_003E8__locals164.category == ThingCategory.Building && !CS_0024_003C_003E8__locals164.IsFrame && CS_0024_003C_003E8__locals164.building.IsDeconstructible && CS_0024_003C_003E8__locals164.thingClass != null && typeof(Building).IsSubclassOf(CS_0024_003C_003E8__locals164.thingClass))
+					{
+						_003C_003E2__current = "has building category and is marked as deconstructible, but thing class is not a subclass of building (" + CS_0024_003C_003E8__locals164.thingClass.Name + ")";
+						_003C_003E1__state = 3;
+						return true;
+					}
+					goto IL_0215;
+					IL_085f:
+					_003C_003Em__Finally6();
+					_003C_003E7__wrap4 = default(List<DamageMultiplier>.Enumerator);
+					goto IL_0871;
+					IL_0871:
+					if (CS_0024_003C_003E8__locals164.Fillage == FillCategory.Full && !CS_0024_003C_003E8__locals164.IsEdifice())
+					{
+						_003C_003E2__current = "fillPercent is 1.00 but is not edifice";
+						_003C_003E1__state = 22;
+						return true;
+					}
+					goto IL_08a3;
+					IL_123d:
+					if (CS_0024_003C_003E8__locals164.plant != null)
+					{
+						_003C_003E7__wrap1 = CS_0024_003C_003E8__locals164.plant.ConfigErrors().GetEnumerator();
+						_003C_003E1__state = -15;
+						goto IL_1291;
+					}
+					goto IL_12ab;
+					IL_14b5:
+					if (CS_0024_003C_003E8__locals164.hasInteractionCell && !CS_0024_003C_003E8__locals164.multipleInteractionCellOffsets.NullOrEmpty())
+					{
+						_003C_003E2__current = "both single and multiple interaction cells are defined, it should be one or the other";
+						_003C_003E1__state = 55;
+						return true;
+					}
+					goto IL_14e8;
+					IL_08a3:
+					if (CS_0024_003C_003E8__locals164.MadeFromStuff && CS_0024_003C_003E8__locals164.constructEffect != null)
+					{
+						_003C_003E2__current = "madeFromStuff but has a defined constructEffect (which will always be overridden by stuff's construct animation).";
+						_003C_003E1__state = 23;
+						return true;
+					}
+					goto IL_08d4;
+					IL_0215:
+					if (CS_0024_003C_003E8__locals164.graphicData != null)
+					{
+						_003C_003E7__wrap1 = CS_0024_003C_003E8__locals164.graphicData.ConfigErrors(CS_0024_003C_003E8__locals164).GetEnumerator();
+						_003C_003E1__state = -4;
+						goto IL_0269;
+					}
+					goto IL_0283;
+					IL_0b94:
+					if (CS_0024_003C_003E8__locals164.ingestible == null && CS_0024_003C_003E8__locals164.GetStatValueAbstract(StatDefOf.Nutrition) != 0f)
+					{
+						_003C_003E2__current = "has nutrition but ingestible properties are null";
+						_003C_003E1__state = 34;
+						return true;
+					}
+					goto IL_0bd0;
+					IL_0269:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current2 = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current2;
+						_003C_003E1__state = 4;
+						return true;
+					}
+					_003C_003Em__Finally2();
+					_003C_003E7__wrap1 = null;
+					goto IL_0283;
+					IL_1375:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current3 = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current3;
+						_003C_003E1__state = 51;
+						return true;
+					}
+					_003C_003Em__Finally15();
+					_003C_003E7__wrap1 = null;
+					goto IL_138f;
+					IL_08d4:
+					if (CS_0024_003C_003E8__locals164.MadeFromStuff && CS_0024_003C_003E8__locals164.stuffCategories.NullOrEmpty())
+					{
+						_003C_003E2__current = "madeFromStuff but has no stuffCategories.";
+						_003C_003E1__state = 24;
+						return true;
+					}
+					goto IL_090a;
+					IL_0283:
+					if (CS_0024_003C_003E8__locals164.projectile != null)
+					{
+						_003C_003E7__wrap1 = CS_0024_003C_003E8__locals164.projectile.ConfigErrors(CS_0024_003C_003E8__locals164).GetEnumerator();
+						_003C_003E1__state = -5;
+						goto IL_02d7;
+					}
+					goto IL_02f1;
+					IL_0ea2:
+					if (CS_0024_003C_003E8__locals164.apparel != null)
+					{
+						_003C_003E7__wrap1 = CS_0024_003C_003E8__locals164.apparel.ConfigErrors(CS_0024_003C_003E8__locals164).GetEnumerator();
+						_003C_003E1__state = -11;
+						goto IL_0ef7;
+					}
+					goto IL_0f11;
+					IL_02d7:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current4 = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current4;
+						_003C_003E1__state = 5;
+						return true;
+					}
+					_003C_003Em__Finally3();
+					_003C_003E7__wrap1 = null;
+					goto IL_02f1;
+					IL_0bd0:
+					if (CS_0024_003C_003E8__locals164.BaseFlammability != 0f && !CS_0024_003C_003E8__locals164.useHitPoints && CS_0024_003C_003E8__locals164.category != ThingCategory.Pawn && !CS_0024_003C_003E8__locals164.destroyOnDrop)
+					{
+						_003C_003E2__current = "flammable but has no hitpoints (will burn indefinitely)";
+						_003C_003E1__state = 35;
+						return true;
+					}
+					goto IL_0c17;
+					IL_090a:
+					if (CS_0024_003C_003E8__locals164.costList.NullOrEmpty() && CS_0024_003C_003E8__locals164.costStuffCount <= 0 && CS_0024_003C_003E8__locals164.recipeMaker != null)
+					{
+						_003C_003E2__current = "has a recipeMaker but no costList or costStuffCount.";
+						_003C_003E1__state = 25;
+						return true;
+					}
+					goto IL_0949;
+					IL_02f1:
+					if (CS_0024_003C_003E8__locals164.statBases != null)
+					{
+						_003C_003E7__wrap2 = CS_0024_003C_003E8__locals164.statBases.GetEnumerator();
+						_003C_003E1__state = -6;
+						goto IL_038e;
+					}
+					goto IL_03b0;
+					IL_13ae:
+					if (!CS_0024_003C_003E8__locals164.randomStyle.NullOrEmpty())
+					{
+						_003C_003E7__wrap7 = CS_0024_003C_003E8__locals164.randomStyle.GetEnumerator();
+						_003C_003E1__state = -18;
+						goto IL_1412;
+					}
+					goto IL_147e;
+					IL_038e:
+					while (_003C_003E7__wrap2.MoveNext())
+					{
+						_003C_003Ec__DisplayClass401_0 CS_0024_003C_003E8__locals55 = new _003C_003Ec__DisplayClass401_0
+						{
+							statBase = _003C_003E7__wrap2.Current
+						};
+						if (CS_0024_003C_003E8__locals164.statBases.Count((StatModifier st) => st.stat == CS_0024_003C_003E8__locals55.statBase.stat) > 1)
+						{
+							_003C_003E2__current = "defines the stat base " + CS_0024_003C_003E8__locals55.statBase.stat?.ToString() + " more than once.";
+							_003C_003E1__state = 6;
+							return true;
+						}
+					}
+					_003C_003Em__Finally4();
+					_003C_003E7__wrap2 = default(List<StatModifier>.Enumerator);
+					goto IL_03b0;
+					IL_0ef7:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current5 = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current5;
+						_003C_003E1__state = 43;
+						return true;
+					}
+					_003C_003Em__Finally9();
+					_003C_003E7__wrap1 = null;
+					goto IL_0f11;
+					IL_03b0:
+					if (!BeautyUtility.BeautyRelevant(CS_0024_003C_003E8__locals164.category) && CS_0024_003C_003E8__locals164.StatBaseDefined(StatDefOf.Beauty))
+					{
+						_003C_003E2__current = "Beauty stat base is defined, but Things of category " + CS_0024_003C_003E8__locals164.category.ToString() + " cannot have beauty.";
+						_003C_003E1__state = 7;
+						return true;
+					}
+					goto IL_0405;
+					IL_1291:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current6 = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current6;
+						_003C_003E1__state = 49;
+						return true;
+					}
+					_003C_003Em__Finally13();
+					_003C_003E7__wrap1 = null;
+					goto IL_12ab;
+					IL_0949:
+					if (CS_0024_003C_003E8__locals164.costStuffCount > 0 && CS_0024_003C_003E8__locals164.stuffCategories.NullOrEmpty())
+					{
+						_003C_003E2__current = "has costStuffCount but no stuffCategories.";
+						_003C_003E1__state = 26;
+						return true;
+					}
+					goto IL_0980;
+					IL_0405:
+					if (!BeautyUtility.BeautyRelevant(CS_0024_003C_003E8__locals164.category) && CS_0024_003C_003E8__locals164.StatBaseDefined(StatDefOf.BeautyOutdoors))
+					{
+						_003C_003E2__current = "BeautyOutdoors stat base is defined, but Things of category " + CS_0024_003C_003E8__locals164.category.ToString() + " cannot have beauty.";
+						_003C_003E1__state = 8;
+						return true;
+					}
+					goto IL_045a;
+					IL_147e:
+					if (CS_0024_003C_003E8__locals164.relicChance > 0f && CS_0024_003C_003E8__locals164.category != ThingCategory.Item)
+					{
+						_003C_003E2__current = "relic chance > 0 but category != item";
+						_003C_003E1__state = 54;
+						return true;
+					}
+					goto IL_14b5;
+					IL_0c17:
+					if (CS_0024_003C_003E8__locals164.graphicData?.shadowData != null && CS_0024_003C_003E8__locals164.staticSunShadowHeight > 0f)
+					{
+						_003C_003E2__current = "graphicData defines a shadowInfo but staticSunShadowHeight > 0";
+						_003C_003E1__state = 36;
+						return true;
+					}
+					goto IL_0c59;
+					IL_045a:
+					if (char.IsNumber(CS_0024_003C_003E8__locals164.defName[CS_0024_003C_003E8__locals164.defName.Length - 1]))
+					{
+						_003C_003E2__current = "ends with a numerical digit, which is not allowed on ThingDefs.";
+						_003C_003E1__state = 9;
+						return true;
+					}
+					goto IL_049a;
+					IL_0980:
+					if (CS_0024_003C_003E8__locals164.GetStatValueAbstract(StatDefOf.DeteriorationRate) > 1E-05f && !CS_0024_003C_003E8__locals164.CanEverDeteriorate && !CS_0024_003C_003E8__locals164.destroyOnDrop)
+					{
+						_003C_003E2__current = "has >0 DeteriorationRate but can't deteriorate.";
+						_003C_003E1__state = 27;
+						return true;
+					}
+					goto IL_09c4;
+					IL_049a:
+					if (CS_0024_003C_003E8__locals164.thingClass == null)
+					{
+						_003C_003E2__current = "has null thingClass.";
+						_003C_003E1__state = 10;
+						return true;
+					}
+					goto IL_04c9;
+					IL_1412:
+					while (_003C_003E7__wrap7.MoveNext())
+					{
+						if (_003C_003E7__wrap7.Current.Chance <= 0f)
+						{
+							_003C_003E2__current = "style chance <= 0.";
+							_003C_003E1__state = 52;
+							return true;
+						}
+					}
+					_003C_003Em__Finally16();
+					_003C_003E7__wrap7 = default(List<ThingStyleChance>.Enumerator);
+					if (!CS_0024_003C_003E8__locals164.comps.Any((CompProperties c) => c.compClass == typeof(CompStyleable)))
+					{
+						_003C_003E2__current = "random style assigned, but missing CompStyleable!";
+						_003C_003E1__state = 53;
+						return true;
+					}
+					goto IL_147e;
+					IL_04c9:
+					if (CS_0024_003C_003E8__locals164.comps.Count > 0 && !typeof(ThingWithComps).IsAssignableFrom(CS_0024_003C_003E8__locals164.thingClass))
+					{
+						_003C_003E2__current = "has components but it's thingClass is not a ThingWithComps";
+						_003C_003E1__state = 11;
+						return true;
+					}
+					goto IL_050f;
+					IL_0fac:
+					if (_003Ci_003E5__6 < CS_0024_003C_003E8__locals164.comps.Count)
+					{
+						_003C_003E7__wrap1 = CS_0024_003C_003E8__locals164.comps[_003Ci_003E5__6].ConfigErrors(CS_0024_003C_003E8__locals164).GetEnumerator();
+						_003C_003E1__state = -12;
+						goto IL_0f80;
+					}
+					goto IL_0fc2;
+					IL_0f11:
+					if (CS_0024_003C_003E8__locals164.comps != null)
+					{
+						_003Ci_003E5__6 = 0;
+						goto IL_0fac;
+					}
+					goto IL_0fc2;
+					IL_050f:
+					if (CS_0024_003C_003E8__locals164.ConnectToPower && CS_0024_003C_003E8__locals164.drawerType == DrawerType.RealtimeOnly && CS_0024_003C_003E8__locals164.IsFrame)
+					{
+						_003C_003E2__current = "connects to power but does not add to map mesh. Will not create wire meshes.";
+						_003C_003E1__state = 12;
+						return true;
+					}
+					goto IL_0549;
+					IL_09c4:
+					if (CS_0024_003C_003E8__locals164.smeltProducts != null && !CS_0024_003C_003E8__locals164.smeltable)
+					{
+						_003C_003E2__current = "has smeltProducts but has smeltable=false";
+						_003C_003E1__state = 28;
+						return true;
+					}
+					goto IL_09f5;
+					IL_12ab:
+					if (CS_0024_003C_003E8__locals164.tools != null)
+					{
+						Tool tool = CS_0024_003C_003E8__locals164.tools.SelectMany(delegate(Tool lhs)
+						{
+							_003C_003Ec__DisplayClass401_4 CS_0024_003C_003E8__locals91 = new _003C_003Ec__DisplayClass401_4
+							{
+								lhs = lhs
+							};
+							return CS_0024_003C_003E8__locals164.tools.Where((Tool rhs) => CS_0024_003C_003E8__locals91.lhs != rhs && CS_0024_003C_003E8__locals91.lhs.id == rhs.id);
+						}).FirstOrDefault();
+						if (tool != null)
+						{
+							_003C_003E2__current = "duplicate thingdef tool id " + tool.id;
+							_003C_003E1__state = 50;
+							return true;
+						}
+						goto IL_1305;
+					}
+					goto IL_13ae;
+					IL_0f80:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current7 = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current7;
+						_003C_003E1__state = 44;
+						return true;
+					}
+					_003C_003Em__Finally10();
+					_003C_003E7__wrap1 = null;
+					_003Ci_003E5__6++;
+					goto IL_0fac;
+					IL_0549:
+					if (CS_0024_003C_003E8__locals164.costList != null)
+					{
+						_003C_003E7__wrap3 = CS_0024_003C_003E8__locals164.costList.GetEnumerator();
+						_003C_003E1__state = -7;
+						goto IL_05c4;
+					}
+					goto IL_05e3;
+					IL_09f5:
+					if (CS_0024_003C_003E8__locals164.smeltable && CS_0024_003C_003E8__locals164.smeltProducts.NullOrEmpty() && CS_0024_003C_003E8__locals164.CostList.NullOrEmpty() && !CS_0024_003C_003E8__locals164.IsStuff && !CS_0024_003C_003E8__locals164.MadeFromStuff && !CS_0024_003C_003E8__locals164.destroyOnDrop)
+					{
+						_003C_003E2__current = "is smeltable but does not give anything for smelting.";
+						_003C_003E1__state = 29;
+						return true;
+					}
+					goto IL_0a50;
+					IL_05c4:
+					while (_003C_003E7__wrap3.MoveNext())
+					{
+						ThingDefCountClass current8 = _003C_003E7__wrap3.Current;
+						if (current8.count == 0)
+						{
+							_003C_003E2__current = "cost in " + current8.thingDef?.ToString() + " is zero.";
+							_003C_003E1__state = 13;
+							return true;
+						}
+					}
+					_003C_003Em__Finally5();
+					_003C_003E7__wrap3 = default(List<ThingDefCountClass>.Enumerator);
+					goto IL_05e3;
+					IL_0c59:
+					if (CS_0024_003C_003E8__locals164.saveCompressible && CS_0024_003C_003E8__locals164.Claimable)
+					{
+						_003C_003E2__current = "claimable item is compressible; faction will be unset after load";
+						_003C_003E1__state = 37;
+						return true;
+					}
+					goto IL_0c8a;
+					IL_05e3:
+					thingCategoryDef = CS_0024_003C_003E8__locals164.thingCategories?.FirstOrDefault(delegate(ThingCategoryDef cat)
+					{
+						_003C_003Ec__DisplayClass401_1 CS_0024_003C_003E8__locals105 = new _003C_003Ec__DisplayClass401_1
+						{
+							cat = cat
+						};
+						return CS_0024_003C_003E8__locals164.thingCategories.Count((ThingCategoryDef c) => c == CS_0024_003C_003E8__locals105.cat) > 1;
 					});
-				}
-				return this.allowedArchonexusCount;
-			}
-		}
-
-		// Token: 0x17000371 RID: 881
-		// (get) Token: 0x060012D4 RID: 4820 RVA: 0x0005714C File Offset: 0x0005534C
-		public bool PlayerAcquirable
-		{
-			get
-			{
-				return !this.destroyOnDrop && (this != ThingDefOf.ReinforcedBarrel || Find.Storyteller == null || !Find.Storyteller.difficulty.classicMortars) && (this.requiresFactionToAcquire == null || Find.World == null || Find.World.factionManager == null || Find.FactionManager.FirstFactionOfDef(this.requiresFactionToAcquire) != null);
-			}
-		}
-
-		// Token: 0x17000372 RID: 882
-		// (get) Token: 0x060012D5 RID: 4821 RVA: 0x000571B8 File Offset: 0x000553B8
-		public bool EverTransmitsPower
-		{
-			get
-			{
-				for (int i = 0; i < this.comps.Count; i++)
-				{
-					CompProperties_Power compProperties_Power = this.comps[i] as CompProperties_Power;
-					if (compProperties_Power != null && compProperties_Power.transmitsPower)
+					if (thingCategoryDef != null)
 					{
+						_003C_003E2__current = "has duplicate thingCategory " + thingCategoryDef?.ToString() + ".";
+						_003C_003E1__state = 14;
 						return true;
 					}
-				}
-				return false;
-			}
-		}
-
-		// Token: 0x17000373 RID: 883
-		// (get) Token: 0x060012D6 RID: 4822 RVA: 0x000571FB File Offset: 0x000553FB
-		public bool Minifiable
-		{
-			get
-			{
-				return this.minifiedDef != null;
-			}
-		}
-
-		// Token: 0x17000374 RID: 884
-		// (get) Token: 0x060012D7 RID: 4823 RVA: 0x00057206 File Offset: 0x00055406
-		public bool HasThingIDNumber
-		{
-			get
-			{
-				return this.category != ThingCategory.Mote;
-			}
-		}
-
-		// Token: 0x17000375 RID: 885
-		// (get) Token: 0x060012D8 RID: 4824 RVA: 0x00057218 File Offset: 0x00055418
-		public List<RecipeDef> AllRecipes
-		{
-			get
-			{
-				if (this.allRecipesCached == null)
-				{
-					this.allRecipesCached = new List<RecipeDef>();
-					if (this.recipes != null)
+					goto IL_063d;
+					IL_118e:
+					if (CS_0024_003C_003E8__locals164.race.Animal && CS_0024_003C_003E8__locals164.GetStatValueAbstract(StatDefOf.Wildness) < 0f)
 					{
-						for (int i = 0; i < this.recipes.Count; i++)
+						_003C_003E2__current = "is animal but wildness is not defined";
+						_003C_003E1__state = 47;
+						return true;
+					}
+					goto IL_11cf;
+					IL_0c8a:
+					if (CS_0024_003C_003E8__locals164.deepCommonality > 0f != CS_0024_003C_003E8__locals164.deepLumpSizeRange.TrueMax > 0)
+					{
+						_003C_003E2__current = "if deepCommonality or deepLumpSizeRange is set, the other also must be set";
+						_003C_003E1__state = 38;
+						return true;
+					}
+					goto IL_0cc8;
+					IL_1150:
+					num2 = _003C_003E8__1.i;
+					_003C_003E8__1.i = num2 + 1;
+					goto IL_116c;
+					IL_0fc2:
+					if (CS_0024_003C_003E8__locals164.race != null)
+					{
+						_003C_003E7__wrap1 = CS_0024_003C_003E8__locals164.race.ConfigErrors(CS_0024_003C_003E8__locals164).GetEnumerator();
+						_003C_003E1__state = -13;
+						goto IL_101a;
+					}
+					goto IL_11cf;
+					IL_0a50:
+					if (CS_0024_003C_003E8__locals164.equipmentType != 0 && CS_0024_003C_003E8__locals164.verbs.NullOrEmpty() && CS_0024_003C_003E8__locals164.tools.NullOrEmpty())
+					{
+						_003C_003E2__current = "is equipment but has no verbs or tools";
+						_003C_003E1__state = 30;
+						return true;
+					}
+					goto IL_0a93;
+					IL_1305:
+					_003C_003E7__wrap6 = CS_0024_003C_003E8__locals164.tools.GetEnumerator();
+					_003C_003E1__state = -16;
+					goto IL_138f;
+					IL_0cc8:
+					if (CS_0024_003C_003E8__locals164.deepCommonality > 0f && CS_0024_003C_003E8__locals164.deepCountPerPortion <= 0)
+					{
+						_003C_003E2__current = "deepCommonality > 0 but deepCountPerPortion is not set";
+						_003C_003E1__state = 39;
+						return true;
+					}
+					goto IL_0cff;
+					IL_063d:
+					if (CS_0024_003C_003E8__locals164.Fillage == FillCategory.Full && CS_0024_003C_003E8__locals164.category != ThingCategory.Building)
+					{
+						_003C_003E2__current = "gives full cover but is not a building.";
+						_003C_003E1__state = 15;
+						return true;
+					}
+					goto IL_0670;
+					IL_101a:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current9 = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current9;
+						_003C_003E1__state = 45;
+						return true;
+					}
+					_003C_003Em__Finally11();
+					_003C_003E7__wrap1 = null;
+					if (CS_0024_003C_003E8__locals164.race.body != null && CS_0024_003C_003E8__locals164.race != null && CS_0024_003C_003E8__locals164.tools != null)
+					{
+						_003C_003E8__1 = new _003C_003Ec__DisplayClass401_3();
+						_003C_003E8__1._003C_003E4__this = CS_0024_003C_003E8__locals164;
+						_003C_003E8__1.i = 0;
+						goto IL_116c;
+					}
+					goto IL_118e;
+					IL_0cff:
+					if (CS_0024_003C_003E8__locals164.verbs != null)
+					{
+						_003Ci_003E5__6 = 0;
+						goto IL_0dd6;
+					}
+					goto IL_0dec;
+					IL_0670:
+					if (CS_0024_003C_003E8__locals164.equipmentType != 0)
+					{
+						if (CS_0024_003C_003E8__locals164.techLevel == TechLevel.Undefined && !CS_0024_003C_003E8__locals164.destroyOnDrop)
 						{
-							this.allRecipesCached.Add(this.recipes[i]);
+							_003C_003E2__current = "is equipment but has no tech level.";
+							_003C_003E1__state = 16;
+							return true;
 						}
+						goto IL_06a9;
 					}
-					List<RecipeDef> allDefsListForReading = DefDatabase<RecipeDef>.AllDefsListForReading;
-					for (int j = 0; j < allDefsListForReading.Count; j++)
+					goto IL_06f6;
+					IL_0a93:
+					if (CS_0024_003C_003E8__locals164.Minifiable && CS_0024_003C_003E8__locals164.thingCategories.NullOrEmpty())
 					{
-						if (allDefsListForReading[j].recipeUsers != null && allDefsListForReading[j].recipeUsers.Contains(this))
-						{
-							this.allRecipesCached.Add(allDefsListForReading[j]);
-						}
-					}
-				}
-				return this.allRecipesCached;
-			}
-		}
-
-		// Token: 0x17000376 RID: 886
-		// (get) Token: 0x060012D9 RID: 4825 RVA: 0x000572C4 File Offset: 0x000554C4
-		public bool ConnectToPower
-		{
-			get
-			{
-				if (this.EverTransmitsPower)
-				{
-					return false;
-				}
-				for (int i = 0; i < this.comps.Count; i++)
-				{
-					if (this.comps[i].compClass == typeof(CompPowerBattery))
-					{
+						_003C_003E2__current = "is minifiable but not in any thing category";
+						_003C_003E1__state = 31;
 						return true;
 					}
-					if (this.comps[i].compClass == typeof(CompPowerTrader))
+					goto IL_0ac9;
+					IL_138f:
+					if (_003C_003E7__wrap6.MoveNext())
 					{
+						Tool current10 = _003C_003E7__wrap6.Current;
+						_003C_003E7__wrap1 = current10.ConfigErrors().GetEnumerator();
+						_003C_003E1__state = -17;
+						goto IL_1375;
+					}
+					_003C_003Em__Finally14();
+					_003C_003E7__wrap6 = default(List<Tool>.Enumerator);
+					goto IL_13ae;
+					IL_0dd6:
+					if (_003Ci_003E5__6 < CS_0024_003C_003E8__locals164.verbs.Count)
+					{
+						_003C_003E7__wrap1 = CS_0024_003C_003E8__locals164.verbs[_003Ci_003E5__6].ConfigErrors(CS_0024_003C_003E8__locals164).GetEnumerator();
+						_003C_003E1__state = -9;
+						goto IL_0daa;
+					}
+					goto IL_0dec;
+					IL_06a9:
+					if (!CS_0024_003C_003E8__locals164.comps.Any((CompProperties c) => typeof(CompEquippable).IsAssignableFrom(c.compClass)))
+					{
+						_003C_003E2__current = "is equipment but has no CompEquippable";
+						_003C_003E1__state = 17;
 						return true;
 					}
-				}
-				return false;
-			}
-		}
-
-		// Token: 0x17000377 RID: 887
-		// (get) Token: 0x060012DA RID: 4826 RVA: 0x0005733A File Offset: 0x0005553A
-		public bool CoexistsWithFloors
-		{
-			get
-			{
-				return !this.neverOverlapFloors && !this.coversFloor;
-			}
-		}
-
-		// Token: 0x17000378 RID: 888
-		// (get) Token: 0x060012DB RID: 4827 RVA: 0x0005734F File Offset: 0x0005554F
-		public FillCategory Fillage
-		{
-			get
-			{
-				if (this.fillPercent < 0.01f)
-				{
-					return FillCategory.None;
-				}
-				if (this.fillPercent > 0.99f)
-				{
-					return FillCategory.Full;
-				}
-				return FillCategory.Partial;
-			}
-		}
-
-		// Token: 0x17000379 RID: 889
-		// (get) Token: 0x060012DC RID: 4828 RVA: 0x00057370 File Offset: 0x00055570
-		public bool MakeFog
-		{
-			get
-			{
-				return this.Fillage == FillCategory.Full;
-			}
-		}
-
-		// Token: 0x1700037A RID: 890
-		// (get) Token: 0x060012DD RID: 4829 RVA: 0x0005737C File Offset: 0x0005557C
-		public bool CanOverlapZones
-		{
-			get
-			{
-				if (this.building != null && this.building.SupportsPlants)
-				{
-					return false;
-				}
-				if (this.passability == Traversability.Impassable && this.category != ThingCategory.Plant && !this.HasComp(typeof(CompTransporter)))
-				{
-					return false;
-				}
-				if (this.surfaceType >= SurfaceType.Item)
-				{
-					return false;
-				}
-				if (typeof(ISlotGroupParent).IsAssignableFrom(this.thingClass))
-				{
-					return false;
-				}
-				if (!this.canOverlapZones)
-				{
-					return false;
-				}
-				if (this.IsBlueprint || this.IsFrame)
-				{
-					ThingDef thingDef = this.entityDefToBuild as ThingDef;
-					if (thingDef != null)
+					goto IL_06f6;
+					IL_11cf:
+					if (CS_0024_003C_003E8__locals164.ingestible != null)
 					{
-						return thingDef.CanOverlapZones;
+						_003C_003E7__wrap1 = CS_0024_003C_003E8__locals164.ingestible.ConfigErrors().GetEnumerator();
+						_003C_003E1__state = -14;
+						goto IL_1223;
 					}
-				}
-				return true;
-			}
-		}
-
-		// Token: 0x1700037B RID: 891
-		// (get) Token: 0x060012DE RID: 4830 RVA: 0x0005741B File Offset: 0x0005561B
-		public bool CountAsResource
-		{
-			get
-			{
-				return this.resourceReadoutPriority > ResourceCountPriority.Uncounted;
-			}
-		}
-
-		// Token: 0x1700037C RID: 892
-		// (get) Token: 0x060012DF RID: 4831 RVA: 0x00057426 File Offset: 0x00055626
-		public List<VerbProperties> Verbs
-		{
-			get
-			{
-				if (this.verbs != null)
-				{
-					return this.verbs;
-				}
-				return ThingDef.EmptyVerbPropertiesList;
-			}
-		}
-
-		// Token: 0x1700037D RID: 893
-		// (get) Token: 0x060012E0 RID: 4832 RVA: 0x0005743C File Offset: 0x0005563C
-		public bool CanHaveFaction
-		{
-			get
-			{
-				if (this.IsBlueprint || this.IsFrame)
-				{
-					return true;
-				}
-				ThingCategory thingCategory = this.category;
-				return thingCategory == ThingCategory.Pawn || thingCategory == ThingCategory.Building;
-			}
-		}
-
-		// Token: 0x1700037E RID: 894
-		// (get) Token: 0x060012E1 RID: 4833 RVA: 0x00057471 File Offset: 0x00055671
-		public bool Claimable
-		{
-			get
-			{
-				return this.building != null && this.building.claimable && !this.building.isNaturalRock;
-			}
-		}
-
-		// Token: 0x1700037F RID: 895
-		// (get) Token: 0x060012E2 RID: 4834 RVA: 0x00057498 File Offset: 0x00055698
-		public ThingCategoryDef FirstThingCategory
-		{
-			get
-			{
-				if (this.thingCategories.NullOrEmpty<ThingCategoryDef>())
-				{
-					return null;
-				}
-				return this.thingCategories[0];
-			}
-		}
-
-		// Token: 0x17000380 RID: 896
-		// (get) Token: 0x060012E3 RID: 4835 RVA: 0x000574B5 File Offset: 0x000556B5
-		public float MedicineTendXpGainFactor
-		{
-			get
-			{
-				return Mathf.Clamp(this.GetStatValueAbstract(StatDefOf.MedicalPotency, null) * 0.7f, 0.5f, 1f);
-			}
-		}
-
-		// Token: 0x17000381 RID: 897
-		// (get) Token: 0x060012E4 RID: 4836 RVA: 0x000574D8 File Offset: 0x000556D8
-		public bool CanEverDeteriorate
-		{
-			get
-			{
-				return this.useHitPoints && (this.category == ThingCategory.Item || (this.plant != null && this.plant.canDeteriorate));
-			}
-		}
-
-		// Token: 0x17000382 RID: 898
-		// (get) Token: 0x060012E5 RID: 4837 RVA: 0x00057504 File Offset: 0x00055704
-		public bool CanInteractThroughCorners
-		{
-			get
-			{
-				return this.canInteractThroughCorners || (this.category == ThingCategory.Building && this.holdsRoof && (this.building == null || !this.building.isNaturalRock || this.IsSmoothed));
-			}
-		}
-
-		// Token: 0x17000383 RID: 899
-		// (get) Token: 0x060012E6 RID: 4838 RVA: 0x00057550 File Offset: 0x00055750
-		public bool AffectsRegions
-		{
-			get
-			{
-				return this.passability == Traversability.Impassable || this.IsDoor || this.IsFence;
-			}
-		}
-
-		// Token: 0x17000384 RID: 900
-		// (get) Token: 0x060012E7 RID: 4839 RVA: 0x0005756B File Offset: 0x0005576B
-		public bool AffectsReachability
-		{
-			get
-			{
-				return this.AffectsRegions || (this.passability == Traversability.Impassable || this.IsDoor) || TouchPathEndModeUtility.MakesOccupiedCellsAlwaysReachableDiagonally(this);
-			}
-		}
-
-		// Token: 0x17000385 RID: 901
-		// (get) Token: 0x060012E8 RID: 4840 RVA: 0x00057598 File Offset: 0x00055798
-		public string DescriptionDetailed
-		{
-			get
-			{
-				if (this.descriptionDetailedCached == null)
-				{
-					StringBuilder stringBuilder = new StringBuilder();
-					stringBuilder.Append(this.description);
-					if (this.IsApparel)
+					goto IL_123d;
+					IL_0ac9:
+					if (CS_0024_003C_003E8__locals164.category == ThingCategory.Building && !CS_0024_003C_003E8__locals164.Minifiable && !CS_0024_003C_003E8__locals164.thingCategories.NullOrEmpty())
 					{
-						stringBuilder.AppendLine();
-						stringBuilder.AppendLine();
-						stringBuilder.AppendLine(string.Format("{0}: {1}", "Layer".Translate(), this.apparel.GetLayersString()));
-						stringBuilder.Append(string.Format("{0}: {1}", "Covers".Translate(), this.apparel.GetCoveredOuterPartsString(BodyDefOf.Human)));
-						if (this.equippedStatOffsets != null && this.equippedStatOffsets.Count > 0)
+						_003C_003E2__current = "is not minifiable yet has thing categories (could be confusing in thing filters because it can't be moved/stored anyway)";
+						_003C_003E1__state = 32;
+						return true;
+					}
+					goto IL_0b08;
+					IL_0daa:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current11 = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = $"verb {_003Ci_003E5__6}: {current11}";
+						_003C_003E1__state = 40;
+						return true;
+					}
+					_003C_003Em__Finally7();
+					_003C_003E7__wrap1 = null;
+					_003Ci_003E5__6++;
+					goto IL_0dd6;
+					IL_06f6:
+					if (CS_0024_003C_003E8__locals164.thingClass == typeof(Bullet) && CS_0024_003C_003E8__locals164.projectile.damageDef == null)
+					{
+						_003C_003E2__current = " is a bullet but has no damageDef.";
+						_003C_003E1__state = 18;
+						return true;
+					}
+					goto IL_073b;
+					IL_07b4:
+					if (CS_0024_003C_003E8__locals164.damageMultipliers != null)
+					{
+						_003C_003E7__wrap4 = CS_0024_003C_003E8__locals164.damageMultipliers.GetEnumerator();
+						_003C_003E1__state = -8;
+						while (_003C_003E7__wrap4.MoveNext())
 						{
-							stringBuilder.AppendLine();
-							stringBuilder.AppendLine();
-							for (int i = 0; i < this.equippedStatOffsets.Count; i++)
+							_003C_003Ec__DisplayClass401_2 CS_0024_003C_003E8__locals147 = new _003C_003Ec__DisplayClass401_2
 							{
-								if (i > 0)
-								{
-									stringBuilder.AppendLine();
-								}
-								StatModifier statModifier = this.equippedStatOffsets[i];
-								stringBuilder.Append(string.Format("{0}: {1}", statModifier.stat.LabelCap, statModifier.ValueToStringAsOffset));
-							}
-						}
-					}
-					this.descriptionDetailedCached = stringBuilder.ToString();
-				}
-				return this.descriptionDetailedCached;
-			}
-		}
-
-		// Token: 0x17000386 RID: 902
-		// (get) Token: 0x060012E9 RID: 4841 RVA: 0x000576C2 File Offset: 0x000558C2
-		public bool CanBenefitFromCover
-		{
-			get
-			{
-				return this.category == ThingCategory.Pawn || (this.building != null && this.building.IsTurret);
-			}
-		}
-
-		// Token: 0x17000387 RID: 903
-		// (get) Token: 0x060012EA RID: 4842 RVA: 0x000576E8 File Offset: 0x000558E8
-		public bool PotentiallySmeltable
-		{
-			get
-			{
-				if (!this.smeltable)
-				{
-					return false;
-				}
-				if (base.MadeFromStuff)
-				{
-					using (IEnumerator<ThingDef> enumerator = GenStuff.AllowedStuffsFor(this, TechLevel.Undefined, false).GetEnumerator())
-					{
-						while (enumerator.MoveNext())
-						{
-							if (enumerator.Current.smeltable)
+								mult = _003C_003E7__wrap4.Current
+							};
+							if (CS_0024_003C_003E8__locals164.damageMultipliers.Count((DamageMultiplier m) => m.damageDef == CS_0024_003C_003E8__locals147.mult.damageDef) > 1)
 							{
+								_003C_003E2__current = "has multiple damage multipliers for damageDef " + CS_0024_003C_003E8__locals147.mult.damageDef;
+								_003C_003E1__state = 21;
 								return true;
 							}
 						}
+						goto IL_085f;
 					}
-					return false;
-				}
-				return true;
-			}
-		}
-
-		// Token: 0x17000388 RID: 904
-		// (get) Token: 0x060012EB RID: 4843 RVA: 0x00057754 File Offset: 0x00055954
-		public bool HasSingleOrMultipleInteractionCells
-		{
-			get
-			{
-				return this.hasInteractionCell || !this.multipleInteractionCellOffsets.NullOrEmpty<IntVec3>();
-			}
-		}
-
-		// Token: 0x17000389 RID: 905
-		// (get) Token: 0x060012EC RID: 4844 RVA: 0x0005776E File Offset: 0x0005596E
-		public bool IsApparel
-		{
-			get
-			{
-				return this.apparel != null;
-			}
-		}
-
-		// Token: 0x1700038A RID: 906
-		// (get) Token: 0x060012ED RID: 4845 RVA: 0x00057779 File Offset: 0x00055979
-		public bool IsBed
-		{
-			get
-			{
-				return typeof(Building_Bed).IsAssignableFrom(this.thingClass);
-			}
-		}
-
-		// Token: 0x1700038B RID: 907
-		// (get) Token: 0x060012EE RID: 4846 RVA: 0x00057790 File Offset: 0x00055990
-		public bool IsWall
-		{
-			get
-			{
-				return this.building != null && this.building.isWall;
-			}
-		}
-
-		// Token: 0x1700038C RID: 908
-		// (get) Token: 0x060012EF RID: 4847 RVA: 0x000577A7 File Offset: 0x000559A7
-		public bool IsCorpse
-		{
-			get
-			{
-				return typeof(Corpse).IsAssignableFrom(this.thingClass);
-			}
-		}
-
-		// Token: 0x1700038D RID: 909
-		// (get) Token: 0x060012F0 RID: 4848 RVA: 0x000577BE File Offset: 0x000559BE
-		public bool IsFrame
-		{
-			get
-			{
-				return this.isFrameInt;
-			}
-		}
-
-		// Token: 0x1700038E RID: 910
-		// (get) Token: 0x060012F1 RID: 4849 RVA: 0x000577C6 File Offset: 0x000559C6
-		public bool IsBlueprint
-		{
-			get
-			{
-				return this.entityDefToBuild != null && this.category == ThingCategory.Ethereal;
-			}
-		}
-
-		// Token: 0x1700038F RID: 911
-		// (get) Token: 0x060012F2 RID: 4850 RVA: 0x000577DC File Offset: 0x000559DC
-		public bool IsStuff
-		{
-			get
-			{
-				return this.stuffProps != null;
-			}
-		}
-
-		// Token: 0x17000390 RID: 912
-		// (get) Token: 0x060012F3 RID: 4851 RVA: 0x000577E7 File Offset: 0x000559E7
-		public bool IsMedicine
-		{
-			get
-			{
-				return this.statBases.StatListContains(StatDefOf.MedicalPotency);
-			}
-		}
-
-		// Token: 0x17000391 RID: 913
-		// (get) Token: 0x060012F4 RID: 4852 RVA: 0x000577F9 File Offset: 0x000559F9
-		public bool IsDoor
-		{
-			get
-			{
-				return typeof(Building_Door).IsAssignableFrom(this.thingClass);
-			}
-		}
-
-		// Token: 0x17000392 RID: 914
-		// (get) Token: 0x060012F5 RID: 4853 RVA: 0x00057810 File Offset: 0x00055A10
-		public bool IsFence
-		{
-			get
-			{
-				return this.building != null && this.building.isFence;
-			}
-		}
-
-		// Token: 0x17000393 RID: 915
-		// (get) Token: 0x060012F6 RID: 4854 RVA: 0x00057827 File Offset: 0x00055A27
-		public bool IsFilth
-		{
-			get
-			{
-				return this.filth != null;
-			}
-		}
-
-		// Token: 0x17000394 RID: 916
-		// (get) Token: 0x060012F7 RID: 4855 RVA: 0x00057832 File Offset: 0x00055A32
-		public bool IsIngestible
-		{
-			get
-			{
-				return this.ingestible != null;
-			}
-		}
-
-		// Token: 0x17000395 RID: 917
-		// (get) Token: 0x060012F8 RID: 4856 RVA: 0x0005783D File Offset: 0x00055A3D
-		public bool IsNutritionGivingIngestible
-		{
-			get
-			{
-				return this.IsIngestible && this.ingestible.CachedNutrition > 0f;
-			}
-		}
-
-		// Token: 0x17000396 RID: 918
-		// (get) Token: 0x060012F9 RID: 4857 RVA: 0x0005785B File Offset: 0x00055A5B
-		public bool IsNutritionGivingIngestibleForHumanlikeBabies
-		{
-			get
-			{
-				return this.IsNutritionGivingIngestible && this.ingestible.HumanEdible && this.ingestible.babiesCanIngest;
-			}
-		}
-
-		// Token: 0x17000397 RID: 919
-		// (get) Token: 0x060012FA RID: 4858 RVA: 0x0005787F File Offset: 0x00055A7F
-		public bool IsWeapon
-		{
-			get
-			{
-				return this.category == ThingCategory.Item && (!this.verbs.NullOrEmpty<VerbProperties>() || !this.tools.NullOrEmpty<Tool>()) && !this.IsApparel;
-			}
-		}
-
-		// Token: 0x17000398 RID: 920
-		// (get) Token: 0x060012FB RID: 4859 RVA: 0x000578AF File Offset: 0x00055AAF
-		public bool IsCommsConsole
-		{
-			get
-			{
-				return typeof(Building_CommsConsole).IsAssignableFrom(this.thingClass);
-			}
-		}
-
-		// Token: 0x17000399 RID: 921
-		// (get) Token: 0x060012FC RID: 4860 RVA: 0x000578C6 File Offset: 0x00055AC6
-		public bool IsOrbitalTradeBeacon
-		{
-			get
-			{
-				return typeof(Building_OrbitalTradeBeacon).IsAssignableFrom(this.thingClass);
-			}
-		}
-
-		// Token: 0x1700039A RID: 922
-		// (get) Token: 0x060012FD RID: 4861 RVA: 0x000578DD File Offset: 0x00055ADD
-		public bool IsFoodDispenser
-		{
-			get
-			{
-				return typeof(Building_NutrientPasteDispenser).IsAssignableFrom(this.thingClass);
-			}
-		}
-
-		// Token: 0x1700039B RID: 923
-		// (get) Token: 0x060012FE RID: 4862 RVA: 0x000578F4 File Offset: 0x00055AF4
-		public bool IsDrug
-		{
-			get
-			{
-				return this.ingestible != null && this.ingestible.drugCategory > DrugCategory.None;
-			}
-		}
-
-		// Token: 0x1700039C RID: 924
-		// (get) Token: 0x060012FF RID: 4863 RVA: 0x0005790E File Offset: 0x00055B0E
-		public bool IsPleasureDrug
-		{
-			get
-			{
-				return this.IsDrug && this.ingestible.joy > 0f;
-			}
-		}
-
-		// Token: 0x1700039D RID: 925
-		// (get) Token: 0x06001300 RID: 4864 RVA: 0x0005792C File Offset: 0x00055B2C
-		public bool IsNonMedicalDrug
-		{
-			get
-			{
-				return this.IsDrug && this.ingestible.drugCategory != DrugCategory.Medical;
-			}
-		}
-
-		// Token: 0x1700039E RID: 926
-		// (get) Token: 0x06001301 RID: 4865 RVA: 0x00057949 File Offset: 0x00055B49
-		public bool IsTable
-		{
-			get
-			{
-				return this.surfaceType == SurfaceType.Eat && this.HasComp(typeof(CompGatherSpot));
-			}
-		}
-
-		// Token: 0x1700039F RID: 927
-		// (get) Token: 0x06001302 RID: 4866 RVA: 0x00057966 File Offset: 0x00055B66
-		public bool IsWorkTable
-		{
-			get
-			{
-				return typeof(Building_WorkTable).IsAssignableFrom(this.thingClass);
-			}
-		}
-
-		// Token: 0x170003A0 RID: 928
-		// (get) Token: 0x06001303 RID: 4867 RVA: 0x0005797D File Offset: 0x00055B7D
-		public bool IsShell
-		{
-			get
-			{
-				return this.projectileWhenLoaded != null;
-			}
-		}
-
-		// Token: 0x170003A1 RID: 929
-		// (get) Token: 0x06001304 RID: 4868 RVA: 0x00057988 File Offset: 0x00055B88
-		public bool IsArt
-		{
-			get
-			{
-				return this.IsWithinCategory(ThingCategoryDefOf.BuildingsArt);
-			}
-		}
-
-		// Token: 0x170003A2 RID: 930
-		// (get) Token: 0x06001305 RID: 4869 RVA: 0x00057995 File Offset: 0x00055B95
-		public bool IsSmoothable
-		{
-			get
-			{
-				BuildingProperties buildingProperties = this.building;
-				return ((buildingProperties != null) ? buildingProperties.smoothedThing : null) != null;
-			}
-		}
-
-		// Token: 0x170003A3 RID: 931
-		// (get) Token: 0x06001306 RID: 4870 RVA: 0x000579AC File Offset: 0x00055BAC
-		public bool IsSmoothed
-		{
-			get
-			{
-				BuildingProperties buildingProperties = this.building;
-				return ((buildingProperties != null) ? buildingProperties.unsmoothedThing : null) != null;
-			}
-		}
-
-		// Token: 0x170003A4 RID: 932
-		// (get) Token: 0x06001307 RID: 4871 RVA: 0x000579C3 File Offset: 0x00055BC3
-		public bool IsMetal
-		{
-			get
-			{
-				return this.stuffProps != null && this.stuffProps.categories.Contains(StuffCategoryDefOf.Metallic);
-			}
-		}
-
-		// Token: 0x170003A5 RID: 933
-		// (get) Token: 0x06001308 RID: 4872 RVA: 0x000579E4 File Offset: 0x00055BE4
-		public bool IsCryptosleepCasket
-		{
-			get
-			{
-				return typeof(Building_CryptosleepCasket).IsAssignableFrom(this.thingClass);
-			}
-		}
-
-		// Token: 0x170003A6 RID: 934
-		// (get) Token: 0x06001309 RID: 4873 RVA: 0x000579FB File Offset: 0x00055BFB
-		public bool IsGibbetCage
-		{
-			get
-			{
-				return typeof(Building_GibbetCage).IsAssignableFrom(this.thingClass);
-			}
-		}
-
-		// Token: 0x170003A7 RID: 935
-		// (get) Token: 0x0600130A RID: 4874 RVA: 0x00057A12 File Offset: 0x00055C12
-		public bool IsMechGestator
-		{
-			get
-			{
-				return typeof(Building_MechGestator).IsAssignableFrom(this.thingClass);
-			}
-		}
-
-		// Token: 0x170003A8 RID: 936
-		// (get) Token: 0x0600130B RID: 4875 RVA: 0x00057A29 File Offset: 0x00055C29
-		public bool IsMechRecharger
-		{
-			get
-			{
-				return typeof(Building_MechCharger).IsAssignableFrom(this.thingClass);
-			}
-		}
-
-		// Token: 0x170003A9 RID: 937
-		// (get) Token: 0x0600130C RID: 4876 RVA: 0x00057A40 File Offset: 0x00055C40
-		public bool IsAddictiveDrug
-		{
-			get
-			{
-				CompProperties_Drug compProperties = this.GetCompProperties<CompProperties_Drug>();
-				return compProperties != null && compProperties.addictiveness > 0f;
-			}
-		}
-
-		// Token: 0x170003AA RID: 938
-		// (get) Token: 0x0600130D RID: 4877 RVA: 0x00057A66 File Offset: 0x00055C66
-		public bool IsMeat
-		{
-			get
-			{
-				return this.category == ThingCategory.Item && this.thingCategories != null && this.thingCategories.Contains(ThingCategoryDefOf.MeatRaw);
-			}
-		}
-
-		// Token: 0x170003AB RID: 939
-		// (get) Token: 0x0600130E RID: 4878 RVA: 0x00057A8B File Offset: 0x00055C8B
-		public bool IsEgg
-		{
-			get
-			{
-				return this.category == ThingCategory.Item && this.thingCategories != null && (this.thingCategories.Contains(ThingCategoryDefOf.EggsFertilized) || this.thingCategories.Contains(ThingCategoryDefOf.EggsUnfertilized));
-			}
-		}
-
-		// Token: 0x170003AC RID: 940
-		// (get) Token: 0x0600130F RID: 4879 RVA: 0x00057AC4 File Offset: 0x00055CC4
-		public bool IsLeather
-		{
-			get
-			{
-				return this.category == ThingCategory.Item && this.thingCategories != null && this.thingCategories.Contains(ThingCategoryDefOf.Leathers);
-			}
-		}
-
-		// Token: 0x170003AD RID: 941
-		// (get) Token: 0x06001310 RID: 4880 RVA: 0x00057AE9 File Offset: 0x00055CE9
-		public bool IsWool
-		{
-			get
-			{
-				return this.category == ThingCategory.Item && this.thingCategories != null && this.thingCategories.Contains(ThingCategoryDefOf.Wools);
-			}
-		}
-
-		// Token: 0x170003AE RID: 942
-		// (get) Token: 0x06001311 RID: 4881 RVA: 0x00057B10 File Offset: 0x00055D10
-		public bool IsRangedWeapon
-		{
-			get
-			{
-				if (!this.IsWeapon)
-				{
-					return false;
-				}
-				if (!this.verbs.NullOrEmpty<VerbProperties>())
-				{
-					for (int i = 0; i < this.verbs.Count; i++)
+					goto IL_0871;
+					IL_0b08:
+					if (!CS_0024_003C_003E8__locals164.destroyOnDrop && !typeof(MinifiedThing).IsAssignableFrom(CS_0024_003C_003E8__locals164.thingClass) && (CS_0024_003C_003E8__locals164.EverHaulable || CS_0024_003C_003E8__locals164.Minifiable) && (CS_0024_003C_003E8__locals164.statBases.NullOrEmpty() || !CS_0024_003C_003E8__locals164.statBases.Any((StatModifier s) => s.stat == StatDefOf.Mass)))
 					{
-						if (!this.verbs[i].IsMeleeAttack)
-						{
-							return true;
-						}
+						_003C_003E2__current = "is haulable, but does not have an authored mass value";
+						_003C_003E1__state = 33;
+						return true;
 					}
+					goto IL_0b94;
+					IL_073b:
+					if (CS_0024_003C_003E8__locals164.destroyOnDrop && CS_0024_003C_003E8__locals164.tradeability != 0)
+					{
+						_003C_003E2__current = "destroyOnDrop but tradeability is " + CS_0024_003C_003E8__locals164.tradeability;
+						_003C_003E1__state = 19;
+						return true;
+					}
+					goto IL_0782;
+					IL_1223:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current12 = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current12;
+						_003C_003E1__state = 48;
+						return true;
+					}
+					_003C_003Em__Finally12();
+					_003C_003E7__wrap1 = null;
+					goto IL_123d;
+					IL_0dec:
+					if (CS_0024_003C_003E8__locals164.building != null)
+					{
+						_003C_003E7__wrap1 = CS_0024_003C_003E8__locals164.building.ConfigErrors(CS_0024_003C_003E8__locals164).GetEnumerator();
+						_003C_003E1__state = -10;
+						goto IL_0e44;
+					}
+					goto IL_0ea2;
+					IL_0782:
+					if (CS_0024_003C_003E8__locals164.stackLimit > 1 && !CS_0024_003C_003E8__locals164.drawGUIOverlay)
+					{
+						_003C_003E2__current = "has stackLimit > 1 but also has drawGUIOverlay = false.";
+						_003C_003E1__state = 20;
+						return true;
+					}
+					goto IL_07b4;
+					IL_0e44:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current13 = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current13;
+						_003C_003E1__state = 41;
+						return true;
+					}
+					_003C_003Em__Finally8();
+					_003C_003E7__wrap1 = null;
+					if ((CS_0024_003C_003E8__locals164.building.isAirtight || CS_0024_003C_003E8__locals164.building.isStuffableAirtight) && CS_0024_003C_003E8__locals164.Fillage != FillCategory.Full)
+					{
+						_003C_003E2__current = "is airtight but Fillage is not Full";
+						_003C_003E1__state = 42;
+						return true;
+					}
+					goto IL_0ea2;
 				}
 				return false;
 			}
-		}
-
-		// Token: 0x170003AF RID: 943
-		// (get) Token: 0x06001312 RID: 4882 RVA: 0x00057B60 File Offset: 0x00055D60
-		public bool IsMeleeWeapon
-		{
-			get
+			catch
 			{
-				return this.IsWeapon && !this.IsRangedWeapon;
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x170003B0 RID: 944
-		// (get) Token: 0x06001313 RID: 4883 RVA: 0x00057B78 File Offset: 0x00055D78
-		public bool IsWeaponUsingProjectiles
+		bool IEnumerator.MoveNext()
 		{
-			get
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				if (!this.IsWeapon)
-				{
-					return false;
-				}
-				if (!this.verbs.NullOrEmpty<VerbProperties>())
-				{
-					for (int i = 0; i < this.verbs.Count; i++)
-					{
-						if (this.verbs[i].LaunchesProjectile)
-						{
-							return true;
-						}
-					}
-				}
-				return false;
+				_003C_003E7__wrap1.Dispose();
 			}
 		}
 
-		// Token: 0x170003B1 RID: 945
-		// (get) Token: 0x06001314 RID: 4884 RVA: 0x00057BC8 File Offset: 0x00055DC8
-		public bool IsShieldThatBlocksRanged
+		private void _003C_003Em__Finally2()
 		{
-			get
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				return this.HasComp(typeof(CompShield)) && this.GetCompProperties<CompProperties_Shield>().blocksRangedWeapons;
+				_003C_003E7__wrap1.Dispose();
 			}
 		}
 
-		// Token: 0x170003B2 RID: 946
-		// (get) Token: 0x06001315 RID: 4885 RVA: 0x00057BE9 File Offset: 0x00055DE9
-		public bool IsBuildingArtificial
+		private void _003C_003Em__Finally3()
 		{
-			get
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				return (this.category == ThingCategory.Building || this.IsFrame) && (this.building == null || (!this.building.isNaturalRock && !this.building.isResourceRock));
+				_003C_003E7__wrap1.Dispose();
 			}
 		}
 
-		// Token: 0x170003B3 RID: 947
-		// (get) Token: 0x06001316 RID: 4886 RVA: 0x00057C25 File Offset: 0x00055E25
-		public bool IsNonResourceNaturalRock
+		private void _003C_003Em__Finally4()
 		{
-			get
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap2/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		private void _003C_003Em__Finally5()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap3/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		private void _003C_003Em__Finally6()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap4/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		private void _003C_003Em__Finally7()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				return this.category == ThingCategory.Building && this.building.isNaturalRock && !this.building.isResourceRock && !this.building.mineablePreventNaturalRockOnSurface && !this.IsSmoothed;
+				_003C_003E7__wrap1.Dispose();
 			}
 		}
 
-		// Token: 0x170003B4 RID: 948
-		// (get) Token: 0x06001317 RID: 4887 RVA: 0x00057C62 File Offset: 0x00055E62
-		public bool HasSunShadows
+		private void _003C_003Em__Finally8()
 		{
-			get
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				if (this.hasSunShadowsCached == null)
-				{
-					this.hasSunShadowsCached = new bool?(typeof(Pawn).IsAssignableFrom(this.thingClass));
-				}
-				return this.hasSunShadowsCached.Value;
+				_003C_003E7__wrap1.Dispose();
 			}
 		}
 
-		// Token: 0x170003B5 RID: 949
-		// (get) Token: 0x06001318 RID: 4888 RVA: 0x00057C9C File Offset: 0x00055E9C
-		public bool IsNaturalOrgan
+		private void _003C_003Em__Finally9()
 		{
-			get
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				if (this.isNaturalOrganCached == null)
-				{
-					if (this.category != ThingCategory.Item)
-					{
-						this.isNaturalOrganCached = new bool?(false);
-					}
-					else
-					{
-						List<BodyPartDef> allDefsListForReading = DefDatabase<BodyPartDef>.AllDefsListForReading;
-						this.isNaturalOrganCached = new bool?(false);
-						for (int i = 0; i < allDefsListForReading.Count; i++)
-						{
-							if (allDefsListForReading[i].spawnThingOnRemoved == this)
-							{
-								this.isNaturalOrganCached = new bool?(true);
-								break;
-							}
-						}
-					}
-				}
-				return this.isNaturalOrganCached.Value;
+				_003C_003E7__wrap1.Dispose();
 			}
 		}
 
-		// Token: 0x170003B6 RID: 950
-		// (get) Token: 0x06001319 RID: 4889 RVA: 0x00057D18 File Offset: 0x00055F18
-		public bool IsFungus
+		private void _003C_003Em__Finally10()
 		{
-			get
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				return this.ingestible != null && this.ingestible.foodType.HasFlag(FoodTypeFlags.Fungus);
+				_003C_003E7__wrap1.Dispose();
 			}
 		}
 
-		// Token: 0x170003B7 RID: 951
-		// (get) Token: 0x0600131A RID: 4890 RVA: 0x00057D43 File Offset: 0x00055F43
-		public bool IsAnimalProduct
+		private void _003C_003Em__Finally11()
 		{
-			get
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				return this.ingestible != null && this.ingestible.foodType.HasFlag(FoodTypeFlags.AnimalProduct);
+				_003C_003E7__wrap1.Dispose();
 			}
 		}
 
-		// Token: 0x170003B8 RID: 952
-		// (get) Token: 0x0600131B RID: 4891 RVA: 0x00057D6B File Offset: 0x00055F6B
-		public bool IsProcessedFood
+		private void _003C_003Em__Finally12()
 		{
-			get
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				return this.ingestible != null && this.ingestible.foodType.HasFlag(FoodTypeFlags.Processed);
+				_003C_003E7__wrap1.Dispose();
 			}
 		}
 
-		// Token: 0x170003B9 RID: 953
-		// (get) Token: 0x0600131C RID: 4892 RVA: 0x00057D96 File Offset: 0x00055F96
-		public bool CanAffectLinker
+		private void _003C_003Em__Finally13()
 		{
-			get
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				return (this.graphicData != null && this.graphicData.Linked) || this.IsDoor;
+				_003C_003E7__wrap1.Dispose();
 			}
 		}
 
-		// Token: 0x170003BA RID: 954
-		// (get) Token: 0x0600131D RID: 4893 RVA: 0x00057DB8 File Offset: 0x00055FB8
-		public bool IsNonDeconstructibleAttackableBuilding
+		private void _003C_003Em__Finally14()
 		{
-			get
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap6/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		private void _003C_003Em__Finally15()
+		{
+			_003C_003E1__state = -16;
+			if (_003C_003E7__wrap1 != null)
 			{
-				return this.IsBuildingArtificial && !this.building.IsDeconstructible && this.destroyable && !this.mineable && this.building.isTargetable && this.building.draftAttackNonDeconstructable;
+				_003C_003E7__wrap1.Dispose();
 			}
 		}
 
-		// Token: 0x170003BB RID: 955
-		// (get) Token: 0x0600131E RID: 4894 RVA: 0x00057E04 File Offset: 0x00056004
-		public bool IsPlant
+		private void _003C_003Em__Finally16()
 		{
-			get
-			{
-				return typeof(Plant).IsAssignableFrom(this.thingClass);
-			}
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap7/*cast due to .constrained prefix*/).Dispose();
 		}
 
-		// Token: 0x170003BC RID: 956
-		// (get) Token: 0x0600131F RID: 4895 RVA: 0x00057E1B File Offset: 0x0005601B
-		public bool IsDeadPlant
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			get
-			{
-				return typeof(DeadPlant).IsAssignableFrom(this.thingClass);
-			}
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x170003BD RID: 957
-		// (get) Token: 0x06001320 RID: 4896 RVA: 0x00057E32 File Offset: 0x00056032
-		public bool IsStudiable
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
 		{
-			get
+			_003CConfigErrors_003Ed__401 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				return this.HasAssignableCompFrom(typeof(CompStudiable));
-			}
-		}
-
-		// Token: 0x170003BE RID: 958
-		// (get) Token: 0x06001321 RID: 4897 RVA: 0x00057E44 File Offset: 0x00056044
-		public List<StyleCategoryDef> RelevantStyleCategories
-		{
-			get
-			{
-				if (this.cachedRelevantStyleCategories == null)
-				{
-					this.cachedRelevantStyleCategories = new List<StyleCategoryDef>();
-					foreach (StyleCategoryDef styleCategoryDef in DefDatabase<StyleCategoryDef>.AllDefs)
-					{
-						if (!styleCategoryDef.thingDefStyles.NullOrEmpty<ThingDefStyle>())
-						{
-							using (List<ThingDefStyle>.Enumerator enumerator2 = styleCategoryDef.thingDefStyles.GetEnumerator())
-							{
-								while (enumerator2.MoveNext())
-								{
-									if (enumerator2.Current.ThingDef == this)
-									{
-										this.cachedRelevantStyleCategories.Add(styleCategoryDef);
-										break;
-									}
-								}
-							}
-						}
-					}
-				}
-				return this.cachedRelevantStyleCategories;
-			}
-		}
-
-		// Token: 0x06001322 RID: 4898 RVA: 0x00057F04 File Offset: 0x00056104
-		public bool BlocksPlanting(bool canWipePlants = false)
-		{
-			return (this.building == null || !this.building.SupportsPlants) && (this.building == null || !this.building.isAttachment) && (this.blockPlants || (!canWipePlants && this.category == ThingCategory.Plant) || this.Fillage > FillCategory.None || this.IsEdifice());
-		}
-
-		// Token: 0x06001323 RID: 4899 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public virtual bool CanSpawnAt(IntVec3 pos, Rot4 rot, Map map)
-		{
-			return true;
-		}
-
-		// Token: 0x06001324 RID: 4900 RVA: 0x00057F70 File Offset: 0x00056170
-		public bool EverStorable(bool willMinifyIfPossible)
-		{
-			if (typeof(MinifiedThing).IsAssignableFrom(this.thingClass))
-			{
-				return true;
-			}
-			if (!this.thingCategories.NullOrEmpty<ThingCategoryDef>())
-			{
-				if (this.category == ThingCategory.Item)
-				{
-					return true;
-				}
-				if (willMinifyIfPossible && this.Minifiable)
-				{
-					return true;
-				}
-			}
-			return false;
-		}
-
-		// Token: 0x06001325 RID: 4901 RVA: 0x00057FBC File Offset: 0x000561BC
-		public Thing GetConcreteExample(ThingDef stuff = null)
-		{
-			if (this.concreteExamplesInt == null)
-			{
-				this.concreteExamplesInt = new Dictionary<ThingDef, Thing>();
-			}
-			if (stuff == null)
-			{
-				stuff = ThingDefOf.Steel;
-			}
-			if (!this.concreteExamplesInt.ContainsKey(stuff))
-			{
-				if (this.race == null)
-				{
-					this.concreteExamplesInt[stuff] = ThingMaker.MakeThing(this, base.MadeFromStuff ? stuff : null);
-				}
-				else
-				{
-					this.concreteExamplesInt[stuff] = PawnGenerator.GeneratePawn(DefDatabase<PawnKindDef>.AllDefsListForReading.FirstOrDefault((PawnKindDef pkd) => pkd.race == this), null, null);
-				}
-			}
-			return this.concreteExamplesInt[stuff];
-		}
-
-		// Token: 0x06001326 RID: 4902 RVA: 0x0005805C File Offset: 0x0005625C
-		public CompProperties CompDefFor<T>() where T : ThingComp
-		{
-			for (int i = 0; i < this.comps.Count; i++)
-			{
-				if (this.comps[i].compClass == typeof(T))
-				{
-					return this.comps[i];
-				}
-			}
-			return null;
-		}
-
-		// Token: 0x06001327 RID: 4903 RVA: 0x000580B0 File Offset: 0x000562B0
-		public CompProperties CompDefForAssignableFrom<T>() where T : ThingComp
-		{
-			for (int i = 0; i < this.comps.Count; i++)
-			{
-				if (typeof(T).IsAssignableFrom(this.comps[i].compClass))
-				{
-					return this.comps[i];
-				}
-			}
-			return null;
-		}
-
-		// Token: 0x06001328 RID: 4904 RVA: 0x00058104 File Offset: 0x00056304
-		public bool HasComp(Type compType)
-		{
-			for (int i = 0; i < this.comps.Count; i++)
-			{
-				if (this.comps[i].compClass == compType)
-				{
-					return true;
-				}
-			}
-			return false;
-		}
-
-		// Token: 0x06001329 RID: 4905 RVA: 0x00058144 File Offset: 0x00056344
-		public bool HasComp<T>() where T : ThingComp
-		{
-			for (int i = 0; i < this.comps.Count; i++)
-			{
-				if (this.comps[i].compClass == typeof(T) || typeof(T).IsAssignableFrom(this.comps[i].compClass))
-				{
-					return true;
-				}
-			}
-			return false;
-		}
-
-		// Token: 0x0600132A RID: 4906 RVA: 0x000581B0 File Offset: 0x000563B0
-		public bool HasAssignableCompFrom(Type compType)
-		{
-			for (int i = 0; i < this.comps.Count; i++)
-			{
-				if (compType.IsAssignableFrom(this.comps[i].compClass))
-				{
-					return true;
-				}
-			}
-			return false;
-		}
-
-		// Token: 0x0600132B RID: 4907 RVA: 0x000581F0 File Offset: 0x000563F0
-		public T GetCompProperties<T>() where T : CompProperties
-		{
-			for (int i = 0; i < this.comps.Count; i++)
-			{
-				T t = this.comps[i] as T;
-				if (t != null)
-				{
-					return t;
-				}
-			}
-			return default(T);
-		}
-
-		// Token: 0x0600132C RID: 4908 RVA: 0x00058240 File Offset: 0x00056440
-		public override void PostLoad()
-		{
-			if (this.graphicData != null)
-			{
-				LongEventHandler.ExecuteWhenFinished(delegate
-				{
-					GraphicData graphicData = this.graphicData;
-					if (graphicData.shaderType == null)
-					{
-						graphicData.shaderType = ShaderTypeDefOf.Cutout;
-					}
-					ContentFinderRequester.requester = this;
-					try
-					{
-						this.graphic = this.graphicData.Graphic;
-						if (this.drawerType != DrawerType.RealtimeOnly)
-						{
-							TextureAtlasGroup textureAtlasGroup = this.category.ToAtlasGroup();
-							this.graphic.TryInsertIntoAtlas(textureAtlasGroup);
-							if (textureAtlasGroup == TextureAtlasGroup.Building && this.Minifiable)
-							{
-								this.graphic.TryInsertIntoAtlas(TextureAtlasGroup.Item);
-							}
-						}
-					}
-					finally
-					{
-						ContentFinderRequester.requester = null;
-					}
-				});
-			}
-			if (this.tools != null)
-			{
-				for (int i = 0; i < this.tools.Count; i++)
-				{
-					this.tools[i].id = i.ToString();
-				}
-			}
-			if (this.verbs != null && this.verbs.Count == 1 && this.verbs[0].label.NullOrEmpty())
-			{
-				this.verbs[0].label = this.label;
-			}
-			base.PostLoad();
-			if (this.category == ThingCategory.Building && this.building == null)
-			{
-				this.building = new BuildingProperties();
-			}
-			BuildingProperties buildingProperties = this.building;
-			if (buildingProperties != null)
-			{
-				buildingProperties.PostLoadSpecial(this);
-			}
-			ApparelProperties apparelProperties = this.apparel;
-			if (apparelProperties != null)
-			{
-				apparelProperties.PostLoadSpecial(this);
-			}
-			PlantProperties plantProperties = this.plant;
-			if (plantProperties != null)
-			{
-				plantProperties.PostLoadSpecial(this);
-			}
-			if (this.comps != null)
-			{
-				foreach (CompProperties compProperties in this.comps)
-				{
-					compProperties.PostLoadSpecial(this);
-				}
-			}
-		}
-
-		// Token: 0x0600132D RID: 4909 RVA: 0x00058388 File Offset: 0x00056588
-		protected override void ResolveIcon()
-		{
-			base.ResolveIcon();
-			if (this.category == ThingCategory.Pawn)
-			{
-				if (!this.uiIconPath.NullOrEmpty())
-				{
-					this.uiIcon = ContentFinder<Texture2D>.Get(this.uiIconPath, true);
-					return;
-				}
-				if (!this.race.Humanlike)
-				{
-					PawnKindDef anyPawnKind = this.race.AnyPawnKind;
-					if (anyPawnKind != null)
-					{
-						Material material = ((ModsConfig.BiotechActive && anyPawnKind.RaceProps.IsMechanoid) ? anyPawnKind.lifeStages.First<PawnKindLifeStage>() : anyPawnKind.lifeStages.Last<PawnKindLifeStage>()).bodyGraphicData.Graphic.MatAt(Rot4.East, null);
-						this.uiIcon = (Texture2D)material.mainTexture;
-						this.uiIconColor = material.color;
-						Shader shader;
-						MaterialRequest req;
-						if (ShaderDatabase.TryGetUIShader(material.shader, out shader) && MaterialPool.TryGetRequestForMat(material, out req))
-						{
-							req.shader = shader;
-							this.uiIconMaterial = MaterialPool.MatFrom(req);
-							return;
-						}
-					}
-				}
+				_003C_003E1__state = 0;
+				result = this;
 			}
 			else
 			{
-				ThingDef thingDef = GenStuff.DefaultStuffFor(this);
-				if (this.colorGenerator != null && (thingDef == null || thingDef.stuffProps.allowColorGenerators))
+				result = new _003CConfigErrors_003Ed__401(0)
 				{
-					this.uiIconColor = this.colorGenerator.ExemplaryColor;
-				}
-				else if (thingDef != null)
-				{
-					this.uiIconColor = base.GetColorForStuff(thingDef);
-				}
-				else if (this.graphicData != null)
-				{
-					this.uiIconColor = this.graphicData.color;
-				}
-				if (this.rotatable && this.graphic != null && this.graphic != BaseContent.BadGraphic && this.graphic.ShouldDrawRotated && this.defaultPlacingRot == Rot4.South)
-				{
-					this.uiIconAngle = 180f + this.graphic.DrawRotatedExtraAngleOffset;
-				}
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
+			return result;
 		}
 
-		// Token: 0x0600132E RID: 4910 RVA: 0x00058534 File Offset: 0x00056734
-		public override void ResolveReferences()
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			base.ResolveReferences();
-			if (this.ingestible != null)
-			{
-				this.ingestible.parent = this;
-			}
-			if (this.stuffProps != null)
-			{
-				this.stuffProps.parent = this;
-			}
-			BuildingProperties buildingProperties = this.building;
-			if (buildingProperties != null)
-			{
-				buildingProperties.ResolveReferencesSpecial();
-			}
-			GraphicData graphicData = this.graphicData;
-			if (graphicData != null)
-			{
-				graphicData.ResolveReferencesSpecial();
-			}
-			RaceProperties raceProperties = this.race;
-			if (raceProperties != null)
-			{
-				raceProperties.ResolveReferencesSpecial();
-			}
-			StuffProperties stuffProperties = this.stuffProps;
-			if (stuffProperties != null)
-			{
-				stuffProperties.ResolveReferencesSpecial();
-			}
-			ApparelProperties apparelProperties = this.apparel;
-			if (apparelProperties != null)
-			{
-				apparelProperties.ResolveReferencesSpecial();
-			}
-			if (this.soundImpactDefault == null)
-			{
-				this.soundImpactDefault = SoundDefOf.BulletImpact_Ground;
-			}
-			if (this.soundDrop == null)
-			{
-				this.soundDrop = SoundDefOf.Standard_Drop;
-			}
-			if (this.soundPickup == null)
-			{
-				this.soundPickup = SoundDefOf.Standard_Pickup;
-			}
-			if (this.soundInteract == null)
-			{
-				this.soundInteract = SoundDefOf.Standard_Pickup;
-			}
-			if (this.inspectorTabs != null && this.inspectorTabs.Any<Type>())
-			{
-				this.inspectorTabsResolved = new List<InspectTabBase>();
-				for (int i = 0; i < this.inspectorTabs.Count; i++)
-				{
-					try
-					{
-						this.inspectorTabsResolved.Add(InspectTabManager.GetSharedInstance(this.inspectorTabs[i]));
-					}
-					catch (Exception ex)
-					{
-						string str = "Could not instantiate inspector tab of type ";
-						Type type = this.inspectorTabs[i];
-						string str2 = (type != null) ? type.ToString() : null;
-						string str3 = ": ";
-						Exception ex2 = ex;
-						Log.Error(str + str2 + str3 + ((ex2 != null) ? ex2.ToString() : null));
-					}
-				}
-			}
-			if (this.comps != null)
-			{
-				for (int j = 0; j < this.comps.Count; j++)
-				{
-					this.comps[j].ResolveReferences(this);
-				}
-			}
+			return ((IEnumerable<string>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x0600132F RID: 4911 RVA: 0x000586E4 File Offset: 0x000568E4
-		public override IEnumerable<string> ConfigErrors()
-		{
-			foreach (string text in base.ConfigErrors())
-			{
-				yield return text;
-			}
-			IEnumerator<string> enumerator = null;
-			if (this.category != ThingCategory.Ethereal && this.label.NullOrEmpty())
-			{
-				yield return "no label";
-			}
-			if (this.category == ThingCategory.Building && !this.IsFrame && this.building.IsDeconstructible && this.thingClass != null && typeof(Building).IsSubclassOf(this.thingClass))
-			{
-				yield return "has building category and is marked as deconstructible, but thing class is not a subclass of building (" + this.thingClass.Name + ")";
-			}
-			if (this.graphicData != null)
-			{
-				foreach (string text2 in this.graphicData.ConfigErrors(this))
-				{
-					yield return text2;
-				}
-				enumerator = null;
-			}
-			if (this.projectile != null)
-			{
-				foreach (string text3 in this.projectile.ConfigErrors(this))
-				{
-					yield return text3;
-				}
-				enumerator = null;
-			}
-			if (this.statBases != null)
-			{
-				using (List<StatModifier>.Enumerator enumerator2 = this.statBases.GetEnumerator())
-				{
-					while (enumerator2.MoveNext())
-					{
-						StatModifier statBase = enumerator2.Current;
-						if (this.statBases.Count((StatModifier st) => st.stat == statBase.stat) > 1)
-						{
-							string str = "defines the stat base ";
-							StatDef stat = statBase.stat;
-							yield return str + ((stat != null) ? stat.ToString() : null) + " more than once.";
-						}
-					}
-				}
-				List<StatModifier>.Enumerator enumerator2 = default(List<StatModifier>.Enumerator);
-			}
-			if (!BeautyUtility.BeautyRelevant(this.category) && this.StatBaseDefined(StatDefOf.Beauty))
-			{
-				yield return "Beauty stat base is defined, but Things of category " + this.category.ToString() + " cannot have beauty.";
-			}
-			if (!BeautyUtility.BeautyRelevant(this.category) && this.StatBaseDefined(StatDefOf.BeautyOutdoors))
-			{
-				yield return "BeautyOutdoors stat base is defined, but Things of category " + this.category.ToString() + " cannot have beauty.";
-			}
-			if (char.IsNumber(this.defName[this.defName.Length - 1]))
-			{
-				yield return "ends with a numerical digit, which is not allowed on ThingDefs.";
-			}
-			if (this.thingClass == null)
-			{
-				yield return "has null thingClass.";
-			}
-			if (this.comps.Count > 0 && !typeof(ThingWithComps).IsAssignableFrom(this.thingClass))
-			{
-				yield return "has components but it's thingClass is not a ThingWithComps";
-			}
-			if (this.ConnectToPower && this.drawerType == DrawerType.RealtimeOnly && this.IsFrame)
-			{
-				yield return "connects to power but does not add to map mesh. Will not create wire meshes.";
-			}
-			if (this.costList != null)
-			{
-				foreach (ThingDefCountClass thingDefCountClass in this.costList)
-				{
-					if (thingDefCountClass.count == 0)
-					{
-						string str2 = "cost in ";
-						ThingDef thingDef = thingDefCountClass.thingDef;
-						yield return str2 + ((thingDef != null) ? thingDef.ToString() : null) + " is zero.";
-					}
-				}
-				List<ThingDefCountClass>.Enumerator enumerator3 = default(List<ThingDefCountClass>.Enumerator);
-			}
-			List<ThingCategoryDef> list = this.thingCategories;
-			ThingCategoryDef thingCategoryDef = (list != null) ? list.FirstOrDefault((ThingCategoryDef cat) => this.thingCategories.Count((ThingCategoryDef c) => c == cat) > 1) : null;
-			if (thingCategoryDef != null)
-			{
-				string str3 = "has duplicate thingCategory ";
-				ThingCategoryDef thingCategoryDef2 = thingCategoryDef;
-				yield return str3 + ((thingCategoryDef2 != null) ? thingCategoryDef2.ToString() : null) + ".";
-			}
-			if (this.Fillage == FillCategory.Full && this.category != ThingCategory.Building)
-			{
-				yield return "gives full cover but is not a building.";
-			}
-			if (this.equipmentType != EquipmentType.None)
-			{
-				if (this.techLevel == TechLevel.Undefined && !this.destroyOnDrop)
-				{
-					yield return "is equipment but has no tech level.";
-				}
-				if (!this.comps.Any((CompProperties c) => typeof(CompEquippable).IsAssignableFrom(c.compClass)))
-				{
-					yield return "is equipment but has no CompEquippable";
-				}
-			}
-			if (this.thingClass == typeof(Bullet) && this.projectile.damageDef == null)
-			{
-				yield return " is a bullet but has no damageDef.";
-			}
-			if (this.destroyOnDrop && this.tradeability != Tradeability.None)
-			{
-				yield return "destroyOnDrop but tradeability is " + this.tradeability.ToString();
-			}
-			if (this.stackLimit > 1 && !this.drawGUIOverlay)
-			{
-				yield return "has stackLimit > 1 but also has drawGUIOverlay = false.";
-			}
-			if (this.damageMultipliers != null)
-			{
-				using (List<DamageMultiplier>.Enumerator enumerator4 = this.damageMultipliers.GetEnumerator())
-				{
-					while (enumerator4.MoveNext())
-					{
-						DamageMultiplier mult = enumerator4.Current;
-						if (this.damageMultipliers.Count((DamageMultiplier m) => m.damageDef == mult.damageDef) > 1)
-						{
-							string str4 = "has multiple damage multipliers for damageDef ";
-							DamageDef damageDef = mult.damageDef;
-							yield return str4 + ((damageDef != null) ? damageDef.ToString() : null);
-							break;
-						}
-					}
-				}
-				List<DamageMultiplier>.Enumerator enumerator4 = default(List<DamageMultiplier>.Enumerator);
-			}
-			if (this.Fillage == FillCategory.Full && !this.IsEdifice())
-			{
-				yield return "fillPercent is 1.00 but is not edifice";
-			}
-			if (base.MadeFromStuff && this.constructEffect != null)
-			{
-				yield return "madeFromStuff but has a defined constructEffect (which will always be overridden by stuff's construct animation).";
-			}
-			if (base.MadeFromStuff && this.stuffCategories.NullOrEmpty<StuffCategoryDef>())
-			{
-				yield return "madeFromStuff but has no stuffCategories.";
-			}
-			if (this.costList.NullOrEmpty<ThingDefCountClass>() && this.costStuffCount <= 0 && this.recipeMaker != null)
-			{
-				yield return "has a recipeMaker but no costList or costStuffCount.";
-			}
-			if (this.costStuffCount > 0 && this.stuffCategories.NullOrEmpty<StuffCategoryDef>())
-			{
-				yield return "has costStuffCount but no stuffCategories.";
-			}
-			if (this.GetStatValueAbstract(StatDefOf.DeteriorationRate, null) > 1E-05f && !this.CanEverDeteriorate && !this.destroyOnDrop)
-			{
-				yield return "has >0 DeteriorationRate but can't deteriorate.";
-			}
-			if (this.smeltProducts != null && !this.smeltable)
-			{
-				yield return "has smeltProducts but has smeltable=false";
-			}
-			if (this.smeltable && this.smeltProducts.NullOrEmpty<ThingDefCountClass>() && base.CostList.NullOrEmpty<ThingDefCountClass>() && !this.IsStuff && !base.MadeFromStuff && !this.destroyOnDrop)
-			{
-				yield return "is smeltable but does not give anything for smelting.";
-			}
-			if (this.equipmentType != EquipmentType.None && this.verbs.NullOrEmpty<VerbProperties>() && this.tools.NullOrEmpty<Tool>())
-			{
-				yield return "is equipment but has no verbs or tools";
-			}
-			if (this.Minifiable && this.thingCategories.NullOrEmpty<ThingCategoryDef>())
-			{
-				yield return "is minifiable but not in any thing category";
-			}
-			if (this.category == ThingCategory.Building && !this.Minifiable && !this.thingCategories.NullOrEmpty<ThingCategoryDef>())
-			{
-				yield return "is not minifiable yet has thing categories (could be confusing in thing filters because it can't be moved/stored anyway)";
-			}
-			if (!this.destroyOnDrop && !typeof(MinifiedThing).IsAssignableFrom(this.thingClass) && (this.EverHaulable || this.Minifiable))
-			{
-				if (!this.statBases.NullOrEmpty<StatModifier>())
-				{
-					if (this.statBases.Any((StatModifier s) => s.stat == StatDefOf.Mass))
-					{
-						goto IL_B94;
-					}
-				}
-				yield return "is haulable, but does not have an authored mass value";
-			}
-			IL_B94:
-			if (this.ingestible == null && this.GetStatValueAbstract(StatDefOf.Nutrition, null) != 0f)
-			{
-				yield return "has nutrition but ingestible properties are null";
-			}
-			if (this.BaseFlammability != 0f && !this.useHitPoints && this.category != ThingCategory.Pawn && !this.destroyOnDrop)
-			{
-				yield return "flammable but has no hitpoints (will burn indefinitely)";
-			}
-			GraphicData graphicData = this.graphicData;
-			if (((graphicData != null) ? graphicData.shadowData : null) != null && this.staticSunShadowHeight > 0f)
-			{
-				yield return "graphicData defines a shadowInfo but staticSunShadowHeight > 0";
-			}
-			if (this.saveCompressible && this.Claimable)
-			{
-				yield return "claimable item is compressible; faction will be unset after load";
-			}
-			if (this.deepCommonality > 0f != this.deepLumpSizeRange.TrueMax > 0)
-			{
-				yield return "if deepCommonality or deepLumpSizeRange is set, the other also must be set";
-			}
-			if (this.deepCommonality > 0f && this.deepCountPerPortion <= 0)
-			{
-				yield return "deepCommonality > 0 but deepCountPerPortion is not set";
-			}
-			if (this.verbs != null)
-			{
-				int num;
-				for (int i = 0; i < this.verbs.Count; i = num + 1)
-				{
-					foreach (string arg in this.verbs[i].ConfigErrors(this))
-					{
-						yield return string.Format("verb {0}: {1}", i, arg);
-					}
-					enumerator = null;
-					num = i;
-				}
-			}
-			if (this.building != null)
-			{
-				foreach (string text4 in this.building.ConfigErrors(this))
-				{
-					yield return text4;
-				}
-				enumerator = null;
-				if ((this.building.isAirtight || this.building.isStuffableAirtight) && this.Fillage != FillCategory.Full)
-				{
-					yield return "is airtight but Fillage is not Full";
-				}
-			}
-			if (this.apparel != null)
-			{
-				foreach (string text5 in this.apparel.ConfigErrors(this))
-				{
-					yield return text5;
-				}
-				enumerator = null;
-			}
-			if (this.comps != null)
-			{
-				int num;
-				for (int i = 0; i < this.comps.Count; i = num + 1)
-				{
-					foreach (string text6 in this.comps[i].ConfigErrors(this))
-					{
-						yield return text6;
-					}
-					enumerator = null;
-					num = i;
-				}
-			}
-			if (this.race != null)
-			{
-				foreach (string text7 in this.race.ConfigErrors(this))
-				{
-					yield return text7;
-				}
-				enumerator = null;
-				if (this.race.body != null && this.race != null && this.tools != null)
-				{
-					ThingDef.<>c__DisplayClass401_3 CS$<>8__locals3 = new ThingDef.<>c__DisplayClass401_3();
-					CS$<>8__locals3.<>4__this = this;
-					CS$<>8__locals3.i = 0;
-					while (CS$<>8__locals3.i < this.tools.Count)
-					{
-						if (this.tools[CS$<>8__locals3.i].linkedBodyPartsGroup != null && !this.race.body.AllParts.Any((BodyPartRecord part) => part.groups.Contains(CS$<>8__locals3.<>4__this.tools[CS$<>8__locals3.i].linkedBodyPartsGroup)))
-						{
-							string[] array = new string[5];
-							array[0] = "has tool with linkedBodyPartsGroup ";
-							int num2 = 1;
-							BodyPartGroupDef linkedBodyPartsGroup = this.tools[CS$<>8__locals3.i].linkedBodyPartsGroup;
-							array[num2] = ((linkedBodyPartsGroup != null) ? linkedBodyPartsGroup.ToString() : null);
-							array[2] = " but body ";
-							int num3 = 3;
-							BodyDef body = this.race.body;
-							array[num3] = ((body != null) ? body.ToString() : null);
-							array[4] = " has no parts with that group.";
-							yield return string.Concat(array);
-						}
-						int num = CS$<>8__locals3.i;
-						CS$<>8__locals3.i = num + 1;
-					}
-					CS$<>8__locals3 = null;
-				}
-				if (this.race.Animal && this.GetStatValueAbstract(StatDefOf.Wildness, null) < 0f)
-				{
-					yield return "is animal but wildness is not defined";
-				}
-			}
-			if (this.ingestible != null)
-			{
-				foreach (string text8 in this.ingestible.ConfigErrors())
-				{
-					yield return text8;
-				}
-				enumerator = null;
-			}
-			if (this.plant != null)
-			{
-				foreach (string text9 in this.plant.ConfigErrors())
-				{
-					yield return text9;
-				}
-				enumerator = null;
-			}
-			if (this.tools != null)
-			{
-				Tool tool = this.tools.SelectMany((Tool lhs) => from rhs in this.tools
-				where lhs != rhs && lhs.id == rhs.id
-				select rhs).FirstOrDefault<Tool>();
-				if (tool != null)
-				{
-					yield return "duplicate thingdef tool id " + tool.id;
-				}
-				foreach (Tool tool2 in this.tools)
-				{
-					foreach (string text10 in tool2.ConfigErrors())
-					{
-						yield return text10;
-					}
-					enumerator = null;
-				}
-				List<Tool>.Enumerator enumerator5 = default(List<Tool>.Enumerator);
-			}
-			if (!this.randomStyle.NullOrEmpty<ThingStyleChance>())
-			{
-				using (List<ThingStyleChance>.Enumerator enumerator6 = this.randomStyle.GetEnumerator())
-				{
-					while (enumerator6.MoveNext())
-					{
-						if (enumerator6.Current.Chance <= 0f)
-						{
-							yield return "style chance <= 0.";
-						}
-					}
-				}
-				List<ThingStyleChance>.Enumerator enumerator6 = default(List<ThingStyleChance>.Enumerator);
-				if (!this.comps.Any((CompProperties c) => c.compClass == typeof(CompStyleable)))
-				{
-					yield return "random style assigned, but missing CompStyleable!";
-				}
-			}
-			if (this.relicChance > 0f && this.category != ThingCategory.Item)
-			{
-				yield return "relic chance > 0 but category != item";
-			}
-			if (this.hasInteractionCell && !this.multipleInteractionCellOffsets.NullOrEmpty<IntVec3>())
-			{
-				yield return "both single and multiple interaction cells are defined, it should be one or the other";
-			}
-			if (this.Fillage != FillCategory.Full && this.passability == Traversability.Impassable && !this.IsDoor && base.BuildableByPlayer && !this.disableImpassableShotOverConfigError)
-			{
-				yield return "impassable, player-buildable building that can be shot/seen over.";
-			}
-			yield break;
-			yield break;
-		}
+	[CompilerGenerated]
+	private sealed class _003CSpecialDisplayStats_003Ed__407 : IEnumerable<StatDrawEntry>, IEnumerable, IEnumerator<StatDrawEntry>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
 
-		// Token: 0x06001330 RID: 4912 RVA: 0x000586F4 File Offset: 0x000568F4
-		public static ThingDef Named(string defName)
-		{
-			return DefDatabase<ThingDef>.GetNamed(defName, true);
-		}
+		private StatDrawEntry _003C_003E2__current;
 
-		// Token: 0x170003BF RID: 959
-		// (get) Token: 0x06001331 RID: 4913 RVA: 0x000586FD File Offset: 0x000568FD
-		public string LabelAsStuff
+		private int _003C_003El__initialThreadId;
+
+		public ThingDef _003C_003E4__this;
+
+		private StatRequest req;
+
+		public StatRequest _003C_003E3__req;
+
+		private IEnumerable<RecipeDef> _003Crecipes_003E5__2;
+
+		private IEnumerator<StatDrawEntry> _003C_003E7__wrap2;
+
+		private VerbProperties _003Cverb_003E5__4;
+
+		private StatCategoryDef _003CverbStatCategory_003E5__5;
+
+		private StatCategoryDef _003CstatCat_003E5__6;
+
+		private float _003CdmgBuildingsImpassable_003E5__7;
+
+		private float _003CdmgBuildingsPassable_003E5__8;
+
+		private StringBuilder _003CticksBetweenBurstShotsExplanation_003E5__9;
+
+		private StringBuilder _003CstoppingPowerExplanation_003E5__10;
+
+		private int _003Ci_003E5__11;
+
+		private Dialog_InfoCard.Hyperlink[] _003Chyperlinks_003E5__12;
+
+		private ThingDef _003Cturret_003E5__13;
+
+		private StatRequest _003Crequest_003E5__14;
+
+		StatDrawEntry IEnumerator<StatDrawEntry>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (!this.stuffProps.stuffAdjective.NullOrEmpty())
-				{
-					return this.stuffProps.stuffAdjective;
-				}
-				return this.label;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06001332 RID: 4914 RVA: 0x00058724 File Offset: 0x00056924
-		public bool IsWithinCategory(ThingCategoryDef category)
+		object IEnumerator.Current
 		{
-			if (this.thingCategories == null)
+			[DebuggerHidden]
+			get
 			{
-				return false;
+				return _003C_003E2__current;
 			}
-			for (int i = 0; i < this.thingCategories.Count; i++)
+		}
+
+		[DebuggerHidden]
+		public _003CSpecialDisplayStats_003Ed__407(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			switch (_003C_003E1__state)
 			{
-				for (ThingCategoryDef thingCategoryDef = this.thingCategories[i]; thingCategoryDef != null; thingCategoryDef = thingCategoryDef.parent)
+			case -3:
+			case 1:
+				try
 				{
-					if (thingCategoryDef == category)
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+				break;
+			case -4:
+			case 27:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally2();
+				}
+				break;
+			case -5:
+			case 28:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally3();
+				}
+				break;
+			case -6:
+			case 29:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally4();
+				}
+				break;
+			case -7:
+			case 30:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally5();
+				}
+				break;
+			case -8:
+			case 31:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally6();
+				}
+				break;
+			case -9:
+			case 32:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally7();
+				}
+				break;
+			case -10:
+			case 36:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally8();
+				}
+				break;
+			case -11:
+			case 42:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally9();
+				}
+				break;
+			}
+			_003Crecipes_003E5__2 = null;
+			_003C_003E7__wrap2 = null;
+			_003Cverb_003E5__4 = null;
+			_003CverbStatCategory_003E5__5 = null;
+			_003CstatCat_003E5__6 = null;
+			_003CticksBetweenBurstShotsExplanation_003E5__9 = null;
+			_003CstoppingPowerExplanation_003E5__10 = null;
+			_003Chyperlinks_003E5__12 = null;
+			_003Cturret_003E5__13 = null;
+			_003Crequest_003E5__14 = default(StatRequest);
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				ThingDef CS_0024_003C_003E8__locals66 = _003C_003E4__this;
+				RecipeDef recipeDef;
+				float buildingDamageFactor;
+				float num7;
+				StringBuilder stringBuilder7;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap2 = ((BuildableDef)CS_0024_003C_003E8__locals66).SpecialDisplayStats(req).GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0118;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0118;
+				case 2:
+					_003C_003E1__state = -1;
+					_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.Apparel, "Layer".Translate(), CS_0024_003C_003E8__locals66.apparel.GetLayersString(), "Stat_Thing_Apparel_Layer_Desc".Translate(), 2751);
+					_003C_003E1__state = 3;
+					return true;
+				case 3:
+					_003C_003E1__state = -1;
+					_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.Apparel, "Stat_Thing_Apparel_CountsAsClothingNudity_Name".Translate(), CS_0024_003C_003E8__locals66.apparel.countsAsClothingForNudity ? "Yes".Translate() : "No".Translate(), "Stat_Thing_Apparel_CountsAsClothingNudity_Desc".Translate(), 2753);
+					_003C_003E1__state = 4;
+					return true;
+				case 4:
+					_003C_003E1__state = -1;
+					if (ModsConfig.BiotechActive)
 					{
+						_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.Apparel, "Stat_Thing_Apparel_ValidLifestage".Translate(), CS_0024_003C_003E8__locals66.apparel.developmentalStageFilter.ToCommaList().CapitalizeFirst(), "Stat_Thing_Apparel_ValidLifestage_Desc".Translate(), 2748);
+						_003C_003E1__state = 5;
 						return true;
 					}
-				}
-			}
-			return false;
-		}
-
-		// Token: 0x06001333 RID: 4915 RVA: 0x00058774 File Offset: 0x00056974
-		public void Notify_UnlockedByResearch()
-		{
-			if (this.comps != null)
-			{
-				for (int i = 0; i < this.comps.Count; i++)
-				{
-					this.comps[i].Notify_PostUnlockedByResearch(this);
-				}
-			}
-		}
-
-		// Token: 0x06001334 RID: 4916 RVA: 0x000587B1 File Offset: 0x000569B1
-		public override IEnumerable<StatDrawEntry> SpecialDisplayStats(StatRequest req)
-		{
-			foreach (StatDrawEntry statDrawEntry in base.SpecialDisplayStats(req))
-			{
-				yield return statDrawEntry;
-			}
-			IEnumerator<StatDrawEntry> enumerator = null;
-			if (this.apparel != null)
-			{
-				string coveredOuterPartsString = this.apparel.GetCoveredOuterPartsString(BodyDefOf.Human);
-				yield return new StatDrawEntry(StatCategoryDefOf.Apparel, "Covers".Translate(), coveredOuterPartsString, "Stat_Thing_Apparel_Covers_Desc".Translate(), 2750, null, null, false, false);
-				yield return new StatDrawEntry(StatCategoryDefOf.Apparel, "Layer".Translate(), this.apparel.GetLayersString(), "Stat_Thing_Apparel_Layer_Desc".Translate(), 2751, null, null, false, false);
-				yield return new StatDrawEntry(StatCategoryDefOf.Apparel, "Stat_Thing_Apparel_CountsAsClothingNudity_Name".Translate(), this.apparel.countsAsClothingForNudity ? "Yes".Translate() : "No".Translate(), "Stat_Thing_Apparel_CountsAsClothingNudity_Desc".Translate(), 2753, null, null, false, false);
-				if (ModsConfig.BiotechActive)
-				{
-					yield return new StatDrawEntry(StatCategoryDefOf.Apparel, "Stat_Thing_Apparel_ValidLifestage".Translate(), this.apparel.developmentalStageFilter.ToCommaList(false).CapitalizeFirst(), "Stat_Thing_Apparel_ValidLifestage_Desc".Translate(), 2748, null, null, false, false);
-				}
-				if (this.apparel.gender != Gender.None)
-				{
-					yield return new StatDrawEntry(StatCategoryDefOf.Apparel, "Stat_Thing_Apparel_Gender".Translate(), this.apparel.gender.GetLabel(false).CapitalizeFirst(), "Stat_Thing_Apparel_Gender_Desc".Translate(), 2749, null, null, false, false);
-				}
-			}
-			if (this.IsMedicine && this.MedicineTendXpGainFactor != 1f)
-			{
-				yield return new StatDrawEntry(StatCategoryDefOf.Basics, "MedicineXpGainFactor".Translate(), this.MedicineTendXpGainFactor.ToStringPercent(), "Stat_Thing_Drug_MedicineXpGainFactor_Desc".Translate(), 1000, null, null, false, false);
-			}
-			if (this.fillPercent > 0f && (this.category == ThingCategory.Item || this.category == ThingCategory.Building || this.category == ThingCategory.Plant))
-			{
-				StatDrawEntry statDrawEntry2 = new StatDrawEntry(StatCategoryDefOf.Basics, "CoverEffectiveness".Translate(), this.BaseBlockChance().ToStringPercent(), "CoverEffectivenessExplanation".Translate(), 2000, null, null, false, false);
-				yield return statDrawEntry2;
-			}
-			if (this.constructionSkillPrerequisite > 0)
-			{
-				yield return new StatDrawEntry(StatCategoryDefOf.Basics, "SkillRequiredToBuild".Translate(SkillDefOf.Construction.LabelCap), this.constructionSkillPrerequisite.ToString(), "SkillRequiredToBuildExplanation".Translate(SkillDefOf.Construction.LabelCap), 1100, null, null, false, false);
-			}
-			if (this.artisticSkillPrerequisite > 0)
-			{
-				yield return new StatDrawEntry(StatCategoryDefOf.Basics, "SkillRequiredToBuild".Translate(SkillDefOf.Artistic.LabelCap), this.artisticSkillPrerequisite.ToString(), "SkillRequiredToBuildExplanation".Translate(SkillDefOf.Artistic.LabelCap), 1100, null, null, false, false);
-			}
-			IEnumerable<RecipeDef> recipes = from r in DefDatabase<RecipeDef>.AllDefsListForReading
-			where r.products.Count == 1 && r.products.Any((ThingDefCountClass p) => p.thingDef == this) && !r.IsSurgery
-			select r;
-			if (recipes.Any<RecipeDef>())
-			{
-				IEnumerable<string> enumerable = (from u in (from x in recipes
-				where x.recipeUsers != null
-				select x).SelectMany((RecipeDef r) => r.recipeUsers)
-				select u.label).Concat(from x in DefDatabase<ThingDef>.AllDefsListForReading
-				where x.recipes != null && x.recipes.Any((RecipeDef y) => y.products.Any((ThingDefCountClass z) => z.thingDef == this))
-				select x.label).Distinct<string>();
-				if (enumerable.Any<string>())
-				{
-					yield return new StatDrawEntry(StatCategoryDefOf.Basics, "CreatedAt".Translate(), enumerable.ToCommaList(false, false).CapitalizeFirst(), "Stat_Thing_CreatedAt_Desc".Translate(), 1103, null, null, false, false);
-				}
-				RecipeDef recipeDef = recipes.FirstOrDefault<RecipeDef>();
-				if (recipeDef != null && !recipeDef.ingredients.NullOrEmpty<IngredientCount>())
-				{
-					BuildableDef.tmpCostList.Clear();
-					BuildableDef.tmpHyperlinks.Clear();
-					for (int j = 0; j < recipeDef.ingredients.Count; j++)
+					goto IL_02d1;
+				case 5:
+					_003C_003E1__state = -1;
+					goto IL_02d1;
+				case 6:
+					_003C_003E1__state = -1;
+					goto IL_0340;
+				case 7:
+					_003C_003E1__state = -1;
+					goto IL_03ac;
+				case 8:
+					_003C_003E1__state = -1;
+					goto IL_042f;
+				case 9:
+					_003C_003E1__state = -1;
+					goto IL_04ae;
+				case 10:
+					_003C_003E1__state = -1;
+					goto IL_052d;
+				case 11:
+					_003C_003E1__state = -1;
+					goto IL_0675;
+				case 12:
+					_003C_003E1__state = -1;
+					goto IL_07f6;
+				case 13:
+					_003C_003E1__state = -1;
+					goto IL_0873;
+				case 14:
+					_003C_003E1__state = -1;
+					goto IL_0ab0;
+				case 15:
+					_003C_003E1__state = -1;
+					if (_003Cverb_003E5__4.defaultProjectile.projectile.damageDef.armorCategory != null)
 					{
-						IngredientCount ingredientCount = recipeDef.ingredients[j];
-						if (!ingredientCount.filter.Summary.NullOrEmpty())
+						StringBuilder stringBuilder2 = new StringBuilder();
+						float armorPenetration = _003Cverb_003E5__4.defaultProjectile.projectile.GetArmorPenetration(req.Thing, stringBuilder2);
+						TaggedString taggedString = "ArmorPenetrationExplanation".Translate();
+						if (stringBuilder2.Length != 0)
 						{
-							IEnumerable<ThingDef> allowedThingDefs = ingredientCount.filter.AllowedThingDefs;
-							if (allowedThingDefs.Any<ThingDef>())
+							taggedString += "\n\n" + stringBuilder2;
+						}
+						_003C_003E2__current = new StatDrawEntry(_003CstatCat_003E5__6, "ArmorPenetration".Translate(), armorPenetration.ToStringPercent(), taggedString, 5400);
+						_003C_003E1__state = 16;
+						return true;
+					}
+					goto IL_0c6a;
+				case 16:
+					_003C_003E1__state = -1;
+					goto IL_0c6a;
+				case 17:
+					_003C_003E1__state = -1;
+					goto IL_0d24;
+				case 18:
+					_003C_003E1__state = -1;
+					goto IL_0d8a;
+				case 19:
+					_003C_003E1__state = -1;
+					goto IL_0df0;
+				case 20:
+					_003C_003E1__state = -1;
+					goto IL_0e7d;
+				case 21:
+					_003C_003E1__state = -1;
+					_003C_003E2__current = new StatDrawEntry(_003CstatCat_003E5__6, "BurstShotFireRate".Translate(), _003CdmgBuildingsImpassable_003E5__7.ToString("0.##") + " rpm", _003CticksBetweenBurstShotsExplanation_003E5__9.ToString(), 5395);
+					_003C_003E1__state = 22;
+					return true;
+				case 22:
+					_003C_003E1__state = -1;
+					goto IL_1454;
+				case 23:
+					_003C_003E1__state = -1;
+					goto IL_14bb;
+				case 24:
+					_003C_003E1__state = -1;
+					_003CticksBetweenBurstShotsExplanation_003E5__9 = null;
+					_003CstoppingPowerExplanation_003E5__10 = null;
+					_003CstatCat_003E5__6 = null;
+					goto IL_1736;
+				case 25:
+					_003C_003E1__state = -1;
+					_003C_003E2__current = new StatDrawEntry(_003CstatCat_003E5__6, "DirectHitChance".Translate(), (1f / (float)GenRadial.NumCellsInRadius(_003Cverb_003E5__4.ForcedMissRadius)).ToStringPercent(), "Stat_Thing_Weapon_DirectHitChance_Desc".Translate(), 3560);
+					_003C_003E1__state = 26;
+					return true;
+				case 26:
+					_003C_003E1__state = -1;
+					_003CstatCat_003E5__6 = null;
+					goto IL_1838;
+				case 27:
+					_003C_003E1__state = -4;
+					goto IL_189a;
+				case 28:
+					_003C_003E1__state = -5;
+					goto IL_1908;
+				case 29:
+					_003C_003E1__state = -6;
+					goto IL_197d;
+				case 30:
+					_003C_003E1__state = -7;
+					goto IL_19f2;
+				case 31:
+					_003C_003E1__state = -8;
+					goto IL_1a74;
+				case 32:
+					_003C_003E1__state = -9;
+					goto IL_1af7;
+				case 33:
+				{
+					_003C_003E1__state = -1;
+					StringBuilder stringBuilder = new StringBuilder();
+					stringBuilder.AppendLine("Stat_MiningYield_Desc".Translate());
+					stringBuilder.AppendLine();
+					stringBuilder.AppendLine("StatsReport_DifficultyMultiplier".Translate(Find.Storyteller.difficultyDef.label) + ": " + Find.Storyteller.difficulty.mineYieldFactor.ToStringByStyle(ToStringStyle.PercentZero, ToStringNumberSense.Factor));
+					_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.Basics, "Stat_MiningYield_Name".Translate(), Mathf.CeilToInt(CS_0024_003C_003E8__locals66.building.EffectiveMineableYield).ToString("F0"), stringBuilder.ToString(), 2200, null, _003Chyperlinks_003E5__12);
+					_003C_003E1__state = 34;
+					return true;
+				}
+				case 34:
+					_003C_003E1__state = -1;
+					_003Chyperlinks_003E5__12 = null;
+					goto IL_1cc5;
+				case 35:
+					_003C_003E1__state = -1;
+					_003Crequest_003E5__14 = StatRequest.For(_003Cturret_003E5__13, null);
+					_003C_003E7__wrap2 = _003Cturret_003E5__13.SpecialDisplayStats(_003Crequest_003E5__14).GetEnumerator();
+					_003C_003E1__state = -10;
+					goto IL_1dce;
+				case 36:
+					_003C_003E1__state = -10;
+					goto IL_1dce;
+				case 37:
+					_003C_003E1__state = -1;
+					goto IL_1e65;
+				case 38:
+					_003C_003E1__state = -1;
+					goto IL_1f46;
+				case 39:
+					_003C_003E1__state = -1;
+					goto IL_20ba;
+				case 40:
+					_003C_003E1__state = -1;
+					goto IL_222e;
+				case 41:
+					_003C_003E1__state = -1;
+					_003Ci_003E5__11++;
+					goto IL_2412;
+				case 42:
+					{
+						_003C_003E1__state = -11;
+						goto IL_2474;
+					}
+					IL_1dce:
+					while (_003C_003E7__wrap2.MoveNext())
+					{
+						StatDrawEntry current = _003C_003E7__wrap2.Current;
+						if (current.category == StatCategoryDefOf.Weapon_Ranged)
+						{
+							_003C_003E2__current = current;
+							_003C_003E1__state = 36;
+							return true;
+						}
+					}
+					_003C_003Em__Finally8();
+					_003C_003E7__wrap2 = null;
+					_003Ci_003E5__11 = 0;
+					goto IL_1e77;
+					IL_1e77:
+					if (_003Ci_003E5__11 < _003Cturret_003E5__13.statBases.Count)
+					{
+						StatModifier statModifier = _003Cturret_003E5__13.statBases[_003Ci_003E5__11];
+						if (statModifier.stat.category == StatCategoryDefOf.Weapon_Ranged)
+						{
+							_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.Weapon_Ranged, statModifier.stat, statModifier.value, _003Crequest_003E5__14, ToStringNumberSense.Undefined, null);
+							_003C_003E1__state = 37;
+							return true;
+						}
+						goto IL_1e65;
+					}
+					_003Cturret_003E5__13 = null;
+					_003Crequest_003E5__14 = default(StatRequest);
+					goto IL_1ea5;
+					IL_1cc5:
+					if (CS_0024_003C_003E8__locals66.building.IsTurret)
+					{
+						_003Cturret_003E5__13 = CS_0024_003C_003E8__locals66.building.turretGunDef;
+						_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.BasicsImportant, "Stat_Weapon_Name".Translate(), _003Cturret_003E5__13.LabelCap, "Stat_Weapon_Desc".Translate(), 5389, null, new Dialog_InfoCard.Hyperlink[1]
+						{
+							new Dialog_InfoCard.Hyperlink(_003Cturret_003E5__13)
+						});
+						_003C_003E1__state = 35;
+						return true;
+					}
+					goto IL_1ea5;
+					IL_20ba:
+					if (CS_0024_003C_003E8__locals66.IsLeather)
+					{
+						List<ThingDef> list = new List<ThingDef>();
+						bool flag = false;
+						foreach (ThingDef allDef in DefDatabase<ThingDef>.AllDefs)
+						{
+							if (allDef.race != null && allDef.race.leatherDef == CS_0024_003C_003E8__locals66 && !allDef.IsCorpse)
 							{
-								using (IEnumerator<ThingDef> enumerator2 = allowedThingDefs.GetEnumerator())
+								if (!Find.HiddenItemsManager.Hidden(allDef))
 								{
-									while (enumerator2.MoveNext())
+									flag = true;
+								}
+								list.Add(allDef);
+							}
+						}
+						_003C_003E2__current = new StatDrawEntry(valueString: (!flag) ? $"({"NotYetDiscovered".Translate()})" : string.Join(", ", (from x in list
+							where !Find.HiddenItemsManager.Hidden(x)
+							select x into p
+							select p.label).ToArray()).CapitalizeFirst(), category: StatCategoryDefOf.BasicsPawn, label: "Stat_SourceSpecies_Name".Translate(), reportText: "Stat_SourceSpecies_Desc".Translate(), displayPriorityWithinCategory: 1200, overrideReportTitle: null, hyperlinks: Dialog_InfoCard.DefsToHyperlinks(list));
+						_003C_003E1__state = 40;
+						return true;
+					}
+					goto IL_222e;
+					IL_0df7:
+					if (_003Cverb_003E5__4.defaultProjectile == null && _003Cverb_003E5__4.beamDamageDef != null)
+					{
+						_003C_003E2__current = new StatDrawEntry(_003CverbStatCategory_003E5__5 ?? StatCategoryDefOf.Weapon_Ranged, "ArmorPenetration".Translate(), _003Cverb_003E5__4.beamDamageDef.defaultArmorPenetration.ToStringPercent(), "ArmorPenetrationExplanation".Translate(), 5400);
+						_003C_003E1__state = 20;
+						return true;
+					}
+					goto IL_0e7d;
+					IL_1e65:
+					_003Ci_003E5__11++;
+					goto IL_1e77;
+					IL_1838:
+					_003Cverb_003E5__4 = null;
+					_003CverbStatCategory_003E5__5 = null;
+					goto IL_1846;
+					IL_0675:
+					recipeDef = _003Crecipes_003E5__2.FirstOrDefault();
+					if (recipeDef != null && !recipeDef.ingredients.NullOrEmpty())
+					{
+						BuildableDef.tmpCostList.Clear();
+						BuildableDef.tmpHyperlinks.Clear();
+						for (int i = 0; i < recipeDef.ingredients.Count; i++)
+						{
+							IngredientCount ingredientCount = recipeDef.ingredients[i];
+							if (ingredientCount.filter.Summary.NullOrEmpty())
+							{
+								continue;
+							}
+							IEnumerable<ThingDef> allowedThingDefs = ingredientCount.filter.AllowedThingDefs;
+							if (allowedThingDefs.Any())
+							{
+								using IEnumerator<ThingDef> enumerator = allowedThingDefs.GetEnumerator();
+								while (enumerator.MoveNext())
+								{
+									_003C_003Ec__DisplayClass407_0 CS_0024_003C_003E8__locals8 = new _003C_003Ec__DisplayClass407_0
 									{
-										ThingDef p = enumerator2.Current;
-										if (!BuildableDef.tmpHyperlinks.Any((Dialog_InfoCard.Hyperlink x) => x.def == p))
-										{
-											BuildableDef.tmpHyperlinks.Add(new Dialog_InfoCard.Hyperlink(p, -1));
-										}
+										p = enumerator.Current
+									};
+									if (!BuildableDef.tmpHyperlinks.Any((Dialog_InfoCard.Hyperlink x) => x.def == CS_0024_003C_003E8__locals8.p))
+									{
+										BuildableDef.tmpHyperlinks.Add(new Dialog_InfoCard.Hyperlink(CS_0024_003C_003E8__locals8.p));
 									}
 								}
 							}
 							BuildableDef.tmpCostList.Add(recipeDef.IngredientValueGetter.BillRequirementsDescription(recipeDef, ingredientCount));
 						}
 					}
-				}
-				if (BuildableDef.tmpCostList.Any<string>())
-				{
-					yield return new StatDrawEntry(StatCategoryDefOf.Basics, "Ingredients".Translate(), BuildableDef.tmpCostList.ToCommaList(false, false), "Stat_Thing_Ingredients".Translate(), 1102, null, BuildableDef.tmpHyperlinks, false, false);
-				}
-			}
-			if (this.thingClass != null && typeof(Building_Bed).IsAssignableFrom(this.thingClass) && !this.statBases.StatListContains(StatDefOf.BedRestEffectiveness))
-			{
-				yield return new StatDrawEntry(StatCategoryDefOf.Building, StatDefOf.BedRestEffectiveness, StatDefOf.BedRestEffectiveness.valueIfMissing, StatRequest.ForEmpty(), ToStringNumberSense.Undefined, null, false);
-			}
-			if (!this.verbs.NullOrEmpty<VerbProperties>())
-			{
-				VerbProperties verb = this.verbs.First((VerbProperties x) => x.isPrimary);
-				StatCategoryDef verbStatCategory = (this.category == ThingCategory.Pawn) ? StatCategoryDefOf.PawnCombat : null;
-				float num = verb.warmupTime;
-				StringBuilder stringBuilder = new StringBuilder("Stat_Thing_Weapon_RangedWarmupTime_Desc".Translate());
-				stringBuilder.AppendLine();
-				stringBuilder.AppendLine();
-				stringBuilder.AppendLine("StatsReport_BaseValue".Translate() + ": " + num.ToString("0.##") + " " + "LetterSecond".Translate());
-				if (num > 0f)
-				{
-					if (req.HasThing)
+					if (BuildableDef.tmpCostList.Any())
 					{
-						float statValue = req.Thing.GetStatValue(StatDefOf.RangedWeapon_WarmupMultiplier, true, -1);
-						num *= statValue;
-						if (!Mathf.Approximately(statValue, 1f))
-						{
-							stringBuilder.AppendLine();
-							stringBuilder.AppendLine("Stat_Thing_Weapon_WarmupTime_Multiplier".Translate() + ": x" + statValue.ToStringPercent());
-							stringBuilder.Append(StatUtility.GetOffsetsAndFactorsFor(StatDefOf.RangedWeapon_WarmupMultiplier, req.Thing));
-						}
+						_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.Basics, "Ingredients".Translate(), BuildableDef.tmpCostList.ToCommaList(), "Stat_Thing_Ingredients".Translate(), 1102, null, BuildableDef.tmpHyperlinks);
+						_003C_003E1__state = 12;
+						return true;
 					}
-					stringBuilder.AppendLine();
-					stringBuilder.AppendLine("StatsReport_FinalValue".Translate() + ": " + num.ToString("0.##") + " " + "LetterSecond".Translate());
-					yield return new StatDrawEntry(verbStatCategory ?? StatCategoryDefOf.Weapon_Ranged, "RangedWarmupTime".Translate(), num.ToString("0.##") + " " + "LetterSecond".Translate(), stringBuilder.ToString(), 3555, null, null, false, false);
-				}
-				ThingDef defaultProjectile = verb.defaultProjectile;
-				if (((defaultProjectile != null) ? defaultProjectile.projectile.damageDef : null) != null && verb.defaultProjectile.projectile.damageDef.harmsHealth)
-				{
-					StatCategoryDef statCat = verbStatCategory ?? StatCategoryDefOf.Weapon_Ranged;
-					StringBuilder stringBuilder2 = new StringBuilder();
-					stringBuilder2.AppendLine("Stat_Thing_Damage_Desc".Translate());
-					stringBuilder2.AppendLine();
-					float num2 = (float)verb.defaultProjectile.projectile.GetDamageAmount(req.Thing, stringBuilder2);
-					yield return new StatDrawEntry(statCat, "Damage".Translate(), num2.ToString(), stringBuilder2.ToString(), 5500, null, null, false, false);
-					if (verb.defaultProjectile.projectile.damageDef.armorCategory != null)
+					goto IL_07f6;
+					IL_2412:
+					if (_003Ci_003E5__11 < CS_0024_003C_003E8__locals66.equippedStatOffsets.Count)
 					{
-						StringBuilder stringBuilder3 = new StringBuilder();
-						float armorPenetration = verb.defaultProjectile.projectile.GetArmorPenetration(req.Thing, stringBuilder3);
-						TaggedString taggedString = "ArmorPenetrationExplanation".Translate();
-						if (stringBuilder3.Length != 0)
+						StatDef stat = CS_0024_003C_003E8__locals66.equippedStatOffsets[_003Ci_003E5__11].stat;
+						float num2 = CS_0024_003C_003E8__locals66.equippedStatOffsets[_003Ci_003E5__11].value;
+						StringBuilder stringBuilder3 = new StringBuilder(stat.description);
+						if (req.HasThing && stat.Worker != null)
 						{
-							TaggedString t = taggedString;
-							string str = "\n\n";
-							StringBuilder stringBuilder4 = stringBuilder3;
-							taggedString = t + (str + ((stringBuilder4 != null) ? stringBuilder4.ToString() : null));
+							stringBuilder3.AppendLine();
+							stringBuilder3.AppendLine();
+							stringBuilder3.AppendLine("StatsReport_BaseValue".Translate() + ": " + stat.ValueToString(num2, ToStringNumberSense.Offset, stat.finalizeEquippedStatOffset));
+							num2 = StatWorker.StatOffsetFromGear(req.Thing, stat);
+							if (!stat.parts.NullOrEmpty())
+							{
+								stringBuilder3.AppendLine();
+								for (int j = 0; j < stat.parts.Count; j++)
+								{
+									string text = stat.parts[j].ExplanationPart(req);
+									if (!text.NullOrEmpty())
+									{
+										stringBuilder3.AppendLine(text);
+									}
+								}
+							}
+							stringBuilder3.AppendLine();
+							stringBuilder3.AppendLine("StatsReport_FinalValue".Translate() + ": " + stat.ValueToString(num2, ToStringNumberSense.Offset, !stat.formatString.NullOrEmpty()));
 						}
-						yield return new StatDrawEntry(statCat, "ArmorPenetration".Translate(), armorPenetration.ToStringPercent(), taggedString, 5400, null, null, false, false);
+						_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.EquippedStatOffsets, CS_0024_003C_003E8__locals66.equippedStatOffsets[_003Ci_003E5__11].stat, num2, StatRequest.ForEmpty(), ToStringNumberSense.Offset, null, forceUnfinalizedMode: true).SetReportText(stringBuilder3.ToString());
+						_003C_003E1__state = 41;
+						return true;
 					}
-					float buildingDamageFactor = verb.defaultProjectile.projectile.damageDef.buildingDamageFactor;
-					float dmgBuildingsImpassable = verb.defaultProjectile.projectile.damageDef.buildingDamageFactorImpassable;
-					float dmgBuildingsPassable = verb.defaultProjectile.projectile.damageDef.buildingDamageFactorPassable;
+					goto IL_2428;
+					IL_0e7d:
+					if (_003Cverb_003E5__4.Ranged)
+					{
+						float num3 = _003Cverb_003E5__4.burstShotCount;
+						float num4 = _003Cverb_003E5__4.ticksBetweenBurstShots;
+						_003CdmgBuildingsPassable_003E5__8 = (_003Cverb_003E5__4?.defaultProjectile?.projectile?.stoppingPower).GetValueOrDefault();
+						StringBuilder stringBuilder4 = new StringBuilder("Stat_Thing_Weapon_BurstShotCount_Desc".Translate());
+						stringBuilder4.AppendLine();
+						stringBuilder4.AppendLine();
+						stringBuilder4.AppendLine("StatsReport_BaseValue".Translate() + ": " + _003Cverb_003E5__4.burstShotCount.ToString());
+						stringBuilder4.AppendLine();
+						_003CticksBetweenBurstShotsExplanation_003E5__9 = new StringBuilder("Stat_Thing_Weapon_BurstShotFireRate_Desc".Translate());
+						_003CticksBetweenBurstShotsExplanation_003E5__9.AppendLine();
+						_003CticksBetweenBurstShotsExplanation_003E5__9.AppendLine();
+						_003CticksBetweenBurstShotsExplanation_003E5__9.AppendLine("StatsReport_BaseValue".Translate() + ": " + (60f / _003Cverb_003E5__4.ticksBetweenBurstShots.TicksToSeconds()).ToString("0.##") + " rpm");
+						_003CticksBetweenBurstShotsExplanation_003E5__9.AppendLine();
+						_003CstoppingPowerExplanation_003E5__10 = new StringBuilder("StoppingPowerExplanation".Translate());
+						_003CstoppingPowerExplanation_003E5__10.AppendLine();
+						_003CstoppingPowerExplanation_003E5__10.AppendLine();
+						_003CstoppingPowerExplanation_003E5__10.AppendLine("StatsReport_BaseValue".Translate() + ": " + _003CdmgBuildingsPassable_003E5__8.ToString("F1"));
+						_003CstoppingPowerExplanation_003E5__10.AppendLine();
+						if (req.HasThing && req.Thing.TryGetComp(out CompUniqueWeapon comp))
+						{
+							bool flag2 = false;
+							bool flag3 = false;
+							bool flag4 = false;
+							foreach (WeaponTraitDef item in comp.TraitsListForReading)
+							{
+								if (!Mathf.Approximately(item.burstShotCountMultiplier, 1f))
+								{
+									if (!flag2)
+									{
+										stringBuilder4.AppendLine("StatsReport_WeaponTraits".Translate() + ":");
+										flag2 = true;
+									}
+									num3 *= item.burstShotCountMultiplier;
+									stringBuilder4.AppendLine("    " + item.LabelCap + ": " + item.burstShotCountMultiplier.ToStringByStyle(ToStringStyle.PercentOne, ToStringNumberSense.Factor));
+								}
+								if (!Mathf.Approximately(item.burstShotSpeedMultiplier, 1f))
+								{
+									if (!flag3)
+									{
+										_003CticksBetweenBurstShotsExplanation_003E5__9.AppendLine("StatsReport_WeaponTraits".Translate() + ":");
+										flag3 = true;
+									}
+									num4 /= item.burstShotSpeedMultiplier;
+									_003CticksBetweenBurstShotsExplanation_003E5__9.AppendLine("    " + item.LabelCap + ": " + item.burstShotSpeedMultiplier.ToStringByStyle(ToStringStyle.PercentOne, ToStringNumberSense.Factor));
+								}
+								if (!Mathf.Approximately(item.additionalStoppingPower, 0f))
+								{
+									if (!flag4)
+									{
+										_003CstoppingPowerExplanation_003E5__10.AppendLine("StatsReport_WeaponTraits".Translate() + ":");
+										flag4 = true;
+									}
+									_003CdmgBuildingsPassable_003E5__8 += item.additionalStoppingPower;
+									_003CstoppingPowerExplanation_003E5__10.AppendLine("    " + item.LabelCap + ": " + item.additionalStoppingPower.ToStringByStyle(ToStringStyle.FloatOne, ToStringNumberSense.Offset));
+								}
+							}
+						}
+						stringBuilder4.AppendLine();
+						stringBuilder4.AppendLine("StatsReport_FinalValue".Translate() + ": " + Mathf.CeilToInt(num3).ToString());
+						_003CdmgBuildingsImpassable_003E5__7 = 60f / ((int)num4).TicksToSeconds();
+						_003CticksBetweenBurstShotsExplanation_003E5__9.AppendLine();
+						_003CticksBetweenBurstShotsExplanation_003E5__9.AppendLine("StatsReport_FinalValue".Translate() + ": " + _003CdmgBuildingsImpassable_003E5__7.ToString("0.##") + " rpm");
+						_003CstoppingPowerExplanation_003E5__10.AppendLine();
+						_003CstoppingPowerExplanation_003E5__10.AppendLine("StatsReport_FinalValue".Translate() + ": " + _003CdmgBuildingsPassable_003E5__8.ToString("F1"));
+						_003CstatCat_003E5__6 = _003CverbStatCategory_003E5__5 ?? StatCategoryDefOf.Weapon_Ranged;
+						if (_003Cverb_003E5__4.showBurstShotStats && _003Cverb_003E5__4.burstShotCount > 1)
+						{
+							_003C_003E2__current = new StatDrawEntry(_003CstatCat_003E5__6, "BurstShotCount".Translate(), Mathf.CeilToInt(num3).ToString(), stringBuilder4.ToString(), 5391);
+							_003C_003E1__state = 21;
+							return true;
+						}
+						goto IL_1454;
+					}
+					goto IL_1736;
+					IL_19f2:
+					if (_003C_003E7__wrap2.MoveNext())
+					{
+						StatDrawEntry current4 = _003C_003E7__wrap2.Current;
+						_003C_003E2__current = current4;
+						_003C_003E1__state = 30;
+						return true;
+					}
+					_003C_003Em__Finally5();
+					_003C_003E7__wrap2 = null;
+					goto IL_1a0c;
+					IL_1997:
+					if (CS_0024_003C_003E8__locals66.building != null)
+					{
+						_003C_003E7__wrap2 = CS_0024_003C_003E8__locals66.building.SpecialDisplayStats(CS_0024_003C_003E8__locals66, req).GetEnumerator();
+						_003C_003E1__state = -7;
+						goto IL_19f2;
+					}
+					goto IL_1a0c;
+					IL_0c6a:
+					buildingDamageFactor = _003Cverb_003E5__4.defaultProjectile.projectile.damageDef.buildingDamageFactor;
+					_003CdmgBuildingsImpassable_003E5__7 = _003Cverb_003E5__4.defaultProjectile.projectile.damageDef.buildingDamageFactorImpassable;
+					_003CdmgBuildingsPassable_003E5__8 = _003Cverb_003E5__4.defaultProjectile.projectile.damageDef.buildingDamageFactorPassable;
 					if (buildingDamageFactor != 1f)
 					{
-						yield return new StatDrawEntry(statCat, "BuildingDamageFactor".Translate(), buildingDamageFactor.ToStringPercent(), "BuildingDamageFactorExplanation".Translate(), 5410, null, null, false, false);
+						_003C_003E2__current = new StatDrawEntry(_003CstatCat_003E5__6, "BuildingDamageFactor".Translate(), buildingDamageFactor.ToStringPercent(), "BuildingDamageFactorExplanation".Translate(), 5410);
+						_003C_003E1__state = 17;
+						return true;
 					}
-					if (dmgBuildingsImpassable != 1f)
+					goto IL_0d24;
+					IL_1ea5:
+					if (ModsConfig.OdysseyActive && CS_0024_003C_003E8__locals66.Fillage == FillCategory.Full)
 					{
-						yield return new StatDrawEntry(statCat, "BuildingDamageFactorImpassable".Translate(), dmgBuildingsImpassable.ToStringPercent(), "BuildingDamageFactorImpassableExplanation".Translate(), 5420, null, null, false, false);
+						bool b = CS_0024_003C_003E8__locals66.building.isAirtight || (CS_0024_003C_003E8__locals66.building.isStuffableAirtight && req.StuffDef.stuffProps.isAirtight);
+						_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.Building, "Stat_Airtight".Translate(), b.ToStringYesNo(), "Stat_Airtight_Desc".Translate(), 6100);
+						_003C_003E1__state = 38;
+						return true;
 					}
-					if (dmgBuildingsPassable != 1f)
+					goto IL_1f46;
+					IL_0d24:
+					if (_003CdmgBuildingsImpassable_003E5__7 != 1f)
 					{
-						yield return new StatDrawEntry(statCat, "BuildingDamageFactorPassable".Translate(), dmgBuildingsPassable.ToStringPercent(), "BuildingDamageFactorPassableExplanation".Translate(), 5430, null, null, false, false);
+						_003C_003E2__current = new StatDrawEntry(_003CstatCat_003E5__6, "BuildingDamageFactorImpassable".Translate(), _003CdmgBuildingsImpassable_003E5__7.ToStringPercent(), "BuildingDamageFactorImpassableExplanation".Translate(), 5420);
+						_003C_003E1__state = 18;
+						return true;
 					}
-					statCat = null;
-				}
-				if (verb.defaultProjectile == null && verb.beamDamageDef != null)
-				{
-					yield return new StatDrawEntry(verbStatCategory ?? StatCategoryDefOf.Weapon_Ranged, "ArmorPenetration".Translate(), verb.beamDamageDef.defaultArmorPenetration.ToStringPercent(), "ArmorPenetrationExplanation".Translate(), 5400, null, null, false, false);
-				}
-				if (verb.Ranged)
-				{
-					float num3 = (float)verb.burstShotCount;
-					float num4 = (float)verb.ticksBetweenBurstShots;
-					VerbProperties verbProperties = verb;
-					float? num5;
-					if (verbProperties == null)
+					goto IL_0d8a;
+					IL_1af7:
+					if (_003C_003E7__wrap2.MoveNext())
 					{
-						num5 = null;
+						StatDrawEntry current5 = _003C_003E7__wrap2.Current;
+						_003C_003E2__current = current5;
+						_003C_003E1__state = 32;
+						return true;
 					}
-					else
+					_003C_003Em__Finally7();
+					_003C_003E7__wrap2 = null;
+					_003Ci_003E5__11++;
+					goto IL_1b23;
+					IL_0d8a:
+					if (_003CdmgBuildingsPassable_003E5__8 != 1f)
 					{
-						ThingDef defaultProjectile2 = verbProperties.defaultProjectile;
-						if (defaultProjectile2 == null)
+						_003C_003E2__current = new StatDrawEntry(_003CstatCat_003E5__6, "BuildingDamageFactorPassable".Translate(), _003CdmgBuildingsPassable_003E5__8.ToStringPercent(), "BuildingDamageFactorPassableExplanation".Translate(), 5430);
+						_003C_003E1__state = 19;
+						return true;
+					}
+					goto IL_0df0;
+					IL_07f6:
+					if (CS_0024_003C_003E8__locals66.thingClass != null && typeof(Building_Bed).IsAssignableFrom(CS_0024_003C_003E8__locals66.thingClass) && !CS_0024_003C_003E8__locals66.statBases.StatListContains(StatDefOf.BedRestEffectiveness))
+					{
+						_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.Building, StatDefOf.BedRestEffectiveness, StatDefOf.BedRestEffectiveness.valueIfMissing, StatRequest.ForEmpty(), ToStringNumberSense.Undefined, null);
+						_003C_003E1__state = 13;
+						return true;
+					}
+					goto IL_0873;
+					IL_0df0:
+					_003CstatCat_003E5__6 = null;
+					goto IL_0df7;
+					IL_1736:
+					if (_003Cverb_003E5__4.ForcedMissRadius > 0f)
+					{
+						_003CstatCat_003E5__6 = _003CverbStatCategory_003E5__5 ?? StatCategoryDefOf.Weapon_Ranged;
+						_003C_003E2__current = new StatDrawEntry(_003CstatCat_003E5__6, "MissRadius".Translate(), _003Cverb_003E5__4.ForcedMissRadius.ToString("0.#"), "Stat_Thing_Weapon_MissRadius_Desc".Translate(), 3557);
+						_003C_003E1__state = 25;
+						return true;
+					}
+					goto IL_1838;
+					IL_02d1:
+					if (CS_0024_003C_003E8__locals66.apparel.gender != 0)
+					{
+						_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.Apparel, "Stat_Thing_Apparel_Gender".Translate(), CS_0024_003C_003E8__locals66.apparel.gender.GetLabel().CapitalizeFirst(), "Stat_Thing_Apparel_Gender_Desc".Translate(), 2749);
+						_003C_003E1__state = 6;
+						return true;
+					}
+					goto IL_0340;
+					IL_1a0c:
+					if (CS_0024_003C_003E8__locals66.isTechHediff)
+					{
+						IEnumerable<RecipeDef> recipes = DefDatabase<RecipeDef>.AllDefs.Where((RecipeDef x) => x.addsHediff != null && x.IsIngredient(CS_0024_003C_003E8__locals66));
+						_003C_003E7__wrap2 = MedicalRecipesUtility.GetMedicalStatsFromRecipeDefs(recipes).GetEnumerator();
+						_003C_003E1__state = -8;
+						goto IL_1a74;
+					}
+					goto IL_1a8e;
+					IL_0873:
+					if (!CS_0024_003C_003E8__locals66.verbs.NullOrEmpty())
+					{
+						_003Cverb_003E5__4 = CS_0024_003C_003E8__locals66.verbs.First((VerbProperties x) => x.isPrimary);
+						_003CverbStatCategory_003E5__5 = ((CS_0024_003C_003E8__locals66.category == ThingCategory.Pawn) ? StatCategoryDefOf.PawnCombat : null);
+						float num5 = _003Cverb_003E5__4.warmupTime;
+						StringBuilder stringBuilder5 = new StringBuilder("Stat_Thing_Weapon_RangedWarmupTime_Desc".Translate());
+						stringBuilder5.AppendLine();
+						stringBuilder5.AppendLine();
+						stringBuilder5.AppendLine("StatsReport_BaseValue".Translate() + ": " + num5.ToString("0.##") + " " + "LetterSecond".Translate());
+						if (num5 > 0f)
 						{
-							num5 = null;
+							if (req.HasThing)
+							{
+								float statValue = req.Thing.GetStatValue(StatDefOf.RangedWeapon_WarmupMultiplier);
+								num5 *= statValue;
+								if (!Mathf.Approximately(statValue, 1f))
+								{
+									stringBuilder5.AppendLine();
+									stringBuilder5.AppendLine("Stat_Thing_Weapon_WarmupTime_Multiplier".Translate() + ": x" + statValue.ToStringPercent());
+									stringBuilder5.Append(StatUtility.GetOffsetsAndFactorsFor(StatDefOf.RangedWeapon_WarmupMultiplier, req.Thing));
+								}
+							}
+							stringBuilder5.AppendLine();
+							stringBuilder5.AppendLine("StatsReport_FinalValue".Translate() + ": " + num5.ToString("0.##") + " " + "LetterSecond".Translate());
+							_003C_003E2__current = new StatDrawEntry(_003CverbStatCategory_003E5__5 ?? StatCategoryDefOf.Weapon_Ranged, "RangedWarmupTime".Translate(), num5.ToString("0.##") + " " + "LetterSecond".Translate(), stringBuilder5.ToString(), 3555);
+							_003C_003E1__state = 14;
+							return true;
 						}
-						else
+						goto IL_0ab0;
+					}
+					goto IL_1846;
+					IL_2428:
+					if (!CS_0024_003C_003E8__locals66.IsDrug)
+					{
+						break;
+					}
+					_003C_003E7__wrap2 = DrugStatsUtility.SpecialDisplayStats(CS_0024_003C_003E8__locals66).GetEnumerator();
+					_003C_003E1__state = -11;
+					goto IL_2474;
+					IL_1a74:
+					if (_003C_003E7__wrap2.MoveNext())
+					{
+						StatDrawEntry current6 = _003C_003E7__wrap2.Current;
+						_003C_003E2__current = current6;
+						_003C_003E1__state = 31;
+						return true;
+					}
+					_003C_003Em__Finally6();
+					_003C_003E7__wrap2 = null;
+					goto IL_1a8e;
+					IL_0118:
+					if (_003C_003E7__wrap2.MoveNext())
+					{
+						StatDrawEntry current7 = _003C_003E7__wrap2.Current;
+						_003C_003E2__current = current7;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap2 = null;
+					if (CS_0024_003C_003E8__locals66.apparel != null)
+					{
+						string coveredOuterPartsString = CS_0024_003C_003E8__locals66.apparel.GetCoveredOuterPartsString(BodyDefOf.Human);
+						_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.Apparel, "Covers".Translate(), coveredOuterPartsString, "Stat_Thing_Apparel_Covers_Desc".Translate(), 2750);
+						_003C_003E1__state = 2;
+						return true;
+					}
+					goto IL_0340;
+					IL_1846:
+					if (CS_0024_003C_003E8__locals66.plant != null)
+					{
+						_003C_003E7__wrap2 = CS_0024_003C_003E8__locals66.plant.SpecialDisplayStats().GetEnumerator();
+						_003C_003E1__state = -4;
+						goto IL_189a;
+					}
+					goto IL_18b4;
+					IL_189a:
+					if (_003C_003E7__wrap2.MoveNext())
+					{
+						StatDrawEntry current8 = _003C_003E7__wrap2.Current;
+						_003C_003E2__current = current8;
+						_003C_003E1__state = 27;
+						return true;
+					}
+					_003C_003Em__Finally2();
+					_003C_003E7__wrap2 = null;
+					goto IL_18b4;
+					IL_0340:
+					if (CS_0024_003C_003E8__locals66.IsMedicine && CS_0024_003C_003E8__locals66.MedicineTendXpGainFactor != 1f)
+					{
+						_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.Basics, "MedicineXpGainFactor".Translate(), CS_0024_003C_003E8__locals66.MedicineTendXpGainFactor.ToStringPercent(), "Stat_Thing_Drug_MedicineXpGainFactor_Desc".Translate(), 1000);
+						_003C_003E1__state = 7;
+						return true;
+					}
+					goto IL_03ac;
+					IL_222e:
+					if (!CS_0024_003C_003E8__locals66.equippedStatOffsets.NullOrEmpty())
+					{
+						_003Ci_003E5__11 = 0;
+						goto IL_2412;
+					}
+					goto IL_2428;
+					IL_1f46:
+					if (CS_0024_003C_003E8__locals66.IsMeat)
+					{
+						List<ThingDef> list2 = new List<ThingDef>();
+						bool flag5 = false;
+						foreach (ThingDef allDef2 in DefDatabase<ThingDef>.AllDefs)
 						{
-							ProjectileProperties projectileProperties = defaultProjectile2.projectile;
-							num5 = ((projectileProperties != null) ? new float?(projectileProperties.stoppingPower) : null);
+							if (allDef2.race != null && allDef2.race.meatDef == CS_0024_003C_003E8__locals66 && !allDef2.IsCorpse)
+							{
+								if (!Find.HiddenItemsManager.Hidden(allDef2))
+								{
+									flag5 = true;
+								}
+								list2.Add(allDef2);
+							}
 						}
+						_003C_003E2__current = new StatDrawEntry(valueString: (!flag5) ? $"({"NotYetDiscovered".Translate()})" : string.Join(", ", (from x in list2
+							where !Find.HiddenItemsManager.Hidden(x)
+							select x into p
+							select p.label).ToArray()).CapitalizeFirst(), category: StatCategoryDefOf.BasicsPawn, label: "Stat_SourceSpecies_Name".Translate(), reportText: "Stat_SourceSpecies_Desc".Translate(), displayPriorityWithinCategory: 1200, overrideReportTitle: null, hyperlinks: Dialog_InfoCard.DefsToHyperlinks(list2));
+						_003C_003E1__state = 39;
+						return true;
 					}
-					float? num6 = num5;
-					float dmgBuildingsPassable = num6.GetValueOrDefault();
-					StringBuilder stringBuilder5 = new StringBuilder("Stat_Thing_Weapon_BurstShotFireRate_Desc".Translate());
-					stringBuilder5.AppendLine();
-					stringBuilder5.AppendLine();
-					stringBuilder5.AppendLine("StatsReport_BaseValue".Translate() + ": " + verb.burstShotCount.ToString());
-					stringBuilder5.AppendLine();
-					StringBuilder ticksBetweenBurstShotsExplanation = new StringBuilder("Stat_Thing_Weapon_BurstShotFireRate_Desc".Translate());
-					ticksBetweenBurstShotsExplanation.AppendLine();
-					ticksBetweenBurstShotsExplanation.AppendLine();
-					ticksBetweenBurstShotsExplanation.AppendLine("StatsReport_BaseValue".Translate() + ": " + (60f / verb.ticksBetweenBurstShots.TicksToSeconds()).ToString("0.##") + " rpm");
-					ticksBetweenBurstShotsExplanation.AppendLine();
-					StringBuilder stoppingPowerExplanation = new StringBuilder("StoppingPowerExplanation".Translate());
-					stoppingPowerExplanation.AppendLine();
-					stoppingPowerExplanation.AppendLine();
-					stoppingPowerExplanation.AppendLine("StatsReport_BaseValue".Translate() + ": " + dmgBuildingsPassable.ToString("F1"));
-					stoppingPowerExplanation.AppendLine();
-					CompUniqueWeapon compUniqueWeapon;
-					if (req.HasThing && req.Thing.TryGetComp(out compUniqueWeapon))
+					goto IL_20ba;
+					IL_03ac:
+					if (CS_0024_003C_003E8__locals66.fillPercent > 0f && (CS_0024_003C_003E8__locals66.category == ThingCategory.Item || CS_0024_003C_003E8__locals66.category == ThingCategory.Building || CS_0024_003C_003E8__locals66.category == ThingCategory.Plant))
 					{
-						bool flag = false;
-						bool flag2 = false;
-						bool flag3 = false;
-						foreach (WeaponTraitDef weaponTraitDef in compUniqueWeapon.TraitsListForReading)
+						StatDrawEntry statDrawEntry = new StatDrawEntry(StatCategoryDefOf.Basics, "CoverEffectiveness".Translate(), CS_0024_003C_003E8__locals66.BaseBlockChance().ToStringPercent(), "CoverEffectivenessExplanation".Translate(), 2000);
+						_003C_003E2__current = statDrawEntry;
+						_003C_003E1__state = 8;
+						return true;
+					}
+					goto IL_042f;
+					IL_2474:
+					if (_003C_003E7__wrap2.MoveNext())
+					{
+						StatDrawEntry current10 = _003C_003E7__wrap2.Current;
+						_003C_003E2__current = current10;
+						_003C_003E1__state = 42;
+						return true;
+					}
+					_003C_003Em__Finally9();
+					_003C_003E7__wrap2 = null;
+					break;
+					IL_1b23:
+					if (_003Ci_003E5__11 < CS_0024_003C_003E8__locals66.comps.Count)
+					{
+						_003C_003E7__wrap2 = CS_0024_003C_003E8__locals66.comps[_003Ci_003E5__11].SpecialDisplayStats(req).GetEnumerator();
+						_003C_003E1__state = -9;
+						goto IL_1af7;
+					}
+					if (CS_0024_003C_003E8__locals66.building != null)
+					{
+						if (CS_0024_003C_003E8__locals66.building.mineableThing != null)
 						{
-							if (!Mathf.Approximately(weaponTraitDef.burstShotCountMultiplier, 1f))
+							_003Chyperlinks_003E5__12 = new Dialog_InfoCard.Hyperlink[1]
 							{
-								if (!flag)
-								{
-									stringBuilder5.AppendLine("StatsReport_WeaponTraits".Translate() + ":");
-									flag = true;
-								}
-								num3 *= weaponTraitDef.burstShotCountMultiplier;
-								stringBuilder5.AppendLine("    " + weaponTraitDef.LabelCap + ": " + weaponTraitDef.burstShotCountMultiplier.ToStringByStyle(ToStringStyle.PercentOne, ToStringNumberSense.Factor));
-							}
-							if (!Mathf.Approximately(weaponTraitDef.burstShotSpeedMultiplier, 1f))
-							{
-								if (!flag2)
-								{
-									ticksBetweenBurstShotsExplanation.AppendLine("StatsReport_WeaponTraits".Translate() + ":");
-									flag2 = true;
-								}
-								num4 /= weaponTraitDef.burstShotSpeedMultiplier;
-								ticksBetweenBurstShotsExplanation.AppendLine("    " + weaponTraitDef.LabelCap + ": " + weaponTraitDef.burstShotSpeedMultiplier.ToStringByStyle(ToStringStyle.PercentOne, ToStringNumberSense.Factor));
-							}
-							if (!Mathf.Approximately(weaponTraitDef.additionalStoppingPower, 0f))
-							{
-								if (!flag3)
-								{
-									stoppingPowerExplanation.AppendLine("StatsReport_WeaponTraits".Translate() + ":");
-									flag3 = true;
-								}
-								dmgBuildingsPassable += weaponTraitDef.additionalStoppingPower;
-								stoppingPowerExplanation.AppendLine("    " + weaponTraitDef.LabelCap + ": " + weaponTraitDef.additionalStoppingPower.ToStringByStyle(ToStringStyle.FloatOne, ToStringNumberSense.Offset));
-							}
+								new Dialog_InfoCard.Hyperlink(CS_0024_003C_003E8__locals66.building.mineableThing)
+							};
+							_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.BasicsImportant, "Stat_MineableThing_Name".Translate(), CS_0024_003C_003E8__locals66.building.mineableThing.LabelCap, "Stat_MineableThing_Desc".Translate(), 2200, null, _003Chyperlinks_003E5__12);
+							_003C_003E1__state = 33;
+							return true;
 						}
+						goto IL_1cc5;
 					}
-					stringBuilder5.AppendLine();
-					stringBuilder5.AppendLine("StatsReport_FinalValue".Translate() + ": " + Mathf.CeilToInt(num3).ToString());
-					float dmgBuildingsImpassable = 60f / ((int)num4).TicksToSeconds();
-					ticksBetweenBurstShotsExplanation.AppendLine();
-					ticksBetweenBurstShotsExplanation.AppendLine("StatsReport_FinalValue".Translate() + ": " + dmgBuildingsImpassable.ToString("0.##") + " rpm");
-					stoppingPowerExplanation.AppendLine();
-					stoppingPowerExplanation.AppendLine("StatsReport_FinalValue".Translate() + ": " + dmgBuildingsPassable.ToString("F1"));
-					StatCategoryDef statCat = verbStatCategory ?? StatCategoryDefOf.Weapon_Ranged;
-					if (verb.showBurstShotStats && verb.burstShotCount > 1)
+					goto IL_1f46;
+					IL_18b4:
+					if (CS_0024_003C_003E8__locals66.ingestible != null)
 					{
-						yield return new StatDrawEntry(statCat, "BurstShotCount".Translate(), Mathf.CeilToInt(num3).ToString(), stringBuilder5.ToString(), 5391, null, null, false, false);
-						yield return new StatDrawEntry(statCat, "BurstShotFireRate".Translate(), dmgBuildingsImpassable.ToString("0.##") + " rpm", ticksBetweenBurstShotsExplanation.ToString(), 5395, null, null, false, false);
+						_003C_003E7__wrap2 = CS_0024_003C_003E8__locals66.ingestible.SpecialDisplayStats().GetEnumerator();
+						_003C_003E1__state = -5;
+						goto IL_1908;
 					}
-					if (dmgBuildingsPassable > 0f)
+					goto IL_1922;
+					IL_1a8e:
+					_003Ci_003E5__11 = 0;
+					goto IL_1b23;
+					IL_042f:
+					if (CS_0024_003C_003E8__locals66.constructionSkillPrerequisite > 0)
 					{
-						yield return new StatDrawEntry(statCat, "StoppingPower".Translate(), dmgBuildingsPassable.ToString("F1"), stoppingPowerExplanation.ToString(), 5402, null, null, false, false);
+						_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.Basics, "SkillRequiredToBuild".Translate(SkillDefOf.Construction.LabelCap), CS_0024_003C_003E8__locals66.constructionSkillPrerequisite.ToString(), "SkillRequiredToBuildExplanation".Translate(SkillDefOf.Construction.LabelCap), 1100);
+						_003C_003E1__state = 9;
+						return true;
 					}
-					float num7 = verb.range;
-					StringBuilder stringBuilder6 = new StringBuilder("Stat_Thing_Weapon_Range_Desc".Translate());
-					stringBuilder6.AppendLine();
-					stringBuilder6.AppendLine();
-					stringBuilder6.AppendLine("StatsReport_BaseValue".Translate() + ": " + num7.ToString("F0"));
+					goto IL_04ae;
+					IL_1454:
+					if (_003CdmgBuildingsPassable_003E5__8 > 0f)
+					{
+						_003C_003E2__current = new StatDrawEntry(_003CstatCat_003E5__6, "StoppingPower".Translate(), _003CdmgBuildingsPassable_003E5__8.ToString("F1"), _003CstoppingPowerExplanation_003E5__10.ToString(), 5402);
+						_003C_003E1__state = 23;
+						return true;
+					}
+					goto IL_14bb;
+					IL_04ae:
+					if (CS_0024_003C_003E8__locals66.artisticSkillPrerequisite > 0)
+					{
+						_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.Basics, "SkillRequiredToBuild".Translate(SkillDefOf.Artistic.LabelCap), CS_0024_003C_003E8__locals66.artisticSkillPrerequisite.ToString(), "SkillRequiredToBuildExplanation".Translate(SkillDefOf.Artistic.LabelCap), 1100);
+						_003C_003E1__state = 10;
+						return true;
+					}
+					goto IL_052d;
+					IL_1908:
+					if (_003C_003E7__wrap2.MoveNext())
+					{
+						StatDrawEntry current11 = _003C_003E7__wrap2.Current;
+						_003C_003E2__current = current11;
+						_003C_003E1__state = 28;
+						return true;
+					}
+					_003C_003Em__Finally3();
+					_003C_003E7__wrap2 = null;
+					goto IL_1922;
+					IL_052d:
+					_003Crecipes_003E5__2 = DefDatabase<RecipeDef>.AllDefsListForReading.Where((RecipeDef r) => r.products.Count == 1 && r.products.Any((ThingDefCountClass p) => p.thingDef == CS_0024_003C_003E8__locals66) && !r.IsSurgery);
+					if (_003Crecipes_003E5__2.Any())
+					{
+						IEnumerable<string> enumerable = (from u in _003Crecipes_003E5__2.Where((RecipeDef x) => x.recipeUsers != null).SelectMany((RecipeDef r) => r.recipeUsers)
+							select u.label).Concat(from x in DefDatabase<ThingDef>.AllDefsListForReading
+							where x.recipes != null && x.recipes.Any((RecipeDef y) => y.products.Any((ThingDefCountClass z) => z.thingDef == CS_0024_003C_003E8__locals66))
+							select x.label).Distinct();
+						if (enumerable.Any())
+						{
+							_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.Basics, "CreatedAt".Translate(), enumerable.ToCommaList().CapitalizeFirst(), "Stat_Thing_CreatedAt_Desc".Translate(), 1103);
+							_003C_003E1__state = 11;
+							return true;
+						}
+						goto IL_0675;
+					}
+					goto IL_07f6;
+					IL_0ab0:
+					if (_003Cverb_003E5__4.defaultProjectile?.projectile.damageDef != null && _003Cverb_003E5__4.defaultProjectile.projectile.damageDef.harmsHealth)
+					{
+						_003CstatCat_003E5__6 = _003CverbStatCategory_003E5__5 ?? StatCategoryDefOf.Weapon_Ranged;
+						StringBuilder stringBuilder6 = new StringBuilder();
+						stringBuilder6.AppendLine("Stat_Thing_Damage_Desc".Translate());
+						stringBuilder6.AppendLine();
+						float num6 = _003Cverb_003E5__4.defaultProjectile.projectile.GetDamageAmount(req.Thing, stringBuilder6);
+						_003C_003E2__current = new StatDrawEntry(_003CstatCat_003E5__6, "Damage".Translate(), num6.ToString(), stringBuilder6.ToString(), 5500);
+						_003C_003E1__state = 15;
+						return true;
+					}
+					goto IL_0df7;
+					IL_1922:
+					if (CS_0024_003C_003E8__locals66.race != null)
+					{
+						_003C_003E7__wrap2 = CS_0024_003C_003E8__locals66.race.SpecialDisplayStats(CS_0024_003C_003E8__locals66, req).GetEnumerator();
+						_003C_003E1__state = -6;
+						goto IL_197d;
+					}
+					goto IL_1997;
+					IL_14bb:
+					num7 = _003Cverb_003E5__4.range;
+					stringBuilder7 = new StringBuilder("Stat_Thing_Weapon_Range_Desc".Translate());
+					stringBuilder7.AppendLine();
+					stringBuilder7.AppendLine();
+					stringBuilder7.AppendLine("StatsReport_BaseValue".Translate() + ": " + num7.ToString("F0"));
 					if (req.HasThing)
 					{
-						float statValue2 = req.Thing.GetStatValue(StatDefOf.RangedWeapon_RangeMultiplier, true, -1);
+						float statValue2 = req.Thing.GetStatValue(StatDefOf.RangedWeapon_RangeMultiplier);
 						num7 *= statValue2;
 						if (!Mathf.Approximately(statValue2, 1f))
 						{
-							stringBuilder6.AppendLine();
-							stringBuilder6.AppendLine("Stat_Thing_Weapon_Range_Multiplier".Translate() + ": x" + statValue2.ToStringPercent());
-							stringBuilder6.Append(StatUtility.GetOffsetsAndFactorsFor(StatDefOf.RangedWeapon_RangeMultiplier, req.Thing));
+							stringBuilder7.AppendLine();
+							stringBuilder7.AppendLine("Stat_Thing_Weapon_Range_Multiplier".Translate() + ": x" + statValue2.ToStringPercent());
+							stringBuilder7.Append(StatUtility.GetOffsetsAndFactorsFor(StatDefOf.RangedWeapon_RangeMultiplier, req.Thing));
 						}
-						Map map = req.Thing.Map ?? req.Thing.MapHeld;
-						if (map != null && map.weatherManager.CurWeatherMaxRangeCap >= 0f)
+						Map obj = req.Thing.Map ?? req.Thing.MapHeld;
+						if (obj != null && obj.weatherManager.CurWeatherMaxRangeCap >= 0f)
 						{
 							WeatherManager weatherManager = (req.Thing.Map ?? req.Thing.MapHeld).weatherManager;
-							bool flag4 = num7 > weatherManager.CurWeatherMaxRangeCap;
-							float num8 = num7;
+							bool num8 = num7 > weatherManager.CurWeatherMaxRangeCap;
+							float num9 = num7;
 							num7 = Mathf.Min(num7, weatherManager.CurWeatherMaxRangeCap);
-							if (flag4)
+							if (num8)
 							{
-								stringBuilder6.AppendLine();
-								stringBuilder6.AppendLine("    " + "Stat_Thing_Weapon_Range_Clamped".Translate(num7.ToString("F0").Named("CAP"), num8.ToString("F0").Named("ORIGINAL")));
+								stringBuilder7.AppendLine();
+								stringBuilder7.AppendLine("    " + "Stat_Thing_Weapon_Range_Clamped".Translate(num7.ToString("F0").Named("CAP"), num9.ToString("F0").Named("ORIGINAL")));
 							}
 						}
 					}
-					stringBuilder6.AppendLine();
-					stringBuilder6.AppendLine("StatsReport_FinalValue".Translate() + ": " + num7.ToString("F0"));
-					yield return new StatDrawEntry(statCat, "Range".Translate(), num7.ToString("F0"), stringBuilder6.ToString(), 5390, null, null, false, false);
-					ticksBetweenBurstShotsExplanation = null;
-					stoppingPowerExplanation = null;
-					statCat = null;
-				}
-				if (verb.ForcedMissRadius > 0f)
-				{
-					StatCategoryDef statCat = verbStatCategory ?? StatCategoryDefOf.Weapon_Ranged;
-					yield return new StatDrawEntry(statCat, "MissRadius".Translate(), verb.ForcedMissRadius.ToString("0.#"), "Stat_Thing_Weapon_MissRadius_Desc".Translate(), 3557, null, null, false, false);
-					yield return new StatDrawEntry(statCat, "DirectHitChance".Translate(), (1f / (float)GenRadial.NumCellsInRadius(verb.ForcedMissRadius)).ToStringPercent(), "Stat_Thing_Weapon_DirectHitChance_Desc".Translate(), 3560, null, null, false, false);
-					statCat = null;
-				}
-				verb = null;
-				verbStatCategory = null;
-			}
-			if (this.plant != null)
-			{
-				foreach (StatDrawEntry statDrawEntry3 in this.plant.SpecialDisplayStats())
-				{
-					yield return statDrawEntry3;
-				}
-				enumerator = null;
-			}
-			if (this.ingestible != null)
-			{
-				foreach (StatDrawEntry statDrawEntry4 in this.ingestible.SpecialDisplayStats())
-				{
-					yield return statDrawEntry4;
-				}
-				enumerator = null;
-			}
-			if (this.race != null)
-			{
-				foreach (StatDrawEntry statDrawEntry5 in this.race.SpecialDisplayStats(this, req))
-				{
-					yield return statDrawEntry5;
-				}
-				enumerator = null;
-			}
-			if (this.building != null)
-			{
-				foreach (StatDrawEntry statDrawEntry6 in this.building.SpecialDisplayStats(this, req))
-				{
-					yield return statDrawEntry6;
-				}
-				enumerator = null;
-			}
-			if (this.isTechHediff)
-			{
-				IEnumerable<RecipeDef> enumerable2 = from x in DefDatabase<RecipeDef>.AllDefs
-				where x.addsHediff != null && x.IsIngredient(this)
-				select x;
-				foreach (StatDrawEntry statDrawEntry7 in MedicalRecipesUtility.GetMedicalStatsFromRecipeDefs(enumerable2))
-				{
-					yield return statDrawEntry7;
-				}
-				enumerator = null;
-			}
-			int num9;
-			for (int i = 0; i < this.comps.Count; i = num9 + 1)
-			{
-				foreach (StatDrawEntry statDrawEntry8 in this.comps[i].SpecialDisplayStats(req))
-				{
-					yield return statDrawEntry8;
-				}
-				enumerator = null;
-				num9 = i;
-			}
-			if (this.building != null)
-			{
-				if (this.building.mineableThing != null)
-				{
-					Dialog_InfoCard.Hyperlink[] hyperlinks = new Dialog_InfoCard.Hyperlink[]
-					{
-						new Dialog_InfoCard.Hyperlink(this.building.mineableThing, -1)
-					};
-					yield return new StatDrawEntry(StatCategoryDefOf.BasicsImportant, "Stat_MineableThing_Name".Translate(), this.building.mineableThing.LabelCap, "Stat_MineableThing_Desc".Translate(), 2200, null, hyperlinks, false, false);
-					StringBuilder stringBuilder7 = new StringBuilder();
-					stringBuilder7.AppendLine("Stat_MiningYield_Desc".Translate());
 					stringBuilder7.AppendLine();
-					stringBuilder7.AppendLine("StatsReport_DifficultyMultiplier".Translate(Find.Storyteller.difficultyDef.label) + ": " + Find.Storyteller.difficulty.mineYieldFactor.ToStringByStyle(ToStringStyle.PercentZero, ToStringNumberSense.Factor));
-					yield return new StatDrawEntry(StatCategoryDefOf.Basics, "Stat_MiningYield_Name".Translate(), Mathf.CeilToInt((float)this.building.EffectiveMineableYield).ToString("F0"), stringBuilder7.ToString(), 2200, null, hyperlinks, false, false);
-					hyperlinks = null;
-				}
-				if (this.building.IsTurret)
-				{
-					ThingDef turret = this.building.turretGunDef;
-					yield return new StatDrawEntry(StatCategoryDefOf.BasicsImportant, "Stat_Weapon_Name".Translate(), turret.LabelCap, "Stat_Weapon_Desc".Translate(), 5389, null, new Dialog_InfoCard.Hyperlink[]
+					stringBuilder7.AppendLine("StatsReport_FinalValue".Translate() + ": " + num7.ToString("F0"));
+					_003C_003E2__current = new StatDrawEntry(_003CstatCat_003E5__6, "Range".Translate(), num7.ToString("F0"), stringBuilder7.ToString(), 5390);
+					_003C_003E1__state = 24;
+					return true;
+					IL_197d:
+					if (_003C_003E7__wrap2.MoveNext())
 					{
-						new Dialog_InfoCard.Hyperlink(turret, -1)
-					}, false, false);
-					StatRequest request = StatRequest.For(turret, null, QualityCategory.Normal);
-					foreach (StatDrawEntry statDrawEntry9 in turret.SpecialDisplayStats(request))
-					{
-						if (statDrawEntry9.category == StatCategoryDefOf.Weapon_Ranged)
-						{
-							yield return statDrawEntry9;
-						}
+						StatDrawEntry current12 = _003C_003E7__wrap2.Current;
+						_003C_003E2__current = current12;
+						_003C_003E1__state = 29;
+						return true;
 					}
-					enumerator = null;
-					for (int i = 0; i < turret.statBases.Count; i = num9 + 1)
-					{
-						StatModifier statModifier = turret.statBases[i];
-						if (statModifier.stat.category == StatCategoryDefOf.Weapon_Ranged)
-						{
-							yield return new StatDrawEntry(StatCategoryDefOf.Weapon_Ranged, statModifier.stat, statModifier.value, request, ToStringNumberSense.Undefined, null, false);
-						}
-						num9 = i;
-					}
-					turret = null;
-					request = default(StatRequest);
+					_003C_003Em__Finally4();
+					_003C_003E7__wrap2 = null;
+					goto IL_1997;
 				}
-				if (ModsConfig.OdysseyActive && this.Fillage == FillCategory.Full)
-				{
-					bool b = this.building.isAirtight || (this.building.isStuffableAirtight && req.StuffDef.stuffProps.isAirtight);
-					yield return new StatDrawEntry(StatCategoryDefOf.Building, "Stat_Airtight".Translate(), b.ToStringYesNo(), "Stat_Airtight_Desc".Translate(), 6100, null, null, false, false);
-				}
+				return false;
 			}
-			if (this.IsMeat)
+			catch
 			{
-				List<ThingDef> list = new List<ThingDef>();
-				bool flag5 = false;
-				foreach (ThingDef thingDef in DefDatabase<ThingDef>.AllDefs)
-				{
-					if (thingDef.race != null && thingDef.race.meatDef == this && !thingDef.IsCorpse)
-					{
-						if (!Find.HiddenItemsManager.Hidden(thingDef))
-						{
-							flag5 = true;
-						}
-						list.Add(thingDef);
-					}
-				}
-				string valueString;
-				if (flag5)
-				{
-					valueString = string.Join(", ", (from x in list
-					where !Find.HiddenItemsManager.Hidden(x)
-					select x into p
-					select p.label).ToArray<string>()).CapitalizeFirst();
-				}
-				else
-				{
-					valueString = string.Format("({0})", "NotYetDiscovered".Translate());
-				}
-				yield return new StatDrawEntry(StatCategoryDefOf.BasicsPawn, "Stat_SourceSpecies_Name".Translate(), valueString, "Stat_SourceSpecies_Desc".Translate(), 1200, null, Dialog_InfoCard.DefsToHyperlinks(list), false, false);
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
-			if (this.IsLeather)
-			{
-				List<ThingDef> list2 = new List<ThingDef>();
-				bool flag6 = false;
-				foreach (ThingDef thingDef2 in DefDatabase<ThingDef>.AllDefs)
-				{
-					if (thingDef2.race != null && thingDef2.race.leatherDef == this && !thingDef2.IsCorpse)
-					{
-						if (!Find.HiddenItemsManager.Hidden(thingDef2))
-						{
-							flag6 = true;
-						}
-						list2.Add(thingDef2);
-					}
-				}
-				string valueString2;
-				if (flag6)
-				{
-					valueString2 = string.Join(", ", (from x in list2
-					where !Find.HiddenItemsManager.Hidden(x)
-					select x into p
-					select p.label).ToArray<string>()).CapitalizeFirst();
-				}
-				else
-				{
-					valueString2 = string.Format("({0})", "NotYetDiscovered".Translate());
-				}
-				yield return new StatDrawEntry(StatCategoryDefOf.BasicsPawn, "Stat_SourceSpecies_Name".Translate(), valueString2, "Stat_SourceSpecies_Desc".Translate(), 1200, null, Dialog_InfoCard.DefsToHyperlinks(list2), false, false);
-			}
-			if (!this.equippedStatOffsets.NullOrEmpty<StatModifier>())
-			{
-				for (int i = 0; i < this.equippedStatOffsets.Count; i = num9 + 1)
-				{
-					StatDef stat = this.equippedStatOffsets[i].stat;
-					float num10 = this.equippedStatOffsets[i].value;
-					StringBuilder stringBuilder8 = new StringBuilder(stat.description);
-					if (req.HasThing && stat.Worker != null)
-					{
-						stringBuilder8.AppendLine();
-						stringBuilder8.AppendLine();
-						stringBuilder8.AppendLine("StatsReport_BaseValue".Translate() + ": " + stat.ValueToString(num10, ToStringNumberSense.Offset, stat.finalizeEquippedStatOffset));
-						num10 = StatWorker.StatOffsetFromGear(req.Thing, stat);
-						if (!stat.parts.NullOrEmpty<StatPart>())
-						{
-							stringBuilder8.AppendLine();
-							for (int k = 0; k < stat.parts.Count; k++)
-							{
-								string text = stat.parts[k].ExplanationPart(req);
-								if (!text.NullOrEmpty())
-								{
-									stringBuilder8.AppendLine(text);
-								}
-							}
-						}
-						stringBuilder8.AppendLine();
-						stringBuilder8.AppendLine("StatsReport_FinalValue".Translate() + ": " + stat.ValueToString(num10, ToStringNumberSense.Offset, !stat.formatString.NullOrEmpty()));
-					}
-					yield return new StatDrawEntry(StatCategoryDefOf.EquippedStatOffsets, this.equippedStatOffsets[i].stat, num10, StatRequest.ForEmpty(), ToStringNumberSense.Offset, null, true).SetReportText(stringBuilder8.ToString());
-					num9 = i;
-				}
-			}
-			if (this.IsDrug)
-			{
-				foreach (StatDrawEntry statDrawEntry10 in DrugStatsUtility.SpecialDisplayStats(this))
-				{
-					yield return statDrawEntry10;
-				}
-				enumerator = null;
-			}
-			yield break;
-			yield break;
 		}
 
-		// Token: 0x04001162 RID: 4450
-		public Type thingClass;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap2 != null)
+			{
+				_003C_003E7__wrap2.Dispose();
+			}
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap2 != null)
+			{
+				_003C_003E7__wrap2.Dispose();
+			}
+		}
+
+		private void _003C_003Em__Finally3()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap2 != null)
+			{
+				_003C_003E7__wrap2.Dispose();
+			}
+		}
+
+		private void _003C_003Em__Finally4()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap2 != null)
+			{
+				_003C_003E7__wrap2.Dispose();
+			}
+		}
+
+		private void _003C_003Em__Finally5()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap2 != null)
+			{
+				_003C_003E7__wrap2.Dispose();
+			}
+		}
+
+		private void _003C_003Em__Finally6()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap2 != null)
+			{
+				_003C_003E7__wrap2.Dispose();
+			}
+		}
+
+		private void _003C_003Em__Finally7()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap2 != null)
+			{
+				_003C_003E7__wrap2.Dispose();
+			}
+		}
+
+		private void _003C_003Em__Finally8()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap2 != null)
+			{
+				_003C_003E7__wrap2.Dispose();
+			}
+		}
+
+		private void _003C_003Em__Finally9()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap2 != null)
+			{
+				_003C_003E7__wrap2.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04001163 RID: 4451
-		public ThingCategory category;
+		[DebuggerHidden]
+		IEnumerator<StatDrawEntry> IEnumerable<StatDrawEntry>.GetEnumerator()
+		{
+			_003CSpecialDisplayStats_003Ed__407 _003CSpecialDisplayStats_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CSpecialDisplayStats_003Ed__ = this;
+			}
+			else
+			{
+				_003CSpecialDisplayStats_003Ed__ = new _003CSpecialDisplayStats_003Ed__407(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CSpecialDisplayStats_003Ed__.req = _003C_003E3__req;
+			return _003CSpecialDisplayStats_003Ed__;
+		}
 
-		// Token: 0x04001164 RID: 4452
-		public TickerType tickerType;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<StatDrawEntry>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x04001165 RID: 4453
-		public int stackLimit = 1;
+	public Type thingClass;
 
-		// Token: 0x04001166 RID: 4454
-		public IntVec2 size = IntVec2.One;
+	public ThingCategory category;
 
-		// Token: 0x04001167 RID: 4455
-		public bool destroyable = true;
+	public TickerType tickerType;
 
-		// Token: 0x04001168 RID: 4456
-		public bool rotatable = true;
+	public int stackLimit = 1;
 
-		// Token: 0x04001169 RID: 4457
-		public bool smallVolume;
+	public IntVec2 size = IntVec2.One;
 
-		// Token: 0x0400116A RID: 4458
-		public bool useHitPoints = true;
+	public bool destroyable = true;
 
-		// Token: 0x0400116B RID: 4459
-		public bool receivesSignals;
+	public bool rotatable = true;
 
-		// Token: 0x0400116C RID: 4460
-		public List<CompProperties> comps = new List<CompProperties>();
+	public bool smallVolume;
 
-		// Token: 0x0400116D RID: 4461
-		public List<ThingDef> virtualDefs = new List<ThingDef>();
+	public bool useHitPoints = true;
 
-		// Token: 0x0400116E RID: 4462
-		public ThingDef virtualDefParent;
+	public bool receivesSignals;
 
-		// Token: 0x0400116F RID: 4463
-		[NoTranslate]
-		public string devNote;
+	public List<CompProperties> comps = new List<CompProperties>();
 
-		// Token: 0x04001170 RID: 4464
-		public List<ThingDefCountRangeClass> killedLeavingsRanges;
+	public List<ThingDef> virtualDefs = new List<ThingDef>();
 
-		// Token: 0x04001171 RID: 4465
-		public List<ThingDefCountClass> killedLeavings;
+	public ThingDef virtualDefParent;
 
-		// Token: 0x04001172 RID: 4466
-		public List<ThingDefCountClass> killedLeavingsPlayerHostile;
+	[NoTranslate]
+	public string devNote;
 
-		// Token: 0x04001173 RID: 4467
-		public float killedLeavingsChance = 1f;
+	public List<ThingDefCountRangeClass> killedLeavingsRanges;
 
-		// Token: 0x04001174 RID: 4468
-		public bool forceLeavingsAllowed;
+	public List<ThingDefCountClass> killedLeavings;
 
-		// Token: 0x04001175 RID: 4469
-		public List<ThingDefCountClass> butcherProducts;
+	public List<ThingDefCountClass> killedLeavingsPlayerHostile;
 
-		// Token: 0x04001176 RID: 4470
-		public List<ThingDefCountClass> smeltProducts;
+	public float killedLeavingsChance = 1f;
 
-		// Token: 0x04001177 RID: 4471
-		public bool smeltable;
+	public bool forceLeavingsAllowed;
 
-		// Token: 0x04001178 RID: 4472
-		public bool burnableByRecipe;
+	public List<ThingDefCountClass> butcherProducts;
 
-		// Token: 0x04001179 RID: 4473
-		public bool randomizeRotationOnSpawn;
+	public List<ThingDefCountClass> smeltProducts;
 
-		// Token: 0x0400117A RID: 4474
-		public List<DamageMultiplier> damageMultipliers;
+	public bool smeltable;
 
-		// Token: 0x0400117B RID: 4475
-		public bool isTechHediff;
+	public bool burnableByRecipe;
 
-		// Token: 0x0400117C RID: 4476
-		public RecipeMakerProperties recipeMaker;
+	public bool randomizeRotationOnSpawn;
 
-		// Token: 0x0400117D RID: 4477
-		public ThingDef minifiedDef;
+	public List<DamageMultiplier> damageMultipliers;
 
-		// Token: 0x0400117E RID: 4478
-		public bool isUnfinishedThing;
+	public bool isTechHediff;
 
-		// Token: 0x0400117F RID: 4479
-		public bool leaveResourcesWhenKilled;
+	public RecipeMakerProperties recipeMaker;
 
-		// Token: 0x04001180 RID: 4480
-		public ThingDef slagDef;
+	public ThingDef minifiedDef;
 
-		// Token: 0x04001181 RID: 4481
-		public bool isFrameInt;
+	public bool isUnfinishedThing;
 
-		// Token: 0x04001182 RID: 4482
-		public List<IntVec3> multipleInteractionCellOffsets;
+	public bool leaveResourcesWhenKilled;
 
-		// Token: 0x04001183 RID: 4483
-		public IntVec3 interactionCellOffset = IntVec3.Zero;
+	public ThingDef slagDef;
 
-		// Token: 0x04001184 RID: 4484
-		public bool hasInteractionCell;
+	public bool isFrameInt;
 
-		// Token: 0x04001185 RID: 4485
-		public ThingDef interactionCellIcon;
+	public List<IntVec3> multipleInteractionCellOffsets;
 
-		// Token: 0x04001186 RID: 4486
-		public bool interactionCellIconReverse;
+	public IntVec3 interactionCellOffset = IntVec3.Zero;
 
-		// Token: 0x04001187 RID: 4487
-		public ThingDef filthLeaving;
+	public bool hasInteractionCell;
 
-		// Token: 0x04001188 RID: 4488
-		public bool forceDebugSpawnable;
+	public ThingDef interactionCellIcon;
 
-		// Token: 0x04001189 RID: 4489
-		public bool intricate;
+	public bool interactionCellIconReverse;
 
-		// Token: 0x0400118A RID: 4490
-		public bool scatterableOnMapGen = true;
+	public ThingDef filthLeaving;
 
-		// Token: 0x0400118B RID: 4491
-		public float deepCommonality;
+	public bool forceDebugSpawnable;
 
-		// Token: 0x0400118C RID: 4492
-		public int deepCountPerCell = 300;
+	public bool intricate;
 
-		// Token: 0x0400118D RID: 4493
-		public int deepCountPerPortion = -1;
+	public bool scatterableOnMapGen = true;
 
-		// Token: 0x0400118E RID: 4494
-		public IntRange deepLumpSizeRange = IntRange.Zero;
+	public float deepCommonality;
 
-		// Token: 0x0400118F RID: 4495
-		public float generateCommonality = 1f;
+	public int deepCountPerCell = 300;
 
-		// Token: 0x04001190 RID: 4496
-		public float generateAllowChance = 1f;
+	public int deepCountPerPortion = -1;
 
-		// Token: 0x04001191 RID: 4497
-		private bool canOverlapZones = true;
+	public IntRange deepLumpSizeRange = IntRange.Zero;
 
-		// Token: 0x04001192 RID: 4498
-		public FloatRange startingHpRange = FloatRange.One;
+	public float generateCommonality = 1f;
 
-		// Token: 0x04001193 RID: 4499
-		[NoTranslate]
-		public List<string> thingSetMakerTags;
+	public float generateAllowChance = 1f;
 
-		// Token: 0x04001194 RID: 4500
-		public bool alwaysFlee;
+	private bool canOverlapZones = true;
 
-		// Token: 0x04001195 RID: 4501
-		public List<RecipeDef> recipes;
+	public FloatRange startingHpRange = FloatRange.One;
 
-		// Token: 0x04001196 RID: 4502
-		public bool messageOnDeteriorateInStorage = true;
+	[NoTranslate]
+	public List<string> thingSetMakerTags;
 
-		// Token: 0x04001197 RID: 4503
-		public bool deteriorateFromEnvironmentalEffects = true;
+	public bool alwaysFlee;
 
-		// Token: 0x04001198 RID: 4504
-		public bool canDeteriorateUnspawned;
+	public List<RecipeDef> recipes;
 
-		// Token: 0x04001199 RID: 4505
-		public bool canLoadIntoCaravan = true;
+	public bool messageOnDeteriorateInStorage = true;
 
-		// Token: 0x0400119A RID: 4506
-		public bool isMechClusterThreat;
+	public bool deteriorateFromEnvironmentalEffects = true;
 
-		// Token: 0x0400119B RID: 4507
-		public FloatRange displayNumbersBetweenSameDefDistRange = FloatRange.Zero;
+	public bool canDeteriorateUnspawned;
 
-		// Token: 0x0400119C RID: 4508
-		public int minRewardCount = 1;
+	public bool canLoadIntoCaravan = true;
 
-		// Token: 0x0400119D RID: 4509
-		public bool preventSkyfallersLandingOn;
+	public bool isMechClusterThreat;
 
-		// Token: 0x0400119E RID: 4510
-		public FactionDef requiresFactionToAcquire;
+	public FloatRange displayNumbersBetweenSameDefDistRange = FloatRange.Zero;
 
-		// Token: 0x0400119F RID: 4511
-		public float relicChance;
+	public int minRewardCount = 1;
 
-		// Token: 0x040011A0 RID: 4512
-		public OrderedTakeGroupDef orderedTakeGroup;
+	public bool preventSkyfallersLandingOn;
 
-		// Token: 0x040011A1 RID: 4513
-		public int allowedArchonexusCount;
+	public FactionDef requiresFactionToAcquire;
 
-		// Token: 0x040011A2 RID: 4514
-		public int possessionCount;
+	public float relicChance;
 
-		// Token: 0x040011A3 RID: 4515
-		public bool notifyMapRemoved;
+	public OrderedTakeGroupDef orderedTakeGroup;
 
-		// Token: 0x040011A4 RID: 4516
-		public bool canScatterOver = true;
+	public int allowedArchonexusCount;
 
-		// Token: 0x040011A5 RID: 4517
-		public bool genericMarketSellable = true;
+	public int possessionCount;
 
-		// Token: 0x040011A6 RID: 4518
-		public bool drawHighlight;
+	public bool notifyMapRemoved;
 
-		// Token: 0x040011A7 RID: 4519
-		public Color? highlightColor;
+	public bool canScatterOver = true;
 
-		// Token: 0x040011A8 RID: 4520
-		public bool drawHighlightOnlyForHostile;
+	public bool genericMarketSellable = true;
 
-		// Token: 0x040011A9 RID: 4521
-		public bool autoTargetNearbyIdenticalThings;
+	public bool drawHighlight;
 
-		// Token: 0x040011AA RID: 4522
-		public bool preventDroppingThingsOn;
+	public Color? highlightColor;
 
-		// Token: 0x040011AB RID: 4523
-		public bool hiddenWhileUndiscovered;
+	public bool drawHighlightOnlyForHostile;
 
-		// Token: 0x040011AC RID: 4524
-		public bool disableImpassableShotOverConfigError;
+	public bool autoTargetNearbyIdenticalThings;
 
-		// Token: 0x040011AD RID: 4525
-		public bool showInSearch = true;
+	public bool preventDroppingThingsOn;
 
-		// Token: 0x040011AE RID: 4526
-		public bool bringAlongOnGravship = true;
+	public bool hiddenWhileUndiscovered;
 
-		// Token: 0x040011AF RID: 4527
-		public ThingDef dropPodFaller;
+	public bool disableImpassableShotOverConfigError;
 
-		// Token: 0x040011B0 RID: 4528
-		public ThingDef dropPodActive;
+	public bool showInSearch = true;
 
-		// Token: 0x040011B1 RID: 4529
-		public bool preventSpawningInResourcePod;
+	public bool bringAlongOnGravship = true;
 
-		// Token: 0x040011B2 RID: 4530
-		public bool pathfinderDangerous;
+	public ThingDef dropPodFaller;
 
-		// Token: 0x040011B3 RID: 4531
-		public bool noRightClickDraftAttack;
+	public ThingDef dropPodActive;
 
-		// Token: 0x040011B4 RID: 4532
-		public int gravshipSpawnPriority = 1;
+	public bool preventSpawningInResourcePod;
 
-		// Token: 0x040011B5 RID: 4533
-		public List<string> replaceTags;
+	public bool pathfinderDangerous;
 
-		// Token: 0x040011B6 RID: 4534
-		public bool preventGravshipLandingOn;
+	public bool noRightClickDraftAttack;
 
-		// Token: 0x040011B7 RID: 4535
-		public bool canInteractThroughCorners;
+	public int gravshipSpawnPriority = 1;
 
-		// Token: 0x040011B8 RID: 4536
-		public GraphicData graphicData;
+	public List<string> replaceTags;
 
-		// Token: 0x040011B9 RID: 4537
-		public DrawerType drawerType = DrawerType.RealtimeOnly;
+	public bool preventGravshipLandingOn;
 
-		// Token: 0x040011BA RID: 4538
-		public bool drawOffscreen;
+	public bool canInteractThroughCorners;
 
-		// Token: 0x040011BB RID: 4539
-		public ColorGenerator colorGenerator;
+	public GraphicData graphicData;
 
-		// Token: 0x040011BC RID: 4540
-		public float hideAtSnowOrSandDepth = 99999f;
+	public DrawerType drawerType = DrawerType.RealtimeOnly;
 
-		// Token: 0x040011BD RID: 4541
-		public bool drawDamagedOverlay = true;
+	public bool drawOffscreen;
 
-		// Token: 0x040011BE RID: 4542
-		public bool castEdgeShadows;
+	public ColorGenerator colorGenerator;
 
-		// Token: 0x040011BF RID: 4543
-		public float staticSunShadowHeight;
+	public float hideAtSnowOrSandDepth = 99999f;
 
-		// Token: 0x040011C0 RID: 4544
-		public bool useSameGraphicForGhost;
+	public bool drawDamagedOverlay = true;
 
-		// Token: 0x040011C1 RID: 4545
-		public bool useBlueprintGraphicAsGhost;
+	public bool castEdgeShadows;
 
-		// Token: 0x040011C2 RID: 4546
-		public List<ThingStyleChance> randomStyle;
+	public float staticSunShadowHeight;
 
-		// Token: 0x040011C3 RID: 4547
-		public float randomStyleChance;
+	public bool useSameGraphicForGhost;
 
-		// Token: 0x040011C4 RID: 4548
-		public bool canEditAnyStyle;
+	public bool useBlueprintGraphicAsGhost;
 
-		// Token: 0x040011C5 RID: 4549
-		public bool dontPrint;
+	public List<ThingStyleChance> randomStyle;
 
-		// Token: 0x040011C6 RID: 4550
-		public ThingDef defaultStuff;
+	public float randomStyleChance;
 
-		// Token: 0x040011C7 RID: 4551
-		public int killedLeavingsExpandRect;
+	public bool canEditAnyStyle;
 
-		// Token: 0x040011C8 RID: 4552
-		public bool minifiedManualDraw;
+	public bool dontPrint;
 
-		// Token: 0x040011C9 RID: 4553
-		public float minifiedDrawScale = 1f;
+	public ThingDef defaultStuff;
 
-		// Token: 0x040011CA RID: 4554
-		public Rot4 overrideMinifiedRot = Rot4.Invalid;
+	public int killedLeavingsExpandRect;
 
-		// Token: 0x040011CB RID: 4555
-		public Vector3 minifiedDrawOffset = Vector3.zero;
+	public bool minifiedManualDraw;
 
-		// Token: 0x040011CC RID: 4556
-		public float deselectedSelectionBracketFactor = 1f;
+	public float minifiedDrawScale = 1f;
 
-		// Token: 0x040011CD RID: 4557
-		public bool selectable;
+	public Rot4 overrideMinifiedRot = Rot4.Invalid;
 
-		// Token: 0x040011CE RID: 4558
-		public bool containedPawnsSelectable;
+	public Vector3 minifiedDrawOffset = Vector3.zero;
 
-		// Token: 0x040011CF RID: 4559
-		public bool containedItemsSelectable;
+	public float deselectedSelectionBracketFactor = 1f;
 
-		// Token: 0x040011D0 RID: 4560
-		public bool neverMultiSelect;
+	public bool selectable;
 
-		// Token: 0x040011D1 RID: 4561
-		public bool isAutoAttackableMapObject;
+	public bool containedPawnsSelectable;
 
-		// Token: 0x040011D2 RID: 4562
-		public bool hasTooltip;
+	public bool containedItemsSelectable;
 
-		// Token: 0x040011D3 RID: 4563
-		public List<Type> inspectorTabs;
+	public bool neverMultiSelect;
 
-		// Token: 0x040011D4 RID: 4564
-		[Unsaved(false)]
-		public List<InspectTabBase> inspectorTabsResolved;
+	public bool isAutoAttackableMapObject;
 
-		// Token: 0x040011D5 RID: 4565
-		public bool seeThroughFog;
+	public bool hasTooltip;
 
-		// Token: 0x040011D6 RID: 4566
-		public bool drawGUIOverlay;
+	public List<Type> inspectorTabs;
 
-		// Token: 0x040011D7 RID: 4567
-		public bool drawGUIOverlayQuality = true;
+	[Unsaved(false)]
+	public List<InspectTabBase> inspectorTabsResolved;
 
-		// Token: 0x040011D8 RID: 4568
-		public ResourceCountPriority resourceReadoutPriority;
+	public bool seeThroughFog;
 
-		// Token: 0x040011D9 RID: 4569
-		public bool resourceReadoutAlwaysShow;
+	public bool drawGUIOverlay;
 
-		// Token: 0x040011DA RID: 4570
-		public bool drawPlaceWorkersWhileSelected;
+	public bool drawGUIOverlayQuality = true;
 
-		// Token: 0x040011DB RID: 4571
-		public bool drawPlaceWorkersWhileInstallBlueprintSelected;
+	public ResourceCountPriority resourceReadoutPriority;
 
-		// Token: 0x040011DC RID: 4572
-		public ConceptDef storedConceptLearnOpportunity;
+	public bool resourceReadoutAlwaysShow;
 
-		// Token: 0x040011DD RID: 4573
-		public float uiIconScale = 1f;
+	public bool drawPlaceWorkersWhileSelected;
 
-		// Token: 0x040011DE RID: 4574
-		public bool hasCustomRectForSelector;
+	public bool drawPlaceWorkersWhileInstallBlueprintSelected;
 
-		// Token: 0x040011DF RID: 4575
-		public bool hideStats;
+	public ConceptDef storedConceptLearnOpportunity;
 
-		// Token: 0x040011E0 RID: 4576
-		public bool hideInspect;
+	public float uiIconScale = 1f;
 
-		// Token: 0x040011E1 RID: 4577
-		public bool onlyShowInspectString;
+	public bool hasCustomRectForSelector;
 
-		// Token: 0x040011E2 RID: 4578
-		public bool hideMainDesc;
+	public bool hideStats;
 
-		// Token: 0x040011E3 RID: 4579
-		public bool alwaysHaulable;
+	public bool hideInspect;
 
-		// Token: 0x040011E4 RID: 4580
-		public bool designateHaulable;
+	public bool onlyShowInspectString;
 
-		// Token: 0x040011E5 RID: 4581
-		public List<ThingCategoryDef> thingCategories;
+	public bool hideMainDesc;
 
-		// Token: 0x040011E6 RID: 4582
-		public bool mineable;
+	public bool alwaysHaulable;
 
-		// Token: 0x040011E7 RID: 4583
-		public bool socialPropernessMatters;
+	public bool designateHaulable;
 
-		// Token: 0x040011E8 RID: 4584
-		public bool stealable = true;
+	public List<ThingCategoryDef> thingCategories;
 
-		// Token: 0x040011E9 RID: 4585
-		public SoundDef soundSpawned;
+	public bool mineable;
 
-		// Token: 0x040011EA RID: 4586
-		public SoundDef soundDrop;
+	public bool socialPropernessMatters;
 
-		// Token: 0x040011EB RID: 4587
-		public SoundDef soundPickup;
+	public bool stealable = true;
 
-		// Token: 0x040011EC RID: 4588
-		public SoundDef soundInteract;
+	public SoundDef soundSpawned;
 
-		// Token: 0x040011ED RID: 4589
-		public SoundDef soundImpactDefault;
+	public SoundDef soundDrop;
 
-		// Token: 0x040011EE RID: 4590
-		public SoundDef soundPlayInstrument;
+	public SoundDef soundPickup;
 
-		// Token: 0x040011EF RID: 4591
-		public SoundDef soundOpen;
+	public SoundDef soundInteract;
 
-		// Token: 0x040011F0 RID: 4592
-		public bool saveCompressible;
+	public SoundDef soundImpactDefault;
 
-		// Token: 0x040011F1 RID: 4593
-		public bool isSaveable = true;
+	public SoundDef soundPlayInstrument;
 
-		// Token: 0x040011F2 RID: 4594
-		public bool holdsRoof;
+	public SoundDef soundOpen;
 
-		// Token: 0x040011F3 RID: 4595
-		public float fillPercent;
+	public bool saveCompressible;
 
-		// Token: 0x040011F4 RID: 4596
-		public bool coversFloor;
+	public bool isSaveable = true;
 
-		// Token: 0x040011F5 RID: 4597
-		public bool neverOverlapFloors;
+	public bool holdsRoof;
 
-		// Token: 0x040011F6 RID: 4598
-		public SurfaceType surfaceType;
+	public float fillPercent;
 
-		// Token: 0x040011F7 RID: 4599
-		public bool wipesPlants;
+	public bool coversFloor;
 
-		// Token: 0x040011F8 RID: 4600
-		public bool blockPlants;
+	public bool neverOverlapFloors;
 
-		// Token: 0x040011F9 RID: 4601
-		public bool blockLight;
+	public SurfaceType surfaceType;
 
-		// Token: 0x040011FA RID: 4602
-		public bool blockWind;
+	public bool wipesPlants;
 
-		// Token: 0x040011FB RID: 4603
-		public bool blockWeather;
+	public bool blockPlants;
 
-		// Token: 0x040011FC RID: 4604
-		public Tradeability tradeability = Tradeability.All;
+	public bool blockLight;
 
-		// Token: 0x040011FD RID: 4605
-		[NoTranslate]
-		public List<string> tradeTags;
+	public bool blockWind;
 
-		// Token: 0x040011FE RID: 4606
-		public bool tradeNeverStack;
+	public bool blockWeather;
 
-		// Token: 0x040011FF RID: 4607
-		public bool tradeNeverGenerateStacked;
+	public Tradeability tradeability = Tradeability.All;
 
-		// Token: 0x04001200 RID: 4608
-		public bool healthAffectsPrice = true;
+	[NoTranslate]
+	public List<string> tradeTags;
 
-		// Token: 0x04001201 RID: 4609
-		public ColorGenerator colorGeneratorInTraderStock;
+	public bool tradeNeverStack;
 
-		// Token: 0x04001202 RID: 4610
-		private List<VerbProperties> verbs;
+	public bool tradeNeverGenerateStacked;
 
-		// Token: 0x04001203 RID: 4611
-		public List<Tool> tools;
+	public bool healthAffectsPrice = true;
 
-		// Token: 0x04001204 RID: 4612
-		public float equippedAngleOffset;
+	public ColorGenerator colorGeneratorInTraderStock;
 
-		// Token: 0x04001205 RID: 4613
-		public float equippedDistanceOffset;
+	private List<VerbProperties> verbs;
 
-		// Token: 0x04001206 RID: 4614
-		public EquipmentType equipmentType;
+	public List<Tool> tools;
 
-		// Token: 0x04001207 RID: 4615
-		public TechLevel techLevel;
+	public float equippedAngleOffset;
 
-		// Token: 0x04001208 RID: 4616
-		public List<WeaponClassDef> weaponClasses;
+	public float equippedDistanceOffset;
 
-		// Token: 0x04001209 RID: 4617
-		[NoTranslate]
-		public List<string> weaponTags;
+	public EquipmentType equipmentType;
 
-		// Token: 0x0400120A RID: 4618
-		[NoTranslate]
-		public List<string> techHediffsTags;
+	public TechLevel techLevel;
 
-		// Token: 0x0400120B RID: 4619
-		public bool violentTechHediff;
+	public List<WeaponClassDef> weaponClasses;
 
-		// Token: 0x0400120C RID: 4620
-		public bool destroyOnDrop;
+	[NoTranslate]
+	public List<string> weaponTags;
 
-		// Token: 0x0400120D RID: 4621
-		public List<StatModifier> equippedStatOffsets;
+	[NoTranslate]
+	public List<string> techHediffsTags;
 
-		// Token: 0x0400120E RID: 4622
-		public SoundDef meleeHitSound;
+	public bool violentTechHediff;
 
-		// Token: 0x0400120F RID: 4623
-		public float recoilPower = 1f;
+	public bool destroyOnDrop;
 
-		// Token: 0x04001210 RID: 4624
-		public float recoilRelaxation = 10f;
+	public List<StatModifier> equippedStatOffsets;
 
-		// Token: 0x04001211 RID: 4625
-		public bool rotateInShelves = true;
+	public SoundDef meleeHitSound;
 
-		// Token: 0x04001212 RID: 4626
-		public bool mergeVerbGizmos = true;
+	public float recoilPower = 1f;
 
-		// Token: 0x04001213 RID: 4627
-		public BuildableDef entityDefToBuild;
+	public float recoilRelaxation = 10f;
 
-		// Token: 0x04001214 RID: 4628
-		public ThingDef projectileWhenLoaded;
+	public bool rotateInShelves = true;
 
-		// Token: 0x04001215 RID: 4629
-		public RulePackDef ideoBuildingNamerBase;
+	public bool mergeVerbGizmos = true;
 
-		// Token: 0x04001216 RID: 4630
-		public EntityCodexEntryDef entityCodexEntry;
+	public BuildableDef entityDefToBuild;
 
-		// Token: 0x04001217 RID: 4631
-		public IngestibleProperties ingestible;
+	public ThingDef projectileWhenLoaded;
 
-		// Token: 0x04001218 RID: 4632
-		public FilthProperties filth;
+	public RulePackDef ideoBuildingNamerBase;
 
-		// Token: 0x04001219 RID: 4633
-		public GasProperties gas;
+	public EntityCodexEntryDef entityCodexEntry;
 
-		// Token: 0x0400121A RID: 4634
-		public BuildingProperties building;
+	public IngestibleProperties ingestible;
 
-		// Token: 0x0400121B RID: 4635
-		public RaceProperties race;
+	public FilthProperties filth;
 
-		// Token: 0x0400121C RID: 4636
-		public ApparelProperties apparel;
+	public GasProperties gas;
 
-		// Token: 0x0400121D RID: 4637
-		public MoteProperties mote;
+	public BuildingProperties building;
 
-		// Token: 0x0400121E RID: 4638
-		public PlantProperties plant;
+	public RaceProperties race;
 
-		// Token: 0x0400121F RID: 4639
-		public ProjectileProperties projectile;
+	public ApparelProperties apparel;
 
-		// Token: 0x04001220 RID: 4640
-		public StuffProperties stuffProps;
+	public MoteProperties mote;
 
-		// Token: 0x04001221 RID: 4641
-		public SkyfallerProperties skyfaller;
+	public PlantProperties plant;
 
-		// Token: 0x04001222 RID: 4642
-		public PawnFlyerProperties pawnFlyer;
+	public ProjectileProperties projectile;
 
-		// Token: 0x04001223 RID: 4643
-		public RitualFocusProperties ritualFocus;
+	public StuffProperties stuffProps;
 
-		// Token: 0x04001224 RID: 4644
-		public IngredientProperties ingredient;
+	public SkyfallerProperties skyfaller;
 
-		// Token: 0x04001225 RID: 4645
-		public MapPortalProperties portal;
+	public PawnFlyerProperties pawnFlyer;
 
-		// Token: 0x04001226 RID: 4646
-		public bool canBeUsedUnderRoof = true;
+	public RitualFocusProperties ritualFocus;
 
-		// Token: 0x04001227 RID: 4647
-		[Unsaved(false)]
-		private string descriptionDetailedCached;
+	public IngredientProperties ingredient;
 
-		// Token: 0x04001228 RID: 4648
-		[Unsaved(false)]
-		public Graphic interactionCellGraphic;
+	public MapPortalProperties portal;
 
-		// Token: 0x04001229 RID: 4649
-		[Unsaved(false)]
-		private bool? isNaturalOrganCached;
+	public bool canBeUsedUnderRoof = true;
 
-		// Token: 0x0400122A RID: 4650
-		[Unsaved(false)]
-		private bool? hasSunShadowsCached;
+	[Unsaved(false)]
+	private string descriptionDetailedCached;
 
-		// Token: 0x0400122B RID: 4651
-		[Unsaved(false)]
-		private List<StyleCategoryDef> cachedRelevantStyleCategories;
+	[Unsaved(false)]
+	public Graphic interactionCellGraphic;
 
-		// Token: 0x0400122C RID: 4652
-		public const int SmallUnitPerVolume = 10;
+	[Unsaved(false)]
+	private bool? isNaturalOrganCached;
 
-		// Token: 0x0400122D RID: 4653
-		public const float SmallVolumePerUnit = 0.1f;
+	[Unsaved(false)]
+	private bool? hasSunShadowsCached;
 
-		// Token: 0x0400122E RID: 4654
-		public const float ArchonexusMaxItemStackMass = 5f;
+	[Unsaved(false)]
+	private List<StyleCategoryDef> cachedRelevantStyleCategories;
 
-		// Token: 0x0400122F RID: 4655
-		public const int ArchonexusMaxItemStackCount = 25;
+	public const int SmallUnitPerVolume = 10;
 
-		// Token: 0x04001230 RID: 4656
-		public const float ArchonexusMaxItemStackValue = 2000f;
+	public const float SmallVolumePerUnit = 0.1f;
 
-		// Token: 0x04001231 RID: 4657
-		public const int ArchonexusAutoCalculateValue = -1;
+	public const float ArchonexusMaxItemStackMass = 5f;
 
-		// Token: 0x04001232 RID: 4658
-		private List<RecipeDef> allRecipesCached;
+	public const int ArchonexusMaxItemStackCount = 25;
 
-		// Token: 0x04001233 RID: 4659
-		private static List<VerbProperties> EmptyVerbPropertiesList = new List<VerbProperties>();
+	public const float ArchonexusMaxItemStackValue = 2000f;
 
-		// Token: 0x04001234 RID: 4660
-		private Dictionary<ThingDef, Thing> concreteExamplesInt;
+	public const int ArchonexusAutoCalculateValue = -1;
+
+	private List<RecipeDef> allRecipesCached;
+
+	private static List<VerbProperties> EmptyVerbPropertiesList = new List<VerbProperties>();
+
+	private Dictionary<ThingDef, Thing> concreteExamplesInt;
+
+	public bool EverHaulable
+	{
+		get
+		{
+			if (!alwaysHaulable)
+			{
+				return designateHaulable;
+			}
+			return true;
+		}
+	}
+
+	public bool EverPollutable => !building.isNaturalRock;
+
+	public float VolumePerUnit
+	{
+		get
+		{
+			if (smallVolume)
+			{
+				return 0.1f;
+			}
+			return 1f;
+		}
+	}
+
+	public override IntVec2 Size => size;
+
+	public bool DiscardOnDestroyed => race == null;
+
+	public int BaseMaxHitPoints => Mathf.RoundToInt(this.GetStatValueAbstract(StatDefOf.MaxHitPoints));
+
+	public float BaseFlammability => this.GetStatValueAbstract(StatDefOf.Flammability);
+
+	public float BaseMarketValue
+	{
+		get
+		{
+			return this.GetStatValueAbstract(StatDefOf.MarketValue);
+		}
+		set
+		{
+			this.SetStatBaseValue(StatDefOf.MarketValue, value);
+		}
+	}
+
+	public float BaseMass => this.GetStatValueAbstract(StatDefOf.Mass);
+
+	public int ArchonexusMaxAllowedCount
+	{
+		get
+		{
+			if (allowedArchonexusCount == -1)
+			{
+				return Mathf.Min(stackLimit, 25, (BaseMass > 0f) ? ((int)(5f / BaseMass)) : 0, (BaseMarketValue > 0f) ? ((int)(2000f / BaseMarketValue)) : 0);
+			}
+			return allowedArchonexusCount;
+		}
+	}
+
+	public bool PlayerAcquirable
+	{
+		get
+		{
+			if (destroyOnDrop)
+			{
+				return false;
+			}
+			if (this == ThingDefOf.ReinforcedBarrel && Find.Storyteller != null && Find.Storyteller.difficulty.classicMortars)
+			{
+				return false;
+			}
+			if (requiresFactionToAcquire != null && Find.World != null && Find.World.factionManager != null)
+			{
+				return Find.FactionManager.FirstFactionOfDef(requiresFactionToAcquire) != null;
+			}
+			return true;
+		}
+	}
+
+	public bool EverTransmitsPower
+	{
+		get
+		{
+			for (int i = 0; i < comps.Count; i++)
+			{
+				if (comps[i] is CompProperties_Power { transmitsPower: not false })
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+
+	public bool Minifiable => minifiedDef != null;
+
+	public bool HasThingIDNumber => category != ThingCategory.Mote;
+
+	public List<RecipeDef> AllRecipes
+	{
+		get
+		{
+			if (allRecipesCached == null)
+			{
+				allRecipesCached = new List<RecipeDef>();
+				if (recipes != null)
+				{
+					for (int i = 0; i < recipes.Count; i++)
+					{
+						allRecipesCached.Add(recipes[i]);
+					}
+				}
+				List<RecipeDef> allDefsListForReading = DefDatabase<RecipeDef>.AllDefsListForReading;
+				for (int j = 0; j < allDefsListForReading.Count; j++)
+				{
+					if (allDefsListForReading[j].recipeUsers != null && allDefsListForReading[j].recipeUsers.Contains(this))
+					{
+						allRecipesCached.Add(allDefsListForReading[j]);
+					}
+				}
+			}
+			return allRecipesCached;
+		}
+	}
+
+	public bool ConnectToPower
+	{
+		get
+		{
+			if (EverTransmitsPower)
+			{
+				return false;
+			}
+			for (int i = 0; i < comps.Count; i++)
+			{
+				if (comps[i].compClass == typeof(CompPowerBattery))
+				{
+					return true;
+				}
+				if (comps[i].compClass == typeof(CompPowerTrader))
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+
+	public bool CoexistsWithFloors
+	{
+		get
+		{
+			if (!neverOverlapFloors)
+			{
+				return !coversFloor;
+			}
+			return false;
+		}
+	}
+
+	public FillCategory Fillage
+	{
+		get
+		{
+			if (fillPercent < 0.01f)
+			{
+				return FillCategory.None;
+			}
+			if (fillPercent > 0.99f)
+			{
+				return FillCategory.Full;
+			}
+			return FillCategory.Partial;
+		}
+	}
+
+	public bool MakeFog => Fillage == FillCategory.Full;
+
+	public bool CanOverlapZones
+	{
+		get
+		{
+			if (building != null && building.SupportsPlants)
+			{
+				return false;
+			}
+			if (passability == Traversability.Impassable && category != ThingCategory.Plant && !HasComp(typeof(CompTransporter)))
+			{
+				return false;
+			}
+			if ((int)surfaceType >= 1)
+			{
+				return false;
+			}
+			if (typeof(ISlotGroupParent).IsAssignableFrom(thingClass))
+			{
+				return false;
+			}
+			if (!canOverlapZones)
+			{
+				return false;
+			}
+			if ((IsBlueprint || IsFrame) && entityDefToBuild is ThingDef thingDef)
+			{
+				return thingDef.CanOverlapZones;
+			}
+			return true;
+		}
+	}
+
+	public bool CountAsResource => resourceReadoutPriority != ResourceCountPriority.Uncounted;
+
+	public List<VerbProperties> Verbs
+	{
+		get
+		{
+			if (verbs != null)
+			{
+				return verbs;
+			}
+			return EmptyVerbPropertiesList;
+		}
+	}
+
+	public bool CanHaveFaction
+	{
+		get
+		{
+			if (IsBlueprint || IsFrame)
+			{
+				return true;
+			}
+			return category switch
+			{
+				ThingCategory.Pawn => true, 
+				ThingCategory.Building => true, 
+				_ => false, 
+			};
+		}
+	}
+
+	public bool Claimable
+	{
+		get
+		{
+			if (building != null && building.claimable)
+			{
+				return !building.isNaturalRock;
+			}
+			return false;
+		}
+	}
+
+	public ThingCategoryDef FirstThingCategory
+	{
+		get
+		{
+			if (thingCategories.NullOrEmpty())
+			{
+				return null;
+			}
+			return thingCategories[0];
+		}
+	}
+
+	public float MedicineTendXpGainFactor => Mathf.Clamp(this.GetStatValueAbstract(StatDefOf.MedicalPotency) * 0.7f, 0.5f, 1f);
+
+	public bool CanEverDeteriorate
+	{
+		get
+		{
+			if (!useHitPoints)
+			{
+				return false;
+			}
+			if (category != ThingCategory.Item)
+			{
+				if (plant != null)
+				{
+					return plant.canDeteriorate;
+				}
+				return false;
+			}
+			return true;
+		}
+	}
+
+	public bool CanInteractThroughCorners
+	{
+		get
+		{
+			if (canInteractThroughCorners)
+			{
+				return true;
+			}
+			if (category != ThingCategory.Building)
+			{
+				return false;
+			}
+			if (!holdsRoof)
+			{
+				return false;
+			}
+			if (building != null && building.isNaturalRock && !IsSmoothed)
+			{
+				return false;
+			}
+			return true;
+		}
+	}
+
+	public bool AffectsRegions
+	{
+		get
+		{
+			if (passability != Traversability.Impassable && !IsDoor)
+			{
+				return IsFence;
+			}
+			return true;
+		}
+	}
+
+	public bool AffectsReachability
+	{
+		get
+		{
+			if (AffectsRegions)
+			{
+				return true;
+			}
+			if (passability == Traversability.Impassable || IsDoor)
+			{
+				return true;
+			}
+			if (TouchPathEndModeUtility.MakesOccupiedCellsAlwaysReachableDiagonally(this))
+			{
+				return true;
+			}
+			return false;
+		}
+	}
+
+	public string DescriptionDetailed
+	{
+		get
+		{
+			if (descriptionDetailedCached == null)
+			{
+				StringBuilder stringBuilder = new StringBuilder();
+				stringBuilder.Append(description);
+				if (IsApparel)
+				{
+					stringBuilder.AppendLine();
+					stringBuilder.AppendLine();
+					stringBuilder.AppendLine($"{"Layer".Translate()}: {apparel.GetLayersString()}");
+					stringBuilder.Append($"{"Covers".Translate()}: {apparel.GetCoveredOuterPartsString(BodyDefOf.Human)}");
+					if (equippedStatOffsets != null && equippedStatOffsets.Count > 0)
+					{
+						stringBuilder.AppendLine();
+						stringBuilder.AppendLine();
+						for (int i = 0; i < equippedStatOffsets.Count; i++)
+						{
+							if (i > 0)
+							{
+								stringBuilder.AppendLine();
+							}
+							StatModifier statModifier = equippedStatOffsets[i];
+							stringBuilder.Append($"{statModifier.stat.LabelCap}: {statModifier.ValueToStringAsOffset}");
+						}
+					}
+				}
+				descriptionDetailedCached = stringBuilder.ToString();
+			}
+			return descriptionDetailedCached;
+		}
+	}
+
+	public bool CanBenefitFromCover
+	{
+		get
+		{
+			if (category == ThingCategory.Pawn)
+			{
+				return true;
+			}
+			if (building != null && building.IsTurret)
+			{
+				return true;
+			}
+			return false;
+		}
+	}
+
+	public bool PotentiallySmeltable
+	{
+		get
+		{
+			if (!smeltable)
+			{
+				return false;
+			}
+			if (base.MadeFromStuff)
+			{
+				foreach (ThingDef item in GenStuff.AllowedStuffsFor(this))
+				{
+					if (item.smeltable)
+					{
+						return true;
+					}
+				}
+				return false;
+			}
+			return true;
+		}
+	}
+
+	public bool HasSingleOrMultipleInteractionCells
+	{
+		get
+		{
+			if (!hasInteractionCell)
+			{
+				return !multipleInteractionCellOffsets.NullOrEmpty();
+			}
+			return true;
+		}
+	}
+
+	public bool IsApparel => apparel != null;
+
+	public bool IsBed => typeof(Building_Bed).IsAssignableFrom(thingClass);
+
+	public bool IsWall
+	{
+		get
+		{
+			if (building != null)
+			{
+				return building.isWall;
+			}
+			return false;
+		}
+	}
+
+	public bool IsCorpse => typeof(Corpse).IsAssignableFrom(thingClass);
+
+	public bool IsFrame => isFrameInt;
+
+	public bool IsBlueprint
+	{
+		get
+		{
+			if (entityDefToBuild != null)
+			{
+				return category == ThingCategory.Ethereal;
+			}
+			return false;
+		}
+	}
+
+	public bool IsStuff => stuffProps != null;
+
+	public bool IsMedicine => statBases.StatListContains(StatDefOf.MedicalPotency);
+
+	public bool IsDoor => typeof(Building_Door).IsAssignableFrom(thingClass);
+
+	public bool IsFence
+	{
+		get
+		{
+			if (building != null)
+			{
+				return building.isFence;
+			}
+			return false;
+		}
+	}
+
+	public bool IsFilth => filth != null;
+
+	public bool IsIngestible => ingestible != null;
+
+	public bool IsNutritionGivingIngestible
+	{
+		get
+		{
+			if (IsIngestible)
+			{
+				return ingestible.CachedNutrition > 0f;
+			}
+			return false;
+		}
+	}
+
+	public bool IsNutritionGivingIngestibleForHumanlikeBabies
+	{
+		get
+		{
+			if (IsNutritionGivingIngestible && ingestible.HumanEdible)
+			{
+				return ingestible.babiesCanIngest;
+			}
+			return false;
+		}
+	}
+
+	public bool IsWeapon
+	{
+		get
+		{
+			if (category == ThingCategory.Item && (!verbs.NullOrEmpty() || !tools.NullOrEmpty()))
+			{
+				return !IsApparel;
+			}
+			return false;
+		}
+	}
+
+	public bool IsCommsConsole => typeof(Building_CommsConsole).IsAssignableFrom(thingClass);
+
+	public bool IsOrbitalTradeBeacon => typeof(Building_OrbitalTradeBeacon).IsAssignableFrom(thingClass);
+
+	public bool IsFoodDispenser => typeof(Building_NutrientPasteDispenser).IsAssignableFrom(thingClass);
+
+	public bool IsDrug
+	{
+		get
+		{
+			if (ingestible != null)
+			{
+				return ingestible.drugCategory != DrugCategory.None;
+			}
+			return false;
+		}
+	}
+
+	public bool IsPleasureDrug
+	{
+		get
+		{
+			if (IsDrug)
+			{
+				return ingestible.joy > 0f;
+			}
+			return false;
+		}
+	}
+
+	public bool IsNonMedicalDrug
+	{
+		get
+		{
+			if (IsDrug)
+			{
+				return ingestible.drugCategory != DrugCategory.Medical;
+			}
+			return false;
+		}
+	}
+
+	public bool IsTable
+	{
+		get
+		{
+			if (surfaceType == SurfaceType.Eat)
+			{
+				return HasComp(typeof(CompGatherSpot));
+			}
+			return false;
+		}
+	}
+
+	public bool IsWorkTable => typeof(Building_WorkTable).IsAssignableFrom(thingClass);
+
+	public bool IsShell => projectileWhenLoaded != null;
+
+	public bool IsArt => IsWithinCategory(ThingCategoryDefOf.BuildingsArt);
+
+	public bool IsSmoothable => building?.smoothedThing != null;
+
+	public bool IsSmoothed => building?.unsmoothedThing != null;
+
+	public bool IsMetal
+	{
+		get
+		{
+			if (stuffProps != null)
+			{
+				return stuffProps.categories.Contains(StuffCategoryDefOf.Metallic);
+			}
+			return false;
+		}
+	}
+
+	public bool IsCryptosleepCasket => typeof(Building_CryptosleepCasket).IsAssignableFrom(thingClass);
+
+	public bool IsGibbetCage => typeof(Building_GibbetCage).IsAssignableFrom(thingClass);
+
+	public bool IsMechGestator => typeof(Building_MechGestator).IsAssignableFrom(thingClass);
+
+	public bool IsMechRecharger => typeof(Building_MechCharger).IsAssignableFrom(thingClass);
+
+	public bool IsAddictiveDrug
+	{
+		get
+		{
+			CompProperties_Drug compProperties = GetCompProperties<CompProperties_Drug>();
+			if (compProperties != null)
+			{
+				return compProperties.addictiveness > 0f;
+			}
+			return false;
+		}
+	}
+
+	public bool IsMeat
+	{
+		get
+		{
+			if (category == ThingCategory.Item && thingCategories != null)
+			{
+				return thingCategories.Contains(ThingCategoryDefOf.MeatRaw);
+			}
+			return false;
+		}
+	}
+
+	public bool IsEgg
+	{
+		get
+		{
+			if (category == ThingCategory.Item && thingCategories != null)
+			{
+				if (!thingCategories.Contains(ThingCategoryDefOf.EggsFertilized))
+				{
+					return thingCategories.Contains(ThingCategoryDefOf.EggsUnfertilized);
+				}
+				return true;
+			}
+			return false;
+		}
+	}
+
+	public bool IsLeather
+	{
+		get
+		{
+			if (category == ThingCategory.Item && thingCategories != null)
+			{
+				return thingCategories.Contains(ThingCategoryDefOf.Leathers);
+			}
+			return false;
+		}
+	}
+
+	public bool IsWool
+	{
+		get
+		{
+			if (category == ThingCategory.Item && thingCategories != null)
+			{
+				return thingCategories.Contains(ThingCategoryDefOf.Wools);
+			}
+			return false;
+		}
+	}
+
+	public bool IsRangedWeapon
+	{
+		get
+		{
+			if (!IsWeapon)
+			{
+				return false;
+			}
+			if (!verbs.NullOrEmpty())
+			{
+				for (int i = 0; i < verbs.Count; i++)
+				{
+					if (!verbs[i].IsMeleeAttack)
+					{
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+	}
+
+	public bool IsMeleeWeapon
+	{
+		get
+		{
+			if (IsWeapon)
+			{
+				return !IsRangedWeapon;
+			}
+			return false;
+		}
+	}
+
+	public bool IsWeaponUsingProjectiles
+	{
+		get
+		{
+			if (!IsWeapon)
+			{
+				return false;
+			}
+			if (!verbs.NullOrEmpty())
+			{
+				for (int i = 0; i < verbs.Count; i++)
+				{
+					if (verbs[i].LaunchesProjectile)
+					{
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+	}
+
+	public bool IsShieldThatBlocksRanged
+	{
+		get
+		{
+			if (HasComp(typeof(CompShield)))
+			{
+				return GetCompProperties<CompProperties_Shield>().blocksRangedWeapons;
+			}
+			return false;
+		}
+	}
+
+	public bool IsBuildingArtificial
+	{
+		get
+		{
+			if (category == ThingCategory.Building || IsFrame)
+			{
+				if (building != null)
+				{
+					if (!building.isNaturalRock)
+					{
+						return !building.isResourceRock;
+					}
+					return false;
+				}
+				return true;
+			}
+			return false;
+		}
+	}
+
+	public bool IsNonResourceNaturalRock
+	{
+		get
+		{
+			if (category == ThingCategory.Building && building.isNaturalRock && !building.isResourceRock && !building.mineablePreventNaturalRockOnSurface)
+			{
+				return !IsSmoothed;
+			}
+			return false;
+		}
+	}
+
+	public bool HasSunShadows
+	{
+		get
+		{
+			if (!hasSunShadowsCached.HasValue)
+			{
+				hasSunShadowsCached = typeof(Pawn).IsAssignableFrom(thingClass);
+			}
+			return hasSunShadowsCached.Value;
+		}
+	}
+
+	public bool IsNaturalOrgan
+	{
+		get
+		{
+			if (!isNaturalOrganCached.HasValue)
+			{
+				if (category != ThingCategory.Item)
+				{
+					isNaturalOrganCached = false;
+				}
+				else
+				{
+					List<BodyPartDef> allDefsListForReading = DefDatabase<BodyPartDef>.AllDefsListForReading;
+					isNaturalOrganCached = false;
+					for (int i = 0; i < allDefsListForReading.Count; i++)
+					{
+						if (allDefsListForReading[i].spawnThingOnRemoved == this)
+						{
+							isNaturalOrganCached = true;
+							break;
+						}
+					}
+				}
+			}
+			return isNaturalOrganCached.Value;
+		}
+	}
+
+	public bool IsFungus
+	{
+		get
+		{
+			if (ingestible != null)
+			{
+				return ingestible.foodType.HasFlag(FoodTypeFlags.Fungus);
+			}
+			return false;
+		}
+	}
+
+	public bool IsAnimalProduct
+	{
+		get
+		{
+			if (ingestible != null)
+			{
+				return ingestible.foodType.HasFlag(FoodTypeFlags.AnimalProduct);
+			}
+			return false;
+		}
+	}
+
+	public bool IsProcessedFood
+	{
+		get
+		{
+			if (ingestible != null)
+			{
+				return ingestible.foodType.HasFlag(FoodTypeFlags.Processed);
+			}
+			return false;
+		}
+	}
+
+	public bool CanAffectLinker
+	{
+		get
+		{
+			if (graphicData == null || !graphicData.Linked)
+			{
+				return IsDoor;
+			}
+			return true;
+		}
+	}
+
+	public bool IsNonDeconstructibleAttackableBuilding
+	{
+		get
+		{
+			if (IsBuildingArtificial && !building.IsDeconstructible && destroyable && !mineable && building.isTargetable)
+			{
+				return building.draftAttackNonDeconstructable;
+			}
+			return false;
+		}
+	}
+
+	public bool IsPlant => typeof(Plant).IsAssignableFrom(thingClass);
+
+	public bool IsDeadPlant => typeof(DeadPlant).IsAssignableFrom(thingClass);
+
+	public bool IsStudiable => HasAssignableCompFrom(typeof(CompStudiable));
+
+	public List<StyleCategoryDef> RelevantStyleCategories
+	{
+		get
+		{
+			if (cachedRelevantStyleCategories == null)
+			{
+				cachedRelevantStyleCategories = new List<StyleCategoryDef>();
+				foreach (StyleCategoryDef allDef in DefDatabase<StyleCategoryDef>.AllDefs)
+				{
+					if (allDef.thingDefStyles.NullOrEmpty())
+					{
+						continue;
+					}
+					foreach (ThingDefStyle thingDefStyle in allDef.thingDefStyles)
+					{
+						if (thingDefStyle.ThingDef == this)
+						{
+							cachedRelevantStyleCategories.Add(allDef);
+							break;
+						}
+					}
+				}
+			}
+			return cachedRelevantStyleCategories;
+		}
+	}
+
+	public string LabelAsStuff
+	{
+		get
+		{
+			if (!stuffProps.stuffAdjective.NullOrEmpty())
+			{
+				return stuffProps.stuffAdjective;
+			}
+			return label;
+		}
+	}
+
+	public bool BlocksPlanting(bool canWipePlants = false)
+	{
+		if (building != null && building.SupportsPlants)
+		{
+			return false;
+		}
+		if (building != null && building.isAttachment)
+		{
+			return false;
+		}
+		if (blockPlants)
+		{
+			return true;
+		}
+		if (!canWipePlants && category == ThingCategory.Plant)
+		{
+			return true;
+		}
+		if ((int)Fillage > 0)
+		{
+			return true;
+		}
+		if (this.IsEdifice())
+		{
+			return true;
+		}
+		return false;
+	}
+
+	public virtual bool CanSpawnAt(IntVec3 pos, Rot4 rot, Map map)
+	{
+		return true;
+	}
+
+	public bool EverStorable(bool willMinifyIfPossible)
+	{
+		if (typeof(MinifiedThing).IsAssignableFrom(thingClass))
+		{
+			return true;
+		}
+		if (!thingCategories.NullOrEmpty())
+		{
+			if (category == ThingCategory.Item)
+			{
+				return true;
+			}
+			if (willMinifyIfPossible && Minifiable)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public Thing GetConcreteExample(ThingDef stuff = null)
+	{
+		if (concreteExamplesInt == null)
+		{
+			concreteExamplesInt = new Dictionary<ThingDef, Thing>();
+		}
+		if (stuff == null)
+		{
+			stuff = ThingDefOf.Steel;
+		}
+		if (!concreteExamplesInt.ContainsKey(stuff))
+		{
+			if (race == null)
+			{
+				concreteExamplesInt[stuff] = ThingMaker.MakeThing(this, base.MadeFromStuff ? stuff : null);
+			}
+			else
+			{
+				concreteExamplesInt[stuff] = PawnGenerator.GeneratePawn(DefDatabase<PawnKindDef>.AllDefsListForReading.FirstOrDefault((PawnKindDef pkd) => pkd.race == this), null, null);
+			}
+		}
+		return concreteExamplesInt[stuff];
+	}
+
+	public CompProperties CompDefFor<T>() where T : ThingComp
+	{
+		for (int i = 0; i < comps.Count; i++)
+		{
+			if (comps[i].compClass == typeof(T))
+			{
+				return comps[i];
+			}
+		}
+		return null;
+	}
+
+	public CompProperties CompDefForAssignableFrom<T>() where T : ThingComp
+	{
+		for (int i = 0; i < comps.Count; i++)
+		{
+			if (typeof(T).IsAssignableFrom(comps[i].compClass))
+			{
+				return comps[i];
+			}
+		}
+		return null;
+	}
+
+	public bool HasComp(Type compType)
+	{
+		for (int i = 0; i < comps.Count; i++)
+		{
+			if (comps[i].compClass == compType)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public bool HasComp<T>() where T : ThingComp
+	{
+		for (int i = 0; i < comps.Count; i++)
+		{
+			if (comps[i].compClass == typeof(T) || typeof(T).IsAssignableFrom(comps[i].compClass))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public bool HasAssignableCompFrom(Type compType)
+	{
+		for (int i = 0; i < comps.Count; i++)
+		{
+			if (compType.IsAssignableFrom(comps[i].compClass))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public T GetCompProperties<T>() where T : CompProperties
+	{
+		for (int i = 0; i < comps.Count; i++)
+		{
+			if (comps[i] is T result)
+			{
+				return result;
+			}
+		}
+		return null;
+	}
+
+	public override void PostLoad()
+	{
+		if (graphicData != null)
+		{
+			LongEventHandler.ExecuteWhenFinished(delegate
+			{
+				GraphicData graphicData = this.graphicData;
+				if (graphicData.shaderType == null)
+				{
+					graphicData.shaderType = ShaderTypeDefOf.Cutout;
+				}
+				ContentFinderRequester.requester = this;
+				try
+				{
+					graphic = this.graphicData.Graphic;
+					if (drawerType != DrawerType.RealtimeOnly)
+					{
+						TextureAtlasGroup textureAtlasGroup = category.ToAtlasGroup();
+						graphic.TryInsertIntoAtlas(textureAtlasGroup);
+						if (textureAtlasGroup == TextureAtlasGroup.Building && Minifiable)
+						{
+							graphic.TryInsertIntoAtlas(TextureAtlasGroup.Item);
+						}
+					}
+				}
+				finally
+				{
+					ContentFinderRequester.requester = null;
+				}
+			});
+		}
+		if (tools != null)
+		{
+			for (int i = 0; i < tools.Count; i++)
+			{
+				tools[i].id = i.ToString();
+			}
+		}
+		if (verbs != null && verbs.Count == 1 && verbs[0].label.NullOrEmpty())
+		{
+			verbs[0].label = label;
+		}
+		base.PostLoad();
+		if (category == ThingCategory.Building && building == null)
+		{
+			building = new BuildingProperties();
+		}
+		building?.PostLoadSpecial(this);
+		apparel?.PostLoadSpecial(this);
+		plant?.PostLoadSpecial(this);
+		if (comps == null)
+		{
+			return;
+		}
+		foreach (CompProperties comp in comps)
+		{
+			comp.PostLoadSpecial(this);
+		}
+	}
+
+	protected override void ResolveIcon()
+	{
+		base.ResolveIcon();
+		if (category == ThingCategory.Pawn)
+		{
+			if (!uiIconPath.NullOrEmpty())
+			{
+				uiIcon = ContentFinder<Texture2D>.Get(uiIconPath);
+			}
+			else
+			{
+				if (race.Humanlike)
+				{
+					return;
+				}
+				PawnKindDef anyPawnKind = race.AnyPawnKind;
+				if (anyPawnKind != null)
+				{
+					Material material = ((ModsConfig.BiotechActive && anyPawnKind.RaceProps.IsMechanoid) ? anyPawnKind.lifeStages.First() : anyPawnKind.lifeStages.Last()).bodyGraphicData.Graphic.MatAt(Rot4.East);
+					uiIcon = (Texture2D)material.mainTexture;
+					uiIconColor = material.color;
+					if (ShaderDatabase.TryGetUIShader(material.shader, out var uiShader) && MaterialPool.TryGetRequestForMat(material, out var request))
+					{
+						request.shader = uiShader;
+						uiIconMaterial = MaterialPool.MatFrom(request);
+					}
+				}
+			}
+		}
+		else
+		{
+			ThingDef thingDef = GenStuff.DefaultStuffFor(this);
+			if (colorGenerator != null && (thingDef == null || thingDef.stuffProps.allowColorGenerators))
+			{
+				uiIconColor = colorGenerator.ExemplaryColor;
+			}
+			else if (thingDef != null)
+			{
+				uiIconColor = GetColorForStuff(thingDef);
+			}
+			else if (graphicData != null)
+			{
+				uiIconColor = graphicData.color;
+			}
+			if (rotatable && graphic != null && graphic != BaseContent.BadGraphic && graphic.ShouldDrawRotated && defaultPlacingRot == Rot4.South)
+			{
+				uiIconAngle = 180f + graphic.DrawRotatedExtraAngleOffset;
+			}
+		}
+	}
+
+	public override void ResolveReferences()
+	{
+		base.ResolveReferences();
+		if (ingestible != null)
+		{
+			ingestible.parent = this;
+		}
+		if (stuffProps != null)
+		{
+			stuffProps.parent = this;
+		}
+		building?.ResolveReferencesSpecial();
+		graphicData?.ResolveReferencesSpecial();
+		race?.ResolveReferencesSpecial();
+		stuffProps?.ResolveReferencesSpecial();
+		apparel?.ResolveReferencesSpecial();
+		if (soundImpactDefault == null)
+		{
+			soundImpactDefault = SoundDefOf.BulletImpact_Ground;
+		}
+		if (soundDrop == null)
+		{
+			soundDrop = SoundDefOf.Standard_Drop;
+		}
+		if (soundPickup == null)
+		{
+			soundPickup = SoundDefOf.Standard_Pickup;
+		}
+		if (soundInteract == null)
+		{
+			soundInteract = SoundDefOf.Standard_Pickup;
+		}
+		if (inspectorTabs != null && inspectorTabs.Any())
+		{
+			inspectorTabsResolved = new List<InspectTabBase>();
+			for (int i = 0; i < inspectorTabs.Count; i++)
+			{
+				try
+				{
+					inspectorTabsResolved.Add(InspectTabManager.GetSharedInstance(inspectorTabs[i]));
+				}
+				catch (Exception ex)
+				{
+					Log.Error("Could not instantiate inspector tab of type " + inspectorTabs[i]?.ToString() + ": " + ex);
+				}
+			}
+		}
+		if (comps != null)
+		{
+			for (int j = 0; j < comps.Count; j++)
+			{
+				comps[j].ResolveReferences(this);
+			}
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__401))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__401(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public static ThingDef Named(string defName)
+	{
+		return DefDatabase<ThingDef>.GetNamed(defName);
+	}
+
+	public bool IsWithinCategory(ThingCategoryDef category)
+	{
+		if (thingCategories == null)
+		{
+			return false;
+		}
+		for (int i = 0; i < thingCategories.Count; i++)
+		{
+			for (ThingCategoryDef thingCategoryDef = thingCategories[i]; thingCategoryDef != null; thingCategoryDef = thingCategoryDef.parent)
+			{
+				if (thingCategoryDef == category)
+				{
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	public void Notify_UnlockedByResearch()
+	{
+		if (comps != null)
+		{
+			for (int i = 0; i < comps.Count; i++)
+			{
+				comps[i].Notify_PostUnlockedByResearch(this);
+			}
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CSpecialDisplayStats_003Ed__407))]
+	public override IEnumerable<StatDrawEntry> SpecialDisplayStats(StatRequest req)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CSpecialDisplayStats_003Ed__407(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__req = req
+		};
 	}
 }

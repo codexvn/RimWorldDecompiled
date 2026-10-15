@@ -1,81 +1,206 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.Grammar;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Reward_DevelopmentPoints : Reward
 {
-	// Token: 0x02003685 RID: 13957
-	public class Reward_DevelopmentPoints : Reward
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass4_0
 	{
-		// Token: 0x060135FD RID: 79357 RVA: 0x005C2DAE File Offset: 0x005C0FAE
-		public Reward_DevelopmentPoints()
+		public Ideo fluidIdeo;
+
+		public Reward_DevelopmentPoints _003C_003E4__this;
+
+		internal void _003Cget_StackElements_003Eb__0(Rect rect)
 		{
+			fluidIdeo.DrawIcon(rect);
 		}
 
-		// Token: 0x060135FE RID: 79358 RVA: 0x005C332F File Offset: 0x005C152F
-		public Reward_DevelopmentPoints(Quest quest)
+		internal string _003Cget_StackElements_003Eb__1()
 		{
-			this.quest = quest;
+			return _003C_003E4__this.GetDescription(default(RewardsGeneratorParams)).CapitalizeFirst();
 		}
 
-		// Token: 0x170031E9 RID: 12777
-		// (get) Token: 0x060135FF RID: 79359 RVA: 0x005C333E File Offset: 0x005C153E
-		public override IEnumerable<GenUI.AnonymousStackElement> StackElements
+		internal void _003Cget_StackElements_003Eb__2()
 		{
+			Find.MainTabsRoot.SetCurrentTab(MainButtonDefOf.Ideos);
+			IdeoUIUtility.SetSelected(fluidIdeo);
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003Cget_StackElements_003Ed__4 : IEnumerable<GenUI.AnonymousStackElement>, IEnumerable, IEnumerator<GenUI.AnonymousStackElement>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private GenUI.AnonymousStackElement _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Reward_DevelopmentPoints _003C_003E4__this;
+
+		GenUI.AnonymousStackElement IEnumerator<GenUI.AnonymousStackElement>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				Ideo fluidIdeo = Faction.OfPlayer.ideos.FluidIdeo;
-				if (fluidIdeo == null || !fluidIdeo.development.CanBeDevelopedNow)
-				{
-					yield break;
-				}
-				int num = IdeoDevelopmentUtility.DevelopmentPointsForQuestSuccess(fluidIdeo, this.quest.root);
-				if (num <= 0)
-				{
-					yield break;
-				}
-				yield return QuestPartUtility.GetStandardRewardStackElement("Reward_DevelopmentPointsLabel".Translate() + ": " + num.ToStringWithSign(), delegate(Rect rect)
-				{
-					fluidIdeo.DrawIcon(rect);
-				}, () => this.GetDescription(default(RewardsGeneratorParams)).CapitalizeFirst(), delegate()
-				{
-					Find.MainTabsRoot.SetCurrentTab(MainButtonDefOf.Ideos, true);
-					IdeoUIUtility.SetSelected(fluidIdeo);
-				});
-				yield break;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06013600 RID: 79360 RVA: 0x00066B11 File Offset: 0x00064D11
-		public override void InitFromValue(float rewardValue, RewardsGeneratorParams parms, out float valueActuallyUsed)
+		object IEnumerator.Current
 		{
-			throw new NotImplementedException();
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x06013601 RID: 79361 RVA: 0x00066B11 File Offset: 0x00064D11
-		public override IEnumerable<QuestPart> GenerateQuestParts(int index, RewardsGeneratorParams parms, string customLetterLabel, string customLetterText, RulePack customLetterLabelRules, RulePack customLetterTextRules)
+		[DebuggerHidden]
+		public _003Cget_StackElements_003Ed__4(int _003C_003E1__state)
 		{
-			throw new NotImplementedException();
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x06013602 RID: 79362 RVA: 0x005C3350 File Offset: 0x005C1550
-		public override string GetDescription(RewardsGeneratorParams parms)
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			Ideo fluidIdeo = Faction.OfPlayer.ideos.FluidIdeo;
-			int value = IdeoDevelopmentUtility.DevelopmentPointsForQuestSuccess(fluidIdeo, this.quest.root);
-			return "Reward_DevelopmentPoints".Translate(fluidIdeo, value, fluidIdeo.development.points, fluidIdeo.development.NextReformationDevelopmentPoints).Resolve();
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x06013603 RID: 79363 RVA: 0x005C33BD File Offset: 0x005C15BD
-		public override void ExposeData()
+		private bool MoveNext()
 		{
-			base.ExposeData();
-			Scribe_References.Look<Quest>(ref this.quest, "quest", false);
+			int num = _003C_003E1__state;
+			Reward_DevelopmentPoints reward_DevelopmentPoints = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+			{
+				_003C_003E1__state = -1;
+				_003C_003Ec__DisplayClass4_0 CS_0024_003C_003E8__locals6 = new _003C_003Ec__DisplayClass4_0
+				{
+					_003C_003E4__this = _003C_003E4__this,
+					fluidIdeo = Faction.OfPlayer.ideos.FluidIdeo
+				};
+				if (CS_0024_003C_003E8__locals6.fluidIdeo == null || !CS_0024_003C_003E8__locals6.fluidIdeo.development.CanBeDevelopedNow)
+				{
+					return false;
+				}
+				int num2 = IdeoDevelopmentUtility.DevelopmentPointsForQuestSuccess(CS_0024_003C_003E8__locals6.fluidIdeo, reward_DevelopmentPoints.quest.root);
+				if (num2 <= 0)
+				{
+					return false;
+				}
+				_003C_003E2__current = QuestPartUtility.GetStandardRewardStackElement("Reward_DevelopmentPointsLabel".Translate() + ": " + num2.ToStringWithSign(), delegate(Rect rect)
+				{
+					CS_0024_003C_003E8__locals6.fluidIdeo.DrawIcon(rect);
+				}, () => CS_0024_003C_003E8__locals6._003C_003E4__this.GetDescription(default(RewardsGeneratorParams)).CapitalizeFirst(), delegate
+				{
+					Find.MainTabsRoot.SetCurrentTab(MainButtonDefOf.Ideos);
+					IdeoUIUtility.SetSelected(CS_0024_003C_003E8__locals6.fluidIdeo);
+				});
+				_003C_003E1__state = 1;
+				return true;
+			}
+			case 1:
+				_003C_003E1__state = -1;
+				return false;
+			}
 		}
 
-		// Token: 0x0400D6DD RID: 55005
-		public Quest quest;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<GenUI.AnonymousStackElement> IEnumerable<GenUI.AnonymousStackElement>.GetEnumerator()
+		{
+			_003Cget_StackElements_003Ed__4 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_StackElements_003Ed__4(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<GenUI.AnonymousStackElement>)this).GetEnumerator();
+		}
+	}
+
+	public Quest quest;
+
+	public override IEnumerable<GenUI.AnonymousStackElement> StackElements
+	{
+		[IteratorStateMachine(typeof(_003Cget_StackElements_003Ed__4))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_StackElements_003Ed__4(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public Reward_DevelopmentPoints()
+	{
+	}
+
+	public Reward_DevelopmentPoints(Quest quest)
+	{
+		this.quest = quest;
+	}
+
+	public override void InitFromValue(float rewardValue, RewardsGeneratorParams parms, out float valueActuallyUsed)
+	{
+		throw new NotImplementedException();
+	}
+
+	public override IEnumerable<QuestPart> GenerateQuestParts(int index, RewardsGeneratorParams parms, string customLetterLabel, string customLetterText, RulePack customLetterLabelRules, RulePack customLetterTextRules)
+	{
+		throw new NotImplementedException();
+	}
+
+	public override string GetDescription(RewardsGeneratorParams parms)
+	{
+		Ideo fluidIdeo = Faction.OfPlayer.ideos.FluidIdeo;
+		int num = IdeoDevelopmentUtility.DevelopmentPointsForQuestSuccess(fluidIdeo, quest.root);
+		return "Reward_DevelopmentPoints".Translate(fluidIdeo, num, fluidIdeo.development.points, fluidIdeo.development.NextReformationDevelopmentPoints).Resolve();
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_References.Look(ref quest, "quest");
 	}
 }

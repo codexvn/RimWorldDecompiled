@@ -1,372 +1,543 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
-using RimWorld.Planet;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class TradeShip : PassingShip, ITrader, IThingHolder
 {
-	// Token: 0x02002FB4 RID: 12212
-	public class TradeShip : PassingShip, ITrader, IThingHolder
+	[CompilerGenerated]
+	private sealed class _003CColonyThingsWillingToBuy_003Ed__31 : IEnumerable<Thing>, IEnumerable, IEnumerator<Thing>, IEnumerator, IDisposable
 	{
-		// Token: 0x17002C8D RID: 11405
-		// (get) Token: 0x06011331 RID: 70449 RVA: 0x004EDFF5 File Offset: 0x004EC1F5
-		public override string FullTitle
+		private int _003C_003E1__state;
+
+		private Thing _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public TradeShip _003C_003E4__this;
+
+		private IEnumerator<Thing> _003C_003E7__wrap1;
+
+		private IEnumerator<Pawn> _003C_003E7__wrap2;
+
+		Thing IEnumerator<Thing>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.name + " (" + this.def.label + ")";
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002C8E RID: 11406
-		// (get) Token: 0x06011332 RID: 70450 RVA: 0x004EE017 File Offset: 0x004EC217
-		public int Silver
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.CountHeldOf(ThingDefOf.Silver, null);
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002C8F RID: 11407
-		// (get) Token: 0x06011333 RID: 70451 RVA: 0x004EE025 File Offset: 0x004EC225
-		public TradeCurrency TradeCurrency
+		[DebuggerHidden]
+		public _003CColonyThingsWillingToBuy_003Ed__31(int _003C_003E1__state)
 		{
-			get
-			{
-				return this.def.tradeCurrency;
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x17002C90 RID: 11408
-		// (get) Token: 0x06011334 RID: 70452 RVA: 0x004EE032 File Offset: 0x004EC232
-		public IThingHolder ParentHolder
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			get
+			switch (_003C_003E1__state)
 			{
-				return base.Map;
-			}
-		}
-
-		// Token: 0x17002C91 RID: 11409
-		// (get) Token: 0x06011335 RID: 70453 RVA: 0x004EE03A File Offset: 0x004EC23A
-		public TraderKindDef TraderKind
-		{
-			get
-			{
-				return this.def;
-			}
-		}
-
-		// Token: 0x17002C92 RID: 11410
-		// (get) Token: 0x06011336 RID: 70454 RVA: 0x004EE042 File Offset: 0x004EC242
-		public int RandomPriceFactorSeed
-		{
-			get
-			{
-				return this.randomPriceFactorSeed;
-			}
-		}
-
-		// Token: 0x17002C93 RID: 11411
-		// (get) Token: 0x06011337 RID: 70455 RVA: 0x004E92EB File Offset: 0x004E74EB
-		public string TraderName
-		{
-			get
-			{
-				return this.name;
-			}
-		}
-
-		// Token: 0x17002C94 RID: 11412
-		// (get) Token: 0x06011338 RID: 70456 RVA: 0x004EE04A File Offset: 0x004EC24A
-		public bool CanTradeNow
-		{
-			get
-			{
-				return !base.Departed;
-			}
-		}
-
-		// Token: 0x17002C95 RID: 11413
-		// (get) Token: 0x06011339 RID: 70457 RVA: 0x00006AAC File Offset: 0x00004CAC
-		public float TradePriceImprovementOffsetForPlayer
-		{
-			get
-			{
-				return 0f;
-			}
-		}
-
-		// Token: 0x17002C96 RID: 11414
-		// (get) Token: 0x0601133A RID: 70458 RVA: 0x004EE055 File Offset: 0x004EC255
-		// (set) Token: 0x0601133B RID: 70459 RVA: 0x004EE05D File Offset: 0x004EC25D
-		public bool WasAnnounced
-		{
-			get
-			{
-				return this.wasAnnounced;
-			}
-			set
-			{
-				this.wasAnnounced = value;
-			}
-		}
-
-		// Token: 0x17002C97 RID: 11415
-		// (get) Token: 0x0601133C RID: 70460 RVA: 0x004EE066 File Offset: 0x004EC266
-		public IEnumerable<Thing> Goods
-		{
-			get
-			{
-				int num;
-				for (int i = 0; i < this.things.Count; i = num + 1)
+			case -3:
+			case 1:
+				try
 				{
-					Pawn pawn = this.things[i] as Pawn;
-					if (pawn == null || !this.soldPrisoners.Contains(pawn))
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+				break;
+			case -4:
+			case 2:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally2();
+				}
+				break;
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E7__wrap2 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				TradeShip tradeShip = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = TradeUtility.AllLaunchableThingsForTrade(tradeShip.Map, tradeShip).GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0078;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0078;
+				case 2:
 					{
-						yield return this.things[i];
+						_003C_003E1__state = -4;
+						break;
 					}
-					num = i;
-				}
-				yield break;
-			}
-		}
-
-		// Token: 0x0601133D RID: 70461 RVA: 0x004EE076 File Offset: 0x004EC276
-		public TradeShip()
-		{
-		}
-
-		// Token: 0x0601133E RID: 70462 RVA: 0x004EE090 File Offset: 0x004EC290
-		public TradeShip(TraderKindDef def, Faction faction = null) : base(faction)
-		{
-			this.def = def;
-			this.things = new ThingOwner<Thing>(this);
-			TradeShip.tmpExtantNames.Clear();
-			List<Map> maps = Find.Maps;
-			for (int i = 0; i < maps.Count; i++)
-			{
-				TradeShip.tmpExtantNames.AddRange(from x in maps[i].passingShipManager.passingShips
-				select x.name);
-			}
-			this.name = NameGenerator.GenerateName(RulePackDefOf.NamerTraderGeneral, TradeShip.tmpExtantNames, false, null);
-			if (faction != null)
-			{
-				this.name = string.Format("{0} {1} {2}", this.name, "OfLower".Translate(), faction.Name);
-			}
-			this.randomPriceFactorSeed = Rand.RangeInclusive(1, 10000000);
-			this.loadID = Find.UniqueIDsManager.GetNextPassingShipID();
-		}
-
-		// Token: 0x0601133F RID: 70463 RVA: 0x004EE18F File Offset: 0x004EC38F
-		public IEnumerable<Thing> ColonyThingsWillingToBuy(Pawn playerNegotiator)
-		{
-			foreach (Thing thing in TradeUtility.AllLaunchableThingsForTrade(base.Map, this))
-			{
-				yield return thing;
-			}
-			IEnumerator<Thing> enumerator = null;
-			foreach (Pawn pawn in TradeUtility.AllSellableColonyPawns(base.Map, false))
-			{
-				yield return pawn;
-			}
-			IEnumerator<Pawn> enumerator2 = null;
-			yield break;
-			yield break;
-		}
-
-		// Token: 0x06011340 RID: 70464 RVA: 0x004EE1A0 File Offset: 0x004EC3A0
-		public void GenerateThings()
-		{
-			ThingSetMakerParams parms = default(ThingSetMakerParams);
-			parms.traderDef = this.def;
-			parms.tile = new PlanetTile?(base.Map.Tile);
-			this.things.TryAddRangeOrTransfer(ThingSetMakerDefOf.TraderStock.root.Generate(parms), true, false);
-		}
-
-		// Token: 0x06011341 RID: 70465 RVA: 0x004EE1F8 File Offset: 0x004EC3F8
-		public override void PassingShipTick()
-		{
-			base.PassingShipTick();
-			for (int i = this.things.Count - 1; i >= 0; i--)
-			{
-				Pawn pawn = this.things[i] as Pawn;
-				if (pawn != null)
-				{
-					pawn.DoTick();
-					if (pawn.Dead)
+					IL_0078:
+					if (_003C_003E7__wrap1.MoveNext())
 					{
-						this.things.Remove(pawn);
+						Thing current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
 					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					_003C_003E7__wrap2 = TradeUtility.AllSellableColonyPawns(tradeShip.Map, checkAcceptableTemperatureOfAnimals: false).GetEnumerator();
+					_003C_003E1__state = -4;
+					break;
 				}
-			}
-		}
-
-		// Token: 0x06011342 RID: 70466 RVA: 0x004EE254 File Offset: 0x004EC454
-		public override void ExposeData()
-		{
-			base.ExposeData();
-			Scribe_Defs.Look<TraderKindDef>(ref this.def, "def");
-			Scribe_Deep.Look<ThingOwner>(ref this.things, "things", new object[]
-			{
-				this
-			});
-			Scribe_Collections.Look<Pawn>(ref this.soldPrisoners, "soldPrisoners", LookMode.Reference, Array.Empty<object>());
-			Scribe_Values.Look<int>(ref this.randomPriceFactorSeed, "randomPriceFactorSeed", 0, false);
-			Scribe_Values.Look<bool>(ref this.wasAnnounced, "wasAnnounced", true, false);
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
-			{
-				this.soldPrisoners.RemoveAll((Pawn x) => x == null);
-			}
-		}
-
-		// Token: 0x06011343 RID: 70467 RVA: 0x004EE300 File Offset: 0x004EC500
-		public override void TryOpenComms(Pawn negotiator)
-		{
-			if (!this.CanTradeNow)
-			{
-				return;
-			}
-			Find.WindowStack.Add(new Dialog_Trade(negotiator, this, false));
-			LessonAutoActivator.TeachOpportunity(ConceptDefOf.BuildOrbitalTradeBeacon, OpportunityType.Critical);
-			PawnRelationUtility.Notify_PawnsSeenByPlayer_Letter_Send(this.Goods.OfType<Pawn>(), "LetterRelatedPawnsTradeShip".Translate(Faction.OfPlayer.def.pawnsPlural), LetterDefOf.NeutralEvent, false, true);
-			TutorUtility.DoModalDialogIfNotKnown(ConceptDefOf.TradeGoodsMustBeNearBeacon, Array.Empty<string>());
-		}
-
-		// Token: 0x06011344 RID: 70468 RVA: 0x004EE37C File Offset: 0x004EC57C
-		public override void Depart()
-		{
-			base.Depart();
-			this.things.ClearAndDestroyContentsOrPassToWorld(DestroyMode.Vanish);
-			this.soldPrisoners.Clear();
-		}
-
-		// Token: 0x06011345 RID: 70469 RVA: 0x004EDFF5 File Offset: 0x004EC1F5
-		public override string GetCallLabel()
-		{
-			return this.name + " (" + this.def.label + ")";
-		}
-
-		// Token: 0x06011346 RID: 70470 RVA: 0x004EE39C File Offset: 0x004EC59C
-		protected override AcceptanceReport CanCommunicateWith(Pawn negotiator)
-		{
-			AcceptanceReport result = base.CanCommunicateWith(negotiator);
-			if (!result.Accepted)
-			{
-				return result;
-			}
-			return negotiator.CanTradeWith(base.Faction, this.TraderKind);
-		}
-
-		// Token: 0x06011347 RID: 70471 RVA: 0x004EE3D0 File Offset: 0x004EC5D0
-		public int CountHeldOf(ThingDef thingDef, ThingDef stuffDef = null)
-		{
-			Thing thing = this.HeldThingMatching(thingDef, stuffDef);
-			if (thing != null)
-			{
-				return thing.stackCount;
-			}
-			return 0;
-		}
-
-		// Token: 0x06011348 RID: 70472 RVA: 0x004EE3F4 File Offset: 0x004EC5F4
-		public void GiveSoldThingToTrader(Thing toGive, int countToGive, Pawn playerNegotiator)
-		{
-			Thing thing = toGive.SplitOff(countToGive);
-			thing.PreTraded(TradeAction.PlayerSells, playerNegotiator, this);
-			Thing thing2 = TradeUtility.ThingFromStockToMergeWith(this, thing);
-			if (thing2 != null)
-			{
-				if (!thing2.TryAbsorbStack(thing, false))
+				if (_003C_003E7__wrap2.MoveNext())
 				{
-					thing.Destroy(DestroyMode.Vanish);
-					return;
+					Pawn current2 = _003C_003E7__wrap2.Current;
+					_003C_003E2__current = current2;
+					_003C_003E1__state = 2;
+					return true;
 				}
+				_003C_003Em__Finally2();
+				_003C_003E7__wrap2 = null;
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap2 != null)
+			{
+				_003C_003E7__wrap2.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Thing> IEnumerable<Thing>.GetEnumerator()
+		{
+			_003CColonyThingsWillingToBuy_003Ed__31 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
 			}
 			else
 			{
-				Pawn pawn = thing as Pawn;
-				if (pawn != null && pawn.RaceProps.Humanlike)
+				result = new _003CColonyThingsWillingToBuy_003Ed__31(0)
 				{
-					this.soldPrisoners.Add(pawn);
-				}
-				this.things.TryAdd(thing, false);
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Thing>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003Cget_Goods_003Ed__27 : IEnumerable<Thing>, IEnumerable, IEnumerator<Thing>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Thing _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public TradeShip _003C_003E4__this;
+
+		private int _003Ci_003E5__2;
+
+		Thing IEnumerator<Thing>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06011349 RID: 70473 RVA: 0x004EE460 File Offset: 0x004EC660
-		public void GiveSoldThingToPlayer(Thing toGive, int countToGive, Pawn playerNegotiator)
+		object IEnumerator.Current
 		{
-			Thing thing = toGive.SplitOff(countToGive);
-			thing.PreTraded(TradeAction.PlayerBuys, playerNegotiator, this);
-			Pawn pawn = thing as Pawn;
-			if (pawn != null)
+			[DebuggerHidden]
+			get
 			{
-				this.soldPrisoners.Remove(pawn);
+				return _003C_003E2__current;
 			}
-			TradeUtility.SpawnDropPod(DropCellFinder.TradeDropSpot(base.Map), base.Map, thing);
 		}
 
-		// Token: 0x0601134A RID: 70474 RVA: 0x004EE4AC File Offset: 0x004EC6AC
-		private Thing HeldThingMatching(ThingDef thingDef, ThingDef stuffDef)
+		[DebuggerHidden]
+		public _003Cget_Goods_003Ed__27(int _003C_003E1__state)
 		{
-			for (int i = 0; i < this.things.Count; i++)
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			TradeShip tradeShip = _003C_003E4__this;
+			if (num != 0)
 			{
-				if (this.things[i].def == thingDef && this.things[i].Stuff == stuffDef)
+				if (num != 1)
 				{
-					return this.things[i];
+					return false;
+				}
+				_003C_003E1__state = -1;
+				goto IL_0076;
+			}
+			_003C_003E1__state = -1;
+			_003Ci_003E5__2 = 0;
+			goto IL_0086;
+			IL_0076:
+			_003Ci_003E5__2++;
+			goto IL_0086;
+			IL_0086:
+			if (_003Ci_003E5__2 < tradeShip.things.Count)
+			{
+				if (!(tradeShip.things[_003Ci_003E5__2] is Pawn item) || !tradeShip.soldPrisoners.Contains(item))
+				{
+					_003C_003E2__current = tradeShip.things[_003Ci_003E5__2];
+					_003C_003E1__state = 1;
+					return true;
+				}
+				goto IL_0076;
+			}
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Thing> IEnumerable<Thing>.GetEnumerator()
+		{
+			_003Cget_Goods_003Ed__27 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_Goods_003Ed__27(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Thing>)this).GetEnumerator();
+		}
+	}
+
+	public TraderKindDef def;
+
+	private ThingOwner things;
+
+	private List<Pawn> soldPrisoners = new List<Pawn>();
+
+	private int randomPriceFactorSeed = -1;
+
+	private bool wasAnnounced;
+
+	private static List<string> tmpExtantNames = new List<string>();
+
+	public override string FullTitle => name + " (" + def.label + ")";
+
+	public int Silver => CountHeldOf(ThingDefOf.Silver);
+
+	public TradeCurrency TradeCurrency => def.tradeCurrency;
+
+	public IThingHolder ParentHolder => base.Map;
+
+	public TraderKindDef TraderKind => def;
+
+	public int RandomPriceFactorSeed => randomPriceFactorSeed;
+
+	public string TraderName => name;
+
+	public bool CanTradeNow => !base.Departed;
+
+	public float TradePriceImprovementOffsetForPlayer => 0f;
+
+	public bool WasAnnounced
+	{
+		get
+		{
+			return wasAnnounced;
+		}
+		set
+		{
+			wasAnnounced = value;
+		}
+	}
+
+	public IEnumerable<Thing> Goods
+	{
+		[IteratorStateMachine(typeof(_003Cget_Goods_003Ed__27))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_Goods_003Ed__27(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public TradeShip()
+	{
+	}
+
+	public TradeShip(TraderKindDef def, Faction faction = null)
+		: base(faction)
+	{
+		this.def = def;
+		things = new ThingOwner<Thing>(this);
+		tmpExtantNames.Clear();
+		List<Map> maps = Find.Maps;
+		for (int i = 0; i < maps.Count; i++)
+		{
+			tmpExtantNames.AddRange(maps[i].passingShipManager.passingShips.Select((PassingShip x) => x.name));
+		}
+		name = NameGenerator.GenerateName(RulePackDefOf.NamerTraderGeneral, tmpExtantNames);
+		if (faction != null)
+		{
+			name = "GuildTradeShipName".Translate(name, faction.Name);
+		}
+		randomPriceFactorSeed = Rand.RangeInclusive(1, 10000000);
+		loadID = Find.UniqueIDsManager.GetNextPassingShipID();
+	}
+
+	[IteratorStateMachine(typeof(_003CColonyThingsWillingToBuy_003Ed__31))]
+	public IEnumerable<Thing> ColonyThingsWillingToBuy(Pawn playerNegotiator)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CColonyThingsWillingToBuy_003Ed__31(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public void GenerateThings()
+	{
+		ThingSetMakerParams parms = default(ThingSetMakerParams);
+		parms.traderDef = def;
+		parms.tile = base.Map.Tile;
+		things.TryAddRangeOrTransfer(ThingSetMakerDefOf.TraderStock.root.Generate(parms));
+	}
+
+	public override void PassingShipTick()
+	{
+		base.PassingShipTick();
+		for (int num = things.Count - 1; num >= 0; num--)
+		{
+			if (things[num] is Pawn pawn)
+			{
+				pawn.DoTick();
+				if (pawn.Dead)
+				{
+					things.Remove(pawn);
 				}
 			}
-			return null;
 		}
+	}
 
-		// Token: 0x0601134B RID: 70475 RVA: 0x004EE505 File Offset: 0x004EC705
-		public void ChangeCountHeldOf(ThingDef thingDef, ThingDef stuffDef, int count)
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Defs.Look(ref def, "def");
+		Scribe_Deep.Look(ref things, "things", this);
+		Scribe_Collections.Look(ref soldPrisoners, "soldPrisoners", LookMode.Reference);
+		Scribe_Values.Look(ref randomPriceFactorSeed, "randomPriceFactorSeed", 0);
+		Scribe_Values.Look(ref wasAnnounced, "wasAnnounced", defaultValue: true);
+		if (Scribe.mode == LoadSaveMode.PostLoadInit)
 		{
-			Thing thing = this.HeldThingMatching(thingDef, stuffDef);
-			if (thing == null)
+			soldPrisoners.RemoveAll((Pawn x) => x == null);
+		}
+	}
+
+	public override void TryOpenComms(Pawn negotiator)
+	{
+		if (CanTradeNow)
+		{
+			Find.WindowStack.Add(new Dialog_Trade(negotiator, this));
+			LessonAutoActivator.TeachOpportunity(ConceptDefOf.BuildOrbitalTradeBeacon, OpportunityType.Critical);
+			PawnRelationUtility.Notify_PawnsSeenByPlayer_Letter_Send(Goods.OfType<Pawn>(), "LetterRelatedPawnsTradeShip".Translate(Faction.OfPlayer.def.pawnsPlural), LetterDefOf.NeutralEvent);
+			TutorUtility.DoModalDialogIfNotKnown(ConceptDefOf.TradeGoodsMustBeNearBeacon);
+		}
+	}
+
+	public override void Depart()
+	{
+		base.Depart();
+		things.ClearAndDestroyContentsOrPassToWorld();
+		soldPrisoners.Clear();
+	}
+
+	public override string GetCallLabel()
+	{
+		return name + " (" + def.label + ")";
+	}
+
+	protected override AcceptanceReport CanCommunicateWith(Pawn negotiator)
+	{
+		AcceptanceReport result = base.CanCommunicateWith(negotiator);
+		if (!result.Accepted)
+		{
+			return result;
+		}
+		return negotiator.CanTradeWith(base.Faction, TraderKind);
+	}
+
+	public int CountHeldOf(ThingDef thingDef, ThingDef stuffDef = null)
+	{
+		return HeldThingMatching(thingDef, stuffDef)?.stackCount ?? 0;
+	}
+
+	public void GiveSoldThingToTrader(Thing toGive, int countToGive, Pawn playerNegotiator)
+	{
+		Thing thing = toGive.SplitOff(countToGive);
+		thing.PreTraded(TradeAction.PlayerSells, playerNegotiator, this);
+		Thing thing2 = TradeUtility.ThingFromStockToMergeWith(this, thing);
+		if (thing2 != null)
+		{
+			if (!thing2.TryAbsorbStack(thing, respectStackLimit: false))
 			{
-				Log.Error("Changing count of thing trader doesn't have: " + ((thingDef != null) ? thingDef.ToString() : null));
+				thing.Destroy();
 			}
-			thing.stackCount += count;
+			return;
 		}
-
-		// Token: 0x0601134C RID: 70476 RVA: 0x004E92F3 File Offset: 0x004E74F3
-		public override string ToString()
+		if (thing is Pawn pawn && pawn.RaceProps.Humanlike)
 		{
-			return this.FullTitle;
+			soldPrisoners.Add(pawn);
 		}
+		things.TryAdd(thing, canMergeWithExistingStacks: false);
+	}
 
-		// Token: 0x0601134D RID: 70477 RVA: 0x004EE53B File Offset: 0x004EC73B
-		public ThingOwner GetDirectlyHeldThings()
+	public void GiveSoldThingToPlayer(Thing toGive, int countToGive, Pawn playerNegotiator)
+	{
+		Thing thing = toGive.SplitOff(countToGive);
+		thing.PreTraded(TradeAction.PlayerBuys, playerNegotiator, this);
+		if (thing is Pawn item)
 		{
-			return this.things;
+			soldPrisoners.Remove(item);
 		}
+		TradeUtility.SpawnDropPod(DropCellFinder.TradeDropSpot(base.Map), base.Map, thing);
+	}
 
-		// Token: 0x0601134E RID: 70478 RVA: 0x004EE543 File Offset: 0x004EC743
-		public void GetChildHolders(List<IThingHolder> outChildren)
+	private Thing HeldThingMatching(ThingDef thingDef, ThingDef stuffDef)
+	{
+		for (int i = 0; i < things.Count; i++)
 		{
-			ThingOwnerUtility.AppendThingHoldersFromThings(outChildren, this.GetDirectlyHeldThings());
+			if (things[i].def == thingDef && things[i].Stuff == stuffDef)
+			{
+				return things[i];
+			}
 		}
+		return null;
+	}
 
-		// Token: 0x0400B283 RID: 45699
-		public TraderKindDef def;
+	public void ChangeCountHeldOf(ThingDef thingDef, ThingDef stuffDef, int count)
+	{
+		Thing thing = HeldThingMatching(thingDef, stuffDef);
+		if (thing == null)
+		{
+			Log.Error("Changing count of thing trader doesn't have: " + thingDef);
+		}
+		thing.stackCount += count;
+	}
 
-		// Token: 0x0400B284 RID: 45700
-		private ThingOwner things;
+	public override string ToString()
+	{
+		return FullTitle;
+	}
 
-		// Token: 0x0400B285 RID: 45701
-		private List<Pawn> soldPrisoners = new List<Pawn>();
+	public ThingOwner GetDirectlyHeldThings()
+	{
+		return things;
+	}
 
-		// Token: 0x0400B286 RID: 45702
-		private int randomPriceFactorSeed = -1;
-
-		// Token: 0x0400B287 RID: 45703
-		private bool wasAnnounced;
-
-		// Token: 0x0400B288 RID: 45704
-		private static List<string> tmpExtantNames = new List<string>();
+	public void GetChildHolders(List<IThingHolder> outChildren)
+	{
+		ThingOwnerUtility.AppendThingHoldersFromThings(outChildren, GetDirectlyHeldThings());
 	}
 }

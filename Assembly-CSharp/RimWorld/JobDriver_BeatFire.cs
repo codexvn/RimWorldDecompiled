@@ -1,98 +1,245 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_BeatFire : JobDriver
 {
-	// Token: 0x02001190 RID: 4496
-	public class JobDriver_BeatFire : JobDriver
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass3_0
 	{
-		// Token: 0x17001108 RID: 4360
-		// (get) Token: 0x06006DEF RID: 28143 RVA: 0x0022596F File Offset: 0x00223B6F
-		protected Fire TargetFire
+		public JobDriver_BeatFire _003C_003E4__this;
+
+		public Toil beat;
+
+		public Toil approach;
+
+		internal void _003CMakeNewToils_003Eb__0()
 		{
+			if (_003C_003E4__this.Map.reservationManager.CanReserve(_003C_003E4__this.pawn, _003C_003E4__this.TargetFire))
+			{
+				_003C_003E4__this.pawn.Reserve(_003C_003E4__this.TargetFire, _003C_003E4__this.job);
+			}
+			_003C_003E4__this.pawn.pather.StartPath(_003C_003E4__this.TargetFire, PathEndMode.Touch);
+		}
+
+		internal void _003CMakeNewToils_003Eb__1(int delta)
+		{
+			if (_003C_003E4__this.pawn.pather.Moving && _003C_003E4__this.pawn.pather.nextCell != _003C_003E4__this.TargetFire.Position)
+			{
+				_003C_003E4__this.StartBeatingFireIfAnyAt(_003C_003E4__this.pawn.pather.nextCell, beat);
+			}
+			if (_003C_003E4__this.pawn.Position != _003C_003E4__this.TargetFire.Position)
+			{
+				_003C_003E4__this.StartBeatingFireIfAnyAt(_003C_003E4__this.pawn.Position, beat);
+			}
+		}
+
+		internal void _003CMakeNewToils_003Eb__2()
+		{
+			if (!_003C_003E4__this.pawn.CanReachImmediate(_003C_003E4__this.TargetFire, PathEndMode.Touch))
+			{
+				_003C_003E4__this.JumpToToil(approach);
+			}
+			else if (!(_003C_003E4__this.pawn.Position != _003C_003E4__this.TargetFire.Position) || !_003C_003E4__this.StartBeatingFireIfAnyAt(_003C_003E4__this.pawn.Position, beat))
+			{
+				_003C_003E4__this.pawn.natives.TryBeatFire(_003C_003E4__this.TargetFire);
+				if (_003C_003E4__this.TargetFire.Destroyed)
+				{
+					_003C_003E4__this.pawn.records.Increment(RecordDefOf.FiresExtinguished);
+					_003C_003E4__this.pawn.jobs.EndCurrentJob(JobCondition.Succeeded);
+				}
+			}
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__3 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_BeatFire _003C_003E4__this;
+
+		private _003C_003Ec__DisplayClass3_0 _003C_003E8__1;
+
+		Toil IEnumerator<Toil>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				return (Fire)this.job.targetA.Thing;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06006DF0 RID: 28144 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		object IEnumerator.Current
 		{
-			return true;
-		}
-
-		// Token: 0x06006DF1 RID: 28145 RVA: 0x00225986 File Offset: 0x00223B86
-		protected override IEnumerable<Toil> MakeNewToils()
-		{
-			this.FailOnDespawnedOrNull(TargetIndex.A);
-			Toil beat = ToilMaker.MakeToil("MakeNewToils");
-			Toil approach = ToilMaker.MakeToil("MakeNewToils");
-			approach.initAction = delegate()
+			[DebuggerHidden]
+			get
 			{
-				if (this.Map.reservationManager.CanReserve(this.pawn, this.TargetFire, 1, -1, null, false))
-				{
-					this.pawn.Reserve(this.TargetFire, this.job, 1, -1, null, true, false);
-				}
-				this.pawn.pather.StartPath(this.TargetFire, PathEndMode.Touch);
-			};
-			approach.tickIntervalAction = delegate(int delta)
-			{
-				if (this.pawn.pather.Moving && this.pawn.pather.nextCell != this.TargetFire.Position)
-				{
-					this.StartBeatingFireIfAnyAt(this.pawn.pather.nextCell, beat);
-				}
-				if (this.pawn.Position != this.TargetFire.Position)
-				{
-					this.StartBeatingFireIfAnyAt(this.pawn.Position, beat);
-				}
-			};
-			approach.FailOnDespawnedOrNull(TargetIndex.A);
-			approach.defaultCompleteMode = ToilCompleteMode.PatherArrival;
-			approach.atomicWithPrevious = true;
-			yield return approach;
-			beat.tickAction = delegate()
-			{
-				if (!this.pawn.CanReachImmediate(this.TargetFire, PathEndMode.Touch))
-				{
-					this.JumpToToil(approach);
-					return;
-				}
-				if (this.pawn.Position != this.TargetFire.Position && this.StartBeatingFireIfAnyAt(this.pawn.Position, beat))
-				{
-					return;
-				}
-				this.pawn.natives.TryBeatFire(this.TargetFire);
-				if (this.TargetFire.Destroyed)
-				{
-					this.pawn.records.Increment(RecordDefOf.FiresExtinguished);
-					this.pawn.jobs.EndCurrentJob(JobCondition.Succeeded, true, true);
-				}
-			};
-			beat.FailOnDespawnedOrNull(TargetIndex.A);
-			beat.defaultCompleteMode = ToilCompleteMode.Never;
-			yield return beat;
-			yield break;
-		}
-
-		// Token: 0x06006DF2 RID: 28146 RVA: 0x00225998 File Offset: 0x00223B98
-		private bool StartBeatingFireIfAnyAt(IntVec3 cell, Toil nextToil)
-		{
-			List<Thing> thingList = cell.GetThingList(base.Map);
-			for (int i = 0; i < thingList.Count; i++)
-			{
-				Fire fire = thingList[i] as Fire;
-				if (fire != null && fire.parent == null)
-				{
-					this.job.targetA = fire;
-					this.pawn.pather.StopDead();
-					base.JumpToToil(nextToil);
-					return true;
-				}
+				return _003C_003E2__current;
 			}
-			return false;
 		}
+
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__3(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E8__1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_BeatFire f = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E8__1 = new _003C_003Ec__DisplayClass3_0();
+				_003C_003E8__1._003C_003E4__this = _003C_003E4__this;
+				f.FailOnDespawnedOrNull(TargetIndex.A);
+				_003C_003E8__1.beat = ToilMaker.MakeToil("MakeNewToils");
+				_003C_003E8__1.approach = ToilMaker.MakeToil("MakeNewToils");
+				_003C_003E8__1.approach.initAction = delegate
+				{
+					if (_003C_003E8__1._003C_003E4__this.Map.reservationManager.CanReserve(_003C_003E8__1._003C_003E4__this.pawn, _003C_003E8__1._003C_003E4__this.TargetFire))
+					{
+						_003C_003E8__1._003C_003E4__this.pawn.Reserve(_003C_003E8__1._003C_003E4__this.TargetFire, _003C_003E8__1._003C_003E4__this.job);
+					}
+					_003C_003E8__1._003C_003E4__this.pawn.pather.StartPath(_003C_003E8__1._003C_003E4__this.TargetFire, PathEndMode.Touch);
+				};
+				_003C_003E8__1.approach.tickIntervalAction = delegate
+				{
+					if (_003C_003E8__1._003C_003E4__this.pawn.pather.Moving && _003C_003E8__1._003C_003E4__this.pawn.pather.nextCell != _003C_003E8__1._003C_003E4__this.TargetFire.Position)
+					{
+						_003C_003E8__1._003C_003E4__this.StartBeatingFireIfAnyAt(_003C_003E8__1._003C_003E4__this.pawn.pather.nextCell, _003C_003E8__1.beat);
+					}
+					if (_003C_003E8__1._003C_003E4__this.pawn.Position != _003C_003E8__1._003C_003E4__this.TargetFire.Position)
+					{
+						_003C_003E8__1._003C_003E4__this.StartBeatingFireIfAnyAt(_003C_003E8__1._003C_003E4__this.pawn.Position, _003C_003E8__1.beat);
+					}
+				};
+				_003C_003E8__1.approach.FailOnDespawnedOrNull(TargetIndex.A);
+				_003C_003E8__1.approach.defaultCompleteMode = ToilCompleteMode.PatherArrival;
+				_003C_003E8__1.approach.atomicWithPrevious = true;
+				_003C_003E2__current = _003C_003E8__1.approach;
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E8__1.beat.tickAction = delegate
+				{
+					if (!_003C_003E8__1._003C_003E4__this.pawn.CanReachImmediate(_003C_003E8__1._003C_003E4__this.TargetFire, PathEndMode.Touch))
+					{
+						_003C_003E8__1._003C_003E4__this.JumpToToil(_003C_003E8__1.approach);
+					}
+					else if (!(_003C_003E8__1._003C_003E4__this.pawn.Position != _003C_003E8__1._003C_003E4__this.TargetFire.Position) || !_003C_003E8__1._003C_003E4__this.StartBeatingFireIfAnyAt(_003C_003E8__1._003C_003E4__this.pawn.Position, _003C_003E8__1.beat))
+					{
+						_003C_003E8__1._003C_003E4__this.pawn.natives.TryBeatFire(_003C_003E8__1._003C_003E4__this.TargetFire);
+						if (_003C_003E8__1._003C_003E4__this.TargetFire.Destroyed)
+						{
+							_003C_003E8__1._003C_003E4__this.pawn.records.Increment(RecordDefOf.FiresExtinguished);
+							_003C_003E8__1._003C_003E4__this.pawn.jobs.EndCurrentJob(JobCondition.Succeeded);
+						}
+					}
+				};
+				_003C_003E8__1.beat.FailOnDespawnedOrNull(TargetIndex.A);
+				_003C_003E8__1.beat.defaultCompleteMode = ToilCompleteMode.Never;
+				_003C_003E2__current = _003C_003E8__1.beat;
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__3 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__3(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	protected Fire TargetFire => (Fire)job.targetA.Thing;
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return true;
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__3))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__3(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	private bool StartBeatingFireIfAnyAt(IntVec3 cell, Toil nextToil)
+	{
+		List<Thing> thingList = cell.GetThingList(base.Map);
+		for (int i = 0; i < thingList.Count; i++)
+		{
+			if (thingList[i] is Fire { parent: null } fire)
+			{
+				job.targetA = fire;
+				pawn.pather.StopDead();
+				JumpToToil(nextToil);
+				return true;
+			}
+		}
+		return false;
 	}
 }

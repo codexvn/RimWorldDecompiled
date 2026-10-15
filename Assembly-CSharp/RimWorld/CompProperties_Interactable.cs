@@ -1,131 +1,263 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompProperties_Interactable : CompProperties
 {
-	// Token: 0x02002CF8 RID: 11512
-	public class CompProperties_Interactable : CompProperties
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__30 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x060102AD RID: 66221 RVA: 0x004AD614 File Offset: 0x004AB814
-		public override IEnumerable<string> ConfigErrors(ThingDef parentDef)
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompProperties_Interactable _003C_003E4__this;
+
+		private ThingDef parentDef;
+
+		public ThingDef _003C_003E3__parentDef;
+
+		private IEnumerator<string> _003C_003E7__wrap1;
+
+		string IEnumerator<string>.Current
 		{
-			foreach (string text in base.ConfigErrors(parentDef))
+			[DebuggerHidden]
+			get
 			{
-				yield return text;
+				return _003C_003E2__current;
 			}
-			IEnumerator<string> enumerator = null;
-			if (this.compClass != null && !typeof(CompInteractable).IsAssignableFrom(this.compClass))
-			{
-				yield return parentDef.defName + " has compClass but is not subclass of CompInteractable.";
-			}
-			if (this.activateTexPath.NullOrEmpty())
-			{
-				yield return parentDef.defName + " has no activate texture.";
-			}
-			yield break;
-			yield break;
 		}
 
-		// Token: 0x0400A8D7 RID: 43223
-		public int cooldownTicks;
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
 
-		// Token: 0x0400A8D8 RID: 43224
-		public int activeTicks;
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__30(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
 
-		// Token: 0x0400A8D9 RID: 43225
-		public int ticksToActivate;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
 
-		// Token: 0x0400A8DA RID: 43226
-		public int cooldownFleckSpawnIntervalTicks;
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				CompProperties_Interactable compProperties_Interactable = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((CompProperties)compProperties_Interactable).ConfigErrors(parentDef).GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_007c;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_007c;
+				case 2:
+					_003C_003E1__state = -1;
+					goto IL_00e8;
+				case 3:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_007c:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (compProperties_Interactable.compClass != null && !typeof(CompInteractable).IsAssignableFrom(compProperties_Interactable.compClass))
+					{
+						_003C_003E2__current = parentDef.defName + " has compClass but is not subclass of CompInteractable.";
+						_003C_003E1__state = 2;
+						return true;
+					}
+					goto IL_00e8;
+					IL_00e8:
+					if (compProperties_Interactable.activateTexPath.NullOrEmpty())
+					{
+						_003C_003E2__current = parentDef.defName + " has no activate texture.";
+						_003C_003E1__state = 3;
+						return true;
+					}
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
 
-		// Token: 0x0400A8DB RID: 43227
-		public float cooldownFleckScale = 1f;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x0400A8DC RID: 43228
-		public bool cooldownPreventsRefuel;
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
 
-		// Token: 0x0400A8DD RID: 43229
-		public bool maintainProgress;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x0400A8DE RID: 43230
-		public bool showMustBeActivatedByColonist = true;
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__30 _003CConfigErrors_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CConfigErrors_003Ed__ = this;
+			}
+			else
+			{
+				_003CConfigErrors_003Ed__ = new _003CConfigErrors_003Ed__30(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CConfigErrors_003Ed__.parentDef = _003C_003E3__parentDef;
+			return _003CConfigErrors_003Ed__;
+		}
 
-		// Token: 0x0400A8DF RID: 43231
-		public bool forceNormalSpeedOnInteracting;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x0400A8E0 RID: 43232
-		public bool remainingSecondsInInspectString;
+	public int cooldownTicks;
 
-		// Token: 0x0400A8E1 RID: 43233
-		public bool ignoreForbidden;
+	public int activeTicks;
 
-		// Token: 0x0400A8E2 RID: 43234
-		public bool requiresPower;
+	public int ticksToActivate;
 
-		// Token: 0x0400A8E3 RID: 43235
-		public TargetingParameters targetingParameters;
+	public int cooldownFleckSpawnIntervalTicks;
 
-		// Token: 0x0400A8E4 RID: 43236
-		public StatDef activateStat;
+	public float cooldownFleckScale = 1f;
 
-		// Token: 0x0400A8E5 RID: 43237
-		public FleckDef fleckOnUsed;
+	public bool cooldownPreventsRefuel;
 
-		// Token: 0x0400A8E6 RID: 43238
-		public float fleckOnUsedScale;
+	public bool maintainProgress;
 
-		// Token: 0x0400A8E7 RID: 43239
-		public FleckDef cooldownFleck;
+	public bool showMustBeActivatedByColonist = true;
 
-		// Token: 0x0400A8E8 RID: 43240
-		public SoundDef soundActivate;
+	public bool forceNormalSpeedOnInteracting;
 
-		// Token: 0x0400A8E9 RID: 43241
-		public EffecterDef interactionEffecter;
+	public bool remainingSecondsInInspectString;
 
-		// Token: 0x0400A8EA RID: 43242
-		[MustTranslate]
-		public string jobString;
+	public bool ignoreForbidden;
 
-		// Token: 0x0400A8EB RID: 43243
-		[MustTranslate]
-		public string activatingStringPending;
+	public bool requiresPower;
 
-		// Token: 0x0400A8EC RID: 43244
-		[MustTranslate]
-		public string activatingString;
+	public TargetingParameters targetingParameters;
 
-		// Token: 0x0400A8ED RID: 43245
-		[MustTranslate]
-		public string activateLabelString;
+	public StatDef activateStat;
 
-		// Token: 0x0400A8EE RID: 43246
-		[MustTranslate]
-		public string activateDescString;
+	public FleckDef fleckOnUsed;
 
-		// Token: 0x0400A8EF RID: 43247
-		[MustTranslate]
-		public string guiLabelString;
+	public float fleckOnUsedScale;
 
-		// Token: 0x0400A8F0 RID: 43248
-		[MustTranslate]
-		public string onCooldownString;
+	public FleckDef cooldownFleck;
 
-		// Token: 0x0400A8F1 RID: 43249
-		[MustTranslate]
-		public string inspectString;
+	public SoundDef soundActivate;
 
-		// Token: 0x0400A8F2 RID: 43250
-		[MustTranslate]
-		public string messageCompletedString;
+	public EffecterDef interactionEffecter;
 
-		// Token: 0x0400A8F3 RID: 43251
-		[MustTranslate]
-		public string messageCooldownEnded;
+	[MustTranslate]
+	public string jobString;
 
-		// Token: 0x0400A8F4 RID: 43252
-		[NoTranslate]
-		public string activateTexPath;
+	[MustTranslate]
+	public string activatingStringPending;
+
+	[MustTranslate]
+	public string activatingString;
+
+	[MustTranslate]
+	public string activateLabelString;
+
+	[MustTranslate]
+	public string activateDescString;
+
+	[MustTranslate]
+	public string guiLabelString;
+
+	[MustTranslate]
+	public string onCooldownString;
+
+	[MustTranslate]
+	public string inspectString;
+
+	[MustTranslate]
+	public string messageCompletedString;
+
+	[MustTranslate]
+	public string messageCooldownEnded;
+
+	[NoTranslate]
+	public string activateTexPath;
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__30))]
+	public override IEnumerable<string> ConfigErrors(ThingDef parentDef)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__30(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__parentDef = parentDef
+		};
 	}
 }

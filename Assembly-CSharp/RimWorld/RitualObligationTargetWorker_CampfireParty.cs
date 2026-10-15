@@ -1,65 +1,152 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class RitualObligationTargetWorker_CampfireParty : RitualObligationTargetWorker_ThingDef
 {
-	// Token: 0x0200270C RID: 9996
-	public class RitualObligationTargetWorker_CampfireParty : RitualObligationTargetWorker_ThingDef
+	[CompilerGenerated]
+	private sealed class _003CGetTargetInfos_003Ed__3 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x0600DB57 RID: 56151 RVA: 0x0040B609 File Offset: 0x00409809
-		public RitualObligationTargetWorker_CampfireParty()
-		{
-		}
+		private int _003C_003E1__state;
 
-		// Token: 0x0600DB58 RID: 56152 RVA: 0x0040B611 File Offset: 0x00409811
-		public RitualObligationTargetWorker_CampfireParty(RitualObligationTargetFilterDef def) : base(def)
-		{
-		}
+		private string _003C_003E2__current;
 
-		// Token: 0x0600DB59 RID: 56153 RVA: 0x0040B81C File Offset: 0x00409A1C
-		protected override RitualTargetUseReport CanUseTargetInternal(TargetInfo target, RitualObligation obligation)
+		private int _003C_003El__initialThreadId;
+
+		string IEnumerator<string>.Current
 		{
-			if (!ModLister.CheckIdeology("Campfire party"))
+			[DebuggerHidden]
+			get
 			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetTargetInfos_003Ed__3(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			switch (_003C_003E1__state)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = "RitualTargetCampfirePartyInfo".Translate();
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = ThingDefOf.RitualSpot.label;
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
 				return false;
 			}
-			if (!base.CanUseTargetInternal(target, obligation).canUse)
-			{
-				return false;
-			}
-			Thing thing = target.Thing;
-			CompRefuelable compRefuelable = thing.TryGetComp<CompRefuelable>();
-			if (compRefuelable != null && !compRefuelable.HasFuel)
-			{
-				return "RitualTargetCampfireNoFuel".Translate();
-			}
-			List<Thing> forCell = target.Map.listerBuldingOfDefInProximity.GetForCell(target.Cell, (float)this.def.maxDrumDistance, ThingDefOf.Drum, null);
-			bool flag = false;
-			using (List<Thing>.Enumerator enumerator = forCell.GetEnumerator())
-			{
-				while (enumerator.MoveNext())
-				{
-					if (enumerator.Current.GetRoom(RegionType.Set_All) == thing.GetRoom(RegionType.Set_All))
-					{
-						flag = true;
-						break;
-					}
-				}
-			}
-			if (!flag)
-			{
-				return "RitualTargetNoDrum".Translate();
-			}
-			return true;
 		}
 
-		// Token: 0x0600DB5A RID: 56154 RVA: 0x0040B910 File Offset: 0x00409B10
-		public override IEnumerable<string> GetTargetInfos(RitualObligation obligation)
+		bool IEnumerator.MoveNext()
 		{
-			yield return "RitualTargetCampfirePartyInfo".Translate();
-			yield return ThingDefOf.RitualSpot.label;
-			yield break;
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				return this;
+			}
+			return new _003CGetTargetInfos_003Ed__3(0);
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	public RitualObligationTargetWorker_CampfireParty()
+	{
+	}
+
+	public RitualObligationTargetWorker_CampfireParty(RitualObligationTargetFilterDef def)
+		: base(def)
+	{
+	}
+
+	protected override RitualTargetUseReport CanUseTargetInternal(TargetInfo target, RitualObligation obligation)
+	{
+		if (!ModLister.CheckIdeology("Campfire party"))
+		{
+			return false;
+		}
+		if (!base.CanUseTargetInternal(target, obligation).canUse)
+		{
+			return false;
+		}
+		Thing thing = target.Thing;
+		CompRefuelable compRefuelable = thing.TryGetComp<CompRefuelable>();
+		if (compRefuelable != null && !compRefuelable.HasFuel)
+		{
+			return "RitualTargetCampfireNoFuel".Translate();
+		}
+		List<Thing> forCell = target.Map.listerBuldingOfDefInProximity.GetForCell(target.Cell, def.maxDrumDistance, ThingDefOf.Drum);
+		bool flag = false;
+		foreach (Thing item in forCell)
+		{
+			if (item.GetRoom() == thing.GetRoom())
+			{
+				flag = true;
+				break;
+			}
+		}
+		if (!flag)
+		{
+			return "RitualTargetNoDrum".Translate();
+		}
+		return true;
+	}
+
+	[IteratorStateMachine(typeof(_003CGetTargetInfos_003Ed__3))]
+	public override IEnumerable<string> GetTargetInfos(RitualObligation obligation)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetTargetInfos_003Ed__3(-2);
 	}
 }

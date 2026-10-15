@@ -1,233 +1,272 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class PawnGroupKindWorker_Trader : PawnGroupKindWorker
 {
-	// Token: 0x0200237A RID: 9082
-	public class PawnGroupKindWorker_Trader : PawnGroupKindWorker
+	[CompilerGenerated]
+	private sealed class _003CGetSlavesAndAnimalsFromWares_003Ed__5 : IEnumerable<Pawn>, IEnumerable, IEnumerator<Pawn>, IEnumerator, IDisposable
 	{
-		// Token: 0x0600C4DB RID: 50395 RVA: 0x00006AAC File Offset: 0x00004CAC
-		public override float MinPointsToGenerateAnything(PawnGroupMaker groupMaker, FactionDef faction, PawnGroupMakerParms parms = null)
-		{
-			return 0f;
-		}
+		private int _003C_003E1__state;
 
-		// Token: 0x0600C4DC RID: 50396 RVA: 0x003943D4 File Offset: 0x003925D4
-		public override bool CanGenerateFrom(PawnGroupMakerParms parms, PawnGroupMaker groupMaker)
-		{
-			return base.CanGenerateFrom(parms, groupMaker) && groupMaker.traders.Any<PawnGenOption>() && (!parms.tile.Valid || groupMaker.carriers.Any((PawnGenOption x) => Find.WorldGrid[parms.tile].PrimaryBiome.IsPackAnimalAllowed(x.kind.race)));
-		}
+		private Pawn _003C_003E2__current;
 
-		// Token: 0x0600C4DD RID: 50397 RVA: 0x00394438 File Offset: 0x00392638
-		protected override void GeneratePawns(PawnGroupMakerParms parms, PawnGroupMaker groupMaker, List<Pawn> outPawns, bool errorOnZeroResults = true)
+		private int _003C_003El__initialThreadId;
+
+		private List<Thing> wares;
+
+		public List<Thing> _003C_003E3__wares;
+
+		private PawnGroupMakerParms parms;
+
+		public PawnGroupMakerParms _003C_003E3__parms;
+
+		private int _003Ci_003E5__2;
+
+		Pawn IEnumerator<Pawn>.Current
 		{
-			if (!this.CanGenerateFrom(parms, groupMaker))
+			[DebuggerHidden]
+			get
 			{
-				if (errorOnZeroResults)
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetSlavesAndAnimalsFromWares_003Ed__5(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			if (num != 0)
+			{
+				if (num != 1)
 				{
-					string str = "Cannot generate trader caravan for ";
-					Faction faction = parms.faction;
-					Log.Error(str + ((faction != null) ? faction.ToString() : null) + ".");
+					return false;
 				}
-				return;
+				_003C_003E1__state = -1;
+				goto IL_0076;
 			}
-			if (!parms.faction.def.caravanTraderKinds.Any<TraderKindDef>())
+			_003C_003E1__state = -1;
+			_003Ci_003E5__2 = 0;
+			goto IL_0086;
+			IL_0076:
+			_003Ci_003E5__2++;
+			goto IL_0086;
+			IL_0086:
+			if (_003Ci_003E5__2 < wares.Count)
 			{
-				string str2 = "Cannot generate trader caravan for ";
-				Faction faction2 = parms.faction;
-				Log.Error(str2 + ((faction2 != null) ? faction2.ToString() : null) + " because it has no trader kinds.");
-				return;
-			}
-			PawnGenOption pawnGenOption = groupMaker.traders.FirstOrDefault((PawnGenOption x) => !x.kind.trader);
-			if (pawnGenOption != null)
-			{
-				string str3 = "Cannot generate arriving trader caravan for ";
-				Faction faction3 = parms.faction;
-				Log.Error(str3 + ((faction3 != null) ? faction3.ToString() : null) + " because there is a pawn kind (" + pawnGenOption.kind.LabelCap + ") who is not a trader but is in a traders list.");
-				return;
-			}
-			PawnGenOption pawnGenOption2 = groupMaker.carriers.FirstOrDefault((PawnGenOption x) => !x.kind.RaceProps.packAnimal);
-			if (pawnGenOption2 != null)
-			{
-				string str4 = "Cannot generate arriving trader caravan for ";
-				Faction faction4 = parms.faction;
-				Log.Error(str4 + ((faction4 != null) ? faction4.ToString() : null) + " because there is a pawn kind (" + pawnGenOption2.kind.LabelCap + ") who is not a carrier but is in a carriers list.");
-				return;
-			}
-			if (parms.seed != null)
-			{
-				Log.Warning("Deterministic seed not implemented for this pawn group kind worker. The result will be random anyway.");
-			}
-			TraderKindDef traderKindDef;
-			if (parms.traderKind == null)
-			{
-				traderKindDef = parms.faction.def.caravanTraderKinds.RandomElementByWeight((TraderKindDef traderDef) => traderDef.CalculatedCommonality);
-			}
-			else
-			{
-				traderKindDef = parms.traderKind;
-			}
-			TraderKindDef traderKindDef2 = traderKindDef;
-			Pawn pawn = this.GenerateTrader(parms, groupMaker, traderKindDef2);
-			outPawns.Add(pawn);
-			ThingSetMakerParams parms2 = default(ThingSetMakerParams);
-			parms2.traderDef = traderKindDef2;
-			parms2.tile = new PlanetTile?(parms.tile);
-			parms2.makingFaction = parms.faction;
-			List<Thing> wares = ThingSetMakerDefOf.TraderStock.root.Generate(parms2).InRandomOrder(null).ToList<Thing>();
-			foreach (Pawn item in this.GetSlavesAndAnimalsFromWares(parms, pawn, wares))
-			{
-				outPawns.Add(item);
-			}
-			this.GenerateCarriers(parms, groupMaker, pawn, wares, outPawns);
-			this.GenerateGuards(parms, groupMaker, pawn, wares, outPawns);
-		}
-
-		// Token: 0x0600C4DE RID: 50398 RVA: 0x003946C0 File Offset: 0x003928C0
-		private Pawn GenerateTrader(PawnGroupMakerParms parms, PawnGroupMaker groupMaker, TraderKindDef traderKind)
-		{
-			PawnKindDef kind = groupMaker.traders.RandomElementByWeight((PawnGenOption x) => x.selectionWeight).kind;
-			Faction faction = parms.faction;
-			PawnGenerationContext context = PawnGenerationContext.NonPlayer;
-			PlanetTile? tile = new PlanetTile?(parms.tile);
-			bool forceGenerateNewPawn = false;
-			bool allowDead = false;
-			bool allowDowned = false;
-			bool canGeneratePawnRelations = true;
-			bool mustBeCapableOfViolence = false;
-			float colonistRelationChanceFactor = 1f;
-			bool forceAddFreeWarmLayerIfNeeded = false;
-			bool allowGay = true;
-			bool allowPregnant = false;
-			bool allowFood = true;
-			bool allowAddictions = true;
-			Ideo ideo = parms.ideo;
-			Pawn pawn = PawnGenerator.GeneratePawn(new PawnGenerationRequest(kind, faction, context, tile, forceGenerateNewPawn, allowDead, allowDowned, canGeneratePawnRelations, mustBeCapableOfViolence, colonistRelationChanceFactor, forceAddFreeWarmLayerIfNeeded, allowGay, allowPregnant, allowFood, allowAddictions, parms.inhabitants, false, false, false, 0f, 0f, null, 1f, null, null, null, null, null, null, null, null, null, null, null, ideo, false, false, false, false, null, null, null, null, null, 0f, DevelopmentalStage.Adult, null, null, null, false, false, false, -1, 0, false));
-			pawn.mindState.wantsToTradeWithColony = true;
-			PawnComponentsUtility.AddAndRemoveDynamicComponents(pawn, true);
-			pawn.trader.traderKind = traderKind;
-			parms.points -= pawn.kindDef.combatPower;
-			TradeUtility.CheckGiveTraderQuest(pawn);
-			return pawn;
-		}
-
-		// Token: 0x0600C4DF RID: 50399 RVA: 0x003947DC File Offset: 0x003929DC
-		private void GenerateCarriers(PawnGroupMakerParms parms, PawnGroupMaker groupMaker, Pawn trader, List<Thing> wares, List<Pawn> outPawns)
-		{
-			List<Thing> list = (from x in wares
-			where !(x is Pawn)
-			select x).ToList<Thing>();
-			int i = 0;
-			int num = Mathf.CeilToInt((float)list.Count / 8f);
-			PawnKindDef kind = (from x in groupMaker.carriers
-			where !parms.tile.Valid || Find.WorldGrid[parms.tile].PrimaryBiome.IsPackAnimalAllowed(x.kind.race)
-			select x).RandomElementByWeight((PawnGenOption x) => x.selectionWeight).kind;
-			List<Pawn> list2 = new List<Pawn>();
-			for (int j = 0; j < num; j++)
-			{
-				PawnKindDef kind2 = kind;
-				Faction faction = parms.faction;
-				PawnGenerationContext context = PawnGenerationContext.NonPlayer;
-				PlanetTile? tile = new PlanetTile?(parms.tile);
-				bool forceGenerateNewPawn = false;
-				bool allowDead = false;
-				bool allowDowned = false;
-				bool canGeneratePawnRelations = true;
-				bool mustBeCapableOfViolence = false;
-				float colonistRelationChanceFactor = 1f;
-				bool forceAddFreeWarmLayerIfNeeded = false;
-				bool allowGay = true;
-				bool allowPregnant = false;
-				bool allowFood = true;
-				bool allowAddictions = true;
-				Ideo ideo = parms.ideo;
-				Pawn pawn = PawnGenerator.GeneratePawn(new PawnGenerationRequest(kind2, faction, context, tile, forceGenerateNewPawn, allowDead, allowDowned, canGeneratePawnRelations, mustBeCapableOfViolence, colonistRelationChanceFactor, forceAddFreeWarmLayerIfNeeded, allowGay, allowPregnant, allowFood, allowAddictions, parms.inhabitants, false, false, false, 0f, 0f, null, 1f, null, null, null, null, null, null, null, null, null, null, null, ideo, false, false, false, false, null, null, null, null, null, 0f, DevelopmentalStage.Adult, null, null, null, false, false, false, -1, 0, false));
-				if (i < list.Count)
-				{
-					pawn.inventory.innerContainer.TryAdd(list[i], true);
-					i++;
-				}
-				list2.Add(pawn);
-				outPawns.Add(pawn);
-			}
-			while (i < list.Count)
-			{
-				list2.RandomElement<Pawn>().inventory.innerContainer.TryAdd(list[i], true);
-				i++;
-			}
-		}
-
-		// Token: 0x0600C4E0 RID: 50400 RVA: 0x003949BC File Offset: 0x00392BBC
-		private IEnumerable<Pawn> GetSlavesAndAnimalsFromWares(PawnGroupMakerParms parms, Pawn trader, List<Thing> wares)
-		{
-			int num;
-			for (int i = 0; i < wares.Count; i = num + 1)
-			{
-				Pawn pawn = wares[i] as Pawn;
-				if (pawn != null)
+				if (wares[_003Ci_003E5__2] is Pawn pawn)
 				{
 					if (pawn.Faction != parms.faction)
 					{
-						pawn.SetFaction(parms.faction, null);
+						pawn.SetFaction(parms.faction);
 					}
-					yield return pawn;
+					_003C_003E2__current = pawn;
+					_003C_003E1__state = 1;
+					return true;
 				}
-				num = i;
+				goto IL_0076;
 			}
-			yield break;
+			return false;
 		}
 
-		// Token: 0x0600C4E1 RID: 50401 RVA: 0x003949D4 File Offset: 0x00392BD4
-		private void GenerateGuards(PawnGroupMakerParms parms, PawnGroupMaker groupMaker, Pawn trader, List<Thing> wares, List<Pawn> outPawns)
+		bool IEnumerator.MoveNext()
 		{
-			if (!groupMaker.guards.Any<PawnGenOption>())
-			{
-				return;
-			}
-			foreach (PawnGenOptionWithXenotype pawnGenOptionWithXenotype in PawnGroupMakerUtility.ChoosePawnGenOptionsByPoints(parms.points, groupMaker.guards, parms))
-			{
-				PawnKindDef kind = pawnGenOptionWithXenotype.Option.kind;
-				Faction faction = parms.faction;
-				PawnGenerationContext context = PawnGenerationContext.NonPlayer;
-				XenotypeDef xenotype = pawnGenOptionWithXenotype.Xenotype;
-				PlanetTile? tile = new PlanetTile?(parms.tile);
-				bool forceGenerateNewPawn = false;
-				bool allowDead = false;
-				bool allowDowned = false;
-				bool canGeneratePawnRelations = true;
-				bool mustBeCapableOfViolence = true;
-				float colonistRelationChanceFactor = 1f;
-				bool forceAddFreeWarmLayerIfNeeded = false;
-				bool allowGay = true;
-				bool allowPregnant = false;
-				bool allowFood = true;
-				bool allowAddictions = true;
-				bool inhabitants = parms.inhabitants;
-				bool certainlyBeenInCryptosleep = false;
-				bool forceRedressWorldPawnIfFormerColonist = false;
-				bool worldPawnFactionDoesntMatter = false;
-				float biocodeWeaponChance = 0f;
-				float biocodeApparelChance = 0f;
-				Pawn extraPawnForExtraRelationChance = null;
-				float relationWithExtraPawnChanceFactor = 1f;
-				Predicate<Pawn> validatorPreGear = null;
-				Predicate<Pawn> validatorPostGear = null;
-				IEnumerable<TraitDef> forcedTraits = null;
-				IEnumerable<TraitDef> prohibitedTraits = null;
-				Ideo ideo = parms.ideo;
-				Pawn item = PawnGenerator.GeneratePawn(new PawnGenerationRequest(kind, faction, context, tile, forceGenerateNewPawn, allowDead, allowDowned, canGeneratePawnRelations, mustBeCapableOfViolence, colonistRelationChanceFactor, forceAddFreeWarmLayerIfNeeded, allowGay, allowPregnant, allowFood, allowAddictions, inhabitants, certainlyBeenInCryptosleep, forceRedressWorldPawnIfFormerColonist, worldPawnFactionDoesntMatter, biocodeWeaponChance, biocodeApparelChance, extraPawnForExtraRelationChance, relationWithExtraPawnChanceFactor, validatorPreGear, validatorPostGear, forcedTraits, prohibitedTraits, null, null, null, null, null, null, null, ideo, false, false, false, false, null, null, xenotype, null, null, 0f, DevelopmentalStage.Adult, null, null, null, false, false, false, -1, 0, false));
-				outPawns.Add(item);
-			}
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0600C4E2 RID: 50402 RVA: 0x00066B11 File Offset: 0x00064D11
-		public override IEnumerable<PawnKindDef> GeneratePawnKindsExample(PawnGroupMakerParms parms, PawnGroupMaker groupMaker)
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			throw new NotImplementedException();
+			throw new NotSupportedException();
 		}
+
+		[DebuggerHidden]
+		IEnumerator<Pawn> IEnumerable<Pawn>.GetEnumerator()
+		{
+			_003CGetSlavesAndAnimalsFromWares_003Ed__5 _003CGetSlavesAndAnimalsFromWares_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CGetSlavesAndAnimalsFromWares_003Ed__ = this;
+			}
+			else
+			{
+				_003CGetSlavesAndAnimalsFromWares_003Ed__ = new _003CGetSlavesAndAnimalsFromWares_003Ed__5(0);
+			}
+			_003CGetSlavesAndAnimalsFromWares_003Ed__.parms = _003C_003E3__parms;
+			_003CGetSlavesAndAnimalsFromWares_003Ed__.wares = _003C_003E3__wares;
+			return _003CGetSlavesAndAnimalsFromWares_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Pawn>)this).GetEnumerator();
+		}
+	}
+
+	public override float MinPointsToGenerateAnything(PawnGroupMaker groupMaker, FactionDef faction, PawnGroupMakerParms parms = null)
+	{
+		return 0f;
+	}
+
+	public override bool CanGenerateFrom(PawnGroupMakerParms parms, PawnGroupMaker groupMaker)
+	{
+		if (base.CanGenerateFrom(parms, groupMaker) && groupMaker.traders.Any())
+		{
+			if (parms.tile.Valid)
+			{
+				return groupMaker.carriers.Any((PawnGenOption x) => Find.WorldGrid[parms.tile].PrimaryBiome.IsPackAnimalAllowed(x.kind.race));
+			}
+			return true;
+		}
+		return false;
+	}
+
+	protected override void GeneratePawns(PawnGroupMakerParms parms, PawnGroupMaker groupMaker, List<Pawn> outPawns, bool errorOnZeroResults = true)
+	{
+		if (!CanGenerateFrom(parms, groupMaker))
+		{
+			if (errorOnZeroResults)
+			{
+				Log.Error("Cannot generate trader caravan for " + parms.faction?.ToString() + ".");
+			}
+			return;
+		}
+		if (!parms.faction.def.caravanTraderKinds.Any())
+		{
+			Log.Error("Cannot generate trader caravan for " + parms.faction?.ToString() + " because it has no trader kinds.");
+			return;
+		}
+		PawnGenOption pawnGenOption = groupMaker.traders.FirstOrDefault((PawnGenOption x) => !x.kind.trader);
+		if (pawnGenOption != null)
+		{
+			Log.Error("Cannot generate arriving trader caravan for " + parms.faction?.ToString() + " because there is a pawn kind (" + pawnGenOption.kind.LabelCap + ") who is not a trader but is in a traders list.");
+			return;
+		}
+		PawnGenOption pawnGenOption2 = groupMaker.carriers.FirstOrDefault((PawnGenOption x) => !x.kind.RaceProps.packAnimal);
+		if (pawnGenOption2 != null)
+		{
+			Log.Error("Cannot generate arriving trader caravan for " + parms.faction?.ToString() + " because there is a pawn kind (" + pawnGenOption2.kind.LabelCap + ") who is not a carrier but is in a carriers list.");
+			return;
+		}
+		if (parms.seed.HasValue)
+		{
+			Log.Warning("Deterministic seed not implemented for this pawn group kind worker. The result will be random anyway.");
+		}
+		TraderKindDef traderKindDef = ((parms.traderKind != null) ? parms.traderKind : parms.faction.def.caravanTraderKinds.RandomElementByWeight((TraderKindDef traderDef) => traderDef.CalculatedCommonality));
+		Pawn pawn = GenerateTrader(parms, groupMaker, traderKindDef);
+		outPawns.Add(pawn);
+		ThingSetMakerParams parms2 = default(ThingSetMakerParams);
+		parms2.traderDef = traderKindDef;
+		parms2.tile = parms.tile;
+		parms2.makingFaction = parms.faction;
+		List<Thing> wares = ThingSetMakerDefOf.TraderStock.root.Generate(parms2).InRandomOrder().ToList();
+		foreach (Pawn slavesAndAnimalsFromWare in GetSlavesAndAnimalsFromWares(parms, pawn, wares))
+		{
+			outPawns.Add(slavesAndAnimalsFromWare);
+		}
+		GenerateCarriers(parms, groupMaker, pawn, wares, outPawns);
+		GenerateGuards(parms, groupMaker, pawn, wares, outPawns);
+	}
+
+	private Pawn GenerateTrader(PawnGroupMakerParms parms, PawnGroupMaker groupMaker, TraderKindDef traderKind)
+	{
+		Pawn pawn = PawnGenerator.GeneratePawn(new PawnGenerationRequest(groupMaker.traders.RandomElementByWeight((PawnGenOption x) => x.selectionWeight).kind, parms.faction, PawnGenerationContext.NonPlayer, parms.tile, forceGenerateNewPawn: false, allowDead: false, allowDowned: false, canGeneratePawnRelations: true, mustBeCapableOfViolence: false, 1f, forceAddFreeWarmLayerIfNeeded: false, allowGay: true, allowPregnant: false, allowFood: true, allowAddictions: true, fixedIdeo: parms.ideo, inhabitant: parms.inhabitants, certainlyBeenInCryptosleep: false, forceRedressWorldPawnIfFormerColonist: false, worldPawnFactionDoesntMatter: false, biocodeWeaponChance: 0f, biocodeApparelChance: 0f, extraPawnForExtraRelationChance: null, relationWithExtraPawnChanceFactor: 1f, validatorPreGear: null, validatorPostGear: null, forcedTraits: null, prohibitedTraits: null, minChanceToRedressWorldPawn: null, fixedBiologicalAge: null, fixedChronologicalAge: null, fixedGender: null, fixedLastName: null, fixedBirthName: null, fixedTitle: null, forceNoIdeo: false, forceNoBackstory: false, forbidAnyTitle: false, forceDead: false, forcedXenogenes: null, forcedEndogenes: null, forcedXenotype: null, forcedCustomXenotype: null, allowedXenotypes: null, forceBaselinerChance: 0f, developmentalStages: DevelopmentalStage.Adult, pawnKindDefGetter: null, excludeBiologicalAgeRange: null, biologicalAgeRange: null));
+		pawn.mindState.wantsToTradeWithColony = true;
+		PawnComponentsUtility.AddAndRemoveDynamicComponents(pawn, actAsIfSpawned: true);
+		pawn.trader.traderKind = traderKind;
+		parms.points -= pawn.kindDef.combatPower;
+		TradeUtility.CheckGiveTraderQuest(pawn);
+		return pawn;
+	}
+
+	private void GenerateCarriers(PawnGroupMakerParms parms, PawnGroupMaker groupMaker, Pawn trader, List<Thing> wares, List<Pawn> outPawns)
+	{
+		List<Thing> list = wares.Where((Thing x) => !(x is Pawn)).ToList();
+		int i = 0;
+		int num = Mathf.CeilToInt((float)list.Count / 8f);
+		PawnKindDef kind = groupMaker.carriers.Where((PawnGenOption x) => !parms.tile.Valid || Find.WorldGrid[parms.tile].PrimaryBiome.IsPackAnimalAllowed(x.kind.race)).RandomElementByWeight((PawnGenOption x) => x.selectionWeight).kind;
+		List<Pawn> list2 = new List<Pawn>();
+		for (int j = 0; j < num; j++)
+		{
+			Pawn pawn = PawnGenerator.GeneratePawn(new PawnGenerationRequest(kind, parms.faction, PawnGenerationContext.NonPlayer, parms.tile, forceGenerateNewPawn: false, allowDead: false, allowDowned: false, canGeneratePawnRelations: true, mustBeCapableOfViolence: false, 1f, forceAddFreeWarmLayerIfNeeded: false, allowGay: true, allowPregnant: false, allowFood: true, allowAddictions: true, fixedIdeo: parms.ideo, inhabitant: parms.inhabitants, certainlyBeenInCryptosleep: false, forceRedressWorldPawnIfFormerColonist: false, worldPawnFactionDoesntMatter: false, biocodeWeaponChance: 0f, biocodeApparelChance: 0f, extraPawnForExtraRelationChance: null, relationWithExtraPawnChanceFactor: 1f, validatorPreGear: null, validatorPostGear: null, forcedTraits: null, prohibitedTraits: null, minChanceToRedressWorldPawn: null, fixedBiologicalAge: null, fixedChronologicalAge: null, fixedGender: null, fixedLastName: null, fixedBirthName: null, fixedTitle: null, forceNoIdeo: false, forceNoBackstory: false, forbidAnyTitle: false, forceDead: false, forcedXenogenes: null, forcedEndogenes: null, forcedXenotype: null, forcedCustomXenotype: null, allowedXenotypes: null, forceBaselinerChance: 0f, developmentalStages: DevelopmentalStage.Adult, pawnKindDefGetter: null, excludeBiologicalAgeRange: null, biologicalAgeRange: null));
+			if (i < list.Count)
+			{
+				pawn.inventory.innerContainer.TryAdd(list[i]);
+				i++;
+			}
+			list2.Add(pawn);
+			outPawns.Add(pawn);
+		}
+		for (; i < list.Count; i++)
+		{
+			list2.RandomElement().inventory.innerContainer.TryAdd(list[i]);
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CGetSlavesAndAnimalsFromWares_003Ed__5))]
+	private IEnumerable<Pawn> GetSlavesAndAnimalsFromWares(PawnGroupMakerParms parms, Pawn trader, List<Thing> wares)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetSlavesAndAnimalsFromWares_003Ed__5(-2)
+		{
+			_003C_003E3__parms = parms,
+			_003C_003E3__wares = wares
+		};
+	}
+
+	private void GenerateGuards(PawnGroupMakerParms parms, PawnGroupMaker groupMaker, Pawn trader, List<Thing> wares, List<Pawn> outPawns)
+	{
+		if (!groupMaker.guards.Any())
+		{
+			return;
+		}
+		foreach (PawnGenOptionWithXenotype item2 in PawnGroupMakerUtility.ChoosePawnGenOptionsByPoints(parms.points, groupMaker.guards, parms))
+		{
+			PawnKindDef kind = item2.Option.kind;
+			Faction faction = parms.faction;
+			XenotypeDef xenotype = item2.Xenotype;
+			PlanetTile? tile = parms.tile;
+			bool inhabitants = parms.inhabitants;
+			Ideo ideo = parms.ideo;
+			Pawn item = PawnGenerator.GeneratePawn(new PawnGenerationRequest(kind, faction, PawnGenerationContext.NonPlayer, tile, forceGenerateNewPawn: false, allowDead: false, allowDowned: false, canGeneratePawnRelations: true, mustBeCapableOfViolence: true, 1f, forceAddFreeWarmLayerIfNeeded: false, allowGay: true, allowPregnant: false, allowFood: true, allowAddictions: true, inhabitants, certainlyBeenInCryptosleep: false, forceRedressWorldPawnIfFormerColonist: false, worldPawnFactionDoesntMatter: false, 0f, 0f, null, 1f, null, null, null, null, null, null, null, null, null, null, null, ideo, forceNoIdeo: false, forceNoBackstory: false, forbidAnyTitle: false, forceDead: false, null, null, xenotype, null, null, 0f, DevelopmentalStage.Adult, null, null, null));
+			outPawns.Add(item);
+		}
+	}
+
+	public override IEnumerable<PawnKindDef> GeneratePawnKindsExample(PawnGroupMakerParms parms, PawnGroupMaker groupMaker)
+	{
+		throw new NotImplementedException();
 	}
 }

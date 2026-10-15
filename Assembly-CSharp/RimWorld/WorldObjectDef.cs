@@ -1,277 +1,412 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class WorldObjectDef : Def
 {
-	// Token: 0x02001B2F RID: 6959
-	public class WorldObjectDef : Def
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__51 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x170017E6 RID: 6118
-		// (get) Token: 0x06009B64 RID: 39780 RVA: 0x002D17AC File Offset: 0x002CF9AC
-		public Material Material
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public WorldObjectDef _003C_003E4__this;
+
+		private IEnumerator<string> _003C_003E7__wrap1;
+
+		private int _003Ci_003E5__3;
+
+		string IEnumerator<string>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.texture.NullOrEmpty())
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__51(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			switch (_003C_003E1__state)
+			{
+			case -3:
+			case 1:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+				break;
+			case -4:
+			case 2:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally2();
+				}
+				break;
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				WorldObjectDef worldObjectDef = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((Def)worldObjectDef).ConfigErrors().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0076;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0076;
+				case 2:
+					_003C_003E1__state = -4;
+					goto IL_00f3;
+				case 3:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_0076:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					_003Ci_003E5__3 = 0;
+					goto IL_011f;
+					IL_011f:
+					if (_003Ci_003E5__3 < worldObjectDef.comps.Count)
+					{
+						_003C_003E7__wrap1 = worldObjectDef.comps[_003Ci_003E5__3].ConfigErrors(worldObjectDef).GetEnumerator();
+						_003C_003E1__state = -4;
+						goto IL_00f3;
+					}
+					if (worldObjectDef.expandMore && !worldObjectDef.expandingIcon)
+					{
+						_003C_003E2__current = "has expandMore but doesn't have any expanding icon";
+						_003C_003E1__state = 3;
+						return true;
+					}
+					break;
+					IL_00f3:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current2 = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current2;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					_003C_003Em__Finally2();
+					_003C_003E7__wrap1 = null;
+					_003Ci_003E5__3++;
+					goto IL_011f;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__51 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__51(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	public Type worldObjectClass = typeof(WorldObject);
+
+	public bool canHaveFaction = true;
+
+	public bool saved = true;
+
+	public bool canBePlayerHome;
+
+	public bool treatAsPlayerHome;
+
+	public bool canResizeToGravship;
+
+	public bool requiresSignalJammerToReach;
+
+	public IntVec3? overrideMapSize;
+
+	public List<WorldObjectCompProperties> comps = new List<WorldObjectCompProperties>();
+
+	public bool canHaveMap = true;
+
+	public bool validLaunchTarget = true;
+
+	public bool allowCaravanIncidentsWhichGenerateMap;
+
+	public bool isTempIncidentMapOwner;
+
+	public List<IncidentTargetTagDef> IncidentTargetTags;
+
+	public bool selectable = true;
+
+	public bool neverMultiSelect;
+
+	public MapGeneratorDef mapGenerator;
+
+	public List<Type> inspectorTabs;
+
+	[Unsaved(false)]
+	public List<InspectTabBase> inspectorTabsResolved;
+
+	public bool useDynamicDrawer;
+
+	public bool expandingIcon;
+
+	[NoTranslate]
+	public string expandingIconTexture;
+
+	[NoTranslate]
+	public string expandingIconMaskTexture;
+
+	public float expandingIconPriority;
+
+	[NoTranslate]
+	public string texture;
+
+	[NoTranslate]
+	public string mapEdgeTexture;
+
+	private ShaderTypeDef mapEdgeShader;
+
+	[Unsaved(false)]
+	private Material material;
+
+	[Unsaved(false)]
+	private Material expandingMaterial;
+
+	[Unsaved(false)]
+	private Texture2D expandingIconTextureInt;
+
+	[Unsaved(false)]
+	private Texture2D expandingIconTextureMaskInt;
+
+	public bool expandMore;
+
+	public bool rotateGraphicWhenTraveling;
+
+	public Color? expandingIconColor;
+
+	public float expandingIconDrawSize = 1f;
+
+	public bool fullyExpandedInSpace;
+
+	public ShaderTypeDef shader;
+
+	public ShaderTypeDef expandingShader;
+
+	public float drawAltitudeOffset;
+
+	public bool blockExitGridUntilBattleIsWon;
+
+	public RulePackDef nameMaker;
+
+	public Material Material
+	{
+		get
+		{
+			if (texture.NullOrEmpty())
+			{
+				return null;
+			}
+			if (material == null)
+			{
+				material = MaterialPool.MatFrom(texture, shader?.Shader ?? ShaderDatabase.WorldOverlayTransparentLit, 3550);
+			}
+			return material;
+		}
+	}
+
+	public Texture2D ExpandingIconTexture
+	{
+		get
+		{
+			if (expandingIconTextureInt == null)
+			{
+				if (expandingIconTexture.NullOrEmpty())
 				{
 					return null;
 				}
-				if (this.material == null)
-				{
-					string texPath = this.texture;
-					ShaderTypeDef shaderTypeDef = this.shader;
-					this.material = MaterialPool.MatFrom(texPath, ((shaderTypeDef != null) ? shaderTypeDef.Shader : null) ?? ShaderDatabase.WorldOverlayTransparentLit, 3550);
-				}
-				return this.material;
+				expandingIconTextureInt = ContentFinder<Texture2D>.Get(expandingIconTexture);
 			}
+			return expandingIconTextureInt;
 		}
+	}
 
-		// Token: 0x170017E7 RID: 6119
-		// (get) Token: 0x06009B65 RID: 39781 RVA: 0x002D180D File Offset: 0x002CFA0D
-		public Texture2D ExpandingIconTexture
+	public Texture2D ExpandingIconTextureMask
+	{
+		get
 		{
-			get
+			if (expandingIconTextureMaskInt == null)
 			{
-				if (this.expandingIconTextureInt == null)
-				{
-					if (this.expandingIconTexture.NullOrEmpty())
-					{
-						return null;
-					}
-					this.expandingIconTextureInt = ContentFinder<Texture2D>.Get(this.expandingIconTexture, true);
-				}
-				return this.expandingIconTextureInt;
-			}
-		}
-
-		// Token: 0x170017E8 RID: 6120
-		// (get) Token: 0x06009B66 RID: 39782 RVA: 0x002D1844 File Offset: 0x002CFA44
-		public Texture2D ExpandingIconTextureMask
-		{
-			get
-			{
-				if (this.expandingIconTextureMaskInt == null)
-				{
-					if (this.expandingIconMaskTexture.NullOrEmpty())
-					{
-						return null;
-					}
-					this.expandingIconTextureMaskInt = ContentFinder<Texture2D>.Get(this.expandingIconMaskTexture, true);
-				}
-				return this.expandingIconTextureMaskInt;
-			}
-		}
-
-		// Token: 0x170017E9 RID: 6121
-		// (get) Token: 0x06009B67 RID: 39783 RVA: 0x002D187B File Offset: 0x002CFA7B
-		public Material MapEdgeMaterial
-		{
-			get
-			{
-				if (this.mapEdgeTexture.NullOrEmpty())
+				if (expandingIconMaskTexture.NullOrEmpty())
 				{
 					return null;
 				}
-				if (this.material == null)
-				{
-					this.material = MaterialPool.MatFrom(this.mapEdgeTexture, ShaderDatabase.MapEdgeTerrain);
-				}
-				return this.material;
+				expandingIconTextureMaskInt = ContentFinder<Texture2D>.Get(expandingIconMaskTexture);
 			}
+			return expandingIconTextureMaskInt;
 		}
+	}
 
-		// Token: 0x06009B68 RID: 39784 RVA: 0x002D18B8 File Offset: 0x002CFAB8
-		public override void PostLoad()
+	public Material MapEdgeMaterial
+	{
+		get
 		{
-			base.PostLoad();
-			if (this.inspectorTabs != null)
+			if (mapEdgeTexture.NullOrEmpty())
 			{
-				for (int i = 0; i < this.inspectorTabs.Count; i++)
-				{
-					if (this.inspectorTabsResolved == null)
-					{
-						this.inspectorTabsResolved = new List<InspectTabBase>();
-					}
-					try
-					{
-						this.inspectorTabsResolved.Add(InspectTabManager.GetSharedInstance(this.inspectorTabs[i]));
-					}
-					catch (Exception ex)
-					{
-						string str = "Could not instantiate inspector tab of type ";
-						Type type = this.inspectorTabs[i];
-						string str2 = (type != null) ? type.ToString() : null;
-						string str3 = ": ";
-						Exception ex2 = ex;
-						Log.Error(str + str2 + str3 + ((ex2 != null) ? ex2.ToString() : null));
-					}
-				}
+				return null;
 			}
+			if (material == null)
+			{
+				material = MaterialPool.MatFrom(mapEdgeTexture, ShaderDatabase.MapEdgeTerrain);
+			}
+			return material;
 		}
+	}
 
-		// Token: 0x06009B69 RID: 39785 RVA: 0x002D196C File Offset: 0x002CFB6C
-		public override void ResolveReferences()
+	public override void PostLoad()
+	{
+		base.PostLoad();
+		if (inspectorTabs == null)
 		{
-			base.ResolveReferences();
-			for (int i = 0; i < this.comps.Count; i++)
-			{
-				this.comps[i].ResolveReferences(this);
-			}
+			return;
 		}
-
-		// Token: 0x06009B6A RID: 39786 RVA: 0x002D19A7 File Offset: 0x002CFBA7
-		public override IEnumerable<string> ConfigErrors()
+		for (int i = 0; i < inspectorTabs.Count; i++)
 		{
-			foreach (string text in base.ConfigErrors())
+			if (inspectorTabsResolved == null)
 			{
-				yield return text;
+				inspectorTabsResolved = new List<InspectTabBase>();
 			}
-			IEnumerator<string> enumerator = null;
-			int num;
-			for (int i = 0; i < this.comps.Count; i = num + 1)
+			try
 			{
-				foreach (string text2 in this.comps[i].ConfigErrors(this))
-				{
-					yield return text2;
-				}
-				enumerator = null;
-				num = i;
+				inspectorTabsResolved.Add(InspectTabManager.GetSharedInstance(inspectorTabs[i]));
 			}
-			if (this.expandMore && !this.expandingIcon)
+			catch (Exception ex)
 			{
-				yield return "has expandMore but doesn't have any expanding icon";
+				Log.Error("Could not instantiate inspector tab of type " + inspectorTabs[i]?.ToString() + ": " + ex);
 			}
-			yield break;
-			yield break;
 		}
+	}
 
-		// Token: 0x04006BBF RID: 27583
-		public Type worldObjectClass = typeof(WorldObject);
+	public override void ResolveReferences()
+	{
+		base.ResolveReferences();
+		for (int i = 0; i < comps.Count; i++)
+		{
+			comps[i].ResolveReferences(this);
+		}
+	}
 
-		// Token: 0x04006BC0 RID: 27584
-		public bool canHaveFaction = true;
-
-		// Token: 0x04006BC1 RID: 27585
-		public bool saved = true;
-
-		// Token: 0x04006BC2 RID: 27586
-		public bool canBePlayerHome;
-
-		// Token: 0x04006BC3 RID: 27587
-		public bool treatAsPlayerHome;
-
-		// Token: 0x04006BC4 RID: 27588
-		public bool canResizeToGravship;
-
-		// Token: 0x04006BC5 RID: 27589
-		public bool requiresSignalJammerToReach;
-
-		// Token: 0x04006BC6 RID: 27590
-		public IntVec3? overrideMapSize;
-
-		// Token: 0x04006BC7 RID: 27591
-		public List<WorldObjectCompProperties> comps = new List<WorldObjectCompProperties>();
-
-		// Token: 0x04006BC8 RID: 27592
-		public bool canHaveMap = true;
-
-		// Token: 0x04006BC9 RID: 27593
-		public bool validLaunchTarget = true;
-
-		// Token: 0x04006BCA RID: 27594
-		public bool allowCaravanIncidentsWhichGenerateMap;
-
-		// Token: 0x04006BCB RID: 27595
-		public bool isTempIncidentMapOwner;
-
-		// Token: 0x04006BCC RID: 27596
-		public List<IncidentTargetTagDef> IncidentTargetTags;
-
-		// Token: 0x04006BCD RID: 27597
-		public bool selectable = true;
-
-		// Token: 0x04006BCE RID: 27598
-		public bool neverMultiSelect;
-
-		// Token: 0x04006BCF RID: 27599
-		public MapGeneratorDef mapGenerator;
-
-		// Token: 0x04006BD0 RID: 27600
-		public List<Type> inspectorTabs;
-
-		// Token: 0x04006BD1 RID: 27601
-		[Unsaved(false)]
-		public List<InspectTabBase> inspectorTabsResolved;
-
-		// Token: 0x04006BD2 RID: 27602
-		public bool useDynamicDrawer;
-
-		// Token: 0x04006BD3 RID: 27603
-		public bool expandingIcon;
-
-		// Token: 0x04006BD4 RID: 27604
-		[NoTranslate]
-		public string expandingIconTexture;
-
-		// Token: 0x04006BD5 RID: 27605
-		[NoTranslate]
-		public string expandingIconMaskTexture;
-
-		// Token: 0x04006BD6 RID: 27606
-		public float expandingIconPriority;
-
-		// Token: 0x04006BD7 RID: 27607
-		[NoTranslate]
-		public string texture;
-
-		// Token: 0x04006BD8 RID: 27608
-		[NoTranslate]
-		public string mapEdgeTexture;
-
-		// Token: 0x04006BD9 RID: 27609
-		[Unsaved(false)]
-		private Material material;
-
-		// Token: 0x04006BDA RID: 27610
-		[Unsaved(false)]
-		private Material expandingMaterial;
-
-		// Token: 0x04006BDB RID: 27611
-		[Unsaved(false)]
-		private Texture2D expandingIconTextureInt;
-
-		// Token: 0x04006BDC RID: 27612
-		[Unsaved(false)]
-		private Texture2D expandingIconTextureMaskInt;
-
-		// Token: 0x04006BDD RID: 27613
-		public bool expandMore;
-
-		// Token: 0x04006BDE RID: 27614
-		public bool rotateGraphicWhenTraveling;
-
-		// Token: 0x04006BDF RID: 27615
-		public Color? expandingIconColor;
-
-		// Token: 0x04006BE0 RID: 27616
-		public float expandingIconDrawSize = 1f;
-
-		// Token: 0x04006BE1 RID: 27617
-		public bool fullyExpandedInSpace;
-
-		// Token: 0x04006BE2 RID: 27618
-		public ShaderTypeDef shader;
-
-		// Token: 0x04006BE3 RID: 27619
-		public ShaderTypeDef expandingShader;
-
-		// Token: 0x04006BE4 RID: 27620
-		public bool blockExitGridUntilBattleIsWon;
-
-		// Token: 0x04006BE5 RID: 27621
-		public RulePackDef nameMaker;
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__51))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__51(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

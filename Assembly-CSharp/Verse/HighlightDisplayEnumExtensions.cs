@@ -1,38 +1,27 @@
-﻿using System;
+using System;
 
-namespace Verse
+namespace Verse;
+
+public static class HighlightDisplayEnumExtensions
 {
-	// Token: 0x02000D4B RID: 3403
-	public static class HighlightDisplayEnumExtensions
+	public static string ToStringHuman(this DotHighlightDisplayMode mode)
 	{
-		// Token: 0x060056DC RID: 22236 RVA: 0x001BED28 File Offset: 0x001BCF28
-		public static string ToStringHuman(this DotHighlightDisplayMode mode)
+		return mode switch
 		{
-			switch (mode)
-			{
-			case DotHighlightDisplayMode.None:
-				return "None".Translate();
-			case DotHighlightDisplayMode.HighlightHostiles:
-				return "DotHighlightDisplayMode_HighlightHostiles".Translate();
-			case DotHighlightDisplayMode.HighlightAll:
-				return "DotHighlightDisplayMode_HighlightAll".Translate();
-			default:
-				throw new NotImplementedException();
-			}
-		}
+			DotHighlightDisplayMode.None => "None".Translate(), 
+			DotHighlightDisplayMode.HighlightHostiles => "DotHighlightDisplayMode_HighlightHostiles".Translate(), 
+			DotHighlightDisplayMode.HighlightAll => "DotHighlightDisplayMode_HighlightAll".Translate(), 
+			_ => throw new NotImplementedException(), 
+		};
+	}
 
-		// Token: 0x060056DD RID: 22237 RVA: 0x001BED7E File Offset: 0x001BCF7E
-		public static string ToStringHuman(this HighlightStyleMode mode)
+	public static string ToStringHuman(this HighlightStyleMode mode)
+	{
+		return mode switch
 		{
-			if (mode == HighlightStyleMode.Dots)
-			{
-				return "HighlightStyleMode_Dots".Translate();
-			}
-			if (mode != HighlightStyleMode.Silhouettes)
-			{
-				throw new NotImplementedException();
-			}
-			return "HighlightStyleMode_Silhouettes".Translate();
-		}
+			HighlightStyleMode.Dots => "HighlightStyleMode_Dots".Translate(), 
+			HighlightStyleMode.Silhouettes => "HighlightStyleMode_Silhouettes".Translate(), 
+			_ => throw new NotImplementedException(), 
+		};
 	}
 }

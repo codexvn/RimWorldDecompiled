@@ -1,344 +1,274 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class TileMutatorDef : Def
 {
-	// Token: 0x020020B7 RID: 8375
-	public class TileMutatorDef : Def
+	private Type workerClass;
+
+	public int genOrder;
+
+	[NoTranslate]
+	public List<string> categories = new List<string>();
+
+	[NoTranslate]
+	public List<string> overrideCategories = new List<string>();
+
+	public int priority;
+
+	public int displayPriority;
+
+	public float chanceOnNonLandmarkTile;
+
+	public List<GenStepDef> extraGenSteps = new List<GenStepDef>();
+
+	public List<GenStepDef> preventGenSteps = new List<GenStepDef>();
+
+	public TerrainDef overrideCoastalBeachTerrain;
+
+	public TerrainDef overrideLakeBeachTerrain;
+
+	public TerrainDef overrideRiverbankTerrain;
+
+	public TerrainDef overrideMudTerrain;
+
+	public bool preventsPondGeneration;
+
+	public bool preventsLandmarks;
+
+	public bool preventNaturalElevation;
+
+	public bool preventPatches;
+
+	public float animalDensityFactor = 1f;
+
+	public float plantDensityFactor = 1f;
+
+	public float junkDensityFactor = 1f;
+
+	public float geyserCountFactor = 1f;
+
+	public float chunkDensityFactor = 1f;
+
+	public float fishPopulationFactor = 1f;
+
+	public List<BiomePlantRecord> additionalWildPlants = new List<BiomePlantRecord>();
+
+	public SimpleCurve overrideDensityForFertilityCurve;
+
+	public bool allowRoofedEdgeWalkIn;
+
+	public List<RaidStrategyDef> blacklistedRaidStrategies = new List<RaidStrategyDef>();
+
+	public List<GameConditionDef> additionalGameConditions = new List<GameConditionDef>();
+
+	public Hilliness hillinessForElevationGen;
+
+	public Hilliness hillinessForOreGeneration;
+
+	public Hilliness hillinessLabel;
+
+	public List<BiomeDef> biomeWhitelist;
+
+	public List<BiomeDef> biomeBlacklist;
+
+	public FloatRange animalDensityRange = new FloatRange(0f, float.MaxValue);
+
+	public FloatRange plantDensityRange = new FloatRange(0f, float.MaxValue);
+
+	public Hilliness minHilliness;
+
+	public Hilliness maxHilliness;
+
+	public IntRange coastSidesRange = IntRange.Invalid;
+
+	public bool canSpawnOnRiver = true;
+
+	public bool canSpawnOnRoad = true;
+
+	public bool canSpawnOnLandmark = true;
+
+	public FactionDef requiresFactionOfDef;
+
+	public FloatRange pollutionRange = new FloatRange(0f, float.MaxValue);
+
+	public FloatRange averageTemperatureRange = new FloatRange(float.MinValue, float.MaxValue);
+
+	public float weatherFrequencyFactor = 1f;
+
+	public float weatherFrequencyOffset;
+
+	public List<WeatherDef> weathersToAffect = new List<WeatherDef>();
+
+	public List<TerrainPatchMaker> terrainPatchMakers = new List<TerrainPatchMaker>();
+
+	public List<ThingDef> plantKinds = new List<ThingDef>();
+
+	public AncientStructureGenParms structureGenParms;
+
+	public List<ThingDef> resourceBlacklist = new List<ThingDef>();
+
+	private HashSet<BiomeDef> biomeWhitelistSet;
+
+	private HashSet<BiomeDef> biomeBlacklistSet;
+
+	private TileMutatorWorker mutatorWorker;
+
+	private static readonly List<PlanetTile> tmpTileNeighbors = new List<PlanetTile>();
+
+	public TileMutatorWorker Worker
 	{
-		// Token: 0x17001BE0 RID: 7136
-		// (get) Token: 0x0600B745 RID: 46917 RVA: 0x0034C84C File Offset: 0x0034AA4C
-		public TileMutatorWorker Worker
+		get
 		{
-			get
+			if (mutatorWorker != null)
 			{
-				if (this.mutatorWorker != null)
+				return mutatorWorker;
+			}
+			if (workerClass != null)
+			{
+				return mutatorWorker = (TileMutatorWorker)Activator.CreateInstance(workerClass, this);
+			}
+			return null;
+		}
+	}
+
+	public bool IsCave => categories.Contains("Caves");
+
+	public override void ResolveReferences()
+	{
+		base.ResolveReferences();
+		if (biomeWhitelist != null)
+		{
+			biomeWhitelistSet = new HashSet<BiomeDef>(biomeWhitelist);
+		}
+		if (biomeBlacklist != null)
+		{
+			biomeBlacklistSet = new HashSet<BiomeDef>(biomeBlacklist);
+		}
+	}
+
+	public string Label(PlanetTile tileID)
+	{
+		return Worker?.GetLabel(tileID) ?? label;
+	}
+
+	public string Description(PlanetTile tileID)
+	{
+		return Worker?.GetDescription(tileID) ?? description;
+	}
+
+	public bool EverValid()
+	{
+		if (requiresFactionOfDef != null && Find.FactionManager.FirstFactionOfDef(requiresFactionOfDef) == null)
+		{
+			return false;
+		}
+		return true;
+	}
+
+	public bool IsValidTile(PlanetTile tile, PlanetLayer layer)
+	{
+		if (!EverValid())
+		{
+			return false;
+		}
+		Tile tile2 = layer[tile];
+		BiomeDef primaryBiome = tile2.PrimaryBiome;
+		if (tile2.Mutators.Contains(this))
+		{
+			return false;
+		}
+		if (Worker != null && !Worker.IsValidTile(tile, layer))
+		{
+			return false;
+		}
+		foreach (string category in categories)
+		{
+			foreach (TileMutatorDef mutator in tile2.Mutators)
+			{
+				if (mutator.categories.Contains(category) && mutator.priority >= priority)
 				{
-					return this.mutatorWorker;
+					return false;
 				}
-				if (this.workerClass != null)
+				if (mutator.overrideCategories.Contains(category))
 				{
-					return this.mutatorWorker = (TileMutatorWorker)Activator.CreateInstance(this.workerClass, new object[]
-					{
-						this
-					});
+					return false;
 				}
-				return null;
 			}
 		}
-
-		// Token: 0x17001BE1 RID: 7137
-		// (get) Token: 0x0600B746 RID: 46918 RVA: 0x0034C89B File Offset: 0x0034AA9B
-		public bool IsCave
+		if (!animalDensityRange.Includes(primaryBiome.animalDensity))
 		{
-			get
-			{
-				return this.categories.Contains("Caves");
-			}
+			return false;
 		}
-
-		// Token: 0x0600B747 RID: 46919 RVA: 0x0034C8AD File Offset: 0x0034AAAD
-		public override void ResolveReferences()
+		if (!plantDensityRange.Includes(primaryBiome.plantDensity))
 		{
-			base.ResolveReferences();
-			if (this.biomeWhitelist != null)
-			{
-				this.biomeWhitelistSet = new HashSet<BiomeDef>(this.biomeWhitelist);
-			}
-			if (this.biomeBlacklist != null)
-			{
-				this.biomeBlacklistSet = new HashSet<BiomeDef>(this.biomeBlacklist);
-			}
+			return false;
 		}
-
-		// Token: 0x0600B748 RID: 46920 RVA: 0x0034C8E7 File Offset: 0x0034AAE7
-		public string Label(PlanetTile tileID)
+		if (!pollutionRange.Includes(tile2.pollution))
 		{
-			TileMutatorWorker worker = this.Worker;
-			return ((worker != null) ? worker.GetLabel(tileID) : null) ?? this.label;
+			return false;
 		}
-
-		// Token: 0x0600B749 RID: 46921 RVA: 0x0034C906 File Offset: 0x0034AB06
-		public string Description(PlanetTile tileID)
+		if (!averageTemperatureRange.Includes(tile2.temperature))
 		{
-			TileMutatorWorker worker = this.Worker;
-			return ((worker != null) ? worker.GetDescription(tileID) : null) ?? this.description;
+			return false;
 		}
-
-		// Token: 0x0600B74A RID: 46922 RVA: 0x0034C925 File Offset: 0x0034AB25
-		public bool EverValid()
+		if (minHilliness != 0 && (int)tile2.hilliness < (int)minHilliness)
 		{
-			return this.requiresFactionOfDef == null || Find.FactionManager.FirstFactionOfDef(this.requiresFactionOfDef) != null;
+			return false;
 		}
-
-		// Token: 0x0600B74B RID: 46923 RVA: 0x0034C944 File Offset: 0x0034AB44
-		public bool IsValidTile(PlanetTile tile, PlanetLayer layer)
+		if (maxHilliness != 0 && (int)tile2.hilliness > (int)maxHilliness)
 		{
-			if (!this.EverValid())
+			return false;
+		}
+		if (biomeWhitelistSet != null && !biomeWhitelistSet.Contains(primaryBiome))
+		{
+			return false;
+		}
+		if (biomeBlacklistSet != null && biomeBlacklistSet.Contains(primaryBiome))
+		{
+			return false;
+		}
+		if (coastSidesRange != IntRange.Invalid)
+		{
+			tmpTileNeighbors.Clear();
+			layer.GetTileNeighbors(tile, tmpTileNeighbors);
+			bool flag = coastSidesRange.max == 0;
+			int num = 0;
+			for (int i = 0; i < tmpTileNeighbors.Count; i++)
 			{
-				return false;
-			}
-			Tile tile2 = layer[tile];
-			BiomeDef primaryBiome = tile2.PrimaryBiome;
-			if (tile2.Mutators.Contains(this))
-			{
-				return false;
-			}
-			if (this.Worker != null && !this.Worker.IsValidTile(tile, layer))
-			{
-				return false;
-			}
-			foreach (string item in this.categories)
-			{
-				foreach (TileMutatorDef tileMutatorDef in tile2.Mutators)
+				BiomeDef primaryBiome2 = layer[tmpTileNeighbors[i]].PrimaryBiome;
+				if (primaryBiome2 == BiomeDefOf.Ocean || primaryBiome2 == BiomeDefOf.Lake)
 				{
-					if (tileMutatorDef.categories.Contains(item) && tileMutatorDef.priority >= this.priority)
+					if (flag)
 					{
 						return false;
 					}
-					if (tileMutatorDef.overrideCategories.Contains(item))
-					{
-						return false;
-					}
+					num++;
 				}
 			}
-			if (!this.animalDensityRange.Includes(primaryBiome.animalDensity))
+			if (!coastSidesRange.Includes(num))
 			{
 				return false;
 			}
-			if (!this.plantDensityRange.Includes(primaryBiome.plantDensity))
-			{
-				return false;
-			}
-			if (!this.pollutionRange.Includes(tile2.pollution))
-			{
-				return false;
-			}
-			if (!this.averageTemperatureRange.Includes(tile2.temperature))
-			{
-				return false;
-			}
-			if (this.minHilliness != Hilliness.Undefined && tile2.hilliness < this.minHilliness)
-			{
-				return false;
-			}
-			if (this.maxHilliness != Hilliness.Undefined && tile2.hilliness > this.maxHilliness)
-			{
-				return false;
-			}
-			if (this.biomeWhitelistSet != null && !this.biomeWhitelistSet.Contains(primaryBiome))
-			{
-				return false;
-			}
-			if (this.biomeBlacklistSet != null && this.biomeBlacklistSet.Contains(primaryBiome))
-			{
-				return false;
-			}
-			if (this.coastSidesRange != IntRange.Invalid)
-			{
-				TileMutatorDef.tmpTileNeighbors.Clear();
-				layer.GetTileNeighbors(tile, TileMutatorDef.tmpTileNeighbors);
-				bool flag = this.coastSidesRange.max == 0;
-				int num = 0;
-				for (int i = 0; i < TileMutatorDef.tmpTileNeighbors.Count; i++)
-				{
-					BiomeDef primaryBiome2 = layer[TileMutatorDef.tmpTileNeighbors[i]].PrimaryBiome;
-					if (primaryBiome2 == BiomeDefOf.Ocean || primaryBiome2 == BiomeDefOf.Lake)
-					{
-						if (flag)
-						{
-							return false;
-						}
-						num++;
-					}
-				}
-				if (!this.coastSidesRange.Includes(num))
-				{
-					return false;
-				}
-			}
-			SurfaceTile surfaceTile = tile2 as SurfaceTile;
-			if (surfaceTile != null)
-			{
-				if (!surfaceTile.Rivers.NullOrEmpty<SurfaceTile.RiverLink>() && !this.canSpawnOnRiver)
-				{
-					return false;
-				}
-				if (!surfaceTile.Roads.NullOrEmpty<SurfaceTile.RoadLink>() && !this.canSpawnOnRoad)
-				{
-					return false;
-				}
-			}
-			return tile2.Landmark == null || this.canSpawnOnLandmark;
 		}
-
-		// Token: 0x04007DB9 RID: 32185
-		private Type workerClass;
-
-		// Token: 0x04007DBA RID: 32186
-		public int genOrder;
-
-		// Token: 0x04007DBB RID: 32187
-		[NoTranslate]
-		public List<string> categories = new List<string>();
-
-		// Token: 0x04007DBC RID: 32188
-		[NoTranslate]
-		public List<string> overrideCategories = new List<string>();
-
-		// Token: 0x04007DBD RID: 32189
-		public int priority;
-
-		// Token: 0x04007DBE RID: 32190
-		public int displayPriority;
-
-		// Token: 0x04007DBF RID: 32191
-		public float chanceOnNonLandmarkTile;
-
-		// Token: 0x04007DC0 RID: 32192
-		public List<GenStepDef> extraGenSteps = new List<GenStepDef>();
-
-		// Token: 0x04007DC1 RID: 32193
-		public List<GenStepDef> preventGenSteps = new List<GenStepDef>();
-
-		// Token: 0x04007DC2 RID: 32194
-		public TerrainDef overrideCoastalBeachTerrain;
-
-		// Token: 0x04007DC3 RID: 32195
-		public TerrainDef overrideLakeBeachTerrain;
-
-		// Token: 0x04007DC4 RID: 32196
-		public TerrainDef overrideRiverbankTerrain;
-
-		// Token: 0x04007DC5 RID: 32197
-		public TerrainDef overrideMudTerrain;
-
-		// Token: 0x04007DC6 RID: 32198
-		public bool preventsPondGeneration;
-
-		// Token: 0x04007DC7 RID: 32199
-		public bool preventsLandmarks;
-
-		// Token: 0x04007DC8 RID: 32200
-		public bool preventNaturalElevation;
-
-		// Token: 0x04007DC9 RID: 32201
-		public bool preventPatches;
-
-		// Token: 0x04007DCA RID: 32202
-		public float animalDensityFactor = 1f;
-
-		// Token: 0x04007DCB RID: 32203
-		public float plantDensityFactor = 1f;
-
-		// Token: 0x04007DCC RID: 32204
-		public float junkDensityFactor = 1f;
-
-		// Token: 0x04007DCD RID: 32205
-		public float geyserCountFactor = 1f;
-
-		// Token: 0x04007DCE RID: 32206
-		public float chunkDensityFactor = 1f;
-
-		// Token: 0x04007DCF RID: 32207
-		public float fishPopulationFactor = 1f;
-
-		// Token: 0x04007DD0 RID: 32208
-		public List<BiomePlantRecord> additionalWildPlants = new List<BiomePlantRecord>();
-
-		// Token: 0x04007DD1 RID: 32209
-		public SimpleCurve overrideDensityForFertilityCurve;
-
-		// Token: 0x04007DD2 RID: 32210
-		public bool allowRoofedEdgeWalkIn;
-
-		// Token: 0x04007DD3 RID: 32211
-		public List<RaidStrategyDef> blacklistedRaidStrategies = new List<RaidStrategyDef>();
-
-		// Token: 0x04007DD4 RID: 32212
-		public List<GameConditionDef> additionalGameConditions = new List<GameConditionDef>();
-
-		// Token: 0x04007DD5 RID: 32213
-		public Hilliness hillinessForElevationGen;
-
-		// Token: 0x04007DD6 RID: 32214
-		public Hilliness hillinessForOreGeneration;
-
-		// Token: 0x04007DD7 RID: 32215
-		public Hilliness hillinessLabel;
-
-		// Token: 0x04007DD8 RID: 32216
-		public List<BiomeDef> biomeWhitelist;
-
-		// Token: 0x04007DD9 RID: 32217
-		public List<BiomeDef> biomeBlacklist;
-
-		// Token: 0x04007DDA RID: 32218
-		public FloatRange animalDensityRange = new FloatRange(0f, float.MaxValue);
-
-		// Token: 0x04007DDB RID: 32219
-		public FloatRange plantDensityRange = new FloatRange(0f, float.MaxValue);
-
-		// Token: 0x04007DDC RID: 32220
-		public Hilliness minHilliness;
-
-		// Token: 0x04007DDD RID: 32221
-		public Hilliness maxHilliness;
-
-		// Token: 0x04007DDE RID: 32222
-		public IntRange coastSidesRange = IntRange.Invalid;
-
-		// Token: 0x04007DDF RID: 32223
-		public bool canSpawnOnRiver = true;
-
-		// Token: 0x04007DE0 RID: 32224
-		public bool canSpawnOnRoad = true;
-
-		// Token: 0x04007DE1 RID: 32225
-		public bool canSpawnOnLandmark = true;
-
-		// Token: 0x04007DE2 RID: 32226
-		public FactionDef requiresFactionOfDef;
-
-		// Token: 0x04007DE3 RID: 32227
-		public FloatRange pollutionRange = new FloatRange(0f, float.MaxValue);
-
-		// Token: 0x04007DE4 RID: 32228
-		public FloatRange averageTemperatureRange = new FloatRange(float.MinValue, float.MaxValue);
-
-		// Token: 0x04007DE5 RID: 32229
-		public float weatherFrequencyFactor = 1f;
-
-		// Token: 0x04007DE6 RID: 32230
-		public float weatherFrequencyOffset;
-
-		// Token: 0x04007DE7 RID: 32231
-		public List<WeatherDef> weathersToAffect = new List<WeatherDef>();
-
-		// Token: 0x04007DE8 RID: 32232
-		public List<TerrainPatchMaker> terrainPatchMakers = new List<TerrainPatchMaker>();
-
-		// Token: 0x04007DE9 RID: 32233
-		public List<ThingDef> plantKinds = new List<ThingDef>();
-
-		// Token: 0x04007DEA RID: 32234
-		public AncientStructureGenParms structureGenParms;
-
-		// Token: 0x04007DEB RID: 32235
-		public List<ThingDef> resourceBlacklist = new List<ThingDef>();
-
-		// Token: 0x04007DEC RID: 32236
-		private HashSet<BiomeDef> biomeWhitelistSet;
-
-		// Token: 0x04007DED RID: 32237
-		private HashSet<BiomeDef> biomeBlacklistSet;
-
-		// Token: 0x04007DEE RID: 32238
-		private TileMutatorWorker mutatorWorker;
-
-		// Token: 0x04007DEF RID: 32239
-		private static readonly List<PlanetTile> tmpTileNeighbors = new List<PlanetTile>();
+		if (tile2 is SurfaceTile surfaceTile)
+		{
+			if (!surfaceTile.Rivers.NullOrEmpty() && !canSpawnOnRiver)
+			{
+				return false;
+			}
+			if (!surfaceTile.Roads.NullOrEmpty() && !canSpawnOnRoad)
+			{
+				return false;
+			}
+		}
+		if (tile2.Landmark != null && !canSpawnOnLandmark)
+		{
+			return false;
+		}
+		return true;
 	}
 }

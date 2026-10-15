@@ -1,70 +1,55 @@
-﻿using System;
 using System.Collections.Generic;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public abstract class WorkGiver_GatherAnimalBodyResources : WorkGiver_Scanner
 {
-	// Token: 0x0200154A RID: 5450
-	public abstract class WorkGiver_GatherAnimalBodyResources : WorkGiver_Scanner
+	protected abstract JobDef JobDef { get; }
+
+	public override PathEndMode PathEndMode => PathEndMode.Touch;
+
+	protected abstract CompHasGatherableBodyResource GetComp(Pawn animal);
+
+	public override IEnumerable<Thing> PotentialWorkThingsGlobal(Pawn pawn)
 	{
-		// Token: 0x170013C2 RID: 5058
-		// (get) Token: 0x06008162 RID: 33122
-		protected abstract JobDef JobDef { get; }
+		return pawn.Map.mapPawns.SpawnedPawnsInFaction(pawn.Faction);
+	}
 
-		// Token: 0x06008163 RID: 33123
-		protected abstract CompHasGatherableBodyResource GetComp(Pawn animal);
-
-		// Token: 0x06008164 RID: 33124 RVA: 0x0026F7EF File Offset: 0x0026D9EF
-		public override IEnumerable<Thing> PotentialWorkThingsGlobal(Pawn pawn)
+	public override bool ShouldSkip(Pawn pawn, bool forced = false)
+	{
+		List<Pawn> list = pawn.Map.mapPawns.SpawnedPawnsInFaction(pawn.Faction);
+		for (int i = 0; i < list.Count; i++)
 		{
-			return pawn.Map.mapPawns.SpawnedPawnsInFaction(pawn.Faction);
-		}
-
-		// Token: 0x06008165 RID: 33125 RVA: 0x0026F808 File Offset: 0x0026DA08
-		public override bool ShouldSkip(Pawn pawn, bool forced = false)
-		{
-			List<Pawn> list = pawn.Map.mapPawns.SpawnedPawnsInFaction(pawn.Faction);
-			for (int i = 0; i < list.Count; i++)
+			if (list[i].IsAnimal)
 			{
-				if (list[i].IsAnimal)
+				CompHasGatherableBodyResource comp = GetComp(list[i]);
+				if (comp != null && comp.ActiveAndFull)
 				{
-					CompHasGatherableBodyResource comp = this.GetComp(list[i]);
-					if (comp != null && comp.ActiveAndFull)
-					{
-						return false;
-					}
+					return false;
 				}
 			}
-			return true;
 		}
+		return true;
+	}
 
-		// Token: 0x170013C3 RID: 5059
-		// (get) Token: 0x06008166 RID: 33126 RVA: 0x000E96BB File Offset: 0x000E78BB
-		public override PathEndMode PathEndMode
+	public override bool HasJobOnThing(Pawn pawn, Thing t, bool forced = false)
+	{
+		if (!(t is Pawn { IsAnimal: not false } pawn2))
 		{
-			get
-			{
-				return PathEndMode.Touch;
-			}
+			return false;
 		}
+		CompHasGatherableBodyResource comp = GetComp(pawn2);
+		if (comp == null || !comp.ActiveAndFull || pawn2.Downed || (pawn2.roping != null && pawn2.roping.IsRopedByPawn) || !pawn2.CanCasuallyInteractNow() || !pawn.CanReserve(pawn2, 1, -1, null, forced))
+		{
+			return false;
+		}
+		return true;
+	}
 
-		// Token: 0x06008167 RID: 33127 RVA: 0x0026F868 File Offset: 0x0026DA68
-		public override bool HasJobOnThing(Pawn pawn, Thing t, bool forced = false)
-		{
-			Pawn pawn2 = t as Pawn;
-			if (pawn2 == null || !pawn2.IsAnimal)
-			{
-				return false;
-			}
-			CompHasGatherableBodyResource comp = this.GetComp(pawn2);
-			return comp != null && comp.ActiveAndFull && !pawn2.Downed && (pawn2.roping == null || !pawn2.roping.IsRopedByPawn) && pawn2.CanCasuallyInteractNow(false, false, false, false) && pawn.CanReserve(pawn2, 1, -1, null, forced);
-		}
-
-		// Token: 0x06008168 RID: 33128 RVA: 0x0026F8DA File Offset: 0x0026DADA
-		public override Job JobOnThing(Pawn pawn, Thing t, bool forced = false)
-		{
-			return JobMaker.MakeJob(this.JobDef, t);
-		}
+	public override Job JobOnThing(Pawn pawn, Thing t, bool forced = false)
+	{
+		return JobMaker.MakeJob(JobDef, t);
 	}
 }

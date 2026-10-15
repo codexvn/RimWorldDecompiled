@@ -1,30 +1,139 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class WorldObjectCompProperties
 {
-	// Token: 0x020019C8 RID: 6600
-	public class WorldObjectCompProperties
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__1 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x0600952C RID: 38188 RVA: 0x002BBA7F File Offset: 0x002B9C7F
-		public virtual IEnumerable<string> ConfigErrors(WorldObjectDef parentDef)
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public WorldObjectCompProperties _003C_003E4__this;
+
+		private WorldObjectDef parentDef;
+
+		public WorldObjectDef _003C_003E3__parentDef;
+
+		string IEnumerator<string>.Current
 		{
-			if (this.compClass == null)
+			[DebuggerHidden]
+			get
 			{
-				yield return parentDef.defName + " has WorldObjectCompProperties with null compClass.";
+				return _003C_003E2__current;
 			}
-			yield break;
 		}
 
-		// Token: 0x0600952D RID: 38189 RVA: 0x000026EA File Offset: 0x000008EA
-		public virtual void ResolveReferences(WorldObjectDef parentDef)
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x0400612A RID: 24874
-		[TranslationHandle]
-		public Type compClass = typeof(WorldObjectComp);
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__1(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			WorldObjectCompProperties worldObjectCompProperties = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (worldObjectCompProperties.compClass == null)
+				{
+					_003C_003E2__current = parentDef.defName + " has WorldObjectCompProperties with null compClass.";
+					_003C_003E1__state = 1;
+					return true;
+				}
+				break;
+			case 1:
+				_003C_003E1__state = -1;
+				break;
+			}
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__1 _003CConfigErrors_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CConfigErrors_003Ed__ = this;
+			}
+			else
+			{
+				_003CConfigErrors_003Ed__ = new _003CConfigErrors_003Ed__1(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CConfigErrors_003Ed__.parentDef = _003C_003E3__parentDef;
+			return _003CConfigErrors_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	[TranslationHandle]
+	public Type compClass = typeof(WorldObjectComp);
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__1))]
+	public virtual IEnumerable<string> ConfigErrors(WorldObjectDef parentDef)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__1(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__parentDef = parentDef
+		};
+	}
+
+	public virtual void ResolveReferences(WorldObjectDef parentDef)
+	{
 	}
 }

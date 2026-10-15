@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Loader;
 using System.Text;
@@ -65,14 +66,19 @@ internal static class CrashReporter
 			Directory.CreateDirectory(text);
 			string text2 = DateTimeOffset.Now.ToString("yyyyMMdd-HHmmss");
 			string text3 = Path.Combine(text, filePrefix + "-" + text2 + ".txt");
-			File.WriteAllText(text3, BuildReport(app, context, exception, title), Encoding.UTF8);
+			string value = BuildReport(app, context, exception, title);
+			using (StreamWriter streamWriter = new StreamWriter(text3, append: false, Encoding.UTF8))
+			{
+				streamWriter.Write(value);
+				AppendLog(streamWriter);
+			}
 			return text3;
 		}
-		catch (Exception value)
+		catch (Exception value2)
 		{
 			try
 			{
-				Console.Error.WriteLine($"Failed to write diagnostic report: {value}");
+				Console.Error.WriteLine($"Failed to write diagnostic report: {value2}");
 			}
 			catch
 			{
@@ -92,6 +98,7 @@ internal static class CrashReporter
 		AppendGpuMemoryInfo(stringBuilder);
 		AppendThreadPoolInfo(stringBuilder);
 		AppendThreadDump(stringBuilder);
+		AppendAssemblies(stringBuilder);
 		return stringBuilder.ToString();
 	}
 
@@ -104,6 +111,10 @@ internal static class CrashReporter
 		}
 		catch
 		{
+		}
+		if (text == null)
+		{
+			text = FileLog.StartedRoot;
 		}
 		if (!string.IsNullOrWhiteSpace(text))
 		{
@@ -442,12 +453,6 @@ internal static class CrashReporter
 	private static void AppendVulkanInfo(StringBuilder report, EngineApplication? app)
 	{
 		report.AppendLine("== Vulkan ==");
-		if (app == null)
-		{
-			report.AppendLine("N/A");
-			report.AppendLine();
-			return;
-		}
 		SafeAppend(report, delegate
 		{
 			AppendVulkanInstanceInfo(report, app);
@@ -456,6 +461,11 @@ internal static class CrashReporter
 		{
 			AppendVulkanDeviceInfo(report, app);
 		});
+		if (app == null)
+		{
+			report.AppendLine();
+			return;
+		}
 		SafeAppend(report, delegate
 		{
 			AppendVulkanSurfaceInfo(report, app);
@@ -475,52 +485,99 @@ internal static class CrashReporter
 		report.AppendLine();
 	}
 
-	private unsafe static void AppendVulkanInstanceInfo(StringBuilder report, EngineApplication app)
+	private static void AppendVulkanInstanceInfo(StringBuilder report, EngineApplication? app)
 	{
 		report.AppendLine("-- Instance --");
-		StringBuilder stringBuilder = report;
-		StringBuilder stringBuilder2 = stringBuilder;
-		StringBuilder.AppendInterpolatedStringHandler handler = new StringBuilder.AppendInterpolatedStringHandler(17, 1, stringBuilder);
-		handler.AppendLiteral("Instance Handle: ");
-		handler.AppendFormatted(FormatHandle(app.VulkanInstance.VkHandle));
-		stringBuilder2.AppendLine(ref handler);
-		stringBuilder = report;
-		StringBuilder stringBuilder3 = stringBuilder;
-		handler = new StringBuilder.AppendInterpolatedStringHandler(23, 1, stringBuilder);
-		handler.AppendLiteral("Requested API Version: ");
-		handler.AppendFormatted(FormatApiVersion(4202496));
-		stringBuilder3.AppendLine(ref handler);
-		stringBuilder = report;
-		StringBuilder stringBuilder4 = stringBuilder;
-		handler = new StringBuilder.AppendInterpolatedStringHandler(20, 1, stringBuilder);
-		handler.AppendLiteral("Validation Enabled: ");
-		handler.AppendFormatted(app.GraphicsDevice?.ValidationEnabled.ToString() ?? "N/A");
-		stringBuilder4.AppendLine(ref handler);
-		stringBuilder = report;
-		StringBuilder stringBuilder5 = stringBuilder;
-		handler = new StringBuilder.AppendInterpolatedStringHandler(21, 1, stringBuilder);
-		handler.AppendLiteral("Debug Utils Enabled: ");
-		handler.AppendFormatted(app.VulkanInstance.IsExtensionEnabled("VK_EXT_debug_utils"));
-		stringBuilder5.AppendLine(ref handler);
 		SafeAppend(report, delegate
 		{
-			int apiVersion = 0;
-			Vulkan.EnumerateInstanceVersion(&apiVersion);
-			StringBuilder stringBuilder6 = report;
-			StringBuilder.AppendInterpolatedStringHandler handler2 = new StringBuilder.AppendInterpolatedStringHandler(22, 1, stringBuilder6);
-			handler2.AppendLiteral("Instance API Version: ");
-			handler2.AppendFormatted(FormatApiVersion(apiVersion));
-			stringBuilder6.AppendLine(ref handler2);
+			StringBuilder stringBuilder = report;
+			StringBuilder.AppendInterpolatedStringHandler handler = new StringBuilder.AppendInterpolatedStringHandler(20, 1, stringBuilder);
+			handler.AppendLiteral("Loader API Version: ");
+			handler.AppendFormatted(FormatApiVersion(VulkanVersion.QueryLoaderVersion()));
+			stringBuilder.AppendLine(ref handler);
 		});
-		AppendCollection(report, "Enabled Instance Extensions", (IEnumerable<string>)(((object)app.GraphicsDevice?.InstanceEnabledExtensions) ?? ((object)Array.Empty<string>())));
-		AppendCollection(report, "Enabled Instance Layers", (IEnumerable<string>)(((object)app.GraphicsDevice?.InstanceEnabledLayers) ?? ((object)Array.Empty<string>())));
-		AppendCollection(report, "Available Instance Extensions", GetAvailableInstanceExtensionLines());
-		AppendCollection(report, "Available Instance Layers", GetAvailableInstanceLayerLines());
+		StringBuilder stringBuilder2 = report;
+		StringBuilder stringBuilder3 = stringBuilder2;
+		StringBuilder.AppendInterpolatedStringHandler handler2 = new StringBuilder.AppendInterpolatedStringHandler(23, 1, stringBuilder2);
+		handler2.AppendLiteral("Requested API Version: ");
+		handler2.AppendFormatted(FormatApiVersion(GraphicsDevice.InstanceApiVersion));
+		stringBuilder3.AppendLine(ref handler2);
+		stringBuilder2 = report;
+		StringBuilder stringBuilder4 = stringBuilder2;
+		handler2 = new StringBuilder.AppendInterpolatedStringHandler(48, 4, stringBuilder2);
+		handler2.AppendLiteral("Loader In Use: ");
+		handler2.AppendFormatted(VulkanStartup.ActiveLoaderSource);
+		handler2.AppendLiteral(" ");
+		handler2.AppendFormatted(VulkanStartup.ActiveLoaderPath ?? "");
+		handler2.AppendLiteral(" (file version ");
+		handler2.AppendFormatted(VulkanStartup.ActiveLoaderVersion ?? "N/A");
+		handler2.AppendLiteral(", binding match ");
+		handler2.AppendFormatted(VulkanStartup.LoaderMatchesBinding?.ToString() ?? "unchecked");
+		handler2.AppendLiteral(")");
+		stringBuilder4.AppendLine(ref handler2);
+		stringBuilder2 = report;
+		StringBuilder stringBuilder5 = stringBuilder2;
+		handler2 = new StringBuilder.AppendInterpolatedStringHandler(34, 2, stringBuilder2);
+		handler2.AppendLiteral("Loader Versions: system ");
+		handler2.AppendFormatted(VulkanStartup.SystemLoaderVersion ?? (VulkanStartup.SystemLoaderMissing ? "missing" : "N/A"));
+		handler2.AppendLiteral(", bundled ");
+		handler2.AppendFormatted(VulkanStartup.BundledLoaderVersion ?? "N/A");
+		stringBuilder5.AppendLine(ref handler2);
+		stringBuilder2 = report;
+		StringBuilder stringBuilder6 = stringBuilder2;
+		handler2 = new StringBuilder.AppendInterpolatedStringHandler(51, 4, stringBuilder2);
+		handler2.AppendLiteral("Fallback Stage: ");
+		handler2.AppendFormatted(VulkanStartup.Stage);
+		handler2.AppendFormatted((VulkanStartup.StageReason != null) ? (" (" + VulkanStartup.StageReason + ")") : "");
+		handler2.AppendLiteral(", implicit layers ");
+		handler2.AppendFormatted(VulkanStartup.DisableImplicitLayers ? "disabled" : "enabled");
+		handler2.AppendLiteral(", initialization ");
+		handler2.AppendFormatted(VulkanStartup.InitializationPending ? "still pending" : "completed");
+		stringBuilder6.AppendLine(ref handler2);
+		SafeAppend(report, delegate
+		{
+			AppendCollection(report, "Available Instance Extensions", GetAvailableInstanceExtensionLines());
+		});
+		SafeAppend(report, delegate
+		{
+			AppendCollection(report, "Available Instance Layers", GetAvailableInstanceLayerLines());
+		});
+		GraphicsDevice graphicsDevice = app?.GraphicsDevice;
+		if (graphicsDevice == null)
+		{
+			report.AppendLine("Instance Handle: N/A (graphics device was never created)");
+			return;
+		}
+		stringBuilder2 = report;
+		StringBuilder stringBuilder7 = stringBuilder2;
+		handler2 = new StringBuilder.AppendInterpolatedStringHandler(17, 1, stringBuilder2);
+		handler2.AppendLiteral("Instance Handle: ");
+		handler2.AppendFormatted(FormatHandle(graphicsDevice.Instance.VkHandle));
+		stringBuilder7.AppendLine(ref handler2);
+		stringBuilder2 = report;
+		StringBuilder stringBuilder8 = stringBuilder2;
+		handler2 = new StringBuilder.AppendInterpolatedStringHandler(20, 1, stringBuilder2);
+		handler2.AppendLiteral("Validation Enabled: ");
+		handler2.AppendFormatted(graphicsDevice.ValidationEnabled);
+		stringBuilder8.AppendLine(ref handler2);
+		stringBuilder2 = report;
+		StringBuilder stringBuilder9 = stringBuilder2;
+		handler2 = new StringBuilder.AppendInterpolatedStringHandler(21, 1, stringBuilder2);
+		handler2.AppendLiteral("Debug Utils Enabled: ");
+		handler2.AppendFormatted(graphicsDevice.Instance.IsExtensionEnabled("VK_EXT_debug_utils"));
+		stringBuilder9.AppendLine(ref handler2);
+		AppendCollection(report, "Enabled Instance Extensions", graphicsDevice.InstanceEnabledExtensions);
+		AppendCollection(report, "Enabled Instance Layers", graphicsDevice.InstanceEnabledLayers);
 	}
 
-	private unsafe static void AppendVulkanDeviceInfo(StringBuilder report, EngineApplication app)
+	private unsafe static void AppendVulkanDeviceInfo(StringBuilder report, EngineApplication? app)
 	{
 		report.AppendLine("-- Device --");
+		if (app?.GraphicsDevice == null)
+		{
+			AppendCollection(report, "Enumerated Devices", GraphicsDevice.EnumeratedGpus.Select((GpuDescription g) => $"[{g.Index}] '{g.Name}' ({g.DeviceType}, Vulkan {FormatApiVersion(g.ApiVersion)}, driver {g.Driver}, {g.VramBytes >> 20} MB): {g.RejectionReason ?? "usable"}").ToList());
+			return;
+		}
 		StringBuilder stringBuilder = report;
 		StringBuilder stringBuilder2 = stringBuilder;
 		StringBuilder.AppendInterpolatedStringHandler handler = new StringBuilder.AppendInterpolatedStringHandler(24, 1, stringBuilder);
@@ -538,179 +595,190 @@ internal static class CrashReporter
 		VkPhysicalDeviceVulkan12Properties vkPhysicalDeviceVulkan12Properties = new VkPhysicalDeviceVulkan12Properties();
 		properties.Next = &properties2;
 		properties2.Next = &vkPhysicalDeviceVulkan12Properties;
-		VkPhysicalDeviceProperties2 vkPhysicalDeviceProperties = new VkPhysicalDeviceProperties2();
-		vkPhysicalDeviceProperties.Next = &properties;
-		VkPhysicalDeviceProperties2 pProperties = vkPhysicalDeviceProperties;
-		app.PhysicalDevice.GetProperties2(ref pProperties);
-		VkPhysicalDeviceProperties properties3 = pProperties.Properties;
+		VkPhysicalDeviceProperties properties3 = app.PhysicalDevice.GetProperties();
+		int apiVersion = app.GraphicsDevice?.ApiVersion ?? VulkanVersion.Min(GraphicsDevice.InstanceApiVersion, properties3.ApiVersion);
+		if (IsApiVersionAtLeast(apiVersion, 1, 2, 0))
+		{
+			VkPhysicalDeviceProperties2 vkPhysicalDeviceProperties = new VkPhysicalDeviceProperties2();
+			vkPhysicalDeviceProperties.Next = &properties;
+			VkPhysicalDeviceProperties2 pProperties = vkPhysicalDeviceProperties;
+			app.PhysicalDevice.GetProperties2(ref pProperties);
+			properties3 = pProperties.Properties;
+		}
 		stringBuilder = report;
 		StringBuilder stringBuilder4 = stringBuilder;
-		handler = new StringBuilder.AppendInterpolatedStringHandler(13, 1, stringBuilder);
-		handler.AppendLiteral("Device Name: ");
-		handler.AppendFormatted(GetDeviceName(properties3));
+		handler = new StringBuilder.AppendInterpolatedStringHandler(23, 1, stringBuilder);
+		handler.AppendLiteral("Effective API Version: ");
+		handler.AppendFormatted(FormatApiVersion(apiVersion));
 		stringBuilder4.AppendLine(ref handler);
 		stringBuilder = report;
 		StringBuilder stringBuilder5 = stringBuilder;
 		handler = new StringBuilder.AppendInterpolatedStringHandler(13, 1, stringBuilder);
-		handler.AppendLiteral("Device Type: ");
-		handler.AppendFormatted(properties3.DeviceType);
+		handler.AppendLiteral("Device Name: ");
+		handler.AppendFormatted(GetDeviceName(properties3));
 		stringBuilder5.AppendLine(ref handler);
 		stringBuilder = report;
 		StringBuilder stringBuilder6 = stringBuilder;
-		handler = new StringBuilder.AppendInterpolatedStringHandler(20, 1, stringBuilder);
-		handler.AppendLiteral("Device API Version: ");
-		handler.AppendFormatted(FormatApiVersion(properties3.ApiVersion));
+		handler = new StringBuilder.AppendInterpolatedStringHandler(13, 1, stringBuilder);
+		handler.AppendLiteral("Device Type: ");
+		handler.AppendFormatted(properties3.DeviceType);
 		stringBuilder6.AppendLine(ref handler);
 		stringBuilder = report;
 		StringBuilder stringBuilder7 = stringBuilder;
-		handler = new StringBuilder.AppendInterpolatedStringHandler(16, 1, stringBuilder);
-		handler.AppendLiteral("Driver Version: ");
-		handler.AppendFormatted(FormatVersionWithHex(properties3.DriverVersion));
+		handler = new StringBuilder.AppendInterpolatedStringHandler(20, 1, stringBuilder);
+		handler.AppendLiteral("Device API Version: ");
+		handler.AppendFormatted(FormatApiVersion(properties3.ApiVersion));
 		stringBuilder7.AppendLine(ref handler);
 		stringBuilder = report;
 		StringBuilder stringBuilder8 = stringBuilder;
-		handler = new StringBuilder.AppendInterpolatedStringHandler(13, 1, stringBuilder);
-		handler.AppendLiteral("Vendor ID: 0x");
-		handler.AppendFormatted(properties3.VendorID, "X");
+		handler = new StringBuilder.AppendInterpolatedStringHandler(16, 1, stringBuilder);
+		handler.AppendLiteral("Driver Version: ");
+		handler.AppendFormatted(FormatVersionWithHex(properties3.DriverVersion));
 		stringBuilder8.AppendLine(ref handler);
 		stringBuilder = report;
 		StringBuilder stringBuilder9 = stringBuilder;
 		handler = new StringBuilder.AppendInterpolatedStringHandler(13, 1, stringBuilder);
-		handler.AppendLiteral("Device ID: 0x");
-		handler.AppendFormatted(properties3.DeviceID, "X");
+		handler.AppendLiteral("Vendor ID: 0x");
+		handler.AppendFormatted(properties3.VendorID, "X");
 		stringBuilder9.AppendLine(ref handler);
 		stringBuilder = report;
 		StringBuilder stringBuilder10 = stringBuilder;
-		handler = new StringBuilder.AppendInterpolatedStringHandler(21, 1, stringBuilder);
-		handler.AppendLiteral("Pipeline Cache UUID: ");
-		handler.AppendFormatted(GetPipelineCacheUuid(properties3));
+		handler = new StringBuilder.AppendInterpolatedStringHandler(13, 1, stringBuilder);
+		handler.AppendLiteral("Device ID: 0x");
+		handler.AppendFormatted(properties3.DeviceID, "X");
 		stringBuilder10.AppendLine(ref handler);
 		stringBuilder = report;
 		StringBuilder stringBuilder11 = stringBuilder;
-		handler = new StringBuilder.AppendInterpolatedStringHandler(11, 1, stringBuilder);
-		handler.AppendLiteral("Driver ID: ");
-		handler.AppendFormatted(properties.DriverID);
+		handler = new StringBuilder.AppendInterpolatedStringHandler(21, 1, stringBuilder);
+		handler.AppendLiteral("Pipeline Cache UUID: ");
+		handler.AppendFormatted(GetPipelineCacheUuid(properties3));
 		stringBuilder11.AppendLine(ref handler);
 		stringBuilder = report;
 		StringBuilder stringBuilder12 = stringBuilder;
-		handler = new StringBuilder.AppendInterpolatedStringHandler(13, 1, stringBuilder);
-		handler.AppendLiteral("Driver Name: ");
-		handler.AppendFormatted(GetDriverName(properties));
+		handler = new StringBuilder.AppendInterpolatedStringHandler(11, 1, stringBuilder);
+		handler.AppendLiteral("Driver ID: ");
+		handler.AppendFormatted(properties.DriverID);
 		stringBuilder12.AppendLine(ref handler);
 		stringBuilder = report;
 		StringBuilder stringBuilder13 = stringBuilder;
 		handler = new StringBuilder.AppendInterpolatedStringHandler(13, 1, stringBuilder);
-		handler.AppendLiteral("Driver Info: ");
-		handler.AppendFormatted(GetDriverInfo(properties));
+		handler.AppendLiteral("Driver Name: ");
+		handler.AppendFormatted(GetDriverName(properties));
 		stringBuilder13.AppendLine(ref handler);
 		stringBuilder = report;
 		StringBuilder stringBuilder14 = stringBuilder;
-		handler = new StringBuilder.AppendInterpolatedStringHandler(20, 1, stringBuilder);
-		handler.AppendLiteral("Driver Conformance: ");
-		handler.AppendFormatted(FormatConformanceVersion(properties.ConformanceVersion));
+		handler = new StringBuilder.AppendInterpolatedStringHandler(13, 1, stringBuilder);
+		handler.AppendLiteral("Driver Info: ");
+		handler.AppendFormatted(GetDriverInfo(properties));
 		stringBuilder14.AppendLine(ref handler);
 		stringBuilder = report;
 		StringBuilder stringBuilder15 = stringBuilder;
-		handler = new StringBuilder.AppendInterpolatedStringHandler(13, 1, stringBuilder);
-		handler.AppendLiteral("Device UUID: ");
-		handler.AppendFormatted(GetDeviceUuid(properties2));
+		handler = new StringBuilder.AppendInterpolatedStringHandler(20, 1, stringBuilder);
+		handler.AppendLiteral("Driver Conformance: ");
+		handler.AppendFormatted(FormatConformanceVersion(properties.ConformanceVersion));
 		stringBuilder15.AppendLine(ref handler);
 		stringBuilder = report;
 		StringBuilder stringBuilder16 = stringBuilder;
 		handler = new StringBuilder.AppendInterpolatedStringHandler(13, 1, stringBuilder);
-		handler.AppendLiteral("Driver UUID: ");
-		handler.AppendFormatted(GetDriverUuid(properties2));
+		handler.AppendLiteral("Device UUID: ");
+		handler.AppendFormatted(GetDeviceUuid(properties2));
 		stringBuilder16.AppendLine(ref handler);
 		stringBuilder = report;
 		StringBuilder stringBuilder17 = stringBuilder;
-		handler = new StringBuilder.AppendInterpolatedStringHandler(19, 1, stringBuilder);
-		handler.AppendLiteral("Device LUID Valid: ");
-		handler.AppendFormatted(properties2.DeviceLUIDValid);
+		handler = new StringBuilder.AppendInterpolatedStringHandler(13, 1, stringBuilder);
+		handler.AppendLiteral("Driver UUID: ");
+		handler.AppendFormatted(GetDriverUuid(properties2));
 		stringBuilder17.AppendLine(ref handler);
 		stringBuilder = report;
 		StringBuilder stringBuilder18 = stringBuilder;
-		handler = new StringBuilder.AppendInterpolatedStringHandler(13, 1, stringBuilder);
-		handler.AppendLiteral("Device LUID: ");
-		handler.AppendFormatted(properties2.DeviceLUIDValid ? GetDeviceLuid(properties2) : "N/A");
+		handler = new StringBuilder.AppendInterpolatedStringHandler(19, 1, stringBuilder);
+		handler.AppendLiteral("Device LUID Valid: ");
+		handler.AppendFormatted(properties2.DeviceLUIDValid);
 		stringBuilder18.AppendLine(ref handler);
 		stringBuilder = report;
 		StringBuilder stringBuilder19 = stringBuilder;
-		handler = new StringBuilder.AppendInterpolatedStringHandler(24, 1, stringBuilder);
-		handler.AppendLiteral("Vulkan 1.2 Conformance: ");
-		handler.AppendFormatted(FormatConformanceVersion(vkPhysicalDeviceVulkan12Properties.ConformanceVersion));
+		handler = new StringBuilder.AppendInterpolatedStringHandler(13, 1, stringBuilder);
+		handler.AppendLiteral("Device LUID: ");
+		handler.AppendFormatted(properties2.DeviceLUIDValid ? GetDeviceLuid(properties2) : "N/A");
 		stringBuilder19.AppendLine(ref handler);
 		stringBuilder = report;
 		StringBuilder stringBuilder20 = stringBuilder;
-		handler = new StringBuilder.AppendInterpolatedStringHandler(23, 1, stringBuilder);
-		handler.AppendLiteral("Graphics Queue Family: ");
-		handler.AppendFormatted(app.GraphicsDevice?.GraphicsFamilyIndex);
+		handler = new StringBuilder.AppendInterpolatedStringHandler(24, 1, stringBuilder);
+		handler.AppendLiteral("Vulkan 1.2 Conformance: ");
+		handler.AppendFormatted(FormatConformanceVersion(vkPhysicalDeviceVulkan12Properties.ConformanceVersion));
 		stringBuilder20.AppendLine(ref handler);
 		stringBuilder = report;
 		StringBuilder stringBuilder21 = stringBuilder;
-		handler = new StringBuilder.AppendInterpolatedStringHandler(22, 1, stringBuilder);
-		handler.AppendLiteral("Present Queue Family: ");
-		handler.AppendFormatted(app.GraphicsDevice?.PresentFamilyIndex);
+		handler = new StringBuilder.AppendInterpolatedStringHandler(23, 1, stringBuilder);
+		handler.AppendLiteral("Graphics Queue Family: ");
+		handler.AppendFormatted(app.GraphicsDevice?.GraphicsFamilyIndex);
 		stringBuilder21.AppendLine(ref handler);
 		stringBuilder = report;
 		StringBuilder stringBuilder22 = stringBuilder;
-		handler = new StringBuilder.AppendInterpolatedStringHandler(27, 1, stringBuilder);
-		handler.AppendLiteral("Video Decode Queue Family: ");
-		handler.AppendFormatted(app.GraphicsDevice?.VideoDecodeFamilyIndex);
+		handler = new StringBuilder.AppendInterpolatedStringHandler(22, 1, stringBuilder);
+		handler.AppendLiteral("Present Queue Family: ");
+		handler.AppendFormatted(app.GraphicsDevice?.PresentFamilyIndex);
 		stringBuilder22.AppendLine(ref handler);
 		stringBuilder = report;
 		StringBuilder stringBuilder23 = stringBuilder;
-		handler = new StringBuilder.AppendInterpolatedStringHandler(33, 1, stringBuilder);
-		handler.AppendLiteral("Enabled Device Extensions Count: ");
-		handler.AppendFormatted(app.GraphicsDevice?.DeviceEnabledExtensions.Count);
+		handler = new StringBuilder.AppendInterpolatedStringHandler(27, 1, stringBuilder);
+		handler.AppendLiteral("Video Decode Queue Family: ");
+		handler.AppendFormatted(app.GraphicsDevice?.VideoDecodeFamilyIndex);
 		stringBuilder23.AppendLine(ref handler);
 		stringBuilder = report;
 		StringBuilder stringBuilder24 = stringBuilder;
-		handler = new StringBuilder.AppendInterpolatedStringHandler(31, 1, stringBuilder);
-		handler.AppendLiteral("Core Feature FillModeNonSolid: ");
-		handler.AppendFormatted(app.PhysicalDevice.GetFeatures().FillModeNonSolid);
+		handler = new StringBuilder.AppendInterpolatedStringHandler(33, 1, stringBuilder);
+		handler.AppendLiteral("Enabled Device Extensions Count: ");
+		handler.AppendFormatted(app.GraphicsDevice?.DeviceEnabledExtensions.Count);
 		stringBuilder24.AppendLine(ref handler);
 		stringBuilder = report;
 		StringBuilder stringBuilder25 = stringBuilder;
-		handler = new StringBuilder.AppendInterpolatedStringHandler(32, 1, stringBuilder);
-		handler.AppendLiteral("Core Feature SamplerAnisotropy: ");
-		handler.AppendFormatted(app.PhysicalDevice.GetFeatures().SamplerAnisotropy);
+		handler = new StringBuilder.AppendInterpolatedStringHandler(31, 1, stringBuilder);
+		handler.AppendLiteral("Core Feature FillModeNonSolid: ");
+		handler.AppendFormatted(app.PhysicalDevice.GetFeatures().FillModeNonSolid);
 		stringBuilder25.AppendLine(ref handler);
 		stringBuilder = report;
 		StringBuilder stringBuilder26 = stringBuilder;
-		handler = new StringBuilder.AppendInterpolatedStringHandler(39, 1, stringBuilder);
-		handler.AppendLiteral("Limit MinUniformBufferOffsetAlignment: ");
-		handler.AppendFormatted(properties3.Limits.MinUniformBufferOffsetAlignment);
+		handler = new StringBuilder.AppendInterpolatedStringHandler(32, 1, stringBuilder);
+		handler.AppendLiteral("Core Feature SamplerAnisotropy: ");
+		handler.AppendFormatted(app.PhysicalDevice.GetFeatures().SamplerAnisotropy);
 		stringBuilder26.AppendLine(ref handler);
 		stringBuilder = report;
 		StringBuilder stringBuilder27 = stringBuilder;
-		handler = new StringBuilder.AppendInterpolatedStringHandler(27, 1, stringBuilder);
-		handler.AppendLiteral("Limit NonCoherentAtomSize: ");
-		handler.AppendFormatted(properties3.Limits.NonCoherentAtomSize);
+		handler = new StringBuilder.AppendInterpolatedStringHandler(39, 1, stringBuilder);
+		handler.AppendLiteral("Limit MinUniformBufferOffsetAlignment: ");
+		handler.AppendFormatted(properties3.Limits.MinUniformBufferOffsetAlignment);
 		stringBuilder27.AppendLine(ref handler);
 		stringBuilder = report;
 		StringBuilder stringBuilder28 = stringBuilder;
-		handler = new StringBuilder.AppendInterpolatedStringHandler(23, 1, stringBuilder);
-		handler.AppendLiteral("Limit TimestampPeriod: ");
-		handler.AppendFormatted(properties3.Limits.TimestampPeriod);
+		handler = new StringBuilder.AppendInterpolatedStringHandler(27, 1, stringBuilder);
+		handler.AppendLiteral("Limit NonCoherentAtomSize: ");
+		handler.AppendFormatted(properties3.Limits.NonCoherentAtomSize);
 		stringBuilder28.AppendLine(ref handler);
 		stringBuilder = report;
 		StringBuilder stringBuilder29 = stringBuilder;
-		handler = new StringBuilder.AppendInterpolatedStringHandler(28, 1, stringBuilder);
-		handler.AppendLiteral("Limit MaxPushConstantsSize: ");
-		handler.AppendFormatted(properties3.Limits.MaxPushConstantsSize);
+		handler = new StringBuilder.AppendInterpolatedStringHandler(23, 1, stringBuilder);
+		handler.AppendLiteral("Limit TimestampPeriod: ");
+		handler.AppendFormatted(properties3.Limits.TimestampPeriod);
 		stringBuilder29.AppendLine(ref handler);
 		stringBuilder = report;
 		StringBuilder stringBuilder30 = stringBuilder;
-		handler = new StringBuilder.AppendInterpolatedStringHandler(30, 1, stringBuilder);
-		handler.AppendLiteral("Limit MaxBoundDescriptorSets: ");
-		handler.AppendFormatted(properties3.Limits.MaxBoundDescriptorSets);
+		handler = new StringBuilder.AppendInterpolatedStringHandler(28, 1, stringBuilder);
+		handler.AppendLiteral("Limit MaxPushConstantsSize: ");
+		handler.AppendFormatted(properties3.Limits.MaxPushConstantsSize);
 		stringBuilder30.AppendLine(ref handler);
 		stringBuilder = report;
 		StringBuilder stringBuilder31 = stringBuilder;
+		handler = new StringBuilder.AppendInterpolatedStringHandler(30, 1, stringBuilder);
+		handler.AppendLiteral("Limit MaxBoundDescriptorSets: ");
+		handler.AppendFormatted(properties3.Limits.MaxBoundDescriptorSets);
+		stringBuilder31.AppendLine(ref handler);
+		stringBuilder = report;
+		StringBuilder stringBuilder32 = stringBuilder;
 		handler = new StringBuilder.AppendInterpolatedStringHandler(27, 1, stringBuilder);
 		handler.AppendLiteral("Limit MaxImageDimension2D: ");
 		handler.AppendFormatted(properties3.Limits.MaxImageDimension2D);
-		stringBuilder31.AppendLine(ref handler);
+		stringBuilder32.AppendLine(ref handler);
 		AppendCollection(report, "Enabled Device Extensions", (IEnumerable<string>)(((object)app.GraphicsDevice?.DeviceEnabledExtensions) ?? ((object)Array.Empty<string>())));
 		AppendCollection(report, "Available Device Extensions", GetAvailableDeviceExtensionLines(app.PhysicalDevice));
 	}
@@ -939,13 +1007,14 @@ internal static class CrashReporter
 		report.AppendLine("-- Memory --");
 		VkPhysicalDeviceMemoryBudgetPropertiesEXT vkPhysicalDeviceMemoryBudgetPropertiesEXT = new VkPhysicalDeviceMemoryBudgetPropertiesEXT();
 		VkPhysicalDeviceMemoryProperties2 pMemoryProperties = new VkPhysicalDeviceMemoryProperties2();
-		bool flag = app.PhysicalDevice.SupportsExtension("VK_EXT_memory_budget");
+		bool flag = app.PhysicalDevice.SupportsExtension("VK_EXT_memory_budget") && IsApiVersionAtLeast(app.GraphicsDevice?.ApiVersion ?? 4194304, 1, 1, 0);
+		VkPhysicalDeviceMemoryProperties memoryProperties = app.PhysicalDevice.GetMemoryProperties();
 		if (flag)
 		{
 			pMemoryProperties.Next = &vkPhysicalDeviceMemoryBudgetPropertiesEXT;
+			app.PhysicalDevice.GetMemoryProperties2(ref pMemoryProperties);
+			memoryProperties = pMemoryProperties.MemoryProperties;
 		}
-		app.PhysicalDevice.GetMemoryProperties2(ref pMemoryProperties);
-		VkPhysicalDeviceMemoryProperties memoryProperties = pMemoryProperties.MemoryProperties;
 		StringBuilder stringBuilder = report;
 		StringBuilder stringBuilder2 = stringBuilder;
 		StringBuilder.AppendInterpolatedStringHandler handler = new StringBuilder.AppendInterpolatedStringHandler(14, 1, stringBuilder);
@@ -1068,6 +1137,78 @@ internal static class CrashReporter
 			}
 		});
 		report.AppendLine();
+	}
+
+	private static void AppendAssemblies(StringBuilder report)
+	{
+		report.AppendLine("== Assemblies ==");
+		SafeAppend(report, delegate
+		{
+			Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+			List<string> list = new List<string>(assemblies.Length);
+			Assembly[] array = assemblies;
+			foreach (Assembly assembly in array)
+			{
+				list.Add(TryFormat(() => FormatAssembly(assembly)));
+			}
+			list.Sort(StringComparer.Ordinal);
+			StringBuilder stringBuilder = report;
+			StringBuilder.AppendInterpolatedStringHandler handler = new StringBuilder.AppendInterpolatedStringHandler(8, 1, stringBuilder);
+			handler.AppendLiteral("Loaded: ");
+			handler.AppendFormatted(list.Count);
+			stringBuilder.AppendLine(ref handler);
+			foreach (string item in list)
+			{
+				report.AppendLine(item);
+			}
+		});
+		report.AppendLine();
+	}
+
+	private static string FormatAssembly(Assembly assembly)
+	{
+		AssemblyName name = assembly.GetName();
+		StringBuilder stringBuilder = new StringBuilder(192);
+		stringBuilder.Append(name.Name).Append(' ').Append(name.Version);
+		if (assembly.IsDynamic)
+		{
+			return stringBuilder.Append(" <dynamic>").ToString();
+		}
+		string location = assembly.Location;
+		if (string.IsNullOrEmpty(location))
+		{
+			return stringBuilder.Append(" <in-memory>").ToString();
+		}
+		try
+		{
+			FileVersionInfo versionInfo = FileVersionInfo.GetVersionInfo(location);
+			if (!string.IsNullOrEmpty(versionInfo.FileVersion) && versionInfo.FileVersion != name.Version?.ToString())
+			{
+				stringBuilder.Append(" file=").Append(versionInfo.FileVersion);
+			}
+			if (!string.IsNullOrEmpty(versionInfo.ProductVersion) && versionInfo.ProductVersion != versionInfo.FileVersion)
+			{
+				stringBuilder.Append(" product=").Append(versionInfo.ProductVersion);
+			}
+		}
+		catch
+		{
+		}
+		return stringBuilder.Append(' ').Append(location).ToString();
+	}
+
+	private static void AppendLog(TextWriter writer)
+	{
+		writer.WriteLine("== Log ==");
+		try
+		{
+			FileLog.CopyLogTo(writer);
+		}
+		catch (Exception ex)
+		{
+			writer.WriteLine($"N/A ({ex.GetType().Name}: {ex.Message})");
+		}
+		writer.WriteLine();
 	}
 
 	private static List<string> GetAvailableInstanceExtensionLines()

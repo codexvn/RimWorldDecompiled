@@ -1,44 +1,139 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompProperties_AbilityBloodfeederBite : CompProperties_AbilityEffect
 {
-	// Token: 0x020021F5 RID: 8693
-	public class CompProperties_AbilityBloodfeederBite : CompProperties_AbilityEffect
+	[CompilerGenerated]
+	private sealed class _003CExtraStatSummary_003Ed__8 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x0600BE65 RID: 48741 RVA: 0x003734EC File Offset: 0x003716EC
-		public CompProperties_AbilityBloodfeederBite()
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompProperties_AbilityBloodfeederBite _003C_003E4__this;
+
+		string IEnumerator<string>.Current
 		{
-			this.compClass = typeof(CompAbilityEffect_BloodfeederBite);
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x0600BE66 RID: 48742 RVA: 0x0037351A File Offset: 0x0037171A
-		public override IEnumerable<string> ExtraStatSummary()
+		object IEnumerator.Current
 		{
-			yield return "AbilityHemogenGain".Translate() + ": " + (this.hemogenGain * 100f).ToString("F0");
-			yield break;
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x040082CE RID: 33486
-		public float hemogenGain;
+		[DebuggerHidden]
+		public _003CExtraStatSummary_003Ed__8(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
 
-		// Token: 0x040082CF RID: 33487
-		public ThoughtDef thoughtDefToGiveTarget;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
 
-		// Token: 0x040082D0 RID: 33488
-		public ThoughtDef opinionThoughtDefToGiveTarget;
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			CompProperties_AbilityBloodfeederBite compProperties_AbilityBloodfeederBite = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = "AbilityHemogenGain".Translate() + ": " + (compProperties_AbilityBloodfeederBite.hemogenGain * 100f).ToString("F0");
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
 
-		// Token: 0x040082D1 RID: 33489
-		public float resistanceGain;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x040082D2 RID: 33490
-		public float nutritionGain = 0.1f;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x040082D3 RID: 33491
-		public float targetBloodLoss = 0.4499f;
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CExtraStatSummary_003Ed__8 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CExtraStatSummary_003Ed__8(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x040082D4 RID: 33492
-		public IntRange bloodFilthToSpawnRange;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	public float hemogenGain;
+
+	public ThoughtDef thoughtDefToGiveTarget;
+
+	public ThoughtDef opinionThoughtDefToGiveTarget;
+
+	public float resistanceGain;
+
+	public float nutritionGain = 0.1f;
+
+	public float targetBloodLoss = 0.4499f;
+
+	public IntRange bloodFilthToSpawnRange;
+
+	public CompProperties_AbilityBloodfeederBite()
+	{
+		compClass = typeof(CompAbilityEffect_BloodfeederBite);
+	}
+
+	[IteratorStateMachine(typeof(_003CExtraStatSummary_003Ed__8))]
+	public override IEnumerable<string> ExtraStatSummary()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CExtraStatSummary_003Ed__8(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

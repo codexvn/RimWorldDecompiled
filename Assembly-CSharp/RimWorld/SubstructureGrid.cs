@@ -1,209 +1,169 @@
-﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class SubstructureGrid
 {
-	// Token: 0x02002195 RID: 8597
-	public class SubstructureGrid
+	private Map map;
+
+	private CellBoolDrawer drawerInt;
+
+	private List<Building_GravEngine> tmpEngines = new List<Building_GravEngine>();
+
+	private int lastGotEnginesTick = -1;
+
+	private static readonly List<IntVec3> tmpFootprintCells = new List<IntVec3>();
+
+	private static readonly HashSet<IntVec3> tmpFootprintCellsHashSet = new HashSet<IntVec3>();
+
+	private static readonly List<IntVec3> tmpGravEngineCells = new List<IntVec3>();
+
+	private static readonly HashSet<IntVec3> tmpGravEngineCellsHashSet = new HashSet<IntVec3>();
+
+	private static int lastUpdateFrame = -1;
+
+	private static int lastGUIFrame = -1;
+
+	private static readonly List<IntVec3> tmpExtraFootprintCells = new List<IntVec3>();
+
+	public CellBoolDrawer Drawer => drawerInt ?? (drawerInt = new CellBoolDrawer(CellBoolDrawerGetBoolInt, CellBoolDrawerColorInt, CellBoolDrawerGetExtraColorInt, map.Size.x, map.Size.z, 3700));
+
+	public SubstructureGrid(Map map)
 	{
-		// Token: 0x17001C88 RID: 7304
-		// (get) Token: 0x0600BBC5 RID: 48069 RVA: 0x00366234 File Offset: 0x00364434
-		public CellBoolDrawer Drawer
+		this.map = map;
+	}
+
+	private Color CellBoolDrawerColorInt()
+	{
+		return Color.white;
+	}
+
+	private bool CellBoolDrawerGetBoolInt(int index)
+	{
+		return map.terrainGrid.FoundationAt(index)?.IsSubstructure ?? false;
+	}
+
+	private Color CellBoolDrawerGetExtraColorInt(int index)
+	{
+		if (Find.TickManager.TicksGame != lastGotEnginesTick)
 		{
-			get
+			tmpEngines.Clear();
+			tmpEngines.AddRange(map.listerBuildings.AllBuildingsColonistOfClass<Building_GravEngine>());
+			lastGotEnginesTick = Find.TickManager.TicksGame;
+		}
+		TerrainDef terrainDef = map.terrainGrid.FoundationAt(index);
+		if (terrainDef != null && terrainDef.IsSubstructure)
+		{
+			foreach (Building_GravEngine tmpEngine in tmpEngines)
 			{
-				CellBoolDrawer result;
-				if ((result = this.drawerInt) == null)
+				if (tmpEngine.ValidSubstructureAt(map.cellIndices.IndexToCell(index)))
 				{
-					result = (this.drawerInt = new CellBoolDrawer(new Func<int, bool>(this.CellBoolDrawerGetBoolInt), new Func<Color>(this.CellBoolDrawerColorInt), new Func<int, Color>(this.CellBoolDrawerGetExtraColorInt), this.map.Size.x, this.map.Size.z, 3700, 0.33f));
+					return GravshipUtility.ConnectedSubstructureColor;
 				}
-				return result;
 			}
 		}
+		return GravshipUtility.DisconnectedSubstructureColor;
+	}
 
-		// Token: 0x0600BBC6 RID: 48070 RVA: 0x003662A7 File Offset: 0x003644A7
-		public SubstructureGrid(Map map)
+	public void DrawSubstructureGrid()
+	{
+		if (GravshipUtility.ShowConnectedSubstructure && !Find.ScreenshotModeHandler.Active)
 		{
-			this.map = map;
+			Drawer.MarkForDraw();
 		}
+		Drawer.CellBoolDrawerUpdate();
+	}
 
-		// Token: 0x0600BBC7 RID: 48071 RVA: 0x000440FD File Offset: 0x000422FD
-		private Color CellBoolDrawerColorInt()
+	public static void DrawSubstructureFootprint(List<IntVec3> extraCells = null, Thing thingToExclude = null)
+	{
+		if (Time.frameCount == lastUpdateFrame)
 		{
-			return Color.white;
+			return;
 		}
-
-		// Token: 0x0600BBC8 RID: 48072 RVA: 0x003662C8 File Offset: 0x003644C8
-		private bool CellBoolDrawerGetBoolInt(int index)
+		lastUpdateFrame = Time.frameCount;
+		foreach (Thing item in Find.CurrentMap.listerThings.ThingsOfDef(ThingDefOf.GravEngine))
 		{
-			TerrainDef terrainDef = this.map.terrainGrid.FoundationAt(index);
-			return terrainDef != null && terrainDef.IsSubstructure;
-		}
-
-		// Token: 0x0600BBC9 RID: 48073 RVA: 0x003662E8 File Offset: 0x003644E8
-		private Color CellBoolDrawerGetExtraColorInt(int index)
-		{
-			if (Find.TickManager.TicksGame != this.lastGotEnginesTick)
+			tmpFootprintCells.Clear();
+			tmpFootprintCellsHashSet.Clear();
+			tmpGravEngineCells.Clear();
+			tmpGravEngineCellsHashSet.Clear();
+			Building_GravEngine building_GravEngine = item as Building_GravEngine;
+			if (building_GravEngine != thingToExclude)
 			{
-				this.tmpEngines.Clear();
-				this.tmpEngines.AddRange(this.map.listerBuildings.AllBuildingsColonistOfClass<Building_GravEngine>());
-				this.lastGotEnginesTick = Find.TickManager.TicksGame;
+				CompSubstructureFootprint compSubstructureFootprint = building_GravEngine.TryGetComp<CompSubstructureFootprint>();
+				tmpGravEngineCells.AddRange(GenRadial.RadialCellsAround(building_GravEngine.Position, compSubstructureFootprint.Props.radius, useCenter: true));
+				tmpGravEngineCellsHashSet.AddRange(tmpGravEngineCells);
+				GenDraw.DrawFieldEdges(tmpGravEngineCells, GravshipUtility.ConnectedSubstructureColor, null);
 			}
-			TerrainDef terrainDef = this.map.terrainGrid.FoundationAt(index);
-			if (terrainDef != null && terrainDef.IsSubstructure)
+			foreach (Thing item2 in building_GravEngine.AffectedByFacilities.LinkedFacilitiesListForReading)
 			{
-				using (List<Building_GravEngine>.Enumerator enumerator = this.tmpEngines.GetEnumerator())
+				if ((thingToExclude != null && item2 == thingToExclude) || !item2.TryGetComp(out CompSubstructureFootprint comp) || !comp.Valid)
 				{
-					while (enumerator.MoveNext())
+					continue;
+				}
+				foreach (IntVec3 item3 in GenRadial.RadialCellsAround(item2.Position, comp.Props.radius, useCenter: true))
+				{
+					if (item3.InBounds(Find.CurrentMap) && !item3.Fogged(Find.CurrentMap) && !tmpGravEngineCellsHashSet.Contains(item3) && !tmpFootprintCellsHashSet.Contains(item3))
 					{
-						if (enumerator.Current.ValidSubstructureAt(this.map.cellIndices.IndexToCell(index)))
-						{
-							return GravshipUtility.ConnectedSubstructureColor;
-						}
+						tmpFootprintCells.Add(item3);
+						tmpFootprintCellsHashSet.Add(item3);
 					}
 				}
 			}
-			return GravshipUtility.DisconnectedSubstructureColor;
-		}
-
-		// Token: 0x0600BBCA RID: 48074 RVA: 0x003663C4 File Offset: 0x003645C4
-		public void DrawSubstructureGrid()
-		{
-			if (GravshipUtility.ShowConnectedSubstructure && !Find.ScreenshotModeHandler.Active)
+			if (extraCells != null)
 			{
-				this.Drawer.MarkForDraw();
-			}
-			this.Drawer.CellBoolDrawerUpdate();
-		}
-
-		// Token: 0x0600BBCB RID: 48075 RVA: 0x003663F0 File Offset: 0x003645F0
-		public static void DrawSubstructureFootprint(List<IntVec3> extraCells = null, Thing thingToExclude = null)
-		{
-			if (Time.frameCount == SubstructureGrid.lastUpdateFrame)
-			{
-				return;
-			}
-			SubstructureGrid.lastUpdateFrame = Time.frameCount;
-			foreach (Thing thing in Find.CurrentMap.listerThings.ThingsOfDef(ThingDefOf.GravEngine))
-			{
-				SubstructureGrid.tmpFootprintCells.Clear();
-				SubstructureGrid.tmpFootprintCellsHashSet.Clear();
-				SubstructureGrid.tmpGravEngineCells.Clear();
-				SubstructureGrid.tmpGravEngineCellsHashSet.Clear();
-				Building_GravEngine building_GravEngine = thing as Building_GravEngine;
-				if (building_GravEngine != thingToExclude)
+				foreach (IntVec3 extraCell in extraCells)
 				{
-					CompSubstructureFootprint compSubstructureFootprint = building_GravEngine.TryGetComp<CompSubstructureFootprint>();
-					SubstructureGrid.tmpGravEngineCells.AddRange(GenRadial.RadialCellsAround(building_GravEngine.Position, compSubstructureFootprint.Props.radius, true));
-					SubstructureGrid.tmpGravEngineCellsHashSet.AddRange(SubstructureGrid.tmpGravEngineCells);
-					GenDraw.DrawFieldEdges(SubstructureGrid.tmpGravEngineCells, GravshipUtility.ConnectedSubstructureColor, null, null, 2900);
-				}
-				foreach (Thing thing2 in building_GravEngine.AffectedByFacilities.LinkedFacilitiesListForReading)
-				{
-					CompSubstructureFootprint compSubstructureFootprint2;
-					if ((thingToExclude == null || thing2 != thingToExclude) && thing2.TryGetComp(out compSubstructureFootprint2) && compSubstructureFootprint2.Valid)
+					if (extraCell.InBounds(Find.CurrentMap) && !extraCell.Fogged(Find.CurrentMap) && !tmpGravEngineCellsHashSet.Contains(extraCell) && !tmpFootprintCellsHashSet.Contains(extraCell))
 					{
-						foreach (IntVec3 intVec in GenRadial.RadialCellsAround(thing2.Position, compSubstructureFootprint2.Props.radius, true))
-						{
-							if (intVec.InBounds(Find.CurrentMap) && !intVec.Fogged(Find.CurrentMap) && !SubstructureGrid.tmpGravEngineCellsHashSet.Contains(intVec) && !SubstructureGrid.tmpFootprintCellsHashSet.Contains(intVec))
-							{
-								SubstructureGrid.tmpFootprintCells.Add(intVec);
-								SubstructureGrid.tmpFootprintCellsHashSet.Add(intVec);
-							}
-						}
+						tmpFootprintCells.Add(extraCell);
+						tmpFootprintCellsHashSet.Add(extraCell);
 					}
 				}
-				if (extraCells != null)
-				{
-					foreach (IntVec3 intVec2 in extraCells)
-					{
-						if (intVec2.InBounds(Find.CurrentMap) && !intVec2.Fogged(Find.CurrentMap) && !SubstructureGrid.tmpGravEngineCellsHashSet.Contains(intVec2) && !SubstructureGrid.tmpFootprintCellsHashSet.Contains(intVec2))
-						{
-							SubstructureGrid.tmpFootprintCells.Add(intVec2);
-							SubstructureGrid.tmpFootprintCellsHashSet.Add(intVec2);
-						}
-					}
-				}
-				List<IntVec3> cells = SubstructureGrid.tmpFootprintCells;
-				Color connectedSubstructureColor = GravshipUtility.ConnectedSubstructureColor;
-				HashSet<IntVec3> ignoreBorderCells = SubstructureGrid.tmpGravEngineCellsHashSet;
-				GenDraw.DrawFieldEdges(cells, connectedSubstructureColor, null, ignoreBorderCells, 2900);
 			}
+			List<IntVec3> cells = tmpFootprintCells;
+			Color connectedSubstructureColor = GravshipUtility.ConnectedSubstructureColor;
+			HashSet<IntVec3> ignoreBorderCells = tmpGravEngineCellsHashSet;
+			GenDraw.DrawFieldEdges(cells, connectedSubstructureColor, null, ignoreBorderCells);
 		}
+	}
 
-		// Token: 0x0600BBCC RID: 48076 RVA: 0x003666DC File Offset: 0x003648DC
-		public static void DrawSubstructureCountOnGUI()
+	public static void DrawSubstructureCountOnGUI()
+	{
+		if (Time.frameCount == lastGUIFrame)
 		{
-			if (Time.frameCount == SubstructureGrid.lastGUIFrame)
-			{
-				return;
-			}
-			foreach (Thing thing in Find.CurrentMap.listerThings.ThingsOfDef(ThingDefOf.GravEngine))
-			{
-				Building_GravEngine building_GravEngine = thing as Building_GravEngine;
-				int count = building_GravEngine.AllConnectedSubstructure.Count;
-				float statValue = building_GravEngine.GetStatValue(StatDefOf.SubstructureSupport, true, -1);
-				Widgets.DrawStringOnMap(building_GravEngine.DrawPos.MapToUIPosition(), string.Format("{0}/{1}", count, statValue), Color.white);
-			}
+			return;
 		}
-
-		// Token: 0x0600BBCD RID: 48077 RVA: 0x0036678C File Offset: 0x0036498C
-		public static void DrawSubstructureFootprintWithExtra(CompProperties_SubstructureFootprint footprint, IntVec3 center, Thing thing)
+		foreach (Thing item in Find.CurrentMap.listerThings.ThingsOfDef(ThingDefOf.GravEngine))
 		{
-			SubstructureGrid.tmpExtraFootprintCells.Clear();
-			foreach (IntVec3 intVec in GenRadial.RadialCellsAround(center, footprint.radius, true))
-			{
-				if (intVec.InBounds(Find.CurrentMap) && !intVec.Fogged(Find.CurrentMap))
-				{
-					SubstructureGrid.tmpExtraFootprintCells.Add(intVec);
-				}
-			}
-			SubstructureGrid.DrawSubstructureFootprint(SubstructureGrid.tmpExtraFootprintCells, thing);
+			Building_GravEngine obj = item as Building_GravEngine;
+			int count = obj.AllConnectedSubstructure.Count;
+			float statValue = obj.GetStatValue(StatDefOf.SubstructureSupport);
+			Widgets.DrawStringOnMap(obj.DrawPos.MapToUIPosition(), $"{count}/{statValue}", Color.white);
 		}
+	}
 
-		// Token: 0x0600BBCE RID: 48078 RVA: 0x00366814 File Offset: 0x00364A14
-		public void MarkDirty()
+	public static void DrawSubstructureFootprintWithExtra(CompProperties_SubstructureFootprint footprint, IntVec3 center, Thing thing)
+	{
+		tmpExtraFootprintCells.Clear();
+		foreach (IntVec3 item in GenRadial.RadialCellsAround(center, footprint.radius, useCenter: true))
 		{
-			foreach (Building_GravEngine building_GravEngine in this.map.listerBuildings.AllBuildingsColonistOfClass<Building_GravEngine>())
+			if (item.InBounds(Find.CurrentMap) && !item.Fogged(Find.CurrentMap))
 			{
-				building_GravEngine.substructureDirty = true;
+				tmpExtraFootprintCells.Add(item);
 			}
-			this.Drawer.SetDirty();
 		}
+		DrawSubstructureFootprint(tmpExtraFootprintCells, thing);
+	}
 
-		// Token: 0x04008149 RID: 33097
-		private Map map;
-
-		// Token: 0x0400814A RID: 33098
-		private CellBoolDrawer drawerInt;
-
-		// Token: 0x0400814B RID: 33099
-		private List<Building_GravEngine> tmpEngines = new List<Building_GravEngine>();
-
-		// Token: 0x0400814C RID: 33100
-		private int lastGotEnginesTick = -1;
-
-		// Token: 0x0400814D RID: 33101
-		private static readonly List<IntVec3> tmpFootprintCells = new List<IntVec3>();
-
-		// Token: 0x0400814E RID: 33102
-		private static readonly HashSet<IntVec3> tmpFootprintCellsHashSet = new HashSet<IntVec3>();
-
-		// Token: 0x0400814F RID: 33103
-		private static readonly List<IntVec3> tmpGravEngineCells = new List<IntVec3>();
-
-		// Token: 0x04008150 RID: 33104
-		private static readonly HashSet<IntVec3> tmpGravEngineCellsHashSet = new HashSet<IntVec3>();
-
-		// Token: 0x04008151 RID: 33105
-		private static int lastUpdateFrame = -1;
-
-		// Token: 0x04008152 RID: 33106
-		private static int lastGUIFrame = -1;
-
-		// Token: 0x04008153 RID: 33107
-		private static readonly List<IntVec3> tmpExtraFootprintCells = new List<IntVec3>();
+	public void MarkDirty()
+	{
+		foreach (Building_GravEngine item in map.listerBuildings.AllBuildingsColonistOfClass<Building_GravEngine>())
+		{
+			item.substructureDirty = true;
+		}
+		Drawer.SetDirty();
 	}
 }

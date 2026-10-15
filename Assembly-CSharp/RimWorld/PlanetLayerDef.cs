@@ -1,302 +1,401 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class PlanetLayerDef : Def
 {
-	// Token: 0x02001AB2 RID: 6834
-	public class PlanetLayerDef : Def
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__57 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001775 RID: 6005
-		// (get) Token: 0x06009910 RID: 39184 RVA: 0x002C99ED File Offset: 0x002C7BED
-		public bool SurfaceTiles
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public PlanetLayerDef _003C_003E4__this;
+
+		private IEnumerator<string> _003C_003E7__wrap1;
+
+		private List<Type>.Enumerator _003C_003E7__wrap2;
+
+		string IEnumerator<string>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.usesSurfaceTiles;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001776 RID: 6006
-		// (get) Token: 0x06009911 RID: 39185 RVA: 0x002C99F5 File Offset: 0x002C7BF5
-		public BiomeDef DefaultBiome
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.defaultBiome ?? BiomeDefOf.TemperateForest;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001777 RID: 6007
-		// (get) Token: 0x06009912 RID: 39186 RVA: 0x002C9A08 File Offset: 0x002C7C08
-		public Texture2D ViewGizmoTexture
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__57(int _003C_003E1__state)
 		{
-			get
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			switch (_003C_003E1__state)
 			{
-				if (!this.cachedGizmoTexture)
+			case -3:
+			case 1:
+				try
 				{
-					return this.cachedGizmoTexture = ContentFinder<Texture2D>.Get(this.viewGizmoTexPath, true);
 				}
-				return this.cachedGizmoTexture;
-			}
-		}
-
-		// Token: 0x17001778 RID: 6008
-		// (get) Token: 0x06009913 RID: 39187 RVA: 0x002C9A3E File Offset: 0x002C7C3E
-		public WorldObjectDef DefaultWorldObject
-		{
-			get
-			{
-				return this.defaultMapWorldObject ?? WorldObjectDefOf.Settlement;
-			}
-		}
-
-		// Token: 0x17001779 RID: 6009
-		// (get) Token: 0x06009914 RID: 39188 RVA: 0x002C9A4F File Offset: 0x002C7C4F
-		public WorldObjectDef SettlementWorldObjectDef
-		{
-			get
-			{
-				return this.settlementWorldObjectDef ?? WorldObjectDefOf.Settlement;
-			}
-		}
-
-		// Token: 0x1700177A RID: 6010
-		// (get) Token: 0x06009915 RID: 39189 RVA: 0x002C9A60 File Offset: 0x002C7C60
-		public WorldObjectDef DestroyedSettlementWorldObjectDef
-		{
-			get
-			{
-				return this.destroyedSettlementWorldObjectDef ?? WorldObjectDefOf.DestroyedSettlement;
-			}
-		}
-
-		// Token: 0x1700177B RID: 6011
-		// (get) Token: 0x06009916 RID: 39190 RVA: 0x002C9A71 File Offset: 0x002C7C71
-		public Material WorldLineMaterial
-		{
-			get
-			{
-				return MaterialPool.MatFrom(GenDraw.OneSidedLineTexPath, ShaderDatabase.WorldOverlayTransparent, this.lineColor, 3590);
-			}
-		}
-
-		// Token: 0x1700177C RID: 6012
-		// (get) Token: 0x06009917 RID: 39191 RVA: 0x002C9A8D File Offset: 0x002C7C8D
-		public Material WorldLineMaterialHighVis
-		{
-			get
-			{
-				return MaterialPool.MatFrom(GenDraw.OneSidedLineOpaqueTexPath, ShaderDatabase.WorldOverlayAdditiveTwoSided, this.lineColor, 3590);
-			}
-		}
-
-		// Token: 0x1700177D RID: 6013
-		// (get) Token: 0x06009918 RID: 39192 RVA: 0x002C9AAC File Offset: 0x002C7CAC
-		public List<WorldGenStepDef> GenStepsInOrder
-		{
-			get
-			{
-				List<WorldGenStepDef> result;
-				if ((result = this.cachedGenSteps) == null)
+				finally
 				{
-					result = (this.cachedGenSteps = (from x in this.worldGenSteps
-					orderby x.order, x.index
-					select x).ToList<WorldGenStepDef>());
+					_003C_003Em__Finally1();
 				}
-				return result;
-			}
-		}
-
-		// Token: 0x1700177E RID: 6014
-		// (get) Token: 0x06009919 RID: 39193 RVA: 0x002C9B1F File Offset: 0x002C7D1F
-		public List<WITab> Tabs
-		{
-			get
-			{
-				return this.cachedTabs;
-			}
-		}
-
-		// Token: 0x0600991A RID: 39194 RVA: 0x002C9B27 File Offset: 0x002C7D27
-		public override IEnumerable<string> ConfigErrors()
-		{
-			foreach (string text in base.ConfigErrors())
-			{
-				yield return text;
-			}
-			IEnumerator<string> enumerator = null;
-			if (this.tileType == null || !this.tileType.SameOrSubclassOf<Tile>())
-			{
-				yield return "tileType type is not the same or subclass of Tile";
-			}
-			if (this.layerType == null || !this.layerType.SameOrSubclassOf<PlanetLayer>())
-			{
-				yield return "layerType type is not the same or subclass of PlanetLayer";
-			}
-			foreach (Type type in this.worldDrawLayers)
-			{
-				if (!type.IsSubclassOf(typeof(WorldDrawLayer)))
+				break;
+			case -4:
+			case 4:
+				try
 				{
-					yield return string.Format("{0} layer {1} is type that is not a subclass of {2}", "worldDrawLayers", type, "WorldDrawLayer");
 				}
-			}
-			List<Type>.Enumerator enumerator2 = default(List<Type>.Enumerator);
-			foreach (Type type2 in this.worldTabs)
-			{
-				if (!type2.IsSubclassOf(typeof(WITab)))
+				finally
 				{
-					yield return string.Format("{0} layer {1} is type that is not a subclass of {2}", "worldTabs", type2, "WITab");
+					_003C_003Em__Finally2();
 				}
+				break;
+			case -5:
+			case 5:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally3();
+				}
+				break;
 			}
-			enumerator2 = default(List<Type>.Enumerator);
-			if (string.IsNullOrEmpty(this.viewGizmoTexPath))
-			{
-				yield return "Must provide a texture to viewGizmoTexPath, use PlaceholderImage if required.";
-			}
-			yield break;
-			yield break;
+			_003C_003E7__wrap1 = null;
+			_003C_003E7__wrap2 = default(List<Type>.Enumerator);
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x0600991B RID: 39195 RVA: 0x002C9B38 File Offset: 0x002C7D38
-		public override void PostLoad()
+		private bool MoveNext()
 		{
-			base.PostLoad();
-			this.usesSurfaceTiles = typeof(SurfaceTile).IsAssignableFrom(this.tileType);
-			foreach (Type type in this.worldTabs)
+			try
 			{
-				this.cachedTabs.Add((WITab)Activator.CreateInstance(type));
+				int num = _003C_003E1__state;
+				PlanetLayerDef planetLayerDef = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((Def)planetLayerDef).ConfigErrors().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0082;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0082;
+				case 2:
+					_003C_003E1__state = -1;
+					goto IL_00d7;
+				case 3:
+					_003C_003E1__state = -1;
+					goto IL_0112;
+				case 4:
+					_003C_003E1__state = -4;
+					goto IL_01b6;
+				case 5:
+					_003C_003E1__state = -5;
+					goto IL_0279;
+				case 6:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_0082:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (planetLayerDef.tileType == null || !planetLayerDef.tileType.SameOrSubclassOf<Tile>())
+					{
+						_003C_003E2__current = "tileType type is not the same or subclass of Tile";
+						_003C_003E1__state = 2;
+						return true;
+					}
+					goto IL_00d7;
+					IL_01b6:
+					while (_003C_003E7__wrap2.MoveNext())
+					{
+						Type current2 = _003C_003E7__wrap2.Current;
+						if (!current2.IsSubclassOf(typeof(WorldDrawLayer)))
+						{
+							_003C_003E2__current = $"{"worldDrawLayers"} layer {current2} is type that is not a subclass of {"WorldDrawLayer"}";
+							_003C_003E1__state = 4;
+							return true;
+						}
+					}
+					_003C_003Em__Finally2();
+					_003C_003E7__wrap2 = default(List<Type>.Enumerator);
+					_003C_003E7__wrap2 = planetLayerDef.worldTabs.GetEnumerator();
+					_003C_003E1__state = -5;
+					goto IL_0279;
+					IL_0279:
+					while (_003C_003E7__wrap2.MoveNext())
+					{
+						Type current3 = _003C_003E7__wrap2.Current;
+						if (!current3.IsSubclassOf(typeof(WITab)))
+						{
+							_003C_003E2__current = $"{"worldTabs"} layer {current3} is type that is not a subclass of {"WITab"}";
+							_003C_003E1__state = 5;
+							return true;
+						}
+					}
+					_003C_003Em__Finally3();
+					_003C_003E7__wrap2 = default(List<Type>.Enumerator);
+					if (string.IsNullOrEmpty(planetLayerDef.viewGizmoTexPath))
+					{
+						_003C_003E2__current = "Must provide a texture to viewGizmoTexPath, use PlaceholderImage if required.";
+						_003C_003E1__state = 6;
+						return true;
+					}
+					break;
+					IL_00d7:
+					if (planetLayerDef.layerType == null || !planetLayerDef.layerType.SameOrSubclassOf<PlanetLayer>())
+					{
+						_003C_003E2__current = "layerType type is not the same or subclass of PlanetLayer";
+						_003C_003E1__state = 3;
+						return true;
+					}
+					goto IL_0112;
+					IL_0112:
+					_003C_003E7__wrap2 = planetLayerDef.worldDrawLayers.GetEnumerator();
+					_003C_003E1__state = -4;
+					goto IL_01b6;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x040067F1 RID: 26609
-		private BiomeDef defaultBiome;
-
-		// Token: 0x040067F2 RID: 26610
-		private WorldObjectDef defaultMapWorldObject;
-
-		// Token: 0x040067F3 RID: 26611
-		private WorldObjectDef settlementWorldObjectDef;
-
-		// Token: 0x040067F4 RID: 26612
-		private WorldObjectDef destroyedSettlementWorldObjectDef;
-
-		// Token: 0x040067F5 RID: 26613
-		public bool onlyAllowWhitelistedIncidents;
-
-		// Token: 0x040067F6 RID: 26614
-		public bool onlyAllowWhitelistedBiomes;
-
-		// Token: 0x040067F7 RID: 26615
-		public bool onlyAllowWhitelistedGameConditions;
-
-		// Token: 0x040067F8 RID: 26616
-		public bool onlyAllowWhitelistedQuests;
-
-		// Token: 0x040067F9 RID: 26617
-		public bool onlyAllowWhitelistedArrivals;
-
-		// Token: 0x040067FA RID: 26618
-		public bool onlyAllowWhitelistedArrivalModes;
-
-		// Token: 0x040067FB RID: 26619
-		public bool alwaysRaycastable = true;
-
-		// Token: 0x040067FC RID: 26620
-		public bool obstructsExpandingIcons = true;
-
-		// Token: 0x040067FD RID: 26621
-		public bool canFormCaravans = true;
-
-		// Token: 0x040067FE RID: 26622
-		public bool isSpace;
-
-		// Token: 0x040067FF RID: 26623
-		public float rangeDistanceFactor = 1f;
-
-		// Token: 0x04006800 RID: 26624
-		public float generatedLocationFactor = 1f;
-
-		// Token: 0x04006801 RID: 26625
-		public float raidPointsFactor = 1f;
-
-		// Token: 0x04006802 RID: 26626
-		public BiomeDef backgroundBiome;
-
-		// Token: 0x04006803 RID: 26627
-		public bool ignoreNoBuildArea;
-
-		// Token: 0x04006804 RID: 26628
-		public Color lineColor = Color.white;
-
-		// Token: 0x04006805 RID: 26629
-		public float lineWidthFactor = 1f;
-
-		// Token: 0x04006806 RID: 26630
-		private List<WorldGenStepDef> worldGenSteps = new List<WorldGenStepDef>();
-
-		// Token: 0x04006807 RID: 26631
-		public List<Type> worldDrawLayers = new List<Type>();
-
-		// Token: 0x04006808 RID: 26632
-		private List<Type> worldTabs = new List<Type>();
-
-		// Token: 0x04006809 RID: 26633
-		public Type layerType = typeof(PlanetLayer);
-
-		// Token: 0x0400680A RID: 26634
-		public Type tileType = typeof(Tile);
-
-		// Token: 0x0400680B RID: 26635
-		[MustTranslate]
-		public string elevationString = "{0}m";
-
-		// Token: 0x0400680C RID: 26636
-		[MustTranslate]
-		public string viewGizmoTooltip;
-
-		// Token: 0x0400680D RID: 26637
-		[MustTranslate]
-		public string gerundLabel;
-
-		// Token: 0x0400680E RID: 26638
-		public bool viewGizmoOnlyVisibleWithDirectConnection = true;
-
-		// Token: 0x0400680F RID: 26639
-		public FloatRange settlementsPer100kTiles = new FloatRange(75f, 85f);
-
-		// Token: 0x04006810 RID: 26640
-		public SimpleCurve viewAngleSettlementsFactorCurve = new SimpleCurve
+		bool IEnumerator.MoveNext()
 		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				new CurvePoint(0f, 1f),
-				true
-			},
-			{
-				new CurvePoint(1f, 1f),
-				true
+				_003C_003E7__wrap1.Dispose();
 			}
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap2/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		private void _003C_003Em__Finally3()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap2/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__57 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__57(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	private BiomeDef defaultBiome;
+
+	private WorldObjectDef defaultMapWorldObject;
+
+	private WorldObjectDef settlementWorldObjectDef;
+
+	private WorldObjectDef destroyedSettlementWorldObjectDef;
+
+	public bool onlyAllowWhitelistedIncidents;
+
+	public bool onlyAllowWhitelistedBiomes;
+
+	public bool onlyAllowWhitelistedGameConditions;
+
+	public bool onlyAllowWhitelistedQuests;
+
+	public bool onlyAllowWhitelistedArrivals;
+
+	public bool onlyAllowWhitelistedArrivalModes;
+
+	public bool alwaysRaycastable = true;
+
+	public bool obstructsExpandingIcons = true;
+
+	public bool canFormCaravans = true;
+
+	public bool isSpace;
+
+	public float rangeDistanceFactor = 1f;
+
+	public float generatedLocationFactor = 1f;
+
+	public float raidPointsFactor = 1f;
+
+	public BiomeDef backgroundBiome;
+
+	public bool ignoreNoBuildArea;
+
+	public Color lineColor = Color.white;
+
+	public float lineWidthFactor = 1f;
+
+	private List<WorldGenStepDef> worldGenSteps = new List<WorldGenStepDef>();
+
+	public List<Type> worldDrawLayers = new List<Type>();
+
+	private List<Type> worldTabs = new List<Type>();
+
+	public Type layerType = typeof(PlanetLayer);
+
+	public Type tileType = typeof(Tile);
+
+	[MustTranslate]
+	public string elevationString = "{0}m";
+
+	[MustTranslate]
+	public string viewGizmoTooltip;
+
+	[MustTranslate]
+	public string gerundLabel;
+
+	public bool viewGizmoOnlyVisibleWithDirectConnection = true;
+
+	public FloatRange settlementsPer100kTiles = new FloatRange(75f, 85f);
+
+	public SimpleCurve viewAngleSettlementsFactorCurve = new SimpleCurve
+	{
+		new CurvePoint(0f, 1f),
+		new CurvePoint(1f, 1f)
+	};
+
+	public string viewGizmoTexPath;
+
+	[Unsaved(false)]
+	private List<WorldGenStepDef> cachedGenSteps;
+
+	[Unsaved(false)]
+	private readonly List<WITab> cachedTabs = new List<WITab>();
+
+	[Unsaved(false)]
+	private Texture2D cachedGizmoTexture;
+
+	private bool usesSurfaceTiles;
+
+	public bool SurfaceTiles => usesSurfaceTiles;
+
+	public BiomeDef DefaultBiome => defaultBiome ?? BiomeDefOf.TemperateForest;
+
+	public Texture2D ViewGizmoTexture
+	{
+		get
+		{
+			if (!cachedGizmoTexture)
+			{
+				return cachedGizmoTexture = ContentFinder<Texture2D>.Get(viewGizmoTexPath);
+			}
+			return cachedGizmoTexture;
+		}
+	}
+
+	public WorldObjectDef DefaultWorldObject => defaultMapWorldObject ?? WorldObjectDefOf.Settlement;
+
+	public WorldObjectDef SettlementWorldObjectDef => settlementWorldObjectDef ?? WorldObjectDefOf.Settlement;
+
+	public WorldObjectDef DestroyedSettlementWorldObjectDef => destroyedSettlementWorldObjectDef ?? WorldObjectDefOf.DestroyedSettlement;
+
+	public Material WorldLineMaterial => MaterialPool.MatFrom(GenDraw.OneSidedLineTexPath, ShaderDatabase.WorldOverlayTransparent, lineColor, 3590);
+
+	public Material WorldLineMaterialHighVis => MaterialPool.MatFrom(GenDraw.OneSidedLineOpaqueTexPath, ShaderDatabase.WorldOverlayAdditiveTwoSided, lineColor, 3590);
+
+	public List<WorldGenStepDef> GenStepsInOrder => cachedGenSteps ?? (cachedGenSteps = (from x in worldGenSteps
+		orderby x.order, x.index
+		select x).ToList());
+
+	public List<WITab> Tabs => cachedTabs;
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__57))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__57(-2)
+		{
+			_003C_003E4__this = this
 		};
+	}
 
-		// Token: 0x04006811 RID: 26641
-		public string viewGizmoTexPath;
-
-		// Token: 0x04006812 RID: 26642
-		[Unsaved(false)]
-		private List<WorldGenStepDef> cachedGenSteps;
-
-		// Token: 0x04006813 RID: 26643
-		[Unsaved(false)]
-		private readonly List<WITab> cachedTabs = new List<WITab>();
-
-		// Token: 0x04006814 RID: 26644
-		[Unsaved(false)]
-		private Texture2D cachedGizmoTexture;
-
-		// Token: 0x04006815 RID: 26645
-		private bool usesSurfaceTiles;
+	public override void PostLoad()
+	{
+		base.PostLoad();
+		usesSurfaceTiles = typeof(SurfaceTile).IsAssignableFrom(tileType);
+		foreach (Type worldTab in worldTabs)
+		{
+			cachedTabs.Add((WITab)Activator.CreateInstance(worldTab));
+		}
 	}
 }

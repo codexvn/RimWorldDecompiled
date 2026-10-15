@@ -1,36 +1,23 @@
-﻿using System;
 using System.Collections.Generic;
 
-namespace Verse
+namespace Verse;
+
+public class GenStep_RandomSelector : GenStep
 {
-	// Token: 0x02000498 RID: 1176
-	public class GenStep_RandomSelector : GenStep
+	public List<RandomGenStepSelectorOption> options;
+
+	public override int SeedPart => 174742427;
+
+	public override void Generate(Map map, GenStepParams parms)
 	{
-		// Token: 0x1700058E RID: 1422
-		// (get) Token: 0x06001EEA RID: 7914 RVA: 0x000A1977 File Offset: 0x0009FB77
-		public override int SeedPart
+		RandomGenStepSelectorOption randomGenStepSelectorOption = options.RandomElementByWeight((RandomGenStepSelectorOption opt) => opt.weight);
+		if (randomGenStepSelectorOption.genStep != null)
 		{
-			get
-			{
-				return 174742427;
-			}
+			randomGenStepSelectorOption.genStep.Generate(map, parms);
 		}
-
-		// Token: 0x06001EEB RID: 7915 RVA: 0x000A1980 File Offset: 0x0009FB80
-		public override void Generate(Map map, GenStepParams parms)
+		if (randomGenStepSelectorOption.def != null)
 		{
-			RandomGenStepSelectorOption randomGenStepSelectorOption = this.options.RandomElementByWeight((RandomGenStepSelectorOption opt) => opt.weight);
-			if (randomGenStepSelectorOption.genStep != null)
-			{
-				randomGenStepSelectorOption.genStep.Generate(map, parms);
-			}
-			if (randomGenStepSelectorOption.def != null)
-			{
-				randomGenStepSelectorOption.def.genStep.Generate(map, parms);
-			}
+			randomGenStepSelectorOption.def.genStep.Generate(map, parms);
 		}
-
-		// Token: 0x04001A77 RID: 6775
-		public List<RandomGenStepSelectorOption> options;
 	}
 }

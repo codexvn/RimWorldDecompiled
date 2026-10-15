@@ -1,93 +1,180 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_ReleaseEntity : JobDriver
 {
-	// Token: 0x020012EC RID: 4844
-	public class JobDriver_ReleaseEntity : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__10 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x170012AA RID: 4778
-		// (get) Token: 0x060076D0 RID: 30416 RVA: 0x00229653 File Offset: 0x00227853
-		private Thing Platform
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_ReleaseEntity _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return base.TargetThingA;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170012AB RID: 4779
-		// (get) Token: 0x060076D1 RID: 30417 RVA: 0x00242B97 File Offset: 0x00240D97
-		private Pawn InnerPawn
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				Building_HoldingPlatform building_HoldingPlatform = this.Platform as Building_HoldingPlatform;
-				if (building_HoldingPlatform == null)
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__10(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_ReleaseEntity CS_0024_003C_003E8__locals4 = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				CS_0024_003C_003E8__locals4.FailOnDespawnedNullOrForbidden(TargetIndex.A);
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.ClosestTouch).FailOnSomeonePhysicallyInteracting(TargetIndex.A).FailOn(() => !CS_0024_003C_003E8__locals4.EntityShouldBeReleased);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+			{
+				_003C_003E1__state = -1;
+				Toil toil = Toils_General.WaitWhileExtractingContents(TargetIndex.A, TargetIndex.B, 300);
+				toil.PlaySustainerOrSound(SoundDefOf.ReleaseFromPlatform);
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 2;
+				return true;
+			}
+			case 2:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.Do(delegate
 				{
-					return null;
-				}
-				return building_HoldingPlatform.HeldPawn;
-			}
-		}
-
-		// Token: 0x170012AC RID: 4780
-		// (get) Token: 0x060076D2 RID: 30418 RVA: 0x00242BB0 File Offset: 0x00240DB0
-		private bool EntityShouldBeReleased
-		{
-			get
-			{
-				Pawn innerPawn = this.InnerPawn;
-				CompHoldingPlatformTarget compHoldingPlatformTarget = (innerPawn != null) ? innerPawn.TryGetComp<CompHoldingPlatformTarget>() : null;
-				return compHoldingPlatformTarget != null && (compHoldingPlatformTarget.containmentMode == EntityContainmentMode.Release || this.job.ignoreDesignations);
-			}
-		}
-
-		// Token: 0x060076D3 RID: 30419 RVA: 0x00242BEB File Offset: 0x00240DEB
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
-		{
-			return this.pawn.Reserve(this.Platform, this.job, 1, -1, null, errorOnFailed, false);
-		}
-
-		// Token: 0x060076D4 RID: 30420 RVA: 0x00242C0E File Offset: 0x00240E0E
-		protected override IEnumerable<Toil> MakeNewToils()
-		{
-			this.FailOnDespawnedNullOrForbidden(TargetIndex.A);
-			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.ClosestTouch, false).FailOnSomeonePhysicallyInteracting(TargetIndex.A).FailOn(() => !this.EntityShouldBeReleased);
-			Toil toil = Toils_General.WaitWhileExtractingContents(TargetIndex.A, TargetIndex.B, 300);
-			toil.PlaySustainerOrSound(SoundDefOf.ReleaseFromPlatform, 1f);
-			yield return toil;
-			yield return Toils_General.Do(delegate
-			{
-				Pawn pawn = base.TargetThingB as Pawn;
-				if (pawn != null)
-				{
-					CompHoldingPlatformTarget compHoldingPlatformTarget = pawn.TryGetComp<CompHoldingPlatformTarget>();
-					compHoldingPlatformTarget.Escape(false);
-					if (compHoldingPlatformTarget != null)
+					if (CS_0024_003C_003E8__locals4.TargetThingB is Pawn thing)
 					{
-						compHoldingPlatformTarget.containmentMode = EntityContainmentMode.MaintainOnly;
+						CompHoldingPlatformTarget compHoldingPlatformTarget = thing.TryGetComp<CompHoldingPlatformTarget>();
+						compHoldingPlatformTarget.Escape(initiator: false);
+						if (compHoldingPlatformTarget != null)
+						{
+							compHoldingPlatformTarget.containmentMode = EntityContainmentMode.MaintainOnly;
+						}
 					}
-				}
-				MentalState mentalState = this.pawn.MentalState;
-				if (mentalState == null)
-				{
-					return;
-				}
-				mentalState.Notify_ReleasedTarget();
-			});
-			yield break;
+					CS_0024_003C_003E8__locals4.pawn.MentalState?.Notify_ReleasedTarget();
+				});
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+				_003C_003E1__state = -1;
+				return false;
+			}
 		}
 
-		// Token: 0x0400511F RID: 20767
-		private const TargetIndex PlatformIndex = TargetIndex.A;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x04005120 RID: 20768
-		private const TargetIndex EntityIndex = TargetIndex.B;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04005121 RID: 20769
-		private const int TransferTicks = 300;
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__10 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__10(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private const TargetIndex PlatformIndex = TargetIndex.A;
+
+	private const TargetIndex EntityIndex = TargetIndex.B;
+
+	private const int TransferTicks = 300;
+
+	private Thing Platform => base.TargetThingA;
+
+	private Pawn InnerPawn => (Platform as Building_HoldingPlatform)?.HeldPawn;
+
+	private bool EntityShouldBeReleased
+	{
+		get
+		{
+			CompHoldingPlatformTarget compHoldingPlatformTarget = InnerPawn?.TryGetComp<CompHoldingPlatformTarget>();
+			if (compHoldingPlatformTarget != null)
+			{
+				if (compHoldingPlatformTarget.containmentMode != EntityContainmentMode.Release)
+				{
+					return job.ignoreDesignations;
+				}
+				return true;
+			}
+			return false;
+		}
+	}
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return pawn.Reserve(Platform, job, 1, -1, null, errorOnFailed);
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__10))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__10(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

@@ -1,60 +1,49 @@
-﻿using System;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public struct IndividualThoughtToAdd
 {
-	// Token: 0x02002336 RID: 9014
-	public struct IndividualThoughtToAdd
+	public Thought_Memory thought;
+
+	public Pawn addTo;
+
+	private Pawn otherPawn;
+
+	public string LabelCap
 	{
-		// Token: 0x17001DD8 RID: 7640
-		// (get) Token: 0x0600C398 RID: 50072 RVA: 0x0038BBA0 File Offset: 0x00389DA0
-		public string LabelCap
+		get
 		{
-			get
+			string text = thought.LabelCap;
+			float num = thought.MoodOffset();
+			if (num != 0f)
 			{
-				string text = this.thought.LabelCap;
-				float num = this.thought.MoodOffset();
-				if (num != 0f)
-				{
-					text = text + " " + Mathf.RoundToInt(num).ToStringWithSign();
-				}
-				return text;
+				text = text + " " + Mathf.RoundToInt(num).ToStringWithSign();
 			}
+			return text;
 		}
+	}
 
-		// Token: 0x0600C399 RID: 50073 RVA: 0x0038BBE8 File Offset: 0x00389DE8
-		public IndividualThoughtToAdd(ThoughtDef thoughtDef, Pawn addTo, Pawn otherPawn = null, float moodPowerFactor = 1f, float opinionOffsetFactor = 1f)
+	public IndividualThoughtToAdd(ThoughtDef thoughtDef, Pawn addTo, Pawn otherPawn = null, float moodPowerFactor = 1f, float opinionOffsetFactor = 1f)
+	{
+		this.addTo = addTo;
+		this.otherPawn = otherPawn;
+		thought = (Thought_Memory)ThoughtMaker.MakeThought(thoughtDef);
+		thought.moodPowerFactor = moodPowerFactor;
+		thought.otherPawn = otherPawn;
+		thought.pawn = addTo;
+		if (thought is Thought_MemorySocial thought_MemorySocial)
 		{
-			this.addTo = addTo;
-			this.otherPawn = otherPawn;
-			this.thought = (Thought_Memory)ThoughtMaker.MakeThought(thoughtDef);
-			this.thought.moodPowerFactor = moodPowerFactor;
-			this.thought.otherPawn = otherPawn;
-			this.thought.pawn = addTo;
-			Thought_MemorySocial thought_MemorySocial = this.thought as Thought_MemorySocial;
-			if (thought_MemorySocial != null)
-			{
-				thought_MemorySocial.opinionOffset *= opinionOffsetFactor;
-			}
+			thought_MemorySocial.opinionOffset *= opinionOffsetFactor;
 		}
+	}
 
-		// Token: 0x0600C39A RID: 50074 RVA: 0x0038BC58 File Offset: 0x00389E58
-		public void Add()
+	public void Add()
+	{
+		if (addTo.needs != null && addTo.needs.mood != null)
 		{
-			if (this.addTo.needs != null && this.addTo.needs.mood != null)
-			{
-				this.addTo.needs.mood.thoughts.memories.TryGainMemory(this.thought, this.otherPawn);
-			}
+			addTo.needs.mood.thoughts.memories.TryGainMemory(thought, otherPawn);
 		}
-
-		// Token: 0x04008545 RID: 34117
-		public Thought_Memory thought;
-
-		// Token: 0x04008546 RID: 34118
-		public Pawn addTo;
-
-		// Token: 0x04008547 RID: 34119
-		private Pawn otherPawn;
 	}
 }

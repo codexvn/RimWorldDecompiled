@@ -1,116 +1,125 @@
-﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Verse
+namespace Verse;
+
+public static class MatLoader
 {
-	// Token: 0x02000D38 RID: 3384
-	public static class MatLoader
+	private struct Request
 	{
-		// Token: 0x0600561F RID: 22047 RVA: 0x001BCD1E File Offset: 0x001BAF1E
-		public static void ClearCache()
+		public string path;
+
+		public int renderQueue;
+
+		public override int GetHashCode()
 		{
-			MatLoader.dict.Clear();
+			return Gen.HashCombineInt(Gen.HashCombine(0, path), renderQueue);
 		}
 
-		// Token: 0x06005620 RID: 22048 RVA: 0x001BCD2C File Offset: 0x001BAF2C
-		public static Material LoadMat(string matPath, int renderQueue = -1)
+		public override bool Equals(object obj)
 		{
-			Material material = (Material)Resources.Load("Materials/" + matPath, typeof(Material));
+			if (!(obj is Request))
+			{
+				return false;
+			}
+			return Equals((Request)obj);
+		}
+
+		public bool Equals(Request other)
+		{
+			if (other.path == path)
+			{
+				return other.renderQueue == renderQueue;
+			}
+			return false;
+		}
+
+		public static bool operator ==(Request lhs, Request rhs)
+		{
+			return lhs.Equals(rhs);
+		}
+
+		public static bool operator !=(Request lhs, Request rhs)
+		{
+			return !(lhs == rhs);
+		}
+
+		public override string ToString()
+		{
+			return "MatLoader.Request(" + path + ", " + renderQueue + ")";
+		}
+	}
+
+	private static Dictionary<Request, Material> dict = new Dictionary<Request, Material>();
+
+	public static void ClearCache()
+	{
+		dict.Clear();
+	}
+
+	public static Material LoadMat(string matPath, int renderQueue = -1)
+	{
+		Request request = default(Request);
+		request.path = matPath;
+		request.renderQueue = renderQueue;
+		Request key = request;
+		if (!dict.TryGetValue(key, out var value))
+		{
+			Material material = TryLoadMaterialDef(matPath, -1, copy: false);
 			if (material == null)
 			{
 				Log.Warning("Could not load material " + matPath);
+				return BaseContent.BadMat;
 			}
-			MatLoader.Request key = new MatLoader.Request
+			value = MaterialAllocator.Create(material);
+			value.name = "MatLoader.LoadMat";
+			if (renderQueue != -1)
 			{
-				path = matPath,
-				renderQueue = renderQueue
-			};
-			Material material2;
-			if (!MatLoader.dict.TryGetValue(key, out material2))
-			{
-				material2 = MaterialAllocator.Create(material);
-				if (renderQueue != -1)
-				{
-					material2.renderQueue = renderQueue;
-				}
-				MatLoader.dict.Add(key, material2);
+				value.renderQueue = renderQueue;
 			}
-			return material2;
+			dict.Add(key, value);
 		}
+		return value;
+	}
 
-		// Token: 0x06005621 RID: 22049 RVA: 0x001BCDBC File Offset: 0x001BAFBC
-		public static Material LoadMatDirect(string matPath)
+	public static Material LoadMatDirect(string matPath)
+	{
+		return TryLoadMaterialDef(matPath, -1, copy: false) ?? BaseContent.BadMat;
+	}
+
+	private static Material TryLoadMaterialDef(string matPath, int renderQueue, bool copy)
+	{
+		if (MaterialDefUtility.TryGetByResourcePath(matPath, out var def))
 		{
-			Material material = Resources.Load<Material>("Materials/" + matPath);
-			if (material == null)
+			if (copy || renderQueue != -1)
 			{
-				throw new Exception("Material not found: " + matPath);
+				return def.CreateMaterialInstance(renderQueue);
 			}
-			if (MatLoader.loadedDirect.ContainsKey(material))
+			return def.Material;
+		}
+		if (DefDatabase<MaterialDef>.DefCount == 0)
+		{
+			Material material = Material.CreateDeferred(() => ResolveDeferredMaterial(matPath));
+			if (renderQueue != -1)
 			{
-				Debug.LogWarning("Material '" + matPath + "' has been loaded multiple times. Mutations to this material might cause bugs");
+				material.renderQueue = renderQueue;
 			}
 			return material;
 		}
+		return null;
+	}
 
-		// Token: 0x04003E51 RID: 15953
-		private static Dictionary<MatLoader.Request, Material> dict = new Dictionary<MatLoader.Request, Material>();
-
-		// Token: 0x04003E52 RID: 15954
-		private static Dictionary<Material, string> loadedDirect = new Dictionary<Material, string>();
-
-		// Token: 0x02000D39 RID: 3385
-		private struct Request
+	private static Material ResolveDeferredMaterial(string matPath)
+	{
+		if (MaterialDefUtility.TryGetByResourcePath(matPath, out var def))
 		{
-			// Token: 0x06005623 RID: 22051 RVA: 0x001BCE2D File Offset: 0x001BB02D
-			public override int GetHashCode()
-			{
-				return Gen.HashCombineInt(Gen.HashCombine<string>(0, this.path), this.renderQueue);
-			}
-
-			// Token: 0x06005624 RID: 22052 RVA: 0x001BCE46 File Offset: 0x001BB046
-			public override bool Equals(object obj)
-			{
-				return obj is MatLoader.Request && this.Equals((MatLoader.Request)obj);
-			}
-
-			// Token: 0x06005625 RID: 22053 RVA: 0x001BCE5E File Offset: 0x001BB05E
-			public bool Equals(MatLoader.Request other)
-			{
-				return other.path == this.path && other.renderQueue == this.renderQueue;
-			}
-
-			// Token: 0x06005626 RID: 22054 RVA: 0x001BCE83 File Offset: 0x001BB083
-			public static bool operator ==(MatLoader.Request lhs, MatLoader.Request rhs)
-			{
-				return lhs.Equals(rhs);
-			}
-
-			// Token: 0x06005627 RID: 22055 RVA: 0x001BCE8D File Offset: 0x001BB08D
-			public static bool operator !=(MatLoader.Request lhs, MatLoader.Request rhs)
-			{
-				return !(lhs == rhs);
-			}
-
-			// Token: 0x06005628 RID: 22056 RVA: 0x001BCE99 File Offset: 0x001BB099
-			public override string ToString()
-			{
-				return string.Concat(new string[]
-				{
-					"MatLoader.Request(",
-					this.path,
-					", ",
-					this.renderQueue.ToString(),
-					")"
-				});
-			}
-
-			// Token: 0x04003E53 RID: 15955
-			public string path;
-
-			// Token: 0x04003E54 RID: 15956
-			public int renderQueue;
+			return def.Material;
 		}
+		if (DefDatabase<MaterialDef>.DefCount == 0)
+		{
+			return null;
+		}
+		Log.Error("No MaterialDef for material path '" + matPath + "'.");
+		return BaseContent.BadMat;
 	}
 }

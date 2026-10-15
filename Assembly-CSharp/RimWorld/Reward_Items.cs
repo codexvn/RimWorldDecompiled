@@ -1,274 +1,568 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using RimWorld.QuestGen;
 using Verse;
 using Verse.Grammar;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Reward_Items : Reward
 {
-	// Token: 0x0200368B RID: 13963
-	public class Reward_Items : Reward
+	public struct RememberedItem : IExposable
 	{
-		// Token: 0x170031F1 RID: 12785
-		// (get) Token: 0x0601362A RID: 79402 RVA: 0x005C3A03 File Offset: 0x005C1C03
-		public List<Thing> ItemsListForReading
+		public ThingStuffPairWithQuality thing;
+
+		public int stackCount;
+
+		public string label;
+
+		public RememberedItem(ThingStuffPairWithQuality thing, int stackCount, string label)
 		{
+			this.thing = thing;
+			this.stackCount = stackCount;
+			this.label = label;
+		}
+
+		public void ExposeData()
+		{
+			Scribe_Deep.Look(ref thing, "thing");
+			Scribe_Values.Look(ref stackCount, "stackCount", 0);
+			Scribe_Values.Look(ref label, "label");
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass15_0
+	{
+		public QuestPart_DropPods dropPods;
+
+		internal void _003CGenerateQuestParts_003Eb__0(string x)
+		{
+			dropPods.customLetterLabel = x;
+		}
+
+		internal void _003CGenerateQuestParts_003Eb__1(string x)
+		{
+			dropPods.customLetterText = x;
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGenerateQuestParts_003Ed__15 : IEnumerable<QuestPart>, IEnumerable, IEnumerator<QuestPart>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private QuestPart _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Reward_Items _003C_003E4__this;
+
+		private RewardsGeneratorParams parms;
+
+		public RewardsGeneratorParams _003C_003E3__parms;
+
+		private string customLetterLabel;
+
+		public string _003C_003E3__customLetterLabel;
+
+		private RulePack customLetterLabelRules;
+
+		public RulePack _003C_003E3__customLetterLabelRules;
+
+		private string customLetterText;
+
+		public string _003C_003E3__customLetterText;
+
+		private RulePack customLetterTextRules;
+
+		public RulePack _003C_003E3__customLetterTextRules;
+
+		private Slate _003Cslate_003E5__2;
+
+		QuestPart IEnumerator<QuestPart>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				return this.items;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170031F2 RID: 12786
-		// (get) Token: 0x0601362B RID: 79403 RVA: 0x005C3A0B File Offset: 0x005C1C0B
-		public override IEnumerable<GenUI.AnonymousStackElement> StackElements
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.usedOrCleanedUp)
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGenerateQuestParts_003Ed__15(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003Cslate_003E5__2 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			Reward_Items reward_Items = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+			{
+				_003C_003E1__state = -1;
+				_003Cslate_003E5__2 = RimWorld.QuestGen.QuestGen.slate;
+				for (int i = 0; i < reward_Items.items.Count; i++)
 				{
-					foreach (GenUI.AnonymousStackElement anonymousStackElement in QuestPartUtility.GetRewardStackElementsForThings(this.itemDefs))
+					if (reward_Items.items[i] is Pawn pawn)
 					{
-						yield return anonymousStackElement;
-					}
-					IEnumerator<GenUI.AnonymousStackElement> enumerator = null;
-				}
-				else
-				{
-					foreach (GenUI.AnonymousStackElement anonymousStackElement2 in QuestPartUtility.GetRewardStackElementsForThings(this.items, false))
-					{
-						yield return anonymousStackElement2;
-					}
-					IEnumerator<GenUI.AnonymousStackElement> enumerator = null;
-				}
-				yield break;
-				yield break;
-			}
-		}
-
-		// Token: 0x170031F3 RID: 12787
-		// (get) Token: 0x0601362C RID: 79404 RVA: 0x005C3A1C File Offset: 0x005C1C1C
-		public override float TotalMarketValue
-		{
-			get
-			{
-				if (this.usedOrCleanedUp)
-				{
-					return this.lastTotalMarketValue;
-				}
-				float num = 0f;
-				for (int i = 0; i < this.items.Count; i++)
-				{
-					Thing innerIfMinified = this.items[i].GetInnerIfMinified();
-					num += innerIfMinified.MarketValue * (float)this.items[i].stackCount;
-				}
-				return num;
-			}
-		}
-
-		// Token: 0x0601362D RID: 79405 RVA: 0x005C3A83 File Offset: 0x005C1C83
-		public override void Notify_Used()
-		{
-			this.RememberItems();
-			base.Notify_Used();
-		}
-
-		// Token: 0x0601362E RID: 79406 RVA: 0x005C3A91 File Offset: 0x005C1C91
-		public override void Notify_PreCleanup()
-		{
-			this.RememberItems();
-			base.Notify_PreCleanup();
-		}
-
-		// Token: 0x0601362F RID: 79407 RVA: 0x005C3AA0 File Offset: 0x005C1CA0
-		private void RememberItems()
-		{
-			if (this.usedOrCleanedUp)
-			{
-				return;
-			}
-			this.itemDefs.Clear();
-			this.lastTotalMarketValue = 0f;
-			for (int i = 0; i < this.items.Count; i++)
-			{
-				Thing innerIfMinified = this.items[i].GetInnerIfMinified();
-				if (innerIfMinified != null && !innerIfMinified.Destroyed)
-				{
-					QualityCategory quality;
-					if (!innerIfMinified.TryGetQuality(out quality))
-					{
-						quality = QualityCategory.Normal;
-					}
-					this.itemDefs.Add(new Reward_Items.RememberedItem(new ThingStuffPairWithQuality(innerIfMinified.def, innerIfMinified.Stuff, quality), this.items[i].stackCount, this.items[i].LabelNoCount));
-					this.lastTotalMarketValue += innerIfMinified.MarketValue * (float)this.items[i].stackCount;
-				}
-			}
-		}
-
-		// Token: 0x06013630 RID: 79408 RVA: 0x005C3B7C File Offset: 0x005C1D7C
-		public override void InitFromValue(float rewardValue, RewardsGeneratorParams parms, out float valueActuallyUsed)
-		{
-			this.items.Clear();
-			bool flag = true;
-			float x2 = (Find.TickManager.TicksGame - Find.History.lastPsylinkAvailable).TicksToDays();
-			if (Rand.Chance(QuestTuning.DaysSincePsylinkAvailableToGuaranteedNeuroformerChance.Evaluate(x2)) && ModsConfig.RoyaltyActive && (parms.disallowedThingDefs == null || !parms.disallowedThingDefs.Contains(ThingDefOf.PsychicAmplifier)) && rewardValue >= 600f && (Faction.OfEmpire == null || parms.giverFaction != Faction.OfEmpire))
-			{
-				this.items.Add(ThingMaker.MakeThing(ThingDefOf.PsychicAmplifier, null));
-				rewardValue -= this.items[0].MarketValue;
-				if (rewardValue < 100f)
-				{
-					flag = false;
-				}
-			}
-			if (flag)
-			{
-				FloatRange value = rewardValue * new FloatRange(0.7f, 1.3f);
-				ThingSetMakerParams parms2 = default(ThingSetMakerParams);
-				parms2.totalMarketValueRange = new FloatRange?(value);
-				parms2.makingFaction = parms.giverFaction;
-				if (!parms.disallowedThingDefs.NullOrEmpty<ThingDef>())
-				{
-					parms2.validator = ((ThingDef x) => !parms.disallowedThingDefs.Contains(x));
-				}
-				this.items.AddRange(ThingSetMakerDefOf.Reward_ItemsStandard.root.Generate(parms2));
-			}
-			valueActuallyUsed = this.TotalMarketValue;
-		}
-
-		// Token: 0x06013631 RID: 79409 RVA: 0x005C3CDD File Offset: 0x005C1EDD
-		public override IEnumerable<QuestPart> GenerateQuestParts(int index, RewardsGeneratorParams parms, string customLetterLabel, string customLetterText, RulePack customLetterLabelRules, RulePack customLetterTextRules)
-		{
-			Slate slate = QuestGen.slate;
-			for (int i = 0; i < this.items.Count; i++)
-			{
-				Pawn pawn = this.items[i] as Pawn;
-				if (pawn != null)
-				{
-					QuestGen.AddToGeneratedPawns(pawn);
-					if (!pawn.IsWorldPawn())
-					{
-						Find.WorldPawns.PassToWorld(pawn, PawnDiscardDecideMode.Decide);
+						RimWorld.QuestGen.QuestGen.AddToGeneratedPawns(pawn);
+						if (!pawn.IsWorldPawn())
+						{
+							Find.WorldPawns.PassToWorld(pawn);
+						}
 					}
 				}
-			}
-			if (parms.giveToCaravan)
-			{
-				yield return new QuestPart_GiveToCaravan
+				if (parms.giveToCaravan)
 				{
-					inSignal = slate.Get<string>("inSignal", null, false),
-					Things = this.items
-				};
-			}
-			else
-			{
-				QuestPart_DropPods dropPods = new QuestPart_DropPods();
-				dropPods.inSignal = slate.Get<string>("inSignal", null, false);
+					_003C_003E2__current = new QuestPart_GiveToCaravan
+					{
+						inSignal = _003Cslate_003E5__2.Get<string>("inSignal"),
+						Things = reward_Items.items
+					};
+					_003C_003E1__state = 1;
+					return true;
+				}
+				_003C_003Ec__DisplayClass15_0 CS_0024_003C_003E8__locals8 = new _003C_003Ec__DisplayClass15_0();
+				CS_0024_003C_003E8__locals8.dropPods = new QuestPart_DropPods();
+				CS_0024_003C_003E8__locals8.dropPods.inSignal = _003Cslate_003E5__2.Get<string>("inSignal");
 				if (!customLetterLabel.NullOrEmpty() || customLetterLabelRules != null)
 				{
-					QuestGen.AddTextRequest("root", delegate(string x)
+					RimWorld.QuestGen.QuestGen.AddTextRequest("root", delegate(string x)
 					{
-						dropPods.customLetterLabel = x;
+						CS_0024_003C_003E8__locals8.dropPods.customLetterLabel = x;
 					}, QuestGenUtility.MergeRules(customLetterLabelRules, customLetterLabel, "root"));
 				}
 				if (!customLetterText.NullOrEmpty() || customLetterTextRules != null)
 				{
-					QuestGen.AddTextRequest("root", delegate(string x)
+					RimWorld.QuestGen.QuestGen.AddTextRequest("root", delegate(string x)
 					{
-						dropPods.customLetterText = x;
+						CS_0024_003C_003E8__locals8.dropPods.customLetterText = x;
 					}, QuestGenUtility.MergeRules(customLetterTextRules, customLetterText, "root"));
 				}
-				dropPods.mapParent = slate.Get<Map>("map", null, false).Parent;
-				dropPods.useTradeDropSpot = true;
-				dropPods.Things = this.items;
-				yield return dropPods;
+				CS_0024_003C_003E8__locals8.dropPods.mapParent = _003Cslate_003E5__2.Get<Map>("map").Parent;
+				CS_0024_003C_003E8__locals8.dropPods.useTradeDropSpot = true;
+				CS_0024_003C_003E8__locals8.dropPods.Things = reward_Items.items;
+				_003C_003E2__current = CS_0024_003C_003E8__locals8.dropPods;
+				_003C_003E1__state = 2;
+				return true;
 			}
-			slate.Set<List<Thing>>("itemsReward_items", this.items, false);
-			slate.Set<float>("itemsReward_totalMarketValue", this.TotalMarketValue, false);
-			yield break;
+			case 1:
+				_003C_003E1__state = -1;
+				break;
+			case 2:
+				_003C_003E1__state = -1;
+				break;
+			}
+			_003Cslate_003E5__2.Set("itemsReward_items", reward_Items.items);
+			_003Cslate_003E5__2.Set("itemsReward_totalMarketValue", reward_Items.TotalMarketValue);
+			return false;
 		}
 
-		// Token: 0x06013632 RID: 79410 RVA: 0x005C3D14 File Offset: 0x005C1F14
-		public override string GetDescription(RewardsGeneratorParams parms)
+		bool IEnumerator.MoveNext()
 		{
-			if (parms.giveToCaravan)
-			{
-				return "Reward_Items_Caravan".Translate(GenLabel.ThingsLabel(this.items, "  - "), this.TotalMarketValue.ToStringMoney(null));
-			}
-			return "Reward_Items".Translate(GenLabel.ThingsLabel(this.items, "  - "), this.TotalMarketValue.ToStringMoney(null));
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x06013633 RID: 79411 RVA: 0x005C3D94 File Offset: 0x005C1F94
-		public override string ToString()
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			string text = base.GetType().Name;
-			text = text + "(value " + this.TotalMarketValue.ToStringMoney(null) + ")";
-			foreach (Thing thing in this.items)
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<QuestPart> IEnumerable<QuestPart>.GetEnumerator()
+		{
+			_003CGenerateQuestParts_003Ed__15 _003CGenerateQuestParts_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				text = string.Concat(new string[]
+				_003C_003E1__state = 0;
+				_003CGenerateQuestParts_003Ed__ = this;
+			}
+			else
+			{
+				_003CGenerateQuestParts_003Ed__ = new _003CGenerateQuestParts_003Ed__15(0)
 				{
-					text,
-					"\n  -",
-					thing.LabelCap,
-					" ",
-					(thing.MarketValue * (float)thing.stackCount).ToStringMoney(null)
-				});
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
-			return text;
+			_003CGenerateQuestParts_003Ed__.parms = _003C_003E3__parms;
+			_003CGenerateQuestParts_003Ed__.customLetterLabel = _003C_003E3__customLetterLabel;
+			_003CGenerateQuestParts_003Ed__.customLetterText = _003C_003E3__customLetterText;
+			_003CGenerateQuestParts_003Ed__.customLetterLabelRules = _003C_003E3__customLetterLabelRules;
+			_003CGenerateQuestParts_003Ed__.customLetterTextRules = _003C_003E3__customLetterTextRules;
+			return _003CGenerateQuestParts_003Ed__;
 		}
 
-		// Token: 0x06013634 RID: 79412 RVA: 0x005C3E4C File Offset: 0x005C204C
-		public override void ExposeData()
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			base.ExposeData();
-			Scribe_Collections.Look<Thing>(ref this.items, "items", LookMode.Reference, Array.Empty<object>());
-			Scribe_Collections.Look<Reward_Items.RememberedItem>(ref this.itemDefs, "itemDefs", LookMode.Deep, Array.Empty<object>());
-			Scribe_Values.Look<float>(ref this.lastTotalMarketValue, "lastTotalMarketValue", 0f, false);
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+			return ((IEnumerable<QuestPart>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003Cget_StackElements_003Ed__8 : IEnumerable<GenUI.AnonymousStackElement>, IEnumerable, IEnumerator<GenUI.AnonymousStackElement>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private GenUI.AnonymousStackElement _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Reward_Items _003C_003E4__this;
+
+		private IEnumerator<GenUI.AnonymousStackElement> _003C_003E7__wrap1;
+
+		GenUI.AnonymousStackElement IEnumerator<GenUI.AnonymousStackElement>.Current
+		{
+			[DebuggerHidden]
+			get
 			{
-				this.items.RemoveAll((Thing x) => x == null);
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0400D6EE RID: 55022
-		public List<Thing> items = new List<Thing>();
-
-		// Token: 0x0400D6EF RID: 55023
-		private List<Reward_Items.RememberedItem> itemDefs = new List<Reward_Items.RememberedItem>();
-
-		// Token: 0x0400D6F0 RID: 55024
-		private float lastTotalMarketValue;
-
-		// Token: 0x0400D6F1 RID: 55025
-		private const string RootSymbol = "root";
-
-		// Token: 0x0200368C RID: 13964
-		public struct RememberedItem : IExposable
+		object IEnumerator.Current
 		{
-			// Token: 0x06013636 RID: 79414 RVA: 0x005C3EF2 File Offset: 0x005C20F2
-			public RememberedItem(ThingStuffPairWithQuality thing, int stackCount, string label)
+			[DebuggerHidden]
+			get
 			{
-				this.thing = thing;
-				this.stackCount = stackCount;
-				this.label = label;
+				return _003C_003E2__current;
 			}
+		}
 
-			// Token: 0x06013637 RID: 79415 RVA: 0x005C3F09 File Offset: 0x005C2109
-			public void ExposeData()
+		[DebuggerHidden]
+		public _003Cget_StackElements_003Ed__8(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			switch (_003C_003E1__state)
 			{
-				Scribe_Deep.Look<ThingStuffPairWithQuality>(ref this.thing, "thing", Array.Empty<object>());
-				Scribe_Values.Look<int>(ref this.stackCount, "stackCount", 0, false);
-				Scribe_Values.Look<string>(ref this.label, "label", null, false);
+			case -3:
+			case 1:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+				break;
+			case -4:
+			case 2:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally2();
+				}
+				break;
 			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
 
-			// Token: 0x0400D6F2 RID: 55026
-			public ThingStuffPairWithQuality thing;
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				Reward_Items reward_Items = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					if (reward_Items.usedOrCleanedUp)
+					{
+						_003C_003E7__wrap1 = QuestPartUtility.GetRewardStackElementsForThings(reward_Items.itemDefs).GetEnumerator();
+						_003C_003E1__state = -3;
+						goto IL_007f;
+					}
+					_003C_003E7__wrap1 = QuestPartUtility.GetRewardStackElementsForThings(reward_Items.items).GetEnumerator();
+					_003C_003E1__state = -4;
+					goto IL_00e4;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_007f;
+				case 2:
+					{
+						_003C_003E1__state = -4;
+						goto IL_00e4;
+					}
+					IL_007f:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						GenUI.AnonymousStackElement current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					break;
+					IL_00e4:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						GenUI.AnonymousStackElement current2 = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current2;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					_003C_003Em__Finally2();
+					_003C_003E7__wrap1 = null;
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
 
-			// Token: 0x0400D6F3 RID: 55027
-			public int stackCount;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-			// Token: 0x0400D6F4 RID: 55028
-			public string label;
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<GenUI.AnonymousStackElement> IEnumerable<GenUI.AnonymousStackElement>.GetEnumerator()
+		{
+			_003Cget_StackElements_003Ed__8 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_StackElements_003Ed__8(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<GenUI.AnonymousStackElement>)this).GetEnumerator();
+		}
+	}
+
+	public List<Thing> items = new List<Thing>();
+
+	private List<RememberedItem> itemDefs = new List<RememberedItem>();
+
+	private float lastTotalMarketValue;
+
+	private const string RootSymbol = "root";
+
+	public List<Thing> ItemsListForReading => items;
+
+	public override IEnumerable<GenUI.AnonymousStackElement> StackElements
+	{
+		[IteratorStateMachine(typeof(_003Cget_StackElements_003Ed__8))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_StackElements_003Ed__8(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public override float TotalMarketValue
+	{
+		get
+		{
+			if (usedOrCleanedUp)
+			{
+				return lastTotalMarketValue;
+			}
+			float num = 0f;
+			for (int i = 0; i < items.Count; i++)
+			{
+				Thing innerIfMinified = items[i].GetInnerIfMinified();
+				num += innerIfMinified.MarketValue * (float)items[i].stackCount;
+			}
+			return num;
+		}
+	}
+
+	public override void Notify_Used()
+	{
+		RememberItems();
+		base.Notify_Used();
+	}
+
+	public override void Notify_PreCleanup()
+	{
+		RememberItems();
+		base.Notify_PreCleanup();
+	}
+
+	private void RememberItems()
+	{
+		if (usedOrCleanedUp)
+		{
+			return;
+		}
+		itemDefs.Clear();
+		lastTotalMarketValue = 0f;
+		for (int i = 0; i < items.Count; i++)
+		{
+			Thing innerIfMinified = items[i].GetInnerIfMinified();
+			if (innerIfMinified != null && !innerIfMinified.Destroyed)
+			{
+				if (!innerIfMinified.TryGetQuality(out var qc))
+				{
+					qc = QualityCategory.Normal;
+				}
+				itemDefs.Add(new RememberedItem(new ThingStuffPairWithQuality(innerIfMinified.def, innerIfMinified.Stuff, qc), items[i].stackCount, items[i].LabelNoCount));
+				lastTotalMarketValue += innerIfMinified.MarketValue * (float)items[i].stackCount;
+			}
+		}
+	}
+
+	public override void InitFromValue(float rewardValue, RewardsGeneratorParams parms, out float valueActuallyUsed)
+	{
+		items.Clear();
+		bool flag = true;
+		float x2 = (Find.TickManager.TicksGame - Find.History.lastPsylinkAvailable).TicksToDays();
+		if (Rand.Chance(QuestTuning.DaysSincePsylinkAvailableToGuaranteedNeuroformerChance.Evaluate(x2)) && ModsConfig.RoyaltyActive && (parms.disallowedThingDefs == null || !parms.disallowedThingDefs.Contains(ThingDefOf.PsychicAmplifier)) && rewardValue >= 600f && (Faction.OfEmpire == null || parms.giverFaction != Faction.OfEmpire))
+		{
+			items.Add(ThingMaker.MakeThing(ThingDefOf.PsychicAmplifier));
+			rewardValue -= items[0].MarketValue;
+			if (rewardValue < 100f)
+			{
+				flag = false;
+			}
+		}
+		if (flag)
+		{
+			FloatRange value = rewardValue * new FloatRange(0.7f, 1.3f);
+			ThingSetMakerParams parms2 = default(ThingSetMakerParams);
+			parms2.totalMarketValueRange = value;
+			parms2.makingFaction = parms.giverFaction;
+			if (!parms.disallowedThingDefs.NullOrEmpty())
+			{
+				parms2.validator = (ThingDef x) => !parms.disallowedThingDefs.Contains(x);
+			}
+			items.AddRange(ThingSetMakerDefOf.Reward_ItemsStandard.root.Generate(parms2));
+		}
+		valueActuallyUsed = TotalMarketValue;
+	}
+
+	[IteratorStateMachine(typeof(_003CGenerateQuestParts_003Ed__15))]
+	public override IEnumerable<QuestPart> GenerateQuestParts(int index, RewardsGeneratorParams parms, string customLetterLabel, string customLetterText, RulePack customLetterLabelRules, RulePack customLetterTextRules)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGenerateQuestParts_003Ed__15(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__parms = parms,
+			_003C_003E3__customLetterLabel = customLetterLabel,
+			_003C_003E3__customLetterText = customLetterText,
+			_003C_003E3__customLetterLabelRules = customLetterLabelRules,
+			_003C_003E3__customLetterTextRules = customLetterTextRules
+		};
+	}
+
+	public override string GetDescription(RewardsGeneratorParams parms)
+	{
+		if (parms.giveToCaravan)
+		{
+			return "Reward_Items_Caravan".Translate(GenLabel.ThingsLabel(items), TotalMarketValue.ToStringMoney());
+		}
+		return "Reward_Items".Translate(GenLabel.ThingsLabel(items), TotalMarketValue.ToStringMoney());
+	}
+
+	public override string ToString()
+	{
+		string name = GetType().Name;
+		name = name + "(value " + TotalMarketValue.ToStringMoney() + ")";
+		foreach (Thing item in items)
+		{
+			name = name + "\n  -" + item.LabelCap + " " + (item.MarketValue * (float)item.stackCount).ToStringMoney();
+		}
+		return name;
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Collections.Look(ref items, "items", LookMode.Reference);
+		Scribe_Collections.Look(ref itemDefs, "itemDefs", LookMode.Deep);
+		Scribe_Values.Look(ref lastTotalMarketValue, "lastTotalMarketValue", 0f);
+		if (Scribe.mode == LoadSaveMode.PostLoadInit)
+		{
+			items.RemoveAll((Thing x) => x == null);
 		}
 	}
 }

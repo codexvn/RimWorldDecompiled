@@ -1,38 +1,34 @@
-﻿using System;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class StatPart_WildManOffset : StatPart
 {
-	// Token: 0x0200372D RID: 14125
-	public class StatPart_WildManOffset : StatPart
+	public float offset;
+
+	public override void TransformValue(StatRequest req, ref float val)
 	{
-		// Token: 0x06013934 RID: 80180 RVA: 0x005CDBD5 File Offset: 0x005CBDD5
-		public override void TransformValue(StatRequest req, ref float val)
+		if (IsWildMan(req))
 		{
-			if (this.IsWildMan(req))
-			{
-				val += this.offset;
-			}
+			val += offset;
 		}
+	}
 
-		// Token: 0x06013935 RID: 80181 RVA: 0x005CDBEB File Offset: 0x005CBDEB
-		public override string ExplanationPart(StatRequest req)
+	public override string ExplanationPart(StatRequest req)
+	{
+		if (IsWildMan(req))
 		{
-			if (this.IsWildMan(req))
-			{
-				return "StatsReport_WildMan".Translate() + ": " + this.offset.ToStringWithSign("0.##");
-			}
-			return null;
+			return "StatsReport_WildMan".Translate() + ": " + offset.ToStringWithSign();
 		}
+		return null;
+	}
 
-		// Token: 0x06013936 RID: 80182 RVA: 0x005CDC28 File Offset: 0x005CBE28
-		private bool IsWildMan(StatRequest req)
+	private bool IsWildMan(StatRequest req)
+	{
+		if (req.Thing is Pawn p)
 		{
-			Pawn pawn = req.Thing as Pawn;
-			return pawn != null && pawn.IsWildMan();
+			return p.IsWildMan();
 		}
-
-		// Token: 0x0400D911 RID: 55569
-		public float offset;
+		return false;
 	}
 }

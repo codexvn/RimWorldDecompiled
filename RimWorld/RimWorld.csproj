@@ -20,58 +20,61 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityStubs">
-      <HintPath>..\..\..\..\..\SteamLibrary\steamapps\common\RimWorld\UnityStubs.dll</HintPath>
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\UnityStubs.dll</HintPath>
     </Reference>
     <Reference Include="Waylith">
-      <HintPath>..\..\..\..\..\SteamLibrary\steamapps\common\RimWorld\Waylith.dll</HintPath>
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\Waylith.dll</HintPath>
     </Reference>
     <Reference Include="Brutal.Core.Numerics">
-      <HintPath>..\..\..\..\..\SteamLibrary\steamapps\common\RimWorld\Brutal.Core.Numerics.dll</HintPath>
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\Brutal.Core.Numerics.dll</HintPath>
     </Reference>
     <Reference Include="Waylith.UnityCompat">
-      <HintPath>..\..\..\..\..\SteamLibrary\steamapps\common\RimWorld\Waylith.UnityCompat.dll</HintPath>
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\Waylith.UnityCompat.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\..\..\..\SteamLibrary\steamapps\common\RimWorld\Assembly-CSharp.dll</HintPath>
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="Brutal.Glfw">
-      <HintPath>..\..\..\..\..\SteamLibrary\steamapps\common\RimWorld\Brutal.Glfw.dll</HintPath>
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\Brutal.Glfw.dll</HintPath>
     </Reference>
     <Reference Include="Waylith.AssetBake">
-      <HintPath>..\..\..\..\..\SteamLibrary\steamapps\common\RimWorld\Waylith.AssetBake.dll</HintPath>
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\Waylith.AssetBake.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Extensions.Logging.Console">
-      <HintPath>..\..\..\..\..\SteamLibrary\steamapps\common\RimWorld\Microsoft.Extensions.Logging.Console.dll</HintPath>
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\Microsoft.Extensions.Logging.Console.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Extensions.Logging.Abstractions">
-      <HintPath>..\..\..\..\..\SteamLibrary\steamapps\common\RimWorld\Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
     </Reference>
     <Reference Include="Brutal.Vulkan.Abstractions">
-      <HintPath>..\..\..\..\..\SteamLibrary\steamapps\common\RimWorld\Brutal.Vulkan.Abstractions.dll</HintPath>
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\Brutal.Vulkan.Abstractions.dll</HintPath>
     </Reference>
     <Reference Include="Brutal.Vulkan.Vma">
-      <HintPath>..\..\..\..\..\SteamLibrary\steamapps\common\RimWorld\Brutal.Vulkan.Vma.dll</HintPath>
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\Brutal.Vulkan.Vma.dll</HintPath>
     </Reference>
     <Reference Include="Brutal.Vulkan">
-      <HintPath>..\..\..\..\..\SteamLibrary\steamapps\common\RimWorld\Brutal.Vulkan.dll</HintPath>
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\Brutal.Vulkan.dll</HintPath>
     </Reference>
     <Reference Include="Brutal.Core.Common">
-      <HintPath>..\..\..\..\..\SteamLibrary\steamapps\common\RimWorld\Brutal.Core.Common.dll</HintPath>
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\Brutal.Core.Common.dll</HintPath>
     </Reference>
     <Reference Include="Brutal.Core.Memory">
-      <HintPath>..\..\..\..\..\SteamLibrary\steamapps\common\RimWorld\Brutal.Core.Memory.dll</HintPath>
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\Brutal.Core.Memory.dll</HintPath>
     </Reference>
     <Reference Include="Brutal.ImGui">
-      <HintPath>..\..\..\..\..\SteamLibrary\steamapps\common\RimWorld\Brutal.ImGui.dll</HintPath>
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\Brutal.ImGui.dll</HintPath>
     </Reference>
     <Reference Include="Waylith.VideoDecode">
-      <HintPath>..\..\..\..\..\SteamLibrary\steamapps\common\RimWorld\Waylith.VideoDecode.dll</HintPath>
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\Waylith.VideoDecode.dll</HintPath>
     </Reference>
     <Reference Include="Brutal.Core.Logging">
-      <HintPath>..\..\..\..\..\SteamLibrary\steamapps\common\RimWorld\Brutal.Core.Logging.dll</HintPath>
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\Brutal.Core.Logging.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Extensions.Logging">
-      <HintPath>..\..\..\..\..\SteamLibrary\steamapps\common\RimWorld\Microsoft.Extensions.Logging.dll</HintPath>
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\Microsoft.Extensions.Logging.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>ps\common\RimWorld\Microsoft.Extensions.Logging.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>

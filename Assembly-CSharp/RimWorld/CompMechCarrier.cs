@@ -1,359 +1,458 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.AI.Group;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompMechCarrier : ThingComp, IThingHolder
 {
-	// Token: 0x02002D2E RID: 11566
-	public class CompMechCarrier : ThingComp, IThingHolder
+	[CompilerGenerated]
+	private sealed class _003CCompGetGizmosExtra_003Ed__25 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700294D RID: 10573
-		// (get) Token: 0x060103F7 RID: 66551 RVA: 0x004B255B File Offset: 0x004B075B
-		public CompProperties_MechCarrier Props
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompMechCarrier _003C_003E4__this;
+
+		private Command_ActionWithCooldown _003Cact_003E5__2;
+
+		private IEnumerator<Gizmo> _003C_003E7__wrap2;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (CompProperties_MechCarrier)this.props;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700294E RID: 10574
-		// (get) Token: 0x060103F8 RID: 66552 RVA: 0x004B2568 File Offset: 0x004B0768
-		public AcceptanceReport CanSpawn
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				Pawn pawn = this.parent as Pawn;
-				if (pawn != null)
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CCompGetGizmosExtra_003Ed__25(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
 				{
-					if (pawn.IsSelfShutdown())
-					{
-						return "SelfShutdown".Translate();
-					}
-					if (pawn.Faction == Faction.OfPlayer && !pawn.IsColonyMechPlayerControlled)
-					{
-						return false;
-					}
-					if (!pawn.Awake() || pawn.Downed || pawn.Dead || !pawn.Spawned)
-					{
-						return false;
-					}
 				}
-				if (this.MaxCanSpawn <= 0)
+				finally
 				{
-					return "MechCarrierNotEnoughResources".Translate();
+					_003C_003Em__Finally1();
 				}
-				if (this.cooldownTicksRemaining > 0)
+			}
+			_003Cact_003E5__2 = null;
+			_003C_003E7__wrap2 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				CompMechCarrier CS_0024_003C_003E8__locals29 = _003C_003E4__this;
+				AcceptanceReport canSpawn;
+				switch (num)
 				{
-					return "CooldownTime".Translate() + " " + this.cooldownTicksRemaining.ToStringSecondsFromTicks();
-				}
-				return true;
-			}
-		}
-
-		// Token: 0x1700294F RID: 10575
-		// (get) Token: 0x060103F9 RID: 66553 RVA: 0x004B2631 File Offset: 0x004B0831
-		public int IngredientCount
-		{
-			get
-			{
-				return this.innerContainer.TotalStackCountOfDef(this.Props.fixedIngredient);
-			}
-		}
-
-		// Token: 0x17002950 RID: 10576
-		// (get) Token: 0x060103FA RID: 66554 RVA: 0x004B2649 File Offset: 0x004B0849
-		public int AmountToAutofill
-		{
-			get
-			{
-				return Mathf.Max(0, this.maxToFill - this.IngredientCount);
-			}
-		}
-
-		// Token: 0x17002951 RID: 10577
-		// (get) Token: 0x060103FB RID: 66555 RVA: 0x004B265E File Offset: 0x004B085E
-		public int MaxCanSpawn
-		{
-			get
-			{
-				return Mathf.Min(Mathf.FloorToInt((float)(this.IngredientCount / this.Props.costPerPawn)), this.Props.maxPawnsToSpawn);
-			}
-		}
-
-		// Token: 0x17002952 RID: 10578
-		// (get) Token: 0x060103FC RID: 66556 RVA: 0x004B2688 File Offset: 0x004B0888
-		public bool LowIngredientCount
-		{
-			get
-			{
-				return this.IngredientCount < 250;
-			}
-		}
-
-		// Token: 0x17002953 RID: 10579
-		// (get) Token: 0x060103FD RID: 66557 RVA: 0x004B2697 File Offset: 0x004B0897
-		public float PercentageFull
-		{
-			get
-			{
-				return (float)this.IngredientCount / (float)this.Props.maxIngredientCount;
-			}
-		}
-
-		// Token: 0x060103FF RID: 66559 RVA: 0x004B26CC File Offset: 0x004B08CC
-		public override void PostSpawnSetup(bool respawningAfterLoad)
-		{
-			if (!ModLister.CheckBiotech("Mech carrier"))
-			{
-				this.parent.Destroy(DestroyMode.Vanish);
-				return;
-			}
-			base.PostSpawnSetup(respawningAfterLoad);
-			if (!respawningAfterLoad && !this.parent.BeingTransportedOnGravship)
-			{
-				this.innerContainer = new ThingOwner<Thing>(this, false, LookMode.Deep, true);
-				if (this.Props.startingIngredientCount > 0)
-				{
-					Thing thing = ThingMaker.MakeThing(this.Props.fixedIngredient, null);
-					thing.stackCount = this.Props.startingIngredientCount;
-					this.innerContainer.TryAdd(thing, this.Props.startingIngredientCount, true);
-				}
-				this.maxToFill = this.Props.startingIngredientCount;
-			}
-		}
-
-		// Token: 0x06010400 RID: 66560 RVA: 0x004B2774 File Offset: 0x004B0974
-		public void TrySpawnPawns()
-		{
-			int maxCanSpawn = this.MaxCanSpawn;
-			if (maxCanSpawn <= 0)
-			{
-				return;
-			}
-			PawnGenerationRequest request = new PawnGenerationRequest(this.Props.spawnPawnKind, this.parent.Faction, PawnGenerationContext.NonPlayer, null, true, false, false, true, false, 1f, false, true, false, true, true, false, false, false, false, 0f, 0f, null, 1f, null, null, null, null, null, null, null, null, null, null, null, null, false, false, false, false, null, null, null, null, null, 0f, DevelopmentalStage.Newborn, null, null, null, false, false, false, -1, 0, false);
-			this.tmpResources.Clear();
-			this.tmpResources.AddRange(this.innerContainer);
-			Pawn pawn = this.parent as Pawn;
-			Lord lord = (pawn != null) ? pawn.GetLord() : null;
-			for (int i = 0; i < maxCanSpawn; i++)
-			{
-				Pawn pawn2 = PawnGenerator.GeneratePawn(request);
-				GenSpawn.Spawn(pawn2, this.parent.Position, this.parent.Map, WipeMode.Vanish);
-				this.spawnedPawns.Add(pawn2);
-				if (lord != null)
-				{
-					lord.AddPawn(pawn2);
-				}
-				int num = this.Props.costPerPawn;
-				for (int j = 0; j < this.tmpResources.Count; j++)
-				{
-					Thing thing = this.innerContainer.Take(this.tmpResources[j], Mathf.Min(this.tmpResources[j].stackCount, this.Props.costPerPawn));
-					num -= thing.stackCount;
-					thing.Destroy(DestroyMode.Vanish);
-					if (num <= 0)
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					if (!(CS_0024_003C_003E8__locals29.parent is Pawn { IsColonyMech: not false } pawn) || pawn.GetOverseer() == null)
 					{
 						break;
 					}
-				}
-				if (this.Props.spawnedMechEffecter != null)
-				{
-					Effecter effecter = new Effecter(this.Props.spawnedMechEffecter);
-					effecter.Trigger(this.Props.attachSpawnedMechEffecter ? pawn2 : new TargetInfo(pawn2.Position, pawn2.Map, false), TargetInfo.Invalid, -1);
-					effecter.Cleanup();
-				}
-			}
-			this.tmpResources.Clear();
-			this.cooldownTicksRemaining = this.Props.cooldownTicks;
-			if (this.Props.spawnEffecter != null)
-			{
-				Effecter effecter2 = new Effecter(this.Props.spawnEffecter);
-				effecter2.Trigger(this.Props.attachSpawnedEffecter ? this.parent : new TargetInfo(this.parent.Position, this.parent.Map, false), TargetInfo.Invalid, -1);
-				effecter2.Cleanup();
-			}
-		}
-
-		// Token: 0x06010401 RID: 66561 RVA: 0x004B2A12 File Offset: 0x004B0C12
-		public override IEnumerable<Gizmo> CompGetGizmosExtra()
-		{
-			Pawn pawn = this.parent as Pawn;
-			if (pawn != null && pawn.IsColonyMech && pawn.GetOverseer() != null)
-			{
-				foreach (Gizmo gizmo in base.CompGetGizmosExtra())
-				{
-					yield return gizmo;
-				}
-				IEnumerator<Gizmo> enumerator = null;
-				if (Find.Selector.SingleSelectedThing == this.parent)
-				{
-					if (this.gizmo == null)
+					_003C_003E7__wrap2 = ((ThingComp)CS_0024_003C_003E8__locals29).CompGetGizmosExtra().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_00ac;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_00ac;
+				case 2:
+					_003C_003E1__state = -1;
+					goto IL_010d;
+				case 3:
+					_003C_003E1__state = -1;
+					goto IL_02a7;
+				case 4:
+					_003C_003E1__state = -1;
+					_003C_003E2__current = new Command_Action
 					{
-						this.gizmo = new MechCarrierGizmo(this);
-					}
-					yield return this.gizmo;
-				}
-				AcceptanceReport canSpawn = this.CanSpawn;
-				Command_ActionWithCooldown act = new Command_ActionWithCooldown();
-				act.cooldownPercentGetter = (() => Mathf.InverseLerp((float)this.Props.cooldownTicks, 0f, (float)this.cooldownTicksRemaining));
-				act.action = delegate()
-				{
-					this.TrySpawnPawns();
-				};
-				act.hotKey = KeyBindingDefOf.Misc2;
-				act.Disabled = !canSpawn.Accepted;
-				act.icon = ContentFinder<Texture2D>.Get("UI/Gizmos/ReleaseWarUrchins", true);
-				act.defaultLabel = "MechCarrierRelease".Translate(this.Props.spawnPawnKind.labelPlural);
-				act.defaultDesc = "MechCarrierDesc".Translate(this.Props.maxPawnsToSpawn, this.Props.spawnPawnKind.labelPlural, this.Props.spawnPawnKind.label, this.Props.costPerPawn, this.Props.fixedIngredient.label);
-				if (!canSpawn.Reason.NullOrEmpty())
-				{
-					act.Disable(canSpawn.Reason);
-				}
-				if (DebugSettings.ShowDevGizmos)
-				{
-					if (this.cooldownTicksRemaining > 0)
-					{
-						yield return new Command_Action
+						defaultLabel = "DEV: Empty " + CS_0024_003C_003E8__locals29.Props.fixedIngredient.label,
+						action = delegate
 						{
-							defaultLabel = "DEV: Reset cooldown",
-							action = delegate()
-							{
-								this.cooldownTicksRemaining = 0;
-							}
-						};
-					}
-					yield return new Command_Action
+							CS_0024_003C_003E8__locals29.innerContainer.ClearAndDestroyContents();
+						}
+					};
+					_003C_003E1__state = 5;
+					return true;
+				case 5:
+					_003C_003E1__state = -1;
+					goto IL_0354;
+				case 6:
 					{
-						defaultLabel = "DEV: Fill with " + this.Props.fixedIngredient.label,
-						action = delegate()
+						_003C_003E1__state = -1;
+						_003Cact_003E5__2 = null;
+						break;
+					}
+					IL_02a7:
+					_003C_003E2__current = new Command_Action
+					{
+						defaultLabel = "DEV: Fill with " + CS_0024_003C_003E8__locals29.Props.fixedIngredient.label,
+						action = delegate
 						{
-							while (this.IngredientCount < this.Props.maxIngredientCount)
+							while (CS_0024_003C_003E8__locals29.IngredientCount < CS_0024_003C_003E8__locals29.Props.maxIngredientCount)
 							{
-								int stackCount = Mathf.Min(this.Props.maxIngredientCount - this.IngredientCount, this.Props.fixedIngredient.stackLimit);
-								Thing thing = ThingMaker.MakeThing(this.Props.fixedIngredient, null);
+								int stackCount = Mathf.Min(CS_0024_003C_003E8__locals29.Props.maxIngredientCount - CS_0024_003C_003E8__locals29.IngredientCount, CS_0024_003C_003E8__locals29.Props.fixedIngredient.stackLimit);
+								Thing thing = ThingMaker.MakeThing(CS_0024_003C_003E8__locals29.Props.fixedIngredient);
 								thing.stackCount = stackCount;
-								this.innerContainer.TryAdd(thing, thing.stackCount, true);
+								CS_0024_003C_003E8__locals29.innerContainer.TryAdd(thing, thing.stackCount);
 							}
 						}
 					};
-					yield return new Command_Action
+					_003C_003E1__state = 4;
+					return true;
+					IL_0354:
+					_003C_003E2__current = _003Cact_003E5__2;
+					_003C_003E1__state = 6;
+					return true;
+					IL_00ac:
+					if (_003C_003E7__wrap2.MoveNext())
 					{
-						defaultLabel = "DEV: Empty " + this.Props.fixedIngredient.label,
-						action = delegate()
-						{
-							this.innerContainer.ClearAndDestroyContents(DestroyMode.Vanish);
-						}
-					};
-				}
-				yield return act;
-				act = null;
-			}
-			yield break;
-			yield break;
-		}
-
-		// Token: 0x06010402 RID: 66562 RVA: 0x004B2A22 File Offset: 0x004B0C22
-		public void GetChildHolders(List<IThingHolder> outChildren)
-		{
-			ThingOwnerUtility.AppendThingHoldersFromThings(outChildren, this.GetDirectlyHeldThings());
-		}
-
-		// Token: 0x06010403 RID: 66563 RVA: 0x004B2A30 File Offset: 0x004B0C30
-		public ThingOwner GetDirectlyHeldThings()
-		{
-			return this.innerContainer;
-		}
-
-		// Token: 0x06010404 RID: 66564 RVA: 0x004B2A38 File Offset: 0x004B0C38
-		public override string CompInspectStringExtra()
-		{
-			string text = base.CompInspectStringExtra();
-			if (!text.NullOrEmpty())
-			{
-				text += "\n";
-			}
-			return text + ("CasketContains".Translate() + ": " + this.innerContainer.ContentsString.CapitalizeFirst());
-		}
-
-		// Token: 0x06010405 RID: 66565 RVA: 0x004B2A98 File Offset: 0x004B0C98
-		public override void PostDestroy(DestroyMode mode, Map previousMap)
-		{
-			base.PostDestroy(mode, previousMap);
-			ThingOwner thingOwner = this.innerContainer;
-			if (thingOwner != null)
-			{
-				thingOwner.ClearAndDestroyContents(DestroyMode.Vanish);
-			}
-			for (int i = 0; i < this.spawnedPawns.Count; i++)
-			{
-				if (!this.spawnedPawns[i].Dead)
-				{
-					this.spawnedPawns[i].Kill(null, null);
-				}
-			}
-		}
-
-		// Token: 0x06010406 RID: 66566 RVA: 0x004B2B04 File Offset: 0x004B0D04
-		public override void PostDrawExtraSelectionOverlays()
-		{
-			if (Find.Selector.IsSelected(this.parent))
-			{
-				for (int i = 0; i < this.spawnedPawns.Count; i++)
-				{
-					if (!this.spawnedPawns[i].Dead)
-					{
-						GenDraw.DrawLineBetween(this.parent.TrueCenter(), this.spawnedPawns[i].TrueCenter());
+						Gizmo current = _003C_003E7__wrap2.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
 					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap2 = null;
+					if (Find.Selector.SingleSelectedThing == CS_0024_003C_003E8__locals29.parent)
+					{
+						if (CS_0024_003C_003E8__locals29.gizmo == null)
+						{
+							CS_0024_003C_003E8__locals29.gizmo = new MechCarrierGizmo(CS_0024_003C_003E8__locals29);
+						}
+						_003C_003E2__current = CS_0024_003C_003E8__locals29.gizmo;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					goto IL_010d;
+					IL_010d:
+					canSpawn = CS_0024_003C_003E8__locals29.CanSpawn;
+					_003Cact_003E5__2 = new Command_ActionWithCooldown();
+					_003Cact_003E5__2.cooldownPercentGetter = () => Mathf.InverseLerp(CS_0024_003C_003E8__locals29.Props.cooldownTicks, 0f, CS_0024_003C_003E8__locals29.cooldownTicksRemaining);
+					_003Cact_003E5__2.action = delegate
+					{
+						CS_0024_003C_003E8__locals29.TrySpawnPawns();
+					};
+					_003Cact_003E5__2.hotKey = KeyBindingDefOf.Misc2;
+					_003Cact_003E5__2.Disabled = !canSpawn.Accepted;
+					_003Cact_003E5__2.icon = ContentFinder<Texture2D>.Get("UI/Gizmos/ReleaseWarUrchins");
+					_003Cact_003E5__2.defaultLabel = "MechCarrierRelease".Translate(CS_0024_003C_003E8__locals29.Props.spawnPawnKind.labelPlural);
+					_003Cact_003E5__2.defaultDesc = "MechCarrierDesc".Translate(CS_0024_003C_003E8__locals29.Props.maxPawnsToSpawn, CS_0024_003C_003E8__locals29.Props.spawnPawnKind.labelPlural, CS_0024_003C_003E8__locals29.Props.spawnPawnKind.label, CS_0024_003C_003E8__locals29.Props.costPerPawn, CS_0024_003C_003E8__locals29.Props.fixedIngredient.label);
+					if (!canSpawn.Reason.NullOrEmpty())
+					{
+						_003Cact_003E5__2.Disable(canSpawn.Reason);
+					}
+					if (DebugSettings.ShowDevGizmos)
+					{
+						if (CS_0024_003C_003E8__locals29.cooldownTicksRemaining > 0)
+						{
+							_003C_003E2__current = new Command_Action
+							{
+								defaultLabel = "DEV: Reset cooldown",
+								action = delegate
+								{
+									CS_0024_003C_003E8__locals29.cooldownTicksRemaining = 0;
+								}
+							};
+							_003C_003E1__state = 3;
+							return true;
+						}
+						goto IL_02a7;
+					}
+					goto IL_0354;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap2 != null)
+			{
+				_003C_003E7__wrap2.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CCompGetGizmosExtra_003Ed__25 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CCompGetGizmosExtra_003Ed__25(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	private const int LowIngredientCountThreshold = 250;
+
+	private int cooldownTicksRemaining;
+
+	private ThingOwner innerContainer;
+
+	private List<Pawn> spawnedPawns = new List<Pawn>();
+
+	private MechCarrierGizmo gizmo;
+
+	public int maxToFill;
+
+	private List<Thing> tmpResources = new List<Thing>();
+
+	public CompProperties_MechCarrier Props => (CompProperties_MechCarrier)props;
+
+	public AcceptanceReport CanSpawn
+	{
+		get
+		{
+			if (parent is Pawn pawn)
+			{
+				if (pawn.IsSelfShutdown())
+				{
+					return "SelfShutdown".Translate();
+				}
+				if (pawn.Faction == Faction.OfPlayer && !pawn.IsColonyMechPlayerControlled)
+				{
+					return false;
+				}
+				if (!pawn.Awake() || pawn.Downed || pawn.Dead || !pawn.Spawned)
+				{
+					return false;
 				}
 			}
+			if (MaxCanSpawn <= 0)
+			{
+				return "MechCarrierNotEnoughResources".Translate();
+			}
+			if (cooldownTicksRemaining > 0)
+			{
+				return "CooldownTime".Translate() + " " + cooldownTicksRemaining.ToStringSecondsFromTicks();
+			}
+			return true;
 		}
+	}
 
-		// Token: 0x06010407 RID: 66567 RVA: 0x004B2B70 File Offset: 0x004B0D70
-		public override void PostExposeData()
+	public int IngredientCount => innerContainer.TotalStackCountOfDef(Props.fixedIngredient);
+
+	public int AmountToAutofill => Mathf.Max(0, maxToFill - IngredientCount);
+
+	public int MaxCanSpawn => Mathf.Min(Mathf.FloorToInt(IngredientCount / Props.costPerPawn), Props.maxPawnsToSpawn);
+
+	public bool LowIngredientCount => IngredientCount < 250;
+
+	public float PercentageFull => (float)IngredientCount / (float)Props.maxIngredientCount;
+
+	public override void PostSpawnSetup(bool respawningAfterLoad)
+	{
+		if (!ModLister.CheckBiotech("Mech carrier"))
 		{
-			base.PostExposeData();
-			Scribe_Deep.Look<ThingOwner>(ref this.innerContainer, "innerContainer", new object[]
+			parent.Destroy();
+		}
+	}
+
+	public override void PostPostMake()
+	{
+		innerContainer = new ThingOwner<Thing>(this, oneStackOnly: false);
+		if (Props.startingIngredientCount > 0)
+		{
+			Thing thing = ThingMaker.MakeThing(Props.fixedIngredient);
+			thing.stackCount = Props.startingIngredientCount;
+			innerContainer.TryAdd(thing, Props.startingIngredientCount);
+		}
+		maxToFill = Props.startingIngredientCount;
+	}
+
+	public void TrySpawnPawns()
+	{
+		int maxCanSpawn = MaxCanSpawn;
+		if (maxCanSpawn <= 0)
+		{
+			return;
+		}
+		PawnGenerationRequest request = new PawnGenerationRequest(Props.spawnPawnKind, parent.Faction, PawnGenerationContext.NonPlayer, null, forceGenerateNewPawn: true, allowDead: false, allowDowned: false, canGeneratePawnRelations: true, mustBeCapableOfViolence: false, 1f, forceAddFreeWarmLayerIfNeeded: false, allowGay: true, allowPregnant: false, allowFood: true, allowAddictions: true, inhabitant: false, certainlyBeenInCryptosleep: false, forceRedressWorldPawnIfFormerColonist: false, worldPawnFactionDoesntMatter: false, 0f, 0f, null, 1f, null, null, null, null, null, null, null, null, null, null, null, null, forceNoIdeo: false, forceNoBackstory: false, forbidAnyTitle: false, forceDead: false, null, null, null, null, null, 0f, DevelopmentalStage.Newborn, null, null, null);
+		tmpResources.Clear();
+		tmpResources.AddRange(innerContainer);
+		Lord lord = ((parent is Pawn p) ? p.GetLord() : null);
+		for (int i = 0; i < maxCanSpawn; i++)
+		{
+			Pawn pawn = PawnGenerator.GeneratePawn(request);
+			GenSpawn.Spawn(pawn, parent.Position, parent.Map);
+			spawnedPawns.Add(pawn);
+			lord?.AddPawn(pawn);
+			int num = Props.costPerPawn;
+			for (int j = 0; j < tmpResources.Count; j++)
 			{
-				this
-			});
-			Scribe_Values.Look<int>(ref this.cooldownTicksRemaining, "cooldownTicksRemaining", 0, false);
-			Scribe_Values.Look<int>(ref this.maxToFill, "maxToFill", 0, false);
-			Scribe_Collections.Look<Pawn>(ref this.spawnedPawns, "spawnedPawns", LookMode.Reference, Array.Empty<object>());
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+				Thing thing = innerContainer.Take(tmpResources[j], Mathf.Min(tmpResources[j].stackCount, Props.costPerPawn));
+				num -= thing.stackCount;
+				thing.Destroy();
+				if (num <= 0)
+				{
+					break;
+				}
+			}
+			if (Props.spawnedMechEffecter != null)
 			{
-				this.spawnedPawns.RemoveAll((Pawn x) => x == null);
+				Effecter effecter = new Effecter(Props.spawnedMechEffecter);
+				effecter.Trigger(Props.attachSpawnedMechEffecter ? ((TargetInfo)pawn) : new TargetInfo(pawn.Position, pawn.Map), TargetInfo.Invalid);
+				effecter.Cleanup();
 			}
 		}
-
-		// Token: 0x06010408 RID: 66568 RVA: 0x004B2C0A File Offset: 0x004B0E0A
-		public override void CompTick()
+		tmpResources.Clear();
+		cooldownTicksRemaining = Props.cooldownTicks;
+		if (Props.spawnEffecter != null)
 		{
-			if (this.cooldownTicksRemaining > 0)
+			Effecter effecter2 = new Effecter(Props.spawnEffecter);
+			effecter2.Trigger(Props.attachSpawnedEffecter ? ((TargetInfo)parent) : new TargetInfo(parent.Position, parent.Map), TargetInfo.Invalid);
+			effecter2.Cleanup();
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CCompGetGizmosExtra_003Ed__25))]
+	public override IEnumerable<Gizmo> CompGetGizmosExtra()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CCompGetGizmosExtra_003Ed__25(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public void GetChildHolders(List<IThingHolder> outChildren)
+	{
+		ThingOwnerUtility.AppendThingHoldersFromThings(outChildren, GetDirectlyHeldThings());
+	}
+
+	public ThingOwner GetDirectlyHeldThings()
+	{
+		return innerContainer;
+	}
+
+	public override string CompInspectStringExtra()
+	{
+		string text = base.CompInspectStringExtra();
+		if (!text.NullOrEmpty())
+		{
+			text += "\n";
+		}
+		return text + ("CasketContains".Translate() + ": " + innerContainer.ContentsString.CapitalizeFirst());
+	}
+
+	public override void PostDestroy(DestroyMode mode, Map previousMap)
+	{
+		base.PostDestroy(mode, previousMap);
+		innerContainer?.ClearAndDestroyContents();
+		for (int i = 0; i < spawnedPawns.Count; i++)
+		{
+			if (!spawnedPawns[i].Dead)
 			{
-				this.cooldownTicksRemaining--;
+				spawnedPawns[i].Kill(null);
 			}
 		}
+	}
 
-		// Token: 0x0400A9B6 RID: 43446
-		private const int LowIngredientCountThreshold = 250;
+	public override void PostDrawExtraSelectionOverlays()
+	{
+		if (!Find.Selector.IsSelected(parent))
+		{
+			return;
+		}
+		for (int i = 0; i < spawnedPawns.Count; i++)
+		{
+			if (!spawnedPawns[i].Dead)
+			{
+				GenDraw.DrawLineBetween(parent.TrueCenter(), spawnedPawns[i].TrueCenter());
+			}
+		}
+	}
 
-		// Token: 0x0400A9B7 RID: 43447
-		private int cooldownTicksRemaining;
+	public override void PostExposeData()
+	{
+		base.PostExposeData();
+		Scribe_Deep.Look(ref innerContainer, "innerContainer", this);
+		Scribe_Values.Look(ref cooldownTicksRemaining, "cooldownTicksRemaining", 0);
+		Scribe_Values.Look(ref maxToFill, "maxToFill", 0);
+		Scribe_Collections.Look(ref spawnedPawns, "spawnedPawns", LookMode.Reference);
+		if (Scribe.mode == LoadSaveMode.PostLoadInit)
+		{
+			spawnedPawns.RemoveAll((Pawn x) => x == null);
+		}
+	}
 
-		// Token: 0x0400A9B8 RID: 43448
-		private ThingOwner innerContainer;
-
-		// Token: 0x0400A9B9 RID: 43449
-		private List<Pawn> spawnedPawns = new List<Pawn>();
-
-		// Token: 0x0400A9BA RID: 43450
-		private MechCarrierGizmo gizmo;
-
-		// Token: 0x0400A9BB RID: 43451
-		public int maxToFill;
-
-		// Token: 0x0400A9BC RID: 43452
-		private List<Thing> tmpResources = new List<Thing>();
+	public override void CompTick()
+	{
+		if (cooldownTicksRemaining > 0)
+		{
+			cooldownTicksRemaining--;
+		}
 	}
 }

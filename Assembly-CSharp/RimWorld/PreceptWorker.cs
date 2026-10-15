@@ -1,72 +1,209 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class PreceptWorker
 {
-	// Token: 0x02001AC2 RID: 6850
-	public class PreceptWorker
+	[CompilerGenerated]
+	private sealed class _003CThingDefsForIdeo_003Ed__7 : IEnumerable<PreceptThingChance>, IEnumerable, IEnumerator<PreceptThingChance>, IEnumerator, IDisposable
 	{
-		// Token: 0x0600995E RID: 39262 RVA: 0x00002501 File Offset: 0x00000701
-		public virtual bool ShouldSkipThing(Ideo ideo, ThingDef thingDef)
-		{
-			return false;
-		}
+		private int _003C_003E1__state;
 
-		// Token: 0x0600995F RID: 39263 RVA: 0x00006AAC File Offset: 0x00004CAC
-		public virtual float GetThingOrder(PreceptThingChance thingChance)
-		{
-			return 0f;
-		}
+		private PreceptThingChance _003C_003E2__current;
 
-		// Token: 0x17001787 RID: 6023
-		// (get) Token: 0x06009960 RID: 39264 RVA: 0x002CAFCF File Offset: 0x002C91CF
-		public virtual IEnumerable<PreceptThingChance> ThingDefs
+		private int _003C_003El__initialThreadId;
+
+		public PreceptWorker _003C_003E4__this;
+
+		private Ideo ideo;
+
+		public Ideo _003C_003E3__ideo;
+
+		private FactionDef generatingFor;
+
+		public FactionDef _003C_003E3__generatingFor;
+
+		private IEnumerator<PreceptThingChance> _003C_003E7__wrap1;
+
+		PreceptThingChance IEnumerator<PreceptThingChance>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return from dc in this.def.buildingDefChances
-				select dc;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06009961 RID: 39265 RVA: 0x0020FC7C File Offset: 0x0020DE7C
-		public virtual AcceptanceReport CanUse(ThingDef def, Ideo ideo, FactionDef generatingFor)
+		object IEnumerator.Current
 		{
-			return true;
-		}
-
-		// Token: 0x06009962 RID: 39266 RVA: 0x002CB000 File Offset: 0x002C9200
-		[Obsolete("Will be removed in a future update")]
-		public virtual AcceptanceReport CanUse(ThingDef def, Ideo ideo)
-		{
-			return this.CanUse(def, ideo, null);
-		}
-
-		// Token: 0x06009963 RID: 39267 RVA: 0x002CB00B File Offset: 0x002C920B
-		public virtual IEnumerable<PreceptThingChance> ThingDefsForIdeo(Ideo ideo, FactionDef generatingFor = null)
-		{
-			foreach (PreceptThingChance preceptThingChance in this.ThingDefs)
+			[DebuggerHidden]
+			get
 			{
-				if (this.CanUse(preceptThingChance.def, ideo, generatingFor))
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CThingDefsForIdeo_003Ed__7(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
 				{
-					yield return preceptThingChance;
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
 				}
 			}
-			IEnumerator<PreceptThingChance> enumerator = null;
-			yield break;
-			yield break;
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x06009964 RID: 39268 RVA: 0x002CB029 File Offset: 0x002C9229
-		[Obsolete("Will be removed in a future update")]
-		public virtual IEnumerable<PreceptThingChance> ThingDefsForIdeo(Ideo ideo)
+		private bool MoveNext()
 		{
-			return this.ThingDefsForIdeo(ideo, null);
+			try
+			{
+				int num = _003C_003E1__state;
+				PreceptWorker preceptWorker = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = preceptWorker.ThingDefs.GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 1:
+					_003C_003E1__state = -3;
+					break;
+				}
+				while (_003C_003E7__wrap1.MoveNext())
+				{
+					PreceptThingChance current = _003C_003E7__wrap1.Current;
+					if ((bool)preceptWorker.CanUse(current.def, ideo, generatingFor))
+					{
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = null;
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
 		}
 
-		// Token: 0x040068B4 RID: 26804
-		public PreceptDef def;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<PreceptThingChance> IEnumerable<PreceptThingChance>.GetEnumerator()
+		{
+			_003CThingDefsForIdeo_003Ed__7 _003CThingDefsForIdeo_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CThingDefsForIdeo_003Ed__ = this;
+			}
+			else
+			{
+				_003CThingDefsForIdeo_003Ed__ = new _003CThingDefsForIdeo_003Ed__7(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CThingDefsForIdeo_003Ed__.ideo = _003C_003E3__ideo;
+			_003CThingDefsForIdeo_003Ed__.generatingFor = _003C_003E3__generatingFor;
+			return _003CThingDefsForIdeo_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<PreceptThingChance>)this).GetEnumerator();
+		}
+	}
+
+	public PreceptDef def;
+
+	public virtual IEnumerable<PreceptThingChance> ThingDefs => ((IEnumerable<PreceptThingChanceClass>)def.buildingDefChances).Select((Func<PreceptThingChanceClass, PreceptThingChance>)((PreceptThingChanceClass dc) => dc));
+
+	public virtual bool ShouldSkipThing(Ideo ideo, ThingDef thingDef)
+	{
+		return false;
+	}
+
+	public virtual float GetThingOrder(PreceptThingChance thingChance)
+	{
+		return 0f;
+	}
+
+	public virtual AcceptanceReport CanUse(ThingDef def, Ideo ideo, FactionDef generatingFor)
+	{
+		return true;
+	}
+
+	[Obsolete("Will be removed in a future update")]
+	public virtual AcceptanceReport CanUse(ThingDef def, Ideo ideo)
+	{
+		return CanUse(def, ideo, null);
+	}
+
+	[IteratorStateMachine(typeof(_003CThingDefsForIdeo_003Ed__7))]
+	public virtual IEnumerable<PreceptThingChance> ThingDefsForIdeo(Ideo ideo, FactionDef generatingFor = null)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CThingDefsForIdeo_003Ed__7(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__ideo = ideo,
+			_003C_003E3__generatingFor = generatingFor
+		};
+	}
+
+	[Obsolete("Will be removed in a future update")]
+	public virtual IEnumerable<PreceptThingChance> ThingDefsForIdeo(Ideo ideo)
+	{
+		return ThingDefsForIdeo(ideo, null);
 	}
 }

@@ -1,67 +1,58 @@
-﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompAutoCutWindTurbine : CompAutoCut
 {
-	// Token: 0x02002BB3 RID: 11187
-	public class CompAutoCutWindTurbine : CompAutoCut
+	private ThingFilter fixedAutoCutFilter;
+
+	public ThingFilter defaultAutoCutFilter;
+
+	public override IEnumerable<IntVec3> GetAutoCutCells()
 	{
-		// Token: 0x0600FA1E RID: 64030 RVA: 0x0048B7A0 File Offset: 0x004899A0
-		public override IEnumerable<IntVec3> GetAutoCutCells()
-		{
-			return WindTurbineUtility.CalculateWindCells(this.parent.Position, this.parent.Rotation, this.parent.def.size);
-		}
+		return WindTurbineUtility.CalculateWindCells(parent.Position, parent.Rotation, parent.def.size);
+	}
 
-		// Token: 0x0600FA1F RID: 64031 RVA: 0x0048B7D0 File Offset: 0x004899D0
-		public override ThingFilter GetDefaultAutoCutFilter()
+	public override ThingFilter GetDefaultAutoCutFilter()
+	{
+		if (defaultAutoCutFilter == null)
 		{
-			if (this.defaultAutoCutFilter == null)
+			defaultAutoCutFilter = new ThingFilter();
+			foreach (ThingDef allowedThingDef in GetFixedAutoCutFilter().AllowedThingDefs)
 			{
-				this.defaultAutoCutFilter = new ThingFilter();
-				foreach (ThingDef thingDef in this.GetFixedAutoCutFilter().AllowedThingDefs)
+				if (allowedThingDef.blockWind)
 				{
-					if (thingDef.blockWind)
-					{
-						this.defaultAutoCutFilter.SetAllow(thingDef, true);
-					}
+					defaultAutoCutFilter.SetAllow(allowedThingDef, allow: true);
 				}
 			}
-			return this.defaultAutoCutFilter;
 		}
+		return defaultAutoCutFilter;
+	}
 
-		// Token: 0x0600FA20 RID: 64032 RVA: 0x0048B84C File Offset: 0x00489A4C
-		public override ThingFilter GetFixedAutoCutFilter()
+	public override ThingFilter GetFixedAutoCutFilter()
+	{
+		if (fixedAutoCutFilter == null)
 		{
-			if (this.fixedAutoCutFilter == null)
+			fixedAutoCutFilter = new ThingFilter();
+			foreach (ThingDef allWildPlant in parent.Map.wildPlantSpawner.AllWildPlants)
 			{
-				this.fixedAutoCutFilter = new ThingFilter();
-				foreach (ThingDef thingDef in this.parent.Map.wildPlantSpawner.AllWildPlants)
+				if (allWildPlant.plant.allowAutoCut)
 				{
-					if (thingDef.plant.allowAutoCut)
-					{
-						this.fixedAutoCutFilter.SetAllow(thingDef, true);
-					}
+					fixedAutoCutFilter.SetAllow(allWildPlant, allow: true);
 				}
-				this.fixedAutoCutFilter.SetAllow(ThingCategoryDefOf.Stumps, true, null, null);
 			}
-			return this.fixedAutoCutFilter;
+			fixedAutoCutFilter.SetAllow(ThingCategoryDefOf.Stumps, allow: true);
 		}
+		return fixedAutoCutFilter;
+	}
 
-		// Token: 0x0600FA21 RID: 64033 RVA: 0x0048B8F0 File Offset: 0x00489AF0
-		public override void CompTick()
+	public override void CompTick()
+	{
+		base.CompTick();
+		if (autoCut && parent.IsHashIntervalTick(2000))
 		{
-			base.CompTick();
-			if (this.autoCut && this.parent.IsHashIntervalTick(2000))
-			{
-				base.DesignatePlantsToCut();
-			}
+			DesignatePlantsToCut();
 		}
-
-		// Token: 0x0400A469 RID: 42089
-		private ThingFilter fixedAutoCutFilter;
-
-		// Token: 0x0400A46A RID: 42090
-		public ThingFilter defaultAutoCutFilter;
 	}
 }

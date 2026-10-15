@@ -1,103 +1,187 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompRoyalImplant : ThingComp
 {
-	// Token: 0x02002DF3 RID: 11763
-	public class CompRoyalImplant : ThingComp
+	[CompilerGenerated]
+	private sealed class _003CSpecialDisplayStats_003Ed__2 : IEnumerable<StatDrawEntry>, IEnumerable, IEnumerator<StatDrawEntry>, IEnumerator, IDisposable
 	{
-		// Token: 0x17002A52 RID: 10834
-		// (get) Token: 0x060108E7 RID: 67815 RVA: 0x004C5F6A File Offset: 0x004C416A
-		public CompProperties_RoyalImplant Props
+		private int _003C_003E1__state;
+
+		private StatDrawEntry _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompRoyalImplant _003C_003E4__this;
+
+		StatDrawEntry IEnumerator<StatDrawEntry>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (CompProperties_RoyalImplant)this.props;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x060108E8 RID: 67816 RVA: 0x004C5F77 File Offset: 0x004C4177
-		public override IEnumerable<StatDrawEntry> SpecialDisplayStats()
+		object IEnumerator.Current
 		{
-			Pair<Faction, RoyalTitleDef> minTitleForImplantAllFactions = Faction.GetMinTitleForImplantAllFactions(this.Props.implantHediff);
-			if (minTitleForImplantAllFactions.First != null)
+			[DebuggerHidden]
+			get
 			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CSpecialDisplayStats_003Ed__2(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			CompRoyalImplant compRoyalImplant = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+			{
+				_003C_003E1__state = -1;
+				Pair<Faction, RoyalTitleDef> minTitleForImplantAllFactions = Faction.GetMinTitleForImplantAllFactions(compRoyalImplant.Props.implantHediff);
+				if (minTitleForImplantAllFactions.First == null)
+				{
+					break;
+				}
 				Faction first = minTitleForImplantAllFactions.First;
 				StringBuilder stringBuilder = new StringBuilder("Stat_Thing_MinimumRoyalTitle_Desc".Translate(first.Named("FACTION")));
-				if (typeof(Hediff_Level).IsAssignableFrom(this.Props.implantHediff.hediffClass))
+				if (typeof(Hediff_Level).IsAssignableFrom(compRoyalImplant.Props.implantHediff.hediffClass))
 				{
 					stringBuilder.Append("\n\n" + "Stat_Thing_MinimumRoyalTitle_Level_Desc".Translate(first.Named("FACTION")) + ":\n\n");
-					int num = 1;
-					while ((float)num <= this.Props.implantHediff.maxSeverity)
+					for (int i = 1; (float)i <= compRoyalImplant.Props.implantHediff.maxSeverity; i++)
 					{
-						stringBuilder.Append(string.Concat(new string[]
-						{
-							" -  x",
-							num.ToString(),
-							", ",
-							first.GetMinTitleForImplant(this.Props.implantHediff, num).GetLabelCapForBothGenders(),
-							"\n"
-						}));
-						num++;
+						stringBuilder.Append(" -  x" + i + ", " + first.GetMinTitleForImplant(compRoyalImplant.Props.implantHediff, i).GetLabelCapForBothGenders() + "\n");
 					}
 				}
-				yield return new StatDrawEntry(StatCategoryDefOf.BasicsNonPawnImportant, "Stat_Thing_MinimumRoyalTitle_Name".Translate(first.Named("FACTION")).Resolve(), minTitleForImplantAllFactions.Second.GetLabelCapForBothGenders(), stringBuilder.ToTaggedString().Resolve(), 2100, null, null, false, false);
+				_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.BasicsNonPawnImportant, "Stat_Thing_MinimumRoyalTitle_Name".Translate(first.Named("FACTION")).Resolve(), minTitleForImplantAllFactions.Second.GetLabelCapForBothGenders(), stringBuilder.ToTaggedString().Resolve(), 2100);
+				_003C_003E1__state = 1;
+				return true;
 			}
-			yield break;
+			case 1:
+				_003C_003E1__state = -1;
+				break;
+			}
+			return false;
 		}
 
-		// Token: 0x060108E9 RID: 67817 RVA: 0x004C5F88 File Offset: 0x004C4188
-		public override string CompInspectStringExtra()
+		bool IEnumerator.MoveNext()
 		{
-			StringBuilder stringBuilder = new StringBuilder();
-			Pair<Faction, RoyalTitleDef> minTitleForImplantAllFactions = Faction.GetMinTitleForImplantAllFactions(this.Props.implantHediff);
-			if (minTitleForImplantAllFactions.First != null)
-			{
-				stringBuilder.AppendLine("MinimumRoyalTitleInspectString".Translate(minTitleForImplantAllFactions.First.Named("FACTION"), minTitleForImplantAllFactions.Second.GetLabelCapForBothGenders().Named("TITLE")).Resolve());
-			}
-			if (stringBuilder.Length <= 0)
-			{
-				return null;
-			}
-			return stringBuilder.ToString().TrimEndNewlines();
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x060108EA RID: 67818 RVA: 0x004C600C File Offset: 0x004C420C
-		public static TaggedString CheckForViolations(Pawn pawn, HediffDef hediff, int levelOffset)
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			if (levelOffset < 0)
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<StatDrawEntry> IEnumerable<StatDrawEntry>.GetEnumerator()
+		{
+			_003CSpecialDisplayStats_003Ed__2 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				return "";
+				_003C_003E1__state = 0;
+				result = this;
 			}
-			if (pawn.Faction != Faction.OfPlayer || !hediff.HasComp(typeof(HediffComp_RoyalImplant)))
+			else
 			{
-				return "";
-			}
-			Hediff_Level hediff_Level = (Hediff_Level)pawn.health.hediffSet.hediffs.FirstOrDefault((Hediff h) => h.def == hediff);
-			int num = (levelOffset != 0 && hediff_Level != null) ? (hediff_Level.level + levelOffset) : 0;
-			foreach (Faction faction in Find.FactionManager.AllFactionsListForReading)
-			{
-				if (pawn.Faction != null && !faction.Hidden && !faction.HostileTo(Faction.OfPlayer) && ThingRequiringRoyalPermissionUtility.IsViolatingRulesOf(hediff, pawn, faction, num))
+				result = new _003CSpecialDisplayStats_003Ed__2(0)
 				{
-					RoyalTitleDef minTitleForImplant = faction.GetMinTitleForImplant(hediff, num);
-					HediffCompProperties_RoyalImplant hediffCompProperties_RoyalImplant = hediff.CompProps<HediffCompProperties_RoyalImplant>();
-					string arg = hediff.label + ((num == 0) ? "" : (" (" + num.ToString() + "x)"));
-					TaggedString taggedString = hediffCompProperties_RoyalImplant.violationTriggerDescriptionKey.Translate(pawn.Named("PAWN"));
-					TaggedString taggedString2 = "RoyalImplantIllegalUseWarning".Translate(pawn.Named("PAWN"), arg.Named("IMPLANT"), faction.Named("FACTION"), minTitleForImplant.GetLabelCapFor(pawn).Named("TITLE"), taggedString.Named("VIOLATIONTRIGGER"));
-					if (levelOffset != 0)
-					{
-						taggedString2 += "\n\n" + "RoyalImplantUpgradeConfirmation".Translate();
-					}
-					else
-					{
-						taggedString2 += "\n\n" + "RoyalImplantInstallConfirmation".Translate();
-					}
-					return taggedString2;
-				}
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<StatDrawEntry>)this).GetEnumerator();
+		}
+	}
+
+	public CompProperties_RoyalImplant Props => (CompProperties_RoyalImplant)props;
+
+	[IteratorStateMachine(typeof(_003CSpecialDisplayStats_003Ed__2))]
+	public override IEnumerable<StatDrawEntry> SpecialDisplayStats()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CSpecialDisplayStats_003Ed__2(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override string CompInspectStringExtra()
+	{
+		StringBuilder stringBuilder = new StringBuilder();
+		Pair<Faction, RoyalTitleDef> minTitleForImplantAllFactions = Faction.GetMinTitleForImplantAllFactions(Props.implantHediff);
+		if (minTitleForImplantAllFactions.First != null)
+		{
+			stringBuilder.AppendLine("MinimumRoyalTitleInspectString".Translate(minTitleForImplantAllFactions.First.Named("FACTION"), minTitleForImplantAllFactions.Second.GetLabelCapForBothGenders().Named("TITLE")).Resolve());
+		}
+		if (stringBuilder.Length <= 0)
+		{
+			return null;
+		}
+		return stringBuilder.ToString().TrimEndNewlines();
+	}
+
+	public static TaggedString CheckForViolations(Pawn pawn, HediffDef hediff, int levelOffset)
+	{
+		if (levelOffset < 0)
+		{
 			return "";
 		}
+		if (pawn.Faction != Faction.OfPlayer || !hediff.HasComp(typeof(HediffComp_RoyalImplant)))
+		{
+			return "";
+		}
+		Hediff_Level hediff_Level = (Hediff_Level)pawn.health.hediffSet.hediffs.FirstOrDefault((Hediff h) => h.def == hediff);
+		int num = ((levelOffset != 0 && hediff_Level != null) ? (hediff_Level.level + levelOffset) : 0);
+		foreach (Faction item in Find.FactionManager.AllFactionsListForReading)
+		{
+			if (pawn.Faction != null && !item.Hidden && !item.HostileTo(Faction.OfPlayer) && ThingRequiringRoyalPermissionUtility.IsViolatingRulesOf(hediff, pawn, item, num))
+			{
+				RoyalTitleDef minTitleForImplant = item.GetMinTitleForImplant(hediff, num);
+				HediffCompProperties_RoyalImplant hediffCompProperties_RoyalImplant = hediff.CompProps<HediffCompProperties_RoyalImplant>();
+				string arg = hediff.label + ((num == 0) ? "" : (" (" + num + "x)"));
+				TaggedString taggedString = hediffCompProperties_RoyalImplant.violationTriggerDescriptionKey.Translate(pawn.Named("PAWN"));
+				TaggedString taggedString2 = "RoyalImplantIllegalUseWarning".Translate(pawn.Named("PAWN"), arg.Named("IMPLANT"), item.Named("FACTION"), minTitleForImplant.GetLabelCapFor(pawn).Named("TITLE"), taggedString.Named("VIOLATIONTRIGGER"));
+				if (levelOffset != 0)
+				{
+					return taggedString2 + ("\n\n" + "RoyalImplantUpgradeConfirmation".Translate());
+				}
+				return taggedString2 + ("\n\n" + "RoyalImplantInstallConfirmation".Translate());
+			}
+		}
+		return "";
 	}
 }

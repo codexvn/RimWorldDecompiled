@@ -1,99 +1,196 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompCauseGameCondition_PsychicSuppression : CompCauseGameCondition
 {
-	// Token: 0x02002BBF RID: 11199
-	public class CompCauseGameCondition_PsychicSuppression : CompCauseGameCondition
+	[CompilerGenerated]
+	private sealed class _003CCompGetGizmosExtra_003Ed__3 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x0600FA6E RID: 64110 RVA: 0x0048C6D3 File Offset: 0x0048A8D3
-		public override void Initialize(CompProperties props)
-		{
-			base.Initialize(props);
-			this.gender = (Rand.Bool ? Gender.Male : Gender.Female);
-		}
+		private int _003C_003E1__state;
 
-		// Token: 0x0600FA6F RID: 64111 RVA: 0x0048C6ED File Offset: 0x0048A8ED
-		public override void PostExposeData()
-		{
-			base.PostExposeData();
-			Scribe_Values.Look<Gender>(ref this.gender, "gender", Gender.None, false);
-		}
+		private Gizmo _003C_003E2__current;
 
-		// Token: 0x0600FA70 RID: 64112 RVA: 0x0048C707 File Offset: 0x0048A907
-		public override IEnumerable<Gizmo> CompGetGizmosExtra()
+		private int _003C_003El__initialThreadId;
+
+		public CompCauseGameCondition_PsychicSuppression _003C_003E4__this;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
-			if (!Prefs.DevMode || !DebugSettings.godMode)
+			[DebuggerHidden]
+			get
 			{
-				yield break;
+				return _003C_003E2__current;
 			}
-			yield return new Command_Action
-			{
-				defaultLabel = this.gender.GetLabel(false),
-				action = delegate()
-				{
-					if (this.gender == Gender.Female)
-					{
-						this.gender = Gender.Male;
-					}
-					else
-					{
-						this.gender = Gender.Female;
-					}
-					base.ReSetupAllConditions();
-				},
-				hotKey = KeyBindingDefOf.Misc1
-			};
-			yield break;
 		}
 
-		// Token: 0x0600FA71 RID: 64113 RVA: 0x0048C718 File Offset: 0x0048A918
-		public override void CompTick()
+		object IEnumerator.Current
 		{
-			base.CompTick();
-			if (!this.Active || !base.MyTile.Valid)
+			[DebuggerHidden]
+			get
 			{
-				return;
+				return _003C_003E2__current;
 			}
-			foreach (Caravan caravan in Find.World.worldObjects.Caravans)
+		}
+
+		[DebuggerHidden]
+		public _003CCompGetGizmosExtra_003Ed__3(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			CompCauseGameCondition_PsychicSuppression CS_0024_003C_003E8__locals5 = _003C_003E4__this;
+			switch (num)
 			{
-				if (Find.WorldGrid.ApproxDistanceInTiles(caravan.Tile, base.MyTile) < (float)base.Props.worldRange)
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (!Prefs.DevMode || !DebugSettings.godMode)
 				{
-					foreach (Pawn pawn in caravan.pawns)
-					{
-						GameCondition_PsychicSuppression.CheckPawn(pawn, this.gender);
-					}
+					return false;
 				}
+				_003C_003E2__current = new Command_Action
+				{
+					defaultLabel = CS_0024_003C_003E8__locals5.gender.GetLabel(),
+					action = delegate
+					{
+						if (CS_0024_003C_003E8__locals5.gender == Gender.Female)
+						{
+							CS_0024_003C_003E8__locals5.gender = Gender.Male;
+						}
+						else
+						{
+							CS_0024_003C_003E8__locals5.gender = Gender.Female;
+						}
+						CS_0024_003C_003E8__locals5.ReSetupAllConditions();
+					},
+					hotKey = KeyBindingDefOf.Misc1
+				};
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				return false;
 			}
 		}
 
-		// Token: 0x0600FA72 RID: 64114 RVA: 0x0048C7F8 File Offset: 0x0048A9F8
-		protected override void SetupCondition(GameCondition condition, Map map)
+		bool IEnumerator.MoveNext()
 		{
-			base.SetupCondition(condition, map);
-			((GameCondition_PsychicSuppression)condition).gender = this.gender;
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0600FA73 RID: 64115 RVA: 0x0048C814 File Offset: 0x0048AA14
-		public override string CompInspectStringExtra()
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			string text = base.CompInspectStringExtra();
-			if (!text.NullOrEmpty())
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CCompGetGizmosExtra_003Ed__3 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				text += "\n";
+				_003C_003E1__state = 0;
+				result = this;
 			}
-			return text + ("AffectedGender".Translate() + ": " + this.gender.GetLabel(false).CapitalizeFirst());
+			else
+			{
+				result = new _003CCompGetGizmosExtra_003Ed__3(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
 		}
 
-		// Token: 0x0600FA74 RID: 64116 RVA: 0x0048C873 File Offset: 0x0048AA73
-		public override void RandomizeSettings(Site site)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			this.gender = (Rand.Bool ? Gender.Male : Gender.Female);
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x0400A48A RID: 42122
-		public Gender gender;
+	public Gender gender;
+
+	public override void Initialize(CompProperties props)
+	{
+		base.Initialize(props);
+		gender = (Rand.Bool ? Gender.Male : Gender.Female);
+	}
+
+	public override void PostExposeData()
+	{
+		base.PostExposeData();
+		Scribe_Values.Look(ref gender, "gender", Gender.None);
+	}
+
+	[IteratorStateMachine(typeof(_003CCompGetGizmosExtra_003Ed__3))]
+	public override IEnumerable<Gizmo> CompGetGizmosExtra()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CCompGetGizmosExtra_003Ed__3(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override void CompTick()
+	{
+		base.CompTick();
+		if (!Active || !base.MyTile.Valid)
+		{
+			return;
+		}
+		foreach (Caravan caravan in Find.World.worldObjects.Caravans)
+		{
+			if (!(Find.WorldGrid.ApproxDistanceInTiles(caravan.Tile, base.MyTile) < (float)base.Props.worldRange))
+			{
+				continue;
+			}
+			foreach (Pawn pawn in caravan.pawns)
+			{
+				GameCondition_PsychicSuppression.CheckPawn(pawn, gender);
+			}
+		}
+	}
+
+	protected override void SetupCondition(GameCondition condition, Map map)
+	{
+		base.SetupCondition(condition, map);
+		((GameCondition_PsychicSuppression)condition).gender = gender;
+	}
+
+	public override string CompInspectStringExtra()
+	{
+		string text = base.CompInspectStringExtra();
+		if (!text.NullOrEmpty())
+		{
+			text += "\n";
+		}
+		return text + ("AffectedGender".Translate() + ": " + gender.GetLabel().CapitalizeFirst());
+	}
+
+	public override void RandomizeSettings(Site site)
+	{
+		gender = (Rand.Bool ? Gender.Male : Gender.Female);
 	}
 }

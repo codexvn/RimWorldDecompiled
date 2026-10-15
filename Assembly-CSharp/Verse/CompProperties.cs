@@ -1,63 +1,166 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using RimWorld;
 using UnityEngine;
 
-namespace Verse
+namespace Verse;
+
+public class CompProperties
 {
-	// Token: 0x02000232 RID: 562
-	public class CompProperties
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__4 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x06000EA8 RID: 3752 RVA: 0x0004446B File Offset: 0x0004266B
-		public CompProperties()
-		{
-		}
+		private int _003C_003E1__state;
 
-		// Token: 0x06000EA9 RID: 3753 RVA: 0x00044483 File Offset: 0x00042683
-		public CompProperties(Type compClass)
-		{
-			this.compClass = compClass;
-		}
+		private string _003C_003E2__current;
 
-		// Token: 0x06000EAA RID: 3754 RVA: 0x000026EA File Offset: 0x000008EA
-		public virtual void DrawGhost(IntVec3 center, Rot4 rot, ThingDef thingDef, Color ghostCol, AltitudeLayer drawAltitude, Thing thing = null)
-		{
-		}
+		private int _003C_003El__initialThreadId;
 
-		// Token: 0x06000EAB RID: 3755 RVA: 0x000444A2 File Offset: 0x000426A2
-		public virtual IEnumerable<string> ConfigErrors(ThingDef parentDef)
+		public CompProperties _003C_003E4__this;
+
+		private ThingDef parentDef;
+
+		public ThingDef _003C_003E3__parentDef;
+
+		string IEnumerator<string>.Current
 		{
-			if (this.compClass == null)
+			[DebuggerHidden]
+			get
 			{
-				yield return parentDef.defName + " has CompProperties with null compClass.";
+				return _003C_003E2__current;
 			}
-			yield break;
 		}
 
-		// Token: 0x06000EAC RID: 3756 RVA: 0x000026EA File Offset: 0x000008EA
-		public virtual void ResolveReferences(ThingDef parentDef)
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x06000EAD RID: 3757 RVA: 0x000444B9 File Offset: 0x000426B9
-		public virtual IEnumerable<StatDrawEntry> SpecialDisplayStats(StatRequest req)
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__4(int _003C_003E1__state)
 		{
-			return Enumerable.Empty<StatDrawEntry>();
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x06000EAE RID: 3758 RVA: 0x000026EA File Offset: 0x000008EA
-		public virtual void PostLoadSpecial(ThingDef parent)
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x06000EAF RID: 3759 RVA: 0x000026EA File Offset: 0x000008EA
-		public virtual void Notify_PostUnlockedByResearch(ThingDef parent)
+		private bool MoveNext()
 		{
+			int num = _003C_003E1__state;
+			CompProperties compProperties = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (compProperties.compClass == null)
+				{
+					_003C_003E2__current = parentDef.defName + " has CompProperties with null compClass.";
+					_003C_003E1__state = 1;
+					return true;
+				}
+				break;
+			case 1:
+				_003C_003E1__state = -1;
+				break;
+			}
+			return false;
 		}
 
-		// Token: 0x04000973 RID: 2419
-		[TranslationHandle]
-		public Type compClass = typeof(ThingComp);
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__4 _003CConfigErrors_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CConfigErrors_003Ed__ = this;
+			}
+			else
+			{
+				_003CConfigErrors_003Ed__ = new _003CConfigErrors_003Ed__4(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CConfigErrors_003Ed__.parentDef = _003C_003E3__parentDef;
+			return _003CConfigErrors_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	[TranslationHandle]
+	public Type compClass = typeof(ThingComp);
+
+	public CompProperties()
+	{
+	}
+
+	public CompProperties(Type compClass)
+	{
+		this.compClass = compClass;
+	}
+
+	public virtual void DrawGhost(IntVec3 center, Rot4 rot, ThingDef thingDef, Color ghostCol, AltitudeLayer drawAltitude, Thing thing = null)
+	{
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__4))]
+	public virtual IEnumerable<string> ConfigErrors(ThingDef parentDef)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__4(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__parentDef = parentDef
+		};
+	}
+
+	public virtual void ResolveReferences(ThingDef parentDef)
+	{
+	}
+
+	public virtual IEnumerable<StatDrawEntry> SpecialDisplayStats(StatRequest req)
+	{
+		return Enumerable.Empty<StatDrawEntry>();
+	}
+
+	public virtual void PostLoadSpecial(ThingDef parent)
+	{
+	}
+
+	public virtual void Notify_PostUnlockedByResearch(ThingDef parent)
+	{
 	}
 }

@@ -1,194 +1,161 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Xml;
 
-namespace Verse
+namespace Verse;
+
+public class ScribeLoader
 {
-	// Token: 0x02000857 RID: 2135
-	public class ScribeLoader
+	public CrossRefHandler crossRefs = new CrossRefHandler();
+
+	public PostLoadIniter initer = new PostLoadIniter();
+
+	public IExposable curParent;
+
+	public XmlNode curXmlParent;
+
+	public string curPathRelToParent;
+
+	public void InitLoading(string filePath)
 	{
-		// Token: 0x060035F7 RID: 13815 RVA: 0x0011FF88 File Offset: 0x0011E188
-		public void InitLoading(string filePath)
+		if (Scribe.mode != 0)
 		{
-			if (Scribe.mode != LoadSaveMode.Inactive)
+			Log.Error("Called InitLoading() but current mode is " + Scribe.mode);
+			Scribe.ForceStop();
+		}
+		if (curParent != null)
+		{
+			Log.Error("Current parent is not null in InitLoading");
+			curParent = null;
+		}
+		if (curPathRelToParent != null)
+		{
+			Log.Error("Current path relative to parent is not null in InitLoading");
+			curPathRelToParent = null;
+		}
+		try
+		{
+			using (StreamReader input = new StreamReader(filePath))
 			{
-				Log.Error("Called InitLoading() but current mode is " + Scribe.mode.ToString());
-				Scribe.ForceStop();
+				using XmlTextReader reader = new XmlTextReader(input);
+				XmlDocument xmlDocument = new XmlDocument();
+				xmlDocument.Load(reader);
+				curXmlParent = xmlDocument.DocumentElement;
 			}
-			if (this.curParent != null)
+			Scribe.mode = LoadSaveMode.LoadingVars;
+		}
+		catch (Exception ex)
+		{
+			Log.Error("Exception while init loading file: " + filePath + "\n" + ex);
+			ForceStop();
+			throw;
+		}
+	}
+
+	public void InitLoadingMetaHeaderOnly(string filePath)
+	{
+		if (Scribe.mode != 0)
+		{
+			Log.Error("Called InitLoadingMetaHeaderOnly() but current mode is " + Scribe.mode);
+			Scribe.ForceStop();
+		}
+		try
+		{
+			using (StreamReader input = new StreamReader(filePath))
 			{
-				Log.Error("Current parent is not null in InitLoading");
-				this.curParent = null;
-			}
-			if (this.curPathRelToParent != null)
-			{
-				Log.Error("Current path relative to parent is not null in InitLoading");
-				this.curPathRelToParent = null;
-			}
-			try
-			{
-				using (StreamReader streamReader = new StreamReader(filePath))
+				using XmlTextReader xmlTextReader = new XmlTextReader(input);
+				if (!ScribeMetaHeaderUtility.ReadToMetaElement(xmlTextReader))
 				{
-					using (XmlTextReader xmlTextReader = new XmlTextReader(streamReader))
-					{
-						XmlDocument xmlDocument = new XmlDocument();
-						xmlDocument.Load(xmlTextReader);
-						this.curXmlParent = xmlDocument.DocumentElement;
-					}
+					return;
 				}
-				Scribe.mode = LoadSaveMode.LoadingVars;
+				using XmlReader reader = xmlTextReader.ReadSubtree();
+				XmlDocument xmlDocument = new XmlDocument();
+				xmlDocument.Load(reader);
+				XmlElement xmlElement = xmlDocument.CreateElement("root");
+				xmlElement.AppendChild(xmlDocument.DocumentElement);
+				curXmlParent = xmlElement;
 			}
-			catch (Exception ex)
-			{
-				string str = "Exception while init loading file: ";
-				string str2 = "\n";
-				Exception ex2 = ex;
-				Log.Error(str + filePath + str2 + ((ex2 != null) ? ex2.ToString() : null));
-				this.ForceStop();
-				throw;
-			}
+			Scribe.mode = LoadSaveMode.LoadingVars;
 		}
-
-		// Token: 0x060035F8 RID: 13816 RVA: 0x00120090 File Offset: 0x0011E290
-		public void InitLoadingMetaHeaderOnly(string filePath)
+		catch (Exception ex)
 		{
-			if (Scribe.mode != LoadSaveMode.Inactive)
-			{
-				Log.Error("Called InitLoadingMetaHeaderOnly() but current mode is " + Scribe.mode.ToString());
-				Scribe.ForceStop();
-			}
-			try
-			{
-				using (StreamReader streamReader = new StreamReader(filePath))
-				{
-					using (XmlTextReader xmlTextReader = new XmlTextReader(streamReader))
-					{
-						if (ScribeMetaHeaderUtility.ReadToMetaElement(xmlTextReader))
-						{
-							using (XmlReader xmlReader = xmlTextReader.ReadSubtree())
-							{
-								XmlDocument xmlDocument = new XmlDocument();
-								xmlDocument.Load(xmlReader);
-								XmlElement xmlElement = xmlDocument.CreateElement("root");
-								xmlElement.AppendChild(xmlDocument.DocumentElement);
-								this.curXmlParent = xmlElement;
-								goto IL_87;
-							}
-							goto IL_85;
-							IL_87:
-							goto IL_93;
-						}
-						IL_85:
-						return;
-					}
-					IL_93:;
-				}
-				Scribe.mode = LoadSaveMode.LoadingVars;
-			}
-			catch (Exception ex)
-			{
-				string str = "Exception while init loading meta header: ";
-				string str2 = "\n";
-				Exception ex2 = ex;
-				Log.Error(str + filePath + str2 + ((ex2 != null) ? ex2.ToString() : null));
-				this.ForceStop();
-				throw;
-			}
+			Log.Error("Exception while init loading meta header: " + filePath + "\n" + ex);
+			ForceStop();
+			throw;
 		}
+	}
 
-		// Token: 0x060035F9 RID: 13817 RVA: 0x001201A8 File Offset: 0x0011E3A8
-		public void FinalizeLoading()
+	public void FinalizeLoading()
+	{
+		if (Scribe.mode != LoadSaveMode.LoadingVars)
 		{
-			if (Scribe.mode != LoadSaveMode.LoadingVars)
-			{
-				Log.Error("Called FinalizeLoading() but current mode is " + Scribe.mode.ToString());
-				return;
-			}
-			try
-			{
-				Scribe.ExitNode();
-				this.curXmlParent = null;
-				this.curParent = null;
-				this.curPathRelToParent = null;
-				Scribe.mode = LoadSaveMode.Inactive;
-				DeepProfiler.Start("ResolveAllCrossReferences()");
-				this.crossRefs.ResolveAllCrossReferences();
-				DeepProfiler.End();
-				DeepProfiler.Start("DoAllPostLoadInits()");
-				this.initer.DoAllPostLoadInits();
-				DeepProfiler.End();
-			}
-			catch (Exception ex)
-			{
-				string str = "Exception in FinalizeLoading(): ";
-				Exception ex2 = ex;
-				Log.Error(str + ((ex2 != null) ? ex2.ToString() : null));
-				this.ForceStop();
-				throw;
-			}
+			Log.Error("Called FinalizeLoading() but current mode is " + Scribe.mode);
+			return;
 		}
-
-		// Token: 0x060035FA RID: 13818 RVA: 0x0012026C File Offset: 0x0011E46C
-		public bool EnterNode(string nodeName)
+		try
 		{
-			if (this.curXmlParent != null)
-			{
-				XmlNode xmlNode = this.curXmlParent[nodeName];
-				if (xmlNode == null && char.IsDigit(nodeName[0]))
-				{
-					xmlNode = this.curXmlParent.ChildNodes[int.Parse(nodeName)];
-				}
-				if (xmlNode == null)
-				{
-					return false;
-				}
-				this.curXmlParent = xmlNode;
-			}
-			this.curPathRelToParent = this.curPathRelToParent + "/" + nodeName;
-			return true;
+			Scribe.ExitNode();
+			curXmlParent = null;
+			curParent = null;
+			curPathRelToParent = null;
+			Scribe.mode = LoadSaveMode.Inactive;
+			DeepProfiler.Start("ResolveAllCrossReferences()");
+			crossRefs.ResolveAllCrossReferences();
+			DeepProfiler.End();
+			DeepProfiler.Start("DoAllPostLoadInits()");
+			initer.DoAllPostLoadInits();
+			DeepProfiler.End();
 		}
-
-		// Token: 0x060035FB RID: 13819 RVA: 0x001202DC File Offset: 0x0011E4DC
-		public void ExitNode()
+		catch (Exception ex)
 		{
-			if (this.curXmlParent != null)
-			{
-				this.curXmlParent = this.curXmlParent.ParentNode;
-			}
-			if (this.curPathRelToParent != null)
-			{
-				int num = this.curPathRelToParent.LastIndexOf('/');
-				this.curPathRelToParent = ((num > 0) ? this.curPathRelToParent.Substring(0, num) : null);
-			}
+			Log.Error("Exception in FinalizeLoading(): " + ex);
+			ForceStop();
+			throw;
 		}
+	}
 
-		// Token: 0x060035FC RID: 13820 RVA: 0x00120334 File Offset: 0x0011E534
-		public void ForceStop()
+	public bool EnterNode(string nodeName)
+	{
+		if (curXmlParent != null)
 		{
-			this.curXmlParent = null;
-			this.curParent = null;
-			this.curPathRelToParent = null;
-			this.crossRefs.Clear(false);
-			this.initer.Clear();
-			if (Scribe.mode == LoadSaveMode.LoadingVars || Scribe.mode == LoadSaveMode.ResolvingCrossRefs || Scribe.mode == LoadSaveMode.PostLoadInit)
+			XmlNode xmlNode = curXmlParent[nodeName];
+			if (xmlNode == null && char.IsDigit(nodeName[0]))
 			{
-				Scribe.mode = LoadSaveMode.Inactive;
+				xmlNode = curXmlParent.ChildNodes[int.Parse(nodeName)];
 			}
+			if (xmlNode == null)
+			{
+				return false;
+			}
+			curXmlParent = xmlNode;
 		}
+		curPathRelToParent = curPathRelToParent + "/" + nodeName;
+		return true;
+	}
 
-		// Token: 0x0400289F RID: 10399
-		public CrossRefHandler crossRefs = new CrossRefHandler();
+	public void ExitNode()
+	{
+		if (curXmlParent != null)
+		{
+			curXmlParent = curXmlParent.ParentNode;
+		}
+		if (curPathRelToParent != null)
+		{
+			int num = curPathRelToParent.LastIndexOf('/');
+			curPathRelToParent = ((num > 0) ? curPathRelToParent.Substring(0, num) : null);
+		}
+	}
 
-		// Token: 0x040028A0 RID: 10400
-		public PostLoadIniter initer = new PostLoadIniter();
-
-		// Token: 0x040028A1 RID: 10401
-		public IExposable curParent;
-
-		// Token: 0x040028A2 RID: 10402
-		public XmlNode curXmlParent;
-
-		// Token: 0x040028A3 RID: 10403
-		public string curPathRelToParent;
+	public void ForceStop()
+	{
+		curXmlParent = null;
+		curParent = null;
+		curPathRelToParent = null;
+		crossRefs.Clear(errorIfNotEmpty: false);
+		initer.Clear();
+		if (Scribe.mode == LoadSaveMode.LoadingVars || Scribe.mode == LoadSaveMode.ResolvingCrossRefs || Scribe.mode == LoadSaveMode.PostLoadInit)
+		{
+			Scribe.mode = LoadSaveMode.Inactive;
+		}
 	}
 }

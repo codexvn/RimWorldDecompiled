@@ -1,89 +1,211 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public abstract class JobDriver_AffectRoof : JobDriver
 {
-	// Token: 0x02001164 RID: 4452
-	public abstract class JobDriver_AffectRoof : JobDriver
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass12_0
 	{
-		// Token: 0x170010CF RID: 4303
-		// (get) Token: 0x06006CE9 RID: 27881 RVA: 0x00222E94 File Offset: 0x00221094
-		protected IntVec3 Cell
+		public JobDriver_AffectRoof _003C_003E4__this;
+
+		public Toil doWork;
+
+		internal void _003CMakeNewToils_003Eb__0()
 		{
-			get
+			_003C_003E4__this.workLeft = 65f;
+		}
+
+		internal void _003CMakeNewToils_003Eb__1(int delta)
+		{
+			float num = doWork.actor.GetStatValue(StatDefOf.ConstructionSpeed) * 1.7f * (float)delta;
+			_003C_003E4__this.workLeft -= num;
+			if (_003C_003E4__this.workLeft <= 0f)
 			{
-				return this.job.GetTarget(TargetIndex.A).Cell;
+				_003C_003E4__this.DoEffect();
+				_003C_003E4__this.ReadyForNextToil();
 			}
 		}
 
-		// Token: 0x170010D0 RID: 4304
-		// (get) Token: 0x06006CEA RID: 27882
-		protected abstract PathEndMode PathEndMode { get; }
-
-		// Token: 0x06006CEB RID: 27883
-		protected abstract void DoEffect();
-
-		// Token: 0x06006CEC RID: 27884
-		protected abstract bool DoWorkFailOn();
-
-		// Token: 0x06006CED RID: 27885 RVA: 0x00222EB5 File Offset: 0x002210B5
-		public override void ExposeData()
+		internal float _003CMakeNewToils_003Eb__2()
 		{
-			base.ExposeData();
-			Scribe_Values.Look<float>(ref this.workLeft, "workLeft", 0f, false);
+			return 1f - _003C_003E4__this.workLeft / 65f;
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__12 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_AffectRoof _003C_003E4__this;
+
+		private _003C_003Ec__DisplayClass12_0 _003C_003E8__1;
+
+		Toil IEnumerator<Toil>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x06006CEE RID: 27886 RVA: 0x00222ED3 File Offset: 0x002210D3
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		object IEnumerator.Current
 		{
-			return this.pawn.Reserve(this.Cell, this.job, 1, -1, ReservationLayerDefOf.Ceiling, errorOnFailed, false);
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x06006CEF RID: 27887 RVA: 0x00222EFA File Offset: 0x002210FA
-		protected override IEnumerable<Toil> MakeNewToils()
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__12(int _003C_003E1__state)
 		{
-			this.FailOnDespawnedOrNull(TargetIndex.B);
-			yield return Toils_Goto.Goto(TargetIndex.B, this.PathEndMode);
-			Toil doWork = ToilMaker.MakeToil("MakeNewToils");
-			doWork.initAction = delegate()
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E8__1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_AffectRoof jobDriver_AffectRoof = _003C_003E4__this;
+			switch (num)
 			{
-				this.workLeft = 65f;
-			};
-			doWork.tickIntervalAction = delegate(int delta)
-			{
-				float num = doWork.actor.GetStatValue(StatDefOf.ConstructionSpeed, true, -1) * 1.7f * (float)delta;
-				this.workLeft -= num;
-				if (this.workLeft <= 0f)
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E8__1 = new _003C_003Ec__DisplayClass12_0();
+				_003C_003E8__1._003C_003E4__this = _003C_003E4__this;
+				jobDriver_AffectRoof.FailOnDespawnedOrNull(TargetIndex.B);
+				_003C_003E2__current = Toils_Goto.Goto(TargetIndex.B, jobDriver_AffectRoof.PathEndMode);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E8__1.doWork = ToilMaker.MakeToil("MakeNewToils");
+				_003C_003E8__1.doWork.initAction = delegate
 				{
-					this.DoEffect();
-					this.ReadyForNextToil();
-					return;
-				}
-			};
-			doWork.FailOnCannotTouch(TargetIndex.B, this.PathEndMode);
-			doWork.PlaySoundAtStart(SoundDefOf.Roof_Start);
-			doWork.PlaySoundAtEnd(SoundDefOf.Roof_Finish);
-			doWork.WithEffect(EffecterDefOf.RoofWork, TargetIndex.A, null);
-			doWork.FailOn(new Func<bool>(this.DoWorkFailOn));
-			doWork.WithProgressBar(TargetIndex.A, () => 1f - this.workLeft / 65f, false, -0.5f, false);
-			doWork.defaultCompleteMode = ToilCompleteMode.Never;
-			doWork.activeSkill = (() => SkillDefOf.Construction);
-			yield return doWork;
-			yield break;
+					_003C_003E8__1._003C_003E4__this.workLeft = 65f;
+				};
+				_003C_003E8__1.doWork.tickIntervalAction = delegate(int delta)
+				{
+					float num2 = _003C_003E8__1.doWork.actor.GetStatValue(StatDefOf.ConstructionSpeed) * 1.7f * (float)delta;
+					_003C_003E8__1._003C_003E4__this.workLeft = _003C_003E8__1._003C_003E4__this.workLeft - num2;
+					if (_003C_003E8__1._003C_003E4__this.workLeft <= 0f)
+					{
+						_003C_003E8__1._003C_003E4__this.DoEffect();
+						_003C_003E8__1._003C_003E4__this.ReadyForNextToil();
+					}
+				};
+				_003C_003E8__1.doWork.FailOnCannotTouch(TargetIndex.B, jobDriver_AffectRoof.PathEndMode);
+				_003C_003E8__1.doWork.PlaySoundAtStart(SoundDefOf.Roof_Start);
+				_003C_003E8__1.doWork.PlaySoundAtEnd(SoundDefOf.Roof_Finish);
+				_003C_003E8__1.doWork.WithEffect(EffecterDefOf.RoofWork, TargetIndex.A, null);
+				_003C_003E8__1.doWork.FailOn(jobDriver_AffectRoof.DoWorkFailOn);
+				_003C_003E8__1.doWork.WithProgressBar(TargetIndex.A, () => 1f - _003C_003E8__1._003C_003E4__this.workLeft / 65f);
+				_003C_003E8__1.doWork.defaultCompleteMode = ToilCompleteMode.Never;
+				_003C_003E8__1.doWork.activeSkill = () => SkillDefOf.Construction;
+				_003C_003E2__current = _003C_003E8__1.doWork;
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				return false;
+			}
 		}
 
-		// Token: 0x04004C67 RID: 19559
-		private float workLeft;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x04004C68 RID: 19560
-		private const TargetIndex CellInd = TargetIndex.A;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04004C69 RID: 19561
-		private const TargetIndex GotoTargetInd = TargetIndex.B;
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__12 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__12(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x04004C6A RID: 19562
-		private const float BaseWorkAmount = 65f;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private float workLeft;
+
+	private const TargetIndex CellInd = TargetIndex.A;
+
+	private const TargetIndex GotoTargetInd = TargetIndex.B;
+
+	private const float BaseWorkAmount = 65f;
+
+	protected IntVec3 Cell => job.GetTarget(TargetIndex.A).Cell;
+
+	protected abstract PathEndMode PathEndMode { get; }
+
+	protected abstract void DoEffect();
+
+	protected abstract bool DoWorkFailOn();
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref workLeft, "workLeft", 0f);
+	}
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return pawn.Reserve(Cell, job, 1, -1, ReservationLayerDefOf.Ceiling, errorOnFailed);
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__12))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__12(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

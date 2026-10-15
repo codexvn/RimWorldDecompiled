@@ -1,200 +1,307 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_Wear : JobDriver
 {
-	// Token: 0x020013C7 RID: 5063
-	public class JobDriver_Wear : JobDriver
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass13_0
 	{
-		// Token: 0x17001388 RID: 5000
-		// (get) Token: 0x06007BFC RID: 31740 RVA: 0x00255718 File Offset: 0x00253918
-		private Apparel Apparel
+		public JobDriver_Wear _003C_003E4__this;
+
+		public bool usingSource;
+
+		internal void _003CMakeNewToils_003Eb__1(int delta)
 		{
-			get
-			{
-				return (Apparel)this.job.GetTarget(TargetIndex.A).Thing;
-			}
+			_003C_003E4__this.unequipBuffer += delta;
+			_003C_003E4__this.TryUnequipSomething();
+			_003C_003E4__this.pawn.rotationTracker.FaceTarget(_003C_003E4__this.Apparel.PositionHeld);
 		}
 
-		// Token: 0x17001389 RID: 5001
-		// (get) Token: 0x06007BFD RID: 31741 RVA: 0x00255740 File Offset: 0x00253940
-		private bool TargetIsOnApparelSource
+		internal void _003CMakeNewToils_003Eb__0()
 		{
-			get
-			{
-				Apparel apparel = this.Apparel;
-				if (apparel != null && !apparel.Spawned)
-				{
-					IApparelSource apparelSource = apparel.ParentHolder as IApparelSource;
-					if (apparelSource != null)
-					{
-						return apparelSource is Thing;
-					}
-				}
-				return false;
-			}
-		}
-
-		// Token: 0x1700138A RID: 5002
-		// (get) Token: 0x06007BFE RID: 31742 RVA: 0x0025577C File Offset: 0x0025397C
-		private IApparelSource ApparelSource
-		{
-			get
-			{
-				return (IApparelSource)this.job.GetTarget(TargetIndex.B).Thing;
-			}
-		}
-
-		// Token: 0x06007BFF RID: 31743 RVA: 0x002557A2 File Offset: 0x002539A2
-		public override void ExposeData()
-		{
-			base.ExposeData();
-			Scribe_Values.Look<int>(ref this.duration, "duration", 0, false);
-			Scribe_Values.Look<int>(ref this.unequipBuffer, "unequipBuffer", 0, false);
-		}
-
-		// Token: 0x06007C00 RID: 31744 RVA: 0x002557D0 File Offset: 0x002539D0
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
-		{
-			if (this.TargetIsOnApparelSource)
-			{
-				return this.pawn.Reserve((Thing)this.Apparel.ParentHolder, this.job, 1, -1, null, errorOnFailed, false);
-			}
-			return this.pawn.Reserve(this.Apparel, this.job, 1, -1, null, errorOnFailed, false);
-		}
-
-		// Token: 0x06007C01 RID: 31745 RVA: 0x00255834 File Offset: 0x00253A34
-		public override void Notify_Starting()
-		{
-			base.Notify_Starting();
-			if (this.TargetIsOnApparelSource)
-			{
-				this.job.targetB = (Thing)this.Apparel.ParentHolder;
-			}
-			this.duration = (int)(this.Apparel.GetStatValue(StatDefOf.EquipDelay, true, -1) * 60f);
-			Apparel apparel = this.Apparel;
-			List<Apparel> wornApparel = this.pawn.apparel.WornApparel;
-			for (int i = wornApparel.Count - 1; i >= 0; i--)
-			{
-				if (!ApparelUtility.CanWearTogether(apparel.def, wornApparel[i].def, this.pawn.RaceProps.body))
-				{
-					this.duration += (int)(wornApparel[i].GetStatValue(StatDefOf.EquipDelay, true, -1) * 60f);
-				}
-			}
-		}
-
-		// Token: 0x06007C02 RID: 31746 RVA: 0x00255909 File Offset: 0x00253B09
-		protected override IEnumerable<Toil> MakeNewToils()
-		{
-			this.FailOnBurningImmobile(TargetIndex.A);
-			bool usingSource = this.TargetIsOnApparelSource;
+			Apparel apparel = _003C_003E4__this.Apparel;
 			if (usingSource)
 			{
-				yield return Toils_Goto.GotoCell(TargetIndex.B, PathEndMode.InteractionCell).FailOnDespawnedNullOrForbidden(TargetIndex.B);
+				_003C_003E4__this.ApparelSource.RemoveApparel(apparel);
+			}
+			_003C_003E4__this.pawn.apparel.Wear(apparel);
+			if (_003C_003E4__this.pawn.outfits != null && _003C_003E4__this.job.playerForced)
+			{
+				_003C_003E4__this.pawn.outfits.forcedHandler.SetForced(apparel, forced: true);
+			}
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__13 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_Wear _003C_003E4__this;
+
+		private _003C_003Ec__DisplayClass13_0 _003C_003E8__1;
+
+		Toil IEnumerator<Toil>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__13(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E8__1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_Wear jobDriver_Wear = _003C_003E4__this;
+			Toil toil;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E8__1 = new _003C_003Ec__DisplayClass13_0();
+				_003C_003E8__1._003C_003E4__this = _003C_003E4__this;
+				jobDriver_Wear.FailOnBurningImmobile(TargetIndex.A);
+				_003C_003E8__1.usingSource = jobDriver_Wear.TargetIsOnApparelSource;
+				if (_003C_003E8__1.usingSource)
+				{
+					_003C_003E2__current = Toils_Goto.GotoCell(TargetIndex.B, PathEndMode.InteractionCell).FailOnDespawnedNullOrForbidden(TargetIndex.B);
+					_003C_003E1__state = 1;
+					return true;
+				}
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.ClosestTouch).FailOnDespawnedNullOrForbidden(TargetIndex.A);
+				_003C_003E1__state = 2;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				goto IL_00bc;
+			case 2:
+				_003C_003E1__state = -1;
+				goto IL_00bc;
+			case 3:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.Do(delegate
+				{
+					Apparel apparel = _003C_003E8__1._003C_003E4__this.Apparel;
+					if (_003C_003E8__1.usingSource)
+					{
+						_003C_003E8__1._003C_003E4__this.ApparelSource.RemoveApparel(apparel);
+					}
+					_003C_003E8__1._003C_003E4__this.pawn.apparel.Wear(apparel);
+					if (_003C_003E8__1._003C_003E4__this.pawn.outfits != null && _003C_003E8__1._003C_003E4__this.job.playerForced)
+					{
+						_003C_003E8__1._003C_003E4__this.pawn.outfits.forcedHandler.SetForced(apparel, forced: true);
+					}
+				});
+				_003C_003E1__state = 4;
+				return true;
+			case 4:
+				{
+					_003C_003E1__state = -1;
+					return false;
+				}
+				IL_00bc:
+				toil = ToilMaker.MakeToil("MakeNewToils");
+				toil.tickIntervalAction = delegate(int delta)
+				{
+					_003C_003E8__1._003C_003E4__this.unequipBuffer = _003C_003E8__1._003C_003E4__this.unequipBuffer + delta;
+					_003C_003E8__1._003C_003E4__this.TryUnequipSomething();
+					_003C_003E8__1._003C_003E4__this.pawn.rotationTracker.FaceTarget(_003C_003E8__1._003C_003E4__this.Apparel.PositionHeld);
+				};
+				toil.WithProgressBarToilDelay((!_003C_003E8__1.usingSource) ? TargetIndex.A : TargetIndex.B);
+				toil.FailOnDespawnedNullOrForbidden((!_003C_003E8__1.usingSource) ? TargetIndex.A : TargetIndex.B);
+				toil.defaultCompleteMode = ToilCompleteMode.Delay;
+				toil.defaultDuration = jobDriver_Wear.duration;
+				toil.handlingFacing = true;
+				toil.PlaySustainerOrSound(jobDriver_Wear.GetCurrentWearSound);
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 3;
+				return true;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__13 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
 			}
 			else
 			{
-				yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.ClosestTouch, false).FailOnDespawnedNullOrForbidden(TargetIndex.A);
+				result = new _003CMakeNewToils_003Ed__13(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
-			Toil toil = ToilMaker.MakeToil("MakeNewToils");
-			toil.tickIntervalAction = delegate(int delta)
-			{
-				this.unequipBuffer += delta;
-				this.TryUnequipSomething();
-				this.pawn.rotationTracker.FaceTarget(this.Apparel.PositionHeld);
-			};
-			toil.WithProgressBarToilDelay(usingSource ? TargetIndex.B : TargetIndex.A, false, -0.5f);
-			toil.FailOnDespawnedNullOrForbidden(usingSource ? TargetIndex.B : TargetIndex.A);
-			toil.defaultCompleteMode = ToilCompleteMode.Delay;
-			toil.defaultDuration = this.duration;
-			toil.handlingFacing = true;
-			toil.PlaySustainerOrSound(new Func<SoundDef>(this.GetCurrentWearSound), 1f);
-			yield return toil;
-			yield return Toils_General.Do(delegate
-			{
-				Apparel apparel = this.Apparel;
-				if (usingSource)
-				{
-					this.ApparelSource.RemoveApparel(apparel);
-				}
-				this.pawn.apparel.Wear(apparel, true, false);
-				if (this.pawn.outfits != null && this.job.playerForced)
-				{
-					this.pawn.outfits.forcedHandler.SetForced(apparel, true);
-				}
-			});
-			yield break;
+			return result;
 		}
 
-		// Token: 0x06007C03 RID: 31747 RVA: 0x0025591C File Offset: 0x00253B1C
-		private SoundDef GetCurrentWearSound()
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			Apparel apparel = this.Apparel;
-			List<Apparel> wornApparel = this.pawn.apparel.WornApparel;
-			int i = wornApparel.Count - 1;
-			while (i >= 0)
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private int duration;
+
+	private int unequipBuffer;
+
+	private const TargetIndex ApparelInd = TargetIndex.A;
+
+	private const TargetIndex ApparelSourceIndex = TargetIndex.B;
+
+	private Apparel Apparel => (Apparel)job.GetTarget(TargetIndex.A).Thing;
+
+	private bool TargetIsOnApparelSource
+	{
+		get
+		{
+			Apparel apparel = Apparel;
+			if (apparel != null && !apparel.Spawned && apparel.ParentHolder is IApparelSource apparelSource)
 			{
-				if (!ApparelUtility.CanWearTogether(apparel.def, wornApparel[i].def, this.pawn.RaceProps.body))
+				return apparelSource is Thing;
+			}
+			return false;
+		}
+	}
+
+	private IApparelSource ApparelSource => (IApparelSource)job.GetTarget(TargetIndex.B).Thing;
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref duration, "duration", 0);
+		Scribe_Values.Look(ref unequipBuffer, "unequipBuffer", 0);
+	}
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		if (TargetIsOnApparelSource)
+		{
+			return pawn.Reserve((Thing)Apparel.ParentHolder, job, 1, -1, null, errorOnFailed);
+		}
+		return pawn.Reserve(Apparel, job, 1, -1, null, errorOnFailed);
+	}
+
+	public override void Notify_Starting()
+	{
+		base.Notify_Starting();
+		if (TargetIsOnApparelSource)
+		{
+			job.targetB = (Thing)Apparel.ParentHolder;
+		}
+		duration = (int)(Apparel.GetStatValue(StatDefOf.EquipDelay) * 60f);
+		Apparel apparel = Apparel;
+		List<Apparel> wornApparel = pawn.apparel.WornApparel;
+		for (int num = wornApparel.Count - 1; num >= 0; num--)
+		{
+			if (!ApparelUtility.CanWearTogether(apparel.def, wornApparel[num].def, pawn.RaceProps.body))
+			{
+				duration += (int)(wornApparel[num].GetStatValue(StatDefOf.EquipDelay) * 60f);
+			}
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__13))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__13(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	private SoundDef GetCurrentWearSound()
+	{
+		Apparel apparel = Apparel;
+		List<Apparel> wornApparel = pawn.apparel.WornApparel;
+		for (int num = wornApparel.Count - 1; num >= 0; num--)
+		{
+			if (!ApparelUtility.CanWearTogether(apparel.def, wornApparel[num].def, pawn.RaceProps.body))
+			{
+				if (unequipBuffer >= (int)(wornApparel[num].GetStatValue(StatDefOf.EquipDelay) * 60f))
 				{
-					if (this.unequipBuffer < (int)(wornApparel[i].GetStatValue(StatDefOf.EquipDelay, true, -1) * 60f))
-					{
-						return wornApparel[i].def.apparel.soundRemove;
-					}
 					break;
 				}
-				else
-				{
-					i--;
-				}
+				return wornApparel[num].def.apparel.soundRemove;
 			}
-			return apparel.def.apparel.soundWear;
 		}
+		return apparel.def.apparel.soundWear;
+	}
 
-		// Token: 0x06007C04 RID: 31748 RVA: 0x002559C8 File Offset: 0x00253BC8
-		private void TryUnequipSomething()
+	private void TryUnequipSomething()
+	{
+		Apparel apparel = Apparel;
+		List<Apparel> wornApparel = pawn.apparel.WornApparel;
+		for (int num = wornApparel.Count - 1; num >= 0; num--)
 		{
-			Apparel apparel = this.Apparel;
-			List<Apparel> wornApparel = this.pawn.apparel.WornApparel;
-			int i = wornApparel.Count - 1;
-			while (i >= 0)
+			if (!ApparelUtility.CanWearTogether(apparel.def, wornApparel[num].def, pawn.RaceProps.body))
 			{
-				if (!ApparelUtility.CanWearTogether(apparel.def, wornApparel[i].def, this.pawn.RaceProps.body))
+				int num2 = (int)(wornApparel[num].GetStatValue(StatDefOf.EquipDelay) * 60f);
+				if (unequipBuffer >= num2)
 				{
-					int num = (int)(wornApparel[i].GetStatValue(StatDefOf.EquipDelay, true, -1) * 60f);
-					if (this.unequipBuffer < num)
+					bool forbid = pawn.Faction != null && pawn.Faction.HostileTo(Faction.OfPlayer);
+					if (!pawn.apparel.TryDrop(wornApparel[num], out var _, pawn.PositionHeld, forbid))
 					{
-						break;
+						Log.Error(pawn?.ToString() + " could not drop " + wornApparel[num].ToStringSafe());
+						EndJobWith(JobCondition.Errored);
 					}
-					bool forbid = this.pawn.Faction != null && this.pawn.Faction.HostileTo(Faction.OfPlayer);
-					Apparel apparel2;
-					if (!this.pawn.apparel.TryDrop(wornApparel[i], out apparel2, this.pawn.PositionHeld, forbid))
-					{
-						Pawn pawn = this.pawn;
-						Log.Error(((pawn != null) ? pawn.ToString() : null) + " could not drop " + wornApparel[i].ToStringSafe<Apparel>());
-						base.EndJobWith(JobCondition.Errored);
-						return;
-					}
-					break;
 				}
-				else
-				{
-					i--;
-				}
+				break;
 			}
 		}
-
-		// Token: 0x040053BB RID: 21435
-		private int duration;
-
-		// Token: 0x040053BC RID: 21436
-		private int unequipBuffer;
-
-		// Token: 0x040053BD RID: 21437
-		private const TargetIndex ApparelInd = TargetIndex.A;
-
-		// Token: 0x040053BE RID: 21438
-		private const TargetIndex ApparelSourceIndex = TargetIndex.B;
 	}
 }

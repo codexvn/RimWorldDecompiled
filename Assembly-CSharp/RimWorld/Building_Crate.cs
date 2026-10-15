@@ -1,173 +1,322 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Building_Crate : Building_Casket, IThingGlower
 {
-	// Token: 0x020029EC RID: 10732
-	public class Building_Crate : Building_Casket, IThingGlower
+	[CompilerGenerated]
+	private sealed class _003CGetMultiSelectFloatMenuOptions_003Ed__13 : IEnumerable<FloatMenuOption>, IEnumerable, IEnumerator<FloatMenuOption>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700248F RID: 9359
-		// (get) Token: 0x0600ECDE RID: 60638 RVA: 0x003E28D8 File Offset: 0x003E0AD8
-		public override int OpenTicks
+		private int _003C_003E1__state;
+
+		private FloatMenuOption _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Building_Crate _003C_003E4__this;
+
+		private IEnumerable<Pawn> selPawns;
+
+		public IEnumerable<Pawn> _003C_003E3__selPawns;
+
+		private IEnumerator<FloatMenuOption> _003C_003E7__wrap1;
+
+		FloatMenuOption IEnumerator<FloatMenuOption>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return 100;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600ECDF RID: 60639 RVA: 0x0044B336 File Offset: 0x00449536
-		public bool ShouldBeLitNow()
+		object IEnumerator.Current
 		{
-			return base.HasAnyContents;
-		}
-
-		// Token: 0x17002490 RID: 9360
-		// (get) Token: 0x0600ECE0 RID: 60640 RVA: 0x0044C0DE File Offset: 0x0044A2DE
-		public override bool CanOpen
-		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.hackable == null)
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetMultiSelectFloatMenuOptions_003Ed__13(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
 				{
-					this.hackable = base.GetComp<CompHackable>();
 				}
-				return (this.hackable == null || this.hackable.IsHacked) && base.CanOpen;
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				Building_Crate CS_0024_003C_003E8__locals12 = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((ThingWithComps)CS_0024_003C_003E8__locals12).GetMultiSelectFloatMenuOptions(selPawns).GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0080;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0080;
+				case 2:
+					_003C_003E1__state = -1;
+					return false;
+				case 3:
+					_003C_003E1__state = -1;
+					return false;
+				case 4:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_0080:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						FloatMenuOption current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (!CS_0024_003C_003E8__locals12.CanOpen)
+					{
+						return false;
+					}
+					tmpAllowedPawns.Clear();
+					foreach (Pawn item in selPawns)
+					{
+						if (item.RaceProps.Humanlike && item.CanReach(CS_0024_003C_003E8__locals12, PathEndMode.InteractionCell, Danger.Deadly))
+						{
+							tmpAllowedPawns.Add(item);
+						}
+					}
+					if (tmpAllowedPawns.Count <= 0)
+					{
+						_003C_003E2__current = new FloatMenuOption("CannotOpen".Translate(CS_0024_003C_003E8__locals12) + ": " + "NoPath".Translate().CapitalizeFirst(), null);
+						_003C_003E1__state = 2;
+						return true;
+					}
+					tmpAllowedPawns.Clear();
+					foreach (Pawn item2 in selPawns)
+					{
+						if (item2.RaceProps.Humanlike && CS_0024_003C_003E8__locals12.IsCapableOfOpening(item2))
+						{
+							tmpAllowedPawns.Add(item2);
+						}
+					}
+					if (tmpAllowedPawns.Count <= 0)
+					{
+						_003C_003E2__current = new FloatMenuOption("CannotOpen".Translate(CS_0024_003C_003E8__locals12.Label) + ": " + "Incapable".Translate(), null);
+						_003C_003E1__state = 3;
+						return true;
+					}
+					tmpAllowedPawns.Clear();
+					foreach (Pawn item3 in selPawns)
+					{
+						if (item3.RaceProps.Humanlike && CS_0024_003C_003E8__locals12.IsCapableOfOpening(item3) && item3.CanReach(CS_0024_003C_003E8__locals12, PathEndMode.InteractionCell, Danger.Deadly))
+						{
+							tmpAllowedPawns.Add(item3);
+						}
+					}
+					if (tmpAllowedPawns.Count <= 0)
+					{
+						break;
+					}
+					_003C_003E2__current = new FloatMenuOption("Open".Translate(CS_0024_003C_003E8__locals12), delegate
+					{
+						tmpAllowedPawns[0].jobs.TryTakeOrderedJob(JobMaker.MakeJob(JobDefOf.Open, CS_0024_003C_003E8__locals12), JobTag.Misc);
+						for (int i = 1; i < tmpAllowedPawns.Count; i++)
+						{
+							FloatMenuOptionProvider_DraftedMove.PawnGotoAction(CS_0024_003C_003E8__locals12.Position, tmpAllowedPawns[i], RCellFinder.BestOrderedGotoDestNear(CS_0024_003C_003E8__locals12.Position, tmpAllowedPawns[i]));
+						}
+					});
+					_003C_003E1__state = 4;
+					return true;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x0600ECE1 RID: 60641 RVA: 0x0044C111 File Offset: 0x0044A311
-		public override void SpawnSetup(Map map, bool respawningAfterLoad)
+		bool IEnumerator.MoveNext()
 		{
-			if (this.def == ThingDefOf.AncientSecurityCrate && !ModLister.CheckIdeology("Ancient security crate"))
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				return;
+				_003C_003E7__wrap1.Dispose();
 			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<FloatMenuOption> IEnumerable<FloatMenuOption>.GetEnumerator()
+		{
+			_003CGetMultiSelectFloatMenuOptions_003Ed__13 _003CGetMultiSelectFloatMenuOptions_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CGetMultiSelectFloatMenuOptions_003Ed__ = this;
+			}
+			else
+			{
+				_003CGetMultiSelectFloatMenuOptions_003Ed__ = new _003CGetMultiSelectFloatMenuOptions_003Ed__13(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CGetMultiSelectFloatMenuOptions_003Ed__.selPawns = _003C_003E3__selPawns;
+			return _003CGetMultiSelectFloatMenuOptions_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<FloatMenuOption>)this).GetEnumerator();
+		}
+	}
+
+	public const string CrateContentsChanged = "CrateContentsChanged";
+
+	private CompHackable hackable;
+
+	private static List<Pawn> tmpAllowedPawns = new List<Pawn>();
+
+	public override int OpenTicks => 100;
+
+	public override bool CanOpen
+	{
+		get
+		{
+			if (hackable == null)
+			{
+				hackable = GetComp<CompHackable>();
+			}
+			if (hackable != null && !hackable.IsHacked)
+			{
+				return false;
+			}
+			return base.CanOpen;
+		}
+	}
+
+	public bool ShouldBeLitNow()
+	{
+		return base.HasAnyContents;
+	}
+
+	public override void SpawnSetup(Map map, bool respawningAfterLoad)
+	{
+		if (def != ThingDefOf.AncientSecurityCrate || ModLister.CheckIdeology("Ancient security crate"))
+		{
 			base.SpawnSetup(map, respawningAfterLoad);
 		}
+	}
 
-		// Token: 0x0600ECE2 RID: 60642 RVA: 0x0044C135 File Offset: 0x0044A335
-		public override bool TryAcceptThing(Thing thing, bool allowSpecialEffects = true)
+	public override bool TryAcceptThing(Thing thing, bool allowSpecialEffects = true)
+	{
+		if (base.TryAcceptThing(thing, allowSpecialEffects))
 		{
-			if (base.TryAcceptThing(thing, allowSpecialEffects))
-			{
-				base.BroadcastCompSignal("CrateContentsChanged");
-				return true;
-			}
-			return false;
+			BroadcastCompSignal("CrateContentsChanged");
+			return true;
 		}
+		return false;
+	}
 
-		// Token: 0x0600ECE3 RID: 60643 RVA: 0x0044C150 File Offset: 0x0044A350
-		public override void EjectContents()
+	public override void EjectContents()
+	{
+		innerContainer.TryDropAll(base.Position, base.Map, ThingPlaceMode.Near, null, (IntVec3 c) => c.GetEdifice(base.Map) == null);
+		contentsKnown = true;
+		if (def.building.openingEffect != null)
 		{
-			this.innerContainer.TryDropAll(base.Position, base.Map, ThingPlaceMode.Near, null, (IntVec3 c) => c.GetEdifice(base.Map) == null, true);
-			this.contentsKnown = true;
-			if (this.def.building.openingEffect != null)
-			{
-				Effecter effecter = this.def.building.openingEffect.Spawn();
-				effecter.Trigger(new TargetInfo(base.Position, base.Map, false), null, -1);
-				effecter.Cleanup();
-			}
-			base.BroadcastCompSignal("CrateContentsChanged");
+			Effecter effecter = def.building.openingEffect.Spawn();
+			effecter.Trigger(new TargetInfo(base.Position, base.Map), null);
+			effecter.Cleanup();
 		}
+		BroadcastCompSignal("CrateContentsChanged");
+	}
 
-		// Token: 0x0600ECE4 RID: 60644 RVA: 0x0044C1E2 File Offset: 0x0044A3E2
-		protected override void ReceiveCompSignal(string signal)
+	protected override void ReceiveCompSignal(string signal)
+	{
+		base.ReceiveCompSignal(signal);
+		if (signal == "Hacked")
 		{
-			base.ReceiveCompSignal(signal);
-			if (signal == "Hacked")
-			{
-				this.Open();
-			}
+			Open();
 		}
+	}
 
-		// Token: 0x0600ECE5 RID: 60645 RVA: 0x0044C1FE File Offset: 0x0044A3FE
-		public override void Open()
+	public override void Open()
+	{
+		contentsKnown = true;
+		if (CanOpen)
 		{
-			this.contentsKnown = true;
-			if (!this.CanOpen)
-			{
-				return;
-			}
 			base.Open();
 		}
+	}
 
-		// Token: 0x0600ECE6 RID: 60646 RVA: 0x0044C216 File Offset: 0x0044A416
-		public override IEnumerable<FloatMenuOption> GetMultiSelectFloatMenuOptions(IEnumerable<Pawn> selPawns)
+	[IteratorStateMachine(typeof(_003CGetMultiSelectFloatMenuOptions_003Ed__13))]
+	public override IEnumerable<FloatMenuOption> GetMultiSelectFloatMenuOptions(IEnumerable<Pawn> selPawns)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetMultiSelectFloatMenuOptions_003Ed__13(-2)
 		{
-			foreach (FloatMenuOption floatMenuOption in base.GetMultiSelectFloatMenuOptions(selPawns))
-			{
-				yield return floatMenuOption;
-			}
-			IEnumerator<FloatMenuOption> enumerator = null;
-			if (!this.CanOpen)
-			{
-				yield break;
-			}
-			Building_Crate.tmpAllowedPawns.Clear();
-			foreach (Pawn pawn in selPawns)
-			{
-				if (pawn.RaceProps.Humanlike && pawn.CanReach(this, PathEndMode.InteractionCell, Danger.Deadly, false, false, TraverseMode.ByPawn))
-				{
-					Building_Crate.tmpAllowedPawns.Add(pawn);
-				}
-			}
-			if (Building_Crate.tmpAllowedPawns.Count <= 0)
-			{
-				yield return new FloatMenuOption("CannotOpen".Translate(this) + ": " + "NoPath".Translate().CapitalizeFirst(), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-				yield break;
-			}
-			Building_Crate.tmpAllowedPawns.Clear();
-			foreach (Pawn pawn2 in selPawns)
-			{
-				if (pawn2.RaceProps.Humanlike && this.IsCapableOfOpening(pawn2))
-				{
-					Building_Crate.tmpAllowedPawns.Add(pawn2);
-				}
-			}
-			if (Building_Crate.tmpAllowedPawns.Count <= 0)
-			{
-				yield return new FloatMenuOption("CannotOpen".Translate(this.Label) + ": " + "Incapable".Translate(), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-				yield break;
-			}
-			Building_Crate.tmpAllowedPawns.Clear();
-			foreach (Pawn pawn3 in selPawns)
-			{
-				if (pawn3.RaceProps.Humanlike && this.IsCapableOfOpening(pawn3) && pawn3.CanReach(this, PathEndMode.InteractionCell, Danger.Deadly, false, false, TraverseMode.ByPawn))
-				{
-					Building_Crate.tmpAllowedPawns.Add(pawn3);
-				}
-			}
-			if (Building_Crate.tmpAllowedPawns.Count > 0)
-			{
-				yield return new FloatMenuOption("Open".Translate(this), delegate()
-				{
-					Building_Crate.tmpAllowedPawns[0].jobs.TryTakeOrderedJob(JobMaker.MakeJob(JobDefOf.Open, this), new JobTag?(JobTag.Misc), false);
-					for (int i = 1; i < Building_Crate.tmpAllowedPawns.Count; i++)
-					{
-						FloatMenuOptionProvider_DraftedMove.PawnGotoAction(base.Position, Building_Crate.tmpAllowedPawns[i], RCellFinder.BestOrderedGotoDestNear(base.Position, Building_Crate.tmpAllowedPawns[i], null, true));
-					}
-				}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-			}
-			yield break;
-			yield break;
-		}
+			_003C_003E4__this = this,
+			_003C_003E3__selPawns = selPawns
+		};
+	}
 
-		// Token: 0x0600ECE7 RID: 60647 RVA: 0x0044C22D File Offset: 0x0044A42D
-		private bool IsCapableOfOpening(Pawn pawn)
+	private bool IsCapableOfOpening(Pawn pawn)
+	{
+		if (!pawn.IsSubhuman)
 		{
-			return !pawn.IsSubhuman && pawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation);
+			return pawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation);
 		}
-
-		// Token: 0x04009CE9 RID: 40169
-		public const string CrateContentsChanged = "CrateContentsChanged";
-
-		// Token: 0x04009CEA RID: 40170
-		private CompHackable hackable;
-
-		// Token: 0x04009CEB RID: 40171
-		private static List<Pawn> tmpAllowedPawns = new List<Pawn>();
+		return false;
 	}
 }

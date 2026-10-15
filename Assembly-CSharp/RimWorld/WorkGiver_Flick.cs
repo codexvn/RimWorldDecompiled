@@ -1,57 +1,188 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class WorkGiver_Flick : WorkGiver_Scanner
 {
-	// Token: 0x02001626 RID: 5670
-	public class WorkGiver_Flick : WorkGiver_Scanner
+	[CompilerGenerated]
+	private sealed class _003CPotentialWorkThingsGlobal_003Ed__3 : IEnumerable<Thing>, IEnumerable, IEnumerator<Thing>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001484 RID: 5252
-		// (get) Token: 0x060085AF RID: 34223 RVA: 0x000E96BB File Offset: 0x000E78BB
-		public override PathEndMode PathEndMode
+		private int _003C_003E1__state;
+
+		private Thing _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private Pawn pawn;
+
+		public Pawn _003C_003E3__pawn;
+
+		private List<Designation>.Enumerator _003C_003E7__wrap1;
+
+		Thing IEnumerator<Thing>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return PathEndMode.Touch;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x060085B0 RID: 34224 RVA: 0x00075162 File Offset: 0x00073362
-		public override Danger MaxPathDanger(Pawn pawn)
+		object IEnumerator.Current
 		{
-			return Danger.Deadly;
-		}
-
-		// Token: 0x060085B1 RID: 34225 RVA: 0x0027EB79 File Offset: 0x0027CD79
-		public override IEnumerable<Thing> PotentialWorkThingsGlobal(Pawn pawn)
-		{
-			foreach (Designation designation in pawn.Map.designationManager.designationsByDef[DesignationDefOf.Flick])
+			[DebuggerHidden]
+			get
 			{
-				yield return designation.target.Thing;
+				return _003C_003E2__current;
 			}
-			List<Designation>.Enumerator enumerator = default(List<Designation>.Enumerator);
-			yield break;
-			yield break;
 		}
 
-		// Token: 0x060085B2 RID: 34226 RVA: 0x0027EB89 File Offset: 0x0027CD89
-		public override bool ShouldSkip(Pawn pawn, bool forced = false)
+		[DebuggerHidden]
+		public _003CPotentialWorkThingsGlobal_003Ed__3(int _003C_003E1__state)
 		{
-			return !pawn.Map.designationManager.AnySpawnedDesignationOfDef(DesignationDefOf.Flick);
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x060085B3 RID: 34227 RVA: 0x0027EBA3 File Offset: 0x0027CDA3
-		public override bool HasJobOnThing(Pawn pawn, Thing t, bool forced = false)
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			return pawn.Map.designationManager.DesignationOn(t, DesignationDefOf.Flick) != null && pawn.CanReserve(t, 1, -1, null, forced);
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = default(List<Designation>.Enumerator);
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x060085B4 RID: 34228 RVA: 0x0027EBD4 File Offset: 0x0027CDD4
-		public override Job JobOnThing(Pawn pawn, Thing t, bool forced = false)
+		private bool MoveNext()
 		{
-			return JobMaker.MakeJob(JobDefOf.Flick, t);
+			try
+			{
+				switch (_003C_003E1__state)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = pawn.Map.designationManager.designationsByDef[DesignationDefOf.Flick].GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 1:
+					_003C_003E1__state = -3;
+					break;
+				}
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					Designation current = _003C_003E7__wrap1.Current;
+					_003C_003E2__current = current.target.Thing;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = default(List<Designation>.Enumerator);
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
 		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap1/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Thing> IEnumerable<Thing>.GetEnumerator()
+		{
+			_003CPotentialWorkThingsGlobal_003Ed__3 _003CPotentialWorkThingsGlobal_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CPotentialWorkThingsGlobal_003Ed__ = this;
+			}
+			else
+			{
+				_003CPotentialWorkThingsGlobal_003Ed__ = new _003CPotentialWorkThingsGlobal_003Ed__3(0);
+			}
+			_003CPotentialWorkThingsGlobal_003Ed__.pawn = _003C_003E3__pawn;
+			return _003CPotentialWorkThingsGlobal_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Thing>)this).GetEnumerator();
+		}
+	}
+
+	public override PathEndMode PathEndMode => PathEndMode.Touch;
+
+	public override Danger MaxPathDanger(Pawn pawn)
+	{
+		return Danger.Deadly;
+	}
+
+	[IteratorStateMachine(typeof(_003CPotentialWorkThingsGlobal_003Ed__3))]
+	public override IEnumerable<Thing> PotentialWorkThingsGlobal(Pawn pawn)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CPotentialWorkThingsGlobal_003Ed__3(-2)
+		{
+			_003C_003E3__pawn = pawn
+		};
+	}
+
+	public override bool ShouldSkip(Pawn pawn, bool forced = false)
+	{
+		return !pawn.Map.designationManager.AnySpawnedDesignationOfDef(DesignationDefOf.Flick);
+	}
+
+	public override bool HasJobOnThing(Pawn pawn, Thing t, bool forced = false)
+	{
+		if (pawn.Map.designationManager.DesignationOn(t, DesignationDefOf.Flick) == null)
+		{
+			return false;
+		}
+		if (!pawn.CanReserve(t, 1, -1, null, forced))
+		{
+			return false;
+		}
+		return true;
+	}
+
+	public override Job JobOnThing(Pawn pawn, Thing t, bool forced = false)
+	{
+		return JobMaker.MakeJob(JobDefOf.Flick, t);
 	}
 }

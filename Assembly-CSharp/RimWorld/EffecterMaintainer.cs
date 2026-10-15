@@ -1,84 +1,69 @@
-﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class EffecterMaintainer
 {
-	// Token: 0x02001E9F RID: 7839
-	public class EffecterMaintainer
+	public struct MaintainedEffecter
 	{
-		// Token: 0x0600ADF8 RID: 44536 RVA: 0x00319C39 File Offset: 0x00317E39
-		public EffecterMaintainer(Map map)
-		{
-			this.map = map;
-		}
+		public Effecter Effecter;
 
-		// Token: 0x0600ADF9 RID: 44537 RVA: 0x00319C54 File Offset: 0x00317E54
-		public void AddEffecterToMaintain(Effecter eff, IntVec3 pos, int ticks)
-		{
-			eff.ticksLeft = ticks;
-			TargetInfo a = new TargetInfo(pos, this.map, false);
-			this.maintainedEffecters.Add(new EffecterMaintainer.MaintainedEffecter(eff, a, TargetInfo.Invalid));
-		}
+		public TargetInfo A;
 
-		// Token: 0x0600ADFA RID: 44538 RVA: 0x00319C8E File Offset: 0x00317E8E
-		public void AddEffecterToMaintain(Effecter eff, Thing target, int ticks)
-		{
-			eff.ticksLeft = ticks;
-			this.maintainedEffecters.Add(new EffecterMaintainer.MaintainedEffecter(eff, target, TargetInfo.Invalid));
-		}
+		public TargetInfo B;
 
-		// Token: 0x0600ADFB RID: 44539 RVA: 0x00319CB3 File Offset: 0x00317EB3
-		public void AddEffecterToMaintain(Effecter eff, TargetInfo A, TargetInfo B, int ticks)
+		public MaintainedEffecter(Effecter effecter, TargetInfo A, TargetInfo B)
 		{
-			eff.ticksLeft = ticks;
-			this.maintainedEffecters.Add(new EffecterMaintainer.MaintainedEffecter(eff, A, B));
+			Effecter = effecter;
+			this.A = A;
+			this.B = B;
 		}
+	}
 
-		// Token: 0x0600ADFC RID: 44540 RVA: 0x00319CD0 File Offset: 0x00317ED0
-		public void EffecterMaintainerTick()
+	private Map map;
+
+	private List<MaintainedEffecter> maintainedEffecters = new List<MaintainedEffecter>();
+
+	public EffecterMaintainer(Map map)
+	{
+		this.map = map;
+	}
+
+	public void AddEffecterToMaintain(Effecter eff, IntVec3 pos, int ticks)
+	{
+		eff.ticksLeft = ticks;
+		TargetInfo a = new TargetInfo(pos, map);
+		maintainedEffecters.Add(new MaintainedEffecter(eff, a, TargetInfo.Invalid));
+	}
+
+	public void AddEffecterToMaintain(Effecter eff, Thing target, int ticks)
+	{
+		eff.ticksLeft = ticks;
+		maintainedEffecters.Add(new MaintainedEffecter(eff, target, TargetInfo.Invalid));
+	}
+
+	public void AddEffecterToMaintain(Effecter eff, TargetInfo A, TargetInfo B, int ticks)
+	{
+		eff.ticksLeft = ticks;
+		maintainedEffecters.Add(new MaintainedEffecter(eff, A, B));
+	}
+
+	public void EffecterMaintainerTick()
+	{
+		for (int num = maintainedEffecters.Count - 1; num >= 0; num--)
 		{
-			for (int i = this.maintainedEffecters.Count - 1; i >= 0; i--)
+			MaintainedEffecter maintainedEffecter = maintainedEffecters[num];
+			if (maintainedEffecter.Effecter.ticksLeft > 0)
 			{
-				EffecterMaintainer.MaintainedEffecter maintainedEffecter = this.maintainedEffecters[i];
-				if (maintainedEffecter.Effecter.ticksLeft > 0)
-				{
-					maintainedEffecter.Effecter.EffectTick(maintainedEffecter.A, maintainedEffecter.B);
-					maintainedEffecter.Effecter.ticksLeft--;
-				}
-				else
-				{
-					maintainedEffecter.Effecter.Cleanup();
-					this.maintainedEffecters.RemoveAt(i);
-				}
+				maintainedEffecter.Effecter.EffectTick(maintainedEffecter.A, maintainedEffecter.B);
+				maintainedEffecter.Effecter.ticksLeft--;
 			}
-		}
-
-		// Token: 0x040077A7 RID: 30631
-		private Map map;
-
-		// Token: 0x040077A8 RID: 30632
-		private List<EffecterMaintainer.MaintainedEffecter> maintainedEffecters = new List<EffecterMaintainer.MaintainedEffecter>();
-
-		// Token: 0x02001EA0 RID: 7840
-		public struct MaintainedEffecter
-		{
-			// Token: 0x0600ADFD RID: 44541 RVA: 0x00319D53 File Offset: 0x00317F53
-			public MaintainedEffecter(Effecter effecter, TargetInfo A, TargetInfo B)
+			else
 			{
-				this.Effecter = effecter;
-				this.A = A;
-				this.B = B;
+				maintainedEffecter.Effecter.Cleanup();
+				maintainedEffecters.RemoveAt(num);
 			}
-
-			// Token: 0x040077A9 RID: 30633
-			public Effecter Effecter;
-
-			// Token: 0x040077AA RID: 30634
-			public TargetInfo A;
-
-			// Token: 0x040077AB RID: 30635
-			public TargetInfo B;
 		}
 	}
 }

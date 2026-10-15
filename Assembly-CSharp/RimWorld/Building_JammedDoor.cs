@@ -1,97 +1,230 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Building_JammedDoor : Building_Door
 {
-	// Token: 0x02002A2C RID: 10796
-	public class Building_JammedDoor : Building_Door
+	[CompilerGenerated]
+	private sealed class _003CGetGizmos_003Ed__8 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700253B RID: 9531
-		// (get) Token: 0x0600EF74 RID: 61300 RVA: 0x00458417 File Offset: 0x00456617
-		public bool Jammed
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Building_JammedDoor _003C_003E4__this;
+
+		private IEnumerator<Gizmo> _003C_003E7__wrap1;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.jammed;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600EF75 RID: 61301 RVA: 0x0045841F File Offset: 0x0045661F
-		public void UnlockDoor()
+		object IEnumerator.Current
 		{
-			this.jammed = false;
-		}
-
-		// Token: 0x0600EF76 RID: 61302 RVA: 0x00458428 File Offset: 0x00456628
-		public void UnlockAndOpenDoor()
-		{
-			this.jammed = false;
-			this.DoorOpen(110);
-		}
-
-		// Token: 0x0600EF77 RID: 61303 RVA: 0x00458439 File Offset: 0x00456639
-		protected override void DoorOpen(int ticksToClose = 110)
-		{
-			base.DoorOpen(ticksToClose);
-			this.holdOpenInt = true;
-		}
-
-		// Token: 0x0600EF78 RID: 61304 RVA: 0x00458449 File Offset: 0x00456649
-		public override bool PawnCanOpen(Pawn p)
-		{
-			return !this.jammed;
-		}
-
-		// Token: 0x0600EF79 RID: 61305 RVA: 0x00458454 File Offset: 0x00456654
-		protected override void DrawAt(Vector3 drawLoc, bool flip = false)
-		{
-			if (!this.jammed)
+			[DebuggerHidden]
+			get
 			{
-				base.DrawAt(drawLoc, flip);
-				return;
+				return _003C_003E2__current;
 			}
-			base.DoorPreDraw();
-			foreach (ThingComp thingComp in base.AllComps)
+		}
+
+		[DebuggerHidden]
+		public _003CGetGizmos_003Ed__8(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				IJammedDoorDrawer jammedDoorDrawer = thingComp as IJammedDoorDrawer;
-				if (jammedDoorDrawer != null)
+				try
 				{
-					jammedDoorDrawer.DrawJammed(base.Rotation);
-					break;
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
 				}
 			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x0600EF7A RID: 61306 RVA: 0x004584D0 File Offset: 0x004566D0
-		public override IEnumerable<Gizmo> GetGizmos()
+		private bool MoveNext()
 		{
-			foreach (Gizmo gizmo in base.GetGizmos())
+			try
 			{
-				yield return gizmo;
-			}
-			IEnumerator<Gizmo> enumerator = null;
-			if (DebugSettings.ShowDevGizmos && !this.holdOpenInt)
-			{
-				yield return new Command_Action
+				int num = _003C_003E1__state;
+				Building_JammedDoor building_JammedDoor = _003C_003E4__this;
+				switch (num)
 				{
-					defaultLabel = "DEV: Unlock",
-					action = new Action(this.UnlockDoor)
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((Building_Door)building_JammedDoor).GetGizmos().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_006f:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Gizmo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (DebugSettings.ShowDevGizmos && !building_JammedDoor.holdOpenInt)
+					{
+						_003C_003E2__current = new Command_Action
+						{
+							defaultLabel = "DEV: Unlock",
+							action = building_JammedDoor.UnlockDoor
+						};
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CGetGizmos_003Ed__8 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CGetGizmos_003Ed__8(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
 				};
 			}
-			yield break;
-			yield break;
+			return result;
 		}
 
-		// Token: 0x0600EF7B RID: 61307 RVA: 0x004584E0 File Offset: 0x004566E0
-		public override void ExposeData()
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			base.ExposeData();
-			Scribe_Values.Look<bool>(ref this.jammed, "jammed", false, false);
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x04009E3E RID: 40510
-		private bool jammed = true;
+	private bool jammed = true;
+
+	public bool Jammed => jammed;
+
+	public void UnlockDoor()
+	{
+		jammed = false;
+	}
+
+	public void UnlockAndOpenDoor()
+	{
+		jammed = false;
+		DoorOpen();
+	}
+
+	protected override void DoorOpen(int ticksToClose = 110)
+	{
+		base.DoorOpen(ticksToClose);
+		holdOpenInt = true;
+	}
+
+	public override bool PawnCanOpen(Pawn p)
+	{
+		return !jammed;
+	}
+
+	protected override void DrawAt(Vector3 drawLoc, bool flip = false)
+	{
+		if (!jammed)
+		{
+			base.DrawAt(drawLoc, flip);
+			return;
+		}
+		DoorPreDraw();
+		foreach (ThingComp allComp in base.AllComps)
+		{
+			if (allComp is IJammedDoorDrawer jammedDoorDrawer)
+			{
+				jammedDoorDrawer.DrawJammed(base.Rotation);
+				break;
+			}
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CGetGizmos_003Ed__8))]
+	public override IEnumerable<Gizmo> GetGizmos()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetGizmos_003Ed__8(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref jammed, "jammed", defaultValue: false);
 	}
 }

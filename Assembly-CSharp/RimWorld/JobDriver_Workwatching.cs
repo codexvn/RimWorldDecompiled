@@ -1,149 +1,205 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_Workwatching : JobDriver
 {
-	// Token: 0x0200120E RID: 4622
-	public class JobDriver_Workwatching : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__8 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001185 RID: 4485
-		// (get) Token: 0x060070E8 RID: 28904 RVA: 0x000024E7 File Offset: 0x000006E7
-		private Pawn AdultToFollow
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_Workwatching _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (Pawn)base.TargetThingA;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x060070E9 RID: 28905 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		object IEnumerator.Current
 		{
-			return true;
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x060070EA RID: 28906 RVA: 0x0022F9CB File Offset: 0x0022DBCB
-		protected override IEnumerable<Toil> MakeNewToils()
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__8(int _003C_003E1__state)
 		{
-			this.FailOnDespawnedOrNull(TargetIndex.A);
-			this.FailOnChildLearningConditions<JobDriver_Workwatching>();
-			Toil toil = ToilMaker.MakeToil("MakeNewToils");
-			toil.tickIntervalAction = delegate(int delta)
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_Workwatching CS_0024_003C_003E8__locals28 = _003C_003E4__this;
+			switch (num)
 			{
-				Pawn adultToFollow = this.AdultToFollow;
-				if (!LearningGiver_Workwatching.ChildCanLearnFromAdultJob(this.pawn, adultToFollow))
+			default:
+				return false;
+			case 0:
+			{
+				_003C_003E1__state = -1;
+				CS_0024_003C_003E8__locals28.FailOnDespawnedOrNull(TargetIndex.A);
+				CS_0024_003C_003E8__locals28.FailOnChildLearningConditions();
+				Toil toil = ToilMaker.MakeToil("MakeNewToils");
+				toil.tickIntervalAction = delegate(int delta)
 				{
-					this.consecutiveTicksNoSkillJob += delta;
-					if (this.consecutiveTicksNoSkillJob >= 5)
+					Pawn adultToFollow = CS_0024_003C_003E8__locals28.AdultToFollow;
+					if (!LearningGiver_Workwatching.ChildCanLearnFromAdultJob(CS_0024_003C_003E8__locals28.pawn, adultToFollow))
 					{
-						Pawn pawn = LearningGiver_Workwatching.AdultToWorkwatch(this.pawn);
-						if (pawn == null)
+						CS_0024_003C_003E8__locals28.consecutiveTicksNoSkillJob += delta;
+						if (CS_0024_003C_003E8__locals28.consecutiveTicksNoSkillJob >= 5)
 						{
-							base.EndJobWith(JobCondition.Incompletable);
-							return;
-						}
-						this.consecutiveTicksNoSkillJob = 0;
-						this.job.SetTarget(TargetIndex.A, pawn);
-						return;
-					}
-				}
-				else
-				{
-					this.consecutiveTicksNoSkillJob = 0;
-					if (this.pawn.Spawned && this.pawn.Map == adultToFollow.MapHeld && this.pawn.Position.InHorDistOf(adultToFollow.Position, 12f))
-					{
-						float num = LearningUtility.LearningRateFactor(this.pawn) * LearningDesireDefOf.Workwatching.xpPerTick * (float)delta;
-						Job curJob = adultToFollow.CurJob;
-						SkillDef skillDef;
-						if (curJob == null)
-						{
-							skillDef = null;
-						}
-						else
-						{
-							RecipeDef recipeDef = curJob.RecipeDef;
-							skillDef = ((recipeDef != null) ? recipeDef.workSkill : null);
-						}
-						SkillDef skillDef2 = skillDef;
-						if (skillDef2 != null)
-						{
-							this.pawn.skills.Learn(skillDef2, num, false, false);
-						}
-						else
-						{
-							Job curJob2 = adultToFollow.CurJob;
-							List<SkillDef> list;
-							if (curJob2 == null)
+							Pawn pawn = LearningGiver_Workwatching.AdultToWorkwatch(CS_0024_003C_003E8__locals28.pawn);
+							if (pawn == null)
 							{
-								list = null;
+								CS_0024_003C_003E8__locals28.EndJobWith(JobCondition.Incompletable);
 							}
 							else
 							{
-								WorkGiverDef workGiverDef = curJob2.workGiverDef;
-								if (workGiverDef == null)
-								{
-									list = null;
-								}
-								else
-								{
-									WorkTypeDef workType = workGiverDef.workType;
-									list = ((workType != null) ? workType.relevantSkills : null);
-								}
+								CS_0024_003C_003E8__locals28.consecutiveTicksNoSkillJob = 0;
+								CS_0024_003C_003E8__locals28.job.SetTarget(TargetIndex.A, pawn);
 							}
-							List<SkillDef> list2 = list;
-							num /= (float)list2.Count;
-							foreach (SkillDef sDef in list2)
+							return;
+						}
+					}
+					else
+					{
+						CS_0024_003C_003E8__locals28.consecutiveTicksNoSkillJob = 0;
+						if (CS_0024_003C_003E8__locals28.pawn.Spawned && CS_0024_003C_003E8__locals28.pawn.Map == adultToFollow.MapHeld && CS_0024_003C_003E8__locals28.pawn.Position.InHorDistOf(adultToFollow.Position, 12f))
+						{
+							float num2 = LearningUtility.LearningRateFactor(CS_0024_003C_003E8__locals28.pawn) * LearningDesireDefOf.Workwatching.xpPerTick * (float)delta;
+							SkillDef skillDef = adultToFollow.CurJob?.RecipeDef?.workSkill;
+							if (skillDef != null)
 							{
-								this.pawn.skills.Learn(sDef, num, false, false);
+								CS_0024_003C_003E8__locals28.pawn.skills.Learn(skillDef, num2);
+							}
+							else
+							{
+								List<SkillDef> list = adultToFollow.CurJob?.workGiverDef?.workType?.relevantSkills;
+								num2 /= (float)list.Count;
+								foreach (SkillDef item in list)
+								{
+									CS_0024_003C_003E8__locals28.pawn.skills.Learn(item, num2);
+								}
 							}
 						}
 					}
-				}
-				if (LearningUtility.LearningTickCheckEnd(this.pawn, delta, false))
-				{
-					return;
-				}
-				if ((adultToFollow.Position - this.pawn.Position).LengthHorizontal <= 3f && this.pawn.Position.WithinRegions(adultToFollow.Position, this.pawn.Map, 2, TraverseParms.For(this.pawn, Danger.Deadly, TraverseMode.ByPawn, false, false, false, true), RegionType.Set_Passable))
-				{
-					return;
-				}
-				if (!this.pawn.CanReach(adultToFollow, PathEndMode.Touch, Danger.Deadly, false, false, TraverseMode.ByPawn) || adultToFollow.IsForbidden(this.pawn))
-				{
-					base.EndJobWith(JobCondition.Incompletable);
-					return;
-				}
-				if (!this.pawn.pather.Moving || this.pawn.pather.Destination != adultToFollow)
-				{
-					this.pawn.pather.StartPath(adultToFollow, PathEndMode.Touch);
-				}
-			};
-			toil.defaultCompleteMode = ToilCompleteMode.Never;
-			yield return toil;
-			yield break;
+					if (!LearningUtility.LearningTickCheckEnd(CS_0024_003C_003E8__locals28.pawn, delta) && (!((adultToFollow.Position - CS_0024_003C_003E8__locals28.pawn.Position).LengthHorizontal <= 3f) || !CS_0024_003C_003E8__locals28.pawn.Position.WithinRegions(adultToFollow.Position, CS_0024_003C_003E8__locals28.pawn.Map, 2, TraverseParms.For(CS_0024_003C_003E8__locals28.pawn))))
+					{
+						if (!CS_0024_003C_003E8__locals28.pawn.CanReach(adultToFollow, PathEndMode.Touch, Danger.Deadly) || adultToFollow.IsForbidden(CS_0024_003C_003E8__locals28.pawn))
+						{
+							CS_0024_003C_003E8__locals28.EndJobWith(JobCondition.Incompletable);
+						}
+						else if (!CS_0024_003C_003E8__locals28.pawn.pather.Moving || CS_0024_003C_003E8__locals28.pawn.pather.Destination != adultToFollow)
+						{
+							CS_0024_003C_003E8__locals28.pawn.pather.StartPath(adultToFollow, PathEndMode.Touch);
+						}
+					}
+				};
+				toil.defaultCompleteMode = ToilCompleteMode.Never;
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 1;
+				return true;
+			}
+			case 1:
+				_003C_003E1__state = -1;
+				return false;
+			}
 		}
 
-		// Token: 0x060070EB RID: 28907 RVA: 0x0022F9DB File Offset: 0x0022DBDB
-		public override void ExposeData()
+		bool IEnumerator.MoveNext()
 		{
-			base.ExposeData();
-			Scribe_Values.Look<int>(ref this.consecutiveTicksNoSkillJob, "consecutiveTicksNoSkillJob", 0, false);
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x04004E5C RID: 20060
-		private const TargetIndex AdultInd = TargetIndex.A;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04004E5D RID: 20061
-		private const int FollowDistance = 3;
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__8 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__8(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x04004E5E RID: 20062
-		private const int StopWatchingNoSkillJobTicks = 5;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x04004E5F RID: 20063
-		private const float LearningObservationDistance = 12f;
+	private const TargetIndex AdultInd = TargetIndex.A;
 
-		// Token: 0x04004E60 RID: 20064
-		private int consecutiveTicksNoSkillJob;
+	private const int FollowDistance = 3;
+
+	private const int StopWatchingNoSkillJobTicks = 5;
+
+	private const float LearningObservationDistance = 12f;
+
+	private int consecutiveTicksNoSkillJob;
+
+	private Pawn AdultToFollow => (Pawn)base.TargetThingA;
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return true;
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__8))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__8(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref consecutiveTicksNoSkillJob, "consecutiveTicksNoSkillJob", 0);
 	}
 }

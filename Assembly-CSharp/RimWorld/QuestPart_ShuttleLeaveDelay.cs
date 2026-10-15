@@ -1,126 +1,248 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class QuestPart_ShuttleLeaveDelay : QuestPart_Delay
 {
-	// Token: 0x02001BDC RID: 7132
-	public class QuestPart_ShuttleLeaveDelay : QuestPart_Delay
+	[CompilerGenerated]
+	private sealed class _003Cget_QuestLookTargets_003Ed__11 : IEnumerable<GlobalTargetInfo>, IEnumerable, IEnumerator<GlobalTargetInfo>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001867 RID: 6247
-		// (get) Token: 0x06009ED4 RID: 40660 RVA: 0x002DE8CF File Offset: 0x002DCACF
-		public override AlertReport AlertReport
+		private int _003C_003E1__state;
+
+		private GlobalTargetInfo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public QuestPart_ShuttleLeaveDelay _003C_003E4__this;
+
+		private IEnumerator<GlobalTargetInfo> _003C_003E7__wrap1;
+
+		GlobalTargetInfo IEnumerator<GlobalTargetInfo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.shuttle == null || !this.shuttle.Spawned)
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003Cget_QuestLookTargets_003Ed__11(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
 				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				QuestPart_ShuttleLeaveDelay questPart_ShuttleLeaveDelay = _003C_003E4__this;
+				switch (num)
+				{
+				default:
 					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((QuestPart_Delay)questPart_ShuttleLeaveDelay).QuestLookTargets.GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_006f:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						GlobalTargetInfo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (questPart_ShuttleLeaveDelay.shuttle != null)
+					{
+						_003C_003E2__current = questPart_ShuttleLeaveDelay.shuttle;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
 				}
-				return AlertReport.CulpritIs(this.shuttle);
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x17001868 RID: 6248
-		// (get) Token: 0x06009ED5 RID: 40661 RVA: 0x002DE4E2 File Offset: 0x002DC6E2
-		public override bool AlertCritical
+		bool IEnumerator.MoveNext()
 		{
-			get
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				return base.TicksLeft < 60000;
+				_003C_003E7__wrap1.Dispose();
 			}
 		}
 
-		// Token: 0x17001869 RID: 6249
-		// (get) Token: 0x06009ED6 RID: 40662 RVA: 0x002DE8FD File Offset: 0x002DCAFD
-		public override string AlertLabel
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			get
-			{
-				return "QuestPartShuttleLeaveDelay".Translate(base.TicksLeft.ToStringTicksToPeriodVerbose(true, true));
-			}
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x1700186A RID: 6250
-		// (get) Token: 0x06009ED7 RID: 40663 RVA: 0x002DE920 File Offset: 0x002DCB20
-		public override string AlertExplanation
+		[DebuggerHidden]
+		IEnumerator<GlobalTargetInfo> IEnumerable<GlobalTargetInfo>.GetEnumerator()
 		{
-			get
+			_003Cget_QuestLookTargets_003Ed__11 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				if (this.quest.hidden)
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_QuestLookTargets_003Ed__11(0)
 				{
-					return "QuestPartShuttleLeaveDelayDescHidden".Translate(base.TicksLeft.ToStringTicksToPeriodVerbose(true, true).Colorize(ColoredText.DateTimeColor));
-				}
-				return "QuestPartShuttleLeaveDelayDesc".Translate(this.quest.name, base.TicksLeft.ToStringTicksToPeriodVerbose(true, true).Colorize(ColoredText.DateTimeColor), this.shuttle.TryGetComp<CompShuttle>().RequiredThingsLabel);
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
+			return result;
 		}
 
-		// Token: 0x1700186B RID: 6251
-		// (get) Token: 0x06009ED8 RID: 40664 RVA: 0x002DE9B6 File Offset: 0x002DCBB6
-		public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			get
-			{
-				foreach (GlobalTargetInfo globalTargetInfo in base.QuestLookTargets)
-				{
-					yield return globalTargetInfo;
-				}
-				IEnumerator<GlobalTargetInfo> enumerator = null;
-				if (this.shuttle != null)
-				{
-					yield return this.shuttle;
-				}
-				yield break;
-				yield break;
-			}
+			return ((IEnumerable<GlobalTargetInfo>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x06009ED9 RID: 40665 RVA: 0x002DE9C6 File Offset: 0x002DCBC6
-		public override void Notify_QuestSignalReceived(Signal signal)
+	public Thing shuttle;
+
+	public List<string> inSignalsDisable = new List<string>();
+
+	public override AlertReport AlertReport
+	{
+		get
 		{
-			base.Notify_QuestSignalReceived(signal);
-			if (base.State == QuestPartState.Enabled && this.inSignalsDisable.Contains(signal.tag))
+			if (shuttle == null || !shuttle.Spawned)
 			{
-				this.Disable();
+				return false;
 			}
+			return AlertReport.CulpritIs(shuttle);
 		}
+	}
 
-		// Token: 0x06009EDA RID: 40666 RVA: 0x002DE9F1 File Offset: 0x002DCBF1
-		public override string ExtraInspectString(ISelectable target)
+	public override bool AlertCritical => base.TicksLeft < 60000;
+
+	public override string AlertLabel => "QuestPartShuttleLeaveDelay".Translate(base.TicksLeft.ToStringTicksToPeriodVerbose());
+
+	public override string AlertExplanation
+	{
+		get
 		{
-			if (target == this.shuttle)
+			if (quest.hidden)
 			{
-				return "ShuttleLeaveDelayInspectString".Translate(base.TicksLeft.ToStringTicksToPeriod(true, false, true, true, false));
+				return "QuestPartShuttleLeaveDelayDescHidden".Translate(base.TicksLeft.ToStringTicksToPeriodVerbose().Colorize(ColoredText.DateTimeColor));
 			}
-			return null;
+			return "QuestPartShuttleLeaveDelayDesc".Translate(quest.name, base.TicksLeft.ToStringTicksToPeriodVerbose().Colorize(ColoredText.DateTimeColor), shuttle.TryGetComp<CompShuttle>().RequiredThingsLabel);
 		}
+	}
 
-		// Token: 0x06009EDB RID: 40667 RVA: 0x002DEA24 File Offset: 0x002DCC24
-		public override void ExposeData()
+	public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+	{
+		[IteratorStateMachine(typeof(_003Cget_QuestLookTargets_003Ed__11))]
+		get
 		{
-			base.ExposeData();
-			Scribe_References.Look<Thing>(ref this.shuttle, "shuttle", false);
-			Scribe_Collections.Look<string>(ref this.inSignalsDisable, "inSignalsDisable", LookMode.Value, Array.Empty<object>());
-			if (Scribe.mode == LoadSaveMode.PostLoadInit && this.inSignalsDisable == null)
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_QuestLookTargets_003Ed__11(-2)
 			{
-				this.inSignalsDisable = new List<string>();
-			}
+				_003C_003E4__this = this
+			};
 		}
+	}
 
-		// Token: 0x06009EDC RID: 40668 RVA: 0x002DEA79 File Offset: 0x002DCC79
-		public override void ReplacePawnReferences(Pawn replace, Pawn with)
+	public override void Notify_QuestSignalReceived(Signal signal)
+	{
+		base.Notify_QuestSignalReceived(signal);
+		if (base.State == QuestPartState.Enabled && inSignalsDisable.Contains(signal.tag))
 		{
-			if (this.shuttle != null)
-			{
-				this.shuttle.TryGetComp<CompShuttle>().requiredPawns.Replace(replace, with);
-			}
+			Disable();
 		}
+	}
 
-		// Token: 0x04006DE7 RID: 28135
-		public Thing shuttle;
+	public override string ExtraInspectString(ISelectable target)
+	{
+		if (target == shuttle)
+		{
+			return "ShuttleLeaveDelayInspectString".Translate(base.TicksLeft.ToStringTicksToPeriod());
+		}
+		return null;
+	}
 
-		// Token: 0x04006DE8 RID: 28136
-		public List<string> inSignalsDisable = new List<string>();
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_References.Look(ref shuttle, "shuttle");
+		Scribe_Collections.Look(ref inSignalsDisable, "inSignalsDisable", LookMode.Value);
+		if (Scribe.mode == LoadSaveMode.PostLoadInit && inSignalsDisable == null)
+		{
+			inSignalsDisable = new List<string>();
+		}
+	}
+
+	public override void ReplacePawnReferences(Pawn replace, Pawn with)
+	{
+		if (shuttle != null)
+		{
+			shuttle.TryGetComp<CompShuttle>().requiredPawns.Replace(replace, with);
+		}
 	}
 }

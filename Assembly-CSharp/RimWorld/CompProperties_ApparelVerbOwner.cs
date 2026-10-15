@@ -1,41 +1,192 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompProperties_ApparelVerbOwner : CompProperties
 {
-	// Token: 0x02002BDF RID: 11231
-	public class CompProperties_ApparelVerbOwner : CompProperties
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__4 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x0600FB5B RID: 64347 RVA: 0x00490196 File Offset: 0x0048E396
-		public CompProperties_ApparelVerbOwner()
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompProperties_ApparelVerbOwner _003C_003E4__this;
+
+		private ThingDef parentDef;
+
+		public ThingDef _003C_003E3__parentDef;
+
+		private IEnumerator<string> _003C_003E7__wrap1;
+
+		string IEnumerator<string>.Current
 		{
-			this.compClass = typeof(CompApparelVerbOwner);
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x0600FB5C RID: 64348 RVA: 0x004901BC File Offset: 0x0048E3BC
-		public override IEnumerable<string> ConfigErrors(ThingDef parentDef)
+		object IEnumerator.Current
 		{
-			foreach (string text in base.ConfigErrors(parentDef))
+			[DebuggerHidden]
+			get
 			{
-				yield return text;
+				return _003C_003E2__current;
 			}
-			IEnumerator<string> enumerator = null;
-			if (!typeof(Apparel).IsAssignableFrom(parentDef.thingClass))
-			{
-				yield return string.Format("Comp {0} can only be added to Apparel", this.compClass);
-			}
-			yield break;
-			yield break;
 		}
 
-		// Token: 0x0400A4F7 RID: 42231
-		public KeyBindingDef hotKey;
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__4(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
 
-		// Token: 0x0400A4F8 RID: 42232
-		public bool displayGizmoWhileUndrafted = true;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
 
-		// Token: 0x0400A4F9 RID: 42233
-		public bool displayGizmoWhileDrafted = true;
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				CompProperties_ApparelVerbOwner compProperties_ApparelVerbOwner = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((CompProperties)compProperties_ApparelVerbOwner).ConfigErrors(parentDef).GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0078;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0078;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_0078:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (!typeof(Apparel).IsAssignableFrom(parentDef.thingClass))
+					{
+						_003C_003E2__current = $"Comp {compProperties_ApparelVerbOwner.compClass} can only be added to Apparel";
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__4 _003CConfigErrors_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CConfigErrors_003Ed__ = this;
+			}
+			else
+			{
+				_003CConfigErrors_003Ed__ = new _003CConfigErrors_003Ed__4(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CConfigErrors_003Ed__.parentDef = _003C_003E3__parentDef;
+			return _003CConfigErrors_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	public KeyBindingDef hotKey;
+
+	public bool displayGizmoWhileUndrafted = true;
+
+	public bool displayGizmoWhileDrafted = true;
+
+	public CompProperties_ApparelVerbOwner()
+	{
+		compClass = typeof(CompApparelVerbOwner);
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__4))]
+	public override IEnumerable<string> ConfigErrors(ThingDef parentDef)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__4(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__parentDef = parentDef
+		};
 	}
 }

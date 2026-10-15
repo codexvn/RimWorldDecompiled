@@ -1,64 +1,262 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class RitualObligationTargetWorker_UnconnectedGauranlenTree : RitualObligationTargetFilter
 {
-	// Token: 0x02002713 RID: 10003
-	public class RitualObligationTargetWorker_UnconnectedGauranlenTree : RitualObligationTargetFilter
+	[CompilerGenerated]
+	private sealed class _003CGetTargetInfos_003Ed__4 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x0600DB86 RID: 56198 RVA: 0x00408B0F File Offset: 0x00406D0F
-		public RitualObligationTargetWorker_UnconnectedGauranlenTree()
-		{
-		}
+		private int _003C_003E1__state;
 
-		// Token: 0x0600DB87 RID: 56199 RVA: 0x00408B17 File Offset: 0x00406D17
-		public RitualObligationTargetWorker_UnconnectedGauranlenTree(RitualObligationTargetFilterDef def) : base(def)
-		{
-		}
+		private string _003C_003E2__current;
 
-		// Token: 0x0600DB88 RID: 56200 RVA: 0x0040C1F0 File Offset: 0x0040A3F0
-		public override IEnumerable<TargetInfo> GetTargets(RitualObligation obligation, Map map)
+		private int _003C_003El__initialThreadId;
+
+		string IEnumerator<string>.Current
 		{
-			List<Thing> trees = map.listerThings.ThingsOfDef(ThingDefOf.Plant_TreeGauranlen);
-			int num;
-			for (int i = 0; i < trees.Count; i = num + 1)
+			[DebuggerHidden]
+			get
 			{
-				CompTreeConnection compTreeConnection = trees[i].TryGetComp<CompTreeConnection>();
-				if (compTreeConnection != null && !compTreeConnection.Connected && !compTreeConnection.ConnectionTorn)
-				{
-					yield return trees[i];
-				}
-				num = i;
+				return _003C_003E2__current;
 			}
-			yield break;
 		}
 
-		// Token: 0x0600DB89 RID: 56201 RVA: 0x0040C200 File Offset: 0x0040A400
-		protected override RitualTargetUseReport CanUseTargetInternal(TargetInfo target, RitualObligation obligation)
+		object IEnumerator.Current
 		{
-			Thing thing = target.Thing;
-			CompTreeConnection compTreeConnection = thing.TryGetComp<CompTreeConnection>();
-			if (compTreeConnection == null)
+			[DebuggerHidden]
+			get
 			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetTargetInfos_003Ed__4(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			switch (_003C_003E1__state)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = "RitualTargetUnconnectedGaruanlenTreeInfo".Translate();
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
 				return false;
 			}
-			if (compTreeConnection.Connected)
-			{
-				return "RitualTargetConnectedGauranlenTree".Translate(thing.Named("TREE"), compTreeConnection.ConnectedPawn.Named("PAWN"));
-			}
-			if (compTreeConnection.ConnectionTorn)
-			{
-				return "RitualTargetConnectionTornGauranlenTree".Translate(thing.Named("TREE"), compTreeConnection.UntornInDurationTicks.ToStringTicksToPeriod(true, false, true, true, false)).Resolve().CapitalizeFirst();
-			}
-			return true;
 		}
 
-		// Token: 0x0600DB8A RID: 56202 RVA: 0x0040C2A4 File Offset: 0x0040A4A4
-		public override IEnumerable<string> GetTargetInfos(RitualObligation obligation)
+		bool IEnumerator.MoveNext()
 		{
-			yield return "RitualTargetUnconnectedGaruanlenTreeInfo".Translate();
-			yield break;
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				return this;
+			}
+			return new _003CGetTargetInfos_003Ed__4(0);
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGetTargets_003Ed__2 : IEnumerable<TargetInfo>, IEnumerable, IEnumerator<TargetInfo>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private TargetInfo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private Map map;
+
+		public Map _003C_003E3__map;
+
+		private List<Thing> _003Ctrees_003E5__2;
+
+		private int _003Ci_003E5__3;
+
+		TargetInfo IEnumerator<TargetInfo>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetTargets_003Ed__2(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003Ctrees_003E5__2 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			if (num != 0)
+			{
+				if (num != 1)
+				{
+					return false;
+				}
+				_003C_003E1__state = -1;
+				goto IL_0091;
+			}
+			_003C_003E1__state = -1;
+			_003Ctrees_003E5__2 = map.listerThings.ThingsOfDef(ThingDefOf.Plant_TreeGauranlen);
+			_003Ci_003E5__3 = 0;
+			goto IL_00a1;
+			IL_0091:
+			_003Ci_003E5__3++;
+			goto IL_00a1;
+			IL_00a1:
+			if (_003Ci_003E5__3 < _003Ctrees_003E5__2.Count)
+			{
+				CompTreeConnection compTreeConnection = _003Ctrees_003E5__2[_003Ci_003E5__3].TryGetComp<CompTreeConnection>();
+				if (compTreeConnection != null && !compTreeConnection.Connected && !compTreeConnection.ConnectionTorn)
+				{
+					_003C_003E2__current = _003Ctrees_003E5__2[_003Ci_003E5__3];
+					_003C_003E1__state = 1;
+					return true;
+				}
+				goto IL_0091;
+			}
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<TargetInfo> IEnumerable<TargetInfo>.GetEnumerator()
+		{
+			_003CGetTargets_003Ed__2 _003CGetTargets_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CGetTargets_003Ed__ = this;
+			}
+			else
+			{
+				_003CGetTargets_003Ed__ = new _003CGetTargets_003Ed__2(0);
+			}
+			_003CGetTargets_003Ed__.map = _003C_003E3__map;
+			return _003CGetTargets_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<TargetInfo>)this).GetEnumerator();
+		}
+	}
+
+	public RitualObligationTargetWorker_UnconnectedGauranlenTree()
+	{
+	}
+
+	public RitualObligationTargetWorker_UnconnectedGauranlenTree(RitualObligationTargetFilterDef def)
+		: base(def)
+	{
+	}
+
+	[IteratorStateMachine(typeof(_003CGetTargets_003Ed__2))]
+	public override IEnumerable<TargetInfo> GetTargets(RitualObligation obligation, Map map)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetTargets_003Ed__2(-2)
+		{
+			_003C_003E3__map = map
+		};
+	}
+
+	protected override RitualTargetUseReport CanUseTargetInternal(TargetInfo target, RitualObligation obligation)
+	{
+		Thing thing = target.Thing;
+		CompTreeConnection compTreeConnection = thing.TryGetComp<CompTreeConnection>();
+		if (compTreeConnection == null)
+		{
+			return false;
+		}
+		if (compTreeConnection.Connected)
+		{
+			return "RitualTargetConnectedGauranlenTree".Translate(thing.Named("TREE"), compTreeConnection.ConnectedPawn.Named("PAWN"));
+		}
+		if (compTreeConnection.ConnectionTorn)
+		{
+			return "RitualTargetConnectionTornGauranlenTree".Translate(thing.Named("TREE"), compTreeConnection.UntornInDurationTicks.ToStringTicksToPeriod()).Resolve().CapitalizeFirst();
+		}
+		return true;
+	}
+
+	[IteratorStateMachine(typeof(_003CGetTargetInfos_003Ed__4))]
+	public override IEnumerable<string> GetTargetInfos(RitualObligation obligation)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetTargetInfos_003Ed__4(-2);
 	}
 }

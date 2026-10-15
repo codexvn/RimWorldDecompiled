@@ -1,82 +1,224 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class QuestPart_DestroyWorldObject : QuestPart
 {
-	// Token: 0x02001C2A RID: 7210
-	public class QuestPart_DestroyWorldObject : QuestPart
+	[CompilerGenerated]
+	private sealed class _003Cget_QuestLookTargets_003Ed__3 : IEnumerable<GlobalTargetInfo>, IEnumerable, IEnumerator<GlobalTargetInfo>, IEnumerator, IDisposable
 	{
-		// Token: 0x170018AF RID: 6319
-		// (get) Token: 0x0600A091 RID: 41105 RVA: 0x002E3F5B File Offset: 0x002E215B
-		public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+		private int _003C_003E1__state;
+
+		private GlobalTargetInfo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public QuestPart_DestroyWorldObject _003C_003E4__this;
+
+		private IEnumerator<GlobalTargetInfo> _003C_003E7__wrap1;
+
+		GlobalTargetInfo IEnumerator<GlobalTargetInfo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				foreach (GlobalTargetInfo globalTargetInfo in base.QuestLookTargets)
-				{
-					yield return globalTargetInfo;
-				}
-				IEnumerator<GlobalTargetInfo> enumerator = null;
-				if (this.worldObject != null)
-				{
-					yield return this.worldObject;
-				}
-				yield break;
-				yield break;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600A092 RID: 41106 RVA: 0x002E3F6B File Offset: 0x002E216B
-		public override void Notify_QuestSignalReceived(Signal signal)
+		object IEnumerator.Current
 		{
-			base.Notify_QuestSignalReceived(signal);
-			if (signal.tag == this.inSignal)
+			[DebuggerHidden]
+			get
 			{
-				QuestPart_DestroyWorldObject.TryRemove(this.worldObject);
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600A093 RID: 41107 RVA: 0x002E3F92 File Offset: 0x002E2192
-		public override void ExposeData()
+		[DebuggerHidden]
+		public _003Cget_QuestLookTargets_003Ed__3(int _003C_003E1__state)
 		{
-			base.ExposeData();
-			Scribe_Values.Look<string>(ref this.inSignal, "inSignal", null, false);
-			Scribe_References.Look<WorldObject>(ref this.worldObject, "worldObject", false);
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x0600A094 RID: 41108 RVA: 0x002E3FC0 File Offset: 0x002E21C0
-		public override void AssignDebugData()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			base.AssignDebugData();
-			this.inSignal = "DebugSignal" + Rand.Int.ToString();
-			PlanetTile tile;
-			if (TileFinder.TryFindNewSiteTile(out tile, 7, 27, false, null, 0.5f, true, TileFinderMode.Near, false, false, null, null))
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				this.worldObject = SiteMaker.MakeSite(null, tile, null, true, null, null);
-			}
-		}
-
-		// Token: 0x0600A095 RID: 41109 RVA: 0x002E4024 File Offset: 0x002E2224
-		public static void TryRemove(WorldObject worldObject)
-		{
-			if (worldObject != null && worldObject.Spawned)
-			{
-				MapParent mapParent = worldObject as MapParent;
-				if (mapParent != null && mapParent.HasMap)
+				try
 				{
-					mapParent.forceRemoveWorldObjectWhenMapRemoved = true;
-					return;
 				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				QuestPart_DestroyWorldObject questPart_DestroyWorldObject = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((QuestPart)questPart_DestroyWorldObject).QuestLookTargets.GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_006f:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						GlobalTargetInfo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (questPart_DestroyWorldObject.worldObject != null)
+					{
+						_003C_003E2__current = questPart_DestroyWorldObject.worldObject;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<GlobalTargetInfo> IEnumerable<GlobalTargetInfo>.GetEnumerator()
+		{
+			_003Cget_QuestLookTargets_003Ed__3 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_QuestLookTargets_003Ed__3(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<GlobalTargetInfo>)this).GetEnumerator();
+		}
+	}
+
+	public string inSignal;
+
+	public WorldObject worldObject;
+
+	public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+	{
+		[IteratorStateMachine(typeof(_003Cget_QuestLookTargets_003Ed__3))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_QuestLookTargets_003Ed__3(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public override void Notify_QuestSignalReceived(Signal signal)
+	{
+		base.Notify_QuestSignalReceived(signal);
+		if (signal.tag == inSignal)
+		{
+			TryRemove(worldObject);
+		}
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref inSignal, "inSignal");
+		Scribe_References.Look(ref worldObject, "worldObject");
+	}
+
+	public override void AssignDebugData()
+	{
+		base.AssignDebugData();
+		inSignal = "DebugSignal" + Rand.Int;
+		if (TileFinder.TryFindNewSiteTile(out var tile))
+		{
+			worldObject = SiteMaker.MakeSite((SitePartDef)null, tile, (Faction)null, ifHostileThenMustRemainHostile: true, (float?)null, (WorldObjectDef)null);
+		}
+	}
+
+	public static void TryRemove(WorldObject worldObject)
+	{
+		if (worldObject != null && worldObject.Spawned)
+		{
+			if (worldObject is MapParent { HasMap: not false } mapParent)
+			{
+				mapParent.forceRemoveWorldObjectWhenMapRemoved = true;
+			}
+			else
+			{
 				worldObject.Destroy();
 			}
 		}
-
-		// Token: 0x04006F02 RID: 28418
-		public string inSignal;
-
-		// Token: 0x04006F03 RID: 28419
-		public WorldObject worldObject;
 	}
 }

@@ -1,182 +1,293 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public abstract class CompAnalyzable : CompInteractable
 {
-	// Token: 0x02002BAB RID: 11179
-	public abstract class CompAnalyzable : CompInteractable
+	[CompilerGenerated]
+	private sealed class _003CCompGetGizmosExtra_003Ed__15 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x17002726 RID: 10022
-		// (get) Token: 0x0600F9EB RID: 63979 RVA: 0x0048AE3B File Offset: 0x0048903B
-		public new CompProperties_Analyzable Props
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompAnalyzable _003C_003E4__this;
+
+		private IEnumerator<Gizmo> _003C_003E7__wrap1;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (CompProperties_Analyzable)this.props;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002727 RID: 10023
-		// (get) Token: 0x0600F9EC RID: 63980 RVA: 0x0048AE48 File Offset: 0x00489048
-		public Pawn Pawn
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.parent as Pawn;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002728 RID: 10024
-		// (get) Token: 0x0600F9ED RID: 63981
-		public abstract int AnalysisID { get; }
-
-		// Token: 0x17002729 RID: 10025
-		// (get) Token: 0x0600F9EE RID: 63982 RVA: 0x0048AE55 File Offset: 0x00489055
-		public override string ExposeKey
+		[DebuggerHidden]
+		public _003CCompGetGizmosExtra_003Ed__15(int _003C_003E1__state)
 		{
-			get
-			{
-				return "Analyzable";
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x0600F9EF RID: 63983 RVA: 0x0048AE5C File Offset: 0x0048905C
-		public override void PostSpawnSetup(bool respawningAfterLoad)
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			base.PostSpawnSetup(respawningAfterLoad);
-			if (!respawningAfterLoad && !Find.AnalysisManager.HasAnalysisWithID(this.AnalysisID))
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				Find.AnalysisManager.AddAnalysisTask(this.AnalysisID, this.Props.analysisRequiredRange.RandomInRange);
-			}
-		}
-
-		// Token: 0x0600F9F0 RID: 63984 RVA: 0x0048AE9C File Offset: 0x0048909C
-		public override void OrderForceTarget(LocalTargetInfo target)
-		{
-			Building_ResearchBench building_ResearchBench = null;
-			if (base.ValidateTarget(target, false) && (this.Props.canStudyInPlace || StudyUtility.TryFindResearchBench(target.Pawn, out building_ResearchBench)))
-			{
-				ThingWithComps parent = this.parent;
-				CompForbiddable compForbiddable = (parent != null) ? parent.TryGetComp<CompForbiddable>() : null;
-				if (compForbiddable != null)
+				try
 				{
-					compForbiddable.Forbidden = false;
 				}
-				target.Pawn.jobs.TryTakeOrderedJob(JobMaker.MakeJob(JobDefOf.AnalyzeItem, this.parent, building_ResearchBench, (building_ResearchBench != null) ? building_ResearchBench.Position : IntVec3.Invalid), new JobTag?(JobTag.Misc), false);
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				CompAnalyzable CS_0024_003C_003E8__locals2 = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((CompInteractable)CS_0024_003C_003E8__locals2).CompGetGizmosExtra().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_006f:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Gizmo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (DebugSettings.ShowDevGizmos)
+					{
+						_003C_003E2__current = new Command_Action
+						{
+							defaultLabel = "DEV: Finish analysis",
+							action = delegate
+							{
+								CS_0024_003C_003E8__locals2.OnAnalyzed(Find.CurrentMap.mapPawns.FreeColonistsSpawned.First());
+							}
+						};
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x0600F9F1 RID: 63985 RVA: 0x0048AF3C File Offset: 0x0048913C
-		public override AcceptanceReport CanInteract(Pawn activateBy = null, bool checkOptionalItems = true)
+		bool IEnumerator.MoveNext()
 		{
-			AcceptanceReport result = base.CanInteract(activateBy, checkOptionalItems);
-			if (!result.Accepted)
-			{
-				return result;
-			}
-			AnalysisDetails analysisDetails;
-			Find.AnalysisManager.TryGetAnalysisProgress(this.AnalysisID, out analysisDetails);
-			if (!this.Props.allowRepeatAnalysis && analysisDetails != null && analysisDetails.Satisfied)
-			{
-				return "AlreadyAnalyzed".Translate();
-			}
-			if (activateBy != null && StatDefOf.ResearchSpeed.Worker.IsDisabledFor(activateBy))
-			{
-				return "Incapable".Translate();
-			}
-			Building_ResearchBench building_ResearchBench;
-			if (activateBy != null && !this.Props.canStudyInPlace && !StudyUtility.TryFindResearchBench(activateBy, out building_ResearchBench))
-			{
-				return "NoResearchBench".Translate();
-			}
-			if (activateBy == null && !this.Props.canStudyInPlace && !this.parent.MapHeld.listerBuildings.ColonistsHaveResearchBench())
-			{
-				return "NoResearchBench".Translate();
-			}
-			return true;
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0600F9F2 RID: 63986 RVA: 0x0048B024 File Offset: 0x00489224
-		public virtual void OnAnalyzed(Pawn pawn)
+		private void _003C_003Em__Finally1()
 		{
-			AnalysisDetails details;
-			if (!Find.AnalysisManager.TryIncrementAnalysisProgress(this.AnalysisID, out details) && Find.AnalysisManager.IsAnalysisComplete(this.AnalysisID))
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				this.SendLetter(this.Props.repeatCompletedLetterLabel, this.Props.repeatCompletedLetter, this.Props.repeatCompletedLetterDef, pawn);
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CCompGetGizmosExtra_003Ed__15 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
 			}
 			else
 			{
-				this.SendAppropriateProgressLetter(pawn, details);
-			}
-			if (this.Props.destroyedOnAnalyzed)
-			{
-				this.parent.Destroy(DestroyMode.Vanish);
-			}
-		}
-
-		// Token: 0x0600F9F3 RID: 63987 RVA: 0x0048B0A4 File Offset: 0x004892A4
-		private void SendAppropriateProgressLetter(Pawn pawn, AnalysisDetails details)
-		{
-			if (details.Satisfied)
-			{
-				this.SendLetter(this.Props.completedLetterLabel, this.Props.completedLetter, this.Props.completedLetterDef, pawn);
-				return;
-			}
-			string str = "";
-			if (this.Props.showProgress)
-			{
-				str = string.Format(" {0}/{1}", details.timesDone, details.required);
-			}
-			string letter = (details.timesDone <= this.Props.progressedLetters.Count) ? this.Props.progressedLetters[details.timesDone - 1] : this.Props.progressedLetters.Last<string>();
-			this.SendLetter(this.Props.progressedLetterLabel + str, letter, this.Props.progressedLetterDef, pawn);
-		}
-
-		// Token: 0x0600F9F4 RID: 63988 RVA: 0x0048B180 File Offset: 0x00489380
-		private void SendLetter(string label, string letter, LetterDef def, Pawn pawn)
-		{
-			if (string.IsNullOrEmpty(label) || string.IsNullOrEmpty(letter))
-			{
-				return;
-			}
-			string formattedLetterString = this.GetFormattedLetterString(label, pawn);
-			string formattedLetterString2 = this.GetFormattedLetterString(letter, pawn);
-			Find.LetterStack.ReceiveLetter(formattedLetterString, formattedLetterString2, def, null, 0, true);
-		}
-
-		// Token: 0x0600F9F5 RID: 63989 RVA: 0x0048B1CC File Offset: 0x004893CC
-		private string GetFormattedLetterString(string text, Pawn pawn)
-		{
-			if (this.ExtraNamedArg != null)
-			{
-				return text.Formatted(pawn.Named("PAWN"), this.ExtraNamedArg.Value).Resolve();
-			}
-			return text.Formatted(pawn.Named("PAWN")).Resolve();
-		}
-
-		// Token: 0x0600F9F6 RID: 63990 RVA: 0x0048B22A File Offset: 0x0048942A
-		public override IEnumerable<Gizmo> CompGetGizmosExtra()
-		{
-			foreach (Gizmo gizmo in base.CompGetGizmosExtra())
-			{
-				yield return gizmo;
-			}
-			IEnumerator<Gizmo> enumerator = null;
-			if (DebugSettings.ShowDevGizmos)
-			{
-				yield return new Command_Action
+				result = new _003CCompGetGizmosExtra_003Ed__15(0)
 				{
-					defaultLabel = "DEV: Finish analysis",
-					action = delegate()
-					{
-						this.OnAnalyzed(Find.CurrentMap.mapPawns.FreeColonistsSpawned.First<Pawn>());
-					}
+					_003C_003E4__this = _003C_003E4__this
 				};
 			}
-			yield break;
-			yield break;
+			return result;
 		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	public new CompProperties_Analyzable Props => (CompProperties_Analyzable)props;
+
+	public Pawn Pawn => parent as Pawn;
+
+	public abstract int AnalysisID { get; }
+
+	public override string ExposeKey => "Analyzable";
+
+	public override void PostSpawnSetup(bool respawningAfterLoad)
+	{
+		base.PostSpawnSetup(respawningAfterLoad);
+		if (!respawningAfterLoad && !Find.AnalysisManager.HasAnalysisWithID(AnalysisID))
+		{
+			Find.AnalysisManager.AddAnalysisTask(AnalysisID, Props.analysisRequiredRange.RandomInRange);
+		}
+	}
+
+	public override void OrderForceTarget(LocalTargetInfo target)
+	{
+		Building_ResearchBench bench = null;
+		if (ValidateTarget(target, showMessages: false) && (Props.canStudyInPlace || StudyUtility.TryFindResearchBench(target.Pawn, out bench)))
+		{
+			CompForbiddable compForbiddable = parent?.TryGetComp<CompForbiddable>();
+			if (compForbiddable != null)
+			{
+				compForbiddable.Forbidden = false;
+			}
+			target.Pawn.jobs.TryTakeOrderedJob(JobMaker.MakeJob(JobDefOf.AnalyzeItem, parent, bench, bench?.Position ?? IntVec3.Invalid), JobTag.Misc);
+		}
+	}
+
+	public override AcceptanceReport CanInteract(Pawn activateBy = null, bool checkOptionalItems = true)
+	{
+		AcceptanceReport result = base.CanInteract(activateBy, checkOptionalItems);
+		if (!result.Accepted)
+		{
+			return result;
+		}
+		Find.AnalysisManager.TryGetAnalysisProgress(AnalysisID, out var details);
+		if (!Props.allowRepeatAnalysis && details != null && details.Satisfied)
+		{
+			return "AlreadyAnalyzed".Translate();
+		}
+		if (activateBy != null && StatDefOf.ResearchSpeed.Worker.IsDisabledFor(activateBy))
+		{
+			return "Incapable".Translate();
+		}
+		if (activateBy != null && !Props.canStudyInPlace && !StudyUtility.TryFindResearchBench(activateBy, out var _))
+		{
+			return "NoResearchBench".Translate();
+		}
+		if (activateBy == null && !Props.canStudyInPlace && !parent.MapHeld.listerBuildings.ColonistsHaveResearchBench())
+		{
+			return "NoResearchBench".Translate();
+		}
+		return true;
+	}
+
+	public virtual void OnAnalyzed(Pawn pawn)
+	{
+		if (!Find.AnalysisManager.TryIncrementAnalysisProgress(AnalysisID, out var details) && Find.AnalysisManager.IsAnalysisComplete(AnalysisID))
+		{
+			SendLetter(Props.repeatCompletedLetterLabel, Props.repeatCompletedLetter, Props.repeatCompletedLetterDef, pawn);
+		}
+		else
+		{
+			SendAppropriateProgressLetter(pawn, details);
+		}
+		if (Props.destroyedOnAnalyzed)
+		{
+			parent.Destroy();
+		}
+	}
+
+	private void SendAppropriateProgressLetter(Pawn pawn, AnalysisDetails details)
+	{
+		if (details.Satisfied)
+		{
+			SendLetter(Props.completedLetterLabel, Props.completedLetter, Props.completedLetterDef, pawn);
+			return;
+		}
+		string text = "";
+		if (Props.showProgress)
+		{
+			text = $" {details.timesDone}/{details.required}";
+		}
+		string letter = ((details.timesDone <= Props.progressedLetters.Count) ? Props.progressedLetters[details.timesDone - 1] : Props.progressedLetters.Last());
+		SendLetter(Props.progressedLetterLabel + text, letter, Props.progressedLetterDef, pawn);
+	}
+
+	private void SendLetter(string label, string letter, LetterDef def, Pawn pawn)
+	{
+		if (!string.IsNullOrEmpty(label) && !string.IsNullOrEmpty(letter))
+		{
+			string formattedLetterString = GetFormattedLetterString(label, pawn);
+			string formattedLetterString2 = GetFormattedLetterString(letter, pawn);
+			Find.LetterStack.ReceiveLetter(formattedLetterString, formattedLetterString2, def);
+		}
+	}
+
+	private string GetFormattedLetterString(string text, Pawn pawn)
+	{
+		if (ExtraNamedArg.HasValue)
+		{
+			return text.Formatted(pawn.Named("PAWN"), ExtraNamedArg.Value).Resolve();
+		}
+		return text.Formatted(pawn.Named("PAWN")).Resolve();
+	}
+
+	[IteratorStateMachine(typeof(_003CCompGetGizmosExtra_003Ed__15))]
+	public override IEnumerable<Gizmo> CompGetGizmosExtra()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CCompGetGizmosExtra_003Ed__15(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

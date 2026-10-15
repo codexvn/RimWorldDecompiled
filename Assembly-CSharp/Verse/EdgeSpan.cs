@@ -1,86 +1,185 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
-namespace Verse
+namespace Verse;
+
+public struct EdgeSpan
 {
-	// Token: 0x020004F9 RID: 1273
-	public struct EdgeSpan
+	[CompilerGenerated]
+	private sealed class _003Cget_Cells_003Ed__6 : IEnumerable<IntVec3>, IEnumerable, IEnumerator<IntVec3>, IEnumerator, IDisposable
 	{
-		// Token: 0x170005E3 RID: 1507
-		// (get) Token: 0x0600210E RID: 8462 RVA: 0x000AD1F3 File Offset: 0x000AB3F3
-		public bool IsValid
+		private int _003C_003E1__state;
+
+		private IntVec3 _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public EdgeSpan _003C_003E4__this;
+
+		public EdgeSpan _003C_003E3___003C_003E4__this;
+
+		private int _003Ci_003E5__2;
+
+		IntVec3 IEnumerator<IntVec3>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.length > 0;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170005E4 RID: 1508
-		// (get) Token: 0x0600210F RID: 8463 RVA: 0x000AD1FE File Offset: 0x000AB3FE
-		public IEnumerable<IntVec3> Cells
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				int num;
-				for (int i = 0; i < this.length; i = num + 1)
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003Cget_Cells_003Ed__6(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			switch (_003C_003E1__state)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003Ci_003E5__2 = 0;
+				goto IL_00e1;
+			case 1:
+				_003C_003E1__state = -1;
+				goto IL_00d1;
+			case 2:
 				{
-					if (this.dir == SpanDirection.North)
-					{
-						yield return new IntVec3(this.root.x, 0, this.root.z + i);
-					}
-					else if (this.dir == SpanDirection.East)
-					{
-						yield return new IntVec3(this.root.x + i, 0, this.root.z);
-					}
-					num = i;
+					_003C_003E1__state = -1;
+					goto IL_00d1;
 				}
-				yield break;
+				IL_00e1:
+				if (_003Ci_003E5__2 < _003C_003E4__this.length)
+				{
+					if (_003C_003E4__this.dir == SpanDirection.North)
+					{
+						_003C_003E2__current = new IntVec3(_003C_003E4__this.root.x, 0, _003C_003E4__this.root.z + _003Ci_003E5__2);
+						_003C_003E1__state = 1;
+						return true;
+					}
+					if (_003C_003E4__this.dir == SpanDirection.East)
+					{
+						_003C_003E2__current = new IntVec3(_003C_003E4__this.root.x + _003Ci_003E5__2, 0, _003C_003E4__this.root.z);
+						_003C_003E1__state = 2;
+						return true;
+					}
+					goto IL_00d1;
+				}
+				return false;
+				IL_00d1:
+				_003Ci_003E5__2++;
+				goto IL_00e1;
 			}
 		}
 
-		// Token: 0x06002110 RID: 8464 RVA: 0x000AD214 File Offset: 0x000AB414
-		public override string ToString()
+		bool IEnumerator.MoveNext()
 		{
-			string[] array = new string[7];
-			array[0] = "(root=";
-			int num = 1;
-			IntVec3 intVec = this.root;
-			array[num] = intVec.ToString();
-			array[2] = ", dir=";
-			array[3] = this.dir.ToString();
-			array[4] = " + length=";
-			array[5] = this.length.ToString();
-			array[6] = ")";
-			return string.Concat(array);
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x06002111 RID: 8465 RVA: 0x000AD285 File Offset: 0x000AB485
-		public EdgeSpan(IntVec3 root, SpanDirection dir, int length)
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			this.root = root;
-			this.dir = dir;
-			this.length = length;
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x06002112 RID: 8466 RVA: 0x000AD29C File Offset: 0x000AB49C
-		public ulong UniqueHashCode()
+		[DebuggerHidden]
+		IEnumerator<IntVec3> IEnumerable<IntVec3>.GetEnumerator()
 		{
-			ulong num = this.root.UniqueHashCode();
-			if (this.dir == SpanDirection.East)
+			_003Cget_Cells_003Ed__6 _003Cget_Cells_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				num += 17592186044416UL;
+				_003C_003E1__state = 0;
+				_003Cget_Cells_003Ed__ = this;
 			}
-			return num + (ulong)(281474976710656L * (long)this.length);
+			else
+			{
+				_003Cget_Cells_003Ed__ = new _003Cget_Cells_003Ed__6(0);
+			}
+			_003Cget_Cells_003Ed__._003C_003E4__this = _003C_003E3___003C_003E4__this;
+			return _003Cget_Cells_003Ed__;
 		}
 
-		// Token: 0x04001C19 RID: 7193
-		public IntVec3 root;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<IntVec3>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x04001C1A RID: 7194
-		public SpanDirection dir;
+	public IntVec3 root;
 
-		// Token: 0x04001C1B RID: 7195
-		public int length;
+	public SpanDirection dir;
+
+	public int length;
+
+	public bool IsValid => length > 0;
+
+	public IEnumerable<IntVec3> Cells
+	{
+		[IteratorStateMachine(typeof(_003Cget_Cells_003Ed__6))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_Cells_003Ed__6(-2)
+			{
+				_003C_003E3___003C_003E4__this = this
+			};
+		}
+	}
+
+	public override string ToString()
+	{
+		string[] obj = new string[7] { "(root=", null, null, null, null, null, null };
+		IntVec3 intVec = root;
+		obj[1] = intVec.ToString();
+		obj[2] = ", dir=";
+		obj[3] = dir.ToString();
+		obj[4] = " + length=";
+		obj[5] = length.ToString();
+		obj[6] = ")";
+		return string.Concat(obj);
+	}
+
+	public EdgeSpan(IntVec3 root, SpanDirection dir, int length)
+	{
+		this.root = root;
+		this.dir = dir;
+		this.length = length;
+	}
+
+	public ulong UniqueHashCode()
+	{
+		ulong num = root.UniqueHashCode();
+		if (dir == SpanDirection.East)
+		{
+			num += 17592186044416L;
+		}
+		return num + (ulong)(281474976710656L * length);
 	}
 }

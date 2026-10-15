@@ -1,71 +1,208 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class RoomRequirement_ThingCount : RoomRequirement_Thing
 {
-	// Token: 0x020037AA RID: 14250
-	public class RoomRequirement_ThingCount : RoomRequirement_Thing
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__4 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x06013BE7 RID: 80871 RVA: 0x005DCE1F File Offset: 0x005DB01F
-		public override bool Met(Room r, Pawn p = null)
-		{
-			return this.Count(r) >= this.count;
-		}
+		private int _003C_003E1__state;
 
-		// Token: 0x06013BE8 RID: 80872 RVA: 0x005DCE33 File Offset: 0x005DB033
-		public int Count(Room r)
-		{
-			return r.ThingCount(this.thingDef);
-		}
+		private string _003C_003E2__current;
 
-		// Token: 0x06013BE9 RID: 80873 RVA: 0x005DCE44 File Offset: 0x005DB044
-		public override string Label(Room r = null)
+		private int _003C_003El__initialThreadId;
+
+		public RoomRequirement_ThingCount _003C_003E4__this;
+
+		private IEnumerator<string> _003C_003E7__wrap1;
+
+		string IEnumerator<string>.Current
 		{
-			bool flag = !this.labelKey.NullOrEmpty();
-			string text = flag ? this.labelKey.Translate() : this.thingDef.label;
-			if (r != null)
+			[DebuggerHidden]
+			get
 			{
-				return string.Concat(new string[]
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__4(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
 				{
-					text,
-					" ",
-					this.Count(r).ToString(),
-					"/",
-					this.count.ToString()
-				});
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
 			}
-			if (!flag)
-			{
-				return GenLabel.ThingLabel(this.thingDef, null, this.count);
-			}
-			return text + " x" + this.count.ToString();
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x06013BEA RID: 80874 RVA: 0x005DCEF0 File Offset: 0x005DB0F0
-		public override IEnumerable<string> ConfigErrors()
+		private bool MoveNext()
 		{
-			foreach (string text in base.ConfigErrors())
+			try
 			{
-				yield return text;
+				int num = _003C_003E1__state;
+				RoomRequirement_ThingCount roomRequirement_ThingCount = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((RoomRequirement_Thing)roomRequirement_ThingCount).ConfigErrors().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_006f:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (roomRequirement_ThingCount.count <= 0)
+					{
+						_003C_003E2__current = "count must be larger than 0";
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
+				}
+				return false;
 			}
-			IEnumerator<string> enumerator = null;
-			if (this.count <= 0)
+			catch
 			{
-				yield return "count must be larger than 0";
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
-			yield break;
-			yield break;
 		}
 
-		// Token: 0x06013BEB RID: 80875 RVA: 0x005DCF00 File Offset: 0x005DB100
-		public override void ExposeData()
+		bool IEnumerator.MoveNext()
 		{
-			base.ExposeData();
-			Scribe_Values.Look<int>(ref this.count, "count", 0, false);
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0400DAB9 RID: 55993
-		public int count;
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__4 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__4(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	public int count;
+
+	public override bool Met(Room r, Pawn p = null)
+	{
+		return Count(r) >= count;
+	}
+
+	public int Count(Room r)
+	{
+		return r.ThingCount(thingDef);
+	}
+
+	public override string Label(Room r = null)
+	{
+		bool flag = !labelKey.NullOrEmpty();
+		string text = (flag ? ((string)labelKey.Translate()) : thingDef.label);
+		if (r != null)
+		{
+			return text + " " + Count(r) + "/" + count;
+		}
+		if (!flag)
+		{
+			return GenLabel.ThingLabel(thingDef, null, count);
+		}
+		return text + " x" + count;
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__4))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__4(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref count, "count", 0);
 	}
 }

@@ -1,417 +1,366 @@
-﻿using System;
 using UnityEngine;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Pawn_FlightTracker : IExposable
 {
-	// Token: 0x0200385F RID: 14431
-	public class Pawn_FlightTracker : IExposable
+	private enum FlightState
 	{
-		// Token: 0x170032F0 RID: 13040
-		// (get) Token: 0x06013F36 RID: 81718 RVA: 0x005EB4AD File Offset: 0x005E96AD
-		public bool Flying
+		Grounded,
+		Flying,
+		TakingOff,
+		Landing
+	}
+
+	private Pawn pawn;
+
+	private int flyingTicks = -1;
+
+	private int flightCooldownTicks;
+
+	private int lerpTick;
+
+	private AnimationDef playing;
+
+	private FlightState flightState;
+
+	private const int TakeoffDurationTicks = 50;
+
+	private const int LandingDurationTicks = 50;
+
+	private static readonly SimpleCurve TakeoffCurve = new SimpleCurve
+	{
+		new CurvePoint(0f, 0f),
+		new CurvePoint(0.5f, 0.6f),
+		new CurvePoint(1f, 1f)
+	};
+
+	private static readonly SimpleCurve LandingCurve = new SimpleCurve
+	{
+		new CurvePoint(0f, 1f),
+		new CurvePoint(0.5f, 0.4f),
+		new CurvePoint(1f, 0f)
+	};
+
+	public bool Flying => flightState != FlightState.Grounded;
+
+	public bool CanEverFly
+	{
+		get
 		{
-			get
+			if (pawn.IsMutant && pawn.mutant.Def.disableFlying)
 			{
-				return this.flightState > Pawn_FlightTracker.FlightState.Grounded;
+				return false;
 			}
-		}
-
-		// Token: 0x170032F1 RID: 13041
-		// (get) Token: 0x06013F37 RID: 81719 RVA: 0x005EB4B8 File Offset: 0x005E96B8
-		public bool CanEverFly
-		{
-			get
+			if (!pawn.RaceProps.canFlyInVacuum)
 			{
-				return (!this.pawn.IsMutant || !this.pawn.mutant.Def.disableFlying) && (this.pawn.RaceProps.canFlyInVacuum || !this.pawn.MapHeld.Biome.inVacuum) && this.pawn.GetStatValue(StatDefOf.MaxFlightTime, true, 300) > 0f;
-			}
-		}
-
-		// Token: 0x170032F2 RID: 13042
-		// (get) Token: 0x06013F38 RID: 81720 RVA: 0x005EB533 File Offset: 0x005E9733
-		public bool CanFlyNow
-		{
-			get
-			{
-				return !this.Flying && this.CanEverFly && this.flightCooldownTicks <= 0;
-			}
-		}
-
-		// Token: 0x170032F3 RID: 13043
-		// (get) Token: 0x06013F39 RID: 81721 RVA: 0x005EB553 File Offset: 0x005E9753
-		public int MaxFlightTicks
-		{
-			get
-			{
-				return Mathf.RoundToInt(this.pawn.GetStatValue(StatDefOf.MaxFlightTime, true, 300) * 60f);
-			}
-		}
-
-		// Token: 0x170032F4 RID: 13044
-		// (get) Token: 0x06013F3A RID: 81722 RVA: 0x005EB578 File Offset: 0x005E9778
-		public float PositionOffsetFactor
-		{
-			get
-			{
-				switch (this.flightState)
+				Map mapHeld = pawn.MapHeld;
+				if (mapHeld != null)
 				{
-				case Pawn_FlightTracker.FlightState.Flying:
-					return 1f;
-				case Pawn_FlightTracker.FlightState.TakingOff:
-					return Pawn_FlightTracker.TakeoffCurve.Evaluate((float)this.lerpTick / 50f);
-				case Pawn_FlightTracker.FlightState.Landing:
-					return Pawn_FlightTracker.LandingCurve.Evaluate((float)this.lerpTick / 50f);
-				}
-				return 0f;
-			}
-		}
-
-		// Token: 0x06013F3B RID: 81723 RVA: 0x005EB5DF File Offset: 0x005E97DF
-		public Pawn_FlightTracker(Pawn pawn)
-		{
-			this.pawn = pawn;
-		}
-
-		// Token: 0x06013F3C RID: 81724 RVA: 0x005EB5F8 File Offset: 0x005E97F8
-		public void FlightTick()
-		{
-			this.CheckFlyAnimation();
-			switch (this.flightState)
-			{
-			case Pawn_FlightTracker.FlightState.Grounded:
-				if (this.flightCooldownTicks > 0)
-				{
-					this.flightCooldownTicks--;
-				}
-				if (this.pawn.CurJob != null && this.pawn.CurJob.flying)
-				{
-					this.pawn.CurJob.flying = false;
-				}
-				break;
-			case Pawn_FlightTracker.FlightState.Flying:
-				this.flyingTicks++;
-				if (this.flyingTicks >= this.MaxFlightTicks)
-				{
-					this.flightState = Pawn_FlightTracker.FlightState.Landing;
-					return;
-				}
-				break;
-			case Pawn_FlightTracker.FlightState.TakingOff:
-				this.lerpTick++;
-				if (this.lerpTick >= 50)
-				{
-					this.flightState = Pawn_FlightTracker.FlightState.Flying;
-					this.lerpTick = 0;
-					return;
-				}
-				break;
-			case Pawn_FlightTracker.FlightState.Landing:
-				this.lerpTick++;
-				if (this.lerpTick >= 50)
-				{
-					this.flightState = Pawn_FlightTracker.FlightState.Grounded;
-					this.lerpTick = 0;
-					this.flightCooldownTicks = Mathf.RoundToInt(this.pawn.GetStatValue(StatDefOf.FlightCooldown, true, -1) * 60f);
-					this.flyingTicks = -1;
-					if (this.pawn.Downed && !this.pawn.Position.WalkableBy(this.pawn.Map, this.pawn))
+					BiomeDef biome = mapHeld.Biome;
+					if (biome != null && biome.inVacuum)
 					{
-						this.pawn.Kill(null, null);
-						Corpse corpse = this.pawn.Corpse;
-						if (corpse != null && !corpse.Destroyed)
-						{
-							corpse.Destroy(DestroyMode.Vanish);
-							return;
-						}
+						return false;
 					}
 				}
-				break;
-			default:
-				return;
 			}
+			return pawn.GetStatValue(StatDefOf.MaxFlightTime, applyPostProcess: true, 300) > 0f;
 		}
+	}
 
-		// Token: 0x06013F3D RID: 81725 RVA: 0x005EB77C File Offset: 0x005E997C
-		public void Notify_JobStarted(Job job)
+	public bool CanFlyNow
+	{
+		get
 		{
-			if (!this.CanEverFly)
+			if (!Flying && CanEverFly)
 			{
-				return;
+				return flightCooldownTicks <= 0;
 			}
-			if ((job.def.tryStartFlying || job.def.ifFlyingKeepFlying) && job.def.tryStartFlying && this.CanFlyNow && Rand.Chance((job.def.overrideFlyChance >= 0f) ? job.def.overrideFlyChance : this.pawn.RaceProps.flightStartChanceOnJobStart))
+			return false;
+		}
+	}
+
+	public int MaxFlightTicks => Mathf.RoundToInt(pawn.GetStatValue(StatDefOf.MaxFlightTime, applyPostProcess: true, 300) * 60f);
+
+	public float PositionOffsetFactor => flightState switch
+	{
+		FlightState.Flying => 1f, 
+		FlightState.TakingOff => TakeoffCurve.Evaluate((float)lerpTick / 50f), 
+		FlightState.Landing => LandingCurve.Evaluate((float)lerpTick / 50f), 
+		_ => 0f, 
+	};
+
+	public Pawn_FlightTracker(Pawn pawn)
+	{
+		this.pawn = pawn;
+	}
+
+	public void FlightTick()
+	{
+		CheckFlyAnimation();
+		switch (flightState)
+		{
+		case FlightState.TakingOff:
+			lerpTick++;
+			if (lerpTick >= 50)
 			{
-				this.StartFlyingInternal();
+				flightState = FlightState.Flying;
+				lerpTick = 0;
+			}
+			break;
+		case FlightState.Landing:
+			lerpTick++;
+			if (lerpTick < 50)
+			{
+				break;
+			}
+			flightState = FlightState.Grounded;
+			lerpTick = 0;
+			flightCooldownTicks = Mathf.RoundToInt(pawn.GetStatValue(StatDefOf.FlightCooldown) * 60f);
+			flyingTicks = -1;
+			if (pawn.Downed && !pawn.Position.WalkableBy(pawn.Map, pawn))
+			{
+				pawn.Kill(null);
+				Corpse corpse = pawn.Corpse;
+				if (corpse != null && !corpse.Destroyed)
+				{
+					corpse.Destroy();
+				}
+			}
+			break;
+		case FlightState.Flying:
+			flyingTicks++;
+			if (flyingTicks >= MaxFlightTicks)
+			{
+				flightState = FlightState.Landing;
+			}
+			break;
+		case FlightState.Grounded:
+			if (flightCooldownTicks > 0)
+			{
+				flightCooldownTicks--;
+			}
+			if (pawn.CurJob != null && pawn.CurJob.flying)
+			{
+				pawn.CurJob.flying = false;
+			}
+			break;
+		}
+	}
+
+	public void Notify_PreSwapMap()
+	{
+		playing = null;
+		pawn.Drawer.renderer.SetAnimation(null);
+	}
+
+	public void Notify_JobStarted(Job job)
+	{
+		if (!CanEverFly)
+		{
+			return;
+		}
+		if (job.def.tryStartFlying && CanFlyNow)
+		{
+			if (Rand.Chance((job.def.overrideFlyChance >= 0f) ? job.def.overrideFlyChance : pawn.RaceProps.flightStartChanceOnJobStart))
+			{
+				StartFlyingInternal();
 				job.flying = true;
 				return;
 			}
-			job.flying = false;
-			if (this.Flying)
+		}
+		else if ((job.def.tryStartFlying || job.def.ifFlyingKeepFlying) && Flying)
+		{
+			job.flying = true;
+			return;
+		}
+		job.flying = false;
+		if (Flying)
+		{
+			ForceLand();
+		}
+	}
+
+	public void StartFlying()
+	{
+		if (CanFlyNow)
+		{
+			StartFlyingInternal();
+		}
+	}
+
+	private void StartFlyingInternal()
+	{
+		flightState = FlightState.TakingOff;
+		lerpTick = 0;
+		flyingTicks = -1;
+		CheckFlyAnimation();
+	}
+
+	private void CheckFlyAnimation()
+	{
+		bool flying = Flying;
+		if (!flying && playing != null)
+		{
+			if (pawn.Drawer.renderer.CurAnimation == playing)
 			{
-				this.ForceLand();
+				pawn.Drawer.renderer.SetAnimation(null);
+			}
+			playing = null;
+		}
+		else if (flying)
+		{
+			AnimationDef bestFlyAnimation = GetBestFlyAnimation(pawn, null);
+			if (pawn.Drawer.renderer.CurAnimation != bestFlyAnimation)
+			{
+				pawn.Drawer.renderer.SetAnimation(bestFlyAnimation);
+				playing = bestFlyAnimation;
 			}
 		}
+	}
 
-		// Token: 0x06013F3E RID: 81726 RVA: 0x005EB81A File Offset: 0x005E9A1A
-		public void StartFlying()
+	public void ForceLand()
+	{
+		if (flightState == FlightState.TakingOff || flightState == FlightState.Flying)
 		{
-			if (!this.CanFlyNow)
-			{
-				return;
-			}
-			this.StartFlyingInternal();
+			flightState = FlightState.Landing;
+			lerpTick = 25;
+			flightCooldownTicks = Mathf.RoundToInt(pawn.GetStatValue(StatDefOf.FlightCooldown) * 60f) + 50;
 		}
+	}
 
-		// Token: 0x06013F3F RID: 81727 RVA: 0x005EB82B File Offset: 0x005E9A2B
-		private void StartFlyingInternal()
+	public string GetStatusString()
+	{
+		if (Flying)
 		{
-			this.flightState = Pawn_FlightTracker.FlightState.TakingOff;
-			this.lerpTick = 0;
-			this.flyingTicks = -1;
-			this.CheckFlyAnimation();
+			return "Flying".Translate().CapitalizeFirst();
 		}
+		return null;
+	}
 
-		// Token: 0x06013F40 RID: 81728 RVA: 0x005EB848 File Offset: 0x005E9A48
-		private void CheckFlyAnimation()
-		{
-			bool flying = this.Flying;
-			if (!flying && this.playing != null)
-			{
-				if (this.pawn.Drawer.renderer.CurAnimation == this.playing)
-				{
-					this.pawn.Drawer.renderer.SetAnimation(null);
-				}
-				this.playing = null;
-				return;
-			}
-			if (flying)
-			{
-				AnimationDef bestFlyAnimation = Pawn_FlightTracker.GetBestFlyAnimation(this.pawn, null);
-				if (this.pawn.Drawer.renderer.CurAnimation == bestFlyAnimation)
-				{
-					return;
-				}
-				this.pawn.Drawer.renderer.SetAnimation(bestFlyAnimation);
-				this.playing = bestFlyAnimation;
-			}
-		}
+	public void ExposeData()
+	{
+		Scribe_Values.Look(ref flyingTicks, "flyingTicks", -1);
+		Scribe_Values.Look(ref flightCooldownTicks, "flightCooldownTicks", 0);
+		Scribe_Values.Look(ref lerpTick, "lerpTick", 0);
+		Scribe_Values.Look(ref flightState, "flightState", FlightState.Grounded);
+		Scribe_Defs.Look(ref playing, "playing");
+	}
 
-		// Token: 0x06013F41 RID: 81729 RVA: 0x005EB8F0 File Offset: 0x005E9AF0
-		public void ForceLand()
+	public static AnimationDef GetBestFlyAnimation(Pawn pawn, Rot4? facingOverride = null)
+	{
+		if (pawn?.kindDef == null)
 		{
-			if (this.flightState != Pawn_FlightTracker.FlightState.TakingOff && this.flightState != Pawn_FlightTracker.FlightState.Flying)
-			{
-				return;
-			}
-			this.flightState = Pawn_FlightTracker.FlightState.Landing;
-			this.lerpTick = 25;
-			this.flightCooldownTicks = Mathf.RoundToInt(this.pawn.GetStatValue(StatDefOf.FlightCooldown, true, -1) * 60f) + 50;
-		}
-
-		// Token: 0x06013F42 RID: 81730 RVA: 0x005EB948 File Offset: 0x005E9B48
-		public string GetStatusString()
-		{
-			if (this.Flying)
-			{
-				return "Flying".Translate().CapitalizeFirst();
-			}
 			return null;
 		}
-
-		// Token: 0x06013F43 RID: 81731 RVA: 0x005EB978 File Offset: 0x005E9B78
-		public void ExposeData()
+		if (pawn.RaceProps.Humanlike)
 		{
-			Scribe_Values.Look<int>(ref this.flyingTicks, "flyingTicks", -1, false);
-			Scribe_Values.Look<int>(ref this.flightCooldownTicks, "flightCooldownTicks", 0, false);
-			Scribe_Values.Look<int>(ref this.lerpTick, "lerpTick", 0, false);
-			Scribe_Values.Look<Pawn_FlightTracker.FlightState>(ref this.flightState, "flightState", Pawn_FlightTracker.FlightState.Grounded, false);
-			Scribe_Defs.Look<AnimationDef>(ref this.playing, "playing");
-		}
-
-		// Token: 0x06013F44 RID: 81732 RVA: 0x005EB9E0 File Offset: 0x005E9BE0
-		public static AnimationDef GetBestFlyAnimation(Pawn pawn, Rot4? facingOverride = null)
-		{
-			if (((pawn != null) ? pawn.kindDef : null) == null)
-			{
-				return null;
-			}
-			if (pawn.RaceProps.Humanlike)
-			{
-				return null;
-			}
-			Rot4 a = facingOverride ?? pawn.Rotation;
-			bool flag = a == Rot4.South;
-			bool flag2 = a == Rot4.North;
-			bool flag3 = pawn.gender == Gender.Female;
-			Pawn_AgeTracker ageTracker = pawn.ageTracker;
-			if (ageTracker != null)
-			{
-				PawnKindLifeStage pawnKindLifeStage = ageTracker.CurKindLifeStage;
-				if (pawnKindLifeStage != null)
-				{
-					if (flag && pawnKindLifeStage.flyingAnimationSouth != null)
-					{
-						if (flag3 && pawnKindLifeStage.flyingAnimationSouthFemale != null)
-						{
-							return pawnKindLifeStage.flyingAnimationSouthFemale;
-						}
-						return pawnKindLifeStage.flyingAnimationSouth;
-					}
-					else if ((flag2 || flag) && pawnKindLifeStage.flyingAnimationNorth != null)
-					{
-						if (flag3 && pawnKindLifeStage.flyingAnimationNorthFemale != null)
-						{
-							return pawnKindLifeStage.flyingAnimationNorthFemale;
-						}
-						return pawnKindLifeStage.flyingAnimationNorth;
-					}
-					else if (pawnKindLifeStage.flyingAnimationEast != null)
-					{
-						if (flag3 && pawnKindLifeStage.flyingAnimationEastFemale != null)
-						{
-							return pawnKindLifeStage.flyingAnimationEastFemale;
-						}
-						return pawnKindLifeStage.flyingAnimationEast;
-					}
-					else if (pawnKindLifeStage.flyingAnimationNorth != null)
-					{
-						if (flag3 && pawnKindLifeStage.flyingAnimationNorthFemale != null)
-						{
-							return pawnKindLifeStage.flyingAnimationNorthFemale;
-						}
-						return pawnKindLifeStage.flyingAnimationNorth;
-					}
-					else if (pawnKindLifeStage.flyingAnimationSouth != null)
-					{
-						if (flag3 && pawnKindLifeStage.flyingAnimationSouthFemale != null)
-						{
-							return pawnKindLifeStage.flyingAnimationSouthFemale;
-						}
-						return pawnKindLifeStage.flyingAnimationSouth;
-					}
-				}
-			}
-			if (pawn.ageTracker == null)
-			{
-				return null;
-			}
-			int i = pawn.ageTracker.CurLifeStageIndex;
-			while (i > 0)
-			{
-				i--;
-				PawnKindLifeStage pawnKindLifeStage = pawn.kindDef.lifeStages[i];
-				if (flag && pawnKindLifeStage.flyingAnimationSouth != null)
-				{
-					if (flag3 && pawnKindLifeStage.flyingAnimationSouthFemale != null)
-					{
-						return pawnKindLifeStage.flyingAnimationSouthFemale;
-					}
-					return pawnKindLifeStage.flyingAnimationSouth;
-				}
-				else if ((flag2 || flag) && pawnKindLifeStage.flyingAnimationNorth != null)
-				{
-					if (flag3 && pawnKindLifeStage.flyingAnimationNorthFemale != null)
-					{
-						return pawnKindLifeStage.flyingAnimationNorthFemale;
-					}
-					return pawnKindLifeStage.flyingAnimationNorth;
-				}
-				else if (pawnKindLifeStage.flyingAnimationEast != null)
-				{
-					if (flag3 && pawnKindLifeStage.flyingAnimationEastFemale != null)
-					{
-						return pawnKindLifeStage.flyingAnimationEastFemale;
-					}
-					return pawnKindLifeStage.flyingAnimationEast;
-				}
-				else if (pawnKindLifeStage.flyingAnimationNorth != null)
-				{
-					if (flag3 && pawnKindLifeStage.flyingAnimationNorthFemale != null)
-					{
-						return pawnKindLifeStage.flyingAnimationNorthFemale;
-					}
-					return pawnKindLifeStage.flyingAnimationNorth;
-				}
-				else if (pawnKindLifeStage.flyingAnimationSouth != null)
-				{
-					if (flag3 && pawnKindLifeStage.flyingAnimationSouthFemale != null)
-					{
-						return pawnKindLifeStage.flyingAnimationSouthFemale;
-					}
-					return pawnKindLifeStage.flyingAnimationSouth;
-				}
-			}
 			return null;
 		}
-
-		// Token: 0x0400DC49 RID: 56393
-		private Pawn pawn;
-
-		// Token: 0x0400DC4A RID: 56394
-		private int flyingTicks = -1;
-
-		// Token: 0x0400DC4B RID: 56395
-		private int flightCooldownTicks;
-
-		// Token: 0x0400DC4C RID: 56396
-		private int lerpTick;
-
-		// Token: 0x0400DC4D RID: 56397
-		private AnimationDef playing;
-
-		// Token: 0x0400DC4E RID: 56398
-		private Pawn_FlightTracker.FlightState flightState;
-
-		// Token: 0x0400DC4F RID: 56399
-		private const int TakeoffDurationTicks = 50;
-
-		// Token: 0x0400DC50 RID: 56400
-		private const int LandingDurationTicks = 50;
-
-		// Token: 0x0400DC51 RID: 56401
-		private static readonly SimpleCurve TakeoffCurve = new SimpleCurve
+		Rot4 obj = facingOverride ?? pawn.Rotation;
+		bool flag = obj == Rot4.South;
+		bool flag2 = obj == Rot4.North;
+		bool flag3 = pawn.gender == Gender.Female;
+		Pawn_AgeTracker ageTracker = pawn.ageTracker;
+		if (ageTracker != null)
 		{
+			PawnKindLifeStage curKindLifeStage = ageTracker.CurKindLifeStage;
+			if (curKindLifeStage != null)
 			{
-				new CurvePoint(0f, 0f),
-				true
-			},
-			{
-				new CurvePoint(0.5f, 0.6f),
-				true
-			},
-			{
-				new CurvePoint(1f, 1f),
-				true
+				if (flag && curKindLifeStage.flyingAnimationSouth != null)
+				{
+					if (flag3 && curKindLifeStage.flyingAnimationSouthFemale != null)
+					{
+						return curKindLifeStage.flyingAnimationSouthFemale;
+					}
+					return curKindLifeStage.flyingAnimationSouth;
+				}
+				if ((flag2 || flag) && curKindLifeStage.flyingAnimationNorth != null)
+				{
+					if (flag3 && curKindLifeStage.flyingAnimationNorthFemale != null)
+					{
+						return curKindLifeStage.flyingAnimationNorthFemale;
+					}
+					return curKindLifeStage.flyingAnimationNorth;
+				}
+				if (curKindLifeStage.flyingAnimationEast != null)
+				{
+					if (flag3 && curKindLifeStage.flyingAnimationEastFemale != null)
+					{
+						return curKindLifeStage.flyingAnimationEastFemale;
+					}
+					return curKindLifeStage.flyingAnimationEast;
+				}
+				if (curKindLifeStage.flyingAnimationNorth != null)
+				{
+					if (flag3 && curKindLifeStage.flyingAnimationNorthFemale != null)
+					{
+						return curKindLifeStage.flyingAnimationNorthFemale;
+					}
+					return curKindLifeStage.flyingAnimationNorth;
+				}
+				if (curKindLifeStage.flyingAnimationSouth != null)
+				{
+					if (flag3 && curKindLifeStage.flyingAnimationSouthFemale != null)
+					{
+						return curKindLifeStage.flyingAnimationSouthFemale;
+					}
+					return curKindLifeStage.flyingAnimationSouth;
+				}
 			}
-		};
-
-		// Token: 0x0400DC52 RID: 56402
-		private static readonly SimpleCurve LandingCurve = new SimpleCurve
-		{
-			{
-				new CurvePoint(0f, 1f),
-				true
-			},
-			{
-				new CurvePoint(0.5f, 0.4f),
-				true
-			},
-			{
-				new CurvePoint(1f, 0f),
-				true
-			}
-		};
-
-		// Token: 0x02003860 RID: 14432
-		private enum FlightState
-		{
-			// Token: 0x0400DC54 RID: 56404
-			Grounded,
-			// Token: 0x0400DC55 RID: 56405
-			Flying,
-			// Token: 0x0400DC56 RID: 56406
-			TakingOff,
-			// Token: 0x0400DC57 RID: 56407
-			Landing
 		}
+		if (pawn.ageTracker == null)
+		{
+			return null;
+		}
+		int num = pawn.ageTracker.CurLifeStageIndex;
+		while (num > 0)
+		{
+			num--;
+			PawnKindLifeStage curKindLifeStage = pawn.kindDef.lifeStages[num];
+			if (flag && curKindLifeStage.flyingAnimationSouth != null)
+			{
+				if (flag3 && curKindLifeStage.flyingAnimationSouthFemale != null)
+				{
+					return curKindLifeStage.flyingAnimationSouthFemale;
+				}
+				return curKindLifeStage.flyingAnimationSouth;
+			}
+			if ((flag2 || flag) && curKindLifeStage.flyingAnimationNorth != null)
+			{
+				if (flag3 && curKindLifeStage.flyingAnimationNorthFemale != null)
+				{
+					return curKindLifeStage.flyingAnimationNorthFemale;
+				}
+				return curKindLifeStage.flyingAnimationNorth;
+			}
+			if (curKindLifeStage.flyingAnimationEast != null)
+			{
+				if (flag3 && curKindLifeStage.flyingAnimationEastFemale != null)
+				{
+					return curKindLifeStage.flyingAnimationEastFemale;
+				}
+				return curKindLifeStage.flyingAnimationEast;
+			}
+			if (curKindLifeStage.flyingAnimationNorth != null)
+			{
+				if (flag3 && curKindLifeStage.flyingAnimationNorthFemale != null)
+				{
+					return curKindLifeStage.flyingAnimationNorthFemale;
+				}
+				return curKindLifeStage.flyingAnimationNorth;
+			}
+			if (curKindLifeStage.flyingAnimationSouth != null)
+			{
+				if (flag3 && curKindLifeStage.flyingAnimationSouthFemale != null)
+				{
+					return curKindLifeStage.flyingAnimationSouthFemale;
+				}
+				return curKindLifeStage.flyingAnimationSouth;
+			}
+		}
+		return null;
 	}
 }

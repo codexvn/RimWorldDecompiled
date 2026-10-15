@@ -161,9 +161,21 @@ public class Application
 		{
 			unityWorld.PostLateUpdate += delegate
 			{
-				_onBeforeRender?.Invoke();
+				InvokeBeforeRender();
 			};
 			_beforeRenderSubscribed = true;
+		}
+	}
+
+	private static void InvokeBeforeRender()
+	{
+		try
+		{
+			_onBeforeRender?.Invoke();
+		}
+		catch (Exception exception)
+		{
+			Debug.LogException(exception);
 		}
 	}
 
@@ -219,7 +231,7 @@ public class Application
 				message2.AppendLiteral("Log message handler threw: ");
 				message2.AppendFormatted(value);
 			}
-			log.Error(message2, "DispatchLog", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\Application.cs", 72);
+			log.Error(message2, "DispatchLog", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\Application.cs", 85);
 		}
 		finally
 		{
@@ -262,7 +274,7 @@ public class Application
 				message.AppendLiteral("': ");
 				message.AppendFormatted(ex.Message);
 			}
-			log.Error(message, "OpenURL", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\Application.cs", 149);
+			log.Error(message, "OpenURL", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\Application.cs", 162);
 		}
 	}
 

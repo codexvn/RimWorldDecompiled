@@ -1,71 +1,220 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class QuestPart_FactionRelationKind : QuestPartActivable
 {
-	// Token: 0x02001BC7 RID: 7111
-	public class QuestPart_FactionRelationKind : QuestPartActivable
+	[CompilerGenerated]
+	private sealed class _003Cget_InvolvedFactions_003Ed__4 : IEnumerable<Faction>, IEnumerable, IEnumerator<Faction>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700184F RID: 6223
-		// (get) Token: 0x06009E50 RID: 40528 RVA: 0x002DCD0B File Offset: 0x002DAF0B
-		public override IEnumerable<Faction> InvolvedFactions
+		private int _003C_003E1__state;
+
+		private Faction _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public QuestPart_FactionRelationKind _003C_003E4__this;
+
+		private IEnumerator<Faction> _003C_003E7__wrap1;
+
+		Faction IEnumerator<Faction>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				foreach (Faction faction in base.InvolvedFactions)
-				{
-					yield return faction;
-				}
-				IEnumerator<Faction> enumerator = null;
-				if (this.faction1 != null)
-				{
-					yield return this.faction1;
-				}
-				if (this.faction2 != null)
-				{
-					yield return this.faction2;
-				}
-				yield break;
-				yield break;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06009E51 RID: 40529 RVA: 0x002DCD1C File Offset: 0x002DAF1C
-		public override void QuestPartTick()
+		object IEnumerator.Current
 		{
-			base.QuestPartTick();
-			if (this.faction1 != null && this.faction2 != null && this.faction1.RelationKindWith(this.faction2) == this.relationKind)
+			[DebuggerHidden]
+			get
 			{
-				base.Complete(this.faction1.Named("SUBJECT"));
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06009E52 RID: 40530 RVA: 0x002DCD6E File Offset: 0x002DAF6E
-		public override void ExposeData()
+		[DebuggerHidden]
+		public _003Cget_InvolvedFactions_003Ed__4(int _003C_003E1__state)
 		{
-			base.ExposeData();
-			Scribe_References.Look<Faction>(ref this.faction1, "faction1", false);
-			Scribe_References.Look<Faction>(ref this.faction2, "faction2", false);
-			Scribe_Values.Look<FactionRelationKind>(ref this.relationKind, "relationKind", FactionRelationKind.Hostile, false);
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x06009E53 RID: 40531 RVA: 0x002DCDAA File Offset: 0x002DAFAA
-		public override void AssignDebugData()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			base.AssignDebugData();
-			this.faction1 = Find.FactionManager.RandomEnemyFaction(false, false, true, TechLevel.Undefined);
-			this.faction2 = Faction.OfPlayer;
-			this.relationKind = FactionRelationKind.Neutral;
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x04006D99 RID: 28057
-		public Faction faction1;
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				QuestPart_FactionRelationKind questPart_FactionRelationKind = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((QuestPart)questPart_FactionRelationKind).InvolvedFactions.GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0073;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0073;
+				case 2:
+					_003C_003E1__state = -1;
+					goto IL_00b3;
+				case 3:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_0073:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Faction current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (questPart_FactionRelationKind.faction1 != null)
+					{
+						_003C_003E2__current = questPart_FactionRelationKind.faction1;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					goto IL_00b3;
+					IL_00b3:
+					if (questPart_FactionRelationKind.faction2 != null)
+					{
+						_003C_003E2__current = questPart_FactionRelationKind.faction2;
+						_003C_003E1__state = 3;
+						return true;
+					}
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
 
-		// Token: 0x04006D9A RID: 28058
-		public Faction faction2;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x04006D9B RID: 28059
-		public FactionRelationKind relationKind;
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Faction> IEnumerable<Faction>.GetEnumerator()
+		{
+			_003Cget_InvolvedFactions_003Ed__4 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_InvolvedFactions_003Ed__4(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Faction>)this).GetEnumerator();
+		}
+	}
+
+	public Faction faction1;
+
+	public Faction faction2;
+
+	public FactionRelationKind relationKind;
+
+	public override IEnumerable<Faction> InvolvedFactions
+	{
+		[IteratorStateMachine(typeof(_003Cget_InvolvedFactions_003Ed__4))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_InvolvedFactions_003Ed__4(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public override void QuestPartTick()
+	{
+		base.QuestPartTick();
+		if (faction1 != null && faction2 != null && faction1.RelationKindWith(faction2) == relationKind)
+		{
+			Complete(faction1.Named("SUBJECT"));
+		}
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_References.Look(ref faction1, "faction1");
+		Scribe_References.Look(ref faction2, "faction2");
+		Scribe_Values.Look(ref relationKind, "relationKind", FactionRelationKind.Hostile);
+	}
+
+	public override void AssignDebugData()
+	{
+		base.AssignDebugData();
+		faction1 = Find.FactionManager.RandomEnemyFaction();
+		faction2 = Faction.OfPlayer;
+		relationKind = FactionRelationKind.Neutral;
 	}
 }

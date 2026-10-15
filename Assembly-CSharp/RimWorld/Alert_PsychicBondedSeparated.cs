@@ -1,52 +1,39 @@
-﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Alert_PsychicBondedSeparated : Alert
 {
-	// Token: 0x02003050 RID: 12368
-	public class Alert_PsychicBondedSeparated : Alert
+	private List<Pawn> targets = new List<Pawn>();
+
+	public Alert_PsychicBondedSeparated()
 	{
-		// Token: 0x06011603 RID: 71171 RVA: 0x004FC1EB File Offset: 0x004FA3EB
-		public Alert_PsychicBondedSeparated()
-		{
-			this.defaultLabel = "AlertPsychicBondedPawnsSeparated".Translate();
-			this.requireBiotech = true;
-		}
+		defaultLabel = "AlertPsychicBondedPawnsSeparated".Translate();
+		requireBiotech = true;
+	}
 
-		// Token: 0x06011604 RID: 71172 RVA: 0x004FC21A File Offset: 0x004FA41A
-		public override AlertReport GetReport()
-		{
-			this.GetTargets();
-			return AlertReport.CulpritsAre(this.targets);
-		}
+	public override AlertReport GetReport()
+	{
+		GetTargets();
+		return AlertReport.CulpritsAre(targets);
+	}
 
-		// Token: 0x06011605 RID: 71173 RVA: 0x004FC230 File Offset: 0x004FA430
-		public override TaggedString GetExplanation()
-		{
-			return "AlertPsychicBondedPawnsSeparatedDesc".Translate() + ":\n" + (from x in this.targets
-			select x.NameShortColored.Resolve()).ToLineList("  - ", true);
-		}
+	public override TaggedString GetExplanation()
+	{
+		return "AlertPsychicBondedPawnsSeparatedDesc".Translate() + ":\n" + targets.Select((Pawn x) => x.NameShortColored.Resolve()).ToLineList("  - ", capitalizeItems: true);
+	}
 
-		// Token: 0x06011606 RID: 71174 RVA: 0x004FC28C File Offset: 0x004FA48C
-		private void GetTargets()
+	private void GetTargets()
+	{
+		targets.Clear();
+		foreach (Pawn item in PawnsFinder.AllMapsCaravansAndTravellingTransporters_AliveSpawned)
 		{
-			this.targets.Clear();
-			foreach (Pawn pawn in PawnsFinder.AllMapsCaravansAndTravellingTransporters_AliveSpawned)
+			if (item.RaceProps.Humanlike && item.Faction == Faction.OfPlayer && item.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.PsychicBond) is Hediff_PsychicBond bondHediff && !ThoughtWorker_PsychicBondProximity.NearPsychicBondedPerson(item, bondHediff))
 			{
-				if (pawn.RaceProps.Humanlike && pawn.Faction == Faction.OfPlayer)
-				{
-					Hediff_PsychicBond hediff_PsychicBond = pawn.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.PsychicBond, false) as Hediff_PsychicBond;
-					if (hediff_PsychicBond != null && !ThoughtWorker_PsychicBondProximity.NearPsychicBondedPerson(pawn, hediff_PsychicBond))
-					{
-						this.targets.Add(pawn);
-					}
-				}
+				targets.Add(item);
 			}
 		}
-
-		// Token: 0x0400B3E4 RID: 46052
-		private List<Pawn> targets = new List<Pawn>();
 	}
 }

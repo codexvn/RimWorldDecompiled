@@ -1,107 +1,198 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public static class TerrorUtility
 {
-	// Token: 0x02003765 RID: 14181
-	public static class TerrorUtility
+	[CompilerGenerated]
+	private sealed class _003CGetTerrorThoughts_003Ed__3 : IEnumerable<Thought_MemoryObservationTerror>, IEnumerable, IEnumerator<Thought_MemoryObservationTerror>, IEnumerator, IDisposable
 	{
-		// Token: 0x06013A78 RID: 80504 RVA: 0x005D7035 File Offset: 0x005D5235
-		public static IEnumerable<Thought_MemoryObservationTerror> GetTerrorThoughts(Pawn pawn)
+		private int _003C_003E1__state;
+
+		private Thought_MemoryObservationTerror _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private Pawn pawn;
+
+		public Pawn _003C_003E3__pawn;
+
+		private List<Thought_Memory> _003Cmemories_003E5__2;
+
+		private int _003Ci_003E5__3;
+
+		Thought_MemoryObservationTerror IEnumerator<Thought_MemoryObservationTerror>.Current
 		{
-			List<Thought_Memory> memories = pawn.needs.mood.thoughts.memories.Memories;
-			int num;
-			for (int i = 0; i < memories.Count; i = num + 1)
+			[DebuggerHidden]
+			get
 			{
-				Thought_MemoryObservationTerror thought_MemoryObservationTerror = memories[i] as Thought_MemoryObservationTerror;
-				if (thought_MemoryObservationTerror != null)
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetTerrorThoughts_003Ed__3(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003Cmemories_003E5__2 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			if (num != 0)
+			{
+				if (num != 1)
 				{
-					yield return thought_MemoryObservationTerror;
+					return false;
 				}
-				num = i;
+				_003C_003E1__state = -1;
+				goto IL_0076;
 			}
-			yield break;
+			_003C_003E1__state = -1;
+			_003Cmemories_003E5__2 = pawn.needs.mood.thoughts.memories.Memories;
+			_003Ci_003E5__3 = 0;
+			goto IL_0086;
+			IL_0076:
+			_003Ci_003E5__3++;
+			goto IL_0086;
+			IL_0086:
+			if (_003Ci_003E5__3 < _003Cmemories_003E5__2.Count)
+			{
+				if (_003Cmemories_003E5__2[_003Ci_003E5__3] is Thought_MemoryObservationTerror thought_MemoryObservationTerror)
+				{
+					_003C_003E2__current = thought_MemoryObservationTerror;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				goto IL_0076;
+			}
+			return false;
 		}
 
-		// Token: 0x06013A79 RID: 80505 RVA: 0x005D7045 File Offset: 0x005D5245
-		public static IEnumerable<Thought_MemoryObservationTerror> TakeTopTerrorThoughts(IEnumerable<Thought_MemoryObservationTerror> thoughts)
+		bool IEnumerator.MoveNext()
 		{
-			return (from t in thoughts
-			orderby t.intensity descending
-			select t).Take(3);
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x06013A7A RID: 80506 RVA: 0x005D7074 File Offset: 0x005D5274
-		public static float GetTerrorLevel(this Pawn pawn)
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			int num = 0;
-			if (!pawn.IsSlave)
-			{
-				return (float)num;
-			}
-			foreach (Thought_MemoryObservationTerror thought_MemoryObservationTerror in TerrorUtility.GetTerrorThoughts(pawn))
-			{
-				num += thought_MemoryObservationTerror.intensity;
-			}
-			return (float)Mathf.Min(num, 100) / 100f;
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x06013A7B RID: 80507 RVA: 0x005D70E0 File Offset: 0x005D52E0
-		public static void RemoveAllTerrorThoughts(Pawn pawn)
+		[DebuggerHidden]
+		IEnumerator<Thought_MemoryObservationTerror> IEnumerable<Thought_MemoryObservationTerror>.GetEnumerator()
 		{
-			foreach (Thought_MemoryObservationTerror th in TerrorUtility.GetTerrorThoughts(pawn))
+			_003CGetTerrorThoughts_003Ed__3 _003CGetTerrorThoughts_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				pawn.needs.mood.thoughts.memories.RemoveMemory(th);
+				_003C_003E1__state = 0;
+				_003CGetTerrorThoughts_003Ed__ = this;
 			}
+			else
+			{
+				_003CGetTerrorThoughts_003Ed__ = new _003CGetTerrorThoughts_003Ed__3(0);
+			}
+			_003CGetTerrorThoughts_003Ed__.pawn = _003C_003E3__pawn;
+			return _003CGetTerrorThoughts_003Ed__;
 		}
 
-		// Token: 0x06013A7C RID: 80508 RVA: 0x005D7144 File Offset: 0x005D5344
-		public static bool TryCreateTerrorThought(Thing thing, out Thought_MemoryObservationTerror thought)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			thought = null;
-			if (!ModsConfig.IdeologyActive)
-			{
-				return false;
-			}
-			float statValue = thing.GetStatValue(StatDefOf.TerrorSource, true, -1);
-			if (statValue <= 0f)
-			{
-				return false;
-			}
-			thought = (Thought_MemoryObservationTerror)ThoughtMaker.MakeThought(ThoughtDefOf.ObservedTerror);
-			thought.Target = thing;
-			thought.intensity = (int)statValue;
-			return true;
+			return ((IEnumerable<Thought_MemoryObservationTerror>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x0400D9BC RID: 55740
-		private const int MaxTerror = 100;
+	private const int MaxTerror = 100;
 
-		// Token: 0x0400D9BD RID: 55741
-		private const int TerrorThoughtsToTake = 3;
+	private const int TerrorThoughtsToTake = 3;
 
-		// Token: 0x0400D9BE RID: 55742
-		public static SimpleCurve SuppressionFallRateOverTerror = new SimpleCurve
+	public static SimpleCurve SuppressionFallRateOverTerror = new SimpleCurve
+	{
+		new CurvePoint(0f, 0f),
+		new CurvePoint(25f, -15f),
+		new CurvePoint(50f, -25f),
+		new CurvePoint(100f, -45f)
+	};
+
+	[IteratorStateMachine(typeof(_003CGetTerrorThoughts_003Ed__3))]
+	public static IEnumerable<Thought_MemoryObservationTerror> GetTerrorThoughts(Pawn pawn)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetTerrorThoughts_003Ed__3(-2)
 		{
-			{
-				new CurvePoint(0f, 0f),
-				true
-			},
-			{
-				new CurvePoint(25f, -15f),
-				true
-			},
-			{
-				new CurvePoint(50f, -25f),
-				true
-			},
-			{
-				new CurvePoint(100f, -45f),
-				true
-			}
+			_003C_003E3__pawn = pawn
 		};
+	}
+
+	public static IEnumerable<Thought_MemoryObservationTerror> TakeTopTerrorThoughts(IEnumerable<Thought_MemoryObservationTerror> thoughts)
+	{
+		return thoughts.OrderByDescending((Thought_MemoryObservationTerror t) => t.intensity).Take(3);
+	}
+
+	public static float GetTerrorLevel(this Pawn pawn)
+	{
+		int num = 0;
+		if (!pawn.IsSlave)
+		{
+			return num;
+		}
+		foreach (Thought_MemoryObservationTerror terrorThought in GetTerrorThoughts(pawn))
+		{
+			num += terrorThought.intensity;
+		}
+		return (float)Mathf.Min(num, 100) / 100f;
+	}
+
+	public static void RemoveAllTerrorThoughts(Pawn pawn)
+	{
+		foreach (Thought_MemoryObservationTerror terrorThought in GetTerrorThoughts(pawn))
+		{
+			pawn.needs.mood.thoughts.memories.RemoveMemory(terrorThought);
+		}
+	}
+
+	public static bool TryCreateTerrorThought(Thing thing, out Thought_MemoryObservationTerror thought)
+	{
+		thought = null;
+		if (!ModsConfig.IdeologyActive)
+		{
+			return false;
+		}
+		float statValue = thing.GetStatValue(StatDefOf.TerrorSource);
+		if (statValue <= 0f)
+		{
+			return false;
+		}
+		thought = (Thought_MemoryObservationTerror)ThoughtMaker.MakeThought(ThoughtDefOf.ObservedTerror);
+		thought.Target = thing;
+		thought.intensity = (int)statValue;
+		return true;
 	}
 }

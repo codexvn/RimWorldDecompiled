@@ -1,233 +1,343 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class MinifiedTree : MinifiedThing, IThingHolderTickable, IThingHolder
 {
-	// Token: 0x02002947 RID: 10567
-	public class MinifiedTree : MinifiedThing, IThingHolderTickable, IThingHolder
+	[CompilerGenerated]
+	private sealed class _003CGetGizmos_003Ed__16 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x17002327 RID: 8999
-		// (get) Token: 0x0600E76E RID: 59246 RVA: 0x00002501 File Offset: 0x00000701
-		public bool ShouldTickContents
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public MinifiedTree _003C_003E4__this;
+
+		private IEnumerator<Gizmo> _003C_003E7__wrap1;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetGizmos_003Ed__16(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				MinifiedTree CS_0024_003C_003E8__locals4 = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((MinifiedThing)CS_0024_003C_003E8__locals4).GetGizmos().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_007a;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_007a;
+				case 2:
+					_003C_003E1__state = -1;
+					_003C_003E2__current = new Command_Action
+					{
+						defaultLabel = "DEV: Die in 1 hour",
+						action = delegate
+						{
+							CS_0024_003C_003E8__locals4.ticksTillDeath = 2500;
+						}
+					};
+					_003C_003E1__state = 3;
+					return true;
+				case 3:
+					_003C_003E1__state = -1;
+					_003C_003E2__current = new Command_Action
+					{
+						defaultLabel = "DEV: Die in 1 day",
+						action = delegate
+						{
+							CS_0024_003C_003E8__locals4.ticksTillDeath = 60000;
+						}
+					};
+					_003C_003E1__state = 4;
+					return true;
+				case 4:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_007a:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Gizmo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (DebugSettings.ShowDevGizmos)
+					{
+						_003C_003E2__current = new Command_Action
+						{
+							defaultLabel = "DEV: Destroy",
+							action = delegate
+							{
+								CS_0024_003C_003E8__locals4.Destroy();
+							}
+						};
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
+				}
 				return false;
 			}
-		}
-
-		// Token: 0x17002328 RID: 9000
-		// (get) Token: 0x0600E76F RID: 59247 RVA: 0x0043706E File Offset: 0x0043526E
-		public int TicksTillDeath
-		{
-			get
+			catch
 			{
-				return this.ticksTillDeath;
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x17002329 RID: 9001
-		// (get) Token: 0x0600E770 RID: 59248 RVA: 0x00437076 File Offset: 0x00435276
-		public Plant InnerTree
+		bool IEnumerator.MoveNext()
 		{
-			get
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				return (Plant)base.InnerThing;
+				_003C_003E7__wrap1.Dispose();
 			}
 		}
 
-		// Token: 0x1700232A RID: 9002
-		// (get) Token: 0x0600E771 RID: 59249 RVA: 0x00437084 File Offset: 0x00435284
-		public override Graphic Graphic
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			get
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CGetGizmos_003Ed__16 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				if (this.cachedGraphic == null)
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CGetGizmos_003Ed__16(0)
 				{
-					this.cachedGraphic = base.InnerThing.Graphic.ExtractInnerGraphicFor(base.InnerThing, null);
-					Vector2 minifiedDrawSize = base.GetMinifiedDrawSize(base.InnerThing.def.size.ToVector2(), 1.1f);
-					Vector2 newDrawSize = new Vector2(minifiedDrawSize.x / (float)base.InnerThing.def.size.x * this.cachedGraphic.drawSize.x, minifiedDrawSize.y / (float)base.InnerThing.def.size.z * this.cachedGraphic.drawSize.y);
-					this.cachedGraphic = this.cachedGraphic.GetCopy(newDrawSize, ShaderTypeDefOf.Cutout.Shader);
-				}
-				return this.cachedGraphic;
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
+			return result;
 		}
 
-		// Token: 0x0600E772 RID: 59250 RVA: 0x00437167 File Offset: 0x00435367
-		protected override Graphic LoadCrateFrontGraphic()
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return GraphicDatabase.Get<Graphic_Single>("Things/Item/Minified/BurlapBag", ShaderDatabase.Cutout, base.GetMinifiedDrawSize(base.InnerThing.def.size.ToVector2(), 1.1f) * 1.16f, Color.white);
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x0600E773 RID: 59251 RVA: 0x004371A8 File Offset: 0x004353A8
-		private void RecordTreeDeath(LookTargets lookTargets)
+	private int ticksTillDeath;
+
+	public const int InitialTicksTillDeath = 420000;
+
+	public const float DyingYieldPercentage = 0.5f;
+
+	public bool ShouldTickContents => false;
+
+	public int TicksTillDeath => ticksTillDeath;
+
+	public Plant InnerTree => (Plant)base.InnerThing;
+
+	public override Graphic Graphic
+	{
+		get
 		{
-			if (base.InnerThing.def.plant.treeLoversCareIfChopped)
+			if (cachedGraphic == null)
 			{
-				using (IEnumerator<Ideo> enumerator = Faction.OfPlayer.ideos.AllIdeos.GetEnumerator())
+				cachedGraphic = base.InnerThing.Graphic.ExtractInnerGraphicFor(base.InnerThing, null);
+				Vector2 minifiedDrawSize = GetMinifiedDrawSize(base.InnerThing.def.size.ToVector2(), 1.1f);
+				Vector2 newDrawSize = new Vector2(minifiedDrawSize.x / (float)base.InnerThing.def.size.x * cachedGraphic.drawSize.x, minifiedDrawSize.y / (float)base.InnerThing.def.size.z * cachedGraphic.drawSize.y);
+				cachedGraphic = cachedGraphic.GetCopy(newDrawSize, ShaderTypeDefOf.Cutout.Shader);
+			}
+			return cachedGraphic;
+		}
+	}
+
+	protected override Graphic LoadCrateFrontGraphic()
+	{
+		return GraphicDatabase.Get<Graphic_Single>("Things/Item/Minified/BurlapBag", ShaderDatabase.Cutout, GetMinifiedDrawSize(base.InnerThing.def.size.ToVector2(), 1.1f) * 1.16f, Color.white);
+	}
+
+	private void RecordTreeDeath(LookTargets lookTargets)
+	{
+		if (base.InnerThing.def.plant.treeLoversCareIfChopped)
+		{
+			foreach (Ideo allIdeo in Faction.OfPlayer.ideos.AllIdeos)
+			{
+				if (allIdeo.WarnPlayerOnDesignateChopTree)
 				{
-					while (enumerator.MoveNext())
-					{
-						if (enumerator.Current.WarnPlayerOnDesignateChopTree)
-						{
-							Messages.Message("MessageMinifiedTreeDied".Translate(), lookTargets, MessageTypeDefOf.NegativeEvent, true);
-							break;
-						}
-					}
+					Messages.Message("MessageMinifiedTreeDied".Translate(), lookTargets, MessageTypeDefOf.NegativeEvent);
+					break;
 				}
 			}
-			Find.HistoryEventsManager.RecordEvent(new HistoryEvent(HistoryEventDefOf.MinifiedTreeDied, new SignalArgs(base.InnerThing.Named(HistoryEventArgsNames.Victim))), true);
 		}
+		Find.HistoryEventsManager.RecordEvent(new HistoryEvent(HistoryEventDefOf.MinifiedTreeDied, new SignalArgs(base.InnerThing.Named(HistoryEventArgsNames.Victim))));
+	}
 
-		// Token: 0x0600E774 RID: 59252 RVA: 0x0043725C File Offset: 0x0043545C
-		public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
+	public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
+	{
+		if (base.InnerThing == null)
 		{
-			if (base.InnerThing == null)
-			{
-				base.Destroy(mode);
-				return;
-			}
-			Caravan anyParent = ThingOwnerUtility.GetAnyParent<Caravan>(this);
-			ActiveTransporterInfo activeTransporterInfo = base.ParentHolder as ActiveTransporterInfo;
-			this.RecordTreeDeath((anyParent == null) ? new LookTargets(base.PositionHeld, base.MapHeld) : anyParent);
-			ThingDef harvestedThingDef = base.InnerThing.def.plant.harvestedThingDef;
-			int i = (int)((float)((Plant)base.InnerThing).YieldNow() * 0.5f);
-			List<Thing> list = new List<Thing>();
-			while (i > 0)
-			{
-				int num = Mathf.Min(i, harvestedThingDef.stackLimit);
-				Thing thing = ThingMaker.MakeThing(harvestedThingDef, null);
-				thing.stackCount = num;
-				list.Add(thing);
-				i -= num;
-			}
-			IntVec3 center = (anyParent == null) ? base.PositionHeld : IntVec3.Invalid;
-			Map map = (anyParent == null) ? base.MapHeld : null;
-			if (base.ParentHolder != null)
-			{
-				base.ParentHolder.GetDirectlyHeldThings().Remove(this);
-			}
 			base.Destroy(mode);
-			if (anyParent != null)
-			{
-				using (List<Thing>.Enumerator enumerator = list.GetEnumerator())
-				{
-					while (enumerator.MoveNext())
-					{
-						Thing thing2 = enumerator.Current;
-						anyParent.AddPawnOrItem(thing2, true);
-					}
-					return;
-				}
-			}
-			if (activeTransporterInfo != null)
-			{
-				using (List<Thing>.Enumerator enumerator = list.GetEnumerator())
-				{
-					while (enumerator.MoveNext())
-					{
-						Thing item = enumerator.Current;
-						activeTransporterInfo.innerContainer.TryAdd(item, true);
-					}
-					return;
-				}
-			}
-			if (map != null)
-			{
-				foreach (Thing thing3 in list)
-				{
-					GenPlace.TryPlaceThing(thing3, center, map, ThingPlaceMode.Near, null, null, null, 1);
-				}
-			}
+			return;
 		}
-
-		// Token: 0x0600E775 RID: 59253 RVA: 0x00437444 File Offset: 0x00435644
-		public override void PostMake()
+		Caravan anyParent = ThingOwnerUtility.GetAnyParent<Caravan>(this);
+		ActiveTransporterInfo activeTransporterInfo = base.ParentHolder as ActiveTransporterInfo;
+		RecordTreeDeath((anyParent == null) ? new LookTargets(base.PositionHeld, base.MapHeld) : ((LookTargets)anyParent));
+		ThingDef harvestedThingDef = base.InnerThing.def.plant.harvestedThingDef;
+		int num = (int)((float)((Plant)base.InnerThing).YieldNow() * 0.5f);
+		List<Thing> list = new List<Thing>();
+		while (num > 0)
 		{
-			base.PostMake();
-			this.ticksTillDeath = 420000;
+			int num2 = Mathf.Min(num, harvestedThingDef.stackLimit);
+			Thing thing = ThingMaker.MakeThing(harvestedThingDef);
+			thing.stackCount = num2;
+			list.Add(thing);
+			num -= num2;
 		}
-
-		// Token: 0x0600E776 RID: 59254 RVA: 0x00437457 File Offset: 0x00435657
-		protected override void Tick()
+		IntVec3 center = ((anyParent == null) ? base.PositionHeld : IntVec3.Invalid);
+		Map map = ((anyParent == null) ? base.MapHeld : null);
+		if (base.ParentHolder != null)
 		{
-			base.Tick();
-			this.ticksTillDeath--;
-			if (this.ticksTillDeath <= 0)
+			base.ParentHolder.GetDirectlyHeldThings().Remove(this);
+		}
+		base.Destroy(mode);
+		if (anyParent != null)
+		{
+			foreach (Thing item in list)
 			{
-				this.Destroy(DestroyMode.Vanish);
+				anyParent.AddPawnOrItem(item, addCarriedPawnToWorldPawnsIfAny: true);
 			}
+			return;
 		}
-
-		// Token: 0x0600E777 RID: 59255 RVA: 0x0043747D File Offset: 0x0043567D
-		public override IEnumerable<Gizmo> GetGizmos()
+		if (activeTransporterInfo != null)
 		{
-			foreach (Gizmo gizmo in base.GetGizmos())
+			foreach (Thing item2 in list)
 			{
-				yield return gizmo;
+				activeTransporterInfo.innerContainer.TryAdd(item2);
 			}
-			IEnumerator<Gizmo> enumerator = null;
-			if (DebugSettings.ShowDevGizmos)
-			{
-				yield return new Command_Action
-				{
-					defaultLabel = "DEV: Destroy",
-					action = delegate()
-					{
-						this.Destroy(DestroyMode.Vanish);
-					}
-				};
-				yield return new Command_Action
-				{
-					defaultLabel = "DEV: Die in 1 hour",
-					action = delegate()
-					{
-						this.ticksTillDeath = 2500;
-					}
-				};
-				yield return new Command_Action
-				{
-					defaultLabel = "DEV: Die in 1 day",
-					action = delegate()
-					{
-						this.ticksTillDeath = 60000;
-					}
-				};
-			}
-			yield break;
-			yield break;
+			return;
 		}
-
-		// Token: 0x0600E778 RID: 59256 RVA: 0x0043748D File Offset: 0x0043568D
-		public override void Notify_MyMapRemoved()
+		if (map == null)
 		{
-			base.Notify_MyMapRemoved();
-			this.RecordTreeDeath(null);
+			return;
 		}
-
-		// Token: 0x0600E779 RID: 59257 RVA: 0x0043749C File Offset: 0x0043569C
-		public override string GetInspectString()
+		foreach (Thing item3 in list)
 		{
-			return "MinifiedTreeWillDieIn".Translate(this.ticksTillDeath.ToStringTicksToPeriod(true, false, true, true, false).Named("time"));
+			GenPlace.TryPlaceThing(item3, center, map, ThingPlaceMode.Near, null, null, null);
 		}
+	}
 
-		// Token: 0x0600E77A RID: 59258 RVA: 0x004374C7 File Offset: 0x004356C7
-		public override void ExposeData()
+	public override void PostMake()
+	{
+		base.PostMake();
+		ticksTillDeath = 420000;
+	}
+
+	protected override void Tick()
+	{
+		base.Tick();
+		ticksTillDeath--;
+		if (ticksTillDeath <= 0)
 		{
-			base.ExposeData();
-			Scribe_Values.Look<int>(ref this.ticksTillDeath, "ticksTillDeath", 0, false);
+			Destroy();
 		}
+	}
 
-		// Token: 0x04009A96 RID: 39574
-		private int ticksTillDeath;
+	[IteratorStateMachine(typeof(_003CGetGizmos_003Ed__16))]
+	public override IEnumerable<Gizmo> GetGizmos()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetGizmos_003Ed__16(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
 
-		// Token: 0x04009A97 RID: 39575
-		public const int InitialTicksTillDeath = 420000;
+	public override void Notify_MyMapRemoved()
+	{
+		base.Notify_MyMapRemoved();
+		RecordTreeDeath(null);
+	}
 
-		// Token: 0x04009A98 RID: 39576
-		public const float DyingYieldPercentage = 0.5f;
+	public override string GetInspectString()
+	{
+		return "MinifiedTreeWillDieIn".Translate(ticksTillDeath.ToStringTicksToPeriod().Named("time"));
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref ticksTillDeath, "ticksTillDeath", 0);
 	}
 }

@@ -1,493 +1,579 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public struct SignalArgs
 {
-	// Token: 0x02001D1F RID: 7455
-	public struct SignalArgs
+	[CompilerGenerated]
+	private sealed class _003Cget_Args_003Ed__9 : IEnumerable<NamedArgument>, IEnumerable, IEnumerator<NamedArgument>, IEnumerator, IDisposable
 	{
-		// Token: 0x170019B5 RID: 6581
-		// (get) Token: 0x0600A6B9 RID: 42681 RVA: 0x002FBDB8 File Offset: 0x002F9FB8
-		public int Count
+		private int _003C_003E1__state;
+
+		private NamedArgument _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public SignalArgs _003C_003E4__this;
+
+		public SignalArgs _003C_003E3___003C_003E4__this;
+
+		private int _003Ci_003E5__2;
+
+		NamedArgument IEnumerator<NamedArgument>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.count;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170019B6 RID: 6582
-		// (get) Token: 0x0600A6BA RID: 42682 RVA: 0x002FBDC0 File Offset: 0x002F9FC0
-		public IEnumerable<NamedArgument> Args
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.count == 0)
-				{
-					yield break;
-				}
-				if (this.args != null)
-				{
-					int num;
-					for (int i = 0; i < this.args.Length; i = num + 1)
-					{
-						yield return this.args[i];
-						num = i;
-					}
-				}
-				else
-				{
-					yield return this.arg1;
-					if (this.count >= 2)
-					{
-						yield return this.arg2;
-					}
-					if (this.count >= 3)
-					{
-						yield return this.arg3;
-					}
-					if (this.count >= 4)
-					{
-						yield return this.arg4;
-					}
-				}
-				yield break;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600A6BB RID: 42683 RVA: 0x002FBDD8 File Offset: 0x002F9FD8
-		public SignalArgs(SignalArgs args)
+		[DebuggerHidden]
+		public _003Cget_Args_003Ed__9(int _003C_003E1__state)
 		{
-			this.count = args.count;
-			this.arg1 = args.arg1;
-			this.arg2 = args.arg2;
-			this.arg3 = args.arg3;
-			this.arg4 = args.arg4;
-			this.args = args.args;
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x0600A6BC RID: 42684 RVA: 0x002FBE2D File Offset: 0x002FA02D
-		public SignalArgs(NamedArgument arg1)
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			this.count = 1;
-			this.arg1 = arg1;
-			this.arg2 = default(NamedArgument);
-			this.arg3 = default(NamedArgument);
-			this.arg4 = default(NamedArgument);
-			this.args = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x0600A6BD RID: 42685 RVA: 0x002FBE68 File Offset: 0x002FA068
-		public SignalArgs(NamedArgument arg1, NamedArgument arg2)
+		private bool MoveNext()
 		{
-			this.count = 2;
-			this.arg1 = arg1;
-			this.arg2 = arg2;
-			this.arg3 = default(NamedArgument);
-			this.arg4 = default(NamedArgument);
-			this.args = null;
-		}
-
-		// Token: 0x0600A6BE RID: 42686 RVA: 0x002FBE9E File Offset: 0x002FA09E
-		public SignalArgs(NamedArgument arg1, NamedArgument arg2, NamedArgument arg3)
-		{
-			this.count = 3;
-			this.arg1 = arg1;
-			this.arg2 = arg2;
-			this.arg3 = arg3;
-			this.arg4 = default(NamedArgument);
-			this.args = null;
-		}
-
-		// Token: 0x0600A6BF RID: 42687 RVA: 0x002FBECF File Offset: 0x002FA0CF
-		public SignalArgs(NamedArgument arg1, NamedArgument arg2, NamedArgument arg3, NamedArgument arg4)
-		{
-			this.count = 4;
-			this.arg1 = arg1;
-			this.arg2 = arg2;
-			this.arg3 = arg3;
-			this.arg4 = arg4;
-			this.args = null;
-		}
-
-		// Token: 0x0600A6C0 RID: 42688 RVA: 0x002FBEFC File Offset: 0x002FA0FC
-		public SignalArgs(params NamedArgument[] args)
-		{
-			this.count = args.Length;
-			if (args.Length > 4)
+			switch (_003C_003E1__state)
 			{
-				this.arg1 = default(NamedArgument);
-				this.arg2 = default(NamedArgument);
-				this.arg3 = default(NamedArgument);
-				this.arg4 = default(NamedArgument);
-				this.args = new NamedArgument[args.Length];
-				for (int i = 0; i < args.Length; i++)
-				{
-					this.args[i] = args[i];
-				}
-				return;
-			}
-			if (args.Length == 1)
-			{
-				this.arg1 = args[0];
-				this.arg2 = default(NamedArgument);
-				this.arg3 = default(NamedArgument);
-				this.arg4 = default(NamedArgument);
-			}
-			else if (args.Length == 2)
-			{
-				this.arg1 = args[0];
-				this.arg2 = args[1];
-				this.arg3 = default(NamedArgument);
-				this.arg4 = default(NamedArgument);
-			}
-			else if (args.Length == 3)
-			{
-				this.arg1 = args[0];
-				this.arg2 = args[1];
-				this.arg3 = args[2];
-				this.arg4 = default(NamedArgument);
-			}
-			else if (args.Length == 4)
-			{
-				this.arg1 = args[0];
-				this.arg2 = args[1];
-				this.arg3 = args[2];
-				this.arg4 = args[3];
-			}
-			else
-			{
-				this.arg1 = default(NamedArgument);
-				this.arg2 = default(NamedArgument);
-				this.arg3 = default(NamedArgument);
-				this.arg4 = default(NamedArgument);
-			}
-			this.args = null;
-		}
-
-		// Token: 0x0600A6C1 RID: 42689 RVA: 0x002FC0A0 File Offset: 0x002FA2A0
-		public bool TryGetArg(int index, out NamedArgument arg)
-		{
-			if (index < 0 || index >= this.count)
-			{
-				arg = default(NamedArgument);
+			default:
 				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (_003C_003E4__this.count == 0)
+				{
+					return false;
+				}
+				if (_003C_003E4__this.args != null)
+				{
+					_003Ci_003E5__2 = 0;
+					goto IL_008f;
+				}
+				_003C_003E2__current = _003C_003E4__this.arg1;
+				_003C_003E1__state = 2;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003Ci_003E5__2++;
+				goto IL_008f;
+			case 2:
+				_003C_003E1__state = -1;
+				if (_003C_003E4__this.count >= 2)
+				{
+					_003C_003E2__current = _003C_003E4__this.arg2;
+					_003C_003E1__state = 3;
+					return true;
+				}
+				goto IL_00f9;
+			case 3:
+				_003C_003E1__state = -1;
+				goto IL_00f9;
+			case 4:
+				_003C_003E1__state = -1;
+				goto IL_0128;
+			case 5:
+				{
+					_003C_003E1__state = -1;
+					break;
+				}
+				IL_00f9:
+				if (_003C_003E4__this.count >= 3)
+				{
+					_003C_003E2__current = _003C_003E4__this.arg3;
+					_003C_003E1__state = 4;
+					return true;
+				}
+				goto IL_0128;
+				IL_0128:
+				if (_003C_003E4__this.count >= 4)
+				{
+					_003C_003E2__current = _003C_003E4__this.arg4;
+					_003C_003E1__state = 5;
+					return true;
+				}
+				break;
+				IL_008f:
+				if (_003Ci_003E5__2 < _003C_003E4__this.args.Length)
+				{
+					_003C_003E2__current = _003C_003E4__this.args[_003Ci_003E5__2];
+					_003C_003E1__state = 1;
+					return true;
+				}
+				break;
 			}
-			if (this.args != null)
-			{
-				arg = this.args[index];
-			}
-			else if (index == 0)
-			{
-				arg = this.arg1;
-			}
-			else if (index == 1)
-			{
-				arg = this.arg2;
-			}
-			else if (index == 2)
-			{
-				arg = this.arg3;
-			}
-			else
-			{
-				arg = this.arg4;
-			}
-			return true;
+			return false;
 		}
 
-		// Token: 0x0600A6C2 RID: 42690 RVA: 0x002FC124 File Offset: 0x002FA324
-		public bool TryGetArg(string name, out NamedArgument arg)
+		bool IEnumerator.MoveNext()
 		{
-			if (this.count == 0)
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<NamedArgument> IEnumerable<NamedArgument>.GetEnumerator()
+		{
+			_003Cget_Args_003Ed__9 _003Cget_Args_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				arg = default(NamedArgument);
-				return false;
-			}
-			if (this.args != null)
-			{
-				for (int i = 0; i < this.args.Length; i++)
-				{
-					if (this.args[i].label == name)
-					{
-						arg = this.args[i];
-						return true;
-					}
-				}
+				_003C_003E1__state = 0;
+				_003Cget_Args_003Ed__ = this;
 			}
 			else
 			{
-				if (this.count >= 1 && this.arg1.label == name)
-				{
-					arg = this.arg1;
-					return true;
-				}
-				if (this.count >= 2 && this.arg2.label == name)
-				{
-					arg = this.arg2;
-					return true;
-				}
-				if (this.count >= 3 && this.arg3.label == name)
-				{
-					arg = this.arg3;
-					return true;
-				}
-				if (this.count >= 4 && this.arg4.label == name)
-				{
-					arg = this.arg4;
-					return true;
-				}
+				_003Cget_Args_003Ed__ = new _003Cget_Args_003Ed__9(0);
 			}
+			_003Cget_Args_003Ed__._003C_003E4__this = _003C_003E3___003C_003E4__this;
+			return _003Cget_Args_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<NamedArgument>)this).GetEnumerator();
+		}
+	}
+
+	private int count;
+
+	private NamedArgument arg1;
+
+	private NamedArgument arg2;
+
+	private NamedArgument arg3;
+
+	private NamedArgument arg4;
+
+	private NamedArgument[] args;
+
+	public int Count => count;
+
+	public IEnumerable<NamedArgument> Args
+	{
+		[IteratorStateMachine(typeof(_003Cget_Args_003Ed__9))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_Args_003Ed__9(-2)
+			{
+				_003C_003E3___003C_003E4__this = this
+			};
+		}
+	}
+
+	public SignalArgs(SignalArgs args)
+	{
+		count = args.count;
+		arg1 = args.arg1;
+		arg2 = args.arg2;
+		arg3 = args.arg3;
+		arg4 = args.arg4;
+		this.args = args.args;
+	}
+
+	public SignalArgs(NamedArgument arg1)
+	{
+		count = 1;
+		this.arg1 = arg1;
+		arg2 = default(NamedArgument);
+		arg3 = default(NamedArgument);
+		arg4 = default(NamedArgument);
+		args = null;
+	}
+
+	public SignalArgs(NamedArgument arg1, NamedArgument arg2)
+	{
+		count = 2;
+		this.arg1 = arg1;
+		this.arg2 = arg2;
+		arg3 = default(NamedArgument);
+		arg4 = default(NamedArgument);
+		args = null;
+	}
+
+	public SignalArgs(NamedArgument arg1, NamedArgument arg2, NamedArgument arg3)
+	{
+		count = 3;
+		this.arg1 = arg1;
+		this.arg2 = arg2;
+		this.arg3 = arg3;
+		arg4 = default(NamedArgument);
+		args = null;
+	}
+
+	public SignalArgs(NamedArgument arg1, NamedArgument arg2, NamedArgument arg3, NamedArgument arg4)
+	{
+		count = 4;
+		this.arg1 = arg1;
+		this.arg2 = arg2;
+		this.arg3 = arg3;
+		this.arg4 = arg4;
+		args = null;
+	}
+
+	public SignalArgs(params NamedArgument[] args)
+	{
+		count = args.Length;
+		if (args.Length > 4)
+		{
+			arg1 = default(NamedArgument);
+			arg2 = default(NamedArgument);
+			arg3 = default(NamedArgument);
+			arg4 = default(NamedArgument);
+			this.args = new NamedArgument[args.Length];
+			for (int i = 0; i < args.Length; i++)
+			{
+				this.args[i] = args[i];
+			}
+			return;
+		}
+		if (args.Length == 1)
+		{
+			arg1 = args[0];
+			arg2 = default(NamedArgument);
+			arg3 = default(NamedArgument);
+			arg4 = default(NamedArgument);
+		}
+		else if (args.Length == 2)
+		{
+			arg1 = args[0];
+			arg2 = args[1];
+			arg3 = default(NamedArgument);
+			arg4 = default(NamedArgument);
+		}
+		else if (args.Length == 3)
+		{
+			arg1 = args[0];
+			arg2 = args[1];
+			arg3 = args[2];
+			arg4 = default(NamedArgument);
+		}
+		else if (args.Length == 4)
+		{
+			arg1 = args[0];
+			arg2 = args[1];
+			arg3 = args[2];
+			arg4 = args[3];
+		}
+		else
+		{
+			arg1 = default(NamedArgument);
+			arg2 = default(NamedArgument);
+			arg3 = default(NamedArgument);
+			arg4 = default(NamedArgument);
+		}
+		this.args = null;
+	}
+
+	public bool TryGetArg(int index, out NamedArgument arg)
+	{
+		if (index < 0 || index >= count)
+		{
 			arg = default(NamedArgument);
 			return false;
 		}
-
-		// Token: 0x0600A6C3 RID: 42691 RVA: 0x002FC240 File Offset: 0x002FA440
-		public bool TryGetArg<T>(int index, out T arg)
+		if (args != null)
 		{
-			NamedArgument namedArgument;
-			if (this.TryGetArg(index, out namedArgument))
+			arg = args[index];
+		}
+		else
+		{
+			switch (index)
 			{
-				object arg2 = namedArgument.arg;
-				if (arg2 is T)
-				{
-					T t = (T)((object)arg2);
-					arg = t;
-					return true;
-				}
+			case 0:
+				arg = arg1;
+				break;
+			case 1:
+				arg = arg2;
+				break;
+			case 2:
+				arg = arg3;
+				break;
+			default:
+				arg = arg4;
+				break;
 			}
-			arg = default(T);
+		}
+		return true;
+	}
+
+	public bool TryGetArg(string name, out NamedArgument arg)
+	{
+		if (count == 0)
+		{
+			arg = default(NamedArgument);
 			return false;
 		}
-
-		// Token: 0x0600A6C4 RID: 42692 RVA: 0x002FC284 File Offset: 0x002FA484
-		public bool TryGetArg<T>(string name, out T arg)
-		{
-			NamedArgument namedArgument;
-			if (!this.TryGetArg(name, out namedArgument) || !(namedArgument.arg is T))
-			{
-				arg = default(T);
-				return false;
-			}
-			arg = (T)((object)namedArgument.arg);
-			return true;
-		}
-
-		// Token: 0x0600A6C5 RID: 42693 RVA: 0x002FC2C4 File Offset: 0x002FA4C4
-		public NamedArgument GetArg(int index)
-		{
-			NamedArgument result;
-			if (this.TryGetArg(index, out result))
-			{
-				return result;
-			}
-			throw new ArgumentOutOfRangeException("index");
-		}
-
-		// Token: 0x0600A6C6 RID: 42694 RVA: 0x002FC2E8 File Offset: 0x002FA4E8
-		public NamedArgument GetArg(string name)
-		{
-			NamedArgument result;
-			if (this.TryGetArg(name, out result))
-			{
-				return result;
-			}
-			throw new ArgumentException("Could not find arg named " + name);
-		}
-
-		// Token: 0x0600A6C7 RID: 42695 RVA: 0x002FC314 File Offset: 0x002FA514
-		public T GetArg<T>(string name)
-		{
-			T result;
-			if (this.TryGetArg<T>(name, out result))
-			{
-				return result;
-			}
-			throw new ArgumentException("Could not find arg named " + name + " of type " + typeof(T).Name);
-		}
-
-		// Token: 0x0600A6C8 RID: 42696 RVA: 0x002FC354 File Offset: 0x002FA554
-		public TaggedString GetFormattedText(TaggedString text)
-		{
-			if (this.count == 0)
-			{
-				return text.Formatted(Array.Empty<NamedArgument>());
-			}
-			if (this.args != null)
-			{
-				return text.Formatted(this.args);
-			}
-			if (this.count == 1)
-			{
-				return text.Formatted(this.arg1);
-			}
-			if (this.count == 2)
-			{
-				return text.Formatted(this.arg1, this.arg2);
-			}
-			if (this.count == 3)
-			{
-				return text.Formatted(this.arg1, this.arg2, this.arg3);
-			}
-			return text.Formatted(this.arg1, this.arg2, this.arg3, this.arg4);
-		}
-
-		// Token: 0x0600A6C9 RID: 42697 RVA: 0x002FC3FC File Offset: 0x002FA5FC
-		public TaggedString GetTranslatedText(string textKey)
-		{
-			if (this.count == 0)
-			{
-				return textKey.Translate();
-			}
-			if (this.args != null)
-			{
-				return textKey.Translate(this.args);
-			}
-			if (this.count == 1)
-			{
-				return textKey.Translate(this.arg1);
-			}
-			if (this.count == 2)
-			{
-				return textKey.Translate(this.arg1, this.arg2);
-			}
-			if (this.count == 3)
-			{
-				return textKey.Translate(this.arg1, this.arg2, this.arg3);
-			}
-			return textKey.Translate(this.arg1, this.arg2, this.arg3, this.arg4);
-		}
-
-		// Token: 0x0600A6CA RID: 42698 RVA: 0x002FC4A0 File Offset: 0x002FA6A0
-		public void Add(NamedArgument arg)
-		{
-			if (this.args != null)
-			{
-				NamedArgument[] array = new NamedArgument[this.args.Length + 1];
-				for (int i = 0; i < this.args.Length; i++)
-				{
-					array[i] = this.args[i];
-				}
-				array[array.Length - 1] = arg;
-				this.args = array;
-				this.count = this.args.Length;
-				return;
-			}
-			if (this.count == 0)
-			{
-				this.arg1 = arg;
-			}
-			else if (this.count == 1)
-			{
-				this.arg2 = arg;
-			}
-			else if (this.count == 2)
-			{
-				this.arg3 = arg;
-			}
-			else if (this.count == 3)
-			{
-				this.arg4 = arg;
-			}
-			else
-			{
-				this.args = new NamedArgument[5];
-				this.args[0] = this.arg1;
-				this.args[1] = this.arg2;
-				this.args[2] = this.arg3;
-				this.args[3] = this.arg4;
-				this.args[4] = arg;
-				this.arg1 = default(NamedArgument);
-				this.arg2 = default(NamedArgument);
-				this.arg3 = default(NamedArgument);
-				this.arg4 = default(NamedArgument);
-			}
-			this.count++;
-		}
-
-		// Token: 0x0600A6CB RID: 42699 RVA: 0x002FC5FF File Offset: 0x002FA7FF
-		public void Add(NamedArgument arg1, NamedArgument arg2)
-		{
-			this.Add(arg1);
-			this.Add(arg2);
-		}
-
-		// Token: 0x0600A6CC RID: 42700 RVA: 0x002FC60F File Offset: 0x002FA80F
-		public void Add(NamedArgument arg1, NamedArgument arg2, NamedArgument arg3)
-		{
-			this.Add(arg1);
-			this.Add(arg2);
-			this.Add(arg3);
-		}
-
-		// Token: 0x0600A6CD RID: 42701 RVA: 0x002FC626 File Offset: 0x002FA826
-		public void Add(NamedArgument arg1, NamedArgument arg2, NamedArgument arg3, NamedArgument arg4)
-		{
-			this.Add(arg1);
-			this.Add(arg2);
-			this.Add(arg3);
-			this.Add(arg4);
-		}
-
-		// Token: 0x0600A6CE RID: 42702 RVA: 0x002FC648 File Offset: 0x002FA848
-		public void Add(params NamedArgument[] args)
+		if (args != null)
 		{
 			for (int i = 0; i < args.Length; i++)
 			{
-				this.Add(args[i]);
-			}
-		}
-
-		// Token: 0x0600A6CF RID: 42703 RVA: 0x002FC670 File Offset: 0x002FA870
-		public void Add(SignalArgs args)
-		{
-			if (args.count == 0)
-			{
-				return;
-			}
-			if (args.args != null)
-			{
-				for (int i = 0; i < args.args.Length; i++)
+				if (args[i].label == name)
 				{
-					this.Add(args.args[i]);
+					arg = args[i];
+					return true;
 				}
-				return;
-			}
-			if (args.count >= 1)
-			{
-				this.Add(args.arg1);
-			}
-			if (args.count >= 2)
-			{
-				this.Add(args.arg2);
-			}
-			if (args.count >= 3)
-			{
-				this.Add(args.arg3);
-			}
-			if (args.count >= 4)
-			{
-				this.Add(args.arg4);
 			}
 		}
+		else
+		{
+			if (count >= 1 && arg1.label == name)
+			{
+				arg = arg1;
+				return true;
+			}
+			if (count >= 2 && arg2.label == name)
+			{
+				arg = arg2;
+				return true;
+			}
+			if (count >= 3 && arg3.label == name)
+			{
+				arg = arg3;
+				return true;
+			}
+			if (count >= 4 && arg4.label == name)
+			{
+				arg = arg4;
+				return true;
+			}
+		}
+		arg = default(NamedArgument);
+		return false;
+	}
 
-		// Token: 0x04007365 RID: 29541
-		private int count;
+	public bool TryGetArg<T>(int index, out T arg)
+	{
+		if (!TryGetArg(index, out var arg2) || !(arg2.arg is T val))
+		{
+			arg = default(T);
+			return false;
+		}
+		arg = val;
+		return true;
+	}
 
-		// Token: 0x04007366 RID: 29542
-		private NamedArgument arg1;
+	public bool TryGetArg<T>(string name, out T arg)
+	{
+		if (!TryGetArg(name, out var arg2) || !(arg2.arg is T))
+		{
+			arg = default(T);
+			return false;
+		}
+		arg = (T)arg2.arg;
+		return true;
+	}
 
-		// Token: 0x04007367 RID: 29543
-		private NamedArgument arg2;
+	public NamedArgument GetArg(int index)
+	{
+		if (TryGetArg(index, out var arg))
+		{
+			return arg;
+		}
+		throw new ArgumentOutOfRangeException("index");
+	}
 
-		// Token: 0x04007368 RID: 29544
-		private NamedArgument arg3;
+	public NamedArgument GetArg(string name)
+	{
+		if (TryGetArg(name, out var arg))
+		{
+			return arg;
+		}
+		throw new ArgumentException("Could not find arg named " + name);
+	}
 
-		// Token: 0x04007369 RID: 29545
-		private NamedArgument arg4;
+	public T GetArg<T>(string name)
+	{
+		if (TryGetArg(name, out T arg))
+		{
+			return arg;
+		}
+		throw new ArgumentException("Could not find arg named " + name + " of type " + typeof(T).Name);
+	}
 
-		// Token: 0x0400736A RID: 29546
-		private NamedArgument[] args;
+	public TaggedString GetFormattedText(TaggedString text)
+	{
+		if (count == 0)
+		{
+			return text.Formatted();
+		}
+		if (args != null)
+		{
+			return text.Formatted(args);
+		}
+		if (count == 1)
+		{
+			return text.Formatted(arg1);
+		}
+		if (count == 2)
+		{
+			return text.Formatted(arg1, arg2);
+		}
+		if (count == 3)
+		{
+			return text.Formatted(arg1, arg2, arg3);
+		}
+		return text.Formatted(arg1, arg2, arg3, arg4);
+	}
+
+	public TaggedString GetTranslatedText(string textKey)
+	{
+		if (count == 0)
+		{
+			return textKey.Translate();
+		}
+		if (args != null)
+		{
+			return textKey.Translate(args);
+		}
+		if (count == 1)
+		{
+			return textKey.Translate(arg1);
+		}
+		if (count == 2)
+		{
+			return textKey.Translate(arg1, arg2);
+		}
+		if (count == 3)
+		{
+			return textKey.Translate(arg1, arg2, arg3);
+		}
+		return textKey.Translate(arg1, arg2, arg3, arg4);
+	}
+
+	public void Add(NamedArgument arg)
+	{
+		if (args != null)
+		{
+			NamedArgument[] array = new NamedArgument[args.Length + 1];
+			for (int i = 0; i < args.Length; i++)
+			{
+				array[i] = args[i];
+			}
+			array[^1] = arg;
+			args = array;
+			count = args.Length;
+			return;
+		}
+		if (count == 0)
+		{
+			arg1 = arg;
+		}
+		else if (count == 1)
+		{
+			arg2 = arg;
+		}
+		else if (count == 2)
+		{
+			arg3 = arg;
+		}
+		else if (count == 3)
+		{
+			arg4 = arg;
+		}
+		else
+		{
+			args = new NamedArgument[5];
+			args[0] = arg1;
+			args[1] = arg2;
+			args[2] = arg3;
+			args[3] = arg4;
+			args[4] = arg;
+			arg1 = default(NamedArgument);
+			arg2 = default(NamedArgument);
+			arg3 = default(NamedArgument);
+			arg4 = default(NamedArgument);
+		}
+		count++;
+	}
+
+	public void Add(NamedArgument arg1, NamedArgument arg2)
+	{
+		Add(arg1);
+		Add(arg2);
+	}
+
+	public void Add(NamedArgument arg1, NamedArgument arg2, NamedArgument arg3)
+	{
+		Add(arg1);
+		Add(arg2);
+		Add(arg3);
+	}
+
+	public void Add(NamedArgument arg1, NamedArgument arg2, NamedArgument arg3, NamedArgument arg4)
+	{
+		Add(arg1);
+		Add(arg2);
+		Add(arg3);
+		Add(arg4);
+	}
+
+	public void Add(params NamedArgument[] args)
+	{
+		for (int i = 0; i < args.Length; i++)
+		{
+			Add(args[i]);
+		}
+	}
+
+	public void Add(SignalArgs args)
+	{
+		if (args.count == 0)
+		{
+			return;
+		}
+		if (args.args != null)
+		{
+			for (int i = 0; i < args.args.Length; i++)
+			{
+				Add(args.args[i]);
+			}
+			return;
+		}
+		if (args.count >= 1)
+		{
+			Add(args.arg1);
+		}
+		if (args.count >= 2)
+		{
+			Add(args.arg2);
+		}
+		if (args.count >= 3)
+		{
+			Add(args.arg3);
+		}
+		if (args.count >= 4)
+		{
+			Add(args.arg4);
+		}
 	}
 }

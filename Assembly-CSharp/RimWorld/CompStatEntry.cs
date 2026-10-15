@@ -1,30 +1,122 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompStatEntry : ThingComp
 {
-	// Token: 0x02002148 RID: 8520
-	public class CompStatEntry : ThingComp
+	[CompilerGenerated]
+	private sealed class _003CSpecialDisplayStats_003Ed__2 : IEnumerable<StatDrawEntry>, IEnumerable, IEnumerator<StatDrawEntry>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001C51 RID: 7249
-		// (get) Token: 0x0600BA1F RID: 47647 RVA: 0x0035B417 File Offset: 0x00359617
-		private CompProperties_StatEntry Props
+		private int _003C_003E1__state;
+
+		private StatDrawEntry _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompStatEntry _003C_003E4__this;
+
+		StatDrawEntry IEnumerator<StatDrawEntry>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (CompProperties_StatEntry)this.props;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600BA20 RID: 47648 RVA: 0x0035B424 File Offset: 0x00359624
-		public override IEnumerable<StatDrawEntry> SpecialDisplayStats()
+		object IEnumerator.Current
 		{
-			StatCategoryDef statCategoryDef = this.Props.statCategoryDef;
-			string statLabel = this.Props.statLabel;
-			Func<CompStatEntry, string> valueFunc = this.Props.valueFunc;
-			yield return new StatDrawEntry(statCategoryDef, statLabel, ((valueFunc != null) ? valueFunc(this) : null) ?? this.Props.valueString, this.Props.reportText, this.Props.displayPriorityInCategory, null, null, false, false);
-			yield break;
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
+
+		[DebuggerHidden]
+		public _003CSpecialDisplayStats_003Ed__2(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			CompStatEntry compStatEntry = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = new StatDrawEntry(compStatEntry.Props.statCategoryDef, compStatEntry.Props.statLabel, compStatEntry.Props.valueFunc?.Invoke(compStatEntry) ?? compStatEntry.Props.valueString, compStatEntry.Props.reportText, compStatEntry.Props.displayPriorityInCategory);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<StatDrawEntry> IEnumerable<StatDrawEntry>.GetEnumerator()
+		{
+			_003CSpecialDisplayStats_003Ed__2 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CSpecialDisplayStats_003Ed__2(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<StatDrawEntry>)this).GetEnumerator();
+		}
+	}
+
+	private CompProperties_StatEntry Props => (CompProperties_StatEntry)props;
+
+	[IteratorStateMachine(typeof(_003CSpecialDisplayStats_003Ed__2))]
+	public override IEnumerable<StatDrawEntry> SpecialDisplayStats()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CSpecialDisplayStats_003Ed__2(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

@@ -1,57 +1,159 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_LayEgg : JobDriver
 {
-	// Token: 0x02001113 RID: 4371
-	public class JobDriver_LayEgg : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__5 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001070 RID: 4208
-		// (get) Token: 0x06006A94 RID: 27284 RVA: 0x0021A58C File Offset: 0x0021878C
-		public CompEggContainer EggBoxComp
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_LayEgg _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.job.GetTarget(TargetIndex.A).Thing.TryGetComp<CompEggContainer>();
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06006A95 RID: 27285 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		object IEnumerator.Current
 		{
-			return true;
-		}
-
-		// Token: 0x06006A96 RID: 27286 RVA: 0x0021A5B2 File Offset: 0x002187B2
-		protected override IEnumerable<Toil> MakeNewToils()
-		{
-			yield return Toils_Goto.GotoCell(TargetIndex.A, PathEndMode.OnCell);
-			yield return Toils_General.Wait(500, TargetIndex.None);
-			yield return Toils_General.Do(delegate
+			[DebuggerHidden]
+			get
 			{
-				Thing thing = this.pawn.GetComp<CompEggLayer>().ProduceEgg();
-				if (this.job.GetTarget(TargetIndex.A).HasThing && this.EggBoxComp.Accepts(thing.def))
-				{
-					this.EggBoxComp.innerContainer.TryAdd(thing, true);
-					return;
-				}
-				GenPlace.TryPlaceThing(thing, this.pawn.Position, this.pawn.Map, ThingPlaceMode.Near, delegate(Thing t, int i)
-				{
-					if (this.pawn.Faction != Faction.OfPlayer)
-					{
-						t.SetForbidden(true, true);
-					}
-				}, null, null, 1);
-			});
-			yield break;
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x04004B3B RID: 19259
-		private const int LayEgg = 500;
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__5(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
 
-		// Token: 0x04004B3C RID: 19260
-		private const TargetIndex LaySpotOrEggBoxInd = TargetIndex.A;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_LayEgg CS_0024_003C_003E8__locals7 = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Goto.GotoCell(TargetIndex.A, PathEndMode.OnCell);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.Wait(500);
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.Do(delegate
+				{
+					Thing thing = CS_0024_003C_003E8__locals7.pawn.GetComp<CompEggLayer>().ProduceEgg();
+					if (CS_0024_003C_003E8__locals7.job.GetTarget(TargetIndex.A).HasThing && CS_0024_003C_003E8__locals7.EggBoxComp.Accepts(thing.def))
+					{
+						CS_0024_003C_003E8__locals7.EggBoxComp.innerContainer.TryAdd(thing);
+					}
+					else
+					{
+						GenPlace.TryPlaceThing(thing, CS_0024_003C_003E8__locals7.pawn.Position, CS_0024_003C_003E8__locals7.pawn.Map, ThingPlaceMode.Near, delegate(Thing t, int i)
+						{
+							if (CS_0024_003C_003E8__locals7.pawn.Faction != Faction.OfPlayer)
+							{
+								t.SetForbidden(value: true);
+							}
+						}, null, null);
+					}
+				});
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__5 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__5(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private const int LayEgg = 500;
+
+	private const TargetIndex LaySpotOrEggBoxInd = TargetIndex.A;
+
+	public CompEggContainer EggBoxComp => job.GetTarget(TargetIndex.A).Thing.TryGetComp<CompEggContainer>();
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return true;
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__5))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__5(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

@@ -1,89 +1,209 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Designator_ZoneAdd_Growing : Designator_ZoneAdd
 {
-	// Token: 0x02003101 RID: 12545
-	public class Designator_ZoneAdd_Growing : Designator_ZoneAdd
+	[CompilerGenerated]
+	private sealed class _003Cget_RightClickFloatMenuOptions_003Ed__8 : IEnumerable<FloatMenuOption>, IEnumerable, IEnumerator<FloatMenuOption>, IEnumerator, IDisposable
 	{
-		// Token: 0x17002DCD RID: 11725
-		// (get) Token: 0x06011A07 RID: 72199 RVA: 0x0050F0C4 File Offset: 0x0050D2C4
-		protected override string NewZoneLabel
+		private int _003C_003E1__state;
+
+		private FloatMenuOption _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Designator_ZoneAdd_Growing _003C_003E4__this;
+
+		private IEnumerator<FloatMenuOption> _003C_003E7__wrap1;
+
+		FloatMenuOption IEnumerator<FloatMenuOption>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return "GrowingZone".Translate();
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002DCE RID: 11726
-		// (get) Token: 0x06011A08 RID: 72200 RVA: 0x000028E7 File Offset: 0x00000AE7
-		protected virtual bool ShowRightClickHideOptions
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return true;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06011A09 RID: 72201 RVA: 0x0050F0D8 File Offset: 0x0050D2D8
-		public Designator_ZoneAdd_Growing()
+		[DebuggerHidden]
+		public _003Cget_RightClickFloatMenuOptions_003Ed__8(int _003C_003E1__state)
 		{
-			this.zoneTypeToPlace = typeof(Zone_Growing);
-			this.defaultLabel = "GrowingZone".Translate();
-			this.defaultDesc = "DesignatorGrowingZoneDesc".Translate();
-			this.icon = ContentFinder<Texture2D>.Get("UI/Designators/ZoneCreate_Growing", true);
-			this.tutorTag = "ZoneAdd_Growing";
-			this.hotKey = KeyBindingDefOf.Misc2;
-			this.soundSucceeded = SoundDefOf.Designate_ZoneAdd_Growing;
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x06011A0A RID: 72202 RVA: 0x0050F158 File Offset: 0x0050D358
-		public override AcceptanceReport CanDesignateCell(IntVec3 c)
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			if (!base.CanDesignateCell(c).Accepted)
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				Designator_ZoneAdd_Growing designator_ZoneAdd_Growing = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					if (!designator_ZoneAdd_Growing.ShowRightClickHideOptions)
+					{
+						return false;
+					}
+					_003C_003E7__wrap1 = Command_Hide_ZoneGrow.GetHideOptions().GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 1:
+					_003C_003E1__state = -3;
+					break;
+				}
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					FloatMenuOption current = _003C_003E7__wrap1.Current;
+					_003C_003E2__current = current;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = null;
 				return false;
 			}
-			float num = ModsConfig.BiotechActive ? 0.5f : ThingDefOf.Plant_Potato.plant.fertilityMin;
-			if (ModsConfig.IdeologyActive && BuildCopyCommandUtility.FindAllowedDesignator(TerrainDefOf.FungalGravel, true) != null)
+			catch
 			{
-				num = Mathf.Min(num, ThingDefOf.Plant_Nutrifungus.plant.fertilityMin);
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
-			if (c.GetFertility(base.Map) < num)
-			{
-				return false;
-			}
-			return true;
 		}
 
-		// Token: 0x06011A0B RID: 72203 RVA: 0x0050F1E1 File Offset: 0x0050D3E1
-		protected override Zone MakeNewZone()
+		bool IEnumerator.MoveNext()
 		{
-			PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.GrowingFood, KnowledgeAmount.Total);
-			return new Zone_Growing(Find.CurrentMap.zoneManager);
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x17002DCF RID: 11727
-		// (get) Token: 0x06011A0C RID: 72204 RVA: 0x0050F1FD File Offset: 0x0050D3FD
-		public override IEnumerable<FloatMenuOption> RightClickFloatMenuOptions
+		private void _003C_003Em__Finally1()
 		{
-			get
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				if (!this.ShowRightClickHideOptions)
-				{
-					yield break;
-				}
-				foreach (FloatMenuOption floatMenuOption in Command_Hide_ZoneGrow.GetHideOptions())
-				{
-					yield return floatMenuOption;
-				}
-				IEnumerator<FloatMenuOption> enumerator = null;
-				yield break;
-				yield break;
+				_003C_003E7__wrap1.Dispose();
 			}
 		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<FloatMenuOption> IEnumerable<FloatMenuOption>.GetEnumerator()
+		{
+			_003Cget_RightClickFloatMenuOptions_003Ed__8 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_RightClickFloatMenuOptions_003Ed__8(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<FloatMenuOption>)this).GetEnumerator();
+		}
+	}
+
+	protected override string NewZoneLabel => "GrowingZone".Translate();
+
+	protected virtual bool ShowRightClickHideOptions => true;
+
+	public override IEnumerable<FloatMenuOption> RightClickFloatMenuOptions
+	{
+		[IteratorStateMachine(typeof(_003Cget_RightClickFloatMenuOptions_003Ed__8))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_RightClickFloatMenuOptions_003Ed__8(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public Designator_ZoneAdd_Growing()
+	{
+		zoneTypeToPlace = typeof(Zone_Growing);
+		defaultLabel = "GrowingZone".Translate();
+		defaultDesc = "DesignatorGrowingZoneDesc".Translate();
+		icon = ContentFinder<Texture2D>.Get("UI/Designators/ZoneCreate_Growing");
+		tutorTag = "ZoneAdd_Growing";
+		hotKey = KeyBindingDefOf.Misc2;
+		soundSucceeded = SoundDefOf.Designate_ZoneAdd_Growing;
+	}
+
+	public override AcceptanceReport CanDesignateCell(IntVec3 c)
+	{
+		if (!base.CanDesignateCell(c).Accepted)
+		{
+			return false;
+		}
+		float num = (ModsConfig.BiotechActive ? 0.5f : ThingDefOf.Plant_Potato.plant.fertilityMin);
+		if (ModsConfig.IdeologyActive && BuildCopyCommandUtility.FindAllowedDesignator(TerrainDefOf.FungalGravel) != null)
+		{
+			num = Mathf.Min(num, ThingDefOf.Plant_Nutrifungus.plant.fertilityMin);
+		}
+		if (c.GetFertility(base.Map) < num)
+		{
+			return false;
+		}
+		return true;
+	}
+
+	protected override Zone MakeNewZone()
+	{
+		PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.GrowingFood, KnowledgeAmount.Total);
+		return new Zone_Growing(Find.CurrentMap.zoneManager);
 	}
 }

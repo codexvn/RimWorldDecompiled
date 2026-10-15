@@ -1,47 +1,133 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class LavaEmergenceImmediate : LavaEmergence
 {
-	// Token: 0x02002AA8 RID: 10920
-	public class LavaEmergenceImmediate : LavaEmergence
+	[CompilerGenerated]
+	private sealed class _003CGetInitialCells_003Ed__5 : IEnumerable<IntVec3>, IEnumerable, IEnumerator<IntVec3>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700260A RID: 9738
-		// (get) Token: 0x0600F349 RID: 62281 RVA: 0x0046A303 File Offset: 0x00468503
-		protected override IntRange PoolSizeRange
+		private int _003C_003E1__state;
+
+		private IntVec3 _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public LavaEmergenceImmediate _003C_003E4__this;
+
+		IntVec3 IEnumerator<IntVec3>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return new IntRange(100, 150);
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700260B RID: 9739
-		// (get) Token: 0x0600F34A RID: 62282 RVA: 0x00002501 File Offset: 0x00000701
-		protected override bool FireLetter
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetInitialCells_003Ed__5(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			LavaEmergenceImmediate lavaEmergenceImmediate = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = lavaEmergenceImmediate.Position;
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
 				return false;
 			}
 		}
 
-		// Token: 0x0600F34B RID: 62283 RVA: 0x0046A311 File Offset: 0x00468511
-		protected override void Tick()
+		bool IEnumerator.MoveNext()
 		{
-			while (this.lavaCells.Count < this.poolSize && this.openCells.Count > 0)
-			{
-				base.SpreadLava();
-			}
-			base.BeginCooling();
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0600F34C RID: 62284 RVA: 0x0046A342 File Offset: 0x00468542
-		protected override IEnumerable<IntVec3> GetInitialCells(Map map)
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			yield return base.Position;
-			yield break;
+			throw new NotSupportedException();
 		}
+
+		[DebuggerHidden]
+		IEnumerator<IntVec3> IEnumerable<IntVec3>.GetEnumerator()
+		{
+			_003CGetInitialCells_003Ed__5 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CGetInitialCells_003Ed__5(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<IntVec3>)this).GetEnumerator();
+		}
+	}
+
+	protected override IntRange PoolSizeRange => new IntRange(100, 150);
+
+	protected override bool FireLetter => false;
+
+	protected override void Tick()
+	{
+		while (lavaCells.Count < poolSize && openCells.Count > 0)
+		{
+			SpreadLava();
+		}
+		BeginCooling();
+	}
+
+	[IteratorStateMachine(typeof(_003CGetInitialCells_003Ed__5))]
+	protected override IEnumerable<IntVec3> GetInitialCells(Map map)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetInitialCells_003Ed__5(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

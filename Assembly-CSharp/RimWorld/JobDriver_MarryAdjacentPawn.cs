@@ -1,88 +1,178 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_MarryAdjacentPawn : JobDriver
 {
-	// Token: 0x020011B0 RID: 4528
-	public class JobDriver_MarryAdjacentPawn : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__8 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700112C RID: 4396
-		// (get) Token: 0x06006EB9 RID: 28345 RVA: 0x0022859C File Offset: 0x0022679C
-		private Pawn OtherFiance
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_MarryAdjacentPawn _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (Pawn)this.job.GetTarget(TargetIndex.A).Thing;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700112D RID: 4397
-		// (get) Token: 0x06006EBA RID: 28346 RVA: 0x002285C2 File Offset: 0x002267C2
-		public int TicksLeftToMarry
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.ticksLeftToMarry;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06006EBB RID: 28347 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__8(int _003C_003E1__state)
 		{
-			return true;
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x06006EBC RID: 28348 RVA: 0x002285CA File Offset: 0x002267CA
-		protected override IEnumerable<Toil> MakeNewToils()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			this.FailOnDespawnedOrNull(TargetIndex.A);
-			this.FailOn(() => this.OtherFiance.Drafted || !this.pawn.Position.AdjacentTo8WayOrInside(this.OtherFiance));
-			Toil toil = ToilMaker.MakeToil("MakeNewToils");
-			toil.initAction = delegate()
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_MarryAdjacentPawn CS_0024_003C_003E8__locals16 = _003C_003E4__this;
+			switch (num)
 			{
-				this.ticksLeftToMarry = 2500;
-			};
-			toil.tickIntervalAction = delegate(int delta)
+			default:
+				return false;
+			case 0:
 			{
-				this.ticksLeftToMarry -= delta;
-				if (this.ticksLeftToMarry <= 0)
+				_003C_003E1__state = -1;
+				CS_0024_003C_003E8__locals16.FailOnDespawnedOrNull(TargetIndex.A);
+				CS_0024_003C_003E8__locals16.FailOn(() => CS_0024_003C_003E8__locals16.OtherFiance.Drafted || !CS_0024_003C_003E8__locals16.pawn.Position.AdjacentTo8WayOrInside(CS_0024_003C_003E8__locals16.OtherFiance));
+				Toil toil2 = ToilMaker.MakeToil("MakeNewToils");
+				toil2.initAction = delegate
 				{
-					this.ticksLeftToMarry = 0;
-					base.ReadyForNextToil();
-				}
-			};
-			toil.defaultCompleteMode = ToilCompleteMode.Never;
-			toil.FailOn(() => !this.pawn.relations.DirectRelationExists(PawnRelationDefOf.Fiance, this.OtherFiance));
-			yield return toil;
-			Toil toil2 = ToilMaker.MakeToil("MakeNewToils");
-			toil2.defaultCompleteMode = ToilCompleteMode.Instant;
-			toil2.initAction = delegate()
-			{
-				if (this.pawn.thingIDNumber < this.OtherFiance.thingIDNumber)
+					CS_0024_003C_003E8__locals16.ticksLeftToMarry = 2500;
+				};
+				toil2.tickIntervalAction = delegate(int delta)
 				{
-					MarriageCeremonyUtility.Married(this.pawn, this.OtherFiance);
-				}
-			};
-			yield return toil2;
-			yield break;
+					CS_0024_003C_003E8__locals16.ticksLeftToMarry -= delta;
+					if (CS_0024_003C_003E8__locals16.ticksLeftToMarry <= 0)
+					{
+						CS_0024_003C_003E8__locals16.ticksLeftToMarry = 0;
+						CS_0024_003C_003E8__locals16.ReadyForNextToil();
+					}
+				};
+				toil2.defaultCompleteMode = ToilCompleteMode.Never;
+				toil2.FailOn(() => !CS_0024_003C_003E8__locals16.pawn.relations.DirectRelationExists(PawnRelationDefOf.Fiance, CS_0024_003C_003E8__locals16.OtherFiance));
+				_003C_003E2__current = toil2;
+				_003C_003E1__state = 1;
+				return true;
+			}
+			case 1:
+			{
+				_003C_003E1__state = -1;
+				Toil toil = ToilMaker.MakeToil("MakeNewToils");
+				toil.defaultCompleteMode = ToilCompleteMode.Instant;
+				toil.initAction = delegate
+				{
+					if (CS_0024_003C_003E8__locals16.pawn.thingIDNumber < CS_0024_003C_003E8__locals16.OtherFiance.thingIDNumber)
+					{
+						MarriageCeremonyUtility.Married(CS_0024_003C_003E8__locals16.pawn, CS_0024_003C_003E8__locals16.OtherFiance);
+					}
+				};
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 2;
+				return true;
+			}
+			case 2:
+				_003C_003E1__state = -1;
+				return false;
+			}
 		}
 
-		// Token: 0x06006EBD RID: 28349 RVA: 0x002285DA File Offset: 0x002267DA
-		public override void ExposeData()
+		bool IEnumerator.MoveNext()
 		{
-			base.ExposeData();
-			Scribe_Values.Look<int>(ref this.ticksLeftToMarry, "ticksLeftToMarry", 0, false);
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x04004D46 RID: 19782
-		private int ticksLeftToMarry = 2500;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04004D47 RID: 19783
-		private const TargetIndex OtherFianceInd = TargetIndex.A;
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__8 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__8(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x04004D48 RID: 19784
-		private const int Duration = 2500;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private int ticksLeftToMarry = 2500;
+
+	private const TargetIndex OtherFianceInd = TargetIndex.A;
+
+	private const int Duration = 2500;
+
+	private Pawn OtherFiance => (Pawn)job.GetTarget(TargetIndex.A).Thing;
+
+	public int TicksLeftToMarry => ticksLeftToMarry;
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return true;
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__8))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__8(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref ticksLeftToMarry, "ticksLeftToMarry", 0);
 	}
 }

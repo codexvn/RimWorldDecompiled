@@ -1,62 +1,154 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class StatPart_Mood : StatPart
 {
-	// Token: 0x0200370D RID: 14093
-	public class StatPart_Mood : StatPart
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__1 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x060138A8 RID: 80040 RVA: 0x005CBE31 File Offset: 0x005CA031
-		public override IEnumerable<string> ConfigErrors()
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public StatPart_Mood _003C_003E4__this;
+
+		string IEnumerator<string>.Current
 		{
-			if (this.factorFromMoodCurve == null)
+			[DebuggerHidden]
+			get
 			{
-				yield return "curve is null.";
+				return _003C_003E2__current;
 			}
-			yield break;
 		}
 
-		// Token: 0x060138A9 RID: 80041 RVA: 0x005CBE44 File Offset: 0x005CA044
-		public override void TransformValue(StatRequest req, ref float val)
+		object IEnumerator.Current
 		{
-			if (req.HasThing)
+			[DebuggerHidden]
+			get
 			{
-				Pawn pawn = req.Thing as Pawn;
-				if (pawn != null && this.ActiveFor(pawn))
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__1(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			StatPart_Mood statPart_Mood = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (statPart_Mood.factorFromMoodCurve == null)
 				{
-					val *= this.FactorFromMood(pawn);
+					_003C_003E2__current = "curve is null.";
+					_003C_003E1__state = 1;
+					return true;
 				}
+				break;
+			case 1:
+				_003C_003E1__state = -1;
+				break;
 			}
+			return false;
 		}
 
-		// Token: 0x060138AA RID: 80042 RVA: 0x005CBE80 File Offset: 0x005CA080
-		public override string ExplanationPart(StatRequest req)
+		bool IEnumerator.MoveNext()
 		{
-			if (req.HasThing)
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__1 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				Pawn pawn = req.Thing as Pawn;
-				if (pawn != null && this.ActiveFor(pawn))
-				{
-					return "StatsReport_MoodMultiplier".Translate(pawn.needs.mood.CurLevel.ToStringPercent()) + ": x" + this.FactorFromMood(pawn).ToStringPercent();
-				}
+				_003C_003E1__state = 0;
+				result = this;
 			}
-			return null;
+			else
+			{
+				result = new _003CConfigErrors_003Ed__1(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
 		}
 
-		// Token: 0x060138AB RID: 80043 RVA: 0x002D7342 File Offset: 0x002D5542
-		private bool ActiveFor(Pawn pawn)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return pawn.needs.mood != null;
+			return ((IEnumerable<string>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x060138AC RID: 80044 RVA: 0x005CBEF5 File Offset: 0x005CA0F5
-		private float FactorFromMood(Pawn pawn)
+	private SimpleCurve factorFromMoodCurve;
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__1))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__1(-2)
 		{
-			return this.factorFromMoodCurve.Evaluate(pawn.needs.mood.CurLevel);
-		}
+			_003C_003E4__this = this
+		};
+	}
 
-		// Token: 0x0400D8D0 RID: 55504
-		private SimpleCurve factorFromMoodCurve;
+	public override void TransformValue(StatRequest req, ref float val)
+	{
+		if (req.HasThing && req.Thing is Pawn pawn && ActiveFor(pawn))
+		{
+			val *= FactorFromMood(pawn);
+		}
+	}
+
+	public override string ExplanationPart(StatRequest req)
+	{
+		if (req.HasThing && req.Thing is Pawn pawn && ActiveFor(pawn))
+		{
+			return "StatsReport_MoodMultiplier".Translate(pawn.needs.mood.CurLevel.ToStringPercent()) + ": x" + FactorFromMood(pawn).ToStringPercent();
+		}
+		return null;
+	}
+
+	private bool ActiveFor(Pawn pawn)
+	{
+		return pawn.needs.mood != null;
+	}
+
+	private float FactorFromMood(Pawn pawn)
+	{
+		return factorFromMoodCurve.Evaluate(pawn.needs.mood.CurLevel);
 	}
 }

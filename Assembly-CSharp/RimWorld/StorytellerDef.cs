@@ -1,141 +1,333 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class StorytellerDef : Def
 {
-	// Token: 0x02001AF1 RID: 6897
-	public class StorytellerDef : Def
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__23 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x06009A1E RID: 39454 RVA: 0x002CD81C File Offset: 0x002CBA1C
-		public override void ResolveReferences()
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public StorytellerDef _003C_003E4__this;
+
+		private IEnumerator<string> _003C_003E7__wrap1;
+
+		private int _003Ci_003E5__3;
+
+		string IEnumerator<string>.Current
 		{
-			base.ResolveReferences();
-			LongEventHandler.ExecuteWhenFinished(delegate
+			[DebuggerHidden]
+			get
 			{
-				if (!this.portraitTiny.NullOrEmpty())
-				{
-					this.portraitTinyTex = ContentFinder<Texture2D>.Get(this.portraitTiny, true);
-					this.portraitLargeTex = ContentFinder<Texture2D>.Get(this.portraitLarge, true);
-				}
-			});
-			for (int i = 0; i < this.comps.Count; i++)
-			{
-				this.comps[i].ResolveReferences(this);
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06009A1F RID: 39455 RVA: 0x002CD868 File Offset: 0x002CBA68
-		public override IEnumerable<string> ConfigErrors()
+		object IEnumerator.Current
 		{
-			if (this.pointsFactorFromAdaptDays == null)
+			[DebuggerHidden]
+			get
 			{
-				yield return "pointsFactorFromAdaptDays is null";
+				return _003C_003E2__current;
 			}
-			if (this.adaptDaysLossFromColonistLostByPostPopulation == null)
-			{
-				yield return "adaptDaysLossFromColonistLostByPostPopulation is null";
-			}
-			if (this.adaptDaysLossFromColonistViolentlyDownedByPopulation == null)
-			{
-				yield return "adaptDaysLossFromColonistViolentlyDownedByPopulation is null";
-			}
-			if (this.adaptDaysGrowthRateCurve == null)
-			{
-				yield return "adaptDaysGrowthRateCurve is null";
-			}
-			if (this.pointsFactorFromDaysPassed == null)
-			{
-				yield return "pointsFactorFromDaysPassed is null";
-			}
-			foreach (string text in base.ConfigErrors())
-			{
-				yield return text;
-			}
-			IEnumerator<string> enumerator = null;
-			int num;
-			for (int i = 0; i < this.comps.Count; i = num + 1)
-			{
-				foreach (string text2 in this.comps[i].ConfigErrors(this))
-				{
-					yield return text2;
-				}
-				enumerator = null;
-				num = i;
-			}
-			yield break;
-			yield break;
 		}
 
-		// Token: 0x04006A09 RID: 27145
-		public int listOrder = 9999;
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__23(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
 
-		// Token: 0x04006A0A RID: 27146
-		public bool listVisible = true;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			switch (_003C_003E1__state)
+			{
+			case -3:
+			case 6:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+				break;
+			case -4:
+			case 7:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally2();
+				}
+				break;
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
 
-		// Token: 0x04006A0B RID: 27147
-		public bool tutorialMode;
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				StorytellerDef storytellerDef = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					if (storytellerDef.pointsFactorFromAdaptDays == null)
+					{
+						_003C_003E2__current = "pointsFactorFromAdaptDays is null";
+						_003C_003E1__state = 1;
+						return true;
+					}
+					goto IL_006a;
+				case 1:
+					_003C_003E1__state = -1;
+					goto IL_006a;
+				case 2:
+					_003C_003E1__state = -1;
+					goto IL_0092;
+				case 3:
+					_003C_003E1__state = -1;
+					goto IL_00ba;
+				case 4:
+					_003C_003E1__state = -1;
+					goto IL_00e2;
+				case 5:
+					_003C_003E1__state = -1;
+					goto IL_010a;
+				case 6:
+					_003C_003E1__state = -3;
+					goto IL_014e;
+				case 7:
+					{
+						_003C_003E1__state = -4;
+						goto IL_01c8;
+					}
+					IL_010a:
+					_003C_003E7__wrap1 = ((Def)storytellerDef).ConfigErrors().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_014e;
+					IL_006a:
+					if (storytellerDef.adaptDaysLossFromColonistLostByPostPopulation == null)
+					{
+						_003C_003E2__current = "adaptDaysLossFromColonistLostByPostPopulation is null";
+						_003C_003E1__state = 2;
+						return true;
+					}
+					goto IL_0092;
+					IL_014e:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 6;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					_003Ci_003E5__3 = 0;
+					goto IL_01f4;
+					IL_0092:
+					if (storytellerDef.adaptDaysLossFromColonistViolentlyDownedByPopulation == null)
+					{
+						_003C_003E2__current = "adaptDaysLossFromColonistViolentlyDownedByPopulation is null";
+						_003C_003E1__state = 3;
+						return true;
+					}
+					goto IL_00ba;
+					IL_00ba:
+					if (storytellerDef.adaptDaysGrowthRateCurve == null)
+					{
+						_003C_003E2__current = "adaptDaysGrowthRateCurve is null";
+						_003C_003E1__state = 4;
+						return true;
+					}
+					goto IL_00e2;
+					IL_01f4:
+					if (_003Ci_003E5__3 < storytellerDef.comps.Count)
+					{
+						_003C_003E7__wrap1 = storytellerDef.comps[_003Ci_003E5__3].ConfigErrors(storytellerDef).GetEnumerator();
+						_003C_003E1__state = -4;
+						goto IL_01c8;
+					}
+					return false;
+					IL_00e2:
+					if (storytellerDef.pointsFactorFromDaysPassed == null)
+					{
+						_003C_003E2__current = "pointsFactorFromDaysPassed is null";
+						_003C_003E1__state = 5;
+						return true;
+					}
+					goto IL_010a;
+					IL_01c8:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current2 = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current2;
+						_003C_003E1__state = 7;
+						return true;
+					}
+					_003C_003Em__Finally2();
+					_003C_003E7__wrap1 = null;
+					_003Ci_003E5__3++;
+					goto IL_01f4;
+				}
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
 
-		// Token: 0x04006A0C RID: 27148
-		public bool disableAdaptiveTraining;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x04006A0D RID: 27149
-		public bool disableAlerts;
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
 
-		// Token: 0x04006A0E RID: 27150
-		public bool disablePermadeath;
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
 
-		// Token: 0x04006A0F RID: 27151
-		public DifficultyDef forcedDifficulty;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04006A10 RID: 27152
-		[NoTranslate]
-		private string portraitLarge;
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__23 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__23(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x04006A11 RID: 27153
-		[NoTranslate]
-		private string portraitTiny;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x04006A12 RID: 27154
-		public List<StorytellerCompProperties> comps = new List<StorytellerCompProperties>();
+	public int listOrder = 9999;
 
-		// Token: 0x04006A13 RID: 27155
-		public SimpleCurve populationIntentFactorFromPopCurve;
+	public bool listVisible = true;
 
-		// Token: 0x04006A14 RID: 27156
-		public SimpleCurve populationIntentFactorFromPopAdaptDaysCurve;
+	public bool tutorialMode;
 
-		// Token: 0x04006A15 RID: 27157
-		public SimpleCurve pointsFactorFromDaysPassed;
+	public bool disableAdaptiveTraining;
 
-		// Token: 0x04006A16 RID: 27158
-		public float adaptDaysMin;
+	public bool disableAlerts;
 
-		// Token: 0x04006A17 RID: 27159
-		public float adaptDaysMax = 100f;
+	public bool disablePermadeath;
 
-		// Token: 0x04006A18 RID: 27160
-		public float adaptDaysGameStartGraceDays;
+	public DifficultyDef forcedDifficulty;
 
-		// Token: 0x04006A19 RID: 27161
-		public SimpleCurve pointsFactorFromAdaptDays;
+	[NoTranslate]
+	private string portraitLarge;
 
-		// Token: 0x04006A1A RID: 27162
-		public SimpleCurve adaptDaysLossFromColonistLostByPostPopulation;
+	[NoTranslate]
+	private string portraitTiny;
 
-		// Token: 0x04006A1B RID: 27163
-		public SimpleCurve adaptDaysLossFromColonistViolentlyDownedByPopulation;
+	public List<StorytellerCompProperties> comps = new List<StorytellerCompProperties>();
 
-		// Token: 0x04006A1C RID: 27164
-		public SimpleCurve adaptDaysGrowthRateCurve;
+	public SimpleCurve populationIntentFactorFromPopCurve;
 
-		// Token: 0x04006A1D RID: 27165
-		[Unsaved(false)]
-		public Texture2D portraitLargeTex;
+	public SimpleCurve populationIntentFactorFromPopAdaptDaysCurve;
 
-		// Token: 0x04006A1E RID: 27166
-		[Unsaved(false)]
-		public Texture2D portraitTinyTex;
+	public SimpleCurve pointsFactorFromDaysPassed;
+
+	public float adaptDaysMin;
+
+	public float adaptDaysMax = 100f;
+
+	public float adaptDaysGameStartGraceDays;
+
+	public SimpleCurve pointsFactorFromAdaptDays;
+
+	public SimpleCurve adaptDaysLossFromColonistLostByPostPopulation;
+
+	public SimpleCurve adaptDaysLossFromColonistViolentlyDownedByPopulation;
+
+	public SimpleCurve adaptDaysGrowthRateCurve;
+
+	[Unsaved(false)]
+	public Texture2D portraitLargeTex;
+
+	[Unsaved(false)]
+	public Texture2D portraitTinyTex;
+
+	public override void ResolveReferences()
+	{
+		base.ResolveReferences();
+		LongEventHandler.ExecuteWhenFinished(delegate
+		{
+			if (!portraitTiny.NullOrEmpty())
+			{
+				portraitTinyTex = ContentFinder<Texture2D>.Get(portraitTiny);
+				portraitLargeTex = ContentFinder<Texture2D>.Get(portraitLarge);
+			}
+		});
+		for (int i = 0; i < comps.Count; i++)
+		{
+			comps[i].ResolveReferences(this);
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__23))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__23(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

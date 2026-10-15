@@ -1,79 +1,194 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld;
 
-namespace Verse
+namespace Verse;
+
+public static class NameUseChecker
 {
-	// Token: 0x02000455 RID: 1109
-	public static class NameUseChecker
+	[CompilerGenerated]
+	private sealed class _003Cget_AllPawnsNamesEverUsed_003Ed__1 : IEnumerable<Name>, IEnumerable, IEnumerator<Name>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700052E RID: 1326
-		// (get) Token: 0x06001CDE RID: 7390 RVA: 0x00091663 File Offset: 0x0008F863
-		public static IEnumerable<Name> AllPawnsNamesEverUsed
+		private int _003C_003E1__state;
+
+		private Name _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private List<Pawn>.Enumerator _003C_003E7__wrap1;
+
+		Name IEnumerator<Name>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				foreach (Pawn pawn in PawnsFinder.AllMapsWorldAndTemporary_AliveOrDead)
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003Cget_AllPawnsNamesEverUsed_003Ed__1(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
 				{
-					if (pawn.Name != null)
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = default(List<Pawn>.Enumerator);
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				switch (_003C_003E1__state)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = PawnsFinder.AllMapsWorldAndTemporary_AliveOrDead.GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 1:
+					_003C_003E1__state = -3;
+					break;
+				}
+				while (_003C_003E7__wrap1.MoveNext())
+				{
+					Pawn current = _003C_003E7__wrap1.Current;
+					if (current.Name != null)
 					{
-						yield return pawn.Name;
-					}
-				}
-				List<Pawn>.Enumerator enumerator = default(List<Pawn>.Enumerator);
-				yield break;
-				yield break;
-			}
-		}
-
-		// Token: 0x06001CDF RID: 7391 RVA: 0x0009166C File Offset: 0x0008F86C
-		public static bool NameWordIsUsed(string singleName)
-		{
-			foreach (Name name in NameUseChecker.AllPawnsNamesEverUsed)
-			{
-				NameTriple nameTriple = name as NameTriple;
-				if (nameTriple != null && (singleName == nameTriple.First || singleName == nameTriple.Nick || singleName == nameTriple.Last))
-				{
-					return true;
-				}
-				NameSingle nameSingle = name as NameSingle;
-				if (nameSingle != null && nameSingle.Name == singleName)
-				{
-					return true;
-				}
-			}
-			return false;
-		}
-
-		// Token: 0x06001CE0 RID: 7392 RVA: 0x0009170C File Offset: 0x0008F90C
-		public static bool NameSingleIsUsed(string candidate)
-		{
-			foreach (Pawn pawn in PawnsFinder.AllMapsWorldAndTemporary_AliveOrDead)
-			{
-				NameSingle nameSingle = pawn.Name as NameSingle;
-				if (nameSingle != null && nameSingle.Name == candidate)
-				{
-					return true;
-				}
-			}
-			return false;
-		}
-
-		// Token: 0x06001CE1 RID: 7393 RVA: 0x0009177C File Offset: 0x0008F97C
-		public static bool XenotypeNameIsUsed(string candidate)
-		{
-			foreach (Pawn pawn in PawnsFinder.AllMapsWorldAndTemporary_AliveOrDead)
-			{
-				if (pawn.genes != null && pawn.genes.UniqueXenotype)
-				{
-					string xenotypeName = pawn.genes.xenotypeName;
-					if (candidate == xenotypeName)
-					{
+						_003C_003E2__current = current.Name;
+						_003C_003E1__state = 1;
 						return true;
 					}
 				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = default(List<Pawn>.Enumerator);
+				return false;
 			}
-			return false;
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
 		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap1/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Name> IEnumerable<Name>.GetEnumerator()
+		{
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				return this;
+			}
+			return new _003Cget_AllPawnsNamesEverUsed_003Ed__1(0);
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Name>)this).GetEnumerator();
+		}
+	}
+
+	public static IEnumerable<Name> AllPawnsNamesEverUsed
+	{
+		[IteratorStateMachine(typeof(_003Cget_AllPawnsNamesEverUsed_003Ed__1))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_AllPawnsNamesEverUsed_003Ed__1(-2);
+		}
+	}
+
+	public static bool NameWordIsUsed(string singleName)
+	{
+		foreach (Name item in AllPawnsNamesEverUsed)
+		{
+			if (item is NameTriple nameTriple && (singleName == nameTriple.First || singleName == nameTriple.Nick || singleName == nameTriple.Last))
+			{
+				return true;
+			}
+			if (item is NameSingle nameSingle && nameSingle.Name == singleName)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static bool NameSingleIsUsed(string candidate)
+	{
+		foreach (Pawn item in PawnsFinder.AllMapsWorldAndTemporary_AliveOrDead)
+		{
+			if (item.Name is NameSingle nameSingle && nameSingle.Name == candidate)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static bool XenotypeNameIsUsed(string candidate)
+	{
+		foreach (Pawn item in PawnsFinder.AllMapsWorldAndTemporary_AliveOrDead)
+		{
+			if (item.genes != null && item.genes.UniqueXenotype)
+			{
+				string xenotypeName = item.genes.xenotypeName;
+				if (candidate == xenotypeName)
+				{
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 }

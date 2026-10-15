@@ -1,64 +1,200 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
-{
-	// Token: 0x02001611 RID: 5649
-	public class WorkGiver_Strip : WorkGiver_Scanner
-	{
-		// Token: 0x06008548 RID: 34120 RVA: 0x0027DDBC File Offset: 0x0027BFBC
-		public override IEnumerable<Thing> PotentialWorkThingsGlobal(Pawn pawn)
-		{
-			foreach (Designation designation in pawn.Map.designationManager.SpawnedDesignationsOfDef(DesignationDefOf.Strip))
-			{
-				if (!designation.target.HasThing)
-				{
-					Log.ErrorOnce("Strip designation has no target.", 63126);
-				}
-				else
-				{
-					yield return designation.target.Thing;
-				}
-			}
-			IEnumerator<Designation> enumerator = null;
-			yield break;
-			yield break;
-		}
+namespace RimWorld;
 
-		// Token: 0x17001473 RID: 5235
-		// (get) Token: 0x06008549 RID: 34121 RVA: 0x00075162 File Offset: 0x00073362
-		public override PathEndMode PathEndMode
+public class WorkGiver_Strip : WorkGiver_Scanner
+{
+	[CompilerGenerated]
+	private sealed class _003CPotentialWorkThingsGlobal_003Ed__0 : IEnumerable<Thing>, IEnumerable, IEnumerator<Thing>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Thing _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private Pawn pawn;
+
+		public Pawn _003C_003E3__pawn;
+
+		private IEnumerator<Designation> _003C_003E7__wrap1;
+
+		Thing IEnumerator<Thing>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return PathEndMode.ClosestTouch;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600854A RID: 34122 RVA: 0x00075162 File Offset: 0x00073362
-		public override Danger MaxPathDanger(Pawn pawn)
+		object IEnumerator.Current
 		{
-			return Danger.Deadly;
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x0600854B RID: 34123 RVA: 0x0027DDCC File Offset: 0x0027BFCC
-		public override bool ShouldSkip(Pawn pawn, bool forced = false)
+		[DebuggerHidden]
+		public _003CPotentialWorkThingsGlobal_003Ed__0(int _003C_003E1__state)
 		{
-			return !pawn.Map.designationManager.AnySpawnedDesignationOfDef(DesignationDefOf.Strip);
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x0600854C RID: 34124 RVA: 0x0027DDE6 File Offset: 0x0027BFE6
-		public override bool HasJobOnThing(Pawn pawn, Thing t, bool forced = false)
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			return t.Map.designationManager.DesignationOn(t, DesignationDefOf.Strip) != null && pawn.CanReserve(t, 1, -1, null, forced) && StrippableUtility.CanBeStrippedByColony(t);
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x0600854D RID: 34125 RVA: 0x0027DE21 File Offset: 0x0027C021
-		public override Job JobOnThing(Pawn pawn, Thing t, bool forced = false)
+		private bool MoveNext()
 		{
-			return JobMaker.MakeJob(JobDefOf.Strip, t);
+			try
+			{
+				switch (_003C_003E1__state)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = pawn.Map.designationManager.SpawnedDesignationsOfDef(DesignationDefOf.Strip).GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 1:
+					_003C_003E1__state = -3;
+					break;
+				}
+				while (_003C_003E7__wrap1.MoveNext())
+				{
+					Designation current = _003C_003E7__wrap1.Current;
+					if (!current.target.HasThing)
+					{
+						Log.ErrorOnce("Strip designation has no target.", 63126);
+						continue;
+					}
+					_003C_003E2__current = current.target.Thing;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = null;
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
 		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Thing> IEnumerable<Thing>.GetEnumerator()
+		{
+			_003CPotentialWorkThingsGlobal_003Ed__0 _003CPotentialWorkThingsGlobal_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CPotentialWorkThingsGlobal_003Ed__ = this;
+			}
+			else
+			{
+				_003CPotentialWorkThingsGlobal_003Ed__ = new _003CPotentialWorkThingsGlobal_003Ed__0(0);
+			}
+			_003CPotentialWorkThingsGlobal_003Ed__.pawn = _003C_003E3__pawn;
+			return _003CPotentialWorkThingsGlobal_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Thing>)this).GetEnumerator();
+		}
+	}
+
+	public override PathEndMode PathEndMode => PathEndMode.ClosestTouch;
+
+	[IteratorStateMachine(typeof(_003CPotentialWorkThingsGlobal_003Ed__0))]
+	public override IEnumerable<Thing> PotentialWorkThingsGlobal(Pawn pawn)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CPotentialWorkThingsGlobal_003Ed__0(-2)
+		{
+			_003C_003E3__pawn = pawn
+		};
+	}
+
+	public override Danger MaxPathDanger(Pawn pawn)
+	{
+		return Danger.Deadly;
+	}
+
+	public override bool ShouldSkip(Pawn pawn, bool forced = false)
+	{
+		return !pawn.Map.designationManager.AnySpawnedDesignationOfDef(DesignationDefOf.Strip);
+	}
+
+	public override bool HasJobOnThing(Pawn pawn, Thing t, bool forced = false)
+	{
+		if (t.Map.designationManager.DesignationOn(t, DesignationDefOf.Strip) == null)
+		{
+			return false;
+		}
+		if (!pawn.CanReserve(t, 1, -1, null, forced))
+		{
+			return false;
+		}
+		if (!StrippableUtility.CanBeStrippedByColony(t))
+		{
+			return false;
+		}
+		return true;
+	}
+
+	public override Job JobOnThing(Pawn pawn, Thing t, bool forced = false)
+	{
+		return JobMaker.MakeJob(JobDefOf.Strip, t);
 	}
 }

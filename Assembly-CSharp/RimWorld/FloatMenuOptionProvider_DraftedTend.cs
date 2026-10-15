@@ -1,179 +1,328 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class FloatMenuOptionProvider_DraftedTend : FloatMenuOptionProvider
 {
-	// Token: 0x020032EF RID: 13039
-	public class FloatMenuOptionProvider_DraftedTend : FloatMenuOptionProvider
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass13_0
 	{
-		// Token: 0x17002F86 RID: 12166
-		// (get) Token: 0x06012586 RID: 75142 RVA: 0x000028E7 File Offset: 0x00000AE7
-		protected override bool Drafted
+		public Pawn clickedPawn;
+
+		public Thing medicine;
+
+		public FloatMenuContext context;
+
+		internal void _003CGetOptionsFor_003Eb__1()
 		{
+			Job job = JobMaker.MakeJob(JobDefOf.TendPatient, clickedPawn, null);
+			job.count = 1;
+			job.draftedTend = true;
+			context.FirstSelectedPawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGetOptionsFor_003Ed__13 : IEnumerable<FloatMenuOption>, IEnumerable, IEnumerator<FloatMenuOption>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private FloatMenuOption _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private Pawn clickedPawn;
+
+		public Pawn _003C_003E3__clickedPawn;
+
+		private FloatMenuContext context;
+
+		public FloatMenuContext _003C_003E3__context;
+
+		public FloatMenuOptionProvider_DraftedTend _003C_003E4__this;
+
+		private _003C_003Ec__DisplayClass13_0 _003C_003E8__1;
+
+		FloatMenuOption IEnumerator<FloatMenuOption>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				return true;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002F87 RID: 12167
-		// (get) Token: 0x06012587 RID: 75143 RVA: 0x00002501 File Offset: 0x00000701
-		protected override bool Undrafted
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetOptionsFor_003Ed__13(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E8__1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			FloatMenuOptionProvider_DraftedTend floatMenuOptionProvider_DraftedTend = _003C_003E4__this;
+			switch (num)
+			{
+			default:
 				return false;
-			}
-		}
-
-		// Token: 0x17002F88 RID: 12168
-		// (get) Token: 0x06012588 RID: 75144 RVA: 0x00002501 File Offset: 0x00000701
-		protected override bool Multiselect
-		{
-			get
+			case 0:
 			{
-				return false;
-			}
-		}
-
-		// Token: 0x17002F89 RID: 12169
-		// (get) Token: 0x06012589 RID: 75145 RVA: 0x000028E7 File Offset: 0x00000AE7
-		protected override bool MechanoidCanDo
-		{
-			get
-			{
-				return true;
-			}
-		}
-
-		// Token: 0x17002F8A RID: 12170
-		// (get) Token: 0x0601258A RID: 75146 RVA: 0x000028E7 File Offset: 0x00000AE7
-		protected override bool RequiresManipulation
-		{
-			get
-			{
-				return true;
-			}
-		}
-
-		// Token: 0x17002F8B RID: 12171
-		// (get) Token: 0x0601258B RID: 75147 RVA: 0x000028E7 File Offset: 0x00000AE7
-		protected override bool CanSelfTarget
-		{
-			get
-			{
-				return true;
-			}
-		}
-
-		// Token: 0x0601258C RID: 75148 RVA: 0x00567DE7 File Offset: 0x00565FE7
-		protected override bool AppliesInt(FloatMenuContext context)
-		{
-			return !context.FirstSelectedPawn.IsMutant || context.FirstSelectedPawn.mutant.Def.canTend;
-		}
-
-		// Token: 0x0601258D RID: 75149 RVA: 0x00567E0D File Offset: 0x0056600D
-		public override IEnumerable<FloatMenuOption> GetOptionsFor(Pawn clickedPawn, FloatMenuContext context)
-		{
-			FloatMenuOptionProvider_DraftedTend.<>c__DisplayClass13_0 CS$<>8__locals1 = new FloatMenuOptionProvider_DraftedTend.<>c__DisplayClass13_0();
-			CS$<>8__locals1.clickedPawn = clickedPawn;
-			CS$<>8__locals1.context = context;
-			if (!this.IsValidTendTarget(CS$<>8__locals1.context.FirstSelectedPawn, CS$<>8__locals1.clickedPawn))
-			{
-				yield break;
-			}
-			if (!CS$<>8__locals1.clickedPawn.health.HasHediffsNeedingTend(false))
-			{
-				if (CS$<>8__locals1.context.FirstSelectedPawn != CS$<>8__locals1.clickedPawn)
+				_003C_003E1__state = -1;
+				_003C_003E8__1 = new _003C_003Ec__DisplayClass13_0();
+				_003C_003E8__1.clickedPawn = clickedPawn;
+				_003C_003E8__1.context = context;
+				if (!floatMenuOptionProvider_DraftedTend.IsValidTendTarget(_003C_003E8__1.context.FirstSelectedPawn, _003C_003E8__1.clickedPawn))
 				{
-					yield return new FloatMenuOption("CannotTend".Translate(CS$<>8__locals1.clickedPawn) + ": " + "TendingNotRequired".Translate(CS$<>8__locals1.clickedPawn), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
+					return false;
 				}
-				yield break;
-			}
-			if (CS$<>8__locals1.context.FirstSelectedPawn.WorkTypeIsDisabled(WorkTypeDefOf.Doctor))
-			{
-				yield return new FloatMenuOption("CannotTend".Translate(CS$<>8__locals1.clickedPawn) + ": " + "CannotPrioritizeWorkTypeDisabled".Translate(WorkTypeDefOf.Doctor.gerundLabel), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-				yield break;
-			}
-			if (!CS$<>8__locals1.context.FirstSelectedPawn.CanReach(CS$<>8__locals1.clickedPawn, PathEndMode.ClosestTouch, Danger.Deadly, false, false, TraverseMode.ByPawn))
-			{
-				yield return new FloatMenuOption("CannotTend".Translate(CS$<>8__locals1.clickedPawn) + ": " + "NoPath".Translate().CapitalizeFirst(), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-				yield break;
-			}
-			if (CS$<>8__locals1.clickedPawn == CS$<>8__locals1.context.FirstSelectedPawn && CS$<>8__locals1.context.FirstSelectedPawn.playerSettings != null && !CS$<>8__locals1.context.FirstSelectedPawn.playerSettings.selfTend)
-			{
-				yield return new FloatMenuOption("CannotTend".Translate(CS$<>8__locals1.clickedPawn) + ": " + "SelfTendDisabled".Translate().CapitalizeFirst(), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-				yield break;
-			}
-			if (CS$<>8__locals1.clickedPawn.InAggroMentalState && !CS$<>8__locals1.clickedPawn.health.hediffSet.HasHediff(HediffDefOf.Scaria, false))
-			{
-				yield return new FloatMenuOption("CannotTend".Translate(CS$<>8__locals1.clickedPawn) + ": " + "PawnIsInAggroMentalState".Translate(CS$<>8__locals1.clickedPawn).CapitalizeFirst(), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-				yield break;
-			}
-			CS$<>8__locals1.medicine = HealthAIUtility.FindBestMedicine(CS$<>8__locals1.context.FirstSelectedPawn, CS$<>8__locals1.clickedPawn, true);
-			TaggedString taggedString = "Tend".Translate(CS$<>8__locals1.clickedPawn);
-			if (CS$<>8__locals1.medicine == null)
-			{
-				taggedString += " (" + "WithoutMedicine".Translate() + ")";
-			}
-			yield return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption(taggedString, new Action(CS$<>8__locals1.<GetOptionsFor>g__Action|0), MenuOptionPriority.Default, null, null, 0f, null, null, true, 0), CS$<>8__locals1.context.FirstSelectedPawn, CS$<>8__locals1.clickedPawn, "ReservedBy", null);
-			if (CS$<>8__locals1.medicine != null && CS$<>8__locals1.context.FirstSelectedPawn.CanReserve(CS$<>8__locals1.clickedPawn, 1, -1, null, false) && CS$<>8__locals1.clickedPawn.Spawned)
-			{
-				yield return new FloatMenuOption("Tend".Translate(CS$<>8__locals1.clickedPawn) + " (" + "WithoutMedicine".Translate() + ")", delegate()
+				if (!_003C_003E8__1.clickedPawn.health.HasHediffsNeedingTend())
 				{
-					Job job = JobMaker.MakeJob(JobDefOf.TendPatient, CS$<>8__locals1.clickedPawn, null);
-					job.count = 1;
-					job.draftedTend = true;
-					CS$<>8__locals1.context.FirstSelectedPawn.jobs.TryTakeOrderedJob(job, new JobTag?(JobTag.Misc), false);
-				}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
+					if (_003C_003E8__1.context.FirstSelectedPawn != _003C_003E8__1.clickedPawn)
+					{
+						_003C_003E2__current = new FloatMenuOption("CannotTend".Translate(_003C_003E8__1.clickedPawn) + ": " + "TendingNotRequired".Translate(_003C_003E8__1.clickedPawn), null);
+						_003C_003E1__state = 1;
+						return true;
+					}
+					goto IL_0137;
+				}
+				if (_003C_003E8__1.context.FirstSelectedPawn.WorkTypeIsDisabled(WorkTypeDefOf.Doctor))
+				{
+					_003C_003E2__current = new FloatMenuOption("CannotTend".Translate(_003C_003E8__1.clickedPawn) + ": " + "CannotPrioritizeWorkTypeDisabled".Translate(WorkTypeDefOf.Doctor.gerundLabel), null);
+					_003C_003E1__state = 2;
+					return true;
+				}
+				if (!_003C_003E8__1.context.FirstSelectedPawn.CanReach(_003C_003E8__1.clickedPawn, PathEndMode.ClosestTouch, Danger.Deadly))
+				{
+					_003C_003E2__current = new FloatMenuOption("CannotTend".Translate(_003C_003E8__1.clickedPawn) + ": " + "NoPath".Translate().CapitalizeFirst(), null);
+					_003C_003E1__state = 3;
+					return true;
+				}
+				if (_003C_003E8__1.clickedPawn == _003C_003E8__1.context.FirstSelectedPawn && _003C_003E8__1.context.FirstSelectedPawn.playerSettings != null && !_003C_003E8__1.context.FirstSelectedPawn.playerSettings.selfTend)
+				{
+					_003C_003E2__current = new FloatMenuOption("CannotTend".Translate(_003C_003E8__1.clickedPawn) + ": " + "SelfTendDisabled".Translate().CapitalizeFirst(), null);
+					_003C_003E1__state = 4;
+					return true;
+				}
+				if (_003C_003E8__1.clickedPawn.InAggroMentalState && !_003C_003E8__1.clickedPawn.health.hediffSet.HasHediff(HediffDefOf.Scaria))
+				{
+					_003C_003E2__current = new FloatMenuOption("CannotTend".Translate(_003C_003E8__1.clickedPawn) + ": " + "PawnIsInAggroMentalState".Translate(_003C_003E8__1.clickedPawn).CapitalizeFirst(), null);
+					_003C_003E1__state = 5;
+					return true;
+				}
+				_003C_003E8__1.medicine = HealthAIUtility.FindBestMedicine(_003C_003E8__1.context.FirstSelectedPawn, _003C_003E8__1.clickedPawn, onlyUseInventory: true);
+				TaggedString taggedString = "Tend".Translate(_003C_003E8__1.clickedPawn);
+				if (_003C_003E8__1.medicine == null)
+				{
+					taggedString += " (" + "WithoutMedicine".Translate() + ")";
+				}
+				_003C_003E2__current = FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption(taggedString, Action), _003C_003E8__1.context.FirstSelectedPawn, _003C_003E8__1.clickedPawn);
+				_003C_003E1__state = 6;
+				return true;
 			}
-			yield break;
+			case 1:
+				_003C_003E1__state = -1;
+				goto IL_0137;
+			case 2:
+				_003C_003E1__state = -1;
+				return false;
+			case 3:
+				_003C_003E1__state = -1;
+				return false;
+			case 4:
+				_003C_003E1__state = -1;
+				return false;
+			case 5:
+				_003C_003E1__state = -1;
+				return false;
+			case 6:
+				_003C_003E1__state = -1;
+				if (_003C_003E8__1.medicine != null && _003C_003E8__1.context.FirstSelectedPawn.CanReserve(_003C_003E8__1.clickedPawn) && _003C_003E8__1.clickedPawn.Spawned)
+				{
+					_003C_003E2__current = new FloatMenuOption("Tend".Translate(_003C_003E8__1.clickedPawn) + " (" + "WithoutMedicine".Translate() + ")", delegate
+					{
+						Job job = JobMaker.MakeJob(JobDefOf.TendPatient, _003C_003E8__1.clickedPawn, null);
+						job.count = 1;
+						job.draftedTend = true;
+						_003C_003E8__1.context.FirstSelectedPawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
+					});
+					_003C_003E1__state = 7;
+					return true;
+				}
+				break;
+			case 7:
+				{
+					_003C_003E1__state = -1;
+					break;
+				}
+				IL_0137:
+				return false;
+			}
+			return false;
+			void Action()
+			{
+				Job job2 = JobMaker.MakeJob(JobDefOf.TendPatient, ((_003C_003Ec__DisplayClass13_0)this).clickedPawn, ((_003C_003Ec__DisplayClass13_0)this).medicine);
+				job2.count = 1;
+				job2.draftedTend = true;
+				((_003C_003Ec__DisplayClass13_0)this).context.FirstSelectedPawn.jobs.TryTakeOrderedJob(job2, JobTag.Misc);
+			}
 		}
 
-		// Token: 0x0601258E RID: 75150 RVA: 0x00567E2C File Offset: 0x0056602C
-		private bool IsValidTendTarget(Pawn doctor, Pawn patient)
+		bool IEnumerator.MoveNext()
 		{
-			return (doctor.Drafted || patient == doctor) && (patient.Downed || (!patient.HostileTo(doctor.Faction) && (patient.IsColonist || patient.IsQuestLodger() || patient.IsPrisonerOfColony || patient.IsSlaveOfColony || (patient.Faction == Faction.OfPlayer && patient.IsAnimal) || (patient.IsColonySubhuman && patient.mutant.Def.entitledToMedicalCare))));
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0601258F RID: 75151 RVA: 0x00567EB8 File Offset: 0x005660B8
-		protected override FloatMenuOption GetSingleOptionFor(Thing clickedThing, FloatMenuContext context)
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			Building_HoldingPlatform holdingPlatform = clickedThing as Building_HoldingPlatform;
-			if (holdingPlatform == null)
-			{
-				return null;
-			}
-			Pawn heldPawn = holdingPlatform.HeldPawn;
-			if (heldPawn == null)
-			{
-				return null;
-			}
-			if (!HealthAIUtility.ShouldBeTendedNowByPlayer(heldPawn))
-			{
-				return null;
-			}
-			if (context.FirstSelectedPawn.WorkTypeIsDisabled(WorkTypeDefOf.Doctor))
-			{
-				return new FloatMenuOption("CannotTend".Translate(heldPawn) + ": " + "CannotPrioritizeWorkTypeDisabled".Translate(WorkTypeDefOf.Doctor.gerundLabel), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-			}
-			if (!context.FirstSelectedPawn.CanReach(heldPawn, PathEndMode.ClosestTouch, Danger.Deadly, false, false, TraverseMode.ByPawn))
-			{
-				return new FloatMenuOption("CannotTend".Translate(heldPawn) + ": " + "NoPath".Translate().CapitalizeFirst(), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-			}
-			Thing medicine = HealthAIUtility.FindBestMedicine(context.FirstSelectedPawn, heldPawn, false);
-			return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("Tend".Translate(heldPawn.LabelShort), delegate()
-			{
-				JobDef tendEntity = JobDefOf.TendEntity;
-				LocalTargetInfo targetA = holdingPlatform;
-				Thing medicine = medicine;
-				Job job = JobMaker.MakeJob(tendEntity, targetA, (medicine != null) ? medicine : LocalTargetInfo.Invalid);
-				job.count = 1;
-				job.draftedTend = true;
-				context.FirstSelectedPawn.jobs.TryTakeOrderedJob(job, new JobTag?(JobTag.Misc), false);
-			}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0), context.FirstSelectedPawn, holdingPlatform, "ReservedBy", null);
+			throw new NotSupportedException();
 		}
+
+		[DebuggerHidden]
+		IEnumerator<FloatMenuOption> IEnumerable<FloatMenuOption>.GetEnumerator()
+		{
+			_003CGetOptionsFor_003Ed__13 _003CGetOptionsFor_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CGetOptionsFor_003Ed__ = this;
+			}
+			else
+			{
+				_003CGetOptionsFor_003Ed__ = new _003CGetOptionsFor_003Ed__13(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CGetOptionsFor_003Ed__.clickedPawn = _003C_003E3__clickedPawn;
+			_003CGetOptionsFor_003Ed__.context = _003C_003E3__context;
+			return _003CGetOptionsFor_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<FloatMenuOption>)this).GetEnumerator();
+		}
+	}
+
+	protected override bool Drafted => true;
+
+	protected override bool Undrafted => false;
+
+	protected override bool Multiselect => false;
+
+	protected override bool MechanoidCanDo => true;
+
+	protected override bool RequiresManipulation => true;
+
+	protected override bool CanSelfTarget => true;
+
+	protected override bool AppliesInt(FloatMenuContext context)
+	{
+		if (context.FirstSelectedPawn.IsMutant)
+		{
+			return context.FirstSelectedPawn.mutant.Def.canTend;
+		}
+		return true;
+	}
+
+	[IteratorStateMachine(typeof(_003CGetOptionsFor_003Ed__13))]
+	public override IEnumerable<FloatMenuOption> GetOptionsFor(Pawn clickedPawn, FloatMenuContext context)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetOptionsFor_003Ed__13(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__clickedPawn = clickedPawn,
+			_003C_003E3__context = context
+		};
+	}
+
+	private bool IsValidTendTarget(Pawn doctor, Pawn patient)
+	{
+		if (!doctor.Drafted && patient != doctor)
+		{
+			return false;
+		}
+		if (patient.Downed)
+		{
+			return true;
+		}
+		if (patient.HostileTo(doctor.Faction))
+		{
+			return false;
+		}
+		if (patient.IsColonist || patient.IsQuestLodger() || patient.IsPrisonerOfColony || patient.IsSlaveOfColony || (patient.Faction == Faction.OfPlayer && patient.IsAnimal))
+		{
+			return true;
+		}
+		if (patient.IsColonySubhuman && patient.mutant.Def.entitledToMedicalCare)
+		{
+			return true;
+		}
+		return false;
+	}
+
+	protected override FloatMenuOption GetSingleOptionFor(Thing clickedThing, FloatMenuContext context)
+	{
+		Building_HoldingPlatform holdingPlatform = clickedThing as Building_HoldingPlatform;
+		if (holdingPlatform == null)
+		{
+			return null;
+		}
+		Pawn heldPawn = holdingPlatform.HeldPawn;
+		if (heldPawn == null)
+		{
+			return null;
+		}
+		if (!HealthAIUtility.ShouldBeTendedNowByPlayer(heldPawn))
+		{
+			return null;
+		}
+		if (context.FirstSelectedPawn.WorkTypeIsDisabled(WorkTypeDefOf.Doctor))
+		{
+			return new FloatMenuOption("CannotTend".Translate(heldPawn) + ": " + "CannotPrioritizeWorkTypeDisabled".Translate(WorkTypeDefOf.Doctor.gerundLabel), null);
+		}
+		if (!context.FirstSelectedPawn.CanReach(heldPawn, PathEndMode.ClosestTouch, Danger.Deadly))
+		{
+			return new FloatMenuOption("CannotTend".Translate(heldPawn) + ": " + "NoPath".Translate().CapitalizeFirst(), null);
+		}
+		Thing medicine = HealthAIUtility.FindBestMedicine(context.FirstSelectedPawn, heldPawn);
+		return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("Tend".Translate(heldPawn.LabelShort), delegate
+		{
+			JobDef tendEntity = JobDefOf.TendEntity;
+			LocalTargetInfo targetA = holdingPlatform;
+			Thing thing = medicine;
+			Job job = JobMaker.MakeJob(tendEntity, targetA, (thing != null) ? ((LocalTargetInfo)thing) : LocalTargetInfo.Invalid);
+			job.count = 1;
+			job.draftedTend = true;
+			context.FirstSelectedPawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
+		}), context.FirstSelectedPawn, holdingPlatform);
 	}
 }

@@ -1,353 +1,529 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.Grammar;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class GeneSet : IExposable
 {
-	// Token: 0x02002AE3 RID: 10979
-	public class GeneSet : IExposable
+	[CompilerGenerated]
+	private sealed class _003CSpecialDisplayStats_003Ed__27 : IEnumerable<StatDrawEntry>, IEnumerable, IEnumerator<StatDrawEntry>, IEnumerator, IDisposable
 	{
-		// Token: 0x17002641 RID: 9793
-		// (get) Token: 0x0600F4C6 RID: 62662 RVA: 0x004725CB File Offset: 0x004707CB
-		public string Label
+		private int _003C_003E1__state;
+
+		private StatDrawEntry _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public GeneSet _003C_003E4__this;
+
+		private Dialog_InfoCard.Hyperlink? inspectGenesHyperlink;
+
+		public Dialog_InfoCard.Hyperlink? _003C_003E3__inspectGenesHyperlink;
+
+		StatDrawEntry IEnumerator<StatDrawEntry>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.name.NullOrEmpty())
-				{
-					this.GenerateName();
-				}
-				return this.name;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002642 RID: 9794
-		// (get) Token: 0x0600F4C7 RID: 62663 RVA: 0x004725E6 File Offset: 0x004707E6
-		private string LabelShortAdj
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (!this.genes.NullOrEmpty<GeneDef>())
-				{
-					return this.genes[0].LabelShortAdj;
-				}
-				return "ERR";
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002643 RID: 9795
-		// (get) Token: 0x0600F4C8 RID: 62664 RVA: 0x0047260C File Offset: 0x0047080C
-		public List<GeneDef> GenesListForReading
+		[DebuggerHidden]
+		public _003CSpecialDisplayStats_003Ed__27(int _003C_003E1__state)
 		{
-			get
-			{
-				return this.genes;
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x17002644 RID: 9796
-		// (get) Token: 0x0600F4C9 RID: 62665 RVA: 0x00472614 File Offset: 0x00470814
-		public bool Empty
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			get
-			{
-				return this.genes.Count == 0;
-			}
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x17002645 RID: 9797
-		// (get) Token: 0x0600F4CA RID: 62666 RVA: 0x00472624 File Offset: 0x00470824
-		public int ComplexityTotal
+		private bool MoveNext()
 		{
-			get
+			int num = _003C_003E1__state;
+			GeneSet geneSet = _003C_003E4__this;
+			int metabolismTotal;
+			int num2;
+			switch (num)
 			{
-				this.RecacheOverridesIfNeeded();
-				int num = 0;
-				for (int i = 0; i < this.cachedNonOverriddenGenes.Count; i++)
-				{
-					num += this.cachedNonOverriddenGenes[i].biostatCpx;
-				}
-				return num;
-			}
-		}
-
-		// Token: 0x17002646 RID: 9798
-		// (get) Token: 0x0600F4CB RID: 62667 RVA: 0x00472664 File Offset: 0x00470864
-		public int MetabolismTotal
-		{
-			get
-			{
-				this.RecacheOverridesIfNeeded();
-				int num = 0;
-				for (int i = 0; i < this.cachedNonOverriddenGenes.Count; i++)
-				{
-					num += this.cachedNonOverriddenGenes[i].biostatMet;
-				}
-				return num;
-			}
-		}
-
-		// Token: 0x17002647 RID: 9799
-		// (get) Token: 0x0600F4CC RID: 62668 RVA: 0x004726A4 File Offset: 0x004708A4
-		public int ArchitesTotal
-		{
-			get
-			{
-				this.RecacheOverridesIfNeeded();
-				int num = 0;
-				for (int i = 0; i < this.cachedNonOverriddenGenes.Count; i++)
-				{
-					num += this.cachedNonOverriddenGenes[i].biostatArc;
-				}
-				return num;
-			}
-		}
-
-		// Token: 0x17002648 RID: 9800
-		// (get) Token: 0x0600F4CD RID: 62669 RVA: 0x004726E4 File Offset: 0x004708E4
-		private IEnumerable<DefHyperlink> GeneDefHyperlinks
-		{
-			get
-			{
-				int num;
-				for (int i = 0; i < this.genes.Count; i = num + 1)
-				{
-					yield return new DefHyperlink(this.genes[i]);
-					num = i;
-				}
-				yield break;
-			}
-		}
-
-		// Token: 0x0600F4CE RID: 62670 RVA: 0x004726F4 File Offset: 0x004708F4
-		public void AddGene(GeneDef gene)
-		{
-			if (!this.genes.Contains(gene))
-			{
-				this.genes.Add(gene);
-				this.DirtyCache();
-			}
-		}
-
-		// Token: 0x0600F4CF RID: 62671 RVA: 0x00472716 File Offset: 0x00470916
-		public void SetNameDirect(string name)
-		{
-			this.name = name;
-		}
-
-		// Token: 0x0600F4D0 RID: 62672 RVA: 0x0047271F File Offset: 0x0047091F
-		public bool IsOverridden(GeneDef geneDef)
-		{
-			if (!ModsConfig.BiotechActive)
-			{
+			default:
 				return false;
-			}
-			if (!this.genes.Contains(geneDef))
+			case 0:
 			{
-				return false;
-			}
-			this.RecacheOverridesIfNeeded();
-			return !this.cachedNonOverriddenGenes.Contains(geneDef);
-		}
-
-		// Token: 0x0600F4D1 RID: 62673 RVA: 0x00472750 File Offset: 0x00470950
-		public void GenerateName()
-		{
-			if (ModsConfig.BiotechActive && this.genes.Any<GeneDef>())
-			{
-				this.name = GrammarResolver.Resolve("r_name", new GrammarRequest
+				_003C_003E1__state = -1;
+				IEnumerable<Dialog_InfoCard.Hyperlink> enumerable = Dialog_InfoCard.DefsToHyperlinks(geneSet.GeneDefHyperlinks);
+				if (inspectGenesHyperlink.HasValue)
 				{
-					Includes = 
-					{
-						RulePackDefOf.NamerGenepack
-					},
-					Rules = 
-					{
-						new Rule_String("geneWord", this.LabelShortAdj),
-						new Rule_String("geneCountMinusOne", (this.genes.Count - 1).ToString())
-					},
-					Constants = 
-					{
-						{
-							"geneCount",
-							this.genes.Count.ToString()
-						}
-					}
-				}, null, false, null, null, null, false);
-				return;
-			}
-			this.name = "ERR";
-		}
-
-		// Token: 0x0600F4D2 RID: 62674 RVA: 0x00472820 File Offset: 0x00470A20
-		public bool CanAddGeneDuringGeneration(GeneDef gene)
-		{
-			if (!ModsConfig.BiotechActive)
-			{
-				return false;
-			}
-			if (this.genes.Contains(gene))
-			{
-				return false;
-			}
-			if (this.genes.Count > 0 && !GeneTuning.BiostatRange.Includes(gene.biostatMet + this.MetabolismTotal))
-			{
-				return false;
-			}
-			if (!gene.canGenerateInGeneSet)
-			{
-				return false;
-			}
-			if (gene.prerequisite != null && !this.genes.Contains(gene.prerequisite))
-			{
-				return false;
-			}
-			for (int i = 0; i < this.genes.Count; i++)
-			{
-				if (gene.ConflictsWith(this.genes[i]))
-				{
-					return false;
+					enumerable = enumerable.Concat(inspectGenesHyperlink.Value);
 				}
+				_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.Genetics, "Genes".Translate().CapitalizeFirst(), geneSet.genes.Select((GeneDef x) => x.label).ToCommaList().CapitalizeFirst(), "ContainedGenesDesc".Translate() + ":", 999, null, enumerable);
+				_003C_003E1__state = 1;
+				return true;
 			}
-			return true;
-		}
-
-		// Token: 0x0600F4D3 RID: 62675 RVA: 0x004728C6 File Offset: 0x00470AC6
-		public void SortGenes()
-		{
-			this.genes.SortBy((GeneDef x) => -x.displayCategory.displayPriorityInGenepack);
-		}
-
-		// Token: 0x0600F4D4 RID: 62676 RVA: 0x004728F4 File Offset: 0x00470AF4
-		public override string ToString()
-		{
-			string str = "GeneSet: ";
-			string str2;
-			if (!this.genes.NullOrEmpty<GeneDef>())
+			case 1:
 			{
-				str2 = (from x in this.genes
-				select x.LabelCap.ToString()).ToCommaList(false, false);
+				_003C_003E1__state = -1;
+				int complexityTotal = geneSet.ComplexityTotal;
+				if (complexityTotal != 0)
+				{
+					_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.Genetics, "ComplexityTotal".Translate(), complexityTotal.ToStringWithSign(), "ComplexityTotalDesc".Translate(), 998);
+					_003C_003E1__state = 2;
+					return true;
+				}
+				goto IL_0143;
+			}
+			case 2:
+				_003C_003E1__state = -1;
+				goto IL_0143;
+			case 3:
+				_003C_003E1__state = -1;
+				goto IL_019d;
+			case 4:
+				{
+					_003C_003E1__state = -1;
+					break;
+				}
+				IL_0143:
+				metabolismTotal = geneSet.MetabolismTotal;
+				if (metabolismTotal != 0)
+				{
+					_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.Genetics, "MetabolismTotal".Translate(), metabolismTotal.ToStringWithSign(), "MetabolismTotalDesc".Translate(), 997);
+					_003C_003E1__state = 3;
+					return true;
+				}
+				goto IL_019d;
+				IL_019d:
+				num2 = geneSet.genes.Sum((GeneDef x) => x.biostatArc);
+				if (num2 != 0)
+				{
+					_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.Genetics, "ArchitesRequired".Translate(), num2.ToString(), "ArchitesRequiredDesc".Translate(), 995);
+					_003C_003E1__state = 4;
+					return true;
+				}
+				break;
+			}
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<StatDrawEntry> IEnumerable<StatDrawEntry>.GetEnumerator()
+		{
+			_003CSpecialDisplayStats_003Ed__27 _003CSpecialDisplayStats_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CSpecialDisplayStats_003Ed__ = this;
 			}
 			else
 			{
-				str2 = "None";
-			}
-			return str + str2;
-		}
-
-		// Token: 0x0600F4D5 RID: 62677 RVA: 0x00472950 File Offset: 0x00470B50
-		public IEnumerable<StatDrawEntry> SpecialDisplayStats(Dialog_InfoCard.Hyperlink? inspectGenesHyperlink = null)
-		{
-			IEnumerable<Dialog_InfoCard.Hyperlink> enumerable = Dialog_InfoCard.DefsToHyperlinks(this.GeneDefHyperlinks);
-			if (inspectGenesHyperlink != null)
-			{
-				enumerable = enumerable.Concat(inspectGenesHyperlink.Value);
-			}
-			yield return new StatDrawEntry(StatCategoryDefOf.Genetics, "Genes".Translate().CapitalizeFirst(), (from x in this.genes
-			select x.label).ToCommaList(false, false).CapitalizeFirst(), "ContainedGenesDesc".Translate() + ":", 999, null, enumerable, false, false);
-			int complexityTotal = this.ComplexityTotal;
-			if (complexityTotal != 0)
-			{
-				yield return new StatDrawEntry(StatCategoryDefOf.Genetics, "ComplexityTotal".Translate(), complexityTotal.ToStringWithSign(), "ComplexityTotalDesc".Translate(), 998, null, null, false, false);
-			}
-			int metabolismTotal = this.MetabolismTotal;
-			if (metabolismTotal != 0)
-			{
-				yield return new StatDrawEntry(StatCategoryDefOf.Genetics, "MetabolismTotal".Translate(), metabolismTotal.ToStringWithSign(), "MetabolismTotalDesc".Translate(), 997, null, null, false, false);
-			}
-			int num = this.genes.Sum((GeneDef x) => x.biostatArc);
-			if (num != 0)
-			{
-				yield return new StatDrawEntry(StatCategoryDefOf.Genetics, "ArchitesRequired".Translate(), num.ToString(), "ArchitesRequiredDesc".Translate(), 995, null, null, false, false);
-			}
-			yield break;
-		}
-
-		// Token: 0x0600F4D6 RID: 62678 RVA: 0x00472967 File Offset: 0x00470B67
-		public void Debug_RemoveGene(GeneDef gene)
-		{
-			if (this.genes.Remove(gene))
-			{
-				this.DirtyCache();
-			}
-		}
-
-		// Token: 0x0600F4D7 RID: 62679 RVA: 0x0047297D File Offset: 0x00470B7D
-		private void DirtyCache()
-		{
-			this.name = null;
-			this.cachedNonOverriddenGenes = null;
-		}
-
-		// Token: 0x0600F4D8 RID: 62680 RVA: 0x00472990 File Offset: 0x00470B90
-		private void RecacheOverridesIfNeeded()
-		{
-			if (this.cachedNonOverriddenGenes == null)
-			{
-				this.cachedNonOverriddenGenes = new List<GeneDef>();
-				foreach (GeneDef geneDef in this.genes)
+				_003CSpecialDisplayStats_003Ed__ = new _003CSpecialDisplayStats_003Ed__27(0)
 				{
-					this.tmpGeneDefWithTypes.Add(new GeneDefWithType(geneDef, true));
-				}
-				this.cachedNonOverriddenGenes.AddRange(this.tmpGeneDefWithTypes.NonOverriddenGenes());
-				this.tmpGeneDefWithTypes.Clear();
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CSpecialDisplayStats_003Ed__.inspectGenesHyperlink = _003C_003E3__inspectGenesHyperlink;
+			return _003CSpecialDisplayStats_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<StatDrawEntry>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003Cget_GeneDefHyperlinks_003Ed__19 : IEnumerable<DefHyperlink>, IEnumerable, IEnumerator<DefHyperlink>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private DefHyperlink _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public GeneSet _003C_003E4__this;
+
+		private int _003Ci_003E5__2;
+
+		DefHyperlink IEnumerator<DefHyperlink>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600F4D9 RID: 62681 RVA: 0x00472A24 File Offset: 0x00470C24
-		public GeneSet Copy()
+		object IEnumerator.Current
 		{
-			GeneSet geneSet = new GeneSet();
-			geneSet.name = this.name;
-			geneSet.genes.AddRange(this.genes);
-			geneSet.DirtyCache();
-			return geneSet;
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x0600F4DA RID: 62682 RVA: 0x00472A50 File Offset: 0x00470C50
-		public bool Matches(GeneSet other)
+		[DebuggerHidden]
+		public _003Cget_GeneDefHyperlinks_003Ed__19(int _003C_003E1__state)
 		{
-			if (this.genes.Count != other.genes.Count)
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			GeneSet geneSet = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003Ci_003E5__2 = 0;
+				break;
+			case 1:
+				_003C_003E1__state = -1;
+				_003Ci_003E5__2++;
+				break;
+			}
+			if (_003Ci_003E5__2 < geneSet.genes.Count)
+			{
+				_003C_003E2__current = new DefHyperlink(geneSet.genes[_003Ci_003E5__2]);
+				_003C_003E1__state = 1;
+				return true;
+			}
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<DefHyperlink> IEnumerable<DefHyperlink>.GetEnumerator()
+		{
+			_003Cget_GeneDefHyperlinks_003Ed__19 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_GeneDefHyperlinks_003Ed__19(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<DefHyperlink>)this).GetEnumerator();
+		}
+	}
+
+	private List<GeneDef> genes = new List<GeneDef>();
+
+	private string name;
+
+	[Unsaved(false)]
+	private List<GeneDef> cachedNonOverriddenGenes;
+
+	public const string ErrorSlugline = "ERR";
+
+	private List<GeneDefWithType> tmpGeneDefWithTypes = new List<GeneDefWithType>();
+
+	public string Label
+	{
+		get
+		{
+			if (name.NullOrEmpty())
+			{
+				GenerateName();
+			}
+			return name;
+		}
+	}
+
+	private string LabelShortAdj
+	{
+		get
+		{
+			if (!genes.NullOrEmpty())
+			{
+				return genes[0].LabelShortAdj;
+			}
+			return "ERR";
+		}
+	}
+
+	public List<GeneDef> GenesListForReading => genes;
+
+	public bool Empty => genes.Count == 0;
+
+	public int ComplexityTotal
+	{
+		get
+		{
+			RecacheOverridesIfNeeded();
+			int num = 0;
+			for (int i = 0; i < cachedNonOverriddenGenes.Count; i++)
+			{
+				num += cachedNonOverriddenGenes[i].biostatCpx;
+			}
+			return num;
+		}
+	}
+
+	public int MetabolismTotal
+	{
+		get
+		{
+			RecacheOverridesIfNeeded();
+			int num = 0;
+			for (int i = 0; i < cachedNonOverriddenGenes.Count; i++)
+			{
+				num += cachedNonOverriddenGenes[i].biostatMet;
+			}
+			return num;
+		}
+	}
+
+	public int ArchitesTotal
+	{
+		get
+		{
+			RecacheOverridesIfNeeded();
+			int num = 0;
+			for (int i = 0; i < cachedNonOverriddenGenes.Count; i++)
+			{
+				num += cachedNonOverriddenGenes[i].biostatArc;
+			}
+			return num;
+		}
+	}
+
+	private IEnumerable<DefHyperlink> GeneDefHyperlinks
+	{
+		[IteratorStateMachine(typeof(_003Cget_GeneDefHyperlinks_003Ed__19))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_GeneDefHyperlinks_003Ed__19(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public void AddGene(GeneDef gene)
+	{
+		if (!genes.Contains(gene))
+		{
+			genes.Add(gene);
+			DirtyCache();
+		}
+	}
+
+	public void SetNameDirect(string name)
+	{
+		this.name = name;
+	}
+
+	public bool IsOverridden(GeneDef geneDef)
+	{
+		if (!ModsConfig.BiotechActive)
+		{
+			return false;
+		}
+		if (!genes.Contains(geneDef))
+		{
+			return false;
+		}
+		RecacheOverridesIfNeeded();
+		return !cachedNonOverriddenGenes.Contains(geneDef);
+	}
+
+	public void GenerateName()
+	{
+		if (ModsConfig.BiotechActive && genes.Any())
+		{
+			GrammarRequest request = default(GrammarRequest);
+			request.Includes.Add(RulePackDefOf.NamerGenepack);
+			request.Rules.Add(new Rule_String("geneWord", LabelShortAdj));
+			request.Rules.Add(new Rule_String("geneCountMinusOne", (genes.Count - 1).ToString()));
+			request.Constants.Add("geneCount", genes.Count.ToString());
+			name = GrammarResolver.Resolve("r_name", request, null, forceLog: false, null, null, null, capitalizeFirstSentence: false);
+		}
+		else
+		{
+			name = "ERR";
+		}
+	}
+
+	public bool CanAddGeneDuringGeneration(GeneDef gene)
+	{
+		if (!ModsConfig.BiotechActive)
+		{
+			return false;
+		}
+		if (genes.Contains(gene))
+		{
+			return false;
+		}
+		if (genes.Count > 0 && !GeneTuning.BiostatRange.Includes(gene.biostatMet + MetabolismTotal))
+		{
+			return false;
+		}
+		if (!gene.canGenerateInGeneSet)
+		{
+			return false;
+		}
+		if (gene.prerequisite != null && !genes.Contains(gene.prerequisite))
+		{
+			return false;
+		}
+		for (int i = 0; i < genes.Count; i++)
+		{
+			if (gene.ConflictsWith(genes[i]))
 			{
 				return false;
 			}
-			for (int i = 0; i < this.genes.Count; i++)
-			{
-				if (!other.genes.Contains(this.genes[i]))
-				{
-					return false;
-				}
-			}
-			return true;
 		}
+		return true;
+	}
 
-		// Token: 0x0600F4DB RID: 62683 RVA: 0x00472AAC File Offset: 0x00470CAC
-		public void ExposeData()
+	public void SortGenes()
+	{
+		genes.SortBy((GeneDef x) => 0f - x.displayCategory.displayPriorityInGenepack);
+	}
+
+	public override string ToString()
+	{
+		return "GeneSet: " + (genes.NullOrEmpty() ? "None" : genes.Select((GeneDef x) => x.LabelCap.ToString()).ToCommaList());
+	}
+
+	[IteratorStateMachine(typeof(_003CSpecialDisplayStats_003Ed__27))]
+	public IEnumerable<StatDrawEntry> SpecialDisplayStats(Dialog_InfoCard.Hyperlink? inspectGenesHyperlink = null)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CSpecialDisplayStats_003Ed__27(-2)
 		{
-			Scribe_Collections.Look<GeneDef>(ref this.genes, "genes", LookMode.Def, Array.Empty<object>());
-			Scribe_Values.Look<string>(ref this.name, "name", null, false);
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+			_003C_003E4__this = this,
+			_003C_003E3__inspectGenesHyperlink = inspectGenesHyperlink
+		};
+	}
+
+	public void Debug_RemoveGene(GeneDef gene)
+	{
+		if (genes.Remove(gene))
+		{
+			DirtyCache();
+		}
+	}
+
+	private void DirtyCache()
+	{
+		name = null;
+		cachedNonOverriddenGenes = null;
+	}
+
+	private void RecacheOverridesIfNeeded()
+	{
+		if (cachedNonOverriddenGenes != null)
+		{
+			return;
+		}
+		cachedNonOverriddenGenes = new List<GeneDef>();
+		foreach (GeneDef gene in genes)
+		{
+			tmpGeneDefWithTypes.Add(new GeneDefWithType(gene, xenogene: true));
+		}
+		cachedNonOverriddenGenes.AddRange(tmpGeneDefWithTypes.NonOverriddenGenes());
+		tmpGeneDefWithTypes.Clear();
+	}
+
+	public GeneSet Copy()
+	{
+		GeneSet geneSet = new GeneSet();
+		geneSet.name = name;
+		geneSet.genes.AddRange(genes);
+		geneSet.DirtyCache();
+		return geneSet;
+	}
+
+	public bool Matches(GeneSet other)
+	{
+		if (genes.Count != other.genes.Count)
+		{
+			return false;
+		}
+		for (int i = 0; i < genes.Count; i++)
+		{
+			if (!other.genes.Contains(genes[i]))
 			{
-				this.genes.RemoveAll((GeneDef x) => x == null);
+				return false;
 			}
 		}
+		return true;
+	}
 
-		// Token: 0x0400A14E RID: 41294
-		private List<GeneDef> genes = new List<GeneDef>();
-
-		// Token: 0x0400A14F RID: 41295
-		private string name;
-
-		// Token: 0x0400A150 RID: 41296
-		[Unsaved(false)]
-		private List<GeneDef> cachedNonOverriddenGenes;
-
-		// Token: 0x0400A151 RID: 41297
-		public const string ErrorSlugline = "ERR";
-
-		// Token: 0x0400A152 RID: 41298
-		private List<GeneDefWithType> tmpGeneDefWithTypes = new List<GeneDefWithType>();
+	public void ExposeData()
+	{
+		Scribe_Collections.Look(ref genes, "genes", LookMode.Def);
+		Scribe_Values.Look(ref name, "name");
+		if (Scribe.mode == LoadSaveMode.PostLoadInit)
+		{
+			genes.RemoveAll((GeneDef x) => x == null);
+		}
 	}
 }

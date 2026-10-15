@@ -1,208 +1,330 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public struct AlertReport
 {
-	// Token: 0x02002FC2 RID: 12226
-	public struct AlertReport
+	[CompilerGenerated]
+	private sealed class _003Cget_AllCulprits_003Ed__9 : IEnumerable<GlobalTargetInfo>, IEnumerable, IEnumerator<GlobalTargetInfo>, IEnumerator, IDisposable
 	{
-		// Token: 0x17002CA7 RID: 11431
-		// (get) Token: 0x060113B0 RID: 70576 RVA: 0x004EFF54 File Offset: 0x004EE154
-		public bool AnyCulpritValid
+		private int _003C_003E1__state;
+
+		private GlobalTargetInfo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public AlertReport _003C_003E4__this;
+
+		public AlertReport _003C_003E3___003C_003E4__this;
+
+		private int _003Ci_003E5__2;
+
+		GlobalTargetInfo IEnumerator<GlobalTargetInfo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (!this.culpritsThings.NullOrEmpty<Thing>() || !this.culpritsPawns.NullOrEmpty<Pawn>() || !this.culpritsCaravans.NullOrEmpty<Caravan>())
-				{
-					return true;
-				}
-				if (this.culpritTarget != null && this.culpritTarget.Value.IsValid)
-				{
-					return true;
-				}
-				if (this.culpritsTargets != null)
-				{
-					for (int i = 0; i < this.culpritsTargets.Count; i++)
-					{
-						if (this.culpritsTargets[i].IsValid)
-						{
-							return true;
-						}
-					}
-				}
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003Cget_AllCulprits_003Ed__9(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			switch (_003C_003E1__state)
+			{
+			default:
 				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (_003C_003E4__this.culpritsThings != null)
+				{
+					_003Ci_003E5__2 = 0;
+					goto IL_0085;
+				}
+				goto IL_009d;
+			case 1:
+				_003C_003E1__state = -1;
+				_003Ci_003E5__2++;
+				goto IL_0085;
+			case 2:
+				_003C_003E1__state = -1;
+				_003Ci_003E5__2++;
+				goto IL_00f4;
+			case 3:
+				_003C_003E1__state = -1;
+				_003Ci_003E5__2++;
+				goto IL_0163;
+			case 4:
+				_003C_003E1__state = -1;
+				goto IL_01b3;
+			case 5:
+				{
+					_003C_003E1__state = -1;
+					_003Ci_003E5__2++;
+					goto IL_0205;
+				}
+				IL_0163:
+				if (_003Ci_003E5__2 < _003C_003E4__this.culpritsCaravans.Count)
+				{
+					_003C_003E2__current = _003C_003E4__this.culpritsCaravans[_003Ci_003E5__2];
+					_003C_003E1__state = 3;
+					return true;
+				}
+				goto IL_017b;
+				IL_0085:
+				if (_003Ci_003E5__2 < _003C_003E4__this.culpritsThings.Count)
+				{
+					_003C_003E2__current = _003C_003E4__this.culpritsThings[_003Ci_003E5__2];
+					_003C_003E1__state = 1;
+					return true;
+				}
+				goto IL_009d;
+				IL_009d:
+				if (_003C_003E4__this.culpritsPawns != null)
+				{
+					_003Ci_003E5__2 = 0;
+					goto IL_00f4;
+				}
+				goto IL_010c;
+				IL_017b:
+				if (_003C_003E4__this.culpritTarget.HasValue)
+				{
+					_003C_003E2__current = _003C_003E4__this.culpritTarget.Value;
+					_003C_003E1__state = 4;
+					return true;
+				}
+				goto IL_01b3;
+				IL_00f4:
+				if (_003Ci_003E5__2 < _003C_003E4__this.culpritsPawns.Count)
+				{
+					_003C_003E2__current = _003C_003E4__this.culpritsPawns[_003Ci_003E5__2];
+					_003C_003E1__state = 2;
+					return true;
+				}
+				goto IL_010c;
+				IL_0205:
+				if (_003Ci_003E5__2 < _003C_003E4__this.culpritsTargets.Count)
+				{
+					_003C_003E2__current = _003C_003E4__this.culpritsTargets[_003Ci_003E5__2];
+					_003C_003E1__state = 5;
+					return true;
+				}
+				break;
+				IL_010c:
+				if (_003C_003E4__this.culpritsCaravans != null)
+				{
+					_003Ci_003E5__2 = 0;
+					goto IL_0163;
+				}
+				goto IL_017b;
+				IL_01b3:
+				if (_003C_003E4__this.culpritsTargets == null)
+				{
+					break;
+				}
+				_003Ci_003E5__2 = 0;
+				goto IL_0205;
 			}
+			return false;
 		}
 
-		// Token: 0x17002CA8 RID: 11432
-		// (get) Token: 0x060113B1 RID: 70577 RVA: 0x004EFFE5 File Offset: 0x004EE1E5
-		public IEnumerable<GlobalTargetInfo> AllCulprits
+		bool IEnumerator.MoveNext()
 		{
-			get
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<GlobalTargetInfo> IEnumerable<GlobalTargetInfo>.GetEnumerator()
+		{
+			_003Cget_AllCulprits_003Ed__9 _003Cget_AllCulprits_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				if (this.culpritsThings != null)
-				{
-					int num;
-					for (int i = 0; i < this.culpritsThings.Count; i = num + 1)
-					{
-						yield return this.culpritsThings[i];
-						num = i;
-					}
-				}
-				if (this.culpritsPawns != null)
-				{
-					int num;
-					for (int i = 0; i < this.culpritsPawns.Count; i = num + 1)
-					{
-						yield return this.culpritsPawns[i];
-						num = i;
-					}
-				}
-				if (this.culpritsCaravans != null)
-				{
-					int num;
-					for (int i = 0; i < this.culpritsCaravans.Count; i = num + 1)
-					{
-						yield return this.culpritsCaravans[i];
-						num = i;
-					}
-				}
-				if (this.culpritTarget != null)
-				{
-					yield return this.culpritTarget.Value;
-				}
-				if (this.culpritsTargets != null)
-				{
-					int num;
-					for (int i = 0; i < this.culpritsTargets.Count; i = num + 1)
-					{
-						yield return this.culpritsTargets[i];
-						num = i;
-					}
-				}
-				yield break;
+				_003C_003E1__state = 0;
+				_003Cget_AllCulprits_003Ed__ = this;
 			}
-		}
-
-		// Token: 0x060113B2 RID: 70578 RVA: 0x004EFFFC File Offset: 0x004EE1FC
-		public static AlertReport CulpritIs(GlobalTargetInfo culp)
-		{
-			AlertReport result = default(AlertReport);
-			result.active = culp.IsValid;
-			if (culp.IsValid)
+			else
 			{
-				result.culpritTarget = new GlobalTargetInfo?(culp);
+				_003Cget_AllCulprits_003Ed__ = new _003Cget_AllCulprits_003Ed__9(0);
 			}
-			return result;
+			_003Cget_AllCulprits_003Ed__._003C_003E4__this = _003C_003E3___003C_003E4__this;
+			return _003Cget_AllCulprits_003Ed__;
 		}
 
-		// Token: 0x060113B3 RID: 70579 RVA: 0x004F0038 File Offset: 0x004EE238
-		public static AlertReport CulpritsAre(List<Thing> culprits)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			AlertReport result = default(AlertReport);
-			result.culpritsThings = culprits;
-			result.active = result.AnyCulpritValid;
-			return result;
+			return ((IEnumerable<GlobalTargetInfo>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x060113B4 RID: 70580 RVA: 0x004F0064 File Offset: 0x004EE264
-		public static AlertReport CulpritsAre(List<Pawn> culprits)
-		{
-			AlertReport result = default(AlertReport);
-			result.culpritsPawns = culprits;
-			result.active = result.AnyCulpritValid;
-			return result;
-		}
+	public bool active;
 
-		// Token: 0x060113B5 RID: 70581 RVA: 0x004F0090 File Offset: 0x004EE290
-		public static AlertReport CulpritsAre(List<Caravan> culprits)
-		{
-			AlertReport result = default(AlertReport);
-			result.culpritsCaravans = culprits;
-			result.active = result.AnyCulpritValid;
-			return result;
-		}
+	public List<Thing> culpritsThings;
 
-		// Token: 0x060113B6 RID: 70582 RVA: 0x004F00BC File Offset: 0x004EE2BC
-		public static AlertReport CulpritsAre(List<GlobalTargetInfo> culprits)
-		{
-			AlertReport result = default(AlertReport);
-			result.culpritsTargets = culprits;
-			result.active = result.AnyCulpritValid;
-			return result;
-		}
+	public List<Pawn> culpritsPawns;
 
-		// Token: 0x060113B7 RID: 70583 RVA: 0x004F00E8 File Offset: 0x004EE2E8
-		public static implicit operator AlertReport(bool b)
+	public List<Caravan> culpritsCaravans;
+
+	public List<GlobalTargetInfo> culpritsTargets;
+
+	public GlobalTargetInfo? culpritTarget;
+
+	public bool AnyCulpritValid
+	{
+		get
 		{
-			return new AlertReport
+			if (!culpritsThings.NullOrEmpty() || !culpritsPawns.NullOrEmpty() || !culpritsCaravans.NullOrEmpty())
 			{
-				active = b
+				return true;
+			}
+			if (culpritTarget.HasValue && culpritTarget.Value.IsValid)
+			{
+				return true;
+			}
+			if (culpritsTargets != null)
+			{
+				for (int i = 0; i < culpritsTargets.Count; i++)
+				{
+					if (culpritsTargets[i].IsValid)
+					{
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+	}
+
+	public IEnumerable<GlobalTargetInfo> AllCulprits
+	{
+		[IteratorStateMachine(typeof(_003Cget_AllCulprits_003Ed__9))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_AllCulprits_003Ed__9(-2)
+			{
+				_003C_003E3___003C_003E4__this = this
 			};
 		}
+	}
 
-		// Token: 0x060113B8 RID: 70584 RVA: 0x004F0106 File Offset: 0x004EE306
-		public static implicit operator AlertReport(Thing culprit)
+	public static AlertReport Active
+	{
+		get
 		{
-			return AlertReport.CulpritIs(culprit);
+			AlertReport result = default(AlertReport);
+			result.active = true;
+			return result;
 		}
+	}
 
-		// Token: 0x060113B9 RID: 70585 RVA: 0x004F0113 File Offset: 0x004EE313
-		public static implicit operator AlertReport(WorldObject culprit)
+	public static AlertReport Inactive
+	{
+		get
 		{
-			return AlertReport.CulpritIs(culprit);
+			AlertReport result = default(AlertReport);
+			result.active = false;
+			return result;
 		}
+	}
 
-		// Token: 0x060113BA RID: 70586 RVA: 0x004F0120 File Offset: 0x004EE320
-		public static implicit operator AlertReport(GlobalTargetInfo culprit)
+	public static AlertReport CulpritIs(GlobalTargetInfo culp)
+	{
+		AlertReport result = default(AlertReport);
+		result.active = culp.IsValid;
+		if (culp.IsValid)
 		{
-			return AlertReport.CulpritIs(culprit);
+			result.culpritTarget = culp;
 		}
+		return result;
+	}
 
-		// Token: 0x17002CA9 RID: 11433
-		// (get) Token: 0x060113BB RID: 70587 RVA: 0x004F0128 File Offset: 0x004EE328
-		public static AlertReport Active
-		{
-			get
-			{
-				return new AlertReport
-				{
-					active = true
-				};
-			}
-		}
+	public static AlertReport CulpritsAre(List<Thing> culprits)
+	{
+		AlertReport result = default(AlertReport);
+		result.culpritsThings = culprits;
+		result.active = result.AnyCulpritValid;
+		return result;
+	}
 
-		// Token: 0x17002CAA RID: 11434
-		// (get) Token: 0x060113BC RID: 70588 RVA: 0x004F0148 File Offset: 0x004EE348
-		public static AlertReport Inactive
-		{
-			get
-			{
-				return new AlertReport
-				{
-					active = false
-				};
-			}
-		}
+	public static AlertReport CulpritsAre(List<Pawn> culprits)
+	{
+		AlertReport result = default(AlertReport);
+		result.culpritsPawns = culprits;
+		result.active = result.AnyCulpritValid;
+		return result;
+	}
 
-		// Token: 0x0400B2E2 RID: 45794
-		public bool active;
+	public static AlertReport CulpritsAre(List<Caravan> culprits)
+	{
+		AlertReport result = default(AlertReport);
+		result.culpritsCaravans = culprits;
+		result.active = result.AnyCulpritValid;
+		return result;
+	}
 
-		// Token: 0x0400B2E3 RID: 45795
-		public List<Thing> culpritsThings;
+	public static AlertReport CulpritsAre(List<GlobalTargetInfo> culprits)
+	{
+		AlertReport result = default(AlertReport);
+		result.culpritsTargets = culprits;
+		result.active = result.AnyCulpritValid;
+		return result;
+	}
 
-		// Token: 0x0400B2E4 RID: 45796
-		public List<Pawn> culpritsPawns;
+	public static implicit operator AlertReport(bool b)
+	{
+		AlertReport result = default(AlertReport);
+		result.active = b;
+		return result;
+	}
 
-		// Token: 0x0400B2E5 RID: 45797
-		public List<Caravan> culpritsCaravans;
+	public static implicit operator AlertReport(Thing culprit)
+	{
+		return CulpritIs(culprit);
+	}
 
-		// Token: 0x0400B2E6 RID: 45798
-		public List<GlobalTargetInfo> culpritsTargets;
+	public static implicit operator AlertReport(WorldObject culprit)
+	{
+		return CulpritIs(culprit);
+	}
 
-		// Token: 0x0400B2E7 RID: 45799
-		public GlobalTargetInfo? culpritTarget;
+	public static implicit operator AlertReport(GlobalTargetInfo culprit)
+	{
+		return CulpritIs(culprit);
 	}
 }

@@ -1,226 +1,375 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class SlotGroup : ISlotGroup
 {
-	// Token: 0x020029B2 RID: 10674
-	public class SlotGroup : ISlotGroup
+	[CompilerGenerated]
+	private sealed class _003CGetEnumerator_003Ed__17 : IEnumerator<IntVec3>, IEnumerator, IDisposable
 	{
-		// Token: 0x17002430 RID: 9264
-		// (get) Token: 0x0600EB3B RID: 60219 RVA: 0x00445D53 File Offset: 0x00443F53
-		private Map Map
+		private int _003C_003E1__state;
+
+		private IntVec3 _003C_003E2__current;
+
+		public SlotGroup _003C_003E4__this;
+
+		private List<IntVec3> _003CcellsList_003E5__2;
+
+		private int _003Ci_003E5__3;
+
+		IntVec3 IEnumerator<IntVec3>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.parent.Map;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002431 RID: 9265
-		// (get) Token: 0x0600EB3C RID: 60220 RVA: 0x00445D60 File Offset: 0x00443F60
-		public StorageSettings Settings
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.parent.GetStoreSettings();
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002432 RID: 9266
-		// (get) Token: 0x0600EB3D RID: 60221 RVA: 0x00445D6D File Offset: 0x00443F6D
-		public string GroupingLabel
+		[DebuggerHidden]
+		public _003CGetEnumerator_003Ed__17(int _003C_003E1__state)
 		{
+			this._003C_003E1__state = _003C_003E1__state;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003CcellsList_003E5__2 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			SlotGroup slotGroup = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003CcellsList_003E5__2 = slotGroup.CellsList;
+				_003Ci_003E5__3 = 0;
+				break;
+			case 1:
+				_003C_003E1__state = -1;
+				_003Ci_003E5__3++;
+				break;
+			}
+			if (_003Ci_003E5__3 < _003CcellsList_003E5__2.Count)
+			{
+				_003C_003E2__current = _003CcellsList_003E5__2[_003Ci_003E5__3];
+				_003C_003E1__state = 1;
+				return true;
+			}
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003Cget_HeldThings_003Ed__10 : IEnumerable<Thing>, IEnumerable, IEnumerator<Thing>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Thing _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public SlotGroup _003C_003E4__this;
+
+		private List<IntVec3> _003CcellsList_003E5__2;
+
+		private Map _003Cmap_003E5__3;
+
+		private int _003Ci_003E5__4;
+
+		private List<Thing> _003CthingList_003E5__5;
+
+		private int _003Cj_003E5__6;
+
+		Thing IEnumerator<Thing>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				return this.parent.GroupingLabel;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002433 RID: 9267
-		// (get) Token: 0x0600EB3E RID: 60222 RVA: 0x00445D7A File Offset: 0x00443F7A
-		public int GroupingOrder
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.parent.GroupingOrder;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002434 RID: 9268
-		// (get) Token: 0x0600EB3F RID: 60223 RVA: 0x00445D87 File Offset: 0x00443F87
-		public IEnumerable<Thing> HeldThings
+		[DebuggerHidden]
+		public _003Cget_HeldThings_003Ed__10(int _003C_003E1__state)
 		{
-			get
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003CcellsList_003E5__2 = null;
+			_003Cmap_003E5__3 = null;
+			_003CthingList_003E5__5 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			SlotGroup slotGroup = _003C_003E4__this;
+			if (num != 0)
 			{
-				List<IntVec3> cellsList = this.CellsList;
-				Map map = this.Map;
-				int num;
-				for (int i = 0; i < cellsList.Count; i = num + 1)
+				if (num != 1)
 				{
-					List<Thing> thingList = map.thingGrid.ThingsListAt(cellsList[i]);
-					for (int j = 0; j < thingList.Count; j = num + 1)
+					return false;
+				}
+				_003C_003E1__state = -1;
+				goto IL_00ba;
+			}
+			_003C_003E1__state = -1;
+			_003CcellsList_003E5__2 = slotGroup.CellsList;
+			_003Cmap_003E5__3 = slotGroup.Map;
+			_003Ci_003E5__4 = 0;
+			goto IL_00f4;
+			IL_00ca:
+			if (_003Cj_003E5__6 < _003CthingList_003E5__5.Count)
+			{
+				if (_003CthingList_003E5__5[_003Cj_003E5__6].def.EverStorable(willMinifyIfPossible: false))
+				{
+					_003C_003E2__current = _003CthingList_003E5__5[_003Cj_003E5__6];
+					_003C_003E1__state = 1;
+					return true;
+				}
+				goto IL_00ba;
+			}
+			_003CthingList_003E5__5 = null;
+			_003Ci_003E5__4++;
+			goto IL_00f4;
+			IL_00ba:
+			_003Cj_003E5__6++;
+			goto IL_00ca;
+			IL_00f4:
+			if (_003Ci_003E5__4 < _003CcellsList_003E5__2.Count)
+			{
+				_003CthingList_003E5__5 = _003Cmap_003E5__3.thingGrid.ThingsListAt(_003CcellsList_003E5__2[_003Ci_003E5__4]);
+				_003Cj_003E5__6 = 0;
+				goto IL_00ca;
+			}
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Thing> IEnumerable<Thing>.GetEnumerator()
+		{
+			_003Cget_HeldThings_003Ed__10 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_HeldThings_003Ed__10(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Thing>)this).GetEnumerator();
+		}
+	}
+
+	public ISlotGroupParent parent;
+
+	private Map Map => parent.Map;
+
+	public StorageSettings Settings => parent.GetStoreSettings();
+
+	public string GroupingLabel => parent.GroupingLabel;
+
+	public int GroupingOrder => parent.GroupingOrder;
+
+	public IEnumerable<Thing> HeldThings
+	{
+		[IteratorStateMachine(typeof(_003Cget_HeldThings_003Ed__10))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_HeldThings_003Ed__10(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public int HeldThingsCount
+	{
+		get
+		{
+			int num = 0;
+			List<IntVec3> cellsList = CellsList;
+			ThingGrid thingGrid = Map.thingGrid;
+			for (int i = 0; i < cellsList.Count; i++)
+			{
+				List<Thing> list = thingGrid.ThingsListAt(cellsList[i]);
+				for (int j = 0; j < list.Count; j++)
+				{
+					if (list[j].def.EverStorable(willMinifyIfPossible: false))
 					{
-						if (thingList[j].def.EverStorable(false))
-						{
-							yield return thingList[j];
-						}
-						num = j;
-					}
-					thingList = null;
-					num = i;
-				}
-				yield break;
-			}
-		}
-
-		// Token: 0x17002435 RID: 9269
-		// (get) Token: 0x0600EB40 RID: 60224 RVA: 0x00445D98 File Offset: 0x00443F98
-		public int HeldThingsCount
-		{
-			get
-			{
-				int num = 0;
-				List<IntVec3> cellsList = this.CellsList;
-				ThingGrid thingGrid = this.Map.thingGrid;
-				for (int i = 0; i < cellsList.Count; i++)
-				{
-					List<Thing> list = thingGrid.ThingsListAt(cellsList[i]);
-					for (int j = 0; j < list.Count; j++)
-					{
-						if (list[j].def.EverStorable(false))
-						{
-							num++;
-						}
-					}
-				}
-				return num;
-			}
-		}
-
-		// Token: 0x17002436 RID: 9270
-		// (get) Token: 0x0600EB41 RID: 60225 RVA: 0x00445E0B File Offset: 0x0044400B
-		public List<IntVec3> CellsList
-		{
-			get
-			{
-				return this.parent.AllSlotCellsList();
-			}
-		}
-
-		// Token: 0x17002437 RID: 9271
-		// (get) Token: 0x0600EB42 RID: 60226 RVA: 0x00445E18 File Offset: 0x00444018
-		public StorageGroup StorageGroup
-		{
-			get
-			{
-				IStorageGroupMember storageGroupMember = this.parent as IStorageGroupMember;
-				if (storageGroupMember != null)
-				{
-					return storageGroupMember.Group;
-				}
-				return null;
-			}
-		}
-
-		// Token: 0x0600EB43 RID: 60227 RVA: 0x00445E3C File Offset: 0x0044403C
-		public IEnumerator<IntVec3> GetEnumerator()
-		{
-			List<IntVec3> cellsList = this.CellsList;
-			int num;
-			for (int i = 0; i < cellsList.Count; i = num + 1)
-			{
-				yield return cellsList[i];
-				num = i;
-			}
-			yield break;
-		}
-
-		// Token: 0x0600EB44 RID: 60228 RVA: 0x00445E4B File Offset: 0x0044404B
-		public SlotGroup(ISlotGroupParent parent)
-		{
-			this.parent = parent;
-		}
-
-		// Token: 0x0600EB45 RID: 60229 RVA: 0x00445E5A File Offset: 0x0044405A
-		public void Notify_AddedCell(IntVec3 c)
-		{
-			this.Map.haulDestinationManager.SetCellFor(c, this);
-			this.Map.listerHaulables.RecalcAllInCell(c);
-			this.Map.listerMergeables.RecalcAllInCell(c);
-		}
-
-		// Token: 0x0600EB46 RID: 60230 RVA: 0x00445E90 File Offset: 0x00444090
-		public void Notify_LostCell(IntVec3 c)
-		{
-			this.Map.haulDestinationManager.ClearCellFor(c, this);
-			this.Map.listerHaulables.RecalcAllInCell(c);
-			this.Map.listerMergeables.RecalcAllInCell(c);
-		}
-
-		// Token: 0x0600EB47 RID: 60231 RVA: 0x00445EC8 File Offset: 0x004440C8
-		public void RemoveHaulDesignationOnStoredThings()
-		{
-			if (this.parent.Map == null)
-			{
-				return;
-			}
-			foreach (Thing t in this.HeldThings)
-			{
-				if (this.Settings.AllowedToAccept(t))
-				{
-					Designation designation = this.Map.designationManager.DesignationOn(t, DesignationDefOf.Haul);
-					if (designation != null)
-					{
-						this.Map.designationManager.RemoveDesignation(designation);
+						num++;
 					}
 				}
 			}
+			return num;
 		}
+	}
 
-		// Token: 0x0600EB48 RID: 60232 RVA: 0x00445F58 File Offset: 0x00444158
-		public override string ToString()
+	public List<IntVec3> CellsList => parent.AllSlotCellsList();
+
+	public StorageGroup StorageGroup
+	{
+		get
 		{
-			if (this.parent != null)
+			if (parent is IStorageGroupMember storageGroupMember)
 			{
-				return this.parent.ToString();
+				return storageGroupMember.Group;
 			}
-			return "NullParent";
+			return null;
 		}
+	}
 
-		// Token: 0x0600EB49 RID: 60233 RVA: 0x00445F74 File Offset: 0x00444174
-		public string GetName()
+	[IteratorStateMachine(typeof(_003CGetEnumerator_003Ed__17))]
+	public IEnumerator<IntVec3> GetEnumerator()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetEnumerator_003Ed__17(0)
 		{
-			Zone_Stockpile zone_Stockpile = this.parent as Zone_Stockpile;
-			if (zone_Stockpile != null)
-			{
-				return zone_Stockpile.label;
-			}
-			Building_Storage building_Storage = this.parent as Building_Storage;
-			if (building_Storage != null)
-			{
-				return building_Storage.Label;
-			}
-			return "UnresolvedSlotGroupName";
-		}
+			_003C_003E4__this = this
+		};
+	}
 
-		// Token: 0x0600EB4A RID: 60234 RVA: 0x00445FB4 File Offset: 0x004441B4
-		public static string GetGroupLabel(ISlotGroup group)
+	public SlotGroup(ISlotGroupParent parent)
+	{
+		this.parent = parent;
+	}
+
+	public void Notify_AddedCell(IntVec3 c)
+	{
+		Map.haulDestinationManager.SetCellFor(c, this);
+		Map.listerHaulables.RecalcAllInCell(c);
+		Map.listerMergeables.RecalcAllInCell(c);
+	}
+
+	public void Notify_LostCell(IntVec3 c)
+	{
+		Map.haulDestinationManager.ClearCellFor(c, this);
+		Map.listerHaulables.RecalcAllInCell(c);
+		Map.listerMergeables.RecalcAllInCell(c);
+	}
+
+	public void RemoveHaulDesignationOnStoredThings()
+	{
+		if (parent.Map == null)
 		{
-			SlotGroup slotGroup = group as SlotGroup;
-			if (slotGroup != null)
-			{
-				return slotGroup.parent.SlotYielderLabel();
-			}
-			IRenameable renameable = group as IRenameable;
-			if (renameable != null)
-			{
-				return renameable.RenamableLabel;
-			}
-			return "UNABLE TO GET LABEL";
+			return;
 		}
+		foreach (Thing heldThing in HeldThings)
+		{
+			if (Settings.AllowedToAccept(heldThing))
+			{
+				Designation designation = Map.designationManager.DesignationOn(heldThing, DesignationDefOf.Haul);
+				if (designation != null)
+				{
+					Map.designationManager.RemoveDesignation(designation);
+				}
+			}
+		}
+	}
 
-		// Token: 0x04009C26 RID: 39974
-		public ISlotGroupParent parent;
+	public override string ToString()
+	{
+		if (parent != null)
+		{
+			return parent.ToString();
+		}
+		return "NullParent";
+	}
+
+	public string GetName()
+	{
+		if (parent is Zone_Stockpile zone_Stockpile)
+		{
+			return zone_Stockpile.label;
+		}
+		if (parent is Building_Storage building_Storage)
+		{
+			return building_Storage.Label;
+		}
+		return "UnresolvedSlotGroupName";
+	}
+
+	public static string GetGroupLabel(ISlotGroup group)
+	{
+		if (group is SlotGroup slotGroup)
+		{
+			return slotGroup.parent.SlotYielderLabel();
+		}
+		if (group is IRenameable renameable)
+		{
+			return renameable.RenamableLabel;
+		}
+		return "UNABLE TO GET LABEL";
 	}
 }

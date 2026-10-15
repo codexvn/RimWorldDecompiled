@@ -1,102 +1,259 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_UnnaturalCorpseAttack : JobDriver
 {
-	// Token: 0x0200133B RID: 4923
-	public class JobDriver_UnnaturalCorpseAttack : JobDriver
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass4_0
 	{
-		// Token: 0x17001317 RID: 4887
-		// (get) Token: 0x060078F6 RID: 30966 RVA: 0x002495EF File Offset: 0x002477EF
-		private Pawn Victim
+		public JobDriver_UnnaturalCorpseAttack _003C_003E4__this;
+
+		public int killTicks;
+
+		public UnnaturalCorpseTracker tracker;
+
+		internal void _003CMakeNewToils_003Eb__0()
 		{
-			get
+			JobDriver curDriver = _003C_003E4__this.pawn.jobs.curDriver;
+			int ticks = killTicks + 60;
+			Find.Anomaly.Hypnotize(_003C_003E4__this.Victim, _003C_003E4__this.pawn, ticks);
+			curDriver.ReadyForNextToil();
+		}
+
+		internal void _003CMakeNewToils_003Eb__3()
+		{
+			Messages.Message("MessageAwokenAttacking".Translate(_003C_003E4__this.Victim.Named("PAWN")), _003C_003E4__this.Victim, MessageTypeDefOf.NegativeEvent);
+			tracker.Notify_AwokenAttackStarting();
+		}
+
+		internal void _003CMakeNewToils_003Eb__4()
+		{
+			_003C_003E4__this.job.GetTarget(TargetIndex.A).Pawn.rotationTracker.FaceTarget(_003C_003E4__this.pawn);
+			_003C_003E4__this.Victim.health.GetOrAddHediff(HediffDefOf.AwokenHypnosis, null, null).TryGetComp<HediffComp_Disappears>().ticksToDisappear++;
+			if (_003C_003E4__this.pawn.Drawer.renderer.CurAnimation != AnimationDefOf.UnnaturalCorpseAwokenKilling)
 			{
-				return base.TargetPawnA;
+				_003C_003E4__this.pawn.Drawer.renderer.SetAnimation(AnimationDefOf.UnnaturalCorpseAwokenKilling);
 			}
 		}
 
-		// Token: 0x060078F7 RID: 30967 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		internal void _003CMakeNewToils_003Eb__1()
 		{
-			return true;
+			if (_003C_003E4__this.pawn.Drawer.renderer.CurAnimation == AnimationDefOf.UnnaturalCorpseAwokenKilling)
+			{
+				_003C_003E4__this.pawn.Drawer.renderer.SetAnimation(null);
+			}
 		}
 
-		// Token: 0x060078F8 RID: 30968 RVA: 0x002495F7 File Offset: 0x002477F7
-		protected override IEnumerable<Toil> MakeNewToils()
+		internal void _003CMakeNewToils_003Eb__2()
 		{
-			this.FailOnDespawnedOrNull(TargetIndex.A);
-			UnnaturalCorpseTracker tracker;
-			Find.Anomaly.TryGetUnnaturalCorpseTrackerForHaunted(this.Victim, out tracker);
-			int killTicks = tracker.TicksToKill;
-			yield return Toils_Combat.FollowAndMeleeAttack(TargetIndex.A, TargetIndex.B, delegate()
+			Pawn pawn = _003C_003E4__this.job.GetTarget(TargetIndex.A).Pawn;
+			BodyPartRecord brain = pawn.health.hediffSet.GetBrain();
+			if (brain != null)
 			{
-				JobDriver curDriver = this.pawn.jobs.curDriver;
-				int ticks = killTicks + 60;
-				Find.Anomaly.Hypnotize(this.Victim, this.pawn, ticks);
-				curDriver.ReadyForNextToil();
-			});
-			Toil toil = ToilMaker.MakeToil("MakeNewToils");
-			Toil toil2 = toil;
-			toil2.initAction = (Action)Delegate.Combine(toil2.initAction, new Action(delegate()
-			{
-				Messages.Message("MessageAwokenAttacking".Translate(this.Victim.Named("PAWN")), this.Victim, MessageTypeDefOf.NegativeEvent, true);
-				tracker.Notify_AwokenAttackStarting();
-			}));
-			Toil toil3 = toil;
-			toil3.tickAction = (Action)Delegate.Combine(toil3.tickAction, new Action(delegate()
-			{
-				this.job.GetTarget(TargetIndex.A).Pawn.rotationTracker.FaceTarget(this.pawn);
-				this.Victim.health.GetOrAddHediff(HediffDefOf.AwokenHypnosis, null, null, null).TryGetComp<HediffComp_Disappears>().ticksToDisappear++;
-				if (this.pawn.Drawer.renderer.CurAnimation != AnimationDefOf.UnnaturalCorpseAwokenKilling)
-				{
-					this.pawn.Drawer.renderer.SetAnimation(AnimationDefOf.UnnaturalCorpseAwokenKilling);
-				}
-			}));
-			toil.defaultDuration = killTicks;
-			toil.defaultCompleteMode = ToilCompleteMode.Delay;
-			toil.PlaySustainerOrSound(SoundDefOf.Pawn_Awoken_Hypnotize, 1f);
-			toil.AddFinishAction(delegate
-			{
-				if (this.pawn.Drawer.renderer.CurAnimation == AnimationDefOf.UnnaturalCorpseAwokenKilling)
-				{
-					this.pawn.Drawer.renderer.SetAnimation(null);
-				}
-			});
-			yield return toil;
-			Toil toil4 = ToilMaker.MakeToil("MakeNewToils");
-			toil4.initAction = delegate()
-			{
-				Pawn pawn = this.job.GetTarget(TargetIndex.A).Pawn;
-				BodyPartRecord brain = pawn.health.hediffSet.GetBrain();
-				if (brain == null)
-				{
-					return;
-				}
-				Find.BattleLog.Add(new BattleLogEntry_Event(pawn, RulePackDefOf.Event_UnnaturalCorpseAttack, this.pawn));
-				Thing thing = pawn;
+				Find.BattleLog.Add(new BattleLogEntry_Event(pawn, RulePackDefOf.Event_UnnaturalCorpseAttack, _003C_003E4__this.pawn));
 				DamageDef psychic = DamageDefOf.Psychic;
-				float amount = 99999f;
-				float armorPenetration = 99999f;
-				float angle = -1f;
 				BodyPartRecord hitPart = brain;
-				thing.TakeDamage(new DamageInfo(psychic, amount, armorPenetration, angle, this.pawn, hitPart, null, DamageInfo.SourceCategory.ThingOrUnknown, null, true, true, QualityCategory.Normal, true, false));
+				pawn.TakeDamage(new DamageInfo(psychic, 99999f, 99999f, -1f, _003C_003E4__this.pawn, hitPart));
 				Find.Anomaly.Notify_PawnKilledViaAwoken(pawn);
-			};
-			toil4.PlaySustainerOrSound(SoundDefOf.CocoonDestroyed, 1f);
-			yield return toil4;
-			yield break;
+			}
 		}
+	}
 
-		// Token: 0x060078F9 RID: 30969 RVA: 0x001D7A1B File Offset: 0x001D5C1B
-		public override bool IsContinuation(Job j)
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__4 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_UnnaturalCorpseAttack _003C_003E4__this;
+
+		private _003C_003Ec__DisplayClass4_0 _003C_003E8__1;
+
+		Toil IEnumerator<Toil>.Current
 		{
-			return this.job.GetTarget(TargetIndex.A) == j.GetTarget(TargetIndex.A);
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x04005225 RID: 21029
-		private const TargetIndex VictimIndex = TargetIndex.A;
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__4(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E8__1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_UnnaturalCorpseAttack jobDriver_UnnaturalCorpseAttack = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E8__1 = new _003C_003Ec__DisplayClass4_0();
+				_003C_003E8__1._003C_003E4__this = _003C_003E4__this;
+				jobDriver_UnnaturalCorpseAttack.FailOnDespawnedOrNull(TargetIndex.A);
+				Find.Anomaly.TryGetUnnaturalCorpseTrackerForHaunted(jobDriver_UnnaturalCorpseAttack.Victim, out _003C_003E8__1.tracker);
+				_003C_003E8__1.killTicks = _003C_003E8__1.tracker.TicksToKill;
+				_003C_003E2__current = Toils_Combat.FollowAndMeleeAttack(TargetIndex.A, TargetIndex.B, delegate
+				{
+					JobDriver curDriver = _003C_003E8__1._003C_003E4__this.pawn.jobs.curDriver;
+					int ticks = _003C_003E8__1.killTicks + 60;
+					Find.Anomaly.Hypnotize(_003C_003E8__1._003C_003E4__this.Victim, _003C_003E8__1._003C_003E4__this.pawn, ticks);
+					curDriver.ReadyForNextToil();
+				});
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+			{
+				_003C_003E1__state = -1;
+				Toil toil2 = ToilMaker.MakeToil("MakeNewToils");
+				toil2.initAction = (Action)Delegate.Combine(toil2.initAction, (Action)delegate
+				{
+					Messages.Message("MessageAwokenAttacking".Translate(_003C_003E8__1._003C_003E4__this.Victim.Named("PAWN")), _003C_003E8__1._003C_003E4__this.Victim, MessageTypeDefOf.NegativeEvent);
+					_003C_003E8__1.tracker.Notify_AwokenAttackStarting();
+				});
+				toil2.tickAction = (Action)Delegate.Combine(toil2.tickAction, (Action)delegate
+				{
+					_003C_003E8__1._003C_003E4__this.job.GetTarget(TargetIndex.A).Pawn.rotationTracker.FaceTarget(_003C_003E8__1._003C_003E4__this.pawn);
+					_003C_003E8__1._003C_003E4__this.Victim.health.GetOrAddHediff(HediffDefOf.AwokenHypnosis, null, null).TryGetComp<HediffComp_Disappears>().ticksToDisappear++;
+					if (_003C_003E8__1._003C_003E4__this.pawn.Drawer.renderer.CurAnimation != AnimationDefOf.UnnaturalCorpseAwokenKilling)
+					{
+						_003C_003E8__1._003C_003E4__this.pawn.Drawer.renderer.SetAnimation(AnimationDefOf.UnnaturalCorpseAwokenKilling);
+					}
+				});
+				toil2.defaultDuration = _003C_003E8__1.killTicks;
+				toil2.defaultCompleteMode = ToilCompleteMode.Delay;
+				toil2.PlaySustainerOrSound(SoundDefOf.Pawn_Awoken_Hypnotize);
+				toil2.AddFinishAction(delegate
+				{
+					if (_003C_003E8__1._003C_003E4__this.pawn.Drawer.renderer.CurAnimation == AnimationDefOf.UnnaturalCorpseAwokenKilling)
+					{
+						_003C_003E8__1._003C_003E4__this.pawn.Drawer.renderer.SetAnimation(null);
+					}
+				});
+				_003C_003E2__current = toil2;
+				_003C_003E1__state = 2;
+				return true;
+			}
+			case 2:
+			{
+				_003C_003E1__state = -1;
+				Toil toil = ToilMaker.MakeToil("MakeNewToils");
+				toil.initAction = delegate
+				{
+					Pawn pawn = _003C_003E8__1._003C_003E4__this.job.GetTarget(TargetIndex.A).Pawn;
+					BodyPartRecord brain = pawn.health.hediffSet.GetBrain();
+					if (brain != null)
+					{
+						Find.BattleLog.Add(new BattleLogEntry_Event(pawn, RulePackDefOf.Event_UnnaturalCorpseAttack, _003C_003E8__1._003C_003E4__this.pawn));
+						DamageDef psychic = DamageDefOf.Psychic;
+						BodyPartRecord hitPart = brain;
+						pawn.TakeDamage(new DamageInfo(psychic, 99999f, 99999f, -1f, _003C_003E8__1._003C_003E4__this.pawn, hitPart));
+						Find.Anomaly.Notify_PawnKilledViaAwoken(pawn);
+					}
+				};
+				toil.PlaySustainerOrSound(SoundDefOf.CocoonDestroyed);
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 3;
+				return true;
+			}
+			case 3:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__4 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__4(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private const TargetIndex VictimIndex = TargetIndex.A;
+
+	private Pawn Victim => base.TargetPawnA;
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return true;
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__4))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__4(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override bool IsContinuation(Job j)
+	{
+		return job.GetTarget(TargetIndex.A) == j.GetTarget(TargetIndex.A);
 	}
 }

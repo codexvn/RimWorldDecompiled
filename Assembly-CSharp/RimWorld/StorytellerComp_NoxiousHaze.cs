@@ -1,47 +1,152 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class StorytellerComp_NoxiousHaze : StorytellerComp
 {
-	// Token: 0x02001E53 RID: 7763
-	public class StorytellerComp_NoxiousHaze : StorytellerComp
+	[CompilerGenerated]
+	private sealed class _003CMakeIntervalIncidents_003Ed__2 : IEnumerable<FiringIncident>, IEnumerable, IEnumerator<FiringIncident>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001A55 RID: 6741
-		// (get) Token: 0x0600AC9A RID: 44186 RVA: 0x00314BCD File Offset: 0x00312DCD
-		protected StorytellerCompProperties_NoxiousHaze Props
+		private int _003C_003E1__state;
+
+		private FiringIncident _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private IIncidentTarget target;
+
+		public IIncidentTarget _003C_003E3__target;
+
+		public StorytellerComp_NoxiousHaze _003C_003E4__this;
+
+		FiringIncident IEnumerator<FiringIncident>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (StorytellerCompProperties_NoxiousHaze)this.props;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600AC9B RID: 44187 RVA: 0x00314BDA File Offset: 0x00312DDA
-		public override IEnumerable<FiringIncident> MakeIntervalIncidents(IIncidentTarget target)
+		object IEnumerator.Current
 		{
-			Map map = (Map)target;
-			float num = WorldPollutionUtility.CalculateNearbyPollutionScore(map.Tile);
-			if (num < GameConditionDefOf.NoxiousHaze.minNearbyPollution)
+			[DebuggerHidden]
+			get
 			{
-				yield break;
+				return _003C_003E2__current;
 			}
-			float num2 = GameConditionDefOf.NoxiousHaze.mtbOverNearbyPollutionCurve.Evaluate(num);
-			float num3 = -1f;
-			if (map.storyState.lastFireTicks.ContainsKey(IncidentDefOf.NoxiousHaze))
-			{
-				num3 = (Find.TickManager.TicksGame - map.storyState.lastFireTicks[IncidentDefOf.NoxiousHaze]).TicksToDays();
-			}
-			if (num3 >= 0f && num3 < this.Props.lastFireMinMTBThreshold * num2)
-			{
-				yield break;
-			}
-			if (num3 > this.Props.lastFireMaxMTBThreshold * num2 || Rand.MTBEventOccurs(num2, 60000f, 1000f))
-			{
-				IncidentParms parms = this.GenerateParms(IncidentDefOf.NoxiousHaze.category, target);
-				yield return new FiringIncident(IncidentDefOf.NoxiousHaze, this, parms);
-			}
-			yield break;
 		}
+
+		[DebuggerHidden]
+		public _003CMakeIntervalIncidents_003Ed__2(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			StorytellerComp_NoxiousHaze storytellerComp_NoxiousHaze = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+			{
+				_003C_003E1__state = -1;
+				Map map = (Map)target;
+				float num2 = WorldPollutionUtility.CalculateNearbyPollutionScore(map.Tile);
+				if (num2 < GameConditionDefOf.NoxiousHaze.minNearbyPollution)
+				{
+					return false;
+				}
+				float num3 = GameConditionDefOf.NoxiousHaze.mtbOverNearbyPollutionCurve.Evaluate(num2);
+				float num4 = -1f;
+				if (map.storyState.lastFireTicks.ContainsKey(IncidentDefOf.NoxiousHaze))
+				{
+					num4 = (Find.TickManager.TicksGame - map.storyState.lastFireTicks[IncidentDefOf.NoxiousHaze]).TicksToDays();
+				}
+				if (num4 >= 0f && num4 < storytellerComp_NoxiousHaze.Props.lastFireMinMTBThreshold * num3)
+				{
+					return false;
+				}
+				if (num4 > storytellerComp_NoxiousHaze.Props.lastFireMaxMTBThreshold * num3 || Rand.MTBEventOccurs(num3, 60000f, 1000f))
+				{
+					IncidentParms parms = storytellerComp_NoxiousHaze.GenerateParms(IncidentDefOf.NoxiousHaze.category, target);
+					_003C_003E2__current = new FiringIncident(IncidentDefOf.NoxiousHaze, storytellerComp_NoxiousHaze, parms);
+					_003C_003E1__state = 1;
+					return true;
+				}
+				break;
+			}
+			case 1:
+				_003C_003E1__state = -1;
+				break;
+			}
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<FiringIncident> IEnumerable<FiringIncident>.GetEnumerator()
+		{
+			_003CMakeIntervalIncidents_003Ed__2 _003CMakeIntervalIncidents_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CMakeIntervalIncidents_003Ed__ = this;
+			}
+			else
+			{
+				_003CMakeIntervalIncidents_003Ed__ = new _003CMakeIntervalIncidents_003Ed__2(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CMakeIntervalIncidents_003Ed__.target = _003C_003E3__target;
+			return _003CMakeIntervalIncidents_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<FiringIncident>)this).GetEnumerator();
+		}
+	}
+
+	protected StorytellerCompProperties_NoxiousHaze Props => (StorytellerCompProperties_NoxiousHaze)props;
+
+	[IteratorStateMachine(typeof(_003CMakeIntervalIncidents_003Ed__2))]
+	public override IEnumerable<FiringIncident> MakeIntervalIncidents(IIncidentTarget target)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeIntervalIncidents_003Ed__2(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__target = target
+		};
 	}
 }

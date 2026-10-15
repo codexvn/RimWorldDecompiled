@@ -1,126 +1,266 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class BossgroupDef : Def
 {
-	// Token: 0x02001A0E RID: 6670
-	public class BossgroupDef : Def
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__16 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x170016EE RID: 5870
-		// (get) Token: 0x06009668 RID: 38504 RVA: 0x002C03DF File Offset: 0x002BE5DF
-		public BossgroupWorker Worker
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public BossgroupDef _003C_003E4__this;
+
+		private IEnumerator<string> _003C_003E7__wrap1;
+
+		string IEnumerator<string>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.workerInt == null && this.workerClass != null)
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__16(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
 				{
-					this.workerInt = (BossgroupWorker)Activator.CreateInstance(this.workerClass);
-					this.workerInt.def = this;
 				}
-				return this.workerInt;
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
 			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x170016EF RID: 5871
-		// (get) Token: 0x06009669 RID: 38505 RVA: 0x002C041F File Offset: 0x002BE61F
-		public string LeaderDescription
+		private bool MoveNext()
 		{
-			get
+			try
 			{
-				return this.leaderDescription.Formatted(this.boss.kindDef.Named("LEADERKIND"));
+				int num = _003C_003E1__state;
+				BossgroupDef bossgroupDef = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((Def)bossgroupDef).ConfigErrors().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_007a;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_007a;
+				case 2:
+					_003C_003E1__state = -1;
+					goto IL_00b9;
+				case 3:
+					_003C_003E1__state = -1;
+					goto IL_00e3;
+				case 4:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_007a:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (bossgroupDef.boss == null)
+					{
+						_003C_003E2__current = "boss required for all bossgroups";
+						_003C_003E1__state = 2;
+						return true;
+					}
+					goto IL_00b9;
+					IL_00e3:
+					if (bossgroupDef.repeatWaveStartIndex >= bossgroupDef.waves.Count)
+					{
+						_003C_003E2__current = "repeatWaveStartIndex must be lower than wave count.";
+						_003C_003E1__state = 4;
+						return true;
+					}
+					break;
+					IL_00b9:
+					if (bossgroupDef.waves.NullOrEmpty())
+					{
+						_003C_003E2__current = "no waves defined.";
+						_003C_003E1__state = 3;
+						return true;
+					}
+					goto IL_00e3;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x0600966A RID: 38506 RVA: 0x002C0448 File Offset: 0x002BE648
-		public int GetWaveIndex(int timesSummoned)
+		bool IEnumerator.MoveNext()
 		{
-			int num = timesSummoned;
-			if (num >= this.waves.Count)
-			{
-				Rand.PushState(Gen.HashCombine<int>(Find.World.info.Seed, timesSummoned));
-				num = Rand.Range(this.repeatWaveStartIndex, this.waves.Count);
-				Rand.PopState();
-			}
-			return num;
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0600966B RID: 38507 RVA: 0x002C049C File Offset: 0x002BE69C
-		public BossGroupWave GetWave(int index)
+		private void _003C_003Em__Finally1()
 		{
-			return this.waves[this.GetWaveIndex(index)];
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
 		}
 
-		// Token: 0x0600966C RID: 38508 RVA: 0x002C04B0 File Offset: 0x002BE6B0
-		public string GetWaveDescription(int waveIndex)
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			BossGroupWave wave = this.GetWave(this.GetWaveIndex(waveIndex));
-			this.tmpEntries.Clear();
-			string text = GenLabel.BestKindLabel(this.boss.kindDef, Gender.None, false, -1).CapitalizeFirst();
-			if (!wave.bossApparel.NullOrEmpty<ThingDef>())
-			{
-				text = "BossWithApparel".Translate(text.Named("BOSS"), (from a in wave.bossApparel
-				select a.label).ToCommaList(true, false).Named("APPAREL"));
-			}
-			this.tmpEntries.Add(text + " x" + wave.bossCount.ToString());
-			foreach (PawnKindDefCount pawnKindDefCount in wave.escorts)
-			{
-				this.tmpEntries.Add(GenLabel.BestKindLabel(pawnKindDefCount.kindDef, Gender.None, false, -1).CapitalizeFirst() + " x" + pawnKindDefCount.count.ToString());
-			}
-			return this.tmpEntries.ToLineList("  - ");
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x0600966D RID: 38509 RVA: 0x002C05F8 File Offset: 0x002BE7F8
-		public override IEnumerable<string> ConfigErrors()
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
 		{
-			foreach (string text in base.ConfigErrors())
+			_003CConfigErrors_003Ed__16 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				yield return text;
+				_003C_003E1__state = 0;
+				result = this;
 			}
-			IEnumerator<string> enumerator = null;
-			if (this.boss == null)
+			else
 			{
-				yield return "boss required for all bossgroups";
+				result = new _003CConfigErrors_003Ed__16(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
-			if (this.waves.NullOrEmpty<BossGroupWave>())
-			{
-				yield return "no waves defined.";
-			}
-			if (this.repeatWaveStartIndex >= this.waves.Count)
-			{
-				yield return "repeatWaveStartIndex must be lower than wave count.";
-			}
-			yield break;
-			yield break;
+			return result;
 		}
 
-		// Token: 0x040062B1 RID: 25265
-		public BossDef boss;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x040062B2 RID: 25266
-		public List<BossGroupWave> waves = new List<BossGroupWave>();
+	public BossDef boss;
 
-		// Token: 0x040062B3 RID: 25267
-		public int repeatWaveStartIndex;
+	public List<BossGroupWave> waves = new List<BossGroupWave>();
 
-		// Token: 0x040062B4 RID: 25268
-		public Type workerClass = typeof(BossgroupWorker);
+	public int repeatWaveStartIndex;
 
-		// Token: 0x040062B5 RID: 25269
-		[MustTranslate]
-		public string leaderDescription;
+	public Type workerClass = typeof(BossgroupWorker);
 
-		// Token: 0x040062B6 RID: 25270
-		public QuestScriptDef quest;
+	[MustTranslate]
+	public string leaderDescription;
 
-		// Token: 0x040062B7 RID: 25271
-		public ThingDef rewardDef;
+	public QuestScriptDef quest;
 
-		// Token: 0x040062B8 RID: 25272
-		private BossgroupWorker workerInt;
+	public ThingDef rewardDef;
 
-		// Token: 0x040062B9 RID: 25273
-		private List<string> tmpEntries = new List<string>();
+	private BossgroupWorker workerInt;
+
+	private List<string> tmpEntries = new List<string>();
+
+	public BossgroupWorker Worker
+	{
+		get
+		{
+			if (workerInt == null && workerClass != null)
+			{
+				workerInt = (BossgroupWorker)Activator.CreateInstance(workerClass);
+				workerInt.def = this;
+			}
+			return workerInt;
+		}
+	}
+
+	public string LeaderDescription => leaderDescription.Formatted(NamedArgumentUtility.Named(boss.kindDef, "LEADERKIND"));
+
+	public int GetWaveIndex(int timesSummoned)
+	{
+		int num = timesSummoned;
+		if (num >= waves.Count)
+		{
+			Rand.PushState(Gen.HashCombine(Find.World.info.Seed, timesSummoned));
+			num = Rand.Range(repeatWaveStartIndex, waves.Count);
+			Rand.PopState();
+		}
+		return num;
+	}
+
+	public BossGroupWave GetWave(int index)
+	{
+		return waves[GetWaveIndex(index)];
+	}
+
+	public string GetWaveDescription(int waveIndex)
+	{
+		BossGroupWave wave = GetWave(GetWaveIndex(waveIndex));
+		tmpEntries.Clear();
+		string text = GenLabel.BestKindLabel(boss.kindDef, Gender.None).CapitalizeFirst();
+		if (!wave.bossApparel.NullOrEmpty())
+		{
+			text = "BossWithApparel".Translate(text.Named("BOSS"), wave.bossApparel.Select((ThingDef a) => a.label).ToCommaList(useAnd: true).Named("APPAREL"));
+		}
+		tmpEntries.Add(text + " x" + wave.bossCount);
+		foreach (PawnKindDefCount escort in wave.escorts)
+		{
+			tmpEntries.Add(GenLabel.BestKindLabel(escort.kindDef, Gender.None).CapitalizeFirst() + " x" + escort.count);
+		}
+		return tmpEntries.ToLineList("  - ");
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__16))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__16(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

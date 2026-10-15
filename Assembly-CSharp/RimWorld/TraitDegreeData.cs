@@ -1,401 +1,287 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class TraitDegreeData : IRenderNodePropertiesParent
 {
-	// Token: 0x02001B18 RID: 6936
-	public class TraitDegreeData : IRenderNodePropertiesParent
+	[MustTranslate]
+	public string label;
+
+	[MustTranslate]
+	public string labelMale;
+
+	[MustTranslate]
+	public string labelFemale;
+
+	[Unsaved(false)]
+	[TranslationHandle]
+	public string untranslatedLabel;
+
+	[MustTranslate]
+	public string description;
+
+	public int degree;
+
+	public float commonality = 1f;
+
+	public List<StatModifier> statOffsets;
+
+	public List<StatModifier> statFactors;
+
+	public ThinkTreeDef thinkTree;
+
+	public MentalStateDef randomMentalState;
+
+	public SimpleCurve randomMentalStateMtbDaysMoodCurve;
+
+	public MentalStateDef forcedMentalState;
+
+	public float forcedMentalStateMtbDays = -1f;
+
+	public List<MentalStateDef> disallowedMentalStates;
+
+	public List<ThoughtDef> disallowedThoughts;
+
+	public List<TraitIngestionThoughtsOverride> disallowedThoughtsFromIngestion;
+
+	public List<TraitIngestionThoughtsOverride> extraThoughtsFromIngestion;
+
+	public List<InspirationDef> disallowedInspirations;
+
+	public List<InspirationDef> mentalBreakInspirationGainSet;
+
+	public string mentalBreakInspirationGainReasonText;
+
+	public List<MeditationFocusDef> allowedMeditationFocusTypes;
+
+	public List<MeditationFocusDef> disallowedMeditationFocusTypes;
+
+	public float mentalBreakInspirationGainChance;
+
+	public List<MentalBreakDef> theOnlyAllowedMentalBreaks;
+
+	public List<SkillGain> skillGains = new List<SkillGain>();
+
+	public float socialFightChanceFactor = 1f;
+
+	public float marketValueFactorOffset;
+
+	public float randomDiseaseMtbDays;
+
+	public float hungerRateFactor = 1f;
+
+	public float painOffset;
+
+	public float painFactor = 1f;
+
+	public Type mentalStateGiverClass = typeof(TraitMentalStateGiver);
+
+	public List<AbilityDef> abilities;
+
+	public List<IngestibleModifiers> ingestibleModifiers;
+
+	public List<Aptitude> aptitudes;
+
+	public List<NeedDef> enablesNeeds;
+
+	public List<NeedDef> disablesNeeds;
+
+	private List<PawnRenderNodeProperties> renderNodeProperties;
+
+	public List<PossessionThingDefCountClass> possessions = new List<PossessionThingDefCountClass>();
+
+	[Unsaved(false)]
+	private TraitMentalStateGiver mentalStateGiverInt;
+
+	[Unsaved(false)]
+	private string cachedLabelCap;
+
+	[Unsaved(false)]
+	private string cachedLabelMaleCap;
+
+	[Unsaved(false)]
+	private string cachedLabelFemaleCap;
+
+	[Unsaved(false)]
+	private List<IssueDef> affectedIssuesCached;
+
+	[Unsaved(false)]
+	private List<MemeDef> agreeableMemesCached;
+
+	[Unsaved(false)]
+	private List<MemeDef> disagreeableMemesCached;
+
+	public string LabelCap
 	{
-		// Token: 0x170017D5 RID: 6101
-		// (get) Token: 0x06009AF7 RID: 39671 RVA: 0x002CFF33 File Offset: 0x002CE133
-		public string LabelCap
+		get
 		{
-			get
+			if (cachedLabelCap == null)
 			{
-				if (this.cachedLabelCap == null)
+				cachedLabelCap = label.CapitalizeFirst();
+			}
+			return cachedLabelCap;
+		}
+	}
+
+	public TraitMentalStateGiver MentalStateGiver
+	{
+		get
+		{
+			if (mentalStateGiverInt == null)
+			{
+				mentalStateGiverInt = (TraitMentalStateGiver)Activator.CreateInstance(mentalStateGiverClass);
+				mentalStateGiverInt.traitDegreeData = this;
+			}
+			return mentalStateGiverInt;
+		}
+	}
+
+	public bool HasDefinedGraphicProperties => !renderNodeProperties.NullOrEmpty();
+
+	public List<PawnRenderNodeProperties> RenderNodeProperties => renderNodeProperties;
+
+	public string GetLabelFor(Pawn pawn)
+	{
+		return GetLabelFor(pawn?.gender ?? Gender.None);
+	}
+
+	public string GetLabelCapFor(Pawn pawn)
+	{
+		return GetLabelCapFor(pawn?.gender ?? Gender.None);
+	}
+
+	public string GetLabelFor(Gender gender)
+	{
+		switch (gender)
+		{
+		case Gender.Male:
+			if (!labelMale.NullOrEmpty())
+			{
+				return labelMale;
+			}
+			return label;
+		case Gender.Female:
+			if (!labelFemale.NullOrEmpty())
+			{
+				return labelFemale;
+			}
+			return label;
+		default:
+			return label;
+		}
+	}
+
+	public string GetLabelCapFor(Gender gender)
+	{
+		switch (gender)
+		{
+		case Gender.Male:
+			if (labelMale.NullOrEmpty())
+			{
+				return LabelCap;
+			}
+			if (cachedLabelMaleCap == null)
+			{
+				cachedLabelMaleCap = labelMale.CapitalizeFirst();
+			}
+			return cachedLabelMaleCap;
+		case Gender.Female:
+			if (labelFemale.NullOrEmpty())
+			{
+				return LabelCap;
+			}
+			if (cachedLabelFemaleCap == null)
+			{
+				cachedLabelFemaleCap = labelFemale.CapitalizeFirst();
+			}
+			return cachedLabelFemaleCap;
+		default:
+			return LabelCap;
+		}
+	}
+
+	public List<IssueDef> GetAffectedIssues(TraitDef def)
+	{
+		if (affectedIssuesCached == null)
+		{
+			affectedIssuesCached = new List<IssueDef>();
+			List<PreceptDef> allDefsListForReading = DefDatabase<PreceptDef>.AllDefsListForReading;
+			for (int i = 0; i < allDefsListForReading.Count; i++)
+			{
+				if (!affectedIssuesCached.Contains(allDefsListForReading[i].issue) && allDefsListForReading[i].TraitsAffecting.Any((TraitRequirement x) => x.def == def && x.degree.GetValueOrDefault() == degree))
 				{
-					this.cachedLabelCap = this.label.CapitalizeFirst();
+					affectedIssuesCached.Add(allDefsListForReading[i].issue);
 				}
-				return this.cachedLabelCap;
 			}
 		}
+		return affectedIssuesCached;
+	}
 
-		// Token: 0x170017D6 RID: 6102
-		// (get) Token: 0x06009AF8 RID: 39672 RVA: 0x002CFF54 File Offset: 0x002CE154
-		public TraitMentalStateGiver MentalStateGiver
+	public List<MemeDef> GetAffectedMemes(TraitDef def, bool agreeable)
+	{
+		if (agreeable)
 		{
-			get
+			if (agreeableMemesCached == null)
 			{
-				if (this.mentalStateGiverInt == null)
-				{
-					this.mentalStateGiverInt = (TraitMentalStateGiver)Activator.CreateInstance(this.mentalStateGiverClass);
-					this.mentalStateGiverInt.traitDegreeData = this;
-				}
-				return this.mentalStateGiverInt;
-			}
-		}
-
-		// Token: 0x170017D7 RID: 6103
-		// (get) Token: 0x06009AF9 RID: 39673 RVA: 0x002CFF86 File Offset: 0x002CE186
-		public bool HasDefinedGraphicProperties
-		{
-			get
-			{
-				return !this.renderNodeProperties.NullOrEmpty<PawnRenderNodeProperties>();
-			}
-		}
-
-		// Token: 0x170017D8 RID: 6104
-		// (get) Token: 0x06009AFA RID: 39674 RVA: 0x002CFF96 File Offset: 0x002CE196
-		public List<PawnRenderNodeProperties> RenderNodeProperties
-		{
-			get
-			{
-				return this.renderNodeProperties;
-			}
-		}
-
-		// Token: 0x06009AFB RID: 39675 RVA: 0x002CFF9E File Offset: 0x002CE19E
-		public string GetLabelFor(Pawn pawn)
-		{
-			return this.GetLabelFor((pawn != null) ? pawn.gender : Gender.None);
-		}
-
-		// Token: 0x06009AFC RID: 39676 RVA: 0x002CFFB2 File Offset: 0x002CE1B2
-		public string GetLabelCapFor(Pawn pawn)
-		{
-			return this.GetLabelCapFor((pawn != null) ? pawn.gender : Gender.None);
-		}
-
-		// Token: 0x06009AFD RID: 39677 RVA: 0x002CFFC8 File Offset: 0x002CE1C8
-		public string GetLabelFor(Gender gender)
-		{
-			if (gender != Gender.Male)
-			{
-				if (gender != Gender.Female)
-				{
-					return this.label;
-				}
-				if (!this.labelFemale.NullOrEmpty())
-				{
-					return this.labelFemale;
-				}
-				return this.label;
-			}
-			else
-			{
-				if (!this.labelMale.NullOrEmpty())
-				{
-					return this.labelMale;
-				}
-				return this.label;
-			}
-		}
-
-		// Token: 0x06009AFE RID: 39678 RVA: 0x002D001C File Offset: 0x002CE21C
-		public string GetLabelCapFor(Gender gender)
-		{
-			if (gender != Gender.Male)
-			{
-				if (gender != Gender.Female)
-				{
-					return this.LabelCap;
-				}
-				if (this.labelFemale.NullOrEmpty())
-				{
-					return this.LabelCap;
-				}
-				if (this.cachedLabelFemaleCap == null)
-				{
-					this.cachedLabelFemaleCap = this.labelFemale.CapitalizeFirst();
-				}
-				return this.cachedLabelFemaleCap;
-			}
-			else
-			{
-				if (this.labelMale.NullOrEmpty())
-				{
-					return this.LabelCap;
-				}
-				if (this.cachedLabelMaleCap == null)
-				{
-					this.cachedLabelMaleCap = this.labelMale.CapitalizeFirst();
-				}
-				return this.cachedLabelMaleCap;
-			}
-		}
-
-		// Token: 0x06009AFF RID: 39679 RVA: 0x002D00A4 File Offset: 0x002CE2A4
-		public List<IssueDef> GetAffectedIssues(TraitDef def)
-		{
-			if (this.affectedIssuesCached == null)
-			{
-				this.affectedIssuesCached = new List<IssueDef>();
-				List<PreceptDef> allDefsListForReading = DefDatabase<PreceptDef>.AllDefsListForReading;
-				Predicate<TraitRequirement> <>9__0;
+				agreeableMemesCached = new List<MemeDef>();
+				List<MemeDef> allDefsListForReading = DefDatabase<MemeDef>.AllDefsListForReading;
 				for (int i = 0; i < allDefsListForReading.Count; i++)
 				{
-					if (!this.affectedIssuesCached.Contains(allDefsListForReading[i].issue))
+					if (!allDefsListForReading[i].agreeableTraits.NullOrEmpty() && allDefsListForReading[i].agreeableTraits.Any((TraitRequirement x) => x.def == def && x.degree.GetValueOrDefault() == degree))
 					{
-						List<TraitRequirement> traitsAffecting = allDefsListForReading[i].TraitsAffecting;
-						Predicate<TraitRequirement> predicate;
-						if ((predicate = <>9__0) == null)
-						{
-							predicate = (<>9__0 = ((TraitRequirement x) => x.def == def && x.degree.GetValueOrDefault() == this.degree));
-						}
-						if (traitsAffecting.Any(predicate))
-						{
-							this.affectedIssuesCached.Add(allDefsListForReading[i].issue);
-						}
+						agreeableMemesCached.Add(allDefsListForReading[i]);
 					}
 				}
 			}
-			return this.affectedIssuesCached;
+			return agreeableMemesCached;
 		}
-
-		// Token: 0x06009B00 RID: 39680 RVA: 0x002D015C File Offset: 0x002CE35C
-		public List<MemeDef> GetAffectedMemes(TraitDef def, bool agreeable)
+		if (disagreeableMemesCached == null)
 		{
-			if (agreeable)
+			disagreeableMemesCached = new List<MemeDef>();
+			List<MemeDef> allDefsListForReading2 = DefDatabase<MemeDef>.AllDefsListForReading;
+			for (int j = 0; j < allDefsListForReading2.Count; j++)
 			{
-				if (this.agreeableMemesCached == null)
+				if (!allDefsListForReading2[j].disagreeableTraits.NullOrEmpty() && allDefsListForReading2[j].disagreeableTraits.Any((TraitRequirement x) => x.def == def && x.degree.GetValueOrDefault() == degree))
 				{
-					this.agreeableMemesCached = new List<MemeDef>();
-					List<MemeDef> allDefsListForReading = DefDatabase<MemeDef>.AllDefsListForReading;
-					Predicate<TraitRequirement> <>9__0;
-					for (int i = 0; i < allDefsListForReading.Count; i++)
-					{
-						if (!allDefsListForReading[i].agreeableTraits.NullOrEmpty<TraitRequirement>())
-						{
-							List<TraitRequirement> agreeableTraits = allDefsListForReading[i].agreeableTraits;
-							Predicate<TraitRequirement> predicate;
-							if ((predicate = <>9__0) == null)
-							{
-								predicate = (<>9__0 = ((TraitRequirement x) => x.def == def && x.degree.GetValueOrDefault() == this.degree));
-							}
-							if (agreeableTraits.Any(predicate))
-							{
-								this.agreeableMemesCached.Add(allDefsListForReading[i]);
-							}
-						}
-					}
-				}
-				return this.agreeableMemesCached;
-			}
-			if (this.disagreeableMemesCached == null)
-			{
-				this.disagreeableMemesCached = new List<MemeDef>();
-				List<MemeDef> allDefsListForReading2 = DefDatabase<MemeDef>.AllDefsListForReading;
-				Predicate<TraitRequirement> <>9__1;
-				for (int j = 0; j < allDefsListForReading2.Count; j++)
-				{
-					if (!allDefsListForReading2[j].disagreeableTraits.NullOrEmpty<TraitRequirement>())
-					{
-						List<TraitRequirement> disagreeableTraits = allDefsListForReading2[j].disagreeableTraits;
-						Predicate<TraitRequirement> predicate2;
-						if ((predicate2 = <>9__1) == null)
-						{
-							predicate2 = (<>9__1 = ((TraitRequirement x) => x.def == def && x.degree.GetValueOrDefault() == this.degree));
-						}
-						if (disagreeableTraits.Any(predicate2))
-						{
-							this.disagreeableMemesCached.Add(allDefsListForReading2[j]);
-						}
-					}
+					disagreeableMemesCached.Add(allDefsListForReading2[j]);
 				}
 			}
-			return this.disagreeableMemesCached;
 		}
+		return disagreeableMemesCached;
+	}
 
-		// Token: 0x06009B01 RID: 39681 RVA: 0x002D02A4 File Offset: 0x002CE4A4
-		public int AptitudeFor(SkillDef skill)
+	public int AptitudeFor(SkillDef skill)
+	{
+		int num = 0;
+		if (aptitudes.NullOrEmpty())
 		{
-			int num = 0;
-			if (this.aptitudes.NullOrEmpty<Aptitude>())
-			{
-				return num;
-			}
-			for (int i = 0; i < this.aptitudes.Count; i++)
-			{
-				if (this.aptitudes[i].skill == skill)
-				{
-					num += this.aptitudes[i].level;
-				}
-			}
 			return num;
 		}
-
-		// Token: 0x06009B02 RID: 39682 RVA: 0x002D0301 File Offset: 0x002CE501
-		public void PostLoad()
+		for (int i = 0; i < aptitudes.Count; i++)
 		{
-			this.untranslatedLabel = this.label;
-		}
-
-		// Token: 0x06009B03 RID: 39683 RVA: 0x002D0310 File Offset: 0x002CE510
-		public void ResolveReferences()
-		{
-			if (this.renderNodeProperties != null)
+			if (aptitudes[i].skill == skill)
 			{
-				for (int i = 0; i < this.renderNodeProperties.Count; i++)
-				{
-					this.renderNodeProperties[i].ResolveReferencesRecursive();
-				}
+				num += aptitudes[i].level;
 			}
 		}
+		return num;
+	}
 
-		// Token: 0x04006B16 RID: 27414
-		[MustTranslate]
-		public string label;
+	public void PostLoad()
+	{
+		untranslatedLabel = label;
+	}
 
-		// Token: 0x04006B17 RID: 27415
-		[MustTranslate]
-		public string labelMale;
-
-		// Token: 0x04006B18 RID: 27416
-		[MustTranslate]
-		public string labelFemale;
-
-		// Token: 0x04006B19 RID: 27417
-		[Unsaved(false)]
-		[TranslationHandle]
-		public string untranslatedLabel;
-
-		// Token: 0x04006B1A RID: 27418
-		[MustTranslate]
-		public string description;
-
-		// Token: 0x04006B1B RID: 27419
-		public int degree;
-
-		// Token: 0x04006B1C RID: 27420
-		public float commonality = 1f;
-
-		// Token: 0x04006B1D RID: 27421
-		public List<StatModifier> statOffsets;
-
-		// Token: 0x04006B1E RID: 27422
-		public List<StatModifier> statFactors;
-
-		// Token: 0x04006B1F RID: 27423
-		public ThinkTreeDef thinkTree;
-
-		// Token: 0x04006B20 RID: 27424
-		public MentalStateDef randomMentalState;
-
-		// Token: 0x04006B21 RID: 27425
-		public SimpleCurve randomMentalStateMtbDaysMoodCurve;
-
-		// Token: 0x04006B22 RID: 27426
-		public MentalStateDef forcedMentalState;
-
-		// Token: 0x04006B23 RID: 27427
-		public float forcedMentalStateMtbDays = -1f;
-
-		// Token: 0x04006B24 RID: 27428
-		public List<MentalStateDef> disallowedMentalStates;
-
-		// Token: 0x04006B25 RID: 27429
-		public List<ThoughtDef> disallowedThoughts;
-
-		// Token: 0x04006B26 RID: 27430
-		public List<TraitIngestionThoughtsOverride> disallowedThoughtsFromIngestion;
-
-		// Token: 0x04006B27 RID: 27431
-		public List<TraitIngestionThoughtsOverride> extraThoughtsFromIngestion;
-
-		// Token: 0x04006B28 RID: 27432
-		public List<InspirationDef> disallowedInspirations;
-
-		// Token: 0x04006B29 RID: 27433
-		public List<InspirationDef> mentalBreakInspirationGainSet;
-
-		// Token: 0x04006B2A RID: 27434
-		public string mentalBreakInspirationGainReasonText;
-
-		// Token: 0x04006B2B RID: 27435
-		public List<MeditationFocusDef> allowedMeditationFocusTypes;
-
-		// Token: 0x04006B2C RID: 27436
-		public List<MeditationFocusDef> disallowedMeditationFocusTypes;
-
-		// Token: 0x04006B2D RID: 27437
-		public float mentalBreakInspirationGainChance;
-
-		// Token: 0x04006B2E RID: 27438
-		public List<MentalBreakDef> theOnlyAllowedMentalBreaks;
-
-		// Token: 0x04006B2F RID: 27439
-		public List<SkillGain> skillGains = new List<SkillGain>();
-
-		// Token: 0x04006B30 RID: 27440
-		public float socialFightChanceFactor = 1f;
-
-		// Token: 0x04006B31 RID: 27441
-		public float marketValueFactorOffset;
-
-		// Token: 0x04006B32 RID: 27442
-		public float randomDiseaseMtbDays;
-
-		// Token: 0x04006B33 RID: 27443
-		public float hungerRateFactor = 1f;
-
-		// Token: 0x04006B34 RID: 27444
-		public float painOffset;
-
-		// Token: 0x04006B35 RID: 27445
-		public float painFactor = 1f;
-
-		// Token: 0x04006B36 RID: 27446
-		public Type mentalStateGiverClass = typeof(TraitMentalStateGiver);
-
-		// Token: 0x04006B37 RID: 27447
-		public List<AbilityDef> abilities;
-
-		// Token: 0x04006B38 RID: 27448
-		public List<IngestibleModifiers> ingestibleModifiers;
-
-		// Token: 0x04006B39 RID: 27449
-		public List<Aptitude> aptitudes;
-
-		// Token: 0x04006B3A RID: 27450
-		public List<NeedDef> enablesNeeds;
-
-		// Token: 0x04006B3B RID: 27451
-		public List<NeedDef> disablesNeeds;
-
-		// Token: 0x04006B3C RID: 27452
-		private List<PawnRenderNodeProperties> renderNodeProperties;
-
-		// Token: 0x04006B3D RID: 27453
-		public List<PossessionThingDefCountClass> possessions = new List<PossessionThingDefCountClass>();
-
-		// Token: 0x04006B3E RID: 27454
-		[Unsaved(false)]
-		private TraitMentalStateGiver mentalStateGiverInt;
-
-		// Token: 0x04006B3F RID: 27455
-		[Unsaved(false)]
-		private string cachedLabelCap;
-
-		// Token: 0x04006B40 RID: 27456
-		[Unsaved(false)]
-		private string cachedLabelMaleCap;
-
-		// Token: 0x04006B41 RID: 27457
-		[Unsaved(false)]
-		private string cachedLabelFemaleCap;
-
-		// Token: 0x04006B42 RID: 27458
-		[Unsaved(false)]
-		private List<IssueDef> affectedIssuesCached;
-
-		// Token: 0x04006B43 RID: 27459
-		[Unsaved(false)]
-		private List<MemeDef> agreeableMemesCached;
-
-		// Token: 0x04006B44 RID: 27460
-		[Unsaved(false)]
-		private List<MemeDef> disagreeableMemesCached;
+	public void ResolveReferences()
+	{
+		if (renderNodeProperties != null)
+		{
+			for (int i = 0; i < renderNodeProperties.Count; i++)
+			{
+				renderNodeProperties[i].ResolveReferencesRecursive();
+			}
+		}
 	}
 }

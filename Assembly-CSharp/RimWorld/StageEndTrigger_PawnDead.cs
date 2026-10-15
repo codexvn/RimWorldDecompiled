@@ -1,36 +1,30 @@
-﻿using System;
 using System.Collections.Generic;
 using Verse;
 using Verse.AI.Group;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class StageEndTrigger_PawnDead : StageEndTrigger
 {
-	// Token: 0x020026A9 RID: 9897
-	public class StageEndTrigger_PawnDead : StageEndTrigger
+	[NoTranslate]
+	public string roleId;
+
+	public override Trigger MakeTrigger(LordJob_Ritual ritual, TargetInfo spot, IEnumerable<TargetInfo> foci, RitualStage stage)
 	{
-		// Token: 0x0600D925 RID: 55589 RVA: 0x00405104 File Offset: 0x00403304
-		public override Trigger MakeTrigger(LordJob_Ritual ritual, TargetInfo spot, IEnumerable<TargetInfo> foci, RitualStage stage)
+		if (ritual.Ritual.behavior.def.roles.FirstOrDefault((RitualRole r) => r.id == roleId) == null)
 		{
-			if (ritual.Ritual.behavior.def.roles.FirstOrDefault((RitualRole r) => r.id == this.roleId) == null)
-			{
-				return null;
-			}
-			Pawn pawn = ritual.assignments.FirstAssignedPawn(this.roleId);
-			if (pawn == null)
-			{
-				return null;
-			}
-			return new Trigger_TickCondition(() => pawn.Dead, 1);
+			return null;
 		}
-
-		// Token: 0x0600D926 RID: 55590 RVA: 0x0040517B File Offset: 0x0040337B
-		public override void ExposeData()
+		Pawn pawn = ritual.assignments.FirstAssignedPawn(roleId);
+		if (pawn == null)
 		{
-			Scribe_Values.Look<string>(ref this.roleId, "roleId", null, false);
+			return null;
 		}
+		return new Trigger_TickCondition(() => pawn.Dead);
+	}
 
-		// Token: 0x04009326 RID: 37670
-		[NoTranslate]
-		public string roleId;
+	public override void ExposeData()
+	{
+		Scribe_Values.Look(ref roleId, "roleId");
 	}
 }

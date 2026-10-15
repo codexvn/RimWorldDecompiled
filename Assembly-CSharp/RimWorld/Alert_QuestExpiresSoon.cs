@@ -1,77 +1,65 @@
-﻿using System;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Alert_QuestExpiresSoon : Alert
 {
-	// Token: 0x02002FE8 RID: 12264
-	public class Alert_QuestExpiresSoon : Alert
+	private Quest questExpiring;
+
+	private const int TicksToAlert = 60000;
+
+	private Quest QuestExpiring
 	{
-		// Token: 0x17002CCC RID: 11468
-		// (get) Token: 0x06011465 RID: 70757 RVA: 0x004F2E44 File Offset: 0x004F1044
-		private Quest QuestExpiring
+		get
 		{
-			get
+			int num = int.MaxValue;
+			questExpiring = null;
+			foreach (Quest item in Find.QuestManager.questsInDisplayOrder)
 			{
-				int num = int.MaxValue;
-				this.questExpiring = null;
-				foreach (Quest quest in Find.QuestManager.questsInDisplayOrder)
+				if (!item.dismissed && !item.Historical && !item.initiallyAccepted && item.State == QuestState.NotYetAccepted && item.TicksUntilExpiry > 0 && item.TicksUntilExpiry < 60000 && item.TicksUntilExpiry < num)
 				{
-					if (!quest.dismissed && !quest.Historical && !quest.initiallyAccepted && quest.State == QuestState.NotYetAccepted && quest.TicksUntilExpiry > 0 && quest.TicksUntilExpiry < 60000 && quest.TicksUntilExpiry < num)
-					{
-						this.questExpiring = quest;
-						num = quest.TicksUntilExpiry;
-					}
+					questExpiring = item;
+					num = item.TicksUntilExpiry;
 				}
-				return this.questExpiring;
 			}
+			return questExpiring;
 		}
+	}
 
-		// Token: 0x06011466 RID: 70758 RVA: 0x004F2A9B File Offset: 0x004F0C9B
-		public Alert_QuestExpiresSoon()
+	public Alert_QuestExpiresSoon()
+	{
+		defaultPriority = AlertPriority.High;
+	}
+
+	protected override void OnClick()
+	{
+		if (questExpiring != null)
 		{
-			this.defaultPriority = AlertPriority.High;
+			Find.MainTabsRoot.SetCurrentTab(MainButtonDefOf.Quests);
+			((MainTabWindow_Quests)MainButtonDefOf.Quests.TabWindow).Select(questExpiring);
 		}
+	}
 
-		// Token: 0x06011467 RID: 70759 RVA: 0x004F2EF4 File Offset: 0x004F10F4
-		protected override void OnClick()
+	public override string GetLabel()
+	{
+		if (questExpiring == null)
 		{
-			if (this.questExpiring != null)
-			{
-				Find.MainTabsRoot.SetCurrentTab(MainButtonDefOf.Quests, true);
-				((MainTabWindow_Quests)MainButtonDefOf.Quests.TabWindow).Select(this.questExpiring);
-			}
+			return string.Empty;
 		}
+		return "QuestExpiresSoon".Translate(questExpiring.TicksUntilExpiry.ToStringTicksToPeriodVerbose());
+	}
 
-		// Token: 0x06011468 RID: 70760 RVA: 0x004F2F28 File Offset: 0x004F1128
-		public override string GetLabel()
+	public override TaggedString GetExplanation()
+	{
+		if (questExpiring == null)
 		{
-			if (this.questExpiring == null)
-			{
-				return string.Empty;
-			}
-			return "QuestExpiresSoon".Translate(this.questExpiring.TicksUntilExpiry.ToStringTicksToPeriodVerbose(true, true));
+			return string.Empty;
 		}
+		return "QuestExpiresSoonDesc".Translate(questExpiring.name, questExpiring.TicksUntilExpiry.ToStringTicksToPeriodVerbose().Colorize(ColoredText.DateTimeColor));
+	}
 
-		// Token: 0x06011469 RID: 70761 RVA: 0x004F2F60 File Offset: 0x004F1160
-		public override TaggedString GetExplanation()
-		{
-			if (this.questExpiring == null)
-			{
-				return string.Empty;
-			}
-			return "QuestExpiresSoonDesc".Translate(this.questExpiring.name, this.questExpiring.TicksUntilExpiry.ToStringTicksToPeriodVerbose(true, true).Colorize(ColoredText.DateTimeColor));
-		}
-
-		// Token: 0x0601146A RID: 70762 RVA: 0x004F2FBB File Offset: 0x004F11BB
-		public override AlertReport GetReport()
-		{
-			return this.QuestExpiring != null;
-		}
-
-		// Token: 0x0400B31F RID: 45855
-		private Quest questExpiring;
-
-		// Token: 0x0400B320 RID: 45856
-		private const int TicksToAlert = 60000;
+	public override AlertReport GetReport()
+	{
+		return QuestExpiring != null;
 	}
 }

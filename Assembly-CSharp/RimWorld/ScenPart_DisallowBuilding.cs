@@ -1,112 +1,329 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class ScenPart_DisallowBuilding : ScenPart_Rule
 {
-	// Token: 0x0200288C RID: 10380
-	public class ScenPart_DisallowBuilding : ScenPart_Rule
+	[CompilerGenerated]
+	private sealed class _003CGetSummaryListEntries_003Ed__4 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x0600E320 RID: 58144 RVA: 0x00427484 File Offset: 0x00425684
-		protected override void ApplyRule()
-		{
-			Current.Game.Rules.SetAllowBuilding(this.building, false);
-		}
+		private int _003C_003E1__state;
 
-		// Token: 0x0600E321 RID: 58145 RVA: 0x0042749C File Offset: 0x0042569C
-		public override string Summary(Scenario scen)
-		{
-			return ScenSummaryList.SummaryWithList(scen, "DisallowBuilding", "ScenPart_DisallowBuilding".Translate());
-		}
+		private string _003C_003E2__current;
 
-		// Token: 0x0600E322 RID: 58146 RVA: 0x004274B8 File Offset: 0x004256B8
-		public override IEnumerable<string> GetSummaryListEntries(string tag)
+		private int _003C_003El__initialThreadId;
+
+		private string tag;
+
+		public string _003C_003E3__tag;
+
+		public ScenPart_DisallowBuilding _003C_003E4__this;
+
+		string IEnumerator<string>.Current
 		{
-			if (tag == "DisallowBuilding")
+			[DebuggerHidden]
+			get
 			{
-				yield return this.building.LabelCap;
+				return _003C_003E2__current;
 			}
-			yield break;
 		}
 
-		// Token: 0x0600E323 RID: 58147 RVA: 0x004274CF File Offset: 0x004256CF
-		public override void ExposeData()
+		object IEnumerator.Current
 		{
-			base.ExposeData();
-			Scribe_Defs.Look<ThingDef>(ref this.building, "building");
-		}
-
-		// Token: 0x0600E324 RID: 58148 RVA: 0x004274E7 File Offset: 0x004256E7
-		public override void Randomize()
-		{
-			this.building = this.RandomizableBuildingDefs().RandomElement<ThingDef>();
-		}
-
-		// Token: 0x0600E325 RID: 58149 RVA: 0x004274FC File Offset: 0x004256FC
-		public override void DoEditInterface(Listing_ScenEdit listing)
-		{
-			if (Widgets.ButtonText(listing.GetScenPartRect(this, ScenPart.RowHeight), this.building.LabelCap, true, true, true, null))
+			[DebuggerHidden]
+			get
 			{
-				List<FloatMenuOption> list = new List<FloatMenuOption>();
-				foreach (ThingDef localTd2 in from t in this.PossibleBuildingDefs()
-				orderby t.label
-				select t)
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetSummaryListEntries_003Ed__4(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			ScenPart_DisallowBuilding scenPart_DisallowBuilding = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (tag == "DisallowBuilding")
 				{
-					ThingDef localTd = localTd2;
-					list.Add(new FloatMenuOption(localTd.LabelCap, delegate()
-					{
-						this.building = localTd;
-					}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0));
+					_003C_003E2__current = scenPart_DisallowBuilding.building.LabelCap;
+					_003C_003E1__state = 1;
+					return true;
 				}
-				Find.WindowStack.Add(new FloatMenu(list));
+				break;
+			case 1:
+				_003C_003E1__state = -1;
+				break;
+			}
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CGetSummaryListEntries_003Ed__4 _003CGetSummaryListEntries_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CGetSummaryListEntries_003Ed__ = this;
+			}
+			else
+			{
+				_003CGetSummaryListEntries_003Ed__ = new _003CGetSummaryListEntries_003Ed__4(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CGetSummaryListEntries_003Ed__.tag = _003C_003E3__tag;
+			return _003CGetSummaryListEntries_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CRandomizableBuildingDefs_003Ed__10 : IEnumerable<ThingDef>, IEnumerable, IEnumerator<ThingDef>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private ThingDef _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		ThingDef IEnumerator<ThingDef>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600E326 RID: 58150 RVA: 0x004275FC File Offset: 0x004257FC
-		public override bool TryMerge(ScenPart other)
+		object IEnumerator.Current
 		{
-			ScenPart_DisallowBuilding scenPart_DisallowBuilding = other as ScenPart_DisallowBuilding;
-			return scenPart_DisallowBuilding != null && scenPart_DisallowBuilding.building == this.building;
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x0600E327 RID: 58151 RVA: 0x00427624 File Offset: 0x00425824
-		protected virtual IEnumerable<ThingDef> PossibleBuildingDefs()
+		[DebuggerHidden]
+		public _003CRandomizableBuildingDefs_003Ed__10(int _003C_003E1__state)
 		{
-			return from d in DefDatabase<ThingDef>.AllDefs
-			where d.category == ThingCategory.Building && d.BuildableByPlayer
-			select d;
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x0600E328 RID: 58152 RVA: 0x0042764F File Offset: 0x0042584F
-		private IEnumerable<ThingDef> RandomizableBuildingDefs()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			yield return ThingDefOf.Wall;
-			yield return ThingDefOf.Turret_MiniTurret;
-			yield return ThingDefOf.OrbitalTradeBeacon;
-			yield return ThingDefOf.Battery;
-			yield return ThingDefOf.TrapSpike;
-			yield return ThingDefOf.Cooler;
-			yield return ThingDefOf.Heater;
-			yield break;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x0600E329 RID: 58153 RVA: 0x00427658 File Offset: 0x00425858
-		public override bool HasNullDefs()
+		private bool MoveNext()
 		{
-			return base.HasNullDefs() || this.building == null;
+			switch (_003C_003E1__state)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = ThingDefOf.Wall;
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = ThingDefOf.Turret_MiniTurret;
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = ThingDefOf.OrbitalTradeBeacon;
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = ThingDefOf.Battery;
+				_003C_003E1__state = 4;
+				return true;
+			case 4:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = ThingDefOf.TrapSpike;
+				_003C_003E1__state = 5;
+				return true;
+			case 5:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = ThingDefOf.Cooler;
+				_003C_003E1__state = 6;
+				return true;
+			case 6:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = ThingDefOf.Heater;
+				_003C_003E1__state = 7;
+				return true;
+			case 7:
+				_003C_003E1__state = -1;
+				return false;
+			}
 		}
 
-		// Token: 0x0600E32A RID: 58154 RVA: 0x0042766D File Offset: 0x0042586D
-		public override int GetHashCode()
+		bool IEnumerator.MoveNext()
 		{
-			return base.GetHashCode() ^ ((this.building != null) ? this.building.GetHashCode() : 0);
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0400983F RID: 38975
-		private ThingDef building;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04009840 RID: 38976
-		private const string DisallowBuildingTag = "DisallowBuilding";
+		[DebuggerHidden]
+		IEnumerator<ThingDef> IEnumerable<ThingDef>.GetEnumerator()
+		{
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				return this;
+			}
+			return new _003CRandomizableBuildingDefs_003Ed__10(0);
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<ThingDef>)this).GetEnumerator();
+		}
+	}
+
+	private ThingDef building;
+
+	private const string DisallowBuildingTag = "DisallowBuilding";
+
+	protected override void ApplyRule()
+	{
+		Current.Game.Rules.SetAllowBuilding(building, allowed: false);
+	}
+
+	public override string Summary(Scenario scen)
+	{
+		return ScenSummaryList.SummaryWithList(scen, "DisallowBuilding", "ScenPart_DisallowBuilding".Translate());
+	}
+
+	[IteratorStateMachine(typeof(_003CGetSummaryListEntries_003Ed__4))]
+	public override IEnumerable<string> GetSummaryListEntries(string tag)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetSummaryListEntries_003Ed__4(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__tag = tag
+		};
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Defs.Look(ref building, "building");
+	}
+
+	public override void Randomize()
+	{
+		building = RandomizableBuildingDefs().RandomElement();
+	}
+
+	public override void DoEditInterface(Listing_ScenEdit listing)
+	{
+		if (!Widgets.ButtonText(listing.GetScenPartRect(this, ScenPart.RowHeight), building.LabelCap, drawBackground: true, doMouseoverSound: true, active: true, null))
+		{
+			return;
+		}
+		List<FloatMenuOption> list = new List<FloatMenuOption>();
+		foreach (ThingDef item in from t in PossibleBuildingDefs()
+			orderby t.label
+			select t)
+		{
+			ThingDef localTd = item;
+			list.Add(new FloatMenuOption(localTd.LabelCap, delegate
+			{
+				building = localTd;
+			}));
+		}
+		Find.WindowStack.Add(new FloatMenu(list));
+	}
+
+	public override bool TryMerge(ScenPart other)
+	{
+		if (other is ScenPart_DisallowBuilding scenPart_DisallowBuilding && scenPart_DisallowBuilding.building == building)
+		{
+			return true;
+		}
+		return false;
+	}
+
+	protected virtual IEnumerable<ThingDef> PossibleBuildingDefs()
+	{
+		return DefDatabase<ThingDef>.AllDefs.Where((ThingDef d) => d.category == ThingCategory.Building && d.BuildableByPlayer);
+	}
+
+	[IteratorStateMachine(typeof(_003CRandomizableBuildingDefs_003Ed__10))]
+	private IEnumerable<ThingDef> RandomizableBuildingDefs()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CRandomizableBuildingDefs_003Ed__10(-2);
+	}
+
+	public override bool HasNullDefs()
+	{
+		if (!base.HasNullDefs())
+		{
+			return building == null;
+		}
+		return true;
+	}
+
+	public override int GetHashCode()
+	{
+		return base.GetHashCode() ^ ((building != null) ? building.GetHashCode() : 0);
 	}
 }

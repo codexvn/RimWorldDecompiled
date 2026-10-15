@@ -1,189 +1,382 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_PredatorHunt : JobDriver
 {
-	// Token: 0x02001119 RID: 4377
-	public class JobDriver_PredatorHunt : JobDriver
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass13_0
 	{
-		// Token: 0x17001078 RID: 4216
-		// (get) Token: 0x06006ABC RID: 27324 RVA: 0x0021AB04 File Offset: 0x00218D04
-		public Pawn Prey
+		public JobDriver_PredatorHunt _003C_003E4__this;
+
+		public Toil prepareToEatCorpse;
+
+		internal void _003CMakeNewToils_003Eb__0(JobCondition jobCondition)
 		{
-			get
+			_003C_003E4__this.Map.attackTargetsCache.UpdateTarget(_003C_003E4__this.pawn);
+		}
+
+		internal void _003CMakeNewToils_003Eb__1()
+		{
+			Pawn actor = prepareToEatCorpse.actor;
+			Corpse corpse = _003C_003E4__this.Corpse;
+			if (corpse == null)
 			{
-				Corpse corpse = this.Corpse;
-				if (corpse != null)
+				Pawn prey = _003C_003E4__this.Prey;
+				if (prey == null)
 				{
-					return corpse.InnerPawn;
+					actor.jobs.EndCurrentJob(JobCondition.Incompletable);
+					return;
 				}
-				return (Pawn)this.job.GetTarget(TargetIndex.A).Thing;
-			}
-		}
-
-		// Token: 0x17001079 RID: 4217
-		// (get) Token: 0x06006ABD RID: 27325 RVA: 0x0021AB3C File Offset: 0x00218D3C
-		private Corpse Corpse
-		{
-			get
-			{
-				return this.job.GetTarget(TargetIndex.A).Thing as Corpse;
-			}
-		}
-
-		// Token: 0x06006ABE RID: 27326 RVA: 0x0021AB62 File Offset: 0x00218D62
-		public override void ExposeData()
-		{
-			base.ExposeData();
-			Scribe_Values.Look<bool>(ref this.firstHit, "firstHit", false, false);
-			Scribe_Values.Look<bool>(ref this.notifiedPlayerAttacking, "notifiedPlayerAttacking", false, false);
-		}
-
-		// Token: 0x06006ABF RID: 27327 RVA: 0x0021AB8E File Offset: 0x00218D8E
-		public override string GetReport()
-		{
-			if (this.Corpse != null)
-			{
-				return this.ReportStringProcessed(JobDefOf.Ingest.reportString);
-			}
-			return base.GetReport();
-		}
-
-		// Token: 0x06006AC0 RID: 27328 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
-		{
-			return true;
-		}
-
-		// Token: 0x06006AC1 RID: 27329 RVA: 0x0021ABAF File Offset: 0x00218DAF
-		protected override IEnumerable<Toil> MakeNewToils()
-		{
-			base.AddFinishAction(delegate(JobCondition jobCondition)
-			{
-				this.Map.attackTargetsCache.UpdateTarget(this.pawn);
-			});
-			Toil prepareToEatCorpse = ToilMaker.MakeToil("MakeNewToils");
-			prepareToEatCorpse.initAction = delegate()
-			{
-				Pawn actor = prepareToEatCorpse.actor;
-				Corpse corpse = this.Corpse;
-				if (corpse == null)
+				corpse = prey.Corpse;
+				if (corpse == null || !corpse.Spawned)
 				{
-					Pawn prey = this.Prey;
-					if (prey == null)
-					{
-						actor.jobs.EndCurrentJob(JobCondition.Incompletable, true, true);
-						return;
-					}
-					corpse = prey.Corpse;
-					if (corpse == null || !corpse.Spawned)
-					{
-						actor.jobs.EndCurrentJob(JobCondition.Incompletable, true, true);
-						return;
-					}
+					actor.jobs.EndCurrentJob(JobCondition.Incompletable);
+					return;
 				}
-				if (actor.Faction == Faction.OfPlayer)
-				{
-					corpse.SetForbidden(false, false);
-				}
-				else
-				{
-					corpse.SetForbidden(true, false);
-				}
-				actor.CurJob.SetTarget(TargetIndex.A, corpse);
-			};
-			yield return Toils_General.DoAtomic(delegate
-			{
-				this.Map.attackTargetsCache.UpdateTarget(this.pawn);
-			});
-			Action hitAction = delegate()
-			{
-				Pawn prey = this.Prey;
-				bool surpriseAttack = this.firstHit && !prey.IsColonist;
-				if (this.pawn.meleeVerbs.TryMeleeAttack(prey, this.job.verbToUse, surpriseAttack))
-				{
-					if (!this.notifiedPlayerAttacked && PawnUtility.ShouldSendNotificationAbout(prey))
-					{
-						this.notifiedPlayerAttacked = true;
-						Messages.Message("MessageAttackedByPredator".Translate(prey.LabelShort, this.pawn.LabelIndefinite(), prey.Named("PREY"), this.pawn.Named("PREDATOR")).CapitalizeFirst(), prey, MessageTypeDefOf.ThreatSmall, true);
-					}
-					this.Map.attackTargetsCache.UpdateTarget(this.pawn);
-					this.firstHit = false;
-				}
-			};
-			Toil toil = Toils_Combat.FollowAndMeleeAttack(TargetIndex.A, hitAction).JumpIfDespawnedOrNull(TargetIndex.A, prepareToEatCorpse).JumpIf(() => this.Corpse != null, prepareToEatCorpse).FailOn(() => Find.TickManager.TicksGame > this.startTick + 5000 && (float)(this.job.GetTarget(TargetIndex.A).Cell - this.pawn.Position).LengthHorizontalSquared > 4f);
-			toil.AddPreTickIntervalAction(new Action<int>(this.CheckWarnPlayerInterval));
-			yield return toil;
-			yield return prepareToEatCorpse;
-			Toil gotoCorpse = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch, false);
-			yield return gotoCorpse;
-			float durationMultiplier = 1f / this.pawn.GetStatValue(StatDefOf.EatingSpeed, true, -1);
-			yield return Toils_Ingest.ChewIngestible(this.pawn, durationMultiplier, TargetIndex.A, TargetIndex.None).FailOnDespawnedOrNull(TargetIndex.A).FailOnCannotTouch(TargetIndex.A, PathEndMode.Touch);
-			yield return Toils_Ingest.FinalizeIngest(this.pawn, TargetIndex.A);
-			yield return Toils_Jump.JumpIf(gotoCorpse, () => this.pawn.needs.food.CurLevelPercentage < 0.9f);
-			yield break;
-		}
-
-		// Token: 0x06006AC2 RID: 27330 RVA: 0x0021ABC0 File Offset: 0x00218DC0
-		public override void Notify_DamageTaken(DamageInfo dinfo)
-		{
-			base.Notify_DamageTaken(dinfo);
-			if (dinfo.Def.ExternalViolenceFor(this.pawn) && dinfo.Def.isRanged && dinfo.Instigator != null && dinfo.Instigator != this.Prey && !this.pawn.InMentalState && !this.pawn.Downed)
-			{
-				this.pawn.mindState.StartFleeingBecauseOfPawnAction(dinfo.Instigator);
 			}
-		}
-
-		// Token: 0x06006AC3 RID: 27331 RVA: 0x0021AC40 File Offset: 0x00218E40
-		private void CheckWarnPlayerInterval(int delta)
-		{
-			if (this.notifiedPlayerAttacking)
+			if (actor.Faction == Faction.OfPlayer)
 			{
-				return;
-			}
-			Pawn prey = this.Prey;
-			if (!prey.Spawned || prey.Faction != Faction.OfPlayer)
-			{
-				return;
-			}
-			if (Find.TickManager.TicksGame <= this.pawn.mindState.lastPredatorHuntingPlayerNotificationTick + 2500)
-			{
-				return;
-			}
-			if (!prey.Position.InHorDistOf(this.pawn.Position, 60f))
-			{
-				return;
-			}
-			if (prey.RaceProps.Humanlike)
-			{
-				Find.LetterStack.ReceiveLetter("LetterLabelPredatorHuntingColonist".Translate(this.pawn.LabelShort, prey.LabelDefinite(), this.pawn.Named("PREDATOR"), prey.Named("PREY")).CapitalizeFirst(), "LetterPredatorHuntingColonist".Translate(this.pawn.LabelIndefinite(), prey.LabelDefinite(), this.pawn.Named("PREDATOR"), prey.Named("PREY")).CapitalizeFirst(), LetterDefOf.ThreatBig, this.pawn, null, null, null, null, 0, true);
+				corpse.SetForbidden(value: false, warnOnFail: false);
 			}
 			else
 			{
-				Messages.Message((prey.Name.Numerical ? "LetterPredatorHuntingColonist" : "MessagePredatorHuntingPlayerAnimal").Translate(this.pawn.Named("PREDATOR"), prey.Named("PREY")), this.pawn, MessageTypeDefOf.ThreatBig, true);
+				corpse.SetForbidden(value: true, warnOnFail: false);
 			}
-			this.pawn.mindState.Notify_PredatorHuntingPlayerNotification();
-			this.notifiedPlayerAttacking = true;
+			actor.CurJob.SetTarget(TargetIndex.A, corpse);
 		}
 
-		// Token: 0x04004B4C RID: 19276
-		private bool notifiedPlayerAttacked;
+		internal void _003CMakeNewToils_003Eb__2()
+		{
+			_003C_003E4__this.Map.attackTargetsCache.UpdateTarget(_003C_003E4__this.pawn);
+		}
 
-		// Token: 0x04004B4D RID: 19277
-		private bool notifiedPlayerAttacking;
+		internal void _003CMakeNewToils_003Eb__3()
+		{
+			Pawn prey = _003C_003E4__this.Prey;
+			bool surpriseAttack = _003C_003E4__this.firstHit && !prey.IsColonist;
+			if (_003C_003E4__this.pawn.meleeVerbs.TryMeleeAttack(prey, _003C_003E4__this.job.verbToUse, surpriseAttack))
+			{
+				if (!_003C_003E4__this.notifiedPlayerAttacked && PawnUtility.ShouldSendNotificationAbout(prey))
+				{
+					_003C_003E4__this.notifiedPlayerAttacked = true;
+					Messages.Message("MessageAttackedByPredator".Translate(prey.LabelShort, _003C_003E4__this.pawn.LabelIndefinite(), prey.Named("PREY"), _003C_003E4__this.pawn.Named("PREDATOR")).CapitalizeFirst(), prey, MessageTypeDefOf.ThreatSmall);
+				}
+				_003C_003E4__this.Map.attackTargetsCache.UpdateTarget(_003C_003E4__this.pawn);
+				_003C_003E4__this.firstHit = false;
+			}
+		}
 
-		// Token: 0x04004B4E RID: 19278
-		private bool firstHit = true;
+		internal bool _003CMakeNewToils_003Eb__4()
+		{
+			return _003C_003E4__this.Corpse != null;
+		}
 
-		// Token: 0x04004B4F RID: 19279
-		public const TargetIndex PreyInd = TargetIndex.A;
+		internal bool _003CMakeNewToils_003Eb__5()
+		{
+			if (Find.TickManager.TicksGame > _003C_003E4__this.startTick + 5000)
+			{
+				return (float)(_003C_003E4__this.job.GetTarget(TargetIndex.A).Cell - _003C_003E4__this.pawn.Position).LengthHorizontalSquared > 4f;
+			}
+			return false;
+		}
 
-		// Token: 0x04004B50 RID: 19280
-		private const TargetIndex CorpseInd = TargetIndex.A;
+		internal bool _003CMakeNewToils_003Eb__6()
+		{
+			return _003C_003E4__this.pawn.needs.food.CurLevelPercentage < 0.9f;
+		}
+	}
 
-		// Token: 0x04004B51 RID: 19281
-		private const int MaxHuntTicks = 5000;
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__13 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_PredatorHunt _003C_003E4__this;
+
+		private _003C_003Ec__DisplayClass13_0 _003C_003E8__1;
+
+		private Toil _003CgotoCorpse_003E5__2;
+
+		Toil IEnumerator<Toil>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__13(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E8__1 = null;
+			_003CgotoCorpse_003E5__2 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_PredatorHunt jobDriver_PredatorHunt = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E8__1 = new _003C_003Ec__DisplayClass13_0();
+				_003C_003E8__1._003C_003E4__this = _003C_003E4__this;
+				jobDriver_PredatorHunt.AddFinishAction(delegate
+				{
+					_003C_003E8__1._003C_003E4__this.Map.attackTargetsCache.UpdateTarget(_003C_003E8__1._003C_003E4__this.pawn);
+				});
+				_003C_003E8__1.prepareToEatCorpse = ToilMaker.MakeToil("MakeNewToils");
+				_003C_003E8__1.prepareToEatCorpse.initAction = delegate
+				{
+					Pawn actor = _003C_003E8__1.prepareToEatCorpse.actor;
+					Corpse corpse = _003C_003E8__1._003C_003E4__this.Corpse;
+					if (corpse == null)
+					{
+						Pawn prey2 = _003C_003E8__1._003C_003E4__this.Prey;
+						if (prey2 == null)
+						{
+							actor.jobs.EndCurrentJob(JobCondition.Incompletable);
+							return;
+						}
+						corpse = prey2.Corpse;
+						if (corpse == null || !corpse.Spawned)
+						{
+							actor.jobs.EndCurrentJob(JobCondition.Incompletable);
+							return;
+						}
+					}
+					if (actor.Faction == Faction.OfPlayer)
+					{
+						corpse.SetForbidden(value: false, warnOnFail: false);
+					}
+					else
+					{
+						corpse.SetForbidden(value: true, warnOnFail: false);
+					}
+					actor.CurJob.SetTarget(TargetIndex.A, corpse);
+				};
+				_003C_003E2__current = Toils_General.DoAtomic(delegate
+				{
+					_003C_003E8__1._003C_003E4__this.Map.attackTargetsCache.UpdateTarget(_003C_003E8__1._003C_003E4__this.pawn);
+				});
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+			{
+				_003C_003E1__state = -1;
+				Action hitAction = delegate
+				{
+					Pawn prey = _003C_003E8__1._003C_003E4__this.Prey;
+					bool surpriseAttack = _003C_003E8__1._003C_003E4__this.firstHit && !prey.IsColonist;
+					if (_003C_003E8__1._003C_003E4__this.pawn.meleeVerbs.TryMeleeAttack(prey, _003C_003E8__1._003C_003E4__this.job.verbToUse, surpriseAttack))
+					{
+						if (!_003C_003E8__1._003C_003E4__this.notifiedPlayerAttacked && PawnUtility.ShouldSendNotificationAbout(prey))
+						{
+							_003C_003E8__1._003C_003E4__this.notifiedPlayerAttacked = true;
+							Messages.Message("MessageAttackedByPredator".Translate(prey.LabelShort, _003C_003E8__1._003C_003E4__this.pawn.LabelIndefinite(), prey.Named("PREY"), _003C_003E8__1._003C_003E4__this.pawn.Named("PREDATOR")).CapitalizeFirst(), prey, MessageTypeDefOf.ThreatSmall);
+						}
+						_003C_003E8__1._003C_003E4__this.Map.attackTargetsCache.UpdateTarget(_003C_003E8__1._003C_003E4__this.pawn);
+						_003C_003E8__1._003C_003E4__this.firstHit = false;
+					}
+				};
+				Toil toil = Toils_Combat.FollowAndMeleeAttack(TargetIndex.A, hitAction).JumpIfDespawnedOrNull(TargetIndex.A, _003C_003E8__1.prepareToEatCorpse).JumpIf(() => _003C_003E8__1._003C_003E4__this.Corpse != null, _003C_003E8__1.prepareToEatCorpse)
+					.FailOn(() => Find.TickManager.TicksGame > _003C_003E8__1._003C_003E4__this.startTick + 5000 && (float)(_003C_003E8__1._003C_003E4__this.job.GetTarget(TargetIndex.A).Cell - _003C_003E8__1._003C_003E4__this.pawn.Position).LengthHorizontalSquared > 4f);
+				toil.AddPreTickIntervalAction(jobDriver_PredatorHunt.CheckWarnPlayerInterval);
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 2;
+				return true;
+			}
+			case 2:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = _003C_003E8__1.prepareToEatCorpse;
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+				_003C_003E1__state = -1;
+				_003CgotoCorpse_003E5__2 = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch);
+				_003C_003E2__current = _003CgotoCorpse_003E5__2;
+				_003C_003E1__state = 4;
+				return true;
+			case 4:
+			{
+				_003C_003E1__state = -1;
+				float durationMultiplier = 1f / jobDriver_PredatorHunt.pawn.GetStatValue(StatDefOf.EatingSpeed);
+				_003C_003E2__current = Toils_Ingest.ChewIngestible(jobDriver_PredatorHunt.pawn, durationMultiplier, TargetIndex.A).FailOnDespawnedOrNull(TargetIndex.A).FailOnCannotTouch(TargetIndex.A, PathEndMode.Touch);
+				_003C_003E1__state = 5;
+				return true;
+			}
+			case 5:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Ingest.FinalizeIngest(jobDriver_PredatorHunt.pawn, TargetIndex.A);
+				_003C_003E1__state = 6;
+				return true;
+			case 6:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Jump.JumpIf(_003CgotoCorpse_003E5__2, () => _003C_003E8__1._003C_003E4__this.pawn.needs.food.CurLevelPercentage < 0.9f);
+				_003C_003E1__state = 7;
+				return true;
+			case 7:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__13 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__13(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private bool notifiedPlayerAttacked;
+
+	private bool notifiedPlayerAttacking;
+
+	private bool firstHit = true;
+
+	public const TargetIndex PreyInd = TargetIndex.A;
+
+	private const TargetIndex CorpseInd = TargetIndex.A;
+
+	private const int MaxHuntTicks = 5000;
+
+	public Pawn Prey
+	{
+		get
+		{
+			Corpse corpse = Corpse;
+			if (corpse != null)
+			{
+				return corpse.InnerPawn;
+			}
+			return (Pawn)job.GetTarget(TargetIndex.A).Thing;
+		}
+	}
+
+	private Corpse Corpse => job.GetTarget(TargetIndex.A).Thing as Corpse;
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref firstHit, "firstHit", defaultValue: false);
+		Scribe_Values.Look(ref notifiedPlayerAttacking, "notifiedPlayerAttacking", defaultValue: false);
+	}
+
+	public override string GetReport()
+	{
+		if (Corpse != null)
+		{
+			return ReportStringProcessed(JobDefOf.Ingest.reportString);
+		}
+		return base.GetReport();
+	}
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return true;
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__13))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__13(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override void Notify_DamageTaken(DamageInfo dinfo)
+	{
+		base.Notify_DamageTaken(dinfo);
+		if (dinfo.Def.ExternalViolenceFor(pawn) && dinfo.Def.isRanged && dinfo.Instigator != null && dinfo.Instigator != Prey && !pawn.InMentalState && !pawn.Downed)
+		{
+			pawn.mindState.StartFleeingBecauseOfPawnAction(dinfo.Instigator);
+		}
+	}
+
+	private void CheckWarnPlayerInterval(int delta)
+	{
+		if (notifiedPlayerAttacking)
+		{
+			return;
+		}
+		Pawn prey = Prey;
+		if (prey.Spawned && prey.Faction == Faction.OfPlayer && Find.TickManager.TicksGame > pawn.mindState.lastPredatorHuntingPlayerNotificationTick + 2500 && prey.Position.InHorDistOf(pawn.Position, 60f))
+		{
+			if (prey.RaceProps.Humanlike)
+			{
+				Find.LetterStack.ReceiveLetter("LetterLabelPredatorHuntingColonist".Translate(pawn.LabelShort, prey.LabelDefinite(), pawn.Named("PREDATOR"), prey.Named("PREY")).CapitalizeFirst(), "LetterPredatorHuntingColonist".Translate(pawn.LabelIndefinite(), prey.LabelDefinite(), pawn.Named("PREDATOR"), prey.Named("PREY")).CapitalizeFirst(), LetterDefOf.ThreatBig, pawn);
+			}
+			else
+			{
+				Messages.Message((prey.Name.Numerical ? "LetterPredatorHuntingColonist" : "MessagePredatorHuntingPlayerAnimal").Translate(pawn.Named("PREDATOR"), prey.Named("PREY")), pawn, MessageTypeDefOf.ThreatBig);
+			}
+			pawn.mindState.Notify_PredatorHuntingPlayerNotification();
+			notifiedPlayerAttacking = true;
+		}
 	}
 }

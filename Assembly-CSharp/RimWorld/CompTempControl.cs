@@ -1,202 +1,394 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Text;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompTempControl : ThingComp
 {
-	// Token: 0x02002E7A RID: 11898
-	public class CompTempControl : ThingComp
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass14_0
 	{
-		// Token: 0x17002B01 RID: 11009
-		// (get) Token: 0x06010C09 RID: 68617 RVA: 0x004D3DFB File Offset: 0x004D1FFB
-		// (set) Token: 0x06010C0A RID: 68618 RVA: 0x004D3E03 File Offset: 0x004D2003
-		public virtual float TargetTemperature
+		public float offset;
+
+		public CompTempControl _003C_003E4__this;
+
+		internal void _003CCompGetGizmosExtra_003Eb__0()
 		{
+			_003C_003E4__this.InterfaceChangeTargetTemperature(offset);
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass14_1
+	{
+		public float offset;
+
+		public CompTempControl _003C_003E4__this;
+
+		internal void _003CCompGetGizmosExtra_003Eb__1()
+		{
+			_003C_003E4__this.InterfaceChangeTargetTemperature(offset);
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass14_2
+	{
+		public float offset;
+
+		public CompTempControl _003C_003E4__this;
+
+		internal void _003CCompGetGizmosExtra_003Eb__3()
+		{
+			_003C_003E4__this.InterfaceChangeTargetTemperature(offset);
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass14_3
+	{
+		public float offset;
+
+		public CompTempControl _003C_003E4__this;
+
+		internal void _003CCompGetGizmosExtra_003Eb__4()
+		{
+			_003C_003E4__this.InterfaceChangeTargetTemperature(offset);
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CCompGetGizmosExtra_003Ed__14 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompTempControl _003C_003E4__this;
+
+		private IEnumerator<Gizmo> _003C_003E7__wrap1;
+
+		Gizmo IEnumerator<Gizmo>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				return this.targetTemperature;
-			}
-			set
-			{
-				this.targetTemperature = value;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002B02 RID: 11010
-		// (get) Token: 0x06010C0B RID: 68619 RVA: 0x004D3E0C File Offset: 0x004D200C
-		public CompProperties_TempControl Props
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (CompProperties_TempControl)this.props;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002B03 RID: 11011
-		// (get) Token: 0x06010C0C RID: 68620 RVA: 0x004D3E1C File Offset: 0x004D201C
-		public CompPowerTrader PowerTrader
+		[DebuggerHidden]
+		public _003CCompGetGizmosExtra_003Ed__14(int _003C_003E1__state)
 		{
-			get
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				CompPowerTrader result;
-				if ((result = this.intPowerTrader) == null)
+				try
 				{
-					result = (this.intPowerTrader = this.parent.GetComp<CompPowerTrader>());
 				}
-				return result;
-			}
-		}
-
-		// Token: 0x06010C0D RID: 68621 RVA: 0x004D3E47 File Offset: 0x004D2047
-		public override void PostSpawnSetup(bool respawningAfterLoad)
-		{
-			base.PostSpawnSetup(respawningAfterLoad);
-			if (this.TargetTemperature < -2000f)
-			{
-				this.TargetTemperature = this.Props.defaultTargetTemperature;
-			}
-		}
-
-		// Token: 0x06010C0E RID: 68622 RVA: 0x004D3E6E File Offset: 0x004D206E
-		public override void PostExposeData()
-		{
-			base.PostExposeData();
-			Scribe_Values.Look<float>(ref this.targetTemperature, "targetTemperature", 0f, false);
-		}
-
-		// Token: 0x06010C0F RID: 68623 RVA: 0x004D3E8C File Offset: 0x004D208C
-		protected float RoundedToCurrentTempModeOffset(float celsiusTemp)
-		{
-			return GenTemperature.ConvertTemperatureOffset((float)Mathf.RoundToInt(GenTemperature.CelsiusToOffset(celsiusTemp, Prefs.TemperatureMode)), Prefs.TemperatureMode, TemperatureDisplayMode.Celsius);
-		}
-
-		// Token: 0x06010C10 RID: 68624 RVA: 0x004D3EAA File Offset: 0x004D20AA
-		public override IEnumerable<Gizmo> CompGetGizmosExtra()
-		{
-			foreach (Gizmo gizmo in base.CompGetGizmosExtra())
-			{
-				yield return gizmo;
-			}
-			IEnumerator<Gizmo> enumerator = null;
-			float offset2 = this.RoundedToCurrentTempModeOffset(-10f);
-			yield return new Command_Action
-			{
-				action = delegate()
+				finally
 				{
-					this.InterfaceChangeTargetTemperature(offset2);
-				},
-				defaultLabel = offset2.ToStringTemperatureOffset("F0"),
-				defaultDesc = "CommandLowerTempDesc".Translate(),
-				hotKey = KeyBindingDefOf.Misc5,
-				icon = ContentFinder<Texture2D>.Get("UI/Commands/TempLower", true)
-			};
-			float offset3 = this.RoundedToCurrentTempModeOffset(-1f);
-			yield return new Command_Action
-			{
-				action = delegate()
-				{
-					this.InterfaceChangeTargetTemperature(offset3);
-				},
-				defaultLabel = offset3.ToStringTemperatureOffset("F0"),
-				defaultDesc = "CommandLowerTempDesc".Translate(),
-				hotKey = KeyBindingDefOf.Misc4,
-				icon = ContentFinder<Texture2D>.Get("UI/Commands/TempLower", true)
-			};
-			yield return new Command_Action
-			{
-				action = delegate()
-				{
-					this.TargetTemperature = 21f;
-					SoundDefOf.Tick_Tiny.PlayOneShotOnCamera(null);
-					this.ThrowCurrentTemperatureText();
-				},
-				defaultLabel = "CommandResetTemp".Translate(),
-				defaultDesc = "CommandResetTempDesc".Translate(),
-				hotKey = KeyBindingDefOf.Misc1,
-				icon = ContentFinder<Texture2D>.Get("UI/Commands/TempReset", true)
-			};
-			float offset4 = this.RoundedToCurrentTempModeOffset(1f);
-			yield return new Command_Action
-			{
-				action = delegate()
-				{
-					this.InterfaceChangeTargetTemperature(offset4);
-				},
-				defaultLabel = "+" + offset4.ToStringTemperatureOffset("F0"),
-				defaultDesc = "CommandRaiseTempDesc".Translate(),
-				hotKey = KeyBindingDefOf.Misc2,
-				icon = ContentFinder<Texture2D>.Get("UI/Commands/TempRaise", true)
-			};
-			float offset = this.RoundedToCurrentTempModeOffset(10f);
-			yield return new Command_Action
-			{
-				action = delegate()
-				{
-					this.InterfaceChangeTargetTemperature(offset);
-				},
-				defaultLabel = "+" + offset.ToStringTemperatureOffset("F0"),
-				defaultDesc = "CommandRaiseTempDesc".Translate(),
-				hotKey = KeyBindingDefOf.Misc3,
-				icon = ContentFinder<Texture2D>.Get("UI/Commands/TempRaise", true)
-			};
-			yield break;
-			yield break;
-		}
-
-		// Token: 0x06010C11 RID: 68625 RVA: 0x004D3EBA File Offset: 0x004D20BA
-		protected void InterfaceChangeTargetTemperature(float offset)
-		{
-			SoundDefOf.DragSlider.PlayOneShotOnCamera(null);
-			this.TargetTemperature += offset;
-			this.TargetTemperature = Mathf.Clamp(this.TargetTemperature, -273.15f, 1000f);
-			this.ThrowCurrentTemperatureText();
-		}
-
-		// Token: 0x06010C12 RID: 68626 RVA: 0x004D3EF8 File Offset: 0x004D20F8
-		protected void ThrowCurrentTemperatureText()
-		{
-			MoteMaker.ThrowText(this.parent.TrueCenter() + new Vector3(0.5f, 0f, 0.5f), this.parent.Map, this.TargetTemperature.ToStringTemperature("F0"), Color.white, -1f);
-		}
-
-		// Token: 0x06010C13 RID: 68627 RVA: 0x004D3F54 File Offset: 0x004D2154
-		public override string CompInspectStringExtra()
-		{
-			StringBuilder stringBuilder = new StringBuilder();
-			stringBuilder.Append((this.Props.inspectString ?? "TargetTemperature".Translate()) + ": ");
-			stringBuilder.AppendLine(this.TargetTemperature.ToStringTemperature("F0"));
-			if (this.PowerTrader != null)
-			{
-				string str;
-				if (this.PowerTrader.Off)
-				{
-					str = "PowerConsumptionOff".Translate();
+					_003C_003Em__Finally1();
 				}
-				else if (!this.operatingAtHighPower)
-				{
-					str = "PowerConsumptionLow".Translate();
-				}
-				else
-				{
-					str = "PowerConsumptionHigh".Translate();
-				}
-				stringBuilder.Append(string.Format("{0}: {1}", "PowerConsumptionMode".Translate(), str.CapitalizeFirst()));
 			}
-			return stringBuilder.ToString();
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x0400AE8C RID: 44684
-		protected const float DefaultTargetTemperature = 21f;
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				CompTempControl CS_0024_003C_003E8__locals23 = _003C_003E4__this;
+				_003C_003Ec__DisplayClass14_0 CS_0024_003C_003E8__locals27;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((ThingComp)CS_0024_003C_003E8__locals23).CompGetGizmosExtra().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0082;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0082;
+				case 2:
+				{
+					_003C_003E1__state = -1;
+					_003C_003Ec__DisplayClass14_1 CS_0024_003C_003E8__locals20 = new _003C_003Ec__DisplayClass14_1
+					{
+						_003C_003E4__this = CS_0024_003C_003E8__locals23,
+						offset = CS_0024_003C_003E8__locals23.RoundedToCurrentTempModeOffset(-1f)
+					};
+					_003C_003E2__current = new Command_Action
+					{
+						action = delegate
+						{
+							CS_0024_003C_003E8__locals20._003C_003E4__this.InterfaceChangeTargetTemperature(CS_0024_003C_003E8__locals20.offset);
+						},
+						defaultLabel = CS_0024_003C_003E8__locals20.offset.ToStringTemperatureOffset("F0"),
+						defaultDesc = "CommandLowerTempDesc".Translate(),
+						hotKey = KeyBindingDefOf.Misc4,
+						icon = ContentFinder<Texture2D>.Get("UI/Commands/TempLower")
+					};
+					_003C_003E1__state = 3;
+					return true;
+				}
+				case 3:
+					_003C_003E1__state = -1;
+					_003C_003E2__current = new Command_Action
+					{
+						action = delegate
+						{
+							CS_0024_003C_003E8__locals23.TargetTemperature = 21f;
+							SoundDefOf.Tick_Tiny.PlayOneShotOnCamera();
+							CS_0024_003C_003E8__locals23.ThrowCurrentTemperatureText();
+						},
+						defaultLabel = "CommandResetTemp".Translate(),
+						defaultDesc = "CommandResetTempDesc".Translate(),
+						hotKey = KeyBindingDefOf.Misc1,
+						icon = ContentFinder<Texture2D>.Get("UI/Commands/TempReset")
+					};
+					_003C_003E1__state = 4;
+					return true;
+				case 4:
+				{
+					_003C_003E1__state = -1;
+					_003C_003Ec__DisplayClass14_2 CS_0024_003C_003E8__locals12 = new _003C_003Ec__DisplayClass14_2
+					{
+						_003C_003E4__this = CS_0024_003C_003E8__locals23,
+						offset = CS_0024_003C_003E8__locals23.RoundedToCurrentTempModeOffset(1f)
+					};
+					_003C_003E2__current = new Command_Action
+					{
+						action = delegate
+						{
+							CS_0024_003C_003E8__locals12._003C_003E4__this.InterfaceChangeTargetTemperature(CS_0024_003C_003E8__locals12.offset);
+						},
+						defaultLabel = "+" + CS_0024_003C_003E8__locals12.offset.ToStringTemperatureOffset("F0"),
+						defaultDesc = "CommandRaiseTempDesc".Translate(),
+						hotKey = KeyBindingDefOf.Misc2,
+						icon = ContentFinder<Texture2D>.Get("UI/Commands/TempRaise")
+					};
+					_003C_003E1__state = 5;
+					return true;
+				}
+				case 5:
+				{
+					_003C_003E1__state = -1;
+					_003C_003Ec__DisplayClass14_3 CS_0024_003C_003E8__locals6 = new _003C_003Ec__DisplayClass14_3
+					{
+						_003C_003E4__this = CS_0024_003C_003E8__locals23,
+						offset = CS_0024_003C_003E8__locals23.RoundedToCurrentTempModeOffset(10f)
+					};
+					_003C_003E2__current = new Command_Action
+					{
+						action = delegate
+						{
+							CS_0024_003C_003E8__locals6._003C_003E4__this.InterfaceChangeTargetTemperature(CS_0024_003C_003E8__locals6.offset);
+						},
+						defaultLabel = "+" + CS_0024_003C_003E8__locals6.offset.ToStringTemperatureOffset("F0"),
+						defaultDesc = "CommandRaiseTempDesc".Translate(),
+						hotKey = KeyBindingDefOf.Misc3,
+						icon = ContentFinder<Texture2D>.Get("UI/Commands/TempRaise")
+					};
+					_003C_003E1__state = 6;
+					return true;
+				}
+				case 6:
+					{
+						_003C_003E1__state = -1;
+						return false;
+					}
+					IL_0082:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Gizmo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					CS_0024_003C_003E8__locals27 = new _003C_003Ec__DisplayClass14_0
+					{
+						_003C_003E4__this = CS_0024_003C_003E8__locals23,
+						offset = CS_0024_003C_003E8__locals23.RoundedToCurrentTempModeOffset(-10f)
+					};
+					_003C_003E2__current = new Command_Action
+					{
+						action = delegate
+						{
+							CS_0024_003C_003E8__locals27._003C_003E4__this.InterfaceChangeTargetTemperature(CS_0024_003C_003E8__locals27.offset);
+						},
+						defaultLabel = CS_0024_003C_003E8__locals27.offset.ToStringTemperatureOffset("F0"),
+						defaultDesc = "CommandLowerTempDesc".Translate(),
+						hotKey = KeyBindingDefOf.Misc5,
+						icon = ContentFinder<Texture2D>.Get("UI/Commands/TempLower")
+					};
+					_003C_003E1__state = 2;
+					return true;
+				}
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
 
-		// Token: 0x0400AE8D RID: 44685
-		public bool operatingAtHighPower;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x0400AE8E RID: 44686
-		private CompPowerTrader intPowerTrader;
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
 
-		// Token: 0x0400AE8F RID: 44687
-		public float targetTemperature = -99999f;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CCompGetGizmosExtra_003Ed__14 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CCompGetGizmosExtra_003Ed__14(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	protected const float DefaultTargetTemperature = 21f;
+
+	public bool operatingAtHighPower;
+
+	private CompPowerTrader intPowerTrader;
+
+	public float targetTemperature = -99999f;
+
+	public virtual float TargetTemperature
+	{
+		get
+		{
+			return targetTemperature;
+		}
+		set
+		{
+			targetTemperature = value;
+		}
+	}
+
+	public CompProperties_TempControl Props => (CompProperties_TempControl)props;
+
+	public CompPowerTrader PowerTrader => intPowerTrader ?? (intPowerTrader = parent.GetComp<CompPowerTrader>());
+
+	public override void PostSpawnSetup(bool respawningAfterLoad)
+	{
+		base.PostSpawnSetup(respawningAfterLoad);
+		if (TargetTemperature < -2000f)
+		{
+			TargetTemperature = Props.defaultTargetTemperature;
+		}
+	}
+
+	public override void PostExposeData()
+	{
+		base.PostExposeData();
+		Scribe_Values.Look(ref targetTemperature, "targetTemperature", 0f);
+	}
+
+	protected float RoundedToCurrentTempModeOffset(float celsiusTemp)
+	{
+		return GenTemperature.ConvertTemperatureOffset(Mathf.RoundToInt(GenTemperature.CelsiusToOffset(celsiusTemp, Prefs.TemperatureMode)), Prefs.TemperatureMode, TemperatureDisplayMode.Celsius);
+	}
+
+	[IteratorStateMachine(typeof(_003CCompGetGizmosExtra_003Ed__14))]
+	public override IEnumerable<Gizmo> CompGetGizmosExtra()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CCompGetGizmosExtra_003Ed__14(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	protected void InterfaceChangeTargetTemperature(float offset)
+	{
+		SoundDefOf.DragSlider.PlayOneShotOnCamera();
+		TargetTemperature += offset;
+		TargetTemperature = Mathf.Clamp(TargetTemperature, -273.15f, 1000f);
+		ThrowCurrentTemperatureText();
+	}
+
+	protected void ThrowCurrentTemperatureText()
+	{
+		MoteMaker.ThrowText(parent.TrueCenter() + new Vector3(0.5f, 0f, 0.5f), parent.Map, TargetTemperature.ToStringTemperature("F0"), Color.white);
+	}
+
+	public override string CompInspectStringExtra()
+	{
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.Append((Props.inspectString ?? ((string)"TargetTemperature".Translate())) + ": ");
+		stringBuilder.AppendLine(TargetTemperature.ToStringTemperature("F0"));
+		if (PowerTrader != null)
+		{
+			string str = (PowerTrader.Off ? ((string)"PowerConsumptionOff".Translate()) : (operatingAtHighPower ? ((string)"PowerConsumptionHigh".Translate()) : ((string)"PowerConsumptionLow".Translate())));
+			stringBuilder.Append($"{"PowerConsumptionMode".Translate()}: {str.CapitalizeFirst()}");
+		}
+		return stringBuilder.ToString();
 	}
 }

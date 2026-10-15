@@ -1,171 +1,276 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class EntityCodexEntryDef : Def
 {
-	// Token: 0x02001A1D RID: 6685
-	public class EntityCodexEntryDef : Def
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__23 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x170016F9 RID: 5881
-		// (get) Token: 0x060096A9 RID: 38569 RVA: 0x002C11E2 File Offset: 0x002BF3E2
-		public string Description
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public EntityCodexEntryDef _003C_003E4__this;
+
+		private IEnumerator<string> _003C_003E7__wrap1;
+
+		string IEnumerator<string>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.useDescriptionFrom == null)
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__23(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
 				{
-					return this.description;
 				}
-				return this.useDescriptionFrom.description;
-			}
-		}
-
-		// Token: 0x170016FA RID: 5882
-		// (get) Token: 0x060096AA RID: 38570 RVA: 0x002C11FE File Offset: 0x002BF3FE
-		public bool Discovered
-		{
-			get
-			{
-				return Find.EntityCodex.Discovered(this);
-			}
-		}
-
-		// Token: 0x170016FB RID: 5883
-		// (get) Token: 0x060096AB RID: 38571 RVA: 0x002C120B File Offset: 0x002BF40B
-		public bool Visible
-		{
-			get
-			{
-				return Current.ProgramState != ProgramState.Playing || !this.hideInPlaystyles.Contains(Find.Storyteller.difficulty.AnomalyPlaystyleDef);
-			}
-		}
-
-		// Token: 0x060096AC RID: 38572 RVA: 0x002C1234 File Offset: 0x002BF434
-		public override void PostLoad()
-		{
-			LongEventHandler.ExecuteWhenFinished(delegate
-			{
-				this.icon = (this.uiIconPath.NullOrEmpty() ? BaseContent.BadTex : ContentFinder<Texture2D>.Get(this.uiIconPath, true));
-				this.silhouette = (this.uiIconPath.NullOrEmpty() ? BaseContent.BadTex : ContentFinder<Texture2D>.Get(this.uiIconPath + "_Silhouette", true));
-			});
-		}
-
-		// Token: 0x060096AD RID: 38573 RVA: 0x002C1248 File Offset: 0x002BF448
-		public override void ResolveReferences()
-		{
-			base.ResolveReferences();
-			foreach (ThingDef thingDef in this.linkedThings)
-			{
-				if (thingDef.entityCodexEntry == null)
+				finally
 				{
-					thingDef.entityCodexEntry = this;
+					_003C_003Em__Finally1();
 				}
-				else
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				EntityCodexEntryDef entityCodexEntryDef = _003C_003E4__this;
+				switch (num)
 				{
-					Log.Error(string.Concat(new string[]
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((Def)entityCodexEntryDef).ConfigErrors().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0073;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0073;
+				case 2:
+					_003C_003E1__state = -1;
+					goto IL_00b2;
+				case 3:
 					{
-						"EntityCodexEntryDef ",
-						this.defName,
-						" is linked to ",
-						thingDef.defName,
-						" but ",
-						thingDef.defName,
-						" is already linked to ",
-						thingDef.entityCodexEntry.defName,
-						"."
-					}));
-				}
-			}
-			foreach (IncidentDef incidentDef in this.linkedIncidents)
-			{
-				if (incidentDef.codexEntry == null)
-				{
-					incidentDef.codexEntry = this;
-				}
-				else
-				{
-					Log.Error(string.Concat(new string[]
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_0073:
+					if (_003C_003E7__wrap1.MoveNext())
 					{
-						"EntityCodexEntryDef ",
-						this.defName,
-						" is linked to ",
-						incidentDef.defName,
-						" but ",
-						incidentDef.defName,
-						" is already linked to ",
-						incidentDef.codexEntry.defName,
-						"."
-					}));
+						string current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (entityCodexEntryDef.category == null)
+					{
+						_003C_003E2__current = "category is null.";
+						_003C_003E1__state = 2;
+						return true;
+					}
+					goto IL_00b2;
+					IL_00b2:
+					if (entityCodexEntryDef.uiIconPath.NullOrEmpty())
+					{
+						_003C_003E2__current = "missing icon.";
+						_003C_003E1__state = 3;
+						return true;
+					}
+					break;
 				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x060096AE RID: 38574 RVA: 0x002C13C4 File Offset: 0x002BF5C4
-		public override IEnumerable<string> ConfigErrors()
+		bool IEnumerator.MoveNext()
 		{
-			foreach (string text in base.ConfigErrors())
-			{
-				yield return text;
-			}
-			IEnumerator<string> enumerator = null;
-			if (this.category == null)
-			{
-				yield return "category is null.";
-			}
-			if (this.uiIconPath.NullOrEmpty())
-			{
-				yield return "missing icon.";
-			}
-			yield break;
-			yield break;
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0400632F RID: 25391
-		public EntityCategoryDef category;
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
 
-		// Token: 0x04006330 RID: 25392
-		public bool startDiscovered;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04006331 RID: 25393
-		public List<ThingDef> linkedThings = new List<ThingDef>();
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__23 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__23(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x04006332 RID: 25394
-		private List<IncidentDef> linkedIncidents = new List<IncidentDef>();
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x04006333 RID: 25395
-		public List<ResearchProjectDef> discoveredResearchProjects = new List<ResearchProjectDef>();
+	public EntityCategoryDef category;
 
-		// Token: 0x04006334 RID: 25396
-		public List<IncidentDef> provocationIncidents = new List<IncidentDef>();
+	public bool startDiscovered;
 
-		// Token: 0x04006335 RID: 25397
-		public EntityDiscoveryType discoveryType;
+	public List<ThingDef> linkedThings = new List<ThingDef>();
 
-		// Token: 0x04006336 RID: 25398
-		public bool allowDiscoveryWhileMapGenerating;
+	private List<IncidentDef> linkedIncidents = new List<IncidentDef>();
 
-		// Token: 0x04006337 RID: 25399
-		public int orderInCategory = 9999999;
+	public List<ResearchProjectDef> discoveredResearchProjects = new List<ResearchProjectDef>();
 
-		// Token: 0x04006338 RID: 25400
-		public List<AnomalyPlaystyleDef> hideInPlaystyles = new List<AnomalyPlaystyleDef>();
+	public List<IncidentDef> provocationIncidents = new List<IncidentDef>();
 
-		// Token: 0x04006339 RID: 25401
-		private ThingDef useDescriptionFrom;
+	public EntityDiscoveryType discoveryType;
 
-		// Token: 0x0400633A RID: 25402
-		[NoTranslate]
-		private string uiIconPath;
+	public bool allowDiscoveryWhileMapGenerating;
 
-		// Token: 0x0400633B RID: 25403
-		public Texture2D icon;
+	public int orderInCategory = 9999999;
 
-		// Token: 0x0400633C RID: 25404
-		public Texture2D silhouette;
+	public List<AnomalyPlaystyleDef> hideInPlaystyles = new List<AnomalyPlaystyleDef>();
 
-		// Token: 0x0400633D RID: 25405
-		private const string SilhouetteTexPathSuffix = "_Silhouette";
+	private ThingDef useDescriptionFrom;
+
+	[NoTranslate]
+	private string uiIconPath;
+
+	public Texture2D icon;
+
+	public Texture2D silhouette;
+
+	private const string SilhouetteTexPathSuffix = "_Silhouette";
+
+	public string Description
+	{
+		get
+		{
+			if (useDescriptionFrom == null)
+			{
+				return description;
+			}
+			return useDescriptionFrom.description;
+		}
+	}
+
+	public bool Discovered => Find.EntityCodex.Discovered(this);
+
+	public bool Visible
+	{
+		get
+		{
+			if (Current.ProgramState == ProgramState.Playing)
+			{
+				return !hideInPlaystyles.Contains(Find.Storyteller.difficulty.AnomalyPlaystyleDef);
+			}
+			return true;
+		}
+	}
+
+	public override void PostLoad()
+	{
+		LongEventHandler.ExecuteWhenFinished(delegate
+		{
+			icon = (uiIconPath.NullOrEmpty() ? BaseContent.BadTex : ContentFinder<Texture2D>.Get(uiIconPath));
+			silhouette = (uiIconPath.NullOrEmpty() ? BaseContent.BadTex : ContentFinder<Texture2D>.Get(uiIconPath + "_Silhouette"));
+		});
+	}
+
+	public override void ResolveReferences()
+	{
+		base.ResolveReferences();
+		foreach (ThingDef linkedThing in linkedThings)
+		{
+			if (linkedThing.entityCodexEntry == null)
+			{
+				linkedThing.entityCodexEntry = this;
+				continue;
+			}
+			Log.Error($"EntityCodexEntryDef {defName} is linked to {linkedThing.defName} but {linkedThing.defName} is already linked to {linkedThing.entityCodexEntry.defName}.");
+		}
+		foreach (IncidentDef linkedIncident in linkedIncidents)
+		{
+			if (linkedIncident.codexEntry == null)
+			{
+				linkedIncident.codexEntry = this;
+				continue;
+			}
+			Log.Error($"EntityCodexEntryDef {defName} is linked to {linkedIncident.defName} but {linkedIncident.defName} is already linked to {linkedIncident.codexEntry.defName}.");
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__23))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__23(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

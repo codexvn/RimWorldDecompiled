@@ -1,48 +1,193 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class RoomRequirement_Area : RoomRequirement
 {
-	// Token: 0x020037A4 RID: 14244
-	public class RoomRequirement_Area : RoomRequirement
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__3 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x06013BB9 RID: 80825 RVA: 0x005DC6E4 File Offset: 0x005DA8E4
-		public override string Label(Room r = null)
-		{
-			return ((!this.labelKey.NullOrEmpty()) ? this.labelKey : "RoomRequirementArea").Translate(((r != null) ? (r.CellCount.ToString() + "/") : "") + this.area.ToString());
-		}
+		private int _003C_003E1__state;
 
-		// Token: 0x06013BBA RID: 80826 RVA: 0x005DC74C File Offset: 0x005DA94C
-		public override bool Met(Room r, Pawn p = null)
-		{
-			return r.CellCount >= this.area;
-		}
+		private string _003C_003E2__current;
 
-		// Token: 0x06013BBB RID: 80827 RVA: 0x005DC75F File Offset: 0x005DA95F
-		public override IEnumerable<string> ConfigErrors()
+		private int _003C_003El__initialThreadId;
+
+		public RoomRequirement_Area _003C_003E4__this;
+
+		private IEnumerator<string> _003C_003E7__wrap1;
+
+		string IEnumerator<string>.Current
 		{
-			foreach (string text in base.ConfigErrors())
+			[DebuggerHidden]
+			get
 			{
-				yield return text;
+				return _003C_003E2__current;
 			}
-			IEnumerator<string> enumerator = null;
-			if (this.area <= 0)
-			{
-				yield return "area must be larger than 0";
-			}
-			yield break;
-			yield break;
 		}
 
-		// Token: 0x06013BBC RID: 80828 RVA: 0x005DC76F File Offset: 0x005DA96F
-		public override void ExposeData()
+		object IEnumerator.Current
 		{
-			base.ExposeData();
-			Scribe_Values.Look<int>(ref this.area, "area", 0, false);
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x0400DAA7 RID: 55975
-		public int area;
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__3(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				RoomRequirement_Area roomRequirement_Area = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((RoomRequirement)roomRequirement_Area).ConfigErrors().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_006f:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (roomRequirement_Area.area <= 0)
+					{
+						_003C_003E2__current = "area must be larger than 0";
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__3 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__3(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	public int area;
+
+	public override string Label(Room r = null)
+	{
+		return ((!labelKey.NullOrEmpty()) ? labelKey : "RoomRequirementArea").Translate(((r != null) ? (r.CellCount + "/") : "") + area);
+	}
+
+	public override bool Met(Room r, Pawn p = null)
+	{
+		return r.CellCount >= area;
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__3))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__3(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref area, "area", 0);
 	}
 }

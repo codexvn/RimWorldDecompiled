@@ -1,35 +1,139 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_ChimeraSwitchToAttackMode : JobDriver
 {
-	// Token: 0x02001239 RID: 4665
-	public class JobDriver_ChimeraSwitchToAttackMode : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__1 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x0600721F RID: 29215 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_ChimeraSwitchToAttackMode _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
 		{
-			return true;
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x06007220 RID: 29216 RVA: 0x002339DF File Offset: 0x00231BDF
-		protected override IEnumerable<Toil> MakeNewToils()
+		object IEnumerator.Current
 		{
-			Toil toil = ToilMaker.MakeToil("MakeNewToils");
-			toil.defaultCompleteMode = ToilCompleteMode.Instant;
-			toil.initAction = delegate()
+			[DebuggerHidden]
+			get
 			{
-				Lord lord = this.pawn.GetLord();
-				if (((lord != null) ? lord.LordJob : null) is LordJob_ChimeraAssault)
-				{
-					lord.ReceiveMemo("StalkToAttack");
-				}
-			};
-			yield return toil;
-			yield break;
+				return _003C_003E2__current;
+			}
 		}
+
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__1(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_ChimeraSwitchToAttackMode CS_0024_003C_003E8__locals1 = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+			{
+				_003C_003E1__state = -1;
+				Toil toil = ToilMaker.MakeToil("MakeNewToils");
+				toil.defaultCompleteMode = ToilCompleteMode.Instant;
+				toil.initAction = delegate
+				{
+					Lord lord = CS_0024_003C_003E8__locals1.pawn.GetLord();
+					if (lord?.LordJob is LordJob_ChimeraAssault)
+					{
+						lord.ReceiveMemo("StalkToAttack");
+					}
+				};
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 1;
+				return true;
+			}
+			case 1:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__1 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__1(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return true;
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__1))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__1(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

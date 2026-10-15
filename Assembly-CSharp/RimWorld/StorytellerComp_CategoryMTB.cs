@@ -1,46 +1,149 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class StorytellerComp_CategoryMTB : StorytellerComp
 {
-	// Token: 0x02001E30 RID: 7728
-	public class StorytellerComp_CategoryMTB : StorytellerComp
+	[CompilerGenerated]
+	private sealed class _003CMakeIntervalIncidents_003Ed__2 : IEnumerable<FiringIncident>, IEnumerable, IEnumerator<FiringIncident>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001A35 RID: 6709
-		// (get) Token: 0x0600AC10 RID: 44048 RVA: 0x003135BF File Offset: 0x003117BF
-		protected StorytellerCompProperties_CategoryMTB Props
+		private int _003C_003E1__state;
+
+		private FiringIncident _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public StorytellerComp_CategoryMTB _003C_003E4__this;
+
+		private IIncidentTarget target;
+
+		public IIncidentTarget _003C_003E3__target;
+
+		FiringIncident IEnumerator<FiringIncident>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (StorytellerCompProperties_CategoryMTB)this.props;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600AC11 RID: 44049 RVA: 0x003135CC File Offset: 0x003117CC
-		public override IEnumerable<FiringIncident> MakeIntervalIncidents(IIncidentTarget target)
+		object IEnumerator.Current
 		{
-			float num = this.Props.mtbDays;
-			if (this.Props.mtbDaysFactorByDaysPassedCurve != null)
+			[DebuggerHidden]
+			get
 			{
-				num *= this.Props.mtbDaysFactorByDaysPassedCurve.Evaluate(GenDate.DaysPassedSinceSettleFloat);
+				return _003C_003E2__current;
 			}
-			if (Rand.MTBEventOccurs(num, 60000f, 1000f))
+		}
+
+		[DebuggerHidden]
+		public _003CMakeIntervalIncidents_003Ed__2(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			StorytellerComp_CategoryMTB storytellerComp_CategoryMTB = _003C_003E4__this;
+			switch (num)
 			{
-				IncidentParms parms = this.GenerateParms(this.Props.category, target);
-				IncidentDef def;
-				if (base.TrySelectRandomIncident(base.UsableIncidentsInCategory(this.Props.category, parms), out def, target))
+			default:
+				return false;
+			case 0:
+			{
+				_003C_003E1__state = -1;
+				float num2 = storytellerComp_CategoryMTB.Props.mtbDays;
+				if (storytellerComp_CategoryMTB.Props.mtbDaysFactorByDaysPassedCurve != null)
 				{
-					yield return new FiringIncident(def, this, parms);
+					num2 *= storytellerComp_CategoryMTB.Props.mtbDaysFactorByDaysPassedCurve.Evaluate(GenDate.DaysPassedSinceSettleFloat);
 				}
+				if (Rand.MTBEventOccurs(num2, 60000f, 1000f))
+				{
+					IncidentParms parms = storytellerComp_CategoryMTB.GenerateParms(storytellerComp_CategoryMTB.Props.category, target);
+					if (storytellerComp_CategoryMTB.TrySelectRandomIncident(storytellerComp_CategoryMTB.UsableIncidentsInCategory(storytellerComp_CategoryMTB.Props.category, parms), out var foundDef, target))
+					{
+						_003C_003E2__current = new FiringIncident(foundDef, storytellerComp_CategoryMTB, parms);
+						_003C_003E1__state = 1;
+						return true;
+					}
+				}
+				break;
 			}
-			yield break;
+			case 1:
+				_003C_003E1__state = -1;
+				break;
+			}
+			return false;
 		}
 
-		// Token: 0x0600AC12 RID: 44050 RVA: 0x003135E3 File Offset: 0x003117E3
-		public override string ToString()
+		bool IEnumerator.MoveNext()
 		{
-			return string.Format("{0} {1}", base.ToString(), this.Props.category);
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<FiringIncident> IEnumerable<FiringIncident>.GetEnumerator()
+		{
+			_003CMakeIntervalIncidents_003Ed__2 _003CMakeIntervalIncidents_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CMakeIntervalIncidents_003Ed__ = this;
+			}
+			else
+			{
+				_003CMakeIntervalIncidents_003Ed__ = new _003CMakeIntervalIncidents_003Ed__2(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CMakeIntervalIncidents_003Ed__.target = _003C_003E3__target;
+			return _003CMakeIntervalIncidents_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<FiringIncident>)this).GetEnumerator();
+		}
+	}
+
+	protected StorytellerCompProperties_CategoryMTB Props => (StorytellerCompProperties_CategoryMTB)props;
+
+	[IteratorStateMachine(typeof(_003CMakeIntervalIncidents_003Ed__2))]
+	public override IEnumerable<FiringIncident> MakeIntervalIncidents(IIncidentTarget target)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeIntervalIncidents_003Ed__2(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__target = target
+		};
+	}
+
+	public override string ToString()
+	{
+		return $"{base.ToString()} {Props.category}";
 	}
 }

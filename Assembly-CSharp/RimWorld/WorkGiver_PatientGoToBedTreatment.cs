@@ -1,45 +1,40 @@
-﻿using System;
 using System.Collections.Generic;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
-{
-	// Token: 0x020015FE RID: 5630
-	public class WorkGiver_PatientGoToBedTreatment : WorkGiver_PatientGoToBedRecuperate
-	{
-		// Token: 0x060084DC RID: 34012 RVA: 0x0027CA1F File Offset: 0x0027AC1F
-		public override Job NonScanJob(Pawn pawn)
-		{
-			if (!HealthAIUtility.ShouldSeekMedicalRestUrgent(pawn))
-			{
-				return null;
-			}
-			if (!WorkGiver_PatientGoToBedTreatment.AnyAvailableDoctorFor(pawn))
-			{
-				return null;
-			}
-			return base.NonScanJob(pawn);
-		}
+namespace RimWorld;
 
-		// Token: 0x060084DD RID: 34013 RVA: 0x0027CA3C File Offset: 0x0027AC3C
-		public static bool AnyAvailableDoctorFor(Pawn pawn)
+public class WorkGiver_PatientGoToBedTreatment : WorkGiver_PatientGoToBedRecuperate
+{
+	public override Job NonScanJob(Pawn pawn)
+	{
+		if (!HealthAIUtility.ShouldSeekMedicalRestUrgent(pawn))
 		{
-			Map mapHeld = pawn.MapHeld;
-			if (mapHeld == null)
-			{
-				return false;
-			}
-			List<Pawn> list = mapHeld.mapPawns.SpawnedPawnsInFaction(Faction.OfPlayer);
-			for (int i = 0; i < list.Count; i++)
-			{
-				Pawn pawn2 = list[i];
-				if (pawn2 != pawn && (pawn2.RaceProps.Humanlike || pawn2.IsColonyMechPlayerControlled) && !pawn2.Downed && pawn2.Awake() && !pawn2.InBed() && !pawn2.InMentalState && !pawn2.IsPrisoner && pawn2.workSettings != null && pawn2.workSettings.EverWork && pawn2.workSettings.WorkIsActive(WorkTypeDefOf.Doctor) && pawn2.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation) && pawn2.CanReach(pawn, PathEndMode.Touch, Danger.Deadly, false, false, TraverseMode.ByPawn))
-				{
-					return true;
-				}
-			}
+			return null;
+		}
+		if (!AnyAvailableDoctorFor(pawn))
+		{
+			return null;
+		}
+		return base.NonScanJob(pawn);
+	}
+
+	public static bool AnyAvailableDoctorFor(Pawn pawn)
+	{
+		Map mapHeld = pawn.MapHeld;
+		if (mapHeld == null)
+		{
 			return false;
 		}
+		List<Pawn> list = mapHeld.mapPawns.SpawnedPawnsInFaction(Faction.OfPlayer);
+		for (int i = 0; i < list.Count; i++)
+		{
+			Pawn pawn2 = list[i];
+			if (pawn2 != pawn && (pawn2.RaceProps.Humanlike || pawn2.IsColonyMechPlayerControlled) && !pawn2.Downed && pawn2.Awake() && !pawn2.InBed() && !pawn2.InMentalState && !pawn2.IsPrisoner && pawn2.workSettings != null && pawn2.workSettings.EverWork && pawn2.workSettings.WorkIsActive(WorkTypeDefOf.Doctor) && pawn2.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation) && pawn2.CanReach(pawn, PathEndMode.Touch, Danger.Deadly))
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 }

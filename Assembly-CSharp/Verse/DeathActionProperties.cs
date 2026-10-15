@@ -1,36 +1,114 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
-namespace Verse
+namespace Verse;
+
+public class DeathActionProperties
 {
-	// Token: 0x0200018D RID: 397
-	public class DeathActionProperties
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__4 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x170001BA RID: 442
-		// (get) Token: 0x06000B49 RID: 2889 RVA: 0x00035C8B File Offset: 0x00033E8B
-		public DeathActionWorker Worker
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		string IEnumerator<string>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.workerInt == null)
-				{
-					this.workerInt = (Activator.CreateInstance(this.workerClass) as DeathActionWorker);
-					this.workerInt.props = this;
-				}
-				return this.workerInt;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06000B4A RID: 2890 RVA: 0x00035CBD File Offset: 0x00033EBD
-		public virtual IEnumerable<string> ConfigErrors()
+		object IEnumerator.Current
 		{
-			yield break;
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x0400067A RID: 1658
-		public Type workerClass = typeof(DeathActionWorker_Simple);
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__4(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
 
-		// Token: 0x0400067B RID: 1659
-		private DeathActionWorker workerInt;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			if (_003C_003E1__state != 0)
+			{
+				return false;
+			}
+			_003C_003E1__state = -1;
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				return this;
+			}
+			return new _003CConfigErrors_003Ed__4(0);
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	public Type workerClass = typeof(DeathActionWorker_Simple);
+
+	private DeathActionWorker workerInt;
+
+	public DeathActionWorker Worker
+	{
+		get
+		{
+			if (workerInt == null)
+			{
+				workerInt = Activator.CreateInstance(workerClass) as DeathActionWorker;
+				workerInt.props = this;
+			}
+			return workerInt;
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__4))]
+	public virtual IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__4(-2);
 	}
 }

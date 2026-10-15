@@ -1,71 +1,242 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class QuestPart_ReleaseParalyzedAnimals : QuestPart
 {
-	// Token: 0x02001C7F RID: 7295
-	public class QuestPart_ReleaseParalyzedAnimals : QuestPart
+	[CompilerGenerated]
+	private sealed class _003Cget_QuestLookTargets_003Ed__2 : IEnumerable<GlobalTargetInfo>, IEnumerable, IEnumerator<GlobalTargetInfo>, IEnumerator, IDisposable
 	{
-		// Token: 0x170018F9 RID: 6393
-		// (get) Token: 0x0600A28C RID: 41612 RVA: 0x002EBEF3 File Offset: 0x002EA0F3
-		public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+		private int _003C_003E1__state;
+
+		private GlobalTargetInfo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public QuestPart_ReleaseParalyzedAnimals _003C_003E4__this;
+
+		private IEnumerator<GlobalTargetInfo> _003C_003E7__wrap1;
+
+		private IEnumerator<Pawn> _003C_003E7__wrap2;
+
+		GlobalTargetInfo IEnumerator<GlobalTargetInfo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				foreach (GlobalTargetInfo globalTargetInfo in base.QuestLookTargets)
-				{
-					yield return globalTargetInfo;
-				}
-				IEnumerator<GlobalTargetInfo> enumerator = null;
-				foreach (Pawn t in PawnsArriveQuestPartUtility.GetQuestLookTargets(this.pawns))
-				{
-					yield return t;
-				}
-				IEnumerator<Pawn> enumerator2 = null;
-				yield break;
-				yield break;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600A28D RID: 41613 RVA: 0x002EBF03 File Offset: 0x002EA103
-		private bool IsParalyzed(Pawn pawn)
+		object IEnumerator.Current
 		{
-			return pawn.health.hediffSet.HasHediff(HediffDefOf.Abasia, false);
-		}
-
-		// Token: 0x0600A28E RID: 41614 RVA: 0x002EBF1C File Offset: 0x002EA11C
-		public override void Cleanup()
-		{
-			base.Cleanup();
-			for (int i = 0; i < this.pawns.Count; i++)
+			[DebuggerHidden]
+			get
 			{
-				if (this.pawns[i].RaceProps.Animal && this.IsParalyzed(this.pawns[i]) && this.pawns[i].Faction != null)
-				{
-					this.pawns[i].SetFaction(null, null);
-				}
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600A28F RID: 41615 RVA: 0x002EBF98 File Offset: 0x002EA198
-		public override void ExposeData()
+		[DebuggerHidden]
+		public _003Cget_QuestLookTargets_003Ed__2(int _003C_003E1__state)
 		{
-			base.ExposeData();
-			Scribe_Collections.Look<Pawn>(ref this.pawns, "pawns", LookMode.Reference, Array.Empty<object>());
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			switch (_003C_003E1__state)
 			{
-				this.pawns.RemoveAll((Pawn x) => x == null);
+			case -3:
+			case 1:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+				break;
+			case -4:
+			case 2:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally2();
+				}
+				break;
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E7__wrap2 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				QuestPart_ReleaseParalyzedAnimals questPart_ReleaseParalyzedAnimals = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((QuestPart)questPart_ReleaseParalyzedAnimals).QuestLookTargets.GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0072;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0072;
+				case 2:
+					{
+						_003C_003E1__state = -4;
+						break;
+					}
+					IL_0072:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						GlobalTargetInfo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					_003C_003E7__wrap2 = PawnsArriveQuestPartUtility.GetQuestLookTargets(questPart_ReleaseParalyzedAnimals.pawns).GetEnumerator();
+					_003C_003E1__state = -4;
+					break;
+				}
+				if (_003C_003E7__wrap2.MoveNext())
+				{
+					Pawn current2 = _003C_003E7__wrap2.Current;
+					_003C_003E2__current = current2;
+					_003C_003E1__state = 2;
+					return true;
+				}
+				_003C_003Em__Finally2();
+				_003C_003E7__wrap2 = null;
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x0600A290 RID: 41616 RVA: 0x002EBFF4 File Offset: 0x002EA1F4
-		public override void ReplacePawnReferences(Pawn replace, Pawn with)
+		bool IEnumerator.MoveNext()
 		{
-			this.pawns.Replace(replace, with);
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x04007076 RID: 28790
-		public List<Pawn> pawns = new List<Pawn>();
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap2 != null)
+			{
+				_003C_003E7__wrap2.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<GlobalTargetInfo> IEnumerable<GlobalTargetInfo>.GetEnumerator()
+		{
+			_003Cget_QuestLookTargets_003Ed__2 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_QuestLookTargets_003Ed__2(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<GlobalTargetInfo>)this).GetEnumerator();
+		}
+	}
+
+	public List<Pawn> pawns = new List<Pawn>();
+
+	public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+	{
+		[IteratorStateMachine(typeof(_003Cget_QuestLookTargets_003Ed__2))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_QuestLookTargets_003Ed__2(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	private bool IsParalyzed(Pawn pawn)
+	{
+		return pawn.health.hediffSet.HasHediff(HediffDefOf.Abasia);
+	}
+
+	public override void Cleanup()
+	{
+		base.Cleanup();
+		for (int i = 0; i < pawns.Count; i++)
+		{
+			if (pawns[i].RaceProps.Animal && IsParalyzed(pawns[i]) && pawns[i].Faction != null)
+			{
+				pawns[i].SetFaction(null);
+			}
+		}
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Collections.Look(ref pawns, "pawns", LookMode.Reference);
+		if (Scribe.mode == LoadSaveMode.PostLoadInit)
+		{
+			pawns.RemoveAll((Pawn x) => x == null);
+		}
+	}
+
+	public override void ReplacePawnReferences(Pawn replace, Pawn with)
+	{
+		pawns.Replace(replace, with);
 	}
 }

@@ -1,78 +1,173 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class QuestPart_RequirementsToAcceptThroneRoom : QuestPart_RequirementsToAccept
 {
-	// Token: 0x02001C9A RID: 7322
-	public class QuestPart_RequirementsToAcceptThroneRoom : QuestPart_RequirementsToAccept
+	[CompilerGenerated]
+	private sealed class _003Cget_Hyperlinks_003Ed__4 : IEnumerable<Dialog_InfoCard.Hyperlink>, IEnumerable, IEnumerator<Dialog_InfoCard.Hyperlink>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001916 RID: 6422
-		// (get) Token: 0x0600A321 RID: 41761 RVA: 0x002ED9F3 File Offset: 0x002EBBF3
-		public override IEnumerable<Dialog_InfoCard.Hyperlink> Hyperlinks
+		private int _003C_003E1__state;
+
+		private Dialog_InfoCard.Hyperlink _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public QuestPart_RequirementsToAcceptThroneRoom _003C_003E4__this;
+
+		Dialog_InfoCard.Hyperlink IEnumerator<Dialog_InfoCard.Hyperlink>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				yield return new Dialog_InfoCard.Hyperlink(this.forTitle, this.faction, -1);
-				yield break;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600A322 RID: 41762 RVA: 0x002EDA04 File Offset: 0x002EBC04
-		public override AcceptanceReport CanAccept()
+		object IEnumerator.Current
 		{
-			this.acceptanceReportUnmetRequirements.Clear();
-			if (this.forTitle.throneRoomRequirements.NullOrEmpty<RoomRequirement>())
+			[DebuggerHidden]
+			get
 			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003Cget_Hyperlinks_003Ed__4(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			QuestPart_RequirementsToAcceptThroneRoom questPart_RequirementsToAcceptThroneRoom = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = new Dialog_InfoCard.Hyperlink(questPart_RequirementsToAcceptThroneRoom.forTitle, questPart_RequirementsToAcceptThroneRoom.faction);
+				_003C_003E1__state = 1;
 				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				return false;
 			}
-			Building_Throne assignedThrone = this.forPawn.ownership.AssignedThrone;
-			if (assignedThrone == null)
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Dialog_InfoCard.Hyperlink> IEnumerable<Dialog_InfoCard.Hyperlink>.GetEnumerator()
+		{
+			_003Cget_Hyperlinks_003Ed__4 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				return "QuestNoThroneRoom".Translate(this.forPawn.Named("PAWN"));
+				_003C_003E1__state = 0;
+				result = this;
 			}
-			foreach (RoomRequirement roomRequirement in this.forTitle.throneRoomRequirements)
+			else
 			{
-				if (!roomRequirement.MetOrDisabled(assignedThrone.GetRoom(RegionType.Set_All), this.forPawn))
+				result = new _003Cget_Hyperlinks_003Ed__4(0)
 				{
-					this.acceptanceReportUnmetRequirements.Add(roomRequirement.LabelCap(assignedThrone.GetRoom(RegionType.Set_All)));
-				}
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
-			if (this.acceptanceReportUnmetRequirements.Count != 0)
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Dialog_InfoCard.Hyperlink>)this).GetEnumerator();
+		}
+	}
+
+	public RoyalTitleDef forTitle;
+
+	public Faction faction;
+
+	public Pawn forPawn;
+
+	private List<string> acceptanceReportUnmetRequirements = new List<string>();
+
+	public override IEnumerable<Dialog_InfoCard.Hyperlink> Hyperlinks
+	{
+		[IteratorStateMachine(typeof(_003Cget_Hyperlinks_003Ed__4))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_Hyperlinks_003Ed__4(-2)
 			{
-				return new AcceptanceReport("QuestThroneRoomRequirementsUnsatisfied".Translate(this.forPawn.Named("PAWN"), this.forTitle.GetLabelFor(this.forPawn).Named("TITLE")) + ":\n\n" + this.acceptanceReportUnmetRequirements.ToLineList("- "));
-			}
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public override AcceptanceReport CanAccept()
+	{
+		acceptanceReportUnmetRequirements.Clear();
+		if (forTitle.throneRoomRequirements.NullOrEmpty())
+		{
 			return true;
 		}
-
-		// Token: 0x0600A323 RID: 41763 RVA: 0x002EDB50 File Offset: 0x002EBD50
-		public override void ExposeData()
+		Building_Throne assignedThrone = forPawn.ownership.AssignedThrone;
+		if (assignedThrone == null)
 		{
-			base.ExposeData();
-			Scribe_Defs.Look<RoyalTitleDef>(ref this.forTitle, "forTitle");
-			Scribe_References.Look<Faction>(ref this.faction, "faction", false);
-			Scribe_References.Look<Pawn>(ref this.forPawn, "forPawn", false);
+			return "QuestNoThroneRoom".Translate(forPawn.Named("PAWN"));
 		}
-
-		// Token: 0x0600A324 RID: 41764 RVA: 0x002EDB8A File Offset: 0x002EBD8A
-		public override void ReplacePawnReferences(Pawn replace, Pawn with)
+		foreach (RoomRequirement throneRoomRequirement in forTitle.throneRoomRequirements)
 		{
-			if (this.forPawn == replace)
+			if (!throneRoomRequirement.MetOrDisabled(assignedThrone.GetRoom(), forPawn))
 			{
-				this.forPawn = with;
+				acceptanceReportUnmetRequirements.Add(throneRoomRequirement.LabelCap(assignedThrone.GetRoom()));
 			}
 		}
+		if (acceptanceReportUnmetRequirements.Count != 0)
+		{
+			return new AcceptanceReport("QuestThroneRoomRequirementsUnsatisfied".Translate(forPawn.Named("PAWN"), forTitle.GetLabelFor(forPawn).Named("TITLE")) + ":\n\n" + acceptanceReportUnmetRequirements.ToLineList("- "));
+		}
+		return true;
+	}
 
-		// Token: 0x040070C0 RID: 28864
-		public RoyalTitleDef forTitle;
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Defs.Look(ref forTitle, "forTitle");
+		Scribe_References.Look(ref faction, "faction");
+		Scribe_References.Look(ref forPawn, "forPawn");
+	}
 
-		// Token: 0x040070C1 RID: 28865
-		public Faction faction;
-
-		// Token: 0x040070C2 RID: 28866
-		public Pawn forPawn;
-
-		// Token: 0x040070C3 RID: 28867
-		private List<string> acceptanceReportUnmetRequirements = new List<string>();
+	public override void ReplacePawnReferences(Pawn replace, Pawn with)
+	{
+		if (forPawn == replace)
+		{
+			forPawn = with;
+		}
 	}
 }

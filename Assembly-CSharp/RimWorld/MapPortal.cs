@@ -1,482 +1,510 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
-using RimWorld.Planet;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 using Verse.Sound;
 
-namespace RimWorld
+namespace RimWorld;
+
+[StaticConstructorOnStartup]
+public class MapPortal : Building, IThingHolder
 {
-	// Token: 0x02002964 RID: 10596
-	[StaticConstructorOnStartup]
-	public class MapPortal : Building, IThingHolder
+	[CompilerGenerated]
+	private sealed class _003CGetGizmos_003Ed__40 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x17002373 RID: 9075
-		// (get) Token: 0x0600E894 RID: 59540 RVA: 0x0043B52C File Offset: 0x0043972C
-		public Map PocketMap
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public MapPortal _003C_003E4__this;
+
+		private IEnumerator<Gizmo> _003C_003E7__wrap1;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				Map map = this.pocketMap;
-				bool flag;
-				if (map == null)
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetGizmos_003Ed__40(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
 				{
-					flag = false;
 				}
-				else
+				finally
 				{
-					MapParent parent = map.Parent;
-					bool? flag2 = (parent != null) ? new bool?(parent.HasMap) : null;
-					bool flag3 = false;
-					flag = (flag2.GetValueOrDefault() == flag3 & flag2 != null);
+					_003C_003Em__Finally1();
 				}
-				if (flag)
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				MapPortal CS_0024_003C_003E8__locals13 = _003C_003E4__this;
+				string reason;
+				switch (num)
 				{
-					this.pocketMap = null;
-				}
-				return this.pocketMap;
-			}
-		}
-
-		// Token: 0x17002374 RID: 9076
-		// (get) Token: 0x0600E895 RID: 59541 RVA: 0x0043B588 File Offset: 0x00439788
-		public bool PocketMapExists
-		{
-			get
-			{
-				return this.PocketMap != null;
-			}
-		}
-
-		// Token: 0x17002375 RID: 9077
-		// (get) Token: 0x0600E896 RID: 59542 RVA: 0x00002501 File Offset: 0x00000701
-		public virtual bool AutoDraftOnEnter
-		{
-			get
-			{
-				return false;
-			}
-		}
-
-		// Token: 0x17002376 RID: 9078
-		// (get) Token: 0x0600E897 RID: 59543 RVA: 0x0043B593 File Offset: 0x00439793
-		protected virtual Texture2D EnterTex
-		{
-			get
-			{
-				return MapPortal.DefaultEnterTex;
-			}
-		}
-
-		// Token: 0x17002377 RID: 9079
-		// (get) Token: 0x0600E898 RID: 59544 RVA: 0x0043B59A File Offset: 0x0043979A
-		public virtual string EnterString
-		{
-			get
-			{
-				return "EnterPortal".Translate(this.Label);
-			}
-		}
-
-		// Token: 0x17002378 RID: 9080
-		// (get) Token: 0x0600E899 RID: 59545 RVA: 0x0043B5B6 File Offset: 0x004397B6
-		public virtual string CancelEnterString
-		{
-			get
-			{
-				return "CommandCancelEnterPortal".Translate();
-			}
-		}
-
-		// Token: 0x17002379 RID: 9081
-		// (get) Token: 0x0600E89A RID: 59546 RVA: 0x0043B5C7 File Offset: 0x004397C7
-		public virtual string EnteringString
-		{
-			get
-			{
-				return "EnteringPortal".Translate(this.Label);
-			}
-		}
-
-		// Token: 0x1700237A RID: 9082
-		// (get) Token: 0x0600E89B RID: 59547 RVA: 0x0043B5E3 File Offset: 0x004397E3
-		public bool LoadInProgress
-		{
-			get
-			{
-				return this.leftToLoad != null && this.leftToLoad.Any<TransferableOneWay>();
-			}
-		}
-
-		// Token: 0x1700237B RID: 9083
-		// (get) Token: 0x0600E89C RID: 59548 RVA: 0x0043B5FC File Offset: 0x004397FC
-		public bool AnyPawnCanLoadAnythingNow
-		{
-			get
-			{
-				if (!this.LoadInProgress)
-				{
+				default:
 					return false;
-				}
-				if (!base.Spawned)
-				{
-					return false;
-				}
-				IReadOnlyList<Pawn> allPawnsSpawned = base.Map.mapPawns.AllPawnsSpawned;
-				for (int i = 0; i < allPawnsSpawned.Count; i++)
-				{
-					if (allPawnsSpawned[i].CurJobDef == JobDefOf.HaulToPortal && ((JobDriver_HaulToPortal)allPawnsSpawned[i].jobs.curDriver).MapPortal == this)
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((Building)CS_0024_003C_003E8__locals13).GetGizmos().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_007c;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_007c;
+				case 2:
+					_003C_003E1__state = -1;
+					if (CS_0024_003C_003E8__locals13.LoadInProgress)
 					{
+						_003C_003E2__current = new Command_Action
+						{
+							action = CS_0024_003C_003E8__locals13.CancelLoad,
+							icon = CancelEnterTex,
+							defaultLabel = CS_0024_003C_003E8__locals13.CancelEnterString,
+							defaultDesc = "CommandCancelEnterPortalDesc".Translate()
+						};
+						_003C_003E1__state = 3;
 						return true;
 					}
-					if (allPawnsSpawned[i].CurJobDef == JobDefOf.EnterPortal && ((JobDriver_EnterPortal)allPawnsSpawned[i].jobs.curDriver).MapPortal == this)
+					goto IL_0193;
+				case 3:
+					_003C_003E1__state = -1;
+					goto IL_0193;
+				case 4:
 					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_007c:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Gizmo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
 						return true;
 					}
-				}
-				for (int j = 0; j < allPawnsSpawned.Count; j++)
-				{
-					Pawn_MindState mindState = allPawnsSpawned[j].mindState;
-					Thing thing;
-					if (mindState == null)
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					_003C_003E2__current = new Command_Action
 					{
-						thing = null;
-					}
-					else
+						action = delegate
+						{
+							Dialog_EnterPortal window = new Dialog_EnterPortal(CS_0024_003C_003E8__locals13);
+							Find.WindowStack.Add(window);
+						},
+						icon = CS_0024_003C_003E8__locals13.EnterTex,
+						defaultLabel = CS_0024_003C_003E8__locals13.EnterString + "...",
+						defaultDesc = "CommandEnterPortalDesc".Translate(CS_0024_003C_003E8__locals13.Label),
+						Disabled = !CS_0024_003C_003E8__locals13.IsEnterable(out reason),
+						disabledReason = reason
+					};
+					_003C_003E1__state = 2;
+					return true;
+					IL_0193:
+					if (CS_0024_003C_003E8__locals13.pocketMap != null)
 					{
-						PawnDuty duty = mindState.duty;
-						thing = ((duty != null) ? duty.focus.Thing : null);
-					}
-					Thing thing2 = thing;
-					if (thing2 != null && thing2 == this && allPawnsSpawned[j].CanReach(thing2, PathEndMode.Touch, Danger.Deadly, false, false, TraverseMode.ByPawn))
-					{
+						_003C_003E2__current = new Command_Action
+						{
+							defaultLabel = "CommandViewPocketMapLabel".Translate(CS_0024_003C_003E8__locals13.def.portal.pocketMapGenerator.label),
+							defaultDesc = "CommandViewPocketMapDesc".Translate(CS_0024_003C_003E8__locals13.def.portal.pocketMapGenerator.label),
+							icon = ViewPocketMapTex,
+							action = delegate
+							{
+								CameraJumper.TryJumpAndSelect(CS_0024_003C_003E8__locals13.exit);
+							}
+						};
+						_003C_003E1__state = 4;
 						return true;
 					}
-				}
-				for (int k = 0; k < allPawnsSpawned.Count; k++)
-				{
-					if (allPawnsSpawned[k].IsColonist && EnterPortalUtility.HasJobOnPortal(allPawnsSpawned[k], this))
-					{
-						return true;
-					}
+					break;
 				}
 				return false;
 			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
 		}
 
-		// Token: 0x0600E89D RID: 59549 RVA: 0x0043B73C File Offset: 0x0043993C
-		public override void ExposeData()
+		bool IEnumerator.MoveNext()
 		{
-			base.ExposeData();
-			Map map = this.pocketMap;
-			bool flag;
-			if (map == null)
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				flag = false;
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CGetGizmos_003Ed__40 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
 			}
 			else
 			{
-				MapParent parent = map.Parent;
-				bool? flag2 = (parent != null) ? new bool?(parent.HasMap) : null;
-				bool flag3 = false;
-				flag = (flag2.GetValueOrDefault() == flag3 & flag2 != null);
-			}
-			if (flag)
-			{
-				this.pocketMap = null;
-			}
-			Scribe_References.Look<Map>(ref this.pocketMap, "pocketMap", false);
-			Scribe_References.Look<PocketMapExit>(ref this.exit, "exit", false);
-			Scribe_Values.Look<bool>(ref this.beenEntered, "beenEntered", false, false);
-			Scribe_Collections.Look<TransferableOneWay>(ref this.leftToLoad, "leftToLoad", LookMode.Deep, Array.Empty<object>());
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
-			{
-				List<TransferableOneWay> list = this.leftToLoad;
-				if (list == null)
+				result = new _003CGetGizmos_003Ed__40(0)
 				{
-					return;
-				}
-				list.RemoveAll((TransferableOneWay x) => x.AnyThing == null);
-			}
-		}
-
-		// Token: 0x0600E89E RID: 59550 RVA: 0x0043B81A File Offset: 0x00439A1A
-		public override void SpawnSetup(Map map, bool respawningAfterLoad)
-		{
-			base.SpawnSetup(map, respawningAfterLoad);
-			this.containerProxy = new PortalContainerProxy
-			{
-				portal = this
-			};
-		}
-
-		// Token: 0x0600E89F RID: 59551 RVA: 0x0043B838 File Offset: 0x00439A38
-		protected override void Tick()
-		{
-			base.Tick();
-			if (this.IsHashIntervalTick(60) && base.Spawned && this.LoadInProgress && !this.notifiedCantLoadMore && !this.AnyPawnCanLoadAnythingNow)
-			{
-				TransferableOneWay transferableOneWay = this.leftToLoad[0];
-				if (((transferableOneWay != null) ? transferableOneWay.AnyThing : null) != null)
-				{
-					this.notifiedCantLoadMore = true;
-					Messages.Message("MessageCantLoadMoreIntoPortal".Translate(this.Label, Faction.OfPlayer.def.pawnsPlural, this.leftToLoad[0].AnyThing), this, MessageTypeDefOf.CautionInput, true);
-				}
-			}
-		}
-
-		// Token: 0x0600E8A0 RID: 59552 RVA: 0x000026EA File Offset: 0x000008EA
-		public void GetChildHolders(List<IThingHolder> outChildren)
-		{
-		}
-
-		// Token: 0x0600E8A1 RID: 59553 RVA: 0x0043B8F4 File Offset: 0x00439AF4
-		public ThingOwner GetDirectlyHeldThings()
-		{
-			return this.containerProxy;
-		}
-
-		// Token: 0x0600E8A2 RID: 59554 RVA: 0x0043B8FC File Offset: 0x00439AFC
-		public void Notify_ThingAdded(Thing t)
-		{
-			this.SubtractFromToLoadList(t, t.stackCount);
-		}
-
-		// Token: 0x0600E8A3 RID: 59555 RVA: 0x0043B90C File Offset: 0x00439B0C
-		public void AddToTheToLoadList(TransferableOneWay t, int count)
-		{
-			if (!t.HasAnyThing || count <= 0)
-			{
-				return;
-			}
-			if (this.leftToLoad == null)
-			{
-				this.leftToLoad = new List<TransferableOneWay>();
-			}
-			TransferableOneWay transferableOneWay = TransferableUtility.TransferableMatching<TransferableOneWay>(t.AnyThing, this.leftToLoad, TransferAsOneMode.PodsOrCaravanPacking);
-			if (transferableOneWay != null)
-			{
-				for (int i = 0; i < t.things.Count; i++)
-				{
-					if (!transferableOneWay.things.Contains(t.things[i]))
-					{
-						transferableOneWay.things.Add(t.things[i]);
-					}
-				}
-				if (transferableOneWay.CanAdjustBy(count).Accepted)
-				{
-					transferableOneWay.AdjustBy(count);
-					return;
-				}
-			}
-			else
-			{
-				TransferableOneWay transferableOneWay2 = new TransferableOneWay();
-				this.leftToLoad.Add(transferableOneWay2);
-				transferableOneWay2.things.AddRange(t.things);
-				transferableOneWay2.AdjustTo(count);
-			}
-		}
-
-		// Token: 0x0600E8A4 RID: 59556 RVA: 0x0043B9D8 File Offset: 0x00439BD8
-		public int SubtractFromToLoadList(Thing t, int count)
-		{
-			if (this.leftToLoad == null)
-			{
-				return 0;
-			}
-			TransferableOneWay transferableOneWay = TransferableUtility.TransferableMatchingDesperate(t, this.leftToLoad, TransferAsOneMode.PodsOrCaravanPacking);
-			if (transferableOneWay == null)
-			{
-				return 0;
-			}
-			if (transferableOneWay.CountToTransfer <= 0)
-			{
-				return 0;
-			}
-			int num = Mathf.Min(count, transferableOneWay.CountToTransfer);
-			transferableOneWay.AdjustBy(-num);
-			transferableOneWay.things.Remove(t);
-			if (transferableOneWay.CountToTransfer <= 0)
-			{
-				this.leftToLoad.Remove(transferableOneWay);
-			}
-			return num;
-		}
-
-		// Token: 0x0600E8A5 RID: 59557 RVA: 0x0043BA48 File Offset: 0x00439C48
-		public void CancelLoad()
-		{
-			Lord lord = base.Map.lordManager.lords.FirstOrDefault(delegate(Lord l)
-			{
-				LordJob_LoadAndEnterPortal lordJob_LoadAndEnterPortal = l.LordJob as LordJob_LoadAndEnterPortal;
-				return lordJob_LoadAndEnterPortal != null && lordJob_LoadAndEnterPortal.portal == this;
-			});
-			if (lord != null)
-			{
-				base.Map.lordManager.RemoveLord(lord);
-			}
-			this.leftToLoad.Clear();
-		}
-
-		// Token: 0x0600E8A6 RID: 59558 RVA: 0x0043BA96 File Offset: 0x00439C96
-		public virtual bool IsEnterable(out string reason)
-		{
-			reason = "";
-			return true;
-		}
-
-		// Token: 0x0600E8A7 RID: 59559 RVA: 0x0043BAA0 File Offset: 0x00439CA0
-		public virtual Map GetOtherMap()
-		{
-			if (this.PocketMap == null)
-			{
-				this.GeneratePocketMap();
-			}
-			return this.PocketMap;
-		}
-
-		// Token: 0x0600E8A8 RID: 59560 RVA: 0x0043BAB6 File Offset: 0x00439CB6
-		public virtual IntVec3 GetDestinationLocation()
-		{
-			PocketMapExit pocketMapExit = this.exit;
-			if (pocketMapExit == null)
-			{
-				return IntVec3.Invalid;
-			}
-			return pocketMapExit.Position;
-		}
-
-		// Token: 0x0600E8A9 RID: 59561 RVA: 0x0043BAD0 File Offset: 0x00439CD0
-		public virtual void OnEntered(Pawn pawn)
-		{
-			this.Notify_ThingAdded(pawn);
-			if (!this.beenEntered)
-			{
-				this.beenEntered = true;
-				if (!this.def.portal.enteredLetterLabel.NullOrEmpty())
-				{
-					Find.LetterStack.ReceiveLetter(this.def.portal.enteredLetterLabel, this.def.portal.enteredLetterText.Formatted(pawn.Named("PAWN")), this.def.portal.enteredLetterDef, this.exit, null, null, null, null, 0, true);
-				}
-			}
-			if (Find.CurrentMap != base.Map)
-			{
-				if (Find.CurrentMap == this.exit.Map)
-				{
-					SoundDef traverseSound = this.def.portal.traverseSound;
-					if (traverseSound == null)
-					{
-						return;
-					}
-					traverseSound.PlayOneShot(this.exit);
-				}
-				return;
-			}
-			SoundDef traverseSound2 = this.def.portal.traverseSound;
-			if (traverseSound2 == null)
-			{
-				return;
-			}
-			traverseSound2.PlayOneShot(this);
-		}
-
-		// Token: 0x0600E8AA RID: 59562 RVA: 0x0043BBCF File Offset: 0x00439DCF
-		public override IEnumerable<Gizmo> GetGizmos()
-		{
-			foreach (Gizmo gizmo in base.GetGizmos())
-			{
-				yield return gizmo;
-			}
-			IEnumerator<Gizmo> enumerator = null;
-			string disabledReason;
-			yield return new Command_Action
-			{
-				action = delegate()
-				{
-					Dialog_EnterPortal window = new Dialog_EnterPortal(this);
-					Find.WindowStack.Add(window);
-				},
-				icon = this.EnterTex,
-				defaultLabel = this.EnterString + "...",
-				defaultDesc = "CommandEnterPortalDesc".Translate(this.Label),
-				Disabled = !this.IsEnterable(out disabledReason),
-				disabledReason = disabledReason
-			};
-			if (this.LoadInProgress)
-			{
-				yield return new Command_Action
-				{
-					action = new Action(this.CancelLoad),
-					icon = MapPortal.CancelEnterTex,
-					defaultLabel = this.CancelEnterString,
-					defaultDesc = "CommandCancelEnterPortalDesc".Translate()
+					_003C_003E4__this = _003C_003E4__this
 				};
 			}
-			if (this.pocketMap != null)
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	private static readonly Texture2D ViewPocketMapTex = ContentFinder<Texture2D>.Get("UI/Commands/ViewCave");
+
+	private static readonly Texture2D CancelEnterTex = ContentFinder<Texture2D>.Get("UI/Designators/Cancel");
+
+	private static readonly Texture2D DefaultEnterTex = ContentFinder<Texture2D>.Get("UI/Commands/EnterCave");
+
+	protected Map pocketMap;
+
+	public PocketMapExit exit;
+
+	protected bool beenEntered;
+
+	public List<TransferableOneWay> leftToLoad;
+
+	public PortalContainerProxy containerProxy;
+
+	public bool notifiedCantLoadMore;
+
+	public Map PocketMap
+	{
+		get
+		{
+			Map map = pocketMap;
+			if (map != null && map.Parent?.HasMap == false)
 			{
-				yield return new Command_Action
-				{
-					defaultLabel = "CommandViewPocketMapLabel".Translate(this.def.portal.pocketMapGenerator.label),
-					defaultDesc = "CommandViewPocketMapDesc".Translate(this.def.portal.pocketMapGenerator.label),
-					icon = MapPortal.ViewPocketMapTex,
-					action = delegate()
-					{
-						CameraJumper.TryJumpAndSelect(this.exit, CameraJumper.MovementMode.Pan);
-					}
-				};
+				pocketMap = null;
 			}
-			yield break;
-			yield break;
+			return pocketMap;
 		}
+	}
 
-		// Token: 0x0600E8AB RID: 59563 RVA: 0x0043BBDF File Offset: 0x00439DDF
-		private void GeneratePocketMap()
+	public bool PocketMapExists => PocketMap != null;
+
+	public virtual bool AutoDraftOnEnter => false;
+
+	protected virtual Texture2D EnterTex => DefaultEnterTex;
+
+	public virtual string EnterString => "EnterPortal".Translate(Label);
+
+	public virtual string CancelEnterString => "CommandCancelEnterPortal".Translate();
+
+	public virtual string EnteringString => "EnteringPortal".Translate(Label);
+
+	public bool LoadInProgress
+	{
+		get
 		{
-			PocketMapUtility.currentlyGeneratingPortal = this;
-			this.pocketMap = this.GeneratePocketMapInt();
-			PocketMapUtility.currentlyGeneratingPortal = null;
+			if (leftToLoad != null)
+			{
+				return leftToLoad.Any();
+			}
+			return false;
 		}
+	}
 
-		// Token: 0x0600E8AC RID: 59564 RVA: 0x0043BBFC File Offset: 0x00439DFC
-		protected virtual Map GeneratePocketMapInt()
+	public bool AnyPawnCanLoadAnythingNow
+	{
+		get
 		{
-			return PocketMapUtility.GeneratePocketMap(new IntVec3(this.def.portal.pocketMapSize, 1, this.def.portal.pocketMapSize), this.def.portal.pocketMapGenerator, this.GetExtraGenSteps(), base.Map);
+			if (!LoadInProgress)
+			{
+				return false;
+			}
+			if (!base.Spawned)
+			{
+				return false;
+			}
+			IReadOnlyList<Pawn> allPawnsSpawned = base.Map.mapPawns.AllPawnsSpawned;
+			for (int i = 0; i < allPawnsSpawned.Count; i++)
+			{
+				if (allPawnsSpawned[i].CurJobDef == JobDefOf.HaulToPortal && ((JobDriver_HaulToPortal)allPawnsSpawned[i].jobs.curDriver).MapPortal == this)
+				{
+					return true;
+				}
+				if (allPawnsSpawned[i].CurJobDef == JobDefOf.EnterPortal && ((JobDriver_EnterPortal)allPawnsSpawned[i].jobs.curDriver).MapPortal == this)
+				{
+					return true;
+				}
+			}
+			for (int j = 0; j < allPawnsSpawned.Count; j++)
+			{
+				Thing thing = allPawnsSpawned[j].mindState?.duty?.focus.Thing;
+				if (thing != null && thing == this && allPawnsSpawned[j].CanReach(thing, PathEndMode.Touch, Danger.Deadly))
+				{
+					return true;
+				}
+			}
+			for (int k = 0; k < allPawnsSpawned.Count; k++)
+			{
+				if (allPawnsSpawned[k].IsColonist && EnterPortalUtility.HasJobOnPortal(allPawnsSpawned[k], this))
+				{
+					return true;
+				}
+			}
+			return false;
 		}
+	}
 
-		// Token: 0x0600E8AD RID: 59565 RVA: 0x0043BC50 File Offset: 0x00439E50
-		protected virtual IEnumerable<GenStepWithParams> GetExtraGenSteps()
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Map map = pocketMap;
+		if (map != null && map.Parent?.HasMap == false)
 		{
-			return Enumerable.Empty<GenStepWithParams>();
+			pocketMap = null;
 		}
+		Scribe_References.Look(ref pocketMap, "pocketMap");
+		Scribe_References.Look(ref exit, "exit");
+		Scribe_Values.Look(ref beenEntered, "beenEntered", defaultValue: false);
+		Scribe_Collections.Look(ref leftToLoad, "leftToLoad", LookMode.Deep);
+		if (Scribe.mode == LoadSaveMode.PostLoadInit)
+		{
+			leftToLoad?.RemoveAll((TransferableOneWay x) => x.AnyThing == null);
+		}
+	}
 
-		// Token: 0x04009AF1 RID: 39665
-		private static readonly Texture2D ViewPocketMapTex = ContentFinder<Texture2D>.Get("UI/Commands/ViewCave", true);
+	public override void SpawnSetup(Map map, bool respawningAfterLoad)
+	{
+		base.SpawnSetup(map, respawningAfterLoad);
+		containerProxy = new PortalContainerProxy
+		{
+			portal = this
+		};
+	}
 
-		// Token: 0x04009AF2 RID: 39666
-		private static readonly Texture2D CancelEnterTex = ContentFinder<Texture2D>.Get("UI/Designators/Cancel", true);
+	protected override void Tick()
+	{
+		base.Tick();
+		if (this.IsHashIntervalTick(60) && base.Spawned && LoadInProgress && !notifiedCantLoadMore && !AnyPawnCanLoadAnythingNow && leftToLoad[0]?.AnyThing != null)
+		{
+			notifiedCantLoadMore = true;
+			Messages.Message("MessageCantLoadMoreIntoPortal".Translate(Label, Faction.OfPlayer.def.pawnsPlural, leftToLoad[0].AnyThing), this, MessageTypeDefOf.CautionInput);
+		}
+	}
 
-		// Token: 0x04009AF3 RID: 39667
-		private static readonly Texture2D DefaultEnterTex = ContentFinder<Texture2D>.Get("UI/Commands/EnterCave", true);
+	public void GetChildHolders(List<IThingHolder> outChildren)
+	{
+	}
 
-		// Token: 0x04009AF4 RID: 39668
-		protected Map pocketMap;
+	public ThingOwner GetDirectlyHeldThings()
+	{
+		return containerProxy;
+	}
 
-		// Token: 0x04009AF5 RID: 39669
-		public PocketMapExit exit;
+	public void Notify_ThingAdded(Thing t)
+	{
+		SubtractFromToLoadList(t, t.stackCount);
+	}
 
-		// Token: 0x04009AF6 RID: 39670
-		protected bool beenEntered;
+	public void AddToTheToLoadList(TransferableOneWay t, int count)
+	{
+		if (!t.HasAnyThing || count <= 0)
+		{
+			return;
+		}
+		if (leftToLoad == null)
+		{
+			leftToLoad = new List<TransferableOneWay>();
+		}
+		TransferableOneWay transferableOneWay = TransferableUtility.TransferableMatching(t.AnyThing, leftToLoad, TransferAsOneMode.PodsOrCaravanPacking);
+		if (transferableOneWay != null)
+		{
+			for (int i = 0; i < t.things.Count; i++)
+			{
+				if (!transferableOneWay.things.Contains(t.things[i]))
+				{
+					transferableOneWay.things.Add(t.things[i]);
+				}
+			}
+			if (transferableOneWay.CanAdjustBy(count).Accepted)
+			{
+				transferableOneWay.AdjustBy(count);
+			}
+		}
+		else
+		{
+			TransferableOneWay transferableOneWay2 = new TransferableOneWay();
+			leftToLoad.Add(transferableOneWay2);
+			transferableOneWay2.things.AddRange(t.things);
+			transferableOneWay2.AdjustTo(count);
+		}
+	}
 
-		// Token: 0x04009AF7 RID: 39671
-		public List<TransferableOneWay> leftToLoad;
+	public int SubtractFromToLoadList(Thing t, int count)
+	{
+		if (leftToLoad == null)
+		{
+			return 0;
+		}
+		TransferableOneWay transferableOneWay = TransferableUtility.TransferableMatchingDesperate(t, leftToLoad, TransferAsOneMode.PodsOrCaravanPacking);
+		if (transferableOneWay == null)
+		{
+			return 0;
+		}
+		if (transferableOneWay.CountToTransfer <= 0)
+		{
+			return 0;
+		}
+		int num = Mathf.Min(count, transferableOneWay.CountToTransfer);
+		transferableOneWay.AdjustBy(-num);
+		transferableOneWay.things.Remove(t);
+		if (transferableOneWay.CountToTransfer <= 0)
+		{
+			leftToLoad.Remove(transferableOneWay);
+		}
+		return num;
+	}
 
-		// Token: 0x04009AF8 RID: 39672
-		public PortalContainerProxy containerProxy;
+	public void CancelLoad()
+	{
+		Lord lord = base.Map.lordManager.lords.FirstOrDefault((Lord l) => l.LordJob is LordJob_LoadAndEnterPortal lordJob_LoadAndEnterPortal && lordJob_LoadAndEnterPortal.portal == this);
+		if (lord != null)
+		{
+			base.Map.lordManager.RemoveLord(lord);
+		}
+		leftToLoad.Clear();
+	}
 
-		// Token: 0x04009AF9 RID: 39673
-		public bool notifiedCantLoadMore;
+	public virtual bool IsEnterable(out string reason)
+	{
+		foreach (ThingComp allComp in base.AllComps)
+		{
+			AcceptanceReport acceptanceReport = allComp.CanEnterPortal();
+			if (!acceptanceReport.Accepted)
+			{
+				reason = acceptanceReport.Reason;
+				return false;
+			}
+		}
+		reason = "";
+		return true;
+	}
+
+	public virtual Map GetOtherMap()
+	{
+		if (PocketMap == null)
+		{
+			GeneratePocketMap();
+		}
+		return PocketMap;
+	}
+
+	public virtual IntVec3 GetDestinationLocation()
+	{
+		return exit?.Position ?? IntVec3.Invalid;
+	}
+
+	public virtual void OnEntered(Pawn pawn)
+	{
+		Notify_ThingAdded(pawn);
+		if (!beenEntered)
+		{
+			beenEntered = true;
+			if (!def.portal.enteredLetterLabel.NullOrEmpty())
+			{
+				Find.LetterStack.ReceiveLetter(def.portal.enteredLetterLabel, def.portal.enteredLetterText.Formatted(pawn.Named("PAWN")), def.portal.enteredLetterDef, exit);
+			}
+		}
+		if (Find.CurrentMap == base.Map)
+		{
+			def.portal.traverseSound?.PlayOneShot(this);
+		}
+		else if (Find.CurrentMap == exit.Map)
+		{
+			def.portal.traverseSound?.PlayOneShot(exit);
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CGetGizmos_003Ed__40))]
+	public override IEnumerable<Gizmo> GetGizmos()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetGizmos_003Ed__40(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	private void GeneratePocketMap()
+	{
+		PocketMapUtility.currentlyGeneratingPortal = this;
+		pocketMap = GeneratePocketMapInt();
+		PocketMapUtility.currentlyGeneratingPortal = null;
+	}
+
+	protected virtual Map GeneratePocketMapInt()
+	{
+		return PocketMapUtility.GeneratePocketMap(new IntVec3(def.portal.pocketMapSize, 1, def.portal.pocketMapSize), def.portal.pocketMapGenerator, GetExtraGenSteps(), base.Map);
+	}
+
+	protected virtual IEnumerable<GenStepWithParams> GetExtraGenSteps()
+	{
+		return Enumerable.Empty<GenStepWithParams>();
 	}
 }

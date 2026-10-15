@@ -1,90 +1,70 @@
-﻿using System;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class IncidentWorker_ShipChunkDrop : IncidentWorker
 {
-	// Token: 0x02001DD2 RID: 7634
-	public class IncidentWorker_ShipChunkDrop : IncidentWorker
+	private static readonly Pair<int, float>[] CountChance = new Pair<int, float>[4]
 	{
-		// Token: 0x17001A17 RID: 6679
-		// (get) Token: 0x0600AA4A RID: 43594 RVA: 0x0030B684 File Offset: 0x00309884
-		private int RandomCountToDrop
+		new Pair<int, float>(1, 1f),
+		new Pair<int, float>(2, 0.95f),
+		new Pair<int, float>(3, 0.7f),
+		new Pair<int, float>(4, 0.4f)
+	};
+
+	private int RandomCountToDrop
+	{
+		get
 		{
-			get
+			float x2 = (float)Find.TickManager.TicksGame / 3600000f;
+			float timePassedFactor = Mathf.Clamp(GenMath.LerpDouble(0f, 1.2f, 1f, 0.1f, x2), 0.1f, 1f);
+			return CountChance.RandomElementByWeight((Pair<int, float> x) => (x.First == 1) ? x.Second : (x.Second * timePassedFactor)).First;
+		}
+	}
+
+	protected override bool CanFireNowSub(IncidentParms parms)
+	{
+		if (!base.CanFireNowSub(parms))
+		{
+			return false;
+		}
+		Map map = (Map)parms.target;
+		IntVec3 pos;
+		return TryFindShipChunkDropCell(map.Center, map, 999999, out pos);
+	}
+
+	protected override bool TryExecuteWorker(IncidentParms parms)
+	{
+		Map map = (Map)parms.target;
+		if (!TryFindShipChunkDropCell(map.Center, map, 999999, out var pos))
+		{
+			return false;
+		}
+		SpawnShipChunks(pos, map, RandomCountToDrop);
+		Messages.Message("MessageShipChunkDrop".Translate(), new TargetInfo(pos, map), MessageTypeDefOf.NeutralEvent);
+		return true;
+	}
+
+	private void SpawnShipChunks(IntVec3 firstChunkPos, Map map, int count)
+	{
+		SpawnChunk(firstChunkPos, map);
+		for (int i = 0; i < count - 1; i++)
+		{
+			if (TryFindShipChunkDropCell(firstChunkPos, map, 5, out var pos))
 			{
-				float x2 = (float)Find.TickManager.TicksGame / 3600000f;
-				float timePassedFactor = Mathf.Clamp(GenMath.LerpDouble(0f, 1.2f, 1f, 0.1f, x2), 0.1f, 1f);
-				return IncidentWorker_ShipChunkDrop.CountChance.RandomElementByWeight(delegate(Pair<int, float> x)
-				{
-					if (x.First == 1)
-					{
-						return x.Second;
-					}
-					return x.Second * timePassedFactor;
-				}).First;
+				SpawnChunk(pos, map);
 			}
 		}
+	}
 
-		// Token: 0x0600AA4B RID: 43595 RVA: 0x0030B6F8 File Offset: 0x003098F8
-		protected override bool CanFireNowSub(IncidentParms parms)
-		{
-			if (!base.CanFireNowSub(parms))
-			{
-				return false;
-			}
-			Map map = (Map)parms.target;
-			IntVec3 intVec;
-			return this.TryFindShipChunkDropCell(map.Center, map, 999999, out intVec);
-		}
+	private void SpawnChunk(IntVec3 pos, Map map)
+	{
+		SkyfallerMaker.SpawnSkyfaller(ThingDefOf.ShipChunkIncoming, ThingDefOf.ShipChunk, pos, map);
+	}
 
-		// Token: 0x0600AA4C RID: 43596 RVA: 0x0030B730 File Offset: 0x00309930
-		protected override bool TryExecuteWorker(IncidentParms parms)
-		{
-			Map map = (Map)parms.target;
-			IntVec3 intVec;
-			if (!this.TryFindShipChunkDropCell(map.Center, map, 999999, out intVec))
-			{
-				return false;
-			}
-			this.SpawnShipChunks(intVec, map, this.RandomCountToDrop);
-			Messages.Message("MessageShipChunkDrop".Translate(), new TargetInfo(intVec, map, false), MessageTypeDefOf.NeutralEvent, true);
-			return true;
-		}
-
-		// Token: 0x0600AA4D RID: 43597 RVA: 0x0030B798 File Offset: 0x00309998
-		private void SpawnShipChunks(IntVec3 firstChunkPos, Map map, int count)
-		{
-			this.SpawnChunk(firstChunkPos, map);
-			for (int i = 0; i < count - 1; i++)
-			{
-				IntVec3 pos;
-				if (this.TryFindShipChunkDropCell(firstChunkPos, map, 5, out pos))
-				{
-					this.SpawnChunk(pos, map);
-				}
-			}
-		}
-
-		// Token: 0x0600AA4E RID: 43598 RVA: 0x0030B7D0 File Offset: 0x003099D0
-		private void SpawnChunk(IntVec3 pos, Map map)
-		{
-			SkyfallerMaker.SpawnSkyfaller(ThingDefOf.ShipChunkIncoming, ThingDefOf.ShipChunk, pos, map);
-		}
-
-		// Token: 0x0600AA4F RID: 43599 RVA: 0x0030B7E4 File Offset: 0x003099E4
-		private bool TryFindShipChunkDropCell(IntVec3 nearLoc, Map map, int maxDist, out IntVec3 pos)
-		{
-			return CellFinderLoose.TryFindSkyfallerCell(ThingDefOf.ShipChunkIncoming, map, ThingDefOf.ShipChunk.terrainAffordanceNeeded, out pos, 10, nearLoc, maxDist, true, false, false, false, true, false, null);
-		}
-
-		// Token: 0x0400757F RID: 30079
-		private static readonly Pair<int, float>[] CountChance = new Pair<int, float>[]
-		{
-			new Pair<int, float>(1, 1f),
-			new Pair<int, float>(2, 0.95f),
-			new Pair<int, float>(3, 0.7f),
-			new Pair<int, float>(4, 0.4f)
-		};
+	private bool TryFindShipChunkDropCell(IntVec3 nearLoc, Map map, int maxDist, out IntVec3 pos)
+	{
+		return CellFinderLoose.TryFindSkyfallerCell(ThingDefOf.ShipChunkIncoming, map, ThingDefOf.ShipChunk.terrainAffordanceNeeded, out pos, 10, nearLoc, maxDist);
 	}
 }

@@ -1,56 +1,54 @@
-﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Alert_NeedBatteries : Alert
 {
-	// Token: 0x0200301A RID: 12314
-	public class Alert_NeedBatteries : Alert
+	public Alert_NeedBatteries()
 	{
-		// Token: 0x0601152E RID: 70958 RVA: 0x004F7DF8 File Offset: 0x004F5FF8
-		public Alert_NeedBatteries()
-		{
-			this.defaultLabel = "NeedBatteries".Translate();
-			this.defaultExplanation = "NeedBatteriesDesc".Translate();
-		}
+		defaultLabel = "NeedBatteries".Translate();
+		defaultExplanation = "NeedBatteriesDesc".Translate();
+	}
 
-		// Token: 0x0601152F RID: 70959 RVA: 0x004F7E2C File Offset: 0x004F602C
-		public override TaggedString GetExplanation()
-		{
-			string text = this.defaultExplanation + "\n\n";
-			if (ResearchProjectDefOf.Batteries.IsFinished)
-			{
-				text += "NeedBatteriesResearchedDesc".Translate();
-			}
-			else
-			{
-				text += "NeedBatteriesNotResearchedDesc".Translate();
-			}
-			return text;
-		}
+	public override TaggedString GetExplanation()
+	{
+		string text = defaultExplanation + "\n\n";
+		text = ((!ResearchProjectDefOf.Batteries.IsFinished) ? ((string)(text + "NeedBatteriesNotResearchedDesc".Translate())) : ((string)(text + "NeedBatteriesResearchedDesc".Translate())));
+		return text;
+	}
 
-		// Token: 0x06011530 RID: 70960 RVA: 0x004F7E8C File Offset: 0x004F608C
-		public override AlertReport GetReport()
+	public override AlertReport GetReport()
+	{
+		List<Map> maps = Find.Maps;
+		for (int i = 0; i < maps.Count; i++)
 		{
-			List<Map> maps = Find.Maps;
-			for (int i = 0; i < maps.Count; i++)
+			if (NeedBatteries(maps[i]))
 			{
-				if (this.NeedBatteries(maps[i]))
-				{
-					return true;
-				}
+				return true;
 			}
+		}
+		return false;
+	}
+
+	private bool NeedBatteries(Map map)
+	{
+		if (!map.IsPlayerHome)
+		{
 			return false;
 		}
-
-		// Token: 0x06011531 RID: 70961 RVA: 0x004F7ECC File Offset: 0x004F60CC
-		private bool NeedBatteries(Map map)
+		if (map.listerBuildings.ColonistsHaveBuilding((Thing building) => building is Building_Battery))
 		{
-			if (!map.IsPlayerHome)
-			{
-				return false;
-			}
-			return !map.listerBuildings.ColonistsHaveBuilding((Thing building) => building is Building_Battery) && (map.listerBuildings.ColonistsHaveBuilding(ThingDefOf.SolarGenerator) || map.listerBuildings.ColonistsHaveBuilding(ThingDefOf.WindTurbine)) && !map.listerBuildings.ColonistsHaveBuilding(ThingDefOf.GeothermalGenerator) && !map.listerBuildings.ColonistsHaveBuilding(ThingDefOf.WatermillGenerator);
+			return false;
 		}
+		if (!map.listerBuildings.ColonistsHaveBuilding(ThingDefOf.SolarGenerator) && !map.listerBuildings.ColonistsHaveBuilding(ThingDefOf.WindTurbine))
+		{
+			return false;
+		}
+		if (map.listerBuildings.ColonistsHaveBuilding(ThingDefOf.GeothermalGenerator) || map.listerBuildings.ColonistsHaveBuilding(ThingDefOf.WatermillGenerator))
+		{
+			return false;
+		}
+		return true;
 	}
 }

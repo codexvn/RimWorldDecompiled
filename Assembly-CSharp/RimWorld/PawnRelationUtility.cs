@@ -1,243 +1,389 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public static class PawnRelationUtility
 {
-	// Token: 0x02002416 RID: 9238
-	public static class PawnRelationUtility
+	[CompilerGenerated]
+	private sealed class _003CGetRelations_003Ed__0 : IEnumerable<PawnRelationDef>, IEnumerable, IEnumerator<PawnRelationDef>, IEnumerator, IDisposable
 	{
-		// Token: 0x0600C81F RID: 51231 RVA: 0x003A71BB File Offset: 0x003A53BB
-		public static IEnumerable<PawnRelationDef> GetRelations(this Pawn me, Pawn other)
+		private int _003C_003E1__state;
+
+		private PawnRelationDef _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private Pawn me;
+
+		public Pawn _003C_003E3__me;
+
+		private Pawn other;
+
+		public Pawn _003C_003E3__other;
+
+		private bool _003CanyNonKinFamilyByBloodRelation_003E5__2;
+
+		private List<PawnRelationDef> _003Cdefs_003E5__3;
+
+		private int _003Ci_003E5__4;
+
+		private int _003Ccount_003E5__5;
+
+		PawnRelationDef IEnumerator<PawnRelationDef>.Current
 		{
-			if (me == other)
+			[DebuggerHidden]
+			get
 			{
-				yield break;
+				return _003C_003E2__current;
 			}
-			if (!me.RaceProps.IsFlesh || !other.RaceProps.IsFlesh)
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
 			{
-				yield break;
+				return _003C_003E2__current;
 			}
-			if (!me.relations.RelatedToAnyoneOrAnyoneRelatedToMe || !other.relations.RelatedToAnyoneOrAnyoneRelatedToMe)
+		}
+
+		[DebuggerHidden]
+		public _003CGetRelations_003Ed__0(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || (uint)(num - 1) <= 1u)
 			{
-				yield break;
-			}
-			bool anyNonKinFamilyByBloodRelation = false;
-			List<PawnRelationDef> defs = DefDatabase<PawnRelationDef>.AllDefsListForReading;
-			int i = 0;
-			int count = defs.Count;
-			while (i < count)
-			{
-				PawnRelationDef pawnRelationDef = defs[i];
-				if (pawnRelationDef != PawnRelationDefOf.Kin && pawnRelationDef.Worker.InRelation(me, other))
+				try
 				{
-					if (pawnRelationDef.familyByBloodRelation)
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003Cdefs_003E5__3 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				switch (_003C_003E1__state)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					if (me == other)
 					{
-						anyNonKinFamilyByBloodRelation = true;
+						return false;
 					}
-					yield return pawnRelationDef;
-				}
-				int num = i;
-				i = num + 1;
-			}
-			if (!anyNonKinFamilyByBloodRelation && PawnRelationDefOf.Kin.Worker.InRelation(me, other))
-			{
-				yield return PawnRelationDefOf.Kin;
-			}
-			defs = null;
-			yield break;
-			yield break;
-		}
-
-		// Token: 0x0600C820 RID: 51232 RVA: 0x003A71D4 File Offset: 0x003A53D4
-		public static PawnRelationDef GetMostImportantRelation(this Pawn me, Pawn other)
-		{
-			PawnRelationDef pawnRelationDef = null;
-			foreach (PawnRelationDef pawnRelationDef2 in me.GetRelations(other))
-			{
-				if (pawnRelationDef == null || pawnRelationDef2.importance > pawnRelationDef.importance)
-				{
-					pawnRelationDef = pawnRelationDef2;
-				}
-			}
-			return pawnRelationDef;
-		}
-
-		// Token: 0x0600C821 RID: 51233 RVA: 0x003A7234 File Offset: 0x003A5434
-		public static void Notify_PawnsSeenByPlayer(IEnumerable<Pawn> seenPawns, out string pawnRelationsInfo, bool informEvenIfSeenBefore = false, bool writeSeenPawnsNames = true)
-		{
-			StringBuilder stringBuilder = new StringBuilder();
-			List<Pawn> list = (from x in PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_FreeColonistsAndPrisoners
-			where x.relations.everSeenByPlayer
-			select x).ToList<Pawn>();
-			bool flag = false;
-			foreach (Pawn pawn in seenPawns)
-			{
-				if (pawn.RaceProps.IsFlesh && (informEvenIfSeenBefore || !pawn.relations.everSeenByPlayer) && (!pawn.Spawned || !pawn.Fogged()))
-				{
-					pawn.relations.everSeenByPlayer = true;
-					bool flag2 = false;
-					foreach (Pawn pawn2 in list)
+					if (!me.RaceProps.IsFlesh || !other.RaceProps.IsFlesh)
 					{
-						if (pawn != pawn2)
-						{
-							PawnRelationDef mostImportantRelation = pawn2.GetMostImportantRelation(pawn);
-							if (mostImportantRelation != null)
-							{
-								if (!flag2)
-								{
-									flag2 = true;
-									if (flag)
-									{
-										stringBuilder.AppendLine();
-									}
-									if (writeSeenPawnsNames)
-									{
-										stringBuilder.AppendLine(pawn.KindLabel.CapitalizeFirst() + " " + pawn.Name.ToStringShort.Colorize(ColoredText.NameColor) + ":");
-									}
-								}
-								flag = true;
-								stringBuilder.AppendLine("  - " + "Relationship".Translate(mostImportantRelation.GetGenderSpecificLabelCap(pawn), pawn2.KindLabel + " " + pawn2.NameShortColored.Resolve(), pawn2));
-							}
-						}
+						return false;
 					}
-				}
-			}
-			if (flag)
-			{
-				pawnRelationsInfo = stringBuilder.ToString().TrimEndNewlines();
-				return;
-			}
-			pawnRelationsInfo = null;
-		}
-
-		// Token: 0x0600C822 RID: 51234 RVA: 0x003A742C File Offset: 0x003A562C
-		public static void Notify_PawnsSeenByPlayer_Letter(IEnumerable<Pawn> seenPawns, ref TaggedString letterLabel, ref TaggedString letterText, string relationsInfoHeader, bool informEvenIfSeenBefore = false, bool writeSeenPawnsNames = true)
-		{
-			string text;
-			PawnRelationUtility.Notify_PawnsSeenByPlayer(seenPawns, out text, informEvenIfSeenBefore, writeSeenPawnsNames);
-			if (!text.NullOrEmpty())
-			{
-				if (letterLabel.NullOrEmpty())
-				{
-					letterLabel = "LetterLabelNoticedRelatedPawns".Translate();
-				}
-				else
-				{
-					letterLabel += ": " + "RelationshipAppendedLetterSuffix".Translate().CapitalizeFirst();
-				}
-				if (!letterText.NullOrEmpty())
-				{
-					letterText += "\n\n";
-				}
-				letterText += relationsInfoHeader + "\n\n" + text;
-			}
-		}
-
-		// Token: 0x0600C823 RID: 51235 RVA: 0x003A74D4 File Offset: 0x003A56D4
-		public static void Notify_PawnsSeenByPlayer_Letter_Send(IEnumerable<Pawn> seenPawns, string relationsInfoHeader, LetterDef letterDef, bool informEvenIfSeenBefore = false, bool writeSeenPawnsNames = true)
-		{
-			TaggedString label = "";
-			TaggedString text = "";
-			seenPawns = seenPawns.ToList<Pawn>();
-			PawnRelationUtility.Notify_PawnsSeenByPlayer_Letter(seenPawns, ref label, ref text, relationsInfoHeader, informEvenIfSeenBefore, writeSeenPawnsNames);
-			if (!text.NullOrEmpty())
-			{
-				Pawn pawn = null;
-				foreach (Pawn pawn2 in seenPawns)
-				{
-					if (PawnRelationUtility.GetMostImportantColonyRelative(pawn2) != null)
+					if (!me.relations.RelatedToAnyoneOrAnyoneRelatedToMe || !other.relations.RelatedToAnyoneOrAnyoneRelatedToMe)
 					{
-						pawn = pawn2;
+						return false;
+					}
+					_003C_003E1__state = -3;
+					_003CanyNonKinFamilyByBloodRelation_003E5__2 = false;
+					_003Cdefs_003E5__3 = DefDatabase<PawnRelationDef>.AllDefsListForReading;
+					_003Ci_003E5__4 = 0;
+					_003Ccount_003E5__5 = _003Cdefs_003E5__3.Count;
+					goto IL_0135;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0125;
+				case 2:
+					{
+						_003C_003E1__state = -3;
 						break;
 					}
+					IL_0125:
+					_003Ci_003E5__4++;
+					goto IL_0135;
+					IL_0135:
+					if (_003Ci_003E5__4 < _003Ccount_003E5__5)
+					{
+						PawnRelationDef pawnRelationDef = _003Cdefs_003E5__3[_003Ci_003E5__4];
+						if (pawnRelationDef != PawnRelationDefOf.Kin && pawnRelationDef.Worker.InRelation(me, other))
+						{
+							if (pawnRelationDef.familyByBloodRelation)
+							{
+								_003CanyNonKinFamilyByBloodRelation_003E5__2 = true;
+							}
+							_003C_003E2__current = pawnRelationDef;
+							_003C_003E1__state = 1;
+							return true;
+						}
+						goto IL_0125;
+					}
+					if (!_003CanyNonKinFamilyByBloodRelation_003E5__2 && PawnRelationDefOf.Kin.Worker.InRelation(me, other))
+					{
+						_003C_003E2__current = PawnRelationDefOf.Kin;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
 				}
-				if (pawn == null)
-				{
-					pawn = seenPawns.FirstOrDefault<Pawn>();
-				}
-				Find.LetterStack.ReceiveLetter(label, text, letterDef, pawn, null, null, null, null, 0, true);
+				_003Cdefs_003E5__3 = null;
+				_003C_003Em__Finally1();
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x0600C824 RID: 51236 RVA: 0x003A7580 File Offset: 0x003A5780
-		public static bool TryAppendRelationsWithColonistsInfo(ref TaggedString text, Pawn pawn)
+		bool IEnumerator.MoveNext()
 		{
-			TaggedString taggedString = null;
-			return PawnRelationUtility.TryAppendRelationsWithColonistsInfo(ref text, ref taggedString, pawn);
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0600C825 RID: 51237 RVA: 0x003A75A0 File Offset: 0x003A57A0
-		public static bool TryAppendRelationsWithColonistsInfo(ref TaggedString text, ref TaggedString title, Pawn pawn)
+		private void _003C_003Em__Finally1()
 		{
-			Pawn mostImportantColonyRelative = PawnRelationUtility.GetMostImportantColonyRelative(pawn);
-			if (mostImportantColonyRelative == null)
+			_003C_003E1__state = -1;
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<PawnRelationDef> IEnumerable<PawnRelationDef>.GetEnumerator()
+		{
+			_003CGetRelations_003Ed__0 _003CGetRelations_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				return false;
-			}
-			if (title != null)
-			{
-				title += " (" + "RelationshipAppendedLetterSuffix".Translate() + ")";
-			}
-			PawnRelationDef mostImportantRelation = mostImportantColonyRelative.GetMostImportantRelation(pawn);
-			string text2 = (mostImportantRelation != null) ? mostImportantRelation.GetGenderSpecificLabel(pawn) : null;
-			if (text2 == null)
-			{
-				return false;
-			}
-			if (mostImportantColonyRelative.IsColonist)
-			{
-				text += "\n\n" + "RelationshipAppendedLetterTextColonist".Translate(mostImportantColonyRelative.LabelShort, text2, mostImportantColonyRelative.Named("RELATIVE"), pawn.Named("PAWN")).AdjustedFor(pawn, "PAWN", false);
+				_003C_003E1__state = 0;
+				_003CGetRelations_003Ed__ = this;
 			}
 			else
 			{
-				text += "\n\n" + "RelationshipAppendedLetterTextPrisoner".Translate(mostImportantColonyRelative.LabelShort, text2, mostImportantColonyRelative.Named("RELATIVE"), pawn.Named("PAWN")).AdjustedFor(pawn, "PAWN", false);
+				_003CGetRelations_003Ed__ = new _003CGetRelations_003Ed__0(0);
 			}
-			return true;
+			_003CGetRelations_003Ed__.me = _003C_003E3__me;
+			_003CGetRelations_003Ed__.other = _003C_003E3__other;
+			return _003CGetRelations_003Ed__;
 		}
 
-		// Token: 0x0600C826 RID: 51238 RVA: 0x003A76D0 File Offset: 0x003A58D0
-		public static Pawn GetMostImportantColonyRelative(Pawn pawn)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			if (pawn.relations == null || !pawn.relations.RelatedToAnyoneOrAnyoneRelatedToMe)
+			return ((IEnumerable<PawnRelationDef>)this).GetEnumerator();
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CGetRelations_003Ed__0))]
+	public static IEnumerable<PawnRelationDef> GetRelations(this Pawn me, Pawn other)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetRelations_003Ed__0(-2)
+		{
+			_003C_003E3__me = me,
+			_003C_003E3__other = other
+		};
+	}
+
+	public static PawnRelationDef GetMostImportantRelation(this Pawn me, Pawn other)
+	{
+		PawnRelationDef pawnRelationDef = null;
+		foreach (PawnRelationDef relation in me.GetRelations(other))
+		{
+			if (pawnRelationDef == null || relation.importance > pawnRelationDef.importance)
 			{
-				return null;
+				pawnRelationDef = relation;
 			}
-			IEnumerable<Pawn> enumerable = from x in PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_FreeColonistsAndPrisoners
-			where x.relations.everSeenByPlayer
-			select x;
-			float num = 0f;
-			Pawn pawn2 = null;
-			foreach (Pawn pawn3 in enumerable)
+		}
+		return pawnRelationDef;
+	}
+
+	public static void Notify_PawnsSeenByPlayer(IEnumerable<Pawn> seenPawns, out string pawnRelationsInfo, bool informEvenIfSeenBefore = false, bool writeSeenPawnsNames = true)
+	{
+		StringBuilder stringBuilder = new StringBuilder();
+		List<Pawn> list = PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_FreeColonistsAndPrisoners.Where((Pawn x) => x.relations.everSeenByPlayer).ToList();
+		bool flag = false;
+		foreach (Pawn seenPawn in seenPawns)
+		{
+			if (!seenPawn.RaceProps.IsFlesh || (!informEvenIfSeenBefore && seenPawn.relations.everSeenByPlayer) || (seenPawn.Spawned && seenPawn.Fogged()))
 			{
-				PawnRelationDef mostImportantRelation = pawn.GetMostImportantRelation(pawn3);
-				if (mostImportantRelation != null && (pawn2 == null || mostImportantRelation.importance > num))
+				continue;
+			}
+			seenPawn.relations.everSeenByPlayer = true;
+			bool flag2 = false;
+			foreach (Pawn item in list)
+			{
+				if (seenPawn == item)
 				{
-					num = mostImportantRelation.importance;
-					pawn2 = pawn3;
+					continue;
 				}
+				PawnRelationDef mostImportantRelation = item.GetMostImportantRelation(seenPawn);
+				if (mostImportantRelation == null)
+				{
+					continue;
+				}
+				if (!flag2)
+				{
+					flag2 = true;
+					if (flag)
+					{
+						stringBuilder.AppendLine();
+					}
+					if (writeSeenPawnsNames)
+					{
+						stringBuilder.AppendLine(seenPawn.KindLabel.CapitalizeFirst() + " " + seenPawn.Name.ToStringShort.Colorize(ColoredText.NameColor) + ":");
+					}
+				}
+				flag = true;
+				stringBuilder.AppendLine("  - " + "Relationship".Translate(mostImportantRelation.GetGenderSpecificLabelCap(seenPawn), item.KindLabel + " " + item.NameShortColored.Resolve(), item));
 			}
-			return pawn2;
 		}
-
-		// Token: 0x0600C827 RID: 51239 RVA: 0x003A7780 File Offset: 0x003A5980
-		public static float MaxPossibleBioAgeAt(float myBiologicalAge, float myChronologicalAge, float atChronologicalAge)
+		if (flag)
 		{
-			float num = Mathf.Min(myBiologicalAge, myChronologicalAge - atChronologicalAge);
-			if (num < 0f)
+			pawnRelationsInfo = stringBuilder.ToString().TrimEndNewlines();
+		}
+		else
+		{
+			pawnRelationsInfo = null;
+		}
+	}
+
+	public static void Notify_PawnsSeenByPlayer_Letter(IEnumerable<Pawn> seenPawns, ref TaggedString letterLabel, ref TaggedString letterText, string relationsInfoHeader, bool informEvenIfSeenBefore = false, bool writeSeenPawnsNames = true)
+	{
+		Notify_PawnsSeenByPlayer(seenPawns, out var pawnRelationsInfo, informEvenIfSeenBefore, writeSeenPawnsNames);
+		if (!pawnRelationsInfo.NullOrEmpty())
+		{
+			if (letterLabel.NullOrEmpty())
 			{
-				return -1f;
+				letterLabel = "LetterLabelNoticedRelatedPawns".Translate();
 			}
-			return num;
+			else
+			{
+				letterLabel += ": " + "RelationshipAppendedLetterSuffix".Translate().CapitalizeFirst();
+			}
+			if (!letterText.NullOrEmpty())
+			{
+				letterText += "\n\n";
+			}
+			letterText += relationsInfoHeader + "\n\n" + pawnRelationsInfo;
 		}
+	}
 
-		// Token: 0x0600C828 RID: 51240 RVA: 0x003A77A6 File Offset: 0x003A59A6
-		public static float MinPossibleBioAgeAt(float myBiologicalAge, float atChronologicalAge)
+	public static void Notify_PawnsSeenByPlayer_Letter_Send(IEnumerable<Pawn> seenPawns, string relationsInfoHeader, LetterDef letterDef, bool informEvenIfSeenBefore = false, bool writeSeenPawnsNames = true)
+	{
+		TaggedString letterLabel = "";
+		TaggedString letterText = "";
+		seenPawns = seenPawns.ToList();
+		Notify_PawnsSeenByPlayer_Letter(seenPawns, ref letterLabel, ref letterText, relationsInfoHeader, informEvenIfSeenBefore, writeSeenPawnsNames);
+		if (letterText.NullOrEmpty())
 		{
-			return Mathf.Max(myBiologicalAge - atChronologicalAge, 0f);
+			return;
 		}
+		Pawn pawn = null;
+		foreach (Pawn seenPawn in seenPawns)
+		{
+			if (GetMostImportantColonyRelative(seenPawn) != null)
+			{
+				pawn = seenPawn;
+				break;
+			}
+		}
+		if (pawn == null)
+		{
+			pawn = seenPawns.FirstOrDefault();
+		}
+		Find.LetterStack.ReceiveLetter(letterLabel, letterText, letterDef, pawn);
+	}
+
+	public static bool TryAppendRelationsWithColonistsInfo(ref TaggedString text, Pawn pawn)
+	{
+		TaggedString title = null;
+		return TryAppendRelationsWithColonistsInfo(ref text, ref title, pawn);
+	}
+
+	public static bool TryAppendRelationsWithColonistsInfo(ref TaggedString text, ref TaggedString title, Pawn pawn)
+	{
+		Pawn mostImportantColonyRelative = GetMostImportantColonyRelative(pawn);
+		if (mostImportantColonyRelative == null)
+		{
+			return false;
+		}
+		if ((string)title != null)
+		{
+			title += " (" + "RelationshipAppendedLetterSuffix".Translate() + ")";
+		}
+		string text2 = mostImportantColonyRelative.GetMostImportantRelation(pawn)?.GetGenderSpecificLabel(pawn);
+		if (text2 == null)
+		{
+			return false;
+		}
+		if (mostImportantColonyRelative.IsColonist)
+		{
+			text += "\n\n" + "RelationshipAppendedLetterTextColonist".Translate(mostImportantColonyRelative.LabelShort, text2, mostImportantColonyRelative.Named("RELATIVE"), pawn.Named("PAWN")).AdjustedFor(pawn, "PAWN", addRelationInfoSymbol: false);
+		}
+		else
+		{
+			text += "\n\n" + "RelationshipAppendedLetterTextPrisoner".Translate(mostImportantColonyRelative.LabelShort, text2, mostImportantColonyRelative.Named("RELATIVE"), pawn.Named("PAWN")).AdjustedFor(pawn, "PAWN", addRelationInfoSymbol: false);
+		}
+		return true;
+	}
+
+	public static Pawn GetMostImportantColonyRelative(Pawn pawn)
+	{
+		if (pawn.relations == null || !pawn.relations.RelatedToAnyoneOrAnyoneRelatedToMe)
+		{
+			return null;
+		}
+		IEnumerable<Pawn> enumerable = PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_FreeColonistsAndPrisoners.Where((Pawn x) => x.relations.everSeenByPlayer);
+		float num = 0f;
+		Pawn pawn2 = null;
+		foreach (Pawn item in enumerable)
+		{
+			PawnRelationDef mostImportantRelation = pawn.GetMostImportantRelation(item);
+			if (mostImportantRelation != null && (pawn2 == null || mostImportantRelation.importance > num))
+			{
+				num = mostImportantRelation.importance;
+				pawn2 = item;
+			}
+		}
+		return pawn2;
+	}
+
+	public static float MaxPossibleBioAgeAt(float myBiologicalAge, float myChronologicalAge, float atChronologicalAge)
+	{
+		float num = Mathf.Min(myBiologicalAge, myChronologicalAge - atChronologicalAge);
+		if (num < 0f)
+		{
+			return -1f;
+		}
+		return num;
+	}
+
+	public static float MinPossibleBioAgeAt(float myBiologicalAge, float atChronologicalAge)
+	{
+		return Mathf.Max(myBiologicalAge - atChronologicalAge, 0f);
 	}
 }

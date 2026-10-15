@@ -1,126 +1,191 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public abstract class GeneGizmo_Resource : Gizmo_Slider
 {
-	// Token: 0x02003847 RID: 14407
-	public abstract class GeneGizmo_Resource : Gizmo_Slider
+	[CompilerGenerated]
+	private sealed class _003CGetBarThresholds_003Ed__24 : IEnumerable<float>, IEnumerable, IEnumerator<float>, IEnumerator, IDisposable
 	{
-		// Token: 0x170032DD RID: 13021
-		// (get) Token: 0x06013ECA RID: 81610 RVA: 0x005E94A3 File Offset: 0x005E76A3
-		protected override Color BarColor { get; }
+		private int _003C_003E1__state;
 
-		// Token: 0x170032DE RID: 13022
-		// (get) Token: 0x06013ECB RID: 81611 RVA: 0x005E94AB File Offset: 0x005E76AB
-		protected override Color BarHighlightColor { get; }
+		private float _003C_003E2__current;
 
-		// Token: 0x170032DF RID: 13023
-		// (get) Token: 0x06013ECC RID: 81612 RVA: 0x005E94B3 File Offset: 0x005E76B3
-		protected override bool IsDraggable
+		private int _003C_003El__initialThreadId;
+
+		public GeneGizmo_Resource _003C_003E4__this;
+
+		private int _003Ci_003E5__2;
+
+		float IEnumerator<float>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.gene.pawn.IsColonistPlayerControlled || this.gene.pawn.IsPrisonerOfColony;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170032E0 RID: 13024
-		// (get) Token: 0x06013ECD RID: 81613 RVA: 0x005E94D9 File Offset: 0x005E76D9
-		protected override string BarLabel
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return string.Format("{0} / {1}", this.gene.ValueForDisplay, this.gene.MaxForDisplay);
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170032E1 RID: 13025
-		// (get) Token: 0x06013ECE RID: 81614 RVA: 0x005E9505 File Offset: 0x005E7705
-		protected override int Increments
+		[DebuggerHidden]
+		public _003CGetBarThresholds_003Ed__24(int _003C_003E1__state)
 		{
-			get
-			{
-				return this.gene.MaxForDisplay / 10;
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x170032E2 RID: 13026
-		// (get) Token: 0x06013ECF RID: 81615 RVA: 0x005E9515 File Offset: 0x005E7715
-		protected override float ValuePercent
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			get
-			{
-				return this.gene.ValuePercent;
-			}
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x170032E3 RID: 13027
-		// (get) Token: 0x06013ED0 RID: 81616 RVA: 0x005E9522 File Offset: 0x005E7722
-		protected override FloatRange DragRange
+		private bool MoveNext()
 		{
-			get
+			int num = _003C_003E1__state;
+			GeneGizmo_Resource geneGizmo_Resource = _003C_003E4__this;
+			switch (num)
 			{
-				return new FloatRange(0f, this.gene.Max);
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003Ci_003E5__2 = 0;
+				break;
+			case 1:
+				_003C_003E1__state = -1;
+				_003Ci_003E5__2++;
+				break;
 			}
+			if (_003Ci_003E5__2 < geneGizmo_Resource.gene.def.resourceGizmoThresholds.Count)
+			{
+				_003C_003E2__current = geneGizmo_Resource.gene.def.resourceGizmoThresholds[_003Ci_003E5__2];
+				_003C_003E1__state = 1;
+				return true;
+			}
+			return false;
 		}
 
-		// Token: 0x170032E4 RID: 13028
-		// (get) Token: 0x06013ED1 RID: 81617 RVA: 0x005E9539 File Offset: 0x005E7739
-		// (set) Token: 0x06013ED2 RID: 81618 RVA: 0x005E9552 File Offset: 0x005E7752
-		protected override float Target
+		bool IEnumerator.MoveNext()
 		{
-			get
-			{
-				return this.gene.targetValue / this.gene.Max;
-			}
-			set
-			{
-				this.gene.SetTargetValuePct(value);
-			}
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x170032E5 RID: 13029
-		// (get) Token: 0x06013ED3 RID: 81619 RVA: 0x005E9560 File Offset: 0x005E7760
-		protected override string Title
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			get
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<float> IEnumerable<float>.GetEnumerator()
+		{
+			_003CGetBarThresholds_003Ed__24 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				string text = this.gene.ResourceLabel.CapitalizeFirst();
-				if (Find.Selector.SelectedPawns.Count != 1)
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CGetBarThresholds_003Ed__24(0)
 				{
-					text = text + " (" + this.gene.pawn.LabelShort + ")";
-				}
-				return text;
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
+			return result;
 		}
 
-		// Token: 0x06013ED4 RID: 81620 RVA: 0x005E95B2 File Offset: 0x005E77B2
-		public GeneGizmo_Resource(Gene_Resource gene, List<IGeneResourceDrain> drainGenes, Color barColor, Color barHighlightColor)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			this.gene = gene;
-			this.drainGenes = drainGenes;
-			this.BarColor = barColor;
-			this.BarHighlightColor = barHighlightColor;
+			return ((IEnumerable<float>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x06013ED5 RID: 81621 RVA: 0x005E95D7 File Offset: 0x005E77D7
-		protected override IEnumerable<float> GetBarThresholds()
+	protected Gene_Resource gene;
+
+	protected List<IGeneResourceDrain> drainGenes;
+
+	protected override Color BarColor { get; }
+
+	protected override Color BarHighlightColor { get; }
+
+	protected override bool IsDraggable
+	{
+		get
 		{
-			int num;
-			for (int i = 0; i < this.gene.def.resourceGizmoThresholds.Count; i = num + 1)
+			if (!gene.pawn.IsColonistPlayerControlled)
 			{
-				yield return this.gene.def.resourceGizmoThresholds[i];
-				num = i;
+				return gene.pawn.IsPrisonerOfColony;
 			}
-			yield break;
+			return true;
 		}
+	}
 
-		// Token: 0x0400DC18 RID: 56344
-		protected Gene_Resource gene;
+	protected override string BarLabel => $"{gene.ValueForDisplay} / {gene.MaxForDisplay}";
 
-		// Token: 0x0400DC19 RID: 56345
-		protected List<IGeneResourceDrain> drainGenes;
+	protected override int Increments => gene.MaxForDisplay / 10;
+
+	protected override float ValuePercent => gene.ValuePercent;
+
+	protected override FloatRange DragRange => new FloatRange(0f, gene.Max);
+
+	protected override float Target
+	{
+		get
+		{
+			return gene.targetValue / gene.Max;
+		}
+		set
+		{
+			gene.SetTargetValuePct(value);
+		}
+	}
+
+	protected override string Title
+	{
+		get
+		{
+			string text = gene.ResourceLabel.CapitalizeFirst();
+			if (Find.Selector.SelectedPawns.Count != 1)
+			{
+				text = text + " (" + gene.pawn.LabelShort + ")";
+			}
+			return text;
+		}
+	}
+
+	public GeneGizmo_Resource(Gene_Resource gene, List<IGeneResourceDrain> drainGenes, Color barColor, Color barHighlightColor)
+	{
+		this.gene = gene;
+		this.drainGenes = drainGenes;
+		BarColor = barColor;
+		BarHighlightColor = barHighlightColor;
+	}
+
+	[IteratorStateMachine(typeof(_003CGetBarThresholds_003Ed__24))]
+	protected override IEnumerable<float> GetBarThresholds()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetBarThresholds_003Ed__24(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

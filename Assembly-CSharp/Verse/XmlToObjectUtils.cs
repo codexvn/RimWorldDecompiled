@@ -1,273 +1,229 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Xml;
 using JetBrains.Annotations;
 
-namespace Verse
+namespace Verse;
+
+public static class XmlToObjectUtils
 {
-	// Token: 0x0200083D RID: 2109
-	public static class XmlToObjectUtils
+	private struct FieldAliasCache : IEquatable<FieldAliasCache>
 	{
-		// Token: 0x06003581 RID: 13697 RVA: 0x0011CD84 File Offset: 0x0011AF84
-		[CanBeNull]
-		public static FieldInfo DoFieldSearch(Type typeBeingDeserialized, XmlNode fieldNode, XmlNode xmlRootForDebug)
+		public Type type;
+
+		public string fieldName;
+
+		public FieldAliasCache(Type type, string fieldName)
 		{
-			string name = fieldNode.Name;
-			FieldInfo fieldInfo = XmlToObjectUtils.DirectGetFieldByName(typeBeingDeserialized, name, xmlRootForDebug);
-			if (fieldInfo != null)
+			this.type = type;
+			this.fieldName = fieldName.ToLower();
+		}
+
+		public bool Equals(FieldAliasCache other)
+		{
+			if (type == other.type)
 			{
-				return fieldInfo;
+				return string.Equals(fieldName, other.fieldName);
 			}
-			DeepProfiler.Start("Search for field alias");
-			try
+			return false;
+		}
+
+		public override int GetHashCode()
+		{
+			return HashCode.Combine(type, fieldName);
+		}
+	}
+
+	private static readonly Dictionary<Type, Dictionary<string, FieldInfo>> fieldInfoLookup = new Dictionary<Type, Dictionary<string, FieldInfo>>();
+
+	private static readonly Dictionary<FieldAliasCache, FieldInfo> fieldAliases = new Dictionary<FieldAliasCache, FieldInfo>(EqualityComparer<FieldAliasCache>.Default);
+
+	private static readonly Dictionary<(Type, string), FieldInfo> getFieldCache = new Dictionary<(Type, string), FieldInfo>();
+
+	private static readonly Dictionary<(Type, string), FieldInfo> getFieldIgnoreCaseCache = new Dictionary<(Type, string), FieldInfo>();
+
+	private static Dictionary<Type, MethodInfo> customDataLoadMethodCache = new Dictionary<Type, MethodInfo>();
+
+	public const string PostLoadMethodName = "PostLoad";
+
+	private static Dictionary<Type, MethodInfo> postLoadMethodCache = new Dictionary<Type, MethodInfo>();
+
+	[CanBeNull]
+	public static FieldInfo DoFieldSearch(Type typeBeingDeserialized, XmlNode fieldNode, XmlNode xmlRootForDebug)
+	{
+		string name = fieldNode.Name;
+		FieldInfo value = DirectGetFieldByName(typeBeingDeserialized, name, xmlRootForDebug);
+		if (value != null)
+		{
+			return value;
+		}
+		DeepProfiler.Start("Search for field alias");
+		try
+		{
+			FieldAliasCache key = new FieldAliasCache(typeBeingDeserialized, name);
+			if (!fieldAliases.TryGetValue(key, out value))
 			{
-				XmlToObjectUtils.FieldAliasCache key = new XmlToObjectUtils.FieldAliasCache(typeBeingDeserialized, name);
-				if (!XmlToObjectUtils.fieldAliases.TryGetValue(key, out fieldInfo))
+				FieldInfo[] fields = typeBeingDeserialized.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+				foreach (FieldInfo fieldInfo in fields)
 				{
-					foreach (FieldInfo fieldInfo2 in typeBeingDeserialized.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
+					foreach (LoadAliasAttribute customAttribute in fieldInfo.GetCustomAttributes<LoadAliasAttribute>(inherit: true))
 					{
-						using (IEnumerator<LoadAliasAttribute> enumerator = fieldInfo2.GetCustomAttributes(true).GetEnumerator())
+						if (customAttribute.alias.EqualsIgnoreCase(name))
 						{
-							while (enumerator.MoveNext())
-							{
-								if (enumerator.Current.alias.EqualsIgnoreCase(name))
-								{
-									fieldInfo = fieldInfo2;
-									break;
-								}
-							}
-						}
-						if (fieldInfo != null)
-						{
+							value = fieldInfo;
 							break;
 						}
 					}
-					XmlToObjectUtils.fieldAliases.Add(key, fieldInfo);
-				}
-			}
-			finally
-			{
-				DeepProfiler.End();
-			}
-			if (fieldInfo != null)
-			{
-				UnsavedAttribute unsavedAttribute = fieldInfo.TryGetAttribute<UnsavedAttribute>();
-				if (unsavedAttribute != null && !unsavedAttribute.allowLoading)
-				{
-					Log.Error(string.Concat(new string[]
-					{
-						"XML error: ",
-						fieldNode.OuterXml,
-						" corresponds to a field in type ",
-						typeBeingDeserialized.Name,
-						" which has an Unsaved attribute. Context: ",
-						xmlRootForDebug.OuterXml
-					}));
-					return null;
-				}
-			}
-			if (fieldInfo != null)
-			{
-				return fieldInfo;
-			}
-			DeepProfiler.Start("Check for ignored missing field");
-			FieldInfo result;
-			try
-			{
-				bool flag = false;
-				XmlAttributeCollection attributes = fieldNode.Attributes;
-				XmlAttribute xmlAttribute = (attributes != null) ? attributes["IgnoreIfNoMatchingField"] : null;
-				if (xmlAttribute != null && xmlAttribute.Value.Equals("true", StringComparison.InvariantCultureIgnoreCase))
-				{
-					flag = true;
-				}
-				else
-				{
-					object[] customAttributes = typeBeingDeserialized.GetCustomAttributes(typeof(IgnoreSavedElementAttribute), true);
-					for (int i = 0; i < customAttributes.Length; i++)
-					{
-						if (string.Equals(((IgnoreSavedElementAttribute)customAttributes[i]).elementToIgnore, name, StringComparison.OrdinalIgnoreCase))
-						{
-							flag = true;
-							break;
-						}
-					}
-				}
-				if (!flag)
-				{
-					Log.Error(string.Concat(new string[]
-					{
-						"XML error: ",
-						fieldNode.OuterXml,
-						" doesn't correspond to any field in type ",
-						typeBeingDeserialized.Name,
-						". Context: ",
-						xmlRootForDebug.OuterXml
-					}));
-				}
-				result = null;
-			}
-			finally
-			{
-				DeepProfiler.End();
-			}
-			return result;
-		}
-
-		// Token: 0x06003582 RID: 13698 RVA: 0x0011CFC0 File Offset: 0x0011B1C0
-		private static FieldInfo DirectGetFieldByName(Type type, string token, XmlNode debugXmlNode)
-		{
-			Dictionary<string, FieldInfo> dictionary;
-			if (!XmlToObjectUtils.fieldInfoLookup.TryGetValue(type, out dictionary))
-			{
-				dictionary = new Dictionary<string, FieldInfo>();
-				XmlToObjectUtils.fieldInfoLookup.Add(type, dictionary);
-			}
-			FieldInfo fieldInfo;
-			if (dictionary.TryGetValue(token, out fieldInfo))
-			{
-				return fieldInfo;
-			}
-			fieldInfo = XmlToObjectUtils.SearchTypeHierarchy(type, token, false);
-			if (fieldInfo != null)
-			{
-				dictionary.Add(token, fieldInfo);
-				return fieldInfo;
-			}
-			fieldInfo = XmlToObjectUtils.SearchTypeHierarchy(type, token, true);
-			if (fieldInfo == null)
-			{
-				return null;
-			}
-			dictionary.Add(token, fieldInfo);
-			if (type.HasAttribute<CaseInsensitiveXMLParsing>())
-			{
-				return fieldInfo;
-			}
-			string text = string.Format("Attempt to use string {0} to refer to field {1} in type {2}; xml tags are now case-sensitive", token, fieldInfo.Name, type);
-			if (debugXmlNode != null)
-			{
-				text = text + ". XML: " + debugXmlNode.OuterXml;
-			}
-			Log.Error(text);
-			return fieldInfo;
-		}
-
-		// Token: 0x06003583 RID: 13699 RVA: 0x0011D06C File Offset: 0x0011B26C
-		private static FieldInfo SearchTypeHierarchy(Type type, string name, bool ignoreCase)
-		{
-			Dictionary<ValueTuple<Type, string>, FieldInfo> dictionary = ignoreCase ? XmlToObjectUtils.getFieldIgnoreCaseCache : XmlToObjectUtils.getFieldCache;
-			BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
-			if (ignoreCase)
-			{
-				bindingFlags |= BindingFlags.IgnoreCase;
-			}
-			FieldInfo field;
-			for (;;)
-			{
-				if (dictionary.TryGetValue(new ValueTuple<Type, string>(type, name), out field))
-				{
-					if (field != null)
+					if (value != null)
 					{
 						break;
 					}
 				}
-				else
+				fieldAliases.Add(key, value);
+			}
+		}
+		finally
+		{
+			DeepProfiler.End();
+		}
+		if (value != null)
+		{
+			UnsavedAttribute unsavedAttribute = value.TryGetAttribute<UnsavedAttribute>();
+			if (unsavedAttribute != null && !unsavedAttribute.allowLoading)
+			{
+				Log.Error($"XML error: {fieldNode.OuterXml} corresponds to a field in type {typeBeingDeserialized.Name} which has an Unsaved attribute. Context: {xmlRootForDebug.OuterXml}");
+				return null;
+			}
+		}
+		if (value != null)
+		{
+			return value;
+		}
+		DeepProfiler.Start("Check for ignored missing field");
+		try
+		{
+			bool flag = false;
+			XmlAttribute xmlAttribute = fieldNode.Attributes?["IgnoreIfNoMatchingField"];
+			if (xmlAttribute != null && xmlAttribute.Value.Equals("true", StringComparison.InvariantCultureIgnoreCase))
+			{
+				flag = true;
+			}
+			else
+			{
+				object[] customAttributes = typeBeingDeserialized.GetCustomAttributes(typeof(IgnoreSavedElementAttribute), inherit: true);
+				for (int i = 0; i < customAttributes.Length; i++)
 				{
-					field = type.GetField(name, bindingFlags);
-					dictionary.Add(new ValueTuple<Type, string>(type, name), field);
-					if (field != null)
+					if (string.Equals(((IgnoreSavedElementAttribute)customAttributes[i]).elementToIgnore, name, StringComparison.OrdinalIgnoreCase))
 					{
-						return field;
+						flag = true;
+						break;
 					}
 				}
-				Type baseType = type.BaseType;
-				if (baseType == null || !(baseType != typeof(object)))
-				{
-					goto IL_79;
-				}
-				type = baseType;
 			}
-			return field;
-			IL_79:
+			if (!flag)
+			{
+				Log.Error($"XML error: {fieldNode.OuterXml} doesn't correspond to any field in type {typeBeingDeserialized.Name}. Context: {xmlRootForDebug.OuterXml}");
+			}
 			return null;
 		}
-
-		// Token: 0x06003584 RID: 13700 RVA: 0x0011D0F4 File Offset: 0x0011B2F4
-		public static MethodInfo CustomDataLoadMethodOf(Type type)
+		finally
 		{
-			MethodInfo result;
-			if (XmlToObjectUtils.customDataLoadMethodCache.TryGetValue(type, out result))
-			{
-				return result;
-			}
-			MethodInfo method = type.GetMethod("LoadDataFromXmlCustom", BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-			XmlToObjectUtils.customDataLoadMethodCache.Add(type, method);
-			return method;
+			DeepProfiler.End();
 		}
+	}
 
-		// Token: 0x06003585 RID: 13701 RVA: 0x0011D130 File Offset: 0x0011B330
-		public static MethodInfo PostLoadMethodOf(Type type)
+	private static FieldInfo DirectGetFieldByName(Type type, string token, XmlNode debugXmlNode)
+	{
+		if (!fieldInfoLookup.TryGetValue(type, out var value))
 		{
-			MethodInfo result;
-			if (XmlToObjectUtils.postLoadMethodCache.TryGetValue(type, out result))
-			{
-				return result;
-			}
-			MethodInfo method = type.GetMethod("PostLoad");
-			XmlToObjectUtils.postLoadMethodCache.Add(type, method);
-			return method;
+			value = new Dictionary<string, FieldInfo>();
+			fieldInfoLookup.Add(type, value);
 		}
-
-		// Token: 0x04002852 RID: 10322
-		private static readonly Dictionary<Type, Dictionary<string, FieldInfo>> fieldInfoLookup = new Dictionary<Type, Dictionary<string, FieldInfo>>();
-
-		// Token: 0x04002853 RID: 10323
-		private static readonly Dictionary<XmlToObjectUtils.FieldAliasCache, FieldInfo> fieldAliases = new Dictionary<XmlToObjectUtils.FieldAliasCache, FieldInfo>(EqualityComparer<XmlToObjectUtils.FieldAliasCache>.Default);
-
-		// Token: 0x04002854 RID: 10324
-		private static readonly Dictionary<ValueTuple<Type, string>, FieldInfo> getFieldCache = new Dictionary<ValueTuple<Type, string>, FieldInfo>();
-
-		// Token: 0x04002855 RID: 10325
-		private static readonly Dictionary<ValueTuple<Type, string>, FieldInfo> getFieldIgnoreCaseCache = new Dictionary<ValueTuple<Type, string>, FieldInfo>();
-
-		// Token: 0x04002856 RID: 10326
-		private static Dictionary<Type, MethodInfo> customDataLoadMethodCache = new Dictionary<Type, MethodInfo>();
-
-		// Token: 0x04002857 RID: 10327
-		public const string PostLoadMethodName = "PostLoad";
-
-		// Token: 0x04002858 RID: 10328
-		private static Dictionary<Type, MethodInfo> postLoadMethodCache = new Dictionary<Type, MethodInfo>();
-
-		// Token: 0x0200083E RID: 2110
-		private struct FieldAliasCache : IEquatable<XmlToObjectUtils.FieldAliasCache>
+		if (value.TryGetValue(token, out var value2))
 		{
-			// Token: 0x06003587 RID: 13703 RVA: 0x0011D1B6 File Offset: 0x0011B3B6
-			public FieldAliasCache(Type type, string fieldName)
-			{
-				this.type = type;
-				this.fieldName = fieldName.ToLower();
-			}
-
-			// Token: 0x06003588 RID: 13704 RVA: 0x0011D1CB File Offset: 0x0011B3CB
-			public bool Equals(XmlToObjectUtils.FieldAliasCache other)
-			{
-				return this.type == other.type && string.Equals(this.fieldName, other.fieldName);
-			}
-
-			// Token: 0x06003589 RID: 13705 RVA: 0x0011D1F3 File Offset: 0x0011B3F3
-			public override int GetHashCode()
-			{
-				return HashCode.Combine<Type, string>(this.type, this.fieldName);
-			}
-
-			// Token: 0x04002859 RID: 10329
-			public Type type;
-
-			// Token: 0x0400285A RID: 10330
-			public string fieldName;
+			return value2;
 		}
+		value2 = SearchTypeHierarchy(type, token, ignoreCase: false);
+		if (value2 != null)
+		{
+			value.Add(token, value2);
+			return value2;
+		}
+		value2 = SearchTypeHierarchy(type, token, ignoreCase: true);
+		if (value2 == null)
+		{
+			return null;
+		}
+		value.Add(token, value2);
+		if (type.HasAttribute<CaseInsensitiveXMLParsing>())
+		{
+			return value2;
+		}
+		string text = $"Attempt to use string {token} to refer to field {value2.Name} in type {type}; xml tags are now case-sensitive";
+		if (debugXmlNode != null)
+		{
+			text = text + ". XML: " + debugXmlNode.OuterXml;
+		}
+		Log.Error(text);
+		return value2;
+	}
+
+	private static FieldInfo SearchTypeHierarchy(Type type, string name, bool ignoreCase)
+	{
+		Dictionary<(Type, string), FieldInfo> dictionary = (ignoreCase ? getFieldIgnoreCaseCache : getFieldCache);
+		BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+		if (ignoreCase)
+		{
+			bindingFlags |= BindingFlags.IgnoreCase;
+		}
+		while (true)
+		{
+			if (dictionary.TryGetValue((type, name), out var value))
+			{
+				if (value != null)
+				{
+					return value;
+				}
+			}
+			else
+			{
+				value = type.GetField(name, bindingFlags);
+				dictionary.Add((type, name), value);
+				if (value != null)
+				{
+					return value;
+				}
+			}
+			Type baseType = type.BaseType;
+			if ((object)baseType == null || !(baseType != typeof(object)))
+			{
+				break;
+			}
+			type = baseType;
+		}
+		return null;
+	}
+
+	public static MethodInfo CustomDataLoadMethodOf(Type type)
+	{
+		if (customDataLoadMethodCache.TryGetValue(type, out var value))
+		{
+			return value;
+		}
+		MethodInfo method = type.GetMethod("LoadDataFromXmlCustom", BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+		customDataLoadMethodCache.Add(type, method);
+		return method;
+	}
+
+	public static MethodInfo PostLoadMethodOf(Type type)
+	{
+		if (postLoadMethodCache.TryGetValue(type, out var value))
+		{
+			return value;
+		}
+		MethodInfo method = type.GetMethod("PostLoad");
+		postLoadMethodCache.Add(type, method);
+		return method;
 	}
 }

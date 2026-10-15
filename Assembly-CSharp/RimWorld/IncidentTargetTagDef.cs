@@ -1,10 +1,7 @@
-﻿using System;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class IncidentTargetTagDef : Def
 {
-	// Token: 0x02001A56 RID: 6742
-	public class IncidentTargetTagDef : Def
-	{
-	}
 }

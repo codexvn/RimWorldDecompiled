@@ -1,215 +1,322 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld;
 using UnityEngine;
 
-namespace Verse
+namespace Verse;
+
+public class BodyPartDef : Def
 {
-	// Token: 0x02000211 RID: 529
-	public class BodyPartDef : Def
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__34 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x17000232 RID: 562
-		// (get) Token: 0x06000E14 RID: 3604 RVA: 0x00042A27 File Offset: 0x00040C27
-		public bool IsSolidInDefinition_Debug
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public BodyPartDef _003C_003E4__this;
+
+		private IEnumerator<string> _003C_003E7__wrap1;
+
+		string IEnumerator<string>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.solid;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17000233 RID: 563
-		// (get) Token: 0x06000E15 RID: 3605 RVA: 0x00042A2F File Offset: 0x00040C2F
-		public bool IsSkinCoveredInDefinition_Debug
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.skinCovered;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17000234 RID: 564
-		// (get) Token: 0x06000E16 RID: 3606 RVA: 0x00042A37 File Offset: 0x00040C37
-		public bool IsMirroredPart
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__34(int _003C_003E1__state)
 		{
-			get
-			{
-				return this.tags.Contains(BodyPartTagDefOf.Mirrored);
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x17000235 RID: 565
-		// (get) Token: 0x06000E17 RID: 3607 RVA: 0x00042A49 File Offset: 0x00040C49
-		public string LabelShort
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			get
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				if (!this.labelShort.NullOrEmpty())
+				try
 				{
-					return this.labelShort;
 				}
-				return this.label;
-			}
-		}
-
-		// Token: 0x17000236 RID: 566
-		// (get) Token: 0x06000E18 RID: 3608 RVA: 0x00042A65 File Offset: 0x00040C65
-		public string LabelShortCap
-		{
-			get
-			{
-				if (this.labelShort.NullOrEmpty())
+				finally
 				{
-					return this.LabelCap;
+					_003C_003Em__Finally1();
 				}
-				if (this.cachedLabelShortCap == null)
-				{
-					this.cachedLabelShortCap = this.labelShort.CapitalizeFirst();
-				}
-				return this.cachedLabelShortCap;
 			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x06000E19 RID: 3609 RVA: 0x00042A9F File Offset: 0x00040C9F
-		public override IEnumerable<string> ConfigErrors()
+		private bool MoveNext()
 		{
-			foreach (string text in base.ConfigErrors())
+			try
 			{
-				yield return text;
-			}
-			IEnumerator<string> enumerator = null;
-			if (this.frostbiteVulnerability > 10f)
-			{
-				yield return "frostbitePriority > max 10: " + this.frostbiteVulnerability.ToString();
-			}
-			if (this.solid && this.bleedRate > 0f)
-			{
-				yield return "solid but bleedRate is not zero";
-			}
-			yield break;
-			yield break;
-		}
-
-		// Token: 0x06000E1A RID: 3610 RVA: 0x00042AB0 File Offset: 0x00040CB0
-		public bool IsSolid(BodyPartRecord part, List<Hediff> hediffs)
-		{
-			for (BodyPartRecord bodyPartRecord = part; bodyPartRecord != null; bodyPartRecord = bodyPartRecord.parent)
-			{
-				for (int i = 0; i < hediffs.Count; i++)
+				int num = _003C_003E1__state;
+				BodyPartDef bodyPartDef = _003C_003E4__this;
+				switch (num)
 				{
-					if (hediffs[i].Part == bodyPartRecord && hediffs[i] is Hediff_AddedPart)
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((Def)bodyPartDef).ConfigErrors().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0076;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0076;
+				case 2:
+					_003C_003E1__state = -1;
+					goto IL_00ca;
+				case 3:
 					{
-						return hediffs[i].def.addedPartProps.solid && !hediffs[i].def.organicAddedBodypart;
+						_003C_003E1__state = -1;
+						break;
 					}
+					IL_0076:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (bodyPartDef.frostbiteVulnerability > 10f)
+					{
+						_003C_003E2__current = "frostbitePriority > max 10: " + bodyPartDef.frostbiteVulnerability;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					goto IL_00ca;
+					IL_00ca:
+					if (bodyPartDef.solid && bodyPartDef.bleedRate > 0f)
+					{
+						_003C_003E2__current = "solid but bleedRate is not zero";
+						_003C_003E1__state = 3;
+						return true;
+					}
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__34 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__34(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	[MustTranslate]
+	public string labelShort;
+
+	public List<BodyPartTagDef> tags = new List<BodyPartTagDef>();
+
+	public int hitPoints = 10;
+
+	public float permanentInjuryChanceFactor = 1f;
+
+	public float bleedRate = 1f;
+
+	public float frostbiteVulnerability;
+
+	private bool skinCovered;
+
+	private bool solid;
+
+	public bool alive = true;
+
+	public bool delicate;
+
+	public bool canScarify;
+
+	public bool beautyRelated;
+
+	public bool conceptual;
+
+	public bool socketed;
+
+	public ThingDef spawnThingOnRemoved;
+
+	public bool pawnGeneratorCanAmputate;
+
+	public bool canSuggestAmputation = true;
+
+	public bool forceAlwaysRemovable;
+
+	public Dictionary<DamageDef, float> hitChanceFactors;
+
+	public bool destroyableByDamage = true;
+
+	public bool canBeVacuumBurnt = true;
+
+	[MustTranslate]
+	public string removeRecipeLabelOverride;
+
+	public float executionPartPriority;
+
+	[Unsaved(false)]
+	private string cachedLabelShortCap;
+
+	public bool IsSolidInDefinition_Debug => solid;
+
+	public bool IsSkinCoveredInDefinition_Debug => skinCovered;
+
+	public bool IsMirroredPart => tags.Contains(BodyPartTagDefOf.Mirrored);
+
+	public string LabelShort
+	{
+		get
+		{
+			if (!labelShort.NullOrEmpty())
+			{
+				return labelShort;
+			}
+			return label;
+		}
+	}
+
+	public string LabelShortCap
+	{
+		get
+		{
+			if (labelShort.NullOrEmpty())
+			{
+				return LabelCap;
+			}
+			if (cachedLabelShortCap == null)
+			{
+				cachedLabelShortCap = labelShort.CapitalizeFirst();
+			}
+			return cachedLabelShortCap;
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__34))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__34(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public bool IsSolid(BodyPartRecord part, List<Hediff> hediffs)
+	{
+		for (BodyPartRecord bodyPartRecord = part; bodyPartRecord != null; bodyPartRecord = bodyPartRecord.parent)
+		{
+			for (int i = 0; i < hediffs.Count; i++)
+			{
+				if (hediffs[i].Part == bodyPartRecord && hediffs[i] is Hediff_AddedPart)
+				{
+					if (hediffs[i].def.addedPartProps.solid)
+					{
+						return !hediffs[i].def.organicAddedBodypart;
+					}
+					return false;
 				}
 			}
-			return this.solid;
 		}
+		return solid;
+	}
 
-		// Token: 0x06000E1B RID: 3611 RVA: 0x00042B2E File Offset: 0x00040D2E
-		public bool IsSkinCovered(BodyPartRecord part, HediffSet body)
+	public bool IsSkinCovered(BodyPartRecord part, HediffSet body)
+	{
+		if (body.PartOrAnyAncestorHasDirectlyAddedParts(part))
 		{
-			return !body.PartOrAnyAncestorHasDirectlyAddedParts(part) && this.skinCovered;
+			return false;
 		}
+		return skinCovered;
+	}
 
-		// Token: 0x06000E1C RID: 3612 RVA: 0x00042B41 File Offset: 0x00040D41
-		public float GetMaxHealth(Pawn pawn)
+	public float GetMaxHealth(Pawn pawn)
+	{
+		return Mathf.CeilToInt((float)hitPoints * pawn.HealthScale);
+	}
+
+	public float GetHitChanceFactorFor(DamageDef damage)
+	{
+		if (conceptual)
 		{
-			return (float)Mathf.CeilToInt((float)this.hitPoints * pawn.HealthScale);
+			return 0f;
 		}
-
-		// Token: 0x06000E1D RID: 3613 RVA: 0x00042B58 File Offset: 0x00040D58
-		public float GetHitChanceFactorFor(DamageDef damage)
+		if (hitChanceFactors == null)
 		{
-			if (this.conceptual)
-			{
-				return 0f;
-			}
-			if (this.hitChanceFactors == null)
-			{
-				return 1f;
-			}
-			float result;
-			if (this.hitChanceFactors.TryGetValue(damage, out result))
-			{
-				return result;
-			}
 			return 1f;
 		}
-
-		// Token: 0x04000861 RID: 2145
-		[MustTranslate]
-		public string labelShort;
-
-		// Token: 0x04000862 RID: 2146
-		public List<BodyPartTagDef> tags = new List<BodyPartTagDef>();
-
-		// Token: 0x04000863 RID: 2147
-		public int hitPoints = 10;
-
-		// Token: 0x04000864 RID: 2148
-		public float permanentInjuryChanceFactor = 1f;
-
-		// Token: 0x04000865 RID: 2149
-		public float bleedRate = 1f;
-
-		// Token: 0x04000866 RID: 2150
-		public float frostbiteVulnerability;
-
-		// Token: 0x04000867 RID: 2151
-		private bool skinCovered;
-
-		// Token: 0x04000868 RID: 2152
-		private bool solid;
-
-		// Token: 0x04000869 RID: 2153
-		public bool alive = true;
-
-		// Token: 0x0400086A RID: 2154
-		public bool delicate;
-
-		// Token: 0x0400086B RID: 2155
-		public bool canScarify;
-
-		// Token: 0x0400086C RID: 2156
-		public bool beautyRelated;
-
-		// Token: 0x0400086D RID: 2157
-		public bool conceptual;
-
-		// Token: 0x0400086E RID: 2158
-		public bool socketed;
-
-		// Token: 0x0400086F RID: 2159
-		public ThingDef spawnThingOnRemoved;
-
-		// Token: 0x04000870 RID: 2160
-		public bool pawnGeneratorCanAmputate;
-
-		// Token: 0x04000871 RID: 2161
-		public bool canSuggestAmputation = true;
-
-		// Token: 0x04000872 RID: 2162
-		public bool forceAlwaysRemovable;
-
-		// Token: 0x04000873 RID: 2163
-		public Dictionary<DamageDef, float> hitChanceFactors;
-
-		// Token: 0x04000874 RID: 2164
-		public bool destroyableByDamage = true;
-
-		// Token: 0x04000875 RID: 2165
-		public bool canBeVacuumBurnt = true;
-
-		// Token: 0x04000876 RID: 2166
-		[MustTranslate]
-		public string removeRecipeLabelOverride;
-
-		// Token: 0x04000877 RID: 2167
-		public float executionPartPriority;
-
-		// Token: 0x04000878 RID: 2168
-		[Unsaved(false)]
-		private string cachedLabelShortCap;
+		if (hitChanceFactors.TryGetValue(damage, out var value))
+		{
+			return value;
+		}
+		return 1f;
 	}
 }

@@ -1,154 +1,271 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class ChoiceLetter_BabyBirth : ChoiceLetter
 {
-	// Token: 0x02003361 RID: 13153
-	public class ChoiceLetter_BabyBirth : ChoiceLetter
+	[CompilerGenerated]
+	private sealed class _003Cget_Choices_003Ed__6 : IEnumerable<DiaOption>, IEnumerable, IEnumerator<DiaOption>, IEnumerator, IDisposable
 	{
-		// Token: 0x17003037 RID: 12343
-		// (get) Token: 0x060127D7 RID: 75735 RVA: 0x005749C4 File Offset: 0x00572BC4
-		public override bool CanShowInLetterStack
+		private int _003C_003E1__state;
+
+		private DiaOption _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public ChoiceLetter_BabyBirth _003C_003E4__this;
+
+		DiaOption IEnumerator<DiaOption>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				Pawn pawn = this.pawn;
-				bool flag;
-				if (pawn == null)
-				{
-					flag = false;
-				}
-				else
-				{
-					Faction faction = pawn.Faction;
-					bool? flag2 = (faction != null) ? new bool?(faction.IsPlayer) : null;
-					bool flag3 = true;
-					flag = (flag2.GetValueOrDefault() == flag3 & flag2 != null);
-				}
-				if (flag)
-				{
-					Pawn pawn2 = this.pawn;
-					if (pawn2 != null && pawn2.babyNamingDeadline >= 0)
-					{
-						return base.CanShowInLetterStack;
-					}
-				}
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003Cget_Choices_003Ed__6(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			ChoiceLetter_BabyBirth choiceLetter_BabyBirth = _003C_003E4__this;
+			switch (num)
+			{
+			default:
 				return false;
-			}
-		}
-
-		// Token: 0x17003038 RID: 12344
-		// (get) Token: 0x060127D8 RID: 75736 RVA: 0x00574A35 File Offset: 0x00572C35
-		public override bool ShouldAutomaticallyOpenLetter
-		{
-			get
-			{
-				Pawn pawn = this.pawn;
-				return pawn != null && pawn.babyNamingDeadline >= 0 && base.ShouldAutomaticallyOpenLetter;
-			}
-		}
-
-		// Token: 0x17003039 RID: 12345
-		// (get) Token: 0x060127D9 RID: 75737 RVA: 0x00574A59 File Offset: 0x00572C59
-		public override IEnumerable<DiaOption> Choices
-		{
-			get
-			{
-				if (!base.ArchivedOnly)
+			case 0:
+				_003C_003E1__state = -1;
+				if (!choiceLetter_BabyBirth.ArchivedOnly)
 				{
-					Faction faction = this.pawn.Faction;
+					Faction faction = choiceLetter_BabyBirth.pawn.Faction;
 					if (faction != null && faction.IsPlayer)
 					{
-						yield return new DiaOption("NameBaby".Translate().CapitalizeFirst())
+						_003C_003E2__current = new DiaOption("NameBaby".Translate().CapitalizeFirst())
 						{
-							action = new Action(this.Rename),
-							disabled = (this.pawn.babyNamingDeadline < Find.TickManager.TicksGame),
-							disabledReason = "BabyAlreadyNamed".Translate(this.pawn),
+							action = choiceLetter_BabyBirth.Rename,
+							disabled = (choiceLetter_BabyBirth.pawn.babyNamingDeadline < Find.TickManager.TicksGame),
+							disabledReason = "BabyAlreadyNamed".Translate(choiceLetter_BabyBirth.pawn),
 							resolveTree = true
 						};
+						_003C_003E1__state = 1;
+						return true;
 					}
 				}
-				if (base.ArchivedOnly)
+				goto IL_00f0;
+			case 1:
+				_003C_003E1__state = -1;
+				goto IL_00f0;
+			case 2:
+				_003C_003E1__state = -1;
+				goto IL_0114;
+			case 3:
+				_003C_003E1__state = -1;
+				break;
+			case 4:
+				_003C_003E1__state = -1;
+				break;
+			case 5:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = choiceLetter_BabyBirth.Option_Close;
+				_003C_003E1__state = 6;
+				return true;
+			case 6:
+				_003C_003E1__state = -1;
+				break;
+			case 7:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = choiceLetter_BabyBirth.Option_Postpone;
+				_003C_003E1__state = 8;
+				return true;
+			case 8:
 				{
-					yield return base.Option_JumpToLocation;
+					_003C_003E1__state = -1;
+					break;
 				}
-				if (base.ArchivedOnly)
+				IL_00f0:
+				if (choiceLetter_BabyBirth.ArchivedOnly)
 				{
-					yield return base.Option_Close;
+					_003C_003E2__current = choiceLetter_BabyBirth.Option_JumpToLocation;
+					_003C_003E1__state = 2;
+					return true;
 				}
-				else if (this.LastTickBeforeTimeout)
+				goto IL_0114;
+				IL_0114:
+				if (choiceLetter_BabyBirth.ArchivedOnly)
 				{
-					if (this.pawn.babyNamingDeadline < 0 || this.pawn.Dead)
+					_003C_003E2__current = choiceLetter_BabyBirth.Option_Close;
+					_003C_003E1__state = 3;
+					return true;
+				}
+				if (choiceLetter_BabyBirth.LastTickBeforeTimeout)
+				{
+					if (choiceLetter_BabyBirth.pawn.babyNamingDeadline < 0 || choiceLetter_BabyBirth.pawn.Dead)
 					{
-						yield return base.Option_Close;
+						_003C_003E2__current = choiceLetter_BabyBirth.Option_Close;
+						_003C_003E1__state = 4;
+						return true;
 					}
+					break;
 				}
-				else if (this.pawn.babyNamingDeadline < Find.TickManager.TicksGame)
+				if (choiceLetter_BabyBirth.pawn.babyNamingDeadline < Find.TickManager.TicksGame)
 				{
-					yield return base.Option_JumpToLocationAndPostpone;
-					yield return base.Option_Close;
+					_003C_003E2__current = choiceLetter_BabyBirth.Option_JumpToLocationAndPostpone;
+					_003C_003E1__state = 5;
+					return true;
 				}
-				else
-				{
-					yield return base.Option_JumpToLocationAndPostpone;
-					yield return base.Option_Postpone;
-				}
-				yield break;
+				_003C_003E2__current = choiceLetter_BabyBirth.Option_JumpToLocationAndPostpone;
+				_003C_003E1__state = 7;
+				return true;
 			}
+			return false;
 		}
 
-		// Token: 0x060127DA RID: 75738 RVA: 0x00574A6C File Offset: 0x00572C6C
-		public void Start()
+		bool IEnumerator.MoveNext()
 		{
-			this.pawn = (this.lookTargets.TryGetPrimaryTarget().Thing as Pawn);
-			if (this.pawn.babyNamingDeadline >= Find.TickManager.TicksGame)
-			{
-				base.StartTimeout(this.pawn.babyNamingDeadline - Find.TickManager.TicksGame);
-			}
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x060127DB RID: 75739 RVA: 0x00574ACC File Offset: 0x00572CCC
-		public override void ExposeData()
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			base.ExposeData();
-			Scribe_References.Look<Pawn>(ref this.pawn, "pawn", true);
-			if (Scribe.mode != LoadSaveMode.Saving && this.pawn == null)
-			{
-				this.pawn = (this.lookTargets.TryGetPrimaryTarget().Thing as Pawn);
-			}
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x060127DC RID: 75740 RVA: 0x00574B20 File Offset: 0x00572D20
-		private void Rename()
+		[DebuggerHidden]
+		IEnumerator<DiaOption> IEnumerable<DiaOption>.GetEnumerator()
 		{
-			string initialFirstNameOverride = null;
-			NameTriple nameTriple = this.pawn.Name as NameTriple;
-			if (nameTriple != null && nameTriple.First == "Baby".Translate().CapitalizeFirst())
+			_003Cget_Choices_003Ed__6 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				Rand.PushState();
-				Name name;
-				try
-				{
-					Rand.Seed = this.pawn.thingIDNumber;
-					Pawn pawn = this.pawn;
-					NameStyle style = NameStyle.Full;
-					string forcedLastName = null;
-					bool forceNoNick = false;
-					Pawn_GeneTracker genes = this.pawn.genes;
-					name = PawnBioAndNameGenerator.GeneratePawnName(pawn, style, forcedLastName, forceNoNick, (genes != null) ? genes.Xenotype : null);
-				}
-				finally
-				{
-					Rand.PopState();
-				}
-				NameTriple nameTriple2 = name as NameTriple;
-				initialFirstNameOverride = ((nameTriple2 != null) ? nameTriple2.First : ((NameSingle)name).Name);
+				_003C_003E1__state = 0;
+				result = this;
 			}
-			Find.WindowStack.Add(this.pawn.NamePawnDialog(initialFirstNameOverride));
+			else
+			{
+				result = new _003Cget_Choices_003Ed__6(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
 		}
 
-		// Token: 0x0400C01B RID: 49179
-		private Pawn pawn;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<DiaOption>)this).GetEnumerator();
+		}
+	}
+
+	private Pawn pawn;
+
+	public override bool CanShowInLetterStack
+	{
+		get
+		{
+			Pawn obj = pawn;
+			if (obj != null && obj.Faction?.IsPlayer == true)
+			{
+				Pawn obj2 = pawn;
+				if (obj2 != null && obj2.babyNamingDeadline >= 0)
+				{
+					return base.CanShowInLetterStack;
+				}
+			}
+			return false;
+		}
+	}
+
+	public override bool ShouldAutomaticallyOpenLetter
+	{
+		get
+		{
+			Pawn obj = pawn;
+			if (obj != null && obj.babyNamingDeadline >= 0)
+			{
+				return base.ShouldAutomaticallyOpenLetter;
+			}
+			return false;
+		}
+	}
+
+	public override IEnumerable<DiaOption> Choices
+	{
+		[IteratorStateMachine(typeof(_003Cget_Choices_003Ed__6))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_Choices_003Ed__6(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public void Start()
+	{
+		pawn = lookTargets.TryGetPrimaryTarget().Thing as Pawn;
+		if (pawn.babyNamingDeadline >= Find.TickManager.TicksGame)
+		{
+			StartTimeout(pawn.babyNamingDeadline - Find.TickManager.TicksGame);
+		}
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_References.Look(ref pawn, "pawn", saveDestroyedThings: true);
+		if (Scribe.mode != LoadSaveMode.Saving && pawn == null)
+		{
+			pawn = lookTargets.TryGetPrimaryTarget().Thing as Pawn;
+		}
+	}
+
+	private void Rename()
+	{
+		string initialFirstNameOverride = null;
+		if (pawn.Name is NameTriple nameTriple && nameTriple.First == "Baby".Translate().CapitalizeFirst())
+		{
+			Rand.PushState();
+			Name name;
+			try
+			{
+				Rand.Seed = pawn.thingIDNumber;
+				name = PawnBioAndNameGenerator.GeneratePawnName(pawn, NameStyle.Full, null, forceNoNick: false, pawn.genes?.Xenotype);
+			}
+			finally
+			{
+				Rand.PopState();
+			}
+			initialFirstNameOverride = ((name is NameTriple nameTriple2) ? nameTriple2.First : ((NameSingle)name).Name);
+		}
+		Find.WindowStack.Add(pawn.NamePawnDialog(initialFirstNameOverride));
 	}
 }

@@ -4,7 +4,7 @@
 
 ## 版本信息
 
-- 游戏版本：`1.7.4977 rev926`（程序集版本 1.7.9782.27799，Steam buildid 25908500）
+- 游戏版本：`1.7.4979 rev109`（程序集版本 1.7.4979，Steam buildid 25908500）
 - 来源目录：`F:\SteamLibrary\steamapps\common\RimWorld`
 - 反编译工具：`ilspycmd 9.x`
 - 运行时：.NET 10（自定义 CLR 构建 `waylithclr 10.0.10`）

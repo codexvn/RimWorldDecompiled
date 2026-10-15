@@ -1,1614 +1,1741 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Pawn_GeneTracker : IExposable
 {
-	// Token: 0x020024BC RID: 9404
-	public class Pawn_GeneTracker : IExposable
+	[CompilerGenerated]
+	private sealed class _003CGetGizmos_003Ed__95 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001F29 RID: 7977
-		// (get) Token: 0x0600CC60 RID: 52320 RVA: 0x003BE369 File Offset: 0x003BC569
-		public XenotypeDef Xenotype
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Pawn_GeneTracker _003C_003E4__this;
+
+		private int _003Ci_003E5__2;
+
+		private IEnumerator<Gizmo> _003C_003E7__wrap2;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.xenotype ?? XenotypeDefOf.Baseliner;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001F2A RID: 7978
-		// (get) Token: 0x0600CC61 RID: 52321 RVA: 0x003BE37A File Offset: 0x003BC57A
-		public bool UniqueXenotype
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return !this.xenotypeName.NullOrEmpty();
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001F2B RID: 7979
-		// (get) Token: 0x0600CC62 RID: 52322 RVA: 0x003BE38A File Offset: 0x003BC58A
-		public string XenotypeLabel
+		[DebuggerHidden]
+		public _003CGetGizmos_003Ed__95(int _003C_003E1__state)
 		{
-			get
-			{
-				if (!this.UniqueXenotype)
-				{
-					return this.Xenotype.label;
-				}
-				return this.xenotypeName ?? "Unique".Translate();
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x17001F2C RID: 7980
-		// (get) Token: 0x0600CC63 RID: 52323 RVA: 0x003BE3B9 File Offset: 0x003BC5B9
-		public string XenotypeLabelCap
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			get
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				return this.XenotypeLabel.CapitalizeFirst();
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
 			}
+			_003C_003E7__wrap2 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x17001F2D RID: 7981
-		// (get) Token: 0x0600CC64 RID: 52324 RVA: 0x003BE3C8 File Offset: 0x003BC5C8
-		public CustomXenotype CustomXenotype
+		private bool MoveNext()
 		{
-			get
+			try
 			{
-				if (this.Xenotype != XenotypeDefOf.Baseliner || this.hybrid || Current.ProgramState != ProgramState.Playing)
+				int num = _003C_003E1__state;
+				Pawn_GeneTracker pawn_GeneTracker = _003C_003E4__this;
+				if (num != 0)
 				{
-					return null;
-				}
-				if (this.cachedHasCustomXenotype == null)
-				{
-					this.cachedHasCustomXenotype = new bool?(false);
-					foreach (CustomXenotype custom in Current.Game.customXenotypeDatabase.customXenotypes)
-					{
-						if (GeneUtility.PawnIsCustomXenotype(this.pawn, custom))
-						{
-							this.cachedHasCustomXenotype = new bool?(true);
-							this.cachedCustomXenotype = custom;
-							break;
-						}
-					}
-				}
-				return this.cachedCustomXenotype;
-			}
-		}
-
-		// Token: 0x17001F2E RID: 7982
-		// (get) Token: 0x0600CC65 RID: 52325 RVA: 0x003BE480 File Offset: 0x003BC680
-		public string XenotypeDescShort
-		{
-			get
-			{
-				if (this.UniqueXenotype)
-				{
-					return "UniqueXenotypeDesc".Translate();
-				}
-				if (!this.Xenotype.descriptionShort.NullOrEmpty())
-				{
-					return this.Xenotype.descriptionShort + "\n\n" + "MoreInfoInInfoScreen".Translate().Colorize(ColoredText.SubtleGrayColor);
-				}
-				return this.Xenotype.description;
-			}
-		}
-
-		// Token: 0x17001F2F RID: 7983
-		// (get) Token: 0x0600CC66 RID: 52326 RVA: 0x003BE4EC File Offset: 0x003BC6EC
-		public Texture2D XenotypeIcon
-		{
-			get
-			{
-				if (!ModsConfig.BiotechActive)
-				{
-					return null;
-				}
-				if (this.iconDef != null)
-				{
-					return this.iconDef.Icon;
-				}
-				if (this.UniqueXenotype)
-				{
-					return XenotypeIconDefOf.Basic.Icon;
-				}
-				return this.Xenotype.Icon;
-			}
-		}
-
-		// Token: 0x17001F30 RID: 7984
-		// (get) Token: 0x0600CC67 RID: 52327 RVA: 0x003BE529 File Offset: 0x003BC729
-		public List<Gene> GenesListForReading
-		{
-			get
-			{
-				if (this.cachedGenes == null)
-				{
-					this.cachedGenes = new List<Gene>();
-					this.cachedGenes.AddRange(this.xenogenes);
-					this.cachedGenes.AddRange(this.endogenes);
-				}
-				return this.cachedGenes;
-			}
-		}
-
-		// Token: 0x17001F31 RID: 7985
-		// (get) Token: 0x0600CC68 RID: 52328 RVA: 0x003BE566 File Offset: 0x003BC766
-		public List<Gene> Xenogenes
-		{
-			get
-			{
-				return this.xenogenes;
-			}
-		}
-
-		// Token: 0x17001F32 RID: 7986
-		// (get) Token: 0x0600CC69 RID: 52329 RVA: 0x003BE56E File Offset: 0x003BC76E
-		public List<Gene> Endogenes
-		{
-			get
-			{
-				return this.endogenes;
-			}
-		}
-
-		// Token: 0x17001F33 RID: 7987
-		// (get) Token: 0x0600CC6A RID: 52330 RVA: 0x003BE578 File Offset: 0x003BC778
-		public float PainOffset
-		{
-			get
-			{
-				float num = 0f;
-				if (!ModLister.BiotechInstalled)
-				{
-					return num;
-				}
-				List<Gene> genesListForReading = this.GenesListForReading;
-				for (int i = 0; i < genesListForReading.Count; i++)
-				{
-					if (genesListForReading[i].Active)
-					{
-						num += genesListForReading[i].def.painOffset;
-					}
-				}
-				return num;
-			}
-		}
-
-		// Token: 0x17001F34 RID: 7988
-		// (get) Token: 0x0600CC6B RID: 52331 RVA: 0x003BE5D0 File Offset: 0x003BC7D0
-		public float PainFactor
-		{
-			get
-			{
-				float num = 1f;
-				if (!ModLister.BiotechInstalled)
-				{
-					return num;
-				}
-				List<Gene> genesListForReading = this.GenesListForReading;
-				for (int i = 0; i < genesListForReading.Count; i++)
-				{
-					if (genesListForReading[i].Active)
-					{
-						num *= genesListForReading[i].def.painFactor;
-					}
-				}
-				return num;
-			}
-		}
-
-		// Token: 0x17001F35 RID: 7989
-		// (get) Token: 0x0600CC6C RID: 52332 RVA: 0x003BE628 File Offset: 0x003BC828
-		public float SocialFightChanceFactor
-		{
-			get
-			{
-				float num = 1f;
-				if (!ModLister.BiotechInstalled)
-				{
-					return num;
-				}
-				List<Gene> genesListForReading = this.GenesListForReading;
-				for (int i = 0; i < genesListForReading.Count; i++)
-				{
-					if (genesListForReading[i].Active)
-					{
-						num *= genesListForReading[i].def.socialFightChanceFactor;
-					}
-				}
-				return num;
-			}
-		}
-
-		// Token: 0x17001F36 RID: 7990
-		// (get) Token: 0x0600CC6D RID: 52333 RVA: 0x003BE680 File Offset: 0x003BC880
-		public float AggroMentalBreakSelectionChanceFactor
-		{
-			get
-			{
-				float num = 1f;
-				if (!ModLister.BiotechInstalled)
-				{
-					return num;
-				}
-				List<Gene> genesListForReading = this.GenesListForReading;
-				for (int i = 0; i < genesListForReading.Count; i++)
-				{
-					if (genesListForReading[i].Active)
-					{
-						num *= genesListForReading[i].def.aggroMentalBreakSelectionChanceFactor;
-					}
-				}
-				return num;
-			}
-		}
-
-		// Token: 0x17001F37 RID: 7991
-		// (get) Token: 0x0600CC6E RID: 52334 RVA: 0x003BE6D8 File Offset: 0x003BC8D8
-		public bool AffectedByDarkness
-		{
-			get
-			{
-				if (!ModLister.BiotechInstalled)
-				{
-					return true;
-				}
-				List<Gene> genesListForReading = this.GenesListForReading;
-				for (int i = 0; i < genesListForReading.Count; i++)
-				{
-					if (genesListForReading[i].Active && genesListForReading[i].def.ignoreDarkness)
+					if (num != 1)
 					{
 						return false;
 					}
+					_003C_003E1__state = -3;
+					goto IL_0095;
 				}
-				return true;
-			}
-		}
-
-		// Token: 0x17001F38 RID: 7992
-		// (get) Token: 0x0600CC6F RID: 52335 RVA: 0x003BE72C File Offset: 0x003BC92C
-		public float BiologicalAgeTickFactor
-		{
-			get
-			{
-				if (!ModLister.BiotechInstalled)
-				{
-					return 1f;
-				}
-				if (this.cachedGenesAffectAge != null && !this.cachedGenesAffectAge.Value)
-				{
-					return 1f;
-				}
-				bool value = this.cachedGenesAffectAge.GetValueOrDefault();
-				if (this.cachedGenesAffectAge == null)
-				{
-					value = false;
-					this.cachedGenesAffectAge = new bool?(value);
-				}
-				float num = 1f;
-				List<Gene> genesListForReading = this.GenesListForReading;
-				for (int i = 0; i < genesListForReading.Count; i++)
-				{
-					if (genesListForReading[i].Active && genesListForReading[i].def.biologicalAgeTickFactorFromAgeCurve != null)
-					{
-						num *= genesListForReading[i].def.biologicalAgeTickFactorFromAgeCurve.Evaluate(this.pawn.ageTracker.AgeBiologicalYearsFloat);
-						this.cachedGenesAffectAge = new bool?(true);
-					}
-				}
-				return num;
-			}
-		}
-
-		// Token: 0x17001F39 RID: 7993
-		// (get) Token: 0x0600CC70 RID: 52336 RVA: 0x003BE804 File Offset: 0x003BCA04
-		public bool EnjoysSunlight
-		{
-			get
-			{
-				if (!ModLister.BiotechInstalled)
-				{
-					return true;
-				}
-				List<Gene> genesListForReading = this.GenesListForReading;
-				for (int i = 0; i < genesListForReading.Count; i++)
-				{
-					if (genesListForReading[i].def.dislikesSunlight && genesListForReading[i].Active)
-					{
-						return false;
-					}
-				}
-				return true;
-			}
-		}
-
-		// Token: 0x17001F3A RID: 7994
-		// (get) Token: 0x0600CC71 RID: 52337 RVA: 0x003BE858 File Offset: 0x003BCA58
-		public bool ShouldHaveCallTracker
-		{
-			get
-			{
+				_003C_003E1__state = -1;
 				if (!ModLister.BiotechInstalled)
 				{
 					return false;
 				}
-				List<Gene> genesListForReading = this.GenesListForReading;
-				for (int i = 0; i < genesListForReading.Count; i++)
+				_003Ci_003E5__2 = 0;
+				goto IL_00c1;
+				IL_0095:
+				if (_003C_003E7__wrap2.MoveNext())
 				{
-					if (genesListForReading[i].Active && genesListForReading[i].def.soundCall != null)
-					{
-						return true;
-					}
-				}
-				return false;
-			}
-		}
-
-		// Token: 0x17001F3B RID: 7995
-		// (get) Token: 0x0600CC72 RID: 52338 RVA: 0x003BE8AC File Offset: 0x003BCAAC
-		public bool DontMindRawFood
-		{
-			get
-			{
-				if (!ModLister.BiotechInstalled)
-				{
-					return false;
-				}
-				List<Gene> genesListForReading = this.GenesListForReading;
-				for (int i = 0; i < genesListForReading.Count; i++)
-				{
-					if (genesListForReading[i].Active && genesListForReading[i].def.dontMindRawFood)
-					{
-						return true;
-					}
-				}
-				return false;
-			}
-		}
-
-		// Token: 0x17001F3C RID: 7996
-		// (get) Token: 0x0600CC73 RID: 52339 RVA: 0x003BE900 File Offset: 0x003BCB00
-		public bool CanHaveBeard
-		{
-			get
-			{
-				if (!ModLister.BiotechInstalled)
-				{
-					return this.pawn.gender != Gender.Female;
-				}
-				if (this.pawn.gender == Gender.Female)
-				{
-					List<Gene> genesListForReading = this.GenesListForReading;
-					for (int i = 0; i < genesListForReading.Count; i++)
-					{
-						if (genesListForReading[i].Active && genesListForReading[i].def.womenCanHaveBeards)
-						{
-							return true;
-						}
-					}
-					return false;
-				}
-				return true;
-			}
-		}
-
-		// Token: 0x17001F3D RID: 7997
-		// (get) Token: 0x0600CC74 RID: 52340 RVA: 0x003BE974 File Offset: 0x003BCB74
-		public float PrisonBreakIntervalFactor
-		{
-			get
-			{
-				if (!ModLister.BiotechInstalled)
-				{
-					return 1f;
-				}
-				float num = 1f;
-				List<Gene> genesListForReading = this.GenesListForReading;
-				for (int i = 0; i < genesListForReading.Count; i++)
-				{
-					if (genesListForReading[i].Active)
-					{
-						num *= genesListForReading[i].def.prisonBreakMTBFactor;
-					}
-				}
-				return num;
-			}
-		}
-
-		// Token: 0x17001F3E RID: 7998
-		// (get) Token: 0x0600CC75 RID: 52341 RVA: 0x003BE9D0 File Offset: 0x003BCBD0
-		public WorkTags DisabledWorkTags
-		{
-			get
-			{
-				if (!ModLister.BiotechInstalled)
-				{
-					return WorkTags.None;
-				}
-				List<Gene> genesListForReading = this.GenesListForReading;
-				WorkTags workTags = WorkTags.None;
-				for (int i = 0; i < genesListForReading.Count; i++)
-				{
-					if (genesListForReading[i].Active)
-					{
-						workTags |= genesListForReading[i].def.disabledWorkTags;
-					}
-				}
-				return workTags;
-			}
-		}
-
-		// Token: 0x17001F3F RID: 7999
-		// (get) Token: 0x0600CC76 RID: 52342 RVA: 0x003BEA24 File Offset: 0x003BCC24
-		public bool TattoosVisible
-		{
-			get
-			{
-				if (this.cachedTattoosVisible != null)
-				{
-					return this.cachedTattoosVisible.Value;
-				}
-				this.cachedTattoosVisible = new bool?(true);
-				List<Gene> genesListForReading = this.GenesListForReading;
-				for (int i = 0; i < genesListForReading.Count; i++)
-				{
-					if (genesListForReading[i].Active && !genesListForReading[i].def.tattoosVisible)
-					{
-						this.cachedTattoosVisible = new bool?(false);
-						break;
-					}
-				}
-				return this.cachedTattoosVisible.Value;
-			}
-		}
-
-		// Token: 0x17001F40 RID: 8000
-		// (get) Token: 0x0600CC77 RID: 52343 RVA: 0x003BEAA8 File Offset: 0x003BCCA8
-		public int? WaterCellCost
-		{
-			get
-			{
-				if (this.hasCachedWaterCost)
-				{
-					return this.cachedWaterCellCost;
-				}
-				this.hasCachedWaterCost = true;
-				List<Gene> genesListForReading = this.GenesListForReading;
-				for (int i = 0; i < genesListForReading.Count; i++)
-				{
-					if (genesListForReading[i].Active && genesListForReading[i].def.waterCellCost != null)
-					{
-						int? waterCellCost = genesListForReading[i].def.waterCellCost;
-						if (this.cachedWaterCellCost == null || waterCellCost.Value < this.cachedWaterCellCost.Value)
-						{
-							this.cachedWaterCellCost = waterCellCost;
-						}
-					}
-				}
-				return this.cachedWaterCellCost;
-			}
-		}
-
-		// Token: 0x0600CC78 RID: 52344 RVA: 0x003BEB4C File Offset: 0x003BCD4C
-		public Pawn_GeneTracker()
-		{
-		}
-
-		// Token: 0x0600CC79 RID: 52345 RVA: 0x003BEBA4 File Offset: 0x003BCDA4
-		public Pawn_GeneTracker(Pawn pawn)
-		{
-			this.pawn = pawn;
-		}
-
-		// Token: 0x0600CC7A RID: 52346 RVA: 0x003BEC00 File Offset: 0x003BCE00
-		public void SetXenotype(XenotypeDef xenotype)
-		{
-			if (!ModLister.CheckBiotech("Xenotypes"))
-			{
-				return;
-			}
-			this.xenotype = xenotype;
-			this.xenotypeName = null;
-			this.iconDef = null;
-			this.cachedHasCustomXenotype = null;
-			this.cachedCustomXenotype = null;
-			this.ClearXenogenes();
-			for (int i = 0; i < xenotype.genes.Count; i++)
-			{
-				this.AddGene(xenotype.genes[i], !xenotype.inheritable);
-			}
-		}
-
-		// Token: 0x0600CC7B RID: 52347 RVA: 0x003BEC7A File Offset: 0x003BCE7A
-		public void SetXenotypeDirect(XenotypeDef xenotype)
-		{
-			if (!ModLister.CheckBiotech("Xenotypes"))
-			{
-				return;
-			}
-			this.xenotype = xenotype;
-			this.xenotypeName = null;
-			this.cachedHasCustomXenotype = null;
-			this.cachedCustomXenotype = null;
-		}
-
-		// Token: 0x0600CC7C RID: 52348 RVA: 0x003BECAC File Offset: 0x003BCEAC
-		[Obsolete("Use HasActiveGene() instead")]
-		public bool HasGene(GeneDef geneDef)
-		{
-			if (geneDef == null)
-			{
-				return false;
-			}
-			List<Gene> genesListForReading = this.GenesListForReading;
-			for (int i = 0; i < genesListForReading.Count; i++)
-			{
-				if (genesListForReading[i].def == geneDef)
-				{
+					Gizmo current = _003C_003E7__wrap2.Current;
+					_003C_003E2__current = current;
+					_003C_003E1__state = 1;
 					return true;
 				}
-			}
-			return false;
-		}
-
-		// Token: 0x0600CC7D RID: 52349 RVA: 0x003BECE8 File Offset: 0x003BCEE8
-		public bool HasActiveGene(GeneDef geneDef)
-		{
-			if (geneDef == null)
-			{
-				return false;
-			}
-			List<Gene> genesListForReading = this.GenesListForReading;
-			for (int i = 0; i < genesListForReading.Count; i++)
-			{
-				if (genesListForReading[i].def == geneDef && genesListForReading[i].Active)
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap2 = null;
+				goto IL_00af;
+				IL_00af:
+				_003Ci_003E5__2++;
+				goto IL_00c1;
+				IL_00c1:
+				if (_003Ci_003E5__2 < pawn_GeneTracker.GenesListForReading.Count)
 				{
-					return true;
-				}
-			}
-			return false;
-		}
-
-		// Token: 0x0600CC7E RID: 52350 RVA: 0x003BED32 File Offset: 0x003BCF32
-		public bool TryGetNeedEnablingGene(NeedDef def, out Gene gene)
-		{
-			if (this.cachedEnabledNeeds == null)
-			{
-				gene = null;
-				return false;
-			}
-			return this.cachedEnabledNeeds.TryGetValue(def, out gene);
-		}
-
-		// Token: 0x0600CC7F RID: 52351 RVA: 0x003BED4E File Offset: 0x003BCF4E
-		public bool TryGetNeedDisablingGene(NeedDef def, out Gene gene)
-		{
-			if (this.cachedDisabledNeeds == null)
-			{
-				gene = null;
-				return false;
-			}
-			return this.cachedDisabledNeeds.TryGetValue(def, out gene);
-		}
-
-		// Token: 0x0600CC80 RID: 52352 RVA: 0x003BED6A File Offset: 0x003BCF6A
-		public bool EnablesNeed(NeedDef def)
-		{
-			Dictionary<NeedDef, Gene> dictionary = this.cachedEnabledNeeds;
-			return dictionary != null && dictionary.ContainsKey(def);
-		}
-
-		// Token: 0x0600CC81 RID: 52353 RVA: 0x003BED7E File Offset: 0x003BCF7E
-		public bool DisablesNeed(NeedDef def)
-		{
-			Dictionary<NeedDef, Gene> dictionary = this.cachedDisabledNeeds;
-			return dictionary != null && dictionary.ContainsKey(def);
-		}
-
-		// Token: 0x0600CC82 RID: 52354 RVA: 0x003BED92 File Offset: 0x003BCF92
-		public bool IsXenogene(Gene gene)
-		{
-			return this.xenogenes.Contains(gene);
-		}
-
-		// Token: 0x0600CC83 RID: 52355 RVA: 0x003BEDA0 File Offset: 0x003BCFA0
-		public bool HasXenogene(GeneDef geneDef)
-		{
-			for (int i = 0; i < this.xenogenes.Count; i++)
-			{
-				if (this.xenogenes[i].def == geneDef)
-				{
-					return true;
-				}
-			}
-			return false;
-		}
-
-		// Token: 0x0600CC84 RID: 52356 RVA: 0x003BEDDC File Offset: 0x003BCFDC
-		public bool HasEndogene(GeneDef geneDef)
-		{
-			for (int i = 0; i < this.endogenes.Count; i++)
-			{
-				if (this.endogenes[i].def == geneDef)
-				{
-					return true;
-				}
-			}
-			return false;
-		}
-
-		// Token: 0x0600CC85 RID: 52357 RVA: 0x003BEE18 File Offset: 0x003BD018
-		public Gene GetGene(GeneDef geneDef)
-		{
-			List<Gene> genesListForReading = this.GenesListForReading;
-			for (int i = 0; i < genesListForReading.Count; i++)
-			{
-				if (genesListForReading[i].def == geneDef)
-				{
-					return genesListForReading[i];
-				}
-			}
-			return null;
-		}
-
-		// Token: 0x0600CC86 RID: 52358 RVA: 0x003BEE58 File Offset: 0x003BD058
-		public T GetFirstGeneOfType<T>() where T : Gene
-		{
-			if (!ModLister.BiotechInstalled)
-			{
-				return default(T);
-			}
-			List<Gene> genesListForReading = this.GenesListForReading;
-			for (int i = 0; i < genesListForReading.Count; i++)
-			{
-				if (genesListForReading[i].Active)
-				{
-					T t = genesListForReading[i] as T;
-					if (t != null)
+					IEnumerable<Gizmo> gizmos = pawn_GeneTracker.GenesListForReading[_003Ci_003E5__2].GetGizmos();
+					if (gizmos != null)
 					{
-						return t;
+						_003C_003E7__wrap2 = gizmos.GetEnumerator();
+						_003C_003E1__state = -3;
+						goto IL_0095;
 					}
+					goto IL_00af;
 				}
+				return false;
 			}
-			return default(T);
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
 		}
 
-		// Token: 0x0600CC87 RID: 52359 RVA: 0x003BEEC4 File Offset: 0x003BD0C4
-		public GeneDef GetMelaninGene()
+		bool IEnumerator.MoveNext()
 		{
-			List<Gene> genesListForReading = this.GenesListForReading;
-			for (int i = 0; i < genesListForReading.Count; i++)
-			{
-				if (genesListForReading[i].Active && genesListForReading[i].def.endogeneCategory == EndogeneCategory.Melanin)
-				{
-					return genesListForReading[i].def;
-				}
-			}
-			return null;
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0600CC88 RID: 52360 RVA: 0x003BEF1C File Offset: 0x003BD11C
-		public GeneDef GetHairColorGene()
+		private void _003C_003Em__Finally1()
 		{
-			List<Gene> genesListForReading = this.GenesListForReading;
-			for (int i = 0; i < genesListForReading.Count; i++)
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap2 != null)
 			{
-				if (genesListForReading[i].Active && genesListForReading[i].def.endogeneCategory == EndogeneCategory.HairColor)
-				{
-					return genesListForReading[i].def;
-				}
+				_003C_003E7__wrap2.Dispose();
 			}
-			return null;
 		}
 
-		// Token: 0x0600CC89 RID: 52361 RVA: 0x003BEF74 File Offset: 0x003BD174
-		public GeneDef GetFirstEndogeneByCategory(EndogeneCategory cat)
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			List<Gene> list = this.Endogenes;
-			for (int i = 0; i < list.Count; i++)
-			{
-				if (list[i].Active && list[i].def.endogeneCategory == cat)
-				{
-					return list[i].def;
-				}
-			}
-			return null;
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x0600CC8A RID: 52362 RVA: 0x003BEFC9 File Offset: 0x003BD1C9
-		public Gene AddGene(GeneDef geneDef, bool xenogene)
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
 		{
-			if (xenogene && !ModLister.BiotechInstalled)
+			_003CGetGizmos_003Ed__95 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				return null;
-			}
-			if (!xenogene && this.HasEndogene(geneDef))
-			{
-				return null;
-			}
-			return this.AddGene(GeneMaker.MakeGene(geneDef, this.pawn), xenogene);
-		}
-
-		// Token: 0x0600CC8B RID: 52363 RVA: 0x003BEFF8 File Offset: 0x003BD1F8
-		private Gene AddGene(Gene gene, bool addAsXenogene)
-		{
-			if (addAsXenogene && !ModLister.BiotechInstalled)
-			{
-				return null;
-			}
-			if (addAsXenogene)
-			{
-				this.xenogenes.Add(gene);
+				_003C_003E1__state = 0;
+				result = this;
 			}
 			else
 			{
-				this.endogenes.Add(gene);
+				result = new _003CGetGizmos_003Ed__95(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
-			this.cachedGenes = null;
-			if (ModLister.BiotechInstalled)
-			{
-				this.CheckForOverrides();
-				if (!gene.def.abilities.NullOrEmpty<AbilityDef>() && this.pawn.abilities != null)
-				{
-					for (int i = 0; i < gene.def.abilities.Count; i++)
-					{
-						this.pawn.abilities.GainAbility(gene.def.abilities[i]);
-					}
-				}
-				if (!gene.def.forcedTraits.NullOrEmpty<GeneticTraitData>() && this.pawn.story != null)
-				{
-					for (int j = 0; j < gene.def.forcedTraits.Count; j++)
-					{
-						Trait trait = new Trait(gene.def.forcedTraits[j].def, gene.def.forcedTraits[j].degree, false);
-						trait.sourceGene = gene;
-						this.pawn.story.traits.GainTrait(trait, true);
-					}
-				}
-				if (gene.def.passionMod != null)
-				{
-					SkillRecord skill = this.pawn.skills.GetSkill(gene.def.passionMod.skill);
-					gene.passionPreAdd = new Passion?(skill.passion);
-					skill.passion = gene.def.passionMod.NewPassionFor(skill);
-				}
-				Pawn_StoryTracker story = this.pawn.story;
-				if (story != null)
-				{
-					TraitSet traits = story.traits;
-					if (traits != null)
-					{
-						traits.RecalculateSuppression();
-					}
-				}
-				if (gene.def.disabledWorkTags.HasFlag(WorkTags.Violent))
-				{
-					Pawn_EquipmentTracker equipment = this.pawn.equipment;
-					if (((equipment != null) ? equipment.Primary : null) != null)
-					{
-						if (this.pawn.PositionHeld.IsValid && this.pawn.MapHeld != null)
-						{
-							ThingWithComps thingWithComps;
-							this.pawn.equipment.TryDropEquipment(this.pawn.equipment.Primary, out thingWithComps, this.pawn.PositionHeld, false);
-						}
-						else
-						{
-							this.pawn.equipment.DestroyEquipment(this.pawn.equipment.Primary);
-						}
-					}
-				}
-			}
-			this.Notify_GenesChanged(gene.def);
-			if (ModLister.BiotechInstalled)
-			{
-				gene.PostAdd();
-			}
-			return gene;
+			return result;
 		}
 
-		// Token: 0x0600CC8C RID: 52364 RVA: 0x003BF26C File Offset: 0x003BD46C
-		public void RemoveGene(Gene gene)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			if (this.xenogenes.Remove(gene) || this.endogenes.Remove(gene))
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CSpecialDisplayStats_003Ed__108 : IEnumerable<StatDrawEntry>, IEnumerable, IEnumerator<StatDrawEntry>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private StatDrawEntry _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Pawn_GeneTracker _003C_003E4__this;
+
+		private List<Gene>.Enumerator _003C_003E7__wrap1;
+
+		private IEnumerator<StatDrawEntry> _003C_003E7__wrap2;
+
+		StatDrawEntry IEnumerator<StatDrawEntry>.Current
+		{
+			[DebuggerHidden]
+			get
 			{
-				this.cachedGenes = null;
-				if (ModLister.BiotechInstalled)
-				{
-					this.CheckForOverrides();
-					if (this.pawn.abilities != null && !gene.def.abilities.NullOrEmpty<AbilityDef>())
-					{
-						for (int i = 0; i < gene.def.abilities.Count; i++)
-						{
-							this.pawn.abilities.RemoveAbility(gene.def.abilities[i]);
-						}
-					}
-					if (!gene.def.forcedTraits.NullOrEmpty<GeneticTraitData>() || !gene.def.suppressedTraits.NullOrEmpty<GeneticTraitData>())
-					{
-						Pawn_StoryTracker story = this.pawn.story;
-						if (story != null)
-						{
-							story.traits.Notify_GeneRemoved(gene);
-						}
-					}
-					if (gene.def.passionMod != null)
-					{
-						SkillRecord skill = this.pawn.skills.GetSkill(gene.def.passionMod.skill);
-						skill.passion = gene.NewPassionForOnRemoval(skill);
-					}
-				}
-				this.Notify_GenesChanged(gene.def);
-				if (ModLister.BiotechInstalled)
-				{
-					gene.PostRemove();
-				}
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600CC8D RID: 52365 RVA: 0x003BF3A0 File Offset: 0x003BD5A0
-		private void CheckForOverrides()
+		object IEnumerator.Current
 		{
-			List<Gene> genesListForReading = this.GenesListForReading;
-			foreach (Gene gene in genesListForReading)
+			[DebuggerHidden]
+			get
 			{
-				if (!gene.def.RandomChosen)
-				{
-					gene.OverrideBy(null);
-				}
+				return _003C_003E2__current;
 			}
-			for (int i = 0; i < genesListForReading.Count; i++)
+		}
+
+		[DebuggerHidden]
+		public _003CSpecialDisplayStats_003Ed__108(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if ((uint)(num - -4) <= 1u || num == 1)
 			{
-				if (!genesListForReading[i].def.RandomChosen)
+				try
 				{
-					for (int j = i + 1; j < genesListForReading.Count; j++)
+					if (num == -4 || num == 1)
 					{
-						if (!genesListForReading[j].def.RandomChosen && genesListForReading[i].def.ConflictsWith(genesListForReading[j].def))
+						try
 						{
-							if (genesListForReading[i].def.Overrides(genesListForReading[j].def, this.IsXenogene(genesListForReading[i]), this.IsXenogene(genesListForReading[j])))
-							{
-								genesListForReading[j].OverrideBy(genesListForReading[i]);
-							}
-							else
-							{
-								genesListForReading[i].OverrideBy(genesListForReading[j]);
-							}
+						}
+						finally
+						{
+							_003C_003Em__Finally2();
 						}
 					}
 				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
 			}
-			Pawn_SkillTracker skills = this.pawn.skills;
-			if (skills != null)
-			{
-				skills.DirtyAptitudes();
-			}
-			this.pawn.Notify_DisabledWorkTypesChanged();
+			_003C_003E7__wrap1 = default(List<Gene>.Enumerator);
+			_003C_003E7__wrap2 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x0600CC8E RID: 52366 RVA: 0x003BF50C File Offset: 0x003BD70C
-		public void ClearXenogenes()
+		private bool MoveNext()
 		{
-			for (int i = this.xenogenes.Count - 1; i >= 0; i--)
+			try
 			{
-				this.RemoveGene(this.xenogenes[i]);
-			}
-		}
-
-		// Token: 0x0600CC8F RID: 52367 RVA: 0x003BF544 File Offset: 0x003BD744
-		public void GeneTrackerTick()
-		{
-			if (!ModLister.BiotechInstalled)
-			{
-				return;
-			}
-			for (int i = this.xenogenes.Count - 1; i >= 0; i--)
-			{
-				if (this.xenogenes[i].Active)
+				int num = _003C_003E1__state;
+				Pawn_GeneTracker pawn_GeneTracker = _003C_003E4__this;
+				if (num != 0)
 				{
-					this.xenogenes[i].Tick();
-				}
-			}
-			for (int j = this.endogenes.Count - 1; j >= 0; j--)
-			{
-				if (this.endogenes[j].Active)
-				{
-					this.endogenes[j].Tick();
-				}
-			}
-		}
-
-		// Token: 0x0600CC90 RID: 52368 RVA: 0x003BF5D4 File Offset: 0x003BD7D4
-		public void GeneTrackerTickInterval(int delta)
-		{
-			if (!ModLister.BiotechInstalled)
-			{
-				return;
-			}
-			for (int i = this.xenogenes.Count - 1; i >= 0; i--)
-			{
-				if (this.xenogenes[i].Active)
-				{
-					this.xenogenes[i].TickInterval(delta);
-				}
-			}
-			for (int j = this.endogenes.Count - 1; j >= 0; j--)
-			{
-				if (this.endogenes[j].Active)
-				{
-					this.endogenes[j].TickInterval(delta);
-				}
-			}
-			if (this.pawn.Spawned && this.Xenotype != XenotypeDefOf.Baseliner && this.pawn.IsHashIntervalTick(300, delta))
-			{
-				LessonAutoActivator.TeachOpportunity(ConceptDefOf.GenesAndXenotypes, OpportunityType.Important);
-			}
-		}
-
-		// Token: 0x0600CC91 RID: 52369 RVA: 0x003BF69C File Offset: 0x003BD89C
-		public void Notify_IngestedThing(Thing thing, int numTaken)
-		{
-			if (!ModLister.BiotechInstalled)
-			{
-				return;
-			}
-			List<Gene> genesListForReading = this.GenesListForReading;
-			for (int i = 0; i < genesListForReading.Count; i++)
-			{
-				if (genesListForReading[i].Active)
-				{
-					genesListForReading[i].Notify_IngestedThing(thing, numTaken);
-				}
-			}
-		}
-
-		// Token: 0x0600CC92 RID: 52370 RVA: 0x003BF6E8 File Offset: 0x003BD8E8
-		public void Reset()
-		{
-			for (int i = 0; i < this.GenesListForReading.Count; i++)
-			{
-				this.GenesListForReading[i].Reset();
-			}
-		}
-
-		// Token: 0x0600CC93 RID: 52371 RVA: 0x003BF71C File Offset: 0x003BD91C
-		public IEnumerable<Gizmo> GetGizmos()
-		{
-			if (!ModLister.BiotechInstalled)
-			{
-				yield break;
-			}
-			int num;
-			for (int i = 0; i < this.GenesListForReading.Count; i = num + 1)
-			{
-				IEnumerable<Gizmo> gizmos = this.GenesListForReading[i].GetGizmos();
-				if (gizmos != null)
-				{
-					foreach (Gizmo gizmo in gizmos)
-					{
-						yield return gizmo;
-					}
-					IEnumerator<Gizmo> enumerator = null;
-				}
-				num = i;
-			}
-			yield break;
-			yield break;
-		}
-
-		// Token: 0x0600CC94 RID: 52372 RVA: 0x003BF72C File Offset: 0x003BD92C
-		private void Notify_GenesChanged(GeneDef addedOrRemovedGene)
-		{
-			Pawn_GeneTracker.<>c__DisplayClass97_0 CS$<>8__locals1 = new Pawn_GeneTracker.<>c__DisplayClass97_0();
-			CS$<>8__locals1.<>4__this = this;
-			CS$<>8__locals1.addedOrRemovedGene = addedOrRemovedGene;
-			bool flag = false;
-			this.cachedGenes = null;
-			CS$<>8__locals1.genes = this.GenesListForReading;
-			if (ModLister.BiotechInstalled && CS$<>8__locals1.addedOrRemovedGene.skinIsHairColor)
-			{
-				Gene gene;
-				if (CS$<>8__locals1.<Notify_GenesChanged>g__SelectGene|0((Gene x) => x.def.skinIsHairColor, out gene))
-				{
-					this.pawn.story.skinColorOverride = new Color?(this.pawn.story.HairColor);
-					this.OverrideAllConflicting(gene);
-				}
-				else
-				{
-					this.pawn.story.skinColorOverride = null;
-				}
-				this.EnsureCorrectSkinColorOverride();
-				flag = true;
-			}
-			if (CS$<>8__locals1.addedOrRemovedGene.hairColorOverride != null)
-			{
-				Gene gene2;
-				if (CS$<>8__locals1.<Notify_GenesChanged>g__SelectGene|0((Gene g) => g.def.hairColorOverride != null, out gene2))
-				{
-					Color color = gene2.def.hairColorOverride.Value;
-					if (gene2.def.randomBrightnessFactor != 0f)
-					{
-						color *= 1f + Rand.Range(-gene2.def.randomBrightnessFactor, gene2.def.randomBrightnessFactor);
-					}
-					this.pawn.story.HairColor = color.ClampToValueRange(GeneTuning.HairColorValueRange);
-					this.OverrideAllConflicting(gene2);
-					this.EnsureCorrectSkinColorOverride();
-					flag = true;
-				}
-			}
-			if (CS$<>8__locals1.addedOrRemovedGene.skinColorBase != null)
-			{
-				Gene gene3;
-				if (CS$<>8__locals1.<Notify_GenesChanged>g__SelectGene|0((Gene g) => g.def.skinColorBase != null, out gene3))
-				{
-					this.OverrideAllConflicting(gene3);
-					this.pawn.story.SkinColorBase = gene3.def.skinColorBase.Value;
-					flag = true;
-				}
-			}
-			if (ModLister.BiotechInstalled)
-			{
-				if (CS$<>8__locals1.addedOrRemovedGene.skinColorOverride != null)
-				{
-					Gene gene4;
-					if (CS$<>8__locals1.<Notify_GenesChanged>g__SelectGene|0((Gene g) => g.def.skinColorOverride != null, out gene4))
-					{
-						Color color2 = gene4.def.skinColorOverride.Value;
-						if (gene4.def.randomBrightnessFactor != 0f)
-						{
-							color2 *= 1f + Rand.Range(-gene4.def.randomBrightnessFactor, gene4.def.randomBrightnessFactor);
-						}
-						this.pawn.story.skinColorOverride = new Color?(color2.ClampToValueRange(GeneTuning.SkinColorValueRange));
-						this.OverrideAllConflicting(gene4);
-					}
-					else
-					{
-						this.pawn.story.skinColorOverride = null;
-					}
-					this.EnsureCorrectSkinColorOverride();
-					flag = true;
-				}
-				if (CS$<>8__locals1.addedOrRemovedGene.bodyType != null && !this.pawn.DevelopmentalStage.Juvenile())
-				{
-					Gene gene5;
-					if (CS$<>8__locals1.<Notify_GenesChanged>g__SelectGene|0((Gene g) => g.def.bodyType != null, out gene5))
-					{
-						this.OverrideAllConflicting(gene5);
-						this.pawn.story.bodyType = gene5.def.bodyType.Value.ToBodyType(this.pawn);
-					}
-					else
-					{
-						this.pawn.story.bodyType = PawnGenerator.GetBodyTypeFor(this.pawn);
-					}
-					flag = true;
-				}
-				if (!CS$<>8__locals1.addedOrRemovedGene.forcedHeadTypes.NullOrEmpty<HeadTypeDef>())
-				{
-					Gene gene6;
-					if (CS$<>8__locals1.<Notify_GenesChanged>g__SelectGene|0((Gene g) => !g.def.forcedHeadTypes.NullOrEmpty<HeadTypeDef>(), out gene6))
-					{
-						this.OverrideAllConflicting(gene6);
-						if (!this.pawn.story.TryGetRandomHeadFromSet(gene6.def.forcedHeadTypes))
-						{
-							this.pawn.story.TryGetRandomHeadFromSet(from x in DefDatabase<HeadTypeDef>.AllDefs
-							where x.randomChosen
-							select x);
-						}
-					}
-					else
-					{
-						this.pawn.story.TryGetRandomHeadFromSet(from x in DefDatabase<HeadTypeDef>.AllDefs
-						where x.randomChosen
-						select x);
-					}
-					flag = true;
-				}
-				if ((CS$<>8__locals1.addedOrRemovedGene.forcedHair != null || CS$<>8__locals1.addedOrRemovedGene.hairTagFilter != null) && !PawnStyleItemChooser.WantsToUseStyle(this.pawn, this.pawn.story.hairDef, null))
-				{
-					this.pawn.story.hairDef = PawnStyleItemChooser.RandomHairFor(this.pawn);
-					flag = true;
-				}
-				if (CS$<>8__locals1.addedOrRemovedGene.beardTagFilter != null && this.pawn.style != null && !PawnStyleItemChooser.WantsToUseStyle(this.pawn, this.pawn.style.beardDef, null))
-				{
-					this.pawn.style.beardDef = PawnStyleItemChooser.RandomBeardFor(this.pawn);
-					flag = true;
-				}
-				if (CS$<>8__locals1.addedOrRemovedGene.fur != null)
-				{
-					Gene gene7;
-					if (CS$<>8__locals1.<Notify_GenesChanged>g__SelectGene|0((Gene g) => g.def.fur != null, out gene7))
-					{
-						this.pawn.story.furDef = gene7.def.fur;
-						this.OverrideAllConflicting(gene7);
-					}
-					else
-					{
-						this.pawn.story.furDef = null;
-					}
-					flag = true;
-				}
-				Gene gene8;
-				if (CS$<>8__locals1.addedOrRemovedGene.RandomChosen && CS$<>8__locals1.<Notify_GenesChanged>g__SelectGene|0((Gene g) => g.Active && g.def.ConflictsWith(CS$<>8__locals1.addedOrRemovedGene), out gene8))
-				{
-					this.OverrideAllConflicting(gene8);
-					flag = true;
-				}
-				this.RecacheNeeds();
-				if (CS$<>8__locals1.addedOrRemovedGene.soundCall != null)
-				{
-					PawnComponentsUtility.AddAndRemoveDynamicComponents(this.pawn, false);
-				}
-				Pawn_NeedsTracker needs = this.pawn.needs;
-				if (needs != null)
-				{
-					needs.AddOrRemoveNeedsAsAppropriate();
-				}
-				this.pawn.health.hediffSet.DirtyCache();
-				this.cachedDamageFactors.Clear();
-				this.cachedAddictionChanceFactors.Clear();
-				this.cachedGenesAffectAge = null;
-				this.cachedHasCustomXenotype = null;
-				this.cachedCustomXenotype = null;
-				this.cachedTattoosVisible = null;
-				this.cachedWaterCellCost = null;
-				this.hasCachedWaterCost = false;
-				Pawn_SkillTracker skills = this.pawn.skills;
-				if (skills != null)
-				{
-					skills.DirtyAptitudes();
-				}
-				this.pawn.Notify_DisabledWorkTypesChanged();
-			}
-			if (flag)
-			{
-				this.pawn.Drawer.renderer.SetAllGraphicsDirty();
-			}
-		}
-
-		// Token: 0x0600CC95 RID: 52373 RVA: 0x003BFDA0 File Offset: 0x003BDFA0
-		private void EnsureCorrectSkinColorOverride()
-		{
-			if (!ModLister.BiotechInstalled)
-			{
-				return;
-			}
-			bool flag = false;
-			Color? skinColorOverride = null;
-			List<Gene> genesListForReading = this.GenesListForReading;
-			for (int i = 0; i < genesListForReading.Count; i++)
-			{
-				Gene gene = genesListForReading[i];
-				if (gene.Active)
-				{
-					if (gene.def.skinIsHairColor)
-					{
-						flag = true;
-					}
-					else if (gene.def.skinColorOverride != null)
-					{
-						skinColorOverride = gene.def.skinColorOverride;
-					}
-				}
-			}
-			if (flag)
-			{
-				this.pawn.story.skinColorOverride = new Color?(this.pawn.story.HairColor);
-				return;
-			}
-			this.pawn.story.skinColorOverride = skinColorOverride;
-		}
-
-		// Token: 0x0600CC96 RID: 52374 RVA: 0x003BFE58 File Offset: 0x003BE058
-		private void OverrideAllConflicting(Gene gene)
-		{
-			if (!ModLister.BiotechInstalled || !gene.def.RandomChosen)
-			{
-				return;
-			}
-			gene.OverrideBy(null);
-			foreach (Gene gene2 in this.GenesListForReading)
-			{
-				if (gene2 != gene && gene2.def.ConflictsWith(gene.def))
-				{
-					gene2.OverrideBy(gene);
-				}
-			}
-		}
-
-		// Token: 0x0600CC97 RID: 52375 RVA: 0x003BFEE0 File Offset: 0x003BE0E0
-		public void Notify_NewColony()
-		{
-			foreach (Gene gene in this.GenesListForReading)
-			{
-				gene.Notify_NewColony();
-			}
-		}
-
-		// Token: 0x0600CC98 RID: 52376 RVA: 0x003BFF30 File Offset: 0x003BE130
-		public void Notify_PawnDied(DamageInfo? dinfo, Hediff culprit = null)
-		{
-			List<Gene> genesListForReading = this.GenesListForReading;
-			for (int i = genesListForReading.Count - 1; i >= 0; i--)
-			{
-				genesListForReading[i].Notify_PawnDied(dinfo, culprit);
-			}
-		}
-
-		// Token: 0x0600CC99 RID: 52377 RVA: 0x003BFF68 File Offset: 0x003BE168
-		public bool StyleItemAllowed(StyleItemDef styleItem)
-		{
-			if (!ModLister.BiotechInstalled)
-			{
-				return true;
-			}
-			bool flag = styleItem is HairDef;
-			bool flag2 = styleItem is BeardDef;
-			if (!flag && !flag2)
-			{
-				return true;
-			}
-			if (flag2 && !this.pawn.style.CanWantBeard)
-			{
-				return styleItem == BeardDefOf.NoBeard;
-			}
-			List<Gene> genesListForReading = this.GenesListForReading;
-			for (int i = 0; i < genesListForReading.Count; i++)
-			{
-				if (genesListForReading[i].Active)
-				{
-					if (flag)
-					{
-						if (genesListForReading[i].def.forcedHair != null && genesListForReading[i].def.forcedHair != styleItem)
-						{
-							return false;
-						}
-						if (genesListForReading[i].def.hairTagFilter != null && !genesListForReading[i].def.hairTagFilter.Allows(styleItem.styleTags))
-						{
-							return false;
-						}
-					}
-					else if (flag2 && genesListForReading[i].def.beardTagFilter != null && !genesListForReading[i].def.beardTagFilter.Allows(styleItem.styleTags))
+					if (num != 1)
 					{
 						return false;
 					}
+					_003C_003E1__state = -4;
+					goto IL_00ae;
 				}
+				_003C_003E1__state = -1;
+				if (!ModLister.BiotechInstalled)
+				{
+					return false;
+				}
+				_003C_003E7__wrap1 = pawn_GeneTracker.GenesListForReading.GetEnumerator();
+				_003C_003E1__state = -3;
+				goto IL_00c8;
+				IL_00c8:
+				IEnumerable<StatDrawEntry> enumerable;
+				while (true)
+				{
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Gene current = _003C_003E7__wrap1.Current;
+						if (current.Active)
+						{
+							enumerable = current.SpecialDisplayStats();
+							if (enumerable != null)
+							{
+								break;
+							}
+						}
+						continue;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = default(List<Gene>.Enumerator);
+					return false;
+				}
+				_003C_003E7__wrap2 = enumerable.GetEnumerator();
+				_003C_003E1__state = -4;
+				goto IL_00ae;
+				IL_00ae:
+				if (_003C_003E7__wrap2.MoveNext())
+				{
+					StatDrawEntry current2 = _003C_003E7__wrap2.Current;
+					_003C_003E2__current = current2;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				_003C_003Em__Finally2();
+				_003C_003E7__wrap2 = null;
+				goto IL_00c8;
 			}
-			return true;
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
 		}
 
-		// Token: 0x0600CC9A RID: 52378 RVA: 0x003C0080 File Offset: 0x003BE280
-		public float FactorForDamage(DamageInfo dinfo)
+		bool IEnumerator.MoveNext()
 		{
-			if (!ModLister.BiotechInstalled || dinfo.Def == null || this.GenesListForReading.NullOrEmpty<Gene>())
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap1/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -3;
+			if (_003C_003E7__wrap2 != null)
 			{
-				return 1f;
+				_003C_003E7__wrap2.Dispose();
 			}
-			float result;
-			if (this.cachedDamageFactors.TryGetValue(dinfo.Def, out result))
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<StatDrawEntry> IEnumerable<StatDrawEntry>.GetEnumerator()
+		{
+			_003CSpecialDisplayStats_003Ed__108 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				return result;
+				_003C_003E1__state = 0;
+				result = this;
 			}
-			float num = 1f;
-			List<Gene> genesListForReading = this.GenesListForReading;
-			for (int i = 0; i < genesListForReading.Count; i++)
+			else
 			{
-				Gene gene = genesListForReading[i];
-				if (gene.Active && !gene.def.damageFactors.NullOrEmpty<DamageFactor>())
+				result = new _003CSpecialDisplayStats_003Ed__108(0)
 				{
-					for (int j = 0; j < gene.def.damageFactors.Count; j++)
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<StatDrawEntry>)this).GetEnumerator();
+		}
+	}
+
+	public Pawn pawn;
+
+	public string xenotypeName;
+
+	public XenotypeIconDef iconDef;
+
+	public bool hybrid;
+
+	private XenotypeDef xenotype;
+
+	private List<Gene> xenogenes = new List<Gene>();
+
+	private List<Gene> endogenes = new List<Gene>();
+
+	[Unsaved(false)]
+	private Dictionary<DamageDef, float> cachedDamageFactors = new Dictionary<DamageDef, float>();
+
+	[Unsaved(false)]
+	private Dictionary<ChemicalDef, float> cachedAddictionChanceFactors = new Dictionary<ChemicalDef, float>();
+
+	[Unsaved(false)]
+	private Dictionary<NeedDef, Gene> cachedEnabledNeeds;
+
+	[Unsaved(false)]
+	private Dictionary<NeedDef, Gene> cachedDisabledNeeds;
+
+	[Unsaved(false)]
+	private List<Gene> cachedGenes;
+
+	[Unsaved(false)]
+	private bool? cachedGenesAffectAge;
+
+	[Unsaved(false)]
+	private CustomXenotype cachedCustomXenotype;
+
+	[Unsaved(false)]
+	private bool? cachedHasCustomXenotype;
+
+	[Unsaved(false)]
+	private bool? cachedTattoosVisible;
+
+	[Unsaved(false)]
+	private int? cachedWaterCellCost;
+
+	[Unsaved(false)]
+	private bool hasCachedWaterCost;
+
+	private const int LearningOpportunityCheckInterval = 300;
+
+	private List<GeneDefWithType> tmpGeneDefWithTypes = new List<GeneDefWithType>();
+
+	private readonly List<Gene> tmpGenes = new List<Gene>();
+
+	public XenotypeDef Xenotype => xenotype ?? XenotypeDefOf.Baseliner;
+
+	public bool UniqueXenotype => !xenotypeName.NullOrEmpty();
+
+	public string XenotypeLabel
+	{
+		get
+		{
+			if (!UniqueXenotype)
+			{
+				return Xenotype.label;
+			}
+			return xenotypeName ?? ((string)"Unique".Translate());
+		}
+	}
+
+	public string XenotypeLabelCap => XenotypeLabel.CapitalizeFirst();
+
+	public CustomXenotype CustomXenotype
+	{
+		get
+		{
+			if (Xenotype != XenotypeDefOf.Baseliner || hybrid || Current.ProgramState != ProgramState.Playing)
+			{
+				return null;
+			}
+			if (!cachedHasCustomXenotype.HasValue)
+			{
+				cachedHasCustomXenotype = false;
+				foreach (CustomXenotype customXenotype in Current.Game.customXenotypeDatabase.customXenotypes)
+				{
+					if (GeneUtility.PawnIsCustomXenotype(pawn, customXenotype))
 					{
-						if (gene.def.damageFactors[j].damageDef == dinfo.Def)
-						{
-							num *= gene.def.damageFactors[j].factor;
-						}
+						cachedHasCustomXenotype = true;
+						cachedCustomXenotype = customXenotype;
+						break;
 					}
 				}
 			}
-			this.cachedDamageFactors.Add(dinfo.Def, num);
-			return num;
+			return cachedCustomXenotype;
 		}
+	}
 
-		// Token: 0x0600CC9B RID: 52379 RVA: 0x003C0184 File Offset: 0x003BE384
-		public float AddictionChanceFactor(ChemicalDef chemical)
+	public string XenotypeDescShort
+	{
+		get
 		{
-			if (!ModLister.BiotechInstalled || this.GenesListForReading.NullOrEmpty<Gene>())
+			if (UniqueXenotype)
 			{
-				return 1f;
+				return "UniqueXenotypeDesc".Translate();
 			}
-			float result;
-			if (this.cachedAddictionChanceFactors.TryGetValue(chemical, out result))
+			if (!Xenotype.descriptionShort.NullOrEmpty())
 			{
-				return result;
+				return Xenotype.descriptionShort + "\n\n" + "MoreInfoInInfoScreen".Translate().Colorize(ColoredText.SubtleGrayColor);
 			}
-			float num = 1f;
-			List<Gene> genesListForReading = this.GenesListForReading;
+			return Xenotype.description;
+		}
+	}
+
+	public Texture2D XenotypeIcon
+	{
+		get
+		{
+			if (!ModsConfig.BiotechActive)
+			{
+				return null;
+			}
+			if (iconDef != null)
+			{
+				return iconDef.Icon;
+			}
+			if (UniqueXenotype)
+			{
+				return XenotypeIconDefOf.Basic.Icon;
+			}
+			return Xenotype.Icon;
+		}
+	}
+
+	public List<Gene> GenesListForReading
+	{
+		get
+		{
+			if (cachedGenes == null)
+			{
+				cachedGenes = new List<Gene>();
+				cachedGenes.AddRange(xenogenes);
+				cachedGenes.AddRange(endogenes);
+			}
+			return cachedGenes;
+		}
+	}
+
+	public List<Gene> Xenogenes => xenogenes;
+
+	public List<Gene> Endogenes => endogenes;
+
+	public float PainOffset
+	{
+		get
+		{
+			float num = 0f;
+			if (!ModLister.BiotechInstalled)
+			{
+				return num;
+			}
+			List<Gene> genesListForReading = GenesListForReading;
 			for (int i = 0; i < genesListForReading.Count; i++)
 			{
-				if (genesListForReading[i].Active && genesListForReading[i].def.chemical == chemical)
+				if (genesListForReading[i].Active)
 				{
-					num *= genesListForReading[i].def.addictionChanceFactor;
+					num += genesListForReading[i].def.painOffset;
 				}
 			}
-			this.cachedAddictionChanceFactors.Add(chemical, num);
 			return num;
 		}
+	}
 
-		// Token: 0x0600CC9C RID: 52380 RVA: 0x003C0220 File Offset: 0x003BE420
-		public bool HediffGiversCanGive(HediffDef hediff)
+	public float PainFactor
+	{
+		get
+		{
+			float num = 1f;
+			if (!ModLister.BiotechInstalled)
+			{
+				return num;
+			}
+			List<Gene> genesListForReading = GenesListForReading;
+			for (int i = 0; i < genesListForReading.Count; i++)
+			{
+				if (genesListForReading[i].Active)
+				{
+					num *= genesListForReading[i].def.painFactor;
+				}
+			}
+			return num;
+		}
+	}
+
+	public float SocialFightChanceFactor
+	{
+		get
+		{
+			float num = 1f;
+			if (!ModLister.BiotechInstalled)
+			{
+				return num;
+			}
+			List<Gene> genesListForReading = GenesListForReading;
+			for (int i = 0; i < genesListForReading.Count; i++)
+			{
+				if (genesListForReading[i].Active)
+				{
+					num *= genesListForReading[i].def.socialFightChanceFactor;
+				}
+			}
+			return num;
+		}
+	}
+
+	public float AggroMentalBreakSelectionChanceFactor
+	{
+		get
+		{
+			float num = 1f;
+			if (!ModLister.BiotechInstalled)
+			{
+				return num;
+			}
+			List<Gene> genesListForReading = GenesListForReading;
+			for (int i = 0; i < genesListForReading.Count; i++)
+			{
+				if (genesListForReading[i].Active)
+				{
+					num *= genesListForReading[i].def.aggroMentalBreakSelectionChanceFactor;
+				}
+			}
+			return num;
+		}
+	}
+
+	public bool AffectedByDarkness
+	{
+		get
 		{
 			if (!ModLister.BiotechInstalled)
 			{
 				return true;
 			}
-			List<Gene> genesListForReading = this.GenesListForReading;
+			List<Gene> genesListForReading = GenesListForReading;
 			for (int i = 0; i < genesListForReading.Count; i++)
 			{
-				if (genesListForReading[i].Active && genesListForReading[i].def.hediffGiversCannotGive != null && genesListForReading[i].def.hediffGiversCannotGive.Contains(hediff))
+				if (genesListForReading[i].Active && genesListForReading[i].def.ignoreDarkness)
 				{
 					return false;
 				}
 			}
 			return true;
 		}
+	}
 
-		// Token: 0x0600CC9D RID: 52381 RVA: 0x003C028C File Offset: 0x003BE48C
-		public SoundDef GetSoundOverrideFromGenes(Func<GeneDef, SoundDef> getter, SoundDef oldSound)
+	public float BiologicalAgeTickFactor
+	{
+		get
 		{
 			if (!ModLister.BiotechInstalled)
 			{
-				return oldSound;
+				return 1f;
 			}
-			List<Gene> genesListForReading = this.GenesListForReading;
+			if (cachedGenesAffectAge.HasValue && !cachedGenesAffectAge.Value)
+			{
+				return 1f;
+			}
+			bool valueOrDefault = cachedGenesAffectAge == true;
+			if (!cachedGenesAffectAge.HasValue)
+			{
+				valueOrDefault = false;
+				cachedGenesAffectAge = valueOrDefault;
+			}
+			float num = 1f;
+			List<Gene> genesListForReading = GenesListForReading;
+			for (int i = 0; i < genesListForReading.Count; i++)
+			{
+				if (genesListForReading[i].Active && genesListForReading[i].def.biologicalAgeTickFactorFromAgeCurve != null)
+				{
+					num *= genesListForReading[i].def.biologicalAgeTickFactorFromAgeCurve.Evaluate(pawn.ageTracker.AgeBiologicalYearsFloat);
+					cachedGenesAffectAge = true;
+				}
+			}
+			return num;
+		}
+	}
+
+	public bool EnjoysSunlight
+	{
+		get
+		{
+			if (!ModLister.BiotechInstalled)
+			{
+				return true;
+			}
+			List<Gene> genesListForReading = GenesListForReading;
+			for (int i = 0; i < genesListForReading.Count; i++)
+			{
+				if (genesListForReading[i].def.dislikesSunlight && genesListForReading[i].Active)
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+	}
+
+	public bool ShouldHaveCallTracker
+	{
+		get
+		{
+			if (!ModLister.BiotechInstalled)
+			{
+				return false;
+			}
+			List<Gene> genesListForReading = GenesListForReading;
+			for (int i = 0; i < genesListForReading.Count; i++)
+			{
+				if (genesListForReading[i].Active && genesListForReading[i].def.soundCall != null)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+
+	public bool DontMindRawFood
+	{
+		get
+		{
+			if (!ModLister.BiotechInstalled)
+			{
+				return false;
+			}
+			List<Gene> genesListForReading = GenesListForReading;
+			for (int i = 0; i < genesListForReading.Count; i++)
+			{
+				if (genesListForReading[i].Active && genesListForReading[i].def.dontMindRawFood)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+
+	public bool CanHaveBeard
+	{
+		get
+		{
+			if (!ModLister.BiotechInstalled)
+			{
+				return pawn.gender != Gender.Female;
+			}
+			if (pawn.gender == Gender.Female)
+			{
+				List<Gene> genesListForReading = GenesListForReading;
+				for (int i = 0; i < genesListForReading.Count; i++)
+				{
+					if (genesListForReading[i].Active && genesListForReading[i].def.womenCanHaveBeards)
+					{
+						return true;
+					}
+				}
+				return false;
+			}
+			return true;
+		}
+	}
+
+	public float PrisonBreakIntervalFactor
+	{
+		get
+		{
+			if (!ModLister.BiotechInstalled)
+			{
+				return 1f;
+			}
+			float num = 1f;
+			List<Gene> genesListForReading = GenesListForReading;
 			for (int i = 0; i < genesListForReading.Count; i++)
 			{
 				if (genesListForReading[i].Active)
 				{
-					SoundDef soundDef = getter(genesListForReading[i].def);
-					if (soundDef != null)
-					{
-						return soundDef;
-					}
+					num *= genesListForReading[i].def.prisonBreakMTBFactor;
 				}
 			}
-			return oldSound;
+			return num;
 		}
+	}
 
-		// Token: 0x0600CC9E RID: 52382 RVA: 0x003C02E4 File Offset: 0x003BE4E4
-		public void InitializeGenesFromOldSave(float melanin)
-		{
-			if (this.GetMelaninGene() == null)
-			{
-				this.AddGene(PawnSkinColors.GetSkinColorGene(melanin), false);
-			}
-			if (this.GetHairColorGene() == null)
-			{
-				GeneDef geneDef = PawnHairColors.ClosestHairColorGene(this.pawn.story.HairColor, this.pawn.story.SkinColorBase);
-				if (geneDef != null)
-				{
-					this.AddGene(geneDef, false);
-				}
-			}
-		}
-
-		// Token: 0x0600CC9F RID: 52383 RVA: 0x003C0341 File Offset: 0x003BE541
-		public IEnumerable<StatDrawEntry> SpecialDisplayStats()
+	public WorkTags DisabledWorkTags
+	{
+		get
 		{
 			if (!ModLister.BiotechInstalled)
 			{
-				yield break;
+				return WorkTags.None;
 			}
-			foreach (Gene gene in this.GenesListForReading)
-			{
-				if (gene.Active)
-				{
-					IEnumerable<StatDrawEntry> enumerable = gene.SpecialDisplayStats();
-					if (enumerable != null)
-					{
-						foreach (StatDrawEntry statDrawEntry in enumerable)
-						{
-							yield return statDrawEntry;
-						}
-						IEnumerator<StatDrawEntry> enumerator2 = null;
-					}
-				}
-			}
-			List<Gene>.Enumerator enumerator = default(List<Gene>.Enumerator);
-			yield break;
-			yield break;
-		}
-
-		// Token: 0x0600CCA0 RID: 52384 RVA: 0x003C0354 File Offset: 0x003BE554
-		public void ExposeData()
-		{
-			Scribe_Collections.Look<Gene>(ref this.xenogenes, "xenogenes", LookMode.Deep, Array.Empty<object>());
-			Scribe_Collections.Look<Gene>(ref this.endogenes, "endogenes", LookMode.Deep, Array.Empty<object>());
-			Scribe_Defs.Look<XenotypeDef>(ref this.xenotype, "xenotype");
-			Scribe_Values.Look<string>(ref this.xenotypeName, "xenotypeName", null, false);
-			Scribe_Values.Look<bool>(ref this.hybrid, "hybrid", false, false);
-			Scribe_Defs.Look<XenotypeIconDef>(ref this.iconDef, "iconDef");
-			if (Scribe.mode == LoadSaveMode.LoadingVars)
-			{
-				if (this.xenogenes != null)
-				{
-					if (this.xenogenes.RemoveAll((Gene x) => x == null || x.def == null) > 0)
-					{
-						goto IL_E2;
-					}
-				}
-				if (this.endogenes == null)
-				{
-					goto IL_EC;
-				}
-				if (this.endogenes.RemoveAll((Gene x) => x == null || x.def == null) <= 0)
-				{
-					goto IL_EC;
-				}
-				IL_E2:
-				Log.Error("Removed null gene(s)");
-			}
-			IL_EC:
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
-			{
-				if (this.xenotype == null && ModsConfig.BiotechActive)
-				{
-					this.xenotype = XenotypeDefOf.Baseliner;
-				}
-				if (this.xenogenes == null)
-				{
-					this.xenogenes = new List<Gene>();
-				}
-				if (this.endogenes == null)
-				{
-					this.endogenes = new List<Gene>();
-				}
-				this.RecacheNeeds();
-			}
-		}
-
-		// Token: 0x0600CCA1 RID: 52385 RVA: 0x003C049C File Offset: 0x003BE69C
-		private void RecacheNeeds()
-		{
-			Dictionary<NeedDef, Gene> dictionary = this.cachedDisabledNeeds;
-			if (dictionary != null)
-			{
-				dictionary.Clear();
-			}
-			Dictionary<NeedDef, Gene> dictionary2 = this.cachedEnabledNeeds;
-			if (dictionary2 != null)
-			{
-				dictionary2.Clear();
-			}
-			List<Gene> genesListForReading = this.GenesListForReading;
+			List<Gene> genesListForReading = GenesListForReading;
+			WorkTags workTags = WorkTags.None;
 			for (int i = 0; i < genesListForReading.Count; i++)
 			{
-				Gene gene = genesListForReading[i];
-				if (gene.Active && !gene.def.enablesNeeds.NullOrEmpty<NeedDef>())
+				if (genesListForReading[i].Active)
 				{
-					for (int j = 0; j < gene.def.enablesNeeds.Count; j++)
+					workTags |= genesListForReading[i].def.disabledWorkTags;
+				}
+			}
+			return workTags;
+		}
+	}
+
+	public bool TattoosVisible
+	{
+		get
+		{
+			if (cachedTattoosVisible.HasValue)
+			{
+				return cachedTattoosVisible.Value;
+			}
+			cachedTattoosVisible = true;
+			List<Gene> genesListForReading = GenesListForReading;
+			for (int i = 0; i < genesListForReading.Count; i++)
+			{
+				if (genesListForReading[i].Active && !genesListForReading[i].def.tattoosVisible)
+				{
+					cachedTattoosVisible = false;
+					break;
+				}
+			}
+			return cachedTattoosVisible.Value;
+		}
+	}
+
+	public int? WaterCellCost
+	{
+		get
+		{
+			if (hasCachedWaterCost)
+			{
+				return cachedWaterCellCost;
+			}
+			hasCachedWaterCost = true;
+			List<Gene> genesListForReading = GenesListForReading;
+			for (int i = 0; i < genesListForReading.Count; i++)
+			{
+				if (genesListForReading[i].Active && genesListForReading[i].def.waterCellCost.HasValue)
+				{
+					int? waterCellCost = genesListForReading[i].def.waterCellCost;
+					if (!cachedWaterCellCost.HasValue || waterCellCost.Value < cachedWaterCellCost.Value)
 					{
-						NeedDef key = gene.def.enablesNeeds[j];
-						if (this.cachedEnabledNeeds == null)
-						{
-							this.cachedEnabledNeeds = new Dictionary<NeedDef, Gene>();
-						}
-						this.cachedEnabledNeeds[key] = gene;
+						cachedWaterCellCost = waterCellCost;
 					}
 				}
-				if (gene.Active && !gene.def.disablesNeeds.NullOrEmpty<NeedDef>())
+			}
+			return cachedWaterCellCost;
+		}
+	}
+
+	public Pawn_GeneTracker()
+	{
+	}
+
+	public Pawn_GeneTracker(Pawn pawn)
+	{
+		this.pawn = pawn;
+	}
+
+	public void SetXenotype(XenotypeDef xenotype)
+	{
+		if (ModLister.CheckBiotech("Xenotypes"))
+		{
+			this.xenotype = xenotype;
+			xenotypeName = null;
+			iconDef = null;
+			cachedHasCustomXenotype = null;
+			cachedCustomXenotype = null;
+			ClearXenogenes();
+			for (int i = 0; i < xenotype.genes.Count; i++)
+			{
+				AddGene(xenotype.genes[i], !xenotype.inheritable);
+			}
+		}
+	}
+
+	public void SetXenotypeDirect(XenotypeDef xenotype)
+	{
+		if (ModLister.CheckBiotech("Xenotypes"))
+		{
+			this.xenotype = xenotype;
+			xenotypeName = null;
+			cachedHasCustomXenotype = null;
+			cachedCustomXenotype = null;
+		}
+	}
+
+	[Obsolete("Use HasActiveGene() instead")]
+	public bool HasGene(GeneDef geneDef)
+	{
+		if (geneDef == null)
+		{
+			return false;
+		}
+		List<Gene> genesListForReading = GenesListForReading;
+		for (int i = 0; i < genesListForReading.Count; i++)
+		{
+			if (genesListForReading[i].def == geneDef)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public bool HasActiveGene(GeneDef geneDef)
+	{
+		if (geneDef == null)
+		{
+			return false;
+		}
+		List<Gene> genesListForReading = GenesListForReading;
+		for (int i = 0; i < genesListForReading.Count; i++)
+		{
+			if (genesListForReading[i].def == geneDef && genesListForReading[i].Active)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public bool TryGetNeedEnablingGene(NeedDef def, out Gene gene)
+	{
+		if (cachedEnabledNeeds == null)
+		{
+			gene = null;
+			return false;
+		}
+		return cachedEnabledNeeds.TryGetValue(def, out gene);
+	}
+
+	public bool TryGetNeedDisablingGene(NeedDef def, out Gene gene)
+	{
+		if (cachedDisabledNeeds == null)
+		{
+			gene = null;
+			return false;
+		}
+		return cachedDisabledNeeds.TryGetValue(def, out gene);
+	}
+
+	public bool EnablesNeed(NeedDef def)
+	{
+		return cachedEnabledNeeds?.ContainsKey(def) ?? false;
+	}
+
+	public bool DisablesNeed(NeedDef def)
+	{
+		return cachedDisabledNeeds?.ContainsKey(def) ?? false;
+	}
+
+	public bool IsXenogene(Gene gene)
+	{
+		return xenogenes.Contains(gene);
+	}
+
+	public bool HasXenogene(GeneDef geneDef)
+	{
+		for (int i = 0; i < xenogenes.Count; i++)
+		{
+			if (xenogenes[i].def == geneDef)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public bool HasEndogene(GeneDef geneDef)
+	{
+		for (int i = 0; i < endogenes.Count; i++)
+		{
+			if (endogenes[i].def == geneDef)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public Gene GetGene(GeneDef geneDef)
+	{
+		List<Gene> genesListForReading = GenesListForReading;
+		for (int i = 0; i < genesListForReading.Count; i++)
+		{
+			if (genesListForReading[i].def == geneDef)
+			{
+				return genesListForReading[i];
+			}
+		}
+		return null;
+	}
+
+	public T GetFirstGeneOfType<T>() where T : Gene
+	{
+		if (!ModLister.BiotechInstalled)
+		{
+			return null;
+		}
+		List<Gene> genesListForReading = GenesListForReading;
+		for (int i = 0; i < genesListForReading.Count; i++)
+		{
+			if (genesListForReading[i].Active && genesListForReading[i] is T result)
+			{
+				return result;
+			}
+		}
+		return null;
+	}
+
+	public GeneDef GetMelaninGene()
+	{
+		List<Gene> genesListForReading = GenesListForReading;
+		for (int i = 0; i < genesListForReading.Count; i++)
+		{
+			if (genesListForReading[i].Active && genesListForReading[i].def.endogeneCategory == EndogeneCategory.Melanin)
+			{
+				return genesListForReading[i].def;
+			}
+		}
+		return null;
+	}
+
+	public GeneDef GetHairColorGene()
+	{
+		List<Gene> genesListForReading = GenesListForReading;
+		for (int i = 0; i < genesListForReading.Count; i++)
+		{
+			if (genesListForReading[i].Active && genesListForReading[i].def.endogeneCategory == EndogeneCategory.HairColor)
+			{
+				return genesListForReading[i].def;
+			}
+		}
+		return null;
+	}
+
+	public GeneDef GetFirstEndogeneByCategory(EndogeneCategory cat)
+	{
+		List<Gene> list = Endogenes;
+		for (int i = 0; i < list.Count; i++)
+		{
+			if (list[i].Active && list[i].def.endogeneCategory == cat)
+			{
+				return list[i].def;
+			}
+		}
+		return null;
+	}
+
+	public Gene AddGene(GeneDef geneDef, bool xenogene)
+	{
+		if (xenogene && !ModLister.BiotechInstalled)
+		{
+			return null;
+		}
+		if (!xenogene && HasEndogene(geneDef))
+		{
+			return null;
+		}
+		return AddGene(GeneMaker.MakeGene(geneDef, pawn), xenogene);
+	}
+
+	private Gene AddGene(Gene gene, bool addAsXenogene)
+	{
+		if (addAsXenogene && !ModLister.BiotechInstalled)
+		{
+			return null;
+		}
+		if (addAsXenogene)
+		{
+			xenogenes.Add(gene);
+		}
+		else
+		{
+			endogenes.Add(gene);
+		}
+		cachedGenes = null;
+		if (ModLister.BiotechInstalled)
+		{
+			CheckForOverrides();
+			if (!gene.def.abilities.NullOrEmpty() && pawn.abilities != null)
+			{
+				for (int i = 0; i < gene.def.abilities.Count; i++)
 				{
-					for (int k = 0; k < gene.def.disablesNeeds.Count; k++)
-					{
-						NeedDef key2 = gene.def.disablesNeeds[k];
-						if (this.cachedDisabledNeeds == null)
-						{
-							this.cachedDisabledNeeds = new Dictionary<NeedDef, Gene>();
-						}
-						this.cachedDisabledNeeds[key2] = gene;
-					}
+					pawn.abilities.GainAbility(gene.def.abilities[i]);
+				}
+			}
+			if (!gene.def.forcedTraits.NullOrEmpty() && pawn.story != null)
+			{
+				for (int j = 0; j < gene.def.forcedTraits.Count; j++)
+				{
+					Trait trait = new Trait(gene.def.forcedTraits[j].def, gene.def.forcedTraits[j].degree);
+					trait.sourceGene = gene;
+					pawn.story.traits.GainTrait(trait, suppressConflicts: true);
+				}
+			}
+			if (gene.def.passionMod != null)
+			{
+				SkillRecord skill = pawn.skills.GetSkill(gene.def.passionMod.skill);
+				gene.passionPreAdd = skill.passion;
+				skill.passion = gene.def.passionMod.NewPassionFor(skill);
+			}
+			pawn.story?.traits?.RecalculateSuppression();
+			if (gene.def.disabledWorkTags.HasFlag(WorkTags.Violent) && pawn.equipment?.Primary != null)
+			{
+				if (pawn.PositionHeld.IsValid && pawn.MapHeld != null)
+				{
+					pawn.equipment.TryDropEquipment(pawn.equipment.Primary, out var _, pawn.PositionHeld, forbid: false);
+				}
+				else
+				{
+					pawn.equipment.DestroyEquipment(pawn.equipment.Primary);
 				}
 			}
 		}
-
-		// Token: 0x0600CCA2 RID: 52386 RVA: 0x003C05C8 File Offset: 0x003BE7C8
-		public void Debug_AddAllGenes(bool xenogene)
+		Notify_GenesChanged(gene.def);
+		if (ModLister.BiotechInstalled)
 		{
-			if (!ModsConfig.BiotechActive)
+			gene.PostAdd();
+		}
+		return gene;
+	}
+
+	public void RemoveGene(Gene gene)
+	{
+		if (!xenogenes.Remove(gene) && !endogenes.Remove(gene))
+		{
+			return;
+		}
+		cachedGenes = null;
+		if (ModLister.BiotechInstalled)
+		{
+			CheckForOverrides();
+			if (pawn.abilities != null && !gene.def.abilities.NullOrEmpty())
 			{
-				return;
-			}
-			this.ClearXenogenes();
-			this.cachedGenes = null;
-			foreach (GeneDef geneDef in DefDatabase<GeneDef>.AllDefs)
-			{
-				if (geneDef.endogeneCategory != EndogeneCategory.Melanin && geneDef.endogeneCategory != EndogeneCategory.HairColor)
+				for (int i = 0; i < gene.def.abilities.Count; i++)
 				{
-					Gene gene = GeneMaker.MakeGene(geneDef, this.pawn);
-					if (xenogene)
+					pawn.abilities.RemoveAbility(gene.def.abilities[i]);
+				}
+			}
+			if (!gene.def.forcedTraits.NullOrEmpty() || !gene.def.suppressedTraits.NullOrEmpty())
+			{
+				pawn.story?.traits.Notify_GeneRemoved(gene);
+			}
+			if (gene.def.passionMod != null)
+			{
+				SkillRecord skill = pawn.skills.GetSkill(gene.def.passionMod.skill);
+				skill.passion = gene.NewPassionForOnRemoval(skill);
+			}
+		}
+		Notify_GenesChanged(gene.def);
+		if (ModLister.BiotechInstalled)
+		{
+			gene.PostRemove();
+		}
+	}
+
+	private void CheckForOverrides()
+	{
+		List<Gene> genesListForReading = GenesListForReading;
+		foreach (Gene item in genesListForReading)
+		{
+			if (!item.def.RandomChosen)
+			{
+				item.OverrideBy(null);
+			}
+		}
+		for (int i = 0; i < genesListForReading.Count; i++)
+		{
+			if (genesListForReading[i].def.RandomChosen)
+			{
+				continue;
+			}
+			for (int j = i + 1; j < genesListForReading.Count; j++)
+			{
+				if (!genesListForReading[j].def.RandomChosen && genesListForReading[i].def.ConflictsWith(genesListForReading[j].def))
+				{
+					if (genesListForReading[i].def.Overrides(genesListForReading[j].def, IsXenogene(genesListForReading[i]), IsXenogene(genesListForReading[j])))
 					{
-						this.xenogenes.Add(gene);
+						genesListForReading[j].OverrideBy(genesListForReading[i]);
 					}
 					else
 					{
-						this.endogenes.Add(gene);
+						genesListForReading[i].OverrideBy(genesListForReading[j]);
 					}
-					this.Notify_GenesChanged(geneDef);
-					gene.PostAdd();
 				}
 			}
-			this.CheckForOverrides();
 		}
+		pawn.skills?.DirtyAptitudes();
+		pawn.Notify_DisabledWorkTypesChanged();
+	}
 
-		// Token: 0x04008B4E RID: 35662
-		public Pawn pawn;
+	public void ClearXenogenes()
+	{
+		for (int num = xenogenes.Count - 1; num >= 0; num--)
+		{
+			RemoveGene(xenogenes[num]);
+		}
+	}
 
-		// Token: 0x04008B4F RID: 35663
-		public string xenotypeName;
+	public void GeneTrackerTick()
+	{
+		if (!ModLister.BiotechInstalled)
+		{
+			return;
+		}
+		for (int num = xenogenes.Count - 1; num >= 0; num--)
+		{
+			if (xenogenes[num].Active)
+			{
+				xenogenes[num].Tick();
+			}
+		}
+		for (int num2 = endogenes.Count - 1; num2 >= 0; num2--)
+		{
+			if (endogenes[num2].Active)
+			{
+				endogenes[num2].Tick();
+			}
+		}
+	}
 
-		// Token: 0x04008B50 RID: 35664
-		public XenotypeIconDef iconDef;
+	public void GeneTrackerTickInterval(int delta)
+	{
+		if (!ModLister.BiotechInstalled)
+		{
+			return;
+		}
+		for (int num = xenogenes.Count - 1; num >= 0; num--)
+		{
+			if (xenogenes[num].Active)
+			{
+				xenogenes[num].TickInterval(delta);
+			}
+		}
+		for (int num2 = endogenes.Count - 1; num2 >= 0; num2--)
+		{
+			if (endogenes[num2].Active)
+			{
+				endogenes[num2].TickInterval(delta);
+			}
+		}
+		if (pawn.Spawned && Xenotype != XenotypeDefOf.Baseliner && pawn.IsHashIntervalTick(300, delta))
+		{
+			LessonAutoActivator.TeachOpportunity(ConceptDefOf.GenesAndXenotypes, OpportunityType.Important);
+		}
+	}
 
-		// Token: 0x04008B51 RID: 35665
-		public bool hybrid;
+	public void Notify_IngestedThing(Thing thing, int numTaken)
+	{
+		if (!ModLister.BiotechInstalled)
+		{
+			return;
+		}
+		List<Gene> genesListForReading = GenesListForReading;
+		for (int i = 0; i < genesListForReading.Count; i++)
+		{
+			if (genesListForReading[i].Active)
+			{
+				genesListForReading[i].Notify_IngestedThing(thing, numTaken);
+			}
+		}
+	}
 
-		// Token: 0x04008B52 RID: 35666
-		private XenotypeDef xenotype;
+	public void Reset()
+	{
+		for (int i = 0; i < GenesListForReading.Count; i++)
+		{
+			GenesListForReading[i].Reset();
+		}
+	}
 
-		// Token: 0x04008B53 RID: 35667
-		private List<Gene> xenogenes = new List<Gene>();
+	[IteratorStateMachine(typeof(_003CGetGizmos_003Ed__95))]
+	public IEnumerable<Gizmo> GetGizmos()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetGizmos_003Ed__95(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
 
-		// Token: 0x04008B54 RID: 35668
-		private List<Gene> endogenes = new List<Gene>();
+	private void Notify_GenesChanged(GeneDef addedOrRemovedGene)
+	{
+		bool flag = false;
+		cachedGenes = null;
+		List<Gene> genes = GenesListForReading;
+		if (ModLister.BiotechInstalled && addedOrRemovedGene.skinIsHairColor)
+		{
+			if (SelectGene((Gene x) => x.def.skinIsHairColor, out var chosen2))
+			{
+				pawn.story.skinColorOverride = pawn.story.HairColor;
+				OverrideAllConflicting(chosen2);
+			}
+			else
+			{
+				pawn.story.skinColorOverride = null;
+			}
+			EnsureCorrectSkinColorOverride();
+			flag = true;
+		}
+		if (addedOrRemovedGene.hairColorOverride.HasValue && SelectGene((Gene g) => g.def.hairColorOverride.HasValue, out var chosen3))
+		{
+			Color value = chosen3.def.hairColorOverride.Value;
+			if (chosen3.def.randomBrightnessFactor != 0f)
+			{
+				value *= 1f + Rand.Range(0f - chosen3.def.randomBrightnessFactor, chosen3.def.randomBrightnessFactor);
+			}
+			pawn.story.HairColor = value.ClampToValueRange(GeneTuning.HairColorValueRange);
+			OverrideAllConflicting(chosen3);
+			EnsureCorrectSkinColorOverride();
+			flag = true;
+		}
+		if (addedOrRemovedGene.skinColorBase.HasValue && SelectGene((Gene g) => g.def.skinColorBase.HasValue, out var chosen4))
+		{
+			OverrideAllConflicting(chosen4);
+			pawn.story.SkinColorBase = chosen4.def.skinColorBase.Value;
+			flag = true;
+		}
+		if (ModLister.BiotechInstalled)
+		{
+			if (addedOrRemovedGene.skinColorOverride.HasValue)
+			{
+				if (SelectGene((Gene g) => g.def.skinColorOverride.HasValue, out var chosen5))
+				{
+					Color value2 = chosen5.def.skinColorOverride.Value;
+					if (chosen5.def.randomBrightnessFactor != 0f)
+					{
+						value2 *= 1f + Rand.Range(0f - chosen5.def.randomBrightnessFactor, chosen5.def.randomBrightnessFactor);
+					}
+					pawn.story.skinColorOverride = value2.ClampToValueRange(GeneTuning.SkinColorValueRange);
+					OverrideAllConflicting(chosen5);
+				}
+				else
+				{
+					pawn.story.skinColorOverride = null;
+				}
+				EnsureCorrectSkinColorOverride();
+				flag = true;
+			}
+			if (addedOrRemovedGene.bodyType.HasValue && !pawn.DevelopmentalStage.Juvenile())
+			{
+				if (SelectGene((Gene g) => g.def.bodyType.HasValue, out var chosen6))
+				{
+					OverrideAllConflicting(chosen6);
+					pawn.story.bodyType = chosen6.def.bodyType.Value.ToBodyType(pawn);
+				}
+				else
+				{
+					pawn.story.bodyType = PawnGenerator.GetBodyTypeFor(pawn);
+				}
+				flag = true;
+			}
+			if (!addedOrRemovedGene.forcedHeadTypes.NullOrEmpty())
+			{
+				if (SelectGene((Gene g) => !g.def.forcedHeadTypes.NullOrEmpty(), out var chosen7))
+				{
+					OverrideAllConflicting(chosen7);
+					if (!pawn.story.TryGetRandomHeadFromSet(chosen7.def.forcedHeadTypes))
+					{
+						pawn.story.TryGetRandomHeadFromSet(DefDatabase<HeadTypeDef>.AllDefs.Where((HeadTypeDef x) => x.randomChosen));
+					}
+				}
+				else
+				{
+					pawn.story.TryGetRandomHeadFromSet(DefDatabase<HeadTypeDef>.AllDefs.Where((HeadTypeDef x) => x.randomChosen));
+				}
+				flag = true;
+			}
+			if ((addedOrRemovedGene.forcedHair != null || addedOrRemovedGene.hairTagFilter != null) && !PawnStyleItemChooser.WantsToUseStyle(pawn, pawn.story.hairDef, null))
+			{
+				pawn.story.hairDef = PawnStyleItemChooser.RandomHairFor(pawn);
+				flag = true;
+			}
+			if (addedOrRemovedGene.beardTagFilter != null && pawn.style != null && !PawnStyleItemChooser.WantsToUseStyle(pawn, pawn.style.beardDef, null))
+			{
+				pawn.style.beardDef = PawnStyleItemChooser.RandomBeardFor(pawn);
+				flag = true;
+			}
+			if (addedOrRemovedGene.fur != null)
+			{
+				if (SelectGene((Gene g) => g.def.fur != null, out var chosen8))
+				{
+					pawn.story.furDef = chosen8.def.fur;
+					OverrideAllConflicting(chosen8);
+				}
+				else
+				{
+					pawn.story.furDef = null;
+				}
+				flag = true;
+			}
+			if (addedOrRemovedGene.RandomChosen && SelectGene((Gene g) => g.Active && g.def.ConflictsWith(addedOrRemovedGene), out var chosen9))
+			{
+				OverrideAllConflicting(chosen9);
+				flag = true;
+			}
+			RecacheNeeds();
+			if (addedOrRemovedGene.soundCall != null)
+			{
+				PawnComponentsUtility.AddAndRemoveDynamicComponents(pawn);
+			}
+			pawn.needs?.AddOrRemoveNeedsAsAppropriate();
+			pawn.health.hediffSet.DirtyCache();
+			cachedDamageFactors.Clear();
+			cachedAddictionChanceFactors.Clear();
+			cachedGenesAffectAge = null;
+			cachedHasCustomXenotype = null;
+			cachedCustomXenotype = null;
+			cachedTattoosVisible = null;
+			cachedWaterCellCost = null;
+			hasCachedWaterCost = false;
+			pawn.skills?.DirtyAptitudes();
+			pawn.Notify_DisabledWorkTypesChanged();
+		}
+		if (flag)
+		{
+			pawn.Drawer.renderer.SetAllGraphicsDirty();
+		}
+		bool SelectGene(Predicate<Gene> validator, out Gene chosen)
+		{
+			for (int i = 0; i < genes.Count; i++)
+			{
+				if ((genes[i].Active || genes[i].Overridden) && validator(genes[i]))
+				{
+					genes[i].OverrideBy(null);
+					tmpGenes.Add(genes[i]);
+				}
+			}
+			if (tmpGenes.Where(IsXenogene).TryRandomElement(out chosen))
+			{
+				tmpGenes.Clear();
+				return true;
+			}
+			if (tmpGenes.TryRandomElement(out chosen))
+			{
+				tmpGenes.Clear();
+				return true;
+			}
+			tmpGenes.Clear();
+			chosen = null;
+			return false;
+		}
+	}
 
-		// Token: 0x04008B55 RID: 35669
-		[Unsaved(false)]
-		private Dictionary<DamageDef, float> cachedDamageFactors = new Dictionary<DamageDef, float>();
+	private void EnsureCorrectSkinColorOverride()
+	{
+		if (!ModLister.BiotechInstalled)
+		{
+			return;
+		}
+		bool flag = false;
+		Color? skinColorOverride = null;
+		List<Gene> genesListForReading = GenesListForReading;
+		for (int i = 0; i < genesListForReading.Count; i++)
+		{
+			Gene gene = genesListForReading[i];
+			if (gene.Active)
+			{
+				if (gene.def.skinIsHairColor)
+				{
+					flag = true;
+				}
+				else if (gene.def.skinColorOverride.HasValue)
+				{
+					skinColorOverride = gene.def.skinColorOverride;
+				}
+			}
+		}
+		if (flag)
+		{
+			pawn.story.skinColorOverride = pawn.story.HairColor;
+		}
+		else
+		{
+			pawn.story.skinColorOverride = skinColorOverride;
+		}
+	}
 
-		// Token: 0x04008B56 RID: 35670
-		[Unsaved(false)]
-		private Dictionary<ChemicalDef, float> cachedAddictionChanceFactors = new Dictionary<ChemicalDef, float>();
+	private void OverrideAllConflicting(Gene gene)
+	{
+		if (!ModLister.BiotechInstalled || !gene.def.RandomChosen)
+		{
+			return;
+		}
+		gene.OverrideBy(null);
+		foreach (Gene item in GenesListForReading)
+		{
+			if (item != gene && item.def.ConflictsWith(gene.def))
+			{
+				item.OverrideBy(gene);
+			}
+		}
+	}
 
-		// Token: 0x04008B57 RID: 35671
-		[Unsaved(false)]
-		private Dictionary<NeedDef, Gene> cachedEnabledNeeds;
+	public void Notify_NewColony()
+	{
+		foreach (Gene item in GenesListForReading)
+		{
+			item.Notify_NewColony();
+		}
+	}
 
-		// Token: 0x04008B58 RID: 35672
-		[Unsaved(false)]
-		private Dictionary<NeedDef, Gene> cachedDisabledNeeds;
+	public void Notify_PawnDied(DamageInfo? dinfo, Hediff culprit = null)
+	{
+		List<Gene> genesListForReading = GenesListForReading;
+		for (int num = genesListForReading.Count - 1; num >= 0; num--)
+		{
+			genesListForReading[num].Notify_PawnDied(dinfo, culprit);
+		}
+	}
 
-		// Token: 0x04008B59 RID: 35673
-		[Unsaved(false)]
-		private List<Gene> cachedGenes;
+	public bool StyleItemAllowed(StyleItemDef styleItem)
+	{
+		if (!ModLister.BiotechInstalled)
+		{
+			return true;
+		}
+		bool flag = styleItem is HairDef;
+		bool flag2 = styleItem is BeardDef;
+		if (!flag && !flag2)
+		{
+			return true;
+		}
+		if (flag2 && !pawn.style.CanWantBeard)
+		{
+			return styleItem == BeardDefOf.NoBeard;
+		}
+		List<Gene> genesListForReading = GenesListForReading;
+		for (int i = 0; i < genesListForReading.Count; i++)
+		{
+			if (!genesListForReading[i].Active)
+			{
+				continue;
+			}
+			if (flag)
+			{
+				if (genesListForReading[i].def.forcedHair != null && genesListForReading[i].def.forcedHair != styleItem)
+				{
+					return false;
+				}
+				if (genesListForReading[i].def.hairTagFilter != null && !genesListForReading[i].def.hairTagFilter.Allows(styleItem.styleTags))
+				{
+					return false;
+				}
+			}
+			else if (flag2 && genesListForReading[i].def.beardTagFilter != null && !genesListForReading[i].def.beardTagFilter.Allows(styleItem.styleTags))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
 
-		// Token: 0x04008B5A RID: 35674
-		[Unsaved(false)]
-		private bool? cachedGenesAffectAge;
+	public float FactorForDamage(DamageInfo dinfo)
+	{
+		if (!ModLister.BiotechInstalled || dinfo.Def == null || GenesListForReading.NullOrEmpty())
+		{
+			return 1f;
+		}
+		if (cachedDamageFactors.TryGetValue(dinfo.Def, out var value))
+		{
+			return value;
+		}
+		float num = 1f;
+		List<Gene> genesListForReading = GenesListForReading;
+		for (int i = 0; i < genesListForReading.Count; i++)
+		{
+			Gene gene = genesListForReading[i];
+			if (!gene.Active || gene.def.damageFactors.NullOrEmpty())
+			{
+				continue;
+			}
+			for (int j = 0; j < gene.def.damageFactors.Count; j++)
+			{
+				if (gene.def.damageFactors[j].damageDef == dinfo.Def)
+				{
+					num *= gene.def.damageFactors[j].factor;
+				}
+			}
+		}
+		cachedDamageFactors.Add(dinfo.Def, num);
+		return num;
+	}
 
-		// Token: 0x04008B5B RID: 35675
-		[Unsaved(false)]
-		private CustomXenotype cachedCustomXenotype;
+	public float AddictionChanceFactor(ChemicalDef chemical)
+	{
+		if (!ModLister.BiotechInstalled || GenesListForReading.NullOrEmpty())
+		{
+			return 1f;
+		}
+		if (cachedAddictionChanceFactors.TryGetValue(chemical, out var value))
+		{
+			return value;
+		}
+		float num = 1f;
+		List<Gene> genesListForReading = GenesListForReading;
+		for (int i = 0; i < genesListForReading.Count; i++)
+		{
+			if (genesListForReading[i].Active && genesListForReading[i].def.chemical == chemical)
+			{
+				num *= genesListForReading[i].def.addictionChanceFactor;
+			}
+		}
+		cachedAddictionChanceFactors.Add(chemical, num);
+		return num;
+	}
 
-		// Token: 0x04008B5C RID: 35676
-		[Unsaved(false)]
-		private bool? cachedHasCustomXenotype;
+	public bool HediffGiversCanGive(HediffDef hediff)
+	{
+		if (!ModLister.BiotechInstalled)
+		{
+			return true;
+		}
+		List<Gene> genesListForReading = GenesListForReading;
+		for (int i = 0; i < genesListForReading.Count; i++)
+		{
+			if (genesListForReading[i].Active && genesListForReading[i].def.hediffGiversCannotGive != null && genesListForReading[i].def.hediffGiversCannotGive.Contains(hediff))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
 
-		// Token: 0x04008B5D RID: 35677
-		[Unsaved(false)]
-		private bool? cachedTattoosVisible;
+	public SoundDef GetSoundOverrideFromGenes(Func<GeneDef, SoundDef> getter, SoundDef oldSound)
+	{
+		if (!ModLister.BiotechInstalled)
+		{
+			return oldSound;
+		}
+		List<Gene> genesListForReading = GenesListForReading;
+		for (int i = 0; i < genesListForReading.Count; i++)
+		{
+			if (genesListForReading[i].Active)
+			{
+				SoundDef soundDef = getter(genesListForReading[i].def);
+				if (soundDef != null)
+				{
+					return soundDef;
+				}
+			}
+		}
+		return oldSound;
+	}
 
-		// Token: 0x04008B5E RID: 35678
-		[Unsaved(false)]
-		private int? cachedWaterCellCost;
+	public void InitializeGenesFromOldSave(float melanin)
+	{
+		if (GetMelaninGene() == null)
+		{
+			AddGene(PawnSkinColors.GetSkinColorGene(melanin), xenogene: false);
+		}
+		if (GetHairColorGene() == null)
+		{
+			GeneDef geneDef = PawnHairColors.ClosestHairColorGene(pawn.story.HairColor, pawn.story.SkinColorBase);
+			if (geneDef != null)
+			{
+				AddGene(geneDef, xenogene: false);
+			}
+		}
+	}
 
-		// Token: 0x04008B5F RID: 35679
-		[Unsaved(false)]
-		private bool hasCachedWaterCost;
+	[IteratorStateMachine(typeof(_003CSpecialDisplayStats_003Ed__108))]
+	public IEnumerable<StatDrawEntry> SpecialDisplayStats()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CSpecialDisplayStats_003Ed__108(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
 
-		// Token: 0x04008B60 RID: 35680
-		private const int LearningOpportunityCheckInterval = 300;
+	public void ExposeData()
+	{
+		Scribe_Collections.Look(ref xenogenes, "xenogenes", LookMode.Deep);
+		Scribe_Collections.Look(ref endogenes, "endogenes", LookMode.Deep);
+		Scribe_Defs.Look(ref xenotype, "xenotype");
+		Scribe_Values.Look(ref xenotypeName, "xenotypeName");
+		Scribe_Values.Look(ref hybrid, "hybrid", defaultValue: false);
+		Scribe_Defs.Look(ref iconDef, "iconDef");
+		if (Scribe.mode == LoadSaveMode.LoadingVars && ((xenogenes != null && xenogenes.RemoveAll((Gene x) => x == null || x.def == null) > 0) || (endogenes != null && endogenes.RemoveAll((Gene x) => x == null || x.def == null) > 0)))
+		{
+			Log.Error("Removed null gene(s)");
+		}
+		if (Scribe.mode == LoadSaveMode.PostLoadInit)
+		{
+			if (xenotype == null && ModsConfig.BiotechActive)
+			{
+				xenotype = XenotypeDefOf.Baseliner;
+			}
+			if (xenogenes == null)
+			{
+				xenogenes = new List<Gene>();
+			}
+			if (endogenes == null)
+			{
+				endogenes = new List<Gene>();
+			}
+			RecacheNeeds();
+		}
+	}
 
-		// Token: 0x04008B61 RID: 35681
-		private List<GeneDefWithType> tmpGeneDefWithTypes = new List<GeneDefWithType>();
+	private void RecacheNeeds()
+	{
+		cachedDisabledNeeds?.Clear();
+		cachedEnabledNeeds?.Clear();
+		List<Gene> genesListForReading = GenesListForReading;
+		for (int i = 0; i < genesListForReading.Count; i++)
+		{
+			Gene gene = genesListForReading[i];
+			if (gene.Active && !gene.def.enablesNeeds.NullOrEmpty())
+			{
+				for (int j = 0; j < gene.def.enablesNeeds.Count; j++)
+				{
+					NeedDef key = gene.def.enablesNeeds[j];
+					if (cachedEnabledNeeds == null)
+					{
+						cachedEnabledNeeds = new Dictionary<NeedDef, Gene>();
+					}
+					cachedEnabledNeeds[key] = gene;
+				}
+			}
+			if (!gene.Active || gene.def.disablesNeeds.NullOrEmpty())
+			{
+				continue;
+			}
+			for (int k = 0; k < gene.def.disablesNeeds.Count; k++)
+			{
+				NeedDef key2 = gene.def.disablesNeeds[k];
+				if (cachedDisabledNeeds == null)
+				{
+					cachedDisabledNeeds = new Dictionary<NeedDef, Gene>();
+				}
+				cachedDisabledNeeds[key2] = gene;
+			}
+		}
+	}
 
-		// Token: 0x04008B62 RID: 35682
-		private readonly List<Gene> tmpGenes = new List<Gene>();
+	public void Debug_AddAllGenes(bool xenogene)
+	{
+		if (!ModsConfig.BiotechActive)
+		{
+			return;
+		}
+		ClearXenogenes();
+		cachedGenes = null;
+		foreach (GeneDef allDef in DefDatabase<GeneDef>.AllDefs)
+		{
+			if (allDef.endogeneCategory != EndogeneCategory.Melanin && allDef.endogeneCategory != EndogeneCategory.HairColor)
+			{
+				Gene gene = GeneMaker.MakeGene(allDef, pawn);
+				if (xenogene)
+				{
+					xenogenes.Add(gene);
+				}
+				else
+				{
+					endogenes.Add(gene);
+				}
+				Notify_GenesChanged(allDef);
+				gene.PostAdd();
+			}
+		}
+		CheckForOverrides();
 	}
 }

@@ -21,22 +21,6 @@ public sealed class MeshBatchRenderer : IDisposable
 	private struct GlobalVertexUniforms
 	{
 		public Matrix4x4 ViewProj;
-
-		public float CameraYaw;
-
-		public float CameraPitch;
-
-		public float SwayHead;
-
-		public float WindSpeed;
-
-		public float BillboardPitchDelta;
-
-		public float Pad1;
-
-		public float Pad2;
-
-		public float Pad3;
 	}
 
 	private struct GlobalFragmentUniforms
@@ -582,7 +566,7 @@ public sealed class MeshBatchRenderer : IDisposable
 		{
 			return;
 		}
-		VkDescriptorSet frameDescriptorSet = CreateFrameDescriptorSet(in cameraView, sunDirection ?? new Vector3(0f, 1f, 0f), 0f, 0f, 0f, 0f, 0f);
+		VkDescriptorSet frameDescriptorSet = CreateFrameDescriptorSet(in cameraView, sunDirection ?? new Vector3(0f, 1f, 0f));
 		if (!frameDescriptorSet.IsNull())
 		{
 			VkDescriptorSet globalTextureDescriptorSet = default(VkDescriptorSet);
@@ -604,7 +588,7 @@ public sealed class MeshBatchRenderer : IDisposable
 			{
 				return;
 			}
-			sceneFrameDescriptorSet = CreateFrameDescriptorSet(viewOverride ?? meshFrame.View, meshFrame.SunDirection, meshFrame.CameraYaw, meshFrame.CameraPitch, meshFrame.SwayHead, meshFrame.WindSpeed, meshFrame.BillboardPitchDelta);
+			sceneFrameDescriptorSet = CreateFrameDescriptorSet(viewOverride ?? meshFrame.View, meshFrame.SunDirection);
 			if (sceneFrameDescriptorSet.IsNull())
 			{
 				LogDiagnostic(diagnosticPrefix, $"RecordMainPass aborted: frame descriptor set is null (pass {passId}).");
@@ -1221,15 +1205,10 @@ public sealed class MeshBatchRenderer : IDisposable
 		DescriptorSetWriter.WriteMaterialDescriptorSet(device, set, textureSlots, in bufferInfo, span);
 	}
 
-	private VkDescriptorSet CreateFrameDescriptorSet(in CameraView view, Vector3 sunDirection, float cameraYaw, float cameraPitch, float swayHead, float windSpeed, float billboardPitchDelta)
+	private VkDescriptorSet CreateFrameDescriptorSet(in CameraView view, Vector3 sunDirection)
 	{
 		GlobalVertexUniforms globalVertexUniforms = default(GlobalVertexUniforms);
 		globalVertexUniforms.ViewProj = view.ViewProjection;
-		globalVertexUniforms.CameraYaw = cameraYaw;
-		globalVertexUniforms.CameraPitch = cameraPitch;
-		globalVertexUniforms.SwayHead = swayHead;
-		globalVertexUniforms.WindSpeed = windSpeed;
-		globalVertexUniforms.BillboardPitchDelta = billboardPitchDelta;
 		GlobalVertexUniforms value = globalVertexUniforms;
 		if (!vkDrawEncoder.TryUploadUniforms(in value, out var bufferInfo))
 		{
@@ -1419,7 +1398,7 @@ public sealed class MeshBatchRenderer : IDisposable
 				message2.AppendLiteral(" ");
 				message2.AppendFormatted(message);
 			}
-			log.Warning(message2, "LogDiagnostic", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\DrawCallCore\\MeshBatchRenderer.cs", 1510);
+			log.Warning(message2, "LogDiagnostic", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\DrawCallCore\\MeshBatchRenderer.cs", 1512);
 		}
 	}
 

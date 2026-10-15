@@ -1,187 +1,380 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Numerics;
+using System.Security.Cryptography;
+using LudeonTK;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
+using Waylith.Assets;
+using Waylith.Graphics;
+using Waylith.Rendering;
 
-namespace Verse
+namespace Verse;
+
+public class StaticTextureAtlas
 {
-	// Token: 0x02000801 RID: 2049
-	public class StaticTextureAtlas
+	public readonly TextureAtlasGroupKey groupKey;
+
+	private List<UnityEngine.Texture2D> textures = new List<UnityEngine.Texture2D>();
+
+	private Dictionary<UnityEngine.Texture2D, UnityEngine.Texture2D> masks = new Dictionary<UnityEngine.Texture2D, UnityEngine.Texture2D>();
+
+	private Dictionary<UnityEngine.Texture, StaticTextureAtlasTile> tiles = new Dictionary<UnityEngine.Texture, StaticTextureAtlasTile>();
+
+	private UnityEngine.Texture2D colorTexture;
+
+	private UnityEngine.Texture2D maskTexture;
+
+	private string colorCacheKey;
+
+	private string maskCacheKey;
+
+	public const int MaxTextureSizeForTiles = 512;
+
+	public const int TexturePadding = 8;
+
+	private const long BakeBytesPerPagePixel = 16L;
+
+	private const int MinPagePixels = 4194304;
+
+	private const int CacheBakeVersion = 1;
+
+	public UnityEngine.Texture2D ColorTexture => colorTexture;
+
+	public UnityEngine.Texture2D MaskTexture => maskTexture;
+
+	public IEnumerable<UnityEngine.Texture2D> Members => textures.Concat(masks.Values);
+
+	public static int MaxPixelsPerAtlas => MaxPagePixels / 8 * 5;
+
+	public static int MaxAtlasSize => SystemInfo.maxTextureSize;
+
+	public static int MaxPagePixels
 	{
-		// Token: 0x170009CE RID: 2510
-		// (get) Token: 0x0600343A RID: 13370 RVA: 0x00112394 File Offset: 0x00110594
-		public Texture2D ColorTexture
+		get
 		{
-			get
+			long num = (long)MaxAtlasSize * (long)MaxAtlasSize / 2;
+			long deviceLocalHeapBytes = TextureResidency.DeviceLocalHeapBytes;
+			if (deviceLocalHeapBytes > 0)
 			{
-				return this.colorTexture;
+				num = Math.Min(num, deviceLocalHeapBytes / 6 / 16);
 			}
+			num = 1L << BitOperations.Log2((ulong)num);
+			return (int)Math.Max(4194304L, num);
 		}
+	}
 
-		// Token: 0x170009CF RID: 2511
-		// (get) Token: 0x0600343B RID: 13371 RVA: 0x0011239C File Offset: 0x0011059C
-		public Texture2D MaskTexture
+	public bool AdoptedFromCache { get; private set; }
+
+	public string CacheKey(bool mask)
+	{
+		if (!mask)
 		{
-			get
-			{
-				return this.maskTexture;
-			}
+			return colorCacheKey;
 		}
+		return maskCacheKey;
+	}
 
-		// Token: 0x170009D0 RID: 2512
-		// (get) Token: 0x0600343C RID: 13372 RVA: 0x001123A4 File Offset: 0x001105A4
-		public static int MaxPixelsPerAtlas
+	public StaticTextureAtlas(TextureAtlasGroupKey groupKey)
+	{
+		this.groupKey = groupKey;
+		colorTexture = new UnityEngine.Texture2D(1, 1, TextureFormat.ARGB32, mipChain: false);
+		colorTexture.name = "StaticTextureAtlas";
+	}
+
+	public void Insert(UnityEngine.Texture2D texture, UnityEngine.Texture2D mask = null)
+	{
+		if (groupKey.hasMask && mask == null)
 		{
-			get
-			{
-				return StaticTextureAtlas.MaxAtlasSize / 2 * (StaticTextureAtlas.MaxAtlasSize / 2);
-			}
+			Log.Error("Tried to insert a mask-less texture into a static atlas which does have a mask atlas");
 		}
-
-		// Token: 0x170009D1 RID: 2513
-		// (get) Token: 0x0600343D RID: 13373 RVA: 0x001123B5 File Offset: 0x001105B5
-		public static int MaxAtlasSize
+		if (!groupKey.hasMask && mask != null)
 		{
-			get
-			{
-				return SystemInfo.maxTextureSize;
-			}
+			Log.Error("Tried to insert a mask texture into a static atlas which does not have a mask atlas");
 		}
-
-		// Token: 0x0600343E RID: 13374 RVA: 0x001123BC File Offset: 0x001105BC
-		public StaticTextureAtlas(TextureAtlasGroupKey groupKey)
+		textures.Add(texture);
+		if (mask != null && groupKey.hasMask)
 		{
-			this.groupKey = groupKey;
-			this.colorTexture = new Texture2D(1, 1, TextureFormat.ARGB32, false);
+			masks.Add(texture, mask);
 		}
+	}
 
-		// Token: 0x0600343F RID: 13375 RVA: 0x001123FC File Offset: 0x001105FC
-		public void Insert(Texture2D texture, Texture2D mask = null)
+	public void Bake(bool rebake = false)
+	{
+		using (new DeepProfilerScope("StaticTextureAtlas.Bake()"))
 		{
-			if (this.groupKey.hasMask && mask == null)
+			if (rebake)
 			{
-				Log.Error("Tried to insert a mask-less texture into a static atlas which does have a mask atlas");
-			}
-			if (!this.groupKey.hasMask && mask != null)
-			{
-				Log.Error("Tried to insert a mask texture into a static atlas which does not have a mask atlas");
-			}
-			this.textures.Add(texture);
-			if (mask != null && this.groupKey.hasMask)
-			{
-				this.masks.Add(texture, mask);
-			}
-		}
-
-		// Token: 0x06003440 RID: 13376 RVA: 0x00112478 File Offset: 0x00110678
-		public void Bake(bool rebake = false)
-		{
-			using (new DeepProfilerScope("StaticTextureAtlas.Bake()"))
-			{
-				if (rebake)
+				foreach (KeyValuePair<UnityEngine.Texture, StaticTextureAtlasTile> tile in tiles)
 				{
-					foreach (KeyValuePair<Texture, StaticTextureAtlasTile> keyValuePair in this.tiles)
-					{
-						UnityEngine.Object.Destroy(keyValuePair.Value.mesh);
-					}
-					this.tiles.Clear();
+					UnityEngine.Object.Destroy(tile.Value.mesh);
 				}
-				Rect[] array = this.CalcRectsForAtlas();
-				if (array.Length != this.textures.Count)
+				tiles.Clear();
+			}
+			Rect[] array = CalcRectsForAtlasNew();
+			if (array.Length != textures.Count)
+			{
+				Log.Error("Texture packing failed! Clearing out atlas...");
+				textures.Clear();
+				return;
+			}
+			BuildMeshesForUvs(array);
+			if (groupKey.hasMask)
+			{
+				CreateMaskTexture();
+			}
+			colorCacheKey = TryGetCacheKey(mask: false);
+			maskCacheKey = (groupKey.hasMask ? TryGetCacheKey(mask: true) : null);
+			AdoptedFromCache = TryAdoptCachedPages();
+			if (!AdoptedFromCache)
+			{
+				BlitTexturesToColorAtlas(array);
+				if (groupKey.hasMask)
 				{
-					Log.Error("Texture packing failed! Clearing out atlas...");
-					this.textures.Clear();
-				}
-				else
-				{
-					bool flag = !UnityData.ComputeShadersSupported;
-					this.BlitTexturesToColorAtlas(array, flag);
-					if (this.groupKey.hasMask)
-					{
-						this.BuildMaskAtlas(array, flag);
-					}
-					this.BuildMeshesForUvs(array);
-					if (Prefs.TextureCompression)
-					{
-						this.ApplyTextureCompression(flag);
-					}
-					if (flag)
-					{
-						DeepProfiler.Start("Final Texture2D.Apply() for atlas textures");
-						if (this.colorTexture != null)
-						{
-							this.colorTexture.Apply(false, true);
-						}
-						if (this.maskTexture != null)
-						{
-							this.maskTexture.Apply(false, true);
-						}
-						DeepProfiler.End();
-					}
+					BlitMaskAtlas(array);
 				}
 			}
 		}
+	}
 
-		// Token: 0x06003441 RID: 13377 RVA: 0x001125D4 File Offset: 0x001107D4
-		private void ApplyTextureCompression(bool noGpuCompressionSupport)
+	private bool TryAdoptCachedPages()
+	{
+		if (!GlobalTextureAtlasManager.AtlasCompressionEnabled)
 		{
-			DeepProfiler.Start("Compress atlas textures");
-			if (this.colorTexture != null)
-			{
-				if (noGpuCompressionSupport)
-				{
-					this.colorTexture.Compress(true);
-				}
-				else
-				{
-					string name = this.colorTexture.name;
-					this.colorTexture = StaticTextureAtlas.FastCompressDXT(this.colorTexture, true);
-					this.colorTexture.name = name;
-				}
-			}
-			if (this.maskTexture != null)
-			{
-				if (noGpuCompressionSupport)
-				{
-					this.maskTexture.Compress(true);
-				}
-				else
-				{
-					string name2 = this.maskTexture.name;
-					this.maskTexture = StaticTextureAtlas.FastCompressDXT(this.maskTexture, true);
-					this.maskTexture.name = name2;
-				}
-			}
-			DeepProfiler.End();
+			return false;
 		}
-
-		// Token: 0x06003442 RID: 13378 RVA: 0x00112684 File Offset: 0x00110884
-		private void BuildMeshesForUvs(Rect[] uvRects)
+		if (!TryOpenCachedPage(mask: false, out var cached))
 		{
-			for (int i = 0; i < this.textures.Count; i++)
+			return false;
+		}
+		ITextureCacheSource cached2 = null;
+		if (groupKey.hasMask && !TryOpenCachedPage(mask: true, out cached2))
+		{
+			cached.Dispose();
+			return false;
+		}
+		using (cached)
+		{
+			using (cached2)
 			{
-				Mesh mesh = TextureAtlasHelper.CreateMeshForUV(uvRects[i], 0.5f);
-				mesh.name = "TextureAtlasMesh_" + this.groupKey.ToString() + "_" + mesh.GetInstanceID().ToString();
-				this.tiles.Add(this.textures[i], new StaticTextureAtlasTile
+				if (!colorTexture.CoreTexture.TryAdoptCompressed(cached) || (groupKey.hasMask && !maskTexture.CoreTexture.TryAdoptCompressed(cached2)))
 				{
-					atlas = this,
-					mesh = mesh,
-					uvRect = uvRects[i]
-				});
+					RecreatePages();
+					return false;
+				}
 			}
 		}
+		NameAtlasTextures();
+		return true;
+	}
 
-		// Token: 0x06003443 RID: 13379 RVA: 0x00112730 File Offset: 0x00110930
-		private Rect[] CalcRectsForAtlas()
+	private void RecreatePages()
+	{
+		UnityEngine.Texture2D texture2D = colorTexture;
+		colorTexture = CreatePage(texture2D.width, texture2D.height, texture2D.mipmapCount, "TextureAtlas_Working");
+		UnityEngine.Object.DestroyImmediate(texture2D);
+		if (groupKey.hasMask)
 		{
-			DeepProfiler.Start("Create dummy textures for atlas packing");
-			Texture2D[] array = this.textures.Select(delegate(Texture2D t)
+			CreateMaskTexture();
+		}
+	}
+
+	private bool TryOpenCachedPage(bool mask, out ITextureCacheSource cached)
+	{
+		string text = CacheKey(mask);
+		if (text != null)
+		{
+			return GpuTextureService.TryOpenKeyedTextureCache(text, out cached);
+		}
+		cached = null;
+		return false;
+	}
+
+	private void NameAtlasTextures()
+	{
+		colorTexture.name = "TextureAtlas_" + groupKey.ToString() + "_" + colorTexture.GetInstanceID();
+		if (maskTexture != null)
+		{
+			maskTexture.name = "Mask_" + colorTexture.name;
+		}
+	}
+
+	private UnityEngine.Texture2D CreatePage(int width, int height, int mipCount, string name)
+	{
+		UnityEngine.Texture2D texture2D = new UnityEngine.Texture2D(width, height, GraphicsFormat.R8G8B8A8_SRGB, mipCount, TextureCreationFlags.DontInitializePixels | TextureCreationFlags.MipChain);
+		texture2D.CoreTexture.MemoryCategory = GpuMemoryCategory.Atlas;
+		texture2D.name = name;
+		ApplyAtlasTextureSamplingSettings(texture2D);
+		return texture2D;
+	}
+
+	private string TryGetCacheKey(bool mask)
+	{
+		UnityEngine.Texture2D texture2D = (mask ? maskTexture : colorTexture);
+		if (texture2D == null || tiles.Count != textures.Count)
+		{
+			return null;
+		}
+		using MemoryStream memoryStream = new MemoryStream();
+		using BinaryWriter binaryWriter = new BinaryWriter(memoryStream);
+		binaryWriter.Write(1);
+		binaryWriter.Write(typeof(StaticTextureAtlas).Assembly.ManifestModule.ModuleVersionId.ToByteArray());
+		binaryWriter.Write(typeof(UnityEngine.Texture2D).Assembly.ManifestModule.ModuleVersionId.ToByteArray());
+		binaryWriter.Write(typeof(GpuTextureService).Assembly.ManifestModule.ModuleVersionId.ToByteArray());
+		binaryWriter.Write(TextureCompressionSettings.CacheTag);
+		binaryWriter.Write(TextureCompressionSettings.Quality);
+		binaryWriter.Write(groupKey.ToString());
+		binaryWriter.Write(mask);
+		binaryWriter.Write(texture2D.width);
+		binaryWriter.Write(texture2D.height);
+		binaryWriter.Write(texture2D.mipmapCount);
+		binaryWriter.Write(8);
+		foreach (UnityEngine.Texture2D texture in textures)
+		{
+			if (!TryWriteSourceStamp(binaryWriter, texture))
+			{
+				return null;
+			}
+			if (mask && (!masks.TryGetValue(texture, out var value) || !TryWriteSourceStamp(binaryWriter, value)))
+			{
+				return null;
+			}
+			if (!tiles.TryGetValue(texture, out var value2))
+			{
+				return null;
+			}
+			binaryWriter.Write(value2.uvRect.x);
+			binaryWriter.Write(value2.uvRect.y);
+			binaryWriter.Write(value2.uvRect.width);
+			binaryWriter.Write(value2.uvRect.height);
+		}
+		binaryWriter.Flush();
+		return Convert.ToHexString(SHA256.HashData(memoryStream.ToArray()));
+	}
+
+	private static bool TryWriteSourceStamp(BinaryWriter writer, UnityEngine.Texture2D texture)
+	{
+		string text = texture?.CoreTexture?.SourcePath;
+		if (text == null)
+		{
+			return false;
+		}
+		writer.Write(text);
+		if (ContentPack.TryGetTextureContentHash(text, out string hash))
+		{
+			writer.Write(hash);
+			return true;
+		}
+		FileInfo fileInfo = new FileInfo(text);
+		if (!fileInfo.Exists)
+		{
+			return false;
+		}
+		writer.Write(fileInfo.Length);
+		writer.Write(fileInfo.LastWriteTimeUtc.Ticks);
+		return true;
+	}
+
+	public void EvictSourceTextures()
+	{
+		foreach (UnityEngine.Texture2D texture in textures)
+		{
+			texture?.EvictGpuResource();
+		}
+		foreach (UnityEngine.Texture2D value in masks.Values)
+		{
+			value?.EvictGpuResource();
+		}
+	}
+
+	private void BuildMeshesForUvs(Rect[] uvRects)
+	{
+		for (int i = 0; i < textures.Count; i++)
+		{
+			Mesh mesh = TextureAtlasHelper.CreateMeshForUV(uvRects[i], 0.5f);
+			mesh.name = "TextureAtlasMesh_" + groupKey.ToString() + "_" + mesh.GetInstanceID();
+			tiles.Add(textures[i], new StaticTextureAtlasTile
+			{
+				atlas = this,
+				mesh = mesh,
+				uvRect = uvRects[i]
+			});
+		}
+	}
+
+	private Rect[] CalcRectsForAtlasNew(int divisor = 1)
+	{
+		using (new DeepProfilerScope("StaticTextureAtlas.CalcRectsForAtlasNew()"))
+		{
+			List<UnityEngine.Texture2D> list = textures.OrderByDescending((UnityEngine.Texture2D t) => t.height).ToList();
+			int a = Mathf.NextPowerOfTwo((int)((float)Mathf.CeilToInt(Mathf.Sqrt(list.Sum((UnityEngine.Texture2D t) => (t.width + 8) * (t.height + 8)))) * 1.05f));
+			a = Mathf.Min(a, MaxAtlasSize);
+			List<UnityEngine.Vector2> list2 = list.Select((UnityEngine.Texture2D t) => new UnityEngine.Vector2(Mathf.RoundToInt((float)t.width / (float)divisor), Mathf.RoundToInt((float)t.height / (float)divisor))).ToList();
+			int num = 0;
+			int num2 = 0;
+			int num3 = 0;
+			Rect[] array = new Rect[list.Count];
+			for (int i = 0; i < list.Count; i++)
+			{
+				UnityEngine.Vector2 vector = list2[i];
+				if ((float)num + vector.x > (float)a)
+				{
+					num = 0;
+					num2 += num3 + 8;
+					num3 = 0;
+				}
+				array[i] = new Rect(num, num2, vector.x, vector.y);
+				num += Mathf.CeilToInt(vector.x) + 8;
+				if (vector.y > (float)num3)
+				{
+					num3 = Mathf.CeilToInt(vector.y);
+				}
+			}
+			int num4 = num2 + num3;
+			int num5 = Mathf.NextPowerOfTwo(num4);
+			if (num4 > MaxAtlasSize || (long)a * (long)num5 > MaxPagePixels)
+			{
+				if (divisor < 4)
+				{
+					Log.Warning($"StaticTextureAtlas: Textures pack to {a}x{num4}, over the page limit of {MaxPagePixels} pixels (max axis {MaxAtlasSize}). Retrying with divisor of {divisor * 2}.");
+					return CalcRectsForAtlasNew(divisor * 2);
+				}
+				return CalcRectsForAtlas();
+			}
+			Rect[] array2 = new Rect[list.Count];
+			for (int j = 0; j < textures.Count; j++)
+			{
+				UnityEngine.Texture2D texture2D = textures[j];
+				int num6 = list.IndexOf(texture2D);
+				if (num6 < 0)
+				{
+					Log.Error("Texture " + texture2D.name + " not found in height sorted list, cannot calculate UV rect.");
+					continue;
+				}
+				Rect rect = array[num6];
+				array2[j] = new Rect(rect.x / (float)a, rect.y / (float)num5, rect.width / (float)a, rect.height / (float)num5);
+			}
+			UnityEngine.Texture2D obj = colorTexture;
+			int mipCount = Mathf.FloorToInt(Mathf.Log((float)Mathf.Min(a, num5) / 512f, 2f)) + 1;
+			colorTexture = CreatePage(a, num5, mipCount, "TextureAtlas_Working");
+			UnityEngine.Object.DestroyImmediate(obj);
+			return array2;
+		}
+	}
+
+	private Rect[] CalcRectsForAtlas()
+	{
+		UnityEngine.Texture2D[] array;
+		using (new DeepProfilerScope("Create dummy textures for atlas packing"))
+		{
+			array = textures.Select(delegate(UnityEngine.Texture2D t)
 			{
 				int width = t.width;
 				int height = t.height;
 				bool flag = width % 4 == 0 && height % 4 == 0;
-				return new Texture2D(width, height, flag ? TextureFormat.DXT1 : TextureFormat.Alpha8, 1, false, true)
+				return new UnityEngine.Texture2D(width, height, (!flag) ? TextureFormat.Alpha8 : TextureFormat.DXT1, 1, linear: false, createUninitialized: true)
 				{
 					name = t.name + "_DummyForAtlas",
 					filterMode = t.filterMode,
@@ -190,302 +383,212 @@ namespace Verse
 					mipMapBias = t.mipMapBias,
 					minimumMipmapLevel = t.minimumMipmapLevel
 				};
-			}).ToArray<Texture2D>();
-			DeepProfiler.End();
-			DeepProfiler.Start("PackTextures() with dummy textures");
-			Rect[] result = this.colorTexture.PackTextures(array, 8, StaticTextureAtlas.MaxAtlasSize, false);
-			Texture2D texture2D = this.colorTexture;
-			Texture2D[] array2 = array;
+			}).ToArray();
+		}
+		using (new DeepProfilerScope("PackTextures() with dummy textures"))
+		{
+			Rect[] result = colorTexture.PackTextures(array, 8, MaxAtlasSize, makeNoLongerReadable: false);
+			UnityEngine.Texture2D texture2D = colorTexture;
+			UnityEngine.Texture2D[] array2 = array;
 			for (int i = 0; i < array2.Length; i++)
 			{
 				UnityEngine.Object.DestroyImmediate(array2[i]);
 			}
-			int mipCount = Mathf.FloorToInt(Mathf.Log((float)Mathf.Max(texture2D.width, texture2D.height) / 512f, 2f)) + 1;
-			this.colorTexture = new Texture2D(texture2D.width, texture2D.height, GraphicsFormat.R8G8B8A8_SRGB, mipCount, TextureCreationFlags.MipChain | TextureCreationFlags.DontInitializePixels);
+			int mipCount = Mathf.FloorToInt(Mathf.Log((float)Mathf.Min(texture2D.width, texture2D.height) / 512f, 2f)) + 1;
+			colorTexture = CreatePage(texture2D.width, texture2D.height, mipCount, "TextureAtlas_Working");
 			UnityEngine.Object.DestroyImmediate(texture2D);
-			DeepProfiler.End();
 			return result;
 		}
+	}
 
-		// Token: 0x06003444 RID: 13380 RVA: 0x00112814 File Offset: 0x00110A14
-		private void BlitTexturesToColorAtlas(Rect[] uvRects, bool noGpuCompressionSupport)
+	private void BlitTexturesToColorAtlas(Rect[] uvRects)
+	{
+		UnityEngine.RenderTexture renderTexture = new UnityEngine.RenderTexture(colorTexture.width, colorTexture.height, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear)
 		{
-			RenderTexture renderTexture = new RenderTexture(this.colorTexture.width, this.colorTexture.height, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear)
-			{
-				name = "StaticTextureAtlas_Bake_Temp"
-			};
-			renderTexture.Create();
-			RenderTexture active = RenderTexture.active;
-			Graphics.SetRenderTarget(renderTexture);
-			GL.Clear(true, true, Color.clear);
-			GL.PushMatrix();
-			GL.LoadPixelMatrix(0f, (float)renderTexture.width, (float)renderTexture.height, 0f);
-			DeepProfiler.Start("Render real textures to RT");
-			Material material = new Material(Shader.Find("Custom/BlitExact"));
+			name = "StaticTextureAtlas_Bake_Temp"
+		};
+		renderTexture.Create();
+		UnityEngine.RenderTexture active = UnityEngine.RenderTexture.active;
+		UnityEngine.Graphics.SetRenderTarget(renderTexture);
+		GL.Clear(clearDepth: true, clearColor: true, Color.clear);
+		GL.PushMatrix();
+		GL.LoadPixelMatrix(0f, renderTexture.width, renderTexture.height, 0f);
+		using (new DeepProfilerScope("Render real textures to RT"))
+		{
+			UnityEngine.Material material = MaterialAllocator.Create(UnityEngine.Shader.Find("Custom/BlitExact"));
+			material.name = "StaticTextureAtlas.BlitTexturesToColorAtlas.Blit";
 			try
 			{
-				for (int i = 0; i < this.textures.Count; i++)
+				for (int i = 0; i < textures.Count; i++)
 				{
 					Rect rect = uvRects[i];
-					Texture2D texture2D = this.textures[i];
-					float num = (float)Mathf.RoundToInt(rect.x * (float)this.colorTexture.width);
-					int num2 = Mathf.RoundToInt((1f - rect.y) * (float)this.colorTexture.height);
-					num2 -= texture2D.height;
-					int num3 = Mathf.RoundToInt(rect.width * (float)this.colorTexture.width);
-					int num4 = Mathf.RoundToInt(rect.height * (float)this.colorTexture.height);
-					Graphics.DrawTexture(new Rect(num, (float)num2, (float)num3, (float)num4), texture2D, new Rect(0f, 0f, 1f, 1f), 0, 0, 0, 0, material, -1);
+					UnityEngine.Texture2D texture = textures[i];
+					int num = Mathf.RoundToInt(rect.x * (float)colorTexture.width);
+					int num2 = Mathf.RoundToInt((1f - rect.y) * (float)colorTexture.height);
+					int num3 = Mathf.RoundToInt(rect.width * (float)colorTexture.width);
+					int num4 = Mathf.RoundToInt(rect.height * (float)colorTexture.height);
+					num2 -= num4;
+					UnityEngine.Graphics.DrawTexture(new Rect(num, num2, num3, num4), texture, new Rect(0f, 0f, 1f, 1f), 0, 0, 0, 0, material, -1);
 				}
 			}
 			finally
 			{
-				UnityEngine.Object.Destroy(material);
+				MaterialAllocator.Destroy(material);
 			}
-			GL.PopMatrix();
-			DeepProfiler.End();
-			if (noGpuCompressionSupport)
-			{
-				DeepProfiler.Start("GPU Readback from RenderTexture to Texture2D");
-				RenderTexture.active = renderTexture;
-				this.colorTexture.ReadPixels(new Rect(0f, 0f, (float)this.colorTexture.width, (float)this.colorTexture.height), 0, 0, false);
-				DeepProfiler.End();
-				DeepProfiler.Start("colorTexture.Apply() to generate mipmaps");
-				this.colorTexture.Apply(true, false);
-				DeepProfiler.End();
-			}
-			else
-			{
-				DeepProfiler.Start("CopyTexture from RenderTexture to Texture2D");
-				Graphics.CopyTexture(renderTexture, 0, 0, 0, 0, this.colorTexture.width, this.colorTexture.height, this.colorTexture, 0, 0, 0, 0);
-				DeepProfiler.End();
-				DeepProfiler.Start("Generate mipmaps with compute shader");
-				this.GenerateMipmapsWithCompute(this.colorTexture);
-				DeepProfiler.End();
-			}
-			RenderTexture.active = active;
-			renderTexture.Release();
-			UnityEngine.Object.DestroyImmediate(renderTexture);
-			this.colorTexture.name = "TextureAtlas_" + this.groupKey.ToString() + "_" + this.colorTexture.GetInstanceID().ToString();
 		}
-
-		// Token: 0x06003445 RID: 13381 RVA: 0x00112AC4 File Offset: 0x00110CC4
-		private void BuildMaskAtlas(Rect[] uvRects, bool noGpuCompressionSupport)
+		GL.PopMatrix();
+		using (new DeepProfilerScope("CopyTexture from RenderTexture to Texture2D"))
 		{
-			this.maskTexture = new Texture2D(this.colorTexture.width, this.colorTexture.height, TextureFormat.ARGB32, false);
-			RenderTexture renderTexture = new RenderTexture(this.maskTexture.width, this.maskTexture.height, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear)
-			{
-				name = "StaticTextureAtlas_MaskBake_Temp"
-			};
-			renderTexture.Create();
-			RenderTexture active = RenderTexture.active;
-			Graphics.SetRenderTarget(renderTexture);
-			GL.Clear(true, true, Color.clear);
-			GL.PushMatrix();
-			GL.LoadPixelMatrix(0f, (float)renderTexture.width, (float)renderTexture.height, 0f);
-			DeepProfiler.Start("Render mask textures to RT");
-			Material material = new Material(Shader.Find("Custom/BlitExact"));
+			UnityEngine.Graphics.CopyTexture(renderTexture, 0, 0, 0, 0, colorTexture.width, colorTexture.height, colorTexture, 0, 0, 0, 0);
+		}
+		UnityEngine.RenderTexture.active = active;
+		using (new DeepProfilerScope("Generate mipmaps"))
+		{
+			GenTexture.GenerateMipmaps(colorTexture, 512, preserveAlphaCoverage: false, 0.25f);
+		}
+		renderTexture.Release();
+		UnityEngine.Object.DestroyImmediate(renderTexture);
+		colorTexture.name = "TextureAtlas_" + groupKey.ToString() + "_" + colorTexture.GetInstanceID();
+	}
+
+	private void CreateMaskTexture()
+	{
+		if (maskTexture != null)
+		{
+			UnityEngine.Object.DestroyImmediate(maskTexture);
+		}
+		maskTexture = CreatePage(colorTexture.width, colorTexture.height, colorTexture.mipmapCount, "TextureAtlasMask_Working");
+	}
+
+	private void BlitMaskAtlas(Rect[] uvRects)
+	{
+		UnityEngine.RenderTexture renderTexture = new UnityEngine.RenderTexture(maskTexture.width, maskTexture.height, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear)
+		{
+			name = "StaticTextureAtlas_MaskBake_Temp"
+		};
+		renderTexture.Create();
+		UnityEngine.RenderTexture active = UnityEngine.RenderTexture.active;
+		UnityEngine.Graphics.SetRenderTarget(renderTexture);
+		GL.Clear(clearDepth: true, clearColor: true, Color.clear);
+		GL.PushMatrix();
+		GL.LoadPixelMatrix(0f, renderTexture.width, renderTexture.height, 0f);
+		using (new DeepProfilerScope("Render mask textures to RT"))
+		{
+			UnityEngine.Material material = MaterialAllocator.Create(UnityEngine.Shader.Find("Custom/BlitExact"));
+			material.name = "StaticTextureAtlas.BuildMaskAtlas.Blit";
 			try
 			{
-				for (int i = 0; i < this.textures.Count; i++)
+				for (int i = 0; i < textures.Count; i++)
 				{
-					Texture2D key = this.textures[i];
-					Texture2D texture2D;
-					if (this.masks.TryGetValue(key, out texture2D))
+					UnityEngine.Texture2D key = textures[i];
+					if (masks.TryGetValue(key, out var value))
 					{
 						Rect rect = uvRects[i];
-						float num = (float)Mathf.RoundToInt(rect.x * (float)this.maskTexture.width);
-						int num2 = Mathf.RoundToInt((1f - rect.y) * (float)this.maskTexture.height);
-						num2 -= texture2D.height;
-						int num3 = Mathf.RoundToInt(rect.width * (float)this.maskTexture.width);
-						int num4 = Mathf.RoundToInt(rect.height * (float)this.maskTexture.height);
-						Graphics.DrawTexture(new Rect(num, (float)num2, (float)num3, (float)num4), texture2D, new Rect(0f, 0f, 1f, 1f), 0, 0, 0, 0, material, -1);
+						int num = Mathf.RoundToInt(rect.x * (float)maskTexture.width);
+						int num2 = Mathf.RoundToInt((1f - rect.y) * (float)maskTexture.height);
+						int num3 = Mathf.RoundToInt(rect.width * (float)maskTexture.width);
+						int num4 = Mathf.RoundToInt(rect.height * (float)maskTexture.height);
+						num2 -= num4;
+						UnityEngine.Graphics.DrawTexture(new Rect(num, num2, num3, num4), value, new Rect(0f, 0f, 1f, 1f), 0, 0, 0, 0, material, -1);
 					}
 				}
 			}
 			finally
 			{
-				UnityEngine.Object.Destroy(material);
+				MaterialAllocator.Destroy(material);
 			}
-			GL.PopMatrix();
-			DeepProfiler.End();
-			if (noGpuCompressionSupport)
-			{
-				DeepProfiler.Start("GPU Readback from RenderTexture to mask Texture2D");
-				RenderTexture.active = renderTexture;
-				this.maskTexture.ReadPixels(new Rect(0f, 0f, (float)this.maskTexture.width, (float)this.maskTexture.height), 0, 0, false);
-				DeepProfiler.End();
-				DeepProfiler.Start("maskTexture.Apply()");
-				this.maskTexture.Apply(true, false);
-				DeepProfiler.End();
-			}
-			else
-			{
-				DeepProfiler.Start("CopyTexture from RenderTexture to mask Texture2D");
-				Graphics.CopyTexture(renderTexture, 0, 0, 0, 0, this.maskTexture.width, this.maskTexture.height, this.maskTexture, 0, 0, 0, 0);
-				DeepProfiler.End();
-			}
-			RenderTexture.active = active;
-			renderTexture.Release();
-			UnityEngine.Object.DestroyImmediate(renderTexture);
-			this.maskTexture.name = "Mask_" + this.colorTexture.name;
 		}
-
-		// Token: 0x06003446 RID: 13382 RVA: 0x00112D6C File Offset: 0x00110F6C
-		public bool TryGetTile(Texture texture, out StaticTextureAtlasTile tile)
+		GL.PopMatrix();
+		using (new DeepProfilerScope("CopyTexture from RenderTexture to mask Texture2D"))
 		{
-			return this.tiles.TryGetValue(texture, out tile);
+			UnityEngine.Graphics.CopyTexture(renderTexture, 0, 0, 0, 0, maskTexture.width, maskTexture.height, maskTexture, 0, 0, 0, 0);
 		}
-
-		// Token: 0x06003447 RID: 13383 RVA: 0x00112D7C File Offset: 0x00110F7C
-		private void GenerateMipmapsWithCompute(Texture2D baseTexture)
+		UnityEngine.RenderTexture.active = active;
+		using (new DeepProfilerScope("Generate mipmaps for mask texture"))
 		{
-			ComputeShader computeShader = Resources.Load<ComputeShader>("Materials/Misc/Mipmapper");
-			int kernelIndex = computeShader.FindKernel("GenerateMip");
-			int num = Mathf.FloorToInt(Mathf.Log((float)Mathf.Max(baseTexture.width, baseTexture.height) / 512f, 2f));
-			if (num < 1)
+			GenTexture.GenerateMipmaps(maskTexture, 512);
+		}
+		renderTexture.Release();
+		UnityEngine.Object.DestroyImmediate(renderTexture);
+		maskTexture.name = "Mask_" + colorTexture.name;
+	}
+
+	public bool TryGetTile(UnityEngine.Texture texture, out StaticTextureAtlasTile tile)
+	{
+		return tiles.TryGetValue(texture, out tile);
+	}
+
+	private void ApplyAtlasTextureSamplingSettings(UnityEngine.Texture2D texture)
+	{
+		if (texture == null)
+		{
+			return;
+		}
+		UnityEngine.FilterMode filterMode = UnityEngine.FilterMode.Bilinear;
+		int num = 1;
+		float num2 = 0f;
+		for (int i = 0; i < textures.Count; i++)
+		{
+			UnityEngine.Texture2D texture2D = textures[i];
+			if (!(texture2D == null))
 			{
-				return;
-			}
-			RenderTexture active = RenderTexture.active;
-			RenderTexture renderTexture = new RenderTexture(baseTexture.width, baseTexture.height, 0, RenderTextureFormat.ARGB32);
-			renderTexture.Create();
-			Material material = new Material(Shader.Find("Custom/BlitExact"));
-			Graphics.Blit(baseTexture, renderTexture, material);
-			UnityEngine.Object.Destroy(material);
-			RenderTexture[] array = new RenderTexture[num];
-			RenderTexture renderTexture2 = renderTexture;
-			for (int i = 0; i < num; i++)
-			{
-				int num2 = Mathf.Max(1, renderTexture2.width / 2);
-				int num3 = Mathf.Max(1, renderTexture2.height / 2);
-				array[i] = new RenderTexture(num2, num3, 0, RenderTextureFormat.ARGB32)
+				if (texture2D.filterMode == UnityEngine.FilterMode.Trilinear)
 				{
-					enableRandomWrite = true,
-					name = string.Format("GenerateMipmapsWithCompute_Mip{0}", i + 1)
-				};
-				array[i].Create();
-				computeShader.SetTexture(kernelIndex, "InputTexture", renderTexture2);
-				computeShader.SetTexture(kernelIndex, "OutputMip", array[i]);
-				computeShader.SetInts("InputSize", new int[]
+					filterMode = UnityEngine.FilterMode.Trilinear;
+				}
+				else if (texture2D.filterMode == UnityEngine.FilterMode.Point && filterMode == UnityEngine.FilterMode.Bilinear)
 				{
-					renderTexture2.width,
-					renderTexture2.height
-				});
-				computeShader.SetInts("OutputSize", new int[]
-				{
-					num2,
-					num3
-				});
-				computeShader.Dispatch(kernelIndex, Mathf.CeilToInt((float)num2 / 8f), Mathf.CeilToInt((float)num3 / 8f), 1);
-				renderTexture2 = array[i];
+					filterMode = UnityEngine.FilterMode.Point;
+				}
+				num = Math.Max(num, texture2D.anisoLevel);
+				num2 = Math.Min(num2, texture2D.mipMapBias);
 			}
-			for (int j = 0; j < num; j++)
-			{
-				Graphics.CopyTexture(array[j], 0, 0, baseTexture, 0, j + 1);
-				array[j].Release();
-				UnityEngine.Object.DestroyImmediate(array[j]);
-			}
-			RenderTexture.active = active;
-			renderTexture.Release();
-			UnityEngine.Object.DestroyImmediate(renderTexture);
 		}
+		texture.filterMode = filterMode;
+		texture.wrapMode = UnityEngine.TextureWrapMode.Clamp;
+		texture.anisoLevel = Math.Max(2, num);
+		texture.mipMapBias = num2;
+		texture.minimumMipmapLevel = 0;
+	}
 
-		// Token: 0x06003448 RID: 13384 RVA: 0x00112F68 File Offset: 0x00111168
-		public static Texture2D FastCompressDXT(Texture2D texture, bool deleteOriginal = false)
+	public static UnityEngine.Texture2D FastCompressDXT(UnityEngine.Texture2D texture, bool deleteOriginal = false)
+	{
+		if (Mathf.Min(texture.width, texture.height) <= 16)
 		{
-			int num = Mathf.Min(texture.width, texture.height);
-			if (num <= 16)
-			{
-				return texture;
-			}
-			ComputeShader computeShader = Resources.Load<ComputeShader>("Materials/Misc/EncodeBCn");
-			int kernelIndex = computeShader.FindKernel("EncodeBC3_AMD");
-			int num2 = Mathf.FloorToInt(Mathf.Log((float)num / 16f, 2f)) + 1;
-			num2 = Math.Min(num2, StaticTextureAtlas.CalculateMaxMipmapsForDxtSupport(texture));
-			num2 = Mathf.Min(num2, texture.mipmapCount);
-			num2 = Mathf.Max(num2, 1);
-			Texture2D texture2D = new Texture2D(texture.width, texture.height, GraphicsFormat.RGBA_DXT5_UNorm, num2, TextureCreationFlags.DontInitializePixels | TextureCreationFlags.DontUploadUponCreate);
-			texture2D.Apply(false, true);
-			computeShader.SetFloat("_Quality", 0.9f);
-			for (int i = 0; i < num2; i++)
-			{
-				int num3 = Mathf.Max(1, texture.width >> i);
-				int num4 = Mathf.Max(1, texture.height >> i);
-				RenderTexture renderTexture = new RenderTexture(num3 / 4, num4 / 4, 24)
-				{
-					graphicsFormat = GraphicsFormat.R32G32B32A32_SInt,
-					enableRandomWrite = true,
-					name = string.Format("FastCompressDXT_OutputRT_Mip{0}", i)
-				};
-				renderTexture.Create();
-				computeShader.SetTexture(kernelIndex, "_Target", renderTexture);
-				computeShader.SetTexture(kernelIndex, "_Source", texture, i);
-				computeShader.SetInt("_mipLevel", i);
-				computeShader.Dispatch(kernelIndex, num3 / 8, num4 / 8, 1);
-				Graphics.CopyTexture(renderTexture, 0, 0, 0, 0, renderTexture.width, renderTexture.height, texture2D, 0, i, 0, 0);
-				renderTexture.Release();
-				UnityEngine.Object.DestroyImmediate(renderTexture);
-			}
-			if (deleteOriginal)
-			{
-				UnityEngine.Object.DestroyImmediate(texture);
-			}
-			return texture2D;
+			return texture;
 		}
+		texture.Compress(_: true);
+		return texture;
+	}
 
-		// Token: 0x06003449 RID: 13385 RVA: 0x00113108 File Offset: 0x00111308
-		public void Destroy()
+	public void Destroy()
+	{
+		UnityEngine.Object.Destroy(colorTexture);
+		UnityEngine.Object.Destroy(maskTexture);
+		foreach (KeyValuePair<UnityEngine.Texture, StaticTextureAtlasTile> tile in tiles)
 		{
-			UnityEngine.Object.Destroy(this.colorTexture);
-			UnityEngine.Object.Destroy(this.maskTexture);
-			foreach (KeyValuePair<Texture, StaticTextureAtlasTile> keyValuePair in this.tiles)
-			{
-				UnityEngine.Object.Destroy(keyValuePair.Value.mesh);
-			}
-			this.textures.Clear();
-			this.tiles.Clear();
+			UnityEngine.Object.Destroy(tile.Value.mesh);
 		}
+		textures.Clear();
+		masks.Clear();
+		tiles.Clear();
+	}
 
-		// Token: 0x0600344A RID: 13386 RVA: 0x00113194 File Offset: 0x00111394
-		public static int CalculateMaxMipmapsForDxtSupport(Texture2D tex)
+	public static int CalculateMaxMipmapsForDxtSupport(UnityEngine.Texture2D tex)
+	{
+		int num = 0;
+		int num2 = tex.width;
+		int num3 = tex.height;
+		while (num2 >= 4 && num3 >= 4 && num2 % 4 == 0 && num3 % 4 == 0)
 		{
-			int num = 0;
-			int num2 = tex.width;
-			int num3 = tex.height;
-			while (num2 >= 4 && num3 >= 4 && num2 % 4 == 0 && num3 % 4 == 0)
-			{
-				num++;
-				num2 >>= 1;
-				num3 >>= 1;
-			}
-			if (num == 0)
-			{
-				num = 1;
-			}
-			return num;
+			num++;
+			num2 >>= 1;
+			num3 >>= 1;
 		}
-
-		// Token: 0x0400276E RID: 10094
-		public readonly TextureAtlasGroupKey groupKey;
-
-		// Token: 0x0400276F RID: 10095
-		private List<Texture2D> textures = new List<Texture2D>();
-
-		// Token: 0x04002770 RID: 10096
-		private Dictionary<Texture2D, Texture2D> masks = new Dictionary<Texture2D, Texture2D>();
-
-		// Token: 0x04002771 RID: 10097
-		private Dictionary<Texture, StaticTextureAtlasTile> tiles = new Dictionary<Texture, StaticTextureAtlasTile>();
-
-		// Token: 0x04002772 RID: 10098
-		private Texture2D colorTexture;
-
-		// Token: 0x04002773 RID: 10099
-		private Texture2D maskTexture;
-
-		// Token: 0x04002774 RID: 10100
-		public const int MaxTextureSizeForTiles = 512;
-
-		// Token: 0x04002775 RID: 10101
-		public const int TexturePadding = 8;
+		if (num == 0)
+		{
+			num = 1;
+		}
+		return num;
 	}
 }

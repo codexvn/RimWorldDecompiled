@@ -1,128 +1,210 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompSendSignalOnCountdown : ThingComp, IThingGlower
 {
-	// Token: 0x02002DFB RID: 11771
-	public class CompSendSignalOnCountdown : ThingComp, IThingGlower
+	[CompilerGenerated]
+	private sealed class _003CCompGetGizmosExtra_003Ed__7 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x17002A57 RID: 10839
-		// (get) Token: 0x06010906 RID: 67846 RVA: 0x004C660F File Offset: 0x004C480F
-		private CompProperties_SendSignalOnCountdown Props
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompSendSignalOnCountdown _003C_003E4__this;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (CompProperties_SendSignalOnCountdown)this.props;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06010907 RID: 67847 RVA: 0x004C661C File Offset: 0x004C481C
-		public bool ShouldBeLitNow()
+		object IEnumerator.Current
 		{
-			return this.ticksLeft > 0;
-		}
-
-		// Token: 0x06010908 RID: 67848 RVA: 0x004C6627 File Offset: 0x004C4827
-		public override void Initialize(CompProperties props)
-		{
-			base.Initialize(props);
-			this.signalTag = this.Props.signalTag;
-			this.ticksLeft = Mathf.CeilToInt(Rand.ByCurve(this.Props.countdownCurveTicks));
-		}
-
-		// Token: 0x06010909 RID: 67849 RVA: 0x004C665C File Offset: 0x004C485C
-		public override IEnumerable<Gizmo> CompGetGizmosExtra()
-		{
-			if (!Prefs.DevMode || !DebugSettings.godMode)
+			[DebuggerHidden]
+			get
 			{
-				yield break;
+				return _003C_003E2__current;
 			}
-			yield return new Command_Action
+		}
+
+		[DebuggerHidden]
+		public _003CCompGetGizmosExtra_003Ed__7(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			CompSendSignalOnCountdown CS_0024_003C_003E8__locals5 = _003C_003E4__this;
+			switch (num)
 			{
-				defaultLabel = "DEV: Activate",
-				action = delegate()
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (!Prefs.DevMode || !DebugSettings.godMode)
 				{
-					Find.SignalManager.SendSignal(new Signal(this.signalTag, this.parent.Named("SUBJECT")));
-					SoundDefOf.MechanoidsWakeUp.PlayOneShot(new TargetInfo(this.parent.Position, this.parent.Map, false));
-					this.ticksLeft = 0;
+					return false;
 				}
-			};
-			yield break;
-		}
-
-		// Token: 0x0601090A RID: 67850 RVA: 0x004C666C File Offset: 0x004C486C
-		public override void CompTick()
-		{
-			if (this.parent.IsHashIntervalTick(250))
-			{
-				this.TickRareWorker();
+				_003C_003E2__current = new Command_Action
+				{
+					defaultLabel = "DEV: Activate",
+					action = delegate
+					{
+						Find.SignalManager.SendSignal(new Signal(CS_0024_003C_003E8__locals5.signalTag, CS_0024_003C_003E8__locals5.parent.Named("SUBJECT")));
+						SoundDefOf.MechanoidsWakeUp.PlayOneShot(new TargetInfo(CS_0024_003C_003E8__locals5.parent.Position, CS_0024_003C_003E8__locals5.parent.Map));
+						CS_0024_003C_003E8__locals5.ticksLeft = 0;
+					}
+				};
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				return false;
 			}
 		}
 
-		// Token: 0x0601090B RID: 67851 RVA: 0x004C6686 File Offset: 0x004C4886
-		public override void CompTickRare()
+		bool IEnumerator.MoveNext()
 		{
-			base.CompTickRare();
-			this.TickRareWorker();
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0601090C RID: 67852 RVA: 0x004C6694 File Offset: 0x004C4894
-		public void TickRareWorker()
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			if (this.ticksLeft <= 0 || !this.parent.Spawned)
-			{
-				return;
-			}
-			this.ticksLeft -= 250;
-			if (this.ticksLeft <= 0)
-			{
-				Find.SignalManager.SendSignal(new Signal(this.signalTag, this.parent.Named("SUBJECT")));
-				SoundDefOf.MechanoidsWakeUp.PlayOneShot(new TargetInfo(this.parent.Position, this.parent.Map, false));
-			}
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x0601090D RID: 67853 RVA: 0x004C6724 File Offset: 0x004C4924
-		public override string CompInspectStringExtra()
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
 		{
-			if (!this.parent.Spawned)
+			_003CCompGetGizmosExtra_003Ed__7 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				return null;
+				_003C_003E1__state = 0;
+				result = this;
 			}
-			if (this.ticksLeft <= 0)
+			else
 			{
-				return "expired".Translate().CapitalizeFirst();
+				result = new _003CCompGetGizmosExtra_003Ed__7(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
-			return "SendSignalOnCountdownCompTime".Translate(this.ticksLeft.ToStringTicksToPeriod(true, false, true, true, false)).Resolve();
+			return result;
 		}
 
-		// Token: 0x0601090E RID: 67854 RVA: 0x004C6788 File Offset: 0x004C4988
-		public override void Notify_SignalReceived(Signal signal)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			Thing thing;
-			if (signal.tag == "CompCanBeDormant.WakeUp" && signal.args.TryGetArg<Thing>("SUBJECT", out thing) && thing != this.parent && thing != null && thing.Map == this.parent.Map && this.parent.Position.DistanceTo(thing.Position) <= 40f)
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	public string signalTag;
+
+	public int ticksLeft;
+
+	private const float MaxDistActivationByOther = 40f;
+
+	private CompProperties_SendSignalOnCountdown Props => (CompProperties_SendSignalOnCountdown)props;
+
+	public bool ShouldBeLitNow()
+	{
+		return ticksLeft > 0;
+	}
+
+	public override void Initialize(CompProperties props)
+	{
+		base.Initialize(props);
+		signalTag = Props.signalTag;
+		ticksLeft = Mathf.CeilToInt(Rand.ByCurve(Props.countdownCurveTicks));
+	}
+
+	[IteratorStateMachine(typeof(_003CCompGetGizmosExtra_003Ed__7))]
+	public override IEnumerable<Gizmo> CompGetGizmosExtra()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CCompGetGizmosExtra_003Ed__7(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override void CompTick()
+	{
+		if (parent.IsHashIntervalTick(250))
+		{
+			TickRareWorker();
+		}
+	}
+
+	public override void CompTickRare()
+	{
+		base.CompTickRare();
+		TickRareWorker();
+	}
+
+	public void TickRareWorker()
+	{
+		if (ticksLeft > 0 && parent.Spawned)
+		{
+			ticksLeft -= 250;
+			if (ticksLeft <= 0)
 			{
-				this.ticksLeft = 0;
+				Find.SignalManager.SendSignal(new Signal(signalTag, parent.Named("SUBJECT")));
+				SoundDefOf.MechanoidsWakeUp.PlayOneShot(new TargetInfo(parent.Position, parent.Map));
 			}
 		}
+	}
 
-		// Token: 0x0601090F RID: 67855 RVA: 0x004C67FF File Offset: 0x004C49FF
-		public override void PostExposeData()
+	public override string CompInspectStringExtra()
+	{
+		if (!parent.Spawned)
 		{
-			base.PostExposeData();
-			Scribe_Values.Look<int>(ref this.ticksLeft, "ticksLeft", 0, false);
-			Scribe_Values.Look<string>(ref this.signalTag, "signalTag", null, false);
+			return null;
 		}
+		if (ticksLeft <= 0)
+		{
+			return "expired".Translate().CapitalizeFirst();
+		}
+		return "SendSignalOnCountdownCompTime".Translate(ticksLeft.ToStringTicksToPeriod()).Resolve();
+	}
 
-		// Token: 0x0400ACA7 RID: 44199
-		public string signalTag;
+	public override void Notify_SignalReceived(Signal signal)
+	{
+		if (signal.tag == "CompCanBeDormant.WakeUp" && signal.args.TryGetArg("SUBJECT", out Thing arg) && arg != parent && arg != null && arg.Map == parent.Map && parent.Position.DistanceTo(arg.Position) <= 40f)
+		{
+			ticksLeft = 0;
+		}
+	}
 
-		// Token: 0x0400ACA8 RID: 44200
-		public int ticksLeft;
-
-		// Token: 0x0400ACA9 RID: 44201
-		private const float MaxDistActivationByOther = 40f;
+	public override void PostExposeData()
+	{
+		base.PostExposeData();
+		Scribe_Values.Look(ref ticksLeft, "ticksLeft", 0);
+		Scribe_Values.Look(ref signalTag, "signalTag");
 	}
 }

@@ -1,218 +1,334 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class QuestPart_BetrayalOffer : QuestPartActivable
 {
-	// Token: 0x02001BBF RID: 7103
-	public class QuestPart_BetrayalOffer : QuestPartActivable
+	[CompilerGenerated]
+	private sealed class _003Cget_QuestLookTargets_003Ed__13 : IEnumerable<GlobalTargetInfo>, IEnumerable, IEnumerator<GlobalTargetInfo>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700183F RID: 6207
-		// (get) Token: 0x06009E16 RID: 40470 RVA: 0x002DBE23 File Offset: 0x002DA023
-		public override string ExpiryInfoPart
+		private int _003C_003E1__state;
+
+		private GlobalTargetInfo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public QuestPart_BetrayalOffer _003C_003E4__this;
+
+		private IEnumerator<GlobalTargetInfo> _003C_003E7__wrap1;
+
+		private int _003Ci_003E5__3;
+
+		GlobalTargetInfo IEnumerator<GlobalTargetInfo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return "QuestBetrayalOffer".Translate(this.PawnsAliveCount, this.extraFaction.faction.Name);
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001840 RID: 6208
-		// (get) Token: 0x06009E17 RID: 40471 RVA: 0x002DBE54 File Offset: 0x002DA054
-		public override string ExpiryInfoPartTip
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return "QuestBetrayalOfferTip".Translate(this.asker.NameFullColored, this.extraFaction.faction.Name);
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001841 RID: 6209
-		// (get) Token: 0x06009E18 RID: 40472 RVA: 0x002DBE8A File Offset: 0x002DA08A
-		public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+		[DebuggerHidden]
+		public _003Cget_QuestLookTargets_003Ed__13(int _003C_003E1__state)
 		{
-			get
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				foreach (GlobalTargetInfo globalTargetInfo in base.QuestLookTargets)
+				try
 				{
-					yield return globalTargetInfo;
 				}
-				IEnumerator<GlobalTargetInfo> enumerator = null;
-				int num;
-				for (int i = 0; i < this.pawns.Count; i = num + 1)
+				finally
 				{
-					if (!this.pawns[i].Destroyed)
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				QuestPart_BetrayalOffer questPart_BetrayalOffer = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((QuestPart)questPart_BetrayalOffer).QuestLookTargets.GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0072;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0072;
+				case 2:
 					{
-						yield return this.pawns[i];
+						_003C_003E1__state = -1;
+						goto IL_00db;
 					}
-					num = i;
-				}
-				yield break;
-				yield break;
-			}
-		}
-
-		// Token: 0x17001842 RID: 6210
-		// (get) Token: 0x06009E19 RID: 40473 RVA: 0x002DBE9C File Offset: 0x002DA09C
-		private int PawnsAliveCount
-		{
-			get
-			{
-				int num = 0;
-				for (int i = 0; i < this.pawns.Count; i++)
-				{
-					if (!this.pawns[i].Destroyed)
+					IL_0072:
+					if (_003C_003E7__wrap1.MoveNext())
 					{
-						num++;
-					}
-				}
-				return num;
-			}
-		}
-
-		// Token: 0x17001843 RID: 6211
-		// (get) Token: 0x06009E1A RID: 40474 RVA: 0x002DBEDC File Offset: 0x002DA0DC
-		private bool AnyPawnDespawnedButAlive
-		{
-			get
-			{
-				for (int i = 0; i < this.pawns.Count; i++)
-				{
-					if (!this.pawns[i].SpawnedOrAnyParentSpawned && !this.pawns[i].Dead)
-					{
+						GlobalTargetInfo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
 						return true;
 					}
-				}
-				return false;
-			}
-		}
-
-		// Token: 0x17001844 RID: 6212
-		// (get) Token: 0x06009E1B RID: 40475 RVA: 0x002DBF28 File Offset: 0x002DA128
-		private bool AllSurvivingPawnsRecruited
-		{
-			get
-			{
-				foreach (Pawn pawn in this.pawns)
-				{
-					if (!pawn.Destroyed && (!pawn.Faction.IsPlayerSafe() || pawn.GetExtraFaction(this.extraFaction.factionType, this.quest) == this.extraFaction.faction))
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					_003Ci_003E5__3 = 0;
+					goto IL_00ed;
+					IL_00ed:
+					if (_003Ci_003E5__3 < questPart_BetrayalOffer.pawns.Count)
 					{
-						return false;
+						if (!questPart_BetrayalOffer.pawns[_003Ci_003E5__3].Destroyed)
+						{
+							_003C_003E2__current = questPart_BetrayalOffer.pawns[_003Ci_003E5__3];
+							_003C_003E1__state = 2;
+							return true;
+						}
+						goto IL_00db;
 					}
+					return false;
+					IL_00db:
+					_003Ci_003E5__3++;
+					goto IL_00ed;
 				}
-				return true;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x06009E1C RID: 40476 RVA: 0x002DBFB4 File Offset: 0x002DA1B4
-		protected override void Enable(SignalArgs receivedArgs)
+		bool IEnumerator.MoveNext()
 		{
-			base.Enable(receivedArgs);
-			if (!this.AnyPawnDespawnedButAlive && this.PawnsAliveCount > 0)
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				if (!this.outSignalEnabled.NullOrEmpty())
-				{
-					Find.SignalManager.SendSignal(new Signal(this.outSignalEnabled, receivedArgs, false));
-					return;
-				}
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<GlobalTargetInfo> IEnumerable<GlobalTargetInfo>.GetEnumerator()
+		{
+			_003Cget_QuestLookTargets_003Ed__13 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
 			}
 			else
 			{
-				base.Complete();
+				result = new _003Cget_QuestLookTargets_003Ed__13(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
+			return result;
 		}
 
-		// Token: 0x06009E1D RID: 40477 RVA: 0x002DC004 File Offset: 0x002DA204
-		protected override void ProcessQuestSignal(Signal signal)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			base.ProcessQuestSignal(signal);
-			if (this.inSignals.Contains(signal.tag))
-			{
-				if (this.AnyPawnDespawnedButAlive)
-				{
-					Find.SignalManager.SendSignal(new Signal(this.outSignalFailure, signal.args, false));
-					base.Complete();
-					return;
-				}
-				if (this.PawnsAliveCount == 0)
-				{
-					Find.SignalManager.SendSignal(new Signal(this.outSignalSuccess, signal.args, false));
-					base.Complete();
-					return;
-				}
-				if (this.AllSurvivingPawnsRecruited)
-				{
-					string tag = this.outSignalFailureRecruited ?? this.outSignalFailure;
-					Find.SignalManager.SendSignal(new Signal(tag, signal.args, false));
-					base.Complete();
-				}
-			}
+			return ((IEnumerable<GlobalTargetInfo>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x06009E1E RID: 40478 RVA: 0x002DC0BA File Offset: 0x002DA2BA
-		public override void Notify_FactionRemoved(Faction f)
+	public ExtraFaction extraFaction;
+
+	public Pawn asker;
+
+	public List<Pawn> pawns = new List<Pawn>();
+
+	public List<string> inSignals = new List<string>();
+
+	public string outSignalEnabled;
+
+	public string outSignalSuccess;
+
+	public string outSignalFailure;
+
+	public string outSignalFailureRecruited;
+
+	public override string ExpiryInfoPart => "QuestBetrayalOffer".Translate(PawnsAliveCount, extraFaction.faction.Name);
+
+	public override string ExpiryInfoPartTip => "QuestBetrayalOfferTip".Translate(asker.NameFullColored, extraFaction.faction.Name);
+
+	public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+	{
+		[IteratorStateMachine(typeof(_003Cget_QuestLookTargets_003Ed__13))]
+		get
 		{
-			if (this.extraFaction.faction == f)
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_QuestLookTargets_003Ed__13(-2)
 			{
-				this.extraFaction.faction = null;
-			}
+				_003C_003E4__this = this
+			};
 		}
+	}
 
-		// Token: 0x06009E1F RID: 40479 RVA: 0x002DC0D6 File Offset: 0x002DA2D6
-		public override void Notify_PawnKilled(Pawn pawn, DamageInfo? dinfo)
+	private int PawnsAliveCount
+	{
+		get
 		{
-			base.Notify_PawnKilled(pawn, dinfo);
-			if (pawn == this.asker && base.State == QuestPartState.Enabled)
+			int num = 0;
+			for (int i = 0; i < pawns.Count; i++)
 			{
-				this.Disable();
-			}
-		}
-
-		// Token: 0x06009E20 RID: 40480 RVA: 0x002DC0F8 File Offset: 0x002DA2F8
-		public override void ExposeData()
-		{
-			base.ExposeData();
-			Scribe_Collections.Look<Pawn>(ref this.pawns, "pawns", LookMode.Reference, Array.Empty<object>());
-			Scribe_Deep.Look<ExtraFaction>(ref this.extraFaction, "extraFaction", Array.Empty<object>());
-			Scribe_References.Look<Pawn>(ref this.asker, "asker", false);
-			Scribe_Collections.Look<string>(ref this.inSignals, "inSignals", LookMode.Value, Array.Empty<object>());
-			Scribe_Values.Look<string>(ref this.outSignalSuccess, "outSignalSuccess", null, false);
-			Scribe_Values.Look<string>(ref this.outSignalFailure, "outSignalFailure", null, false);
-			Scribe_Values.Look<string>(ref this.outSignalFailureRecruited, "outSignalFailureRecruited", null, false);
-			Scribe_Values.Look<string>(ref this.outSignalEnabled, "outSignalEnabled", null, false);
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
-			{
-				this.pawns.RemoveAll((Pawn x) => x == null);
-				if (this.asker == null && base.State == QuestPartState.Enabled)
+				if (!pawns[i].Destroyed)
 				{
-					this.Disable();
+					num++;
 				}
 			}
+			return num;
 		}
+	}
 
-		// Token: 0x04006D70 RID: 28016
-		public ExtraFaction extraFaction;
+	private bool AnyPawnDespawnedButAlive
+	{
+		get
+		{
+			for (int i = 0; i < pawns.Count; i++)
+			{
+				if (!pawns[i].SpawnedOrAnyParentSpawned && !pawns[i].Dead)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+	}
 
-		// Token: 0x04006D71 RID: 28017
-		public Pawn asker;
+	private bool AllSurvivingPawnsRecruited
+	{
+		get
+		{
+			foreach (Pawn pawn in pawns)
+			{
+				if (!pawn.Destroyed && (!pawn.Faction.IsPlayerSafe() || pawn.GetExtraFaction(extraFaction.factionType, quest) == extraFaction.faction))
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+	}
 
-		// Token: 0x04006D72 RID: 28018
-		public List<Pawn> pawns = new List<Pawn>();
+	protected override void Enable(SignalArgs receivedArgs)
+	{
+		base.Enable(receivedArgs);
+		if (!AnyPawnDespawnedButAlive && PawnsAliveCount > 0)
+		{
+			if (!outSignalEnabled.NullOrEmpty())
+			{
+				Find.SignalManager.SendSignal(new Signal(outSignalEnabled, receivedArgs));
+			}
+		}
+		else
+		{
+			Complete();
+		}
+	}
 
-		// Token: 0x04006D73 RID: 28019
-		public List<string> inSignals = new List<string>();
+	protected override void ProcessQuestSignal(Signal signal)
+	{
+		base.ProcessQuestSignal(signal);
+		if (inSignals.Contains(signal.tag))
+		{
+			if (AnyPawnDespawnedButAlive)
+			{
+				Find.SignalManager.SendSignal(new Signal(outSignalFailure, signal.args));
+				Complete();
+			}
+			else if (PawnsAliveCount == 0)
+			{
+				Find.SignalManager.SendSignal(new Signal(outSignalSuccess, signal.args));
+				Complete();
+			}
+			else if (AllSurvivingPawnsRecruited)
+			{
+				string tag = outSignalFailureRecruited ?? outSignalFailure;
+				Find.SignalManager.SendSignal(new Signal(tag, signal.args));
+				Complete();
+			}
+		}
+	}
 
-		// Token: 0x04006D74 RID: 28020
-		public string outSignalEnabled;
+	public override void Notify_FactionRemoved(Faction f)
+	{
+		if (extraFaction.faction == f)
+		{
+			extraFaction.faction = null;
+		}
+	}
 
-		// Token: 0x04006D75 RID: 28021
-		public string outSignalSuccess;
+	public override void Notify_PawnKilled(Pawn pawn, DamageInfo? dinfo)
+	{
+		base.Notify_PawnKilled(pawn, dinfo);
+		if (pawn == asker && base.State == QuestPartState.Enabled)
+		{
+			Disable();
+		}
+	}
 
-		// Token: 0x04006D76 RID: 28022
-		public string outSignalFailure;
-
-		// Token: 0x04006D77 RID: 28023
-		public string outSignalFailureRecruited;
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Collections.Look(ref pawns, "pawns", LookMode.Reference);
+		Scribe_Deep.Look(ref extraFaction, "extraFaction");
+		Scribe_References.Look(ref asker, "asker");
+		Scribe_Collections.Look(ref inSignals, "inSignals", LookMode.Value);
+		Scribe_Values.Look(ref outSignalSuccess, "outSignalSuccess");
+		Scribe_Values.Look(ref outSignalFailure, "outSignalFailure");
+		Scribe_Values.Look(ref outSignalFailureRecruited, "outSignalFailureRecruited");
+		Scribe_Values.Look(ref outSignalEnabled, "outSignalEnabled");
+		if (Scribe.mode == LoadSaveMode.PostLoadInit)
+		{
+			pawns.RemoveAll((Pawn x) => x == null);
+			if (asker == null && base.State == QuestPartState.Enabled)
+			{
+				Disable();
+			}
+		}
 	}
 }

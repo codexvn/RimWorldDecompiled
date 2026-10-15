@@ -1,161 +1,277 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
 
-namespace RimWorld
+namespace RimWorld;
+
+[StaticConstructorOnStartup]
+public static class MedicalCareUtility
 {
-	// Token: 0x020024F5 RID: 9461
-	[StaticConstructorOnStartup]
-	public static class MedicalCareUtility
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass10_0
 	{
-		// Token: 0x0600CEAD RID: 52909 RVA: 0x003CAFBF File Offset: 0x003C91BF
-		public static void Reset()
-		{
-			LongEventHandler.ExecuteWhenFinished(delegate
-			{
-				MedicalCareUtility.careTextures = new Texture2D[5];
-				MedicalCareUtility.careTextures[0] = ContentFinder<Texture2D>.Get("UI/Icons/Medical/NoCare", true);
-				MedicalCareUtility.careTextures[1] = ContentFinder<Texture2D>.Get("UI/Icons/Medical/NoMeds", true);
-				MedicalCareUtility.careTextures[2] = ThingDefOf.MedicineHerbal.uiIcon;
-				MedicalCareUtility.careTextures[3] = ThingDefOf.MedicineIndustrial.uiIcon;
-				MedicalCareUtility.careTextures[4] = ThingDefOf.MedicineUltratech.uiIcon;
-			});
-		}
+		public Pawn p;
+	}
 
-		// Token: 0x0600CEAE RID: 52910 RVA: 0x003CAFE8 File Offset: 0x003C91E8
-		public static void MedicalCareSetter(Rect rect, ref MedicalCareCategory medCare)
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass10_1
+	{
+		public MedicalCareCategory mc;
+
+		public _003C_003Ec__DisplayClass10_0 CS_0024_003C_003E8__locals1;
+
+		internal void _003CMedicalCareSelectButton_GenerateMenu_003Eb__0()
 		{
-			Rect rect2 = new Rect(rect.x, rect.y, rect.width / 5f, rect.height);
-			for (int i = 0; i < 5; i++)
+			CS_0024_003C_003E8__locals1.p.playerSettings.medCare = mc;
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CMedicalCareSelectButton_GenerateMenu_003Ed__10 : IEnumerable<Widgets.DropdownMenuElement<MedicalCareCategory>>, IEnumerable, IEnumerator<Widgets.DropdownMenuElement<MedicalCareCategory>>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Widgets.DropdownMenuElement<MedicalCareCategory> _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private Pawn p;
+
+		public Pawn _003C_003E3__p;
+
+		private _003C_003Ec__DisplayClass10_0 _003C_003E8__1;
+
+		private int _003Ci_003E5__2;
+
+		Widgets.DropdownMenuElement<MedicalCareCategory> IEnumerator<Widgets.DropdownMenuElement<MedicalCareCategory>>.Current
+		{
+			[DebuggerHidden]
+			get
 			{
-				MedicalCareCategory mc = (MedicalCareCategory)i;
-				Widgets.DrawHighlightIfMouseover(rect2);
-				MouseoverSounds.DoRegion(rect2);
-				GUI.DrawTexture(rect2, MedicalCareUtility.careTextures[i]);
-				Widgets.DraggableResult draggableResult = Widgets.ButtonInvisibleDraggable(rect2, false);
-				if (draggableResult == Widgets.DraggableResult.Dragged)
-				{
-					MedicalCareUtility.medicalCarePainting = true;
-				}
-				if ((MedicalCareUtility.medicalCarePainting && Mouse.IsOver(rect2) && medCare != mc) || draggableResult.AnyPressed())
-				{
-					medCare = mc;
-					SoundDefOf.Tick_High.PlayOneShotOnCamera(null);
-				}
-				if (medCare == mc)
-				{
-					Widgets.DrawBox(rect2, 2, null);
-				}
-				if (Mouse.IsOver(rect2))
-				{
-					TooltipHandler.TipRegion(rect2, () => mc.GetLabel().CapitalizeFirst(), 632165 + i * 17);
-				}
-				rect2.x += rect2.width;
-			}
-			if (!Input.GetMouseButton(0))
-			{
-				MedicalCareUtility.medicalCarePainting = false;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600CEAF RID: 52911 RVA: 0x003CB0F6 File Offset: 0x003C92F6
-		public static string GetLabel(this MedicalCareCategory cat)
+		object IEnumerator.Current
 		{
-			return ("MedicalCareCategory_" + cat.ToString()).Translate();
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x0600CEB0 RID: 52912 RVA: 0x003CB11C File Offset: 0x003C931C
-		public static bool AllowsMedicine(this MedicalCareCategory cat, ThingDef meds)
+		[DebuggerHidden]
+		public _003CMedicalCareSelectButton_GenerateMenu_003Ed__10(int _003C_003E1__state)
 		{
-			switch (cat)
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E8__1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			switch (_003C_003E1__state)
 			{
-			case MedicalCareCategory.NoCare:
-				return false;
-			case MedicalCareCategory.NoMeds:
-				return false;
-			case MedicalCareCategory.HerbalOrWorse:
-				return meds.GetStatValueAbstract(StatDefOf.MedicalPotency, null) <= ThingDefOf.MedicineHerbal.GetStatValueAbstract(StatDefOf.MedicalPotency, null);
-			case MedicalCareCategory.NormalOrWorse:
-				return meds.GetStatValueAbstract(StatDefOf.MedicalPotency, null) <= ThingDefOf.MedicineIndustrial.GetStatValueAbstract(StatDefOf.MedicalPotency, null);
-			case MedicalCareCategory.Best:
-				return true;
 			default:
-				throw new InvalidOperationException();
-			}
-		}
-
-		// Token: 0x0600CEB1 RID: 52913 RVA: 0x003CB194 File Offset: 0x003C9394
-		public static void MedicalCareSelectButton(Rect rect, Pawn pawn)
-		{
-			Widgets.Dropdown<Pawn, MedicalCareCategory>(rect, pawn, new Func<Pawn, MedicalCareCategory>(MedicalCareUtility.MedicalCareSelectButton_GetMedicalCare), new Func<Pawn, IEnumerable<Widgets.DropdownMenuElement<MedicalCareCategory>>>(MedicalCareUtility.MedicalCareSelectButton_GenerateMenu), null, MedicalCareUtility.careTextures[(int)pawn.playerSettings.medCare], null, null, null, true);
-		}
-
-		// Token: 0x0600CEB2 RID: 52914 RVA: 0x003CB1D6 File Offset: 0x003C93D6
-		private static MedicalCareCategory MedicalCareSelectButton_GetMedicalCare(Pawn pawn)
-		{
-			return pawn.playerSettings.medCare;
-		}
-
-		// Token: 0x0600CEB3 RID: 52915 RVA: 0x003CB1E3 File Offset: 0x003C93E3
-		private static IEnumerable<Widgets.DropdownMenuElement<MedicalCareCategory>> MedicalCareSelectButton_GenerateMenu(Pawn p)
-		{
-			Widgets.DropdownMenuElement<MedicalCareCategory> dropdownMenuElement;
-			int num;
-			for (int i = 0; i < 5; i = num + 1)
-			{
-				MedicalCareCategory mc = (MedicalCareCategory)i;
-				dropdownMenuElement = new Widgets.DropdownMenuElement<MedicalCareCategory>
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E8__1 = new _003C_003Ec__DisplayClass10_0();
+				_003C_003E8__1.p = p;
+				_003Ci_003E5__2 = 0;
+				goto IL_00eb;
+			case 1:
+				_003C_003E1__state = -1;
+				_003Ci_003E5__2++;
+				goto IL_00eb;
+			case 2:
 				{
-					option = new FloatMenuOption(mc.GetLabel().CapitalizeFirst(), delegate()
+					_003C_003E1__state = -1;
+					return false;
+				}
+				IL_00eb:
+				if (_003Ci_003E5__2 < 5)
+				{
+					_003C_003Ec__DisplayClass10_1 CS_0024_003C_003E8__locals5 = new _003C_003Ec__DisplayClass10_1
 					{
-						p.playerSettings.medCare = mc;
-					}, MedicalCareUtility.MedicalCareIcon(mc), Color.white, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0, HorizontalJustification.Left, false),
-					payload = mc
+						CS_0024_003C_003E8__locals1 = _003C_003E8__1,
+						mc = (MedicalCareCategory)_003Ci_003E5__2
+					};
+					_003C_003E2__current = new Widgets.DropdownMenuElement<MedicalCareCategory>
+					{
+						option = new FloatMenuOption(CS_0024_003C_003E8__locals5.mc.GetLabel().CapitalizeFirst(), delegate
+						{
+							CS_0024_003C_003E8__locals5.CS_0024_003C_003E8__locals1.p.playerSettings.medCare = CS_0024_003C_003E8__locals5.mc;
+						}, MedicalCareIcon(CS_0024_003C_003E8__locals5.mc), Color.white),
+						payload = CS_0024_003C_003E8__locals5.mc
+					};
+					_003C_003E1__state = 1;
+					return true;
+				}
+				_003C_003E2__current = new Widgets.DropdownMenuElement<MedicalCareCategory>
+				{
+					option = new FloatMenuOption("ChangeDefaults".Translate(), delegate
+					{
+						Find.WindowStack.Add(new Dialog_MedicalDefaults());
+					})
 				};
-				yield return dropdownMenuElement;
-				num = i;
+				_003C_003E1__state = 2;
+				return true;
 			}
-			dropdownMenuElement = default(Widgets.DropdownMenuElement<MedicalCareCategory>);
-			dropdownMenuElement.option = new FloatMenuOption("ChangeDefaults".Translate(), delegate()
-			{
-				Find.WindowStack.Add(new Dialog_MedicalDefaults());
-			}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-			yield return dropdownMenuElement;
-			yield break;
 		}
 
-		// Token: 0x0600CEB4 RID: 52916 RVA: 0x003CB1F4 File Offset: 0x003C93F4
-		private static Texture2D MedicalCareIcon(MedicalCareCategory category)
+		bool IEnumerator.MoveNext()
 		{
-			switch (category)
-			{
-			case MedicalCareCategory.NoCare:
-				return MedicalCareUtility.careTextures[0];
-			case MedicalCareCategory.NoMeds:
-				return MedicalCareUtility.careTextures[1];
-			case MedicalCareCategory.HerbalOrWorse:
-				return MedicalCareUtility.careTextures[2];
-			case MedicalCareCategory.NormalOrWorse:
-				return MedicalCareUtility.careTextures[3];
-			case MedicalCareCategory.Best:
-				return MedicalCareUtility.careTextures[4];
-			default:
-				return null;
-			}
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x04008CA7 RID: 36007
-		private static Texture2D[] careTextures;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04008CA8 RID: 36008
-		public const float CareSetterHeight = 28f;
+		[DebuggerHidden]
+		IEnumerator<Widgets.DropdownMenuElement<MedicalCareCategory>> IEnumerable<Widgets.DropdownMenuElement<MedicalCareCategory>>.GetEnumerator()
+		{
+			_003CMedicalCareSelectButton_GenerateMenu_003Ed__10 _003CMedicalCareSelectButton_GenerateMenu_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CMedicalCareSelectButton_GenerateMenu_003Ed__ = this;
+			}
+			else
+			{
+				_003CMedicalCareSelectButton_GenerateMenu_003Ed__ = new _003CMedicalCareSelectButton_GenerateMenu_003Ed__10(0);
+			}
+			_003CMedicalCareSelectButton_GenerateMenu_003Ed__.p = _003C_003E3__p;
+			return _003CMedicalCareSelectButton_GenerateMenu_003Ed__;
+		}
 
-		// Token: 0x04008CA9 RID: 36009
-		public const float CareSetterWidth = 140f;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Widgets.DropdownMenuElement<MedicalCareCategory>>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x04008CAA RID: 36010
-		private static bool medicalCarePainting;
+	private static Texture2D[] careTextures;
+
+	public const float CareSetterHeight = 28f;
+
+	public const float CareSetterWidth = 140f;
+
+	private static bool medicalCarePainting;
+
+	public static void Reset()
+	{
+		LongEventHandler.ExecuteWhenFinished(delegate
+		{
+			careTextures = new Texture2D[5];
+			careTextures[0] = ContentFinder<Texture2D>.Get("UI/Icons/Medical/NoCare");
+			careTextures[1] = ContentFinder<Texture2D>.Get("UI/Icons/Medical/NoMeds");
+			careTextures[2] = ThingDefOf.MedicineHerbal.uiIcon;
+			careTextures[3] = ThingDefOf.MedicineIndustrial.uiIcon;
+			careTextures[4] = ThingDefOf.MedicineUltratech.uiIcon;
+		});
+	}
+
+	public static void MedicalCareSetter(Rect rect, ref MedicalCareCategory medCare)
+	{
+		Rect rect2 = new Rect(rect.x, rect.y, rect.width / 5f, rect.height);
+		for (int i = 0; i < 5; i++)
+		{
+			MedicalCareCategory mc = (MedicalCareCategory)i;
+			Widgets.DrawHighlightIfMouseover(rect2);
+			MouseoverSounds.DoRegion(rect2);
+			GUI.DrawTexture(rect2, careTextures[i]);
+			Widgets.DraggableResult draggableResult = Widgets.ButtonInvisibleDraggable(rect2);
+			if (draggableResult == Widgets.DraggableResult.Dragged)
+			{
+				medicalCarePainting = true;
+			}
+			if ((medicalCarePainting && Mouse.IsOver(rect2) && medCare != mc) || draggableResult.AnyPressed())
+			{
+				medCare = mc;
+				SoundDefOf.Tick_High.PlayOneShotOnCamera();
+			}
+			if (medCare == mc)
+			{
+				Widgets.DrawBox(rect2, 2);
+			}
+			if (Mouse.IsOver(rect2))
+			{
+				TooltipHandler.TipRegion(rect2, () => mc.GetLabel().CapitalizeFirst(), 632165 + i * 17);
+			}
+			rect2.x += rect2.width;
+		}
+		if (!Input.GetMouseButton(0))
+		{
+			medicalCarePainting = false;
+		}
+	}
+
+	public static string GetLabel(this MedicalCareCategory cat)
+	{
+		return ("MedicalCareCategory_" + cat).Translate();
+	}
+
+	public static bool AllowsMedicine(this MedicalCareCategory cat, ThingDef meds)
+	{
+		return cat switch
+		{
+			MedicalCareCategory.NoCare => false, 
+			MedicalCareCategory.NoMeds => false, 
+			MedicalCareCategory.HerbalOrWorse => meds.GetStatValueAbstract(StatDefOf.MedicalPotency) <= ThingDefOf.MedicineHerbal.GetStatValueAbstract(StatDefOf.MedicalPotency), 
+			MedicalCareCategory.NormalOrWorse => meds.GetStatValueAbstract(StatDefOf.MedicalPotency) <= ThingDefOf.MedicineIndustrial.GetStatValueAbstract(StatDefOf.MedicalPotency), 
+			MedicalCareCategory.Best => true, 
+			_ => throw new InvalidOperationException(), 
+		};
+	}
+
+	public static void MedicalCareSelectButton(Rect rect, Pawn pawn)
+	{
+		Widgets.Dropdown(rect, pawn, MedicalCareSelectButton_GetMedicalCare, MedicalCareSelectButton_GenerateMenu, null, careTextures[(uint)pawn.playerSettings.medCare], null, null, null, paintable: true);
+	}
+
+	private static MedicalCareCategory MedicalCareSelectButton_GetMedicalCare(Pawn pawn)
+	{
+		return pawn.playerSettings.medCare;
+	}
+
+	[IteratorStateMachine(typeof(_003CMedicalCareSelectButton_GenerateMenu_003Ed__10))]
+	private static IEnumerable<Widgets.DropdownMenuElement<MedicalCareCategory>> MedicalCareSelectButton_GenerateMenu(Pawn p)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMedicalCareSelectButton_GenerateMenu_003Ed__10(-2)
+		{
+			_003C_003E3__p = p
+		};
+	}
+
+	private static Texture2D MedicalCareIcon(MedicalCareCategory category)
+	{
+		return category switch
+		{
+			MedicalCareCategory.NoCare => careTextures[0], 
+			MedicalCareCategory.NoMeds => careTextures[1], 
+			MedicalCareCategory.HerbalOrWorse => careTextures[2], 
+			MedicalCareCategory.NormalOrWorse => careTextures[3], 
+			MedicalCareCategory.Best => careTextures[4], 
+			_ => null, 
+		};
 	}
 }

@@ -1,46 +1,181 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI.Group;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class PsychicRitualDef_VoidProvocation : PsychicRitualDef_InvocationCircle
 {
-	// Token: 0x020016AD RID: 5805
-	public class PsychicRitualDef_VoidProvocation : PsychicRitualDef_InvocationCircle
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__5 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x060088D6 RID: 35030 RVA: 0x0028CE03 File Offset: 0x0028B003
-		public override List<PsychicRitualToil> CreateToils(PsychicRitual psychicRitual, PsychicRitualGraph graph)
-		{
-			List<PsychicRitualToil> list = base.CreateToils(psychicRitual, graph);
-			list.Add(new PsychicRitualToil_VoidProvocation(this.InvokerRole, this.psychicShockChanceFromQualityCurve));
-			return list;
-		}
+		private int _003C_003E1__state;
 
-		// Token: 0x060088D7 RID: 35031 RVA: 0x0028CE24 File Offset: 0x0028B024
-		public override TaggedString OutcomeDescription(FloatRange qualityRange, string qualityNumber, PsychicRitualRoleAssignments assignments)
-		{
-			return this.outcomeDescription.Formatted(this.psychicShockChanceFromQualityCurve.Evaluate(qualityRange.min).ToStringPercent());
-		}
+		private string _003C_003E2__current;
 
-		// Token: 0x060088D8 RID: 35032 RVA: 0x0028CE4C File Offset: 0x0028B04C
-		public override IEnumerable<string> ConfigErrors()
+		private int _003C_003El__initialThreadId;
+
+		public PsychicRitualDef_VoidProvocation _003C_003E4__this;
+
+		private IEnumerator<string> _003C_003E7__wrap1;
+
+		string IEnumerator<string>.Current
 		{
-			foreach (string text in base.ConfigErrors())
+			[DebuggerHidden]
+			get
 			{
-				yield return text;
+				return _003C_003E2__current;
 			}
-			IEnumerator<string> enumerator = null;
-			yield break;
-			yield break;
 		}
 
-		// Token: 0x04005946 RID: 22854
-		public SimpleCurve psychicShockChanceFromQualityCurve;
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
 
-		// Token: 0x04005947 RID: 22855
-		public FloatRange darkPsychicShockDurarionHoursRange;
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__5(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
 
-		// Token: 0x04005948 RID: 22856
-		public FloatRange incidentDelayHoursRange;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				PsychicRitualDef_VoidProvocation psychicRitualDef_VoidProvocation = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((Def)psychicRitualDef_VoidProvocation).ConfigErrors().GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 1:
+					_003C_003E1__state = -3;
+					break;
+				}
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					string current = _003C_003E7__wrap1.Current;
+					_003C_003E2__current = current;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = null;
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__5 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__5(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	public SimpleCurve psychicShockChanceFromQualityCurve;
+
+	public FloatRange darkPsychicShockDurarionHoursRange;
+
+	public FloatRange incidentDelayHoursRange;
+
+	public override List<PsychicRitualToil> CreateToils(PsychicRitual psychicRitual, PsychicRitualGraph graph)
+	{
+		List<PsychicRitualToil> list = base.CreateToils(psychicRitual, graph);
+		list.Add(new PsychicRitualToil_VoidProvocation(InvokerRole, psychicShockChanceFromQualityCurve));
+		return list;
+	}
+
+	public override TaggedString OutcomeDescription(FloatRange qualityRange, string qualityNumber, PsychicRitualRoleAssignments assignments)
+	{
+		return outcomeDescription.Formatted(psychicShockChanceFromQualityCurve.Evaluate(qualityRange.min).ToStringPercent());
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__5))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__5(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

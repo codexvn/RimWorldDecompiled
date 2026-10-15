@@ -1,125 +1,201 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_RepairMech : JobDriver
 {
-	// Token: 0x020012F8 RID: 4856
-	public class JobDriver_RepairMech : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__10 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x170012B9 RID: 4793
-		// (get) Token: 0x0600771E RID: 30494 RVA: 0x00243924 File Offset: 0x00241B24
-		protected Pawn Mech
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_RepairMech _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (Pawn)this.job.GetTarget(TargetIndex.A).Thing;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170012BA RID: 4794
-		// (get) Token: 0x0600771F RID: 30495 RVA: 0x00002501 File Offset: 0x00000701
-		protected virtual bool Remote
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__10(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_RepairMech CS_0024_003C_003E8__locals24 = _003C_003E4__this;
+			Toil toil;
+			switch (num)
+			{
+			default:
 				return false;
-			}
-		}
-
-		// Token: 0x170012BB RID: 4795
-		// (get) Token: 0x06007720 RID: 30496 RVA: 0x0024394A File Offset: 0x00241B4A
-		protected int TicksPerHeal
-		{
-			get
-			{
-				return Mathf.RoundToInt(1f / this.pawn.GetStatValue(StatDefOf.MechRepairSpeed, true, -1) * 120f);
-			}
-		}
-
-		// Token: 0x06007721 RID: 30497 RVA: 0x0024396F File Offset: 0x00241B6F
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
-		{
-			return this.pawn.Reserve(this.Mech, this.job, 1, -1, null, errorOnFailed, false);
-		}
-
-		// Token: 0x06007722 RID: 30498 RVA: 0x00243992 File Offset: 0x00241B92
-		protected override IEnumerable<Toil> MakeNewToils()
-		{
-			if (!ModLister.CheckBiotech("Mech repair"))
-			{
-				yield break;
-			}
-			this.FailOnDestroyedOrNull(TargetIndex.A);
-			this.FailOnForbidden(TargetIndex.A);
-			this.FailOn(() => this.Mech.IsAttacking());
-			if (!this.Remote)
-			{
-				yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch, false);
-			}
-			Toil toil = this.Remote ? Toils_General.Wait(int.MaxValue, TargetIndex.None) : Toils_General.WaitWith(TargetIndex.A, int.MaxValue, false, true, true, TargetIndex.None, PathEndMode.Touch);
-			toil.WithEffect(EffecterDefOf.MechRepairing, TargetIndex.A, null);
-			toil.PlaySustainerOrSound(this.Remote ? SoundDefOf.RepairMech_Remote : SoundDefOf.RepairMech_Touch, 1f);
-			toil.AddPreInitAction(delegate
-			{
-				this.ticksToNextRepair = this.TicksPerHeal;
-			});
-			toil.handlingFacing = true;
-			toil.tickIntervalAction = delegate(int delta)
-			{
-				this.ticksToNextRepair -= delta;
-				if (this.ticksToNextRepair <= 0)
+			case 0:
+				_003C_003E1__state = -1;
+				if (!ModLister.CheckBiotech("Mech repair"))
 				{
-					this.Mech.needs.energy.CurLevel -= this.Mech.GetStatValue(StatDefOf.MechEnergyLossPerHP, true, -1) * (float)delta;
-					MechRepairUtility.RepairTick(this.Mech, delta);
-					this.ticksToNextRepair = this.TicksPerHeal;
+					return false;
 				}
-				this.pawn.rotationTracker.FaceTarget(this.Mech);
-				if (this.pawn.skills != null)
+				CS_0024_003C_003E8__locals24.FailOnDestroyedOrNull(TargetIndex.A);
+				CS_0024_003C_003E8__locals24.FailOnForbidden(TargetIndex.A);
+				CS_0024_003C_003E8__locals24.FailOn(() => CS_0024_003C_003E8__locals24.Mech.IsAttacking());
+				if (!CS_0024_003C_003E8__locals24.Remote)
 				{
-					this.pawn.skills.Learn(SkillDefOf.Crafting, 0.05f * (float)delta, false, false);
+					_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch);
+					_003C_003E1__state = 1;
+					return true;
 				}
-			};
-			toil.AddFinishAction(delegate
-			{
-				Pawn_JobTracker jobs = this.Mech.jobs;
-				if (((jobs != null) ? jobs.curJob : null) != null)
+				goto IL_0080;
+			case 1:
+				_003C_003E1__state = -1;
+				goto IL_0080;
+			case 2:
 				{
-					this.Mech.jobs.EndCurrentJob(JobCondition.InterruptForced, true, true);
+					_003C_003E1__state = -1;
+					return false;
 				}
-			});
-			toil.AddEndCondition(delegate
-			{
-				if (!MechRepairUtility.CanRepair(this.Mech))
+				IL_0080:
+				toil = (CS_0024_003C_003E8__locals24.Remote ? Toils_General.Wait(int.MaxValue) : Toils_General.WaitWith(TargetIndex.A, int.MaxValue, useProgressBar: false, maintainPosture: true, maintainSleep: true));
+				toil.WithEffect(EffecterDefOf.MechRepairing, TargetIndex.A, null);
+				toil.PlaySustainerOrSound(CS_0024_003C_003E8__locals24.Remote ? SoundDefOf.RepairMech_Remote : SoundDefOf.RepairMech_Touch);
+				toil.AddPreInitAction(delegate
 				{
-					return JobCondition.Succeeded;
+					CS_0024_003C_003E8__locals24.ticksToNextRepair = CS_0024_003C_003E8__locals24.TicksPerHeal;
+				});
+				toil.handlingFacing = true;
+				toil.tickIntervalAction = delegate(int delta)
+				{
+					CS_0024_003C_003E8__locals24.ticksToNextRepair -= delta;
+					if (CS_0024_003C_003E8__locals24.ticksToNextRepair <= 0)
+					{
+						CS_0024_003C_003E8__locals24.Mech.needs.energy.CurLevel -= CS_0024_003C_003E8__locals24.Mech.GetStatValue(StatDefOf.MechEnergyLossPerHP);
+						MechRepairUtility.RepairTick(CS_0024_003C_003E8__locals24.Mech);
+						CS_0024_003C_003E8__locals24.ticksToNextRepair = CS_0024_003C_003E8__locals24.TicksPerHeal;
+					}
+					CS_0024_003C_003E8__locals24.pawn.rotationTracker.FaceTarget(CS_0024_003C_003E8__locals24.Mech);
+					if (CS_0024_003C_003E8__locals24.pawn.skills != null)
+					{
+						CS_0024_003C_003E8__locals24.pawn.skills.Learn(SkillDefOf.Crafting, 0.05f * (float)delta);
+					}
+				};
+				toil.AddFinishAction(delegate
+				{
+					if (CS_0024_003C_003E8__locals24.Mech.jobs?.curJob != null)
+					{
+						CS_0024_003C_003E8__locals24.Mech.jobs.EndCurrentJob(JobCondition.InterruptForced);
+					}
+				});
+				toil.AddEndCondition(() => MechRepairUtility.CanRepair(CS_0024_003C_003E8__locals24.Mech) ? JobCondition.Ongoing : JobCondition.Succeeded);
+				if (!CS_0024_003C_003E8__locals24.Remote)
+				{
+					toil.activeSkill = () => SkillDefOf.Crafting;
 				}
-				return JobCondition.Ongoing;
-			});
-			if (!this.Remote)
-			{
-				toil.activeSkill = (() => SkillDefOf.Crafting);
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 2;
+				return true;
 			}
-			yield return toil;
-			yield break;
 		}
 
-		// Token: 0x06007723 RID: 30499 RVA: 0x002439A2 File Offset: 0x00241BA2
-		public override void ExposeData()
+		bool IEnumerator.MoveNext()
 		{
-			base.ExposeData();
-			Scribe_Values.Look<int>(ref this.ticksToNextRepair, "ticksToNextRepair", 0, false);
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x04005147 RID: 20807
-		private const TargetIndex MechInd = TargetIndex.A;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04005148 RID: 20808
-		private const int DefaultTicksPerHeal = 120;
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__10 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__10(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x04005149 RID: 20809
-		protected int ticksToNextRepair;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private const TargetIndex MechInd = TargetIndex.A;
+
+	private const int DefaultTicksPerHeal = 120;
+
+	protected int ticksToNextRepair;
+
+	protected Pawn Mech => (Pawn)job.GetTarget(TargetIndex.A).Thing;
+
+	protected virtual bool Remote => false;
+
+	protected int TicksPerHeal => Mathf.RoundToInt(1f / pawn.GetStatValue(StatDefOf.MechRepairSpeed) * 120f);
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return pawn.Reserve(Mech, job, 1, -1, null, errorOnFailed);
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__10))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__10(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref ticksToNextRepair, "ticksToNextRepair", 0);
 	}
 }

@@ -1,217 +1,521 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+[StaticConstructorOnStartup]
+public class HumanOvum : ThingWithComps
 {
-	// Token: 0x02002AD1 RID: 10961
-	[StaticConstructorOnStartup]
-	public class HumanOvum : ThingWithComps
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass3_0
 	{
-		// Token: 0x0600F437 RID: 62519 RVA: 0x0046F7D7 File Offset: 0x0046D9D7
-		public override IEnumerable<Gizmo> GetGizmos()
+		public List<FloatMenuOption> maleOptions;
+
+		internal void _003CGetGizmos_003Eb__0()
 		{
-			foreach (Gizmo gizmo in base.GetGizmos())
+			Find.WindowStack.Add(new FloatMenu(maleOptions));
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGetFloatMenuOptions_003Ed__6 : IEnumerable<FloatMenuOption>, IEnumerable, IEnumerator<FloatMenuOption>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private FloatMenuOption _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public HumanOvum _003C_003E4__this;
+
+		private Pawn selPawn;
+
+		public Pawn _003C_003E3__selPawn;
+
+		private IEnumerator<FloatMenuOption> _003C_003E7__wrap1;
+
+		FloatMenuOption IEnumerator<FloatMenuOption>.Current
+		{
+			[DebuggerHidden]
+			get
 			{
-				yield return gizmo;
+				return _003C_003E2__current;
 			}
-			IEnumerator<Gizmo> enumerator = null;
-			if (!ModsConfig.BiotechActive)
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
 			{
-				yield break;
+				return _003C_003E2__current;
 			}
-			if (base.MapHeld != null)
+		}
+
+		[DebuggerHidden]
+		public _003CGetFloatMenuOptions_003Ed__6(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				Pawn pawn = this.fertilizingMan;
-				JobDef jobDef;
-				if (pawn == null)
+				try
 				{
-					jobDef = null;
 				}
-				else
+				finally
 				{
-					Job curJob = pawn.CurJob;
-					jobDef = ((curJob != null) ? curJob.def : null);
+					_003C_003Em__Finally1();
 				}
-				if (jobDef != JobDefOf.FertilizeOvum || this.fertilizingMan.CurJob.GetTarget(TargetIndex.A).Thing != this)
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				HumanOvum humanOvum = _003C_003E4__this;
+				FloatMenuOption floatMenuOption;
+				switch (num)
 				{
-					this.fertilizingMan = null;
-				}
-				if (this.fertilizingMan == null)
-				{
-					List<FloatMenuOption> maleOptions = new List<FloatMenuOption>();
-					foreach (Pawn pawn2 in base.MapHeld.mapPawns.FreeColonistsSpawned)
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((ThingWithComps)humanOvum).GetFloatMenuOptions(selPawn).GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0077;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0077;
+				case 2:
 					{
-						FloatMenuOption floatMenuOption = this.CanFertilizeFloatOption(pawn2, true);
-						if (floatMenuOption != null)
-						{
-							maleOptions.Add(floatMenuOption);
-						}
+						_003C_003E1__state = -1;
+						break;
 					}
-					Command_Action command_Action = new Command_Action
+					IL_0077:
+					if (_003C_003E7__wrap1.MoveNext())
 					{
-						defaultLabel = string.Format("{0}...", "Fertilize".Translate()),
-						defaultDesc = "FertilizeGizmoDescription".Translate(),
-						icon = HumanOvum.FertilizeIcon.Texture,
-						action = delegate()
-						{
-							Find.WindowStack.Add(new FloatMenu(maleOptions));
-						}
-					};
-					if (maleOptions.Count == 0)
-					{
-						command_Action.Disable("FertilizeDisabledNoMales".Translate());
+						FloatMenuOption current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
 					}
-					yield return command_Action;
-				}
-				else
-				{
-					yield return new Command_Action
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					floatMenuOption = humanOvum.CanFertilizeFloatOption(selPawn, pawnAsLabel: false);
+					if (floatMenuOption != null)
 					{
-						defaultLabel = "FertilizeCancel".Translate(this.fertilizingMan.LabelShort),
-						defaultDesc = "FertilizeCancel".Translate(this.fertilizingMan.LabelShort),
-						icon = HumanOvum.CancelFertilizeIcon,
-						action = delegate()
+						_003C_003E2__current = floatMenuOption;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<FloatMenuOption> IEnumerable<FloatMenuOption>.GetEnumerator()
+		{
+			_003CGetFloatMenuOptions_003Ed__6 _003CGetFloatMenuOptions_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CGetFloatMenuOptions_003Ed__ = this;
+			}
+			else
+			{
+				_003CGetFloatMenuOptions_003Ed__ = new _003CGetFloatMenuOptions_003Ed__6(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CGetFloatMenuOptions_003Ed__.selPawn = _003C_003E3__selPawn;
+			return _003CGetFloatMenuOptions_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<FloatMenuOption>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGetGizmos_003Ed__3 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public HumanOvum _003C_003E4__this;
+
+		private IEnumerator<Gizmo> _003C_003E7__wrap1;
+
+		Gizmo IEnumerator<Gizmo>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetGizmos_003Ed__3(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				HumanOvum CS_0024_003C_003E8__locals16 = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((ThingWithComps)CS_0024_003C_003E8__locals16).GetGizmos().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0076;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0076;
+				case 2:
+					_003C_003E1__state = -1;
+					break;
+				case 3:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_0076:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Gizmo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (!ModsConfig.BiotechActive)
+					{
+						return false;
+					}
+					if (CS_0024_003C_003E8__locals16.MapHeld == null)
+					{
+						break;
+					}
+					if (CS_0024_003C_003E8__locals16.fertilizingMan?.CurJob?.def != JobDefOf.FertilizeOvum || CS_0024_003C_003E8__locals16.fertilizingMan.CurJob.GetTarget(TargetIndex.A).Thing != CS_0024_003C_003E8__locals16)
+					{
+						CS_0024_003C_003E8__locals16.fertilizingMan = null;
+					}
+					if (CS_0024_003C_003E8__locals16.fertilizingMan == null)
+					{
+						_003C_003Ec__DisplayClass3_0 CS_0024_003C_003E8__locals13 = new _003C_003Ec__DisplayClass3_0
 						{
-							this.fertilizingMan.jobs.EndCurrentJob(JobCondition.InterruptForced, true, true);
+							maleOptions = new List<FloatMenuOption>()
+						};
+						foreach (Pawn item in CS_0024_003C_003E8__locals16.MapHeld.mapPawns.FreeColonistsSpawned)
+						{
+							FloatMenuOption floatMenuOption = CS_0024_003C_003E8__locals16.CanFertilizeFloatOption(item, pawnAsLabel: true);
+							if (floatMenuOption != null)
+							{
+								CS_0024_003C_003E8__locals13.maleOptions.Add(floatMenuOption);
+							}
+						}
+						Command_Action command_Action = new Command_Action
+						{
+							defaultLabel = $"{"Fertilize".Translate()}...",
+							defaultDesc = "FertilizeGizmoDescription".Translate(),
+							icon = FertilizeIcon.Texture,
+							action = delegate
+							{
+								Find.WindowStack.Add(new FloatMenu(CS_0024_003C_003E8__locals13.maleOptions));
+							}
+						};
+						if (CS_0024_003C_003E8__locals13.maleOptions.Count == 0)
+						{
+							command_Action.Disable("FertilizeDisabledNoMales".Translate());
+						}
+						_003C_003E2__current = command_Action;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					_003C_003E2__current = new Command_Action
+					{
+						defaultLabel = "FertilizeCancel".Translate(CS_0024_003C_003E8__locals16.fertilizingMan.LabelShort),
+						defaultDesc = "FertilizeCancel".Translate(CS_0024_003C_003E8__locals16.fertilizingMan.LabelShort),
+						icon = CancelFertilizeIcon,
+						action = delegate
+						{
+							CS_0024_003C_003E8__locals16.fertilizingMan.jobs.EndCurrentJob(JobCondition.InterruptForced);
 						},
 						activateSound = SoundDefOf.Designate_Cancel
 					};
+					_003C_003E1__state = 3;
+					return true;
 				}
+				return false;
 			}
-			yield break;
-			yield break;
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
 		}
 
-		// Token: 0x0600F438 RID: 62520 RVA: 0x0046F7E8 File Offset: 0x0046D9E8
-		public Thing ProduceEmbryo(Pawn father)
+		bool IEnumerator.MoveNext()
 		{
-			HumanEmbryo humanEmbryo = (HumanEmbryo)ThingMaker.MakeThing(ThingDefOf.HumanEmbryo, null);
-			CompHasPawnSources comp = humanEmbryo.GetComp<CompHasPawnSources>();
-			List<Pawn> pawnSources = base.GetComp<CompHasPawnSources>().pawnSources;
-			if (!pawnSources.NullOrEmpty<Pawn>())
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				foreach (Pawn pawn in pawnSources)
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CGetGizmos_003Ed__3 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CGetGizmos_003Ed__3(0)
 				{
-					comp.AddSource(pawn);
-				}
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
-			comp.AddSource(father);
-			if (!humanEmbryo.TryPopulateGenes())
-			{
-				humanEmbryo.Destroy(DestroyMode.Vanish);
-				return null;
-			}
-			return humanEmbryo;
+			return result;
 		}
 
-		// Token: 0x0600F439 RID: 62521 RVA: 0x0046F880 File Offset: 0x0046DA80
-		public override Thing SplitOff(int count)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return base.SplitOff(count) as HumanOvum;
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x0600F43A RID: 62522 RVA: 0x0046F88E File Offset: 0x0046DA8E
-		public override IEnumerable<FloatMenuOption> GetFloatMenuOptions(Pawn selPawn)
+	public static readonly CachedTexture FertilizeIcon = new CachedTexture("UI/Gizmos/Fertilize");
+
+	private Pawn fertilizingMan;
+
+	private static readonly Texture2D CancelFertilizeIcon = ContentFinder<Texture2D>.Get("UI/Designators/Cancel");
+
+	[IteratorStateMachine(typeof(_003CGetGizmos_003Ed__3))]
+	public override IEnumerable<Gizmo> GetGizmos()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetGizmos_003Ed__3(-2)
 		{
-			foreach (FloatMenuOption floatMenuOption in base.GetFloatMenuOptions(selPawn))
+			_003C_003E4__this = this
+		};
+	}
+
+	public Thing ProduceEmbryo(Pawn father)
+	{
+		HumanEmbryo humanEmbryo = (HumanEmbryo)ThingMaker.MakeThing(ThingDefOf.HumanEmbryo);
+		CompHasPawnSources comp = humanEmbryo.GetComp<CompHasPawnSources>();
+		List<Pawn> pawnSources = GetComp<CompHasPawnSources>().pawnSources;
+		if (!pawnSources.NullOrEmpty())
+		{
+			foreach (Pawn item in pawnSources)
 			{
-				yield return floatMenuOption;
+				comp.AddSource(item);
 			}
-			IEnumerator<FloatMenuOption> enumerator = null;
-			FloatMenuOption floatMenuOption2 = this.CanFertilizeFloatOption(selPawn, false);
-			if (floatMenuOption2 != null)
-			{
-				yield return floatMenuOption2;
-			}
-			yield break;
-			yield break;
 		}
-
-		// Token: 0x0600F43B RID: 62523 RVA: 0x0046F8A8 File Offset: 0x0046DAA8
-		private FloatMenuOption CanFertilizeFloatOption(Pawn pawn, bool pawnAsLabel)
+		comp.AddSource(father);
+		if (!humanEmbryo.TryPopulateGenes())
 		{
-			AcceptanceReport acceptanceReport = this.CanFertilizeReport(pawn);
-			if (acceptanceReport.Accepted)
-			{
-				Action <>9__2;
-				return new FloatMenuOption(pawnAsLabel ? pawn.LabelShort : "FertilizeThing".Translate(this).ToString(), delegate()
-				{
-					Pawn pawn2 = this.GetComp<CompHasPawnSources>().pawnSources.FirstOrDefault<Pawn>();
-					PawnRelationDef pawnRelationDef;
-					float num = PregnancyUtility.InbredChanceFromParents(pawn, pawn2, out pawnRelationDef);
-					if (num > 0f)
-					{
-						WindowStack windowStack = Find.WindowStack;
-						TaggedString text = "FertilizeOvumInbredChance".Translate(pawn2.Named("MOTHER"), pawn.Named("FATHER"), pawnRelationDef.label.Named("RELATION"), num.ToStringPercent().Named("CHANCE"));
-						Action confirmedAct;
-						if ((confirmedAct = <>9__2) == null)
-						{
-							confirmedAct = (<>9__2 = delegate()
-							{
-								base.<CanFertilizeFloatOption>g__TakeJob|1();
-							});
-						}
-						windowStack.Add(Dialog_MessageBox.CreateConfirmation(text, confirmedAct, false, null, WindowLayer.Dialog));
-						return;
-					}
-					base.<CanFertilizeFloatOption>g__TakeJob|1();
-				}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-			}
-			if (!acceptanceReport.Reason.NullOrEmpty())
-			{
-				return new FloatMenuOption(pawnAsLabel ? "DisabledOption".Translate(pawn.LabelShort, acceptanceReport.Reason).ToString() : ("FertilizeCannotFloatOption".Translate().ToString() + ": " + acceptanceReport.Reason), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-			}
+			humanEmbryo.Destroy();
 			return null;
 		}
+		return humanEmbryo;
+	}
 
-		// Token: 0x0600F43C RID: 62524 RVA: 0x0046F9B0 File Offset: 0x0046DBB0
-		private AcceptanceReport CanFertilizeReport(Pawn pawn)
+	public override Thing SplitOff(int count)
+	{
+		return base.SplitOff(count) as HumanOvum;
+	}
+
+	[IteratorStateMachine(typeof(_003CGetFloatMenuOptions_003Ed__6))]
+	public override IEnumerable<FloatMenuOption> GetFloatMenuOptions(Pawn selPawn)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetFloatMenuOptions_003Ed__6(-2)
 		{
-			if (pawn.gender != Gender.Male)
-			{
-				return false;
-			}
-			if (pawn.IsQuestLodger())
-			{
-				return false;
-			}
-			if (!pawn.CanReach(this, PathEndMode.OnCell, Danger.Deadly, false, false, TraverseMode.ByPawn))
-			{
-				return "NoPath".Translate();
-			}
-			if ((float)pawn.ageTracker.AgeBiologicalYears < 14f)
-			{
-				return "CannotMustBeAge".Translate(14f).CapitalizeFirst();
-			}
-			if (pawn.Sterile())
-			{
-				return "CannotSterile".Translate();
-			}
-			if (pawn.Downed || !pawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation))
-			{
-				return "Incapacitated".Translate().ToLower();
-			}
-			return true;
-		}
+			_003C_003E4__this = this,
+			_003C_003E3__selPawn = selPawn
+		};
+	}
 
-		// Token: 0x0600F43D RID: 62525 RVA: 0x0046FA89 File Offset: 0x0046DC89
-		public override void ExposeData()
+	private FloatMenuOption CanFertilizeFloatOption(Pawn pawn, bool pawnAsLabel)
+	{
+		AcceptanceReport acceptanceReport = CanFertilizeReport(pawn);
+		if (acceptanceReport.Accepted)
 		{
-			base.ExposeData();
-			Scribe_References.Look<Pawn>(ref this.fertilizingMan, "fertilizingMan", false);
+			return new FloatMenuOption(pawnAsLabel ? pawn.LabelShort : "FertilizeThing".Translate(this).ToString(), delegate
+			{
+				Pawn pawn2 = GetComp<CompHasPawnSources>().pawnSources.FirstOrDefault();
+				PawnRelationDef relation;
+				float num = PregnancyUtility.InbredChanceFromParents(pawn, pawn2, out relation);
+				if (num > 0f)
+				{
+					Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("FertilizeOvumInbredChance".Translate(pawn2.Named("MOTHER"), pawn.Named("FATHER"), relation.label.Named("RELATION"), num.ToStringPercent().Named("CHANCE")), delegate
+					{
+						TakeJob();
+					}));
+				}
+				else
+				{
+					TakeJob();
+				}
+			});
 		}
+		if (!acceptanceReport.Reason.NullOrEmpty())
+		{
+			return new FloatMenuOption(pawnAsLabel ? "DisabledOption".Translate(pawn.LabelShort, acceptanceReport.Reason).ToString() : ("FertilizeCannotFloatOption".Translate().ToString() + ": " + acceptanceReport.Reason), null);
+		}
+		return null;
+		void TakeJob()
+		{
+			Job job = JobMaker.MakeJob(JobDefOf.FertilizeOvum, this);
+			job.count = 1;
+			if (pawn.jobs.TryTakeOrderedJob(job, JobTag.Misc))
+			{
+				fertilizingMan = pawn;
+			}
+		}
+	}
 
-		// Token: 0x0400A0FA RID: 41210
-		public static readonly CachedTexture FertilizeIcon = new CachedTexture("UI/Gizmos/Fertilize");
+	private AcceptanceReport CanFertilizeReport(Pawn pawn)
+	{
+		if (pawn.gender != Gender.Male)
+		{
+			return false;
+		}
+		if (pawn.IsQuestLodger())
+		{
+			return false;
+		}
+		if (!pawn.CanReach(this, PathEndMode.OnCell, Danger.Deadly))
+		{
+			return "NoPath".Translate();
+		}
+		if ((float)pawn.ageTracker.AgeBiologicalYears < 14f)
+		{
+			return "CannotMustBeAge".Translate(14f).CapitalizeFirst();
+		}
+		if (pawn.Sterile())
+		{
+			return "CannotSterile".Translate();
+		}
+		if (pawn.Downed || !pawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation))
+		{
+			return "Incapacitated".Translate().ToLower();
+		}
+		return true;
+	}
 
-		// Token: 0x0400A0FB RID: 41211
-		private Pawn fertilizingMan;
-
-		// Token: 0x0400A0FC RID: 41212
-		private static readonly Texture2D CancelFertilizeIcon = ContentFinder<Texture2D>.Get("UI/Designators/Cancel", true);
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_References.Look(ref fertilizingMan, "fertilizingMan");
 	}
 }

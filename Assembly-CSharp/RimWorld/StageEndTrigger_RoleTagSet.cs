@@ -1,77 +1,68 @@
-﻿using System;
 using System.Collections.Generic;
 using Verse;
 using Verse.AI.Group;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class StageEndTrigger_RoleTagSet : StageEndTrigger
 {
-	// Token: 0x02002699 RID: 9881
-	public class StageEndTrigger_RoleTagSet : StageEndTrigger
+	public List<string> roleIds;
+
+	public bool clearTag;
+
+	[NoTranslate]
+	public string tag;
+
+	public override Trigger MakeTrigger(LordJob_Ritual ritual, TargetInfo spot, IEnumerable<TargetInfo> foci, RitualStage stage)
 	{
-		// Token: 0x0600D8FD RID: 55549 RVA: 0x004048FC File Offset: 0x00402AFC
-		public override Trigger MakeTrigger(LordJob_Ritual ritual, TargetInfo spot, IEnumerable<TargetInfo> foci, RitualStage stage)
+		return new Trigger_TickCondition(delegate
 		{
-			return new Trigger_TickCondition(delegate()
+			foreach (string roleId in roleIds)
 			{
-				foreach (string r in this.roleIds)
+				if (!ArrivedCheck(roleId, ritual))
 				{
-					if (!this.ArrivedCheck(r, ritual))
-					{
-						return false;
-					}
+					return false;
 				}
-				if (this.clearTag)
+			}
+			if (clearTag)
+			{
+				foreach (string roleId2 in roleIds)
 				{
-					foreach (string b in this.roleIds)
+					foreach (KeyValuePair<Pawn, PawnTags> perPawnTag in ritual.perPawnTags)
 					{
-						foreach (KeyValuePair<Pawn, PawnTags> keyValuePair in ritual.perPawnTags)
+						RitualRole ritualRole = ritual.RoleFor(perPawnTag.Key, includeForced: true);
+						if (ritualRole != null && ritualRole.id == roleId2 && perPawnTag.Value.Contains(tag))
 						{
-							RitualRole ritualRole = ritual.RoleFor(keyValuePair.Key, true);
-							if (ritualRole != null && ritualRole.id == b && keyValuePair.Value.Contains(this.tag))
-							{
-								keyValuePair.Value.tags.Remove(this.tag);
-							}
+							perPawnTag.Value.tags.Remove(tag);
 						}
 					}
 				}
-				return true;
-			}, 1);
-		}
+			}
+			return true;
+		});
+	}
 
-		// Token: 0x0600D8FE RID: 55550 RVA: 0x00404924 File Offset: 0x00402B24
-		protected virtual bool ArrivedCheck(string r, LordJob_Ritual ritual)
+	protected virtual bool ArrivedCheck(string r, LordJob_Ritual ritual)
+	{
+		if (!ritual.RoleFilled(r))
 		{
-			if (!ritual.RoleFilled(r))
+			return true;
+		}
+		foreach (KeyValuePair<Pawn, PawnTags> perPawnTag in ritual.perPawnTags)
+		{
+			RitualRole ritualRole = ritual.RoleFor(perPawnTag.Key, includeForced: true);
+			if (ritualRole != null && ritualRole.id == r && perPawnTag.Value.Contains(tag))
 			{
 				return true;
 			}
-			foreach (KeyValuePair<Pawn, PawnTags> keyValuePair in ritual.perPawnTags)
-			{
-				RitualRole ritualRole = ritual.RoleFor(keyValuePair.Key, true);
-				if (ritualRole != null && ritualRole.id == r && keyValuePair.Value.Contains(this.tag))
-				{
-					return true;
-				}
-			}
-			return false;
 		}
+		return false;
+	}
 
-		// Token: 0x0600D8FF RID: 55551 RVA: 0x004049B8 File Offset: 0x00402BB8
-		public override void ExposeData()
-		{
-			Scribe_Collections.Look<string>(ref this.roleIds, "roleIds", LookMode.Undefined, Array.Empty<object>());
-			Scribe_Values.Look<bool>(ref this.clearTag, "clearTag", false, false);
-			Scribe_Values.Look<string>(ref this.tag, "tag", null, false);
-		}
-
-		// Token: 0x04009310 RID: 37648
-		public List<string> roleIds;
-
-		// Token: 0x04009311 RID: 37649
-		public bool clearTag;
-
-		// Token: 0x04009312 RID: 37650
-		[NoTranslate]
-		public string tag;
+	public override void ExposeData()
+	{
+		Scribe_Collections.Look(ref roleIds, "roleIds", LookMode.Undefined);
+		Scribe_Values.Look(ref clearTag, "clearTag", defaultValue: false);
+		Scribe_Values.Look(ref tag, "tag");
 	}
 }

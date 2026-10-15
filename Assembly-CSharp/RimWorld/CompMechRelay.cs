@@ -1,155 +1,281 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompMechRelay : ThingComp
 {
-	// Token: 0x02002D43 RID: 11587
-	public class CompMechRelay : ThingComp
+	[CompilerGenerated]
+	private sealed class _003CCompGetGizmosExtra_003Ed__12 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x17002962 RID: 10594
-		// (get) Token: 0x0601046D RID: 66669 RVA: 0x004B45B0 File Offset: 0x004B27B0
-		public CompProperties_MechRelay Props
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompMechRelay _003C_003E4__this;
+
+		private IEnumerator<Gizmo> _003C_003E7__wrap1;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (CompProperties_MechRelay)this.props;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002963 RID: 10595
-		// (get) Token: 0x0601046E RID: 66670 RVA: 0x004B45BD File Offset: 0x004B27BD
-		public int DestabilizationTick
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.destabilizationTick;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0601046F RID: 66671 RVA: 0x004B45C8 File Offset: 0x004B27C8
-		public void Deactivate()
+		[DebuggerHidden]
+		public _003CCompGetGizmosExtra_003Ed__12(int _003C_003E1__state)
 		{
-			if (!this.active || this.inert)
-			{
-				return;
-			}
-			this.active = false;
-			if (!this.Props.destabilizationMessage.NullOrEmpty())
-			{
-				Messages.Message(this.Props.destabilizationMessage, this.parent, MessageTypeDefOf.PositiveEvent, true);
-			}
-			this.destabilizationTick = Find.TickManager.TicksGame + 7500;
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x06010470 RID: 66672 RVA: 0x004B4638 File Offset: 0x004B2838
-		public override void CompTick()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			if (this.inert)
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				return;
-			}
-			if (this.destabilizationTick > 0 && Find.TickManager.TicksGame >= this.destabilizationTick)
-			{
-				this.destabilizationTick = -1;
-				Map map = this.parent.Map;
-				IntVec3 position = this.parent.Position;
-				this.parent.Destroy(DestroyMode.Vanish);
-				if (this.Props.crashedThingDef != null)
+				try
 				{
-					Thing thing = ThingMaker.MakeThing(this.Props.crashedThingDef, null);
-					GenPlace.TryPlaceThing(thing, position, map, ThingPlaceMode.Direct, null, null, null, 1);
-					CellRect cellRect = this.parent.OccupiedRect();
-					for (int i = 0; i < cellRect.Area; i++)
-					{
-						FleckMaker.ThrowDustPuff(cellRect.RandomVector3.WithY(AltitudeLayer.MoteLow.AltitudeFor()), map, 2f);
-					}
-					if (thing.Faction != this.parent.Faction)
-					{
-						thing.SetFaction(this.parent.Faction, null);
-					}
-					if (!this.Props.crashedLetterLabel.NullOrEmpty())
-					{
-						Find.LetterStack.ReceiveLetter(this.Props.crashedLetterLabel, this.Props.crashedLetterText, LetterDefOf.NeutralEvent, thing, null, null, null, null, 0, true);
-					}
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
 				}
 			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x06010471 RID: 66673 RVA: 0x004B4788 File Offset: 0x004B2988
-		public override string CompInspectStringExtra()
+		private bool MoveNext()
 		{
-			if (this.inert)
+			try
 			{
-				return null;
-			}
-			if (this.active && !this.Props.activeInspectString.NullOrEmpty())
-			{
-				return this.Props.activeInspectString;
-			}
-			if (this.destabilizationTick > 0 && !this.Props.destabilizationInspectString.NullOrEmpty())
-			{
-				return this.Props.destabilizationInspectString + ": " + (this.destabilizationTick - Find.TickManager.TicksGame).ToStringTicksToPeriod(true, false, true, true, false).Colorize(ColoredText.DateTimeColor);
-			}
-			return base.CompInspectStringExtra();
-		}
-
-		// Token: 0x06010472 RID: 66674 RVA: 0x004B4821 File Offset: 0x004B2A21
-		public override IEnumerable<Gizmo> CompGetGizmosExtra()
-		{
-			foreach (Gizmo gizmo in base.CompGetGizmosExtra())
-			{
-				yield return gizmo;
-			}
-			IEnumerator<Gizmo> enumerator = null;
-			if (DebugSettings.ShowDevGizmos && !this.inert)
-			{
-				if (this.active)
+				int num = _003C_003E1__state;
+				CompMechRelay CS_0024_003C_003E8__locals6 = _003C_003E4__this;
+				switch (num)
 				{
-					yield return new Command_Action
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((ThingComp)CS_0024_003C_003E8__locals6).CompGetGizmosExtra().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0076;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0076;
+				case 2:
+					_003C_003E1__state = -1;
+					break;
+				case 3:
 					{
-						defaultLabel = "DEV: Deactivate",
-						action = new Action(this.Deactivate)
-					};
-				}
-				else if (this.destabilizationTick > 0)
-				{
-					yield return new Command_Action
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_0076:
+					if (_003C_003E7__wrap1.MoveNext())
 					{
-						defaultLabel = "DEV: Destabilize now",
-						action = delegate()
+						Gizmo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (!DebugSettings.ShowDevGizmos || CS_0024_003C_003E8__locals6.inert)
+					{
+						break;
+					}
+					if (CS_0024_003C_003E8__locals6.active)
+					{
+						_003C_003E2__current = new Command_Action
 						{
-							this.destabilizationTick = Find.TickManager.TicksGame;
-						}
-					};
+							defaultLabel = "DEV: Deactivate",
+							action = CS_0024_003C_003E8__locals6.Deactivate
+						};
+						_003C_003E1__state = 2;
+						return true;
+					}
+					if (CS_0024_003C_003E8__locals6.destabilizationTick > 0)
+					{
+						_003C_003E2__current = new Command_Action
+						{
+							defaultLabel = "DEV: Destabilize now",
+							action = delegate
+							{
+								CS_0024_003C_003E8__locals6.destabilizationTick = Find.TickManager.TicksGame;
+							}
+						};
+						_003C_003E1__state = 3;
+						return true;
+					}
+					break;
 				}
+				return false;
 			}
-			yield break;
-			yield break;
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
 		}
 
-		// Token: 0x06010473 RID: 66675 RVA: 0x004B4831 File Offset: 0x004B2A31
-		public override void PostExposeData()
+		bool IEnumerator.MoveNext()
 		{
-			base.PostExposeData();
-			Scribe_Values.Look<bool>(ref this.active, "active", true, false);
-			Scribe_Values.Look<bool>(ref this.inert, "inert", false, false);
-			Scribe_Values.Look<int>(ref this.destabilizationTick, "destabilizationTick", -1, false);
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0400AA09 RID: 43529
-		public const int DestabilizationTicks = 7500;
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
 
-		// Token: 0x0400AA0A RID: 43530
-		private const int CrashFlecksPerCell = 1;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x0400AA0B RID: 43531
-		private bool active = true;
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CCompGetGizmosExtra_003Ed__12 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CCompGetGizmosExtra_003Ed__12(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x0400AA0C RID: 43532
-		public bool inert;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x0400AA0D RID: 43533
-		private int destabilizationTick = -1;
+	public const int DestabilizationTicks = 7500;
+
+	private const int CrashFlecksPerCell = 1;
+
+	private bool active = true;
+
+	public bool inert;
+
+	private int destabilizationTick = -1;
+
+	public CompProperties_MechRelay Props => (CompProperties_MechRelay)props;
+
+	public int DestabilizationTick => destabilizationTick;
+
+	public void Deactivate()
+	{
+		if (active && !inert)
+		{
+			active = false;
+			if (!Props.destabilizationMessage.NullOrEmpty())
+			{
+				Messages.Message(Props.destabilizationMessage, parent, MessageTypeDefOf.PositiveEvent);
+			}
+			destabilizationTick = Find.TickManager.TicksGame + 7500;
+		}
+	}
+
+	public override void CompTick()
+	{
+		if (inert || destabilizationTick <= 0 || Find.TickManager.TicksGame < destabilizationTick)
+		{
+			return;
+		}
+		destabilizationTick = -1;
+		Map map = parent.Map;
+		IntVec3 position = parent.Position;
+		parent.Destroy();
+		if (Props.crashedThingDef != null)
+		{
+			Thing thing = ThingMaker.MakeThing(Props.crashedThingDef);
+			GenPlace.TryPlaceThing(thing, position, map, ThingPlaceMode.Direct, null, null, null);
+			CellRect cellRect = parent.OccupiedRect();
+			for (int i = 0; i < cellRect.Area; i++)
+			{
+				FleckMaker.ThrowDustPuff(cellRect.RandomVector3.WithY(AltitudeLayer.MoteLow.AltitudeFor()), map, 2f);
+			}
+			if (thing.Faction != parent.Faction)
+			{
+				thing.SetFaction(parent.Faction);
+			}
+			if (!Props.crashedLetterLabel.NullOrEmpty())
+			{
+				Find.LetterStack.ReceiveLetter(Props.crashedLetterLabel, Props.crashedLetterText, LetterDefOf.NeutralEvent, thing);
+			}
+		}
+	}
+
+	public override string CompInspectStringExtra()
+	{
+		if (inert)
+		{
+			return null;
+		}
+		if (active && !Props.activeInspectString.NullOrEmpty())
+		{
+			return Props.activeInspectString;
+		}
+		if (destabilizationTick > 0 && !Props.destabilizationInspectString.NullOrEmpty())
+		{
+			return Props.destabilizationInspectString + ": " + (destabilizationTick - Find.TickManager.TicksGame).ToStringTicksToPeriod().Colorize(ColoredText.DateTimeColor);
+		}
+		return base.CompInspectStringExtra();
+	}
+
+	[IteratorStateMachine(typeof(_003CCompGetGizmosExtra_003Ed__12))]
+	public override IEnumerable<Gizmo> CompGetGizmosExtra()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CCompGetGizmosExtra_003Ed__12(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override void PostExposeData()
+	{
+		base.PostExposeData();
+		Scribe_Values.Look(ref active, "active", defaultValue: true);
+		Scribe_Values.Look(ref inert, "inert", defaultValue: false);
+		Scribe_Values.Look(ref destabilizationTick, "destabilizationTick", -1);
 	}
 }

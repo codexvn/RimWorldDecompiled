@@ -1,252 +1,347 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Building_Casket : Building, IThingHolder, IOpenable, ISearchableContents
 {
-	// Token: 0x020029E4 RID: 10724
-	public class Building_Casket : Building, IThingHolder, IOpenable, ISearchableContents
+	[CompilerGenerated]
+	private sealed class _003CGetGizmos_003Ed__17 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x17002481 RID: 9345
-		// (get) Token: 0x0600EC98 RID: 60568 RVA: 0x00222DEB File Offset: 0x00220FEB
-		public virtual int OpenTicks
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Building_Casket _003C_003E4__this;
+
+		private IEnumerator<Gizmo> _003C_003E7__wrap1;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return 300;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600EC99 RID: 60569 RVA: 0x0044B2F2 File Offset: 0x004494F2
-		public Building_Casket()
+		object IEnumerator.Current
 		{
-			this.innerContainer = new ThingOwner<Thing>(this, false, LookMode.Deep, true);
-		}
-
-		// Token: 0x17002482 RID: 9346
-		// (get) Token: 0x0600EC9A RID: 60570 RVA: 0x0044B309 File Offset: 0x00449509
-		public bool HasAnyContents
-		{
+			[DebuggerHidden]
 			get
 			{
-				return this.innerContainer.Count > 0;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002483 RID: 9347
-		// (get) Token: 0x0600EC9B RID: 60571 RVA: 0x0044B319 File Offset: 0x00449519
-		public Thing ContainedThing
+		[DebuggerHidden]
+		public _003CGetGizmos_003Ed__17(int _003C_003E1__state)
 		{
-			get
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				if (this.innerContainer.Count != 0)
+				try
 				{
-					return this.innerContainer[0];
 				}
-				return null;
-			}
-		}
-
-		// Token: 0x17002484 RID: 9348
-		// (get) Token: 0x0600EC9C RID: 60572 RVA: 0x0044B336 File Offset: 0x00449536
-		public virtual bool CanOpen
-		{
-			get
-			{
-				return this.HasAnyContents;
-			}
-		}
-
-		// Token: 0x17002485 RID: 9349
-		// (get) Token: 0x0600EC9D RID: 60573 RVA: 0x0044B33E File Offset: 0x0044953E
-		public ThingOwner SearchableContents
-		{
-			get
-			{
-				return this.innerContainer;
-			}
-		}
-
-		// Token: 0x0600EC9E RID: 60574 RVA: 0x0044B33E File Offset: 0x0044953E
-		public ThingOwner GetDirectlyHeldThings()
-		{
-			return this.innerContainer;
-		}
-
-		// Token: 0x0600EC9F RID: 60575 RVA: 0x0044B346 File Offset: 0x00449546
-		public void GetChildHolders(List<IThingHolder> outChildren)
-		{
-			ThingOwnerUtility.AppendThingHoldersFromThings(outChildren, this.GetDirectlyHeldThings());
-		}
-
-		// Token: 0x0600ECA0 RID: 60576 RVA: 0x0044B354 File Offset: 0x00449554
-		public virtual void Open()
-		{
-			if (!this.HasAnyContents)
-			{
-				return;
-			}
-			this.EjectContents();
-			if (!this.openedSignal.NullOrEmpty())
-			{
-				Find.SignalManager.SendSignal(new Signal(this.openedSignal, this.Named("SUBJECT")));
-			}
-			base.DirtyMapMesh(base.Map);
-		}
-
-		// Token: 0x0600ECA1 RID: 60577 RVA: 0x0044B3A9 File Offset: 0x004495A9
-		public override IEnumerable<Gizmo> GetGizmos()
-		{
-			foreach (Gizmo gizmo in base.GetGizmos())
-			{
-				yield return gizmo;
-			}
-			IEnumerator<Gizmo> enumerator = null;
-			Gizmo gizmo2 = Building.SelectContainedItemGizmo(this, this.ContainedThing);
-			if (gizmo2 != null)
-			{
-				yield return gizmo2;
-			}
-			if (DebugSettings.ShowDevGizmos && this.CanOpen)
-			{
-				yield return new Command_Action
+				finally
 				{
-					defaultLabel = "DEV: Open",
-					action = new Action(this.Open)
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				Building_Casket building_Casket = _003C_003E4__this;
+				Gizmo gizmo;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((Building)building_Casket).GetGizmos().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0078;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0078;
+				case 2:
+					_003C_003E1__state = -1;
+					goto IL_00bb;
+				case 3:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_0078:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Gizmo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					gizmo = Building.SelectContainedItemGizmo(building_Casket, building_Casket.ContainedThing);
+					if (gizmo != null)
+					{
+						_003C_003E2__current = gizmo;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					goto IL_00bb;
+					IL_00bb:
+					if (DebugSettings.ShowDevGizmos && building_Casket.CanOpen)
+					{
+						_003C_003E2__current = new Command_Action
+						{
+							defaultLabel = "DEV: Open",
+							action = building_Casket.Open
+						};
+						_003C_003E1__state = 3;
+						return true;
+					}
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CGetGizmos_003Ed__17 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CGetGizmos_003Ed__17(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
 				};
 			}
-			yield break;
-			yield break;
+			return result;
 		}
 
-		// Token: 0x0600ECA2 RID: 60578 RVA: 0x0044B3BC File Offset: 0x004495BC
-		public override void ExposeData()
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			base.ExposeData();
-			Scribe_Deep.Look<ThingOwner>(ref this.innerContainer, "innerContainer", new object[]
-			{
-				this
-			});
-			Scribe_Values.Look<bool>(ref this.contentsKnown, "contentsKnown", false, false);
-			Scribe_Values.Look<string>(ref this.openedSignal, "openedSignal", null, false);
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x0600ECA3 RID: 60579 RVA: 0x0044B40D File Offset: 0x0044960D
-		public override void SpawnSetup(Map map, bool respawningAfterLoad)
+	protected ThingOwner innerContainer;
+
+	protected bool contentsKnown;
+
+	public string openedSignal;
+
+	public virtual int OpenTicks => 300;
+
+	public bool HasAnyContents => innerContainer.Count > 0;
+
+	public Thing ContainedThing
+	{
+		get
 		{
-			base.SpawnSetup(map, respawningAfterLoad);
-			if (base.Faction != null && base.Faction.IsPlayer)
+			if (innerContainer.Count != 0)
 			{
-				this.contentsKnown = true;
+				return innerContainer[0];
 			}
+			return null;
 		}
+	}
 
-		// Token: 0x0600ECA4 RID: 60580 RVA: 0x0044B433 File Offset: 0x00449633
-		public override AcceptanceReport ClaimableBy(Faction fac)
+	public virtual bool CanOpen => HasAnyContents;
+
+	public ThingOwner SearchableContents => innerContainer;
+
+	public Building_Casket()
+	{
+		innerContainer = new ThingOwner<Thing>(this, oneStackOnly: false);
+	}
+
+	public ThingOwner GetDirectlyHeldThings()
+	{
+		return innerContainer;
+	}
+
+	public void GetChildHolders(List<IThingHolder> outChildren)
+	{
+		ThingOwnerUtility.AppendThingHoldersFromThings(outChildren, GetDirectlyHeldThings());
+	}
+
+	public virtual void Open()
+	{
+		if (HasAnyContents)
 		{
-			if (this.innerContainer.Any && !this.contentsKnown)
+			EjectContents();
+			if (!openedSignal.NullOrEmpty())
 			{
-				return false;
+				Find.SignalManager.SendSignal(new Signal(openedSignal, this.Named("SUBJECT")));
 			}
-			return base.ClaimableBy(fac);
+			DirtyMapMesh(base.Map);
 		}
+	}
 
-		// Token: 0x0600ECA5 RID: 60581 RVA: 0x0044B458 File Offset: 0x00449658
-		public virtual bool Accepts(Thing thing)
+	[IteratorStateMachine(typeof(_003CGetGizmos_003Ed__17))]
+	public override IEnumerable<Gizmo> GetGizmos()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetGizmos_003Ed__17(-2)
 		{
-			return this.innerContainer.CanAcceptAnyOf(thing, true);
+			_003C_003E4__this = this
+		};
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Deep.Look(ref innerContainer, "innerContainer", this);
+		Scribe_Values.Look(ref contentsKnown, "contentsKnown", defaultValue: false);
+		Scribe_Values.Look(ref openedSignal, "openedSignal");
+	}
+
+	public override void SpawnSetup(Map map, bool respawningAfterLoad)
+	{
+		base.SpawnSetup(map, respawningAfterLoad);
+		if (base.Faction != null && base.Faction.IsPlayer)
+		{
+			contentsKnown = true;
 		}
+	}
 
-		// Token: 0x0600ECA6 RID: 60582 RVA: 0x0044B468 File Offset: 0x00449668
-		public virtual bool TryAcceptThing(Thing thing, bool allowSpecialEffects = true)
+	public override AcceptanceReport ClaimableBy(Faction fac)
+	{
+		if (innerContainer.Any && !contentsKnown)
 		{
-			if (!this.Accepts(thing))
-			{
-				return false;
-			}
-			bool flag;
-			if (thing.holdingOwner != null)
-			{
-				thing.holdingOwner.TryTransferToContainer(thing, this.innerContainer, thing.stackCount, true);
-				flag = true;
-			}
-			else
-			{
-				flag = this.innerContainer.TryAdd(thing, true);
-			}
-			if (flag)
-			{
-				if (thing.Faction != null && thing.Faction.IsPlayer)
-				{
-					this.contentsKnown = true;
-				}
-				return true;
-			}
 			return false;
 		}
+		return base.ClaimableBy(fac);
+	}
 
-		// Token: 0x0600ECA7 RID: 60583 RVA: 0x0044B4D8 File Offset: 0x004496D8
-		public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
+	public virtual bool Accepts(Thing thing)
+	{
+		return innerContainer.CanAcceptAnyOf(thing);
+	}
+
+	public virtual bool TryAcceptThing(Thing thing, bool allowSpecialEffects = true)
+	{
+		if (!Accepts(thing))
 		{
-			Map map = base.Map;
-			base.Destroy(mode);
-			if (this.innerContainer.Count > 0 && (mode == DestroyMode.Deconstruct || mode == DestroyMode.KillFinalize))
+			return false;
+		}
+		bool flag;
+		if (thing.holdingOwner != null)
+		{
+			thing.holdingOwner.TryTransferToContainer(thing, innerContainer, thing.stackCount);
+			flag = true;
+		}
+		else
+		{
+			flag = innerContainer.TryAdd(thing);
+		}
+		if (flag)
+		{
+			if (thing.Faction != null && thing.Faction.IsPlayer)
 			{
-				if (mode != DestroyMode.Deconstruct)
+				contentsKnown = true;
+			}
+			return true;
+		}
+		return false;
+	}
+
+	public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
+	{
+		Map map = base.Map;
+		base.Destroy(mode);
+		if (innerContainer.Count > 0 && (mode == DestroyMode.Deconstruct || mode == DestroyMode.KillFinalize))
+		{
+			if (mode != DestroyMode.Deconstruct)
+			{
+				List<Pawn> list = new List<Pawn>();
+				foreach (Thing item2 in (IEnumerable<Thing>)innerContainer)
 				{
-					List<Pawn> list = new List<Pawn>();
-					foreach (Thing thing in ((IEnumerable<Thing>)this.innerContainer))
+					if (item2 is Pawn item)
 					{
-						Pawn pawn = thing as Pawn;
-						if (pawn != null)
-						{
-							list.Add(pawn);
-						}
-					}
-					foreach (Pawn p in list)
-					{
-						HealthUtility.DamageUntilDowned(p, true, null, null, null);
+						list.Add(item);
 					}
 				}
-				this.innerContainer.TryDropAll(base.Position, map, ThingPlaceMode.Near, null, null, true);
+				foreach (Pawn item3 in list)
+				{
+					HealthUtility.DamageUntilDowned(item3);
+				}
 			}
-			this.innerContainer.ClearAndDestroyContents(DestroyMode.Vanish);
+			innerContainer.TryDropAll(base.Position, map, ThingPlaceMode.Near);
 		}
+		innerContainer.ClearAndDestroyContents();
+	}
 
-		// Token: 0x0600ECA8 RID: 60584 RVA: 0x0044B5C4 File Offset: 0x004497C4
-		public virtual void EjectContents()
+	public virtual void EjectContents()
+	{
+		innerContainer.TryDropAll(InteractionCell, base.Map, ThingPlaceMode.Near);
+		contentsKnown = true;
+	}
+
+	public override string GetInspectString()
+	{
+		string text = base.GetInspectString();
+		string str = (contentsKnown ? innerContainer.ContentsString : ((string)"UnknownLower".Translate()));
+		if (!text.NullOrEmpty())
 		{
-			this.innerContainer.TryDropAll(this.InteractionCell, base.Map, ThingPlaceMode.Near, null, null, true);
-			this.contentsKnown = true;
+			text += "\n";
 		}
-
-		// Token: 0x0600ECA9 RID: 60585 RVA: 0x0044B5EC File Offset: 0x004497EC
-		public override string GetInspectString()
-		{
-			string text = base.GetInspectString();
-			string str;
-			if (!this.contentsKnown)
-			{
-				str = "UnknownLower".Translate();
-			}
-			else
-			{
-				str = this.innerContainer.ContentsString;
-			}
-			if (!text.NullOrEmpty())
-			{
-				text += "\n";
-			}
-			return text + ("CasketContains".Translate() + ": " + str.CapitalizeFirst());
-		}
-
-		// Token: 0x04009CD4 RID: 40148
-		protected ThingOwner innerContainer;
-
-		// Token: 0x04009CD5 RID: 40149
-		protected bool contentsKnown;
-
-		// Token: 0x04009CD6 RID: 40150
-		public string openedSignal;
+		return text + ("CasketContains".Translate() + ": " + str.CapitalizeFirst());
 	}
 }

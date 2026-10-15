@@ -1,15 +1,15 @@
-﻿using System;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class RitualSpectatorFilter_WillWitnessExecution : RitualSpectatorFilter
 {
-	// Token: 0x020027C3 RID: 10179
-	public class RitualSpectatorFilter_WillWitnessExecution : RitualSpectatorFilter
+	public override bool Allowed(Pawn p)
 	{
-		// Token: 0x0600DEEF RID: 57071 RVA: 0x00418B8A File Offset: 0x00416D8A
-		public override bool Allowed(Pawn p)
+		if (p.IsSlave || p.Ideo == null)
 		{
-			return p.IsSlave || p.Ideo == null || p.Ideo.MemberWillingToDo(new HistoryEvent(HistoryEventDefOf.ExecutedPrisoner, p.Named(HistoryEventArgsNames.Doer)));
+			return true;
 		}
+		return p.Ideo.MemberWillingToDo(new HistoryEvent(HistoryEventDefOf.ExecutedPrisoner, p.Named(HistoryEventArgsNames.Doer)));
 	}
 }

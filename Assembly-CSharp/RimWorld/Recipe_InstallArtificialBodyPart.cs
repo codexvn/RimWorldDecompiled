@@ -1,103 +1,90 @@
-﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Recipe_InstallArtificialBodyPart : Recipe_Surgery
 {
-	// Token: 0x02002303 RID: 8963
-	public class Recipe_InstallArtificialBodyPart : Recipe_Surgery
+	public override IEnumerable<BodyPartRecord> GetPartsToApplyOn(Pawn pawn, RecipeDef recipe)
 	{
-		// Token: 0x0600C2C5 RID: 49861 RVA: 0x00387BB4 File Offset: 0x00385DB4
-		public override IEnumerable<BodyPartRecord> GetPartsToApplyOn(Pawn pawn, RecipeDef recipe)
+		return MedicalRecipesUtility.GetFixedPartsToApplyOn(recipe, pawn, delegate(BodyPartRecord record)
 		{
-			Func<Hediff, bool> <>9__2;
-			return MedicalRecipesUtility.GetFixedPartsToApplyOn(recipe, pawn, delegate(BodyPartRecord record)
+			IEnumerable<Hediff> source = pawn.health.hediffSet.hediffs.Where((Hediff x) => x.Part == record);
+			if (typeof(Hediff_AddedPart).IsAssignableFrom(recipe.addsHediff.hediffClass))
 			{
-				IEnumerable<Hediff> enumerable = from x in pawn.health.hediffSet.hediffs
-				where x.Part == record
-				select x;
-				if (typeof(Hediff_AddedPart).IsAssignableFrom(recipe.addsHediff.hediffClass))
+				if (source.Count() == 1 && source.First().def == recipe.addsHediff)
 				{
-					if (enumerable.Count<Hediff>() == 1 && enumerable.First<Hediff>().def == recipe.addsHediff)
-					{
-						return false;
-					}
+					return false;
 				}
-				else
-				{
-					IEnumerable<Hediff> source = enumerable;
-					Func<Hediff, bool> predicate;
-					if ((predicate = <>9__2) == null)
-					{
-						predicate = (<>9__2 = ((Hediff hd) => hd.def == recipe.addsHediff));
-					}
-					if (source.Any(predicate))
-					{
-						return false;
-					}
-				}
-				return (record.parent == null || pawn.health.hediffSet.GetNotMissingParts(BodyPartHeight.Undefined, BodyPartDepth.Undefined, null, null).Contains(record.parent)) && (!pawn.health.hediffSet.PartOrAnyAncestorHasDirectlyAddedParts(record) || pawn.health.hediffSet.HasDirectlyAddedPartFor(record));
-			});
-		}
+			}
+			else if (source.Any((Hediff hd) => hd.def == recipe.addsHediff))
+			{
+				return false;
+			}
+			if (record.parent != null && !pawn.health.hediffSet.GetNotMissingParts().Contains(record.parent))
+			{
+				return false;
+			}
+			return (!pawn.health.hediffSet.PartOrAnyAncestorHasDirectlyAddedParts(record) || pawn.health.hediffSet.HasDirectlyAddedPartFor(record)) ? true : false;
+		});
+	}
 
-		// Token: 0x0600C2C6 RID: 49862 RVA: 0x00387BF4 File Offset: 0x00385DF4
-		public override void ApplyOnPawn(Pawn pawn, BodyPartRecord part, Pawn billDoer, List<Thing> ingredients, Bill bill)
+	public override void ApplyOnPawn(Pawn pawn, BodyPartRecord part, Pawn billDoer, List<Thing> ingredients, Bill bill)
+	{
+		bool flag = MedicalRecipesUtility.IsClean(pawn, part);
+		bool flag2 = !PawnGenerator.IsBeingGenerated(pawn) && IsViolationOnPawn(pawn, part, Faction.OfPlayer);
+		Hediff hediff = null;
+		if (billDoer != null)
 		{
-			bool flag = MedicalRecipesUtility.IsClean(pawn, part);
-			bool flag2 = !PawnGenerator.IsBeingGenerated(pawn) && this.IsViolationOnPawn(pawn, part, Faction.OfPlayer);
-			Hediff hediff = null;
-			if (billDoer != null)
+			if (CheckSurgeryFail(billDoer, pawn, ingredients, part, bill))
 			{
-				if (base.CheckSurgeryFail(billDoer, pawn, ingredients, part, bill))
-				{
-					return;
-				}
-				TaleRecorder.RecordTale(TaleDefOf.DidSurgery, new object[]
-				{
-					billDoer,
-					pawn
-				});
-				hediff = pawn.health.hediffSet.GetDirectlyAddedPartFor(part);
-				if (part != null)
-				{
-					MedicalRecipesUtility.RestorePartAndSpawnAllPreviousParts(pawn, part, billDoer.Position, billDoer.Map);
-				}
-				if (flag && flag2 && part.def.spawnThingOnRemoved != null)
-				{
-					ThoughtUtility.GiveThoughtsForPawnOrganHarvested(pawn, billDoer);
-				}
-				if (flag2)
-				{
-					base.ReportViolation(pawn, billDoer, pawn.HomeFaction, -70, null);
-				}
-				if (ModsConfig.IdeologyActive)
-				{
-					Find.HistoryEventsManager.RecordEvent(new HistoryEvent(HistoryEventDefOf.InstalledProsthetic, billDoer.Named(HistoryEventArgsNames.Doer)), true);
-				}
+				return;
 			}
-			else if (pawn.Map != null)
+			TaleRecorder.RecordTale(TaleDefOf.DidSurgery, billDoer, pawn);
+			hediff = pawn.health.hediffSet.GetDirectlyAddedPartFor(part);
+			if (part != null)
 			{
-				if (part != null)
-				{
-					MedicalRecipesUtility.RestorePartAndSpawnAllPreviousParts(pawn, part, pawn.Position, pawn.Map);
-				}
+				MedicalRecipesUtility.RestorePartAndSpawnAllPreviousParts(pawn, part, billDoer.Position, billDoer.Map);
 			}
-			else if (part != null)
+			if (flag && flag2 && part.def.spawnThingOnRemoved != null)
 			{
-				pawn.health.RestorePart(part, null, true);
+				ThoughtUtility.GiveThoughtsForPawnOrganHarvested(pawn, billDoer);
 			}
-			pawn.health.AddHediff(this.recipe.addsHediff, part, null, null);
-			if (hediff != null)
+			if (flag2)
 			{
-				hediff.Notify_SurgicallyReplaced(billDoer);
+				ReportViolation(pawn, billDoer, pawn.HomeFaction, -70);
+			}
+			if (ModsConfig.IdeologyActive)
+			{
+				Find.HistoryEventsManager.RecordEvent(new HistoryEvent(HistoryEventDefOf.InstalledProsthetic, billDoer.Named(HistoryEventArgsNames.Doer)));
 			}
 		}
+		else if (pawn.Map != null)
+		{
+			if (part != null)
+			{
+				MedicalRecipesUtility.RestorePartAndSpawnAllPreviousParts(pawn, part, pawn.Position, pawn.Map);
+			}
+		}
+		else if (part != null)
+		{
+			pawn.health.RestorePart(part);
+		}
+		pawn.health.AddHediff(recipe.addsHediff, part, null);
+		hediff?.Notify_SurgicallyReplaced(billDoer);
+	}
 
-		// Token: 0x0600C2C7 RID: 49863 RVA: 0x00387D30 File Offset: 0x00385F30
-		public override bool IsViolationOnPawn(Pawn pawn, BodyPartRecord part, Faction billDoerFaction)
+	public override bool IsViolationOnPawn(Pawn pawn, BodyPartRecord part, Faction billDoerFaction)
+	{
+		if ((pawn.Faction == billDoerFaction || pawn.Faction == null) && !pawn.IsQuestLodger())
 		{
-			return ((pawn.Faction != billDoerFaction && pawn.Faction != null) || pawn.IsQuestLodger()) && (this.recipe.addsHediff.addedPartProps == null || !this.recipe.addsHediff.addedPartProps.betterThanNatural) && HealthUtility.PartRemovalIntent(pawn, part) == BodyPartRemovalIntent.Harvest;
+			return false;
 		}
+		if (recipe.addsHediff.addedPartProps != null && recipe.addsHediff.addedPartProps.betterThanNatural)
+		{
+			return false;
+		}
+		return HealthUtility.PartRemovalIntent(pawn, part) == BodyPartRemovalIntent.Harvest;
 	}
 }

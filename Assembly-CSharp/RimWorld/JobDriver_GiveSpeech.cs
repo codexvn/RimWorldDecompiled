@@ -1,147 +1,230 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 
-namespace RimWorld
+namespace RimWorld;
+
+[StaticConstructorOnStartup]
+public class JobDriver_GiveSpeech : JobDriver
 {
-	// Token: 0x020011A9 RID: 4521
-	[StaticConstructorOnStartup]
-	public class JobDriver_GiveSpeech : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__11 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001124 RID: 4388
-		// (get) Token: 0x06006E8B RID: 28299 RVA: 0x00227D5B File Offset: 0x00225F5B
-		private Building_Throne Throne
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_GiveSpeech _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (Building_Throne)base.TargetThingA;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06006E8C RID: 28300 RVA: 0x00227D68 File Offset: 0x00225F68
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		object IEnumerator.Current
 		{
-			if (this.Throne != null)
+			[DebuggerHidden]
+			get
 			{
-				return this.pawn.Reserve(this.Throne, this.job, 1, -1, null, errorOnFailed, false);
+				return _003C_003E2__current;
 			}
-			return this.pawn.Reserve(base.TargetLocA, this.job, 1, -1, null, errorOnFailed, false);
 		}
 
-		// Token: 0x06006E8D RID: 28301 RVA: 0x00227DC0 File Offset: 0x00225FC0
-		protected override IEnumerable<Toil> MakeNewToils()
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__11(int _003C_003E1__state)
 		{
-			this.FailOnDespawnedNullOrForbidden(TargetIndex.A);
-			yield return Toils_Goto.GotoCell(TargetIndex.A, PathEndMode.OnCell);
-			yield return Toils_General.Do(delegate
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_GiveSpeech CS_0024_003C_003E8__locals36 = _003C_003E4__this;
+			switch (num)
 			{
-				LocalTargetInfo pack = (this.Throne != null) ? (this.Throne.InteractionCell + this.Throne.Rotation.FacingCell) : base.TargetB;
-				this.job.SetTarget(TargetIndex.B, pack);
-			});
-			Toil toil = ToilMaker.MakeToil("MakeNewToils");
-			if (this.Throne != null)
-			{
-				toil.FailOnCannotTouch(TargetIndex.A, PathEndMode.InteractionCell);
-				toil.FailOn(() => this.Throne.AssignedPawn != this.pawn);
-				toil.FailOn(() => RoomRoleWorker_ThroneRoom.Validate(this.Throne.GetRoom(RegionType.Set_All)) != null);
-			}
-			else
-			{
-				toil.FailOnCannotTouch(TargetIndex.A, PathEndMode.OnCell);
-			}
-			toil.tickIntervalAction = delegate(int delta)
-			{
-				this.pawn.GainComfortFromCellIfPossible(delta, false);
-				this.pawn.skills.Learn(SkillDefOf.Social, 0.3f * (float)delta, false, false);
-				if (this.ticksTillSocialInteraction <= 0)
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				CS_0024_003C_003E8__locals36.FailOnDespawnedNullOrForbidden(TargetIndex.A);
+				_003C_003E2__current = Toils_Goto.GotoCell(TargetIndex.A, PathEndMode.OnCell);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.Do(delegate
 				{
-					if (this.job.showSpeechBubbles)
-					{
-						MoteMaker.MakeSpeechBubble(this.pawn, JobDriver_GiveSpeech.moteIcon);
-					}
-					if (this.job.interaction != null)
-					{
-						Lord lord = this.pawn.GetLord();
-						LordJob_Ritual lordJob_Ritual = ((lord != null) ? lord.LordJob : null) as LordJob_Ritual;
-						if (lordJob_Ritual != null)
-						{
-							SocialInteractionUtility.ImitateSocialInteractionWithManyPawns(this.pawn, lordJob_Ritual.lord.ownedPawns, this.job.interaction);
-						}
-					}
-					this.ticksTillSocialInteraction = JobDriver_GiveSpeech.SocialInteractionInterval;
-				}
-				if (this.ticksTillFacingUpdate == 0)
+					LocalTargetInfo pack = ((CS_0024_003C_003E8__locals36.Throne != null) ? ((LocalTargetInfo)(CS_0024_003C_003E8__locals36.Throne.InteractionCell + CS_0024_003C_003E8__locals36.Throne.Rotation.FacingCell)) : CS_0024_003C_003E8__locals36.TargetB);
+					CS_0024_003C_003E8__locals36.job.SetTarget(TargetIndex.B, pack);
+				});
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+			{
+				_003C_003E1__state = -1;
+				Toil toil = ToilMaker.MakeToil("MakeNewToils");
+				if (CS_0024_003C_003E8__locals36.Throne != null)
 				{
-					IntVec3 intVec = RitualUtility.RitualCrowdCenterFor(this.pawn);
-					if (intVec.IsValid)
-					{
-						this.facingCellCached = intVec;
-					}
-					this.ticksTillFacingUpdate = JobDriver_GiveSpeech.FacingUpdateInterval;
-				}
-				if (this.facingCellCached.IsValid)
-				{
-					this.pawn.rotationTracker.FaceTarget(this.facingCellCached);
+					toil.FailOnCannotTouch(TargetIndex.A, PathEndMode.InteractionCell);
+					toil.FailOn(() => CS_0024_003C_003E8__locals36.Throne.AssignedPawn != CS_0024_003C_003E8__locals36.pawn);
+					toil.FailOn(() => RoomRoleWorker_ThroneRoom.Validate(CS_0024_003C_003E8__locals36.Throne.GetRoom()) != null);
 				}
 				else
 				{
-					this.pawn.rotationTracker.FaceTarget(this.job.GetTarget(TargetIndex.B));
+					toil.FailOnCannotTouch(TargetIndex.A, PathEndMode.OnCell);
 				}
-				this.rotateToFace = TargetIndex.B;
-				this.ticksTillSocialInteraction -= delta;
-				this.ticksTillFacingUpdate -= delta;
-			};
-			if (ModsConfig.IdeologyActive)
-			{
-				toil.PlaySustainerOrSound(delegate()
+				toil.tickIntervalAction = delegate(int delta)
 				{
-					if (this.pawn.gender != Gender.Female)
+					CS_0024_003C_003E8__locals36.pawn.GainComfortFromCellIfPossible(delta);
+					CS_0024_003C_003E8__locals36.pawn.skills.Learn(SkillDefOf.Social, 0.3f * (float)delta);
+					if (CS_0024_003C_003E8__locals36.ticksTillSocialInteraction <= 0)
 					{
-						return this.job.speechSoundMale;
+						if (CS_0024_003C_003E8__locals36.job.showSpeechBubbles)
+						{
+							MoteMaker.MakeSpeechBubble(CS_0024_003C_003E8__locals36.pawn, moteIcon);
+						}
+						if (CS_0024_003C_003E8__locals36.job.interaction != null && CS_0024_003C_003E8__locals36.pawn.GetLord()?.LordJob is LordJob_Ritual lordJob_Ritual)
+						{
+							SocialInteractionUtility.ImitateSocialInteractionWithManyPawns(CS_0024_003C_003E8__locals36.pawn, lordJob_Ritual.lord.ownedPawns, CS_0024_003C_003E8__locals36.job.interaction);
+						}
+						CS_0024_003C_003E8__locals36.ticksTillSocialInteraction = SocialInteractionInterval;
 					}
-					return this.job.speechSoundFemale;
-				}, this.pawn.story.VoicePitchFactor);
+					if (CS_0024_003C_003E8__locals36.ticksTillFacingUpdate == 0)
+					{
+						IntVec3 facingCellCached = RitualUtility.RitualCrowdCenterFor(CS_0024_003C_003E8__locals36.pawn);
+						if (facingCellCached.IsValid)
+						{
+							CS_0024_003C_003E8__locals36.facingCellCached = facingCellCached;
+						}
+						CS_0024_003C_003E8__locals36.ticksTillFacingUpdate = FacingUpdateInterval;
+					}
+					if (CS_0024_003C_003E8__locals36.facingCellCached.IsValid)
+					{
+						CS_0024_003C_003E8__locals36.pawn.rotationTracker.FaceTarget(CS_0024_003C_003E8__locals36.facingCellCached);
+					}
+					else
+					{
+						CS_0024_003C_003E8__locals36.pawn.rotationTracker.FaceTarget(CS_0024_003C_003E8__locals36.job.GetTarget(TargetIndex.B));
+					}
+					CS_0024_003C_003E8__locals36.rotateToFace = TargetIndex.B;
+					CS_0024_003C_003E8__locals36.ticksTillSocialInteraction -= delta;
+					CS_0024_003C_003E8__locals36.ticksTillFacingUpdate -= delta;
+				};
+				if (ModsConfig.IdeologyActive)
+				{
+					toil.PlaySustainerOrSound(() => (CS_0024_003C_003E8__locals36.pawn.gender != Gender.Female) ? CS_0024_003C_003E8__locals36.job.speechSoundMale : CS_0024_003C_003E8__locals36.job.speechSoundFemale, CS_0024_003C_003E8__locals36.pawn.story.VoicePitchFactor);
+				}
+				toil.defaultCompleteMode = ToilCompleteMode.Never;
+				toil.handlingFacing = true;
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 3;
+				return true;
 			}
-			toil.defaultCompleteMode = ToilCompleteMode.Never;
-			toil.handlingFacing = true;
-			yield return toil;
-			yield break;
+			case 3:
+				_003C_003E1__state = -1;
+				return false;
+			}
 		}
 
-		// Token: 0x06006E8E RID: 28302 RVA: 0x00227DD0 File Offset: 0x00225FD0
-		public override void ExposeData()
+		bool IEnumerator.MoveNext()
 		{
-			base.ExposeData();
-			Scribe_Values.Look<int>(ref this.ticksTillSocialInteraction, "ticksTillSocialInteraction", 0, false);
-			Scribe_Values.Look<int>(ref this.ticksTillFacingUpdate, "ticksTillFacingUpdate", 0, false);
-			Scribe_Values.Look<IntVec3>(ref this.facingCellCached, "facingCellCached", default(IntVec3), false);
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x04004D30 RID: 19760
-		private int ticksTillSocialInteraction = 60;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04004D31 RID: 19761
-		private int ticksTillFacingUpdate;
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__11 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__11(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x04004D32 RID: 19762
-		private IntVec3 facingCellCached = IntVec3.Invalid;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x04004D33 RID: 19763
-		private const TargetIndex StandIndex = TargetIndex.A;
+	private int ticksTillSocialInteraction = 60;
 
-		// Token: 0x04004D34 RID: 19764
-		private const TargetIndex FacingIndex = TargetIndex.B;
+	private int ticksTillFacingUpdate;
 
-		// Token: 0x04004D35 RID: 19765
-		private static readonly int SocialInteractionInterval = 480;
+	private IntVec3 facingCellCached = IntVec3.Invalid;
 
-		// Token: 0x04004D36 RID: 19766
-		private static readonly int FacingUpdateInterval = 20;
+	private const TargetIndex StandIndex = TargetIndex.A;
 
-		// Token: 0x04004D37 RID: 19767
-		public static readonly Texture2D moteIcon = ContentFinder<Texture2D>.Get("Things/Mote/SpeechSymbols/Speech", true);
+	private const TargetIndex FacingIndex = TargetIndex.B;
+
+	private static readonly int SocialInteractionInterval = 480;
+
+	private static readonly int FacingUpdateInterval = 20;
+
+	public static readonly Texture2D moteIcon = ContentFinder<Texture2D>.Get("Things/Mote/SpeechSymbols/Speech");
+
+	private Building_Throne Throne => (Building_Throne)base.TargetThingA;
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		if (Throne != null)
+		{
+			return pawn.Reserve(Throne, job, 1, -1, null, errorOnFailed);
+		}
+		return pawn.Reserve(base.TargetLocA, job, 1, -1, null, errorOnFailed);
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__11))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__11(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref ticksTillSocialInteraction, "ticksTillSocialInteraction", 0);
+		Scribe_Values.Look(ref ticksTillFacingUpdate, "ticksTillFacingUpdate", 0);
+		Scribe_Values.Look(ref facingCellCached, "facingCellCached");
 	}
 }

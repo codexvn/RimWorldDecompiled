@@ -1,131 +1,100 @@
-﻿using System;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompTemperatureRuinable : ThingComp
 {
-	// Token: 0x02002E81 RID: 11905
-	public class CompTemperatureRuinable : ThingComp
+	protected float ruinedPercent;
+
+	public const string RuinedSignal = "RuinedByTemperature";
+
+	public CompProperties_TemperatureRuinable Props => (CompProperties_TemperatureRuinable)props;
+
+	public bool Ruined => ruinedPercent >= 1f;
+
+	public override void PostExposeData()
 	{
-		// Token: 0x17002B06 RID: 11014
-		// (get) Token: 0x06010C29 RID: 68649 RVA: 0x004D4591 File Offset: 0x004D2791
-		public CompProperties_TemperatureRuinable Props
+		Scribe_Values.Look(ref ruinedPercent, "ruinedPercent", 0f);
+	}
+
+	public void Reset()
+	{
+		ruinedPercent = 0f;
+	}
+
+	public override void CompTickRare()
+	{
+		CompTick();
+	}
+
+	public override void CompTick()
+	{
+		if (!Ruined)
 		{
-			get
+			float ambientTemperature = parent.AmbientTemperature;
+			if (ambientTemperature > Props.maxSafeTemperature)
 			{
-				return (CompProperties_TemperatureRuinable)this.props;
+				ruinedPercent += (ambientTemperature - Props.maxSafeTemperature) * Props.progressPerDegreePerTick;
+			}
+			else if (ambientTemperature < Props.minSafeTemperature)
+			{
+				ruinedPercent -= (ambientTemperature - Props.minSafeTemperature) * Props.progressPerDegreePerTick;
+			}
+			if (ruinedPercent >= 1f)
+			{
+				ruinedPercent = 1f;
+				parent.BroadcastCompSignal("RuinedByTemperature");
+			}
+			else if (ruinedPercent < 0f)
+			{
+				ruinedPercent = 0f;
 			}
 		}
+	}
 
-		// Token: 0x17002B07 RID: 11015
-		// (get) Token: 0x06010C2A RID: 68650 RVA: 0x004D459E File Offset: 0x004D279E
-		public bool Ruined
+	public override void PreAbsorbStack(Thing otherStack, int count)
+	{
+		float t = (float)count / (float)(parent.stackCount + count);
+		CompTemperatureRuinable comp = ((ThingWithComps)otherStack).GetComp<CompTemperatureRuinable>();
+		ruinedPercent = Mathf.Lerp(ruinedPercent, comp.ruinedPercent, t);
+	}
+
+	public override bool AllowStackWith(Thing other)
+	{
+		CompTemperatureRuinable comp = ((ThingWithComps)other).GetComp<CompTemperatureRuinable>();
+		return Ruined == comp.Ruined;
+	}
+
+	public override void PostSplitOff(Thing piece)
+	{
+		((ThingWithComps)piece).GetComp<CompTemperatureRuinable>().ruinedPercent = ruinedPercent;
+	}
+
+	public override string CompInspectStringExtra()
+	{
+		if (Ruined)
 		{
-			get
+			return "RuinedByTemperature".Translate();
+		}
+		if (ruinedPercent > 0f)
+		{
+			float ambientTemperature = parent.AmbientTemperature;
+			string text;
+			if (ambientTemperature > Props.maxSafeTemperature)
 			{
-				return this.ruinedPercent >= 1f;
+				text = "Overheating".Translate();
 			}
-		}
-
-		// Token: 0x06010C2B RID: 68651 RVA: 0x004D45B0 File Offset: 0x004D27B0
-		public override void PostExposeData()
-		{
-			Scribe_Values.Look<float>(ref this.ruinedPercent, "ruinedPercent", 0f, false);
-		}
-
-		// Token: 0x06010C2C RID: 68652 RVA: 0x004D45C8 File Offset: 0x004D27C8
-		public void Reset()
-		{
-			this.ruinedPercent = 0f;
-		}
-
-		// Token: 0x06010C2D RID: 68653 RVA: 0x004A1C8D File Offset: 0x0049FE8D
-		public override void CompTickRare()
-		{
-			this.CompTick();
-		}
-
-		// Token: 0x06010C2E RID: 68654 RVA: 0x004D45D8 File Offset: 0x004D27D8
-		public override void CompTick()
-		{
-			if (this.Ruined)
+			else
 			{
-				return;
-			}
-			float ambientTemperature = this.parent.AmbientTemperature;
-			if (ambientTemperature > this.Props.maxSafeTemperature)
-			{
-				this.ruinedPercent += (ambientTemperature - this.Props.maxSafeTemperature) * this.Props.progressPerDegreePerTick;
-			}
-			else if (ambientTemperature < this.Props.minSafeTemperature)
-			{
-				this.ruinedPercent -= (ambientTemperature - this.Props.minSafeTemperature) * this.Props.progressPerDegreePerTick;
-			}
-			if (this.ruinedPercent >= 1f)
-			{
-				this.ruinedPercent = 1f;
-				this.parent.BroadcastCompSignal("RuinedByTemperature");
-				return;
-			}
-			if (this.ruinedPercent < 0f)
-			{
-				this.ruinedPercent = 0f;
-			}
-		}
-
-		// Token: 0x06010C2F RID: 68655 RVA: 0x004D46A8 File Offset: 0x004D28A8
-		public override void PreAbsorbStack(Thing otherStack, int count)
-		{
-			float t = (float)count / (float)(this.parent.stackCount + count);
-			CompTemperatureRuinable comp = ((ThingWithComps)otherStack).GetComp<CompTemperatureRuinable>();
-			this.ruinedPercent = Mathf.Lerp(this.ruinedPercent, comp.ruinedPercent, t);
-		}
-
-		// Token: 0x06010C30 RID: 68656 RVA: 0x004D46EC File Offset: 0x004D28EC
-		public override bool AllowStackWith(Thing other)
-		{
-			CompTemperatureRuinable comp = ((ThingWithComps)other).GetComp<CompTemperatureRuinable>();
-			return this.Ruined == comp.Ruined;
-		}
-
-		// Token: 0x06010C31 RID: 68657 RVA: 0x004D4713 File Offset: 0x004D2913
-		public override void PostSplitOff(Thing piece)
-		{
-			((ThingWithComps)piece).GetComp<CompTemperatureRuinable>().ruinedPercent = this.ruinedPercent;
-		}
-
-		// Token: 0x06010C32 RID: 68658 RVA: 0x004D472C File Offset: 0x004D292C
-		public override string CompInspectStringExtra()
-		{
-			if (this.Ruined)
-			{
-				return "RuinedByTemperature".Translate();
-			}
-			if (this.ruinedPercent > 0f)
-			{
-				float ambientTemperature = this.parent.AmbientTemperature;
-				string str;
-				if (ambientTemperature > this.Props.maxSafeTemperature)
+				if (!(ambientTemperature < Props.minSafeTemperature))
 				{
-					str = "Overheating".Translate();
+					return null;
 				}
-				else
-				{
-					if (ambientTemperature >= this.Props.minSafeTemperature)
-					{
-						return null;
-					}
-					str = "Freezing".Translate();
-				}
-				return str + ": " + this.ruinedPercent.ToStringPercent();
+				text = "Freezing".Translate();
 			}
-			return null;
+			return text + ": " + ruinedPercent.ToStringPercent();
 		}
-
-		// Token: 0x0400AEA0 RID: 44704
-		protected float ruinedPercent;
-
-		// Token: 0x0400AEA1 RID: 44705
-		public const string RuinedSignal = "RuinedByTemperature";
+		return null;
 	}
 }

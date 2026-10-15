@@ -1,21 +1,123 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class ThoughtWorker_Precept_HighLife : ThoughtWorker_Precept, IPreceptCompDescriptionArgs
 {
-	// Token: 0x02001807 RID: 6151
-	public class ThoughtWorker_Precept_HighLife : ThoughtWorker_Precept, IPreceptCompDescriptionArgs
+	[CompilerGenerated]
+	private sealed class _003CGetDescriptionArgs_003Ed__6 : IEnumerable<NamedArgument>, IEnumerable, IEnumerator<NamedArgument>, IEnumerator, IDisposable
 	{
-		// Token: 0x06008E98 RID: 36504 RVA: 0x002A37B8 File Offset: 0x002A19B8
-		protected override ThoughtState ShouldHaveThought(Pawn p)
+		private int _003C_003E1__state;
+
+		private NamedArgument _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		NamedArgument IEnumerator<NamedArgument>.Current
 		{
-			if (ThoughtUtility.ThoughtNullified(p, this.def))
+			[DebuggerHidden]
+			get
 			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetDescriptionArgs_003Ed__6(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			switch (_003C_003E1__state)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = 0.75f.ToString("F2").Named("DAYSSATISIFED");
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
 				return false;
 			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<NamedArgument> IEnumerable<NamedArgument>.GetEnumerator()
+		{
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				return this;
+			}
+			return new _003CGetDescriptionArgs_003Ed__6(0);
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<NamedArgument>)this).GetEnumerator();
+		}
+	}
+
+	private const float DaysSatisfied = 0.75f;
+
+	private const float DaysNoBonus = 1f;
+
+	private const float DaysMissing = 2f;
+
+	private const float DaysMissing_Major = 11f;
+
+	public static readonly SimpleCurve MoodOffsetFromDaysSinceLastDrugCurve = new SimpleCurve
+	{
+		new CurvePoint(0.75f, 3f),
+		new CurvePoint(1f, 0f),
+		new CurvePoint(2f, -1f),
+		new CurvePoint(11f, -10f)
+	};
+
+	protected override ThoughtState ShouldHaveThought(Pawn p)
+	{
+		if (!ThoughtUtility.ThoughtNullified(p, def))
+		{
 			float num = (float)(Find.TickManager.TicksGame - p.mindState.lastTakeRecreationalDrugTick) / 60000f;
-			if (num > 1f && this.def.minExpectationForNegativeThought != null && p.MapHeld != null && ExpectationsUtility.CurrentExpectationFor(p.MapHeld).order < this.def.minExpectationForNegativeThought.order)
+			if (num > 1f && def.minExpectationForNegativeThought != null && p.MapHeld != null && ExpectationsUtility.CurrentExpectationFor(p.MapHeld).order < def.minExpectationForNegativeThought.order)
 			{
 				return false;
 			}
@@ -33,45 +135,13 @@ namespace RimWorld
 			}
 			return ThoughtState.ActiveAtStage(3);
 		}
+		return false;
+	}
 
-		// Token: 0x06008E99 RID: 36505 RVA: 0x002A3874 File Offset: 0x002A1A74
-		public IEnumerable<NamedArgument> GetDescriptionArgs()
-		{
-			yield return 0.75f.ToString("F2").Named("DAYSSATISIFED");
-			yield break;
-		}
-
-		// Token: 0x04005BFB RID: 23547
-		private const float DaysSatisfied = 0.75f;
-
-		// Token: 0x04005BFC RID: 23548
-		private const float DaysNoBonus = 1f;
-
-		// Token: 0x04005BFD RID: 23549
-		private const float DaysMissing = 2f;
-
-		// Token: 0x04005BFE RID: 23550
-		private const float DaysMissing_Major = 11f;
-
-		// Token: 0x04005BFF RID: 23551
-		public static readonly SimpleCurve MoodOffsetFromDaysSinceLastDrugCurve = new SimpleCurve
-		{
-			{
-				new CurvePoint(0.75f, 3f),
-				true
-			},
-			{
-				new CurvePoint(1f, 0f),
-				true
-			},
-			{
-				new CurvePoint(2f, -1f),
-				true
-			},
-			{
-				new CurvePoint(11f, -10f),
-				true
-			}
-		};
+	[IteratorStateMachine(typeof(_003CGetDescriptionArgs_003Ed__6))]
+	public IEnumerable<NamedArgument> GetDescriptionArgs()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetDescriptionArgs_003Ed__6(-2);
 	}
 }

@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using Brutal.Logging;
 using Microsoft.Extensions.Logging;
@@ -23,6 +24,7 @@ internal static class Program
 		WaylithLogFormatter.EnableStackTraces = !HasSwitch("DisableLogStackTraces");
 		Bootstrap.WatchShaders = HasSwitch("WatchShaders");
 		FileLog.Disabled = HasSwitch("NoFileLog");
+		FileLog.SetDirectory(Bootstrap.ResolveEarlyLogRoot());
 		if (HasSwitch("NoFileLogCallstacks"))
 		{
 			FileLog.CaptureStackTraces = false;
@@ -39,6 +41,7 @@ internal static class Program
 			CommandLineAccessor = commandLine,
 			EnableVideoDecode = true,
 			DisallowFullscreenExclusive = HasSwitch("DisplayCaptureCompatibilityMode"),
+			BundledVulkanLoaderPath = (OperatingSystem.IsWindows() ? Path.Combine(AppContext.BaseDirectory, "vulkan", "vulkan-1.dll") : null),
 			ShowCrashDialog = !HasSwitch("NoCrashDialog"),
 			CrashReportInstructions = "Please report the crash to Ludeon Studios and attach the newest report from that folder together with the game log.",
 			AudioBackend = new MiniAudioBackend()

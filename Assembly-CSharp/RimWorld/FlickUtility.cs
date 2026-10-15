@@ -1,59 +1,56 @@
-﻿using System;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public static class FlickUtility
 {
-	// Token: 0x02001EA3 RID: 7843
-	public static class FlickUtility
+	public static void UpdateFlickDesignation(Thing t)
 	{
-		// Token: 0x0600AE0C RID: 44556 RVA: 0x0031A078 File Offset: 0x00318278
-		public static void UpdateFlickDesignation(Thing t)
+		bool flag = false;
+		if (t is ThingWithComps thingWithComps)
 		{
-			bool flag = false;
-			ThingWithComps thingWithComps = t as ThingWithComps;
-			if (thingWithComps != null)
+			for (int i = 0; i < thingWithComps.AllComps.Count; i++)
 			{
-				for (int i = 0; i < thingWithComps.AllComps.Count; i++)
+				if (thingWithComps.AllComps[i] is CompFlickable compFlickable && compFlickable.WantsFlick())
 				{
-					CompFlickable compFlickable = thingWithComps.AllComps[i] as CompFlickable;
-					if (compFlickable != null && compFlickable.WantsFlick())
-					{
-						flag = true;
-						break;
-					}
+					flag = true;
+					break;
 				}
 			}
-			Designation designation = t.Map.designationManager.DesignationOn(t, DesignationDefOf.Flick);
-			if (flag && designation == null)
-			{
-				t.Map.designationManager.AddDesignation(new Designation(t, DesignationDefOf.Flick, null));
-			}
-			else if (!flag && designation != null)
-			{
-				designation.Delete();
-			}
-			TutorUtility.DoModalDialogIfNotKnown(ConceptDefOf.SwitchFlickingDesignation, Array.Empty<string>());
 		}
-
-		// Token: 0x0600AE0D RID: 44557 RVA: 0x0031A128 File Offset: 0x00318328
-		public static bool WantsToBeOn(Thing t)
+		Designation designation = t.Map.designationManager.DesignationOn(t, DesignationDefOf.Flick);
+		if (flag && designation == null)
 		{
-			CompFlickable compFlickable = t.TryGetComp<CompFlickable>();
-			if (compFlickable != null && !compFlickable.SwitchIsOn)
-			{
-				return false;
-			}
-			CompSchedule compSchedule = t.TryGetComp<CompSchedule>();
-			if (compSchedule != null && !compSchedule.Allowed)
-			{
-				return false;
-			}
-			if (t.TryGetComp<CompLightball>() != null && !t.IsRitualTarget())
-			{
-				return false;
-			}
-			CompAutoPowered compAutoPowered = t.TryGetComp<CompAutoPowered>();
-			return compAutoPowered == null || compAutoPowered.WantsToBeOn;
+			t.Map.designationManager.AddDesignation(new Designation(t, DesignationDefOf.Flick));
 		}
+		else if (!flag)
+		{
+			designation?.Delete();
+		}
+		TutorUtility.DoModalDialogIfNotKnown(ConceptDefOf.SwitchFlickingDesignation);
+	}
+
+	public static bool WantsToBeOn(Thing t)
+	{
+		CompFlickable compFlickable = t.TryGetComp<CompFlickable>();
+		if (compFlickable != null && !compFlickable.SwitchIsOn)
+		{
+			return false;
+		}
+		CompSchedule compSchedule = t.TryGetComp<CompSchedule>();
+		if (compSchedule != null && !compSchedule.Allowed)
+		{
+			return false;
+		}
+		if (t.TryGetComp<CompLightball>() != null && !t.IsRitualTarget())
+		{
+			return false;
+		}
+		CompAutoPowered compAutoPowered = t.TryGetComp<CompAutoPowered>();
+		if (compAutoPowered != null && !compAutoPowered.WantsToBeOn)
+		{
+			return false;
+		}
+		return true;
 	}
 }

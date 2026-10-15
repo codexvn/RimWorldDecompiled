@@ -10,6 +10,8 @@ public sealed class GpuDescription
 
 	public required string Driver { get; init; }
 
+	public required int ApiVersion { get; init; }
+
 	public required VkPhysicalDeviceType DeviceType { get; init; }
 
 	public required long VramBytes { get; init; }

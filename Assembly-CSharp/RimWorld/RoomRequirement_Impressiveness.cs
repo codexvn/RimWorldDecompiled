@@ -1,49 +1,194 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class RoomRequirement_Impressiveness : RoomRequirement
 {
-	// Token: 0x020037B0 RID: 14256
-	public class RoomRequirement_Impressiveness : RoomRequirement
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__3 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x06013C1A RID: 80922 RVA: 0x005DD710 File Offset: 0x005DB910
-		public override string Label(Room r = null)
-		{
-			return ((!this.labelKey.NullOrEmpty()) ? this.labelKey : "RoomRequirementImpressiveness").Translate() + " " + ((r != null) ? (Mathf.Round(r.GetStat(RoomStatDefOf.Impressiveness)).ToString() + "/") : "") + this.impressiveness.ToString();
-		}
+		private int _003C_003E1__state;
 
-		// Token: 0x06013C1B RID: 80923 RVA: 0x005DD78C File Offset: 0x005DB98C
-		public override bool Met(Room r, Pawn p = null)
-		{
-			return Mathf.Round(r.GetStat(RoomStatDefOf.Impressiveness)) >= (float)this.impressiveness;
-		}
+		private string _003C_003E2__current;
 
-		// Token: 0x06013C1C RID: 80924 RVA: 0x005DD7AA File Offset: 0x005DB9AA
-		public override IEnumerable<string> ConfigErrors()
+		private int _003C_003El__initialThreadId;
+
+		public RoomRequirement_Impressiveness _003C_003E4__this;
+
+		private IEnumerator<string> _003C_003E7__wrap1;
+
+		string IEnumerator<string>.Current
 		{
-			foreach (string text in base.ConfigErrors())
+			[DebuggerHidden]
+			get
 			{
-				yield return text;
+				return _003C_003E2__current;
 			}
-			IEnumerator<string> enumerator = null;
-			if (this.impressiveness <= 0)
-			{
-				yield return "impressiveness must be larger than 0";
-			}
-			yield break;
-			yield break;
 		}
 
-		// Token: 0x06013C1D RID: 80925 RVA: 0x005DD7BA File Offset: 0x005DB9BA
-		public override void ExposeData()
+		object IEnumerator.Current
 		{
-			base.ExposeData();
-			Scribe_Values.Look<int>(ref this.impressiveness, "impressiveness", 0, false);
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x0400DACB RID: 56011
-		public int impressiveness;
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__3(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				RoomRequirement_Impressiveness roomRequirement_Impressiveness = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((RoomRequirement)roomRequirement_Impressiveness).ConfigErrors().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_006f:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (roomRequirement_Impressiveness.impressiveness <= 0)
+					{
+						_003C_003E2__current = "impressiveness must be larger than 0";
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__3 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__3(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	public int impressiveness;
+
+	public override string Label(Room r = null)
+	{
+		return string.Concat(((!labelKey.NullOrEmpty()) ? labelKey : "RoomRequirementImpressiveness").Translate() + " " + ((r != null) ? (Mathf.Round(r.GetStat(RoomStatDefOf.Impressiveness)) + "/") : ""), impressiveness.ToString());
+	}
+
+	public override bool Met(Room r, Pawn p = null)
+	{
+		return Mathf.Round(r.GetStat(RoomStatDefOf.Impressiveness)) >= (float)impressiveness;
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__3))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__3(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref impressiveness, "impressiveness", 0);
 	}
 }

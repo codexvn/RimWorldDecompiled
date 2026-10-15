@@ -1,225 +1,318 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Comp_AtmosphericHeater : CompTempControl, IThingGlower
 {
-	// Token: 0x02002ED4 RID: 11988
-	public class Comp_AtmosphericHeater : CompTempControl, IThingGlower
+	private class Command_GroupedTempChange : Command_Action
 	{
-		// Token: 0x17002BA5 RID: 11173
-		// (get) Token: 0x06010ECC RID: 69324 RVA: 0x004DF13C File Offset: 0x004DD33C
-		private GameCondition_UnnaturalHeat Condition
+		private Comp_AtmosphericHeater heater;
+
+		private float offset;
+
+		public Command_GroupedTempChange(Comp_AtmosphericHeater heater, float offset)
 		{
+			this.heater = heater;
+			this.offset = offset;
+		}
+
+		public override void ProcessInput(Event ev)
+		{
+		}
+
+		public override void ProcessGroupInput(Event ev, List<Gizmo> group)
+		{
+			heater.InterfaceChangeTargetTemperature(offset);
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CCompGetGizmosExtra_003Ed__20 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Comp_AtmosphericHeater _003C_003E4__this;
+
+		Gizmo IEnumerator<Gizmo>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				GameCondition_UnnaturalHeat gameCondition_UnnaturalHeat = this.parent.Map.gameConditionManager.GetActiveCondition(GameConditionDefOf.UnnaturalHeat) as GameCondition_UnnaturalHeat;
-				if (gameCondition_UnnaturalHeat == null)
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CCompGetGizmosExtra_003Ed__20(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			Comp_AtmosphericHeater CS_0024_003C_003E8__locals10 = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+			{
+				_003C_003E1__state = -1;
+				float num5 = CS_0024_003C_003E8__locals10.RoundedToCurrentTempModeOffset(-10f);
+				_003C_003E2__current = new Command_GroupedTempChange(CS_0024_003C_003E8__locals10, num5)
 				{
-					gameCondition_UnnaturalHeat = (GameCondition_UnnaturalHeat)GameConditionMaker.MakeCondition(GameConditionDefOf.UnnaturalHeat, -1);
-					this.parent.Map.GameConditionManager.RegisterCondition(gameCondition_UnnaturalHeat);
-					gameCondition_UnnaturalHeat.Permanent = true;
-				}
-				return gameCondition_UnnaturalHeat;
+					defaultLabel = num5.ToStringTemperatureOffset("F0"),
+					defaultDesc = "CommandLowerTempDesc".Translate(),
+					hotKey = KeyBindingDefOf.Misc5,
+					icon = ContentFinder<Texture2D>.Get("UI/Commands/TempLower")
+				};
+				_003C_003E1__state = 1;
+				return true;
 			}
-		}
-
-		// Token: 0x17002BA6 RID: 11174
-		// (get) Token: 0x06010ECD RID: 69325 RVA: 0x004DF19B File Offset: 0x004DD39B
-		// (set) Token: 0x06010ECE RID: 69326 RVA: 0x004DF1A8 File Offset: 0x004DD3A8
-		public override float TargetTemperature
-		{
-			get
+			case 1:
 			{
-				return this.Condition.heaterTargetTemp;
-			}
-			set
-			{
-				this.Condition.heaterTargetTemp = value;
-			}
-		}
-
-		// Token: 0x17002BA7 RID: 11175
-		// (get) Token: 0x06010ECF RID: 69327 RVA: 0x004DF1B6 File Offset: 0x004DD3B6
-		private bool Powered
-		{
-			get
-			{
-				return this.powerTraderComp.PowerOn;
-			}
-		}
-
-		// Token: 0x17002BA8 RID: 11176
-		// (get) Token: 0x06010ED0 RID: 69328 RVA: 0x004DF1C3 File Offset: 0x004DD3C3
-		public int TempOffset
-		{
-			get
-			{
-				if (!this.Powered || !this.refuelableComp.HasFuel || this.TargetTemperature <= this.parent.Map.mapTemperature.OutdoorTemp)
+				_003C_003E1__state = -1;
+				float num4 = CS_0024_003C_003E8__locals10.RoundedToCurrentTempModeOffset(-1f);
+				_003C_003E2__current = new Command_GroupedTempChange(CS_0024_003C_003E8__locals10, num4)
 				{
-					return 0;
-				}
-				return 10;
+					defaultLabel = num4.ToStringTemperatureOffset("F0"),
+					defaultDesc = "CommandLowerTempDesc".Translate(),
+					hotKey = KeyBindingDefOf.Misc4,
+					icon = ContentFinder<Texture2D>.Get("UI/Commands/TempLower")
+				};
+				_003C_003E1__state = 2;
+				return true;
+			}
+			case 2:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = new Command_Action
+				{
+					action = delegate
+					{
+						CS_0024_003C_003E8__locals10.TargetTemperature = 21f;
+						SoundDefOf.Tick_Tiny.PlayOneShotOnCamera();
+						CS_0024_003C_003E8__locals10.ThrowCurrentTemperatureText();
+					},
+					defaultLabel = "CommandResetTemp".Translate(),
+					defaultDesc = "CommandResetTempDesc".Translate(),
+					hotKey = KeyBindingDefOf.Misc1,
+					icon = ContentFinder<Texture2D>.Get("UI/Commands/TempReset")
+				};
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+			{
+				_003C_003E1__state = -1;
+				float num3 = CS_0024_003C_003E8__locals10.RoundedToCurrentTempModeOffset(1f);
+				_003C_003E2__current = new Command_GroupedTempChange(CS_0024_003C_003E8__locals10, num3)
+				{
+					defaultLabel = "+" + num3.ToStringTemperatureOffset("F0"),
+					defaultDesc = "CommandRaiseTempDesc".Translate(),
+					hotKey = KeyBindingDefOf.Misc2,
+					icon = ContentFinder<Texture2D>.Get("UI/Commands/TempRaise")
+				};
+				_003C_003E1__state = 4;
+				return true;
+			}
+			case 4:
+			{
+				_003C_003E1__state = -1;
+				float num2 = CS_0024_003C_003E8__locals10.RoundedToCurrentTempModeOffset(10f);
+				_003C_003E2__current = new Command_GroupedTempChange(CS_0024_003C_003E8__locals10, num2)
+				{
+					defaultLabel = "+" + num2.ToStringTemperatureOffset("F0"),
+					defaultDesc = "CommandRaiseTempDesc".Translate(),
+					hotKey = KeyBindingDefOf.Misc3,
+					icon = ContentFinder<Texture2D>.Get("UI/Commands/TempRaise")
+				};
+				_003C_003E1__state = 5;
+				return true;
+			}
+			case 5:
+				_003C_003E1__state = -1;
+				return false;
 			}
 		}
 
-		// Token: 0x17002BA9 RID: 11177
-		// (get) Token: 0x06010ED1 RID: 69329 RVA: 0x004DF1FB File Offset: 0x004DD3FB
-		private bool Working
+		bool IEnumerator.MoveNext()
 		{
-			get
-			{
-				return this.Powered && this.refuelableComp.HasFuel && this.TargetTemperature > this.parent.Map.mapTemperature.OutdoorTemp - 1f;
-			}
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x06010ED2 RID: 69330 RVA: 0x004DF237 File Offset: 0x004DD437
-		public bool ShouldBeLitNow()
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			return this.Working;
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x06010ED3 RID: 69331 RVA: 0x004DF240 File Offset: 0x004DD440
-		public override void PostSpawnSetup(bool respawningAfterLoad)
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
 		{
-			if (!ModLister.CheckAnomaly("Atmospheric heater"))
+			_003CCompGetGizmosExtra_003Ed__20 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				this.parent.Destroy(DestroyMode.Vanish);
-				return;
-			}
-			base.PostSpawnSetup(respawningAfterLoad);
-			this.powerTraderComp = this.parent.GetComp<CompPowerTrader>();
-			this.heatPusherComp = this.parent.GetComp<CompHeatPusher>();
-			this.refuelableComp = this.parent.GetComp<CompRefuelable>();
-		}
-
-		// Token: 0x06010ED4 RID: 69332 RVA: 0x004DF2A0 File Offset: 0x004DD4A0
-		public override void CompTick()
-		{
-			if (this.Working)
-			{
-				this.powerTraderComp.PowerOutput = -this.powerTraderComp.Props.PowerConsumption;
-				this.refuelableComp.Notify_UsedThisTick();
-				this.heatPusherComp.enabled = true;
+				_003C_003E1__state = 0;
+				result = this;
 			}
 			else
 			{
-				this.powerTraderComp.PowerOutput = -this.powerTraderComp.Props.PowerConsumption * base.Props.lowPowerConsumptionFactor;
-				this.heatPusherComp.enabled = false;
-			}
-			int num = this.Working ? 1 : 0;
-			int? overrideGraphicIndex = this.parent.overrideGraphicIndex;
-			int num2 = num;
-			if (!(overrideGraphicIndex.GetValueOrDefault() == num2 & overrideGraphicIndex != null))
-			{
-				this.parent.overrideGraphicIndex = new int?(num);
-				this.parent.DirtyMapMesh(this.parent.Map);
-				CompGlower compGlower = this.parent.TryGetComp<CompGlower>();
-				if (compGlower != null)
+				result = new _003CCompGetGizmosExtra_003Ed__20(0)
 				{
-					compGlower.UpdateLit(this.parent.Map);
-				}
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
-			this.operatingAtHighPower = this.Working;
+			return result;
 		}
 
-		// Token: 0x06010ED5 RID: 69333 RVA: 0x004DF3A1 File Offset: 0x004DD5A1
-		public override IEnumerable<Gizmo> CompGetGizmosExtra()
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			float num = base.RoundedToCurrentTempModeOffset(-10f);
-			yield return new Comp_AtmosphericHeater.Command_GroupedTempChange(this, num)
-			{
-				defaultLabel = num.ToStringTemperatureOffset("F0"),
-				defaultDesc = "CommandLowerTempDesc".Translate(),
-				hotKey = KeyBindingDefOf.Misc5,
-				icon = ContentFinder<Texture2D>.Get("UI/Commands/TempLower", true)
-			};
-			float num2 = base.RoundedToCurrentTempModeOffset(-1f);
-			yield return new Comp_AtmosphericHeater.Command_GroupedTempChange(this, num2)
-			{
-				defaultLabel = num2.ToStringTemperatureOffset("F0"),
-				defaultDesc = "CommandLowerTempDesc".Translate(),
-				hotKey = KeyBindingDefOf.Misc4,
-				icon = ContentFinder<Texture2D>.Get("UI/Commands/TempLower", true)
-			};
-			yield return new Command_Action
-			{
-				action = delegate()
-				{
-					this.TargetTemperature = 21f;
-					SoundDefOf.Tick_Tiny.PlayOneShotOnCamera(null);
-					base.ThrowCurrentTemperatureText();
-				},
-				defaultLabel = "CommandResetTemp".Translate(),
-				defaultDesc = "CommandResetTempDesc".Translate(),
-				hotKey = KeyBindingDefOf.Misc1,
-				icon = ContentFinder<Texture2D>.Get("UI/Commands/TempReset", true)
-			};
-			float num3 = base.RoundedToCurrentTempModeOffset(1f);
-			yield return new Comp_AtmosphericHeater.Command_GroupedTempChange(this, num3)
-			{
-				defaultLabel = "+" + num3.ToStringTemperatureOffset("F0"),
-				defaultDesc = "CommandRaiseTempDesc".Translate(),
-				hotKey = KeyBindingDefOf.Misc2,
-				icon = ContentFinder<Texture2D>.Get("UI/Commands/TempRaise", true)
-			};
-			float num4 = base.RoundedToCurrentTempModeOffset(10f);
-			yield return new Comp_AtmosphericHeater.Command_GroupedTempChange(this, num4)
-			{
-				defaultLabel = "+" + num4.ToStringTemperatureOffset("F0"),
-				defaultDesc = "CommandRaiseTempDesc".Translate(),
-				hotKey = KeyBindingDefOf.Misc3,
-				icon = ContentFinder<Texture2D>.Get("UI/Commands/TempRaise", true)
-			};
-			yield break;
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x0400B00F RID: 45071
-		private const int DisabledTextureIndex = 0;
+	private const int DisabledTextureIndex = 0;
 
-		// Token: 0x0400B010 RID: 45072
-		private const int EnabledTextureIndex = 1;
+	private const int EnabledTextureIndex = 1;
 
-		// Token: 0x0400B011 RID: 45073
-		private const int MaxOffset = 10;
+	private const int MaxOffset = 10;
 
-		// Token: 0x0400B012 RID: 45074
-		private CompPowerTrader powerTraderComp;
+	private CompPowerTrader powerTraderComp;
 
-		// Token: 0x0400B013 RID: 45075
-		private CompHeatPusher heatPusherComp;
+	private CompHeatPusher heatPusherComp;
 
-		// Token: 0x0400B014 RID: 45076
-		private CompRefuelable refuelableComp;
+	private CompRefuelable refuelableComp;
 
-		// Token: 0x02002ED5 RID: 11989
-		private class Command_GroupedTempChange : Command_Action
+	private GameCondition_UnnaturalHeat Condition
+	{
+		get
 		{
-			// Token: 0x06010ED8 RID: 69336 RVA: 0x004DF3B9 File Offset: 0x004DD5B9
-			public Command_GroupedTempChange(Comp_AtmosphericHeater heater, float offset)
+			GameCondition_UnnaturalHeat gameCondition_UnnaturalHeat = parent.Map.gameConditionManager.GetActiveCondition(GameConditionDefOf.UnnaturalHeat) as GameCondition_UnnaturalHeat;
+			if (gameCondition_UnnaturalHeat == null)
 			{
-				this.heater = heater;
-				this.offset = offset;
+				gameCondition_UnnaturalHeat = (GameCondition_UnnaturalHeat)GameConditionMaker.MakeCondition(GameConditionDefOf.UnnaturalHeat);
+				parent.Map.GameConditionManager.RegisterCondition(gameCondition_UnnaturalHeat);
+				gameCondition_UnnaturalHeat.Permanent = true;
 			}
-
-			// Token: 0x06010ED9 RID: 69337 RVA: 0x000026EA File Offset: 0x000008EA
-			public override void ProcessInput(Event ev)
-			{
-			}
-
-			// Token: 0x06010EDA RID: 69338 RVA: 0x004DF3CF File Offset: 0x004DD5CF
-			public override void ProcessGroupInput(Event ev, List<Gizmo> group)
-			{
-				this.heater.InterfaceChangeTargetTemperature(this.offset);
-			}
-
-			// Token: 0x0400B015 RID: 45077
-			private Comp_AtmosphericHeater heater;
-
-			// Token: 0x0400B016 RID: 45078
-			private float offset;
+			return gameCondition_UnnaturalHeat;
 		}
+	}
+
+	public override float TargetTemperature
+	{
+		get
+		{
+			return Condition.heaterTargetTemp;
+		}
+		set
+		{
+			Condition.heaterTargetTemp = value;
+		}
+	}
+
+	private bool Powered => powerTraderComp.PowerOn;
+
+	public int TempOffset
+	{
+		get
+		{
+			if (!Powered || !refuelableComp.HasFuel || !(TargetTemperature > parent.Map.mapTemperature.OutdoorTemp))
+			{
+				return 0;
+			}
+			return 10;
+		}
+	}
+
+	private bool Working
+	{
+		get
+		{
+			if (Powered && refuelableComp.HasFuel)
+			{
+				return TargetTemperature > parent.Map.mapTemperature.OutdoorTemp - 1f;
+			}
+			return false;
+		}
+	}
+
+	public bool ShouldBeLitNow()
+	{
+		return Working;
+	}
+
+	public override void PostSpawnSetup(bool respawningAfterLoad)
+	{
+		if (!ModLister.CheckAnomaly("Atmospheric heater"))
+		{
+			parent.Destroy();
+			return;
+		}
+		base.PostSpawnSetup(respawningAfterLoad);
+		powerTraderComp = parent.GetComp<CompPowerTrader>();
+		heatPusherComp = parent.GetComp<CompHeatPusher>();
+		refuelableComp = parent.GetComp<CompRefuelable>();
+	}
+
+	public override void CompTick()
+	{
+		if (Working)
+		{
+			powerTraderComp.PowerOutput = 0f - powerTraderComp.Props.PowerConsumption;
+			refuelableComp.Notify_UsedThisTick();
+			heatPusherComp.enabled = true;
+		}
+		else
+		{
+			powerTraderComp.PowerOutput = (0f - powerTraderComp.Props.PowerConsumption) * base.Props.lowPowerConsumptionFactor;
+			heatPusherComp.enabled = false;
+		}
+		int num = (Working ? 1 : 0);
+		if (parent.overrideGraphicIndex != num)
+		{
+			parent.overrideGraphicIndex = num;
+			parent.DirtyMapMesh(parent.Map);
+			parent.TryGetComp<CompGlower>()?.UpdateLit(parent.Map);
+		}
+		operatingAtHighPower = Working;
+	}
+
+	[IteratorStateMachine(typeof(_003CCompGetGizmosExtra_003Ed__20))]
+	public override IEnumerable<Gizmo> CompGetGizmosExtra()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CCompGetGizmosExtra_003Ed__20(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

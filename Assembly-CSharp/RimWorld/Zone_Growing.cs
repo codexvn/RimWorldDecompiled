@@ -1,255 +1,477 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using RimWorld.Planet;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Zone_Growing : Zone, IPlantToGrowSettable
 {
-	// Token: 0x020021D0 RID: 8656
-	public class Zone_Growing : Zone, IPlantToGrowSettable
+	[CompilerGenerated]
+	private sealed class _003CGetGizmos_003Ed__19 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001CCD RID: 7373
-		// (get) Token: 0x0600BD18 RID: 48408 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public override bool IsMultiselectable
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Zone_Growing _003C_003E4__this;
+
+		private IEnumerator<Gizmo> _003C_003E7__wrap1;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return true;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001CCE RID: 7374
-		// (get) Token: 0x0600BD19 RID: 48409 RVA: 0x0036DD9F File Offset: 0x0036BF9F
-		protected override Color NextZoneColor
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return ZoneColorUtility.NextGrowingZoneColor();
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001CCF RID: 7375
-		// (get) Token: 0x0600BD1A RID: 48410 RVA: 0x0036DDA6 File Offset: 0x0036BFA6
-		IEnumerable<IntVec3> IPlantToGrowSettable.Cells
+		[DebuggerHidden]
+		public _003CGetGizmos_003Ed__19(int _003C_003E1__state)
 		{
-			get
-			{
-				return base.Cells;
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x17001CD0 RID: 7376
-		// (get) Token: 0x0600BD1B RID: 48411 RVA: 0x0036DDAE File Offset: 0x0036BFAE
-		public ThingDef PlantDefToGrow
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			get
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 2)
 			{
-				if (this.plantDefToGrow != null)
+				try
 				{
-					return this.plantDefToGrow;
 				}
-				if (PollutionUtility.SettableEntirelyPolluted(this))
+				finally
 				{
-					this.plantDefToGrow = ThingDefOf.Plant_Toxipotato;
+					_003C_003Em__Finally1();
 				}
-				else
-				{
-					this.plantDefToGrow = ThingDefOf.Plant_Potato;
-				}
-				return this.plantDefToGrow;
 			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x0600BD1C RID: 48412 RVA: 0x0036DDE5 File Offset: 0x0036BFE5
-		public Zone_Growing()
+		private bool MoveNext()
 		{
-		}
-
-		// Token: 0x0600BD1D RID: 48413 RVA: 0x0036DDFB File Offset: 0x0036BFFB
-		public Zone_Growing(ZoneManager zoneManager) : base("GrowingZone".Translate(), zoneManager)
-		{
-		}
-
-		// Token: 0x0600BD1E RID: 48414 RVA: 0x0036DE21 File Offset: 0x0036C021
-		public override void ExposeData()
-		{
-			base.ExposeData();
-			Scribe_Defs.Look<ThingDef>(ref this.plantDefToGrow, "plantDefToGrow");
-			Scribe_Values.Look<bool>(ref this.allowSow, "allowSow", true, false);
-			Scribe_Values.Look<bool>(ref this.allowCut, "allowCut", true, false);
-		}
-
-		// Token: 0x0600BD1F RID: 48415 RVA: 0x0036DE60 File Offset: 0x0036C060
-		public void ContentsStatistics(out int totalPlants, out float averagePlantAgeTicks, out int oldestPlantAgeTicks, out float averagePlantGrowth, out float maxPlantGrowth)
-		{
-			averagePlantAgeTicks = 0f;
-			totalPlants = 0;
-			oldestPlantAgeTicks = 0;
-			averagePlantGrowth = 0f;
-			maxPlantGrowth = 0f;
-			foreach (IntVec3 c in base.Cells)
+			try
 			{
-				foreach (Thing thing in c.GetThingList(base.Map))
+				int num = _003C_003E1__state;
+				Zone_Growing CS_0024_003C_003E8__locals9 = _003C_003E4__this;
+				switch (num)
 				{
-					if (thing.def == this.plantDefToGrow)
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E2__current = new Command_Hide_ZoneGrow(CS_0024_003C_003E8__locals9);
+					_003C_003E1__state = 1;
+					return true;
+				case 1:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((Zone)CS_0024_003C_003E8__locals9).GetGizmos().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_009f;
+				case 2:
+					_003C_003E1__state = -3;
+					goto IL_009f;
+				case 3:
+					_003C_003E1__state = -1;
+					_003C_003E2__current = new Command_Toggle
 					{
-						Plant plant = thing as Plant;
-						if (plant != null)
+						defaultLabel = "CommandAllowSow".Translate(),
+						defaultDesc = "CommandAllowSowDesc".Translate(),
+						hotKey = KeyBindingDefOf.Command_ItemForbid,
+						icon = TexCommand.ForbidOff,
+						isActive = () => CS_0024_003C_003E8__locals9.allowSow,
+						toggleAction = delegate
 						{
-							totalPlants++;
-							averagePlantAgeTicks += (float)plant.Age;
-							oldestPlantAgeTicks = Mathf.Max(oldestPlantAgeTicks, plant.Age);
-							averagePlantGrowth += plant.Growth;
-							maxPlantGrowth = Mathf.Max(maxPlantGrowth, plant.Growth);
+							CS_0024_003C_003E8__locals9.allowSow = !CS_0024_003C_003E8__locals9.allowSow;
 						}
+					};
+					_003C_003E1__state = 4;
+					return true;
+				case 4:
+					_003C_003E1__state = -1;
+					_003C_003E2__current = new Command_Toggle
+					{
+						defaultLabel = "CommandAllowCut".Translate(),
+						defaultDesc = "CommandAllowCutDesc".Translate(),
+						icon = Designator_PlantsCut.IconTex,
+						isActive = () => CS_0024_003C_003E8__locals9.allowCut,
+						toggleAction = delegate
+						{
+							CS_0024_003C_003E8__locals9.allowCut = !CS_0024_003C_003E8__locals9.allowCut;
+						}
+					};
+					_003C_003E1__state = 5;
+					return true;
+				case 5:
+					{
+						_003C_003E1__state = -1;
+						return false;
 					}
+					IL_009f:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Gizmo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					_003C_003E2__current = PlantToGrowSettableUtility.SetPlantToGrowCommand(CS_0024_003C_003E8__locals9);
+					_003C_003E1__state = 3;
+					return true;
 				}
 			}
-			averagePlantGrowth /= (float)totalPlants;
-			averagePlantAgeTicks /= (float)totalPlants;
-		}
-
-		// Token: 0x0600BD20 RID: 48416 RVA: 0x0036DF78 File Offset: 0x0036C178
-		public override string GetInspectString()
-		{
-			StringBuilder stringBuilder = new StringBuilder(base.GetInspectString());
-			stringBuilder.AppendLine();
-			if (!base.Cells.NullOrEmpty<IntVec3>())
+			catch
 			{
-				int num;
-				float f;
-				int numTicks;
-				float f2;
-				float f3;
-				this.ContentsStatistics(out num, out f, out numTicks, out f2, out f3);
-				if (num > 0)
-				{
-					string arg = Mathf.RoundToInt(f).ToStringTicksToPeriodVerbose(true, true);
-					string arg2 = numTicks.ToStringTicksToPeriodVerbose(true, true);
-					stringBuilder.AppendLine(string.Format("{0}: {1} {2}", "Contains".Translate().CapitalizeFirst(), num, Find.ActiveLanguageWorker.Pluralize(this.plantDefToGrow.label, num)));
-					stringBuilder.AppendLine(string.Format("{0}: {1} ({2})", "AveragePlantAge".Translate().CapitalizeFirst(), arg, "PercentGrowth".Translate(f2.ToStringPercent())));
-					stringBuilder.AppendLine(string.Format("{0}: {1} ({2})", "OldestPlantAge".Translate().CapitalizeFirst(), arg2, "PercentGrowth".Translate(f3.ToStringPercent())));
-				}
-				IntVec3 c = base.Cells.First<IntVec3>();
-				if (c.UsesOutdoorTemperature(base.Map))
-				{
-					stringBuilder.AppendLine(string.Format("{0}: {1}", "OutdoorGrowingPeriod".Translate(), Zone_Growing.GrowingQuadrumsDescription(base.Map.Tile, this.plantDefToGrow)));
-				}
-				if (PlantUtility.GrowthSeasonNow(c, base.Map, this.plantDefToGrow))
-				{
-					stringBuilder.Append("GrowSeasonHereNow".Translate());
-				}
-				else
-				{
-					stringBuilder.Append("CannotGrowBadSeasonTemperature".Translate());
-				}
-			}
-			return stringBuilder.ToString();
-		}
-
-		// Token: 0x0600BD21 RID: 48417 RVA: 0x0036E140 File Offset: 0x0036C340
-		public static string GrowingQuadrumsDescription(PlanetTile tile, ThingDef plantDef = null)
-		{
-			float minTemp = (plantDef != null) ? plantDef.plant.minOptimalGrowthTemperature : 6f;
-			float maxTemp = (plantDef != null) ? plantDef.plant.maxOptimalGrowthTemperature : 42f;
-			List<Twelfth> list = GenTemperature.TwelfthsInAverageTemperatureRange(tile, minTemp, maxTemp);
-			if (list.NullOrEmpty<Twelfth>())
-			{
-				return "NoGrowingPeriod".Translate();
-			}
-			if (list.Count == 12)
-			{
-				return "GrowYearRound".Translate();
-			}
-			return "PeriodDays".Translate(string.Format("{0}/{1}", list.Count * 5, 60)) + (" (" + QuadrumUtility.QuadrumsRangeLabel(list) + ")");
-		}
-
-		// Token: 0x0600BD22 RID: 48418 RVA: 0x0036E200 File Offset: 0x0036C400
-		public override void AddCell(IntVec3 c)
-		{
-			base.AddCell(c);
-			foreach (Thing thing in base.Map.thingGrid.ThingsListAt(c))
-			{
-				CompPlantPreventCutting compPlantPreventCutting;
-				if (!thing.TryGetComp(out compPlantPreventCutting) || !compPlantPreventCutting.PreventCutting)
-				{
-					Designator_PlantsHarvestWood.PossiblyWarnPlayerImportantPlantDesignateCut(thing);
-				}
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x0600BD23 RID: 48419 RVA: 0x0036E278 File Offset: 0x0036C478
-		public override IEnumerable<Gizmo> GetGizmos()
+		bool IEnumerator.MoveNext()
 		{
-			yield return new Command_Hide_ZoneGrow(this);
-			foreach (Gizmo gizmo in base.GetGizmos())
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				yield return gizmo;
+				_003C_003E7__wrap1.Dispose();
 			}
-			IEnumerator<Gizmo> enumerator = null;
-			yield return PlantToGrowSettableUtility.SetPlantToGrowCommand(this);
-			yield return new Command_Toggle
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CGetGizmos_003Ed__19 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				defaultLabel = "CommandAllowSow".Translate(),
-				defaultDesc = "CommandAllowSowDesc".Translate(),
-				hotKey = KeyBindingDefOf.Command_ItemForbid,
-				icon = TexCommand.ForbidOff,
-				isActive = (() => this.allowSow),
-				toggleAction = delegate()
-				{
-					this.allowSow = !this.allowSow;
-				}
-			};
-			yield return new Command_Toggle
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
 			{
-				defaultLabel = "CommandAllowCut".Translate(),
-				defaultDesc = "CommandAllowCutDesc".Translate(),
-				icon = Designator_PlantsCut.IconTex,
-				isActive = (() => this.allowCut),
-				toggleAction = delegate()
+				result = new _003CGetGizmos_003Ed__19(0)
 				{
-					this.allowCut = !this.allowCut;
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGetZoneAddGizmos_003Ed__20 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		Gizmo IEnumerator<Gizmo>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetZoneAddGizmos_003Ed__20(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			switch (_003C_003E1__state)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = DesignatorUtility.FindAllowedDesignator<Designator_ZoneAdd_Growing_Expand>();
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				return this;
+			}
+			return new _003CGetZoneAddGizmos_003Ed__20(0);
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	private ThingDef plantDefToGrow;
+
+	public bool allowSow = true;
+
+	public bool allowCut = true;
+
+	public override bool IsMultiselectable => true;
+
+	protected override Color NextZoneColor => ZoneColorUtility.NextGrowingZoneColor();
+
+	IEnumerable<IntVec3> IPlantToGrowSettable.Cells => base.Cells;
+
+	public ThingDef PlantDefToGrow
+	{
+		get
+		{
+			if (plantDefToGrow != null)
+			{
+				return plantDefToGrow;
+			}
+			if (PollutionUtility.SettableEntirelyPolluted(this))
+			{
+				plantDefToGrow = ThingDefOf.Plant_Toxipotato;
+			}
+			else
+			{
+				plantDefToGrow = ThingDefOf.Plant_Potato;
+			}
+			return plantDefToGrow;
+		}
+	}
+
+	public Zone_Growing()
+	{
+	}
+
+	public Zone_Growing(ZoneManager zoneManager)
+		: base("GrowingZone".Translate(), zoneManager)
+	{
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Defs.Look(ref plantDefToGrow, "plantDefToGrow");
+		Scribe_Values.Look(ref allowSow, "allowSow", defaultValue: true);
+		Scribe_Values.Look(ref allowCut, "allowCut", defaultValue: true);
+	}
+
+	public void ContentsStatistics(out int totalPlants, out float averagePlantAgeTicks, out int oldestPlantAgeTicks, out float averagePlantGrowth, out float maxPlantGrowth)
+	{
+		averagePlantAgeTicks = 0f;
+		totalPlants = 0;
+		oldestPlantAgeTicks = 0;
+		averagePlantGrowth = 0f;
+		maxPlantGrowth = 0f;
+		foreach (IntVec3 cell in base.Cells)
+		{
+			foreach (Thing thing in cell.GetThingList(base.Map))
+			{
+				if (thing.def == plantDefToGrow && thing is Plant plant)
+				{
+					totalPlants++;
+					averagePlantAgeTicks += plant.Age;
+					oldestPlantAgeTicks = Mathf.Max(oldestPlantAgeTicks, plant.Age);
+					averagePlantGrowth += plant.Growth;
+					maxPlantGrowth = Mathf.Max(maxPlantGrowth, plant.Growth);
 				}
-			};
-			yield break;
-			yield break;
+			}
 		}
+		averagePlantGrowth /= totalPlants;
+		averagePlantAgeTicks /= totalPlants;
+	}
 
-		// Token: 0x0600BD24 RID: 48420 RVA: 0x0036E288 File Offset: 0x0036C488
-		public override IEnumerable<Gizmo> GetZoneAddGizmos()
+	public override string GetInspectString()
+	{
+		StringBuilder stringBuilder = new StringBuilder(base.GetInspectString());
+		stringBuilder.AppendLine();
+		if (!base.Cells.NullOrEmpty())
 		{
-			yield return DesignatorUtility.FindAllowedDesignator<Designator_ZoneAdd_Growing_Expand>();
-			yield break;
+			ContentsStatistics(out var totalPlants, out var averagePlantAgeTicks, out var oldestPlantAgeTicks, out var averagePlantGrowth, out var maxPlantGrowth);
+			if (totalPlants > 0)
+			{
+				string value = Mathf.RoundToInt(averagePlantAgeTicks).ToStringTicksToPeriodVerbose();
+				string value2 = oldestPlantAgeTicks.ToStringTicksToPeriodVerbose();
+				stringBuilder.AppendLine($"{"Contains".Translate().CapitalizeFirst()}: {totalPlants} {Find.ActiveLanguageWorker.Pluralize(plantDefToGrow.label, totalPlants)}");
+				stringBuilder.AppendLine($"{"AveragePlantAge".Translate().CapitalizeFirst()}: {value} ({"PercentGrowth".Translate(averagePlantGrowth.ToStringPercent())})");
+				stringBuilder.AppendLine($"{"OldestPlantAge".Translate().CapitalizeFirst()}: {value2} ({"PercentGrowth".Translate(maxPlantGrowth.ToStringPercent())})");
+			}
+			IntVec3 c = base.Cells.First();
+			if (c.UsesOutdoorTemperature(base.Map))
+			{
+				stringBuilder.AppendLine($"{"OutdoorGrowingPeriod".Translate()}: {GrowingQuadrumsDescription(base.Map, plantDefToGrow)}");
+			}
+			if (PlantUtility.GrowthSeasonNow(c, base.Map, plantDefToGrow))
+			{
+				stringBuilder.Append("GrowSeasonHereNow".Translate());
+			}
+			else
+			{
+				stringBuilder.Append("CannotGrowBadSeasonTemperature".Translate());
+			}
 		}
+		return stringBuilder.ToString();
+	}
 
-		// Token: 0x0600BD25 RID: 48421 RVA: 0x0036E291 File Offset: 0x0036C491
-		public ThingDef GetPlantDefToGrow()
+	public static string GrowingQuadrumsDescription(PlanetTile tile, ThingDef plantDef = null)
+	{
+		if (!tile.Valid)
 		{
-			return this.PlantDefToGrow;
+			return "NoGrowingPeriod".Translate();
 		}
-
-		// Token: 0x0600BD26 RID: 48422 RVA: 0x0036E299 File Offset: 0x0036C499
-		public void SetPlantDefToGrow(ThingDef plantDef)
+		float minTemp = plantDef?.plant.minOptimalGrowthTemperature ?? 6f;
+		float maxTemp = plantDef?.plant.maxOptimalGrowthTemperature ?? 42f;
+		List<Twelfth> list = GenTemperature.TwelfthsInAverageTemperatureRange(tile, minTemp, maxTemp);
+		if (list.NullOrEmpty())
 		{
-			this.plantDefToGrow = plantDef;
+			return "NoGrowingPeriod".Translate();
 		}
-
-		// Token: 0x0600BD27 RID: 48423 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public bool CanAcceptSowNow()
+		if (list.Count == 12)
 		{
-			return true;
+			return "GrowYearRound".Translate();
 		}
+		return "PeriodDays".Translate($"{list.Count * 5}/{60}") + (" (" + QuadrumUtility.QuadrumsRangeLabel(list) + ")");
+	}
 
-		// Token: 0x04008248 RID: 33352
-		private ThingDef plantDefToGrow;
+	public static string GrowingQuadrumsDescription(Map map, ThingDef plantDef = null)
+	{
+		if (map == null)
+		{
+			return "NoGrowingPeriod".Translate();
+		}
+		if (!map.IsPocketMap)
+		{
+			return GrowingQuadrumsDescription(map.Tile, plantDef);
+		}
+		float num = plantDef?.plant.minOptimalGrowthTemperature ?? 6f;
+		float num2 = plantDef?.plant.maxOptimalGrowthTemperature ?? 42f;
+		float outdoorTemp = map.mapTemperature.OutdoorTemp;
+		if (outdoorTemp >= num && outdoorTemp <= num2)
+		{
+			return "GrowYearRound".Translate();
+		}
+		return "NoGrowingPeriod".Translate();
+	}
 
-		// Token: 0x04008249 RID: 33353
-		public bool allowSow = true;
+	public override void AddCell(IntVec3 c)
+	{
+		base.AddCell(c);
+		foreach (Thing item in base.Map.thingGrid.ThingsListAt(c))
+		{
+			if (!item.TryGetComp(out CompPlantPreventCutting comp) || !comp.PreventCutting)
+			{
+				Designator_PlantsHarvestWood.PossiblyWarnPlayerImportantPlantDesignateCut(item);
+			}
+		}
+	}
 
-		// Token: 0x0400824A RID: 33354
-		public bool allowCut = true;
+	[IteratorStateMachine(typeof(_003CGetGizmos_003Ed__19))]
+	public override IEnumerable<Gizmo> GetGizmos()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetGizmos_003Ed__19(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	[IteratorStateMachine(typeof(_003CGetZoneAddGizmos_003Ed__20))]
+	public override IEnumerable<Gizmo> GetZoneAddGizmos()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetZoneAddGizmos_003Ed__20(-2);
+	}
+
+	public ThingDef GetPlantDefToGrow()
+	{
+		return PlantDefToGrow;
+	}
+
+	public void SetPlantDefToGrow(ThingDef plantDef)
+	{
+		plantDefToGrow = plantDef;
+	}
+
+	public bool CanAcceptSowNow()
+	{
+		return true;
 	}
 }

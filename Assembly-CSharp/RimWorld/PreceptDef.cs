@@ -1,473 +1,594 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class PreceptDef : Def
 {
-	// Token: 0x02001ABF RID: 6847
-	public class PreceptDef : Def
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__119 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001781 RID: 6017
-		// (get) Token: 0x06009947 RID: 39239 RVA: 0x002CA828 File Offset: 0x002C8A28
-		public Texture2D Icon
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public PreceptDef _003C_003E4__this;
+
+		private IEnumerator<string> _003C_003E7__wrap1;
+
+		private IEnumerator<PreceptThingChance> _003C_003E7__wrap2;
+
+		private List<PreceptComp>.Enumerator _003C_003E7__wrap3;
+
+		string IEnumerator<string>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.icon == null)
-				{
-					if (this.iconPath != null)
-					{
-						this.icon = ContentFinder<Texture2D>.Get(this.iconPath, true);
-					}
-					else if (!this.issue.iconPath.NullOrEmpty())
-					{
-						this.icon = this.issue.Icon;
-					}
-				}
-				return this.icon;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001782 RID: 6018
-		// (get) Token: 0x06009948 RID: 39240 RVA: 0x002CA888 File Offset: 0x002C8A88
-		public PreceptWorker Worker
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.worker == null)
-				{
-					this.worker = (PreceptWorker)Activator.CreateInstance(this.workerClass);
-					this.worker.def = this;
-				}
-				return this.worker;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001783 RID: 6019
-		// (get) Token: 0x06009949 RID: 39241 RVA: 0x002CA8BC File Offset: 0x002C8ABC
-		public List<TraitRequirement> TraitsAffecting
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__119(int _003C_003E1__state)
 		{
-			get
-			{
-				if (this.traitsAffectingCached == null)
-				{
-					this.traitsAffectingCached = new List<TraitRequirement>();
-					for (int i = 0; i < this.comps.Count; i++)
-					{
-						this.traitsAffectingCached.AddRange(this.comps[i].TraitsAffecting);
-					}
-					this.traitsAffectingCached.RemoveDuplicates((TraitRequirement a, TraitRequirement b) => a.def == b.def && ((a.degree != null) ? a.degree.Value : 0) == ((b.degree != null) ? b.degree.Value : 0));
-				}
-				return this.traitsAffectingCached;
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x17001784 RID: 6020
-		// (get) Token: 0x0600994A RID: 39242 RVA: 0x002CA940 File Offset: 0x002C8B40
-		public List<string> RequiredMemeLabels
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			get
+			int num = _003C_003E1__state;
+			switch (num)
 			{
-				if (this.requiredMemeLabels == null && !this.requiredMemes.NullOrEmpty<MemeDef>())
+			case -3:
+			case 1:
+				try
 				{
-					this.requiredMemeLabels = new List<string>();
-					foreach (MemeDef memeDef in this.requiredMemes)
-					{
-						this.requiredMemeLabels.Add(memeDef.label);
-					}
 				}
-				return this.requiredMemeLabels;
-			}
-		}
-
-		// Token: 0x0600994B RID: 39243 RVA: 0x002CA9C4 File Offset: 0x002C8BC4
-		public override IEnumerable<string> ConfigErrors()
-		{
-			foreach (string text in base.ConfigErrors())
-			{
-				yield return text;
-			}
-			IEnumerator<string> enumerator = null;
-			if (this.preceptClass == typeof(Precept_Ritual) && this.ritualPatternBase == null)
-			{
-				yield return "Ritual doesn't define a ritualPatternBase, was it meant to be abstract?";
-			}
-			if (typeof(Precept_ThingStyle).IsAssignableFrom(this.preceptClass))
-			{
-				foreach (PreceptThingChance preceptThingChance in this.Worker.ThingDefs)
+				finally
 				{
-					ThingDef def = preceptThingChance.def;
-					if (!def.CanBeStyled())
+					_003C_003Em__Finally1();
+				}
+				break;
+			case -4:
+			case 3:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally2();
+				}
+				break;
+			case -6:
+			case -5:
+			case 4:
+				try
+				{
+					if (num == -6 || num == 4)
 					{
-						yield return string.Concat(new string[]
+						try
 						{
-							"ThingDef ",
-							def.defName,
-							" is on available things list of ",
-							this.defName,
-							" precept, but missing CompStyleable thing comp!"
-						});
+						}
+						finally
+						{
+							_003C_003Em__Finally4();
+						}
 					}
 				}
-				IEnumerator<PreceptThingChance> enumerator2 = null;
-			}
-			foreach (PreceptComp preceptComp in this.comps)
-			{
-				foreach (string text2 in preceptComp.ConfigErrors(this))
+				finally
 				{
-					yield return text2;
+					_003C_003Em__Finally3();
 				}
-				enumerator = null;
+				break;
 			}
-			List<PreceptComp>.Enumerator enumerator3 = default(List<PreceptComp>.Enumerator);
-			yield break;
-			yield break;
+			_003C_003E7__wrap1 = null;
+			_003C_003E7__wrap2 = null;
+			_003C_003E7__wrap3 = default(List<PreceptComp>.Enumerator);
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x0600994C RID: 39244 RVA: 0x002CA9D4 File Offset: 0x002C8BD4
-		public override void PostLoad()
+		private bool MoveNext()
 		{
-			base.PostLoad();
-			foreach (PreceptComp preceptComp in this.comps)
+			try
 			{
-				preceptComp.preceptDef = this;
+				int num = _003C_003E1__state;
+				PreceptDef preceptDef = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((Def)preceptDef).ConfigErrors().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_007a;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_007a;
+				case 2:
+					_003C_003E1__state = -1;
+					goto IL_00d3;
+				case 3:
+					_003C_003E1__state = -4;
+					goto IL_017a;
+				case 4:
+					{
+						_003C_003E1__state = -6;
+						goto IL_0201;
+					}
+					IL_007a:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (preceptDef.preceptClass == typeof(Precept_Ritual) && preceptDef.ritualPatternBase == null)
+					{
+						_003C_003E2__current = "Ritual doesn't define a ritualPatternBase, was it meant to be abstract?";
+						_003C_003E1__state = 2;
+						return true;
+					}
+					goto IL_00d3;
+					IL_0201:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current2 = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current2;
+						_003C_003E1__state = 4;
+						return true;
+					}
+					_003C_003Em__Finally4();
+					_003C_003E7__wrap1 = null;
+					goto IL_021b;
+					IL_021b:
+					if (_003C_003E7__wrap3.MoveNext())
+					{
+						PreceptComp current3 = _003C_003E7__wrap3.Current;
+						_003C_003E7__wrap1 = current3.ConfigErrors(preceptDef).GetEnumerator();
+						_003C_003E1__state = -6;
+						goto IL_0201;
+					}
+					_003C_003Em__Finally3();
+					_003C_003E7__wrap3 = default(List<PreceptComp>.Enumerator);
+					return false;
+					IL_0194:
+					_003C_003E7__wrap3 = preceptDef.comps.GetEnumerator();
+					_003C_003E1__state = -5;
+					goto IL_021b;
+					IL_00d3:
+					if (typeof(Precept_ThingStyle).IsAssignableFrom(preceptDef.preceptClass))
+					{
+						_003C_003E7__wrap2 = preceptDef.Worker.ThingDefs.GetEnumerator();
+						_003C_003E1__state = -4;
+						goto IL_017a;
+					}
+					goto IL_0194;
+					IL_017a:
+					while (_003C_003E7__wrap2.MoveNext())
+					{
+						ThingDef def = _003C_003E7__wrap2.Current.def;
+						if (!def.CanBeStyled())
+						{
+							_003C_003E2__current = "ThingDef " + def.defName + " is on available things list of " + preceptDef.defName + " precept, but missing CompStyleable thing comp!";
+							_003C_003E1__state = 3;
+							return true;
+						}
+					}
+					_003C_003Em__Finally2();
+					_003C_003E7__wrap2 = null;
+					goto IL_0194;
+				}
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x0400683D RID: 26685
-		public Type preceptClass = typeof(Precept);
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
 
-		// Token: 0x0400683E RID: 26686
-		public IssueDef issue;
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap2 != null)
+			{
+				_003C_003E7__wrap2.Dispose();
+			}
+		}
 
-		// Token: 0x0400683F RID: 26687
-		public List<PreceptComp> comps = new List<PreceptComp>();
+		private void _003C_003Em__Finally3()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap3/*cast due to .constrained prefix*/).Dispose();
+		}
 
-		// Token: 0x04006840 RID: 26688
-		public List<AbilityStatModifiers> abilityStatFactors;
+		private void _003C_003Em__Finally4()
+		{
+			_003C_003E1__state = -5;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
 
-		// Token: 0x04006841 RID: 26689
-		public List<StatModifier> statOffsets;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04006842 RID: 26690
-		public List<StatModifier> statFactors;
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__119 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__119(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x04006843 RID: 26691
-		public List<ConditionalStatAffecter> conditionalStatAffecters;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x04006844 RID: 26692
-		public float selectionWeight = 1f;
+	public Type preceptClass = typeof(Precept);
 
-		// Token: 0x04006845 RID: 26693
-		public List<WorkTypeDef> opposedWorkTypes = new List<WorkTypeDef>();
+	public IssueDef issue;
 
-		// Token: 0x04006846 RID: 26694
-		public PreceptImpact impact;
+	public List<PreceptComp> comps = new List<PreceptComp>();
 
-		// Token: 0x04006847 RID: 26695
-		public List<MemeDef> associatedMemes = new List<MemeDef>();
+	public List<AbilityStatModifiers> abilityStatFactors;
 
-		// Token: 0x04006848 RID: 26696
-		public List<MemeDef> conflictingMemes = new List<MemeDef>();
+	public List<StatModifier> statOffsets;
 
-		// Token: 0x04006849 RID: 26697
-		public List<MemeDef> requiredMemes = new List<MemeDef>();
+	public List<StatModifier> statFactors;
 
-		// Token: 0x0400684A RID: 26698
-		public bool visible = true;
+	public List<ConditionalStatAffecter> conditionalStatAffecters;
 
-		// Token: 0x0400684B RID: 26699
-		public bool visibleOnAddFloatMenu = true;
+	public float selectionWeight = 1f;
 
-		// Token: 0x0400684C RID: 26700
-		public bool listedForRoles = true;
+	public List<WorkTypeDef> opposedWorkTypes = new List<WorkTypeDef>();
 
-		// Token: 0x0400684D RID: 26701
-		public PreceptDef takeNameFrom;
+	public PreceptImpact impact;
 
-		// Token: 0x0400684E RID: 26702
-		public PreceptDef alsoAdds;
+	public List<MemeDef> associatedMemes = new List<MemeDef>();
 
-		// Token: 0x0400684F RID: 26703
-		public int maxCount = 1;
+	public List<MemeDef> conflictingMemes = new List<MemeDef>();
 
-		// Token: 0x04006850 RID: 26704
-		[NoTranslate]
-		public List<string> exclusionTags = new List<string>();
+	public List<MemeDef> requiredMemes = new List<MemeDef>();
 
-		// Token: 0x04006851 RID: 26705
-		public bool allowDuplicates;
+	public bool visible = true;
 
-		// Token: 0x04006852 RID: 26706
-		public bool ignoreLimitsInEditMode;
+	public bool visibleOnAddFloatMenu = true;
 
-		// Token: 0x04006853 RID: 26707
-		public bool canUseAlreadyUsedThingDef;
+	public bool listedForRoles = true;
 
-		// Token: 0x04006854 RID: 26708
-		public bool classic;
+	public PreceptDef takeNameFrom;
 
-		// Token: 0x04006855 RID: 26709
-		public bool classicExtra;
+	public PreceptDef alsoAdds;
 
-		// Token: 0x04006856 RID: 26710
-		public float defaultSelectionWeight;
+	public int maxCount = 1;
 
-		// Token: 0x04006857 RID: 26711
-		public bool enabledForNPCFactions = true;
+	public bool isNonIdeoRitual;
 
-		// Token: 0x04006858 RID: 26712
-		public bool countsTowardsPreceptLimit = true;
+	[NoTranslate]
+	public List<string> exclusionTags = new List<string>();
 
-		// Token: 0x04006859 RID: 26713
-		public bool canGenerateAsSpecialPrecept = true;
+	public bool allowDuplicates;
 
-		// Token: 0x0400685A RID: 26714
-		public RulePackDef nameMaker;
+	public bool ignoreLimitsInEditMode;
 
-		// Token: 0x0400685B RID: 26715
-		public int nameMaxLength = 16;
+	public bool canUseAlreadyUsedThingDef;
 
-		// Token: 0x0400685C RID: 26716
-		public SimpleCurve preceptInstanceCountCurve;
+	public bool classic;
 
-		// Token: 0x0400685D RID: 26717
-		public RitualPatternDef ritualPatternBase;
+	public bool classicExtra;
 
-		// Token: 0x0400685E RID: 26718
-		public bool receivesExpectationsQualityOffset;
+	public float defaultSelectionWeight;
 
-		// Token: 0x0400685F RID: 26719
-		public bool usesIdeoVisualEffects = true;
+	public bool enabledForNPCFactions = true;
 
-		// Token: 0x04006860 RID: 26720
-		public bool mergeRitualGizmosFromAllIdeos;
+	public bool countsTowardsPreceptLimit = true;
 
-		// Token: 0x04006861 RID: 26721
-		public bool allowSpectatorsFromOtherIdeos = true;
+	public bool canGenerateAsSpecialPrecept = true;
 
-		// Token: 0x04006862 RID: 26722
-		public bool allowOptionalRitualObligations;
+	public RulePackDef nameMaker;
 
-		// Token: 0x04006863 RID: 26723
-		public bool classicModeOnly;
+	public int nameMaxLength = 16;
 
-		// Token: 0x04006864 RID: 26724
-		public List<PreceptThingChanceClass> buildingDefChances;
+	public SimpleCurve preceptInstanceCountCurve;
 
-		// Token: 0x04006865 RID: 26725
-		public List<ExpectationDef> buildingMinExpectations;
+	public RitualPatternDef ritualPatternBase;
 
-		// Token: 0x04006866 RID: 26726
-		public List<RoomRequirement> buildingRoomRequirements;
+	public bool receivesExpectationsQualityOffset;
 
-		// Token: 0x04006867 RID: 26727
-		public List<RoomRequirement> buildingRoomRequirementsFixed;
+	public bool usesIdeoVisualEffects = true;
 
-		// Token: 0x04006868 RID: 26728
-		public SimpleCurve roomRequirementCountCurve;
+	public bool mergeRitualGizmosFromAllIdeos;
 
-		// Token: 0x04006869 RID: 26729
-		public bool leaderRole;
+	public bool allowSpectatorsFromOtherIdeos = true;
 
-		// Token: 0x0400686A RID: 26730
-		public int activationBelieverCount = -1;
+	public bool allowOptionalRitualObligations;
 
-		// Token: 0x0400686B RID: 26731
-		public int deactivationBelieverCount = -1;
+	public bool classicModeOnly;
 
-		// Token: 0x0400686C RID: 26732
-		public List<RoleRequirement> roleRequirements;
+	public List<PreceptThingChanceClass> buildingDefChances;
 
-		// Token: 0x0400686D RID: 26733
-		public WorkTags roleDisabledWorkTags;
+	public List<ExpectationDef> buildingMinExpectations;
 
-		// Token: 0x0400686E RID: 26734
-		public WorkTags roleRequiredWorkTags;
+	public List<RoomRequirement> buildingRoomRequirements;
 
-		// Token: 0x0400686F RID: 26735
-		public WorkTags roleRequiredWorkTagAny;
+	public List<RoomRequirement> buildingRoomRequirementsFixed;
 
-		// Token: 0x04006870 RID: 26736
-		public List<PreceptApparelRequirement> roleApparelRequirements;
+	public SimpleCurve roomRequirementCountCurve;
 
-		// Token: 0x04006871 RID: 26737
-		public SimpleCurve roleApparelRequirementCountCurve;
+	public bool leaderRole;
 
-		// Token: 0x04006872 RID: 26738
-		public List<AbilityDef> grantedAbilities;
+	public int activationBelieverCount = -1;
 
-		// Token: 0x04006873 RID: 26739
-		public List<RoleEffect> roleEffects;
+	public int deactivationBelieverCount = -1;
 
-		// Token: 0x04006874 RID: 26740
-		public List<string> roleTags;
+	public List<RoleRequirement> roleRequirements;
 
-		// Token: 0x04006875 RID: 26741
-		public string iconPath;
+	public WorkTags roleDisabledWorkTags;
 
-		// Token: 0x04006876 RID: 26742
-		public float restrictToSupremeGenderChance;
+	public WorkTags roleRequiredWorkTags;
 
-		// Token: 0x04006877 RID: 26743
-		public float certaintyLossFactor = 1f;
+	public WorkTags roleRequiredWorkTagAny;
 
-		// Token: 0x04006878 RID: 26744
-		public float convertPowerFactor = 1f;
+	public List<PreceptApparelRequirement> roleApparelRequirements;
 
-		// Token: 0x04006879 RID: 26745
-		public int expectationsOffset;
+	public SimpleCurve roleApparelRequirementCountCurve;
 
-		// Token: 0x0400687A RID: 26746
-		public bool createsRoleEmptyThought = true;
+	public List<AbilityDef> grantedAbilities;
 
-		// Token: 0x0400687B RID: 26747
-		public bool roleCanBeChild;
+	public List<RoleEffect> roleEffects;
 
-		// Token: 0x0400687C RID: 26748
-		public bool disallowLoggingCamps;
+	public List<string> roleTags;
 
-		// Token: 0x0400687D RID: 26749
-		public bool disallowMiningCamps;
+	public string iconPath;
 
-		// Token: 0x0400687E RID: 26750
-		public bool disallowHuntingCamps;
+	public float restrictToSupremeGenderChance;
 
-		// Token: 0x0400687F RID: 26751
-		public bool disallowFarmingCamps;
+	public float certaintyLossFactor = 1f;
 
-		// Token: 0x04006880 RID: 26752
-		public bool approvesOfSlavery;
+	public float convertPowerFactor = 1f;
 
-		// Token: 0x04006881 RID: 26753
-		public bool prefersNudity;
+	public int expectationsOffset;
 
-		// Token: 0x04006882 RID: 26754
-		public Gender genderPrefersNudity;
+	public bool createsRoleEmptyThought = true;
 
-		// Token: 0x04006883 RID: 26755
-		public bool useChoicesFromBuildingDefs;
+	public bool roleCanBeChild;
 
-		// Token: 0x04006884 RID: 26756
-		public int displayOrderInImpact;
+	public bool disallowLoggingCamps;
 
-		// Token: 0x04006885 RID: 26757
-		public int displayOrderInIssue;
+	public bool disallowMiningCamps;
 
-		// Token: 0x04006886 RID: 26758
-		public bool proselytizes;
+	public bool disallowHuntingCamps;
 
-		// Token: 0x04006887 RID: 26759
-		public int requiredScars;
+	public bool disallowFarmingCamps;
 
-		// Token: 0x04006888 RID: 26760
-		public bool approvesOfCharity;
+	public bool approvesOfSlavery;
 
-		// Token: 0x04006889 RID: 26761
-		public float blindPawnChance = -1f;
+	public bool prefersNudity;
 
-		// Token: 0x0400688A RID: 26762
-		public bool approvesOfBlindness;
+	public Gender genderPrefersNudity;
 
-		// Token: 0x0400688B RID: 26763
-		public bool canRemoveInUI = true;
+	public bool useChoicesFromBuildingDefs;
 
-		// Token: 0x0400688C RID: 26764
-		public bool prefersDarkness;
+	public int displayOrderInImpact;
 
-		// Token: 0x0400688D RID: 26765
-		public List<NeedDef> enablesNeeds;
+	public int displayOrderInIssue;
 
-		// Token: 0x0400688E RID: 26766
-		public List<NeedDef> disablesNeeds;
+	public bool proselytizes;
 
-		// Token: 0x0400688F RID: 26767
-		public float blindPsychicSensitivityOffset;
+	public int requiredScars;
 
-		// Token: 0x04006890 RID: 26768
-		public DrugPolicyDef defaultDrugPolicyOverride;
+	public bool approvesOfCharity;
 
-		// Token: 0x04006891 RID: 26769
-		public bool warnPlayerOnDesignateChopTree;
+	public float blindPawnChance = -1f;
 
-		// Token: 0x04006892 RID: 26770
-		public bool warnPlayerOnDesignateMine;
+	public bool approvesOfBlindness;
 
-		// Token: 0x04006893 RID: 26771
-		public bool willingToConstructOtherIdeoBuildables;
+	public bool canRemoveInUI = true;
 
-		// Token: 0x04006894 RID: 26772
-		public float biosculpterPodCycleSpeedFactor = 1f;
+	public bool prefersDarkness;
 
-		// Token: 0x04006895 RID: 26773
-		public float growthVatSpeedFactor = 1f;
+	public List<NeedDef> enablesNeeds;
 
-		// Token: 0x04006896 RID: 26774
-		public bool prefersSlabBed;
+	public List<NeedDef> disablesNeeds;
 
-		// Token: 0x04006897 RID: 26775
-		public bool useRepeatPenalty = true;
+	public float blindPsychicSensitivityOffset;
 
-		// Token: 0x04006898 RID: 26776
-		public bool showRitualFloatMenuOption = true;
+	public DrugPolicyDef defaultDrugPolicyOverride;
 
-		// Token: 0x04006899 RID: 26777
-		[MustTranslate]
-		public string tipLabelOverride;
+	public bool warnPlayerOnDesignateChopTree;
 
-		// Token: 0x0400689A RID: 26778
-		public bool capitalizeAsTitle = true;
+	public bool warnPlayerOnDesignateMine;
 
-		// Token: 0x0400689B RID: 26779
-		public bool ignoreNameUniqueness;
+	public bool willingToConstructOtherIdeoBuildables;
 
-		// Token: 0x0400689C RID: 26780
-		[MustTranslate]
-		public string extraTextPawnDeathLetter;
+	public float biosculpterPodCycleSpeedFactor = 1f;
 
-		// Token: 0x0400689D RID: 26781
-		public PreceptDef apparelPreceptSwapDef;
+	public float growthVatSpeedFactor = 1f;
 
-		// Token: 0x0400689E RID: 26782
-		public AbilityGroupDef useCooldownFromAbilityGroupDef;
+	public bool prefersSlabBed;
 
-		// Token: 0x0400689F RID: 26783
-		public bool iconIgnoresIdeoColor;
+	public bool useRepeatPenalty = true;
 
-		// Token: 0x040068A0 RID: 26784
-		public PreceptDef sourcePawnRoleDef;
+	public bool showRitualFloatMenuOption = true;
 
-		// Token: 0x040068A1 RID: 26785
-		public AbilityDef sourceAbilityDef;
+	[MustTranslate]
+	public string tipLabelOverride;
 
-		// Token: 0x040068A2 RID: 26786
-		public bool likesHumanLeatherApparel;
+	public bool capitalizeAsTitle = true;
 
-		// Token: 0x040068A3 RID: 26787
-		public bool approvesOfRaiding;
+	public bool ignoreNameUniqueness;
 
-		// Token: 0x040068A4 RID: 26788
-		public float skipOpportunityLettersBeforeDay = 10f;
+	[MustTranslate]
+	public string extraTextPawnDeathLetter;
 
-		// Token: 0x040068A5 RID: 26789
-		public bool notifyPlayerOnOpportunity = true;
+	public PreceptDef apparelPreceptSwapDef;
 
-		// Token: 0x040068A6 RID: 26790
-		public Type workerClass = typeof(PreceptWorker);
+	public AbilityGroupDef useCooldownFromAbilityGroupDef;
 
-		// Token: 0x040068A7 RID: 26791
-		private PreceptWorker worker;
+	public bool iconIgnoresIdeoColor;
 
-		// Token: 0x040068A8 RID: 26792
-		[Unsaved(false)]
-		private List<TraitRequirement> traitsAffectingCached;
+	public PreceptDef sourcePawnRoleDef;
 
-		// Token: 0x040068A9 RID: 26793
-		[Unsaved(false)]
-		private List<string> requiredMemeLabels;
+	public AbilityDef sourceAbilityDef;
 
-		// Token: 0x040068AA RID: 26794
-		private Texture2D icon;
+	public bool likesHumanLeatherApparel;
+
+	public bool approvesOfRaiding;
+
+	public float skipOpportunityLettersBeforeDay = 10f;
+
+	public bool notifyPlayerOnOpportunity = true;
+
+	public Type workerClass = typeof(PreceptWorker);
+
+	private PreceptWorker worker;
+
+	[Unsaved(false)]
+	private List<TraitRequirement> traitsAffectingCached;
+
+	[Unsaved(false)]
+	private List<string> requiredMemeLabels;
+
+	private Texture2D icon;
+
+	public Texture2D Icon
+	{
+		get
+		{
+			if (icon == null)
+			{
+				if (iconPath != null)
+				{
+					icon = ContentFinder<Texture2D>.Get(iconPath);
+				}
+				else if (!issue.iconPath.NullOrEmpty())
+				{
+					icon = issue.Icon;
+				}
+			}
+			return icon;
+		}
+	}
+
+	public PreceptWorker Worker
+	{
+		get
+		{
+			if (worker == null)
+			{
+				worker = (PreceptWorker)Activator.CreateInstance(workerClass);
+				worker.def = this;
+			}
+			return worker;
+		}
+	}
+
+	public List<TraitRequirement> TraitsAffecting
+	{
+		get
+		{
+			if (traitsAffectingCached == null)
+			{
+				traitsAffectingCached = new List<TraitRequirement>();
+				for (int i = 0; i < comps.Count; i++)
+				{
+					traitsAffectingCached.AddRange(comps[i].TraitsAffecting);
+				}
+				traitsAffectingCached.RemoveDuplicates((TraitRequirement a, TraitRequirement b) => a.def == b.def && (a.degree.HasValue ? a.degree.Value : 0) == (b.degree.HasValue ? b.degree.Value : 0));
+			}
+			return traitsAffectingCached;
+		}
+	}
+
+	public List<string> RequiredMemeLabels
+	{
+		get
+		{
+			if (requiredMemeLabels == null && !requiredMemes.NullOrEmpty())
+			{
+				requiredMemeLabels = new List<string>();
+				foreach (MemeDef requiredMeme in requiredMemes)
+				{
+					requiredMemeLabels.Add(requiredMeme.label);
+				}
+			}
+			return requiredMemeLabels;
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__119))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__119(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override void PostLoad()
+	{
+		base.PostLoad();
+		foreach (PreceptComp comp in comps)
+		{
+			comp.preceptDef = this;
+		}
 	}
 }

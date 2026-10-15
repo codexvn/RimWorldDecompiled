@@ -1,105 +1,234 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class WorkGiver_ExtractSkull : WorkGiver_Scanner
 {
-	// Token: 0x020015BF RID: 5567
-	public class WorkGiver_ExtractSkull : WorkGiver_Scanner
+	[CompilerGenerated]
+	private sealed class _003CPotentialWorkThingsGlobal_003Ed__4 : IEnumerable<Thing>, IEnumerable, IEnumerator<Thing>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001421 RID: 5153
-		// (get) Token: 0x06008393 RID: 33683 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public override PathEndMode PathEndMode
+		private int _003C_003E1__state;
+
+		private Thing _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private Pawn pawn;
+
+		public Pawn _003C_003E3__pawn;
+
+		private IEnumerator<Designation> _003C_003E7__wrap1;
+
+		Thing IEnumerator<Thing>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return PathEndMode.OnCell;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06008394 RID: 33684 RVA: 0x00277C11 File Offset: 0x00275E11
-		public static bool CanExtractSkull(Ideo ideo)
+		object IEnumerator.Current
 		{
-			return ideo.classicMode || ideo.HasPrecept(PreceptDefOf.Skullspike_Desired) || (ModsConfig.AnomalyActive && ResearchProjectDefOf.AdvancedPsychicRituals.IsFinished);
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x06008395 RID: 33685 RVA: 0x00277C40 File Offset: 0x00275E40
-		public static bool CanPlayerExtractSkull()
+		[DebuggerHidden]
+		public _003CPotentialWorkThingsGlobal_003Ed__4(int _003C_003E1__state)
 		{
-			if (Find.IdeoManager.classicMode)
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				return true;
-			}
-			if (WorkGiver_ExtractSkull.CanExtractSkull(Faction.OfPlayer.ideos.PrimaryIdeo))
-			{
-				return true;
-			}
-			using (List<Ideo>.Enumerator enumerator = Faction.OfPlayer.ideos.IdeosMinorListForReading.GetEnumerator())
-			{
-				while (enumerator.MoveNext())
+				try
 				{
-					if (WorkGiver_ExtractSkull.CanExtractSkull(enumerator.Current))
-					{
-						return true;
-					}
 				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				switch (_003C_003E1__state)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = pawn.Map.designationManager.SpawnedDesignationsOfDef(DesignationDefOf.ExtractSkull).GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 1:
+					_003C_003E1__state = -3;
+					break;
+				}
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					Designation current = _003C_003E7__wrap1.Current;
+					_003C_003E2__current = current.target.Thing;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = null;
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Thing> IEnumerable<Thing>.GetEnumerator()
+		{
+			_003CPotentialWorkThingsGlobal_003Ed__4 _003CPotentialWorkThingsGlobal_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CPotentialWorkThingsGlobal_003Ed__ = this;
+			}
+			else
+			{
+				_003CPotentialWorkThingsGlobal_003Ed__ = new _003CPotentialWorkThingsGlobal_003Ed__4(0);
+			}
+			_003CPotentialWorkThingsGlobal_003Ed__.pawn = _003C_003E3__pawn;
+			return _003CPotentialWorkThingsGlobal_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Thing>)this).GetEnumerator();
+		}
+	}
+
+	public override PathEndMode PathEndMode => PathEndMode.OnCell;
+
+	public static bool CanExtractSkull(Ideo ideo)
+	{
+		if (!ideo.classicMode && !ideo.HasPrecept(PreceptDefOf.Skullspike_Desired))
+		{
+			if (ModsConfig.AnomalyActive)
+			{
+				return ResearchProjectDefOf.AdvancedPsychicRituals.IsFinished;
 			}
 			return false;
 		}
+		return true;
+	}
 
-		// Token: 0x06008396 RID: 33686 RVA: 0x00277CC8 File Offset: 0x00275EC8
-		public override IEnumerable<Thing> PotentialWorkThingsGlobal(Pawn pawn)
+	public static bool CanPlayerExtractSkull()
+	{
+		if (Find.IdeoManager.classicMode)
 		{
-			foreach (Designation designation in pawn.Map.designationManager.SpawnedDesignationsOfDef(DesignationDefOf.ExtractSkull))
-			{
-				yield return designation.target.Thing;
-			}
-			IEnumerator<Designation> enumerator = null;
-			yield break;
-			yield break;
-		}
-
-		// Token: 0x06008397 RID: 33687 RVA: 0x00277CD8 File Offset: 0x00275ED8
-		public override bool ShouldSkip(Pawn pawn, bool forced = false)
-		{
-			return !pawn.Map.designationManager.AnySpawnedDesignationOfDef(DesignationDefOf.ExtractSkull);
-		}
-
-		// Token: 0x06008398 RID: 33688 RVA: 0x00277CF4 File Offset: 0x00275EF4
-		public override bool HasJobOnThing(Pawn pawn, Thing t, bool forced = false)
-		{
-			Corpse corpse = t as Corpse;
-			if (corpse == null || corpse.Destroyed)
-			{
-				return false;
-			}
-			if (corpse.Map.designationManager.DesignationOn(t, DesignationDefOf.ExtractSkull) == null)
-			{
-				return false;
-			}
-			if (!corpse.InnerPawn.health.hediffSet.HasHead)
-			{
-				return false;
-			}
-			if (!pawn.CanReserve(t, 1, -1, null, forced))
-			{
-				return false;
-			}
-			if (ModsConfig.IdeologyActive && (pawn.Ideo == null || !WorkGiver_ExtractSkull.CanExtractSkull(pawn.Ideo)))
-			{
-				JobFailReason.Is("CannotExtractSkull".Translate(), null);
-				return false;
-			}
 			return true;
 		}
-
-		// Token: 0x06008399 RID: 33689 RVA: 0x00277D90 File Offset: 0x00275F90
-		public override Job JobOnThing(Pawn pawn, Thing t, bool forced = false)
+		if (CanExtractSkull(Faction.OfPlayer.ideos.PrimaryIdeo))
 		{
-			Job job = JobMaker.MakeJob(JobDefOf.ExtractSkull, t);
-			job.count = 1;
-			return job;
+			return true;
 		}
+		foreach (Ideo item in Faction.OfPlayer.ideos.IdeosMinorListForReading)
+		{
+			if (CanExtractSkull(item))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	[IteratorStateMachine(typeof(_003CPotentialWorkThingsGlobal_003Ed__4))]
+	public override IEnumerable<Thing> PotentialWorkThingsGlobal(Pawn pawn)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CPotentialWorkThingsGlobal_003Ed__4(-2)
+		{
+			_003C_003E3__pawn = pawn
+		};
+	}
+
+	public override bool ShouldSkip(Pawn pawn, bool forced = false)
+	{
+		return !pawn.Map.designationManager.AnySpawnedDesignationOfDef(DesignationDefOf.ExtractSkull);
+	}
+
+	public override bool HasJobOnThing(Pawn pawn, Thing t, bool forced = false)
+	{
+		if (!(t is Corpse { Destroyed: false } corpse))
+		{
+			return false;
+		}
+		if (corpse.Map.designationManager.DesignationOn(t, DesignationDefOf.ExtractSkull) == null)
+		{
+			return false;
+		}
+		if (!corpse.InnerPawn.health.hediffSet.HasHead)
+		{
+			return false;
+		}
+		if (!pawn.CanReserve(t, 1, -1, null, forced))
+		{
+			return false;
+		}
+		if (ModsConfig.IdeologyActive && (pawn.Ideo == null || !CanExtractSkull(pawn.Ideo)))
+		{
+			JobFailReason.Is("CannotExtractSkull".Translate());
+			return false;
+		}
+		return true;
+	}
+
+	public override Job JobOnThing(Pawn pawn, Thing t, bool forced = false)
+	{
+		Job job = JobMaker.MakeJob(JobDefOf.ExtractSkull, t);
+		job.count = 1;
+		return job;
 	}
 }

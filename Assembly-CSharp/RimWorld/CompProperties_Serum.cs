@@ -1,35 +1,188 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompProperties_Serum : CompProperties
 {
-	// Token: 0x02002E03 RID: 11779
-	public class CompProperties_Serum : CompProperties
+	[CompilerGenerated]
+	private sealed class _003CSpecialDisplayStats_003Ed__1 : IEnumerable<StatDrawEntry>, IEnumerable, IEnumerator<StatDrawEntry>, IEnumerator, IDisposable
 	{
-		// Token: 0x0601093A RID: 67898 RVA: 0x004C7375 File Offset: 0x004C5575
-		public CompProperties_Serum()
+		private int _003C_003E1__state;
+
+		private StatDrawEntry _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompProperties_Serum _003C_003E4__this;
+
+		private StatRequest req;
+
+		public StatRequest _003C_003E3__req;
+
+		private IEnumerator<StatDrawEntry> _003C_003E7__wrap1;
+
+		StatDrawEntry IEnumerator<StatDrawEntry>.Current
 		{
-			this.compClass = typeof(CompSerum);
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x0601093B RID: 67899 RVA: 0x004C738D File Offset: 0x004C558D
-		public override IEnumerable<StatDrawEntry> SpecialDisplayStats(StatRequest req)
+		object IEnumerator.Current
 		{
-			foreach (StatDrawEntry statDrawEntry in base.SpecialDisplayStats(req))
+			[DebuggerHidden]
+			get
 			{
-				yield return statDrawEntry;
+				return _003C_003E2__current;
 			}
-			IEnumerator<StatDrawEntry> enumerator = null;
-			ThingDef thingDef = req.Def as ThingDef;
-			HediffDef hediffDef = (thingDef != null) ? thingDef.GetCompProperties<CompProperties_UseEffectAddHediff>().hediffDef : null;
-			HediffCompProperties_DisappearsDisableable hediffCompProperties_DisappearsDisableable = (hediffDef != null) ? hediffDef.CompProps<HediffCompProperties_DisappearsDisableable>() : null;
-			if (hediffCompProperties_DisappearsDisableable != null)
-			{
-				yield return new StatDrawEntry(StatCategoryDefOf.Serum, "StatsReport_SerumDuration".Translate(), hediffCompProperties_DisappearsDisableable.disappearsAfterTicks.min.ToStringTicksToPeriod(true, false, true, true, false), "StatsReport_SerumDuration_Desc".Translate(), 1000, null, null, false, false);
-			}
-			yield break;
-			yield break;
 		}
+
+		[DebuggerHidden]
+		public _003CSpecialDisplayStats_003Ed__1(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				CompProperties_Serum compProperties_Serum = _003C_003E4__this;
+				HediffCompProperties_DisappearsDisableable hediffCompProperties_DisappearsDisableable;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((CompProperties)compProperties_Serum).SpecialDisplayStats(req).GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_007a;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_007a;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_007a:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						StatDrawEntry current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					hediffCompProperties_DisappearsDisableable = ((req.Def as ThingDef)?.GetCompProperties<CompProperties_UseEffectAddHediff>().hediffDef)?.CompProps<HediffCompProperties_DisappearsDisableable>();
+					if (hediffCompProperties_DisappearsDisableable != null)
+					{
+						_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.Serum, "StatsReport_SerumDuration".Translate(), hediffCompProperties_DisappearsDisableable.disappearsAfterTicks.min.ToStringTicksToPeriod(), "StatsReport_SerumDuration_Desc".Translate(), 1000);
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<StatDrawEntry> IEnumerable<StatDrawEntry>.GetEnumerator()
+		{
+			_003CSpecialDisplayStats_003Ed__1 _003CSpecialDisplayStats_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CSpecialDisplayStats_003Ed__ = this;
+			}
+			else
+			{
+				_003CSpecialDisplayStats_003Ed__ = new _003CSpecialDisplayStats_003Ed__1(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CSpecialDisplayStats_003Ed__.req = _003C_003E3__req;
+			return _003CSpecialDisplayStats_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<StatDrawEntry>)this).GetEnumerator();
+		}
+	}
+
+	public CompProperties_Serum()
+	{
+		compClass = typeof(CompSerum);
+	}
+
+	[IteratorStateMachine(typeof(_003CSpecialDisplayStats_003Ed__1))]
+	public override IEnumerable<StatDrawEntry> SpecialDisplayStats(StatRequest req)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CSpecialDisplayStats_003Ed__1(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__req = req
+		};
 	}
 }

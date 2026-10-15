@@ -1,9 +1,5 @@
-﻿using System;
+namespace Verse;
 
-namespace Verse
+public class PawnRenderNodeTagDef : Def
 {
-	// Token: 0x02000622 RID: 1570
-	public class PawnRenderNodeTagDef : Def
-	{
-	}
 }

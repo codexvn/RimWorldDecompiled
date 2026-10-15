@@ -1,30 +1,25 @@
-﻿using System;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class ThoughtWorker_HediffThoughtRandom : ThoughtWorker
 {
-	// Token: 0x020018BE RID: 6334
-	public class ThoughtWorker_HediffThoughtRandom : ThoughtWorker
+	protected override ThoughtState CurrentStateInternal(Pawn p)
 	{
-		// Token: 0x0600909C RID: 37020 RVA: 0x002A9978 File Offset: 0x002A7B78
-		protected override ThoughtState CurrentStateInternal(Pawn p)
+		foreach (Hediff hediff in p.health.hediffSet.hediffs)
 		{
-			foreach (Hediff hediff in p.health.hediffSet.hediffs)
+			if (!(hediff is HediffWithComps hediffWithComps))
 			{
-				HediffWithComps hediffWithComps = hediff as HediffWithComps;
-				if (hediffWithComps != null)
+				continue;
+			}
+			foreach (HediffComp comp in hediffWithComps.comps)
+			{
+				if (comp is HediffComp_GiveRandomSituationalThought hediffComp_GiveRandomSituationalThought && hediffComp_GiveRandomSituationalThought.selectedThought == def)
 				{
-					foreach (HediffComp hediffComp in hediffWithComps.comps)
-					{
-						HediffComp_GiveRandomSituationalThought hediffComp_GiveRandomSituationalThought = hediffComp as HediffComp_GiveRandomSituationalThought;
-						if (hediffComp_GiveRandomSituationalThought != null && hediffComp_GiveRandomSituationalThought.selectedThought == this.def)
-						{
-							return true;
-						}
-					}
+					return true;
 				}
 			}
-			return false;
 		}
+		return false;
 	}
 }

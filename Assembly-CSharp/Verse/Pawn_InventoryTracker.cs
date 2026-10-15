@@ -1,600 +1,908 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using RimWorld;
 using RimWorld.Planet;
 using UnityEngine;
-using Verse.AI.Group;
 
-namespace Verse
+namespace Verse;
+
+[StaticConstructorOnStartup]
+public class Pawn_InventoryTracker : IThingHolder, IExposable
 {
-	// Token: 0x020007E4 RID: 2020
-	[StaticConstructorOnStartup]
-	public class Pawn_InventoryTracker : IThingHolder, IExposable
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass44_0
 	{
-		// Token: 0x170009B7 RID: 2487
-		// (get) Token: 0x0600338B RID: 13195 RVA: 0x0010EA32 File Offset: 0x0010CC32
-		// (set) Token: 0x0600338C RID: 13196 RVA: 0x0010EA44 File Offset: 0x0010CC44
-		public bool UnloadEverything
+		public Thing drug;
+
+		public Pawn_InventoryTracker _003C_003E4__this;
+
+		internal void _003CGetGizmos_003Eb__0()
 		{
+			FoodUtility.IngestFromInventoryNow(_003C_003E4__this.pawn, drug);
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass44_1
+	{
+		public Thing drug;
+
+		public Pawn_InventoryTracker _003C_003E4__this;
+
+		internal void _003CGetGizmos_003Eb__2()
+		{
+			FoodUtility.IngestFromInventoryNow(_003C_003E4__this.pawn, drug);
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGetCombatEnhancingDrugs_003Ed__41 : IEnumerable<Thing>, IEnumerable, IEnumerator<Thing>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Thing _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Pawn_InventoryTracker _003C_003E4__this;
+
+		private List<Thing>.Enumerator _003C_003E7__wrap1;
+
+		Thing IEnumerator<Thing>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				return this.unloadEverything && this.HasAnyUnloadableThing;
-			}
-			set
-			{
-				if (value && this.HasAnyUnloadableThing)
-				{
-					this.unloadEverything = true;
-					return;
-				}
-				this.unloadEverything = false;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170009B8 RID: 2488
-		// (get) Token: 0x0600338D RID: 13197 RVA: 0x0010EA60 File Offset: 0x0010CC60
-		public bool HasAnyUnpackedCaravanItems
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.unpackedCaravanItems.Count > 0;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170009B9 RID: 2489
-		// (get) Token: 0x0600338E RID: 13198 RVA: 0x0010EA70 File Offset: 0x0010CC70
-		private bool HasAnyUnloadableThing
+		[DebuggerHidden]
+		public _003CGetCombatEnhancingDrugs_003Ed__41(int _003C_003E1__state)
 		{
-			get
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				return this.FirstUnloadableThing != default(ThingCount);
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = default(List<Thing>.Enumerator);
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				Pawn_InventoryTracker pawn_InventoryTracker = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = pawn_InventoryTracker.innerContainer.GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 1:
+					_003C_003E1__state = -3;
+					break;
+				}
+				while (_003C_003E7__wrap1.MoveNext())
+				{
+					Thing current = _003C_003E7__wrap1.Current;
+					CompDrug compDrug = current.TryGetComp<CompDrug>();
+					if (compDrug != null && compDrug.Props.isCombatEnhancingDrug)
+					{
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = default(List<Thing>.Enumerator);
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x170009BA RID: 2490
-		// (get) Token: 0x0600338F RID: 13199 RVA: 0x0010EA94 File Offset: 0x0010CC94
-		public ThingCount FirstUnloadableThing
+		bool IEnumerator.MoveNext()
 		{
-			get
-			{
-				if (this.innerContainer.Count == 0)
-				{
-					return default(ThingCount);
-				}
-				Pawn_DrugPolicyTracker drugs = this.pawn.drugs;
-				if (((drugs != null) ? drugs.CurrentPolicy : null) != null)
-				{
-					DrugPolicy currentPolicy = this.pawn.drugs.CurrentPolicy;
-					Pawn_InventoryTracker.tmpItemsToKeep.Clear();
-					for (int i = 0; i < currentPolicy.Count; i++)
-					{
-						if (currentPolicy[i].takeToInventory > 0)
-						{
-							Pawn_InventoryTracker.tmpItemsToKeep.Add(new ThingDefCount(currentPolicy[i].drug, currentPolicy[i].takeToInventory));
-						}
-					}
-				}
-				Pawn_InventoryStockTracker inventoryStock = this.pawn.inventoryStock;
-				bool flag;
-				if (inventoryStock == null)
-				{
-					flag = false;
-				}
-				else
-				{
-					Dictionary<InventoryStockGroupDef, InventoryStockEntry> stockEntries = inventoryStock.stockEntries;
-					int? num = (stockEntries != null) ? new int?(stockEntries.Count) : null;
-					int num2 = 0;
-					flag = (num.GetValueOrDefault() > num2 & num != null);
-				}
-				if (flag)
-				{
-					foreach (InventoryStockEntry inventoryStockEntry in this.pawn.inventoryStock.stockEntries.Values)
-					{
-						Pawn_InventoryTracker.tmpItemsToKeep.Add(new ThingDefCount(inventoryStockEntry.thingDef, inventoryStockEntry.count));
-					}
-				}
-				foreach (Thing thing in this.innerContainer)
-				{
-					int num3 = -1;
-					for (int j = 0; j < Pawn_InventoryTracker.tmpItemsToKeep.Count; j++)
-					{
-						if (thing.def == Pawn_InventoryTracker.tmpItemsToKeep[j].ThingDef)
-						{
-							num3 = j;
-							break;
-						}
-					}
-					if (this.pawn.IsColonist && thing.def.IsNutritionGivingIngestible && !thing.def.IsDrug && JobGiver_PackFood.IsGoodPackableFoodFor(thing, this.pawn, false))
-					{
-						float inventoryPackableFoodNutrition = JobGiver_PackFood.GetInventoryPackableFoodNutrition(this.pawn);
-						float maxLevel = this.pawn.needs.food.MaxLevel;
-						if (inventoryPackableFoodNutrition - thing.GetStatValue(StatDefOf.Nutrition, true, -1) * (float)thing.stackCount <= maxLevel)
-						{
-							int num4 = 0;
-							while (inventoryPackableFoodNutrition - thing.GetStatValue(StatDefOf.Nutrition, true, -1) * (float)num4 > maxLevel)
-							{
-								num4++;
-							}
-							if (thing.stackCount - num4 > 0)
-							{
-								Pawn_InventoryTracker.tmpItemsToKeep.Add(new ThingDefCount(thing.def, thing.stackCount - num4));
-								num3 = Pawn_InventoryTracker.tmpItemsToKeep.Count - 1;
-							}
-						}
-					}
-					if (num3 < 0)
-					{
-						return new ThingCount(thing, thing.stackCount, false);
-					}
-					if (thing.stackCount > Pawn_InventoryTracker.tmpItemsToKeep[num3].Count)
-					{
-						return new ThingCount(thing, thing.stackCount - Pawn_InventoryTracker.tmpItemsToKeep[num3].Count, false);
-					}
-					Pawn_InventoryTracker.tmpItemsToKeep[num3] = new ThingDefCount(Pawn_InventoryTracker.tmpItemsToKeep[num3].ThingDef, Pawn_InventoryTracker.tmpItemsToKeep[num3].Count - thing.stackCount);
-				}
-				return default(ThingCount);
-			}
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x170009BB RID: 2491
-		// (get) Token: 0x06003390 RID: 13200 RVA: 0x0010EE1C File Offset: 0x0010D01C
-		public IThingHolder ParentHolder
+		private void _003C_003Em__Finally1()
 		{
-			get
-			{
-				return this.pawn;
-			}
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap1/*cast due to .constrained prefix*/).Dispose();
 		}
 
-		// Token: 0x06003391 RID: 13201 RVA: 0x0010EE24 File Offset: 0x0010D024
-		public Pawn_InventoryTracker(Pawn pawn)
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			this.pawn = pawn;
-			this.innerContainer = new ThingOwner<Thing>(this, false, LookMode.Deep, true);
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x06003392 RID: 13202 RVA: 0x0010EE64 File Offset: 0x0010D064
-		public void ExposeData()
+		[DebuggerHidden]
+		IEnumerator<Thing> IEnumerable<Thing>.GetEnumerator()
 		{
-			Scribe_Collections.Look<Thing>(ref this.itemsNotForSale, "itemsNotForSale", LookMode.Reference, Array.Empty<object>());
-			Scribe_Collections.Look<Thing>(ref this.unpackedCaravanItems, "unpackedCaravanItems", LookMode.Reference, Array.Empty<object>());
-			Scribe_Deep.Look<ThingOwner<Thing>>(ref this.innerContainer, "innerContainer", new object[]
+			_003CGetCombatEnhancingDrugs_003Ed__41 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				this
-			});
-			Scribe_Values.Look<bool>(ref this.unloadEverything, "unloadEverything", false, false);
-		}
-
-		// Token: 0x06003393 RID: 13203 RVA: 0x0010EEC9 File Offset: 0x0010D0C9
-		public void InventoryTrackerTick()
-		{
-			if (this.unloadEverything && !this.HasAnyUnloadableThing)
-			{
-				this.unloadEverything = false;
-			}
-		}
-
-		// Token: 0x06003394 RID: 13204 RVA: 0x0010EEE2 File Offset: 0x0010D0E2
-		public void DropAllNearPawn(IntVec3 pos, bool forbid = false, bool unforbid = false)
-		{
-			this.DropAllNearPawnHelper(pos, forbid, unforbid, false);
-		}
-
-		// Token: 0x06003395 RID: 13205 RVA: 0x0010EEF0 File Offset: 0x0010D0F0
-		private void DropAllNearPawnHelper(IntVec3 pos, bool forbid = false, bool unforbid = false, bool caravanHaulOnly = false)
-		{
-			if (this.pawn.MapHeld == null)
-			{
-				string str = "Tried to drop all inventory near pawn but the pawn is unspawned. pawn=";
-				Pawn pawn = this.pawn;
-				Log.Error(str + ((pawn != null) ? pawn.ToString() : null));
-				return;
-			}
-			Pawn_InventoryTracker.tmpThingList.Clear();
-			if (caravanHaulOnly)
-			{
-				Pawn_InventoryTracker.tmpThingList.AddRange(this.unpackedCaravanItems);
+				_003C_003E1__state = 0;
+				result = this;
 			}
 			else
 			{
-				Pawn_InventoryTracker.tmpThingList.AddRange(this.innerContainer);
+				result = new _003CGetCombatEnhancingDrugs_003Ed__41(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
-			int i;
-			Action<Thing, int> <>9__0;
-			int j;
-			for (i = 0; i < Pawn_InventoryTracker.tmpThingList.Count; i = j + 1)
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Thing>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGetDrugs_003Ed__40 : IEnumerable<Thing>, IEnumerable, IEnumerator<Thing>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Thing _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Pawn_InventoryTracker _003C_003E4__this;
+
+		private List<Thing>.Enumerator _003C_003E7__wrap1;
+
+		Thing IEnumerator<Thing>.Current
+		{
+			[DebuggerHidden]
+			get
 			{
-				if (caravanHaulOnly && !this.innerContainer.Contains(Pawn_InventoryTracker.tmpThingList[i]))
-				{
-					this.unpackedCaravanItems.Remove(Pawn_InventoryTracker.tmpThingList[i]);
-					Log.Warning("Could not drop unpacked caravan item " + Pawn_InventoryTracker.tmpThingList[i].Label + ", inventory no longer contains it");
-				}
-				else
-				{
-					ThingOwner<Thing> thingOwner = this.innerContainer;
-					Thing thing = Pawn_InventoryTracker.tmpThingList[i];
-					Map mapHeld = this.pawn.MapHeld;
-					ThingPlaceMode mode = ThingPlaceMode.Near;
-					Action<Thing, int> placedAction;
-					if ((placedAction = <>9__0) == null)
-					{
-						placedAction = (<>9__0 = delegate(Thing t, int unused)
-						{
-							if (forbid)
-							{
-								t.SetForbiddenIfOutsideHomeArea();
-							}
-							if (unforbid)
-							{
-								t.SetForbidden(false, false);
-							}
-							if (t.def.IsPleasureDrug)
-							{
-								LessonAutoActivator.TeachOpportunity(ConceptDefOf.DrugBurning, OpportunityType.Important);
-							}
-							Lord formAndSendCaravanLord = CaravanFormingUtility.GetFormAndSendCaravanLord(this.pawn);
-							LordJob_FormAndSendCaravan lordJob_FormAndSendCaravan = ((formAndSendCaravanLord != null) ? formAndSendCaravanLord.LordJob : null) as LordJob_FormAndSendCaravan;
-							if (caravanHaulOnly && lordJob_FormAndSendCaravan != null && lordJob_FormAndSendCaravan.GatheringItemsNow)
-							{
-								CaravanFormingUtility.TryAddItemBackToTransferables(t, lordJob_FormAndSendCaravan.transferables, Pawn_InventoryTracker.tmpThingList[i].stackCount);
-							}
-							this.unpackedCaravanItems.Remove(Pawn_InventoryTracker.tmpThingList[i]);
-						});
-					}
-					Thing thing2;
-					thingOwner.TryDrop(thing, pos, mapHeld, mode, out thing2, placedAction, null);
-				}
-				j = i;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06003396 RID: 13206 RVA: 0x0010F06C File Offset: 0x0010D26C
-		public void DropCount(ThingDef def, int count, bool forbid = false, bool unforbid = false)
+		object IEnumerator.Current
 		{
-			if (this.pawn.MapHeld == null)
+			[DebuggerHidden]
+			get
 			{
-				string str = "Tried to drop a thing near pawn but the pawn is unspawned. pawn=";
-				Pawn pawn = this.pawn;
-				Log.Error(str + ((pawn != null) ? pawn.ToString() : null));
-				return;
-			}
-			Pawn_InventoryTracker.tmpThingList.Clear();
-			Pawn_InventoryTracker.tmpThingList.AddRange(this.innerContainer);
-			int num = 0;
-			Action<Thing, int> <>9__0;
-			for (int i = 0; i < Pawn_InventoryTracker.tmpThingList.Count; i++)
-			{
-				Thing thing = Pawn_InventoryTracker.tmpThingList[i];
-				if (thing.def == def)
-				{
-					int num2 = Math.Min(thing.stackCount, count);
-					ThingOwner<Thing> thingOwner = this.innerContainer;
-					Thing thing2 = Pawn_InventoryTracker.tmpThingList[i];
-					IntVec3 position = this.pawn.Position;
-					Map mapHeld = this.pawn.MapHeld;
-					ThingPlaceMode mode = ThingPlaceMode.Near;
-					int count2 = num2;
-					Action<Thing, int> placedAction;
-					if ((placedAction = <>9__0) == null)
-					{
-						placedAction = (<>9__0 = delegate(Thing t, int unused)
-						{
-							if (forbid)
-							{
-								t.SetForbiddenIfOutsideHomeArea();
-							}
-							if (unforbid)
-							{
-								t.SetForbidden(false, false);
-							}
-							if (t.def.IsPleasureDrug)
-							{
-								LessonAutoActivator.TeachOpportunity(ConceptDefOf.DrugBurning, OpportunityType.Important);
-							}
-						});
-					}
-					Thing thing3;
-					thingOwner.TryDrop(thing2, position, mapHeld, mode, count2, out thing3, placedAction, null);
-					num += num2;
-					if (num >= count)
-					{
-						break;
-					}
-				}
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06003397 RID: 13207 RVA: 0x0010F174 File Offset: 0x0010D374
-		public void RemoveCount(ThingDef def, int count, bool destroy = true)
+		[DebuggerHidden]
+		public _003CGetDrugs_003Ed__40(int _003C_003E1__state)
 		{
-			Pawn_InventoryTracker.tmpThingList.Clear();
-			Pawn_InventoryTracker.tmpThingList.AddRange(this.innerContainer);
-			foreach (Thing thing in Pawn_InventoryTracker.tmpThingList)
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				if (thing.def == def)
+				try
 				{
-					if (thing.stackCount > count)
-					{
-						thing.stackCount -= count;
-						break;
-					}
-					this.innerContainer.Remove(thing);
-					if (destroy)
-					{
-						thing.Destroy(DestroyMode.Vanish);
-						break;
-					}
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = default(List<Thing>.Enumerator);
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				Pawn_InventoryTracker pawn_InventoryTracker = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = pawn_InventoryTracker.innerContainer.GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 1:
+					_003C_003E1__state = -3;
 					break;
 				}
-			}
-		}
-
-		// Token: 0x06003398 RID: 13208 RVA: 0x0010F214 File Offset: 0x0010D414
-		public void DestroyAll(DestroyMode mode = DestroyMode.Vanish)
-		{
-			this.innerContainer.ClearAndDestroyContents(mode);
-		}
-
-		// Token: 0x06003399 RID: 13209 RVA: 0x0010F222 File Offset: 0x0010D422
-		public bool Contains(Thing item)
-		{
-			return this.innerContainer.Contains(item);
-		}
-
-		// Token: 0x0600339A RID: 13210 RVA: 0x0010F230 File Offset: 0x0010D430
-		public int Count(ThingDef def)
-		{
-			int num = 0;
-			foreach (Thing thing in this.innerContainer)
-			{
-				if (thing.def == def)
+				while (_003C_003E7__wrap1.MoveNext())
 				{
-					num += thing.stackCount;
+					Thing current = _003C_003E7__wrap1.Current;
+					if (current.TryGetComp<CompDrug>() != null)
+					{
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
 				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = default(List<Thing>.Enumerator);
+				return false;
 			}
-			return num;
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
 		}
 
-		// Token: 0x0600339B RID: 13211 RVA: 0x0010F294 File Offset: 0x0010D494
-		public int Count(Func<Thing, bool> validator)
+		bool IEnumerator.MoveNext()
 		{
-			int num = 0;
-			foreach (Thing thing in this.innerContainer)
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap1/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Thing> IEnumerable<Thing>.GetEnumerator()
+		{
+			_003CGetDrugs_003Ed__40 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				if (validator(thing))
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CGetDrugs_003Ed__40(0)
 				{
-					num += thing.stackCount;
-				}
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
-			return num;
+			return result;
 		}
 
-		// Token: 0x0600339C RID: 13212 RVA: 0x0010F2F8 File Offset: 0x0010D4F8
-		public void AddHauledCaravanItem(Thing item)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			Thing thing;
-			if (this.pawn.carryTracker.innerContainer.TryTransferToContainer(item, this.innerContainer, item.stackCount, out thing, false) > 0)
+			return ((IEnumerable<Thing>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGetGizmos_003Ed__44 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Pawn_InventoryTracker _003C_003E4__this;
+
+		Gizmo IEnumerator<Gizmo>.Current
+		{
+			[DebuggerHidden]
+			get
 			{
-				this.unpackedCaravanItems.Add(thing);
-			}
-			CompForbiddable compForbiddable = (thing != null) ? thing.TryGetComp<CompForbiddable>() : null;
-			if (compForbiddable != null)
-			{
-				compForbiddable.Forbidden = false;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600339D RID: 13213 RVA: 0x0010F350 File Offset: 0x0010D550
-		public void TryAddAndUnforbid(Thing item)
+		object IEnumerator.Current
 		{
-			CompForbiddable compForbiddable = item.TryGetComp<CompForbiddable>();
-			if (this.innerContainer.TryAdd(item, true) && compForbiddable != null)
+			[DebuggerHidden]
+			get
 			{
-				compForbiddable.Forbidden = false;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600339E RID: 13214 RVA: 0x0010F380 File Offset: 0x0010D580
-		public void TransferCaravanItemsToCarrier(Pawn_InventoryTracker carrierInventory)
+		[DebuggerHidden]
+		public _003CGetGizmos_003Ed__44(int _003C_003E1__state)
 		{
-			List<Thing> list = new List<Thing>();
-			list.AddRange(this.pawn.inventory.unpackedCaravanItems);
-			foreach (Thing thing in list)
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			Pawn_InventoryTracker CS_0024_003C_003E8__locals26 = _003C_003E4__this;
+			switch (num)
 			{
-				if (MassUtility.IsOverEncumbered(carrierInventory.pawn))
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (!CS_0024_003C_003E8__locals26.pawn.IsColonistPlayerControlled || !CS_0024_003C_003E8__locals26.pawn.Drafted || Find.Selector.SingleSelectedThing != CS_0024_003C_003E8__locals26.pawn)
 				{
 					break;
 				}
-				if (this.innerContainer.Contains(thing))
+				CS_0024_003C_003E8__locals26.usableDrugsTmp.Clear();
+				foreach (Thing drug in CS_0024_003C_003E8__locals26.GetDrugs())
 				{
-					this.pawn.inventory.innerContainer.TryTransferToContainer(thing, carrierInventory.innerContainer, thing.stackCount, true);
-				}
-				this.unpackedCaravanItems.Remove(thing);
-			}
-		}
-
-		// Token: 0x0600339F RID: 13215 RVA: 0x0010F430 File Offset: 0x0010D630
-		public void DropAllPackingCaravanThings()
-		{
-			if (this.pawn.Spawned)
-			{
-				this.DropAllNearPawnHelper(this.pawn.Position, false, false, true);
-				this.ClearHaulingCaravanCache();
-			}
-		}
-
-		// Token: 0x060033A0 RID: 13216 RVA: 0x0010F459 File Offset: 0x0010D659
-		public void ClearHaulingCaravanCache()
-		{
-			this.unpackedCaravanItems.Clear();
-		}
-
-		// Token: 0x060033A1 RID: 13217 RVA: 0x0010F466 File Offset: 0x0010D666
-		public bool NotForSale(Thing item)
-		{
-			return this.itemsNotForSale.Contains(item);
-		}
-
-		// Token: 0x060033A2 RID: 13218 RVA: 0x0010F474 File Offset: 0x0010D674
-		public void TryAddItemNotForSale(Thing item)
-		{
-			if (this.innerContainer.TryAdd(item, false))
-			{
-				this.itemsNotForSale.Add(item);
-			}
-		}
-
-		// Token: 0x060033A3 RID: 13219 RVA: 0x0010F491 File Offset: 0x0010D691
-		public void Notify_ItemRemoved(Thing item)
-		{
-			this.itemsNotForSale.Remove(item);
-			this.unpackedCaravanItems.Remove(item);
-			if (this.unloadEverything && !this.HasAnyUnloadableThing)
-			{
-				this.unloadEverything = false;
-			}
-		}
-
-		// Token: 0x060033A4 RID: 13220 RVA: 0x0010F4C4 File Offset: 0x0010D6C4
-		public ThingOwner GetDirectlyHeldThings()
-		{
-			return this.innerContainer;
-		}
-
-		// Token: 0x060033A5 RID: 13221 RVA: 0x0010F4CC File Offset: 0x0010D6CC
-		public void GetChildHolders(List<IThingHolder> outChildren)
-		{
-			ThingOwnerUtility.AppendThingHoldersFromThings(outChildren, this.GetDirectlyHeldThings());
-		}
-
-		// Token: 0x060033A6 RID: 13222 RVA: 0x0010F4DA File Offset: 0x0010D6DA
-		public IEnumerable<Thing> GetDrugs()
-		{
-			foreach (Thing thing in this.innerContainer)
-			{
-				if (thing.TryGetComp<CompDrug>() != null)
-				{
-					yield return thing;
-				}
-			}
-			List<Thing>.Enumerator enumerator = default(List<Thing>.Enumerator);
-			yield break;
-			yield break;
-		}
-
-		// Token: 0x060033A7 RID: 13223 RVA: 0x0010F4EA File Offset: 0x0010D6EA
-		public IEnumerable<Thing> GetCombatEnhancingDrugs()
-		{
-			foreach (Thing thing in this.innerContainer)
-			{
-				CompDrug compDrug = thing.TryGetComp<CompDrug>();
-				if (compDrug != null && compDrug.Props.isCombatEnhancingDrug)
-				{
-					yield return thing;
-				}
-			}
-			List<Thing>.Enumerator enumerator = default(List<Thing>.Enumerator);
-			yield break;
-			yield break;
-		}
-
-		// Token: 0x060033A8 RID: 13224 RVA: 0x0010F4FA File Offset: 0x0010D6FA
-		public Thing FindCombatEnhancingDrug()
-		{
-			return this.GetCombatEnhancingDrugs().FirstOrDefault<Thing>();
-		}
-
-		// Token: 0x060033A9 RID: 13225 RVA: 0x0010F507 File Offset: 0x0010D707
-		public IEnumerable<Gizmo> GetGizmos()
-		{
-			if (this.pawn.IsColonistPlayerControlled && this.pawn.Drafted && Find.Selector.SingleSelectedThing == this.pawn)
-			{
-				this.usableDrugsTmp.Clear();
-				foreach (Thing thing in this.GetDrugs())
-				{
-					if (FoodUtility.WillIngestFromInventoryNow(this.pawn, thing))
+					if (FoodUtility.WillIngestFromInventoryNow(CS_0024_003C_003E8__locals26.pawn, drug))
 					{
-						this.usableDrugsTmp.Add(thing);
+						CS_0024_003C_003E8__locals26.usableDrugsTmp.Add(drug);
 					}
 				}
-				if (this.usableDrugsTmp.Count == 0)
+				if (CS_0024_003C_003E8__locals26.usableDrugsTmp.Count == 0)
 				{
-					yield break;
+					return false;
 				}
-				if (this.usableDrugsTmp.Count == 1)
+				if (CS_0024_003C_003E8__locals26.usableDrugsTmp.Count == 1)
 				{
-					Thing drug = this.usableDrugsTmp[0];
-					string defaultLabel = drug.def.ingestible.ingestCommandString.NullOrEmpty() ? "ConsumeThing".Translate(drug.LabelNoCount, drug) : drug.def.ingestible.ingestCommandString.Formatted(drug.LabelShort);
-					yield return new Command_Action
+					_003C_003Ec__DisplayClass44_0 CS_0024_003C_003E8__locals24 = new _003C_003Ec__DisplayClass44_0
+					{
+						_003C_003E4__this = CS_0024_003C_003E8__locals26,
+						drug = CS_0024_003C_003E8__locals26.usableDrugsTmp[0]
+					};
+					string defaultLabel = (CS_0024_003C_003E8__locals24.drug.def.ingestible.ingestCommandString.NullOrEmpty() ? "ConsumeThing".Translate(CS_0024_003C_003E8__locals24.drug.LabelNoCount, CS_0024_003C_003E8__locals24.drug) : CS_0024_003C_003E8__locals24.drug.def.ingestible.ingestCommandString.Formatted(CS_0024_003C_003E8__locals24.drug.LabelShort));
+					_003C_003E2__current = new Command_Action
 					{
 						defaultLabel = defaultLabel,
-						defaultDesc = drug.LabelCapNoCount + ": " + drug.def.description.CapitalizeFirst(),
-						icon = drug.def.uiIcon,
-						iconAngle = drug.def.uiIconAngle,
-						iconOffset = drug.def.uiIconOffset,
-						action = delegate()
+						defaultDesc = CS_0024_003C_003E8__locals24.drug.LabelCapNoCount + ": " + CS_0024_003C_003E8__locals24.drug.def.description.CapitalizeFirst(),
+						icon = CS_0024_003C_003E8__locals24.drug.def.uiIcon,
+						iconAngle = CS_0024_003C_003E8__locals24.drug.def.uiIconAngle,
+						iconOffset = CS_0024_003C_003E8__locals24.drug.def.uiIconOffset,
+						action = delegate
 						{
-							FoodUtility.IngestFromInventoryNow(this.pawn, drug);
+							FoodUtility.IngestFromInventoryNow(CS_0024_003C_003E8__locals24._003C_003E4__this.pawn, CS_0024_003C_003E8__locals24.drug);
 						}
 					};
+					_003C_003E1__state = 1;
+					return true;
 				}
-				else
+				_003C_003E2__current = new Command_Action
 				{
-					yield return new Command_Action
+					defaultLabel = "TakeDrug".Translate(),
+					defaultDesc = "TakeDrugDesc".Translate(),
+					icon = DrugTex,
+					action = delegate
 					{
-						defaultLabel = "TakeDrug".Translate(),
-						defaultDesc = "TakeDrugDesc".Translate(),
-						icon = Pawn_InventoryTracker.DrugTex,
-						action = delegate()
+						List<FloatMenuOption> list = new List<FloatMenuOption>();
+						using (List<Thing>.Enumerator enumerator2 = CS_0024_003C_003E8__locals26.usableDrugsTmp.GetEnumerator())
 						{
-							List<FloatMenuOption> list = new List<FloatMenuOption>();
-							using (List<Thing>.Enumerator enumerator2 = this.usableDrugsTmp.GetEnumerator())
+							while (enumerator2.MoveNext())
 							{
-								while (enumerator2.MoveNext())
+								_003C_003Ec__DisplayClass44_1 CS_0024_003C_003E8__locals34 = new _003C_003Ec__DisplayClass44_1
 								{
-									Thing drug = enumerator2.Current;
-									string label = drug.def.ingestible.ingestCommandString.NullOrEmpty() ? "ConsumeThing".Translate(drug.LabelNoCount, drug) : drug.def.ingestible.ingestCommandString.Formatted(drug.LabelShort);
-									list.Add(new FloatMenuOption(label, delegate()
-									{
-										FoodUtility.IngestFromInventoryNow(this.pawn, drug);
-									}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0));
-								}
+									_003C_003E4__this = CS_0024_003C_003E8__locals26,
+									drug = enumerator2.Current
+								};
+								string label = (CS_0024_003C_003E8__locals34.drug.def.ingestible.ingestCommandString.NullOrEmpty() ? "ConsumeThing".Translate(CS_0024_003C_003E8__locals34.drug.LabelNoCount, CS_0024_003C_003E8__locals34.drug) : CS_0024_003C_003E8__locals34.drug.def.ingestible.ingestCommandString.Formatted(CS_0024_003C_003E8__locals34.drug.LabelShort));
+								list.Add(new FloatMenuOption(label, delegate
+								{
+									FoodUtility.IngestFromInventoryNow(CS_0024_003C_003E8__locals34._003C_003E4__this.pawn, CS_0024_003C_003E8__locals34.drug);
+								}));
 							}
-							Find.WindowStack.Add(new FloatMenu(list));
 						}
-					};
-				}
+						Find.WindowStack.Add(new FloatMenu(list));
+					}
+				};
+				_003C_003E1__state = 2;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				break;
+			case 2:
+				_003C_003E1__state = -1;
+				break;
 			}
-			yield break;
+			return false;
 		}
 
-		// Token: 0x040026FD RID: 9981
-		public Pawn pawn;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x040026FE RID: 9982
-		public ThingOwner<Thing> innerContainer;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x040026FF RID: 9983
-		private bool unloadEverything;
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CGetGizmos_003Ed__44 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CGetGizmos_003Ed__44(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x04002700 RID: 9984
-		private List<Thing> itemsNotForSale = new List<Thing>();
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x04002701 RID: 9985
-		private List<Thing> unpackedCaravanItems = new List<Thing>();
+	public Pawn pawn;
 
-		// Token: 0x04002702 RID: 9986
-		public static readonly Texture2D DrugTex = ContentFinder<Texture2D>.Get("UI/Commands/TakeDrug", true);
+	public ThingOwner<Thing> innerContainer;
 
-		// Token: 0x04002703 RID: 9987
-		private static List<ThingDefCount> tmpItemsToKeep = new List<ThingDefCount>();
+	private bool unloadEverything;
 
-		// Token: 0x04002704 RID: 9988
-		private static readonly List<Thing> tmpThingList = new List<Thing>();
+	private List<Thing> itemsNotForSale = new List<Thing>();
 
-		// Token: 0x04002705 RID: 9989
-		private List<Thing> usableDrugsTmp = new List<Thing>();
+	private List<Thing> unpackedCaravanItems = new List<Thing>();
+
+	public static readonly Texture2D DrugTex = ContentFinder<Texture2D>.Get("UI/Commands/TakeDrug");
+
+	private static List<ThingDefCount> tmpItemsToKeep = new List<ThingDefCount>();
+
+	private static readonly List<Thing> tmpThingList = new List<Thing>();
+
+	private List<Thing> usableDrugsTmp = new List<Thing>();
+
+	public bool UnloadEverything
+	{
+		get
+		{
+			if (unloadEverything)
+			{
+				return HasAnyUnloadableThing;
+			}
+			return false;
+		}
+		set
+		{
+			if (value && HasAnyUnloadableThing)
+			{
+				unloadEverything = true;
+			}
+			else
+			{
+				unloadEverything = false;
+			}
+		}
+	}
+
+	public bool HasAnyUnpackedCaravanItems => unpackedCaravanItems.Count > 0;
+
+	private bool HasAnyUnloadableThing => FirstUnloadableThing != default(ThingCount);
+
+	public ThingCount FirstUnloadableThing
+	{
+		get
+		{
+			if (innerContainer.Count == 0)
+			{
+				return default(ThingCount);
+			}
+			if (pawn.drugs?.CurrentPolicy != null)
+			{
+				DrugPolicy currentPolicy = pawn.drugs.CurrentPolicy;
+				tmpItemsToKeep.Clear();
+				for (int i = 0; i < currentPolicy.Count; i++)
+				{
+					if (currentPolicy[i].takeToInventory > 0)
+					{
+						tmpItemsToKeep.Add(new ThingDefCount(currentPolicy[i].drug, currentPolicy[i].takeToInventory));
+					}
+				}
+			}
+			Pawn_InventoryStockTracker inventoryStock = pawn.inventoryStock;
+			if (inventoryStock != null && inventoryStock.stockEntries?.Count > 0)
+			{
+				foreach (InventoryStockEntry value in pawn.inventoryStock.stockEntries.Values)
+				{
+					tmpItemsToKeep.Add(new ThingDefCount(value.thingDef, value.count));
+				}
+			}
+			foreach (Thing item in innerContainer)
+			{
+				int num = -1;
+				for (int j = 0; j < tmpItemsToKeep.Count; j++)
+				{
+					if (item.def == tmpItemsToKeep[j].ThingDef)
+					{
+						num = j;
+						break;
+					}
+				}
+				if (pawn.IsColonist && item.def.IsNutritionGivingIngestible && !item.def.IsDrug && JobGiver_PackFood.IsGoodPackableFoodFor(item, pawn, checkMass: false))
+				{
+					float inventoryPackableFoodNutrition = JobGiver_PackFood.GetInventoryPackableFoodNutrition(pawn);
+					float maxLevel = pawn.needs.food.MaxLevel;
+					if (inventoryPackableFoodNutrition - item.GetStatValue(StatDefOf.Nutrition) * (float)item.stackCount <= maxLevel)
+					{
+						int k;
+						for (k = 0; inventoryPackableFoodNutrition - item.GetStatValue(StatDefOf.Nutrition) * (float)k > maxLevel; k++)
+						{
+						}
+						if (item.stackCount - k > 0)
+						{
+							tmpItemsToKeep.Add(new ThingDefCount(item.def, item.stackCount - k));
+							num = tmpItemsToKeep.Count - 1;
+						}
+					}
+				}
+				if (num < 0)
+				{
+					return new ThingCount(item, item.stackCount);
+				}
+				if (item.stackCount > tmpItemsToKeep[num].Count)
+				{
+					return new ThingCount(item, item.stackCount - tmpItemsToKeep[num].Count);
+				}
+				tmpItemsToKeep[num] = new ThingDefCount(tmpItemsToKeep[num].ThingDef, tmpItemsToKeep[num].Count - item.stackCount);
+			}
+			return default(ThingCount);
+		}
+	}
+
+	public IThingHolder ParentHolder => pawn;
+
+	public Pawn_InventoryTracker(Pawn pawn)
+	{
+		this.pawn = pawn;
+		innerContainer = new ThingOwner<Thing>(this, oneStackOnly: false);
+	}
+
+	public void ExposeData()
+	{
+		Scribe_Collections.Look(ref itemsNotForSale, "itemsNotForSale", LookMode.Reference);
+		Scribe_Collections.Look(ref unpackedCaravanItems, "unpackedCaravanItems", LookMode.Reference);
+		Scribe_Deep.Look(ref innerContainer, "innerContainer", this);
+		Scribe_Values.Look(ref unloadEverything, "unloadEverything", defaultValue: false);
+	}
+
+	public void InventoryTrackerTick()
+	{
+		if (unloadEverything && !HasAnyUnloadableThing)
+		{
+			unloadEverything = false;
+		}
+	}
+
+	public void DropAllNearPawn(IntVec3 pos, bool forbid = false, bool unforbid = false)
+	{
+		DropAllNearPawnHelper(pos, forbid, unforbid);
+	}
+
+	private void DropAllNearPawnHelper(IntVec3 pos, bool forbid = false, bool unforbid = false, bool caravanHaulOnly = false)
+	{
+		if (pawn.MapHeld == null)
+		{
+			Log.Error("Tried to drop all inventory near pawn but the pawn is unspawned. pawn=" + pawn);
+			return;
+		}
+		tmpThingList.Clear();
+		if (caravanHaulOnly)
+		{
+			tmpThingList.AddRange(unpackedCaravanItems);
+		}
+		else
+		{
+			tmpThingList.AddRange(innerContainer);
+		}
+		int i;
+		for (i = 0; i < tmpThingList.Count; i++)
+		{
+			if (caravanHaulOnly && !innerContainer.Contains(tmpThingList[i]))
+			{
+				unpackedCaravanItems.Remove(tmpThingList[i]);
+				Log.Warning("Could not drop unpacked caravan item " + tmpThingList[i].Label + ", inventory no longer contains it");
+				continue;
+			}
+			innerContainer.TryDrop(tmpThingList[i], pos, pawn.MapHeld, ThingPlaceMode.Near, out var _, delegate(Thing t, int unused)
+			{
+				if (forbid)
+				{
+					t.SetForbiddenIfOutsideHomeArea();
+				}
+				if (unforbid)
+				{
+					t.SetForbidden(value: false, warnOnFail: false);
+				}
+				if (t.def.IsPleasureDrug)
+				{
+					LessonAutoActivator.TeachOpportunity(ConceptDefOf.DrugBurning, OpportunityType.Important);
+				}
+				LordJob_FormAndSendCaravan lordJob_FormAndSendCaravan = CaravanFormingUtility.GetFormAndSendCaravanLord(pawn)?.LordJob as LordJob_FormAndSendCaravan;
+				if (caravanHaulOnly && lordJob_FormAndSendCaravan != null && lordJob_FormAndSendCaravan.GatheringItemsNow)
+				{
+					CaravanFormingUtility.TryAddItemBackToTransferables(t, lordJob_FormAndSendCaravan.transferables, tmpThingList[i].stackCount);
+				}
+				unpackedCaravanItems.Remove(tmpThingList[i]);
+			});
+		}
+	}
+
+	public void DropCount(ThingDef def, int count, bool forbid = false, bool unforbid = false)
+	{
+		if (pawn.MapHeld == null)
+		{
+			Log.Error("Tried to drop a thing near pawn but the pawn is unspawned. pawn=" + pawn);
+			return;
+		}
+		tmpThingList.Clear();
+		tmpThingList.AddRange(innerContainer);
+		int num = 0;
+		for (int i = 0; i < tmpThingList.Count; i++)
+		{
+			Thing thing = tmpThingList[i];
+			if (thing.def != def)
+			{
+				continue;
+			}
+			int num2 = Math.Min(thing.stackCount, count);
+			innerContainer.TryDrop(tmpThingList[i], pawn.Position, pawn.MapHeld, ThingPlaceMode.Near, num2, out var _, delegate(Thing t, int unused)
+			{
+				if (forbid)
+				{
+					t.SetForbiddenIfOutsideHomeArea();
+				}
+				if (unforbid)
+				{
+					t.SetForbidden(value: false, warnOnFail: false);
+				}
+				if (t.def.IsPleasureDrug)
+				{
+					LessonAutoActivator.TeachOpportunity(ConceptDefOf.DrugBurning, OpportunityType.Important);
+				}
+			});
+			num += num2;
+			if (num >= count)
+			{
+				break;
+			}
+		}
+	}
+
+	public void RemoveCount(ThingDef def, int count, bool destroy = true)
+	{
+		tmpThingList.Clear();
+		tmpThingList.AddRange(innerContainer);
+		foreach (Thing tmpThing in tmpThingList)
+		{
+			if (tmpThing.def != def)
+			{
+				continue;
+			}
+			if (tmpThing.stackCount > count)
+			{
+				tmpThing.stackCount -= count;
+				break;
+			}
+			innerContainer.Remove(tmpThing);
+			if (destroy)
+			{
+				tmpThing.Destroy();
+			}
+			break;
+		}
+	}
+
+	public void DestroyAll(DestroyMode mode = DestroyMode.Vanish)
+	{
+		innerContainer.ClearAndDestroyContents(mode);
+	}
+
+	public bool Contains(Thing item)
+	{
+		return innerContainer.Contains(item);
+	}
+
+	public int Count(ThingDef def)
+	{
+		int num = 0;
+		foreach (Thing item in innerContainer)
+		{
+			if (item.def == def)
+			{
+				num += item.stackCount;
+			}
+		}
+		return num;
+	}
+
+	public int Count(Func<Thing, bool> validator)
+	{
+		int num = 0;
+		foreach (Thing item in innerContainer)
+		{
+			if (validator(item))
+			{
+				num += item.stackCount;
+			}
+		}
+		return num;
+	}
+
+	public void AddHauledCaravanItem(Thing item)
+	{
+		if (pawn.carryTracker.innerContainer.TryTransferToContainer(item, innerContainer, item.stackCount, out var resultingTransferredItem, canMergeWithExistingStacks: false) > 0)
+		{
+			unpackedCaravanItems.Add(resultingTransferredItem);
+		}
+		CompForbiddable compForbiddable = resultingTransferredItem?.TryGetComp<CompForbiddable>();
+		if (compForbiddable != null)
+		{
+			compForbiddable.Forbidden = false;
+		}
+	}
+
+	public void TryAddAndUnforbid(Thing item)
+	{
+		CompForbiddable compForbiddable = item.TryGetComp<CompForbiddable>();
+		if (innerContainer.TryAdd(item) && compForbiddable != null)
+		{
+			compForbiddable.Forbidden = false;
+		}
+	}
+
+	public void TransferCaravanItemsToCarrier(Pawn_InventoryTracker carrierInventory)
+	{
+		List<Thing> list = new List<Thing>();
+		list.AddRange(pawn.inventory.unpackedCaravanItems);
+		foreach (Thing item in list)
+		{
+			if (MassUtility.IsOverEncumbered(carrierInventory.pawn))
+			{
+				break;
+			}
+			if (innerContainer.Contains(item))
+			{
+				pawn.inventory.innerContainer.TryTransferToContainer(item, carrierInventory.innerContainer, item.stackCount);
+			}
+			unpackedCaravanItems.Remove(item);
+		}
+	}
+
+	public void DropAllPackingCaravanThings()
+	{
+		if (pawn.Spawned)
+		{
+			DropAllNearPawnHelper(pawn.Position, forbid: false, unforbid: false, caravanHaulOnly: true);
+			ClearHaulingCaravanCache();
+		}
+	}
+
+	public void ClearHaulingCaravanCache()
+	{
+		unpackedCaravanItems.Clear();
+	}
+
+	public bool NotForSale(Thing item)
+	{
+		return itemsNotForSale.Contains(item);
+	}
+
+	public void TryAddItemNotForSale(Thing item)
+	{
+		if (innerContainer.TryAdd(item, canMergeWithExistingStacks: false))
+		{
+			itemsNotForSale.Add(item);
+		}
+	}
+
+	public void Notify_ItemRemoved(Thing item)
+	{
+		itemsNotForSale.Remove(item);
+		unpackedCaravanItems.Remove(item);
+		if (unloadEverything && !HasAnyUnloadableThing)
+		{
+			unloadEverything = false;
+		}
+	}
+
+	public ThingOwner GetDirectlyHeldThings()
+	{
+		return innerContainer;
+	}
+
+	public void GetChildHolders(List<IThingHolder> outChildren)
+	{
+		ThingOwnerUtility.AppendThingHoldersFromThings(outChildren, GetDirectlyHeldThings());
+	}
+
+	[IteratorStateMachine(typeof(_003CGetDrugs_003Ed__40))]
+	public IEnumerable<Thing> GetDrugs()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetDrugs_003Ed__40(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	[IteratorStateMachine(typeof(_003CGetCombatEnhancingDrugs_003Ed__41))]
+	public IEnumerable<Thing> GetCombatEnhancingDrugs()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetCombatEnhancingDrugs_003Ed__41(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public Thing FindCombatEnhancingDrug()
+	{
+		return GetCombatEnhancingDrugs().FirstOrDefault();
+	}
+
+	[IteratorStateMachine(typeof(_003CGetGizmos_003Ed__44))]
+	public IEnumerable<Gizmo> GetGizmos()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetGizmos_003Ed__44(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

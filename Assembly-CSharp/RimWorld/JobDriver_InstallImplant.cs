@@ -1,91 +1,194 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 using Verse.Sound;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_InstallImplant : JobDriver
 {
-	// Token: 0x02001299 RID: 4761
-	public class JobDriver_InstallImplant : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__8 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001236 RID: 4662
-		// (get) Token: 0x06007494 RID: 29844 RVA: 0x0023B3F0 File Offset: 0x002395F0
-		private Pawn TargetPawn
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_InstallImplant _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (Pawn)this.job.GetTarget(TargetIndex.A).Thing;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001237 RID: 4663
-		// (get) Token: 0x06007495 RID: 29845 RVA: 0x0023B418 File Offset: 0x00239618
-		private Thing Item
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.job.GetTarget(TargetIndex.B).Thing;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06007496 RID: 29846 RVA: 0x0023B43C File Offset: 0x0023963C
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__8(int _003C_003E1__state)
 		{
-			return this.pawn.Reserve(this.TargetPawn, this.job, 1, -1, null, errorOnFailed, false) && this.pawn.Reserve(this.Item, this.job, 1, -1, null, errorOnFailed, false);
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x06007497 RID: 29847 RVA: 0x0023B48F File Offset: 0x0023968F
-		protected override IEnumerable<Toil> MakeNewToils()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			yield return Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.Touch, false).FailOnDespawnedOrNull(TargetIndex.B).FailOnDespawnedOrNull(TargetIndex.A);
-			yield return Toils_Haul.StartCarryThing(TargetIndex.B, false, false, false, true, false);
-			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch, false).FailOnDespawnedOrNull(TargetIndex.A);
-			Toil toil = Toils_General.WaitWith(TargetIndex.A, 600, false, true, false, TargetIndex.A, PathEndMode.Touch);
-			toil.WithProgressBarToilDelay(TargetIndex.A, false, -0.5f);
-			toil.FailOnDespawnedOrNull(TargetIndex.A);
-			toil.FailOnCannotTouch(TargetIndex.A, PathEndMode.Touch);
-			yield return toil;
-			yield return Toils_General.Do(new Action(this.Install));
-			yield break;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x06007498 RID: 29848 RVA: 0x0023B4A0 File Offset: 0x002396A0
-		private void Install()
+		private bool MoveNext()
 		{
-			CompTargetEffect_InstallImplantInOtherPawn compTargetEffect_InstallImplantInOtherPawn = this.Item.TryGetComp<CompTargetEffect_InstallImplantInOtherPawn>();
-			if (compTargetEffect_InstallImplantInOtherPawn == null)
+			int num = _003C_003E1__state;
+			JobDriver_InstallImplant @object = _003C_003E4__this;
+			switch (num)
 			{
-				return;
-			}
-			BodyPartRecord bodyPartRecord = this.TargetPawn.RaceProps.body.GetPartsWithDef(compTargetEffect_InstallImplantInOtherPawn.Props.bodyPart).FirstOrFallback(null);
-			if (bodyPartRecord == null)
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.Touch).FailOnDespawnedOrNull(TargetIndex.B).FailOnDespawnedOrNull(TargetIndex.A);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Haul.StartCarryThing(TargetIndex.B);
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch).FailOnDespawnedOrNull(TargetIndex.A);
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
 			{
-				return;
+				_003C_003E1__state = -1;
+				Toil toil = Toils_General.WaitWith(TargetIndex.A, 600, useProgressBar: false, maintainPosture: true, maintainSleep: false, TargetIndex.A);
+				toil.WithProgressBarToilDelay(TargetIndex.A);
+				toil.FailOnDespawnedOrNull(TargetIndex.A);
+				toil.FailOnCannotTouch(TargetIndex.A, PathEndMode.Touch);
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 4;
+				return true;
 			}
-			Hediff firstHediffOfDef = this.TargetPawn.health.hediffSet.GetFirstHediffOfDef(compTargetEffect_InstallImplantInOtherPawn.Props.hediffDef, false);
+			case 4:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.Do(@object.Install);
+				_003C_003E1__state = 5;
+				return true;
+			case 5:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__8 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__8(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private const TargetIndex TargetPawnInd = TargetIndex.A;
+
+	private const TargetIndex ItemInd = TargetIndex.B;
+
+	private const int DurationTicks = 600;
+
+	private Pawn TargetPawn => (Pawn)job.GetTarget(TargetIndex.A).Thing;
+
+	private Thing Item => job.GetTarget(TargetIndex.B).Thing;
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		if (pawn.Reserve(TargetPawn, job, 1, -1, null, errorOnFailed))
+		{
+			return pawn.Reserve(Item, job, 1, -1, null, errorOnFailed);
+		}
+		return false;
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__8))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__8(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	private void Install()
+	{
+		CompTargetEffect_InstallImplantInOtherPawn compTargetEffect_InstallImplantInOtherPawn = Item.TryGetComp<CompTargetEffect_InstallImplantInOtherPawn>();
+		if (compTargetEffect_InstallImplantInOtherPawn == null)
+		{
+			return;
+		}
+		BodyPartRecord bodyPartRecord = TargetPawn.RaceProps.body.GetPartsWithDef(compTargetEffect_InstallImplantInOtherPawn.Props.bodyPart).FirstOrFallback();
+		if (bodyPartRecord != null)
+		{
+			Hediff firstHediffOfDef = TargetPawn.health.hediffSet.GetFirstHediffOfDef(compTargetEffect_InstallImplantInOtherPawn.Props.hediffDef);
 			if (firstHediffOfDef == null && !compTargetEffect_InstallImplantInOtherPawn.Props.requiresExistingHediff)
 			{
-				this.TargetPawn.health.AddHediff(compTargetEffect_InstallImplantInOtherPawn.Props.hediffDef, bodyPartRecord, null, null);
+				TargetPawn.health.AddHediff(compTargetEffect_InstallImplantInOtherPawn.Props.hediffDef, bodyPartRecord, null);
 			}
 			else if (compTargetEffect_InstallImplantInOtherPawn.Props.canUpgrade)
 			{
 				((Hediff_Level)firstHediffOfDef).ChangeLevel(1);
 			}
-			if (this.TargetPawn.Map == Find.CurrentMap && compTargetEffect_InstallImplantInOtherPawn.Props.soundOnUsed != null)
+			if (TargetPawn.Map == Find.CurrentMap && compTargetEffect_InstallImplantInOtherPawn.Props.soundOnUsed != null)
 			{
-				compTargetEffect_InstallImplantInOtherPawn.Props.soundOnUsed.PlayOneShot(SoundInfo.InMap(this.TargetPawn, MaintenanceType.None));
+				compTargetEffect_InstallImplantInOtherPawn.Props.soundOnUsed.PlayOneShot(SoundInfo.InMap(TargetPawn));
 			}
-			this.Item.SplitOff(1).Destroy(DestroyMode.Vanish);
+			Item.SplitOff(1).Destroy();
 		}
-
-		// Token: 0x04005014 RID: 20500
-		private const TargetIndex TargetPawnInd = TargetIndex.A;
-
-		// Token: 0x04005015 RID: 20501
-		private const TargetIndex ItemInd = TargetIndex.B;
-
-		// Token: 0x04005016 RID: 20502
-		private const int DurationTicks = 600;
 	}
 }

@@ -1,40 +1,36 @@
-﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompLeavingsLetter : ThingComp
 {
-	// Token: 0x02002D1B RID: 11547
-	public class CompLeavingsLetter : ThingComp
+	private static List<Thing> tmpLeavings = new List<Thing>();
+
+	public CompProperties_LeavingsLetter Props => (CompProperties_LeavingsLetter)props;
+
+	public override void Notify_KilledLeavingsLeft(List<Thing> leavings)
 	{
-		// Token: 0x17002936 RID: 10550
-		// (get) Token: 0x0601039F RID: 66463 RVA: 0x004B155D File Offset: 0x004AF75D
-		public CompProperties_LeavingsLetter Props
+		if (leavings.NullOrEmpty())
 		{
-			get
-			{
-				return (CompProperties_LeavingsLetter)this.props;
-			}
+			return;
 		}
-
-		// Token: 0x060103A0 RID: 66464 RVA: 0x004B156C File Offset: 0x004AF76C
-		public override void Notify_KilledLeavingsLeft(List<Thing> leavings)
+		List<Thing> list = tmpLeavings;
+		object collection;
+		if (Props.leavingsFilter == null)
 		{
-			if (!leavings.NullOrEmpty<Thing>())
-			{
-				CompLeavingsLetter.tmpLeavings.AddRange((this.Props.leavingsFilter != null) ? (from t in leavings
-				where this.Props.leavingsFilter.Allows(t.def)
-				select t) : leavings);
-				if (CompLeavingsLetter.tmpLeavings.Count > 0)
-				{
-					Find.LetterStack.ReceiveLetter(this.Props.letterLabel.Formatted(CompLeavingsLetter.tmpLeavings[0].Named("LEAVINGS1")), this.Props.letterText.Formatted(CompLeavingsLetter.tmpLeavings[0].Named("LEAVINGS1"), this.parent.Named("PARENT")), this.Props.letterDef, CompLeavingsLetter.tmpLeavings, null, null, null, null, 0, true);
-					CompLeavingsLetter.tmpLeavings.Clear();
-				}
-			}
+			collection = leavings;
 		}
-
-		// Token: 0x0400A976 RID: 43382
-		private static List<Thing> tmpLeavings = new List<Thing>();
+		else
+		{
+			collection = leavings.Where((Thing t) => Props.leavingsFilter.Allows(t.def));
+		}
+		list.AddRange((IEnumerable<Thing>)collection);
+		if (tmpLeavings.Count > 0)
+		{
+			Find.LetterStack.ReceiveLetter(Props.letterLabel.Formatted(tmpLeavings[0].Named("LEAVINGS1")), Props.letterText.Formatted(tmpLeavings[0].Named("LEAVINGS1"), parent.Named("PARENT")), Props.letterDef, tmpLeavings);
+			tmpLeavings.Clear();
+		}
 	}
 }

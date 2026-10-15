@@ -1,68 +1,216 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class PreceptComp_BedThought : PreceptComp_Thought
 {
-	// Token: 0x02002636 RID: 9782
-	public class PreceptComp_BedThought : PreceptComp_Thought
+	public class FacilityData
 	{
-		// Token: 0x0600D65B RID: 54875 RVA: 0x003F9C8C File Offset: 0x003F7E8C
-		public override void Notify_AddBedThoughts(Pawn pawn, Precept precept)
+		public ThingDef def;
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__4 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public PreceptComp_BedThought _003C_003E4__this;
+
+		private PreceptDef parent;
+
+		public PreceptDef _003C_003E3__parent;
+
+		private IEnumerator<string> _003C_003E7__wrap1;
+
+		string IEnumerator<string>.Current
 		{
-			base.Notify_AddBedThoughts(pawn, precept);
-			pawn.needs.mood.thoughts.memories.RemoveMemoriesOfDef(this.thought);
-			if (this.requireFacility != null && !this.HasActiveLinkedFacility(pawn))
+			[DebuggerHidden]
+			get
 			{
-				return;
+				return _003C_003E2__current;
 			}
-			Thought_Memory newThought = ThoughtMaker.MakeThought(this.thought, precept);
-			pawn.needs.mood.thoughts.memories.TryGainMemory(newThought, null);
 		}
 
-		// Token: 0x0600D65C RID: 54876 RVA: 0x003F9CFC File Offset: 0x003F7EFC
-		private bool HasActiveLinkedFacility(Pawn pawn)
+		object IEnumerator.Current
 		{
-			Building_Bed building_Bed = pawn.CurrentBed();
-			CompAffectedByFacilities compAffectedByFacilities = (building_Bed != null) ? building_Bed.TryGetComp<CompAffectedByFacilities>() : null;
-			if (compAffectedByFacilities == null)
+			[DebuggerHidden]
+			get
 			{
-				return false;
+				return _003C_003E2__current;
 			}
-			foreach (Thing thing in compAffectedByFacilities.LinkedFacilitiesListForReading)
+		}
+
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__4(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				if (thing.def == this.requireFacility.def && compAffectedByFacilities.IsFacilityActive(thing))
+				try
 				{
-					return true;
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
 				}
 			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				PreceptComp_BedThought preceptComp_BedThought = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((PreceptComp)preceptComp_BedThought).ConfigErrors(parent).GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0075;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0075;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_0075:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (preceptComp_BedThought.requireFacility != null && preceptComp_BedThought.requireFacility.def == null)
+					{
+						_003C_003E2__current = "<requireFacility> has null <def>";
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__4 _003CConfigErrors_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CConfigErrors_003Ed__ = this;
+			}
+			else
+			{
+				_003CConfigErrors_003Ed__ = new _003CConfigErrors_003Ed__4(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CConfigErrors_003Ed__.parent = _003C_003E3__parent;
+			return _003CConfigErrors_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	public FacilityData requireFacility;
+
+	public override void Notify_AddBedThoughts(Pawn pawn, Precept precept)
+	{
+		base.Notify_AddBedThoughts(pawn, precept);
+		pawn.needs.mood.thoughts.memories.RemoveMemoriesOfDef(thought);
+		if (requireFacility == null || HasActiveLinkedFacility(pawn))
+		{
+			Thought_Memory newThought = ThoughtMaker.MakeThought(thought, precept);
+			pawn.needs.mood.thoughts.memories.TryGainMemory(newThought);
+		}
+	}
+
+	private bool HasActiveLinkedFacility(Pawn pawn)
+	{
+		CompAffectedByFacilities compAffectedByFacilities = pawn.CurrentBed()?.TryGetComp<CompAffectedByFacilities>();
+		if (compAffectedByFacilities == null)
+		{
 			return false;
 		}
-
-		// Token: 0x0600D65D RID: 54877 RVA: 0x003F9D84 File Offset: 0x003F7F84
-		public override IEnumerable<string> ConfigErrors(PreceptDef parent)
+		foreach (Thing item in compAffectedByFacilities.LinkedFacilitiesListForReading)
 		{
-			foreach (string text in base.ConfigErrors(parent))
+			if (item.def == requireFacility.def && compAffectedByFacilities.IsFacilityActive(item))
 			{
-				yield return text;
+				return true;
 			}
-			IEnumerator<string> enumerator = null;
-			if (this.requireFacility != null && this.requireFacility.def == null)
-			{
-				yield return "<requireFacility> has null <def>";
-			}
-			yield break;
-			yield break;
 		}
+		return false;
+	}
 
-		// Token: 0x040091B5 RID: 37301
-		public PreceptComp_BedThought.FacilityData requireFacility;
-
-		// Token: 0x02002637 RID: 9783
-		public class FacilityData
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__4))]
+	public override IEnumerable<string> ConfigErrors(PreceptDef parent)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__4(-2)
 		{
-			// Token: 0x040091B6 RID: 37302
-			public ThingDef def;
-		}
+			_003C_003E4__this = this,
+			_003C_003E3__parent = parent
+		};
 	}
 }

@@ -1,69 +1,272 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class RitualObligationTargetWorker_AnyGatherSpot : RitualObligationTargetFilter
 {
-	// Token: 0x020026F1 RID: 9969
-	public class RitualObligationTargetWorker_AnyGatherSpot : RitualObligationTargetFilter
+	[CompilerGenerated]
+	private sealed class _003CGetTargetInfos_003Ed__4 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x0600DA98 RID: 55960 RVA: 0x00408B0F File Offset: 0x00406D0F
-		public RitualObligationTargetWorker_AnyGatherSpot()
-		{
-		}
+		private int _003C_003E1__state;
 
-		// Token: 0x0600DA99 RID: 55961 RVA: 0x00408B17 File Offset: 0x00406D17
-		public RitualObligationTargetWorker_AnyGatherSpot(RitualObligationTargetFilterDef def) : base(def)
-		{
-		}
+		private string _003C_003E2__current;
 
-		// Token: 0x0600DA9A RID: 55962 RVA: 0x0040974F File Offset: 0x0040794F
-		public override IEnumerable<TargetInfo> GetTargets(RitualObligation obligation, Map map)
+		private int _003C_003El__initialThreadId;
+
+		string IEnumerator<string>.Current
 		{
-			List<Thing> partySpot = map.listerThings.ThingsOfDef(ThingDefOf.PartySpot);
-			int num;
-			for (int i = 0; i < partySpot.Count; i = num + 1)
+			[DebuggerHidden]
+			get
 			{
-				yield return partySpot[i];
-				num = i;
+				return _003C_003E2__current;
 			}
-			for (int i = 0; i < map.gatherSpotLister.activeSpots.Count; i = num + 1)
-			{
-				yield return map.gatherSpotLister.activeSpots[i].parent;
-				num = i;
-			}
-			yield break;
 		}
 
-		// Token: 0x0600DA9B RID: 55963 RVA: 0x00409760 File Offset: 0x00407960
-		protected override RitualTargetUseReport CanUseTargetInternal(TargetInfo target, RitualObligation obligation)
+		object IEnumerator.Current
 		{
-			if (!target.HasThing)
+			[DebuggerHidden]
+			get
 			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetTargetInfos_003Ed__4(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			switch (_003C_003E1__state)
+			{
+			default:
 				return false;
-			}
-			Thing thing = target.Thing;
-			if (this.def.colonistThingsOnly && (thing.Faction == null || !thing.Faction.IsPlayer))
-			{
-				return false;
-			}
-			if (thing.def == ThingDefOf.PartySpot)
-			{
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = "RitualTargetGatherSpotInfo".Translate();
+				_003C_003E1__state = 1;
 				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				return false;
 			}
-			CompGatherSpot compGatherSpot = thing.TryGetComp<CompGatherSpot>();
-			if (compGatherSpot != null && compGatherSpot.Active)
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
+				_003C_003E1__state = 0;
+				return this;
+			}
+			return new _003CGetTargetInfos_003Ed__4(0);
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGetTargets_003Ed__2 : IEnumerable<TargetInfo>, IEnumerable, IEnumerator<TargetInfo>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private TargetInfo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private Map map;
+
+		public Map _003C_003E3__map;
+
+		private List<Thing> _003CpartySpot_003E5__2;
+
+		private int _003Cj_003E5__3;
+
+		TargetInfo IEnumerator<TargetInfo>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetTargets_003Ed__2(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003CpartySpot_003E5__2 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			switch (_003C_003E1__state)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003CpartySpot_003E5__2 = map.listerThings.ThingsOfDef(ThingDefOf.PartySpot);
+				_003Cj_003E5__3 = 0;
+				goto IL_0082;
+			case 1:
+				_003C_003E1__state = -1;
+				_003Cj_003E5__3++;
+				goto IL_0082;
+			case 2:
+				{
+					_003C_003E1__state = -1;
+					_003Cj_003E5__3++;
+					break;
+				}
+				IL_0082:
+				if (_003Cj_003E5__3 < _003CpartySpot_003E5__2.Count)
+				{
+					_003C_003E2__current = _003CpartySpot_003E5__2[_003Cj_003E5__3];
+					_003C_003E1__state = 1;
+					return true;
+				}
+				_003Cj_003E5__3 = 0;
+				break;
+			}
+			if (_003Cj_003E5__3 < map.gatherSpotLister.activeSpots.Count)
+			{
+				_003C_003E2__current = map.gatherSpotLister.activeSpots[_003Cj_003E5__3].parent;
+				_003C_003E1__state = 2;
 				return true;
 			}
 			return false;
 		}
 
-		// Token: 0x0600DA9C RID: 55964 RVA: 0x004097E1 File Offset: 0x004079E1
-		public override IEnumerable<string> GetTargetInfos(RitualObligation obligation)
+		bool IEnumerator.MoveNext()
 		{
-			yield return "RitualTargetGatherSpotInfo".Translate();
-			yield break;
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<TargetInfo> IEnumerable<TargetInfo>.GetEnumerator()
+		{
+			_003CGetTargets_003Ed__2 _003CGetTargets_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CGetTargets_003Ed__ = this;
+			}
+			else
+			{
+				_003CGetTargets_003Ed__ = new _003CGetTargets_003Ed__2(0);
+			}
+			_003CGetTargets_003Ed__.map = _003C_003E3__map;
+			return _003CGetTargets_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<TargetInfo>)this).GetEnumerator();
+		}
+	}
+
+	public RitualObligationTargetWorker_AnyGatherSpot()
+	{
+	}
+
+	public RitualObligationTargetWorker_AnyGatherSpot(RitualObligationTargetFilterDef def)
+		: base(def)
+	{
+	}
+
+	[IteratorStateMachine(typeof(_003CGetTargets_003Ed__2))]
+	public override IEnumerable<TargetInfo> GetTargets(RitualObligation obligation, Map map)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetTargets_003Ed__2(-2)
+		{
+			_003C_003E3__map = map
+		};
+	}
+
+	protected override RitualTargetUseReport CanUseTargetInternal(TargetInfo target, RitualObligation obligation)
+	{
+		if (!target.HasThing)
+		{
+			return false;
+		}
+		Thing thing = target.Thing;
+		if (def.colonistThingsOnly && (thing.Faction == null || !thing.Faction.IsPlayer))
+		{
+			return false;
+		}
+		if (thing.def == ThingDefOf.PartySpot)
+		{
+			return true;
+		}
+		CompGatherSpot compGatherSpot = thing.TryGetComp<CompGatherSpot>();
+		if (compGatherSpot != null && compGatherSpot.Active)
+		{
+			return true;
+		}
+		return false;
+	}
+
+	[IteratorStateMachine(typeof(_003CGetTargetInfos_003Ed__4))]
+	public override IEnumerable<string> GetTargetInfos(RitualObligation obligation)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetTargetInfos_003Ed__4(-2);
 	}
 }

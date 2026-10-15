@@ -1,183 +1,213 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_Lessongiving : JobDriver
 {
-	// Token: 0x020011FE RID: 4606
-	public class JobDriver_Lessongiving : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__9 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001176 RID: 4470
-		// (get) Token: 0x06007087 RID: 28807 RVA: 0x00229653 File Offset: 0x00227853
-		private Thing Desk
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_Lessongiving _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return base.TargetThingA;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001177 RID: 4471
-		// (get) Token: 0x06007088 RID: 28808 RVA: 0x000024F4 File Offset: 0x000006F4
-		private Pawn Student
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (Pawn)base.TargetThingB;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06007089 RID: 28809 RVA: 0x0022E8A3 File Offset: 0x0022CAA3
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__9(int _003C_003E1__state)
 		{
-			return ModsConfig.BiotechActive && this.pawn.ReserveSittableOrSpot(SchoolUtility.DeskSpotTeacher(this.Desk), this.job, errorOnFailed);
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x0600708A RID: 28810 RVA: 0x0022E8CE File Offset: 0x0022CACE
-		protected override IEnumerable<Toil> MakeNewToils()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			this.FailOnDespawnedNullOrForbidden(TargetIndex.A);
-			this.FailOnDespawnedNullOrForbidden(TargetIndex.B);
-			this.FailOn(delegate()
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_Lessongiving CS_0024_003C_003E8__locals32 = _003C_003E4__this;
+			switch (num)
 			{
-				if (PawnUtility.WillSoonHaveBasicNeed(this.pawn, -0.05f))
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				CS_0024_003C_003E8__locals32.FailOnDespawnedNullOrForbidden(TargetIndex.A);
+				CS_0024_003C_003E8__locals32.FailOnDespawnedNullOrForbidden(TargetIndex.B);
+				CS_0024_003C_003E8__locals32.FailOn(delegate
 				{
-					return true;
-				}
-				Pawn student = this.Student;
-				Job job;
-				if (student == null)
-				{
-					job = null;
-				}
-				else
-				{
-					Pawn_JobTracker jobs = student.jobs;
-					job = ((jobs != null) ? jobs.curJob : null);
-				}
-				Job job2 = job;
-				return job2 == null || job2.def != JobDefOf.Lessontaking || job2.GetTarget(TargetIndex.B).Pawn != this.pawn || job2.GetTarget(TargetIndex.A).Thing != this.Desk;
-			});
-			yield return Toils_Goto.GotoCell(SchoolUtility.DeskSpotTeacher(this.Desk), PathEndMode.OnCell);
-			Toil toil = ToilMaker.MakeToil("MakeNewToils");
-			toil.tickIntervalAction = delegate(int delta)
+					if (PawnUtility.WillSoonHaveBasicNeed(CS_0024_003C_003E8__locals32.pawn, -0.05f))
+					{
+						return true;
+					}
+					Job job = CS_0024_003C_003E8__locals32.Student?.jobs?.curJob;
+					return (job == null || job.def != JobDefOf.Lessontaking || job.GetTarget(TargetIndex.B).Pawn != CS_0024_003C_003E8__locals32.pawn || job.GetTarget(TargetIndex.A).Thing != CS_0024_003C_003E8__locals32.Desk) ? true : false;
+				});
+				_003C_003E2__current = Toils_Goto.GotoCell(SchoolUtility.DeskSpotTeacher(CS_0024_003C_003E8__locals32.Desk), PathEndMode.OnCell);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
 			{
-				this.pawn.GainComfortFromCellIfPossible(delta, false);
-				this.isReadyToTeach = true;
-				this.pawn.rotationTracker.FaceTarget(this.Desk);
-				if (this.taughtSkill == null)
+				_003C_003E1__state = -1;
+				Toil toil = ToilMaker.MakeToil("MakeNewToils");
+				toil.tickIntervalAction = delegate(int delta)
 				{
-					this.taughtSkill = this.ChooseSkill(this.Student);
-				}
-				if (this.taughtSkill == null)
-				{
-					base.EndJobWith(JobCondition.Incompletable);
-					return;
-				}
-				if (this.isReadyToTeach)
-				{
-					Pawn student = this.Student;
-					object obj;
-					if (student == null)
+					CS_0024_003C_003E8__locals32.pawn.GainComfortFromCellIfPossible(delta);
+					CS_0024_003C_003E8__locals32.isReadyToTeach = true;
+					CS_0024_003C_003E8__locals32.pawn.rotationTracker.FaceTarget(CS_0024_003C_003E8__locals32.Desk);
+					if (CS_0024_003C_003E8__locals32.taughtSkill == null)
 					{
-						obj = null;
+						CS_0024_003C_003E8__locals32.taughtSkill = CS_0024_003C_003E8__locals32.ChooseSkill(CS_0024_003C_003E8__locals32.Student);
 					}
-					else
+					if (CS_0024_003C_003E8__locals32.taughtSkill == null)
 					{
-						Pawn_JobTracker jobs = student.jobs;
-						obj = ((jobs != null) ? jobs.curDriver : null);
+						CS_0024_003C_003E8__locals32.EndJobWith(JobCondition.Incompletable);
 					}
-					JobDriver_Lessontaking jobDriver_Lessontaking = obj as JobDriver_Lessontaking;
-					if (jobDriver_Lessontaking != null && jobDriver_Lessontaking.isReadyToLearn)
+					else if (CS_0024_003C_003E8__locals32.isReadyToTeach && CS_0024_003C_003E8__locals32.Student?.jobs?.curDriver is JobDriver_Lessontaking { isReadyToLearn: not false })
 					{
-						if (this.pawn.IsHashIntervalTick(900, delta))
+						if (CS_0024_003C_003E8__locals32.pawn.IsHashIntervalTick(900, delta))
 						{
-							this.pawn.interactions.TryInteractWith(this.Student, this.taughtSkill.lessonInteraction);
-							Pawn_NeedsTracker needs = this.pawn.needs;
-							if (needs != null)
-							{
-								Need_Mood mood = needs.mood;
-								if (mood != null)
-								{
-									ThoughtHandler thoughts = mood.thoughts;
-									if (thoughts != null)
-									{
-										MemoryThoughtHandler memories = thoughts.memories;
-										if (memories != null)
-										{
-											memories.TryGainMemory(ThoughtDefOf.GaveLesson, this.Student, null);
-										}
-									}
-								}
-							}
-							Pawn_NeedsTracker needs2 = this.Student.needs;
-							if (needs2 != null)
-							{
-								Need_Mood mood2 = needs2.mood;
-								if (mood2 != null)
-								{
-									ThoughtHandler thoughts2 = mood2.thoughts;
-									if (thoughts2 != null)
-									{
-										MemoryThoughtHandler memories2 = thoughts2.memories;
-										if (memories2 != null)
-										{
-											memories2.TryGainMemory(ThoughtDefOf.WasTaught, this.pawn, null);
-										}
-									}
-								}
-							}
+							CS_0024_003C_003E8__locals32.pawn.interactions.TryInteractWith(CS_0024_003C_003E8__locals32.Student, CS_0024_003C_003E8__locals32.taughtSkill.lessonInteraction);
+							CS_0024_003C_003E8__locals32.pawn.needs?.mood?.thoughts?.memories?.TryGainMemory(ThoughtDefOf.GaveLesson, CS_0024_003C_003E8__locals32.Student);
+							CS_0024_003C_003E8__locals32.Student.needs?.mood?.thoughts?.memories?.TryGainMemory(ThoughtDefOf.WasTaught, CS_0024_003C_003E8__locals32.pawn);
 						}
-						float num = LearningDesireDefOf.Lessontaking.xpPerTick * LearningUtility.LearningRateFactor(this.Student);
-						this.Student.skills.Learn(this.taughtSkill, num * (float)delta, false, false);
-						this.pawn.skills.Learn(SkillDefOf.Social, 0.1f * (float)delta, false, false);
+						float num2 = LearningDesireDefOf.Lessontaking.xpPerTick * LearningUtility.LearningRateFactor(CS_0024_003C_003E8__locals32.Student);
+						CS_0024_003C_003E8__locals32.Student.skills.Learn(CS_0024_003C_003E8__locals32.taughtSkill, num2 * (float)delta);
+						CS_0024_003C_003E8__locals32.pawn.skills.Learn(SkillDefOf.Social, 0.1f * (float)delta);
 					}
-				}
-			};
-			toil.handlingFacing = true;
-			toil.defaultCompleteMode = ToilCompleteMode.Never;
-			toil.socialMode = RandomSocialMode.Off;
-			toil.activeSkill = (() => SkillDefOf.Social);
-			yield return toil;
-			yield break;
+				};
+				toil.handlingFacing = true;
+				toil.defaultCompleteMode = ToilCompleteMode.Never;
+				toil.socialMode = RandomSocialMode.Off;
+				toil.activeSkill = () => SkillDefOf.Social;
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 2;
+				return true;
+			}
+			case 2:
+				_003C_003E1__state = -1;
+				return false;
+			}
 		}
 
-		// Token: 0x0600708B RID: 28811 RVA: 0x0022E8E0 File Offset: 0x0022CAE0
-		private SkillDef ChooseSkill(Pawn student)
+		bool IEnumerator.MoveNext()
 		{
-			return (from s in this.pawn.skills.skills
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__9 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__9(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private const int InteractionTicks = 900;
+
+	private const int TopTeachableSkillCount = 4;
+
+	public bool isReadyToTeach;
+
+	public SkillDef taughtSkill;
+
+	private Thing Desk => base.TargetThingA;
+
+	private Pawn Student => (Pawn)base.TargetThingB;
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		if (!ModsConfig.BiotechActive || !pawn.ReserveSittableOrSpot(SchoolUtility.DeskSpotTeacher(Desk), job, errorOnFailed))
+		{
+			return false;
+		}
+		return true;
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__9))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__9(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	private SkillDef ChooseSkill(Pawn student)
+	{
+		return (from s in pawn.skills.skills
 			where !s.TotallyDisabled && s.def.lessonInteraction != null && !student.skills.GetSkill(s.def).TotallyDisabled
 			orderby s descending
-			select s).Take(4).RandomElement<SkillRecord>().def;
-		}
+			select s).Take(4).RandomElement().def;
+	}
 
-		// Token: 0x0600708C RID: 28812 RVA: 0x0022E950 File Offset: 0x0022CB50
-		public override string GetReport()
-		{
-			string str = (this.taughtSkill != null) ? (" (" + this.taughtSkill.label + ")") : "";
-			return this.ReportStringProcessed(this.job.def.reportString) + str;
-		}
+	public override string GetReport()
+	{
+		string text = ((taughtSkill != null) ? (" (" + taughtSkill.label + ")") : "");
+		return ReportStringProcessed(job.def.reportString) + text;
+	}
 
-		// Token: 0x0600708D RID: 28813 RVA: 0x0022E9A3 File Offset: 0x0022CBA3
-		public override void ExposeData()
-		{
-			base.ExposeData();
-			Scribe_Values.Look<bool>(ref this.isReadyToTeach, "isReadyToTeach", false, false);
-			Scribe_Defs.Look<SkillDef>(ref this.taughtSkill, "taughtSkill");
-		}
-
-		// Token: 0x04004E2D RID: 20013
-		private const int InteractionTicks = 900;
-
-		// Token: 0x04004E2E RID: 20014
-		private const int TopTeachableSkillCount = 4;
-
-		// Token: 0x04004E2F RID: 20015
-		public bool isReadyToTeach;
-
-		// Token: 0x04004E30 RID: 20016
-		public SkillDef taughtSkill;
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref isReadyToTeach, "isReadyToTeach", defaultValue: false);
+		Scribe_Defs.Look(ref taughtSkill, "taughtSkill");
 	}
 }

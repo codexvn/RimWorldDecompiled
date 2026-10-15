@@ -71,6 +71,8 @@ internal static class Bootstrap
 
 	private static GlfwInputBridge? _inputBridge;
 
+	private static WindowsImeBridge? _imeBridge;
+
 	private static UnityRuntime _unityRuntime;
 
 	private static ImguiDispatch? _imguiDispatch;
@@ -209,6 +211,10 @@ internal static class Bootstrap
 		{
 			_inputBridge = new GlfwInputBridge(app);
 		}
+		if (OperatingSystem.IsWindows())
+		{
+			WindowsImeBridge.Current = _imeBridge ?? (_imeBridge = new WindowsImeBridge(app.Window));
+		}
 		app.PrePollEvents += OnPrePollEvents;
 	}
 
@@ -219,6 +225,10 @@ internal static class Bootstrap
 		app.GraphicsDevice.MeshUploads.BeginFrame(UnityEngine.Time.frameCount);
 		MeshDrawSubmission.BeginFrame(app.GraphicsDevice, app.RenderContext);
 		InputSystem.BeginFrame();
+		if (OperatingSystem.IsWindows())
+		{
+			_imeBridge?.BeginFrame();
+		}
 	}
 
 	private static void SyncWindowSizeIfChanged(EngineApplication app)
@@ -349,6 +359,7 @@ internal static class Bootstrap
 		string path = (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? Path.GetFullPath(Path.Combine(directoryName, "..", "..", "..")) : directoryName);
 		runtime.App.IsEditor = false;
 		runtime.ConfigurePaths(Path.Combine(path, "RimWorld_Data"), ResolvePersistentDataRoot(), Path.GetTempPath(), ResolveLogDataRoot(), text);
+		DeleteOldUnityLogs();
 		RuntimeShaderCompiler.ConfigureCacheDirectory(Path.Combine(text ?? ResolvePersistentDataRoot(), runtime.App.IsEditor ? "ShaderCache-editor" : "ShaderCache"));
 		AssetPack assetPack = AssetPackBoot.Open(runtime.App.DataPath, options.CommandLineAccessor);
 		if ((assetPack == null || assetPack.ContentHashes.Count == 0) && !options.CommandLineAccessor.HasSwitch("NoAssetPack") && !Directory.Exists(Path.Combine(runtime.App.DataPath, "Resources", "Textures")))
@@ -378,6 +389,10 @@ internal static class Bootstrap
 
 	private static void OnAppShuttingDown()
 	{
+		if (OperatingSystem.IsWindows())
+		{
+			_imeBridge?.Dispose();
+		}
 		try
 		{
 			SteamManager.ShutdownSteam();
@@ -398,6 +413,46 @@ internal static class Bootstrap
 		return Path.GetFullPath((value.Length == 0) ? Path.DirectorySeparatorChar.ToString() : value);
 	}
 
+	private static void DeleteOldUnityLogs()
+	{
+		string text;
+		if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+		{
+			text = ResolvePersistentDataRoot();
+		}
+		else
+		{
+			InlineArray5<string> buffer = default(InlineArray5<string>);
+			global::_003CPrivateImplementationDetails_003E.InlineArrayElementRef<InlineArray5<string>, string>(ref buffer, 0) = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+			global::_003CPrivateImplementationDetails_003E.InlineArrayElementRef<InlineArray5<string>, string>(ref buffer, 1) = "Library";
+			global::_003CPrivateImplementationDetails_003E.InlineArrayElementRef<InlineArray5<string>, string>(ref buffer, 2) = "Logs";
+			global::_003CPrivateImplementationDetails_003E.InlineArrayElementRef<InlineArray5<string>, string>(ref buffer, 3) = "Ludeon Studios";
+			global::_003CPrivateImplementationDetails_003E.InlineArrayElementRef<InlineArray5<string>, string>(ref buffer, 4) = "RimWorld by Ludeon Studios";
+			text = Path.Combine(global::_003CPrivateImplementationDetails_003E.InlineArrayAsReadOnlySpan<InlineArray5<string>, string>(in buffer, 5));
+		}
+		string path = text;
+		InlineArray2<string> buffer2 = default(InlineArray2<string>);
+		global::_003CPrivateImplementationDetails_003E.InlineArrayElementRef<InlineArray2<string>, string>(ref buffer2, 0) = "Player.log";
+		global::_003CPrivateImplementationDetails_003E.InlineArrayElementRef<InlineArray2<string>, string>(ref buffer2, 1) = "Player-prev.log";
+		ReadOnlySpan<string> readOnlySpan = global::_003CPrivateImplementationDetails_003E.InlineArrayAsReadOnlySpan<InlineArray2<string>, string>(in buffer2, 2);
+		for (int i = 0; i < readOnlySpan.Length; i++)
+		{
+			string path2 = readOnlySpan[i];
+			string text2 = Path.Combine(path, path2);
+			try
+			{
+				if (File.Exists(text2))
+				{
+					File.Delete(text2);
+				}
+			}
+			catch (Exception ex)
+			{
+				VerboseLog.Log("Bootstrap: could not delete the unity era log " + text2 + ": " + ex.Message);
+			}
+		}
+	}
+
 	internal static string ResolvePersistentDataRoot()
 	{
 		string folderPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
@@ -415,6 +470,11 @@ internal static class Bootstrap
 			return Path.Combine(text, "unity3d", "Ludeon Studios", "RimWorld by Ludeon Studios");
 		}
 		return Path.Combine(GetLocalAppDataLow(), "Ludeon Studios", "RimWorld by Ludeon Studios");
+	}
+
+	internal static string ResolveEarlyLogRoot()
+	{
+		return ResolveLogDataRoot();
 	}
 
 	internal static string ResolveLogDataRoot()

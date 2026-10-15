@@ -1,47 +1,38 @@
-﻿using System;
+using System;
 
-namespace Verse
+namespace Verse;
+
+public class SimpleMovingAverage
 {
-	// Token: 0x02000D61 RID: 3425
-	public class SimpleMovingAverage
+	private readonly float[] values;
+
+	private int lastValueIndex;
+
+	public SimpleMovingAverage(int numValues)
 	{
-		// Token: 0x06005721 RID: 22305 RVA: 0x001C0E49 File Offset: 0x001BF049
-		public SimpleMovingAverage(int numValues)
+		values = new float[numValues];
+	}
+
+	public void AddValue(float value)
+	{
+		values[lastValueIndex] = value;
+		lastValueIndex = (lastValueIndex + 1) % values.Length;
+	}
+
+	public float GetAverage()
+	{
+		float num = 0f;
+		int num2 = ((values[^1] == 0f) ? lastValueIndex : values.Length);
+		for (int i = 0; i < num2; i++)
 		{
-			this.values = new float[numValues];
+			num += values[i];
 		}
+		return num / (float)num2;
+	}
 
-		// Token: 0x06005722 RID: 22306 RVA: 0x001C0E5D File Offset: 0x001BF05D
-		public void AddValue(float value)
-		{
-			this.values[this.lastValueIndex] = value;
-			this.lastValueIndex = (this.lastValueIndex + 1) % this.values.Length;
-		}
-
-		// Token: 0x06005723 RID: 22307 RVA: 0x001C0E84 File Offset: 0x001BF084
-		public float GetAverage()
-		{
-			float num = 0f;
-			float[] array = this.values;
-			int num2 = (array[array.Length - 1] == 0f) ? this.lastValueIndex : this.values.Length;
-			for (int i = 0; i < num2; i++)
-			{
-				num += this.values[i];
-			}
-			return num / (float)num2;
-		}
-
-		// Token: 0x06005724 RID: 22308 RVA: 0x001C0ED6 File Offset: 0x001BF0D6
-		public void Reset()
-		{
-			this.lastValueIndex = 0;
-			Array.Clear(this.values, 0, this.values.Length);
-		}
-
-		// Token: 0x04003F83 RID: 16259
-		private readonly float[] values;
-
-		// Token: 0x04003F84 RID: 16260
-		private int lastValueIndex;
+	public void Reset()
+	{
+		lastValueIndex = 0;
+		Array.Clear(values, 0, values.Length);
 	}
 }

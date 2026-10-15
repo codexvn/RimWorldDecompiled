@@ -1,109 +1,145 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.Grammar;
 
-namespace RimWorld
+namespace RimWorld;
+
+public abstract class BookOutcomeDoer : ReadingOutcomeDoer
 {
-	// Token: 0x02001920 RID: 6432
-	public abstract class BookOutcomeDoer : ReadingOutcomeDoer
+	[CompilerGenerated]
+	private sealed class _003CGetHyperlinks_003Ed__13 : IEnumerable<Dialog_InfoCard.Hyperlink>, IEnumerable, IEnumerator<Dialog_InfoCard.Hyperlink>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001621 RID: 5665
-		// (get) Token: 0x06009245 RID: 37445 RVA: 0x002B207F File Offset: 0x002B027F
-		public new BookOutcomeProperties Props
+		private int _003C_003E1__state;
+
+		private Dialog_InfoCard.Hyperlink _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		Dialog_InfoCard.Hyperlink IEnumerator<Dialog_InfoCard.Hyperlink>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (BookOutcomeProperties)this.props;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001622 RID: 5666
-		// (get) Token: 0x06009246 RID: 37446 RVA: 0x002B208C File Offset: 0x002B028C
-		public Book Book
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (Book)base.Parent;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001623 RID: 5667
-		// (get) Token: 0x06009247 RID: 37447 RVA: 0x002B209C File Offset: 0x002B029C
-		private CompQuality CompQuality
+		[DebuggerHidden]
+		public _003CGetHyperlinks_003Ed__13(int _003C_003E1__state)
 		{
-			get
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			if (_003C_003E1__state != 0)
 			{
-				CompQuality result;
-				if ((result = this.compQualityCached) == null)
-				{
-					result = (this.compQualityCached = base.Parent.GetComp<CompQuality>());
-				}
-				return result;
+				return false;
 			}
-		}
-
-		// Token: 0x17001624 RID: 5668
-		// (get) Token: 0x06009248 RID: 37448 RVA: 0x002B20C7 File Offset: 0x002B02C7
-		public QualityCategory Quality
-		{
-			get
-			{
-				return this.CompQuality.Quality;
-			}
-		}
-
-		// Token: 0x06009249 RID: 37449
-		public abstract bool DoesProvidesOutcome(Pawn reader);
-
-		// Token: 0x0600924A RID: 37450 RVA: 0x000026EA File Offset: 0x000008EA
-		public virtual void OnBookGenerated(Pawn author = null)
-		{
-		}
-
-		// Token: 0x0600924B RID: 37451 RVA: 0x00035ADE File Offset: 0x00033CDE
-		public virtual string GetBenefitsString(Pawn reader = null)
-		{
-			return "";
-		}
-
-		// Token: 0x0600924C RID: 37452 RVA: 0x00002501 File Offset: 0x00000701
-		public virtual bool BenefitDetailsCanChange(Pawn reader = null)
-		{
+			_003C_003E1__state = -1;
 			return false;
 		}
 
-		// Token: 0x0600924D RID: 37453 RVA: 0x002B20D4 File Offset: 0x002B02D4
-		public virtual IEnumerable<Dialog_InfoCard.Hyperlink> GetHyperlinks()
+		bool IEnumerator.MoveNext()
 		{
-			yield break;
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0600924E RID: 37454 RVA: 0x00002C42 File Offset: 0x00000E42
-		public virtual IEnumerable<RulePack> GetTopicRulePacks()
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			return null;
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x0600924F RID: 37455 RVA: 0x00002C42 File Offset: 0x00000E42
-		public virtual IEnumerable<Rule_String> GetTopicRuleStrings()
+		[DebuggerHidden]
+		IEnumerator<Dialog_InfoCard.Hyperlink> IEnumerable<Dialog_InfoCard.Hyperlink>.GetEnumerator()
 		{
-			return null;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				return this;
+			}
+			return new _003CGetHyperlinks_003Ed__13(0);
 		}
 
-		// Token: 0x06009250 RID: 37456 RVA: 0x000B7861 File Offset: 0x000B5A61
-		public virtual IEnumerable<Gizmo> GetGizmos()
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return Enumerable.Empty<Gizmo>();
+			return ((IEnumerable<Dialog_InfoCard.Hyperlink>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x06009251 RID: 37457 RVA: 0x000026EA File Offset: 0x000008EA
-		public virtual void Reset()
-		{
-		}
+	private CompQuality compQualityCached;
 
-		// Token: 0x04005D68 RID: 23912
-		private CompQuality compQualityCached;
+	public new BookOutcomeProperties Props => (BookOutcomeProperties)props;
+
+	public Book Book => (Book)base.Parent;
+
+	private CompQuality CompQuality => compQualityCached ?? (compQualityCached = base.Parent.GetComp<CompQuality>());
+
+	public QualityCategory Quality => CompQuality.Quality;
+
+	public abstract bool DoesProvidesOutcome(Pawn reader);
+
+	public virtual void OnBookGenerated(Pawn author = null)
+	{
+	}
+
+	public virtual string GetBenefitsString(Pawn reader = null)
+	{
+		return "";
+	}
+
+	public virtual bool BenefitDetailsCanChange(Pawn reader = null)
+	{
+		return false;
+	}
+
+	[IteratorStateMachine(typeof(_003CGetHyperlinks_003Ed__13))]
+	public virtual IEnumerable<Dialog_InfoCard.Hyperlink> GetHyperlinks()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetHyperlinks_003Ed__13(-2);
+	}
+
+	public virtual IEnumerable<RulePack> GetTopicRulePacks()
+	{
+		return null;
+	}
+
+	public virtual IEnumerable<Rule_String> GetTopicRuleStrings()
+	{
+		return null;
+	}
+
+	public virtual IEnumerable<Gizmo> GetGizmos()
+	{
+		return Enumerable.Empty<Gizmo>();
+	}
+
+	public virtual void Reset()
+	{
 	}
 }

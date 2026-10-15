@@ -1,629 +1,888 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.AI;
 using Verse.Sound;
 
-namespace RimWorld
+namespace RimWorld;
+
+[StaticConstructorOnStartup]
+public class Building_GeneExtractor : Building_Enterable, IThingHolderWithDrawnPawn, IThingHolder
 {
-	// Token: 0x02002A04 RID: 10756
-	[StaticConstructorOnStartup]
-	public class Building_GeneExtractor : Building_Enterable, IThingHolderWithDrawnPawn, IThingHolder
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass37_0
 	{
-		// Token: 0x170024DB RID: 9435
-		// (get) Token: 0x0600EDEA RID: 60906 RVA: 0x00450843 File Offset: 0x0044EA43
-		private Pawn ContainedPawn
+		public Building_GeneExtractor _003C_003E4__this;
+
+		public Pawn selPawn;
+
+		internal void _003CGetFloatMenuOptions_003Eb__0()
 		{
+			_003C_003E4__this.SelectPawn(selPawn);
+		}
+
+		internal void _003CGetFloatMenuOptions_003Eb__1()
+		{
+			selPawn.jobs.TryTakeOrderedJob(JobMaker.MakeJob(JobDefOf.EnterBuilding, _003C_003E4__this), JobTag.Misc);
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass38_0
+	{
+		public Pawn pawn;
+
+		public Building_GeneExtractor _003C_003E4__this;
+
+		internal void _003CGetGizmos_003Eb__6()
+		{
+			_003C_003E4__this.SelectPawn(pawn);
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGetFloatMenuOptions_003Ed__37 : IEnumerable<FloatMenuOption>, IEnumerable, IEnumerator<FloatMenuOption>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private FloatMenuOption _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Building_GeneExtractor _003C_003E4__this;
+
+		private Pawn selPawn;
+
+		public Pawn _003C_003E3__selPawn;
+
+		private _003C_003Ec__DisplayClass37_0 _003C_003E8__1;
+
+		private IEnumerator<FloatMenuOption> _003C_003E7__wrap1;
+
+		FloatMenuOption IEnumerator<FloatMenuOption>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				return this.innerContainer.FirstOrDefault<Thing>() as Pawn;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170024DC RID: 9436
-		// (get) Token: 0x0600EDEB RID: 60907 RVA: 0x00450855 File Offset: 0x0044EA55
-		public bool PowerOn
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.PowerTraderComp.PowerOn;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170024DD RID: 9437
-		// (get) Token: 0x0600EDEC RID: 60908 RVA: 0x00002501 File Offset: 0x00000701
-		public override bool IsContentsSuspended
+		[DebuggerHidden]
+		public _003CGetFloatMenuOptions_003Ed__37(int _003C_003E1__state)
 		{
-			get
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E8__1 = null;
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				Building_GeneExtractor building_GeneExtractor = _003C_003E4__this;
+				AcceptanceReport acceptanceReport;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E8__1 = new _003C_003Ec__DisplayClass37_0();
+					_003C_003E8__1._003C_003E4__this = _003C_003E4__this;
+					_003C_003E8__1.selPawn = selPawn;
+					_003C_003E7__wrap1 = ((ThingWithComps)building_GeneExtractor).GetFloatMenuOptions(_003C_003E8__1.selPawn).GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_00b6;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_00b6;
+				case 2:
+					_003C_003E1__state = -1;
+					break;
+				case 3:
+					_003C_003E1__state = -1;
+					break;
+				case 4:
+					_003C_003E1__state = -1;
+					break;
+				case 5:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_00b6:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						FloatMenuOption current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (!_003C_003E8__1.selPawn.CanReach(building_GeneExtractor, PathEndMode.InteractionCell, Danger.Deadly))
+					{
+						_003C_003E2__current = new FloatMenuOption("CannotEnterBuilding".Translate(building_GeneExtractor) + ": " + "NoPath".Translate().CapitalizeFirst(), null);
+						_003C_003E1__state = 2;
+						return true;
+					}
+					acceptanceReport = building_GeneExtractor.CanAcceptPawn(_003C_003E8__1.selPawn);
+					if (acceptanceReport.Accepted)
+					{
+						_003C_003E2__current = FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("EnterBuilding".Translate(building_GeneExtractor), delegate
+						{
+							_003C_003E8__1._003C_003E4__this.SelectPawn(_003C_003E8__1.selPawn);
+						}), _003C_003E8__1.selPawn, building_GeneExtractor);
+						_003C_003E1__state = 3;
+						return true;
+					}
+					if (building_GeneExtractor.SelectedPawn == _003C_003E8__1.selPawn && !_003C_003E8__1.selPawn.IsPrisonerOfColony)
+					{
+						_003C_003E2__current = FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("EnterBuilding".Translate(building_GeneExtractor), delegate
+						{
+							_003C_003E8__1.selPawn.jobs.TryTakeOrderedJob(JobMaker.MakeJob(JobDefOf.EnterBuilding, _003C_003E8__1._003C_003E4__this), JobTag.Misc);
+						}), _003C_003E8__1.selPawn, building_GeneExtractor);
+						_003C_003E1__state = 4;
+						return true;
+					}
+					if (!acceptanceReport.Reason.NullOrEmpty())
+					{
+						_003C_003E2__current = new FloatMenuOption("CannotEnterBuilding".Translate(building_GeneExtractor) + ": " + acceptanceReport.Reason.CapitalizeFirst(), null);
+						_003C_003E1__state = 5;
+						return true;
+					}
+					break;
+				}
 				return false;
 			}
-		}
-
-		// Token: 0x170024DE RID: 9438
-		// (get) Token: 0x0600EDED RID: 60909 RVA: 0x00450862 File Offset: 0x0044EA62
-		private CompPowerTrader PowerTraderComp
-		{
-			get
+			catch
 			{
-				if (this.cachedPowerComp == null)
-				{
-					this.cachedPowerComp = this.TryGetComp<CompPowerTrader>();
-				}
-				return this.cachedPowerComp;
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x170024DF RID: 9439
-		// (get) Token: 0x0600EDEE RID: 60910 RVA: 0x0045087E File Offset: 0x0044EA7E
-		public Texture2D InsertPawnTex
+		bool IEnumerator.MoveNext()
 		{
-			get
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				if (this.cachedInsertPawnTex == null)
-				{
-					this.cachedInsertPawnTex = ContentFinder<Texture2D>.Get("UI/Gizmos/InsertPawn", true);
-				}
-				return this.cachedInsertPawnTex;
+				_003C_003E7__wrap1.Dispose();
 			}
 		}
 
-		// Token: 0x170024E0 RID: 9440
-		// (get) Token: 0x0600EDEF RID: 60911 RVA: 0x004508A5 File Offset: 0x0044EAA5
-		public float HeldPawnDrawPos_Y
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			get
-			{
-				return this.DrawPos.y + 0.03658537f;
-			}
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x170024E1 RID: 9441
-		// (get) Token: 0x0600EDF0 RID: 60912 RVA: 0x004508B8 File Offset: 0x0044EAB8
-		public float HeldPawnBodyAngle
+		[DebuggerHidden]
+		IEnumerator<FloatMenuOption> IEnumerable<FloatMenuOption>.GetEnumerator()
 		{
-			get
+			_003CGetFloatMenuOptions_003Ed__37 _003CGetFloatMenuOptions_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				return base.Rotation.Opposite.AsAngle;
-			}
-		}
-
-		// Token: 0x170024E2 RID: 9442
-		// (get) Token: 0x0600EDF1 RID: 60913 RVA: 0x00075162 File Offset: 0x00073362
-		public PawnPosture HeldPawnPosture
-		{
-			get
-			{
-				return PawnPosture.LayingOnGroundFaceUp;
-			}
-		}
-
-		// Token: 0x170024E3 RID: 9443
-		// (get) Token: 0x0600EDF2 RID: 60914 RVA: 0x004508DC File Offset: 0x0044EADC
-		public override Vector3 PawnDrawOffset
-		{
-			get
-			{
-				return IntVec3.West.RotatedBy(base.Rotation).ToVector3() / (float)this.def.size.x;
-			}
-		}
-
-		// Token: 0x0600EDF3 RID: 60915 RVA: 0x00450917 File Offset: 0x0044EB17
-		public override void PostPostMake()
-		{
-			if (!ModLister.CheckBiotech("gene extractor"))
-			{
-				this.Destroy(DestroyMode.Vanish);
-				return;
-			}
-			base.PostPostMake();
-		}
-
-		// Token: 0x0600EDF4 RID: 60916 RVA: 0x00450933 File Offset: 0x0044EB33
-		public override void DeSpawn(DestroyMode mode = DestroyMode.Vanish)
-		{
-			this.sustainerWorking = null;
-			if (this.progressBar != null)
-			{
-				this.progressBar.Cleanup();
-				this.progressBar = null;
-			}
-			base.DeSpawn(mode);
-		}
-
-		// Token: 0x0600EDF5 RID: 60917 RVA: 0x00450960 File Offset: 0x0044EB60
-		protected override void Tick()
-		{
-			base.Tick();
-			if (this.IsHashIntervalTick(250))
-			{
-				this.PowerTraderComp.PowerOutput = (base.Working ? (-base.PowerComp.Props.PowerConsumption) : (-base.PowerComp.Props.idlePowerDraw));
-			}
-			if (base.Working)
-			{
-				if (this.ContainedPawn == null)
-				{
-					this.Cancel();
-					return;
-				}
-				if (this.PowerTraderComp.PowerOn)
-				{
-					this.TickEffects();
-					if (this.PowerOn)
-					{
-						this.ticksRemaining--;
-					}
-					if (this.ticksRemaining <= 0)
-					{
-						this.Finish();
-						return;
-					}
-				}
-				else
-				{
-					this.powerCutTicks++;
-					if (this.powerCutTicks >= 60000)
-					{
-						Pawn containedPawn = this.ContainedPawn;
-						if (containedPawn != null)
-						{
-							Messages.Message("GeneExtractorNoPowerEjectedMessage".Translate(containedPawn.Named("PAWN")), containedPawn, MessageTypeDefOf.NegativeEvent, false);
-						}
-						this.Cancel();
-						return;
-					}
-				}
+				_003C_003E1__state = 0;
+				_003CGetFloatMenuOptions_003Ed__ = this;
 			}
 			else
 			{
-				if (this.selectedPawn != null && this.selectedPawn.Dead)
+				_003CGetFloatMenuOptions_003Ed__ = new _003CGetFloatMenuOptions_003Ed__37(0)
 				{
-					this.Cancel();
-				}
-				if (this.progressBar != null)
-				{
-					this.progressBar.Cleanup();
-					this.progressBar = null;
-				}
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CGetFloatMenuOptions_003Ed__.selPawn = _003C_003E3__selPawn;
+			return _003CGetFloatMenuOptions_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<FloatMenuOption>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGetGizmos_003Ed__38 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Building_GeneExtractor _003C_003E4__this;
+
+		private IEnumerator<Gizmo> _003C_003E7__wrap1;
+
+		Gizmo IEnumerator<Gizmo>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600EDF6 RID: 60918 RVA: 0x00450A9C File Offset: 0x0044EC9C
-		private void TickEffects()
+		object IEnumerator.Current
 		{
-			if (this.sustainerWorking == null || this.sustainerWorking.Ended)
+			[DebuggerHidden]
+			get
 			{
-				this.sustainerWorking = SoundDefOf.GeneExtractor_Working.TrySpawnSustainer(SoundInfo.InMap(this, MaintenanceType.PerTick));
-			}
-			else
-			{
-				this.sustainerWorking.Maintain();
-			}
-			if (this.progressBar == null)
-			{
-				this.progressBar = EffecterDefOf.ProgressBarAlwaysVisible.Spawn();
-			}
-			this.progressBar.EffectTick(new TargetInfo(base.Position + IntVec3.North.RotatedBy(base.Rotation), base.Map, false), TargetInfo.Invalid);
-			MoteProgressBar mote = ((SubEffecter_ProgressBar)this.progressBar.children[0]).mote;
-			if (mote != null)
-			{
-				mote.progress = 1f - Mathf.Clamp01((float)this.ticksRemaining / 30000f);
-				mote.offsetZ = ((base.Rotation == Rot4.North) ? 0.5f : -0.5f);
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600EDF7 RID: 60919 RVA: 0x00450B98 File Offset: 0x0044ED98
-		public override AcceptanceReport CanAcceptPawn(Pawn pawn)
+		[DebuggerHidden]
+		public _003CGetGizmos_003Ed__38(int _003C_003E1__state)
 		{
-			if (!pawn.IsColonist && !pawn.IsSlaveOfColony && !pawn.IsPrisonerOfColony && (!pawn.IsColonySubhuman || !pawn.IsGhoul))
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				return false;
-			}
-			if (this.selectedPawn != null && this.selectedPawn != pawn)
-			{
-				return false;
-			}
-			if (!pawn.RaceProps.Humanlike || pawn.IsQuestLodger())
-			{
-				return false;
-			}
-			if (!this.PowerOn)
-			{
-				return "NoPower".Translate().CapitalizeFirst();
-			}
-			if (this.innerContainer.Count > 0)
-			{
-				return "Occupied".Translate();
-			}
-			if (pawn.genes != null)
-			{
-				if (pawn.genes.GenesListForReading.Any((Gene x) => x.def.passOnDirectly))
+				try
 				{
-					if (!pawn.genes.GenesListForReading.Any((Gene x) => x.def.biostatArc == 0))
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				Building_GeneExtractor CS_0024_003C_003E8__locals28 = _003C_003E4__this;
+				Command_Action command_Action;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((Building_Enterable)CS_0024_003C_003E8__locals28).GetGizmos().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_007e;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_007e;
+				case 2:
+					_003C_003E1__state = -1;
+					if (DebugSettings.ShowDevGizmos)
 					{
-						return "PawnHasNoNonArchiteGenes".Translate(pawn.Named("PAWN"));
-					}
-					if (pawn.health.hediffSet.HasHediff(HediffDefOf.XenogerminationComa, false))
-					{
-						return "InXenogerminationComa".Translate();
-					}
-					return true;
-				}
-			}
-			return "PawnHasNoGenes".Translate(pawn.Named("PAWN"));
-		}
-
-		// Token: 0x0600EDF8 RID: 60920 RVA: 0x00450D14 File Offset: 0x0044EF14
-		private void Cancel()
-		{
-			this.startTick = -1;
-			this.selectedPawn = null;
-			this.sustainerWorking = null;
-			this.powerCutTicks = 0;
-			this.innerContainer.TryDropAll(this.def.hasInteractionCell ? this.InteractionCell : base.Position, base.Map, ThingPlaceMode.Near, null, null, true);
-		}
-
-		// Token: 0x0600EDF9 RID: 60921 RVA: 0x00450D70 File Offset: 0x0044EF70
-		private void Finish()
-		{
-			this.selectedPawn = null;
-			this.sustainerWorking = null;
-			this.powerCutTicks = 0;
-			if (this.ContainedPawn != null)
-			{
-				Pawn containedPawn = this.ContainedPawn;
-				Rand.PushState(containedPawn.thingIDNumber ^ this.startTick);
-				Building_GeneExtractor.<>c__DisplayClass34_0 CS$<>8__locals1 = new Building_GeneExtractor.<>c__DisplayClass34_0();
-				CS$<>8__locals1.genesToAdd = new List<GeneDef>();
-				Genepack genepack = (Genepack)ThingMaker.MakeThing(ThingDefOf.Genepack, null);
-				int num = Mathf.Min((int)Building_GeneExtractor.GeneCountChanceCurve.RandomElementByWeight((CurvePoint p) => p.y).x, containedPawn.genes.GenesListForReading.Count((Gene x) => x.def.biostatArc == 0));
-				int num2 = 0;
-				Gene gene;
-				while (num2 < num && containedPawn.genes.GenesListForReading.TryRandomElementByWeight(new Func<Gene, float>(CS$<>8__locals1.<Finish>g__SelectionWeight|0), out gene))
-				{
-					CS$<>8__locals1.genesToAdd.Add(gene.def);
-					num2++;
-				}
-				if (CS$<>8__locals1.genesToAdd.Any<GeneDef>())
-				{
-					genepack.Initialize(CS$<>8__locals1.genesToAdd);
-				}
-				GeneUtility.ExtractXenogerm(containedPawn, Mathf.RoundToInt(60000f * GeneTuning.GeneExtractorRegrowingDurationDaysRange.RandomInRange));
-				IntVec3 intVec = this.def.hasInteractionCell ? this.InteractionCell : base.Position;
-				this.innerContainer.TryDropAll(intVec, base.Map, ThingPlaceMode.Near, null, null, true);
-				if (!containedPawn.Dead && (containedPawn.IsPrisonerOfColony || containedPawn.IsSlaveOfColony))
-				{
-					Pawn_NeedsTracker needs = containedPawn.needs;
-					if (needs != null)
-					{
-						Need_Mood mood = needs.mood;
-						if (mood != null)
+						_003C_003E2__current = new Command_Action
 						{
-							ThoughtHandler thoughts = mood.thoughts;
-							if (thoughts != null)
+							defaultLabel = "DEV: Finish extraction",
+							action = delegate
 							{
-								MemoryThoughtHandler memories = thoughts.memories;
-								if (memories != null)
+								CS_0024_003C_003E8__locals28.Finish();
+							}
+						};
+						_003C_003E1__state = 3;
+						return true;
+					}
+					break;
+				case 3:
+					_003C_003E1__state = -1;
+					break;
+				case 4:
+					_003C_003E1__state = -1;
+					break;
+				case 5:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_007e:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Gizmo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (CS_0024_003C_003E8__locals28.Working)
+					{
+						_003C_003E2__current = new Command_Action
+						{
+							defaultLabel = "CommandCancelExtraction".Translate(),
+							defaultDesc = "CommandCancelExtractionDesc".Translate(),
+							icon = CancelIcon,
+							action = delegate
+							{
+								CS_0024_003C_003E8__locals28.Cancel();
+							},
+							activateSound = SoundDefOf.Designate_Cancel
+						};
+						_003C_003E1__state = 2;
+						return true;
+					}
+					if (CS_0024_003C_003E8__locals28.selectedPawn != null)
+					{
+						_003C_003E2__current = new Command_Action
+						{
+							defaultLabel = "CommandCancelLoad".Translate(),
+							defaultDesc = "CommandCancelLoadDesc".Translate(),
+							icon = CancelIcon,
+							activateSound = SoundDefOf.Designate_Cancel,
+							action = delegate
+							{
+								CS_0024_003C_003E8__locals28.innerContainer.TryDropAll(CS_0024_003C_003E8__locals28.Position, CS_0024_003C_003E8__locals28.Map, ThingPlaceMode.Near);
+								if (CS_0024_003C_003E8__locals28.selectedPawn.CurJobDef == JobDefOf.EnterBuilding)
 								{
-									memories.TryGainMemory(ThoughtDefOf.XenogermHarvested_Prisoner, null, null);
+									CS_0024_003C_003E8__locals28.selectedPawn.jobs.EndCurrentJob(JobCondition.InterruptForced);
+								}
+								CS_0024_003C_003E8__locals28.selectedPawn = null;
+								CS_0024_003C_003E8__locals28.startTick = -1;
+								CS_0024_003C_003E8__locals28.sustainerWorking = null;
+							}
+						};
+						_003C_003E1__state = 4;
+						return true;
+					}
+					command_Action = new Command_Action
+					{
+						defaultLabel = "InsertPerson".Translate() + "...",
+						defaultDesc = "InsertPersonGeneExtractorDesc".Translate(),
+						icon = CS_0024_003C_003E8__locals28.InsertPawnTex,
+						action = delegate
+						{
+							List<FloatMenuOption> list = new List<FloatMenuOption>();
+							foreach (Pawn item in CS_0024_003C_003E8__locals28.Map.mapPawns.AllPawnsSpawned.OrderBy(delegate(Pawn p)
+							{
+								if (p.IsColonist)
+								{
+									return 0;
+								}
+								return (p.IsPrisonerOfColony || p.IsSlaveOfColony) ? 1 : 2;
+							}).ThenBy((Pawn p) => p.Label))
+							{
+								_003C_003Ec__DisplayClass38_0 CS_0024_003C_003E8__locals27 = new _003C_003Ec__DisplayClass38_0
+								{
+									_003C_003E4__this = CS_0024_003C_003E8__locals28,
+									pawn = item
+								};
+								if (CS_0024_003C_003E8__locals27.pawn.genes != null)
+								{
+									AcceptanceReport acceptanceReport = CS_0024_003C_003E8__locals28.CanAcceptPawn(CS_0024_003C_003E8__locals27.pawn);
+									string text = CS_0024_003C_003E8__locals27.pawn.LabelShortCap + ", " + CS_0024_003C_003E8__locals27.pawn.genes.XenotypeLabelCap;
+									if (!acceptanceReport.Accepted)
+									{
+										if (!acceptanceReport.Reason.NullOrEmpty())
+										{
+											list.Add(new FloatMenuOption(text + ": " + acceptanceReport.Reason, null, CS_0024_003C_003E8__locals27.pawn, Color.white));
+										}
+									}
+									else
+									{
+										Hediff firstHediffOfDef = CS_0024_003C_003E8__locals27.pawn.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.XenogermReplicating);
+										if (firstHediffOfDef != null)
+										{
+											text += $" ({firstHediffOfDef.LabelBase}, {firstHediffOfDef.TryGetComp<HediffComp_Disappears>().ticksToDisappear.ToStringTicksToPeriod(allowSeconds: true, shortForm: true).Colorize(ColoredText.SubtleGrayColor)})";
+										}
+										list.Add(new FloatMenuOption(text, delegate
+										{
+											CS_0024_003C_003E8__locals27._003C_003E4__this.SelectPawn(CS_0024_003C_003E8__locals27.pawn);
+										}, CS_0024_003C_003E8__locals27.pawn, Color.white));
+									}
 								}
 							}
-						}
-					}
-				}
-				if (CS$<>8__locals1.genesToAdd.Any<GeneDef>())
-				{
-					GenPlace.TryPlaceThing(genepack, intVec, base.Map, ThingPlaceMode.Near, null, null, null, 1);
-				}
-				Messages.Message("GeneExtractionComplete".Translate(containedPawn.Named("PAWN")) + ": " + (from x in CS$<>8__locals1.genesToAdd
-				select x.label).ToCommaList(false, false).CapitalizeFirst(), new LookTargets(new TargetInfo[]
-				{
-					containedPawn,
-					genepack
-				}), MessageTypeDefOf.PositiveEvent, true);
-				Rand.PopState();
-			}
-			this.startTick = -1;
-		}
-
-		// Token: 0x0600EDFA RID: 60922 RVA: 0x00451008 File Offset: 0x0044F208
-		public override void TryAcceptPawn(Pawn pawn)
-		{
-			if (this.CanAcceptPawn(pawn))
-			{
-				this.selectedPawn = pawn;
-				bool flag = pawn.DeSpawnOrDeselect(DestroyMode.Vanish);
-				if (this.innerContainer.TryAddOrTransfer(pawn, true))
-				{
-					this.startTick = Find.TickManager.TicksGame;
-					this.ticksRemaining = 30000;
-				}
-				if (flag)
-				{
-					Find.Selector.Select(pawn, false, false);
-				}
-			}
-		}
-
-		// Token: 0x0600EDFB RID: 60923 RVA: 0x0045106C File Offset: 0x0044F26C
-		protected override void SelectPawn(Pawn pawn)
-		{
-			if (pawn.health.hediffSet.HasHediff(HediffDefOf.XenogermReplicating, false))
-			{
-				Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("ConfirmExtractXenogermWillKill".Translate(pawn.Named("PAWN")), delegate()
-				{
-					this.<>n__0(pawn);
-				}, false, null, WindowLayer.Dialog));
-				return;
-			}
-			base.SelectPawn(pawn);
-		}
-
-		// Token: 0x0600EDFC RID: 60924 RVA: 0x004510EF File Offset: 0x0044F2EF
-		public override IEnumerable<FloatMenuOption> GetFloatMenuOptions(Pawn selPawn)
-		{
-			foreach (FloatMenuOption floatMenuOption in base.GetFloatMenuOptions(selPawn))
-			{
-				yield return floatMenuOption;
-			}
-			IEnumerator<FloatMenuOption> enumerator = null;
-			if (!selPawn.CanReach(this, PathEndMode.InteractionCell, Danger.Deadly, false, false, TraverseMode.ByPawn))
-			{
-				yield return new FloatMenuOption("CannotEnterBuilding".Translate(this) + ": " + "NoPath".Translate().CapitalizeFirst(), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-			}
-			else
-			{
-				AcceptanceReport acceptanceReport = this.CanAcceptPawn(selPawn);
-				if (acceptanceReport.Accepted)
-				{
-					yield return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("EnterBuilding".Translate(this), delegate()
-					{
-						this.SelectPawn(selPawn);
-					}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0), selPawn, this, "ReservedBy", null);
-				}
-				else if (base.SelectedPawn == selPawn && !selPawn.IsPrisonerOfColony)
-				{
-					yield return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("EnterBuilding".Translate(this), delegate()
-					{
-						selPawn.jobs.TryTakeOrderedJob(JobMaker.MakeJob(JobDefOf.EnterBuilding, this), new JobTag?(JobTag.Misc), false);
-					}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0), selPawn, this, "ReservedBy", null);
-				}
-				else if (!acceptanceReport.Reason.NullOrEmpty())
-				{
-					yield return new FloatMenuOption("CannotEnterBuilding".Translate(this) + ": " + acceptanceReport.Reason.CapitalizeFirst(), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-				}
-			}
-			yield break;
-			yield break;
-		}
-
-		// Token: 0x0600EDFD RID: 60925 RVA: 0x00451106 File Offset: 0x0044F306
-		public override IEnumerable<Gizmo> GetGizmos()
-		{
-			foreach (Gizmo gizmo in base.GetGizmos())
-			{
-				yield return gizmo;
-			}
-			IEnumerator<Gizmo> enumerator = null;
-			if (base.Working)
-			{
-				yield return new Command_Action
-				{
-					defaultLabel = "CommandCancelExtraction".Translate(),
-					defaultDesc = "CommandCancelExtractionDesc".Translate(),
-					icon = Building_GeneExtractor.CancelIcon,
-					action = delegate()
-					{
-						this.Cancel();
-					},
-					activateSound = SoundDefOf.Designate_Cancel
-				};
-				if (DebugSettings.ShowDevGizmos)
-				{
-					yield return new Command_Action
-					{
-						defaultLabel = "DEV: Finish extraction",
-						action = delegate()
-						{
-							this.Finish();
+							if (!list.Any())
+							{
+								list.Add(new FloatMenuOption("NoExtractablePawns".Translate(), null));
+							}
+							Find.WindowStack.Add(new FloatMenu(list));
 						}
 					};
-				}
-			}
-			else if (this.selectedPawn != null)
-			{
-				yield return new Command_Action
-				{
-					defaultLabel = "CommandCancelLoad".Translate(),
-					defaultDesc = "CommandCancelLoadDesc".Translate(),
-					icon = Building_GeneExtractor.CancelIcon,
-					activateSound = SoundDefOf.Designate_Cancel,
-					action = delegate()
+					if (!CS_0024_003C_003E8__locals28.PowerOn)
 					{
-						this.innerContainer.TryDropAll(base.Position, base.Map, ThingPlaceMode.Near, null, null, true);
-						if (this.selectedPawn.CurJobDef == JobDefOf.EnterBuilding)
-						{
-							this.selectedPawn.jobs.EndCurrentJob(JobCondition.InterruptForced, true, true);
-						}
-						this.selectedPawn = null;
-						this.startTick = -1;
-						this.sustainerWorking = null;
+						command_Action.Disable("NoPower".Translate().CapitalizeFirst());
 					}
-				};
+					_003C_003E2__current = command_Action;
+					_003C_003E1__state = 5;
+					return true;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CGetGizmos_003Ed__38 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
 			}
 			else
 			{
-				Command_Action command_Action = new Command_Action();
-				command_Action.defaultLabel = "InsertPerson".Translate() + "...";
-				command_Action.defaultDesc = "InsertPersonGeneExtractorDesc".Translate();
-				command_Action.icon = this.InsertPawnTex;
-				command_Action.action = delegate()
+				result = new _003CGetGizmos_003Ed__38(0)
 				{
-					List<FloatMenuOption> list = new List<FloatMenuOption>();
-					foreach (Pawn pawn2 in base.Map.mapPawns.AllPawnsSpawned.OrderBy(delegate(Pawn p)
-					{
-						if (p.IsColonist)
-						{
-							return 0;
-						}
-						if (p.IsPrisonerOfColony || p.IsSlaveOfColony)
-						{
-							return 1;
-						}
-						return 2;
-					}).ThenBy((Pawn p) => p.Label))
-					{
-						Pawn pawn = pawn2;
-						if (pawn.genes != null)
-						{
-							AcceptanceReport acceptanceReport = this.CanAcceptPawn(pawn);
-							string text = pawn.LabelShortCap + ", " + pawn.genes.XenotypeLabelCap;
-							if (!acceptanceReport.Accepted)
-							{
-								if (!acceptanceReport.Reason.NullOrEmpty())
-								{
-									list.Add(new FloatMenuOption(text + ": " + acceptanceReport.Reason, null, pawn, Color.white, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0));
-								}
-							}
-							else
-							{
-								Hediff firstHediffOfDef = pawn.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.XenogermReplicating, false);
-								if (firstHediffOfDef != null)
-								{
-									text = string.Concat(new string[]
-									{
-										text,
-										" (",
-										firstHediffOfDef.LabelBase,
-										", ",
-										firstHediffOfDef.TryGetComp<HediffComp_Disappears>().ticksToDisappear.ToStringTicksToPeriod(true, true, true, true, false).Colorize(ColoredText.SubtleGrayColor),
-										")"
-									});
-								}
-								list.Add(new FloatMenuOption(text, delegate()
-								{
-									this.SelectPawn(pawn);
-								}, pawn, Color.white, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0));
-							}
-						}
-					}
-					if (!list.Any<FloatMenuOption>())
-					{
-						list.Add(new FloatMenuOption("NoExtractablePawns".Translate(), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0));
-					}
-					Find.WindowStack.Add(new FloatMenu(list));
+					_003C_003E4__this = _003C_003E4__this
 				};
-				if (!this.PowerOn)
-				{
-					command_Action.Disable("NoPower".Translate().CapitalizeFirst());
-				}
-				yield return command_Action;
 			}
-			yield break;
-			yield break;
+			return result;
 		}
 
-		// Token: 0x0600EDFE RID: 60926 RVA: 0x00451118 File Offset: 0x0044F318
-		public override void DynamicDrawPhaseAt(DrawPhase phase, Vector3 drawLoc, bool flip = false)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			base.DynamicDrawPhaseAt(phase, drawLoc, flip);
-			if (base.Working && this.ContainedPawn != null)
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	private int ticksRemaining;
+
+	private int powerCutTicks;
+
+	[Unsaved(false)]
+	private CompPowerTrader cachedPowerComp;
+
+	[Unsaved(false)]
+	private Texture2D cachedInsertPawnTex;
+
+	[Unsaved(false)]
+	private Sustainer sustainerWorking;
+
+	[Unsaved(false)]
+	private Effecter progressBar;
+
+	private const int TicksToExtract = 30000;
+
+	private const int NoPowerEjectCumulativeTicks = 60000;
+
+	private static readonly Texture2D CancelIcon = ContentFinder<Texture2D>.Get("UI/Designators/Cancel");
+
+	private static readonly SimpleCurve GeneCountChanceCurve = new SimpleCurve
+	{
+		new CurvePoint(1f, 0.7f),
+		new CurvePoint(2f, 0.2f),
+		new CurvePoint(3f, 0.08f),
+		new CurvePoint(4f, 0.02f)
+	};
+
+	private Pawn ContainedPawn => innerContainer.FirstOrDefault() as Pawn;
+
+	public bool PowerOn => PowerTraderComp.PowerOn;
+
+	public override bool IsContentsSuspended => false;
+
+	private CompPowerTrader PowerTraderComp
+	{
+		get
+		{
+			if (cachedPowerComp == null)
 			{
-				this.ContainedPawn.Drawer.renderer.DynamicDrawPhaseAt(phase, drawLoc + this.PawnDrawOffset, null, true);
+				cachedPowerComp = this.TryGetComp<CompPowerTrader>();
+			}
+			return cachedPowerComp;
+		}
+	}
+
+	public Texture2D InsertPawnTex
+	{
+		get
+		{
+			if (cachedInsertPawnTex == null)
+			{
+				cachedInsertPawnTex = ContentFinder<Texture2D>.Get("UI/Gizmos/InsertPawn");
+			}
+			return cachedInsertPawnTex;
+		}
+	}
+
+	public float HeldPawnDrawPos_Y => DrawPos.y + 0.03658537f;
+
+	public float HeldPawnBodyAngle => base.Rotation.Opposite.AsAngle;
+
+	public PawnPosture HeldPawnPosture => PawnPosture.LayingOnGroundFaceUp;
+
+	public override Vector3 PawnDrawOffset => IntVec3.West.RotatedBy(base.Rotation).ToVector3() / def.size.x;
+
+	public override void PostPostMake()
+	{
+		if (!ModLister.CheckBiotech("gene extractor"))
+		{
+			Destroy();
+		}
+		else
+		{
+			base.PostPostMake();
+		}
+	}
+
+	public override void DeSpawn(DestroyMode mode = DestroyMode.Vanish)
+	{
+		sustainerWorking = null;
+		if (progressBar != null)
+		{
+			progressBar.Cleanup();
+			progressBar = null;
+		}
+		base.DeSpawn(mode);
+	}
+
+	protected override void Tick()
+	{
+		base.Tick();
+		if (this.IsHashIntervalTick(250))
+		{
+			PowerTraderComp.PowerOutput = (base.Working ? (0f - base.PowerComp.Props.PowerConsumption) : (0f - base.PowerComp.Props.idlePowerDraw));
+		}
+		if (base.Working)
+		{
+			if (ContainedPawn == null)
+			{
+				Cancel();
+				return;
+			}
+			if (PowerTraderComp.PowerOn)
+			{
+				TickEffects();
+				if (PowerOn)
+				{
+					ticksRemaining--;
+				}
+				if (ticksRemaining <= 0)
+				{
+					Finish();
+				}
+				return;
+			}
+			powerCutTicks++;
+			if (powerCutTicks >= 60000)
+			{
+				Pawn containedPawn = ContainedPawn;
+				if (containedPawn != null)
+				{
+					Messages.Message("GeneExtractorNoPowerEjectedMessage".Translate(containedPawn.Named("PAWN")), containedPawn, MessageTypeDefOf.NegativeEvent, historical: false);
+				}
+				Cancel();
 			}
 		}
-
-		// Token: 0x0600EDFF RID: 60927 RVA: 0x0045116C File Offset: 0x0044F36C
-		public override string GetInspectString()
+		else
 		{
-			string text = base.GetInspectString();
-			if (this.selectedPawn != null && this.innerContainer.Count == 0)
+			if (selectedPawn != null && selectedPawn.Dead)
 			{
-				if (!text.NullOrEmpty())
-				{
-					text += "\n";
-				}
-				text += "WaitingForPawn".Translate(this.selectedPawn.Named("PAWN")).Resolve();
+				Cancel();
 			}
-			else if (base.Working && this.ContainedPawn != null)
+			if (progressBar != null)
 			{
-				if (!text.NullOrEmpty())
-				{
-					text += "\n";
-				}
-				text = text + "ExtractingXenogermFrom".Translate(this.ContainedPawn.Named("PAWN")).Resolve() + "\n";
-				if (this.PowerOn)
-				{
-					text += "DurationLeft".Translate(this.ticksRemaining.ToStringTicksToPeriod(true, false, true, true, false)).Resolve();
-				}
-				else
-				{
-					text += "ExtractionPausedNoPower".Translate((60000 - this.powerCutTicks).ToStringTicksToPeriod(true, false, true, true, false).Named("TIME")).Colorize(ColorLibrary.RedReadable);
-				}
+				progressBar.Cleanup();
+				progressBar = null;
 			}
-			return text;
 		}
+	}
 
-		// Token: 0x0600EE00 RID: 60928 RVA: 0x004512A3 File Offset: 0x0044F4A3
-		public override void ExposeData()
+	private void TickEffects()
+	{
+		if (sustainerWorking == null || sustainerWorking.Ended)
 		{
-			base.ExposeData();
-			Scribe_Values.Look<int>(ref this.ticksRemaining, "ticksRemaining", 0, false);
-			Scribe_Values.Look<int>(ref this.powerCutTicks, "powerCutTicks", 0, false);
+			sustainerWorking = SoundDefOf.GeneExtractor_Working.TrySpawnSustainer(SoundInfo.InMap(this, MaintenanceType.PerTick));
 		}
-
-		// Token: 0x04009D69 RID: 40297
-		private int ticksRemaining;
-
-		// Token: 0x04009D6A RID: 40298
-		private int powerCutTicks;
-
-		// Token: 0x04009D6B RID: 40299
-		[Unsaved(false)]
-		private CompPowerTrader cachedPowerComp;
-
-		// Token: 0x04009D6C RID: 40300
-		[Unsaved(false)]
-		private Texture2D cachedInsertPawnTex;
-
-		// Token: 0x04009D6D RID: 40301
-		[Unsaved(false)]
-		private Sustainer sustainerWorking;
-
-		// Token: 0x04009D6E RID: 40302
-		[Unsaved(false)]
-		private Effecter progressBar;
-
-		// Token: 0x04009D6F RID: 40303
-		private const int TicksToExtract = 30000;
-
-		// Token: 0x04009D70 RID: 40304
-		private const int NoPowerEjectCumulativeTicks = 60000;
-
-		// Token: 0x04009D71 RID: 40305
-		private static readonly Texture2D CancelIcon = ContentFinder<Texture2D>.Get("UI/Designators/Cancel", true);
-
-		// Token: 0x04009D72 RID: 40306
-		private static readonly SimpleCurve GeneCountChanceCurve = new SimpleCurve
+		else
 		{
+			sustainerWorking.Maintain();
+		}
+		if (progressBar == null)
+		{
+			progressBar = EffecterDefOf.ProgressBarAlwaysVisible.Spawn();
+		}
+		progressBar.EffectTick(new TargetInfo(base.Position + IntVec3.North.RotatedBy(base.Rotation), base.Map), TargetInfo.Invalid);
+		MoteProgressBar mote = ((SubEffecter_ProgressBar)progressBar.children[0]).mote;
+		if (mote != null)
+		{
+			mote.progress = 1f - Mathf.Clamp01((float)ticksRemaining / 30000f);
+			mote.offsetZ = ((base.Rotation == Rot4.North) ? 0.5f : (-0.5f));
+		}
+	}
+
+	public override AcceptanceReport CanAcceptPawn(Pawn pawn)
+	{
+		if (!pawn.IsColonist && !pawn.IsSlaveOfColony && !pawn.IsPrisonerOfColony && (!pawn.IsColonySubhuman || !pawn.IsGhoul))
+		{
+			return false;
+		}
+		if (selectedPawn != null && selectedPawn != pawn)
+		{
+			return false;
+		}
+		if (!pawn.RaceProps.Humanlike || pawn.IsQuestLodger())
+		{
+			return false;
+		}
+		if (!PowerOn)
+		{
+			return "NoPower".Translate().CapitalizeFirst();
+		}
+		if (innerContainer.Count > 0)
+		{
+			return "Occupied".Translate();
+		}
+		if (pawn.genes == null || !pawn.genes.GenesListForReading.Any((Gene x) => x.def.passOnDirectly))
+		{
+			return "PawnHasNoGenes".Translate(pawn.Named("PAWN"));
+		}
+		if (!pawn.genes.GenesListForReading.Any((Gene x) => x.def.biostatArc == 0))
+		{
+			return "PawnHasNoNonArchiteGenes".Translate(pawn.Named("PAWN"));
+		}
+		if (pawn.health.hediffSet.HasHediff(HediffDefOf.XenogerminationComa))
+		{
+			return "InXenogerminationComa".Translate();
+		}
+		return true;
+	}
+
+	private void Cancel()
+	{
+		startTick = -1;
+		selectedPawn = null;
+		sustainerWorking = null;
+		powerCutTicks = 0;
+		innerContainer.TryDropAll(def.hasInteractionCell ? InteractionCell : base.Position, base.Map, ThingPlaceMode.Near);
+	}
+
+	private void Finish()
+	{
+		selectedPawn = null;
+		sustainerWorking = null;
+		powerCutTicks = 0;
+		List<GeneDef> genesToAdd;
+		if (ContainedPawn != null)
+		{
+			Pawn containedPawn = ContainedPawn;
+			Rand.PushState(containedPawn.thingIDNumber ^ startTick);
+			genesToAdd = new List<GeneDef>();
+			Genepack genepack = (Genepack)ThingMaker.MakeThing(ThingDefOf.Genepack);
+			int num = Mathf.Min((int)GeneCountChanceCurve.RandomElementByWeight((CurvePoint p) => p.y).x, containedPawn.genes.GenesListForReading.Count((Gene x) => x.def.biostatArc == 0));
+			for (int i = 0; i < num; i++)
 			{
-				new CurvePoint(1f, 0.7f),
-				true
-			},
-			{
-				new CurvePoint(2f, 0.2f),
-				true
-			},
-			{
-				new CurvePoint(3f, 0.08f),
-				true
-			},
-			{
-				new CurvePoint(4f, 0.02f),
-				true
+				if (!containedPawn.genes.GenesListForReading.TryRandomElementByWeight(SelectionWeight, out var result))
+				{
+					break;
+				}
+				genesToAdd.Add(result.def);
 			}
+			if (genesToAdd.Any())
+			{
+				genepack.Initialize(genesToAdd);
+			}
+			GeneUtility.ExtractXenogerm(containedPawn, Mathf.RoundToInt(60000f * GeneTuning.GeneExtractorRegrowingDurationDaysRange.RandomInRange));
+			IntVec3 intVec = (def.hasInteractionCell ? InteractionCell : base.Position);
+			innerContainer.TryDropAll(intVec, base.Map, ThingPlaceMode.Near);
+			if (!containedPawn.Dead && (containedPawn.IsPrisonerOfColony || containedPawn.IsSlaveOfColony))
+			{
+				containedPawn.needs?.mood?.thoughts?.memories?.TryGainMemory(ThoughtDefOf.XenogermHarvested_Prisoner);
+			}
+			if (genesToAdd.Any())
+			{
+				GenPlace.TryPlaceThing(genepack, intVec, base.Map, ThingPlaceMode.Near, null, null, null);
+			}
+			Messages.Message("GeneExtractionComplete".Translate(containedPawn.Named("PAWN")) + ": " + genesToAdd.Select((GeneDef x) => x.label).ToCommaList().CapitalizeFirst(), new LookTargets(containedPawn, genepack), MessageTypeDefOf.PositiveEvent);
+			Rand.PopState();
+		}
+		startTick = -1;
+		float SelectionWeight(Gene g)
+		{
+			if (genesToAdd.Contains(g.def))
+			{
+				return 0f;
+			}
+			if (g.def.biostatArc > 0)
+			{
+				return 0f;
+			}
+			if (g.def.endogeneCategory == EndogeneCategory.Melanin)
+			{
+				return 0f;
+			}
+			if (!GeneTuning.BiostatRange.Includes(g.def.biostatMet + genesToAdd.Sum((GeneDef x) => x.biostatMet)))
+			{
+				return 0f;
+			}
+			if (g.def.biostatCpx > 0)
+			{
+				return 3f;
+			}
+			return 1f;
+		}
+	}
+
+	public override void TryAcceptPawn(Pawn pawn)
+	{
+		if ((bool)CanAcceptPawn(pawn))
+		{
+			selectedPawn = pawn;
+			bool num = pawn.DeSpawnOrDeselect();
+			if (innerContainer.TryAddOrTransfer(pawn))
+			{
+				startTick = Find.TickManager.TicksGame;
+				ticksRemaining = 30000;
+			}
+			if (num)
+			{
+				Find.Selector.Select(pawn, playSound: false, forceDesignatorDeselect: false);
+			}
+		}
+	}
+
+	protected override void SelectPawn(Pawn pawn)
+	{
+		if (pawn.health.hediffSet.HasHediff(HediffDefOf.XenogermReplicating))
+		{
+			Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("ConfirmExtractXenogermWillKill".Translate(pawn.Named("PAWN")), delegate
+			{
+				base.SelectPawn(pawn);
+			}));
+		}
+		else
+		{
+			base.SelectPawn(pawn);
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CGetFloatMenuOptions_003Ed__37))]
+	public override IEnumerable<FloatMenuOption> GetFloatMenuOptions(Pawn selPawn)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetFloatMenuOptions_003Ed__37(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__selPawn = selPawn
 		};
+	}
+
+	[IteratorStateMachine(typeof(_003CGetGizmos_003Ed__38))]
+	public override IEnumerable<Gizmo> GetGizmos()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetGizmos_003Ed__38(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override void DynamicDrawPhaseAt(DrawPhase phase, Vector3 drawLoc, bool flip = false)
+	{
+		base.DynamicDrawPhaseAt(phase, drawLoc, flip);
+		if (base.Working && ContainedPawn != null)
+		{
+			ContainedPawn.Drawer.renderer.DynamicDrawPhaseAt(phase, drawLoc + PawnDrawOffset, null, neverAimWeapon: true);
+		}
+	}
+
+	public override string GetInspectString()
+	{
+		string text = base.GetInspectString();
+		if (selectedPawn != null && innerContainer.Count == 0)
+		{
+			if (!text.NullOrEmpty())
+			{
+				text += "\n";
+			}
+			text += "WaitingForPawn".Translate(selectedPawn.Named("PAWN")).Resolve();
+		}
+		else if (base.Working && ContainedPawn != null)
+		{
+			if (!text.NullOrEmpty())
+			{
+				text += "\n";
+			}
+			text = text + "ExtractingXenogermFrom".Translate(ContainedPawn.Named("PAWN")).Resolve() + "\n";
+			text = ((!PowerOn) ? (text + "ExtractionPausedNoPower".Translate((60000 - powerCutTicks).ToStringTicksToPeriod().Named("TIME")).Colorize(ColorLibrary.RedReadable)) : (text + "DurationLeft".Translate(ticksRemaining.ToStringTicksToPeriod()).Resolve()));
+		}
+		return text;
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref ticksRemaining, "ticksRemaining", 0);
+		Scribe_Values.Look(ref powerCutTicks, "powerCutTicks", 0);
 	}
 }

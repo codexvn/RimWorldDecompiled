@@ -1,5 +1,6 @@
 using Brutal.Numerics;
 using Waylith.Diagnostics;
+using Waylith.Graphics;
 using Waylith.Rendering;
 
 namespace Waylith.CLI;
@@ -13,6 +14,10 @@ internal static class EngineSwitches
 		GpuTextureService.TrackRehydration |= commandLineAccessor.HasSwitch("TrackRehydration");
 		options.UseKosmicKrisp |= commandLineAccessor.HasSwitch("KosmicKrisp");
 		options.HideWindow |= commandLineAccessor.HasSwitch("NoWindow");
+		VulkanStartup.LoaderChoice = (commandLineAccessor.HasSwitch("BundledVulkanLoader") ? VulkanLoaderChoice.Bundled : (commandLineAccessor.HasSwitch("SystemVulkanLoader") ? VulkanLoaderChoice.System : VulkanLoaderChoice.Newest));
+		VulkanStartup.DisableImplicitLayers |= commandLineAccessor.HasSwitch("NoVulkanLayers");
+		VulkanStartup.FallbackDisabled |= commandLineAccessor.HasSwitch("NoVulkanFallback");
+		VulkanStartup.ResetFallback |= commandLineAccessor.HasSwitch("ResetVulkanFallback");
 		string value = commandLineAccessor.GetValue("texCacheCompression");
 		if (value != null)
 		{

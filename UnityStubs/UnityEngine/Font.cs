@@ -165,6 +165,8 @@ public class Font : Object
 			list.Add("/usr/local/share/fonts");
 			list.Add(Path.Combine(folderPath, ".fonts"));
 			list.Add(Path.Combine(folderPath, ".local", "share", "fonts"));
+			list.Add("/run/host/fonts");
+			list.Add("/run/host/user-fonts");
 		}
 		List<string> list2 = new List<string>();
 		foreach (string item in list)
@@ -193,7 +195,7 @@ public class Font : Object
 
 	public static Font CreateDynamicFontFromOSFont(string fontname, int size)
 	{
-		StubWarner.LogStub("CreateDynamicFontFromOSFont", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\Font.cs", 101);
+		StubWarner.LogStub("CreateDynamicFontFromOSFont", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\Font.cs", 103);
 		return new Font
 		{
 			name = fontname
@@ -202,7 +204,7 @@ public class Font : Object
 
 	public static Font CreateDynamicFontFromOSFont(string[] fontnames, int size)
 	{
-		StubWarner.LogStub("CreateDynamicFontFromOSFont", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\Font.cs", 102);
+		StubWarner.LogStub("CreateDynamicFontFromOSFont", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\Font.cs", 104);
 		return new Font
 		{
 			name = ((fontnames != null && fontnames.Length > 0) ? fontnames[0] : string.Empty)
@@ -211,7 +213,7 @@ public class Font : Object
 
 	public static string[] GetOSInstalledFontNames()
 	{
-		StubWarner.LogStub("GetOSInstalledFontNames", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\Font.cs", 103);
+		StubWarner.LogStub("GetOSInstalledFontNames", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\Font.cs", 105);
 		return Array.Empty<string>();
 	}
 

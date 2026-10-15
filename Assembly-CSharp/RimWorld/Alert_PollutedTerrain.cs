@@ -1,61 +1,50 @@
-﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Alert_PollutedTerrain : Alert
 {
-	// Token: 0x02003008 RID: 12296
-	public class Alert_PollutedTerrain : Alert
+	private const float ToxicBuildupSeverityThreshold = 0.3f;
+
+	private List<Pawn> targets = new List<Pawn>();
+
+	public List<Pawn> Targets
 	{
-		// Token: 0x17002CDA RID: 11482
-		// (get) Token: 0x060114E5 RID: 70885 RVA: 0x004F60E0 File Offset: 0x004F42E0
-		public List<Pawn> Targets
+		get
 		{
-			get
+			targets.Clear();
+			foreach (Map map in Find.Maps)
 			{
-				this.targets.Clear();
-				foreach (Map map in Find.Maps)
+				foreach (Pawn item in map.mapPawns.FreeColonistsSpawned)
 				{
-					foreach (Pawn pawn in map.mapPawns.FreeColonistsSpawned)
+					Hediff firstHediffOfDef = item.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.ToxicBuildup);
+					if (firstHediffOfDef != null && firstHediffOfDef.Severity >= 0.3f && item.Position.IsPolluted(map))
 					{
-						Hediff firstHediffOfDef = pawn.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.ToxicBuildup, false);
-						if (firstHediffOfDef != null && firstHediffOfDef.Severity >= 0.3f && pawn.Position.IsPolluted(map))
-						{
-							this.targets.Add(pawn);
-						}
+						targets.Add(item);
 					}
 				}
-				return this.targets;
 			}
+			return targets;
 		}
+	}
 
-		// Token: 0x060114E6 RID: 70886 RVA: 0x004F61C8 File Offset: 0x004F43C8
-		public Alert_PollutedTerrain()
-		{
-			this.defaultLabel = "AlertPollutedTerrain".Translate();
-			this.defaultPriority = AlertPriority.High;
-			this.requireBiotech = true;
-		}
+	public Alert_PollutedTerrain()
+	{
+		defaultLabel = "AlertPollutedTerrain".Translate();
+		defaultPriority = AlertPriority.High;
+		requireBiotech = true;
+	}
 
-		// Token: 0x060114E7 RID: 70887 RVA: 0x004F61FE File Offset: 0x004F43FE
-		public override AlertReport GetReport()
-		{
-			return AlertReport.CulpritsAre(this.Targets);
-		}
+	public override AlertReport GetReport()
+	{
+		return AlertReport.CulpritsAre(Targets);
+	}
 
-		// Token: 0x060114E8 RID: 70888 RVA: 0x004F620C File Offset: 0x004F440C
-		public override TaggedString GetExplanation()
-		{
-			string value = (from p in this.targets
-			select p.NameShortColored.Resolve()).ToLineList("  - ", false);
-			return "AlertPollutedTerrainDesc".Translate(value);
-		}
-
-		// Token: 0x0400B35E RID: 45918
-		private const float ToxicBuildupSeverityThreshold = 0.3f;
-
-		// Token: 0x0400B35F RID: 45919
-		private List<Pawn> targets = new List<Pawn>();
+	public override TaggedString GetExplanation()
+	{
+		string text = targets.Select((Pawn p) => p.NameShortColored.Resolve()).ToLineList("  - ");
+		return "AlertPollutedTerrainDesc".Translate(text);
 	}
 }

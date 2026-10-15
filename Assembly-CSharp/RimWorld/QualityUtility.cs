@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,469 +6,359 @@ using LudeonTK;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public static class QualityUtility
 {
-	// Token: 0x02002EFF RID: 12031
-	public static class QualityUtility
+	public static List<QualityCategory> AllQualityCategories;
+
+	public static int QualityCount { get; }
+
+	static QualityUtility()
 	{
-		// Token: 0x17002BDD RID: 11229
-		// (get) Token: 0x06010FC1 RID: 69569 RVA: 0x004E2FD8 File Offset: 0x004E11D8
-		public static int QualityCount { get; }
-
-		// Token: 0x06010FC2 RID: 69570 RVA: 0x004E2FE0 File Offset: 0x004E11E0
-		static QualityUtility()
+		AllQualityCategories = new List<QualityCategory>();
+		foreach (QualityCategory value in Enum.GetValues(typeof(QualityCategory)))
 		{
-			foreach (object obj in Enum.GetValues(typeof(QualityCategory)))
-			{
-				QualityCategory item = (QualityCategory)obj;
-				QualityUtility.AllQualityCategories.Add(item);
-			}
-			QualityUtility.QualityCount = Enum.GetValues(typeof(QualityCategory)).Length;
+			AllQualityCategories.Add(value);
 		}
+		QualityCount = Enum.GetValues(typeof(QualityCategory)).Length;
+	}
 
-		// Token: 0x06010FC3 RID: 69571 RVA: 0x004E306C File Offset: 0x004E126C
-		public static bool TryGetQuality(this Thing t, out QualityCategory qc)
+	public static bool TryGetQuality(this Thing t, out QualityCategory qc)
+	{
+		CompQuality compQuality = ((!(t is MinifiedThing minifiedThing)) ? (t as ThingWithComps)?.compQuality : (minifiedThing.InnerThing as ThingWithComps)?.compQuality);
+		if (compQuality == null)
 		{
-			MinifiedThing minifiedThing = t as MinifiedThing;
-			CompQuality compQuality;
-			if (minifiedThing == null)
-			{
-				ThingWithComps thingWithComps = t as ThingWithComps;
-				compQuality = ((thingWithComps != null) ? thingWithComps.compQuality : null);
-			}
-			else
-			{
-				ThingWithComps thingWithComps2 = minifiedThing.InnerThing as ThingWithComps;
-				compQuality = ((thingWithComps2 != null) ? thingWithComps2.compQuality : null);
-			}
-			CompQuality compQuality2 = compQuality;
-			if (compQuality2 == null)
-			{
-				qc = QualityCategory.Normal;
-				return false;
-			}
-			qc = compQuality2.Quality;
+			qc = QualityCategory.Normal;
+			return false;
+		}
+		qc = compQuality.Quality;
+		return true;
+	}
+
+	public static string GetLabel(this QualityCategory cat)
+	{
+		return cat switch
+		{
+			QualityCategory.Awful => "QualityCategory_Awful".Translate(), 
+			QualityCategory.Poor => "QualityCategory_Poor".Translate(), 
+			QualityCategory.Normal => "QualityCategory_Normal".Translate(), 
+			QualityCategory.Good => "QualityCategory_Good".Translate(), 
+			QualityCategory.Excellent => "QualityCategory_Excellent".Translate(), 
+			QualityCategory.Masterwork => "QualityCategory_Masterwork".Translate(), 
+			QualityCategory.Legendary => "QualityCategory_Legendary".Translate(), 
+			_ => throw new ArgumentException(), 
+		};
+	}
+
+	public static string GetLabelShort(this QualityCategory cat)
+	{
+		return cat switch
+		{
+			QualityCategory.Awful => "QualityCategoryShort_Awful".Translate(), 
+			QualityCategory.Poor => "QualityCategoryShort_Poor".Translate(), 
+			QualityCategory.Normal => "QualityCategoryShort_Normal".Translate(), 
+			QualityCategory.Good => "QualityCategoryShort_Good".Translate(), 
+			QualityCategory.Excellent => "QualityCategoryShort_Excellent".Translate(), 
+			QualityCategory.Masterwork => "QualityCategoryShort_Masterwork".Translate(), 
+			QualityCategory.Legendary => "QualityCategoryShort_Legendary".Translate(), 
+			_ => throw new ArgumentException(), 
+		};
+	}
+
+	public static bool FollowQualityThingFilter(this ThingDef def)
+	{
+		if (def.HasComp(typeof(CompQuality)))
+		{
 			return true;
 		}
+		return false;
+	}
 
-		// Token: 0x06010FC4 RID: 69572 RVA: 0x004E30C0 File Offset: 0x004E12C0
-		public static string GetLabel(this QualityCategory cat)
+	public static QualityCategory GenerateQuality(QualityGenerator qualityGenerator)
+	{
+		return qualityGenerator switch
 		{
-			switch (cat)
+			QualityGenerator.BaseGen => GenerateQualityBaseGen(), 
+			QualityGenerator.Reward => GenerateQualityReward(), 
+			QualityGenerator.Gift => GenerateQualityGift(), 
+			QualityGenerator.Super => GenerateQualitySuper(), 
+			QualityGenerator.Trader => GenerateQualityTraderItem(), 
+			_ => throw new NotImplementedException(qualityGenerator.ToString()), 
+		};
+	}
+
+	public static QualityCategory GenerateQualityRandomEqualChance()
+	{
+		return AllQualityCategories.RandomElement();
+	}
+
+	public static QualityCategory GenerateQualityReward()
+	{
+		return GenerateFromGaussian(1f, QualityCategory.Legendary, QualityCategory.Excellent, QualityCategory.Good);
+	}
+
+	public static QualityCategory GenerateQualityGift()
+	{
+		return GenerateFromGaussian(1f, QualityCategory.Legendary, QualityCategory.Normal, QualityCategory.Normal);
+	}
+
+	public static QualityCategory GenerateQualitySuper()
+	{
+		return GenerateFromGaussian(1f, QualityCategory.Legendary, QualityCategory.Masterwork, QualityCategory.Masterwork);
+	}
+
+	public static QualityCategory GenerateQualityTraderItem()
+	{
+		return GenerateFromGaussian(1f, QualityCategory.Masterwork, QualityCategory.Normal, QualityCategory.Normal);
+	}
+
+	public static QualityCategory GenerateQualityBaseGen()
+	{
+		if (Rand.Value < 0.3f)
+		{
+			return QualityCategory.Normal;
+		}
+		return GenerateFromGaussian(1f, QualityCategory.Excellent);
+	}
+
+	public static QualityCategory GenerateQualityGeneratingPawn(PawnKindDef pawnKind, ThingDef forThing)
+	{
+		if (pawnKind.forceNormalGearQuality)
+		{
+			return QualityCategory.Normal;
+		}
+		if (forThing.IsWeapon && pawnKind.forceWeaponQuality.HasValue)
+		{
+			return pawnKind.forceWeaponQuality.Value;
+		}
+		if (!forThing.IsWeapon && pawnKind.specificApparelRequirements != null)
+		{
+			for (int i = 0; i < pawnKind.specificApparelRequirements.Count; i++)
 			{
-			case QualityCategory.Awful:
-				return "QualityCategory_Awful".Translate();
-			case QualityCategory.Poor:
-				return "QualityCategory_Poor".Translate();
-			case QualityCategory.Normal:
-				return "QualityCategory_Normal".Translate();
-			case QualityCategory.Good:
-				return "QualityCategory_Good".Translate();
-			case QualityCategory.Excellent:
-				return "QualityCategory_Excellent".Translate();
-			case QualityCategory.Masterwork:
-				return "QualityCategory_Masterwork".Translate();
-			case QualityCategory.Legendary:
-				return "QualityCategory_Legendary".Translate();
-			default:
-				throw new ArgumentException();
-			}
-		}
-
-		// Token: 0x06010FC5 RID: 69573 RVA: 0x004E3168 File Offset: 0x004E1368
-		public static string GetLabelShort(this QualityCategory cat)
-		{
-			switch (cat)
-			{
-			case QualityCategory.Awful:
-				return "QualityCategoryShort_Awful".Translate();
-			case QualityCategory.Poor:
-				return "QualityCategoryShort_Poor".Translate();
-			case QualityCategory.Normal:
-				return "QualityCategoryShort_Normal".Translate();
-			case QualityCategory.Good:
-				return "QualityCategoryShort_Good".Translate();
-			case QualityCategory.Excellent:
-				return "QualityCategoryShort_Excellent".Translate();
-			case QualityCategory.Masterwork:
-				return "QualityCategoryShort_Masterwork".Translate();
-			case QualityCategory.Legendary:
-				return "QualityCategoryShort_Legendary".Translate();
-			default:
-				throw new ArgumentException();
-			}
-		}
-
-		// Token: 0x06010FC6 RID: 69574 RVA: 0x004E320E File Offset: 0x004E140E
-		public static bool FollowQualityThingFilter(this ThingDef def)
-		{
-			return def.HasComp(typeof(CompQuality));
-		}
-
-		// Token: 0x06010FC7 RID: 69575 RVA: 0x004E3228 File Offset: 0x004E1428
-		public static QualityCategory GenerateQuality(QualityGenerator qualityGenerator)
-		{
-			switch (qualityGenerator)
-			{
-			case QualityGenerator.BaseGen:
-				return QualityUtility.GenerateQualityBaseGen();
-			case QualityGenerator.Reward:
-				return QualityUtility.GenerateQualityReward();
-			case QualityGenerator.Gift:
-				return QualityUtility.GenerateQualityGift();
-			case QualityGenerator.Super:
-				return QualityUtility.GenerateQualitySuper();
-			case QualityGenerator.Trader:
-				return QualityUtility.GenerateQualityTraderItem();
-			default:
-				throw new NotImplementedException(qualityGenerator.ToString());
-			}
-		}
-
-		// Token: 0x06010FC8 RID: 69576 RVA: 0x004E3281 File Offset: 0x004E1481
-		public static QualityCategory GenerateQualityRandomEqualChance()
-		{
-			return QualityUtility.AllQualityCategories.RandomElement<QualityCategory>();
-		}
-
-		// Token: 0x06010FC9 RID: 69577 RVA: 0x004E328D File Offset: 0x004E148D
-		public static QualityCategory GenerateQualityReward()
-		{
-			return QualityUtility.GenerateFromGaussian(1f, QualityCategory.Legendary, QualityCategory.Excellent, QualityCategory.Good);
-		}
-
-		// Token: 0x06010FCA RID: 69578 RVA: 0x004E329C File Offset: 0x004E149C
-		public static QualityCategory GenerateQualityGift()
-		{
-			return QualityUtility.GenerateFromGaussian(1f, QualityCategory.Legendary, QualityCategory.Normal, QualityCategory.Normal);
-		}
-
-		// Token: 0x06010FCB RID: 69579 RVA: 0x004E32AB File Offset: 0x004E14AB
-		public static QualityCategory GenerateQualitySuper()
-		{
-			return QualityUtility.GenerateFromGaussian(1f, QualityCategory.Legendary, QualityCategory.Masterwork, QualityCategory.Masterwork);
-		}
-
-		// Token: 0x06010FCC RID: 69580 RVA: 0x004E32BA File Offset: 0x004E14BA
-		public static QualityCategory GenerateQualityTraderItem()
-		{
-			return QualityUtility.GenerateFromGaussian(1f, QualityCategory.Masterwork, QualityCategory.Normal, QualityCategory.Normal);
-		}
-
-		// Token: 0x06010FCD RID: 69581 RVA: 0x004E32C9 File Offset: 0x004E14C9
-		public static QualityCategory GenerateQualityBaseGen()
-		{
-			if (Rand.Value < 0.3f)
-			{
-				return QualityCategory.Normal;
-			}
-			return QualityUtility.GenerateFromGaussian(1f, QualityCategory.Excellent, QualityCategory.Normal, QualityCategory.Awful);
-		}
-
-		// Token: 0x06010FCE RID: 69582 RVA: 0x004E32E8 File Offset: 0x004E14E8
-		public static QualityCategory GenerateQualityGeneratingPawn(PawnKindDef pawnKind, ThingDef forThing)
-		{
-			if (pawnKind.forceNormalGearQuality)
-			{
-				return QualityCategory.Normal;
-			}
-			if (forThing.IsWeapon && pawnKind.forceWeaponQuality != null)
-			{
-				return pawnKind.forceWeaponQuality.Value;
-			}
-			if (!forThing.IsWeapon && pawnKind.specificApparelRequirements != null)
-			{
-				for (int i = 0; i < pawnKind.specificApparelRequirements.Count; i++)
+				if (pawnKind.specificApparelRequirements[i].Quality.HasValue && PawnApparelGenerator.ApparelRequirementHandlesThing(pawnKind.specificApparelRequirements[i], forThing))
 				{
-					if (pawnKind.specificApparelRequirements[i].Quality != null && PawnApparelGenerator.ApparelRequirementHandlesThing(pawnKind.specificApparelRequirements[i], forThing))
-					{
-						return pawnKind.specificApparelRequirements[i].Quality.Value;
-					}
-				}
-			}
-			int itemQuality = (int)pawnKind.itemQuality;
-			float value = Rand.Value;
-			int num;
-			if (value < 0.1f)
-			{
-				num = itemQuality - 1;
-			}
-			else if (value < 0.2f)
-			{
-				num = itemQuality + 1;
-			}
-			else
-			{
-				num = itemQuality;
-			}
-			num = Mathf.Clamp(num, (int)pawnKind.minApparelQuality, (int)pawnKind.maxApparelQuality);
-			return (QualityCategory)num;
-		}
-
-		// Token: 0x06010FCF RID: 69583 RVA: 0x004E33D4 File Offset: 0x004E15D4
-		public static QualityCategory GenerateQualityCreatedByPawn(int relevantSkillLevel, bool inspired)
-		{
-			float num = 0f;
-			switch (relevantSkillLevel)
-			{
-			case 0:
-				num += 0.7f;
-				break;
-			case 1:
-				num += 1.1f;
-				break;
-			case 2:
-				num += 1.5f;
-				break;
-			case 3:
-				num += 1.8f;
-				break;
-			case 4:
-				num += 2f;
-				break;
-			case 5:
-				num += 2.2f;
-				break;
-			case 6:
-				num += 2.4f;
-				break;
-			case 7:
-				num += 2.6f;
-				break;
-			case 8:
-				num += 2.8f;
-				break;
-			case 9:
-				num += 2.95f;
-				break;
-			case 10:
-				num += 3.1f;
-				break;
-			case 11:
-				num += 3.25f;
-				break;
-			case 12:
-				num += 3.4f;
-				break;
-			case 13:
-				num += 3.5f;
-				break;
-			case 14:
-				num += 3.6f;
-				break;
-			case 15:
-				num += 3.7f;
-				break;
-			case 16:
-				num += 3.8f;
-				break;
-			case 17:
-				num += 3.9f;
-				break;
-			case 18:
-				num += 4f;
-				break;
-			case 19:
-				num += 4.1f;
-				break;
-			case 20:
-				num += 4.2f;
-				break;
-			}
-			int num2 = (int)Rand.GaussianAsymmetric(num, 0.6f, 0.8f);
-			num2 = Mathf.Clamp(num2, 0, 5);
-			if (num2 == 5 && Rand.Value < 0.5f)
-			{
-				num2 = (int)Rand.GaussianAsymmetric(num, 0.6f, 0.95f);
-				num2 = Mathf.Clamp(num2, 0, 5);
-			}
-			QualityCategory qualityCategory = (QualityCategory)num2;
-			if (inspired)
-			{
-				qualityCategory = QualityUtility.AddLevels(qualityCategory, 2);
-			}
-			return qualityCategory;
-		}
-
-		// Token: 0x06010FD0 RID: 69584 RVA: 0x004E3584 File Offset: 0x004E1784
-		public static QualityCategory GenerateQualityCreatedByPawn(Pawn pawn, SkillDef relevantSkill, bool consumeInspiration = true)
-		{
-			int relevantSkillLevel = pawn.RaceProps.IsMechanoid ? pawn.RaceProps.mechFixedSkillLevel : pawn.skills.GetSkill(relevantSkill).Level;
-			bool flag = consumeInspiration && pawn.InspirationDef == InspirationDefOf.Inspired_Creativity;
-			QualityCategory qualityCategory = QualityUtility.GenerateQualityCreatedByPawn(relevantSkillLevel, flag);
-			if (ModsConfig.IdeologyActive && pawn.Ideo != null)
-			{
-				Precept_Role role = pawn.Ideo.GetRole(pawn);
-				if (role != null && role.def.roleEffects != null)
-				{
-					RoleEffect roleEffect = role.def.roleEffects.FirstOrDefault((RoleEffect eff) => eff is RoleEffect_ProductionQualityOffset);
-					if (roleEffect != null)
-					{
-						qualityCategory = QualityUtility.AddLevels(qualityCategory, ((RoleEffect_ProductionQualityOffset)roleEffect).offset);
-					}
-				}
-			}
-			if (flag)
-			{
-				pawn.mindState.inspirationHandler.EndInspiration(InspirationDefOf.Inspired_Creativity);
-			}
-			return qualityCategory;
-		}
-
-		// Token: 0x06010FD1 RID: 69585 RVA: 0x004E3664 File Offset: 0x004E1864
-		public static QualityCategory GenerateFromGaussian(float widthFactor, QualityCategory max = QualityCategory.Legendary, QualityCategory center = QualityCategory.Normal, QualityCategory min = QualityCategory.Awful)
-		{
-			float num = Rand.Gaussian((float)center + 0.5f, widthFactor);
-			if (num < (float)min)
-			{
-				num = (float)min;
-			}
-			if (num > (float)max)
-			{
-				num = (float)max;
-			}
-			return (QualityCategory)((int)num);
-		}
-
-		// Token: 0x06010FD2 RID: 69586 RVA: 0x004E3693 File Offset: 0x004E1893
-		private static QualityCategory AddLevels(QualityCategory quality, int levels)
-		{
-			return (QualityCategory)Mathf.Min((int)(quality + (byte)levels), 6);
-		}
-
-		// Token: 0x06010FD3 RID: 69587 RVA: 0x004E36A0 File Offset: 0x004E18A0
-		public static void SendCraftNotification(Thing thing, Pawn worker)
-		{
-			if (worker == null)
-			{
-				return;
-			}
-			ThingWithComps thingWithComps = thing as ThingWithComps;
-			CompQuality compQuality = (thingWithComps != null) ? thingWithComps.compQuality : null;
-			if (compQuality == null)
-			{
-				return;
-			}
-			CompArt compArt = thing.TryGetComp<CompArt>();
-			if (compArt == null || compArt.Props.mustBeFullGrave)
-			{
-				if (compQuality.Quality == QualityCategory.Masterwork)
-				{
-					Find.LetterStack.ReceiveLetter("LetterCraftedMasterworkLabel".Translate(), "LetterCraftedMasterworkMessage".Translate().Formatted(worker.LabelShort, thing.LabelShort, worker.Named("WORKER"), thing.Named("CRAFTED")), LetterDefOf.PositiveEvent, thing, null, null, null, null, 0, true);
-					return;
-				}
-				if (compQuality.Quality == QualityCategory.Legendary)
-				{
-					Find.LetterStack.ReceiveLetter("LetterCraftedLegendaryLabel".Translate(), "LetterCraftedLegendaryMessage".Translate().Formatted(worker.LabelShort, thing.LabelShort, worker.Named("WORKER"), thing.Named("CRAFTED")), LetterDefOf.PositiveEvent, thing, null, null, null, null, 0, true);
-					return;
-				}
-			}
-			else
-			{
-				if (compQuality.Quality == QualityCategory.Masterwork)
-				{
-					Find.LetterStack.ReceiveLetter("LetterCraftedMasterworkLabel".Translate(), "LetterCraftedMasterworkMessageArt".Translate().Formatted(compArt.GenerateImageDescription(), worker.LabelShort, thing.LabelShort, worker.Named("WORKER"), thing.Named("CRAFTED")), LetterDefOf.PositiveEvent, thing, null, null, null, null, 0, true);
-					return;
-				}
-				if (compQuality.Quality == QualityCategory.Legendary)
-				{
-					Find.LetterStack.ReceiveLetter("LetterCraftedLegendaryLabel".Translate(), "LetterCraftedLegendaryMessageArt".Translate().Formatted(compArt.GenerateImageDescription(), worker.LabelShort, thing.LabelShort, worker.Named("WORKER"), thing.Named("CRAFTED")), LetterDefOf.PositiveEvent, thing, null, null, null, null, 0, true);
+					return pawnKind.specificApparelRequirements[i].Quality.Value;
 				}
 			}
 		}
+		int itemQuality = (int)pawnKind.itemQuality;
+		float value = Rand.Value;
+		int value2 = ((value < 0.1f) ? (itemQuality - 1) : ((!(value < 0.2f)) ? itemQuality : (itemQuality + 1)));
+		value2 = Mathf.Clamp(value2, (int)pawnKind.minApparelQuality, (int)pawnKind.maxApparelQuality);
+		return (QualityCategory)value2;
+	}
 
-		// Token: 0x06010FD4 RID: 69588 RVA: 0x004E38A4 File Offset: 0x004E1AA4
-		[DebugOutput]
-		private static void QualityGenerationData()
+	public static QualityCategory GenerateQualityCreatedByPawn(int relevantSkillLevel, bool inspired)
+	{
+		float num = 0f;
+		switch (relevantSkillLevel)
 		{
-			List<TableDataGetter<QualityCategory>> list = new List<TableDataGetter<QualityCategory>>();
-			list.Add(new TableDataGetter<QualityCategory>("quality", (QualityCategory q) => q.ToString()));
-			list.Add(new TableDataGetter<QualityCategory>("Rewards\n(quests,\netc...? )", (QualityCategory q) => QualityUtility.DebugQualitiesStringSingle(q, () => QualityUtility.GenerateQualityReward())));
-			list.Add(new TableDataGetter<QualityCategory>("Trader\nitems", (QualityCategory q) => QualityUtility.DebugQualitiesStringSingle(q, () => QualityUtility.GenerateQualityTraderItem())));
-			list.Add(new TableDataGetter<QualityCategory>("Map generation\nitems and\nbuildings\n(e.g. NPC bases)", (QualityCategory q) => QualityUtility.DebugQualitiesStringSingle(q, () => QualityUtility.GenerateQualityBaseGen())));
-			list.Add(new TableDataGetter<QualityCategory>("Gifts", (QualityCategory q) => QualityUtility.DebugQualitiesStringSingle(q, () => QualityUtility.GenerateQualityGift())));
-			for (int i = 0; i <= 20; i++)
+		case 0:
+			num += 0.7f;
+			break;
+		case 1:
+			num += 1.1f;
+			break;
+		case 2:
+			num += 1.5f;
+			break;
+		case 3:
+			num += 1.8f;
+			break;
+		case 4:
+			num += 2f;
+			break;
+		case 5:
+			num += 2.2f;
+			break;
+		case 6:
+			num += 2.4f;
+			break;
+		case 7:
+			num += 2.6f;
+			break;
+		case 8:
+			num += 2.8f;
+			break;
+		case 9:
+			num += 2.95f;
+			break;
+		case 10:
+			num += 3.1f;
+			break;
+		case 11:
+			num += 3.25f;
+			break;
+		case 12:
+			num += 3.4f;
+			break;
+		case 13:
+			num += 3.5f;
+			break;
+		case 14:
+			num += 3.6f;
+			break;
+		case 15:
+			num += 3.7f;
+			break;
+		case 16:
+			num += 3.8f;
+			break;
+		case 17:
+			num += 3.9f;
+			break;
+		case 18:
+			num += 4f;
+			break;
+		case 19:
+			num += 4.1f;
+			break;
+		case 20:
+			num += 4.2f;
+			break;
+		}
+		int value = (int)Rand.GaussianAsymmetric(num, 0.6f, 0.8f);
+		value = Mathf.Clamp(value, 0, 5);
+		if (value == 5 && Rand.Value < 0.5f)
+		{
+			value = (int)Rand.GaussianAsymmetric(num, 0.6f, 0.95f);
+			value = Mathf.Clamp(value, 0, 5);
+		}
+		QualityCategory qualityCategory = (QualityCategory)value;
+		if (inspired)
+		{
+			qualityCategory = AddLevels(qualityCategory, 2);
+		}
+		return qualityCategory;
+	}
+
+	public static QualityCategory GenerateQualityCreatedByPawn(Pawn pawn, SkillDef relevantSkill, bool consumeInspiration = true)
+	{
+		int relevantSkillLevel = (pawn.RaceProps.IsMechanoid ? pawn.RaceProps.mechFixedSkillLevel : pawn.skills.GetSkill(relevantSkill).Level);
+		bool flag = consumeInspiration && pawn.InspirationDef == InspirationDefOf.Inspired_Creativity;
+		QualityCategory qualityCategory = GenerateQualityCreatedByPawn(relevantSkillLevel, flag);
+		if (ModsConfig.IdeologyActive && pawn.Ideo != null)
+		{
+			Precept_Role role = pawn.Ideo.GetRole(pawn);
+			if (role != null && role.def.roleEffects != null)
 			{
-				int localLevel = i;
-				Func<QualityCategory> <>9__10;
-				list.Add(new TableDataGetter<QualityCategory>("Made\nat skill\n" + i.ToString(), delegate(QualityCategory q)
+				RoleEffect roleEffect = role.def.roleEffects.FirstOrDefault((RoleEffect eff) => eff is RoleEffect_ProductionQualityOffset);
+				if (roleEffect != null)
 				{
-					Func<QualityCategory> qualityGenerator;
-					if ((qualityGenerator = <>9__10) == null)
-					{
-						qualityGenerator = (<>9__10 = (() => QualityUtility.GenerateQualityCreatedByPawn(localLevel, false)));
-					}
-					return QualityUtility.DebugQualitiesStringSingle(q, qualityGenerator);
-				}));
-			}
-			foreach (PawnKindDef localPk2 in from k in DefDatabase<PawnKindDef>.AllDefs
-			orderby k.combatPower
-			select k)
-			{
-				PawnKindDef localPk = localPk2;
-				if (localPk.RaceProps.Humanlike)
-				{
-					Func<QualityCategory> <>9__13;
-					list.Add(new TableDataGetter<QualityCategory>(string.Concat(new string[]
-					{
-						"Gear for\n",
-						localPk.defName,
-						"\nPower ",
-						localPk.combatPower.ToString("F0"),
-						"\nitemQuality:\n",
-						localPk.itemQuality.ToString()
-					}), delegate(QualityCategory q)
-					{
-						Func<QualityCategory> qualityGenerator;
-						if ((qualityGenerator = <>9__13) == null)
-						{
-							qualityGenerator = (<>9__13 = (() => QualityUtility.GenerateQualityGeneratingPawn(localPk, null)));
-						}
-						return QualityUtility.DebugQualitiesStringSingle(q, qualityGenerator);
-					}));
+					qualityCategory = AddLevels(qualityCategory, ((RoleEffect_ProductionQualityOffset)roleEffect).offset);
 				}
 			}
-			DebugTables.MakeTablesDialog<QualityCategory>(QualityUtility.AllQualityCategories, list.ToArray());
 		}
-
-		// Token: 0x06010FD5 RID: 69589 RVA: 0x004E3AF8 File Offset: 0x004E1CF8
-		private static string DebugQualitiesStringSingle(QualityCategory quality, Func<QualityCategory> qualityGenerator)
+		if (flag)
 		{
-			int num = 10000;
-			List<QualityCategory> list = new List<QualityCategory>();
-			for (int i = 0; i < num; i++)
-			{
-				list.Add(qualityGenerator());
-			}
-			return ((float)(from q in list
-			where q == quality
-			select q).Count<QualityCategory>() / (float)num).ToStringPercent();
+			pawn.mindState.inspirationHandler.EndInspiration(InspirationDefOf.Inspired_Creativity);
 		}
+		return qualityCategory;
+	}
 
-		// Token: 0x06010FD6 RID: 69590 RVA: 0x004E3B58 File Offset: 0x004E1D58
-		private static string DebugQualitiesString(Func<QualityCategory> qualityGenerator)
+	public static QualityCategory GenerateFromGaussian(float widthFactor, QualityCategory max = QualityCategory.Legendary, QualityCategory center = QualityCategory.Normal, QualityCategory min = QualityCategory.Awful)
+	{
+		float num = Rand.Gaussian((float)(int)center + 0.5f, widthFactor);
+		if (num < (float)(int)min)
 		{
-			int num = 10000;
-			StringBuilder stringBuilder = new StringBuilder();
-			List<QualityCategory> list = new List<QualityCategory>();
-			for (int i = 0; i < num; i++)
-			{
-				list.Add(qualityGenerator());
-			}
-			using (List<QualityCategory>.Enumerator enumerator = QualityUtility.AllQualityCategories.GetEnumerator())
-			{
-				while (enumerator.MoveNext())
-				{
-					QualityCategory qu = enumerator.Current;
-					stringBuilder.AppendLine(qu.ToString() + " - " + ((float)(from q in list
-					where q == qu
-					select q).Count<QualityCategory>() / (float)num).ToStringPercent());
-				}
-			}
-			return stringBuilder.ToString();
+			num = (int)min;
 		}
+		if (num > (float)(int)max)
+		{
+			num = (int)max;
+		}
+		return (QualityCategory)(int)num;
+	}
 
-		// Token: 0x0400B0A1 RID: 45217
-		public static List<QualityCategory> AllQualityCategories = new List<QualityCategory>();
+	private static QualityCategory AddLevels(QualityCategory quality, int levels)
+	{
+		return (QualityCategory)Mathf.Min((int)quality + levels, 6);
+	}
+
+	public static void SendCraftNotification(Thing thing, Pawn worker)
+	{
+		if (worker == null)
+		{
+			return;
+		}
+		CompQuality compQuality = (thing as ThingWithComps)?.compQuality;
+		if (compQuality == null)
+		{
+			return;
+		}
+		CompArt compArt = thing.TryGetComp<CompArt>();
+		if (compArt == null || compArt.Props.mustBeFullGrave)
+		{
+			if (compQuality.Quality == QualityCategory.Masterwork)
+			{
+				Find.LetterStack.ReceiveLetter("LetterCraftedMasterworkLabel".Translate(), "LetterCraftedMasterworkMessage".Translate().Formatted(worker.LabelShort, thing.LabelShort, worker.Named("WORKER"), thing.Named("CRAFTED")), LetterDefOf.PositiveEvent, thing);
+			}
+			else if (compQuality.Quality == QualityCategory.Legendary)
+			{
+				Find.LetterStack.ReceiveLetter("LetterCraftedLegendaryLabel".Translate(), "LetterCraftedLegendaryMessage".Translate().Formatted(worker.LabelShort, thing.LabelShort, worker.Named("WORKER"), thing.Named("CRAFTED")), LetterDefOf.PositiveEvent, thing);
+			}
+		}
+		else if (compQuality.Quality == QualityCategory.Masterwork)
+		{
+			Find.LetterStack.ReceiveLetter("LetterCraftedMasterworkLabel".Translate(), "LetterCraftedMasterworkMessageArt".Translate().Formatted(compArt.GenerateImageDescription(), worker.LabelShort, thing.LabelShort, worker.Named("WORKER"), thing.Named("CRAFTED")), LetterDefOf.PositiveEvent, thing);
+		}
+		else if (compQuality.Quality == QualityCategory.Legendary)
+		{
+			Find.LetterStack.ReceiveLetter("LetterCraftedLegendaryLabel".Translate(), "LetterCraftedLegendaryMessageArt".Translate().Formatted(compArt.GenerateImageDescription(), worker.LabelShort, thing.LabelShort, worker.Named("WORKER"), thing.Named("CRAFTED")), LetterDefOf.PositiveEvent, thing);
+		}
+	}
+
+	[DebugOutput]
+	private static void QualityGenerationData()
+	{
+		List<TableDataGetter<QualityCategory>> list = new List<TableDataGetter<QualityCategory>>();
+		list.Add(new TableDataGetter<QualityCategory>("quality", (QualityCategory q) => q.ToString()));
+		list.Add(new TableDataGetter<QualityCategory>("Rewards\n(quests,\netc...? )", (QualityCategory q) => DebugQualitiesStringSingle(q, () => GenerateQualityReward())));
+		list.Add(new TableDataGetter<QualityCategory>("Trader\nitems", (QualityCategory q) => DebugQualitiesStringSingle(q, () => GenerateQualityTraderItem())));
+		list.Add(new TableDataGetter<QualityCategory>("Map generation\nitems and\nbuildings\n(e.g. NPC bases)", (QualityCategory q) => DebugQualitiesStringSingle(q, () => GenerateQualityBaseGen())));
+		list.Add(new TableDataGetter<QualityCategory>("Gifts", (QualityCategory q) => DebugQualitiesStringSingle(q, () => GenerateQualityGift())));
+		for (int i = 0; i <= 20; i++)
+		{
+			int localLevel = i;
+			list.Add(new TableDataGetter<QualityCategory>("Made\nat skill\n" + i, (QualityCategory q) => DebugQualitiesStringSingle(q, () => GenerateQualityCreatedByPawn(localLevel, inspired: false))));
+		}
+		foreach (PawnKindDef item in DefDatabase<PawnKindDef>.AllDefs.OrderBy((PawnKindDef k) => k.combatPower))
+		{
+			PawnKindDef localPk = item;
+			if (!localPk.RaceProps.Humanlike)
+			{
+				continue;
+			}
+			list.Add(new TableDataGetter<QualityCategory>("Gear for\n" + localPk.defName + "\nPower " + localPk.combatPower.ToString("F0") + "\nitemQuality:\n" + localPk.itemQuality, (QualityCategory q) => DebugQualitiesStringSingle(q, () => GenerateQualityGeneratingPawn(localPk, null))));
+		}
+		DebugTables.MakeTablesDialog(AllQualityCategories, list.ToArray());
+	}
+
+	private static string DebugQualitiesStringSingle(QualityCategory quality, Func<QualityCategory> qualityGenerator)
+	{
+		int num = 10000;
+		List<QualityCategory> list = new List<QualityCategory>();
+		for (int i = 0; i < num; i++)
+		{
+			list.Add(qualityGenerator());
+		}
+		return ((float)list.Where((QualityCategory q) => q == quality).Count() / (float)num).ToStringPercent();
+	}
+
+	private static string DebugQualitiesString(Func<QualityCategory> qualityGenerator)
+	{
+		int num = 10000;
+		StringBuilder stringBuilder = new StringBuilder();
+		List<QualityCategory> list = new List<QualityCategory>();
+		for (int i = 0; i < num; i++)
+		{
+			list.Add(qualityGenerator());
+		}
+		foreach (QualityCategory qu in AllQualityCategories)
+		{
+			stringBuilder.AppendLine(qu.ToString() + " - " + ((float)list.Where((QualityCategory q) => q == qu).Count() / (float)num).ToStringPercent());
+		}
+		return stringBuilder.ToString();
 	}
 }

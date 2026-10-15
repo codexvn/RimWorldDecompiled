@@ -1,135 +1,237 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class PocketMapExit : MapPortal
 {
-	// Token: 0x02002B14 RID: 11028
-	public class PocketMapExit : MapPortal
+	[CompilerGenerated]
+	private sealed class _003CGetGizmos_003Ed__13 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700268B RID: 9867
-		// (get) Token: 0x0600F64E RID: 63054 RVA: 0x0047847B File Offset: 0x0047667B
-		public override string EnterString
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public PocketMapExit _003C_003E4__this;
+
+		private IEnumerator<Gizmo> _003C_003E7__wrap1;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				string key = "ExitPortal";
-				MapPortal mapPortal = this.entrance;
-				return key.Translate((mapPortal != null) ? mapPortal.def.portal.pocketMapGenerator.label : null);
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700268C RID: 9868
-		// (get) Token: 0x0600F64F RID: 63055 RVA: 0x004784B2 File Offset: 0x004766B2
-		public override string CancelEnterString
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return "CommandCancelExitPortal".Translate();
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700268D RID: 9869
-		// (get) Token: 0x0600F650 RID: 63056 RVA: 0x004784C3 File Offset: 0x004766C3
-		protected override Texture2D EnterTex
+		[DebuggerHidden]
+		public _003CGetGizmos_003Ed__13(int _003C_003E1__state)
 		{
-			get
-			{
-				return PocketMapExit.ExitMapTex.Texture;
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x0600F651 RID: 63057 RVA: 0x004784CF File Offset: 0x004766CF
-		public override void SpawnSetup(Map map, bool respawningAfterLoad)
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			base.SpawnSetup(map, respawningAfterLoad);
-			if (!respawningAfterLoad)
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				if (PocketMapUtility.currentlyGeneratingPortal == null)
+				try
 				{
-					Log.Error("Pocket map exit could not find map portal to connect to");
-					return;
 				}
-				this.entrance = PocketMapUtility.currentlyGeneratingPortal;
-				this.entrance.exit = this;
-			}
-		}
-
-		// Token: 0x0600F652 RID: 63058 RVA: 0x00478505 File Offset: 0x00476705
-		public override Map GetOtherMap()
-		{
-			return this.entrance.Map;
-		}
-
-		// Token: 0x0600F653 RID: 63059 RVA: 0x00478512 File Offset: 0x00476712
-		public override IntVec3 GetDestinationLocation()
-		{
-			return this.entrance.Position;
-		}
-
-		// Token: 0x0600F654 RID: 63060 RVA: 0x00478520 File Offset: 0x00476720
-		public override void OnEntered(Pawn pawn)
-		{
-			base.Notify_ThingAdded(pawn);
-			if (Find.CurrentMap != base.Map)
-			{
-				if (Find.CurrentMap == this.entrance.Map)
+				finally
 				{
-					SoundDef traverseSound = this.entrance.def.portal.traverseSound;
-					if (traverseSound == null)
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				PocketMapExit CS_0024_003C_003E8__locals2 = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((MapPortal)CS_0024_003C_003E8__locals2).GetGizmos().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0072;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0072;
+				case 2:
 					{
-						return;
+						_003C_003E1__state = -1;
+						return false;
 					}
-					traverseSound.PlayOneShot(this.entrance);
+					IL_0072:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Gizmo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					_003C_003E2__current = new Command_Action
+					{
+						defaultLabel = "CommandViewSurface".Translate(),
+						defaultDesc = "CommandViewSurfaceDesc".Translate(),
+						icon = ViewEntranceTex.Texture,
+						action = delegate
+						{
+							CameraJumper.TryJumpAndSelect(CS_0024_003C_003E8__locals2.entrance);
+						}
+					};
+					_003C_003E1__state = 2;
+					return true;
 				}
-				return;
 			}
-			SoundDef traverseSound2 = this.entrance.def.portal.traverseSound;
-			if (traverseSound2 == null)
+			catch
 			{
-				return;
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
-			traverseSound2.PlayOneShot(this);
 		}
 
-		// Token: 0x0600F655 RID: 63061 RVA: 0x004785A3 File Offset: 0x004767A3
-		public override IEnumerable<Gizmo> GetGizmos()
+		bool IEnumerator.MoveNext()
 		{
-			foreach (Gizmo gizmo in base.GetGizmos())
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				yield return gizmo;
+				_003C_003E7__wrap1.Dispose();
 			}
-			IEnumerator<Gizmo> enumerator = null;
-			yield return new Command_Action
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CGetGizmos_003Ed__13 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				defaultLabel = "CommandViewSurface".Translate(),
-				defaultDesc = "CommandViewSurfaceDesc".Translate(),
-				icon = PocketMapExit.ViewEntranceTex.Texture,
-				action = delegate()
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CGetGizmos_003Ed__13(0)
 				{
-					CameraJumper.TryJumpAndSelect(this.entrance, CameraJumper.MovementMode.Pan);
-				}
-			};
-			yield break;
-			yield break;
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
 		}
 
-		// Token: 0x0600F656 RID: 63062 RVA: 0x004785B3 File Offset: 0x004767B3
-		public override void ExposeData()
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			base.ExposeData();
-			Scribe_References.Look<MapPortal>(ref this.entrance, "pitGate", false);
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x0400A226 RID: 41510
-		private static readonly CachedTexture ExitMapTex = new CachedTexture("UI/Commands/ExitCave");
+	private static readonly CachedTexture ExitMapTex = new CachedTexture("UI/Commands/ExitCave");
 
-		// Token: 0x0400A227 RID: 41511
-		private static readonly CachedTexture ViewEntranceTex = new CachedTexture("UI/Commands/ViewCave");
+	private static readonly CachedTexture ViewEntranceTex = new CachedTexture("UI/Commands/ViewCave");
 
-		// Token: 0x0400A228 RID: 41512
-		public MapPortal entrance;
+	public MapPortal entrance;
+
+	public override string EnterString => "ExitPortal".Translate(entrance?.def.portal.pocketMapGenerator.label);
+
+	public override string CancelEnterString => "CommandCancelExitPortal".Translate();
+
+	protected override Texture2D EnterTex => ExitMapTex.Texture;
+
+	public override void SpawnSetup(Map map, bool respawningAfterLoad)
+	{
+		base.SpawnSetup(map, respawningAfterLoad);
+		if (!respawningAfterLoad)
+		{
+			if (PocketMapUtility.currentlyGeneratingPortal == null)
+			{
+				Log.Error("Pocket map exit could not find map portal to connect to");
+				return;
+			}
+			entrance = PocketMapUtility.currentlyGeneratingPortal;
+			entrance.exit = this;
+		}
+	}
+
+	public override Map GetOtherMap()
+	{
+		return entrance.Map;
+	}
+
+	public override IntVec3 GetDestinationLocation()
+	{
+		return entrance.Position;
+	}
+
+	public override void OnEntered(Pawn pawn)
+	{
+		Notify_ThingAdded(pawn);
+		if (Find.CurrentMap == base.Map)
+		{
+			entrance.def.portal.traverseSound?.PlayOneShot(this);
+		}
+		else if (Find.CurrentMap == entrance.Map)
+		{
+			entrance.def.portal.traverseSound?.PlayOneShot(entrance);
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CGetGizmos_003Ed__13))]
+	public override IEnumerable<Gizmo> GetGizmos()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetGizmos_003Ed__13(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_References.Look(ref entrance, "pitGate");
 	}
 }

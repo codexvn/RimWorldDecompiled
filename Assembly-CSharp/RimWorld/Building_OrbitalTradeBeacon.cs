@@ -1,103 +1,375 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Building_OrbitalTradeBeacon : Building
 {
-	// Token: 0x02002A3B RID: 10811
-	public class Building_OrbitalTradeBeacon : Building
+	[CompilerGenerated]
+	private sealed class _003CAllPowered_003Ed__7 : IEnumerable<Building_OrbitalTradeBeacon>, IEnumerable, IEnumerator<Building_OrbitalTradeBeacon>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700255A RID: 9562
-		// (get) Token: 0x0600F001 RID: 61441 RVA: 0x0045A413 File Offset: 0x00458613
-		public IEnumerable<IntVec3> TradeableCells
+		private int _003C_003E1__state;
+
+		private Building_OrbitalTradeBeacon _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private Map map;
+
+		public Map _003C_003E3__map;
+
+		private IEnumerator<Building_OrbitalTradeBeacon> _003C_003E7__wrap1;
+
+		Building_OrbitalTradeBeacon IEnumerator<Building_OrbitalTradeBeacon>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return Building_OrbitalTradeBeacon.TradeableCellsAround(base.Position, base.Map);
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600F002 RID: 61442 RVA: 0x0045A426 File Offset: 0x00458626
-		public override IEnumerable<Gizmo> GetGizmos()
+		object IEnumerator.Current
 		{
-			foreach (Gizmo gizmo in base.GetGizmos())
+			[DebuggerHidden]
+			get
 			{
-				yield return gizmo;
+				return _003C_003E2__current;
 			}
-			IEnumerator<Gizmo> enumerator = null;
-			if (DesignatorUtility.FindAllowedDesignator<Designator_ZoneAddStockpile_Resources>() != null)
+		}
+
+		[DebuggerHidden]
+		public _003CAllPowered_003Ed__7(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				yield return new Command_Action
+				try
 				{
-					action = new Action(this.MakeMatchingStockpile),
-					hotKey = KeyBindingDefOf.Misc1,
-					defaultDesc = "CommandMakeBeaconStockpileDesc".Translate(),
-					icon = ContentFinder<Texture2D>.Get("UI/Designators/ZoneCreate_Stockpile", true),
-					defaultLabel = "CommandMakeBeaconStockpileLabel".Translate()
-				};
-			}
-			yield break;
-			yield break;
-		}
-
-		// Token: 0x0600F003 RID: 61443 RVA: 0x0045A438 File Offset: 0x00458638
-		private void MakeMatchingStockpile()
-		{
-			Designator_ZoneAddStockpile_Resources des = DesignatorUtility.FindAllowedDesignator<Designator_ZoneAddStockpile_Resources>();
-			des.DesignateMultiCell(from c in this.TradeableCells
-			where des.CanDesignateCell(c).Accepted
-			select c);
-		}
-
-		// Token: 0x0600F004 RID: 61444 RVA: 0x0045A478 File Offset: 0x00458678
-		public static List<IntVec3> TradeableCellsAround(IntVec3 pos, Map map)
-		{
-			Building_OrbitalTradeBeacon.tradeableCells.Clear();
-			if (!pos.InBounds(map))
-			{
-				return Building_OrbitalTradeBeacon.tradeableCells;
-			}
-			Region region = pos.GetRegion(map, RegionType.Set_Passable);
-			if (region == null)
-			{
-				return Building_OrbitalTradeBeacon.tradeableCells;
-			}
-			RegionTraverser.BreadthFirstTraverse(region, (Region from, Region r) => r.door == null, delegate(Region r)
-			{
-				foreach (IntVec3 item in r.Cells)
+				}
+				finally
 				{
-					if (item.InHorDistOf(pos, 7.9f))
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				switch (_003C_003E1__state)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = map.listerBuildings.AllBuildingsColonistOfClass<Building_OrbitalTradeBeacon>().GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 1:
+					_003C_003E1__state = -3;
+					break;
+				}
+				while (_003C_003E7__wrap1.MoveNext())
+				{
+					Building_OrbitalTradeBeacon current = _003C_003E7__wrap1.Current;
+					CompPowerTrader comp = current.GetComp<CompPowerTrader>();
+					if (comp == null || comp.PowerOn)
 					{
-						Building_OrbitalTradeBeacon.tradeableCells.Add(item);
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
 					}
 				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = null;
 				return false;
-			}, 16, RegionType.Set_Passable);
-			return Building_OrbitalTradeBeacon.tradeableCells;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
 		}
 
-		// Token: 0x0600F005 RID: 61445 RVA: 0x0045A502 File Offset: 0x00458702
-		public static IEnumerable<Building_OrbitalTradeBeacon> AllPowered(Map map)
+		bool IEnumerator.MoveNext()
 		{
-			foreach (Building_OrbitalTradeBeacon building_OrbitalTradeBeacon in map.listerBuildings.AllBuildingsColonistOfClass<Building_OrbitalTradeBeacon>())
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				CompPowerTrader comp = building_OrbitalTradeBeacon.GetComp<CompPowerTrader>();
-				if (comp == null || comp.PowerOn)
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Building_OrbitalTradeBeacon> IEnumerable<Building_OrbitalTradeBeacon>.GetEnumerator()
+		{
+			_003CAllPowered_003Ed__7 _003CAllPowered_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CAllPowered_003Ed__ = this;
+			}
+			else
+			{
+				_003CAllPowered_003Ed__ = new _003CAllPowered_003Ed__7(0);
+			}
+			_003CAllPowered_003Ed__.map = _003C_003E3__map;
+			return _003CAllPowered_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Building_OrbitalTradeBeacon>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGetGizmos_003Ed__3 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Building_OrbitalTradeBeacon _003C_003E4__this;
+
+		private IEnumerator<Gizmo> _003C_003E7__wrap1;
+
+		Gizmo IEnumerator<Gizmo>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetGizmos_003Ed__3(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
 				{
-					yield return building_OrbitalTradeBeacon;
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
 				}
 			}
-			IEnumerator<Building_OrbitalTradeBeacon> enumerator = null;
-			yield break;
-			yield break;
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x04009E7E RID: 40574
-		private const float TradeRadius = 7.9f;
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				Building_OrbitalTradeBeacon building_OrbitalTradeBeacon = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((Building)building_OrbitalTradeBeacon).GetGizmos().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0072;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0072;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_0072:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Gizmo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (DesignatorUtility.FindAllowedDesignator<Designator_ZoneAddStockpile_Resources>() != null)
+					{
+						_003C_003E2__current = new Command_Action
+						{
+							action = building_OrbitalTradeBeacon.MakeMatchingStockpile,
+							hotKey = KeyBindingDefOf.Misc1,
+							defaultDesc = "CommandMakeBeaconStockpileDesc".Translate(),
+							icon = ContentFinder<Texture2D>.Get("UI/Designators/ZoneCreate_Stockpile"),
+							defaultLabel = "CommandMakeBeaconStockpileLabel".Translate()
+						};
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
 
-		// Token: 0x04009E7F RID: 40575
-		private static List<IntVec3> tradeableCells = new List<IntVec3>();
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CGetGizmos_003Ed__3 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CGetGizmos_003Ed__3(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	private const float TradeRadius = 7.9f;
+
+	private static List<IntVec3> tradeableCells = new List<IntVec3>();
+
+	public IEnumerable<IntVec3> TradeableCells => TradeableCellsAround(base.Position, base.Map);
+
+	[IteratorStateMachine(typeof(_003CGetGizmos_003Ed__3))]
+	public override IEnumerable<Gizmo> GetGizmos()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetGizmos_003Ed__3(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	private void MakeMatchingStockpile()
+	{
+		Designator_ZoneAddStockpile_Resources des = DesignatorUtility.FindAllowedDesignator<Designator_ZoneAddStockpile_Resources>();
+		des.DesignateMultiCell(TradeableCells.Where((IntVec3 c) => des.CanDesignateCell(c).Accepted));
+	}
+
+	public static List<IntVec3> TradeableCellsAround(IntVec3 pos, Map map)
+	{
+		tradeableCells.Clear();
+		if (!pos.InBounds(map))
+		{
+			return tradeableCells;
+		}
+		Region region = pos.GetRegion(map);
+		if (region == null)
+		{
+			return tradeableCells;
+		}
+		RegionTraverser.BreadthFirstTraverse(region, (Region from, Region r) => r.door == null, delegate(Region r)
+		{
+			foreach (IntVec3 cell in r.Cells)
+			{
+				if (cell.InHorDistOf(pos, 7.9f))
+				{
+					tradeableCells.Add(cell);
+				}
+			}
+			return false;
+		}, 16);
+		return tradeableCells;
+	}
+
+	[IteratorStateMachine(typeof(_003CAllPowered_003Ed__7))]
+	public static IEnumerable<Building_OrbitalTradeBeacon> AllPowered(Map map)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CAllPowered_003Ed__7(-2)
+		{
+			_003C_003E3__map = map
+		};
 	}
 }

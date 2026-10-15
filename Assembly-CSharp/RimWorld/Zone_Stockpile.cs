@@ -1,245 +1,535 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Zone_Stockpile : Zone, ISlotGroupParent, IStoreSettingsParent, IHaulDestination
 {
-	// Token: 0x020021D5 RID: 8661
-	public class Zone_Stockpile : Zone, ISlotGroupParent, IStoreSettingsParent, IHaulDestination
+	[CompilerGenerated]
+	private sealed class _003CAllSlotCells_003Ed__21 : IEnumerable<IntVec3>, IEnumerable, IEnumerator<IntVec3>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001CD5 RID: 7381
-		// (get) Token: 0x0600BD3F RID: 48447 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public bool StorageTabVisible
+		private int _003C_003E1__state;
+
+		private IntVec3 _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Zone_Stockpile _003C_003E4__this;
+
+		private int _003Ci_003E5__2;
+
+		IntVec3 IEnumerator<IntVec3>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return true;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001CD6 RID: 7382
-		// (get) Token: 0x0600BD40 RID: 48448 RVA: 0x00002501 File Offset: 0x00000701
-		public bool IgnoreStoredThingsBeauty
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CAllSlotCells_003Ed__21(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			Zone_Stockpile zone_Stockpile = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003Ci_003E5__2 = 0;
+				break;
+			case 1:
+				_003C_003E1__state = -1;
+				_003Ci_003E5__2++;
+				break;
+			}
+			if (_003Ci_003E5__2 < zone_Stockpile.cells.Count)
+			{
+				_003C_003E2__current = zone_Stockpile.cells[_003Ci_003E5__2];
+				_003C_003E1__state = 1;
+				return true;
+			}
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<IntVec3> IEnumerable<IntVec3>.GetEnumerator()
+		{
+			_003CAllSlotCells_003Ed__21 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CAllSlotCells_003Ed__21(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<IntVec3>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGetGizmos_003Ed__18 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Zone_Stockpile _003C_003E4__this;
+
+		private IEnumerator<Gizmo> _003C_003E7__wrap1;
+
+		Gizmo IEnumerator<Gizmo>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetGizmos_003Ed__18(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			switch (_003C_003E1__state)
+			{
+			case -3:
+			case 2:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+				break;
+			case -4:
+			case 3:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally2();
+				}
+				break;
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				Zone_Stockpile zone_Stockpile = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E2__current = new Command_Hide_ZoneStockpile(zone_Stockpile);
+					_003C_003E1__state = 1;
+					return true;
+				case 1:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((Zone)zone_Stockpile).GetGizmos().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0097;
+				case 2:
+					_003C_003E1__state = -3;
+					goto IL_0097;
+				case 3:
+					{
+						_003C_003E1__state = -4;
+						break;
+					}
+					IL_0097:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Gizmo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					_003C_003E7__wrap1 = StorageSettingsClipboard.CopyPasteGizmosFor(zone_Stockpile.settings).GetEnumerator();
+					_003C_003E1__state = -4;
+					break;
+				}
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					Gizmo current2 = _003C_003E7__wrap1.Current;
+					_003C_003E2__current = current2;
+					_003C_003E1__state = 3;
+					return true;
+				}
+				_003C_003Em__Finally2();
+				_003C_003E7__wrap1 = null;
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CGetGizmos_003Ed__18 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CGetGizmos_003Ed__18(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGetZoneAddGizmos_003Ed__19 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		Gizmo IEnumerator<Gizmo>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetZoneAddGizmos_003Ed__19(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			switch (_003C_003E1__state)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = DesignatorUtility.FindAllowedDesignator<Designator_ZoneAddStockpile_Expand>();
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
 				return false;
 			}
 		}
 
-		// Token: 0x17001CD7 RID: 7383
-		// (get) Token: 0x0600BD41 RID: 48449 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public bool HaulDestinationEnabled
+		bool IEnumerator.MoveNext()
 		{
-			get
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				return true;
+				_003C_003E1__state = 0;
+				return this;
 			}
+			return new _003CGetZoneAddGizmos_003Ed__19(0);
 		}
 
-		// Token: 0x17001CD8 RID: 7384
-		// (get) Token: 0x0600BD42 RID: 48450 RVA: 0x0036E675 File Offset: 0x0036C875
-		protected override Color NextZoneColor
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			get
-			{
-				return ZoneColorUtility.NextStorageZoneColor();
-			}
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x0600BD43 RID: 48451 RVA: 0x0036E67C File Offset: 0x0036C87C
-		public Zone_Stockpile()
+	public StorageSettings settings;
+
+	public SlotGroup slotGroup;
+
+	private static readonly ITab[] ITabs = new ITab[1]
+	{
+		new ITab_Storage()
+	};
+
+	public bool StorageTabVisible => true;
+
+	public bool IgnoreStoredThingsBeauty => false;
+
+	public bool HaulDestinationEnabled => true;
+
+	protected override Color NextZoneColor => ZoneColorUtility.NextStorageZoneColor();
+
+	public int SpaceRemaining => base.CellCount - base.HeldThingsCount;
+
+	public string GroupingLabel => "StockpilePlural".Translate();
+
+	public int GroupingOrder => -50;
+
+	public Zone_Stockpile()
+	{
+		slotGroup = new SlotGroup(this);
+	}
+
+	public Zone_Stockpile(StorageSettingsPreset preset, ZoneManager zoneManager)
+		: base(preset.PresetName(), zoneManager)
+	{
+		settings = new StorageSettings(this);
+		settings.SetFromPreset(preset);
+		slotGroup = new SlotGroup(this);
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Deep.Look(ref settings, "settings", this);
+	}
+
+	public override void AddCell(IntVec3 sq)
+	{
+		base.AddCell(sq);
+		slotGroup?.Notify_AddedCell(sq);
+		LessonAutoActivator.TeachOpportunity(ConceptDefOf.Shelves, OpportunityType.GoodToKnow);
+	}
+
+	public override void RemoveCell(IntVec3 sq)
+	{
+		base.RemoveCell(sq);
+		slotGroup.Notify_LostCell(sq);
+	}
+
+	public override void PostDeregister()
+	{
+		base.PostDeregister();
+		BillUtility.Notify_ISlotGroupRemoved(slotGroup);
+	}
+
+	public override IEnumerable<InspectTabBase> GetInspectTabs()
+	{
+		return ITabs;
+	}
+
+	[IteratorStateMachine(typeof(_003CGetGizmos_003Ed__18))]
+	public override IEnumerable<Gizmo> GetGizmos()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetGizmos_003Ed__18(-2)
 		{
-			this.slotGroup = new SlotGroup(this);
-		}
-
-		// Token: 0x0600BD44 RID: 48452 RVA: 0x0036E690 File Offset: 0x0036C890
-		public Zone_Stockpile(StorageSettingsPreset preset, ZoneManager zoneManager) : base(preset.PresetName(), zoneManager)
-		{
-			this.settings = new StorageSettings(this);
-			this.settings.SetFromPreset(preset);
-			this.slotGroup = new SlotGroup(this);
-		}
-
-		// Token: 0x0600BD45 RID: 48453 RVA: 0x0036E6C3 File Offset: 0x0036C8C3
-		public override void ExposeData()
-		{
-			base.ExposeData();
-			Scribe_Deep.Look<StorageSettings>(ref this.settings, "settings", new object[]
-			{
-				this
-			});
-		}
-
-		// Token: 0x0600BD46 RID: 48454 RVA: 0x0036E6E5 File Offset: 0x0036C8E5
-		public override void AddCell(IntVec3 sq)
-		{
-			base.AddCell(sq);
-			SlotGroup slotGroup = this.slotGroup;
-			if (slotGroup != null)
-			{
-				slotGroup.Notify_AddedCell(sq);
-			}
-			LessonAutoActivator.TeachOpportunity(ConceptDefOf.Shelves, OpportunityType.GoodToKnow);
-		}
-
-		// Token: 0x0600BD47 RID: 48455 RVA: 0x0036E70B File Offset: 0x0036C90B
-		public override void RemoveCell(IntVec3 sq)
-		{
-			base.RemoveCell(sq);
-			this.slotGroup.Notify_LostCell(sq);
-		}
-
-		// Token: 0x0600BD48 RID: 48456 RVA: 0x0036E720 File Offset: 0x0036C920
-		public override void PostDeregister()
-		{
-			base.PostDeregister();
-			BillUtility.Notify_ISlotGroupRemoved(this.slotGroup);
-		}
-
-		// Token: 0x0600BD49 RID: 48457 RVA: 0x0036E733 File Offset: 0x0036C933
-		public override IEnumerable<InspectTabBase> GetInspectTabs()
-		{
-			return Zone_Stockpile.ITabs;
-		}
-
-		// Token: 0x0600BD4A RID: 48458 RVA: 0x0036E73A File Offset: 0x0036C93A
-		public override IEnumerable<Gizmo> GetGizmos()
-		{
-			yield return new Command_Hide_ZoneStockpile(this);
-			foreach (Gizmo gizmo in base.GetGizmos())
-			{
-				yield return gizmo;
-			}
-			IEnumerator<Gizmo> enumerator = null;
-			foreach (Gizmo gizmo2 in StorageSettingsClipboard.CopyPasteGizmosFor(this.settings))
-			{
-				yield return gizmo2;
-			}
-			enumerator = null;
-			yield break;
-			yield break;
-		}
-
-		// Token: 0x0600BD4B RID: 48459 RVA: 0x0036E74A File Offset: 0x0036C94A
-		public override IEnumerable<Gizmo> GetZoneAddGizmos()
-		{
-			yield return DesignatorUtility.FindAllowedDesignator<Designator_ZoneAddStockpile_Expand>();
-			yield break;
-		}
-
-		// Token: 0x0600BD4C RID: 48460 RVA: 0x0036E753 File Offset: 0x0036C953
-		public SlotGroup GetSlotGroup()
-		{
-			return this.slotGroup;
-		}
-
-		// Token: 0x0600BD4D RID: 48461 RVA: 0x0036E75B File Offset: 0x0036C95B
-		public IEnumerable<IntVec3> AllSlotCells()
-		{
-			int num;
-			for (int i = 0; i < this.cells.Count; i = num + 1)
-			{
-				yield return this.cells[i];
-				num = i;
-			}
-			yield break;
-		}
-
-		// Token: 0x0600BD4E RID: 48462 RVA: 0x0036E76B File Offset: 0x0036C96B
-		public List<IntVec3> AllSlotCellsList()
-		{
-			return this.cells;
-		}
-
-		// Token: 0x0600BD4F RID: 48463 RVA: 0x0036E773 File Offset: 0x0036C973
-		public StorageSettings GetParentStoreSettings()
-		{
-			return StorageSettings.EverStorableFixedSettings();
-		}
-
-		// Token: 0x0600BD50 RID: 48464 RVA: 0x0036E77A File Offset: 0x0036C97A
-		public StorageSettings GetStoreSettings()
-		{
-			return this.settings;
-		}
-
-		// Token: 0x0600BD51 RID: 48465 RVA: 0x0036E782 File Offset: 0x0036C982
-		public void Notify_SettingsChanged()
-		{
-			if (base.Map != null && this.slotGroup != null)
-			{
-				base.Map.listerHaulables.Notify_SlotGroupChanged(this.slotGroup);
-			}
-		}
-
-		// Token: 0x0600BD52 RID: 48466 RVA: 0x0036E7AA File Offset: 0x0036C9AA
-		public bool Accepts(Thing t)
-		{
-			return this.settings.AllowedToAccept(t);
-		}
-
-		// Token: 0x17001CD9 RID: 7385
-		// (get) Token: 0x0600BD53 RID: 48467 RVA: 0x0036E7B8 File Offset: 0x0036C9B8
-		public int SpaceRemaining
-		{
-			get
-			{
-				return base.CellCount - base.HeldThingsCount;
-			}
-		}
-
-		// Token: 0x0600BD54 RID: 48468 RVA: 0x000B7A10 File Offset: 0x000B5C10
-		public string SlotYielderLabel()
-		{
-			return this.label;
-		}
-
-		// Token: 0x17001CDA RID: 7386
-		// (get) Token: 0x0600BD55 RID: 48469 RVA: 0x0036E7C7 File Offset: 0x0036C9C7
-		public string GroupingLabel
-		{
-			get
-			{
-				return "StockpilePlural".Translate();
-			}
-		}
-
-		// Token: 0x17001CDB RID: 7387
-		// (get) Token: 0x0600BD56 RID: 48470 RVA: 0x0036E7D8 File Offset: 0x0036C9D8
-		public int GroupingOrder
-		{
-			get
-			{
-				return -50;
-			}
-		}
-
-		// Token: 0x0600BD57 RID: 48471 RVA: 0x0036E7DC File Offset: 0x0036C9DC
-		public void Notify_ReceivedThing(Thing newItem)
-		{
-			if (newItem.def.storedConceptLearnOpportunity != null)
-			{
-				LessonAutoActivator.TeachOpportunity(newItem.def.storedConceptLearnOpportunity, OpportunityType.GoodToKnow);
-			}
-		}
-
-		// Token: 0x0600BD58 RID: 48472 RVA: 0x000026EA File Offset: 0x000008EA
-		public void Notify_LostThing(Thing newItem)
-		{
-		}
-
-		// Token: 0x04008257 RID: 33367
-		public StorageSettings settings;
-
-		// Token: 0x04008258 RID: 33368
-		public SlotGroup slotGroup;
-
-		// Token: 0x04008259 RID: 33369
-		private static readonly ITab[] ITabs = new ITab[]
-		{
-			new ITab_Storage()
+			_003C_003E4__this = this
 		};
+	}
+
+	[IteratorStateMachine(typeof(_003CGetZoneAddGizmos_003Ed__19))]
+	public override IEnumerable<Gizmo> GetZoneAddGizmos()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetZoneAddGizmos_003Ed__19(-2);
+	}
+
+	public SlotGroup GetSlotGroup()
+	{
+		return slotGroup;
+	}
+
+	[IteratorStateMachine(typeof(_003CAllSlotCells_003Ed__21))]
+	public IEnumerable<IntVec3> AllSlotCells()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CAllSlotCells_003Ed__21(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public List<IntVec3> AllSlotCellsList()
+	{
+		return cells;
+	}
+
+	public StorageSettings GetParentStoreSettings()
+	{
+		return StorageSettings.EverStorableFixedSettings();
+	}
+
+	public StorageSettings GetStoreSettings()
+	{
+		return settings;
+	}
+
+	public void Notify_SettingsChanged()
+	{
+		if (base.Map != null && slotGroup != null)
+		{
+			base.Map.listerHaulables.Notify_SlotGroupChanged(slotGroup);
+		}
+	}
+
+	public bool Accepts(Thing t)
+	{
+		return settings.AllowedToAccept(t);
+	}
+
+	public string SlotYielderLabel()
+	{
+		return label;
+	}
+
+	public void Notify_ReceivedThing(Thing newItem)
+	{
+		if (newItem.def.storedConceptLearnOpportunity != null)
+		{
+			LessonAutoActivator.TeachOpportunity(newItem.def.storedConceptLearnOpportunity, OpportunityType.GoodToKnow);
+		}
+	}
+
+	public void Notify_LostThing(Thing newItem)
+	{
 	}
 }

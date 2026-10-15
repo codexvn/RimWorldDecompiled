@@ -1,133 +1,255 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class PreceptWorker_Apparel : PreceptWorker
 {
-	// Token: 0x02002664 RID: 9828
-	public class PreceptWorker_Apparel : PreceptWorker
+	[CompilerGenerated]
+	private sealed class _003Cget_ThingDefs_003Ed__5 : IEnumerable<PreceptThingChance>, IEnumerable, IEnumerator<PreceptThingChance>, IEnumerator, IDisposable
 	{
-		// Token: 0x0600D799 RID: 55193 RVA: 0x003FF0D8 File Offset: 0x003FD2D8
-		public override bool ShouldSkipThing(Ideo ideo, ThingDef thingDef)
+		private int _003C_003E1__state;
+
+		private PreceptThingChance _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public PreceptWorker_Apparel _003C_003E4__this;
+
+		private IEnumerator<ThingDef> _003C_003E7__wrap1;
+
+		PreceptThingChance IEnumerator<PreceptThingChance>.Current
 		{
-			foreach (Precept precept in ideo.PreceptsListForReading)
+			[DebuggerHidden]
+			get
 			{
-				Precept_Apparel precept_Apparel = precept as Precept_Apparel;
-				if (precept_Apparel != null && precept_Apparel.apparelDef == thingDef)
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003Cget_ThingDefs_003Ed__5(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
 				{
-					return true;
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
 				}
 			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				PreceptWorker_Apparel CS_0024_003C_003E8__locals1 = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = DefDatabase<ThingDef>.AllDefs.Where((ThingDef x) => CS_0024_003C_003E8__locals1.IsValidApparel(x)).GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 1:
+					_003C_003E1__state = -3;
+					break;
+				}
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					ThingDef current = _003C_003E7__wrap1.Current;
+					PreceptThingChance preceptThingChance = default(PreceptThingChance);
+					preceptThingChance.def = current;
+					preceptThingChance.chance = 1f;
+					_003C_003E2__current = preceptThingChance;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = null;
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<PreceptThingChance> IEnumerable<PreceptThingChance>.GetEnumerator()
+		{
+			_003Cget_ThingDefs_003Ed__5 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_ThingDefs_003Ed__5(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<PreceptThingChance>)this).GetEnumerator();
+		}
+	}
+
+	public override IEnumerable<PreceptThingChance> ThingDefs
+	{
+		[IteratorStateMachine(typeof(_003Cget_ThingDefs_003Ed__5))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_ThingDefs_003Ed__5(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public override bool ShouldSkipThing(Ideo ideo, ThingDef thingDef)
+	{
+		foreach (Precept item in ideo.PreceptsListForReading)
+		{
+			if (item is Precept_Apparel precept_Apparel && precept_Apparel.apparelDef == thingDef)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public override float GetThingOrder(PreceptThingChance thingChance)
+	{
+		if (thingChance.def.IsApparel)
+		{
+			return (thingChance.def.apparel.LastLayer == ApparelLayerDefOf.Overhead || thingChance.def.apparel.LastLayer == ApparelLayerDefOf.EyeCover) ? 1 : 2;
+		}
+		return 0f;
+	}
+
+	private bool IsValidApparel(ThingDef td)
+	{
+		if (!td.IsApparel || !td.MadeFromStuff)
+		{
 			return false;
 		}
-
-		// Token: 0x0600D79A RID: 55194 RVA: 0x003FF13C File Offset: 0x003FD33C
-		public override float GetThingOrder(PreceptThingChance thingChance)
+		if (!td.apparel.canBeDesiredForIdeo)
 		{
-			if (thingChance.def.IsApparel)
-			{
-				return (float)((thingChance.def.apparel.LastLayer == ApparelLayerDefOf.Overhead || thingChance.def.apparel.LastLayer == ApparelLayerDefOf.EyeCover) ? 1 : 2);
-			}
-			return 0f;
+			return false;
 		}
-
-		// Token: 0x0600D79B RID: 55195 RVA: 0x003FF190 File Offset: 0x003FD390
-		private bool IsValidApparel(ThingDef td)
+		if (td.thingCategories != null && (td.thingCategories.Contains(ThingCategoryDefOf.ArmorHeadgear) || td.thingCategories.Contains(ThingCategoryDefOf.ApparelArmor)))
 		{
-			if (!td.IsApparel || !td.MadeFromStuff)
+			return false;
+		}
+		for (int i = 0; i < def.comps.Count; i++)
+		{
+			if (def.comps[i] is PreceptComp_Apparel preceptComp_Apparel && !preceptComp_Apparel.CanApplyToApparel(td))
 			{
 				return false;
 			}
-			if (!td.apparel.canBeDesiredForIdeo)
+		}
+		return true;
+	}
+
+	public override AcceptanceReport CanUse(ThingDef def, Ideo ideo, FactionDef generatingFor)
+	{
+		if (IsValidApparel(def))
+		{
+			if (generatingFor != null)
 			{
-				return false;
-			}
-			if (td.thingCategories != null && (td.thingCategories.Contains(ThingCategoryDefOf.ArmorHeadgear) || td.thingCategories.Contains(ThingCategoryDefOf.ApparelArmor)))
-			{
-				return false;
-			}
-			for (int i = 0; i < this.def.comps.Count; i++)
-			{
-				PreceptComp_Apparel preceptComp_Apparel = this.def.comps[i] as PreceptComp_Apparel;
-				if (preceptComp_Apparel != null && !preceptComp_Apparel.CanApplyToApparel(td))
+				AcceptanceReport result = CheckFaction(generatingFor);
+				if (!result.Accepted)
 				{
-					return false;
+					return result;
+				}
+			}
+			if (Find.World != null && Find.FactionManager != null)
+			{
+				foreach (Faction allFaction in Find.FactionManager.AllFactions)
+				{
+					if (allFaction.def != generatingFor && allFaction.ideos != null && allFaction.ideos.PrimaryIdeo == ideo)
+					{
+						AcceptanceReport acceptanceReport = CheckFaction(allFaction.def);
+						if (!acceptanceReport)
+						{
+							return acceptanceReport;
+						}
+					}
 				}
 			}
 			return true;
 		}
-
-		// Token: 0x0600D79C RID: 55196 RVA: 0x003FF230 File Offset: 0x003FD430
-		public override AcceptanceReport CanUse(ThingDef def, Ideo ideo, FactionDef generatingFor)
+		return false;
+		AcceptanceReport CheckFaction(FactionDef faction)
 		{
-			PreceptWorker_Apparel.<>c__DisplayClass3_0 CS$<>8__locals1;
-			CS$<>8__locals1.def = def;
-			if (this.IsValidApparel(CS$<>8__locals1.def))
+			if (def.apparel.ideoDesireAllowedFactionCategoryTags != null && !def.apparel.ideoDesireAllowedFactionCategoryTags.Contains(faction.categoryTag))
 			{
-				if (generatingFor != null)
-				{
-					AcceptanceReport result = PreceptWorker_Apparel.<CanUse>g__CheckFaction|3_0(generatingFor, ref CS$<>8__locals1);
-					if (!result.Accepted)
-					{
-						return result;
-					}
-				}
-				if (Find.World != null && Find.FactionManager != null)
-				{
-					foreach (Faction faction in Find.FactionManager.AllFactions)
-					{
-						if (faction.def != generatingFor && faction.ideos != null && faction.ideos.PrimaryIdeo == ideo)
-						{
-							AcceptanceReport acceptanceReport = PreceptWorker_Apparel.<CanUse>g__CheckFaction|3_0(faction.def, ref CS$<>8__locals1);
-							if (!acceptanceReport)
-							{
-								return acceptanceReport;
-							}
-						}
-					}
-				}
-				return true;
+				return new AcceptanceReport("RoleApparelRequirementIncompatibleFaction".Translate(Find.ActiveLanguageWorker.WithIndefiniteArticle(def.apparel.ideoDesireAllowedFactionCategoryTags.Select((string t) => ("RoleApparelRequirementIncompatibleFaction_Allowed_" + t).Translate().Resolve()).ToCommaListOr())));
 			}
-			return false;
-		}
-
-		// Token: 0x17002104 RID: 8452
-		// (get) Token: 0x0600D79D RID: 55197 RVA: 0x003FF308 File Offset: 0x003FD508
-		public override IEnumerable<PreceptThingChance> ThingDefs
-		{
-			get
+			if (def.apparel.ideoDesireDisallowedFactionCategoryTags != null && def.apparel.ideoDesireDisallowedFactionCategoryTags.Contains(faction.categoryTag))
 			{
-				foreach (ThingDef def in from x in DefDatabase<ThingDef>.AllDefs
-				where this.IsValidApparel(x)
-				select x)
-				{
-					yield return new PreceptThingChance
-					{
-						def = def,
-						chance = 1f
-					};
-				}
-				IEnumerator<ThingDef> enumerator = null;
-				yield break;
-				yield break;
-			}
-		}
-
-		// Token: 0x0600D79F RID: 55199 RVA: 0x003FF318 File Offset: 0x003FD518
-		[CompilerGenerated]
-		internal static AcceptanceReport <CanUse>g__CheckFaction|3_0(FactionDef faction, ref PreceptWorker_Apparel.<>c__DisplayClass3_0 A_1)
-		{
-			if (A_1.def.apparel.ideoDesireAllowedFactionCategoryTags != null && !A_1.def.apparel.ideoDesireAllowedFactionCategoryTags.Contains(faction.categoryTag))
-			{
-				return new AcceptanceReport("RoleApparelRequirementIncompatibleFaction".Translate(Find.ActiveLanguageWorker.WithIndefiniteArticle((from t in A_1.def.apparel.ideoDesireAllowedFactionCategoryTags
-				select ("RoleApparelRequirementIncompatibleFaction_Allowed_" + t).Translate().Resolve()).ToCommaListOr(false), false, false)));
-			}
-			if (A_1.def.apparel.ideoDesireDisallowedFactionCategoryTags != null && A_1.def.apparel.ideoDesireDisallowedFactionCategoryTags.Contains(faction.categoryTag))
-			{
-				return new AcceptanceReport("RoleApparelRequirementIncompatibleFaction".Translate(Find.ActiveLanguageWorker.WithIndefiniteArticle((from t in A_1.def.apparel.ideoDesireDisallowedFactionCategoryTags
-				select ("RoleApparelRequirementIncompatibleFaction_Disallowed_" + t).Translate().Resolve()).ToCommaListOr(false), false, false)));
+				return new AcceptanceReport("RoleApparelRequirementIncompatibleFaction".Translate(Find.ActiveLanguageWorker.WithIndefiniteArticle(def.apparel.ideoDesireDisallowedFactionCategoryTags.Select((string t) => ("RoleApparelRequirementIncompatibleFaction_Disallowed_" + t).Translate().Resolve()).ToCommaListOr())));
 			}
 			return true;
 		}

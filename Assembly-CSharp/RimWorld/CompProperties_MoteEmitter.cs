@@ -1,116 +1,194 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
-{
-	// Token: 0x02002D66 RID: 11622
-	public class CompProperties_MoteEmitter : CompProperties
-	{
-		// Token: 0x06010544 RID: 66884 RVA: 0x004B6BE8 File Offset: 0x004B4DE8
-		public CompProperties_MoteEmitter()
-		{
-			this.compClass = typeof(CompMoteEmitter);
-		}
+namespace RimWorld;
 
-		// Token: 0x1700298A RID: 10634
-		// (get) Token: 0x06010545 RID: 66885 RVA: 0x004B6C54 File Offset: 0x004B4E54
-		public Vector3 EmissionOffset
+public class CompProperties_MoteEmitter : CompProperties
+{
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__20 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompProperties_MoteEmitter _003C_003E4__this;
+
+		string IEnumerator<string>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return new Vector3(Rand.Range(this.offsetMin.x, this.offsetMax.x), Rand.Range(this.offsetMin.y, this.offsetMax.y), Rand.Range(this.offsetMin.z, this.offsetMax.z));
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06010546 RID: 66886 RVA: 0x004B6CB8 File Offset: 0x004B4EB8
-		public Vector3 RotationOffset(Rot4 rot)
+		object IEnumerator.Current
 		{
-			switch (rot.AsInt)
+			[DebuggerHidden]
+			get
 			{
-			case 0:
-				return this.offsetNorth;
-			case 1:
-				return this.offsetEast;
-			case 2:
-				return this.offsetSouth;
-			case 3:
-				return this.offsetWest;
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__20(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			CompProperties_MoteEmitter compProperties_MoteEmitter = _003C_003E4__this;
+			switch (num)
+			{
 			default:
-				return Vector3.zero;
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (compProperties_MoteEmitter.mote == null && compProperties_MoteEmitter.perRotationMotes.NullOrEmpty())
+				{
+					_003C_003E2__current = "CompMoteEmitter must have a mote assigned.";
+					_003C_003E1__state = 1;
+					return true;
+				}
+				goto IL_0059;
+			case 1:
+				_003C_003E1__state = -1;
+				goto IL_0059;
+			case 2:
+				{
+					_003C_003E1__state = -1;
+					break;
+				}
+				IL_0059:
+				if (!compProperties_MoteEmitter.perRotationMotes.NullOrEmpty() && compProperties_MoteEmitter.perRotationMotes.Count != 4)
+				{
+					_003C_003E2__current = "perRotationMotes must contain 4 elements for North, East, South, West";
+					_003C_003E1__state = 2;
+					return true;
+				}
+				break;
 			}
+			return false;
 		}
 
-		// Token: 0x06010547 RID: 66887 RVA: 0x004B6D06 File Offset: 0x004B4F06
-		public ThingDef RotationMote(Rot4 rot)
+		bool IEnumerator.MoveNext()
 		{
-			List<ThingDef> list = this.perRotationMotes;
-			if (list == null)
-			{
-				return null;
-			}
-			return list[rot.AsInt];
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x06010548 RID: 66888 RVA: 0x004B6D20 File Offset: 0x004B4F20
-		public override IEnumerable<string> ConfigErrors(ThingDef parentDef)
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			if (this.mote == null && this.perRotationMotes.NullOrEmpty<ThingDef>())
-			{
-				yield return "CompMoteEmitter must have a mote assigned.";
-			}
-			if (!this.perRotationMotes.NullOrEmpty<ThingDef>() && this.perRotationMotes.Count != 4)
-			{
-				yield return "perRotationMotes must contain 4 elements for North, East, South, West";
-			}
-			yield break;
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x0400AA50 RID: 43600
-		public ThingDef mote;
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__20 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__20(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x0400AA51 RID: 43601
-		public List<ThingDef> perRotationMotes;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x0400AA52 RID: 43602
-		public Vector3 offset;
+	public ThingDef mote;
 
-		// Token: 0x0400AA53 RID: 43603
-		public Vector3 offsetMin = Vector3.zero;
+	public List<ThingDef> perRotationMotes;
 
-		// Token: 0x0400AA54 RID: 43604
-		public Vector3 offsetMax = Vector3.zero;
+	public Vector3 offset;
 
-		// Token: 0x0400AA55 RID: 43605
-		public Vector3 offsetNorth = Vector3.zero;
+	public Vector3 offsetMin = Vector3.zero;
 
-		// Token: 0x0400AA56 RID: 43606
-		public Vector3 offsetSouth = Vector3.zero;
+	public Vector3 offsetMax = Vector3.zero;
 
-		// Token: 0x0400AA57 RID: 43607
-		public Vector3 offsetEast = Vector3.zero;
+	public Vector3 offsetNorth = Vector3.zero;
 
-		// Token: 0x0400AA58 RID: 43608
-		public Vector3 offsetWest = Vector3.zero;
+	public Vector3 offsetSouth = Vector3.zero;
 
-		// Token: 0x0400AA59 RID: 43609
-		public bool useParentRotation;
+	public Vector3 offsetEast = Vector3.zero;
 
-		// Token: 0x0400AA5A RID: 43610
-		public SoundDef soundOnEmission;
+	public Vector3 offsetWest = Vector3.zero;
 
-		// Token: 0x0400AA5B RID: 43611
-		public int emissionInterval = -1;
+	public bool useParentRotation;
 
-		// Token: 0x0400AA5C RID: 43612
-		public int ticksSinceLastEmittedMaxOffset;
+	public SoundDef soundOnEmission;
 
-		// Token: 0x0400AA5D RID: 43613
-		public bool maintain;
+	public int emissionInterval = -1;
 
-		// Token: 0x0400AA5E RID: 43614
-		[NoTranslate]
-		public string saveKeysPrefix;
+	public int ticksSinceLastEmittedMaxOffset;
+
+	public bool maintain;
+
+	[NoTranslate]
+	public string saveKeysPrefix;
+
+	public Vector3 EmissionOffset => new Vector3(Rand.Range(offsetMin.x, offsetMax.x), Rand.Range(offsetMin.y, offsetMax.y), Rand.Range(offsetMin.z, offsetMax.z));
+
+	public CompProperties_MoteEmitter()
+	{
+		compClass = typeof(CompMoteEmitter);
+	}
+
+	public Vector3 RotationOffset(Rot4 rot)
+	{
+		return rot.AsInt switch
+		{
+			0 => offsetNorth, 
+			1 => offsetEast, 
+			2 => offsetSouth, 
+			3 => offsetWest, 
+			_ => Vector3.zero, 
+		};
+	}
+
+	public ThingDef RotationMote(Rot4 rot)
+	{
+		return perRotationMotes?[rot.AsInt];
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__20))]
+	public override IEnumerable<string> ConfigErrors(ThingDef parentDef)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__20(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

@@ -1,59 +1,184 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_CarryToEntityHolderAlreadyHolding : JobDriver
 {
-	// Token: 0x02001235 RID: 4661
-	public class JobDriver_CarryToEntityHolderAlreadyHolding : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__7 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x170011BF RID: 4543
-		// (get) Token: 0x060071FD RID: 29181 RVA: 0x00233404 File Offset: 0x00231604
-		private Thing Takee
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_CarryToEntityHolderAlreadyHolding _003C_003E4__this;
+
+		private IEnumerator<Toil> _003C_003E7__wrap1;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.job.GetTarget(TargetIndex.B).Thing;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170011C0 RID: 4544
-		// (get) Token: 0x060071FE RID: 29182 RVA: 0x00233428 File Offset: 0x00231628
-		private CompEntityHolder DestHolder
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.job.GetTarget(TargetIndex.A).Thing.TryGetComp<CompEntityHolder>();
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x060071FF RID: 29183 RVA: 0x0023344E File Offset: 0x0023164E
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__7(int _003C_003E1__state)
 		{
-			return this.pawn.Reserve(this.DestHolder.parent, this.job, 1, -1, null, errorOnFailed, false);
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x06007200 RID: 29184 RVA: 0x00233476 File Offset: 0x00231676
-		protected override IEnumerable<Toil> MakeNewToils()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			this.FailOnDestroyedOrNull(TargetIndex.B);
-			this.FailOnDespawnedNullOrForbidden(TargetIndex.A);
-			this.FailOn(() => !this.DestHolder.Available);
-			yield return Toils_Haul.StartCarryThing(TargetIndex.B, false, false, false, true, false);
-			foreach (Toil toil in JobDriver_CarryToEntityHolder.ChainTakeeToPlatformToils(this.pawn, this.Takee, this.DestHolder, TargetIndex.A))
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 2)
 			{
-				yield return toil;
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
 			}
-			IEnumerator<Toil> enumerator = null;
-			yield break;
-			yield break;
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x04004EE5 RID: 20197
-		private const TargetIndex DestIndex = TargetIndex.A;
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				JobDriver_CarryToEntityHolderAlreadyHolding CS_0024_003C_003E8__locals7 = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					CS_0024_003C_003E8__locals7.FailOnDestroyedOrNull(TargetIndex.B);
+					CS_0024_003C_003E8__locals7.FailOnDespawnedNullOrForbidden(TargetIndex.A);
+					CS_0024_003C_003E8__locals7.FailOn(() => !CS_0024_003C_003E8__locals7.DestHolder.Available);
+					_003C_003E2__current = Toils_Haul.StartCarryThing(TargetIndex.B);
+					_003C_003E1__state = 1;
+					return true;
+				case 1:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = JobDriver_CarryToEntityHolder.ChainTakeeToPlatformToils(CS_0024_003C_003E8__locals7.pawn, CS_0024_003C_003E8__locals7.Takee, CS_0024_003C_003E8__locals7.DestHolder, TargetIndex.A).GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 2:
+					_003C_003E1__state = -3;
+					break;
+				}
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					Toil current = _003C_003E7__wrap1.Current;
+					_003C_003E2__current = current;
+					_003C_003E1__state = 2;
+					return true;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = null;
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
 
-		// Token: 0x04004EE6 RID: 20198
-		private const TargetIndex TakeeIndex = TargetIndex.B;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__7 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__7(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private const TargetIndex DestIndex = TargetIndex.A;
+
+	private const TargetIndex TakeeIndex = TargetIndex.B;
+
+	private Thing Takee => job.GetTarget(TargetIndex.B).Thing;
+
+	private CompEntityHolder DestHolder => job.GetTarget(TargetIndex.A).Thing.TryGetComp<CompEntityHolder>();
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return pawn.Reserve(DestHolder.parent, job, 1, -1, null, errorOnFailed);
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__7))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__7(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

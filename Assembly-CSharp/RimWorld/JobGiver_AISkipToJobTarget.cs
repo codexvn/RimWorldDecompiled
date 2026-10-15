@@ -1,54 +1,46 @@
-﻿using System;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobGiver_AISkipToJobTarget : ThinkNode_JobGiver
 {
-	// Token: 0x0200141E RID: 5150
-	public class JobGiver_AISkipToJobTarget : ThinkNode_JobGiver
+	public AbilityDef ability;
+
+	public TargetIndex targetIndex = TargetIndex.A;
+
+	protected override Job TryGiveJob(Pawn pawn)
 	{
-		// Token: 0x06007D46 RID: 32070 RVA: 0x0025BA64 File Offset: 0x00259C64
-		protected override Job TryGiveJob(Pawn pawn)
+		Ability ability = pawn.abilities?.GetAbility(this.ability);
+		if (ability == null || !ability.CanCast)
 		{
-			Pawn_AbilityTracker abilities = pawn.abilities;
-			Ability ability = (abilities != null) ? abilities.GetAbility(this.ability, false) : null;
-			if (ability == null || !ability.CanCast)
-			{
-				return null;
-			}
-			Job curJob = pawn.CurJob;
-			if (curJob == null || curJob.def == this.ability.jobDef)
-			{
-				return null;
-			}
-			LocalTargetInfo target = curJob.GetTarget(this.targetIndex);
-			if (!this.CanSkipToTarget(pawn, target))
-			{
-				return null;
-			}
-			IntVec3 cell = target.Cell;
-			if (target.HasThing && !RCellFinder.TryFindGoodAdjacentSpotToTouch(pawn, target.Thing, out cell))
-			{
-				return null;
-			}
-			if (ability.verb.ValidateTarget(target, false))
-			{
-				Job job = ability.GetJob(pawn, cell);
-				pawn.jobs.StartJob(job, JobCondition.InterruptForced, null, true, true, null, null, false, false, null, false, true, false);
-			}
 			return null;
 		}
-
-		// Token: 0x06007D47 RID: 32071 RVA: 0x0025BB49 File Offset: 0x00259D49
-		protected virtual bool CanSkipToTarget(Pawn pawn, LocalTargetInfo target)
+		Job curJob = pawn.CurJob;
+		if (curJob == null || curJob.def == this.ability.jobDef)
 		{
-			return target.Cell.Fogged(pawn.Map);
+			return null;
 		}
+		LocalTargetInfo target = curJob.GetTarget(targetIndex);
+		if (!CanSkipToTarget(pawn, target))
+		{
+			return null;
+		}
+		IntVec3 result = target.Cell;
+		if (target.HasThing && !RCellFinder.TryFindGoodAdjacentSpotToTouch(pawn, target.Thing, out result))
+		{
+			return null;
+		}
+		if (ability.verb.ValidateTarget(target, showMessages: false))
+		{
+			Job job = ability.GetJob(pawn, result);
+			pawn.jobs.StartJob(job, JobCondition.InterruptForced, null, resumeCurJobAfterwards: true, cancelBusyStances: true, null, null, fromQueue: false, canReturnCurJobToPool: false, null);
+		}
+		return null;
+	}
 
-		// Token: 0x04005447 RID: 21575
-		public AbilityDef ability;
-
-		// Token: 0x04005448 RID: 21576
-		public TargetIndex targetIndex = TargetIndex.A;
+	protected virtual bool CanSkipToTarget(Pawn pawn, LocalTargetInfo target)
+	{
+		return target.Cell.Fogged(pawn.Map);
 	}
 }

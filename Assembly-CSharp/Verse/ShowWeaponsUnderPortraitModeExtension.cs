@@ -1,24 +1,17 @@
-﻿using System;
+using System;
 
-namespace Verse
+namespace Verse;
+
+public static class ShowWeaponsUnderPortraitModeExtension
 {
-	// Token: 0x02000D53 RID: 3411
-	public static class ShowWeaponsUnderPortraitModeExtension
+	public static string ToStringHuman(this ShowWeaponsUnderPortraitMode mode)
 	{
-		// Token: 0x060056E3 RID: 22243 RVA: 0x001BEF8C File Offset: 0x001BD18C
-		public static string ToStringHuman(this ShowWeaponsUnderPortraitMode mode)
+		return mode switch
 		{
-			switch (mode)
-			{
-			case ShowWeaponsUnderPortraitMode.Never:
-				return "Never".Translate().CapitalizeFirst();
-			case ShowWeaponsUnderPortraitMode.WhileDrafted:
-				return "ShowWeapons_WhileDrafted".Translate().CapitalizeFirst();
-			case ShowWeaponsUnderPortraitMode.Always:
-				return "ShowWeapons_Always".Translate().CapitalizeFirst();
-			default:
-				throw new NotImplementedException();
-			}
-		}
+			ShowWeaponsUnderPortraitMode.Never => "Never".Translate().CapitalizeFirst(), 
+			ShowWeaponsUnderPortraitMode.WhileDrafted => "ShowWeapons_WhileDrafted".Translate().CapitalizeFirst(), 
+			ShowWeaponsUnderPortraitMode.Always => "ShowWeapons_Always".Translate().CapitalizeFirst(), 
+			_ => throw new NotImplementedException(), 
+		};
 	}
 }

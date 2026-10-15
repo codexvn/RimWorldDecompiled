@@ -1,98 +1,234 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public abstract class JobDriver_AffectFloor : JobDriver
 {
-	// Token: 0x0200115D RID: 4445
-	public abstract class JobDriver_AffectFloor : JobDriver
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass9_0
 	{
-		// Token: 0x170010C1 RID: 4289
-		// (get) Token: 0x06006CC2 RID: 27842
-		protected abstract int BaseWorkAmount { get; }
+		public JobDriver_AffectFloor _003C_003E4__this;
 
-		// Token: 0x170010C2 RID: 4290
-		// (get) Token: 0x06006CC3 RID: 27843
-		protected abstract DesignationDef DesDef { get; }
+		public Toil doWork;
 
-		// Token: 0x170010C3 RID: 4291
-		// (get) Token: 0x06006CC4 RID: 27844 RVA: 0x00002C42 File Offset: 0x00000E42
-		protected virtual StatDef SpeedStat
+		internal bool _003CMakeNewToils_003Eb__0()
 		{
-			get
+			if (!_003C_003E4__this.job.ignoreDesignations && _003C_003E4__this.Map.designationManager.DesignationAt(_003C_003E4__this.TargetLocA, _003C_003E4__this.DesDef) == null)
 			{
-				return null;
+				return true;
+			}
+			return false;
+		}
+
+		internal void _003CMakeNewToils_003Eb__1()
+		{
+			_003C_003E4__this.workLeft = _003C_003E4__this.BaseWorkAmount;
+		}
+
+		internal void _003CMakeNewToils_003Eb__2(int delta)
+		{
+			float num = ((_003C_003E4__this.SpeedStat != null && !_003C_003E4__this.SpeedStat.Worker.IsDisabledFor(doWork.actor)) ? doWork.actor.GetStatValue(_003C_003E4__this.SpeedStat) : 1f);
+			num *= 1.7f * (float)delta;
+			_003C_003E4__this.workLeft -= num;
+			if (doWork.actor.skills != null)
+			{
+				doWork.actor.skills.Learn(SkillDefOf.Construction, 0.1f * (float)delta);
+			}
+			if (_003C_003E4__this.clearSnow)
+			{
+				_003C_003E4__this.Map.snowGrid.SetDepth(_003C_003E4__this.TargetLocA, 0f);
+				_003C_003E4__this.Map.sandGrid?.SetDepth(_003C_003E4__this.TargetLocA, 0f);
+			}
+			if (_003C_003E4__this.workLeft <= 0f)
+			{
+				_003C_003E4__this.DoEffect(_003C_003E4__this.TargetLocA);
+				_003C_003E4__this.Map.designationManager.DesignationAt(_003C_003E4__this.TargetLocA, _003C_003E4__this.DesDef)?.Delete();
+				_003C_003E4__this.ReadyForNextToil();
 			}
 		}
 
-		// Token: 0x06006CC5 RID: 27845 RVA: 0x002228DC File Offset: 0x00220ADC
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		internal float _003CMakeNewToils_003Eb__3()
 		{
-			return this.pawn.Reserve(this.job.targetA, this.job, 1, -1, ReservationLayerDefOf.Floor, errorOnFailed, false);
+			return 1f - _003C_003E4__this.workLeft / (float)_003C_003E4__this.BaseWorkAmount;
 		}
+	}
 
-		// Token: 0x06006CC6 RID: 27846 RVA: 0x00222903 File Offset: 0x00220B03
-		protected override IEnumerable<Toil> MakeNewToils()
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__9 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_AffectFloor _003C_003E4__this;
+
+		private _003C_003Ec__DisplayClass9_0 _003C_003E8__1;
+
+		Toil IEnumerator<Toil>.Current
 		{
-			this.FailOn(() => !this.job.ignoreDesignations && this.Map.designationManager.DesignationAt(this.TargetLocA, this.DesDef) == null);
-			yield return Toils_Goto.GotoCell(TargetIndex.A, PathEndMode.Touch);
-			Toil doWork = ToilMaker.MakeToil("MakeNewToils");
-			doWork.initAction = delegate()
+			[DebuggerHidden]
+			get
 			{
-				this.workLeft = (float)this.BaseWorkAmount;
-			};
-			doWork.tickIntervalAction = delegate(int delta)
-			{
-				float num = (this.SpeedStat != null && !this.SpeedStat.Worker.IsDisabledFor(doWork.actor)) ? doWork.actor.GetStatValue(this.SpeedStat, true, -1) : 1f;
-				num *= 1.7f * (float)delta;
-				this.workLeft -= num;
-				if (doWork.actor.skills != null)
-				{
-					doWork.actor.skills.Learn(SkillDefOf.Construction, 0.1f * (float)delta, false, false);
-				}
-				if (this.clearSnow)
-				{
-					this.Map.snowGrid.SetDepth(this.TargetLocA, 0f);
-					SandGrid sandGrid = this.Map.sandGrid;
-					if (sandGrid != null)
-					{
-						sandGrid.SetDepth(this.TargetLocA, 0f);
-					}
-				}
-				if (this.workLeft <= 0f)
-				{
-					this.DoEffect(this.TargetLocA);
-					Designation designation = this.Map.designationManager.DesignationAt(this.TargetLocA, this.DesDef);
-					if (designation != null)
-					{
-						designation.Delete();
-					}
-					this.ReadyForNextToil();
-				}
-			};
-			doWork.FailOnCannotTouch(TargetIndex.A, PathEndMode.Touch);
-			doWork.WithProgressBar(TargetIndex.A, () => 1f - this.workLeft / (float)this.BaseWorkAmount, false, -0.5f, false);
-			doWork.defaultCompleteMode = ToilCompleteMode.Never;
-			doWork.activeSkill = (() => SkillDefOf.Construction);
-			yield return doWork;
-			yield break;
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x06006CC7 RID: 27847
-		protected abstract void DoEffect(IntVec3 c);
-
-		// Token: 0x06006CC8 RID: 27848 RVA: 0x00222913 File Offset: 0x00220B13
-		public override void ExposeData()
+		object IEnumerator.Current
 		{
-			base.ExposeData();
-			Scribe_Values.Look<float>(ref this.workLeft, "workLeft", 0f, false);
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x04004C5C RID: 19548
-		private float workLeft = -1000f;
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__9(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
 
-		// Token: 0x04004C5D RID: 19549
-		protected bool clearSnow;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E8__1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_AffectFloor f = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E8__1 = new _003C_003Ec__DisplayClass9_0();
+				_003C_003E8__1._003C_003E4__this = _003C_003E4__this;
+				f.FailOn(() => (!_003C_003E8__1._003C_003E4__this.job.ignoreDesignations && _003C_003E8__1._003C_003E4__this.Map.designationManager.DesignationAt(_003C_003E8__1._003C_003E4__this.TargetLocA, _003C_003E8__1._003C_003E4__this.DesDef) == null) ? true : false);
+				_003C_003E2__current = Toils_Goto.GotoCell(TargetIndex.A, PathEndMode.Touch);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E8__1.doWork = ToilMaker.MakeToil("MakeNewToils");
+				_003C_003E8__1.doWork.initAction = delegate
+				{
+					_003C_003E8__1._003C_003E4__this.workLeft = _003C_003E8__1._003C_003E4__this.BaseWorkAmount;
+				};
+				_003C_003E8__1.doWork.tickIntervalAction = delegate(int delta)
+				{
+					float num2 = ((_003C_003E8__1._003C_003E4__this.SpeedStat != null && !_003C_003E8__1._003C_003E4__this.SpeedStat.Worker.IsDisabledFor(_003C_003E8__1.doWork.actor)) ? _003C_003E8__1.doWork.actor.GetStatValue(_003C_003E8__1._003C_003E4__this.SpeedStat) : 1f);
+					num2 *= 1.7f * (float)delta;
+					_003C_003E8__1._003C_003E4__this.workLeft = _003C_003E8__1._003C_003E4__this.workLeft - num2;
+					if (_003C_003E8__1.doWork.actor.skills != null)
+					{
+						_003C_003E8__1.doWork.actor.skills.Learn(SkillDefOf.Construction, 0.1f * (float)delta);
+					}
+					if (_003C_003E8__1._003C_003E4__this.clearSnow)
+					{
+						_003C_003E8__1._003C_003E4__this.Map.snowGrid.SetDepth(_003C_003E8__1._003C_003E4__this.TargetLocA, 0f);
+						_003C_003E8__1._003C_003E4__this.Map.sandGrid?.SetDepth(_003C_003E8__1._003C_003E4__this.TargetLocA, 0f);
+					}
+					if (_003C_003E8__1._003C_003E4__this.workLeft <= 0f)
+					{
+						_003C_003E8__1._003C_003E4__this.DoEffect(_003C_003E8__1._003C_003E4__this.TargetLocA);
+						_003C_003E8__1._003C_003E4__this.Map.designationManager.DesignationAt(_003C_003E8__1._003C_003E4__this.TargetLocA, _003C_003E8__1._003C_003E4__this.DesDef)?.Delete();
+						_003C_003E8__1._003C_003E4__this.ReadyForNextToil();
+					}
+				};
+				_003C_003E8__1.doWork.FailOnCannotTouch(TargetIndex.A, PathEndMode.Touch);
+				_003C_003E8__1.doWork.WithProgressBar(TargetIndex.A, () => 1f - _003C_003E8__1._003C_003E4__this.workLeft / (float)_003C_003E8__1._003C_003E4__this.BaseWorkAmount);
+				_003C_003E8__1.doWork.defaultCompleteMode = ToilCompleteMode.Never;
+				_003C_003E8__1.doWork.activeSkill = () => SkillDefOf.Construction;
+				_003C_003E2__current = _003C_003E8__1.doWork;
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__9 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__9(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private float workLeft = -1000f;
+
+	protected bool clearSnow;
+
+	protected abstract int BaseWorkAmount { get; }
+
+	protected abstract DesignationDef DesDef { get; }
+
+	protected virtual StatDef SpeedStat => null;
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return pawn.Reserve(job.targetA, job, 1, -1, ReservationLayerDefOf.Floor, errorOnFailed);
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__9))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__9(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	protected abstract void DoEffect(IntVec3 c);
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref workLeft, "workLeft", 0f);
 	}
 }

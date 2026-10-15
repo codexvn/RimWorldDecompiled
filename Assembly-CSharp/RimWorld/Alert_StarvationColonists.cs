@@ -1,59 +1,49 @@
-﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Alert_StarvationColonists : Alert
 {
-	// Token: 0x02002FFE RID: 12286
-	public class Alert_StarvationColonists : Alert
+	private List<Pawn> starvingColonistsResult = new List<Pawn>();
+
+	private StringBuilder sb = new StringBuilder();
+
+	private List<Pawn> StarvingColonists
 	{
-		// Token: 0x060114BE RID: 70846 RVA: 0x004F5505 File Offset: 0x004F3705
-		public Alert_StarvationColonists()
+		get
 		{
-			this.defaultLabel = "Starvation".Translate();
-			this.defaultPriority = AlertPriority.High;
-		}
-
-		// Token: 0x17002CD1 RID: 11473
-		// (get) Token: 0x060114BF RID: 70847 RVA: 0x004F5540 File Offset: 0x004F3740
-		private List<Pawn> StarvingColonists
-		{
-			get
+			starvingColonistsResult.Clear();
+			foreach (Pawn item in PawnsFinder.AllMapsCaravansAndTravellingTransporters_AliveSpawned_FreeColonists_NoSuspended)
 			{
-				this.starvingColonistsResult.Clear();
-				foreach (Pawn pawn in PawnsFinder.AllMapsCaravansAndTravellingTransporters_AliveSpawned_FreeColonists_NoSuspended)
+				if (item.needs.food != null && item.needs.food.Starving)
 				{
-					if (pawn.needs.food != null && pawn.needs.food.Starving)
-					{
-						this.starvingColonistsResult.Add(pawn);
-					}
+					starvingColonistsResult.Add(item);
 				}
-				return this.starvingColonistsResult;
 			}
+			return starvingColonistsResult;
 		}
+	}
 
-		// Token: 0x060114C0 RID: 70848 RVA: 0x004F55C8 File Offset: 0x004F37C8
-		public override TaggedString GetExplanation()
+	public Alert_StarvationColonists()
+	{
+		defaultLabel = "Starvation".Translate();
+		defaultPriority = AlertPriority.High;
+	}
+
+	public override TaggedString GetExplanation()
+	{
+		sb.Length = 0;
+		foreach (Pawn item in starvingColonistsResult)
 		{
-			this.sb.Length = 0;
-			foreach (Pawn pawn in this.starvingColonistsResult)
-			{
-				this.sb.AppendLine("  - " + pawn.NameShortColored.Resolve());
-			}
-			return "StarvationDesc".Translate(this.sb.ToString().TrimEndNewlines());
+			sb.AppendLine("  - " + item.NameShortColored.Resolve());
 		}
+		return "StarvationDesc".Translate(sb.ToString().TrimEndNewlines());
+	}
 
-		// Token: 0x060114C1 RID: 70849 RVA: 0x004F5664 File Offset: 0x004F3864
-		public override AlertReport GetReport()
-		{
-			return AlertReport.CulpritsAre(this.StarvingColonists);
-		}
-
-		// Token: 0x0400B34E RID: 45902
-		private List<Pawn> starvingColonistsResult = new List<Pawn>();
-
-		// Token: 0x0400B34F RID: 45903
-		private StringBuilder sb = new StringBuilder();
+	public override AlertReport GetReport()
+	{
+		return AlertReport.CulpritsAre(StarvingColonists);
 	}
 }

@@ -1,156 +1,119 @@
-﻿using System;
 using RimWorld;
 using UnityEngine;
 
-namespace Verse
+namespace Verse;
+
+public sealed class RoofGrid : IExposable, ICellBoolGiver
 {
-	// Token: 0x02000523 RID: 1315
-	public sealed class RoofGrid : IExposable, ICellBoolGiver
+	private Map map;
+
+	private RoofDef[] roofGrid;
+
+	private CellBoolDrawer drawerInt;
+
+	public CellBoolDrawer Drawer
 	{
-		// Token: 0x17000622 RID: 1570
-		// (get) Token: 0x0600223F RID: 8767 RVA: 0x000B28DC File Offset: 0x000B0ADC
-		public CellBoolDrawer Drawer
+		get
 		{
-			get
+			if (drawerInt == null)
 			{
-				if (this.drawerInt == null)
-				{
-					this.drawerInt = new CellBoolDrawer(this, this.map.Size.x, this.map.Size.z, 3620, 0.33f);
-				}
-				return this.drawerInt;
+				drawerInt = new CellBoolDrawer(this, map.Size.x, map.Size.z, 3620);
 			}
+			return drawerInt;
 		}
+	}
 
-		// Token: 0x17000623 RID: 1571
-		// (get) Token: 0x06002240 RID: 8768 RVA: 0x000B292D File Offset: 0x000B0B2D
-		public Color Color
+	public Color Color => new Color(0.3f, 1f, 0.4f);
+
+	public RoofGrid(Map map)
+	{
+		this.map = map;
+		roofGrid = new RoofDef[map.cellIndices.NumGridCells];
+	}
+
+	public void ExposeData()
+	{
+		MapExposeUtility.ExposeUshort(map, (IntVec3 c) => (ushort)((roofGrid[map.cellIndices.CellToIndex(c)] != null) ? roofGrid[map.cellIndices.CellToIndex(c)].shortHash : 0), delegate(IntVec3 c, ushort val)
 		{
-			get
+			SetRoof(c, DefDatabase<RoofDef>.GetByShortHash(val));
+		}, "roofs");
+	}
+
+	public bool GetCellBool(int index)
+	{
+		if (roofGrid[index] != null)
+		{
+			return !map.fogGrid.IsFogged(index);
+		}
+		return false;
+	}
+
+	public Color GetCellExtraColor(int index)
+	{
+		if (RoofDefOf.RoofRockThick != null && roofGrid[index] == RoofDefOf.RoofRockThick)
+		{
+			return Color.gray;
+		}
+		return Color.white;
+	}
+
+	public bool Roofed(int index)
+	{
+		return roofGrid[index] != null;
+	}
+
+	public bool Roofed(int x, int z)
+	{
+		return roofGrid[map.cellIndices.CellToIndex(x, z)] != null;
+	}
+
+	public bool Roofed(IntVec3 c)
+	{
+		return roofGrid[map.cellIndices.CellToIndex(c)] != null;
+	}
+
+	public RoofDef RoofAt(int index)
+	{
+		return roofGrid[index];
+	}
+
+	public RoofDef RoofAt(IntVec3 c)
+	{
+		return roofGrid[map.cellIndices.CellToIndex(c)];
+	}
+
+	public RoofDef RoofAt(int x, int z)
+	{
+		return roofGrid[map.cellIndices.CellToIndex(x, z)];
+	}
+
+	public void SetRoof(IntVec3 c, RoofDef def)
+	{
+		if (roofGrid[map.cellIndices.CellToIndex(c)] != def)
+		{
+			roofGrid[map.cellIndices.CellToIndex(c)] = def;
+			map.regionGrid.GetValidRegionAt_NoRebuild(c)?.District.Notify_RoofChanged();
+			if (drawerInt != null)
 			{
-				return new Color(0.3f, 1f, 0.4f);
+				drawerInt.SetDirty();
 			}
+			map.mapDrawer.MapMeshDirty(c, MapMeshFlagDefOf.Roofs);
+			map.glowGrid.DirtyCell(c);
+			map.events.Notify_RoofChanged(c);
 		}
+	}
 
-		// Token: 0x06002241 RID: 8769 RVA: 0x000B2943 File Offset: 0x000B0B43
-		public RoofGrid(Map map)
+	public void RemoveRoofUnsafe(int index)
+	{
+		roofGrid[index] = null;
+	}
+
+	public void RoofGridUpdate()
+	{
+		if (Find.PlaySettings.showRoofOverlay && !Find.ScreenshotModeHandler.Active)
 		{
-			this.map = map;
-			this.roofGrid = new RoofDef[map.cellIndices.NumGridCells];
+			Drawer.MarkForDraw();
 		}
-
-		// Token: 0x06002242 RID: 8770 RVA: 0x000B2968 File Offset: 0x000B0B68
-		public void ExposeData()
-		{
-			MapExposeUtility.ExposeUshort(this.map, delegate(IntVec3 c)
-			{
-				if (this.roofGrid[this.map.cellIndices.CellToIndex(c)] != null)
-				{
-					return this.roofGrid[this.map.cellIndices.CellToIndex(c)].shortHash;
-				}
-				return 0;
-			}, delegate(IntVec3 c, ushort val)
-			{
-				this.SetRoof(c, DefDatabase<RoofDef>.GetByShortHash(val));
-			}, "roofs");
-		}
-
-		// Token: 0x06002243 RID: 8771 RVA: 0x000B2992 File Offset: 0x000B0B92
-		public bool GetCellBool(int index)
-		{
-			return this.roofGrid[index] != null && !this.map.fogGrid.IsFogged(index);
-		}
-
-		// Token: 0x06002244 RID: 8772 RVA: 0x000B29B4 File Offset: 0x000B0BB4
-		public Color GetCellExtraColor(int index)
-		{
-			if (RoofDefOf.RoofRockThick != null && this.roofGrid[index] == RoofDefOf.RoofRockThick)
-			{
-				return Color.gray;
-			}
-			return Color.white;
-		}
-
-		// Token: 0x06002245 RID: 8773 RVA: 0x000B29D7 File Offset: 0x000B0BD7
-		public bool Roofed(int index)
-		{
-			return this.roofGrid[index] != null;
-		}
-
-		// Token: 0x06002246 RID: 8774 RVA: 0x000B29E4 File Offset: 0x000B0BE4
-		public bool Roofed(int x, int z)
-		{
-			return this.roofGrid[this.map.cellIndices.CellToIndex(x, z)] != null;
-		}
-
-		// Token: 0x06002247 RID: 8775 RVA: 0x000B2A02 File Offset: 0x000B0C02
-		public bool Roofed(IntVec3 c)
-		{
-			return this.roofGrid[this.map.cellIndices.CellToIndex(c)] != null;
-		}
-
-		// Token: 0x06002248 RID: 8776 RVA: 0x000B2A1F File Offset: 0x000B0C1F
-		public RoofDef RoofAt(int index)
-		{
-			return this.roofGrid[index];
-		}
-
-		// Token: 0x06002249 RID: 8777 RVA: 0x000B2A29 File Offset: 0x000B0C29
-		public RoofDef RoofAt(IntVec3 c)
-		{
-			return this.roofGrid[this.map.cellIndices.CellToIndex(c)];
-		}
-
-		// Token: 0x0600224A RID: 8778 RVA: 0x000B2A43 File Offset: 0x000B0C43
-		public RoofDef RoofAt(int x, int z)
-		{
-			return this.roofGrid[this.map.cellIndices.CellToIndex(x, z)];
-		}
-
-		// Token: 0x0600224B RID: 8779 RVA: 0x000B2A60 File Offset: 0x000B0C60
-		public void SetRoof(IntVec3 c, RoofDef def)
-		{
-			if (this.roofGrid[this.map.cellIndices.CellToIndex(c)] == def)
-			{
-				return;
-			}
-			this.roofGrid[this.map.cellIndices.CellToIndex(c)] = def;
-			Region validRegionAt_NoRebuild = this.map.regionGrid.GetValidRegionAt_NoRebuild(c);
-			if (validRegionAt_NoRebuild != null)
-			{
-				validRegionAt_NoRebuild.District.Notify_RoofChanged();
-			}
-			if (this.drawerInt != null)
-			{
-				this.drawerInt.SetDirty();
-			}
-			this.map.mapDrawer.MapMeshDirty(c, MapMeshFlagDefOf.Roofs);
-			this.map.glowGrid.DirtyCell(c);
-			this.map.events.Notify_RoofChanged(c);
-		}
-
-		// Token: 0x0600224C RID: 8780 RVA: 0x000B2B12 File Offset: 0x000B0D12
-		public void RemoveRoofUnsafe(int index)
-		{
-			this.roofGrid[index] = null;
-		}
-
-		// Token: 0x0600224D RID: 8781 RVA: 0x000B2B1D File Offset: 0x000B0D1D
-		public void RoofGridUpdate()
-		{
-			if (Find.PlaySettings.showRoofOverlay && !Find.ScreenshotModeHandler.Active)
-			{
-				this.Drawer.MarkForDraw();
-			}
-			this.Drawer.CellBoolDrawerUpdate();
-		}
-
-		// Token: 0x04001CD8 RID: 7384
-		private Map map;
-
-		// Token: 0x04001CD9 RID: 7385
-		private RoofDef[] roofGrid;
-
-		// Token: 0x04001CDA RID: 7386
-		private CellBoolDrawer drawerInt;
+		Drawer.CellBoolDrawerUpdate();
 	}
 }

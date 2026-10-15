@@ -1,54 +1,48 @@
-﻿using System;
 using RimWorld;
 using Verse;
 
-// Token: 0x0200000E RID: 14
 public static class ResearchUtility
 {
-	// Token: 0x06000036 RID: 54 RVA: 0x00002A04 File Offset: 0x00000C04
 	public static void ApplyPlayerStartingResearch()
 	{
 		if (Faction.OfPlayer.def.startingResearchTags != null)
 		{
-			foreach (ResearchProjectTagDef tag in Faction.OfPlayer.def.startingResearchTags)
+			foreach (ResearchProjectTagDef startingResearchTag in Faction.OfPlayer.def.startingResearchTags)
 			{
-				foreach (ResearchProjectDef researchProjectDef in DefDatabase<ResearchProjectDef>.AllDefs)
+				foreach (ResearchProjectDef allDef in DefDatabase<ResearchProjectDef>.AllDefs)
 				{
-					if (researchProjectDef.HasTag(tag))
+					if (allDef.HasTag(startingResearchTag))
 					{
-						Find.ResearchManager.FinishProject(researchProjectDef, false, null, false);
+						Find.ResearchManager.FinishProject(allDef, doCompletionDialog: false, null, doCompletionLetter: false);
 					}
 				}
 			}
 		}
-		if (ModLister.IdeologyInstalled)
+		Ideo ideo;
+		if (ModLister.IdeologyInstalled && (ideo = Faction.OfPlayer.ideos?.PrimaryIdeo) != null)
 		{
-			FactionIdeosTracker ideos = Faction.OfPlayer.ideos;
-			Ideo ideo;
-			if ((ideo = ((ideos != null) ? ideos.PrimaryIdeo : null)) != null)
+			foreach (MemeDef meme in ideo.memes)
 			{
-				foreach (MemeDef memeDef in ideo.memes)
+				foreach (ResearchProjectDef startingResearchProject in meme.startingResearchProjects)
 				{
-					foreach (ResearchProjectDef proj in memeDef.startingResearchProjects)
-					{
-						Find.ResearchManager.FinishProject(proj, false, null, false);
-					}
+					Find.ResearchManager.FinishProject(startingResearchProject, doCompletionDialog: false, null, doCompletionLetter: false);
 				}
 			}
 		}
-		if (Faction.OfPlayer.def.startingTechprintsResearchTags != null)
+		if (Faction.OfPlayer.def.startingTechprintsResearchTags == null)
 		{
-			foreach (ResearchProjectTagDef tag2 in Faction.OfPlayer.def.startingTechprintsResearchTags)
+			return;
+		}
+		foreach (ResearchProjectTagDef startingTechprintsResearchTag in Faction.OfPlayer.def.startingTechprintsResearchTags)
+		{
+			foreach (ResearchProjectDef allDef2 in DefDatabase<ResearchProjectDef>.AllDefs)
 			{
-				foreach (ResearchProjectDef researchProjectDef2 in DefDatabase<ResearchProjectDef>.AllDefs)
+				if (allDef2.HasTag(startingTechprintsResearchTag))
 				{
-					if (researchProjectDef2.HasTag(tag2))
+					int techprints = Find.ResearchManager.GetTechprints(allDef2);
+					if (techprints < allDef2.TechprintCount)
 					{
-						int techprints = Find.ResearchManager.GetTechprints(researchProjectDef2);
-						if (techprints < researchProjectDef2.TechprintCount)
-						{
-							Find.ResearchManager.AddTechprints(researchProjectDef2, researchProjectDef2.TechprintCount - techprints);
-						}
+						Find.ResearchManager.AddTechprints(allDef2, allDef2.TechprintCount - techprints);
 					}
 				}
 			}

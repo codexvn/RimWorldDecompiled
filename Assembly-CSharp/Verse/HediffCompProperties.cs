@@ -1,44 +1,165 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
-namespace Verse
+namespace Verse;
+
+public class HediffCompProperties
 {
-	// Token: 0x02000244 RID: 580
-	public class HediffCompProperties
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__3 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x06000EE6 RID: 3814 RVA: 0x000026EA File Offset: 0x000008EA
-		public virtual void PostLoad()
-		{
-		}
+		private int _003C_003E1__state;
 
-		// Token: 0x06000EE7 RID: 3815 RVA: 0x000026EA File Offset: 0x000008EA
-		public virtual void ResolveReferences(HediffDef parent)
-		{
-		}
+		private string _003C_003E2__current;
 
-		// Token: 0x06000EE8 RID: 3816 RVA: 0x00045D9B File Offset: 0x00043F9B
-		public virtual IEnumerable<string> ConfigErrors(HediffDef parentDef)
+		private int _003C_003El__initialThreadId;
+
+		public HediffCompProperties _003C_003E4__this;
+
+		private HediffDef parentDef;
+
+		public HediffDef _003C_003E3__parentDef;
+
+		private int _003Ci_003E5__2;
+
+		string IEnumerator<string>.Current
 		{
-			if (this.compClass == null)
+			[DebuggerHidden]
+			get
 			{
-				yield return "compClass is null";
+				return _003C_003E2__current;
 			}
-			int num;
-			for (int i = 0; i < parentDef.comps.Count; i = num + 1)
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
 			{
-				if (parentDef.comps[i] != this && parentDef.comps[i].compClass == this.compClass)
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__3(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			HediffCompProperties hediffCompProperties = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (hediffCompProperties.compClass == null)
 				{
-					string str = "two comps with same compClass: ";
-					Type type = this.compClass;
-					yield return str + ((type != null) ? type.ToString() : null);
+					_003C_003E2__current = "compClass is null";
+					_003C_003E1__state = 1;
+					return true;
 				}
-				num = i;
+				goto IL_0052;
+			case 1:
+				_003C_003E1__state = -1;
+				goto IL_0052;
+			case 2:
+				{
+					_003C_003E1__state = -1;
+					goto IL_00d1;
+				}
+				IL_0052:
+				_003Ci_003E5__2 = 0;
+				goto IL_00e1;
+				IL_00e1:
+				if (_003Ci_003E5__2 < parentDef.comps.Count)
+				{
+					if (parentDef.comps[_003Ci_003E5__2] != hediffCompProperties && parentDef.comps[_003Ci_003E5__2].compClass == hediffCompProperties.compClass)
+					{
+						_003C_003E2__current = "two comps with same compClass: " + hediffCompProperties.compClass;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					goto IL_00d1;
+				}
+				return false;
+				IL_00d1:
+				_003Ci_003E5__2++;
+				goto IL_00e1;
 			}
-			yield break;
 		}
 
-		// Token: 0x04000A06 RID: 2566
-		[TranslationHandle]
-		public Type compClass;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__3 _003CConfigErrors_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CConfigErrors_003Ed__ = this;
+			}
+			else
+			{
+				_003CConfigErrors_003Ed__ = new _003CConfigErrors_003Ed__3(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CConfigErrors_003Ed__.parentDef = _003C_003E3__parentDef;
+			return _003CConfigErrors_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	[TranslationHandle]
+	public Type compClass;
+
+	public virtual void PostLoad()
+	{
+	}
+
+	public virtual void ResolveReferences(HediffDef parent)
+	{
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__3))]
+	public virtual IEnumerable<string> ConfigErrors(HediffDef parentDef)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__3(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__parentDef = parentDef
+		};
 	}
 }

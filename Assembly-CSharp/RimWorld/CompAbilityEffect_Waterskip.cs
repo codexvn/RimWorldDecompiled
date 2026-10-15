@@ -1,93 +1,235 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompAbilityEffect_Waterskip : CompAbilityEffect
 {
-	// Token: 0x020022A7 RID: 8871
-	public class CompAbilityEffect_Waterskip : CompAbilityEffect
+	[CompilerGenerated]
+	private sealed class _003CAffectedCells_003Ed__1 : IEnumerable<IntVec3>, IEnumerable, IEnumerator<IntVec3>, IEnumerator, IDisposable
 	{
-		// Token: 0x0600C0FC RID: 49404 RVA: 0x0037E424 File Offset: 0x0037C624
-		public override void Apply(LocalTargetInfo target, LocalTargetInfo dest)
+		private int _003C_003E1__state;
+
+		private IntVec3 _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private LocalTargetInfo target;
+
+		public LocalTargetInfo _003C_003E3__target;
+
+		private Map map;
+
+		public Map _003C_003E3__map;
+
+		public CompAbilityEffect_Waterskip _003C_003E4__this;
+
+		private IEnumerator<IntVec3> _003C_003E7__wrap1;
+
+		IntVec3 IEnumerator<IntVec3>.Current
 		{
-			base.Apply(target, dest);
-			Map map = this.parent.pawn.Map;
-			foreach (IntVec3 c in this.AffectedCells(target, map))
+			[DebuggerHidden]
+			get
 			{
-				if (c.InBounds(map))
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CAffectedCells_003Ed__1(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
 				{
-					List<Thing> thingList = c.GetThingList(map);
-					for (int i = thingList.Count - 1; i >= 0; i--)
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				CompAbilityEffect_Waterskip compAbilityEffect_Waterskip = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					if (!target.Cell.InBounds(map) || target.Cell.Filled(compAbilityEffect_Waterskip.parent.pawn.Map))
 					{
-						if (thingList[i] is Fire)
-						{
-							thingList[i].Destroy(DestroyMode.Vanish);
-						}
-						else
-						{
-							Pawn pawn = thingList[i] as Pawn;
-							if (pawn != null)
-							{
-								HediffComp_Invisibility invisibilityComp = pawn.GetInvisibilityComp();
-								if (invisibilityComp != null)
-								{
-									invisibilityComp.DisruptInvisibility();
-								}
-							}
-						}
+						return false;
 					}
-					if (!c.Filled(map))
+					_003C_003E7__wrap1 = GenRadial.RadialCellsAround(target.Cell, compAbilityEffect_Waterskip.parent.def.EffectRadius, useCenter: true).GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 1:
+					_003C_003E1__state = -3;
+					break;
+				}
+				while (_003C_003E7__wrap1.MoveNext())
+				{
+					IntVec3 current = _003C_003E7__wrap1.Current;
+					if (current.InBounds(map) && GenSight.LineOfSightToEdges(target.Cell, current, map, skipFirstCell: true))
 					{
-						FilthMaker.TryMakeFilth(c, map, ThingDefOf.Filth_Water, 1, FilthSourceFlags.None, true);
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
 					}
-					FleckCreationData dataStatic = FleckMaker.GetDataStatic(c.ToVector3Shifted(), map, FleckDefOf.WaterskipSplashParticles, 1f);
-					dataStatic.rotationRate = (float)Rand.Range(-30, 30);
-					dataStatic.rotation = (float)(90 * Rand.RangeInclusive(0, 3));
-					map.flecks.CreateFleck(dataStatic);
-					CompAbilityEffect_Teleport.SendSkipUsedSignal(c, this.parent.pawn);
 				}
-			}
-		}
-
-		// Token: 0x0600C0FD RID: 49405 RVA: 0x0037E580 File Offset: 0x0037C780
-		private IEnumerable<IntVec3> AffectedCells(LocalTargetInfo target, Map map)
-		{
-			if (!target.Cell.InBounds(map) || target.Cell.Filled(this.parent.pawn.Map))
-			{
-				yield break;
-			}
-			foreach (IntVec3 intVec in GenRadial.RadialCellsAround(target.Cell, this.parent.def.EffectRadius, true))
-			{
-				if (intVec.InBounds(map) && GenSight.LineOfSightToEdges(target.Cell, intVec, map, true, null))
-				{
-					yield return intVec;
-				}
-			}
-			IEnumerator<IntVec3> enumerator = null;
-			yield break;
-			yield break;
-		}
-
-		// Token: 0x0600C0FE RID: 49406 RVA: 0x0037E5A0 File Offset: 0x0037C7A0
-		public override void DrawEffectPreview(LocalTargetInfo target)
-		{
-			GenDraw.DrawFieldEdges(this.AffectedCells(target, this.parent.pawn.Map).ToList<IntVec3>(), this.Valid(target, false) ? Color.white : Color.red, null, null, 2900);
-		}
-
-		// Token: 0x0600C0FF RID: 49407 RVA: 0x0037E5F4 File Offset: 0x0037C7F4
-		public override bool Valid(LocalTargetInfo target, bool throwMessages = false)
-		{
-			if (target.Cell.Filled(this.parent.pawn.Map))
-			{
-				if (throwMessages)
-				{
-					Messages.Message("AbilityOccupiedCells".Translate(this.parent.def.LabelCap), target.ToTargetInfo(this.parent.pawn.Map), MessageTypeDefOf.RejectInput, false);
-				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = null;
 				return false;
 			}
-			return true;
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
 		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<IntVec3> IEnumerable<IntVec3>.GetEnumerator()
+		{
+			_003CAffectedCells_003Ed__1 _003CAffectedCells_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CAffectedCells_003Ed__ = this;
+			}
+			else
+			{
+				_003CAffectedCells_003Ed__ = new _003CAffectedCells_003Ed__1(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CAffectedCells_003Ed__.target = _003C_003E3__target;
+			_003CAffectedCells_003Ed__.map = _003C_003E3__map;
+			return _003CAffectedCells_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<IntVec3>)this).GetEnumerator();
+		}
+	}
+
+	public override void Apply(LocalTargetInfo target, LocalTargetInfo dest)
+	{
+		base.Apply(target, dest);
+		Map map = parent.pawn.Map;
+		foreach (IntVec3 item in AffectedCells(target, map))
+		{
+			if (!item.InBounds(map))
+			{
+				continue;
+			}
+			List<Thing> thingList = item.GetThingList(map);
+			for (int num = thingList.Count - 1; num >= 0; num--)
+			{
+				if (thingList[num] is Fire)
+				{
+					thingList[num].Destroy();
+				}
+				else if (thingList[num] is Pawn pawn)
+				{
+					pawn.GetInvisibilityComp()?.DisruptInvisibility();
+				}
+			}
+			if (!item.Filled(map))
+			{
+				FilthMaker.TryMakeFilth(item, map, ThingDefOf.Filth_Water);
+			}
+			FleckCreationData dataStatic = FleckMaker.GetDataStatic(item.ToVector3Shifted(), map, FleckDefOf.WaterskipSplashParticles);
+			dataStatic.rotationRate = Rand.Range(-30, 30);
+			dataStatic.rotation = 90 * Rand.RangeInclusive(0, 3);
+			map.flecks.CreateFleck(dataStatic);
+			CompAbilityEffect_Teleport.SendSkipUsedSignal(item, parent.pawn);
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CAffectedCells_003Ed__1))]
+	private IEnumerable<IntVec3> AffectedCells(LocalTargetInfo target, Map map)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CAffectedCells_003Ed__1(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__target = target,
+			_003C_003E3__map = map
+		};
+	}
+
+	public override void DrawEffectPreview(LocalTargetInfo target)
+	{
+		GenDraw.DrawFieldEdges(AffectedCells(target, parent.pawn.Map).ToList(), Valid(target) ? Color.white : Color.red, null);
+	}
+
+	public override bool Valid(LocalTargetInfo target, bool throwMessages = false)
+	{
+		if (target.Cell.Filled(parent.pawn.Map))
+		{
+			if (throwMessages)
+			{
+				Messages.Message("AbilityOccupiedCells".Translate(parent.def.LabelCap), target.ToTargetInfo(parent.pawn.Map), MessageTypeDefOf.RejectInput, historical: false);
+			}
+			return false;
+		}
+		return true;
 	}
 }

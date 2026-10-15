@@ -1,91 +1,195 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+[Obsolete("Betray visitors is now a subquest of refugee quest.")]
+public class ChoiceLetter_BetrayVisitors : ChoiceLetter
 {
-	// Token: 0x02003365 RID: 13157
-	[Obsolete("Betray visitors is now a subquest of refugee quest.")]
-	public class ChoiceLetter_BetrayVisitors : ChoiceLetter
+	[CompilerGenerated]
+	private sealed class _003Cget_Choices_003Ed__8 : IEnumerable<DiaOption>, IEnumerable, IEnumerator<DiaOption>, IEnumerator, IDisposable
 	{
-		// Token: 0x17003040 RID: 12352
-		// (get) Token: 0x060127F5 RID: 75765 RVA: 0x00002501 File Offset: 0x00000701
-		public override bool CanDismissWithRightClick
+		private int _003C_003E1__state;
+
+		private DiaOption _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public ChoiceLetter_BetrayVisitors _003C_003E4__this;
+
+		DiaOption IEnumerator<DiaOption>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return false;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17003041 RID: 12353
-		// (get) Token: 0x060127F6 RID: 75766 RVA: 0x005752A4 File Offset: 0x005734A4
-		public override bool CanShowInLetterStack
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (!base.CanShowInLetterStack)
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003Cget_Choices_003Ed__8(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			ChoiceLetter_BetrayVisitors choiceLetter_BetrayVisitors = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (choiceLetter_BetrayVisitors.lookTargets.IsValid())
 				{
+					_003C_003E2__current = choiceLetter_BetrayVisitors.Option_JumpToLocationAndPostpone;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				goto IL_0056;
+			case 1:
+				_003C_003E1__state = -1;
+				goto IL_0056;
+			case 2:
+				_003C_003E1__state = -1;
+				goto IL_008d;
+			case 3:
+				{
+					_003C_003E1__state = -1;
 					return false;
 				}
-				if (this.quest == null || this.quest.State != QuestState.Ongoing)
+				IL_0056:
+				if (choiceLetter_BetrayVisitors.quest != null && !choiceLetter_BetrayVisitors.quest.hidden)
 				{
-					return false;
+					_003C_003E2__current = choiceLetter_BetrayVisitors.Option_ViewInQuestsTab("ViewRelatedQuest", postpone: true);
+					_003C_003E1__state = 2;
+					return true;
 				}
-				if (this.requiresAliveAsker && (this.asker == null || this.asker.Dead))
-				{
-					return false;
-				}
-				for (int i = 0; i < this.pawns.Count; i++)
-				{
-					if (!this.pawns[i].Spawned && !this.pawns[i].Destroyed)
-					{
-						return false;
-					}
-				}
+				goto IL_008d;
+				IL_008d:
+				_003C_003E2__current = choiceLetter_BetrayVisitors.Option_Close;
+				_003C_003E1__state = 3;
 				return true;
 			}
 		}
 
-		// Token: 0x17003042 RID: 12354
-		// (get) Token: 0x060127F7 RID: 75767 RVA: 0x00575331 File Offset: 0x00573531
-		public override IEnumerable<DiaOption> Choices
+		bool IEnumerator.MoveNext()
 		{
-			get
-			{
-				if (this.lookTargets.IsValid())
-				{
-					yield return base.Option_JumpToLocationAndPostpone;
-				}
-				if (this.quest != null && !this.quest.hidden)
-				{
-					yield return base.Option_ViewInQuestsTab("ViewRelatedQuest", true);
-				}
-				yield return base.Option_Close;
-				yield break;
-			}
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x060127F8 RID: 75768 RVA: 0x00575344 File Offset: 0x00573544
-		public override void ExposeData()
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			base.ExposeData();
-			Scribe_Collections.Look<Pawn>(ref this.pawns, "pawns", LookMode.Reference, Array.Empty<object>());
-			Scribe_References.Look<Pawn>(ref this.asker, "asker", false);
-			Scribe_Values.Look<bool>(ref this.requiresAliveAsker, "requiresAliveAsker", false, false);
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
-			{
-				this.pawns.RemoveAll((Pawn x) => x == null);
-			}
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x0400C029 RID: 49193
-		public List<Pawn> pawns = new List<Pawn>();
+		[DebuggerHidden]
+		IEnumerator<DiaOption> IEnumerable<DiaOption>.GetEnumerator()
+		{
+			_003Cget_Choices_003Ed__8 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_Choices_003Ed__8(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x0400C02A RID: 49194
-		public Pawn asker;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<DiaOption>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x0400C02B RID: 49195
-		public bool requiresAliveAsker;
+	public List<Pawn> pawns = new List<Pawn>();
+
+	public Pawn asker;
+
+	public bool requiresAliveAsker;
+
+	public override bool CanDismissWithRightClick => false;
+
+	public override bool CanShowInLetterStack
+	{
+		get
+		{
+			if (!base.CanShowInLetterStack)
+			{
+				return false;
+			}
+			if (quest == null || quest.State != QuestState.Ongoing)
+			{
+				return false;
+			}
+			if (requiresAliveAsker && (asker == null || asker.Dead))
+			{
+				return false;
+			}
+			for (int i = 0; i < pawns.Count; i++)
+			{
+				if (!pawns[i].Spawned && !pawns[i].Destroyed)
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+	}
+
+	public override IEnumerable<DiaOption> Choices
+	{
+		[IteratorStateMachine(typeof(_003Cget_Choices_003Ed__8))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_Choices_003Ed__8(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Collections.Look(ref pawns, "pawns", LookMode.Reference);
+		Scribe_References.Look(ref asker, "asker");
+		Scribe_Values.Look(ref requiresAliveAsker, "requiresAliveAsker", defaultValue: false);
+		if (Scribe.mode == LoadSaveMode.PostLoadInit)
+		{
+			pawns.RemoveAll((Pawn x) => x == null);
+		}
 	}
 }

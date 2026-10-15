@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Gilzoide.ManagedJobs;
@@ -9,971 +9,806 @@ using Unity.Jobs;
 using UnityEngine;
 using Verse.AI;
 
-namespace Verse
+namespace Verse;
+
+public class PathFinder : IDisposable
 {
-	// Token: 0x020005B3 RID: 1459
-	public class PathFinder : IDisposable
+	private struct ScheduledPathJob
 	{
-		// Token: 0x170006BB RID: 1723
-		// (get) Token: 0x060025AA RID: 9642 RVA: 0x000C5917 File Offset: 0x000C3B17
-		public PathFinderMapData MapData
+		public PathRequest request;
+
+		public JobHandle handle;
+
+		public PathUniqueState state;
+
+		public PathJobOutput output;
+	}
+
+	private struct ScheduledGridJob
+	{
+		public int computed;
+
+		public int lastAccessed;
+
+		public JobHandle handle;
+
+		public GridJobOutput output;
+	}
+
+	public readonly struct UnmanagedGridTraverseParams : IEquatable<UnmanagedGridTraverseParams>
+	{
+		public readonly TraverseMode mode;
+
+		public readonly bool canBashFences;
+
+		public readonly bool fenceBlocked;
+
+		public readonly bool avoidPersistentDanger;
+
+		public readonly bool avoidDarknessDanger;
+
+		public readonly bool avoidFog;
+
+		public readonly CellRect targetBuildable;
+
+		public UnmanagedGridTraverseParams(TraverseMode mode, bool canBashFences, bool fenceBlocked, bool avoidPersistentDanger, bool avoidDarknessDanger, bool avoidFog, CellRect targetBuildable)
 		{
-			get
-			{
-				return this.mapData;
-			}
+			this.mode = mode;
+			this.canBashFences = canBashFences;
+			this.fenceBlocked = fenceBlocked;
+			this.avoidPersistentDanger = avoidPersistentDanger;
+			this.avoidDarknessDanger = avoidDarknessDanger;
+			this.avoidFog = avoidFog;
+			this.targetBuildable = targetBuildable;
 		}
 
-		// Token: 0x060025AB RID: 9643 RVA: 0x000C5920 File Offset: 0x000C3B20
-		public PathFinder(Map map)
+		public static UnmanagedGridTraverseParams For(TraverseParms parms)
 		{
-			this.map = map;
-			this.mapData = new PathFinderMapData(map);
-			int numGridCells = map.cellIndices.NumGridCells;
-			int maxJobWorkerCount = UnityData.MaxJobWorkerCount;
-			for (int i = 0; i < maxJobWorkerCount; i++)
-			{
-				this.batches.Add(PathFinder.JobBatchState.AllocateNew(numGridCells));
-			}
-			this.immediateBatch = PathFinder.JobBatchState.AllocateNew(numGridCells);
+			return new UnmanagedGridTraverseParams(parms.mode, parms.canBashFences, parms.fenceBlocked, parms.avoidPersistentDanger, parms.avoidDarknessDanger, parms.avoidFog, parms.targetBuildable);
 		}
 
-		// Token: 0x060025AC RID: 9644 RVA: 0x000C5A08 File Offset: 0x000C3C08
-		public void PathFinderTick()
+		public bool Equals(UnmanagedGridTraverseParams other)
 		{
-			if (this.disposed)
+			if (mode == other.mode && canBashFences == other.canBashFences && fenceBlocked == other.fenceBlocked && avoidPersistentDanger == other.avoidPersistentDanger && avoidDarknessDanger == other.avoidDarknessDanger && avoidFog == other.avoidFog)
 			{
-				return;
+				return targetBuildable == other.targetBuildable;
 			}
-			this.ForceCompleteScheduledJobs();
-			this.FinalizeRecyclePathJobData();
-			this.ComputeWorkThisTick();
-			if (this.tmpCurrentWork.Count == 0)
-			{
-				return;
-			}
-			if (this.mapData.GatherData(this.tmpCurrentWork))
-			{
-				this.RecycleGridJobData();
-			}
-			JobHandle lastGridHandle = this.ScheduleGridJobs();
-			this.ScheduleBatchedPathJobs(lastGridHandle);
+			return false;
 		}
 
-		// Token: 0x060025AD RID: 9645 RVA: 0x000C5A68 File Offset: 0x000C3C68
-		private void ComputeWorkThisTick()
+		public override bool Equals(object obj)
 		{
-			if (this.tmpCurrentWork.Count != 0)
+			if (obj is UnmanagedGridTraverseParams other)
 			{
-				Log.Error(string.Format("Pathfinder current work queue is not empty, count: {0}", this.tmpCurrentWork.Count));
+				return Equals(other);
 			}
-			this.tmpCurrentWork.Clear();
-			int ticksGame = GenTicks.TicksGame;
-			for (int i = this.workQueue.Count - 1; i >= 0; i--)
-			{
-				PathRequest pathRequest = this.workQueue[i];
-				if (pathRequest.Cancelled)
-				{
-					this.workQueue.RemoveAt(i);
-				}
-				else if (!pathRequest.Validate())
-				{
-					this.workQueue.RemoveAt(i);
-				}
-				else if (pathRequest.TickStart <= ticksGame)
-				{
-					this.tmpCurrentWork.Add(pathRequest);
-					this.workQueue.RemoveAt(i);
-				}
-			}
+			return false;
 		}
 
-		// Token: 0x060025AE RID: 9646 RVA: 0x000C5B24 File Offset: 0x000C3D24
-		private void FinalizeRecyclePathJobData()
+		public override int GetHashCode()
 		{
-			foreach (PathFinder.ScheduledPathJob scheduledPathJob in this.scheduledPathJobs)
-			{
-				if (!scheduledPathJob.request.Cancelled && scheduledPathJob.output.path.Length == 0)
-				{
-					Log.WarningOnce(string.Format("Resolved path returned no nodes, request: {0}", scheduledPathJob.request), HashCode.Combine<PathRequest, int>(scheduledPathJob.request, 163511));
-					scheduledPathJob.request.Resolve(null);
-				}
-				else if (!scheduledPathJob.request.Cancelled && (scheduledPathJob.request.pawn == null || scheduledPathJob.request.pawn.Spawned))
-				{
-					PawnPath p = this.EmitPath(scheduledPathJob.output);
-					scheduledPathJob.request.Resolve(p);
-				}
-				this.pathUniqueStates.Enqueue(scheduledPathJob.state);
-				this.pathJobOutputs.Enqueue(scheduledPathJob.output);
-			}
-			this.scheduledPathJobs.Clear();
+			return HashCode.Combine((int)mode, canBashFences, fenceBlocked, avoidPersistentDanger, avoidDarknessDanger, avoidFog, targetBuildable);
 		}
+	}
 
-		// Token: 0x060025AF RID: 9647 RVA: 0x000C5C3C File Offset: 0x000C3E3C
-		private void RecycleGridJobData()
-		{
-			foreach (PathFinder.ScheduledGridJob scheduledGridJob in this.scheduledGridJobs)
-			{
-				this.gridJobOutputs.Enqueue(scheduledGridJob.output);
-			}
-			this.scheduledGridJobs.Clear();
-			this.gridJobLookup.Clear();
-		}
+	public struct MapGridRequest : IEquatable<MapGridRequest>
+	{
+		public UnmanagedGridTraverseParams traverseParams;
 
-		// Token: 0x060025B0 RID: 9648 RVA: 0x000C5CB0 File Offset: 0x000C3EB0
-		private void ScheduleBatchedPathJobs(JobHandle lastGridHandle = default(JobHandle))
-		{
-			int count = this.batches.Count;
-			int count2 = this.tmpCurrentWork.Count;
-			int num2;
-			int num = Math.DivRem(count2, count, out num2);
-			if (num2 > 0)
-			{
-				num++;
-			}
-			int i = 0;
-			int num3 = 0;
-			while (i < count)
-			{
-				JobHandle jobHandle = lastGridHandle;
-				PathFinder.JobBatchState jobBatchState = this.batches[i];
-				int num4 = 0;
-				while (num4 < num && num3 < count2)
-				{
-					PathRequest request = this.tmpCurrentWork.Pop<PathRequest>();
-					PathFinder.MapGridRequest key = PathFinder.MapGridRequest.For(request);
-					PathFinder.ScheduledGridJob scheduledGridJob = this.gridJobLookup[key];
-					PathFinderJob jobData = default(PathFinderJob);
-					PathFinder.PathUniqueState state;
-					this.GetOrCreatePathJobUniqueState(out state);
-					PathFinder.PathJobOutput output;
-					this.GetOrCreatePathJobOutput(out output);
-					jobHandle = this.GetDoorBlockedJob(request, ref state).Schedule(jobHandle);
-					this.ParameterizePathJob(ref jobData, ref key, ref output, ref state, ref jobBatchState, ref scheduledGridJob, request);
-					this.mapData.ParameterizePathJob(ref jobData);
-					jobHandle = jobData.Schedule(jobHandle);
-					this.scheduledPathJobs.Add(new PathFinder.ScheduledPathJob
-					{
-						request = request,
-						handle = jobHandle,
-						state = state,
-						output = output
-					});
-					num4++;
-					num3++;
-				}
-				i++;
-			}
-			JobHandle.ScheduleBatchedJobs();
-		}
+		public PathFinderCostTuning tuning;
 
-		// Token: 0x060025B1 RID: 9649 RVA: 0x000C5DF4 File Offset: 0x000C3FF4
-		private ManagedJob GetDoorBlockedJob(PathRequest request, ref PathFinder.PathUniqueState jobState)
-		{
-			PathGridDoorsBlockedJob pathGridDoorsBlockedJob = new PathGridDoorsBlockedJob();
-			this.ParameterizeDoorBlockedJob(pathGridDoorsBlockedJob, request, ref jobState);
-			return new ManagedJob(pathGridDoorsBlockedJob);
-		}
+		public PathRequest.IPathGridCustomizer customizer;
 
-		// Token: 0x060025B2 RID: 9650 RVA: 0x000C5E18 File Offset: 0x000C4018
-		private JobHandle ScheduleGridJobs()
+		public Area allowedArea;
+
+		public AvoidGrid avoidGrid;
+
+		public static MapGridRequest For(PathRequest request)
 		{
-			JobHandle result;
-			using (ProfilerBlock.Scope("PathFinder.ScheduleGridJobs()"))
+			AvoidGrid grid = null;
+			if (request.pawn != null)
 			{
-				JobHandle jobHandle = default(JobHandle);
-				foreach (PathRequest request in this.tmpCurrentWork)
-				{
-					PathFinder.MapGridRequest key = PathFinder.MapGridRequest.For(request);
-					if (!this.gridJobLookup.ContainsKey(key))
-					{
-						jobHandle = this.ScheduleGridJob(request, jobHandle).handle;
-					}
-				}
-				result = jobHandle;
+				request.pawn.TryGetAvoidGrid(out grid);
 			}
+			MapGridRequest result = default(MapGridRequest);
+			result.traverseParams = UnmanagedGridTraverseParams.For(request.TraverseParms);
+			result.tuning = request.Tuning;
+			result.customizer = request.customizer;
+			result.allowedArea = request.area;
+			result.avoidGrid = grid;
 			return result;
 		}
 
-		// Token: 0x060025B3 RID: 9651 RVA: 0x000C5EC0 File Offset: 0x000C40C0
-		private PathFinder.ScheduledGridJob ScheduleGridJob(PathRequest request, JobHandle handle = default(JobHandle))
+		public bool Equals(MapGridRequest other)
 		{
-			PathFinder.MapGridRequest key = PathFinder.MapGridRequest.For(request);
-			PathFinder.ScheduledGridJob scheduledGridJob;
-			scheduledGridJob.lastAccessed = (scheduledGridJob.computed = GenTicks.TicksGame);
-			this.GetOrCreateGridJobOutput(out scheduledGridJob.output);
-			PathGridJob jobData = default(PathGridJob);
-			this.mapData.ParameterizeGridJob(request, ref key, ref jobData, ref scheduledGridJob.output);
-			int numGridCells = this.map.cellIndices.NumGridCells;
-			int idealBatchCount = UnityData.GetIdealBatchCount(numGridCells);
-			scheduledGridJob.handle = (handle.Equals(default(JobHandle)) ? jobData.Schedule(numGridCells, idealBatchCount, default(JobHandle)) : jobData.Schedule(numGridCells, idealBatchCount, handle));
-			this.scheduledGridJobs.Add(scheduledGridJob);
-			return this.gridJobLookup[key] = scheduledGridJob;
+			if (traverseParams.Equals(other.traverseParams) && tuning.Equals(other.tuning) && object.Equals(customizer, other.customizer) && object.Equals(allowedArea, other.allowedArea))
+			{
+				return object.Equals(avoidGrid, other.avoidGrid);
+			}
+			return false;
 		}
 
-		// Token: 0x060025B4 RID: 9652 RVA: 0x000C5F88 File Offset: 0x000C4188
-		private void ForceCompleteScheduledJobs()
+		public override bool Equals(object obj)
 		{
-			int num = this.scheduledPathJobs.Count + this.scheduledGridJobs.Count;
-			if (num <= 0)
+			if (obj is MapGridRequest other)
 			{
-				return;
+				return Equals(other);
 			}
-			NativeArray<JobHandle> jobs = new NativeArray<JobHandle>(num, Allocator.Persistent, NativeArrayOptions.ClearMemory);
-			for (int i = 0; i < this.scheduledPathJobs.Count; i++)
+			return false;
+		}
+
+		public override int GetHashCode()
+		{
+			return HashCode.Combine(traverseParams, tuning, customizer, allowedArea, avoidGrid);
+		}
+
+		public override string ToString()
+		{
+			return $"{traverseParams.mode}{(traverseParams.fenceBlocked ? ", fence blocked" : "")}{(traverseParams.avoidFog ? ", avoid fog" : "")}{((allowedArea != null) ? (", area: " + allowedArea.RenamableLabel) : "")}{((avoidGrid != null) ? ", avoid grid: true" : "")}";
+		}
+	}
+
+	private struct JobBatchState : IDisposable
+	{
+		public NativeArray<PathFinderJob.CalcNode> calcGrid;
+
+		public NativePriorityQueue<int, float, FloatMinComparer> frontier;
+
+		public static JobBatchState AllocateNew(int cells)
+		{
+			JobBatchState result = default(JobBatchState);
+			result.calcGrid = new NativeArray<PathFinderJob.CalcNode>(cells, Allocator.Persistent);
+			result.frontier = new NativePriorityQueue<int, float, FloatMinComparer>(cells, default(FloatMinComparer), Allocator.Persistent);
+			return result;
+		}
+
+		public void Dispose()
+		{
+			calcGrid.Dispose();
+			frontier.Dispose();
+		}
+	}
+
+	public struct GridJobOutput : IDisposable
+	{
+		public NativeArray<int> grid;
+
+		public void Initalize(int cells)
+		{
+			grid = new NativeArray<int>(cells, Allocator.Persistent);
+		}
+
+		public void Dispose()
+		{
+			grid.Dispose();
+		}
+	}
+
+	private struct PathUniqueState : IDisposable
+	{
+		public NativeList<int> excludedDestIndices;
+
+		public NativeArray<ushort> providers;
+
+		public NativeArray<bool> blocked;
+
+		public void Initialize(int cells)
+		{
+			excludedDestIndices = new NativeList<int>(4, Allocator.Persistent);
+			providers = new NativeArray<ushort>(cells, Allocator.Persistent);
+			blocked = new NativeArray<bool>(cells, Allocator.Persistent);
+		}
+
+		public void Dispose()
+		{
+			excludedDestIndices.Dispose();
+			providers.Dispose();
+			blocked.Dispose();
+		}
+	}
+
+	private struct PathJobOutput : IDisposable
+	{
+		public NativeList<IntVec3> path;
+
+		public NativeReference<PathFinderJob.ResultData> data;
+
+		public void Initialize(int cells)
+		{
+			path = new NativeList<IntVec3>(cells, Allocator.Persistent);
+			data = new NativeReference<PathFinderJob.ResultData>(default(PathFinderJob.ResultData), Allocator.Persistent);
+		}
+
+		public void Dispose()
+		{
+			path.Dispose();
+			data.Dispose();
+		}
+	}
+
+	private readonly Map map;
+
+	private readonly PathFinderMapData mapData;
+
+	private readonly List<JobBatchState> batches = new List<JobBatchState>();
+
+	private JobBatchState immediateBatch;
+
+	private readonly List<PathRequest> workQueue = new List<PathRequest>();
+
+	private readonly List<ScheduledPathJob> scheduledPathJobs = new List<ScheduledPathJob>();
+
+	private readonly List<ScheduledGridJob> scheduledGridJobs = new List<ScheduledGridJob>();
+
+	private readonly Queue<PathJobOutput> pathJobOutputs = new Queue<PathJobOutput>();
+
+	private readonly Queue<PathUniqueState> pathUniqueStates = new Queue<PathUniqueState>();
+
+	private readonly Queue<GridJobOutput> gridJobOutputs = new Queue<GridJobOutput>();
+
+	private readonly Dictionary<MapGridRequest, ScheduledGridJob> gridJobLookup = new Dictionary<MapGridRequest, ScheduledGridJob>();
+
+	private readonly List<PathRequest> tmpCurrentWork = new List<PathRequest>();
+
+	private bool disposed;
+
+	public const int DefaultMoveTicksCardinal = 13;
+
+	public const int DefaultMoveTicksDiagonal = 18;
+
+	public const float DiagonalMoveFactor = 1.41421f;
+
+	private const float HeuristicScaleAnimal = 1.75f;
+
+	private static readonly SimpleCurve HeuristicScaleAI = new SimpleCurve
+	{
+		new CurvePoint(40f, 1f),
+		new CurvePoint(120f, 2f)
+	};
+
+	private readonly List<IPathFindCostProvider> cachedProviders = new List<IPathFindCostProvider>();
+
+	private readonly List<Thing> cachedDoors = new List<Thing>();
+
+	private readonly List<Pawn> cachedPawns = new List<Pawn>();
+
+	private int cachedTick;
+
+	public PathFinderMapData MapData => mapData;
+
+	public PathFinder(Map map)
+	{
+		this.map = map;
+		mapData = new PathFinderMapData(map);
+		int numGridCells = map.cellIndices.NumGridCells;
+		int maxJobWorkerCount = UnityData.MaxJobWorkerCount;
+		for (int i = 0; i < maxJobWorkerCount; i++)
+		{
+			batches.Add(JobBatchState.AllocateNew(numGridCells));
+		}
+		immediateBatch = JobBatchState.AllocateNew(numGridCells);
+	}
+
+	public void PathFinderTick()
+	{
+		if (disposed)
+		{
+			return;
+		}
+		ForceCompleteScheduledJobs();
+		FinalizeRecyclePathJobData();
+		ComputeWorkThisTick();
+		if (tmpCurrentWork.Count != 0)
+		{
+			if (mapData.GatherData(tmpCurrentWork))
 			{
-				jobs[i] = this.scheduledPathJobs[i].handle;
+				RecycleGridJobData();
 			}
-			for (int j = 0; j < this.scheduledGridJobs.Count; j++)
+			JobHandle lastGridHandle = ScheduleGridJobs();
+			ScheduleBatchedPathJobs(lastGridHandle);
+		}
+	}
+
+	private void ComputeWorkThisTick()
+	{
+		if (tmpCurrentWork.Count != 0)
+		{
+			Log.Error($"Pathfinder current work queue is not empty, count: {tmpCurrentWork.Count}");
+		}
+		tmpCurrentWork.Clear();
+		int ticksGame = GenTicks.TicksGame;
+		for (int num = workQueue.Count - 1; num >= 0; num--)
+		{
+			PathRequest pathRequest = workQueue[num];
+			if (pathRequest.Cancelled)
 			{
-				jobs[this.scheduledPathJobs.Count + j] = this.scheduledGridJobs[j].handle;
+				workQueue.RemoveAt(num);
+			}
+			else if (!pathRequest.Validate())
+			{
+				workQueue.RemoveAt(num);
+			}
+			else if (pathRequest.TickStart <= ticksGame)
+			{
+				tmpCurrentWork.Add(pathRequest);
+				workQueue.RemoveAt(num);
+			}
+		}
+	}
+
+	private void FinalizeRecyclePathJobData()
+	{
+		foreach (ScheduledPathJob scheduledPathJob in scheduledPathJobs)
+		{
+			ScheduledPathJob current = scheduledPathJob;
+			if (!current.request.Cancelled && current.output.path.Length == 0)
+			{
+				Log.WarningOnce($"Resolved path returned no nodes, request: {current.request}", HashCode.Combine(current.request, 163511));
+				current.request.Resolve(null);
+			}
+			else if (!current.request.Cancelled && (current.request.pawn == null || current.request.pawn.Spawned))
+			{
+				PawnPath p = EmitPath(in current.output);
+				current.request.Resolve(p);
+			}
+			pathUniqueStates.Enqueue(current.state);
+			pathJobOutputs.Enqueue(current.output);
+		}
+		scheduledPathJobs.Clear();
+	}
+
+	private void RecycleGridJobData()
+	{
+		foreach (ScheduledGridJob scheduledGridJob in scheduledGridJobs)
+		{
+			gridJobOutputs.Enqueue(scheduledGridJob.output);
+		}
+		scheduledGridJobs.Clear();
+		gridJobLookup.Clear();
+	}
+
+	private void ScheduleBatchedPathJobs(JobHandle lastGridHandle = default(JobHandle))
+	{
+		int count = batches.Count;
+		int count2 = tmpCurrentWork.Count;
+		int result;
+		int num = Math.DivRem(count2, count, out result);
+		if (result > 0)
+		{
+			num++;
+		}
+		int i = 0;
+		int num2 = 0;
+		for (; i < count; i++)
+		{
+			JobHandle jobHandle = lastGridHandle;
+			JobBatchState batchState = batches[i];
+			int num3 = 0;
+			while (num3 < num && num2 < count2)
+			{
+				PathRequest request = tmpCurrentWork.Pop();
+				MapGridRequest gridRequest = MapGridRequest.For(request);
+				ScheduledGridJob scheduledGridJob = gridJobLookup[gridRequest];
+				PathFinderJob job = default(PathFinderJob);
+				GetOrCreatePathJobUniqueState(out var state);
+				GetOrCreatePathJobOutput(out var output);
+				jobHandle = GetDoorBlockedJob(request, ref state).Schedule(jobHandle);
+				ParameterizePathJob(ref job, ref gridRequest, ref output, ref state, ref batchState, ref scheduledGridJob, request);
+				mapData.ParameterizePathJob(ref job);
+				jobHandle = job.Schedule(jobHandle);
+				scheduledPathJobs.Add(new ScheduledPathJob
+				{
+					request = request,
+					handle = jobHandle,
+					state = state,
+					output = output
+				});
+				num3++;
+				num2++;
+			}
+		}
+		JobHandle.ScheduleBatchedJobs();
+	}
+
+	private ManagedJob GetDoorBlockedJob(PathRequest request, ref PathUniqueState jobState)
+	{
+		PathGridDoorsBlockedJob pathGridDoorsBlockedJob = new PathGridDoorsBlockedJob();
+		ParameterizeDoorBlockedJob(pathGridDoorsBlockedJob, request, ref jobState);
+		return new ManagedJob(pathGridDoorsBlockedJob);
+	}
+
+	private JobHandle ScheduleGridJobs()
+	{
+		using (ProfilerBlock.Scope("PathFinder.ScheduleGridJobs()"))
+		{
+			JobHandle jobHandle = default(JobHandle);
+			foreach (PathRequest item in tmpCurrentWork)
+			{
+				MapGridRequest key = MapGridRequest.For(item);
+				if (!gridJobLookup.ContainsKey(key))
+				{
+					jobHandle = ScheduleGridJob(item, jobHandle).handle;
+				}
+			}
+			return jobHandle;
+		}
+	}
+
+	private ScheduledGridJob ScheduleGridJob(PathRequest request, JobHandle handle = default(JobHandle))
+	{
+		MapGridRequest query = MapGridRequest.For(request);
+		ScheduledGridJob scheduledGridJob = default(ScheduledGridJob);
+		scheduledGridJob.lastAccessed = (scheduledGridJob.computed = GenTicks.TicksGame);
+		GetOrCreateGridJobOutput(out scheduledGridJob.output);
+		PathGridJob job = default(PathGridJob);
+		mapData.ParameterizeGridJob(request, ref query, ref job, ref scheduledGridJob.output);
+		int numGridCells = map.cellIndices.NumGridCells;
+		int idealBatchCount = UnityData.GetIdealBatchCount(numGridCells);
+		scheduledGridJob.handle = (handle.Equals(default(JobHandle)) ? job.Schedule(numGridCells, idealBatchCount) : job.Schedule(numGridCells, idealBatchCount, handle));
+		scheduledGridJobs.Add(scheduledGridJob);
+		return gridJobLookup[query] = scheduledGridJob;
+	}
+
+	private void ForceCompleteScheduledJobs()
+	{
+		int num = scheduledPathJobs.Count + scheduledGridJobs.Count;
+		if (num > 0)
+		{
+			NativeArray<JobHandle> jobs = new NativeArray<JobHandle>(num, Allocator.Persistent);
+			for (int i = 0; i < scheduledPathJobs.Count; i++)
+			{
+				jobs[i] = scheduledPathJobs[i].handle;
+			}
+			for (int j = 0; j < scheduledGridJobs.Count; j++)
+			{
+				jobs[scheduledPathJobs.Count + j] = scheduledGridJobs[j].handle;
 			}
 			JobHandle.CompleteAll(jobs);
 			jobs.Dispose();
 		}
+	}
 
-		// Token: 0x060025B5 RID: 9653 RVA: 0x000C6034 File Offset: 0x000C4234
-		private PawnPath EmitPath(in PathFinder.PathJobOutput pathJobOutput)
+	private PawnPath EmitPath(in PathJobOutput pathJobOutput)
+	{
+		NativeList<IntVec3> path = pathJobOutput.path;
+		PathFinderJob.ResultData value = pathJobOutput.data.Value;
+		PawnPath path2 = map.pawnPathPool.GetPath();
+		path2.Initialize(path, value.pathCost);
+		return path2;
+	}
+
+	private void GetOrCreateGridJobOutput(out GridJobOutput output)
+	{
+		if (!gridJobOutputs.TryDequeue(out output))
 		{
-			NativeList<IntVec3> path = pathJobOutput.path;
-			NativeReference<PathFinderJob.ResultData> data = pathJobOutput.data;
-			PathFinderJob.ResultData value = data.Value;
-			PawnPath path2 = this.map.pawnPathPool.GetPath();
-			path2.Initialize(path, value.pathCost);
-			return path2;
+			output.Initalize(map.cellIndices.NumGridCells);
 		}
+	}
 
-		// Token: 0x060025B6 RID: 9654 RVA: 0x000C6074 File Offset: 0x000C4274
-		private void GetOrCreateGridJobOutput(out PathFinder.GridJobOutput output)
+	private void GetOrCreatePathJobUniqueState(out PathUniqueState state)
+	{
+		if (!pathUniqueStates.TryDequeue(out state))
 		{
-			if (!this.gridJobOutputs.TryDequeue(out output))
-			{
-				output.Initalize(this.map.cellIndices.NumGridCells);
-			}
+			state.Initialize(map.cellIndices.NumGridCells);
 		}
+	}
 
-		// Token: 0x060025B7 RID: 9655 RVA: 0x000C609A File Offset: 0x000C429A
-		private void GetOrCreatePathJobUniqueState(out PathFinder.PathUniqueState state)
+	private void GetOrCreatePathJobOutput(out PathJobOutput output)
+	{
+		if (!pathJobOutputs.TryDequeue(out output))
 		{
-			if (!this.pathUniqueStates.TryDequeue(out state))
-			{
-				state.Initialize(this.map.cellIndices.NumGridCells);
-			}
+			output.Initialize(map.cellIndices.NumGridCells);
 		}
+	}
 
-		// Token: 0x060025B8 RID: 9656 RVA: 0x000C60C0 File Offset: 0x000C42C0
-		private void GetOrCreatePathJobOutput(out PathFinder.PathJobOutput output)
+	public PathRequest CreateRequest(IntVec3 start, LocalTargetInfo target, IntVec3? dest, Pawn pawn, PathFinderCostTuning? tuning, PathEndMode peMode = PathEndMode.OnCell, PathRequest.IPathGridCustomizer customizer = null)
+	{
+		ResolveCanBash(pawn, out var canBashDoors, out var canBashFences);
+		bool canBashFences2 = canBashFences;
+		return CreateRequest(start, target, dest, TraverseParms.For(pawn, Danger.Deadly, TraverseMode.ByPawn, canBashDoors, alwaysUseAvoidGrid: false, canBashFences2), tuning, peMode, pawn, customizer);
+	}
+
+	public PathRequest CreateRequest(IntVec3 start, LocalTargetInfo target, IntVec3? dest, TraverseParms traverseParms, PathFinderCostTuning? mtuning, PathEndMode peMode = PathEndMode.OnCell, Pawn pawn = null, PathRequest.IPathGridCustomizer customizer = null)
+	{
+		int ticksGame = GenTicks.TicksGame;
+		PathFinderCostTuning tuning = mtuning ?? PathFinderCostTuning.DefaultTuning;
+		return new PathRequest(map, start, target, dest, traverseParms, tuning, peMode, pawn, ticksGame, ticksGame, ticksGame, customizer);
+	}
+
+	public void PushRequest(PathRequest request)
+	{
+		if (workQueue.Contains(request))
 		{
-			if (!this.pathJobOutputs.TryDequeue(out output))
-			{
-				output.Initialize(this.map.cellIndices.NumGridCells);
-			}
+			Log.Error("Tried to add the same PathRequest twice to PathFinder.");
 		}
-
-		// Token: 0x060025B9 RID: 9657 RVA: 0x000C60E8 File Offset: 0x000C42E8
-		public PathRequest CreateRequest(IntVec3 start, LocalTargetInfo target, IntVec3? dest, Pawn pawn, PathFinderCostTuning? tuning, PathEndMode peMode = PathEndMode.OnCell, PathRequest.IPathGridCustomizer customizer = null)
+		else if (request.ResultIsReady)
 		{
-			bool canBashDoors;
-			bool flag;
-			this.ResolveCanBash(pawn, out canBashDoors, out flag);
-			Danger maxDanger = Danger.Deadly;
-			TraverseMode mode = TraverseMode.ByPawn;
-			bool canBashFences = flag;
-			return this.CreateRequest(start, target, dest, TraverseParms.For(pawn, maxDanger, mode, canBashDoors, false, canBashFences, true), tuning, peMode, pawn, customizer);
+			Log.Error("Tried to add PathRequest to PathFinder but it already has its result calculated.");
 		}
-
-		// Token: 0x060025BA RID: 9658 RVA: 0x000C6124 File Offset: 0x000C4324
-		public PathRequest CreateRequest(IntVec3 start, LocalTargetInfo target, IntVec3? dest, TraverseParms traverseParms, PathFinderCostTuning? mtuning, PathEndMode peMode = PathEndMode.OnCell, Pawn pawn = null, PathRequest.IPathGridCustomizer customizer = null)
+		else
 		{
-			int ticksGame = GenTicks.TicksGame;
-			PathFinderCostTuning tuning = mtuning ?? PathFinderCostTuning.DefaultTuning;
-			return new PathRequest(this.map, start, target, dest, traverseParms, tuning, peMode, pawn, ticksGame, ticksGame, ticksGame, customizer);
+			workQueue.Add(request);
 		}
+	}
 
-		// Token: 0x060025BB RID: 9659 RVA: 0x000C616C File Offset: 0x000C436C
-		public void PushRequest(PathRequest request)
+	private static float DetermineHeuristicStrength(Pawn pawn, IntVec3 start, LocalTargetInfo dest)
+	{
+		if (pawn == null)
 		{
-			if (this.workQueue.Contains(request))
-			{
-				Log.Error("Tried to add the same PathRequest twice to PathFinder.");
-				return;
-			}
-			if (request.ResultIsReady)
-			{
-				Log.Error("Tried to add PathRequest to PathFinder but it already has its result calculated.");
-				return;
-			}
-			this.workQueue.Add(request);
+			return 1f;
 		}
-
-		// Token: 0x060025BC RID: 9660 RVA: 0x000C61A8 File Offset: 0x000C43A8
-		private static float DetermineHeuristicStrength(Pawn pawn, IntVec3 start, LocalTargetInfo dest)
+		if (pawn.RaceProps.Animal)
 		{
-			if (pawn == null)
-			{
-				return 1f;
-			}
-			if (pawn.RaceProps.Animal)
-			{
-				return 1.75f;
-			}
-			if (!pawn.IsColonist)
-			{
-				float magnitude = (start - dest.Cell).Magnitude;
-				return (float)Mathf.RoundToInt(PathFinder.HeuristicScaleAI.Evaluate(magnitude));
-			}
+			return 1.75f;
+		}
+		if (pawn.IsColonist)
+		{
 			if (GameCondition_UnnaturalDarkness.UnnaturalDarknessOnMap(pawn.Map) && GameCondition_UnnaturalDarkness.AffectedByDarkness(pawn))
 			{
 				return 1.5f;
 			}
 			return 1f;
 		}
+		float magnitude = (start - dest.Cell).Magnitude;
+		return Mathf.RoundToInt(HeuristicScaleAI.Evaluate(magnitude));
+	}
 
-		// Token: 0x060025BD RID: 9661 RVA: 0x000C6224 File Offset: 0x000C4424
-		public PawnPath FindPathNow(IntVec3 start, LocalTargetInfo target, Pawn pawn, PathFinderCostTuning? tuning = null, PathEndMode peMode = PathEndMode.OnCell)
+	public PawnPath FindPathNow(IntVec3 start, LocalTargetInfo target, Pawn pawn, PathFinderCostTuning? tuning = null, PathEndMode peMode = PathEndMode.OnCell)
+	{
+		ResolveCanBash(pawn, out var canBashDoors, out var canBashFences);
+		bool canBashFences2 = canBashFences;
+		return FindPathNow(start, target, TraverseParms.For(pawn, Danger.Deadly, TraverseMode.ByPawn, canBashDoors, alwaysUseAvoidGrid: false, canBashFences2), tuning, peMode);
+	}
+
+	public PawnPath FindPathNow(IntVec3 start, LocalTargetInfo target, TraverseParms traverseParms, PathFinderCostTuning? tuning = null, PathEndMode peMode = PathEndMode.OnCell, PathRequest.IPathGridCustomizer customizer = null)
+	{
+		if (disposed)
 		{
-			bool canBashDoors;
-			bool flag;
-			this.ResolveCanBash(pawn, out canBashDoors, out flag);
-			Danger maxDanger = Danger.Deadly;
-			TraverseMode mode = TraverseMode.ByPawn;
-			bool canBashFences = flag;
-			return this.FindPathNow(start, target, TraverseParms.For(pawn, maxDanger, mode, canBashDoors, false, canBashFences, true), tuning, peMode, null);
+			return PawnPath.NotFound;
 		}
-
-		// Token: 0x060025BE RID: 9662 RVA: 0x000C6258 File Offset: 0x000C4458
-		public PawnPath FindPathNow(IntVec3 start, LocalTargetInfo target, TraverseParms traverseParms, PathFinderCostTuning? tuning = null, PathEndMode peMode = PathEndMode.OnCell, PathRequest.IPathGridCustomizer customizer = null)
+		PathRequest pathRequest = CreateRequest(start, target, null, traverseParms, tuning, peMode, traverseParms.pawn, customizer);
+		if (!pathRequest.Validate())
 		{
-			if (this.disposed)
-			{
-				return PawnPath.NotFound;
-			}
-			PathRequest pathRequest = this.CreateRequest(start, target, null, traverseParms, tuning, peMode, traverseParms.pawn, customizer);
-			if (!pathRequest.Validate())
-			{
-				return PawnPath.NotFound;
-			}
-			this.ForceCompleteScheduledJobs();
-			if (this.mapData.GatherData(new PathRequest[]
-			{
-				pathRequest
-			}))
-			{
-				this.RecycleGridJobData();
-			}
-			PathFinder.MapGridRequest key = PathFinder.MapGridRequest.For(pathRequest);
-			PathFinder.ScheduledGridJob scheduledGridJob;
-			if (!this.gridJobLookup.TryGetValue(key, out scheduledGridJob))
-			{
-				scheduledGridJob = this.ScheduleGridJob(pathRequest, default(JobHandle));
-			}
-			PathFinderJob jobData = default(PathFinderJob);
-			PathFinder.PathUniqueState item;
-			this.GetOrCreatePathJobUniqueState(out item);
-			PathFinder.PathJobOutput item2;
-			this.GetOrCreatePathJobOutput(out item2);
-			scheduledGridJob.handle.Complete();
-			this.GetDoorBlockedJob(pathRequest, ref item).Run();
-			this.ParameterizePathJob(ref jobData, ref key, ref item2, ref item, ref this.immediateBatch, ref scheduledGridJob, pathRequest);
-			this.mapData.ParameterizePathJob(ref jobData);
-			jobData.Run<PathFinderJob>();
-			if (item2.path.Length == 0)
-			{
-				this.pathUniqueStates.Enqueue(item);
-				this.pathJobOutputs.Enqueue(item2);
-				pathRequest.Resolve(null);
-				return PawnPath.NotFound;
-			}
-			PawnPath result = this.EmitPath(item2);
-			this.pathUniqueStates.Enqueue(item);
-			this.pathJobOutputs.Enqueue(item2);
-			return result;
+			return PawnPath.NotFound;
 		}
-
-		// Token: 0x060025BF RID: 9663 RVA: 0x000C63A4 File Offset: 0x000C45A4
-		private void ParameterizeDoorBlockedJob(PathGridDoorsBlockedJob job, PathRequest request, ref PathFinder.PathUniqueState state)
+		ForceCompleteScheduledJobs();
+		if (mapData.GatherData(new PathRequest[1] { pathRequest }))
 		{
+			RecycleGridJobData();
+		}
+		MapGridRequest gridRequest = MapGridRequest.For(pathRequest);
+		if (!gridJobLookup.TryGetValue(gridRequest, out var value))
+		{
+			value = ScheduleGridJob(pathRequest);
+		}
+		PathFinderJob job = default(PathFinderJob);
+		GetOrCreatePathJobUniqueState(out var state);
+		GetOrCreatePathJobOutput(out var output);
+		value.handle.Complete();
+		GetDoorBlockedJob(pathRequest, ref state).Run();
+		ParameterizePathJob(ref job, ref gridRequest, ref output, ref state, ref immediateBatch, ref value, pathRequest);
+		mapData.ParameterizePathJob(ref job);
+		job.Run();
+		if (output.path.Length == 0)
+		{
+			pathUniqueStates.Enqueue(state);
+			pathJobOutputs.Enqueue(output);
+			pathRequest.Resolve(null);
+			return PawnPath.NotFound;
+		}
+		PawnPath result = EmitPath(in output);
+		pathUniqueStates.Enqueue(state);
+		pathJobOutputs.Enqueue(output);
+		return result;
+	}
+
+	private void ParameterizeDoorBlockedJob(PathGridDoorsBlockedJob job, PathRequest request, ref PathUniqueState state)
+	{
+		job.start = request.Start;
+		job.dest = request.Target.Cell;
+		job.map = map;
+		job.pawn = request.pawn;
+		job.traverseParams = request.TraverseParms;
+		job.tuning = request.Tuning;
+		EnsureDoorsPawnsCached();
+		job.doors = cachedDoors;
+		job.providers = cachedProviders;
+		job.pawns = cachedPawns;
+		job.providerCost = state.providers;
+		job.blocked = state.blocked;
+	}
+
+	private void EnsureDoorsPawnsCached()
+	{
+		if (cachedTick == GenTicks.TicksGame)
+		{
+			return;
+		}
+		cachedTick = GenTicks.TicksGame;
+		cachedProviders.Clear();
+		cachedDoors.Clear();
+		cachedPawns.Clear();
+		foreach (Thing item in map.listerThings.ThingsInGroup(ThingRequestGroup.CostProvider))
+		{
+			cachedProviders.Add((IPathFindCostProvider)item);
+		}
+		cachedDoors.AddRange(map.listerThings.ThingsInGroup(ThingRequestGroup.Door));
+		foreach (Thing cachedDoor in cachedDoors)
+		{
+			if (cachedDoor is Building_Door building_Door)
+			{
+				building_Door.SnapshotWillCloseSoonForJobs();
+			}
+		}
+		cachedPawns.AddRange(map.mapPawns.AllPawnsSpawned);
+	}
+
+	private void ParameterizePathJob(ref PathFinderJob job, ref MapGridRequest gridRequest, ref PathJobOutput output, ref PathUniqueState uniqueState, ref JobBatchState batchState, ref ScheduledGridJob scheduledGridJob, PathRequest request)
+	{
+		using (ProfilerBlock.Scope("PathFinder.Parameterize"))
+		{
+			job.indices = map.cellIndices;
+			MakeDestination(request.Target, request.EndMode, map.pathing.For(request.TraverseParms), out var rect, ref uniqueState.excludedDestIndices);
+			job.grid = scheduledGridJob.output.grid.AsReadOnly();
+			scheduledGridJob.lastAccessed = GenTicks.TicksGame;
 			job.start = request.Start;
-			job.dest = request.Target.Cell;
-			job.map = this.map;
-			job.pawn = request.pawn;
-			job.traverseParams = request.TraverseParms;
-			job.tuning = request.Tuning;
-			this.EnsureDoorsPawnsCached();
-			job.doors = this.cachedDoors;
-			job.providers = this.cachedProviders;
-			job.pawns = this.cachedPawns;
-			job.providerCost = state.providers;
-			job.blocked = state.blocked;
-		}
-
-		// Token: 0x060025C0 RID: 9664 RVA: 0x000C6444 File Offset: 0x000C4644
-		private void EnsureDoorsPawnsCached()
-		{
-			if (this.cachedTick == GenTicks.TicksGame)
+			job.destCell = request.Target.Cell;
+			job.destRect = rect;
+			job.heuristicStrength = DetermineHeuristicStrength(request.TraverseParms.pawn, request.Start, request.Target);
+			job.traverseParams = gridRequest.traverseParams;
+			if (request.TraverseParms.pawn != null)
 			{
-				return;
-			}
-			this.cachedTick = GenTicks.TicksGame;
-			this.cachedProviders.Clear();
-			this.cachedDoors.Clear();
-			this.cachedPawns.Clear();
-			foreach (Thing thing in this.map.listerThings.ThingsInGroup(ThingRequestGroup.CostProvider))
-			{
-				this.cachedProviders.Add((IPathFindCostProvider)thing);
-			}
-			this.cachedDoors.AddRange(this.map.listerThings.ThingsInGroup(ThingRequestGroup.Door));
-			this.cachedPawns.AddRange(this.map.mapPawns.AllPawnsSpawned);
-		}
-
-		// Token: 0x060025C1 RID: 9665 RVA: 0x000C6520 File Offset: 0x000C4720
-		private void ParameterizePathJob(ref PathFinderJob job, ref PathFinder.MapGridRequest gridRequest, ref PathFinder.PathJobOutput output, ref PathFinder.PathUniqueState uniqueState, ref PathFinder.JobBatchState batchState, ref PathFinder.ScheduledGridJob scheduledGridJob, PathRequest request)
-		{
-			using (ProfilerBlock.Scope("PathFinder.Parameterize"))
-			{
-				job.indices = this.map.cellIndices;
-				CellRect destRect;
-				PathFinder.MakeDestination(request.Target, request.EndMode, this.map.pathing.For(request.TraverseParms), out destRect, ref uniqueState.excludedDestIndices);
-				job.grid = scheduledGridJob.output.grid.AsReadOnly();
-				scheduledGridJob.lastAccessed = GenTicks.TicksGame;
-				job.start = request.Start;
-				job.destCell = request.Target.Cell;
-				job.destRect = destRect;
-				job.heuristicStrength = PathFinder.DetermineHeuristicStrength(request.TraverseParms.pawn, request.Start, request.Target);
-				job.traverseParams = gridRequest.traverseParams;
-				if (request.TraverseParms.pawn != null)
-				{
-					job.moveTicksCardinal = Mathf.RoundToInt(request.TraverseParms.pawn.TicksPerMoveCardinal);
-					job.moveTicksDiagonal = Mathf.RoundToInt(request.TraverseParms.pawn.TicksPerMoveDiagonal);
-				}
-				else
-				{
-					job.moveTicksCardinal = 18;
-					job.moveTicksDiagonal = 18;
-				}
-				job.calcGrid = batchState.calcGrid;
-				job.frontier = batchState.frontier;
-				job.path = output.path;
-				job.result = output.data;
-				job.providerCost = uniqueState.providers.AsReadOnly();
-				job.blocked = uniqueState.blocked.AsReadOnly();
-				job.excludedRectIndices = uniqueState.excludedDestIndices;
-			}
-		}
-
-		// Token: 0x060025C2 RID: 9666 RVA: 0x000C66E0 File Offset: 0x000C48E0
-		private static void MakeDestination(LocalTargetInfo target, PathEndMode peMode, PathingContext context, out CellRect rect, ref NativeList<int> excluded)
-		{
-			excluded.Clear();
-			Map map = context.map;
-			CellIndices cellIndices = map.cellIndices;
-			rect = PathFinder.CalculateDestinationRect(target, peMode, context);
-			if (peMode == PathEndMode.Touch && rect.Area != 1)
-			{
-				IntVec3 b = new IntVec3(1, 0, 0);
-				IntVec3 b2 = new IntVec3(0, 0, 1);
-				IntVec3 intVec;
-				IntVec3 intVec2;
-				IntVec3 intVec3;
-				IntVec3 intVec4;
-				rect.GetInternalCorners(out intVec, out intVec2, out intVec3, out intVec4);
-				if (intVec.InBounds(map) && !TouchPathEndModeUtility.IsCornerTouchAllowed_NewTemp(intVec + b2, intVec + b, context, target.Thing))
-				{
-					int num = cellIndices.CellToIndex(intVec);
-					excluded.Add(num);
-				}
-				if (intVec3.InBounds(map) && !TouchPathEndModeUtility.IsCornerTouchAllowed_NewTemp(intVec3 - b2, intVec3 - b, context, target.Thing))
-				{
-					int num = cellIndices.CellToIndex(intVec3);
-					excluded.Add(num);
-				}
-				if (intVec2.InBounds(map) && !TouchPathEndModeUtility.IsCornerTouchAllowed_NewTemp(intVec2 - b2, intVec2 + b, context, target.Thing))
-				{
-					int num = cellIndices.CellToIndex(intVec2);
-					excluded.Add(num);
-				}
-				if (intVec4.InBounds(map) && !TouchPathEndModeUtility.IsCornerTouchAllowed_NewTemp(intVec4 + b2, intVec4 - b, context, target.Thing))
-				{
-					int num = cellIndices.CellToIndex(intVec4);
-					excluded.Add(num);
-				}
-			}
-			rect = rect.ClipInsideMap(map);
-		}
-
-		// Token: 0x060025C3 RID: 9667 RVA: 0x000C6848 File Offset: 0x000C4A48
-		private static CellRect CalculateDestinationRect(LocalTargetInfo dest, PathEndMode peMode, PathingContext context)
-		{
-			CellRect result;
-			if (!dest.HasThing || peMode == PathEndMode.OnCell)
-			{
-				result = CellRect.SingleCell(dest.Cell);
+				job.moveTicksCardinal = Mathf.RoundToInt(request.TraverseParms.pawn.TicksPerMoveCardinal);
+				job.moveTicksDiagonal = Mathf.RoundToInt(request.TraverseParms.pawn.TicksPerMoveDiagonal);
 			}
 			else
 			{
-				result = dest.Thing.OccupiedRect();
+				job.moveTicksCardinal = 18;
+				job.moveTicksDiagonal = 18;
 			}
-			if (peMode == PathEndMode.Touch)
-			{
-				result = result.ExpandedBy(1);
-			}
-			return result;
+			job.calcGrid = batchState.calcGrid;
+			job.frontier = batchState.frontier;
+			job.path = output.path;
+			job.result = output.data;
+			job.providerCost = uniqueState.providers.AsReadOnly();
+			job.blocked = uniqueState.blocked.AsReadOnly();
+			job.excludedRectIndices = uniqueState.excludedDestIndices;
 		}
+	}
 
-		// Token: 0x060025C4 RID: 9668 RVA: 0x000C688C File Offset: 0x000C4A8C
-		private void ResolveCanBash(Pawn pawn, out bool canBashDoors, out bool canBashFences)
+	private static void MakeDestination(LocalTargetInfo target, PathEndMode peMode, PathingContext context, out CellRect rect, ref NativeList<int> excluded)
+	{
+		excluded.Clear();
+		Map map = context.map;
+		CellIndices cellIndices = map.cellIndices;
+		rect = CalculateDestinationRect(target, peMode, context);
+		if (peMode == PathEndMode.Touch && rect.Area != 1)
 		{
-			canBashDoors = (pawn != null && pawn.CurJob != null && pawn.CurJob.canBashDoors);
-			canBashFences = (pawn != null && pawn.CurJob != null && pawn.CurJob.canBashFences);
-		}
-
-		// Token: 0x060025C5 RID: 9669 RVA: 0x000C68C4 File Offset: 0x000C4AC4
-		public void LogPathfinderState()
-		{
-			StringBuilder stringBuilder = new StringBuilder();
-			stringBuilder.AppendLine("Pathfinder State");
-			stringBuilder.AppendLine();
-			stringBuilder.AppendLine("Avaliable resources:");
-			stringBuilder.AppendLine(string.Format("Grid outputs: {0}", this.gridJobOutputs.Count));
-			stringBuilder.AppendLine(string.Format("Path states: {0}", this.pathUniqueStates.Count));
-			stringBuilder.AppendLine(string.Format("Path outputs: {0}", this.pathJobOutputs.Count));
-			stringBuilder.AppendLine();
-			stringBuilder.AppendLine(string.Format("Current grid results: {0}", this.gridJobLookup.Count));
-			foreach (KeyValuePair<PathFinder.MapGridRequest, PathFinder.ScheduledGridJob> keyValuePair in this.gridJobLookup)
+			IntVec3 intVec = new IntVec3(1, 0, 0);
+			IntVec3 intVec2 = new IntVec3(0, 0, 1);
+			rect.GetInternalCorners(out var BL, out var TL, out var TR, out var BR);
+			if (BL.InBounds(map) && !TouchPathEndModeUtility.IsCornerTouchAllowed_NewTemp(BL + intVec2, BL + intVec, context, target.Thing))
 			{
-				PathFinder.MapGridRequest mapGridRequest;
-				PathFinder.ScheduledGridJob scheduledGridJob;
-				keyValuePair.Deconstruct(out mapGridRequest, out scheduledGridJob);
-				PathFinder.MapGridRequest mapGridRequest2 = mapGridRequest;
-				PathFinder.ScheduledGridJob scheduledGridJob2 = scheduledGridJob;
-				stringBuilder.AppendLine(string.Format("   - {0} ({1:F2}s old, last accessed: {2:F2}s ago)", mapGridRequest2, (GenTicks.TicksGame - scheduledGridJob2.computed).TicksToSeconds(), (GenTicks.TicksGame - scheduledGridJob2.lastAccessed).TicksToSeconds()));
+				excluded.Add(cellIndices.CellToIndex(BL));
 			}
-			Log.Message(stringBuilder.ToString());
-		}
-
-		// Token: 0x060025C6 RID: 9670 RVA: 0x000C6A20 File Offset: 0x000C4C20
-		public void LogGridCellResult(IntVec3 cell)
-		{
-			List<FloatMenuOption> list = new List<FloatMenuOption>();
-			foreach (KeyValuePair<PathFinder.MapGridRequest, PathFinder.ScheduledGridJob> keyValuePair in this.gridJobLookup)
+			if (TR.InBounds(map) && !TouchPathEndModeUtility.IsCornerTouchAllowed_NewTemp(TR - intVec2, TR - intVec, context, target.Thing))
 			{
-				PathFinder.MapGridRequest mapGridRequest;
-				PathFinder.ScheduledGridJob scheduledGridJob;
-				keyValuePair.Deconstruct(out mapGridRequest, out scheduledGridJob);
-				PathFinder.MapGridRequest mapGridRequest2 = mapGridRequest;
-				PathFinder.ScheduledGridJob scheduledGridJob2 = scheduledGridJob;
-				PathFinder.ScheduledGridJob local = scheduledGridJob2;
-				list.Add(new FloatMenuOption(string.Format("{0} ({1:F2}s old)", mapGridRequest2, (GenTicks.TicksGame - scheduledGridJob2.computed).TicksToSeconds()), delegate()
-				{
-					Log.Message(string.Format("{0}: {1}", cell, local.output.grid[this.map.cellIndices[cell]]));
-				}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0));
+				excluded.Add(cellIndices.CellToIndex(TR));
 			}
-			Find.WindowStack.Add(new FloatMenu(list));
-		}
-
-		// Token: 0x060025C7 RID: 9671 RVA: 0x000026EA File Offset: 0x000008EA
-		public void OnDraw()
-		{
-		}
-
-		// Token: 0x060025C8 RID: 9672 RVA: 0x000026EA File Offset: 0x000008EA
-		public void OnGUI()
-		{
-		}
-
-		// Token: 0x060025C9 RID: 9673 RVA: 0x000C6B10 File Offset: 0x000C4D10
-		public void Dispose()
-		{
-			if (this.disposed)
+			if (TL.InBounds(map) && !TouchPathEndModeUtility.IsCornerTouchAllowed_NewTemp(TL - intVec2, TL + intVec, context, target.Thing))
 			{
-				return;
+				excluded.Add(cellIndices.CellToIndex(TL));
 			}
-			this.disposed = true;
-			foreach (PathFinder.ScheduledGridJob scheduledGridJob in this.scheduledGridJobs)
+			if (BR.InBounds(map) && !TouchPathEndModeUtility.IsCornerTouchAllowed_NewTemp(BR + intVec2, BR - intVec, context, target.Thing))
 			{
-				JobHandle handle = scheduledGridJob.handle;
-				handle.Complete();
-			}
-			foreach (PathFinder.ScheduledPathJob scheduledPathJob in this.scheduledPathJobs)
-			{
-				JobHandle handle = scheduledPathJob.handle;
-				handle.Complete();
-			}
-			foreach (PathFinder.ScheduledGridJob scheduledGridJob2 in this.scheduledGridJobs)
-			{
-				PathFinder.GridJobOutput output = scheduledGridJob2.output;
-				output.Dispose();
-			}
-			foreach (PathFinder.ScheduledPathJob scheduledPathJob2 in this.scheduledPathJobs)
-			{
-				PathFinder.PathUniqueState state = scheduledPathJob2.state;
-				state.Dispose();
-				PathFinder.PathJobOutput output2 = scheduledPathJob2.output;
-				output2.Dispose();
-			}
-			this.mapData.Dispose();
-			foreach (PathFinder.JobBatchState jobBatchState in this.batches)
-			{
-				jobBatchState.Dispose();
-			}
-			this.immediateBatch.Dispose();
-			foreach (PathFinder.GridJobOutput gridJobOutput in this.gridJobOutputs)
-			{
-				gridJobOutput.Dispose();
-			}
-			foreach (PathFinder.PathUniqueState pathUniqueState in this.pathUniqueStates)
-			{
-				pathUniqueState.Dispose();
-			}
-			foreach (PathFinder.PathJobOutput pathJobOutput in this.pathJobOutputs)
-			{
-				pathJobOutput.Dispose();
+				excluded.Add(cellIndices.CellToIndex(BR));
 			}
 		}
+		rect = rect.ClipInsideMap(map);
+	}
 
-		// Token: 0x04001EEE RID: 7918
-		private readonly Map map;
-
-		// Token: 0x04001EEF RID: 7919
-		private readonly PathFinderMapData mapData;
-
-		// Token: 0x04001EF0 RID: 7920
-		private readonly List<PathFinder.JobBatchState> batches = new List<PathFinder.JobBatchState>();
-
-		// Token: 0x04001EF1 RID: 7921
-		private PathFinder.JobBatchState immediateBatch;
-
-		// Token: 0x04001EF2 RID: 7922
-		private readonly List<PathRequest> workQueue = new List<PathRequest>();
-
-		// Token: 0x04001EF3 RID: 7923
-		private readonly List<PathFinder.ScheduledPathJob> scheduledPathJobs = new List<PathFinder.ScheduledPathJob>();
-
-		// Token: 0x04001EF4 RID: 7924
-		private readonly List<PathFinder.ScheduledGridJob> scheduledGridJobs = new List<PathFinder.ScheduledGridJob>();
-
-		// Token: 0x04001EF5 RID: 7925
-		private readonly Queue<PathFinder.PathJobOutput> pathJobOutputs = new Queue<PathFinder.PathJobOutput>();
-
-		// Token: 0x04001EF6 RID: 7926
-		private readonly Queue<PathFinder.PathUniqueState> pathUniqueStates = new Queue<PathFinder.PathUniqueState>();
-
-		// Token: 0x04001EF7 RID: 7927
-		private readonly Queue<PathFinder.GridJobOutput> gridJobOutputs = new Queue<PathFinder.GridJobOutput>();
-
-		// Token: 0x04001EF8 RID: 7928
-		private readonly Dictionary<PathFinder.MapGridRequest, PathFinder.ScheduledGridJob> gridJobLookup = new Dictionary<PathFinder.MapGridRequest, PathFinder.ScheduledGridJob>();
-
-		// Token: 0x04001EF9 RID: 7929
-		private readonly List<PathRequest> tmpCurrentWork = new List<PathRequest>();
-
-		// Token: 0x04001EFA RID: 7930
-		private bool disposed;
-
-		// Token: 0x04001EFB RID: 7931
-		public const int DefaultMoveTicksCardinal = 13;
-
-		// Token: 0x04001EFC RID: 7932
-		public const int DefaultMoveTicksDiagonal = 18;
-
-		// Token: 0x04001EFD RID: 7933
-		public const float DiagonalMoveFactor = 1.41421f;
-
-		// Token: 0x04001EFE RID: 7934
-		private const float HeuristicScaleAnimal = 1.75f;
-
-		// Token: 0x04001EFF RID: 7935
-		private static readonly SimpleCurve HeuristicScaleAI = new SimpleCurve
+	private static CellRect CalculateDestinationRect(LocalTargetInfo dest, PathEndMode peMode, PathingContext context)
+	{
+		CellRect result = ((dest.HasThing && peMode != PathEndMode.OnCell) ? dest.Thing.OccupiedRect() : CellRect.SingleCell(dest.Cell));
+		if (peMode == PathEndMode.Touch)
 		{
-			{
-				new CurvePoint(40f, 1f),
-				true
-			},
-			{
-				new CurvePoint(120f, 2f),
-				true
-			}
-		};
-
-		// Token: 0x04001F00 RID: 7936
-		private readonly List<IPathFindCostProvider> cachedProviders = new List<IPathFindCostProvider>();
-
-		// Token: 0x04001F01 RID: 7937
-		private readonly List<Thing> cachedDoors = new List<Thing>();
-
-		// Token: 0x04001F02 RID: 7938
-		private readonly List<Pawn> cachedPawns = new List<Pawn>();
-
-		// Token: 0x04001F03 RID: 7939
-		private int cachedTick;
-
-		// Token: 0x020005B4 RID: 1460
-		private struct ScheduledPathJob
-		{
-			// Token: 0x04001F04 RID: 7940
-			public PathRequest request;
-
-			// Token: 0x04001F05 RID: 7941
-			public JobHandle handle;
-
-			// Token: 0x04001F06 RID: 7942
-			public PathFinder.PathUniqueState state;
-
-			// Token: 0x04001F07 RID: 7943
-			public PathFinder.PathJobOutput output;
+			result = result.ExpandedBy(1);
 		}
+		return result;
+	}
 
-		// Token: 0x020005B5 RID: 1461
-		private struct ScheduledGridJob
+	private void ResolveCanBash(Pawn pawn, out bool canBashDoors, out bool canBashFences)
+	{
+		canBashDoors = pawn != null && pawn.CurJob != null && pawn.CurJob.canBashDoors;
+		canBashFences = pawn != null && pawn.CurJob != null && pawn.CurJob.canBashFences;
+	}
+
+	public void LogPathfinderState()
+	{
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.AppendLine("Pathfinder State");
+		stringBuilder.AppendLine();
+		stringBuilder.AppendLine("Avaliable resources:");
+		stringBuilder.AppendLine($"Grid outputs: {gridJobOutputs.Count}");
+		stringBuilder.AppendLine($"Path states: {pathUniqueStates.Count}");
+		stringBuilder.AppendLine($"Path outputs: {pathJobOutputs.Count}");
+		stringBuilder.AppendLine();
+		stringBuilder.AppendLine($"Current grid results: {gridJobLookup.Count}");
+		foreach (var (value, scheduledGridJob2) in gridJobLookup)
 		{
-			// Token: 0x04001F08 RID: 7944
-			public int computed;
-
-			// Token: 0x04001F09 RID: 7945
-			public int lastAccessed;
-
-			// Token: 0x04001F0A RID: 7946
-			public JobHandle handle;
-
-			// Token: 0x04001F0B RID: 7947
-			public PathFinder.GridJobOutput output;
+			stringBuilder.AppendLine($"   - {value} ({(GenTicks.TicksGame - scheduledGridJob2.computed).TicksToSeconds():F2}s old, last accessed: {(GenTicks.TicksGame - scheduledGridJob2.lastAccessed).TicksToSeconds():F2}s ago)");
 		}
+		Log.Message(stringBuilder.ToString());
+	}
 
-		// Token: 0x020005B6 RID: 1462
-		public readonly struct UnmanagedGridTraverseParams : IEquatable<PathFinder.UnmanagedGridTraverseParams>
+	public void LogGridCellResult(IntVec3 cell)
+	{
+		List<FloatMenuOption> list = new List<FloatMenuOption>();
+		foreach (KeyValuePair<MapGridRequest, ScheduledGridJob> item in gridJobLookup)
 		{
-			// Token: 0x060025CB RID: 9675 RVA: 0x000C6DCC File Offset: 0x000C4FCC
-			public UnmanagedGridTraverseParams(TraverseMode mode, bool canBashFences, bool fenceBlocked, bool avoidPersistentDanger, bool avoidDarknessDanger, bool avoidFog, CellRect targetBuildable)
+			item.Deconstruct(out var key, out var value);
+			MapGridRequest value2 = key;
+			ScheduledGridJob scheduledGridJob = value;
+			ScheduledGridJob local = scheduledGridJob;
+			list.Add(new FloatMenuOption($"{value2} ({(GenTicks.TicksGame - scheduledGridJob.computed).TicksToSeconds():F2}s old)", delegate
 			{
-				this.mode = mode;
-				this.canBashFences = canBashFences;
-				this.fenceBlocked = fenceBlocked;
-				this.avoidPersistentDanger = avoidPersistentDanger;
-				this.avoidDarknessDanger = avoidDarknessDanger;
-				this.avoidFog = avoidFog;
-				this.targetBuildable = targetBuildable;
-			}
-
-			// Token: 0x060025CC RID: 9676 RVA: 0x000C6E03 File Offset: 0x000C5003
-			public static PathFinder.UnmanagedGridTraverseParams For(TraverseParms parms)
-			{
-				return new PathFinder.UnmanagedGridTraverseParams(parms.mode, parms.canBashFences, parms.fenceBlocked, parms.avoidPersistentDanger, parms.avoidDarknessDanger, parms.avoidFog, parms.targetBuildable);
-			}
-
-			// Token: 0x060025CD RID: 9677 RVA: 0x000C6E34 File Offset: 0x000C5034
-			public bool Equals(PathFinder.UnmanagedGridTraverseParams other)
-			{
-				return this.mode == other.mode && this.canBashFences == other.canBashFences && this.fenceBlocked == other.fenceBlocked && this.avoidPersistentDanger == other.avoidPersistentDanger && this.avoidDarknessDanger == other.avoidDarknessDanger && this.avoidFog == other.avoidFog && this.targetBuildable == other.targetBuildable;
-			}
-
-			// Token: 0x060025CE RID: 9678 RVA: 0x000C6EA8 File Offset: 0x000C50A8
-			public override bool Equals(object obj)
-			{
-				if (obj is PathFinder.UnmanagedGridTraverseParams)
-				{
-					PathFinder.UnmanagedGridTraverseParams other = (PathFinder.UnmanagedGridTraverseParams)obj;
-					return this.Equals(other);
-				}
-				return false;
-			}
-
-			// Token: 0x060025CF RID: 9679 RVA: 0x000C6ECD File Offset: 0x000C50CD
-			public override int GetHashCode()
-			{
-				return HashCode.Combine<int, bool, bool, bool, bool, bool, CellRect>((int)this.mode, this.canBashFences, this.fenceBlocked, this.avoidPersistentDanger, this.avoidDarknessDanger, this.avoidFog, this.targetBuildable);
-			}
-
-			// Token: 0x04001F0C RID: 7948
-			public readonly TraverseMode mode;
-
-			// Token: 0x04001F0D RID: 7949
-			public readonly bool canBashFences;
-
-			// Token: 0x04001F0E RID: 7950
-			public readonly bool fenceBlocked;
-
-			// Token: 0x04001F0F RID: 7951
-			public readonly bool avoidPersistentDanger;
-
-			// Token: 0x04001F10 RID: 7952
-			public readonly bool avoidDarknessDanger;
-
-			// Token: 0x04001F11 RID: 7953
-			public readonly bool avoidFog;
-
-			// Token: 0x04001F12 RID: 7954
-			public readonly CellRect targetBuildable;
+				Log.Message($"{cell}: {local.output.grid[map.cellIndices[cell]]}");
+			}));
 		}
+		Find.WindowStack.Add(new FloatMenu(list));
+	}
 
-		// Token: 0x020005B7 RID: 1463
-		public struct MapGridRequest : IEquatable<PathFinder.MapGridRequest>
+	public void OnDraw()
+	{
+	}
+
+	public void OnGUI()
+	{
+	}
+
+	public void Dispose()
+	{
+		if (disposed)
 		{
-			// Token: 0x060025D0 RID: 9680 RVA: 0x000C6F00 File Offset: 0x000C5100
-			public static PathFinder.MapGridRequest For(PathRequest request)
-			{
-				AvoidGrid avoidGrid = null;
-				if (request.pawn != null)
-				{
-					request.pawn.TryGetAvoidGrid(out avoidGrid, true);
-				}
-				return new PathFinder.MapGridRequest
-				{
-					traverseParams = PathFinder.UnmanagedGridTraverseParams.For(request.TraverseParms),
-					tuning = request.Tuning,
-					customizer = request.customizer,
-					allowedArea = request.area,
-					avoidGrid = avoidGrid
-				};
-			}
-
-			// Token: 0x060025D1 RID: 9681 RVA: 0x000C6F70 File Offset: 0x000C5170
-			public bool Equals(PathFinder.MapGridRequest other)
-			{
-				return this.traverseParams.Equals(other.traverseParams) && this.tuning.Equals(other.tuning) && object.Equals(this.customizer, other.customizer) && object.Equals(this.allowedArea, other.allowedArea) && object.Equals(this.avoidGrid, other.avoidGrid);
-			}
-
-			// Token: 0x060025D2 RID: 9682 RVA: 0x000C6FDC File Offset: 0x000C51DC
-			public override bool Equals(object obj)
-			{
-				if (obj is PathFinder.MapGridRequest)
-				{
-					PathFinder.MapGridRequest other = (PathFinder.MapGridRequest)obj;
-					return this.Equals(other);
-				}
-				return false;
-			}
-
-			// Token: 0x060025D3 RID: 9683 RVA: 0x000C7001 File Offset: 0x000C5201
-			public override int GetHashCode()
-			{
-				return HashCode.Combine<PathFinder.UnmanagedGridTraverseParams, PathFinderCostTuning, PathRequest.IPathGridCustomizer, Area, AvoidGrid>(this.traverseParams, this.tuning, this.customizer, this.allowedArea, this.avoidGrid);
-			}
-
-			// Token: 0x060025D4 RID: 9684 RVA: 0x000C7028 File Offset: 0x000C5228
-			public override string ToString()
-			{
-				return string.Format("{0}{1}{2}{3}{4}", new object[]
-				{
-					this.traverseParams.mode,
-					this.traverseParams.fenceBlocked ? ", fence blocked" : "",
-					this.traverseParams.avoidFog ? ", avoid fog" : "",
-					(this.allowedArea != null) ? (", area: " + this.allowedArea.RenamableLabel) : "",
-					(this.avoidGrid != null) ? ", avoid grid: true" : ""
-				});
-			}
-
-			// Token: 0x04001F13 RID: 7955
-			public PathFinder.UnmanagedGridTraverseParams traverseParams;
-
-			// Token: 0x04001F14 RID: 7956
-			public PathFinderCostTuning tuning;
-
-			// Token: 0x04001F15 RID: 7957
-			public PathRequest.IPathGridCustomizer customizer;
-
-			// Token: 0x04001F16 RID: 7958
-			public Area allowedArea;
-
-			// Token: 0x04001F17 RID: 7959
-			public AvoidGrid avoidGrid;
+			return;
 		}
-
-		// Token: 0x020005B8 RID: 1464
-		private struct JobBatchState : IDisposable
+		disposed = true;
+		foreach (ScheduledGridJob scheduledGridJob in scheduledGridJobs)
 		{
-			// Token: 0x060025D5 RID: 9685 RVA: 0x000C70D0 File Offset: 0x000C52D0
-			public static PathFinder.JobBatchState AllocateNew(int cells)
-			{
-				PathFinder.JobBatchState result;
-				result.calcGrid = new NativeArray<PathFinderJob.CalcNode>(cells, Allocator.Persistent, NativeArrayOptions.ClearMemory);
-				result.frontier = new NativePriorityQueue<int, float, FloatMinComparer>(cells, default(FloatMinComparer), Allocator.Persistent);
-				return result;
-			}
-
-			// Token: 0x060025D6 RID: 9686 RVA: 0x000C7104 File Offset: 0x000C5304
-			public void Dispose()
-			{
-				this.calcGrid.Dispose();
-				this.frontier.Dispose();
-			}
-
-			// Token: 0x04001F18 RID: 7960
-			public NativeArray<PathFinderJob.CalcNode> calcGrid;
-
-			// Token: 0x04001F19 RID: 7961
-			public NativePriorityQueue<int, float, FloatMinComparer> frontier;
+			scheduledGridJob.handle.Complete();
 		}
-
-		// Token: 0x020005B9 RID: 1465
-		public struct GridJobOutput : IDisposable
+		foreach (ScheduledPathJob scheduledPathJob in scheduledPathJobs)
 		{
-			// Token: 0x060025D7 RID: 9687 RVA: 0x000C711C File Offset: 0x000C531C
-			public void Initalize(int cells)
-			{
-				this.grid = new NativeArray<int>(cells, Allocator.Persistent, NativeArrayOptions.ClearMemory);
-			}
-
-			// Token: 0x060025D8 RID: 9688 RVA: 0x000C712C File Offset: 0x000C532C
-			public void Dispose()
-			{
-				this.grid.Dispose();
-			}
-
-			// Token: 0x04001F1A RID: 7962
-			public NativeArray<int> grid;
+			scheduledPathJob.handle.Complete();
 		}
-
-		// Token: 0x020005BA RID: 1466
-		private struct PathUniqueState : IDisposable
+		foreach (ScheduledGridJob scheduledGridJob2 in scheduledGridJobs)
 		{
-			// Token: 0x060025D9 RID: 9689 RVA: 0x000C7139 File Offset: 0x000C5339
-			public void Initialize(int cells)
-			{
-				this.excludedDestIndices = new NativeList<int>(4, Allocator.Persistent);
-				this.providers = new NativeArray<ushort>(cells, Allocator.Persistent, NativeArrayOptions.ClearMemory);
-				this.blocked = new NativeArray<bool>(cells, Allocator.Persistent, NativeArrayOptions.ClearMemory);
-			}
-
-			// Token: 0x060025DA RID: 9690 RVA: 0x000C7169 File Offset: 0x000C5369
-			public void Dispose()
-			{
-				this.excludedDestIndices.Dispose();
-				this.providers.Dispose();
-				this.blocked.Dispose();
-			}
-
-			// Token: 0x04001F1B RID: 7963
-			public NativeList<int> excludedDestIndices;
-
-			// Token: 0x04001F1C RID: 7964
-			public NativeArray<ushort> providers;
-
-			// Token: 0x04001F1D RID: 7965
-			public NativeArray<bool> blocked;
+			scheduledGridJob2.output.Dispose();
 		}
-
-		// Token: 0x020005BB RID: 1467
-		private struct PathJobOutput : IDisposable
+		foreach (ScheduledPathJob scheduledPathJob2 in scheduledPathJobs)
 		{
-			// Token: 0x060025DB RID: 9691 RVA: 0x000C718C File Offset: 0x000C538C
-			public void Initialize(int cells)
-			{
-				this.path = new NativeList<IntVec3>(cells, Allocator.Persistent);
-				this.data = new NativeReference<PathFinderJob.ResultData>(default(PathFinderJob.ResultData), Allocator.Persistent);
-			}
-
-			// Token: 0x060025DC RID: 9692 RVA: 0x000C71C5 File Offset: 0x000C53C5
-			public void Dispose()
-			{
-				this.path.Dispose();
-				this.data.Dispose();
-			}
-
-			// Token: 0x04001F1E RID: 7966
-			public NativeList<IntVec3> path;
-
-			// Token: 0x04001F1F RID: 7967
-			public NativeReference<PathFinderJob.ResultData> data;
+			PathUniqueState state = scheduledPathJob2.state;
+			state.Dispose();
+			PathJobOutput output = scheduledPathJob2.output;
+			output.Dispose();
+		}
+		mapData.Dispose();
+		foreach (JobBatchState batch in batches)
+		{
+			batch.Dispose();
+		}
+		immediateBatch.Dispose();
+		foreach (GridJobOutput gridJobOutput in gridJobOutputs)
+		{
+			gridJobOutput.Dispose();
+		}
+		foreach (PathUniqueState pathUniqueState in pathUniqueStates)
+		{
+			pathUniqueState.Dispose();
+		}
+		foreach (PathJobOutput pathJobOutput in pathJobOutputs)
+		{
+			pathJobOutput.Dispose();
 		}
 	}
 }

@@ -1,138 +1,387 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class LordToil_BestowingCeremony_Wait : LordToil_Wait
 {
-	// Token: 0x02001639 RID: 5689
-	public class LordToil_BestowingCeremony_Wait : LordToil_Wait
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass7_0
 	{
-		// Token: 0x0600860D RID: 34317 RVA: 0x0028087E File Offset: 0x0027EA7E
-		public LordToil_BestowingCeremony_Wait(Pawn target, Pawn bestower) : base(true)
-		{
-			this.target = target;
-			this.bestower = bestower;
-		}
+		public LordJob_BestowingCeremony lordJob;
 
-		// Token: 0x0600860E RID: 34318 RVA: 0x00280898 File Offset: 0x0027EA98
-		public override void Init()
+		public LordToil_BestowingCeremony_Wait _003C_003E4__this;
+
+		public Func<Pawn, bool> _003C_003E9__3;
+
+		public Dialog_BeginRitual.ActionCallback _003C_003E9__1;
+
+		internal void _003CExtraFloatMenuOptions_003Eb__0()
 		{
-			Messages.Message("MessageBestowerWaiting".Translate(this.target.Named("TARGET"), this.lord.ownedPawns[0].Named("BESTOWER")), new LookTargets(new Pawn[]
+			Find.WindowStack.Add(new Dialog_BeginRitual("RitualBestowingCeremony".Translate(), null, lordJob.targetSpot.ToTargetInfo(_003C_003E4__this.bestower.Map), _003C_003E4__this.bestower.Map, delegate(RitualRoleAssignments assignments)
 			{
-				this.target,
-				this.lord.ownedPawns[0]
-			}), MessageTypeDefOf.NeutralEvent, true);
-		}
-
-		// Token: 0x0600860F RID: 34319 RVA: 0x00280912 File Offset: 0x0027EB12
-		protected override void DecoratePawnDuty(PawnDuty duty)
-		{
-			duty.focus = this.target;
-		}
-
-		// Token: 0x06008610 RID: 34320 RVA: 0x00280925 File Offset: 0x0027EB25
-		public override void DrawPawnGUIOverlay(Pawn pawn)
-		{
-			pawn.Map.overlayDrawer.DrawOverlay(pawn, OverlayTypes.QuestionMark);
-		}
-
-		// Token: 0x06008611 RID: 34321 RVA: 0x0028093A File Offset: 0x0027EB3A
-		public override IEnumerable<Gizmo> GetPawnGizmos(Pawn p)
-		{
-			if (p == this.bestower)
+				_003C_003E4__this.StartRitual(assignments.Participants.Where((Pawn p) => p != _003C_003E4__this.bestower).ToList());
+				return true;
+			}, _003C_003E4__this.bestower, null, delegate(Pawn pawn, bool voluntary, bool allowOtherIdeos)
 			{
-				LordJob_BestowingCeremony job = (LordJob_BestowingCeremony)this.lord.LordJob;
-				yield return new Command_BestowerCeremony(job, this.bestower, this.target, new Action<List<Pawn>>(this.StartRitual));
-			}
-			yield break;
-		}
-
-		// Token: 0x06008612 RID: 34322 RVA: 0x00280951 File Offset: 0x0027EB51
-		public override IEnumerable<FloatMenuOption> ExtraFloatMenuOptions(Pawn target, Pawn forPawn)
-		{
-			LordJob_BestowingCeremony lordJob = (LordJob_BestowingCeremony)this.lord.LordJob;
-			if (target == this.bestower)
-			{
-				Func<Pawn, bool> <>9__3;
-				Dialog_BeginRitual.ActionCallback <>9__1;
-				FloatMenuOption floatMenuOption = new FloatMenuOption("BeginRitual".Translate("RitualBestowingCeremony".Translate()), delegate()
+				if (pawn.GetLord()?.LordJob is LordJob_Ritual)
 				{
-					WindowStack windowStack = Find.WindowStack;
-					string ritualLabel = "RitualBestowingCeremony".Translate();
-					Precept_Ritual ritual = null;
-					TargetInfo targetInfo = lordJob.targetSpot.ToTargetInfo(this.bestower.Map);
-					Map map = this.bestower.Map;
-					Dialog_BeginRitual.ActionCallback action;
-					if ((action = <>9__1) == null)
+					return false;
+				}
+				if (pawn.IsSubhuman)
+				{
+					return false;
+				}
+				return !pawn.IsPrisonerOfColony && !pawn.RaceProps.Animal;
+			}, "Begin".Translate(), new List<Pawn> { _003C_003E4__this.bestower, _003C_003E4__this.target }, null, RitualOutcomeEffectDefOf.BestowingCeremony));
+		}
+
+		internal bool _003CExtraFloatMenuOptions_003Eb__1(RitualRoleAssignments assignments)
+		{
+			_003C_003E4__this.StartRitual(assignments.Participants.Where((Pawn p) => p != _003C_003E4__this.bestower).ToList());
+			return true;
+		}
+
+		internal bool _003CExtraFloatMenuOptions_003Eb__3(Pawn p)
+		{
+			return p != _003C_003E4__this.bestower;
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CExtraFloatMenuOptions_003Ed__7 : IEnumerable<FloatMenuOption>, IEnumerable, IEnumerator<FloatMenuOption>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private FloatMenuOption _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public LordToil_BestowingCeremony_Wait _003C_003E4__this;
+
+		private Pawn target;
+
+		public Pawn _003C_003E3__target;
+
+		FloatMenuOption IEnumerator<FloatMenuOption>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CExtraFloatMenuOptions_003Ed__7(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			LordToil_BestowingCeremony_Wait lordToil_BestowingCeremony_Wait = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+			{
+				_003C_003E1__state = -1;
+				_003C_003Ec__DisplayClass7_0 CS_0024_003C_003E8__locals8 = new _003C_003Ec__DisplayClass7_0
+				{
+					_003C_003E4__this = _003C_003E4__this,
+					lordJob = (LordJob_BestowingCeremony)lordToil_BestowingCeremony_Wait.lord.LordJob
+				};
+				if (target != lordToil_BestowingCeremony_Wait.bestower)
+				{
+					break;
+				}
+				FloatMenuOption floatMenuOption = new FloatMenuOption("BeginRitual".Translate("RitualBestowingCeremony".Translate()), delegate
+				{
+					Find.WindowStack.Add(new Dialog_BeginRitual("RitualBestowingCeremony".Translate(), null, CS_0024_003C_003E8__locals8.lordJob.targetSpot.ToTargetInfo(CS_0024_003C_003E8__locals8._003C_003E4__this.bestower.Map), CS_0024_003C_003E8__locals8._003C_003E4__this.bestower.Map, delegate(RitualRoleAssignments assignments)
 					{
-						action = (<>9__1 = delegate(RitualRoleAssignments assignments)
+						CS_0024_003C_003E8__locals8._003C_003E4__this.StartRitual(assignments.Participants.Where((Pawn p) => p != CS_0024_003C_003E8__locals8._003C_003E4__this.bestower).ToList());
+						return true;
+					}, CS_0024_003C_003E8__locals8._003C_003E4__this.bestower, null, delegate(Pawn pawn, bool voluntary, bool allowOtherIdeos)
+					{
+						if (pawn.GetLord()?.LordJob is LordJob_Ritual)
 						{
-							LordToil_BestowingCeremony_Wait <>4__this = this;
-							IEnumerable<Pawn> participants = assignments.Participants;
-							Func<Pawn, bool> predicate;
-							if ((predicate = <>9__3) == null)
-							{
-								predicate = (<>9__3 = ((Pawn p) => p != this.bestower));
-							}
-							<>4__this.StartRitual(participants.Where(predicate).ToList<Pawn>());
-							return true;
-						});
-					}
-					windowStack.Add(new Dialog_BeginRitual(ritualLabel, ritual, targetInfo, map, action, this.bestower, null, delegate(Pawn pawn, bool voluntary, bool allowOtherIdeos)
-					{
-						Lord lord = pawn.GetLord();
-						return !(((lord != null) ? lord.LordJob : null) is LordJob_Ritual) && !pawn.IsSubhuman && !pawn.IsPrisonerOfColony && !pawn.RaceProps.Animal;
+							return false;
+						}
+						if (pawn.IsSubhuman)
+						{
+							return false;
+						}
+						return !pawn.IsPrisonerOfColony && !pawn.RaceProps.Animal;
 					}, "Begin".Translate(), new List<Pawn>
 					{
-						this.bestower,
-						this.target
-					}, null, RitualOutcomeEffectDefOf.BestowingCeremony, null, null));
-				}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-				if (!LordJob_BestowingCeremony.TryGetUsableSpotAdjacentToBestower(this.bestower).IsValid)
+						CS_0024_003C_003E8__locals8._003C_003E4__this.bestower,
+						CS_0024_003C_003E8__locals8._003C_003E4__this.target
+					}, null, RitualOutcomeEffectDefOf.BestowingCeremony));
+				});
+				if (!LordJob_BestowingCeremony.TryGetUsableSpotAdjacentToBestower(lordToil_BestowingCeremony_Wait.bestower).IsValid)
 				{
 					floatMenuOption.Disabled = true;
-					FloatMenuOption floatMenuOption2 = floatMenuOption;
-					floatMenuOption2.Label += " (" + "BestowingSpotUnavailable".Translate() + ")";
+					floatMenuOption.Label += " (" + "BestowingSpotUnavailable".Translate() + ")";
 				}
-				yield return floatMenuOption;
+				_003C_003E2__current = floatMenuOption;
+				_003C_003E1__state = 1;
+				return true;
 			}
-			yield break;
+			case 1:
+				_003C_003E1__state = -1;
+				break;
+			}
+			return false;
 		}
 
-		// Token: 0x06008613 RID: 34323 RVA: 0x00280968 File Offset: 0x0027EB68
-		private void StartRitual(List<Pawn> pawns)
+		bool IEnumerator.MoveNext()
 		{
-			foreach (Pawn pawn in pawns)
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<FloatMenuOption> IEnumerable<FloatMenuOption>.GetEnumerator()
+		{
+			_003CExtraFloatMenuOptions_003Ed__7 _003CExtraFloatMenuOptions_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				Lord lord = pawn.GetLord();
-				if (((lord != null) ? lord.LordJob : null) is LordJob_VoluntarilyJoinable)
-				{
-					pawn.GetLord().Notify_PawnLost(pawn, PawnLostCondition.LeftVoluntarily, null);
-				}
+				_003C_003E1__state = 0;
+				_003CExtraFloatMenuOptions_003Ed__ = this;
 			}
-			this.lord.AddPawns(pawns, true);
-			((LordJob_BestowingCeremony)this.lord.LordJob).colonistParticipants.AddRange(pawns);
-			this.lord.ReceiveMemo(LordJob_BestowingCeremony.MemoCeremonyStarted);
-			foreach (Pawn pawn2 in pawns)
+			else
 			{
-				if (pawn2.drafter != null)
+				_003CExtraFloatMenuOptions_003Ed__ = new _003CExtraFloatMenuOptions_003Ed__7(0)
 				{
-					pawn2.drafter.Drafted = false;
-				}
-				if (!pawn2.Awake())
-				{
-					RestUtility.WakeUp(pawn2, true);
-				}
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CExtraFloatMenuOptions_003Ed__.target = _003C_003E3__target;
+			return _003CExtraFloatMenuOptions_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<FloatMenuOption>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGetPawnGizmos_003Ed__6 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private Pawn p;
+
+		public Pawn _003C_003E3__p;
+
+		public LordToil_BestowingCeremony_Wait _003C_003E4__this;
+
+		Gizmo IEnumerator<Gizmo>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0400579B RID: 22427
-		public Pawn target;
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
 
-		// Token: 0x0400579C RID: 22428
-		public Pawn bestower;
+		[DebuggerHidden]
+		public _003CGetPawnGizmos_003Ed__6(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			LordToil_BestowingCeremony_Wait lordToil_BestowingCeremony_Wait = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (p == lordToil_BestowingCeremony_Wait.bestower)
+				{
+					LordJob_BestowingCeremony job = (LordJob_BestowingCeremony)lordToil_BestowingCeremony_Wait.lord.LordJob;
+					_003C_003E2__current = new Command_BestowerCeremony(job, lordToil_BestowingCeremony_Wait.bestower, lordToil_BestowingCeremony_Wait.target, lordToil_BestowingCeremony_Wait.StartRitual);
+					_003C_003E1__state = 1;
+					return true;
+				}
+				break;
+			case 1:
+				_003C_003E1__state = -1;
+				break;
+			}
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CGetPawnGizmos_003Ed__6 _003CGetPawnGizmos_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CGetPawnGizmos_003Ed__ = this;
+			}
+			else
+			{
+				_003CGetPawnGizmos_003Ed__ = new _003CGetPawnGizmos_003Ed__6(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CGetPawnGizmos_003Ed__.p = _003C_003E3__p;
+			return _003CGetPawnGizmos_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	public Pawn target;
+
+	public Pawn bestower;
+
+	public LordToil_BestowingCeremony_Wait(Pawn target, Pawn bestower)
+	{
+		this.target = target;
+		this.bestower = bestower;
+	}
+
+	public override void Init()
+	{
+		Messages.Message("MessageBestowerWaiting".Translate(target.Named("TARGET"), lord.ownedPawns[0].Named("BESTOWER")), new LookTargets(new Pawn[2]
+		{
+			target,
+			lord.ownedPawns[0]
+		}), MessageTypeDefOf.NeutralEvent);
+	}
+
+	protected override void DecoratePawnDuty(PawnDuty duty)
+	{
+		duty.focus = target;
+	}
+
+	public override void DrawPawnGUIOverlay(Pawn pawn)
+	{
+		pawn.Map.overlayDrawer.DrawOverlay(pawn, OverlayTypes.QuestionMark);
+	}
+
+	[IteratorStateMachine(typeof(_003CGetPawnGizmos_003Ed__6))]
+	public override IEnumerable<Gizmo> GetPawnGizmos(Pawn p)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetPawnGizmos_003Ed__6(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__p = p
+		};
+	}
+
+	[IteratorStateMachine(typeof(_003CExtraFloatMenuOptions_003Ed__7))]
+	public override IEnumerable<FloatMenuOption> ExtraFloatMenuOptions(Pawn target, Pawn forPawn)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CExtraFloatMenuOptions_003Ed__7(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__target = target
+		};
+	}
+
+	private void StartRitual(List<Pawn> pawns)
+	{
+		foreach (Pawn pawn in pawns)
+		{
+			if (pawn.GetLord()?.LordJob is LordJob_VoluntarilyJoinable)
+			{
+				pawn.GetLord().Notify_PawnLost(pawn, PawnLostCondition.LeftVoluntarily, null);
+			}
+		}
+		lord.AddPawns(pawns);
+		((LordJob_BestowingCeremony)lord.LordJob).colonistParticipants.AddRange(pawns);
+		lord.ReceiveMemo(LordJob_BestowingCeremony.MemoCeremonyStarted);
+		foreach (Pawn pawn2 in pawns)
+		{
+			if (pawn2.drafter != null)
+			{
+				pawn2.drafter.Drafted = false;
+			}
+			if (!pawn2.Awake())
+			{
+				RestUtility.WakeUp(pawn2);
+			}
+		}
 	}
 }

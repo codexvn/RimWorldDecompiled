@@ -56,7 +56,7 @@ public static class ResourceFiles
 	}
 
 	[CompilerGenerated]
-	private sealed class _003CEnumerateCandidatePaths_003Ed__25 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
+	private sealed class _003CEnumerateCandidatePaths_003Ed__26 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
 		private int _003C_003E1__state;
 
@@ -107,7 +107,7 @@ public static class ResourceFiles
 		}
 
 		[DebuggerHidden]
-		public _003CEnumerateCandidatePaths_003Ed__25(int _003C_003E1__state)
+		public _003CEnumerateCandidatePaths_003Ed__26(int _003C_003E1__state)
 		{
 			this._003C_003E1__state = _003C_003E1__state;
 			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
@@ -219,7 +219,7 @@ public static class ResourceFiles
 		[DebuggerHidden]
 		IEnumerator<string> IEnumerable<string>.GetEnumerator()
 		{
-			_003CEnumerateCandidatePaths_003Ed__25 _003CEnumerateCandidatePaths_003Ed__;
+			_003CEnumerateCandidatePaths_003Ed__26 _003CEnumerateCandidatePaths_003Ed__;
 			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
 				_003C_003E1__state = 0;
@@ -227,7 +227,7 @@ public static class ResourceFiles
 			}
 			else
 			{
-				_003CEnumerateCandidatePaths_003Ed__ = new _003CEnumerateCandidatePaths_003Ed__25(0);
+				_003CEnumerateCandidatePaths_003Ed__ = new _003CEnumerateCandidatePaths_003Ed__26(0);
 			}
 			_003CEnumerateCandidatePaths_003Ed__.roots = _003C_003E3__roots;
 			_003CEnumerateCandidatePaths_003Ed__.normalizedPath = _003C_003E3__normalizedPath;
@@ -244,7 +244,7 @@ public static class ResourceFiles
 	}
 
 	[CompilerGenerated]
-	private sealed class _003CEnumerateFiles_003Ed__12 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
+	private sealed class _003CEnumerateFiles_003Ed__13 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
 		private int _003C_003E1__state;
 
@@ -285,7 +285,7 @@ public static class ResourceFiles
 		}
 
 		[DebuggerHidden]
-		public _003CEnumerateFiles_003Ed__12(int _003C_003E1__state)
+		public _003CEnumerateFiles_003Ed__13(int _003C_003E1__state)
 		{
 			this._003C_003E1__state = _003C_003E1__state;
 			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
@@ -446,7 +446,7 @@ public static class ResourceFiles
 		[DebuggerHidden]
 		IEnumerator<string> IEnumerable<string>.GetEnumerator()
 		{
-			_003CEnumerateFiles_003Ed__12 _003CEnumerateFiles_003Ed__;
+			_003CEnumerateFiles_003Ed__13 _003CEnumerateFiles_003Ed__;
 			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
 				_003C_003E1__state = 0;
@@ -454,7 +454,7 @@ public static class ResourceFiles
 			}
 			else
 			{
-				_003CEnumerateFiles_003Ed__ = new _003CEnumerateFiles_003Ed__12(0);
+				_003CEnumerateFiles_003Ed__ = new _003CEnumerateFiles_003Ed__13(0);
 			}
 			_003CEnumerateFiles_003Ed__.directory = _003C_003E3__directory;
 			_003CEnumerateFiles_003Ed__.recursive = _003C_003E3__recursive;
@@ -469,6 +469,8 @@ public static class ResourceFiles
 	}
 
 	private static readonly ConcurrentDictionary<string, DirectoryListing?> Listings = new ConcurrentDictionary<string, DirectoryListing>(StringComparer.Ordinal);
+
+	private static readonly StringComparison VirtualPathComparison = StringComparison.OrdinalIgnoreCase;
 
 	private static volatile VirtualRoot[] VirtualRoots = Array.Empty<VirtualRoot>();
 
@@ -494,7 +496,7 @@ public static class ResourceFiles
 	public static void AddVirtualFiles(string root, IEnumerable<string> fullPaths)
 	{
 		root = Normalize(root);
-		Dictionary<string, (HashSet<string>, HashSet<string>)> dictionary = new Dictionary<string, (HashSet<string>, HashSet<string>)>(StringComparer.Ordinal);
+		Dictionary<string, (HashSet<string>, HashSet<string>)> dictionary = new Dictionary<string, (HashSet<string>, HashSet<string>)>(StringComparer.FromComparison(VirtualPathComparison));
 		foreach (string fullPath in fullPaths)
 		{
 			string path = Normalize(fullPath);
@@ -502,7 +504,7 @@ public static class ResourceFiles
 			while (true)
 			{
 				string directoryName = Path.GetDirectoryName(path);
-				if (directoryName == null || directoryName.Length <= 0 || (!(directoryName == root) && !directoryName.StartsWith(root + Path.DirectorySeparatorChar, StringComparison.Ordinal)))
+				if (directoryName == null || directoryName.Length <= 0 || (!string.Equals(directoryName, root, VirtualPathComparison) && !directoryName.StartsWith(root + Path.DirectorySeparatorChar, VirtualPathComparison)))
 				{
 					break;
 				}
@@ -540,7 +542,7 @@ public static class ResourceFiles
 			}
 		}
 		List<VirtualRoot> list = new List<VirtualRoot>();
-		list.AddRange(VirtualRoots.Where((VirtualRoot r) => r.Root != root));
+		list.AddRange(VirtualRoots.Where((VirtualRoot r) => !string.Equals(r.Root, root, VirtualPathComparison)));
 		list.Add(new VirtualRoot
 		{
 			Root = root,
@@ -554,7 +556,7 @@ public static class ResourceFiles
 	public static void RemoveVirtualFiles(string root)
 	{
 		root = Normalize(root);
-		VirtualRoots = VirtualRoots.Where((VirtualRoot r) => r.Root != root).ToArray();
+		VirtualRoots = VirtualRoots.Where((VirtualRoot r) => !string.Equals(r.Root, root, VirtualPathComparison)).ToArray();
 		Listings.Clear();
 		ResolvedDirectories.Clear();
 	}
@@ -608,11 +610,11 @@ public static class ResourceFiles
 		ResolvedDirectories.Clear();
 	}
 
-	[IteratorStateMachine(typeof(_003CEnumerateFiles_003Ed__12))]
+	[IteratorStateMachine(typeof(_003CEnumerateFiles_003Ed__13))]
 	public static IEnumerable<string> EnumerateFiles(string directory, bool recursive)
 	{
 		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
-		return new _003CEnumerateFiles_003Ed__12(-2)
+		return new _003CEnumerateFiles_003Ed__13(-2)
 		{
 			_003C_003E3__directory = directory,
 			_003C_003E3__recursive = recursive
@@ -784,7 +786,7 @@ public static class ResourceFiles
 		{
 			if (ExistsExact(item, expectFile: true))
 			{
-				return item;
+				return TryResolveCaseInsensitive(item, expectFile: true) ?? item;
 			}
 		}
 		foreach (string item2 in readOnlyList)
@@ -841,11 +843,11 @@ public static class ResourceFiles
 		return value;
 	}
 
-	[IteratorStateMachine(typeof(_003CEnumerateCandidatePaths_003Ed__25))]
+	[IteratorStateMachine(typeof(_003CEnumerateCandidatePaths_003Ed__26))]
 	public static IEnumerable<string> EnumerateCandidatePaths(IReadOnlyList<string> roots, string normalizedPath, string[] extensions, bool includeBareIfHasExtension = false)
 	{
 		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
-		return new _003CEnumerateCandidatePaths_003Ed__25(-2)
+		return new _003CEnumerateCandidatePaths_003Ed__26(-2)
 		{
 			_003C_003E3__roots = roots,
 			_003C_003E3__normalizedPath = normalizedPath,

@@ -1,48 +1,39 @@
-﻿using System;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class StatPart_IsCorpseFresh : StatPart
 {
-	// Token: 0x02003708 RID: 14088
-	public class StatPart_IsCorpseFresh : StatPart
+	public override void TransformValue(StatRequest req, ref float val)
 	{
-		// Token: 0x06013894 RID: 80020 RVA: 0x005CBB44 File Offset: 0x005C9D44
-		public override void TransformValue(StatRequest req, ref float val)
+		if (TryGetIsFreshFactor(req, out var factor))
 		{
-			float num;
-			if (this.TryGetIsFreshFactor(req, out num))
-			{
-				val *= num;
-			}
+			val *= factor;
 		}
+	}
 
-		// Token: 0x06013895 RID: 80021 RVA: 0x005CBB64 File Offset: 0x005C9D64
-		public override string ExplanationPart(StatRequest req)
+	public override string ExplanationPart(StatRequest req)
+	{
+		if (TryGetIsFreshFactor(req, out var factor) && factor != 1f)
 		{
-			float num;
-			if (this.TryGetIsFreshFactor(req, out num) && num != 1f)
-			{
-				return "StatsReport_NotFresh".Translate() + ": x" + num.ToStringPercent();
-			}
-			return null;
+			return "StatsReport_NotFresh".Translate() + ": x" + factor.ToStringPercent();
 		}
+		return null;
+	}
 
-		// Token: 0x06013896 RID: 80022 RVA: 0x005CBBAC File Offset: 0x005C9DAC
-		private bool TryGetIsFreshFactor(StatRequest req, out float factor)
+	private bool TryGetIsFreshFactor(StatRequest req, out float factor)
+	{
+		if (!req.HasThing)
 		{
-			if (!req.HasThing)
-			{
-				factor = 1f;
-				return false;
-			}
-			Corpse corpse = req.Thing as Corpse;
-			if (corpse == null)
-			{
-				factor = 1f;
-				return false;
-			}
-			factor = ((corpse.GetRotStage() == RotStage.Fresh) ? 1f : 0f);
-			return true;
+			factor = 1f;
+			return false;
 		}
+		if (!(req.Thing is Corpse t))
+		{
+			factor = 1f;
+			return false;
+		}
+		factor = ((t.GetRotStage() == RotStage.Fresh) ? 1f : 0f);
+		return true;
 	}
 }

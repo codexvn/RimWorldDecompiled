@@ -1,50 +1,195 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_FleeAndCower : JobDriver_Flee
 {
-	// Token: 0x0200127F RID: 4735
-	public class JobDriver_FleeAndCower : JobDriver_Flee
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__3 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x060073D8 RID: 29656 RVA: 0x00238DA4 File Offset: 0x00236FA4
-		public override string GetReport()
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_FleeAndCower _003C_003E4__this;
+
+		private IEnumerator<Toil> _003C_003E7__wrap1;
+
+		Toil IEnumerator<Toil>.Current
 		{
-			if (this.pawn.CurJob == this.job && this.pawn.Position == this.job.GetTarget(TargetIndex.A).Cell)
+			[DebuggerHidden]
+			get
 			{
-				return "ReportCowering".Translate();
+				return _003C_003E2__current;
 			}
-			return base.GetReport();
 		}
 
-		// Token: 0x060073D9 RID: 29657 RVA: 0x00238E00 File Offset: 0x00237000
-		protected override IEnumerable<Toil> MakeNewToils()
+		object IEnumerator.Current
 		{
-			foreach (Toil toil in base.MakeNewToils())
+			[DebuggerHidden]
+			get
 			{
-				yield return toil;
+				return _003C_003E2__current;
 			}
-			IEnumerator<Toil> enumerator = null;
-			Toil toil2 = ToilMaker.MakeToil("MakeNewToils");
-			toil2.defaultCompleteMode = ToilCompleteMode.Delay;
-			toil2.defaultDuration = 1200;
-			toil2.tickIntervalAction = delegate(int delta)
+		}
+
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__3(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				if (this.pawn.IsHashIntervalTick(35, delta) && SelfDefenseUtility.ShouldStartFleeing(this.pawn))
+				try
 				{
-					base.EndJobWith(JobCondition.InterruptForced);
 				}
-			};
-			yield return toil2;
-			yield break;
-			yield break;
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x04004FC2 RID: 20418
-		private const int CowerTicks = 1200;
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				JobDriver_FleeAndCower CS_0024_003C_003E8__locals4 = _003C_003E4__this;
+				Toil toil;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((JobDriver_Flee)CS_0024_003C_003E8__locals4).MakeNewToils().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						return false;
+					}
+					IL_006f:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Toil current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					toil = ToilMaker.MakeToil("MakeNewToils");
+					toil.defaultCompleteMode = ToilCompleteMode.Delay;
+					toil.defaultDuration = 1200;
+					toil.tickIntervalAction = delegate(int delta)
+					{
+						if (CS_0024_003C_003E8__locals4.pawn.IsHashIntervalTick(35, delta) && SelfDefenseUtility.ShouldStartFleeing(CS_0024_003C_003E8__locals4.pawn))
+						{
+							CS_0024_003C_003E8__locals4.EndJobWith(JobCondition.InterruptForced);
+						}
+					};
+					_003C_003E2__current = toil;
+					_003C_003E1__state = 2;
+					return true;
+				}
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
 
-		// Token: 0x04004FC3 RID: 20419
-		private const int CheckFleeAgainIntervalTicks = 35;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__3 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__3(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private const int CowerTicks = 1200;
+
+	private const int CheckFleeAgainIntervalTicks = 35;
+
+	public override string GetReport()
+	{
+		if (pawn.CurJob == job && pawn.Position == job.GetTarget(TargetIndex.A).Cell)
+		{
+			return "ReportCowering".Translate();
+		}
+		return base.GetReport();
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__3))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__3(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

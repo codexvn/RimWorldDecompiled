@@ -1,100 +1,186 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompSubstructureFootprint : ThingComp
 {
-	// Token: 0x02002E71 RID: 11889
-	public class CompSubstructureFootprint : ThingComp
+	[CompilerGenerated]
+	private sealed class _003CCompGetGizmosExtra_003Ed__11 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x17002AF8 RID: 11000
-		// (get) Token: 0x06010BDE RID: 68574 RVA: 0x004D3603 File Offset: 0x004D1803
-		public CompProperties_SubstructureFootprint Props
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompSubstructureFootprint _003C_003E4__this;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (CompProperties_SubstructureFootprint)this.props;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002AF9 RID: 11001
-		// (get) Token: 0x06010BDF RID: 68575 RVA: 0x004D3610 File Offset: 0x004D1810
-		public bool DisplaySubstructureOverlay
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.Props.displaySubstructureOverlayWhenSelected && this.displaySubstructureOverlay;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002AFA RID: 11002
-		// (get) Token: 0x06010BE0 RID: 68576 RVA: 0x004D3627 File Offset: 0x004D1827
-		public bool Valid
+		[DebuggerHidden]
+		public _003CCompGetGizmosExtra_003Ed__11(int _003C_003E1__state)
 		{
-			get
-			{
-				return this.facilityComp == null || this.facilityComp.CanBeActive;
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x06010BE1 RID: 68577 RVA: 0x004D363E File Offset: 0x004D183E
-		public override void PostSpawnSetup(bool respawningAfterLoad)
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			base.PostSpawnSetup(respawningAfterLoad);
-			SubstructureGrid substructureGrid = this.parent.Map.substructureGrid;
-			if (substructureGrid != null)
-			{
-				substructureGrid.MarkDirty();
-			}
-			this.facilityComp = this.parent.TryGetComp<CompGravshipFacility>();
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x06010BE2 RID: 68578 RVA: 0x004D3673 File Offset: 0x004D1873
-		public override void PostDeSpawn(Map map, DestroyMode mode = DestroyMode.Vanish)
+		private bool MoveNext()
 		{
-			base.PostDeSpawn(map, mode);
-			SubstructureGrid substructureGrid = map.substructureGrid;
-			if (substructureGrid == null)
+			int num = _003C_003E1__state;
+			CompSubstructureFootprint CS_0024_003C_003E8__locals5 = _003C_003E4__this;
+			switch (num)
 			{
-				return;
-			}
-			substructureGrid.MarkDirty();
-		}
-
-		// Token: 0x06010BE3 RID: 68579 RVA: 0x004D368D File Offset: 0x004D188D
-		public override IEnumerable<Gizmo> CompGetGizmosExtra()
-		{
-			if (this.Props.displaySubstructureOverlayWhenSelected && this.parent.Faction == Faction.OfPlayer)
-			{
-				yield return new Command_Toggle
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (CS_0024_003C_003E8__locals5.Props.displaySubstructureOverlayWhenSelected && CS_0024_003C_003E8__locals5.parent.Faction == Faction.OfPlayer)
 				{
-					defaultLabel = "CommandShowSubstructureOverlay".Translate(),
-					defaultDesc = "CommandShowSubstructureOverlayDesc".Translate(),
-					icon = CompSubstructureFootprint.DisplaySubstructureTex.Texture,
-					isActive = (() => this.displaySubstructureOverlay),
-					toggleAction = delegate()
+					_003C_003E2__current = new Command_Toggle
 					{
-						this.displaySubstructureOverlay = !this.displaySubstructureOverlay;
-					}
+						defaultLabel = "CommandShowSubstructureOverlay".Translate(),
+						defaultDesc = "CommandShowSubstructureOverlayDesc".Translate(),
+						icon = DisplaySubstructureTex.Texture,
+						isActive = () => CS_0024_003C_003E8__locals5.displaySubstructureOverlay,
+						toggleAction = delegate
+						{
+							CS_0024_003C_003E8__locals5.displaySubstructureOverlay = !CS_0024_003C_003E8__locals5.displaySubstructureOverlay;
+						}
+					};
+					_003C_003E1__state = 1;
+					return true;
+				}
+				break;
+			case 1:
+				_003C_003E1__state = -1;
+				break;
+			}
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CCompGetGizmosExtra_003Ed__11 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CCompGetGizmosExtra_003Ed__11(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
 				};
 			}
-			yield break;
+			return result;
 		}
 
-		// Token: 0x06010BE4 RID: 68580 RVA: 0x004D369D File Offset: 0x004D189D
-		public override void PostExposeData()
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			Scribe_Values.Look<bool>(ref this.displaySubstructureOverlay, "displaySubstructureOverlay", true, false);
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x0400AE76 RID: 44662
-		[Unsaved(false)]
-		private CompGravshipFacility facilityComp;
+	[Unsaved(false)]
+	private CompGravshipFacility facilityComp;
 
-		// Token: 0x0400AE77 RID: 44663
-		private bool displaySubstructureOverlay = true;
+	private bool displaySubstructureOverlay = true;
 
-		// Token: 0x0400AE78 RID: 44664
-		private static readonly CachedTexture DisplaySubstructureTex = new CachedTexture("UI/Commands/ShowSubstructureOverlay");
+	private static readonly CachedTexture DisplaySubstructureTex = new CachedTexture("UI/Commands/ShowSubstructureOverlay");
+
+	public CompProperties_SubstructureFootprint Props => (CompProperties_SubstructureFootprint)props;
+
+	public bool DisplaySubstructureOverlay
+	{
+		get
+		{
+			if (Props.displaySubstructureOverlayWhenSelected)
+			{
+				return displaySubstructureOverlay;
+			}
+			return false;
+		}
+	}
+
+	public bool Valid
+	{
+		get
+		{
+			if (facilityComp != null)
+			{
+				return facilityComp.CanBeActive;
+			}
+			return true;
+		}
+	}
+
+	public override void PostSpawnSetup(bool respawningAfterLoad)
+	{
+		base.PostSpawnSetup(respawningAfterLoad);
+		parent.Map.substructureGrid?.MarkDirty();
+		facilityComp = parent.TryGetComp<CompGravshipFacility>();
+	}
+
+	public override void PostDeSpawn(Map map, DestroyMode mode = DestroyMode.Vanish)
+	{
+		base.PostDeSpawn(map, mode);
+		map.substructureGrid?.MarkDirty();
+	}
+
+	[IteratorStateMachine(typeof(_003CCompGetGizmosExtra_003Ed__11))]
+	public override IEnumerable<Gizmo> CompGetGizmosExtra()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CCompGetGizmosExtra_003Ed__11(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override void PostExposeData()
+	{
+		Scribe_Values.Look(ref displaySubstructureOverlay, "displaySubstructureOverlay", defaultValue: true);
 	}
 }

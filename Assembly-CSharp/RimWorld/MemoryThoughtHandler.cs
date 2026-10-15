@@ -1,414 +1,360 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public sealed class MemoryThoughtHandler : IExposable
 {
-	// Token: 0x0200252D RID: 9517
-	public sealed class MemoryThoughtHandler : IExposable
+	public Pawn pawn;
+
+	private List<Thought_Memory> memories = new List<Thought_Memory>();
+
+	private List<Thought_Memory> tmpMemories = new List<Thought_Memory>();
+
+	public List<Thought_Memory> Memories => memories;
+
+	public MemoryThoughtHandler(Pawn pawn)
 	{
-		// Token: 0x17001FF4 RID: 8180
-		// (get) Token: 0x0600D026 RID: 53286 RVA: 0x003D366E File Offset: 0x003D186E
-		public List<Thought_Memory> Memories
-		{
-			get
-			{
-				return this.memories;
-			}
-		}
+		this.pawn = pawn;
+	}
 
-		// Token: 0x0600D027 RID: 53287 RVA: 0x003D3676 File Offset: 0x003D1876
-		public MemoryThoughtHandler(Pawn pawn)
+	public void ExposeData()
+	{
+		if (Scribe.mode == LoadSaveMode.Saving)
 		{
-			this.pawn = pawn;
-		}
-
-		// Token: 0x0600D028 RID: 53288 RVA: 0x003D369C File Offset: 0x003D189C
-		public void ExposeData()
-		{
-			if (Scribe.mode == LoadSaveMode.Saving)
+			tmpMemories.Clear();
+			for (int num = memories.Count - 1; num >= 0; num--)
 			{
-				this.tmpMemories.Clear();
-				for (int i = this.memories.Count - 1; i >= 0; i--)
+				if (!memories[num].Save)
 				{
-					if (!this.memories[i].Save)
-					{
-						this.tmpMemories.Add(this.memories[i]);
-						this.memories.Remove(this.memories[i]);
-					}
+					tmpMemories.Add(memories[num]);
+					memories.Remove(memories[num]);
 				}
 			}
-			Scribe_Collections.Look<Thought_Memory>(ref this.memories, "memories", LookMode.Deep, Array.Empty<object>());
-			foreach (Thought_Memory item in this.tmpMemories)
+		}
+		Scribe_Collections.Look(ref memories, "memories", LookMode.Deep);
+		foreach (Thought_Memory tmpMemory in tmpMemories)
+		{
+			memories.Add(tmpMemory);
+		}
+		tmpMemories.Clear();
+		if (Scribe.mode != LoadSaveMode.PostLoadInit)
+		{
+			return;
+		}
+		for (int num2 = memories.Count - 1; num2 >= 0; num2--)
+		{
+			if (memories[num2].def == null)
 			{
-				this.memories.Add(item);
+				memories.RemoveAt(num2);
 			}
-			this.tmpMemories.Clear();
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+			else
 			{
-				for (int j = this.memories.Count - 1; j >= 0; j--)
+				memories[num2].pawn = pawn;
+				if (memories[num2].permanent)
 				{
-					if (this.memories[j].def == null)
+					bool flag = false;
+					foreach (Hediff hediff in pawn.health.hediffSet.hediffs)
 					{
-						this.memories.RemoveAt(j);
-					}
-					else
-					{
-						this.memories[j].pawn = this.pawn;
-						if (this.memories[j].permanent)
+						HediffComp_ThoughtSetter hediffComp_ThoughtSetter = hediff.TryGetComp<HediffComp_ThoughtSetter>();
+						if (hediffComp_ThoughtSetter != null && hediffComp_ThoughtSetter.Props.thought == memories[num2].def)
 						{
-							bool flag = false;
-							foreach (Hediff hd in this.pawn.health.hediffSet.hediffs)
-							{
-								HediffComp_ThoughtSetter hediffComp_ThoughtSetter = hd.TryGetComp<HediffComp_ThoughtSetter>();
-								if (hediffComp_ThoughtSetter != null && hediffComp_ThoughtSetter.Props.thought == this.memories[j].def)
-								{
-									flag = true;
-									break;
-								}
-							}
-							if (!flag)
-							{
-								this.memories[j].permanent = false;
-							}
+							flag = true;
+							break;
 						}
 					}
-				}
-			}
-		}
-
-		// Token: 0x0600D029 RID: 53289 RVA: 0x003D3890 File Offset: 0x003D1A90
-		public void MemoryThoughtInterval()
-		{
-			for (int i = 0; i < this.memories.Count; i++)
-			{
-				this.memories[i].ThoughtInterval();
-			}
-			this.RemoveExpiredMemories();
-		}
-
-		// Token: 0x0600D02A RID: 53290 RVA: 0x003D38CC File Offset: 0x003D1ACC
-		private void RemoveExpiredMemories()
-		{
-			for (int i = this.memories.Count - 1; i >= 0; i--)
-			{
-				Thought_Memory thought_Memory = this.memories[i];
-				if (thought_Memory.ShouldDiscard)
-				{
-					this.RemoveMemory(thought_Memory);
-					if (thought_Memory.def.nextThought != null)
+					if (!flag)
 					{
-						this.TryGainMemory(thought_Memory.def.nextThought, null, null);
+						memories[num2].permanent = false;
 					}
 				}
 			}
 		}
+	}
 
-		// Token: 0x0600D02B RID: 53291 RVA: 0x003D3930 File Offset: 0x003D1B30
-		public void TryGainMemoryFast(ThoughtDef mem, Precept sourcePrecept = null)
+	public void MemoryThoughtInterval()
+	{
+		for (int i = 0; i < memories.Count; i++)
 		{
-			Thought_Memory firstMemoryOfDef = this.GetFirstMemoryOfDef(mem);
-			if (firstMemoryOfDef != null)
+			memories[i].ThoughtInterval();
+		}
+		RemoveExpiredMemories();
+	}
+
+	private void RemoveExpiredMemories()
+	{
+		for (int num = memories.Count - 1; num >= 0; num--)
+		{
+			Thought_Memory thought_Memory = memories[num];
+			if (thought_Memory.ShouldDiscard)
 			{
-				firstMemoryOfDef.Renew();
+				RemoveMemory(thought_Memory);
+				if (thought_Memory.def.nextThought != null)
+				{
+					TryGainMemory(thought_Memory.def.nextThought);
+				}
+			}
+		}
+	}
+
+	public void TryGainMemoryFast(ThoughtDef mem, Precept sourcePrecept = null)
+	{
+		Thought_Memory firstMemoryOfDef = GetFirstMemoryOfDef(mem);
+		if (firstMemoryOfDef != null)
+		{
+			firstMemoryOfDef.Renew();
+		}
+		else
+		{
+			TryGainMemory(mem, null, sourcePrecept);
+		}
+	}
+
+	public void TryGainMemoryFast(ThoughtDef mem, int stage, Precept sourcePrecept = null)
+	{
+		Thought_Memory firstMemoryOfDef = GetFirstMemoryOfDef(mem);
+		if (firstMemoryOfDef != null)
+		{
+			firstMemoryOfDef.Renew();
+			firstMemoryOfDef.SetForcedStage(stage);
+		}
+		else
+		{
+			TryGainMemory(mem, null, sourcePrecept);
+			GetFirstMemoryOfDef(mem)?.SetForcedStage(stage);
+		}
+	}
+
+	public void TryGainMemory(ThoughtDef def, Pawn otherPawn = null, Precept sourcePrecept = null)
+	{
+		if (!def.IsMemory)
+		{
+			Log.Error(def?.ToString() + " is not a memory thought.");
+		}
+		else
+		{
+			TryGainMemory(ThoughtMaker.MakeThought(def, sourcePrecept), otherPawn);
+		}
+	}
+
+	public void TryGainMemory(Thought_Memory newThought, Pawn otherPawn = null)
+	{
+		if (!ThoughtUtility.CanGetThought(pawn, newThought.def))
+		{
+			return;
+		}
+		if (newThought is Thought_MemorySocial)
+		{
+			if (newThought.otherPawn == null && otherPawn == null)
+			{
+				Log.Error("Can't gain social thought " + newThought.def?.ToString() + " because its otherPawn is null and otherPawn passed to this method is also null. Social thoughts must have otherPawn.");
 				return;
 			}
-			this.TryGainMemory(mem, null, sourcePrecept);
-		}
-
-		// Token: 0x0600D02C RID: 53292 RVA: 0x003D3958 File Offset: 0x003D1B58
-		public void TryGainMemoryFast(ThoughtDef mem, int stage, Precept sourcePrecept = null)
-		{
-			Thought_Memory firstMemoryOfDef = this.GetFirstMemoryOfDef(mem);
-			if (firstMemoryOfDef != null)
-			{
-				firstMemoryOfDef.Renew();
-				firstMemoryOfDef.SetForcedStage(stage);
-				return;
-			}
-			this.TryGainMemory(mem, null, sourcePrecept);
-			Thought_Memory firstMemoryOfDef2 = this.GetFirstMemoryOfDef(mem);
-			if (firstMemoryOfDef2 == null)
+			otherPawn = otherPawn ?? newThought.otherPawn;
+			if (!newThought.def.socialTargetDevelopmentalStageFilter.Has(otherPawn.DevelopmentalStage))
 			{
 				return;
 			}
-			firstMemoryOfDef2.SetForcedStage(stage);
 		}
-
-		// Token: 0x0600D02D RID: 53293 RVA: 0x003D3999 File Offset: 0x003D1B99
-		public void TryGainMemory(ThoughtDef def, Pawn otherPawn = null, Precept sourcePrecept = null)
+		newThought.pawn = pawn;
+		newThought.otherPawn = otherPawn;
+		if (!newThought.TryMergeWithExistingMemory(out var showBubble))
 		{
-			if (!def.IsMemory)
-			{
-				Log.Error(((def != null) ? def.ToString() : null) + " is not a memory thought.");
-				return;
-			}
-			this.TryGainMemory(ThoughtMaker.MakeThought(def, sourcePrecept), otherPawn);
+			memories.Add(newThought);
 		}
-
-		// Token: 0x0600D02E RID: 53294 RVA: 0x003D39D0 File Offset: 0x003D1BD0
-		public void TryGainMemory(Thought_Memory newThought, Pawn otherPawn = null)
+		if (newThought.def.stackLimitForSameOtherPawn >= 0)
 		{
-			if (!ThoughtUtility.CanGetThought(this.pawn, newThought.def, false))
+			while (NumMemoriesInGroup(newThought) > newThought.def.stackLimitForSameOtherPawn)
 			{
-				return;
-			}
-			if (newThought is Thought_MemorySocial)
-			{
-				if (newThought.otherPawn == null && otherPawn == null)
-				{
-					string str = "Can't gain social thought ";
-					ThoughtDef def = newThought.def;
-					Log.Error(str + ((def != null) ? def.ToString() : null) + " because its otherPawn is null and otherPawn passed to this method is also null. Social thoughts must have otherPawn.");
-					return;
-				}
-				otherPawn = (otherPawn ?? newThought.otherPawn);
-				if (!newThought.def.socialTargetDevelopmentalStageFilter.Has(otherPawn.DevelopmentalStage))
-				{
-					return;
-				}
-			}
-			newThought.pawn = this.pawn;
-			newThought.otherPawn = otherPawn;
-			bool flag;
-			if (!newThought.TryMergeWithExistingMemory(out flag))
-			{
-				this.memories.Add(newThought);
-			}
-			if (newThought.def.stackLimitForSameOtherPawn >= 0)
-			{
-				while (this.NumMemoriesInGroup(newThought) > newThought.def.stackLimitForSameOtherPawn)
-				{
-					this.RemoveMemory(this.OldestMemoryInGroup(newThought));
-				}
-			}
-			if (newThought.def.stackLimit >= 0)
-			{
-				while (this.NumMemoriesOfDef(newThought.def) > newThought.def.stackLimit)
-				{
-					this.RemoveMemory(this.OldestMemoryOfDef(newThought.def));
-				}
-			}
-			if (newThought.def.thoughtToMake != null)
-			{
-				this.TryGainMemory(newThought.def.thoughtToMake, newThought.otherPawn, null);
-			}
-			List<Thought_Memory> list = (newThought.def.replaceThoughts == null) ? this.memories : new List<Thought_Memory>(this.memories);
-			for (int i = 0; i < list.Count; i++)
-			{
-				if (list[i] != newThought && list[i].GroupsWith(newThought))
-				{
-					list[i].Notify_NewThoughtInGroupAdded(newThought);
-				}
-				if (newThought.def.replaceThoughts != null && newThought.def.replaceThoughts.Contains(list[i].def))
-				{
-					this.RemoveMemory(list[i]);
-				}
-			}
-			if (flag && newThought.def.showBubble && this.pawn.Spawned && PawnUtility.ShouldSendNotificationAbout(this.pawn))
-			{
-				MoteMaker.MakeMoodThoughtBubble(this.pawn, newThought);
+				RemoveMemory(OldestMemoryInGroup(newThought));
 			}
 		}
-
-		// Token: 0x0600D02F RID: 53295 RVA: 0x003D3BD4 File Offset: 0x003D1DD4
-		public Thought_Memory OldestMemoryInGroup(Thought_Memory group)
+		if (newThought.def.stackLimit >= 0)
 		{
-			Thought_Memory result = null;
-			int num = -9999;
-			for (int i = 0; i < this.memories.Count; i++)
+			while (NumMemoriesOfDef(newThought.def) > newThought.def.stackLimit)
 			{
-				Thought_Memory thought_Memory = this.memories[i];
-				if (thought_Memory.GroupsWith(group) && thought_Memory.age > num)
-				{
-					result = thought_Memory;
-					num = thought_Memory.age;
-				}
+				RemoveMemory(OldestMemoryOfDef(newThought.def));
 			}
-			return result;
 		}
-
-		// Token: 0x0600D030 RID: 53296 RVA: 0x003D3C28 File Offset: 0x003D1E28
-		public Thought_Memory OldestMemoryOfDef(ThoughtDef def)
+		if (newThought.def.thoughtToMake != null)
 		{
-			Thought_Memory result = null;
-			int num = -9999;
-			for (int i = 0; i < this.memories.Count; i++)
-			{
-				Thought_Memory thought_Memory = this.memories[i];
-				if (thought_Memory.def == def && thought_Memory.age > num)
-				{
-					result = thought_Memory;
-					num = thought_Memory.age;
-				}
-			}
-			return result;
+			TryGainMemory(newThought.def.thoughtToMake, newThought.otherPawn);
 		}
-
-		// Token: 0x0600D031 RID: 53297 RVA: 0x003D3C7C File Offset: 0x003D1E7C
-		public void RemoveMemory(Thought_Memory th)
+		List<Thought_Memory> list = ((newThought.def.replaceThoughts == null) ? memories : new List<Thought_Memory>(memories));
+		for (int i = 0; i < list.Count; i++)
 		{
-			if (!this.memories.Remove(th))
+			if (list[i] != newThought && list[i].GroupsWith(newThought))
 			{
-				Log.Warning("Tried to remove memory thought of def " + th.def.defName + " but it's not here.");
+				list[i].Notify_NewThoughtInGroupAdded(newThought);
+			}
+			if (newThought.def.replaceThoughts != null && newThought.def.replaceThoughts.Contains(list[i].def))
+			{
+				RemoveMemory(list[i]);
 			}
 		}
-
-		// Token: 0x0600D032 RID: 53298 RVA: 0x003D3CAC File Offset: 0x003D1EAC
-		public int NumMemoriesInGroup(Thought_Memory group)
+		if (showBubble && newThought.def.showBubble && pawn.Spawned && PawnUtility.ShouldSendNotificationAbout(pawn))
 		{
-			int num = 0;
-			for (int i = 0; i < this.memories.Count; i++)
-			{
-				if (this.memories[i].GroupsWith(group))
-				{
-					num++;
-				}
-			}
-			return num;
+			MoteMaker.MakeMoodThoughtBubble(pawn, newThought);
 		}
+	}
 
-		// Token: 0x0600D033 RID: 53299 RVA: 0x003D3CEC File Offset: 0x003D1EEC
-		public int NumMemoriesOfDef(ThoughtDef def)
+	public Thought_Memory OldestMemoryInGroup(Thought_Memory group)
+	{
+		Thought_Memory result = null;
+		int num = -9999;
+		for (int i = 0; i < memories.Count; i++)
 		{
-			int num = 0;
-			for (int i = 0; i < this.memories.Count; i++)
+			Thought_Memory thought_Memory = memories[i];
+			if (thought_Memory.GroupsWith(group) && thought_Memory.age > num)
 			{
-				if (this.memories[i].def == def)
-				{
-					num++;
-				}
+				result = thought_Memory;
+				num = thought_Memory.age;
 			}
-			return num;
 		}
+		return result;
+	}
 
-		// Token: 0x0600D034 RID: 53300 RVA: 0x003D3D2C File Offset: 0x003D1F2C
-		public Thought_Memory GetFirstMemoryOfDef(ThoughtDef def)
+	public Thought_Memory OldestMemoryOfDef(ThoughtDef def)
+	{
+		Thought_Memory result = null;
+		int num = -9999;
+		for (int i = 0; i < memories.Count; i++)
 		{
-			for (int i = 0; i < this.memories.Count; i++)
+			Thought_Memory thought_Memory = memories[i];
+			if (thought_Memory.def == def && thought_Memory.age > num)
 			{
-				if (this.memories[i].def == def)
-				{
-					return this.memories[i];
-				}
+				result = thought_Memory;
+				num = thought_Memory.age;
 			}
-			return null;
 		}
+		return result;
+	}
 
-		// Token: 0x0600D035 RID: 53301 RVA: 0x003D3D74 File Offset: 0x003D1F74
-		public void RemoveMemoriesOfDefWhereOtherPawnIs(ThoughtDef def, Pawn otherPawn)
+	public void RemoveMemory(Thought_Memory th)
+	{
+		if (!memories.Remove(th))
 		{
-			for (int i = this.memories.Count - 1; i >= 0; i--)
-			{
-				Thought_Memory thought_Memory = this.memories[i];
-				if (thought_Memory.def == def && thought_Memory.otherPawn == otherPawn)
-				{
-					this.RemoveMemory(thought_Memory);
-				}
-			}
+			Log.Warning("Tried to remove memory thought of def " + th.def.defName + " but it's not here.");
 		}
+	}
 
-		// Token: 0x0600D036 RID: 53302 RVA: 0x003D3DC0 File Offset: 0x003D1FC0
-		public void RemoveMemoriesWhereOtherPawnIs(Pawn otherPawn)
+	public int NumMemoriesInGroup(Thought_Memory group)
+	{
+		int num = 0;
+		for (int i = 0; i < memories.Count; i++)
 		{
-			Predicate<Thought_Memory> <>9__0;
-			for (;;)
+			if (memories[i].GroupsWith(group))
 			{
-				List<Thought_Memory> list = this.memories;
-				Predicate<Thought_Memory> match;
-				if ((match = <>9__0) == null)
-				{
-					match = (<>9__0 = ((Thought_Memory x) => x.otherPawn == otherPawn));
-				}
-				Thought_Memory thought_Memory = list.Find(match);
-				if (thought_Memory == null)
-				{
-					break;
-				}
-				this.RemoveMemory(thought_Memory);
+				num++;
 			}
 		}
+		return num;
+	}
 
-		// Token: 0x0600D037 RID: 53303 RVA: 0x003D3E14 File Offset: 0x003D2014
-		public void RemoveMemoriesOfDef(ThoughtDef def)
+	public int NumMemoriesOfDef(ThoughtDef def)
+	{
+		int num = 0;
+		for (int i = 0; i < memories.Count; i++)
 		{
-			if (!def.IsMemory)
+			if (memories[i].def == def)
 			{
-				ThoughtDef def2 = def;
-				Log.Warning(((def2 != null) ? def2.ToString() : null) + " is not a memory thought.");
-				return;
-			}
-			Predicate<Thought_Memory> <>9__0;
-			for (;;)
-			{
-				List<Thought_Memory> list = this.memories;
-				Predicate<Thought_Memory> match;
-				if ((match = <>9__0) == null)
-				{
-					match = (<>9__0 = ((Thought_Memory x) => x.def == def));
-				}
-				Thought_Memory thought_Memory = list.Find(match);
-				if (thought_Memory == null)
-				{
-					break;
-				}
-				this.RemoveMemory(thought_Memory);
+				num++;
 			}
 		}
+		return num;
+	}
 
-		// Token: 0x0600D038 RID: 53304 RVA: 0x003D3E94 File Offset: 0x003D2094
-		public void RemoveMemoriesOfDefIf(ThoughtDef def, Func<Thought_Memory, bool> predicate)
+	public Thought_Memory GetFirstMemoryOfDef(ThoughtDef def)
+	{
+		for (int i = 0; i < memories.Count; i++)
 		{
-			if (!def.IsMemory)
+			if (memories[i].def == def)
 			{
-				ThoughtDef def2 = def;
-				Log.Warning(((def2 != null) ? def2.ToString() : null) + " is not a memory thought.");
-				return;
-			}
-			Predicate<Thought_Memory> <>9__0;
-			for (;;)
-			{
-				List<Thought_Memory> list = this.memories;
-				Predicate<Thought_Memory> match;
-				if ((match = <>9__0) == null)
-				{
-					match = (<>9__0 = ((Thought_Memory x) => x.def == def && predicate(x)));
-				}
-				Thought_Memory thought_Memory = list.Find(match);
-				if (thought_Memory == null)
-				{
-					break;
-				}
-				this.RemoveMemory(thought_Memory);
+				return memories[i];
 			}
 		}
+		return null;
+	}
 
-		// Token: 0x0600D039 RID: 53305 RVA: 0x003D3F1C File Offset: 0x003D211C
-		public bool AnyMemoryConcerns(Pawn otherPawn)
+	public void RemoveMemoriesOfDefWhereOtherPawnIs(ThoughtDef def, Pawn otherPawn)
+	{
+		for (int num = memories.Count - 1; num >= 0; num--)
 		{
-			for (int i = 0; i < this.memories.Count; i++)
+			Thought_Memory thought_Memory = memories[num];
+			if (thought_Memory.def == def && thought_Memory.otherPawn == otherPawn)
 			{
-				if (this.memories[i].otherPawn == otherPawn)
-				{
-					return true;
-				}
+				RemoveMemory(thought_Memory);
 			}
-			return false;
 		}
+	}
 
-		// Token: 0x0600D03A RID: 53306 RVA: 0x003D3F56 File Offset: 0x003D2156
-		public void Notify_PawnDiscarded(Pawn discarded)
+	public void RemoveMemoriesWhereOtherPawnIs(Pawn otherPawn)
+	{
+		while (true)
 		{
-			this.RemoveMemoriesWhereOtherPawnIs(discarded);
+			Thought_Memory thought_Memory = memories.Find((Thought_Memory x) => x.otherPawn == otherPawn);
+			if (thought_Memory != null)
+			{
+				RemoveMemory(thought_Memory);
+				continue;
+			}
+			break;
 		}
+	}
 
-		// Token: 0x04008DA9 RID: 36265
-		public Pawn pawn;
+	public void RemoveMemoriesOfDef(ThoughtDef def)
+	{
+		if (!def.IsMemory)
+		{
+			Log.Warning(def?.ToString() + " is not a memory thought.");
+			return;
+		}
+		while (true)
+		{
+			Thought_Memory thought_Memory = memories.Find((Thought_Memory x) => x.def == def);
+			if (thought_Memory != null)
+			{
+				RemoveMemory(thought_Memory);
+				continue;
+			}
+			break;
+		}
+	}
 
-		// Token: 0x04008DAA RID: 36266
-		private List<Thought_Memory> memories = new List<Thought_Memory>();
+	public void RemoveMemoriesOfDefIf(ThoughtDef def, Func<Thought_Memory, bool> predicate)
+	{
+		if (!def.IsMemory)
+		{
+			Log.Warning(def?.ToString() + " is not a memory thought.");
+			return;
+		}
+		while (true)
+		{
+			Thought_Memory thought_Memory = memories.Find((Thought_Memory x) => x.def == def && predicate(x));
+			if (thought_Memory != null)
+			{
+				RemoveMemory(thought_Memory);
+				continue;
+			}
+			break;
+		}
+	}
 
-		// Token: 0x04008DAB RID: 36267
-		private List<Thought_Memory> tmpMemories = new List<Thought_Memory>();
+	public bool AnyMemoryConcerns(Pawn otherPawn)
+	{
+		for (int i = 0; i < memories.Count; i++)
+		{
+			if (memories[i].otherPawn == otherPawn)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public void Notify_PawnDiscarded(Pawn discarded)
+	{
+		RemoveMemoriesWhereOtherPawnIs(discarded);
 	}
 }

@@ -1,633 +1,1145 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using RimWorld;
 using UnityEngine;
 using Verse.AI.Group;
 
-namespace Verse
+namespace Verse;
+
+public class Corpse : ThingWithComps, IThingHolder, IThingHolderTickable, IStrippable, IBillGiver, IObservedThoughtGiver
 {
-	// Token: 0x02000872 RID: 2162
-	public class Corpse : ThingWithComps, IThingHolder, IStrippable, IBillGiver, IObservedThoughtGiver
+	[CompilerGenerated]
+	private sealed class _003CButcherProducts_003Ed__45 : IEnumerable<Thing>, IEnumerable, IEnumerator<Thing>, IEnumerator, IDisposable
 	{
-		// Token: 0x170009FE RID: 2558
-		// (get) Token: 0x0600369F RID: 13983 RVA: 0x001254CA File Offset: 0x001236CA
-		// (set) Token: 0x060036A0 RID: 13984 RVA: 0x001254E8 File Offset: 0x001236E8
-		public Pawn InnerPawn
+		private int _003C_003E1__state;
+
+		private Thing _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Corpse _003C_003E4__this;
+
+		private Pawn butcher;
+
+		public Pawn _003C_003E3__butcher;
+
+		private float efficiency;
+
+		public float _003C_003E3__efficiency;
+
+		private IEnumerator<Thing> _003C_003E7__wrap1;
+
+		Thing IEnumerator<Thing>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.innerContainer.Count <= 0)
-				{
-					return null;
-				}
-				return this.innerContainer[0];
-			}
-			set
-			{
-				if (value == null)
-				{
-					this.innerContainer.Clear();
-					return;
-				}
-				if (this.innerContainer.Count > 0)
-				{
-					Log.Error("Setting InnerPawn in corpse that already has one.");
-					this.innerContainer.Clear();
-				}
-				this.innerContainer.TryAdd(value, true);
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170009FF RID: 2559
-		// (get) Token: 0x060036A1 RID: 13985 RVA: 0x00125535 File Offset: 0x00123735
-		// (set) Token: 0x060036A2 RID: 13986 RVA: 0x00125548 File Offset: 0x00123748
-		public int Age
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return Find.TickManager.TicksGame - this.timeOfDeath;
-			}
-			set
-			{
-				this.timeOfDeath = Find.TickManager.TicksGame - value;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17000A00 RID: 2560
-		// (get) Token: 0x060036A3 RID: 13987 RVA: 0x0012555C File Offset: 0x0012375C
-		public override string LabelNoCount
+		[DebuggerHidden]
+		public _003CButcherProducts_003Ed__45(int _003C_003E1__state)
 		{
-			get
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				if (this.cachedLabel == null)
+				try
 				{
-					if (this.Bugged)
-					{
-						Log.Error("LabelNoCount on Corpse while Bugged.");
-						return string.Empty;
-					}
-					this.cachedLabel = "DeadLabel".Translate(this.InnerPawn.Label, this.InnerPawn);
 				}
-				return this.cachedLabel;
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
 			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x17000A01 RID: 2561
-		// (get) Token: 0x060036A4 RID: 13988 RVA: 0x001255BF File Offset: 0x001237BF
-		public override bool IngestibleNow
+		private bool MoveNext()
 		{
-			get
+			try
 			{
-				if (this.Bugged)
+				int num = _003C_003E1__state;
+				Corpse corpse = _003C_003E4__this;
+				switch (num)
 				{
-					Log.Error("IngestibleNow on Corpse while Bugged.");
+				default:
 					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = corpse.InnerPawn.ButcherProducts(butcher, efficiency).GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 1:
+					_003C_003E1__state = -3;
+					break;
 				}
-				return base.IngestibleNow && this.InnerPawn.RaceProps.IsFlesh && this.GetRotStage() == RotStage.Fresh;
-			}
-		}
-
-		// Token: 0x17000A02 RID: 2562
-		// (get) Token: 0x060036A5 RID: 13989 RVA: 0x00125600 File Offset: 0x00123800
-		public RotDrawMode CurRotDrawMode
-		{
-			get
-			{
-				CompRottable comp = base.GetComp<CompRottable>();
-				if (comp != null)
+				if (_003C_003E7__wrap1.MoveNext())
 				{
-					switch (comp.Stage)
-					{
-					case RotStage.Rotting:
-						return RotDrawMode.Rotting;
-					case RotStage.Dessicated:
-						return RotDrawMode.Dessicated;
-					}
-					return RotDrawMode.Fresh;
+					Thing current = _003C_003E7__wrap1.Current;
+					_003C_003E2__current = current;
+					_003C_003E1__state = 1;
+					return true;
 				}
-				return RotDrawMode.Fresh;
-			}
-		}
-
-		// Token: 0x17000A03 RID: 2563
-		// (get) Token: 0x060036A6 RID: 13990 RVA: 0x0012563C File Offset: 0x0012383C
-		private bool ShouldVanish
-		{
-			get
-			{
-				return this.InnerPawn.RaceProps.Animal && this.vanishAfterTimestamp > 0 && this.Age >= this.vanishAfterTimestamp && base.Spawned && this.GetRoom(RegionType.Set_All) != null && this.GetRoom(RegionType.Set_All).TouchesMapEdge && !base.Map.roofGrid.Roofed(base.Position);
-			}
-		}
-
-		// Token: 0x17000A04 RID: 2564
-		// (get) Token: 0x060036A7 RID: 13991 RVA: 0x001256AE File Offset: 0x001238AE
-		public BillStack BillStack
-		{
-			get
-			{
-				return this.operationsBillStack;
-			}
-		}
-
-		// Token: 0x17000A05 RID: 2565
-		// (get) Token: 0x060036A8 RID: 13992 RVA: 0x001256B6 File Offset: 0x001238B6
-		public IEnumerable<IntVec3> IngredientStackCells
-		{
-			get
-			{
-				yield return this.InteractionCell;
-				yield break;
-			}
-		}
-
-		// Token: 0x17000A06 RID: 2566
-		// (get) Token: 0x060036A9 RID: 13993 RVA: 0x001256C6 File Offset: 0x001238C6
-		public bool Bugged
-		{
-			get
-			{
-				if (this.innerContainer.Count != 0)
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = null;
+				if (corpse.InnerPawn.RaceProps.BloodDef != null)
 				{
-					Pawn pawn = this.innerContainer[0];
-					if (((pawn != null) ? pawn.def : null) != null)
-					{
-						return this.innerContainer[0].kindDef == null;
-					}
+					FilthMaker.TryMakeFilth(butcher.Position, butcher.Map, corpse.InnerPawn.RaceProps.BloodDef, corpse.InnerPawn.LabelIndefinite());
 				}
-				return true;
-			}
-		}
-
-		// Token: 0x060036AA RID: 13994 RVA: 0x00125705 File Offset: 0x00123905
-		public Corpse()
-		{
-			this.operationsBillStack = new BillStack(this);
-			this.innerContainer = new ThingOwner<Pawn>(this, true, LookMode.Reference, false);
-		}
-
-		// Token: 0x060036AB RID: 13995 RVA: 0x00125738 File Offset: 0x00123938
-		public bool CurrentlyUsableForBills()
-		{
-			return this.InteractionCell.IsValid;
-		}
-
-		// Token: 0x060036AC RID: 13996 RVA: 0x00125753 File Offset: 0x00123953
-		public bool UsableForBillsAfterFueling()
-		{
-			return this.CurrentlyUsableForBills();
-		}
-
-		// Token: 0x060036AD RID: 13997 RVA: 0x0012575B File Offset: 0x0012395B
-		public bool AnythingToStrip()
-		{
-			return this.InnerPawn.AnythingToStrip();
-		}
-
-		// Token: 0x060036AE RID: 13998 RVA: 0x00125768 File Offset: 0x00123968
-		public ThingOwner GetDirectlyHeldThings()
-		{
-			return this.innerContainer;
-		}
-
-		// Token: 0x060036AF RID: 13999 RVA: 0x00125770 File Offset: 0x00123970
-		public void GetChildHolders(List<IThingHolder> outChildren)
-		{
-			ThingOwnerUtility.AppendThingHoldersFromThings(outChildren, this.GetDirectlyHeldThings());
-		}
-
-		// Token: 0x060036B0 RID: 14000 RVA: 0x0012577E File Offset: 0x0012397E
-		public override void PostMake()
-		{
-			base.PostMake();
-			this.timeOfDeath = Find.TickManager.TicksGame;
-		}
-
-		// Token: 0x060036B1 RID: 14001 RVA: 0x00125798 File Offset: 0x00123998
-		public override void SpawnSetup(Map map, bool respawningAfterLoad)
-		{
-			if (this.Bugged)
-			{
-				Log.Error(((this != null) ? this.ToString() : null) + " spawned in bugged state.");
-				return;
-			}
-			base.SpawnSetup(map, respawningAfterLoad);
-			this.InnerPawn.Rotation = Rot4.South;
-			List<Hediff> hediffs = this.InnerPawn.health.hediffSet.hediffs;
-			for (int i = 0; i < hediffs.Count; i++)
-			{
-				hediffs[i].Notify_PawnCorpseSpawned();
-			}
-			this.NotifyColonistBar();
-		}
-
-		// Token: 0x060036B2 RID: 14002 RVA: 0x0012581C File Offset: 0x00123A1C
-		public override void Kill(DamageInfo? dinfo = null, Hediff exactCulprit = null)
-		{
-			if (dinfo != null && dinfo.Value.Def == DamageDefOf.Bomb)
-			{
-				CompRottable comp = base.GetComp<CompRottable>();
-				ThingDef thingDef;
-				if (comp != null && comp.Stage == RotStage.Rotting)
+				if (corpse.InnerPawn.RaceProps.Humanlike)
 				{
-					thingDef = ThingDefOf.Filth_CorpseBile;
+					Find.HistoryEventsManager.RecordEvent(new HistoryEvent(HistoryEventDefOf.ButcheredHuman, new SignalArgs(butcher.Named(HistoryEventArgsNames.Doer), corpse.InnerPawn.Named(HistoryEventArgsNames.Victim))));
+					TaleRecorder.RecordTale(TaleDefOf.ButcheredHumanlikeCorpse, butcher);
 				}
-				else
-				{
-					thingDef = this.InnerPawn.RaceProps.BloodDef;
-				}
-				if (thingDef != null)
-				{
-					int randomInRange = Corpse.ExplodeFilthCountRange.RandomInRange;
-					for (int i = 0; i < randomInRange; i++)
-					{
-						FilthMaker.TryMakeFilth(base.PositionHeld, base.MapHeld, thingDef, 1, FilthSourceFlags.None, true);
-					}
-				}
+				return false;
 			}
-			base.Kill(dinfo, exactCulprit);
-		}
-
-		// Token: 0x060036B3 RID: 14003 RVA: 0x001258B4 File Offset: 0x00123AB4
-		public override void DeSpawn(DestroyMode mode = DestroyMode.Vanish)
-		{
-			base.DeSpawn(mode);
-			if (!this.Bugged)
+			catch
 			{
-				this.NotifyColonistBar();
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x060036B4 RID: 14004 RVA: 0x001258CC File Offset: 0x00123ACC
-		public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
+		bool IEnumerator.MoveNext()
 		{
-			Pawn pawn = null;
-			if (!this.Bugged)
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				pawn = this.InnerPawn;
-				this.NotifyColonistBar();
-				this.innerContainer.Clear();
-			}
-			Lord lord = this.GetLord();
-			if (lord != null)
-			{
-				lord.Notify_CorpseLost(this, null);
-			}
-			base.Destroy(mode);
-			if (pawn != null)
-			{
-				Corpse.PostCorpseDestroy(pawn, false);
+				_003C_003E7__wrap1.Dispose();
 			}
 		}
 
-		// Token: 0x060036B5 RID: 14005 RVA: 0x00125928 File Offset: 0x00123B28
-		public static void PostCorpseDestroy(Pawn pawn, bool discarded = false)
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			Pawn_Ownership ownership = pawn.ownership;
-			if (ownership != null)
-			{
-				ownership.UnclaimAll();
-			}
-			Pawn_EquipmentTracker equipment = pawn.equipment;
-			if (equipment != null)
-			{
-				equipment.DestroyAllEquipment(DestroyMode.Vanish);
-			}
-			pawn.inventory.DestroyAll(DestroyMode.Vanish);
-			pawn.health.Notify_PawnCorpseDestroyed();
-			Pawn_ApparelTracker apparel = pawn.apparel;
-			if (apparel != null)
-			{
-				apparel.DestroyAll(DestroyMode.Vanish);
-			}
-			if (!PawnGenerator.IsBeingGenerated(pawn) && !discarded)
-			{
-				Ideo ideo = pawn.Ideo;
-				if (ideo == null)
-				{
-					return;
-				}
-				ideo.Notify_MemberCorpseDestroyed(pawn);
-			}
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x060036B6 RID: 14006 RVA: 0x001259A0 File Offset: 0x00123BA0
-		public override void TickRare()
+		[DebuggerHidden]
+		IEnumerator<Thing> IEnumerable<Thing>.GetEnumerator()
 		{
-			this.TickRareInt();
-			if (base.Destroyed)
+			_003CButcherProducts_003Ed__45 _003CButcherProducts_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				return;
-			}
-			if (this.Bugged)
-			{
-				Log.Error(((this != null) ? this.ToString() : null) + " has null innerPawn. Destroying.");
-				this.Destroy(DestroyMode.Vanish);
-				return;
-			}
-			Hediff_DeathRefusal firstHediff = this.InnerPawn.health.hediffSet.GetFirstHediff<Hediff_DeathRefusal>();
-			if (firstHediff != null)
-			{
-				firstHediff.TickRare();
-				if (base.Destroyed)
-				{
-					return;
-				}
-			}
-			if (ModsConfig.AnomalyActive && this.InnerPawn.kindDef.IsFleshBeast() && this.GetRotStage() == RotStage.Dessicated)
-			{
-				FilthMaker.TryMakeFilth(base.PositionHeld, base.MapHeld, ThingDefOf.Filth_TwistedFlesh, 1, FilthSourceFlags.None, true);
-				this.Destroy(DestroyMode.Vanish);
-				return;
-			}
-			if (this.ShouldVanish)
-			{
-				this.Destroy(DestroyMode.Vanish);
-			}
-		}
-
-		// Token: 0x060036B7 RID: 14007 RVA: 0x00125A64 File Offset: 0x00123C64
-		protected void TickRareInt()
-		{
-			if (base.AllComps != null)
-			{
-				int i = 0;
-				int count = base.AllComps.Count;
-				while (i < count)
-				{
-					base.AllComps[i].CompTickRare();
-					i++;
-				}
-			}
-			if (base.Destroyed)
-			{
-				return;
-			}
-			this.InnerPawn.TickRare();
-			GasUtility.CorpseGasEffectsTickRare(this);
-		}
-
-		// Token: 0x060036B8 RID: 14008 RVA: 0x00125ABC File Offset: 0x00123CBC
-		protected override void IngestedCalculateAmounts(Pawn ingester, float nutritionWanted, out int numTaken, out float nutritionIngested)
-		{
-			BodyPartRecord bodyPartRecord = this.GetBestBodyPartToEat(nutritionWanted);
-			if (bodyPartRecord == null)
-			{
-				Log.Error(((ingester != null) ? ingester.ToString() : null) + " ate " + ((this != null) ? this.ToString() : null) + " but no body part was found. Replacing with core part.");
-				bodyPartRecord = this.InnerPawn.RaceProps.body.corePart;
-			}
-			float bodyPartNutrition = FoodUtility.GetBodyPartNutrition(this, bodyPartRecord);
-			if (bodyPartRecord == this.InnerPawn.RaceProps.body.corePart)
-			{
-				if (ingester != null && PawnUtility.ShouldSendNotificationAbout(this.InnerPawn) && this.InnerPawn.RaceProps.Humanlike)
-				{
-					Messages.Message("MessageEatenByPredator".Translate(this.InnerPawn.LabelShort, ingester.Named("PREDATOR"), this.InnerPawn.Named("EATEN")).CapitalizeFirst(), ingester, MessageTypeDefOf.NegativeEvent, true);
-				}
-				numTaken = 1;
+				_003C_003E1__state = 0;
+				_003CButcherProducts_003Ed__ = this;
 			}
 			else
 			{
-				Hediff_MissingPart hediff_MissingPart = (Hediff_MissingPart)HediffMaker.MakeHediff(HediffDefOf.MissingBodyPart, this.InnerPawn, bodyPartRecord);
-				if (ingester != null)
+				_003CButcherProducts_003Ed__ = new _003CButcherProducts_003Ed__45(0)
 				{
-					hediff_MissingPart.lastInjury = HediffDefOf.Bite;
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CButcherProducts_003Ed__.butcher = _003C_003E3__butcher;
+			_003CButcherProducts_003Ed__.efficiency = _003C_003E3__efficiency;
+			return _003CButcherProducts_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Thing>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGetGizmos_003Ed__57 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Corpse _003C_003E4__this;
+
+		private IEnumerator<Gizmo> _003C_003E7__wrap1;
+
+		Gizmo IEnumerator<Gizmo>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetGizmos_003Ed__57(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			switch (_003C_003E1__state)
+			{
+			case -3:
+			case 1:
+				try
+				{
 				}
-				hediff_MissingPart.IsFresh = true;
-				this.InnerPawn.health.AddHediff(hediff_MissingPart, null, null, null);
-				numTaken = 0;
-			}
-			nutritionIngested = bodyPartNutrition;
-		}
-
-		// Token: 0x060036B9 RID: 14009 RVA: 0x00125C02 File Offset: 0x00123E02
-		public override IEnumerable<Thing> ButcherProducts(Pawn butcher, float efficiency)
-		{
-			foreach (Thing thing in this.InnerPawn.ButcherProducts(butcher, efficiency))
-			{
-				yield return thing;
-			}
-			IEnumerator<Thing> enumerator = null;
-			if (this.InnerPawn.RaceProps.BloodDef != null)
-			{
-				FilthMaker.TryMakeFilth(butcher.Position, butcher.Map, this.InnerPawn.RaceProps.BloodDef, this.InnerPawn.LabelIndefinite(), 1, FilthSourceFlags.None);
-			}
-			if (this.InnerPawn.RaceProps.Humanlike)
-			{
-				Find.HistoryEventsManager.RecordEvent(new HistoryEvent(HistoryEventDefOf.ButcheredHuman, new SignalArgs(butcher.Named(HistoryEventArgsNames.Doer), this.InnerPawn.Named(HistoryEventArgsNames.Victim))), true);
-				TaleRecorder.RecordTale(TaleDefOf.ButcheredHumanlikeCorpse, new object[]
+				finally
 				{
-					butcher
-				});
+					_003C_003Em__Finally1();
+				}
+				break;
+			case -4:
+			case 2:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally2();
+				}
+				break;
 			}
-			yield break;
-			yield break;
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x060036BA RID: 14010 RVA: 0x00125C20 File Offset: 0x00123E20
-		public override void ExposeData()
+		private bool MoveNext()
 		{
-			base.ExposeData();
-			Scribe_Values.Look<int>(ref this.timeOfDeath, "timeOfDeath", 0, false);
-			Scribe_Values.Look<int>(ref this.vanishAfterTimestamp, "vanishAfterTimestamp", 0, false);
-			Scribe_Values.Look<bool>(ref this.everBuriedInSarcophagus, "everBuriedInSarcophagus", false, false);
-			Scribe_Deep.Look<BillStack>(ref this.operationsBillStack, "operationsBillStack", new object[]
+			try
 			{
-				this
-			});
-			Scribe_Deep.Look<ThingOwner<Pawn>>(ref this.innerContainer, "innerContainer", new object[]
+				int num = _003C_003E1__state;
+				Corpse CS_0024_003C_003E8__locals5 = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((ThingWithComps)CS_0024_003C_003E8__locals5).GetGizmos().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_007a;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_007a;
+				case 2:
+					_003C_003E1__state = -4;
+					goto IL_00ec;
+				case 3:
+					_003C_003E1__state = -1;
+					if (ModsConfig.AnomalyActive)
+					{
+						_003C_003E2__current = new Command_Action
+						{
+							defaultLabel = "DEV: Resurrect as shambler",
+							action = delegate
+							{
+								MutantUtility.ResurrectAsShambler(CS_0024_003C_003E8__locals5.InnerPawn);
+							}
+						};
+						_003C_003E1__state = 4;
+						return true;
+					}
+					break;
+				case 4:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_00ec:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Gizmo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					_003C_003Em__Finally2();
+					_003C_003E7__wrap1 = null;
+					goto IL_0106;
+					IL_007a:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Gizmo current2 = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current2;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (CS_0024_003C_003E8__locals5.InnerPawn.HasShowGizmosOnCorpseHediff)
+					{
+						_003C_003E7__wrap1 = CS_0024_003C_003E8__locals5.InnerPawn.GetGizmos().GetEnumerator();
+						_003C_003E1__state = -4;
+						goto IL_00ec;
+					}
+					goto IL_0106;
+					IL_0106:
+					if (DebugSettings.ShowDevGizmos)
+					{
+						_003C_003E2__current = new Command_Action
+						{
+							defaultLabel = "DEV: Resurrect",
+							action = delegate
+							{
+								ResurrectionUtility.TryResurrect(CS_0024_003C_003E8__locals5.InnerPawn);
+							}
+						};
+						_003C_003E1__state = 3;
+						return true;
+					}
+					break;
+				}
+				return false;
+			}
+			catch
 			{
-				this
-			});
-			if (Scribe.mode == LoadSaveMode.PostLoadInit && this.innerContainer.removeContentsIfDestroyed)
-			{
-				this.innerContainer.removeContentsIfDestroyed = false;
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x060036BB RID: 14011 RVA: 0x00125CBE File Offset: 0x00123EBE
-		public void Strip(bool notifyFaction = true)
+		bool IEnumerator.MoveNext()
 		{
-			this.InnerPawn.Strip(notifyFaction);
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x060036BC RID: 14012 RVA: 0x00125CCC File Offset: 0x00123ECC
-		public override void DynamicDrawPhaseAt(DrawPhase phase, Vector3 drawLoc, bool flip = false)
+		private void _003C_003Em__Finally1()
 		{
-			this.InnerPawn.DynamicDrawPhaseAt(phase, drawLoc.WithYOffset(this.InnerPawn.Drawer.SeededYOffset), false);
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
 		}
 
-		// Token: 0x060036BD RID: 14013 RVA: 0x00002C42 File Offset: 0x00000E42
-		public Thought_Memory GiveObservedThought(Pawn observer)
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CGetGizmos_003Ed__57 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CGetGizmos_003Ed__57(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CSpecialDisplayStats_003Ed__52 : IEnumerable<StatDrawEntry>, IEnumerable, IEnumerator<StatDrawEntry>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private StatDrawEntry _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Corpse _003C_003E4__this;
+
+		private IEnumerator<StatDrawEntry> _003C_003E7__wrap1;
+
+		StatDrawEntry IEnumerator<StatDrawEntry>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CSpecialDisplayStats_003Ed__52(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				Corpse corpse = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((ThingWithComps)corpse).SpecialDisplayStats().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_007a;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_007a;
+				case 2:
+					_003C_003E1__state = -1;
+					if (corpse.GetRotStage() == RotStage.Fresh)
+					{
+						StatDef meatAmount = StatDefOf.MeatAmount;
+						_003C_003E2__current = new StatDrawEntry(meatAmount.category, meatAmount, corpse.InnerPawn.GetStatValue(meatAmount), StatRequest.For(corpse.InnerPawn), ToStringNumberSense.Undefined, null);
+						_003C_003E1__state = 3;
+						return true;
+					}
+					break;
+				case 3:
+				{
+					_003C_003E1__state = -1;
+					StatDef leatherAmount = StatDefOf.LeatherAmount;
+					_003C_003E2__current = new StatDrawEntry(leatherAmount.category, leatherAmount, corpse.InnerPawn.GetStatValue(leatherAmount), StatRequest.For(corpse.InnerPawn), ToStringNumberSense.Undefined, null);
+					_003C_003E1__state = 4;
+					return true;
+				}
+				case 4:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_007a:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						StatDrawEntry current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.Basics, "BodySize".Translate(), corpse.InnerPawn.BodySize.ToString("F2"), "Stat_Race_BodySize_Desc".Translate(), 4195);
+					_003C_003E1__state = 2;
+					return true;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<StatDrawEntry> IEnumerable<StatDrawEntry>.GetEnumerator()
+		{
+			_003CSpecialDisplayStats_003Ed__52 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CSpecialDisplayStats_003Ed__52(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<StatDrawEntry>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003Cget_IngredientStackCells_003Ed__25 : IEnumerable<IntVec3>, IEnumerable, IEnumerator<IntVec3>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private IntVec3 _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Corpse _003C_003E4__this;
+
+		IntVec3 IEnumerator<IntVec3>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003Cget_IngredientStackCells_003Ed__25(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			Corpse corpse = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = corpse.InteractionCell;
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<IntVec3> IEnumerable<IntVec3>.GetEnumerator()
+		{
+			_003Cget_IngredientStackCells_003Ed__25 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_IngredientStackCells_003Ed__25(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<IntVec3>)this).GetEnumerator();
+		}
+	}
+
+	protected ThingOwner<Pawn> innerContainer;
+
+	public int timeOfDeath = -1;
+
+	private int vanishAfterTimestamp = -1;
+
+	private BillStack operationsBillStack;
+
+	public bool everBuriedInSarcophagus;
+
+	[Unsaved(false)]
+	private string cachedLabel;
+
+	private const int DontCauseObservedCorpseThoughtAfterRitualExecutionTicks = 60000;
+
+	private static readonly IntRange ExplodeFilthCountRange = new IntRange(2, 5);
+
+	public Pawn InnerPawn
+	{
+		get
+		{
+			if (innerContainer.Count <= 0)
+			{
+				return null;
+			}
+			return innerContainer[0];
+		}
+		set
+		{
+			if (value == null)
+			{
+				innerContainer.Clear();
+				return;
+			}
+			if (innerContainer.Count > 0)
+			{
+				Log.Error("Setting InnerPawn in corpse that already has one.");
+				innerContainer.Clear();
+			}
+			innerContainer.TryAdd(value);
+		}
+	}
+
+	public int Age
+	{
+		get
+		{
+			return Find.TickManager.TicksGame - timeOfDeath;
+		}
+		set
+		{
+			timeOfDeath = Find.TickManager.TicksGame - value;
+		}
+	}
+
+	public override string LabelNoCount
+	{
+		get
+		{
+			if (cachedLabel == null)
+			{
+				if (Bugged)
+				{
+					Log.Error("LabelNoCount on Corpse while Bugged.");
+					return string.Empty;
+				}
+				cachedLabel = "DeadLabel".Translate(InnerPawn.Label, InnerPawn);
+			}
+			return cachedLabel;
+		}
+	}
+
+	public override bool IngestibleNow
+	{
+		get
+		{
+			if (Bugged)
+			{
+				Log.Error("IngestibleNow on Corpse while Bugged.");
+				return false;
+			}
+			if (!base.IngestibleNow)
+			{
+				return false;
+			}
+			if (!InnerPawn.RaceProps.IsFlesh)
+			{
+				return false;
+			}
+			if (this.GetRotStage() != 0)
+			{
+				return false;
+			}
+			return true;
+		}
+	}
+
+	public RotDrawMode CurRotDrawMode
+	{
+		get
+		{
+			CompRottable comp = GetComp<CompRottable>();
+			if (comp != null)
+			{
+				return comp.Stage switch
+				{
+					RotStage.Dessicated => RotDrawMode.Dessicated, 
+					RotStage.Rotting => RotDrawMode.Rotting, 
+					_ => RotDrawMode.Fresh, 
+				};
+			}
+			return RotDrawMode.Fresh;
+		}
+	}
+
+	private bool ShouldVanish
+	{
+		get
+		{
+			if (InnerPawn.RaceProps.Animal && vanishAfterTimestamp > 0 && Age >= vanishAfterTimestamp && base.Spawned && this.GetRoom() != null && this.GetRoom().TouchesMapEdge)
+			{
+				return !base.Map.roofGrid.Roofed(base.Position);
+			}
+			return false;
+		}
+	}
+
+	public BillStack BillStack => operationsBillStack;
+
+	public IEnumerable<IntVec3> IngredientStackCells
+	{
+		[IteratorStateMachine(typeof(_003Cget_IngredientStackCells_003Ed__25))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_IngredientStackCells_003Ed__25(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public bool ShouldTickContents => false;
+
+	public bool Bugged
+	{
+		get
+		{
+			if (innerContainer.Count != 0 && innerContainer[0]?.def != null)
+			{
+				return innerContainer[0].kindDef == null;
+			}
+			return true;
+		}
+	}
+
+	public Corpse()
+	{
+		operationsBillStack = new BillStack(this);
+		innerContainer = new ThingOwner<Pawn>(this, oneStackOnly: true, LookMode.Reference, removeContentsIfDestroyed: false);
+	}
+
+	public bool CurrentlyUsableForBills()
+	{
+		return InteractionCell.IsValid;
+	}
+
+	public bool UsableForBillsAfterFueling()
+	{
+		return CurrentlyUsableForBills();
+	}
+
+	public bool AnythingToStrip()
+	{
+		return InnerPawn.AnythingToStrip();
+	}
+
+	public ThingOwner GetDirectlyHeldThings()
+	{
+		return innerContainer;
+	}
+
+	public void GetChildHolders(List<IThingHolder> outChildren)
+	{
+		ThingOwnerUtility.AppendThingHoldersFromThings(outChildren, GetDirectlyHeldThings());
+	}
+
+	public override void PostMake()
+	{
+		base.PostMake();
+		timeOfDeath = Find.TickManager.TicksGame;
+	}
+
+	public override void SpawnSetup(Map map, bool respawningAfterLoad)
+	{
+		if (Bugged)
+		{
+			Log.Error(this?.ToString() + " spawned in bugged state.");
+			return;
+		}
+		base.SpawnSetup(map, respawningAfterLoad);
+		InnerPawn.Rotation = Rot4.South;
+		List<Hediff> hediffs = InnerPawn.health.hediffSet.hediffs;
+		for (int i = 0; i < hediffs.Count; i++)
+		{
+			hediffs[i].Notify_PawnCorpseSpawned();
+		}
+		NotifyColonistBar();
+	}
+
+	public override void Kill(DamageInfo? dinfo = null, Hediff exactCulprit = null)
+	{
+		if (dinfo.HasValue && dinfo.Value.Def == DamageDefOf.Bomb)
+		{
+			CompRottable comp = GetComp<CompRottable>();
+			ThingDef thingDef = ((comp == null || comp.Stage != RotStage.Rotting) ? InnerPawn.RaceProps.BloodDef : ThingDefOf.Filth_CorpseBile);
+			if (thingDef != null)
+			{
+				int randomInRange = ExplodeFilthCountRange.RandomInRange;
+				for (int i = 0; i < randomInRange; i++)
+				{
+					FilthMaker.TryMakeFilth(base.PositionHeld, base.MapHeld, thingDef);
+				}
+			}
+		}
+		base.Kill(dinfo, exactCulprit);
+	}
+
+	public override void DeSpawn(DestroyMode mode = DestroyMode.Vanish)
+	{
+		base.DeSpawn(mode);
+		if (!Bugged)
+		{
+			NotifyColonistBar();
+		}
+	}
+
+	public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
+	{
+		Pawn pawn = null;
+		if (!Bugged)
+		{
+			pawn = InnerPawn;
+			NotifyColonistBar();
+			innerContainer.Clear();
+		}
+		this.GetLord()?.Notify_CorpseLost(this, null);
+		base.Destroy(mode);
+		if (pawn != null)
+		{
+			PostCorpseDestroy(pawn);
+		}
+	}
+
+	public static void PostCorpseDestroy(Pawn pawn, bool discarded = false)
+	{
+		pawn.ownership?.UnclaimAll();
+		pawn.equipment?.DestroyAllEquipment();
+		pawn.inventory.DestroyAll();
+		pawn.health.Notify_PawnCorpseDestroyed();
+		pawn.apparel?.DestroyAll();
+		if (!PawnGenerator.IsBeingGenerated(pawn) && !discarded)
+		{
+			pawn.Ideo?.Notify_MemberCorpseDestroyed(pawn);
+		}
+	}
+
+	public override void TickRare()
+	{
+		TickRareInt();
+		if (base.Destroyed)
+		{
+			return;
+		}
+		if (Bugged)
+		{
+			Log.Error(this?.ToString() + " has null innerPawn. Destroying.");
+			Destroy();
+			return;
+		}
+		Hediff_DeathRefusal firstHediff = InnerPawn.health.hediffSet.GetFirstHediff<Hediff_DeathRefusal>();
+		if (firstHediff != null)
+		{
+			firstHediff.TickRare();
+			if (base.Destroyed)
+			{
+				return;
+			}
+		}
+		if (ModsConfig.AnomalyActive && InnerPawn.kindDef.IsFleshBeast() && this.GetRotStage() == RotStage.Dessicated)
+		{
+			FilthMaker.TryMakeFilth(base.PositionHeld, base.MapHeld, ThingDefOf.Filth_TwistedFlesh);
+			Destroy();
+		}
+		else if (ShouldVanish)
+		{
+			Destroy();
+		}
+	}
+
+	protected void TickRareInt()
+	{
+		if (base.AllComps != null)
+		{
+			int i = 0;
+			for (int count = base.AllComps.Count; i < count; i++)
+			{
+				base.AllComps[i].CompTickRare();
+			}
+		}
+		if (!base.Destroyed)
+		{
+			InnerPawn.TickRare();
+			GasUtility.CorpseGasEffectsTickRare(this);
+		}
+	}
+
+	protected override void IngestedCalculateAmounts(Pawn ingester, float nutritionWanted, out int numTaken, out float nutritionIngested)
+	{
+		BodyPartRecord bodyPartRecord = GetBestBodyPartToEat(nutritionWanted);
+		if (bodyPartRecord == null)
+		{
+			Log.Error(ingester?.ToString() + " ate " + this?.ToString() + " but no body part was found. Replacing with core part.");
+			bodyPartRecord = InnerPawn.RaceProps.body.corePart;
+		}
+		float bodyPartNutrition = FoodUtility.GetBodyPartNutrition(this, bodyPartRecord);
+		if (bodyPartRecord == InnerPawn.RaceProps.body.corePart)
+		{
+			if (ingester != null && PawnUtility.ShouldSendNotificationAbout(InnerPawn) && InnerPawn.RaceProps.Humanlike)
+			{
+				Messages.Message("MessageEatenByPredator".Translate(InnerPawn.LabelShort, ingester.Named("PREDATOR"), InnerPawn.Named("EATEN")).CapitalizeFirst(), ingester, MessageTypeDefOf.NegativeEvent);
+			}
+			numTaken = 1;
+		}
+		else
+		{
+			Hediff_MissingPart hediff_MissingPart = (Hediff_MissingPart)HediffMaker.MakeHediff(HediffDefOf.MissingBodyPart, InnerPawn, bodyPartRecord);
+			if (ingester != null)
+			{
+				hediff_MissingPart.lastInjury = HediffDefOf.Bite;
+			}
+			hediff_MissingPart.IsFresh = true;
+			InnerPawn.health.AddHediff(hediff_MissingPart, null, null);
+			numTaken = 0;
+		}
+		nutritionIngested = bodyPartNutrition;
+	}
+
+	[IteratorStateMachine(typeof(_003CButcherProducts_003Ed__45))]
+	public override IEnumerable<Thing> ButcherProducts(Pawn butcher, float efficiency)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CButcherProducts_003Ed__45(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__butcher = butcher,
+			_003C_003E3__efficiency = efficiency
+		};
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref timeOfDeath, "timeOfDeath", 0);
+		Scribe_Values.Look(ref vanishAfterTimestamp, "vanishAfterTimestamp", 0);
+		Scribe_Values.Look(ref everBuriedInSarcophagus, "everBuriedInSarcophagus", defaultValue: false);
+		Scribe_Deep.Look(ref operationsBillStack, "operationsBillStack", this);
+		Scribe_Deep.Look(ref innerContainer, "innerContainer", this);
+		if (Scribe.mode == LoadSaveMode.PostLoadInit && innerContainer.removeContentsIfDestroyed)
+		{
+			innerContainer.removeContentsIfDestroyed = false;
+		}
+	}
+
+	public void Strip(bool notifyFaction = true)
+	{
+		InnerPawn.Strip(notifyFaction);
+	}
+
+	public override void DynamicDrawPhaseAt(DrawPhase phase, Vector3 drawLoc, bool flip = false)
+	{
+		InnerPawn.DynamicDrawPhaseAt(phase, drawLoc.WithYOffset(InnerPawn.Drawer.SeededYOffset));
+	}
+
+	public Thought_Memory GiveObservedThought(Pawn observer)
+	{
+		return null;
+	}
+
+	public HistoryEventDef GiveObservedHistoryEvent(Pawn observer)
+	{
+		if (!InnerPawn.RaceProps.Humanlike)
 		{
 			return null;
 		}
-
-		// Token: 0x060036BE RID: 14014 RVA: 0x00125CF4 File Offset: 0x00123EF4
-		public HistoryEventDef GiveObservedHistoryEvent(Pawn observer)
+		if (InnerPawn.health.killedByRitual && Find.TickManager.TicksGame - timeOfDeath < 60000)
 		{
-			if (!this.InnerPawn.RaceProps.Humanlike)
-			{
-				return null;
-			}
-			if (this.InnerPawn.health.killedByRitual && Find.TickManager.TicksGame - this.timeOfDeath < 60000)
-			{
-				return null;
-			}
-			if (this.StoringThing() != null)
-			{
-				return null;
-			}
+			return null;
+		}
+		if (this.StoringThing() == null)
+		{
 			if (this.IsNotFresh())
 			{
 				return HistoryEventDefOf.ObservedLayingRottingCorpse;
 			}
 			return HistoryEventDefOf.ObservedLayingCorpse;
 		}
+		return null;
+	}
 
-		// Token: 0x060036BF RID: 14015 RVA: 0x00125D60 File Offset: 0x00123F60
-		public override string GetInspectString()
+	public override string GetInspectString()
+	{
+		StringBuilder stringBuilder = new StringBuilder();
+		if (InnerPawn.Faction != null && !InnerPawn.Faction.Hidden)
 		{
-			StringBuilder stringBuilder = new StringBuilder();
-			if (this.InnerPawn.Faction != null && !this.InnerPawn.Faction.Hidden)
-			{
-				stringBuilder.AppendLineTagged("Faction".Translate() + ": " + this.InnerPawn.Faction.NameColored);
-			}
-			stringBuilder.AppendLine("DeadTime".Translate(this.Age.ToStringTicksToPeriodVague(true, false)));
-			float num = 1f - this.InnerPawn.health.hediffSet.GetCoverageOfNotMissingNaturalParts(this.InnerPawn.RaceProps.body.corePart);
-			if (num >= 0.01f)
-			{
-				stringBuilder.AppendLine("CorpsePercentMissing".Translate() + ": " + num.ToStringPercent());
-			}
-			Hediff_DeathRefusal firstHediff = this.InnerPawn.health.hediffSet.GetFirstHediff<Hediff_DeathRefusal>();
-			if (firstHediff != null && firstHediff.InProgress)
-			{
-				stringBuilder.AppendLine("SelfResurrecting".Translate());
-			}
-			stringBuilder.AppendLine(base.GetInspectString());
-			return stringBuilder.ToString().TrimEndNewlines();
+			stringBuilder.AppendLineTagged("Faction".Translate() + ": " + InnerPawn.Faction.NameColored);
 		}
-
-		// Token: 0x060036C0 RID: 14016 RVA: 0x00125E9D File Offset: 0x0012409D
-		public override IEnumerable<StatDrawEntry> SpecialDisplayStats()
+		stringBuilder.AppendLine("DeadTime".Translate(Age.ToStringTicksToPeriodVague(vagueMin: true, vagueMax: false)));
+		float num = 1f - InnerPawn.health.hediffSet.GetCoverageOfNotMissingNaturalParts(InnerPawn.RaceProps.body.corePart);
+		if (num >= 0.01f)
 		{
-			foreach (StatDrawEntry statDrawEntry in base.SpecialDisplayStats())
-			{
-				yield return statDrawEntry;
-			}
-			IEnumerator<StatDrawEntry> enumerator = null;
-			yield return new StatDrawEntry(StatCategoryDefOf.Basics, "BodySize".Translate(), this.InnerPawn.BodySize.ToString("F2"), "Stat_Race_BodySize_Desc".Translate(), 4195, null, null, false, false);
-			if (this.GetRotStage() == RotStage.Fresh)
-			{
-				StatDef meatAmount = StatDefOf.MeatAmount;
-				yield return new StatDrawEntry(meatAmount.category, meatAmount, this.InnerPawn.GetStatValue(meatAmount, true, -1), StatRequest.For(this.InnerPawn), ToStringNumberSense.Undefined, null, false);
-				StatDef leatherAmount = StatDefOf.LeatherAmount;
-				yield return new StatDrawEntry(leatherAmount.category, leatherAmount, this.InnerPawn.GetStatValue(leatherAmount, true, -1), StatRequest.For(this.InnerPawn), ToStringNumberSense.Undefined, null, false);
-			}
-			yield break;
-			yield break;
+			stringBuilder.AppendLine("CorpsePercentMissing".Translate() + ": " + num.ToStringPercent());
 		}
-
-		// Token: 0x060036C1 RID: 14017 RVA: 0x00125EAD File Offset: 0x001240AD
-		public void RotStageChanged()
+		Hediff_DeathRefusal firstHediff = InnerPawn.health.hediffSet.GetFirstHediff<Hediff_DeathRefusal>();
+		if (firstHediff != null && firstHediff.InProgress)
 		{
-			this.InnerPawn.Drawer.renderer.SetAllGraphicsDirty();
-			this.InnerPawn.Drawer.renderer.WoundOverlays.ClearCache();
-			this.NotifyColonistBar();
+			stringBuilder.AppendLine("SelfResurrecting".Translate());
 		}
+		stringBuilder.AppendLine(base.GetInspectString());
+		return stringBuilder.ToString().TrimEndNewlines();
+	}
 
-		// Token: 0x060036C2 RID: 14018 RVA: 0x00125EE4 File Offset: 0x001240E4
-		public BodyPartRecord GetBestBodyPartToEat(float nutritionWanted)
+	[IteratorStateMachine(typeof(_003CSpecialDisplayStats_003Ed__52))]
+	public override IEnumerable<StatDrawEntry> SpecialDisplayStats()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CSpecialDisplayStats_003Ed__52(-2)
 		{
-			IEnumerable<BodyPartRecord> source = from x in this.InnerPawn.health.hediffSet.GetNotMissingParts(BodyPartHeight.Undefined, BodyPartDepth.Undefined, null, null)
+			_003C_003E4__this = this
+		};
+	}
+
+	public void RotStageChanged()
+	{
+		InnerPawn.Drawer.renderer.SetAllGraphicsDirty();
+		InnerPawn.Drawer.renderer.WoundOverlays.ClearCache();
+		NotifyColonistBar();
+	}
+
+	public BodyPartRecord GetBestBodyPartToEat(float nutritionWanted)
+	{
+		IEnumerable<BodyPartRecord> source = from x in InnerPawn.health.hediffSet.GetNotMissingParts()
 			where x.depth == BodyPartDepth.Outside && FoodUtility.GetBodyPartNutrition(this, x) > 0.001f
 			select x;
-			if (!source.Any<BodyPartRecord>())
-			{
-				return null;
-			}
-			return source.MinBy((BodyPartRecord x) => Mathf.Abs(FoodUtility.GetBodyPartNutrition(this, x) - nutritionWanted));
-		}
-
-		// Token: 0x060036C3 RID: 14019 RVA: 0x00125F4C File Offset: 0x0012414C
-		private void NotifyColonistBar()
+		if (!source.Any())
 		{
-			if (this.InnerPawn.Faction == Faction.OfPlayer && Current.ProgramState == ProgramState.Playing)
-			{
-				Find.ColonistBar.MarkColonistsDirty();
-			}
+			return null;
 		}
+		return source.MinBy((BodyPartRecord x) => Mathf.Abs(FoodUtility.GetBodyPartNutrition(this, x) - nutritionWanted));
+	}
 
-		// Token: 0x060036C4 RID: 14020 RVA: 0x000026EA File Offset: 0x000008EA
-		public void Notify_BillDeleted(Bill bill)
+	private void NotifyColonistBar()
+	{
+		if (InnerPawn.Faction == Faction.OfPlayer && Current.ProgramState == ProgramState.Playing)
 		{
+			Find.ColonistBar.MarkColonistsDirty();
 		}
+	}
 
-		// Token: 0x060036C5 RID: 14021 RVA: 0x00125F72 File Offset: 0x00124172
-		public override IEnumerable<Gizmo> GetGizmos()
+	public void Notify_BillDeleted(Bill bill)
+	{
+	}
+
+	[IteratorStateMachine(typeof(_003CGetGizmos_003Ed__57))]
+	public override IEnumerable<Gizmo> GetGizmos()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetGizmos_003Ed__57(-2)
 		{
-			foreach (Gizmo gizmo in base.GetGizmos())
-			{
-				yield return gizmo;
-			}
-			IEnumerator<Gizmo> enumerator = null;
-			if (this.InnerPawn.HasShowGizmosOnCorpseHediff)
-			{
-				foreach (Gizmo gizmo2 in this.InnerPawn.GetGizmos())
-				{
-					yield return gizmo2;
-				}
-				enumerator = null;
-			}
-			if (DebugSettings.ShowDevGizmos)
-			{
-				yield return new Command_Action
-				{
-					defaultLabel = "DEV: Resurrect",
-					action = delegate()
-					{
-						ResurrectionUtility.TryResurrect(this.InnerPawn, null);
-					}
-				};
-				if (ModsConfig.AnomalyActive)
-				{
-					yield return new Command_Action
-					{
-						defaultLabel = "DEV: Resurrect as shambler",
-						action = delegate()
-						{
-							MutantUtility.ResurrectAsShambler(this.InnerPawn, -1, null);
-						}
-					};
-				}
-			}
-			yield break;
-			yield break;
-		}
-
-		// Token: 0x04002902 RID: 10498
-		protected ThingOwner<Pawn> innerContainer;
-
-		// Token: 0x04002903 RID: 10499
-		public int timeOfDeath = -1;
-
-		// Token: 0x04002904 RID: 10500
-		private int vanishAfterTimestamp = -1;
-
-		// Token: 0x04002905 RID: 10501
-		private BillStack operationsBillStack;
-
-		// Token: 0x04002906 RID: 10502
-		public bool everBuriedInSarcophagus;
-
-		// Token: 0x04002907 RID: 10503
-		[Unsaved(false)]
-		private string cachedLabel;
-
-		// Token: 0x04002908 RID: 10504
-		private const int DontCauseObservedCorpseThoughtAfterRitualExecutionTicks = 60000;
-
-		// Token: 0x04002909 RID: 10505
-		private static readonly IntRange ExplodeFilthCountRange = new IntRange(2, 5);
+			_003C_003E4__this = this
+		};
 	}
 }

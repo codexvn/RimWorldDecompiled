@@ -1,112 +1,428 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld.Utility;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class FloatMenuOptionProvider_Reload : FloatMenuOptionProvider
 {
-	// Token: 0x0200332D RID: 13101
-	public class FloatMenuOptionProvider_Reload : FloatMenuOptionProvider
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass6_0
 	{
-		// Token: 0x17002FE7 RID: 12263
-		// (get) Token: 0x060126AD RID: 75437 RVA: 0x000028E7 File Offset: 0x00000AE7
-		protected override bool Drafted
+		public FloatMenuContext context;
+	}
+
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass6_1
+	{
+		public IReloadableComp reloadable;
+
+		public List<Thing> chosenAmmo;
+
+		public _003C_003Ec__DisplayClass6_0 CS_0024_003C_003E8__locals1;
+
+		internal void _003CGetOptionsFor_003Eb__0()
 		{
+			CS_0024_003C_003E8__locals1.context.FirstSelectedPawn.jobs.TryTakeOrderedJob(JobGiver_Reload.MakeReloadJob(reloadable, chosenAmmo), JobTag.Misc);
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGetOptionsFor_003Ed__6 : IEnumerable<FloatMenuOption>, IEnumerable, IEnumerator<FloatMenuOption>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private FloatMenuOption _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private FloatMenuContext context;
+
+		public FloatMenuContext _003C_003E3__context;
+
+		public FloatMenuOptionProvider_Reload _003C_003E4__this;
+
+		private Thing clickedThing;
+
+		public Thing _003C_003E3__clickedThing;
+
+		private _003C_003Ec__DisplayClass6_0 _003C_003E8__1;
+
+		private IEnumerator<IReloadableComp> _003C_003E7__wrap1;
+
+		FloatMenuOption IEnumerator<FloatMenuOption>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				return true;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002FE8 RID: 12264
-		// (get) Token: 0x060126AE RID: 75438 RVA: 0x000028E7 File Offset: 0x00000AE7
-		protected override bool Undrafted
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return true;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002FE9 RID: 12265
-		// (get) Token: 0x060126AF RID: 75439 RVA: 0x00002501 File Offset: 0x00000701
-		protected override bool Multiselect
+		[DebuggerHidden]
+		public _003CGetOptionsFor_003Ed__6(int _003C_003E1__state)
 		{
-			get
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || (uint)(num - 1) <= 4u)
 			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E8__1 = null;
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				FloatMenuOptionProvider_Reload floatMenuOptionProvider_Reload = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E8__1 = new _003C_003Ec__DisplayClass6_0();
+					_003C_003E8__1.context = context;
+					_003C_003E7__wrap1 = floatMenuOptionProvider_Reload.GetReloadablesUsingAmmo(_003C_003E8__1.context.FirstSelectedPawn, clickedThing).GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 1:
+					_003C_003E1__state = -3;
+					break;
+				case 2:
+					_003C_003E1__state = -3;
+					break;
+				case 3:
+					_003C_003E1__state = -3;
+					break;
+				case 4:
+					_003C_003E1__state = -3;
+					break;
+				case 5:
+					_003C_003E1__state = -3;
+					break;
+				}
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					_003C_003Ec__DisplayClass6_1 CS_0024_003C_003E8__locals16 = new _003C_003Ec__DisplayClass6_1
+					{
+						CS_0024_003C_003E8__locals1 = _003C_003E8__1,
+						reloadable = _003C_003E7__wrap1.Current
+					};
+					ThingComp thingComp = CS_0024_003C_003E8__locals16.reloadable as ThingComp;
+					string text = "Reload".Translate(thingComp.parent.Named("GEAR"), NamedArgumentUtility.Named(CS_0024_003C_003E8__locals16.reloadable.AmmoDef, "AMMO")) + " (" + CS_0024_003C_003E8__locals16.reloadable.LabelRemaining + ")";
+					if (!CS_0024_003C_003E8__locals16.CS_0024_003C_003E8__locals1.context.FirstSelectedPawn.CanReach(clickedThing, PathEndMode.ClosestTouch, Danger.Deadly))
+					{
+						_003C_003E2__current = new FloatMenuOption(text + ": " + "NoPath".Translate().CapitalizeFirst(), null);
+						_003C_003E1__state = 1;
+						return true;
+					}
+					if (!CS_0024_003C_003E8__locals16.reloadable.NeedsReload(allowForceReload: true))
+					{
+						_003C_003E2__current = new FloatMenuOption(text + ": " + "ReloadFull".Translate(), null);
+						_003C_003E1__state = 2;
+						return true;
+					}
+					if ((CS_0024_003C_003E8__locals16.chosenAmmo = ReloadableUtility.FindEnoughAmmo(CS_0024_003C_003E8__locals16.CS_0024_003C_003E8__locals1.context.FirstSelectedPawn, clickedThing.Position, CS_0024_003C_003E8__locals16.reloadable, forceReload: true)) == null)
+					{
+						_003C_003E2__current = new FloatMenuOption(text + ": " + "ReloadNotEnough".Translate(), null);
+						_003C_003E1__state = 3;
+						return true;
+					}
+					if (CS_0024_003C_003E8__locals16.CS_0024_003C_003E8__locals1.context.FirstSelectedPawn.carryTracker.AvailableStackSpace(CS_0024_003C_003E8__locals16.reloadable.AmmoDef) < CS_0024_003C_003E8__locals16.reloadable.MinAmmoNeeded(allowForcedReload: true))
+					{
+						_003C_003E2__current = new FloatMenuOption(text + ": " + "ReloadCannotCarryEnough".Translate(NamedArgumentUtility.Named(CS_0024_003C_003E8__locals16.reloadable.AmmoDef, "AMMO")), null);
+						_003C_003E1__state = 4;
+						return true;
+					}
+					Action action = delegate
+					{
+						CS_0024_003C_003E8__locals16.CS_0024_003C_003E8__locals1.context.FirstSelectedPawn.jobs.TryTakeOrderedJob(JobGiver_Reload.MakeReloadJob(CS_0024_003C_003E8__locals16.reloadable, CS_0024_003C_003E8__locals16.chosenAmmo), JobTag.Misc);
+					};
+					_003C_003E2__current = FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption(text, action), CS_0024_003C_003E8__locals16.CS_0024_003C_003E8__locals1.context.FirstSelectedPawn, clickedThing);
+					_003C_003E1__state = 5;
+					return true;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = null;
 				return false;
 			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
 		}
 
-		// Token: 0x060126B0 RID: 75440 RVA: 0x0056D9EB File Offset: 0x0056BBEB
-		public override IEnumerable<FloatMenuOption> GetOptionsFor(Thing clickedThing, FloatMenuContext context)
+		bool IEnumerator.MoveNext()
 		{
-			using (IEnumerator<IReloadableComp> enumerator = this.GetReloadablesUsingAmmo(context.FirstSelectedPawn, clickedThing).GetEnumerator())
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				while (enumerator.MoveNext())
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<FloatMenuOption> IEnumerable<FloatMenuOption>.GetEnumerator()
+		{
+			_003CGetOptionsFor_003Ed__6 _003CGetOptionsFor_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CGetOptionsFor_003Ed__ = this;
+			}
+			else
+			{
+				_003CGetOptionsFor_003Ed__ = new _003CGetOptionsFor_003Ed__6(0)
 				{
-					IReloadableComp reloadable = enumerator.Current;
-					ThingComp thingComp = reloadable as ThingComp;
-					string text = "Reload".Translate(thingComp.parent.Named("GEAR"), reloadable.AmmoDef.Named("AMMO")) + " (" + reloadable.LabelRemaining + ")";
-					List<Thing> chosenAmmo;
-					if (!context.FirstSelectedPawn.CanReach(clickedThing, PathEndMode.ClosestTouch, Danger.Deadly, false, false, TraverseMode.ByPawn))
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CGetOptionsFor_003Ed__.clickedThing = _003C_003E3__clickedThing;
+			_003CGetOptionsFor_003Ed__.context = _003C_003E3__context;
+			return _003CGetOptionsFor_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<FloatMenuOption>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGetReloadablesUsingAmmo_003Ed__7 : IEnumerable<IReloadableComp>, IEnumerable, IEnumerator<IReloadableComp>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private IReloadableComp _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private Pawn pawn;
+
+		public Pawn _003C_003E3__pawn;
+
+		private Thing clickedThing;
+
+		public Thing _003C_003E3__clickedThing;
+
+		private List<Apparel>.Enumerator _003C_003E7__wrap1;
+
+		IReloadableComp IEnumerator<IReloadableComp>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetReloadablesUsingAmmo_003Ed__7(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 2)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = default(List<Apparel>.Enumerator);
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				switch (_003C_003E1__state)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					if (pawn.equipment?.PrimaryEq != null && pawn.equipment.PrimaryEq is IReloadableComp reloadableComp && clickedThing.def == reloadableComp.AmmoDef)
 					{
-						yield return new FloatMenuOption(text + ": " + "NoPath".Translate().CapitalizeFirst(), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
+						_003C_003E2__current = reloadableComp;
+						_003C_003E1__state = 1;
+						return true;
 					}
-					else if (!reloadable.NeedsReload(true))
+					goto IL_0088;
+				case 1:
+					_003C_003E1__state = -1;
+					goto IL_0088;
+				case 2:
 					{
-						yield return new FloatMenuOption(text + ": " + "ReloadFull".Translate(), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
+						_003C_003E1__state = -3;
+						goto IL_00fe;
 					}
-					else if ((chosenAmmo = ReloadableUtility.FindEnoughAmmo(context.FirstSelectedPawn, clickedThing.Position, reloadable, true)) == null)
+					IL_00fe:
+					while (_003C_003E7__wrap1.MoveNext())
 					{
-						yield return new FloatMenuOption(text + ": " + "ReloadNotEnough".Translate(), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-					}
-					else if (context.FirstSelectedPawn.carryTracker.AvailableStackSpace(reloadable.AmmoDef) < reloadable.MinAmmoNeeded(true))
-					{
-						yield return new FloatMenuOption(text + ": " + "ReloadCannotCarryEnough".Translate(reloadable.AmmoDef.Named("AMMO")), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-					}
-					else
-					{
-						Action action = delegate()
+						IReloadableComp reloadableComp2 = _003C_003E7__wrap1.Current.TryGetComp<CompApparelReloadable>();
+						if (reloadableComp2 != null && clickedThing.def == reloadableComp2.AmmoDef)
 						{
-							context.FirstSelectedPawn.jobs.TryTakeOrderedJob(JobGiver_Reload.MakeReloadJob(reloadable, chosenAmmo), new JobTag?(JobTag.Misc), false);
-						};
-						yield return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption(text, action, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0), context.FirstSelectedPawn, clickedThing, "ReservedBy", null);
+							_003C_003E2__current = reloadableComp2;
+							_003C_003E1__state = 2;
+							return true;
+						}
 					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = default(List<Apparel>.Enumerator);
+					break;
+					IL_0088:
+					if (pawn.apparel == null)
+					{
+						break;
+					}
+					_003C_003E7__wrap1 = pawn.apparel.WornApparel.GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_00fe;
 				}
+				return false;
 			}
-			IEnumerator<IReloadableComp> enumerator = null;
-			yield break;
-			yield break;
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
 		}
 
-		// Token: 0x060126B1 RID: 75441 RVA: 0x0056DA09 File Offset: 0x0056BC09
-		private IEnumerable<IReloadableComp> GetReloadablesUsingAmmo(Pawn pawn, Thing clickedThing)
+		bool IEnumerator.MoveNext()
 		{
-			Pawn_EquipmentTracker equipment = pawn.equipment;
-			if (((equipment != null) ? equipment.PrimaryEq : null) != null)
-			{
-				IReloadableComp reloadableComp = pawn.equipment.PrimaryEq as IReloadableComp;
-				if (reloadableComp != null && clickedThing.def == reloadableComp.AmmoDef)
-				{
-					yield return reloadableComp;
-				}
-			}
-			if (pawn.apparel != null)
-			{
-				foreach (Apparel thing in pawn.apparel.WornApparel)
-				{
-					IReloadableComp reloadableComp2 = thing.TryGetComp<CompApparelReloadable>();
-					if (reloadableComp2 != null && clickedThing.def == reloadableComp2.AmmoDef)
-					{
-						yield return reloadableComp2;
-					}
-				}
-				List<Apparel>.Enumerator enumerator = default(List<Apparel>.Enumerator);
-			}
-			yield break;
-			yield break;
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap1/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<IReloadableComp> IEnumerable<IReloadableComp>.GetEnumerator()
+		{
+			_003CGetReloadablesUsingAmmo_003Ed__7 _003CGetReloadablesUsingAmmo_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CGetReloadablesUsingAmmo_003Ed__ = this;
+			}
+			else
+			{
+				_003CGetReloadablesUsingAmmo_003Ed__ = new _003CGetReloadablesUsingAmmo_003Ed__7(0);
+			}
+			_003CGetReloadablesUsingAmmo_003Ed__.pawn = _003C_003E3__pawn;
+			_003CGetReloadablesUsingAmmo_003Ed__.clickedThing = _003C_003E3__clickedThing;
+			return _003CGetReloadablesUsingAmmo_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<IReloadableComp>)this).GetEnumerator();
+		}
+	}
+
+	protected override bool Drafted => true;
+
+	protected override bool Undrafted => true;
+
+	protected override bool Multiselect => false;
+
+	[IteratorStateMachine(typeof(_003CGetOptionsFor_003Ed__6))]
+	public override IEnumerable<FloatMenuOption> GetOptionsFor(Thing clickedThing, FloatMenuContext context)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetOptionsFor_003Ed__6(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__clickedThing = clickedThing,
+			_003C_003E3__context = context
+		};
+	}
+
+	[IteratorStateMachine(typeof(_003CGetReloadablesUsingAmmo_003Ed__7))]
+	private IEnumerable<IReloadableComp> GetReloadablesUsingAmmo(Pawn pawn, Thing clickedThing)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetReloadablesUsingAmmo_003Ed__7(-2)
+		{
+			_003C_003E3__pawn = pawn,
+			_003C_003E3__clickedThing = clickedThing
+		};
 	}
 }

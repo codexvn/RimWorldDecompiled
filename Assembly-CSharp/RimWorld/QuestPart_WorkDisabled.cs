@@ -1,82 +1,192 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class QuestPart_WorkDisabled : QuestPartActivable
 {
-	// Token: 0x02001BE7 RID: 7143
-	public class QuestPart_WorkDisabled : QuestPartActivable
+	[CompilerGenerated]
+	private sealed class _003Cget_DisabledWorkTypes_003Ed__3 : IEnumerable<WorkTypeDef>, IEnumerable, IEnumerator<WorkTypeDef>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001879 RID: 6265
-		// (get) Token: 0x06009F22 RID: 40738 RVA: 0x002DF6E5 File Offset: 0x002DD8E5
-		public IEnumerable<WorkTypeDef> DisabledWorkTypes
+		private int _003C_003E1__state;
+
+		private WorkTypeDef _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public QuestPart_WorkDisabled _003C_003E4__this;
+
+		private List<WorkTypeDef> _003Clist_003E5__2;
+
+		private int _003Ci_003E5__3;
+
+		WorkTypeDef IEnumerator<WorkTypeDef>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (base.State == QuestPartState.Enabled)
-				{
-					List<WorkTypeDef> list = DefDatabase<WorkTypeDef>.AllDefsListForReading;
-					int num;
-					for (int i = 0; i < list.Count; i = num + 1)
-					{
-						if ((this.disabledWorkTags & list[i].workTags) != WorkTags.None)
-						{
-							yield return list[i];
-						}
-						num = i;
-					}
-					list = null;
-				}
-				yield break;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06009F23 RID: 40739 RVA: 0x002DF6F5 File Offset: 0x002DD8F5
-		protected override void Enable(SignalArgs receivedArgs)
+		object IEnumerator.Current
 		{
-			base.Enable(receivedArgs);
-			this.ClearPawnWorkTypesAndSkillsCache();
-		}
-
-		// Token: 0x06009F24 RID: 40740 RVA: 0x002DF704 File Offset: 0x002DD904
-		public override void Cleanup()
-		{
-			base.Cleanup();
-			this.ClearPawnWorkTypesAndSkillsCache();
-		}
-
-		// Token: 0x06009F25 RID: 40741 RVA: 0x002DF714 File Offset: 0x002DD914
-		private void ClearPawnWorkTypesAndSkillsCache()
-		{
-			for (int i = 0; i < this.pawns.Count; i++)
+			[DebuggerHidden]
+			get
 			{
-				if (this.pawns[i] != null)
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003Cget_DisabledWorkTypes_003Ed__3(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003Clist_003E5__2 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			QuestPart_WorkDisabled questPart_WorkDisabled = _003C_003E4__this;
+			if (num != 0)
+			{
+				if (num != 1)
 				{
-					this.pawns[i].Notify_DisabledWorkTypesChanged();
-					if (this.pawns[i].skills != null)
-					{
-						this.pawns[i].skills.Notify_SkillDisablesChanged();
-					}
+					return false;
+				}
+				_003C_003E1__state = -1;
+				goto IL_0084;
+			}
+			_003C_003E1__state = -1;
+			if (questPart_WorkDisabled.State == QuestPartState.Enabled)
+			{
+				_003Clist_003E5__2 = DefDatabase<WorkTypeDef>.AllDefsListForReading;
+				_003Ci_003E5__3 = 0;
+				goto IL_0094;
+			}
+			goto IL_00ae;
+			IL_0084:
+			_003Ci_003E5__3++;
+			goto IL_0094;
+			IL_0094:
+			if (_003Ci_003E5__3 < _003Clist_003E5__2.Count)
+			{
+				if ((questPart_WorkDisabled.disabledWorkTags & _003Clist_003E5__2[_003Ci_003E5__3].workTags) != 0)
+				{
+					_003C_003E2__current = _003Clist_003E5__2[_003Ci_003E5__3];
+					_003C_003E1__state = 1;
+					return true;
+				}
+				goto IL_0084;
+			}
+			_003Clist_003E5__2 = null;
+			goto IL_00ae;
+			IL_00ae:
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<WorkTypeDef> IEnumerable<WorkTypeDef>.GetEnumerator()
+		{
+			_003Cget_DisabledWorkTypes_003Ed__3 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_DisabledWorkTypes_003Ed__3(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<WorkTypeDef>)this).GetEnumerator();
+		}
+	}
+
+	public List<Pawn> pawns = new List<Pawn>();
+
+	public WorkTags disabledWorkTags;
+
+	public IEnumerable<WorkTypeDef> DisabledWorkTypes
+	{
+		[IteratorStateMachine(typeof(_003Cget_DisabledWorkTypes_003Ed__3))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_DisabledWorkTypes_003Ed__3(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	protected override void Enable(SignalArgs receivedArgs)
+	{
+		base.Enable(receivedArgs);
+		ClearPawnWorkTypesAndSkillsCache();
+	}
+
+	public override void Cleanup()
+	{
+		base.Cleanup();
+		ClearPawnWorkTypesAndSkillsCache();
+	}
+
+	private void ClearPawnWorkTypesAndSkillsCache()
+	{
+		for (int i = 0; i < pawns.Count; i++)
+		{
+			if (pawns[i] != null)
+			{
+				pawns[i].Notify_DisabledWorkTypesChanged();
+				if (pawns[i].skills != null)
+				{
+					pawns[i].skills.Notify_SkillDisablesChanged();
 				}
 			}
 		}
+	}
 
-		// Token: 0x06009F26 RID: 40742 RVA: 0x002DF780 File Offset: 0x002DD980
-		public override void ExposeData()
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Collections.Look(ref pawns, "pawns", LookMode.Reference);
+		Scribe_Values.Look(ref disabledWorkTags, "disabledWorkTags", WorkTags.None);
+		if (Scribe.mode == LoadSaveMode.PostLoadInit)
 		{
-			base.ExposeData();
-			Scribe_Collections.Look<Pawn>(ref this.pawns, "pawns", LookMode.Reference, Array.Empty<object>());
-			Scribe_Values.Look<WorkTags>(ref this.disabledWorkTags, "disabledWorkTags", WorkTags.None, false);
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
-			{
-				this.pawns.RemoveAll((Pawn x) => x == null);
-			}
+			pawns.RemoveAll((Pawn x) => x == null);
 		}
-
-		// Token: 0x04006E09 RID: 28169
-		public List<Pawn> pawns = new List<Pawn>();
-
-		// Token: 0x04006E0A RID: 28170
-		public WorkTags disabledWorkTags;
 	}
 }

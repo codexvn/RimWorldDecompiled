@@ -1,68 +1,47 @@
-﻿using System;
 using System.Text;
 using RimWorld;
 
-namespace Verse
+namespace Verse;
+
+public static class TooltipUtility
 {
-	// Token: 0x02000BDF RID: 3039
-	public static class TooltipUtility
+	public static string ShotCalculationTipString(Thing target)
 	{
-		// Token: 0x06004DD0 RID: 19920 RVA: 0x0018B81C File Offset: 0x00189A1C
-		public static string ShotCalculationTipString(Thing target)
+		StringBuilder stringBuilder = new StringBuilder();
+		if (Find.Selector.SingleSelectedThing != null)
 		{
-			StringBuilder stringBuilder = new StringBuilder();
-			if (Find.Selector.SingleSelectedThing != null)
+			Thing singleSelectedThing = Find.Selector.SingleSelectedThing;
+			Verb verb = null;
+			if (singleSelectedThing is Pawn pawn && pawn != target && pawn.equipment?.Primary != null && pawn.equipment.PrimaryEq.PrimaryVerb is Verb_LaunchProjectile && (!pawn.IsPlayerControlled || pawn.Drafted))
 			{
-				Thing singleSelectedThing = Find.Selector.SingleSelectedThing;
-				Verb verb = null;
-				Pawn pawn = singleSelectedThing as Pawn;
-				if (pawn != null && pawn != target)
+				verb = pawn.equipment.PrimaryEq.PrimaryVerb;
+			}
+			else if (singleSelectedThing is Building_TurretGun building_TurretGun && building_TurretGun != target)
+			{
+				verb = building_TurretGun.AttackVerb;
+			}
+			if (verb != null)
+			{
+				stringBuilder.Append("ShotBy".Translate(Find.Selector.SingleSelectedThing.LabelShort, Find.Selector.SingleSelectedThing) + ": ");
+				if (verb.CanHitTarget(target))
 				{
-					Pawn_EquipmentTracker equipment = pawn.equipment;
-					if (((equipment != null) ? equipment.Primary : null) != null && pawn.equipment.PrimaryEq.PrimaryVerb is Verb_LaunchProjectile && (!pawn.IsPlayerControlled || pawn.Drafted))
-					{
-						verb = pawn.equipment.PrimaryEq.PrimaryVerb;
-						goto IL_97;
-					}
+					stringBuilder.Append(ShotReport.HitReportFor(verb.caster, verb, target).GetTextReadout());
 				}
-				Building_TurretGun building_TurretGun = singleSelectedThing as Building_TurretGun;
-				if (building_TurretGun != null && building_TurretGun != target)
+				else
 				{
-					verb = building_TurretGun.AttackVerb;
+					stringBuilder.AppendLine("CannotHit".Translate());
 				}
-				IL_97:
-				if (verb != null)
+				if (target is Pawn { Faction: null, InAggroMentalState: false } pawn2 && pawn2.AnimalOrWildMan())
 				{
-					stringBuilder.Append("ShotBy".Translate(Find.Selector.SingleSelectedThing.LabelShort, Find.Selector.SingleSelectedThing) + ": ");
-					if (verb.CanHitTarget(target))
+					float num = ((!verb.IsMeleeAttack) ? PawnUtility.GetManhunterOnDamageChance(pawn2, singleSelectedThing) : PawnUtility.GetManhunterOnDamageChance(pawn2, singleSelectedThing, 0f));
+					if (num > 0f)
 					{
-						stringBuilder.Append(ShotReport.HitReportFor(verb.caster, verb, target).GetTextReadout());
-					}
-					else
-					{
-						stringBuilder.AppendLine("CannotHit".Translate());
-					}
-					Pawn pawn2 = target as Pawn;
-					if (pawn2 != null && pawn2.Faction == null && !pawn2.InAggroMentalState && pawn2.AnimalOrWildMan())
-					{
-						float manhunterOnDamageChance;
-						if (verb.IsMeleeAttack)
-						{
-							manhunterOnDamageChance = PawnUtility.GetManhunterOnDamageChance(pawn2, singleSelectedThing, 0f);
-						}
-						else
-						{
-							manhunterOnDamageChance = PawnUtility.GetManhunterOnDamageChance(pawn2, singleSelectedThing, -1f);
-						}
-						if (manhunterOnDamageChance > 0f)
-						{
-							stringBuilder.AppendLine();
-							stringBuilder.AppendLine(string.Format("{0}: {1}", "ManhunterPerHit".Translate(), manhunterOnDamageChance.ToStringPercent()));
-						}
+						stringBuilder.AppendLine();
+						stringBuilder.AppendLine($"{"ManhunterPerHit".Translate()}: {num.ToStringPercent()}");
 					}
 				}
 			}
-			return stringBuilder.ToString();
 		}
+		return stringBuilder.ToString();
 	}
 }

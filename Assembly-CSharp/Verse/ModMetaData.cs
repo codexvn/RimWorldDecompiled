@@ -1,7 +1,10 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
@@ -10,1116 +13,1049 @@ using Steamworks;
 using UnityEngine;
 using Verse.Steam;
 
-namespace Verse
+namespace Verse;
+
+public class ModMetaData : WorkshopUploadable
 {
-	// Token: 0x02000577 RID: 1399
-	public class ModMetaData : WorkshopUploadable
+	private class ModMetaDataInternal
 	{
-		// Token: 0x17000676 RID: 1654
-		// (get) Token: 0x0600247A RID: 9338 RVA: 0x000BD370 File Offset: 0x000BB570
-		public Texture2D PreviewImage
+		public string packageId = "";
+
+		public string name = "";
+
+		public string shortName = "";
+
+		public string author = "Anonymous";
+
+		public List<string> authors;
+
+		public string modIconPath = "";
+
+		public string modVersion = "";
+
+		public string url = "";
+
+		public string description = "No description provided.";
+
+		public uint steamAppId;
+
+		public List<string> supportedVersions;
+
+		[Unsaved(true)]
+		private string targetVersion;
+
+		public List<ModDependency> modDependencies = new List<ModDependency>();
+
+		public List<string> loadBefore = new List<string>();
+
+		public List<string> loadAfter = new List<string>();
+
+		public List<string> incompatibleWith = new List<string>();
+
+		public List<string> forceLoadBefore = new List<string>();
+
+		public List<string> forceLoadAfter = new List<string>();
+
+		private VersionedData<string> descriptionsByVersion;
+
+		private VersionedData<List<ModDependency>> modDependenciesByVersion;
+
+		private VersionedData<List<string>> loadBeforeByVersion;
+
+		private VersionedData<List<string>> loadAfterByVersion;
+
+		private VersionedData<List<string>> incompatibleWithByVersion;
+
+		public static readonly Regex PackageIdFormatRegex = new Regex("(?=.{1,60}$)^(?!\\.)(?=.*?[.])(?!.*([.])\\1+)[a-zA-Z0-9.]{1,}[a-zA-Z0-9]{1}$");
+
+		public List<System.Version> SupportedVersions { get; private set; }
+
+		private bool TryParseVersion(string str, bool logIssues = true)
 		{
-			get
+			if (!VersionControl.TryParseVersionString(str, out var version))
 			{
-				if (this.previewImageWasLoaded)
+				if (logIssues)
 				{
-					return this.previewImage;
+					Log.Error("Unable to parse version string on mod " + name + " from " + author + " \"" + str + "\"");
 				}
-				if (File.Exists(this.PreviewImagePath))
+				return false;
+			}
+			SupportedVersions.Add(version);
+			if (!VersionControl.IsWellFormattedVersionString(str))
+			{
+				if (logIssues)
 				{
-					this.previewImage = new Texture2D(0, 0);
-					this.previewImage.LoadImage(File.ReadAllBytes(this.PreviewImagePath));
+					Log.Warning("Malformed (correct format is Major.Minor) version string on mod " + name + " from " + author + " \"" + str + "\" - parsed as \"" + version.Major + "." + version.Minor + "\"");
 				}
-				this.previewImageWasLoaded = true;
-				return this.previewImage;
+				return false;
+			}
+			return true;
+		}
+
+		public bool TryParseSupportedVersions(bool logIssues = true)
+		{
+			if (targetVersion != null && logIssues)
+			{
+				Log.Warning("Mod " + name + ": targetVersion field is obsolete, use supportedVersions instead.");
+			}
+			bool flag = false;
+			SupportedVersions = new List<System.Version>();
+			if (packageId.ToLower() == "ludeon.rimworld")
+			{
+				SupportedVersions.Add(VersionControl.CurrentVersion);
+			}
+			else if (supportedVersions == null)
+			{
+				if (logIssues)
+				{
+					Log.Warning("Mod " + name + " is missing supported versions list in About.xml! (example: <supportedVersions><li>1.0</li></supportedVersions>)");
+				}
+				flag = true;
+			}
+			else if (supportedVersions.Count == 0)
+			{
+				if (logIssues)
+				{
+					Log.Error("Mod " + name + ": <supportedVersions> in mod About.xml must specify at least one version.");
+				}
+				flag = true;
+			}
+			else
+			{
+				for (int i = 0; i < supportedVersions.Count; i++)
+				{
+					flag |= !TryParseVersion(supportedVersions[i], logIssues);
+				}
+			}
+			SupportedVersions = (from v in SupportedVersions
+				orderby (!VersionControl.IsCompatible(v)) ? 100 : (-100), v.Major descending, v.Minor descending
+				select v).Distinct().ToList();
+			return !flag;
+		}
+
+		public bool TryParsePackageId(bool isOfficial, bool logIssues = true)
+		{
+			bool flag = false;
+			if (packageId.NullOrEmpty())
+			{
+				string text = "none";
+				if (!description.NullOrEmpty())
+				{
+					text = GenText.StableStringHash(description).ToString().Replace("-", "");
+					text = text.Substring(0, Math.Min(3, text.Length));
+				}
+				packageId = ConvertToASCII(author + text) + "." + ConvertToASCII(name);
+				if (logIssues)
+				{
+					Log.Warning("Mod " + name + " is missing packageId in About.xml! (example: <packageId>AuthorName.ModName.Specific</packageId>)");
+				}
+				flag = true;
+			}
+			if (!PackageIdFormatRegex.IsMatch(packageId))
+			{
+				if (logIssues)
+				{
+					Log.Warning("Mod " + name + " <packageId> (" + packageId + ") is not in valid format.");
+				}
+				flag = true;
+			}
+			if (!isOfficial && packageId.ToLower().Contains("ludeon"))
+			{
+				if (logIssues)
+				{
+					Log.Warning("Mod " + name + " <packageId> contains word \"Ludeon\", which is reserved for official content.");
+				}
+				flag = true;
+			}
+			return !flag;
+		}
+
+		private string ConvertToASCII(string part)
+		{
+			StringBuilder stringBuilder = new StringBuilder("");
+			for (int i = 0; i < part.Length; i++)
+			{
+				char c = part[i];
+				if (!char.IsLetterOrDigit(c) || c >= '\u0080')
+				{
+					c = (char)(c % 25 + 65);
+				}
+				stringBuilder.Append(c);
+			}
+			return stringBuilder.ToString();
+		}
+
+		public void ValidateDependencies(bool logIssues = true)
+		{
+			for (int num = modDependencies.Count - 1; num >= 0; num--)
+			{
+				bool flag = false;
+				ModDependency modDependency = modDependencies[num];
+				if (modDependency.packageId.NullOrEmpty())
+				{
+					if (logIssues)
+					{
+						Log.Warning("Mod " + name + " has a dependency with no <packageId> specified.");
+					}
+					flag = true;
+				}
+				else if (!PackageIdFormatRegex.IsMatch(modDependency.packageId))
+				{
+					if (logIssues)
+					{
+						Log.Warning("Mod " + name + " has a dependency with invalid <packageId>: " + modDependency.packageId);
+					}
+					flag = true;
+				}
+				if (modDependency.displayName.NullOrEmpty())
+				{
+					if (logIssues)
+					{
+						Log.Warning("Mod " + name + " has a dependency (" + modDependency.packageId + ") with empty display name.");
+					}
+					flag = true;
+				}
+				if (modDependency.downloadUrl.NullOrEmpty() && modDependency.steamWorkshopUrl.NullOrEmpty() && !modDependency.packageId.ToLower().Contains("ludeon"))
+				{
+					if (logIssues)
+					{
+						Log.Warning("Mod " + name + " dependency (" + modDependency.packageId + ") needs to have <downloadUrl> and/or <steamWorkshopUrl> specified.");
+					}
+					flag = true;
+				}
+				if (flag)
+				{
+					modDependencies.Remove(modDependency);
+				}
 			}
 		}
 
-		// Token: 0x17000677 RID: 1655
-		// (get) Token: 0x0600247B RID: 9339 RVA: 0x000BD3CC File Offset: 0x000BB5CC
-		public Texture2D Icon
+		public void InitVersionedData()
 		{
-			get
+			string currentVersionStringWithoutBuild = VersionControl.CurrentVersionStringWithoutBuild;
+			string text = descriptionsByVersion?.GetItemForVersion(currentVersionStringWithoutBuild);
+			if (text != null)
 			{
-				if (this.iconImageWasLoaded)
+				description = text;
+			}
+			List<ModDependency> list = modDependenciesByVersion?.GetItemForVersion(currentVersionStringWithoutBuild);
+			if (list != null)
+			{
+				modDependencies = list;
+			}
+			List<string> list2 = loadBeforeByVersion?.GetItemForVersion(currentVersionStringWithoutBuild);
+			if (list2 != null)
+			{
+				loadBefore = list2;
+			}
+			List<string> list3 = loadAfterByVersion?.GetItemForVersion(currentVersionStringWithoutBuild);
+			if (list3 != null)
+			{
+				loadAfter = list3;
+			}
+			List<string> list4 = incompatibleWithByVersion?.GetItemForVersion(currentVersionStringWithoutBuild);
+			if (list4 != null)
+			{
+				incompatibleWith = list4;
+			}
+		}
+	}
+
+	private class VersionedData<T> where T : class
+	{
+		private Dictionary<string, T> itemForVersion = new Dictionary<string, T>();
+
+		public void LoadDataFromXmlCustom(XmlNode xmlRoot)
+		{
+			foreach (XmlNode childNode in xmlRoot.ChildNodes)
+			{
+				if (!(childNode is XmlComment))
 				{
-					return this.iconImage;
+					string text = childNode.Name.ToLower();
+					if (text.StartsWith("v"))
+					{
+						text = text.Substring(1);
+					}
+					if (!itemForVersion.ContainsKey(text))
+					{
+						itemForVersion[text] = ((typeof(T) == typeof(string)) ? ((T)(object)childNode.FirstChild.Value) : DirectXmlToObject.ObjectFromXml<T>(childNode, doPostLoad: false));
+					}
+					else
+					{
+						Log.Warning("More than one value for a same version of " + typeof(T).Name + " named " + xmlRoot.Name);
+					}
 				}
-				if (!this.ModIconPath.NullOrEmpty())
+			}
+		}
+
+		public T GetItemForVersion(string ver)
+		{
+			if (itemForVersion.ContainsKey(ver))
+			{
+				return itemForVersion[ver];
+			}
+			return null;
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGetRequirements_003Ed__122 : IEnumerable<ModRequirement>, IEnumerable, IEnumerator<ModRequirement>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private ModRequirement _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public ModMetaData _003C_003E4__this;
+
+		private int _003Ci_003E5__2;
+
+		ModRequirement IEnumerator<ModRequirement>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetRequirements_003Ed__122(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			ModMetaData modMetaData = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003Ci_003E5__2 = 0;
+				goto IL_0069;
+			case 1:
+				_003C_003E1__state = -1;
+				_003Ci_003E5__2++;
+				goto IL_0069;
+			case 2:
 				{
-					this.iconImage = ContentFinder<Texture2D>.Get(this.ModIconPath, true);
+					_003C_003E1__state = -1;
+					goto IL_00d8;
 				}
-				else if (File.Exists(this.ModIconImagePath))
+				IL_0069:
+				if (_003Ci_003E5__2 < modMetaData.Dependencies.Count)
 				{
-					this.iconImage = new Texture2D(0, 0);
-					this.iconImage.LoadImage(File.ReadAllBytes(this.ModIconImagePath));
-				}
-				else
-				{
-					this.iconImage = ModMetaData.ModIcon.Texture;
-				}
-				this.iconImageWasLoaded = true;
-				return this.iconImage;
-			}
-		}
-
-		// Token: 0x17000678 RID: 1656
-		// (get) Token: 0x0600247C RID: 9340 RVA: 0x000BD459 File Offset: 0x000BB659
-		public string FolderName
-		{
-			get
-			{
-				return this.RootDir.Name;
-			}
-		}
-
-		// Token: 0x17000679 RID: 1657
-		// (get) Token: 0x0600247D RID: 9341 RVA: 0x000BD466 File Offset: 0x000BB666
-		public DirectoryInfo RootDir
-		{
-			get
-			{
-				return this.rootDirInt;
-			}
-		}
-
-		// Token: 0x1700067A RID: 1658
-		// (get) Token: 0x0600247E RID: 9342 RVA: 0x000BD46E File Offset: 0x000BB66E
-		public bool IsCoreMod
-		{
-			get
-			{
-				return this.SamePackageId("ludeon.rimworld", false);
-			}
-		}
-
-		// Token: 0x1700067B RID: 1659
-		// (get) Token: 0x0600247F RID: 9343 RVA: 0x000BD47C File Offset: 0x000BB67C
-		// (set) Token: 0x06002480 RID: 9344 RVA: 0x000BD484 File Offset: 0x000BB684
-		public bool Active
-		{
-			get
-			{
-				return ModsConfig.IsActive(this);
-			}
-			set
-			{
-				ModsConfig.SetActive(this, value);
-			}
-		}
-
-		// Token: 0x1700067C RID: 1660
-		// (get) Token: 0x06002481 RID: 9345 RVA: 0x000BD48D File Offset: 0x000BB68D
-		public bool VersionCompatible
-		{
-			get
-			{
-				if (this.IsCoreMod)
-				{
+					_003C_003E2__current = modMetaData.Dependencies[_003Ci_003E5__2];
+					_003C_003E1__state = 1;
 					return true;
 				}
-				return this.meta.SupportedVersions.Any((System.Version v) => VersionControl.IsCompatible(v));
+				_003Ci_003E5__2 = 0;
+				goto IL_00e8;
+				IL_00e8:
+				if (_003Ci_003E5__2 < modMetaData.meta.incompatibleWith.Count)
+				{
+					ModMetaData modWithIdentifier = ModLister.GetModWithIdentifier(modMetaData.meta.incompatibleWith[_003Ci_003E5__2]);
+					if (modWithIdentifier != null)
+					{
+						_003C_003E2__current = new ModIncompatibility
+						{
+							packageId = modWithIdentifier.PackageIdPlayerFacing,
+							displayName = modWithIdentifier.Name
+						};
+						_003C_003E1__state = 2;
+						return true;
+					}
+					goto IL_00d8;
+				}
+				return false;
+				IL_00d8:
+				_003Ci_003E5__2++;
+				goto IL_00e8;
 			}
 		}
 
-		// Token: 0x1700067D RID: 1661
-		// (get) Token: 0x06002482 RID: 9346 RVA: 0x000BD4C8 File Offset: 0x000BB6C8
-		public bool MadeForNewerVersion
+		bool IEnumerator.MoveNext()
 		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<ModRequirement> IEnumerable<ModRequirement>.GetEnumerator()
+		{
+			_003CGetRequirements_003Ed__122 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CGetRequirements_003Ed__122(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<ModRequirement>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003Cget_Authors_003Ed__51 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public ModMetaData _003C_003E4__this;
+
+		private List<string>.Enumerator _003C_003E7__wrap1;
+
+		private IEnumerator<string> _003C_003E7__wrap2;
+
+		string IEnumerator<string>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.VersionCompatible)
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003Cget_Authors_003Ed__51(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			switch (_003C_003E1__state)
+			{
+			case -3:
+			case 1:
+				try
 				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+				break;
+			case -4:
+			case 2:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally2();
+				}
+				break;
+			}
+			_003C_003E7__wrap1 = default(List<string>.Enumerator);
+			_003C_003E7__wrap2 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				ModMetaData modMetaData = _003C_003E4__this;
+				switch (num)
+				{
+				default:
 					return false;
-				}
-				return this.meta.SupportedVersions.Any((System.Version v) => v.Major > VersionControl.CurrentMajor || (v.Major == VersionControl.CurrentMajor && v.Minor > VersionControl.CurrentMinor));
-			}
-		}
-
-		// Token: 0x1700067E RID: 1662
-		// (get) Token: 0x06002483 RID: 9347 RVA: 0x000BD503 File Offset: 0x000BB703
-		public ExpansionDef Expansion
-		{
-			get
-			{
-				return ModLister.GetExpansionWithIdentifier(this.PackageId);
-			}
-		}
-
-		// Token: 0x1700067F RID: 1663
-		// (get) Token: 0x06002484 RID: 9348 RVA: 0x000BD510 File Offset: 0x000BB710
-		public string Name
-		{
-			get
-			{
-				ExpansionDef expansion = this.Expansion;
-				if (expansion == null)
-				{
-					return this.meta.name;
-				}
-				return expansion.label;
-			}
-		}
-
-		// Token: 0x17000680 RID: 1664
-		// (get) Token: 0x06002485 RID: 9349 RVA: 0x000BD539 File Offset: 0x000BB739
-		public string ShortName
-		{
-			get
-			{
-				if (!this.meta.shortName.NullOrEmpty())
-				{
-					return this.meta.shortName;
-				}
-				return this.Name;
-			}
-		}
-
-		// Token: 0x17000681 RID: 1665
-		// (get) Token: 0x06002486 RID: 9350 RVA: 0x000BD560 File Offset: 0x000BB760
-		public string Description
-		{
-			get
-			{
-				if (this.descriptionCached == null)
-				{
-					ExpansionDef expansionWithIdentifier = ModLister.GetExpansionWithIdentifier(this.PackageId);
-					this.descriptionCached = ((expansionWithIdentifier != null) ? expansionWithIdentifier.description : this.meta.description);
-				}
-				return this.descriptionCached;
-			}
-		}
-
-		// Token: 0x17000682 RID: 1666
-		// (get) Token: 0x06002487 RID: 9351 RVA: 0x000BD5A3 File Offset: 0x000BB7A3
-		public string AuthorsString
-		{
-			get
-			{
-				return this.Authors.ToCommaList(true, false);
-			}
-		}
-
-		// Token: 0x17000683 RID: 1667
-		// (get) Token: 0x06002488 RID: 9352 RVA: 0x000BD5B2 File Offset: 0x000BB7B2
-		public IEnumerable<string> Authors
-		{
-			get
-			{
-				if (!this.meta.authors.NullOrEmpty<string>())
-				{
-					foreach (string text in this.meta.authors)
+				case 0:
+					_003C_003E1__state = -1;
+					if (!modMetaData.meta.authors.NullOrEmpty())
 					{
-						yield return text;
+						_003C_003E7__wrap1 = modMetaData.meta.authors.GetEnumerator();
+						_003C_003E1__state = -3;
+						goto IL_0089;
 					}
-					List<string>.Enumerator enumerator = default(List<string>.Enumerator);
-					yield break;
-				}
-				if (!string.IsNullOrWhiteSpace(this.meta.author))
-				{
-					foreach (string text2 in this.meta.author.Split(ModMetaData.AndToken, StringSplitOptions.RemoveEmptyEntries).SelectMany((string x) => x.Split(',', StringSplitOptions.None)))
+					if (string.IsNullOrWhiteSpace(modMetaData.meta.author))
 					{
-						yield return text2;
+						break;
 					}
-					IEnumerator<string> enumerator2 = null;
+					_003C_003E7__wrap2 = modMetaData.meta.author.Split(AndToken, StringSplitOptions.RemoveEmptyEntries).SelectMany((string x) => x.Split(',')).GetEnumerator();
+					_003C_003E1__state = -4;
+					goto IL_013b;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0089;
+				case 2:
+					{
+						_003C_003E1__state = -4;
+						goto IL_013b;
+					}
+					IL_0089:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = default(List<string>.Enumerator);
+					return false;
+					IL_013b:
+					if (_003C_003E7__wrap2.MoveNext())
+					{
+						string current2 = _003C_003E7__wrap2.Current;
+						_003C_003E2__current = current2;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					_003C_003Em__Finally2();
+					_003C_003E7__wrap2 = null;
+					break;
 				}
-				yield break;
-				yield break;
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x17000684 RID: 1668
-		// (get) Token: 0x06002489 RID: 9353 RVA: 0x000BD5C2 File Offset: 0x000BB7C2
-		public virtual string ModVersion
+		bool IEnumerator.MoveNext()
 		{
-			get
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap1/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap2 != null)
 			{
-				return this.meta.modVersion;
+				_003C_003E7__wrap2.Dispose();
 			}
 		}
 
-		// Token: 0x17000685 RID: 1669
-		// (get) Token: 0x0600248A RID: 9354 RVA: 0x000BD5CF File Offset: 0x000BB7CF
-		public string Url
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			get
-			{
-				return this.meta.url;
-			}
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x17000686 RID: 1670
-		// (get) Token: 0x0600248B RID: 9355 RVA: 0x000BD5DC File Offset: 0x000BB7DC
-		public uint SteamAppId
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
 		{
-			get
+			_003Cget_Authors_003Ed__51 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				return this.meta.steamAppId;
+				_003C_003E1__state = 0;
+				result = this;
 			}
-		}
-
-		// Token: 0x17000687 RID: 1671
-		// (get) Token: 0x0600248C RID: 9356 RVA: 0x000BD5E9 File Offset: 0x000BB7E9
-		public List<System.Version> SupportedVersionsReadOnly
-		{
-			get
+			else
 			{
-				return this.meta.SupportedVersions;
-			}
-		}
-
-		// Token: 0x17000688 RID: 1672
-		// (get) Token: 0x0600248D RID: 9357 RVA: 0x000BD5F6 File Offset: 0x000BB7F6
-		IEnumerable<System.Version> WorkshopUploadable.SupportedVersions
-		{
-			get
-			{
-				return this.SupportedVersionsReadOnly;
-			}
-		}
-
-		// Token: 0x17000689 RID: 1673
-		// (get) Token: 0x0600248E RID: 9358 RVA: 0x000BD5FE File Offset: 0x000BB7FE
-		public string PreviewImagePath
-		{
-			get
-			{
-				return Path.Combine(this.rootDirInt.FullName, "About", "Preview.png");
-			}
-		}
-
-		// Token: 0x1700068A RID: 1674
-		// (get) Token: 0x0600248F RID: 9359 RVA: 0x000BD61A File Offset: 0x000BB81A
-		public string ModIconImagePath
-		{
-			get
-			{
-				return Path.Combine(this.rootDirInt.FullName, "About", "ModIcon.png");
-			}
-		}
-
-		// Token: 0x1700068B RID: 1675
-		// (get) Token: 0x06002490 RID: 9360 RVA: 0x000BD636 File Offset: 0x000BB836
-		public bool Official
-		{
-			get
-			{
-				return this.IsCoreMod || this.Source == ContentSource.OfficialModsFolder;
-			}
-		}
-
-		// Token: 0x1700068C RID: 1676
-		// (get) Token: 0x06002491 RID: 9361 RVA: 0x000BD64B File Offset: 0x000BB84B
-		public ContentSource Source
-		{
-			get
-			{
-				return this.source;
-			}
-		}
-
-		// Token: 0x1700068D RID: 1677
-		// (get) Token: 0x06002492 RID: 9362 RVA: 0x000BD653 File Offset: 0x000BB853
-		public string PackageId
-		{
-			get
-			{
-				if (!this.appendPackageIdSteamPostfix)
+				result = new _003Cget_Authors_003Ed__51(0)
 				{
-					return this.packageIdLowerCase;
-				}
-				return this.packageIdLowerCase + ModMetaData.SteamModPostfix;
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
+			return result;
 		}
 
-		// Token: 0x1700068E RID: 1678
-		// (get) Token: 0x06002493 RID: 9363 RVA: 0x000BD674 File Offset: 0x000BB874
-		public string PackageIdNonUnique
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			get
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	private DirectoryInfo rootDirInt;
+
+	private ContentSource source;
+
+	private Texture2D previewImage;
+
+	private bool previewImageWasLoaded;
+
+	private Texture2D iconImage;
+
+	private bool iconImageWasLoaded;
+
+	public bool enabled = true;
+
+	private ModMetaDataInternal meta = new ModMetaDataInternal();
+
+	public ModLoadFolders loadFolders;
+
+	private WorkshopItemHook workshopHookInt;
+
+	private PublishedFileId_t publishedFileIdInt = PublishedFileId_t.Invalid;
+
+	public bool appendPackageIdSteamPostfix;
+
+	public bool translationMod;
+
+	public bool uploadBuildAssetPack = true;
+
+	public bool uploadSkipSourceTextures;
+
+	public DirectoryInfo workshopUploadDirectoryOverride;
+
+	public string packageIdLowerCase;
+
+	private string descriptionCached;
+
+	private const string AboutFolderName = "About";
+
+	public static readonly string SteamModPostfix = "_steam";
+
+	private static readonly CachedTexture ModIcon = new CachedTexture("UI/Icons/Options/OptionsMod");
+
+	private static readonly string[] AndToken = new string[1] { " and " };
+
+	private List<string> unsatisfiedDepsList = new List<string>();
+
+	public Texture2D PreviewImage
+	{
+		get
+		{
+			if (previewImageWasLoaded)
 			{
-				return this.packageIdLowerCase;
+				return previewImage;
 			}
-		}
-
-		// Token: 0x1700068F RID: 1679
-		// (get) Token: 0x06002494 RID: 9364 RVA: 0x000BD67C File Offset: 0x000BB87C
-		public string PackageIdPlayerFacing
-		{
-			get
+			if (File.Exists(PreviewImagePath))
 			{
-				return this.meta.packageId;
+				previewImage = new Texture2D(0, 0);
+				previewImage.LoadImage(File.ReadAllBytes(PreviewImagePath));
 			}
+			previewImageWasLoaded = true;
+			return previewImage;
 		}
+	}
 
-		// Token: 0x17000690 RID: 1680
-		// (get) Token: 0x06002495 RID: 9365 RVA: 0x000BD689 File Offset: 0x000BB889
-		public List<ModDependency> Dependencies
+	public Texture2D Icon
+	{
+		get
 		{
-			get
+			if (iconImageWasLoaded)
 			{
-				return this.meta.modDependencies;
+				return iconImage;
 			}
-		}
-
-		// Token: 0x17000691 RID: 1681
-		// (get) Token: 0x06002496 RID: 9366 RVA: 0x000BD696 File Offset: 0x000BB896
-		public List<string> LoadBefore
-		{
-			get
+			if (!ModIconPath.NullOrEmpty())
 			{
-				return this.meta.loadBefore;
+				iconImage = ContentFinder<Texture2D>.Get(ModIconPath);
 			}
-		}
-
-		// Token: 0x17000692 RID: 1682
-		// (get) Token: 0x06002497 RID: 9367 RVA: 0x000BD6A3 File Offset: 0x000BB8A3
-		public List<string> LoadAfter
-		{
-			get
+			else if (File.Exists(ModIconImagePath))
 			{
-				return this.meta.loadAfter;
+				iconImage = new Texture2D(0, 0);
+				iconImage.LoadImage(File.ReadAllBytes(ModIconImagePath));
 			}
-		}
-
-		// Token: 0x17000693 RID: 1683
-		// (get) Token: 0x06002498 RID: 9368 RVA: 0x000BD6B0 File Offset: 0x000BB8B0
-		public List<string> ForceLoadBefore
-		{
-			get
+			else
 			{
-				return this.meta.forceLoadBefore;
+				iconImage = ModIcon.Texture;
 			}
+			iconImageWasLoaded = true;
+			return iconImage;
 		}
+	}
 
-		// Token: 0x17000694 RID: 1684
-		// (get) Token: 0x06002499 RID: 9369 RVA: 0x000BD6BD File Offset: 0x000BB8BD
-		public List<string> ForceLoadAfter
+	public string FolderName => RootDir.Name;
+
+	public DirectoryInfo RootDir => rootDirInt;
+
+	public bool IsCoreMod => SamePackageId("ludeon.rimworld");
+
+	public bool Active
+	{
+		get
 		{
-			get
+			return ModsConfig.IsActive(this);
+		}
+		set
+		{
+			ModsConfig.SetActive(this, value);
+		}
+	}
+
+	public bool VersionCompatible
+	{
+		get
+		{
+			if (IsCoreMod)
 			{
-				return this.meta.forceLoadAfter;
+				return true;
 			}
+			return meta.SupportedVersions.Any((System.Version v) => VersionControl.IsCompatible(v));
 		}
+	}
 
-		// Token: 0x17000695 RID: 1685
-		// (get) Token: 0x0600249A RID: 9370 RVA: 0x000BD6CA File Offset: 0x000BB8CA
-		public List<string> IncompatibleWith
+	public bool MadeForNewerVersion
+	{
+		get
 		{
-			get
-			{
-				return this.meta.incompatibleWith;
-			}
-		}
-
-		// Token: 0x17000696 RID: 1686
-		// (get) Token: 0x0600249B RID: 9371 RVA: 0x000BD6D7 File Offset: 0x000BB8D7
-		public string ModIconPath
-		{
-			get
-			{
-				return this.meta.modIconPath;
-			}
-		}
-
-		// Token: 0x0600249C RID: 9372 RVA: 0x000BD6E4 File Offset: 0x000BB8E4
-		public List<string> UnsatisfiedDependencies()
-		{
-			this.unsatisfiedDepsList.Clear();
-			for (int i = 0; i < this.Dependencies.Count; i++)
-			{
-				ModDependency modDependency = this.Dependencies[i];
-				if (!modDependency.IsSatisfied)
-				{
-					this.unsatisfiedDepsList.Add(modDependency.displayName);
-				}
-			}
-			return this.unsatisfiedDepsList;
-		}
-
-		// Token: 0x17000697 RID: 1687
-		// (get) Token: 0x0600249D RID: 9373 RVA: 0x000BD73E File Offset: 0x000BB93E
-		// (set) Token: 0x0600249E RID: 9374 RVA: 0x000BD746 File Offset: 0x000BB946
-		public bool HadIncorrectlyFormattedVersionInMetadata { get; private set; }
-
-		// Token: 0x17000698 RID: 1688
-		// (get) Token: 0x0600249F RID: 9375 RVA: 0x000BD74F File Offset: 0x000BB94F
-		// (set) Token: 0x060024A0 RID: 9376 RVA: 0x000BD757 File Offset: 0x000BB957
-		public bool HadIncorrectlyFormattedPackageId { get; private set; }
-
-		// Token: 0x060024A1 RID: 9377 RVA: 0x000BD760 File Offset: 0x000BB960
-		public ModMetaData(string localAbsPath, bool official = false)
-		{
-			this.rootDirInt = new DirectoryInfo(localAbsPath);
-			this.source = (official ? ContentSource.OfficialModsFolder : ContentSource.ModsFolder);
-			this.Init();
-		}
-
-		// Token: 0x060024A2 RID: 9378 RVA: 0x000BD7BC File Offset: 0x000BB9BC
-		public ModMetaData(WorkshopItem workshopItem)
-		{
-			this.rootDirInt = workshopItem.Directory;
-			this.source = ContentSource.SteamWorkshop;
-			this.Init();
-		}
-
-		// Token: 0x060024A3 RID: 9379 RVA: 0x000BD810 File Offset: 0x000BBA10
-		public void UnsetPreviewImage()
-		{
-			this.previewImage = null;
-		}
-
-		// Token: 0x060024A4 RID: 9380 RVA: 0x000BD819 File Offset: 0x000BBA19
-		public bool SamePackageId(string otherPackageId, bool ignorePostfix = false)
-		{
-			if (this.PackageId == null)
+			if (VersionCompatible)
 			{
 				return false;
 			}
-			if (ignorePostfix)
+			return meta.SupportedVersions.Any((System.Version v) => v.Major > VersionControl.CurrentMajor || (v.Major == VersionControl.CurrentMajor && v.Minor > VersionControl.CurrentMinor));
+		}
+	}
+
+	public ExpansionDef Expansion => ModLister.GetExpansionWithIdentifier(PackageId);
+
+	public string Name
+	{
+		get
+		{
+			ExpansionDef expansion = Expansion;
+			if (expansion == null)
 			{
-				return this.packageIdLowerCase.Equals(otherPackageId, StringComparison.CurrentCultureIgnoreCase);
+				return meta.name;
 			}
-			return this.PackageId.Equals(otherPackageId, StringComparison.CurrentCultureIgnoreCase);
+			return expansion.label;
 		}
+	}
 
-		// Token: 0x060024A5 RID: 9381 RVA: 0x000BD843 File Offset: 0x000BBA43
-		public List<LoadFolder> LoadFoldersForVersion(string version)
+	public string ShortName
+	{
+		get
 		{
-			ModLoadFolders modLoadFolders = this.loadFolders;
-			if (modLoadFolders == null)
+			if (!meta.shortName.NullOrEmpty())
 			{
-				return null;
+				return meta.shortName;
 			}
-			return modLoadFolders.FoldersForVersion(version);
+			return Name;
 		}
+	}
 
-		// Token: 0x060024A6 RID: 9382 RVA: 0x000BD858 File Offset: 0x000BBA58
-		private void Init()
+	public string Description
+	{
+		get
 		{
-			this.meta = DirectXmlLoader.ItemFromXmlFile<ModMetaData.ModMetaDataInternal>(GenFile.ResolveCaseInsensitiveFilePath(this.RootDir.FullName + Path.DirectorySeparatorChar.ToString() + "About", "About.xml"), false);
-			this.loadFolders = DirectXmlLoader.ItemFromXmlFile<ModLoadFolders>(GenFile.ResolveCaseInsensitiveFilePath(this.RootDir.FullName, "LoadFolders.xml"), false);
-			bool shouldLogIssues = ModLister.ShouldLogIssues;
-			this.HadIncorrectlyFormattedVersionInMetadata = !this.meta.TryParseSupportedVersions(!this.OnSteamWorkshop && shouldLogIssues);
-			if (this.meta.name.NullOrEmpty())
+			if (descriptionCached == null)
 			{
-				if (this.OnSteamWorkshop)
-				{
-					this.meta.name = "Workshop mod " + this.FolderName;
-				}
-				else
-				{
-					this.meta.name = this.FolderName;
-				}
+				ExpansionDef expansionWithIdentifier = ModLister.GetExpansionWithIdentifier(PackageId);
+				descriptionCached = ((expansionWithIdentifier != null) ? expansionWithIdentifier.description : meta.description);
 			}
-			this.HadIncorrectlyFormattedPackageId = !this.meta.TryParsePackageId(this.Official, !this.OnSteamWorkshop && shouldLogIssues);
-			this.packageIdLowerCase = this.meta.packageId.ToLower();
-			this.meta.InitVersionedData();
-			this.meta.ValidateDependencies(shouldLogIssues);
-			string publishedFileIdPath = this.PublishedFileIdPath;
-			ulong value;
-			if (File.Exists(this.PublishedFileIdPath) && ulong.TryParse(File.ReadAllText(publishedFileIdPath), out value))
+			return descriptionCached;
+		}
+	}
+
+	public string AuthorsString => Authors.ToCommaList(useAnd: true);
+
+	public IEnumerable<string> Authors
+	{
+		[IteratorStateMachine(typeof(_003Cget_Authors_003Ed__51))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_Authors_003Ed__51(-2)
 			{
-				this.publishedFileIdInt = new PublishedFileId_t(value);
-			}
-		}
-
-		// Token: 0x060024A7 RID: 9383 RVA: 0x000BD9AC File Offset: 0x000BBBAC
-		internal void DeleteContent()
-		{
-			this.rootDirInt.Delete(true);
-			ModLister.RebuildModList();
-		}
-
-		// Token: 0x17000699 RID: 1689
-		// (get) Token: 0x060024A8 RID: 9384 RVA: 0x000BD9BF File Offset: 0x000BBBBF
-		public bool OnSteamWorkshop
-		{
-			get
-			{
-				return this.source == ContentSource.SteamWorkshop;
-			}
-		}
-
-		// Token: 0x1700069A RID: 1690
-		// (get) Token: 0x060024A9 RID: 9385 RVA: 0x000BD9CC File Offset: 0x000BBBCC
-		private string PublishedFileIdPath
-		{
-			get
-			{
-				return string.Concat(new string[]
-				{
-					this.rootDirInt.FullName,
-					Path.DirectorySeparatorChar.ToString(),
-					"About",
-					Path.DirectorySeparatorChar.ToString(),
-					"PublishedFileId.txt"
-				});
-			}
-		}
-
-		// Token: 0x060024AA RID: 9386 RVA: 0x000026EA File Offset: 0x000008EA
-		public void PrepareForWorkshopUpload()
-		{
-		}
-
-		// Token: 0x060024AB RID: 9387 RVA: 0x000BDA22 File Offset: 0x000BBC22
-		public bool CanToUploadToWorkshop()
-		{
-			return !this.Official && this.Source == ContentSource.ModsFolder && !this.GetWorkshopItemHook().MayHaveAuthorNotCurrentUser;
-		}
-
-		// Token: 0x060024AC RID: 9388 RVA: 0x000BDA49 File Offset: 0x000BBC49
-		public PublishedFileId_t GetPublishedFileId()
-		{
-			return this.publishedFileIdInt;
-		}
-
-		// Token: 0x060024AD RID: 9389 RVA: 0x000BDA51 File Offset: 0x000BBC51
-		public void SetPublishedFileId(PublishedFileId_t newPfid)
-		{
-			if (this.publishedFileIdInt == newPfid)
-			{
-				return;
-			}
-			this.publishedFileIdInt = newPfid;
-			File.WriteAllText(this.PublishedFileIdPath, newPfid.ToString());
-		}
-
-		// Token: 0x060024AE RID: 9390 RVA: 0x000BDA81 File Offset: 0x000BBC81
-		public string GetWorkshopName()
-		{
-			return this.Name;
-		}
-
-		// Token: 0x060024AF RID: 9391 RVA: 0x000BDA89 File Offset: 0x000BBC89
-		public string GetWorkshopDescription()
-		{
-			return this.Description;
-		}
-
-		// Token: 0x060024B0 RID: 9392 RVA: 0x000BDA91 File Offset: 0x000BBC91
-		public string GetWorkshopPreviewImagePath()
-		{
-			return this.PreviewImagePath;
-		}
-
-		// Token: 0x060024B1 RID: 9393 RVA: 0x000BDA99 File Offset: 0x000BBC99
-		public IList<string> GetWorkshopTags()
-		{
-			if (!this.translationMod)
-			{
-				return new List<string>
-				{
-					"Mod"
-				};
-			}
-			return new List<string>
-			{
-				"Translation"
+				_003C_003E4__this = this
 			};
 		}
+	}
 
-		// Token: 0x060024B2 RID: 9394 RVA: 0x000BDAC4 File Offset: 0x000BBCC4
-		public DirectoryInfo GetWorkshopUploadDirectory()
-		{
-			return this.RootDir;
-		}
+	public virtual string ModVersion => meta.modVersion;
 
-		// Token: 0x060024B3 RID: 9395 RVA: 0x000BDACC File Offset: 0x000BBCCC
-		public WorkshopItemHook GetWorkshopItemHook()
+	public string Url => meta.url;
+
+	public uint SteamAppId => meta.steamAppId;
+
+	public List<System.Version> SupportedVersionsReadOnly => meta.SupportedVersions;
+
+	IEnumerable<System.Version> WorkshopUploadable.SupportedVersions => SupportedVersionsReadOnly;
+
+	public string PreviewImagePath => GenFile.ResolveCaseInsensitiveFilePath(Path.Combine(rootDirInt.FullName, "About"), "Preview.png");
+
+	public string ModIconImagePath => GenFile.ResolveCaseInsensitiveFilePath(Path.Combine(rootDirInt.FullName, "About"), "ModIcon.png");
+
+	public bool Official
+	{
+		get
 		{
-			if (this.workshopHookInt == null)
+			if (!IsCoreMod)
 			{
-				this.workshopHookInt = new WorkshopItemHook(this);
+				return Source == ContentSource.OfficialModsFolder;
 			}
-			return this.workshopHookInt;
+			return true;
 		}
+	}
 
-		// Token: 0x060024B4 RID: 9396 RVA: 0x000BDAE8 File Offset: 0x000BBCE8
-		public IEnumerable<ModRequirement> GetRequirements()
+	public ContentSource Source => source;
+
+	public string PackageId
+	{
+		get
 		{
-			int num;
-			for (int i = 0; i < this.Dependencies.Count; i = num + 1)
+			if (!appendPackageIdSteamPostfix)
 			{
-				yield return this.Dependencies[i];
-				num = i;
+				return packageIdLowerCase;
 			}
-			for (int i = 0; i < this.meta.incompatibleWith.Count; i = num + 1)
+			return packageIdLowerCase + SteamModPostfix;
+		}
+	}
+
+	public string PackageIdNonUnique => packageIdLowerCase;
+
+	public string PackageIdPlayerFacing => meta.packageId;
+
+	public List<ModDependency> Dependencies => meta.modDependencies;
+
+	public List<string> LoadBefore => meta.loadBefore;
+
+	public List<string> LoadAfter => meta.loadAfter;
+
+	public List<string> ForceLoadBefore => meta.forceLoadBefore;
+
+	public List<string> ForceLoadAfter => meta.forceLoadAfter;
+
+	public List<string> IncompatibleWith => meta.incompatibleWith;
+
+	public string ModIconPath => meta.modIconPath;
+
+	public bool HadIncorrectlyFormattedVersionInMetadata { get; private set; }
+
+	public bool HadIncorrectlyFormattedPackageId { get; private set; }
+
+	public bool OnSteamWorkshop => source == ContentSource.SteamWorkshop;
+
+	private string PublishedFileIdPath => rootDirInt.FullName + Path.DirectorySeparatorChar + "About" + Path.DirectorySeparatorChar + "PublishedFileId.txt";
+
+	public List<string> UnsatisfiedDependencies()
+	{
+		unsatisfiedDepsList.Clear();
+		for (int i = 0; i < Dependencies.Count; i++)
+		{
+			ModDependency modDependency = Dependencies[i];
+			if (!modDependency.IsSatisfied)
 			{
-				ModMetaData modWithIdentifier = ModLister.GetModWithIdentifier(this.meta.incompatibleWith[i], false);
-				if (modWithIdentifier != null)
-				{
-					yield return new ModIncompatibility
-					{
-						packageId = modWithIdentifier.PackageIdPlayerFacing,
-						displayName = modWithIdentifier.Name
-					};
-				}
-				num = i;
+				unsatisfiedDepsList.Add(modDependency.displayName);
 			}
-			yield break;
 		}
+		return unsatisfiedDepsList;
+	}
 
-		// Token: 0x060024B5 RID: 9397 RVA: 0x000BDAF8 File Offset: 0x000BBCF8
-		public override int GetHashCode()
+	public ModMetaData(string localAbsPath, bool official = false)
+	{
+		rootDirInt = new DirectoryInfo(localAbsPath);
+		source = (official ? ContentSource.OfficialModsFolder : ContentSource.ModsFolder);
+		Init();
+	}
+
+	public ModMetaData(WorkshopItem workshopItem)
+	{
+		rootDirInt = workshopItem.Directory;
+		source = ContentSource.SteamWorkshop;
+		Init();
+	}
+
+	public void UnsetPreviewImage()
+	{
+		previewImage = null;
+	}
+
+	public bool SamePackageId(string otherPackageId, bool ignorePostfix = false)
+	{
+		if (PackageId == null)
 		{
-			return this.PackageId.GetHashCode();
+			return false;
 		}
-
-		// Token: 0x060024B6 RID: 9398 RVA: 0x000BDB05 File Offset: 0x000BBD05
-		public override string ToString()
+		if (ignorePostfix)
 		{
-			return string.Concat(new string[]
+			return packageIdLowerCase.Equals(otherPackageId, StringComparison.CurrentCultureIgnoreCase);
+		}
+		return PackageId.Equals(otherPackageId, StringComparison.CurrentCultureIgnoreCase);
+	}
+
+	public List<LoadFolder> LoadFoldersForVersion(string version)
+	{
+		return loadFolders?.FoldersForVersion(version);
+	}
+
+	private void Init()
+	{
+		meta = DirectXmlLoader.ItemFromXmlFile<ModMetaDataInternal>(GenFile.ResolveCaseInsensitiveFilePath(RootDir.FullName + Path.DirectorySeparatorChar + "About", "About.xml"), resolveCrossRefs: false);
+		loadFolders = DirectXmlLoader.ItemFromXmlFile<ModLoadFolders>(GenFile.ResolveCaseInsensitiveFilePath(RootDir.FullName, "LoadFolders.xml"), resolveCrossRefs: false);
+		bool shouldLogIssues = ModLister.ShouldLogIssues;
+		HadIncorrectlyFormattedVersionInMetadata = !meta.TryParseSupportedVersions(!OnSteamWorkshop && shouldLogIssues);
+		if (meta.name.NullOrEmpty())
+		{
+			if (OnSteamWorkshop)
 			{
-				"[",
-				this.PackageIdPlayerFacing,
-				"|",
-				this.Name,
-				"]"
-			});
+				meta.name = "Workshop mod " + FolderName;
+			}
+			else
+			{
+				meta.name = FolderName;
+			}
 		}
-
-		// Token: 0x060024B7 RID: 9399 RVA: 0x000BDB3C File Offset: 0x000BBD3C
-		public string ToStringLong()
+		HadIncorrectlyFormattedPackageId = !meta.TryParsePackageId(Official, !OnSteamWorkshop && shouldLogIssues);
+		packageIdLowerCase = meta.packageId.ToLower();
+		meta.InitVersionedData();
+		meta.ValidateDependencies(shouldLogIssues);
+		string publishedFileIdPath = PublishedFileIdPath;
+		if (File.Exists(PublishedFileIdPath) && ulong.TryParse(File.ReadAllText(publishedFileIdPath), out var result))
 		{
-			return this.PackageIdPlayerFacing + "(" + this.RootDir.ToString() + ")";
+			publishedFileIdInt = new PublishedFileId_t(result);
 		}
+	}
 
-		// Token: 0x04001E1F RID: 7711
-		private DirectoryInfo rootDirInt;
+	internal void DeleteContent()
+	{
+		rootDirInt.Delete(recursive: true);
+		ModLister.RebuildModList();
+	}
 
-		// Token: 0x04001E20 RID: 7712
-		private ContentSource source;
+	public void PrepareForWorkshopUpload()
+	{
+	}
 
-		// Token: 0x04001E21 RID: 7713
-		private Texture2D previewImage;
-
-		// Token: 0x04001E22 RID: 7714
-		private bool previewImageWasLoaded;
-
-		// Token: 0x04001E23 RID: 7715
-		private Texture2D iconImage;
-
-		// Token: 0x04001E24 RID: 7716
-		private bool iconImageWasLoaded;
-
-		// Token: 0x04001E25 RID: 7717
-		public bool enabled = true;
-
-		// Token: 0x04001E26 RID: 7718
-		private ModMetaData.ModMetaDataInternal meta = new ModMetaData.ModMetaDataInternal();
-
-		// Token: 0x04001E27 RID: 7719
-		public ModLoadFolders loadFolders;
-
-		// Token: 0x04001E28 RID: 7720
-		private WorkshopItemHook workshopHookInt;
-
-		// Token: 0x04001E29 RID: 7721
-		private PublishedFileId_t publishedFileIdInt = PublishedFileId_t.Invalid;
-
-		// Token: 0x04001E2A RID: 7722
-		public bool appendPackageIdSteamPostfix;
-
-		// Token: 0x04001E2B RID: 7723
-		public bool translationMod;
-
-		// Token: 0x04001E2C RID: 7724
-		public string packageIdLowerCase;
-
-		// Token: 0x04001E2D RID: 7725
-		private string descriptionCached;
-
-		// Token: 0x04001E2E RID: 7726
-		private const string AboutFolderName = "About";
-
-		// Token: 0x04001E2F RID: 7727
-		public static readonly string SteamModPostfix = "_steam";
-
-		// Token: 0x04001E30 RID: 7728
-		private static readonly CachedTexture ModIcon = new CachedTexture("UI/Icons/Options/OptionsMod");
-
-		// Token: 0x04001E31 RID: 7729
-		private static readonly string[] AndToken = new string[]
+	public bool CanToUploadToWorkshop()
+	{
+		if (Official)
 		{
-			" and "
+			return false;
+		}
+		if (Source != ContentSource.ModsFolder)
+		{
+			return false;
+		}
+		if (GetWorkshopItemHook().MayHaveAuthorNotCurrentUser)
+		{
+			return false;
+		}
+		return true;
+	}
+
+	public PublishedFileId_t GetPublishedFileId()
+	{
+		return publishedFileIdInt;
+	}
+
+	public void SetPublishedFileId(PublishedFileId_t newPfid)
+	{
+		if (!(publishedFileIdInt == newPfid))
+		{
+			publishedFileIdInt = newPfid;
+			File.WriteAllText(PublishedFileIdPath, newPfid.ToString());
+		}
+	}
+
+	public string GetWorkshopName()
+	{
+		return Name;
+	}
+
+	public string GetWorkshopDescription()
+	{
+		return Description;
+	}
+
+	public string GetWorkshopPreviewImagePath()
+	{
+		return PreviewImagePath;
+	}
+
+	public IList<string> GetWorkshopTags()
+	{
+		if (!translationMod)
+		{
+			return new List<string> { "Mod" };
+		}
+		return new List<string> { "Translation" };
+	}
+
+	public DirectoryInfo GetWorkshopUploadDirectory()
+	{
+		return workshopUploadDirectoryOverride ?? RootDir;
+	}
+
+	public WorkshopItemHook GetWorkshopItemHook()
+	{
+		if (workshopHookInt == null)
+		{
+			workshopHookInt = new WorkshopItemHook(this);
+		}
+		return workshopHookInt;
+	}
+
+	[IteratorStateMachine(typeof(_003CGetRequirements_003Ed__122))]
+	public IEnumerable<ModRequirement> GetRequirements()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetRequirements_003Ed__122(-2)
+		{
+			_003C_003E4__this = this
 		};
+	}
 
-		// Token: 0x04001E32 RID: 7730
-		private List<string> unsatisfiedDepsList = new List<string>();
+	public override int GetHashCode()
+	{
+		return PackageId.GetHashCode();
+	}
 
-		// Token: 0x02000578 RID: 1400
-		private class ModMetaDataInternal
-		{
-			// Token: 0x1700069B RID: 1691
-			// (get) Token: 0x060024B9 RID: 9401 RVA: 0x000BDB8C File Offset: 0x000BBD8C
-			// (set) Token: 0x060024BA RID: 9402 RVA: 0x000BDB94 File Offset: 0x000BBD94
-			public List<System.Version> SupportedVersions { get; private set; }
+	public override string ToString()
+	{
+		return "[" + PackageIdPlayerFacing + "|" + Name + "]";
+	}
 
-			// Token: 0x060024BB RID: 9403 RVA: 0x000BDBA0 File Offset: 0x000BBDA0
-			private bool TryParseVersion(string str, bool logIssues = true)
-			{
-				System.Version version;
-				if (!VersionControl.TryParseVersionString(str, out version))
-				{
-					if (logIssues)
-					{
-						Log.Error(string.Concat(new string[]
-						{
-							"Unable to parse version string on mod ",
-							this.name,
-							" from ",
-							this.author,
-							" \"",
-							str,
-							"\""
-						}));
-					}
-					return false;
-				}
-				this.SupportedVersions.Add(version);
-				if (!VersionControl.IsWellFormattedVersionString(str))
-				{
-					if (logIssues)
-					{
-						Log.Warning(string.Concat(new string[]
-						{
-							"Malformed (correct format is Major.Minor) version string on mod ",
-							this.name,
-							" from ",
-							this.author,
-							" \"",
-							str,
-							"\" - parsed as \"",
-							version.Major.ToString(),
-							".",
-							version.Minor.ToString(),
-							"\""
-						}));
-					}
-					return false;
-				}
-				return true;
-			}
-
-			// Token: 0x060024BC RID: 9404 RVA: 0x000BDC9C File Offset: 0x000BBE9C
-			public bool TryParseSupportedVersions(bool logIssues = true)
-			{
-				if (this.targetVersion != null && logIssues)
-				{
-					Log.Warning("Mod " + this.name + ": targetVersion field is obsolete, use supportedVersions instead.");
-				}
-				bool flag = false;
-				this.SupportedVersions = new List<System.Version>();
-				if (this.packageId.ToLower() == "ludeon.rimworld")
-				{
-					this.SupportedVersions.Add(VersionControl.CurrentVersion);
-				}
-				else if (this.supportedVersions == null)
-				{
-					if (logIssues)
-					{
-						Log.Warning("Mod " + this.name + " is missing supported versions list in About.xml! (example: <supportedVersions><li>1.0</li></supportedVersions>)");
-					}
-					flag = true;
-				}
-				else if (this.supportedVersions.Count == 0)
-				{
-					if (logIssues)
-					{
-						Log.Error("Mod " + this.name + ": <supportedVersions> in mod About.xml must specify at least one version.");
-					}
-					flag = true;
-				}
-				else
-				{
-					for (int i = 0; i < this.supportedVersions.Count; i++)
-					{
-						flag |= !this.TryParseVersion(this.supportedVersions[i], logIssues);
-					}
-				}
-				this.SupportedVersions = this.SupportedVersions.OrderBy(delegate(System.Version v)
-				{
-					if (!VersionControl.IsCompatible(v))
-					{
-						return 100;
-					}
-					return -100;
-				}).ThenByDescending((System.Version v) => v.Major).ThenByDescending((System.Version v) => v.Minor).Distinct<System.Version>().ToList<System.Version>();
-				return !flag;
-			}
-
-			// Token: 0x060024BD RID: 9405 RVA: 0x000BDE18 File Offset: 0x000BC018
-			public bool TryParsePackageId(bool isOfficial, bool logIssues = true)
-			{
-				bool flag = false;
-				if (this.packageId.NullOrEmpty())
-				{
-					string text = "none";
-					if (!this.description.NullOrEmpty())
-					{
-						text = GenText.StableStringHash(this.description).ToString().Replace("-", "");
-						text = text.Substring(0, Math.Min(3, text.Length));
-					}
-					this.packageId = this.ConvertToASCII(this.author + text) + "." + this.ConvertToASCII(this.name);
-					if (logIssues)
-					{
-						Log.Warning("Mod " + this.name + " is missing packageId in About.xml! (example: <packageId>AuthorName.ModName.Specific</packageId>)");
-					}
-					flag = true;
-				}
-				if (!ModMetaData.ModMetaDataInternal.PackageIdFormatRegex.IsMatch(this.packageId))
-				{
-					if (logIssues)
-					{
-						Log.Warning(string.Concat(new string[]
-						{
-							"Mod ",
-							this.name,
-							" <packageId> (",
-							this.packageId,
-							") is not in valid format."
-						}));
-					}
-					flag = true;
-				}
-				if (!isOfficial && this.packageId.ToLower().Contains("ludeon"))
-				{
-					if (logIssues)
-					{
-						Log.Warning("Mod " + this.name + " <packageId> contains word \"Ludeon\", which is reserved for official content.");
-					}
-					flag = true;
-				}
-				return !flag;
-			}
-
-			// Token: 0x060024BE RID: 9406 RVA: 0x000BDF5C File Offset: 0x000BC15C
-			private string ConvertToASCII(string part)
-			{
-				StringBuilder stringBuilder = new StringBuilder("");
-				foreach (char c in part)
-				{
-					if (!char.IsLetterOrDigit(c) || c >= '\u0080')
-					{
-						c = c % '\u0019' + 'A';
-					}
-					stringBuilder.Append(c);
-				}
-				return stringBuilder.ToString();
-			}
-
-			// Token: 0x060024BF RID: 9407 RVA: 0x000BDFB4 File Offset: 0x000BC1B4
-			public void ValidateDependencies(bool logIssues = true)
-			{
-				for (int i = this.modDependencies.Count - 1; i >= 0; i--)
-				{
-					bool flag = false;
-					ModDependency modDependency = this.modDependencies[i];
-					if (modDependency.packageId.NullOrEmpty())
-					{
-						if (logIssues)
-						{
-							Log.Warning("Mod " + this.name + " has a dependency with no <packageId> specified.");
-						}
-						flag = true;
-					}
-					else if (!ModMetaData.ModMetaDataInternal.PackageIdFormatRegex.IsMatch(modDependency.packageId))
-					{
-						if (logIssues)
-						{
-							Log.Warning("Mod " + this.name + " has a dependency with invalid <packageId>: " + modDependency.packageId);
-						}
-						flag = true;
-					}
-					if (modDependency.displayName.NullOrEmpty())
-					{
-						if (logIssues)
-						{
-							Log.Warning(string.Concat(new string[]
-							{
-								"Mod ",
-								this.name,
-								" has a dependency (",
-								modDependency.packageId,
-								") with empty display name."
-							}));
-						}
-						flag = true;
-					}
-					if (modDependency.downloadUrl.NullOrEmpty() && modDependency.steamWorkshopUrl.NullOrEmpty() && !modDependency.packageId.ToLower().Contains("ludeon"))
-					{
-						if (logIssues)
-						{
-							Log.Warning(string.Concat(new string[]
-							{
-								"Mod ",
-								this.name,
-								" dependency (",
-								modDependency.packageId,
-								") needs to have <downloadUrl> and/or <steamWorkshopUrl> specified."
-							}));
-						}
-						flag = true;
-					}
-					if (flag)
-					{
-						this.modDependencies.Remove(modDependency);
-					}
-				}
-			}
-
-			// Token: 0x060024C0 RID: 9408 RVA: 0x000BE120 File Offset: 0x000BC320
-			public void InitVersionedData()
-			{
-				string currentVersionStringWithoutBuild = VersionControl.CurrentVersionStringWithoutBuild;
-				ModMetaData.VersionedData<string> versionedData = this.descriptionsByVersion;
-				string text = (versionedData != null) ? versionedData.GetItemForVersion(currentVersionStringWithoutBuild) : null;
-				if (text != null)
-				{
-					this.description = text;
-				}
-				ModMetaData.VersionedData<List<ModDependency>> versionedData2 = this.modDependenciesByVersion;
-				List<ModDependency> list = (versionedData2 != null) ? versionedData2.GetItemForVersion(currentVersionStringWithoutBuild) : null;
-				if (list != null)
-				{
-					this.modDependencies = list;
-				}
-				ModMetaData.VersionedData<List<string>> versionedData3 = this.loadBeforeByVersion;
-				List<string> list2 = (versionedData3 != null) ? versionedData3.GetItemForVersion(currentVersionStringWithoutBuild) : null;
-				if (list2 != null)
-				{
-					this.loadBefore = list2;
-				}
-				ModMetaData.VersionedData<List<string>> versionedData4 = this.loadAfterByVersion;
-				List<string> list3 = (versionedData4 != null) ? versionedData4.GetItemForVersion(currentVersionStringWithoutBuild) : null;
-				if (list3 != null)
-				{
-					this.loadAfter = list3;
-				}
-				ModMetaData.VersionedData<List<string>> versionedData5 = this.incompatibleWithByVersion;
-				List<string> list4 = (versionedData5 != null) ? versionedData5.GetItemForVersion(currentVersionStringWithoutBuild) : null;
-				if (list4 != null)
-				{
-					this.incompatibleWith = list4;
-				}
-			}
-
-			// Token: 0x04001E35 RID: 7733
-			public string packageId = "";
-
-			// Token: 0x04001E36 RID: 7734
-			public string name = "";
-
-			// Token: 0x04001E37 RID: 7735
-			public string shortName = "";
-
-			// Token: 0x04001E38 RID: 7736
-			public string author = "Anonymous";
-
-			// Token: 0x04001E39 RID: 7737
-			public List<string> authors;
-
-			// Token: 0x04001E3A RID: 7738
-			public string modIconPath = "";
-
-			// Token: 0x04001E3B RID: 7739
-			public string modVersion = "";
-
-			// Token: 0x04001E3C RID: 7740
-			public string url = "";
-
-			// Token: 0x04001E3D RID: 7741
-			public string description = "No description provided.";
-
-			// Token: 0x04001E3E RID: 7742
-			public uint steamAppId;
-
-			// Token: 0x04001E3F RID: 7743
-			public List<string> supportedVersions;
-
-			// Token: 0x04001E40 RID: 7744
-			[Unsaved(true)]
-			private string targetVersion;
-
-			// Token: 0x04001E41 RID: 7745
-			public List<ModDependency> modDependencies = new List<ModDependency>();
-
-			// Token: 0x04001E42 RID: 7746
-			public List<string> loadBefore = new List<string>();
-
-			// Token: 0x04001E43 RID: 7747
-			public List<string> loadAfter = new List<string>();
-
-			// Token: 0x04001E44 RID: 7748
-			public List<string> incompatibleWith = new List<string>();
-
-			// Token: 0x04001E45 RID: 7749
-			public List<string> forceLoadBefore = new List<string>();
-
-			// Token: 0x04001E46 RID: 7750
-			public List<string> forceLoadAfter = new List<string>();
-
-			// Token: 0x04001E47 RID: 7751
-			private ModMetaData.VersionedData<string> descriptionsByVersion;
-
-			// Token: 0x04001E48 RID: 7752
-			private ModMetaData.VersionedData<List<ModDependency>> modDependenciesByVersion;
-
-			// Token: 0x04001E49 RID: 7753
-			private ModMetaData.VersionedData<List<string>> loadBeforeByVersion;
-
-			// Token: 0x04001E4A RID: 7754
-			private ModMetaData.VersionedData<List<string>> loadAfterByVersion;
-
-			// Token: 0x04001E4B RID: 7755
-			private ModMetaData.VersionedData<List<string>> incompatibleWithByVersion;
-
-			// Token: 0x04001E4C RID: 7756
-			public static readonly Regex PackageIdFormatRegex = new Regex("(?=.{1,60}$)^(?!\\.)(?=.*?[.])(?!.*([.])\\1+)[a-zA-Z0-9.]{1,}[a-zA-Z0-9]{1}$");
-		}
-
-		// Token: 0x0200057A RID: 1402
-		private class VersionedData<T> where T : class
-		{
-			// Token: 0x060024C8 RID: 9416 RVA: 0x000BE2BC File Offset: 0x000BC4BC
-			public void LoadDataFromXmlCustom(XmlNode xmlRoot)
-			{
-				foreach (object obj in xmlRoot.ChildNodes)
-				{
-					XmlNode xmlNode = (XmlNode)obj;
-					if (!(xmlNode is XmlComment))
-					{
-						string text = xmlNode.Name.ToLower();
-						if (text.StartsWith("v"))
-						{
-							text = text.Substring(1);
-						}
-						if (!this.itemForVersion.ContainsKey(text))
-						{
-							this.itemForVersion[text] = ((typeof(T) == typeof(string)) ? ((T)((object)xmlNode.FirstChild.Value)) : DirectXmlToObject.ObjectFromXml<T>(xmlNode, false));
-						}
-						else
-						{
-							Log.Warning("More than one value for a same version of " + typeof(T).Name + " named " + xmlRoot.Name);
-						}
-					}
-				}
-			}
-
-			// Token: 0x060024C9 RID: 9417 RVA: 0x000BE3BC File Offset: 0x000BC5BC
-			public T GetItemForVersion(string ver)
-			{
-				if (this.itemForVersion.ContainsKey(ver))
-				{
-					return this.itemForVersion[ver];
-				}
-				return default(T);
-			}
-
-			// Token: 0x04001E52 RID: 7762
-			private Dictionary<string, T> itemForVersion = new Dictionary<string, T>();
-		}
+	public string ToStringLong()
+	{
+		return PackageIdPlayerFacing + "(" + RootDir.ToString() + ")";
 	}
 }

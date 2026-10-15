@@ -1,4 +1,3 @@
-﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using RimWorld.Planet;
@@ -6,133 +5,120 @@ using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 
-namespace RimWorld
+namespace RimWorld;
+
+public static class LeaveQuestPartUtility
 {
-	// Token: 0x02001C58 RID: 7256
-	public static class LeaveQuestPartUtility
+	public static void MakePawnLeave(Pawn pawn, Quest quest)
 	{
-		// Token: 0x0600A1A1 RID: 41377 RVA: 0x002E723C File Offset: 0x002E543C
-		public static void MakePawnLeave(Pawn pawn, Quest quest)
+		Caravan caravan = pawn.GetCaravan();
+		if (caravan != null)
 		{
-			Caravan caravan = pawn.GetCaravan();
-			if (caravan != null)
+			CaravanInventoryUtility.MoveAllInventoryToSomeoneElse(pawn, caravan.PawnsListForReading);
+			caravan.RemovePawn(pawn);
+		}
+		if (pawn.Faction == Faction.OfPlayer)
+		{
+			Rand.PushState(quest.id ^ 0x394042B4);
+			Faction result;
+			if (pawn.HasExtraHomeFaction(quest) && pawn.GetExtraHomeFaction(quest) != Faction.OfPlayer)
 			{
-				CaravanInventoryUtility.MoveAllInventoryToSomeoneElse(pawn, caravan.PawnsListForReading, null);
-				caravan.RemovePawn(pawn);
+				result = pawn.GetExtraHomeFaction(quest);
 			}
-			if (pawn.Faction == Faction.OfPlayer)
+			else if (pawn.HasExtraMiniFaction(quest) && pawn.GetExtraMiniFaction(quest) != Faction.OfPlayer)
 			{
-				Rand.PushState(quest.id ^ 960512692);
-				Faction faction;
-				if (pawn.HasExtraHomeFaction(quest) && pawn.GetExtraHomeFaction(quest) != Faction.OfPlayer)
-				{
-					faction = pawn.GetExtraHomeFaction(quest);
-				}
-				else if (pawn.HasExtraMiniFaction(quest) && pawn.GetExtraMiniFaction(quest) != Faction.OfPlayer)
-				{
-					faction = pawn.GetExtraMiniFaction(quest);
-				}
-				else if (pawn.IsSlave && pawn.SlaveFaction != Faction.OfPlayer)
-				{
-					faction = pawn.SlaveFaction;
-				}
-				else if (!(from x in Find.FactionManager.GetFactions(false, false, false, TechLevel.Undefined, false)
+				result = pawn.GetExtraMiniFaction(quest);
+			}
+			else if (pawn.IsSlave && pawn.SlaveFaction != Faction.OfPlayer)
+			{
+				result = pawn.SlaveFaction;
+			}
+			else if (!(from x in Find.FactionManager.GetFactions(allowHidden: false, allowDefeated: false, allowNonHumanlike: false)
 				where !x.HostileTo(Faction.OfPlayer)
-				select x).TryRandomElement(out faction) && !Find.FactionManager.GetFactions(false, false, false, TechLevel.Undefined, false).TryRandomElement(out faction))
-				{
-					faction = null;
-				}
-				Rand.PopState();
-				if (pawn.Faction != faction)
-				{
-					pawn.SetFaction(faction, null);
-				}
-			}
-			foreach (Pawn pawn2 in PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_OfPlayerFaction)
+				select x).TryRandomElement(out result) && !Find.FactionManager.GetFactions(allowHidden: false, allowDefeated: false, allowNonHumanlike: false).TryRandomElement(out result))
 			{
-				if (pawn2.playerSettings.Master == pawn)
-				{
-					pawn2.playerSettings.Master = null;
-				}
+				result = null;
 			}
-			if (pawn.guest != null)
+			Rand.PopState();
+			if (pawn.Faction != result)
 			{
-				if (pawn.InBed() && pawn.CurrentBed().Faction == Faction.OfPlayer && (pawn.Faction == null || !pawn.Faction.HostileTo(Faction.OfPlayer)))
-				{
-					pawn.guest.SetGuestStatus(Faction.OfPlayer, GuestStatus.Guest);
-				}
-				else
-				{
-					pawn.guest.SetGuestStatus(null, GuestStatus.Guest);
-				}
-			}
-			Pawn_CarryTracker carryTracker = pawn.carryTracker;
-			if (((carryTracker != null) ? carryTracker.CarriedThing : null) != null)
-			{
-				Thing thing;
-				pawn.carryTracker.TryDropCarriedThing(pawn.Position, ThingPlaceMode.Near, out thing, null);
-			}
-			Lord lord = pawn.GetLord();
-			if (lord != null)
-			{
-				lord.Notify_PawnLost(pawn, PawnLostCondition.ForcedByQuest, null);
+				pawn.SetFaction(result);
 			}
 		}
-
-		// Token: 0x0600A1A2 RID: 41378 RVA: 0x002E7458 File Offset: 0x002E5658
-		public static void MakePawnsLeave(IEnumerable<Pawn> pawns, bool sendLetter, Quest quest, bool wakeUp = false)
+		foreach (Pawn item in PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_OfPlayerFaction)
 		{
-			bool flag = pawns.Any((Pawn x) => x.Faction == Faction.OfPlayer || x.HostFaction == Faction.OfPlayer);
-			List<Pawn> list = (from x in pawns
-			where x.Spawned || x.IsCaravanMember()
-			select x).ToList<Pawn>();
-			if (sendLetter && list.Any<Pawn>())
+			if (item.playerSettings.Master == pawn)
 			{
-				Pawn pawn;
-				string value = GenLabel.BestGroupLabel(list, false, out pawn);
-				string value2 = GenLabel.BestGroupLabel(list, true, out pawn);
-				if (flag)
+				item.playerSettings.Master = null;
+			}
+		}
+		if (pawn.guest != null)
+		{
+			if (pawn.InBed() && pawn.CurrentBed().Faction == Faction.OfPlayer && (pawn.Faction == null || !pawn.Faction.HostileTo(Faction.OfPlayer)))
+			{
+				pawn.guest.SetGuestStatus(Faction.OfPlayer);
+			}
+			else
+			{
+				pawn.guest.SetGuestStatus(null);
+			}
+		}
+		if (pawn.carryTracker?.CarriedThing != null)
+		{
+			pawn.carryTracker.TryDropCarriedThing(pawn.Position, ThingPlaceMode.Near, out var _);
+		}
+		pawn.GetLord()?.Notify_PawnLost(pawn, PawnLostCondition.ForcedByQuest, null);
+	}
+
+	public static void MakePawnsLeave(IEnumerable<Pawn> pawns, bool sendLetter, Quest quest, bool wakeUp = false)
+	{
+		bool flag = pawns.Any((Pawn x) => x.Faction == Faction.OfPlayer || x.HostFaction == Faction.OfPlayer);
+		List<Pawn> list = pawns.Where((Pawn x) => x.Spawned || x.IsCaravanMember()).ToList();
+		if (sendLetter && list.Any())
+		{
+			Pawn singlePawn;
+			string text = GenLabel.BestGroupLabel(list, definite: false, out singlePawn);
+			string text2 = GenLabel.BestGroupLabel(list, definite: true, out singlePawn);
+			if (flag)
+			{
+				if (singlePawn != null)
 				{
-					if (pawn != null)
-					{
-						Find.LetterStack.ReceiveLetter("LetterLabelPawnLeaving".Translate(value), "LetterPawnLeaving".Translate(value2), LetterDefOf.NeutralEvent, pawn, null, quest, null, null, 0, true);
-					}
-					else
-					{
-						Find.LetterStack.ReceiveLetter("LetterLabelPawnsLeaving".Translate(value), "LetterPawnsLeaving".Translate(value2), LetterDefOf.NeutralEvent, list[0], null, quest, null, null, 0, true);
-					}
-				}
-				else if (pawn != null)
-				{
-					Messages.Message("MessagePawnLeaving".Translate(value2), pawn, MessageTypeDefOf.NeutralEvent, true);
+					Find.LetterStack.ReceiveLetter("LetterLabelPawnLeaving".Translate(text), "LetterPawnLeaving".Translate(text2), LetterDefOf.NeutralEvent, singlePawn, null, quest);
 				}
 				else
 				{
-					Messages.Message("MessagePawnsLeaving".Translate(value2), list[0], MessageTypeDefOf.NeutralEvent, true);
+					Find.LetterStack.ReceiveLetter("LetterLabelPawnsLeaving".Translate(text), "LetterPawnsLeaving".Translate(text2), LetterDefOf.NeutralEvent, list[0], null, quest);
 				}
 			}
-			foreach (Pawn pawn2 in pawns)
+			else if (singlePawn != null)
 			{
-				LeaveQuestPartUtility.MakePawnLeave(pawn2, quest);
+				Messages.Message("MessagePawnLeaving".Translate(text2), singlePawn, MessageTypeDefOf.NeutralEvent);
 			}
-			IEnumerable<Pawn> enumerable = from p in pawns
-			where p.Spawned && !p.Downed
-			select p;
-			if (enumerable.Any<Pawn>())
+			else
 			{
-				Pawn pawn3 = enumerable.First<Pawn>();
-				LordJob_ExitMapBest lordJob = new LordJob_ExitMapBest(LocomotionUrgency.Walk, true, true);
-				LordMaker.MakeNewLord(pawn3.Faction, lordJob, pawn3.MapHeld, enumerable);
+				Messages.Message("MessagePawnsLeaving".Translate(text2), list[0], MessageTypeDefOf.NeutralEvent);
 			}
-			if (wakeUp)
+		}
+		foreach (Pawn pawn2 in pawns)
+		{
+			MakePawnLeave(pawn2, quest);
+		}
+		IEnumerable<Pawn> enumerable = pawns.Where((Pawn p) => p.Spawned && !p.Downed);
+		if (enumerable.Any())
+		{
+			Pawn pawn = enumerable.First();
+			LordJob_ExitMapBest lordJob = new LordJob_ExitMapBest(LocomotionUrgency.Walk, canDig: true, canDefendSelf: true);
+			LordMaker.MakeNewLord(pawn.Faction, lordJob, pawn.MapHeld, enumerable);
+		}
+		if (!wakeUp)
+		{
+			return;
+		}
+		foreach (Pawn pawn3 in pawns)
+		{
+			if (!pawn3.Awake())
 			{
-				foreach (Pawn p2 in pawns)
-				{
-					if (!p2.Awake())
-					{
-						RestUtility.WakeUp(p2, true);
-					}
-				}
+				RestUtility.WakeUp(pawn3);
 			}
 		}
 	}

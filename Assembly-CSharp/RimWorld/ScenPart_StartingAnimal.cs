@@ -1,236 +1,438 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class ScenPart_StartingAnimal : ScenPart
 {
-	// Token: 0x020028DF RID: 10463
-	public class ScenPart_StartingAnimal : ScenPart
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass17_0
 	{
-		// Token: 0x0600E4CA RID: 58570 RVA: 0x0042D2BB File Offset: 0x0042B4BB
-		public override void ExposeData()
+		public Pawn animal;
+
+		internal bool _003CPlayerStartingThings_003Eb__1(Pawn p)
 		{
-			base.ExposeData();
-			Scribe_Defs.Look<PawnKindDef>(ref this.animalKind, "animalKind");
-			Scribe_Values.Look<int>(ref this.count, "count", 0, false);
-			Scribe_Values.Look<float>(ref this.bondToRandomPlayerPawnChance, "bondToRandomPlayerPawnChance", 0f, false);
+			if (TrainableUtility.CanBeMaster(p, animal, checkSpawned: false) && !p.story.traits.HasTrait(TraitDefOf.Psychopath))
+			{
+				return !p.Inhumanized();
+			}
+			return false;
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGetSummaryListEntries_003Ed__13 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private string tag;
+
+		public string _003C_003E3__tag;
+
+		public ScenPart_StartingAnimal _003C_003E4__this;
+
+		string IEnumerator<string>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x0600E4CB RID: 58571 RVA: 0x0042D2FC File Offset: 0x0042B4FC
-		public override void DoEditInterface(Listing_ScenEdit listing)
+		object IEnumerator.Current
 		{
-			Rect scenPartRect = listing.GetScenPartRect(this, ScenPart.RowHeight * 2f + 1f);
-			Listing_Standard listing_Standard = new Listing_Standard();
-			listing_Standard.Begin(scenPartRect.TopHalf());
-			listing_Standard.ColumnWidth = scenPartRect.width;
-			listing_Standard.TextFieldNumeric<int>(ref this.count, ref this.countBuf, 1f, 1E+09f);
-			listing_Standard.End();
-			if (Widgets.ButtonText(scenPartRect.BottomHalf(), this.CurrentAnimalLabel().CapitalizeFirst(), true, true, true, null))
+			[DebuggerHidden]
+			get
 			{
-				List<FloatMenuOption> list = new List<FloatMenuOption>();
-				list.Add(new FloatMenuOption("RandomPet".Translate().CapitalizeFirst(), delegate()
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetSummaryListEntries_003Ed__13(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			ScenPart_StartingAnimal scenPart_StartingAnimal = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (tag == "PlayerStartsWith")
 				{
-					this.animalKind = null;
-				}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0));
-				foreach (PawnKindDef localKind2 in this.PossibleAnimals(false))
-				{
-					PawnKindDef localKind = localKind2;
-					list.Add(new FloatMenuOption(localKind.LabelCap, delegate()
-					{
-						this.animalKind = localKind;
-					}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0));
+					_003C_003E2__current = scenPart_StartingAnimal.CurrentAnimalLabel().CapitalizeFirst() + " x" + scenPart_StartingAnimal.count;
+					_003C_003E1__state = 1;
+					return true;
 				}
-				Find.WindowStack.Add(new FloatMenu(list));
+				break;
+			case 1:
+				_003C_003E1__state = -1;
+				break;
 			}
+			return false;
 		}
 
-		// Token: 0x0600E4CC RID: 58572 RVA: 0x0042D468 File Offset: 0x0042B668
-		private IEnumerable<PawnKindDef> PossibleAnimals(bool checkForTamer = true)
+		bool IEnumerator.MoveNext()
 		{
-			return from td in DefDatabase<PawnKindDef>.AllDefs
-			where td.RaceProps.Animal && (!checkForTamer || ScenPart_StartingAnimal.CanKeepPetTame(td))
-			select td;
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0600E4CD RID: 58573 RVA: 0x0042D498 File Offset: 0x0042B698
-		private static bool CanKeepPetTame(PawnKindDef def)
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			float level = (float)Find.GameInitData.startingAndOptionalPawns.Take(Find.GameInitData.startingPawnCount).MaxBy((Pawn c) => c.skills.GetSkill(SkillDefOf.Animals).Level).skills.GetSkill(SkillDefOf.Animals).Level;
-			float statValueAbstract = def.race.GetStatValueAbstract(StatDefOf.MinimumHandlingSkill, null);
-			return level >= statValueAbstract;
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x0600E4CE RID: 58574 RVA: 0x0042D510 File Offset: 0x0042B710
-		private IEnumerable<PawnKindDef> RandomPets()
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
 		{
-			IEnumerable<PawnKindDef> enumerable = from td in this.PossibleAnimals(true)
-			where td.RaceProps.petness > 0f
-			select td;
-			if (enumerable.EnumerableNullOrEmpty<PawnKindDef>())
+			_003CGetSummaryListEntries_003Ed__13 _003CGetSummaryListEntries_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				enumerable = from td in this.PossibleAnimals(false)
-				where td.RaceProps.petness > 0f
-				select td;
-			}
-			return enumerable;
-		}
-
-		// Token: 0x0600E4CF RID: 58575 RVA: 0x0042D57E File Offset: 0x0042B77E
-		private string CurrentAnimalLabel()
-		{
-			if (this.animalKind == null)
-			{
-				return "RandomPet".TranslateSimple();
-			}
-			return this.animalKind.label;
-		}
-
-		// Token: 0x0600E4D0 RID: 58576 RVA: 0x0042D59E File Offset: 0x0042B79E
-		public override string Summary(Scenario scen)
-		{
-			return ScenSummaryList.SummaryWithList(scen, "PlayerStartsWith", ScenPart_StartingThing_Defined.PlayerStartWithIntro);
-		}
-
-		// Token: 0x0600E4D1 RID: 58577 RVA: 0x0042D5B0 File Offset: 0x0042B7B0
-		public override IEnumerable<string> GetSummaryListEntries(string tag)
-		{
-			if (tag == "PlayerStartsWith")
-			{
-				yield return this.CurrentAnimalLabel().CapitalizeFirst() + " x" + this.count.ToString();
-			}
-			yield break;
-		}
-
-		// Token: 0x0600E4D2 RID: 58578 RVA: 0x0042D5C8 File Offset: 0x0042B7C8
-		public override void Randomize()
-		{
-			if (Rand.Value < 0.5f)
-			{
-				this.animalKind = null;
+				_003C_003E1__state = 0;
+				_003CGetSummaryListEntries_003Ed__ = this;
 			}
 			else
 			{
-				this.animalKind = this.PossibleAnimals(false).RandomElement<PawnKindDef>();
+				_003CGetSummaryListEntries_003Ed__ = new _003CGetSummaryListEntries_003Ed__13(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
-			this.count = ScenPart_StartingAnimal.PetCountChances.RandomElementByWeight((Pair<int, float> pa) => pa.Second).First;
-			this.bondToRandomPlayerPawnChance = 0f;
+			_003CGetSummaryListEntries_003Ed__.tag = _003C_003E3__tag;
+			return _003CGetSummaryListEntries_003Ed__;
 		}
 
-		// Token: 0x0600E4D3 RID: 58579 RVA: 0x0042D640 File Offset: 0x0042B840
-		public override bool TryMerge(ScenPart other)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			ScenPart_StartingAnimal scenPart_StartingAnimal = other as ScenPart_StartingAnimal;
-			if (scenPart_StartingAnimal != null && scenPart_StartingAnimal.animalKind == this.animalKind)
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CPlayerStartingThings_003Ed__17 : IEnumerable<Thing>, IEnumerable, IEnumerator<Thing>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Thing _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public ScenPart_StartingAnimal _003C_003E4__this;
+
+		private int _003Ci_003E5__2;
+
+		Thing IEnumerator<Thing>.Current
+		{
+			[DebuggerHidden]
+			get
 			{
-				this.count += scenPart_StartingAnimal.count;
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CPlayerStartingThings_003Ed__17(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			ScenPart_StartingAnimal CS_0024_003C_003E8__locals12 = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003Ci_003E5__2 = 0;
+				break;
+			case 1:
+				_003C_003E1__state = -1;
+				_003Ci_003E5__2++;
+				break;
+			}
+			if (_003Ci_003E5__2 < CS_0024_003C_003E8__locals12.count)
+			{
+				_003C_003Ec__DisplayClass17_0 CS_0024_003C_003E8__locals19 = new _003C_003Ec__DisplayClass17_0();
+				PawnKindDef kindDef = ((CS_0024_003C_003E8__locals12.animalKind == null) ? CS_0024_003C_003E8__locals12.RandomPets().RandomElementByWeightWithFallback((PawnKindDef td) => CS_0024_003C_003E8__locals12.PetWeight(td)) : CS_0024_003C_003E8__locals12.animalKind);
+				CS_0024_003C_003E8__locals19.animal = PawnGenerator.GeneratePawn(kindDef, Faction.OfPlayer, null);
+				if (CS_0024_003C_003E8__locals19.animal.Name == null || CS_0024_003C_003E8__locals19.animal.Name.Numerical)
+				{
+					CS_0024_003C_003E8__locals19.animal.Name = PawnBioAndNameGenerator.GeneratePawnName(CS_0024_003C_003E8__locals19.animal);
+				}
+				if (Rand.Value < CS_0024_003C_003E8__locals12.bondToRandomPlayerPawnChance && CS_0024_003C_003E8__locals19.animal.training.CanAssignToTrain(TrainableDefOf.Obedience).Accepted)
+				{
+					Pawn pawn = (from p in Find.GameInitData.startingAndOptionalPawns.Take(Find.GameInitData.startingPawnCount)
+						where TrainableUtility.CanBeMaster(p, CS_0024_003C_003E8__locals19.animal, checkSpawned: false) && !p.story.traits.HasTrait(TraitDefOf.Psychopath) && !p.Inhumanized()
+						select p).RandomElementWithFallback();
+					if (pawn != null)
+					{
+						CS_0024_003C_003E8__locals19.animal.training.Train(TrainableDefOf.Obedience, null, complete: true);
+						CS_0024_003C_003E8__locals19.animal.training.SetWantedRecursive(TrainableDefOf.Obedience, checkOn: true);
+						CS_0024_003C_003E8__locals19.animal.playerSettings.Master = pawn;
+						if (pawn.Ideo == null || pawn.Ideo.MemberWillingToDo(new HistoryEvent(HistoryEventDefOf.Bonded, pawn.Named(HistoryEventArgsNames.Doer))))
+						{
+							pawn.relations.AddDirectRelation(PawnRelationDefOf.Bond, CS_0024_003C_003E8__locals19.animal);
+						}
+					}
+				}
+				_003C_003E2__current = CS_0024_003C_003E8__locals19.animal;
+				_003C_003E1__state = 1;
 				return true;
 			}
 			return false;
 		}
 
-		// Token: 0x0600E4D4 RID: 58580 RVA: 0x0042D67C File Offset: 0x0042B87C
-		private float PetWeight(PawnKindDef animal)
+		bool IEnumerator.MoveNext()
 		{
-			FactionIdeosTracker ideos = Find.GameInitData.playerFaction.ideos;
-			Ideo ideo = (ideos != null) ? ideos.PrimaryIdeo : null;
-			if (ideo != null)
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Thing> IEnumerable<Thing>.GetEnumerator()
+		{
+			_003CPlayerStartingThings_003Ed__17 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				using (List<ThingDef>.Enumerator enumerator = ideo.VeneratedAnimals.GetEnumerator())
-				{
-					while (enumerator.MoveNext())
-					{
-						if (enumerator.Current == animal.race)
-						{
-							return 8f;
-						}
-					}
-				}
+				_003C_003E1__state = 0;
+				result = this;
 			}
-			return animal.RaceProps.petness;
-		}
-
-		// Token: 0x0600E4D5 RID: 58581 RVA: 0x0042D704 File Offset: 0x0042B904
-		public override IEnumerable<Thing> PlayerStartingThings()
-		{
-			int num;
-			for (int i = 0; i < this.count; i = num + 1)
+			else
 			{
-				PawnKindDef kindDef;
-				if (this.animalKind != null)
+				result = new _003CPlayerStartingThings_003Ed__17(0)
 				{
-					kindDef = this.animalKind;
-				}
-				else
-				{
-					kindDef = this.RandomPets().RandomElementByWeightWithFallback((PawnKindDef td) => this.PetWeight(td), null);
-				}
-				Pawn animal = PawnGenerator.GeneratePawn(kindDef, Faction.OfPlayer, null);
-				if (animal.Name == null || animal.Name.Numerical)
-				{
-					animal.Name = PawnBioAndNameGenerator.GeneratePawnName(animal, NameStyle.Full, null, false, null);
-				}
-				if (Rand.Value < this.bondToRandomPlayerPawnChance && animal.training.CanAssignToTrain(TrainableDefOf.Obedience).Accepted)
-				{
-					Pawn pawn = (from p in Find.GameInitData.startingAndOptionalPawns.Take(Find.GameInitData.startingPawnCount)
-					where TrainableUtility.CanBeMaster(p, animal, false) && !p.story.traits.HasTrait(TraitDefOf.Psychopath) && !p.Inhumanized()
-					select p).RandomElementWithFallback(null);
-					if (pawn != null)
-					{
-						animal.training.Train(TrainableDefOf.Obedience, null, true);
-						animal.training.SetWantedRecursive(TrainableDefOf.Obedience, true);
-						animal.playerSettings.Master = pawn;
-						if (pawn.Ideo == null || pawn.Ideo.MemberWillingToDo(new HistoryEvent(HistoryEventDefOf.Bonded, pawn.Named(HistoryEventArgsNames.Doer))))
-						{
-							pawn.relations.AddDirectRelation(PawnRelationDefOf.Bond, animal);
-						}
-					}
-				}
-				yield return animal;
-				num = i;
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
-			yield break;
+			return result;
 		}
 
-		// Token: 0x0600E4D6 RID: 58582 RVA: 0x0042D714 File Offset: 0x0042B914
-		public override int GetHashCode()
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return base.GetHashCode() ^ ((this.animalKind != null) ? this.animalKind.GetHashCode() : 0) ^ this.count ^ this.bondToRandomPlayerPawnChance.GetHashCode();
+			return ((IEnumerable<Thing>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x04009926 RID: 39206
-		private PawnKindDef animalKind;
+	private PawnKindDef animalKind;
 
-		// Token: 0x04009927 RID: 39207
-		private int count = 1;
+	private int count = 1;
 
-		// Token: 0x04009928 RID: 39208
-		private float bondToRandomPlayerPawnChance = 0.5f;
+	private float bondToRandomPlayerPawnChance = 0.5f;
 
-		// Token: 0x04009929 RID: 39209
-		private string countBuf;
+	private string countBuf;
 
-		// Token: 0x0400992A RID: 39210
-		private static readonly List<Pair<int, float>> PetCountChances = new List<Pair<int, float>>
+	private static readonly List<Pair<int, float>> PetCountChances = new List<Pair<int, float>>
+	{
+		new Pair<int, float>(1, 20f),
+		new Pair<int, float>(2, 10f),
+		new Pair<int, float>(3, 5f),
+		new Pair<int, float>(4, 3f),
+		new Pair<int, float>(5, 1f),
+		new Pair<int, float>(6, 1f),
+		new Pair<int, float>(7, 1f),
+		new Pair<int, float>(8, 1f),
+		new Pair<int, float>(9, 1f),
+		new Pair<int, float>(10, 0.1f),
+		new Pair<int, float>(11, 0.1f),
+		new Pair<int, float>(12, 0.1f),
+		new Pair<int, float>(13, 0.1f),
+		new Pair<int, float>(14, 0.1f)
+	};
+
+	public const float VeneratedAnimalWeight = 8f;
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Defs.Look(ref animalKind, "animalKind");
+		Scribe_Values.Look(ref count, "count", 0);
+		Scribe_Values.Look(ref bondToRandomPlayerPawnChance, "bondToRandomPlayerPawnChance", 0f);
+	}
+
+	public override void DoEditInterface(Listing_ScenEdit listing)
+	{
+		Rect scenPartRect = listing.GetScenPartRect(this, ScenPart.RowHeight * 2f + 1f);
+		Listing_Standard listing_Standard = new Listing_Standard();
+		listing_Standard.Begin(scenPartRect.TopHalf());
+		listing_Standard.ColumnWidth = scenPartRect.width;
+		listing_Standard.TextFieldNumeric(ref count, ref countBuf, 1f);
+		listing_Standard.End();
+		if (!Widgets.ButtonText(scenPartRect.BottomHalf(), CurrentAnimalLabel().CapitalizeFirst(), drawBackground: true, doMouseoverSound: true, active: true, null))
 		{
-			new Pair<int, float>(1, 20f),
-			new Pair<int, float>(2, 10f),
-			new Pair<int, float>(3, 5f),
-			new Pair<int, float>(4, 3f),
-			new Pair<int, float>(5, 1f),
-			new Pair<int, float>(6, 1f),
-			new Pair<int, float>(7, 1f),
-			new Pair<int, float>(8, 1f),
-			new Pair<int, float>(9, 1f),
-			new Pair<int, float>(10, 0.1f),
-			new Pair<int, float>(11, 0.1f),
-			new Pair<int, float>(12, 0.1f),
-			new Pair<int, float>(13, 0.1f),
-			new Pair<int, float>(14, 0.1f)
+			return;
+		}
+		List<FloatMenuOption> list = new List<FloatMenuOption>();
+		list.Add(new FloatMenuOption("RandomPet".Translate().CapitalizeFirst(), delegate
+		{
+			animalKind = null;
+		}));
+		foreach (PawnKindDef item in PossibleAnimals(checkForTamer: false))
+		{
+			PawnKindDef localKind = item;
+			list.Add(new FloatMenuOption(localKind.LabelCap, delegate
+			{
+				animalKind = localKind;
+			}));
+		}
+		Find.WindowStack.Add(new FloatMenu(list));
+	}
+
+	private IEnumerable<PawnKindDef> PossibleAnimals(bool checkForTamer = true)
+	{
+		return DefDatabase<PawnKindDef>.AllDefs.Where((PawnKindDef td) => td.RaceProps.Animal && (!checkForTamer || CanKeepPetTame(td)));
+	}
+
+	private static bool CanKeepPetTame(PawnKindDef def)
+	{
+		int level = Find.GameInitData.startingAndOptionalPawns.Take(Find.GameInitData.startingPawnCount).MaxBy((Pawn c) => c.skills.GetSkill(SkillDefOf.Animals).Level).skills.GetSkill(SkillDefOf.Animals).Level;
+		float statValueAbstract = def.race.GetStatValueAbstract(StatDefOf.MinimumHandlingSkill);
+		return (float)level >= statValueAbstract;
+	}
+
+	private IEnumerable<PawnKindDef> RandomPets()
+	{
+		IEnumerable<PawnKindDef> enumerable = from td in PossibleAnimals()
+			where td.RaceProps.petness > 0f
+			select td;
+		if (enumerable.EnumerableNullOrEmpty())
+		{
+			enumerable = from td in PossibleAnimals(checkForTamer: false)
+				where td.RaceProps.petness > 0f
+				select td;
+		}
+		return enumerable;
+	}
+
+	private string CurrentAnimalLabel()
+	{
+		if (animalKind == null)
+		{
+			return "RandomPet".TranslateSimple();
+		}
+		return animalKind.label;
+	}
+
+	public override string Summary(Scenario scen)
+	{
+		return ScenSummaryList.SummaryWithList(scen, "PlayerStartsWith", ScenPart_StartingThing_Defined.PlayerStartWithIntro);
+	}
+
+	[IteratorStateMachine(typeof(_003CGetSummaryListEntries_003Ed__13))]
+	public override IEnumerable<string> GetSummaryListEntries(string tag)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetSummaryListEntries_003Ed__13(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__tag = tag
 		};
+	}
 
-		// Token: 0x0400992B RID: 39211
-		public const float VeneratedAnimalWeight = 8f;
+	public override void Randomize()
+	{
+		if (Rand.Value < 0.5f)
+		{
+			animalKind = null;
+		}
+		else
+		{
+			animalKind = PossibleAnimals(checkForTamer: false).RandomElement();
+		}
+		count = PetCountChances.RandomElementByWeight((Pair<int, float> pa) => pa.Second).First;
+		bondToRandomPlayerPawnChance = 0f;
+	}
+
+	public override bool TryMerge(ScenPart other)
+	{
+		if (other is ScenPart_StartingAnimal scenPart_StartingAnimal && scenPart_StartingAnimal.animalKind == animalKind)
+		{
+			count += scenPart_StartingAnimal.count;
+			return true;
+		}
+		return false;
+	}
+
+	private float PetWeight(PawnKindDef animal)
+	{
+		Ideo ideo = Find.GameInitData.playerFaction.ideos?.PrimaryIdeo;
+		if (ideo != null)
+		{
+			foreach (ThingDef veneratedAnimal in ideo.VeneratedAnimals)
+			{
+				if (veneratedAnimal == animal.race)
+				{
+					return 8f;
+				}
+			}
+		}
+		return animal.RaceProps.petness;
+	}
+
+	[IteratorStateMachine(typeof(_003CPlayerStartingThings_003Ed__17))]
+	public override IEnumerable<Thing> PlayerStartingThings()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CPlayerStartingThings_003Ed__17(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override int GetHashCode()
+	{
+		return base.GetHashCode() ^ ((animalKind != null) ? animalKind.GetHashCode() : 0) ^ count ^ bondToRandomPlayerPawnChance.GetHashCode();
 	}
 }

@@ -1,125 +1,287 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.Steam;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class ConceptDef : Def
 {
-	// Token: 0x02001B24 RID: 6948
-	public class ConceptDef : Def
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__13 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x170017DC RID: 6108
-		// (get) Token: 0x06009B2B RID: 39723 RVA: 0x002D0B3F File Offset: 0x002CED3F
-		public bool TriggeredDirect
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public ConceptDef _003C_003E4__this;
+
+		private IEnumerator<string> _003C_003E7__wrap1;
+
+		private int _003Ci_003E5__3;
+
+		string IEnumerator<string>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.priority <= 0f;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170017DD RID: 6109
-		// (get) Token: 0x06009B2C RID: 39724 RVA: 0x002D0B51 File Offset: 0x002CED51
-		public string HelpTextAdjusted
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (!SteamDeck.IsSteamDeckInNonKeyboardMode || this.helpTextController.NullOrEmpty())
-				{
-					return this.helpText.AdjustedForKeys(null, true);
-				}
-				return this.helpTextController.AdjustedForKeys(null, true);
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06009B2D RID: 39725 RVA: 0x002D0B82 File Offset: 0x002CED82
-		public override IEnumerable<string> ConfigErrors()
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__13(int _003C_003E1__state)
 		{
-			foreach (string text in base.ConfigErrors())
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				yield return text;
-			}
-			IEnumerator<string> enumerator = null;
-			if (this.priority > 9999999f)
-			{
-				yield return "priority isn't set";
-			}
-			if (this.helpText.NullOrEmpty())
-			{
-				yield return "no help text";
-			}
-			if (this.TriggeredDirect && this.label.NullOrEmpty())
-			{
-				yield return "no label";
-			}
-			ConceptDef.tmpParseErrors.Clear();
-			this.helpText.AdjustedForKeys(ConceptDef.tmpParseErrors, false);
-			int num;
-			for (int i = 0; i < ConceptDef.tmpParseErrors.Count; i = num + 1)
-			{
-				yield return "helpText error: " + ConceptDef.tmpParseErrors[i];
-				num = i;
-			}
-			if (!this.helpTextController.NullOrEmpty())
-			{
-				ConceptDef.tmpParseErrors.Clear();
-				this.helpTextController.AdjustedForKeys(ConceptDef.tmpParseErrors, false);
-				for (int i = 0; i < ConceptDef.tmpParseErrors.Count; i = num + 1)
+				try
 				{
-					yield return "helpText error (controller): " + ConceptDef.tmpParseErrors[i];
-					num = i;
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
 				}
 			}
-			yield break;
-			yield break;
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x06009B2E RID: 39726 RVA: 0x002D0B92 File Offset: 0x002CED92
-		public static ConceptDef Named(string defName)
+		private bool MoveNext()
 		{
-			return DefDatabase<ConceptDef>.GetNamed(defName, true);
-		}
-
-		// Token: 0x06009B2F RID: 39727 RVA: 0x002D0B9C File Offset: 0x002CED9C
-		public void HighlightAllTags()
-		{
-			if (this.highlightTags != null)
+			try
 			{
-				for (int i = 0; i < this.highlightTags.Count; i++)
+				int num = _003C_003E1__state;
+				ConceptDef conceptDef = _003C_003E4__this;
+				switch (num)
 				{
-					UIHighlighter.HighlightTag(this.highlightTags[i]);
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((Def)conceptDef).ConfigErrors().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0082;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0082;
+				case 2:
+					_003C_003E1__state = -1;
+					goto IL_00c9;
+				case 3:
+					_003C_003E1__state = -1;
+					goto IL_00f6;
+				case 4:
+					_003C_003E1__state = -1;
+					goto IL_012b;
+				case 5:
+					_003C_003E1__state = -1;
+					_003Ci_003E5__3++;
+					goto IL_0197;
+				case 6:
+					{
+						_003C_003E1__state = -1;
+						_003Ci_003E5__3++;
+						goto IL_021f;
+					}
+					IL_0082:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (conceptDef.priority > 9999999f)
+					{
+						_003C_003E2__current = "priority isn't set";
+						_003C_003E1__state = 2;
+						return true;
+					}
+					goto IL_00c9;
+					IL_021f:
+					if (_003Ci_003E5__3 < tmpParseErrors.Count)
+					{
+						_003C_003E2__current = "helpText error (controller): " + tmpParseErrors[_003Ci_003E5__3];
+						_003C_003E1__state = 6;
+						return true;
+					}
+					break;
+					IL_0197:
+					if (_003Ci_003E5__3 < tmpParseErrors.Count)
+					{
+						_003C_003E2__current = "helpText error: " + tmpParseErrors[_003Ci_003E5__3];
+						_003C_003E1__state = 5;
+						return true;
+					}
+					if (conceptDef.helpTextController.NullOrEmpty())
+					{
+						break;
+					}
+					tmpParseErrors.Clear();
+					conceptDef.helpTextController.AdjustedForKeys(tmpParseErrors, resolveKeys: false);
+					_003Ci_003E5__3 = 0;
+					goto IL_021f;
+					IL_00c9:
+					if (conceptDef.helpText.NullOrEmpty())
+					{
+						_003C_003E2__current = "no help text";
+						_003C_003E1__state = 3;
+						return true;
+					}
+					goto IL_00f6;
+					IL_00f6:
+					if (conceptDef.TriggeredDirect && conceptDef.label.NullOrEmpty())
+					{
+						_003C_003E2__current = "no label";
+						_003C_003E1__state = 4;
+						return true;
+					}
+					goto IL_012b;
+					IL_012b:
+					tmpParseErrors.Clear();
+					conceptDef.helpText.AdjustedForKeys(tmpParseErrors, resolveKeys: false);
+					_003Ci_003E5__3 = 0;
+					goto IL_0197;
 				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x04006B75 RID: 27509
-		public float priority = float.MaxValue;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x04006B76 RID: 27510
-		public bool noteTeaches;
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
 
-		// Token: 0x04006B77 RID: 27511
-		public bool needsOpportunity;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04006B78 RID: 27512
-		public bool opportunityDecays = true;
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__13 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__13(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x04006B79 RID: 27513
-		public ProgramState gameMode = ProgramState.Playing;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x04006B7A RID: 27514
-		[MustTranslate]
-		private string helpText;
+	public float priority = float.MaxValue;
 
-		// Token: 0x04006B7B RID: 27515
-		[MustTranslate]
-		private string helpTextController;
+	public bool noteTeaches;
 
-		// Token: 0x04006B7C RID: 27516
-		[NoTranslate]
-		public List<string> highlightTags;
+	public bool needsOpportunity;
 
-		// Token: 0x04006B7D RID: 27517
-		private static List<string> tmpParseErrors = new List<string>();
+	public bool opportunityDecays = true;
+
+	public ProgramState gameMode = ProgramState.Playing;
+
+	[MustTranslate]
+	private string helpText;
+
+	[MustTranslate]
+	private string helpTextController;
+
+	[NoTranslate]
+	public List<string> highlightTags;
+
+	private static List<string> tmpParseErrors = new List<string>();
+
+	public bool TriggeredDirect => priority <= 0f;
+
+	public string HelpTextAdjusted
+	{
+		get
+		{
+			if (!SteamDeck.IsSteamDeckInNonKeyboardMode || helpTextController.NullOrEmpty())
+			{
+				return helpText.AdjustedForKeys();
+			}
+			return helpTextController.AdjustedForKeys();
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__13))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__13(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public static ConceptDef Named(string defName)
+	{
+		return DefDatabase<ConceptDef>.GetNamed(defName);
+	}
+
+	public void HighlightAllTags()
+	{
+		if (highlightTags != null)
+		{
+			for (int i = 0; i < highlightTags.Count; i++)
+			{
+				UIHighlighter.HighlightTag(highlightTags[i]);
+			}
+		}
 	}
 }

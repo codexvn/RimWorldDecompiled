@@ -1,162 +1,284 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompFlickable : ThingComp
 {
-	// Token: 0x0200212F RID: 8495
-	public class CompFlickable : ThingComp
+	[CompilerGenerated]
+	private sealed class _003CCompGetGizmosExtra_003Ed__20 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001C23 RID: 7203
-		// (get) Token: 0x0600B94A RID: 47434 RVA: 0x00357A03 File Offset: 0x00355C03
-		private CompProperties_Flickable Props
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompFlickable _003C_003E4__this;
+
+		private IEnumerator<Gizmo> _003C_003E7__wrap1;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (CompProperties_Flickable)this.props;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001C24 RID: 7204
-		// (get) Token: 0x0600B94B RID: 47435 RVA: 0x00357A10 File Offset: 0x00355C10
-		private Texture2D CommandTex
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.cachedCommandTex == null)
-				{
-					this.cachedCommandTex = ContentFinder<Texture2D>.Get(this.Props.commandTexture, true);
-				}
-				return this.cachedCommandTex;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001C25 RID: 7205
-		// (get) Token: 0x0600B94C RID: 47436 RVA: 0x00357A3D File Offset: 0x00355C3D
-		// (set) Token: 0x0600B94D RID: 47437 RVA: 0x00357A48 File Offset: 0x00355C48
-		public bool SwitchIsOn
+		[DebuggerHidden]
+		public _003CCompGetGizmosExtra_003Ed__20(int _003C_003E1__state)
 		{
-			get
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				return this.switchOnInt;
-			}
-			set
-			{
-				if (this.switchOnInt == value)
+				try
 				{
-					return;
 				}
-				this.switchOnInt = value;
-				if (this.switchOnInt)
+				finally
 				{
-					this.parent.BroadcastCompSignal("FlickedOn");
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				CompFlickable CS_0024_003C_003E8__locals9 = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((ThingComp)CS_0024_003C_003E8__locals9).CompGetGizmosExtra().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0072;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0072;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_0072:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Gizmo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (CS_0024_003C_003E8__locals9.parent.Faction == Faction.OfPlayer)
+					{
+						_003C_003E2__current = new Command_Toggle
+						{
+							hotKey = KeyBindingDefOf.Command_TogglePower,
+							icon = CS_0024_003C_003E8__locals9.CommandTex,
+							defaultLabel = CS_0024_003C_003E8__locals9.Props.commandLabelKey.Translate(),
+							defaultDesc = CS_0024_003C_003E8__locals9.Props.commandDescKey.Translate(),
+							isActive = () => CS_0024_003C_003E8__locals9.wantSwitchOn,
+							toggleAction = delegate
+							{
+								CS_0024_003C_003E8__locals9.wantSwitchOn = !CS_0024_003C_003E8__locals9.wantSwitchOn;
+								FlickUtility.UpdateFlickDesignation(CS_0024_003C_003E8__locals9.parent);
+							}
+						};
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CCompGetGizmosExtra_003Ed__20 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CCompGetGizmosExtra_003Ed__20(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	private bool switchOnInt = true;
+
+	private bool wantSwitchOn = true;
+
+	private Graphic offGraphic;
+
+	private Texture2D cachedCommandTex;
+
+	private const string OffGraphicSuffix = "_Off";
+
+	public const string FlickedOnSignal = "FlickedOn";
+
+	public const string FlickedOffSignal = "FlickedOff";
+
+	private CompProperties_Flickable Props => (CompProperties_Flickable)props;
+
+	private Texture2D CommandTex
+	{
+		get
+		{
+			if (cachedCommandTex == null)
+			{
+				cachedCommandTex = ContentFinder<Texture2D>.Get(Props.commandTexture);
+			}
+			return cachedCommandTex;
+		}
+	}
+
+	public bool SwitchIsOn
+	{
+		get
+		{
+			return switchOnInt;
+		}
+		set
+		{
+			if (switchOnInt != value)
+			{
+				switchOnInt = value;
+				if (switchOnInt)
+				{
+					parent.BroadcastCompSignal("FlickedOn");
 				}
 				else
 				{
-					this.parent.BroadcastCompSignal("FlickedOff");
+					parent.BroadcastCompSignal("FlickedOff");
 				}
-				if (this.parent.Spawned)
+				if (parent.Spawned)
 				{
-					this.parent.Map.mapDrawer.MapMeshDirty(this.parent.Position, MapMeshFlagDefOf.Buildings | MapMeshFlagDefOf.Things);
+					parent.Map.mapDrawer.MapMeshDirty(parent.Position, (ulong)MapMeshFlagDefOf.Buildings | (ulong)MapMeshFlagDefOf.Things);
 				}
 			}
 		}
+	}
 
-		// Token: 0x17001C26 RID: 7206
-		// (get) Token: 0x0600B94E RID: 47438 RVA: 0x00357AD4 File Offset: 0x00355CD4
-		public Graphic CurrentGraphic
+	public Graphic CurrentGraphic
+	{
+		get
 		{
-			get
+			if (SwitchIsOn)
 			{
-				if (this.SwitchIsOn)
-				{
-					return this.parent.DefaultGraphic;
-				}
-				if (this.offGraphic == null)
-				{
-					this.offGraphic = GraphicDatabase.Get(this.parent.def.graphicData.graphicClass, this.parent.def.graphicData.texPath + "_Off", this.parent.def.graphicData.shaderType.Shader, this.parent.def.graphicData.drawSize, this.parent.DrawColor, this.parent.DrawColorTwo, null);
-				}
-				return this.offGraphic;
+				return parent.DefaultGraphic;
 			}
-		}
-
-		// Token: 0x0600B94F RID: 47439 RVA: 0x00357B8B File Offset: 0x00355D8B
-		public override void PostExposeData()
-		{
-			base.PostExposeData();
-			Scribe_Values.Look<bool>(ref this.switchOnInt, "switchOn", true, false);
-			Scribe_Values.Look<bool>(ref this.wantSwitchOn, "wantSwitchOn", true, false);
-		}
-
-		// Token: 0x0600B950 RID: 47440 RVA: 0x00357BB7 File Offset: 0x00355DB7
-		public bool WantsFlick()
-		{
-			return this.wantSwitchOn != this.switchOnInt;
-		}
-
-		// Token: 0x0600B951 RID: 47441 RVA: 0x00357BCA File Offset: 0x00355DCA
-		public void DoFlick()
-		{
-			this.SwitchIsOn = !this.SwitchIsOn;
-			SoundDefOf.FlickSwitch.PlayOneShot(new TargetInfo(this.parent.Position, this.parent.Map, false));
-		}
-
-		// Token: 0x0600B952 RID: 47442 RVA: 0x00357C06 File Offset: 0x00355E06
-		public void ResetToOn()
-		{
-			this.switchOnInt = true;
-			this.wantSwitchOn = true;
-		}
-
-		// Token: 0x0600B953 RID: 47443 RVA: 0x00357C16 File Offset: 0x00355E16
-		public override IEnumerable<Gizmo> CompGetGizmosExtra()
-		{
-			foreach (Gizmo gizmo in base.CompGetGizmosExtra())
+			if (offGraphic == null)
 			{
-				yield return gizmo;
+				offGraphic = GraphicDatabase.Get(parent.def.graphicData.graphicClass, parent.def.graphicData.texPath + "_Off", parent.def.graphicData.shaderType.Shader, parent.def.graphicData.drawSize, parent.DrawColor, parent.DrawColorTwo);
 			}
-			IEnumerator<Gizmo> enumerator = null;
-			if (this.parent.Faction == Faction.OfPlayer)
-			{
-				yield return new Command_Toggle
-				{
-					hotKey = KeyBindingDefOf.Command_TogglePower,
-					icon = this.CommandTex,
-					defaultLabel = this.Props.commandLabelKey.Translate(),
-					defaultDesc = this.Props.commandDescKey.Translate(),
-					isActive = (() => this.wantSwitchOn),
-					toggleAction = delegate()
-					{
-						this.wantSwitchOn = !this.wantSwitchOn;
-						FlickUtility.UpdateFlickDesignation(this.parent);
-					}
-				};
-			}
-			yield break;
-			yield break;
+			return offGraphic;
 		}
+	}
 
-		// Token: 0x04007FCE RID: 32718
-		private bool switchOnInt = true;
+	public override void PostExposeData()
+	{
+		base.PostExposeData();
+		Scribe_Values.Look(ref switchOnInt, "switchOn", defaultValue: true);
+		Scribe_Values.Look(ref wantSwitchOn, "wantSwitchOn", defaultValue: true);
+	}
 
-		// Token: 0x04007FCF RID: 32719
-		private bool wantSwitchOn = true;
+	public bool WantsFlick()
+	{
+		return wantSwitchOn != switchOnInt;
+	}
 
-		// Token: 0x04007FD0 RID: 32720
-		private Graphic offGraphic;
+	public void DoFlick()
+	{
+		SwitchIsOn = !SwitchIsOn;
+		SoundDefOf.FlickSwitch.PlayOneShot(new TargetInfo(parent.Position, parent.Map));
+	}
 
-		// Token: 0x04007FD1 RID: 32721
-		private Texture2D cachedCommandTex;
+	public void ResetToOn()
+	{
+		switchOnInt = true;
+		wantSwitchOn = true;
+	}
 
-		// Token: 0x04007FD2 RID: 32722
-		private const string OffGraphicSuffix = "_Off";
-
-		// Token: 0x04007FD3 RID: 32723
-		public const string FlickedOnSignal = "FlickedOn";
-
-		// Token: 0x04007FD4 RID: 32724
-		public const string FlickedOffSignal = "FlickedOff";
+	[IteratorStateMachine(typeof(_003CCompGetGizmosExtra_003Ed__20))]
+	public override IEnumerable<Gizmo> CompGetGizmosExtra()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CCompGetGizmosExtra_003Ed__20(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

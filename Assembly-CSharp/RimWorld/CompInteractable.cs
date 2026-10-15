@@ -1,725 +1,729 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.AI;
 using Verse.Sound;
 
-namespace RimWorld
+namespace RimWorld;
+
+public abstract class CompInteractable : ThingComp, ITargetingSource
 {
-	// Token: 0x02002CFA RID: 11514
-	public abstract class CompInteractable : ThingComp, ITargetingSource
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass64_0
 	{
-		// Token: 0x170028F5 RID: 10485
-		// (get) Token: 0x060102B9 RID: 66233 RVA: 0x004AD86B File Offset: 0x004ABA6B
-		public CompProperties_Interactable Props
+		public CompInteractable _003C_003E4__this;
+
+		public Pawn selPawn;
+
+		internal void _003CCompFloatMenuOptions_003Eb__0()
 		{
+			_003C_003E4__this.OrderForceTarget(selPawn);
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CCompFloatMenuOptions_003Ed__64 : IEnumerable<FloatMenuOption>, IEnumerable, IEnumerator<FloatMenuOption>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private FloatMenuOption _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompInteractable _003C_003E4__this;
+
+		private Pawn selPawn;
+
+		public Pawn _003C_003E3__selPawn;
+
+		FloatMenuOption IEnumerator<FloatMenuOption>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				return (CompProperties_Interactable)this.props;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170028F6 RID: 10486
-		// (get) Token: 0x060102BA RID: 66234 RVA: 0x004AD878 File Offset: 0x004ABA78
-		public bool OnCooldown
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.cooldownTicks > 0;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170028F7 RID: 10487
-		// (get) Token: 0x060102BB RID: 66235 RVA: 0x004AD883 File Offset: 0x004ABA83
-		public virtual bool Active
+		[DebuggerHidden]
+		public _003CCompFloatMenuOptions_003Ed__64(int _003C_003E1__state)
 		{
-			get
-			{
-				return this.activeTicks > 0;
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x170028F8 RID: 10488
-		// (get) Token: 0x060102BC RID: 66236 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public virtual bool CanCooldown
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			get
-			{
-				return true;
-			}
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x170028F9 RID: 10489
-		// (get) Token: 0x060102BD RID: 66237 RVA: 0x004AD88E File Offset: 0x004ABA8E
-		public virtual int TicksToActivate
+		private bool MoveNext()
 		{
-			get
+			int num = _003C_003E1__state;
+			CompInteractable compInteractable = _003C_003E4__this;
+			switch (num)
 			{
-				return this.Props.ticksToActivate;
-			}
-		}
-
-		// Token: 0x170028FA RID: 10490
-		// (get) Token: 0x060102BE RID: 66238 RVA: 0x004AD89C File Offset: 0x004ABA9C
-		public virtual NamedArgument? ExtraNamedArg
-		{
-			get
-			{
-				return null;
-			}
-		}
-
-		// Token: 0x170028FB RID: 10491
-		// (get) Token: 0x060102BF RID: 66239 RVA: 0x00002C42 File Offset: 0x00000E42
-		public virtual string ExposeKey
-		{
-			get
-			{
-				return null;
-			}
-		}
-
-		// Token: 0x170028FC RID: 10492
-		// (get) Token: 0x060102C0 RID: 66240 RVA: 0x00002501 File Offset: 0x00000701
-		public virtual bool HideInteraction
-		{
-			get
-			{
+			default:
 				return false;
-			}
-		}
-
-		// Token: 0x170028FD RID: 10493
-		// (get) Token: 0x060102C1 RID: 66241 RVA: 0x004AD8B2 File Offset: 0x004ABAB2
-		protected virtual string ActivateOptionLabel
-		{
-			get
+			case 0:
 			{
-				return this.Props.jobString.CapitalizeFirst();
-			}
-		}
-
-		// Token: 0x170028FE RID: 10494
-		// (get) Token: 0x060102C2 RID: 66242 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public bool CasterIsPawn
-		{
-			get
-			{
-				return true;
-			}
-		}
-
-		// Token: 0x170028FF RID: 10495
-		// (get) Token: 0x060102C3 RID: 66243 RVA: 0x00002501 File Offset: 0x00000701
-		public bool IsMeleeAttack
-		{
-			get
-			{
-				return false;
-			}
-		}
-
-		// Token: 0x17002900 RID: 10496
-		// (get) Token: 0x060102C4 RID: 66244 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public bool Targetable
-		{
-			get
-			{
-				return true;
-			}
-		}
-
-		// Token: 0x17002901 RID: 10497
-		// (get) Token: 0x060102C5 RID: 66245 RVA: 0x00002501 File Offset: 0x00000701
-		public bool MultiSelect
-		{
-			get
-			{
-				return false;
-			}
-		}
-
-		// Token: 0x17002902 RID: 10498
-		// (get) Token: 0x060102C6 RID: 66246 RVA: 0x00002501 File Offset: 0x00000701
-		public bool HidePawnTooltips
-		{
-			get
-			{
-				return false;
-			}
-		}
-
-		// Token: 0x17002903 RID: 10499
-		// (get) Token: 0x060102C7 RID: 66247 RVA: 0x0048FDB8 File Offset: 0x0048DFB8
-		public Thing Caster
-		{
-			get
-			{
-				return this.parent;
-			}
-		}
-
-		// Token: 0x17002904 RID: 10500
-		// (get) Token: 0x060102C8 RID: 66248 RVA: 0x00002C42 File Offset: 0x00000E42
-		public Pawn CasterPawn
-		{
-			get
-			{
-				return null;
-			}
-		}
-
-		// Token: 0x17002905 RID: 10501
-		// (get) Token: 0x060102C9 RID: 66249 RVA: 0x00002C42 File Offset: 0x00000E42
-		public Verb GetVerb
-		{
-			get
-			{
-				return null;
-			}
-		}
-
-		// Token: 0x17002906 RID: 10502
-		// (get) Token: 0x060102CA RID: 66250 RVA: 0x004AD8C4 File Offset: 0x004ABAC4
-		public TargetingParameters targetParams
-		{
-			get
-			{
-				return this.Props.targetingParameters;
-			}
-		}
-
-		// Token: 0x17002907 RID: 10503
-		// (get) Token: 0x060102CB RID: 66251 RVA: 0x00002C42 File Offset: 0x00000E42
-		public virtual ITargetingSource DestinationSelector
-		{
-			get
-			{
-				return null;
-			}
-		}
-
-		// Token: 0x17002908 RID: 10504
-		// (get) Token: 0x060102CC RID: 66252 RVA: 0x004AD8D4 File Offset: 0x004ABAD4
-		public Texture2D UIIcon
-		{
-			get
-			{
-				if (!(this.activateTex != null))
+				_003C_003E1__state = -1;
+				_003C_003Ec__DisplayClass64_0 CS_0024_003C_003E8__locals4 = new _003C_003Ec__DisplayClass64_0
 				{
-					return this.activateTex = ContentFinder<Texture2D>.Get(this.Props.activateTexPath, true);
-				}
-				return this.activateTex;
-			}
-		}
-
-		// Token: 0x060102CD RID: 66253 RVA: 0x004AD910 File Offset: 0x004ABB10
-		public override void PostSpawnSetup(bool respawningAfterLoad)
-		{
-			this.refuelable = this.parent.TryGetComp<CompRefuelable>();
-			this.power = this.parent.TryGetComp<CompPowerTrader>();
-		}
-
-		// Token: 0x060102CE RID: 66254 RVA: 0x004AD934 File Offset: 0x004ABB34
-		public override void CompTick()
-		{
-			if (this.Active)
-			{
-				if (this.TryInteractTick())
-				{
-					this.Deactivate();
-				}
-				else
-				{
-					if (this.ShouldDeactivate())
-					{
-						this.SendDeactivateMessage();
-						this.Deactivate();
-						return;
-					}
-					this.activeTicks--;
-				}
-				if (this.activeTicks <= 0)
-				{
-					this.StartCooldown();
-				}
-			}
-			else if (this.OnCooldown)
-			{
-				if (this.CanCooldown)
-				{
-					this.cooldownTicks--;
-				}
-				if (this.parent.Spawned)
-				{
-					if (this.progressBarEffecter == null)
-					{
-						this.progressBarEffecter = EffecterDefOf.ProgressBar.Spawn();
-					}
-					this.progressBarEffecter.EffectTick(this.parent, TargetInfo.Invalid);
-					MoteProgressBar mote = ((SubEffecter_ProgressBar)this.progressBarEffecter.children[0]).mote;
-					mote.progress = 1f - (float)this.cooldownTicks / (float)this.Props.cooldownTicks;
-					mote.offsetZ = -0.8f;
-				}
-				else
-				{
-					Effecter effecter = this.progressBarEffecter;
-					if (effecter != null)
-					{
-						effecter.Cleanup();
-					}
-					this.progressBarEffecter = null;
-				}
-				if (this.Props.cooldownFleck != null && this.parent.IsHashIntervalTick(this.Props.cooldownFleckSpawnIntervalTicks))
-				{
-					FleckCreationData dataStatic = FleckMaker.GetDataStatic(this.parent.DrawPos, this.parent.Map, this.Props.cooldownFleck, this.Props.cooldownFleckScale);
-					this.parent.Map.flecks.CreateFleck(dataStatic);
-				}
-				if (this.cooldownTicks <= 0)
-				{
-					this.CooldownEnded(true);
-				}
-			}
-			Effecter effecter2 = this.interactionEffecter;
-			if (effecter2 == null)
-			{
-				return;
-			}
-			effecter2.EffectTick(this.parent, this.parent);
-		}
-
-		// Token: 0x060102CF RID: 66255 RVA: 0x004ADAF6 File Offset: 0x004ABCF6
-		public void ResetCooldown(bool sendMessage = true)
-		{
-			if (this.Active)
-			{
-				this.Deactivate();
-			}
-			if (this.OnCooldown)
-			{
-				this.cooldownTicks = 0;
-				this.CooldownEnded(sendMessage);
-			}
-		}
-
-		// Token: 0x060102D0 RID: 66256 RVA: 0x004ADB1C File Offset: 0x004ABD1C
-		protected virtual void SendDeactivateMessage()
-		{
-			Messages.Message("MessageActivationCanceled".Translate(this.parent), this.parent, MessageTypeDefOf.NeutralEvent, true);
-		}
-
-		// Token: 0x060102D1 RID: 66257 RVA: 0x004ADB50 File Offset: 0x004ABD50
-		public virtual AcceptanceReport CanInteract(Pawn activateBy = null, bool checkOptionalItems = true)
-		{
-			if (this.Active)
-			{
-				return "AlreadyActive".Translate();
-			}
-			if (this.OnCooldown)
-			{
-				return this.Props.onCooldownString + " (" + "DurationLeft".Translate(this.cooldownTicks.ToStringTicksToPeriod(true, false, true, true, false)) + ")";
-			}
-			if (this.refuelable != null && !this.refuelable.HasFuel)
-			{
-				return this.refuelable.Props.outOfFuelMessage ?? "NoFuel".Translate();
-			}
-			if (this.Props.requiresPower && this.power != null && !this.power.PowerOn)
-			{
-				return "NoPower".Translate().CapitalizeFirst();
-			}
-			if (activateBy != null)
-			{
-				if (activateBy.Dead)
-				{
-					return "PawnIsDead".Translate(activateBy);
-				}
-				if (this.Props.activateStat != null && (this.Props.activateStat.Worker.IsDisabledFor(activateBy) || this.Props.activateStat.statFactors.Any((StatDef s) => s.Worker.IsDisabledFor(activateBy))))
-				{
-					return "Incapable".Translate().CapitalizeFirst();
-				}
-				if (this.parent.PositionHeld.IsForbidden(activateBy) && !activateBy.Drafted && !this.Props.ignoreForbidden)
-				{
-					return "CannotPrioritizeForbiddenOutsideAllowedArea".Translate() + ": " + activateBy.playerSettings.EffectiveAreaRestrictionInPawnCurrentMap.Label;
-				}
-				if (this.parent.IsForbidden(activateBy) && !activateBy.Drafted && !this.Props.ignoreForbidden)
-				{
-					return "CannotPrioritizeCellForbidden".Translate();
-				}
-				if (activateBy.Downed)
-				{
-					return "MessageRitualPawnDowned".Translate(activateBy);
-				}
-				if (activateBy.Deathresting)
-				{
-					return "IsDeathresting".Translate(activateBy.Named("PAWN"));
-				}
-				if (!activateBy.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation))
-				{
-					return "MessageIncapableOfManipulation".Translate(activateBy);
-				}
-				if (!activateBy.CanReach(this.parent.SpawnedParentOrMe, PathEndMode.ClosestTouch, Danger.Deadly, false, false, TraverseMode.ByPawn))
-				{
-					return "CannotReach".Translate();
-				}
-			}
-			return true;
-		}
-
-		// Token: 0x060102D2 RID: 66258 RVA: 0x004ADE4C File Offset: 0x004AC04C
-		public void Interact(Pawn caster, bool force = false)
-		{
-			if (this.CanInteract(caster, false).Accepted || force)
-			{
-				this.activeTicks = this.Props.activeTicks;
-				if (!this.Props.soundActivate.NullOrUndefined())
-				{
-					this.Props.soundActivate.PlayOneShot(SoundInfo.InMap(this.parent, MaintenanceType.None));
-				}
-				if (this.Props.fleckOnUsed != null)
-				{
-					FleckMaker.AttachedOverlay(caster, this.Props.fleckOnUsed, Vector3.zero, this.Props.fleckOnUsedScale, -1f);
-				}
-				this.OnInteracted(caster);
-				this.parent.BroadcastCompSignal("Interacted");
-				QuestUtility.SendQuestTargetSignals(this.parent.questTags, "Activated", this.parent.Named("SUBJECT"), caster.Named("ACTIVATOR"));
-				if (!string.IsNullOrEmpty(this.Props.messageCompletedString))
-				{
-					Messages.Message(this.Props.messageCompletedString.Formatted(caster.Named("PAWN")), caster, MessageTypeDefOf.NeutralEvent, false);
-				}
-			}
-		}
-
-		// Token: 0x060102D3 RID: 66259 RVA: 0x000026EA File Offset: 0x000008EA
-		protected virtual void OnInteracted(Pawn caster)
-		{
-		}
-
-		// Token: 0x060102D4 RID: 66260 RVA: 0x000028E7 File Offset: 0x00000AE7
-		protected virtual bool TryInteractTick()
-		{
-			return true;
-		}
-
-		// Token: 0x060102D5 RID: 66261 RVA: 0x00002501 File Offset: 0x00000701
-		protected virtual bool ShouldDeactivate()
-		{
-			return false;
-		}
-
-		// Token: 0x060102D6 RID: 66262 RVA: 0x004ADF71 File Offset: 0x004AC171
-		protected virtual void Deactivate()
-		{
-			this.activeTicks = 0;
-		}
-
-		// Token: 0x060102D7 RID: 66263 RVA: 0x004ADF7A File Offset: 0x004AC17A
-		protected virtual void StartCooldown()
-		{
-			this.cooldownTicks = this.Props.cooldownTicks;
-		}
-
-		// Token: 0x060102D8 RID: 66264 RVA: 0x004ADF90 File Offset: 0x004AC190
-		protected virtual void CooldownEnded(bool sendMessage = true)
-		{
-			Effecter effecter = this.progressBarEffecter;
-			if (effecter != null)
-			{
-				effecter.Cleanup();
-			}
-			this.progressBarEffecter = null;
-			if (sendMessage && !string.IsNullOrEmpty(this.Props.messageCooldownEnded))
-			{
-				Messages.Message(this.Props.messageCooldownEnded, this.parent, MessageTypeDefOf.NeutralEvent, false);
-			}
-		}
-
-		// Token: 0x060102D9 RID: 66265 RVA: 0x004ADFEB File Offset: 0x004AC1EB
-		public override void PostDestroy(DestroyMode mode, Map previousMap)
-		{
-			Effecter effecter = this.progressBarEffecter;
-			if (effecter != null)
-			{
-				effecter.Cleanup();
-			}
-			this.progressBarEffecter = null;
-			base.PostDestroy(mode, previousMap);
-		}
-
-		// Token: 0x060102DA RID: 66266 RVA: 0x004AE00D File Offset: 0x004AC20D
-		public override IEnumerable<Gizmo> CompGetGizmosExtra()
-		{
-			if (this.HideInteraction)
-			{
-				yield break;
-			}
-			if (this.parent.SpawnedOrAnyParentSpawned)
-			{
-				string defaultLabel;
-				if (string.IsNullOrEmpty(this.Props.activateLabelString))
-				{
-					defaultLabel = "OrderActivation".Translate() + "...";
-				}
-				else
-				{
-					defaultLabel = this.Props.activateLabelString;
-				}
-				string defaultDesc;
-				if (this.ExtraNamedArg != null)
-				{
-					if (string.IsNullOrEmpty(this.Props.activateDescString))
-					{
-						defaultDesc = "OrderActivationDesc".Translate(this.parent.Named("THING"), this.ExtraNamedArg.Value);
-					}
-					else
-					{
-						defaultDesc = this.Props.activateDescString.Formatted(this.parent.Named("THING"), this.ExtraNamedArg.Value);
-					}
-				}
-				else if (string.IsNullOrEmpty(this.Props.activateDescString))
-				{
-					defaultDesc = "OrderActivationDesc".Translate(this.parent.Named("THING"));
-				}
-				else
-				{
-					defaultDesc = this.Props.activateDescString.Formatted(this.parent.Named("THING"));
-				}
-				Command_Action command_Action = new Command_Action
-				{
-					defaultLabel = defaultLabel,
-					defaultDesc = defaultDesc,
-					icon = this.UIIcon,
-					groupable = false,
-					action = delegate()
-					{
-						SoundDefOf.Tick_Tiny.PlayOneShotOnCamera(null);
-						Find.Targeter.BeginTargeting(this, null, false, null, null, true);
-					}
+					_003C_003E4__this = _003C_003E4__this,
+					selPawn = selPawn
 				};
-				AcceptanceReport acceptanceReport = this.CanInteract(null, true);
+				if (compInteractable.HideInteraction)
+				{
+					return false;
+				}
+				AcceptanceReport acceptanceReport = compInteractable.CanInteract(CS_0024_003C_003E8__locals4.selPawn);
+				FloatMenuOption floatMenuOption = FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption(compInteractable.ActivateOptionLabel, delegate
+				{
+					CS_0024_003C_003E8__locals4._003C_003E4__this.OrderForceTarget(CS_0024_003C_003E8__locals4.selPawn);
+				}), CS_0024_003C_003E8__locals4.selPawn, compInteractable.parent);
 				if (!acceptanceReport.Accepted)
 				{
-					command_Action.Disable(acceptanceReport.Reason.CapitalizeFirst());
+					floatMenuOption.Disabled = true;
+					floatMenuOption.Label = floatMenuOption.Label + " (" + acceptanceReport.Reason.UncapitalizeFirst() + ")";
 				}
-				yield return command_Action;
+				_003C_003E2__current = floatMenuOption;
+				_003C_003E1__state = 1;
+				return true;
 			}
-			if (DebugSettings.ShowDevGizmos && this.OnCooldown)
-			{
-				yield return new Command_Action
-				{
-					defaultLabel = "DEV: Reset cooldown",
-					action = delegate()
-					{
-						this.cooldownTicks = 0;
-						this.CooldownEnded(true);
-					}
-				};
-			}
-			yield break;
-		}
-
-		// Token: 0x060102DB RID: 66267 RVA: 0x004AE020 File Offset: 0x004AC220
-		public override string CompInspectStringExtra()
-		{
-			TaggedString t = base.CompInspectStringExtra();
-			if (!t.NullOrEmpty())
-			{
-				t += "\n";
-			}
-			if (this.OnCooldown)
-			{
-				t += this.Props.onCooldownString.CapitalizeFirst() + ": " + "DurationLeft".Translate(this.cooldownTicks.ToStringTicksToPeriod(true, false, true, true, false)).CapitalizeFirst() + ".";
-				if (!this.CanCooldown)
-				{
-					t += string.Format(" ({0})", "Paused".Translate());
-				}
-			}
-			if (!this.Props.inspectString.NullOrEmpty())
-			{
-				if (!t.NullOrEmpty())
-				{
-					t += "\n";
-				}
-				t += this.Props.inspectString;
-			}
-			else if (this.Props.showMustBeActivatedByColonist)
-			{
-				if (!t.NullOrEmpty())
-				{
-					t += "\n";
-				}
-				t += "MustBeActivatedByColonist".Translate();
-			}
-			if (!this.Active && this.Props.maintainProgress && this.progress > 0f)
-			{
-				if (this.Props.remainingSecondsInInspectString)
-				{
-					t += "\n" + "Activation".Translate() + ": " + Mathf.FloorToInt((float)this.TicksToActivate * (1f - this.progress)).ToStringSecondsFromTicks("F0");
-				}
-				else
-				{
-					t += "\n" + "Activation".Translate() + ": " + this.progress.ToStringPercent();
-				}
-			}
-			return t.Resolve();
-		}
-
-		// Token: 0x060102DC RID: 66268 RVA: 0x004AE206 File Offset: 0x004AC406
-		public override IEnumerable<FloatMenuOption> CompFloatMenuOptions(Pawn selPawn)
-		{
-			if (this.HideInteraction)
-			{
-				yield break;
-			}
-			AcceptanceReport acceptanceReport = this.CanInteract(selPawn, true);
-			FloatMenuOption floatMenuOption = FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption(this.ActivateOptionLabel, delegate()
-			{
-				this.OrderForceTarget(selPawn);
-			}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0), selPawn, this.parent, "ReservedBy", null);
-			if (!acceptanceReport.Accepted)
-			{
-				floatMenuOption.Disabled = true;
-				FloatMenuOption floatMenuOption2 = floatMenuOption;
-				floatMenuOption2.Label = floatMenuOption2.Label + " (" + acceptanceReport.Reason.UncapitalizeFirst() + ")";
-			}
-			yield return floatMenuOption;
-			yield break;
-		}
-
-		// Token: 0x060102DD RID: 66269 RVA: 0x004AE220 File Offset: 0x004AC420
-		public override void PostExposeData()
-		{
-			if (string.IsNullOrEmpty(this.ExposeKey))
-			{
-				Scribe_Values.Look<int>(ref this.cooldownTicks, "cooldownTicks", 0, false);
-				Scribe_Values.Look<int>(ref this.activeTicks, "activeTicks", 0, false);
-				Scribe_Values.Look<float>(ref this.progress, "progress", 0f, false);
-				return;
-			}
-			Scribe_Values.Look<int>(ref this.cooldownTicks, this.ExposeKey + "_cooldownTicks", 0, false);
-			Scribe_Values.Look<int>(ref this.activeTicks, this.ExposeKey + "_activeTicks", 0, false);
-			Scribe_Values.Look<float>(ref this.progress, this.ExposeKey + "_progress", 0f, false);
-		}
-
-		// Token: 0x060102DE RID: 66270 RVA: 0x004AE2D0 File Offset: 0x004AC4D0
-		public bool CanHitTarget(LocalTargetInfo target)
-		{
-			return this.ValidateTarget(target, false);
-		}
-
-		// Token: 0x060102DF RID: 66271 RVA: 0x004AE2DC File Offset: 0x004AC4DC
-		public bool ValidateTarget(LocalTargetInfo target, bool showMessages = true)
-		{
-			if (!target.IsValid || target.Pawn == null)
-			{
+			case 1:
+				_003C_003E1__state = -1;
 				return false;
 			}
-			Pawn pawn = target.Pawn;
-			AcceptanceReport acceptanceReport = this.CanInteract(pawn, true);
-			if (!acceptanceReport.Accepted)
-			{
-				if (showMessages && !acceptanceReport.Reason.NullOrEmpty())
-				{
-					Messages.Message("CannotGenericWorkCustom".Translate(this.Props.jobString) + ": " + acceptanceReport.Reason.CapitalizeFirst(), pawn, MessageTypeDefOf.RejectInput, false);
-				}
-				return false;
-			}
-			return true;
 		}
 
-		// Token: 0x060102E0 RID: 66272 RVA: 0x0045EA21 File Offset: 0x0045CC21
-		public void DrawHighlight(LocalTargetInfo target)
+		bool IEnumerator.MoveNext()
 		{
-			if (target.IsValid)
-			{
-				GenDraw.DrawTargetHighlight(target);
-			}
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x060102E1 RID: 66273 RVA: 0x004AE378 File Offset: 0x004AC578
-		public virtual void OrderForceTarget(LocalTargetInfo target)
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			if (this.ValidateTarget(target, false))
-			{
-				Job job = JobMaker.MakeJob(JobDefOf.InteractThing, this.parent);
-				target.Pawn.jobs.TryTakeOrderedJob(job, new JobTag?(JobTag.Misc), false);
-			}
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x060102E2 RID: 66274 RVA: 0x004AE3C0 File Offset: 0x004AC5C0
-		public void OnGUI(LocalTargetInfo target)
+		[DebuggerHidden]
+		IEnumerator<FloatMenuOption> IEnumerable<FloatMenuOption>.GetEnumerator()
 		{
-			string label;
-			if (string.IsNullOrEmpty(this.Props.guiLabelString))
+			_003CCompFloatMenuOptions_003Ed__64 _003CCompFloatMenuOptions_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				label = "ChooseWhoShouldActivate".Translate();
+				_003C_003E1__state = 0;
+				_003CCompFloatMenuOptions_003Ed__ = this;
 			}
 			else
 			{
-				label = this.Props.guiLabelString;
+				_003CCompFloatMenuOptions_003Ed__ = new _003CCompFloatMenuOptions_003Ed__64(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
-			Widgets.MouseAttachedLabel(label, 0f, 0f, null);
-			if (this.ValidateTarget(target, false) && this.Props.targetingParameters.CanTarget(target.Pawn, this))
+			_003CCompFloatMenuOptions_003Ed__.selPawn = _003C_003E3__selPawn;
+			return _003CCompFloatMenuOptions_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<FloatMenuOption>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CCompGetGizmosExtra_003Ed__62 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompInteractable _003C_003E4__this;
+
+		Gizmo IEnumerator<Gizmo>.Current
+		{
+			[DebuggerHidden]
+			get
 			{
-				GenUI.DrawMouseAttachment(this.UIIcon);
-				return;
+				return _003C_003E2__current;
 			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CCompGetGizmosExtra_003Ed__62(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			CompInteractable CS_0024_003C_003E8__locals21 = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (CS_0024_003C_003E8__locals21.HideInteraction)
+				{
+					return false;
+				}
+				if (CS_0024_003C_003E8__locals21.parent.SpawnedOrAnyParentSpawned)
+				{
+					string defaultLabel = ((!string.IsNullOrEmpty(CS_0024_003C_003E8__locals21.Props.activateLabelString)) ? CS_0024_003C_003E8__locals21.Props.activateLabelString : ((string)("OrderActivation".Translate() + "...")));
+					string defaultDesc = (CS_0024_003C_003E8__locals21.ExtraNamedArg.HasValue ? ((!string.IsNullOrEmpty(CS_0024_003C_003E8__locals21.Props.activateDescString)) ? ((string)CS_0024_003C_003E8__locals21.Props.activateDescString.Formatted(CS_0024_003C_003E8__locals21.parent.Named("THING"), CS_0024_003C_003E8__locals21.ExtraNamedArg.Value)) : ((string)"OrderActivationDesc".Translate(CS_0024_003C_003E8__locals21.parent.Named("THING"), CS_0024_003C_003E8__locals21.ExtraNamedArg.Value))) : ((!string.IsNullOrEmpty(CS_0024_003C_003E8__locals21.Props.activateDescString)) ? ((string)CS_0024_003C_003E8__locals21.Props.activateDescString.Formatted(CS_0024_003C_003E8__locals21.parent.Named("THING"))) : ((string)"OrderActivationDesc".Translate(CS_0024_003C_003E8__locals21.parent.Named("THING")))));
+					Command_Action command_Action = new Command_Action
+					{
+						defaultLabel = defaultLabel,
+						defaultDesc = defaultDesc,
+						icon = CS_0024_003C_003E8__locals21.UIIcon,
+						groupable = false,
+						action = delegate
+						{
+							SoundDefOf.Tick_Tiny.PlayOneShotOnCamera();
+							Find.Targeter.BeginTargeting(CS_0024_003C_003E8__locals21);
+						}
+					};
+					AcceptanceReport acceptanceReport = CS_0024_003C_003E8__locals21.CanInteract();
+					if (!acceptanceReport.Accepted)
+					{
+						command_Action.Disable(acceptanceReport.Reason.CapitalizeFirst());
+					}
+					_003C_003E2__current = command_Action;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				goto IL_01dd;
+			case 1:
+				_003C_003E1__state = -1;
+				goto IL_01dd;
+			case 2:
+				{
+					_003C_003E1__state = -1;
+					break;
+				}
+				IL_01dd:
+				if (DebugSettings.ShowDevGizmos && CS_0024_003C_003E8__locals21.OnCooldown)
+				{
+					_003C_003E2__current = new Command_Action
+					{
+						defaultLabel = "DEV: Reset cooldown",
+						action = delegate
+						{
+							CS_0024_003C_003E8__locals21.cooldownTicks = 0;
+							CS_0024_003C_003E8__locals21.CooldownEnded();
+						}
+					};
+					_003C_003E1__state = 2;
+					return true;
+				}
+				break;
+			}
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CCompGetGizmosExtra_003Ed__62 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CCompGetGizmosExtra_003Ed__62(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	protected int cooldownTicks;
+
+	private int activeTicks;
+
+	public float progress;
+
+	[Unsaved(false)]
+	public Effecter interactionEffecter;
+
+	[Unsaved(false)]
+	private Effecter progressBarEffecter;
+
+	[Unsaved(false)]
+	private Texture2D activateTex;
+
+	[Unsaved(false)]
+	private CompRefuelable refuelable;
+
+	[Unsaved(false)]
+	protected CompPowerTrader power;
+
+	public const string InteractedSignal = "Interacted";
+
+	public CompProperties_Interactable Props => (CompProperties_Interactable)props;
+
+	public bool OnCooldown => cooldownTicks > 0;
+
+	public virtual bool Active => activeTicks > 0;
+
+	public virtual bool CanCooldown => true;
+
+	public virtual int TicksToActivate => Props.ticksToActivate;
+
+	public virtual NamedArgument? ExtraNamedArg => null;
+
+	public virtual string ExposeKey => null;
+
+	public virtual bool HideInteraction => false;
+
+	protected virtual string ActivateOptionLabel => Props.jobString.CapitalizeFirst();
+
+	public bool CasterIsPawn => true;
+
+	public bool IsMeleeAttack => false;
+
+	public bool Targetable => true;
+
+	public bool MultiSelect => false;
+
+	public bool HidePawnTooltips => false;
+
+	public Thing Caster => parent;
+
+	public Pawn CasterPawn => null;
+
+	public Verb GetVerb => null;
+
+	public TargetingParameters targetParams => Props.targetingParameters;
+
+	public virtual ITargetingSource DestinationSelector => null;
+
+	public Texture2D UIIcon
+	{
+		get
+		{
+			if (!(activateTex != null))
+			{
+				return activateTex = ContentFinder<Texture2D>.Get(Props.activateTexPath);
+			}
+			return activateTex;
+		}
+	}
+
+	public override void PostSpawnSetup(bool respawningAfterLoad)
+	{
+		refuelable = parent.TryGetComp<CompRefuelable>();
+		power = parent.TryGetComp<CompPowerTrader>();
+	}
+
+	public override void CompTick()
+	{
+		if (Active)
+		{
+			if (TryInteractTick())
+			{
+				Deactivate();
+			}
+			else
+			{
+				if (ShouldDeactivate())
+				{
+					SendDeactivateMessage();
+					Deactivate();
+					return;
+				}
+				activeTicks--;
+			}
+			if (activeTicks <= 0)
+			{
+				StartCooldown();
+			}
+		}
+		else if (OnCooldown)
+		{
+			if (CanCooldown)
+			{
+				cooldownTicks--;
+			}
+			if (parent.Spawned)
+			{
+				if (progressBarEffecter == null)
+				{
+					progressBarEffecter = EffecterDefOf.ProgressBar.Spawn();
+				}
+				progressBarEffecter.EffectTick(parent, TargetInfo.Invalid);
+				MoteProgressBar mote = ((SubEffecter_ProgressBar)progressBarEffecter.children[0]).mote;
+				mote.progress = 1f - (float)cooldownTicks / (float)Props.cooldownTicks;
+				mote.offsetZ = -0.8f;
+			}
+			else
+			{
+				progressBarEffecter?.Cleanup();
+				progressBarEffecter = null;
+			}
+			if (Props.cooldownFleck != null && parent.IsHashIntervalTick(Props.cooldownFleckSpawnIntervalTicks))
+			{
+				FleckCreationData dataStatic = FleckMaker.GetDataStatic(parent.DrawPos, parent.Map, Props.cooldownFleck, Props.cooldownFleckScale);
+				parent.Map.flecks.CreateFleck(dataStatic);
+			}
+			if (cooldownTicks <= 0)
+			{
+				CooldownEnded();
+			}
+		}
+		interactionEffecter?.EffectTick(parent, parent);
+	}
+
+	public void ResetCooldown(bool sendMessage = true)
+	{
+		if (Active)
+		{
+			Deactivate();
+		}
+		if (OnCooldown)
+		{
+			cooldownTicks = 0;
+			CooldownEnded(sendMessage);
+		}
+	}
+
+	protected virtual void SendDeactivateMessage()
+	{
+		Messages.Message("MessageActivationCanceled".Translate(parent), parent, MessageTypeDefOf.NeutralEvent);
+	}
+
+	public virtual AcceptanceReport CanInteract(Pawn activateBy = null, bool checkOptionalItems = true)
+	{
+		if (Active)
+		{
+			return "AlreadyActive".Translate();
+		}
+		if (OnCooldown)
+		{
+			return Props.onCooldownString + " (" + "DurationLeft".Translate(cooldownTicks.ToStringTicksToPeriod()) + ")";
+		}
+		if (refuelable != null && !refuelable.HasFuel)
+		{
+			return refuelable.Props.outOfFuelMessage ?? ((string)"NoFuel".Translate());
+		}
+		if (Props.requiresPower && power != null && !power.PowerOn)
+		{
+			return "NoPower".Translate().CapitalizeFirst();
+		}
+		if (activateBy != null)
+		{
+			if (activateBy.Dead)
+			{
+				return "PawnIsDead".Translate(activateBy);
+			}
+			if (Props.activateStat != null && (Props.activateStat.Worker.IsDisabledFor(activateBy) || Props.activateStat.statFactors.Any((StatDef s) => s.Worker.IsDisabledFor(activateBy))))
+			{
+				return "Incapable".Translate().CapitalizeFirst();
+			}
+			if (parent.PositionHeld.IsForbidden(activateBy) && !activateBy.Drafted && !Props.ignoreForbidden)
+			{
+				return "CannotPrioritizeForbiddenOutsideAllowedArea".Translate() + ": " + activateBy.playerSettings.EffectiveAreaRestrictionInPawnCurrentMap.Label;
+			}
+			if (parent.IsForbidden(activateBy) && !activateBy.Drafted && !Props.ignoreForbidden)
+			{
+				return "CannotPrioritizeCellForbidden".Translate();
+			}
+			if (activateBy.Downed)
+			{
+				return "MessageRitualPawnDowned".Translate(activateBy);
+			}
+			if (activateBy.Deathresting)
+			{
+				return "IsDeathresting".Translate(activateBy.Named("PAWN"));
+			}
+			if (!activateBy.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation))
+			{
+				return "MessageIncapableOfManipulation".Translate(activateBy);
+			}
+			if (!activateBy.CanReach(parent.SpawnedParentOrMe, PathEndMode.ClosestTouch, Danger.Deadly))
+			{
+				return "CannotReach".Translate();
+			}
+		}
+		return true;
+	}
+
+	public void Interact(Pawn caster, bool force = false)
+	{
+		if (CanInteract(caster, checkOptionalItems: false).Accepted || force)
+		{
+			activeTicks = Props.activeTicks;
+			if (!Props.soundActivate.NullOrUndefined())
+			{
+				Props.soundActivate.PlayOneShot(SoundInfo.InMap(parent));
+			}
+			if (Props.fleckOnUsed != null)
+			{
+				FleckMaker.AttachedOverlay(caster, Props.fleckOnUsed, Vector3.zero, Props.fleckOnUsedScale);
+			}
+			OnInteracted(caster);
+			parent.BroadcastCompSignal("Interacted");
+			QuestUtility.SendQuestTargetSignals(parent.questTags, "Activated", parent.Named("SUBJECT"), caster.Named("ACTIVATOR"));
+			if (!string.IsNullOrEmpty(Props.messageCompletedString))
+			{
+				Messages.Message(Props.messageCompletedString.Formatted(caster.Named("PAWN")), caster, MessageTypeDefOf.NeutralEvent, historical: false);
+			}
+		}
+	}
+
+	protected virtual void OnInteracted(Pawn caster)
+	{
+	}
+
+	protected virtual bool TryInteractTick()
+	{
+		return true;
+	}
+
+	protected virtual bool ShouldDeactivate()
+	{
+		return false;
+	}
+
+	protected virtual void Deactivate()
+	{
+		activeTicks = 0;
+	}
+
+	protected virtual void StartCooldown()
+	{
+		cooldownTicks = Props.cooldownTicks;
+	}
+
+	protected virtual void CooldownEnded(bool sendMessage = true)
+	{
+		progressBarEffecter?.Cleanup();
+		progressBarEffecter = null;
+		if (sendMessage && !string.IsNullOrEmpty(Props.messageCooldownEnded))
+		{
+			Messages.Message(Props.messageCooldownEnded, parent, MessageTypeDefOf.NeutralEvent, historical: false);
+		}
+	}
+
+	public override void PostDestroy(DestroyMode mode, Map previousMap)
+	{
+		progressBarEffecter?.Cleanup();
+		progressBarEffecter = null;
+		base.PostDestroy(mode, previousMap);
+	}
+
+	[IteratorStateMachine(typeof(_003CCompGetGizmosExtra_003Ed__62))]
+	public override IEnumerable<Gizmo> CompGetGizmosExtra()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CCompGetGizmosExtra_003Ed__62(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override string CompInspectStringExtra()
+	{
+		TaggedString taggedString = base.CompInspectStringExtra();
+		if (!taggedString.NullOrEmpty())
+		{
+			taggedString += "\n";
+		}
+		if (OnCooldown)
+		{
+			taggedString += Props.onCooldownString.CapitalizeFirst() + ": " + "DurationLeft".Translate(cooldownTicks.ToStringTicksToPeriod()).CapitalizeFirst() + ".";
+			if (!CanCooldown)
+			{
+				taggedString += $" ({"Paused".Translate()})";
+			}
+		}
+		if (!Props.inspectString.NullOrEmpty())
+		{
+			if (!taggedString.NullOrEmpty())
+			{
+				taggedString += "\n";
+			}
+			taggedString += Props.inspectString;
+		}
+		else if (Props.showMustBeActivatedByColonist)
+		{
+			if (!taggedString.NullOrEmpty())
+			{
+				taggedString += "\n";
+			}
+			taggedString += "MustBeActivatedByColonist".Translate();
+		}
+		if (!Active && Props.maintainProgress && progress > 0f)
+		{
+			if (Props.remainingSecondsInInspectString)
+			{
+				taggedString += "\n" + "Activation".Translate() + ": " + Mathf.FloorToInt((float)TicksToActivate * (1f - progress)).ToStringSecondsFromTicks("F0");
+			}
+			else
+			{
+				taggedString += "\n" + "Activation".Translate() + ": " + progress.ToStringPercent();
+			}
+		}
+		return taggedString.Resolve();
+	}
+
+	[IteratorStateMachine(typeof(_003CCompFloatMenuOptions_003Ed__64))]
+	public override IEnumerable<FloatMenuOption> CompFloatMenuOptions(Pawn selPawn)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CCompFloatMenuOptions_003Ed__64(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__selPawn = selPawn
+		};
+	}
+
+	public override void PostExposeData()
+	{
+		if (string.IsNullOrEmpty(ExposeKey))
+		{
+			Scribe_Values.Look(ref cooldownTicks, "cooldownTicks", 0);
+			Scribe_Values.Look(ref activeTicks, "activeTicks", 0);
+			Scribe_Values.Look(ref progress, "progress", 0f);
+		}
+		else
+		{
+			Scribe_Values.Look(ref cooldownTicks, ExposeKey + "_cooldownTicks", 0);
+			Scribe_Values.Look(ref activeTicks, ExposeKey + "_activeTicks", 0);
+			Scribe_Values.Look(ref progress, ExposeKey + "_progress", 0f);
+		}
+	}
+
+	public bool CanHitTarget(LocalTargetInfo target)
+	{
+		return ValidateTarget(target, showMessages: false);
+	}
+
+	public bool ValidateTarget(LocalTargetInfo target, bool showMessages = true)
+	{
+		if (!target.IsValid || target.Pawn == null)
+		{
+			return false;
+		}
+		Pawn pawn = target.Pawn;
+		AcceptanceReport acceptanceReport = CanInteract(pawn);
+		if (!acceptanceReport.Accepted)
+		{
+			if (showMessages && !acceptanceReport.Reason.NullOrEmpty())
+			{
+				Messages.Message("CannotGenericWorkCustom".Translate(Props.jobString) + ": " + acceptanceReport.Reason.CapitalizeFirst(), pawn, MessageTypeDefOf.RejectInput, historical: false);
+			}
+			return false;
+		}
+		return true;
+	}
+
+	public void DrawHighlight(LocalTargetInfo target)
+	{
+		if (target.IsValid)
+		{
+			GenDraw.DrawTargetHighlight(target);
+		}
+	}
+
+	public virtual void OrderForceTarget(LocalTargetInfo target)
+	{
+		if (ValidateTarget(target, showMessages: false))
+		{
+			Job job = JobMaker.MakeJob(JobDefOf.InteractThing, parent);
+			target.Pawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
+		}
+	}
+
+	public void OnGUI(LocalTargetInfo target)
+	{
+		string label = ((!string.IsNullOrEmpty(Props.guiLabelString)) ? Props.guiLabelString : ((string)"ChooseWhoShouldActivate".Translate()));
+		Widgets.MouseAttachedLabel(label, 0f, 0f, null);
+		if (ValidateTarget(target, showMessages: false) && Props.targetingParameters.CanTarget(target.Pawn, this))
+		{
+			GenUI.DrawMouseAttachment(UIIcon);
+		}
+		else
+		{
 			GenUI.DrawMouseAttachment(TexCommand.CannotShoot);
 		}
+	}
 
-		// Token: 0x060102E3 RID: 66275 RVA: 0x004AE455 File Offset: 0x004AC655
-		public void Notify_InteractionStarted()
+	public void Notify_InteractionStarted()
+	{
+		if (Props.interactionEffecter != null)
 		{
-			if (this.Props.interactionEffecter != null)
-			{
-				this.interactionEffecter = this.Props.interactionEffecter.Spawn(this.parent, this.parent.Map, 1f);
-			}
+			interactionEffecter = Props.interactionEffecter.Spawn(parent, parent.Map);
 		}
+	}
 
-		// Token: 0x060102E4 RID: 66276 RVA: 0x004AE490 File Offset: 0x004AC690
-		public void Notify_InteractionEnded()
+	public void Notify_InteractionEnded()
+	{
+		if (Props.interactionEffecter != null)
 		{
-			if (this.Props.interactionEffecter != null)
-			{
-				Effecter effecter = this.interactionEffecter;
-				if (effecter != null)
-				{
-					effecter.Cleanup();
-				}
-				this.interactionEffecter = null;
-			}
+			interactionEffecter?.Cleanup();
+			interactionEffecter = null;
 		}
-
-		// Token: 0x0400A8FC RID: 43260
-		protected int cooldownTicks;
-
-		// Token: 0x0400A8FD RID: 43261
-		private int activeTicks;
-
-		// Token: 0x0400A8FE RID: 43262
-		public float progress;
-
-		// Token: 0x0400A8FF RID: 43263
-		[Unsaved(false)]
-		public Effecter interactionEffecter;
-
-		// Token: 0x0400A900 RID: 43264
-		[Unsaved(false)]
-		private Effecter progressBarEffecter;
-
-		// Token: 0x0400A901 RID: 43265
-		[Unsaved(false)]
-		private Texture2D activateTex;
-
-		// Token: 0x0400A902 RID: 43266
-		[Unsaved(false)]
-		private CompRefuelable refuelable;
-
-		// Token: 0x0400A903 RID: 43267
-		[Unsaved(false)]
-		protected CompPowerTrader power;
-
-		// Token: 0x0400A904 RID: 43268
-		public const string InteractedSignal = "Interacted";
 	}
 }

@@ -1,93 +1,195 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class StorytellerCompProperties
 {
-	// Token: 0x02001AF3 RID: 6899
-	public class StorytellerCompProperties
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__11 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x170017A7 RID: 6055
-		// (get) Token: 0x06009A2D RID: 39469 RVA: 0x002CDC08 File Offset: 0x002CBE08
-		public bool Enabled
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public StorytellerCompProperties _003C_003E4__this;
+
+		string IEnumerator<string>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (!this.enableIfAnyModActive.NullOrEmpty<string>())
-				{
-					for (int i = 0; i < this.enableIfAnyModActive.Count; i++)
-					{
-						if (ModsConfig.IsActive(this.enableIfAnyModActive[i]))
-						{
-							return true;
-						}
-					}
-					return false;
-				}
-				if (!this.disableIfAnyModActive.NullOrEmpty<string>())
-				{
-					for (int j = 0; j < this.disableIfAnyModActive.Count; j++)
-					{
-						if (ModsConfig.IsActive(this.disableIfAnyModActive[j]))
-						{
-							return false;
-						}
-					}
-				}
-				return true;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06009A2E RID: 39470 RVA: 0x002CDC88 File Offset: 0x002CBE88
-		public StorytellerCompProperties()
+		object IEnumerator.Current
 		{
-		}
-
-		// Token: 0x06009A2F RID: 39471 RVA: 0x002CDC9B File Offset: 0x002CBE9B
-		public StorytellerCompProperties(Type compClass)
-		{
-			this.compClass = compClass;
-		}
-
-		// Token: 0x06009A30 RID: 39472 RVA: 0x002CDCB5 File Offset: 0x002CBEB5
-		public virtual IEnumerable<string> ConfigErrors(StorytellerDef parentDef)
-		{
-			if (this.compClass == null)
+			[DebuggerHidden]
+			get
 			{
-				yield return "a StorytellerCompProperties has null compClass.";
+				return _003C_003E2__current;
 			}
-			if (!this.enableIfAnyModActive.NullOrEmpty<string>() && !this.disableIfAnyModActive.NullOrEmpty<string>())
-			{
-				yield return "enableIfAnyModActive and disableIfAnyModActive can't be used simultaneously";
-			}
-			yield break;
 		}
 
-		// Token: 0x06009A31 RID: 39473 RVA: 0x000026EA File Offset: 0x000008EA
-		public virtual void ResolveReferences(StorytellerDef parentDef)
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__11(int _003C_003E1__state)
 		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x04006A25 RID: 27173
-		[TranslationHandle]
-		public Type compClass;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
 
-		// Token: 0x04006A26 RID: 27174
-		public float minDaysPassed;
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			StorytellerCompProperties storytellerCompProperties = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (storytellerCompProperties.compClass == null)
+				{
+					_003C_003E2__current = "a StorytellerCompProperties has null compClass.";
+					_003C_003E1__state = 1;
+					return true;
+				}
+				goto IL_0052;
+			case 1:
+				_003C_003E1__state = -1;
+				goto IL_0052;
+			case 2:
+				{
+					_003C_003E1__state = -1;
+					break;
+				}
+				IL_0052:
+				if (!storytellerCompProperties.enableIfAnyModActive.NullOrEmpty() && !storytellerCompProperties.disableIfAnyModActive.NullOrEmpty())
+				{
+					_003C_003E2__current = "enableIfAnyModActive and disableIfAnyModActive can't be used simultaneously";
+					_003C_003E1__state = 2;
+					return true;
+				}
+				break;
+			}
+			return false;
+		}
 
-		// Token: 0x04006A27 RID: 27175
-		public List<IncidentTargetTagDef> allowedTargetTags;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x04006A28 RID: 27176
-		public List<IncidentTargetTagDef> disallowedTargetTags;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04006A29 RID: 27177
-		public float minIncChancePopulationIntentFactor = 0.05f;
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__11 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__11(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x04006A2A RID: 27178
-		public List<string> enableIfAnyModActive;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x04006A2B RID: 27179
-		public List<string> disableIfAnyModActive;
+	[TranslationHandle]
+	public Type compClass;
+
+	public float minDaysPassed;
+
+	public List<IncidentTargetTagDef> allowedTargetTags;
+
+	public List<IncidentTargetTagDef> disallowedTargetTags;
+
+	public float minIncChancePopulationIntentFactor = 0.05f;
+
+	public List<string> enableIfAnyModActive;
+
+	public List<string> disableIfAnyModActive;
+
+	public bool Enabled
+	{
+		get
+		{
+			if (!enableIfAnyModActive.NullOrEmpty())
+			{
+				for (int i = 0; i < enableIfAnyModActive.Count; i++)
+				{
+					if (ModsConfig.IsActive(enableIfAnyModActive[i]))
+					{
+						return true;
+					}
+				}
+				return false;
+			}
+			if (!disableIfAnyModActive.NullOrEmpty())
+			{
+				for (int j = 0; j < disableIfAnyModActive.Count; j++)
+				{
+					if (ModsConfig.IsActive(disableIfAnyModActive[j]))
+					{
+						return false;
+					}
+				}
+			}
+			return true;
+		}
+	}
+
+	public StorytellerCompProperties()
+	{
+	}
+
+	public StorytellerCompProperties(Type compClass)
+	{
+		this.compClass = compClass;
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__11))]
+	public virtual IEnumerable<string> ConfigErrors(StorytellerDef parentDef)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__11(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public virtual void ResolveReferences(StorytellerDef parentDef)
+	{
 	}
 }

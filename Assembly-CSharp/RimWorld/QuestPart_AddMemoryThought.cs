@@ -1,89 +1,228 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class QuestPart_AddMemoryThought : QuestPart
 {
-	// Token: 0x02001C07 RID: 7175
-	public class QuestPart_AddMemoryThought : QuestPart
+	[CompilerGenerated]
+	private sealed class _003Cget_QuestLookTargets_003Ed__6 : IEnumerable<GlobalTargetInfo>, IEnumerable, IEnumerator<GlobalTargetInfo>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700188D RID: 6285
-		// (get) Token: 0x06009FCA RID: 40906 RVA: 0x002E1943 File Offset: 0x002DFB43
-		public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+		private int _003C_003E1__state;
+
+		private GlobalTargetInfo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public QuestPart_AddMemoryThought _003C_003E4__this;
+
+		private IEnumerator<GlobalTargetInfo> _003C_003E7__wrap1;
+
+		GlobalTargetInfo IEnumerator<GlobalTargetInfo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				foreach (GlobalTargetInfo globalTargetInfo in base.QuestLookTargets)
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003Cget_QuestLookTargets_003Ed__6(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
 				{
-					yield return globalTargetInfo;
 				}
-				IEnumerator<GlobalTargetInfo> enumerator = null;
-				if (this.pawn != null && this.addToLookTargets)
+				finally
 				{
-					yield return this.pawn;
+					_003C_003Em__Finally1();
 				}
-				yield break;
-				yield break;
 			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x06009FCB RID: 40907 RVA: 0x002E1954 File Offset: 0x002DFB54
-		public override void Notify_QuestSignalReceived(Signal signal)
+		private bool MoveNext()
 		{
-			base.Notify_QuestSignalReceived(signal);
-			if (signal.tag == this.inSignal && this.pawn != null && this.pawn.needs != null)
+			try
 			{
-				this.pawn.needs.mood.thoughts.memories.TryGainMemory(this.def, this.otherPawn, null);
+				int num = _003C_003E1__state;
+				QuestPart_AddMemoryThought questPart_AddMemoryThought = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((QuestPart)questPart_AddMemoryThought).QuestLookTargets.GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_006f:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						GlobalTargetInfo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (questPart_AddMemoryThought.pawn != null && questPart_AddMemoryThought.addToLookTargets)
+					{
+						_003C_003E2__current = questPart_AddMemoryThought.pawn;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
+				}
+				return false;
 			}
-		}
-
-		// Token: 0x06009FCC RID: 40908 RVA: 0x002E19BC File Offset: 0x002DFBBC
-		public override void ExposeData()
-		{
-			base.ExposeData();
-			Scribe_Values.Look<string>(ref this.inSignal, "inSignal", null, false);
-			Scribe_Values.Look<bool>(ref this.addToLookTargets, "addToLookTargets", false, false);
-			Scribe_Defs.Look<ThoughtDef>(ref this.def, "def");
-			Scribe_References.Look<Pawn>(ref this.pawn, "pawn", false);
-			Scribe_References.Look<Pawn>(ref this.otherPawn, "otherPawn", false);
-		}
-
-		// Token: 0x06009FCD RID: 40909 RVA: 0x002E1A25 File Offset: 0x002DFC25
-		public override void AssignDebugData()
-		{
-			base.AssignDebugData();
-			this.def = (ThoughtDefOf.DecreeMet ?? ThoughtDefOf.DebugGood);
-			this.pawn = PawnsFinder.AllMaps_FreeColonists.FirstOrDefault<Pawn>();
-		}
-
-		// Token: 0x06009FCE RID: 40910 RVA: 0x002E1A51 File Offset: 0x002DFC51
-		public override void ReplacePawnReferences(Pawn replace, Pawn with)
-		{
-			if (this.pawn == replace)
+			catch
 			{
-				this.pawn = with;
-			}
-			if (this.otherPawn == replace)
-			{
-				this.otherPawn = with;
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x04006E83 RID: 28291
-		public string inSignal;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x04006E84 RID: 28292
-		public ThoughtDef def;
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
 
-		// Token: 0x04006E85 RID: 28293
-		public Pawn pawn;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04006E86 RID: 28294
-		public Pawn otherPawn;
+		[DebuggerHidden]
+		IEnumerator<GlobalTargetInfo> IEnumerable<GlobalTargetInfo>.GetEnumerator()
+		{
+			_003Cget_QuestLookTargets_003Ed__6 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_QuestLookTargets_003Ed__6(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x04006E87 RID: 28295
-		public bool addToLookTargets = true;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<GlobalTargetInfo>)this).GetEnumerator();
+		}
+	}
+
+	public string inSignal;
+
+	public ThoughtDef def;
+
+	public Pawn pawn;
+
+	public Pawn otherPawn;
+
+	public bool addToLookTargets = true;
+
+	public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+	{
+		[IteratorStateMachine(typeof(_003Cget_QuestLookTargets_003Ed__6))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_QuestLookTargets_003Ed__6(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public override void Notify_QuestSignalReceived(Signal signal)
+	{
+		base.Notify_QuestSignalReceived(signal);
+		if (signal.tag == inSignal && pawn != null && pawn.needs != null)
+		{
+			pawn.needs.mood.thoughts.memories.TryGainMemory(def, otherPawn);
+		}
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref inSignal, "inSignal");
+		Scribe_Values.Look(ref addToLookTargets, "addToLookTargets", defaultValue: false);
+		Scribe_Defs.Look(ref def, "def");
+		Scribe_References.Look(ref pawn, "pawn");
+		Scribe_References.Look(ref otherPawn, "otherPawn");
+	}
+
+	public override void AssignDebugData()
+	{
+		base.AssignDebugData();
+		def = ThoughtDefOf.DecreeMet ?? ThoughtDefOf.DebugGood;
+		pawn = PawnsFinder.AllMaps_FreeColonists.FirstOrDefault();
+	}
+
+	public override void ReplacePawnReferences(Pawn replace, Pawn with)
+	{
+		if (pawn == replace)
+		{
+			pawn = with;
+		}
+		if (otherPawn == replace)
+		{
+			otherPawn = with;
+		}
 	}
 }

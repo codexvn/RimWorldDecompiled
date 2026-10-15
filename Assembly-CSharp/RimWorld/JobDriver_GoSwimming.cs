@@ -1,103 +1,304 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_GoSwimming : JobDriver
 {
-	// Token: 0x020011DC RID: 4572
-	public class JobDriver_GoSwimming : JobDriver
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass2_0
 	{
-		// Token: 0x06006FB6 RID: 28598 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
-		{
-			return true;
-		}
+		public JobDriver_GoSwimming _003C_003E4__this;
 
-		// Token: 0x06006FB7 RID: 28599 RVA: 0x0022BD54 File Offset: 0x00229F54
-		private bool NextDestIsOutdoorsAndNotEnjoyable()
-		{
-			if (base.Map == null)
-			{
-				return false;
-			}
-			if (!this.job.targetA.IsValid)
-			{
-				return false;
-			}
-			Room room = this.job.targetA.Cell.GetRoom(base.Map);
-			return room != null && room.PsychologicallyOutdoors && !JoyGiver_GoSwimming.HappyToSwimOutsideOnMap(base.Map);
-		}
+		public Toil goToil;
 
-		// Token: 0x06006FB8 RID: 28600 RVA: 0x0022BDB6 File Offset: 0x00229FB6
-		protected override IEnumerable<Toil> MakeNewToils()
+		internal void _003CMakeNewToils_003Eb__0(int delta)
 		{
-			this.FailOn(new Func<bool>(this.NextDestIsOutdoorsAndNotEnjoyable));
-			Toil toil = Toils_Goto.GotoCell(TargetIndex.A, PathEndMode.OnCell);
-			toil.tickIntervalAction = delegate(int delta)
+			if (Find.TickManager.TicksGame > _003C_003E4__this.startTick + _003C_003E4__this.job.def.joyDuration)
 			{
-				if (Find.TickManager.TicksGame > this.startTick + this.job.def.joyDuration)
-				{
-					this.EndJobWith(JobCondition.Succeeded);
-					return;
-				}
-				this.CheckForSwimmingPose();
-				this.pawn.mindState.lastSwamTick = GenTicks.TicksGame;
-			};
-			yield return toil;
-			Toil goToil = Toils_Goto.GotoCell(TargetIndex.A, PathEndMode.OnCell);
-			goToil.tickIntervalAction = delegate(int delta)
-			{
-				if (Find.TickManager.TicksGame > this.startTick + this.job.def.joyDuration)
-				{
-					this.EndJobWith(JobCondition.Succeeded);
-					return;
-				}
-				this.CheckForSwimmingPose();
-				this.pawn.mindState.lastSwamTick = GenTicks.TicksGame;
-				JoyUtility.JoyTickCheckEnd(this.pawn, delta, JoyTickFullJoyAction.EndJob, 1f, null);
-			};
-			goToil.AddFinishAction(new Action(this.CheckForSwimmingPose));
-			yield return goToil;
-			Toil toil2 = Toils_General.Wait(240, TargetIndex.None);
-			toil2.tickIntervalAction = delegate(int delta)
-			{
-				this.CheckForSwimmingPose();
-				JoyUtility.JoyTickCheckEnd(this.pawn, delta, JoyTickFullJoyAction.EndJob, 1f, null);
-				this.pawn.mindState.lastSwamTick = GenTicks.TicksGame;
-			};
-			yield return toil2;
-			Toil toil3 = ToilMaker.MakeToil("MakeNewToils");
-			toil3.initAction = delegate()
-			{
-				if (this.job.targetQueueA.Count <= 0)
-				{
-					return;
-				}
-				Pawn_HealthTracker health = this.pawn.health;
-				Hediff hediff;
-				if (((health != null) ? health.hediffSet : null) != null && this.pawn.health.hediffSet.TryGetHediff(HediffDefOf.Heatstroke, out hediff))
-				{
-					this.pawn.health.RemoveHediff(hediff);
-				}
-				LocalTargetInfo targetA = this.job.targetQueueA[0];
-				this.job.targetQueueA.RemoveAt(0);
-				this.job.targetA = targetA;
-				this.JumpToToil(goToil);
-			};
-			yield return toil3;
-			yield break;
-		}
-
-		// Token: 0x06006FB9 RID: 28601 RVA: 0x0022BDC6 File Offset: 0x00229FC6
-		private void CheckForSwimmingPose()
-		{
-			if (this.pawn.Position.GetTerrain(this.pawn.Map).IsWater)
-			{
-				this.job.swimming = true;
+				_003C_003E4__this.EndJobWith(JobCondition.Succeeded);
 				return;
 			}
-			this.job.swimming = false;
+			_003C_003E4__this.CheckForSwimmingPose();
+			_003C_003E4__this.pawn.mindState.lastSwamTick = GenTicks.TicksGame;
+		}
+
+		internal void _003CMakeNewToils_003Eb__1()
+		{
+			_003C_003E4__this.job.locomotionUrgency = LocomotionUrgency.Jog;
+		}
+
+		internal void _003CMakeNewToils_003Eb__2()
+		{
+			_003C_003E4__this.job.locomotionUrgency = LocomotionUrgency.Walk;
+		}
+
+		internal void _003CMakeNewToils_003Eb__3(int delta)
+		{
+			if (Find.TickManager.TicksGame > _003C_003E4__this.startTick + _003C_003E4__this.job.def.joyDuration)
+			{
+				_003C_003E4__this.EndJobWith(JobCondition.Succeeded);
+				return;
+			}
+			_003C_003E4__this.CheckForSwimmingPose();
+			_003C_003E4__this.pawn.mindState.lastSwamTick = GenTicks.TicksGame;
+			JoyUtility.JoyTickCheckEnd(_003C_003E4__this.pawn, delta);
+		}
+
+		internal void _003CMakeNewToils_003Eb__4(int delta)
+		{
+			_003C_003E4__this.CheckForSwimmingPose();
+			JoyUtility.JoyTickCheckEnd(_003C_003E4__this.pawn, delta);
+			_003C_003E4__this.pawn.mindState.lastSwamTick = GenTicks.TicksGame;
+		}
+
+		internal void _003CMakeNewToils_003Eb__5()
+		{
+			if (_003C_003E4__this.job.targetQueueA.Count > 0)
+			{
+				if (_003C_003E4__this.pawn.health?.hediffSet != null && _003C_003E4__this.pawn.health.hediffSet.TryGetHediff(HediffDefOf.Heatstroke, out var hediff))
+				{
+					_003C_003E4__this.pawn.health.RemoveHediff(hediff);
+				}
+				LocalTargetInfo targetA = _003C_003E4__this.job.targetQueueA[0];
+				_003C_003E4__this.job.targetQueueA.RemoveAt(0);
+				_003C_003E4__this.job.targetA = targetA;
+				_003C_003E4__this.JumpToToil(goToil);
+			}
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__2 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_GoSwimming _003C_003E4__this;
+
+		private _003C_003Ec__DisplayClass2_0 _003C_003E8__1;
+
+		Toil IEnumerator<Toil>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__2(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E8__1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_GoSwimming jobDriver_GoSwimming = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+			{
+				_003C_003E1__state = -1;
+				_003C_003E8__1 = new _003C_003Ec__DisplayClass2_0();
+				_003C_003E8__1._003C_003E4__this = _003C_003E4__this;
+				jobDriver_GoSwimming.FailOn(jobDriver_GoSwimming.NextDestIsOutdoorsAndNotEnjoyable);
+				Toil toil3 = Toils_Goto.GotoCell(TargetIndex.A, PathEndMode.OnCell);
+				toil3.tickIntervalAction = delegate
+				{
+					if (Find.TickManager.TicksGame > _003C_003E8__1._003C_003E4__this.startTick + _003C_003E8__1._003C_003E4__this.job.def.joyDuration)
+					{
+						_003C_003E8__1._003C_003E4__this.EndJobWith(JobCondition.Succeeded);
+					}
+					else
+					{
+						_003C_003E8__1._003C_003E4__this.CheckForSwimmingPose();
+						_003C_003E8__1._003C_003E4__this.pawn.mindState.lastSwamTick = GenTicks.TicksGame;
+					}
+				};
+				toil3.AddPreInitAction(delegate
+				{
+					_003C_003E8__1._003C_003E4__this.job.locomotionUrgency = LocomotionUrgency.Jog;
+				});
+				toil3.AddFinishAction(delegate
+				{
+					_003C_003E8__1._003C_003E4__this.job.locomotionUrgency = LocomotionUrgency.Walk;
+				});
+				_003C_003E2__current = toil3;
+				_003C_003E1__state = 1;
+				return true;
+			}
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E8__1.goToil = Toils_Goto.GotoCell(TargetIndex.A, PathEndMode.OnCell);
+				_003C_003E8__1.goToil.tickIntervalAction = delegate(int delta)
+				{
+					if (Find.TickManager.TicksGame > _003C_003E8__1._003C_003E4__this.startTick + _003C_003E8__1._003C_003E4__this.job.def.joyDuration)
+					{
+						_003C_003E8__1._003C_003E4__this.EndJobWith(JobCondition.Succeeded);
+					}
+					else
+					{
+						_003C_003E8__1._003C_003E4__this.CheckForSwimmingPose();
+						_003C_003E8__1._003C_003E4__this.pawn.mindState.lastSwamTick = GenTicks.TicksGame;
+						JoyUtility.JoyTickCheckEnd(_003C_003E8__1._003C_003E4__this.pawn, delta);
+					}
+				};
+				_003C_003E8__1.goToil.AddFinishAction(jobDriver_GoSwimming.CheckForSwimmingPose);
+				_003C_003E2__current = _003C_003E8__1.goToil;
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+			{
+				_003C_003E1__state = -1;
+				Toil toil2 = Toils_General.Wait(240);
+				toil2.tickIntervalAction = delegate(int delta)
+				{
+					_003C_003E8__1._003C_003E4__this.CheckForSwimmingPose();
+					JoyUtility.JoyTickCheckEnd(_003C_003E8__1._003C_003E4__this.pawn, delta);
+					_003C_003E8__1._003C_003E4__this.pawn.mindState.lastSwamTick = GenTicks.TicksGame;
+				};
+				_003C_003E2__current = toil2;
+				_003C_003E1__state = 3;
+				return true;
+			}
+			case 3:
+			{
+				_003C_003E1__state = -1;
+				Toil toil = ToilMaker.MakeToil("MakeNewToils");
+				toil.initAction = delegate
+				{
+					if (_003C_003E8__1._003C_003E4__this.job.targetQueueA.Count > 0)
+					{
+						if (_003C_003E8__1._003C_003E4__this.pawn.health?.hediffSet != null && _003C_003E8__1._003C_003E4__this.pawn.health.hediffSet.TryGetHediff(HediffDefOf.Heatstroke, out var hediff))
+						{
+							_003C_003E8__1._003C_003E4__this.pawn.health.RemoveHediff(hediff);
+						}
+						LocalTargetInfo targetA = _003C_003E8__1._003C_003E4__this.job.targetQueueA[0];
+						_003C_003E8__1._003C_003E4__this.job.targetQueueA.RemoveAt(0);
+						_003C_003E8__1._003C_003E4__this.job.targetA = targetA;
+						_003C_003E8__1._003C_003E4__this.JumpToToil(_003C_003E8__1.goToil);
+					}
+				};
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 4;
+				return true;
+			}
+			case 4:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__2 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__2(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return true;
+	}
+
+	private bool NextDestIsOutdoorsAndNotEnjoyable()
+	{
+		if (base.Map == null)
+		{
+			return false;
+		}
+		if (!job.targetA.IsValid)
+		{
+			return false;
+		}
+		Room room = job.targetA.Cell.GetRoom(base.Map);
+		if (room == null || !room.PsychologicallyOutdoors)
+		{
+			return false;
+		}
+		return !JoyGiver_GoSwimming.HappyToSwimOutsideOnMap(base.Map);
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__2))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__2(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	private void CheckForSwimmingPose()
+	{
+		if (pawn.Position.GetTerrain(pawn.Map).IsWater)
+		{
+			job.swimming = true;
+		}
+		else
+		{
+			job.swimming = false;
 		}
 	}
 }

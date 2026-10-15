@@ -1,9 +1,7 @@
-﻿using System;
+using System;
 
-namespace Verse
+namespace Verse;
+
+public class CaseInsensitiveXMLParsing : Attribute
 {
-	// Token: 0x0200082F RID: 2095
-	public class CaseInsensitiveXMLParsing : Attribute
-	{
-	}
 }

@@ -1,309 +1,380 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompIngredients : ThingComp
 {
-	// Token: 0x02002CEB RID: 11499
-	public class CompIngredients : ThingComp
+	[CompilerGenerated]
+	private sealed class _003CSpecialDisplayStats_003Ed__17 : IEnumerable<StatDrawEntry>, IEnumerable, IEnumerator<StatDrawEntry>, IEnumerator, IDisposable
 	{
-		// Token: 0x170028ED RID: 10477
-		// (get) Token: 0x0601027D RID: 66173 RVA: 0x004ACAD6 File Offset: 0x004AACD6
-		public CompProperties_Ingredients Props
+		private int _003C_003E1__state;
+
+		private StatDrawEntry _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompIngredients _003C_003E4__this;
+
+		StatDrawEntry IEnumerator<StatDrawEntry>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (CompProperties_Ingredients)this.props;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170028EE RID: 10478
-		// (get) Token: 0x0601027E RID: 66174 RVA: 0x004ACAE3 File Offset: 0x004AACE3
-		public List<string> MergeCompatibilityTags
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.cachedMergeCompatibilityTags == null)
-				{
-					this.cachedMergeCompatibilityTags = new List<string>();
-					if (this.Props.performMergeCompatibilityChecks)
-					{
-						CompIngredients.ComputeTags(this.cachedMergeCompatibilityTags, this.ingredients);
-					}
-				}
-				return this.cachedMergeCompatibilityTags;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0601027F RID: 66175 RVA: 0x004ACB1C File Offset: 0x004AAD1C
-		public override void PostExposeData()
+		[DebuggerHidden]
+		public _003CSpecialDisplayStats_003Ed__17(int _003C_003E1__state)
 		{
-			base.PostExposeData();
-			Scribe_Collections.Look<ThingDef>(ref this.ingredients, "ingredients", LookMode.Def, Array.Empty<object>());
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
-			{
-				if (this.ingredients == null)
-				{
-					this.ingredients = new List<ThingDef>();
-				}
-				if (this.ingredients.RemoveAll((ThingDef i) => i == null) != 0)
-				{
-					Log.Error("Some ingredients were null after loading.");
-				}
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x06010280 RID: 66176 RVA: 0x004ACB96 File Offset: 0x004AAD96
-		public void RegisterIngredient(ThingDef def)
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			if (!this.ingredients.Contains(def))
-			{
-				this.ingredients.Add(def);
-				this.cachedMergeCompatibilityTags = null;
-			}
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x06010281 RID: 66177 RVA: 0x004ACBBC File Offset: 0x004AADBC
-		public override void PostSplitOff(Thing piece)
+		private bool MoveNext()
 		{
-			base.PostSplitOff(piece);
-			if (piece != this.parent)
+			int num = _003C_003E1__state;
+			CompIngredients compIngredients = _003C_003E4__this;
+			switch (num)
 			{
-				CompIngredients compIngredients = piece.TryGetComp<CompIngredients>();
-				for (int i = 0; i < this.ingredients.Count; i++)
-				{
-					compIngredients.ingredients.Add(this.ingredients[i]);
-				}
-			}
-		}
-
-		// Token: 0x06010282 RID: 66178 RVA: 0x004ACC10 File Offset: 0x004AAE10
-		public override bool AllowStackWith(Thing otherStack)
-		{
-			CompIngredients compIngredients;
-			if (!otherStack.TryGetComp(out compIngredients))
-			{
+			default:
 				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (compIngredients.parent.def.ingestible == null || !compIngredients.parent.def.ingestible.IsMeal)
+				{
+					break;
+				}
+				if (compIngredients.ingredients.Count > 0)
+				{
+					_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.BasicsNonPawnImportant, "Ingredients".Translate(), compIngredients.GetIngredientsString(includeMergeCompatibility: false, out var _), "IngredientsDesc".Translate(), 1000, null, Dialog_InfoCard.DefsToHyperlinks(compIngredients.ingredients));
+					_003C_003E1__state = 1;
+					return true;
+				}
+				goto IL_00c0;
+			case 1:
+				_003C_003E1__state = -1;
+				goto IL_00c0;
+			case 2:
+				{
+					_003C_003E1__state = -1;
+					break;
+				}
+				IL_00c0:
+				if (ModsConfig.IdeologyActive)
+				{
+					_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.BasicsNonPawnImportant, "DietaryType".Translate(), compIngredients.GetFoodKindInspectString().StripTags(), "DietaryTypeDesc".Translate(), 995);
+					_003C_003E1__state = 2;
+					return true;
+				}
+				break;
 			}
-			if (!this.Props.performMergeCompatibilityChecks || !compIngredients.Props.performMergeCompatibilityChecks)
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<StatDrawEntry> IEnumerable<StatDrawEntry>.GetEnumerator()
+		{
+			_003CSpecialDisplayStats_003Ed__17 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				return true;
-			}
-			if (ModsConfig.BiotechActive && FoodUtility.GetFoodKind(this.parent) != FoodUtility.GetFoodKind(otherStack))
-			{
-				return false;
-			}
-			int count = this.MergeCompatibilityTags.Count;
-			int count2 = compIngredients.MergeCompatibilityTags.Count;
-			bool result;
-			if (count == 0 && count2 == 0)
-			{
-				result = true;
-			}
-			else if (count != count2 && (count == 0 || count2 == 0))
-			{
-				result = false;
+				_003C_003E1__state = 0;
+				result = this;
 			}
 			else
 			{
-				CompIngredients.tmpMergedIngredients.Clear();
-				CompIngredients.tmpMergedIngredientTags.Clear();
-				CompIngredients.tmpMergedIngredients.AddRange(this.ingredients);
-				bool flag;
-				CompIngredients.MergeIngredients(CompIngredients.tmpMergedIngredients, compIngredients.ingredients, out flag, this.parent.def);
-				if (flag)
+				result = new _003CSpecialDisplayStats_003Ed__17(0)
 				{
-					result = false;
-				}
-				else
-				{
-					CompIngredients.ComputeTags(CompIngredients.tmpMergedIngredientTags, CompIngredients.tmpMergedIngredients);
-					result = (CompIngredients.tmpMergedIngredientTags.SetsEqual(this.MergeCompatibilityTags) && CompIngredients.tmpMergedIngredientTags.SetsEqual(compIngredients.MergeCompatibilityTags));
-				}
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
 			return result;
 		}
 
-		// Token: 0x06010283 RID: 66179 RVA: 0x004ACD14 File Offset: 0x004AAF14
-		public override void PreAbsorbStack(Thing otherStack, int count)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			base.PreAbsorbStack(otherStack, count);
-			CompIngredients compIngredients = otherStack.TryGetComp<CompIngredients>();
-			bool flag;
-			CompIngredients.MergeIngredients(this.ingredients, compIngredients.ingredients, out flag, null);
-			this.cachedMergeCompatibilityTags = null;
+			return ((IEnumerable<StatDrawEntry>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x06010284 RID: 66180 RVA: 0x004ACD4C File Offset: 0x004AAF4C
-		public override string CompInspectStringExtra()
+	public List<ThingDef> ingredients = new List<ThingDef>();
+
+	private List<string> cachedMergeCompatibilityTags;
+
+	public const int MaxNumIngredients = 3;
+
+	private static readonly List<ThingDef> tmpMergedIngredients = new List<ThingDef>();
+
+	private static readonly List<string> tmpMergedIngredientTags = new List<string>();
+
+	private static readonly List<IngredientCount> missingIngredients = new List<IngredientCount>();
+
+	private static readonly Func<ThingDef, ThingDef, int> MostTagsCmp = GenCollection.CompareBy((ThingDef a) => a.ingredient?.mergeCompatibilityTags.Count ?? 0).Descending().Compare;
+
+	public CompProperties_Ingredients Props => (CompProperties_Ingredients)props;
+
+	public List<string> MergeCompatibilityTags
+	{
+		get
 		{
-			StringBuilder stringBuilder = new StringBuilder();
-			if (this.ingredients.Count > 0)
+			if (cachedMergeCompatibilityTags == null)
 			{
-				stringBuilder.Append("Ingredients".Translate() + ": ");
-				bool flag;
-				stringBuilder.Append(this.GetIngredientsString(true, out flag));
-				if (flag)
+				cachedMergeCompatibilityTags = new List<string>();
+				if (Props.performMergeCompatibilityChecks)
 				{
-					stringBuilder.Append(" (* " + "OnlyStacksWithCompatibleMeals".Translate().Resolve() + ")");
+					ComputeTags(cachedMergeCompatibilityTags, ingredients);
 				}
 			}
-			if (ModsConfig.IdeologyActive)
-			{
-				stringBuilder.AppendLineIfNotEmpty().Append(this.GetFoodKindInspectString());
-			}
-			return stringBuilder.ToString();
+			return cachedMergeCompatibilityTags;
 		}
+	}
 
-		// Token: 0x06010285 RID: 66181 RVA: 0x004ACDE8 File Offset: 0x004AAFE8
-		public string GetIngredientsString(bool includeMergeCompatibility, out bool hasMergeCompatibilityIngredients)
+	public override void PostExposeData()
+	{
+		base.PostExposeData();
+		Scribe_Collections.Look(ref ingredients, "ingredients", LookMode.Def);
+		if (Scribe.mode == LoadSaveMode.PostLoadInit)
 		{
-			StringBuilder stringBuilder = new StringBuilder();
-			hasMergeCompatibilityIngredients = false;
-			for (int i = 0; i < this.ingredients.Count; i++)
+			if (ingredients == null)
 			{
-				ThingDef thingDef = this.ingredients[i];
-				stringBuilder.Append((i == 0) ? thingDef.LabelCap.Resolve() : thingDef.label);
-				if (includeMergeCompatibility && this.Props.performMergeCompatibilityChecks)
-				{
-					IngredientProperties ingredient = thingDef.ingredient;
-					if (ingredient != null && ingredient.mergeCompatibilityTags.Count > 0)
-					{
-						stringBuilder.Append("*");
-						hasMergeCompatibilityIngredients = true;
-					}
-				}
-				if (i < this.ingredients.Count - 1)
-				{
-					stringBuilder.Append(", ");
-				}
+				ingredients = new List<ThingDef>();
 			}
-			return stringBuilder.ToString();
-		}
-
-		// Token: 0x06010286 RID: 66182 RVA: 0x004ACEA4 File Offset: 0x004AB0A4
-		private string GetFoodKindInspectString()
-		{
-			if (FoodUtility.GetFoodKind(this.parent) == FoodKind.NonMeat)
+			if (ingredients.RemoveAll((ThingDef i) => i == null) != 0)
 			{
-				return "MealKindVegetarian".Translate().Colorize(Color.green);
-			}
-			if (FoodUtility.GetFoodKind(this.parent) == FoodKind.Meat)
-			{
-				return "MealKindMeat".Translate().Colorize(ColorLibrary.RedReadable);
-			}
-			return "MealKindAny".Translate().Colorize(Color.white);
-		}
-
-		// Token: 0x06010287 RID: 66183 RVA: 0x004ACF0A File Offset: 0x004AB10A
-		public override IEnumerable<StatDrawEntry> SpecialDisplayStats()
-		{
-			if (this.parent.def.ingestible != null && this.parent.def.ingestible.IsMeal)
-			{
-				if (this.ingredients.Count > 0)
-				{
-					bool flag;
-					yield return new StatDrawEntry(StatCategoryDefOf.BasicsNonPawnImportant, "Ingredients".Translate(), this.GetIngredientsString(false, out flag), "IngredientsDesc".Translate(), 1000, null, Dialog_InfoCard.DefsToHyperlinks(this.ingredients), false, false);
-				}
-				if (ModsConfig.IdeologyActive)
-				{
-					yield return new StatDrawEntry(StatCategoryDefOf.BasicsNonPawnImportant, "DietaryType".Translate(), this.GetFoodKindInspectString().StripTags(), "DietaryTypeDesc".Translate(), 995, null, null, false, false);
-				}
-			}
-			yield break;
-		}
-
-		// Token: 0x06010288 RID: 66184 RVA: 0x004ACF1C File Offset: 0x004AB11C
-		private static void ComputeTags(List<string> result, List<ThingDef> ingredients)
-		{
-			foreach (ThingDef thingDef in ingredients)
-			{
-				if (thingDef.ingredient != null)
-				{
-					foreach (string obj in thingDef.ingredient.mergeCompatibilityTags)
-					{
-						result.AddUnique(obj);
-					}
-				}
+				Log.Error("Some ingredients were null after loading.");
 			}
 		}
+	}
 
-		// Token: 0x06010289 RID: 66185 RVA: 0x004ACFB4 File Offset: 0x004AB1B4
-		private static void MergeIngredients(List<ThingDef> destIngredients, List<ThingDef> srcIngredients, out bool lostImportantIngredients, ThingDef defToMake = null)
+	public void RegisterIngredient(ThingDef def)
+	{
+		if (!ingredients.Contains(def))
 		{
-			lostImportantIngredients = false;
-			foreach (ThingDef obj in srcIngredients)
+			ingredients.Add(def);
+			cachedMergeCompatibilityTags = null;
+		}
+	}
+
+	public override void PostSplitOff(Thing piece)
+	{
+		base.PostSplitOff(piece);
+		if (piece != parent)
+		{
+			CompIngredients compIngredients = piece.TryGetComp<CompIngredients>();
+			for (int i = 0; i < ingredients.Count; i++)
 			{
-				destIngredients.AddUnique(obj);
+				compIngredients.ingredients.Add(ingredients[i]);
 			}
-			if (destIngredients.Count > 3)
+		}
+	}
+
+	public override bool AllowStackWith(Thing otherStack)
+	{
+		if (!otherStack.TryGetComp(out CompIngredients comp))
+		{
+			return false;
+		}
+		if (!Props.performMergeCompatibilityChecks || !comp.Props.performMergeCompatibilityChecks)
+		{
+			return true;
+		}
+		if (ModsConfig.BiotechActive && FoodUtility.GetFoodKind(parent) != FoodUtility.GetFoodKind(otherStack))
+		{
+			return false;
+		}
+		int count = MergeCompatibilityTags.Count;
+		int count2 = comp.MergeCompatibilityTags.Count;
+		if (count == 0 && count2 == 0)
+		{
+			return true;
+		}
+		if (count != count2 && (count == 0 || count2 == 0))
+		{
+			return false;
+		}
+		tmpMergedIngredients.Clear();
+		tmpMergedIngredientTags.Clear();
+		tmpMergedIngredients.AddRange(ingredients);
+		MergeIngredients(tmpMergedIngredients, comp.ingredients, out var lostImportantIngredients, parent.def);
+		if (lostImportantIngredients)
+		{
+			return false;
+		}
+		ComputeTags(tmpMergedIngredientTags, tmpMergedIngredients);
+		return tmpMergedIngredientTags.SetsEqual(MergeCompatibilityTags) && tmpMergedIngredientTags.SetsEqual(comp.MergeCompatibilityTags);
+	}
+
+	public override void PreAbsorbStack(Thing otherStack, int count)
+	{
+		base.PreAbsorbStack(otherStack, count);
+		CompIngredients compIngredients = otherStack.TryGetComp<CompIngredients>();
+		MergeIngredients(ingredients, compIngredients.ingredients, out var _);
+		cachedMergeCompatibilityTags = null;
+	}
+
+	public override string CompInspectStringExtra()
+	{
+		StringBuilder stringBuilder = new StringBuilder();
+		if (ingredients.Count > 0)
+		{
+			stringBuilder.Append("Ingredients".Translate() + ": ");
+			stringBuilder.Append(GetIngredientsString(includeMergeCompatibility: true, out var hasMergeCompatibilityIngredients));
+			if (hasMergeCompatibilityIngredients)
 			{
-				destIngredients.SortStable(CompIngredients.MostTagsCmp);
-				while (destIngredients.Count > 3)
+				stringBuilder.Append(" (* " + "OnlyStacksWithCompatibleMeals".Translate().Resolve() + ")");
+			}
+		}
+		if (ModsConfig.IdeologyActive)
+		{
+			stringBuilder.AppendLineIfNotEmpty().Append(GetFoodKindInspectString());
+		}
+		return stringBuilder.ToString();
+	}
+
+	public string GetIngredientsString(bool includeMergeCompatibility, out bool hasMergeCompatibilityIngredients)
+	{
+		StringBuilder stringBuilder = new StringBuilder();
+		hasMergeCompatibilityIngredients = false;
+		for (int i = 0; i < ingredients.Count; i++)
+		{
+			ThingDef thingDef = ingredients[i];
+			stringBuilder.Append((i == 0) ? thingDef.LabelCap.Resolve() : thingDef.label);
+			if (includeMergeCompatibility && Props.performMergeCompatibilityChecks)
+			{
+				IngredientProperties ingredient = thingDef.ingredient;
+				if (ingredient != null && ingredient.mergeCompatibilityTags.Count > 0)
 				{
-					IngredientProperties ingredient = destIngredients.Last<ThingDef>().ingredient;
-					List<string> list = (ingredient != null) ? ingredient.mergeCompatibilityTags : null;
-					if (list != null && list.Any<string>())
-					{
-						lostImportantIngredients = true;
-					}
-					destIngredients.RemoveLast<ThingDef>();
+					stringBuilder.Append("*");
+					hasMergeCompatibilityIngredients = true;
 				}
 			}
-			if (defToMake != null && !lostImportantIngredients)
+			if (i < ingredients.Count - 1)
 			{
-				RecipeDef recipeDef = DefDatabase<RecipeDef>.AllDefs.FirstOrDefault((RecipeDef x) => x.ProducedThingDef == defToMake);
-				if (recipeDef == null)
-				{
-					return;
-				}
-				CompIngredients.missingIngredients.AddRange(recipeDef.ingredients);
-				using (List<ThingDef>.Enumerator enumerator = destIngredients.GetEnumerator())
-				{
-					while (enumerator.MoveNext())
-					{
-						ThingDef ing = enumerator.Current;
-						IngredientCount ingredientCount = CompIngredients.missingIngredients.FirstOrDefault((IngredientCount x) => x.filter.Allows(ing));
-						if (ingredientCount != null)
-						{
-							CompIngredients.missingIngredients.Remove(ingredientCount);
-							if (!CompIngredients.missingIngredients.Any<IngredientCount>())
-							{
-								break;
-							}
-						}
-					}
-				}
-				if (CompIngredients.missingIngredients.Any<IngredientCount>())
+				stringBuilder.Append(", ");
+			}
+		}
+		return stringBuilder.ToString();
+	}
+
+	private string GetFoodKindInspectString()
+	{
+		if (FoodUtility.GetFoodKind(parent) == FoodKind.NonMeat)
+		{
+			return "MealKindVegetarian".Translate().Colorize(Color.green);
+		}
+		if (FoodUtility.GetFoodKind(parent) == FoodKind.Meat)
+		{
+			return "MealKindMeat".Translate().Colorize(ColorLibrary.RedReadable);
+		}
+		return "MealKindAny".Translate().Colorize(Color.white);
+	}
+
+	[IteratorStateMachine(typeof(_003CSpecialDisplayStats_003Ed__17))]
+	public override IEnumerable<StatDrawEntry> SpecialDisplayStats()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CSpecialDisplayStats_003Ed__17(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	private static void ComputeTags(List<string> result, List<ThingDef> ingredients)
+	{
+		foreach (ThingDef ingredient in ingredients)
+		{
+			if (ingredient.ingredient == null)
+			{
+				continue;
+			}
+			foreach (string mergeCompatibilityTag in ingredient.ingredient.mergeCompatibilityTags)
+			{
+				result.AddUnique(mergeCompatibilityTag);
+			}
+		}
+	}
+
+	private static void MergeIngredients(List<ThingDef> destIngredients, List<ThingDef> srcIngredients, out bool lostImportantIngredients, ThingDef defToMake = null)
+	{
+		lostImportantIngredients = false;
+		foreach (ThingDef srcIngredient in srcIngredients)
+		{
+			destIngredients.AddUnique(srcIngredient);
+		}
+		if (destIngredients.Count > 3)
+		{
+			destIngredients.SortStable(MostTagsCmp);
+			while (destIngredients.Count > 3)
+			{
+				List<string> list = destIngredients.Last().ingredient?.mergeCompatibilityTags;
+				if (list != null && list.Any())
 				{
 					lostImportantIngredients = true;
 				}
+				destIngredients.RemoveLast();
 			}
-			CompIngredients.missingIngredients.Clear();
 		}
-
-		// Token: 0x0400A8C4 RID: 43204
-		public List<ThingDef> ingredients = new List<ThingDef>();
-
-		// Token: 0x0400A8C5 RID: 43205
-		private List<string> cachedMergeCompatibilityTags;
-
-		// Token: 0x0400A8C6 RID: 43206
-		public const int MaxNumIngredients = 3;
-
-		// Token: 0x0400A8C7 RID: 43207
-		private static readonly List<ThingDef> tmpMergedIngredients = new List<ThingDef>();
-
-		// Token: 0x0400A8C8 RID: 43208
-		private static readonly List<string> tmpMergedIngredientTags = new List<string>();
-
-		// Token: 0x0400A8C9 RID: 43209
-		private static readonly List<IngredientCount> missingIngredients = new List<IngredientCount>();
-
-		// Token: 0x0400A8CA RID: 43210
-		private static readonly Func<ThingDef, ThingDef, int> MostTagsCmp = new Func<ThingDef, ThingDef, int>(GenCollection.CompareBy<ThingDef, int>(new Func<ThingDef, int>(CompIngredients.<>c.<>9, ldftn(<.cctor>b__23_0))).Descending<ThingDef>().Compare);
+		if (defToMake != null && !lostImportantIngredients)
+		{
+			RecipeDef recipeDef = DefDatabase<RecipeDef>.AllDefs.FirstOrDefault((RecipeDef x) => x.ProducedThingDef == defToMake);
+			if (recipeDef == null)
+			{
+				return;
+			}
+			missingIngredients.AddRange(recipeDef.ingredients);
+			foreach (ThingDef ing in destIngredients)
+			{
+				IngredientCount ingredientCount = missingIngredients.FirstOrDefault((IngredientCount x) => x.filter.Allows(ing));
+				if (ingredientCount != null)
+				{
+					missingIngredients.Remove(ingredientCount);
+					if (!missingIngredients.Any())
+					{
+						break;
+					}
+				}
+			}
+			if (missingIngredients.Any())
+			{
+				lostImportantIngredients = true;
+			}
+		}
+		missingIngredients.Clear();
 	}
 }

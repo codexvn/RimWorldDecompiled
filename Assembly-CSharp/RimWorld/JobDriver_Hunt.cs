@@ -1,187 +1,363 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_Hunt : JobDriver
 {
-	// Token: 0x02001291 RID: 4753
-	public class JobDriver_Hunt : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__13 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700122E RID: 4654
-		// (get) Token: 0x06007463 RID: 29795 RVA: 0x0023A8E0 File Offset: 0x00238AE0
-		public Pawn Victim
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_Hunt _003C_003E4__this;
+
+		private Toil _003CstartCollectCorpseLabel_003E5__2;
+
+		private Toil _003CslaughterLabel_003E5__3;
+
+		private Toil _003CgotoCastPos_003E5__4;
+
+		private Toil _003CslaughterIfPossible_003E5__5;
+
+		private Toil _003CcarryToCell_003E5__6;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				Corpse corpse = this.Corpse;
-				if (corpse != null)
-				{
-					return corpse.InnerPawn;
-				}
-				return (Pawn)this.job.GetTarget(TargetIndex.A).Thing;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700122F RID: 4655
-		// (get) Token: 0x06007464 RID: 29796 RVA: 0x0023A918 File Offset: 0x00238B18
-		private Corpse Corpse
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.job.GetTarget(TargetIndex.A).Thing as Corpse;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06007465 RID: 29797 RVA: 0x0023A93E File Offset: 0x00238B3E
-		public override void ExposeData()
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__13(int _003C_003E1__state)
 		{
-			base.ExposeData();
-			Scribe_Values.Look<int>(ref this.jobStartTick, "jobStartTick", 0, false);
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x06007466 RID: 29798 RVA: 0x0023A958 File Offset: 0x00238B58
-		public override string GetReport()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			if (this.Victim != null)
+			_003CstartCollectCorpseLabel_003E5__2 = null;
+			_003CslaughterLabel_003E5__3 = null;
+			_003CgotoCastPos_003E5__4 = null;
+			_003CslaughterIfPossible_003E5__5 = null;
+			_003CcarryToCell_003E5__6 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_Hunt CS_0024_003C_003E8__locals18 = _003C_003E4__this;
+			switch (num)
 			{
-				return JobUtility.GetResolvedJobReport(this.job.def.reportString, this.Victim);
-			}
-			return base.GetReport();
-		}
-
-		// Token: 0x06007467 RID: 29799 RVA: 0x0023A989 File Offset: 0x00238B89
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
-		{
-			return this.pawn.Reserve(this.Victim, this.job, 1, -1, null, errorOnFailed, false);
-		}
-
-		// Token: 0x06007468 RID: 29800 RVA: 0x0023A9AC File Offset: 0x00238BAC
-		protected override IEnumerable<Toil> MakeNewToils()
-		{
-			this.FailOn(delegate()
+			default:
+				return false;
+			case 0:
 			{
-				if (this.Victim == null)
+				_003C_003E1__state = -1;
+				CS_0024_003C_003E8__locals18.FailOn(delegate
 				{
-					return true;
-				}
-				if (this.Victim.IsForbidden(this.pawn))
-				{
-					return true;
-				}
-				if (!this.job.ignoreDesignations)
-				{
-					Pawn victim = this.Victim;
-					if (victim != null && !victim.Dead && base.Map.designationManager.DesignationOn(victim, DesignationDefOf.Hunt) == null)
+					if (CS_0024_003C_003E8__locals18.Victim == null)
 					{
 						return true;
 					}
-				}
-				return false;
-			});
-			Toil toil = ToilMaker.MakeToil("MakeNewToils");
-			toil.initAction = delegate()
-			{
-				this.jobStartTick = Find.TickManager.TicksGame;
-			};
-			yield return toil;
-			yield return Toils_Combat.TrySetJobToUseAttackVerb(TargetIndex.A);
-			Toil startCollectCorpseLabel = Toils_General.Label();
-			Toil slaughterLabel = Toils_General.Label();
-			Toil gotoCastPos = Toils_Combat.GotoCastPosition(TargetIndex.A, TargetIndex.None, true, 0.95f).JumpIfDespawnedOrNull(TargetIndex.A, startCollectCorpseLabel).FailOn(() => Find.TickManager.TicksGame > this.jobStartTick + 5000);
-			yield return gotoCastPos;
-			Toil slaughterIfPossible = Toils_Jump.JumpIf(slaughterLabel, delegate
-			{
-				Pawn victim = this.Victim;
-				return (victim.RaceProps.DeathActionWorker == null || !victim.RaceProps.DeathActionWorker.DangerousInMelee) && victim.Downed;
-			});
-			yield return slaughterIfPossible;
-			yield return Toils_Jump.JumpIfTargetNotHittable(TargetIndex.A, gotoCastPos);
-			yield return Toils_Combat.CastVerb(TargetIndex.A, false).JumpIfDespawnedOrNull(TargetIndex.A, startCollectCorpseLabel).FailOn(() => Find.TickManager.TicksGame > this.jobStartTick + 5000);
-			yield return Toils_Jump.JumpIfTargetDespawnedOrNull(TargetIndex.A, startCollectCorpseLabel);
-			yield return Toils_Jump.Jump(slaughterIfPossible);
-			yield return slaughterLabel;
-			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch, false).FailOnMobile(TargetIndex.A);
-			yield return Toils_General.WaitWith(TargetIndex.A, 180, true, false, false, TargetIndex.None, PathEndMode.Touch).FailOnMobile(TargetIndex.A);
-			yield return Toils_General.Do(delegate
-			{
-				if (this.Victim.Dead)
-				{
-					return;
-				}
-				ExecutionUtility.DoHuntingExecution(this.pawn, this.Victim);
-				this.pawn.records.Increment(RecordDefOf.AnimalsSlaughtered);
-				if (this.pawn.InMentalState)
-				{
-					this.pawn.MentalState.Notify_SlaughteredTarget();
-				}
-			});
-			yield return Toils_Jump.Jump(startCollectCorpseLabel);
-			yield return startCollectCorpseLabel;
-			yield return this.StartCollectCorpseToil();
-			yield return Toils_Goto.GotoCell(TargetIndex.A, PathEndMode.ClosestTouch).FailOnDespawnedNullOrForbidden(TargetIndex.A).FailOnSomeonePhysicallyInteracting(TargetIndex.A);
-			yield return Toils_Haul.StartCarryThing(TargetIndex.A, false, false, false, true, false);
-			Toil carryToCell = Toils_Haul.CarryHauledThingToCell(TargetIndex.B, PathEndMode.ClosestTouch);
-			yield return carryToCell;
-			yield return Toils_Haul.PlaceHauledThingInCell(TargetIndex.B, carryToCell, true, false);
-			yield break;
-		}
-
-		// Token: 0x06007469 RID: 29801 RVA: 0x0023A9BC File Offset: 0x00238BBC
-		private Toil StartCollectCorpseToil()
-		{
-			Toil toil = ToilMaker.MakeToil("StartCollectCorpseToil");
-			toil.initAction = delegate()
-			{
-				if (this.Victim == null)
-				{
-					toil.actor.jobs.EndCurrentJob(JobCondition.Incompletable, true, true);
-					return;
-				}
-				TaleRecorder.RecordTale(TaleDefOf.Hunted, new object[]
-				{
-					this.pawn,
-					this.Victim
+					if (CS_0024_003C_003E8__locals18.Victim.IsForbidden(CS_0024_003C_003E8__locals18.pawn))
+					{
+						return true;
+					}
+					if (!CS_0024_003C_003E8__locals18.job.ignoreDesignations)
+					{
+						Pawn victim2 = CS_0024_003C_003E8__locals18.Victim;
+						if (victim2 != null && !victim2.Dead && CS_0024_003C_003E8__locals18.Map.designationManager.DesignationOn(victim2, DesignationDefOf.Hunt) == null)
+						{
+							return true;
+						}
+					}
+					return false;
 				});
-				Corpse corpse = this.Victim.Corpse;
-				if (corpse == null || !this.pawn.CanReserveAndReach(corpse, PathEndMode.ClosestTouch, Danger.Deadly, 1, -1, null, false))
+				Toil toil = ToilMaker.MakeToil("MakeNewToils");
+				toil.initAction = delegate
 				{
-					this.pawn.jobs.EndCurrentJob(JobCondition.Incompletable, true, true);
-					return;
-				}
-				corpse.SetForbidden(false, true);
-				IntVec3 c;
-				if (StoreUtility.TryFindBestBetterStoreCellFor(corpse, this.pawn, this.Map, StoragePriority.Unstored, this.pawn.Faction, out c, true))
+					CS_0024_003C_003E8__locals18.jobStartTick = Find.TickManager.TicksGame;
+				};
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 1;
+				return true;
+			}
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Combat.TrySetJobToUseAttackVerb(TargetIndex.A);
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				_003CstartCollectCorpseLabel_003E5__2 = Toils_General.Label();
+				_003CslaughterLabel_003E5__3 = Toils_General.Label();
+				_003CgotoCastPos_003E5__4 = Toils_Combat.GotoCastPosition(TargetIndex.A, TargetIndex.None, closeIfDowned: true, 0.95f).JumpIfDespawnedOrNull(TargetIndex.A, _003CstartCollectCorpseLabel_003E5__2).FailOn(() => Find.TickManager.TicksGame > CS_0024_003C_003E8__locals18.jobStartTick + 5000);
+				_003C_003E2__current = _003CgotoCastPos_003E5__4;
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+				_003C_003E1__state = -1;
+				_003CslaughterIfPossible_003E5__5 = Toils_Jump.JumpIf(_003CslaughterLabel_003E5__3, delegate
 				{
-					this.pawn.Reserve(corpse, this.job, 1, -1, null, true, false);
-					this.pawn.Reserve(c, this.job, 1, -1, null, true, false);
-					this.job.SetTarget(TargetIndex.B, c);
-					this.job.SetTarget(TargetIndex.A, corpse);
-					this.job.count = 1;
-					this.job.haulMode = HaulMode.ToCellStorage;
-					return;
-				}
-				this.pawn.jobs.EndCurrentJob(JobCondition.Succeeded, true, true);
-			};
-			return toil;
+					Pawn victim = CS_0024_003C_003E8__locals18.Victim;
+					if (victim.RaceProps.DeathActionWorker != null && victim.RaceProps.DeathActionWorker.DangerousInMelee)
+					{
+						return false;
+					}
+					return victim.Downed ? true : false;
+				});
+				_003C_003E2__current = _003CslaughterIfPossible_003E5__5;
+				_003C_003E1__state = 4;
+				return true;
+			case 4:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Jump.JumpIfTargetNotHittable(TargetIndex.A, _003CgotoCastPos_003E5__4);
+				_003C_003E1__state = 5;
+				return true;
+			case 5:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Combat.CastVerb(TargetIndex.A, canHitNonTargetPawns: false).JumpIfDespawnedOrNull(TargetIndex.A, _003CstartCollectCorpseLabel_003E5__2).FailOn(() => Find.TickManager.TicksGame > CS_0024_003C_003E8__locals18.jobStartTick + 5000);
+				_003C_003E1__state = 6;
+				return true;
+			case 6:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Jump.JumpIfTargetDespawnedOrNull(TargetIndex.A, _003CstartCollectCorpseLabel_003E5__2);
+				_003C_003E1__state = 7;
+				return true;
+			case 7:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Jump.Jump(_003CslaughterIfPossible_003E5__5);
+				_003C_003E1__state = 8;
+				return true;
+			case 8:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = _003CslaughterLabel_003E5__3;
+				_003C_003E1__state = 9;
+				return true;
+			case 9:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch).FailOnMobile(TargetIndex.A);
+				_003C_003E1__state = 10;
+				return true;
+			case 10:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.WaitWith(TargetIndex.A, 180, useProgressBar: true).FailOnMobile(TargetIndex.A);
+				_003C_003E1__state = 11;
+				return true;
+			case 11:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.Do(delegate
+				{
+					if (!CS_0024_003C_003E8__locals18.Victim.Dead)
+					{
+						ExecutionUtility.DoHuntingExecution(CS_0024_003C_003E8__locals18.pawn, CS_0024_003C_003E8__locals18.Victim);
+						CS_0024_003C_003E8__locals18.pawn.records.Increment(RecordDefOf.AnimalsSlaughtered);
+						if (CS_0024_003C_003E8__locals18.pawn.InMentalState)
+						{
+							CS_0024_003C_003E8__locals18.pawn.MentalState.Notify_SlaughteredTarget();
+						}
+					}
+				});
+				_003C_003E1__state = 12;
+				return true;
+			case 12:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Jump.Jump(_003CstartCollectCorpseLabel_003E5__2);
+				_003C_003E1__state = 13;
+				return true;
+			case 13:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = _003CstartCollectCorpseLabel_003E5__2;
+				_003C_003E1__state = 14;
+				return true;
+			case 14:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = CS_0024_003C_003E8__locals18.StartCollectCorpseToil();
+				_003C_003E1__state = 15;
+				return true;
+			case 15:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Goto.GotoCell(TargetIndex.A, PathEndMode.ClosestTouch).FailOnDespawnedNullOrForbidden(TargetIndex.A).FailOnSomeonePhysicallyInteracting(TargetIndex.A);
+				_003C_003E1__state = 16;
+				return true;
+			case 16:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Haul.StartCarryThing(TargetIndex.A);
+				_003C_003E1__state = 17;
+				return true;
+			case 17:
+				_003C_003E1__state = -1;
+				_003CcarryToCell_003E5__6 = Toils_Haul.CarryHauledThingToCell(TargetIndex.B);
+				_003C_003E2__current = _003CcarryToCell_003E5__6;
+				_003C_003E1__state = 18;
+				return true;
+			case 18:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Haul.PlaceHauledThingInCell(TargetIndex.B, _003CcarryToCell_003E5__6, storageMode: true);
+				_003C_003E1__state = 19;
+				return true;
+			case 19:
+				_003C_003E1__state = -1;
+				return false;
+			}
 		}
 
-		// Token: 0x04004FFA RID: 20474
-		private int jobStartTick = -1;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x04004FFB RID: 20475
-		private const TargetIndex VictimInd = TargetIndex.A;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04004FFC RID: 20476
-		private const TargetIndex CorpseInd = TargetIndex.A;
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__13 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__13(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x04004FFD RID: 20477
-		private const TargetIndex StoreCellInd = TargetIndex.B;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x04004FFE RID: 20478
-		private const int MaxHuntTicks = 5000;
+	private int jobStartTick = -1;
 
-		// Token: 0x04004FFF RID: 20479
-		public const float MaxRangeFactor = 0.95f;
+	private const TargetIndex VictimInd = TargetIndex.A;
+
+	private const TargetIndex CorpseInd = TargetIndex.A;
+
+	private const TargetIndex StoreCellInd = TargetIndex.B;
+
+	private const int MaxHuntTicks = 5000;
+
+	public const float MaxRangeFactor = 0.95f;
+
+	public Pawn Victim
+	{
+		get
+		{
+			Corpse corpse = Corpse;
+			if (corpse != null)
+			{
+				return corpse.InnerPawn;
+			}
+			return (Pawn)job.GetTarget(TargetIndex.A).Thing;
+		}
+	}
+
+	private Corpse Corpse => job.GetTarget(TargetIndex.A).Thing as Corpse;
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref jobStartTick, "jobStartTick", 0);
+	}
+
+	public override string GetReport()
+	{
+		if (Victim != null)
+		{
+			return JobUtility.GetResolvedJobReport(job.def.reportString, Victim);
+		}
+		return base.GetReport();
+	}
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return pawn.Reserve(Victim, job, 1, -1, null, errorOnFailed);
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__13))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__13(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	private Toil StartCollectCorpseToil()
+	{
+		Toil toil = ToilMaker.MakeToil("StartCollectCorpseToil");
+		toil.initAction = delegate
+		{
+			if (Victim == null)
+			{
+				toil.actor.jobs.EndCurrentJob(JobCondition.Incompletable);
+			}
+			else
+			{
+				TaleRecorder.RecordTale(TaleDefOf.Hunted, pawn, Victim);
+				Corpse corpse = Victim.Corpse;
+				if (corpse == null || !pawn.CanReserveAndReach(corpse, PathEndMode.ClosestTouch, Danger.Deadly))
+				{
+					pawn.jobs.EndCurrentJob(JobCondition.Incompletable);
+				}
+				else
+				{
+					corpse.SetForbidden(value: false);
+					if (StoreUtility.TryFindBestBetterStoreCellFor(corpse, pawn, base.Map, StoragePriority.Unstored, pawn.Faction, out var foundCell))
+					{
+						pawn.Reserve(corpse, job);
+						pawn.Reserve(foundCell, job);
+						job.SetTarget(TargetIndex.B, foundCell);
+						job.SetTarget(TargetIndex.A, corpse);
+						job.count = 1;
+						job.haulMode = HaulMode.ToCellStorage;
+					}
+					else
+					{
+						pawn.jobs.EndCurrentJob(JobCondition.Succeeded);
+					}
+				}
+			}
+		};
+		return toil;
 	}
 }

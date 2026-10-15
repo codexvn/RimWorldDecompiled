@@ -1,52 +1,141 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_DevourerDigest : JobDriver
 {
-	// Token: 0x020011D7 RID: 4567
-	public class JobDriver_DevourerDigest : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__5 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700114F RID: 4431
-		// (get) Token: 0x06006F99 RID: 28569 RVA: 0x0022B994 File Offset: 0x00229B94
-		private CompDevourer Comp
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_DevourerDigest _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				CompDevourer result;
-				if ((result = this.comp) == null)
-				{
-					result = (this.comp = this.pawn.GetComp<CompDevourer>());
-				}
-				return result;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06006F9A RID: 28570 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		object IEnumerator.Current
 		{
-			return true;
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x06006F9B RID: 28571 RVA: 0x00002C42 File Offset: 0x00000E42
-		public override string GetReport()
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__5(int _003C_003E1__state)
 		{
-			return null;
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x06006F9C RID: 28572 RVA: 0x0022B9BF File Offset: 0x00229BBF
-		protected override IEnumerable<Toil> MakeNewToils()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			int digestionTicks = this.Comp.GetDigestionTicks();
-			Toil toil = Toils_General.Wait(digestionTicks, TargetIndex.None).WithProgressBarToilDelay(TargetIndex.None, digestionTicks, false, -0.5f);
-			toil.FailOn(() => !this.Comp.Digesting);
-			toil.PlaySustainerOrSound(SoundDefOf.Pawn_Devourer_Digesting, 1f);
-			toil.AddFinishAction(new Action(this.Comp.DigestJobFinished));
-			yield return toil;
-			yield break;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x04004DCC RID: 19916
-		private CompDevourer comp;
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_DevourerDigest CS_0024_003C_003E8__locals3 = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+			{
+				_003C_003E1__state = -1;
+				int digestionTicks = CS_0024_003C_003E8__locals3.Comp.GetDigestionTicks();
+				Toil toil = Toils_General.Wait(digestionTicks).WithProgressBarToilDelay(TargetIndex.None, digestionTicks);
+				toil.FailOn(() => !CS_0024_003C_003E8__locals3.Comp.Digesting);
+				toil.PlaySustainerOrSound(SoundDefOf.Pawn_Devourer_Digesting);
+				toil.AddFinishAction(CS_0024_003C_003E8__locals3.Comp.DigestJobFinished);
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 1;
+				return true;
+			}
+			case 1:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__5 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__5(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private CompDevourer comp;
+
+	private CompDevourer Comp => comp ?? (comp = pawn.GetComp<CompDevourer>());
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return true;
+	}
+
+	public override string GetReport()
+	{
+		return null;
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__5))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__5(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

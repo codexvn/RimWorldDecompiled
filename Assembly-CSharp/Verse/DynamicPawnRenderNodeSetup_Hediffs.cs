@@ -1,72 +1,216 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-namespace Verse
+namespace Verse;
+
+public class DynamicPawnRenderNodeSetup_Hediffs : DynamicPawnRenderNodeSetup
 {
-	// Token: 0x0200060D RID: 1549
-	public class DynamicPawnRenderNodeSetup_Hediffs : DynamicPawnRenderNodeSetup
+	[CompilerGenerated]
+	private sealed class _003CGetDynamicNodes_003Ed__2 : IEnumerable<(PawnRenderNode node, PawnRenderNode parent)>, IEnumerable, IEnumerator<(PawnRenderNode node, PawnRenderNode parent)>, IEnumerator, IDisposable
 	{
-		// Token: 0x17000705 RID: 1797
-		// (get) Token: 0x0600279A RID: 10138 RVA: 0x00002501 File Offset: 0x00000701
-		public override bool HumanlikeOnly
+		private int _003C_003E1__state;
+
+		private (PawnRenderNode node, PawnRenderNode parent) _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private Pawn pawn;
+
+		public Pawn _003C_003E3__pawn;
+
+		private PawnRenderTree tree;
+
+		public PawnRenderTree _003C_003E3__tree;
+
+		private List<Hediff>.Enumerator _003C_003E7__wrap1;
+
+		private Hediff _003Ch_003E5__3;
+
+		private List<PawnRenderNodeProperties>.Enumerator _003C_003E7__wrap3;
+
+		(PawnRenderNode node, PawnRenderNode parent) IEnumerator<(PawnRenderNode, PawnRenderNode)>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return false;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600279B RID: 10139 RVA: 0x000D2E77 File Offset: 0x000D1077
-		[return: TupleElementNames(new string[]
+		object IEnumerator.Current
 		{
-			"node",
-			"parent"
-		})]
-		public override IEnumerable<ValueTuple<PawnRenderNode, PawnRenderNode>> GetDynamicNodes(Pawn pawn, PawnRenderTree tree)
-		{
-			Pawn_HealthTracker health = pawn.health;
-			List<Hediff> list;
-			if (health == null)
+			[DebuggerHidden]
+			get
 			{
-				list = null;
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetDynamicNodes_003Ed__2(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if ((uint)(num - -4) <= 1u || num == 1)
+			{
+				try
+				{
+					if (num == -4 || num == 1)
+					{
+						try
+						{
+						}
+						finally
+						{
+							_003C_003Em__Finally2();
+						}
+					}
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = default(List<Hediff>.Enumerator);
+			_003Ch_003E5__3 = null;
+			_003C_003E7__wrap3 = default(List<PawnRenderNodeProperties>.Enumerator);
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				if (num != 0)
+				{
+					if (num != 1)
+					{
+						return false;
+					}
+					_003C_003E1__state = -4;
+					goto IL_014c;
+				}
+				_003C_003E1__state = -1;
+				List<Hediff> list = pawn.health?.hediffSet?.hediffs;
+				if (list == null)
+				{
+					return false;
+				}
+				_003C_003E7__wrap1 = list.GetEnumerator();
+				_003C_003E1__state = -3;
+				goto IL_0175;
+				IL_0175:
+				do
+				{
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						_003Ch_003E5__3 = _003C_003E7__wrap1.Current;
+						continue;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = default(List<Hediff>.Enumerator);
+					return false;
+				}
+				while (!_003Ch_003E5__3.Visible || !_003Ch_003E5__3.def.HasDefinedGraphicProperties);
+				_003C_003E7__wrap3 = _003Ch_003E5__3.def.RenderNodeProperties.GetEnumerator();
+				_003C_003E1__state = -4;
+				goto IL_014c;
+				IL_014c:
+				while (_003C_003E7__wrap3.MoveNext())
+				{
+					PawnRenderNodeProperties current = _003C_003E7__wrap3.Current;
+					if (tree.ShouldAddNodeToTree(current))
+					{
+						PawnRenderNode pawnRenderNode = (PawnRenderNode)Activator.CreateInstance(current.nodeClass, pawn, current, tree);
+						pawnRenderNode.hediff = _003Ch_003E5__3;
+						pawnRenderNode.bodyPart = _003Ch_003E5__3.Part;
+						_003C_003E2__current = (node: pawnRenderNode, parent: null);
+						_003C_003E1__state = 1;
+						return true;
+					}
+				}
+				_003C_003Em__Finally2();
+				_003C_003E7__wrap3 = default(List<PawnRenderNodeProperties>.Enumerator);
+				_003Ch_003E5__3 = null;
+				goto IL_0175;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap1/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -3;
+			((IDisposable)_003C_003E7__wrap3/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<(PawnRenderNode node, PawnRenderNode parent)> IEnumerable<(PawnRenderNode, PawnRenderNode)>.GetEnumerator()
+		{
+			_003CGetDynamicNodes_003Ed__2 _003CGetDynamicNodes_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CGetDynamicNodes_003Ed__ = this;
 			}
 			else
 			{
-				HediffSet hediffSet = health.hediffSet;
-				list = ((hediffSet != null) ? hediffSet.hediffs : null);
+				_003CGetDynamicNodes_003Ed__ = new _003CGetDynamicNodes_003Ed__2(0);
 			}
-			List<Hediff> list2 = list;
-			if (list2 == null)
-			{
-				yield break;
-			}
-			foreach (Hediff h in list2)
-			{
-				if (h.Visible && h.def.HasDefinedGraphicProperties)
-				{
-					foreach (PawnRenderNodeProperties pawnRenderNodeProperties in h.def.RenderNodeProperties)
-					{
-						if (tree.ShouldAddNodeToTree(pawnRenderNodeProperties))
-						{
-							PawnRenderNode pawnRenderNode = (PawnRenderNode)Activator.CreateInstance(pawnRenderNodeProperties.nodeClass, new object[]
-							{
-								pawn,
-								pawnRenderNodeProperties,
-								tree
-							});
-							pawnRenderNode.hediff = h;
-							pawnRenderNode.bodyPart = h.Part;
-							yield return new ValueTuple<PawnRenderNode, PawnRenderNode>(pawnRenderNode, null);
-						}
-					}
-					List<PawnRenderNodeProperties>.Enumerator enumerator2 = default(List<PawnRenderNodeProperties>.Enumerator);
-					h = null;
-				}
-			}
-			List<Hediff>.Enumerator enumerator = default(List<Hediff>.Enumerator);
-			yield break;
-			yield break;
+			_003CGetDynamicNodes_003Ed__.pawn = _003C_003E3__pawn;
+			_003CGetDynamicNodes_003Ed__.tree = _003C_003E3__tree;
+			return _003CGetDynamicNodes_003Ed__;
 		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<(PawnRenderNode, PawnRenderNode)>)this).GetEnumerator();
+		}
+	}
+
+	public override bool HumanlikeOnly => false;
+
+	[IteratorStateMachine(typeof(_003CGetDynamicNodes_003Ed__2))]
+	public override IEnumerable<(PawnRenderNode node, PawnRenderNode parent)> GetDynamicNodes(Pawn pawn, PawnRenderTree tree)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetDynamicNodes_003Ed__2(-2)
+		{
+			_003C_003E3__pawn = pawn,
+			_003C_003E3__tree = tree
+		};
 	}
 }

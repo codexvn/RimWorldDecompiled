@@ -1,262 +1,338 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Pawn_DraftController : IExposable
 {
-	// Token: 0x02002443 RID: 9283
-	public class Pawn_DraftController : IExposable
+	[CompilerGenerated]
+	private sealed class _003CGetGizmos_003Ed__15 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001E53 RID: 7763
-		// (get) Token: 0x0600C8E6 RID: 51430 RVA: 0x003AAFE8 File Offset: 0x003A91E8
-		// (set) Token: 0x0600C8E7 RID: 51431 RVA: 0x003AAFF0 File Offset: 0x003A91F0
-		public bool Drafted
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Pawn_DraftController _003C_003E4__this;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.draftedInt;
+				return _003C_003E2__current;
 			}
-			set
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
 			{
-				if (value == this.draftedInt)
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetGizmos_003Ed__15(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			Pawn_DraftController CS_0024_003C_003E8__locals20 = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (CS_0024_003C_003E8__locals20.ShowDraftGizmo)
 				{
-					return;
-				}
-				this.pawn.mindState.priorityWork.ClearPrioritizedWorkAndJobQueue();
-				this.fireAtWillInt = true;
-				this.draftedInt = value;
-				if (!value && this.pawn.Spawned)
-				{
-					this.pawn.Map.pawnDestinationReservationManager.ReleaseAllClaimedBy(this.pawn);
-				}
-				this.pawn.jobs.ClearQueuedJobs(true);
-				if (this.pawn.jobs.curJob != null && this.pawn.jobs.IsCurrentJobPlayerInterruptible())
-				{
-					JobDriver_Ingest jobDriver_Ingest = this.pawn.jobs.curDriver as JobDriver_Ingest;
-					if (jobDriver_Ingest != null && jobDriver_Ingest.EatingFromInventory)
+					Command_Toggle command_Toggle = new Command_Toggle
 					{
-						this.pawn.inventory.innerContainer.TryAddRangeOrTransfer(this.pawn.carryTracker.innerContainer, true, false);
+						hotKey = KeyBindingDefOf.Command_ColonistDraft,
+						isActive = () => CS_0024_003C_003E8__locals20.Drafted,
+						toggleAction = delegate
+						{
+							CS_0024_003C_003E8__locals20.Drafted = !CS_0024_003C_003E8__locals20.Drafted;
+							PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.Drafting, KnowledgeAmount.SpecificInteraction);
+							if (CS_0024_003C_003E8__locals20.Drafted)
+							{
+								LessonAutoActivator.TeachOpportunity(ConceptDefOf.QueueOrders, OpportunityType.GoodToKnow);
+							}
+						},
+						defaultDesc = "CommandToggleDraftDesc".Translate(),
+						icon = TexCommand.Draft,
+						turnOnSound = SoundDefOf.DraftOn,
+						turnOffSound = SoundDefOf.DraftOff,
+						groupKeyIgnoreContent = 81729172,
+						defaultLabel = (CS_0024_003C_003E8__locals20.Drafted ? "CommandUndraftLabel" : "CommandDraftLabel").Translate()
+					};
+					if (CS_0024_003C_003E8__locals20.pawn.Downed)
+					{
+						command_Toggle.Disable("IsIncapped".Translate(CS_0024_003C_003E8__locals20.pawn.LabelShort, CS_0024_003C_003E8__locals20.pawn));
 					}
-					if (!value)
+					if (CS_0024_003C_003E8__locals20.pawn.Deathresting)
 					{
-						Pawn pawn = this.pawn.carryTracker.CarriedThing as Pawn;
-						ChildcareUtility.BreastfeedFailReason? breastfeedFailReason;
-						if (pawn != null && ChildcareUtility.CanSuckle(pawn, out breastfeedFailReason))
+						command_Toggle.Disable("IsDeathresting".Translate(CS_0024_003C_003E8__locals20.pawn.Named("PAWN")));
+					}
+					if (ModsConfig.BiotechActive && CS_0024_003C_003E8__locals20.pawn.IsColonyMech)
+					{
+						AcceptanceReport acceptanceReport = MechanitorUtility.CanDraftMech(CS_0024_003C_003E8__locals20.pawn);
+						if (!acceptanceReport)
 						{
-							Job job = ChildcareUtility.MakeBringBabyToSafetyJob(this.pawn, pawn);
-							Pawn_JobTracker jobs = this.pawn.jobs;
-							Job newJob = job;
-							JobCondition lastJobEndCondition = JobCondition.InterruptForced;
-							ThinkNode jobGiver = null;
-							bool resumeCurJobAfterwards = false;
-							bool cancelBusyStances = true;
-							ThinkTreeDef thinkTree = null;
-							bool? keepCarryingThingOverride = new bool?(true);
-							jobs.StartJob(newJob, lastJobEndCondition, jobGiver, resumeCurJobAfterwards, cancelBusyStances, thinkTree, null, false, false, keepCarryingThingOverride, false, true, false);
+							command_Toggle.Disable(acceptanceReport.Reason);
 						}
-						else if (this.pawn.IsCarrying())
+					}
+					command_Toggle.tutorTag = ((!CS_0024_003C_003E8__locals20.Drafted) ? "Draft" : "Undraft");
+					_003C_003E2__current = command_Toggle;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				goto IL_01a3;
+			case 1:
+				_003C_003E1__state = -1;
+				goto IL_01a3;
+			case 2:
+				{
+					_003C_003E1__state = -1;
+					break;
+				}
+				IL_01a3:
+				if (CS_0024_003C_003E8__locals20.Drafted && CS_0024_003C_003E8__locals20.pawn.equipment.Primary != null && CS_0024_003C_003E8__locals20.pawn.equipment.Primary.def.IsRangedWeapon)
+				{
+					_003C_003E2__current = new Command_Toggle
+					{
+						hotKey = KeyBindingDefOf.Misc6,
+						isActive = () => CS_0024_003C_003E8__locals20.FireAtWill,
+						toggleAction = delegate
 						{
-							Thing thing;
-							this.pawn.carryTracker.TryDropCarriedThing(this.pawn.Position, ThingPlaceMode.Near, out thing, null);
-							this.pawn.jobs.EndCurrentJob(JobCondition.InterruptForced, true, true);
-						}
-						else
-						{
-							this.pawn.jobs.EndCurrentJob(JobCondition.InterruptForced, true, true);
-						}
+							CS_0024_003C_003E8__locals20.FireAtWill = !CS_0024_003C_003E8__locals20.FireAtWill;
+						},
+						icon = TexCommand.FireAtWill,
+						defaultLabel = "CommandFireAtWillLabel".Translate(),
+						defaultDesc = "CommandFireAtWillDesc".Translate(),
+						tutorTag = "FireAtWillToggle"
+					};
+					_003C_003E1__state = 2;
+					return true;
+				}
+				break;
+			}
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CGetGizmos_003Ed__15 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CGetGizmos_003Ed__15(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	public Pawn pawn;
+
+	private bool draftedInt;
+
+	private bool fireAtWillInt = true;
+
+	private AutoUndrafter autoUndrafter;
+
+	public bool Drafted
+	{
+		get
+		{
+			return draftedInt;
+		}
+		set
+		{
+			if (value == draftedInt)
+			{
+				return;
+			}
+			pawn.mindState.priorityWork.ClearPrioritizedWorkAndJobQueue();
+			fireAtWillInt = true;
+			draftedInt = value;
+			if (!value && pawn.Spawned)
+			{
+				pawn.Map.pawnDestinationReservationManager.ReleaseAllClaimedBy(pawn);
+			}
+			pawn.jobs.ClearQueuedJobs();
+			if (pawn.jobs.curJob != null && pawn.jobs.IsCurrentJobPlayerInterruptible())
+			{
+				if (pawn.jobs.curDriver is JobDriver_Ingest { EatingFromInventory: not false })
+				{
+					pawn.inventory.innerContainer.TryAddRangeOrTransfer(pawn.carryTracker.innerContainer);
+				}
+				ChildcareUtility.BreastfeedFailReason? reason;
+				if (!value)
+				{
+					if (pawn.carryTracker.CarriedThing is Pawn baby && ChildcareUtility.CanSuckle(baby, out reason))
+					{
+						Job newJob = ChildcareUtility.MakeBringBabyToSafetyJob(pawn, baby);
+						Pawn_JobTracker jobs = pawn.jobs;
+						bool? keepCarryingThingOverride = true;
+						jobs.StartJob(newJob, JobCondition.InterruptForced, null, resumeCurJobAfterwards: false, cancelBusyStances: true, null, null, fromQueue: false, canReturnCurJobToPool: false, keepCarryingThingOverride);
+					}
+					else if (pawn.IsCarrying())
+					{
+						pawn.carryTracker.TryDropCarriedThing(pawn.Position, ThingPlaceMode.Near, out var _);
+						pawn.jobs.EndCurrentJob(JobCondition.InterruptForced);
 					}
 					else
 					{
-						Pawn pawn2 = this.pawn.carryTracker.CarriedThing as Pawn;
-						ChildcareUtility.BreastfeedFailReason? breastfeedFailReason;
-						if (pawn2 != null && ChildcareUtility.CanSuckle(pawn2, out breastfeedFailReason))
-						{
-							Messages.Message("MessageDraftedPawnCarryingBaby".Translate(this.pawn), this.pawn, MessageTypeDefOf.NeutralEvent, true);
-						}
-						this.pawn.jobs.EndCurrentJob(JobCondition.InterruptForced, true, true);
-					}
-				}
-				if (this.draftedInt)
-				{
-					Lord lord = this.pawn.GetLord();
-					if (lord != null && lord.LordJob is LordJob_VoluntarilyJoinable)
-					{
-						lord.Notify_PawnLost(this.pawn, PawnLostCondition.Drafted, null);
-					}
-					this.autoUndrafter.Notify_Drafted();
-					Pawn_JobTracker jobs2 = this.pawn.jobs;
-					if (jobs2 != null)
-					{
-						jobs2.SetFormingCaravanTick(true);
-					}
-					this.pawn.inventory.DropAllPackingCaravanThings();
-					CompCanBeDormant compCanBeDormant = this.pawn.TryGetComp<CompCanBeDormant>();
-					if (compCanBeDormant != null)
-					{
-						compCanBeDormant.WakeUp();
+						pawn.jobs.EndCurrentJob(JobCondition.InterruptForced);
 					}
 				}
 				else
 				{
-					if (this.pawn.playerSettings != null)
+					if (pawn.carryTracker.CarriedThing is Pawn baby2 && ChildcareUtility.CanSuckle(baby2, out reason))
 					{
-						this.pawn.playerSettings.animalsReleased = false;
+						Messages.Message("MessageDraftedPawnCarryingBaby".Translate(pawn), pawn, MessageTypeDefOf.NeutralEvent);
 					}
-					if (this.pawn.IsFormingCaravan())
-					{
-						Pawn_JobTracker jobs3 = this.pawn.jobs;
-						if (jobs3 != null)
-						{
-							jobs3.SetFormingCaravanTick(false);
-						}
-					}
-				}
-				foreach (Pawn pawn3 in PawnUtility.SpawnedMasteredPawns(this.pawn))
-				{
-					pawn3.jobs.Notify_MasterDraftedOrUndrafted();
+					pawn.jobs.EndCurrentJob(JobCondition.InterruptForced);
 				}
 			}
-		}
-
-		// Token: 0x17001E54 RID: 7764
-		// (get) Token: 0x0600C8E8 RID: 51432 RVA: 0x003AB324 File Offset: 0x003A9524
-		// (set) Token: 0x0600C8E9 RID: 51433 RVA: 0x003AB32C File Offset: 0x003A952C
-		public bool FireAtWill
-		{
-			get
+			if (draftedInt)
 			{
-				return this.fireAtWillInt;
-			}
-			set
-			{
-				this.fireAtWillInt = value;
-				if (this.fireAtWillInt)
+				Lord lord = pawn.GetLord();
+				if (lord != null && lord.LordJob is LordJob_VoluntarilyJoinable)
 				{
-					return;
+					lord.Notify_PawnLost(pawn, PawnLostCondition.Drafted, null);
 				}
-				if (this.pawn.stances.curStance is Stance_Warmup)
+				autoUndrafter.Notify_Drafted();
+				pawn.jobs?.SetFormingCaravanTick(clear: true);
+				pawn.inventory.DropAllPackingCaravanThings();
+				pawn.TryGetComp<CompCanBeDormant>()?.WakeUp();
+			}
+			else
+			{
+				if (pawn.playerSettings != null)
 				{
-					this.pawn.stances.CancelBusyStanceSoft();
+					pawn.playerSettings.animalsReleased = false;
+				}
+				if (pawn.IsFormingCaravan())
+				{
+					pawn.jobs?.SetFormingCaravanTick();
 				}
 			}
-		}
-
-		// Token: 0x17001E55 RID: 7765
-		// (get) Token: 0x0600C8EA RID: 51434 RVA: 0x003AB368 File Offset: 0x003A9568
-		public bool ShowDraftGizmo
-		{
-			get
+			foreach (Pawn item in PawnUtility.SpawnedMasteredPawns(pawn))
 			{
-				return (!ModsConfig.BiotechActive || !this.pawn.IsColonyMech || this.pawn.GetMechControlGroup() != null) && (!this.pawn.IsSubhuman || this.pawn.IsColonySubhumanPlayerControlled);
+				item.jobs.Notify_MasterDraftedOrUndrafted();
 			}
 		}
+	}
 
-		// Token: 0x0600C8EB RID: 51435 RVA: 0x003AB3B5 File Offset: 0x003A95B5
-		public Pawn_DraftController(Pawn pawn)
+	public bool FireAtWill
+	{
+		get
 		{
-			this.pawn = pawn;
-			this.autoUndrafter = new AutoUndrafter(pawn);
+			return fireAtWillInt;
 		}
-
-		// Token: 0x0600C8EC RID: 51436 RVA: 0x003AB3D8 File Offset: 0x003A95D8
-		public void ExposeData()
+		set
 		{
-			Scribe_Values.Look<bool>(ref this.draftedInt, "drafted", false, false);
-			Scribe_Values.Look<bool>(ref this.fireAtWillInt, "fireAtWill", true, false);
-			Scribe_Deep.Look<AutoUndrafter>(ref this.autoUndrafter, "autoUndrafter", new object[]
+			fireAtWillInt = value;
+			if (!fireAtWillInt && pawn.stances.curStance is Stance_Warmup)
 			{
-				this.pawn
-			});
-		}
-
-		// Token: 0x0600C8ED RID: 51437 RVA: 0x003AB428 File Offset: 0x003A9628
-		public void DraftControllerTickInterval(int delta)
-		{
-			this.autoUndrafter.AutoUndraftTickInterval(delta);
-		}
-
-		// Token: 0x0600C8EE RID: 51438 RVA: 0x003AB436 File Offset: 0x003A9636
-		internal IEnumerable<Gizmo> GetGizmos()
-		{
-			if (this.ShowDraftGizmo)
-			{
-				Command_Toggle command_Toggle = new Command_Toggle
-				{
-					hotKey = KeyBindingDefOf.Command_ColonistDraft,
-					isActive = (() => this.Drafted),
-					toggleAction = delegate()
-					{
-						this.Drafted = !this.Drafted;
-						PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.Drafting, KnowledgeAmount.SpecificInteraction);
-						if (this.Drafted)
-						{
-							LessonAutoActivator.TeachOpportunity(ConceptDefOf.QueueOrders, OpportunityType.GoodToKnow);
-						}
-					},
-					defaultDesc = "CommandToggleDraftDesc".Translate(),
-					icon = TexCommand.Draft,
-					turnOnSound = SoundDefOf.DraftOn,
-					turnOffSound = SoundDefOf.DraftOff,
-					groupKeyIgnoreContent = 81729172,
-					defaultLabel = (this.Drafted ? "CommandUndraftLabel" : "CommandDraftLabel").Translate()
-				};
-				if (this.pawn.Downed)
-				{
-					command_Toggle.Disable("IsIncapped".Translate(this.pawn.LabelShort, this.pawn));
-				}
-				if (this.pawn.Deathresting)
-				{
-					command_Toggle.Disable("IsDeathresting".Translate(this.pawn.Named("PAWN")));
-				}
-				if (ModsConfig.BiotechActive && this.pawn.IsColonyMech)
-				{
-					AcceptanceReport report = MechanitorUtility.CanDraftMech(this.pawn);
-					if (!report)
-					{
-						command_Toggle.Disable(report.Reason);
-					}
-				}
-				command_Toggle.tutorTag = ((!this.Drafted) ? "Draft" : "Undraft");
-				yield return command_Toggle;
+				pawn.stances.CancelBusyStanceSoft();
 			}
-			if (this.Drafted && this.pawn.equipment.Primary != null && this.pawn.equipment.Primary.def.IsRangedWeapon)
-			{
-				yield return new Command_Toggle
-				{
-					hotKey = KeyBindingDefOf.Misc6,
-					isActive = (() => this.FireAtWill),
-					toggleAction = delegate()
-					{
-						this.FireAtWill = !this.FireAtWill;
-					},
-					icon = TexCommand.FireAtWill,
-					defaultLabel = "CommandFireAtWillLabel".Translate(),
-					defaultDesc = "CommandFireAtWillDesc".Translate(),
-					tutorTag = "FireAtWillToggle"
-				};
-			}
-			yield break;
 		}
+	}
 
-		// Token: 0x0600C8EF RID: 51439 RVA: 0x003AB446 File Offset: 0x003A9646
-		internal void Notify_PrimaryWeaponChanged()
+	public bool ShowDraftGizmo
+	{
+		get
 		{
-			this.fireAtWillInt = true;
+			if (ModsConfig.BiotechActive && pawn.IsColonyMech && pawn.GetMechControlGroup() == null)
+			{
+				return false;
+			}
+			if (pawn.IsSubhuman && !pawn.IsColonySubhumanPlayerControlled)
+			{
+				return false;
+			}
+			return true;
 		}
+	}
 
-		// Token: 0x040088B8 RID: 35000
-		public Pawn pawn;
+	public Pawn_DraftController(Pawn pawn)
+	{
+		this.pawn = pawn;
+		autoUndrafter = new AutoUndrafter(pawn);
+	}
 
-		// Token: 0x040088B9 RID: 35001
-		private bool draftedInt;
+	public void ExposeData()
+	{
+		Scribe_Values.Look(ref draftedInt, "drafted", defaultValue: false);
+		Scribe_Values.Look(ref fireAtWillInt, "fireAtWill", defaultValue: true);
+		Scribe_Deep.Look(ref autoUndrafter, "autoUndrafter", pawn);
+	}
 
-		// Token: 0x040088BA RID: 35002
-		private bool fireAtWillInt = true;
+	public void DraftControllerTickInterval(int delta)
+	{
+		autoUndrafter.AutoUndraftTickInterval(delta);
+	}
 
-		// Token: 0x040088BB RID: 35003
-		private AutoUndrafter autoUndrafter;
+	[IteratorStateMachine(typeof(_003CGetGizmos_003Ed__15))]
+	internal IEnumerable<Gizmo> GetGizmos()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetGizmos_003Ed__15(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	internal void Notify_PrimaryWeaponChanged()
+	{
+		fireAtWillInt = true;
 	}
 }

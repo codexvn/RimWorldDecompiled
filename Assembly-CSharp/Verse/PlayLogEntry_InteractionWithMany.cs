@@ -1,134 +1,273 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld;
 using Verse.Grammar;
 
-namespace Verse
+namespace Verse;
+
+public class PlayLogEntry_InteractionWithMany : PlayLogEntry_Interaction
 {
-	// Token: 0x02000349 RID: 841
-	public class PlayLogEntry_InteractionWithMany : PlayLogEntry_Interaction
+	[CompilerGenerated]
+	private sealed class _003CGetConcerns_003Ed__4 : IEnumerable<Thing>, IEnumerable, IEnumerator<Thing>, IEnumerator, IDisposable
 	{
-		// Token: 0x06001580 RID: 5504 RVA: 0x00065803 File Offset: 0x00063A03
-		public PlayLogEntry_InteractionWithMany()
-		{
-		}
+		private int _003C_003E1__state;
 
-		// Token: 0x06001581 RID: 5505 RVA: 0x0006580B File Offset: 0x00063A0B
-		public PlayLogEntry_InteractionWithMany(InteractionDef intDef, Pawn initiator, List<Pawn> recipients, List<RulePackDef> extraSentencePacks)
-		{
-			this.intDef = intDef;
-			this.initiator = initiator;
-			this.recipients = recipients;
-			this.extraSentencePacks = extraSentencePacks;
-			this.initiatorFaction = initiator.Faction;
-			this.initiatorIdeo = initiator.Ideo;
-		}
+		private Thing _003C_003E2__current;
 
-		// Token: 0x06001582 RID: 5506 RVA: 0x00065848 File Offset: 0x00063A48
-		public override bool Concerns(Thing t)
-		{
-			Pawn pawn = t as Pawn;
-			return pawn != null && (t == this.initiator || this.recipients.Contains(pawn));
-		}
+		private int _003C_003El__initialThreadId;
 
-		// Token: 0x06001583 RID: 5507 RVA: 0x00065878 File Offset: 0x00063A78
-		public override IEnumerable<Thing> GetConcerns()
+		public PlayLogEntry_InteractionWithMany _003C_003E4__this;
+
+		private List<Pawn>.Enumerator _003C_003E7__wrap1;
+
+		Thing IEnumerator<Thing>.Current
 		{
-			yield return this.initiator;
-			foreach (Pawn pawn in this.recipients)
+			[DebuggerHidden]
+			get
 			{
-				yield return pawn;
+				return _003C_003E2__current;
 			}
-			List<Pawn>.Enumerator enumerator = default(List<Pawn>.Enumerator);
-			yield break;
-			yield break;
 		}
 
-		// Token: 0x06001584 RID: 5508 RVA: 0x00065888 File Offset: 0x00063A88
-		protected override string ToGameStringFromPOV_Worker(Thing pov, bool forceLog)
+		object IEnumerator.Current
 		{
-			if (this.initiator == null || this.recipients == null || this.recipients.Contains(null))
+			[DebuggerHidden]
+			get
 			{
-				Log.ErrorOnce("PlayLogEntry_Interaction has a null pawn reference.", 34422);
-				return "[" + this.intDef.label + " error: null pawn reference]";
+				return _003C_003E2__current;
 			}
-			Rand.PushState();
-			Rand.Seed = this.logID;
-			GrammarRequest request = base.GenerateGrammarRequest();
-			string result;
-			if (pov == this.initiator)
+		}
+
+		[DebuggerHidden]
+		public _003CGetConcerns_003Ed__4(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 2)
 			{
-				request.IncludesBare.Add(this.intDef.logRulesInitiator);
-				request.Rules.AddRange(GrammarUtility.RulesForPawn("INITIATOR", this.initiator, request.Constants, true, true));
-				result = GrammarResolver.Resolve("r_logentry", request, "interaction from initiator", forceLog, null, null, null, true);
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = default(List<Pawn>.Enumerator);
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				PlayLogEntry_InteractionWithMany playLogEntry_InteractionWithMany = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E2__current = playLogEntry_InteractionWithMany.initiator;
+					_003C_003E1__state = 1;
+					return true;
+				case 1:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = playLogEntry_InteractionWithMany.recipients.GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 2:
+					_003C_003E1__state = -3;
+					break;
+				}
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					Pawn current = _003C_003E7__wrap1.Current;
+					_003C_003E2__current = current;
+					_003C_003E1__state = 2;
+					return true;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = default(List<Pawn>.Enumerator);
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap1/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Thing> IEnumerable<Thing>.GetEnumerator()
+		{
+			_003CGetConcerns_003Ed__4 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
 			}
 			else
 			{
-				Pawn pawn = pov as Pawn;
-				if (pawn != null && this.recipients.Contains(pawn))
+				result = new _003CGetConcerns_003Ed__4(0)
 				{
-					if (this.intDef.logRulesRecipient != null)
-					{
-						request.IncludesBare.Add(this.intDef.logRulesRecipient);
-					}
-					else
-					{
-						request.IncludesBare.Add(this.intDef.logRulesInitiator);
-					}
-					request.Rules.AddRange(GrammarUtility.RulesForPawn("INITIATOR", this.initiator, request.Constants, true, true));
-					request.Rules.AddRange(GrammarUtility.RulesForPawn("RECIPIENT", pawn, request.Constants, true, true));
-					result = GrammarResolver.Resolve("r_logentry", request, "interaction from recipient", forceLog, null, null, null, true);
-				}
-				else
-				{
-					Log.ErrorOnce("Cannot display PlayLogEntry_Interaction from POV who isn't initiator or recipient.", 51251);
-					result = this.ToString();
-				}
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
-			Rand.PopState();
 			return result;
 		}
 
-		// Token: 0x06001585 RID: 5509 RVA: 0x00065A28 File Offset: 0x00063C28
-		public override bool CanBeClickedFromPOV(Thing pov)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return this.recipients.Contains(pov as Pawn) && CameraJumper.CanJump(this.initiator);
+			return ((IEnumerable<Thing>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x06001586 RID: 5510 RVA: 0x00065A50 File Offset: 0x00063C50
-		public override void ClickedFromPOV(Thing pov)
+	private List<Pawn> recipients;
+
+	public PlayLogEntry_InteractionWithMany()
+	{
+	}
+
+	public PlayLogEntry_InteractionWithMany(InteractionDef intDef, Pawn initiator, List<Pawn> recipients, List<RulePackDef> extraSentencePacks)
+	{
+		base.intDef = intDef;
+		base.initiator = initiator;
+		this.recipients = recipients;
+		base.extraSentencePacks = extraSentencePacks;
+		initiatorFaction = initiator.Faction;
+		initiatorIdeo = initiator.Ideo;
+	}
+
+	public override bool Concerns(Thing t)
+	{
+		if (t is Pawn item)
 		{
-			if (pov == this.initiator)
+			if (t != initiator)
 			{
-				CameraJumper.TryJumpAndSelect(this.recipients.RandomElement<Pawn>(), CameraJumper.MovementMode.Pan);
-				return;
+				return recipients.Contains(item);
 			}
-			if (this.recipients.Contains(pov as Pawn))
-			{
-				CameraJumper.TryJumpAndSelect(this.initiator, CameraJumper.MovementMode.Pan);
-				return;
-			}
-			throw new NotImplementedException();
+			return true;
 		}
+		return false;
+	}
 
-		// Token: 0x06001587 RID: 5511 RVA: 0x00065AA7 File Offset: 0x00063CA7
-		public override string ToString()
+	[IteratorStateMachine(typeof(_003CGetConcerns_003Ed__4))]
+	public override IEnumerable<Thing> GetConcerns()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetConcerns_003Ed__4(-2)
 		{
-			return this.intDef.label + ": " + base.InitiatorName + "-> Many";
-		}
+			_003C_003E4__this = this
+		};
+	}
 
-		// Token: 0x06001588 RID: 5512 RVA: 0x00065ACC File Offset: 0x00063CCC
-		public override void ExposeData()
+	protected override string ToGameStringFromPOV_Worker(Thing pov, bool forceLog)
+	{
+		if (initiator == null || recipients == null || recipients.Contains(null))
 		{
-			base.ExposeData();
-			Scribe_Collections.Look<Pawn>(ref this.recipients, "recipients", LookMode.Reference, Array.Empty<object>());
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
-			{
-				this.recipients.RemoveAll((Pawn x) => x == null);
-			}
+			Log.ErrorOnce("PlayLogEntry_Interaction has a null pawn reference.", 34422);
+			return "[" + intDef.label + " error: null pawn reference]";
 		}
+		Rand.PushState();
+		Rand.Seed = logID;
+		GrammarRequest request = base.GenerateGrammarRequest();
+		string result;
+		if (pov == initiator)
+		{
+			request.IncludesBare.Add(intDef.logRulesInitiator);
+			request.Rules.AddRange(GrammarUtility.RulesForPawn("INITIATOR", initiator, request.Constants));
+			result = GrammarResolver.Resolve("r_logentry", request, "interaction from initiator", forceLog);
+		}
+		else if (pov is Pawn pawn && recipients.Contains(pawn))
+		{
+			if (intDef.logRulesRecipient != null)
+			{
+				request.IncludesBare.Add(intDef.logRulesRecipient);
+			}
+			else
+			{
+				request.IncludesBare.Add(intDef.logRulesInitiator);
+			}
+			request.Rules.AddRange(GrammarUtility.RulesForPawn("INITIATOR", initiator, request.Constants));
+			request.Rules.AddRange(GrammarUtility.RulesForPawn("RECIPIENT", pawn, request.Constants));
+			result = GrammarResolver.Resolve("r_logentry", request, "interaction from recipient", forceLog);
+		}
+		else
+		{
+			Log.ErrorOnce("Cannot display PlayLogEntry_Interaction from POV who isn't initiator or recipient.", 51251);
+			result = ToString();
+		}
+		Rand.PopState();
+		return result;
+	}
 
-		// Token: 0x040013FA RID: 5114
-		private List<Pawn> recipients;
+	public override bool CanBeClickedFromPOV(Thing pov)
+	{
+		if (recipients.Contains(pov as Pawn))
+		{
+			return CameraJumper.CanJump(initiator);
+		}
+		return false;
+	}
+
+	public override void ClickedFromPOV(Thing pov)
+	{
+		if (pov == initiator)
+		{
+			CameraJumper.TryJumpAndSelect(recipients.RandomElement());
+			return;
+		}
+		if (recipients.Contains(pov as Pawn))
+		{
+			CameraJumper.TryJumpAndSelect(initiator);
+			return;
+		}
+		throw new NotImplementedException();
+	}
+
+	public override string ToString()
+	{
+		return intDef.label + ": " + base.InitiatorName + "-> Many";
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Collections.Look(ref recipients, "recipients", LookMode.Reference);
+		if (Scribe.mode == LoadSaveMode.PostLoadInit)
+		{
+			recipients.RemoveAll((Pawn x) => x == null);
+		}
 	}
 }

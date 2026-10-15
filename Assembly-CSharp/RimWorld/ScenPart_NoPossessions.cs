@@ -1,9 +1,5 @@
-﻿using System;
+namespace RimWorld;
 
-namespace RimWorld
+public class ScenPart_NoPossessions : ScenPart
 {
-	// Token: 0x02002880 RID: 10368
-	public class ScenPart_NoPossessions : ScenPart
-	{
-	}
 }

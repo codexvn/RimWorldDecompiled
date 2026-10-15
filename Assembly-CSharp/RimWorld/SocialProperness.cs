@@ -1,63 +1,57 @@
-﻿using System;
-using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public static class SocialProperness
 {
-	// Token: 0x02001787 RID: 6023
-	public static class SocialProperness
+	public static bool IsSociallyProper(this Thing t, Pawn p)
 	{
-		// Token: 0x06008D56 RID: 36182 RVA: 0x002A08F1 File Offset: 0x0029EAF1
-		public static bool IsSociallyProper(this Thing t, Pawn p)
-		{
-			return t.IsSociallyProper(p, p.IsPrisonerOfColony, false);
-		}
+		return t.IsSociallyProper(p, p.IsPrisonerOfColony);
+	}
 
-		// Token: 0x06008D57 RID: 36183 RVA: 0x002A0904 File Offset: 0x0029EB04
-		public static bool IsSociallyProper(this Thing t, Pawn p, bool forPrisoner, bool animalsCare = false)
+	public static bool IsSociallyProper(this Thing t, Pawn p, bool forPrisoner, bool animalsCare = false)
+	{
+		if (!animalsCare && p != null && !p.RaceProps.Humanlike)
 		{
-			if (!animalsCare && p != null && !p.RaceProps.Humanlike)
-			{
-				return true;
-			}
-			if (!t.def.socialPropernessMatters)
-			{
-				return true;
-			}
-			if (!t.Spawned)
-			{
-				return true;
-			}
-			IntVec3 intVec = t.def.hasInteractionCell ? t.InteractionCell : t.Position;
-			if (forPrisoner)
-			{
-				return p == null || intVec.GetRoom(t.Map) == p.GetRoom(RegionType.Set_All);
-			}
-			if (ModsConfig.BiotechActive && t.def == ThingDefOf.HemogenPack)
-			{
-				return !SocialProperness.BloodfeedingPrisonerInRoom(t.GetRoom(RegionType.Set_All));
-			}
-			return !intVec.IsInPrisonCell(t.Map);
+			return true;
 		}
-
-		// Token: 0x06008D58 RID: 36184 RVA: 0x002A09B0 File Offset: 0x0029EBB0
-		public static bool BloodfeedingPrisonerInRoom(Room r)
+		if (!t.def.socialPropernessMatters)
 		{
-			if (r == null || !r.IsPrisonCell)
+			return true;
+		}
+		if (!t.Spawned)
+		{
+			return true;
+		}
+		IntVec3 intVec = (t.def.hasInteractionCell ? t.InteractionCell : t.Position);
+		if (forPrisoner)
+		{
+			if (p != null)
 			{
-				return false;
+				return intVec.GetRoom(t.Map) == p.GetRoom();
 			}
-			using (IEnumerator<Pawn> enumerator = r.Owners.GetEnumerator())
-			{
-				while (enumerator.MoveNext())
-				{
-					if (enumerator.Current.IsBloodfeeder())
-					{
-						return true;
-					}
-				}
-			}
+			return true;
+		}
+		if (ModsConfig.BiotechActive && t.def == ThingDefOf.HemogenPack)
+		{
+			return !BloodfeedingPrisonerInRoom(t.GetRoom());
+		}
+		return !intVec.IsInPrisonCell(t.Map);
+	}
+
+	public static bool BloodfeedingPrisonerInRoom(Room r)
+	{
+		if (r == null || !r.IsPrisonCell)
+		{
 			return false;
 		}
+		foreach (Pawn owner in r.Owners)
+		{
+			if (owner.IsBloodfeeder())
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 }

@@ -1,176 +1,317 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public abstract class RitualOutcomeEffectWorker : IExposable
 {
-	// Token: 0x02002762 RID: 10082
-	public abstract class RitualOutcomeEffectWorker : IExposable
+	[CompilerGenerated]
+	private sealed class _003CBlockingIssues_003Ed__22 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x170021D6 RID: 8662
-		// (get) Token: 0x0600DD1C RID: 56604 RVA: 0x00002501 File Offset: 0x00000701
-		public virtual bool ApplyOnFailure
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public RitualOutcomeEffectWorker _003C_003E4__this;
+
+		private Precept_Ritual ritual;
+
+		public Precept_Ritual _003C_003E3__ritual;
+
+		private TargetInfo target;
+
+		public TargetInfo _003C_003E3__target;
+
+		private RitualRoleAssignments assignments;
+
+		public RitualRoleAssignments _003C_003E3__assignments;
+
+		private List<RitualOutcomeComp>.Enumerator _003C_003E7__wrap1;
+
+		private IEnumerator<string> _003C_003E7__wrap2;
+
+		string IEnumerator<string>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return false;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170021D7 RID: 8663
-		// (get) Token: 0x0600DD1D RID: 56605 RVA: 0x00002501 File Offset: 0x00000701
-		public virtual bool SupportsAttachableOutcomeEffect
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return false;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170021D8 RID: 8664
-		// (get) Token: 0x0600DD1E RID: 56606 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public virtual bool ShowQuality
+		[DebuggerHidden]
+		public _003CBlockingIssues_003Ed__22(int _003C_003E1__state)
 		{
-			get
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if ((uint)(num - -4) <= 1u || num == 1)
 			{
-				return true;
-			}
-		}
-
-		// Token: 0x170021D9 RID: 8665
-		// (get) Token: 0x0600DD1F RID: 56607 RVA: 0x00410F83 File Offset: 0x0040F183
-		public virtual string Description
-		{
-			get
-			{
-				return this.def.Description;
-			}
-		}
-
-		// Token: 0x0600DD20 RID: 56608 RVA: 0x000024DF File Offset: 0x000006DF
-		public RitualOutcomeEffectWorker()
-		{
-		}
-
-		// Token: 0x0600DD21 RID: 56609 RVA: 0x00410F90 File Offset: 0x0040F190
-		public RitualOutcomeEffectWorker(RitualOutcomeEffectDef def)
-		{
-			this.def = def;
-			this.FillCompData();
-		}
-
-		// Token: 0x0600DD22 RID: 56610 RVA: 0x00410FA8 File Offset: 0x0040F1A8
-		public void ResetCompDatas()
-		{
-			foreach (RitualOutcomeComp_Data ritualOutcomeComp_Data in this.compDatas)
-			{
-				if (ritualOutcomeComp_Data != null)
+				try
 				{
-					ritualOutcomeComp_Data.Reset();
-				}
-			}
-		}
-
-		// Token: 0x0600DD23 RID: 56611 RVA: 0x00411000 File Offset: 0x0040F200
-		public void FillCompData()
-		{
-			if ((this.compDatas == null || this.compDatas.Count != this.def.comps.Count) && !this.def.comps.NullOrEmpty<RitualOutcomeComp>())
-			{
-				this.compDatas = new List<RitualOutcomeComp_Data>();
-				foreach (RitualOutcomeComp ritualOutcomeComp in this.def.comps)
-				{
-					this.compDatas.Add(ritualOutcomeComp.MakeData());
-				}
-			}
-		}
-
-		// Token: 0x0600DD24 RID: 56612 RVA: 0x004110A4 File Offset: 0x0040F2A4
-		public RitualOutcomeComp_Data DataForComp(RitualOutcomeComp comp)
-		{
-			int num = this.def.comps.IndexOf(comp);
-			if (num != -1)
-			{
-				return this.compDatas[num];
-			}
-			Log.Error("Can't find index for " + comp.GetType().Name);
-			return null;
-		}
-
-		// Token: 0x0600DD25 RID: 56613
-		public abstract void Apply(float progress, Dictionary<Pawn, int> totalPresence, LordJob_Ritual jobRitual);
-
-		// Token: 0x0600DD26 RID: 56614 RVA: 0x004110F0 File Offset: 0x0040F2F0
-		public virtual void ExposeData()
-		{
-			Scribe_Defs.Look<RitualOutcomeEffectDef>(ref this.def, "def");
-			Scribe_Collections.Look<RitualOutcomeComp_Data>(ref this.compDatas, "compDatas", LookMode.Deep, Array.Empty<object>());
-			if (Scribe.mode == LoadSaveMode.PostLoadInit && (this.compDatas.NullOrEmpty<RitualOutcomeComp_Data>() || this.compDatas.Count != this.def.comps.Count))
-			{
-				this.FillCompData();
-			}
-		}
-
-		// Token: 0x0600DD27 RID: 56615 RVA: 0x0041115B File Offset: 0x0040F35B
-		public Thought_Memory MakeMemory(Pawn p, LordJob_Ritual ritual, ThoughtDef overrideDef = null)
-		{
-			Thought_Memory thought_Memory = (Thought_Memory)ThoughtMaker.MakeThought(overrideDef ?? this.def.memoryDef);
-			thought_Memory.sourcePrecept = ritual.Ritual;
-			return thought_Memory;
-		}
-
-		// Token: 0x0600DD28 RID: 56616 RVA: 0x00411184 File Offset: 0x0040F384
-		public virtual void Tick(LordJob_Ritual ritual, float progressAmount = 1f)
-		{
-			if (!this.def.comps.NullOrEmpty<RitualOutcomeComp>())
-			{
-				foreach (RitualOutcomeComp ritualOutcomeComp in this.def.comps)
-				{
-					ritualOutcomeComp.Tick(ritual, this.DataForComp(ritualOutcomeComp), progressAmount);
-				}
-			}
-		}
-
-		// Token: 0x0600DD29 RID: 56617 RVA: 0x00002C42 File Offset: 0x00000E42
-		public virtual string ExtraAlertParagraph(Precept_Ritual ritual)
-		{
-			return null;
-		}
-
-		// Token: 0x0600DD2A RID: 56618 RVA: 0x00002C42 File Offset: 0x00000E42
-		public virtual string ExpectedQualityLabel()
-		{
-			return null;
-		}
-
-		// Token: 0x0600DD2B RID: 56619 RVA: 0x00002C42 File Offset: 0x00000E42
-		public virtual RitualOutcomePossibility GetForcedOutcome(Precept_Ritual ritual, TargetInfo ritualTarget, RitualObligation obligation, RitualRoleAssignments assignments)
-		{
-			return null;
-		}
-
-		// Token: 0x0600DD2C RID: 56620 RVA: 0x004111F8 File Offset: 0x0040F3F8
-		public virtual IEnumerable<string> BlockingIssues(Precept_Ritual ritual, TargetInfo target, RitualRoleAssignments assignments)
-		{
-			if (!this.def.comps.NullOrEmpty<RitualOutcomeComp>())
-			{
-				foreach (RitualOutcomeComp ritualOutcomeComp in this.def.comps)
-				{
-					foreach (string text in ritualOutcomeComp.BlockingIssues(ritual, target, assignments))
+					if (num == -4 || num == 1)
 					{
-						yield return text;
+						try
+						{
+						}
+						finally
+						{
+							_003C_003Em__Finally2();
+						}
 					}
-					IEnumerator<string> enumerator2 = null;
 				}
-				List<RitualOutcomeComp>.Enumerator enumerator = default(List<RitualOutcomeComp>.Enumerator);
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
 			}
-			yield break;
-			yield break;
+			_003C_003E7__wrap1 = default(List<RitualOutcomeComp>.Enumerator);
+			_003C_003E7__wrap2 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x0400952C RID: 38188
-		public RitualOutcomeEffectDef def;
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				RitualOutcomeEffectWorker ritualOutcomeEffectWorker = _003C_003E4__this;
+				if (num != 0)
+				{
+					if (num != 1)
+					{
+						return false;
+					}
+					_003C_003E1__state = -4;
+					goto IL_00bc;
+				}
+				_003C_003E1__state = -1;
+				if (!ritualOutcomeEffectWorker.def.comps.NullOrEmpty())
+				{
+					_003C_003E7__wrap1 = ritualOutcomeEffectWorker.def.comps.GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_00d6;
+				}
+				goto IL_00f8;
+				IL_00bc:
+				if (_003C_003E7__wrap2.MoveNext())
+				{
+					string current = _003C_003E7__wrap2.Current;
+					_003C_003E2__current = current;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				_003C_003Em__Finally2();
+				_003C_003E7__wrap2 = null;
+				goto IL_00d6;
+				IL_00d6:
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					RitualOutcomeComp current2 = _003C_003E7__wrap1.Current;
+					_003C_003E7__wrap2 = current2.BlockingIssues(ritual, target, assignments).GetEnumerator();
+					_003C_003E1__state = -4;
+					goto IL_00bc;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = default(List<RitualOutcomeComp>.Enumerator);
+				goto IL_00f8;
+				IL_00f8:
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
 
-		// Token: 0x0400952D RID: 38189
-		public List<RitualOutcomeComp_Data> compDatas;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap1/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -3;
+			if (_003C_003E7__wrap2 != null)
+			{
+				_003C_003E7__wrap2.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CBlockingIssues_003Ed__22 _003CBlockingIssues_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CBlockingIssues_003Ed__ = this;
+			}
+			else
+			{
+				_003CBlockingIssues_003Ed__ = new _003CBlockingIssues_003Ed__22(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CBlockingIssues_003Ed__.ritual = _003C_003E3__ritual;
+			_003CBlockingIssues_003Ed__.target = _003C_003E3__target;
+			_003CBlockingIssues_003Ed__.assignments = _003C_003E3__assignments;
+			return _003CBlockingIssues_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	public RitualOutcomeEffectDef def;
+
+	public List<RitualOutcomeComp_Data> compDatas;
+
+	public virtual bool ApplyOnFailure => false;
+
+	public virtual bool SupportsAttachableOutcomeEffect => false;
+
+	public virtual bool ShowQuality => true;
+
+	public virtual string Description => def.Description;
+
+	public RitualOutcomeEffectWorker()
+	{
+	}
+
+	public RitualOutcomeEffectWorker(RitualOutcomeEffectDef def)
+	{
+		this.def = def;
+		FillCompData();
+	}
+
+	public void ResetCompDatas()
+	{
+		foreach (RitualOutcomeComp_Data compData in compDatas)
+		{
+			compData?.Reset();
+		}
+	}
+
+	public void FillCompData()
+	{
+		if ((compDatas != null && compDatas.Count == def.comps.Count) || def.comps.NullOrEmpty())
+		{
+			return;
+		}
+		compDatas = new List<RitualOutcomeComp_Data>();
+		foreach (RitualOutcomeComp comp in def.comps)
+		{
+			compDatas.Add(comp.MakeData());
+		}
+	}
+
+	public RitualOutcomeComp_Data DataForComp(RitualOutcomeComp comp)
+	{
+		int num = def.comps.IndexOf(comp);
+		if (num != -1)
+		{
+			return compDatas[num];
+		}
+		Log.Error("Can't find index for " + comp.GetType().Name);
+		return null;
+	}
+
+	public abstract void Apply(float progress, Dictionary<Pawn, int> totalPresence, LordJob_Ritual jobRitual);
+
+	public virtual void ExposeData()
+	{
+		Scribe_Defs.Look(ref def, "def");
+		Scribe_Collections.Look(ref compDatas, "compDatas", LookMode.Deep);
+		if (Scribe.mode == LoadSaveMode.PostLoadInit && (compDatas.NullOrEmpty() || compDatas.Count != def.comps.Count))
+		{
+			FillCompData();
+		}
+	}
+
+	public Thought_Memory MakeMemory(Pawn p, LordJob_Ritual ritual, ThoughtDef overrideDef = null)
+	{
+		Thought_Memory obj = (Thought_Memory)ThoughtMaker.MakeThought(overrideDef ?? def.memoryDef);
+		obj.sourcePrecept = ritual.Ritual;
+		return obj;
+	}
+
+	public virtual void Tick(LordJob_Ritual ritual, float progressAmount = 1f)
+	{
+		if (def.comps.NullOrEmpty())
+		{
+			return;
+		}
+		foreach (RitualOutcomeComp comp in def.comps)
+		{
+			comp.Tick(ritual, DataForComp(comp), progressAmount);
+		}
+	}
+
+	public virtual string ExtraAlertParagraph(Precept_Ritual ritual)
+	{
+		return null;
+	}
+
+	public virtual string ExpectedQualityLabel()
+	{
+		return null;
+	}
+
+	public virtual RitualOutcomePossibility GetForcedOutcome(Precept_Ritual ritual, TargetInfo ritualTarget, RitualObligation obligation, RitualRoleAssignments assignments)
+	{
+		return null;
+	}
+
+	[IteratorStateMachine(typeof(_003CBlockingIssues_003Ed__22))]
+	public virtual IEnumerable<string> BlockingIssues(Precept_Ritual ritual, TargetInfo target, RitualRoleAssignments assignments)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CBlockingIssues_003Ed__22(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__ritual = ritual,
+			_003C_003E3__target = target,
+			_003C_003E3__assignments = assignments
+		};
 	}
 }

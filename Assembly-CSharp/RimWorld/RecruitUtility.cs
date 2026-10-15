@@ -1,41 +1,33 @@
-﻿using System;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public static class RecruitUtility
 {
-	// Token: 0x02002406 RID: 9222
-	public static class RecruitUtility
+	public static void Recruit(Pawn pawn, Faction faction, Pawn recruiter = null)
 	{
-		// Token: 0x0600C7C3 RID: 51139 RVA: 0x003A4C3C File Offset: 0x003A2E3C
-		public static void Recruit(Pawn pawn, Faction faction, Pawn recruiter = null)
+		pawn.apparel?.UnlockAll();
+		if (pawn.royalty != null)
 		{
-			Pawn_ApparelTracker apparel = pawn.apparel;
-			if (apparel != null)
+			foreach (RoyalTitle item in pawn.royalty.AllTitlesForReading)
 			{
-				apparel.UnlockAll();
-			}
-			if (pawn.royalty != null)
-			{
-				foreach (RoyalTitle royalTitle in pawn.royalty.AllTitlesForReading)
+				if (item.def.replaceOnRecruited != null)
 				{
-					if (royalTitle.def.replaceOnRecruited != null)
-					{
-						pawn.royalty.SetTitle(royalTitle.faction, royalTitle.def.replaceOnRecruited, false, false, false);
-					}
+					pawn.royalty.SetTitle(item.faction, item.def.replaceOnRecruited, grantRewards: false, rewardsOnlyForNewestTitle: false, sendLetter: false);
 				}
 			}
-			if (pawn.guest != null)
-			{
-				pawn.guest.SetGuestStatus(null, GuestStatus.Guest);
-			}
-			if (pawn.Faction != faction)
-			{
-				pawn.SetFaction(faction, recruiter);
-			}
-			if (pawn.guest != null)
-			{
-				pawn.guest.Notify_PawnRecruited();
-			}
+		}
+		if (pawn.guest != null)
+		{
+			pawn.guest.SetGuestStatus(null);
+		}
+		if (pawn.Faction != faction)
+		{
+			pawn.SetFaction(faction, recruiter);
+		}
+		if (pawn.guest != null)
+		{
+			pawn.guest.Notify_PawnRecruited();
 		}
 	}
 }

@@ -1,9 +1,5 @@
-﻿using System;
+namespace Verse;
 
-namespace Verse
+public class LanguageWorker_Default : LanguageWorker
 {
-	// Token: 0x02000382 RID: 898
-	public class LanguageWorker_Default : LanguageWorker
-	{
-	}
 }

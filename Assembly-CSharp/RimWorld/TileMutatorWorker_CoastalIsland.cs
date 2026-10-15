@@ -1,70 +1,49 @@
-﻿using System;
 using Verse;
 using Verse.Noise;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class TileMutatorWorker_CoastalIsland : TileMutatorWorker_Coast
 {
-	// Token: 0x020020E1 RID: 8417
-	public class TileMutatorWorker_CoastalIsland : TileMutatorWorker_Coast
+	private const float IslandRadius = 0.65f;
+
+	private const float WaterRadius = 0.95f;
+
+	private const float IslandNoiseFrequency = 0.015f;
+
+	private const float IslandNoiseStrength = 35f;
+
+	private const float WaterSmoothMinStrength = 0.25f;
+
+	private static readonly FloatRange IslandSquashRange = new FloatRange(0.65f, 1f);
+
+	protected override FloatRange CoastOffset => new FloatRange(0.6f);
+
+	public TileMutatorWorker_CoastalIsland(TileMutatorDef def)
+		: base(def)
 	{
-		// Token: 0x17001BF7 RID: 7159
-		// (get) Token: 0x0600B7F1 RID: 47089 RVA: 0x0034FE2F File Offset: 0x0034E02F
-		protected override FloatRange CoastOffset
-		{
-			get
-			{
-				return new FloatRange(0.6f);
-			}
-		}
+	}
 
-		// Token: 0x0600B7F2 RID: 47090 RVA: 0x0034E49C File Offset: 0x0034C69C
-		public TileMutatorWorker_CoastalIsland(TileMutatorDef def) : base(def)
+	public override void Init(Map map)
+	{
+		if (ModsConfig.OdysseyActive)
 		{
-		}
-
-		// Token: 0x0600B7F3 RID: 47091 RVA: 0x0035014C File Offset: 0x0034E34C
-		public override void Init(Map map)
-		{
-			if (!ModsConfig.OdysseyActive)
-			{
-				return;
-			}
 			base.Init(map);
-			float randomInRange = TileMutatorWorker_CoastalIsland.IslandSquashRange.RandomInRange;
+			float randomInRange = IslandSquashRange.RandomInRange;
 			float num = Rand.Range(0f, 360f);
-			ModuleBase moduleBase = new DistFromPoint((float)map.Size.x * 0.95f);
-			moduleBase = new Clamp((double)this.MaxForDeepWater, 1.0, moduleBase);
-			moduleBase = new Scale((double)randomInRange, 1.0, 1.0, moduleBase);
-			moduleBase = new Rotate(0.0, (double)num, 0.0, moduleBase);
-			moduleBase = new Translate((double)((float)(-(float)map.Size.x) / 2f), 0.0, (double)((float)(-(float)map.Size.z) / 2f), moduleBase);
-			moduleBase = MapNoiseUtility.AddDisplacementNoise(moduleBase, 0.015f, 35f, 4, map.Tile.tileId);
-			ModuleBase moduleBase2 = new DistFromPoint((float)map.Size.x * 0.65f);
-			moduleBase2 = new ScaleBias(-1.0, 1.0, moduleBase2);
-			moduleBase2 = new Scale((double)randomInRange, 1.0, 1.0, moduleBase2);
-			moduleBase2 = new Rotate(0.0, (double)num, 0.0, moduleBase2);
-			moduleBase2 = new Translate((double)((float)(-(float)map.Size.x) / 2f), 0.0, (double)((float)(-(float)map.Size.z) / 2f), moduleBase2);
-			moduleBase2 = MapNoiseUtility.AddDisplacementNoise(moduleBase2, 0.015f, 35f, 4, map.Tile.tileId);
-			this.coastNoise = new SmoothMin(this.coastNoise, moduleBase, 0.25);
-			this.coastNoise = new Max(this.coastNoise, moduleBase2);
-			NoiseDebugUI.StoreNoiseRender(this.coastNoise, "island & coast");
+			ModuleBase input2 = new Clamp(input: new DistFromPoint((float)map.Size.x * 0.95f), min: MaxForDeepWater, max: 1.0);
+			input2 = new Scale(randomInRange, 1.0, 1.0, input2);
+			input2 = new Translate(input: new Rotate(0.0, num, 0.0, input2), x: (float)(-map.Size.x) / 2f, y: 0.0, z: (float)(-map.Size.z) / 2f);
+			input2 = MapNoiseUtility.AddDisplacementNoise(input2, 0.015f, 35f, 4, map.Tile.tileId);
+			ModuleBase input4 = new DistFromPoint((float)map.Size.x * 0.65f);
+			input4 = new ScaleBias(-1.0, 1.0, input4);
+			input4 = new Scale(randomInRange, 1.0, 1.0, input4);
+			input4 = new Rotate(0.0, num, 0.0, input4);
+			input4 = new Translate((float)(-map.Size.x) / 2f, 0.0, (float)(-map.Size.z) / 2f, input4);
+			input4 = MapNoiseUtility.AddDisplacementNoise(input4, 0.015f, 35f, 4, map.Tile.tileId);
+			coastNoise = new SmoothMin(coastNoise, input2, 0.25);
+			coastNoise = new Max(coastNoise, input4);
+			NoiseDebugUI.StoreNoiseRender(coastNoise, "island & coast");
 		}
-
-		// Token: 0x04007E88 RID: 32392
-		private const float IslandRadius = 0.65f;
-
-		// Token: 0x04007E89 RID: 32393
-		private const float WaterRadius = 0.95f;
-
-		// Token: 0x04007E8A RID: 32394
-		private const float IslandNoiseFrequency = 0.015f;
-
-		// Token: 0x04007E8B RID: 32395
-		private const float IslandNoiseStrength = 35f;
-
-		// Token: 0x04007E8C RID: 32396
-		private const float WaterSmoothMinStrength = 0.25f;
-
-		// Token: 0x04007E8D RID: 32397
-		private static readonly FloatRange IslandSquashRange = new FloatRange(0.65f, 1f);
 	}
 }

@@ -1,85 +1,176 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 using Verse.Sound;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_Hack : JobDriver
 {
-	// Token: 0x0200128A RID: 4746
-	public class JobDriver_Hack : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__5 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001221 RID: 4641
-		// (get) Token: 0x06007429 RID: 29737 RVA: 0x00229653 File Offset: 0x00227853
-		private Thing HackTarget
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_Hack _003C_003E4__this;
+
+		private PathEndMode _003CpathEndMode_003E5__2;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return base.TargetThingA;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001222 RID: 4642
-		// (get) Token: 0x0600742A RID: 29738 RVA: 0x00239BF3 File Offset: 0x00237DF3
-		private CompHackable CompHacking
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.HackTarget.TryGetComp<CompHackable>();
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600742B RID: 29739 RVA: 0x00239C00 File Offset: 0x00237E00
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__5(int _003C_003E1__state)
 		{
-			return this.pawn.Reserve(this.HackTarget, this.job, 1, -1, null, errorOnFailed, false);
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x0600742C RID: 29740 RVA: 0x00239C23 File Offset: 0x00237E23
-		protected override IEnumerable<Toil> MakeNewToils()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			this.FailOnDespawnedNullOrForbidden(TargetIndex.A);
-			this.FailOn(() => this.CompHacking.Props.intellectualSkillPrerequisite > 0 && this.pawn.skills.GetSkill(SkillDefOf.Intellectual).Level < this.CompHacking.Props.intellectualSkillPrerequisite);
-			PathEndMode pathEndMode = base.TargetThingA.def.hasInteractionCell ? PathEndMode.InteractionCell : PathEndMode.ClosestTouch;
-			yield return Toils_Goto.GotoThing(TargetIndex.A, pathEndMode, false);
-			Toil toil = ToilMaker.MakeToil("MakeNewToils");
-			toil.handlingFacing = true;
-			toil.tickAction = delegate()
-			{
-				float statValue = this.pawn.GetStatValue(StatDefOf.HackingSpeed, true, -1);
-				this.CompHacking.Hack(statValue, this.pawn, false);
-				this.pawn.skills.Learn(SkillDefOf.Intellectual, 0.1f, false, false);
-				this.pawn.rotationTracker.FaceTarget(this.HackTarget);
-			};
-			toil.WithEffect(EffecterDefOf.Hacking, TargetIndex.A, null);
-			if (this.CompHacking.Props.effectHacking != null)
-			{
-				toil.WithEffect(() => this.CompHacking.Props.effectHacking, () => this.HackTarget.OccupiedRect().ClosestCellTo(this.pawn.Position), null);
-			}
-			toil.WithProgressBar(TargetIndex.A, () => this.CompHacking.ProgressPercent, false, -0.5f, true);
-			toil.PlaySoundAtStart(SoundDefOf.Hacking_Started);
-			toil.PlaySustainerOrSound(SoundDefOf.Hacking_InProgress, 1f);
-			toil.AddFinishAction(delegate
-			{
-				if (!this.CompHacking.IsHacked)
-				{
-					SoundDefOf.Hacking_Suspended.PlayOneShot(this.HackTarget);
-					return;
-				}
-				SoundDefOf.Hacking_Completed.PlayOneShot(this.HackTarget);
-				SoundDef hackingCompletedSound = this.CompHacking.Props.hackingCompletedSound;
-				if (hackingCompletedSound == null)
-				{
-					return;
-				}
-				hackingCompletedSound.PlayOneShot(this.HackTarget);
-			});
-			toil.FailOnCannotTouch(TargetIndex.A, pathEndMode);
-			toil.FailOn(() => this.CompHacking.IsHacked || this.CompHacking.LockedOut);
-			toil.defaultCompleteMode = ToilCompleteMode.Never;
-			toil.activeSkill = (() => SkillDefOf.Intellectual);
-			yield return toil;
-			yield break;
+			_003C_003E1__state = -2;
 		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_Hack CS_0024_003C_003E8__locals24 = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				CS_0024_003C_003E8__locals24.FailOnDespawnedNullOrForbidden(TargetIndex.A);
+				CS_0024_003C_003E8__locals24.FailOn(() => CS_0024_003C_003E8__locals24.CompHacking.Props.intellectualSkillPrerequisite > 0 && CS_0024_003C_003E8__locals24.pawn.skills.GetSkill(SkillDefOf.Intellectual).Level < CS_0024_003C_003E8__locals24.CompHacking.Props.intellectualSkillPrerequisite);
+				_003CpathEndMode_003E5__2 = (CS_0024_003C_003E8__locals24.TargetThingA.def.hasInteractionCell ? PathEndMode.InteractionCell : PathEndMode.ClosestTouch);
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.A, _003CpathEndMode_003E5__2);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+			{
+				_003C_003E1__state = -1;
+				Toil toil = ToilMaker.MakeToil("MakeNewToils");
+				toil.handlingFacing = true;
+				toil.tickAction = delegate
+				{
+					float statValue = CS_0024_003C_003E8__locals24.pawn.GetStatValue(StatDefOf.HackingSpeed);
+					CS_0024_003C_003E8__locals24.CompHacking.Hack(statValue, CS_0024_003C_003E8__locals24.pawn);
+					CS_0024_003C_003E8__locals24.pawn.skills.Learn(SkillDefOf.Intellectual, 0.1f);
+					CS_0024_003C_003E8__locals24.pawn.rotationTracker.FaceTarget(CS_0024_003C_003E8__locals24.HackTarget);
+				};
+				toil.WithEffect(EffecterDefOf.Hacking, TargetIndex.A, null);
+				if (CS_0024_003C_003E8__locals24.CompHacking.Props.effectHacking != null)
+				{
+					toil.WithEffect(() => CS_0024_003C_003E8__locals24.CompHacking.Props.effectHacking, () => CS_0024_003C_003E8__locals24.HackTarget.OccupiedRect().ClosestCellTo(CS_0024_003C_003E8__locals24.pawn.Position), null);
+				}
+				toil.WithProgressBar(TargetIndex.A, () => CS_0024_003C_003E8__locals24.CompHacking.ProgressPercent, interpolateBetweenActorAndTarget: false, -0.5f, alwaysShow: true);
+				toil.PlaySoundAtStart(SoundDefOf.Hacking_Started);
+				toil.PlaySustainerOrSound(SoundDefOf.Hacking_InProgress);
+				toil.AddFinishAction(delegate
+				{
+					if (CS_0024_003C_003E8__locals24.CompHacking.IsHacked)
+					{
+						SoundDefOf.Hacking_Completed.PlayOneShot(CS_0024_003C_003E8__locals24.HackTarget);
+						CS_0024_003C_003E8__locals24.CompHacking.Props.hackingCompletedSound?.PlayOneShot(CS_0024_003C_003E8__locals24.HackTarget);
+					}
+					else
+					{
+						SoundDefOf.Hacking_Suspended.PlayOneShot(CS_0024_003C_003E8__locals24.HackTarget);
+					}
+				});
+				toil.FailOnCannotTouch(TargetIndex.A, _003CpathEndMode_003E5__2);
+				toil.FailOn(() => CS_0024_003C_003E8__locals24.CompHacking.IsHacked || CS_0024_003C_003E8__locals24.CompHacking.LockedOut);
+				toil.defaultCompleteMode = ToilCompleteMode.Never;
+				toil.activeSkill = () => SkillDefOf.Intellectual;
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 2;
+				return true;
+			}
+			case 2:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__5 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__5(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private Thing HackTarget => base.TargetThingA;
+
+	private CompHackable CompHacking => HackTarget.TryGetComp<CompHackable>();
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return pawn.Reserve(HackTarget, job, 1, -1, null, errorOnFailed);
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__5))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__5(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

@@ -1,250 +1,980 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public static class BillUtility
 {
-	// Token: 0x020010F7 RID: 4343
-	public static class BillUtility
+	[CompilerGenerated]
+	private sealed class _003CGlobalBillGivers_003Ed__8 : IEnumerable<IBillGiver>, IEnumerable, IEnumerator<IBillGiver>, IEnumerator, IDisposable
 	{
-		// Token: 0x060069C5 RID: 27077 RVA: 0x00214C88 File Offset: 0x00212E88
-		public static void TryDrawIngredientSearchRadiusOnMap(this Bill bill, IntVec3 center)
+		private int _003C_003E1__state;
+
+		private IBillGiver _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private List<Map>.Enumerator _003C_003E7__wrap1;
+
+		private IEnumerator<IBillGiver> _003C_003E7__wrap2;
+
+		private List<Caravan>.Enumerator _003C_003E7__wrap3;
+
+		private IEnumerator<Thing> _003C_003E7__wrap4;
+
+		IBillGiver IEnumerator<IBillGiver>.Current
 		{
-			if (bill.ingredientSearchRadius < GenRadial.MaxRadialPatternRadius)
+			[DebuggerHidden]
+			get
 			{
-				GenDraw.DrawRadiusRing(center, bill.ingredientSearchRadius);
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x060069C6 RID: 27078 RVA: 0x00214CA4 File Offset: 0x00212EA4
-		public static Bill MakeNewBill(this RecipeDef recipe, Precept_ThingStyle precept = null)
+		object IEnumerator.Current
 		{
-			if (recipe.UsesUnfinishedThing)
+			[DebuggerHidden]
+			get
 			{
-				return new Bill_ProductionWithUft(recipe, precept);
+				return _003C_003E2__current;
 			}
-			if (recipe.mechResurrection)
-			{
-				return new Bill_ResurrectMech(recipe, precept);
-			}
-			if (recipe.gestationCycles > 0)
-			{
-				return new Bill_ProductionMech(recipe, precept);
-			}
-			if (recipe.formingTicks > 0)
-			{
-				return new Bill_Autonomous(recipe, precept);
-			}
-			return new Bill_Production(recipe, precept);
 		}
 
-		// Token: 0x060069C7 RID: 27079 RVA: 0x00214CFA File Offset: 0x00212EFA
-		public static IEnumerable<IBillGiver> GlobalBillGivers()
+		[DebuggerHidden]
+		public _003CGlobalBillGivers_003Ed__8(int _003C_003E1__state)
 		{
-			foreach (Map map in Find.Maps)
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			switch (num)
 			{
-				foreach (Thing thing in map.listerThings.ThingsMatching(ThingRequest.ForGroup(ThingRequestGroup.PotentialBillGiver)))
+			case -4:
+			case -3:
+			case 1:
+				try
 				{
-					IBillGiver billGiver = thing as IBillGiver;
-					if (billGiver == null)
+					if (num == -4 || num == 1)
 					{
-						Log.ErrorOnce("Found non-bill-giver tagged as PotentialBillGiver", 13389774);
-					}
-					else
-					{
-						yield return billGiver;
-					}
-				}
-				List<Thing>.Enumerator enumerator2 = default(List<Thing>.Enumerator);
-				foreach (Thing outerThing in map.listerThings.ThingsMatching(ThingRequest.ForGroup(ThingRequestGroup.MinifiedThing)))
-				{
-					IBillGiver billGiver2 = outerThing.GetInnerIfMinified() as IBillGiver;
-					if (billGiver2 != null)
-					{
-						yield return billGiver2;
-					}
-				}
-				enumerator2 = default(List<Thing>.Enumerator);
-				map = null;
-			}
-			List<Map>.Enumerator enumerator = default(List<Map>.Enumerator);
-			foreach (Caravan caravan in Find.WorldObjects.Caravans)
-			{
-				foreach (Thing outerThing2 in caravan.AllThings)
-				{
-					IBillGiver billGiver3 = outerThing2.GetInnerIfMinified() as IBillGiver;
-					if (billGiver3 != null)
-					{
-						yield return billGiver3;
+						try
+						{
+						}
+						finally
+						{
+							_003C_003Em__Finally2();
+						}
 					}
 				}
-				IEnumerator<Thing> enumerator4 = null;
-			}
-			List<Caravan>.Enumerator enumerator3 = default(List<Caravan>.Enumerator);
-			yield break;
-			yield break;
-		}
-
-		// Token: 0x060069C8 RID: 27080 RVA: 0x00214D03 File Offset: 0x00212F03
-		public static IEnumerable<Bill> GlobalBills()
-		{
-			foreach (IBillGiver billGiver in BillUtility.GlobalBillGivers())
-			{
-				foreach (Bill bill in billGiver.BillStack)
+				finally
 				{
-					yield return bill;
+					_003C_003Em__Finally1();
 				}
-				IEnumerator<Bill> enumerator2 = null;
+				break;
+			case -6:
+			case -5:
+			case 2:
+				try
+				{
+					if (num == -6 || num == 2)
+					{
+						try
+						{
+						}
+						finally
+						{
+							_003C_003Em__Finally4();
+						}
+					}
+				}
+				finally
+				{
+					_003C_003Em__Finally3();
+				}
+				break;
 			}
-			IEnumerator<IBillGiver> enumerator = null;
-			if (BillUtility.Clipboard != null)
-			{
-				yield return BillUtility.Clipboard;
-			}
-			yield break;
-			yield break;
+			_003C_003E7__wrap1 = default(List<Map>.Enumerator);
+			_003C_003E7__wrap2 = null;
+			_003C_003E7__wrap3 = default(List<Caravan>.Enumerator);
+			_003C_003E7__wrap4 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x060069C9 RID: 27081 RVA: 0x00214D0C File Offset: 0x00212F0C
-		public static void Notify_ISlotGroupRemoved(ISlotGroup group)
-		{
-			if (GravshipUtility.generatingGravship)
-			{
-				return;
-			}
-			foreach (Bill bill in BillUtility.GlobalBills())
-			{
-				bill.ValidateSettings();
-			}
-		}
-
-		// Token: 0x060069CA RID: 27082 RVA: 0x00214D60 File Offset: 0x00212F60
-		public static void Notify_ColonistUnavailable(Pawn pawn)
+		private bool MoveNext()
 		{
 			try
 			{
-				foreach (Bill bill in BillUtility.GlobalBills())
+				switch (_003C_003E1__state)
 				{
-					bill.ValidateSettings();
-				}
-			}
-			catch (Exception ex)
-			{
-				string str = "Could not notify bills: ";
-				Exception ex2 = ex;
-				Log.Error(str + ((ex2 != null) ? ex2.ToString() : null));
-			}
-		}
-
-		// Token: 0x060069CB RID: 27083 RVA: 0x00214DD8 File Offset: 0x00212FD8
-		public static WorkGiverDef GetWorkgiver(this IBillGiver billGiver)
-		{
-			Thing thing = billGiver as Thing;
-			if (thing == null)
-			{
-				Log.ErrorOnce(string.Format("Attempting to get the workgiver for a non-Thing IBillGiver {0}", billGiver.ToString()), 96810282);
-				return null;
-			}
-			List<WorkGiverDef> allDefsListForReading = DefDatabase<WorkGiverDef>.AllDefsListForReading;
-			for (int i = 0; i < allDefsListForReading.Count; i++)
-			{
-				WorkGiverDef workGiverDef = allDefsListForReading[i];
-				WorkGiver_DoBill workGiver_DoBill = workGiverDef.Worker as WorkGiver_DoBill;
-				if (workGiver_DoBill != null && workGiver_DoBill.ThingIsUsableBillGiver(thing))
-				{
-					return workGiverDef;
-				}
-			}
-			Log.ErrorOnce(string.Format("Can't find a WorkGiver for a BillGiver {0}", thing.ToString()), 57348705);
-			return null;
-		}
-
-		// Token: 0x060069CC RID: 27084 RVA: 0x00214E64 File Offset: 0x00213064
-		public static bool IsSurgeryViolationOnExtraFactionMember(this Bill_Medical bill, Pawn billDoer)
-		{
-			if (bill.recipe.IsSurgery && bill.recipe.Worker != null)
-			{
-				RecipeWorker worker = bill.recipe.Worker;
-				Faction sharedExtraFaction = billDoer.GetSharedExtraFaction(bill.GiverPawn, ExtraFactionType.HomeFaction, null);
-				if (sharedExtraFaction != null && worker.IsViolationOnPawn(bill.GiverPawn, bill.Part, sharedExtraFaction))
-				{
-					return true;
-				}
-				Faction sharedExtraFaction2 = billDoer.GetSharedExtraFaction(bill.GiverPawn, ExtraFactionType.MiniFaction, null);
-				if (sharedExtraFaction2 != null && worker.IsViolationOnPawn(bill.GiverPawn, bill.Part, sharedExtraFaction2))
-				{
-					return true;
-				}
-			}
-			return false;
-		}
-
-		// Token: 0x060069CD RID: 27085 RVA: 0x00214EEC File Offset: 0x002130EC
-		public static void MakeIngredientsListInProcessingOrder(this Bill bill, List<IngredientCount> ingredientsOrdered)
-		{
-			ingredientsOrdered.Clear();
-			if (bill.recipe.productHasIngredientStuff)
-			{
-				ingredientsOrdered.Add(bill.recipe.ingredients[0]);
-			}
-			for (int i = 0; i < bill.recipe.ingredients.Count; i++)
-			{
-				if (!bill.recipe.productHasIngredientStuff || i != 0)
-				{
-					IngredientCount ingredientCount = bill.recipe.ingredients[i];
-					if (ingredientCount.IsFixedIngredient)
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = Find.Maps.GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_00ab;
+				case 1:
+					_003C_003E1__state = -4;
+					goto IL_0091;
+				case 2:
 					{
-						ingredientsOrdered.Add(ingredientCount);
+						_003C_003E1__state = -6;
+						goto IL_0148;
+					}
+					IL_00ab:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Map current = _003C_003E7__wrap1.Current;
+						_003C_003E7__wrap2 = MapBillGivers(current).GetEnumerator();
+						_003C_003E1__state = -4;
+						goto IL_0091;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = default(List<Map>.Enumerator);
+					_003C_003E7__wrap3 = Find.WorldObjects.Caravans.GetEnumerator();
+					_003C_003E1__state = -5;
+					goto IL_0162;
+					IL_0148:
+					while (_003C_003E7__wrap4.MoveNext())
+					{
+						if (_003C_003E7__wrap4.Current.GetInnerIfMinified() is IBillGiver billGiver)
+						{
+							_003C_003E2__current = billGiver;
+							_003C_003E1__state = 2;
+							return true;
+						}
+					}
+					_003C_003Em__Finally4();
+					_003C_003E7__wrap4 = null;
+					goto IL_0162;
+					IL_0162:
+					if (_003C_003E7__wrap3.MoveNext())
+					{
+						Caravan current2 = _003C_003E7__wrap3.Current;
+						_003C_003E7__wrap4 = current2.AllThings.GetEnumerator();
+						_003C_003E1__state = -6;
+						goto IL_0148;
+					}
+					_003C_003Em__Finally3();
+					_003C_003E7__wrap3 = default(List<Caravan>.Enumerator);
+					return false;
+					IL_0091:
+					if (_003C_003E7__wrap2.MoveNext())
+					{
+						IBillGiver current3 = _003C_003E7__wrap2.Current;
+						_003C_003E2__current = current3;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally2();
+					_003C_003E7__wrap2 = null;
+					goto IL_00ab;
+				}
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap1/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -3;
+			if (_003C_003E7__wrap2 != null)
+			{
+				_003C_003E7__wrap2.Dispose();
+			}
+		}
+
+		private void _003C_003Em__Finally3()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap3/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		private void _003C_003Em__Finally4()
+		{
+			_003C_003E1__state = -5;
+			if (_003C_003E7__wrap4 != null)
+			{
+				_003C_003E7__wrap4.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<IBillGiver> IEnumerable<IBillGiver>.GetEnumerator()
+		{
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				return this;
+			}
+			return new _003CGlobalBillGivers_003Ed__8(0);
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<IBillGiver>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGlobalBills_003Ed__10 : IEnumerable<Bill>, IEnumerable, IEnumerator<Bill>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Bill _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private IEnumerator<IBillGiver> _003C_003E7__wrap1;
+
+		private IEnumerator<Bill> _003C_003E7__wrap2;
+
+		Bill IEnumerator<Bill>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGlobalBills_003Ed__10(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if ((uint)(num - -4) <= 1u || num == 1)
+			{
+				try
+				{
+					if (num == -4 || num == 1)
+					{
+						try
+						{
+						}
+						finally
+						{
+							_003C_003Em__Finally2();
+						}
 					}
 				}
-			}
-			for (int j = 0; j < bill.recipe.ingredients.Count; j++)
-			{
-				IngredientCount item = bill.recipe.ingredients[j];
-				if (!ingredientsOrdered.Contains(item))
+				finally
 				{
-					ingredientsOrdered.Add(item);
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E7__wrap2 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				switch (_003C_003E1__state)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = GlobalBillGivers().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_00a8;
+				case 1:
+					_003C_003E1__state = -4;
+					goto IL_008e;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_00a8:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						IBillGiver current = _003C_003E7__wrap1.Current;
+						_003C_003E7__wrap2 = current.BillStack.GetEnumerator();
+						_003C_003E1__state = -4;
+						goto IL_008e;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (Clipboard != null)
+					{
+						_003C_003E2__current = Clipboard;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
+					IL_008e:
+					if (_003C_003E7__wrap2.MoveNext())
+					{
+						Bill current2 = _003C_003E7__wrap2.Current;
+						_003C_003E2__current = current2;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally2();
+					_003C_003E7__wrap2 = null;
+					goto IL_00a8;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -3;
+			if (_003C_003E7__wrap2 != null)
+			{
+				_003C_003E7__wrap2.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Bill> IEnumerable<Bill>.GetEnumerator()
+		{
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				return this;
+			}
+			return new _003CGlobalBills_003Ed__10(0);
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Bill>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CMapBillGivers_003Ed__9 : IEnumerable<IBillGiver>, IEnumerable, IEnumerator<IBillGiver>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private IBillGiver _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private Map map;
+
+		public Map _003C_003E3__map;
+
+		private List<Thing>.Enumerator _003C_003E7__wrap1;
+
+		IBillGiver IEnumerator<IBillGiver>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CMapBillGivers_003Ed__9(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			switch (_003C_003E1__state)
+			{
+			case -3:
+			case 1:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+				break;
+			case -4:
+			case 2:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally2();
+				}
+				break;
+			}
+			_003C_003E7__wrap1 = default(List<Thing>.Enumerator);
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				switch (_003C_003E1__state)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = map.listerThings.ThingsMatching(ThingRequest.ForGroup(ThingRequestGroup.PotentialBillGiver)).GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0095;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0095;
+				case 2:
+					{
+						_003C_003E1__state = -4;
+						break;
+					}
+					IL_0095:
+					while (_003C_003E7__wrap1.MoveNext())
+					{
+						if (!(_003C_003E7__wrap1.Current is IBillGiver billGiver))
+						{
+							Log.ErrorOnce("Found non-bill-giver tagged as PotentialBillGiver", 13389774);
+							continue;
+						}
+						_003C_003E2__current = billGiver;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = default(List<Thing>.Enumerator);
+					_003C_003E7__wrap1 = map.listerThings.ThingsMatching(ThingRequest.ForGroup(ThingRequestGroup.MinifiedThing)).GetEnumerator();
+					_003C_003E1__state = -4;
+					break;
+				}
+				while (_003C_003E7__wrap1.MoveNext())
+				{
+					if (_003C_003E7__wrap1.Current.GetInnerIfMinified() is IBillGiver billGiver2)
+					{
+						_003C_003E2__current = billGiver2;
+						_003C_003E1__state = 2;
+						return true;
+					}
+				}
+				_003C_003Em__Finally2();
+				_003C_003E7__wrap1 = default(List<Thing>.Enumerator);
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap1/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap1/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<IBillGiver> IEnumerable<IBillGiver>.GetEnumerator()
+		{
+			_003CMapBillGivers_003Ed__9 _003CMapBillGivers_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CMapBillGivers_003Ed__ = this;
+			}
+			else
+			{
+				_003CMapBillGivers_003Ed__ = new _003CMapBillGivers_003Ed__9(0);
+			}
+			_003CMapBillGivers_003Ed__.map = _003C_003E3__map;
+			return _003CMapBillGivers_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<IBillGiver>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CMapBills_003Ed__11 : IEnumerable<Bill>, IEnumerable, IEnumerator<Bill>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Bill _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private Map map;
+
+		public Map _003C_003E3__map;
+
+		private IEnumerator<IBillGiver> _003C_003E7__wrap1;
+
+		private IEnumerator<Bill> _003C_003E7__wrap2;
+
+		Bill IEnumerator<Bill>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CMapBills_003Ed__11(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if ((uint)(num - -4) <= 1u || num == 1)
+			{
+				try
+				{
+					if (num == -4 || num == 1)
+					{
+						try
+						{
+						}
+						finally
+						{
+							_003C_003Em__Finally2();
+						}
+					}
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E7__wrap2 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				if (num != 0)
+				{
+					if (num != 1)
+					{
+						return false;
+					}
+					_003C_003E1__state = -4;
+					goto IL_0089;
+				}
+				_003C_003E1__state = -1;
+				_003C_003E7__wrap1 = MapBillGivers(map).GetEnumerator();
+				_003C_003E1__state = -3;
+				goto IL_00a3;
+				IL_0089:
+				if (_003C_003E7__wrap2.MoveNext())
+				{
+					Bill current = _003C_003E7__wrap2.Current;
+					_003C_003E2__current = current;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				_003C_003Em__Finally2();
+				_003C_003E7__wrap2 = null;
+				goto IL_00a3;
+				IL_00a3:
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					IBillGiver current2 = _003C_003E7__wrap1.Current;
+					_003C_003E7__wrap2 = current2.BillStack.GetEnumerator();
+					_003C_003E1__state = -4;
+					goto IL_0089;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = null;
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -3;
+			if (_003C_003E7__wrap2 != null)
+			{
+				_003C_003E7__wrap2.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Bill> IEnumerable<Bill>.GetEnumerator()
+		{
+			_003CMapBills_003Ed__11 _003CMapBills_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CMapBills_003Ed__ = this;
+			}
+			else
+			{
+				_003CMapBills_003Ed__ = new _003CMapBills_003Ed__11(0);
+			}
+			_003CMapBills_003Ed__.map = _003C_003E3__map;
+			return _003CMapBills_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Bill>)this).GetEnumerator();
+		}
+	}
+
+	public static Bill Clipboard = null;
+
+	private static readonly RecipeTooltipLayout recipeTooltipLayout = new RecipeTooltipLayout();
+
+	private const int MaxIngredientIcons = 9;
+
+	private const float Indent = 8f;
+
+	private const float ElementSpacing = 4f;
+
+	private const float Margin = 6f;
+
+	private static HashSet<ThingDef> tmpSpecialProducts = new HashSet<ThingDef>();
+
+	private static List<IngredientCount> tmpSortedIngredients = new List<IngredientCount>();
+
+	public static void TryDrawIngredientSearchRadiusOnMap(this Bill bill, IntVec3 center)
+	{
+		if (bill.ingredientSearchRadius < GenRadial.MaxRadialPatternRadius)
+		{
+			GenDraw.DrawRadiusRing(center, bill.ingredientSearchRadius);
+		}
+	}
+
+	public static Bill MakeNewBill(this RecipeDef recipe, Precept_ThingStyle precept = null)
+	{
+		if (recipe.UsesUnfinishedThing)
+		{
+			return new Bill_ProductionWithUft(recipe, precept);
+		}
+		if (recipe.mechResurrection)
+		{
+			return new Bill_ResurrectMech(recipe, precept);
+		}
+		if (recipe.gestationCycles > 0)
+		{
+			return new Bill_ProductionMech(recipe, precept);
+		}
+		if (recipe.formingTicks > 0)
+		{
+			return new Bill_Autonomous(recipe, precept);
+		}
+		return new Bill_Production(recipe, precept);
+	}
+
+	[IteratorStateMachine(typeof(_003CGlobalBillGivers_003Ed__8))]
+	public static IEnumerable<IBillGiver> GlobalBillGivers()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGlobalBillGivers_003Ed__8(-2);
+	}
+
+	[IteratorStateMachine(typeof(_003CMapBillGivers_003Ed__9))]
+	public static IEnumerable<IBillGiver> MapBillGivers(Map map)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMapBillGivers_003Ed__9(-2)
+		{
+			_003C_003E3__map = map
+		};
+	}
+
+	[IteratorStateMachine(typeof(_003CGlobalBills_003Ed__10))]
+	public static IEnumerable<Bill> GlobalBills()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGlobalBills_003Ed__10(-2);
+	}
+
+	[IteratorStateMachine(typeof(_003CMapBills_003Ed__11))]
+	public static IEnumerable<Bill> MapBills(Map map)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMapBills_003Ed__11(-2)
+		{
+			_003C_003E3__map = map
+		};
+	}
+
+	public static void Notify_ISlotGroupRemoved(ISlotGroup group)
+	{
+		if (GravshipUtility.generatingGravship)
+		{
+			return;
+		}
+		foreach (Bill item in GlobalBills())
+		{
+			item.ValidateSettings();
+		}
+	}
+
+	public static void Notify_ColonistUnavailable(Pawn pawn)
+	{
+		try
+		{
+			foreach (Bill item in GlobalBills())
+			{
+				item.ValidateSettings();
+			}
+		}
+		catch (Exception ex)
+		{
+			Log.Error("Could not notify bills: " + ex);
+		}
+	}
+
+	public static WorkGiverDef GetWorkgiver(this IBillGiver billGiver)
+	{
+		if (!(billGiver is Thing thing))
+		{
+			Log.ErrorOnce($"Attempting to get the workgiver for a non-Thing IBillGiver {billGiver.ToString()}", 96810282);
+			return null;
+		}
+		List<WorkGiverDef> allDefsListForReading = DefDatabase<WorkGiverDef>.AllDefsListForReading;
+		for (int i = 0; i < allDefsListForReading.Count; i++)
+		{
+			WorkGiverDef workGiverDef = allDefsListForReading[i];
+			if (workGiverDef.Worker is WorkGiver_DoBill workGiver_DoBill && workGiver_DoBill.ThingIsUsableBillGiver(thing))
+			{
+				return workGiverDef;
+			}
+		}
+		Log.ErrorOnce($"Can't find a WorkGiver for a BillGiver {thing.ToString()}", 57348705);
+		return null;
+	}
+
+	public static bool IsSurgeryViolationOnExtraFactionMember(this Bill_Medical bill, Pawn billDoer)
+	{
+		if (bill.recipe.IsSurgery && bill.recipe.Worker != null)
+		{
+			RecipeWorker worker = bill.recipe.Worker;
+			Faction sharedExtraFaction = billDoer.GetSharedExtraFaction(bill.GiverPawn, ExtraFactionType.HomeFaction);
+			if (sharedExtraFaction != null && worker.IsViolationOnPawn(bill.GiverPawn, bill.Part, sharedExtraFaction))
+			{
+				return true;
+			}
+			Faction sharedExtraFaction2 = billDoer.GetSharedExtraFaction(bill.GiverPawn, ExtraFactionType.MiniFaction);
+			if (sharedExtraFaction2 != null && worker.IsViolationOnPawn(bill.GiverPawn, bill.Part, sharedExtraFaction2))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static void MakeIngredientsListInProcessingOrder(this Bill bill, List<IngredientCount> ingredientsOrdered)
+	{
+		ingredientsOrdered.Clear();
+		if (bill.recipe.productHasIngredientStuff)
+		{
+			ingredientsOrdered.Add(bill.recipe.ingredients[0]);
+		}
+		for (int i = 0; i < bill.recipe.ingredients.Count; i++)
+		{
+			if (!bill.recipe.productHasIngredientStuff || i != 0)
+			{
+				IngredientCount ingredientCount = bill.recipe.ingredients[i];
+				if (ingredientCount.IsFixedIngredient)
+				{
+					ingredientsOrdered.Add(ingredientCount);
 				}
 			}
 		}
-
-		// Token: 0x060069CE RID: 27086 RVA: 0x00214FAC File Offset: 0x002131AC
-		public static bool BillGiverCanContainIngredients(Bill bill)
+		for (int j = 0; j < bill.recipe.ingredients.Count; j++)
 		{
-			return BillUtility.GetBillGiverContainer(bill) != null;
-		}
-
-		// Token: 0x060069CF RID: 27087 RVA: 0x00214FB8 File Offset: 0x002131B8
-		public static ThingOwner<Thing> GetBillGiverContainer(Bill bill)
-		{
-			Building_WorkTableAutonomous building_WorkTableAutonomous = bill.billStack.billGiver as Building_WorkTableAutonomous;
-			if (building_WorkTableAutonomous != null)
+			IngredientCount item = bill.recipe.ingredients[j];
+			if (!ingredientsOrdered.Contains(item))
 			{
-				return (ThingOwner<Thing>)building_WorkTableAutonomous.innerContainer;
+				ingredientsOrdered.Add(item);
 			}
-			return null;
 		}
+	}
 
-		// Token: 0x060069D0 RID: 27088 RVA: 0x00214FE8 File Offset: 0x002131E8
-		public static bool ContainedInBillGiver(Bill bill, Thing thing)
+	public static bool BillGiverCanContainIngredients(Bill bill)
+	{
+		return GetBillGiverContainer(bill) != null;
+	}
+
+	public static ThingOwner<Thing> GetBillGiverContainer(Bill bill)
+	{
+		if (bill.billStack.billGiver is Building_WorkTableAutonomous building_WorkTableAutonomous)
 		{
-			ThingOwner<Thing> billGiverContainer = BillUtility.GetBillGiverContainer(bill);
-			return billGiverContainer != null && billGiverContainer.Contains(thing);
+			return (ThingOwner<Thing>)building_WorkTableAutonomous.innerContainer;
 		}
+		return null;
+	}
 
-		// Token: 0x060069D1 RID: 27089 RVA: 0x00215008 File Offset: 0x00213208
-		public static void DoBillInfoWindow(int billIndex, string label, Rect rect, RecipeDef recipe, BodyPartRecord part = null, Pawn pawn = null)
+	public static bool ContainedInBillGiver(Bill bill, Thing thing)
+	{
+		return GetBillGiverContainer(bill)?.Contains(thing) ?? false;
+	}
+
+	public static void DoBillInfoWindow(int billIndex, string label, Rect rect, RecipeDef recipe, BodyPartRecord part = null, Pawn pawn = null)
+	{
+		LayoutTooltip(recipe, part, pawn, draw: false);
+		if (!recipeTooltipLayout.Empty)
 		{
-			BillUtility.LayoutTooltip(recipe, part, pawn, false);
-			if (BillUtility.recipeTooltipLayout.Empty)
-			{
-				return;
-			}
 			Rect windowRect = Find.WindowStack.currentlyDrawnWindow.windowRect;
-			Rect immRect = new Rect(windowRect.x + rect.xMax + 10f, windowRect.y + rect.y, BillUtility.recipeTooltipLayout.Size.x, BillUtility.recipeTooltipLayout.Size.y);
+			Rect immRect = new Rect(windowRect.x + rect.xMax + 10f, windowRect.y + rect.y, recipeTooltipLayout.Size.x, recipeTooltipLayout.Size.y);
 			immRect.x = Mathf.Min(immRect.x, (float)UI.screenWidth - immRect.width);
 			immRect.y = Mathf.Min(immRect.y, (float)UI.screenHeight - immRect.height);
 			Find.WindowStack.ImmediateWindow(123 * (billIndex + 1), immRect, WindowLayer.Super, delegate
@@ -252,281 +982,228 @@ namespace RimWorld
 				GameFont font = Text.Font;
 				Text.Font = GameFont.Small;
 				GUI.BeginGroup(immRect.AtZero());
-				BillUtility.LayoutTooltip(recipe, part, pawn, true);
+				LayoutTooltip(recipe, part, pawn, draw: true);
 				GUI.EndGroup();
 				Text.Font = font;
-			}, true, false, 1f, null, false);
+			});
 		}
+	}
 
-		// Token: 0x060069D2 RID: 27090 RVA: 0x0021513C File Offset: 0x0021333C
-		private static void LayoutTooltip(RecipeDef recipe, BodyPartRecord part, Pawn pawn, bool draw)
+	private static void LayoutTooltip(RecipeDef recipe, BodyPartRecord part, Pawn pawn, bool draw)
+	{
+		recipeTooltipLayout.Reset(6f);
+		tmpSpecialProducts.Clear();
+		tmpSortedIngredients.Clear();
+		if (!recipe.skillRequirements.NullOrEmpty())
 		{
-			BillUtility.recipeTooltipLayout.Reset(6f);
-			BillUtility.tmpSpecialProducts.Clear();
-			BillUtility.tmpSortedIngredients.Clear();
-			if (!recipe.skillRequirements.NullOrEmpty<SkillRequirement>())
+			recipeTooltipLayout.Label(("Requires".Translate() + ": ").AsTipTitle() + recipe.skillRequirements.Select((SkillRequirement x) => $"{x.skill.LabelCap} {x.minLevel}").ToCommaList(), draw);
+		}
+		if (!recipe.ingredients.NullOrEmpty())
+		{
+			bool flag = false;
+			tmpSortedIngredients.AddRange(recipe.ingredients);
+			tmpSortedIngredients.Sort((IngredientCount a, IngredientCount b) => Mathf.RoundToInt(b.CountFor(recipe) - a.CountFor(recipe)));
+			foreach (IngredientCount ing in tmpSortedIngredients)
 			{
-				BillUtility.recipeTooltipLayout.Label(("Requires".Translate() + ": ").AsTipTitle() + (from x in recipe.skillRequirements
-				select string.Format("{0} {1}", x.skill.LabelCap, x.minLevel)).ToCommaList(false, false), draw, GameFont.Small);
-			}
-			if (!recipe.ingredients.NullOrEmpty<IngredientCount>())
-			{
-				bool flag = false;
-				BillUtility.tmpSortedIngredients.AddRange(recipe.ingredients);
-				BillUtility.tmpSortedIngredients.Sort((IngredientCount a, IngredientCount b) => Mathf.RoundToInt(b.CountFor(recipe) - a.CountFor(recipe)));
-				using (List<IngredientCount>.Enumerator enumerator = BillUtility.tmpSortedIngredients.GetEnumerator())
+				if (ing.filter?.AllowedThingDefs == null)
 				{
-					while (enumerator.MoveNext())
-					{
-						IngredientCount ing = enumerator.Current;
-						ThingFilter filter = ing.filter;
-						if (((filter != null) ? filter.AllowedThingDefs : null) != null)
-						{
-							IEnumerable<ThingDef> enumerable = from x in ing.filter.AllowedThingDefs
-							where Widgets.GetIconFor(x, null, null, null) != BaseContent.BadTex && ((ing.IsFixedIngredient && ing.filter.Allows(x)) || recipe.fixedIngredientFilter.AllowedDefCount == 0 || (recipe.fixedIngredientFilter.Allows(x) && !recipe.fixedIngredientFilter.IsAlwaysDisallowedDueToSpecialFilters(x)))
-							select x;
-							BillUtility.GetDistinctProductsFromIngredients(recipe, enumerable, BillUtility.tmpSpecialProducts);
-							IEnumerable<TextureAndColor> enumerable2 = (from x in enumerable
-							select x.ToTextureAndColor()).Distinct<TextureAndColor>();
-							if (enumerable2.Any<TextureAndColor>())
-							{
-								if (!flag)
-								{
-									if (!BillUtility.recipeTooltipLayout.Empty)
-									{
-										BillUtility.recipeTooltipLayout.Newline(GameFont.Small);
-									}
-									BillUtility.recipeTooltipLayout.Label(("Ingredients".Translate() + ": ").AsTipTitle(), draw, GameFont.Small);
-									flag = true;
-								}
-								BillUtility.recipeTooltipLayout.Newline(GameFont.Small);
-								ThingDef singleIngredient = null;
-								if (enumerable.EnumerableCount() == 1)
-								{
-									singleIngredient = enumerable.First<ThingDef>();
-								}
-								BillUtility.DisplayIngredientIconRow(enumerable2, draw, new float?(ing.CountFor(recipe)), singleIngredient);
-							}
-						}
-					}
+					continue;
 				}
-			}
-			if (!recipe.products.NullOrEmpty<ThingDefCountClass>() || BillUtility.tmpSpecialProducts.Count > 0)
-			{
-				if (!BillUtility.recipeTooltipLayout.Empty)
+				IEnumerable<ThingDef> enumerable = ing.filter.AllowedThingDefs.Where((ThingDef x) => Widgets.GetIconFor(x, null, null, null) != BaseContent.BadTex && ((ing.IsFixedIngredient && ing.filter.Allows(x)) || recipe.fixedIngredientFilter.AllowedDefCount == 0 || (recipe.fixedIngredientFilter.Allows(x) && !recipe.fixedIngredientFilter.IsAlwaysDisallowedDueToSpecialFilters(x))));
+				GetDistinctProductsFromIngredients(recipe, enumerable, tmpSpecialProducts);
+				IEnumerable<TextureAndColor> enumerable2 = enumerable.Select((ThingDef x) => x.ToTextureAndColor()).Distinct();
+				if (!enumerable2.Any())
 				{
-					BillUtility.recipeTooltipLayout.Newline(GameFont.Small);
+					continue;
 				}
-				BillUtility.recipeTooltipLayout.Label(("Products".Translate() + ": ").AsTipTitle(), draw, GameFont.Small);
-				BillUtility.recipeTooltipLayout.Newline(GameFont.Small);
-				if (!recipe.products.NullOrEmpty<ThingDefCountClass>())
+				if (!flag)
 				{
-					foreach (ThingDefCountClass thingDefCountClass in recipe.products)
+					if (!recipeTooltipLayout.Empty)
 					{
-						BillUtility.DisplayIngredientIconRow(Gen.YieldSingle<TextureAndColor>(thingDefCountClass.thingDef.ToTextureAndColor()), draw, new float?((float)thingDefCountClass.count), null);
+						recipeTooltipLayout.Newline();
 					}
-					if (BillUtility.tmpSpecialProducts.Count > 0)
-					{
-						BillUtility.recipeTooltipLayout.Newline(GameFont.Small);
-					}
+					recipeTooltipLayout.Label(("Ingredients".Translate() + ": ").AsTipTitle(), draw);
+					flag = true;
 				}
-				if (BillUtility.tmpSpecialProducts.Count > 0)
+				recipeTooltipLayout.Newline();
+				ThingDef singleIngredient = null;
+				if (enumerable.EnumerableCount() == 1)
 				{
-					BillUtility.DisplayIngredientIconRow((from x in BillUtility.tmpSpecialProducts
-					select x.ToTextureAndColor()).Distinct<TextureAndColor>(), draw, null, null);
+					singleIngredient = enumerable.First();
 				}
-			}
-			if (recipe.addsHediff != null && part != null && pawn != null)
-			{
-				AddedBodyPartProps addedPartProps = recipe.addsHediff.addedPartProps;
-				if (addedPartProps != null && addedPartProps.solid)
-				{
-					List<Hediff> list = new List<Hediff>();
-					List<Hediff_MissingPart> list2 = new List<Hediff_MissingPart>();
-					List<Hediff_MissingPart> missingPartsCommonAncestors = pawn.health.hediffSet.GetMissingPartsCommonAncestors();
-					using (IEnumerator<BodyPartRecord> enumerator3 = part.GetPartAndAllChildParts().GetEnumerator())
-					{
-						while (enumerator3.MoveNext())
-						{
-							BodyPartRecord childPart = enumerator3.Current;
-							Hediff item;
-							if (pawn.health.hediffSet.TryGetDirectlyAddedPartFor(childPart, out item))
-							{
-								list.Add(item);
-							}
-							else
-							{
-								Hediff hediff = pawn.health.hediffSet.hediffs.FirstOrDefault((Hediff x) => x.Part == childPart && x is Hediff_Implant);
-								if (hediff != null)
-								{
-									list.Add(hediff);
-								}
-								else
-								{
-									Hediff_MissingPart hediff_MissingPart = missingPartsCommonAncestors.Find((Hediff_MissingPart h) => h.Part == childPart);
-									if (hediff_MissingPart != null)
-									{
-										list2.Add(hediff_MissingPart);
-									}
-								}
-							}
-						}
-					}
-					if (list.Count > 0)
-					{
-						if (!BillUtility.recipeTooltipLayout.Empty)
-						{
-							BillUtility.recipeTooltipLayout.Newline(GameFont.Small);
-						}
-						BillUtility.recipeTooltipLayout.Label(("Replaces".Translate() + ": ").Colorize(ColoredText.WarningColor), draw, GameFont.Small);
-						BillUtility.recipeTooltipLayout.Label((from p in list
-						select p.Label).ToCommaList(false, false).CapitalizeFirst().Colorize(ColoredText.WarningColor), draw, GameFont.Small);
-					}
-					if (list2.Count > 0)
-					{
-						if (!BillUtility.recipeTooltipLayout.Empty)
-						{
-							BillUtility.recipeTooltipLayout.Newline(GameFont.Small);
-						}
-						BillUtility.recipeTooltipLayout.Label(("Replaces".Translate() + ": ").AsTipTitle(), draw, GameFont.Small);
-						BillUtility.recipeTooltipLayout.Label((from p in list2
-						select "MissingPartWithLabel".Translate(p.Part.Label).ToString()).ToCommaList(false, false).CapitalizeFirst(), draw, GameFont.Small);
-					}
-				}
-			}
-			if (!BillUtility.recipeTooltipLayout.Empty)
-			{
-				BillUtility.recipeTooltipLayout.Expand(6f, 6f);
+				DisplayIngredientIconRow(enumerable2, draw, ing.CountFor(recipe), singleIngredient);
 			}
 		}
-
-		// Token: 0x060069D3 RID: 27091 RVA: 0x00215768 File Offset: 0x00213968
-		private static void GetDistinctProductsFromIngredients(RecipeDef recipe, IEnumerable<ThingDef> ingredients, HashSet<ThingDef> outProducts)
+		if (!recipe.products.NullOrEmpty() || tmpSpecialProducts.Count > 0)
 		{
-			if (recipe.specialProducts.NullOrEmpty<SpecialProductType>())
+			if (!recipeTooltipLayout.Empty)
 			{
-				return;
+				recipeTooltipLayout.Newline();
 			}
-			foreach (SpecialProductType specialProductType in recipe.specialProducts)
+			recipeTooltipLayout.Label(("Products".Translate() + ": ").AsTipTitle(), draw);
+			recipeTooltipLayout.Newline();
+			if (!recipe.products.NullOrEmpty())
 			{
-				foreach (ThingDef thingDef in ingredients)
+				foreach (ThingDefCountClass product in recipe.products)
 				{
-					if (thingDef.IsCorpse)
+					DisplayIngredientIconRow(Gen.YieldSingle(product.thingDef.ToTextureAndColor()), draw, product.count);
+				}
+				if (tmpSpecialProducts.Count > 0)
+				{
+					recipeTooltipLayout.Newline();
+				}
+			}
+			if (tmpSpecialProducts.Count > 0)
+			{
+				DisplayIngredientIconRow(tmpSpecialProducts.Select((ThingDef x) => x.ToTextureAndColor()).Distinct(), draw, null);
+			}
+		}
+		if (recipe.addsHediff != null && part != null && pawn != null)
+		{
+			AddedBodyPartProps addedPartProps = recipe.addsHediff.addedPartProps;
+			if (addedPartProps != null && addedPartProps.solid)
+			{
+				List<Hediff> list = new List<Hediff>();
+				List<Hediff_MissingPart> list2 = new List<Hediff_MissingPart>();
+				List<Hediff_MissingPart> missingPartsCommonAncestors = pawn.health.hediffSet.GetMissingPartsCommonAncestors();
+				foreach (BodyPartRecord childPart in part.GetPartAndAllChildParts())
+				{
+					if (pawn.health.hediffSet.TryGetDirectlyAddedPartFor(childPart, out var hediff))
 					{
-						IngestibleProperties ingestible = thingDef.ingestible;
-						if (((ingestible != null) ? ingestible.sourceDef : null) != null)
-						{
-							thingDef = thingDef.ingestible.sourceDef;
-						}
+						list.Add(hediff);
+						continue;
 					}
-					if (specialProductType != SpecialProductType.Butchery)
+					Hediff hediff2 = pawn.health.hediffSet.hediffs.FirstOrDefault((Hediff x) => x.Part == childPart && x is Hediff_Implant);
+					if (hediff2 != null)
 					{
-						if (specialProductType == SpecialProductType.Smelted)
-						{
-							if (!thingDef.CostList.NullOrEmpty<ThingDefCountClass>())
-							{
-								foreach (ThingDefCountClass thingDefCountClass in thingDef.CostList)
-								{
-									if (!thingDefCountClass.thingDef.intricate && Mathf.Round((float)thingDefCountClass.count * 0.25f) > 0f)
-									{
-										outProducts.Add(thingDefCountClass.thingDef);
-									}
-								}
-							}
-							if (!thingDef.smeltProducts.NullOrEmpty<ThingDefCountClass>())
-							{
-								foreach (ThingDefCountClass thingDefCountClass2 in thingDef.smeltProducts)
-								{
-									outProducts.Add(thingDefCountClass2.thingDef);
-								}
-							}
-						}
+						list.Add(hediff2);
+						continue;
 					}
-					else
+					Hediff_MissingPart hediff_MissingPart = missingPartsCommonAncestors.Find((Hediff_MissingPart h) => h.Part == childPart);
+					if (hediff_MissingPart != null)
 					{
-						if (!thingDef.butcherProducts.NullOrEmpty<ThingDefCountClass>())
-						{
-							foreach (ThingDefCountClass thingDefCountClass3 in thingDef.butcherProducts)
-							{
-								outProducts.Add(thingDefCountClass3.thingDef);
-							}
-						}
-						RaceProperties race = thingDef.race;
-						if (((race != null) ? race.meatDef : null) != null)
-						{
-							outProducts.Add(thingDef.race.meatDef);
-						}
-						RaceProperties race2 = thingDef.race;
-						if (((race2 != null) ? race2.leatherDef : null) != null)
-						{
-							outProducts.Add(thingDef.race.leatherDef);
-						}
+						list2.Add(hediff_MissingPart);
 					}
+				}
+				if (list.Count > 0)
+				{
+					if (!recipeTooltipLayout.Empty)
+					{
+						recipeTooltipLayout.Newline();
+					}
+					recipeTooltipLayout.Label(("Replaces".Translate() + ": ").Colorize(ColoredText.WarningColor), draw);
+					recipeTooltipLayout.Label(list.Select((Hediff p) => p.Label).ToCommaList().CapitalizeFirst()
+						.Colorize(ColoredText.WarningColor), draw);
+				}
+				if (list2.Count > 0)
+				{
+					if (!recipeTooltipLayout.Empty)
+					{
+						recipeTooltipLayout.Newline();
+					}
+					recipeTooltipLayout.Label(("Replaces".Translate() + ": ").AsTipTitle(), draw);
+					recipeTooltipLayout.Label(list2.Select((Hediff_MissingPart p) => "MissingPartWithLabel".Translate(p.Part.Label).ToString()).ToCommaList().CapitalizeFirst(), draw);
 				}
 			}
 		}
-
-		// Token: 0x060069D4 RID: 27092 RVA: 0x002159F8 File Offset: 0x00213BF8
-		private static void DisplayIngredientIconRow(IEnumerable<TextureAndColor> icons, bool draw, float? count = null, ThingDef singleIngredient = null)
+		if (!recipeTooltipLayout.Empty)
 		{
-			int num = icons.EnumerableCount();
-			if (num <= 0)
+			recipeTooltipLayout.Expand(6f, 6f);
+		}
+	}
+
+	private static void GetDistinctProductsFromIngredients(RecipeDef recipe, IEnumerable<ThingDef> ingredients, HashSet<ThingDef> outProducts)
+	{
+		if (recipe.specialProducts.NullOrEmpty())
+		{
+			return;
+		}
+		foreach (SpecialProductType specialProduct in recipe.specialProducts)
+		{
+			foreach (ThingDef ingredient in ingredients)
 			{
-				return;
+				ThingDef thingDef = ingredient;
+				if (thingDef.IsCorpse && thingDef.ingestible?.sourceDef != null)
+				{
+					thingDef = thingDef.ingestible.sourceDef;
+				}
+				switch (specialProduct)
+				{
+				case SpecialProductType.Butchery:
+				case SpecialProductType.StoneBlocks:
+					if (!thingDef.butcherProducts.NullOrEmpty())
+					{
+						foreach (ThingDefCountClass butcherProduct in thingDef.butcherProducts)
+						{
+							outProducts.Add(butcherProduct.thingDef);
+						}
+					}
+					if (thingDef.race?.meatDef != null)
+					{
+						outProducts.Add(thingDef.race.meatDef);
+					}
+					if (thingDef.race?.leatherDef != null)
+					{
+						outProducts.Add(thingDef.race.leatherDef);
+					}
+					break;
+				case SpecialProductType.Smelted:
+					if (!thingDef.CostList.NullOrEmpty())
+					{
+						foreach (ThingDefCountClass cost in thingDef.CostList)
+						{
+							if (!cost.thingDef.intricate && Mathf.Round((float)cost.count * 0.25f) > 0f)
+							{
+								outProducts.Add(cost.thingDef);
+							}
+						}
+					}
+					if (thingDef.smeltProducts.NullOrEmpty())
+					{
+						break;
+					}
+					foreach (ThingDefCountClass smeltProduct in thingDef.smeltProducts)
+					{
+						outProducts.Add(smeltProduct.thingDef);
+					}
+					break;
+				}
 			}
+		}
+	}
+
+	private static void DisplayIngredientIconRow(IEnumerable<TextureAndColor> icons, bool draw, float? count = null, ThingDef singleIngredient = null)
+	{
+		int num = icons.EnumerableCount();
+		if (num > 0)
+		{
 			int num2 = Mathf.Min(9, num);
-			BillUtility.recipeTooltipLayout.Gap(8f, 0f);
-			if (count != null)
+			recipeTooltipLayout.Gap(8f, 0f);
+			if (count.HasValue)
 			{
-				BillUtility.recipeTooltipLayout.Label(count.Value.ToString() + "x ", draw, GameFont.Small);
+				recipeTooltipLayout.Label(count.Value + "x ", draw);
 			}
 			for (int i = 0; i < num2; i++)
 			{
 				TextureAndColor textureAndColor = icons.ElementAt(i);
-				BillUtility.recipeTooltipLayout.Icon(textureAndColor.Texture, textureAndColor.Color, Text.LineHeightOf(GameFont.Small), draw);
-				BillUtility.recipeTooltipLayout.Gap(4f, 0f);
+				recipeTooltipLayout.Icon(textureAndColor.Texture, textureAndColor.Color, Text.LineHeightOf(GameFont.Small), draw);
+				recipeTooltipLayout.Gap(4f, 0f);
 			}
 			if (num > 9)
 			{
 				Text.Anchor = TextAnchor.MiddleLeft;
-				BillUtility.recipeTooltipLayout.Label(" " + "Etc".Translate() + "...", draw, GameFont.Small);
+				recipeTooltipLayout.Label(" " + "Etc".Translate() + "...", draw);
 				Text.Anchor = TextAnchor.UpperLeft;
-				return;
 			}
-			if (singleIngredient != null)
+			else if (singleIngredient != null)
 			{
-				BillUtility.recipeTooltipLayout.Label(singleIngredient.LabelCap, draw, GameFont.Small);
+				recipeTooltipLayout.Label(singleIngredient.LabelCap, draw);
 			}
 		}
+	}
 
-		// Token: 0x060069D5 RID: 27093 RVA: 0x00215B00 File Offset: 0x00213D00
-		private static TextureAndColor ToTextureAndColor(this ThingDef td)
-		{
-			return new TextureAndColor(Widgets.GetIconFor(td, null, null, null), td.uiIconColor);
-		}
-
-		// Token: 0x04004ACA RID: 19146
-		public static Bill Clipboard = null;
-
-		// Token: 0x04004ACB RID: 19147
-		private static readonly RecipeTooltipLayout recipeTooltipLayout = new RecipeTooltipLayout();
-
-		// Token: 0x04004ACC RID: 19148
-		private const int MaxIngredientIcons = 9;
-
-		// Token: 0x04004ACD RID: 19149
-		private const float Indent = 8f;
-
-		// Token: 0x04004ACE RID: 19150
-		private const float ElementSpacing = 4f;
-
-		// Token: 0x04004ACF RID: 19151
-		private const float Margin = 6f;
-
-		// Token: 0x04004AD0 RID: 19152
-		private static HashSet<ThingDef> tmpSpecialProducts = new HashSet<ThingDef>();
-
-		// Token: 0x04004AD1 RID: 19153
-		private static List<IngredientCount> tmpSortedIngredients = new List<IngredientCount>();
+	private static TextureAndColor ToTextureAndColor(this ThingDef td)
+	{
+		return new TextureAndColor(Widgets.GetIconFor(td, null, null, null), td.uiIconColor);
 	}
 }

@@ -1,154 +1,118 @@
-﻿using System;
 using System.Linq;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Designator_Deconstruct : Designator
 {
-	// Token: 0x0200308F RID: 12431
-	public class Designator_Deconstruct : Designator
+	protected override DesignationDef Designation => DesignationDefOf.Deconstruct;
+
+	public override DrawStyleCategoryDef DrawStyleCategory => DrawStyleCategoryDefOf.Orders;
+
+	public Designator_Deconstruct()
 	{
-		// Token: 0x17002D28 RID: 11560
-		// (get) Token: 0x0601171C RID: 71452 RVA: 0x00223A33 File Offset: 0x00221C33
-		protected override DesignationDef Designation
-		{
-			get
-			{
-				return DesignationDefOf.Deconstruct;
-			}
-		}
+		defaultLabel = "DesignatorDeconstruct".Translate();
+		defaultDesc = "DesignatorDeconstructDesc".Translate();
+		icon = ContentFinder<Texture2D>.Get("UI/Designators/Deconstruct");
+		soundDragSustain = SoundDefOf.Designate_DragStandard;
+		soundDragChanged = SoundDefOf.Designate_DragStandard_Changed;
+		useMouseIcon = true;
+		soundSucceeded = SoundDefOf.Designate_Deconstruct;
+		hotKey = KeyBindingDefOf.Designator_Deconstruct;
+		showReverseDesignatorDisabledReason = true;
+	}
 
-		// Token: 0x17002D29 RID: 11561
-		// (get) Token: 0x0601171D RID: 71453 RVA: 0x00503150 File Offset: 0x00501350
-		public override DrawStyleCategoryDef DrawStyleCategory
+	public override AcceptanceReport CanDesignateCell(IntVec3 c)
+	{
+		if (!c.InBounds(base.Map))
 		{
-			get
-			{
-				return DrawStyleCategoryDefOf.Orders;
-			}
+			return false;
 		}
-
-		// Token: 0x0601171E RID: 71454 RVA: 0x00503158 File Offset: 0x00501358
-		public Designator_Deconstruct()
+		if (!DebugSettings.godMode && c.Fogged(base.Map))
 		{
-			this.defaultLabel = "DesignatorDeconstruct".Translate();
-			this.defaultDesc = "DesignatorDeconstructDesc".Translate();
-			this.icon = ContentFinder<Texture2D>.Get("UI/Designators/Deconstruct", true);
-			this.soundDragSustain = SoundDefOf.Designate_DragStandard;
-			this.soundDragChanged = SoundDefOf.Designate_DragStandard_Changed;
-			this.useMouseIcon = true;
-			this.soundSucceeded = SoundDefOf.Designate_Deconstruct;
-			this.hotKey = KeyBindingDefOf.Designator_Deconstruct;
-			this.showReverseDesignatorDisabledReason = true;
+			return false;
 		}
-
-		// Token: 0x0601171F RID: 71455 RVA: 0x005031E0 File Offset: 0x005013E0
-		public override AcceptanceReport CanDesignateCell(IntVec3 c)
+		if (TopDeconstructibleInCell(c, out var reportToDisplay) == null)
 		{
-			if (!c.InBounds(base.Map))
-			{
-				return false;
-			}
-			if (!DebugSettings.godMode && c.Fogged(base.Map))
-			{
-				return false;
-			}
-			AcceptanceReport result;
-			if (this.TopDeconstructibleInCell(c, out result) == null)
-			{
-				return result;
-			}
-			return true;
+			return reportToDisplay;
 		}
+		return true;
+	}
 
-		// Token: 0x06011720 RID: 71456 RVA: 0x00503234 File Offset: 0x00501434
-		public override void DesignateSingleCell(IntVec3 loc)
-		{
-			AcceptanceReport acceptanceReport;
-			this.DesignateThing(this.TopDeconstructibleInCell(loc, out acceptanceReport));
-		}
+	public override void DesignateSingleCell(IntVec3 loc)
+	{
+		DesignateThing(TopDeconstructibleInCell(loc, out var _));
+	}
 
-		// Token: 0x06011721 RID: 71457 RVA: 0x00503250 File Offset: 0x00501450
-		private Thing TopDeconstructibleInCell(IntVec3 loc, out AcceptanceReport reportToDisplay)
-		{
-			reportToDisplay = AcceptanceReport.WasRejected;
-			foreach (Thing thing in from t in base.Map.thingGrid.ThingsAt(loc)
+	private Thing TopDeconstructibleInCell(IntVec3 loc, out AcceptanceReport reportToDisplay)
+	{
+		reportToDisplay = AcceptanceReport.WasRejected;
+		foreach (Thing item in from t in base.Map.thingGrid.ThingsAt(loc)
 			orderby t.def.altitudeLayer descending
 			select t)
-			{
-				AcceptanceReport acceptanceReport = this.CanDesignateThing(thing);
-				if (this.CanDesignateThing(thing).Accepted)
-				{
-					reportToDisplay = AcceptanceReport.WasAccepted;
-					return thing;
-				}
-				if (!acceptanceReport.Reason.NullOrEmpty())
-				{
-					reportToDisplay = acceptanceReport;
-				}
-			}
-			return null;
-		}
-
-		// Token: 0x06011722 RID: 71458 RVA: 0x00503314 File Offset: 0x00501514
-		public override void DesignateThing(Thing t)
 		{
-			Thing innerIfMinified = t.GetInnerIfMinified();
-			if (DebugSettings.godMode || innerIfMinified.GetStatValue(StatDefOf.WorkToBuild, true, -1) == 0f || t.def.IsFrame)
+			AcceptanceReport acceptanceReport = CanDesignateThing(item);
+			if (CanDesignateThing(item).Accepted)
 			{
-				t.Destroy(DestroyMode.Deconstruct);
-				return;
+				reportToDisplay = AcceptanceReport.WasAccepted;
+				return item;
 			}
-			base.Map.designationManager.AddDesignation(new Designation(t, this.Designation, null));
-			if (ModsConfig.AnomalyActive)
+			if (!acceptanceReport.Reason.NullOrEmpty())
 			{
-				Building_HoldingPlatform building_HoldingPlatform = t as Building_HoldingPlatform;
-				if (building_HoldingPlatform != null && building_HoldingPlatform.Occupied)
-				{
-					Messages.Message("MessageOccupiedHoldingPlatformDeconstructed".Translate(), building_HoldingPlatform, MessageTypeDefOf.CautionInput, true);
-				}
+				reportToDisplay = acceptanceReport;
 			}
 		}
+		return null;
+	}
 
-		// Token: 0x06011723 RID: 71459 RVA: 0x005033B4 File Offset: 0x005015B4
-		public override AcceptanceReport CanDesignateThing(Thing t)
+	public override void DesignateThing(Thing t)
+	{
+		Thing innerIfMinified = t.GetInnerIfMinified();
+		if (DebugSettings.godMode || innerIfMinified.GetStatValue(StatDefOf.WorkToBuild) == 0f || t.def.IsFrame)
 		{
-			Building building = t.GetInnerIfMinified() as Building;
-			if (building == null)
-			{
-				return false;
-			}
-			if (building.def.category != ThingCategory.Building)
-			{
-				return false;
-			}
-			AcceptanceReport acceptanceReport = building.DeconstructibleBy(Faction.OfPlayer);
-			if (!acceptanceReport.Accepted)
-			{
-				if (building.def.IsNonDeconstructibleAttackableBuilding)
-				{
-					return "RemoveByAttackingTooltip".Translate();
-				}
-				return acceptanceReport.Reason;
-			}
-			else
-			{
-				if (base.Map.designationManager.DesignationOn(t, this.Designation) != null)
-				{
-					return false;
-				}
-				if (base.Map.designationManager.DesignationOn(t, DesignationDefOf.Uninstall) != null)
-				{
-					return false;
-				}
-				return true;
-			}
+			t.Destroy(DestroyMode.Deconstruct);
+			return;
 		}
+		base.Map.designationManager.AddDesignation(new Designation(t, Designation));
+		if (ModsConfig.AnomalyActive && t is Building_HoldingPlatform { Occupied: not false } building_HoldingPlatform)
+		{
+			Messages.Message("MessageOccupiedHoldingPlatformDeconstructed".Translate(), building_HoldingPlatform, MessageTypeDefOf.CautionInput);
+		}
+	}
 
-		// Token: 0x06011724 RID: 71460 RVA: 0x00502E05 File Offset: 0x00501005
-		public override void SelectedUpdate()
+	public override AcceptanceReport CanDesignateThing(Thing t)
+	{
+		if (!(t.GetInnerIfMinified() is Building building))
 		{
-			GenUI.RenderMouseoverBracket();
+			return false;
 		}
+		if (building.def.category != ThingCategory.Building)
+		{
+			return false;
+		}
+		AcceptanceReport acceptanceReport = building.DeconstructibleBy(Faction.OfPlayer);
+		if (!acceptanceReport.Accepted)
+		{
+			if (building.def.IsNonDeconstructibleAttackableBuilding)
+			{
+				return "RemoveByAttackingTooltip".Translate();
+			}
+			return acceptanceReport.Reason;
+		}
+		if (base.Map.designationManager.DesignationOn(t, Designation) != null)
+		{
+			return false;
+		}
+		if (base.Map.designationManager.DesignationOn(t, DesignationDefOf.Uninstall) != null)
+		{
+			return false;
+		}
+		return true;
+	}
+
+	public override void SelectedUpdate()
+	{
+		GenUI.RenderMouseoverBracket();
 	}
 }

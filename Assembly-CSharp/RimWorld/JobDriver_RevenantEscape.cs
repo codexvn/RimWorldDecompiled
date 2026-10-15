@@ -1,83 +1,177 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_RevenantEscape : JobDriver
 {
-	// Token: 0x0200130A RID: 4874
-	public class JobDriver_RevenantEscape : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__7 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x170012D2 RID: 4818
-		// (get) Token: 0x06007798 RID: 30616 RVA: 0x00244A3E File Offset: 0x00242C3E
-		private CompRevenant Comp
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_RevenantEscape _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.pawn.TryGetComp<CompRevenant>();
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06007799 RID: 30617 RVA: 0x001DDCB7 File Offset: 0x001DBEB7
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		object IEnumerator.Current
 		{
-			this.pawn.Map.pawnDestinationReservationManager.Reserve(this.pawn, this.job, this.job.targetA.Cell);
-			return true;
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x0600779A RID: 30618 RVA: 0x002452D3 File Offset: 0x002434D3
-		protected override IEnumerable<Toil> MakeNewToils()
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__7(int _003C_003E1__state)
 		{
-			this.Comp.becomeInvisibleTick = Find.TickManager.TicksGame + 140;
-			Toil toil = Toils_Goto.GotoCell(TargetIndex.A, PathEndMode.OnCell);
-			Toil toil2 = toil;
-			toil2.tickIntervalAction = (Action<int>)Delegate.Combine(toil2.tickIntervalAction, new Action<int>(delegate(int delta)
-			{
-				if (Rand.MTBEventOccurs((float)JobDriver_RevenantEscape.SmearMTBTicks, 1f, (float)delta))
-				{
-					RevenantUtility.CreateRevenantSmear(this.pawn);
-				}
-				if (Rand.MTBEventOccurs((float)JobDriver_RevenantEscape.EscapedCheckInterval, 1f, (float)delta) && Find.TickManager.TicksGame > this.pawn.mindState.lastEngageTargetTick + JobDriver_RevenantEscape.MinEscapeTime && RevenantUtility.NearbyHumanlikePawnCount(this.pawn.Position, this.pawn.Map, 20f) == 0)
-				{
-					base.ReadyForNextToil();
-				}
-			}));
-			yield return toil;
-			Toil toil3 = Toils_Goto.GotoCell(TargetIndex.A, PathEndMode.OnCell);
-			Toil toil4 = toil3;
-			toil4.initAction = (Action)Delegate.Combine(toil4.initAction, new Action(delegate()
-			{
-				this.Comp.escapeSecondStageStartedTick = Find.TickManager.TicksGame;
-			}));
-			Toil toil5 = toil3;
-			toil5.tickIntervalAction = (Action<int>)Delegate.Combine(toil5.tickIntervalAction, new Action<int>(delegate(int delta)
-			{
-				AnalysisDetails analysisDetails;
-				if (Find.AnalysisManager.TryGetAnalysisProgress(this.Comp.biosignature, out analysisDetails) && (analysisDetails.Satisfied || analysisDetails.timesDone >= 1) && Find.TickManager.TicksGame < this.Comp.escapeSecondStageStartedTick + JobDriver_RevenantEscape.SmearLeavingDuration && Rand.MTBEventOccurs((float)JobDriver_RevenantEscape.SmearMTBTicks, 1f, (float)delta))
-				{
-					RevenantUtility.CreateRevenantSmear(this.pawn);
-				}
-				if (Find.TickManager.TicksGame > this.Comp.escapeSecondStageStartedTick + JobDriver_RevenantEscape.MinEscapeTime * 2 && RevenantUtility.NearbyHumanlikePawnCount(this.pawn.Position, this.pawn.Map, 20f) == 0)
-				{
-					this.pawn.TryGetComp<CompRevenant>().revenantState = RevenantState.Sleep;
-					base.EndJobWith(JobCondition.Succeeded);
-				}
-			}));
-			yield return toil3;
-			yield break;
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x0400517C RID: 20860
-		private static int MinEscapeTime = 300;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
 
-		// Token: 0x0400517D RID: 20861
-		private static int EscapedCheckInterval = 120;
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_RevenantEscape CS_0024_003C_003E8__locals15 = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+			{
+				_003C_003E1__state = -1;
+				CS_0024_003C_003E8__locals15.Comp.becomeInvisibleTick = Find.TickManager.TicksGame + 140;
+				Toil toil2 = Toils_Goto.GotoCell(TargetIndex.A, PathEndMode.OnCell);
+				toil2.tickIntervalAction = (Action<int>)Delegate.Combine(toil2.tickIntervalAction, (Action<int>)delegate(int delta)
+				{
+					if (Rand.MTBEventOccurs(SmearMTBTicks, 1f, delta))
+					{
+						RevenantUtility.CreateRevenantSmear(CS_0024_003C_003E8__locals15.pawn);
+					}
+					if (Rand.MTBEventOccurs(EscapedCheckInterval, 1f, delta) && Find.TickManager.TicksGame > CS_0024_003C_003E8__locals15.pawn.mindState.lastEngageTargetTick + MinEscapeTime && RevenantUtility.NearbyHumanlikePawnCount(CS_0024_003C_003E8__locals15.pawn.Position, CS_0024_003C_003E8__locals15.pawn.Map, 20f) == 0)
+					{
+						CS_0024_003C_003E8__locals15.ReadyForNextToil();
+					}
+				});
+				_003C_003E2__current = toil2;
+				_003C_003E1__state = 1;
+				return true;
+			}
+			case 1:
+			{
+				_003C_003E1__state = -1;
+				Toil toil = Toils_Goto.GotoCell(TargetIndex.A, PathEndMode.OnCell);
+				toil.initAction = (Action)Delegate.Combine(toil.initAction, (Action)delegate
+				{
+					CS_0024_003C_003E8__locals15.Comp.escapeSecondStageStartedTick = Find.TickManager.TicksGame;
+				});
+				toil.tickIntervalAction = (Action<int>)Delegate.Combine(toil.tickIntervalAction, (Action<int>)delegate(int delta)
+				{
+					if (Find.AnalysisManager.TryGetAnalysisProgress(CS_0024_003C_003E8__locals15.Comp.biosignature, out var details) && (details.Satisfied || details.timesDone >= 1) && Find.TickManager.TicksGame < CS_0024_003C_003E8__locals15.Comp.escapeSecondStageStartedTick + SmearLeavingDuration && Rand.MTBEventOccurs(SmearMTBTicks, 1f, delta))
+					{
+						RevenantUtility.CreateRevenantSmear(CS_0024_003C_003E8__locals15.pawn);
+					}
+					if (Find.TickManager.TicksGame > CS_0024_003C_003E8__locals15.Comp.escapeSecondStageStartedTick + MinEscapeTime * 2 && RevenantUtility.NearbyHumanlikePawnCount(CS_0024_003C_003E8__locals15.pawn.Position, CS_0024_003C_003E8__locals15.pawn.Map, 20f) == 0)
+					{
+						CS_0024_003C_003E8__locals15.pawn.TryGetComp<CompRevenant>().revenantState = RevenantState.Sleep;
+						CS_0024_003C_003E8__locals15.EndJobWith(JobCondition.Succeeded);
+					}
+				});
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 2;
+				return true;
+			}
+			case 2:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
 
-		// Token: 0x0400517E RID: 20862
-		private static int SmearMTBTicks = 60;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x0400517F RID: 20863
-		private static readonly int SmearLeavingDuration = Mathf.FloorToInt((float)JobDriver_RevenantEscape.MinEscapeTime * 1.4f);
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__7 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__7(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private static int MinEscapeTime = 300;
+
+	private static int EscapedCheckInterval = 120;
+
+	private static int SmearMTBTicks = 60;
+
+	private static readonly int SmearLeavingDuration = Mathf.FloorToInt((float)MinEscapeTime * 1.4f);
+
+	private CompRevenant Comp => pawn.TryGetComp<CompRevenant>();
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		pawn.Map.pawnDestinationReservationManager.Reserve(pawn, job, job.targetA.Cell);
+		return true;
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__7))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__7(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

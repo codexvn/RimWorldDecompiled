@@ -1,295 +1,426 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld;
 
-namespace Verse
+namespace Verse;
+
+public class UnnaturalCorpse : Corpse
 {
-	// Token: 0x020008F1 RID: 2289
-	public class UnnaturalCorpse : Corpse
+	[CompilerGenerated]
+	private sealed class _003CGetGizmos_003Ed__20 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x17000AF8 RID: 2808
-		// (get) Token: 0x06003B16 RID: 15126 RVA: 0x00138EDC File Offset: 0x001370DC
-		public CompForbiddable Forbiddable
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public UnnaturalCorpse _003C_003E4__this;
+
+		private IEnumerator<Gizmo> _003C_003E7__wrap1;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				CompForbiddable result;
-				if ((result = this.compForbidInt) == null)
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetGizmos_003Ed__20(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
 				{
-					result = (this.compForbidInt = base.GetComp<CompForbiddable>());
 				}
-				return result;
-			}
-		}
-
-		// Token: 0x17000AF9 RID: 2809
-		// (get) Token: 0x06003B17 RID: 15127 RVA: 0x00138F02 File Offset: 0x00137102
-		public UnnaturalCorpseTracker Tracker
-		{
-			get
-			{
-				return this.tracker;
-			}
-		}
-
-		// Token: 0x06003B18 RID: 15128 RVA: 0x00138F0A File Offset: 0x0013710A
-		public UnnaturalCorpse()
-		{
-			this.innerContainer.contentsLookMode = LookMode.Deep;
-		}
-
-		// Token: 0x06003B19 RID: 15129 RVA: 0x00138F1E File Offset: 0x0013711E
-		public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
-		{
-			base.Destroy(mode);
-			UnnaturalCorpseTracker unnaturalCorpseTracker = this.tracker;
-			if (unnaturalCorpseTracker == null)
-			{
-				return;
-			}
-			unnaturalCorpseTracker.Notify_CorpseDestroyed();
-		}
-
-		// Token: 0x06003B1A RID: 15130 RVA: 0x00138F37 File Offset: 0x00137137
-		public override void PostMake()
-		{
-			base.PostMake();
-			this.lastTeleport = GenTicks.TicksGame;
-			this.Forbiddable.Forbidden = true;
-			this.TryGetComp<CompRottable>().disabled = true;
-		}
-
-		// Token: 0x06003B1B RID: 15131 RVA: 0x00138F64 File Offset: 0x00137164
-		protected override void TickInterval(int delta)
-		{
-			base.TickInterval(delta);
-			if (this.disappear)
-			{
-				this.DoDisappear();
-				return;
-			}
-			if (base.Destroyed)
-			{
-				return;
-			}
-			if (base.ParentHolder != null && !(base.ParentHolder is Map))
-			{
-				return;
-			}
-			if (Rand.MTBEventOccurs(24f, 2500f, (float)delta))
-			{
-				this.teleport = true;
-			}
-			IntVec3 intVec;
-			if (this.teleport && this.IsOutsideView() && AnomalyUtility.TryGetNearbyUnseenCell(this.tracker.Haunted, out intVec))
-			{
-				if (base.MapHeld != this.tracker.Haunted.MapHeld)
+				finally
 				{
-					SkipUtility.SkipTo(this, intVec, this.tracker.Haunted.MapHeld);
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				UnnaturalCorpse CS_0024_003C_003E8__locals9 = _003C_003E4__this;
+				Gizmo gizmo;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((Corpse)CS_0024_003C_003E8__locals9).GetGizmos().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0088;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0088;
+				case 2:
+					_003C_003E1__state = -1;
+					goto IL_00c8;
+				case 3:
+					_003C_003E1__state = -1;
+					if (!CS_0024_003C_003E8__locals9.teleport)
+					{
+						_003C_003E2__current = new Command_Action
+						{
+							defaultLabel = "DEV: Teleport",
+							action = delegate
+							{
+								CS_0024_003C_003E8__locals9.teleport = true;
+							}
+						};
+						_003C_003E1__state = 4;
+						return true;
+					}
+					goto IL_0158;
+				case 4:
+					_003C_003E1__state = -1;
+					goto IL_0158;
+				case 5:
+					_003C_003E1__state = -1;
+					_003C_003E2__current = new Command_Action
+					{
+						defaultLabel = "DEV: Awake",
+						action = delegate
+						{
+							CS_0024_003C_003E8__locals9.tracker.DevAwaken();
+						}
+					};
+					_003C_003E1__state = 6;
+					return true;
+				case 6:
+					_003C_003E1__state = -1;
+					if (!CS_0024_003C_003E8__locals9.tracker.CanDestroyViaResearch)
+					{
+						_003C_003E2__current = new Command_Action
+						{
+							defaultLabel = "DEV: Unlock deactivation",
+							action = delegate
+							{
+								CS_0024_003C_003E8__locals9.tracker.DevUnlockDeactivation();
+							}
+						};
+						_003C_003E1__state = 7;
+						return true;
+					}
+					break;
+				case 7:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_00c8:
+					if (!DebugSettings.ShowDevGizmos)
+					{
+						return false;
+					}
+					_003C_003E2__current = new Command_Action
+					{
+						defaultLabel = "DEV: Disappear",
+						action = delegate
+						{
+							Find.Anomaly.DevRemoveUnnaturalCorpse(CS_0024_003C_003E8__locals9.tracker.Haunted);
+						}
+					};
+					_003C_003E1__state = 3;
+					return true;
+					IL_0158:
+					_003C_003E2__current = new Command_Action
+					{
+						defaultLabel = "DEV: Mental break",
+						action = delegate
+						{
+							CS_0024_003C_003E8__locals9.tracker.TryTriggerMentalBreak();
+						}
+					};
+					_003C_003E1__state = 5;
+					return true;
+					IL_0088:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Gizmo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					gizmo = AnomalyUtility.OpenCodexGizmo(CS_0024_003C_003E8__locals9);
+					if (gizmo != null)
+					{
+						_003C_003E2__current = gizmo;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					goto IL_00c8;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CGetGizmos_003Ed__20 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CGetGizmos_003Ed__20(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	private UnnaturalCorpseTracker tracker;
+
+	private bool disappear;
+
+	private bool teleport;
+
+	private int lastTeleport;
+
+	private CompForbiddable compForbidInt;
+
+	private const int MTBTeleportHours = 24;
+
+	public CompForbiddable Forbiddable => compForbidInt ?? (compForbidInt = GetComp<CompForbiddable>());
+
+	public UnnaturalCorpseTracker Tracker => tracker;
+
+	public UnnaturalCorpse()
+	{
+		innerContainer.contentsLookMode = LookMode.Deep;
+	}
+
+	public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
+	{
+		base.Destroy(mode);
+		tracker?.Notify_CorpseDestroyed();
+	}
+
+	public override void PostMake()
+	{
+		base.PostMake();
+		lastTeleport = GenTicks.TicksGame;
+		Forbiddable.Forbidden = true;
+		this.TryGetComp<CompRottable>().disabled = true;
+	}
+
+	protected override void TickInterval(int delta)
+	{
+		base.TickInterval(delta);
+		if (disappear)
+		{
+			DoDisappear();
+		}
+		else
+		{
+			if (base.Destroyed || (base.ParentHolder != null && !(base.ParentHolder is Map)))
+			{
+				return;
+			}
+			if (Rand.MTBEventOccurs(24f, 2500f, delta))
+			{
+				teleport = true;
+			}
+			if (teleport && IsOutsideView() && AnomalyUtility.TryGetNearbyUnseenCell(tracker.Haunted, out var pos))
+			{
+				if (base.MapHeld != tracker.Haunted.MapHeld)
+				{
+					SkipUtility.SkipTo(this, pos, tracker.Haunted.MapHeld);
 				}
 				else
 				{
-					base.Position = intVec;
+					base.Position = pos;
 				}
-				this.teleport = false;
-				this.lastTeleport = GenTicks.TicksGame;
+				teleport = false;
+				lastTeleport = GenTicks.TicksGame;
 				base.Map.listerHaulables.Notify_Unforbidden(this);
 			}
 		}
+	}
 
-		// Token: 0x06003B1C RID: 15132 RVA: 0x00139040 File Offset: 0x00137240
-		public override void TickRare()
+	public override void TickRare()
+	{
+		TickRareInt();
+	}
+
+	public override void Notify_Studied(Pawn studier, float amount, KnowledgeCategoryDef category = null)
+	{
+		base.Notify_Studied(studier, amount, category);
+		if (category.IsAnomalyResearchCategory())
 		{
-			base.TickRareInt();
+			tracker.Notify_Studied(studier, amount);
 		}
+	}
 
-		// Token: 0x06003B1D RID: 15133 RVA: 0x00139048 File Offset: 0x00137248
-		public override void Notify_Studied(Pawn studier, float amount, KnowledgeCategoryDef category = null)
+	public void DoStudiedDeactivation(Pawn interactor)
+	{
+		IntVec3 positionHeld = base.PositionHeld;
+		Map mapHeld = base.MapHeld;
+		tracker.Notify_Finished();
+		EffecterDefOf.MeatExplosion.Spawn(base.PositionHeld, base.MapHeld).Cleanup();
+		Destroy();
+		Thing thing = GenSpawn.Spawn(ThingMaker.MakeThing(ThingDefOf.Shard), positionHeld, mapHeld);
+		TaggedString label = "UnnaturalCorpseDeactivatedLetter".Translate();
+		TaggedString text = "UnnaturalCorpseDeactivatedLetterDesc".Translate(interactor.Named("PAWN"));
+		text += "\n\n" + "UnnaturalCorpseDeactivatedLetterDescAppended".Translate(tracker.Haunted.Named("PAWN"));
+		Find.LetterStack.ReceiveLetter(label, text, LetterDefOf.PositiveEvent, thing);
+		if (tracker.Haunted.health.hediffSet.TryGetHediff(HediffDefOf.CorpseTorment, out var hediff))
 		{
-			base.Notify_Studied(studier, amount, category);
-			if (!category.IsAnomalyResearchCategory())
-			{
-				return;
-			}
-			this.tracker.Notify_Studied(studier, amount);
+			tracker.Haunted.health.RemoveHediff(hediff);
 		}
+		Find.Anomaly.RemoveCorpseTracker(tracker.Haunted);
+	}
 
-		// Token: 0x06003B1E RID: 15134 RVA: 0x0013906C File Offset: 0x0013726C
-		public void DoStudiedDeactivation(Pawn interactor)
+	public void DoDisappear()
+	{
+		disappear = true;
+		Thing spawnedParentOrMe = base.SpawnedParentOrMe;
+		if (spawnedParentOrMe is Building_Casket building_Casket)
 		{
-			IntVec3 positionHeld = base.PositionHeld;
-			Map mapHeld = base.MapHeld;
-			this.tracker.Notify_Finished();
-			EffecterDefOf.MeatExplosion.Spawn(base.PositionHeld, base.MapHeld, 1f).Cleanup();
-			this.Destroy(DestroyMode.Vanish);
-			Thing t = GenSpawn.Spawn(ThingMaker.MakeThing(ThingDefOf.Shard, null), positionHeld, mapHeld, WipeMode.Vanish);
-			TaggedString label = "UnnaturalCorpseDeactivatedLetter".Translate();
-			TaggedString taggedString = "UnnaturalCorpseDeactivatedLetterDesc".Translate(interactor.Named("PAWN"));
-			taggedString += "\n\n" + "UnnaturalCorpseDeactivatedLetterDescAppended".Translate(this.tracker.Haunted.Named("PAWN"));
-			Find.LetterStack.ReceiveLetter(label, taggedString, LetterDefOf.PositiveEvent, t, null, null, null, null, 0, true);
-			Hediff hediff;
-			if (this.tracker.Haunted.health.hediffSet.TryGetHediff(HediffDefOf.CorpseTorment, out hediff))
-			{
-				this.tracker.Haunted.health.RemoveHediff(hediff);
-			}
-			Find.Anomaly.RemoveCorpseTracker(this.tracker.Haunted);
+			SendDisappearedLetter();
+			building_Casket.EjectContents();
+			Destroy();
 		}
-
-		// Token: 0x06003B1F RID: 15135 RVA: 0x00139190 File Offset: 0x00137390
-		public void DoDisappear()
+		else if (spawnedParentOrMe != this)
 		{
-			this.disappear = true;
-			Thing spawnedParentOrMe = base.SpawnedParentOrMe;
-			Building_Casket building_Casket = spawnedParentOrMe as Building_Casket;
-			if (building_Casket != null)
-			{
-				this.SendDisappearedLetter();
-				building_Casket.EjectContents();
-				this.Destroy(DestroyMode.Vanish);
-				return;
-			}
-			if (spawnedParentOrMe != this)
-			{
-				this.SendDisappearedLetter();
-				Thing thing;
-				base.ParentHolder.GetDirectlyHeldThings().TryDrop(this, ThingPlaceMode.Near, 1, out thing, null, null);
-				SkipUtility.SkipDeSpawn(this);
-				this.Destroy(DestroyMode.Vanish);
-				return;
-			}
-			if (this.IsOutsideView())
-			{
-				this.SendDisappearedLetter();
-				this.Destroy(DestroyMode.Vanish);
-			}
+			SendDisappearedLetter();
+			base.ParentHolder.GetDirectlyHeldThings().TryDrop(this, ThingPlaceMode.Near, 1, out var _);
+			SkipUtility.SkipDeSpawn(this);
+			Destroy();
 		}
-
-		// Token: 0x06003B20 RID: 15136 RVA: 0x00139210 File Offset: 0x00137410
-		private void SendDisappearedLetter()
+		else if (IsOutsideView())
 		{
-			TaggedString label = "LetterLabelCorpseDisappeared".Translate();
-			TaggedString taggedString = "LetterCorpseDisappeared".Translate();
-			if (!this.tracker.Haunted.DestroyedOrNull() && !this.tracker.Haunted.Dead)
-			{
-				taggedString += " " + "LetterCorpseDisappearedPawnAliveAppend".Translate(this.tracker.Haunted.Named("PAWN"));
-			}
-			Find.LetterStack.ReceiveLetter(label, taggedString, LetterDefOf.NeutralEvent, null, 0, true);
+			SendDisappearedLetter();
+			Destroy();
 		}
+	}
 
-		// Token: 0x06003B21 RID: 15137 RVA: 0x0013929B File Offset: 0x0013749B
-		public void LinkToTracker(UnnaturalCorpseTracker newTracker)
+	private void SendDisappearedLetter()
+	{
+		TaggedString label = "LetterLabelCorpseDisappeared".Translate();
+		TaggedString text = "LetterCorpseDisappeared".Translate();
+		if (!tracker.Haunted.DestroyedOrNull() && !tracker.Haunted.Dead)
 		{
-			if (this.tracker != null)
-			{
-				Log.ErrorOnce("mysterious corpse " + this.Label + " was linked to a new tracker when it still had one assigned.", 62521241);
-			}
-			this.tracker = newTracker;
+			text += " " + "LetterCorpseDisappearedPawnAliveAppend".Translate(tracker.Haunted.Named("PAWN"));
 		}
+		Find.LetterStack.ReceiveLetter(label, text, LetterDefOf.NeutralEvent);
+	}
 
-		// Token: 0x06003B22 RID: 15138 RVA: 0x001392CB File Offset: 0x001374CB
-		public override IEnumerable<Gizmo> GetGizmos()
+	public void LinkToTracker(UnnaturalCorpseTracker newTracker)
+	{
+		if (tracker != null)
 		{
-			foreach (Gizmo gizmo in base.GetGizmos())
-			{
-				yield return gizmo;
-			}
-			IEnumerator<Gizmo> enumerator = null;
-			Gizmo gizmo2 = AnomalyUtility.OpenCodexGizmo(this);
-			if (gizmo2 != null)
-			{
-				yield return gizmo2;
-			}
-			if (!DebugSettings.ShowDevGizmos)
-			{
-				yield break;
-			}
-			yield return new Command_Action
-			{
-				defaultLabel = "DEV: Disappear",
-				action = delegate()
-				{
-					Find.Anomaly.DevRemoveUnnaturalCorpse(this.tracker.Haunted);
-				}
-			};
-			if (!this.teleport)
-			{
-				yield return new Command_Action
-				{
-					defaultLabel = "DEV: Teleport",
-					action = delegate()
-					{
-						this.teleport = true;
-					}
-				};
-			}
-			yield return new Command_Action
-			{
-				defaultLabel = "DEV: Mental break",
-				action = delegate()
-				{
-					this.tracker.TryTriggerMentalBreak();
-				}
-			};
-			yield return new Command_Action
-			{
-				defaultLabel = "DEV: Awake",
-				action = delegate()
-				{
-					this.tracker.DevAwaken();
-				}
-			};
-			if (!this.tracker.CanDestroyViaResearch)
-			{
-				yield return new Command_Action
-				{
-					defaultLabel = "DEV: Unlock deactivation",
-					action = delegate()
-					{
-						this.tracker.DevUnlockDeactivation();
-					}
-				};
-			}
-			yield break;
-			yield break;
+			Log.ErrorOnce("mysterious corpse " + Label + " was linked to a new tracker when it still had one assigned.", 62521241);
 		}
+		tracker = newTracker;
+	}
 
-		// Token: 0x06003B23 RID: 15139 RVA: 0x001392DC File Offset: 0x001374DC
-		private bool IsOutsideView()
+	[IteratorStateMachine(typeof(_003CGetGizmos_003Ed__20))]
+	public override IEnumerable<Gizmo> GetGizmos()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetGizmos_003Ed__20(-2)
 		{
-			return (!base.SpawnedOrAnyParentSpawned || !base.MapHeld.reservationManager.IsReservedByAnyoneOf(this, Faction.OfPlayer)) && (Find.CurrentMap != base.MapHeld || !Find.CameraDriver.CurrentViewRect.ExpandedBy(1).Contains(base.PositionHeld));
-		}
+			_003C_003E4__this = this
+		};
+	}
 
-		// Token: 0x06003B24 RID: 15140 RVA: 0x00139344 File Offset: 0x00137544
-		public override void ExposeData()
+	private bool IsOutsideView()
+	{
+		if (base.SpawnedOrAnyParentSpawned && base.MapHeld.reservationManager.IsReservedByAnyoneOf(this, Faction.OfPlayer))
 		{
-			base.ExposeData();
-			Scribe_References.Look<UnnaturalCorpseTracker>(ref this.tracker, "tracker", false);
-			Scribe_Values.Look<bool>(ref this.disappear, "disappears", false, false);
-			Scribe_Values.Look<bool>(ref this.teleport, "teleport", false, false);
-			Scribe_Values.Look<int>(ref this.lastTeleport, "lastTeleport", 0, false);
-			if (Scribe.mode == LoadSaveMode.PostLoadInit && this.tracker == null)
-			{
-				Log.Error("Failed to find corpse tracker, this should not happen. Destroying corpse.");
-				this.Destroy(DestroyMode.Vanish);
-			}
+			return false;
 		}
+		if (Find.CurrentMap != base.MapHeld)
+		{
+			return true;
+		}
+		return !Find.CameraDriver.CurrentViewRect.ExpandedBy(1).Contains(base.PositionHeld);
+	}
 
-		// Token: 0x04002AD4 RID: 10964
-		private UnnaturalCorpseTracker tracker;
-
-		// Token: 0x04002AD5 RID: 10965
-		private bool disappear;
-
-		// Token: 0x04002AD6 RID: 10966
-		private bool teleport;
-
-		// Token: 0x04002AD7 RID: 10967
-		private int lastTeleport;
-
-		// Token: 0x04002AD8 RID: 10968
-		private CompForbiddable compForbidInt;
-
-		// Token: 0x04002AD9 RID: 10969
-		private const int MTBTeleportHours = 24;
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_References.Look(ref tracker, "tracker");
+		Scribe_Values.Look(ref disappear, "disappears", defaultValue: false);
+		Scribe_Values.Look(ref teleport, "teleport", defaultValue: false);
+		Scribe_Values.Look(ref lastTeleport, "lastTeleport", 0);
+		if (Scribe.mode == LoadSaveMode.PostLoadInit && tracker == null)
+		{
+			Log.Error("Failed to find corpse tracker, this should not happen. Destroying corpse.");
+			Destroy();
+		}
 	}
 }

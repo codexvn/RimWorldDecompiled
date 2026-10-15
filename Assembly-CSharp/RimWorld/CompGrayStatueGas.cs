@@ -1,69 +1,155 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompGrayStatueGas : CompGrayStatue
 {
-	// Token: 0x02002EF8 RID: 12024
-	public class CompGrayStatueGas : CompGrayStatue
+	[CompilerGenerated]
+	private sealed class _003CCompGetGizmosExtra_003Ed__7 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x17002BD6 RID: 11222
-		// (get) Token: 0x06010F9C RID: 69532 RVA: 0x004E2B6A File Offset: 0x004E0D6A
-		private CompProperties_GrayStatueGas Props
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompGrayStatueGas _003C_003E4__this;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (CompProperties_GrayStatueGas)this.props;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002BD7 RID: 11223
-		// (get) Token: 0x06010F9D RID: 69533 RVA: 0x004E2B77 File Offset: 0x004E0D77
-		private int GasAmount
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return Mathf.Min(Mathf.CeilToInt((float)this.parent.GetRoom(RegionType.Set_All).CellCount * 0.15f * 255f), 12750);
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06010F9E RID: 69534 RVA: 0x004E2BA8 File Offset: 0x004E0DA8
-		protected override void Trigger(Pawn target)
+		[DebuggerHidden]
+		public _003CCompGetGizmosExtra_003Ed__7(int _003C_003E1__state)
 		{
-			if (this.Props.gas == GasType.DeadlifeDust)
-			{
-				GasUtility.AddDeadifeGas(this.parent.Position, this.parent.Map, Faction.OfEntities, this.GasAmount);
-				return;
-			}
-			GasUtility.AddGas(this.parent.Position, this.parent.Map, this.Props.gas, this.GasAmount);
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x06010F9F RID: 69535 RVA: 0x004E2C17 File Offset: 0x004E0E17
-		public override IEnumerable<Gizmo> CompGetGizmosExtra()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			if (!DebugSettings.ShowDevGizmos)
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			CompGrayStatueGas CS_0024_003C_003E8__locals4 = _003C_003E4__this;
+			switch (num)
 			{
-				yield break;
-			}
-			yield return new Command_Action
-			{
-				defaultLabel = "DEV: Test gas spread",
-				action = delegate()
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (!DebugSettings.ShowDevGizmos)
 				{
-					this.parent.Map.gasGrid.EstimateGasDiffusion(this.parent.Position, GasType.DeadlifeDust, this.GasAmount, delegate(IntVec3 c)
-					{
-						GenSpawn.Spawn(ThingMaker.MakeThing(ThingDefOf.PowerConduit, null), c, this.parent.Map, WipeMode.Vanish);
-					});
+					return false;
 				}
-			};
-			yield break;
+				_003C_003E2__current = new Command_Action
+				{
+					defaultLabel = "DEV: Test gas spread",
+					action = delegate
+					{
+						CS_0024_003C_003E8__locals4.parent.Map.gasGrid.EstimateGasDiffusion(CS_0024_003C_003E8__locals4.parent.Position, GasType.DeadlifeDust, CS_0024_003C_003E8__locals4.GasAmount, delegate(IntVec3 c)
+						{
+							GenSpawn.Spawn(ThingMaker.MakeThing(ThingDefOf.PowerConduit), c, CS_0024_003C_003E8__locals4.parent.Map);
+						});
+					}
+				};
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				return false;
+			}
 		}
 
-		// Token: 0x0400B090 RID: 45200
-		private const float RoomCellGasFactor = 0.15f;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x0400B091 RID: 45201
-		private const int MaxGas = 12750;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CCompGetGizmosExtra_003Ed__7 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CCompGetGizmosExtra_003Ed__7(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	private const float RoomCellGasFactor = 0.15f;
+
+	private const int MaxGas = 12750;
+
+	private CompProperties_GrayStatueGas Props => (CompProperties_GrayStatueGas)props;
+
+	private int GasAmount => Mathf.Min(Mathf.CeilToInt((float)parent.GetRoom().CellCount * 0.15f * 255f), 12750);
+
+	protected override void Trigger(Pawn target)
+	{
+		if (Props.gas == GasType.DeadlifeDust)
+		{
+			GasUtility.AddDeadifeGas(parent.Position, parent.Map, Faction.OfEntities, GasAmount);
+		}
+		else
+		{
+			GasUtility.AddGas(parent.Position, parent.Map, Props.gas, GasAmount);
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CCompGetGizmosExtra_003Ed__7))]
+	public override IEnumerable<Gizmo> CompGetGizmosExtra()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CCompGetGizmosExtra_003Ed__7(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

@@ -12,64 +12,64 @@
   <ItemGroup />
   <ItemGroup>
     <Reference Include="Brutal.Core.Collections">
-      <HintPath>Brutal.Core.Collections.dll</HintPath>
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\Brutal.Core.Collections.dll</HintPath>
     </Reference>
     <Reference Include="Brutal.Vulkan">
-      <HintPath>Brutal.Vulkan.dll</HintPath>
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\Brutal.Vulkan.dll</HintPath>
     </Reference>
     <Reference Include="Brutal.Core.Numerics">
-      <HintPath>Brutal.Core.Numerics.dll</HintPath>
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\Brutal.Core.Numerics.dll</HintPath>
     </Reference>
     <Reference Include="Brutal.Glfw">
-      <HintPath>Brutal.Glfw.dll</HintPath>
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\Brutal.Glfw.dll</HintPath>
     </Reference>
     <Reference Include="Brutal.Vulkan.Abstractions">
-      <HintPath>Brutal.Vulkan.Abstractions.dll</HintPath>
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\Brutal.Vulkan.Abstractions.dll</HintPath>
     </Reference>
     <Reference Include="Brutal.Core.Common">
-      <HintPath>Brutal.Core.Common.dll</HintPath>
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\Brutal.Core.Common.dll</HintPath>
     </Reference>
     <Reference Include="Brutal.Core.Logging">
-      <HintPath>Brutal.Core.Logging.dll</HintPath>
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\Brutal.Core.Logging.dll</HintPath>
     </Reference>
     <Reference Include="Brutal.Stb">
-      <HintPath>Brutal.Stb.dll</HintPath>
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\Brutal.Stb.dll</HintPath>
     </Reference>
     <Reference Include="Brutal.Vulkan.Vma">
-      <HintPath>Brutal.Vulkan.Vma.dll</HintPath>
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\Brutal.Vulkan.Vma.dll</HintPath>
     </Reference>
     <Reference Include="Brutal.Texture">
-      <HintPath>Brutal.Texture.dll</HintPath>
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\Brutal.Texture.dll</HintPath>
     </Reference>
     <Reference Include="PsdSharp">
-      <HintPath>PsdSharp.dll</HintPath>
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\PsdSharp.dll</HintPath>
     </Reference>
     <Reference Include="Brutal.Slang">
-      <HintPath>Brutal.Slang.dll</HintPath>
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\Brutal.Slang.dll</HintPath>
     </Reference>
     <Reference Include="Brutal.Core.Strings">
-      <HintPath>Brutal.Core.Strings.dll</HintPath>
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\Brutal.Core.Strings.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Extensions.Logging.Abstractions">
-      <HintPath>Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Extensions.Logging.Console">
-      <HintPath>Microsoft.Extensions.Logging.Console.dll</HintPath>
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\Microsoft.Extensions.Logging.Console.dll</HintPath>
     </Reference>
     <Reference Include="Brutal.Core.Memory">
-      <HintPath>Brutal.Core.Memory.dll</HintPath>
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\Brutal.Core.Memory.dll</HintPath>
     </Reference>
     <Reference Include="ZstdSharp">
-      <HintPath>ZstdSharp.dll</HintPath>
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\ZstdSharp.dll</HintPath>
     </Reference>
     <Reference Include="K4os.Compression.LZ4.Streams">
-      <HintPath>K4os.Compression.LZ4.Streams.dll</HintPath>
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\K4os.Compression.LZ4.Streams.dll</HintPath>
     </Reference>
     <Reference Include="K4os.Compression.LZ4">
-      <HintPath>K4os.Compression.LZ4.dll</HintPath>
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\K4os.Compression.LZ4.dll</HintPath>
     </Reference>
     <Reference Include="System.IO.Hashing">
-      <HintPath>System.IO.Hashing.dll</HintPath>
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\System.IO.Hashing.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>

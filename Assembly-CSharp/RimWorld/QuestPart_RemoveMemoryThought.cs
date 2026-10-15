@@ -1,111 +1,252 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class QuestPart_RemoveMemoryThought : QuestPart
 {
-	// Token: 0x02001C84 RID: 7300
-	public class QuestPart_RemoveMemoryThought : QuestPart
+	[CompilerGenerated]
+	private sealed class _003Cget_QuestLookTargets_003Ed__7 : IEnumerable<GlobalTargetInfo>, IEnumerable, IEnumerator<GlobalTargetInfo>, IEnumerator, IDisposable
 	{
-		// Token: 0x170018FC RID: 6396
-		// (get) Token: 0x0600A2A6 RID: 41638 RVA: 0x002EC369 File Offset: 0x002EA569
-		public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+		private int _003C_003E1__state;
+
+		private GlobalTargetInfo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public QuestPart_RemoveMemoryThought _003C_003E4__this;
+
+		private IEnumerator<GlobalTargetInfo> _003C_003E7__wrap1;
+
+		GlobalTargetInfo IEnumerator<GlobalTargetInfo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				foreach (GlobalTargetInfo globalTargetInfo in base.QuestLookTargets)
-				{
-					yield return globalTargetInfo;
-				}
-				IEnumerator<GlobalTargetInfo> enumerator = null;
-				if (this.pawn != null && this.addToLookTargets)
-				{
-					yield return this.pawn;
-				}
-				yield break;
-				yield break;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600A2A7 RID: 41639 RVA: 0x002EC37C File Offset: 0x002EA57C
-		public override void Notify_QuestSignalReceived(Signal signal)
+		object IEnumerator.Current
 		{
-			base.Notify_QuestSignalReceived(signal);
-			if (signal.tag == this.inSignal && this.pawn != null && this.pawn.needs != null)
+			[DebuggerHidden]
+			get
 			{
-				if (this.count != null)
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003Cget_QuestLookTargets_003Ed__7(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
 				{
-					for (int i = 0; i < this.count.Value; i++)
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				QuestPart_RemoveMemoryThought questPart_RemoveMemoryThought = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((QuestPart)questPart_RemoveMemoryThought).QuestLookTargets.GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 2:
 					{
-						Thought_Memory thought_Memory = this.pawn.needs.mood.thoughts.memories.Memories.FirstOrDefault((Thought_Memory m) => this.def == m.def && (this.otherPawn == null || m.otherPawn == this.otherPawn));
-						if (thought_Memory == null)
-						{
-							return;
-						}
-						this.pawn.needs.mood.thoughts.memories.RemoveMemory(thought_Memory);
+						_003C_003E1__state = -1;
+						break;
 					}
-					return;
+					IL_006f:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						GlobalTargetInfo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (questPart_RemoveMemoryThought.pawn != null && questPart_RemoveMemoryThought.addToLookTargets)
+					{
+						_003C_003E2__current = questPart_RemoveMemoryThought.pawn;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
 				}
-				if (this.otherPawn == null)
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<GlobalTargetInfo> IEnumerable<GlobalTargetInfo>.GetEnumerator()
+		{
+			_003Cget_QuestLookTargets_003Ed__7 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_QuestLookTargets_003Ed__7(0)
 				{
-					this.pawn.needs.mood.thoughts.memories.RemoveMemoriesOfDef(this.def);
-					return;
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<GlobalTargetInfo>)this).GetEnumerator();
+		}
+	}
+
+	public string inSignal;
+
+	public ThoughtDef def;
+
+	public Pawn pawn;
+
+	public Pawn otherPawn;
+
+	public int? count;
+
+	public bool addToLookTargets = true;
+
+	public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+	{
+		[IteratorStateMachine(typeof(_003Cget_QuestLookTargets_003Ed__7))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_QuestLookTargets_003Ed__7(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public override void Notify_QuestSignalReceived(Signal signal)
+	{
+		base.Notify_QuestSignalReceived(signal);
+		if (!(signal.tag == inSignal) || pawn == null || pawn.needs == null)
+		{
+			return;
+		}
+		if (count.HasValue)
+		{
+			for (int i = 0; i < count.Value; i++)
+			{
+				Thought_Memory thought_Memory = pawn.needs.mood.thoughts.memories.Memories.FirstOrDefault((Thought_Memory m) => def == m.def && (otherPawn == null || m.otherPawn == otherPawn));
+				if (thought_Memory != null)
+				{
+					pawn.needs.mood.thoughts.memories.RemoveMemory(thought_Memory);
+					continue;
 				}
-				this.pawn.needs.mood.thoughts.memories.RemoveMemoriesOfDefWhereOtherPawnIs(this.def, this.otherPawn);
+				break;
 			}
 		}
-
-		// Token: 0x0600A2A8 RID: 41640 RVA: 0x002EC498 File Offset: 0x002EA698
-		public override void ExposeData()
+		else if (otherPawn == null)
 		{
-			base.ExposeData();
-			Scribe_Values.Look<string>(ref this.inSignal, "inSignal", null, false);
-			Scribe_Values.Look<bool>(ref this.addToLookTargets, "addToLookTargets", false, false);
-			Scribe_Values.Look<int?>(ref this.count, "count", null, false);
-			Scribe_Defs.Look<ThoughtDef>(ref this.def, "def");
-			Scribe_References.Look<Pawn>(ref this.pawn, "pawn", false);
-			Scribe_References.Look<Pawn>(ref this.otherPawn, "otherPawn", false);
+			pawn.needs.mood.thoughts.memories.RemoveMemoriesOfDef(def);
 		}
-
-		// Token: 0x0600A2A9 RID: 41641 RVA: 0x002EC51B File Offset: 0x002EA71B
-		public override void AssignDebugData()
+		else
 		{
-			base.AssignDebugData();
-			this.def = (ThoughtDefOf.DecreeMet ?? ThoughtDefOf.DebugGood);
-			this.pawn = PawnsFinder.AllMaps_FreeColonists.FirstOrDefault<Pawn>();
+			pawn.needs.mood.thoughts.memories.RemoveMemoriesOfDefWhereOtherPawnIs(def, otherPawn);
 		}
+	}
 
-		// Token: 0x0600A2AA RID: 41642 RVA: 0x002EC547 File Offset: 0x002EA747
-		public override void ReplacePawnReferences(Pawn replace, Pawn with)
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref inSignal, "inSignal");
+		Scribe_Values.Look(ref addToLookTargets, "addToLookTargets", defaultValue: false);
+		Scribe_Values.Look(ref count, "count", null);
+		Scribe_Defs.Look(ref def, "def");
+		Scribe_References.Look(ref pawn, "pawn");
+		Scribe_References.Look(ref otherPawn, "otherPawn");
+	}
+
+	public override void AssignDebugData()
+	{
+		base.AssignDebugData();
+		def = ThoughtDefOf.DecreeMet ?? ThoughtDefOf.DebugGood;
+		pawn = PawnsFinder.AllMaps_FreeColonists.FirstOrDefault();
+	}
+
+	public override void ReplacePawnReferences(Pawn replace, Pawn with)
+	{
+		if (pawn == replace)
 		{
-			if (this.pawn == replace)
-			{
-				this.pawn = with;
-			}
-			if (this.otherPawn == replace)
-			{
-				this.otherPawn = with;
-			}
+			pawn = with;
 		}
-
-		// Token: 0x04007083 RID: 28803
-		public string inSignal;
-
-		// Token: 0x04007084 RID: 28804
-		public ThoughtDef def;
-
-		// Token: 0x04007085 RID: 28805
-		public Pawn pawn;
-
-		// Token: 0x04007086 RID: 28806
-		public Pawn otherPawn;
-
-		// Token: 0x04007087 RID: 28807
-		public int? count;
-
-		// Token: 0x04007088 RID: 28808
-		public bool addToLookTargets = true;
+		if (otherPawn == replace)
+		{
+			otherPawn = with;
+		}
 	}
 }

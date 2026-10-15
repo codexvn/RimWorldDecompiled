@@ -1,274 +1,363 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompAnimalPenMarker : CompAutoCut, IRenameable
 {
-	// Token: 0x02002BD9 RID: 11225
-	public class CompAnimalPenMarker : CompAutoCut, IRenameable
+	[CompilerGenerated]
+	private sealed class _003CGetAutoCutCells_003Ed__29 : IEnumerable<IntVec3>, IEnumerable, IEnumerator<IntVec3>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700275A RID: 10074
-		// (get) Token: 0x0600FB16 RID: 64278 RVA: 0x0048F0F0 File Offset: 0x0048D2F0
-		public CompProperties_AnimalPenMarker Props
+		private int _003C_003E1__state;
+
+		private IntVec3 _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompAnimalPenMarker _003C_003E4__this;
+
+		private List<Region>.Enumerator _003C_003E7__wrap1;
+
+		private IEnumerator<IntVec3> _003C_003E7__wrap2;
+
+		IntVec3 IEnumerator<IntVec3>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.props as CompProperties_AnimalPenMarker;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700275B RID: 10075
-		// (get) Token: 0x0600FB17 RID: 64279 RVA: 0x0048F0FD File Offset: 0x0048D2FD
-		public PenMarkerState PenState
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				ThingWithComps parent = this.parent;
-				if (parent == null)
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetAutoCutCells_003Ed__29(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if ((uint)(num - -4) <= 1u || num == 1)
+			{
+				try
 				{
-					return null;
-				}
-				Map map = parent.Map;
-				if (map == null)
-				{
-					return null;
-				}
-				return map.animalPenManager.GetPenMarkerState(this);
-			}
-		}
-
-		// Token: 0x1700275C RID: 10076
-		// (get) Token: 0x0600FB18 RID: 64280 RVA: 0x0048F121 File Offset: 0x0048D321
-		public ThingFilter AnimalFilter
-		{
-			get
-			{
-				return this.animalFilter;
-			}
-		}
-
-		// Token: 0x1700275D RID: 10077
-		// (get) Token: 0x0600FB19 RID: 64281 RVA: 0x0048F129 File Offset: 0x0048D329
-		public List<ThingDef> ForceDisplayedAnimalDefs
-		{
-			get
-			{
-				return this.forceDisplayedAnimalDefs;
-			}
-		}
-
-		// Token: 0x1700275E RID: 10078
-		// (get) Token: 0x0600FB1A RID: 64282 RVA: 0x0048F134 File Offset: 0x0048D334
-		public override bool CanDesignatePlants
-		{
-			get
-			{
-				PenMarkerState penState = this.PenState;
-				return penState != null && !penState.Unenclosed;
-			}
-		}
-
-		// Token: 0x1700275F RID: 10079
-		// (get) Token: 0x0600FB1B RID: 64283 RVA: 0x0048F156 File Offset: 0x0048D356
-		// (set) Token: 0x0600FB1C RID: 64284 RVA: 0x0048F168 File Offset: 0x0048D368
-		public string RenamableLabel
-		{
-			get
-			{
-				return this.label ?? this.BaseLabel;
-			}
-			set
-			{
-				this.label = value;
-			}
-		}
-
-		// Token: 0x17002760 RID: 10080
-		// (get) Token: 0x0600FB1D RID: 64285 RVA: 0x0048F171 File Offset: 0x0048D371
-		public string BaseLabel
-		{
-			get
-			{
-				return this.parent.def.label.CapitalizeFirst();
-			}
-		}
-
-		// Token: 0x17002761 RID: 10081
-		// (get) Token: 0x0600FB1E RID: 64286 RVA: 0x0048F188 File Offset: 0x0048D388
-		public string InspectLabel
-		{
-			get
-			{
-				return this.RenamableLabel;
-			}
-		}
-
-		// Token: 0x17002762 RID: 10082
-		// (get) Token: 0x0600FB1F RID: 64287 RVA: 0x0048F190 File Offset: 0x0048D390
-		public PenFoodCalculator PenFoodCalculator
-		{
-			get
-			{
-				if (this.cachedFoodCalculator == null)
-				{
-					this.cachedFoodCalculator = new PenFoodCalculator();
-					this.cachedFoodCalculator_cachedAtTick = null;
-				}
-				if (this.cachedFoodCalculator_cachedAtTick != null)
-				{
-					int ticksGame = Find.TickManager.TicksGame;
-					int? num = this.cachedFoodCalculator_cachedAtTick + 20;
-					if (!(ticksGame > num.GetValueOrDefault() & num != null))
+					if (num == -4 || num == 1)
 					{
-						goto IL_95;
+						try
+						{
+						}
+						finally
+						{
+							_003C_003Em__Finally2();
+						}
 					}
 				}
-				this.cachedFoodCalculator.ResetAndProcessPen(this);
-				this.cachedFoodCalculator_cachedAtTick = new int?(Find.TickManager.TicksGame);
-				IL_95:
-				return this.cachedFoodCalculator;
-			}
-		}
-
-		// Token: 0x0600FB20 RID: 64288 RVA: 0x0048F238 File Offset: 0x0048D438
-		public void AddForceDisplayedAnimal(ThingDef animalDef)
-		{
-			if (!this.forceDisplayedAnimalDefs.Contains(animalDef))
-			{
-				this.forceDisplayedAnimalDefs.Add(animalDef);
-			}
-		}
-
-		// Token: 0x0600FB21 RID: 64289 RVA: 0x0048F254 File Offset: 0x0048D454
-		public void RemoveForceDisplayedAnimal(ThingDef animalDef)
-		{
-			this.forceDisplayedAnimalDefs.Remove(animalDef);
-		}
-
-		// Token: 0x0600FB22 RID: 64290 RVA: 0x0048F263 File Offset: 0x0048D463
-		public bool AcceptsToPen(Pawn animal)
-		{
-			return this.animalFilter.Allows(animal) && AnimalPenUtility.GetFixedAnimalFilter().Allows(animal);
-		}
-
-		// Token: 0x0600FB23 RID: 64291 RVA: 0x0048F280 File Offset: 0x0048D480
-		public override void PostSpawnSetup(bool respawningAfterLoad)
-		{
-			base.PostSpawnSetup(respawningAfterLoad);
-			if (!respawningAfterLoad && !this.parent.BeingTransportedOnGravship && this.label.NullOrEmpty())
-			{
-				this.label = (this.parent.Map.animalPenManager.MakeNewAnimalPenName() ?? "AnimalPenMarkerDefaultLabel".Translate(1));
-				this.forceDisplayedAnimalDefs.Add(ThingDefOf.Cow);
-				this.forceDisplayedAnimalDefs.Add(ThingDefOf.Goat);
-				this.forceDisplayedAnimalDefs.Add(ThingDefOf.Chicken);
-				base.AutoCutFilter.CopyAllowancesFrom(this.parent.Map.animalPenManager.GetDefaultAutoCutFilter());
-				this.animalFilter.CopyAllowancesFrom(AnimalPenUtility.GetDefaultAnimalFilter());
-			}
-		}
-
-		// Token: 0x0600FB24 RID: 64292 RVA: 0x0048F34E File Offset: 0x0048D54E
-		public override IEnumerable<IntVec3> GetAutoCutCells()
-		{
-			foreach (Region region in this.PenState.DirectlyConnectedRegions)
-			{
-				foreach (IntVec3 intVec in region.Cells)
+				finally
 				{
-					yield return intVec;
+					_003C_003Em__Finally1();
 				}
-				IEnumerator<IntVec3> enumerator2 = null;
 			}
-			List<Region>.Enumerator enumerator = default(List<Region>.Enumerator);
-			yield break;
-			yield break;
+			_003C_003E7__wrap1 = default(List<Region>.Enumerator);
+			_003C_003E7__wrap2 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x0600FB25 RID: 64293 RVA: 0x0048F35E File Offset: 0x0048D55E
-		public override ThingFilter GetDefaultAutoCutFilter()
+		private bool MoveNext()
 		{
-			return this.parent.Map.animalPenManager.GetDefaultAutoCutFilter();
-		}
-
-		// Token: 0x0600FB26 RID: 64294 RVA: 0x0048F35E File Offset: 0x0048D55E
-		public override ThingFilter GetFixedAutoCutFilter()
-		{
-			return this.parent.Map.animalPenManager.GetDefaultAutoCutFilter();
-		}
-
-		// Token: 0x0600FB27 RID: 64295 RVA: 0x0048F378 File Offset: 0x0048D578
-		public override void PostExposeData()
-		{
-			base.PostExposeData();
-			Scribe_Values.Look<string>(ref this.label, "label", null, false);
-			Scribe_Deep.Look<ThingFilter>(ref this.animalFilter, "animalFilter", Array.Empty<object>());
-			Scribe_Collections.Look<ThingDef>(ref this.forceDisplayedAnimalDefs, "forceDisplayedAnimalDefs", LookMode.Undefined, Array.Empty<object>());
-			if (Scribe.mode == LoadSaveMode.PostLoadInit && this.forceDisplayedAnimalDefs == null)
+			try
 			{
-				this.forceDisplayedAnimalDefs = new List<ThingDef>();
-			}
-		}
-
-		// Token: 0x0600FB28 RID: 64296 RVA: 0x0048F3E4 File Offset: 0x0048D5E4
-		public override string CompInspectStringExtra()
-		{
-			if (!this.parent.Spawned)
-			{
-				return string.Empty;
-			}
-			PenFoodCalculator penFoodCalculator = this.PenFoodCalculator;
-			StringBuilder stringBuilder = new StringBuilder();
-			stringBuilder.Append(this.label).Append(": ").AppendLine(penFoodCalculator.PenSizeDescription());
-			PenMarkerState penState = this.PenState;
-			if (penState.Unenclosed)
-			{
-				stringBuilder.Append("PenUnenclosedLabel".Translate());
-				if (penState.PassableDoors)
+				int num = _003C_003E1__state;
+				CompAnimalPenMarker compAnimalPenMarker = _003C_003E4__this;
+				if (num != 0)
 				{
-					stringBuilder.Append(" (" + "PenOpenDoorLabel".Translate() + ")");
+					if (num != 1)
+					{
+						return false;
+					}
+					_003C_003E1__state = -4;
+					goto IL_0092;
 				}
-				else
+				_003C_003E1__state = -1;
+				_003C_003E7__wrap1 = compAnimalPenMarker.PenState.DirectlyConnectedRegions.GetEnumerator();
+				_003C_003E1__state = -3;
+				goto IL_00ac;
+				IL_0092:
+				if (_003C_003E7__wrap2.MoveNext())
 				{
-					stringBuilder.Append(".");
+					IntVec3 current = _003C_003E7__wrap2.Current;
+					_003C_003E2__current = current;
+					_003C_003E1__state = 1;
+					return true;
 				}
-				stringBuilder.AppendLine();
+				_003C_003Em__Finally2();
+				_003C_003E7__wrap2 = null;
+				goto IL_00ac;
+				IL_00ac:
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					Region current2 = _003C_003E7__wrap1.Current;
+					_003C_003E7__wrap2 = current2.Cells.GetEnumerator();
+					_003C_003E1__state = -4;
+					goto IL_0092;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = default(List<Region>.Enumerator);
+				return false;
 			}
-			else if (!penState.HasOutsideAccess)
+			catch
 			{
-				stringBuilder.Append("NoExteriorAccess".Translate());
-				stringBuilder.AppendLine();
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
-			bool flag = penFoodCalculator.SumNutritionConsumptionPerDay > penFoodCalculator.NutritionPerDayToday;
-			string value = PenFoodCalculator.NutritionPerDayToString(penFoodCalculator.NutritionPerDayToday, false);
-			string text = PenFoodCalculator.NutritionPerDayToString(penFoodCalculator.SumNutritionConsumptionPerDay, false);
-			if (flag)
-			{
-				text = text.Colorize(ColorLibrary.RedReadable);
-			}
-			stringBuilder.Append("PenFoodTab_NaturalNutritionGrowthRate".Translate()).Append(": ").AppendLine(value);
-			stringBuilder.Append("PenFoodTab_TotalNutritionConsumptionRate".Translate()).Append(": ").AppendLine(text);
-			if (penFoodCalculator.sumStockpiledNutritionAvailableNow > 0f)
-			{
-				stringBuilder.Append("PenFoodTab_StockpileTotal".Translate()).Append(": ").AppendLine(PenFoodCalculator.NutritionToString(penFoodCalculator.sumStockpiledNutritionAvailableNow, false));
-			}
-			return stringBuilder.ToString().TrimEnd();
 		}
 
-		// Token: 0x0400A4D5 RID: 42197
-		private const int FoodCalculatorCacheTicks = 20;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x0400A4D6 RID: 42198
-		public string label = "";
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap1/*cast due to .constrained prefix*/).Dispose();
+		}
 
-		// Token: 0x0400A4D7 RID: 42199
-		private ThingFilter animalFilter = new ThingFilter();
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -3;
+			if (_003C_003E7__wrap2 != null)
+			{
+				_003C_003E7__wrap2.Dispose();
+			}
+		}
 
-		// Token: 0x0400A4D8 RID: 42200
-		private List<ThingDef> forceDisplayedAnimalDefs = new List<ThingDef>();
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x0400A4D9 RID: 42201
-		private PenFoodCalculator cachedFoodCalculator;
+		[DebuggerHidden]
+		IEnumerator<IntVec3> IEnumerable<IntVec3>.GetEnumerator()
+		{
+			_003CGetAutoCutCells_003Ed__29 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CGetAutoCutCells_003Ed__29(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x0400A4DA RID: 42202
-		private int? cachedFoodCalculator_cachedAtTick;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<IntVec3>)this).GetEnumerator();
+		}
+	}
+
+	private const int FoodCalculatorCacheTicks = 20;
+
+	public string label = "";
+
+	private ThingFilter animalFilter = new ThingFilter();
+
+	private List<ThingDef> forceDisplayedAnimalDefs = new List<ThingDef>();
+
+	private PenFoodCalculator cachedFoodCalculator;
+
+	private int? cachedFoodCalculator_cachedAtTick;
+
+	public CompProperties_AnimalPenMarker Props => props as CompProperties_AnimalPenMarker;
+
+	public PenMarkerState PenState => parent?.Map?.animalPenManager.GetPenMarkerState(this);
+
+	public ThingFilter AnimalFilter => animalFilter;
+
+	public List<ThingDef> ForceDisplayedAnimalDefs => forceDisplayedAnimalDefs;
+
+	public override bool CanDesignatePlants
+	{
+		get
+		{
+			PenMarkerState penState = PenState;
+			if (penState != null)
+			{
+				return !penState.Unenclosed;
+			}
+			return false;
+		}
+	}
+
+	public string RenamableLabel
+	{
+		get
+		{
+			return label ?? BaseLabel;
+		}
+		set
+		{
+			label = value;
+		}
+	}
+
+	public string BaseLabel => parent.def.label.CapitalizeFirst();
+
+	public string InspectLabel => RenamableLabel;
+
+	public PenFoodCalculator PenFoodCalculator
+	{
+		get
+		{
+			if (cachedFoodCalculator == null)
+			{
+				cachedFoodCalculator = new PenFoodCalculator();
+				cachedFoodCalculator_cachedAtTick = null;
+			}
+			if (!cachedFoodCalculator_cachedAtTick.HasValue || Find.TickManager.TicksGame > cachedFoodCalculator_cachedAtTick + 20)
+			{
+				cachedFoodCalculator.ResetAndProcessPen(this);
+				cachedFoodCalculator_cachedAtTick = Find.TickManager.TicksGame;
+			}
+			return cachedFoodCalculator;
+		}
+	}
+
+	public void AddForceDisplayedAnimal(ThingDef animalDef)
+	{
+		if (!forceDisplayedAnimalDefs.Contains(animalDef))
+		{
+			forceDisplayedAnimalDefs.Add(animalDef);
+		}
+	}
+
+	public void RemoveForceDisplayedAnimal(ThingDef animalDef)
+	{
+		forceDisplayedAnimalDefs.Remove(animalDef);
+	}
+
+	public bool AcceptsToPen(Pawn animal)
+	{
+		if (animalFilter.Allows(animal))
+		{
+			return AnimalPenUtility.GetFixedAnimalFilter().Allows(animal);
+		}
+		return false;
+	}
+
+	public override void PostSpawnSetup(bool respawningAfterLoad)
+	{
+		base.PostSpawnSetup(respawningAfterLoad);
+		if (!respawningAfterLoad && !parent.BeingTransportedOnGravship && label.NullOrEmpty())
+		{
+			label = parent.Map.animalPenManager.MakeNewAnimalPenName() ?? ((string)"AnimalPenMarkerDefaultLabel".Translate(1));
+			forceDisplayedAnimalDefs.Add(ThingDefOf.Cow);
+			forceDisplayedAnimalDefs.Add(ThingDefOf.Goat);
+			forceDisplayedAnimalDefs.Add(ThingDefOf.Chicken);
+			base.AutoCutFilter.CopyAllowancesFrom(parent.Map.animalPenManager.GetDefaultAutoCutFilter());
+			animalFilter.CopyAllowancesFrom(AnimalPenUtility.GetDefaultAnimalFilter());
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CGetAutoCutCells_003Ed__29))]
+	public override IEnumerable<IntVec3> GetAutoCutCells()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetAutoCutCells_003Ed__29(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override ThingFilter GetDefaultAutoCutFilter()
+	{
+		return parent.Map.animalPenManager.GetDefaultAutoCutFilter();
+	}
+
+	public override ThingFilter GetFixedAutoCutFilter()
+	{
+		return parent.Map.animalPenManager.GetDefaultAutoCutFilter();
+	}
+
+	public override void PostExposeData()
+	{
+		base.PostExposeData();
+		Scribe_Values.Look(ref label, "label");
+		Scribe_Deep.Look(ref animalFilter, "animalFilter");
+		Scribe_Collections.Look(ref forceDisplayedAnimalDefs, "forceDisplayedAnimalDefs", LookMode.Undefined);
+		if (Scribe.mode == LoadSaveMode.PostLoadInit && forceDisplayedAnimalDefs == null)
+		{
+			forceDisplayedAnimalDefs = new List<ThingDef>();
+		}
+	}
+
+	public override string CompInspectStringExtra()
+	{
+		if (!parent.Spawned)
+		{
+			return string.Empty;
+		}
+		PenFoodCalculator penFoodCalculator = PenFoodCalculator;
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.Append(label).Append(": ").AppendLine(penFoodCalculator.PenSizeDescription());
+		PenMarkerState penState = PenState;
+		if (penState.Unenclosed)
+		{
+			stringBuilder.Append("PenUnenclosedLabel".Translate());
+			if (penState.PassableDoors)
+			{
+				stringBuilder.Append(" (" + "PenOpenDoorLabel".Translate() + ")");
+			}
+			else
+			{
+				stringBuilder.Append(".");
+			}
+			stringBuilder.AppendLine();
+		}
+		else if (!penState.HasOutsideAccess)
+		{
+			stringBuilder.Append("NoExteriorAccess".Translate());
+			stringBuilder.AppendLine();
+		}
+		bool num = penFoodCalculator.SumNutritionConsumptionPerDay > penFoodCalculator.NutritionPerDayToday;
+		string value = PenFoodCalculator.NutritionPerDayToString(penFoodCalculator.NutritionPerDayToday, withUnits: false);
+		string text = PenFoodCalculator.NutritionPerDayToString(penFoodCalculator.SumNutritionConsumptionPerDay, withUnits: false);
+		if (num)
+		{
+			text = text.Colorize(ColorLibrary.RedReadable);
+		}
+		stringBuilder.Append("PenFoodTab_NaturalNutritionGrowthRate".Translate()).Append(": ").AppendLine(value);
+		stringBuilder.Append("PenFoodTab_TotalNutritionConsumptionRate".Translate()).Append(": ").AppendLine(text);
+		if (penFoodCalculator.sumStockpiledNutritionAvailableNow > 0f)
+		{
+			stringBuilder.Append("PenFoodTab_StockpileTotal".Translate()).Append(": ").AppendLine(PenFoodCalculator.NutritionToString(penFoodCalculator.sumStockpiledNutritionAvailableNow, withUnits: false));
+		}
+		return stringBuilder.ToString().TrimEnd();
 	}
 }

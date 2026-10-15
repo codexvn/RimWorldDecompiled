@@ -1,84 +1,78 @@
-﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Verse
+namespace Verse;
+
+public static class DialogDatabase
 {
-	// Token: 0x02000C21 RID: 3105
-	public static class DialogDatabase
+	private static List<DiaNodeMold> Nodes;
+
+	private static List<DiaNodeList> NodeLists;
+
+	static DialogDatabase()
 	{
-		// Token: 0x06004FC5 RID: 20421 RVA: 0x00199FB5 File Offset: 0x001981B5
-		static DialogDatabase()
+		Nodes = new List<DiaNodeMold>();
+		NodeLists = new List<DiaNodeList>();
+		LoadAllDialog();
+	}
+
+	private static void LoadAllDialog()
+	{
+		Nodes.Clear();
+		Object[] array = Resources.LoadAll("Dialog", typeof(TextAsset));
+		foreach (Object @object in array)
 		{
-			DialogDatabase.LoadAllDialog();
+			TextAsset ass = @object as TextAsset;
+			if (@object.name == "BaseEncounters" || @object.name == "GeneratedDialogs")
+			{
+				LayerLoader.LoadFileIntoList(ass, Nodes, NodeLists, DiaNodeType.BaseEncounters);
+			}
+			if (@object.name == "InsanityBattles")
+			{
+				LayerLoader.LoadFileIntoList(ass, Nodes, NodeLists, DiaNodeType.InsanityBattles);
+			}
+			if (@object.name == "SpecialEncounters")
+			{
+				LayerLoader.LoadFileIntoList(ass, Nodes, NodeLists, DiaNodeType.Special);
+			}
 		}
-
-		// Token: 0x06004FC6 RID: 20422 RVA: 0x00199FD0 File Offset: 0x001981D0
-		private static void LoadAllDialog()
+		foreach (DiaNodeMold node in Nodes)
 		{
-			DialogDatabase.Nodes.Clear();
-			foreach (UnityEngine.Object @object in Resources.LoadAll("Dialog", typeof(TextAsset)))
-			{
-				TextAsset ass = @object as TextAsset;
-				if (@object.name == "BaseEncounters" || @object.name == "GeneratedDialogs")
-				{
-					LayerLoader.LoadFileIntoList(ass, DialogDatabase.Nodes, DialogDatabase.NodeLists, DiaNodeType.BaseEncounters);
-				}
-				if (@object.name == "InsanityBattles")
-				{
-					LayerLoader.LoadFileIntoList(ass, DialogDatabase.Nodes, DialogDatabase.NodeLists, DiaNodeType.InsanityBattles);
-				}
-				if (@object.name == "SpecialEncounters")
-				{
-					LayerLoader.LoadFileIntoList(ass, DialogDatabase.Nodes, DialogDatabase.NodeLists, DiaNodeType.Special);
-				}
-			}
-			foreach (DiaNodeMold diaNodeMold in DialogDatabase.Nodes)
-			{
-				diaNodeMold.PostLoad();
-			}
-			LayerLoader.MarkNonRootNodes(DialogDatabase.Nodes);
+			node.PostLoad();
 		}
+		LayerLoader.MarkNonRootNodes(Nodes);
+	}
 
-		// Token: 0x06004FC7 RID: 20423 RVA: 0x0019A0E4 File Offset: 0x001982E4
-		public static DiaNodeMold GetRandomEncounterRootNode(DiaNodeType NType)
+	public static DiaNodeMold GetRandomEncounterRootNode(DiaNodeType NType)
+	{
+		List<DiaNodeMold> list = new List<DiaNodeMold>();
+		foreach (DiaNodeMold node in Nodes)
 		{
-			List<DiaNodeMold> list = new List<DiaNodeMold>();
-			foreach (DiaNodeMold diaNodeMold in DialogDatabase.Nodes)
+			if (node.isRoot && (!node.unique || !node.used) && node.nodeType == NType)
 			{
-				if (diaNodeMold.isRoot && (!diaNodeMold.unique || !diaNodeMold.used) && diaNodeMold.nodeType == NType)
-				{
-					list.Add(diaNodeMold);
-				}
+				list.Add(node);
 			}
-			return list.RandomElement<DiaNodeMold>();
 		}
+		return list.RandomElement();
+	}
 
-		// Token: 0x06004FC8 RID: 20424 RVA: 0x0019A164 File Offset: 0x00198364
-		public static DiaNodeMold GetNodeNamed(string NodeName)
+	public static DiaNodeMold GetNodeNamed(string NodeName)
+	{
+		foreach (DiaNodeMold node in Nodes)
 		{
-			foreach (DiaNodeMold diaNodeMold in DialogDatabase.Nodes)
+			if (node.name == NodeName)
 			{
-				if (diaNodeMold.name == NodeName)
-				{
-					return diaNodeMold;
-				}
+				return node;
 			}
-			foreach (DiaNodeList diaNodeList in DialogDatabase.NodeLists)
-			{
-				if (diaNodeList.Name == NodeName)
-				{
-					return diaNodeList.RandomNodeFromList();
-				}
-			}
-			Log.Error("Did not find node named '" + NodeName + "'.");
-			return null;
 		}
-
-		// Token: 0x04003947 RID: 14663
-		private static List<DiaNodeMold> Nodes = new List<DiaNodeMold>();
-
-		// Token: 0x04003948 RID: 14664
-		private static List<DiaNodeList> NodeLists = new List<DiaNodeList>();
+		foreach (DiaNodeList nodeList in NodeLists)
+		{
+			if (nodeList.Name == NodeName)
+			{
+				return nodeList.RandomNodeFromList();
+			}
+		}
+		Log.Error("Did not find node named '" + NodeName + "'.");
+		return null;
 	}
 }

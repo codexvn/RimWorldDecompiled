@@ -1,87 +1,224 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class MusicSequenceDef : Def
 {
-	// Token: 0x02001A9D RID: 6813
-	public class MusicSequenceDef : Def
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__19 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x06009891 RID: 39057 RVA: 0x002C8097 File Offset: 0x002C6297
-		public override IEnumerable<string> ConfigErrors()
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public MusicSequenceDef _003C_003E4__this;
+
+		private IEnumerator<string> _003C_003E7__wrap1;
+
+		string IEnumerator<string>.Current
 		{
-			if (this.workerType != null && !typeof(MusicSequenceWorker).IsAssignableFrom(this.workerType))
+			[DebuggerHidden]
+			get
 			{
-				yield return "Music condition type is not a subclass of MusicSequenceWorker, type was: " + this.workerType.FullName;
+				return _003C_003E2__current;
 			}
-			if (this.song != null && this.songs != null && this.workerType == typeof(MusicSequenceWorker))
-			{
-				yield return "You are using both a single song and a list, multiple songs won't play with default worker implementation, use a custom worker or remove one of the two options. In sequence def: " + this.defName;
-			}
-			foreach (string text in base.ConfigErrors())
-			{
-				yield return text;
-			}
-			IEnumerator<string> enumerator = null;
-			yield break;
-			yield break;
 		}
 
-		// Token: 0x040066E4 RID: 26340
-		public Type workerType = typeof(MusicSequenceWorker);
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
 
-		// Token: 0x040066E5 RID: 26341
-		public SongDef song;
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__19(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
 
-		// Token: 0x040066E6 RID: 26342
-		public List<SongDef> songs;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 3)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
 
-		// Token: 0x040066E7 RID: 26343
-		public MusicSequenceDef nextSequence;
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				MusicSequenceDef musicSequenceDef = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					if (musicSequenceDef.workerType != null && !typeof(MusicSequenceWorker).IsAssignableFrom(musicSequenceDef.workerType))
+					{
+						_003C_003E2__current = "Music condition type is not a subclass of MusicSequenceWorker, type was: " + musicSequenceDef.workerType.FullName;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					goto IL_0087;
+				case 1:
+					_003C_003E1__state = -1;
+					goto IL_0087;
+				case 2:
+					_003C_003E1__state = -1;
+					goto IL_00d6;
+				case 3:
+					{
+						_003C_003E1__state = -3;
+						break;
+					}
+					IL_00d6:
+					_003C_003E7__wrap1 = ((Def)musicSequenceDef).ConfigErrors().GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+					IL_0087:
+					if (musicSequenceDef.song != null && musicSequenceDef.songs != null && musicSequenceDef.workerType == typeof(MusicSequenceWorker))
+					{
+						_003C_003E2__current = "You are using both a single song and a list, multiple songs won't play with default worker implementation, use a custom worker or remove one of the two options. In sequence def: " + musicSequenceDef.defName;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					goto IL_00d6;
+				}
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					string current = _003C_003E7__wrap1.Current;
+					_003C_003E2__current = current;
+					_003C_003E1__state = 3;
+					return true;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = null;
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
 
-		// Token: 0x040066E8 RID: 26344
-		public bool loop;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x040066E9 RID: 26345
-		public bool canBeInterrupted = true;
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
 
-		// Token: 0x040066EA RID: 26346
-		public bool useTransitionForLifetime = true;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x040066EB RID: 26347
-		public bool transitionOnDanger;
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__19 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__19(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x040066EC RID: 26348
-		public bool transitionOnNoDanger;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x040066ED RID: 26349
-		public bool endOnNoDanger;
+	public Type workerType = typeof(MusicSequenceWorker);
 
-		// Token: 0x040066EE RID: 26350
-		public bool endOnDanger;
+	public SongDef song;
 
-		// Token: 0x040066EF RID: 26351
-		public FloatRange loopDelayRange = FloatRange.Zero;
+	public List<SongDef> songs;
 
-		// Token: 0x040066F0 RID: 26352
-		public float fadeoutLastSongDuration = 10f;
+	public MusicSequenceDef nextSequence;
 
-		// Token: 0x040066F1 RID: 26353
-		public float fadeInDuration;
+	public bool loop;
 
-		// Token: 0x040066F2 RID: 26354
-		public bool loopFadeout;
+	public bool canBeInterrupted = true;
 
-		// Token: 0x040066F3 RID: 26355
-		public float? overrideFadeout;
+	public bool useTransitionForLifetime = true;
 
-		// Token: 0x040066F4 RID: 26356
-		public float? overrideVolume;
+	public bool transitionOnDanger;
 
-		// Token: 0x040066F5 RID: 26357
-		public float? minTimeToPlay;
+	public bool transitionOnNoDanger;
 
-		// Token: 0x040066F6 RID: 26358
-		public float? pausedVolumeFactor;
+	public bool endOnNoDanger;
+
+	public bool endOnDanger;
+
+	public FloatRange loopDelayRange = FloatRange.Zero;
+
+	public float fadeoutLastSongDuration = 10f;
+
+	public float fadeInDuration;
+
+	public bool loopFadeout;
+
+	public float? overrideFadeout;
+
+	public float? overrideVolume;
+
+	public float? minTimeToPlay;
+
+	public float? pausedVolumeFactor;
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__19))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__19(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

@@ -1,144 +1,266 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class ThingSetMaker_MarketValue : ThingSetMaker
 {
-	// Token: 0x02002B6C RID: 11116
-	public class ThingSetMaker_MarketValue : ThingSetMaker
+	[CompilerGenerated]
+	private sealed class _003CAllGeneratableThingsDebugSub_003Ed__10 : IEnumerable<ThingDef>, IEnumerable, IEnumerator<ThingDef>, IEnumerator, IDisposable
 	{
-		// Token: 0x0600F88E RID: 63630 RVA: 0x0048488B File Offset: 0x00482A8B
-		public ThingSetMaker_MarketValue()
+		private int _003C_003E1__state;
+
+		private ThingDef _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private ThingSetMakerParams parms;
+
+		public ThingSetMakerParams _003C_003E3__parms;
+
+		public ThingSetMaker_MarketValue _003C_003E4__this;
+
+		private TechLevel _003CtechLevel_003E5__2;
+
+		private IEnumerator<ThingDef> _003C_003E7__wrap2;
+
+		ThingDef IEnumerator<ThingDef>.Current
 		{
-			this.nextSeed = Rand.Int;
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x0600F88F RID: 63631 RVA: 0x004848A0 File Offset: 0x00482AA0
-		protected override bool CanGenerateSub(ThingSetMakerParams parms)
+		object IEnumerator.Current
 		{
-			List<ThingDef> list = this.AllowedThingDefs(parms).ToList<ThingDef>();
-			if (!list.Any<ThingDef>())
+			[DebuggerHidden]
+			get
 			{
-				return false;
+				return _003C_003E2__current;
 			}
-			if (parms.countRange != null && parms.countRange.Value.max <= 0)
+		}
+
+		[DebuggerHidden]
+		public _003CAllGeneratableThingsDebugSub_003Ed__10(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				return false;
-			}
-			if (parms.totalMarketValueRange == null || parms.totalMarketValueRange.Value.max <= 0f)
-			{
-				return false;
-			}
-			float maxValue;
-			if (parms.maxTotalMass != null)
-			{
-				float? maxTotalMass = parms.maxTotalMass;
-				maxValue = float.MaxValue;
-				if (!(maxTotalMass.GetValueOrDefault() == maxValue & maxTotalMass != null) && !ThingSetMakerUtility.PossibleToWeighNoMoreThan(list, parms.techLevel.GetValueOrDefault(), parms.maxTotalMass.Value, (parms.countRange != null) ? parms.countRange.Value.min : 1))
+				try
 				{
-					return false;
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
 				}
 			}
-			return this.GeneratePossibleDefs(parms, out maxValue, this.nextSeed).Any<ThingStuffPairWithQuality>();
+			_003C_003E7__wrap2 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x0600F890 RID: 63632 RVA: 0x0048499C File Offset: 0x00482B9C
-		protected override void Generate(ThingSetMakerParams parms, List<Thing> outThings)
+		private bool MoveNext()
 		{
-			float maxMass = parms.maxTotalMass ?? float.MaxValue;
-			float totalValue;
-			List<ThingStuffPairWithQuality> list = this.GeneratePossibleDefs(parms, out totalValue, this.nextSeed);
-			for (int i = 0; i < list.Count; i++)
+			try
 			{
-				outThings.Add(list[i].MakeThing(false));
-			}
-			ThingSetMakerByTotalStatUtility.IncreaseStackCountsToTotalValue(outThings, totalValue, (Thing x) => x.MarketValue, maxMass, true);
-			this.nextSeed++;
-		}
-
-		// Token: 0x0600F891 RID: 63633 RVA: 0x0048465D File Offset: 0x0048285D
-		protected virtual IEnumerable<ThingDef> AllowedThingDefs(ThingSetMakerParams parms)
-		{
-			return ThingSetMakerUtility.GetAllowedThingDefs(parms);
-		}
-
-		// Token: 0x0600F892 RID: 63634 RVA: 0x00484A3B File Offset: 0x00482C3B
-		private float GetSingleThingValue(ThingStuffPairWithQuality thingStuffPair)
-		{
-			return thingStuffPair.GetStatValue(StatDefOf.MarketValue);
-		}
-
-		// Token: 0x0600F893 RID: 63635 RVA: 0x00484A49 File Offset: 0x00482C49
-		private float GetMinValue(ThingStuffPairWithQuality thingStuffPair)
-		{
-			return thingStuffPair.GetStatValue(StatDefOf.MarketValue) * (float)thingStuffPair.thing.minRewardCount;
-		}
-
-		// Token: 0x0600F894 RID: 63636 RVA: 0x00484A64 File Offset: 0x00482C64
-		private float GetMaxValue(ThingStuffPairWithQuality thingStuffPair)
-		{
-			return thingStuffPair.GetStatValue(StatDefOf.MarketValue) * (float)thingStuffPair.thing.stackLimit;
-		}
-
-		// Token: 0x0600F895 RID: 63637 RVA: 0x00484A7F File Offset: 0x00482C7F
-		private List<ThingStuffPairWithQuality> GeneratePossibleDefs(ThingSetMakerParams parms, out float totalMarketValue, int seed)
-		{
-			Rand.PushState(seed);
-			List<ThingStuffPairWithQuality> result = this.GeneratePossibleDefs(parms, out totalMarketValue);
-			Rand.PopState();
-			return result;
-		}
-
-		// Token: 0x0600F896 RID: 63638 RVA: 0x00484A94 File Offset: 0x00482C94
-		private List<ThingStuffPairWithQuality> GeneratePossibleDefs(ThingSetMakerParams parms, out float totalMarketValue)
-		{
-			IEnumerable<ThingDef> enumerable = this.AllowedThingDefs(parms);
-			if (!enumerable.Any<ThingDef>())
-			{
-				totalMarketValue = 0f;
-				return new List<ThingStuffPairWithQuality>();
-			}
-			TechLevel valueOrDefault = parms.techLevel.GetValueOrDefault();
-			IntRange countRange = parms.countRange ?? new IntRange(1, int.MaxValue);
-			FloatRange floatRange = parms.totalMarketValueRange ?? FloatRange.Zero;
-			float maxMass = parms.maxTotalMass ?? float.MaxValue;
-			QualityGenerator valueOrDefault2 = parms.qualityGenerator.GetValueOrDefault();
-			totalMarketValue = floatRange.RandomInRange;
-			return ThingSetMakerByTotalStatUtility.GenerateDefsWithPossibleTotalValue(countRange, totalMarketValue, enumerable, valueOrDefault, valueOrDefault2, new Func<ThingStuffPairWithQuality, float>(this.GetMinValue), new Func<ThingStuffPairWithQuality, float>(this.GetMaxValue), new Func<ThingStuffPairWithQuality, float>(this.GetSingleThingValue), null, 100, maxMass, parms.allowNonStackableDuplicates.GetValueOrDefault(true), totalMarketValue * parms.minSingleItemMarketValuePct.GetValueOrDefault());
-		}
-
-		// Token: 0x0600F897 RID: 63639 RVA: 0x00484B96 File Offset: 0x00482D96
-		protected override IEnumerable<ThingDef> AllGeneratableThingsDebugSub(ThingSetMakerParams parms)
-		{
-			TechLevel techLevel = parms.techLevel.GetValueOrDefault();
-			foreach (ThingDef thingDef in this.AllowedThingDefs(parms))
-			{
-				if (parms.maxTotalMass != null)
+				int num = _003C_003E1__state;
+				ThingSetMaker_MarketValue thingSetMaker_MarketValue = _003C_003E4__this;
+				switch (num)
 				{
-					float? maxTotalMass = parms.maxTotalMass;
-					float maxValue = float.MaxValue;
-					if (!(maxTotalMass.GetValueOrDefault() == maxValue & maxTotalMass != null))
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003CtechLevel_003E5__2 = parms.techLevel.GetValueOrDefault();
+					_003C_003E7__wrap2 = thingSetMaker_MarketValue.AllowedThingDefs(parms).GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 1:
+					_003C_003E1__state = -3;
+					break;
+				}
+				while (_003C_003E7__wrap2.MoveNext())
+				{
+					ThingDef current = _003C_003E7__wrap2.Current;
+					if ((!parms.maxTotalMass.HasValue || parms.maxTotalMass.GetValueOrDefault() == float.MaxValue || !(ThingSetMakerUtility.GetMinMass(current, _003CtechLevel_003E5__2) > parms.maxTotalMass)) && (!parms.totalMarketValueRange.HasValue || parms.totalMarketValueRange.Value.max == float.MaxValue || !(ThingSetMakerUtility.GetMinMarketValue(current, _003CtechLevel_003E5__2) > parms.totalMarketValueRange.Value.max)))
 					{
-						float minMass = ThingSetMakerUtility.GetMinMass(thingDef, techLevel);
-						maxTotalMass = parms.maxTotalMass;
-						if (minMass > maxTotalMass.GetValueOrDefault() & maxTotalMass != null)
-						{
-							continue;
-						}
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
 					}
 				}
-				if (parms.totalMarketValueRange == null || parms.totalMarketValueRange.Value.max == 3.4028235E+38f || ThingSetMakerUtility.GetMinMarketValue(thingDef, techLevel) <= parms.totalMarketValueRange.Value.max)
-				{
-					yield return thingDef;
-				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap2 = null;
+				return false;
 			}
-			IEnumerator<ThingDef> enumerator = null;
-			yield break;
-			yield break;
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
 		}
 
-		// Token: 0x0400A378 RID: 41848
-		private int nextSeed;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap2 != null)
+			{
+				_003C_003E7__wrap2.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<ThingDef> IEnumerable<ThingDef>.GetEnumerator()
+		{
+			_003CAllGeneratableThingsDebugSub_003Ed__10 _003CAllGeneratableThingsDebugSub_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CAllGeneratableThingsDebugSub_003Ed__ = this;
+			}
+			else
+			{
+				_003CAllGeneratableThingsDebugSub_003Ed__ = new _003CAllGeneratableThingsDebugSub_003Ed__10(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CAllGeneratableThingsDebugSub_003Ed__.parms = _003C_003E3__parms;
+			return _003CAllGeneratableThingsDebugSub_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<ThingDef>)this).GetEnumerator();
+		}
+	}
+
+	private int nextSeed;
+
+	public ThingSetMaker_MarketValue()
+	{
+		nextSeed = Rand.Int;
+	}
+
+	protected override bool CanGenerateSub(ThingSetMakerParams parms)
+	{
+		List<ThingDef> list = AllowedThingDefs(parms).ToList();
+		if (!list.Any())
+		{
+			return false;
+		}
+		if (parms.countRange.HasValue && parms.countRange.Value.max <= 0)
+		{
+			return false;
+		}
+		if (!parms.totalMarketValueRange.HasValue || parms.totalMarketValueRange.Value.max <= 0f)
+		{
+			return false;
+		}
+		if (parms.maxTotalMass.HasValue && parms.maxTotalMass.GetValueOrDefault() != float.MaxValue && !ThingSetMakerUtility.PossibleToWeighNoMoreThan(list, parms.techLevel.GetValueOrDefault(), parms.maxTotalMass.Value, (!parms.countRange.HasValue) ? 1 : parms.countRange.Value.min))
+		{
+			return false;
+		}
+		if (!GeneratePossibleDefs(parms, out var _, nextSeed).Any())
+		{
+			return false;
+		}
+		return true;
+	}
+
+	protected override void Generate(ThingSetMakerParams parms, List<Thing> outThings)
+	{
+		float maxMass = parms.maxTotalMass ?? float.MaxValue;
+		float totalMarketValue;
+		List<ThingStuffPairWithQuality> list = GeneratePossibleDefs(parms, out totalMarketValue, nextSeed);
+		for (int i = 0; i < list.Count; i++)
+		{
+			outThings.Add(list[i].MakeThing());
+		}
+		ThingSetMakerByTotalStatUtility.IncreaseStackCountsToTotalValue(outThings, totalMarketValue, (Thing x) => x.MarketValue, maxMass, satisfyMinRewardCount: true);
+		nextSeed++;
+	}
+
+	protected virtual IEnumerable<ThingDef> AllowedThingDefs(ThingSetMakerParams parms)
+	{
+		return ThingSetMakerUtility.GetAllowedThingDefs(parms);
+	}
+
+	private float GetSingleThingValue(ThingStuffPairWithQuality thingStuffPair)
+	{
+		return thingStuffPair.GetStatValue(StatDefOf.MarketValue);
+	}
+
+	private float GetMinValue(ThingStuffPairWithQuality thingStuffPair)
+	{
+		return thingStuffPair.GetStatValue(StatDefOf.MarketValue) * (float)thingStuffPair.thing.minRewardCount;
+	}
+
+	private float GetMaxValue(ThingStuffPairWithQuality thingStuffPair)
+	{
+		return thingStuffPair.GetStatValue(StatDefOf.MarketValue) * (float)thingStuffPair.thing.stackLimit;
+	}
+
+	private List<ThingStuffPairWithQuality> GeneratePossibleDefs(ThingSetMakerParams parms, out float totalMarketValue, int seed)
+	{
+		Rand.PushState(seed);
+		List<ThingStuffPairWithQuality> result = GeneratePossibleDefs(parms, out totalMarketValue);
+		Rand.PopState();
+		return result;
+	}
+
+	private List<ThingStuffPairWithQuality> GeneratePossibleDefs(ThingSetMakerParams parms, out float totalMarketValue)
+	{
+		IEnumerable<ThingDef> enumerable = AllowedThingDefs(parms);
+		if (!enumerable.Any())
+		{
+			totalMarketValue = 0f;
+			return new List<ThingStuffPairWithQuality>();
+		}
+		TechLevel valueOrDefault = parms.techLevel.GetValueOrDefault();
+		IntRange countRange = parms.countRange ?? new IntRange(1, int.MaxValue);
+		FloatRange floatRange = parms.totalMarketValueRange ?? FloatRange.Zero;
+		float maxMass = parms.maxTotalMass ?? float.MaxValue;
+		QualityGenerator valueOrDefault2 = parms.qualityGenerator.GetValueOrDefault();
+		totalMarketValue = floatRange.RandomInRange;
+		return ThingSetMakerByTotalStatUtility.GenerateDefsWithPossibleTotalValue(countRange, totalMarketValue, enumerable, valueOrDefault, valueOrDefault2, GetMinValue, GetMaxValue, GetSingleThingValue, null, 100, maxMass, parms.allowNonStackableDuplicates ?? true, totalMarketValue * parms.minSingleItemMarketValuePct.GetValueOrDefault());
+	}
+
+	[IteratorStateMachine(typeof(_003CAllGeneratableThingsDebugSub_003Ed__10))]
+	protected override IEnumerable<ThingDef> AllGeneratableThingsDebugSub(ThingSetMakerParams parms)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CAllGeneratableThingsDebugSub_003Ed__10(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__parms = parms
+		};
 	}
 }

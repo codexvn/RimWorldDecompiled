@@ -1,326 +1,309 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using RimWorld;
 using RimWorld.Planet;
 using UnityEngine;
 using Verse.Noise;
 
-namespace Verse
+namespace Verse;
+
+public static class PollutionUtility
 {
-	// Token: 0x020004D1 RID: 1233
-	public static class PollutionUtility
+	internal class PollutionCellComparer : IComparer<IntVec3>
 	{
-		// Token: 0x06001FE9 RID: 8169 RVA: 0x000A6F0C File Offset: 0x000A510C
-		public static void PawnPollutionTickInterval(Pawn pawn, int delta)
+		private const float NoisyEdgeFactor = 0.25f;
+
+		private const float PerlinNoiseFactor = 2f;
+
+		private readonly IntVec3 root;
+
+		private readonly Map map;
+
+		private readonly ModuleBase perlin;
+
+		public PollutionCellComparer(IntVec3 root, Map map, float frequency = 0.015f)
 		{
-			if (!pawn.Spawned)
-			{
-				return;
-			}
-			if (pawn.IsHashIntervalTick(60, delta) && pawn.Position.IsPolluted(pawn.Map) && PollutionUtility.StimulatedByPollution(pawn) && !pawn.health.hediffSet.HasHediff(HediffDefOf.PollutionStimulus, false))
-			{
-				pawn.health.AddHediff(HediffDefOf.PollutionStimulus, null, null, null);
-			}
+			this.root = root;
+			this.map = map;
+			perlin = new Perlin(frequency, 2.0, 0.5, 6, map.uniqueID, QualityMode.Medium);
+			perlin = new ScaleBias(0.5, 0.5, perlin);
 		}
 
-		// Token: 0x06001FEA RID: 8170 RVA: 0x000A6F7C File Offset: 0x000A517C
-		public static void Notify_TunnelHiveSpawnedInsect(Pawn pawn)
+		private float PolluteScore(IntVec3 c)
 		{
-			if (!pawn.Spawned || !pawn.RaceProps.Insect)
+			float num = 1f;
+			num *= 1f / c.DistanceTo(root);
+			num *= 1f + (float)perlin.GetValue(c.x, c.y, c.z) * 2f;
+			if (MapGenerator.mapBeingGenerated == map)
 			{
-				return;
+				num *= c.DistanceTo(MapGenerator.PlayerStartSpot) / map.Size.LengthHorizontal;
 			}
-			if (pawn.Position.IsPolluted(pawn.Map))
-			{
-				pawn.health.AddHediff(HediffDefOf.PollutionStimulus, null, null, null);
-				HealthUtility.AdjustSeverity(pawn, HediffDefOf.PollutionStimulus, HediffDefOf.PollutionStimulus.maxSeverity);
-			}
+			return num * (1f + (float)AdjacentPollutedCount(c) / 8f * 0.25f);
 		}
 
-		// Token: 0x06001FEB RID: 8171 RVA: 0x000A6FE3 File Offset: 0x000A51E3
-		private static bool StimulatedByPollution(Pawn pawn)
+		private int AdjacentPollutedCount(IntVec3 c)
 		{
-			if (!ModsConfig.BiotechActive)
+			int num = 0;
+			for (int i = 0; i < GenAdj.AdjacentCells.Length; i++)
 			{
-				return false;
-			}
-			if (pawn.RaceProps.Insect)
-			{
-				return true;
-			}
-			Pawn_GeneTracker genes = pawn.genes;
-			return ((genes != null) ? genes.GetFirstGeneOfType<Gene_PollutionRush>() : null) != null;
-		}
-
-		// Token: 0x06001FEC RID: 8172 RVA: 0x000A7014 File Offset: 0x000A5214
-		public static bool SettableEntirelyPolluted(IPlantToGrowSettable s)
-		{
-			using (IEnumerator<IntVec3> enumerator = s.Cells.GetEnumerator())
-			{
-				while (enumerator.MoveNext())
+				IntVec3 intVec = GenAdj.AdjacentCells[i];
+				IntVec3 c2 = c + intVec;
+				if (c2.InBounds(map) && c2.IsPolluted(map))
 				{
-					if (!enumerator.Current.IsPolluted(s.Map))
-					{
-						return false;
-					}
+					num++;
 				}
 			}
+			return num;
+		}
+
+		public int Compare(IntVec3 a, IntVec3 b)
+		{
+			float num = PolluteScore(a);
+			float num2 = PolluteScore(b);
+			if (num < num2)
+			{
+				return 1;
+			}
+			if (num > num2)
+			{
+				return -1;
+			}
+			return 0;
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass10_0
+	{
+		public Map map;
+
+		public Func<IntVec3, bool> adjacentPolluteValidator;
+
+		internal bool _003CGrowPollutionAt_003Eb__1(IntVec3 x)
+		{
+			return x.IsPolluted(map);
+		}
+	}
+
+	private const float PollutionPerlinFrequency = 0.015f;
+
+	private static FastPriorityQueue<IntVec3> tmpPollutableCells;
+
+	private static readonly List<IntVec3> tmpPollutedCells = new List<IntVec3>();
+
+	private static readonly List<IntVec3> tmpMapCells = new List<IntVec3>();
+
+	public static void PawnPollutionTickInterval(Pawn pawn, int delta)
+	{
+		if (pawn.Spawned && pawn.IsHashIntervalTick(60, delta) && pawn.Position.IsPolluted(pawn.Map) && StimulatedByPollution(pawn) && !pawn.health.hediffSet.HasHediff(HediffDefOf.PollutionStimulus))
+		{
+			pawn.health.AddHediff(HediffDefOf.PollutionStimulus, null, null);
+		}
+	}
+
+	public static void Notify_TunnelHiveSpawnedInsect(Pawn pawn)
+	{
+		if (pawn.Spawned && pawn.RaceProps.Insect && pawn.Position.IsPolluted(pawn.Map))
+		{
+			pawn.health.AddHediff(HediffDefOf.PollutionStimulus, null, null);
+			HealthUtility.AdjustSeverity(pawn, HediffDefOf.PollutionStimulus, HediffDefOf.PollutionStimulus.maxSeverity);
+		}
+	}
+
+	private static bool StimulatedByPollution(Pawn pawn)
+	{
+		if (!ModsConfig.BiotechActive)
+		{
+			return false;
+		}
+		if (pawn.RaceProps.Insect)
+		{
 			return true;
 		}
-
-		// Token: 0x06001FED RID: 8173 RVA: 0x000A7070 File Offset: 0x000A5270
-		public static bool CanPlantAt(ThingDef plantDef, IPlantToGrowSettable settable)
+		if (pawn.genes?.GetFirstGeneOfType<Gene_PollutionRush>() != null)
 		{
-			if (plantDef.plant.RequiresNoPollution)
-			{
-				using (IEnumerator<IntVec3> enumerator = settable.Cells.GetEnumerator())
-				{
-					while (enumerator.MoveNext())
-					{
-						if (!enumerator.Current.IsPolluted(settable.Map))
-						{
-							return true;
-						}
-					}
-				}
-				return false;
-			}
-			if (plantDef.plant.RequiresPollution)
-			{
-				using (IEnumerator<IntVec3> enumerator = settable.Cells.GetEnumerator())
-				{
-					while (enumerator.MoveNext())
-					{
-						if (enumerator.Current.IsPolluted(settable.Map))
-						{
-							return true;
-						}
-					}
-				}
-				return false;
-			}
 			return true;
 		}
+		return false;
+	}
 
-		// Token: 0x06001FEE RID: 8174 RVA: 0x000A712C File Offset: 0x000A532C
-		public static bool IsExecutingPollutionIgnoredQuest()
+	public static bool SettableEntirelyPolluted(IPlantToGrowSettable s)
+	{
+		foreach (IntVec3 cell in s.Cells)
 		{
-			foreach (Quest quest in Find.QuestManager.QuestsListForReading)
+			if (!cell.IsPolluted(s.Map))
 			{
-				if (quest.State == QuestState.Ongoing && (quest.root == QuestScriptDefOf.EndGame_ArchonexusVictory_FirstCycle || quest.root == QuestScriptDefOf.EndGame_ArchonexusVictory_SecondCycle))
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public static bool CanPlantAt(ThingDef plantDef, IPlantToGrowSettable settable)
+	{
+		if (plantDef.plant.RequiresNoPollution)
+		{
+			foreach (IntVec3 cell in settable.Cells)
+			{
+				if (!cell.IsPolluted(settable.Map))
 				{
 					return true;
 				}
 			}
 			return false;
 		}
-
-		// Token: 0x06001FEF RID: 8175 RVA: 0x000A71A8 File Offset: 0x000A53A8
-		public static void GrowPollutionAt(IntVec3 root, Map map, int cellCountToPollute = 4, Action<IntVec3> onPolluteAction = null, bool silent = false, Func<IntVec3, bool> adjacentPolluteValidator = null)
+		if (plantDef.plant.RequiresPollution)
 		{
-			PollutionUtility.<>c__DisplayClass10_0 CS$<>8__locals1 = new PollutionUtility.<>c__DisplayClass10_0();
-			CS$<>8__locals1.map = map;
-			CS$<>8__locals1.adjacentPolluteValidator = adjacentPolluteValidator;
-			if (cellCountToPollute < 0)
+			foreach (IntVec3 cell2 in settable.Cells)
 			{
-				Log.Error("Non-positive max cells value passed in PolluteClosestMapTerrain");
-				return;
-			}
-			if (CS$<>8__locals1.map.pollutionGrid.TotalPollution >= CS$<>8__locals1.map.cellIndices.NumGridCells)
-			{
-				return;
-			}
-			if (root.CanPollute(CS$<>8__locals1.map))
-			{
-				root.Pollute(CS$<>8__locals1.map, false);
-				cellCountToPollute--;
-				if (onPolluteAction != null)
+				if (cell2.IsPolluted(settable.Map))
 				{
-					onPolluteAction(root);
+					return true;
 				}
+			}
+			return false;
+		}
+		return true;
+	}
+
+	public static bool IsExecutingPollutionIgnoredQuest()
+	{
+		foreach (Quest item in Find.QuestManager.QuestsListForReading)
+		{
+			if (item.State == QuestState.Ongoing && (item.root == QuestScriptDefOf.EndGame_ArchonexusVictory_FirstCycle || item.root == QuestScriptDefOf.EndGame_ArchonexusVictory_SecondCycle))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static void GrowPollutionAt(IntVec3 root, Map map, int cellCountToPollute = 4, Action<IntVec3> onPolluteAction = null, bool silent = false, Func<IntVec3, bool> adjacentPolluteValidator = null)
+	{
+		_003C_003Ec__DisplayClass10_0 CS_0024_003C_003E8__locals13 = new _003C_003Ec__DisplayClass10_0();
+		CS_0024_003C_003E8__locals13.map = map;
+		CS_0024_003C_003E8__locals13.adjacentPolluteValidator = adjacentPolluteValidator;
+		if (cellCountToPollute < 0)
+		{
+			Log.Error("Non-positive max cells value passed in PolluteClosestMapTerrain");
+		}
+		else
+		{
+			if (CS_0024_003C_003E8__locals13.map.pollutionGrid.TotalPollution >= CS_0024_003C_003E8__locals13.map.cellIndices.NumGridCells)
+			{
+				return;
+			}
+			if (root.CanPollute(CS_0024_003C_003E8__locals13.map))
+			{
+				root.Pollute(CS_0024_003C_003E8__locals13.map);
+				cellCountToPollute--;
+				onPolluteAction?.Invoke(root);
 			}
 			if (cellCountToPollute <= 0)
 			{
 				return;
 			}
-			PollutionUtility.tmpPollutableCells = new FastPriorityQueue<IntVec3>(new PollutionUtility.PollutionCellComparer(root, CS$<>8__locals1.map, 0.015f));
-			CS$<>8__locals1.map.floodFiller.FloodFill(root, (IntVec3 x) => x.IsPolluted(CS$<>8__locals1.map), delegate(IntVec3 x)
+			tmpPollutableCells = new FastPriorityQueue<IntVec3>(new PollutionCellComparer(root, CS_0024_003C_003E8__locals13.map));
+			CS_0024_003C_003E8__locals13.map.floodFiller.FloodFill(root, (IntVec3 x) => x.IsPolluted(CS_0024_003C_003E8__locals13.map), delegate(IntVec3 x)
 			{
-				PollutionUtility.tmpPollutedCells.Add(x);
-			}, int.MaxValue, false, null);
-			if (PollutionUtility.tmpPollutedCells.Count == 0)
+				tmpPollutedCells.Add(x);
+			});
+			if (tmpPollutedCells.Count == 0)
 			{
 				return;
 			}
-			PollutionUtility.tmpPollutableCells.Clear();
-			for (int i = 0; i < PollutionUtility.tmpPollutedCells.Count; i++)
+			tmpPollutableCells.Clear();
+			for (int i = 0; i < tmpPollutedCells.Count; i++)
 			{
-				foreach (IntVec3 item in CS$<>8__locals1.<GrowPollutionAt>g__GetAdjacentPollutableCells|0(PollutionUtility.tmpPollutedCells[i], CS$<>8__locals1.map))
+				foreach (IntVec3 item in GetAdjacentPollutableCells(tmpPollutedCells[i], CS_0024_003C_003E8__locals13.map))
 				{
-					if (!PollutionUtility.tmpPollutableCells.Contains(item))
+					if (!tmpPollutableCells.Contains(item))
 					{
-						PollutionUtility.tmpPollutableCells.Push(item);
+						tmpPollutableCells.Push(item);
 					}
 				}
 			}
-			PollutionUtility.tmpPollutedCells.Clear();
-			while (cellCountToPollute > 0 && PollutionUtility.tmpPollutableCells.Count > 0)
+			tmpPollutedCells.Clear();
+			while (cellCountToPollute > 0 && tmpPollutableCells.Count > 0)
 			{
-				IntVec3 intVec = PollutionUtility.tmpPollutableCells.Pop();
-				CS$<>8__locals1.map.pollutionGrid.SetPolluted(intVec, true, silent);
-				if (onPolluteAction != null)
+				IntVec3 intVec = tmpPollutableCells.Pop();
+				CS_0024_003C_003E8__locals13.map.pollutionGrid.SetPolluted(intVec, isPolluted: true, silent);
+				onPolluteAction?.Invoke(intVec);
+				foreach (IntVec3 item2 in GetAdjacentPollutableCells(intVec, CS_0024_003C_003E8__locals13.map))
 				{
-					onPolluteAction(intVec);
-				}
-				foreach (IntVec3 item2 in CS$<>8__locals1.<GrowPollutionAt>g__GetAdjacentPollutableCells|0(intVec, CS$<>8__locals1.map))
-				{
-					if (!PollutionUtility.tmpPollutableCells.Contains(item2))
+					if (!tmpPollutableCells.Contains(item2))
 					{
-						PollutionUtility.tmpPollutableCells.Push(item2);
+						tmpPollutableCells.Push(item2);
 					}
 				}
 				cellCountToPollute--;
 			}
 		}
-
-		// Token: 0x06001FF0 RID: 8176 RVA: 0x000A73C0 File Offset: 0x000A55C0
-		public static PollutionLevel PollutionLevel(this Tile tile)
+		[IteratorStateMachine(typeof(_003C_003Ec__DisplayClass10_0._003C_003CGrowPollutionAt_003Eg__GetAdjacentPollutableCells_007C0_003Ed))]
+		IEnumerable<IntVec3> GetAdjacentPollutableCells(IntVec3 c, Map m)
 		{
-			if (tile.pollution < 0.25f)
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003C_003Ec__DisplayClass10_0._003C_003CGrowPollutionAt_003Eg__GetAdjacentPollutableCells_007C0_003Ed(-2)
 			{
-				return Verse.PollutionLevel.None;
-			}
-			if (tile.pollution < 0.5f)
-			{
-				return Verse.PollutionLevel.Light;
-			}
-			if (tile.pollution < 0.75f)
-			{
-				return Verse.PollutionLevel.Moderate;
-			}
-			return Verse.PollutionLevel.Extreme;
+				_003C_003E4__this = CS_0024_003C_003E8__locals13,
+				_003C_003E3__c = c
+			};
 		}
+	}
 
-		// Token: 0x06001FF1 RID: 8177 RVA: 0x000A73F0 File Offset: 0x000A55F0
-		public static void PolluteMapToPercent(Map map, float mapPollutionPercent, int globSize = 1000)
+	public static PollutionLevel PollutionLevel(this Tile tile)
+	{
+		if (tile.pollution < 0.25f)
 		{
-			PollutionUtility.<>c__DisplayClass13_0 CS$<>8__locals1 = new PollutionUtility.<>c__DisplayClass13_0();
-			CS$<>8__locals1.map = map;
-			mapPollutionPercent = Mathf.Clamp01(mapPollutionPercent);
-			float totalPollutionPercent = CS$<>8__locals1.map.pollutionGrid.TotalPollutionPercent;
-			if (Mathf.Approximately(mapPollutionPercent, totalPollutionPercent))
+			return Verse.PollutionLevel.None;
+		}
+		if (tile.pollution < 0.5f)
+		{
+			return Verse.PollutionLevel.Light;
+		}
+		if (tile.pollution < 0.75f)
+		{
+			return Verse.PollutionLevel.Moderate;
+		}
+		return Verse.PollutionLevel.Extreme;
+	}
+
+	public static void PolluteMapToPercent(Map map, float mapPollutionPercent, int globSize = 1000)
+	{
+		mapPollutionPercent = Mathf.Clamp01(mapPollutionPercent);
+		float totalPollutionPercent = map.pollutionGrid.TotalPollutionPercent;
+		if (Mathf.Approximately(mapPollutionPercent, totalPollutionPercent))
+		{
+			return;
+		}
+		List<IntVec3> allPollutableCells = map.pollutionGrid.AllPollutableCells;
+		if (mapPollutionPercent < totalPollutionPercent)
+		{
+			tmpMapCells.Clear();
+			tmpMapCells.AddRange(allPollutableCells.InRandomOrder());
+			float num = totalPollutionPercent - mapPollutionPercent;
+			float num2 = Mathf.Max(0f, (float)tmpMapCells.Count * num);
+			for (int i = 0; (float)i < num2; i++)
 			{
-				return;
+				tmpMapCells[i].Unpollute(map);
 			}
-			List<IntVec3> allPollutableCells = CS$<>8__locals1.map.pollutionGrid.AllPollutableCells;
-			if (mapPollutionPercent < totalPollutionPercent)
+			tmpMapCells.Clear();
+		}
+		else
+		{
+			int num3 = Mathf.FloorToInt((float)allPollutableCells.Count * mapPollutionPercent);
+			int num4 = Mathf.CeilToInt((float)num3 / (float)globSize);
+			for (int j = 0; j < num4; j++)
 			{
-				PollutionUtility.tmpMapCells.Clear();
-				PollutionUtility.tmpMapCells.AddRange(allPollutableCells.InRandomOrder(null));
-				float num = totalPollutionPercent - mapPollutionPercent;
-				float num2 = Mathf.Max(0f, (float)PollutionUtility.tmpMapCells.Count * num);
-				int num3 = 0;
-				while ((float)num3 < num2)
-				{
-					PollutionUtility.tmpMapCells[num3].Unpollute(CS$<>8__locals1.map);
-					num3++;
-				}
-				PollutionUtility.tmpMapCells.Clear();
-				return;
-			}
-			int num4 = Mathf.FloorToInt((float)allPollutableCells.Count * mapPollutionPercent);
-			int num5 = Mathf.CeilToInt((float)num4 / (float)globSize);
-			for (int i = 0; i < num5; i++)
-			{
-				int num6 = Mathf.Min(globSize, num4);
-				PollutionUtility.GrowPollutionAt(allPollutableCells.RandomElementByWeight(new Func<IntVec3, float>(CS$<>8__locals1.<PolluteMapToPercent>g__GlobCellSelectionWeight|0)), CS$<>8__locals1.map, num6, null, false, null);
-				num4 -= num6;
+				int num5 = Mathf.Min(globSize, num3);
+				GrowPollutionAt(allPollutableCells.RandomElementByWeight(GlobCellSelectionWeight), map, num5);
+				num3 -= num5;
 			}
 		}
-
-		// Token: 0x04001B54 RID: 6996
-		private const float PollutionPerlinFrequency = 0.015f;
-
-		// Token: 0x04001B55 RID: 6997
-		private static FastPriorityQueue<IntVec3> tmpPollutableCells;
-
-		// Token: 0x04001B56 RID: 6998
-		private static readonly List<IntVec3> tmpPollutedCells = new List<IntVec3>();
-
-		// Token: 0x04001B57 RID: 6999
-		private static readonly List<IntVec3> tmpMapCells = new List<IntVec3>();
-
-		// Token: 0x020004D2 RID: 1234
-		internal class PollutionCellComparer : IComparer<IntVec3>
+		float GlobCellSelectionWeight(IntVec3 c)
 		{
-			// Token: 0x06001FF3 RID: 8179 RVA: 0x000A7524 File Offset: 0x000A5724
-			public PollutionCellComparer(IntVec3 root, Map map, float frequency = 0.015f)
-			{
-				this.root = root;
-				this.map = map;
-				this.perlin = new Perlin((double)frequency, 2.0, 0.5, 6, map.uniqueID, QualityMode.Medium);
-				this.perlin = new ScaleBias(0.5, 0.5, this.perlin);
-			}
-
-			// Token: 0x06001FF4 RID: 8180 RVA: 0x000A7590 File Offset: 0x000A5790
-			private float PolluteScore(IntVec3 c)
-			{
-				float num = 1f;
-				num *= 1f / c.DistanceTo(this.root);
-				num *= 1f + (float)this.perlin.GetValue((double)c.x, (double)c.y, (double)c.z) * 2f;
-				if (MapGenerator.mapBeingGenerated == this.map)
-				{
-					num *= c.DistanceTo(MapGenerator.PlayerStartSpot) / this.map.Size.LengthHorizontal;
-				}
-				return num * (1f + (float)this.AdjacentPollutedCount(c) / 8f * 0.25f);
-			}
-
-			// Token: 0x06001FF5 RID: 8181 RVA: 0x000A7638 File Offset: 0x000A5838
-			private int AdjacentPollutedCount(IntVec3 c)
-			{
-				int num = 0;
-				for (int i = 0; i < GenAdj.AdjacentCells.Length; i++)
-				{
-					IntVec3 b = GenAdj.AdjacentCells[i];
-					IntVec3 c2 = c + b;
-					if (c2.InBounds(this.map) && c2.IsPolluted(this.map))
-					{
-						num++;
-					}
-				}
-				return num;
-			}
-
-			// Token: 0x06001FF6 RID: 8182 RVA: 0x000A7690 File Offset: 0x000A5890
-			public int Compare(IntVec3 a, IntVec3 b)
-			{
-				float num = this.PolluteScore(a);
-				float num2 = this.PolluteScore(b);
-				if (num < num2)
-				{
-					return 1;
-				}
-				if (num > num2)
-				{
-					return -1;
-				}
-				return 0;
-			}
-
-			// Token: 0x04001B58 RID: 7000
-			private const float NoisyEdgeFactor = 0.25f;
-
-			// Token: 0x04001B59 RID: 7001
-			private const float PerlinNoiseFactor = 2f;
-
-			// Token: 0x04001B5A RID: 7002
-			private readonly IntVec3 root;
-
-			// Token: 0x04001B5B RID: 7003
-			private readonly Map map;
-
-			// Token: 0x04001B5C RID: 7004
-			private readonly ModuleBase perlin;
+			return 1f * (c.DistanceTo(map.Center) / map.Size.LengthHorizontal) * ((float)c.DistanceToEdge(map) / map.Size.LengthHorizontal);
 		}
 	}
 }

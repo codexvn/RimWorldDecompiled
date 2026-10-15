@@ -1,211 +1,269 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
 
-namespace RimWorld
+namespace RimWorld;
+
+public abstract class CompDryadHolder : ThingComp, IThingHolder, ISuspendableThingHolder
 {
-	// Token: 0x02002C6A RID: 11370
-	public abstract class CompDryadHolder : ThingComp, IThingHolder, ISuspendableThingHolder
+	[CompilerGenerated]
+	private sealed class _003CCompGetGizmosExtra_003Ed__17 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700282B RID: 10283
-		// (get) Token: 0x0600FEE5 RID: 65253 RVA: 0x0049E3F7 File Offset: 0x0049C5F7
-		public CompProperties_DryadCocoon Props
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompDryadHolder _003C_003E4__this;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (CompProperties_DryadCocoon)this.props;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700282C RID: 10284
-		// (get) Token: 0x0600FEE6 RID: 65254 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public bool IsContentsSuspended
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return true;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700282D RID: 10285
-		// (get) Token: 0x0600FEE7 RID: 65255 RVA: 0x0049E404 File Offset: 0x0049C604
-		protected CompTreeConnection TreeComp
+		[DebuggerHidden]
+		public _003CCompGetGizmosExtra_003Ed__17(int _003C_003E1__state)
 		{
-			get
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			CompDryadHolder compDryadHolder = _003C_003E4__this;
+			switch (num)
 			{
-				if (this.cachedTreeComp == null)
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (compDryadHolder.tickComplete >= 0 && DebugSettings.ShowDevGizmos)
 				{
-					Thing thing = this.tree;
-					this.cachedTreeComp = ((thing != null) ? thing.TryGetComp<CompTreeConnection>() : null);
+					_003C_003E2__current = new Command_Action
+					{
+						defaultLabel = "DEV: Complete",
+						action = compDryadHolder.Complete
+					};
+					_003C_003E1__state = 1;
+					return true;
 				}
-				return this.cachedTreeComp;
+				break;
+			case 1:
+				_003C_003E1__state = -1;
+				break;
 			}
+			return false;
 		}
 
-		// Token: 0x1700282E RID: 10286
-		// (get) Token: 0x0600FEE8 RID: 65256 RVA: 0x0049E42C File Offset: 0x0049C62C
-		private Material FrontMat
+		bool IEnumerator.MoveNext()
 		{
-			get
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CCompGetGizmosExtra_003Ed__17 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				if (this.cachedFrontMat == null)
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CCompGetGizmosExtra_003Ed__17(0)
 				{
-					this.cachedFrontMat = MaterialPool.MatFrom("Things/Building/Misc/DryadSphere/DryadSphereFront", ShaderDatabase.Cutout);
-				}
-				return this.cachedFrontMat;
-			}
-		}
-
-		// Token: 0x0600FEE9 RID: 65257 RVA: 0x0049E457 File Offset: 0x0049C657
-		public override void PostSpawnSetup(bool respawningAfterLoad)
-		{
-			if (!respawningAfterLoad && !this.parent.BeingTransportedOnGravship)
-			{
-				this.innerContainer = new ThingOwner<Thing>(this, false, LookMode.Deep, true);
-			}
-		}
-
-		// Token: 0x0600FEEA RID: 65258 RVA: 0x0049E478 File Offset: 0x0049C678
-		public override void CompTick()
-		{
-			if (this.tickComplete < 0)
-			{
-				return;
-			}
-			if (this.tree == null || this.tree.Destroyed)
-			{
-				this.parent.Destroy(DestroyMode.Vanish);
-				return;
-			}
-			if (Find.TickManager.TicksGame >= this.tickComplete)
-			{
-				this.Complete();
-			}
-		}
-
-		// Token: 0x0600FEEB RID: 65259 RVA: 0x0049E4CC File Offset: 0x0049C6CC
-		public override void PostDraw()
-		{
-			if (this.Props.drawContents)
-			{
-				for (int i = 0; i < this.innerContainer.Count; i++)
-				{
-					this.innerContainer[i].DrawNowAt(this.parent.Position.ToVector3ShiftedWithAltitude(AltitudeLayer.BuildingOnTop), false);
-				}
-				Matrix4x4 matrix = default(Matrix4x4);
-				Vector3 pos = this.parent.Position.ToVector3ShiftedWithAltitude(AltitudeLayer.BuildingOnTop.AltitudeFor() + 0.01f);
-				Quaternion q = Quaternion.Euler(0f, this.parent.Rotation.AsAngle, 0f);
-				Vector3 s = new Vector3(this.parent.Graphic.drawSize.x, 1f, this.parent.Graphic.drawSize.y);
-				matrix.SetTRS(pos, q, s);
-				Graphics.DrawMesh(MeshPool.plane10, matrix, this.FrontMat, 0);
-			}
-		}
-
-		// Token: 0x0600FEEC RID: 65260 RVA: 0x0049E5CC File Offset: 0x0049C7CC
-		public override IEnumerable<Gizmo> CompGetGizmosExtra()
-		{
-			if (this.tickComplete >= 0 && DebugSettings.ShowDevGizmos)
-			{
-				yield return new Command_Action
-				{
-					defaultLabel = "DEV: Complete",
-					action = new Action(this.Complete)
+					_003C_003E4__this = _003C_003E4__this
 				};
 			}
-			yield break;
+			return result;
 		}
 
-		// Token: 0x0600FEED RID: 65261 RVA: 0x0049E5DC File Offset: 0x0049C7DC
-		public virtual void TryAcceptPawn(Pawn p)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			bool flag = p.DeSpawnOrDeselect(DestroyMode.Vanish);
-			this.innerContainer.TryAddOrTransfer(p, 1, true);
-			if (flag)
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	protected int tickComplete = -1;
+
+	protected ThingOwner innerContainer;
+
+	protected Thing tree;
+
+	private CompTreeConnection cachedTreeComp;
+
+	private Material cachedFrontMat;
+
+	protected const int ExpiryDurationTicks = 600;
+
+	public CompProperties_DryadCocoon Props => (CompProperties_DryadCocoon)props;
+
+	public bool IsContentsSuspended => true;
+
+	protected CompTreeConnection TreeComp
+	{
+		get
+		{
+			if (cachedTreeComp == null)
 			{
-				Find.Selector.Select(p, false, false);
+				cachedTreeComp = tree?.TryGetComp<CompTreeConnection>();
 			}
-			SoundDefOf.Pawn_EnterDryadPod.PlayOneShot(SoundInfo.InMap(this.parent, MaintenanceType.None));
-			if (p.connections != null)
+			return cachedTreeComp;
+		}
+	}
+
+	private Material FrontMat
+	{
+		get
+		{
+			if (cachedFrontMat == null)
 			{
-				foreach (Thing thing in p.connections.ConnectedThings)
-				{
-					if (thing.TryGetComp<CompTreeConnection>() != null)
-					{
-						this.tree = thing;
-						break;
-					}
-				}
+				cachedFrontMat = MaterialPool.MatFrom("Things/Building/Misc/DryadSphere/DryadSphereFront", ShaderDatabase.Cutout);
+			}
+			return cachedFrontMat;
+		}
+	}
+
+	public override void PostSpawnSetup(bool respawningAfterLoad)
+	{
+		if (!respawningAfterLoad && !parent.BeingTransportedOnGravship)
+		{
+			innerContainer = new ThingOwner<Thing>(this, oneStackOnly: false);
+		}
+	}
+
+	public override void CompTick()
+	{
+		if (tickComplete >= 0)
+		{
+			if (tree == null || tree.Destroyed)
+			{
+				parent.Destroy();
+			}
+			else if (Find.TickManager.TicksGame >= tickComplete)
+			{
+				Complete();
 			}
 		}
+	}
 
-		// Token: 0x0600FEEE RID: 65262 RVA: 0x0049E688 File Offset: 0x0049C888
-		public override string CompInspectStringExtra()
+	public override void PostDraw()
+	{
+		if (Props.drawContents)
 		{
-			string text = base.CompInspectStringExtra();
-			if (!text.NullOrEmpty())
+			for (int i = 0; i < innerContainer.Count; i++)
 			{
-				text += "\n";
+				innerContainer[i].DrawNowAt(parent.Position.ToVector3ShiftedWithAltitude(AltitudeLayer.BuildingOnTop));
 			}
-			text += "CasketContains".Translate() + ": " + this.innerContainer.ContentsString.CapitalizeFirst();
-			if (this.tickComplete >= 0)
+			Matrix4x4 matrix = default(Matrix4x4);
+			Vector3 pos = parent.Position.ToVector3ShiftedWithAltitude(AltitudeLayer.BuildingOnTop.AltitudeFor() + 0.01f);
+			Quaternion q = Quaternion.Euler(0f, parent.Rotation.AsAngle, 0f);
+			Vector3 s = new Vector3(parent.Graphic.drawSize.x, 1f, parent.Graphic.drawSize.y);
+			matrix.SetTRS(pos, q, s);
+			Graphics.DrawMesh(MeshPool.plane10, matrix, FrontMat, 0);
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CCompGetGizmosExtra_003Ed__17))]
+	public override IEnumerable<Gizmo> CompGetGizmosExtra()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CCompGetGizmosExtra_003Ed__17(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public virtual void TryAcceptPawn(Pawn p)
+	{
+		bool num = p.DeSpawnOrDeselect();
+		innerContainer.TryAddOrTransfer(p, 1);
+		if (num)
+		{
+			Find.Selector.Select(p, playSound: false, forceDesignatorDeselect: false);
+		}
+		SoundDefOf.Pawn_EnterDryadPod.PlayOneShot(SoundInfo.InMap(parent));
+		if (p.connections == null)
+		{
+			return;
+		}
+		foreach (Thing connectedThing in p.connections.ConnectedThings)
+		{
+			if (connectedThing.TryGetComp<CompTreeConnection>() != null)
 			{
-				text = string.Concat(new string[]
-				{
-					text,
-					"\n",
-					"TimeLeft".Translate().CapitalizeFirst(),
-					": ",
-					(this.tickComplete - Find.TickManager.TicksGame).ToStringTicksToPeriod(true, false, true, true, false).Colorize(ColoredText.DateTimeColor)
-				});
+				tree = connectedThing;
+				break;
 			}
-			return text;
 		}
+	}
 
-		// Token: 0x0600FEEF RID: 65263
-		protected abstract void Complete();
-
-		// Token: 0x0600FEF0 RID: 65264 RVA: 0x0049E751 File Offset: 0x0049C951
-		public ThingOwner GetDirectlyHeldThings()
+	public override string CompInspectStringExtra()
+	{
+		string text = base.CompInspectStringExtra();
+		if (!text.NullOrEmpty())
 		{
-			return this.innerContainer;
+			text += "\n";
 		}
-
-		// Token: 0x0600FEF1 RID: 65265 RVA: 0x0049E759 File Offset: 0x0049C959
-		public void GetChildHolders(List<IThingHolder> outChildren)
+		text += "CasketContains".Translate() + ": " + innerContainer.ContentsString.CapitalizeFirst();
+		if (tickComplete >= 0)
 		{
-			ThingOwnerUtility.AppendThingHoldersFromThings(outChildren, this.GetDirectlyHeldThings());
+			text = string.Concat(text, "\n", "TimeLeft".Translate().CapitalizeFirst(), ": ", (tickComplete - Find.TickManager.TicksGame).ToStringTicksToPeriod().Colorize(ColoredText.DateTimeColor));
 		}
+		return text;
+	}
 
-		// Token: 0x0600FEF2 RID: 65266 RVA: 0x0049E768 File Offset: 0x0049C968
-		public override void PostExposeData()
-		{
-			base.PostExposeData();
-			Scribe_Values.Look<int>(ref this.tickComplete, "tickComplete", -1, false);
-			Scribe_Deep.Look<ThingOwner>(ref this.innerContainer, "innerContainer", new object[]
-			{
-				this
-			});
-			Scribe_References.Look<Thing>(ref this.tree, "tree", false);
-		}
+	protected abstract void Complete();
 
-		// Token: 0x0400A6F5 RID: 42741
-		protected int tickComplete = -1;
+	public ThingOwner GetDirectlyHeldThings()
+	{
+		return innerContainer;
+	}
 
-		// Token: 0x0400A6F6 RID: 42742
-		protected ThingOwner innerContainer;
+	public void GetChildHolders(List<IThingHolder> outChildren)
+	{
+		ThingOwnerUtility.AppendThingHoldersFromThings(outChildren, GetDirectlyHeldThings());
+	}
 
-		// Token: 0x0400A6F7 RID: 42743
-		protected Thing tree;
-
-		// Token: 0x0400A6F8 RID: 42744
-		private CompTreeConnection cachedTreeComp;
-
-		// Token: 0x0400A6F9 RID: 42745
-		private Material cachedFrontMat;
-
-		// Token: 0x0400A6FA RID: 42746
-		protected const int ExpiryDurationTicks = 600;
+	public override void PostExposeData()
+	{
+		base.PostExposeData();
+		Scribe_Values.Look(ref tickComplete, "tickComplete", -1);
+		Scribe_Deep.Look(ref innerContainer, "innerContainer", this);
+		Scribe_References.Look(ref tree, "tree");
 	}
 }

@@ -1,143 +1,259 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompProperties_GravshipThruster : CompProperties_GravshipFacility
 {
-	// Token: 0x02002EEB RID: 12011
-	public class CompProperties_GravshipThruster : CompProperties_GravshipFacility
+	public class ExhaustSettings
 	{
-		// Token: 0x17002BC8 RID: 11208
-		// (get) Token: 0x06010F4B RID: 69451 RVA: 0x004E0E46 File Offset: 0x004DF046
-		public ShaderTypeDef FlameShaderType
+		public bool enabled = true;
+
+		private FleckDef exhaustFleckDef;
+
+		public float emissionsPerSecond = 10f;
+
+		public Vector3 spawnOffset = new Vector3(0f, 0f, 0f);
+
+		public FloatRange spawnRadiusRange = new FloatRange(0f);
+
+		public bool inheritGravshipRotation = true;
+
+		public bool inheritThrusterRotation = true;
+
+		public Vector3 velocity = new Vector3(0f, 0f, -1f);
+
+		public FloatRange velocityRotationRange = new FloatRange(0f);
+
+		public FloatRange velocityMultiplierRange = new FloatRange(1f);
+
+		public FloatRange rotationOverTimeRange = new FloatRange(0f);
+
+		public FloatRange scaleRange = new FloatRange(1f);
+
+		public FleckDef ExhaustFleckDef => exhaustFleckDef ?? FleckDefOf.GravshipThrusterExhaust;
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__13 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompProperties_GravshipThruster _003C_003E4__this;
+
+		private ThingDef parentDef;
+
+		public ThingDef _003C_003E3__parentDef;
+
+		private IEnumerator<string> _003C_003E7__wrap1;
+
+		string IEnumerator<string>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.flameShaderType ?? ShaderTypeDefOf.MoteGlow;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06010F4C RID: 69452 RVA: 0x004E0E58 File Offset: 0x004DF058
-		public CompProperties_GravshipThruster()
+		object IEnumerator.Current
 		{
-			this.compClass = typeof(CompGravshipThruster);
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x06010F4D RID: 69453 RVA: 0x004E0EC8 File Offset: 0x004DF0C8
-		public void GetExclusionZone(IntVec3 pos, Rot4 rot, ref List<IntVec3> exclusionCells)
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__13(int _003C_003E1__state)
 		{
-			if (exclusionCells == null)
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				exclusionCells = new List<IntVec3>();
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				CompProperties_GravshipThruster compProperties_GravshipThruster = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((CompProperties)compProperties_GravshipThruster).ConfigErrors(parentDef).GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0078;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0078;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_0078:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (compProperties_GravshipThruster.exhaustSettings != null && compProperties_GravshipThruster.exhaustSettings.ExhaustFleckDef != null && compProperties_GravshipThruster.exhaustSettings.ExhaustFleckDef.fleckSystemClass != null && compProperties_GravshipThruster.exhaustSettings.ExhaustFleckDef.fleckSystemClass != typeof(FleckSystemThrown))
+					{
+						_003C_003E2__current = "exhaust fleck '" + compProperties_GravshipThruster.exhaustSettings.ExhaustFleckDef.defName + "' uses a fleckSystemClass other than FleckSystemThrown";
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__13 _003CConfigErrors_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CConfigErrors_003Ed__ = this;
 			}
 			else
 			{
-				exclusionCells.Clear();
-			}
-			for (int i = 0; i < this.exclusionAreaSize.x; i++)
-			{
-				for (int j = 0; j < this.exclusionAreaSize.z; j++)
+				_003CConfigErrors_003Ed__ = new _003CConfigErrors_003Ed__13(0)
 				{
-					exclusionCells.Add(pos + new IntVec3(i, 0, j).RotatedBy(rot) + this.exclusionAreaOffset.RotatedBy(rot));
-				}
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
+			_003CConfigErrors_003Ed__.parentDef = _003C_003E3__parentDef;
+			return _003CConfigErrors_003Ed__;
 		}
 
-		// Token: 0x06010F4E RID: 69454 RVA: 0x004E0F41 File Offset: 0x004DF141
-		public override IEnumerable<string> ConfigErrors(ThingDef parentDef)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			foreach (string text in base.ConfigErrors(parentDef))
-			{
-				yield return text;
-			}
-			IEnumerator<string> enumerator = null;
-			if (this.exhaustSettings != null && this.exhaustSettings.ExhaustFleckDef != null && this.exhaustSettings.ExhaustFleckDef.fleckSystemClass != null && this.exhaustSettings.ExhaustFleckDef.fleckSystemClass != typeof(FleckSystemThrown))
-			{
-				yield return "exhaust fleck '" + this.exhaustSettings.ExhaustFleckDef.defName + "' uses a fleckSystemClass other than FleckSystemThrown";
-			}
-			yield break;
-			yield break;
+			return ((IEnumerable<string>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x0400B04F RID: 45135
-		public IntVec3 exclusionAreaSize;
+	public IntVec3 exclusionAreaSize;
 
-		// Token: 0x0400B050 RID: 45136
-		public IntVec3 exclusionAreaOffset;
+	public IntVec3 exclusionAreaOffset;
 
-		// Token: 0x0400B051 RID: 45137
-		public int directionInfluence;
+	public int directionInfluence;
 
-		// Token: 0x0400B052 RID: 45138
-		public List<Vector3> flameOffsetsPerDirection = new List<Vector3>
+	public List<Vector3> flameOffsetsPerDirection = new List<Vector3>
+	{
+		Vector3.zero,
+		Vector3.zero,
+		Vector3.zero,
+		Vector3.zero
+	};
+
+	public float flameSize;
+
+	private ShaderTypeDef flameShaderType;
+
+	public List<ShaderParameter> flameShaderParameters = new List<ShaderParameter>();
+
+	public ExhaustSettings exhaustSettings = new ExhaustSettings();
+
+	public ShaderTypeDef FlameShaderType => flameShaderType ?? ShaderTypeDefOf.MoteGlow;
+
+	public CompProperties_GravshipThruster()
+	{
+		compClass = typeof(CompGravshipThruster);
+	}
+
+	public void GetExclusionZone(IntVec3 pos, Rot4 rot, ref List<IntVec3> exclusionCells)
+	{
+		if (exclusionCells == null)
 		{
-			Vector3.zero,
-			Vector3.zero,
-			Vector3.zero,
-			Vector3.zero
+			exclusionCells = new List<IntVec3>();
+		}
+		else
+		{
+			exclusionCells.Clear();
+		}
+		for (int i = 0; i < exclusionAreaSize.x; i++)
+		{
+			for (int j = 0; j < exclusionAreaSize.z; j++)
+			{
+				exclusionCells.Add(pos + new IntVec3(i, 0, j).RotatedBy(rot) + exclusionAreaOffset.RotatedBy(rot));
+			}
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__13))]
+	public override IEnumerable<string> ConfigErrors(ThingDef parentDef)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__13(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__parentDef = parentDef
 		};
-
-		// Token: 0x0400B053 RID: 45139
-		public float flameSize;
-
-		// Token: 0x0400B054 RID: 45140
-		private ShaderTypeDef flameShaderType;
-
-		// Token: 0x0400B055 RID: 45141
-		public List<ShaderParameter> flameShaderParameters = new List<ShaderParameter>();
-
-		// Token: 0x0400B056 RID: 45142
-		public CompProperties_GravshipThruster.ExhaustSettings exhaustSettings = new CompProperties_GravshipThruster.ExhaustSettings();
-
-		// Token: 0x02002EEC RID: 12012
-		public class ExhaustSettings
-		{
-			// Token: 0x17002BC9 RID: 11209
-			// (get) Token: 0x06010F50 RID: 69456 RVA: 0x004E0F58 File Offset: 0x004DF158
-			public FleckDef ExhaustFleckDef
-			{
-				get
-				{
-					return this.exhaustFleckDef ?? FleckDefOf.GravshipThrusterExhaust;
-				}
-			}
-
-			// Token: 0x0400B057 RID: 45143
-			public bool enabled = true;
-
-			// Token: 0x0400B058 RID: 45144
-			private FleckDef exhaustFleckDef;
-
-			// Token: 0x0400B059 RID: 45145
-			public float emissionsPerSecond = 10f;
-
-			// Token: 0x0400B05A RID: 45146
-			public Vector3 spawnOffset = new Vector3(0f, 0f, 0f);
-
-			// Token: 0x0400B05B RID: 45147
-			public FloatRange spawnRadiusRange = new FloatRange(0f);
-
-			// Token: 0x0400B05C RID: 45148
-			public bool inheritGravshipRotation = true;
-
-			// Token: 0x0400B05D RID: 45149
-			public bool inheritThrusterRotation = true;
-
-			// Token: 0x0400B05E RID: 45150
-			public Vector3 velocity = new Vector3(0f, 0f, -1f);
-
-			// Token: 0x0400B05F RID: 45151
-			public FloatRange velocityRotationRange = new FloatRange(0f);
-
-			// Token: 0x0400B060 RID: 45152
-			public FloatRange velocityMultiplierRange = new FloatRange(1f);
-
-			// Token: 0x0400B061 RID: 45153
-			public FloatRange rotationOverTimeRange = new FloatRange(0f);
-
-			// Token: 0x0400B062 RID: 45154
-			public FloatRange scaleRange = new FloatRange(1f);
-		}
 	}
 }

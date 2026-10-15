@@ -1,337 +1,577 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_Reading : JobDriver
 {
-	// Token: 0x020012E2 RID: 4834
-	public class JobDriver_Reading : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__14 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001298 RID: 4760
-		// (get) Token: 0x06007674 RID: 30324 RVA: 0x00241350 File Offset: 0x0023F550
-		public Book Book
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_Reading _003C_003E4__this;
+
+		private IEnumerator<Toil> _003C_003E7__wrap1;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.job.GetTarget(TargetIndex.A).Thing as Book;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001299 RID: 4761
-		// (get) Token: 0x06007675 RID: 30325 RVA: 0x00241376 File Offset: 0x0023F576
-		public bool IsReading
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.isReading;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06007676 RID: 30326 RVA: 0x0024137E File Offset: 0x0023F57E
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__14(int _003C_003E1__state)
 		{
-			return this.pawn.Reserve(this.Book, this.job, 1, 1, null, errorOnFailed, false);
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x06007677 RID: 30327 RVA: 0x002413A1 File Offset: 0x0023F5A1
-		protected override IEnumerable<Toil> MakeNewToils()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			base.SetFinalizerJob(delegate(JobCondition condition)
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				if (!this.pawn.IsCarryingThing(this.Book))
+				try
 				{
-					return null;
 				}
-				if (condition != JobCondition.Succeeded)
+				finally
 				{
-					Thing thing;
-					this.pawn.carryTracker.TryDropCarriedThing(this.pawn.Position, ThingPlaceMode.Direct, out thing, null);
-					return null;
+					_003C_003Em__Finally1();
 				}
-				return HaulAIUtility.HaulToStorageJob(this.pawn, this.Book, false);
-			});
-			foreach (Toil toil in this.PrepareToReadBook())
-			{
-				yield return toil;
 			}
-			IEnumerator<Toil> enumerator = null;
-			int duration = this.job.playerForced ? 5000 : this.job.def.joyDuration;
-			yield return this.ReadBook(duration);
-			yield break;
-			yield break;
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x06007678 RID: 30328 RVA: 0x002413B4 File Offset: 0x0023F5B4
-		public override void Notify_Starting()
+		private bool MoveNext()
 		{
-			base.Notify_Starting();
-			this.job.count = 1;
-			this.hasInInventory = (this.pawn.inventory != null && this.pawn.inventory.Contains(this.Book));
-			Pawn pawn = this.pawn;
-			this.carrying = (((pawn != null) ? pawn.carryTracker.CarriedThing : null) == this.Book);
-			Pawn pawn2 = this.pawn;
-			this.isLearningDesire = (((pawn2 != null) ? pawn2.learning : null) != null && this.pawn.learning.ActiveLearningDesires.Contains(LearningDesireDefOf.Reading));
+			try
+			{
+				int num = _003C_003E1__state;
+				JobDriver_Reading CS_0024_003C_003E8__locals11 = _003C_003E4__this;
+				int duration;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					CS_0024_003C_003E8__locals11.SetFinalizerJob(delegate(JobCondition condition)
+					{
+						if (!CS_0024_003C_003E8__locals11.pawn.IsCarryingThing(CS_0024_003C_003E8__locals11.Book))
+						{
+							return (Job)null;
+						}
+						if (condition != JobCondition.Succeeded)
+						{
+							CS_0024_003C_003E8__locals11.pawn.carryTracker.TryDropCarriedThing(CS_0024_003C_003E8__locals11.pawn.Position, ThingPlaceMode.Direct, out var _);
+							return (Job)null;
+						}
+						return HaulAIUtility.HaulToStorageJob(CS_0024_003C_003E8__locals11.pawn, CS_0024_003C_003E8__locals11.Book, forced: false);
+					});
+					_003C_003E7__wrap1 = CS_0024_003C_003E8__locals11.PrepareToReadBook().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0083;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0083;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						return false;
+					}
+					IL_0083:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Toil current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					duration = (CS_0024_003C_003E8__locals11.job.playerForced ? 5000 : CS_0024_003C_003E8__locals11.job.def.joyDuration);
+					_003C_003E2__current = CS_0024_003C_003E8__locals11.ReadBook(duration);
+					_003C_003E1__state = 2;
+					return true;
+				}
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
 		}
 
-		// Token: 0x06007679 RID: 30329 RVA: 0x0024145B File Offset: 0x0023F65B
-		private IEnumerable<Toil> PrepareToReadBook()
+		bool IEnumerator.MoveNext()
 		{
-			if (this.carrying)
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				yield break;
+				_003C_003E7__wrap1.Dispose();
 			}
-			if (this.hasInInventory)
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__14 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				yield return Toils_Misc.TakeItemFromInventoryToCarrier(this.pawn, TargetIndex.A);
+				_003C_003E1__state = 0;
+				result = this;
 			}
 			else
 			{
-				yield return Toils_Goto.GotoCell(this.Book.PositionHeld, PathEndMode.ClosestTouch).FailOnDestroyedOrNull(TargetIndex.A).FailOnSomeonePhysicallyInteracting(TargetIndex.A);
-				yield return Toils_Haul.StartCarryThing(TargetIndex.A, false, false, false, true, true);
+				result = new _003CMakeNewToils_003Ed__14(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
-			yield return this.CarryToReadingSpot().FailOnDestroyedOrNull(TargetIndex.A);
-			yield return this.FindAdjacentReadingSurface();
-			yield break;
+			return result;
 		}
 
-		// Token: 0x0600767A RID: 30330 RVA: 0x0024146C File Offset: 0x0023F66C
-		private Toil ReadBook(int duration)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			Toil toil = Toils_General.Wait(duration, TargetIndex.None);
-			toil.debugName = "Reading";
-			toil.FailOnDestroyedNullOrForbidden(TargetIndex.A);
-			toil.handlingFacing = true;
-			toil.initAction = delegate()
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CPrepareToReadBook_003Ed__16 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_Reading _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
+		{
+			[DebuggerHidden]
+			get
 			{
-				this.Book.IsOpen = true;
-				this.pawn.pather.StopDead();
-				this.job.showCarryingInspectLine = false;
-			};
-			toil.tickIntervalAction = delegate(int delta)
-			{
-				if (this.job.GetTarget(TargetIndex.B).IsValid)
-				{
-					this.pawn.rotationTracker.FaceCell(this.job.GetTarget(TargetIndex.B).Cell);
-				}
-				else if (this.Book.Spawned)
-				{
-					this.pawn.rotationTracker.FaceCell(this.Book.Position);
-				}
-				else if (this.pawn.Rotation == Rot4.North)
-				{
-					this.pawn.Rotation = new Rot4(Rand.Range(1, 4));
-				}
-				float readingBonus = BookUtility.GetReadingBonus(this.pawn);
-				this.isReading = true;
-				this.Book.OnBookReadTick(this.pawn, delta, readingBonus);
-				Pawn_SkillTracker skills = this.pawn.skills;
-				if (skills != null)
-				{
-					skills.Learn(SkillDefOf.Intellectual, 0.1f * (float)delta, false, false);
-				}
-				this.pawn.GainComfortFromCellIfPossible(delta, false);
-				if (this.pawn.CurJob != null)
-				{
-					Pawn_NeedsTracker needs = this.pawn.needs;
-					if (((needs != null) ? needs.joy : null) != null)
-					{
-						JoyTickFullJoyAction fullJoyAction = JoyTickFullJoyAction.GoToNextToil;
-						if (this.pawn.CurJob.playerForced || this.pawn.learning != null)
-						{
-							fullJoyAction = JoyTickFullJoyAction.None;
-						}
-						JoyUtility.JoyTickCheckEnd(this.pawn, delta, fullJoyAction, this.Book.JoyFactor * readingBonus, null);
-					}
-				}
-				if (this.isLearningDesire && this.job != null)
-				{
-					Pawn_NeedsTracker needs2 = this.pawn.needs;
-					if (((needs2 != null) ? needs2.learning : null) != null)
-					{
-						LearningUtility.LearningTickCheckEnd(this.pawn, delta, this.job.playerForced);
-					}
-					else
-					{
-						this.pawn.jobs.curDriver.EndJobWith(JobCondition.Succeeded);
-					}
-				}
-				if (this.pawn.IsHashIntervalTick(600, delta))
-				{
-					this.pawn.jobs.CheckForJobOverride(9.1f, true);
-				}
-			};
-			toil.AddEndCondition(delegate
-			{
-				string text;
-				if (!BookUtility.CanReadBook(this.Book, this.pawn, out text))
-				{
-					return JobCondition.InterruptForced;
-				}
-				return JobCondition.Ongoing;
-			});
-			toil.AddFinishAction(delegate
-			{
-				this.Book.IsOpen = false;
-				TaleRecorder.RecordTale(TaleDefOf.ReadBook, new object[]
-				{
-					this.pawn,
-					this.Book
-				});
-				JoyUtility.TryGainRecRoomThought(this.pawn);
-			});
-			if (this.isLearningDesire && !this.job.playerForced)
-			{
-				toil.defaultCompleteMode = ToilCompleteMode.Never;
+				return _003C_003E2__current;
 			}
-			return toil;
 		}
 
-		// Token: 0x0600767B RID: 30331 RVA: 0x00241500 File Offset: 0x0023F700
-		private Toil CarryToReadingSpot()
+		object IEnumerator.Current
 		{
-			Toil toil = ToilMaker.MakeToil("CarryToReadingSpot");
-			toil.initAction = delegate()
+			[DebuggerHidden]
+			get
 			{
-				IntVec3 intVec;
-				if (!this.TryGetClosestChairFreeSittingSpot(true, out intVec) && !this.TryGetClosestChairFreeSittingSpot(false, out intVec))
-				{
-					intVec = RCellFinder.SpotToChewStandingNear(this.pawn, this.Book, (IntVec3 c) => !c.Fogged(this.pawn.Map) && this.pawn.CanReserveSittableOrSpot(c, false));
-				}
-				if (!intVec.IsValid)
-				{
-					this.pawn.pather.StartPath(this.pawn.Position, PathEndMode.OnCell);
-					return;
-				}
-				this.pawn.ReserveSittableOrSpot(intVec, this.pawn.CurJob, true);
-				this.pawn.Map.pawnDestinationReservationManager.Reserve(this.pawn, this.pawn.CurJob, intVec);
-				this.pawn.pather.StartPath(intVec, PathEndMode.OnCell);
-			};
-			toil.defaultCompleteMode = ToilCompleteMode.PatherArrival;
-			return toil;
-		}
-
-		// Token: 0x0600767C RID: 30332 RVA: 0x00241528 File Offset: 0x0023F728
-		private bool TryGetClosestChairFreeSittingSpot(bool skipInteractionCells, out IntVec3 cell)
-		{
-			Thing thing = GenClosest.ClosestThingReachable(this.pawn.Position, this.pawn.Map, ThingRequest.ForGroup(ThingRequestGroup.BuildingArtificial), PathEndMode.OnCell, TraverseParms.For(this.pawn, Danger.Deadly, TraverseMode.ByPawn, false, false, false, true), 32f, (Thing t) => JobDriver_Reading.ValidateChair(t, this.pawn, skipInteractionCells) && t.Position.GetDangerFor(this.pawn, t.Map) == Danger.None, null, 0, -1, false, RegionType.Set_Passable, false, false);
-			if (thing != null)
-			{
-				return JobDriver_Reading.TryFindFreeSittingSpotOnThing(thing, this.pawn, skipInteractionCells, out cell);
+				return _003C_003E2__current;
 			}
-			cell = IntVec3.Invalid;
-			return false;
 		}
 
-		// Token: 0x0600767D RID: 30333 RVA: 0x002415BA File Offset: 0x0023F7BA
-		private Toil FindAdjacentReadingSurface()
+		[DebuggerHidden]
+		public _003CPrepareToReadBook_003Ed__16(int _003C_003E1__state)
 		{
-			Toil toil = ToilMaker.MakeToil("FindAdjacentReadingSurface");
-			toil.initAction = delegate()
-			{
-				Map map = this.pawn.Map;
-				IntVec3 position = this.pawn.Position;
-				Building firstThing = this.pawn.Position.GetFirstThing(this.pawn.Map);
-				if (firstThing == null || firstThing.def.building == null || !firstThing.def.building.isSittable)
-				{
-					this.TryFaceClosestSurface(position, map);
-					return;
-				}
-				if (this.TryFaceClosestSurface(position, map))
-				{
-					return;
-				}
-				this.job.SetTarget(TargetIndex.B, position + firstThing.Rotation.FacingCell);
-				this.pawn.jobs.curDriver.rotateToFace = TargetIndex.B;
-			};
-			toil.defaultCompleteMode = ToilCompleteMode.Instant;
-			return toil;
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x0600767E RID: 30334 RVA: 0x002415E0 File Offset: 0x0023F7E0
-		private bool TryFaceClosestSurface(IntVec3 pos, Map map)
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			for (int i = 0; i < 4; i++)
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_Reading jobDriver_Reading = _003C_003E4__this;
+			switch (num)
 			{
-				Rot4 rot = new Rot4(i);
-				IntVec3 c = pos + rot.FacingCell;
-				if (c.GetSurfaceType(map) == SurfaceType.Eat)
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (jobDriver_Reading.carrying)
 				{
-					this.job.SetTarget(TargetIndex.B, c);
-					this.pawn.jobs.curDriver.rotateToFace = TargetIndex.B;
+					return false;
+				}
+				if (jobDriver_Reading.hasInInventory)
+				{
+					_003C_003E2__current = Toils_Misc.TakeItemFromInventoryToCarrier(jobDriver_Reading.pawn, TargetIndex.A);
+					_003C_003E1__state = 1;
 					return true;
 				}
-			}
-			for (int j = 0; j < 4; j++)
-			{
-				Rot4 rot2 = new Rot4(j);
-				IntVec3 c2 = pos + rot2.FacingCell;
-				if (c2.GetSurfaceType(map) == SurfaceType.Item)
+				_003C_003E2__current = Toils_Goto.GotoCell(jobDriver_Reading.Book.PositionHeld, PathEndMode.ClosestTouch).FailOnDestroyedOrNull(TargetIndex.A).FailOnSomeonePhysicallyInteracting(TargetIndex.A);
+				_003C_003E1__state = 2;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				goto IL_00bf;
+			case 2:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Haul.StartCarryThing(TargetIndex.A, putRemainderInQueue: false, subtractNumTakenFromJobCount: false, failIfStackCountLessThanJobCount: false, reserve: true, canTakeFromInventory: true);
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+				_003C_003E1__state = -1;
+				goto IL_00bf;
+			case 4:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = jobDriver_Reading.FindAdjacentReadingSurface();
+				_003C_003E1__state = 5;
+				return true;
+			case 5:
 				{
-					this.job.SetTarget(TargetIndex.B, c2);
-					this.pawn.jobs.curDriver.rotateToFace = TargetIndex.B;
-					return true;
+					_003C_003E1__state = -1;
+					return false;
+				}
+				IL_00bf:
+				_003C_003E2__current = jobDriver_Reading.CarryToReadingSpot().FailOnDestroyedOrNull(TargetIndex.A);
+				_003C_003E1__state = 4;
+				return true;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CPrepareToReadBook_003Ed__16 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CPrepareToReadBook_003Ed__16(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private bool hasInInventory;
+
+	private bool carrying;
+
+	private bool isLearningDesire;
+
+	private bool isReading;
+
+	public const TargetIndex BookIndex = TargetIndex.A;
+
+	public const TargetIndex SurfaceIndex = TargetIndex.B;
+
+	private const int ManualReadTicks = 5000;
+
+	private const int ChairSearchRadius = 32;
+
+	private const int UrgentJobCheckIntervalTicks = 600;
+
+	public Book Book => job.GetTarget(TargetIndex.A).Thing as Book;
+
+	public bool IsReading => isReading;
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return pawn.Reserve(Book, job, 1, 1, null, errorOnFailed);
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__14))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__14(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override void Notify_Starting()
+	{
+		base.Notify_Starting();
+		job.count = 1;
+		hasInInventory = pawn.inventory != null && pawn.inventory.Contains(Book);
+		carrying = pawn?.carryTracker.CarriedThing == Book;
+		isLearningDesire = pawn?.learning != null && pawn.learning.ActiveLearningDesires.Contains(LearningDesireDefOf.Reading);
+	}
+
+	[IteratorStateMachine(typeof(_003CPrepareToReadBook_003Ed__16))]
+	private IEnumerable<Toil> PrepareToReadBook()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CPrepareToReadBook_003Ed__16(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	private Toil ReadBook(int duration)
+	{
+		Toil toil = Toils_General.Wait(duration);
+		toil.debugName = "Reading";
+		toil.FailOnDestroyedNullOrForbidden(TargetIndex.A);
+		toil.handlingFacing = true;
+		toil.initAction = delegate
+		{
+			Book.IsOpen = true;
+			pawn.pather.StopDead();
+			job.showCarryingInspectLine = false;
+		};
+		toil.tickIntervalAction = delegate(int delta)
+		{
+			if (job.GetTarget(TargetIndex.B).IsValid)
+			{
+				pawn.rotationTracker.FaceCell(job.GetTarget(TargetIndex.B).Cell);
+			}
+			else if (Book.Spawned)
+			{
+				pawn.rotationTracker.FaceCell(Book.Position);
+			}
+			else if (pawn.Rotation == Rot4.North)
+			{
+				pawn.Rotation = new Rot4(Rand.Range(1, 4));
+			}
+			float readingBonus = BookUtility.GetReadingBonus(pawn);
+			isReading = true;
+			Book.OnBookReadTick(pawn, delta, readingBonus);
+			pawn.skills?.Learn(SkillDefOf.Intellectual, 0.1f * (float)delta);
+			pawn.GainComfortFromCellIfPossible(delta);
+			if (pawn.CurJob != null && pawn.needs?.joy != null)
+			{
+				JoyTickFullJoyAction fullJoyAction = JoyTickFullJoyAction.GoToNextToil;
+				if (pawn.CurJob.playerForced || pawn.learning != null)
+				{
+					fullJoyAction = JoyTickFullJoyAction.None;
+				}
+				JoyUtility.JoyTickCheckEnd(pawn, delta, fullJoyAction, Book.JoyFactor * readingBonus);
+			}
+			if (isLearningDesire && job != null)
+			{
+				if (pawn.needs?.learning != null)
+				{
+					LearningUtility.LearningTickCheckEnd(pawn, delta, job.playerForced);
+				}
+				else
+				{
+					pawn.jobs.curDriver.EndJobWith(JobCondition.Succeeded);
 				}
 			}
-			return false;
-		}
-
-		// Token: 0x0600767F RID: 30335 RVA: 0x002416A0 File Offset: 0x0023F8A0
-		private static bool ValidateChair(Thing t, Pawn pawn, bool skipInteractionCells)
-		{
-			IntVec3 intVec;
-			return t.def.building != null && t.def.building.isSittable && JobDriver_Reading.TryFindFreeSittingSpotOnThing(t, pawn, skipInteractionCells, out intVec) && !t.Fogged() && !t.IsForbidden(pawn) && pawn.CanReserve(t, 1, -1, null, false) && t.IsSociallyProper(pawn) && !t.IsBurning() && !t.HostileTo(pawn);
-		}
-
-		// Token: 0x06007680 RID: 30336 RVA: 0x00241728 File Offset: 0x0023F928
-		private static bool TryFindFreeSittingSpotOnThing(Thing t, Pawn pawn, bool skipInteractionCells, out IntVec3 cell)
-		{
-			foreach (IntVec3 intVec in t.OccupiedRect())
+			if (pawn.IsHashIntervalTick(600, delta))
 			{
-				if ((!skipInteractionCells || !intVec.IsBuildingInteractionCell(pawn.Map)) && !intVec.Fogged(pawn.Map) && pawn.CanReserveSittableOrSpot(intVec, false))
+				pawn.jobs.CheckForJobOverride(9.1f);
+			}
+		};
+		toil.AddEndCondition(() => BookUtility.CanReadBook(Book, pawn, out var _) ? JobCondition.Ongoing : JobCondition.InterruptForced);
+		toil.AddFinishAction(delegate
+		{
+			Book.IsOpen = false;
+			TaleRecorder.RecordTale(TaleDefOf.ReadBook, pawn, Book);
+			JoyUtility.TryGainRecRoomThought(pawn);
+		});
+		if (isLearningDesire && !job.playerForced)
+		{
+			toil.defaultCompleteMode = ToilCompleteMode.Never;
+		}
+		return toil;
+	}
+
+	private Toil CarryToReadingSpot()
+	{
+		Toil toil = ToilMaker.MakeToil("CarryToReadingSpot");
+		toil.initAction = delegate
+		{
+			if (!TryGetClosestChairFreeSittingSpot(skipInteractionCells: true, out var cell) && !TryGetClosestChairFreeSittingSpot(skipInteractionCells: false, out cell))
+			{
+				cell = RCellFinder.SpotToChewStandingNear(pawn, Book, (IntVec3 c) => !c.Fogged(pawn.Map) && pawn.CanReserveSittableOrSpot(c));
+			}
+			if (!cell.IsValid)
+			{
+				pawn.pather.StartPath(pawn.Position, PathEndMode.OnCell);
+			}
+			else
+			{
+				pawn.ReserveSittableOrSpot(cell, pawn.CurJob);
+				pawn.Map.pawnDestinationReservationManager.Reserve(pawn, pawn.CurJob, cell);
+				pawn.pather.StartPath(cell, PathEndMode.OnCell);
+			}
+		};
+		toil.defaultCompleteMode = ToilCompleteMode.PatherArrival;
+		return toil;
+	}
+
+	private bool TryGetClosestChairFreeSittingSpot(bool skipInteractionCells, out IntVec3 cell)
+	{
+		Thing thing = GenClosest.ClosestThingReachable(pawn.Position, pawn.Map, ThingRequest.ForGroup(ThingRequestGroup.BuildingArtificial), PathEndMode.OnCell, TraverseParms.For(pawn), 32f, (Thing t) => ValidateChair(t, pawn, skipInteractionCells) && t.Position.GetDangerFor(pawn, t.Map) == Danger.None);
+		if (thing != null)
+		{
+			return TryFindFreeSittingSpotOnThing(thing, pawn, skipInteractionCells, out cell);
+		}
+		cell = IntVec3.Invalid;
+		return false;
+	}
+
+	private Toil FindAdjacentReadingSurface()
+	{
+		Toil toil = ToilMaker.MakeToil("FindAdjacentReadingSurface");
+		toil.initAction = delegate
+		{
+			Map map = pawn.Map;
+			IntVec3 position = pawn.Position;
+			Building firstThing = pawn.Position.GetFirstThing<Building>(pawn.Map);
+			if (firstThing != null && firstThing.def.building != null && firstThing.def.building.isSittable)
+			{
+				if (!TryFaceClosestSurface(position, map))
 				{
-					cell = intVec;
-					return true;
+					job.SetTarget(TargetIndex.B, position + firstThing.Rotation.FacingCell);
+					pawn.jobs.curDriver.rotateToFace = TargetIndex.B;
 				}
 			}
-			cell = default(IntVec3);
+			else
+			{
+				TryFaceClosestSurface(position, map);
+			}
+		};
+		toil.defaultCompleteMode = ToilCompleteMode.Instant;
+		return toil;
+	}
+
+	private bool TryFaceClosestSurface(IntVec3 pos, Map map)
+	{
+		for (int i = 0; i < 4; i++)
+		{
+			IntVec3 intVec = pos + new Rot4(i).FacingCell;
+			if (intVec.GetSurfaceType(map) == SurfaceType.Eat)
+			{
+				job.SetTarget(TargetIndex.B, intVec);
+				pawn.jobs.curDriver.rotateToFace = TargetIndex.B;
+				return true;
+			}
+		}
+		for (int j = 0; j < 4; j++)
+		{
+			IntVec3 intVec2 = pos + new Rot4(j).FacingCell;
+			if (intVec2.GetSurfaceType(map) == SurfaceType.Item)
+			{
+				job.SetTarget(TargetIndex.B, intVec2);
+				pawn.jobs.curDriver.rotateToFace = TargetIndex.B;
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private static bool ValidateChair(Thing t, Pawn pawn, bool skipInteractionCells)
+	{
+		if (t.def.building == null || !t.def.building.isSittable)
+		{
 			return false;
 		}
-
-		// Token: 0x06007681 RID: 30337 RVA: 0x002417B8 File Offset: 0x0023F9B8
-		public override void ExposeData()
+		if (!TryFindFreeSittingSpotOnThing(t, pawn, skipInteractionCells, out var _))
 		{
-			base.ExposeData();
-			Scribe_Values.Look<bool>(ref this.carrying, "carrying", false, false);
-			Scribe_Values.Look<bool>(ref this.hasInInventory, "hasInInventory", false, false);
-			Scribe_Values.Look<bool>(ref this.isLearningDesire, "wasLearningDesire", false, false);
+			return false;
 		}
+		if (t.Fogged())
+		{
+			return false;
+		}
+		if (t.IsForbidden(pawn))
+		{
+			return false;
+		}
+		if (!pawn.CanReserve(t))
+		{
+			return false;
+		}
+		if (!t.IsSociallyProper(pawn))
+		{
+			return false;
+		}
+		if (t.IsBurning())
+		{
+			return false;
+		}
+		if (t.HostileTo(pawn))
+		{
+			return false;
+		}
+		return true;
+	}
 
-		// Token: 0x040050EF RID: 20719
-		private bool hasInInventory;
+	private static bool TryFindFreeSittingSpotOnThing(Thing t, Pawn pawn, bool skipInteractionCells, out IntVec3 cell)
+	{
+		foreach (IntVec3 item in t.OccupiedRect())
+		{
+			if ((!skipInteractionCells || !item.IsBuildingInteractionCell(pawn.Map)) && !item.Fogged(pawn.Map) && pawn.CanReserveSittableOrSpot(item))
+			{
+				cell = item;
+				return true;
+			}
+		}
+		cell = default(IntVec3);
+		return false;
+	}
 
-		// Token: 0x040050F0 RID: 20720
-		private bool carrying;
-
-		// Token: 0x040050F1 RID: 20721
-		private bool isLearningDesire;
-
-		// Token: 0x040050F2 RID: 20722
-		private bool isReading;
-
-		// Token: 0x040050F3 RID: 20723
-		public const TargetIndex BookIndex = TargetIndex.A;
-
-		// Token: 0x040050F4 RID: 20724
-		public const TargetIndex SurfaceIndex = TargetIndex.B;
-
-		// Token: 0x040050F5 RID: 20725
-		private const int ManualReadTicks = 5000;
-
-		// Token: 0x040050F6 RID: 20726
-		private const int ChairSearchRadius = 32;
-
-		// Token: 0x040050F7 RID: 20727
-		private const int UrgentJobCheckIntervalTicks = 600;
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref carrying, "carrying", defaultValue: false);
+		Scribe_Values.Look(ref hasInInventory, "hasInInventory", defaultValue: false);
+		Scribe_Values.Look(ref isLearningDesire, "wasLearningDesire", defaultValue: false);
 	}
 }

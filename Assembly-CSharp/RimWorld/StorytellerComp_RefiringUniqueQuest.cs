@@ -1,100 +1,171 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class StorytellerComp_RefiringUniqueQuest : StorytellerComp
 {
-	// Token: 0x02001E66 RID: 7782
-	public class StorytellerComp_RefiringUniqueQuest : StorytellerComp
+	[CompilerGenerated]
+	private sealed class _003CMakeIntervalIncidents_003Ed__5 : IEnumerable<FiringIncident>, IEnumerable, IEnumerator<FiringIncident>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001A63 RID: 6755
-		// (get) Token: 0x0600ACE7 RID: 44263 RVA: 0x0031376A File Offset: 0x0031196A
-		private int IntervalsPassed
+		private int _003C_003E1__state;
+
+		private FiringIncident _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public StorytellerComp_RefiringUniqueQuest _003C_003E4__this;
+
+		private IIncidentTarget target;
+
+		public IIncidentTarget _003C_003E3__target;
+
+		FiringIncident IEnumerator<FiringIncident>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return Find.TickManager.TicksGame / 1000;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001A64 RID: 6756
-		// (get) Token: 0x0600ACE8 RID: 44264 RVA: 0x00315A48 File Offset: 0x00313C48
-		private StorytellerCompProperties_RefiringUniqueQuest Props
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (StorytellerCompProperties_RefiringUniqueQuest)this.props;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600ACE9 RID: 44265 RVA: 0x00315A55 File Offset: 0x00313C55
-		public override IEnumerable<FiringIncident> MakeIntervalIncidents(IIncidentTarget target)
+		[DebuggerHidden]
+		public _003CMakeIntervalIncidents_003Ed__5(int _003C_003E1__state)
 		{
-			if (!this.Props.incident.TargetAllowed(target))
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			StorytellerComp_RefiringUniqueQuest storytellerComp_RefiringUniqueQuest = _003C_003E4__this;
+			switch (num)
 			{
-				yield break;
+			default:
+				return false;
+			case 0:
+			{
+				_003C_003E1__state = -1;
+				if (!storytellerComp_RefiringUniqueQuest.Props.incident.TargetAllowed(target))
+				{
+					return false;
+				}
+				Quest quest = null;
+				List<Quest> questsListForReading = Find.QuestManager.QuestsListForReading;
+				for (int i = 0; i < questsListForReading.Count; i++)
+				{
+					if (questsListForReading[i].root == storytellerComp_RefiringUniqueQuest.Props.incident.questScriptDef && (quest == null || questsListForReading[i].appearanceTick > quest.appearanceTick))
+					{
+						quest = questsListForReading[i];
+						break;
+					}
+				}
+				if ((quest == null) ? ((storytellerComp_RefiringUniqueQuest.Props.minColonyWealth <= 0 || !(WealthUtility.PlayerWealth < (float)storytellerComp_RefiringUniqueQuest.Props.minColonyWealth)) && ((!storytellerComp_RefiringUniqueQuest.generateSkipped) ? (storytellerComp_RefiringUniqueQuest.IntervalsPassed == (int)(storytellerComp_RefiringUniqueQuest.Props.minDaysPassed * 60f) + 1) : ((float)GenTicks.TicksGame >= storytellerComp_RefiringUniqueQuest.Props.minDaysPassed * 60000f))) : (storytellerComp_RefiringUniqueQuest.Props.refireEveryDays >= 0f && ((quest.State != QuestState.EndedSuccess && quest.State != QuestState.Ongoing && quest.State != 0 && quest.cleanupTick >= 0 && storytellerComp_RefiringUniqueQuest.IntervalsPassed == (int)((float)quest.cleanupTick + storytellerComp_RefiringUniqueQuest.Props.refireEveryDays * 60000f) / 1000) ? true : false)))
+				{
+					IncidentParms parms = storytellerComp_RefiringUniqueQuest.GenerateParms(storytellerComp_RefiringUniqueQuest.Props.incident.category, target);
+					if (storytellerComp_RefiringUniqueQuest.Props.incident.Worker.CanFireNow(parms))
+					{
+						_003C_003E2__current = new FiringIncident(storytellerComp_RefiringUniqueQuest.Props.incident, storytellerComp_RefiringUniqueQuest, parms);
+						_003C_003E1__state = 1;
+						return true;
+					}
+				}
+				break;
 			}
-			Quest quest = null;
-			List<Quest> questsListForReading = Find.QuestManager.QuestsListForReading;
-			for (int i = 0; i < questsListForReading.Count; i++)
-			{
-				if (questsListForReading[i].root == this.Props.incident.questScriptDef && (quest == null || questsListForReading[i].appearanceTick > quest.appearanceTick))
-				{
-					quest = questsListForReading[i];
-					break;
-				}
+			case 1:
+				_003C_003E1__state = -1;
+				break;
 			}
-			bool flag;
-			if (quest == null)
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<FiringIncident> IEnumerable<FiringIncident>.GetEnumerator()
+		{
+			_003CMakeIntervalIncidents_003Ed__5 _003CMakeIntervalIncidents_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				if (this.Props.minColonyWealth > 0 && WealthUtility.PlayerWealth < (float)this.Props.minColonyWealth)
-				{
-					flag = false;
-				}
-				else if (this.generateSkipped)
-				{
-					flag = ((float)GenTicks.TicksGame >= this.Props.minDaysPassed * 60000f);
-				}
-				else
-				{
-					flag = (this.IntervalsPassed == (int)(this.Props.minDaysPassed * 60f) + 1);
-				}
+				_003C_003E1__state = 0;
+				_003CMakeIntervalIncidents_003Ed__ = this;
 			}
 			else
 			{
-				flag = (this.Props.refireEveryDays >= 0f && (quest.State != QuestState.EndedSuccess && quest.State != QuestState.Ongoing && quest.State != QuestState.NotYetAccepted && quest.cleanupTick >= 0 && this.IntervalsPassed == (int)((float)quest.cleanupTick + this.Props.refireEveryDays * 60000f) / 1000));
-			}
-			if (flag)
-			{
-				IncidentParms parms = this.GenerateParms(this.Props.incident.category, target);
-				if (this.Props.incident.Worker.CanFireNow(parms))
+				_003CMakeIntervalIncidents_003Ed__ = new _003CMakeIntervalIncidents_003Ed__5(0)
 				{
-					yield return new FiringIncident(this.Props.incident, this, parms);
-				}
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
-			yield break;
+			_003CMakeIntervalIncidents_003Ed__.target = _003C_003E3__target;
+			return _003CMakeIntervalIncidents_003Ed__;
 		}
 
-		// Token: 0x0600ACEA RID: 44266 RVA: 0x00315A6C File Offset: 0x00313C6C
-		public override void Initialize()
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			base.Initialize();
-			if ((float)GenTicks.TicksGame >= this.Props.minDaysPassed * 60000f)
-			{
-				this.generateSkipped = true;
-			}
+			return ((IEnumerable<FiringIncident>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x0600ACEB RID: 44267 RVA: 0x00315A94 File Offset: 0x00313C94
-		public override string ToString()
+	private bool generateSkipped;
+
+	private int IntervalsPassed => Find.TickManager.TicksGame / 1000;
+
+	private StorytellerCompProperties_RefiringUniqueQuest Props => (StorytellerCompProperties_RefiringUniqueQuest)props;
+
+	[IteratorStateMachine(typeof(_003CMakeIntervalIncidents_003Ed__5))]
+	public override IEnumerable<FiringIncident> MakeIntervalIncidents(IIncidentTarget target)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeIntervalIncidents_003Ed__5(-2)
 		{
-			string str = base.ToString();
-			string str2 = " ";
-			IncidentDef incident = this.Props.incident;
-			return str + str2 + ((incident != null) ? incident.ToString() : null);
-		}
+			_003C_003E4__this = this,
+			_003C_003E3__target = target
+		};
+	}
 
-		// Token: 0x040076EF RID: 30447
-		private bool generateSkipped;
+	public override void Initialize()
+	{
+		base.Initialize();
+		if ((float)GenTicks.TicksGame >= Props.minDaysPassed * 60000f)
+		{
+			generateSkipped = true;
+		}
+	}
+
+	public override string ToString()
+	{
+		return base.ToString() + " " + Props.incident;
 	}
 }

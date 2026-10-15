@@ -1,49 +1,187 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
-{
-	// Token: 0x02001559 RID: 5465
-	public abstract class WorkGiver_ConstructAffectFloor : WorkGiver_Scanner
-	{
-		// Token: 0x170013D1 RID: 5073
-		// (get) Token: 0x060081B5 RID: 33205
-		protected abstract DesignationDef DesDef { get; }
+namespace RimWorld;
 
-		// Token: 0x170013D2 RID: 5074
-		// (get) Token: 0x060081B6 RID: 33206 RVA: 0x000E96BB File Offset: 0x000E78BB
-		public override PathEndMode PathEndMode
+public abstract class WorkGiver_ConstructAffectFloor : WorkGiver_Scanner
+{
+	[CompilerGenerated]
+	private sealed class _003CPotentialWorkCellsGlobal_003Ed__4 : IEnumerable<IntVec3>, IEnumerable, IEnumerator<IntVec3>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private IntVec3 _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private Pawn pawn;
+
+		public Pawn _003C_003E3__pawn;
+
+		public WorkGiver_ConstructAffectFloor _003C_003E4__this;
+
+		private IEnumerator<Designation> _003C_003E7__wrap1;
+
+		IntVec3 IEnumerator<IntVec3>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return PathEndMode.Touch;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x060081B7 RID: 33207 RVA: 0x00270A98 File Offset: 0x0026EC98
-		public override IEnumerable<IntVec3> PotentialWorkCellsGlobal(Pawn pawn)
+		object IEnumerator.Current
 		{
-			foreach (Designation designation in pawn.Map.designationManager.SpawnedDesignationsOfDef(this.DesDef))
+			[DebuggerHidden]
+			get
 			{
-				yield return designation.target.Cell;
+				return _003C_003E2__current;
 			}
-			IEnumerator<Designation> enumerator = null;
-			yield break;
-			yield break;
 		}
 
-		// Token: 0x060081B8 RID: 33208 RVA: 0x00270AAF File Offset: 0x0026ECAF
-		public override bool ShouldSkip(Pawn pawn, bool forced = false)
+		[DebuggerHidden]
+		public _003CPotentialWorkCellsGlobal_003Ed__4(int _003C_003E1__state)
 		{
-			return !pawn.Map.designationManager.AnySpawnedDesignationOfDef(this.DesDef);
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x060081B9 RID: 33209 RVA: 0x00270ACA File Offset: 0x0026ECCA
-		public override bool HasJobOnCell(Pawn pawn, IntVec3 c, bool forced = false)
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			return pawn.Map.designationManager.DesignationAt(c, this.DesDef) != null && pawn.CanReserve(c, 1, -1, ReservationLayerDefOf.Floor, forced);
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				WorkGiver_ConstructAffectFloor workGiver_ConstructAffectFloor = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = pawn.Map.designationManager.SpawnedDesignationsOfDef(workGiver_ConstructAffectFloor.DesDef).GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 1:
+					_003C_003E1__state = -3;
+					break;
+				}
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					Designation current = _003C_003E7__wrap1.Current;
+					_003C_003E2__current = current.target.Cell;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = null;
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<IntVec3> IEnumerable<IntVec3>.GetEnumerator()
+		{
+			_003CPotentialWorkCellsGlobal_003Ed__4 _003CPotentialWorkCellsGlobal_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CPotentialWorkCellsGlobal_003Ed__ = this;
+			}
+			else
+			{
+				_003CPotentialWorkCellsGlobal_003Ed__ = new _003CPotentialWorkCellsGlobal_003Ed__4(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CPotentialWorkCellsGlobal_003Ed__.pawn = _003C_003E3__pawn;
+			return _003CPotentialWorkCellsGlobal_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<IntVec3>)this).GetEnumerator();
+		}
+	}
+
+	protected abstract DesignationDef DesDef { get; }
+
+	public override PathEndMode PathEndMode => PathEndMode.Touch;
+
+	[IteratorStateMachine(typeof(_003CPotentialWorkCellsGlobal_003Ed__4))]
+	public override IEnumerable<IntVec3> PotentialWorkCellsGlobal(Pawn pawn)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CPotentialWorkCellsGlobal_003Ed__4(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__pawn = pawn
+		};
+	}
+
+	public override bool ShouldSkip(Pawn pawn, bool forced = false)
+	{
+		return !pawn.Map.designationManager.AnySpawnedDesignationOfDef(DesDef);
+	}
+
+	public override bool HasJobOnCell(Pawn pawn, IntVec3 c, bool forced = false)
+	{
+		if (pawn.Map.designationManager.DesignationAt(c, DesDef) == null || !pawn.CanReserve(c, 1, -1, ReservationLayerDefOf.Floor, forced))
+		{
+			return false;
+		}
+		return true;
 	}
 }

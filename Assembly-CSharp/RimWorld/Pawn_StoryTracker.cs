@@ -1,551 +1,464 @@
-﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Pawn_StoryTracker : IExposable
 {
-	// Token: 0x02002437 RID: 9271
-	public class Pawn_StoryTracker : IExposable
+	private Pawn pawn;
+
+	private BackstoryDef childhood;
+
+	private BackstoryDef adulthood;
+
+	private Color hairColor = Color.white;
+
+	public Color? skinColorOverride;
+
+	public HeadTypeDef headType;
+
+	public BodyTypeDef bodyType;
+
+	public HairDef hairDef;
+
+	public TraitSet traits;
+
+	public string title;
+
+	public string birthLastName;
+
+	public ColorDef favoriteColor;
+
+	public FurDef furDef;
+
+	[Unsaved(false)]
+	private Color? skinColorBase;
+
+	[Unsaved(false)]
+	private float melanin = -1f;
+
+	[Unsaved(false)]
+	private List<BackstoryDef> backstoriesCache;
+
+	private static readonly FloatRange VoicePitchFactorRange = new FloatRange(0.85f, 1.15f);
+
+	public BackstoryDef Childhood
 	{
-		// Token: 0x17001E3E RID: 7742
-		// (get) Token: 0x0600C89C RID: 51356 RVA: 0x003A9AB5 File Offset: 0x003A7CB5
-		// (set) Token: 0x0600C89D RID: 51357 RVA: 0x003A9AC0 File Offset: 0x003A7CC0
-		public BackstoryDef Childhood
+		get
 		{
-			get
+			return childhood;
+		}
+		set
+		{
+			if (pawn.DevelopmentalStage.Adult() && value.spawnCategories.Contains("Child"))
 			{
-				return this.childhood;
+				Log.Warning($"Assigning active child backstory to adult pawn {pawn}.");
 			}
-			set
+			backstoriesCache = null;
+			childhood = value;
+		}
+	}
+
+	public BackstoryDef Adulthood
+	{
+		get
+		{
+			return adulthood;
+		}
+		set
+		{
+			backstoriesCache = null;
+			adulthood = value;
+		}
+	}
+
+	public string Title
+	{
+		get
+		{
+			if (title != null)
 			{
-				if (this.pawn.DevelopmentalStage.Adult() && value.spawnCategories.Contains("Child"))
-				{
-					Log.Warning(string.Format("Assigning active child backstory to adult pawn {0}.", this.pawn));
-				}
-				this.backstoriesCache = null;
-				this.childhood = value;
+				return title;
+			}
+			return TitleDefault;
+		}
+		set
+		{
+			title = null;
+			if (value != Title && !value.NullOrEmpty())
+			{
+				title = value;
 			}
 		}
+	}
 
-		// Token: 0x17001E3F RID: 7743
-		// (get) Token: 0x0600C89E RID: 51358 RVA: 0x003A9B14 File Offset: 0x003A7D14
-		// (set) Token: 0x0600C89F RID: 51359 RVA: 0x003A9B1C File Offset: 0x003A7D1C
-		public BackstoryDef Adulthood
+	public string TitleCap => Title.CapitalizeFirst();
+
+	public string TitleDefault
+	{
+		get
 		{
-			get
+			if (adulthood != null)
 			{
-				return this.adulthood;
+				return adulthood.TitleFor(pawn.gender);
 			}
-			set
+			if (childhood != null)
 			{
-				this.backstoriesCache = null;
-				this.adulthood = value;
+				return childhood.TitleFor(pawn.gender);
 			}
+			return "";
 		}
+	}
 
-		// Token: 0x17001E40 RID: 7744
-		// (get) Token: 0x0600C8A0 RID: 51360 RVA: 0x003A9B2C File Offset: 0x003A7D2C
-		// (set) Token: 0x0600C8A1 RID: 51361 RVA: 0x003A9B43 File Offset: 0x003A7D43
-		public string Title
+	public string TitleDefaultCap => TitleDefault.CapitalizeFirst();
+
+	public string TitleShort
+	{
+		get
 		{
-			get
+			if (title != null)
 			{
-				if (this.title != null)
-				{
-					return this.title;
-				}
-				return this.TitleDefault;
+				return title;
 			}
-			set
+			if (adulthood != null)
 			{
-				this.title = null;
-				if (value != this.Title && !value.NullOrEmpty())
-				{
-					this.title = value;
-				}
+				return adulthood.TitleShortFor(pawn.gender);
 			}
+			if (childhood != null)
+			{
+				return childhood.TitleShortFor(pawn.gender);
+			}
+			return "";
 		}
+	}
 
-		// Token: 0x17001E41 RID: 7745
-		// (get) Token: 0x0600C8A2 RID: 51362 RVA: 0x003A9B69 File Offset: 0x003A7D69
-		public string TitleCap
-		{
-			get
-			{
-				return this.Title.CapitalizeFirst();
-			}
-		}
+	public string TitleShortCap => TitleShort.CapitalizeFirst();
 
-		// Token: 0x17001E42 RID: 7746
-		// (get) Token: 0x0600C8A3 RID: 51363 RVA: 0x003A9B78 File Offset: 0x003A7D78
-		public string TitleDefault
+	public Color SkinColorBase
+	{
+		get
 		{
-			get
+			if (!skinColorBase.HasValue && pawn.genes != null)
 			{
-				if (this.adulthood != null)
+				GeneDef melaninGene = pawn.genes.GetMelaninGene();
+				if (melaninGene != null)
 				{
-					return this.adulthood.TitleFor(this.pawn.gender);
+					skinColorBase = melaninGene.skinColorBase;
 				}
-				if (this.childhood != null)
+				else
 				{
-					return this.childhood.TitleFor(this.pawn.gender);
-				}
-				return "";
-			}
-		}
-
-		// Token: 0x17001E43 RID: 7747
-		// (get) Token: 0x0600C8A4 RID: 51364 RVA: 0x003A9BC8 File Offset: 0x003A7DC8
-		public string TitleDefaultCap
-		{
-			get
-			{
-				return this.TitleDefault.CapitalizeFirst();
-			}
-		}
-
-		// Token: 0x17001E44 RID: 7748
-		// (get) Token: 0x0600C8A5 RID: 51365 RVA: 0x003A9BD8 File Offset: 0x003A7DD8
-		public string TitleShort
-		{
-			get
-			{
-				if (this.title != null)
-				{
-					return this.title;
-				}
-				if (this.adulthood != null)
-				{
-					return this.adulthood.TitleShortFor(this.pawn.gender);
-				}
-				if (this.childhood != null)
-				{
-					return this.childhood.TitleShortFor(this.pawn.gender);
-				}
-				return "";
-			}
-		}
-
-		// Token: 0x17001E45 RID: 7749
-		// (get) Token: 0x0600C8A6 RID: 51366 RVA: 0x003A9C37 File Offset: 0x003A7E37
-		public string TitleShortCap
-		{
-			get
-			{
-				return this.TitleShort.CapitalizeFirst();
-			}
-		}
-
-		// Token: 0x17001E46 RID: 7750
-		// (get) Token: 0x0600C8A7 RID: 51367 RVA: 0x003A9C44 File Offset: 0x003A7E44
-		// (set) Token: 0x0600C8A8 RID: 51368 RVA: 0x003A9CBA File Offset: 0x003A7EBA
-		public Color SkinColorBase
-		{
-			get
-			{
-				if (this.skinColorBase == null && this.pawn.genes != null)
-				{
-					GeneDef melaninGene = this.pawn.genes.GetMelaninGene();
-					if (melaninGene != null)
+					GeneDef geneDef = PawnSkinColors.RandomSkinColorGene(pawn);
+					if (geneDef != null)
 					{
-						this.skinColorBase = melaninGene.skinColorBase;
+						pawn.genes.AddGene(geneDef, xenogene: false);
 					}
-					else
+				}
+			}
+			return skinColorBase.Value;
+		}
+		set
+		{
+			skinColorBase = value;
+		}
+	}
+
+	public Color SkinColor
+	{
+		get
+		{
+			Color baseColor = skinColorOverride ?? SkinColorBase;
+			if (pawn.IsMutant)
+			{
+				baseColor = MutantUtility.GetMutantSkinColor(pawn, baseColor);
+			}
+			return pawn.health.hediffSet.GetSkinColor(baseColor);
+		}
+	}
+
+	public bool SkinColorOverriden
+	{
+		get
+		{
+			if (!skinColorOverride.HasValue)
+			{
+				if (pawn.IsMutant)
+				{
+					return pawn.mutant.Def.skinColorOverride.HasValue;
+				}
+				return false;
+			}
+			return true;
+		}
+	}
+
+	public bool CaresAboutOthersAppearance
+	{
+		get
+		{
+			if (!pawn.Inhumanized() && !traits.HasTrait(TraitDefOf.Kind))
+			{
+				return !traits.HasTrait(TraitDefOf.Ascetic);
+			}
+			return false;
+		}
+	}
+
+	public Color HairColor
+	{
+		get
+		{
+			if (pawn.Corpse != null && pawn.Corpse.CurRotDrawMode == RotDrawMode.Rotting)
+			{
+				return PawnRenderUtility.GetRottenColor(hairColor);
+			}
+			if (ModsConfig.AnomalyActive && pawn.IsMutant && pawn.mutant.Def.useCorpseGraphics && pawn.mutant.rotStage == RotStage.Rotting)
+			{
+				return PawnRenderUtility.GetRottenColor(hairColor);
+			}
+			if (ModsConfig.AnomalyActive && pawn.IsShambler)
+			{
+				return MutantUtility.GetShamblerColor(hairColor);
+			}
+			return hairColor;
+		}
+		set
+		{
+			hairColor = value;
+			if (!ModsConfig.BiotechActive || pawn.genes == null)
+			{
+				return;
+			}
+			foreach (Gene item in pawn.genes.GenesListForReading)
+			{
+				if (item.def.skinIsHairColor && item.Active)
+				{
+					skinColorOverride = hairColor;
+					break;
+				}
+			}
+		}
+	}
+
+	public List<BackstoryDef> AllBackstories
+	{
+		get
+		{
+			if (backstoriesCache == null)
+			{
+				backstoriesCache = new List<BackstoryDef>();
+				if (childhood != null)
+				{
+					backstoriesCache.Add(childhood);
+				}
+				if (adulthood != null)
+				{
+					backstoriesCache.Add(adulthood);
+				}
+			}
+			return backstoriesCache;
+		}
+	}
+
+	public WorkTags DisabledWorkTagsBackstoryAndTraits
+	{
+		get
+		{
+			WorkTags workTags = WorkTags.None;
+			if (childhood != null)
+			{
+				workTags |= childhood.workDisables;
+			}
+			if (adulthood != null)
+			{
+				workTags |= adulthood.workDisables;
+			}
+			for (int i = 0; i < traits.allTraits.Count; i++)
+			{
+				if (!traits.allTraits[i].Suppressed)
+				{
+					workTags |= traits.allTraits[i].def.disabledWorkTags;
+				}
+			}
+			return workTags;
+		}
+	}
+
+	public WorkTags DisabledWorkTagsBackstoryTraitsAndGenes
+	{
+		get
+		{
+			WorkTags workTags = DisabledWorkTagsBackstoryAndTraits;
+			if (pawn.genes != null)
+			{
+				workTags |= pawn.genes.DisabledWorkTags;
+			}
+			return workTags;
+		}
+	}
+
+	public float VoicePitchFactor => VoicePitchFactorRange.RandomInRangeSeeded(pawn.thingIDNumber);
+
+	public bool IsDisturbing
+	{
+		get
+		{
+			if (!ModsConfig.AnomalyActive || !traits.HasTrait(TraitDefOf.Disturbing))
+			{
+				return pawn.health.hediffSet.HasHediff(HediffDefOf.VoidTouched);
+			}
+			return true;
+		}
+	}
+
+	public Pawn_StoryTracker(Pawn pawn)
+	{
+		this.pawn = pawn;
+		traits = new TraitSet(pawn);
+	}
+
+	public void ExposeData()
+	{
+		Scribe_Defs.Look(ref bodyType, "bodyType");
+		Scribe_Defs.Look(ref hairDef, "hairDef");
+		Scribe_Values.Look(ref hairColor, "hairColor");
+		Scribe_Values.Look(ref skinColorOverride, "skinColorOverride", null);
+		Scribe_Deep.Look(ref traits, "traits", pawn);
+		Scribe_Values.Look(ref title, "title");
+		Scribe_Values.Look(ref birthLastName, "birthLastName");
+		Scribe_Defs.Look(ref favoriteColor, "favoriteColorDef");
+		Scribe_Defs.Look(ref furDef, "furDef");
+		Scribe_Defs.Look(ref headType, "headType");
+		if (Scribe.mode != LoadSaveMode.Saving)
+		{
+			Scribe_Values.Look(ref melanin, "melanin", -1f);
+			if (Scribe.mode == LoadSaveMode.PostLoadInit && melanin >= 0f)
+			{
+				pawn.genes.InitializeGenesFromOldSave(melanin);
+			}
+		}
+		if (Scribe.mode == LoadSaveMode.LoadingVars)
+		{
+			string headGraphicPath = null;
+			Scribe_Values.Look(ref headGraphicPath, "headGraphicPath");
+			if (!headGraphicPath.NullOrEmpty())
+			{
+				TryGetRandomHeadFromSet(DefDatabase<HeadTypeDef>.AllDefs.Where((HeadTypeDef x) => x.graphicPath == headGraphicPath));
+			}
+			if (ModsConfig.IdeologyActive && favoriteColor == null)
+			{
+				Color? value = null;
+				Scribe_Values.Look(ref value, "favoriteColor", null);
+				if (value.HasValue)
+				{
+					Color color = value.Value;
+					favoriteColor = DefDatabase<ColorDef>.AllDefsListForReading.FirstOrDefault((ColorDef cd) => cd.color.IndistinguishableFrom(color));
+					if (favoriteColor == null)
 					{
-						GeneDef geneDef = PawnSkinColors.RandomSkinColorGene(this.pawn);
-						if (geneDef != null)
+						favoriteColor = DefDatabase<ColorDef>.AllDefs.Where(delegate(ColorDef x)
 						{
-							this.pawn.genes.AddGene(geneDef, false);
-						}
-					}
-				}
-				return this.skinColorBase.Value;
-			}
-			set
-			{
-				this.skinColorBase = new Color?(value);
-			}
-		}
-
-		// Token: 0x17001E47 RID: 7751
-		// (get) Token: 0x0600C8A9 RID: 51369 RVA: 0x003A9CC8 File Offset: 0x003A7EC8
-		public Color SkinColor
-		{
-			get
-			{
-				Color baseColor = this.skinColorOverride ?? this.SkinColorBase;
-				if (this.pawn.IsMutant)
-				{
-					baseColor = MutantUtility.GetMutantSkinColor(this.pawn, baseColor);
-				}
-				return this.pawn.health.hediffSet.GetSkinColor(baseColor);
-			}
-		}
-
-		// Token: 0x17001E48 RID: 7752
-		// (get) Token: 0x0600C8AA RID: 51370 RVA: 0x003A9D27 File Offset: 0x003A7F27
-		public bool SkinColorOverriden
-		{
-			get
-			{
-				return this.skinColorOverride != null || (this.pawn.IsMutant && this.pawn.mutant.Def.skinColorOverride != null);
-			}
-		}
-
-		// Token: 0x17001E49 RID: 7753
-		// (get) Token: 0x0600C8AB RID: 51371 RVA: 0x003A9D61 File Offset: 0x003A7F61
-		public bool CaresAboutOthersAppearance
-		{
-			get
-			{
-				return !this.pawn.Inhumanized() && !this.traits.HasTrait(TraitDefOf.Kind) && !this.traits.HasTrait(TraitDefOf.Ascetic);
-			}
-		}
-
-		// Token: 0x17001E4A RID: 7754
-		// (get) Token: 0x0600C8AC RID: 51372 RVA: 0x003A9D98 File Offset: 0x003A7F98
-		// (set) Token: 0x0600C8AD RID: 51373 RVA: 0x003A9E44 File Offset: 0x003A8044
-		public Color HairColor
-		{
-			get
-			{
-				if (this.pawn.Corpse != null && this.pawn.Corpse.CurRotDrawMode == RotDrawMode.Rotting)
-				{
-					return PawnRenderUtility.GetRottenColor(this.hairColor);
-				}
-				if (ModsConfig.AnomalyActive && this.pawn.IsMutant && this.pawn.mutant.Def.useCorpseGraphics && this.pawn.mutant.rotStage == RotStage.Rotting)
-				{
-					return PawnRenderUtility.GetRottenColor(this.hairColor);
-				}
-				if (ModsConfig.AnomalyActive && this.pawn.IsShambler)
-				{
-					return MutantUtility.GetShamblerColor(this.hairColor);
-				}
-				return this.hairColor;
-			}
-			set
-			{
-				this.hairColor = value;
-				if (ModsConfig.BiotechActive && this.pawn.genes != null)
-				{
-					foreach (Gene gene in this.pawn.genes.GenesListForReading)
-					{
-						if (gene.def.skinIsHairColor && gene.Active)
-						{
-							this.skinColorOverride = new Color?(this.hairColor);
-							break;
-						}
+							ColorType colorType = x.colorType;
+							return colorType <= ColorType.Ideo;
+						}).RandomElement();
 					}
 				}
 			}
 		}
-
-		// Token: 0x17001E4B RID: 7755
-		// (get) Token: 0x0600C8AE RID: 51374 RVA: 0x003A9EE0 File Offset: 0x003A80E0
-		public List<BackstoryDef> AllBackstories
+		if (Scribe.mode == LoadSaveMode.PostLoadInit)
 		{
-			get
+			if (birthLastName == null && pawn.Name is NameTriple nameTriple)
 			{
-				if (this.backstoriesCache == null)
-				{
-					this.backstoriesCache = new List<BackstoryDef>();
-					if (this.childhood != null)
-					{
-						this.backstoriesCache.Add(this.childhood);
-					}
-					if (this.adulthood != null)
-					{
-						this.backstoriesCache.Add(this.adulthood);
-					}
-				}
-				return this.backstoriesCache;
+				birthLastName = nameTriple.Last;
+			}
+			if (hairDef == null)
+			{
+				hairDef = DefDatabase<HairDef>.AllDefs.RandomElement();
+			}
+			if (headType == null)
+			{
+				TryGetRandomHeadFromSet(DefDatabase<HeadTypeDef>.AllDefs.Where((HeadTypeDef x) => x.randomChosen));
+			}
+			if (ModsConfig.BiotechActive && pawn.DevelopmentalStage.Child() && bodyType != BodyTypeDefOf.Child)
+			{
+				Log.Warning(pawn?.ToString() + " had body type set to " + bodyType?.label + " as a child.");
+				bodyType = BodyTypeDefOf.Child;
 			}
 		}
-
-		// Token: 0x17001E4C RID: 7756
-		// (get) Token: 0x0600C8AF RID: 51375 RVA: 0x003A9F38 File Offset: 0x003A8138
-		public WorkTags DisabledWorkTagsBackstoryAndTraits
+		if (Scribe.mode == LoadSaveMode.LoadingVars)
 		{
-			get
+			string childDefName = null;
+			Scribe_Values.Look(ref childDefName, "childhood");
+			if (!childDefName.NullOrEmpty())
 			{
-				WorkTags workTags = WorkTags.None;
-				if (this.childhood != null)
+				childhood = DefDatabase<BackstoryDef>.AllDefs.FirstOrDefault((BackstoryDef b) => b.defName == childDefName);
+				if (childhood == null)
 				{
-					workTags |= this.childhood.workDisables;
+					Log.Error($"Couldn't load child backstory {childDefName} for {pawn.Name}. Giving random.");
+					childhood = DefDatabase<BackstoryDef>.AllDefs.Where((BackstoryDef bs) => bs.slot == BackstorySlot.Childhood).RandomElement();
 				}
-				if (this.adulthood != null)
-				{
-					workTags |= this.adulthood.workDisables;
-				}
-				for (int i = 0; i < this.traits.allTraits.Count; i++)
-				{
-					if (!this.traits.allTraits[i].Suppressed)
-					{
-						workTags |= this.traits.allTraits[i].def.disabledWorkTags;
-					}
-				}
-				return workTags;
+			}
+			string adultDefName = null;
+			Scribe_Values.Look(ref adultDefName, "adulthood");
+			if (adultDefName.NullOrEmpty())
+			{
+				return;
+			}
+			adulthood = DefDatabase<BackstoryDef>.AllDefs.FirstOrDefault((BackstoryDef b) => b.defName == adultDefName);
+			if (adulthood == null)
+			{
+				Log.Error($"Couldn't load adult backstory {adultDefName} for {pawn.Name}. Giving random.");
+				adulthood = DefDatabase<BackstoryDef>.AllDefs.Where((BackstoryDef bs) => bs.slot == BackstorySlot.Adulthood).RandomElement();
 			}
 		}
-
-		// Token: 0x17001E4D RID: 7757
-		// (get) Token: 0x0600C8B0 RID: 51376 RVA: 0x003A9FC8 File Offset: 0x003A81C8
-		public WorkTags DisabledWorkTagsBackstoryTraitsAndGenes
+		else if (Scribe.mode == LoadSaveMode.Saving)
 		{
-			get
-			{
-				WorkTags workTags = this.DisabledWorkTagsBackstoryAndTraits;
-				if (this.pawn.genes != null)
-				{
-					workTags |= this.pawn.genes.DisabledWorkTags;
-				}
-				return workTags;
-			}
+			Scribe_Defs.Look(ref childhood, "childhood");
+			Scribe_Defs.Look(ref adulthood, "adulthood");
 		}
+	}
 
-		// Token: 0x17001E4E RID: 7758
-		// (get) Token: 0x0600C8B1 RID: 51377 RVA: 0x003AA000 File Offset: 0x003A8200
-		public float VoicePitchFactor
+	public BackstoryDef GetBackstory(BackstorySlot slot)
+	{
+		if (slot == BackstorySlot.Childhood)
 		{
-			get
-			{
-				return Pawn_StoryTracker.VoicePitchFactorRange.RandomInRangeSeeded(this.pawn.thingIDNumber);
-			}
+			return childhood;
 		}
+		return adulthood;
+	}
 
-		// Token: 0x17001E4F RID: 7759
-		// (get) Token: 0x0600C8B2 RID: 51378 RVA: 0x003AA025 File Offset: 0x003A8225
-		public bool IsDisturbing
+	public bool TryGetRandomHeadFromSet(IEnumerable<HeadTypeDef> options)
+	{
+		Rand.PushState(pawn.thingIDNumber);
+		bool result = options.Where(CanUseHeadType).TryRandomElementByWeight((HeadTypeDef x) => x.selectionWeight, out headType);
+		Rand.PopState();
+		return result;
+		bool CanUseHeadType(HeadTypeDef head)
 		{
-			get
+			if (!ModsConfig.BiotechActive || head.requiredGenes.NullOrEmpty())
 			{
-				return (ModsConfig.AnomalyActive && this.traits.HasTrait(TraitDefOf.Disturbing)) || this.pawn.health.hediffSet.HasHediff(HediffDefOf.VoidTouched, false);
+				if (head.gender != 0)
+				{
+					return head.gender == pawn.gender;
+				}
+				return true;
 			}
-		}
-
-		// Token: 0x0600C8B3 RID: 51379 RVA: 0x003AA05D File Offset: 0x003A825D
-		public Pawn_StoryTracker(Pawn pawn)
-		{
-			this.pawn = pawn;
-			this.traits = new TraitSet(pawn);
-		}
-
-		// Token: 0x0600C8B4 RID: 51380 RVA: 0x003AA090 File Offset: 0x003A8290
-		public void ExposeData()
-		{
-			Scribe_Defs.Look<BodyTypeDef>(ref this.bodyType, "bodyType");
-			Scribe_Defs.Look<HairDef>(ref this.hairDef, "hairDef");
-			Scribe_Values.Look<Color>(ref this.hairColor, "hairColor", default(Color), false);
-			Scribe_Values.Look<Color?>(ref this.skinColorOverride, "skinColorOverride", null, false);
-			Scribe_Deep.Look<TraitSet>(ref this.traits, "traits", new object[]
-			{
-				this.pawn
-			});
-			Scribe_Values.Look<string>(ref this.title, "title", null, false);
-			Scribe_Values.Look<string>(ref this.birthLastName, "birthLastName", null, false);
-			Scribe_Defs.Look<ColorDef>(ref this.favoriteColor, "favoriteColorDef");
-			Scribe_Defs.Look<FurDef>(ref this.furDef, "furDef");
-			Scribe_Defs.Look<HeadTypeDef>(ref this.headType, "headType");
-			if (Scribe.mode != LoadSaveMode.Saving)
-			{
-				Scribe_Values.Look<float>(ref this.melanin, "melanin", -1f, false);
-				if (Scribe.mode == LoadSaveMode.PostLoadInit && this.melanin >= 0f)
-				{
-					this.pawn.genes.InitializeGenesFromOldSave(this.melanin);
-				}
-			}
-			if (Scribe.mode == LoadSaveMode.LoadingVars)
-			{
-				string headGraphicPath = null;
-				Scribe_Values.Look<string>(ref headGraphicPath, "headGraphicPath", null, false);
-				if (!headGraphicPath.NullOrEmpty())
-				{
-					this.TryGetRandomHeadFromSet(from x in DefDatabase<HeadTypeDef>.AllDefs
-					where x.graphicPath == headGraphicPath
-					select x);
-				}
-				if (ModsConfig.IdeologyActive && this.favoriteColor == null)
-				{
-					Color? color2 = null;
-					Scribe_Values.Look<Color?>(ref color2, "favoriteColor", null, false);
-					if (color2 != null)
-					{
-						Color color = color2.Value;
-						this.favoriteColor = DefDatabase<ColorDef>.AllDefsListForReading.FirstOrDefault((ColorDef cd) => cd.color.IndistinguishableFrom(color));
-						if (this.favoriteColor == null)
-						{
-							this.favoriteColor = DefDatabase<ColorDef>.AllDefs.Where(delegate(ColorDef x)
-							{
-								ColorType colorType = x.colorType;
-								return colorType == ColorType.Ideo || colorType == ColorType.Misc;
-							}).RandomElement<ColorDef>();
-						}
-					}
-				}
-			}
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
-			{
-				if (this.birthLastName == null)
-				{
-					NameTriple nameTriple = this.pawn.Name as NameTriple;
-					if (nameTriple != null)
-					{
-						this.birthLastName = nameTriple.Last;
-					}
-				}
-				if (this.hairDef == null)
-				{
-					this.hairDef = DefDatabase<HairDef>.AllDefs.RandomElement<HairDef>();
-				}
-				if (this.headType == null)
-				{
-					this.TryGetRandomHeadFromSet(from x in DefDatabase<HeadTypeDef>.AllDefs
-					where x.randomChosen
-					select x);
-				}
-				if (ModsConfig.BiotechActive && this.pawn.DevelopmentalStage.Child() && this.bodyType != BodyTypeDefOf.Child)
-				{
-					Pawn pawn = this.pawn;
-					string str = (pawn != null) ? pawn.ToString() : null;
-					string str2 = " had body type set to ";
-					BodyTypeDef bodyTypeDef = this.bodyType;
-					Log.Warning(str + str2 + ((bodyTypeDef != null) ? bodyTypeDef.label : null) + " as a child.");
-					this.bodyType = BodyTypeDefOf.Child;
-				}
-			}
-			if (Scribe.mode == LoadSaveMode.LoadingVars)
-			{
-				string childDefName = null;
-				Scribe_Values.Look<string>(ref childDefName, "childhood", null, false);
-				if (!childDefName.NullOrEmpty())
-				{
-					this.childhood = DefDatabase<BackstoryDef>.AllDefs.FirstOrDefault((BackstoryDef b) => b.defName == childDefName);
-					if (this.childhood == null)
-					{
-						Log.Error(string.Format("Couldn't load child backstory {0} for {1}. Giving random.", childDefName, this.pawn.Name));
-						this.childhood = (from bs in DefDatabase<BackstoryDef>.AllDefs
-						where bs.slot == BackstorySlot.Childhood
-						select bs).RandomElement<BackstoryDef>();
-					}
-				}
-				string adultDefName = null;
-				Scribe_Values.Look<string>(ref adultDefName, "adulthood", null, false);
-				if (!adultDefName.NullOrEmpty())
-				{
-					this.adulthood = DefDatabase<BackstoryDef>.AllDefs.FirstOrDefault((BackstoryDef b) => b.defName == adultDefName);
-					if (this.adulthood == null)
-					{
-						Log.Error(string.Format("Couldn't load adult backstory {0} for {1}. Giving random.", adultDefName, this.pawn.Name));
-						this.adulthood = (from bs in DefDatabase<BackstoryDef>.AllDefs
-						where bs.slot == BackstorySlot.Adulthood
-						select bs).RandomElement<BackstoryDef>();
-						return;
-					}
-				}
-			}
-			else if (Scribe.mode == LoadSaveMode.Saving)
-			{
-				Scribe_Defs.Look<BackstoryDef>(ref this.childhood, "childhood");
-				Scribe_Defs.Look<BackstoryDef>(ref this.adulthood, "adulthood");
-			}
-		}
-
-		// Token: 0x0600C8B5 RID: 51381 RVA: 0x003AA51E File Offset: 0x003A871E
-		public BackstoryDef GetBackstory(BackstorySlot slot)
-		{
-			if (slot == BackstorySlot.Childhood)
-			{
-				return this.childhood;
-			}
-			return this.adulthood;
-		}
-
-		// Token: 0x0600C8B6 RID: 51382 RVA: 0x003AA530 File Offset: 0x003A8730
-		public bool TryGetRandomHeadFromSet(IEnumerable<HeadTypeDef> options)
-		{
-			Rand.PushState(this.pawn.thingIDNumber);
-			bool result = options.Where(new Func<HeadTypeDef, bool>(this.<TryGetRandomHeadFromSet>g__CanUseHeadType|61_0)).TryRandomElementByWeight((HeadTypeDef x) => x.selectionWeight, out this.headType);
-			Rand.PopState();
-			return result;
-		}
-
-		// Token: 0x0600C8B8 RID: 51384 RVA: 0x003AA5A4 File Offset: 0x003A87A4
-		[CompilerGenerated]
-		private bool <TryGetRandomHeadFromSet>g__CanUseHeadType|61_0(HeadTypeDef head)
-		{
-			if (!ModsConfig.BiotechActive || head.requiredGenes.NullOrEmpty<GeneDef>())
-			{
-				return head.gender == Gender.None || head.gender == this.pawn.gender;
-			}
-			if (this.pawn.genes == null)
+			if (pawn.genes == null)
 			{
 				return false;
 			}
-			foreach (GeneDef geneDef in head.requiredGenes)
+			foreach (GeneDef requiredGene in head.requiredGenes)
 			{
-				if (!this.pawn.genes.HasActiveGene(geneDef))
+				if (!pawn.genes.HasActiveGene(requiredGene))
 				{
 					return false;
 				}
 			}
-			return head.gender == Gender.None || head.gender == this.pawn.gender;
+			if (head.gender != 0)
+			{
+				return head.gender == pawn.gender;
+			}
+			return true;
 		}
-
-		// Token: 0x04008883 RID: 34947
-		private Pawn pawn;
-
-		// Token: 0x04008884 RID: 34948
-		private BackstoryDef childhood;
-
-		// Token: 0x04008885 RID: 34949
-		private BackstoryDef adulthood;
-
-		// Token: 0x04008886 RID: 34950
-		private Color hairColor = Color.white;
-
-		// Token: 0x04008887 RID: 34951
-		public Color? skinColorOverride;
-
-		// Token: 0x04008888 RID: 34952
-		public HeadTypeDef headType;
-
-		// Token: 0x04008889 RID: 34953
-		public BodyTypeDef bodyType;
-
-		// Token: 0x0400888A RID: 34954
-		public HairDef hairDef;
-
-		// Token: 0x0400888B RID: 34955
-		public TraitSet traits;
-
-		// Token: 0x0400888C RID: 34956
-		public string title;
-
-		// Token: 0x0400888D RID: 34957
-		public string birthLastName;
-
-		// Token: 0x0400888E RID: 34958
-		public ColorDef favoriteColor;
-
-		// Token: 0x0400888F RID: 34959
-		public FurDef furDef;
-
-		// Token: 0x04008890 RID: 34960
-		[Unsaved(false)]
-		private Color? skinColorBase;
-
-		// Token: 0x04008891 RID: 34961
-		[Unsaved(false)]
-		private float melanin = -1f;
-
-		// Token: 0x04008892 RID: 34962
-		[Unsaved(false)]
-		private List<BackstoryDef> backstoriesCache;
-
-		// Token: 0x04008893 RID: 34963
-		private static readonly FloatRange VoicePitchFactorRange = new FloatRange(0.85f, 1.15f);
 	}
 }

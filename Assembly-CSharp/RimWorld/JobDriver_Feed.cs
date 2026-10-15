@@ -1,70 +1,188 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_Feed : JobDriver
 {
-	// Token: 0x02001388 RID: 5000
-	public class JobDriver_Feed : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__8 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700134C RID: 4940
-		// (get) Token: 0x06007A7A RID: 31354 RVA: 0x001E5D2F File Offset: 0x001E3F2F
-		protected Thing Food
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_Feed _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.job.targetA.Thing;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700134D RID: 4941
-		// (get) Token: 0x06007A7B RID: 31355 RVA: 0x0024E845 File Offset: 0x0024CA45
-		protected Pawn Deliveree
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (Pawn)this.job.targetB.Thing;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06007A7C RID: 31356 RVA: 0x0024E85C File Offset: 0x0024CA5C
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__8(int _003C_003E1__state)
 		{
-			return this.pawn.Reserve(this.Deliveree, this.job, 1, -1, null, errorOnFailed, false);
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x06007A7D RID: 31357 RVA: 0x0024E884 File Offset: 0x0024CA84
-		protected override IEnumerable<Toil> MakeNewToils()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			this.FailOnDespawnedNullOrForbidden(TargetIndex.B);
-			if (this.pawn.inventory != null && this.pawn.inventory.Contains(base.TargetThingA))
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_Feed jobDriver_Feed = _003C_003E4__this;
+			switch (num)
 			{
-				yield return Toils_Misc.TakeItemFromInventoryToCarrier(this.pawn, TargetIndex.A);
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				jobDriver_Feed.FailOnDespawnedNullOrForbidden(TargetIndex.B);
+				if (jobDriver_Feed.pawn.inventory != null && jobDriver_Feed.pawn.inventory.Contains(jobDriver_Feed.TargetThingA))
+				{
+					_003C_003E2__current = Toils_Misc.TakeItemFromInventoryToCarrier(jobDriver_Feed.pawn, TargetIndex.A);
+					_003C_003E1__state = 1;
+					return true;
+				}
+				if (jobDriver_Feed.TargetThingA is Building_NutrientPasteDispenser)
+				{
+					_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.InteractionCell).FailOnForbidden(TargetIndex.A);
+					_003C_003E1__state = 2;
+					return true;
+				}
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.ClosestTouch).FailOnForbidden(TargetIndex.A);
+				_003C_003E1__state = 4;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				goto IL_0130;
+			case 2:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Ingest.TakeMealFromDispenser(TargetIndex.A, jobDriver_Feed.pawn);
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+				_003C_003E1__state = -1;
+				goto IL_0130;
+			case 4:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Ingest.PickupIngestible(TargetIndex.A, jobDriver_Feed.Deliveree);
+				_003C_003E1__state = 5;
+				return true;
+			case 5:
+				_003C_003E1__state = -1;
+				goto IL_0130;
+			case 6:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Ingest.ChewIngestible(jobDriver_Feed.Deliveree, 1.5f, TargetIndex.A).FailOnCannotTouch(TargetIndex.B, PathEndMode.Touch);
+				_003C_003E1__state = 7;
+				return true;
+			case 7:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Ingest.FinalizeIngest(jobDriver_Feed.Deliveree, TargetIndex.A);
+				_003C_003E1__state = 8;
+				return true;
+			case 8:
+				{
+					_003C_003E1__state = -1;
+					return false;
+				}
+				IL_0130:
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.Touch);
+				_003C_003E1__state = 6;
+				return true;
 			}
-			else if (base.TargetThingA is Building_NutrientPasteDispenser)
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__8 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.InteractionCell, false).FailOnForbidden(TargetIndex.A);
-				yield return Toils_Ingest.TakeMealFromDispenser(TargetIndex.A, this.pawn);
+				_003C_003E1__state = 0;
+				result = this;
 			}
 			else
 			{
-				yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.ClosestTouch, false).FailOnForbidden(TargetIndex.A);
-				yield return Toils_Ingest.PickupIngestible(TargetIndex.A, this.Deliveree);
+				result = new _003CMakeNewToils_003Ed__8(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
-			yield return Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.Touch, false);
-			yield return Toils_Ingest.ChewIngestible(this.Deliveree, 1.5f, TargetIndex.A, TargetIndex.None).FailOnCannotTouch(TargetIndex.B, PathEndMode.Touch);
-			yield return Toils_Ingest.FinalizeIngest(this.Deliveree, TargetIndex.A);
-			yield break;
+			return result;
 		}
 
-		// Token: 0x040052E5 RID: 21221
-		private const TargetIndex IngestableInd = TargetIndex.A;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x040052E6 RID: 21222
-		private const TargetIndex DelivereeInd = TargetIndex.B;
+	private const TargetIndex IngestableInd = TargetIndex.A;
 
-		// Token: 0x040052E7 RID: 21223
-		private const float FeedDurationMultiplier = 1.5f;
+	private const TargetIndex DelivereeInd = TargetIndex.B;
+
+	private const float FeedDurationMultiplier = 1.5f;
+
+	protected Thing Food => job.targetA.Thing;
+
+	protected Pawn Deliveree => (Pawn)job.targetB.Thing;
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		if (!pawn.Reserve(Deliveree, job, 1, -1, null, errorOnFailed))
+		{
+			return false;
+		}
+		return true;
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__8))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__8(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

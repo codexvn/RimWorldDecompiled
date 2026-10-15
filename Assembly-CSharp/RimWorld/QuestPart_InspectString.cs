@@ -1,91 +1,242 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class QuestPart_InspectString : QuestPartActivable
 {
-	// Token: 0x02001C51 RID: 7249
-	public class QuestPart_InspectString : QuestPartActivable
+	[CompilerGenerated]
+	private sealed class _003Cget_QuestLookTargets_003Ed__5 : IEnumerable<GlobalTargetInfo>, IEnumerable, IEnumerator<GlobalTargetInfo>, IEnumerator, IDisposable
 	{
-		// Token: 0x170018D3 RID: 6355
-		// (get) Token: 0x0600A16E RID: 41326 RVA: 0x002E684F File Offset: 0x002E4A4F
-		public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+		private int _003C_003E1__state;
+
+		private GlobalTargetInfo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public QuestPart_InspectString _003C_003E4__this;
+
+		private IEnumerator<GlobalTargetInfo> _003C_003E7__wrap1;
+
+		private int _003Ci_003E5__3;
+
+		GlobalTargetInfo IEnumerator<GlobalTargetInfo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				foreach (GlobalTargetInfo globalTargetInfo in base.QuestLookTargets)
-				{
-					yield return globalTargetInfo;
-				}
-				IEnumerator<GlobalTargetInfo> enumerator = null;
-				int num;
-				for (int i = 0; i < this.targets.Count; i = num + 1)
-				{
-					ISelectable selectable = this.targets[i];
-					if (selectable is Thing)
-					{
-						yield return (Thing)selectable;
-					}
-					else if (selectable is WorldObject)
-					{
-						yield return (WorldObject)selectable;
-					}
-					num = i;
-				}
-				yield break;
-				yield break;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600A16F RID: 41327 RVA: 0x002E685F File Offset: 0x002E4A5F
-		protected override void Enable(SignalArgs receivedArgs)
+		object IEnumerator.Current
 		{
-			base.Enable(receivedArgs);
-			this.resolvedInspectString = receivedArgs.GetFormattedText(this.inspectString);
-		}
-
-		// Token: 0x0600A170 RID: 41328 RVA: 0x002E6885 File Offset: 0x002E4A85
-		public override string ExtraInspectString(ISelectable target)
-		{
-			if (this.targets.Contains(target))
+			[DebuggerHidden]
+			get
 			{
-				return this.resolvedInspectString;
+				return _003C_003E2__current;
 			}
-			return null;
 		}
 
-		// Token: 0x0600A171 RID: 41329 RVA: 0x002E68A0 File Offset: 0x002E4AA0
-		public override void ExposeData()
+		[DebuggerHidden]
+		public _003Cget_QuestLookTargets_003Ed__5(int _003C_003E1__state)
 		{
-			base.ExposeData();
-			Scribe_Collections.Look<ISelectable>(ref this.targets, "targets", LookMode.Reference, Array.Empty<object>());
-			Scribe_Values.Look<string>(ref this.inspectString, "inspectString", null, false);
-			Scribe_Values.Look<string>(ref this.resolvedInspectString, "resolvedInspectString", null, false);
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x0600A172 RID: 41330 RVA: 0x002E68ED File Offset: 0x002E4AED
-		public override void AssignDebugData()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			base.AssignDebugData();
-			if (Find.AnyPlayerHomeMap != null)
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				this.targets.Add(Find.RandomPlayerHomeMap.mapPawns.FreeColonists.FirstOrDefault<Pawn>());
-				this.inspectString = "Debug inspect string.";
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				QuestPart_InspectString questPart_InspectString = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((QuestPart)questPart_InspectString).QuestLookTargets.GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0076;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0076;
+				case 2:
+					_003C_003E1__state = -1;
+					goto IL_010b;
+				case 3:
+					{
+						_003C_003E1__state = -1;
+						goto IL_010b;
+					}
+					IL_0076:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						GlobalTargetInfo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					_003Ci_003E5__3 = 0;
+					goto IL_011d;
+					IL_011d:
+					if (_003Ci_003E5__3 < questPart_InspectString.targets.Count)
+					{
+						ISelectable selectable = questPart_InspectString.targets[_003Ci_003E5__3];
+						if (selectable is Thing)
+						{
+							_003C_003E2__current = (Thing)selectable;
+							_003C_003E1__state = 2;
+							return true;
+						}
+						if (selectable is WorldObject)
+						{
+							_003C_003E2__current = (WorldObject)selectable;
+							_003C_003E1__state = 3;
+							return true;
+						}
+						goto IL_010b;
+					}
+					return false;
+					IL_010b:
+					_003Ci_003E5__3++;
+					goto IL_011d;
+				}
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x04006F8D RID: 28557
-		public List<ISelectable> targets = new List<ISelectable>();
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x04006F8E RID: 28558
-		public string inspectString;
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
 
-		// Token: 0x04006F8F RID: 28559
-		private string resolvedInspectString;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04006F90 RID: 28560
-		private ILoadReferenceable targetRef;
+		[DebuggerHidden]
+		IEnumerator<GlobalTargetInfo> IEnumerable<GlobalTargetInfo>.GetEnumerator()
+		{
+			_003Cget_QuestLookTargets_003Ed__5 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_QuestLookTargets_003Ed__5(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<GlobalTargetInfo>)this).GetEnumerator();
+		}
+	}
+
+	public List<ISelectable> targets = new List<ISelectable>();
+
+	public string inspectString;
+
+	private string resolvedInspectString;
+
+	private ILoadReferenceable targetRef;
+
+	public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+	{
+		[IteratorStateMachine(typeof(_003Cget_QuestLookTargets_003Ed__5))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_QuestLookTargets_003Ed__5(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	protected override void Enable(SignalArgs receivedArgs)
+	{
+		base.Enable(receivedArgs);
+		resolvedInspectString = receivedArgs.GetFormattedText(inspectString);
+	}
+
+	public override string ExtraInspectString(ISelectable target)
+	{
+		if (targets.Contains(target))
+		{
+			return resolvedInspectString;
+		}
+		return null;
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Collections.Look(ref targets, "targets", LookMode.Reference);
+		Scribe_Values.Look(ref inspectString, "inspectString");
+		Scribe_Values.Look(ref resolvedInspectString, "resolvedInspectString");
+	}
+
+	public override void AssignDebugData()
+	{
+		base.AssignDebugData();
+		if (Find.AnyPlayerHomeMap != null)
+		{
+			targets.Add(Find.RandomPlayerHomeMap.mapPawns.FreeColonists.FirstOrDefault());
+			inspectString = "Debug inspect string.";
+		}
 	}
 }

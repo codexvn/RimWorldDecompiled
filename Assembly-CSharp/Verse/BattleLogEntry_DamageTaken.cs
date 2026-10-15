@@ -1,123 +1,226 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse.Grammar;
 
-namespace Verse
+namespace Verse;
+
+public class BattleLogEntry_DamageTaken : LogEntry_DamageResult
 {
-	// Token: 0x02000324 RID: 804
-	public class BattleLogEntry_DamageTaken : LogEntry_DamageResult
+	[CompilerGenerated]
+	private sealed class _003CGetConcerns_003Ed__8 : IEnumerable<Thing>, IEnumerable, IEnumerator<Thing>, IEnumerator, IDisposable
 	{
-		// Token: 0x170003DC RID: 988
-		// (get) Token: 0x06001403 RID: 5123 RVA: 0x0005E7CE File Offset: 0x0005C9CE
-		private string RecipientName
+		private int _003C_003E1__state;
+
+		private Thing _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public BattleLogEntry_DamageTaken _003C_003E4__this;
+
+		Thing IEnumerator<Thing>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.recipientPawn == null)
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetConcerns_003Ed__8(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			BattleLogEntry_DamageTaken battleLogEntry_DamageTaken = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (battleLogEntry_DamageTaken.initiatorPawn != null)
 				{
-					return "null";
+					_003C_003E2__current = battleLogEntry_DamageTaken.initiatorPawn;
+					_003C_003E1__state = 1;
+					return true;
 				}
-				return this.recipientPawn.LabelShort;
+				goto IL_004d;
+			case 1:
+				_003C_003E1__state = -1;
+				goto IL_004d;
+			case 2:
+				{
+					_003C_003E1__state = -1;
+					break;
+				}
+				IL_004d:
+				if (battleLogEntry_DamageTaken.recipientPawn != null)
+				{
+					_003C_003E2__current = battleLogEntry_DamageTaken.recipientPawn;
+					_003C_003E1__state = 2;
+					return true;
+				}
+				break;
 			}
+			return false;
 		}
 
-		// Token: 0x06001404 RID: 5124 RVA: 0x0005E7E9 File Offset: 0x0005C9E9
-		public BattleLogEntry_DamageTaken() : base(null)
+		bool IEnumerator.MoveNext()
 		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x06001405 RID: 5125 RVA: 0x0005E7F2 File Offset: 0x0005C9F2
-		public BattleLogEntry_DamageTaken(Pawn recipient, RulePackDef ruleDef, Pawn initiator = null) : base(null)
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			this.initiatorPawn = initiator;
-			this.recipientPawn = recipient;
-			this.ruleDef = ruleDef;
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x06001406 RID: 5126 RVA: 0x0005E810 File Offset: 0x0005CA10
-		public override bool Concerns(Thing t)
+		[DebuggerHidden]
+		IEnumerator<Thing> IEnumerable<Thing>.GetEnumerator()
 		{
-			return t == this.initiatorPawn || t == this.recipientPawn;
-		}
-
-		// Token: 0x06001407 RID: 5127 RVA: 0x0005E826 File Offset: 0x0005CA26
-		public override IEnumerable<Thing> GetConcerns()
-		{
-			if (this.initiatorPawn != null)
+			_003CGetConcerns_003Ed__8 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				yield return this.initiatorPawn;
+				_003C_003E1__state = 0;
+				result = this;
 			}
-			if (this.recipientPawn != null)
+			else
 			{
-				yield return this.recipientPawn;
+				result = new _003CGetConcerns_003Ed__8(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
-			yield break;
-		}
-
-		// Token: 0x06001408 RID: 5128 RVA: 0x0005E836 File Offset: 0x0005CA36
-		public override bool CanBeClickedFromPOV(Thing pov)
-		{
-			return CameraJumper.CanJump(this.recipientPawn);
-		}
-
-		// Token: 0x06001409 RID: 5129 RVA: 0x0005E848 File Offset: 0x0005CA48
-		public override void ClickedFromPOV(Thing pov)
-		{
-			CameraJumper.TryJumpAndSelect(this.recipientPawn, CameraJumper.MovementMode.Pan);
-		}
-
-		// Token: 0x0600140A RID: 5130 RVA: 0x0005E85B File Offset: 0x0005CA5B
-		public override Texture2D IconFromPOV(Thing pov)
-		{
-			return LogEntry.Blood;
-		}
-
-		// Token: 0x0600140B RID: 5131 RVA: 0x0005E862 File Offset: 0x0005CA62
-		protected override BodyDef DamagedBody()
-		{
-			if (this.recipientPawn == null)
-			{
-				return null;
-			}
-			return this.recipientPawn.RaceProps.body;
-		}
-
-		// Token: 0x0600140C RID: 5132 RVA: 0x0005E880 File Offset: 0x0005CA80
-		protected override GrammarRequest GenerateGrammarRequest()
-		{
-			GrammarRequest result = base.GenerateGrammarRequest();
-			if (this.recipientPawn == null)
-			{
-				Log.ErrorOnce("BattleLogEntry_DamageTaken has a null recipient.", 60465709);
-			}
-			result.Includes.Add(this.ruleDef);
-			result.Rules.AddRange(GrammarUtility.RulesForPawn("RECIPIENT", this.recipientPawn, result.Constants, true, true));
 			return result;
 		}
 
-		// Token: 0x0600140D RID: 5133 RVA: 0x0005E8E3 File Offset: 0x0005CAE3
-		public override void ExposeData()
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			base.ExposeData();
-			Scribe_References.Look<Pawn>(ref this.initiatorPawn, "initiatorPawn", true);
-			Scribe_References.Look<Pawn>(ref this.recipientPawn, "recipientPawn", true);
-			Scribe_Defs.Look<RulePackDef>(ref this.ruleDef, "ruleDef");
+			return ((IEnumerable<Thing>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x0600140E RID: 5134 RVA: 0x0005E91D File Offset: 0x0005CB1D
-		public override string ToString()
+	private Pawn initiatorPawn;
+
+	private Pawn recipientPawn;
+
+	private RulePackDef ruleDef;
+
+	private string RecipientName
+	{
+		get
 		{
-			return "BattleLogEntry_DamageTaken: " + this.RecipientName;
+			if (recipientPawn == null)
+			{
+				return "null";
+			}
+			return recipientPawn.LabelShort;
 		}
+	}
 
-		// Token: 0x040012F9 RID: 4857
-		private Pawn initiatorPawn;
+	public BattleLogEntry_DamageTaken()
+	{
+	}
 
-		// Token: 0x040012FA RID: 4858
-		private Pawn recipientPawn;
+	public BattleLogEntry_DamageTaken(Pawn recipient, RulePackDef ruleDef, Pawn initiator = null)
+	{
+		initiatorPawn = initiator;
+		recipientPawn = recipient;
+		this.ruleDef = ruleDef;
+	}
 
-		// Token: 0x040012FB RID: 4859
-		private RulePackDef ruleDef;
+	public override bool Concerns(Thing t)
+	{
+		if (t != initiatorPawn)
+		{
+			return t == recipientPawn;
+		}
+		return true;
+	}
+
+	[IteratorStateMachine(typeof(_003CGetConcerns_003Ed__8))]
+	public override IEnumerable<Thing> GetConcerns()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetConcerns_003Ed__8(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override bool CanBeClickedFromPOV(Thing pov)
+	{
+		return CameraJumper.CanJump(recipientPawn);
+	}
+
+	public override void ClickedFromPOV(Thing pov)
+	{
+		CameraJumper.TryJumpAndSelect(recipientPawn);
+	}
+
+	public override Texture2D IconFromPOV(Thing pov)
+	{
+		return LogEntry.Blood;
+	}
+
+	protected override BodyDef DamagedBody()
+	{
+		if (recipientPawn == null)
+		{
+			return null;
+		}
+		return recipientPawn.RaceProps.body;
+	}
+
+	protected override GrammarRequest GenerateGrammarRequest()
+	{
+		GrammarRequest result = base.GenerateGrammarRequest();
+		if (recipientPawn == null)
+		{
+			Log.ErrorOnce("BattleLogEntry_DamageTaken has a null recipient.", 60465709);
+		}
+		result.Includes.Add(ruleDef);
+		result.Rules.AddRange(GrammarUtility.RulesForPawn("RECIPIENT", recipientPawn, result.Constants));
+		return result;
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_References.Look(ref initiatorPawn, "initiatorPawn", saveDestroyedThings: true);
+		Scribe_References.Look(ref recipientPawn, "recipientPawn", saveDestroyedThings: true);
+		Scribe_Defs.Look(ref ruleDef, "ruleDef");
+	}
+
+	public override string ToString()
+	{
+		return "BattleLogEntry_DamageTaken: " + RecipientName;
 	}
 }

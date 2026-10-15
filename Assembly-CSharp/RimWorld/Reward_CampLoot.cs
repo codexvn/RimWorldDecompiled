@@ -1,45 +1,143 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.Grammar;
 
-namespace RimWorld
+namespace RimWorld;
+
+[StaticConstructorOnStartup]
+public class Reward_CampLoot : Reward
 {
-	// Token: 0x02003680 RID: 13952
-	[StaticConstructorOnStartup]
-	public class Reward_CampLoot : Reward
+	[CompilerGenerated]
+	private sealed class _003Cget_StackElements_003Ed__2 : IEnumerable<GenUI.AnonymousStackElement>, IEnumerable, IEnumerator<GenUI.AnonymousStackElement>, IEnumerator, IDisposable
 	{
-		// Token: 0x170031E1 RID: 12769
-		// (get) Token: 0x060135D6 RID: 79318 RVA: 0x005C2FFF File Offset: 0x005C11FF
-		public override IEnumerable<GenUI.AnonymousStackElement> StackElements
+		private int _003C_003E1__state;
+
+		private GenUI.AnonymousStackElement _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Reward_CampLoot _003C_003E4__this;
+
+		GenUI.AnonymousStackElement IEnumerator<GenUI.AnonymousStackElement>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				yield return QuestPartUtility.GetStandardRewardStackElement("Reward_CampLoot_Label".Translate(), Reward_CampLoot.Icon, () => this.GetDescription(default(RewardsGeneratorParams)).CapitalizeFirst() + ".", null);
-				yield break;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x060135D7 RID: 79319 RVA: 0x00066B11 File Offset: 0x00064D11
-		public override void InitFromValue(float rewardValue, RewardsGeneratorParams parms, out float valueActuallyUsed)
+		object IEnumerator.Current
 		{
-			throw new NotImplementedException();
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x060135D8 RID: 79320 RVA: 0x00066B11 File Offset: 0x00064D11
-		public override IEnumerable<QuestPart> GenerateQuestParts(int index, RewardsGeneratorParams parms, string customLetterLabel, string customLetterText, RulePack customLetterLabelRules, RulePack customLetterTextRules)
+		[DebuggerHidden]
+		public _003Cget_StackElements_003Ed__2(int _003C_003E1__state)
 		{
-			throw new NotImplementedException();
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x060135D9 RID: 79321 RVA: 0x005C3010 File Offset: 0x005C1210
-		public override string GetDescription(RewardsGeneratorParams parms)
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			return "Reward_CampLoot".Translate().Resolve();
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x0400D6D0 RID: 54992
-		private static readonly Texture2D Icon = ContentFinder<Texture2D>.Get("UI/Overlays/QuestionMark", true);
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			Reward_CampLoot CS_0024_003C_003E8__locals1 = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = QuestPartUtility.GetStandardRewardStackElement("Reward_CampLoot_Label".Translate(), Icon, () => CS_0024_003C_003E8__locals1.GetDescription(default(RewardsGeneratorParams)).CapitalizeFirst() + ".");
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<GenUI.AnonymousStackElement> IEnumerable<GenUI.AnonymousStackElement>.GetEnumerator()
+		{
+			_003Cget_StackElements_003Ed__2 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_StackElements_003Ed__2(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<GenUI.AnonymousStackElement>)this).GetEnumerator();
+		}
+	}
+
+	private static readonly Texture2D Icon = ContentFinder<Texture2D>.Get("UI/Overlays/QuestionMark");
+
+	public override IEnumerable<GenUI.AnonymousStackElement> StackElements
+	{
+		[IteratorStateMachine(typeof(_003Cget_StackElements_003Ed__2))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_StackElements_003Ed__2(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public override void InitFromValue(float rewardValue, RewardsGeneratorParams parms, out float valueActuallyUsed)
+	{
+		throw new NotImplementedException();
+	}
+
+	public override IEnumerable<QuestPart> GenerateQuestParts(int index, RewardsGeneratorParams parms, string customLetterLabel, string customLetterText, RulePack customLetterLabelRules, RulePack customLetterTextRules)
+	{
+		throw new NotImplementedException();
+	}
+
+	public override string GetDescription(RewardsGeneratorParams parms)
+	{
+		return "Reward_CampLoot".Translate().Resolve();
 	}
 }

@@ -1,26 +1,38 @@
-﻿using System;
+using System;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobGiver_EatRandom : ThinkNode_JobGiver
 {
-	// Token: 0x020013CE RID: 5070
-	public class JobGiver_EatRandom : ThinkNode_JobGiver
+	protected override Job TryGiveJob(Pawn pawn)
 	{
-		// Token: 0x06007C1D RID: 31773 RVA: 0x00256088 File Offset: 0x00254288
-		protected override Job TryGiveJob(Pawn pawn)
+		if (pawn.Downed)
 		{
-			if (pawn.Downed)
-			{
-				return null;
-			}
-			Predicate<Thing> validator = (Thing t) => t.def.category == ThingCategory.Item && t.IngestibleNow && pawn.RaceProps.CanEverEat(t) && pawn.CanReserve(t, 1, -1, null, false);
-			Thing thing = GenClosest.ClosestThingReachable(pawn.Position, pawn.Map, ThingRequest.ForGroup(ThingRequestGroup.HaulableAlways), PathEndMode.OnCell, TraverseParms.For(pawn, Danger.Deadly, TraverseMode.ByPawn, false, false, false, true), 10f, validator, null, 0, -1, false, RegionType.Set_Passable, false, false);
-			if (thing == null)
-			{
-				return null;
-			}
-			return JobMaker.MakeJob(JobDefOf.Ingest, thing);
+			return null;
 		}
+		Predicate<Thing> validator = delegate(Thing t)
+		{
+			if (t.def.category != ThingCategory.Item)
+			{
+				return false;
+			}
+			if (!t.IngestibleNow)
+			{
+				return false;
+			}
+			if (!pawn.RaceProps.CanEverEat(t))
+			{
+				return false;
+			}
+			return pawn.CanReserve(t) ? true : false;
+		};
+		Thing thing = GenClosest.ClosestThingReachable(pawn.Position, pawn.Map, ThingRequest.ForGroup(ThingRequestGroup.HaulableAlways), PathEndMode.OnCell, TraverseParms.For(pawn), 10f, validator);
+		if (thing == null)
+		{
+			return null;
+		}
+		return JobMaker.MakeJob(JobDefOf.Ingest, thing);
 	}
 }

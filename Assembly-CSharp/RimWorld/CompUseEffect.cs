@@ -1,102 +1,66 @@
-﻿using System;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public abstract class CompUseEffect : ThingComp
 {
-	// Token: 0x02002F51 RID: 12113
-	public abstract class CompUseEffect : ThingComp
+	private const float CameraShakeMag = 1f;
+
+	private Effecter effecter;
+
+	public virtual float OrderPriority => 0f;
+
+	private CompProperties_UseEffect Props => (CompProperties_UseEffect)props;
+
+	public virtual void DoEffect(Pawn usedBy)
 	{
-		// Token: 0x17002C2B RID: 11307
-		// (get) Token: 0x06011143 RID: 69955 RVA: 0x00006AAC File Offset: 0x00004CAC
-		public virtual float OrderPriority
+		if (usedBy.Map == Find.CurrentMap)
 		{
-			get
+			if (Props.doCameraShake && usedBy.Spawned)
 			{
-				return 0f;
+				Find.CameraDriver.shaker.DoShake(1f);
 			}
-		}
-
-		// Token: 0x17002C2C RID: 11308
-		// (get) Token: 0x06011144 RID: 69956 RVA: 0x004E7B17 File Offset: 0x004E5D17
-		private CompProperties_UseEffect Props
-		{
-			get
+			if (Props.moteOnUsed != null)
 			{
-				return (CompProperties_UseEffect)this.props;
+				MoteMaker.MakeAttachedOverlay(usedBy, Props.moteOnUsed, Vector3.zero, Props.moteOnUsedScale);
 			}
-		}
-
-		// Token: 0x06011145 RID: 69957 RVA: 0x004E7B24 File Offset: 0x004E5D24
-		public virtual void DoEffect(Pawn usedBy)
-		{
-			if (usedBy.Map == Find.CurrentMap)
+			if (Props.fleckOnUsed != null)
 			{
-				if (this.Props.doCameraShake && usedBy.Spawned)
-				{
-					Find.CameraDriver.shaker.DoShake(1f);
-				}
-				if (this.Props.moteOnUsed != null)
-				{
-					MoteMaker.MakeAttachedOverlay(usedBy, this.Props.moteOnUsed, Vector3.zero, this.Props.moteOnUsedScale, -1f);
-				}
-				if (this.Props.fleckOnUsed != null)
-				{
-					FleckMaker.AttachedOverlay(usedBy, this.Props.fleckOnUsed, Vector3.zero, this.Props.fleckOnUsedScale, -1f);
-				}
-				if (this.Props.effecterOnUsed != null)
-				{
-					this.Props.effecterOnUsed.SpawnMaintained(usedBy, new TargetInfo(this.parent.Position, this.parent.Map, false), 1f);
-				}
-				Effecter effecter = this.effecter;
-				if (effecter == null)
-				{
-					return;
-				}
-				effecter.Cleanup();
+				FleckMaker.AttachedOverlay(usedBy, Props.fleckOnUsed, Vector3.zero, Props.fleckOnUsedScale);
 			}
-		}
-
-		// Token: 0x06011146 RID: 69958 RVA: 0x004E7C28 File Offset: 0x004E5E28
-		public virtual void PrepareTick()
-		{
-			if (this.Props.warmupEffecter != null)
+			if (Props.effecterOnUsed != null)
 			{
-				if (this.effecter == null)
-				{
-					this.effecter = this.Props.warmupEffecter.Spawn(this.parent, this.parent.Map, 1f);
-				}
-				Effecter effecter = this.effecter;
-				if (effecter == null)
-				{
-					return;
-				}
-				effecter.EffectTick(this.parent, this.parent);
+				Props.effecterOnUsed.SpawnMaintained(usedBy, new TargetInfo(parent.Position, parent.Map));
 			}
+			effecter?.Cleanup();
 		}
+	}
 
-		// Token: 0x06011147 RID: 69959 RVA: 0x00048A14 File Offset: 0x00046C14
-		public virtual TaggedString ConfirmMessage(Pawn p)
+	public virtual void PrepareTick()
+	{
+		if (Props.warmupEffecter != null)
 		{
-			return null;
+			if (effecter == null)
+			{
+				effecter = Props.warmupEffecter.Spawn(parent, parent.Map);
+			}
+			effecter?.EffectTick(parent, parent);
 		}
+	}
 
-		// Token: 0x06011148 RID: 69960 RVA: 0x00002501 File Offset: 0x00000701
-		public virtual bool SelectedUseOption(Pawn p)
-		{
-			return false;
-		}
+	public virtual TaggedString ConfirmMessage(Pawn p)
+	{
+		return null;
+	}
 
-		// Token: 0x06011149 RID: 69961 RVA: 0x0020FC7C File Offset: 0x0020DE7C
-		public virtual AcceptanceReport CanBeUsedBy(Pawn p)
-		{
-			return true;
-		}
+	public virtual bool SelectedUseOption(Pawn p)
+	{
+		return false;
+	}
 
-		// Token: 0x0400B157 RID: 45399
-		private const float CameraShakeMag = 1f;
-
-		// Token: 0x0400B158 RID: 45400
-		private Effecter effecter;
+	public virtual AcceptanceReport CanBeUsedBy(Pawn p)
+	{
+		return true;
 	}
 }

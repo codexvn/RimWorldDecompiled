@@ -1,79 +1,159 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_EnterTransporter : JobDriver
 {
-	// Token: 0x02001267 RID: 4711
-	public class JobDriver_EnterTransporter : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__6 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x170011F8 RID: 4600
-		// (get) Token: 0x0600733B RID: 29499 RVA: 0x00237168 File Offset: 0x00235368
-		public CompTransporter Transporter
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_EnterTransporter _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				Thing thing = this.job.GetTarget(this.TransporterInd).Thing;
-				if (thing == null)
-				{
-					return null;
-				}
-				return thing.TryGetComp<CompTransporter>();
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170011F9 RID: 4601
-		// (get) Token: 0x0600733C RID: 29500 RVA: 0x0023719C File Offset: 0x0023539C
-		public CompShuttle Shuttle
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				Thing thing = this.job.GetTarget(this.TransporterInd).Thing;
-				if (thing == null)
-				{
-					return null;
-				}
-				return thing.TryGetComp<CompShuttle>();
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600733D RID: 29501 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__6(int _003C_003E1__state)
 		{
-			return true;
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x0600733E RID: 29502 RVA: 0x002371CE File Offset: 0x002353CE
-		protected override IEnumerable<Toil> MakeNewToils()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			this.FailOnDespawnedOrNull(this.TransporterInd);
-			this.FailOn(() => this.Shuttle != null && !this.Shuttle.IsAllowed(this.pawn));
-			yield return Toils_Goto.GotoThing(this.TransporterInd, PathEndMode.Touch, false);
-			Toil toil = ToilMaker.MakeToil("MakeNewToils");
-			toil.initAction = delegate()
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_EnterTransporter CS_0024_003C_003E8__locals16 = _003C_003E4__this;
+			switch (num)
 			{
-				if (!this.job.playerForced && LoadTransportersJobUtility.HasJobOnTransporter(this.pawn, this.Transporter))
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				CS_0024_003C_003E8__locals16.FailOnDespawnedOrNull(CS_0024_003C_003E8__locals16.TransporterInd);
+				CS_0024_003C_003E8__locals16.FailOn(() => CS_0024_003C_003E8__locals16.Shuttle != null && !CS_0024_003C_003E8__locals16.Shuttle.IsAllowed(CS_0024_003C_003E8__locals16.pawn));
+				_003C_003E2__current = Toils_Goto.GotoThing(CS_0024_003C_003E8__locals16.TransporterInd, PathEndMode.Touch);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+			{
+				_003C_003E1__state = -1;
+				Toil toil = ToilMaker.MakeToil("MakeNewToils");
+				toil.initAction = delegate
 				{
-					return;
-				}
-				if (!this.Transporter.LoadingInProgressOrReadyToLaunch)
-				{
-					TransporterUtility.InitiateLoading(Gen.YieldSingle<CompTransporter>(this.Transporter));
-				}
-				CompTransporter transporter = this.Transporter;
-				bool flag = this.pawn.DeSpawnOrDeselect(DestroyMode.Vanish);
-				transporter.GetDirectlyHeldThings().TryAdd(this.pawn, true);
-				if (flag)
-				{
-					Find.Selector.Select(this.pawn, false, false);
-				}
-			};
-			yield return toil;
-			yield break;
+					if (CS_0024_003C_003E8__locals16.job.playerForced || !LoadTransportersJobUtility.HasJobOnTransporter(CS_0024_003C_003E8__locals16.pawn, CS_0024_003C_003E8__locals16.Transporter))
+					{
+						if (!CS_0024_003C_003E8__locals16.Transporter.LoadingInProgressOrReadyToLaunch)
+						{
+							TransporterUtility.InitiateLoading(Gen.YieldSingle(CS_0024_003C_003E8__locals16.Transporter));
+						}
+						CompTransporter transporter = CS_0024_003C_003E8__locals16.Transporter;
+						bool flag = CS_0024_003C_003E8__locals16.pawn.DeSpawnOrDeselect();
+						transporter.GetDirectlyHeldThings().TryAdd(CS_0024_003C_003E8__locals16.pawn);
+						if (flag)
+						{
+							Find.Selector.Select(CS_0024_003C_003E8__locals16.pawn, playSound: false, forceDesignatorDeselect: false);
+						}
+					}
+				};
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 2;
+				return true;
+			}
+			case 2:
+				_003C_003E1__state = -1;
+				return false;
+			}
 		}
 
-		// Token: 0x04004F7F RID: 20351
-		private TargetIndex TransporterInd = TargetIndex.A;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__6 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__6(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private TargetIndex TransporterInd = TargetIndex.A;
+
+	public CompTransporter Transporter => job.GetTarget(TransporterInd).Thing?.TryGetComp<CompTransporter>();
+
+	public CompShuttle Shuttle => job.GetTarget(TransporterInd).Thing?.TryGetComp<CompShuttle>();
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return true;
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__6))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__6(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

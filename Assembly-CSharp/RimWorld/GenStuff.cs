@@ -1,174 +1,95 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public static class GenStuff
 {
-	// Token: 0x02003650 RID: 13904
-	public static class GenStuff
+	[CompilerGenerated]
+	private sealed class _003CAllowedStuffs_003Ed__7 : IEnumerable<ThingDef>, IEnumerable, IEnumerator<ThingDef>, IEnumerator, IDisposable
 	{
-		// Token: 0x170031CD RID: 12749
-		// (get) Token: 0x060134DF RID: 79071 RVA: 0x005BC9F0 File Offset: 0x005BABF0
-		private static List<ThingDef> StuffDefs
+		private int _003C_003E1__state;
+
+		private ThingDef _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private TechLevel maxTechLevel;
+
+		public TechLevel _003C_003E3__maxTechLevel;
+
+		private List<StuffCategoryDef> categories;
+
+		public List<StuffCategoryDef> _003C_003E3__categories;
+
+		private int _003Ci_003E5__2;
+
+		ThingDef IEnumerator<ThingDef>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (GenStuff.cachedStuffDefs == null)
-				{
-					GenStuff.cachedStuffDefs = new List<ThingDef>();
-					foreach (ThingDef thingDef in DefDatabase<ThingDef>.AllDefsListForReading)
-					{
-						if (thingDef.IsStuff)
-						{
-							GenStuff.cachedStuffDefs.Add(thingDef);
-						}
-					}
-				}
-				return GenStuff.cachedStuffDefs;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x060134E0 RID: 79072 RVA: 0x005BCA64 File Offset: 0x005BAC64
-		public static ThingDef DefaultStuffFor(BuildableDef bd)
+		object IEnumerator.Current
 		{
-			if (!bd.MadeFromStuff)
+			[DebuggerHidden]
+			get
 			{
-				return null;
+				return _003C_003E2__current;
 			}
-			ThingDef thingDef = bd as ThingDef;
-			if (thingDef != null)
-			{
-				if (thingDef.defaultStuff != null)
-				{
-					return thingDef.defaultStuff;
-				}
-				if (thingDef.IsMeleeWeapon)
-				{
-					if (ThingDefOf.Steel.stuffProps.CanMake(bd))
-					{
-						return ThingDefOf.Steel;
-					}
-					if (ThingDefOf.Plasteel.stuffProps.CanMake(bd))
-					{
-						return ThingDefOf.Plasteel;
-					}
-				}
-				if (thingDef.IsApparel)
-				{
-					if (ThingDefOf.Cloth.stuffProps.CanMake(bd))
-					{
-						return ThingDefOf.Cloth;
-					}
-					if (ThingDefOf.Leather_Plain.stuffProps.CanMake(bd))
-					{
-						return ThingDefOf.Leather_Plain;
-					}
-					if (ThingDefOf.Steel.stuffProps.CanMake(bd))
-					{
-						return ThingDefOf.Steel;
-					}
-				}
-			}
-			if (ThingDefOf.WoodLog.stuffProps.CanMake(bd))
-			{
-				return ThingDefOf.WoodLog;
-			}
-			if (ThingDefOf.Steel.stuffProps.CanMake(bd))
-			{
-				return ThingDefOf.Steel;
-			}
-			if (ThingDefOf.Plasteel.stuffProps.CanMake(bd))
-			{
-				return ThingDefOf.Plasteel;
-			}
-			if (ThingDefOf.BlocksGranite.stuffProps.CanMake(bd))
-			{
-				return ThingDefOf.BlocksGranite;
-			}
-			if (ThingDefOf.Cloth.stuffProps.CanMake(bd))
-			{
-				return ThingDefOf.Cloth;
-			}
-			if (ThingDefOf.Leather_Plain.stuffProps.CanMake(bd))
-			{
-				return ThingDefOf.Leather_Plain;
-			}
-			return GenStuff.AllowedStuffsFor(bd, TechLevel.Undefined, false).First<ThingDef>();
 		}
 
-		// Token: 0x060134E1 RID: 79073 RVA: 0x005BCBBC File Offset: 0x005BADBC
-		public static ThingDef RandomStuffFor(ThingDef td)
+		[DebuggerHidden]
+		public _003CAllowedStuffs_003Ed__7(int _003C_003E1__state)
 		{
-			if (!td.MadeFromStuff)
-			{
-				return null;
-			}
-			return GenStuff.AllowedStuffsFor(td, TechLevel.Undefined, true).RandomElement<ThingDef>();
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x060134E2 RID: 79074 RVA: 0x005BCBD8 File Offset: 0x005BADD8
-		public static ThingDef RandomStuffByCommonalityFor(ThingDef td, TechLevel maxTechLevel = TechLevel.Undefined)
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			if (!td.MadeFromStuff)
-			{
-				return null;
-			}
-			ThingDef result;
-			if (!GenStuff.TryRandomStuffByCommonalityFor(td, out result, maxTechLevel))
-			{
-				result = GenStuff.DefaultStuffFor(td);
-			}
-			return result;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x060134E3 RID: 79075 RVA: 0x005BCC02 File Offset: 0x005BAE02
-		public static IEnumerable<ThingDef> AllowedStuffsFor(BuildableDef td, TechLevel maxTechLevel = TechLevel.Undefined, bool checkAllowedInStuffGeneration = false)
+		private bool MoveNext()
 		{
-			if (!td.MadeFromStuff)
+			int num = _003C_003E1__state;
+			if (num != 0)
 			{
-				yield break;
-			}
-			ThingDef found = null;
-			int yielded = 0;
-			int num;
-			for (int i = 0; i < GenStuff.StuffDefs.Count; i = num + 1)
-			{
-				ThingDef thingDef = GenStuff.StuffDefs[i];
-				if (thingDef.IsStuff && (maxTechLevel == TechLevel.Undefined || thingDef.techLevel <= maxTechLevel) && thingDef.stuffProps.CanMake(td))
+				if (num != 1)
 				{
-					found = thingDef;
-					if (!checkAllowedInStuffGeneration || thingDef.stuffProps.allowedInStuffGeneration)
-					{
-						num = yielded;
-						yielded = num + 1;
-						yield return thingDef;
-					}
+					return false;
 				}
-				num = i;
+				_003C_003E1__state = -1;
+				goto IL_00d0;
 			}
-			if (yielded == 0 && found != null)
+			_003C_003E1__state = -1;
+			_003Ci_003E5__2 = 0;
+			goto IL_00e2;
+			IL_00d0:
+			_003Ci_003E5__2++;
+			goto IL_00e2;
+			IL_00e2:
+			if (_003Ci_003E5__2 < StuffDefs.Count)
 			{
-				yield return found;
-			}
-			yield break;
-		}
-
-		// Token: 0x060134E4 RID: 79076 RVA: 0x005BCC20 File Offset: 0x005BAE20
-		public static IEnumerable<ThingDef> AllowedStuffs(List<StuffCategoryDef> categories, TechLevel maxTechLevel = TechLevel.Undefined)
-		{
-			int num;
-			for (int i = 0; i < GenStuff.StuffDefs.Count; i = num + 1)
-			{
-				ThingDef thingDef = GenStuff.StuffDefs[i];
-				if (thingDef.IsStuff && (maxTechLevel == TechLevel.Undefined || thingDef.techLevel <= maxTechLevel))
+				ThingDef thingDef = StuffDefs[_003Ci_003E5__2];
+				if (thingDef.IsStuff && (maxTechLevel == TechLevel.Undefined || (int)thingDef.techLevel <= (int)maxTechLevel))
 				{
 					bool flag = false;
-					for (int j = 0; j < thingDef.stuffProps.categories.Count; j++)
+					for (int i = 0; i < thingDef.stuffProps.categories.Count; i++)
 					{
-						for (int k = 0; k < categories.Count; k++)
+						for (int j = 0; j < categories.Count; j++)
 						{
-							if (thingDef.stuffProps.categories[j] == categories[k])
+							if (thingDef.stuffProps.categories[i] == categories[j])
 							{
 								flag = true;
 								break;
@@ -181,105 +102,410 @@ namespace RimWorld
 					}
 					if (flag)
 					{
-						yield return thingDef;
+						_003C_003E2__current = thingDef;
+						_003C_003E1__state = 1;
+						return true;
 					}
 				}
-				num = i;
+				goto IL_00d0;
 			}
-			yield break;
+			return false;
 		}
 
-		// Token: 0x060134E5 RID: 79077 RVA: 0x005BCC37 File Offset: 0x005BAE37
-		public static bool TryRandomStuffByCommonalityFor(ThingDef td, out ThingDef stuff, TechLevel maxTechLevel = TechLevel.Undefined)
+		bool IEnumerator.MoveNext()
 		{
-			if (!td.MadeFromStuff)
-			{
-				stuff = null;
-				return true;
-			}
-			return GenStuff.AllowedStuffsFor(td, maxTechLevel, true).TryRandomElementByWeight((ThingDef x) => x.stuffProps.commonality, out stuff);
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x060134E6 RID: 79078 RVA: 0x005BCC74 File Offset: 0x005BAE74
-		public static bool TryRandomStuffFor(ThingDef td, out ThingDef stuff, TechLevel maxTechLevel = TechLevel.Undefined, Predicate<ThingDef> validator = null)
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			if (!td.MadeFromStuff)
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<ThingDef> IEnumerable<ThingDef>.GetEnumerator()
+		{
+			_003CAllowedStuffs_003Ed__7 _003CAllowedStuffs_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				stuff = null;
-				return true;
+				_003C_003E1__state = 0;
+				_003CAllowedStuffs_003Ed__ = this;
 			}
-			if (validator != null)
+			else
 			{
-				GenStuff.allowedStuffTmp.Clear();
-				using (IEnumerator<ThingDef> enumerator = GenStuff.AllowedStuffsFor(td, maxTechLevel, true).GetEnumerator())
+				_003CAllowedStuffs_003Ed__ = new _003CAllowedStuffs_003Ed__7(0);
+			}
+			_003CAllowedStuffs_003Ed__.categories = _003C_003E3__categories;
+			_003CAllowedStuffs_003Ed__.maxTechLevel = _003C_003E3__maxTechLevel;
+			return _003CAllowedStuffs_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<ThingDef>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CAllowedStuffsFor_003Ed__6 : IEnumerable<ThingDef>, IEnumerable, IEnumerator<ThingDef>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private ThingDef _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private BuildableDef td;
+
+		public BuildableDef _003C_003E3__td;
+
+		private TechLevel maxTechLevel;
+
+		public TechLevel _003C_003E3__maxTechLevel;
+
+		private bool checkAllowedInStuffGeneration;
+
+		public bool _003C_003E3__checkAllowedInStuffGeneration;
+
+		private ThingDef _003Cfound_003E5__2;
+
+		private int _003Cyielded_003E5__3;
+
+		private int _003Ci_003E5__4;
+
+		ThingDef IEnumerator<ThingDef>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CAllowedStuffsFor_003Ed__6(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003Cfound_003E5__2 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			switch (_003C_003E1__state)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (!td.MadeFromStuff)
 				{
-					while (enumerator.MoveNext())
+					return false;
+				}
+				_003Cfound_003E5__2 = null;
+				_003Cyielded_003E5__3 = 0;
+				_003Ci_003E5__4 = 0;
+				goto IL_00e0;
+			case 1:
+				_003C_003E1__state = -1;
+				goto IL_00d0;
+			case 2:
+				{
+					_003C_003E1__state = -1;
+					break;
+				}
+				IL_00d0:
+				_003Ci_003E5__4++;
+				goto IL_00e0;
+				IL_00e0:
+				if (_003Ci_003E5__4 < StuffDefs.Count)
+				{
+					ThingDef thingDef = StuffDefs[_003Ci_003E5__4];
+					if (thingDef.IsStuff && (maxTechLevel == TechLevel.Undefined || (int)thingDef.techLevel <= (int)maxTechLevel) && thingDef.stuffProps.CanMake(td))
 					{
-						ThingDef thingDef = enumerator.Current;
-						if (validator(thingDef))
+						_003Cfound_003E5__2 = thingDef;
+						if (!checkAllowedInStuffGeneration || thingDef.stuffProps.allowedInStuffGeneration)
 						{
-							GenStuff.allowedStuffTmp.Add(thingDef);
+							_003Cyielded_003E5__3++;
+							_003C_003E2__current = thingDef;
+							_003C_003E1__state = 1;
+							return true;
 						}
 					}
-					goto IL_75;
+					goto IL_00d0;
 				}
-			}
-			GenStuff.allowedStuffTmp.Clear();
-			GenStuff.allowedStuffTmp.AddRange(GenStuff.AllowedStuffsFor(td, maxTechLevel, false));
-			IL_75:
-			return GenStuff.allowedStuffTmp.TryRandomElement(out stuff);
-		}
-
-		// Token: 0x060134E7 RID: 79079 RVA: 0x005BCD14 File Offset: 0x005BAF14
-		public static ThingDef RandomStuffInexpensiveFor(ThingDef thingDef, Faction faction, Predicate<ThingDef> validator = null)
-		{
-			return GenStuff.RandomStuffInexpensiveFor(thingDef, (faction != null) ? faction.def.techLevel : TechLevel.Undefined, validator);
-		}
-
-		// Token: 0x060134E8 RID: 79080 RVA: 0x005BCD30 File Offset: 0x005BAF30
-		public static ThingDef RandomStuffInexpensiveFor(ThingDef thingDef, TechLevel maxTechLevel = TechLevel.Undefined, Predicate<ThingDef> validator = null)
-		{
-			if (!thingDef.MadeFromStuff)
-			{
-				return null;
-			}
-			IEnumerable<ThingDef> enumerable = GenStuff.AllowedStuffsFor(thingDef, maxTechLevel, true);
-			if (validator != null)
-			{
-				enumerable = from x in enumerable
-				where validator(x)
-				select x;
-			}
-			float cheapestPrice = -1f;
-			foreach (ThingDef thingDef2 in enumerable)
-			{
-				float num = thingDef2.BaseMarketValue / thingDef2.VolumePerUnit;
-				if (cheapestPrice == -1f || num < cheapestPrice)
+				if (_003Cyielded_003E5__3 == 0 && _003Cfound_003E5__2 != null)
 				{
-					cheapestPrice = num;
+					_003C_003E2__current = _003Cfound_003E5__2;
+					_003C_003E1__state = 2;
+					return true;
+				}
+				break;
+			}
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<ThingDef> IEnumerable<ThingDef>.GetEnumerator()
+		{
+			_003CAllowedStuffsFor_003Ed__6 _003CAllowedStuffsFor_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CAllowedStuffsFor_003Ed__ = this;
+			}
+			else
+			{
+				_003CAllowedStuffsFor_003Ed__ = new _003CAllowedStuffsFor_003Ed__6(0);
+			}
+			_003CAllowedStuffsFor_003Ed__.td = _003C_003E3__td;
+			_003CAllowedStuffsFor_003Ed__.maxTechLevel = _003C_003E3__maxTechLevel;
+			_003CAllowedStuffsFor_003Ed__.checkAllowedInStuffGeneration = _003C_003E3__checkAllowedInStuffGeneration;
+			return _003CAllowedStuffsFor_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<ThingDef>)this).GetEnumerator();
+		}
+	}
+
+	private static List<ThingDef> cachedStuffDefs;
+
+	private static List<ThingDef> allowedStuffTmp = new List<ThingDef>();
+
+	private static List<ThingDef> StuffDefs
+	{
+		get
+		{
+			if (cachedStuffDefs == null)
+			{
+				cachedStuffDefs = new List<ThingDef>();
+				foreach (ThingDef item in DefDatabase<ThingDef>.AllDefsListForReading)
+				{
+					if (item.IsStuff)
+					{
+						cachedStuffDefs.Add(item);
+					}
 				}
 			}
-			enumerable = from x in enumerable
-			where x.BaseMarketValue / x.VolumePerUnit <= cheapestPrice * 4f
-			select x;
-			ThingDef result;
-			if (enumerable.TryRandomElementByWeight((ThingDef x) => x.stuffProps.commonality, out result))
-			{
-				return result;
-			}
+			return cachedStuffDefs;
+		}
+	}
+
+	public static ThingDef DefaultStuffFor(BuildableDef bd)
+	{
+		if (!bd.MadeFromStuff)
+		{
 			return null;
 		}
-
-		// Token: 0x060134E9 RID: 79081 RVA: 0x005BCE28 File Offset: 0x005BB028
-		public static void ResetStaticData()
+		if (bd is ThingDef thingDef)
 		{
-			GenStuff.cachedStuffDefs = null;
+			if (thingDef.defaultStuff != null)
+			{
+				return thingDef.defaultStuff;
+			}
+			if (thingDef.IsMeleeWeapon)
+			{
+				if (ThingDefOf.Steel.stuffProps.CanMake(bd))
+				{
+					return ThingDefOf.Steel;
+				}
+				if (ThingDefOf.Plasteel.stuffProps.CanMake(bd))
+				{
+					return ThingDefOf.Plasteel;
+				}
+			}
+			if (thingDef.IsApparel)
+			{
+				if (ThingDefOf.Cloth.stuffProps.CanMake(bd))
+				{
+					return ThingDefOf.Cloth;
+				}
+				if (ThingDefOf.Leather_Plain.stuffProps.CanMake(bd))
+				{
+					return ThingDefOf.Leather_Plain;
+				}
+				if (ThingDefOf.Steel.stuffProps.CanMake(bd))
+				{
+					return ThingDefOf.Steel;
+				}
+			}
 		}
+		if (ThingDefOf.WoodLog.stuffProps.CanMake(bd))
+		{
+			return ThingDefOf.WoodLog;
+		}
+		if (ThingDefOf.Steel.stuffProps.CanMake(bd))
+		{
+			return ThingDefOf.Steel;
+		}
+		if (ThingDefOf.Plasteel.stuffProps.CanMake(bd))
+		{
+			return ThingDefOf.Plasteel;
+		}
+		if (ThingDefOf.BlocksGranite.stuffProps.CanMake(bd))
+		{
+			return ThingDefOf.BlocksGranite;
+		}
+		if (ThingDefOf.Cloth.stuffProps.CanMake(bd))
+		{
+			return ThingDefOf.Cloth;
+		}
+		if (ThingDefOf.Leather_Plain.stuffProps.CanMake(bd))
+		{
+			return ThingDefOf.Leather_Plain;
+		}
+		return AllowedStuffsFor(bd).First();
+	}
 
-		// Token: 0x0400D63C RID: 54844
-		private static List<ThingDef> cachedStuffDefs;
+	public static ThingDef RandomStuffFor(ThingDef td)
+	{
+		if (!td.MadeFromStuff)
+		{
+			return null;
+		}
+		return AllowedStuffsFor(td, TechLevel.Undefined, checkAllowedInStuffGeneration: true).RandomElement();
+	}
 
-		// Token: 0x0400D63D RID: 54845
-		private static List<ThingDef> allowedStuffTmp = new List<ThingDef>();
+	public static ThingDef RandomStuffByCommonalityFor(ThingDef td, TechLevel maxTechLevel = TechLevel.Undefined)
+	{
+		if (!td.MadeFromStuff)
+		{
+			return null;
+		}
+		if (!TryRandomStuffByCommonalityFor(td, out var stuff, maxTechLevel))
+		{
+			return DefaultStuffFor(td);
+		}
+		return stuff;
+	}
+
+	[IteratorStateMachine(typeof(_003CAllowedStuffsFor_003Ed__6))]
+	public static IEnumerable<ThingDef> AllowedStuffsFor(BuildableDef td, TechLevel maxTechLevel = TechLevel.Undefined, bool checkAllowedInStuffGeneration = false)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CAllowedStuffsFor_003Ed__6(-2)
+		{
+			_003C_003E3__td = td,
+			_003C_003E3__maxTechLevel = maxTechLevel,
+			_003C_003E3__checkAllowedInStuffGeneration = checkAllowedInStuffGeneration
+		};
+	}
+
+	[IteratorStateMachine(typeof(_003CAllowedStuffs_003Ed__7))]
+	public static IEnumerable<ThingDef> AllowedStuffs(List<StuffCategoryDef> categories, TechLevel maxTechLevel = TechLevel.Undefined)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CAllowedStuffs_003Ed__7(-2)
+		{
+			_003C_003E3__categories = categories,
+			_003C_003E3__maxTechLevel = maxTechLevel
+		};
+	}
+
+	public static bool TryRandomStuffByCommonalityFor(ThingDef td, out ThingDef stuff, TechLevel maxTechLevel = TechLevel.Undefined)
+	{
+		if (!td.MadeFromStuff)
+		{
+			stuff = null;
+			return true;
+		}
+		return AllowedStuffsFor(td, maxTechLevel, checkAllowedInStuffGeneration: true).TryRandomElementByWeight((ThingDef x) => x.stuffProps.commonality, out stuff);
+	}
+
+	public static bool TryRandomStuffFor(ThingDef td, out ThingDef stuff, TechLevel maxTechLevel = TechLevel.Undefined, Predicate<ThingDef> validator = null)
+	{
+		if (!td.MadeFromStuff)
+		{
+			stuff = null;
+			return true;
+		}
+		if (validator != null)
+		{
+			allowedStuffTmp.Clear();
+			foreach (ThingDef item in AllowedStuffsFor(td, maxTechLevel, checkAllowedInStuffGeneration: true))
+			{
+				if (validator(item))
+				{
+					allowedStuffTmp.Add(item);
+				}
+			}
+		}
+		else
+		{
+			allowedStuffTmp.Clear();
+			allowedStuffTmp.AddRange(AllowedStuffsFor(td, maxTechLevel));
+		}
+		return allowedStuffTmp.TryRandomElement(out stuff);
+	}
+
+	public static ThingDef RandomStuffInexpensiveFor(ThingDef thingDef, Faction faction, Predicate<ThingDef> validator = null)
+	{
+		return RandomStuffInexpensiveFor(thingDef, faction?.def.techLevel ?? TechLevel.Undefined, validator);
+	}
+
+	public static ThingDef RandomStuffInexpensiveFor(ThingDef thingDef, TechLevel maxTechLevel = TechLevel.Undefined, Predicate<ThingDef> validator = null)
+	{
+		if (!thingDef.MadeFromStuff)
+		{
+			return null;
+		}
+		IEnumerable<ThingDef> enumerable = AllowedStuffsFor(thingDef, maxTechLevel, checkAllowedInStuffGeneration: true);
+		if (validator != null)
+		{
+			enumerable = enumerable.Where((ThingDef x) => validator(x));
+		}
+		float cheapestPrice = -1f;
+		foreach (ThingDef item in enumerable)
+		{
+			float num = item.BaseMarketValue / item.VolumePerUnit;
+			if (cheapestPrice == -1f || num < cheapestPrice)
+			{
+				cheapestPrice = num;
+			}
+		}
+		enumerable = enumerable.Where((ThingDef x) => x.BaseMarketValue / x.VolumePerUnit <= cheapestPrice * 4f);
+		if (enumerable.TryRandomElementByWeight((ThingDef x) => x.stuffProps.commonality, out var result))
+		{
+			return result;
+		}
+		return null;
+	}
+
+	public static void ResetStaticData()
+	{
+		cachedStuffDefs = null;
 	}
 }

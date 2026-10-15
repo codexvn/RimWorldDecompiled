@@ -1,143 +1,307 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class PawnColumnWorker_Outfit : PawnColumnWorker
 {
-	// Token: 0x0200346D RID: 13421
-	public class PawnColumnWorker_Outfit : PawnColumnWorker
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass4_0
 	{
-		// Token: 0x06012DFD RID: 77309 RVA: 0x005976E4 File Offset: 0x005958E4
-		public override void DoHeader(Rect rect, PawnTable table)
+		public Pawn pawn;
+
+		internal void _003CButton_GenerateMenu_003Eb__1()
 		{
-			base.DoHeader(rect, table);
-			MouseoverSounds.DoRegion(rect);
-			Rect rect2 = new Rect(rect.x, rect.y + (rect.height - 65f), Mathf.Min(rect.width, 360f), 32f);
-			if (Widgets.ButtonText(rect2, "ManageApparelPolicies".Translate(), true, true, true, null))
+			Find.WindowStack.Add(new Dialog_ManageApparelPolicies(pawn.outfits.CurrentApparelPolicy));
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass4_1
+	{
+		public ApparelPolicy outfit;
+
+		public _003C_003Ec__DisplayClass4_0 CS_0024_003C_003E8__locals1;
+
+		internal void _003CButton_GenerateMenu_003Eb__0()
+		{
+			CS_0024_003C_003E8__locals1.pawn.outfits.CurrentApparelPolicy = outfit;
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CButton_GenerateMenu_003Ed__4 : IEnumerable<Widgets.DropdownMenuElement<ApparelPolicy>>, IEnumerable, IEnumerator<Widgets.DropdownMenuElement<ApparelPolicy>>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Widgets.DropdownMenuElement<ApparelPolicy> _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private Pawn pawn;
+
+		public Pawn _003C_003E3__pawn;
+
+		private _003C_003Ec__DisplayClass4_0 _003C_003E8__1;
+
+		private List<ApparelPolicy>.Enumerator _003C_003E7__wrap1;
+
+		Widgets.DropdownMenuElement<ApparelPolicy> IEnumerator<Widgets.DropdownMenuElement<ApparelPolicy>>.Current
+		{
+			[DebuggerHidden]
+			get
 			{
-				Find.WindowStack.Add(new Dialog_ManageApparelPolicies(null));
-				PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.Outfits, KnowledgeAmount.Total);
+				return _003C_003E2__current;
 			}
-			UIHighlighter.HighlightOpportunity(rect2, "ManageOutfits");
 		}
 
-		// Token: 0x06012DFE RID: 77310 RVA: 0x00597780 File Offset: 0x00595980
-		public override void DoCell(Rect rect, Pawn pawn, PawnTable table)
+		object IEnumerator.Current
 		{
-			if (pawn.outfits == null)
+			[DebuggerHidden]
+			get
 			{
-				return;
+				return _003C_003E2__current;
 			}
-			Rect rect2 = rect.ContractedBy(0f, 2f);
-			bool somethingIsForced = pawn.outfits.forcedHandler.SomethingIsForced;
-			Rect rect3 = rect2;
-			Rect rect4 = default(Rect);
-			if (somethingIsForced)
+		}
+
+		[DebuggerHidden]
+		public _003CButton_GenerateMenu_003Ed__4(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				rect2.SplitVerticallyWithMargin(out rect3, out rect4, 4f);
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
 			}
-			if (pawn.IsQuestLodger())
+			_003C_003E8__1 = null;
+			_003C_003E7__wrap1 = default(List<ApparelPolicy>.Enumerator);
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
 			{
-				Text.Anchor = TextAnchor.MiddleCenter;
-				Widgets.Label(rect3, "Unchangeable".Translate().Truncate(rect3.width, null));
-				TooltipHandler.TipRegionByKey(rect3, "QuestRelated_Outfit");
-				Text.Anchor = TextAnchor.UpperLeft;
+				switch (_003C_003E1__state)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E8__1 = new _003C_003Ec__DisplayClass4_0();
+					_003C_003E8__1.pawn = pawn;
+					_003C_003E7__wrap1 = Current.Game.outfitDatabase.AllOutfits.GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_00ee;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_00ee;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						return false;
+					}
+					IL_00ee:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						_003C_003Ec__DisplayClass4_1 CS_0024_003C_003E8__locals4 = new _003C_003Ec__DisplayClass4_1
+						{
+							CS_0024_003C_003E8__locals1 = _003C_003E8__1,
+							outfit = _003C_003E7__wrap1.Current
+						};
+						_003C_003E2__current = new Widgets.DropdownMenuElement<ApparelPolicy>
+						{
+							option = new FloatMenuOption(CS_0024_003C_003E8__locals4.outfit.label, delegate
+							{
+								CS_0024_003C_003E8__locals4.CS_0024_003C_003E8__locals1.pawn.outfits.CurrentApparelPolicy = CS_0024_003C_003E8__locals4.outfit;
+							}),
+							payload = CS_0024_003C_003E8__locals4.outfit
+						};
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = default(List<ApparelPolicy>.Enumerator);
+					_003C_003E2__current = new Widgets.DropdownMenuElement<ApparelPolicy>
+					{
+						option = new FloatMenuOption($"{"AssignTabEdit".Translate()}...", delegate
+						{
+							Find.WindowStack.Add(new Dialog_ManageApparelPolicies(_003C_003E8__1.pawn.outfits.CurrentApparelPolicy));
+						})
+					};
+					_003C_003E1__state = 2;
+					return true;
+				}
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap1/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Widgets.DropdownMenuElement<ApparelPolicy>> IEnumerable<Widgets.DropdownMenuElement<ApparelPolicy>>.GetEnumerator()
+		{
+			_003CButton_GenerateMenu_003Ed__4 _003CButton_GenerateMenu_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CButton_GenerateMenu_003Ed__ = this;
 			}
 			else
 			{
-				Widgets.Dropdown<Pawn, ApparelPolicy>(rect3, pawn, (Pawn p) => p.outfits.CurrentApparelPolicy, new Func<Pawn, IEnumerable<Widgets.DropdownMenuElement<ApparelPolicy>>>(this.Button_GenerateMenu), pawn.outfits.CurrentApparelPolicy.label.Truncate(rect3.width, null), null, pawn.outfits.CurrentApparelPolicy.label, null, null, true);
+				_003CButton_GenerateMenu_003Ed__ = new _003CButton_GenerateMenu_003Ed__4(0);
 			}
-			if (somethingIsForced)
+			_003CButton_GenerateMenu_003Ed__.pawn = _003C_003E3__pawn;
+			return _003CButton_GenerateMenu_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Widgets.DropdownMenuElement<ApparelPolicy>>)this).GetEnumerator();
+		}
+	}
+
+	public const int TopAreaHeight = 65;
+
+	public const int ManageOutfitsButtonHeight = 32;
+
+	public override void DoHeader(Rect rect, PawnTable table)
+	{
+		base.DoHeader(rect, table);
+		MouseoverSounds.DoRegion(rect);
+		Rect rect2 = new Rect(rect.x, rect.y + (rect.height - 65f), Mathf.Min(rect.width, 360f), 32f);
+		if (Widgets.ButtonText(rect2, "ManageApparelPolicies".Translate(), drawBackground: true, doMouseoverSound: true, active: true, null))
+		{
+			Find.WindowStack.Add(new Dialog_ManageApparelPolicies(null));
+			PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.Outfits, KnowledgeAmount.Total);
+		}
+		UIHighlighter.HighlightOpportunity(rect2, "ManageOutfits");
+	}
+
+	public override void DoCell(Rect rect, Pawn pawn, PawnTable table)
+	{
+		if (pawn.outfits == null)
+		{
+			return;
+		}
+		Rect rect2 = rect.ContractedBy(0f, 2f);
+		bool somethingIsForced = pawn.outfits.forcedHandler.SomethingIsForced;
+		Rect left = rect2;
+		Rect right = default(Rect);
+		if (somethingIsForced)
+		{
+			rect2.SplitVerticallyWithMargin(out left, out right, 4f);
+		}
+		if (pawn.IsQuestLodger())
+		{
+			Text.Anchor = TextAnchor.MiddleCenter;
+			Widgets.Label(left, "Unchangeable".Translate().Truncate(left.width));
+			TooltipHandler.TipRegionByKey(left, "QuestRelated_Outfit");
+			Text.Anchor = TextAnchor.UpperLeft;
+		}
+		else
+		{
+			Widgets.Dropdown(left, pawn, (Pawn p) => p.outfits.CurrentApparelPolicy, Button_GenerateMenu, pawn.outfits.CurrentApparelPolicy.label.Truncate(left.width), null, pawn.outfits.CurrentApparelPolicy.label, null, null, paintable: true);
+		}
+		if (!somethingIsForced)
+		{
+			return;
+		}
+		if (Widgets.ButtonText(right, "ClearForcedApparel".Translate(), drawBackground: true, doMouseoverSound: true, active: true, null))
+		{
+			pawn.outfits.forcedHandler.Reset();
+		}
+		if (!Mouse.IsOver(right))
+		{
+			return;
+		}
+		TooltipHandler.TipRegion(right, new TipSignal(delegate
+		{
+			string text = "ForcedApparel".Translate() + ":\n";
+			foreach (Apparel item in pawn.outfits.forcedHandler.ForcedApparel)
 			{
-				if (Widgets.ButtonText(rect4, "ClearForcedApparel".Translate(), true, true, true, null))
-				{
-					pawn.outfits.forcedHandler.Reset();
-				}
-				if (Mouse.IsOver(rect4))
-				{
-					TooltipHandler.TipRegion(rect4, new TipSignal(delegate()
-					{
-						string text = "ForcedApparel".Translate() + ":\n";
-						foreach (Apparel apparel in pawn.outfits.forcedHandler.ForcedApparel)
-						{
-							text = text + "\n   " + apparel.LabelCap;
-						}
-						return text;
-					}, pawn.GetHashCode() * 612));
-				}
+				text = text + "\n   " + item.LabelCap;
 			}
-		}
+			return text;
+		}, pawn.GetHashCode() * 612));
+	}
 
-		// Token: 0x06012DFF RID: 77311 RVA: 0x0059790A File Offset: 0x00595B0A
-		private IEnumerable<Widgets.DropdownMenuElement<ApparelPolicy>> Button_GenerateMenu(Pawn pawn)
+	[IteratorStateMachine(typeof(_003CButton_GenerateMenu_003Ed__4))]
+	private IEnumerable<Widgets.DropdownMenuElement<ApparelPolicy>> Button_GenerateMenu(Pawn pawn)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CButton_GenerateMenu_003Ed__4(-2)
 		{
-			using (List<ApparelPolicy>.Enumerator enumerator = Current.Game.outfitDatabase.AllOutfits.GetEnumerator())
-			{
-				while (enumerator.MoveNext())
-				{
-					ApparelPolicy outfit = enumerator.Current;
-					yield return new Widgets.DropdownMenuElement<ApparelPolicy>
-					{
-						option = new FloatMenuOption(outfit.label, delegate()
-						{
-							pawn.outfits.CurrentApparelPolicy = outfit;
-						}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0),
-						payload = outfit
-					};
-				}
-			}
-			List<ApparelPolicy>.Enumerator enumerator = default(List<ApparelPolicy>.Enumerator);
-			yield return new Widgets.DropdownMenuElement<ApparelPolicy>
-			{
-				option = new FloatMenuOption(string.Format("{0}...", "AssignTabEdit".Translate()), delegate()
-				{
-					Find.WindowStack.Add(new Dialog_ManageApparelPolicies(pawn.outfits.CurrentApparelPolicy));
-				}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0)
-			};
-			yield break;
-			yield break;
-		}
+			_003C_003E3__pawn = pawn
+		};
+	}
 
-		// Token: 0x06012E00 RID: 77312 RVA: 0x00596898 File Offset: 0x00594A98
-		public override int GetMinWidth(PawnTable table)
+	public override int GetMinWidth(PawnTable table)
+	{
+		return Mathf.Max(base.GetMinWidth(table), Mathf.CeilToInt(194f));
+	}
+
+	public override int GetOptimalWidth(PawnTable table)
+	{
+		return Mathf.Clamp(Mathf.CeilToInt(251f), GetMinWidth(table), GetMaxWidth(table));
+	}
+
+	public override int GetMinHeaderHeight(PawnTable table)
+	{
+		return Mathf.Max(base.GetMinHeaderHeight(table), 65);
+	}
+
+	public override int Compare(Pawn a, Pawn b)
+	{
+		return GetValueToCompare(a).CompareTo(GetValueToCompare(b));
+	}
+
+	private int GetValueToCompare(Pawn pawn)
+	{
+		if (pawn.outfits != null && pawn.outfits.CurrentApparelPolicy != null)
 		{
-			return Mathf.Max(base.GetMinWidth(table), Mathf.CeilToInt(194f));
+			return pawn.outfits.CurrentApparelPolicy.id;
 		}
-
-		// Token: 0x06012E01 RID: 77313 RVA: 0x005968B0 File Offset: 0x00594AB0
-		public override int GetOptimalWidth(PawnTable table)
-		{
-			return Mathf.Clamp(Mathf.CeilToInt(251f), this.GetMinWidth(table), this.GetMaxWidth(table));
-		}
-
-		// Token: 0x06012E02 RID: 77314 RVA: 0x00595E9D File Offset: 0x0059409D
-		public override int GetMinHeaderHeight(PawnTable table)
-		{
-			return Mathf.Max(base.GetMinHeaderHeight(table), 65);
-		}
-
-		// Token: 0x06012E03 RID: 77315 RVA: 0x0059791C File Offset: 0x00595B1C
-		public override int Compare(Pawn a, Pawn b)
-		{
-			return this.GetValueToCompare(a).CompareTo(this.GetValueToCompare(b));
-		}
-
-		// Token: 0x06012E04 RID: 77316 RVA: 0x0059793F File Offset: 0x00595B3F
-		private int GetValueToCompare(Pawn pawn)
-		{
-			if (pawn.outfits != null && pawn.outfits.CurrentApparelPolicy != null)
-			{
-				return pawn.outfits.CurrentApparelPolicy.id;
-			}
-			return int.MinValue;
-		}
-
-		// Token: 0x0400C3B0 RID: 50096
-		public const int TopAreaHeight = 65;
-
-		// Token: 0x0400C3B1 RID: 50097
-		public const int ManageOutfitsButtonHeight = 32;
+		return int.MinValue;
 	}
 }

@@ -1,86 +1,229 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class RoomRequirement_ThingAnyOf : RoomRequirement
 {
-	// Token: 0x020037AC RID: 14252
-	public class RoomRequirement_ThingAnyOf : RoomRequirement
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__4 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x06013BF7 RID: 80887 RVA: 0x005DD0C4 File Offset: 0x005DB2C4
-		public override string Label(Room r = null)
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public RoomRequirement_ThingAnyOf _003C_003E4__this;
+
+		private IEnumerator<string> _003C_003E7__wrap1;
+
+		string IEnumerator<string>.Current
 		{
-			return ((!this.labelKey.NullOrEmpty()) ? this.labelKey.Translate() : this.things[0].label) + ((r != null) ? " 0/1" : "");
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x06013BF8 RID: 80888 RVA: 0x005DD118 File Offset: 0x005DB318
-		public override bool Met(Room r, Pawn p = null)
+		object IEnumerator.Current
 		{
-			foreach (ThingDef def in this.things)
+			[DebuggerHidden]
+			get
 			{
-				if (r.ContainsThing(def))
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__4(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
 				{
-					return true;
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
 				}
 			}
-			return false;
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x06013BF9 RID: 80889 RVA: 0x005DD174 File Offset: 0x005DB374
-		public override bool SameOrSubsetOf(RoomRequirement other)
+		private bool MoveNext()
 		{
-			if (!base.SameOrSubsetOf(other))
+			try
+			{
+				int num = _003C_003E1__state;
+				RoomRequirement_ThingAnyOf roomRequirement_ThingAnyOf = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((RoomRequirement)roomRequirement_ThingAnyOf).ConfigErrors().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_006f:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (roomRequirement_ThingAnyOf.things.NullOrEmpty())
+					{
+						_003C_003E2__current = "things are null or empty";
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__4 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__4(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	public List<ThingDef> things;
+
+	public override string Label(Room r = null)
+	{
+		return ((!labelKey.NullOrEmpty()) ? ((string)labelKey.Translate()) : things[0].label) + ((r != null) ? " 0/1" : "");
+	}
+
+	public override bool Met(Room r, Pawn p = null)
+	{
+		foreach (ThingDef thing in things)
+		{
+			if (r.ContainsThing(thing))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public override bool SameOrSubsetOf(RoomRequirement other)
+	{
+		if (!base.SameOrSubsetOf(other))
+		{
+			return false;
+		}
+		RoomRequirement_ThingAnyOf roomRequirement_ThingAnyOf = (RoomRequirement_ThingAnyOf)other;
+		foreach (ThingDef thing in things)
+		{
+			if (!roomRequirement_ThingAnyOf.things.Contains(thing))
 			{
 				return false;
 			}
-			RoomRequirement_ThingAnyOf roomRequirement_ThingAnyOf = (RoomRequirement_ThingAnyOf)other;
-			foreach (ThingDef item in this.things)
-			{
-				if (!roomRequirement_ThingAnyOf.things.Contains(item))
-				{
-					return false;
-				}
-			}
-			return true;
 		}
+		return true;
+	}
 
-		// Token: 0x06013BFA RID: 80890 RVA: 0x005DD1E8 File Offset: 0x005DB3E8
-		public override IEnumerable<string> ConfigErrors()
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__4))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__4(-2)
 		{
-			foreach (string text in base.ConfigErrors())
-			{
-				yield return text;
-			}
-			IEnumerator<string> enumerator = null;
-			if (this.things.NullOrEmpty<ThingDef>())
-			{
-				yield return "things are null or empty";
-			}
-			yield break;
-			yield break;
-		}
+			_003C_003E4__this = this
+		};
+	}
 
-		// Token: 0x06013BFB RID: 80891 RVA: 0x005DD1F8 File Offset: 0x005DB3F8
-		public override bool PlayerCanBuildNow()
+	public override bool PlayerCanBuildNow()
+	{
+		for (int i = 0; i < things.Count; i++)
 		{
-			for (int i = 0; i < this.things.Count; i++)
+			if (things[i].IsResearchFinished)
 			{
-				if (this.things[i].IsResearchFinished)
-				{
-					return true;
-				}
+				return true;
 			}
-			return false;
 		}
+		return false;
+	}
 
-		// Token: 0x06013BFC RID: 80892 RVA: 0x005DD231 File Offset: 0x005DB431
-		public override void ExposeData()
-		{
-			base.ExposeData();
-			Scribe_Collections.Look<ThingDef>(ref this.things, "things", LookMode.Def, Array.Empty<object>());
-		}
-
-		// Token: 0x0400DABF RID: 55999
-		public List<ThingDef> things;
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Collections.Look(ref things, "things", LookMode.Def);
 	}
 }

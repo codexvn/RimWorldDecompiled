@@ -1,51 +1,145 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class IngestionOutcomeDoer_OffsetNeed : IngestionOutcomeDoer
 {
-	// Token: 0x020019A7 RID: 6567
-	public class IngestionOutcomeDoer_OffsetNeed : IngestionOutcomeDoer
+	[CompilerGenerated]
+	private sealed class _003CSpecialDisplayStats_003Ed__5 : IEnumerable<StatDrawEntry>, IEnumerable, IEnumerator<StatDrawEntry>, IEnumerator, IDisposable
 	{
-		// Token: 0x06009498 RID: 38040 RVA: 0x002BA13C File Offset: 0x002B833C
-		protected override void DoIngestionOutcomeSpecial(Pawn pawn, Thing ingested, int ingestedCount)
+		private int _003C_003E1__state;
+
+		private StatDrawEntry _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public IngestionOutcomeDoer_OffsetNeed _003C_003E4__this;
+
+		StatDrawEntry IEnumerator<StatDrawEntry>.Current
 		{
-			if (pawn.needs == null)
+			[DebuggerHidden]
+			get
 			{
-				return;
+				return _003C_003E2__current;
 			}
-			Need need;
-			if (!pawn.needs.TryGetNeed(this.need, out need))
-			{
-				return;
-			}
-			float num = this.offset * (float)ingestedCount;
-			AddictionUtility.ModifyChemicalEffectForToleranceAndBodySize(pawn, this.toleranceChemical, ref num, false, true);
-			if (this.perIngested)
-			{
-				num *= (float)ingested.stackCount;
-			}
-			need.CurLevel += num;
 		}
 
-		// Token: 0x06009499 RID: 38041 RVA: 0x002BA1A2 File Offset: 0x002B83A2
-		public override IEnumerable<StatDrawEntry> SpecialDisplayStats(ThingDef parentDef)
+		object IEnumerator.Current
 		{
-			string str = (this.offset >= 0f) ? "+" : string.Empty;
-			yield return new StatDrawEntry(StatCategoryDefOf.Drug, this.need.LabelCap, str + this.offset.ToStringPercent(), this.need.description, this.need.listPriority, null, null, false, false);
-			yield break;
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x04006084 RID: 24708
-		public NeedDef need;
+		[DebuggerHidden]
+		public _003CSpecialDisplayStats_003Ed__5(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
 
-		// Token: 0x04006085 RID: 24709
-		public float offset;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
 
-		// Token: 0x04006086 RID: 24710
-		public ChemicalDef toleranceChemical;
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			IngestionOutcomeDoer_OffsetNeed ingestionOutcomeDoer_OffsetNeed = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+			{
+				_003C_003E1__state = -1;
+				string text = ((ingestionOutcomeDoer_OffsetNeed.offset >= 0f) ? "+" : string.Empty);
+				_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.Drug, ingestionOutcomeDoer_OffsetNeed.need.LabelCap, text + ingestionOutcomeDoer_OffsetNeed.offset.ToStringPercent(), ingestionOutcomeDoer_OffsetNeed.need.description, ingestionOutcomeDoer_OffsetNeed.need.listPriority);
+				_003C_003E1__state = 1;
+				return true;
+			}
+			case 1:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
 
-		// Token: 0x04006087 RID: 24711
-		public bool perIngested;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<StatDrawEntry> IEnumerable<StatDrawEntry>.GetEnumerator()
+		{
+			_003CSpecialDisplayStats_003Ed__5 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CSpecialDisplayStats_003Ed__5(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<StatDrawEntry>)this).GetEnumerator();
+		}
+	}
+
+	public NeedDef need;
+
+	public float offset;
+
+	public ChemicalDef toleranceChemical;
+
+	public bool perIngested;
+
+	protected override void DoIngestionOutcomeSpecial(Pawn pawn, Thing ingested, int ingestedCount)
+	{
+		if (pawn.needs != null && pawn.needs.TryGetNeed(this.need, out var need))
+		{
+			float effect = offset * (float)ingestedCount;
+			AddictionUtility.ModifyChemicalEffectForToleranceAndBodySize(pawn, toleranceChemical, ref effect, applyGeneToleranceFactor: false);
+			if (perIngested)
+			{
+				effect *= (float)ingested.stackCount;
+			}
+			need.CurLevel += effect;
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CSpecialDisplayStats_003Ed__5))]
+	public override IEnumerable<StatDrawEntry> SpecialDisplayStats(ThingDef parentDef)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CSpecialDisplayStats_003Ed__5(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

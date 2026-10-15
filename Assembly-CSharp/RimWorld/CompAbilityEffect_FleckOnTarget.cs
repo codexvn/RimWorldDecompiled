@@ -1,84 +1,173 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompAbilityEffect_FleckOnTarget : CompAbilityEffect
 {
-	// Token: 0x02002232 RID: 8754
-	public class CompAbilityEffect_FleckOnTarget : CompAbilityEffect
+	[CompilerGenerated]
+	private sealed class _003CGetPreCastActions_003Ed__3 : IEnumerable<PreCastAction>, IEnumerable, IEnumerator<PreCastAction>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001D34 RID: 7476
-		// (get) Token: 0x0600BF4C RID: 48972 RVA: 0x00377AFF File Offset: 0x00375CFF
-		public new CompProperties_AbilityFleckOnTarget Props
+		private int _003C_003E1__state;
+
+		private PreCastAction _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompAbilityEffect_FleckOnTarget _003C_003E4__this;
+
+		PreCastAction IEnumerator<PreCastAction>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (CompProperties_AbilityFleckOnTarget)this.props;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600BF4D RID: 48973 RVA: 0x00377B0C File Offset: 0x00375D0C
-		public override void Apply(LocalTargetInfo target, LocalTargetInfo dest)
+		object IEnumerator.Current
 		{
-			if (this.Props.preCastTicks <= 0)
+			[DebuggerHidden]
+			get
 			{
-				SoundDef sound = this.Props.sound;
-				if (sound != null)
-				{
-					sound.PlayOneShot(new TargetInfo(target.Cell, this.parent.pawn.Map, false));
-				}
-				this.SpawnAll(target);
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600BF4E RID: 48974 RVA: 0x00377B66 File Offset: 0x00375D66
-		public override IEnumerable<PreCastAction> GetPreCastActions()
+		[DebuggerHidden]
+		public _003CGetPreCastActions_003Ed__3(int _003C_003E1__state)
 		{
-			if (this.Props.preCastTicks > 0)
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			CompAbilityEffect_FleckOnTarget CS_0024_003C_003E8__locals5 = _003C_003E4__this;
+			switch (num)
 			{
-				yield return new PreCastAction
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (CS_0024_003C_003E8__locals5.Props.preCastTicks > 0)
 				{
-					action = delegate(LocalTargetInfo t, LocalTargetInfo d)
+					_003C_003E2__current = new PreCastAction
 					{
-						this.SpawnAll(t);
-						SoundDef sound = this.Props.sound;
-						if (sound == null)
+						action = delegate(LocalTargetInfo t, LocalTargetInfo d)
 						{
-							return;
-						}
-						sound.PlayOneShot(new TargetInfo(t.Cell, this.parent.pawn.Map, false));
-					},
-					ticksAwayFromCast = this.Props.preCastTicks
+							CS_0024_003C_003E8__locals5.SpawnAll(t);
+							CS_0024_003C_003E8__locals5.Props.sound?.PlayOneShot(new TargetInfo(t.Cell, CS_0024_003C_003E8__locals5.parent.pawn.Map));
+						},
+						ticksAwayFromCast = CS_0024_003C_003E8__locals5.Props.preCastTicks
+					};
+					_003C_003E1__state = 1;
+					return true;
+				}
+				break;
+			case 1:
+				_003C_003E1__state = -1;
+				break;
+			}
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<PreCastAction> IEnumerable<PreCastAction>.GetEnumerator()
+		{
+			_003CGetPreCastActions_003Ed__3 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CGetPreCastActions_003Ed__3(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
 				};
 			}
-			yield break;
+			return result;
 		}
 
-		// Token: 0x0600BF4F RID: 48975 RVA: 0x00377B78 File Offset: 0x00375D78
-		private void SpawnAll(LocalTargetInfo target)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			if (!this.Props.fleckDefs.NullOrEmpty<FleckDef>())
-			{
-				for (int i = 0; i < this.Props.fleckDefs.Count; i++)
-				{
-					this.SpawnFleck(target, this.Props.fleckDefs[i]);
-				}
-				return;
-			}
-			this.SpawnFleck(target, this.Props.fleckDef);
+			return ((IEnumerable<PreCastAction>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x0600BF50 RID: 48976 RVA: 0x00377BE0 File Offset: 0x00375DE0
-		private void SpawnFleck(LocalTargetInfo target, FleckDef def)
+	public new CompProperties_AbilityFleckOnTarget Props => (CompProperties_AbilityFleckOnTarget)props;
+
+	public override void Apply(LocalTargetInfo target, LocalTargetInfo dest)
+	{
+		if (Props.preCastTicks <= 0)
 		{
-			if (target.HasThing && target.Thing.SpawnedOrAnyParentSpawned)
+			Props.sound?.PlayOneShot(new TargetInfo(target.Cell, parent.pawn.Map));
+			SpawnAll(target);
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CGetPreCastActions_003Ed__3))]
+	public override IEnumerable<PreCastAction> GetPreCastActions()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetPreCastActions_003Ed__3(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	private void SpawnAll(LocalTargetInfo target)
+	{
+		if (!Props.fleckDefs.NullOrEmpty())
+		{
+			for (int i = 0; i < Props.fleckDefs.Count; i++)
 			{
-				FleckMaker.AttachedOverlay(target.Thing, def, Vector3.zero, this.Props.scale, -1f);
-				return;
+				SpawnFleck(target, Props.fleckDefs[i]);
 			}
-			FleckMaker.Static(target.Cell, this.parent.pawn.Map, def, this.Props.scale);
+		}
+		else
+		{
+			SpawnFleck(target, Props.fleckDef);
+		}
+	}
+
+	private void SpawnFleck(LocalTargetInfo target, FleckDef def)
+	{
+		if (target.HasThing && target.Thing.SpawnedOrAnyParentSpawned)
+		{
+			FleckMaker.AttachedOverlay(target.Thing, def, Vector3.zero, Props.scale);
+		}
+		else
+		{
+			FleckMaker.Static(target.Cell, parent.pawn.Map, def, Props.scale);
 		}
 	}
 }

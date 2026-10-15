@@ -1,100 +1,240 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_ActivateMonolith : JobDriver
 {
-	// Token: 0x02001215 RID: 4629
-	public class JobDriver_ActivateMonolith : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__6 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700118E RID: 4494
-		// (get) Token: 0x06007114 RID: 28948 RVA: 0x00230170 File Offset: 0x0022E370
-		private Building_VoidMonolith VoidMonolith
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_ActivateMonolith _003C_003E4__this;
+
+		private Toil _003CgetToHaulTarget_003E5__2;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.job.GetTarget(TargetIndex.A).Thing as Building_VoidMonolith;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06007115 RID: 28949 RVA: 0x00230198 File Offset: 0x0022E398
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		object IEnumerator.Current
 		{
-			if (base.TargetThingC != null)
+			[DebuggerHidden]
+			get
 			{
-				this.pawn.ReserveAsManyAsPossible(this.job.GetTargetQueue(TargetIndex.B), this.job, 1, -1, null);
+				return _003C_003E2__current;
 			}
-			return (base.TargetThingB == null || this.pawn.Reserve(this.job.GetTarget(TargetIndex.B), this.job, 1, -1, null, errorOnFailed, false)) && this.pawn.Reserve(this.VoidMonolith, this.job, 1, -1, null, errorOnFailed, false) && this.pawn.ReserveSittableOrSpot(this.VoidMonolith.InteractionCell, this.job, errorOnFailed);
 		}
 
-		// Token: 0x06007116 RID: 28950 RVA: 0x00230242 File Offset: 0x0022E442
-		protected override IEnumerable<Toil> MakeNewToils()
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__6(int _003C_003E1__state)
 		{
-			this.FailOn(delegate()
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003CgetToHaulTarget_003E5__2 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_ActivateMonolith CS_0024_003C_003E8__locals12 = _003C_003E4__this;
+			switch (num)
 			{
-				string text;
-				string text2;
-				return !this.VoidMonolith.CanActivate(out text, out text2);
-			});
-			if (Find.Anomaly.NextLevelDef == MonolithLevelDefOf.VoidAwakened)
+			default:
+				return false;
+			case 0:
 			{
-				yield return Toils_General.Do(delegate
+				_003C_003E1__state = -1;
+				CS_0024_003C_003E8__locals12.FailOn(() => !CS_0024_003C_003E8__locals12.VoidMonolith.CanActivate(out var _, out var _));
+				if (Find.Anomaly.NextLevelDef == MonolithLevelDefOf.VoidAwakened)
 				{
-					Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("VoidAwakeningConfirmationText".Translate(), delegate()
+					_003C_003E2__current = Toils_General.Do(delegate
 					{
-					}, delegate()
-					{
-						this.pawn.jobs.EndCurrentJob(JobCondition.Succeeded, true, true);
-					}, false, null, WindowLayer.Dialog));
-				});
-			}
-			if (base.TargetThingB != null)
-			{
-				Toil getToHaulTarget = Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.ClosestTouch, true).FailOnDespawnedNullOrForbidden(TargetIndex.B).FailOnSomeonePhysicallyInteracting(TargetIndex.B);
-				yield return getToHaulTarget;
-				yield return Toils_Haul.StartCarryThing(TargetIndex.B, false, true, false, true, true);
-				yield return Toils_Haul.JumpIfAlsoCollectingNextTargetInQueue(getToHaulTarget, TargetIndex.B);
-				getToHaulTarget = null;
-			}
-			if (this.job.targetC == null)
-			{
-				this.job.targetC = base.TargetThingA.SpawnedParentOrMe;
-			}
-			yield return Toils_Goto.GotoThing(TargetIndex.C, PathEndMode.InteractionCell, false).FailOnDespawnedNullOrForbidden(TargetIndex.C).FailOnSomeonePhysicallyInteracting(TargetIndex.C);
-			int ticks = Mathf.RoundToInt(600f);
-			Toil toil = Toils_General.WaitWith(TargetIndex.A, ticks, true, true, false, TargetIndex.A, PathEndMode.Touch);
-			toil.WithEffect(EffecterDefOf.MonolithStage2, () => base.TargetA, null);
-			Toil toil2 = toil;
-			toil2.tickAction = (Action)Delegate.Combine(toil2.tickAction, new Action(delegate()
-			{
-				Find.TickManager.slower.SignalForceNormalSpeed();
-			}));
-			if (Find.Anomaly.LevelDef.activateSound != null)
-			{
-				toil.PlaySustainerOrSound(Find.Anomaly.LevelDef.activateSound, 1f);
-			}
-			yield return toil;
-			yield return Toils_General.Do(delegate
-			{
-				if (base.TargetThingB != null)
-				{
-					this.pawn.carryTracker.DestroyCarriedThing();
+						Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("VoidAwakeningConfirmationText".Translate(), delegate
+						{
+						}, delegate
+						{
+							CS_0024_003C_003E8__locals12.pawn.jobs.EndCurrentJob(JobCondition.Succeeded);
+						}));
+					});
+					_003C_003E1__state = 1;
+					return true;
 				}
-				this.VoidMonolith.Activate(this.pawn);
-			});
-			yield return Toils_General.Wait(360, TargetIndex.A);
-			yield break;
+				goto IL_008c;
+			}
+			case 1:
+				_003C_003E1__state = -1;
+				goto IL_008c;
+			case 2:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Haul.StartCarryThing(TargetIndex.B, putRemainderInQueue: false, subtractNumTakenFromJobCount: true, failIfStackCountLessThanJobCount: false, reserve: true, canTakeFromInventory: true);
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Haul.JumpIfAlsoCollectingNextTargetInQueue(_003CgetToHaulTarget_003E5__2, TargetIndex.B);
+				_003C_003E1__state = 4;
+				return true;
+			case 4:
+				_003C_003E1__state = -1;
+				_003CgetToHaulTarget_003E5__2 = null;
+				goto IL_0117;
+			case 5:
+			{
+				_003C_003E1__state = -1;
+				int ticks = Mathf.RoundToInt(600f);
+				Toil toil = Toils_General.WaitWith(TargetIndex.A, ticks, useProgressBar: true, maintainPosture: true, maintainSleep: false, TargetIndex.A);
+				toil.WithEffect(EffecterDefOf.MonolithStage2, () => CS_0024_003C_003E8__locals12.TargetA, null);
+				toil.tickAction = (Action)Delegate.Combine(toil.tickAction, (Action)delegate
+				{
+					Find.TickManager.slower.SignalForceNormalSpeed();
+				});
+				if (Find.Anomaly.LevelDef.activateSound != null)
+				{
+					toil.PlaySustainerOrSound(Find.Anomaly.LevelDef.activateSound);
+				}
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 6;
+				return true;
+			}
+			case 6:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.Do(delegate
+				{
+					if (CS_0024_003C_003E8__locals12.TargetThingB != null)
+					{
+						CS_0024_003C_003E8__locals12.pawn.carryTracker.DestroyCarriedThing();
+					}
+					CS_0024_003C_003E8__locals12.VoidMonolith.Activate(CS_0024_003C_003E8__locals12.pawn);
+				});
+				_003C_003E1__state = 7;
+				return true;
+			case 7:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.Wait(360, TargetIndex.A);
+				_003C_003E1__state = 8;
+				return true;
+			case 8:
+				{
+					_003C_003E1__state = -1;
+					return false;
+				}
+				IL_0117:
+				if (CS_0024_003C_003E8__locals12.job.targetC == null)
+				{
+					CS_0024_003C_003E8__locals12.job.targetC = CS_0024_003C_003E8__locals12.TargetThingA.SpawnedParentOrMe;
+				}
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.C, PathEndMode.InteractionCell).FailOnDespawnedNullOrForbidden(TargetIndex.C).FailOnSomeonePhysicallyInteracting(TargetIndex.C);
+				_003C_003E1__state = 5;
+				return true;
+				IL_008c:
+				if (CS_0024_003C_003E8__locals12.TargetThingB != null)
+				{
+					_003CgetToHaulTarget_003E5__2 = Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.ClosestTouch, canGotoSpawnedParent: true).FailOnDespawnedNullOrForbidden(TargetIndex.B).FailOnSomeonePhysicallyInteracting(TargetIndex.B);
+					_003C_003E2__current = _003CgetToHaulTarget_003E5__2;
+					_003C_003E1__state = 2;
+					return true;
+				}
+				goto IL_0117;
+			}
 		}
 
-		// Token: 0x04004E70 RID: 20080
-		private const int ActivateSeconds = 10;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x04004E71 RID: 20081
-		private const TargetIndex MonolithIndex = TargetIndex.A;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04004E72 RID: 20082
-		private const TargetIndex ActivationItemIndex = TargetIndex.B;
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__6 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__6(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private const int ActivateSeconds = 10;
+
+	private const TargetIndex MonolithIndex = TargetIndex.A;
+
+	private const TargetIndex ActivationItemIndex = TargetIndex.B;
+
+	private Building_VoidMonolith VoidMonolith => job.GetTarget(TargetIndex.A).Thing as Building_VoidMonolith;
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		if (base.TargetThingC != null)
+		{
+			pawn.ReserveAsManyAsPossible(job.GetTargetQueue(TargetIndex.B), job);
+		}
+		if (base.TargetThingB != null && !pawn.Reserve(job.GetTarget(TargetIndex.B), job, 1, -1, null, errorOnFailed))
+		{
+			return false;
+		}
+		if (!pawn.Reserve(VoidMonolith, job, 1, -1, null, errorOnFailed))
+		{
+			return false;
+		}
+		if (!pawn.ReserveSittableOrSpot(VoidMonolith.InteractionCell, job, errorOnFailed))
+		{
+			return false;
+		}
+		return true;
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__6))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__6(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

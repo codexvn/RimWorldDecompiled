@@ -1,102 +1,233 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompMannable : ThingComp
 {
-	// Token: 0x02002D27 RID: 11559
-	public class CompMannable : ThingComp
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass10_0
 	{
-		// Token: 0x17002941 RID: 10561
-		// (get) Token: 0x060103CB RID: 66507 RVA: 0x004B1C39 File Offset: 0x004AFE39
-		public bool MannedNow
+		public CompMannable _003C_003E4__this;
+
+		public Pawn pawn;
+
+		internal void _003CCompFloatMenuOptions_003Eb__0()
 		{
+			Job job = JobMaker.MakeJob(JobDefOf.ManTurret, _003C_003E4__this.parent);
+			pawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CCompFloatMenuOptions_003Ed__10 : IEnumerable<FloatMenuOption>, IEnumerable, IEnumerator<FloatMenuOption>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private FloatMenuOption _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompMannable _003C_003E4__this;
+
+		private Pawn pawn;
+
+		public Pawn _003C_003E3__pawn;
+
+		FloatMenuOption IEnumerator<FloatMenuOption>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				return Find.TickManager.TicksGame - this.lastManTick <= 1 && this.lastManPawn != null && this.lastManPawn.Spawned;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002942 RID: 10562
-		// (get) Token: 0x060103CC RID: 66508 RVA: 0x004B1C64 File Offset: 0x004AFE64
-		public Pawn ManningPawn
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (!this.MannedNow)
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CCompFloatMenuOptions_003Ed__10(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			CompMannable compMannable = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+			{
+				_003C_003E1__state = -1;
+				_003C_003Ec__DisplayClass10_0 CS_0024_003C_003E8__locals9 = new _003C_003Ec__DisplayClass10_0
 				{
-					return null;
-				}
-				return this.lastManPawn;
-			}
-		}
-
-		// Token: 0x17002943 RID: 10563
-		// (get) Token: 0x060103CD RID: 66509 RVA: 0x004B1C76 File Offset: 0x004AFE76
-		public CompProperties_Mannable Props
-		{
-			get
-			{
-				return (CompProperties_Mannable)this.props;
-			}
-		}
-
-		// Token: 0x060103CE RID: 66510 RVA: 0x004B1C83 File Offset: 0x004AFE83
-		public void ManForATick(Pawn pawn)
-		{
-			this.lastManTick = Find.TickManager.TicksGame;
-			this.lastManPawn = pawn;
-			pawn.mindState.lastMannedThing = this.parent;
-		}
-
-		// Token: 0x060103CF RID: 66511 RVA: 0x004B1CB0 File Offset: 0x004AFEB0
-		public override string CompInspectStringExtra()
-		{
-			if (this.parent.Spawned && !this.Props.planetLayerWhitelist.NullOrEmpty<PlanetLayerDef>() && !this.Props.planetLayerWhitelist.Contains(this.parent.Map.Tile.LayerDef))
-			{
-				return "CannotFunctionOnLayer".Translate(this.parent.Map.Tile.LayerDef.label).CapitalizeFirst().Colorize(ColoredText.WarningColor);
-			}
-			return null;
-		}
-
-		// Token: 0x060103D0 RID: 66512 RVA: 0x004B1D46 File Offset: 0x004AFF46
-		public override IEnumerable<FloatMenuOption> CompFloatMenuOptions(Pawn pawn)
-		{
-			if (!pawn.RaceProps.ToolUser)
-			{
-				yield break;
-			}
-			if (!pawn.CanReserveAndReach(this.parent, PathEndMode.InteractionCell, Danger.Deadly, 1, -1, null, false))
-			{
-				yield break;
-			}
-			if (this.Props.manWorkType != WorkTags.None && pawn.WorkTagIsDisabled(this.Props.manWorkType))
-			{
-				if (this.Props.manWorkType == WorkTags.Violent)
+					_003C_003E4__this = _003C_003E4__this,
+					pawn = pawn
+				};
+				if (!CS_0024_003C_003E8__locals9.pawn.RaceProps.ToolUser)
 				{
-					yield return new FloatMenuOption("CannotManThing".Translate(this.parent.LabelShort, this.parent) + " (" + "IsIncapableOfViolenceLower".Translate(pawn.LabelShort, pawn) + ")", null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
+					return false;
 				}
-				yield break;
+				if (!CS_0024_003C_003E8__locals9.pawn.CanReserveAndReach(compMannable.parent, PathEndMode.InteractionCell, Danger.Deadly))
+				{
+					return false;
+				}
+				if (compMannable.Props.manWorkType != 0 && CS_0024_003C_003E8__locals9.pawn.WorkTagIsDisabled(compMannable.Props.manWorkType))
+				{
+					if (compMannable.Props.manWorkType == WorkTags.Violent)
+					{
+						_003C_003E2__current = new FloatMenuOption("CannotManThing".Translate(compMannable.parent.LabelShort, compMannable.parent) + " (" + "IsIncapableOfViolenceLower".Translate(CS_0024_003C_003E8__locals9.pawn.LabelShort, CS_0024_003C_003E8__locals9.pawn) + ")", null);
+						_003C_003E1__state = 1;
+						return true;
+					}
+					goto IL_014b;
+				}
+				if (!compMannable.Props.planetLayerWhitelist.NullOrEmpty() && !compMannable.Props.planetLayerWhitelist.Contains(CS_0024_003C_003E8__locals9.pawn.Map.Tile.LayerDef))
+				{
+					_003C_003E2__current = new FloatMenuOption("CannotManThing".Translate(compMannable.parent.LabelShort, compMannable.parent) + " (" + "CannotFunctionOnLayer".Translate(CS_0024_003C_003E8__locals9.pawn.Map.Tile.LayerDef.label) + ")", null);
+					_003C_003E1__state = 2;
+					return true;
+				}
+				FloatMenuOption floatMenuOption = new FloatMenuOption("OrderManThing".Translate(compMannable.parent.LabelShort, compMannable.parent), delegate
+				{
+					Job job = JobMaker.MakeJob(JobDefOf.ManTurret, CS_0024_003C_003E8__locals9._003C_003E4__this.parent);
+					CS_0024_003C_003E8__locals9.pawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
+				});
+				_003C_003E2__current = floatMenuOption;
+				_003C_003E1__state = 3;
+				return true;
 			}
-			if (!this.Props.planetLayerWhitelist.NullOrEmpty<PlanetLayerDef>() && !this.Props.planetLayerWhitelist.Contains(pawn.Map.Tile.LayerDef))
-			{
-				yield return new FloatMenuOption("CannotManThing".Translate(this.parent.LabelShort, this.parent) + " (" + "CannotFunctionOnLayer".Translate(pawn.Map.Tile.LayerDef.label) + ")", null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-				yield break;
+			case 1:
+				_003C_003E1__state = -1;
+				goto IL_014b;
+			case 2:
+				_003C_003E1__state = -1;
+				return false;
+			case 3:
+				{
+					_003C_003E1__state = -1;
+					return false;
+				}
+				IL_014b:
+				return false;
 			}
-			FloatMenuOption floatMenuOption = new FloatMenuOption("OrderManThing".Translate(this.parent.LabelShort, this.parent), delegate()
-			{
-				Job job = JobMaker.MakeJob(JobDefOf.ManTurret, this.parent);
-				pawn.jobs.TryTakeOrderedJob(job, new JobTag?(JobTag.Misc), false);
-			}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-			yield return floatMenuOption;
-			yield break;
 		}
 
-		// Token: 0x0400A997 RID: 43415
-		private int lastManTick = -1;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x0400A998 RID: 43416
-		private Pawn lastManPawn;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<FloatMenuOption> IEnumerable<FloatMenuOption>.GetEnumerator()
+		{
+			_003CCompFloatMenuOptions_003Ed__10 _003CCompFloatMenuOptions_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CCompFloatMenuOptions_003Ed__ = this;
+			}
+			else
+			{
+				_003CCompFloatMenuOptions_003Ed__ = new _003CCompFloatMenuOptions_003Ed__10(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CCompFloatMenuOptions_003Ed__.pawn = _003C_003E3__pawn;
+			return _003CCompFloatMenuOptions_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<FloatMenuOption>)this).GetEnumerator();
+		}
+	}
+
+	private int lastManTick = -1;
+
+	private Pawn lastManPawn;
+
+	public bool MannedNow
+	{
+		get
+		{
+			if (Find.TickManager.TicksGame - lastManTick <= 1 && lastManPawn != null)
+			{
+				return lastManPawn.Spawned;
+			}
+			return false;
+		}
+	}
+
+	public Pawn ManningPawn
+	{
+		get
+		{
+			if (!MannedNow)
+			{
+				return null;
+			}
+			return lastManPawn;
+		}
+	}
+
+	public CompProperties_Mannable Props => (CompProperties_Mannable)props;
+
+	public void ManForATick(Pawn pawn)
+	{
+		lastManTick = Find.TickManager.TicksGame;
+		lastManPawn = pawn;
+		pawn.mindState.lastMannedThing = parent;
+	}
+
+	public override string CompInspectStringExtra()
+	{
+		if (parent.Spawned && !Props.planetLayerWhitelist.NullOrEmpty() && !Props.planetLayerWhitelist.Contains(parent.Map.Tile.LayerDef))
+		{
+			return "CannotFunctionOnLayer".Translate(parent.Map.Tile.LayerDef.label).CapitalizeFirst().Colorize(ColoredText.WarningColor);
+		}
+		return null;
+	}
+
+	[IteratorStateMachine(typeof(_003CCompFloatMenuOptions_003Ed__10))]
+	public override IEnumerable<FloatMenuOption> CompFloatMenuOptions(Pawn pawn)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CCompFloatMenuOptions_003Ed__10(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__pawn = pawn
+		};
 	}
 }

@@ -1,207 +1,281 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Gene_Hemogen : Gene_Resource, IGeneResourceDrain
 {
-	// Token: 0x0200383F RID: 14399
-	public class Gene_Hemogen : Gene_Resource, IGeneResourceDrain
+	[CompilerGenerated]
+	private sealed class _003CGetGizmos_003Ed__26 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x170032C3 RID: 12995
-		// (get) Token: 0x06013E88 RID: 81544 RVA: 0x000FD030 File Offset: 0x000FB230
-		public Gene_Resource Resource
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Gene_Hemogen _003C_003E4__this;
+
+		private IEnumerator<Gizmo> _003C_003E7__wrap1;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170032C4 RID: 12996
-		// (get) Token: 0x06013E89 RID: 81545 RVA: 0x005E8C53 File Offset: 0x005E6E53
-		public Pawn Pawn
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.pawn;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170032C5 RID: 12997
-		// (get) Token: 0x06013E8A RID: 81546 RVA: 0x005E8C5B File Offset: 0x005E6E5B
-		public bool CanOffset
+		[DebuggerHidden]
+		public _003CGetGizmos_003Ed__26(int _003C_003E1__state)
 		{
-			get
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			switch (_003C_003E1__state)
 			{
-				return this.Active && !this.pawn.Deathresting;
+			case -3:
+			case 1:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+				break;
+			case -4:
+			case 2:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally2();
+				}
+				break;
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				Gene_Hemogen gene_Hemogen = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					if (!gene_Hemogen.Active)
+					{
+						return false;
+					}
+					_003C_003E7__wrap1 = ((Gene_Resource)gene_Hemogen).GetGizmos().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0081;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0081;
+				case 2:
+					{
+						_003C_003E1__state = -4;
+						break;
+					}
+					IL_0081:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Gizmo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					_003C_003E7__wrap1 = GeneResourceDrainUtility.GetResourceDrainGizmos(gene_Hemogen).GetEnumerator();
+					_003C_003E1__state = -4;
+					break;
+				}
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					Gizmo current2 = _003C_003E7__wrap1.Current;
+					_003C_003E2__current = current2;
+					_003C_003E1__state = 2;
+					return true;
+				}
+				_003C_003Em__Finally2();
+				_003C_003E7__wrap1 = null;
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x170032C6 RID: 12998
-		// (get) Token: 0x06013E8B RID: 81547 RVA: 0x005E8C75 File Offset: 0x005E6E75
-		public string DisplayLabel
+		bool IEnumerator.MoveNext()
 		{
-			get
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				return this.Label + " (" + "Gene".Translate() + ")";
+				_003C_003E7__wrap1.Dispose();
 			}
 		}
 
-		// Token: 0x170032C7 RID: 12999
-		// (get) Token: 0x06013E8C RID: 81548 RVA: 0x005E8CA5 File Offset: 0x005E6EA5
-		public float ResourceLossPerDay
+		private void _003C_003Em__Finally2()
 		{
-			get
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				return this.def.resourceLossPerDay;
+				_003C_003E7__wrap1.Dispose();
 			}
 		}
 
-		// Token: 0x170032C8 RID: 13000
-		// (get) Token: 0x06013E8D RID: 81549 RVA: 0x0004FC72 File Offset: 0x0004DE72
-		public override float InitialResourceMax
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			get
-			{
-				return 1f;
-			}
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x170032C9 RID: 13001
-		// (get) Token: 0x06013E8E RID: 81550 RVA: 0x0012950E File Offset: 0x0012770E
-		public override float MinLevelForAlert
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
 		{
-			get
+			_003CGetGizmos_003Ed__26 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				return 0.15f;
+				_003C_003E1__state = 0;
+				result = this;
 			}
+			else
+			{
+				result = new _003CGetGizmos_003Ed__26(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
 		}
 
-		// Token: 0x170032CA RID: 13002
-		// (get) Token: 0x06013E8F RID: 81551 RVA: 0x0031CBE4 File Offset: 0x0031ADE4
-		public override float MaxLevelOffset
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			get
-			{
-				return 0.1f;
-			}
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x170032CB RID: 13003
-		// (get) Token: 0x06013E90 RID: 81552 RVA: 0x005E8CB4 File Offset: 0x005E6EB4
-		protected override Color BarColor
+	public bool hemogenPacksAllowed = true;
+
+	public Gene_Resource Resource => this;
+
+	public Pawn Pawn => pawn;
+
+	public bool CanOffset
+	{
+		get
 		{
-			get
+			if (Active)
 			{
-				return new ColorInt(138, 3, 3).ToColor;
+				return !pawn.Deathresting;
 			}
+			return false;
 		}
+	}
 
-		// Token: 0x170032CC RID: 13004
-		// (get) Token: 0x06013E91 RID: 81553 RVA: 0x005E8CD8 File Offset: 0x005E6ED8
-		protected override Color BarHighlightColor
-		{
-			get
-			{
-				return new ColorInt(145, 42, 42).ToColor;
-			}
-		}
+	public string DisplayLabel => Label + " (" + "Gene".Translate() + ")";
 
-		// Token: 0x06013E92 RID: 81554 RVA: 0x005E8CFB File Offset: 0x005E6EFB
-		public override void PostAdd()
+	public float ResourceLossPerDay => def.resourceLossPerDay;
+
+	public override float InitialResourceMax => 1f;
+
+	public override float MinLevelForAlert => 0.15f;
+
+	public override float MaxLevelOffset => 0.1f;
+
+	protected override Color BarColor => new ColorInt(138, 3, 3).ToColor;
+
+	protected override Color BarHighlightColor => new ColorInt(145, 42, 42).ToColor;
+
+	public override void PostAdd()
+	{
+		if (ModLister.CheckBiotech("Hemogen"))
 		{
-			if (!ModLister.CheckBiotech("Hemogen"))
-			{
-				return;
-			}
 			base.PostAdd();
-			this.Reset();
+			Reset();
 		}
+	}
 
-		// Token: 0x06013E93 RID: 81555 RVA: 0x005E8D18 File Offset: 0x005E6F18
-		public override void Notify_IngestedThing(Thing thing, int numTaken)
+	public override void Notify_IngestedThing(Thing thing, int numTaken)
+	{
+		if (thing.def.IsMeat)
 		{
-			if (thing.def.IsMeat)
+			IngestibleProperties ingestible = thing.def.ingestible;
+			if (ingestible != null && ingestible.sourceDef?.race?.Humanlike == true)
 			{
-				IngestibleProperties ingestible = thing.def.ingestible;
-				bool flag;
-				if (ingestible == null)
-				{
-					flag = false;
-				}
-				else
-				{
-					ThingDef sourceDef = ingestible.sourceDef;
-					bool? flag2;
-					if (sourceDef == null)
-					{
-						flag2 = null;
-					}
-					else
-					{
-						RaceProperties race = sourceDef.race;
-						flag2 = ((race != null) ? new bool?(race.Humanlike) : null);
-					}
-					bool? flag3 = flag2;
-					bool flag4 = true;
-					flag = (flag3.GetValueOrDefault() == flag4 & flag3 != null);
-				}
-				if (flag)
-				{
-					GeneUtility.OffsetHemogen(this.pawn, 0.0375f * thing.GetStatValue(StatDefOf.Nutrition, true, -1) * (float)numTaken, true);
-				}
+				GeneUtility.OffsetHemogen(pawn, 0.0375f * thing.GetStatValue(StatDefOf.Nutrition) * (float)numTaken);
 			}
 		}
+	}
 
-		// Token: 0x06013E94 RID: 81556 RVA: 0x005E8DAF File Offset: 0x005E6FAF
-		public override void TickInterval(int delta)
+	public override void TickInterval(int delta)
+	{
+		base.TickInterval(delta);
+		GeneResourceDrainUtility.TickResourceDrainInterval(this, delta);
+	}
+
+	public override void SetTargetValuePct(float val)
+	{
+		targetValue = Mathf.Clamp(val * Max, 0f, Max - MaxLevelOffset);
+	}
+
+	public bool ShouldConsumeHemogenNow()
+	{
+		return Value < targetValue;
+	}
+
+	[IteratorStateMachine(typeof(_003CGetGizmos_003Ed__26))]
+	public override IEnumerable<Gizmo> GetGizmos()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetGizmos_003Ed__26(-2)
 		{
-			base.TickInterval(delta);
-			GeneResourceDrainUtility.TickResourceDrainInterval(this, delta);
-		}
+			_003C_003E4__this = this
+		};
+	}
 
-		// Token: 0x06013E95 RID: 81557 RVA: 0x005E8DBF File Offset: 0x005E6FBF
-		public override void SetTargetValuePct(float val)
-		{
-			this.targetValue = Mathf.Clamp(val * this.Max, 0f, this.Max - this.MaxLevelOffset);
-		}
-
-		// Token: 0x06013E96 RID: 81558 RVA: 0x005E8DE6 File Offset: 0x005E6FE6
-		public bool ShouldConsumeHemogenNow()
-		{
-			return this.Value < this.targetValue;
-		}
-
-		// Token: 0x06013E97 RID: 81559 RVA: 0x005E8DF6 File Offset: 0x005E6FF6
-		public override IEnumerable<Gizmo> GetGizmos()
-		{
-			if (!this.Active)
-			{
-				yield break;
-			}
-			foreach (Gizmo gizmo in base.GetGizmos())
-			{
-				yield return gizmo;
-			}
-			IEnumerator<Gizmo> enumerator = null;
-			foreach (Gizmo gizmo2 in GeneResourceDrainUtility.GetResourceDrainGizmos(this))
-			{
-				yield return gizmo2;
-			}
-			enumerator = null;
-			yield break;
-			yield break;
-		}
-
-		// Token: 0x06013E98 RID: 81560 RVA: 0x005E8E06 File Offset: 0x005E7006
-		public override void ExposeData()
-		{
-			base.ExposeData();
-			Scribe_Values.Look<bool>(ref this.hemogenPacksAllowed, "hemogenPacksAllowed", true, false);
-		}
-
-		// Token: 0x0400DC03 RID: 56323
-		public bool hemogenPacksAllowed = true;
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref hemogenPacksAllowed, "hemogenPacksAllowed", defaultValue: true);
 	}
 }

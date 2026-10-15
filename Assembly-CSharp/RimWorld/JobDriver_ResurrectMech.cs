@@ -1,55 +1,147 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_ResurrectMech : JobDriver
 {
-	// Token: 0x02001305 RID: 4869
-	public class JobDriver_ResurrectMech : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__7 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x170012C9 RID: 4809
-		// (get) Token: 0x0600776F RID: 30575 RVA: 0x0024480C File Offset: 0x00242A0C
-		private Corpse Corpse
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_ResurrectMech _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (Corpse)this.job.GetTarget(TargetIndex.A).Thing;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170012CA RID: 4810
-		// (get) Token: 0x06007770 RID: 30576 RVA: 0x00244834 File Offset: 0x00242A34
-		private IntVec3 Destination
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return base.TargetB.Cell;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06007771 RID: 30577 RVA: 0x00244850 File Offset: 0x00242A50
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__7(int _003C_003E1__state)
 		{
-			return this.pawn.Reserve(this.Corpse, this.job, 1, -1, null, errorOnFailed, false) && this.pawn.Reserve(this.Destination, this.job, 1, -1, null, errorOnFailed, false);
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x06007772 RID: 30578 RVA: 0x002448A3 File Offset: 0x00242AA3
-		protected override IEnumerable<Toil> MakeNewToils()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			yield return Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.Touch, false).FailOnDespawnedOrNull(TargetIndex.B);
-			yield return Toils_General.Do(delegate
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_ResurrectMech CS_0024_003C_003E8__locals4 = _003C_003E4__this;
+			switch (num)
 			{
-				Ability ability = this.pawn.abilities.GetAbility(AbilityDefOf.ResurrectionMech, false);
-				this.pawn.jobs.TryTakeOrderedJob(ability.GetJob(this.Corpse, this.Destination), new JobTag?(JobTag.Misc), false);
-			});
-			yield break;
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.Touch).FailOnDespawnedOrNull(TargetIndex.B);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.Do(delegate
+				{
+					Ability ability = CS_0024_003C_003E8__locals4.pawn.abilities.GetAbility(AbilityDefOf.ResurrectionMech);
+					CS_0024_003C_003E8__locals4.pawn.jobs.TryTakeOrderedJob(ability.GetJob(CS_0024_003C_003E8__locals4.Corpse, CS_0024_003C_003E8__locals4.Destination), JobTag.Misc);
+				});
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				return false;
+			}
 		}
 
-		// Token: 0x04005169 RID: 20841
-		private const TargetIndex CorpseInd = TargetIndex.A;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x0400516A RID: 20842
-		private const TargetIndex CastCellInd = TargetIndex.B;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__7 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__7(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private const TargetIndex CorpseInd = TargetIndex.A;
+
+	private const TargetIndex CastCellInd = TargetIndex.B;
+
+	private Corpse Corpse => (Corpse)job.GetTarget(TargetIndex.A).Thing;
+
+	private IntVec3 Destination => base.TargetB.Cell;
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		if (pawn.Reserve(Corpse, job, 1, -1, null, errorOnFailed))
+		{
+			return pawn.Reserve(Destination, job, 1, -1, null, errorOnFailed);
+		}
+		return false;
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__7))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__7(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

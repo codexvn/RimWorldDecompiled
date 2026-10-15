@@ -1,88 +1,219 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Instruction_AddBill : Lesson_Instruction
 {
-	// Token: 0x020034C6 RID: 13510
-	public class Instruction_AddBill : Lesson_Instruction
+	[CompilerGenerated]
+	private sealed class _003CThingsToSelect_003Ed__3 : IEnumerable<Thing>, IEnumerable, IEnumerator<Thing>, IEnumerator, IDisposable
 	{
-		// Token: 0x17003172 RID: 12658
-		// (get) Token: 0x06012FC8 RID: 77768 RVA: 0x005A1F80 File Offset: 0x005A0180
-		protected override float ProgressPercent
+		private int _003C_003E1__state;
+
+		private Thing _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Instruction_AddBill _003C_003E4__this;
+
+		private List<Building>.Enumerator _003C_003E7__wrap1;
+
+		Thing IEnumerator<Thing>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				int num = this.def.recipeTargetCount + 1;
-				int num2 = 0;
-				Bill_Production bill_Production = this.RelevantBill();
-				if (bill_Production != null)
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CThingsToSelect_003Ed__3(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
 				{
-					num2++;
-					if (bill_Production.repeatMode == BillRepeatModeDefOf.RepeatCount)
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = default(List<Building>.Enumerator);
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				Instruction_AddBill instruction_AddBill = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					if (Find.Selector.SingleSelectedThing == null || Find.Selector.SingleSelectedThing.def != instruction_AddBill.def.thingDef)
 					{
-						num2 += bill_Production.repeatCount;
+						_003C_003E7__wrap1 = instruction_AddBill.Map.listerBuildings.AllBuildingsColonistOfDef(instruction_AddBill.def.thingDef).GetEnumerator();
+						_003C_003E1__state = -3;
+						goto IL_00a4;
 					}
+					return false;
+				case 1:
+					{
+						_003C_003E1__state = -3;
+						goto IL_00a4;
+					}
+					IL_00a4:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Building current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = default(List<Building>.Enumerator);
+					return false;
 				}
-				return (float)num2 / (float)num;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x06012FC9 RID: 77769 RVA: 0x005A1FC8 File Offset: 0x005A01C8
-		private Bill_Production RelevantBill()
+		bool IEnumerator.MoveNext()
 		{
-			if (Find.Selector.SingleSelectedThing != null && Find.Selector.SingleSelectedThing.def == this.def.thingDef)
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap1/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Thing> IEnumerable<Thing>.GetEnumerator()
+		{
+			_003CThingsToSelect_003Ed__3 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				IBillGiver billGiver = Find.Selector.SingleSelectedThing as IBillGiver;
-				if (billGiver != null)
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CThingsToSelect_003Ed__3(0)
 				{
-					return (Bill_Production)billGiver.BillStack.Bills.FirstOrDefault((Bill b) => b.recipe == this.def.recipeDef);
-				}
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
-			return null;
+			return result;
 		}
 
-		// Token: 0x06012FCA RID: 77770 RVA: 0x005A2033 File Offset: 0x005A0233
-		private IEnumerable<Thing> ThingsToSelect()
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			if (Find.Selector.SingleSelectedThing == null || Find.Selector.SingleSelectedThing.def != this.def.thingDef)
+			return ((IEnumerable<Thing>)this).GetEnumerator();
+		}
+	}
+
+	protected override float ProgressPercent
+	{
+		get
+		{
+			int num = def.recipeTargetCount + 1;
+			int num2 = 0;
+			Bill_Production bill_Production = RelevantBill();
+			if (bill_Production != null)
 			{
-				foreach (Building building in base.Map.listerBuildings.AllBuildingsColonistOfDef(this.def.thingDef))
+				num2++;
+				if (bill_Production.repeatMode == BillRepeatModeDefOf.RepeatCount)
 				{
-					yield return building;
+					num2 += bill_Production.repeatCount;
 				}
-				List<Building>.Enumerator enumerator = default(List<Building>.Enumerator);
-				yield break;
 			}
-			yield break;
-			yield break;
+			return (float)num2 / (float)num;
 		}
+	}
 
-		// Token: 0x06012FCB RID: 77771 RVA: 0x005A2044 File Offset: 0x005A0244
-		public override void LessonOnGUI()
+	private Bill_Production RelevantBill()
+	{
+		if (Find.Selector.SingleSelectedThing != null && Find.Selector.SingleSelectedThing.def == def.thingDef && Find.Selector.SingleSelectedThing is IBillGiver billGiver)
 		{
-			foreach (Thing t in this.ThingsToSelect())
-			{
-				TutorUtility.DrawLabelOnThingOnGUI(t, this.def.onMapInstruction);
-			}
-			if (this.RelevantBill() == null)
-			{
-				UIHighlighter.HighlightTag("AddBill");
-			}
-			base.LessonOnGUI();
+			return (Bill_Production)billGiver.BillStack.Bills.FirstOrDefault((Bill b) => b.recipe == def.recipeDef);
 		}
+		return null;
+	}
 
-		// Token: 0x06012FCC RID: 77772 RVA: 0x005A20B4 File Offset: 0x005A02B4
-		public override void LessonUpdate()
+	[IteratorStateMachine(typeof(_003CThingsToSelect_003Ed__3))]
+	private IEnumerable<Thing> ThingsToSelect()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CThingsToSelect_003Ed__3(-2)
 		{
-			foreach (Thing thing in this.ThingsToSelect())
-			{
-				GenDraw.DrawArrowPointingAt(thing.DrawPos, false);
-			}
-			if (this.ProgressPercent > 0.999f)
-			{
-				Find.ActiveLesson.Deactivate();
-			}
+			_003C_003E4__this = this
+		};
+	}
+
+	public override void LessonOnGUI()
+	{
+		foreach (Thing item in ThingsToSelect())
+		{
+			TutorUtility.DrawLabelOnThingOnGUI(item, def.onMapInstruction);
+		}
+		if (RelevantBill() == null)
+		{
+			UIHighlighter.HighlightTag("AddBill");
+		}
+		base.LessonOnGUI();
+	}
+
+	public override void LessonUpdate()
+	{
+		foreach (Thing item in ThingsToSelect())
+		{
+			GenDraw.DrawArrowPointingAt(item.DrawPos);
+		}
+		if (ProgressPercent > 0.999f)
+		{
+			Find.ActiveLesson.Deactivate();
 		}
 	}
 }

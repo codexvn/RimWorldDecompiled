@@ -1,737 +1,568 @@
-﻿using System;
 using System.Collections.Generic;
 using RimWorld;
 using UnityEngine;
 using Verse.Sound;
 
-namespace Verse
+namespace Verse;
+
+public class UnnaturalCorpseTracker : IExposable, ILoadReferenceable
 {
-	// Token: 0x0200033B RID: 827
-	public class UnnaturalCorpseTracker : IExposable, ILoadReferenceable
+	private static readonly FloatRange GrowingLetterDelayDays = new FloatRange(11f, 13f);
+
+	private static readonly FloatRange AwakenDelayDays = new FloatRange(1f, 3f);
+
+	private static readonly FloatRange DestroyResearchRequiredRange = new FloatRange(8f, 12f);
+
+	private const float FirstLetterResearchRequired = 3f;
+
+	private const int PawnDiedDisappearHours = 3;
+
+	private const int PawnKilledDisappearTicks = 600;
+
+	private const int MTBReappearHoursCorpse = 24;
+
+	private const int MTBReappearHoursAwoken = 6;
+
+	private const int MTBMentalBreakDays = 5;
+
+	private const int MTBEscapeContainerHours = 24;
+
+	private const int MinMentalBreakRefireTicks = 150000;
+
+	private const int RisingTime = 420;
+
+	private static readonly SimpleCurve CombatPointsPerHpRegenCurve = new SimpleCurve
 	{
-		// Token: 0x17000404 RID: 1028
-		// (get) Token: 0x060014E2 RID: 5346 RVA: 0x00062607 File Offset: 0x00060807
-		public UnnaturalCorpse Corpse
-		{
-			get
-			{
-				return this.corpse;
-			}
-		}
+		new CurvePoint(300f, 150f),
+		new CurvePoint(3000f, 800f)
+	};
 
-		// Token: 0x17000405 RID: 1029
-		// (get) Token: 0x060014E3 RID: 5347 RVA: 0x0006260F File Offset: 0x0006080F
-		public bool CorpseSpawned
-		{
-			get
-			{
-				return this.corpse != null;
-			}
-		}
+	private static readonly SimpleCurve CombatPointsSecondsToKillCurve = new SimpleCurve
+	{
+		new CurvePoint(300f, 25f),
+		new CurvePoint(3000f, 10f)
+	};
 
-		// Token: 0x17000406 RID: 1030
-		// (get) Token: 0x060014E4 RID: 5348 RVA: 0x0006261A File Offset: 0x0006081A
-		public Pawn AwokenPawn
-		{
-			get
-			{
-				return this.awokenPawn;
-			}
-		}
+	private UnnaturalCorpse corpse;
 
-		// Token: 0x17000407 RID: 1031
-		// (get) Token: 0x060014E5 RID: 5349 RVA: 0x00062622 File Offset: 0x00060822
-		public int SpawnedTicks
-		{
-			get
-			{
-				return GenTicks.TicksGame - this.spawnedTick;
-			}
-		}
+	private Pawn awokenPawn;
 
-		// Token: 0x17000408 RID: 1032
-		// (get) Token: 0x060014E6 RID: 5350 RVA: 0x00062630 File Offset: 0x00060830
-		public int TicksToKill
-		{
-			get
-			{
-				return this.ticksToKill;
-			}
-		}
+	private Pawn haunted;
 
-		// Token: 0x17000409 RID: 1033
-		// (get) Token: 0x060014E7 RID: 5351 RVA: 0x00062638 File Offset: 0x00060838
-		public bool ShouldDisappear
-		{
-			get
-			{
-				return this.awokenFinished || (this.disappearTick != 0 && GenTicks.TicksGame >= this.disappearTick);
-			}
-		}
+	private int disappearTick;
 
-		// Token: 0x1700040A RID: 1034
-		// (get) Token: 0x060014E8 RID: 5352 RVA: 0x0006265E File Offset: 0x0006085E
-		public Pawn Haunted
-		{
-			get
-			{
-				return this.haunted;
-			}
-		}
+	private int lastSpawnInCheck;
 
-		// Token: 0x1700040B RID: 1035
-		// (get) Token: 0x060014E9 RID: 5353 RVA: 0x00062666 File Offset: 0x00060866
-		public bool CanDestroyViaResearch
-		{
-			get
-			{
-				return this.research >= this.researchToDestroy;
-			}
-		}
+	private int loadID;
 
-		// Token: 0x1700040C RID: 1036
-		// (get) Token: 0x060014EA RID: 5354 RVA: 0x00062679 File Offset: 0x00060879
-		public IReadOnlyList<ChoiceLetter> Letters
-		{
-			get
-			{
-				return this.letters;
-			}
-		}
+	private int awakenTick;
 
-		// Token: 0x060014EB RID: 5355 RVA: 0x00062681 File Offset: 0x00060881
-		public UnnaturalCorpseTracker()
-		{
-		}
+	private int spawnedTick;
 
-		// Token: 0x060014EC RID: 5356 RVA: 0x00062694 File Offset: 0x00060894
-		public UnnaturalCorpseTracker(Pawn haunted, UnnaturalCorpse corpse)
-		{
-			this.haunted = haunted;
-			this.corpse = corpse;
-			this.loadID = haunted.thingIDNumber;
-			this.researchToDestroy = UnnaturalCorpseTracker.DestroyResearchRequiredRange.RandomInRange;
-			this.awakenTick = GenTicks.TicksGame + Mathf.CeilToInt(UnnaturalCorpseTracker.GrowingLetterDelayDays.RandomInRange * 60000f);
-			this.spawnedTick = GenTicks.TicksGame;
-			corpse.LinkToTracker(this);
-		}
+	private int minMentalBreakRefireTick;
 
-		// Token: 0x060014ED RID: 5357 RVA: 0x00062718 File Offset: 0x00060918
-		public void Notify_Finished()
-		{
-			this.removing = true;
-			if (this.awokenPawn != null && this.awokenPawn.Spawned)
-			{
-				Messages.Message("MessageAwokenDisappeared".Translate(), MessageTypeDefOf.NeutralEvent, true);
-				SkipUtility.SkipDeSpawn(this.awokenPawn);
-				this.awokenPawn.Destroy(DestroyMode.Vanish);
-				return;
-			}
-			if (this.Corpse != null)
-			{
-				this.Corpse.DoDisappear();
-			}
-		}
+	private int ticksToKill;
 
-		// Token: 0x060014EE RID: 5358 RVA: 0x00062786 File Offset: 0x00060986
-		public void Notify_CorpseDestroyed()
-		{
-			if (!this.removing && !this.Haunted.DestroyedOrNull())
-			{
-				this.applyThoughtNextTick = true;
-			}
-			this.lastSpawnInCheck = GenTicks.TicksGame;
-			this.corpse = null;
-		}
+	private float research;
 
-		// Token: 0x060014EF RID: 5359 RVA: 0x000627B8 File Offset: 0x000609B8
-		public void Notify_AwokenAttackStarting()
-		{
-			if (this.awokenPawn == null)
-			{
-				return;
-			}
-			Hediff hd;
-			if (!this.awokenPawn.health.hediffSet.TryGetHediff(HediffDefOf.AwokenCorpse, out hd))
-			{
-				return;
-			}
-			hd.TryGetComp<HediffComp_MessageStageIncreased>().sendMessages = false;
-		}
+	private float researchToDestroy;
 
-		// Token: 0x060014F0 RID: 5360 RVA: 0x000627FC File Offset: 0x000609FC
-		private void ApplyCorpseDestroyedThoughts()
+	private bool teleportIn;
+
+	private bool escape;
+
+	private bool mentalBreak;
+
+	private bool removing;
+
+	private bool sentLetterOne;
+
+	private bool sentLetterTwo;
+
+	private bool sentAwakeningLetter;
+
+	private bool awoken;
+
+	private bool rising;
+
+	private bool awokenFinished;
+
+	private List<ChoiceLetter> letters = new List<ChoiceLetter>();
+
+	private bool applyThoughtNextTick;
+
+	private Effecter riseEffecter;
+
+	private Sustainer riseSustainer;
+
+	public UnnaturalCorpse Corpse => corpse;
+
+	public bool CorpseSpawned => corpse != null;
+
+	public Pawn AwokenPawn => awokenPawn;
+
+	public int SpawnedTicks => GenTicks.TicksGame - spawnedTick;
+
+	public int TicksToKill => ticksToKill;
+
+	public bool ShouldDisappear
+	{
+		get
 		{
-			this.applyThoughtNextTick = false;
-			Pawn_NeedsTracker needs = this.haunted.needs;
-			if (needs != null)
+			if (!awokenFinished)
 			{
-				Need_Mood mood = needs.mood;
-				if (mood != null)
+				if (disappearTick != 0)
 				{
-					ThoughtHandler thoughts = mood.thoughts;
-					if (thoughts != null)
-					{
-						MemoryThoughtHandler memories = thoughts.memories;
-						if (memories != null)
-						{
-							memories.TryGainMemory(ThoughtDefOf.UnnaturalCorpseDestroyed, null, null);
-						}
-					}
+					return GenTicks.TicksGame >= disappearTick;
+				}
+				return false;
+			}
+			return true;
+		}
+	}
+
+	public Pawn Haunted => haunted;
+
+	public bool CanDestroyViaResearch => research >= researchToDestroy;
+
+	public IReadOnlyList<ChoiceLetter> Letters => letters;
+
+	public UnnaturalCorpseTracker()
+	{
+	}
+
+	public UnnaturalCorpseTracker(Pawn haunted, UnnaturalCorpse corpse)
+	{
+		this.haunted = haunted;
+		this.corpse = corpse;
+		loadID = haunted.thingIDNumber;
+		researchToDestroy = DestroyResearchRequiredRange.RandomInRange;
+		awakenTick = GenTicks.TicksGame + Mathf.CeilToInt(GrowingLetterDelayDays.RandomInRange * 60000f);
+		spawnedTick = GenTicks.TicksGame;
+		corpse.LinkToTracker(this);
+	}
+
+	public void Notify_Finished()
+	{
+		removing = true;
+		if (awokenPawn != null && awokenPawn.Spawned)
+		{
+			Messages.Message("MessageAwokenDisappeared".Translate(), MessageTypeDefOf.NeutralEvent);
+			SkipUtility.SkipDeSpawn(awokenPawn);
+			awokenPawn.Destroy();
+		}
+		else if (Corpse != null)
+		{
+			Corpse.DoDisappear();
+		}
+	}
+
+	public void Notify_CorpseDestroyed()
+	{
+		if (!removing && !Haunted.DestroyedOrNull())
+		{
+			applyThoughtNextTick = true;
+		}
+		lastSpawnInCheck = GenTicks.TicksGame;
+		corpse = null;
+	}
+
+	public void Notify_AwokenAttackStarting()
+	{
+		if (awokenPawn != null && awokenPawn.health.hediffSet.TryGetHediff(HediffDefOf.AwokenCorpse, out var hediff))
+		{
+			hediff.TryGetComp<HediffComp_MessageStageIncreased>().sendMessages = false;
+		}
+	}
+
+	private void ApplyCorpseDestroyedThoughts()
+	{
+		applyThoughtNextTick = false;
+		haunted.needs?.mood?.thoughts?.memories?.TryGainMemory(ThoughtDefOf.UnnaturalCorpseDestroyed);
+		if (haunted.health.hediffSet.TryGetHediff(HediffDefOf.CorpseTorment, out var hediff))
+		{
+			hediff.TryGetComp<HediffComp_Disappears>().ResetElapsedTicks();
+			return;
+		}
+		haunted.health.AddHediff(HediffDefOf.CorpseTorment, null, null);
+		Messages.Message("MessagePawnFainted".Translate(Haunted.Named("PAWN")), Haunted, MessageTypeDefOf.NegativeHealthEvent);
+	}
+
+	public void Notify_PawnDied()
+	{
+		if (disappearTick == 0)
+		{
+			if (awoken)
+			{
+				disappearTick = GenTicks.TicksGame + 600;
+			}
+			else
+			{
+				disappearTick = GenTicks.TicksGame + 7500;
+			}
+		}
+	}
+
+	public void Notify_PawnKilledViaAwoken()
+	{
+		disappearTick = GenTicks.TicksGame + 600;
+		Messages.Message("MessageAwokenKilledVictim".Translate(Haunted.Named("PAWN")), Haunted, MessageTypeDefOf.NegativeEvent);
+	}
+
+	public void CorpseTick()
+	{
+		if (disappearTick == 0 && Haunted.SpawnedOrAnyParentSpawned && Haunted.IsMutant)
+		{
+			disappearTick = GenTicks.TicksGame + 7500;
+		}
+		if (awoken)
+		{
+			AwokenTick();
+			return;
+		}
+		if (applyThoughtNextTick)
+		{
+			ApplyCorpseDestroyedThoughts();
+		}
+		UpdateCorpseState();
+		UpdateMentalBreak();
+		AwakeningTick();
+	}
+
+	private void UpdateMentalBreak()
+	{
+		if (Haunted.SpawnedOrAnyParentSpawned && CorpseSpawned)
+		{
+			if (!mentalBreak && !Haunted.InMentalState && GenTicks.TicksGame >= minMentalBreakRefireTick && Rand.MTBEventOccurs(5f, 60000f, 1f))
+			{
+				mentalBreak = true;
+			}
+			if (mentalBreak)
+			{
+				TryTriggerMentalBreak();
+			}
+		}
+	}
+
+	public void TryTriggerMentalBreak()
+	{
+		MentalBreakDef breakDef;
+		if (MentalBreakDefOf.CorpseObsession.Worker.BreakCanOccur(Haunted))
+		{
+			mentalBreak = false;
+			minMentalBreakRefireTick = GenTicks.TicksGame + 150000;
+			Haunted.mindState.mentalBreaker.TryDoMentalBreak("MentalBreakReason_MysteriousCorpse".Translate(), MentalBreakDefOf.CorpseObsession);
+		}
+		else if (Haunted.mindState.mentalBreaker.TryGetRandomMentalBreak(MentalBreakIntensity.Major, out breakDef))
+		{
+			mentalBreak = false;
+			minMentalBreakRefireTick = GenTicks.TicksGame + 150000;
+			Haunted.mindState.mentalBreaker.TryDoMentalBreak("MentalBreakReason_MysteriousCorpse".Translate(), breakDef);
+		}
+	}
+
+	private void AwokenTick()
+	{
+		if (awokenFinished)
+		{
+			return;
+		}
+		if (awokenPawn != null)
+		{
+			if (awokenPawn.Downed && !awokenPawn.Dead && !awokenPawn.health.hediffSet.HasHediff(HediffDefOf.RapidRegeneration))
+			{
+				awokenPawn.Kill(null);
+			}
+			if (awokenPawn.Dead)
+			{
+				TaggedString label = "UnnaturalCorpseAwokenDefeatedLetter".Translate();
+				TaggedString text = "UnnaturalCorpseAwokenDefeatedLetterDesc".Translate(Haunted.Named("PAWN"));
+				Find.LetterStack.ReceiveLetter(label, text, LetterDefOf.PositiveEvent, awokenPawn);
+				if (awokenPawn.SpawnedOrAnyParentSpawned)
+				{
+					GenDrop.TryDropSpawn(ThingMaker.MakeThing(ThingDefOf.Shard), awokenPawn.PositionHeld, awokenPawn.MapHeld, ThingPlaceMode.Near, out var _);
+					FleshbeastUtility.MeatSplatter(3, awokenPawn.PositionHeld, awokenPawn.MapHeld);
+					awokenPawn.Corpse.Destroy();
+				}
+				awokenFinished = true;
+				return;
+			}
+		}
+		if ((awokenPawn.DestroyedOrNull() || !awokenPawn.SpawnedOrAnyParentSpawned) && Haunted.SpawnedOrAnyParentSpawned)
+		{
+			if (!teleportIn)
+			{
+				int num = Mathf.Max(GenTicks.TicksGame - lastSpawnInCheck, 1);
+				lastSpawnInCheck = GenTicks.TicksGame;
+				if (Rand.MTBEventOccurs(6f, 2500f, num))
+				{
+					teleportIn = true;
 				}
 			}
-			Hediff hd;
-			if (this.haunted.health.hediffSet.TryGetHediff(HediffDefOf.CorpseTorment, out hd))
+			if (teleportIn && CellFinder.TryFindRandomReachableNearbyCell(Haunted.PositionHeld, Haunted.MapHeld, 70f, TraverseParms.For(TraverseMode.PassDoors), IsValidAwokenSpawnCell, null, out var result))
 			{
-				hd.TryGetComp<HediffComp_Disappears>().ResetElapsedTicks();
-				return;
-			}
-			this.haunted.health.AddHediff(HediffDefOf.CorpseTorment, null, null, null);
-			Messages.Message("MessagePawnFainted".Translate(this.Haunted.Named("PAWN")), this.Haunted, MessageTypeDefOf.NegativeHealthEvent, true);
-		}
-
-		// Token: 0x060014F1 RID: 5361 RVA: 0x000628CE File Offset: 0x00060ACE
-		public void Notify_PawnDied()
-		{
-			if (this.disappearTick != 0)
-			{
-				return;
-			}
-			if (this.awoken)
-			{
-				this.disappearTick = GenTicks.TicksGame + 600;
-				return;
-			}
-			this.disappearTick = GenTicks.TicksGame + 7500;
-		}
-
-		// Token: 0x060014F2 RID: 5362 RVA: 0x00062904 File Offset: 0x00060B04
-		public void Notify_PawnKilledViaAwoken()
-		{
-			this.disappearTick = GenTicks.TicksGame + 600;
-			Messages.Message("MessageAwokenKilledVictim".Translate(this.Haunted.Named("PAWN")), this.Haunted, MessageTypeDefOf.NegativeEvent, true);
-		}
-
-		// Token: 0x060014F3 RID: 5363 RVA: 0x00062958 File Offset: 0x00060B58
-		public void CorpseTick()
-		{
-			if (this.disappearTick == 0 && this.Haunted.SpawnedOrAnyParentSpawned && this.Haunted.IsMutant)
-			{
-				this.disappearTick = GenTicks.TicksGame + 7500;
-			}
-			if (this.awoken)
-			{
-				this.AwokenTick();
-				return;
-			}
-			if (this.applyThoughtNextTick)
-			{
-				this.ApplyCorpseDestroyedThoughts();
-			}
-			this.UpdateCorpseState();
-			this.UpdateMentalBreak();
-			this.AwakeningTick();
-		}
-
-		// Token: 0x060014F4 RID: 5364 RVA: 0x000629C8 File Offset: 0x00060BC8
-		private void UpdateMentalBreak()
-		{
-			if (!this.Haunted.SpawnedOrAnyParentSpawned || !this.CorpseSpawned)
-			{
-				return;
-			}
-			if (!this.mentalBreak && !this.Haunted.InMentalState && GenTicks.TicksGame >= this.minMentalBreakRefireTick && Rand.MTBEventOccurs(5f, 60000f, 1f))
-			{
-				this.mentalBreak = true;
-			}
-			if (this.mentalBreak)
-			{
-				this.TryTriggerMentalBreak();
-			}
-		}
-
-		// Token: 0x060014F5 RID: 5365 RVA: 0x00062A38 File Offset: 0x00060C38
-		public void TryTriggerMentalBreak()
-		{
-			if (MentalBreakDefOf.CorpseObsession.Worker.BreakCanOccur(this.Haunted))
-			{
-				this.mentalBreak = false;
-				this.minMentalBreakRefireTick = GenTicks.TicksGame + 150000;
-				this.Haunted.mindState.mentalBreaker.TryDoMentalBreak("MentalBreakReason_MysteriousCorpse".Translate(), MentalBreakDefOf.CorpseObsession);
-				return;
-			}
-			MentalBreakDef breakDef;
-			if (this.Haunted.mindState.mentalBreaker.TryGetRandomMentalBreak(MentalBreakIntensity.Major, out breakDef))
-			{
-				this.mentalBreak = false;
-				this.minMentalBreakRefireTick = GenTicks.TicksGame + 150000;
-				this.Haunted.mindState.mentalBreaker.TryDoMentalBreak("MentalBreakReason_MysteriousCorpse".Translate(), breakDef);
-			}
-		}
-
-		// Token: 0x060014F6 RID: 5366 RVA: 0x00062AF8 File Offset: 0x00060CF8
-		private void AwokenTick()
-		{
-			if (this.awokenFinished)
-			{
-				return;
-			}
-			if (this.awokenPawn != null)
-			{
-				if (this.awokenPawn.Downed && !this.awokenPawn.Dead && !this.awokenPawn.health.hediffSet.HasHediff(HediffDefOf.RapidRegeneration, false))
-				{
-					this.awokenPawn.Kill(null, null);
-				}
-				if (this.awokenPawn.Dead)
-				{
-					TaggedString label = "UnnaturalCorpseAwokenDefeatedLetter".Translate();
-					TaggedString text = "UnnaturalCorpseAwokenDefeatedLetterDesc".Translate(this.Haunted.Named("PAWN"));
-					Find.LetterStack.ReceiveLetter(label, text, LetterDefOf.PositiveEvent, this.awokenPawn, null, null, null, null, 0, true);
-					if (this.awokenPawn.SpawnedOrAnyParentSpawned)
-					{
-						Thing thing;
-						GenDrop.TryDropSpawn(ThingMaker.MakeThing(ThingDefOf.Shard, null), this.awokenPawn.PositionHeld, this.awokenPawn.MapHeld, ThingPlaceMode.Near, out thing, null, null, true);
-						FleshbeastUtility.MeatSplatter(3, this.awokenPawn.PositionHeld, this.awokenPawn.MapHeld, FleshbeastUtility.MeatExplosionSize.Normal);
-						this.awokenPawn.Corpse.Destroy(DestroyMode.Vanish);
-					}
-					this.awokenFinished = true;
-					return;
-				}
-			}
-			if ((this.awokenPawn.DestroyedOrNull() || !this.awokenPawn.SpawnedOrAnyParentSpawned) && this.Haunted.SpawnedOrAnyParentSpawned)
-			{
-				if (!this.teleportIn)
-				{
-					int num = Mathf.Max(GenTicks.TicksGame - this.lastSpawnInCheck, 1);
-					this.lastSpawnInCheck = GenTicks.TicksGame;
-					if (Rand.MTBEventOccurs(6f, 2500f, (float)num))
-					{
-						this.teleportIn = true;
-					}
-				}
-				IntVec3 cell;
-				if (this.teleportIn && CellFinder.TryFindRandomReachableNearbyCell(this.Haunted.PositionHeld, this.Haunted.MapHeld, 70f, TraverseParms.For(TraverseMode.PassDoors, Danger.Deadly, false, false, false, true, false), new Predicate<IntVec3>(this.IsValidAwokenSpawnCell), null, out cell, 999999))
-				{
-					this.teleportIn = false;
-					this.awokenPawn = this.MakeNewAwoken();
-					SkipUtility.SkipTo(this.awokenPawn, cell, this.Haunted.MapHeld);
-					this.TurnAwoken(this.awokenPawn);
-					Messages.Message("MessageAwokenReappeared".Translate(this.Haunted.Named("PAWN")), this.awokenPawn, MessageTypeDefOf.NegativeEvent, true);
-					Find.MusicManagerPlay.CheckTransitions();
-					return;
-				}
-			}
-			else if (!this.awokenPawn.DestroyedOrNull() && this.awokenPawn.Spawned && !this.Haunted.DestroyedOrNull() && this.Haunted.MapHeld != this.awokenPawn.Map)
-			{
-				SkipUtility.SkipDeSpawn(this.awokenPawn);
-				this.awokenPawn.Destroy(DestroyMode.Vanish);
-				this.awokenPawn = null;
-				Messages.Message("MessageAwokenVanished".Translate(this.Haunted.Named("PAWN")), this.awokenPawn, MessageTypeDefOf.NeutralEvent, true);
-			}
-		}
-
-		// Token: 0x060014F7 RID: 5367 RVA: 0x00062DFC File Offset: 0x00060FFC
-		private bool IsValidAwokenSpawnCell(IntVec3 cell)
-		{
-			Map mapHeld = this.Haunted.MapHeld;
-			return cell.Standable(mapHeld) && !cell.Fogged(mapHeld);
-		}
-
-		// Token: 0x060014F8 RID: 5368 RVA: 0x00062E2C File Offset: 0x0006102C
-		private void UpdateCorpseState()
-		{
-			if (this.Haunted.Dead)
-			{
-				return;
-			}
-			if (this.corpse == null && this.Haunted.SpawnedOrAnyParentSpawned)
-			{
-				if (!this.teleportIn)
-				{
-					int num = Mathf.Max(GenTicks.TicksGame - this.lastSpawnInCheck, 1);
-					this.lastSpawnInCheck = GenTicks.TicksGame;
-					if (Rand.MTBEventOccurs(24f, 2500f, (float)num))
-					{
-						this.teleportIn = true;
-					}
-				}
-				IntVec3 cell;
-				if (this.teleportIn && AnomalyUtility.TryGetNearbyUnseenCell(this.Haunted, out cell))
-				{
-					this.SpawnNewCorpse(cell);
-				}
-			}
-			if (this.corpse != null && this.InEscapableContainer())
-			{
-				if (!this.escape && Rand.MTBEventOccurs(24f, 2500f, 1f))
-				{
-					this.escape = true;
-				}
-				if (this.escape && AnomalyUtility.IsValidUnseenCell(Find.CameraDriver.CurrentViewRect.ExpandedBy(1), this.corpse.PositionHeld, this.corpse.MapHeld))
-				{
-					this.BreakoutOfContainer();
-				}
-			}
-		}
-
-		// Token: 0x060014F9 RID: 5369 RVA: 0x00062F30 File Offset: 0x00061130
-		private void AwakeningTick()
-		{
-			if (this.CorpseSpawned && this.rising && this.Corpse.Spawned)
-			{
-				if (this.riseSustainer == null || this.riseSustainer.Ended)
-				{
-					SoundInfo info = SoundInfo.InMap(this.Corpse, MaintenanceType.PerTick);
-					this.riseSustainer = SoundDefOf.Pawn_Shambler_Rise.TrySpawnSustainer(info);
-				}
-				if (this.riseEffecter == null)
-				{
-					this.riseEffecter = EffecterDefOf.ShamblerRaise.Spawn(this.Corpse, this.Corpse.Map, 1f);
-				}
-				this.riseSustainer.Maintain();
-				this.riseEffecter.EffectTick(this.Corpse, TargetInfo.Invalid);
-			}
-			if (this.awoken || GenTicks.TicksGame <= this.awakenTick)
-			{
-				return;
-			}
-			if (this.CorpseSpawned && this.Haunted.SpawnedOrAnyParentSpawned && !this.awoken && !this.sentAwakeningLetter)
-			{
-				this.sentAwakeningLetter = true;
-				this.awakenTick = GenTicks.TicksGame + Mathf.CeilToInt(UnnaturalCorpseTracker.AwakenDelayDays.RandomInRange * 60000f);
-				TaggedString label = "UnnaturalCorpseAwakeningLetter".Translate();
-				TaggedString taggedString = "UnnaturalCorpseAwakeningLetterDesc".Translate(this.Haunted.Named("PAWN"));
-				if (this.CanDestroyViaResearch)
-				{
-					taggedString += "\n\n" + "UnnaturalCorpseAwakeningLetterExtra_StudyComplete".Translate();
-				}
-				else
-				{
-					taggedString += "\n\n" + "UnnaturalCorpseAwakeningLetterExtra_StudyIncomplete".Translate();
-				}
-				Find.LetterStack.ReceiveLetter(label, taggedString, LetterDefOf.NeutralEvent, this.corpse, null, null, null, null, 0, true);
-				return;
-			}
-			if (this.CorpseSpawned && this.Haunted.SpawnedOrAnyParentSpawned && this.Corpse.MapHeld == this.Haunted.MapHeld && !this.Haunted.Downed && this.Haunted.Awake() && !this.rising)
-			{
-				this.rising = true;
-				this.awakenTick = GenTicks.TicksGame + 420;
-				this.Corpse.InnerPawn.Drawer.renderer.SetAnimation(AnimationDefOf.ShamblerRise);
-				TaggedString label2 = "UnnaturalCorpseAwokenLetter".Translate();
-				TaggedString text = "UnnaturalCorpseAwokenLetterDesc".Translate(this.Haunted.Named("PAWN"));
-				Find.LetterStack.ReceiveLetter(label2, text, LetterDefOf.ThreatBig, this.awokenPawn, null, null, null, null, 0, true);
-				Find.TickManager.slower.SignalForceNormalSpeed();
-				return;
-			}
-			if (this.CorpseSpawned)
-			{
-				this.awoken = true;
-				IntVec3 positionHeld = this.Corpse.PositionHeld;
-				this.Corpse.Destroy(DestroyMode.Vanish);
-				this.awokenPawn = this.MakeNewAwoken();
-				GenSpawn.Spawn(this.awokenPawn, positionHeld, this.Haunted.MapHeld, WipeMode.Vanish);
-				this.TurnAwoken(this.awokenPawn);
-				this.awokenPawn.Drawer.renderer.SetAnimation(null);
-				float numSeconds = UnnaturalCorpseTracker.CombatPointsSecondsToKillCurve.Evaluate(StorytellerUtility.DefaultThreatPointsNow(this.Haunted.MapHeld));
-				this.ticksToKill = numSeconds.SecondsToTicks();
+				teleportIn = false;
+				awokenPawn = MakeNewAwoken();
+				SkipUtility.SkipTo(awokenPawn, result, Haunted.MapHeld);
+				TurnAwoken(awokenPawn);
+				Messages.Message("MessageAwokenReappeared".Translate(Haunted.Named("PAWN")), awokenPawn, MessageTypeDefOf.NegativeEvent);
 				Find.MusicManagerPlay.CheckTransitions();
 			}
-			this.awakenTick = GenTicks.TicksGame + 2500;
 		}
-
-		// Token: 0x060014FA RID: 5370 RVA: 0x00063298 File Offset: 0x00061498
-		private void SpawnNewCorpse(IntVec3 cell)
+		else if (!awokenPawn.DestroyedOrNull() && awokenPawn.Spawned && !Haunted.DestroyedOrNull() && Haunted.MapHeld != awokenPawn.Map)
 		{
-			this.teleportIn = false;
-			UnnaturalCorpse unnaturalCorpse = AnomalyUtility.MakeUnnaturalCorpse(this.Haunted);
-			unnaturalCorpse.LinkToTracker(this);
-			GenSpawn.Spawn(unnaturalCorpse, cell, this.Haunted.MapHeld, WipeMode.Vanish);
-			this.spawnedTick = GenTicks.TicksGame;
-			this.corpse = unnaturalCorpse;
-			this.corpse.Forbiddable.Forbidden = true;
-			TaggedString label = "LetterLabelCorpseReappeared".Translate();
-			TaggedString text = "LetterCorpseReappeared".Translate(this.Haunted.Named("PAWN"));
-			Find.LetterStack.ReceiveLetter(label, text, LetterDefOf.NeutralEvent, this.corpse, null, null, null, null, 0, true);
+			SkipUtility.SkipDeSpawn(awokenPawn);
+			awokenPawn.Destroy();
+			awokenPawn = null;
+			Messages.Message("MessageAwokenVanished".Translate(Haunted.Named("PAWN")), awokenPawn, MessageTypeDefOf.NeutralEvent);
 		}
+	}
 
-		// Token: 0x060014FB RID: 5371 RVA: 0x0006333E File Offset: 0x0006153E
-		private Pawn MakeNewAwoken()
+	private bool IsValidAwokenSpawnCell(IntVec3 cell)
+	{
+		Map mapHeld = Haunted.MapHeld;
+		if (cell.Standable(mapHeld))
 		{
-			Pawn pawn = Find.PawnDuplicator.Duplicate(this.Haunted);
-			pawn.apparel.DestroyAll(DestroyMode.Vanish);
-			return pawn;
+			return !cell.Fogged(mapHeld);
 		}
+		return false;
+	}
 
-		// Token: 0x060014FC RID: 5372 RVA: 0x0006335C File Offset: 0x0006155C
-		private void TurnAwoken(Pawn pawn)
+	private void UpdateCorpseState()
+	{
+		if (Haunted.Dead)
 		{
-			MutantUtility.SetPawnAsMutantInstantly(pawn, MutantDefOf.AwokenCorpse, pawn.GetRotStage());
-			if (pawn.Faction != Faction.OfEntities)
+			return;
+		}
+		if (corpse == null && Haunted.SpawnedOrAnyParentSpawned)
+		{
+			if (!teleportIn)
 			{
-				pawn.SetFaction(Faction.OfEntities, null);
+				int num = Mathf.Max(GenTicks.TicksGame - lastSpawnInCheck, 1);
+				lastSpawnInCheck = GenTicks.TicksGame;
+				if (Rand.MTBEventOccurs(24f, 2500f, num))
+				{
+					teleportIn = true;
+				}
 			}
-			pawn.health.hediffSet.GetFirstHediff<Hediff_RapidRegeneration>().SetHpCapacity(UnnaturalCorpseTracker.CombatPointsPerHpRegenCurve.Evaluate(StorytellerUtility.DefaultThreatPointsNow(this.Haunted.MapHeld)));
-			Pawn_AbilityTracker abilities = pawn.abilities;
-			Ability ability = (abilities != null) ? abilities.GetAbility(AbilityDefOf.UnnaturalCorpseSkip, true) : null;
-			if (ability != null)
+			if (teleportIn && AnomalyUtility.TryGetNearbyUnseenCell(Haunted, out var pos))
 			{
-				ability.StartCooldown(ability.def.cooldownTicksRange.RandomInRange);
+				SpawnNewCorpse(pos);
 			}
 		}
-
-		// Token: 0x060014FD RID: 5373 RVA: 0x000633F4 File Offset: 0x000615F4
-		private void BreakoutOfContainer()
+		if (corpse != null && InEscapableContainer())
 		{
-			if (!this.InEscapableContainer())
+			if (!escape && Rand.MTBEventOccurs(24f, 2500f, 1f))
 			{
-				return;
+				escape = true;
 			}
-			this.escape = false;
-			Thing thing = ThingOwnerUtility.SpawnedParentOrMe(this.corpse);
-			Messages.Message("MessageCorpseEscaped".Translate(this.Haunted.Named("PAWN"), thing.Named("CONTAINER")), this.corpse, MessageTypeDefOf.NeutralEvent, true);
-			Building_Casket building_Casket = thing as Building_Casket;
-			if (building_Casket != null)
+			if (escape && AnomalyUtility.IsValidUnseenCell(Find.CameraDriver.CurrentViewRect.ExpandedBy(1), corpse.PositionHeld, corpse.MapHeld))
+			{
+				BreakoutOfContainer();
+			}
+		}
+	}
+
+	private void AwakeningTick()
+	{
+		if (CorpseSpawned && rising && Corpse.Spawned)
+		{
+			if (riseSustainer == null || riseSustainer.Ended)
+			{
+				SoundInfo info = SoundInfo.InMap(Corpse, MaintenanceType.PerTick);
+				riseSustainer = SoundDefOf.Pawn_Shambler_Rise.TrySpawnSustainer(info);
+			}
+			if (riseEffecter == null)
+			{
+				riseEffecter = EffecterDefOf.ShamblerRaise.Spawn(Corpse, Corpse.Map);
+			}
+			riseSustainer.Maintain();
+			riseEffecter.EffectTick(Corpse, TargetInfo.Invalid);
+		}
+		if (awoken || GenTicks.TicksGame <= awakenTick)
+		{
+			return;
+		}
+		if (CorpseSpawned && Haunted.SpawnedOrAnyParentSpawned && !awoken && !sentAwakeningLetter)
+		{
+			sentAwakeningLetter = true;
+			awakenTick = GenTicks.TicksGame + Mathf.CeilToInt(AwakenDelayDays.RandomInRange * 60000f);
+			TaggedString label = "UnnaturalCorpseAwakeningLetter".Translate();
+			TaggedString text = "UnnaturalCorpseAwakeningLetterDesc".Translate(Haunted.Named("PAWN"));
+			if (CanDestroyViaResearch)
+			{
+				text += "\n\n" + "UnnaturalCorpseAwakeningLetterExtra_StudyComplete".Translate();
+			}
+			else
+			{
+				text += "\n\n" + "UnnaturalCorpseAwakeningLetterExtra_StudyIncomplete".Translate();
+			}
+			Find.LetterStack.ReceiveLetter(label, text, LetterDefOf.NeutralEvent, corpse);
+			return;
+		}
+		if (CorpseSpawned && Haunted.SpawnedOrAnyParentSpawned && Corpse.MapHeld == Haunted.MapHeld && !Haunted.Downed && Haunted.Awake() && !rising)
+		{
+			rising = true;
+			awakenTick = GenTicks.TicksGame + 420;
+			Corpse.InnerPawn.Drawer.renderer.SetAnimation(AnimationDefOf.ShamblerRise);
+			TaggedString label2 = "UnnaturalCorpseAwokenLetter".Translate();
+			TaggedString text2 = "UnnaturalCorpseAwokenLetterDesc".Translate(Haunted.Named("PAWN"));
+			Find.LetterStack.ReceiveLetter(label2, text2, LetterDefOf.ThreatBig, awokenPawn);
+			Find.TickManager.slower.SignalForceNormalSpeed();
+			return;
+		}
+		if (CorpseSpawned)
+		{
+			awoken = true;
+			IntVec3 positionHeld = Corpse.PositionHeld;
+			Corpse.Destroy();
+			awokenPawn = MakeNewAwoken();
+			GenSpawn.Spawn(awokenPawn, positionHeld, Haunted.MapHeld);
+			TurnAwoken(awokenPawn);
+			awokenPawn.Drawer.renderer.SetAnimation(null);
+			float numSeconds = CombatPointsSecondsToKillCurve.Evaluate(StorytellerUtility.DefaultThreatPointsNow(Haunted.MapHeld));
+			ticksToKill = numSeconds.SecondsToTicks();
+			Find.MusicManagerPlay.CheckTransitions();
+		}
+		awakenTick = GenTicks.TicksGame + 2500;
+	}
+
+	private void SpawnNewCorpse(IntVec3 cell)
+	{
+		teleportIn = false;
+		UnnaturalCorpse unnaturalCorpse = AnomalyUtility.MakeUnnaturalCorpse(Haunted);
+		unnaturalCorpse.LinkToTracker(this);
+		GenSpawn.Spawn(unnaturalCorpse, cell, Haunted.MapHeld);
+		spawnedTick = GenTicks.TicksGame;
+		corpse = unnaturalCorpse;
+		corpse.Forbiddable.Forbidden = true;
+		TaggedString label = "LetterLabelCorpseReappeared".Translate();
+		TaggedString text = "LetterCorpseReappeared".Translate(Haunted.Named("PAWN"));
+		Find.LetterStack.ReceiveLetter(label, text, LetterDefOf.NeutralEvent, corpse);
+	}
+
+	private Pawn MakeNewAwoken()
+	{
+		Pawn pawn = Find.PawnDuplicator.Duplicate(Haunted);
+		pawn.apparel.DestroyAll();
+		return pawn;
+	}
+
+	private void TurnAwoken(Pawn pawn)
+	{
+		MutantUtility.SetPawnAsMutantInstantly(pawn, MutantDefOf.AwokenCorpse, pawn.GetRotStage());
+		if (pawn.Faction != Faction.OfEntities)
+		{
+			pawn.SetFaction(Faction.OfEntities);
+		}
+		pawn.health.hediffSet.GetFirstHediff<Hediff_RapidRegeneration>().SetHpCapacity(CombatPointsPerHpRegenCurve.Evaluate(StorytellerUtility.DefaultThreatPointsNow(Haunted.MapHeld)));
+		Ability ability = pawn.abilities?.GetAbility(AbilityDefOf.UnnaturalCorpseSkip, includeTemporary: true);
+		ability?.StartCooldown(ability.def.cooldownTicksRange.RandomInRange);
+	}
+
+	private void BreakoutOfContainer()
+	{
+		if (InEscapableContainer())
+		{
+			escape = false;
+			Thing thing = ThingOwnerUtility.SpawnedParentOrMe(corpse);
+			Messages.Message("MessageCorpseEscaped".Translate(Haunted.Named("PAWN"), thing.Named("CONTAINER")), corpse, MessageTypeDefOf.NeutralEvent);
+			if (thing is Building_Casket building_Casket)
 			{
 				building_Casket.EjectContents();
 			}
 			else
 			{
-				Thing thing2;
-				this.corpse.ParentHolder.GetDirectlyHeldThings().TryDrop(this.corpse, ThingPlaceMode.Near, 1, out thing2, null, null);
+				corpse.ParentHolder.GetDirectlyHeldThings().TryDrop(corpse, ThingPlaceMode.Near, 1, out var _);
 			}
-			this.corpse.Forbiddable.Forbidden = true;
+			corpse.Forbiddable.Forbidden = true;
 		}
+	}
 
-		// Token: 0x060014FE RID: 5374 RVA: 0x000634A4 File Offset: 0x000616A4
-		public void Notify_Studied(Pawn studier, float amount)
+	public void Notify_Studied(Pawn studier, float amount)
+	{
+		research += amount;
+		if (research >= 3f && !sentLetterOne)
 		{
-			this.research += amount;
-			if (this.research >= 3f && !this.sentLetterOne)
-			{
-				this.sentLetterOne = true;
-				this.SendLetter(studier, "UnnaturalCorpseStudyLetter", "UnnaturalCorpseStudyLetterDesc");
-				return;
-			}
-			if (this.CanDestroyViaResearch && !this.sentLetterTwo)
-			{
-				this.sentLetterTwo = true;
-				this.SendLetter(studier, "UnnaturalCorpseStudyCompletedLetter", "UnnaturalCorpseStudyCompletedLetterDesc");
-			}
+			sentLetterOne = true;
+			SendLetter(studier, "UnnaturalCorpseStudyLetter", "UnnaturalCorpseStudyLetterDesc");
 		}
-
-		// Token: 0x060014FF RID: 5375 RVA: 0x00063518 File Offset: 0x00061718
-		private void SendLetter(Pawn studier, string labelKey, string descKey)
+		else if (CanDestroyViaResearch && !sentLetterTwo)
 		{
-			TaggedString label = labelKey.Translate();
-			TaggedString text = descKey.Translate(this.haunted.Named("VICTIM"), studier.Named("RESEARCHER"));
-			Thing t = this.corpse.Spawned ? this.corpse : this.haunted;
-			Find.LetterStack.ReceiveLetter(label, text, LetterDefOf.NeutralEvent, t, null, null, null, null, 0, true);
-			ChoiceLetter choiceLetter = LetterMaker.MakeLetter(label, text, LetterDefOf.NeutralEvent, t, null, null, null);
-			choiceLetter.arrivalTick = Find.TickManager.TicksGame;
-			this.letters.Add(choiceLetter);
+			sentLetterTwo = true;
+			SendLetter(studier, "UnnaturalCorpseStudyCompletedLetter", "UnnaturalCorpseStudyCompletedLetterDesc");
 		}
+	}
 
-		// Token: 0x06001500 RID: 5376 RVA: 0x000635B9 File Offset: 0x000617B9
-		public void DevAwaken()
+	private void SendLetter(Pawn studier, string labelKey, string descKey)
+	{
+		TaggedString label = labelKey.Translate();
+		TaggedString text = descKey.Translate(haunted.Named("VICTIM"), studier.Named("RESEARCHER"));
+		Thing thing = (corpse.Spawned ? ((Thing)corpse) : ((Thing)haunted));
+		Find.LetterStack.ReceiveLetter(label, text, LetterDefOf.NeutralEvent, thing);
+		ChoiceLetter choiceLetter = LetterMaker.MakeLetter(label, text, LetterDefOf.NeutralEvent, thing);
+		choiceLetter.arrivalTick = Find.TickManager.TicksGame;
+		letters.Add(choiceLetter);
+	}
+
+	public void DevAwaken()
+	{
+		sentAwakeningLetter = true;
+		awakenTick = GenTicks.TicksGame;
+	}
+
+	public void DevUnlockDeactivation()
+	{
+		sentLetterOne = true;
+		sentLetterTwo = true;
+		research += researchToDestroy;
+	}
+
+	public void ExposeData()
+	{
+		Scribe_References.Look(ref haunted, "haunted");
+		Scribe_References.Look(ref awokenPawn, "awokenPawn");
+		Scribe_References.Look(ref corpse, "corpse", saveDestroyedThings: true);
+		Scribe_Values.Look(ref disappearTick, "disappearTick", 0);
+		Scribe_Values.Look(ref awakenTick, "awakenTick", 0);
+		Scribe_Values.Look(ref sentAwakeningLetter, "sentAwakeningLetter", defaultValue: false);
+		Scribe_Values.Look(ref minMentalBreakRefireTick, "minMentalBreakRefireTick", 0);
+		Scribe_Values.Look(ref lastSpawnInCheck, "lastSpawnInCheck", 0);
+		Scribe_Values.Look(ref teleportIn, "teleportIn", defaultValue: false);
+		Scribe_Values.Look(ref escape, "escape", defaultValue: false);
+		Scribe_Values.Look(ref mentalBreak, "mentalBreak", defaultValue: false);
+		Scribe_Values.Look(ref removing, "removing", defaultValue: false);
+		Scribe_Values.Look(ref research, "research", 0f);
+		Scribe_Values.Look(ref researchToDestroy, "researchToDestroy", 0f);
+		Scribe_Values.Look(ref sentLetterOne, "sentLetterOne", defaultValue: false);
+		Scribe_Values.Look(ref sentLetterTwo, "sentLetterTwo", defaultValue: false);
+		Scribe_Values.Look(ref awoken, "awoken", defaultValue: false);
+		Scribe_Values.Look(ref awokenFinished, "awokenFinished", defaultValue: false);
+		Scribe_Values.Look(ref rising, "rising", defaultValue: false);
+		Scribe_Values.Look(ref ticksToKill, "ticksToKill", 0);
+		Scribe_Values.Look(ref loadID, "loadID", 0);
+		Scribe_Collections.Look(ref letters, "letters", LookMode.Deep);
+	}
+
+	public string GetUniqueLoadID()
+	{
+		return $"MysteriousCorpseTracker_{loadID}";
+	}
+
+	private bool InEscapableContainer()
+	{
+		if (corpse == null)
 		{
-			this.sentAwakeningLetter = true;
-			this.awakenTick = GenTicks.TicksGame;
+			return false;
 		}
-
-		// Token: 0x06001501 RID: 5377 RVA: 0x000635CD File Offset: 0x000617CD
-		public void DevUnlockDeactivation()
+		if (corpse.ParentHolder == null || corpse.ParentHolder is Map)
 		{
-			this.sentLetterOne = true;
-			this.sentLetterTwo = true;
-			this.research += this.researchToDestroy;
+			return false;
 		}
-
-		// Token: 0x06001502 RID: 5378 RVA: 0x000635F0 File Offset: 0x000617F0
-		public void ExposeData()
+		if ((corpse.ParentHolder is Building building && building.def.building.isEscapableContainer) || corpse.ParentHolder is CompTransporter)
 		{
-			Scribe_References.Look<Pawn>(ref this.haunted, "haunted", false);
-			Scribe_References.Look<Pawn>(ref this.awokenPawn, "awokenPawn", false);
-			Scribe_References.Look<UnnaturalCorpse>(ref this.corpse, "corpse", true);
-			Scribe_Values.Look<int>(ref this.disappearTick, "disappearTick", 0, false);
-			Scribe_Values.Look<int>(ref this.awakenTick, "awakenTick", 0, false);
-			Scribe_Values.Look<bool>(ref this.sentAwakeningLetter, "sentAwakeningLetter", false, false);
-			Scribe_Values.Look<int>(ref this.minMentalBreakRefireTick, "minMentalBreakRefireTick", 0, false);
-			Scribe_Values.Look<int>(ref this.lastSpawnInCheck, "lastSpawnInCheck", 0, false);
-			Scribe_Values.Look<bool>(ref this.teleportIn, "teleportIn", false, false);
-			Scribe_Values.Look<bool>(ref this.escape, "escape", false, false);
-			Scribe_Values.Look<bool>(ref this.mentalBreak, "mentalBreak", false, false);
-			Scribe_Values.Look<bool>(ref this.removing, "removing", false, false);
-			Scribe_Values.Look<float>(ref this.research, "research", 0f, false);
-			Scribe_Values.Look<float>(ref this.researchToDestroy, "researchToDestroy", 0f, false);
-			Scribe_Values.Look<bool>(ref this.sentLetterOne, "sentLetterOne", false, false);
-			Scribe_Values.Look<bool>(ref this.sentLetterTwo, "sentLetterTwo", false, false);
-			Scribe_Values.Look<bool>(ref this.awoken, "awoken", false, false);
-			Scribe_Values.Look<bool>(ref this.awokenFinished, "awokenFinished", false, false);
-			Scribe_Values.Look<bool>(ref this.rising, "rising", false, false);
-			Scribe_Values.Look<int>(ref this.ticksToKill, "ticksToKill", 0, false);
-			Scribe_Values.Look<int>(ref this.loadID, "loadID", 0, false);
-			Scribe_Collections.Look<ChoiceLetter>(ref this.letters, "letters", LookMode.Deep, Array.Empty<object>());
+			return true;
 		}
-
-		// Token: 0x06001503 RID: 5379 RVA: 0x00063792 File Offset: 0x00061992
-		public string GetUniqueLoadID()
-		{
-			return string.Format("MysteriousCorpseTracker_{0}", this.loadID);
-		}
-
-		// Token: 0x06001504 RID: 5380 RVA: 0x000637AC File Offset: 0x000619AC
-		private bool InEscapableContainer()
-		{
-			if (this.corpse == null)
-			{
-				return false;
-			}
-			if (this.corpse.ParentHolder == null || this.corpse.ParentHolder is Map)
-			{
-				return false;
-			}
-			Building building = this.corpse.ParentHolder as Building;
-			return (building != null && building.def.building.isEscapableContainer) || this.corpse.ParentHolder is CompTransporter;
-		}
-
-		// Token: 0x0400137B RID: 4987
-		private static readonly FloatRange GrowingLetterDelayDays = new FloatRange(11f, 13f);
-
-		// Token: 0x0400137C RID: 4988
-		private static readonly FloatRange AwakenDelayDays = new FloatRange(1f, 3f);
-
-		// Token: 0x0400137D RID: 4989
-		private static readonly FloatRange DestroyResearchRequiredRange = new FloatRange(8f, 12f);
-
-		// Token: 0x0400137E RID: 4990
-		private const float FirstLetterResearchRequired = 3f;
-
-		// Token: 0x0400137F RID: 4991
-		private const int PawnDiedDisappearHours = 3;
-
-		// Token: 0x04001380 RID: 4992
-		private const int PawnKilledDisappearTicks = 600;
-
-		// Token: 0x04001381 RID: 4993
-		private const int MTBReappearHoursCorpse = 24;
-
-		// Token: 0x04001382 RID: 4994
-		private const int MTBReappearHoursAwoken = 6;
-
-		// Token: 0x04001383 RID: 4995
-		private const int MTBMentalBreakDays = 5;
-
-		// Token: 0x04001384 RID: 4996
-		private const int MTBEscapeContainerHours = 24;
-
-		// Token: 0x04001385 RID: 4997
-		private const int MinMentalBreakRefireTicks = 150000;
-
-		// Token: 0x04001386 RID: 4998
-		private const int RisingTime = 420;
-
-		// Token: 0x04001387 RID: 4999
-		private static readonly SimpleCurve CombatPointsPerHpRegenCurve = new SimpleCurve
-		{
-			{
-				new CurvePoint(300f, 150f),
-				true
-			},
-			{
-				new CurvePoint(3000f, 800f),
-				true
-			}
-		};
-
-		// Token: 0x04001388 RID: 5000
-		private static readonly SimpleCurve CombatPointsSecondsToKillCurve = new SimpleCurve
-		{
-			{
-				new CurvePoint(300f, 25f),
-				true
-			},
-			{
-				new CurvePoint(3000f, 10f),
-				true
-			}
-		};
-
-		// Token: 0x04001389 RID: 5001
-		private UnnaturalCorpse corpse;
-
-		// Token: 0x0400138A RID: 5002
-		private Pawn awokenPawn;
-
-		// Token: 0x0400138B RID: 5003
-		private Pawn haunted;
-
-		// Token: 0x0400138C RID: 5004
-		private int disappearTick;
-
-		// Token: 0x0400138D RID: 5005
-		private int lastSpawnInCheck;
-
-		// Token: 0x0400138E RID: 5006
-		private int loadID;
-
-		// Token: 0x0400138F RID: 5007
-		private int awakenTick;
-
-		// Token: 0x04001390 RID: 5008
-		private int spawnedTick;
-
-		// Token: 0x04001391 RID: 5009
-		private int minMentalBreakRefireTick;
-
-		// Token: 0x04001392 RID: 5010
-		private int ticksToKill;
-
-		// Token: 0x04001393 RID: 5011
-		private float research;
-
-		// Token: 0x04001394 RID: 5012
-		private float researchToDestroy;
-
-		// Token: 0x04001395 RID: 5013
-		private bool teleportIn;
-
-		// Token: 0x04001396 RID: 5014
-		private bool escape;
-
-		// Token: 0x04001397 RID: 5015
-		private bool mentalBreak;
-
-		// Token: 0x04001398 RID: 5016
-		private bool removing;
-
-		// Token: 0x04001399 RID: 5017
-		private bool sentLetterOne;
-
-		// Token: 0x0400139A RID: 5018
-		private bool sentLetterTwo;
-
-		// Token: 0x0400139B RID: 5019
-		private bool sentAwakeningLetter;
-
-		// Token: 0x0400139C RID: 5020
-		private bool awoken;
-
-		// Token: 0x0400139D RID: 5021
-		private bool rising;
-
-		// Token: 0x0400139E RID: 5022
-		private bool awokenFinished;
-
-		// Token: 0x0400139F RID: 5023
-		private List<ChoiceLetter> letters = new List<ChoiceLetter>();
-
-		// Token: 0x040013A0 RID: 5024
-		private bool applyThoughtNextTick;
-
-		// Token: 0x040013A1 RID: 5025
-		private Effecter riseEffecter;
-
-		// Token: 0x040013A2 RID: 5026
-		private Sustainer riseSustainer;
+		return false;
 	}
 }

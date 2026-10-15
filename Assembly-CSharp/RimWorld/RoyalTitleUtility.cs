@@ -1,597 +1,809 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using LudeonTK;
 using RimWorld.QuestGen;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public static class RoyalTitleUtility
 {
-	// Token: 0x020036AC RID: 13996
-	public static class RoyalTitleUtility
+	[CompilerGenerated]
+	private sealed class _003CGetConceitedTraits_003Ed__10 : IEnumerable<Trait>, IEnumerable, IEnumerator<Trait>, IEnumerator, IDisposable
 	{
-		// Token: 0x060136F9 RID: 79609 RVA: 0x005C605C File Offset: 0x005C425C
-		public static void FindLostAndGainedPermits(RoyalTitleDef currentTitle, RoyalTitleDef newTitle, out List<RoyalTitlePermitDef> gainedPermits, out List<RoyalTitlePermitDef> lostPermits)
+		private int _003C_003E1__state;
+
+		private Trait _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private Pawn p;
+
+		public Pawn _003C_003E3__p;
+
+		private TraitSet _003Ctraits_003E5__2;
+
+		private int _003Ci_003E5__3;
+
+		Trait IEnumerator<Trait>.Current
 		{
-			gainedPermits = new List<RoyalTitlePermitDef>();
-			lostPermits = new List<RoyalTitlePermitDef>();
-			if (newTitle != null && newTitle.permits != null)
+			[DebuggerHidden]
+			get
 			{
-				foreach (RoyalTitlePermitDef item in newTitle.permits)
-				{
-					if (currentTitle == null || currentTitle.permits == null || !currentTitle.permits.Contains(item))
-					{
-						gainedPermits.Add(item);
-					}
-				}
-			}
-			if (currentTitle != null && currentTitle.permits != null)
-			{
-				foreach (RoyalTitlePermitDef item2 in currentTitle.permits)
-				{
-					if (newTitle == null || newTitle.permits == null || !newTitle.permits.Contains(item2))
-					{
-						lostPermits.Add(item2);
-					}
-				}
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x060136FA RID: 79610 RVA: 0x005C614C File Offset: 0x005C434C
-		public static string BuildDifferenceExplanationText(RoyalTitleDef currentTitle, RoyalTitleDef newTitle, Faction faction, Pawn pawn)
+		object IEnumerator.Current
 		{
-			RoyalTitleUtility.<>c__DisplayClass1_0 CS$<>8__locals1 = new RoyalTitleUtility.<>c__DisplayClass1_0();
-			CS$<>8__locals1.faction = faction;
-			CS$<>8__locals1.pawn = pawn;
-			CS$<>8__locals1.newTitle = newTitle;
-			StringBuilder stringBuilder = new StringBuilder();
-			bool flag = RoyalTitleUtility.ShouldBecomeConceitedOnNewTitle(CS$<>8__locals1.pawn);
-			List<WorkTags> list = CS$<>8__locals1.pawn.story.DisabledWorkTagsBackstoryTraitsAndGenes.GetAllSelectedItems<WorkTags>().ToList<WorkTags>();
-			List<WorkTags> list2 = (CS$<>8__locals1.newTitle == null) ? new List<WorkTags>() : CS$<>8__locals1.newTitle.disabledWorkTags.GetAllSelectedItems<WorkTags>().ToList<WorkTags>();
-			List<WorkTags> list3 = new List<WorkTags>();
-			foreach (WorkTags item in list2)
+			[DebuggerHidden]
+			get
 			{
-				if (!list.Contains(item))
-				{
-					list3.Add(item);
-				}
+				return _003C_003E2__current;
 			}
-			int num = (CS$<>8__locals1.newTitle != null) ? CS$<>8__locals1.faction.def.RoyalTitlesAwardableInSeniorityOrderForReading.IndexOf(CS$<>8__locals1.newTitle) : -1;
-			if (CS$<>8__locals1.newTitle != null && flag)
-			{
-				stringBuilder.AppendLineTagged("LetterRoyalTitleConceitedTrait".Translate(CS$<>8__locals1.pawn.Named("PAWN"), (from t in RoyalTitleUtility.GetConceitedTraits(CS$<>8__locals1.pawn)
-				select t.Label).ToCommaList(true, false)));
-				stringBuilder.AppendLine();
-				if (CS$<>8__locals1.newTitle.minExpectation != null)
-				{
-					stringBuilder.AppendLineTagged("LetterRoyalTitleExpectation".Translate(CS$<>8__locals1.pawn.Named("PAWN"), CS$<>8__locals1.newTitle.minExpectation.label).CapitalizeFirst());
-					stringBuilder.AppendLine();
-				}
-			}
-			if (CS$<>8__locals1.newTitle != null)
-			{
-				if (CS$<>8__locals1.newTitle.canBeInherited)
-				{
-					Pawn heir = CS$<>8__locals1.pawn.royalty.GetHeir(CS$<>8__locals1.faction);
-					TaggedString taggedString = (heir != null) ? "LetterRoyalTitleHeir".Translate(CS$<>8__locals1.pawn.Named("PAWN"), heir.Named("HEIR")) : "LetterRoyalTitleNoHeir".Translate(CS$<>8__locals1.pawn.Named("PAWN"));
-					stringBuilder.AppendTagged(taggedString);
-					if (heir != null && heir.Faction != Faction.OfPlayer)
-					{
-						stringBuilder.AppendTagged(" " + "LetterRoyalTitleHeirFactionWarning".Translate(heir.Named("PAWN"), CS$<>8__locals1.faction.Named("FACTION")));
-					}
-					stringBuilder.AppendLineTagged(" " + "LetterRoyalTitleChangingHeir".Translate(CS$<>8__locals1.faction.Named("FACTION")));
-				}
-				else
-				{
-					stringBuilder.AppendTagged("LetterRoyalTitleCantBeInherited".Translate(CS$<>8__locals1.newTitle.Named("TITLE")).CapitalizeFirst());
-					stringBuilder.AppendTagged(" " + "LetterRoyalTitleNoHeir".Translate(CS$<>8__locals1.pawn.Named("PAWN")));
-					stringBuilder.AppendLine();
-				}
-				stringBuilder.AppendLine();
-				if (CS$<>8__locals1.newTitle.permitPointsAwarded > 0 && CS$<>8__locals1.pawn.royalty.NewHighestTitle(CS$<>8__locals1.faction, CS$<>8__locals1.newTitle))
-				{
-					stringBuilder.AppendLine("PermitPointsAwarded".Translate(CS$<>8__locals1.newTitle.permitPointsAwarded));
-					stringBuilder.AppendLine();
-				}
-			}
-			if (flag && list3.Count > 0)
-			{
-				stringBuilder.AppendLine("LetterRoyalTitleDisabledWorkTag".Translate(CS$<>8__locals1.pawn.Named("PAWN"), (from t in list3
-				orderby base.<BuildDifferenceExplanationText>g__FirstTitleDisablingWorkTags|1(t).seniority
-				select t.LabelTranslated() + " (" + base.<BuildDifferenceExplanationText>g__FirstTitleDisablingWorkTags|1(t).GetLabelFor(CS$<>8__locals1.pawn) + ")").ToLineList("- ", false)).CapitalizeFirst());
-				stringBuilder.AppendLine();
-			}
-			if (CS$<>8__locals1.newTitle != null)
-			{
-				if (CS$<>8__locals1.newTitle.requiredMinimumApparelQuality > QualityCategory.Awful)
-				{
-					stringBuilder.AppendLine("LetterRoyalTitleApparelQualityRequirement".Translate(CS$<>8__locals1.pawn.Named("PAWN"), CS$<>8__locals1.newTitle.requiredMinimumApparelQuality.GetLabel().ToLower()).CapitalizeFirst());
-					stringBuilder.AppendLine();
-				}
-				if (CS$<>8__locals1.newTitle.requiredApparel != null && CS$<>8__locals1.newTitle.requiredApparel.Count > 0)
-				{
-					bool flag2 = false;
-					stringBuilder.AppendLine("LetterRoyalTitleApparelRequirement".Translate(CS$<>8__locals1.pawn.Named("PAWN")).CapitalizeFirst());
-					foreach (ApparelRequirement apparelRequirement in CS$<>8__locals1.newTitle.requiredApparel)
-					{
-						int i = 0;
-						stringBuilder.Append("- ");
-						stringBuilder.Append(string.Join(", ", apparelRequirement.AllRequiredApparelForPawn(CS$<>8__locals1.pawn, false, true).Select(delegate(ThingDef a)
-						{
-							int i;
-							string result = (i == 0) ? a.LabelCap.Resolve() : a.label;
-							i = i;
-							i++;
-							return result;
-						}).ToArray<string>()));
-						string t2;
-						if (!ApparelUtility.IsRequirementActive(apparelRequirement, ApparelRequirementSource.Title, CS$<>8__locals1.pawn, out t2))
-						{
-							stringBuilder.Append(" [" + "ApparelRequirementDisabledLabel".Translate() + ": " + t2 + "]");
-						}
-						else
-						{
-							flag2 = true;
-						}
-						stringBuilder.AppendLine();
-					}
-					if (flag2)
-					{
-						stringBuilder.AppendLine("- " + "ApparelRequirementAnyPrestigeArmor".Translate());
-						stringBuilder.AppendLine("- " + "ApparelRequirementAnyPsycasterApparel".Translate());
-						if (ModsConfig.BiotechActive)
-						{
-							stringBuilder.AppendLine("- " + "ApparelRequirementAnyMechlordApparel".Translate());
-						}
-					}
-					stringBuilder.AppendLine();
-				}
-				if (!CS$<>8__locals1.newTitle.throneRoomRequirements.NullOrEmpty<RoomRequirement>())
-				{
-					stringBuilder.AppendLine("LetterRoyalTitleThroneroomRequirements".Translate(CS$<>8__locals1.pawn.Named("PAWN"), "\n" + (from r in CS$<>8__locals1.newTitle.throneRoomRequirements
-					select r.LabelCap(null)).ToLineList("- ", false)).CapitalizeFirst());
-					stringBuilder.AppendLine();
-				}
-				if (!CS$<>8__locals1.newTitle.GetBedroomRequirements(CS$<>8__locals1.pawn).EnumerableNullOrEmpty<RoomRequirement>())
-				{
-					stringBuilder.AppendLine("LetterRoyalTitleBedroomRequirements".Translate(CS$<>8__locals1.pawn.Named("PAWN"), "\n" + (from r in CS$<>8__locals1.newTitle.GetBedroomRequirements(CS$<>8__locals1.pawn)
-					select r.LabelCap(null)).ToLineList("- ", false)).CapitalizeFirst());
-					stringBuilder.AppendLine();
-				}
-				if (flag && CS$<>8__locals1.newTitle.foodRequirement.Defined && CS$<>8__locals1.newTitle.SatisfyingMeals(true).Any<ThingDef>() && (CS$<>8__locals1.pawn.story == null || !CS$<>8__locals1.pawn.story.traits.HasTrait(TraitDefOf.Ascetic)))
-				{
-					stringBuilder.AppendLine("LetterRoyalTitleFoodRequirements".Translate(CS$<>8__locals1.pawn.Named("PAWN"), "\n" + (from m in CS$<>8__locals1.newTitle.SatisfyingMeals(false)
-					select m.LabelCap.Resolve()).ToLineList("- ", false)).CapitalizeFirst());
-					stringBuilder.AppendLine();
-				}
-			}
-			List<RoyalTitlePermitDef> list4;
-			List<RoyalTitlePermitDef> list5;
-			RoyalTitleUtility.FindLostAndGainedPermits(currentTitle, CS$<>8__locals1.newTitle, out list4, out list5);
-			if (CS$<>8__locals1.newTitle != null && CS$<>8__locals1.newTitle.permits != null)
-			{
-				stringBuilder.AppendLine("LetterRoyalTitlePermits".Translate(CS$<>8__locals1.pawn.Named("PAWN")).CapitalizeFirst());
-				IEnumerable<RoyalTitlePermitDef> permits = CS$<>8__locals1.newTitle.permits;
-				Func<RoyalTitlePermitDef, int?> keySelector;
-				if ((keySelector = CS$<>8__locals1.<>9__11) == null)
-				{
-					keySelector = (CS$<>8__locals1.<>9__11 = delegate(RoyalTitlePermitDef p)
-					{
-						RoyalTitleDef royalTitleDef2 = base.<BuildDifferenceExplanationText>g__FirstTitleWithPermit|7(p);
-						if (royalTitleDef2 == null)
-						{
-							return null;
-						}
-						return new int?(royalTitleDef2.seniority);
-					});
-				}
-				foreach (RoyalTitlePermitDef royalTitlePermitDef in permits.OrderBy(keySelector))
-				{
-					RoyalTitleDef royalTitleDef = CS$<>8__locals1.<BuildDifferenceExplanationText>g__FirstTitleWithPermit|7(royalTitlePermitDef);
-					if (royalTitleDef != null)
-					{
-						stringBuilder.AppendLine("- " + royalTitlePermitDef.LabelCap + " (" + royalTitleDef.GetLabelFor(CS$<>8__locals1.pawn) + ")");
-					}
-				}
-				stringBuilder.AppendLine();
-			}
-			if (list5.Count > 0)
-			{
-				stringBuilder.AppendLine("LetterRoyalTitleLostPermits".Translate(CS$<>8__locals1.pawn.Named("PAWN")).CapitalizeFirst());
-				foreach (RoyalTitlePermitDef royalTitlePermitDef2 in list5)
-				{
-					stringBuilder.AppendLine("- " + royalTitlePermitDef2.LabelCap);
-				}
-				stringBuilder.AppendLine();
-			}
-			if (CS$<>8__locals1.newTitle != null)
-			{
-				if (CS$<>8__locals1.newTitle.grantedAbilities.Contains(AbilityDefOf.Speech) && (currentTitle == null || !currentTitle.grantedAbilities.Contains(AbilityDefOf.Speech)))
-				{
-					stringBuilder.AppendLine("LetterRoyalTitleSpeechAbilityGained".Translate(CS$<>8__locals1.pawn.Named("PAWN")).CapitalizeFirst());
-					stringBuilder.AppendLine();
-				}
-				List<JoyKindDef> list6 = (from def in DefDatabase<JoyKindDef>.AllDefsListForReading
-				where def.titleRequiredAny != null && def.titleRequiredAny.Contains(CS$<>8__locals1.newTitle)
-				select def).ToList<JoyKindDef>();
-				if (list6.Count > 0)
-				{
-					stringBuilder.AppendLine("LetterRoyalTitleEnabledJoyKind".Translate(CS$<>8__locals1.pawn.Named("PAWN")).CapitalizeFirst());
-					foreach (JoyKindDef joyKindDef in list6)
-					{
-						stringBuilder.AppendLine("- " + joyKindDef.LabelCap);
-					}
-					stringBuilder.AppendLine();
-				}
-				if (flag && !CS$<>8__locals1.newTitle.disabledJoyKinds.NullOrEmpty<JoyKindDef>())
-				{
-					stringBuilder.AppendLine("LetterRoyalTitleDisabledJoyKind".Translate(CS$<>8__locals1.pawn.Named("PAWN")).CapitalizeFirst());
-					foreach (JoyKindDef joyKindDef2 in CS$<>8__locals1.newTitle.disabledJoyKinds)
-					{
-						stringBuilder.AppendLine("- " + joyKindDef2.LabelCap);
-					}
-					stringBuilder.AppendLine();
-				}
-				if (CS$<>8__locals1.faction.def.royalImplantRules != null)
-				{
-					List<RoyalImplantRule> list7 = new List<RoyalImplantRule>();
-					foreach (RoyalImplantRule royalImplantRule in CS$<>8__locals1.faction.def.royalImplantRules)
-					{
-						RoyalTitleDef minTitleForImplant = CS$<>8__locals1.faction.GetMinTitleForImplant(royalImplantRule.implantHediff, 0);
-						int num2 = CS$<>8__locals1.faction.def.RoyalTitlesAwardableInSeniorityOrderForReading.IndexOf(minTitleForImplant);
-						if (num >= num2)
-						{
-							if (royalImplantRule.maxLevel == 0)
-							{
-								list7.Add(royalImplantRule);
-							}
-							else
-							{
-								list7.AddUnique(CS$<>8__locals1.faction.GetMaxAllowedImplantLevel(royalImplantRule.implantHediff, CS$<>8__locals1.newTitle));
-							}
-						}
-					}
-					if (list7.Count > 0)
-					{
-						stringBuilder.AppendLine("LetterRoyalTitleAllowedImplants".Translate(CS$<>8__locals1.pawn.Named("PAWN"), "\n" + list7.Select(delegate(RoyalImplantRule i)
-						{
-							if (i.maxLevel == 0)
-							{
-								return string.Format("{0} ({1})", i.implantHediff.LabelCap, CS$<>8__locals1.faction.GetMinTitleForImplant(i.implantHediff, 0).GetLabelFor(CS$<>8__locals1.pawn));
-							}
-							return string.Format("{0}({1}x) ({2})", i.implantHediff.LabelCap, i.maxLevel, i.minTitle.GetLabelFor(CS$<>8__locals1.pawn));
-						}).ToLineList("- ", false)).CapitalizeFirst());
-						stringBuilder.AppendLine();
-					}
-				}
-				if (currentTitle != null && CS$<>8__locals1.newTitle.seniority < currentTitle.seniority)
-				{
-					List<Hediff> list8 = new List<Hediff>();
-					if (CS$<>8__locals1.pawn.health != null && CS$<>8__locals1.pawn.health.hediffSet != null)
-					{
-						foreach (Hediff hediff in CS$<>8__locals1.pawn.health.hediffSet.hediffs)
-						{
-							if (hediff.def.HasComp(typeof(HediffComp_RoyalImplant)))
-							{
-								RoyalTitleDef minTitleForImplant2 = CS$<>8__locals1.faction.GetMinTitleForImplant(hediff.def, HediffComp_RoyalImplant.GetImplantLevel(hediff));
-								if (CS$<>8__locals1.faction.def.RoyalTitlesAwardableInSeniorityOrderForReading.IndexOf(minTitleForImplant2) > num)
-								{
-									list8.Add(hediff);
-								}
-							}
-						}
-					}
-					if (list8.Count > 0)
-					{
-						stringBuilder.AppendLine("LetterRoyalTitleImplantsMustBeRemoved".Translate(CS$<>8__locals1.pawn.Named("PAWN"), "\n" + (from i in list8
-						select i.LabelCap).ToLineList("- ", false)).Resolve());
-						stringBuilder.AppendLine("LetterRoyalTitleImplantGracePeriod".Translate());
-						stringBuilder.AppendLine();
-					}
-				}
-				if (CS$<>8__locals1.pawn.royalty.NewHighestTitle(CS$<>8__locals1.faction, CS$<>8__locals1.newTitle) && !CS$<>8__locals1.newTitle.rewards.NullOrEmpty<ThingDefCountClass>())
-				{
-					stringBuilder.AppendLine("LetterRoyalTitleRewardGranted".Translate(CS$<>8__locals1.pawn.Named("PAWN"), "\n" + (from r in CS$<>8__locals1.newTitle.rewards
-					select r.Label).ToLineList("- ", false)).CapitalizeFirst());
-					stringBuilder.AppendLine();
-				}
-			}
-			return stringBuilder.ToString().TrimEndNewlines();
 		}
 
-		// Token: 0x060136FB RID: 79611 RVA: 0x005C706C File Offset: 0x005C526C
-		public static RoyalTitleDef GetCurrentTitleIn(this Pawn p, Faction faction)
+		[DebuggerHidden]
+		public _003CGetConceitedTraits_003Ed__10(int _003C_003E1__state)
 		{
-			if (p.royalty != null)
-			{
-				return p.royalty.GetCurrentTitle(faction);
-			}
-			return null;
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x060136FC RID: 79612 RVA: 0x005C7084 File Offset: 0x005C5284
-		public static int GetCurrentTitleSeniorityIn(this Pawn p, Faction faction)
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			RoyalTitleDef currentTitleIn = p.GetCurrentTitleIn(faction);
-			if (currentTitleIn != null)
-			{
-				return currentTitleIn.seniority;
-			}
-			return 0;
+			_003Ctraits_003E5__2 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x060136FD RID: 79613 RVA: 0x005C70A4 File Offset: 0x005C52A4
-		public static string GetTitleProgressionInfo(Faction faction, Pawn pawn = null)
+		private bool MoveNext()
 		{
-			TaggedString t = "RoyalTitleTooltipTitlesEarnable".Translate(faction.Named("FACTION")) + ":";
-			int num = 0;
-			foreach (RoyalTitleDef royalTitleDef in faction.def.RoyalTitlesAwardableInSeniorityOrderForReading)
+			int num = _003C_003E1__state;
+			if (num != 0)
 			{
-				num += royalTitleDef.favorCost;
-				t += "\n  - " + ((pawn != null) ? royalTitleDef.GetLabelCapFor(pawn) : royalTitleDef.GetLabelCapForBothGenders()) + ": " + "RoyalTitleTooltipRoyalFavorAmount".Translate(royalTitleDef.favorCost, faction.def.royalFavorLabel) + " (" + "RoyalTitleTooltipRoyalFavorTotal".Translate(num.ToString()) + ")";
-			}
-			t += "\n\n" + "RoyalTitleTooltipTitlesNonEarnable".Translate(faction.Named("FACTION")) + ":";
-			foreach (RoyalTitleDef royalTitleDef2 in from tit in faction.def.RoyalTitlesAllInSeniorityOrderForReading
-			where !tit.Awardable
-			select tit)
-			{
-				t += "\n  - " + royalTitleDef2.GetLabelCapForBothGenders();
-			}
-			return t.Resolve();
-		}
-
-		// Token: 0x060136FE RID: 79614 RVA: 0x005C725C File Offset: 0x005C545C
-		public static Building_Throne FindBestUnassignedThrone(Pawn pawn)
-		{
-			float num = float.PositiveInfinity;
-			Building_Throne result = null;
-			foreach (Thing thing in pawn.Map.listerThings.ThingsOfDef(ThingDefOf.Throne))
-			{
-				Building_Throne building_Throne = thing as Building_Throne;
-				if (building_Throne != null && building_Throne.CompAssignableToPawn.HasFreeSlot && building_Throne.Spawned && !building_Throne.IsForbidden(pawn) && pawn.CanReserveAndReach(building_Throne, PathEndMode.InteractionCell, pawn.NormalMaxDanger(), 1, -1, null, false) && RoomRoleWorker_ThroneRoom.Validate(building_Throne.GetRoom(RegionType.Set_All)) == null)
+				if (num != 1)
 				{
-					PawnPath pawnPath = pawn.Map.pathFinder.FindPathNow(pawn.Position, building_Throne, TraverseParms.For(pawn, Danger.Deadly, TraverseMode.ByPawn, false, false, false, true), null, PathEndMode.InteractionCell, null);
-					float num2 = pawnPath.Found ? pawnPath.TotalCost : float.PositiveInfinity;
-					pawnPath.ReleaseToPool();
-					if (num > num2)
-					{
-						num = num2;
-						result = building_Throne;
-					}
+					return false;
 				}
+				_003C_003E1__state = -1;
+				goto IL_007b;
 			}
-			if (num >= float.PositiveInfinity)
+			_003C_003E1__state = -1;
+			_003Ctraits_003E5__2 = p.story?.traits;
+			if (_003Ctraits_003E5__2 != null)
 			{
-				return null;
+				_003Ci_003E5__3 = 0;
+				goto IL_008b;
 			}
-			return result;
+			goto IL_009d;
+			IL_007b:
+			_003Ci_003E5__3++;
+			goto IL_008b;
+			IL_009d:
+			return false;
+			IL_008b:
+			if (_003Ci_003E5__3 < ConceitedTraits.Count)
+			{
+				Trait trait = _003Ctraits_003E5__2.GetTrait(ConceitedTraits[_003Ci_003E5__3]);
+				if (trait != null)
+				{
+					_003C_003E2__current = trait;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				goto IL_007b;
+			}
+			goto IL_009d;
 		}
 
-		// Token: 0x060136FF RID: 79615 RVA: 0x005C738C File Offset: 0x005C558C
-		public static Building_Throne FindBestUsableThrone(Pawn pawn)
+		bool IEnumerator.MoveNext()
 		{
-			Building_Throne building_Throne = pawn.ownership.AssignedThrone;
-			if (building_Throne != null)
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Trait> IEnumerable<Trait>.GetEnumerator()
+		{
+			_003CGetConceitedTraits_003Ed__10 _003CGetConceitedTraits_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				if (!building_Throne.Spawned || building_Throne.IsForbidden(pawn) || !pawn.CanReserveAndReach(building_Throne, PathEndMode.InteractionCell, pawn.NormalMaxDanger(), 1, -1, null, false))
-				{
-					return null;
-				}
-				if (RoomRoleWorker_ThroneRoom.Validate(building_Throne.GetRoom(RegionType.Set_All)) != null)
-				{
-					return null;
-				}
+				_003C_003E1__state = 0;
+				_003CGetConceitedTraits_003Ed__ = this;
 			}
 			else
 			{
-				building_Throne = RoyalTitleUtility.FindBestUnassignedThrone(pawn);
-				if (building_Throne == null)
-				{
-					return null;
-				}
+				_003CGetConceitedTraits_003Ed__ = new _003CGetConceitedTraits_003Ed__10(0);
 			}
-			return building_Throne;
+			_003CGetConceitedTraits_003Ed__.p = _003C_003E3__p;
+			return _003CGetConceitedTraits_003Ed__;
 		}
 
-		// Token: 0x06013700 RID: 79616 RVA: 0x005C73F4 File Offset: 0x005C55F4
-		public static bool BedroomSatisfiesRequirements(Room room, RoyalTitle title)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			using (List<RoomRequirement>.Enumerator enumerator = title.def.bedroomRequirements.GetEnumerator())
+			return ((IEnumerable<Trait>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGetTraitsAffectingPsylinkNegatively_003Ed__11 : IEnumerable<Trait>, IEnumerable, IEnumerator<Trait>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Trait _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private Pawn p;
+
+		public Pawn _003C_003E3__p;
+
+		private List<Trait>.Enumerator _003C_003E7__wrap1;
+
+		Trait IEnumerator<Trait>.Current
+		{
+			[DebuggerHidden]
+			get
 			{
-				while (enumerator.MoveNext())
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetTraitsAffectingPsylinkNegatively_003Ed__11(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
 				{
-					if (!enumerator.Current.MetOrDisabled(room, null))
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = default(List<Trait>.Enumerator);
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				switch (_003C_003E1__state)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					if (p.story == null || p.story.traits == null || p.story.traits.allTraits.NullOrEmpty())
 					{
 						return false;
 					}
+					_003C_003E7__wrap1 = p.story.traits.allTraits.GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 1:
+					_003C_003E1__state = -3;
+					break;
 				}
-			}
-			return true;
-		}
-
-		// Token: 0x06013701 RID: 79617 RVA: 0x005C7454 File Offset: 0x005C5654
-		public static bool IsPawnConceited(Pawn p)
-		{
-			Pawn_StoryTracker story = p.story;
-			TraitSet traitSet = (story != null) ? story.traits : null;
-			return (traitSet == null || !traitSet.HasTrait(TraitDefOf.Ascetic)) && (!p.Faction.IsPlayer || p.IsQuestLodger() || (traitSet != null && (traitSet.HasTrait(TraitDefOf.Abrasive) || traitSet.HasTrait(TraitDefOf.Greedy) || traitSet.HasTrait(TraitDefOf.Jealous))));
-		}
-
-		// Token: 0x06013702 RID: 79618 RVA: 0x005C74C9 File Offset: 0x005C56C9
-		public static IEnumerable<Trait> GetConceitedTraits(Pawn p)
-		{
-			Pawn_StoryTracker story = p.story;
-			TraitSet traits = (story != null) ? story.traits : null;
-			if (traits != null)
-			{
-				int num;
-				for (int i = 0; i < RoyalTitleUtility.ConceitedTraits.Count; i = num + 1)
+				while (_003C_003E7__wrap1.MoveNext())
 				{
-					Trait trait = traits.GetTrait(RoyalTitleUtility.ConceitedTraits[i]);
-					if (trait != null)
+					Trait current = _003C_003E7__wrap1.Current;
+					if (!current.Suppressed)
 					{
-						yield return trait;
-					}
-					num = i;
-				}
-			}
-			yield break;
-		}
-
-		// Token: 0x06013703 RID: 79619 RVA: 0x005C74D9 File Offset: 0x005C56D9
-		public static IEnumerable<Trait> GetTraitsAffectingPsylinkNegatively(Pawn p)
-		{
-			if (p.story == null || p.story.traits == null || p.story.traits.allTraits.NullOrEmpty<Trait>())
-			{
-				yield break;
-			}
-			foreach (Trait trait in p.story.traits.allTraits)
-			{
-				if (!trait.Suppressed)
-				{
-					TraitDegreeData traitDegreeData = trait.def.DataAtDegree(trait.Degree);
-					if (traitDegreeData.statFactors != null)
-					{
-						if (traitDegreeData.statFactors.Any((StatModifier f) => f.stat == StatDefOf.PsychicSensitivity && f.value < 1f))
+						TraitDegreeData traitDegreeData = current.def.DataAtDegree(current.Degree);
+						if ((traitDegreeData.statFactors != null && traitDegreeData.statFactors.Any((StatModifier f) => f.stat == StatDefOf.PsychicSensitivity && f.value < 1f)) || (traitDegreeData.statOffsets != null && traitDegreeData.statOffsets.Any((StatModifier f) => f.stat == StatDefOf.PsychicSensitivity && f.value < 0f)))
 						{
-							goto IL_11F;
+							_003C_003E2__current = current;
+							_003C_003E1__state = 1;
+							return true;
 						}
 					}
-					if (traitDegreeData.statOffsets == null)
-					{
-						continue;
-					}
-					if (!traitDegreeData.statOffsets.Any((StatModifier f) => f.stat == StatDefOf.PsychicSensitivity && f.value < 0f))
-					{
-						continue;
-					}
-					IL_11F:
-					yield return trait;
 				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = default(List<Trait>.Enumerator);
+				return false;
 			}
-			List<Trait>.Enumerator enumerator = default(List<Trait>.Enumerator);
-			yield break;
-			yield break;
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
 		}
 
-		// Token: 0x06013704 RID: 79620 RVA: 0x005C74EC File Offset: 0x005C56EC
-		public static TaggedString GetPsylinkAffectedByTraitsNegativelyWarning(Pawn p)
+		bool IEnumerator.MoveNext()
 		{
-			if (p.HasPsylink || !RoyalTitleUtility.GetTraitsAffectingPsylinkNegatively(p).Any<Trait>())
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap1/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Trait> IEnumerable<Trait>.GetEnumerator()
+		{
+			_003CGetTraitsAffectingPsylinkNegatively_003Ed__11 _003CGetTraitsAffectingPsylinkNegatively_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CGetTraitsAffectingPsylinkNegatively_003Ed__ = this;
+			}
+			else
+			{
+				_003CGetTraitsAffectingPsylinkNegatively_003Ed__ = new _003CGetTraitsAffectingPsylinkNegatively_003Ed__11(0);
+			}
+			_003CGetTraitsAffectingPsylinkNegatively_003Ed__.p = _003C_003E3__p;
+			return _003CGetTraitsAffectingPsylinkNegatively_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Trait>)this).GetEnumerator();
+		}
+	}
+
+	private static List<TraitDef> ConceitedTraits;
+
+	public static void FindLostAndGainedPermits(RoyalTitleDef currentTitle, RoyalTitleDef newTitle, out List<RoyalTitlePermitDef> gainedPermits, out List<RoyalTitlePermitDef> lostPermits)
+	{
+		gainedPermits = new List<RoyalTitlePermitDef>();
+		lostPermits = new List<RoyalTitlePermitDef>();
+		if (newTitle != null && newTitle.permits != null)
+		{
+			foreach (RoyalTitlePermitDef permit in newTitle.permits)
+			{
+				if (currentTitle == null || currentTitle.permits == null || !currentTitle.permits.Contains(permit))
+				{
+					gainedPermits.Add(permit);
+				}
+			}
+		}
+		if (currentTitle == null || currentTitle.permits == null)
+		{
+			return;
+		}
+		foreach (RoyalTitlePermitDef permit2 in currentTitle.permits)
+		{
+			if (newTitle == null || newTitle.permits == null || !newTitle.permits.Contains(permit2))
+			{
+				lostPermits.Add(permit2);
+			}
+		}
+	}
+
+	public static string BuildDifferenceExplanationText(RoyalTitleDef currentTitle, RoyalTitleDef newTitle, Faction faction, Pawn pawn)
+	{
+		StringBuilder stringBuilder = new StringBuilder();
+		bool flag = ShouldBecomeConceitedOnNewTitle(pawn);
+		List<WorkTags> list = pawn.story.DisabledWorkTagsBackstoryTraitsAndGenes.GetAllSelectedItems<WorkTags>().ToList();
+		List<WorkTags> obj = ((newTitle == null) ? new List<WorkTags>() : newTitle.disabledWorkTags.GetAllSelectedItems<WorkTags>().ToList());
+		List<WorkTags> list2 = new List<WorkTags>();
+		foreach (WorkTags item in obj)
+		{
+			if (!list.Contains(item))
+			{
+				list2.Add(item);
+			}
+		}
+		int num = ((newTitle != null) ? faction.def.RoyalTitlesAwardableInSeniorityOrderForReading.IndexOf(newTitle) : (-1));
+		if (newTitle != null && flag)
+		{
+			stringBuilder.AppendLineTagged("LetterRoyalTitleConceitedTrait".Translate(pawn.Named("PAWN"), (from t in GetConceitedTraits(pawn)
+				select t.Label).ToCommaList(useAnd: true)));
+			stringBuilder.AppendLine();
+			if (newTitle.minExpectation != null)
+			{
+				stringBuilder.AppendLineTagged("LetterRoyalTitleExpectation".Translate(pawn.Named("PAWN"), newTitle.minExpectation.label).CapitalizeFirst());
+				stringBuilder.AppendLine();
+			}
+		}
+		if (newTitle != null)
+		{
+			if (newTitle.canBeInherited)
+			{
+				Pawn heir = pawn.royalty.GetHeir(faction);
+				TaggedString taggedString = ((heir != null) ? "LetterRoyalTitleHeir".Translate(pawn.Named("PAWN"), heir.Named("HEIR")) : "LetterRoyalTitleNoHeir".Translate(pawn.Named("PAWN")));
+				stringBuilder.AppendTagged(taggedString);
+				if (heir != null && heir.Faction != Faction.OfPlayer)
+				{
+					stringBuilder.AppendTagged(" " + "LetterRoyalTitleHeirFactionWarning".Translate(heir.Named("PAWN"), faction.Named("FACTION")));
+				}
+				stringBuilder.AppendLineTagged(" " + "LetterRoyalTitleChangingHeir".Translate(faction.Named("FACTION")));
+			}
+			else
+			{
+				stringBuilder.AppendTagged("LetterRoyalTitleCantBeInherited".Translate(newTitle.Named("TITLE")).CapitalizeFirst());
+				stringBuilder.AppendTagged(" " + "LetterRoyalTitleNoHeir".Translate(pawn.Named("PAWN")));
+				stringBuilder.AppendLine();
+			}
+			stringBuilder.AppendLine();
+			if (newTitle.permitPointsAwarded > 0 && pawn.royalty.NewHighestTitle(faction, newTitle))
+			{
+				stringBuilder.AppendLine("PermitPointsAwarded".Translate(newTitle.permitPointsAwarded));
+				stringBuilder.AppendLine();
+			}
+		}
+		if (flag && list2.Count > 0)
+		{
+			stringBuilder.AppendLine("LetterRoyalTitleDisabledWorkTag".Translate(pawn.Named("PAWN"), (from t in list2
+				orderby FirstTitleDisablingWorkTags(t).seniority
+				select t.LabelTranslated() + " (" + FirstTitleDisablingWorkTags(t).GetLabelFor(pawn) + ")").ToLineList("- ")).CapitalizeFirst());
+			stringBuilder.AppendLine();
+		}
+		if (newTitle != null)
+		{
+			if ((int)newTitle.requiredMinimumApparelQuality > 0)
+			{
+				stringBuilder.AppendLine("LetterRoyalTitleApparelQualityRequirement".Translate(pawn.Named("PAWN"), newTitle.requiredMinimumApparelQuality.GetLabel().ToLower()).CapitalizeFirst());
+				stringBuilder.AppendLine();
+			}
+			if (newTitle.requiredApparel != null && newTitle.requiredApparel.Count > 0)
+			{
+				bool flag2 = false;
+				stringBuilder.AppendLine("LetterRoyalTitleApparelRequirement".Translate(pawn.Named("PAWN")).CapitalizeFirst());
+				foreach (ApparelRequirement item2 in newTitle.requiredApparel)
+				{
+					int i2 = 0;
+					stringBuilder.Append("- ");
+					stringBuilder.Append(string.Join(", ", item2.AllRequiredApparelForPawn(pawn, ignoreGender: false, includeWorn: true).Select(delegate(ThingDef a)
+					{
+						string result = ((i2 == 0) ? a.LabelCap.Resolve() : a.label);
+						i2++;
+						return result;
+					}).ToArray()));
+					if (!ApparelUtility.IsRequirementActive(item2, ApparelRequirementSource.Title, pawn, out var disabledByLabel))
+					{
+						stringBuilder.Append(" [" + "ApparelRequirementDisabledLabel".Translate() + ": " + disabledByLabel + "]");
+					}
+					else
+					{
+						flag2 = true;
+					}
+					stringBuilder.AppendLine();
+				}
+				if (flag2)
+				{
+					stringBuilder.AppendLine("- " + "ApparelRequirementAnyPrestigeArmor".Translate());
+					stringBuilder.AppendLine("- " + "ApparelRequirementAnyPsycasterApparel".Translate());
+					if (ModsConfig.BiotechActive)
+					{
+						stringBuilder.AppendLine("- " + "ApparelRequirementAnyMechlordApparel".Translate());
+					}
+				}
+				stringBuilder.AppendLine();
+			}
+			if (!newTitle.throneRoomRequirements.NullOrEmpty())
+			{
+				stringBuilder.AppendLine("LetterRoyalTitleThroneroomRequirements".Translate(pawn.Named("PAWN"), "\n" + newTitle.throneRoomRequirements.Select((RoomRequirement r) => r.LabelCap()).ToLineList("- ")).CapitalizeFirst());
+				stringBuilder.AppendLine();
+			}
+			if (!newTitle.GetBedroomRequirements(pawn).EnumerableNullOrEmpty())
+			{
+				stringBuilder.AppendLine("LetterRoyalTitleBedroomRequirements".Translate(pawn.Named("PAWN"), "\n" + (from r in newTitle.GetBedroomRequirements(pawn)
+					select r.LabelCap()).ToLineList("- ")).CapitalizeFirst());
+				stringBuilder.AppendLine();
+			}
+			if (flag && newTitle.foodRequirement.Defined && newTitle.SatisfyingMeals().Any() && (pawn.story == null || !pawn.story.traits.HasTrait(TraitDefOf.Ascetic)))
+			{
+				stringBuilder.AppendLine("LetterRoyalTitleFoodRequirements".Translate(pawn.Named("PAWN"), "\n" + (from m in newTitle.SatisfyingMeals(includeDrugs: false)
+					select m.LabelCap.Resolve()).ToLineList("- ")).CapitalizeFirst());
+				stringBuilder.AppendLine();
+			}
+		}
+		FindLostAndGainedPermits(currentTitle, newTitle, out var _, out var lostPermits);
+		if (newTitle != null && newTitle.permits != null)
+		{
+			stringBuilder.AppendLine("LetterRoyalTitlePermits".Translate(pawn.Named("PAWN")).CapitalizeFirst());
+			foreach (RoyalTitlePermitDef item3 in newTitle.permits.OrderBy((RoyalTitlePermitDef p) => FirstTitleWithPermit(p)?.seniority))
+			{
+				RoyalTitleDef royalTitleDef = FirstTitleWithPermit(item3);
+				if (royalTitleDef != null)
+				{
+					stringBuilder.AppendLine("- " + item3.LabelCap + " (" + royalTitleDef.GetLabelFor(pawn) + ")");
+				}
+			}
+			stringBuilder.AppendLine();
+		}
+		if (lostPermits.Count > 0)
+		{
+			stringBuilder.AppendLine("LetterRoyalTitleLostPermits".Translate(pawn.Named("PAWN")).CapitalizeFirst());
+			foreach (RoyalTitlePermitDef item4 in lostPermits)
+			{
+				stringBuilder.AppendLine("- " + item4.LabelCap);
+			}
+			stringBuilder.AppendLine();
+		}
+		if (newTitle != null)
+		{
+			if (newTitle.grantedAbilities.Contains(AbilityDefOf.Speech) && (currentTitle == null || !currentTitle.grantedAbilities.Contains(AbilityDefOf.Speech)))
+			{
+				stringBuilder.AppendLine("LetterRoyalTitleSpeechAbilityGained".Translate(pawn.Named("PAWN")).CapitalizeFirst());
+				stringBuilder.AppendLine();
+			}
+			List<JoyKindDef> list3 = DefDatabase<JoyKindDef>.AllDefsListForReading.Where((JoyKindDef def) => def.titleRequiredAny != null && def.titleRequiredAny.Contains(newTitle)).ToList();
+			if (list3.Count > 0)
+			{
+				stringBuilder.AppendLine("LetterRoyalTitleEnabledJoyKind".Translate(pawn.Named("PAWN")).CapitalizeFirst());
+				foreach (JoyKindDef item5 in list3)
+				{
+					stringBuilder.AppendLine("- " + item5.LabelCap);
+				}
+				stringBuilder.AppendLine();
+			}
+			if (flag && !newTitle.disabledJoyKinds.NullOrEmpty())
+			{
+				stringBuilder.AppendLine("LetterRoyalTitleDisabledJoyKind".Translate(pawn.Named("PAWN")).CapitalizeFirst());
+				foreach (JoyKindDef disabledJoyKind in newTitle.disabledJoyKinds)
+				{
+					stringBuilder.AppendLine("- " + disabledJoyKind.LabelCap);
+				}
+				stringBuilder.AppendLine();
+			}
+			if (faction.def.royalImplantRules != null)
+			{
+				List<RoyalImplantRule> list4 = new List<RoyalImplantRule>();
+				foreach (RoyalImplantRule royalImplantRule in faction.def.royalImplantRules)
+				{
+					RoyalTitleDef minTitleForImplant = faction.GetMinTitleForImplant(royalImplantRule.implantHediff);
+					int num2 = faction.def.RoyalTitlesAwardableInSeniorityOrderForReading.IndexOf(minTitleForImplant);
+					if (num >= num2)
+					{
+						if (royalImplantRule.maxLevel == 0)
+						{
+							list4.Add(royalImplantRule);
+						}
+						else
+						{
+							list4.AddUnique(faction.GetMaxAllowedImplantLevel(royalImplantRule.implantHediff, newTitle));
+						}
+					}
+				}
+				if (list4.Count > 0)
+				{
+					stringBuilder.AppendLine("LetterRoyalTitleAllowedImplants".Translate(pawn.Named("PAWN"), "\n" + list4.Select((RoyalImplantRule i) => (i.maxLevel == 0) ? $"{i.implantHediff.LabelCap} ({faction.GetMinTitleForImplant(i.implantHediff).GetLabelFor(pawn)})" : $"{i.implantHediff.LabelCap}({i.maxLevel}x) ({i.minTitle.GetLabelFor(pawn)})").ToLineList("- ")).CapitalizeFirst());
+					stringBuilder.AppendLine();
+				}
+			}
+			if (currentTitle != null && newTitle.seniority < currentTitle.seniority)
+			{
+				List<Hediff> list5 = new List<Hediff>();
+				if (pawn.health != null && pawn.health.hediffSet != null)
+				{
+					foreach (Hediff hediff in pawn.health.hediffSet.hediffs)
+					{
+						if (hediff.def.HasComp(typeof(HediffComp_RoyalImplant)))
+						{
+							RoyalTitleDef minTitleForImplant2 = faction.GetMinTitleForImplant(hediff.def, HediffComp_RoyalImplant.GetImplantLevel(hediff));
+							if (faction.def.RoyalTitlesAwardableInSeniorityOrderForReading.IndexOf(minTitleForImplant2) > num)
+							{
+								list5.Add(hediff);
+							}
+						}
+					}
+				}
+				if (list5.Count > 0)
+				{
+					stringBuilder.AppendLine("LetterRoyalTitleImplantsMustBeRemoved".Translate(pawn.Named("PAWN"), "\n" + list5.Select((Hediff i) => i.LabelCap).ToLineList("- ")).Resolve());
+					stringBuilder.AppendLine("LetterRoyalTitleImplantGracePeriod".Translate());
+					stringBuilder.AppendLine();
+				}
+			}
+			if (pawn.royalty.NewHighestTitle(faction, newTitle) && !newTitle.rewards.NullOrEmpty())
+			{
+				stringBuilder.AppendLine("LetterRoyalTitleRewardGranted".Translate(pawn.Named("PAWN"), "\n" + newTitle.rewards.Select((ThingDefCountClass r) => r.Label).ToLineList("- ")).CapitalizeFirst());
+				stringBuilder.AppendLine();
+			}
+		}
+		return stringBuilder.ToString().TrimEndNewlines();
+		RoyalTitleDef FirstTitleDisablingWorkTags(WorkTags t)
+		{
+			return faction.def.RoyalTitlesAllInSeniorityOrderForReading.FirstOrDefault((RoyalTitleDef title) => (t & title.disabledWorkTags) != 0);
+		}
+		RoyalTitleDef FirstTitleWithPermit(RoyalTitlePermitDef permitDef)
+		{
+			return faction.def.RoyalTitlesAwardableInSeniorityOrderForReading.FirstOrDefault((RoyalTitleDef t) => t.permits != null && t.permits.Contains(permitDef));
+		}
+	}
+
+	public static RoyalTitleDef GetCurrentTitleIn(this Pawn p, Faction faction)
+	{
+		if (p.royalty != null)
+		{
+			return p.royalty.GetCurrentTitle(faction);
+		}
+		return null;
+	}
+
+	public static int GetCurrentTitleSeniorityIn(this Pawn p, Faction faction)
+	{
+		return p.GetCurrentTitleIn(faction)?.seniority ?? 0;
+	}
+
+	public static string GetTitleProgressionInfo(Faction faction, Pawn pawn = null)
+	{
+		TaggedString taggedString = "RoyalTitleTooltipTitlesEarnable".Translate(faction.Named("FACTION")) + ":";
+		int num = 0;
+		foreach (RoyalTitleDef item in faction.def.RoyalTitlesAwardableInSeniorityOrderForReading)
+		{
+			num += item.favorCost;
+			taggedString += "\n  - " + ((pawn != null) ? item.GetLabelCapFor(pawn) : item.GetLabelCapForBothGenders()) + ": " + "RoyalTitleTooltipRoyalFavorAmount".Translate(item.favorCost, faction.def.royalFavorLabel) + " (" + "RoyalTitleTooltipRoyalFavorTotal".Translate(num.ToString()) + ")";
+		}
+		taggedString += "\n\n" + "RoyalTitleTooltipTitlesNonEarnable".Translate(faction.Named("FACTION")) + ":";
+		foreach (RoyalTitleDef item2 in faction.def.RoyalTitlesAllInSeniorityOrderForReading.Where((RoyalTitleDef tit) => !tit.Awardable))
+		{
+			taggedString += "\n  - " + item2.GetLabelCapForBothGenders();
+		}
+		return taggedString.Resolve();
+	}
+
+	public static Building_Throne FindBestUnassignedThrone(Pawn pawn)
+	{
+		float num = float.PositiveInfinity;
+		Building_Throne result = null;
+		foreach (Thing item in pawn.Map.listerThings.ThingsOfDef(ThingDefOf.Throne))
+		{
+			if (item is Building_Throne building_Throne && building_Throne.CompAssignableToPawn.HasFreeSlot && building_Throne.Spawned && !building_Throne.IsForbidden(pawn) && pawn.CanReserveAndReach(building_Throne, PathEndMode.InteractionCell, pawn.NormalMaxDanger()) && RoomRoleWorker_ThroneRoom.Validate(building_Throne.GetRoom()) == null)
+			{
+				PawnPath pawnPath = pawn.Map.pathFinder.FindPathNow(pawn.Position, building_Throne, TraverseParms.For(pawn), null, PathEndMode.InteractionCell);
+				float num2 = (pawnPath.Found ? pawnPath.TotalCost : float.PositiveInfinity);
+				pawnPath.ReleaseToPool();
+				if (num > num2)
+				{
+					num = num2;
+					result = building_Throne;
+				}
+			}
+		}
+		if (num >= float.PositiveInfinity)
+		{
+			return null;
+		}
+		return result;
+	}
+
+	public static Building_Throne FindBestUsableThrone(Pawn pawn)
+	{
+		Building_Throne building_Throne = pawn.ownership.AssignedThrone;
+		if (building_Throne != null)
+		{
+			if (!building_Throne.Spawned || building_Throne.IsForbidden(pawn) || !pawn.CanReserveAndReach(building_Throne, PathEndMode.InteractionCell, pawn.NormalMaxDanger()))
 			{
 				return null;
 			}
-			return "RoyalWithTraitAffectingPsylinkNegatively".Translate(p.Named("PAWN"), p.Faction.Named("FACTION"), (from t in RoyalTitleUtility.GetTraitsAffectingPsylinkNegatively(p)
-			select t.Label).ToCommaList(true, false));
-		}
-
-		// Token: 0x06013705 RID: 79621 RVA: 0x005C7570 File Offset: 0x005C5770
-		public static bool ShouldBecomeConceitedOnNewTitle(Pawn p)
-		{
-			Pawn_StoryTracker story = p.story;
-			TraitSet traitSet = (story != null) ? story.traits : null;
-			return (traitSet == null || !traitSet.HasTrait(TraitDefOf.Ascetic)) && (p.Faction == null || !p.Faction.IsPlayer || p.IsQuestLodger() || RoyalTitleUtility.GetConceitedTraits(p).Any<Trait>());
-		}
-
-		// Token: 0x06013706 RID: 79622 RVA: 0x005C75CC File Offset: 0x005C57CC
-		public static Quest GetCurrentBestowingCeremonyQuest(Pawn pawn, Faction faction)
-		{
-			foreach (Quest quest in Find.QuestManager.QuestsListForReading)
+			if (RoomRoleWorker_ThroneRoom.Validate(building_Throne.GetRoom()) != null)
 			{
-				if (!quest.Historical)
-				{
-					QuestPart_BestowingCeremony questPart_BestowingCeremony = (QuestPart_BestowingCeremony)quest.PartsListForReading.FirstOrDefault((QuestPart p) => p is QuestPart_BestowingCeremony);
-					if (questPart_BestowingCeremony != null && questPart_BestowingCeremony.target == pawn && questPart_BestowingCeremony.bestower != null && questPart_BestowingCeremony.bestower.Faction == faction)
-					{
-						return quest;
-					}
-				}
+				return null;
 			}
+		}
+		else
+		{
+			building_Throne = FindBestUnassignedThrone(pawn);
+			if (building_Throne == null)
+			{
+				return null;
+			}
+		}
+		return building_Throne;
+	}
+
+	public static bool BedroomSatisfiesRequirements(Room room, RoyalTitle title)
+	{
+		foreach (RoomRequirement bedroomRequirement in title.def.bedroomRequirements)
+		{
+			if (!bedroomRequirement.MetOrDisabled(room))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public static bool IsPawnConceited(Pawn p)
+	{
+		TraitSet traitSet = p.story?.traits;
+		if (traitSet != null && traitSet.HasTrait(TraitDefOf.Ascetic))
+		{
+			return false;
+		}
+		if (p.Faction.IsPlayer && !p.IsQuestLodger())
+		{
+			if (traitSet != null)
+			{
+				if (!traitSet.HasTrait(TraitDefOf.Abrasive) && !traitSet.HasTrait(TraitDefOf.Greedy))
+				{
+					return traitSet.HasTrait(TraitDefOf.Jealous);
+				}
+				return true;
+			}
+			return false;
+		}
+		return true;
+	}
+
+	[IteratorStateMachine(typeof(_003CGetConceitedTraits_003Ed__10))]
+	public static IEnumerable<Trait> GetConceitedTraits(Pawn p)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetConceitedTraits_003Ed__10(-2)
+		{
+			_003C_003E3__p = p
+		};
+	}
+
+	[IteratorStateMachine(typeof(_003CGetTraitsAffectingPsylinkNegatively_003Ed__11))]
+	public static IEnumerable<Trait> GetTraitsAffectingPsylinkNegatively(Pawn p)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetTraitsAffectingPsylinkNegatively_003Ed__11(-2)
+		{
+			_003C_003E3__p = p
+		};
+	}
+
+	public static TaggedString GetPsylinkAffectedByTraitsNegativelyWarning(Pawn p)
+	{
+		if (p.HasPsylink || !GetTraitsAffectingPsylinkNegatively(p).Any())
+		{
 			return null;
 		}
+		return "RoyalWithTraitAffectingPsylinkNegatively".Translate(p.Named("PAWN"), p.Faction.Named("FACTION"), (from t in GetTraitsAffectingPsylinkNegatively(p)
+			select t.Label).ToCommaList(useAnd: true));
+	}
 
-		// Token: 0x06013707 RID: 79623 RVA: 0x005C7680 File Offset: 0x005C5880
-		public static bool ShouldGetBestowingCeremonyQuest(Pawn pawn, out Faction faction)
+	public static bool ShouldBecomeConceitedOnNewTitle(Pawn p)
+	{
+		TraitSet traitSet = p.story?.traits;
+		if (traitSet != null && traitSet.HasTrait(TraitDefOf.Ascetic))
 		{
-			faction = null;
-			return (!pawn.IsMutant || !pawn.mutant.Def.disableTitles) && (pawn.Faction != null && pawn.Faction.IsPlayer && pawn.royalty != null && pawn.royalty.CanUpdateTitleOfAnyFaction(out faction)) && RoyalTitleUtility.GetCurrentBestowingCeremonyQuest(pawn, faction) == null;
+			return false;
 		}
-
-		// Token: 0x06013708 RID: 79624 RVA: 0x005C76E4 File Offset: 0x005C58E4
-		public static bool ShouldGetBestowingCeremonyQuest(Pawn pawn, Faction faction)
+		if (p.Faction != null && p.Faction.IsPlayer && !p.IsQuestLodger())
 		{
-			return (!pawn.IsMutant || !pawn.mutant.Def.disableTitles) && (pawn.Faction != null && pawn.Faction.IsPlayer && pawn.royalty != null && pawn.royalty.CanUpdateTitle(faction)) && RoyalTitleUtility.GetCurrentBestowingCeremonyQuest(pawn, faction) == null;
+			return GetConceitedTraits(p).Any();
 		}
+		return true;
+	}
 
-		// Token: 0x06013709 RID: 79625 RVA: 0x005C7744 File Offset: 0x005C5944
-		public static void EndExistingBestowingCeremonyQuest(Pawn pawn, Faction faction)
+	public static Quest GetCurrentBestowingCeremonyQuest(Pawn pawn, Faction faction)
+	{
+		foreach (Quest item in Find.QuestManager.QuestsListForReading)
 		{
-			foreach (Quest quest in Find.QuestManager.QuestsListForReading)
+			if (!item.Historical)
 			{
-				if (!quest.Historical && quest.State != QuestState.Ongoing)
+				QuestPart_BestowingCeremony questPart_BestowingCeremony = (QuestPart_BestowingCeremony)item.PartsListForReading.FirstOrDefault((QuestPart p) => p is QuestPart_BestowingCeremony);
+				if (questPart_BestowingCeremony != null && questPart_BestowingCeremony.target == pawn && questPart_BestowingCeremony.bestower != null && questPart_BestowingCeremony.bestower.Faction == faction)
 				{
-					QuestPart_BestowingCeremony questPart_BestowingCeremony = (QuestPart_BestowingCeremony)quest.PartsListForReading.FirstOrDefault((QuestPart p) => p is QuestPart_BestowingCeremony);
-					if (questPart_BestowingCeremony != null && questPart_BestowingCeremony.target == pawn && questPart_BestowingCeremony.bestower.Faction == faction)
-					{
-						quest.End(QuestEndOutcome.InvalidPreAcceptance, false, true);
-					}
+					return item;
 				}
 			}
 		}
+		return null;
+	}
 
-		// Token: 0x0601370A RID: 79626 RVA: 0x005C77F8 File Offset: 0x005C59F8
-		public static void GenerateBestowingCeremonyQuest(Pawn pawn, Faction faction)
+	public static bool ShouldGetBestowingCeremonyQuest(Pawn pawn, out Faction faction)
+	{
+		faction = null;
+		if (pawn.IsMutant && pawn.mutant.Def.disableTitles)
 		{
-			if (pawn == null || pawn.Dead)
+			return false;
+		}
+		if (pawn.Faction != null && pawn.Faction.IsPlayer && pawn.royalty != null && pawn.royalty.CanUpdateTitleOfAnyFaction(out faction))
+		{
+			return GetCurrentBestowingCeremonyQuest(pawn, faction) == null;
+		}
+		return false;
+	}
+
+	public static bool ShouldGetBestowingCeremonyQuest(Pawn pawn, Faction faction)
+	{
+		if (pawn.IsMutant && pawn.mutant.Def.disableTitles)
+		{
+			return false;
+		}
+		if (pawn.Faction != null && pawn.Faction.IsPlayer && pawn.royalty != null && pawn.royalty.CanUpdateTitle(faction))
+		{
+			return GetCurrentBestowingCeremonyQuest(pawn, faction) == null;
+		}
+		return false;
+	}
+
+	public static void EndExistingBestowingCeremonyQuest(Pawn pawn, Faction faction)
+	{
+		foreach (Quest item in Find.QuestManager.QuestsListForReading)
+		{
+			if (!item.Historical && item.State != QuestState.Ongoing)
 			{
-				return;
-			}
-			Slate slate = new Slate();
-			slate.Set<Pawn>("titleHolder", pawn, false);
-			slate.Set<Faction>("bestowingFaction", faction, false);
-			if (QuestScriptDefOf.BestowingCeremony.CanRun(slate, pawn.MapHeld))
-			{
-				Quest quest = QuestUtility.GenerateQuestAndMakeAvailable(QuestScriptDefOf.BestowingCeremony, slate);
-				if (quest.root.sendAvailableLetter)
+				QuestPart_BestowingCeremony questPart_BestowingCeremony = (QuestPart_BestowingCeremony)item.PartsListForReading.FirstOrDefault((QuestPart p) => p is QuestPart_BestowingCeremony);
+				if (questPart_BestowingCeremony != null && questPart_BestowingCeremony.target == pawn && questPart_BestowingCeremony.bestower.Faction == faction)
 				{
-					QuestUtility.SendLetterQuestAvailable(quest, null);
+					item.End(QuestEndOutcome.InvalidPreAcceptance, sendLetter: false);
 				}
 			}
 		}
+	}
 
-		// Token: 0x0601370B RID: 79627 RVA: 0x005C7864 File Offset: 0x005C5A64
-		public static void ResetStaticData()
+	public static void GenerateBestowingCeremonyQuest(Pawn pawn, Faction faction)
+	{
+		if (pawn == null || pawn.Dead)
 		{
-			RoyalTitleUtility.ConceitedTraits = new List<TraitDef>
-			{
-				TraitDefOf.Abrasive,
-				TraitDefOf.Greedy,
-				TraitDefOf.Jealous
-			};
+			return;
 		}
-
-		// Token: 0x0601370C RID: 79628 RVA: 0x005C7894 File Offset: 0x005C5A94
-		public static void DoTable_IngestibleMaxSatisfiedTitle()
+		Slate slate = new Slate();
+		slate.Set("titleHolder", pawn);
+		slate.Set("bestowingFaction", faction);
+		if (QuestScriptDefOf.BestowingCeremony.CanRun(slate, pawn.MapHeld))
 		{
-			List<TableDataGetter<ThingDef>> list = new List<TableDataGetter<ThingDef>>();
-			list.Add(new TableDataGetter<ThingDef>("name", (ThingDef f) => f.LabelCap));
-			list.Add(new TableDataGetter<ThingDef>("max satisfied title", delegate(ThingDef t)
+			Quest quest = QuestUtility.GenerateQuestAndMakeAvailable(QuestScriptDefOf.BestowingCeremony, slate);
+			if (quest.root.sendAvailableLetter)
 			{
-				RoyalTitleDef royalTitleDef = t.ingestible.MaxSatisfiedTitle();
-				if (royalTitleDef == null)
-				{
-					return "-";
-				}
-				return royalTitleDef.LabelCap;
-			}));
-			DebugTables.MakeTablesDialog<ThingDef>(from t in DefDatabase<ThingDef>.AllDefsListForReading
-			where t.ingestible != null && !t.IsCorpse && t.ingestible.HumanEdible
-			select t, list.ToArray());
+				QuestUtility.SendLetterQuestAvailable(quest);
+			}
 		}
+	}
 
-		// Token: 0x0400D77B RID: 55163
-		private static List<TraitDef> ConceitedTraits;
+	public static void ResetStaticData()
+	{
+		ConceitedTraits = new List<TraitDef>
+		{
+			TraitDefOf.Abrasive,
+			TraitDefOf.Greedy,
+			TraitDefOf.Jealous
+		};
+	}
+
+	public static void DoTable_IngestibleMaxSatisfiedTitle()
+	{
+		List<TableDataGetter<ThingDef>> list = new List<TableDataGetter<ThingDef>>();
+		list.Add(new TableDataGetter<ThingDef>("name", (ThingDef f) => f.LabelCap));
+		list.Add(new TableDataGetter<ThingDef>("max satisfied title", delegate(ThingDef t)
+		{
+			RoyalTitleDef royalTitleDef = t.ingestible.MaxSatisfiedTitle();
+			return (royalTitleDef == null) ? "-" : ((string)royalTitleDef.LabelCap);
+		}));
+		DebugTables.MakeTablesDialog(DefDatabase<ThingDef>.AllDefsListForReading.Where((ThingDef t) => t.ingestible != null && !t.IsCorpse && t.ingestible.HumanEdible), list.ToArray());
 	}
 }

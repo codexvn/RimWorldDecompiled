@@ -1,75 +1,63 @@
-﻿using System;
 using System.Linq;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class IncidentWorker_RevenantEmergence : IncidentWorker
 {
-	// Token: 0x02001DC7 RID: 7623
-	public class IncidentWorker_RevenantEmergence : IncidentWorker
+	private static readonly IntRange EmergenceDelay = new IntRange(7500, 12500);
+
+	protected override bool CanFireNowSub(IncidentParms parms)
 	{
-		// Token: 0x0600AA22 RID: 43554 RVA: 0x0030ABB4 File Offset: 0x00308DB4
-		protected override bool CanFireNowSub(IncidentParms parms)
+		if (!ModsConfig.AnomalyActive)
 		{
-			if (!ModsConfig.AnomalyActive)
+			return false;
+		}
+		if (parms.target is Caravan caravan)
+		{
+			Thing thing;
+			Pawn owner;
+			return CaravanInventoryUtility.TryGetThingOfDef(caravan, ThingDefOf.RevenantSpine, out thing, out owner);
+		}
+		if (parms.target is Map map)
+		{
+			return map.listerThings.ThingsOfDef(ThingDefOf.RevenantSpine).Count > 0;
+		}
+		return false;
+	}
+
+	protected override bool TryExecuteWorker(IncidentParms parms)
+	{
+		if (parms.target is Caravan caravan)
+		{
+			CaravanInventoryUtility.TryGetThingOfDef(caravan, ThingDefOf.RevenantSpine, out var thing, out var _);
+			if (thing == null)
 			{
 				return false;
 			}
-			Caravan caravan = parms.target as Caravan;
-			if (caravan != null)
+			CompSpawnsRevenant compSpawnsRevenant = thing.TryGetComp<CompSpawnsRevenant>();
+			if (compSpawnsRevenant.spawnTick > 0)
 			{
-				Thing thing;
-				Pawn pawn;
-				return CaravanInventoryUtility.TryGetThingOfDef(caravan, ThingDefOf.RevenantSpine, out thing, out pawn);
+				return false;
 			}
-			Map map = parms.target as Map;
-			return map != null && map.listerThings.ThingsOfDef(ThingDefOf.RevenantSpine).Count > 0;
+			compSpawnsRevenant.spawnTick = Find.TickManager.TicksGame + EmergenceDelay.RandomInRange;
+			IncidentWorker.SendIncidentLetter(def.letterLabel, def.letterText, LetterDefOf.NegativeEvent, parms, caravan, def);
+			return true;
 		}
-
-		// Token: 0x0600AA23 RID: 43555 RVA: 0x0030AC14 File Offset: 0x00308E14
-		protected override bool TryExecuteWorker(IncidentParms parms)
+		if (parms.target is Map map)
 		{
-			Caravan caravan = parms.target as Caravan;
-			if (caravan != null)
-			{
-				Thing thing;
-				Pawn pawn;
-				CaravanInventoryUtility.TryGetThingOfDef(caravan, ThingDefOf.RevenantSpine, out thing, out pawn);
-				if (thing == null)
-				{
-					return false;
-				}
-				CompSpawnsRevenant compSpawnsRevenant = thing.TryGetComp<CompSpawnsRevenant>();
-				if (compSpawnsRevenant.spawnTick > 0)
-				{
-					return false;
-				}
-				compSpawnsRevenant.spawnTick = Find.TickManager.TicksGame + IncidentWorker_RevenantEmergence.EmergenceDelay.RandomInRange;
-				IncidentWorker.SendIncidentLetter(this.def.letterLabel, this.def.letterText, LetterDefOf.NegativeEvent, parms, caravan, this.def, Array.Empty<NamedArgument>());
-				return true;
-			}
-			else
-			{
-				Map map = parms.target as Map;
-				if (map == null)
-				{
-					return false;
-				}
-				Thing thing2;
-				(from s in map.listerThings.ThingsOfDef(ThingDefOf.RevenantSpine)
+			(from s in map.listerThings.ThingsOfDef(ThingDefOf.RevenantSpine)
 				where s.TryGetComp<CompSpawnsRevenant>().spawnTick < 0
-				select s).TryRandomElement(out thing2);
-				if (thing2 == null)
-				{
-					return false;
-				}
-				thing2.TryGetComp<CompSpawnsRevenant>().spawnTick = Find.TickManager.TicksGame + IncidentWorker_RevenantEmergence.EmergenceDelay.RandomInRange;
-				IncidentWorker.SendIncidentLetter(this.def.letterLabel, this.def.letterText, LetterDefOf.NegativeEvent, parms, thing2, this.def, Array.Empty<NamedArgument>());
-				return true;
+				select s).TryRandomElement(out var result);
+			if (result == null)
+			{
+				return false;
 			}
+			result.TryGetComp<CompSpawnsRevenant>().spawnTick = Find.TickManager.TicksGame + EmergenceDelay.RandomInRange;
+			IncidentWorker.SendIncidentLetter(def.letterLabel, def.letterText, LetterDefOf.NegativeEvent, parms, result, def);
+			return true;
 		}
-
-		// Token: 0x04007570 RID: 30064
-		private static readonly IntRange EmergenceDelay = new IntRange(7500, 12500);
+		return false;
 	}
 }

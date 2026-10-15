@@ -1,359 +1,675 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using UnityEngine;
 using Verse;
 
-namespace LudeonTK
+namespace LudeonTK;
+
+public class DebugActionNode
 {
-	// Token: 0x0200006F RID: 111
-	public class DebugActionNode
+	[CompilerGenerated]
+	private sealed class _003CPawnsAt_003Ed__41 : IEnumerable<Pawn>, IEnumerable, IEnumerator<Pawn>, IEnumerator, IDisposable
 	{
-		// Token: 0x17000069 RID: 105
-		// (get) Token: 0x06000262 RID: 610 RVA: 0x0000D5E6 File Offset: 0x0000B7E6
-		public bool IsRoot
+		private int _003C_003E1__state;
+
+		private Pawn _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private Map map;
+
+		public Map _003C_003E3__map;
+
+		private IntVec3 cell;
+
+		public IntVec3 _003C_003E3__cell;
+
+		private IEnumerator<Thing> _003C_003E7__wrap1;
+
+		private IEnumerator<Pawn> _003C_003E7__wrap2;
+
+		Pawn IEnumerator<Pawn>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.parent == null;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700006A RID: 106
-		// (get) Token: 0x06000263 RID: 611 RVA: 0x0000D5F4 File Offset: 0x0000B7F4
-		public bool On
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.cachedCheckOn == null)
-				{
-					if (this.settingsField == null)
-					{
-						this.cachedCheckOn = new bool?(false);
-					}
-					else
-					{
-						this.cachedCheckOn = new bool?((bool)this.settingsField.GetValue(null));
-					}
-				}
-				return this.cachedCheckOn.Value;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700006B RID: 107
-		// (get) Token: 0x06000264 RID: 612 RVA: 0x0000D654 File Offset: 0x0000B854
-		public string LabelNow
+		[DebuggerHidden]
+		public _003CPawnsAt_003Ed__41(int _003C_003E1__state)
 		{
-			get
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if ((uint)(num - -4) <= 1u || num == 1)
 			{
-				if (Time.frameCount >= this.lastLabelCacheFrame + 30)
+				try
 				{
-					this.DirtyLabelCache();
-				}
-				if (this.cachedLabelNow == null)
-				{
-					if (this.labelGetter != null)
+					if (num == -4 || num == 1)
 					{
 						try
 						{
-							this.cachedLabelNow = this.labelGetter();
-							goto IL_72;
 						}
-						catch (Exception ex)
+						finally
 						{
-							string str = "Exception getting label for DebugActionNode: ";
-							Exception ex2 = ex;
-							Log.Error(str + ((ex2 != null) ? ex2.ToString() : null));
-							this.cachedLabelNow = null;
-							return this.label;
+							_003C_003Em__Finally2();
 						}
 					}
-					this.cachedLabelNow = this.label;
 				}
-				IL_72:
-				return this.cachedLabelNow;
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E7__wrap2 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				if (num != 0)
+				{
+					if (num != 1)
+					{
+						return false;
+					}
+					_003C_003E1__state = -4;
+					goto IL_009f;
+				}
+				_003C_003E1__state = -1;
+				_003C_003E7__wrap1 = map.thingGrid.ThingsAt(cell).GetEnumerator();
+				_003C_003E1__state = -3;
+				goto IL_00b9;
+				IL_009f:
+				if (_003C_003E7__wrap2.MoveNext())
+				{
+					Pawn current = _003C_003E7__wrap2.Current;
+					_003C_003E2__current = current;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				_003C_003Em__Finally2();
+				_003C_003E7__wrap2 = null;
+				goto IL_00b9;
+				IL_00b9:
+				IThingHolder thingHolder;
+				do
+				{
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						thingHolder = _003C_003E7__wrap1.Current as IThingHolder;
+						continue;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					return false;
+				}
+				while (thingHolder == null);
+				_003C_003E7__wrap2 = PawnsInside(thingHolder).GetEnumerator();
+				_003C_003E1__state = -4;
+				goto IL_009f;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x1700006C RID: 108
-		// (get) Token: 0x06000265 RID: 613 RVA: 0x0000D6EC File Offset: 0x0000B8EC
-		public bool ActiveNow
+		bool IEnumerator.MoveNext()
 		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -3;
+			if (_003C_003E7__wrap2 != null)
+			{
+				_003C_003E7__wrap2.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Pawn> IEnumerable<Pawn>.GetEnumerator()
+		{
+			_003CPawnsAt_003Ed__41 _003CPawnsAt_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CPawnsAt_003Ed__ = this;
+			}
+			else
+			{
+				_003CPawnsAt_003Ed__ = new _003CPawnsAt_003Ed__41(0);
+			}
+			_003CPawnsAt_003Ed__.cell = _003C_003E3__cell;
+			_003CPawnsAt_003Ed__.map = _003C_003E3__map;
+			return _003CPawnsAt_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Pawn>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CPawnsInside_003Ed__40 : IEnumerable<Pawn>, IEnumerable, IEnumerator<Pawn>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Pawn _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private IThingHolder holder;
+
+		public IThingHolder _003C_003E3__holder;
+
+		private IEnumerator<Thing> _003C_003E7__wrap1;
+
+		private IEnumerator<Pawn> _003C_003E7__wrap2;
+
+		Pawn IEnumerator<Pawn>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				DebugActionType debugActionType = this.actionType;
-				if (debugActionType - DebugActionType.ToolMap > 1)
-				{
-					return debugActionType != DebugActionType.ToolWorld || WorldRendererUtility.WorldSelected;
-				}
-				return WorldRendererUtility.DrawingMap;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700006D RID: 109
-		// (get) Token: 0x06000266 RID: 614 RVA: 0x0000D717 File Offset: 0x0000B917
-		public bool VisibleNow
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (this.sourceAttribute == null || this.sourceAttribute.IsAllowedInCurrentGameState) && (this.visibilityGetter == null || this.visibilityGetter());
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700006E RID: 110
-		// (get) Token: 0x06000267 RID: 615 RVA: 0x0000D748 File Offset: 0x0000B948
-		public string Path
+		[DebuggerHidden]
+		public _003CPawnsInside_003Ed__40(int _003C_003E1__state)
 		{
-			get
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if ((uint)(num - -4) <= 1u || num == 2)
 			{
-				if (this.cachedPath == null)
+				try
 				{
-					if (this.parent != null && !this.parent.IsRoot)
+					if (num == -4 || num == 2)
 					{
-						this.cachedPath = this.parent.Path + "\\" + this.label;
+						try
+						{
+						}
+						finally
+						{
+							_003C_003Em__Finally2();
+						}
 					}
-					else
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E7__wrap2 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				IThingHolder thingHolder;
+				ThingOwner directlyHeldThings;
+				switch (_003C_003E1__state)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					if (holder is Pawn pawn)
 					{
-						this.cachedPath = this.label;
+						_003C_003E2__current = pawn;
+						_003C_003E1__state = 1;
+						return true;
 					}
-				}
-				return this.cachedPath;
-			}
-		}
-
-		// Token: 0x06000268 RID: 616 RVA: 0x0000D7A7 File Offset: 0x0000B9A7
-		public DebugActionNode()
-		{
-		}
-
-		// Token: 0x06000269 RID: 617 RVA: 0x0000D7C1 File Offset: 0x0000B9C1
-		public DebugActionNode(string label, DebugActionType actionType = DebugActionType.Action, Action action = null, Action<Pawn> pawnAction = null)
-		{
-			this.label = label;
-			this.actionType = actionType;
-			this.action = action;
-			this.pawnAction = pawnAction;
-		}
-
-		// Token: 0x0600026A RID: 618 RVA: 0x0000D7F8 File Offset: 0x0000B9F8
-		public void AddChild(DebugActionNode child)
-		{
-			child.SetParent(this);
-			this.children.Add(child);
-			this.sorted = false;
-		}
-
-		// Token: 0x0600026B RID: 619 RVA: 0x0000D814 File Offset: 0x0000BA14
-		public void SetParent(DebugActionNode newParent)
-		{
-			this.parent = newParent;
-			this.DirtyPath();
-		}
-
-		// Token: 0x0600026C RID: 620 RVA: 0x0000D824 File Offset: 0x0000BA24
-		private void DirtyPath()
-		{
-			this.cachedPath = null;
-			foreach (DebugActionNode debugActionNode in this.children)
-			{
-				debugActionNode.DirtyPath();
-			}
-		}
-
-		// Token: 0x0600026D RID: 621 RVA: 0x0000D87C File Offset: 0x0000BA7C
-		public void DirtyLabelCache()
-		{
-			this.cachedLabelNow = null;
-			this.cachedCheckOn = null;
-			this.lastLabelCacheFrame = Time.frameCount;
-		}
-
-		// Token: 0x0600026E RID: 622 RVA: 0x0000D89C File Offset: 0x0000BA9C
-		public void TrySort()
-		{
-			if (this.sorted)
-			{
-				return;
-			}
-			if (!this.children.NullOrEmpty<DebugActionNode>())
-			{
-				this.children = (from r in this.children
-				orderby DebugActionCategories.GetOrderFor(r.category), r.category, -r.displayPriority
-				select r).ToList<DebugActionNode>();
-			}
-			this.sorted = true;
-		}
-
-		// Token: 0x0600026F RID: 623 RVA: 0x0000D944 File Offset: 0x0000BB44
-		public void TrySetupChildren()
-		{
-			if (!this.childrenSetup && this.childGetter != null)
-			{
-				foreach (DebugActionNode child in this.childGetter())
-				{
-					this.AddChild(child);
-				}
-			}
-			this.childrenSetup = true;
-		}
-
-		// Token: 0x06000270 RID: 624 RVA: 0x0000D9B4 File Offset: 0x0000BBB4
-		private static IEnumerable<Pawn> PawnsInside(IThingHolder holder)
-		{
-			Pawn pawn = holder as Pawn;
-			if (pawn != null)
-			{
-				yield return pawn;
-			}
-			ThingOwner directlyHeldThings = holder.GetDirectlyHeldThings();
-			if (directlyHeldThings == null)
-			{
-				yield break;
-			}
-			foreach (Thing thing in ((IEnumerable<Thing>)directlyHeldThings))
-			{
-				IThingHolder thingHolder = thing as IThingHolder;
-				if (thingHolder != null)
-				{
-					foreach (Pawn pawn2 in DebugActionNode.PawnsInside(thingHolder))
+					goto IL_0052;
+				case 1:
+					_003C_003E1__state = -1;
+					goto IL_0052;
+				case 2:
 					{
-						yield return pawn2;
+						_003C_003E1__state = -4;
+						goto IL_00d8;
 					}
-					IEnumerator<Pawn> enumerator2 = null;
-				}
-			}
-			IEnumerator<Thing> enumerator = null;
-			yield break;
-			yield break;
-		}
-
-		// Token: 0x06000271 RID: 625 RVA: 0x0000D9C4 File Offset: 0x0000BBC4
-		private static IEnumerable<Pawn> PawnsAt(IntVec3 cell, Map map)
-		{
-			foreach (Thing thing in map.thingGrid.ThingsAt(cell))
-			{
-				IThingHolder thingHolder = thing as IThingHolder;
-				if (thingHolder != null)
-				{
-					foreach (Pawn pawn in DebugActionNode.PawnsInside(thingHolder))
+					IL_00f2:
+					do
 					{
-						yield return pawn;
+						if (_003C_003E7__wrap1.MoveNext())
+						{
+							thingHolder = _003C_003E7__wrap1.Current as IThingHolder;
+							continue;
+						}
+						_003C_003Em__Finally1();
+						_003C_003E7__wrap1 = null;
+						return false;
 					}
-					IEnumerator<Pawn> enumerator2 = null;
+					while (thingHolder == null);
+					_003C_003E7__wrap2 = PawnsInside(thingHolder).GetEnumerator();
+					_003C_003E1__state = -4;
+					goto IL_00d8;
+					IL_0052:
+					directlyHeldThings = holder.GetDirectlyHeldThings();
+					if (directlyHeldThings == null)
+					{
+						return false;
+					}
+					_003C_003E7__wrap1 = ((IEnumerable<Thing>)directlyHeldThings).GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_00f2;
+					IL_00d8:
+					if (_003C_003E7__wrap2.MoveNext())
+					{
+						Pawn current = _003C_003E7__wrap2.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					_003C_003Em__Finally2();
+					_003C_003E7__wrap2 = null;
+					goto IL_00f2;
 				}
 			}
-			IEnumerator<Thing> enumerator = null;
-			yield break;
-			yield break;
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
 		}
 
-		// Token: 0x06000272 RID: 626 RVA: 0x0000D9DC File Offset: 0x0000BBDC
-		public void Enter(Dialog_Debug dialog)
+		bool IEnumerator.MoveNext()
 		{
-			this.TrySetupChildren();
-			if (this.children.Any<DebugActionNode>())
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				this.TrySort();
-				if (dialog == null)
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -3;
+			if (_003C_003E7__wrap2 != null)
+			{
+				_003C_003E7__wrap2.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Pawn> IEnumerable<Pawn>.GetEnumerator()
+		{
+			_003CPawnsInside_003Ed__40 _003CPawnsInside_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CPawnsInside_003Ed__ = this;
+			}
+			else
+			{
+				_003CPawnsInside_003Ed__ = new _003CPawnsInside_003Ed__40(0);
+			}
+			_003CPawnsInside_003Ed__.holder = _003C_003E3__holder;
+			return _003CPawnsInside_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Pawn>)this).GetEnumerator();
+		}
+	}
+
+	public string label;
+
+	public DebugActionType actionType;
+
+	public Action action;
+
+	public Action<Pawn> pawnAction;
+
+	public Func<List<DebugActionNode>> childGetter;
+
+	public DebugActionAttribute sourceAttribute;
+
+	public Func<bool> visibilityGetter;
+
+	public Func<string> labelGetter;
+
+	public string category;
+
+	public int displayPriority;
+
+	public FieldInfo settingsField;
+
+	private bool childrenSetup;
+
+	public DebugActionNode parent;
+
+	public List<DebugActionNode> children = new List<DebugActionNode>();
+
+	private string cachedPath;
+
+	private string cachedLabelNow;
+
+	private bool sorted;
+
+	private bool? cachedCheckOn;
+
+	private int lastLabelCacheFrame = -1;
+
+	private const int LabelRecacheFrameCount = 30;
+
+	public bool IsRoot => parent == null;
+
+	public bool On
+	{
+		get
+		{
+			if (!cachedCheckOn.HasValue)
+			{
+				if (settingsField == null)
 				{
-					dialog = new Dialog_Debug();
-					Find.WindowStack.Add(dialog);
+					cachedCheckOn = false;
 				}
-				dialog.SetCurrentNode(this);
-				return;
+				else
+				{
+					cachedCheckOn = (bool)settingsField.GetValue(null);
+				}
 			}
-			if (dialog != null)
+			return cachedCheckOn.Value;
+		}
+	}
+
+	public string LabelNow
+	{
+		get
+		{
+			if (Time.frameCount >= lastLabelCacheFrame + 30)
 			{
-				dialog.Close(true);
+				DirtyLabelCache();
 			}
-			switch (this.actionType)
+			if (cachedLabelNow == null)
 			{
-			case DebugActionType.Action:
-				this.action();
-				break;
-			case DebugActionType.ToolMap:
+				if (labelGetter != null)
+				{
+					try
+					{
+						cachedLabelNow = labelGetter();
+					}
+					catch (Exception ex)
+					{
+						Log.Error("Exception getting label for DebugActionNode: " + ex);
+						cachedLabelNow = null;
+						return label;
+					}
+				}
+				else
+				{
+					cachedLabelNow = label;
+				}
+			}
+			return cachedLabelNow;
+		}
+	}
+
+	public bool ActiveNow
+	{
+		get
+		{
+			switch (actionType)
+			{
 			case DebugActionType.ToolWorld:
-				DebugTools.curTool = new DebugTool(this.LabelNow, this.action, null);
-				break;
+				return WorldRendererUtility.WorldSelected;
+			case DebugActionType.ToolMap:
 			case DebugActionType.ToolMapForPawns:
-			{
-				DebugActionNode instance = this;
-				DebugTools.curTool = new DebugTool(this.LabelNow, delegate()
-				{
-					if (UI.MouseCell().InBounds(Find.CurrentMap))
-					{
-						foreach (Pawn obj in DebugActionNode.PawnsAt(UI.MouseCell(), Find.CurrentMap).ToList<Pawn>())
-						{
-							instance.pawnAction(obj);
-						}
-					}
-				}, null);
-				break;
+				return WorldRendererUtility.DrawingMap;
+			default:
+				return true;
 			}
-			}
-			this.DirtyLabelCache();
 		}
+	}
 
-		// Token: 0x04000147 RID: 327
-		public string label;
+	public bool VisibleNow
+	{
+		get
+		{
+			if (sourceAttribute != null && !sourceAttribute.IsAllowedInCurrentGameState)
+			{
+				return false;
+			}
+			if (visibilityGetter != null && !visibilityGetter())
+			{
+				return false;
+			}
+			return true;
+		}
+	}
 
-		// Token: 0x04000148 RID: 328
-		public DebugActionType actionType;
+	public string Path
+	{
+		get
+		{
+			if (cachedPath == null)
+			{
+				if (parent != null && !parent.IsRoot)
+				{
+					cachedPath = parent.Path + "\\" + label;
+				}
+				else
+				{
+					cachedPath = label;
+				}
+			}
+			return cachedPath;
+		}
+	}
 
-		// Token: 0x04000149 RID: 329
-		public Action action;
+	public DebugActionNode()
+	{
+	}
 
-		// Token: 0x0400014A RID: 330
-		public Action<Pawn> pawnAction;
+	public DebugActionNode(string label, DebugActionType actionType = DebugActionType.Action, Action action = null, Action<Pawn> pawnAction = null)
+	{
+		this.label = label;
+		this.actionType = actionType;
+		this.action = action;
+		this.pawnAction = pawnAction;
+	}
 
-		// Token: 0x0400014B RID: 331
-		public Func<List<DebugActionNode>> childGetter;
+	public void AddChild(DebugActionNode child)
+	{
+		child.SetParent(this);
+		children.Add(child);
+		sorted = false;
+	}
 
-		// Token: 0x0400014C RID: 332
-		public DebugActionAttribute sourceAttribute;
+	public void SetParent(DebugActionNode newParent)
+	{
+		parent = newParent;
+		DirtyPath();
+	}
 
-		// Token: 0x0400014D RID: 333
-		public Func<bool> visibilityGetter;
+	private void DirtyPath()
+	{
+		cachedPath = null;
+		foreach (DebugActionNode child in children)
+		{
+			child.DirtyPath();
+		}
+	}
 
-		// Token: 0x0400014E RID: 334
-		public Func<string> labelGetter;
+	public void DirtyLabelCache()
+	{
+		cachedLabelNow = null;
+		cachedCheckOn = null;
+		lastLabelCacheFrame = Time.frameCount;
+	}
 
-		// Token: 0x0400014F RID: 335
-		public string category;
+	public void TrySort()
+	{
+		if (sorted)
+		{
+			return;
+		}
+		if (!children.NullOrEmpty())
+		{
+			children = (from r in children
+				orderby DebugActionCategories.GetOrderFor(r.category), r.category, -r.displayPriority
+				select r).ToList();
+		}
+		sorted = true;
+	}
 
-		// Token: 0x04000150 RID: 336
-		public int displayPriority;
+	public void TrySetupChildren()
+	{
+		if (!childrenSetup && childGetter != null)
+		{
+			foreach (DebugActionNode item in childGetter())
+			{
+				AddChild(item);
+			}
+		}
+		childrenSetup = true;
+	}
 
-		// Token: 0x04000151 RID: 337
-		public FieldInfo settingsField;
+	[IteratorStateMachine(typeof(_003CPawnsInside_003Ed__40))]
+	private static IEnumerable<Pawn> PawnsInside(IThingHolder holder)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CPawnsInside_003Ed__40(-2)
+		{
+			_003C_003E3__holder = holder
+		};
+	}
 
-		// Token: 0x04000152 RID: 338
-		private bool childrenSetup;
+	[IteratorStateMachine(typeof(_003CPawnsAt_003Ed__41))]
+	private static IEnumerable<Pawn> PawnsAt(IntVec3 cell, Map map)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CPawnsAt_003Ed__41(-2)
+		{
+			_003C_003E3__cell = cell,
+			_003C_003E3__map = map
+		};
+	}
 
-		// Token: 0x04000153 RID: 339
-		public DebugActionNode parent;
-
-		// Token: 0x04000154 RID: 340
-		public List<DebugActionNode> children = new List<DebugActionNode>();
-
-		// Token: 0x04000155 RID: 341
-		private string cachedPath;
-
-		// Token: 0x04000156 RID: 342
-		private string cachedLabelNow;
-
-		// Token: 0x04000157 RID: 343
-		private bool sorted;
-
-		// Token: 0x04000158 RID: 344
-		private bool? cachedCheckOn;
-
-		// Token: 0x04000159 RID: 345
-		private int lastLabelCacheFrame = -1;
-
-		// Token: 0x0400015A RID: 346
-		private const int LabelRecacheFrameCount = 30;
+	public void Enter(Dialog_Debug dialog)
+	{
+		TrySetupChildren();
+		if (children.Any())
+		{
+			TrySort();
+			if (dialog == null)
+			{
+				dialog = new Dialog_Debug();
+				Find.WindowStack.Add(dialog);
+			}
+			dialog.SetCurrentNode(this);
+			return;
+		}
+		dialog?.Close();
+		switch (actionType)
+		{
+		case DebugActionType.Action:
+			action();
+			break;
+		case DebugActionType.ToolMap:
+		case DebugActionType.ToolWorld:
+			DebugTools.curTool = new DebugTool(LabelNow, action);
+			break;
+		case DebugActionType.ToolMapForPawns:
+		{
+			DebugActionNode instance = this;
+			DebugTools.curTool = new DebugTool(LabelNow, delegate
+			{
+				if (UI.MouseCell().InBounds(Find.CurrentMap))
+				{
+					foreach (Pawn item in PawnsAt(UI.MouseCell(), Find.CurrentMap).ToList())
+					{
+						instance.pawnAction(item);
+					}
+				}
+			});
+			break;
+		}
+		}
+		DirtyLabelCache();
 	}
 }

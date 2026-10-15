@@ -1,703 +1,722 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class TraitSet : IExposable
 {
-	// Token: 0x0200254E RID: 9550
-	public class TraitSet : IExposable
+	[CompilerGenerated]
+	private sealed class _003Cget_TheOnlyAllowedMentalBreaks_003Ed__30 : IEnumerable<MentalBreakDef>, IEnumerable, IEnumerator<MentalBreakDef>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700203D RID: 8253
-		// (get) Token: 0x0600D115 RID: 53525 RVA: 0x003D7A4B File Offset: 0x003D5C4B
-		public bool AnyTraitHasIngestibleOverrides
+		private int _003C_003E1__state;
+
+		private MentalBreakDef _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public TraitSet _003C_003E4__this;
+
+		private int _003Ci_003E5__2;
+
+		private Trait _003Ctrait_003E5__3;
+
+		private int _003Cj_003E5__4;
+
+		MentalBreakDef IEnumerator<MentalBreakDef>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.anyTraitHasIngestibleOverrides;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700203E RID: 8254
-		// (get) Token: 0x0600D116 RID: 53526 RVA: 0x003D7A54 File Offset: 0x003D5C54
-		public float HungerRateFactor
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				float num = 1f;
-				foreach (Trait trait in this.allTraits)
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003Cget_TheOnlyAllowedMentalBreaks_003Ed__30(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003Ctrait_003E5__3 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			TraitSet traitSet = _003C_003E4__this;
+			if (num != 0)
+			{
+				if (num != 1)
 				{
-					if (!trait.Suppressed)
+					return false;
+				}
+				_003C_003E1__state = -1;
+				_003Cj_003E5__4++;
+				goto IL_00b0;
+			}
+			_003C_003E1__state = -1;
+			_003Ci_003E5__2 = 0;
+			goto IL_00e4;
+			IL_00cd:
+			_003Ctrait_003E5__3 = null;
+			goto IL_00d4;
+			IL_00d4:
+			_003Ci_003E5__2++;
+			goto IL_00e4;
+			IL_00e4:
+			if (_003Ci_003E5__2 < traitSet.allTraits.Count)
+			{
+				_003Ctrait_003E5__3 = traitSet.allTraits[_003Ci_003E5__2];
+				if (!_003Ctrait_003E5__3.Suppressed)
+				{
+					if (_003Ctrait_003E5__3.CurrentData.theOnlyAllowedMentalBreaks != null)
 					{
-						num *= trait.CurrentData.hungerRateFactor;
+						_003Cj_003E5__4 = 0;
+						goto IL_00b0;
+					}
+					goto IL_00cd;
+				}
+				goto IL_00d4;
+			}
+			return false;
+			IL_00b0:
+			if (_003Cj_003E5__4 < _003Ctrait_003E5__3.CurrentData.theOnlyAllowedMentalBreaks.Count)
+			{
+				_003C_003E2__current = _003Ctrait_003E5__3.CurrentData.theOnlyAllowedMentalBreaks[_003Cj_003E5__4];
+				_003C_003E1__state = 1;
+				return true;
+			}
+			goto IL_00cd;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<MentalBreakDef> IEnumerable<MentalBreakDef>.GetEnumerator()
+		{
+			_003Cget_TheOnlyAllowedMentalBreaks_003Ed__30 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_TheOnlyAllowedMentalBreaks_003Ed__30(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<MentalBreakDef>)this).GetEnumerator();
+		}
+	}
+
+	protected Pawn pawn;
+
+	public List<Trait> allTraits = new List<Trait>();
+
+	private bool anyTraitHasIngestibleOverrides;
+
+	private Dictionary<NeedDef, Trait> cachedEnabledNeeds;
+
+	private Dictionary<NeedDef, Trait> cachedDisabledNeeds;
+
+	private readonly List<Trait> tmpTraits = new List<Trait>();
+
+	public bool AnyTraitHasIngestibleOverrides => anyTraitHasIngestibleOverrides;
+
+	public float HungerRateFactor
+	{
+		get
+		{
+			float num = 1f;
+			foreach (Trait allTrait in allTraits)
+			{
+				if (!allTrait.Suppressed)
+				{
+					num *= allTrait.CurrentData.hungerRateFactor;
+				}
+			}
+			return num;
+		}
+	}
+
+	public List<Trait> TraitsSorted
+	{
+		get
+		{
+			tmpTraits.Clear();
+			if (!allTraits.NullOrEmpty())
+			{
+				for (int i = 0; i < allTraits.Count; i++)
+				{
+					if (allTraits[i].sourceGene == null || !allTraits[i].Suppressed)
+					{
+						tmpTraits.Add(allTraits[i]);
 					}
 				}
-				return num;
+				tmpTraits.SortBy((Trait y) => y.sourceGene != null, (Trait x) => x.Suppressed);
+			}
+			return tmpTraits;
+		}
+	}
+
+	public IEnumerable<MentalBreakDef> TheOnlyAllowedMentalBreaks
+	{
+		[IteratorStateMachine(typeof(_003Cget_TheOnlyAllowedMentalBreaks_003Ed__30))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_TheOnlyAllowedMentalBreaks_003Ed__30(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public TraitSet(Pawn pawn)
+	{
+		this.pawn = pawn;
+	}
+
+	public void ExposeData()
+	{
+		Scribe_Collections.Look(ref allTraits, "allTraits", LookMode.Deep);
+		if (Scribe.mode == LoadSaveMode.LoadingVars)
+		{
+			if (allTraits.RemoveAll((Trait x) => x == null) != 0)
+			{
+				Log.Error("Some traits were null after loading.");
+			}
+			if (allTraits.RemoveAll((Trait x) => x.def == null) != 0)
+			{
+				Log.Error("Some traits had null def after loading.");
+			}
+			for (int i = 0; i < allTraits.Count; i++)
+			{
+				allTraits[i].pawn = pawn;
 			}
 		}
-
-		// Token: 0x1700203F RID: 8255
-		// (get) Token: 0x0600D117 RID: 53527 RVA: 0x003D7AC0 File Offset: 0x003D5CC0
-		public List<Trait> TraitsSorted
+		if (Scribe.mode != LoadSaveMode.PostLoadInit)
 		{
-			get
+			return;
+		}
+		RecacheTraits();
+		for (int num = allTraits.Count - 1; num >= 0; num--)
+		{
+			Trait t = allTraits[num];
+			if (t.sourceGene?.def != null && (t.sourceGene.def.forcedTraits == null || !t.sourceGene.def.forcedTraits.Any((GeneticTraitData x) => x.def == t.def && x.degree == t.Degree)))
 			{
-				this.tmpTraits.Clear();
-				if (!this.allTraits.NullOrEmpty<Trait>())
+				allTraits.Remove(t);
+			}
+		}
+	}
+
+	public bool DisableHostilityFrom(Pawn p)
+	{
+		for (int i = 0; i < allTraits.Count; i++)
+		{
+			if (!allTraits[i].Suppressed)
+			{
+				if (p.Faction != null && allTraits[i].def.disableHostilityFromFaction == p.Faction.def)
 				{
-					for (int i = 0; i < this.allTraits.Count; i++)
+					return true;
+				}
+				if (allTraits[i].def.disableHostilityFromAnimalType.HasValue && allTraits[i].def.disableHostilityFromAnimalType == p.RaceProps.animalType)
+				{
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	public bool IsThoughtDisallowed(ThoughtDef thought)
+	{
+		if (pawn.story == null || thought == null)
+		{
+			return false;
+		}
+		for (int i = 0; i < allTraits.Count; i++)
+		{
+			if (allTraits[i].Suppressed)
+			{
+				continue;
+			}
+			TraitDegreeData currentData = allTraits[i].CurrentData;
+			if (currentData.disallowedThoughts == null)
+			{
+				continue;
+			}
+			for (int j = 0; j < currentData.disallowedThoughts.Count; j++)
+			{
+				if (currentData.disallowedThoughts[j] == thought)
+				{
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	public bool IsThoughtFromIngestionDisallowed(ThoughtDef thought, ThingDef ingestible, MeatSourceCategory meatSourceCategory)
+	{
+		if (thought == null || ingestible == null)
+		{
+			return false;
+		}
+		for (int i = 0; i < allTraits.Count; i++)
+		{
+			if (allTraits[i].Suppressed)
+			{
+				continue;
+			}
+			TraitDegreeData currentData = allTraits[i].CurrentData;
+			if (currentData.disallowedThoughtsFromIngestion == null)
+			{
+				continue;
+			}
+			for (int j = 0; j < currentData.disallowedThoughtsFromIngestion.Count; j++)
+			{
+				TraitIngestionThoughtsOverride traitIngestionThoughtsOverride = currentData.disallowedThoughtsFromIngestion[j];
+				if (traitIngestionThoughtsOverride.thoughts.NullOrEmpty())
+				{
+					continue;
+				}
+				if (traitIngestionThoughtsOverride.thing != null)
+				{
+					if (traitIngestionThoughtsOverride.thing != ingestible)
 					{
-						if (this.allTraits[i].sourceGene == null || !this.allTraits[i].Suppressed)
-						{
-							this.tmpTraits.Add(this.allTraits[i]);
-						}
-					}
-					this.tmpTraits.SortBy((Trait y) => y.sourceGene != null, (Trait x) => x.Suppressed);
-				}
-				return this.tmpTraits;
-			}
-		}
-
-		// Token: 0x0600D118 RID: 53528 RVA: 0x003D7B8A File Offset: 0x003D5D8A
-		public TraitSet(Pawn pawn)
-		{
-			this.pawn = pawn;
-		}
-
-		// Token: 0x0600D119 RID: 53529 RVA: 0x003D7BB0 File Offset: 0x003D5DB0
-		public void ExposeData()
-		{
-			Scribe_Collections.Look<Trait>(ref this.allTraits, "allTraits", LookMode.Deep, Array.Empty<object>());
-			if (Scribe.mode == LoadSaveMode.LoadingVars)
-			{
-				if (this.allTraits.RemoveAll((Trait x) => x == null) != 0)
-				{
-					Log.Error("Some traits were null after loading.");
-				}
-				if (this.allTraits.RemoveAll((Trait x) => x.def == null) != 0)
-				{
-					Log.Error("Some traits had null def after loading.");
-				}
-				for (int i = 0; i < this.allTraits.Count; i++)
-				{
-					this.allTraits[i].pawn = this.pawn;
-				}
-			}
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
-			{
-				this.RecacheTraits();
-				for (int j = this.allTraits.Count - 1; j >= 0; j--)
-				{
-					Trait t = this.allTraits[j];
-					Gene sourceGene = t.sourceGene;
-					if (((sourceGene != null) ? sourceGene.def : null) != null && (t.sourceGene.def.forcedTraits == null || !t.sourceGene.def.forcedTraits.Any((GeneticTraitData x) => x.def == t.def && x.degree == t.Degree)))
-					{
-						this.allTraits.Remove(t);
+						continue;
 					}
 				}
-			}
-		}
-
-		// Token: 0x0600D11A RID: 53530 RVA: 0x003D7D28 File Offset: 0x003D5F28
-		public bool DisableHostilityFrom(Pawn p)
-		{
-			for (int i = 0; i < this.allTraits.Count; i++)
-			{
-				if (!this.allTraits[i].Suppressed)
+				else if (meatSourceCategory == MeatSourceCategory.NotMeat || traitIngestionThoughtsOverride.meatSource != meatSourceCategory)
 				{
-					if (p.Faction != null && this.allTraits[i].def.disableHostilityFromFaction == p.Faction.def)
+					continue;
+				}
+				for (int k = 0; k < traitIngestionThoughtsOverride.thoughts.Count; k++)
+				{
+					if (traitIngestionThoughtsOverride.thoughts[k] == thought)
 					{
 						return true;
 					}
-					if (this.allTraits[i].def.disableHostilityFromAnimalType != null)
-					{
-						AnimalType? disableHostilityFromAnimalType = this.allTraits[i].def.disableHostilityFromAnimalType;
-						AnimalType animalType = p.RaceProps.animalType;
-						if (disableHostilityFromAnimalType.GetValueOrDefault() == animalType & disableHostilityFromAnimalType != null)
-						{
-							return true;
-						}
-					}
 				}
 			}
-			return false;
 		}
+		return false;
+	}
 
-		// Token: 0x0600D11B RID: 53531 RVA: 0x003D7DEC File Offset: 0x003D5FEC
-		public bool IsThoughtDisallowed(ThoughtDef thought)
+	public void GetExtraThoughtsFromIngestion(List<ThoughtDef> buffer, ThingDef ingestible, MeatSourceCategory meatSourceCategory, bool direct)
+	{
+		if (ingestible == null || buffer == null)
 		{
-			if (this.pawn.story == null || thought == null)
+			return;
+		}
+		for (int i = 0; i < allTraits.Count; i++)
+		{
+			if (allTraits[i].Suppressed)
 			{
-				return false;
+				continue;
 			}
-			for (int i = 0; i < this.allTraits.Count; i++)
+			TraitDegreeData currentData = allTraits[i].CurrentData;
+			if (currentData.extraThoughtsFromIngestion == null)
 			{
-				if (!this.allTraits[i].Suppressed)
+				continue;
+			}
+			for (int j = 0; j < currentData.extraThoughtsFromIngestion.Count; j++)
+			{
+				TraitIngestionThoughtsOverride traitIngestionThoughtsOverride = currentData.extraThoughtsFromIngestion[j];
+				if (traitIngestionThoughtsOverride.thing != null)
 				{
-					TraitDegreeData currentData = this.allTraits[i].CurrentData;
-					if (currentData.disallowedThoughts != null)
+					if (traitIngestionThoughtsOverride.thing != ingestible)
 					{
-						for (int j = 0; j < currentData.disallowedThoughts.Count; j++)
-						{
-							if (currentData.disallowedThoughts[j] == thought)
-							{
-								return true;
-							}
-						}
+						continue;
 					}
 				}
-			}
-			return false;
-		}
-
-		// Token: 0x0600D11C RID: 53532 RVA: 0x003D7E78 File Offset: 0x003D6078
-		public bool IsThoughtFromIngestionDisallowed(ThoughtDef thought, ThingDef ingestible, MeatSourceCategory meatSourceCategory)
-		{
-			if (thought == null || ingestible == null)
-			{
-				return false;
-			}
-			for (int i = 0; i < this.allTraits.Count; i++)
-			{
-				if (!this.allTraits[i].Suppressed)
+				else if (meatSourceCategory == MeatSourceCategory.NotMeat || traitIngestionThoughtsOverride.meatSource != meatSourceCategory)
 				{
-					TraitDegreeData currentData = this.allTraits[i].CurrentData;
-					if (currentData.disallowedThoughtsFromIngestion != null)
+					continue;
+				}
+				if (!traitIngestionThoughtsOverride.thoughts.NullOrEmpty())
+				{
+					buffer.AddRange(traitIngestionThoughtsOverride.thoughts);
+				}
+				if (direct)
+				{
+					if (!traitIngestionThoughtsOverride.thoughtsDirect.NullOrEmpty())
 					{
-						for (int j = 0; j < currentData.disallowedThoughtsFromIngestion.Count; j++)
-						{
-							TraitIngestionThoughtsOverride traitIngestionThoughtsOverride = currentData.disallowedThoughtsFromIngestion[j];
-							if (!traitIngestionThoughtsOverride.thoughts.NullOrEmpty<ThoughtDef>())
-							{
-								if (traitIngestionThoughtsOverride.thing != null)
-								{
-									if (traitIngestionThoughtsOverride.thing != ingestible)
-									{
-										goto IL_A8;
-									}
-								}
-								else if (meatSourceCategory == MeatSourceCategory.NotMeat || traitIngestionThoughtsOverride.meatSource != meatSourceCategory)
-								{
-									goto IL_A8;
-								}
-								for (int k = 0; k < traitIngestionThoughtsOverride.thoughts.Count; k++)
-								{
-									if (traitIngestionThoughtsOverride.thoughts[k] == thought)
-									{
-										return true;
-									}
-								}
-							}
-							IL_A8:;
-						}
+						buffer.AddRange(traitIngestionThoughtsOverride.thoughtsDirect);
 					}
 				}
+				else if (!traitIngestionThoughtsOverride.thoughtsAsIngredient.NullOrEmpty())
+				{
+					buffer.AddRange(traitIngestionThoughtsOverride.thoughtsAsIngredient);
+				}
 			}
-			return false;
 		}
+	}
 
-		// Token: 0x0600D11D RID: 53533 RVA: 0x003D7F58 File Offset: 0x003D6158
-		public void GetExtraThoughtsFromIngestion(List<ThoughtDef> buffer, ThingDef ingestible, MeatSourceCategory meatSourceCategory, bool direct)
+	public void GainTrait(Trait trait, bool suppressConflicts = false)
+	{
+		if (!suppressConflicts && HasTrait(trait.def))
 		{
-			if (ingestible == null || buffer == null)
+			Log.Warning(pawn?.ToString() + " already has trait " + trait.def);
+		}
+		else
+		{
+			if (HasNonSuppressedTrait(trait))
 			{
 				return;
 			}
-			for (int i = 0; i < this.allTraits.Count; i++)
-			{
-				if (!this.allTraits[i].Suppressed)
-				{
-					TraitDegreeData currentData = this.allTraits[i].CurrentData;
-					if (currentData.extraThoughtsFromIngestion != null)
-					{
-						int j = 0;
-						while (j < currentData.extraThoughtsFromIngestion.Count)
-						{
-							TraitIngestionThoughtsOverride traitIngestionThoughtsOverride = currentData.extraThoughtsFromIngestion[j];
-							if (traitIngestionThoughtsOverride.thing != null)
-							{
-								if (traitIngestionThoughtsOverride.thing == ingestible)
-								{
-									goto IL_74;
-								}
-							}
-							else if (meatSourceCategory != MeatSourceCategory.NotMeat && traitIngestionThoughtsOverride.meatSource == meatSourceCategory)
-							{
-								goto IL_74;
-							}
-							IL_C5:
-							j++;
-							continue;
-							IL_74:
-							if (!traitIngestionThoughtsOverride.thoughts.NullOrEmpty<ThoughtDef>())
-							{
-								buffer.AddRange(traitIngestionThoughtsOverride.thoughts);
-							}
-							if (direct)
-							{
-								if (!traitIngestionThoughtsOverride.thoughtsDirect.NullOrEmpty<ThoughtDef>())
-								{
-									buffer.AddRange(traitIngestionThoughtsOverride.thoughtsDirect);
-									goto IL_C5;
-								}
-								goto IL_C5;
-							}
-							else
-							{
-								if (!traitIngestionThoughtsOverride.thoughtsAsIngredient.NullOrEmpty<ThoughtDef>())
-								{
-									buffer.AddRange(traitIngestionThoughtsOverride.thoughtsAsIngredient);
-									goto IL_C5;
-								}
-								goto IL_C5;
-							}
-						}
-					}
-				}
-			}
-		}
-
-		// Token: 0x0600D11E RID: 53534 RVA: 0x003D8054 File Offset: 0x003D6254
-		public void GainTrait(Trait trait, bool suppressConflicts = false)
-		{
-			if (!suppressConflicts && this.HasTrait(trait.def))
-			{
-				Pawn pawn = this.pawn;
-				string str = (pawn != null) ? pawn.ToString() : null;
-				string str2 = " already has trait ";
-				TraitDef def = trait.def;
-				Log.Warning(str + str2 + ((def != null) ? def.ToString() : null));
-				return;
-			}
-			if (this.HasTrait(trait.def, trait.Degree))
-			{
-				return;
-			}
-			this.allTraits.Add(trait);
-			trait.pawn = this.pawn;
+			allTraits.Add(trait);
+			trait.pawn = pawn;
 			if ((ModsConfig.BiotechActive || ModsConfig.AnomalyActive) && suppressConflicts)
 			{
-				if (this.allTraits.Any((Trait x) => x != trait && trait.def.CanSuppress(x) && !x.def.canBeSuppressed))
+				if (allTraits.Any((Trait x) => x != trait && trait.def.CanSuppress(x) && !x.def.canBeSuppressed))
 				{
 					trait.suppressedByTrait = true;
 				}
 				else
 				{
-					for (int i = 0; i < this.allTraits.Count; i++)
+					for (int i = 0; i < allTraits.Count; i++)
 					{
-						if (this.allTraits[i] != trait && trait.def.CanSuppress(this.allTraits[i]))
+						if (allTraits[i] != trait && trait.def.CanSuppress(allTraits[i]))
 						{
-							this.allTraits[i].suppressedByTrait = true;
+							allTraits[i].suppressedByTrait = true;
 						}
 					}
 				}
-				this.RecalculateSuppression();
+				RecalculateSuppression();
 			}
-			this.pawn.Notify_DisabledWorkTypesChanged();
+			pawn.Notify_DisabledWorkTypesChanged();
 			if (trait.CurrentData.HasDefinedGraphicProperties)
 			{
-				this.pawn.Drawer.renderer.SetAllGraphicsDirty();
+				pawn.Drawer.renderer.SetAllGraphicsDirty();
 			}
-			if (this.pawn.skills != null)
+			if (pawn.skills != null)
 			{
-				this.pawn.skills.Notify_SkillDisablesChanged();
-				this.pawn.skills.DirtyAptitudes();
+				pawn.skills.Notify_SkillDisablesChanged();
+				pawn.skills.DirtyAptitudes();
 			}
-			if (!this.pawn.Dead && this.pawn.RaceProps.Humanlike && this.pawn.needs.mood != null)
+			if (!pawn.Dead && pawn.RaceProps.Humanlike && pawn.needs.mood != null)
 			{
-				this.pawn.needs.mood.thoughts.situational.Notify_SituationalThoughtsDirty();
+				pawn.needs.mood.thoughts.situational.Notify_SituationalThoughtsDirty();
 			}
 			List<AbilityDef> abilities = trait.def.DataAtDegree(trait.Degree).abilities;
-			if (!abilities.NullOrEmpty<AbilityDef>())
+			if (!abilities.NullOrEmpty())
 			{
 				for (int j = 0; j < abilities.Count; j++)
 				{
-					this.pawn.abilities.GainAbility(abilities[j]);
+					pawn.abilities.GainAbility(abilities[j]);
 				}
 			}
-			if (trait.def.disableHostilityFromAnimalType != null)
+			if (((trait.def.disableHostilityFromAnimalType.HasValue && trait.def.disableHostilityFromAnimalType != AnimalType.None) || trait.def.disableHostilityFromFaction != null) && pawn.Map != null)
 			{
-				AnimalType? disableHostilityFromAnimalType = trait.def.disableHostilityFromAnimalType;
-				AnimalType animalType = AnimalType.None;
-				if (!(disableHostilityFromAnimalType.GetValueOrDefault() == animalType & disableHostilityFromAnimalType != null))
-				{
-					goto IL_28D;
-				}
+				pawn.Map.attackTargetsCache.UpdateTarget(pawn);
 			}
-			if (trait.def.disableHostilityFromFaction == null)
+			RecacheTraits();
+			if (!trait.CurrentData.enablesNeeds.NullOrEmpty() || !trait.CurrentData.disablesNeeds.NullOrEmpty())
 			{
-				goto IL_2B5;
+				pawn.needs?.AddOrRemoveNeedsAsAppropriate();
 			}
-			IL_28D:
-			if (this.pawn.Map != null)
-			{
-				this.pawn.Map.attackTargetsCache.UpdateTarget(this.pawn);
-			}
-			IL_2B5:
-			this.RecacheTraits();
-			if (!trait.CurrentData.enablesNeeds.NullOrEmpty<NeedDef>() || !trait.CurrentData.disablesNeeds.NullOrEmpty<NeedDef>())
-			{
-				Pawn_NeedsTracker needs = this.pawn.needs;
-				if (needs != null)
-				{
-					needs.AddOrRemoveNeedsAsAppropriate();
-				}
-			}
-			MeditationFocusTypeAvailabilityCache.ClearFor(this.pawn);
+			MeditationFocusTypeAvailabilityCache.ClearFor(pawn);
 		}
+	}
 
-		// Token: 0x0600D11F RID: 53535 RVA: 0x003D836C File Offset: 0x003D656C
-		public void RemoveTrait(Trait trait, bool unsuppressConflicts = false)
+	public void RemoveTrait(Trait trait, bool unsuppressConflicts = false)
+	{
+		if (!HasTrait(trait.def))
 		{
-			if (!this.HasTrait(trait.def))
-			{
-				string[] array = new string[5];
-				array[0] = "Trying to remove ";
-				array[1] = trait.Label;
-				array[2] = " but ";
-				int num = 3;
-				Pawn pawn = this.pawn;
-				array[num] = ((pawn != null) ? pawn.ToString() : null);
-				array[4] = " doesn't have it.";
-				Log.Warning(string.Concat(array));
-				return;
-			}
-			List<AbilityDef> abilities = trait.def.DataAtDegree(trait.Degree).abilities;
-			if (!abilities.NullOrEmpty<AbilityDef>())
-			{
-				for (int i = 0; i < abilities.Count; i++)
-				{
-					this.pawn.abilities.RemoveAbility(abilities[i]);
-				}
-			}
-			this.allTraits.Remove(trait);
-			if (trait.sourceGene != null)
-			{
-				this.pawn.genes.RemoveGene(trait.sourceGene);
-			}
-			if ((ModsConfig.BiotechActive || ModsConfig.AnomalyActive) && unsuppressConflicts)
-			{
-				for (int j = 0; j < this.allTraits.Count; j++)
-				{
-					if (this.allTraits[j].Suppressed)
-					{
-						bool flag = false;
-						for (int k = 0; k < this.allTraits.Count; k++)
-						{
-							if (this.allTraits[j] != this.allTraits[k] && (this.allTraits[k].sourceGene == null || !this.allTraits[k].sourceGene.Overridden) && this.allTraits[j].def.CanSuppress(this.allTraits[k]))
-							{
-								flag = true;
-								break;
-							}
-						}
-						if (!flag)
-						{
-							this.allTraits[j].suppressedByTrait = false;
-						}
-					}
-				}
-			}
-			this.pawn.Notify_DisabledWorkTypesChanged();
-			if (trait.CurrentData.HasDefinedGraphicProperties)
-			{
-				this.pawn.Drawer.renderer.SetAllGraphicsDirty();
-			}
-			if (this.pawn.skills != null)
-			{
-				this.pawn.skills.Notify_SkillDisablesChanged();
-				this.pawn.skills.DirtyAptitudes();
-			}
-			if (!this.pawn.Dead && this.pawn.RaceProps.Humanlike && this.pawn.needs.mood != null)
-			{
-				this.pawn.needs.mood.thoughts.situational.Notify_SituationalThoughtsDirty();
-			}
-			if (trait.def.disableHostilityFromAnimalType != null)
-			{
-				AnimalType? disableHostilityFromAnimalType = trait.def.disableHostilityFromAnimalType;
-				AnimalType animalType = AnimalType.None;
-				if (!(disableHostilityFromAnimalType.GetValueOrDefault() == animalType & disableHostilityFromAnimalType != null))
-				{
-					goto IL_2A2;
-				}
-			}
-			if (trait.def.disableHostilityFromFaction == null)
-			{
-				goto IL_2CA;
-			}
-			IL_2A2:
-			if (this.pawn.Map != null)
-			{
-				this.pawn.Map.attackTargetsCache.UpdateTarget(this.pawn);
-			}
-			IL_2CA:
-			this.RecacheTraits();
-			if (!trait.CurrentData.enablesNeeds.NullOrEmpty<NeedDef>() || !trait.CurrentData.disablesNeeds.NullOrEmpty<NeedDef>())
-			{
-				Pawn_NeedsTracker needs = this.pawn.needs;
-				if (needs != null)
-				{
-					needs.AddOrRemoveNeedsAsAppropriate();
-				}
-			}
-			MeditationFocusTypeAvailabilityCache.ClearFor(this.pawn);
+			Log.Warning("Trying to remove " + trait.Label + " but " + pawn?.ToString() + " doesn't have it.");
+			return;
 		}
-
-		// Token: 0x0600D120 RID: 53536 RVA: 0x003D8690 File Offset: 0x003D6890
-		public void Notify_GeneRemoved(Gene gene)
+		List<AbilityDef> abilities = trait.def.DataAtDegree(trait.Degree).abilities;
+		if (!abilities.NullOrEmpty())
 		{
-			if (ModsConfig.BiotechActive)
+			for (int i = 0; i < abilities.Count; i++)
 			{
-				for (int i = this.allTraits.Count - 1; i >= 0; i--)
-				{
-					if (this.allTraits[i].sourceGene == gene)
-					{
-						this.RemoveTrait(this.allTraits[i], true);
-					}
-				}
-				this.RecalculateSuppression();
+				pawn.abilities.RemoveAbility(abilities[i]);
 			}
 		}
-
-		// Token: 0x0600D121 RID: 53537 RVA: 0x003D86EC File Offset: 0x003D68EC
-		public void RecalculateSuppression()
+		allTraits.Remove(trait);
+		if (trait.sourceGene != null)
 		{
-			if (!ModsConfig.BiotechActive || this.pawn.genes == null)
+			pawn.genes.RemoveGene(trait.sourceGene);
+		}
+		if ((ModsConfig.BiotechActive || ModsConfig.AnomalyActive) && unsuppressConflicts)
+		{
+			for (int j = 0; j < allTraits.Count; j++)
 			{
-				return;
-			}
-			List<Gene> genesListForReading = this.pawn.genes.GenesListForReading;
-			int i;
-			Predicate<GeneticTraitData> <>9__0;
-			int i2;
-			for (i = 0; i < this.allTraits.Count; i = i2 + 1)
-			{
+				if (!allTraits[j].Suppressed)
+				{
+					continue;
+				}
 				bool flag = false;
-				if (this.allTraits[i].sourceGene != null && this.allTraits[i].sourceGene.Overridden)
+				for (int k = 0; k < allTraits.Count; k++)
 				{
-					this.allTraits[i].suppressedByGene = this.allTraits[i].sourceGene.overriddenByGene;
-					flag = true;
-				}
-				else
-				{
-					for (int j = 0; j < genesListForReading.Count; j++)
+					if (allTraits[j] != allTraits[k] && (allTraits[k].sourceGene == null || !allTraits[k].sourceGene.Overridden) && allTraits[j].def.CanSuppress(allTraits[k]))
 					{
-						if (genesListForReading[j].Active && genesListForReading[j].def.suppressedTraits != null)
-						{
-							List<GeneticTraitData> suppressedTraits = genesListForReading[j].def.suppressedTraits;
-							Predicate<GeneticTraitData> predicate;
-							if ((predicate = <>9__0) == null)
-							{
-								predicate = (<>9__0 = ((GeneticTraitData x) => x.def == this.allTraits[i].def && x.degree == this.allTraits[i].Degree));
-							}
-							if (suppressedTraits.Any(predicate))
-							{
-								this.allTraits[i].suppressedByGene = genesListForReading[j];
-								flag = true;
-								break;
-							}
-						}
+						flag = true;
+						break;
 					}
 				}
 				if (!flag)
 				{
-					this.allTraits[i].suppressedByGene = null;
+					allTraits[j].suppressedByTrait = false;
 				}
-				i2 = i;
 			}
 		}
-
-		// Token: 0x0600D122 RID: 53538 RVA: 0x003D8878 File Offset: 0x003D6A78
-		public bool HasTrait(TraitDef tDef)
+		pawn.Notify_DisabledWorkTypesChanged();
+		if (trait.CurrentData.HasDefinedGraphicProperties)
 		{
-			for (int i = 0; i < this.allTraits.Count; i++)
+			pawn.Drawer.renderer.SetAllGraphicsDirty();
+		}
+		if (pawn.skills != null)
+		{
+			pawn.skills.Notify_SkillDisablesChanged();
+			pawn.skills.DirtyAptitudes();
+		}
+		if (!pawn.Dead && pawn.RaceProps.Humanlike && pawn.needs.mood != null)
+		{
+			pawn.needs.mood.thoughts.situational.Notify_SituationalThoughtsDirty();
+		}
+		if (((trait.def.disableHostilityFromAnimalType.HasValue && trait.def.disableHostilityFromAnimalType != AnimalType.None) || trait.def.disableHostilityFromFaction != null) && pawn.Map != null)
+		{
+			pawn.Map.attackTargetsCache.UpdateTarget(pawn);
+		}
+		RecacheTraits();
+		if (!trait.CurrentData.enablesNeeds.NullOrEmpty() || !trait.CurrentData.disablesNeeds.NullOrEmpty())
+		{
+			pawn.needs?.AddOrRemoveNeedsAsAppropriate();
+		}
+		MeditationFocusTypeAvailabilityCache.ClearFor(pawn);
+	}
+
+	public void Notify_GeneRemoved(Gene gene)
+	{
+		if (!ModsConfig.BiotechActive)
+		{
+			return;
+		}
+		for (int num = allTraits.Count - 1; num >= 0; num--)
+		{
+			if (allTraits[num].sourceGene == gene)
 			{
-				if (this.allTraits[i].def == tDef && !this.allTraits[i].Suppressed)
+				RemoveTrait(allTraits[num], unsuppressConflicts: true);
+			}
+		}
+		RecalculateSuppression();
+	}
+
+	public void RecalculateSuppression()
+	{
+		if (!ModsConfig.BiotechActive || pawn.genes == null)
+		{
+			return;
+		}
+		List<Gene> genesListForReading = pawn.genes.GenesListForReading;
+		int i;
+		for (i = 0; i < allTraits.Count; i++)
+		{
+			bool flag = false;
+			if (allTraits[i].sourceGene != null && allTraits[i].sourceGene.Overridden)
+			{
+				allTraits[i].suppressedByGene = allTraits[i].sourceGene.overriddenByGene;
+				flag = true;
+			}
+			else
+			{
+				for (int j = 0; j < genesListForReading.Count; j++)
 				{
-					return true;
+					if (genesListForReading[j].Active && genesListForReading[j].def.suppressedTraits != null && genesListForReading[j].def.suppressedTraits.Any((GeneticTraitData x) => x.def == allTraits[i].def && x.degree == allTraits[i].Degree))
+					{
+						allTraits[i].suppressedByGene = genesListForReading[j];
+						flag = true;
+						break;
+					}
 				}
 			}
+			if (!flag)
+			{
+				allTraits[i].suppressedByGene = null;
+			}
+		}
+	}
+
+	public bool HasTrait(TraitDef tDef)
+	{
+		for (int i = 0; i < allTraits.Count; i++)
+		{
+			if (allTraits[i].def == tDef && !allTraits[i].Suppressed)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public bool HasTrait(TraitDef tDef, int degree)
+	{
+		for (int i = 0; i < allTraits.Count; i++)
+		{
+			if (allTraits[i].def == tDef && allTraits[i].Degree == degree && !allTraits[i].Suppressed)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public bool HasNonSuppressedTrait(Trait trait)
+	{
+		for (int i = 0; i < allTraits.Count; i++)
+		{
+			Trait trait2 = allTraits[i];
+			if ((trait.sourceGene == null || trait2.sourceGene == null || !trait.sourceGene.def.Overrides(trait2.sourceGene.def, pawn.genes.IsXenogene(trait.sourceGene), pawn.genes.IsXenogene(trait2.sourceGene))) && trait2.def == trait.def && trait2.Degree == trait.Degree && !trait2.Suppressed)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public bool TryGetNeedEnablingTrait(NeedDef def, out Trait trait)
+	{
+		if (cachedEnabledNeeds == null)
+		{
+			trait = null;
 			return false;
 		}
+		return cachedEnabledNeeds.TryGetValue(def, out trait);
+	}
 
-		// Token: 0x0600D123 RID: 53539 RVA: 0x003D88C8 File Offset: 0x003D6AC8
-		public bool HasTrait(TraitDef tDef, int degree)
+	public bool TryGetNeedDisablingTrait(NeedDef def, out Trait trait)
+	{
+		if (cachedDisabledNeeds == null)
 		{
-			for (int i = 0; i < this.allTraits.Count; i++)
-			{
-				if (this.allTraits[i].def == tDef && this.allTraits[i].Degree == degree && !this.allTraits[i].Suppressed)
-				{
-					return true;
-				}
-			}
+			trait = null;
 			return false;
 		}
+		return cachedDisabledNeeds.TryGetValue(def, out trait);
+	}
 
-		// Token: 0x0600D124 RID: 53540 RVA: 0x003D8929 File Offset: 0x003D6B29
-		public bool TryGetNeedEnablingTrait(NeedDef def, out Trait trait)
+	public bool EnablesNeed(NeedDef def)
+	{
+		return cachedEnabledNeeds?.ContainsKey(def) ?? false;
+	}
+
+	public bool DisablesNeed(NeedDef def)
+	{
+		return cachedDisabledNeeds?.ContainsKey(def) ?? false;
+	}
+
+	public Trait GetTrait(TraitDef tDef)
+	{
+		for (int i = 0; i < allTraits.Count; i++)
 		{
-			if (this.cachedEnabledNeeds == null)
+			if (allTraits[i].def == tDef && !allTraits[i].Suppressed)
 			{
-				trait = null;
-				return false;
+				return allTraits[i];
 			}
-			return this.cachedEnabledNeeds.TryGetValue(def, out trait);
 		}
+		return null;
+	}
 
-		// Token: 0x0600D125 RID: 53541 RVA: 0x003D8945 File Offset: 0x003D6B45
-		public bool TryGetNeedDisablingTrait(NeedDef def, out Trait trait)
+	public Trait GetTrait(TraitDef tDef, int degree)
+	{
+		for (int i = 0; i < allTraits.Count; i++)
 		{
-			if (this.cachedDisabledNeeds == null)
+			if (allTraits[i].def == tDef && allTraits[i].Degree == degree && !allTraits[i].Suppressed)
 			{
-				trait = null;
-				return false;
+				return allTraits[i];
 			}
-			return this.cachedDisabledNeeds.TryGetValue(def, out trait);
 		}
+		return null;
+	}
 
-		// Token: 0x0600D126 RID: 53542 RVA: 0x003D8961 File Offset: 0x003D6B61
-		public bool EnablesNeed(NeedDef def)
+	public int DegreeOfTrait(TraitDef tDef)
+	{
+		for (int i = 0; i < allTraits.Count; i++)
 		{
-			Dictionary<NeedDef, Trait> dictionary = this.cachedEnabledNeeds;
-			return dictionary != null && dictionary.ContainsKey(def);
-		}
-
-		// Token: 0x0600D127 RID: 53543 RVA: 0x003D8975 File Offset: 0x003D6B75
-		public bool DisablesNeed(NeedDef def)
-		{
-			Dictionary<NeedDef, Trait> dictionary = this.cachedDisabledNeeds;
-			return dictionary != null && dictionary.ContainsKey(def);
-		}
-
-		// Token: 0x17002040 RID: 8256
-		// (get) Token: 0x0600D128 RID: 53544 RVA: 0x003D8989 File Offset: 0x003D6B89
-		public IEnumerable<MentalBreakDef> TheOnlyAllowedMentalBreaks
-		{
-			get
+			if (allTraits[i].def == tDef && !allTraits[i].Suppressed)
 			{
-				int num;
-				for (int i = 0; i < this.allTraits.Count; i = num + 1)
+				return allTraits[i].Degree;
+			}
+		}
+		return 0;
+	}
+
+	private void RecacheTraits()
+	{
+		anyTraitHasIngestibleOverrides = false;
+		cachedDisabledNeeds?.Clear();
+		cachedEnabledNeeds?.Clear();
+		for (int i = 0; i < allTraits.Count; i++)
+		{
+			Trait trait = allTraits[i];
+			if (!trait.Suppressed && !trait.CurrentData.ingestibleModifiers.NullOrEmpty())
+			{
+				anyTraitHasIngestibleOverrides = true;
+			}
+			if (!trait.Suppressed && !trait.CurrentData.enablesNeeds.NullOrEmpty())
+			{
+				for (int j = 0; j < trait.CurrentData.enablesNeeds.Count; j++)
 				{
-					Trait trait = this.allTraits[i];
-					if (!trait.Suppressed)
+					NeedDef key = trait.CurrentData.enablesNeeds[j];
+					if (cachedEnabledNeeds == null)
 					{
-						if (trait.CurrentData.theOnlyAllowedMentalBreaks != null)
-						{
-							for (int j = 0; j < trait.CurrentData.theOnlyAllowedMentalBreaks.Count; j = num + 1)
-							{
-								yield return trait.CurrentData.theOnlyAllowedMentalBreaks[j];
-								num = j;
-							}
-						}
-						trait = null;
+						cachedEnabledNeeds = new Dictionary<NeedDef, Trait>();
 					}
-					num = i;
+					cachedEnabledNeeds[key] = trait;
 				}
-				yield break;
+			}
+			if (trait.Suppressed || trait.CurrentData.disablesNeeds.NullOrEmpty())
+			{
+				continue;
+			}
+			for (int k = 0; k < trait.CurrentData.disablesNeeds.Count; k++)
+			{
+				NeedDef key2 = trait.CurrentData.disablesNeeds[k];
+				if (cachedDisabledNeeds == null)
+				{
+					cachedDisabledNeeds = new Dictionary<NeedDef, Trait>();
+				}
+				cachedDisabledNeeds[key2] = trait;
 			}
 		}
-
-		// Token: 0x0600D129 RID: 53545 RVA: 0x003D899C File Offset: 0x003D6B9C
-		public Trait GetTrait(TraitDef tDef)
-		{
-			for (int i = 0; i < this.allTraits.Count; i++)
-			{
-				if (this.allTraits[i].def == tDef && !this.allTraits[i].Suppressed)
-				{
-					return this.allTraits[i];
-				}
-			}
-			return null;
-		}
-
-		// Token: 0x0600D12A RID: 53546 RVA: 0x003D89F4 File Offset: 0x003D6BF4
-		public Trait GetTrait(TraitDef tDef, int degree)
-		{
-			for (int i = 0; i < this.allTraits.Count; i++)
-			{
-				if (this.allTraits[i].def == tDef && this.allTraits[i].Degree == degree && !this.allTraits[i].Suppressed)
-				{
-					return this.allTraits[i];
-				}
-			}
-			return null;
-		}
-
-		// Token: 0x0600D12B RID: 53547 RVA: 0x003D8A60 File Offset: 0x003D6C60
-		public int DegreeOfTrait(TraitDef tDef)
-		{
-			for (int i = 0; i < this.allTraits.Count; i++)
-			{
-				if (this.allTraits[i].def == tDef && !this.allTraits[i].Suppressed)
-				{
-					return this.allTraits[i].Degree;
-				}
-			}
-			return 0;
-		}
-
-		// Token: 0x0600D12C RID: 53548 RVA: 0x003D8AC0 File Offset: 0x003D6CC0
-		private void RecacheTraits()
-		{
-			this.anyTraitHasIngestibleOverrides = false;
-			Dictionary<NeedDef, Trait> dictionary = this.cachedDisabledNeeds;
-			if (dictionary != null)
-			{
-				dictionary.Clear();
-			}
-			Dictionary<NeedDef, Trait> dictionary2 = this.cachedEnabledNeeds;
-			if (dictionary2 != null)
-			{
-				dictionary2.Clear();
-			}
-			for (int i = 0; i < this.allTraits.Count; i++)
-			{
-				Trait trait = this.allTraits[i];
-				if (!trait.Suppressed && !trait.CurrentData.ingestibleModifiers.NullOrEmpty<IngestibleModifiers>())
-				{
-					this.anyTraitHasIngestibleOverrides = true;
-				}
-				if (!trait.Suppressed && !trait.CurrentData.enablesNeeds.NullOrEmpty<NeedDef>())
-				{
-					for (int j = 0; j < trait.CurrentData.enablesNeeds.Count; j++)
-					{
-						NeedDef key = trait.CurrentData.enablesNeeds[j];
-						if (this.cachedEnabledNeeds == null)
-						{
-							this.cachedEnabledNeeds = new Dictionary<NeedDef, Trait>();
-						}
-						this.cachedEnabledNeeds[key] = trait;
-					}
-				}
-				if (!trait.Suppressed && !trait.CurrentData.disablesNeeds.NullOrEmpty<NeedDef>())
-				{
-					for (int k = 0; k < trait.CurrentData.disablesNeeds.Count; k++)
-					{
-						NeedDef key2 = trait.CurrentData.disablesNeeds[k];
-						if (this.cachedDisabledNeeds == null)
-						{
-							this.cachedDisabledNeeds = new Dictionary<NeedDef, Trait>();
-						}
-						this.cachedDisabledNeeds[key2] = trait;
-					}
-				}
-			}
-		}
-
-		// Token: 0x04008E06 RID: 36358
-		protected Pawn pawn;
-
-		// Token: 0x04008E07 RID: 36359
-		public List<Trait> allTraits = new List<Trait>();
-
-		// Token: 0x04008E08 RID: 36360
-		private bool anyTraitHasIngestibleOverrides;
-
-		// Token: 0x04008E09 RID: 36361
-		private Dictionary<NeedDef, Trait> cachedEnabledNeeds;
-
-		// Token: 0x04008E0A RID: 36362
-		private Dictionary<NeedDef, Trait> cachedDisabledNeeds;
-
-		// Token: 0x04008E0B RID: 36363
-		private readonly List<Trait> tmpTraits = new List<Trait>();
 	}
 }

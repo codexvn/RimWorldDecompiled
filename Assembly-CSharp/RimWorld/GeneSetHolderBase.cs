@@ -1,157 +1,459 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public abstract class GeneSetHolderBase : ThingWithComps
 {
-	// Token: 0x02002AE7 RID: 10983
-	public abstract class GeneSetHolderBase : ThingWithComps
+	[CompilerGenerated]
+	private sealed class _003CGetGizmos_003Ed__13 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700264D RID: 9805
-		// (get) Token: 0x0600F4F4 RID: 62708 RVA: 0x00472F07 File Offset: 0x00471107
-		public GeneSet GeneSet
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public GeneSetHolderBase _003C_003E4__this;
+
+		private IEnumerator<Gizmo> _003C_003E7__wrap1;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.geneSet;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700264E RID: 9806
-		// (get) Token: 0x0600F4F5 RID: 62709 RVA: 0x00472F0F File Offset: 0x0047110F
-		protected virtual string InspectGeneDescription
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return "InspectGenesDesc".Translate(this);
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700264F RID: 9807
-		// (get) Token: 0x0600F4F6 RID: 62710 RVA: 0x00472F28 File Offset: 0x00471128
-		public override string DescriptionDetailed
+		[DebuggerHidden]
+		public _003CGetGizmos_003Ed__13(int _003C_003E1__state)
 		{
-			get
-			{
-				this.tmpGeneLabelsDesc.Clear();
-				string text = base.DescriptionDetailed;
-				if (this.geneSet == null || !this.geneSet.GenesListForReading.Any<GeneDef>())
-				{
-					return text;
-				}
-				if (!text.NullOrEmpty())
-				{
-					text += "\n\n";
-				}
-				for (int i = 0; i < this.geneSet.GenesListForReading.Count; i++)
-				{
-					this.tmpGeneLabelsDesc.Add(this.geneSet.GenesListForReading[i].label);
-				}
-				return text + ("Genes".Translate().CapitalizeFirst() + ":\n" + this.tmpGeneLabelsDesc.ToLineList("  - ", true));
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x0600F4F7 RID: 62711 RVA: 0x00472FF2 File Offset: 0x004711F2
-		public override IEnumerable<StatDrawEntry> SpecialDisplayStats()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			foreach (StatDrawEntry statDrawEntry in base.SpecialDisplayStats())
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				yield return statDrawEntry;
-			}
-			IEnumerator<StatDrawEntry> enumerator = null;
-			if (this.geneSet != null)
-			{
-				Dialog_InfoCard.Hyperlink? inspectGenesHyperlink = null;
-				if (ThingSelectionUtility.SelectableByMapClick(this))
+				try
 				{
-					inspectGenesHyperlink = new Dialog_InfoCard.Hyperlink?(new Dialog_InfoCard.Hyperlink(this, -1, true));
 				}
-				foreach (StatDrawEntry statDrawEntry2 in this.geneSet.SpecialDisplayStats(inspectGenesHyperlink))
+				finally
 				{
-					yield return statDrawEntry2;
+					_003C_003Em__Finally1();
 				}
-				enumerator = null;
 			}
-			yield break;
-			yield break;
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x0600F4F8 RID: 62712 RVA: 0x00473004 File Offset: 0x00471204
-		public override string GetInspectString()
+		private bool MoveNext()
 		{
-			string text = base.GetInspectString();
-			this.tmpGeneLabels.Clear();
-			if (this.geneSet != null && this.geneSet.GenesListForReading.Any<GeneDef>())
+			try
 			{
-				if (!text.NullOrEmpty())
+				int num = _003C_003E1__state;
+				GeneSetHolderBase geneSetHolderBase = _003C_003E4__this;
+				switch (num)
 				{
-					text += "\n";
-				}
-				List<GeneDef> genesListForReading = this.geneSet.GenesListForReading;
-				int num = Mathf.Min(5, genesListForReading.Count);
-				for (int i = 0; i < num; i++)
-				{
-					string text2 = genesListForReading[i].label;
-					if (this.geneSet.IsOverridden(genesListForReading[i]))
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((ThingWithComps)geneSetHolderBase).GetGizmos().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0072;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0072;
+				case 2:
 					{
-						text2 += " (" + "Overridden".Translate() + ")";
+						_003C_003E1__state = -1;
+						break;
 					}
-					this.tmpGeneLabels.Add(text2);
+					IL_0072:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Gizmo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (geneSetHolderBase.geneSet != null)
+					{
+						_003C_003E2__current = new Command_Action
+						{
+							defaultLabel = "InspectGenes".Translate() + "...",
+							defaultDesc = geneSetHolderBase.InspectGeneDescription,
+							icon = GeneticInfoTex.Texture,
+							action = delegate
+							{
+								InspectPaneUtility.OpenTab(typeof(ITab_Genes));
+							}
+						};
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
 				}
-				if (genesListForReading.Count > num)
-				{
-					this.tmpGeneLabels.Add("Etc".Translate() + "...");
-				}
-				text += "Genes".Translate().CapitalizeFirst() + ":\n" + this.tmpGeneLabels.ToLineList("  - ", true);
+				return false;
 			}
-			return text;
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
 		}
 
-		// Token: 0x0600F4F9 RID: 62713 RVA: 0x00473144 File Offset: 0x00471344
-		public override IEnumerable<Gizmo> GetGizmos()
+		bool IEnumerator.MoveNext()
 		{
-			foreach (Gizmo gizmo in base.GetGizmos())
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				yield return gizmo;
+				_003C_003E7__wrap1.Dispose();
 			}
-			IEnumerator<Gizmo> enumerator = null;
-			if (this.geneSet != null)
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CGetGizmos_003Ed__13 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				Command_Action command_Action = new Command_Action();
-				command_Action.defaultLabel = "InspectGenes".Translate() + "...";
-				command_Action.defaultDesc = this.InspectGeneDescription;
-				command_Action.icon = GeneSetHolderBase.GeneticInfoTex.Texture;
-				command_Action.action = delegate()
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CGetGizmos_003Ed__13(0)
 				{
-					InspectPaneUtility.OpenTab(typeof(ITab_Genes));
+					_003C_003E4__this = _003C_003E4__this
 				};
-				yield return command_Action;
 			}
-			yield break;
-			yield break;
+			return result;
 		}
 
-		// Token: 0x0600F4FA RID: 62714 RVA: 0x00473154 File Offset: 0x00471354
-		public override void ExposeData()
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			base.ExposeData();
-			Scribe_Deep.Look<GeneSet>(ref this.geneSet, "geneSet", Array.Empty<object>());
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CSpecialDisplayStats_003Ed__10 : IEnumerable<StatDrawEntry>, IEnumerable, IEnumerator<StatDrawEntry>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private StatDrawEntry _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public GeneSetHolderBase _003C_003E4__this;
+
+		private IEnumerator<StatDrawEntry> _003C_003E7__wrap1;
+
+		StatDrawEntry IEnumerator<StatDrawEntry>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x0400A164 RID: 41316
-		protected GeneSet geneSet;
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
 
-		// Token: 0x0400A165 RID: 41317
-		private const int MaxGeneLabels = 5;
+		[DebuggerHidden]
+		public _003CSpecialDisplayStats_003Ed__10(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
 
-		// Token: 0x0400A166 RID: 41318
-		public static readonly CachedTexture GeneticInfoTex = new CachedTexture("UI/Gizmos/ViewGenes");
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			switch (_003C_003E1__state)
+			{
+			case -3:
+			case 1:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+				break;
+			case -4:
+			case 2:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally2();
+				}
+				break;
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
 
-		// Token: 0x0400A167 RID: 41319
-		private List<string> tmpGeneLabelsDesc = new List<string>();
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				GeneSetHolderBase geneSetHolderBase = _003C_003E4__this;
+				Dialog_InfoCard.Hyperlink? inspectGenesHyperlink;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((ThingWithComps)geneSetHolderBase).SpecialDisplayStats().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0072;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0072;
+				case 2:
+					{
+						_003C_003E1__state = -4;
+						goto IL_0100;
+					}
+					IL_0072:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						StatDrawEntry current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (geneSetHolderBase.geneSet == null)
+					{
+						break;
+					}
+					inspectGenesHyperlink = null;
+					if (ThingSelectionUtility.SelectableByMapClick(geneSetHolderBase))
+					{
+						inspectGenesHyperlink = new Dialog_InfoCard.Hyperlink(geneSetHolderBase, -1, thingIsGeneOwner: true);
+					}
+					_003C_003E7__wrap1 = geneSetHolderBase.geneSet.SpecialDisplayStats(inspectGenesHyperlink).GetEnumerator();
+					_003C_003E1__state = -4;
+					goto IL_0100;
+					IL_0100:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						StatDrawEntry current2 = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current2;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					_003C_003Em__Finally2();
+					_003C_003E7__wrap1 = null;
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
 
-		// Token: 0x0400A168 RID: 41320
-		private List<string> tmpGeneLabels = new List<string>();
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<StatDrawEntry> IEnumerable<StatDrawEntry>.GetEnumerator()
+		{
+			_003CSpecialDisplayStats_003Ed__10 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CSpecialDisplayStats_003Ed__10(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<StatDrawEntry>)this).GetEnumerator();
+		}
+	}
+
+	protected GeneSet geneSet;
+
+	private const int MaxGeneLabels = 5;
+
+	public static readonly CachedTexture GeneticInfoTex = new CachedTexture("UI/Gizmos/ViewGenes");
+
+	private List<string> tmpGeneLabelsDesc = new List<string>();
+
+	private List<string> tmpGeneLabels = new List<string>();
+
+	public GeneSet GeneSet => geneSet;
+
+	protected virtual string InspectGeneDescription => "InspectGenesDesc".Translate(this);
+
+	public override string DescriptionDetailed
+	{
+		get
+		{
+			tmpGeneLabelsDesc.Clear();
+			string text = base.DescriptionDetailed;
+			if (geneSet == null || !geneSet.GenesListForReading.Any())
+			{
+				return text;
+			}
+			if (!text.NullOrEmpty())
+			{
+				text += "\n\n";
+			}
+			for (int i = 0; i < geneSet.GenesListForReading.Count; i++)
+			{
+				tmpGeneLabelsDesc.Add(geneSet.GenesListForReading[i].label);
+			}
+			return text + ("Genes".Translate().CapitalizeFirst() + ":\n" + tmpGeneLabelsDesc.ToLineList("  - ", capitalizeItems: true));
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CSpecialDisplayStats_003Ed__10))]
+	public override IEnumerable<StatDrawEntry> SpecialDisplayStats()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CSpecialDisplayStats_003Ed__10(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override string GetInspectString()
+	{
+		string text = base.GetInspectString();
+		tmpGeneLabels.Clear();
+		if (geneSet != null && geneSet.GenesListForReading.Any())
+		{
+			if (!text.NullOrEmpty())
+			{
+				text += "\n";
+			}
+			List<GeneDef> genesListForReading = geneSet.GenesListForReading;
+			int num = Mathf.Min(5, genesListForReading.Count);
+			for (int i = 0; i < num; i++)
+			{
+				string text2 = genesListForReading[i].label;
+				if (geneSet.IsOverridden(genesListForReading[i]))
+				{
+					text2 += " (" + "Overridden".Translate() + ")";
+				}
+				tmpGeneLabels.Add(text2);
+			}
+			if (genesListForReading.Count > num)
+			{
+				tmpGeneLabels.Add("Etc".Translate() + "...");
+			}
+			text += "Genes".Translate().CapitalizeFirst() + ":\n" + tmpGeneLabels.ToLineList("  - ", capitalizeItems: true);
+		}
+		return text;
+	}
+
+	[IteratorStateMachine(typeof(_003CGetGizmos_003Ed__13))]
+	public override IEnumerable<Gizmo> GetGizmos()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetGizmos_003Ed__13(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Deep.Look(ref geneSet, "geneSet");
 	}
 }

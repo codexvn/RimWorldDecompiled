@@ -1,66 +1,181 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_Replant : JobDriver_HaulToContainer
 {
-	// Token: 0x02001181 RID: 4481
-	public class JobDriver_Replant : JobDriver_HaulToContainer
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__6 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x170010F7 RID: 4343
-		// (get) Token: 0x06006D9D RID: 28061 RVA: 0x00224B8B File Offset: 0x00222D8B
-		protected override int Duration
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_Replant _003C_003E4__this;
+
+		private IEnumerator<Toil> _003C_003E7__wrap1;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (int)(((MinifiedTree)base.ThingToCarry).InnerTree.def.plant.harvestWork / JobDriver_PlantWork.WorkDonePerTick(this.pawn, ((MinifiedTree)base.ThingToCarry).InnerTree));
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170010F8 RID: 4344
-		// (get) Token: 0x06006D9E RID: 28062 RVA: 0x00224BC9 File Offset: 0x00222DC9
-		protected override EffecterDef WorkEffecter
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return EffecterDefOf.Sow;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170010F9 RID: 4345
-		// (get) Token: 0x06006D9F RID: 28063 RVA: 0x00224BD0 File Offset: 0x00222DD0
-		protected override SoundDef WorkSustainer
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__6(int _003C_003E1__state)
 		{
-			get
-			{
-				return SoundDefOf.Interact_ConstructDirt;
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x06006DA0 RID: 28064 RVA: 0x00224BD7 File Offset: 0x00222DD7
-		protected override IEnumerable<Toil> MakeNewToils()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			this.FailOn(() => this.job.plantDefToSow.plant.interferesWithRoof && base.Container.Position.Roofed(base.Map));
-			foreach (Toil toil in base.MakeNewToils())
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				yield return toil;
-			}
-			IEnumerator<Toil> enumerator = null;
-			yield break;
-			yield break;
-		}
-
-		// Token: 0x06006DA1 RID: 28065 RVA: 0x00224BE7 File Offset: 0x00222DE7
-		protected override void ModifyPrepareToil(Toil toil)
-		{
-			toil.tickIntervalAction = (Action<int>)Delegate.Combine(toil.tickIntervalAction, new Action<int>(delegate(int delta)
-			{
-				if (this.pawn.skills != null)
+				try
 				{
-					this.pawn.skills.Learn(SkillDefOf.Plants, 0.085f * (float)delta, false, false);
 				}
-			}));
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				JobDriver_Replant CS_0024_003C_003E8__locals5 = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					CS_0024_003C_003E8__locals5.FailOn(() => CS_0024_003C_003E8__locals5.job.plantDefToSow.plant.interferesWithRoof && CS_0024_003C_003E8__locals5.Container.Position.Roofed(CS_0024_003C_003E8__locals5.Map));
+					_003C_003E7__wrap1 = ((JobDriver_HaulToContainer)CS_0024_003C_003E8__locals5).MakeNewToils().GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 1:
+					_003C_003E1__state = -3;
+					break;
+				}
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					Toil current = _003C_003E7__wrap1.Current;
+					_003C_003E2__current = current;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = null;
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__6 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__6(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	protected override int Duration => (int)(((MinifiedTree)base.ThingToCarry).InnerTree.def.plant.harvestWork / JobDriver_PlantWork.WorkDonePerTick(pawn, ((MinifiedTree)base.ThingToCarry).InnerTree));
+
+	protected override EffecterDef WorkEffecter => EffecterDefOf.Sow;
+
+	protected override SoundDef WorkSustainer => SoundDefOf.Interact_ConstructDirt;
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__6))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__6(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	protected override void ModifyPrepareToil(Toil toil)
+	{
+		toil.tickIntervalAction = (Action<int>)Delegate.Combine(toil.tickIntervalAction, (Action<int>)delegate(int delta)
+		{
+			if (pawn.skills != null)
+			{
+				pawn.skills.Learn(SkillDefOf.Plants, 0.085f * (float)delta);
+			}
+		});
 	}
 }

@@ -1,286 +1,391 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld;
 
-namespace Verse
+namespace Verse;
+
+public class VerbTracker : IExposable
 {
-	// Token: 0x02000D72 RID: 3442
-	public class VerbTracker : IExposable
+	[CompilerGenerated]
+	private sealed class _003CGetVerbsCommands_003Ed__10 : IEnumerable<Command>, IEnumerable, IEnumerator<Command>, IEnumerator, IDisposable
 	{
-		// Token: 0x17000DEA RID: 3562
-		// (get) Token: 0x060057CE RID: 22478 RVA: 0x001C4AC3 File Offset: 0x001C2CC3
-		public List<Verb> AllVerbs
+		private int _003C_003E1__state;
+
+		private Command _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public VerbTracker _003C_003E4__this;
+
+		private CompEquippable _003Cce_003E5__2;
+
+		private Thing _003CownerThing_003E5__3;
+
+		private List<Verb> _003Cverbs_003E5__4;
+
+		private int _003Ci_003E5__5;
+
+		Command IEnumerator<Command>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.verbs == null)
-				{
-					this.InitVerbsFromZero();
-				}
-				return this.verbs;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17000DEB RID: 3563
-		// (get) Token: 0x060057CF RID: 22479 RVA: 0x001C4ADC File Offset: 0x001C2CDC
-		public Verb PrimaryVerb
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.verbs == null)
-				{
-					this.InitVerbsFromZero();
-				}
-				for (int i = 0; i < this.verbs.Count; i++)
-				{
-					if (this.verbs[i].verbProps.isPrimary)
-					{
-						return this.verbs[i];
-					}
-				}
-				return null;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17000DEC RID: 3564
-		// (get) Token: 0x060057D0 RID: 22480 RVA: 0x001C4B34 File Offset: 0x001C2D34
-		public bool AnyVerbBursting
+		[DebuggerHidden]
+		public _003CGetVerbsCommands_003Ed__10(int _003C_003E1__state)
 		{
-			get
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003Cce_003E5__2 = null;
+			_003CownerThing_003E5__3 = null;
+			_003Cverbs_003E5__4 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			VerbTracker verbTracker = _003C_003E4__this;
+			switch (num)
 			{
-				for (int i = 0; i < this.verbs.Count; i++)
+			default:
+				return false;
+			case 0:
+			{
+				_003C_003E1__state = -1;
+				IVerbOwner directOwner = verbTracker.directOwner;
+				_003Cce_003E5__2 = directOwner as CompEquippable;
+				if (_003Cce_003E5__2 == null)
 				{
-					if (this.verbs[i].state == VerbState.Bursting)
+					return false;
+				}
+				_003CownerThing_003E5__3 = _003Cce_003E5__2.parent;
+				_003Cverbs_003E5__4 = verbTracker.AllVerbs;
+				_003Ci_003E5__5 = 0;
+				goto IL_00c0;
+			}
+			case 1:
+				_003C_003E1__state = -1;
+				goto IL_00ae;
+			case 2:
+				{
+					_003C_003E1__state = -1;
+					break;
+				}
+				IL_00ae:
+				_003Ci_003E5__5++;
+				goto IL_00c0;
+				IL_00c0:
+				if (_003Ci_003E5__5 < _003Cverbs_003E5__4.Count)
+				{
+					Verb verb = _003Cverbs_003E5__4[_003Ci_003E5__5];
+					if (verb.verbProps.hasStandardCommand)
 					{
+						_003C_003E2__current = verbTracker.CreateVerbTargetCommand(_003CownerThing_003E5__3, verb);
+						_003C_003E1__state = 1;
 						return true;
 					}
+					goto IL_00ae;
 				}
-				return false;
+				if (!verbTracker.directOwner.Tools.NullOrEmpty() && _003Cce_003E5__2 != null && _003Cce_003E5__2.parent.def.IsMeleeWeapon)
+				{
+					_003C_003E2__current = verbTracker.CreateVerbTargetCommand(_003CownerThing_003E5__3, _003Cverbs_003E5__4.FirstOrDefault((Verb v) => v.verbProps.IsMeleeAttack));
+					_003C_003E1__state = 2;
+					return true;
+				}
+				break;
 			}
+			return false;
 		}
 
-		// Token: 0x060057D1 RID: 22481 RVA: 0x001C4B6E File Offset: 0x001C2D6E
-		public VerbTracker(IVerbOwner directOwner)
+		bool IEnumerator.MoveNext()
 		{
-			this.directOwner = directOwner;
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x060057D2 RID: 22482 RVA: 0x001C4B80 File Offset: 0x001C2D80
-		public void VerbsTick()
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			if (this.verbs == null)
-			{
-				return;
-			}
-			for (int i = 0; i < this.verbs.Count; i++)
-			{
-				this.verbs[i].VerbTick();
-			}
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x060057D3 RID: 22483 RVA: 0x001C4BBD File Offset: 0x001C2DBD
-		public IEnumerable<Command> GetVerbsCommands()
+		[DebuggerHidden]
+		IEnumerator<Command> IEnumerable<Command>.GetEnumerator()
 		{
-			IVerbOwner verbOwner = this.directOwner;
-			CompEquippable ce = verbOwner as CompEquippable;
-			if (ce == null)
+			_003CGetVerbsCommands_003Ed__10 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				yield break;
+				_003C_003E1__state = 0;
+				result = this;
 			}
-			Thing ownerThing = ce.parent;
-			List<Verb> verbs = this.AllVerbs;
-			int num;
-			for (int i = 0; i < verbs.Count; i = num + 1)
+			else
 			{
-				Verb verb = verbs[i];
-				if (verb.verbProps.hasStandardCommand)
+				result = new _003CGetVerbsCommands_003Ed__10(0)
 				{
-					yield return this.CreateVerbTargetCommand(ownerThing, verb);
-				}
-				num = i;
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
-			if (!this.directOwner.Tools.NullOrEmpty<Tool>() && ce != null && ce.parent.def.IsMeleeWeapon)
-			{
-				yield return this.CreateVerbTargetCommand(ownerThing, verbs.FirstOrDefault((Verb v) => v.verbProps.IsMeleeAttack));
-			}
-			yield break;
+			return result;
 		}
 
-		// Token: 0x060057D4 RID: 22484 RVA: 0x001C4BD0 File Offset: 0x001C2DD0
-		private Command_VerbTarget CreateVerbTargetCommand(Thing ownerThing, Verb verb)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			Command_VerbTarget command_VerbTarget = new Command_VerbTarget();
-			command_VerbTarget.defaultDesc = ownerThing.LabelCap + ": " + ownerThing.def.description.CapitalizeFirst();
-			command_VerbTarget.ownerThing = ownerThing;
-			command_VerbTarget.tutorTag = "VerbTarget";
-			command_VerbTarget.verb = verb;
-			if (verb.caster.Faction != Faction.OfPlayer && !DebugSettings.ShowDevGizmos)
-			{
-				command_VerbTarget.Disable("CannotOrderNonControlled".Translate());
-			}
-			else if (verb.CasterIsPawn)
-			{
-				string reason;
-				if (verb.CasterPawn.RaceProps.IsMechanoid && !MechanitorUtility.EverControllable(verb.CasterPawn) && !DebugSettings.ShowDevGizmos)
-				{
-					command_VerbTarget.Disable("CannotOrderNonControlled".Translate());
-				}
-				else if (verb.CasterPawn.WorkTagIsDisabled(WorkTags.Violent))
-				{
-					command_VerbTarget.Disable("IsIncapableOfViolence".Translate(verb.CasterPawn.LabelShort, verb.CasterPawn));
-				}
-				else if (!verb.CasterPawn.Drafted && !DebugSettings.ShowDevGizmos)
-				{
-					command_VerbTarget.Disable("IsNotDrafted".Translate(verb.CasterPawn.LabelShort, verb.CasterPawn));
-				}
-				else if (verb is Verb_LaunchProjectile)
-				{
-					Apparel apparel = verb.FirstApparelPreventingShooting();
-					if (apparel != null)
-					{
-						command_VerbTarget.Disable("ApparelPreventsShooting".Translate(verb.CasterPawn.Named("PAWN"), apparel.Named("APPAREL")).CapitalizeFirst());
-					}
-				}
-				else if (EquipmentUtility.RolePreventsFromUsing(verb.CasterPawn, verb.EquipmentSource, out reason))
-				{
-					command_VerbTarget.Disable(reason);
-				}
-			}
-			CompUniqueWeapon compUniqueWeapon;
-			if ((!verb.EquipmentSource.TryGetComp(out compUniqueWeapon) || !compUniqueWeapon.IgnoreAccuracyMaluses) && verb.caster.Spawned && verb.caster.Map.weatherManager.CurWeatherMaxRangeCap >= 0f)
-			{
-				command_VerbTarget.defaultDescPostfix = "\n\n" + ("WeatherMaxRangeCap".Translate() + ": " + verb.caster.Map.weatherManager.curWeather.LabelCap).Colorize(ColoredText.WarningColor);
-			}
-			return command_VerbTarget;
+			return ((IEnumerable<Command>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x060057D5 RID: 22485 RVA: 0x001C4E24 File Offset: 0x001C3024
-		public Verb GetVerb(VerbCategory category)
+	public IVerbOwner directOwner;
+
+	private List<Verb> verbs;
+
+	public List<Verb> AllVerbs
+	{
+		get
 		{
-			List<Verb> allVerbs = this.AllVerbs;
-			if (allVerbs != null)
+			if (verbs == null)
 			{
-				for (int i = 0; i < allVerbs.Count; i++)
+				InitVerbsFromZero();
+			}
+			return verbs;
+		}
+	}
+
+	public Verb PrimaryVerb
+	{
+		get
+		{
+			if (verbs == null)
+			{
+				InitVerbsFromZero();
+			}
+			for (int i = 0; i < verbs.Count; i++)
+			{
+				if (verbs[i].verbProps.isPrimary)
 				{
-					if (allVerbs[i].verbProps.category == category)
-					{
-						return allVerbs[i];
-					}
+					return verbs[i];
 				}
 			}
 			return null;
 		}
+	}
 
-		// Token: 0x060057D6 RID: 22486 RVA: 0x001C4E6C File Offset: 0x001C306C
-		public void ExposeData()
+	public bool AnyVerbBursting
+	{
+		get
 		{
-			Scribe_Collections.Look<Verb>(ref this.verbs, "verbs", LookMode.Deep, Array.Empty<object>());
-			if (Scribe.mode == LoadSaveMode.ResolvingCrossRefs && this.verbs != null)
+			for (int i = 0; i < verbs.Count; i++)
 			{
-				if (this.verbs.RemoveAll((Verb x) => x == null) != 0)
+				if (verbs[i].state == VerbState.Bursting)
 				{
-					Log.Error("Some verbs were null after loading. directOwner=" + this.directOwner.ToStringSafe<IVerbOwner>());
-				}
-				List<Verb> sources = this.verbs;
-				this.verbs = new List<Verb>();
-				this.InitVerbs(delegate(Type type, string id)
-				{
-					Verb verb = sources.FirstOrDefault((Verb v) => v.loadID == id && v.GetType() == type);
-					if (verb == null)
-					{
-						Log.Warning(string.Format("Replaced verb {0}/{1}; may have been changed through a version update or a mod change", type, id));
-						verb = (Verb)Activator.CreateInstance(type);
-					}
-					this.verbs.Add(verb);
-					return verb;
-				});
-			}
-		}
-
-		// Token: 0x060057D7 RID: 22487 RVA: 0x001C4F1B File Offset: 0x001C311B
-		public void InitVerbsFromZero()
-		{
-			this.verbs = new List<Verb>();
-			this.InitVerbs(delegate(Type type, string id)
-			{
-				Verb verb = (Verb)Activator.CreateInstance(type);
-				this.verbs.Add(verb);
-				return verb;
-			});
-		}
-
-		// Token: 0x060057D8 RID: 22488 RVA: 0x001C4F3C File Offset: 0x001C313C
-		private void InitVerbs(Func<Type, string, Verb> creator)
-		{
-			List<VerbProperties> verbProperties = this.directOwner.VerbProperties;
-			if (verbProperties != null)
-			{
-				for (int i = 0; i < verbProperties.Count; i++)
-				{
-					try
-					{
-						VerbProperties verbProperties2 = verbProperties[i];
-						string text = Verb.CalculateUniqueLoadID(this.directOwner, i);
-						this.InitVerb(creator(verbProperties2.verbClass, text), verbProperties2, null, null, text);
-					}
-					catch (Exception ex)
-					{
-						string str = "Could not instantiate Verb (directOwner=";
-						string str2 = this.directOwner.ToStringSafe<IVerbOwner>();
-						string str3 = "): ";
-						Exception ex2 = ex;
-						Log.Error(str + str2 + str3 + ((ex2 != null) ? ex2.ToString() : null));
-					}
+					return true;
 				}
 			}
-			List<Tool> tools = this.directOwner.Tools;
-			if (tools != null)
+			return false;
+		}
+	}
+
+	public VerbTracker(IVerbOwner directOwner)
+	{
+		this.directOwner = directOwner;
+	}
+
+	public void VerbsTick()
+	{
+		if (verbs != null)
+		{
+			for (int i = 0; i < verbs.Count; i++)
 			{
-				for (int j = 0; j < tools.Count; j++)
+				verbs[i].VerbTick();
+			}
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CGetVerbsCommands_003Ed__10))]
+	public IEnumerable<Command> GetVerbsCommands()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetVerbsCommands_003Ed__10(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	private Command_VerbTarget CreateVerbTargetCommand(Thing ownerThing, Verb verb)
+	{
+		Command_VerbTarget command_VerbTarget = new Command_VerbTarget();
+		command_VerbTarget.defaultDesc = ownerThing.LabelCap + ": " + ownerThing.def.description.CapitalizeFirst();
+		command_VerbTarget.ownerThing = ownerThing;
+		command_VerbTarget.tutorTag = "VerbTarget";
+		command_VerbTarget.verb = verb;
+		if (verb.caster.Faction != Faction.OfPlayer && !DebugSettings.ShowDevGizmos)
+		{
+			command_VerbTarget.Disable("CannotOrderNonControlled".Translate());
+		}
+		else if (verb.CasterIsPawn)
+		{
+			string reason;
+			if (verb.CasterPawn.RaceProps.IsMechanoid && !MechanitorUtility.EverControllable(verb.CasterPawn) && !DebugSettings.ShowDevGizmos)
+			{
+				command_VerbTarget.Disable("CannotOrderNonControlled".Translate());
+			}
+			else if (verb.CasterPawn.WorkTagIsDisabled(WorkTags.Violent))
+			{
+				command_VerbTarget.Disable("IsIncapableOfViolence".Translate(verb.CasterPawn.LabelShort, verb.CasterPawn));
+			}
+			else if (!verb.CasterPawn.Drafted && !DebugSettings.ShowDevGizmos)
+			{
+				command_VerbTarget.Disable("IsNotDrafted".Translate(verb.CasterPawn.LabelShort, verb.CasterPawn));
+			}
+			else if (verb is Verb_LaunchProjectile)
+			{
+				Apparel apparel = verb.FirstApparelPreventingShooting();
+				if (apparel != null)
 				{
-					Tool tool = tools[j];
-					foreach (ManeuverDef maneuverDef in tool.Maneuvers)
-					{
-						try
-						{
-							VerbProperties verb = maneuverDef.verb;
-							string text2 = Verb.CalculateUniqueLoadID(this.directOwner, tool, maneuverDef);
-							this.InitVerb(creator(verb.verbClass, text2), verb, tool, maneuverDef, text2);
-						}
-						catch (Exception ex3)
-						{
-							string str4 = "Could not instantiate Verb (directOwner=";
-							string str5 = this.directOwner.ToStringSafe<IVerbOwner>();
-							string str6 = "): ";
-							Exception ex4 = ex3;
-							Log.Error(str4 + str5 + str6 + ((ex4 != null) ? ex4.ToString() : null));
-						}
-					}
+					command_VerbTarget.Disable("ApparelPreventsShooting".Translate(verb.CasterPawn.Named("PAWN"), apparel.Named("APPAREL")).CapitalizeFirst());
+				}
+			}
+			else if (EquipmentUtility.RolePreventsFromUsing(verb.CasterPawn, verb.EquipmentSource, out reason))
+			{
+				command_VerbTarget.Disable(reason);
+			}
+		}
+		if ((!verb.EquipmentSource.TryGetComp<CompUniqueWeapon>(out var comp) || !comp.IgnoreAccuracyMaluses) && verb.caster.Spawned && verb.caster.Map.weatherManager.CurWeatherMaxRangeCap >= 0f)
+		{
+			command_VerbTarget.defaultDescPostfix = "\n\n" + ("WeatherMaxRangeCap".Translate() + ": " + verb.caster.Map.weatherManager.curWeather.LabelCap).Colorize(ColoredText.WarningColor);
+		}
+		return command_VerbTarget;
+	}
+
+	public Verb GetVerb(VerbCategory category)
+	{
+		List<Verb> allVerbs = AllVerbs;
+		if (allVerbs != null)
+		{
+			for (int i = 0; i < allVerbs.Count; i++)
+			{
+				if (allVerbs[i].verbProps.category == category)
+				{
+					return allVerbs[i];
 				}
 			}
 		}
+		return null;
+	}
 
-		// Token: 0x060057D9 RID: 22489 RVA: 0x001C50C8 File Offset: 0x001C32C8
-		private void InitVerb(Verb verb, VerbProperties properties, Tool tool, ManeuverDef maneuver, string id)
+	public void ExposeData()
+	{
+		Scribe_Collections.Look(ref verbs, "verbs", LookMode.Deep);
+		if (Scribe.mode != LoadSaveMode.ResolvingCrossRefs || verbs == null)
 		{
-			verb.loadID = id;
-			verb.verbProps = properties;
-			verb.verbTracker = this;
-			verb.tool = tool;
-			verb.maneuver = maneuver;
-			verb.caster = this.directOwner.ConstantCaster;
+			return;
 		}
-
-		// Token: 0x060057DA RID: 22490 RVA: 0x001C5100 File Offset: 0x001C3300
-		public void VerbsNeedReinitOnLoad()
+		if (verbs.RemoveAll((Verb x) => x == null) != 0)
 		{
-			this.verbs = null;
+			Log.Error("Some verbs were null after loading. directOwner=" + directOwner.ToStringSafe());
 		}
+		List<Verb> sources = verbs;
+		verbs = new List<Verb>();
+		InitVerbs(delegate(Type type, string id)
+		{
+			Verb verb = sources.FirstOrDefault((Verb v) => v.loadID == id && v.GetType() == type);
+			if (verb == null)
+			{
+				Log.Warning($"Replaced verb {type}/{id}; may have been changed through a version update or a mod change");
+				verb = (Verb)Activator.CreateInstance(type);
+			}
+			verbs.Add(verb);
+			return verb;
+		});
+	}
 
-		// Token: 0x04003FE5 RID: 16357
-		public IVerbOwner directOwner;
+	public void InitVerbsFromZero()
+	{
+		verbs = new List<Verb>();
+		InitVerbs(delegate(Type type, string id)
+		{
+			Verb verb = (Verb)Activator.CreateInstance(type);
+			verbs.Add(verb);
+			return verb;
+		});
+	}
 
-		// Token: 0x04003FE6 RID: 16358
-		private List<Verb> verbs;
+	private void InitVerbs(Func<Type, string, Verb> creator)
+	{
+		List<VerbProperties> verbProperties = directOwner.VerbProperties;
+		if (verbProperties != null)
+		{
+			for (int i = 0; i < verbProperties.Count; i++)
+			{
+				try
+				{
+					VerbProperties verbProperties2 = verbProperties[i];
+					string text = Verb.CalculateUniqueLoadID(directOwner, i);
+					InitVerb(creator(verbProperties2.verbClass, text), verbProperties2, null, null, text);
+				}
+				catch (Exception ex)
+				{
+					Log.Error("Could not instantiate Verb (directOwner=" + directOwner.ToStringSafe() + "): " + ex);
+				}
+			}
+		}
+		List<Tool> tools = directOwner.Tools;
+		if (tools == null)
+		{
+			return;
+		}
+		for (int j = 0; j < tools.Count; j++)
+		{
+			Tool tool = tools[j];
+			foreach (ManeuverDef maneuver in tool.Maneuvers)
+			{
+				try
+				{
+					VerbProperties verb = maneuver.verb;
+					string text2 = Verb.CalculateUniqueLoadID(directOwner, tool, maneuver);
+					InitVerb(creator(verb.verbClass, text2), verb, tool, maneuver, text2);
+				}
+				catch (Exception ex2)
+				{
+					Log.Error("Could not instantiate Verb (directOwner=" + directOwner.ToStringSafe() + "): " + ex2);
+				}
+			}
+		}
+	}
+
+	private void InitVerb(Verb verb, VerbProperties properties, Tool tool, ManeuverDef maneuver, string id)
+	{
+		verb.loadID = id;
+		verb.verbProps = properties;
+		verb.verbTracker = this;
+		verb.tool = tool;
+		verb.maneuver = maneuver;
+		verb.caster = directOwner.ConstantCaster;
+	}
+
+	public void VerbsNeedReinitOnLoad()
+	{
+		verbs = null;
 	}
 }

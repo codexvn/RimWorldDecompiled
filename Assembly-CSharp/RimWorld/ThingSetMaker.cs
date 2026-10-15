@@ -1,185 +1,392 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public abstract class ThingSetMaker
 {
-	// Token: 0x02001B0B RID: 6923
-	public abstract class ThingSetMaker
+	[CompilerGenerated]
+	private sealed class _003CAllGeneratableThingsDebug_003Ed__9 : IEnumerable<ThingDef>, IEnumerable, IEnumerator<ThingDef>, IEnumerator, IDisposable
 	{
-		// Token: 0x06009A88 RID: 39560 RVA: 0x002CEAF8 File Offset: 0x002CCCF8
-		public List<Thing> Generate()
+		private int _003C_003E1__state;
+
+		private ThingDef _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public ThingSetMaker _003C_003E4__this;
+
+		private ThingSetMakerParams parms;
+
+		public ThingSetMakerParams _003C_003E3__parms;
+
+		private IEnumerator<ThingDef> _003C_003E7__wrap1;
+
+		ThingDef IEnumerator<ThingDef>.Current
 		{
-			return this.Generate(default(ThingSetMakerParams));
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x06009A89 RID: 39561 RVA: 0x002CEB14 File Offset: 0x002CCD14
-		public List<Thing> Generate(ThingSetMakerParams parms)
+		object IEnumerator.Current
 		{
-			List<Thing> list = new List<Thing>();
-			ThingSetMaker.thingsBeingGeneratedNow.Add(list);
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CAllGeneratableThingsDebug_003Ed__9(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
 			try
 			{
-				ThingSetMakerParams parms2 = this.ApplyFixedParams(parms);
-				this.Generate(parms2, list);
-				this.PostProcess(list);
-			}
-			catch (Exception ex)
-			{
-				string str = "Exception while generating thing set: ";
-				Exception ex2 = ex;
-				Log.Error(str + ((ex2 != null) ? ex2.ToString() : null));
-				for (int i = list.Count - 1; i >= 0; i--)
+				int num = _003C_003E1__state;
+				ThingSetMaker thingSetMaker = _003C_003E4__this;
+				switch (num)
 				{
-					list[i].Destroy(DestroyMode.Vanish);
-					list.RemoveAt(i);
-				}
-			}
-			finally
-			{
-				ThingSetMaker.thingsBeingGeneratedNow.Remove(list);
-			}
-			return list;
-		}
-
-		// Token: 0x06009A8A RID: 39562 RVA: 0x002CEBBC File Offset: 0x002CCDBC
-		public bool CanGenerate(ThingSetMakerParams parms)
-		{
-			ThingSetMakerParams parms2 = this.ApplyFixedParams(parms);
-			return this.CanGenerateSub(parms2);
-		}
-
-		// Token: 0x06009A8B RID: 39563 RVA: 0x000028E7 File Offset: 0x00000AE7
-		protected virtual bool CanGenerateSub(ThingSetMakerParams parms)
-		{
-			return true;
-		}
-
-		// Token: 0x06009A8C RID: 39564
-		protected abstract void Generate(ThingSetMakerParams parms, List<Thing> outThings);
-
-		// Token: 0x06009A8D RID: 39565 RVA: 0x002CEBD8 File Offset: 0x002CCDD8
-		public IEnumerable<ThingDef> AllGeneratableThingsDebug()
-		{
-			return this.AllGeneratableThingsDebug(default(ThingSetMakerParams));
-		}
-
-		// Token: 0x06009A8E RID: 39566 RVA: 0x002CEBF4 File Offset: 0x002CCDF4
-		public IEnumerable<ThingDef> AllGeneratableThingsDebug(ThingSetMakerParams parms)
-		{
-			if (!this.CanGenerate(parms))
-			{
-				yield break;
-			}
-			ThingSetMakerParams parms2 = this.ApplyFixedParams(parms);
-			foreach (ThingDef thingDef in this.AllGeneratableThingsDebugSub(parms2).Distinct<ThingDef>())
-			{
-				yield return thingDef;
-			}
-			IEnumerator<ThingDef> enumerator = null;
-			yield break;
-			yield break;
-		}
-
-		// Token: 0x06009A8F RID: 39567 RVA: 0x0004FC72 File Offset: 0x0004DE72
-		public virtual float ExtraSelectionWeightFactor(ThingSetMakerParams parms)
-		{
-			return 1f;
-		}
-
-		// Token: 0x06009A90 RID: 39568
-		protected abstract IEnumerable<ThingDef> AllGeneratableThingsDebugSub(ThingSetMakerParams parms);
-
-		// Token: 0x06009A91 RID: 39569 RVA: 0x002CEC0C File Offset: 0x002CCE0C
-		private void PostProcess(List<Thing> things)
-		{
-			if (things.RemoveAll((Thing x) => x == null) != 0)
-			{
-				Type type = base.GetType();
-				Log.Error(((type != null) ? type.ToString() : null) + " generated null things.");
-			}
-			this.ChangeDeadPawnsToTheirCorpses(things);
-			for (int i = things.Count - 1; i >= 0; i--)
-			{
-				if (things[i].Destroyed)
+				default:
+					return false;
+				case 0:
 				{
-					Type type2 = base.GetType();
-					Log.Error(((type2 != null) ? type2.ToString() : null) + " generated destroyed thing " + things[i].ToStringSafe<Thing>());
-					things.RemoveAt(i);
+					_003C_003E1__state = -1;
+					if (!thingSetMaker.CanGenerate(parms))
+					{
+						return false;
+					}
+					ThingSetMakerParams thingSetMakerParams = thingSetMaker.ApplyFixedParams(parms);
+					_003C_003E7__wrap1 = thingSetMaker.AllGeneratableThingsDebugSub(thingSetMakerParams).Distinct().GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
 				}
-				else if (things[i].stackCount <= 0)
+				case 1:
+					_003C_003E1__state = -3;
+					break;
+				}
+				if (_003C_003E7__wrap1.MoveNext())
 				{
-					string[] array = new string[5];
-					int num = 0;
-					Type type3 = base.GetType();
-					array[num] = ((type3 != null) ? type3.ToString() : null);
-					array[1] = " generated ";
-					array[2] = things[i].ToStringSafe<Thing>();
-					array[3] = " with stackCount=";
-					array[4] = things[i].stackCount.ToString();
-					Log.Error(string.Concat(array));
-					things.RemoveAt(i);
+					ThingDef current = _003C_003E7__wrap1.Current;
+					_003C_003E2__current = current;
+					_003C_003E1__state = 1;
+					return true;
 				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = null;
+				return false;
 			}
-			this.Minify(things);
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
 		}
 
-		// Token: 0x06009A92 RID: 39570 RVA: 0x002CED3C File Offset: 0x002CCF3C
-		private void Minify(List<Thing> things)
+		bool IEnumerator.MoveNext()
 		{
-			for (int i = 0; i < things.Count; i++)
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				if (things[i].def.Minifiable)
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<ThingDef> IEnumerable<ThingDef>.GetEnumerator()
+		{
+			_003CAllGeneratableThingsDebug_003Ed__9 _003CAllGeneratableThingsDebug_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CAllGeneratableThingsDebug_003Ed__ = this;
+			}
+			else
+			{
+				_003CAllGeneratableThingsDebug_003Ed__ = new _003CAllGeneratableThingsDebug_003Ed__9(0)
 				{
-					int stackCount = things[i].stackCount;
-					things[i].stackCount = 1;
-					MinifiedThing minifiedThing = things[i].MakeMinified(DestroyMode.Vanish);
-					minifiedThing.stackCount = stackCount;
-					things[i] = minifiedThing;
-				}
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
+			_003CAllGeneratableThingsDebug_003Ed__.parms = _003C_003E3__parms;
+			return _003CAllGeneratableThingsDebug_003Ed__;
 		}
 
-		// Token: 0x06009A93 RID: 39571 RVA: 0x002CEDA4 File Offset: 0x002CCFA4
-		private void ChangeDeadPawnsToTheirCorpses(List<Thing> things)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			for (int i = 0; i < things.Count; i++)
+			return ((IEnumerable<ThingDef>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__17 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		string IEnumerator<string>.Current
+		{
+			[DebuggerHidden]
+			get
 			{
-				if (things[i].ParentHolder is Corpse)
-				{
-					things[i] = (Corpse)things[i].ParentHolder;
-				}
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06009A94 RID: 39572 RVA: 0x002CEDF0 File Offset: 0x002CCFF0
-		private ThingSetMakerParams ApplyFixedParams(ThingSetMakerParams parms)
+		object IEnumerator.Current
 		{
-			ThingSetMakerParams result = this.fixedParams;
-			Gen.ReplaceNullFields<ThingSetMakerParams>(ref result, parms);
-			return result;
-		}
-
-		// Token: 0x06009A95 RID: 39573 RVA: 0x002CEE0D File Offset: 0x002CD00D
-		public virtual void ResolveReferences()
-		{
-			if (this.fixedParams.filter != null)
+			[DebuggerHidden]
+			get
 			{
-				this.fixedParams.filter.ResolveReferences();
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06009A96 RID: 39574 RVA: 0x002CEE2C File Offset: 0x002CD02C
-		public virtual IEnumerable<string> ConfigErrors()
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__17(int _003C_003E1__state)
 		{
-			yield break;
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x04006A9A RID: 27290
-		public ThingSetMakerParams fixedParams;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
 
-		// Token: 0x04006A9B RID: 27291
-		public static List<List<Thing>> thingsBeingGeneratedNow = new List<List<Thing>>();
+		private bool MoveNext()
+		{
+			if (_003C_003E1__state != 0)
+			{
+				return false;
+			}
+			_003C_003E1__state = -1;
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				return this;
+			}
+			return new _003CConfigErrors_003Ed__17(0);
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	public ThingSetMakerParams fixedParams;
+
+	public static List<List<Thing>> thingsBeingGeneratedNow;
+
+	static ThingSetMaker()
+	{
+		thingsBeingGeneratedNow = new List<List<Thing>>();
+	}
+
+	public List<Thing> Generate()
+	{
+		return Generate(default(ThingSetMakerParams));
+	}
+
+	public List<Thing> Generate(ThingSetMakerParams parms)
+	{
+		List<Thing> list = new List<Thing>();
+		thingsBeingGeneratedNow.Add(list);
+		try
+		{
+			ThingSetMakerParams parms2 = ApplyFixedParams(parms);
+			Generate(parms2, list);
+			PostProcess(list);
+		}
+		catch (Exception ex)
+		{
+			Log.Error("Exception while generating thing set: " + ex);
+			for (int num = list.Count - 1; num >= 0; num--)
+			{
+				list[num].Destroy();
+				list.RemoveAt(num);
+			}
+		}
+		finally
+		{
+			thingsBeingGeneratedNow.Remove(list);
+		}
+		return list;
+	}
+
+	public bool CanGenerate(ThingSetMakerParams parms)
+	{
+		ThingSetMakerParams parms2 = ApplyFixedParams(parms);
+		return CanGenerateSub(parms2);
+	}
+
+	protected virtual bool CanGenerateSub(ThingSetMakerParams parms)
+	{
+		return true;
+	}
+
+	protected abstract void Generate(ThingSetMakerParams parms, List<Thing> outThings);
+
+	public IEnumerable<ThingDef> AllGeneratableThingsDebug()
+	{
+		return AllGeneratableThingsDebug(default(ThingSetMakerParams));
+	}
+
+	[IteratorStateMachine(typeof(_003CAllGeneratableThingsDebug_003Ed__9))]
+	public IEnumerable<ThingDef> AllGeneratableThingsDebug(ThingSetMakerParams parms)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CAllGeneratableThingsDebug_003Ed__9(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__parms = parms
+		};
+	}
+
+	public virtual float ExtraSelectionWeightFactor(ThingSetMakerParams parms)
+	{
+		return 1f;
+	}
+
+	protected abstract IEnumerable<ThingDef> AllGeneratableThingsDebugSub(ThingSetMakerParams parms);
+
+	private void PostProcess(List<Thing> things)
+	{
+		if (things.RemoveAll((Thing x) => x == null) != 0)
+		{
+			Log.Error(GetType()?.ToString() + " generated null things.");
+		}
+		ChangeDeadPawnsToTheirCorpses(things);
+		for (int num = things.Count - 1; num >= 0; num--)
+		{
+			if (things[num].Destroyed)
+			{
+				Log.Error(GetType()?.ToString() + " generated destroyed thing " + things[num].ToStringSafe());
+				things.RemoveAt(num);
+			}
+			else if (things[num].stackCount <= 0)
+			{
+				Log.Error(GetType()?.ToString() + " generated " + things[num].ToStringSafe() + " with stackCount=" + things[num].stackCount);
+				things.RemoveAt(num);
+			}
+		}
+		Minify(things);
+	}
+
+	private void Minify(List<Thing> things)
+	{
+		for (int i = 0; i < things.Count; i++)
+		{
+			if (things[i].def.Minifiable)
+			{
+				int stackCount = things[i].stackCount;
+				things[i].stackCount = 1;
+				MinifiedThing minifiedThing = things[i].MakeMinified();
+				minifiedThing.stackCount = stackCount;
+				things[i] = minifiedThing;
+			}
+		}
+	}
+
+	private void ChangeDeadPawnsToTheirCorpses(List<Thing> things)
+	{
+		for (int i = 0; i < things.Count; i++)
+		{
+			if (things[i].ParentHolder is Corpse)
+			{
+				things[i] = (Corpse)things[i].ParentHolder;
+			}
+		}
+	}
+
+	private ThingSetMakerParams ApplyFixedParams(ThingSetMakerParams parms)
+	{
+		ThingSetMakerParams replaceIn = fixedParams;
+		Gen.ReplaceNullFields(ref replaceIn, parms);
+		return replaceIn;
+	}
+
+	public virtual void ResolveReferences()
+	{
+		if (fixedParams.filter != null)
+		{
+			fixedParams.filter.ResolveReferences();
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__17))]
+	public virtual IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__17(-2);
 	}
 }

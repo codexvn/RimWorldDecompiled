@@ -1,104 +1,235 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class TrainableDef : Def
 {
-	// Token: 0x02001B16 RID: 6934
-	public class TrainableDef : Def
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__16 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x170017D2 RID: 6098
-		// (get) Token: 0x06009AE9 RID: 39657 RVA: 0x002CFCCB File Offset: 0x002CDECB
-		public Texture2D Icon
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public TrainableDef _003C_003E4__this;
+
+		private IEnumerator<string> _003C_003E7__wrap1;
+
+		string IEnumerator<string>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.iconTex == null)
-				{
-					this.iconTex = ContentFinder<Texture2D>.Get(this.icon, true);
-				}
-				return this.iconTex;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06009AEA RID: 39658 RVA: 0x002CFCF4 File Offset: 0x002CDEF4
-		public bool MatchesTag(string tag)
+		object IEnumerator.Current
 		{
-			if (tag == this.defName)
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__16(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				TrainableDef trainableDef = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((Def)trainableDef).ConfigErrors().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_006f:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (trainableDef.difficulty < 0f)
+					{
+						_003C_003E2__current = "difficulty not set";
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__16 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__16(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	public float difficulty = -1f;
+
+	public float minBodySize;
+
+	public List<TrainableDef> prerequisites;
+
+	[NoTranslate]
+	public List<string> tags = new List<string>();
+
+	public bool defaultTrainable;
+
+	public TrainabilityDef requiredTrainability;
+
+	public int steps = 1;
+
+	public float listPriority;
+
+	[NoTranslate]
+	public string icon;
+
+	public bool specialTrainable;
+
+	[Obsolete]
+	public AbilityDef enablesAbility;
+
+	[Unsaved(false)]
+	public int indent;
+
+	[Unsaved(false)]
+	private Texture2D iconTex;
+
+	public Texture2D Icon
+	{
+		get
+		{
+			if (iconTex == null)
+			{
+				iconTex = ContentFinder<Texture2D>.Get(icon);
+			}
+			return iconTex;
+		}
+	}
+
+	public bool MatchesTag(string tag)
+	{
+		if (tag == defName)
+		{
+			return true;
+		}
+		foreach (string tag2 in tags)
+		{
+			if (tag2 == tag)
 			{
 				return true;
 			}
-			using (List<string>.Enumerator enumerator = this.tags.GetEnumerator())
-			{
-				while (enumerator.MoveNext())
-				{
-					if (enumerator.Current == tag)
-					{
-						return true;
-					}
-				}
-			}
-			return false;
 		}
+		return false;
+	}
 
-		// Token: 0x06009AEB RID: 39659 RVA: 0x002CFD60 File Offset: 0x002CDF60
-		public override IEnumerable<string> ConfigErrors()
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__16))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__16(-2)
 		{
-			foreach (string text in base.ConfigErrors())
-			{
-				yield return text;
-			}
-			IEnumerator<string> enumerator = null;
-			if (this.difficulty < 0f)
-			{
-				yield return "difficulty not set";
-			}
-			yield break;
-			yield break;
-		}
-
-		// Token: 0x04006B04 RID: 27396
-		public float difficulty = -1f;
-
-		// Token: 0x04006B05 RID: 27397
-		public float minBodySize;
-
-		// Token: 0x04006B06 RID: 27398
-		public List<TrainableDef> prerequisites;
-
-		// Token: 0x04006B07 RID: 27399
-		[NoTranslate]
-		public List<string> tags = new List<string>();
-
-		// Token: 0x04006B08 RID: 27400
-		public bool defaultTrainable;
-
-		// Token: 0x04006B09 RID: 27401
-		public TrainabilityDef requiredTrainability;
-
-		// Token: 0x04006B0A RID: 27402
-		public int steps = 1;
-
-		// Token: 0x04006B0B RID: 27403
-		public float listPriority;
-
-		// Token: 0x04006B0C RID: 27404
-		[NoTranslate]
-		public string icon;
-
-		// Token: 0x04006B0D RID: 27405
-		public bool specialTrainable;
-
-		// Token: 0x04006B0E RID: 27406
-		public AbilityDef enablesAbility;
-
-		// Token: 0x04006B0F RID: 27407
-		[Unsaved(false)]
-		public int indent;
-
-		// Token: 0x04006B10 RID: 27408
-		[Unsaved(false)]
-		private Texture2D iconTex;
+			_003C_003E4__this = this
+		};
 	}
 }

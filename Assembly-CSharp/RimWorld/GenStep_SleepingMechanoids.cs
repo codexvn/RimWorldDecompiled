@@ -1,107 +1,86 @@
-﻿using System;
 using System.Collections.Generic;
-using RimWorld.Planet;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class GenStep_SleepingMechanoids : GenStep
 {
-	// Token: 0x02002081 RID: 8321
-	public class GenStep_SleepingMechanoids : GenStep
+	public FloatRange defaultPointsRange = new FloatRange(340f, 1000f);
+
+	public override int SeedPart => 341176078;
+
+	public static void SendMechanoidsToSleepImmediately(List<Pawn> spawnedMechanoids)
 	{
-		// Token: 0x17001BDA RID: 7130
-		// (get) Token: 0x0600B661 RID: 46689 RVA: 0x00345501 File Offset: 0x00343701
-		public override int SeedPart
+		for (int i = 0; i < spawnedMechanoids.Count; i++)
 		{
-			get
+			spawnedMechanoids[i].jobs.EndCurrentJob(JobCondition.InterruptForced);
+			JobDriver curDriver = spawnedMechanoids[i].jobs.curDriver;
+			if (curDriver != null)
 			{
-				return 341176078;
+				curDriver.asleep = true;
+			}
+			CompCanBeDormant comp = spawnedMechanoids[i].GetComp<CompCanBeDormant>();
+			if (comp != null)
+			{
+				comp.ToSleep();
+			}
+			else
+			{
+				Log.ErrorOnce("Tried spawning sleeping mechanoid " + spawnedMechanoids[i]?.ToString() + " without CompCanBeDormant!", 0x12EA9A79 ^ spawnedMechanoids[i].def.defName.GetHashCode());
 			}
 		}
+	}
 
-		// Token: 0x0600B662 RID: 46690 RVA: 0x00346660 File Offset: 0x00344860
-		public static void SendMechanoidsToSleepImmediately(List<Pawn> spawnedMechanoids)
+	public override void Generate(Map map, GenStepParams parms)
+	{
+		if (!SiteGenStepUtility.TryFindRootToSpawnAroundRectOfInterest(out var rectToDefend, out var singleCellToSpawnNear, map))
 		{
-			for (int i = 0; i < spawnedMechanoids.Count; i++)
+			return;
+		}
+		List<Pawn> list = new List<Pawn>();
+		foreach (Pawn item in GeneratePawns(parms, map))
+		{
+			if (!SiteGenStepUtility.TryFindSpawnCellAroundOrNear(rectToDefend, singleCellToSpawnNear, map, out var spawnCell))
 			{
-				spawnedMechanoids[i].jobs.EndCurrentJob(JobCondition.InterruptForced, true, true);
-				JobDriver curDriver = spawnedMechanoids[i].jobs.curDriver;
-				if (curDriver != null)
-				{
-					curDriver.asleep = true;
-				}
-				CompCanBeDormant comp = spawnedMechanoids[i].GetComp<CompCanBeDormant>();
-				if (comp != null)
-				{
-					comp.ToSleep();
-				}
-				else
-				{
-					string str = "Tried spawning sleeping mechanoid ";
-					Pawn pawn = spawnedMechanoids[i];
-					Log.ErrorOnce(str + ((pawn != null) ? pawn.ToString() : null) + " without CompCanBeDormant!", 317364857 ^ spawnedMechanoids[i].def.defName.GetHashCode());
-				}
+				Find.WorldPawns.PassToWorld(item);
+				break;
+			}
+			GenSpawn.Spawn(item, spawnCell, map);
+			list.Add(item);
+		}
+		if (!list.Any())
+		{
+			return;
+		}
+		bool @bool = Rand.Bool;
+		foreach (Pawn item2 in list)
+		{
+			CompWakeUpDormant comp = item2.GetComp<CompWakeUpDormant>();
+			if (comp != null)
+			{
+				comp.wakeUpIfTargetClose = @bool;
 			}
 		}
+		LordMaker.MakeNewLord(Faction.OfMechanoids, new LordJob_SleepThenAssaultColony(Faction.OfMechanoids), map, list);
+		SendMechanoidsToSleepImmediately(list);
+	}
 
-		// Token: 0x0600B663 RID: 46691 RVA: 0x00346710 File Offset: 0x00344910
-		public override void Generate(Map map, GenStepParams parms)
+	private IEnumerable<Pawn> GeneratePawns(GenStepParams parms, Map map)
+	{
+		float points = ((parms.sitePart != null) ? parms.sitePart.parms.threatPoints : defaultPointsRange.RandomInRange);
+		PawnGroupMakerParms pawnGroupMakerParms = new PawnGroupMakerParms
 		{
-			CellRect around;
-			IntVec3 near;
-			if (!SiteGenStepUtility.TryFindRootToSpawnAroundRectOfInterest(out around, out near, map))
-			{
-				return;
-			}
-			List<Pawn> list = new List<Pawn>();
-			foreach (Pawn pawn in this.GeneratePawns(parms, map))
-			{
-				IntVec3 loc;
-				if (!SiteGenStepUtility.TryFindSpawnCellAroundOrNear(around, near, map, out loc))
-				{
-					Find.WorldPawns.PassToWorld(pawn, PawnDiscardDecideMode.Decide);
-					break;
-				}
-				GenSpawn.Spawn(pawn, loc, map, WipeMode.Vanish);
-				list.Add(pawn);
-			}
-			if (!list.Any<Pawn>())
-			{
-				return;
-			}
-			bool @bool = Rand.Bool;
-			foreach (Pawn pawn2 in list)
-			{
-				CompWakeUpDormant comp = pawn2.GetComp<CompWakeUpDormant>();
-				if (comp != null)
-				{
-					comp.wakeUpIfTargetClose = @bool;
-				}
-			}
-			LordMaker.MakeNewLord(Faction.OfMechanoids, new LordJob_SleepThenAssaultColony(Faction.OfMechanoids, true), map, list);
-			GenStep_SleepingMechanoids.SendMechanoidsToSleepImmediately(list);
-		}
-
-		// Token: 0x0600B664 RID: 46692 RVA: 0x00346818 File Offset: 0x00344A18
-		private IEnumerable<Pawn> GeneratePawns(GenStepParams parms, Map map)
+			groupKind = PawnGroupKindDefOf.Combat,
+			tile = map.Tile,
+			faction = Faction.OfMechanoids,
+			points = points
+		};
+		if (parms.sitePart != null)
 		{
-			float points = (parms.sitePart != null) ? parms.sitePart.parms.threatPoints : this.defaultPointsRange.RandomInRange;
-			PawnGroupMakerParms pawnGroupMakerParms = new PawnGroupMakerParms
-			{
-				groupKind = PawnGroupKindDefOf.Combat,
-				tile = map.Tile,
-				faction = Faction.OfMechanoids,
-				points = points
-			};
-			if (parms.sitePart != null)
-			{
-				pawnGroupMakerParms.seed = new int?(SleepingMechanoidsSitePartUtility.GetPawnGroupMakerSeed(parms.sitePart.parms));
-			}
-			return PawnGroupMakerUtility.GeneratePawns(pawnGroupMakerParms, true);
+			pawnGroupMakerParms.seed = SleepingMechanoidsSitePartUtility.GetPawnGroupMakerSeed(parms.sitePart.parms);
 		}
-
-		// Token: 0x04007D21 RID: 32033
-		public FloatRange defaultPointsRange = new FloatRange(340f, 1000f);
+		return PawnGroupMakerUtility.GeneratePawns(pawnGroupMakerParms);
 	}
 }

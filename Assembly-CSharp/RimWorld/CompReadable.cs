@@ -1,157 +1,240 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompReadable : ThingComp
 {
-	// Token: 0x02001927 RID: 6439
-	public class CompReadable : ThingComp
+	[CompilerGenerated]
+	private sealed class _003CGetDoers_003Ed__9<T> : IEnumerable<T>, IEnumerable, IEnumerator<T>, IEnumerator, IDisposable where T : ReadingOutcomeDoer
 	{
-		// Token: 0x1700162B RID: 5675
-		// (get) Token: 0x0600926D RID: 37485 RVA: 0x002B240E File Offset: 0x002B060E
-		public IEnumerable<ReadingOutcomeDoer> Doers
+		private int _003C_003E1__state;
+
+		private T _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompReadable _003C_003E4__this;
+
+		private int _003Ci_003E5__2;
+
+		T IEnumerator<T>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.doers;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700162C RID: 5676
-		// (get) Token: 0x0600926E RID: 37486 RVA: 0x002B2416 File Offset: 0x002B0616
-		public CompProperties_Readable Props
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (CompProperties_Readable)this.props;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600926F RID: 37487 RVA: 0x002B2423 File Offset: 0x002B0623
-		public override void Initialize(CompProperties props)
+		[DebuggerHidden]
+		public _003CGetDoers_003Ed__9(int _003C_003E1__state)
 		{
-			base.Initialize(props);
-			this.InitializeDoers();
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x06009270 RID: 37488 RVA: 0x002B2434 File Offset: 0x002B0634
-		public override void PostPostMake()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			base.PostPostMake();
-			this.InitializeDoers();
-			if (this.doers == null)
-			{
-				return;
-			}
-			for (int i = 0; i < this.doers.Count; i++)
-			{
-				this.doers[i].PostMake();
-			}
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x06009271 RID: 37489 RVA: 0x002B2480 File Offset: 0x002B0680
-		public bool TryGetDoer<T>(out T doer) where T : ReadingOutcomeDoer
+		private bool MoveNext()
 		{
-			if (this.doers == null)
+			int num = _003C_003E1__state;
+			CompReadable compReadable = _003C_003E4__this;
+			if (num != 0)
 			{
-				doer = default(T);
+				if (num != 1)
+				{
+					return false;
+				}
+				_003C_003E1__state = -1;
+				goto IL_006c;
+			}
+			_003C_003E1__state = -1;
+			if (compReadable.doers == null)
+			{
 				return false;
 			}
-			for (int i = 0; i < this.doers.Count; i++)
+			_003Ci_003E5__2 = 0;
+			goto IL_007c;
+			IL_007c:
+			if (_003Ci_003E5__2 < compReadable.doers.Count)
 			{
-				T t = this.doers[i] as T;
-				if (t != null)
+				if (compReadable.doers[_003Ci_003E5__2] is T val)
 				{
-					doer = t;
+					_003C_003E2__current = val;
+					_003C_003E1__state = 1;
 					return true;
 				}
+				goto IL_006c;
 			}
-			doer = default(T);
+			return false;
+			IL_006c:
+			_003Ci_003E5__2++;
+			goto IL_007c;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<T> IEnumerable<T>.GetEnumerator()
+		{
+			_003CGetDoers_003Ed__9<T> result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CGetDoers_003Ed__9<T>(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<T>)this).GetEnumerator();
+		}
+	}
+
+	protected List<ReadingOutcomeDoer> doers;
+
+	public IEnumerable<ReadingOutcomeDoer> Doers => doers;
+
+	public CompProperties_Readable Props => (CompProperties_Readable)props;
+
+	public override void Initialize(CompProperties props)
+	{
+		base.Initialize(props);
+		InitializeDoers();
+	}
+
+	public override void PostPostMake()
+	{
+		base.PostPostMake();
+		InitializeDoers();
+		if (doers != null)
+		{
+			for (int i = 0; i < doers.Count; i++)
+			{
+				doers[i].PostMake();
+			}
+		}
+	}
+
+	public bool TryGetDoer<T>(out T doer) where T : ReadingOutcomeDoer
+	{
+		if (doers == null)
+		{
+			doer = null;
 			return false;
 		}
-
-		// Token: 0x06009272 RID: 37490 RVA: 0x002B24E4 File Offset: 0x002B06E4
-		public T GetDoer<T>() where T : ReadingOutcomeDoer
+		for (int i = 0; i < doers.Count; i++)
 		{
-			if (this.doers == null)
+			if (doers[i] is T val)
 			{
-				return default(T);
-			}
-			for (int i = 0; i < this.doers.Count; i++)
-			{
-				T t = this.doers[i] as T;
-				if (t != null)
-				{
-					return t;
-				}
-			}
-			return default(T);
-		}
-
-		// Token: 0x06009273 RID: 37491 RVA: 0x002B2543 File Offset: 0x002B0743
-		public IEnumerable<T> GetDoers<T>() where T : ReadingOutcomeDoer
-		{
-			if (this.doers == null)
-			{
-				yield break;
-			}
-			int num;
-			for (int i = 0; i < this.doers.Count; i = num + 1)
-			{
-				T t = this.doers[i] as T;
-				if (t != null)
-				{
-					yield return t;
-				}
-				num = i;
-			}
-			yield break;
-		}
-
-		// Token: 0x06009274 RID: 37492 RVA: 0x002B2554 File Offset: 0x002B0754
-		private void InitializeDoers()
-		{
-			if (this.Props.doers.Empty<ReadingOutcomeProperties>())
-			{
-				return;
-			}
-			this.doers = new List<ReadingOutcomeDoer>();
-			for (int i = 0; i < this.Props.doers.Count; i++)
-			{
-				ReadingOutcomeDoer readingOutcomeDoer = null;
-				ReadingOutcomeProperties readingOutcomeProperties = this.Props.doers[i];
-				try
-				{
-					readingOutcomeDoer = (ReadingOutcomeDoer)Activator.CreateInstance(readingOutcomeProperties.DoerClass);
-					this.doers.Add(readingOutcomeDoer);
-					readingOutcomeDoer.Initialize(this.parent, readingOutcomeProperties);
-				}
-				catch (Exception arg)
-				{
-					Log.Error(string.Format("Could not instantiate or initialize reading outcome doer ({0}): {1}", readingOutcomeProperties.DoerClass, arg));
-					this.doers.Remove(readingOutcomeDoer);
-				}
+				doer = val;
+				return true;
 			}
 		}
+		doer = null;
+		return false;
+	}
 
-		// Token: 0x06009275 RID: 37493 RVA: 0x002B2610 File Offset: 0x002B0810
-		public override void PostExposeData()
+	public T GetDoer<T>() where T : ReadingOutcomeDoer
+	{
+		if (doers == null)
 		{
-			if (Scribe.mode == LoadSaveMode.LoadingVars)
+			return null;
+		}
+		for (int i = 0; i < doers.Count; i++)
+		{
+			if (doers[i] is T result)
 			{
-				this.InitializeDoers();
-			}
-			if (this.doers == null)
-			{
-				return;
-			}
-			for (int i = 0; i < this.doers.Count; i++)
-			{
-				this.doers[i].PostExposeData();
+				return result;
 			}
 		}
+		return null;
+	}
 
-		// Token: 0x04005D7C RID: 23932
-		protected List<ReadingOutcomeDoer> doers;
+	[IteratorStateMachine(typeof(_003CGetDoers_003Ed__9<>))]
+	public IEnumerable<T> GetDoers<T>() where T : ReadingOutcomeDoer
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetDoers_003Ed__9<T>(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	private void InitializeDoers()
+	{
+		if (Props.doers.Empty())
+		{
+			return;
+		}
+		doers = new List<ReadingOutcomeDoer>();
+		for (int i = 0; i < Props.doers.Count; i++)
+		{
+			ReadingOutcomeDoer readingOutcomeDoer = null;
+			ReadingOutcomeProperties readingOutcomeProperties = Props.doers[i];
+			try
+			{
+				readingOutcomeDoer = (ReadingOutcomeDoer)Activator.CreateInstance(readingOutcomeProperties.DoerClass);
+				doers.Add(readingOutcomeDoer);
+				readingOutcomeDoer.Initialize(parent, readingOutcomeProperties);
+			}
+			catch (Exception value)
+			{
+				Log.Error($"Could not instantiate or initialize reading outcome doer ({readingOutcomeProperties.DoerClass}): {value}");
+				doers.Remove(readingOutcomeDoer);
+			}
+		}
+	}
+
+	public override void PostExposeData()
+	{
+		if (Scribe.mode == LoadSaveMode.LoadingVars)
+		{
+			InitializeDoers();
+		}
+		if (doers != null)
+		{
+			for (int i = 0; i < doers.Count; i++)
+			{
+				doers[i].PostExposeData();
+			}
+		}
 	}
 }

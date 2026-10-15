@@ -1,72 +1,170 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class StatPart_AgeOffset : StatPart
 {
-	// Token: 0x020036DF RID: 14047
-	public class StatPart_AgeOffset : StatPart
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__7 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x060137D7 RID: 79831 RVA: 0x005C95A3 File Offset: 0x005C77A3
-		private bool ActiveFor(Pawn pawn)
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public StatPart_AgeOffset _003C_003E4__this;
+
+		string IEnumerator<string>.Current
 		{
-			return pawn.ageTracker != null && (!this.humanlikeOnly || pawn.RaceProps.Humanlike);
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x060137D8 RID: 79832 RVA: 0x005C95C8 File Offset: 0x005C77C8
-		public override void TransformValue(StatRequest req, ref float val)
+		object IEnumerator.Current
 		{
-			if (req.HasThing)
+			[DebuggerHidden]
+			get
 			{
-				Pawn pawn = req.Thing as Pawn;
-				if (pawn != null && this.ActiveFor(pawn))
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__7(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			StatPart_AgeOffset statPart_AgeOffset = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (statPart_AgeOffset.curve == null)
 				{
-					val += this.AgeOffset(pawn);
+					_003C_003E2__current = "curve is null.";
+					_003C_003E1__state = 1;
+					return true;
 				}
+				break;
+			case 1:
+				_003C_003E1__state = -1;
+				break;
 			}
+			return false;
 		}
 
-		// Token: 0x060137D9 RID: 79833 RVA: 0x005C9604 File Offset: 0x005C7804
-		public override string ExplanationPart(StatRequest req)
+		bool IEnumerator.MoveNext()
 		{
-			if (req.HasThing)
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__7 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				Pawn pawn = req.Thing as Pawn;
-				if (pawn != null && this.ActiveFor(pawn))
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__7(0)
 				{
-					return "StatsReport_AgeOffset".Translate(pawn.ageTracker.AgeBiologicalYears) + ": " + this.AgeOffset(pawn).ToStringByStyle(this.parentStat.toStringStyle, this.parentStat.toStringNumberSense);
-				}
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
-			return null;
+			return result;
 		}
 
-		// Token: 0x060137DA RID: 79834 RVA: 0x005C9688 File Offset: 0x005C7888
-		private float AgeOffset(Pawn pawn)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			if (!this.useBiologicalYears)
-			{
-				return this.curve.Evaluate((float)pawn.ageTracker.AgeBiologicalYears / pawn.RaceProps.lifeExpectancy);
-			}
-			return this.curve.Evaluate((float)pawn.ageTracker.AgeBiologicalYears);
+			return ((IEnumerable<string>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x060137DB RID: 79835 RVA: 0x005C96D8 File Offset: 0x005C78D8
-		public override IEnumerable<string> ConfigErrors()
+	private SimpleCurve curve;
+
+	private bool useBiologicalYears;
+
+	private bool humanlikeOnly;
+
+	private bool ActiveFor(Pawn pawn)
+	{
+		if (pawn.ageTracker == null)
 		{
-			if (this.curve == null)
-			{
-				yield return "curve is null.";
-			}
-			yield break;
+			return false;
 		}
+		if (humanlikeOnly && !pawn.RaceProps.Humanlike)
+		{
+			return false;
+		}
+		return true;
+	}
 
-		// Token: 0x0400D888 RID: 55432
-		private SimpleCurve curve;
+	public override void TransformValue(StatRequest req, ref float val)
+	{
+		if (req.HasThing && req.Thing is Pawn pawn && ActiveFor(pawn))
+		{
+			val += AgeOffset(pawn);
+		}
+	}
 
-		// Token: 0x0400D889 RID: 55433
-		private bool useBiologicalYears;
+	public override string ExplanationPart(StatRequest req)
+	{
+		if (req.HasThing && req.Thing is Pawn pawn && ActiveFor(pawn))
+		{
+			return "StatsReport_AgeOffset".Translate(pawn.ageTracker.AgeBiologicalYears) + ": " + AgeOffset(pawn).ToStringByStyle(parentStat.toStringStyle, parentStat.toStringNumberSense);
+		}
+		return null;
+	}
 
-		// Token: 0x0400D88A RID: 55434
-		private bool humanlikeOnly;
+	private float AgeOffset(Pawn pawn)
+	{
+		if (!useBiologicalYears)
+		{
+			return curve.Evaluate((float)pawn.ageTracker.AgeBiologicalYears / pawn.RaceProps.lifeExpectancy);
+		}
+		return curve.Evaluate(pawn.ageTracker.AgeBiologicalYears);
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__7))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__7(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

@@ -1,55 +1,152 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class QuestPart_SendShuttleAwayOnCleanup : QuestPart
 {
-	// Token: 0x02001CA3 RID: 7331
-	public class QuestPart_SendShuttleAwayOnCleanup : QuestPart
+	[CompilerGenerated]
+	private sealed class _003Cget_QuestLookTargets_003Ed__3 : IEnumerable<GlobalTargetInfo>, IEnumerable, IEnumerator<GlobalTargetInfo>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700191C RID: 6428
-		// (get) Token: 0x0600A34C RID: 41804 RVA: 0x002EE0E6 File Offset: 0x002EC2E6
-		public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+		private int _003C_003E1__state;
+
+		private GlobalTargetInfo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public QuestPart_SendShuttleAwayOnCleanup _003C_003E4__this;
+
+		GlobalTargetInfo IEnumerator<GlobalTargetInfo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				yield return this.shuttle;
-				yield break;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600A34D RID: 41805 RVA: 0x002EE0F6 File Offset: 0x002EC2F6
-		public override void Cleanup()
+		object IEnumerator.Current
 		{
-			base.Cleanup();
-			if (this.shuttle != null)
+			[DebuggerHidden]
+			get
 			{
-				SendShuttleAwayQuestPartUtility.SendAway(this.shuttle, this.dropEverything);
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600A34E RID: 41806 RVA: 0x002EE117 File Offset: 0x002EC317
-		public override void ExposeData()
+		[DebuggerHidden]
+		public _003Cget_QuestLookTargets_003Ed__3(int _003C_003E1__state)
 		{
-			base.ExposeData();
-			Scribe_References.Look<Thing>(ref this.shuttle, "shuttle", false);
-			Scribe_Values.Look<bool>(ref this.dropEverything, "dropEverything", false, false);
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x0600A34F RID: 41807 RVA: 0x002EE142 File Offset: 0x002EC342
-		public override void ReplacePawnReferences(Pawn replace, Pawn with)
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			if (this.shuttle != null)
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			QuestPart_SendShuttleAwayOnCleanup questPart_SendShuttleAwayOnCleanup = _003C_003E4__this;
+			switch (num)
 			{
-				this.shuttle.TryGetComp<CompShuttle>().requiredPawns.Replace(replace, with);
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = questPart_SendShuttleAwayOnCleanup.shuttle;
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				return false;
 			}
 		}
 
-		// Token: 0x040070D6 RID: 28886
-		public Thing shuttle;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x040070D7 RID: 28887
-		public bool dropEverything;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<GlobalTargetInfo> IEnumerable<GlobalTargetInfo>.GetEnumerator()
+		{
+			_003Cget_QuestLookTargets_003Ed__3 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_QuestLookTargets_003Ed__3(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<GlobalTargetInfo>)this).GetEnumerator();
+		}
+	}
+
+	public Thing shuttle;
+
+	public bool dropEverything;
+
+	public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+	{
+		[IteratorStateMachine(typeof(_003Cget_QuestLookTargets_003Ed__3))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_QuestLookTargets_003Ed__3(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public override void Cleanup()
+	{
+		base.Cleanup();
+		if (shuttle != null)
+		{
+			SendShuttleAwayQuestPartUtility.SendAway(shuttle, dropEverything);
+		}
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_References.Look(ref shuttle, "shuttle");
+		Scribe_Values.Look(ref dropEverything, "dropEverything", defaultValue: false);
+	}
+
+	public override void ReplacePawnReferences(Pawn replace, Pawn with)
+	{
+		if (shuttle != null)
+		{
+			shuttle.TryGetComp<CompShuttle>().requiredPawns.Replace(replace, with);
+		}
 	}
 }

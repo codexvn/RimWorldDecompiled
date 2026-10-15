@@ -1,968 +1,1286 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using RimWorld;
 using UnityEngine;
 
-namespace Verse
+namespace Verse;
+
+public class GeneDef : Def, IRenderNodePropertiesParent
 {
-	// Token: 0x02000175 RID: 373
-	public class GeneDef : Def, IRenderNodePropertiesParent
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__110 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700019B RID: 411
-		// (get) Token: 0x06000ABC RID: 2748 RVA: 0x0003261C File Offset: 0x0003081C
-		public Texture2D Icon
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public GeneDef _003C_003E4__this;
+
+		private List<PawnRenderNodeProperties>.Enumerator _003C_003E7__wrap1;
+
+		private IEnumerator<string> _003C_003E7__wrap2;
+
+		string IEnumerator<string>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.cachedIcon == null)
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__110(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if ((uint)(num - -4) <= 1u || num == 4)
+			{
+				try
 				{
-					if (this.iconPath.NullOrEmpty())
+					if (num == -4 || num == 4)
 					{
-						this.cachedIcon = BaseContent.BadTex;
-					}
-					else
-					{
-						this.cachedIcon = (ContentFinder<Texture2D>.Get(this.iconPath, true) ?? BaseContent.BadTex);
-					}
-				}
-				return this.cachedIcon;
-			}
-		}
-
-		// Token: 0x1700019C RID: 412
-		// (get) Token: 0x06000ABD RID: 2749 RVA: 0x00032674 File Offset: 0x00030874
-		public Color IconColor
-		{
-			get
-			{
-				if (this.iconColor != null)
-				{
-					return this.iconColor.Value;
-				}
-				if (this.skinColorBase != null)
-				{
-					return this.skinColorBase.Value;
-				}
-				if (this.skinColorOverride != null)
-				{
-					return this.skinColorOverride.Value;
-				}
-				if (this.hairColorOverride != null)
-				{
-					return this.hairColorOverride.Value;
-				}
-				return Color.white;
-			}
-		}
-
-		// Token: 0x1700019D RID: 413
-		// (get) Token: 0x06000ABE RID: 2750 RVA: 0x000326EA File Offset: 0x000308EA
-		public string LabelShortAdj
-		{
-			get
-			{
-				if (!this.labelShortAdj.NullOrEmpty())
-				{
-					return this.labelShortAdj;
-				}
-				return this.label;
-			}
-		}
-
-		// Token: 0x1700019E RID: 414
-		// (get) Token: 0x06000ABF RID: 2751 RVA: 0x00032708 File Offset: 0x00030908
-		public string DescriptionFull
-		{
-			get
-			{
-				string result;
-				if ((result = this.cachedDescription) == null)
-				{
-					result = (this.cachedDescription = this.GetDescriptionFull());
-				}
-				return result;
-			}
-		}
-
-		// Token: 0x1700019F RID: 415
-		// (get) Token: 0x06000AC0 RID: 2752 RVA: 0x0003272E File Offset: 0x0003092E
-		public bool HasDefinedGraphicProperties
-		{
-			get
-			{
-				return !this.renderNodeProperties.NullOrEmpty<PawnRenderNodeProperties>();
-			}
-		}
-
-		// Token: 0x170001A0 RID: 416
-		// (get) Token: 0x06000AC1 RID: 2753 RVA: 0x0003273E File Offset: 0x0003093E
-		public List<PawnRenderNodeProperties> RenderNodeProperties
-		{
-			get
-			{
-				return this.renderNodeProperties;
-			}
-		}
-
-		// Token: 0x170001A1 RID: 417
-		// (get) Token: 0x06000AC2 RID: 2754 RVA: 0x00032748 File Offset: 0x00030948
-		public bool RandomChosen
-		{
-			get
-			{
-				return this.randomChosen || (this.biostatArc <= 0 && this.biostatCpx == 0 && this.biostatMet == 0 && (this.hairColorOverride != null || this.skinColorBase != null || this.skinColorOverride != null || this.bodyType != null || !this.forcedHeadTypes.NullOrEmpty<HeadTypeDef>() || this.hairTagFilter != null || this.beardTagFilter != null || this.HasDefinedGraphicProperties));
-			}
-		}
-
-		// Token: 0x06000AC3 RID: 2755 RVA: 0x000327D4 File Offset: 0x000309D4
-		public override void ResolveReferences()
-		{
-			base.ResolveReferences();
-			if (this.displayCategory == null)
-			{
-				this.displayCategory = GeneCategoryDefOf.Miscellaneous;
-			}
-			if (this.renderNodeProperties != null)
-			{
-				for (int i = 0; i < this.renderNodeProperties.Count; i++)
-				{
-					this.renderNodeProperties[i].ResolveReferencesRecursive();
-				}
-			}
-		}
-
-		// Token: 0x06000AC4 RID: 2756 RVA: 0x0003282C File Offset: 0x00030A2C
-		public int AptitudeFor(SkillDef skill)
-		{
-			int num = 0;
-			if (this.aptitudes.NullOrEmpty<Aptitude>())
-			{
-				return num;
-			}
-			for (int i = 0; i < this.aptitudes.Count; i++)
-			{
-				if (this.aptitudes[i].skill == skill)
-				{
-					num += this.aptitudes[i].level;
-				}
-			}
-			return num;
-		}
-
-		// Token: 0x06000AC5 RID: 2757 RVA: 0x0003288C File Offset: 0x00030A8C
-		private string GetDescriptionFull()
-		{
-			GeneDef.<>c__DisplayClass107_0 CS$<>8__locals1 = new GeneDef.<>c__DisplayClass107_0();
-			CS$<>8__locals1.<>4__this = this;
-			CS$<>8__locals1.sb = new StringBuilder();
-			if (!this.description.NullOrEmpty())
-			{
-				CS$<>8__locals1.sb.Append(this.description).AppendLine().AppendLine();
-			}
-			bool flag = false;
-			if (this.prerequisite != null)
-			{
-				CS$<>8__locals1.sb.AppendLine("Requires".Translate() + ": " + this.prerequisite.LabelCap);
-				flag = true;
-			}
-			if (this.minAgeActive > 0f)
-			{
-				CS$<>8__locals1.sb.AppendLine("TakesEffectAfterAge".Translate() + ": " + this.minAgeActive.ToString());
-				flag = true;
-			}
-			if (flag)
-			{
-				CS$<>8__locals1.sb.AppendLine();
-			}
-			bool flag2 = false;
-			if (this.biostatCpx != 0)
-			{
-				CS$<>8__locals1.sb.AppendLineTagged("Complexity".Translate().Colorize(GeneUtility.GCXColor) + ": " + this.biostatCpx.ToStringWithSign());
-				flag2 = true;
-			}
-			if (this.biostatMet != 0)
-			{
-				CS$<>8__locals1.sb.AppendLineTagged("Metabolism".Translate().CapitalizeFirst().Colorize(GeneUtility.METColor) + ": " + this.biostatMet.ToStringWithSign());
-				flag2 = true;
-			}
-			if (this.biostatArc != 0)
-			{
-				CS$<>8__locals1.sb.AppendLineTagged("ArchitesRequired".Translate().Colorize(GeneUtility.ARCColor) + ": " + this.biostatArc.ToStringWithSign());
-				flag2 = true;
-			}
-			if (flag2)
-			{
-				CS$<>8__locals1.sb.AppendLine();
-			}
-			if (this.forcedTraits != null)
-			{
-				CS$<>8__locals1.sb.AppendLineTagged(("ForcedTraits".Translate() + ":").Colorize(ColoredText.TipSectionTitleColor));
-				CS$<>8__locals1.sb.Append((from x in this.forcedTraits
-				select x.def.DataAtDegree(x.degree).label).ToLineList("  - ", true)).AppendLine().AppendLine();
-			}
-			if (this.suppressedTraits != null)
-			{
-				CS$<>8__locals1.sb.AppendLineTagged(("SuppressedTraits".Translate() + ":").Colorize(ColoredText.TipSectionTitleColor));
-				CS$<>8__locals1.sb.Append((from x in this.suppressedTraits
-				select x.def.DataAtDegree(x.degree).label).ToLineList("  - ", true)).AppendLine().AppendLine();
-			}
-			if (this.aptitudes != null)
-			{
-				CS$<>8__locals1.sb.AppendLineTagged(("Aptitudes".Translate().CapitalizeFirst() + ":").Colorize(ColoredText.TipSectionTitleColor));
-				CS$<>8__locals1.sb.Append((from x in this.aptitudes
-				select x.skill.LabelCap.ToString() + " " + x.level.ToStringWithSign()).ToLineList("  - ", true)).AppendLine().AppendLine();
-			}
-			CS$<>8__locals1.effectsTitleWritten = false;
-			if (this.passionMod != null)
-			{
-				PassionMod.PassionModType modType = this.passionMod.modType;
-				if (modType != PassionMod.PassionModType.AddOneLevel)
-				{
-					if (modType == PassionMod.PassionModType.DropAll)
-					{
-						CS$<>8__locals1.<GetDescriptionFull>g__AppendEffectLine|3("PassionModDrop".Translate(this.passionMod.skill));
-					}
-				}
-				else
-				{
-					CS$<>8__locals1.<GetDescriptionFull>g__AppendEffectLine|3("PassionModAdd".Translate(this.passionMod.skill));
-				}
-			}
-			if (!this.statFactors.NullOrEmpty<StatModifier>())
-			{
-				for (int i = 0; i < this.statFactors.Count; i++)
-				{
-					StatModifier statModifier = this.statFactors[i];
-					if (statModifier.stat.CanShowWithLoadedMods())
-					{
-						CS$<>8__locals1.<GetDescriptionFull>g__AppendEffectLine|3(statModifier.stat.LabelCap + " " + statModifier.ToStringAsFactor);
-					}
-				}
-			}
-			if (!this.conditionalStatAffecters.NullOrEmpty<ConditionalStatAffecter>())
-			{
-				for (int j = 0; j < this.conditionalStatAffecters.Count; j++)
-				{
-					if (!this.conditionalStatAffecters[j].statFactors.NullOrEmpty<StatModifier>())
-					{
-						for (int k = 0; k < this.conditionalStatAffecters[j].statFactors.Count; k++)
+						try
 						{
-							StatModifier statModifier2 = this.conditionalStatAffecters[j].statFactors[k];
-							if (statModifier2.stat.CanShowWithLoadedMods())
-							{
-								CS$<>8__locals1.<GetDescriptionFull>g__AppendEffectLine|3(statModifier2.stat.LabelCap + " " + statModifier2.ToStringAsFactor + " (" + this.conditionalStatAffecters[j].Label + ")");
-							}
+						}
+						finally
+						{
+							_003C_003Em__Finally2();
 						}
 					}
 				}
-			}
-			if (!this.statOffsets.NullOrEmpty<StatModifier>())
-			{
-				for (int l = 0; l < this.statOffsets.Count; l++)
+				finally
 				{
-					StatModifier statModifier3 = this.statOffsets[l];
-					if (statModifier3.stat.CanShowWithLoadedMods())
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = default(List<PawnRenderNodeProperties>.Enumerator);
+			_003C_003E7__wrap2 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				GeneDef geneDef = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					if (geneDef.geneClass == null)
 					{
-						CS$<>8__locals1.<GetDescriptionFull>g__AppendEffectLine|3(statModifier3.stat.LabelCap + " " + statModifier3.ValueToStringAsOffset);
+						_003C_003E2__current = "geneClass is null";
+						_003C_003E1__state = 1;
+						return true;
 					}
-				}
-			}
-			if (!this.conditionalStatAffecters.NullOrEmpty<ConditionalStatAffecter>())
-			{
-				for (int m = 0; m < this.conditionalStatAffecters.Count; m++)
-				{
-					if (!this.conditionalStatAffecters[m].statOffsets.NullOrEmpty<StatModifier>())
+					goto IL_0064;
+				case 1:
+					_003C_003E1__state = -1;
+					goto IL_0064;
+				case 2:
+					_003C_003E1__state = -1;
+					goto IL_009b;
+				case 3:
+					_003C_003E1__state = -1;
+					goto IL_00d0;
+				case 4:
 					{
-						for (int n = 0; n < this.conditionalStatAffecters[m].statOffsets.Count; n++)
-						{
-							StatModifier statModifier4 = this.conditionalStatAffecters[m].statOffsets[n];
-							if (statModifier4.stat.CanShowWithLoadedMods())
-							{
-								CS$<>8__locals1.<GetDescriptionFull>g__AppendEffectLine|3(statModifier4.stat.LabelCap + " " + statModifier4.ValueToStringAsOffset + " (" + this.conditionalStatAffecters[m].Label.UncapitalizeFirst() + ")");
-							}
-						}
+						_003C_003E1__state = -4;
+						goto IL_0145;
 					}
-				}
-			}
-			if (!this.capMods.NullOrEmpty<PawnCapacityModifier>())
-			{
-				for (int num = 0; num < this.capMods.Count; num++)
-				{
-					PawnCapacityModifier pawnCapacityModifier = this.capMods[num];
-					if (pawnCapacityModifier.offset != 0f)
+					IL_00d0:
+					if (!geneDef.HasDefinedGraphicProperties)
 					{
-						CS$<>8__locals1.<GetDescriptionFull>g__AppendEffectLine|3(pawnCapacityModifier.capacity.GetLabelFor().CapitalizeFirst() + " " + (pawnCapacityModifier.offset * 100f).ToString("+#;-#") + "%");
+						break;
 					}
-					if (pawnCapacityModifier.postFactor != 1f)
+					_003C_003E7__wrap1 = geneDef.renderNodeProperties.GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_015f;
+					IL_0064:
+					if (!typeof(Gene).IsAssignableFrom(geneDef.geneClass))
 					{
-						CS$<>8__locals1.<GetDescriptionFull>g__AppendEffectLine|3(pawnCapacityModifier.capacity.GetLabelFor().CapitalizeFirst() + " x" + pawnCapacityModifier.postFactor.ToStringPercent());
+						_003C_003E2__current = "geneClass is not Gene or subclass thereof";
+						_003C_003E1__state = 2;
+						return true;
 					}
-					if (pawnCapacityModifier.setMax != 999f)
+					goto IL_009b;
+					IL_009b:
+					if (geneDef.mentalBreakMtbDays > 0f && geneDef.mentalBreakDef == null)
 					{
-						CS$<>8__locals1.<GetDescriptionFull>g__AppendEffectLine|3(pawnCapacityModifier.capacity.GetLabelFor().CapitalizeFirst() + " " + "max".Translate().CapitalizeFirst() + ": " + pawnCapacityModifier.setMax.ToStringPercent());
+						_003C_003E2__current = "mentalBreakMtbDays is >0 with null mentalBreakDef";
+						_003C_003E1__state = 3;
+						return true;
 					}
-				}
-			}
-			if (!this.customEffectDescriptions.NullOrEmpty<string>())
-			{
-				foreach (string str in this.customEffectDescriptions)
-				{
-					CS$<>8__locals1.<GetDescriptionFull>g__AppendEffectLine|3(str.ResolveTags());
-				}
-			}
-			if (!this.damageFactors.NullOrEmpty<DamageFactor>())
-			{
-				for (int num2 = 0; num2 < this.damageFactors.Count; num2++)
-				{
-					CS$<>8__locals1.<GetDescriptionFull>g__AppendEffectLine|3("DamageType".Translate(this.damageFactors[num2].damageDef.label).CapitalizeFirst() + " x" + this.damageFactors[num2].factor.ToStringPercent());
-				}
-			}
-			if (this.resourceLossPerDay != 0f && !this.resourceLabel.NullOrEmpty())
-			{
-				CS$<>8__locals1.<GetDescriptionFull>g__AppendEffectLine|3("ResourceLossPerDay".Translate(this.resourceLabel.Named("RESOURCE"), (-Mathf.RoundToInt(this.resourceLossPerDay * 100f)).ToStringWithSign().Named("OFFSET")).CapitalizeFirst());
-			}
-			if (!Mathf.Approximately(this.painFactor, 1f))
-			{
-				CS$<>8__locals1.<GetDescriptionFull>g__AppendEffectLine|3("Pain".Translate() + " x" + this.painFactor.ToStringPercent());
-			}
-			if (this.painOffset != 0f)
-			{
-				CS$<>8__locals1.<GetDescriptionFull>g__AppendEffectLine|3("Pain".Translate() + " " + (this.painOffset * 100f).ToString("+###0;-###0") + "%");
-			}
-			if (this.chemical != null)
-			{
-				if (!Mathf.Approximately(this.addictionChanceFactor, 1f))
-				{
-					if (this.addictionChanceFactor <= 0f)
+					goto IL_00d0;
+					IL_015f:
+					if (_003C_003E7__wrap1.MoveNext())
 					{
-						CS$<>8__locals1.<GetDescriptionFull>g__AppendEffectLine|3("AddictionImmune".Translate(this.chemical).CapitalizeFirst());
+						PawnRenderNodeProperties current = _003C_003E7__wrap1.Current;
+						_003C_003E7__wrap2 = current.ConfigErrors().GetEnumerator();
+						_003C_003E1__state = -4;
+						goto IL_0145;
 					}
-					else
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = default(List<PawnRenderNodeProperties>.Enumerator);
+					break;
+					IL_0145:
+					if (_003C_003E7__wrap2.MoveNext())
 					{
-						CS$<>8__locals1.<GetDescriptionFull>g__AppendEffectLine|3("AddictionChanceFactor".Translate(this.chemical).CapitalizeFirst() + " x" + this.addictionChanceFactor.ToStringPercent());
+						string current2 = _003C_003E7__wrap2.Current;
+						_003C_003E2__current = current2;
+						_003C_003E1__state = 4;
+						return true;
 					}
-				}
-				if (this.overdoseChanceFactor != 1f)
-				{
-					CS$<>8__locals1.<GetDescriptionFull>g__AppendEffectLine|3("OverdoseChanceFactor".Translate(this.chemical).CapitalizeFirst() + " x" + this.overdoseChanceFactor.ToStringPercent());
-				}
-				if (this.toleranceBuildupFactor != 1f)
-				{
-					CS$<>8__locals1.<GetDescriptionFull>g__AppendEffectLine|3("ToleranceBuildupFactor".Translate(this.chemical).CapitalizeFirst() + " x" + this.toleranceBuildupFactor.ToStringPercent());
-				}
-			}
-			if (!this.enablesNeeds.NullOrEmpty<NeedDef>())
-			{
-				if (this.enablesNeeds.Count == 1)
-				{
-					CS$<>8__locals1.<GetDescriptionFull>g__AppendEffectLine|3(string.Format("{0}: {1}", "AddsNeed".Translate(), this.enablesNeeds[0].LabelCap));
-				}
-				else
-				{
-					CS$<>8__locals1.<GetDescriptionFull>g__AppendEffectLine|3(string.Format("{0}: {1}", "AddsNeeds".Translate(), (from x in this.enablesNeeds
-					select x.label).ToCommaList(false, false).CapitalizeFirst()));
-				}
-			}
-			if (!this.disablesNeeds.NullOrEmpty<NeedDef>())
-			{
-				if (this.disablesNeeds.Count == 1)
-				{
-					CS$<>8__locals1.<GetDescriptionFull>g__AppendEffectLine|3(string.Format("{0}: {1}", "DisablesNeed".Translate(), this.disablesNeeds[0].LabelCap));
-				}
-				else
-				{
-					CS$<>8__locals1.<GetDescriptionFull>g__AppendEffectLine|3(string.Format("{0}: {1}", "DisablesNeeds".Translate(), (from x in this.disablesNeeds
-					select x.label).ToCommaList(false, false).CapitalizeFirst()));
-				}
-			}
-			if (this.missingGeneRomanceChanceFactor != 1f)
-			{
-				CS$<>8__locals1.<GetDescriptionFull>g__AppendEffectLine|3("MissingGeneRomanceChance".Translate(this.label.Named("GENE")) + " x" + this.missingGeneRomanceChanceFactor.ToStringPercent());
-			}
-			if (this.ignoreDarkness)
-			{
-				CS$<>8__locals1.<GetDescriptionFull>g__AppendEffectLine|3("UnaffectedByDarkness".Translate());
-			}
-			if (this.foodPoisoningChanceFactor != 1f)
-			{
-				if (this.foodPoisoningChanceFactor <= 0f)
-				{
-					CS$<>8__locals1.<GetDescriptionFull>g__AppendEffectLine|3("FoodPoisoningImmune".Translate());
-				}
-				else
-				{
-					CS$<>8__locals1.<GetDescriptionFull>g__AppendEffectLine|3("Stat_Hediff_FoodPoisoningChanceFactor_Name".Translate() + " x" + this.foodPoisoningChanceFactor.ToStringPercent());
-				}
-			}
-			if (this.socialFightChanceFactor != 1f)
-			{
-				if (this.socialFightChanceFactor <= 0f)
-				{
-					CS$<>8__locals1.<GetDescriptionFull>g__AppendEffectLine|3("WillNeverSocialFight".Translate());
-				}
-				else
-				{
-					CS$<>8__locals1.<GetDescriptionFull>g__AppendEffectLine|3("SocialFightChanceFactor".Translate() + " x" + this.socialFightChanceFactor.ToStringPercent());
-				}
-			}
-			if (this.aggroMentalBreakSelectionChanceFactor != 1f)
-			{
-				if (this.aggroMentalBreakSelectionChanceFactor >= 999f)
-				{
-					CS$<>8__locals1.<GetDescriptionFull>g__AppendEffectLine|3("AlwaysAggroMentalBreak".Translate());
-				}
-				else if (this.aggroMentalBreakSelectionChanceFactor <= 0f)
-				{
-					CS$<>8__locals1.<GetDescriptionFull>g__AppendEffectLine|3("NeverAggroMentalBreak".Translate());
-				}
-				else
-				{
-					CS$<>8__locals1.<GetDescriptionFull>g__AppendEffectLine|3("AggroMentalBreakSelectionChanceFactor".Translate() + " x" + this.aggroMentalBreakSelectionChanceFactor.ToStringPercent());
-				}
-			}
-			if (this.prisonBreakMTBFactor != 1f)
-			{
-				if (this.prisonBreakMTBFactor < 0f)
-				{
-					CS$<>8__locals1.<GetDescriptionFull>g__AppendEffectLine|3("WillNeverPrisonBreak".Translate());
-				}
-				else
-				{
-					CS$<>8__locals1.<GetDescriptionFull>g__AppendEffectLine|3("PrisonBreakIntervalFactor".Translate() + " x" + this.prisonBreakMTBFactor.ToStringPercent());
-				}
-			}
-			bool flag3 = CS$<>8__locals1.effectsTitleWritten;
-			if (!this.makeImmuneTo.NullOrEmpty<HediffDef>())
-			{
-				if (flag3)
-				{
-					CS$<>8__locals1.sb.AppendLine();
-				}
-				CS$<>8__locals1.sb.AppendLineTagged(("ImmuneTo".Translate() + ":").Colorize(ColoredText.TipSectionTitleColor));
-				CS$<>8__locals1.sb.AppendLine((from x in this.makeImmuneTo
-				select x.label).ToLineList("  - ", true));
-				flag3 = true;
-			}
-			if (!this.hediffGiversCannotGive.NullOrEmpty<HediffDef>())
-			{
-				if (flag3)
-				{
-					CS$<>8__locals1.sb.AppendLine();
-				}
-				CS$<>8__locals1.sb.AppendLineTagged(("ImmuneTo".Translate() + ":").Colorize(ColoredText.TipSectionTitleColor));
-				CS$<>8__locals1.sb.AppendLine((from x in this.hediffGiversCannotGive
-				select x.label).ToLineList("  - ", true));
-				flag3 = true;
-			}
-			if (this.biologicalAgeTickFactorFromAgeCurve != null)
-			{
-				if (flag3)
-				{
-					CS$<>8__locals1.sb.AppendLine();
-				}
-				CS$<>8__locals1.sb.AppendLineTagged(("AgeFactors".Translate().CapitalizeFirst() + ":").Colorize(ColoredText.TipSectionTitleColor));
-				CS$<>8__locals1.sb.AppendLine((from p in this.biologicalAgeTickFactorFromAgeCurve
-				select "PeriodYears".Translate(p.x).ToString() + ": x" + p.y.ToStringPercent()).ToLineList("  - ", true));
-				flag3 = true;
-			}
-			if (this.disabledWorkTags != WorkTags.None)
-			{
-				if (flag3)
-				{
-					CS$<>8__locals1.sb.AppendLine();
-				}
-				IEnumerable<WorkTypeDef> source = from x in DefDatabase<WorkTypeDef>.AllDefsListForReading
-				where (CS$<>8__locals1.<>4__this.disabledWorkTags & x.workTags) > WorkTags.None
-				select x;
-				CS$<>8__locals1.sb.AppendLineTagged(("DisabledWorkLabel".Translate().CapitalizeFirst() + ":").Colorize(ColoredText.TipSectionTitleColor));
-				CS$<>8__locals1.sb.AppendLine("  - " + (from x in source
-				select x.labelShort).ToCommaList(false, false).CapitalizeFirst());
-				if (this.disabledWorkTags.ExactlyOneWorkTagSet())
-				{
-					CS$<>8__locals1.sb.AppendLine("  - " + this.disabledWorkTags.LabelTranslated().CapitalizeFirst());
-				}
-				flag3 = true;
-			}
-			if (!this.abilities.NullOrEmpty<AbilityDef>())
-			{
-				if (flag3)
-				{
-					CS$<>8__locals1.sb.AppendLine();
-				}
-				if (this.abilities.Count == 1)
-				{
-					CS$<>8__locals1.sb.AppendLineTagged(("GivesAbility".Translate().CapitalizeFirst() + ":").Colorize(ColoredText.TipSectionTitleColor));
-				}
-				else
-				{
-					CS$<>8__locals1.sb.AppendLineTagged(("GivesAbilities".Translate().CapitalizeFirst() + ":").Colorize(ColoredText.TipSectionTitleColor));
-				}
-				CS$<>8__locals1.sb.AppendLine((from x in this.abilities
-				select x.label).ToLineList("  - ", true));
-				flag3 = true;
-			}
-			IEnumerable<ThoughtDef> enumerable = DefDatabase<ThoughtDef>.AllDefs.Where(delegate(ThoughtDef x)
-			{
-				if ((x.requiredGenes.NotNullAndContains(CS$<>8__locals1.<>4__this) || x.nullifyingGenes.NotNullAndContains(CS$<>8__locals1.<>4__this)) && x.stages != null)
-				{
-					return x.stages.Any((ThoughtStage y) => y.baseMoodEffect != 0f);
+					_003C_003Em__Finally2();
+					_003C_003E7__wrap2 = null;
+					goto IL_015f;
 				}
 				return false;
-			});
-			if (enumerable.Any<ThoughtDef>())
-			{
-				if (flag3)
-				{
-					CS$<>8__locals1.sb.AppendLine();
-				}
-				CS$<>8__locals1.sb.AppendLineTagged(("Mood".Translate().CapitalizeFirst() + ":").Colorize(ColoredText.TipSectionTitleColor));
-				foreach (ThoughtDef thoughtDef in enumerable)
-				{
-					ThoughtStage thoughtStage = thoughtDef.stages.FirstOrDefault((ThoughtStage x) => x.baseMoodEffect != 0f);
-					if (thoughtStage != null)
-					{
-						string text = thoughtStage.LabelCap + ": " + thoughtStage.baseMoodEffect.ToStringWithSign("0.##");
-						if (thoughtDef.requiredGenes.NotNullAndContains(this))
-						{
-							CS$<>8__locals1.sb.AppendLine("  - " + text);
-						}
-						else if (thoughtDef.nullifyingGenes.NotNullAndContains(this))
-						{
-							CS$<>8__locals1.sb.AppendLine("  - " + "Removes".Translate() + ": " + text);
-						}
-					}
-				}
 			}
-			return CS$<>8__locals1.sb.ToString().TrimEndNewlines();
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
 		}
 
-		// Token: 0x06000AC6 RID: 2758 RVA: 0x00033BE4 File Offset: 0x00031DE4
-		public bool ConflictsWith(GeneDef other)
+		bool IEnumerator.MoveNext()
 		{
-			if (this == other)
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap1/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -3;
+			if (_003C_003E7__wrap2 != null)
+			{
+				_003C_003E7__wrap2.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__110 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__110(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CSpecialDisplayStats_003Ed__109 : IEnumerable<StatDrawEntry>, IEnumerable, IEnumerator<StatDrawEntry>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private StatDrawEntry _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public GeneDef _003C_003E4__this;
+
+		private StatRequest req;
+
+		public StatRequest _003C_003E3__req;
+
+		private IEnumerator<StatDrawEntry> _003C_003E7__wrap1;
+
+		private int _003Ci_003E5__3;
+
+		private PawnCapacityModifier _003CcapMod_003E5__4;
+
+		StatDrawEntry IEnumerator<StatDrawEntry>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CSpecialDisplayStats_003Ed__109(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003CcapMod_003E5__4 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				GeneDef geneDef = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((Def)geneDef).SpecialDisplayStats(req).GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_00a8;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_00a8;
+				case 2:
+					_003C_003E1__state = -1;
+					goto IL_0130;
+				case 3:
+					_003C_003E1__state = -1;
+					goto IL_01ad;
+				case 4:
+					_003C_003E1__state = -1;
+					goto IL_0230;
+				case 5:
+					_003C_003E1__state = -1;
+					goto IL_02cd;
+				case 6:
+					_003C_003E1__state = -1;
+					goto IL_0373;
+				case 7:
+					_003C_003E1__state = -1;
+					goto IL_03fd;
+				case 8:
+					_003C_003E1__state = -1;
+					goto IL_04af;
+				case 9:
+					_003C_003E1__state = -1;
+					goto IL_0594;
+				case 10:
+					_003C_003E1__state = -1;
+					goto IL_0614;
+				case 11:
+					_003C_003E1__state = -1;
+					goto IL_06ca;
+				case 12:
+					_003C_003E1__state = -1;
+					goto IL_0762;
+				case 13:
+					_003C_003E1__state = -1;
+					goto IL_07c8;
+				case 14:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_00a8:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						StatDrawEntry current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (geneDef.painFactor != 1f)
+					{
+						_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.CapacityEffects, "Pain".Translate(), "x" + geneDef.painFactor.ToStringPercent(), "Stat_Hediff_Pain_Desc".Translate(), 4050);
+						_003C_003E1__state = 2;
+						return true;
+					}
+					goto IL_0130;
+					IL_03fd:
+					_003Ci_003E5__3++;
+					goto IL_040f;
+					IL_0614:
+					if (_003CcapMod_003E5__4.SetMaxDefined && req.Pawn != null)
+					{
+						_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.CapacityEffects, _003CcapMod_003E5__4.capacity.GetLabelFor().CapitalizeFirst(), "max".Translate().CapitalizeFirst() + " " + _003CcapMod_003E5__4.EvaluateSetMax(req.Pawn).ToStringPercent(), _003CcapMod_003E5__4.capacity.description, 4060);
+						_003C_003E1__state = 11;
+						return true;
+					}
+					goto IL_06ca;
+					IL_0130:
+					if (geneDef.painOffset != 0f)
+					{
+						_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.CapacityEffects, "Pain".Translate(), (geneDef.painOffset * 100f).ToString("+###0;-###0") + "%", "Stat_Hediff_Pain_Desc".Translate(), 4050);
+						_003C_003E1__state = 3;
+						return true;
+					}
+					goto IL_01ad;
+					IL_04c1:
+					if (_003Ci_003E5__3 < geneDef.statFactors.Count)
+					{
+						StatModifier statModifier = geneDef.statFactors[_003Ci_003E5__3];
+						if (statModifier.stat.CanShowWithLoadedMods())
+						{
+							_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.CapacityEffects, statModifier.stat.LabelCap, statModifier.ToStringAsFactor, statModifier.stat.description, 4070);
+							_003C_003E1__state = 8;
+							return true;
+						}
+						goto IL_04af;
+					}
+					goto IL_04d7;
+					IL_01ad:
+					if (geneDef.missingGeneRomanceChanceFactor != 1f)
+					{
+						_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.CapacityEffects, "MissingGeneRomanceChance".Translate(geneDef.LabelCap.Named("GENE")), "x" + geneDef.missingGeneRomanceChanceFactor.ToStringPercent(), "StatsReport_MissingGeneRomanceChance".Translate(), 4050);
+						_003C_003E1__state = 4;
+						return true;
+					}
+					goto IL_0230;
+					IL_0425:
+					if (geneDef.statFactors != null)
+					{
+						_003Ci_003E5__3 = 0;
+						goto IL_04c1;
+					}
+					goto IL_04d7;
+					IL_0230:
+					if (geneDef.forcedTraits != null)
+					{
+						string text = geneDef.forcedTraits.Select((GeneticTraitData x) => x.def.DataAtDegree(x.degree).label).ToLineList(null, capitalizeItems: true);
+						_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.CapacityEffects, "ForcedTraits".Translate(), text, "ForcedTraitsDesc".Translate() + "\n\n" + text, 4080);
+						_003C_003E1__state = 5;
+						return true;
+					}
+					goto IL_02cd;
+					IL_07c8:
+					if (geneDef.biostatArc != 0)
+					{
+						_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.Genetics, "ArchitesRequired".Translate().CapitalizeFirst(), geneDef.biostatArc.ToString(), "ArchitesRequiredDesc".Translate(), 995);
+						_003C_003E1__state = 14;
+						return true;
+					}
+					break;
+					IL_04d7:
+					if (geneDef.capMods != null)
+					{
+						_003Ci_003E5__3 = 0;
+						goto IL_06e3;
+					}
+					goto IL_06f9;
+					IL_04af:
+					_003Ci_003E5__3++;
+					goto IL_04c1;
+					IL_02cd:
+					if (geneDef.aptitudes != null)
+					{
+						string text2 = geneDef.aptitudes.Select((Aptitude x) => x.skill.LabelCap.ToString() + " " + x.level.ToStringWithSign()).ToLineList(null, capitalizeItems: true);
+						_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.CapacityEffects, "Aptitudes".Translate().CapitalizeFirst(), text2, "AptitudesDesc".Translate() + "\n\n" + text2, 4090);
+						_003C_003E1__state = 6;
+						return true;
+					}
+					goto IL_0373;
+					IL_06ca:
+					_003CcapMod_003E5__4 = null;
+					_003Ci_003E5__3++;
+					goto IL_06e3;
+					IL_06f9:
+					if (geneDef.biostatCpx != 0)
+					{
+						_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.Genetics, "Complexity".Translate().CapitalizeFirst(), geneDef.biostatCpx.ToString(), "ComplexityDesc".Translate(), 998);
+						_003C_003E1__state = 12;
+						return true;
+					}
+					goto IL_0762;
+					IL_06e3:
+					if (_003Ci_003E5__3 < geneDef.capMods.Count)
+					{
+						_003CcapMod_003E5__4 = geneDef.capMods[_003Ci_003E5__3];
+						if (_003CcapMod_003E5__4.offset != 0f)
+						{
+							_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.CapacityEffects, _003CcapMod_003E5__4.capacity.GetLabelFor().CapitalizeFirst(), (_003CcapMod_003E5__4.offset * 100f).ToString("+#;-#") + "%", _003CcapMod_003E5__4.capacity.description, 4060);
+							_003C_003E1__state = 9;
+							return true;
+						}
+						goto IL_0594;
+					}
+					goto IL_06f9;
+					IL_0373:
+					if (geneDef.statOffsets != null)
+					{
+						_003Ci_003E5__3 = 0;
+						goto IL_040f;
+					}
+					goto IL_0425;
+					IL_040f:
+					if (_003Ci_003E5__3 < geneDef.statOffsets.Count)
+					{
+						StatModifier statModifier2 = geneDef.statOffsets[_003Ci_003E5__3];
+						if (statModifier2.stat.CanShowWithLoadedMods())
+						{
+							_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.CapacityEffects, statModifier2.stat.LabelCap, statModifier2.ValueToStringAsOffset, statModifier2.stat.description, 4070);
+							_003C_003E1__state = 7;
+							return true;
+						}
+						goto IL_03fd;
+					}
+					goto IL_0425;
+					IL_0594:
+					if (_003CcapMod_003E5__4.postFactor != 1f)
+					{
+						_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.CapacityEffects, _003CcapMod_003E5__4.capacity.GetLabelFor().CapitalizeFirst(), "x" + _003CcapMod_003E5__4.postFactor.ToStringPercent(), _003CcapMod_003E5__4.capacity.description, 4060);
+						_003C_003E1__state = 10;
+						return true;
+					}
+					goto IL_0614;
+					IL_0762:
+					if (geneDef.biostatMet != 0)
+					{
+						_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.Genetics, "Metabolism".Translate().CapitalizeFirst(), geneDef.biostatMet.ToString(), "MetabolismDesc".Translate(), 997);
+						_003C_003E1__state = 13;
+						return true;
+					}
+					goto IL_07c8;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<StatDrawEntry> IEnumerable<StatDrawEntry>.GetEnumerator()
+		{
+			_003CSpecialDisplayStats_003Ed__109 _003CSpecialDisplayStats_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CSpecialDisplayStats_003Ed__ = this;
+			}
+			else
+			{
+				_003CSpecialDisplayStats_003Ed__ = new _003CSpecialDisplayStats_003Ed__109(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CSpecialDisplayStats_003Ed__.req = _003C_003E3__req;
+			return _003CSpecialDisplayStats_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<StatDrawEntry>)this).GetEnumerator();
+		}
+	}
+
+	public Type geneClass = typeof(Gene);
+
+	[MustTranslate]
+	public string labelShortAdj;
+
+	[MustTranslate]
+	public List<string> customEffectDescriptions;
+
+	[NoTranslate]
+	public string iconPath;
+
+	private Color? iconColor;
+
+	public GeneCategoryDef displayCategory;
+
+	public float displayOrderInCategory;
+
+	public List<PawnRenderNodeProperties> renderNodeProperties;
+
+	public bool neverGrayHair;
+
+	public bool skinIsHairColor;
+
+	public bool tattoosVisible = true;
+
+	public FurDef fur;
+
+	public SoundDef soundCall;
+
+	public SoundDef soundDeath;
+
+	public SoundDef soundWounded;
+
+	public Type resourceGizmoType = typeof(GeneGizmo_Resource);
+
+	public float resourceLossPerDay;
+
+	[MustTranslate]
+	public string resourceLabel;
+
+	[MustTranslate]
+	public string resourceDescription;
+
+	public List<float> resourceGizmoThresholds;
+
+	public bool showGizmoOnWorldView;
+
+	public bool showGizmoWhenDrafted;
+
+	public bool showGizmoOnMultiSelect;
+
+	public List<AbilityDef> abilities;
+
+	public List<GeneticTraitData> forcedTraits;
+
+	public List<GeneticTraitData> suppressedTraits;
+
+	public List<NeedDef> enablesNeeds;
+
+	public List<NeedDef> disablesNeeds;
+
+	public WorkTags disabledWorkTags;
+
+	public bool ignoreDarkness;
+
+	public EndogeneCategory endogeneCategory;
+
+	public bool dislikesSunlight;
+
+	public float minAgeActive;
+
+	public float lovinMTBFactor = 1f;
+
+	public bool immuneToToxGasExposure;
+
+	public bool immuneToVacuumBurns;
+
+	public bool randomChosen;
+
+	public int? waterCellCost;
+
+	public HistoryEventDef deathHistoryEvent;
+
+	public List<Aptitude> aptitudes;
+
+	public PassionMod passionMod;
+
+	public List<StatModifier> statOffsets;
+
+	public List<StatModifier> statFactors;
+
+	public List<ConditionalStatAffecter> conditionalStatAffecters;
+
+	public float painOffset;
+
+	public float painFactor = 1f;
+
+	public float foodPoisoningChanceFactor = 1f;
+
+	public List<DamageFactor> damageFactors;
+
+	public SimpleCurve biologicalAgeTickFactorFromAgeCurve;
+
+	public List<HediffDef> makeImmuneTo;
+
+	public List<HediffDef> hediffGiversCannotGive;
+
+	public ChemicalDef chemical;
+
+	public float addictionChanceFactor = 1f;
+
+	public float overdoseChanceFactor = 1f;
+
+	public float toleranceBuildupFactor = 1f;
+
+	public bool sterilize;
+
+	public List<PawnCapacityModifier> capMods;
+
+	public bool preventPermanentWounds;
+
+	public bool dontMindRawFood;
+
+	public Color? hairColorOverride;
+
+	public Color? skinColorBase;
+
+	public Color? skinColorOverride;
+
+	public float randomBrightnessFactor;
+
+	public TagFilter hairTagFilter;
+
+	public TagFilter beardTagFilter;
+
+	public GeneticBodyType? bodyType;
+
+	public List<HeadTypeDef> forcedHeadTypes;
+
+	public float minMelanin = -1f;
+
+	public HairDef forcedHair;
+
+	public bool womenCanHaveBeards;
+
+	public float socialFightChanceFactor = 1f;
+
+	public float aggroMentalBreakSelectionChanceFactor = 1f;
+
+	public float mentalBreakMtbDays;
+
+	public MentalBreakDef mentalBreakDef;
+
+	public float missingGeneRomanceChanceFactor = 1f;
+
+	public float prisonBreakMTBFactor = 1f;
+
+	public int biostatCpx = 1;
+
+	public int biostatMet;
+
+	public int biostatArc;
+
+	public List<string> exclusionTags;
+
+	public GeneDef prerequisite;
+
+	public float selectionWeight = 1f;
+
+	public bool canGenerateInGeneSet = true;
+
+	public GeneSymbolPack symbolPack;
+
+	public float marketValueFactor = 1f;
+
+	public bool removeOnRedress;
+
+	public bool passOnDirectly = true;
+
+	public float selectionWeightFactorDarkSkin = 1f;
+
+	public float selectionWeightCultist = 1f;
+
+	[Unsaved(false)]
+	private string cachedDescription;
+
+	[Unsaved(false)]
+	private Texture2D cachedIcon;
+
+	public Texture2D Icon
+	{
+		get
+		{
+			if (cachedIcon == null)
+			{
+				if (iconPath.NullOrEmpty())
+				{
+					cachedIcon = BaseContent.BadTex;
+				}
+				else
+				{
+					cachedIcon = ContentFinder<Texture2D>.Get(iconPath) ?? BaseContent.BadTex;
+				}
+			}
+			return cachedIcon;
+		}
+	}
+
+	public Color IconColor
+	{
+		get
+		{
+			if (iconColor.HasValue)
+			{
+				return iconColor.Value;
+			}
+			if (skinColorBase.HasValue)
+			{
+				return skinColorBase.Value;
+			}
+			if (skinColorOverride.HasValue)
+			{
+				return skinColorOverride.Value;
+			}
+			if (hairColorOverride.HasValue)
+			{
+				return hairColorOverride.Value;
+			}
+			return Color.white;
+		}
+	}
+
+	public string LabelShortAdj
+	{
+		get
+		{
+			if (!labelShortAdj.NullOrEmpty())
+			{
+				return labelShortAdj;
+			}
+			return label;
+		}
+	}
+
+	public string DescriptionFull => cachedDescription ?? (cachedDescription = GetDescriptionFull());
+
+	public bool HasDefinedGraphicProperties => !renderNodeProperties.NullOrEmpty();
+
+	public List<PawnRenderNodeProperties> RenderNodeProperties => renderNodeProperties;
+
+	public bool RandomChosen
+	{
+		get
+		{
+			if (randomChosen)
 			{
 				return true;
 			}
-			if (this.exclusionTags != null && other.exclusionTags != null)
+			if (biostatArc > 0 || biostatCpx != 0 || biostatMet != 0)
 			{
-				for (int i = 0; i < this.exclusionTags.Count; i++)
-				{
-					if (other.exclusionTags.Contains(this.exclusionTags[i]))
-					{
-						return true;
-					}
-				}
+				return false;
 			}
-			return false;
+			if (!hairColorOverride.HasValue && !skinColorBase.HasValue && !skinColorOverride.HasValue && !bodyType.HasValue && forcedHeadTypes.NullOrEmpty() && hairTagFilter == null && beardTagFilter == null)
+			{
+				return HasDefinedGraphicProperties;
+			}
+			return true;
 		}
+	}
 
-		// Token: 0x06000AC7 RID: 2759 RVA: 0x00033C39 File Offset: 0x00031E39
-		public override IEnumerable<StatDrawEntry> SpecialDisplayStats(StatRequest req)
+	public override void ResolveReferences()
+	{
+		base.ResolveReferences();
+		if (displayCategory == null)
 		{
-			foreach (StatDrawEntry statDrawEntry in base.SpecialDisplayStats(req))
+			displayCategory = GeneCategoryDefOf.Miscellaneous;
+		}
+		if (renderNodeProperties != null)
+		{
+			for (int i = 0; i < renderNodeProperties.Count; i++)
 			{
-				yield return statDrawEntry;
+				renderNodeProperties[i].ResolveReferencesRecursive();
 			}
-			IEnumerator<StatDrawEntry> enumerator = null;
-			if (this.painFactor != 1f)
+		}
+	}
+
+	public int AptitudeFor(SkillDef skill)
+	{
+		int num = 0;
+		if (aptitudes.NullOrEmpty())
+		{
+			return num;
+		}
+		for (int i = 0; i < aptitudes.Count; i++)
+		{
+			if (aptitudes[i].skill == skill)
 			{
-				yield return new StatDrawEntry(StatCategoryDefOf.CapacityEffects, "Pain".Translate(), "x" + this.painFactor.ToStringPercent(), "Stat_Hediff_Pain_Desc".Translate(), 4050, null, null, false, false);
+				num += aptitudes[i].level;
 			}
-			if (this.painOffset != 0f)
+		}
+		return num;
+	}
+
+	private string GetDescriptionFull()
+	{
+		StringBuilder sb = new StringBuilder();
+		if (!description.NullOrEmpty())
+		{
+			sb.Append(description).AppendLine().AppendLine();
+		}
+		bool flag = false;
+		if (prerequisite != null)
+		{
+			sb.AppendLine("Requires".Translate() + ": " + prerequisite.LabelCap);
+			flag = true;
+		}
+		if (minAgeActive > 0f)
+		{
+			sb.AppendLine(string.Concat("TakesEffectAfterAge".Translate() + ": ", minAgeActive.ToString()));
+			flag = true;
+		}
+		if (flag)
+		{
+			sb.AppendLine();
+		}
+		bool flag2 = false;
+		if (biostatCpx != 0)
+		{
+			sb.AppendLineTagged("Complexity".Translate().Colorize(GeneUtility.GCXColor) + ": " + biostatCpx.ToStringWithSign());
+			flag2 = true;
+		}
+		if (biostatMet != 0)
+		{
+			sb.AppendLineTagged("Metabolism".Translate().CapitalizeFirst().Colorize(GeneUtility.METColor) + ": " + biostatMet.ToStringWithSign());
+			flag2 = true;
+		}
+		if (biostatArc != 0)
+		{
+			sb.AppendLineTagged("ArchitesRequired".Translate().Colorize(GeneUtility.ARCColor) + ": " + biostatArc.ToStringWithSign());
+			flag2 = true;
+		}
+		if (flag2)
+		{
+			sb.AppendLine();
+		}
+		if (forcedTraits != null)
+		{
+			sb.AppendLineTagged(("ForcedTraits".Translate() + ":").Colorize(ColoredText.TipSectionTitleColor));
+			sb.Append(forcedTraits.Select((GeneticTraitData x) => x.def.DataAtDegree(x.degree).label).ToLineList("  - ", capitalizeItems: true)).AppendLine().AppendLine();
+		}
+		if (suppressedTraits != null)
+		{
+			sb.AppendLineTagged(("SuppressedTraits".Translate() + ":").Colorize(ColoredText.TipSectionTitleColor));
+			sb.Append(suppressedTraits.Select((GeneticTraitData x) => x.def.DataAtDegree(x.degree).label).ToLineList("  - ", capitalizeItems: true)).AppendLine().AppendLine();
+		}
+		if (aptitudes != null)
+		{
+			sb.AppendLineTagged(("Aptitudes".Translate().CapitalizeFirst() + ":").Colorize(ColoredText.TipSectionTitleColor));
+			sb.Append(aptitudes.Select((Aptitude x) => x.skill.LabelCap.ToString() + " " + x.level.ToStringWithSign()).ToLineList("  - ", capitalizeItems: true)).AppendLine().AppendLine();
+		}
+		bool effectsTitleWritten = false;
+		if (passionMod != null)
+		{
+			switch (passionMod.modType)
 			{
-				yield return new StatDrawEntry(StatCategoryDefOf.CapacityEffects, "Pain".Translate(), (this.painOffset * 100f).ToString("+###0;-###0") + "%", "Stat_Hediff_Pain_Desc".Translate(), 4050, null, null, false, false);
+			case PassionMod.PassionModType.AddOneLevel:
+				AppendEffectLine("PassionModAdd".Translate(passionMod.skill));
+				break;
+			case PassionMod.PassionModType.DropAll:
+				AppendEffectLine("PassionModDrop".Translate(passionMod.skill));
+				break;
 			}
-			if (this.missingGeneRomanceChanceFactor != 1f)
+		}
+		if (!statFactors.NullOrEmpty())
+		{
+			for (int i = 0; i < statFactors.Count; i++)
 			{
-				yield return new StatDrawEntry(StatCategoryDefOf.CapacityEffects, "MissingGeneRomanceChance".Translate(this.LabelCap.Named("GENE")), "x" + this.missingGeneRomanceChanceFactor.ToStringPercent(), "StatsReport_MissingGeneRomanceChance".Translate(), 4050, null, null, false, false);
-			}
-			if (this.forcedTraits != null)
-			{
-				string text = (from x in this.forcedTraits
-				select x.def.DataAtDegree(x.degree).label).ToLineList(null, true);
-				yield return new StatDrawEntry(StatCategoryDefOf.CapacityEffects, "ForcedTraits".Translate(), text, "ForcedTraitsDesc".Translate() + "\n\n" + text, 4080, null, null, false, false);
-			}
-			if (this.aptitudes != null)
-			{
-				string text2 = (from x in this.aptitudes
-				select x.skill.LabelCap.ToString() + " " + x.level.ToStringWithSign()).ToLineList(null, true);
-				yield return new StatDrawEntry(StatCategoryDefOf.CapacityEffects, "Aptitudes".Translate().CapitalizeFirst(), text2, "AptitudesDesc".Translate() + "\n\n" + text2, 4090, null, null, false, false);
-			}
-			if (this.statOffsets != null)
-			{
-				int num;
-				for (int i = 0; i < this.statOffsets.Count; i = num + 1)
+				StatModifier statModifier = statFactors[i];
+				if (statModifier.stat.CanShowWithLoadedMods())
 				{
-					StatModifier statModifier = this.statOffsets[i];
-					if (statModifier.stat.CanShowWithLoadedMods())
-					{
-						yield return new StatDrawEntry(StatCategoryDefOf.CapacityEffects, statModifier.stat.LabelCap, statModifier.ValueToStringAsOffset, statModifier.stat.description, 4070, null, null, false, false);
-					}
-					num = i;
+					AppendEffectLine(statModifier.stat.LabelCap + " " + statModifier.ToStringAsFactor);
 				}
 			}
-			if (this.statFactors != null)
+		}
+		if (!conditionalStatAffecters.NullOrEmpty())
+		{
+			for (int j = 0; j < conditionalStatAffecters.Count; j++)
 			{
-				int num;
-				for (int i = 0; i < this.statFactors.Count; i = num + 1)
+				if (conditionalStatAffecters[j].statFactors.NullOrEmpty())
 				{
-					StatModifier statModifier2 = this.statFactors[i];
+					continue;
+				}
+				for (int k = 0; k < conditionalStatAffecters[j].statFactors.Count; k++)
+				{
+					StatModifier statModifier2 = conditionalStatAffecters[j].statFactors[k];
 					if (statModifier2.stat.CanShowWithLoadedMods())
 					{
-						yield return new StatDrawEntry(StatCategoryDefOf.CapacityEffects, statModifier2.stat.LabelCap, statModifier2.ToStringAsFactor, statModifier2.stat.description, 4070, null, null, false, false);
+						AppendEffectLine(statModifier2.stat.LabelCap + " " + statModifier2.ToStringAsFactor + " (" + conditionalStatAffecters[j].Label + ")");
 					}
-					num = i;
 				}
 			}
-			if (this.capMods != null)
-			{
-				int num;
-				for (int i = 0; i < this.capMods.Count; i = num + 1)
-				{
-					PawnCapacityModifier capMod = this.capMods[i];
-					if (capMod.offset != 0f)
-					{
-						yield return new StatDrawEntry(StatCategoryDefOf.CapacityEffects, capMod.capacity.GetLabelFor().CapitalizeFirst(), (capMod.offset * 100f).ToString("+#;-#") + "%", capMod.capacity.description, 4060, null, null, false, false);
-					}
-					if (capMod.postFactor != 1f)
-					{
-						yield return new StatDrawEntry(StatCategoryDefOf.CapacityEffects, capMod.capacity.GetLabelFor().CapitalizeFirst(), "x" + capMod.postFactor.ToStringPercent(), capMod.capacity.description, 4060, null, null, false, false);
-					}
-					if (capMod.SetMaxDefined && req.Pawn != null)
-					{
-						yield return new StatDrawEntry(StatCategoryDefOf.CapacityEffects, capMod.capacity.GetLabelFor().CapitalizeFirst(), "max".Translate().CapitalizeFirst() + " " + capMod.EvaluateSetMax(req.Pawn).ToStringPercent(), capMod.capacity.description, 4060, null, null, false, false);
-					}
-					capMod = null;
-					num = i;
-				}
-			}
-			if (this.biostatCpx != 0)
-			{
-				yield return new StatDrawEntry(StatCategoryDefOf.Genetics, "Complexity".Translate().CapitalizeFirst(), this.biostatCpx.ToString(), "ComplexityDesc".Translate(), 998, null, null, false, false);
-			}
-			if (this.biostatMet != 0)
-			{
-				yield return new StatDrawEntry(StatCategoryDefOf.Genetics, "Metabolism".Translate().CapitalizeFirst(), this.biostatMet.ToString(), "MetabolismDesc".Translate(), 997, null, null, false, false);
-			}
-			if (this.biostatArc != 0)
-			{
-				yield return new StatDrawEntry(StatCategoryDefOf.Genetics, "ArchitesRequired".Translate().CapitalizeFirst(), this.biostatArc.ToString(), "ArchitesRequiredDesc".Translate(), 995, null, null, false, false);
-			}
-			yield break;
-			yield break;
 		}
-
-		// Token: 0x06000AC8 RID: 2760 RVA: 0x00033C50 File Offset: 0x00031E50
-		public override IEnumerable<string> ConfigErrors()
+		if (!statOffsets.NullOrEmpty())
 		{
-			if (this.geneClass == null)
+			for (int l = 0; l < statOffsets.Count; l++)
 			{
-				yield return "geneClass is null";
-			}
-			if (!typeof(Gene).IsAssignableFrom(this.geneClass))
-			{
-				yield return "geneClass is not Gene or subclass thereof";
-			}
-			if (this.mentalBreakMtbDays > 0f && this.mentalBreakDef == null)
-			{
-				yield return "mentalBreakMtbDays is >0 with null mentalBreakDef";
-			}
-			if (this.HasDefinedGraphicProperties)
-			{
-				foreach (PawnRenderNodeProperties pawnRenderNodeProperties in this.renderNodeProperties)
+				StatModifier statModifier3 = statOffsets[l];
+				if (statModifier3.stat.CanShowWithLoadedMods())
 				{
-					foreach (string text in pawnRenderNodeProperties.ConfigErrors())
-					{
-						yield return text;
-					}
-					IEnumerator<string> enumerator2 = null;
+					AppendEffectLine(statModifier3.stat.LabelCap + " " + statModifier3.ValueToStringAsOffset);
 				}
-				List<PawnRenderNodeProperties>.Enumerator enumerator = default(List<PawnRenderNodeProperties>.Enumerator);
 			}
-			yield break;
-			yield break;
 		}
-
-		// Token: 0x040005A9 RID: 1449
-		public Type geneClass = typeof(Gene);
-
-		// Token: 0x040005AA RID: 1450
-		[MustTranslate]
-		public string labelShortAdj;
-
-		// Token: 0x040005AB RID: 1451
-		[MustTranslate]
-		public List<string> customEffectDescriptions;
-
-		// Token: 0x040005AC RID: 1452
-		[NoTranslate]
-		public string iconPath;
-
-		// Token: 0x040005AD RID: 1453
-		private Color? iconColor;
-
-		// Token: 0x040005AE RID: 1454
-		public GeneCategoryDef displayCategory;
-
-		// Token: 0x040005AF RID: 1455
-		public float displayOrderInCategory;
-
-		// Token: 0x040005B0 RID: 1456
-		public List<PawnRenderNodeProperties> renderNodeProperties;
-
-		// Token: 0x040005B1 RID: 1457
-		public bool neverGrayHair;
-
-		// Token: 0x040005B2 RID: 1458
-		public bool skinIsHairColor;
-
-		// Token: 0x040005B3 RID: 1459
-		public bool tattoosVisible = true;
-
-		// Token: 0x040005B4 RID: 1460
-		public FurDef fur;
-
-		// Token: 0x040005B5 RID: 1461
-		public SoundDef soundCall;
-
-		// Token: 0x040005B6 RID: 1462
-		public SoundDef soundDeath;
-
-		// Token: 0x040005B7 RID: 1463
-		public SoundDef soundWounded;
-
-		// Token: 0x040005B8 RID: 1464
-		public Type resourceGizmoType = typeof(GeneGizmo_Resource);
-
-		// Token: 0x040005B9 RID: 1465
-		public float resourceLossPerDay;
-
-		// Token: 0x040005BA RID: 1466
-		[MustTranslate]
-		public string resourceLabel;
-
-		// Token: 0x040005BB RID: 1467
-		[MustTranslate]
-		public string resourceDescription;
-
-		// Token: 0x040005BC RID: 1468
-		public List<float> resourceGizmoThresholds;
-
-		// Token: 0x040005BD RID: 1469
-		public bool showGizmoOnWorldView;
-
-		// Token: 0x040005BE RID: 1470
-		public bool showGizmoWhenDrafted;
-
-		// Token: 0x040005BF RID: 1471
-		public bool showGizmoOnMultiSelect;
-
-		// Token: 0x040005C0 RID: 1472
-		public List<AbilityDef> abilities;
-
-		// Token: 0x040005C1 RID: 1473
-		public List<GeneticTraitData> forcedTraits;
-
-		// Token: 0x040005C2 RID: 1474
-		public List<GeneticTraitData> suppressedTraits;
-
-		// Token: 0x040005C3 RID: 1475
-		public List<NeedDef> enablesNeeds;
-
-		// Token: 0x040005C4 RID: 1476
-		public List<NeedDef> disablesNeeds;
-
-		// Token: 0x040005C5 RID: 1477
-		public WorkTags disabledWorkTags;
-
-		// Token: 0x040005C6 RID: 1478
-		public bool ignoreDarkness;
-
-		// Token: 0x040005C7 RID: 1479
-		public EndogeneCategory endogeneCategory;
-
-		// Token: 0x040005C8 RID: 1480
-		public bool dislikesSunlight;
-
-		// Token: 0x040005C9 RID: 1481
-		public float minAgeActive;
-
-		// Token: 0x040005CA RID: 1482
-		public float lovinMTBFactor = 1f;
-
-		// Token: 0x040005CB RID: 1483
-		public bool immuneToToxGasExposure;
-
-		// Token: 0x040005CC RID: 1484
-		public bool immuneToVacuumBurns;
-
-		// Token: 0x040005CD RID: 1485
-		public bool randomChosen;
-
-		// Token: 0x040005CE RID: 1486
-		public int? waterCellCost;
-
-		// Token: 0x040005CF RID: 1487
-		public HistoryEventDef deathHistoryEvent;
-
-		// Token: 0x040005D0 RID: 1488
-		public List<Aptitude> aptitudes;
-
-		// Token: 0x040005D1 RID: 1489
-		public PassionMod passionMod;
-
-		// Token: 0x040005D2 RID: 1490
-		public List<StatModifier> statOffsets;
-
-		// Token: 0x040005D3 RID: 1491
-		public List<StatModifier> statFactors;
-
-		// Token: 0x040005D4 RID: 1492
-		public List<ConditionalStatAffecter> conditionalStatAffecters;
-
-		// Token: 0x040005D5 RID: 1493
-		public float painOffset;
-
-		// Token: 0x040005D6 RID: 1494
-		public float painFactor = 1f;
-
-		// Token: 0x040005D7 RID: 1495
-		public float foodPoisoningChanceFactor = 1f;
-
-		// Token: 0x040005D8 RID: 1496
-		public List<DamageFactor> damageFactors;
-
-		// Token: 0x040005D9 RID: 1497
-		public SimpleCurve biologicalAgeTickFactorFromAgeCurve;
-
-		// Token: 0x040005DA RID: 1498
-		public List<HediffDef> makeImmuneTo;
-
-		// Token: 0x040005DB RID: 1499
-		public List<HediffDef> hediffGiversCannotGive;
-
-		// Token: 0x040005DC RID: 1500
-		public ChemicalDef chemical;
-
-		// Token: 0x040005DD RID: 1501
-		public float addictionChanceFactor = 1f;
-
-		// Token: 0x040005DE RID: 1502
-		public float overdoseChanceFactor = 1f;
-
-		// Token: 0x040005DF RID: 1503
-		public float toleranceBuildupFactor = 1f;
-
-		// Token: 0x040005E0 RID: 1504
-		public bool sterilize;
-
-		// Token: 0x040005E1 RID: 1505
-		public List<PawnCapacityModifier> capMods;
-
-		// Token: 0x040005E2 RID: 1506
-		public bool preventPermanentWounds;
-
-		// Token: 0x040005E3 RID: 1507
-		public bool dontMindRawFood;
-
-		// Token: 0x040005E4 RID: 1508
-		public Color? hairColorOverride;
-
-		// Token: 0x040005E5 RID: 1509
-		public Color? skinColorBase;
-
-		// Token: 0x040005E6 RID: 1510
-		public Color? skinColorOverride;
-
-		// Token: 0x040005E7 RID: 1511
-		public float randomBrightnessFactor;
-
-		// Token: 0x040005E8 RID: 1512
-		public TagFilter hairTagFilter;
-
-		// Token: 0x040005E9 RID: 1513
-		public TagFilter beardTagFilter;
-
-		// Token: 0x040005EA RID: 1514
-		public GeneticBodyType? bodyType;
-
-		// Token: 0x040005EB RID: 1515
-		public List<HeadTypeDef> forcedHeadTypes;
-
-		// Token: 0x040005EC RID: 1516
-		public float minMelanin = -1f;
-
-		// Token: 0x040005ED RID: 1517
-		public HairDef forcedHair;
-
-		// Token: 0x040005EE RID: 1518
-		public bool womenCanHaveBeards;
-
-		// Token: 0x040005EF RID: 1519
-		public float socialFightChanceFactor = 1f;
-
-		// Token: 0x040005F0 RID: 1520
-		public float aggroMentalBreakSelectionChanceFactor = 1f;
-
-		// Token: 0x040005F1 RID: 1521
-		public float mentalBreakMtbDays;
-
-		// Token: 0x040005F2 RID: 1522
-		public MentalBreakDef mentalBreakDef;
-
-		// Token: 0x040005F3 RID: 1523
-		public float missingGeneRomanceChanceFactor = 1f;
-
-		// Token: 0x040005F4 RID: 1524
-		public float prisonBreakMTBFactor = 1f;
-
-		// Token: 0x040005F5 RID: 1525
-		public int biostatCpx = 1;
-
-		// Token: 0x040005F6 RID: 1526
-		public int biostatMet;
-
-		// Token: 0x040005F7 RID: 1527
-		public int biostatArc;
-
-		// Token: 0x040005F8 RID: 1528
-		public List<string> exclusionTags;
-
-		// Token: 0x040005F9 RID: 1529
-		public GeneDef prerequisite;
-
-		// Token: 0x040005FA RID: 1530
-		public float selectionWeight = 1f;
-
-		// Token: 0x040005FB RID: 1531
-		public bool canGenerateInGeneSet = true;
-
-		// Token: 0x040005FC RID: 1532
-		public GeneSymbolPack symbolPack;
-
-		// Token: 0x040005FD RID: 1533
-		public float marketValueFactor = 1f;
-
-		// Token: 0x040005FE RID: 1534
-		public bool removeOnRedress;
-
-		// Token: 0x040005FF RID: 1535
-		public bool passOnDirectly = true;
-
-		// Token: 0x04000600 RID: 1536
-		public float selectionWeightFactorDarkSkin = 1f;
-
-		// Token: 0x04000601 RID: 1537
-		public float selectionWeightCultist = 1f;
-
-		// Token: 0x04000602 RID: 1538
-		[Unsaved(false)]
-		private string cachedDescription;
-
-		// Token: 0x04000603 RID: 1539
-		[Unsaved(false)]
-		private Texture2D cachedIcon;
+		if (!conditionalStatAffecters.NullOrEmpty())
+		{
+			for (int m = 0; m < conditionalStatAffecters.Count; m++)
+			{
+				if (conditionalStatAffecters[m].statOffsets.NullOrEmpty())
+				{
+					continue;
+				}
+				for (int n = 0; n < conditionalStatAffecters[m].statOffsets.Count; n++)
+				{
+					StatModifier statModifier4 = conditionalStatAffecters[m].statOffsets[n];
+					if (statModifier4.stat.CanShowWithLoadedMods())
+					{
+						AppendEffectLine(statModifier4.stat.LabelCap + " " + statModifier4.ValueToStringAsOffset + " (" + conditionalStatAffecters[m].Label.UncapitalizeFirst() + ")");
+					}
+				}
+			}
+		}
+		if (!capMods.NullOrEmpty())
+		{
+			for (int num = 0; num < capMods.Count; num++)
+			{
+				PawnCapacityModifier pawnCapacityModifier = capMods[num];
+				if (pawnCapacityModifier.offset != 0f)
+				{
+					AppendEffectLine(pawnCapacityModifier.capacity.GetLabelFor().CapitalizeFirst() + " " + (pawnCapacityModifier.offset * 100f).ToString("+#;-#") + "%");
+				}
+				if (pawnCapacityModifier.postFactor != 1f)
+				{
+					AppendEffectLine(pawnCapacityModifier.capacity.GetLabelFor().CapitalizeFirst() + " x" + pawnCapacityModifier.postFactor.ToStringPercent());
+				}
+				if (pawnCapacityModifier.setMax != 999f)
+				{
+					AppendEffectLine(pawnCapacityModifier.capacity.GetLabelFor().CapitalizeFirst() + " " + "max".Translate().CapitalizeFirst() + ": " + pawnCapacityModifier.setMax.ToStringPercent());
+				}
+			}
+		}
+		if (!customEffectDescriptions.NullOrEmpty())
+		{
+			foreach (string customEffectDescription in customEffectDescriptions)
+			{
+				AppendEffectLine(customEffectDescription.ResolveTags());
+			}
+		}
+		if (!damageFactors.NullOrEmpty())
+		{
+			for (int num2 = 0; num2 < damageFactors.Count; num2++)
+			{
+				AppendEffectLine("DamageType".Translate(damageFactors[num2].damageDef.label).CapitalizeFirst() + " x" + damageFactors[num2].factor.ToStringPercent());
+			}
+		}
+		if (resourceLossPerDay != 0f && !resourceLabel.NullOrEmpty())
+		{
+			AppendEffectLine("ResourceLossPerDay".Translate(resourceLabel.Named("RESOURCE"), (-Mathf.RoundToInt(resourceLossPerDay * 100f)).ToStringWithSign().Named("OFFSET")).CapitalizeFirst());
+		}
+		if (!Mathf.Approximately(painFactor, 1f))
+		{
+			AppendEffectLine("Pain".Translate() + " x" + painFactor.ToStringPercent());
+		}
+		if (painOffset != 0f)
+		{
+			AppendEffectLine("Pain".Translate() + " " + (painOffset * 100f).ToString("+###0;-###0") + "%");
+		}
+		if (chemical != null)
+		{
+			if (!Mathf.Approximately(addictionChanceFactor, 1f))
+			{
+				if (addictionChanceFactor <= 0f)
+				{
+					AppendEffectLine("AddictionImmune".Translate(chemical).CapitalizeFirst());
+				}
+				else
+				{
+					AppendEffectLine("AddictionChanceFactor".Translate(chemical).CapitalizeFirst() + " x" + addictionChanceFactor.ToStringPercent());
+				}
+			}
+			if (overdoseChanceFactor != 1f)
+			{
+				AppendEffectLine("OverdoseChanceFactor".Translate(chemical).CapitalizeFirst() + " x" + overdoseChanceFactor.ToStringPercent());
+			}
+			if (toleranceBuildupFactor != 1f)
+			{
+				AppendEffectLine("ToleranceBuildupFactor".Translate(chemical).CapitalizeFirst() + " x" + toleranceBuildupFactor.ToStringPercent());
+			}
+		}
+		if (!enablesNeeds.NullOrEmpty())
+		{
+			if (enablesNeeds.Count == 1)
+			{
+				AppendEffectLine($"{"AddsNeed".Translate()}: {enablesNeeds[0].LabelCap}");
+			}
+			else
+			{
+				AppendEffectLine($"{"AddsNeeds".Translate()}: {enablesNeeds.Select((NeedDef x) => x.label).ToCommaList().CapitalizeFirst()}");
+			}
+		}
+		if (!disablesNeeds.NullOrEmpty())
+		{
+			if (disablesNeeds.Count == 1)
+			{
+				AppendEffectLine($"{"DisablesNeed".Translate()}: {disablesNeeds[0].LabelCap}");
+			}
+			else
+			{
+				AppendEffectLine($"{"DisablesNeeds".Translate()}: {disablesNeeds.Select((NeedDef x) => x.label).ToCommaList().CapitalizeFirst()}");
+			}
+		}
+		if (missingGeneRomanceChanceFactor != 1f)
+		{
+			AppendEffectLine("MissingGeneRomanceChance".Translate(label.Named("GENE")) + " x" + missingGeneRomanceChanceFactor.ToStringPercent());
+		}
+		if (ignoreDarkness)
+		{
+			AppendEffectLine("UnaffectedByDarkness".Translate());
+		}
+		if (foodPoisoningChanceFactor != 1f)
+		{
+			if (foodPoisoningChanceFactor <= 0f)
+			{
+				AppendEffectLine("FoodPoisoningImmune".Translate());
+			}
+			else
+			{
+				AppendEffectLine("Stat_Hediff_FoodPoisoningChanceFactor_Name".Translate() + " x" + foodPoisoningChanceFactor.ToStringPercent());
+			}
+		}
+		if (socialFightChanceFactor != 1f)
+		{
+			if (socialFightChanceFactor <= 0f)
+			{
+				AppendEffectLine("WillNeverSocialFight".Translate());
+			}
+			else
+			{
+				AppendEffectLine("SocialFightChanceFactor".Translate() + " x" + socialFightChanceFactor.ToStringPercent());
+			}
+		}
+		if (aggroMentalBreakSelectionChanceFactor != 1f)
+		{
+			if (aggroMentalBreakSelectionChanceFactor >= 999f)
+			{
+				AppendEffectLine("AlwaysAggroMentalBreak".Translate());
+			}
+			else if (aggroMentalBreakSelectionChanceFactor <= 0f)
+			{
+				AppendEffectLine("NeverAggroMentalBreak".Translate());
+			}
+			else
+			{
+				AppendEffectLine("AggroMentalBreakSelectionChanceFactor".Translate() + " x" + aggroMentalBreakSelectionChanceFactor.ToStringPercent());
+			}
+		}
+		if (prisonBreakMTBFactor != 1f)
+		{
+			if (prisonBreakMTBFactor < 0f)
+			{
+				AppendEffectLine("WillNeverPrisonBreak".Translate());
+			}
+			else
+			{
+				AppendEffectLine("PrisonBreakIntervalFactor".Translate() + " x" + prisonBreakMTBFactor.ToStringPercent());
+			}
+		}
+		bool flag3 = effectsTitleWritten;
+		if (!makeImmuneTo.NullOrEmpty())
+		{
+			if (flag3)
+			{
+				sb.AppendLine();
+			}
+			sb.AppendLineTagged(("ImmuneTo".Translate() + ":").Colorize(ColoredText.TipSectionTitleColor));
+			sb.AppendLine(makeImmuneTo.Select((HediffDef x) => x.label).ToLineList("  - ", capitalizeItems: true));
+			flag3 = true;
+		}
+		if (!hediffGiversCannotGive.NullOrEmpty())
+		{
+			if (flag3)
+			{
+				sb.AppendLine();
+			}
+			sb.AppendLineTagged(("ImmuneTo".Translate() + ":").Colorize(ColoredText.TipSectionTitleColor));
+			sb.AppendLine(hediffGiversCannotGive.Select((HediffDef x) => x.label).ToLineList("  - ", capitalizeItems: true));
+			flag3 = true;
+		}
+		if (biologicalAgeTickFactorFromAgeCurve != null)
+		{
+			if (flag3)
+			{
+				sb.AppendLine();
+			}
+			sb.AppendLineTagged(("AgeFactors".Translate().CapitalizeFirst() + ":").Colorize(ColoredText.TipSectionTitleColor));
+			sb.AppendLine(biologicalAgeTickFactorFromAgeCurve.Select((CurvePoint p) => "PeriodYears".Translate(p.x).ToString() + ": x" + p.y.ToStringPercent()).ToLineList("  - ", capitalizeItems: true));
+			flag3 = true;
+		}
+		if (disabledWorkTags != 0)
+		{
+			if (flag3)
+			{
+				sb.AppendLine();
+			}
+			IEnumerable<WorkTypeDef> source = DefDatabase<WorkTypeDef>.AllDefsListForReading.Where((WorkTypeDef x) => (disabledWorkTags & x.workTags) != 0);
+			sb.AppendLineTagged(("DisabledWorkLabel".Translate().CapitalizeFirst() + ":").Colorize(ColoredText.TipSectionTitleColor));
+			sb.AppendLine("  - " + source.Select((WorkTypeDef x) => x.labelShort).ToCommaList().CapitalizeFirst());
+			if (disabledWorkTags.ExactlyOneWorkTagSet())
+			{
+				sb.AppendLine("  - " + disabledWorkTags.LabelTranslated().CapitalizeFirst());
+			}
+			flag3 = true;
+		}
+		if (!abilities.NullOrEmpty())
+		{
+			if (flag3)
+			{
+				sb.AppendLine();
+			}
+			if (abilities.Count == 1)
+			{
+				sb.AppendLineTagged(("GivesAbility".Translate().CapitalizeFirst() + ":").Colorize(ColoredText.TipSectionTitleColor));
+			}
+			else
+			{
+				sb.AppendLineTagged(("GivesAbilities".Translate().CapitalizeFirst() + ":").Colorize(ColoredText.TipSectionTitleColor));
+			}
+			sb.AppendLine(abilities.Select((AbilityDef x) => x.label).ToLineList("  - ", capitalizeItems: true));
+			flag3 = true;
+		}
+		IEnumerable<ThoughtDef> enumerable = DefDatabase<ThoughtDef>.AllDefs.Where((ThoughtDef x) => (x.requiredGenes.NotNullAndContains(this) || x.nullifyingGenes.NotNullAndContains(this)) && x.stages != null && x.stages.Any((ThoughtStage y) => y.baseMoodEffect != 0f));
+		if (enumerable.Any())
+		{
+			if (flag3)
+			{
+				sb.AppendLine();
+			}
+			sb.AppendLineTagged(("Mood".Translate().CapitalizeFirst() + ":").Colorize(ColoredText.TipSectionTitleColor));
+			foreach (ThoughtDef item in enumerable)
+			{
+				ThoughtStage thoughtStage = item.stages.FirstOrDefault((ThoughtStage x) => x.baseMoodEffect != 0f);
+				if (thoughtStage != null)
+				{
+					string text2 = thoughtStage.LabelCap + ": " + thoughtStage.baseMoodEffect.ToStringWithSign();
+					if (item.requiredGenes.NotNullAndContains(this))
+					{
+						sb.AppendLine("  - " + text2);
+					}
+					else if (item.nullifyingGenes.NotNullAndContains(this))
+					{
+						sb.AppendLine("  - " + "Removes".Translate() + ": " + text2);
+					}
+				}
+			}
+		}
+		return sb.ToString().TrimEndNewlines();
+		void AppendEffectLine(string text)
+		{
+			if (!effectsTitleWritten)
+			{
+				sb.AppendLineTagged(("Effects".Translate().CapitalizeFirst() + ":").Colorize(ColoredText.TipSectionTitleColor));
+				effectsTitleWritten = true;
+			}
+			sb.AppendLine("  - " + text);
+		}
+	}
+
+	public bool ConflictsWith(GeneDef other)
+	{
+		if (this == other)
+		{
+			return true;
+		}
+		if (exclusionTags != null && other.exclusionTags != null)
+		{
+			for (int i = 0; i < exclusionTags.Count; i++)
+			{
+				if (other.exclusionTags.Contains(exclusionTags[i]))
+				{
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	[IteratorStateMachine(typeof(_003CSpecialDisplayStats_003Ed__109))]
+	public override IEnumerable<StatDrawEntry> SpecialDisplayStats(StatRequest req)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CSpecialDisplayStats_003Ed__109(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__req = req
+		};
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__110))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__110(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

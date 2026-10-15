@@ -1,109 +1,207 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public abstract class ScenPart_IncidentBase : ScenPart
 {
-	// Token: 0x020028BA RID: 10426
-	public abstract class ScenPart_IncidentBase : ScenPart
+	[CompilerGenerated]
+	private sealed class _003CGetSummaryListEntries_003Ed__9 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x170022AE RID: 8878
-		// (get) Token: 0x0600E415 RID: 58389 RVA: 0x0042A584 File Offset: 0x00428784
-		public IncidentDef Incident
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private string tag;
+
+		public string _003C_003E3__tag;
+
+		public ScenPart_IncidentBase _003C_003E4__this;
+
+		string IEnumerator<string>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.incident;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170022AF RID: 8879
-		// (get) Token: 0x0600E416 RID: 58390
-		protected abstract string IncidentTag { get; }
-
-		// Token: 0x0600E417 RID: 58391 RVA: 0x0042A58C File Offset: 0x0042878C
-		public override void ExposeData()
+		object IEnumerator.Current
 		{
-			base.ExposeData();
-			Scribe_Defs.Look<IncidentDef>(ref this.incident, "incident");
-			if (Scribe.mode == LoadSaveMode.PostLoadInit && this.incident == null)
+			[DebuggerHidden]
+			get
 			{
-				this.incident = this.RandomizableIncidents().FirstOrDefault<IncidentDef>();
-				Log.Error("ScenPart has null incident after loading. Changing to " + this.incident.ToStringSafe<IncidentDef>());
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600E418 RID: 58392 RVA: 0x0042A5EA File Offset: 0x004287EA
-		public override int GetHashCode()
+		[DebuggerHidden]
+		public _003CGetSummaryListEntries_003Ed__9(int _003C_003E1__state)
 		{
-			return base.GetHashCode() ^ ((this.incident != null) ? this.incident.GetHashCode() : 0);
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x0600E419 RID: 58393 RVA: 0x0042A60C File Offset: 0x0042880C
-		public override void DoEditInterface(Listing_ScenEdit listing)
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			Rect scenPartRect = listing.GetScenPartRect(this, ScenPart.RowHeight);
-			this.DoIncidentEditInterface(scenPartRect);
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x0600E41A RID: 58394 RVA: 0x0042A630 File Offset: 0x00428830
-		public override string Summary(Scenario scen)
+		private bool MoveNext()
 		{
-			string key = "ScenPart_" + this.IncidentTag;
-			return ScenSummaryList.SummaryWithList(scen, this.IncidentTag, key.Translate());
-		}
-
-		// Token: 0x0600E41B RID: 58395 RVA: 0x0042A665 File Offset: 0x00428865
-		public override IEnumerable<string> GetSummaryListEntries(string tag)
-		{
-			if (tag == this.IncidentTag)
+			int num = _003C_003E1__state;
+			ScenPart_IncidentBase scenPart_IncidentBase = _003C_003E4__this;
+			switch (num)
 			{
-				yield return this.incident.LabelCap;
-			}
-			yield break;
-		}
-
-		// Token: 0x0600E41C RID: 58396 RVA: 0x0042A67C File Offset: 0x0042887C
-		public override void Randomize()
-		{
-			this.incident = this.RandomizableIncidents().RandomElement<IncidentDef>();
-		}
-
-		// Token: 0x0600E41D RID: 58397 RVA: 0x0042A690 File Offset: 0x00428890
-		public override bool TryMerge(ScenPart other)
-		{
-			ScenPart_IncidentBase scenPart_IncidentBase = other as ScenPart_IncidentBase;
-			return scenPart_IncidentBase != null && scenPart_IncidentBase.Incident == this.incident;
-		}
-
-		// Token: 0x0600E41E RID: 58398 RVA: 0x0042A6B8 File Offset: 0x004288B8
-		public override bool CanCoexistWith(ScenPart other)
-		{
-			ScenPart_IncidentBase scenPart_IncidentBase = other as ScenPart_IncidentBase;
-			return scenPart_IncidentBase == null || scenPart_IncidentBase.Incident != this.incident;
-		}
-
-		// Token: 0x0600E41F RID: 58399 RVA: 0x0042A6E2 File Offset: 0x004288E2
-		protected virtual IEnumerable<IncidentDef> RandomizableIncidents()
-		{
-			return Enumerable.Empty<IncidentDef>();
-		}
-
-		// Token: 0x0600E420 RID: 58400 RVA: 0x0042A6EC File Offset: 0x004288EC
-		protected void DoIncidentEditInterface(Rect rect)
-		{
-			if (Widgets.ButtonText(rect, this.incident.LabelCap, true, true, true, null))
-			{
-				FloatMenuUtility.MakeMenu<IncidentDef>(DefDatabase<IncidentDef>.AllDefs, (IncidentDef id) => id.LabelCap, (IncidentDef id) => delegate()
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (tag == scenPart_IncidentBase.IncidentTag)
 				{
-					this.incident = id;
-				});
+					_003C_003E2__current = scenPart_IncidentBase.incident.LabelCap;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				break;
+			case 1:
+				_003C_003E1__state = -1;
+				break;
 			}
+			return false;
 		}
 
-		// Token: 0x040098B0 RID: 39088
-		protected IncidentDef incident;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CGetSummaryListEntries_003Ed__9 _003CGetSummaryListEntries_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CGetSummaryListEntries_003Ed__ = this;
+			}
+			else
+			{
+				_003CGetSummaryListEntries_003Ed__ = new _003CGetSummaryListEntries_003Ed__9(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CGetSummaryListEntries_003Ed__.tag = _003C_003E3__tag;
+			return _003CGetSummaryListEntries_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	protected IncidentDef incident;
+
+	public IncidentDef Incident => incident;
+
+	protected abstract string IncidentTag { get; }
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Defs.Look(ref incident, "incident");
+		if (Scribe.mode == LoadSaveMode.PostLoadInit && incident == null)
+		{
+			incident = RandomizableIncidents().FirstOrDefault();
+			Log.Error("ScenPart has null incident after loading. Changing to " + incident.ToStringSafe());
+		}
+	}
+
+	public override int GetHashCode()
+	{
+		return base.GetHashCode() ^ ((incident != null) ? incident.GetHashCode() : 0);
+	}
+
+	public override void DoEditInterface(Listing_ScenEdit listing)
+	{
+		Rect scenPartRect = listing.GetScenPartRect(this, ScenPart.RowHeight);
+		DoIncidentEditInterface(scenPartRect);
+	}
+
+	public override string Summary(Scenario scen)
+	{
+		string key = "ScenPart_" + IncidentTag;
+		return ScenSummaryList.SummaryWithList(scen, IncidentTag, key.Translate());
+	}
+
+	[IteratorStateMachine(typeof(_003CGetSummaryListEntries_003Ed__9))]
+	public override IEnumerable<string> GetSummaryListEntries(string tag)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetSummaryListEntries_003Ed__9(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__tag = tag
+		};
+	}
+
+	public override void Randomize()
+	{
+		incident = RandomizableIncidents().RandomElement();
+	}
+
+	public override bool TryMerge(ScenPart other)
+	{
+		if (other is ScenPart_IncidentBase scenPart_IncidentBase)
+		{
+			return scenPart_IncidentBase.Incident == incident;
+		}
+		return false;
+	}
+
+	public override bool CanCoexistWith(ScenPart other)
+	{
+		if (other is ScenPart_IncidentBase scenPart_IncidentBase)
+		{
+			return scenPart_IncidentBase.Incident != incident;
+		}
+		return true;
+	}
+
+	protected virtual IEnumerable<IncidentDef> RandomizableIncidents()
+	{
+		return Enumerable.Empty<IncidentDef>();
+	}
+
+	protected void DoIncidentEditInterface(Rect rect)
+	{
+		if (!Widgets.ButtonText(rect, incident.LabelCap, drawBackground: true, doMouseoverSound: true, active: true, null))
+		{
+			return;
+		}
+		FloatMenuUtility.MakeMenu(DefDatabase<IncidentDef>.AllDefs, (IncidentDef id) => id.LabelCap, (IncidentDef id) => delegate
+		{
+			incident = id;
+		});
 	}
 }

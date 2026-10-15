@@ -1,75 +1,184 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_FixBrokenDownBuilding : JobDriver
 {
-	// Token: 0x02001172 RID: 4466
-	public class JobDriver_FixBrokenDownBuilding : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__8 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x170010E3 RID: 4323
-		// (get) Token: 0x06006D41 RID: 27969 RVA: 0x00223D0C File Offset: 0x00221F0C
-		private Building Building
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_FixBrokenDownBuilding _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (Building)this.job.GetTarget(TargetIndex.A).Thing;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170010E4 RID: 4324
-		// (get) Token: 0x06006D42 RID: 27970 RVA: 0x00223D34 File Offset: 0x00221F34
-		private Thing Components
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.job.GetTarget(TargetIndex.B).Thing;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06006D43 RID: 27971 RVA: 0x00223D58 File Offset: 0x00221F58
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__8(int _003C_003E1__state)
 		{
-			return this.pawn.Reserve(this.Building, this.job, 1, -1, null, errorOnFailed, false) && this.pawn.Reserve(this.Components, this.job, 1, -1, null, errorOnFailed, false);
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x06006D44 RID: 27972 RVA: 0x00223DAB File Offset: 0x00221FAB
-		protected override IEnumerable<Toil> MakeNewToils()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			this.FailOnDespawnedNullOrForbidden(TargetIndex.A);
-			yield return Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.Touch, false).FailOnDespawnedNullOrForbidden(TargetIndex.B).FailOnSomeonePhysicallyInteracting(TargetIndex.B);
-			yield return Toils_Haul.StartCarryThing(TargetIndex.B, false, false, false, true, false);
-			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch, false).FailOnDespawnedOrNull(TargetIndex.A);
-			Toil toil = Toils_General.Wait(1000, TargetIndex.None);
-			toil.FailOnDespawnedOrNull(TargetIndex.A);
-			toil.FailOnCannotTouch(TargetIndex.A, PathEndMode.Touch);
-			toil.WithEffect(this.Building.def.repairEffect, TargetIndex.A, null);
-			toil.WithProgressBarToilDelay(TargetIndex.A, false, -0.5f);
-			toil.activeSkill = (() => SkillDefOf.Construction);
-			yield return toil;
-			Toil toil2 = ToilMaker.MakeToil("MakeNewToils");
-			toil2.initAction = delegate()
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_FixBrokenDownBuilding CS_0024_003C_003E8__locals8 = _003C_003E4__this;
+			switch (num)
 			{
-				this.Components.Destroy(DestroyMode.Vanish);
-				if (Rand.Value > this.pawn.GetStatValue(StatDefOf.FixBrokenDownBuildingSuccessChance, true, -1))
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				CS_0024_003C_003E8__locals8.FailOnDespawnedNullOrForbidden(TargetIndex.A);
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.Touch).FailOnDespawnedNullOrForbidden(TargetIndex.B).FailOnSomeonePhysicallyInteracting(TargetIndex.B);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Haul.StartCarryThing(TargetIndex.B);
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch).FailOnDespawnedOrNull(TargetIndex.A);
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+			{
+				_003C_003E1__state = -1;
+				Toil toil2 = Toils_General.Wait(1000);
+				toil2.FailOnDespawnedOrNull(TargetIndex.A);
+				toil2.FailOnCannotTouch(TargetIndex.A, PathEndMode.Touch);
+				toil2.WithEffect(CS_0024_003C_003E8__locals8.Building.def.repairEffect, TargetIndex.A, null);
+				toil2.WithProgressBarToilDelay(TargetIndex.A);
+				toil2.activeSkill = () => SkillDefOf.Construction;
+				_003C_003E2__current = toil2;
+				_003C_003E1__state = 4;
+				return true;
+			}
+			case 4:
+			{
+				_003C_003E1__state = -1;
+				Toil toil = ToilMaker.MakeToil("MakeNewToils");
+				toil.initAction = delegate
 				{
-					MoteMaker.ThrowText((this.pawn.DrawPos + this.Building.DrawPos) / 2f, base.Map, "TextMote_FixBrokenDownBuildingFail".Translate(), 3.65f);
-					return;
-				}
-				this.Building.GetComp<CompBreakdownable>().Notify_Repaired();
-			};
-			yield return toil2;
-			yield break;
+					CS_0024_003C_003E8__locals8.Components.Destroy();
+					if (Rand.Value > CS_0024_003C_003E8__locals8.pawn.GetStatValue(StatDefOf.FixBrokenDownBuildingSuccessChance))
+					{
+						MoteMaker.ThrowText((CS_0024_003C_003E8__locals8.pawn.DrawPos + CS_0024_003C_003E8__locals8.Building.DrawPos) / 2f, CS_0024_003C_003E8__locals8.Map, "TextMote_FixBrokenDownBuildingFail".Translate(), 3.65f);
+					}
+					else
+					{
+						CS_0024_003C_003E8__locals8.Building.GetComp<CompBreakdownable>().Notify_Repaired();
+					}
+				};
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 5;
+				return true;
+			}
+			case 5:
+				_003C_003E1__state = -1;
+				return false;
+			}
 		}
 
-		// Token: 0x04004C8B RID: 19595
-		private const TargetIndex BuildingInd = TargetIndex.A;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x04004C8C RID: 19596
-		private const TargetIndex ComponentInd = TargetIndex.B;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04004C8D RID: 19597
-		private const int TicksDuration = 1000;
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__8 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__8(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private const TargetIndex BuildingInd = TargetIndex.A;
+
+	private const TargetIndex ComponentInd = TargetIndex.B;
+
+	private const int TicksDuration = 1000;
+
+	private Building Building => (Building)job.GetTarget(TargetIndex.A).Thing;
+
+	private Thing Components => job.GetTarget(TargetIndex.B).Thing;
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		if (pawn.Reserve(Building, job, 1, -1, null, errorOnFailed))
+		{
+			return pawn.Reserve(Components, job, 1, -1, null, errorOnFailed);
+		}
+		return false;
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__8))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__8(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

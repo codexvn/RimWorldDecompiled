@@ -1,35 +1,133 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class IngestionOutcomeDoer_OffsetPsyfocus : IngestionOutcomeDoer
 {
-	// Token: 0x020019A9 RID: 6569
-	public class IngestionOutcomeDoer_OffsetPsyfocus : IngestionOutcomeDoer
+	[CompilerGenerated]
+	private sealed class _003CSpecialDisplayStats_003Ed__2 : IEnumerable<StatDrawEntry>, IEnumerable, IEnumerator<StatDrawEntry>, IEnumerator, IDisposable
 	{
-		// Token: 0x060094A3 RID: 38051 RVA: 0x002BA2CB File Offset: 0x002B84CB
-		protected override void DoIngestionOutcomeSpecial(Pawn pawn, Thing ingested, int ingestedCount)
+		private int _003C_003E1__state;
+
+		private StatDrawEntry _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public IngestionOutcomeDoer_OffsetPsyfocus _003C_003E4__this;
+
+		StatDrawEntry IEnumerator<StatDrawEntry>.Current
 		{
-			Pawn_PsychicEntropyTracker psychicEntropy = pawn.psychicEntropy;
-			if (psychicEntropy == null)
+			[DebuggerHidden]
+			get
 			{
-				return;
+				return _003C_003E2__current;
 			}
-			psychicEntropy.OffsetPsyfocusDirectly(this.offset * (float)ingestedCount);
 		}
 
-		// Token: 0x060094A4 RID: 38052 RVA: 0x002BA2E6 File Offset: 0x002B84E6
-		public override IEnumerable<StatDrawEntry> SpecialDisplayStats(ThingDef parentDef)
+		object IEnumerator.Current
 		{
-			if (ModsConfig.RoyaltyActive)
+			[DebuggerHidden]
+			get
 			{
-				string str = (this.offset >= 0f) ? "+" : string.Empty;
-				yield return new StatDrawEntry(StatCategoryDefOf.Drug, "Psyfocus".Translate(), str + this.offset.ToStringPercent(), "PsyfocusDesc".Translate() + ".", 1000, null, null, false, false);
+				return _003C_003E2__current;
 			}
-			yield break;
 		}
 
-		// Token: 0x0400608C RID: 24716
-		public float offset;
+		[DebuggerHidden]
+		public _003CSpecialDisplayStats_003Ed__2(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			IngestionOutcomeDoer_OffsetPsyfocus ingestionOutcomeDoer_OffsetPsyfocus = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (ModsConfig.RoyaltyActive)
+				{
+					string text = ((ingestionOutcomeDoer_OffsetPsyfocus.offset >= 0f) ? "+" : string.Empty);
+					_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.Drug, "Psyfocus".Translate(), text + ingestionOutcomeDoer_OffsetPsyfocus.offset.ToStringPercent(), "PsyfocusDesc".Translate() + ".", 1000);
+					_003C_003E1__state = 1;
+					return true;
+				}
+				break;
+			case 1:
+				_003C_003E1__state = -1;
+				break;
+			}
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<StatDrawEntry> IEnumerable<StatDrawEntry>.GetEnumerator()
+		{
+			_003CSpecialDisplayStats_003Ed__2 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CSpecialDisplayStats_003Ed__2(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<StatDrawEntry>)this).GetEnumerator();
+		}
+	}
+
+	public float offset;
+
+	protected override void DoIngestionOutcomeSpecial(Pawn pawn, Thing ingested, int ingestedCount)
+	{
+		pawn.psychicEntropy?.OffsetPsyfocusDirectly(offset * (float)ingestedCount);
+	}
+
+	[IteratorStateMachine(typeof(_003CSpecialDisplayStats_003Ed__2))]
+	public override IEnumerable<StatDrawEntry> SpecialDisplayStats(ThingDef parentDef)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CSpecialDisplayStats_003Ed__2(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

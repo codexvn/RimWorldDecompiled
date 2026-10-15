@@ -1,122 +1,271 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class RoyalTitlePermitWorker_OrbitalStrike : RoyalTitlePermitWorker_Targeted
 {
-	// Token: 0x020023E9 RID: 9193
-	public class RoyalTitlePermitWorker_OrbitalStrike : RoyalTitlePermitWorker_Targeted
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass4_0
 	{
-		// Token: 0x0600C750 RID: 51024 RVA: 0x003A168C File Offset: 0x0039F88C
-		public override bool ValidateTarget(LocalTargetInfo target, bool showMessages = true)
+		public RoyalTitlePermitWorker_OrbitalStrike _003C_003E4__this;
+
+		public Pawn pawn;
+
+		public Faction faction;
+
+		public Map map;
+
+		public bool free;
+
+		internal void _003CGetRoyalAidOptions_003Eb__0()
 		{
-			if (!base.CanHitTarget(target))
+			_003C_003E4__this.BeginCallBombardment(pawn, faction, map, free);
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGetRoyalAidOptions_003Ed__4 : IEnumerable<FloatMenuOption>, IEnumerable, IEnumerator<FloatMenuOption>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private FloatMenuOption _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public RoyalTitlePermitWorker_OrbitalStrike _003C_003E4__this;
+
+		private Pawn pawn;
+
+		public Pawn _003C_003E3__pawn;
+
+		private Faction faction;
+
+		public Faction _003C_003E3__faction;
+
+		private Map map;
+
+		public Map _003C_003E3__map;
+
+		FloatMenuOption IEnumerator<FloatMenuOption>.Current
+		{
+			[DebuggerHidden]
+			get
 			{
-				if (target.IsValid && showMessages)
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetRoyalAidOptions_003Ed__4(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			RoyalTitlePermitWorker_OrbitalStrike royalTitlePermitWorker_OrbitalStrike = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+			{
+				_003C_003E1__state = -1;
+				_003C_003Ec__DisplayClass4_0 CS_0024_003C_003E8__locals15 = new _003C_003Ec__DisplayClass4_0
 				{
-					Messages.Message(this.def.LabelCap + ": " + "AbilityCannotHitTarget".Translate(), MessageTypeDefOf.RejectInput, true);
+					_003C_003E4__this = _003C_003E4__this,
+					pawn = pawn,
+					faction = faction,
+					map = map
+				};
+				if (royalTitlePermitWorker_OrbitalStrike.AidDisabled_NewTemp(CS_0024_003C_003E8__locals15.map, CS_0024_003C_003E8__locals15.pawn, CS_0024_003C_003E8__locals15.faction, out var reason, temperatureMatters: false))
+				{
+					_003C_003E2__current = new FloatMenuOption(royalTitlePermitWorker_OrbitalStrike.def.LabelCap + ": " + reason, null);
+					_003C_003E1__state = 1;
+					return true;
 				}
+				if (CS_0024_003C_003E8__locals15.faction.HostileTo(Faction.OfPlayer))
+				{
+					_003C_003E2__current = new FloatMenuOption(royalTitlePermitWorker_OrbitalStrike.def.LabelCap + ": " + "CommandCallRoyalAidFactionHostile".Translate(CS_0024_003C_003E8__locals15.faction.Named("FACTION")), null);
+					_003C_003E1__state = 2;
+					return true;
+				}
+				string description = royalTitlePermitWorker_OrbitalStrike.def.LabelCap + ": ";
+				Action action = null;
+				if (royalTitlePermitWorker_OrbitalStrike.FillAidOption(CS_0024_003C_003E8__locals15.pawn, CS_0024_003C_003E8__locals15.faction, ref description, out CS_0024_003C_003E8__locals15.free))
+				{
+					action = delegate
+					{
+						CS_0024_003C_003E8__locals15._003C_003E4__this.BeginCallBombardment(CS_0024_003C_003E8__locals15.pawn, CS_0024_003C_003E8__locals15.faction, CS_0024_003C_003E8__locals15.map, CS_0024_003C_003E8__locals15.free);
+					};
+				}
+				_003C_003E2__current = new FloatMenuOption(description, action, CS_0024_003C_003E8__locals15.faction.def.FactionIcon, CS_0024_003C_003E8__locals15.faction.Color);
+				_003C_003E1__state = 3;
+				return true;
+			}
+			case 1:
+				_003C_003E1__state = -1;
+				return false;
+			case 2:
+				_003C_003E1__state = -1;
+				return false;
+			case 3:
+				_003C_003E1__state = -1;
 				return false;
 			}
-			return true;
 		}
 
-		// Token: 0x0600C751 RID: 51025 RVA: 0x003A16E4 File Offset: 0x0039F8E4
-		public override void DrawHighlight(LocalTargetInfo target)
+		bool IEnumerator.MoveNext()
 		{
-			GenDraw.DrawRadiusRing(this.caller.Position, base.RangeClamped, Color.white, null);
-			GenDraw.DrawRadiusRing(target.Cell, this.def.royalAid.radius + this.def.royalAid.explosionRadiusRange.max, Color.white, null);
-			if (target.IsValid)
-			{
-				GenDraw.DrawTargetHighlight(target);
-			}
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0600C752 RID: 51026 RVA: 0x003A1754 File Offset: 0x0039F954
-		public override void OrderForceTarget(LocalTargetInfo target)
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			this.CallBombardment(target.Cell);
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x0600C753 RID: 51027 RVA: 0x003A1763 File Offset: 0x0039F963
-		public override IEnumerable<FloatMenuOption> GetRoyalAidOptions(Map map, Pawn pawn, Faction faction)
+		[DebuggerHidden]
+		IEnumerator<FloatMenuOption> IEnumerable<FloatMenuOption>.GetEnumerator()
 		{
-			string t;
-			if (this.AidDisabled_NewTemp(map, pawn, faction, out t, false))
+			_003CGetRoyalAidOptions_003Ed__4 _003CGetRoyalAidOptions_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				yield return new FloatMenuOption(this.def.LabelCap + ": " + t, null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-				yield break;
+				_003C_003E1__state = 0;
+				_003CGetRoyalAidOptions_003Ed__ = this;
 			}
-			if (faction.HostileTo(Faction.OfPlayer))
+			else
 			{
-				yield return new FloatMenuOption(this.def.LabelCap + ": " + "CommandCallRoyalAidFactionHostile".Translate(faction.Named("FACTION")), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-				yield break;
-			}
-			string label = this.def.LabelCap + ": ";
-			Action action = null;
-			bool free;
-			if (base.FillAidOption(pawn, faction, ref label, out free))
-			{
-				action = delegate()
+				_003CGetRoyalAidOptions_003Ed__ = new _003CGetRoyalAidOptions_003Ed__4(0)
 				{
-					this.BeginCallBombardment(pawn, faction, map, free);
+					_003C_003E4__this = _003C_003E4__this
 				};
 			}
-			yield return new FloatMenuOption(label, action, faction.def.FactionIcon, faction.Color, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0, HorizontalJustification.Left, false);
-			yield break;
+			_003CGetRoyalAidOptions_003Ed__.map = _003C_003E3__map;
+			_003CGetRoyalAidOptions_003Ed__.pawn = _003C_003E3__pawn;
+			_003CGetRoyalAidOptions_003Ed__.faction = _003C_003E3__faction;
+			return _003CGetRoyalAidOptions_003Ed__;
 		}
 
-		// Token: 0x0600C754 RID: 51028 RVA: 0x003A1788 File Offset: 0x0039F988
-		private void BeginCallBombardment(Pawn caller, Faction faction, Map map, bool free)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			this.targetingParameters = new TargetingParameters();
-			this.targetingParameters.canTargetLocations = true;
-			this.targetingParameters.canTargetSelf = true;
-			this.targetingParameters.canTargetFires = true;
-			this.targetingParameters.canTargetItems = true;
-			this.caller = caller;
-			this.map = map;
-			this.faction = faction;
-			this.free = free;
-			float rangeActual = base.RangeClamped;
-			this.targetingParameters.validator = delegate(TargetInfo target)
-			{
-				if (rangeActual > 0f && target.Cell.DistanceTo(caller.Position) > rangeActual)
-				{
-					return false;
-				}
-				if (target.Cell.Fogged(map))
-				{
-					return false;
-				}
-				RoofDef roof = target.Cell.GetRoof(map);
-				return roof == null || !roof.isThickRoof;
-			};
-			Find.Targeter.BeginTargeting(this, null, false, null, null, true);
+			return ((IEnumerable<FloatMenuOption>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x0600C755 RID: 51029 RVA: 0x003A1840 File Offset: 0x0039FA40
-		private void CallBombardment(IntVec3 targetCell)
+	private Faction faction;
+
+	public override bool ValidateTarget(LocalTargetInfo target, bool showMessages = true)
+	{
+		if (!CanHitTarget(target))
 		{
-			Bombardment bombardment = (Bombardment)GenSpawn.Spawn(ThingDefOf.Bombardment, targetCell, this.map, WipeMode.Vanish);
-			bombardment.impactAreaRadius = this.def.royalAid.radius;
-			bombardment.explosionRadiusRange = this.def.royalAid.explosionRadiusRange;
-			bombardment.bombIntervalTicks = this.def.royalAid.intervalTicks;
-			bombardment.randomFireRadius = 1;
-			bombardment.explosionCount = this.def.royalAid.explosionCount;
-			bombardment.warmupTicks = this.def.royalAid.warmupTicks;
-			bombardment.instigator = this.caller;
-			SoundDefOf.OrbitalStrike_Ordered.PlayOneShotOnCamera(null);
-			this.caller.royalty.GetPermit(this.def, this.faction).Notify_Used();
-			if (!this.free)
+			if (target.IsValid && showMessages)
 			{
-				this.caller.royalty.TryRemoveFavor(this.faction, this.def.royalAid.favorCost);
+				Messages.Message(def.LabelCap + ": " + "AbilityCannotHitTarget".Translate(), MessageTypeDefOf.RejectInput);
 			}
+			return false;
 		}
+		return true;
+	}
 
-		// Token: 0x040087E9 RID: 34793
-		private Faction faction;
+	public override void DrawHighlight(LocalTargetInfo target)
+	{
+		GenDraw.DrawRadiusRing(caller.Position, base.RangeClamped, Color.white);
+		GenDraw.DrawRadiusRing(target.Cell, def.royalAid.radius + def.royalAid.explosionRadiusRange.max, Color.white);
+		if (target.IsValid)
+		{
+			GenDraw.DrawTargetHighlight(target);
+		}
+	}
+
+	public override void OrderForceTarget(LocalTargetInfo target)
+	{
+		CallBombardment(target.Cell);
+	}
+
+	[IteratorStateMachine(typeof(_003CGetRoyalAidOptions_003Ed__4))]
+	public override IEnumerable<FloatMenuOption> GetRoyalAidOptions(Map map, Pawn pawn, Faction faction)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetRoyalAidOptions_003Ed__4(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__map = map,
+			_003C_003E3__pawn = pawn,
+			_003C_003E3__faction = faction
+		};
+	}
+
+	private void BeginCallBombardment(Pawn caller, Faction faction, Map map, bool free)
+	{
+		targetingParameters = new TargetingParameters();
+		targetingParameters.canTargetLocations = true;
+		targetingParameters.canTargetSelf = true;
+		targetingParameters.canTargetFires = true;
+		targetingParameters.canTargetItems = true;
+		base.caller = caller;
+		base.map = map;
+		this.faction = faction;
+		base.free = free;
+		float rangeActual = base.RangeClamped;
+		targetingParameters.validator = delegate(TargetInfo target)
+		{
+			if (rangeActual > 0f && target.Cell.DistanceTo(caller.Position) > rangeActual)
+			{
+				return false;
+			}
+			if (target.Cell.Fogged(map))
+			{
+				return false;
+			}
+			RoofDef roof = target.Cell.GetRoof(map);
+			return (roof == null || !roof.isThickRoof) ? true : false;
+		};
+		Find.Targeter.BeginTargeting(this);
+	}
+
+	private void CallBombardment(IntVec3 targetCell)
+	{
+		Bombardment obj = (Bombardment)GenSpawn.Spawn(ThingDefOf.Bombardment, targetCell, map);
+		obj.impactAreaRadius = def.royalAid.radius;
+		obj.explosionRadiusRange = def.royalAid.explosionRadiusRange;
+		obj.bombIntervalTicks = def.royalAid.intervalTicks;
+		obj.randomFireRadius = 1;
+		obj.explosionCount = def.royalAid.explosionCount;
+		obj.warmupTicks = def.royalAid.warmupTicks;
+		obj.instigator = caller;
+		SoundDefOf.OrbitalStrike_Ordered.PlayOneShotOnCamera();
+		caller.royalty.GetPermit(def, faction).Notify_Used();
+		if (!free)
+		{
+			caller.royalty.TryRemoveFavor(faction, def.royalAid.favorCost);
+		}
 	}
 }

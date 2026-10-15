@@ -1,125 +1,258 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class NeedDef : Def
 {
-	// Token: 0x02001AA3 RID: 6819
-	public class NeedDef : Def
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__30 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x060098B2 RID: 39090 RVA: 0x002C87FC File Offset: 0x002C69FC
-		public override IEnumerable<string> ConfigErrors()
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public NeedDef _003C_003E4__this;
+
+		private IEnumerator<string> _003C_003E7__wrap1;
+
+		string IEnumerator<string>.Current
 		{
-			foreach (string text in base.ConfigErrors())
+			[DebuggerHidden]
+			get
 			{
-				yield return text;
+				return _003C_003E2__current;
 			}
-			IEnumerator<string> enumerator = null;
-			if (this.description.NullOrEmpty() && this.showOnNeedList)
-			{
-				yield return "no description";
-			}
-			if (this.needClass == null)
-			{
-				yield return "needClass is null";
-			}
-			if (this.needClass == typeof(Need_Seeker) && (this.seekerRisePerHour == 0f || this.seekerFallPerHour == 0f))
-			{
-				yield return "seeker rise/fall rates not set";
-			}
-			yield break;
-			yield break;
 		}
 
-		// Token: 0x0400676D RID: 26477
-		public Type needClass;
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
 
-		// Token: 0x0400676E RID: 26478
-		public Intelligence minIntelligence;
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__30(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
 
-		// Token: 0x0400676F RID: 26479
-		public bool colonistAndPrisonersOnly;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
 
-		// Token: 0x04006770 RID: 26480
-		public bool playerMechsOnly;
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				NeedDef needDef = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((Def)needDef).ConfigErrors().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_007a;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_007a;
+				case 2:
+					_003C_003E1__state = -1;
+					goto IL_00c9;
+				case 3:
+					_003C_003E1__state = -1;
+					goto IL_00f4;
+				case 4:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_007a:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (needDef.description.NullOrEmpty() && needDef.showOnNeedList)
+					{
+						_003C_003E2__current = "no description";
+						_003C_003E1__state = 2;
+						return true;
+					}
+					goto IL_00c9;
+					IL_00c9:
+					if (needDef.needClass == null)
+					{
+						_003C_003E2__current = "needClass is null";
+						_003C_003E1__state = 3;
+						return true;
+					}
+					goto IL_00f4;
+					IL_00f4:
+					if (needDef.needClass == typeof(Need_Seeker) && (needDef.seekerRisePerHour == 0f || needDef.seekerFallPerHour == 0f))
+					{
+						_003C_003E2__current = "seeker rise/fall rates not set";
+						_003C_003E1__state = 4;
+						return true;
+					}
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
 
-		// Token: 0x04006771 RID: 26481
-		public bool colonistsOnly;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x04006772 RID: 26482
-		public bool slavesOnly;
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
 
-		// Token: 0x04006773 RID: 26483
-		public bool onlyIfCausedByHediff;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04006774 RID: 26484
-		public bool onlyIfCausedByGene;
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__30 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__30(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x04006775 RID: 26485
-		public bool onlyIfCausedByTrait;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x04006776 RID: 26486
-		public bool onlyIfCausedByIdeo;
+	public Type needClass;
 
-		// Token: 0x04006777 RID: 26487
-		public bool neverOnPrisoner;
+	public Intelligence minIntelligence;
 
-		// Token: 0x04006778 RID: 26488
-		public bool neverOnSlave;
+	public bool colonistAndPrisonersOnly;
 
-		// Token: 0x04006779 RID: 26489
-		public List<RoyalTitleDef> titleRequiredAny;
+	public bool playerMechsOnly;
 
-		// Token: 0x0400677A RID: 26490
-		public List<HediffDef> hediffRequiredAny;
+	public bool colonistsOnly;
 
-		// Token: 0x0400677B RID: 26491
-		public List<PreceptDef> nullifyingPrecepts;
+	public bool slavesOnly;
 
-		// Token: 0x0400677C RID: 26492
-		public List<CompProperties> requiredComps;
+	public bool onlyIfCausedByHediff;
 
-		// Token: 0x0400677D RID: 26493
-		public DevelopmentalStage developmentalStageFilter = DevelopmentalStage.Child | DevelopmentalStage.Adult;
+	public bool onlyIfCausedByGene;
 
-		// Token: 0x0400677E RID: 26494
-		public bool showOnNeedList = true;
+	public bool onlyIfCausedByTrait;
 
-		// Token: 0x0400677F RID: 26495
-		public float baseLevel = 0.5f;
+	public bool onlyIfCausedByIdeo;
 
-		// Token: 0x04006780 RID: 26496
-		public bool major;
+	public bool neverOnPrisoner;
 
-		// Token: 0x04006781 RID: 26497
-		public int listPriority;
+	public bool neverOnSlave;
 
-		// Token: 0x04006782 RID: 26498
-		[NoTranslate]
-		public string tutorHighlightTag;
+	public List<RoyalTitleDef> titleRequiredAny;
 
-		// Token: 0x04006783 RID: 26499
-		public bool showForCaravanMembers;
+	public List<HediffDef> hediffRequiredAny;
 
-		// Token: 0x04006784 RID: 26500
-		public bool scaleBar;
+	public List<PreceptDef> nullifyingPrecepts;
 
-		// Token: 0x04006785 RID: 26501
-		public bool showUnitTicks;
+	public List<CompProperties> requiredComps;
 
-		// Token: 0x04006786 RID: 26502
-		public float fallPerDay = 0.5f;
+	public DevelopmentalStage developmentalStageFilter = DevelopmentalStage.Child | DevelopmentalStage.Adult;
 
-		// Token: 0x04006787 RID: 26503
-		public float seekerRisePerHour;
+	public bool showOnNeedList = true;
 
-		// Token: 0x04006788 RID: 26504
-		public float seekerFallPerHour;
+	public float baseLevel = 0.5f;
 
-		// Token: 0x04006789 RID: 26505
-		public bool freezeWhileSleeping;
+	public bool major;
 
-		// Token: 0x0400678A RID: 26506
-		public bool freezeInMentalState;
+	public int listPriority;
+
+	[NoTranslate]
+	public string tutorHighlightTag;
+
+	public bool showForCaravanMembers;
+
+	public bool scaleBar;
+
+	public bool showUnitTicks;
+
+	public float fallPerDay = 0.5f;
+
+	public float seekerRisePerHour;
+
+	public float seekerFallPerHour;
+
+	public bool freezeWhileSleeping;
+
+	public bool freezeInMentalState;
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__30))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__30(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

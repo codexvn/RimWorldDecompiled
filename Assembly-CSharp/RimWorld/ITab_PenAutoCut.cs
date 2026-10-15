@@ -1,131 +1,216 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class ITab_PenAutoCut : ITab_PenBase
 {
-	// Token: 0x020033C6 RID: 13254
-	public class ITab_PenAutoCut : ITab_PenBase
+	[CompilerGenerated]
+	private sealed class _003CHiddenSpecialThingFilters_003Ed__10 : IEnumerable<SpecialThingFilterDef>, IEnumerable, IEnumerator<SpecialThingFilterDef>, IEnumerator, IDisposable
 	{
-		// Token: 0x060129F5 RID: 76277 RVA: 0x0058299C File Offset: 0x00580B9C
-		public ITab_PenAutoCut()
+		private int _003C_003E1__state;
+
+		private SpecialThingFilterDef _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		SpecialThingFilterDef IEnumerator<SpecialThingFilterDef>.Current
 		{
-			this.size = ITab_PenAutoCut.WinSize;
-			this.labelKey = "TabPenAutoCut";
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x060129F6 RID: 76278 RVA: 0x005829C5 File Offset: 0x00580BC5
-		public override void OnOpen()
+		object IEnumerator.Current
 		{
-			base.OnOpen();
-			this.plantFilterState.quickSearch.Reset();
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x060129F7 RID: 76279 RVA: 0x005829E0 File Offset: 0x00580BE0
-		protected override void FillTab()
+		[DebuggerHidden]
+		public _003CHiddenSpecialThingFilters_003Ed__10(int _003C_003E1__state)
 		{
-			CompAnimalPenMarker selectedCompAnimalPenMarker = base.SelectedCompAnimalPenMarker;
-			Rect rect = new Rect(0f, 0f, ITab_PenAutoCut.WinSize.x, ITab_PenAutoCut.WinSize.y).ContractedBy(10f);
-			Widgets.BeginGroup(rect);
-			float num = 0f;
-			this.DrawAutoCutOptions(ref num, rect.width, selectedCompAnimalPenMarker);
-			num += 4f;
-			this.DrawPlantFilter(ref num, rect.width, rect.height - num, selectedCompAnimalPenMarker);
-			Widgets.EndGroup();
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x060129F8 RID: 76280 RVA: 0x00582A64 File Offset: 0x00580C64
-		private void DrawPlantFilter(ref float curY, float width, float height, CompAnimalPenMarker marker)
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			Rect rect = new Rect(0f, curY, width, height);
-			ThingFilterUI.UIState state = this.plantFilterState;
-			ThingFilter autoCutFilter = marker.AutoCutFilter;
-			ThingFilter fixedAutoCutFilter = marker.parent.Map.animalPenManager.GetFixedAutoCutFilter();
-			int openMask = 1;
-			IEnumerable<ThingDef> forceHiddenDefs = null;
-			Map map = marker.parent.Map;
-			ThingFilterUI.DoThingFilterConfigWindow(rect, state, autoCutFilter, fixedAutoCutFilter, openMask, forceHiddenDefs, this.HiddenSpecialThingFilters(), true, false, false, null, map);
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x060129F9 RID: 76281 RVA: 0x00582AC4 File Offset: 0x00580CC4
-		private void DrawAutoCutOptions(ref float curY, float width, CompAnimalPenMarker marker)
+		private bool MoveNext()
 		{
+			switch (_003C_003E1__state)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = SpecialThingFilterDefOf.AllowFresh;
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				if (ModsConfig.IdeologyActive)
+				{
+					_003C_003E2__current = SpecialThingFilterDefOf.AllowVegetarian;
+					_003C_003E1__state = 2;
+					return true;
+				}
+				break;
+			case 2:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = SpecialThingFilterDefOf.AllowCarnivore;
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = SpecialThingFilterDefOf.AllowCannibal;
+				_003C_003E1__state = 4;
+				return true;
+			case 4:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = SpecialThingFilterDefOf.AllowInsectMeat;
+				_003C_003E1__state = 5;
+				return true;
+			case 5:
+				_003C_003E1__state = -1;
+				break;
+			}
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<SpecialThingFilterDef> IEnumerable<SpecialThingFilterDef>.GetEnumerator()
+		{
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				return this;
+			}
+			return new _003CHiddenSpecialThingFilters_003Ed__10(0);
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<SpecialThingFilterDef>)this).GetEnumerator();
+		}
+	}
+
+	private static readonly Vector2 WinSize = new Vector2(300f, 480f);
+
+	private const float AutoCutRowHeight = 24f;
+
+	private const int CutNowButtonWidth = 150;
+
+	private const int CutNowButtonHeight = 27;
+
+	private ThingFilterUI.UIState plantFilterState = new ThingFilterUI.UIState();
+
+	public ITab_PenAutoCut()
+	{
+		size = WinSize;
+		labelKey = "TabPenAutoCut";
+	}
+
+	public override void OnOpen()
+	{
+		base.OnOpen();
+		plantFilterState.quickSearch.Reset();
+	}
+
+	protected override void FillTab()
+	{
+		CompAnimalPenMarker selectedCompAnimalPenMarker = base.SelectedCompAnimalPenMarker;
+		Rect rect = new Rect(0f, 0f, WinSize.x, WinSize.y).ContractedBy(10f);
+		Widgets.BeginGroup(rect);
+		float curY = 0f;
+		DrawAutoCutOptions(ref curY, rect.width, selectedCompAnimalPenMarker);
+		curY += 4f;
+		DrawPlantFilter(ref curY, rect.width, rect.height - curY, selectedCompAnimalPenMarker);
+		Widgets.EndGroup();
+	}
+
+	private void DrawPlantFilter(ref float curY, float width, float height, CompAnimalPenMarker marker)
+	{
+		ThingFilterUI.DoThingFilterConfigWindow(new Rect(0f, curY, width, height), plantFilterState, marker.AutoCutFilter, marker.parent.Map.animalPenManager.GetFixedAutoCutFilter(), 1, null, map: marker.parent.Map, forceHiddenFilters: HiddenSpecialThingFilters(), forceHideHitPointsConfig: true);
+	}
+
+	private void DrawAutoCutOptions(ref float curY, float width, CompAnimalPenMarker marker)
+	{
+		Text.Font = GameFont.Small;
+		bool enclosed = marker.PenState.Enclosed;
+		Designator_PlantsCut designator_PlantsCut = Find.ReverseDesignatorDatabase.Get<Designator_PlantsCut>();
+		Rect position = new Rect(0f, curY, 24f, 24f);
+		Rect rect = new Rect(position.xMax + 4f, curY, width, 24f);
+		Rect rect2 = new Rect(0f, rect.yMax + 4f, 150f, 27f);
+		Rect rect3 = new Rect(0f, curY, width - 18f, 55f);
+		Widgets.DrawHighlightIfMouseover(rect3);
+		if (!enclosed)
+		{
+			GUI.color = Widgets.InactiveColor;
+		}
+		GUI.DrawTexture(position, designator_PlantsCut.icon);
+		Widgets.CheckboxLabeled(rect, "PenAutoCut_EnabledCheckbox".Translate(), ref marker.autoCut, disabled: false, null, null, placeCheckboxNearText: true);
+		GUI.color = Color.white;
+		if (enclosed)
+		{
+			if (Widgets.ButtonText(rect2, "AutoCutNow".Translate(), drawBackground: true, doMouseoverSound: true, active: true, null))
+			{
+				marker.DesignatePlantsToCut();
+				designator_PlantsCut.soundSucceeded?.PlayOneShotOnCamera();
+			}
+		}
+		else
+		{
+			GUI.color = ColorLibrary.RedReadable;
+			Text.Font = GameFont.Tiny;
+			Widgets.Label(rect2, "AutocutUnenclosedPen".Translate());
 			Text.Font = GameFont.Small;
-			bool enclosed = marker.PenState.Enclosed;
-			Designator_PlantsCut designator_PlantsCut = Find.ReverseDesignatorDatabase.Get<Designator_PlantsCut>();
-			Rect position = new Rect(0f, curY, 24f, 24f);
-			Rect rect = new Rect(position.xMax + 4f, curY, width, 24f);
-			Rect rect2 = new Rect(0f, rect.yMax + 4f, 150f, 27f);
-			Rect rect3 = new Rect(0f, curY, width - 18f, 55f);
-			Widgets.DrawHighlightIfMouseover(rect3);
+			GUI.color = Color.white;
+		}
+		if (Mouse.IsOver(rect3))
+		{
+			TaggedString tooltip = "PenAutoCut_EnabledCheckboxTip".Translate();
 			if (!enclosed)
 			{
-				GUI.color = Widgets.InactiveColor;
+				tooltip += "\n\n" + "AutocutUnenclosedPenTip".Translate().Colorize(ColorLibrary.RedReadable);
 			}
-			GUI.DrawTexture(position, designator_PlantsCut.icon);
-			Widgets.CheckboxLabeled(rect, "PenAutoCut_EnabledCheckbox".Translate(), ref marker.autoCut, false, null, null, true, false);
-			GUI.color = Color.white;
-			if (enclosed)
-			{
-				if (Widgets.ButtonText(rect2, "AutoCutNow".Translate(), true, true, true, null))
-				{
-					marker.DesignatePlantsToCut();
-					SoundDef soundSucceeded = designator_PlantsCut.soundSucceeded;
-					if (soundSucceeded != null)
-					{
-						soundSucceeded.PlayOneShotOnCamera(null);
-					}
-				}
-			}
-			else
-			{
-				GUI.color = ColorLibrary.RedReadable;
-				Text.Font = GameFont.Tiny;
-				Widgets.Label(rect2, "AutocutUnenclosedPen".Translate());
-				Text.Font = GameFont.Small;
-				GUI.color = Color.white;
-			}
-			if (Mouse.IsOver(rect3))
-			{
-				TaggedString tooltip = "PenAutoCut_EnabledCheckboxTip".Translate();
-				if (!enclosed)
-				{
-					tooltip += "\n\n" + "AutocutUnenclosedPenTip".Translate().Colorize(ColorLibrary.RedReadable);
-				}
-				TooltipHandler.TipRegion(rect, () => tooltip.Resolve(), 19727181);
-			}
-			curY = rect2.yMax;
+			TooltipHandler.TipRegion(rect, () => tooltip.Resolve(), 19727181);
 		}
+		curY = rect2.yMax;
+	}
 
-		// Token: 0x060129FA RID: 76282 RVA: 0x00582C92 File Offset: 0x00580E92
-		private IEnumerable<SpecialThingFilterDef> HiddenSpecialThingFilters()
-		{
-			yield return SpecialThingFilterDefOf.AllowFresh;
-			if (ModsConfig.IdeologyActive)
-			{
-				yield return SpecialThingFilterDefOf.AllowVegetarian;
-				yield return SpecialThingFilterDefOf.AllowCarnivore;
-				yield return SpecialThingFilterDefOf.AllowCannibal;
-				yield return SpecialThingFilterDefOf.AllowInsectMeat;
-			}
-			yield break;
-		}
-
-		// Token: 0x0400C168 RID: 49512
-		private static readonly Vector2 WinSize = new Vector2(300f, 480f);
-
-		// Token: 0x0400C169 RID: 49513
-		private const float AutoCutRowHeight = 24f;
-
-		// Token: 0x0400C16A RID: 49514
-		private const int CutNowButtonWidth = 150;
-
-		// Token: 0x0400C16B RID: 49515
-		private const int CutNowButtonHeight = 27;
-
-		// Token: 0x0400C16C RID: 49516
-		private ThingFilterUI.UIState plantFilterState = new ThingFilterUI.UIState();
+	[IteratorStateMachine(typeof(_003CHiddenSpecialThingFilters_003Ed__10))]
+	private IEnumerable<SpecialThingFilterDef> HiddenSpecialThingFilters()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CHiddenSpecialThingFilters_003Ed__10(-2);
 	}
 }

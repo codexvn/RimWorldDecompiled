@@ -1,49 +1,150 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_Slaughter : JobDriver
 {
-	// Token: 0x02001135 RID: 4405
-	public class JobDriver_Slaughter : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__4 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001092 RID: 4242
-		// (get) Token: 0x06006B79 RID: 27513 RVA: 0x0021B747 File Offset: 0x00219947
-		protected Pawn Victim
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_Slaughter _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (Pawn)this.job.targetA.Thing;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06006B7A RID: 27514 RVA: 0x0021D35A File Offset: 0x0021B55A
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		object IEnumerator.Current
 		{
-			return this.pawn.Reserve(this.Victim, this.job, 1, -1, null, errorOnFailed, false);
-		}
-
-		// Token: 0x06006B7B RID: 27515 RVA: 0x0021D37D File Offset: 0x0021B57D
-		protected override IEnumerable<Toil> MakeNewToils()
-		{
-			this.FailOnAggroMentalState(TargetIndex.A);
-			this.FailOn(() => !this.job.ignoreDesignations && !this.Victim.ShouldBeSlaughtered());
-			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch, false);
-			yield return Toils_General.WaitWith(TargetIndex.A, 180, true, false, false, TargetIndex.None, PathEndMode.Touch);
-			yield return Toils_General.Do(delegate
+			[DebuggerHidden]
+			get
 			{
-				ExecutionUtility.DoExecutionByCut(this.pawn, this.Victim, 8, true);
-				this.pawn.records.Increment(RecordDefOf.AnimalsSlaughtered);
-				if (this.pawn.InMentalState)
-				{
-					this.pawn.MentalState.Notify_SlaughteredTarget();
-				}
-			});
-			yield break;
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x04004B9D RID: 19357
-		public const int SlaughterDuration = 180;
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__4(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_Slaughter CS_0024_003C_003E8__locals9 = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				CS_0024_003C_003E8__locals9.FailOnAggroMentalState(TargetIndex.A);
+				CS_0024_003C_003E8__locals9.FailOn(() => !CS_0024_003C_003E8__locals9.job.ignoreDesignations && !CS_0024_003C_003E8__locals9.Victim.ShouldBeSlaughtered());
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.WaitWith(TargetIndex.A, 180, useProgressBar: true);
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.Do(delegate
+				{
+					ExecutionUtility.DoExecutionByCut(CS_0024_003C_003E8__locals9.pawn, CS_0024_003C_003E8__locals9.Victim);
+					CS_0024_003C_003E8__locals9.pawn.records.Increment(RecordDefOf.AnimalsSlaughtered);
+					if (CS_0024_003C_003E8__locals9.pawn.InMentalState)
+					{
+						CS_0024_003C_003E8__locals9.pawn.MentalState.Notify_SlaughteredTarget();
+					}
+				});
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__4 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__4(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	public const int SlaughterDuration = 180;
+
+	protected Pawn Victim => (Pawn)job.targetA.Thing;
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return pawn.Reserve(Victim, job, 1, -1, null, errorOnFailed);
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__4))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__4(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

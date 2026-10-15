@@ -1,137 +1,239 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompTerraformer : ThingComp
 {
-	// Token: 0x02002E83 RID: 11907
-	public class CompTerraformer : ThingComp
+	[CompilerGenerated]
+	private sealed class _003CCompGetGizmosExtra_003Ed__11 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x17002B09 RID: 11017
-		// (get) Token: 0x06010C36 RID: 68662 RVA: 0x004D47FA File Offset: 0x004D29FA
-		public CompProperties_Terraformer Props
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompTerraformer _003C_003E4__this;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (CompProperties_Terraformer)this.props;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002B0A RID: 11018
-		// (get) Token: 0x06010C37 RID: 68663 RVA: 0x004D4807 File Offset: 0x004D2A07
-		public int TicksTillConvert
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return Mathf.Max(this.convertTick - GenTicks.TicksGame, 0);
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002B0B RID: 11019
-		// (get) Token: 0x06010C38 RID: 68664 RVA: 0x004D481C File Offset: 0x004D2A1C
-		private bool Active
+		[DebuggerHidden]
+		public _003CCompGetGizmosExtra_003Ed__11(int _003C_003E1__state)
 		{
-			get
-			{
-				IntVec3 intVec;
-				return this.parent.Spawned && this.TryGetCellToCovert(out intVec);
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x06010C39 RID: 68665 RVA: 0x004D4845 File Offset: 0x004D2A45
-		public override void PostSpawnSetup(bool respawningAfterLoad)
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			base.PostSpawnSetup(respawningAfterLoad);
-			if (!respawningAfterLoad && !this.parent.BeingTransportedOnGravship)
-			{
-				this.convertTick = GenTicks.TicksGame + this.Props.secondsPerConvert.SecondsToTicks();
-			}
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x06010C3A RID: 68666 RVA: 0x004D487C File Offset: 0x004D2A7C
-		private bool TryGetCellToCovert(out IntVec3 cell)
+		private bool MoveNext()
 		{
-			int num = GenRadial.NumCellsInRadius(this.Props.radius);
-			Map map = this.parent.Map;
-			for (int i = 0; i < num; i++)
+			int num = _003C_003E1__state;
+			CompTerraformer compTerraformer = _003C_003E4__this;
+			switch (num)
 			{
-				cell = this.parent.Position + GenRadial.RadialPattern[i];
-				if (CompTerraformer.CanEverConvertCell(cell, map, this.Props.convertTerrainDef))
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (!DebugSettings.ShowDevGizmos)
 				{
-					return true;
+					return false;
 				}
+				_003C_003E2__current = new Command_Action
+				{
+					defaultLabel = "DEV: Convert",
+					action = compTerraformer.Convert,
+					Disabled = !compTerraformer.Active
+				};
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				return false;
 			}
-			cell = IntVec3.Invalid;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CCompGetGizmosExtra_003Ed__11 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CCompGetGizmosExtra_003Ed__11(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	private int convertTick;
+
+	public CompProperties_Terraformer Props => (CompProperties_Terraformer)props;
+
+	public int TicksTillConvert => Mathf.Max(convertTick - GenTicks.TicksGame, 0);
+
+	private bool Active
+	{
+		get
+		{
+			if (!parent.Spawned)
+			{
+				return false;
+			}
+			if (!TryGetCellToCovert(out var _))
+			{
+				return false;
+			}
+			return true;
+		}
+	}
+
+	public override void PostSpawnSetup(bool respawningAfterLoad)
+	{
+		base.PostSpawnSetup(respawningAfterLoad);
+		if (!respawningAfterLoad && !parent.BeingTransportedOnGravship)
+		{
+			convertTick = GenTicks.TicksGame + Props.secondsPerConvert.SecondsToTicks();
+		}
+	}
+
+	private bool TryGetCellToCovert(out IntVec3 cell)
+	{
+		int num = GenRadial.NumCellsInRadius(Props.radius);
+		Map map = parent.Map;
+		for (int i = 0; i < num; i++)
+		{
+			cell = parent.Position + GenRadial.RadialPattern[i];
+			if (CanEverConvertCell(cell, map, Props.convertTerrainDef))
+			{
+				return true;
+			}
+		}
+		cell = IntVec3.Invalid;
+		return false;
+	}
+
+	public static bool CanEverConvertCell(IntVec3 cell, Map map, TerrainDef skip = null)
+	{
+		if (!cell.InBounds(map))
+		{
 			return false;
 		}
-
-		// Token: 0x06010C3B RID: 68667 RVA: 0x004D48FC File Offset: 0x004D2AFC
-		public static bool CanEverConvertCell(IntVec3 cell, Map map, TerrainDef skip = null)
+		if (cell.GetEdifice(map) != null)
 		{
-			if (!cell.InBounds(map))
-			{
-				return false;
-			}
-			if (cell.GetEdifice(map) != null)
-			{
-				return false;
-			}
-			TerrainDef terrain = cell.GetTerrain(map);
-			return terrain.canEverTerraform && (skip == null || terrain != skip) && terrain.passability != Traversability.Impassable && terrain.affordances.Contains(TerrainAffordanceDefOf.Light) && !terrain.isFoundation;
+			return false;
 		}
-
-		// Token: 0x06010C3C RID: 68668 RVA: 0x004D4964 File Offset: 0x004D2B64
-		private void Convert()
+		TerrainDef terrain = cell.GetTerrain(map);
+		if (!terrain.canEverTerraform)
 		{
-			IntVec3 c;
-			if (!this.TryGetCellToCovert(out c))
-			{
-				return;
-			}
-			this.parent.Map.terrainGrid.SetTerrain(c, this.Props.convertTerrainDef);
+			return false;
 		}
-
-		// Token: 0x06010C3D RID: 68669 RVA: 0x004D499D File Offset: 0x004D2B9D
-		public override IEnumerable<Gizmo> CompGetGizmosExtra()
+		if (skip != null && terrain == skip)
 		{
-			if (!DebugSettings.ShowDevGizmos)
-			{
-				yield break;
-			}
-			yield return new Command_Action
-			{
-				defaultLabel = "DEV: Convert",
-				action = new Action(this.Convert),
-				Disabled = !this.Active
-			};
-			yield break;
+			return false;
 		}
-
-		// Token: 0x06010C3E RID: 68670 RVA: 0x004D49AD File Offset: 0x004D2BAD
-		public override void CompTickRare()
+		if (terrain.passability == Traversability.Impassable)
 		{
-			if (GenTicks.TicksGame >= this.convertTick && this.Active)
-			{
-				this.convertTick = GenTicks.TicksGame + this.Props.secondsPerConvert.SecondsToTicks();
-				this.Convert();
-			}
+			return false;
 		}
-
-		// Token: 0x06010C3F RID: 68671 RVA: 0x004D49E6 File Offset: 0x004D2BE6
-		public override void PostDrawExtraSelectionOverlays()
+		if (!terrain.affordances.Contains(TerrainAffordanceDefOf.Light))
 		{
-			GenDraw.DrawRadiusRing(this.parent.Position, this.Props.radius);
+			return false;
 		}
-
-		// Token: 0x06010C40 RID: 68672 RVA: 0x004D4A03 File Offset: 0x004D2C03
-		public override void PostExposeData()
+		if (terrain.isFoundation)
 		{
-			base.PostExposeData();
-			Scribe_Values.Look<int>(ref this.convertTick, "convertTick", 0, false);
+			return false;
 		}
+		return true;
+	}
 
-		// Token: 0x0400AEA5 RID: 44709
-		private int convertTick;
+	private void Convert()
+	{
+		if (TryGetCellToCovert(out var cell))
+		{
+			parent.Map.terrainGrid.SetTerrain(cell, Props.convertTerrainDef);
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CCompGetGizmosExtra_003Ed__11))]
+	public override IEnumerable<Gizmo> CompGetGizmosExtra()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CCompGetGizmosExtra_003Ed__11(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override void CompTickRare()
+	{
+		if (GenTicks.TicksGame >= convertTick && Active)
+		{
+			convertTick = GenTicks.TicksGame + Props.secondsPerConvert.SecondsToTicks();
+			Convert();
+		}
+	}
+
+	public override void PostDrawExtraSelectionOverlays()
+	{
+		GenDraw.DrawRadiusRing(parent.Position, Props.radius);
+	}
+
+	public override void PostExposeData()
+	{
+		base.PostExposeData();
+		Scribe_Values.Look(ref convertTick, "convertTick", 0);
 	}
 }

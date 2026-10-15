@@ -1,83 +1,202 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompInteractableRocketswarmLauncher : CompInteractable
 {
-	// Token: 0x02002D00 RID: 11520
-	public class CompInteractableRocketswarmLauncher : CompInteractable
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass3_0
 	{
-		// Token: 0x1700290F RID: 10511
-		// (get) Token: 0x06010303 RID: 66307 RVA: 0x004AE907 File Offset: 0x004ACB07
-		private Building_TurretGun ParentGun
+		public CompInteractableRocketswarmLauncher _003C_003E4__this;
+
+		public Pawn selPawn;
+
+		internal void _003CCompFloatMenuOptions_003Eb__0()
 		{
+			_003C_003E4__this.TargetLocation(selPawn);
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CCompFloatMenuOptions_003Ed__3 : IEnumerable<FloatMenuOption>, IEnumerable, IEnumerator<FloatMenuOption>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private FloatMenuOption _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompInteractableRocketswarmLauncher _003C_003E4__this;
+
+		private Pawn selPawn;
+
+		public Pawn _003C_003E3__selPawn;
+
+		FloatMenuOption IEnumerator<FloatMenuOption>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				return (Building_TurretGun)this.parent;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06010304 RID: 66308 RVA: 0x004AEA1B File Offset: 0x004ACC1B
-		public override void OrderForceTarget(LocalTargetInfo target)
+		object IEnumerator.Current
 		{
-			if (base.ValidateTarget(target, false))
+			[DebuggerHidden]
+			get
 			{
-				this.TargetLocation(target.Pawn);
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06010305 RID: 66309 RVA: 0x004AEA34 File Offset: 0x004ACC34
-		public override IEnumerable<FloatMenuOption> CompFloatMenuOptions(Pawn selPawn)
+		[DebuggerHidden]
+		public _003CCompFloatMenuOptions_003Ed__3(int _003C_003E1__state)
 		{
-			if (this.CanInteract(selPawn, true))
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			CompInteractableRocketswarmLauncher compInteractableRocketswarmLauncher = _003C_003E4__this;
+			switch (num)
 			{
-				yield return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption(base.Props.jobString.CapitalizeFirst(), delegate()
+			default:
+				return false;
+			case 0:
+			{
+				_003C_003E1__state = -1;
+				_003C_003Ec__DisplayClass3_0 CS_0024_003C_003E8__locals4 = new _003C_003Ec__DisplayClass3_0
 				{
-					this.TargetLocation(selPawn);
-				}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0), selPawn, this.parent, "ReservedBy", null);
-			}
-			yield break;
-		}
-
-		// Token: 0x06010306 RID: 66310 RVA: 0x004AEA4C File Offset: 0x004ACC4C
-		private void TargetLocation(Pawn caster)
-		{
-			Find.Targeter.BeginTargeting(this.ParentGun.AttackVerb, null, true, null, delegate()
-			{
-				if (this.ParentGun.ForcedTarget.IsValid)
+					_003C_003E4__this = _003C_003E4__this,
+					selPawn = selPawn
+				};
+				if ((bool)compInteractableRocketswarmLauncher.CanInteract(CS_0024_003C_003E8__locals4.selPawn))
 				{
-					Job job = JobMaker.MakeJob(JobDefOf.InteractThing, this.parent);
-					caster.jobs.TryTakeOrderedJob(job, new JobTag?(JobTag.Misc), false);
+					_003C_003E2__current = FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption(compInteractableRocketswarmLauncher.Props.jobString.CapitalizeFirst(), delegate
+					{
+						CS_0024_003C_003E8__locals4._003C_003E4__this.TargetLocation(CS_0024_003C_003E8__locals4.selPawn);
+					}), CS_0024_003C_003E8__locals4.selPawn, compInteractableRocketswarmLauncher.parent);
+					_003C_003E1__state = 1;
+					return true;
 				}
-			}, true);
+				break;
+			}
+			case 1:
+				_003C_003E1__state = -1;
+				break;
+			}
+			return false;
 		}
 
-		// Token: 0x06010307 RID: 66311 RVA: 0x004AEA94 File Offset: 0x004ACC94
-		protected override bool TryInteractTick()
+		bool IEnumerator.MoveNext()
 		{
-			this.ParentGun.TryActivateBurst();
-			if (this.ParentGun.CurrentTarget.IsValid)
-			{
-				this.ParentGun.Top.ForceFaceTarget(this.ParentGun.CurrentTarget);
-				return true;
-			}
-			return true;
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x06010308 RID: 66312 RVA: 0x004AEAE0 File Offset: 0x004ACCE0
-		public override AcceptanceReport CanInteract(Pawn activateBy = null, bool checkOptionalItems = true)
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			AcceptanceReport result = base.CanInteract(activateBy, checkOptionalItems);
-			if (!result.Accepted)
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<FloatMenuOption> IEnumerable<FloatMenuOption>.GetEnumerator()
+		{
+			_003CCompFloatMenuOptions_003Ed__3 _003CCompFloatMenuOptions_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				return result;
+				_003C_003E1__state = 0;
+				_003CCompFloatMenuOptions_003Ed__ = this;
 			}
-			if (activateBy != null && activateBy.WorkTagIsDisabled(WorkTags.Violent))
+			else
 			{
-				return "IsIncapableOfViolence".Translate(activateBy.LabelShort, activateBy);
+				_003CCompFloatMenuOptions_003Ed__ = new _003CCompFloatMenuOptions_003Ed__3(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
+			_003CCompFloatMenuOptions_003Ed__.selPawn = _003C_003E3__selPawn;
+			return _003CCompFloatMenuOptions_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<FloatMenuOption>)this).GetEnumerator();
+		}
+	}
+
+	private Building_TurretGun ParentGun => (Building_TurretGun)parent;
+
+	public override void OrderForceTarget(LocalTargetInfo target)
+	{
+		if (ValidateTarget(target, showMessages: false))
+		{
+			TargetLocation(target.Pawn);
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CCompFloatMenuOptions_003Ed__3))]
+	public override IEnumerable<FloatMenuOption> CompFloatMenuOptions(Pawn selPawn)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CCompFloatMenuOptions_003Ed__3(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__selPawn = selPawn
+		};
+	}
+
+	private void TargetLocation(Pawn caster)
+	{
+		Find.Targeter.BeginTargeting(ParentGun.AttackVerb, null, allowNonSelectedTargetingSource: true, null, delegate
+		{
+			if (ParentGun.ForcedTarget.IsValid)
+			{
+				Job job = JobMaker.MakeJob(JobDefOf.InteractThing, parent);
+				caster.jobs.TryTakeOrderedJob(job, JobTag.Misc);
+			}
+		});
+	}
+
+	protected override bool TryInteractTick()
+	{
+		ParentGun.TryActivateBurst();
+		if (ParentGun.CurrentTarget.IsValid)
+		{
+			ParentGun.Top.ForceFaceTarget(ParentGun.CurrentTarget);
 			return true;
 		}
+		return true;
+	}
+
+	public override AcceptanceReport CanInteract(Pawn activateBy = null, bool checkOptionalItems = true)
+	{
+		AcceptanceReport result = base.CanInteract(activateBy, checkOptionalItems);
+		if (!result.Accepted)
+		{
+			return result;
+		}
+		if (activateBy != null && activateBy.WorkTagIsDisabled(WorkTags.Violent))
+		{
+			return "IsIncapableOfViolence".Translate(activateBy.LabelShort, activateBy);
+		}
+		return true;
 	}
 }

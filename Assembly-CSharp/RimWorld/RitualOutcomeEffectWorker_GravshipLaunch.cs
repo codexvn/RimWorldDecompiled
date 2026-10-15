@@ -1,57 +1,51 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class RitualOutcomeEffectWorker_GravshipLaunch : RitualOutcomeEffectWorker_FromQuality
 {
-	// Token: 0x02002781 RID: 10113
-	public class RitualOutcomeEffectWorker_GravshipLaunch : RitualOutcomeEffectWorker_FromQuality
+	public RitualOutcomeEffectWorker_GravshipLaunch()
 	{
-		// Token: 0x0600DDB6 RID: 56758 RVA: 0x00411501 File Offset: 0x0040F701
-		public RitualOutcomeEffectWorker_GravshipLaunch()
-		{
-		}
+	}
 
-		// Token: 0x0600DDB7 RID: 56759 RVA: 0x00411509 File Offset: 0x0040F709
-		public RitualOutcomeEffectWorker_GravshipLaunch(RitualOutcomeEffectDef def) : base(def)
-		{
-		}
+	public RitualOutcomeEffectWorker_GravshipLaunch(RitualOutcomeEffectDef def)
+		: base(def)
+	{
+	}
 
-		// Token: 0x0600DDB8 RID: 56760 RVA: 0x00414190 File Offset: 0x00412390
-		public override void Apply(float progress, Dictionary<Pawn, int> totalPresence, LordJob_Ritual jobRitual)
+	public override void Apply(float progress, Dictionary<Pawn, int> totalPresence, LordJob_Ritual jobRitual)
+	{
+		if (progress < 1f)
 		{
-			if (progress < 1f)
+			Messages.Message("GravshipLaunchInterrupted".Translate(), MessageTypeDefOf.NegativeEvent);
+			return;
+		}
+		try
+		{
+			CompPilotConsole consoleComp = jobRitual.selectedTarget.Thing?.TryGetComp<CompPilotConsole>();
+			float quality = GetQuality(jobRitual, progress);
+			consoleComp.engine.launchInfo = new LaunchInfo
 			{
-				Messages.Message("GravshipLaunchInterrupted".Translate(), MessageTypeDefOf.NegativeEvent, true);
+				pilot = jobRitual.PawnWithRole("pilot"),
+				copilot = jobRitual.PawnWithRole("copilot"),
+				quality = quality,
+				doNegativeOutcome = Rand.Chance(GravshipUtility.NegativeLandingOutcomeFromQuality(quality))
+			};
+			if (jobRitual.Map.listerThings.AnyThingWithDef(ThingDefOf.GravAnchor))
+			{
+				consoleComp.StartChoosingDestination_NewTemp();
 				return;
 			}
-			try
+			GravshipUtility.PreLaunchConfirmation(consoleComp.engine, delegate
 			{
-				Thing thing = jobRitual.selectedTarget.Thing;
-				CompPilotConsole compPilotConsole = (thing != null) ? thing.TryGetComp<CompPilotConsole>() : null;
-				float quality = base.GetQuality(jobRitual, progress);
-				compPilotConsole.engine.launchInfo = new LaunchInfo
-				{
-					pilot = jobRitual.PawnWithRole("pilot"),
-					copilot = jobRitual.PawnWithRole("copilot"),
-					quality = quality,
-					doNegativeOutcome = Rand.Chance(GravshipUtility.NegativeLandingOutcomeFromQuality(quality))
-				};
-				if (jobRitual.Map.listerThings.AnyThingWithDef(ThingDefOf.GravAnchor))
-				{
-					compPilotConsole.StartChoosingDestination();
-				}
-				else
-				{
-					GravshipUtility.PreLaunchConfirmation(compPilotConsole.engine, new Action(compPilotConsole.StartChoosingDestination));
-				}
-			}
-			catch (Exception ex)
-			{
-				string str = "Error launching gravship: ";
-				Exception ex2 = ex;
-				Log.Error(str + ((ex2 != null) ? ex2.ToString() : null));
-			}
+				consoleComp.StartChoosingDestination_NewTemp();
+			});
+		}
+		catch (Exception ex)
+		{
+			Log.Error("Error launching gravship: " + ex);
 		}
 	}
 }

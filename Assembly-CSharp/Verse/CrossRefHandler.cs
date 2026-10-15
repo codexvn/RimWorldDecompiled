@@ -1,149 +1,128 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
-namespace Verse
+namespace Verse;
+
+public class CrossRefHandler
 {
-	// Token: 0x02000850 RID: 2128
-	public class CrossRefHandler
+	private LoadedObjectDirectory loadedObjectDirectory = new LoadedObjectDirectory();
+
+	public LoadIDsWantedBank loadIDs = new LoadIDsWantedBank();
+
+	public List<IExposable> crossReferencingExposables = new List<IExposable>();
+
+	public void RegisterForCrossRefResolve(IExposable s)
 	{
-		// Token: 0x060035CC RID: 13772 RVA: 0x0011E324 File Offset: 0x0011C524
-		public void RegisterForCrossRefResolve(IExposable s)
+		if (Scribe.mode != LoadSaveMode.LoadingVars)
 		{
-			if (Scribe.mode != LoadSaveMode.LoadingVars)
-			{
-				Log.Error("Registered " + ((s != null) ? s.ToString() : null) + " for cross ref resolve, but current mode is " + Scribe.mode.ToString());
-				return;
-			}
-			if (s == null)
-			{
-				return;
-			}
+			Log.Error("Registered " + s?.ToString() + " for cross ref resolve, but current mode is " + Scribe.mode);
+		}
+		else if (s != null)
+		{
 			if (DebugViewSettings.logMapLoad)
 			{
 				LogSimple.Message("RegisterForCrossRefResolve " + ((s != null) ? s.GetType().ToString() : "null"));
 			}
-			this.crossReferencingExposables.Add(s);
+			crossReferencingExposables.Add(s);
 		}
+	}
 
-		// Token: 0x060035CD RID: 13773 RVA: 0x0011E3A8 File Offset: 0x0011C5A8
-		public void ResolveAllCrossReferences()
+	public void ResolveAllCrossReferences()
+	{
+		Scribe.mode = LoadSaveMode.ResolvingCrossRefs;
+		if (DebugViewSettings.logMapLoad)
 		{
-			Scribe.mode = LoadSaveMode.ResolvingCrossRefs;
-			if (DebugViewSettings.logMapLoad)
-			{
-				LogSimple.Message("==================Register the saveables all so we can find them later");
-			}
-			foreach (IExposable exposable in this.crossReferencingExposables)
-			{
-				ILoadReferenceable loadReferenceable = exposable as ILoadReferenceable;
-				if (loadReferenceable != null)
-				{
-					if (DebugViewSettings.logMapLoad)
-					{
-						string str = "RegisterLoaded ";
-						Type type = loadReferenceable.GetType();
-						LogSimple.Message(str + ((type != null) ? type.ToString() : null));
-					}
-					this.loadedObjectDirectory.RegisterLoaded(loadReferenceable);
-				}
-			}
-			if (DebugViewSettings.logMapLoad)
-			{
-				LogSimple.Message("==================Fill all cross-references to the saveables");
-			}
-			foreach (IExposable exposable2 in this.crossReferencingExposables)
+			LogSimple.Message("==================Register the saveables all so we can find them later");
+		}
+		foreach (IExposable crossReferencingExposable in crossReferencingExposables)
+		{
+			if (crossReferencingExposable is ILoadReferenceable loadReferenceable)
 			{
 				if (DebugViewSettings.logMapLoad)
 				{
-					string str2 = "ResolvingCrossRefs ExposeData ";
-					Type type2 = exposable2.GetType();
-					LogSimple.Message(str2 + ((type2 != null) ? type2.ToString() : null));
+					LogSimple.Message("RegisterLoaded " + loadReferenceable.GetType());
 				}
-				try
-				{
-					Scribe.loader.curParent = exposable2;
-					Scribe.loader.curPathRelToParent = null;
-					exposable2.ExposeData();
-				}
-				catch (Exception ex)
-				{
-					string str3 = "Could not resolve cross refs: ";
-					Exception ex2 = ex;
-					Log.Error(str3 + ((ex2 != null) ? ex2.ToString() : null));
-				}
+				loadedObjectDirectory.RegisterLoaded(loadReferenceable);
 			}
-			Scribe.loader.curParent = null;
-			Scribe.loader.curPathRelToParent = null;
-			Scribe.mode = LoadSaveMode.Inactive;
-			this.Clear(true);
 		}
-
-		// Token: 0x060035CE RID: 13774 RVA: 0x0011E528 File Offset: 0x0011C728
-		public T TakeResolvedRef<T>(string pathRelToParent, IExposable parent) where T : ILoadReferenceable
+		if (DebugViewSettings.logMapLoad)
 		{
-			string loadID = this.loadIDs.Take<T>(pathRelToParent, parent);
-			return this.loadedObjectDirectory.ObjectWithLoadID<T>(loadID);
+			LogSimple.Message("==================Fill all cross-references to the saveables");
 		}
-
-		// Token: 0x060035CF RID: 13775 RVA: 0x0011E550 File Offset: 0x0011C750
-		public T TakeResolvedRef<T>(string toAppendToPathRelToParent) where T : ILoadReferenceable
+		foreach (IExposable crossReferencingExposable2 in crossReferencingExposables)
 		{
-			string text = Scribe.loader.curPathRelToParent;
-			if (!toAppendToPathRelToParent.NullOrEmpty())
+			if (DebugViewSettings.logMapLoad)
 			{
-				text = text + "/" + toAppendToPathRelToParent;
+				LogSimple.Message("ResolvingCrossRefs ExposeData " + crossReferencingExposable2.GetType());
 			}
-			return this.TakeResolvedRef<T>(text, Scribe.loader.curParent);
+			try
+			{
+				Scribe.loader.curParent = crossReferencingExposable2;
+				Scribe.loader.curPathRelToParent = null;
+				crossReferencingExposable2.ExposeData();
+			}
+			catch (Exception ex)
+			{
+				Log.Error("Could not resolve cross refs: " + ex);
+			}
 		}
+		Scribe.loader.curParent = null;
+		Scribe.loader.curPathRelToParent = null;
+		Scribe.mode = LoadSaveMode.Inactive;
+		Clear(errorIfNotEmpty: true);
+	}
 
-		// Token: 0x060035D0 RID: 13776 RVA: 0x0011E590 File Offset: 0x0011C790
-		public List<T> TakeResolvedRefList<T>(string pathRelToParent, IExposable parent)
+	public T TakeResolvedRef<T>(string pathRelToParent, IExposable parent) where T : ILoadReferenceable
+	{
+		string loadID = loadIDs.Take<T>(pathRelToParent, parent);
+		return loadedObjectDirectory.ObjectWithLoadID<T>(loadID);
+	}
+
+	public T TakeResolvedRef<T>(string toAppendToPathRelToParent) where T : ILoadReferenceable
+	{
+		string text = Scribe.loader.curPathRelToParent;
+		if (!toAppendToPathRelToParent.NullOrEmpty())
 		{
-			List<string> list = this.loadIDs.TakeList(pathRelToParent, parent);
-			List<T> list2 = new List<T>();
-			if (list != null)
-			{
-				for (int i = 0; i < list.Count; i++)
-				{
-					list2.Add(this.loadedObjectDirectory.ObjectWithLoadID<T>(list[i]));
-				}
-			}
-			return list2;
+			text = text + "/" + toAppendToPathRelToParent;
 		}
+		return TakeResolvedRef<T>(text, Scribe.loader.curParent);
+	}
 
-		// Token: 0x060035D1 RID: 13777 RVA: 0x0011E5E0 File Offset: 0x0011C7E0
-		public List<T> TakeResolvedRefList<T>(string toAppendToPathRelToParent)
+	public List<T> TakeResolvedRefList<T>(string pathRelToParent, IExposable parent)
+	{
+		List<string> list = loadIDs.TakeList(pathRelToParent, parent);
+		List<T> list2 = new List<T>();
+		if (list != null)
 		{
-			string text = Scribe.loader.curPathRelToParent;
-			if (!toAppendToPathRelToParent.NullOrEmpty())
+			for (int i = 0; i < list.Count; i++)
 			{
-				text = text + "/" + toAppendToPathRelToParent;
+				list2.Add(loadedObjectDirectory.ObjectWithLoadID<T>(list[i]));
 			}
-			return this.TakeResolvedRefList<T>(text, Scribe.loader.curParent);
 		}
+		return list2;
+	}
 
-		// Token: 0x060035D2 RID: 13778 RVA: 0x0011E61E File Offset: 0x0011C81E
-		public void Clear(bool errorIfNotEmpty)
+	public List<T> TakeResolvedRefList<T>(string toAppendToPathRelToParent)
+	{
+		string text = Scribe.loader.curPathRelToParent;
+		if (!toAppendToPathRelToParent.NullOrEmpty())
 		{
-			if (errorIfNotEmpty)
-			{
-				this.loadIDs.ConfirmClear();
-			}
-			else
-			{
-				this.loadIDs.Clear();
-			}
-			this.crossReferencingExposables.Clear();
-			this.loadedObjectDirectory.Clear();
+			text = text + "/" + toAppendToPathRelToParent;
 		}
+		return TakeResolvedRefList<T>(text, Scribe.loader.curParent);
+	}
 
-		// Token: 0x0400288F RID: 10383
-		private LoadedObjectDirectory loadedObjectDirectory = new LoadedObjectDirectory();
-
-		// Token: 0x04002890 RID: 10384
-		public LoadIDsWantedBank loadIDs = new LoadIDsWantedBank();
-
-		// Token: 0x04002891 RID: 10385
-		public List<IExposable> crossReferencingExposables = new List<IExposable>();
+	public void Clear(bool errorIfNotEmpty)
+	{
+		if (errorIfNotEmpty)
+		{
+			loadIDs.ConfirmClear();
+		}
+		else
+		{
+			loadIDs.Clear();
+		}
+		crossReferencingExposables.Clear();
+		loadedObjectDirectory.Clear();
 	}
 }

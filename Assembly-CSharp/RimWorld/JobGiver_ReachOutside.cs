@@ -1,34 +1,29 @@
-﻿using System;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobGiver_ReachOutside : ThinkNode_JobGiver
 {
-	// Token: 0x02001532 RID: 5426
-	public class JobGiver_ReachOutside : ThinkNode_JobGiver
+	protected override Job TryGiveJob(Pawn pawn)
 	{
-		// Token: 0x060080FB RID: 33019 RVA: 0x0026D704 File Offset: 0x0026B904
-		protected override Job TryGiveJob(Pawn pawn)
+		District district = pawn.GetDistrict();
+		if (district.Room.PsychologicallyOutdoors && district.TouchesMapEdge)
 		{
-			District district = pawn.GetDistrict(RegionType.Set_Passable);
-			if (district.Room.PsychologicallyOutdoors && district.TouchesMapEdge)
-			{
-				return null;
-			}
-			if (!pawn.CanReachMapEdge())
-			{
-				return null;
-			}
-			IntVec3 intVec;
-			if (!RCellFinder.TryFindRandomSpotJustOutsideColony(pawn, out intVec))
-			{
-				return null;
-			}
-			if (intVec == pawn.Position)
-			{
-				return null;
-			}
-			return JobMaker.MakeJob(JobDefOf.Goto, intVec);
+			return null;
 		}
+		if (!pawn.CanReachMapEdge())
+		{
+			return null;
+		}
+		if (!RCellFinder.TryFindRandomSpotJustOutsideColony(pawn, out var result))
+		{
+			return null;
+		}
+		if (result == pawn.Position)
+		{
+			return null;
+		}
+		return JobMaker.MakeJob(JobDefOf.Goto, result);
 	}
 }

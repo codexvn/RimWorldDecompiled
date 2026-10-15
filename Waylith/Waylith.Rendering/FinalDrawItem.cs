@@ -125,6 +125,11 @@ public sealed class FinalDrawItem
 		Instancing = instancing;
 		Matrix = matrix;
 		PassId = passId;
+		SceneGrabPoint sceneGrab = materialBinding.Shader.SceneGrab;
+		if (sceneGrab != null && renderQueue < sceneGrab.Queue)
+		{
+			renderQueue = sceneGrab.Queue;
+		}
 		RenderQueue = renderQueue;
 		Layer = layer;
 		SortKey = DrawSortKey.Make(renderQueue, renderQueue > 2500, hostOrder, materialBinding.PipelineSortId, queueOrder);

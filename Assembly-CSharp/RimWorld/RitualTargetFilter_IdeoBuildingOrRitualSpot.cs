@@ -1,44 +1,195 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class RitualTargetFilter_IdeoBuildingOrRitualSpot : RitualTargetFilter_IdeoBuilding
 {
-	// Token: 0x020027D9 RID: 10201
-	public class RitualTargetFilter_IdeoBuildingOrRitualSpot : RitualTargetFilter_IdeoBuilding
+	[CompilerGenerated]
+	private sealed class _003CGetTargetInfos_003Ed__3 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x0600DF48 RID: 57160 RVA: 0x004199FB File Offset: 0x00417BFB
-		public RitualTargetFilter_IdeoBuildingOrRitualSpot()
-		{
-		}
+		private int _003C_003E1__state;
 
-		// Token: 0x0600DF49 RID: 57161 RVA: 0x00419A03 File Offset: 0x00417C03
-		public RitualTargetFilter_IdeoBuildingOrRitualSpot(RitualTargetFilterDef def) : base(def)
-		{
-		}
+		private string _003C_003E2__current;
 
-		// Token: 0x0600DF4A RID: 57162 RVA: 0x00419A0C File Offset: 0x00417C0C
-		protected override IEnumerable<Thing> ExtraCandidates(TargetInfo initiator)
-		{
-			Pawn pawn = (Pawn)initiator.Thing;
-			return from s in initiator.Map.listerThings.ThingsOfDef(ThingDefOf.RitualSpot)
-			where pawn.CanReach(s, PathEndMode.Touch, pawn.NormalMaxDanger(), false, false, TraverseMode.ByPawn)
-			select s;
-		}
+		private int _003C_003El__initialThreadId;
 
-		// Token: 0x0600DF4B RID: 57163 RVA: 0x00419A58 File Offset: 0x00417C58
-		public override IEnumerable<string> GetTargetInfos(TargetInfo initiator)
+		public RitualTargetFilter_IdeoBuildingOrRitualSpot _003C_003E4__this;
+
+		private TargetInfo initiator;
+
+		public TargetInfo _003C_003E3__initiator;
+
+		private IEnumerator<string> _003C_003E7__wrap1;
+
+		string IEnumerator<string>.Current
 		{
-			foreach (string text in base.GetTargetInfos(initiator))
+			[DebuggerHidden]
+			get
 			{
-				yield return text;
+				return _003C_003E2__current;
 			}
-			IEnumerator<string> enumerator = null;
-			yield return ThingDefOf.RitualSpot.LabelCap;
-			yield break;
-			yield break;
 		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetTargetInfos_003Ed__3(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				RitualTargetFilter_IdeoBuildingOrRitualSpot ritualTargetFilter_IdeoBuildingOrRitualSpot = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((RitualTargetFilter_IdeoBuilding)ritualTargetFilter_IdeoBuildingOrRitualSpot).GetTargetInfos(initiator).GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0075;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0075;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						return false;
+					}
+					IL_0075:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					_003C_003E2__current = ThingDefOf.RitualSpot.LabelCap;
+					_003C_003E1__state = 2;
+					return true;
+				}
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CGetTargetInfos_003Ed__3 _003CGetTargetInfos_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CGetTargetInfos_003Ed__ = this;
+			}
+			else
+			{
+				_003CGetTargetInfos_003Ed__ = new _003CGetTargetInfos_003Ed__3(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CGetTargetInfos_003Ed__.initiator = _003C_003E3__initiator;
+			return _003CGetTargetInfos_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	public RitualTargetFilter_IdeoBuildingOrRitualSpot()
+	{
+	}
+
+	public RitualTargetFilter_IdeoBuildingOrRitualSpot(RitualTargetFilterDef def)
+		: base(def)
+	{
+	}
+
+	protected override IEnumerable<Thing> ExtraCandidates(TargetInfo initiator)
+	{
+		Pawn pawn = (Pawn)initiator.Thing;
+		return from s in initiator.Map.listerThings.ThingsOfDef(ThingDefOf.RitualSpot)
+			where pawn.CanReach(s, PathEndMode.Touch, pawn.NormalMaxDanger())
+			select s;
+	}
+
+	[IteratorStateMachine(typeof(_003CGetTargetInfos_003Ed__3))]
+	public override IEnumerable<string> GetTargetInfos(TargetInfo initiator)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetTargetInfos_003Ed__3(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__initiator = initiator
+		};
 	}
 }

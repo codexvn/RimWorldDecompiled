@@ -1,100 +1,74 @@
-﻿using System;
 using System.Collections.Generic;
 using RimWorld.BaseGen;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld
-{
-	// Token: 0x02002056 RID: 8278
-	public class GenStep_ConditionCauser : GenStep_Scatterer
-	{
-		// Token: 0x17001BC1 RID: 7105
-		// (get) Token: 0x0600B5D1 RID: 46545 RVA: 0x00343C74 File Offset: 0x00341E74
-		public override int SeedPart
-		{
-			get
-			{
-				return 1068345639;
-			}
-		}
+namespace RimWorld;
 
-		// Token: 0x0600B5D2 RID: 46546 RVA: 0x00343C7C File Offset: 0x00341E7C
-		protected override bool CanScatterAt(IntVec3 c, Map map)
+public class GenStep_ConditionCauser : GenStep_Scatterer
+{
+	private const int Size = 10;
+
+	private GenStepParams currentParams;
+
+	public override int SeedPart => 1068345639;
+
+	protected override bool CanScatterAt(IntVec3 c, Map map)
+	{
+		if (!base.CanScatterAt(c, map))
 		{
-			if (!base.CanScatterAt(c, map))
+			return false;
+		}
+		CellRect rect = CellRect.CenteredOn(c, 10, 10);
+		if (!rect.InBounds(map))
+		{
+			return false;
+		}
+		if (MapGenerator.TryGetVar<List<CellRect>>("UsedRects", out var var) && var.Any((CellRect x) => rect.Overlaps(x)))
+		{
+			return false;
+		}
+		foreach (IntVec3 cell in rect.Cells)
+		{
+			if (!GenConstruct.CanBuildOnTerrain(currentParams.sitePart.conditionCauser.def, cell, map, Rot4.North))
 			{
 				return false;
 			}
-			CellRect rect = CellRect.CenteredOn(c, 10, 10);
-			if (!rect.InBounds(map))
+			foreach (Thing thing in cell.GetThingList(map))
 			{
-				return false;
-			}
-			List<CellRect> list;
-			if (MapGenerator.TryGetVar<List<CellRect>>("UsedRects", out list) && list.Any((CellRect x) => rect.Overlaps(x)))
-			{
-				return false;
-			}
-			foreach (IntVec3 c2 in rect.Cells)
-			{
-				if (!GenConstruct.CanBuildOnTerrain(this.currentParams.sitePart.conditionCauser.def, c2, map, Rot4.North, null, null))
+				if (thing.def.building != null)
 				{
 					return false;
 				}
-				using (List<Thing>.Enumerator enumerator2 = c2.GetThingList(map).GetEnumerator())
-				{
-					while (enumerator2.MoveNext())
-					{
-						if (enumerator2.Current.def.building != null)
-						{
-							return false;
-						}
-					}
-				}
 			}
-			return true;
 		}
+		return true;
+	}
 
-		// Token: 0x0600B5D3 RID: 46547 RVA: 0x00343D98 File Offset: 0x00341F98
-		public override void Generate(Map map, GenStepParams parms)
+	public override void Generate(Map map, GenStepParams parms)
+	{
+		currentParams = parms;
+		count = 1;
+		base.Generate(map, parms);
+	}
+
+	protected override void ScatterAt(IntVec3 loc, Map map, GenStepParams parms, int count = 1)
+	{
+		Faction faction = ((map.ParentFaction != null && map.ParentFaction != Faction.OfPlayer) ? map.ParentFaction : Find.FactionManager.RandomEnemyFaction());
+		List<CellRect> orGenerateVar = MapGenerator.GetOrGenerateVar<List<CellRect>>("UsedRects");
+		CellRect cellRect = CellRect.CenteredOn(loc, 10, 10).ClipInsideMap(map);
+		SitePart sitePart = currentParams.sitePart;
+		sitePart.conditionCauserWasSpawned = true;
+		ResolveParams resolveParams = new ResolveParams
 		{
-			this.currentParams = parms;
-			this.count = 1;
-			base.Generate(map, parms);
-		}
-
-		// Token: 0x0600B5D4 RID: 46548 RVA: 0x00343DB0 File Offset: 0x00341FB0
-		protected override void ScatterAt(IntVec3 loc, Map map, GenStepParams parms, int count = 1)
-		{
-			Faction faction;
-			if (map.ParentFaction == null || map.ParentFaction == Faction.OfPlayer)
-			{
-				faction = Find.FactionManager.RandomEnemyFaction(false, false, true, TechLevel.Undefined);
-			}
-			else
-			{
-				faction = map.ParentFaction;
-			}
-			List<CellRect> orGenerateVar = MapGenerator.GetOrGenerateVar<List<CellRect>>("UsedRects");
-			CellRect cellRect = CellRect.CenteredOn(loc, 10, 10).ClipInsideMap(map);
-			SitePart sitePart = this.currentParams.sitePart;
-			sitePart.conditionCauserWasSpawned = true;
-			ResolveParams resolveParams = default(ResolveParams);
-			resolveParams.rect = cellRect;
-			resolveParams.faction = faction;
-			resolveParams.conditionCauser = sitePart.conditionCauser;
-			BaseGen.globalSettings.map = map;
-			BaseGen.symbolStack.Push("conditionCauserRoom", resolveParams, null);
-			BaseGen.Generate();
-			MapGenerator.SetVar<CellRect>("RectOfInterest", cellRect);
-			orGenerateVar.Add(cellRect);
-		}
-
-		// Token: 0x04007CBB RID: 31931
-		private const int Size = 10;
-
-		// Token: 0x04007CBC RID: 31932
-		private GenStepParams currentParams;
+			rect = cellRect,
+			faction = faction,
+			conditionCauser = sitePart.conditionCauser
+		};
+		RimWorld.BaseGen.BaseGen.globalSettings.map = map;
+		RimWorld.BaseGen.BaseGen.symbolStack.Push("conditionCauserRoom", resolveParams);
+		RimWorld.BaseGen.BaseGen.Generate();
+		MapGenerator.SetVar("RectOfInterest", cellRect);
+		orGenerateVar.Add(cellRect);
 	}
 }

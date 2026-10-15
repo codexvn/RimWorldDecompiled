@@ -1,39 +1,145 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_PilotConsole : JobDriver
 {
-	// Token: 0x020012DE RID: 4830
-	public class JobDriver_PilotConsole : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__2 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x06007656 RID: 30294 RVA: 0x001D81A7 File Offset: 0x001D63A7
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
-		{
-			return this.pawn.Reserve(this.job.GetTarget(TargetIndex.A), this.job, 1, -1, null, errorOnFailed, false);
-		}
+		private int _003C_003E1__state;
 
-		// Token: 0x06007657 RID: 30295 RVA: 0x00240DBB File Offset: 0x0023EFBB
-		protected override IEnumerable<Toil> MakeNewToils()
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_PilotConsole _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
 		{
-			this.FailOnDespawnedNullOrForbidden(TargetIndex.A);
-			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.InteractionCell, false);
-			Toil toil = ToilMaker.MakeToil("MakeNewToils");
-			toil.initAction = delegate()
+			[DebuggerHidden]
+			get
 			{
-				Thing thing = this.job.GetTarget(TargetIndex.A).Thing;
-				if (thing == null)
-				{
-					return;
-				}
-				((Precept_Ritual)this.pawn.Ideo.GetPrecept(PreceptDefOf.GravshipLaunch)).ShowRitualBeginWindow(thing, null, this.pawn, null);
-			};
-			yield return toil;
-			yield break;
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x040050E2 RID: 20706
-		private const TargetIndex ConsoleInd = TargetIndex.A;
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__2(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_PilotConsole CS_0024_003C_003E8__locals4 = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				CS_0024_003C_003E8__locals4.FailOnDespawnedNullOrForbidden(TargetIndex.A);
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.InteractionCell);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+			{
+				_003C_003E1__state = -1;
+				Toil toil = ToilMaker.MakeToil("MakeNewToils");
+				toil.initAction = delegate
+				{
+					Thing thing = CS_0024_003C_003E8__locals4.job.GetTarget(TargetIndex.A).Thing;
+					if (thing != null)
+					{
+						((Precept_Ritual)CS_0024_003C_003E8__locals4.pawn.Ideo.GetPrecept(PreceptDefOf.GravshipLaunch)).ShowRitualBeginWindow(thing, null, CS_0024_003C_003E8__locals4.pawn);
+					}
+				};
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 2;
+				return true;
+			}
+			case 2:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__2 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__2(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private const TargetIndex ConsoleInd = TargetIndex.A;
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return pawn.Reserve(job.GetTarget(TargetIndex.A), job, 1, -1, null, errorOnFailed);
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__2))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__2(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

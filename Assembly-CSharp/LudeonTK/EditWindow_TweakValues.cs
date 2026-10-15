@@ -1,249 +1,359 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace LudeonTK
+namespace LudeonTK;
+
+public class EditWindow_TweakValues : EditWindow
 {
-	// Token: 0x020000AA RID: 170
-	public class EditWindow_TweakValues : EditWindow
+	private struct TweakInfo
 	{
-		// Token: 0x170000A0 RID: 160
-		// (get) Token: 0x060003AB RID: 939 RVA: 0x00015AFF File Offset: 0x00013CFF
-		public override Vector2 InitialSize
+		public FieldInfo field;
+
+		public TweakValue tweakValue;
+
+		public float initial;
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CFindAllTweakables_003Ed__11 : IEnumerable<FieldInfo>, IEnumerable, IEnumerator<FieldInfo>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private FieldInfo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private List<Type>.Enumerator _003C_003E7__wrap1;
+
+		private FieldInfo[] _003C_003E7__wrap2;
+
+		private int _003C_003E7__wrap3;
+
+		FieldInfo IEnumerator<FieldInfo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return new Vector2(1000f, 600f);
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170000A1 RID: 161
-		// (get) Token: 0x060003AC RID: 940 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public override bool IsDebug
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return true;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x060003AD RID: 941 RVA: 0x00015B10 File Offset: 0x00013D10
-		public EditWindow_TweakValues()
+		[DebuggerHidden]
+		public _003CFindAllTweakables_003Ed__11(int _003C_003E1__state)
 		{
-			this.optionalTitle = "TweakValues";
-			if (EditWindow_TweakValues.tweakValueFields == null)
-			{
-				EditWindow_TweakValues.tweakValueFields = (from field in this.FindAllTweakables()
-				select new EditWindow_TweakValues.TweakInfo
-				{
-					field = field,
-					tweakValue = field.TryGetAttribute<TweakValue>(),
-					initial = this.GetAsFloat(field)
-				} into ti
-				orderby string.Format("{0}.{1}", ti.tweakValue.category, ti.field.DeclaringType.Name)
-				select ti).ToList<EditWindow_TweakValues.TweakInfo>();
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x060003AE RID: 942 RVA: 0x00015B7A File Offset: 0x00013D7A
-		private IEnumerable<FieldInfo> FindAllTweakables()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			foreach (Type type in GenTypes.AllTypes)
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				foreach (FieldInfo fieldInfo in type.GetFields(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))
+				try
 				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = default(List<Type>.Enumerator);
+			_003C_003E7__wrap2 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				if (num != 0)
+				{
+					if (num != 1)
+					{
+						return false;
+					}
+					_003C_003E1__state = -3;
+					goto IL_0113;
+				}
+				_003C_003E1__state = -1;
+				_003C_003E7__wrap1 = GenTypes.AllTypes.GetEnumerator();
+				_003C_003E1__state = -3;
+				goto IL_013b;
+				IL_0121:
+				if (_003C_003E7__wrap3 < _003C_003E7__wrap2.Length)
+				{
+					FieldInfo fieldInfo = _003C_003E7__wrap2[_003C_003E7__wrap3];
 					if (fieldInfo.TryGetAttribute<TweakValue>() != null)
 					{
 						if (!fieldInfo.IsStatic)
 						{
-							Log.Error(string.Format("Field {0}.{1} is marked with TweakValue, but isn't static; TweakValue won't work", fieldInfo.DeclaringType.FullName, fieldInfo.Name));
+							Log.Error($"Field {fieldInfo.DeclaringType.FullName}.{fieldInfo.Name} is marked with TweakValue, but isn't static; TweakValue won't work");
 						}
 						else if (fieldInfo.IsLiteral)
 						{
-							Log.Error(string.Format("Field {0}.{1} is marked with TweakValue, but is const; TweakValue won't work", fieldInfo.DeclaringType.FullName, fieldInfo.Name));
-						}
-						else if (fieldInfo.IsInitOnly)
-						{
-							Log.Error(string.Format("Field {0}.{1} is marked with TweakValue, but is readonly; TweakValue won't work", fieldInfo.DeclaringType.FullName, fieldInfo.Name));
+							Log.Error($"Field {fieldInfo.DeclaringType.FullName}.{fieldInfo.Name} is marked with TweakValue, but is const; TweakValue won't work");
 						}
 						else
 						{
-							yield return fieldInfo;
+							if (!fieldInfo.IsInitOnly)
+							{
+								_003C_003E2__current = fieldInfo;
+								_003C_003E1__state = 1;
+								return true;
+							}
+							Log.Error($"Field {fieldInfo.DeclaringType.FullName}.{fieldInfo.Name} is marked with TweakValue, but is readonly; TweakValue won't work");
 						}
 					}
+					goto IL_0113;
 				}
-				FieldInfo[] array = null;
+				_003C_003E7__wrap2 = null;
+				goto IL_013b;
+				IL_0113:
+				_003C_003E7__wrap3++;
+				goto IL_0121;
+				IL_013b:
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					Type current = _003C_003E7__wrap1.Current;
+					_003C_003E7__wrap2 = current.GetFields(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+					_003C_003E7__wrap3 = 0;
+					goto IL_0121;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = default(List<Type>.Enumerator);
+				return false;
 			}
-			List<Type>.Enumerator enumerator = default(List<Type>.Enumerator);
-			yield break;
-			yield break;
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
 		}
 
-		// Token: 0x060003AF RID: 943 RVA: 0x00015B84 File Offset: 0x00013D84
-		public override void DoWindowContents(Rect inRect)
+		bool IEnumerator.MoveNext()
 		{
-			Text.Font = GameFont.Small;
-			Rect rect;
-			Rect outRect = rect = inRect.ContractedBy(4f);
-			rect.xMax -= 33f;
-			Rect rect2 = new Rect(0f, 0f, EditWindow_TweakValues.CategoryWidth, Text.CalcHeight("test", 1000f));
-			Rect rect3 = new Rect(rect2.xMax, 0f, EditWindow_TweakValues.TitleWidth, rect2.height);
-			Rect rect4 = new Rect(rect3.xMax, 0f, EditWindow_TweakValues.NumberWidth, rect2.height);
-			Rect rect5 = new Rect(rect4.xMax, 0f, rect.width - rect4.xMax, rect2.height);
-			DevGUI.BeginScrollView(outRect, ref this.scrollPosition, new Rect(0f, 0f, rect.width, rect2.height * (float)EditWindow_TweakValues.tweakValueFields.Count), true);
-			foreach (EditWindow_TweakValues.TweakInfo tweakInfo in EditWindow_TweakValues.tweakValueFields)
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap1/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<FieldInfo> IEnumerable<FieldInfo>.GetEnumerator()
+		{
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				DevGUI.Label(rect2, tweakInfo.tweakValue.category);
-				DevGUI.Label(rect3, string.Format("{0}.{1}", tweakInfo.field.DeclaringType.Name, tweakInfo.field.Name));
-				float num;
-				bool flag;
-				if (tweakInfo.field.FieldType == typeof(float) || tweakInfo.field.FieldType == typeof(int) || tweakInfo.field.FieldType == typeof(ushort))
+				_003C_003E1__state = 0;
+				return this;
+			}
+			return new _003CFindAllTweakables_003Ed__11(0);
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<FieldInfo>)this).GetEnumerator();
+		}
+	}
+
+	[TweakValue("TweakValue", 0f, 300f)]
+	public static float CategoryWidth = 180f;
+
+	[TweakValue("TweakValue", 0f, 300f)]
+	public static float TitleWidth = 300f;
+
+	[TweakValue("TweakValue", 0f, 300f)]
+	public static float NumberWidth = 140f;
+
+	private Vector2 scrollPosition;
+
+	private static List<TweakInfo> tweakValueFields;
+
+	public override Vector2 InitialSize => new Vector2(1000f, 600f);
+
+	public override bool IsDebug => true;
+
+	public EditWindow_TweakValues()
+	{
+		optionalTitle = "TweakValues";
+		if (tweakValueFields == null)
+		{
+			tweakValueFields = (from ti in FindAllTweakables().Select(delegate(FieldInfo field)
 				{
-					float asFloat = this.GetAsFloat(tweakInfo.field);
-					num = DevGUI.HorizontalSlider(rect5, this.GetAsFloat(tweakInfo.field), tweakInfo.tweakValue.min, tweakInfo.tweakValue.max);
-					this.SetFromFloat(tweakInfo.field, num);
-					flag = (asFloat != num);
-				}
-				else if (tweakInfo.field.FieldType == typeof(bool))
+					TweakInfo result = default(TweakInfo);
+					result.field = field;
+					result.tweakValue = field.TryGetAttribute<TweakValue>();
+					result.initial = GetAsFloat(field);
+					return result;
+				})
+				orderby $"{ti.tweakValue.category}.{ti.field.DeclaringType.Name}"
+				select ti).ToList();
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CFindAllTweakables_003Ed__11))]
+	private IEnumerable<FieldInfo> FindAllTweakables()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CFindAllTweakables_003Ed__11(-2);
+	}
+
+	public override void DoWindowContents(Rect inRect)
+	{
+		Text.Font = GameFont.Small;
+		Rect rect;
+		Rect outRect = (rect = inRect.ContractedBy(4f));
+		rect.xMax -= 33f;
+		Rect rect2 = new Rect(0f, 0f, CategoryWidth, Text.CalcHeight("test", 1000f));
+		Rect rect3 = new Rect(rect2.xMax, 0f, TitleWidth, rect2.height);
+		Rect rect4 = new Rect(rect3.xMax, 0f, NumberWidth, rect2.height);
+		Rect rect5 = new Rect(rect4.xMax, 0f, rect.width - rect4.xMax, rect2.height);
+		DevGUI.BeginScrollView(outRect, ref scrollPosition, new Rect(0f, 0f, rect.width, rect2.height * (float)tweakValueFields.Count));
+		foreach (TweakInfo tweakValueField in tweakValueFields)
+		{
+			DevGUI.Label(rect2, tweakValueField.tweakValue.category);
+			DevGUI.Label(rect3, $"{tweakValueField.field.DeclaringType.Name}.{tweakValueField.field.Name}");
+			float num;
+			bool flag;
+			if (tweakValueField.field.FieldType == typeof(float) || tweakValueField.field.FieldType == typeof(int) || tweakValueField.field.FieldType == typeof(ushort))
+			{
+				float asFloat = GetAsFloat(tweakValueField.field);
+				num = DevGUI.HorizontalSlider(rect5, GetAsFloat(tweakValueField.field), tweakValueField.tweakValue.min, tweakValueField.tweakValue.max);
+				SetFromFloat(tweakValueField.field, num);
+				flag = asFloat != num;
+			}
+			else if (tweakValueField.field.FieldType == typeof(bool))
+			{
+				bool num2 = (bool)tweakValueField.field.GetValue(null);
+				bool checkOn = num2;
+				DevGUI.Checkbox(new Rect(rect5.xMin, rect5.yMin, rect2.height, rect2.height), ref checkOn);
+				tweakValueField.field.SetValue(null, checkOn);
+				num = (checkOn ? 1 : 0);
+				flag = num2 != checkOn;
+			}
+			else
+			{
+				Log.ErrorOnce($"Attempted to tweakvalue unknown field type {tweakValueField.field.FieldType}", 83944645);
+				flag = false;
+				num = tweakValueField.initial;
+			}
+			if (num != tweakValueField.initial)
+			{
+				GUI.color = Color.red;
+				Text.WordWrap = false;
+				DevGUI.Label(rect4, $"{tweakValueField.initial} -> {num}");
+				Text.WordWrap = true;
+				GUI.color = Color.white;
+				if (DevGUI.ButtonInvisible(rect4))
 				{
-					bool flag3;
-					bool flag2 = flag3 = (bool)tweakInfo.field.GetValue(null);
-					DevGUI.Checkbox(new Rect(rect5.xMin, rect5.yMin, rect2.height, rect2.height), ref flag3);
-					tweakInfo.field.SetValue(null, flag3);
-					num = (float)(flag3 ? 1 : 0);
-					flag = (flag2 != flag3);
-				}
-				else
-				{
-					Log.ErrorOnce(string.Format("Attempted to tweakvalue unknown field type {0}", tweakInfo.field.FieldType), 83944645);
-					flag = false;
-					num = tweakInfo.initial;
-				}
-				if (num != tweakInfo.initial)
-				{
-					GUI.color = Color.red;
-					Text.WordWrap = false;
-					DevGUI.Label(rect4, string.Format("{0} -> {1}", tweakInfo.initial, num));
-					Text.WordWrap = true;
-					GUI.color = Color.white;
-					if (DevGUI.ButtonInvisible(rect4))
+					flag = true;
+					if (tweakValueField.field.FieldType == typeof(float) || tweakValueField.field.FieldType == typeof(int) || tweakValueField.field.FieldType == typeof(ushort))
 					{
-						flag = true;
-						if (tweakInfo.field.FieldType == typeof(float) || tweakInfo.field.FieldType == typeof(int) || tweakInfo.field.FieldType == typeof(ushort))
-						{
-							this.SetFromFloat(tweakInfo.field, tweakInfo.initial);
-						}
-						else if (tweakInfo.field.FieldType == typeof(bool))
-						{
-							tweakInfo.field.SetValue(null, tweakInfo.initial != 0f);
-						}
-						else
-						{
-							Log.ErrorOnce(string.Format("Attempted to tweakvalue unknown field type {0}", tweakInfo.field.FieldType), 83944646);
-						}
+						SetFromFloat(tweakValueField.field, tweakValueField.initial);
 					}
-				}
-				else
-				{
-					DevGUI.Label(rect4, string.Format("{0}", tweakInfo.initial));
-				}
-				if (flag)
-				{
-					MethodInfo method = tweakInfo.field.DeclaringType.GetMethod(tweakInfo.field.Name + "_Changed", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-					if (method != null)
+					else if (tweakValueField.field.FieldType == typeof(bool))
 					{
-						method.Invoke(null, null);
+						tweakValueField.field.SetValue(null, tweakValueField.initial != 0f);
+					}
+					else
+					{
+						Log.ErrorOnce($"Attempted to tweakvalue unknown field type {tweakValueField.field.FieldType}", 83944646);
 					}
 				}
-				rect2.y += rect2.height;
-				rect3.y += rect2.height;
-				rect4.y += rect2.height;
-				rect5.y += rect2.height;
 			}
-			DevGUI.EndScrollView();
+			else
+			{
+				DevGUI.Label(rect4, $"{tweakValueField.initial}");
+			}
+			if (flag)
+			{
+				MethodInfo method = tweakValueField.field.DeclaringType.GetMethod(tweakValueField.field.Name + "_Changed", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+				if (method != null)
+				{
+					method.Invoke(null, null);
+				}
+			}
+			rect2.y += rect2.height;
+			rect3.y += rect2.height;
+			rect4.y += rect2.height;
+			rect5.y += rect2.height;
 		}
+		DevGUI.EndScrollView();
+	}
 
-		// Token: 0x060003B0 RID: 944 RVA: 0x00016054 File Offset: 0x00014254
-		private float GetAsFloat(FieldInfo field)
+	private float GetAsFloat(FieldInfo field)
+	{
+		if (field.FieldType == typeof(float))
 		{
-			if (field.FieldType == typeof(float))
-			{
-				return (float)field.GetValue(null);
-			}
-			if (field.FieldType == typeof(bool))
-			{
-				return (float)(((bool)field.GetValue(null)) ? 1 : 0);
-			}
-			if (field.FieldType == typeof(int))
-			{
-				return (float)((int)field.GetValue(null));
-			}
-			if (field.FieldType == typeof(ushort))
-			{
-				return (float)((ushort)field.GetValue(null));
-			}
-			Log.ErrorOnce(string.Format("Attempted to return unknown field type {0} as a float", field.FieldType), 83944644);
-			return 0f;
+			return (float)field.GetValue(null);
 		}
-
-		// Token: 0x060003B1 RID: 945 RVA: 0x0001611C File Offset: 0x0001431C
-		private void SetFromFloat(FieldInfo field, float input)
+		if (field.FieldType == typeof(bool))
 		{
-			if (field.FieldType == typeof(float))
-			{
-				field.SetValue(null, input);
-				return;
-			}
-			if (field.FieldType == typeof(bool))
-			{
-				field.SetValue(null, input != 0f);
-				return;
-			}
-			if (field.FieldType == typeof(int))
-			{
-				field.SetValue(field, (int)input);
-				return;
-			}
-			if (field.FieldType == typeof(ushort))
-			{
-				field.SetValue(field, (ushort)input);
-				return;
-			}
-			Log.ErrorOnce(string.Format("Attempted to set unknown field type {0} from a float", field.FieldType), 83944645);
+			return ((bool)field.GetValue(null)) ? 1 : 0;
 		}
-
-		// Token: 0x0400024F RID: 591
-		[TweakValue("TweakValue", 0f, 300f)]
-		public static float CategoryWidth = 180f;
-
-		// Token: 0x04000250 RID: 592
-		[TweakValue("TweakValue", 0f, 300f)]
-		public static float TitleWidth = 300f;
-
-		// Token: 0x04000251 RID: 593
-		[TweakValue("TweakValue", 0f, 300f)]
-		public static float NumberWidth = 140f;
-
-		// Token: 0x04000252 RID: 594
-		private Vector2 scrollPosition;
-
-		// Token: 0x04000253 RID: 595
-		private static List<EditWindow_TweakValues.TweakInfo> tweakValueFields;
-
-		// Token: 0x020000AB RID: 171
-		private struct TweakInfo
+		if (field.FieldType == typeof(int))
 		{
-			// Token: 0x04000254 RID: 596
-			public FieldInfo field;
+			return (int)field.GetValue(null);
+		}
+		if (field.FieldType == typeof(ushort))
+		{
+			return (int)(ushort)field.GetValue(null);
+		}
+		Log.ErrorOnce($"Attempted to return unknown field type {field.FieldType} as a float", 83944644);
+		return 0f;
+	}
 
-			// Token: 0x04000255 RID: 597
-			public TweakValue tweakValue;
-
-			// Token: 0x04000256 RID: 598
-			public float initial;
+	private void SetFromFloat(FieldInfo field, float input)
+	{
+		if (field.FieldType == typeof(float))
+		{
+			field.SetValue(null, input);
+		}
+		else if (field.FieldType == typeof(bool))
+		{
+			field.SetValue(null, input != 0f);
+		}
+		else if (field.FieldType == typeof(int))
+		{
+			field.SetValue(field, (int)input);
+		}
+		else if (field.FieldType == typeof(ushort))
+		{
+			field.SetValue(field, (ushort)input);
+		}
+		else
+		{
+			Log.ErrorOnce($"Attempted to set unknown field type {field.FieldType} from a float", 83944645);
 		}
 	}
 }

@@ -1,44 +1,44 @@
-﻿using System;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobGiver_RescueNearby : ThinkNode_JobGiver
 {
-	// Token: 0x020014C0 RID: 5312
-	public class JobGiver_RescueNearby : ThinkNode_JobGiver
+	private float radius = 30f;
+
+	private const float MinDistFromEnemy = 25f;
+
+	public override ThinkNode DeepCopy(bool resolve = true)
 	{
-		// Token: 0x06007F35 RID: 32565 RVA: 0x00264FFC File Offset: 0x002631FC
-		public override ThinkNode DeepCopy(bool resolve = true)
+		JobGiver_RescueNearby obj = (JobGiver_RescueNearby)base.DeepCopy(resolve);
+		obj.radius = radius;
+		return obj;
+	}
+
+	protected override Job TryGiveJob(Pawn pawn)
+	{
+		Pawn pawn2 = (Pawn)GenClosest.ClosestThingReachable(pawn.Position, pawn.Map, ThingRequest.ForGroup(ThingRequestGroup.Pawn), PathEndMode.OnCell, TraverseParms.For(pawn), radius, Validator);
+		if (pawn2 == null)
 		{
-			JobGiver_RescueNearby jobGiver_RescueNearby = (JobGiver_RescueNearby)base.DeepCopy(resolve);
-			jobGiver_RescueNearby.radius = this.radius;
-			return jobGiver_RescueNearby;
+			return null;
 		}
-
-		// Token: 0x06007F36 RID: 32566 RVA: 0x00265018 File Offset: 0x00263218
-		protected override Job TryGiveJob(Pawn pawn)
+		Building_Bed building_Bed = RestUtility.FindBedFor(pawn2, pawn, checkSocialProperness: false, ignoreOtherReservations: false, pawn2.GuestStatus);
+		if (building_Bed == null || !pawn2.CanReserve(building_Bed))
 		{
-			JobGiver_RescueNearby.<>c__DisplayClass3_0 CS$<>8__locals1 = new JobGiver_RescueNearby.<>c__DisplayClass3_0();
-			CS$<>8__locals1.pawn = pawn;
-			Pawn pawn2 = (Pawn)GenClosest.ClosestThingReachable(CS$<>8__locals1.pawn.Position, CS$<>8__locals1.pawn.Map, ThingRequest.ForGroup(ThingRequestGroup.Pawn), PathEndMode.OnCell, TraverseParms.For(CS$<>8__locals1.pawn, Danger.Deadly, TraverseMode.ByPawn, false, false, false, true), this.radius, new Predicate<Thing>(CS$<>8__locals1.<TryGiveJob>g__Validator|0), null, 0, -1, false, RegionType.Set_Passable, false, false);
-			if (pawn2 == null)
-			{
-				return null;
-			}
-			Building_Bed building_Bed = RestUtility.FindBedFor(pawn2, CS$<>8__locals1.pawn, false, false, pawn2.GuestStatus);
-			if (building_Bed == null || !pawn2.CanReserve(building_Bed, 1, -1, null, false))
-			{
-				return null;
-			}
-			Job job = JobMaker.MakeJob(JobDefOf.Rescue, pawn2, building_Bed);
-			job.count = 1;
-			return job;
+			return null;
 		}
-
-		// Token: 0x04005530 RID: 21808
-		private float radius = 30f;
-
-		// Token: 0x04005531 RID: 21809
-		private const float MinDistFromEnemy = 25f;
+		Job job = JobMaker.MakeJob(JobDefOf.Rescue, pawn2, building_Bed);
+		job.count = 1;
+		return job;
+		bool Validator(Thing t)
+		{
+			Pawn patient = (Pawn)t;
+			if (!HealthAIUtility.CanRescueNow(pawn, patient))
+			{
+				return false;
+			}
+			return true;
+		}
 	}
 }

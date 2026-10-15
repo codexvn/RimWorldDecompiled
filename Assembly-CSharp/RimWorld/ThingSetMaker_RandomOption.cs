@@ -1,143 +1,436 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class ThingSetMaker_RandomOption : ThingSetMaker
 {
-	// Token: 0x02002B60 RID: 11104
-	public class ThingSetMaker_RandomOption : ThingSetMaker
+	public class Option
 	{
-		// Token: 0x0600F846 RID: 63558 RVA: 0x004834C8 File Offset: 0x004816C8
-		protected override bool CanGenerateSub(ThingSetMakerParams parms)
+		public ThingSetMaker thingSetMaker;
+
+		public float weight;
+
+		public float? weightIfPlayerHasNoItem;
+
+		public ThingDef weightIfPlayerHasNoItemItem;
+
+		public float? weightIfPlayerHasXenotype;
+
+		public XenotypeDef weightIfPlayerHasXenotypeXenotype;
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CAllGeneratableThingsDebugSub_003Ed__6 : IEnumerable<ThingDef>, IEnumerable, IEnumerator<ThingDef>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private ThingDef _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public ThingSetMaker_RandomOption _003C_003E4__this;
+
+		private ThingSetMakerParams parms;
+
+		public ThingSetMakerParams _003C_003E3__parms;
+
+		private int _003Ci_003E5__2;
+
+		private IEnumerator<ThingDef> _003C_003E7__wrap2;
+
+		ThingDef IEnumerator<ThingDef>.Current
 		{
-			for (int i = 0; i < this.options.Count; i++)
+			[DebuggerHidden]
+			get
 			{
-				if (this.options[i].thingSetMaker.CanGenerate(parms) && this.GetSelectionWeight(this.options[i], parms) > 0f)
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CAllGeneratableThingsDebugSub_003Ed__6(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
 				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap2 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				ThingSetMaker_RandomOption thingSetMaker_RandomOption = _003C_003E4__this;
+				if (num != 0)
+				{
+					if (num != 1)
+					{
+						return false;
+					}
+					_003C_003E1__state = -3;
+					goto IL_00ee;
+				}
+				_003C_003E1__state = -1;
+				_003Ci_003E5__2 = 0;
+				goto IL_011a;
+				IL_011a:
+				if (_003Ci_003E5__2 < thingSetMaker_RandomOption.options.Count)
+				{
+					float num2 = thingSetMaker_RandomOption.options[_003Ci_003E5__2].weight;
+					if (thingSetMaker_RandomOption.options[_003Ci_003E5__2].weightIfPlayerHasNoItem.HasValue)
+					{
+						num2 = Mathf.Max(num2, thingSetMaker_RandomOption.options[_003Ci_003E5__2].weightIfPlayerHasNoItem.Value);
+					}
+					if (!(num2 <= 0f))
+					{
+						_003C_003E7__wrap2 = thingSetMaker_RandomOption.options[_003Ci_003E5__2].thingSetMaker.AllGeneratableThingsDebug(parms).GetEnumerator();
+						_003C_003E1__state = -3;
+						goto IL_00ee;
+					}
+					goto IL_0108;
+				}
+				return false;
+				IL_00ee:
+				if (_003C_003E7__wrap2.MoveNext())
+				{
+					ThingDef current = _003C_003E7__wrap2.Current;
+					_003C_003E2__current = current;
+					_003C_003E1__state = 1;
 					return true;
 				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap2 = null;
+				goto IL_0108;
+				IL_0108:
+				_003Ci_003E5__2++;
+				goto IL_011a;
 			}
-			return false;
-		}
-
-		// Token: 0x0600F847 RID: 63559 RVA: 0x00483524 File Offset: 0x00481724
-		protected override void Generate(ThingSetMakerParams parms, List<Thing> outThings)
-		{
-			ThingSetMaker_RandomOption.Option option;
-			if (!(from x in this.options
-			where x.thingSetMaker.CanGenerate(parms)
-			select x).TryRandomElementByWeight((ThingSetMaker_RandomOption.Option x) => this.GetSelectionWeight(x, parms), out option))
+			catch
 			{
-				return;
-			}
-			outThings.AddRange(option.thingSetMaker.Generate(parms));
-		}
-
-		// Token: 0x0600F848 RID: 63560 RVA: 0x0048358C File Offset: 0x0048178C
-		private float GetSelectionWeight(ThingSetMaker_RandomOption.Option option, ThingSetMakerParams parms)
-		{
-			if (option.weightIfPlayerHasNoItem != null && !PlayerItemAccessibilityUtility.PlayerOrQuestRewardHas(option.weightIfPlayerHasNoItemItem, 1))
-			{
-				return option.weightIfPlayerHasNoItem.Value * option.thingSetMaker.ExtraSelectionWeightFactor(parms);
-			}
-			if (ModsConfig.BiotechActive && option.weightIfPlayerHasXenotype != null && option.weightIfPlayerHasXenotypeXenotype != null && PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_Colonists_OfXenotype(option.weightIfPlayerHasXenotypeXenotype).Count > 0)
-			{
-				return option.weightIfPlayerHasXenotype.Value * option.thingSetMaker.ExtraSelectionWeightFactor(parms);
-			}
-			return option.weight * option.thingSetMaker.ExtraSelectionWeightFactor(parms);
-		}
-
-		// Token: 0x0600F849 RID: 63561 RVA: 0x00483628 File Offset: 0x00481828
-		public override void ResolveReferences()
-		{
-			base.ResolveReferences();
-			for (int i = 0; i < this.options.Count; i++)
-			{
-				this.options[i].thingSetMaker.ResolveReferences();
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x0600F84A RID: 63562 RVA: 0x00483667 File Offset: 0x00481867
-		protected override IEnumerable<ThingDef> AllGeneratableThingsDebugSub(ThingSetMakerParams parms)
+		bool IEnumerator.MoveNext()
 		{
-			int num2;
-			for (int i = 0; i < this.options.Count; i = num2 + 1)
-			{
-				float num = this.options[i].weight;
-				if (this.options[i].weightIfPlayerHasNoItem != null)
-				{
-					num = Mathf.Max(num, this.options[i].weightIfPlayerHasNoItem.Value);
-				}
-				if (num > 0f)
-				{
-					foreach (ThingDef thingDef in this.options[i].thingSetMaker.AllGeneratableThingsDebug(parms))
-					{
-						yield return thingDef;
-					}
-					IEnumerator<ThingDef> enumerator = null;
-				}
-				num2 = i;
-			}
-			yield break;
-			yield break;
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0600F84B RID: 63563 RVA: 0x0048367E File Offset: 0x0048187E
-		public override IEnumerable<string> ConfigErrors()
+		private void _003C_003Em__Finally1()
 		{
-			if (this.options.NullOrEmpty<ThingSetMaker_RandomOption.Option>())
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap2 != null)
 			{
-				yield return "no options.";
+				_003C_003E7__wrap2.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<ThingDef> IEnumerable<ThingDef>.GetEnumerator()
+		{
+			_003CAllGeneratableThingsDebugSub_003Ed__6 _003CAllGeneratableThingsDebugSub_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CAllGeneratableThingsDebugSub_003Ed__ = this;
 			}
 			else
 			{
-				int num;
-				for (int i = 0; i < this.options.Count; i = num + 1)
+				_003CAllGeneratableThingsDebugSub_003Ed__ = new _003CAllGeneratableThingsDebugSub_003Ed__6(0)
 				{
-					if (this.options[i].thingSetMaker == null)
-					{
-						yield return "options[" + i.ToString() + "]=null.";
-					}
-					else
-					{
-						foreach (string str in this.options[i].thingSetMaker.ConfigErrors())
-						{
-							yield return "options[" + i.ToString() + "]: " + str;
-						}
-						IEnumerator<string> enumerator = null;
-					}
-					num = i;
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CAllGeneratableThingsDebugSub_003Ed__.parms = _003C_003E3__parms;
+			return _003CAllGeneratableThingsDebugSub_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<ThingDef>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__7 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public ThingSetMaker_RandomOption _003C_003E4__this;
+
+		private int _003Ci_003E5__2;
+
+		private IEnumerator<string> _003C_003E7__wrap2;
+
+		string IEnumerator<string>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__7(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 3)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
 				}
 			}
-			yield break;
-			yield break;
+			_003C_003E7__wrap2 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x0400A341 RID: 41793
-		public List<ThingSetMaker_RandomOption.Option> options;
-
-		// Token: 0x02002B61 RID: 11105
-		public class Option
+		private bool MoveNext()
 		{
-			// Token: 0x0400A342 RID: 41794
-			public ThingSetMaker thingSetMaker;
-
-			// Token: 0x0400A343 RID: 41795
-			public float weight;
-
-			// Token: 0x0400A344 RID: 41796
-			public float? weightIfPlayerHasNoItem;
-
-			// Token: 0x0400A345 RID: 41797
-			public ThingDef weightIfPlayerHasNoItemItem;
-
-			// Token: 0x0400A346 RID: 41798
-			public float? weightIfPlayerHasXenotype;
-
-			// Token: 0x0400A347 RID: 41799
-			public XenotypeDef weightIfPlayerHasXenotypeXenotype;
+			try
+			{
+				int num = _003C_003E1__state;
+				ThingSetMaker_RandomOption thingSetMaker_RandomOption = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					if (thingSetMaker_RandomOption.options.NullOrEmpty())
+					{
+						_003C_003E2__current = "no options.";
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003Ci_003E5__2 = 0;
+					goto IL_015e;
+				case 1:
+					_003C_003E1__state = -1;
+					break;
+				case 2:
+					_003C_003E1__state = -1;
+					goto IL_014c;
+				case 3:
+					{
+						_003C_003E1__state = -3;
+						goto IL_0132;
+					}
+					IL_014c:
+					_003Ci_003E5__2++;
+					goto IL_015e;
+					IL_015e:
+					if (_003Ci_003E5__2 >= thingSetMaker_RandomOption.options.Count)
+					{
+						break;
+					}
+					if (thingSetMaker_RandomOption.options[_003Ci_003E5__2].thingSetMaker == null)
+					{
+						_003C_003E2__current = "options[" + _003Ci_003E5__2 + "]=null.";
+						_003C_003E1__state = 2;
+						return true;
+					}
+					_003C_003E7__wrap2 = thingSetMaker_RandomOption.options[_003Ci_003E5__2].thingSetMaker.ConfigErrors().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0132;
+					IL_0132:
+					if (_003C_003E7__wrap2.MoveNext())
+					{
+						string current = _003C_003E7__wrap2.Current;
+						_003C_003E2__current = "options[" + _003Ci_003E5__2 + "]: " + current;
+						_003C_003E1__state = 3;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap2 = null;
+					goto IL_014c;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
 		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap2 != null)
+			{
+				_003C_003E7__wrap2.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__7 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__7(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	public List<Option> options;
+
+	protected override bool CanGenerateSub(ThingSetMakerParams parms)
+	{
+		for (int i = 0; i < options.Count; i++)
+		{
+			if (options[i].thingSetMaker.CanGenerate(parms) && GetSelectionWeight(options[i], parms) > 0f)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	protected override void Generate(ThingSetMakerParams parms, List<Thing> outThings)
+	{
+		if (options.Where((Option x) => x.thingSetMaker.CanGenerate(parms)).TryRandomElementByWeight((Option x) => GetSelectionWeight(x, parms), out var result))
+		{
+			outThings.AddRange(result.thingSetMaker.Generate(parms));
+		}
+	}
+
+	private float GetSelectionWeight(Option option, ThingSetMakerParams parms)
+	{
+		if (option.weightIfPlayerHasNoItem.HasValue && !PlayerItemAccessibilityUtility.PlayerOrQuestRewardHas(option.weightIfPlayerHasNoItemItem))
+		{
+			return option.weightIfPlayerHasNoItem.Value * option.thingSetMaker.ExtraSelectionWeightFactor(parms);
+		}
+		if (ModsConfig.BiotechActive && option.weightIfPlayerHasXenotype.HasValue && option.weightIfPlayerHasXenotypeXenotype != null && PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_Colonists_OfXenotype(option.weightIfPlayerHasXenotypeXenotype).Count > 0)
+		{
+			return option.weightIfPlayerHasXenotype.Value * option.thingSetMaker.ExtraSelectionWeightFactor(parms);
+		}
+		return option.weight * option.thingSetMaker.ExtraSelectionWeightFactor(parms);
+	}
+
+	public override void ResolveReferences()
+	{
+		base.ResolveReferences();
+		for (int i = 0; i < options.Count; i++)
+		{
+			options[i].thingSetMaker.ResolveReferences();
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CAllGeneratableThingsDebugSub_003Ed__6))]
+	protected override IEnumerable<ThingDef> AllGeneratableThingsDebugSub(ThingSetMakerParams parms)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CAllGeneratableThingsDebugSub_003Ed__6(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__parms = parms
+		};
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__7))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__7(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

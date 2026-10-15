@@ -1,82 +1,210 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompProperties_Drug : CompProperties
 {
-	// Token: 0x02001959 RID: 6489
-	public class CompProperties_Drug : CompProperties
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__15 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700165F RID: 5727
-		// (get) Token: 0x06009372 RID: 37746 RVA: 0x002B5BFA File Offset: 0x002B3DFA
-		public bool Addictive
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompProperties_Drug _003C_003E4__this;
+
+		private ThingDef parentDef;
+
+		public ThingDef _003C_003E3__parentDef;
+
+		private IEnumerator<string> _003C_003E7__wrap1;
+
+		string IEnumerator<string>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.addictiveness > 0f;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001660 RID: 5728
-		// (get) Token: 0x06009373 RID: 37747 RVA: 0x002B5C09 File Offset: 0x002B3E09
-		public bool CanCauseOverdose
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.overdoseSeverityOffset.TrueMax > 0f;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06009374 RID: 37748 RVA: 0x002B5C1D File Offset: 0x002B3E1D
-		public CompProperties_Drug()
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__15(int _003C_003E1__state)
 		{
-			this.compClass = typeof(CompDrug);
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x06009375 RID: 37749 RVA: 0x002B5C56 File Offset: 0x002B3E56
-		public override IEnumerable<string> ConfigErrors(ThingDef parentDef)
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			foreach (string text in base.ConfigErrors(parentDef))
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				yield return text;
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
 			}
-			IEnumerator<string> enumerator = null;
-			if (this.Addictive && this.chemical == null)
-			{
-				yield return "addictive but chemical is null";
-			}
-			yield break;
-			yield break;
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x04005EDF RID: 24287
-		public ChemicalDef chemical;
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				CompProperties_Drug compProperties_Drug = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((CompProperties)compProperties_Drug).ConfigErrors(parentDef).GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0075;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0075;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_0075:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (compProperties_Drug.Addictive && compProperties_Drug.chemical == null)
+					{
+						_003C_003E2__current = "addictive but chemical is null";
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
 
-		// Token: 0x04005EE0 RID: 24288
-		public float addictiveness;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x04005EE1 RID: 24289
-		public float minToleranceToAddict;
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
 
-		// Token: 0x04005EE2 RID: 24290
-		public float existingAddictionSeverityOffset = 0.1f;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04005EE3 RID: 24291
-		public float needLevelOffset = 1f;
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__15 _003CConfigErrors_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CConfigErrors_003Ed__ = this;
+			}
+			else
+			{
+				_003CConfigErrors_003Ed__ = new _003CConfigErrors_003Ed__15(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CConfigErrors_003Ed__.parentDef = _003C_003E3__parentDef;
+			return _003CConfigErrors_003Ed__;
+		}
 
-		// Token: 0x04005EE4 RID: 24292
-		public FloatRange overdoseSeverityOffset = FloatRange.Zero;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x04005EE5 RID: 24293
-		public float largeOverdoseChance;
+	public ChemicalDef chemical;
 
-		// Token: 0x04005EE6 RID: 24294
-		public bool isCombatEnhancingDrug;
+	public float addictiveness;
 
-		// Token: 0x04005EE7 RID: 24295
-		public bool teetotalerCanConsume;
+	public float minToleranceToAddict;
 
-		// Token: 0x04005EE8 RID: 24296
-		public float listOrder;
+	public float existingAddictionSeverityOffset = 0.1f;
+
+	public float needLevelOffset = 1f;
+
+	public FloatRange overdoseSeverityOffset = FloatRange.Zero;
+
+	public float largeOverdoseChance;
+
+	public bool isCombatEnhancingDrug;
+
+	public bool teetotalerCanConsume;
+
+	public float listOrder;
+
+	public bool Addictive => addictiveness > 0f;
+
+	public bool CanCauseOverdose => overdoseSeverityOffset.TrueMax > 0f;
+
+	public CompProperties_Drug()
+	{
+		compClass = typeof(CompDrug);
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__15))]
+	public override IEnumerable<string> ConfigErrors(ThingDef parentDef)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__15(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__parentDef = parentDef
+		};
 	}
 }

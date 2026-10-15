@@ -1,173 +1,358 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
 
-namespace RimWorld
+namespace RimWorld;
+
+[StaticConstructorOnStartup]
+public static class StorageGroupUtility
 {
-	// Token: 0x020029B8 RID: 10680
-	[StaticConstructorOnStartup]
-	public static class StorageGroupUtility
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass5_0
 	{
-		// Token: 0x0600EB7E RID: 60286 RVA: 0x00446793 File Offset: 0x00444993
-		public static IEnumerable<Gizmo> StorageGroupMemberGizmos(IStorageGroupMember member)
+		public IStorageGroupMember member;
+
+		internal void _003CStorageGroupMemberGizmos_003Eb__0()
 		{
-			bool flag = true;
-			StorageGroup storageGroup = null;
-			StorageGroupUtility.tmpMembers.Clear();
-			foreach (object obj in Find.Selector.SelectedObjects)
+			bool num = tmpMembers[0].Group != null;
+			StorageGroup storageGroup = tmpMembers[0].Group ?? member.Map.storageGroups.NewGroup();
+			if (!num)
 			{
-				IStorageGroupMember storageGroupMember = obj as IStorageGroupMember;
-				if (storageGroupMember != null && storageGroupMember.StorageGroupTag == member.StorageGroupTag)
+				storageGroup.InitFrom(tmpMembers[0]);
+			}
+			foreach (IStorageGroupMember tmpMember in tmpMembers)
+			{
+				tmpMember.SetStorageGroup(storageGroup);
+			}
+			if (tmpMembers.Count > 1)
+			{
+				Messages.Message("SettingsLinkedFor".Translate(tmpMembers.Count), null, MessageTypeDefOf.NeutralEvent, historical: false);
+			}
+			else
+			{
+				Messages.Message("SettingsLinkedForSingular".Translate(), null, MessageTypeDefOf.NeutralEvent, historical: false);
+			}
+		}
+
+		internal void _003CStorageGroupMemberGizmos_003Eb__2()
+		{
+			if (member.Group != null)
+			{
+				StorageSettings storeSettings = member.Group.GetStoreSettings();
+				member.Group.RemoveMember(member);
+				member.Group = null;
+				if (member is Building_Storage building_Storage)
 				{
-					Building_Storage building_Storage = storageGroupMember as Building_Storage;
-					if ((building_Storage == null || building_Storage.StorageTabVisible) && storageGroupMember.Map == member.Map)
+					building_Storage.settings.CopyFrom(storeSettings);
+				}
+			}
+			if (tmpMembers.Count > 1)
+			{
+				Messages.Message("SettingsUnlinkedFor".Translate(tmpMembers.Count), null, MessageTypeDefOf.NeutralEvent, historical: false);
+			}
+			else
+			{
+				Messages.Message("SettingsUnlinkedForSingular".Translate(), null, MessageTypeDefOf.NeutralEvent, historical: false);
+			}
+		}
+
+		internal void _003CStorageGroupMemberGizmos_003Eb__3()
+		{
+			bool flag = false;
+			foreach (IStorageGroupMember member in member.Group.members)
+			{
+				if (!Find.Selector.IsSelected(member) && !(member is Thing { Destroyed: not false }))
+				{
+					Find.Selector.Select(member, playSound: false);
+					flag = true;
+				}
+			}
+			if (flag)
+			{
+				SoundDefOf.ThingSelected.PlayOneShotOnCamera();
+			}
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CStorageGroupMemberGizmos_003Ed__5 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private IStorageGroupMember member;
+
+		public IStorageGroupMember _003C_003E3__member;
+
+		private _003C_003Ec__DisplayClass5_0 _003C_003E8__1;
+
+		Gizmo IEnumerator<Gizmo>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CStorageGroupMemberGizmos_003Ed__5(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E8__1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			switch (_003C_003E1__state)
+			{
+			default:
+				return false;
+			case 0:
+			{
+				_003C_003E1__state = -1;
+				_003C_003E8__1 = new _003C_003Ec__DisplayClass5_0();
+				_003C_003E8__1.member = member;
+				bool flag2 = true;
+				StorageGroup storageGroup = null;
+				tmpMembers.Clear();
+				foreach (object selectedObject in Find.Selector.SelectedObjects)
+				{
+					if (!(selectedObject is IStorageGroupMember storageGroupMember) || !(storageGroupMember.StorageGroupTag == _003C_003E8__1.member.StorageGroupTag) || storageGroupMember is Building_Storage { StorageTabVisible: false } || storageGroupMember.Map != _003C_003E8__1.member.Map)
 					{
-						StorageGroupUtility.tmpMembers.Add(storageGroupMember);
-						if (flag)
+						continue;
+					}
+					tmpMembers.Add(storageGroupMember);
+					if (flag2)
+					{
+						if (storageGroup == null && _003C_003E8__1.member.Group != null)
 						{
-							if (storageGroup == null && member.Group != null)
-							{
-								storageGroup = member.Group;
-							}
-							if (storageGroup != member.Group)
-							{
-								flag = false;
-							}
+							storageGroup = _003C_003E8__1.member.Group;
+						}
+						if (storageGroup != _003C_003E8__1.member.Group)
+						{
+							flag2 = false;
 						}
 					}
 				}
-			}
-			if (storageGroup == null)
-			{
-				flag = false;
-			}
-			Command_Action command_Action = new Command_Action();
-			command_Action.defaultLabel = "LinkStorageSettings".Translate();
-			command_Action.defaultDesc = "LinkStorageSettingsDesc".Translate();
-			command_Action.icon = StorageGroupUtility.LinkTex;
-			command_Action.action = delegate()
-			{
-				bool flag2 = StorageGroupUtility.tmpMembers[0].Group != null;
-				StorageGroup storageGroup2 = StorageGroupUtility.tmpMembers[0].Group ?? member.Map.storageGroups.NewGroup(null);
-				if (!flag2)
+				if (storageGroup == null)
 				{
-					storageGroup2.InitFrom(StorageGroupUtility.tmpMembers[0]);
+					flag2 = false;
 				}
-				foreach (IStorageGroupMember member2 in StorageGroupUtility.tmpMembers)
+				Command_Action command_Action = new Command_Action
 				{
-					member2.SetStorageGroup(storageGroup2, true);
-				}
-				if (StorageGroupUtility.tmpMembers.Count > 1)
-				{
-					Messages.Message("SettingsLinkedFor".Translate(StorageGroupUtility.tmpMembers.Count), null, MessageTypeDefOf.NeutralEvent, false);
-					return;
-				}
-				Messages.Message("SettingsLinkedForSingular".Translate(), null, MessageTypeDefOf.NeutralEvent, false);
-			};
-			command_Action.onHover = delegate()
-			{
-				if (StorageGroupUtility.tmpMembers.Any<IStorageGroupMember>())
-				{
-					Thing thing = StorageGroupUtility.tmpMembers[0] as Thing;
-					if (thing != null)
+					defaultLabel = "LinkStorageSettings".Translate(),
+					defaultDesc = "LinkStorageSettingsDesc".Translate(),
+					icon = LinkTex,
+					action = delegate
 					{
-						TargetHighlighter.Highlight(thing, true, true, false);
+						bool num = tmpMembers[0].Group != null;
+						StorageGroup storageGroup2 = tmpMembers[0].Group ?? _003C_003E8__1.member.Map.storageGroups.NewGroup();
+						if (!num)
+						{
+							storageGroup2.InitFrom(tmpMembers[0]);
+						}
+						foreach (IStorageGroupMember tmpMember in tmpMembers)
+						{
+							tmpMember.SetStorageGroup(storageGroup2);
+						}
+						if (tmpMembers.Count > 1)
+						{
+							Messages.Message("SettingsLinkedFor".Translate(tmpMembers.Count), null, MessageTypeDefOf.NeutralEvent, historical: false);
+						}
+						else
+						{
+							Messages.Message("SettingsLinkedForSingular".Translate(), null, MessageTypeDefOf.NeutralEvent, historical: false);
+						}
+					},
+					onHover = delegate
+					{
+						if (tmpMembers.Any() && tmpMembers[0] is Thing thing2)
+						{
+							TargetHighlighter.Highlight(thing2);
+						}
 					}
+				};
+				if (tmpMembers.Count < 2)
+				{
+					command_Action.Disable("LinkStorageDisabledSelectTwo".Translate());
 				}
-			};
-			Command_Action command_Action2 = command_Action;
-			if (StorageGroupUtility.tmpMembers.Count < 2)
-			{
-				command_Action2.Disable("LinkStorageDisabledSelectTwo".Translate());
+				else if (flag2)
+				{
+					command_Action.Disable("AlreadyLinked".Translate());
+				}
+				_003C_003E2__current = command_Action;
+				_003C_003E1__state = 1;
+				return true;
 			}
-			else if (flag)
-			{
-				command_Action2.Disable("AlreadyLinked".Translate());
-			}
-			yield return command_Action2;
-			if (member.Group != null)
-			{
-				yield return new Command_Action
+			case 1:
+				_003C_003E1__state = -1;
+				if (_003C_003E8__1.member.Group == null)
+				{
+					break;
+				}
+				_003C_003E2__current = new Command_Action
 				{
 					defaultLabel = "UnlinkStorageSettings".Translate(),
 					defaultDesc = "UnlinkStorageSettingsDesc".Translate(),
-					icon = StorageGroupUtility.UnlinkTex,
-					action = delegate()
+					icon = UnlinkTex,
+					action = delegate
 					{
-						if (member.Group != null)
+						if (_003C_003E8__1.member.Group != null)
 						{
-							StorageSettings storeSettings = member.Group.GetStoreSettings();
-							member.Group.RemoveMember(member, true);
-							member.Group = null;
-							Building_Storage building_Storage2 = member as Building_Storage;
-							if (building_Storage2 != null)
+							StorageSettings storeSettings = _003C_003E8__1.member.Group.GetStoreSettings();
+							_003C_003E8__1.member.Group.RemoveMember(_003C_003E8__1.member);
+							_003C_003E8__1.member.Group = null;
+							if (_003C_003E8__1.member is Building_Storage building_Storage)
 							{
-								building_Storage2.settings.CopyFrom(storeSettings);
+								building_Storage.settings.CopyFrom(storeSettings);
 							}
 						}
-						if (StorageGroupUtility.tmpMembers.Count > 1)
+						if (tmpMembers.Count > 1)
 						{
-							Messages.Message("SettingsUnlinkedFor".Translate(StorageGroupUtility.tmpMembers.Count), null, MessageTypeDefOf.NeutralEvent, false);
-							return;
+							Messages.Message("SettingsUnlinkedFor".Translate(tmpMembers.Count), null, MessageTypeDefOf.NeutralEvent, historical: false);
 						}
-						Messages.Message("SettingsUnlinkedForSingular".Translate(), null, MessageTypeDefOf.NeutralEvent, false);
+						else
+						{
+							Messages.Message("SettingsUnlinkedForSingular".Translate(), null, MessageTypeDefOf.NeutralEvent, historical: false);
+						}
 					}
 				};
-				yield return new Command_Action
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = new Command_Action
 				{
 					defaultLabel = "SelectAllLinked".Translate(),
 					defaultDesc = "SelectAllLinkedDesc".Translate(),
-					icon = StorageGroupUtility.SelectLinkedTex,
-					action = delegate()
+					icon = SelectLinkedTex,
+					action = delegate
 					{
-						bool flag2 = false;
-						foreach (IStorageGroupMember storageGroupMember2 in member.Group.members)
+						bool flag = false;
+						foreach (IStorageGroupMember member in _003C_003E8__1.member.Group.members)
 						{
-							if (!Find.Selector.IsSelected(storageGroupMember2))
+							if (!Find.Selector.IsSelected(member) && !(member is Thing { Destroyed: not false }))
 							{
-								Thing thing = storageGroupMember2 as Thing;
-								if (thing == null || !thing.Destroyed)
-								{
-									Find.Selector.Select(storageGroupMember2, false, true);
-									flag2 = true;
-								}
+								Find.Selector.Select(member, playSound: false);
+								flag = true;
 							}
 						}
-						if (flag2)
+						if (flag)
 						{
-							SoundDefOf.ThingSelected.PlayOneShotOnCamera(null);
+							SoundDefOf.ThingSelected.PlayOneShotOnCamera();
 						}
 					}
 				};
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+				_003C_003E1__state = -1;
+				break;
 			}
-			yield break;
+			return false;
 		}
 
-		// Token: 0x0600EB7F RID: 60287 RVA: 0x004467A4 File Offset: 0x004449A4
-		public static void DrawSelectionOverlaysFor(IStorageGroupMember member)
+		bool IEnumerator.MoveNext()
 		{
-			if (member.Group != null && !SelectionDrawer.DrawnStorageGroupThisFrame(member.Group))
-			{
-				foreach (IStorageGroupMember storageGroupMember in member.Group.members)
-				{
-					if (storageGroupMember.DrawConnectionOverlay)
-					{
-						SelectionDrawer.DrawSelectionBracketFor(storageGroupMember, StorageGroupUtility.GroupedMat);
-					}
-				}
-				SelectionDrawer.Notify_DrawnStorageGroup(member.Group);
-			}
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0600EB80 RID: 60288 RVA: 0x00446828 File Offset: 0x00444A28
-		public static void SetStorageGroup(this IStorageGroupMember member, StorageGroup newGroup, bool removeIfEmpty = true)
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			if (member.Group != null && member.Group == newGroup)
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CStorageGroupMemberGizmos_003Ed__5 _003CStorageGroupMemberGizmos_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				return;
+				_003C_003E1__state = 0;
+				_003CStorageGroupMemberGizmos_003Ed__ = this;
 			}
+			else
+			{
+				_003CStorageGroupMemberGizmos_003Ed__ = new _003CStorageGroupMemberGizmos_003Ed__5(0);
+			}
+			_003CStorageGroupMemberGizmos_003Ed__.member = _003C_003E3__member;
+			return _003CStorageGroupMemberGizmos_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	private static readonly Texture2D LinkTex = ContentFinder<Texture2D>.Get("UI/Commands/LinkStorageSettings");
+
+	private static readonly Texture2D UnlinkTex = ContentFinder<Texture2D>.Get("UI/Commands/UnlinkStorageSettings");
+
+	private static readonly Texture2D SelectLinkedTex = ContentFinder<Texture2D>.Get("UI/Commands/SelectAllLinked");
+
+	public static readonly Material GroupedMat = MaterialPool.MatFrom("UI/Overlays/SelectionBracket", ShaderDatabase.MetaOverlay, new Color(1f, 1f, 0f, 0.2f));
+
+	private static List<IStorageGroupMember> tmpMembers = new List<IStorageGroupMember>();
+
+	[IteratorStateMachine(typeof(_003CStorageGroupMemberGizmos_003Ed__5))]
+	public static IEnumerable<Gizmo> StorageGroupMemberGizmos(IStorageGroupMember member)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CStorageGroupMemberGizmos_003Ed__5(-2)
+		{
+			_003C_003E3__member = member
+		};
+	}
+
+	public static void DrawSelectionOverlaysFor(IStorageGroupMember member)
+	{
+		if (member.Group == null || SelectionDrawer.DrawnStorageGroupThisFrame(member.Group))
+		{
+			return;
+		}
+		foreach (IStorageGroupMember member2 in member.Group.members)
+		{
+			if (member2.DrawConnectionOverlay)
+			{
+				SelectionDrawer.DrawSelectionBracketFor(member2, GroupedMat);
+			}
+		}
+		SelectionDrawer.Notify_DrawnStorageGroup(member.Group);
+	}
+
+	public static void SetStorageGroup(this IStorageGroupMember member, StorageGroup newGroup, bool removeIfEmpty = true)
+	{
+		if (member.Group == null || member.Group != newGroup)
+		{
 			if (member.Group != null)
 			{
 				StorageSettings storeSettings = member.Group.GetStoreSettings();
@@ -180,42 +365,19 @@ namespace RimWorld
 				member.Group = newGroup;
 				member.Group.members.Add(member);
 			}
-			IStoreSettingsParent storeSettingsParent = member as IStoreSettingsParent;
-			if (storeSettingsParent != null)
+			if (member is IStoreSettingsParent storeSettingsParent)
 			{
 				storeSettingsParent.Notify_SettingsChanged();
 			}
 		}
+	}
 
-		// Token: 0x0600EB81 RID: 60289 RVA: 0x004468A6 File Offset: 0x00444AA6
-		public static bool IsHopper(this Thing thing)
+	public static bool IsHopper(this Thing thing)
+	{
+		if (thing?.def?.building == null)
 		{
-			bool flag;
-			if (thing == null)
-			{
-				flag = (null != null);
-			}
-			else
-			{
-				ThingDef def = thing.def;
-				flag = (((def != null) ? def.building : null) != null);
-			}
-			return flag && thing.def.building.isHopper;
+			return false;
 		}
-
-		// Token: 0x04009C44 RID: 40004
-		private static readonly Texture2D LinkTex = ContentFinder<Texture2D>.Get("UI/Commands/LinkStorageSettings", true);
-
-		// Token: 0x04009C45 RID: 40005
-		private static readonly Texture2D UnlinkTex = ContentFinder<Texture2D>.Get("UI/Commands/UnlinkStorageSettings", true);
-
-		// Token: 0x04009C46 RID: 40006
-		private static readonly Texture2D SelectLinkedTex = ContentFinder<Texture2D>.Get("UI/Commands/SelectAllLinked", true);
-
-		// Token: 0x04009C47 RID: 40007
-		public static readonly Material GroupedMat = MaterialPool.MatFrom("UI/Overlays/SelectionBracket", ShaderDatabase.MetaOverlay, new Color(1f, 1f, 0f, 0.2f));
-
-		// Token: 0x04009C48 RID: 40008
-		private static List<IStorageGroupMember> tmpMembers = new List<IStorageGroupMember>();
+		return thing.def.building.isHopper;
 	}
 }

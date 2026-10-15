@@ -1,350 +1,593 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
-namespace KTrie
+namespace KTrie;
+
+public class TrieSet<T> : ICollection<IEnumerable<T>>, IEnumerable<IEnumerable<T>>, IEnumerable
 {
-	// Token: 0x02003EA4 RID: 16036
-	public class TrieSet<T> : ICollection<IEnumerable<T>>, IEnumerable<IEnumerable<T>>, IEnumerable
+	internal sealed class TrieNode
 	{
-		// Token: 0x06015F7B RID: 89979 RVA: 0x0069049D File Offset: 0x0068E69D
-		public TrieSet() : this(EqualityComparer<T>.Default)
+		public bool IsTerminal { get; set; }
+
+		public T Key { get; }
+
+		public IEnumerable<T> Item { get; set; }
+
+		public IDictionary<T, TrieNode> Children { get; }
+
+		public TrieNode Parent { get; set; }
+
+		public TrieNode(T key, IEqualityComparer<T> comparer)
 		{
+			Key = key;
+			Children = new Dictionary<T, TrieNode>(comparer);
 		}
+	}
 
-		// Token: 0x06015F7C RID: 89980 RVA: 0x006904AC File Offset: 0x0068E6AC
-		public TrieSet(IEqualityComparer<T> comparer)
+	[CompilerGenerated]
+	private sealed class _003CGetAllNodes_003Ed__21 : IEnumerable<TrieNode>, IEnumerable, IEnumerator<TrieNode>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private TrieNode _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private TrieNode node;
+
+		public TrieNode _003C_003E3__node;
+
+		private IEnumerator<KeyValuePair<T, TrieNode>> _003C_003E7__wrap1;
+
+		private KeyValuePair<T, TrieNode> _003Cchild_003E5__3;
+
+		private IEnumerator<TrieNode> _003C_003E7__wrap3;
+
+		TrieNode IEnumerator<TrieNode>.Current
 		{
-			this._comparer = comparer;
-			this._root = new TrieSet<T>.TrieNode(default(T), comparer);
-		}
-
-		// Token: 0x17003701 RID: 14081
-		// (get) Token: 0x06015F7D RID: 89981 RVA: 0x006904DB File Offset: 0x0068E6DB
-		// (set) Token: 0x06015F7E RID: 89982 RVA: 0x006904E3 File Offset: 0x0068E6E3
-		public int Count { get; private set; }
-
-		// Token: 0x17003702 RID: 14082
-		// (get) Token: 0x06015F7F RID: 89983 RVA: 0x00002501 File Offset: 0x00000701
-		bool ICollection<IEnumerable<!0>>.IsReadOnly
-		{
+			[DebuggerHidden]
 			get
 			{
-				return false;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06015F80 RID: 89984 RVA: 0x006904EC File Offset: 0x0068E6EC
-		public IEnumerator<IEnumerable<T>> GetEnumerator()
+		object IEnumerator.Current
 		{
-			return TrieSet<T>.GetAllNodes(this._root).Select(new Func<TrieSet<T>.TrieNode, IEnumerable<T>>(TrieSet<T>.GetFullKey)).GetEnumerator();
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x06015F81 RID: 89985 RVA: 0x0069050F File Offset: 0x0068E70F
+		[DebuggerHidden]
+		public _003CGetAllNodes_003Ed__21(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if ((uint)(num - -4) <= 1u || (uint)(num - 1) <= 1u)
+			{
+				try
+				{
+					if (num == -4 || num == 2)
+					{
+						try
+						{
+						}
+						finally
+						{
+							_003C_003Em__Finally2();
+						}
+					}
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003Cchild_003E5__3 = default(KeyValuePair<T, TrieNode>);
+			_003C_003E7__wrap3 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				switch (_003C_003E1__state)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = node.Children.GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_010d;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0094;
+				case 2:
+					{
+						_003C_003E1__state = -4;
+						goto IL_00e7;
+					}
+					IL_010d:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						_003Cchild_003E5__3 = _003C_003E7__wrap1.Current;
+						if (_003Cchild_003E5__3.Value.IsTerminal)
+						{
+							_003C_003E2__current = _003Cchild_003E5__3.Value;
+							_003C_003E1__state = 1;
+							return true;
+						}
+						goto IL_0094;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					return false;
+					IL_0094:
+					_003C_003E7__wrap3 = TrieSet<T>.GetAllNodes(_003Cchild_003E5__3.Value).GetEnumerator();
+					_003C_003E1__state = -4;
+					goto IL_00e7;
+					IL_00e7:
+					while (_003C_003E7__wrap3.MoveNext())
+					{
+						TrieNode current = _003C_003E7__wrap3.Current;
+						if (current.IsTerminal)
+						{
+							_003C_003E2__current = current;
+							_003C_003E1__state = 2;
+							return true;
+						}
+					}
+					_003C_003Em__Finally2();
+					_003C_003E7__wrap3 = null;
+					_003Cchild_003E5__3 = default(KeyValuePair<T, TrieNode>);
+					goto IL_010d;
+				}
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -3;
+			if (_003C_003E7__wrap3 != null)
+			{
+				_003C_003E7__wrap3.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<TrieNode> IEnumerable<TrieNode>.GetEnumerator()
+		{
+			_003CGetAllNodes_003Ed__21 _003CGetAllNodes_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CGetAllNodes_003Ed__ = this;
+			}
+			else
+			{
+				_003CGetAllNodes_003Ed__ = new _003CGetAllNodes_003Ed__21(0);
+			}
+			_003CGetAllNodes_003Ed__.node = _003C_003E3__node;
+			return _003CGetAllNodes_003Ed__;
+		}
+
+		[DebuggerHidden]
 		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return this.GetEnumerator();
+			return ((IEnumerable<TrieNode>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x06015F82 RID: 89986 RVA: 0x00690518 File Offset: 0x0068E718
-		public void Add(IEnumerable<T> key)
-		{
-			if (key == null)
-			{
-				throw new ArgumentNullException("key");
-			}
-			TrieSet<T>.TrieNode trieNode = this._root;
-			foreach (T key2 in key)
-			{
-				trieNode = this.AddItem(trieNode, key2);
-			}
-			if (trieNode.IsTerminal)
-			{
-				throw new ArgumentException(string.Format("An element with the same key already exists: '{0}'", key), "key");
-			}
-			trieNode.IsTerminal = true;
-			trieNode.Item = key;
-			int count = this.Count;
-			this.Count = count + 1;
-		}
+	[CompilerGenerated]
+	private sealed class _003CGetByPrefix_003Ed__22 : IEnumerable<IEnumerable<T>>, IEnumerable, IEnumerator<IEnumerable<T>>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
 
-		// Token: 0x06015F83 RID: 89987 RVA: 0x006905B4 File Offset: 0x0068E7B4
-		public void AddRange(IEnumerable<IEnumerable<T>> collection)
+		private IEnumerable<T> _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private TrieNode node;
+
+		public TrieNode _003C_003E3__node;
+
+		private Stack<TrieNode> _003Cstack_003E5__2;
+
+		private TrieNode _003Ccurrent_003E5__3;
+
+		IEnumerable<T> IEnumerator<IEnumerable<T>>.Current
 		{
-			if (collection == null)
+			[DebuggerHidden]
+			get
 			{
-				throw new ArgumentNullException("collection");
-			}
-			foreach (IEnumerable<T> key in collection)
-			{
-				this.Add(key);
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06015F84 RID: 89988 RVA: 0x0069060C File Offset: 0x0068E80C
-		public void Clear()
+		object IEnumerator.Current
 		{
-			this._root.Children.Clear();
-			this.Count = 0;
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x06015F85 RID: 89989 RVA: 0x00690628 File Offset: 0x0068E828
-		public bool Contains(IEnumerable<T> item)
+		[DebuggerHidden]
+		public _003CGetByPrefix_003Ed__22(int _003C_003E1__state)
 		{
-			TrieSet<T>.TrieNode node = this.GetNode(item);
-			return node != null && node.IsTerminal;
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x06015F86 RID: 89990 RVA: 0x00690648 File Offset: 0x0068E848
-		public void CopyTo(IEnumerable<T>[] array, int arrayIndex)
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			Array.Copy(TrieSet<T>.GetAllNodes(this._root).Select(new Func<TrieSet<T>.TrieNode, IEnumerable<T>>(TrieSet<T>.GetFullKey)).ToArray<IEnumerable<T>>(), 0, array, arrayIndex, this.Count);
+			_003Cstack_003E5__2 = null;
+			_003Ccurrent_003E5__3 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x06015F87 RID: 89991 RVA: 0x0069067C File Offset: 0x0068E87C
-		public bool Remove(IEnumerable<T> key)
+		private bool MoveNext()
 		{
-			if (key == null)
+			int num = _003C_003E1__state;
+			if (num != 0)
 			{
-				throw new ArgumentNullException("key");
-			}
-			TrieSet<T>.TrieNode node = this.GetNode(key);
-			if (node == null)
-			{
-				return false;
-			}
-			if (!node.IsTerminal)
-			{
-				return false;
-			}
-			this.RemoveNode(node);
-			return true;
-		}
-
-		// Token: 0x06015F88 RID: 89992 RVA: 0x006906B8 File Offset: 0x0068E8B8
-		public bool TryGetItem(IEnumerable<T> key, out IEnumerable<T> item)
-		{
-			if (key == null)
-			{
-				throw new ArgumentNullException("key");
-			}
-			TrieSet<T>.TrieNode node = this.GetNode(key);
-			item = null;
-			if (node == null)
-			{
-				return false;
-			}
-			if (!node.IsTerminal)
-			{
-				return false;
-			}
-			item = node.Item;
-			return true;
-		}
-
-		// Token: 0x06015F89 RID: 89993 RVA: 0x006906F6 File Offset: 0x0068E8F6
-		internal bool TryGetNode(IEnumerable<T> key, out TrieSet<T>.TrieNode node)
-		{
-			node = this.GetNode(key);
-			return node != null && node.IsTerminal;
-		}
-
-		// Token: 0x06015F8A RID: 89994 RVA: 0x00690714 File Offset: 0x0068E914
-		public IEnumerable<IEnumerable<T>> GetByPrefix(IEnumerable<T> prefix)
-		{
-			if (prefix == null)
-			{
-				throw new ArgumentNullException("prefix");
-			}
-			TrieSet<T>.TrieNode root = this._root;
-			foreach (T key in prefix)
-			{
-				if (!root.Children.TryGetValue(key, out root))
+				if (num != 1)
 				{
-					return Enumerable.Empty<IEnumerable<T>>();
+					return false;
+				}
+				_003C_003E1__state = -1;
+				goto IL_006c;
+			}
+			_003C_003E1__state = -1;
+			_003Cstack_003E5__2 = new Stack<TrieNode>();
+			_003Ccurrent_003E5__3 = node;
+			goto IL_00dc;
+			IL_006c:
+			using (IEnumerator<KeyValuePair<T, TrieNode>> enumerator = _003Ccurrent_003E5__3.Children.GetEnumerator())
+			{
+				_003Ccurrent_003E5__3 = (enumerator.MoveNext() ? enumerator.Current.Value : null);
+				while (enumerator.MoveNext())
+				{
+					_003Cstack_003E5__2.Push(enumerator.Current.Value);
 				}
 			}
-			return TrieSet<T>.GetByPrefix(root);
-		}
-
-		// Token: 0x06015F8B RID: 89995 RVA: 0x0069078C File Offset: 0x0068E98C
-		private static IEnumerable<TrieSet<T>.TrieNode> GetAllNodes(TrieSet<T>.TrieNode node)
-		{
-			foreach (KeyValuePair<T, TrieSet<T>.TrieNode> child in node.Children)
+			goto IL_00dc;
+			IL_00dc:
+			while (true)
 			{
-				if (child.Value.IsTerminal)
+				if (_003Cstack_003E5__2.Count > 0 || _003Ccurrent_003E5__3 != null)
 				{
-					yield return child.Value;
-				}
-				foreach (TrieSet<T>.TrieNode trieNode in TrieSet<T>.GetAllNodes(child.Value))
-				{
-					if (trieNode.IsTerminal)
+					if (_003Ccurrent_003E5__3 != null)
 					{
-						yield return trieNode;
+						break;
 					}
+					_003Ccurrent_003E5__3 = _003Cstack_003E5__2.Pop();
+					continue;
 				}
-				IEnumerator<TrieSet<T>.TrieNode> enumerator2 = null;
-				child = default(KeyValuePair<T, TrieSet<T>.TrieNode>);
+				return false;
 			}
-			IEnumerator<KeyValuePair<T, TrieSet<T>.TrieNode>> enumerator = null;
-			yield break;
-			yield break;
+			if (_003Ccurrent_003E5__3.IsTerminal)
+			{
+				_003C_003E2__current = TrieSet<T>.GetFullKey(_003Ccurrent_003E5__3);
+				_003C_003E1__state = 1;
+				return true;
+			}
+			goto IL_006c;
 		}
 
-		// Token: 0x06015F8C RID: 89996 RVA: 0x0069079C File Offset: 0x0068E99C
-		private static IEnumerable<IEnumerable<T>> GetByPrefix(TrieSet<T>.TrieNode node)
+		bool IEnumerator.MoveNext()
 		{
-			Stack<TrieSet<T>.TrieNode> stack = new Stack<TrieSet<T>.TrieNode>();
-			TrieSet<T>.TrieNode current = node;
-			while (stack.Count > 0 || current != null)
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<IEnumerable<T>> IEnumerable<IEnumerable<T>>.GetEnumerator()
+		{
+			_003CGetByPrefix_003Ed__22 _003CGetByPrefix_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				if (current != null)
+				_003C_003E1__state = 0;
+				_003CGetByPrefix_003Ed__ = this;
+			}
+			else
+			{
+				_003CGetByPrefix_003Ed__ = new _003CGetByPrefix_003Ed__22(0);
+			}
+			_003CGetByPrefix_003Ed__.node = _003C_003E3__node;
+			return _003CGetByPrefix_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<IEnumerable<T>>)this).GetEnumerator();
+		}
+	}
+
+	private readonly IEqualityComparer<T> _comparer;
+
+	private readonly TrieNode _root;
+
+	public int Count { get; private set; }
+
+	bool ICollection<IEnumerable<T>>.IsReadOnly => false;
+
+	public TrieSet()
+		: this((IEqualityComparer<T>)EqualityComparer<T>.Default)
+	{
+	}
+
+	public TrieSet(IEqualityComparer<T> comparer)
+	{
+		_comparer = comparer;
+		_root = new TrieNode(default(T), comparer);
+	}
+
+	public IEnumerator<IEnumerable<T>> GetEnumerator()
+	{
+		return GetAllNodes(_root).Select(GetFullKey).GetEnumerator();
+	}
+
+	IEnumerator IEnumerable.GetEnumerator()
+	{
+		return GetEnumerator();
+	}
+
+	public void Add(IEnumerable<T> key)
+	{
+		if (key == null)
+		{
+			throw new ArgumentNullException("key");
+		}
+		TrieNode trieNode = _root;
+		foreach (T item in key)
+		{
+			trieNode = AddItem(trieNode, item);
+		}
+		if (trieNode.IsTerminal)
+		{
+			throw new ArgumentException($"An element with the same key already exists: '{key}'", "key");
+		}
+		trieNode.IsTerminal = true;
+		trieNode.Item = key;
+		Count++;
+	}
+
+	public void AddRange(IEnumerable<IEnumerable<T>> collection)
+	{
+		if (collection == null)
+		{
+			throw new ArgumentNullException("collection");
+		}
+		foreach (IEnumerable<T> item in collection)
+		{
+			Add(item);
+		}
+	}
+
+	public void Clear()
+	{
+		_root.Children.Clear();
+		Count = 0;
+	}
+
+	public bool Contains(IEnumerable<T> item)
+	{
+		return GetNode(item)?.IsTerminal ?? false;
+	}
+
+	public void CopyTo(IEnumerable<T>[] array, int arrayIndex)
+	{
+		Array.Copy(GetAllNodes(_root).Select(GetFullKey).ToArray(), 0, array, arrayIndex, Count);
+	}
+
+	public bool Remove(IEnumerable<T> key)
+	{
+		if (key == null)
+		{
+			throw new ArgumentNullException("key");
+		}
+		TrieNode node = GetNode(key);
+		if (node == null)
+		{
+			return false;
+		}
+		if (!node.IsTerminal)
+		{
+			return false;
+		}
+		RemoveNode(node);
+		return true;
+	}
+
+	public bool TryGetItem(IEnumerable<T> key, out IEnumerable<T> item)
+	{
+		if (key == null)
+		{
+			throw new ArgumentNullException("key");
+		}
+		TrieNode node = GetNode(key);
+		item = null;
+		if (node == null)
+		{
+			return false;
+		}
+		if (!node.IsTerminal)
+		{
+			return false;
+		}
+		item = node.Item;
+		return true;
+	}
+
+	internal bool TryGetNode(IEnumerable<T> key, out TrieNode node)
+	{
+		node = GetNode(key);
+		if (node == null)
+		{
+			return false;
+		}
+		if (!node.IsTerminal)
+		{
+			return false;
+		}
+		return true;
+	}
+
+	public IEnumerable<IEnumerable<T>> GetByPrefix(IEnumerable<T> prefix)
+	{
+		if (prefix == null)
+		{
+			throw new ArgumentNullException("prefix");
+		}
+		TrieNode value = _root;
+		foreach (T item in prefix)
+		{
+			if (!value.Children.TryGetValue(item, out value))
+			{
+				return Enumerable.Empty<IEnumerable<T>>();
+			}
+		}
+		return GetByPrefix(value);
+	}
+
+	[IteratorStateMachine(typeof(TrieSet<>._003CGetAllNodes_003Ed__21))]
+	private static IEnumerable<TrieNode> GetAllNodes(TrieNode node)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetAllNodes_003Ed__21(-2)
+		{
+			_003C_003E3__node = node
+		};
+	}
+
+	[IteratorStateMachine(typeof(TrieSet<>._003CGetByPrefix_003Ed__22))]
+	private static IEnumerable<IEnumerable<T>> GetByPrefix(TrieNode node)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetByPrefix_003Ed__22(-2)
+		{
+			_003C_003E3__node = node
+		};
+	}
+
+	private static IEnumerable<T> GetFullKey(TrieNode node)
+	{
+		return node.Item;
+	}
+
+	private TrieNode GetNode(IEnumerable<T> key)
+	{
+		TrieNode value = _root;
+		foreach (T item in key)
+		{
+			if (!value.Children.TryGetValue(item, out value))
+			{
+				return null;
+			}
+		}
+		return value;
+	}
+
+	private void RemoveNode(TrieNode node)
+	{
+		Remove(node);
+		Count--;
+	}
+
+	private TrieNode AddItem(TrieNode node, T key)
+	{
+		if (!node.Children.TryGetValue(key, out var value))
+		{
+			value = new TrieNode(key, _comparer)
+			{
+				Parent = node
+			};
+			node.Children.Add(key, value);
+		}
+		return value;
+	}
+
+	private void Remove(TrieNode node, T key)
+	{
+		foreach (KeyValuePair<T, TrieNode> child in node.Children)
+		{
+			if (_comparer.Equals(key, child.Key))
+			{
+				node.Children.Remove(child);
+				break;
+			}
+		}
+	}
+
+	private void Remove(TrieNode node)
+	{
+		while (true)
+		{
+			node.IsTerminal = false;
+			if (node.Children.Count == 0 && node.Parent != null)
+			{
+				Remove(node.Parent, node.Key);
+				if (!node.Parent.IsTerminal)
 				{
-					if (current.IsTerminal)
-					{
-						yield return TrieSet<T>.GetFullKey(current);
-					}
-					using (IEnumerator<KeyValuePair<T, TrieSet<T>.TrieNode>> enumerator = current.Children.GetEnumerator())
-					{
-						TrieSet<T>.TrieNode trieNode;
-						if (!enumerator.MoveNext())
-						{
-							trieNode = null;
-						}
-						else
-						{
-							KeyValuePair<T, TrieSet<T>.TrieNode> keyValuePair = enumerator.Current;
-							trieNode = keyValuePair.Value;
-						}
-						current = trieNode;
-						while (enumerator.MoveNext())
-						{
-							Stack<TrieSet<T>.TrieNode> stack2 = stack;
-							KeyValuePair<T, TrieSet<T>.TrieNode> keyValuePair = enumerator.Current;
-							stack2.Push(keyValuePair.Value);
-						}
-						continue;
-					}
+					node = node.Parent;
+					continue;
 				}
-				current = stack.Pop();
+				break;
 			}
-			yield break;
-		}
-
-		// Token: 0x06015F8D RID: 89997 RVA: 0x006907AC File Offset: 0x0068E9AC
-		private static IEnumerable<T> GetFullKey(TrieSet<T>.TrieNode node)
-		{
-			return node.Item;
-		}
-
-		// Token: 0x06015F8E RID: 89998 RVA: 0x006907B4 File Offset: 0x0068E9B4
-		private TrieSet<T>.TrieNode GetNode(IEnumerable<T> key)
-		{
-			TrieSet<T>.TrieNode root = this._root;
-			foreach (T key2 in key)
-			{
-				if (!root.Children.TryGetValue(key2, out root))
-				{
-					return null;
-				}
-			}
-			return root;
-		}
-
-		// Token: 0x06015F8F RID: 89999 RVA: 0x00690814 File Offset: 0x0068EA14
-		private void RemoveNode(TrieSet<T>.TrieNode node)
-		{
-			this.Remove(node);
-			int count = this.Count;
-			this.Count = count - 1;
-		}
-
-		// Token: 0x06015F90 RID: 90000 RVA: 0x00690838 File Offset: 0x0068EA38
-		private TrieSet<T>.TrieNode AddItem(TrieSet<T>.TrieNode node, T key)
-		{
-			TrieSet<T>.TrieNode trieNode;
-			if (!node.Children.TryGetValue(key, out trieNode))
-			{
-				trieNode = new TrieSet<T>.TrieNode(key, this._comparer)
-				{
-					Parent = node
-				};
-				node.Children.Add(key, trieNode);
-			}
-			return trieNode;
-		}
-
-		// Token: 0x06015F91 RID: 90001 RVA: 0x00690878 File Offset: 0x0068EA78
-		private void Remove(TrieSet<T>.TrieNode node, T key)
-		{
-			foreach (KeyValuePair<T, TrieSet<T>.TrieNode> item in node.Children)
-			{
-				if (this._comparer.Equals(key, item.Key))
-				{
-					node.Children.Remove(item);
-					break;
-				}
-			}
-		}
-
-		// Token: 0x06015F92 RID: 90002 RVA: 0x006908E4 File Offset: 0x0068EAE4
-		private void Remove(TrieSet<T>.TrieNode node)
-		{
-			for (;;)
-			{
-				node.IsTerminal = false;
-				if (node.Children.Count != 0 || node.Parent == null)
-				{
-					break;
-				}
-				this.Remove(node.Parent, node.Key);
-				if (node.Parent.IsTerminal)
-				{
-					break;
-				}
-				node = node.Parent;
-			}
-		}
-
-		// Token: 0x0400F364 RID: 62308
-		private readonly IEqualityComparer<T> _comparer;
-
-		// Token: 0x0400F365 RID: 62309
-		private readonly TrieSet<T>.TrieNode _root;
-
-		// Token: 0x02003EA5 RID: 16037
-		internal sealed class TrieNode
-		{
-			// Token: 0x06015F93 RID: 90003 RVA: 0x00690936 File Offset: 0x0068EB36
-			public TrieNode(T key, IEqualityComparer<T> comparer)
-			{
-				this.Key = key;
-				this.Children = new Dictionary<T, TrieSet<T>.TrieNode>(comparer);
-			}
-
-			// Token: 0x17003703 RID: 14083
-			// (get) Token: 0x06015F94 RID: 90004 RVA: 0x00690951 File Offset: 0x0068EB51
-			// (set) Token: 0x06015F95 RID: 90005 RVA: 0x00690959 File Offset: 0x0068EB59
-			public bool IsTerminal { get; set; }
-
-			// Token: 0x17003704 RID: 14084
-			// (get) Token: 0x06015F96 RID: 90006 RVA: 0x00690962 File Offset: 0x0068EB62
-			public T Key { get; }
-
-			// Token: 0x17003705 RID: 14085
-			// (get) Token: 0x06015F97 RID: 90007 RVA: 0x0069096A File Offset: 0x0068EB6A
-			// (set) Token: 0x06015F98 RID: 90008 RVA: 0x00690972 File Offset: 0x0068EB72
-			public IEnumerable<T> Item { get; set; }
-
-			// Token: 0x17003706 RID: 14086
-			// (get) Token: 0x06015F99 RID: 90009 RVA: 0x0069097B File Offset: 0x0068EB7B
-			public IDictionary<T, TrieSet<T>.TrieNode> Children { get; }
-
-			// Token: 0x17003707 RID: 14087
-			// (get) Token: 0x06015F9A RID: 90010 RVA: 0x00690983 File Offset: 0x0068EB83
-			// (set) Token: 0x06015F9B RID: 90011 RVA: 0x0069098B File Offset: 0x0068EB8B
-			public TrieSet<T>.TrieNode Parent { get; set; }
+			break;
 		}
 	}
 }

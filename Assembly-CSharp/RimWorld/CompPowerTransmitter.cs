@@ -1,9 +1,5 @@
-﻿using System;
+namespace RimWorld;
 
-namespace RimWorld
+public class CompPowerTransmitter : CompPower
 {
-	// Token: 0x02002145 RID: 8517
-	public class CompPowerTransmitter : CompPower
-	{
-	}
 }

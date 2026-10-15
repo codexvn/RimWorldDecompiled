@@ -1,24 +1,17 @@
-﻿using System;
+using System;
 
-namespace Verse
+namespace Verse;
+
+public static class PsychGlowUtility
 {
-	// Token: 0x0200041A RID: 1050
-	public static class PsychGlowUtility
+	public static string GetLabel(this PsychGlow gl)
 	{
-		// Token: 0x06001A8A RID: 6794 RVA: 0x000865E4 File Offset: 0x000847E4
-		public static string GetLabel(this PsychGlow gl)
+		return gl switch
 		{
-			switch (gl)
-			{
-			case PsychGlow.Dark:
-				return "Dark".Translate();
-			case PsychGlow.Lit:
-				return "Lit".Translate();
-			case PsychGlow.Overlit:
-				return "LitBrightly".Translate();
-			default:
-				throw new ArgumentException();
-			}
-		}
+			PsychGlow.Dark => "Dark".Translate(), 
+			PsychGlow.Lit => "Lit".Translate(), 
+			PsychGlow.Overlit => "LitBrightly".Translate(), 
+			_ => throw new ArgumentException(), 
+		};
 	}
 }

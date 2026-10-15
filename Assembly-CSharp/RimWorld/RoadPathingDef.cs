@@ -1,10 +1,7 @@
-﻿using System;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class RoadPathingDef : Def
 {
-	// Token: 0x02001AD9 RID: 6873
-	public class RoadPathingDef : Def
-	{
-	}
 }

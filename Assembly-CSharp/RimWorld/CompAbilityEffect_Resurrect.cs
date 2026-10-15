@@ -1,50 +1,33 @@
-﻿using System;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompAbilityEffect_Resurrect : CompAbilityEffect
 {
-	// Token: 0x0200226D RID: 8813
-	public class CompAbilityEffect_Resurrect : CompAbilityEffect
+	public new CompProperties_Resurrect Props => (CompProperties_Resurrect)props;
+
+	public override void Apply(LocalTargetInfo target, LocalTargetInfo dest)
 	{
-		// Token: 0x17001D58 RID: 7512
-		// (get) Token: 0x0600C011 RID: 49169 RVA: 0x0037A6D1 File Offset: 0x003788D1
-		public new CompProperties_Resurrect Props
+		base.Apply(target, dest);
+		Pawn innerPawn = ((Corpse)target.Thing).InnerPawn;
+		if (ResurrectionUtility.TryResurrectWithSideEffects(innerPawn))
 		{
-			get
-			{
-				return (CompProperties_Resurrect)this.props;
-			}
+			Messages.Message("MessagePawnResurrected".Translate(innerPawn), innerPawn, MessageTypeDefOf.PositiveEvent);
+			MoteMaker.MakeAttachedOverlay(innerPawn, ThingDefOf.Mote_ResurrectFlash, Vector3.zero);
 		}
+	}
 
-		// Token: 0x0600C012 RID: 49170 RVA: 0x0037A6E0 File Offset: 0x003788E0
-		public override void Apply(LocalTargetInfo target, LocalTargetInfo dest)
+	public override bool Valid(LocalTargetInfo target, bool throwMessages = false)
+	{
+		if (target.HasThing && target.Thing is Corpse corpse && corpse.GetRotStage() == RotStage.Dessicated)
 		{
-			base.Apply(target, dest);
-			Pawn innerPawn = ((Corpse)target.Thing).InnerPawn;
-			if (ResurrectionUtility.TryResurrectWithSideEffects(innerPawn))
+			if (throwMessages)
 			{
-				Messages.Message("MessagePawnResurrected".Translate(innerPawn), innerPawn, MessageTypeDefOf.PositiveEvent, true);
-				MoteMaker.MakeAttachedOverlay(innerPawn, ThingDefOf.Mote_ResurrectFlash, Vector3.zero, 1f, -1f);
+				Messages.Message("MessageCannotResurrectDessicatedCorpse".Translate(), corpse, MessageTypeDefOf.RejectInput, historical: false);
 			}
+			return false;
 		}
-
-		// Token: 0x0600C013 RID: 49171 RVA: 0x0037A750 File Offset: 0x00378950
-		public override bool Valid(LocalTargetInfo target, bool throwMessages = false)
-		{
-			if (target.HasThing)
-			{
-				Corpse corpse = target.Thing as Corpse;
-				if (corpse != null && corpse.GetRotStage() == RotStage.Dessicated)
-				{
-					if (throwMessages)
-					{
-						Messages.Message("MessageCannotResurrectDessicatedCorpse".Translate(), corpse, MessageTypeDefOf.RejectInput, false);
-					}
-					return false;
-				}
-			}
-			return base.Valid(target, throwMessages);
-		}
+		return base.Valid(target, throwMessages);
 	}
 }

@@ -1,83 +1,53 @@
-﻿using System;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class FloatMenuOptionProvider_ReturnSlaveToBed : FloatMenuOptionProvider
 {
-	// Token: 0x02003336 RID: 13110
-	public class FloatMenuOptionProvider_ReturnSlaveToBed : FloatMenuOptionProvider
+	protected override bool Drafted => true;
+
+	protected override bool Undrafted => true;
+
+	protected override bool Multiselect => false;
+
+	protected override bool RequiresManipulation => true;
+
+	protected override FloatMenuOption GetSingleOptionFor(Pawn clickedPawn, FloatMenuContext context)
 	{
-		// Token: 0x17002FF6 RID: 12278
-		// (get) Token: 0x060126D9 RID: 75481 RVA: 0x000028E7 File Offset: 0x00000AE7
-		protected override bool Drafted
+		if (!clickedPawn.IsSlaveOfColony || clickedPawn.InMentalState)
 		{
-			get
-			{
-				return true;
-			}
+			return null;
 		}
-
-		// Token: 0x17002FF7 RID: 12279
-		// (get) Token: 0x060126DA RID: 75482 RVA: 0x000028E7 File Offset: 0x00000AE7
-		protected override bool Undrafted
+		if (!clickedPawn.Downed)
 		{
-			get
-			{
-				return true;
-			}
+			return null;
 		}
-
-		// Token: 0x17002FF8 RID: 12280
-		// (get) Token: 0x060126DB RID: 75483 RVA: 0x00002501 File Offset: 0x00000701
-		protected override bool Multiselect
+		if (clickedPawn.InBed())
 		{
-			get
-			{
-				return false;
-			}
+			return null;
 		}
-
-		// Token: 0x17002FF9 RID: 12281
-		// (get) Token: 0x060126DC RID: 75484 RVA: 0x000028E7 File Offset: 0x00000AE7
-		protected override bool RequiresManipulation
+		FloatMenuOption floatMenuOption = FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("ReturnToSlaveBed".Translate(), delegate
 		{
-			get
+			Building_Bed building_Bed = RestUtility.FindBedFor(clickedPawn, context.FirstSelectedPawn, checkSocialProperness: false, ignoreOtherReservations: false, GuestStatus.Slave);
+			if (building_Bed == null)
 			{
-				return true;
+				building_Bed = RestUtility.FindBedFor(clickedPawn, context.FirstSelectedPawn, checkSocialProperness: false, ignoreOtherReservations: true, GuestStatus.Slave);
 			}
-		}
-
-		// Token: 0x060126DD RID: 75485 RVA: 0x0056E558 File Offset: 0x0056C758
-		protected override FloatMenuOption GetSingleOptionFor(Pawn clickedPawn, FloatMenuContext context)
-		{
-			if (!clickedPawn.IsSlaveOfColony || clickedPawn.InMentalState)
+			if (building_Bed == null)
 			{
-				return null;
+				Messages.Message($"{"CannotRescue".Translate()}: {"NoSlaveBed".Translate()}", clickedPawn, MessageTypeDefOf.RejectInput, historical: false);
 			}
-			if (!clickedPawn.Downed)
+			else
 			{
-				return null;
-			}
-			FloatMenuOption floatMenuOption = FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("ReturnToSlaveBed".Translate(), delegate()
-			{
-				Building_Bed building_Bed = RestUtility.FindBedFor(clickedPawn, context.FirstSelectedPawn, false, false, new GuestStatus?(GuestStatus.Slave));
-				if (building_Bed == null)
-				{
-					building_Bed = RestUtility.FindBedFor(clickedPawn, context.FirstSelectedPawn, false, true, new GuestStatus?(GuestStatus.Slave));
-				}
-				if (building_Bed == null)
-				{
-					Messages.Message(string.Format("{0}: {1}", "CannotRescue".Translate(), "NoSlaveBed".Translate()), clickedPawn, MessageTypeDefOf.RejectInput, false);
-					return;
-				}
 				Job job = JobMaker.MakeJob(JobDefOf.Rescue, clickedPawn, building_Bed);
 				job.count = 1;
-				context.FirstSelectedPawn.jobs.TryTakeOrderedJob(job, new JobTag?(JobTag.Misc), false);
+				context.FirstSelectedPawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
 				PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.Rescuing, KnowledgeAmount.Total);
-			}, MenuOptionPriority.RescueOrCapture, null, clickedPawn, 0f, null, null, true, 0), context.FirstSelectedPawn, clickedPawn, "ReservedBy", null);
-			string cannot = string.Format("{0}: {1}", "CannotRescue".Translate(), "NoSlaveBed".Translate());
-			FloatMenuUtility.ValidateTakeToBedOption(context.FirstSelectedPawn, clickedPawn, floatMenuOption, cannot, new GuestStatus?(GuestStatus.Slave));
-			return floatMenuOption;
-		}
+			}
+		}, MenuOptionPriority.RescueOrCapture, null, clickedPawn), context.FirstSelectedPawn, clickedPawn);
+		string cannot = $"{"CannotRescue".Translate()}: {"NoSlaveBed".Translate()}";
+		FloatMenuUtility.ValidateTakeToBedOption(context.FirstSelectedPawn, clickedPawn, floatMenuOption, cannot, GuestStatus.Slave);
+		return floatMenuOption;
 	}
 }

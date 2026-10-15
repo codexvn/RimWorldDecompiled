@@ -1,45 +1,143 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.Grammar;
 
-namespace RimWorld
+namespace RimWorld;
+
+[StaticConstructorOnStartup]
+public class Reward_VisitorsHelp : Reward
 {
-	// Token: 0x020036A4 RID: 13988
-	[StaticConstructorOnStartup]
-	public class Reward_VisitorsHelp : Reward
+	[CompilerGenerated]
+	private sealed class _003Cget_StackElements_003Ed__2 : IEnumerable<GenUI.AnonymousStackElement>, IEnumerable, IEnumerator<GenUI.AnonymousStackElement>, IEnumerator, IDisposable
 	{
-		// Token: 0x17003212 RID: 12818
-		// (get) Token: 0x060136D4 RID: 79572 RVA: 0x005C5687 File Offset: 0x005C3887
-		public override IEnumerable<GenUI.AnonymousStackElement> StackElements
+		private int _003C_003E1__state;
+
+		private GenUI.AnonymousStackElement _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Reward_VisitorsHelp _003C_003E4__this;
+
+		GenUI.AnonymousStackElement IEnumerator<GenUI.AnonymousStackElement>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				yield return QuestPartUtility.GetStandardRewardStackElement("Reward_VisitorsHelp_Label".Translate(), Reward_VisitorsHelp.Icon, () => this.GetDescription(default(RewardsGeneratorParams)).CapitalizeFirst() + ".", null);
-				yield break;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x060136D5 RID: 79573 RVA: 0x00066B11 File Offset: 0x00064D11
-		public override void InitFromValue(float rewardValue, RewardsGeneratorParams parms, out float valueActuallyUsed)
+		object IEnumerator.Current
 		{
-			throw new NotImplementedException();
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x060136D6 RID: 79574 RVA: 0x00066B11 File Offset: 0x00064D11
-		public override IEnumerable<QuestPart> GenerateQuestParts(int index, RewardsGeneratorParams parms, string customLetterLabel, string customLetterText, RulePack customLetterLabelRules, RulePack customLetterTextRules)
+		[DebuggerHidden]
+		public _003Cget_StackElements_003Ed__2(int _003C_003E1__state)
 		{
-			throw new NotImplementedException();
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x060136D7 RID: 79575 RVA: 0x005C5698 File Offset: 0x005C3898
-		public override string GetDescription(RewardsGeneratorParams parms)
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			return "Reward_VisitorsHelp".Translate().Resolve();
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x0400D74F RID: 55119
-		private static readonly Texture2D Icon = ContentFinder<Texture2D>.Get("UI/Icons/VisitorsHelp", true);
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			Reward_VisitorsHelp CS_0024_003C_003E8__locals1 = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = QuestPartUtility.GetStandardRewardStackElement("Reward_VisitorsHelp_Label".Translate(), Icon, () => CS_0024_003C_003E8__locals1.GetDescription(default(RewardsGeneratorParams)).CapitalizeFirst() + ".");
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<GenUI.AnonymousStackElement> IEnumerable<GenUI.AnonymousStackElement>.GetEnumerator()
+		{
+			_003Cget_StackElements_003Ed__2 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_StackElements_003Ed__2(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<GenUI.AnonymousStackElement>)this).GetEnumerator();
+		}
+	}
+
+	private static readonly Texture2D Icon = ContentFinder<Texture2D>.Get("UI/Icons/VisitorsHelp");
+
+	public override IEnumerable<GenUI.AnonymousStackElement> StackElements
+	{
+		[IteratorStateMachine(typeof(_003Cget_StackElements_003Ed__2))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_StackElements_003Ed__2(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public override void InitFromValue(float rewardValue, RewardsGeneratorParams parms, out float valueActuallyUsed)
+	{
+		throw new NotImplementedException();
+	}
+
+	public override IEnumerable<QuestPart> GenerateQuestParts(int index, RewardsGeneratorParams parms, string customLetterLabel, string customLetterText, RulePack customLetterLabelRules, RulePack customLetterTextRules)
+	{
+		throw new NotImplementedException();
+	}
+
+	public override string GetDescription(RewardsGeneratorParams parms)
+	{
+		return "Reward_VisitorsHelp".Translate().Resolve();
 	}
 }

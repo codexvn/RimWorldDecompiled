@@ -1,56 +1,157 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_ExtinguishSelf : JobDriver
 {
-	// Token: 0x02001197 RID: 4503
-	public class JobDriver_ExtinguishSelf : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__4 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700110E RID: 4366
-		// (get) Token: 0x06006E1B RID: 28187 RVA: 0x0022596F File Offset: 0x00223B6F
-		protected Fire TargetFire
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_ExtinguishSelf _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (Fire)this.job.targetA.Thing;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06006E1C RID: 28188 RVA: 0x002266D8 File Offset: 0x002248D8
-		public override string GetReport()
+		object IEnumerator.Current
 		{
-			if (this.TargetFire != null && this.TargetFire.parent != null)
+			[DebuggerHidden]
+			get
 			{
-				return "ReportExtinguishingFireOn".Translate(this.TargetFire.parent.LabelCap, this.TargetFire.parent.Named("TARGET"));
+				return _003C_003E2__current;
 			}
-			return "ReportExtinguishingFire".Translate();
 		}
 
-		// Token: 0x06006E1D RID: 28189 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__4(int _003C_003E1__state)
 		{
-			return true;
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x06006E1E RID: 28190 RVA: 0x00226743 File Offset: 0x00224943
-		protected override IEnumerable<Toil> MakeNewToils()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			Toil toil = ToilMaker.MakeToil("MakeNewToils");
-			toil.defaultCompleteMode = ToilCompleteMode.Delay;
-			toil.defaultDuration = 150;
-			yield return toil;
-			Toil toil2 = ToilMaker.MakeToil("MakeNewToils");
-			toil2.initAction = delegate()
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_ExtinguishSelf CS_0024_003C_003E8__locals2 = _003C_003E4__this;
+			switch (num)
 			{
-				this.TargetFire.Destroy(DestroyMode.Vanish);
-				this.pawn.records.Increment(RecordDefOf.FiresExtinguished);
-			};
-			toil2.FailOnDestroyedOrNull(TargetIndex.A);
-			toil2.defaultCompleteMode = ToilCompleteMode.Instant;
-			yield return toil2;
-			yield break;
+			default:
+				return false;
+			case 0:
+			{
+				_003C_003E1__state = -1;
+				Toil toil2 = ToilMaker.MakeToil("MakeNewToils");
+				toil2.defaultCompleteMode = ToilCompleteMode.Delay;
+				toil2.defaultDuration = 150;
+				_003C_003E2__current = toil2;
+				_003C_003E1__state = 1;
+				return true;
+			}
+			case 1:
+			{
+				_003C_003E1__state = -1;
+				Toil toil = ToilMaker.MakeToil("MakeNewToils");
+				toil.initAction = delegate
+				{
+					CS_0024_003C_003E8__locals2.TargetFire.Destroy();
+					CS_0024_003C_003E8__locals2.pawn.records.Increment(RecordDefOf.FiresExtinguished);
+				};
+				toil.FailOnDestroyedOrNull(TargetIndex.A);
+				toil.defaultCompleteMode = ToilCompleteMode.Instant;
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 2;
+				return true;
+			}
+			case 2:
+				_003C_003E1__state = -1;
+				return false;
+			}
 		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__4 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__4(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	protected Fire TargetFire => (Fire)job.targetA.Thing;
+
+	public override string GetReport()
+	{
+		if (TargetFire != null && TargetFire.parent != null)
+		{
+			return "ReportExtinguishingFireOn".Translate(TargetFire.parent.LabelCap, TargetFire.parent.Named("TARGET"));
+		}
+		return "ReportExtinguishingFire".Translate();
+	}
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return true;
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__4))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__4(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

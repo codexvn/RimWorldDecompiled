@@ -1,14 +1,8 @@
-﻿using System;
+namespace Verse;
 
-namespace Verse
+public static class DebugGenerationSettings
 {
-	// Token: 0x02000CA2 RID: 3234
-	public static class DebugGenerationSettings
-	{
-		// Token: 0x04003BF2 RID: 15346
-		public static bool prefabCopyTerrain;
+	public static bool prefabCopyTerrain;
 
-		// Token: 0x04003BF3 RID: 15347
-		public static bool prefabCopyAllThings;
-	}
+	public static bool prefabCopyAllThings;
 }

@@ -1,158 +1,492 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public abstract class FloatMenuOptionProvider
 {
-	// Token: 0x020032B7 RID: 12983
-	public abstract class FloatMenuOptionProvider
+	[CompilerGenerated]
+	private sealed class _003CGetOptions_003Ed__21 : IEnumerable<FloatMenuOption>, IEnumerable, IEnumerator<FloatMenuOption>, IEnumerator, IDisposable
 	{
-		// Token: 0x17002F23 RID: 12067
-		// (get) Token: 0x0601245D RID: 74845
-		protected abstract bool Drafted { get; }
+		private int _003C_003E1__state;
 
-		// Token: 0x17002F24 RID: 12068
-		// (get) Token: 0x0601245E RID: 74846
-		protected abstract bool Undrafted { get; }
+		private FloatMenuOption _003C_003E2__current;
 
-		// Token: 0x17002F25 RID: 12069
-		// (get) Token: 0x0601245F RID: 74847
-		protected abstract bool Multiselect { get; }
+		private int _003C_003El__initialThreadId;
 
-		// Token: 0x17002F26 RID: 12070
-		// (get) Token: 0x06012460 RID: 74848 RVA: 0x00002501 File Offset: 0x00000701
-		protected virtual bool RequiresManipulation
+		public FloatMenuOptionProvider _003C_003E4__this;
+
+		private FloatMenuContext context;
+
+		public FloatMenuContext _003C_003E3__context;
+
+		FloatMenuOption IEnumerator<FloatMenuOption>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return false;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002F27 RID: 12071
-		// (get) Token: 0x06012461 RID: 74849 RVA: 0x00002501 File Offset: 0x00000701
-		protected virtual bool MechanoidCanDo
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return false;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002F28 RID: 12072
-		// (get) Token: 0x06012462 RID: 74850 RVA: 0x00002501 File Offset: 0x00000701
-		protected virtual bool CanSelfTarget
+		[DebuggerHidden]
+		public _003CGetOptions_003Ed__21(int _003C_003E1__state)
 		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			FloatMenuOptionProvider floatMenuOptionProvider = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+			{
+				_003C_003E1__state = -1;
+				FloatMenuOption singleOption = floatMenuOptionProvider.GetSingleOption(context);
+				if (singleOption != null)
+				{
+					_003C_003E2__current = singleOption;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				break;
+			}
+			case 1:
+				_003C_003E1__state = -1;
+				break;
+			}
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<FloatMenuOption> IEnumerable<FloatMenuOption>.GetEnumerator()
+		{
+			_003CGetOptions_003Ed__21 _003CGetOptions_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CGetOptions_003Ed__ = this;
+			}
+			else
+			{
+				_003CGetOptions_003Ed__ = new _003CGetOptions_003Ed__21(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CGetOptions_003Ed__.context = _003C_003E3__context;
+			return _003CGetOptions_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<FloatMenuOption>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGetOptionsFor_003Ed__22 : IEnumerable<FloatMenuOption>, IEnumerable, IEnumerator<FloatMenuOption>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private FloatMenuOption _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public FloatMenuOptionProvider _003C_003E4__this;
+
+		private Thing clickedThing;
+
+		public Thing _003C_003E3__clickedThing;
+
+		private FloatMenuContext context;
+
+		public FloatMenuContext _003C_003E3__context;
+
+		FloatMenuOption IEnumerator<FloatMenuOption>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				return false;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002F29 RID: 12073
-		// (get) Token: 0x06012463 RID: 74851 RVA: 0x00002501 File Offset: 0x00000701
-		public virtual bool CanTargetDespawned
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return false;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002F2A RID: 12074
-		// (get) Token: 0x06012464 RID: 74852 RVA: 0x000028E7 File Offset: 0x00000AE7
-		protected virtual bool IgnoreFogged
+		[DebuggerHidden]
+		public _003CGetOptionsFor_003Ed__22(int _003C_003E1__state)
 		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			FloatMenuOptionProvider floatMenuOptionProvider = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+			{
+				_003C_003E1__state = -1;
+				FloatMenuOption singleOptionFor = floatMenuOptionProvider.GetSingleOptionFor(clickedThing, context);
+				if (singleOptionFor != null)
+				{
+					_003C_003E2__current = singleOptionFor;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				break;
+			}
+			case 1:
+				_003C_003E1__state = -1;
+				break;
+			}
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<FloatMenuOption> IEnumerable<FloatMenuOption>.GetEnumerator()
+		{
+			_003CGetOptionsFor_003Ed__22 _003CGetOptionsFor_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CGetOptionsFor_003Ed__ = this;
+			}
+			else
+			{
+				_003CGetOptionsFor_003Ed__ = new _003CGetOptionsFor_003Ed__22(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CGetOptionsFor_003Ed__.clickedThing = _003C_003E3__clickedThing;
+			_003CGetOptionsFor_003Ed__.context = _003C_003E3__context;
+			return _003CGetOptionsFor_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<FloatMenuOption>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGetOptionsFor_003Ed__23 : IEnumerable<FloatMenuOption>, IEnumerable, IEnumerator<FloatMenuOption>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private FloatMenuOption _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public FloatMenuOptionProvider _003C_003E4__this;
+
+		private Pawn clickedPawn;
+
+		public Pawn _003C_003E3__clickedPawn;
+
+		private FloatMenuContext context;
+
+		public FloatMenuContext _003C_003E3__context;
+
+		FloatMenuOption IEnumerator<FloatMenuOption>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				return true;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06012465 RID: 74853 RVA: 0x00562930 File Offset: 0x00560B30
-		public virtual bool SelectedPawnValid(Pawn pawn, FloatMenuContext context)
+		object IEnumerator.Current
 		{
-			return (!pawn.IsMutant || pawn.mutant.Def.whitelistedFloatMenuProviders == null || pawn.mutant.Def.whitelistedFloatMenuProviders.Contains(FloatMenuMakerMap.currentProvider.GetType())) && (this.Drafted || !pawn.Drafted) && (this.Undrafted || pawn.Drafted) && (this.MechanoidCanDo || !pawn.RaceProps.IsMechanoid) && (!this.RequiresManipulation || pawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation));
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x06012466 RID: 74854 RVA: 0x005629D8 File Offset: 0x00560BD8
-		public virtual bool TargetThingValid(Thing thing, FloatMenuContext context)
+		[DebuggerHidden]
+		public _003CGetOptionsFor_003Ed__23(int _003C_003E1__state)
 		{
-			if (!this.CanTargetDespawned && !thing.Spawned)
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			FloatMenuOptionProvider floatMenuOptionProvider = _003C_003E4__this;
+			switch (num)
 			{
+			default:
 				return false;
-			}
-			Pawn pawn = thing as Pawn;
-			return pawn == null || this.TargetPawnValid(pawn, context);
-		}
-
-		// Token: 0x06012467 RID: 74855 RVA: 0x00562A0E File Offset: 0x00560C0E
-		public virtual bool TargetPawnValid(Pawn pawn, FloatMenuContext context)
-		{
-			return this.CanSelfTarget || pawn != context.FirstSelectedPawn;
-		}
-
-		// Token: 0x06012468 RID: 74856 RVA: 0x00562A24 File Offset: 0x00560C24
-		public virtual bool Applies(FloatMenuContext context)
-		{
-			return (this.Multiselect || !context.IsMultiselect) && (!this.IgnoreFogged || !context.ClickedCell.Fogged(context.map)) && this.AppliesInt(context);
-		}
-
-		// Token: 0x06012469 RID: 74857 RVA: 0x000028E7 File Offset: 0x00000AE7
-		protected virtual bool AppliesInt(FloatMenuContext context)
-		{
-			return true;
-		}
-
-		// Token: 0x0601246A RID: 74858 RVA: 0x00562A61 File Offset: 0x00560C61
-		public virtual IEnumerable<FloatMenuOption> GetOptions(FloatMenuContext context)
-		{
-			FloatMenuOption singleOption = this.GetSingleOption(context);
-			if (singleOption != null)
+			case 0:
 			{
-				yield return singleOption;
+				_003C_003E1__state = -1;
+				FloatMenuOption singleOptionFor = floatMenuOptionProvider.GetSingleOptionFor(clickedPawn, context);
+				if (singleOptionFor != null)
+				{
+					_003C_003E2__current = singleOptionFor;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				break;
 			}
-			yield break;
+			case 1:
+				_003C_003E1__state = -1;
+				break;
+			}
+			return false;
 		}
 
-		// Token: 0x0601246B RID: 74859 RVA: 0x00562A78 File Offset: 0x00560C78
-		public virtual IEnumerable<FloatMenuOption> GetOptionsFor(Thing clickedThing, FloatMenuContext context)
+		bool IEnumerator.MoveNext()
 		{
-			FloatMenuOption singleOptionFor = this.GetSingleOptionFor(clickedThing, context);
-			if (singleOptionFor != null)
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<FloatMenuOption> IEnumerable<FloatMenuOption>.GetEnumerator()
+		{
+			_003CGetOptionsFor_003Ed__23 _003CGetOptionsFor_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				yield return singleOptionFor;
+				_003C_003E1__state = 0;
+				_003CGetOptionsFor_003Ed__ = this;
 			}
-			yield break;
-		}
-
-		// Token: 0x0601246C RID: 74860 RVA: 0x00562A96 File Offset: 0x00560C96
-		public virtual IEnumerable<FloatMenuOption> GetOptionsFor(Pawn clickedPawn, FloatMenuContext context)
-		{
-			FloatMenuOption singleOptionFor = this.GetSingleOptionFor(clickedPawn, context);
-			if (singleOptionFor != null)
+			else
 			{
-				yield return singleOptionFor;
+				_003CGetOptionsFor_003Ed__ = new _003CGetOptionsFor_003Ed__23(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
-			yield break;
+			_003CGetOptionsFor_003Ed__.clickedPawn = _003C_003E3__clickedPawn;
+			_003CGetOptionsFor_003Ed__.context = _003C_003E3__context;
+			return _003CGetOptionsFor_003Ed__;
 		}
 
-		// Token: 0x0601246D RID: 74861 RVA: 0x00002C42 File Offset: 0x00000E42
-		protected virtual FloatMenuOption GetSingleOption(FloatMenuContext context)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return null;
+			return ((IEnumerable<FloatMenuOption>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x0601246E RID: 74862 RVA: 0x00002C42 File Offset: 0x00000E42
-		protected virtual FloatMenuOption GetSingleOptionFor(Thing clickedThing, FloatMenuContext context)
-		{
-			return null;
-		}
+	protected abstract bool Drafted { get; }
 
-		// Token: 0x0601246F RID: 74863 RVA: 0x00002C42 File Offset: 0x00000E42
-		protected virtual FloatMenuOption GetSingleOptionFor(Pawn clickedPawn, FloatMenuContext context)
+	protected abstract bool Undrafted { get; }
+
+	protected abstract bool Multiselect { get; }
+
+	protected virtual bool RequiresManipulation => false;
+
+	protected virtual bool MechanoidCanDo => false;
+
+	protected virtual bool CanSelfTarget => false;
+
+	public virtual bool CanTargetDespawned => false;
+
+	protected virtual bool IgnoreFogged => true;
+
+	public virtual bool SelectedPawnValid(Pawn pawn, FloatMenuContext context)
+	{
+		if (pawn.IsMutant && pawn.mutant.Def.whitelistedFloatMenuProviders != null && !pawn.mutant.Def.whitelistedFloatMenuProviders.Contains(FloatMenuMakerMap.currentProvider.GetType()))
 		{
-			return null;
+			return false;
 		}
+		if (!Drafted && pawn.Drafted)
+		{
+			return false;
+		}
+		if (!Undrafted && !pawn.Drafted)
+		{
+			return false;
+		}
+		if (!MechanoidCanDo && pawn.RaceProps.IsMechanoid)
+		{
+			return false;
+		}
+		if (RequiresManipulation && !pawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation))
+		{
+			return false;
+		}
+		return true;
+	}
+
+	public virtual bool TargetThingValid(Thing thing, FloatMenuContext context)
+	{
+		if (!CanTargetDespawned && !thing.Spawned)
+		{
+			return false;
+		}
+		if (thing is Pawn pawn && !TargetPawnValid(pawn, context))
+		{
+			return false;
+		}
+		return true;
+	}
+
+	public virtual bool TargetPawnValid(Pawn pawn, FloatMenuContext context)
+	{
+		if (!CanSelfTarget && pawn == context.FirstSelectedPawn)
+		{
+			return false;
+		}
+		return true;
+	}
+
+	public virtual bool Applies(FloatMenuContext context)
+	{
+		if (!Multiselect && context.IsMultiselect)
+		{
+			return false;
+		}
+		if (IgnoreFogged && context.ClickedCell.Fogged(context.map))
+		{
+			return false;
+		}
+		if (!AppliesInt(context))
+		{
+			return false;
+		}
+		return true;
+	}
+
+	protected virtual bool AppliesInt(FloatMenuContext context)
+	{
+		return true;
+	}
+
+	[IteratorStateMachine(typeof(_003CGetOptions_003Ed__21))]
+	public virtual IEnumerable<FloatMenuOption> GetOptions(FloatMenuContext context)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetOptions_003Ed__21(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__context = context
+		};
+	}
+
+	[IteratorStateMachine(typeof(_003CGetOptionsFor_003Ed__22))]
+	public virtual IEnumerable<FloatMenuOption> GetOptionsFor(Thing clickedThing, FloatMenuContext context)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetOptionsFor_003Ed__22(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__clickedThing = clickedThing,
+			_003C_003E3__context = context
+		};
+	}
+
+	[IteratorStateMachine(typeof(_003CGetOptionsFor_003Ed__23))]
+	public virtual IEnumerable<FloatMenuOption> GetOptionsFor(Pawn clickedPawn, FloatMenuContext context)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetOptionsFor_003Ed__23(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__clickedPawn = clickedPawn,
+			_003C_003E3__context = context
+		};
+	}
+
+	protected virtual FloatMenuOption GetSingleOption(FloatMenuContext context)
+	{
+		return null;
+	}
+
+	protected virtual FloatMenuOption GetSingleOptionFor(Thing clickedThing, FloatMenuContext context)
+	{
+		return null;
+	}
+
+	protected virtual FloatMenuOption GetSingleOptionFor(Pawn clickedPawn, FloatMenuContext context)
+	{
+		return null;
 	}
 }

@@ -54,6 +54,10 @@ public sealed class GraphicsDevice : IDisposable
 
 	public PhysicalDevice PhysicalDevice { get; }
 
+	public int ApiVersion { get; }
+
+	public static int InstanceApiVersion { get; private set; } = 4202496;
+
 	public DeviceEx Device { get; }
 
 	public VmaAllocator Allocator { get; }
@@ -111,32 +115,68 @@ public sealed class GraphicsDevice : IDisposable
 		GraphicsQueue = device.GetQueue(graphicsFamilyIndex, 0);
 		PresentQueue = device.GetQueue(presentFamilyIndex, 0);
 		VideoDecodeFamilyIndex = videoDecodeFamilyIndex;
+		bool shouldAppend;
+		LogString<Information> message;
+		LogCategory logger;
 		if (videoDecodeFamilyIndex >= 0)
 		{
 			VideoDecodeQueue = device.GetQueue(videoDecodeFamilyIndex, 0);
-			LogCategory logger = Logger;
-			bool shouldAppend;
-			LogString<Information> message = new LogString<Information>(45, 1, logger, out shouldAppend);
+			logger = Logger;
+			LogCategory logCategory = logger;
+			message = new LogString<Information>(45, 1, logger, out shouldAppend);
 			if (shouldAppend)
 			{
 				message.AppendLiteral("Vulkan Video decode enabled on queue family ");
 				message.AppendFormatted(videoDecodeFamilyIndex);
 				message.AppendLiteral(".");
 			}
-			logger.Info(message, ".ctor", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 68);
+			logCategory.Info(message, ".ctor", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 68);
 		}
-		MemoryBudgetEnabled = deviceEnabledExtensions.Contains("VK_EXT_memory_budget");
+		int apiVersion = physicalDevice.GetProperties().ApiVersion;
+		ApiVersion = VulkanVersion.Min(InstanceApiVersion, apiVersion);
+		logger = Logger;
+		LogCategory logCategory2 = logger;
+		message = new LogString<Information>(47, 3, logger, out shouldAppend);
+		if (shouldAppend)
+		{
+			message.AppendLiteral("Effective Vulkan version ");
+			message.AppendFormatted(VulkanVersion.Format(ApiVersion));
+			message.AppendLiteral(" (instance ");
+			message.AppendFormatted(VulkanVersion.Format(InstanceApiVersion));
+			message.AppendLiteral(", device ");
+			message.AppendFormatted(VulkanVersion.Format(apiVersion));
+			message.AppendLiteral(").");
+		}
+		logCategory2.Info(message, ".ctor", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 72);
+		string text = (VulkanVersion.AtLeast(ApiVersion, 4198400) ? "spirv_1_3" : "spirv_1_0");
+		RuntimeShaderCompiler.ConfigureTargetProfile(text);
+		if (text != "spirv_1_3")
+		{
+			logger = Logger;
+			LogCategory logCategory3 = logger;
+			LogString<Warning> message2 = new LogString<Warning>(86, 2, logger, out shouldAppend);
+			if (shouldAppend)
+			{
+				message2.AppendLiteral("Vulkan ");
+				message2.AppendFormatted(VulkanVersion.Format(ApiVersion));
+				message2.AppendLiteral(" device, shaders will be compiled for ");
+				message2.AppendFormatted(text);
+				message2.AppendLiteral(" and baked shader packs will not be used.");
+			}
+			logCategory3.Warning(message2, ".ctor", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 76);
+		}
+		MemoryBudgetEnabled = deviceEnabledExtensions.Contains("VK_EXT_memory_budget") && (VulkanVersion.AtLeast(ApiVersion, 4198400) || instance.IsExtensionEnabled("VK_KHR_get_physical_device_properties2"));
 		FullscreenExclusiveDisallowed = disallowFullscreenExclusive && instance.IsExtensionEnabled("VK_KHR_get_surface_capabilities2") && deviceEnabledExtensions.Contains("VK_EXT_full_screen_exclusive");
 		if (disallowFullscreenExclusive)
 		{
-			Logger.Info(FullscreenExclusiveDisallowed ? "Fullscreen exclusive disallowed, swapchains will be created with VK_FULL_SCREEN_EXCLUSIVE_DISALLOWED_EXT." : "Fullscreen exclusive disallow requested but VK_EXT_full_screen_exclusive or VK_KHR_get_surface_capabilities2 is unavailable, ignoring.", ".ctor", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 75);
+			Logger.Info(FullscreenExclusiveDisallowed ? "Fullscreen exclusive disallowed, swapchains will be created with VK_FULL_SCREEN_EXCLUSIVE_DISALLOWED_EXT." : "Fullscreen exclusive disallow requested but VK_EXT_full_screen_exclusive or VK_KHR_get_surface_capabilities2 is unavailable, ignoring.", ".ctor", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 84);
 		}
 		VramLimitBytes = ReadVramLimitOverride();
-		Allocator = CreateAllocator(instance, physicalDevice, device, MemoryBudgetEnabled, VramLimitBytes);
-		Logger.Info(MemoryBudgetEnabled ? "VK_EXT_memory_budget enabled, VRAM budget figures are driver-reported." : "VK_EXT_memory_budget unavailable, VRAM budget figures are VMA estimates.", ".ctor", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 80);
+		Allocator = CreateAllocator(instance, physicalDevice, device, ApiVersion, MemoryBudgetEnabled, VramLimitBytes);
+		Logger.Info(MemoryBudgetEnabled ? "VK_EXT_memory_budget enabled, VRAM budget figures are driver-reported." : "VK_EXT_memory_budget unavailable, VRAM budget figures are VMA estimates.", ".ctor", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 89);
 		MeshUploads = new MeshUploader(this, framesInFlight);
 		ShaderLayoutCache = new VulkanShaderLayoutCache(device);
-		GpuInfo.Configure(physicalDevice, GetDeviceLocalMemoryBytes(physicalDevice));
+		GpuInfo.Configure(physicalDevice, GetDeviceLocalMemoryBytes(physicalDevice), ApiVersion);
 		if (instance.IsExtensionEnabled("VK_EXT_debug_utils"))
 		{
 			_debugMessenger = instance.CreateDebugUtilsMessengerEXT(VulkanHelpers.BuildDefaultDebugMessengerCreateInfo(new PfnVkDebugUtilsMessengerCallbackEXT((delegate* unmanaged[Cdecl]<VkDebugUtilsMessageSeverityFlagsEXT, VkDebugUtilsMessageTypeFlagsEXT, VkDebugUtilsMessengerCallbackDataEXT*, void*, Bool32>)(delegate*<VkDebugUtilsMessageSeverityFlagsEXT, VkDebugUtilsMessageTypeFlagsEXT, VkDebugUtilsMessengerCallbackDataEXT*, void*, Bool32>)(&DebugUtilsCallback))), null);
@@ -147,9 +187,30 @@ public sealed class GraphicsDevice : IDisposable
 	{
 		byte[] bytes = Encoding.UTF8.GetBytes(applicationName + "\0");
 		byte[] bytes2 = Encoding.UTF8.GetBytes(engineName + "\0");
+		int num = VulkanVersion.QueryLoaderVersion();
+		InstanceApiVersion = VulkanVersion.Min(4202496, num);
+		bool shouldAppend;
+		if (!VulkanVersion.AtLeast(InstanceApiVersion, 4202496))
+		{
+			LogCategory logger = Logger;
+			LogString<Warning> message = new LogString<Warning>(42, 2, logger, out shouldAppend);
+			if (shouldAppend)
+			{
+				message.AppendLiteral("Vulkan loader is ");
+				message.AppendFormatted(VulkanVersion.Format(num));
+				message.AppendLiteral(", requesting a ");
+				message.AppendFormatted(VulkanVersion.Format(InstanceApiVersion));
+				message.AppendLiteral(" instance.");
+			}
+			logger.Warning(message, "CreateInstance", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 139);
+		}
 		HashSet<string> enabledInstanceExtensions = GetEnabledInstanceExtensions(disallowFullscreenExclusive);
-		bool validationEnabled;
-		HashSet<string> enabledInstanceLayers = GetEnabledInstanceLayers(out validationEnabled, emitUnsupportedWarning: true);
+		HashSet<string> enabledInstanceLayers = GetEnabledInstanceLayers(out shouldAppend, emitUnsupportedWarning: true);
+		bool flag = enabledInstanceExtensions.Contains("VK_EXT_debug_utils");
+		if (!flag)
+		{
+			Logger.Warning("VK_EXT_debug_utils unavailable, running without Vulkan debug messages and object names.", "CreateInstance", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 144);
+		}
 		fixed (byte* applicationName2 = bytes)
 		{
 			fixed (byte* engineName2 = bytes2)
@@ -159,7 +220,7 @@ public sealed class GraphicsDevice : IDisposable
 				vkApplicationInfo.ApplicationVersion = 0;
 				vkApplicationInfo.EngineName = engineName2;
 				vkApplicationInfo.EngineVersion = 0;
-				vkApplicationInfo.ApiVersion = 4202496;
+				vkApplicationInfo.ApiVersion = InstanceApiVersion;
 				VkApplicationInfo appInfo = vkApplicationInfo;
 				VkInstanceCreateFlags platformRequiredInstanceCreateFlags = VulkanHelpers.GetPlatformRequiredInstanceCreateFlags();
 				VkDebugUtilsMessengerCreateInfoEXT vkDebugUtilsMessengerCreateInfoEXT = VulkanHelpers.BuildDefaultDebugMessengerCreateInfo(new PfnVkDebugUtilsMessengerCallbackEXT((delegate* unmanaged[Cdecl]<VkDebugUtilsMessageSeverityFlagsEXT, VkDebugUtilsMessageTypeFlagsEXT, VkDebugUtilsMessengerCallbackDataEXT*, void*, Bool32>)(delegate*<VkDebugUtilsMessageSeverityFlagsEXT, VkDebugUtilsMessageTypeFlagsEXT, VkDebugUtilsMessengerCallbackDataEXT*, void*, Bool32>)(&DebugUtilsCallback)));
@@ -173,17 +234,25 @@ public sealed class GraphicsDevice : IDisposable
 				vkValidationFeaturesEXT.EnabledValidationFeatures = enabledValidationFeatures;
 				vkValidationFeaturesEXT.DisabledValidationFeatureCount = 0;
 				VkValidationFeaturesEXT vkValidationFeaturesEXT2 = vkValidationFeaturesEXT;
+				void* next = (flag ? (&vkDebugUtilsMessengerCreateInfoEXT) : null);
 				if (Environment.CommandLine.Contains("-EnableVulkanValidation"))
 				{
-					RenderLog.Log.Info("Enabling vulkan validation features", "CreateInstance", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 159);
-					vkDebugUtilsMessengerCreateInfoEXT.Next = &vkValidationFeaturesEXT2;
+					RenderLog.Log.Info("Enabling vulkan validation features", "CreateInstance", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 178);
+					if (flag)
+					{
+						vkDebugUtilsMessengerCreateInfoEXT.Next = &vkValidationFeaturesEXT2;
+					}
+					else
+					{
+						next = &vkValidationFeaturesEXT2;
+					}
 				}
 				Instance.CreateInfo createInfo = default(Instance.CreateInfo);
 				createInfo.AppInfo = appInfo;
 				createInfo.Flags = platformRequiredInstanceCreateFlags;
 				createInfo.EnabledExtensions = enabledInstanceExtensions;
 				createInfo.EnabledLayers = enabledInstanceLayers;
-				createInfo.Next = &vkDebugUtilsMessengerCreateInfoEXT;
+				createInfo.Next = next;
 				return Vulkan.CreateInstance(createInfo);
 			}
 		}
@@ -193,7 +262,7 @@ public sealed class GraphicsDevice : IDisposable
 	{
 		HashSet<string> deviceExtensions;
 		QueueSelection queueSelection = SelectQueueFamilies(instance, surface, preference, out deviceExtensions);
-		int videoDecodeFamilyIndex = (enableVideoDecode ? FindVideoDecodeFamily(queueSelection.Device) : (-1));
+		int videoDecodeFamilyIndex = ((enableVideoDecode && HasCoreProperties2(queueSelection.Device)) ? FindVideoDecodeFamily(queueSelection.Device) : (-1));
 		DeviceEx device = CreateDevice(queueSelection, deviceExtensions, videoDecodeFamilyIndex, disallowFullscreenExclusive);
 		HashSet<string> enabledInstanceExtensions = GetEnabledInstanceExtensions(disallowFullscreenExclusive);
 		bool validationEnabled;
@@ -241,11 +310,11 @@ public sealed class GraphicsDevice : IDisposable
 		{
 			if (messageSeverity.HasFlag(VkDebugUtilsMessageSeverityFlagsEXT.InfoBitEXT))
 			{
-				RenderLog.Log.Info(text, "DebugUtilsCallback", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 245);
+				RenderLog.Log.Info(text, "DebugUtilsCallback", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 267);
 			}
 			else if (messageSeverity.HasFlag(VkDebugUtilsMessageSeverityFlagsEXT.VerboseBitEXT))
 			{
-				RenderLog.Log.Debug(text, "DebugUtilsCallback", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 247);
+				RenderLog.Log.Debug(text, "DebugUtilsCallback", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 269);
 			}
 		}
 		return false;
@@ -484,7 +553,7 @@ public sealed class GraphicsDevice : IDisposable
 		});
 	}
 
-	private unsafe static VmaAllocator CreateAllocator(Instance instance, PhysicalDevice physicalDevice, DeviceEx device, bool memoryBudget, long vramLimitBytes)
+	private unsafe static VmaAllocator CreateAllocator(Instance instance, PhysicalDevice physicalDevice, DeviceEx device, int apiVersion, bool memoryBudget, long vramLimitBytes)
 	{
 		VkPhysicalDeviceMemoryProperties memoryProperties = physicalDevice.GetMemoryProperties();
 		ByteSize* ptr = stackalloc ByteSize[System.Math.Max(1, memoryProperties.MemoryHeapCount)];
@@ -497,13 +566,46 @@ public sealed class GraphicsDevice : IDisposable
 		vmaVulkanFunctions.VkGetInstanceProcAddr = Vulkan.GetInstanceProcAddr;
 		vmaVulkanFunctions.VkGetDeviceProcAddr = device.PInvoke.vkGetDeviceProcAddr;
 		VmaVulkanFunctions vmaVulkanFunctions2 = vmaVulkanFunctions;
+		if (VulkanVersion.AtLeast(apiVersion, 4198400) && (device.GetProcAddr(new byte[30]
+		{
+			118, 107, 71, 101, 116, 73, 109, 97, 103, 101,
+			77, 101, 109, 111, 114, 121, 82, 101, 113, 117,
+			105, 114, 101, 109, 101, 110, 116, 115, 50, 0
+		}).Invoke == (delegate* unmanaged[Cdecl]<void>)null || device.GetProcAddr(new byte[31]
+		{
+			118, 107, 71, 101, 116, 66, 117, 102, 102, 101,
+			114, 77, 101, 109, 111, 114, 121, 82, 101, 113,
+			117, 105, 114, 101, 109, 101, 110, 116, 115, 50,
+			0
+		}).Invoke == (delegate* unmanaged[Cdecl]<void>)null || device.GetProcAddr(new byte[19]
+		{
+			118, 107, 66, 105, 110, 100, 73, 109, 97, 103,
+			101, 77, 101, 109, 111, 114, 121, 50, 0
+		}).Invoke == (delegate* unmanaged[Cdecl]<void>)null || device.GetProcAddr(new byte[20]
+		{
+			118, 107, 66, 105, 110, 100, 66, 117, 102, 102,
+			101, 114, 77, 101, 109, 111, 114, 121, 50, 0
+		}).Invoke == (delegate* unmanaged[Cdecl]<void>)null))
+		{
+			LogCategory logger = Logger;
+			bool shouldAppend;
+			LogString<Warning> message = new LogString<Warning>(102, 1, logger, out shouldAppend);
+			if (shouldAppend)
+			{
+				message.AppendLiteral("Vulkan ");
+				message.AppendFormatted(VulkanVersion.Format(apiVersion));
+				message.AppendLiteral(" device does not expose the core 1.1 memory entry points. Making VMA fall back to the 1.0 ones.");
+			}
+			logger.Warning(message, "CreateAllocator", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 544);
+			apiVersion = 4194304;
+		}
 		return device.CreateVmaAllocator(new VmaAllocatorCreateInfo
 		{
 			Flags = (memoryBudget ? VmaAllocatorCreateFlags.ExtMemoryBudgetBit : VmaAllocatorCreateFlags.None),
 			Instance = instance,
 			PhysicalDevice = physicalDevice,
 			Device = device,
-			VulkanApiVersion = 4202496u,
+			VulkanApiVersion = (uint)VulkanVersion.WithoutPatch(apiVersion),
 			PVulkanFunctions = &vmaVulkanFunctions2,
 			PreferredLargeHeapBlockSize = new ByteSize(67108864u),
 			PHeapSizeLimit = ((vramLimitBytes > 0) ? ptr : null)
@@ -532,7 +634,7 @@ public sealed class GraphicsDevice : IDisposable
 				message.AppendFormatted(environmentVariable);
 				message.AppendLiteral("' is not a positive number of MB, ignoring it.");
 			}
-			logCategory.Warning(message, "ReadVramLimitOverride", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 538);
+			logCategory.Warning(message, "ReadVramLimitOverride", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 570);
 			return 0L;
 		}
 		log = RenderLog.Log;
@@ -545,7 +647,7 @@ public sealed class GraphicsDevice : IDisposable
 			message.AppendFormatted(result);
 			message.AppendLiteral(" MB.");
 		}
-		logCategory2.Warning(message, "ReadVramLimitOverride", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 542);
+		logCategory2.Warning(message, "ReadVramLimitOverride", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 574);
 		return result * 1024 * 1024;
 	}
 
@@ -555,7 +657,14 @@ public sealed class GraphicsDevice : IDisposable
 		VulkanHelpers.AddPlatformRequiredExtensions(hashSet);
 		VulkanHelpers.AddSurfaceExtensions(hashSet);
 		AddGlfwRequiredExtensions(hashSet);
-		VulkanHelpers.AddDebugExtensions(hashSet);
+		if (IsInstanceExtensionAvailable("VK_EXT_debug_utils"))
+		{
+			hashSet.Add("VK_EXT_debug_utils");
+		}
+		if (IsInstanceExtensionAvailable("VK_KHR_get_physical_device_properties2"))
+		{
+			hashSet.Add("VK_KHR_get_physical_device_properties2");
+		}
 		if (disallowFullscreenExclusive && IsInstanceExtensionAvailable("VK_KHR_get_surface_capabilities2"))
 		{
 			hashSet.Add("VK_KHR_get_surface_capabilities2");
@@ -586,13 +695,13 @@ public sealed class GraphicsDevice : IDisposable
 		{
 			if (VulkanHelpers.Validation.IsSupported)
 			{
-				RenderLog.Log.Info("Enabling vulkan validation layer", "GetEnabledInstanceLayers", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 581);
+				RenderLog.Log.Info("Enabling vulkan validation layer", "GetEnabledInstanceLayers", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 617);
 				VulkanHelpers.AddValidationLayers(hashSet);
 				validationEnabled = true;
 			}
 			else if (emitUnsupportedWarning)
 			{
-				RenderLog.Log.Warning("VK_LAYER_KHRONOS_validation is not available; Vulkan validation messages are disabled for this run.", "GetEnabledInstanceLayers", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 587);
+				RenderLog.Log.Warning("VK_LAYER_KHRONOS_validation is not available; Vulkan validation messages are disabled for this run.", "GetEnabledInstanceLayers", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 623);
 			}
 		}
 		return hashSet;
@@ -624,6 +733,7 @@ public sealed class GraphicsDevice : IDisposable
 				Index = num,
 				Name = deviceName,
 				Driver = text,
+				ApiVersion = properties.ApiVersion,
 				DeviceType = properties.DeviceType,
 				VramBytes = deviceLocalMemoryBytes,
 				Uuid = deviceUuid,
@@ -631,7 +741,7 @@ public sealed class GraphicsDevice : IDisposable
 			};
 			list.Add(gpuDescription);
 			bool flag3 = flag && deviceName.Contains(environmentVariable, StringComparison.OrdinalIgnoreCase);
-			string value = $"GPU [{num}] '{deviceName}' ({properties.DeviceType}, driver {text}, {FormatVram(deviceLocalMemoryBytes)} device-local, uuid {deviceUuid})" + (flag3 ? " [matches WAYLITH_VULKAN_DEVICE]" : string.Empty);
+			string value = $"GPU [{num}] '{deviceName}' ({properties.DeviceType}, Vulkan {VulkanVersion.Format(properties.ApiVersion)}, driver {text}, {FormatVram(deviceLocalMemoryBytes)} device-local, uuid {deviceUuid})" + (flag3 ? " [matches WAYLITH_VULKAN_DEVICE]" : string.Empty);
 			bool shouldAppend;
 			if (text2 != null)
 			{
@@ -645,7 +755,7 @@ public sealed class GraphicsDevice : IDisposable
 					message.AppendFormatted(text2);
 					message.AppendLiteral(".");
 				}
-				logCategory.Info(message, "SelectQueueFamilies", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 656);
+				logCategory.Info(message, "SelectQueueFamilies", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 693);
 				if (flag3)
 				{
 					flag2 = true;
@@ -663,7 +773,7 @@ public sealed class GraphicsDevice : IDisposable
 					message.AppendFormatted(queueSelection.Score);
 					message.AppendLiteral(").");
 				}
-				logCategory2.Info(message, "SelectQueueFamilies", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 662);
+				logCategory2.Info(message, "SelectQueueFamilies", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 699);
 				list2.Add((gpuDescription, queueSelection));
 			}
 		}
@@ -674,8 +784,8 @@ public sealed class GraphicsDevice : IDisposable
 			{
 				WarnOverrideUnusable(environmentVariable);
 			}
-			string text3 = ((list.Count == 0) ? "No Vulkan devices were enumerated, which usually means no working Vulkan driver is installed." : ("Devices found: " + string.Join("; ", list.Select((GpuDescription g) => $"'{g.Name}' ({g.DeviceType}, driver {g.Driver}): {g.RejectionReason}")) + ". The most common scenario is a laptop with two GPUs, in which case you need working drivers for both, including the integrated one."));
-			throw new InvalidOperationException("Could not find a Vulkan device that supports graphics and presentation. " + text3);
+			string text3 = ((list.Count == 0) ? "No Vulkan devices were enumerated, which usually means no working Vulkan driver is installed." : ("Devices found: " + string.Join("; ", list.Select((GpuDescription g) => $"'{g.Name}' ({g.DeviceType}, Vulkan {VulkanVersion.Format(g.ApiVersion)}, driver {g.Driver}): {g.RejectionReason}")) + "."));
+			throw new InvalidOperationException("Could not find a Vulkan device that supports graphics and presentation. " + text3 + " The most common scenario is a laptop with two GPUs, in which case you need working drivers for both, including the integrated one.");
 		}
 		(GpuDescription, QueueSelection) tuple = list2[0];
 		for (int j = 1; j < list2.Count; j++)
@@ -701,14 +811,14 @@ public sealed class GraphicsDevice : IDisposable
 			}
 			else
 			{
-				RenderLog.Log.Warning("WAYLITH_VULKAN_DEVICE='" + environmentVariable + "' did not match any usable Vulkan device; falling back to automatic selection.", "SelectQueueFamilies", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 700);
+				RenderLog.Log.Warning("WAYLITH_VULKAN_DEVICE='" + environmentVariable + "' did not match any usable Vulkan device; falling back to automatic selection.", "SelectQueueFamilies", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 736);
 			}
 		}
 		if (preference.IsSet)
 		{
 			foreach (var (gpuDescription3, selection3) in list2)
 			{
-				if (string.Equals(gpuDescription3.Uuid, preference.Uuid, StringComparison.OrdinalIgnoreCase))
+				if (gpuDescription3.Uuid.Length > 0 && string.Equals(gpuDescription3.Uuid, preference.Uuid, StringComparison.OrdinalIgnoreCase))
 				{
 					return Finalize(gpuDescription3, selection3, "user graphics setting");
 				}
@@ -720,14 +830,14 @@ public sealed class GraphicsDevice : IDisposable
 					return Finalize(gpuDescription4, selection4, "user graphics setting (matched by name)");
 				}
 			}
-			GpuDescription gpuDescription5 = list.FirstOrDefault((GpuDescription g) => !g.Usable && (string.Equals(g.Uuid, preference.Uuid, StringComparison.OrdinalIgnoreCase) || string.Equals(g.Name, preference.Name, StringComparison.OrdinalIgnoreCase)));
+			GpuDescription gpuDescription5 = list.FirstOrDefault((GpuDescription g) => !g.Usable && ((g.Uuid.Length > 0 && string.Equals(g.Uuid, preference.Uuid, StringComparison.OrdinalIgnoreCase)) || string.Equals(g.Name, preference.Name, StringComparison.OrdinalIgnoreCase)));
 			if (gpuDescription5 != null)
 			{
-				RenderLog.Log.Warning($"Preferred GPU '{gpuDescription5.Name}' is present but unusable ({gpuDescription5.RejectionReason}); " + "falling back to automatic selection.", "SelectQueueFamilies", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 726);
+				RenderLog.Log.Warning($"Preferred GPU '{gpuDescription5.Name}' is present but unusable ({gpuDescription5.RejectionReason}); " + "falling back to automatic selection.", "SelectQueueFamilies", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 762);
 			}
 			else
 			{
-				RenderLog.Log.Warning($"Preferred GPU '{preference.Name}' (uuid {preference.Uuid}) was not found; " + "falling back to automatic selection.", "SelectQueueFamilies", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 730);
+				RenderLog.Log.Warning($"Preferred GPU '{preference.Name}' (uuid {preference.Uuid}) was not found; " + "falling back to automatic selection.", "SelectQueueFamilies", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 766);
 			}
 		}
 		return Finalize(tuple.Item1, tuple.Item2, $"best automatic match of {list.Count} device(s)");
@@ -747,14 +857,14 @@ public sealed class GraphicsDevice : IDisposable
 				message2.AppendFormatted(reason);
 				message2.AppendLiteral(".");
 			}
-			logger2.Info(message2, "SelectQueueFamilies", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 740);
+			logger2.Info(message2, "SelectQueueFamilies", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 776);
 			return selection;
 		}
 	}
 
 	private static void WarnOverrideUnusable(string requestedDevice)
 	{
-		RenderLog.Log.Warning("WAYLITH_VULKAN_DEVICE='" + requestedDevice + "' matched a device that cannot render and present to this window, so it was ignored. On hybrid-GPU laptops the discrete GPU usually cannot present directly; launch through your platform's GPU offload mechanism (e.g. PRIME / DRI_PRIME / the NVIDIA control panel) to route the whole app onto it instead.", "WarnOverrideUnusable", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 747);
+		RenderLog.Log.Warning("WAYLITH_VULKAN_DEVICE='" + requestedDevice + "' matched a device that cannot render and present to this window, so it was ignored. On hybrid-GPU laptops the discrete GPU usually cannot present directly; launch through your platform's GPU offload mechanism (e.g. PRIME / DRI_PRIME / the NVIDIA control panel) to route the whole app onto it instead.", "WarnOverrideUnusable", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 783);
 	}
 
 	private static bool TrySelectQueueFamilies(PhysicalDevice physicalDevice, VkSurfaceKHR surface, int enumerationIndex, out QueueSelection queueSelection)
@@ -819,12 +929,41 @@ public sealed class GraphicsDevice : IDisposable
 
 	private unsafe static string GetDeviceUuid(PhysicalDevice physicalDevice)
 	{
+		if (!VulkanVersion.AtLeast(physicalDevice.GetProperties().ApiVersion, 4198400) && !physicalDevice.SupportsExtension("VK_KHR_external_memory_capabilities"))
+		{
+			return string.Empty;
+		}
 		VkPhysicalDeviceIdProperties vkPhysicalDeviceIdProperties = new VkPhysicalDeviceIdProperties();
 		VkPhysicalDeviceProperties2 vkPhysicalDeviceProperties = new VkPhysicalDeviceProperties2();
 		vkPhysicalDeviceProperties.Next = &vkPhysicalDeviceIdProperties;
-		VkPhysicalDeviceProperties2 pProperties = vkPhysicalDeviceProperties;
-		physicalDevice.GetProperties2(ref pProperties);
+		VkPhysicalDeviceProperties2 properties = vkPhysicalDeviceProperties;
+		if (!TryGetProperties2(physicalDevice, ref properties))
+		{
+			return string.Empty;
+		}
 		return Convert.ToHexString(new ReadOnlySpan<byte>(vkPhysicalDeviceIdProperties.DeviceUUID, 16));
+	}
+
+	private static bool HasCoreProperties2(PhysicalDevice physicalDevice)
+	{
+		return VulkanVersion.AtLeast(VulkanVersion.Min(InstanceApiVersion, physicalDevice.GetProperties().ApiVersion), 4198400);
+	}
+
+	public static bool TryGetProperties2(PhysicalDevice physicalDevice, ref VkPhysicalDeviceProperties2 properties)
+	{
+		if (HasCoreProperties2(physicalDevice))
+		{
+			physicalDevice.GetProperties2(ref properties);
+		}
+		else
+		{
+			if (!physicalDevice.Instance.IsExtensionEnabled("VK_KHR_get_physical_device_properties2"))
+			{
+				return false;
+			}
+			physicalDevice.GetProperties2KHR(ref properties);
+		}
+		return true;
 	}
 
 	private static long GetDeviceLocalMemoryBytes(PhysicalDevice physicalDevice)
@@ -849,12 +988,20 @@ public sealed class GraphicsDevice : IDisposable
 
 	private unsafe static string DescribeDriver(PhysicalDevice physicalDevice)
 	{
+		VkPhysicalDeviceProperties properties = physicalDevice.GetProperties();
+		if (!VulkanVersion.AtLeast(properties.ApiVersion, 4202496) && !physicalDevice.SupportsExtension("VK_KHR_driver_properties"))
+		{
+			return $"unknown (Vulkan {VulkanVersion.Format(properties.ApiVersion)}, driver version 0x{properties.DriverVersion:X})";
+		}
 		VkPhysicalDeviceDriverProperties vkPhysicalDeviceDriverProperties = new VkPhysicalDeviceDriverProperties();
 		VkPhysicalDeviceProperties2 vkPhysicalDeviceProperties = new VkPhysicalDeviceProperties2();
 		vkPhysicalDeviceProperties.Next = &vkPhysicalDeviceDriverProperties;
-		VkPhysicalDeviceProperties2 pProperties = vkPhysicalDeviceProperties;
-		physicalDevice.GetProperties2(ref pProperties);
-		return $"{vkPhysicalDeviceDriverProperties.DriverID} '{Utf8.GetString(vkPhysicalDeviceDriverProperties.DriverName).TrimEnd('\0')}' '{Utf8.GetString(vkPhysicalDeviceDriverProperties.DriverInfo).TrimEnd('\0')}'";
+		VkPhysicalDeviceProperties2 properties2 = vkPhysicalDeviceProperties;
+		if (TryGetProperties2(physicalDevice, ref properties2))
+		{
+			return $"{vkPhysicalDeviceDriverProperties.DriverID} '{Utf8.GetString(vkPhysicalDeviceDriverProperties.DriverName).TrimEnd('\0')}' '{Utf8.GetString(vkPhysicalDeviceDriverProperties.DriverInfo).TrimEnd('\0')}'";
+		}
+		return $"unknown (Vulkan {VulkanVersion.Format(properties.ApiVersion)}, driver version 0x{properties.DriverVersion:X})";
 	}
 
 	private static string FormatVram(long bytes)

@@ -1,62 +1,203 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class QuestPart_Skyfaller : QuestPart
 {
-	// Token: 0x02001CF8 RID: 7416
-	public class QuestPart_Skyfaller : QuestPart
+	[CompilerGenerated]
+	private sealed class _003Cget_QuestLookTargets_003Ed__6 : IEnumerable<GlobalTargetInfo>, IEnumerable, IEnumerator<GlobalTargetInfo>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700198F RID: 6543
-		// (get) Token: 0x0600A5A3 RID: 42403 RVA: 0x002F6E77 File Offset: 0x002F5077
-		public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+		private int _003C_003E1__state;
+
+		private GlobalTargetInfo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public QuestPart_Skyfaller _003C_003E4__this;
+
+		private IEnumerator<GlobalTargetInfo> _003C_003E7__wrap1;
+
+		GlobalTargetInfo IEnumerator<GlobalTargetInfo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				foreach (GlobalTargetInfo globalTargetInfo in base.QuestLookTargets)
-				{
-					yield return globalTargetInfo;
-				}
-				IEnumerator<GlobalTargetInfo> enumerator = null;
-				if (this.mapParent != null)
-				{
-					yield return this.mapParent;
-				}
-				yield break;
-				yield break;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600A5A4 RID: 42404 RVA: 0x002F6E88 File Offset: 0x002F5088
-		public override void Notify_QuestSignalReceived(Signal signal)
+		object IEnumerator.Current
 		{
-			if (this.mapParent == null || !this.mapParent.HasMap)
+			[DebuggerHidden]
+			get
 			{
-				Map anyPlayerHomeMap = Find.AnyPlayerHomeMap;
-				this.mapParent = ((anyPlayerHomeMap != null) ? anyPlayerHomeMap.Parent : null);
-			}
-			if (signal.tag == this.inSignal && this.mapParent != null && this.mapParent.HasMap)
-			{
-				this.items.RemoveAll((Thing x) => x.Destroyed);
-				Map map = this.mapParent.Map;
-				SkyfallerMaker.SpawnSkyfaller(this.skyfallerDef, this.items, this.dropSpot, map);
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0400726F RID: 29295
-		public ThingDef skyfallerDef;
+		[DebuggerHidden]
+		public _003Cget_QuestLookTargets_003Ed__6(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
 
-		// Token: 0x04007270 RID: 29296
-		public string inSignal;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
 
-		// Token: 0x04007271 RID: 29297
-		public IntVec3 dropSpot = IntVec3.Invalid;
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				QuestPart_Skyfaller questPart_Skyfaller = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((QuestPart)questPart_Skyfaller).QuestLookTargets.GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_006f:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						GlobalTargetInfo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (questPart_Skyfaller.mapParent != null)
+					{
+						_003C_003E2__current = questPart_Skyfaller.mapParent;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
 
-		// Token: 0x04007272 RID: 29298
-		public MapParent mapParent;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x04007273 RID: 29299
-		private List<Thing> items = new List<Thing>();
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<GlobalTargetInfo> IEnumerable<GlobalTargetInfo>.GetEnumerator()
+		{
+			_003Cget_QuestLookTargets_003Ed__6 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_QuestLookTargets_003Ed__6(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<GlobalTargetInfo>)this).GetEnumerator();
+		}
+	}
+
+	public ThingDef skyfallerDef;
+
+	public string inSignal;
+
+	public IntVec3 dropSpot = IntVec3.Invalid;
+
+	public MapParent mapParent;
+
+	private List<Thing> items = new List<Thing>();
+
+	public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+	{
+		[IteratorStateMachine(typeof(_003Cget_QuestLookTargets_003Ed__6))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_QuestLookTargets_003Ed__6(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public override void Notify_QuestSignalReceived(Signal signal)
+	{
+		if (mapParent == null || !mapParent.HasMap || !quest.IsParentSuitableForQuest(mapParent))
+		{
+			mapParent = quest.TryFindNewSuitableMapParentForRetarget();
+		}
+		if (signal.tag == inSignal && mapParent != null && mapParent.HasMap)
+		{
+			items.RemoveAll((Thing x) => x.Destroyed);
+			Map map = mapParent.Map;
+			SkyfallerMaker.SpawnSkyfaller(skyfallerDef, items, dropSpot, map);
+		}
 	}
 }

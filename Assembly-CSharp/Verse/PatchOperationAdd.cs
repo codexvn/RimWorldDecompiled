@@ -1,58 +1,42 @@
-﻿using System;
-using System.Collections;
 using System.Xml;
 
-namespace Verse
+namespace Verse;
+
+public class PatchOperationAdd : PatchOperationPathed
 {
-	// Token: 0x02000593 RID: 1427
-	public class PatchOperationAdd : PatchOperationPathed
+	private enum Order
 	{
-		// Token: 0x0600254F RID: 9551 RVA: 0x000C09FC File Offset: 0x000BEBFC
-		protected override bool ApplyWorker(XmlDocument xml)
+		Append,
+		Prepend
+	}
+
+	private XmlContainer value;
+
+	private Order order;
+
+	protected override bool ApplyWorker(XmlDocument xml)
+	{
+		XmlNode node = value.node;
+		bool result = false;
+		foreach (object item in xml.SelectNodes(xpath))
 		{
-			XmlNode node = this.value.node;
-			bool result = false;
-			foreach (object obj in xml.SelectNodes(this.xpath))
+			result = true;
+			XmlNode xmlNode = item as XmlNode;
+			if (order == Order.Append)
 			{
-				result = true;
-				XmlNode xmlNode = obj as XmlNode;
-				if (this.order == PatchOperationAdd.Order.Append)
+				foreach (XmlNode childNode in node.ChildNodes)
 				{
-					using (IEnumerator enumerator2 = node.ChildNodes.GetEnumerator())
-					{
-						while (enumerator2.MoveNext())
-						{
-							object obj2 = enumerator2.Current;
-							XmlNode node2 = (XmlNode)obj2;
-							xmlNode.AppendChild(xmlNode.OwnerDocument.ImportNode(node2, true));
-						}
-						continue;
-					}
-				}
-				if (this.order == PatchOperationAdd.Order.Prepend)
-				{
-					for (int i = node.ChildNodes.Count - 1; i >= 0; i--)
-					{
-						xmlNode.PrependChild(xmlNode.OwnerDocument.ImportNode(node.ChildNodes[i], true));
-					}
+					xmlNode.AppendChild(xmlNode.OwnerDocument.ImportNode(childNode, deep: true));
 				}
 			}
-			return result;
+			else if (order == Order.Prepend)
+			{
+				for (int num = node.ChildNodes.Count - 1; num >= 0; num--)
+				{
+					xmlNode.PrependChild(xmlNode.OwnerDocument.ImportNode(node.ChildNodes[num], deep: true));
+				}
+			}
 		}
-
-		// Token: 0x04001EA0 RID: 7840
-		private XmlContainer value;
-
-		// Token: 0x04001EA1 RID: 7841
-		private PatchOperationAdd.Order order;
-
-		// Token: 0x02000594 RID: 1428
-		private enum Order
-		{
-			// Token: 0x04001EA3 RID: 7843
-			Append,
-			// Token: 0x04001EA4 RID: 7844
-			Prepend
-		}
+		return result;
 	}
 }

@@ -1,143 +1,277 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld;
 
-namespace Verse
+namespace Verse;
+
+public class GameConditionDef : Def
 {
-	// Token: 0x0200027C RID: 636
-	public class GameConditionDef : Def
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__34 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x0600100D RID: 4109 RVA: 0x0004BC79 File Offset: 0x00049E79
-		public bool CanCoexistWith(GameConditionDef other)
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public GameConditionDef _003C_003E4__this;
+
+		private IEnumerator<string> _003C_003E7__wrap1;
+
+		string IEnumerator<string>.Current
 		{
-			return this != other && (!ModsConfig.AnomalyActive || this == GameConditionDefOf.UnnaturalDarkness || other != GameConditionDefOf.UnnaturalDarkness) && (this.exclusiveConditions == null || !this.exclusiveConditions.Contains(other));
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x0600100E RID: 4110 RVA: 0x0004BCB3 File Offset: 0x00049EB3
-		public static GameConditionDef Named(string defName)
+		object IEnumerator.Current
 		{
-			return DefDatabase<GameConditionDef>.GetNamed(defName, true);
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x0600100F RID: 4111 RVA: 0x0004BCBC File Offset: 0x00049EBC
-		public override IEnumerable<string> ConfigErrors()
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__34(int _003C_003E1__state)
 		{
-			foreach (string text in base.ConfigErrors())
-			{
-				yield return text;
-			}
-			IEnumerator<string> enumerator = null;
-			if (this.conditionClass == null)
-			{
-				yield return "conditionClass is null";
-			}
-			if (!this.layerBlacklist.NullOrEmpty<PlanetLayerDef>() && !this.layerWhitelist.NullOrEmpty<PlanetLayerDef>())
-			{
-				yield return "Both layerBlacklist and layerWhitelist are used, this will lead to unexpected behaviour. Use one or the other.";
-			}
-			yield break;
-			yield break;
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x04000C8D RID: 3213
-		public Type conditionClass = typeof(GameCondition);
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
 
-		// Token: 0x04000C8E RID: 3214
-		private List<GameConditionDef> exclusiveConditions;
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				GameConditionDef gameConditionDef = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((Def)gameConditionDef).ConfigErrors().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0076;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0076;
+				case 2:
+					_003C_003E1__state = -1;
+					goto IL_00bb;
+				case 3:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_0076:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (gameConditionDef.conditionClass == null)
+					{
+						_003C_003E2__current = "conditionClass is null";
+						_003C_003E1__state = 2;
+						return true;
+					}
+					goto IL_00bb;
+					IL_00bb:
+					if (!gameConditionDef.layerBlacklist.NullOrEmpty() && !gameConditionDef.layerWhitelist.NullOrEmpty())
+					{
+						_003C_003E2__current = "Both layerBlacklist and layerWhitelist are used, this will lead to unexpected behaviour. Use one or the other.";
+						_003C_003E1__state = 3;
+						return true;
+					}
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
 
-		// Token: 0x04000C8F RID: 3215
-		[MustTranslate]
-		public string startMessage;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x04000C90 RID: 3216
-		[MustTranslate]
-		public string endMessage;
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
 
-		// Token: 0x04000C91 RID: 3217
-		[MustTranslate]
-		public string letterText;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04000C92 RID: 3218
-		public List<ThingDef> letterHyperlinks;
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__34 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__34(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x04000C93 RID: 3219
-		public LetterDef letterDef;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x04000C94 RID: 3220
-		public bool canBePermanent;
+	public Type conditionClass = typeof(GameCondition);
 
-		// Token: 0x04000C95 RID: 3221
-		public bool showPermanentInTooltip = true;
+	private List<GameConditionDef> exclusiveConditions;
 
-		// Token: 0x04000C96 RID: 3222
-		public bool allowUnderground = true;
+	[MustTranslate]
+	public string startMessage;
 
-		// Token: 0x04000C97 RID: 3223
-		public bool requireFish;
+	[MustTranslate]
+	public string endMessage;
 
-		// Token: 0x04000C98 RID: 3224
-		[MustTranslate]
-		public string descriptionFuture;
+	[MustTranslate]
+	public string letterText;
 
-		// Token: 0x04000C99 RID: 3225
-		[NoTranslate]
-		public string jumpToSourceKey = "ClickToJumpToSource";
+	public List<ThingDef> letterHyperlinks;
 
-		// Token: 0x04000C9A RID: 3226
-		public List<GameConditionDef> silencedByConditions;
+	public LetterDef letterDef;
 
-		// Token: 0x04000C9B RID: 3227
-		public bool natural = true;
+	public bool canBePermanent;
 
-		// Token: 0x04000C9C RID: 3228
-		public bool preventNeutralVisitors;
+	public bool showPermanentInTooltip = true;
 
-		// Token: 0x04000C9D RID: 3229
-		public bool preventShuttleLaunch;
+	public bool allowUnderground = true;
 
-		// Token: 0x04000C9E RID: 3230
-		public bool causesTraderCaravanExit;
+	public bool requireFish;
 
-		// Token: 0x04000C9F RID: 3231
-		public bool preventIncidents;
+	[MustTranslate]
+	public string descriptionFuture;
 
-		// Token: 0x04000CA0 RID: 3232
-		public bool displayOnUI = true;
+	[NoTranslate]
+	public string jumpToSourceKey = "ClickToJumpToSource";
 
-		// Token: 0x04000CA1 RID: 3233
-		public bool pennedAnimalsSeekShelter;
+	public List<GameConditionDef> silencedByConditions;
 
-		// Token: 0x04000CA2 RID: 3234
-		public ThingDef spreadsFilth;
+	public bool natural = true;
 
-		// Token: 0x04000CA3 RID: 3235
-		public bool canAffectAllPlanetLayers;
+	public bool preventNeutralVisitors;
 
-		// Token: 0x04000CA4 RID: 3236
-		public List<PlanetLayerDef> layerWhitelist;
+	public bool preventShuttleLaunch;
 
-		// Token: 0x04000CA5 RID: 3237
-		public List<PlanetLayerDef> layerBlacklist;
+	public bool causesTraderCaravanExit;
 
-		// Token: 0x04000CA6 RID: 3238
-		public PsychicDroneLevel defaultDroneLevel = PsychicDroneLevel.BadMedium;
+	public bool preventIncidents;
 
-		// Token: 0x04000CA7 RID: 3239
-		public bool preventRain;
+	public bool displayOnUI = true;
 
-		// Token: 0x04000CA8 RID: 3240
-		public WeatherDef weatherDef;
+	public bool pennedAnimalsSeekShelter;
 
-		// Token: 0x04000CA9 RID: 3241
-		public float temperatureOffset = -10f;
+	public ThingDef spreadsFilth;
 
-		// Token: 0x04000CAA RID: 3242
-		public float minNearbyPollution;
+	public bool canAffectAllPlanetLayers;
 
-		// Token: 0x04000CAB RID: 3243
-		public SimpleCurve mtbOverNearbyPollutionCurve;
+	public List<PlanetLayerDef> layerWhitelist;
 
-		// Token: 0x04000CAC RID: 3244
-		public float fishPopulationOffsetPerDay;
+	public List<PlanetLayerDef> layerBlacklist;
+
+	public PsychicDroneLevel defaultDroneLevel = PsychicDroneLevel.BadMedium;
+
+	public bool preventRain;
+
+	public WeatherDef weatherDef;
+
+	public float temperatureOffset = -10f;
+
+	public float minNearbyPollution;
+
+	public SimpleCurve mtbOverNearbyPollutionCurve;
+
+	public float fishPopulationOffsetPerDay;
+
+	public bool CanCoexistWith(GameConditionDef other)
+	{
+		if (this == other)
+		{
+			return false;
+		}
+		if (ModsConfig.AnomalyActive && this != GameConditionDefOf.UnnaturalDarkness && other == GameConditionDefOf.UnnaturalDarkness)
+		{
+			return false;
+		}
+		if (exclusiveConditions != null)
+		{
+			return !exclusiveConditions.Contains(other);
+		}
+		return true;
+	}
+
+	public static GameConditionDef Named(string defName)
+	{
+		return DefDatabase<GameConditionDef>.GetNamed(defName);
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__34))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__34(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

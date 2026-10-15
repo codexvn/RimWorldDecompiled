@@ -1,60 +1,218 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
-namespace Verse
+namespace Verse;
+
+public class InventoryStockGroupDef : Def
 {
-	// Token: 0x02000296 RID: 662
-	public class InventoryStockGroupDef : Def
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__6 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x170002C3 RID: 707
-		// (get) Token: 0x06001082 RID: 4226 RVA: 0x0004E5AB File Offset: 0x0004C7AB
-		public ThingDef DefaultThingDef
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public InventoryStockGroupDef _003C_003E4__this;
+
+		private IEnumerator<string> _003C_003E7__wrap1;
+
+		string IEnumerator<string>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.defaultThingDef ?? this.thingDefs.First<ThingDef>();
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06001083 RID: 4227 RVA: 0x0004E5C2 File Offset: 0x0004C7C2
-		public override IEnumerable<string> ConfigErrors()
+		object IEnumerator.Current
 		{
-			foreach (string text in base.ConfigErrors())
+			[DebuggerHidden]
+			get
 			{
-				yield return text;
+				return _003C_003E2__current;
 			}
-			IEnumerator<string> enumerator = null;
-			if (this.defaultThingDef != null && !this.thingDefs.Contains(this.defaultThingDef))
-			{
-				yield return "Default thing def " + this.defaultThingDef.defName + " should be in thingDefs but not found.";
-			}
-			if (this.min > this.max)
-			{
-				yield return "Min should be less than max.";
-			}
-			if (this.min < 0 || this.max < 0)
-			{
-				yield return "Min/max should be greater than zero.";
-			}
-			if (this.thingDefs.NullOrEmpty<ThingDef>())
-			{
-				yield return "thingDefs cannot be null or empty.";
-			}
-			yield break;
-			yield break;
 		}
 
-		// Token: 0x04000D95 RID: 3477
-		public List<ThingDef> thingDefs;
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__6(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
 
-		// Token: 0x04000D96 RID: 3478
-		public int min;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
 
-		// Token: 0x04000D97 RID: 3479
-		public int max = 3;
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				InventoryStockGroupDef inventoryStockGroupDef = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((Def)inventoryStockGroupDef).ConfigErrors().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_007e;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_007e;
+				case 2:
+					_003C_003E1__state = -1;
+					goto IL_00e8;
+				case 3:
+					_003C_003E1__state = -1;
+					goto IL_0113;
+				case 4:
+					_003C_003E1__state = -1;
+					goto IL_0142;
+				case 5:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_007e:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (inventoryStockGroupDef.defaultThingDef != null && !inventoryStockGroupDef.thingDefs.Contains(inventoryStockGroupDef.defaultThingDef))
+					{
+						_003C_003E2__current = "Default thing def " + inventoryStockGroupDef.defaultThingDef.defName + " should be in thingDefs but not found.";
+						_003C_003E1__state = 2;
+						return true;
+					}
+					goto IL_00e8;
+					IL_0113:
+					if (inventoryStockGroupDef.min < 0 || inventoryStockGroupDef.max < 0)
+					{
+						_003C_003E2__current = "Min/max should be greater than zero.";
+						_003C_003E1__state = 4;
+						return true;
+					}
+					goto IL_0142;
+					IL_0142:
+					if (inventoryStockGroupDef.thingDefs.NullOrEmpty())
+					{
+						_003C_003E2__current = "thingDefs cannot be null or empty.";
+						_003C_003E1__state = 5;
+						return true;
+					}
+					break;
+					IL_00e8:
+					if (inventoryStockGroupDef.min > inventoryStockGroupDef.max)
+					{
+						_003C_003E2__current = "Min should be less than max.";
+						_003C_003E1__state = 3;
+						return true;
+					}
+					goto IL_0113;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
 
-		// Token: 0x04000D98 RID: 3480
-		public ThingDef defaultThingDef;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__6 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__6(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	public List<ThingDef> thingDefs;
+
+	public int min;
+
+	public int max = 3;
+
+	public ThingDef defaultThingDef;
+
+	public ThingDef DefaultThingDef => defaultThingDef ?? thingDefs.First();
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__6))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__6(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

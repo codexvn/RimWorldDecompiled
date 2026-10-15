@@ -1,41 +1,185 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class MusicTransitionDef : Def
 {
-	// Token: 0x02001AA0 RID: 6816
-	public class MusicTransitionDef : Def
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__5 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x0600989D RID: 39069 RVA: 0x002C830F File Offset: 0x002C650F
-		public override IEnumerable<string> ConfigErrors()
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public MusicTransitionDef _003C_003E4__this;
+
+		private IEnumerator<string> _003C_003E7__wrap1;
+
+		string IEnumerator<string>.Current
 		{
-			if (this.workerType != null && !typeof(MusicTransition).IsAssignableFrom(this.workerType))
+			[DebuggerHidden]
+			get
 			{
-				yield return "[def: " + this.defName + "] Music condition type is not a subclass of MusicTransition, type was: " + this.workerType.FullName;
+				return _003C_003E2__current;
 			}
-			foreach (string text in base.ConfigErrors())
-			{
-				yield return text;
-			}
-			IEnumerator<string> enumerator = null;
-			yield break;
-			yield break;
 		}
 
-		// Token: 0x04006700 RID: 26368
-		public Type workerType = typeof(MusicTransition);
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
 
-		// Token: 0x04006701 RID: 26369
-		public int priority = 100;
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__5(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
 
-		// Token: 0x04006702 RID: 26370
-		public MusicSequenceDef sequence;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 2)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
 
-		// Token: 0x04006703 RID: 26371
-		public MusicDangerRequirement dangerRequirement;
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				MusicTransitionDef musicTransitionDef = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					if (musicTransitionDef.workerType != null && !typeof(MusicTransition).IsAssignableFrom(musicTransitionDef.workerType))
+					{
+						_003C_003E2__current = $"[def: {musicTransitionDef.defName}] Music condition type is not a subclass of {"MusicTransition"}, type was: {musicTransitionDef.workerType.FullName}";
+						_003C_003E1__state = 1;
+						return true;
+					}
+					goto IL_00dc;
+				case 1:
+					_003C_003E1__state = -1;
+					goto IL_00dc;
+				case 2:
+					{
+						_003C_003E1__state = -3;
+						break;
+					}
+					IL_00dc:
+					_003C_003E7__wrap1 = ((Def)musicTransitionDef).ConfigErrors().GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				}
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					string current = _003C_003E7__wrap1.Current;
+					_003C_003E2__current = current;
+					_003C_003E1__state = 2;
+					return true;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = null;
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
 
-		// Token: 0x04006704 RID: 26372
-		public bool overridesInterruptions;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__5 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__5(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	public Type workerType = typeof(MusicTransition);
+
+	public int priority = 100;
+
+	public MusicSequenceDef sequence;
+
+	public MusicDangerRequirement dangerRequirement;
+
+	public bool overridesInterruptions;
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__5))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__5(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

@@ -1,199 +1,323 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompDeepDrill : ThingComp
 {
-	// Token: 0x02002C50 RID: 11344
-	public class CompDeepDrill : ThingComp
+	[CompilerGenerated]
+	private sealed class _003CCompGetGizmosExtra_003Ed__18 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700280D RID: 10253
-		// (get) Token: 0x0600FE5B RID: 65115 RVA: 0x0049BEF6 File Offset: 0x0049A0F6
-		[Obsolete("Use WorkPerPortionBase constant directly.")]
-		public static float WorkPerPortionCurrentDifficulty
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompDeepDrill _003C_003E4__this;
+
+		private IEnumerator<Gizmo> _003C_003E7__wrap1;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return 10000f;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700280E RID: 10254
-		// (get) Token: 0x0600FE5C RID: 65116 RVA: 0x0049BEFD File Offset: 0x0049A0FD
-		public float ProgressToNextPortionPercent
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.portionProgress / 10000f;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600FE5D RID: 65117 RVA: 0x0049BF0C File Offset: 0x0049A10C
-		public override void PostSpawnSetup(bool respawningAfterLoad)
+		[DebuggerHidden]
+		public _003CCompGetGizmosExtra_003Ed__18(int _003C_003E1__state)
 		{
-			this.powerComp = this.parent.TryGetComp<CompPowerTrader>();
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x0600FE5E RID: 65118 RVA: 0x0049BF1F File Offset: 0x0049A11F
-		public override void PostExposeData()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			Scribe_Values.Look<float>(ref this.portionProgress, "portionProgress", 0f, false);
-			Scribe_Values.Look<float>(ref this.portionYieldPct, "portionYieldPct", 0f, false);
-			Scribe_Values.Look<int>(ref this.lastUsedTick, "lastUsedTick", 0, false);
-		}
-
-		// Token: 0x0600FE5F RID: 65119 RVA: 0x0049BF60 File Offset: 0x0049A160
-		public void DrillWorkDone(Pawn driller, int delta)
-		{
-			float num = driller.GetStatValue(StatDefOf.DeepDrillingSpeed, true, -1) * (float)delta;
-			this.portionProgress += num;
-			this.portionYieldPct += num * driller.GetStatValue(StatDefOf.MiningYield, true, -1) / 10000f;
-			this.lastUsedTick = Find.TickManager.TicksGame;
-			if (this.portionProgress > 10000f)
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				this.TryProducePortion(this.portionYieldPct, driller);
-				this.portionProgress = 0f;
-				this.portionYieldPct = 0f;
-			}
-		}
-
-		// Token: 0x0600FE60 RID: 65120 RVA: 0x0049BFEE File Offset: 0x0049A1EE
-		public override void PostDeSpawn(Map map, DestroyMode mode = DestroyMode.Vanish)
-		{
-			this.portionProgress = 0f;
-			this.portionYieldPct = 0f;
-			this.lastUsedTick = -99999;
-		}
-
-		// Token: 0x0600FE61 RID: 65121 RVA: 0x0049C014 File Offset: 0x0049A214
-		private void TryProducePortion(float yieldPct, Pawn driller = null)
-		{
-			ThingDef thingDef;
-			int num;
-			IntVec3 intVec;
-			bool nextResource = this.GetNextResource(out thingDef, out num, out intVec);
-			if (thingDef == null)
-			{
-				return;
-			}
-			int num2 = Mathf.Min(num, thingDef.deepCountPerPortion);
-			if (nextResource)
-			{
-				this.parent.Map.deepResourceGrid.SetAt(intVec, thingDef, num - num2);
-			}
-			int stackCount = Mathf.Max(1, GenMath.RoundRandom((float)num2 * yieldPct));
-			Thing thing = ThingMaker.MakeThing(thingDef, null);
-			thing.stackCount = stackCount;
-			GenPlace.TryPlaceThing(thing, this.parent.InteractionCell, this.parent.Map, ThingPlaceMode.Near, null, (IntVec3 p) => p != this.parent.Position && p != this.parent.InteractionCell, null, 1);
-			if (driller != null)
-			{
-				Find.HistoryEventsManager.RecordEvent(new HistoryEvent(HistoryEventDefOf.Mined, driller.Named(HistoryEventArgsNames.Doer)), true);
-			}
-			if (nextResource && !this.ValuableResourcesPresent())
-			{
-				if (DeepDrillUtility.GetBaseResource(this.parent.Map, this.parent.Position) == null)
+				try
 				{
-					Messages.Message("DeepDrillExhaustedNoFallback".Translate(), this.parent, MessageTypeDefOf.TaskCompletion, true);
-					return;
 				}
-				Messages.Message("DeepDrillExhausted".Translate(Find.ActiveLanguageWorker.Pluralize(DeepDrillUtility.GetBaseResource(this.parent.Map, this.parent.Position).label, -1)), this.parent, MessageTypeDefOf.TaskCompletion, true);
-				for (int i = 0; i < 21; i++)
+				finally
 				{
-					IntVec3 c = intVec + GenRadial.RadialPattern[i];
-					if (c.InBounds(this.parent.Map))
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				CompDeepDrill CS_0024_003C_003E8__locals2 = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((ThingComp)CS_0024_003C_003E8__locals2).CompGetGizmosExtra().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 2:
 					{
-						ThingWithComps firstThingWithComp = c.GetFirstThingWithComp(this.parent.Map);
-						if (firstThingWithComp != null && !firstThingWithComp.GetComp<CompDeepDrill>().ValuableResourcesPresent())
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_006f:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Gizmo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (DebugSettings.ShowDevGizmos)
+					{
+						_003C_003E2__current = new Command_Action
 						{
-							firstThingWithComp.SetForbidden(true, true);
-						}
+							defaultLabel = "DEV: Produce portion (100% yield)",
+							action = delegate
+							{
+								CS_0024_003C_003E8__locals2.TryProducePortion(1f);
+							}
+						};
+						_003C_003E1__state = 2;
+						return true;
 					}
+					break;
 				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x0600FE62 RID: 65122 RVA: 0x0049C1E8 File Offset: 0x0049A3E8
-		private bool GetNextResource(out ThingDef resDef, out int countPresent, out IntVec3 cell)
+		bool IEnumerator.MoveNext()
 		{
-			return DeepDrillUtility.GetNextResource(this.parent.Position, this.parent.Map, out resDef, out countPresent, out cell);
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0600FE63 RID: 65123 RVA: 0x0049C208 File Offset: 0x0049A408
-		public bool CanDrillNow()
+		private void _003C_003Em__Finally1()
 		{
-			return (this.powerComp == null || this.powerComp.PowerOn) && (DeepDrillUtility.GetBaseResource(this.parent.Map, this.parent.Position) != null || this.ValuableResourcesPresent());
-		}
-
-		// Token: 0x0600FE64 RID: 65124 RVA: 0x0049C248 File Offset: 0x0049A448
-		public bool ValuableResourcesPresent()
-		{
-			ThingDef thingDef;
-			int num;
-			IntVec3 intVec;
-			return this.GetNextResource(out thingDef, out num, out intVec);
-		}
-
-		// Token: 0x0600FE65 RID: 65125 RVA: 0x0049C261 File Offset: 0x0049A461
-		public bool UsedLastTick()
-		{
-			return this.lastUsedTick >= Find.TickManager.TicksGame - 1;
-		}
-
-		// Token: 0x0600FE66 RID: 65126 RVA: 0x0049C27A File Offset: 0x0049A47A
-		public override IEnumerable<Gizmo> CompGetGizmosExtra()
-		{
-			foreach (Gizmo gizmo in base.CompGetGizmosExtra())
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				yield return gizmo;
+				_003C_003E7__wrap1.Dispose();
 			}
-			IEnumerator<Gizmo> enumerator = null;
-			if (DebugSettings.ShowDevGizmos)
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CCompGetGizmosExtra_003Ed__18 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				yield return new Command_Action
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CCompGetGizmosExtra_003Ed__18(0)
 				{
-					defaultLabel = "DEV: Produce portion (100% yield)",
-					action = delegate()
-					{
-						this.TryProducePortion(1f, null);
-					}
+					_003C_003E4__this = _003C_003E4__this
 				};
 			}
-			yield break;
-			yield break;
+			return result;
 		}
 
-		// Token: 0x0600FE67 RID: 65127 RVA: 0x0049C28C File Offset: 0x0049A48C
-		public override string CompInspectStringExtra()
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			if (!this.parent.Spawned)
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	private CompPowerTrader powerComp;
+
+	private float portionProgress;
+
+	private float portionYieldPct;
+
+	private int lastUsedTick = -99999;
+
+	private const float WorkPerPortionBase = 10000f;
+
+	[Obsolete("Use WorkPerPortionBase constant directly.")]
+	public static float WorkPerPortionCurrentDifficulty => 10000f;
+
+	public float ProgressToNextPortionPercent => portionProgress / 10000f;
+
+	public override void PostSpawnSetup(bool respawningAfterLoad)
+	{
+		powerComp = parent.TryGetComp<CompPowerTrader>();
+	}
+
+	public override void PostExposeData()
+	{
+		Scribe_Values.Look(ref portionProgress, "portionProgress", 0f);
+		Scribe_Values.Look(ref portionYieldPct, "portionYieldPct", 0f);
+		Scribe_Values.Look(ref lastUsedTick, "lastUsedTick", 0);
+	}
+
+	public void DrillWorkDone(Pawn driller, int delta)
+	{
+		float num = driller.GetStatValue(StatDefOf.DeepDrillingSpeed) * (float)delta;
+		portionProgress += num;
+		portionYieldPct += num * driller.GetStatValue(StatDefOf.MiningYield) / 10000f;
+		lastUsedTick = Find.TickManager.TicksGame;
+		if (portionProgress > 10000f)
+		{
+			TryProducePortion(portionYieldPct, driller);
+			portionProgress = 0f;
+			portionYieldPct = 0f;
+		}
+	}
+
+	public override void PostDeSpawn(Map map, DestroyMode mode = DestroyMode.Vanish)
+	{
+		portionProgress = 0f;
+		portionYieldPct = 0f;
+		lastUsedTick = -99999;
+	}
+
+	private void TryProducePortion(float yieldPct, Pawn driller = null)
+	{
+		ThingDef resDef;
+		int countPresent;
+		IntVec3 cell;
+		bool nextResource = GetNextResource(out resDef, out countPresent, out cell);
+		if (resDef == null)
+		{
+			return;
+		}
+		int num = Mathf.Min(countPresent, resDef.deepCountPerPortion);
+		if (nextResource)
+		{
+			parent.Map.deepResourceGrid.SetAt(cell, resDef, countPresent - num);
+		}
+		int stackCount = Mathf.Max(1, GenMath.RoundRandom((float)num * yieldPct));
+		Thing thing = ThingMaker.MakeThing(resDef);
+		thing.stackCount = stackCount;
+		GenPlace.TryPlaceThing(thing, parent.InteractionCell, parent.Map, ThingPlaceMode.Near, null, (IntVec3 p) => p != parent.Position && p != parent.InteractionCell, null);
+		if (driller != null)
+		{
+			Find.HistoryEventsManager.RecordEvent(new HistoryEvent(HistoryEventDefOf.Mined, driller.Named(HistoryEventArgsNames.Doer)));
+		}
+		if (!nextResource || ValuableResourcesPresent())
+		{
+			return;
+		}
+		if (DeepDrillUtility.GetBaseResource(parent.Map, parent.Position) == null)
+		{
+			Messages.Message("DeepDrillExhaustedNoFallback".Translate(), parent, MessageTypeDefOf.TaskCompletion);
+			return;
+		}
+		Messages.Message("DeepDrillExhausted".Translate(Find.ActiveLanguageWorker.Pluralize(DeepDrillUtility.GetBaseResource(parent.Map, parent.Position).label)), parent, MessageTypeDefOf.TaskCompletion);
+		for (int i = 0; i < 21; i++)
+		{
+			IntVec3 c = cell + GenRadial.RadialPattern[i];
+			if (c.InBounds(parent.Map))
 			{
-				return null;
+				ThingWithComps firstThingWithComp = c.GetFirstThingWithComp<CompDeepDrill>(parent.Map);
+				if (firstThingWithComp != null && !firstThingWithComp.GetComp<CompDeepDrill>().ValuableResourcesPresent())
+				{
+					firstThingWithComp.SetForbidden(value: true);
+				}
 			}
-			ThingDef thingDef;
-			int num;
-			IntVec3 intVec;
-			this.GetNextResource(out thingDef, out num, out intVec);
-			if (thingDef == null)
+		}
+	}
+
+	private bool GetNextResource(out ThingDef resDef, out int countPresent, out IntVec3 cell)
+	{
+		return DeepDrillUtility.GetNextResource(parent.Position, parent.Map, out resDef, out countPresent, out cell);
+	}
+
+	public bool CanDrillNow()
+	{
+		if (powerComp != null && !powerComp.PowerOn)
+		{
+			return false;
+		}
+		if (DeepDrillUtility.GetBaseResource(parent.Map, parent.Position) != null)
+		{
+			return true;
+		}
+		return ValuableResourcesPresent();
+	}
+
+	public bool ValuableResourcesPresent()
+	{
+		ThingDef resDef;
+		int countPresent;
+		IntVec3 cell;
+		return GetNextResource(out resDef, out countPresent, out cell);
+	}
+
+	public bool UsedLastTick()
+	{
+		return lastUsedTick >= Find.TickManager.TicksGame - 1;
+	}
+
+	[IteratorStateMachine(typeof(_003CCompGetGizmosExtra_003Ed__18))]
+	public override IEnumerable<Gizmo> CompGetGizmosExtra()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CCompGetGizmosExtra_003Ed__18(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override string CompInspectStringExtra()
+	{
+		if (parent.Spawned)
+		{
+			GetNextResource(out var resDef, out var _, out var _);
+			if (resDef == null)
 			{
 				return "DeepDrillNoResources".Translate();
 			}
-			return "ResourceBelow".Translate() + ": " + thingDef.LabelCap + "\n" + "ProgressToNextPortion".Translate() + ": " + this.ProgressToNextPortionPercent.ToStringPercent("F0");
+			return "ResourceBelow".Translate() + ": " + resDef.LabelCap + "\n" + "ProgressToNextPortion".Translate() + ": " + ProgressToNextPortionPercent.ToStringPercent("F0");
 		}
-
-		// Token: 0x0400A6B2 RID: 42674
-		private CompPowerTrader powerComp;
-
-		// Token: 0x0400A6B3 RID: 42675
-		private float portionProgress;
-
-		// Token: 0x0400A6B4 RID: 42676
-		private float portionYieldPct;
-
-		// Token: 0x0400A6B5 RID: 42677
-		private int lastUsedTick = -99999;
-
-		// Token: 0x0400A6B6 RID: 42678
-		private const float WorkPerPortionBase = 10000f;
+		return null;
 	}
 }

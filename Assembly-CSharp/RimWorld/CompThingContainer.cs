@@ -1,200 +1,409 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompThingContainer : ThingComp, IThingHolder, ISearchableContents
 {
-	// Token: 0x02002E8B RID: 11915
-	public class CompThingContainer : ThingComp, IThingHolder, ISearchableContents
+	[CompilerGenerated]
+	private sealed class _003CCompGetGizmosExtra_003Ed__27 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x17002B16 RID: 11030
-		// (get) Token: 0x06010C6B RID: 68715 RVA: 0x004D5032 File Offset: 0x004D3232
-		public CompProperties_ThingContainer Props
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompThingContainer _003C_003E4__this;
+
+		private IEnumerator<Thing> _003C_003E7__wrap1;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (CompProperties_ThingContainer)this.props;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002B17 RID: 11031
-		// (get) Token: 0x06010C6C RID: 68716 RVA: 0x004D503F File Offset: 0x004D323F
-		public Thing ContainedThing
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (!this.innerContainer.Any)
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CCompGetGizmosExtra_003Ed__27(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
 				{
-					return null;
 				}
-				return this.innerContainer[0];
-			}
-		}
-
-		// Token: 0x17002B18 RID: 11032
-		// (get) Token: 0x06010C6D RID: 68717 RVA: 0x004D505C File Offset: 0x004D325C
-		public bool Empty
-		{
-			get
-			{
-				return this.ContainedThing == null;
-			}
-		}
-
-		// Token: 0x17002B19 RID: 11033
-		// (get) Token: 0x06010C6E RID: 68718 RVA: 0x004D5067 File Offset: 0x004D3267
-		public int TotalStackCount
-		{
-			get
-			{
-				if (!this.Empty)
+				finally
 				{
-					return this.innerContainer.TotalStackCountOfDef(this.innerContainer[0].def);
+					_003C_003Em__Finally1();
 				}
-				return 0;
 			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x17002B1A RID: 11034
-		// (get) Token: 0x06010C6F RID: 68719 RVA: 0x004D508F File Offset: 0x004D328F
-		public bool Full
+		private bool MoveNext()
 		{
-			get
+			try
 			{
-				return !this.Empty && this.TotalStackCount >= this.Props.stackLimit;
-			}
-		}
-
-		// Token: 0x17002B1B RID: 11035
-		// (get) Token: 0x06010C70 RID: 68720 RVA: 0x004D50B1 File Offset: 0x004D32B1
-		public string LabelCapWithTotalCount
-		{
-			get
-			{
-				if (!this.Empty)
+				int num = _003C_003E1__state;
+				CompThingContainer compThingContainer = _003C_003E4__this;
+				switch (num)
 				{
-					return this.ContainedThing.LabelCapNoCount + " x" + this.TotalStackCount.ToStringCached();
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((IEnumerable<Thing>)compThingContainer.innerContainer).GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 1:
+					_003C_003E1__state = -3;
+					break;
 				}
+				while (_003C_003E7__wrap1.MoveNext())
+				{
+					Thing current = _003C_003E7__wrap1.Current;
+					Gizmo gizmo = Building.SelectContainedItemGizmo(compThingContainer.parent, current);
+					if (gizmo != null)
+					{
+						_003C_003E2__current = gizmo;
+						_003C_003E1__state = 1;
+						return true;
+					}
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = null;
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CCompGetGizmosExtra_003Ed__27 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CCompGetGizmosExtra_003Ed__27(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CSpecialDisplayStats_003Ed__23 : IEnumerable<StatDrawEntry>, IEnumerable, IEnumerator<StatDrawEntry>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private StatDrawEntry _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompThingContainer _003C_003E4__this;
+
+		StatDrawEntry IEnumerator<StatDrawEntry>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CSpecialDisplayStats_003Ed__23(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			CompThingContainer compThingContainer = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (!compThingContainer.Empty)
+				{
+					_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.Building, "Contents".Translate(), compThingContainer.LabelCapWithTotalCount, compThingContainer.LabelCapWithTotalCount, 1200, null, Gen.YieldSingle(new Dialog_InfoCard.Hyperlink(compThingContainer.ContainedThing)));
+					_003C_003E1__state = 1;
+					return true;
+				}
+				break;
+			case 1:
+				_003C_003E1__state = -1;
+				break;
+			}
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<StatDrawEntry> IEnumerable<StatDrawEntry>.GetEnumerator()
+		{
+			_003CSpecialDisplayStats_003Ed__23 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CSpecialDisplayStats_003Ed__23(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<StatDrawEntry>)this).GetEnumerator();
+		}
+	}
+
+	public ThingOwner innerContainer;
+
+	public CompProperties_ThingContainer Props => (CompProperties_ThingContainer)props;
+
+	public Thing ContainedThing
+	{
+		get
+		{
+			if (!innerContainer.Any)
+			{
 				return null;
 			}
+			return innerContainer[0];
 		}
+	}
 
-		// Token: 0x17002B1C RID: 11036
-		// (get) Token: 0x06010C71 RID: 68721 RVA: 0x004D50DD File Offset: 0x004D32DD
-		public ThingOwner SearchableContents
+	public bool Empty => ContainedThing == null;
+
+	public int TotalStackCount
+	{
+		get
 		{
-			get
+			if (!Empty)
 			{
-				return this.innerContainer;
+				return innerContainer.TotalStackCountOfDef(innerContainer[0].def);
 			}
+			return 0;
 		}
+	}
 
-		// Token: 0x06010C72 RID: 68722 RVA: 0x004D50E5 File Offset: 0x004D32E5
-		public CompThingContainer()
+	public bool Full
+	{
+		get
 		{
-			this.innerContainer = new ThingOwner<Thing>(this);
-		}
-
-		// Token: 0x06010C73 RID: 68723 RVA: 0x004D50F9 File Offset: 0x004D32F9
-		public virtual bool Accepts(ThingDef thingDef)
-		{
-			return this.Empty || (this.TotalStackCount < this.Props.stackLimit && thingDef == this.ContainedThing.def);
-		}
-
-		// Token: 0x06010C74 RID: 68724 RVA: 0x004D5128 File Offset: 0x004D3328
-		public virtual bool Accepts(Thing thing)
-		{
-			return this.Accepts(thing.def);
-		}
-
-		// Token: 0x06010C75 RID: 68725 RVA: 0x004D5136 File Offset: 0x004D3336
-		public override void CompTick()
-		{
-			this.innerContainer.DoTick();
-		}
-
-		// Token: 0x06010C76 RID: 68726 RVA: 0x004D5144 File Offset: 0x004D3344
-		public override void PostDraw()
-		{
-			if (!this.Empty && this.Props.drawContainedThing)
+			if (!Empty)
 			{
-				this.ContainedThing.DrawNowAt((this.parent.Position + this.Props.containedThingOffset.RotatedBy(this.parent.Rotation)).ToVector3ShiftedWithAltitude(AltitudeLayer.BuildingOnTop), false);
+				return TotalStackCount >= Props.stackLimit;
 			}
+			return false;
 		}
+	}
 
-		// Token: 0x06010C77 RID: 68727 RVA: 0x004D51A8 File Offset: 0x004D33A8
-		public override void DrawGUIOverlay()
+	public string LabelCapWithTotalCount
+	{
+		get
 		{
-			if (this.parent.Spawned && this.Props.drawStackLabel && !this.Empty && Find.CameraDriver.CurrentZoom == CameraZoomRange.Closest)
+			if (!Empty)
 			{
-				GenMapUI.DrawThingLabel(this.parent, this.TotalStackCount.ToStringCached());
+				return ContainedThing.LabelCapNoCount + " x" + TotalStackCount.ToStringCached();
 			}
+			return null;
 		}
+	}
 
-		// Token: 0x06010C78 RID: 68728 RVA: 0x004D51F9 File Offset: 0x004D33F9
-		public override void PostDeSpawn(Map map, DestroyMode mode = DestroyMode.Vanish)
+	public ThingOwner SearchableContents => innerContainer;
+
+	public CompThingContainer()
+	{
+		innerContainer = new ThingOwner<Thing>(this);
+	}
+
+	public virtual bool Accepts(ThingDef thingDef)
+	{
+		if (!Empty)
 		{
-			if (mode != DestroyMode.WillReplace)
+			if (TotalStackCount < Props.stackLimit)
 			{
-				this.innerContainer.TryDropAll(this.parent.Position, map, ThingPlaceMode.Near, null, null, true);
+				return thingDef == ContainedThing.def;
 			}
+			return false;
 		}
+		return true;
+	}
 
-		// Token: 0x06010C79 RID: 68729 RVA: 0x004D521B File Offset: 0x004D341B
-		public override string CompInspectStringExtra()
+	public virtual bool Accepts(Thing thing)
+	{
+		return Accepts(thing.def);
+	}
+
+	public override void CompTick()
+	{
+		innerContainer.DoTick();
+	}
+
+	public override void PostDraw()
+	{
+		if (!Empty && Props.drawContainedThing)
 		{
-			return "Contents".Translate() + ": " + (this.Empty ? "Nothing".Translate() : this.LabelCapWithTotalCount);
+			ContainedThing.DrawNowAt((parent.Position + Props.containedThingOffset.RotatedBy(parent.Rotation)).ToVector3ShiftedWithAltitude(AltitudeLayer.BuildingOnTop));
 		}
+	}
 
-		// Token: 0x06010C7A RID: 68730 RVA: 0x004D525A File Offset: 0x004D345A
-		public override IEnumerable<StatDrawEntry> SpecialDisplayStats()
+	public override void DrawGUIOverlay()
+	{
+		if (parent.Spawned && Props.drawStackLabel && !Empty && Find.CameraDriver.CurrentZoom == CameraZoomRange.Closest)
 		{
-			if (!this.Empty)
-			{
-				yield return new StatDrawEntry(StatCategoryDefOf.Building, "Contents".Translate(), this.LabelCapWithTotalCount, this.LabelCapWithTotalCount, 1200, null, Gen.YieldSingle<Dialog_InfoCard.Hyperlink>(new Dialog_InfoCard.Hyperlink(this.ContainedThing, -1, false)), false, false);
-			}
-			yield break;
+			GenMapUI.DrawThingLabel(parent, TotalStackCount.ToStringCached());
 		}
+	}
 
-		// Token: 0x06010C7B RID: 68731 RVA: 0x004D526A File Offset: 0x004D346A
-		public void GetChildHolders(List<IThingHolder> outChildren)
+	public override void PostDeSpawn(Map map, DestroyMode mode = DestroyMode.Vanish)
+	{
+		if (mode != DestroyMode.WillReplace)
 		{
-			ThingOwnerUtility.AppendThingHoldersFromThings(outChildren, this.GetDirectlyHeldThings());
+			innerContainer.TryDropAll(parent.Position, map, ThingPlaceMode.Near);
 		}
+	}
 
-		// Token: 0x06010C7C RID: 68732 RVA: 0x004D50DD File Offset: 0x004D32DD
-		public ThingOwner GetDirectlyHeldThings()
+	public override string CompInspectStringExtra()
+	{
+		return "Contents".Translate() + ": " + (Empty ? ((string)"Nothing".Translate()) : LabelCapWithTotalCount);
+	}
+
+	[IteratorStateMachine(typeof(_003CSpecialDisplayStats_003Ed__23))]
+	public override IEnumerable<StatDrawEntry> SpecialDisplayStats()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CSpecialDisplayStats_003Ed__23(-2)
 		{
-			return this.innerContainer;
-		}
+			_003C_003E4__this = this
+		};
+	}
 
-		// Token: 0x06010C7D RID: 68733 RVA: 0x004D5278 File Offset: 0x004D3478
-		public override void PostExposeData()
+	public void GetChildHolders(List<IThingHolder> outChildren)
+	{
+		ThingOwnerUtility.AppendThingHoldersFromThings(outChildren, GetDirectlyHeldThings());
+	}
+
+	public ThingOwner GetDirectlyHeldThings()
+	{
+		return innerContainer;
+	}
+
+	public override void PostExposeData()
+	{
+		base.PostExposeData();
+		Scribe_Deep.Look(ref innerContainer, "innerContainer", this);
+	}
+
+	[IteratorStateMachine(typeof(_003CCompGetGizmosExtra_003Ed__27))]
+	public override IEnumerable<Gizmo> CompGetGizmosExtra()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CCompGetGizmosExtra_003Ed__27(-2)
 		{
-			base.PostExposeData();
-			Scribe_Deep.Look<ThingOwner>(ref this.innerContainer, "innerContainer", new object[]
-			{
-				this
-			});
-		}
-
-		// Token: 0x06010C7E RID: 68734 RVA: 0x004D529A File Offset: 0x004D349A
-		public override IEnumerable<Gizmo> CompGetGizmosExtra()
-		{
-			foreach (Thing item in ((IEnumerable<Thing>)this.innerContainer))
-			{
-				Gizmo gizmo = Building.SelectContainedItemGizmo(this.parent, item);
-				if (gizmo != null)
-				{
-					yield return gizmo;
-				}
-			}
-			IEnumerator<Thing> enumerator = null;
-			yield break;
-			yield break;
-		}
-
-		// Token: 0x0400AEBA RID: 44730
-		public ThingOwner innerContainer;
+			_003C_003E4__this = this
+		};
 	}
 }

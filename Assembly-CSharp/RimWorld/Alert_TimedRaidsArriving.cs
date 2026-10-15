@@ -1,66 +1,58 @@
-﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Alert_TimedRaidsArriving : Alert
 {
-	// Token: 0x02003034 RID: 12340
-	public class Alert_TimedRaidsArriving : Alert
+	private List<TimedDetectionRaids> timedRaidsArrivingSoon = new List<TimedDetectionRaids>();
+
+	private List<GlobalTargetInfo> targets = new List<GlobalTargetInfo>();
+
+	private void CalculateTargets()
 	{
-		// Token: 0x0601158E RID: 71054 RVA: 0x004F9EE4 File Offset: 0x004F80E4
-		private void CalculateTargets()
+		timedRaidsArrivingSoon.Clear();
+		targets.Clear();
+		foreach (WorldObject allWorldObject in Find.WorldObjects.AllWorldObjects)
 		{
-			this.timedRaidsArrivingSoon.Clear();
-			this.targets.Clear();
-			foreach (WorldObject worldObject in Find.WorldObjects.AllWorldObjects)
+			foreach (WorldObjectComp allComp in allWorldObject.AllComps)
 			{
-				foreach (WorldObjectComp worldObjectComp in worldObject.AllComps)
+				if (allComp is TimedDetectionRaids timedDetectionRaids && ShouldAlertTimedRaids(timedDetectionRaids))
 				{
-					TimedDetectionRaids timedDetectionRaids = worldObjectComp as TimedDetectionRaids;
-					if (timedDetectionRaids != null && this.ShouldAlertTimedRaids(timedDetectionRaids))
+					timedRaidsArrivingSoon.Add(timedDetectionRaids);
+					if (!targets.Contains(allWorldObject))
 					{
-						this.timedRaidsArrivingSoon.Add(timedDetectionRaids);
-						if (!this.targets.Contains(worldObject))
-						{
-							this.targets.Add(worldObject);
-						}
+						targets.Add(allWorldObject);
 					}
 				}
 			}
 		}
+	}
 
-		// Token: 0x0601158F RID: 71055 RVA: 0x004F9FCC File Offset: 0x004F81CC
-		private bool ShouldAlertTimedRaids(TimedDetectionRaids timedDetectionRaids)
+	private bool ShouldAlertTimedRaids(TimedDetectionRaids timedDetectionRaids)
+	{
+		if (timedDetectionRaids.alertRaidsArrivingIn && timedDetectionRaids.DetectionCountdownStarted)
 		{
-			return timedDetectionRaids.alertRaidsArrivingIn && timedDetectionRaids.DetectionCountdownStarted && timedDetectionRaids.RaidsSentCount == 0;
+			return timedDetectionRaids.RaidsSentCount == 0;
 		}
+		return false;
+	}
 
-		// Token: 0x06011590 RID: 71056 RVA: 0x004F9FEC File Offset: 0x004F81EC
-		public override string GetLabel()
-		{
-			return "AlertTimedRaidsArrivingIn".Translate(this.timedRaidsArrivingSoon.MinBy((TimedDetectionRaids t) => t.TicksLeftToSendRaids).TicksLeftToSendRaids.ToStringTicksToPeriodVerbose(true, true));
-		}
+	public override string GetLabel()
+	{
+		return "AlertTimedRaidsArrivingIn".Translate(timedRaidsArrivingSoon.MinBy((TimedDetectionRaids t) => t.TicksLeftToSendRaids).TicksLeftToSendRaids.ToStringTicksToPeriodVerbose());
+	}
 
-		// Token: 0x06011591 RID: 71057 RVA: 0x004FA044 File Offset: 0x004F8244
-		public override TaggedString GetExplanation()
-		{
-			return "AlertTimedRaidsArrivingInDesc".Translate((from t in this.timedRaidsArrivingSoon
-			select "AlertTimedRaidsArrivingAt".Translate(t.parent.Label, t.TicksLeftToSendRaids.ToStringTicksToPeriodVerbose(true, true)).Resolve()).ToLineList("  - ", false));
-		}
+	public override TaggedString GetExplanation()
+	{
+		return "AlertTimedRaidsArrivingInDesc".Translate(timedRaidsArrivingSoon.Select((TimedDetectionRaids t) => "AlertTimedRaidsArrivingAt".Translate(t.parent.Label, t.TicksLeftToSendRaids.ToStringTicksToPeriodVerbose()).Resolve()).ToLineList("  - "));
+	}
 
-		// Token: 0x06011592 RID: 71058 RVA: 0x004FA095 File Offset: 0x004F8295
-		public override AlertReport GetReport()
-		{
-			this.CalculateTargets();
-			return AlertReport.CulpritsAre(this.targets);
-		}
-
-		// Token: 0x0400B3A8 RID: 45992
-		private List<TimedDetectionRaids> timedRaidsArrivingSoon = new List<TimedDetectionRaids>();
-
-		// Token: 0x0400B3A9 RID: 45993
-		private List<GlobalTargetInfo> targets = new List<GlobalTargetInfo>();
+	public override AlertReport GetReport()
+	{
+		CalculateTargets();
+		return AlertReport.CulpritsAre(targets);
 	}
 }

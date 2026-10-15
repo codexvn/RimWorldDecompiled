@@ -1,16 +1,20 @@
-﻿using System;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class ThinkNode_ConditionalOfPlayerFactionOrPlayerGuest : ThinkNode_Conditional
 {
-	// Token: 0x02001793 RID: 6035
-	public class ThinkNode_ConditionalOfPlayerFactionOrPlayerGuest : ThinkNode_Conditional
+	protected override bool Satisfied(Pawn pawn)
 	{
-		// Token: 0x06008D6F RID: 36207 RVA: 0x002A0B16 File Offset: 0x0029ED16
-		protected override bool Satisfied(Pawn pawn)
+		if (pawn.Faction != Faction.OfPlayer)
 		{
-			return pawn.Faction == Faction.OfPlayer || (pawn.HostFaction == Faction.OfPlayer && !pawn.guest.IsPrisoner);
+			if (pawn.HostFaction == Faction.OfPlayer)
+			{
+				return !pawn.guest.IsPrisoner;
+			}
+			return false;
 		}
+		return true;
 	}
 }

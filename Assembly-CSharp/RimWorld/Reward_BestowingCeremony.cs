@@ -1,84 +1,185 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.Grammar;
 
-namespace RimWorld
+namespace RimWorld;
+
+[StaticConstructorOnStartup]
+public class Reward_BestowingCeremony : Reward
 {
-	// Token: 0x0200367D RID: 13949
-	[StaticConstructorOnStartup]
-	public class Reward_BestowingCeremony : Reward
+	[CompilerGenerated]
+	private sealed class _003Cget_StackElements_003Ed__7 : IEnumerable<GenUI.AnonymousStackElement>, IEnumerable, IEnumerator<GenUI.AnonymousStackElement>, IEnumerator, IDisposable
 	{
-		// Token: 0x170031DE RID: 12766
-		// (get) Token: 0x060135C1 RID: 79297 RVA: 0x005C2D03 File Offset: 0x005C0F03
-		public override IEnumerable<GenUI.AnonymousStackElement> StackElements
+		private int _003C_003E1__state;
+
+		private GenUI.AnonymousStackElement _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Reward_BestowingCeremony _003C_003E4__this;
+
+		GenUI.AnonymousStackElement IEnumerator<GenUI.AnonymousStackElement>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.givePsylink)
-				{
-					yield return QuestPartUtility.GetStandardRewardStackElement("Reward_BestowingCeremony_Label".Translate(), Reward_BestowingCeremony.IconPsylink, () => this.GetDescription(default(RewardsGeneratorParams)).CapitalizeFirst() + ".", delegate()
-					{
-						Find.WindowStack.Add(new Dialog_InfoCard(HediffDefOf.PsychicAmplifier, null));
-					});
-				}
-				yield return QuestPartUtility.GetStandardRewardStackElement("Reward_Title_Label".Translate(this.titleName.Named("TITLE")), this.awardingFaction.def.FactionIcon, () => "Reward_Title".Translate(this.targetPawnName.Named("PAWNNAME"), this.titleName.Named("TITLE"), this.awardingFaction.Named("FACTION")).Resolve() + ".", delegate()
-				{
-					if (this.royalTitle != null)
-					{
-						Find.WindowStack.Add(new Dialog_InfoCard(this.royalTitle, this.awardingFaction, null));
-					}
-				});
-				yield break;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x060135C2 RID: 79298 RVA: 0x00066B11 File Offset: 0x00064D11
-		public override void InitFromValue(float rewardValue, RewardsGeneratorParams parms, out float valueActuallyUsed)
+		object IEnumerator.Current
 		{
-			throw new NotImplementedException();
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x060135C3 RID: 79299 RVA: 0x00066B11 File Offset: 0x00064D11
-		public override IEnumerable<QuestPart> GenerateQuestParts(int index, RewardsGeneratorParams parms, string customLetterLabel, string customLetterText, RulePack customLetterLabelRules, RulePack customLetterTextRules)
+		[DebuggerHidden]
+		public _003Cget_StackElements_003Ed__7(int _003C_003E1__state)
 		{
-			throw new NotImplementedException();
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x060135C4 RID: 79300 RVA: 0x005C2D14 File Offset: 0x005C0F14
-		public override string GetDescription(RewardsGeneratorParams parms)
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			return "Reward_BestowingCeremony".Translate(this.targetPawnName.Named("PAWNNAME")).Resolve();
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x060135C5 RID: 79301 RVA: 0x005C2D44 File Offset: 0x005C0F44
-		public override void ExposeData()
+		private bool MoveNext()
 		{
-			base.ExposeData();
-			Scribe_Values.Look<string>(ref this.targetPawnName, "targetPawnName", null, false);
-			Scribe_Values.Look<string>(ref this.titleName, "titleName", null, false);
-			Scribe_Values.Look<bool>(ref this.givePsylink, "givePsylink", false, false);
-			Scribe_References.Look<Faction>(ref this.awardingFaction, "awardingFaction", false);
-			Scribe_Defs.Look<RoyalTitleDef>(ref this.royalTitle, "royalTitle");
+			int num = _003C_003E1__state;
+			Reward_BestowingCeremony CS_0024_003C_003E8__locals10 = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (CS_0024_003C_003E8__locals10.givePsylink)
+				{
+					_003C_003E2__current = QuestPartUtility.GetStandardRewardStackElement("Reward_BestowingCeremony_Label".Translate(), IconPsylink, () => CS_0024_003C_003E8__locals10.GetDescription(default(RewardsGeneratorParams)).CapitalizeFirst() + ".", delegate
+					{
+						Find.WindowStack.Add(new Dialog_InfoCard(HediffDefOf.PsychicAmplifier));
+					});
+					_003C_003E1__state = 1;
+					return true;
+				}
+				goto IL_008b;
+			case 1:
+				_003C_003E1__state = -1;
+				goto IL_008b;
+			case 2:
+				{
+					_003C_003E1__state = -1;
+					return false;
+				}
+				IL_008b:
+				_003C_003E2__current = QuestPartUtility.GetStandardRewardStackElement("Reward_Title_Label".Translate(CS_0024_003C_003E8__locals10.titleName.Named("TITLE")), CS_0024_003C_003E8__locals10.awardingFaction.def.FactionIcon, () => "Reward_Title".Translate(CS_0024_003C_003E8__locals10.targetPawnName.Named("PAWNNAME"), CS_0024_003C_003E8__locals10.titleName.Named("TITLE"), CS_0024_003C_003E8__locals10.awardingFaction.Named("FACTION")).Resolve() + ".", delegate
+				{
+					if (CS_0024_003C_003E8__locals10.royalTitle != null)
+					{
+						Find.WindowStack.Add(new Dialog_InfoCard(CS_0024_003C_003E8__locals10.royalTitle, CS_0024_003C_003E8__locals10.awardingFaction));
+					}
+				});
+				_003C_003E1__state = 2;
+				return true;
+			}
 		}
 
-		// Token: 0x0400D6C4 RID: 54980
-		private static readonly Texture2D IconPsylink = ContentFinder<Texture2D>.Get("Things/Item/Special/PsylinkNeuroformer", true);
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x0400D6C5 RID: 54981
-		public string targetPawnName;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x0400D6C6 RID: 54982
-		public string titleName;
+		[DebuggerHidden]
+		IEnumerator<GenUI.AnonymousStackElement> IEnumerable<GenUI.AnonymousStackElement>.GetEnumerator()
+		{
+			_003Cget_StackElements_003Ed__7 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_StackElements_003Ed__7(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x0400D6C7 RID: 54983
-		public RoyalTitleDef royalTitle;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<GenUI.AnonymousStackElement>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x0400D6C8 RID: 54984
-		public bool givePsylink;
+	private static readonly Texture2D IconPsylink = ContentFinder<Texture2D>.Get("Things/Item/Special/PsylinkNeuroformer");
 
-		// Token: 0x0400D6C9 RID: 54985
-		public Faction awardingFaction;
+	public string targetPawnName;
+
+	public string titleName;
+
+	public RoyalTitleDef royalTitle;
+
+	public bool givePsylink;
+
+	public Faction awardingFaction;
+
+	public override IEnumerable<GenUI.AnonymousStackElement> StackElements
+	{
+		[IteratorStateMachine(typeof(_003Cget_StackElements_003Ed__7))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_StackElements_003Ed__7(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public override void InitFromValue(float rewardValue, RewardsGeneratorParams parms, out float valueActuallyUsed)
+	{
+		throw new NotImplementedException();
+	}
+
+	public override IEnumerable<QuestPart> GenerateQuestParts(int index, RewardsGeneratorParams parms, string customLetterLabel, string customLetterText, RulePack customLetterLabelRules, RulePack customLetterTextRules)
+	{
+		throw new NotImplementedException();
+	}
+
+	public override string GetDescription(RewardsGeneratorParams parms)
+	{
+		return "Reward_BestowingCeremony".Translate(targetPawnName.Named("PAWNNAME")).Resolve();
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref targetPawnName, "targetPawnName");
+		Scribe_Values.Look(ref titleName, "titleName");
+		Scribe_Values.Look(ref givePsylink, "givePsylink", defaultValue: false);
+		Scribe_References.Look(ref awardingFaction, "awardingFaction");
+		Scribe_Defs.Look(ref royalTitle, "royalTitle");
 	}
 }

@@ -1,152 +1,260 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse.Grammar;
 
-namespace Verse
+namespace Verse;
+
+public class BattleLogEntry_Event : LogEntry
 {
-	// Token: 0x02000326 RID: 806
-	public class BattleLogEntry_Event : LogEntry
+	[CompilerGenerated]
+	private sealed class _003CGetConcerns_003Ed__10 : IEnumerable<Thing>, IEnumerable, IEnumerator<Thing>, IEnumerator, IDisposable
 	{
-		// Token: 0x170003DF RID: 991
-		// (get) Token: 0x06001417 RID: 5143 RVA: 0x0005EA1F File Offset: 0x0005CC1F
-		private string SubjectName
+		private int _003C_003E1__state;
+
+		private Thing _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public BattleLogEntry_Event _003C_003E4__this;
+
+		Thing IEnumerator<Thing>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.subjectPawn == null)
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetConcerns_003Ed__10(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			BattleLogEntry_Event battleLogEntry_Event = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (battleLogEntry_Event.subjectPawn != null)
 				{
-					return "null";
+					_003C_003E2__current = battleLogEntry_Event.subjectPawn;
+					_003C_003E1__state = 1;
+					return true;
 				}
-				return this.subjectPawn.LabelShort;
+				goto IL_004d;
+			case 1:
+				_003C_003E1__state = -1;
+				goto IL_004d;
+			case 2:
+				{
+					_003C_003E1__state = -1;
+					break;
+				}
+				IL_004d:
+				if (battleLogEntry_Event.initiatorPawn != null)
+				{
+					_003C_003E2__current = battleLogEntry_Event.initiatorPawn;
+					_003C_003E1__state = 2;
+					return true;
+				}
+				break;
 			}
+			return false;
 		}
 
-		// Token: 0x06001418 RID: 5144 RVA: 0x0005EA3A File Offset: 0x0005CC3A
-		public BattleLogEntry_Event() : base(null)
+		bool IEnumerator.MoveNext()
 		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x06001419 RID: 5145 RVA: 0x0005EA44 File Offset: 0x0005CC44
-		public BattleLogEntry_Event(Thing subject, RulePackDef eventDef, Thing initiator) : base(null)
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			if (subject is Pawn)
-			{
-				this.subjectPawn = (subject as Pawn);
-			}
-			else if (subject != null)
-			{
-				this.subjectThing = subject.def;
-			}
-			if (initiator is Pawn)
-			{
-				this.initiatorPawn = (initiator as Pawn);
-			}
-			else if (initiator != null)
-			{
-				this.initiatorThing = initiator.def;
-			}
-			this.eventDef = eventDef;
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x0600141A RID: 5146 RVA: 0x0005EAA9 File Offset: 0x0005CCA9
-		public override bool Concerns(Thing t)
+		[DebuggerHidden]
+		IEnumerator<Thing> IEnumerable<Thing>.GetEnumerator()
 		{
-			return t == this.subjectPawn || t == this.initiatorPawn;
-		}
-
-		// Token: 0x0600141B RID: 5147 RVA: 0x0005EABF File Offset: 0x0005CCBF
-		public override IEnumerable<Thing> GetConcerns()
-		{
-			if (this.subjectPawn != null)
+			_003CGetConcerns_003Ed__10 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				yield return this.subjectPawn;
+				_003C_003E1__state = 0;
+				result = this;
 			}
-			if (this.initiatorPawn != null)
+			else
 			{
-				yield return this.initiatorPawn;
-			}
-			yield break;
-		}
-
-		// Token: 0x0600141C RID: 5148 RVA: 0x0005EACF File Offset: 0x0005CCCF
-		public override bool CanBeClickedFromPOV(Thing pov)
-		{
-			return (pov == this.subjectPawn && CameraJumper.CanJump(this.initiatorPawn)) || (pov == this.initiatorPawn && CameraJumper.CanJump(this.subjectPawn));
-		}
-
-		// Token: 0x0600141D RID: 5149 RVA: 0x0005EB09 File Offset: 0x0005CD09
-		public override void ClickedFromPOV(Thing pov)
-		{
-			if (pov == this.subjectPawn)
-			{
-				CameraJumper.TryJumpAndSelect(this.initiatorPawn, CameraJumper.MovementMode.Pan);
-				return;
-			}
-			if (pov == this.initiatorPawn)
-			{
-				CameraJumper.TryJumpAndSelect(this.subjectPawn, CameraJumper.MovementMode.Pan);
-				return;
-			}
-			throw new NotImplementedException();
-		}
-
-		// Token: 0x0600141E RID: 5150 RVA: 0x0005EB48 File Offset: 0x0005CD48
-		protected override GrammarRequest GenerateGrammarRequest()
-		{
-			GrammarRequest result = base.GenerateGrammarRequest();
-			result.Includes.Add(this.eventDef);
-			if (this.subjectPawn != null)
-			{
-				result.Rules.AddRange(GrammarUtility.RulesForPawn("SUBJECT", this.subjectPawn, result.Constants, true, true));
-			}
-			else if (this.subjectThing != null)
-			{
-				result.Rules.AddRange(GrammarUtility.RulesForDef("SUBJECT", this.subjectThing));
-			}
-			if (this.initiatorPawn != null)
-			{
-				result.Rules.AddRange(GrammarUtility.RulesForPawn("INITIATOR", this.initiatorPawn, result.Constants, true, true));
-			}
-			else if (this.initiatorThing != null)
-			{
-				result.Rules.AddRange(GrammarUtility.RulesForDef("INITIATOR", this.initiatorThing));
+				result = new _003CGetConcerns_003Ed__10(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
 			return result;
 		}
 
-		// Token: 0x0600141F RID: 5151 RVA: 0x0005EC18 File Offset: 0x0005CE18
-		public override void ExposeData()
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			base.ExposeData();
-			Scribe_Defs.Look<RulePackDef>(ref this.eventDef, "eventDef");
-			Scribe_References.Look<Pawn>(ref this.subjectPawn, "subjectPawn", true);
-			Scribe_Defs.Look<ThingDef>(ref this.subjectThing, "subjectThing");
-			Scribe_References.Look<Pawn>(ref this.initiatorPawn, "initiatorPawn", true);
-			Scribe_Defs.Look<ThingDef>(ref this.initiatorThing, "initiatorThing");
+			return ((IEnumerable<Thing>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x06001420 RID: 5152 RVA: 0x0005EC7D File Offset: 0x0005CE7D
-		public override string ToString()
+	protected RulePackDef eventDef;
+
+	protected Pawn subjectPawn;
+
+	protected ThingDef subjectThing;
+
+	protected Pawn initiatorPawn;
+
+	protected ThingDef initiatorThing;
+
+	private string SubjectName
+	{
+		get
 		{
-			string defName = this.eventDef.defName;
-			string str = ": ";
-			Pawn pawn = this.subjectPawn;
-			return defName + str + ((pawn != null) ? pawn.ToString() : null);
+			if (subjectPawn == null)
+			{
+				return "null";
+			}
+			return subjectPawn.LabelShort;
 		}
+	}
 
-		// Token: 0x04001300 RID: 4864
-		protected RulePackDef eventDef;
+	public BattleLogEntry_Event()
+	{
+	}
 
-		// Token: 0x04001301 RID: 4865
-		protected Pawn subjectPawn;
+	public BattleLogEntry_Event(Thing subject, RulePackDef eventDef, Thing initiator)
+	{
+		if (subject is Pawn)
+		{
+			subjectPawn = subject as Pawn;
+		}
+		else if (subject != null)
+		{
+			subjectThing = subject.def;
+		}
+		if (initiator is Pawn)
+		{
+			initiatorPawn = initiator as Pawn;
+		}
+		else if (initiator != null)
+		{
+			initiatorThing = initiator.def;
+		}
+		this.eventDef = eventDef;
+	}
 
-		// Token: 0x04001302 RID: 4866
-		protected ThingDef subjectThing;
+	public override bool Concerns(Thing t)
+	{
+		if (t != subjectPawn)
+		{
+			return t == initiatorPawn;
+		}
+		return true;
+	}
 
-		// Token: 0x04001303 RID: 4867
-		protected Pawn initiatorPawn;
+	[IteratorStateMachine(typeof(_003CGetConcerns_003Ed__10))]
+	public override IEnumerable<Thing> GetConcerns()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetConcerns_003Ed__10(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
 
-		// Token: 0x04001304 RID: 4868
-		protected ThingDef initiatorThing;
+	public override bool CanBeClickedFromPOV(Thing pov)
+	{
+		if (pov != subjectPawn || !CameraJumper.CanJump(initiatorPawn))
+		{
+			if (pov == initiatorPawn)
+			{
+				return CameraJumper.CanJump(subjectPawn);
+			}
+			return false;
+		}
+		return true;
+	}
+
+	public override void ClickedFromPOV(Thing pov)
+	{
+		if (pov == subjectPawn)
+		{
+			CameraJumper.TryJumpAndSelect(initiatorPawn);
+			return;
+		}
+		if (pov == initiatorPawn)
+		{
+			CameraJumper.TryJumpAndSelect(subjectPawn);
+			return;
+		}
+		throw new NotImplementedException();
+	}
+
+	protected override GrammarRequest GenerateGrammarRequest()
+	{
+		GrammarRequest result = base.GenerateGrammarRequest();
+		result.Includes.Add(eventDef);
+		if (subjectPawn != null)
+		{
+			result.Rules.AddRange(GrammarUtility.RulesForPawn("SUBJECT", subjectPawn, result.Constants));
+		}
+		else if (subjectThing != null)
+		{
+			result.Rules.AddRange(GrammarUtility.RulesForDef("SUBJECT", subjectThing));
+		}
+		if (initiatorPawn != null)
+		{
+			result.Rules.AddRange(GrammarUtility.RulesForPawn("INITIATOR", initiatorPawn, result.Constants));
+		}
+		else if (initiatorThing != null)
+		{
+			result.Rules.AddRange(GrammarUtility.RulesForDef("INITIATOR", initiatorThing));
+		}
+		return result;
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Defs.Look(ref eventDef, "eventDef");
+		Scribe_References.Look(ref subjectPawn, "subjectPawn", saveDestroyedThings: true);
+		Scribe_Defs.Look(ref subjectThing, "subjectThing");
+		Scribe_References.Look(ref initiatorPawn, "initiatorPawn", saveDestroyedThings: true);
+		Scribe_Defs.Look(ref initiatorThing, "initiatorThing");
+	}
+
+	public override string ToString()
+	{
+		return eventDef.defName + ": " + subjectPawn;
 	}
 }

@@ -1,461 +1,547 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class ScenPart_PlanetLayer : ScenPart
 {
-	// Token: 0x020028C8 RID: 10440
-	public class ScenPart_PlanetLayer : ScenPart
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__12 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x170022B3 RID: 8883
-		// (get) Token: 0x0600E450 RID: 58448 RVA: 0x0042AF35 File Offset: 0x00429135
-		public PlanetLayerSettings Settings
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public ScenPart_PlanetLayer _003C_003E4__this;
+
+		private IEnumerator<string> _003C_003E7__wrap1;
+
+		string IEnumerator<string>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.settingsDef.settings;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600E451 RID: 58449 RVA: 0x0042AF42 File Offset: 0x00429142
-		public override bool Valid()
+		object IEnumerator.Current
 		{
-			return base.Valid() && this.settingsDef != null;
-		}
-
-		// Token: 0x170022B4 RID: 8884
-		// (get) Token: 0x0600E452 RID: 58450 RVA: 0x000028E7 File Offset: 0x00000AE7
-		protected virtual bool CanEdit
-		{
+			[DebuggerHidden]
 			get
 			{
-				return true;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600E453 RID: 58451 RVA: 0x0042AF58 File Offset: 0x00429158
-		public override void ExposeData()
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__12(int _003C_003E1__state)
 		{
-			base.ExposeData();
-			Scribe_Defs.Look<PlanetLayerDef>(ref this.layer, "layer");
-			Scribe_Defs.Look<PlanetLayerSettingsDef>(ref this.settingsDef, "settingsDef");
-			Scribe_Values.Look<bool>(ref this.hide, "hide", false, false);
-			Scribe_Values.Look<string>(ref this.tag, "tag", null, false);
-			Scribe_Collections.Look<LayerConnection>(ref this.connections, "connections", LookMode.Deep, Array.Empty<object>());
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				if (this.layer == null)
+				try
 				{
-					Log.Error("ScenPart has null layer after loading.");
 				}
-				if (this.settingsDef == null)
+				finally
 				{
-					Log.Error("ScenPart has null playet layer settings def.");
+					_003C_003Em__Finally1();
 				}
 			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x0600E454 RID: 58452 RVA: 0x0042AFF4 File Offset: 0x004291F4
-		public override int GetHashCode()
+		private bool MoveNext()
 		{
-			HashCode hashCode = default(HashCode);
-			hashCode.Add<int>(base.GetHashCode());
-			hashCode.Add<int>((this.layer != null) ? this.layer.GetHashCode() : 0);
-			hashCode.Add<int>((this.settingsDef != null) ? this.settingsDef.GetHashCode() : 0);
-			hashCode.Add<string>(this.tag);
-			foreach (LayerConnection layerConnection in this.connections)
+			try
 			{
-				hashCode.Add<int>(layerConnection.GetHashCode());
-			}
-			return hashCode.ToHashCode();
-		}
-
-		// Token: 0x0600E455 RID: 58453 RVA: 0x0042B0B0 File Offset: 0x004292B0
-		public override IEnumerable<string> ConfigErrors()
-		{
-			foreach (string text in base.ConfigErrors())
-			{
-				yield return text;
-			}
-			IEnumerator<string> enumerator = null;
-			if (string.IsNullOrEmpty(this.tag))
-			{
-				yield return "Layer tag empty";
-			}
-			yield break;
-			yield break;
-		}
-
-		// Token: 0x0600E456 RID: 58454 RVA: 0x0042B0C0 File Offset: 0x004292C0
-		public override void DoEditInterface(Listing_ScenEdit listing)
-		{
-			if (this.hide)
-			{
-				return;
-			}
-			this.ClearInvalidConnections();
-			Rect rect = listing.GetScenPartRect(this, this.lastHeight).TopPartPixels(ScenPart.RowHeight);
-			float yMin = rect.yMin;
-			this.DoTypeRow(ref rect);
-			this.DoTagRow(ref rect);
-			this.DoSettings(ref rect);
-			this.DoConnections(ref rect);
-			this.lastHeight = rect.yMax - yMin + 4f;
-		}
-
-		// Token: 0x0600E457 RID: 58455 RVA: 0x0042B134 File Offset: 0x00429334
-		private bool IsTagValid()
-		{
-			if (string.IsNullOrEmpty(this.tag))
-			{
+				int num = _003C_003E1__state;
+				ScenPart_PlanetLayer scenPart_PlanetLayer = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((ScenPart)scenPart_PlanetLayer).ConfigErrors().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_006f:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (string.IsNullOrEmpty(scenPart_PlanetLayer.tag))
+					{
+						_003C_003E2__current = "Layer tag empty";
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
+				}
 				return false;
 			}
-			using (List<string>.Enumerator enumerator = this.GetAllTags().GetEnumerator())
+			catch
 			{
-				while (enumerator.MoveNext())
-				{
-					if (enumerator.Current == this.tag)
-					{
-						return false;
-					}
-				}
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
-			return true;
 		}
 
-		// Token: 0x0600E458 RID: 58456 RVA: 0x00002501 File Offset: 0x00000701
-		public override bool TryMerge(ScenPart other)
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__12 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__12(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	public PlanetLayerDef layer;
+
+	public PlanetLayerSettingsDef settingsDef;
+
+	public bool hide;
+
+	public string tag;
+
+	public List<LayerConnection> connections = new List<LayerConnection>();
+
+	private float lastHeight;
+
+	private static readonly List<string> tmpTags = new List<string>();
+
+	private string[] vBuffer;
+
+	private string radiusBuffer;
+
+	private string extraCameraAltitudeBuffer;
+
+	private string backgroundWorldCameraOffsetBuffer;
+
+	private string backgroundWorldCameraParallaxBuffer;
+
+	private string subdivisionsBuffer;
+
+	private string viewAngleBuffer;
+
+	private string numericBuffer;
+
+	public PlanetLayerSettings Settings => settingsDef.settings;
+
+	protected virtual bool CanEdit => true;
+
+	public override bool Valid()
+	{
+		if (base.Valid())
+		{
+			return settingsDef != null;
+		}
+		return false;
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Defs.Look(ref layer, "layer");
+		Scribe_Defs.Look(ref settingsDef, "settingsDef");
+		Scribe_Values.Look(ref hide, "hide", defaultValue: false);
+		Scribe_Values.Look(ref tag, "tag");
+		Scribe_Collections.Look(ref connections, "connections", LookMode.Deep);
+		if (Scribe.mode == LoadSaveMode.PostLoadInit)
+		{
+			if (layer == null)
+			{
+				Log.Error("ScenPart has null layer after loading.");
+			}
+			if (settingsDef == null)
+			{
+				Log.Error("ScenPart has null playet layer settings def.");
+			}
+		}
+	}
+
+	public override int GetHashCode()
+	{
+		HashCode hashCode = default(HashCode);
+		hashCode.Add(base.GetHashCode());
+		hashCode.Add((layer != null) ? layer.GetHashCode() : 0);
+		hashCode.Add((settingsDef != null) ? settingsDef.GetHashCode() : 0);
+		hashCode.Add(tag);
+		foreach (LayerConnection connection in connections)
+		{
+			hashCode.Add(connection.GetHashCode());
+		}
+		return hashCode.ToHashCode();
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__12))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__12(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override void DoEditInterface(Listing_ScenEdit listing)
+	{
+		if (!hide)
+		{
+			ClearInvalidConnections();
+			Rect row = listing.GetScenPartRect(this, lastHeight).TopPartPixels(ScenPart.RowHeight);
+			float yMin = row.yMin;
+			DoTypeRow(ref row);
+			DoTagRow(ref row);
+			DoSettings(ref row);
+			DoConnections(ref row);
+			lastHeight = row.yMax - yMin + 4f;
+		}
+	}
+
+	private bool IsTagValid()
+	{
+		if (string.IsNullOrEmpty(tag))
 		{
 			return false;
 		}
-
-		// Token: 0x0600E459 RID: 58457 RVA: 0x0042B1A4 File Offset: 0x004293A4
-		public override bool CanCoexistWith(ScenPart other)
+		foreach (string allTag in GetAllTags())
 		{
-			ScenPart_PlanetLayer scenPart_PlanetLayer = other as ScenPart_PlanetLayer;
-			return scenPart_PlanetLayer == null || !(scenPart_PlanetLayer.tag == this.tag);
-		}
-
-		// Token: 0x0600E45A RID: 58458 RVA: 0x0042B1D4 File Offset: 0x004293D4
-		private List<string> GetAllTags()
-		{
-			ScenPart_PlanetLayer.tmpTags.Clear();
-			foreach (ScenPart scenPart in Find.Scenario.AllParts)
+			if (allTag == tag)
 			{
-				if (scenPart != this)
-				{
-					ScenPart_PlanetLayer scenPart_PlanetLayer = scenPart as ScenPart_PlanetLayer;
-					if (scenPart_PlanetLayer != null && !string.IsNullOrEmpty(scenPart_PlanetLayer.tag))
-					{
-						ScenPart_PlanetLayer.tmpTags.Add(scenPart_PlanetLayer.tag);
-					}
-				}
-			}
-			return ScenPart_PlanetLayer.tmpTags;
-		}
-
-		// Token: 0x0600E45B RID: 58459 RVA: 0x0042B258 File Offset: 0x00429458
-		private void DoLabel(Rect row, string label)
-		{
-			Rect rect = row;
-			rect.x -= rect.width + 5f;
-			using (new TextBlock(TextAnchor.MiddleRight))
-			{
-				Widgets.Label(rect, label);
+				return false;
 			}
 		}
+		return true;
+	}
 
-		// Token: 0x0600E45C RID: 58460 RVA: 0x0042B2B4 File Offset: 0x004294B4
-		private void DoTypeRow(ref Rect row)
+	public override bool TryMerge(ScenPart other)
+	{
+		return false;
+	}
+
+	public override bool CanCoexistWith(ScenPart other)
+	{
+		if (other is ScenPart_PlanetLayer scenPart_PlanetLayer && scenPart_PlanetLayer.tag == tag)
 		{
-			using (new TextBlock(this.CanEdit ? Color.white : Color.gray))
+			return false;
+		}
+		return true;
+	}
+
+	private List<string> GetAllTags()
+	{
+		tmpTags.Clear();
+		foreach (ScenPart allPart in Find.Scenario.AllParts)
+		{
+			if (allPart != this && allPart is ScenPart_PlanetLayer scenPart_PlanetLayer && !string.IsNullOrEmpty(scenPart_PlanetLayer.tag))
 			{
-				Rect rect = row;
-				PlanetLayerDef planetLayerDef = this.layer;
-				if (Widgets.ButtonText(rect, (planetLayerDef != null) ? planetLayerDef.LabelCap : "ScenPart_SelectQuestDef".Translate(), true, true, this.CanEdit, null))
-				{
-					FloatMenuUtility.MakeMenu<PlanetLayerDef>(DefDatabase<PlanetLayerDef>.AllDefs, (PlanetLayerDef id) => id.LabelCap, (PlanetLayerDef selected) => delegate()
-					{
-						this.layer = selected;
-					});
-				}
-				row.y += ScenPart.RowHeight + 4f;
+				tmpTags.Add(scenPart_PlanetLayer.tag);
 			}
 		}
+		return tmpTags;
+	}
 
-		// Token: 0x0600E45D RID: 58461 RVA: 0x0042B388 File Offset: 0x00429588
-		private void DoTagRow(ref Rect row)
+	private void DoLabel(Rect row, string label)
+	{
+		Rect rect = row;
+		rect.x -= rect.width + 5f;
+		using (new TextBlock(TextAnchor.MiddleRight))
 		{
-			string text = this.tag;
-			this.tag = Widgets.TextArea(row, this.tag, false);
-			if (!this.IsTagValid())
-			{
-				using (new TextBlock(ColorLibrary.RedReadable))
-				{
-					this.DoLabel(row, "ScenPart_PlanetLayerTag_Error".Translate());
-					goto IL_79;
-				}
-			}
-			this.DoLabel(row, "ScenPart_PlanetLayerTag".Translate());
-			IL_79:
-			if (text != this.tag && !string.IsNullOrEmpty(this.tag))
-			{
-				foreach (ScenPart scenPart in Find.Scenario.AllParts)
-				{
-					if (scenPart != this)
-					{
-						ScenPart_PlanetLayer scenPart_PlanetLayer = scenPart as ScenPart_PlanetLayer;
-						if (scenPart_PlanetLayer != null)
-						{
-							foreach (LayerConnection layerConnection in scenPart_PlanetLayer.connections)
-							{
-								if (layerConnection.tag == text)
-								{
-									layerConnection.tag = this.tag;
-								}
-							}
-						}
-					}
-				}
-			}
-			row.y += ScenPart.RowHeight + 4f;
+			Widgets.Label(rect, label);
 		}
+	}
 
-		// Token: 0x0600E45E RID: 58462 RVA: 0x0042B4FC File Offset: 0x004296FC
-		private void DoSettings(ref Rect row)
+	private void DoTypeRow(ref Rect row)
+	{
+		TextBlock textBlock = new TextBlock(CanEdit ? Color.white : Color.gray);
+		try
 		{
-			this.Seperator(ref row);
-			this.DoLabel(row, "ScenPart_PlanetLayerSettings".Translate());
-			PlanetLayerSettingsDef planetLayerSettingsDef = this.settingsDef;
-			TaggedString taggedString = (planetLayerSettingsDef != null) ? planetLayerSettingsDef.LabelCap : "ScenPart_PlanetLayerSettings_SelectDef".Translate();
-			if (Widgets.ButtonText(row, taggedString, true, true, true, null))
+			if (Widgets.ButtonText(row, layer?.LabelCap ?? "ScenPart_SelectQuestDef".Translate(), drawBackground: true, doMouseoverSound: true, CanEdit, null))
 			{
-				FloatMenuUtility.MakeMenu<PlanetLayerSettingsDef>(DefDatabase<PlanetLayerSettingsDef>.AllDefs, (PlanetLayerSettingsDef x) => x.LabelCap, (PlanetLayerSettingsDef x) => delegate()
+				FloatMenuUtility.MakeMenu(DefDatabase<PlanetLayerDef>.AllDefs, (PlanetLayerDef id) => id.LabelCap, (PlanetLayerDef selected) => delegate
 				{
-					this.settingsDef = x;
+					layer = selected;
 				});
 			}
 			row.y += ScenPart.RowHeight + 4f;
 		}
-
-		// Token: 0x0600E45F RID: 58463 RVA: 0x0042B5B4 File Offset: 0x004297B4
-		private void DoConnections(ref Rect row)
+		finally
 		{
-			this.Seperator(ref row);
-			this.DoLabel(row, "ScenPart_PlanetLayerConnections".Translate());
-			for (int i = this.connections.Count - 1; i >= 0; i--)
+			((IDisposable)textBlock/*cast due to .constrained prefix*/).Dispose();
+		}
+	}
+
+	private void DoTagRow(ref Rect row)
+	{
+		string text = tag;
+		tag = Widgets.TextArea(row, tag);
+		if (!IsTagValid())
+		{
+			using (new TextBlock(ColorLibrary.RedReadable))
 			{
-				if (i % 2 == 1)
+				DoLabel(row, "ScenPart_PlanetLayerTag_Error".Translate());
+			}
+		}
+		else
+		{
+			DoLabel(row, "ScenPart_PlanetLayerTag".Translate());
+		}
+		if (text != tag && !string.IsNullOrEmpty(tag))
+		{
+			foreach (ScenPart allPart in Find.Scenario.AllParts)
+			{
+				if (allPart == this || !(allPart is ScenPart_PlanetLayer scenPart_PlanetLayer))
 				{
-					Widgets.DrawLightHighlight(row);
+					continue;
 				}
-				LayerConnection other = this.connections[i];
-				Rect rect = row.LeftPart(0.25f);
-				Rect rect2 = row.LeftPart(0.25f);
-				Rect rect3 = row.RightPart(0.5f);
-				rect2.x = rect.xMax;
-				rect.xMax -= 4f;
-				rect2.xMax += 4f;
-				rect2.xMax -= 4f;
-				rect3.xMin += 4f;
-				if (Widgets.ButtonText(rect, other.tag, true, true, true, null))
+				foreach (LayerConnection connection in scenPart_PlanetLayer.connections)
 				{
-					List<FloatMenuOption> list = new List<FloatMenuOption>();
-					int captured = i;
-					list.Add(new FloatMenuOption("Remove", delegate()
+					if (connection.tag == text)
 					{
-						this.connections.RemoveAt(captured);
-					}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0));
-					using (List<string>.Enumerator enumerator = this.GetAllTags().GetEnumerator())
+						connection.tag = tag;
+					}
+				}
+			}
+		}
+		row.y += ScenPart.RowHeight + 4f;
+	}
+
+	private void DoSettings(ref Rect row)
+	{
+		Seperator(ref row);
+		DoLabel(row, "ScenPart_PlanetLayerSettings".Translate());
+		TaggedString taggedString = settingsDef?.LabelCap ?? "ScenPart_PlanetLayerSettings_SelectDef".Translate();
+		if (Widgets.ButtonText(row, taggedString, drawBackground: true, doMouseoverSound: true, active: true, null))
+		{
+			FloatMenuUtility.MakeMenu(DefDatabase<PlanetLayerSettingsDef>.AllDefs, (PlanetLayerSettingsDef x) => x.LabelCap, (PlanetLayerSettingsDef x) => delegate
+			{
+				settingsDef = x;
+			});
+		}
+		row.y += ScenPart.RowHeight + 4f;
+	}
+
+	private void DoConnections(ref Rect row)
+	{
+		Seperator(ref row);
+		DoLabel(row, "ScenPart_PlanetLayerConnections".Translate());
+		for (int num = connections.Count - 1; num >= 0; num--)
+		{
+			if (num % 2 == 1)
+			{
+				Widgets.DrawLightHighlight(row);
+			}
+			LayerConnection other = connections[num];
+			Rect rect = row.LeftPart(0.25f);
+			Rect rect2 = row.LeftPart(0.25f);
+			Rect rect3 = row.RightPart(0.5f);
+			rect2.x = rect.xMax;
+			rect.xMax -= 4f;
+			rect2.xMax += 4f;
+			rect2.xMax -= 4f;
+			rect3.xMin += 4f;
+			if (Widgets.ButtonText(rect, other.tag, drawBackground: true, doMouseoverSound: true, active: true, null))
+			{
+				List<FloatMenuOption> list = new List<FloatMenuOption>();
+				int captured = num;
+				list.Add(new FloatMenuOption("Remove", delegate
+				{
+					connections.RemoveAt(captured);
+				}));
+				foreach (string value in GetAllTags())
+				{
+					if (!connections.Any((LayerConnection x) => x.tag == value))
 					{
-						while (enumerator.MoveNext())
+						list.Add(new FloatMenuOption(value, delegate
 						{
-							string value = enumerator.Current;
-							if (!this.connections.Any((LayerConnection x) => x.tag == value))
+							other.tag = value;
+						}));
+					}
+				}
+				Find.WindowStack.Add(new FloatMenu(list));
+			}
+			if (Widgets.ButtonText(label: (other.zoomMode == LayerConnection.ZoomMode.None) ? ((string)"ScenPart_PlanetLayerConnections_Zoom".Translate()) : ((other.zoomMode != LayerConnection.ZoomMode.ZoomIn) ? ((string)"ScenPart_PlanetLayerConnections_ZoomOut".Translate()) : ((string)"ScenPart_PlanetLayerConnections_ZoomIn".Translate())), rect: rect2, drawBackground: true, doMouseoverSound: true, active: true, overrideTextAnchor: null))
+			{
+				List<FloatMenuOption> list2 = new List<FloatMenuOption>();
+				int localIndex = num;
+				if (other.zoomMode != 0)
+				{
+					list2.Add(new FloatMenuOption("ScenPart_PlanetLayerConnections_Zoom".Translate(), delegate
+					{
+						other.zoomMode = LayerConnection.ZoomMode.None;
+					}));
+				}
+				if (other.zoomMode != LayerConnection.ZoomMode.ZoomIn)
+				{
+					list2.Add(new FloatMenuOption("ScenPart_PlanetLayerConnections_ZoomIn".Translate(), delegate
+					{
+						other.zoomMode = LayerConnection.ZoomMode.ZoomIn;
+						for (int i = 0; i < connections.Count; i++)
+						{
+							if (localIndex != i && connections[i].zoomMode == LayerConnection.ZoomMode.ZoomIn)
 							{
-								list.Add(new FloatMenuOption(value, delegate()
-								{
-									other.tag = value;
-								}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0));
+								connections[i].zoomMode = LayerConnection.ZoomMode.None;
 							}
 						}
-					}
-					Find.WindowStack.Add(new FloatMenu(list));
+					}));
 				}
-				string label;
-				if (other.zoomMode == LayerConnection.ZoomMode.None)
+				if (other.zoomMode != LayerConnection.ZoomMode.ZoomOut)
 				{
-					label = "ScenPart_PlanetLayerConnections_Zoom".Translate();
-				}
-				else if (other.zoomMode == LayerConnection.ZoomMode.ZoomIn)
-				{
-					label = "ScenPart_PlanetLayerConnections_ZoomIn".Translate();
-				}
-				else
-				{
-					label = "ScenPart_PlanetLayerConnections_ZoomOut".Translate();
-				}
-				if (Widgets.ButtonText(rect2, label, true, true, true, null))
-				{
-					List<FloatMenuOption> list2 = new List<FloatMenuOption>();
-					int localIndex = i;
-					if (other.zoomMode != LayerConnection.ZoomMode.None)
+					list2.Add(new FloatMenuOption("ScenPart_PlanetLayerConnections_ZoomOut".Translate(), delegate
 					{
-						list2.Add(new FloatMenuOption("ScenPart_PlanetLayerConnections_Zoom".Translate(), delegate()
+						other.zoomMode = LayerConnection.ZoomMode.ZoomOut;
+						for (int j = 0; j < connections.Count; j++)
 						{
-							other.zoomMode = LayerConnection.ZoomMode.None;
-						}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0));
-					}
-					if (other.zoomMode != LayerConnection.ZoomMode.ZoomIn)
-					{
-						list2.Add(new FloatMenuOption("ScenPart_PlanetLayerConnections_ZoomIn".Translate(), delegate()
-						{
-							other.zoomMode = LayerConnection.ZoomMode.ZoomIn;
-							for (int j = 0; j < this.connections.Count; j++)
+							if (localIndex != j && connections[j].zoomMode == LayerConnection.ZoomMode.ZoomOut)
 							{
-								if (localIndex != j && this.connections[j].zoomMode == LayerConnection.ZoomMode.ZoomIn)
-								{
-									this.connections[j].zoomMode = LayerConnection.ZoomMode.None;
-								}
+								connections[j].zoomMode = LayerConnection.ZoomMode.None;
 							}
-						}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0));
-					}
-					if (other.zoomMode != LayerConnection.ZoomMode.ZoomOut)
-					{
-						list2.Add(new FloatMenuOption("ScenPart_PlanetLayerConnections_ZoomOut".Translate(), delegate()
-						{
-							other.zoomMode = LayerConnection.ZoomMode.ZoomOut;
-							for (int j = 0; j < this.connections.Count; j++)
-							{
-								if (localIndex != j && this.connections[j].zoomMode == LayerConnection.ZoomMode.ZoomOut)
-								{
-									this.connections[j].zoomMode = LayerConnection.ZoomMode.None;
-								}
-							}
-						}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0));
-					}
-					Find.WindowStack.Add(new FloatMenu(list2));
-				}
-				Rect rect4 = rect3.LeftHalf();
-				rect4.xMax -= 4f;
-				using (new TextBlock(TextAnchor.MiddleRight))
-				{
-					Widgets.Label(rect4, "ScenPart_PlanetLayerConnections_Fuel".Translate());
-				}
-				Widgets.TextFieldNumeric<float>(rect3.RightHalf(), ref other.fuelCost, ref this.numericBuffer, 0f, 1E+09f);
-				row.y += ScenPart.RowHeight + 4f;
-			}
-			List<string> unusedTags = this.GetUnusedTags();
-			using (new TextBlock(unusedTags.Any<string>() ? Color.white : Color.gray))
-			{
-				if (Widgets.ButtonText(row, "ScenPart_PlanetLayerConnections_Add".Translate(), true, true, unusedTags.Any<string>(), null))
-				{
-					FloatMenuUtility.MakeMenu<string>(unusedTags, (string id) => id, (string nTag) => delegate()
-					{
-						this.connections.Add(new LayerConnection
-						{
-							tag = nTag
-						});
-					});
-				}
-			}
-		}
-
-		// Token: 0x0600E460 RID: 58464 RVA: 0x0042BA80 File Offset: 0x00429C80
-		private void Seperator(ref Rect row)
-		{
-			Widgets.DrawLineHorizontal(row.x + 4f, row.y + row.height / 4f, row.width - 8f, Color.gray);
-			row.y += 17f;
-		}
-
-		// Token: 0x0600E461 RID: 58465 RVA: 0x0042BAD4 File Offset: 0x00429CD4
-		private List<string> GetUnusedTags()
-		{
-			ScenPart_PlanetLayer.tmpTags.Clear();
-			foreach (ScenPart scenPart in Find.Scenario.AllParts)
-			{
-				if (scenPart != this)
-				{
-					ScenPart_PlanetLayer other = scenPart as ScenPart_PlanetLayer;
-					if (other != null && !string.IsNullOrEmpty(other.tag) && !this.connections.Any((LayerConnection t) => t.tag == other.tag))
-					{
-						ScenPart_PlanetLayer.tmpTags.Add(other.tag);
-					}
-				}
-			}
-			return ScenPart_PlanetLayer.tmpTags;
-		}
-
-		// Token: 0x0600E462 RID: 58466 RVA: 0x0042BB8C File Offset: 0x00429D8C
-		private void ClearInvalidConnections()
-		{
-			for (int i = this.connections.Count - 1; i >= 0; i--)
-			{
-				LayerConnection layerConnection = this.connections[i];
-				bool flag = false;
-				foreach (ScenPart scenPart in Find.Scenario.AllParts)
-				{
-					if (this != scenPart)
-					{
-						ScenPart_PlanetLayer scenPart_PlanetLayer = scenPart as ScenPart_PlanetLayer;
-						if (scenPart_PlanetLayer != null && scenPart_PlanetLayer.tag == layerConnection.tag)
-						{
-							flag = true;
-							break;
 						}
-					}
+					}));
 				}
-				if (!flag)
+				Find.WindowStack.Add(new FloatMenu(list2));
+			}
+			Rect rect4 = rect3.LeftHalf();
+			rect4.xMax -= 4f;
+			using (new TextBlock(TextAnchor.MiddleRight))
+			{
+				Widgets.Label(rect4, "ScenPart_PlanetLayerConnections_Fuel".Translate());
+			}
+			Widgets.TextFieldNumeric(rect3.RightHalf(), ref other.fuelCost, ref numericBuffer);
+			row.y += ScenPart.RowHeight + 4f;
+		}
+		List<string> unusedTags = GetUnusedTags();
+		TextBlock textBlock2 = new TextBlock(unusedTags.Any() ? Color.white : Color.gray);
+		try
+		{
+			if (!Widgets.ButtonText(row, "ScenPart_PlanetLayerConnections_Add".Translate(), drawBackground: true, doMouseoverSound: true, unusedTags.Any(), null))
+			{
+				return;
+			}
+			FloatMenuUtility.MakeMenu(unusedTags, (string id) => id, (string nTag) => delegate
+			{
+				connections.Add(new LayerConnection
 				{
-					this.connections.RemoveAt(i);
+					tag = nTag
+				});
+			});
+		}
+		finally
+		{
+			((IDisposable)textBlock2/*cast due to .constrained prefix*/).Dispose();
+		}
+	}
+
+	private void Seperator(ref Rect row)
+	{
+		Widgets.DrawLineHorizontal(row.x + 4f, row.y + row.height / 4f, row.width - 8f, Color.gray);
+		row.y += 17f;
+	}
+
+	private List<string> GetUnusedTags()
+	{
+		tmpTags.Clear();
+		foreach (ScenPart allPart in Find.Scenario.AllParts)
+		{
+			if (allPart != this)
+			{
+				ScenPart_PlanetLayer other = allPart as ScenPart_PlanetLayer;
+				if (other != null && !string.IsNullOrEmpty(other.tag) && !connections.Any((LayerConnection t) => t.tag == other.tag))
+				{
+					tmpTags.Add(other.tag);
 				}
 			}
 		}
+		return tmpTags;
+	}
 
-		// Token: 0x040098D2 RID: 39122
-		public PlanetLayerDef layer;
-
-		// Token: 0x040098D3 RID: 39123
-		public PlanetLayerSettingsDef settingsDef;
-
-		// Token: 0x040098D4 RID: 39124
-		public bool hide;
-
-		// Token: 0x040098D5 RID: 39125
-		public string tag;
-
-		// Token: 0x040098D6 RID: 39126
-		public List<LayerConnection> connections = new List<LayerConnection>();
-
-		// Token: 0x040098D7 RID: 39127
-		private float lastHeight;
-
-		// Token: 0x040098D8 RID: 39128
-		private static readonly List<string> tmpTags = new List<string>();
-
-		// Token: 0x040098D9 RID: 39129
-		private string[] vBuffer;
-
-		// Token: 0x040098DA RID: 39130
-		private string radiusBuffer;
-
-		// Token: 0x040098DB RID: 39131
-		private string extraCameraAltitudeBuffer;
-
-		// Token: 0x040098DC RID: 39132
-		private string backgroundWorldCameraOffsetBuffer;
-
-		// Token: 0x040098DD RID: 39133
-		private string backgroundWorldCameraParallaxBuffer;
-
-		// Token: 0x040098DE RID: 39134
-		private string subdivisionsBuffer;
-
-		// Token: 0x040098DF RID: 39135
-		private string viewAngleBuffer;
-
-		// Token: 0x040098E0 RID: 39136
-		private string numericBuffer;
+	private void ClearInvalidConnections()
+	{
+		for (int num = connections.Count - 1; num >= 0; num--)
+		{
+			LayerConnection layerConnection = connections[num];
+			bool flag = false;
+			foreach (ScenPart allPart in Find.Scenario.AllParts)
+			{
+				if (this != allPart && allPart is ScenPart_PlanetLayer scenPart_PlanetLayer && scenPart_PlanetLayer.tag == layerConnection.tag)
+				{
+					flag = true;
+					break;
+				}
+			}
+			if (!flag)
+			{
+				connections.RemoveAt(num);
+			}
+		}
 	}
 }

@@ -1,91 +1,80 @@
-﻿using System;
 using System.Linq;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public static class DefGenerator
 {
-	// Token: 0x020018FA RID: 6394
-	public static class DefGenerator
+	public const int StandardItemPathCost = 14;
+
+	public static void GenerateImpliedDefs_PreResolve(bool hotReload = false)
 	{
-		// Token: 0x06009155 RID: 37205 RVA: 0x002AC1E0 File Offset: 0x002AA3E0
-		public static void GenerateImpliedDefs_PreResolve(bool hotReload = false)
+		foreach (TerrainDef item in TerrainDefGenerator_Carpet.ImpliedTerrainDefs(hotReload))
 		{
-			foreach (TerrainDef def in TerrainDefGenerator_Carpet.ImpliedTerrainDefs(hotReload))
-			{
-				DefGenerator.AddImpliedDef<TerrainDef>(def, hotReload);
-			}
-			foreach (ThingDef def2 in ThingDefGenerator_Buildings.ImpliedBlueprintAndFrameDefs(hotReload).Concat(ThingDefGenerator_Meat.ImpliedMeatDefs(hotReload)).Concat(ThingDefGenerator_Techprints.ImpliedTechprintDefs(hotReload)).Concat(ThingDefGenerator_Corpses.ImpliedCorpseDefs(hotReload)))
-			{
-				DefGenerator.AddImpliedDef<ThingDef>(def2, hotReload);
-			}
-			DirectXmlCrossRefLoader.ResolveAllWantedCrossReferences(FailMode.Silent);
-			foreach (TerrainDef def3 in TerrainDefGenerator_Stone.ImpliedTerrainDefs(hotReload))
-			{
-				DefGenerator.AddImpliedDef<TerrainDef>(def3, hotReload);
-			}
-			foreach (RecipeDef def4 in RecipeDefGenerator.ImpliedRecipeDefs(hotReload))
-			{
-				DefGenerator.AddImpliedDef<RecipeDef>(def4, hotReload);
-			}
-			foreach (PawnColumnDef def5 in PawnColumnDefGenerator.ImpliedPawnColumnDefs(hotReload))
-			{
-				DefGenerator.AddImpliedDef<PawnColumnDef>(def5, hotReload);
-			}
-			foreach (ThingDef def6 in ThingDefGenerator_Neurotrainer.ImpliedThingDefs(hotReload))
-			{
-				DefGenerator.AddImpliedDef<ThingDef>(def6, hotReload);
-			}
-			foreach (GeneDef def7 in GeneDefGenerator.ImpliedGeneDefs(hotReload))
-			{
-				DefGenerator.AddImpliedDef<GeneDef>(def7, hotReload);
-			}
-			foreach (ThoughtDef def8 in GeneDefGenerator.ImpliedThoughtDefs(hotReload))
-			{
-				DefGenerator.AddImpliedDef<ThoughtDef>(def8, hotReload);
-			}
-			AnimationDefGenerator_Flying.InitializeNeededDefs(hotReload);
-			foreach (GraphicStateDef def9 in AnimationDefGenerator_Flying.ImpliedGraphicStateDefs())
-			{
-				DefGenerator.AddImpliedDef<GraphicStateDef>(def9, hotReload);
-			}
-			foreach (AnimationDef def10 in AnimationDefGenerator_Flying.ImpliedAnimationDefs())
-			{
-				DefGenerator.AddImpliedDef<AnimationDef>(def10, hotReload);
-			}
+			AddImpliedDef(item, hotReload);
 		}
-
-		// Token: 0x06009156 RID: 37206 RVA: 0x002AC474 File Offset: 0x002AA674
-		public static void GenerateImpliedDefs_PostResolve(bool hotReload = false)
+		foreach (ThingDef item2 in ThingDefGenerator_Buildings.ImpliedBlueprintAndFrameDefs(hotReload).Concat(ThingDefGenerator_Meat.ImpliedMeatDefs(hotReload)).Concat(ThingDefGenerator_Techprints.ImpliedTechprintDefs(hotReload))
+			.Concat(ThingDefGenerator_Corpses.ImpliedCorpseDefs(hotReload)))
 		{
-			foreach (KeyBindingCategoryDef def in KeyBindingDefGenerator.ImpliedKeyBindingCategoryDefs(hotReload))
-			{
-				DefGenerator.AddImpliedDef<KeyBindingCategoryDef>(def, hotReload);
-			}
-			foreach (KeyBindingDef def2 in KeyBindingDefGenerator.ImpliedKeyBindingDefs(hotReload))
-			{
-				DefGenerator.AddImpliedDef<KeyBindingDef>(def2, hotReload);
-			}
+			AddImpliedDef(item2, hotReload);
 		}
-
-		// Token: 0x06009157 RID: 37207 RVA: 0x002AC4FC File Offset: 0x002AA6FC
-		public static void AddImpliedDef<T>(T def, bool hotReload = false) where T : Def, new()
+		DirectXmlCrossRefLoader.ResolveAllWantedCrossReferences(FailMode.Silent);
+		foreach (TerrainDef item3 in TerrainDefGenerator_Stone.ImpliedTerrainDefs(hotReload))
 		{
-			def.generated = true;
-			def.ResolveDefNameHash();
-			ModContentPack modContentPack = def.modContentPack;
-			if (modContentPack != null)
-			{
-				modContentPack.AddDef(def, "ImpliedDefs");
-			}
-			def.PostLoad();
-			if (hotReload && DefDatabase<T>.GetNamed(def.defName, false) != null)
-			{
-				return;
-			}
+			AddImpliedDef(item3, hotReload);
+		}
+		foreach (RecipeDef item4 in RecipeDefGenerator.ImpliedRecipeDefs(hotReload))
+		{
+			AddImpliedDef(item4, hotReload);
+		}
+		foreach (PawnColumnDef item5 in PawnColumnDefGenerator.ImpliedPawnColumnDefs(hotReload))
+		{
+			AddImpliedDef(item5, hotReload);
+		}
+		foreach (ThingDef item6 in ThingDefGenerator_Neurotrainer.ImpliedThingDefs(hotReload))
+		{
+			AddImpliedDef(item6, hotReload);
+		}
+		foreach (GeneDef item7 in GeneDefGenerator.ImpliedGeneDefs(hotReload))
+		{
+			AddImpliedDef(item7, hotReload);
+		}
+		foreach (ThoughtDef item8 in GeneDefGenerator.ImpliedThoughtDefs(hotReload))
+		{
+			AddImpliedDef(item8, hotReload);
+		}
+		AnimationDefGenerator_Flying.InitializeNeededDefs(hotReload);
+		foreach (GraphicStateDef item9 in AnimationDefGenerator_Flying.ImpliedGraphicStateDefs())
+		{
+			AddImpliedDef(item9, hotReload);
+		}
+		foreach (AnimationDef item10 in AnimationDefGenerator_Flying.ImpliedAnimationDefs())
+		{
+			AddImpliedDef(item10, hotReload);
+		}
+	}
+
+	public static void GenerateImpliedDefs_PostResolve(bool hotReload = false)
+	{
+		foreach (KeyBindingCategoryDef item in KeyBindingDefGenerator.ImpliedKeyBindingCategoryDefs(hotReload))
+		{
+			AddImpliedDef(item, hotReload);
+		}
+		foreach (KeyBindingDef item2 in KeyBindingDefGenerator.ImpliedKeyBindingDefs(hotReload))
+		{
+			AddImpliedDef(item2, hotReload);
+		}
+	}
+
+	public static void AddImpliedDef<T>(T def, bool hotReload = false) where T : Def, new()
+	{
+		def.generated = true;
+		def.ResolveDefNameHash();
+		def.modContentPack?.AddDef(def, "ImpliedDefs");
+		def.PostLoad();
+		if (!hotReload || DefDatabase<T>.GetNamed(def.defName, errorOnFail: false) == null)
+		{
 			DefDatabase<T>.Add(def);
 		}
-
-		// Token: 0x04005C7D RID: 23677
-		public const int StandardItemPathCost = 14;
 	}
 }

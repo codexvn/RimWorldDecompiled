@@ -1,119 +1,108 @@
-﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class RitualOutcomeEffectWorker_Speech : RitualOutcomeEffectWorker_FromQuality
 {
-	// Token: 0x0200276A RID: 10090
-	public class RitualOutcomeEffectWorker_Speech : RitualOutcomeEffectWorker_FromQuality
+	private static readonly float InspirationChanceFromInspirationalSpeech = 0.05f;
+
+	private static readonly float ConversionChanceFromInspirationalSpeech = 0.02f;
+
+	public override bool SupportsAttachableOutcomeEffect => false;
+
+	public RitualOutcomeEffectWorker_Speech()
 	{
-		// Token: 0x170021E0 RID: 8672
-		// (get) Token: 0x0600DD5A RID: 56666 RVA: 0x00002501 File Offset: 0x00000701
-		public override bool SupportsAttachableOutcomeEffect
+	}
+
+	public RitualOutcomeEffectWorker_Speech(RitualOutcomeEffectDef def)
+		: base(def)
+	{
+	}
+
+	public override void Apply(float progress, Dictionary<Pawn, int> totalPresence, LordJob_Ritual jobRitual)
+	{
+		Pawn organizer = jobRitual.Organizer;
+		float quality = GetQuality(jobRitual, progress);
+		RitualOutcomePossibility outcome = GetOutcome(quality, jobRitual);
+		ThoughtDef memory = outcome.memory;
+		LookTargets letterLookTargets = organizer;
+		string extraLetterText = null;
+		if (jobRitual.Ritual != null)
 		{
-			get
+			ApplyAttachableOutcome(totalPresence, jobRitual, outcome, out extraLetterText, ref letterLookTargets);
+		}
+		string text = "";
+		string text2 = "";
+		foreach (KeyValuePair<Pawn, int> item in totalPresence)
+		{
+			Pawn key = item.Key;
+			if (key == organizer || !organizer.Position.InHorDistOf(key.Position, 18f))
 			{
-				return false;
+				continue;
 			}
-		}
-
-		// Token: 0x0600DD5B RID: 56667 RVA: 0x00411501 File Offset: 0x0040F701
-		public RitualOutcomeEffectWorker_Speech()
-		{
-		}
-
-		// Token: 0x0600DD5C RID: 56668 RVA: 0x00411509 File Offset: 0x0040F709
-		public RitualOutcomeEffectWorker_Speech(RitualOutcomeEffectDef def) : base(def)
-		{
-		}
-
-		// Token: 0x0600DD5D RID: 56669 RVA: 0x00412130 File Offset: 0x00410330
-		public override void Apply(float progress, Dictionary<Pawn, int> totalPresence, LordJob_Ritual jobRitual)
-		{
-			Pawn organizer = jobRitual.Organizer;
-			float quality = base.GetQuality(jobRitual, progress);
-			RitualOutcomePossibility outcome = this.GetOutcome(quality, jobRitual);
-			ThoughtDef memory = outcome.memory;
-			LookTargets lookTargets = organizer;
-			string text = null;
-			if (jobRitual.Ritual != null)
+			Thought_Memory thought_Memory = MakeMemory(key, jobRitual, memory);
+			thought_Memory.otherPawn = organizer;
+			thought_Memory.moodPowerFactor = ((key.Ideo == organizer.Ideo) ? 1f : 0.5f);
+			key.needs.mood.thoughts.memories.TryGainMemory(thought_Memory);
+			if (memory != ThoughtDefOf.InspirationalSpeech)
 			{
-				this.ApplyAttachableOutcome(totalPresence, jobRitual, outcome, out text, ref lookTargets);
+				continue;
 			}
-			string text2 = "";
-			string text3 = "";
-			foreach (KeyValuePair<Pawn, int> keyValuePair in totalPresence)
+			if (Rand.Chance(InspirationChanceFromInspirationalSpeech))
 			{
-				Pawn key = keyValuePair.Key;
-				if (key != organizer && organizer.Position.InHorDistOf(key.Position, 18f))
+				InspirationDef randomAvailableInspirationDef = key.mindState.inspirationHandler.GetRandomAvailableInspirationDef();
+				if (randomAvailableInspirationDef != null && key.mindState.inspirationHandler.TryStartInspiration(randomAvailableInspirationDef, "LetterSpeechInspiration".Translate(key.Named("PAWN"), organizer.Named("SPEAKER"))))
 				{
-					Thought_Memory thought_Memory = base.MakeMemory(key, jobRitual, memory);
-					thought_Memory.otherPawn = organizer;
-					thought_Memory.moodPowerFactor = ((key.Ideo == organizer.Ideo) ? 1f : 0.5f);
-					key.needs.mood.thoughts.memories.TryGainMemory(thought_Memory, null);
-					if (memory == ThoughtDefOf.InspirationalSpeech)
-					{
-						if (Rand.Chance(RitualOutcomeEffectWorker_Speech.InspirationChanceFromInspirationalSpeech))
-						{
-							InspirationDef randomAvailableInspirationDef = key.mindState.inspirationHandler.GetRandomAvailableInspirationDef();
-							if (randomAvailableInspirationDef != null && key.mindState.inspirationHandler.TryStartInspiration(randomAvailableInspirationDef, "LetterSpeechInspiration".Translate(key.Named("PAWN"), organizer.Named("SPEAKER")), true))
-							{
-								text2 = text2 + "  - " + key.NameShortColored.Resolve() + "\n";
-							}
-						}
-						if (ModsConfig.IdeologyActive && key.Ideo != organizer.Ideo && Rand.Chance(RitualOutcomeEffectWorker_Speech.ConversionChanceFromInspirationalSpeech))
-						{
-							key.ideo.SetIdeo(organizer.Ideo);
-							text3 = text3 + "  - " + key.NameShortColored.Resolve() + "\n";
-						}
-					}
+					text = text + "  - " + key.NameShortColored.Resolve() + "\n";
 				}
 			}
-			TaggedString taggedString = "LetterFinishedSpeech".Translate(organizer.Named("ORGANIZER")).CapitalizeFirst() + " " + ("Letter" + memory.defName).Translate() + "\n\n" + this.OutcomeQualityBreakdownDesc(quality, progress, jobRitual);
-			if (!text3.NullOrEmpty())
+			if (ModsConfig.IdeologyActive && key.Ideo != organizer.Ideo && Rand.Chance(ConversionChanceFromInspirationalSpeech))
 			{
-				taggedString += "\n\n" + "LetterSpeechConvertedListeners".Translate(organizer.Named("PAWN"), organizer.Ideo.Named("IDEO")).CapitalizeFirst() + ":\n\n" + text3.TrimEndNewlines();
-			}
-			if (!text2.NullOrEmpty())
-			{
-				taggedString += "\n\n" + "LetterSpeechInspiredListeners".Translate() + "\n\n" + text2.TrimEndNewlines();
-			}
-			if (progress < 1f)
-			{
-				taggedString += "\n\n" + "LetterSpeechInterrupted".Translate(progress.ToStringPercent(), organizer.Named("ORGANIZER"));
-			}
-			if (text != null)
-			{
-				taggedString += "\n\n" + text;
-			}
-			string text4;
-			this.ApplyDevelopmentPoints(jobRitual.Ritual, outcome, out text4);
-			if (text4 != null)
-			{
-				taggedString += "\n\n" + text4;
-			}
-			Find.LetterStack.ReceiveLetter("OutcomeLetterLabel".Translate(outcome.label.Named("OUTCOMELABEL"), jobRitual.Ritual.Label.Named("RITUALLABEL")), taggedString, RitualOutcomeEffectWorker_Speech.PositiveOutcome(memory) ? LetterDefOf.RitualOutcomePositive : LetterDefOf.RitualOutcomeNegative, lookTargets, null, null, null, null, 0, true);
-			if (jobRitual.Ritual.def == PreceptDefOf.ThroneSpeech)
-			{
-				Ability ability = organizer.abilities.GetAbility(AbilityDefOf.Speech, true);
-				RoyalTitle mostSeniorTitle = organizer.royalty.MostSeniorTitle;
-				if (ability != null && mostSeniorTitle != null)
-				{
-					ability.StartCooldown(mostSeniorTitle.def.speechCooldown.RandomInRange);
-				}
+				key.ideo.SetIdeo(organizer.Ideo);
+				text2 = text2 + "  - " + key.NameShortColored.Resolve() + "\n";
 			}
 		}
-
-		// Token: 0x0600DD5E RID: 56670 RVA: 0x00412560 File Offset: 0x00410760
-		private static bool PositiveOutcome(ThoughtDef outcome)
+		TaggedString text3 = "LetterFinishedSpeech".Translate(organizer.Named("ORGANIZER")).CapitalizeFirst() + " " + ("Letter" + memory.defName).Translate() + "\n\n" + OutcomeQualityBreakdownDesc(quality, progress, jobRitual);
+		if (!text2.NullOrEmpty())
 		{
-			return outcome == ThoughtDefOf.EncouragingSpeech || outcome == ThoughtDefOf.InspirationalSpeech;
+			text3 += "\n\n" + "LetterSpeechConvertedListeners".Translate(organizer.Named("PAWN"), organizer.Ideo.Named("IDEO")).CapitalizeFirst() + ":\n\n" + text2.TrimEndNewlines();
 		}
+		if (!text.NullOrEmpty())
+		{
+			text3 += "\n\n" + "LetterSpeechInspiredListeners".Translate() + "\n\n" + text.TrimEndNewlines();
+		}
+		if (progress < 1f)
+		{
+			text3 += "\n\n" + "LetterSpeechInterrupted".Translate(progress.ToStringPercent(), organizer.Named("ORGANIZER"));
+		}
+		if (extraLetterText != null)
+		{
+			text3 += "\n\n" + extraLetterText;
+		}
+		ApplyDevelopmentPoints(jobRitual.Ritual, outcome, out var extraOutcomeDesc);
+		if (extraOutcomeDesc != null)
+		{
+			text3 += "\n\n" + extraOutcomeDesc;
+		}
+		Find.LetterStack.ReceiveLetter("OutcomeLetterLabel".Translate(outcome.label.Named("OUTCOMELABEL"), jobRitual.Ritual.Label.Named("RITUALLABEL")), text3, PositiveOutcome(memory) ? LetterDefOf.RitualOutcomePositive : LetterDefOf.RitualOutcomeNegative, letterLookTargets);
+		if (jobRitual.Ritual.def == PreceptDefOf.ThroneSpeech)
+		{
+			Ability ability = organizer.abilities.GetAbility(AbilityDefOf.Speech, includeTemporary: true);
+			RoyalTitle mostSeniorTitle = organizer.royalty.MostSeniorTitle;
+			if (ability != null && mostSeniorTitle != null)
+			{
+				ability.StartCooldown(mostSeniorTitle.def.speechCooldown.RandomInRange);
+			}
+		}
+	}
 
-		// Token: 0x04009541 RID: 38209
-		private static readonly float InspirationChanceFromInspirationalSpeech = 0.05f;
-
-		// Token: 0x04009542 RID: 38210
-		private static readonly float ConversionChanceFromInspirationalSpeech = 0.02f;
+	private static bool PositiveOutcome(ThoughtDef outcome)
+	{
+		if (outcome != ThoughtDefOf.EncouragingSpeech)
+		{
+			return outcome == ThoughtDefOf.InspirationalSpeech;
+		}
+		return true;
 	}
 }

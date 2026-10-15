@@ -1,234 +1,195 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using RimWorld.SketchGen;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class ScenPart_PlayerPawnsArriveMethod : ScenPart
 {
-	// Token: 0x020028D9 RID: 10457
-	public class ScenPart_PlayerPawnsArriveMethod : ScenPart
+	private PlayerPawnsArriveMethod method;
+
+	public override void ExposeData()
 	{
-		// Token: 0x0600E4A2 RID: 58530 RVA: 0x0042C42A File Offset: 0x0042A62A
-		public override void ExposeData()
-		{
-			base.ExposeData();
-			Scribe_Values.Look<PlayerPawnsArriveMethod>(ref this.method, "method", PlayerPawnsArriveMethod.Standing, false);
-		}
+		base.ExposeData();
+		Scribe_Values.Look(ref method, "method", PlayerPawnsArriveMethod.Standing);
+	}
 
-		// Token: 0x0600E4A3 RID: 58531 RVA: 0x0042C444 File Offset: 0x0042A644
-		public override void DoEditInterface(Listing_ScenEdit listing)
+	public override void DoEditInterface(Listing_ScenEdit listing)
+	{
+		if (!Widgets.ButtonText(listing.GetScenPartRect(this, ScenPart.RowHeight), method.ToStringHuman(), drawBackground: true, doMouseoverSound: true, active: true, null))
 		{
-			if (Widgets.ButtonText(listing.GetScenPartRect(this, ScenPart.RowHeight), this.method.ToStringHuman(), true, true, true, null))
+			return;
+		}
+		List<FloatMenuOption> list = new List<FloatMenuOption>();
+		foreach (PlayerPawnsArriveMethod value in Enum.GetValues(typeof(PlayerPawnsArriveMethod)))
+		{
+			if (value != PlayerPawnsArriveMethod.Gravship || ModsConfig.OdysseyActive)
 			{
-				List<FloatMenuOption> list = new List<FloatMenuOption>();
-				foreach (object obj in Enum.GetValues(typeof(PlayerPawnsArriveMethod)))
+				PlayerPawnsArriveMethod localM = value;
+				list.Add(new FloatMenuOption(localM.ToStringHuman(), delegate
 				{
-					PlayerPawnsArriveMethod playerPawnsArriveMethod = (PlayerPawnsArriveMethod)obj;
-					if (playerPawnsArriveMethod != PlayerPawnsArriveMethod.Gravship || ModsConfig.OdysseyActive)
-					{
-						PlayerPawnsArriveMethod localM = playerPawnsArriveMethod;
-						list.Add(new FloatMenuOption(localM.ToStringHuman(), delegate()
-						{
-							this.method = localM;
-						}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0));
-					}
-				}
-				Find.WindowStack.Add(new FloatMenu(list));
+					method = localM;
+				}));
 			}
 		}
+		Find.WindowStack.Add(new FloatMenu(list));
+	}
 
-		// Token: 0x0600E4A4 RID: 58532 RVA: 0x0042C538 File Offset: 0x0042A738
-		public override string Summary(Scenario scen)
+	public override string Summary(Scenario scen)
+	{
+		if (method == PlayerPawnsArriveMethod.DropPods)
 		{
-			if (this.method == PlayerPawnsArriveMethod.DropPods)
-			{
-				return "ScenPart_ArriveInDropPods".Translate();
-			}
-			return null;
+			return "ScenPart_ArriveInDropPods".Translate();
 		}
+		return null;
+	}
 
-		// Token: 0x0600E4A5 RID: 58533 RVA: 0x0042C554 File Offset: 0x0042A754
-		public override void Randomize()
+	public override void Randomize()
+	{
+		method = ((Rand.Value < 0.5f) ? PlayerPawnsArriveMethod.DropPods : PlayerPawnsArriveMethod.Standing);
+	}
+
+	public override void GenerateIntoMap(Map map)
+	{
+		if (Find.GameInitData == null)
 		{
-			this.method = ((Rand.Value < 0.5f) ? PlayerPawnsArriveMethod.DropPods : PlayerPawnsArriveMethod.Standing);
+			return;
 		}
-
-		// Token: 0x0600E4A6 RID: 58534 RVA: 0x0042C56C File Offset: 0x0042A76C
-		public override void GenerateIntoMap(Map map)
+		List<Thing> list = new List<Thing>();
+		foreach (ScenPart allPart in Find.Scenario.AllParts)
 		{
-			if (Find.GameInitData == null)
-			{
-				return;
-			}
-			List<Thing> list = new List<Thing>();
-			foreach (ScenPart scenPart in Find.Scenario.AllParts)
-			{
-				list.AddRange(scenPart.PlayerStartingThings());
-			}
-			foreach (Pawn key in Find.GameInitData.startingAndOptionalPawns)
-			{
-				foreach (ThingDefCount t in Find.GameInitData.startingPossessions[key])
-				{
-					list.Add(StartingPawnUtility.GenerateStartingPossession(t));
-				}
-			}
-			if (this.method == PlayerPawnsArriveMethod.Gravship && ModsConfig.OdysseyActive)
-			{
-				this.DoGravship(map, list);
-				return;
-			}
-			this.DoDropPods(map, list);
+			list.AddRange(allPart.PlayerStartingThings());
 		}
-
-		// Token: 0x0600E4A7 RID: 58535 RVA: 0x0042C688 File Offset: 0x0042A888
-		private void DoDropPods(Map map, List<Thing> startingItems)
+		foreach (Pawn startingAndOptionalPawn in Find.GameInitData.startingAndOptionalPawns)
 		{
-			List<List<Thing>> list = new List<List<Thing>>();
-			foreach (Pawn item in Find.GameInitData.startingAndOptionalPawns)
+			foreach (ThingDefCount item in Find.GameInitData.startingPossessions[startingAndOptionalPawn])
 			{
-				list.Add(new List<Thing>
-				{
-					item
-				});
+				list.Add(StartingPawnUtility.GenerateStartingPossession(item));
 			}
-			int num = 0;
-			foreach (Thing thing in startingItems)
-			{
-				if (thing.def.CanHaveFaction)
-				{
-					thing.SetFactionDirect(Faction.OfPlayer);
-				}
-				list[num].Add(thing);
-				num++;
-				if (num >= list.Count)
-				{
-					num = 0;
-				}
-			}
-			DropPodUtility.DropThingGroupsNear(MapGenerator.PlayerStartSpot, map, list, 110, Find.GameInitData.QuickStarted || this.method != PlayerPawnsArriveMethod.DropPods, true, true, true, false, false, null);
 		}
-
-		// Token: 0x0600E4A8 RID: 58536 RVA: 0x0042C798 File Offset: 0x0042A998
-		private void DoGravship(Map map, List<Thing> startingItems)
+		if (method == PlayerPawnsArriveMethod.Gravship && ModsConfig.OdysseyActive)
 		{
-			SketchResolveParams parms = default(SketchResolveParams);
-			parms.sketch = new Sketch();
-			Sketch sketch = SketchGen.Generate(SketchResolverDefOf.Gravship, parms);
-			sketch.Rotate(Rot4.Random);
-			HashSet<IntVec3> hashSet = (from c in sketch.OccupiedRect.Cells
-			select c - sketch.OccupiedCenter).ToHashSet<IntVec3>();
-			List<CellRect> orGenerateVar = MapGenerator.GetOrGenerateVar<List<CellRect>>("UsedRects");
-			map.regionAndRoomUpdater.Enabled = true;
-			IntVec3 playerStartSpot = MapGenerator.PlayerStartSpot;
-			if (!MapGenerator.PlayerStartSpotValid)
+			DoGravship(map, list);
+		}
+		else
+		{
+			DoDropPods(map, list);
+		}
+	}
+
+	private void DoDropPods(Map map, List<Thing> startingItems)
+	{
+		List<List<Thing>> list = new List<List<Thing>>();
+		foreach (Pawn startingAndOptionalPawn in Find.GameInitData.startingAndOptionalPawns)
+		{
+			List<Thing> list2 = new List<Thing>();
+			list2.Add(startingAndOptionalPawn);
+			list.Add(list2);
+		}
+		int num = 0;
+		foreach (Thing startingItem in startingItems)
+		{
+			if (startingItem.def.CanHaveFaction)
 			{
-				GenStep_ReserveGravshipArea.SetStartSpot(map, hashSet, orGenerateVar);
-				playerStartSpot = MapGenerator.PlayerStartSpot;
+				startingItem.SetFactionDirect(Faction.OfPlayer);
 			}
-			GravshipPlacementUtility.ClearAreaForGravship(map, playerStartSpot, hashSet);
-			List<Thing> list = new List<Thing>();
-			sketch.Spawn(map, playerStartSpot, Faction.OfPlayer, Sketch.SpawnPosType.OccupiedCenter, Sketch.SpawnMode.Normal, true, true, true, list, false, true, null, null, null);
-			IntVec3 offset = playerStartSpot - sketch.OccupiedCenter;
-			CellRect cellRect = sketch.OccupiedRect.MovedBy(offset);
-			orGenerateVar.Add(cellRect);
-			Predicate<IntVec3> <>9__1;
-			foreach (Pawn pawn in Find.GameInitData.startingAndOptionalPawns)
+			list[num].Add(startingItem);
+			num++;
+			if (num >= list.Count)
 			{
-				IEnumerable<IntVec3> source = cellRect;
-				Predicate<IntVec3> predicate;
-				if ((predicate = <>9__1) == null)
-				{
-					predicate = (<>9__1 = delegate(IntVec3 c)
-					{
-						if (c.Standable(map))
-						{
-							TerrainDef terrain = c.GetTerrain(map);
-							return terrain != null && terrain.IsSubstructure;
-						}
-						return false;
-					});
-				}
-				IntVec3 center;
-				if (!source.TryRandomElement(predicate, out center))
-				{
-					string str = "Could not find a valid spawn location for pawn ";
-					Name name = pawn.Name;
-					Log.Error(str + ((name != null) ? name.ToString() : null));
-				}
-				else
-				{
-					GenPlace.TryPlaceThing(pawn, center, map, ThingPlaceMode.Near, null, null, null, 1);
-				}
+				num = 0;
 			}
-			foreach (Thing thing in startingItems)
+		}
+		DropPodUtility.DropThingGroupsNear(MapGenerator.PlayerStartSpot, map, list, 110, Find.GameInitData.QuickStarted || method != PlayerPawnsArriveMethod.DropPods, leaveSlag: true, canRoofPunch: true, forbid: true, allowFogged: false);
+	}
+
+	private void DoGravship(Map map, List<Thing> startingItems)
+	{
+		SketchResolveParams parms = default(SketchResolveParams);
+		parms.sketch = new Sketch();
+		Sketch sketch = RimWorld.SketchGen.SketchGen.Generate(SketchResolverDefOf.Gravship, parms);
+		sketch.Rotate(Rot4.Random);
+		HashSet<IntVec3> hashSet = sketch.OccupiedRect.Cells.Select((IntVec3 c) => c - sketch.OccupiedCenter).ToHashSet();
+		List<CellRect> orGenerateVar = MapGenerator.GetOrGenerateVar<List<CellRect>>("UsedRects");
+		map.regionAndRoomUpdater.Enabled = true;
+		IntVec3 playerStartSpot = MapGenerator.PlayerStartSpot;
+		if (!MapGenerator.PlayerStartSpotValid)
+		{
+			GenStep_ReserveGravshipArea.SetStartSpot(map, hashSet, orGenerateVar);
+			playerStartSpot = MapGenerator.PlayerStartSpot;
+		}
+		GravshipPlacementUtility.ClearAreaForGravship(map, playerStartSpot, hashSet);
+		List<Thing> list = new List<Thing>();
+		sketch.Spawn(map, playerStartSpot, Faction.OfPlayer, Sketch.SpawnPosType.OccupiedCenter, Sketch.SpawnMode.Normal, wipeIfCollides: true, forceTerrainAffordance: true, clearEdificeWhereFloor: true, list, dormant: false, buildRoofsInstantly: true);
+		IntVec3 offset = playerStartSpot - sketch.OccupiedCenter;
+		CellRect cellRect = sketch.OccupiedRect.MovedBy(offset);
+		orGenerateVar.Add(cellRect);
+		foreach (Pawn startingAndOptionalPawn in Find.GameInitData.startingAndOptionalPawns)
+		{
+			if (!cellRect.TryRandomElement((IntVec3 c) => c.Standable(map) && (c.GetTerrain(map)?.IsSubstructure ?? false), out var result))
 			{
-				if (thing.def.CanHaveFaction)
-				{
-					thing.SetFactionDirect(Faction.OfPlayer);
-				}
-				int num = thing.stackCount;
-				int num2 = 99;
-				while (num > 0 && num2-- > 0)
-				{
-					Thing t2;
-					if ((from t in list
-					where t.def == ThingDefOf.Shelf || t.def == ThingDefOf.ShelfSmall
-					select t).TryRandomElement(out t2))
-					{
-						IntVec3 randomCell = t2.OccupiedRect().RandomCell;
-						Thing thing2 = thing.SplitOff(Math.Min(thing.def.stackLimit, num));
-						num -= thing2.stackCount;
-						GenPlace.TryPlaceThing(thing2, randomCell, map, ThingPlaceMode.Near, null, null, null, 1);
-					}
-				}
+				Log.Error("Could not find a valid spawn location for pawn " + startingAndOptionalPawn.Name);
 			}
-			foreach (Thing thing3 in list)
+			else
 			{
-				if (thing3.def == ThingDefOf.Door)
-				{
-					MapGenerator.rootsToUnfog.AddRange(GenAdj.CellsAdjacentCardinal(thing3));
-				}
-				CompRefuelable compRefuelable;
-				if (thing3.TryGetComp(out compRefuelable))
-				{
-					compRefuelable.Refuel(compRefuelable.Props.fuelCapacity);
-				}
-				Building_GravEngine building_GravEngine = thing3 as Building_GravEngine;
-				if (building_GravEngine != null)
-				{
-					building_GravEngine.silentlyActivate = true;
-				}
+				GenPlace.TryPlaceThing(startingAndOptionalPawn, result, map, ThingPlaceMode.Near, null, null, null);
 			}
-			foreach (IntVec3 c2 in cellRect)
+		}
+		foreach (Thing startingItem in startingItems)
+		{
+			if (startingItem.def.CanHaveFaction)
 			{
-				if (c2.GetTerrain(map) == TerrainDefOf.Substructure)
+				startingItem.SetFactionDirect(Faction.OfPlayer);
+			}
+			int num = startingItem.stackCount;
+			int num2 = 99;
+			while (num > 0 && num2-- > 0)
+			{
+				if (list.Where((Thing t) => t.def == ThingDefOf.Shelf || t.def == ThingDefOf.ShelfSmall).TryRandomElement(out var result2))
 				{
-					map.areaManager.Home[c2] = true;
+					IntVec3 randomCell = result2.OccupiedRect().RandomCell;
+					Thing thing = startingItem.SplitOff(Math.Min(startingItem.def.stackLimit, num));
+					num -= thing.stackCount;
+					GenPlace.TryPlaceThing(thing, randomCell, map, ThingPlaceMode.Near, null, null, null);
 				}
 			}
 		}
-
-		// Token: 0x0600E4A9 RID: 58537 RVA: 0x0042CB6C File Offset: 0x0042AD6C
-		public override void PostMapGenerate(Map map)
+		foreach (Thing item in list)
 		{
-			if (Find.GameInitData == null)
+			if (item.def == ThingDefOf.Door)
 			{
-				return;
+				MapGenerator.rootsToUnfog.AddRange(GenAdj.CellsAdjacentCardinal(item));
 			}
-			if (this.method == PlayerPawnsArriveMethod.DropPods)
+			if (item.TryGetComp(out CompRefuelable comp))
 			{
-				PawnUtility.GiveAllStartingPlayerPawnsThought(ThoughtDefOf.CrashedTogether);
+				comp.Refuel(comp.Props.fuelCapacity);
+			}
+			if (item is Building_GravEngine building_GravEngine)
+			{
+				building_GravEngine.silentlyActivate = true;
 			}
 		}
-
-		// Token: 0x0600E4AA RID: 58538 RVA: 0x0042CB89 File Offset: 0x0042AD89
-		public override int GetHashCode()
+		foreach (IntVec3 item2 in cellRect)
 		{
-			return base.GetHashCode() ^ this.method.GetHashCode();
+			if (item2.GetTerrain(map) == TerrainDefOf.Substructure)
+			{
+				map.areaManager.Home[item2] = true;
+			}
 		}
+	}
 
-		// Token: 0x04009907 RID: 39175
-		private PlayerPawnsArriveMethod method;
+	public override void PostMapGenerate(Map map)
+	{
+		if (Find.GameInitData != null && method == PlayerPawnsArriveMethod.DropPods)
+		{
+			PawnUtility.GiveAllStartingPlayerPawnsThought(ThoughtDefOf.CrashedTogether);
+		}
+	}
+
+	public override int GetHashCode()
+	{
+		return base.GetHashCode() ^ method.GetHashCode();
 	}
 }

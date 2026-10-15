@@ -1,117 +1,97 @@
-﻿using System;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompUseEffect_CallBossgroup : CompUseEffect
 {
-	// Token: 0x02002F59 RID: 12121
-	public class CompUseEffect_CallBossgroup : CompUseEffect
+	private Effecter prepareEffecter;
+
+	public CompProperties_Useable_CallBossgroup Props => (CompProperties_Useable_CallBossgroup)props;
+
+	public bool ShouldSendSpawnLetter
 	{
-		// Token: 0x17002C2F RID: 11311
-		// (get) Token: 0x0601115F RID: 69983 RVA: 0x004E7FF3 File Offset: 0x004E61F3
-		public CompProperties_Useable_CallBossgroup Props
+		get
 		{
-			get
+			if (Props.spawnLetterLabelKey.NullOrEmpty() || Props.spawnLetterTextKey.NullOrEmpty())
 			{
-				return (CompProperties_Useable_CallBossgroup)this.props;
+				return false;
 			}
+			if (!MechanitorUtility.AnyMechanitorInPlayerFaction())
+			{
+				return false;
+			}
+			if (Find.BossgroupManager.lastBossgroupCalled > 0)
+			{
+				return false;
+			}
+			return true;
 		}
+	}
 
-		// Token: 0x17002C30 RID: 11312
-		// (get) Token: 0x06011160 RID: 69984 RVA: 0x004E8000 File Offset: 0x004E6200
-		public bool ShouldSendSpawnLetter
+	public override void DoEffect(Pawn usedBy)
+	{
+		base.DoEffect(usedBy);
+		if (Props.effecterDef != null)
 		{
-			get
-			{
-				return !this.Props.spawnLetterLabelKey.NullOrEmpty() && !this.Props.spawnLetterTextKey.NullOrEmpty() && MechanitorUtility.AnyMechanitorInPlayerFaction() && Find.BossgroupManager.lastBossgroupCalled <= 0;
-			}
+			Effecter obj = new Effecter(Props.effecterDef);
+			obj.Trigger(new TargetInfo(parent.Position, parent.Map), TargetInfo.Invalid);
+			obj.Cleanup();
 		}
+		prepareEffecter?.Cleanup();
+		prepareEffecter = null;
+		CallBossgroup();
+	}
 
-		// Token: 0x06011161 RID: 69985 RVA: 0x004E804C File Offset: 0x004E624C
-		public override void DoEffect(Pawn usedBy)
+	private void CallBossgroup()
+	{
+		GameComponent_Bossgroup component = Current.Game.GetComponent<GameComponent_Bossgroup>();
+		if (component == null)
 		{
-			base.DoEffect(usedBy);
-			if (this.Props.effecterDef != null)
-			{
-				Effecter effecter = new Effecter(this.Props.effecterDef);
-				effecter.Trigger(new TargetInfo(this.parent.Position, this.parent.Map, false), TargetInfo.Invalid, -1);
-				effecter.Cleanup();
-			}
-			Effecter effecter2 = this.prepareEffecter;
-			if (effecter2 != null)
-			{
-				effecter2.Cleanup();
-			}
-			this.prepareEffecter = null;
-			this.CallBossgroup();
+			Log.Error("Trying to call bossgroup with no GameComponent_Bossgroup.");
 		}
-
-		// Token: 0x06011162 RID: 69986 RVA: 0x004E80CC File Offset: 0x004E62CC
-		private void CallBossgroup()
+		else
 		{
-			GameComponent_Bossgroup component = Current.Game.GetComponent<GameComponent_Bossgroup>();
-			if (component == null)
-			{
-				Log.Error("Trying to call bossgroup with no GameComponent_Bossgroup.");
-				return;
-			}
-			this.Props.bossgroupDef.Worker.Resolve(this.parent.Map, component.NumTimesCalledBossgroup(this.Props.bossgroupDef));
+			Props.bossgroupDef.Worker.Resolve(parent.Map, component.NumTimesCalledBossgroup(Props.bossgroupDef));
 		}
+	}
 
-		// Token: 0x06011163 RID: 69987 RVA: 0x004E8124 File Offset: 0x004E6324
-		public override TaggedString ConfirmMessage(Pawn p)
+	public override TaggedString ConfirmMessage(Pawn p)
+	{
+		GameComponent_Bossgroup component = Current.Game.GetComponent<GameComponent_Bossgroup>();
+		return "BossgroupWarningDialog".Translate(NamedArgumentUtility.Named(Props.bossgroupDef.boss.kindDef, "LEADERKIND"), Props.bossgroupDef.GetWaveDescription(component.NumTimesCalledBossgroup(Props.bossgroupDef)).Named("PAWNS"));
+	}
+
+	public override void PrepareTick()
+	{
+		if (Props.prepareEffecterDef != null && prepareEffecter == null)
 		{
-			GameComponent_Bossgroup component = Current.Game.GetComponent<GameComponent_Bossgroup>();
-			return "BossgroupWarningDialog".Translate(this.Props.bossgroupDef.boss.kindDef.Named("LEADERKIND"), this.Props.bossgroupDef.GetWaveDescription(component.NumTimesCalledBossgroup(this.Props.bossgroupDef)).Named("PAWNS"));
+			prepareEffecter = Props.prepareEffecterDef.Spawn(parent.Position, parent.MapHeld);
 		}
+		prepareEffecter?.EffectTick(parent, TargetInfo.Invalid);
+	}
 
-		// Token: 0x06011164 RID: 69988 RVA: 0x004E8190 File Offset: 0x004E6390
-		public override void PrepareTick()
+	public override AcceptanceReport CanBeUsedBy(Pawn p)
+	{
+		if (Faction.OfMechanoids == null || Faction.OfMechanoids.deactivated)
 		{
-			if (this.Props.prepareEffecterDef != null && this.prepareEffecter == null)
-			{
-				this.prepareEffecter = this.Props.prepareEffecterDef.Spawn(this.parent.Position, this.parent.MapHeld, 1f);
-			}
-			Effecter effecter = this.prepareEffecter;
-			if (effecter == null)
-			{
-				return;
-			}
-			effecter.EffectTick(this.parent, TargetInfo.Invalid);
+			return "MechsDisabled".Translate();
 		}
-
-		// Token: 0x06011165 RID: 69989 RVA: 0x004E8204 File Offset: 0x004E6404
-		public override AcceptanceReport CanBeUsedBy(Pawn p)
+		if (!MechanitorUtility.IsMechanitor(p))
 		{
-			if (Faction.OfMechanoids == null || Faction.OfMechanoids.deactivated)
-			{
-				return "MechsDisabled".Translate();
-			}
-			if (!MechanitorUtility.IsMechanitor(p))
-			{
-				return "RequiresMechanitor".Translate();
-			}
-			return this.Props.bossgroupDef.Worker.CanResolve(p);
+			return "RequiresMechanitor".Translate();
 		}
+		return Props.bossgroupDef.Worker.CanResolve(p);
+	}
 
-		// Token: 0x06011166 RID: 69990 RVA: 0x004E8264 File Offset: 0x004E6464
-		public override void PostSpawnSetup(bool respawningAfterLoad)
+	public override void PostSpawnSetup(bool respawningAfterLoad)
+	{
+		if (!ModLister.CheckBiotech("Call bossgroup"))
 		{
-			if (!ModLister.CheckBiotech("Call bossgroup"))
-			{
-				this.parent.Destroy(DestroyMode.Vanish);
-				return;
-			}
-			if (respawningAfterLoad)
-			{
-				return;
-			}
-			if (this.ShouldSendSpawnLetter)
-			{
-				this.Props.SendBossgroupDetailsLetter(this.Props.spawnLetterLabelKey, this.Props.spawnLetterTextKey, this.parent.def);
-			}
+			parent.Destroy();
 		}
-
-		// Token: 0x0400B168 RID: 45416
-		private Effecter prepareEffecter;
+		else if (!respawningAfterLoad && ShouldSendSpawnLetter)
+		{
+			Props.SendBossgroupDetailsLetter(Props.spawnLetterLabelKey, Props.spawnLetterTextKey, parent.def);
+		}
 	}
 }

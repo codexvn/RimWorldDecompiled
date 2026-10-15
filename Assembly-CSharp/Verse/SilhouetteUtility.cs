@@ -1,422 +1,379 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using RimWorld;
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace Verse
+namespace Verse;
+
+public static class SilhouetteUtility
 {
-	// Token: 0x02000653 RID: 1619
-	public static class SilhouetteUtility
+	private readonly struct SilhouetteCacheKey
 	{
-		// Token: 0x060028BD RID: 10429 RVA: 0x000D71C4 File Offset: 0x000D53C4
-		public static void DrawGraphicSilhouette(Thing thing, Vector3 pos)
+		private readonly ThingDef thingDef;
+
+		private readonly LifeStageDef lifeStageDef;
+
+		private readonly int graphicIndex;
+
+		private readonly Gender gender;
+
+		private readonly RotStage rotMode;
+
+		public SilhouetteCacheKey(Pawn pawn)
 		{
-			if (SilhouetteUtility.ShouldDrawSilhouette(thing))
+			thingDef = pawn.def;
+			lifeStageDef = pawn.ageTracker.CurLifeStage;
+			graphicIndex = pawn.GetGraphicIndex();
+			gender = pawn.gender;
+			rotMode = pawn.mutant?.rotStage ?? RotStage.Fresh;
+		}
+
+		public SilhouetteCacheKey(Thing thing)
+		{
+			thingDef = thing.def;
+			lifeStageDef = null;
+			graphicIndex = thing.OverrideGraphicIndex ?? (-1);
+			gender = Gender.None;
+			rotMode = RotStage.Fresh;
+		}
+
+		public override int GetHashCode()
+		{
+			int seed = thingDef.GetHashCode();
+			if (lifeStageDef != null)
 			{
-				SilhouetteUtility.DrawSilhouette(thing, pos);
+				seed = Gen.HashCombineInt(seed, lifeStageDef.GetHashCode());
 			}
+			seed = Gen.HashCombineInt(seed, graphicIndex);
+			seed = Gen.HashCombineInt(seed, gender.GetHashCode());
+			return Gen.HashCombineInt(seed, rotMode.GetHashCode());
+		}
+	}
+
+	private class SilhouetteCacheValue : IDisposable
+	{
+		public readonly Material east;
+
+		public readonly Material west;
+
+		public SilhouetteCacheValue(Material east, Material west)
+		{
+			this.east = east;
+			this.west = west;
 		}
 
-		// Token: 0x060028BE RID: 10430 RVA: 0x000D71D8 File Offset: 0x000D53D8
-		public static void DrawGUISilhouette(Thing thing)
+		public void Dispose()
 		{
-			Pawn pawn = thing as Pawn;
-			if (pawn != null && SilhouetteUtility.ShouldDrawPawnDotSilhouette(pawn))
-			{
-				SilhouetteUtility.DrawPawnDotSilhouette(pawn);
-			}
+			UnityEngine.Object.Destroy(east);
+			UnityEngine.Object.Destroy(west);
 		}
+	}
 
-		// Token: 0x060028BF RID: 10431 RVA: 0x000D7200 File Offset: 0x000D5400
-		private static SilhouetteUtility.SilhouetteCacheKey GetSilhouetteCacheKey(Thing thing)
+	private static readonly Dictionary<SilhouetteCacheKey, SilhouetteCacheValue> materialCache = new Dictionary<SilhouetteCacheKey, SilhouetteCacheValue>(512);
+
+	private static readonly Dictionary<float3, MaterialPropertyBlock> materialPropertyBlockCache = new Dictionary<float3, MaterialPropertyBlock>();
+
+	private static int lastCachedAlphaFrame = -1;
+
+	private static float lastCachedAlpha = 0f;
+
+	private const float DotHighlightSizeRatio = 0.01f;
+
+	private const float DotAlpha = 0.75f;
+
+	private const float SilhouetteAlpha = 0.9f;
+
+	private static readonly Color ThingColor = new Color(0.56f, 0.62f, 0.9f);
+
+	private static readonly Color UncontrolledMechDotColor = new Color(0.8f, 0.55f, 0.17f, 0.75f);
+
+	public const float DotHighlightStartRange = 0.9f;
+
+	private const int MaximumMaterialCache = 512;
+
+	public static void DrawGraphicSilhouette(Thing thing, Vector3 pos)
+	{
+		if (ShouldDrawSilhouette(thing))
 		{
-			Pawn pawn = thing as Pawn;
-			if (pawn != null)
-			{
-				return new SilhouetteUtility.SilhouetteCacheKey(pawn);
-			}
-			return new SilhouetteUtility.SilhouetteCacheKey(thing);
+			DrawSilhouette(thing, pos);
 		}
+	}
 
-		// Token: 0x060028C0 RID: 10432 RVA: 0x000D7224 File Offset: 0x000D5424
-		public static void NotifyGraphicDirty(Thing thing)
+	public static void DrawGUISilhouette(Thing thing)
+	{
+		if (thing is Pawn thing2 && ShouldDrawPawnDotSilhouette(thing2))
 		{
-			SilhouetteUtility.SilhouetteCacheKey silhouetteCacheKey = SilhouetteUtility.GetSilhouetteCacheKey(thing);
-			if (SilhouetteUtility.materialCache.ContainsKey(silhouetteCacheKey))
-			{
-				SilhouetteUtility.materialCache.Remove(silhouetteCacheKey);
-			}
+			DrawPawnDotSilhouette(thing2);
 		}
+	}
 
-		// Token: 0x060028C1 RID: 10433 RVA: 0x000D7254 File Offset: 0x000D5454
-		private static void DrawPawnDotSilhouette(Thing thing)
+	private static SilhouetteCacheKey GetSilhouetteCacheKey(Thing thing)
+	{
+		if (thing is Pawn pawn)
 		{
-			Color color = SilhouetteUtility.GetColor(thing);
-			color.a = SilhouetteUtility.GetAlpha();
-			GUI.DrawTexture(SilhouetteUtility.GetAdjustedScreenspaceRect(thing, 0.01f), TexUI.DotHighlight, ScaleMode.ScaleToFit, true, 0f, color, 0f, 0f);
+			return new SilhouetteCacheKey(pawn);
 		}
+		return new SilhouetteCacheKey(thing);
+	}
 
-		// Token: 0x060028C2 RID: 10434 RVA: 0x000D729C File Offset: 0x000D549C
-		public static void DrawSilhouetteJob(Thing thing, Matrix4x4 trs)
+	public static void NotifyGraphicDirty(Thing thing)
+	{
+		SilhouetteCacheKey silhouetteCacheKey = GetSilhouetteCacheKey(thing);
+		if (materialCache.ContainsKey(silhouetteCacheKey))
 		{
-			ValueTuple<Mesh, Material> cachedSilhouetteData = SilhouetteUtility.GetCachedSilhouetteData(thing);
-			Mesh item = cachedSilhouetteData.Item1;
-			Material item2 = cachedSilhouetteData.Item2;
-			MaterialPropertyBlock cachedMaterialPropertyBlock = SilhouetteUtility.GetCachedMaterialPropertyBlock(SilhouetteUtility.GetColor(thing));
-			GenDraw.DrawMeshNowOrLater(item, trs, item2, false, cachedMaterialPropertyBlock);
+			materialCache.Remove(silhouetteCacheKey);
 		}
+	}
 
-		// Token: 0x060028C3 RID: 10435 RVA: 0x000D72D4 File Offset: 0x000D54D4
-		private static void DrawSilhouette(Thing thing, Vector3 pos)
+	private static void DrawPawnDotSilhouette(Thing thing)
+	{
+		Color color = GetColor(thing);
+		color.a = GetAlpha();
+		GUI.DrawTexture(GetAdjustedScreenspaceRect(thing), TexUI.DotHighlight, ScaleMode.ScaleToFit, alphaBlend: true, 0f, color, 0f, 0f);
+	}
+
+	public static void DrawSilhouetteJob(Thing thing, Matrix4x4 trs)
+	{
+		(Mesh mesh, Material material) cachedSilhouetteData = GetCachedSilhouetteData(thing);
+		Mesh item = cachedSilhouetteData.mesh;
+		Material item2 = cachedSilhouetteData.material;
+		MaterialPropertyBlock cachedMaterialPropertyBlock = GetCachedMaterialPropertyBlock(GetColor(thing));
+		GenDraw.DrawMeshNowOrLater(item, trs, item2, drawNow: false, cachedMaterialPropertyBlock);
+	}
+
+	private static void DrawSilhouette(Thing thing, Vector3 pos)
+	{
+		(Mesh mesh, Material material) cachedSilhouetteData = GetCachedSilhouetteData(thing);
+		Mesh item = cachedSilhouetteData.mesh;
+		Material item2 = cachedSilhouetteData.material;
+		Graphic graphic = ((thing is Pawn pawn) ? pawn.Drawer.renderer.SilhouetteGraphic : thing.Graphic);
+		MaterialPropertyBlock cachedMaterialPropertyBlock = GetCachedMaterialPropertyBlock(GetColor(thing));
+		Vector3 vector = (thing.def.rotatable ? new Vector3(graphic.drawSize.y, 0f, graphic.drawSize.x) : new Vector3(graphic.drawSize.x, 0f, graphic.drawSize.y));
+		Vector3 inverseFovScale = Find.CameraDriver.InverseFovScale;
+		if (vector.x < 2.5f)
 		{
-			ValueTuple<Mesh, Material> cachedSilhouetteData = SilhouetteUtility.GetCachedSilhouetteData(thing);
-			Mesh item = cachedSilhouetteData.Item1;
-			Material item2 = cachedSilhouetteData.Item2;
-			Pawn pawn = thing as Pawn;
-			Graphic graphic = (pawn != null) ? pawn.Drawer.renderer.SilhouetteGraphic : thing.Graphic;
-			MaterialPropertyBlock cachedMaterialPropertyBlock = SilhouetteUtility.GetCachedMaterialPropertyBlock(SilhouetteUtility.GetColor(thing));
-			Vector3 vector = thing.def.rotatable ? new Vector3(graphic.drawSize.y, 0f, graphic.drawSize.x) : new Vector3(graphic.drawSize.x, 0f, graphic.drawSize.y);
-			Vector3 inverseFovScale = Find.CameraDriver.InverseFovScale;
-			if (vector.x < 2.5f)
-			{
-				inverseFovScale.x *= vector.x + SilhouetteUtility.AdjustScale(vector.x);
-			}
-			else
-			{
-				inverseFovScale.x *= vector.x;
-			}
-			if (vector.z < 2.5f)
-			{
-				inverseFovScale.z *= vector.z + SilhouetteUtility.AdjustScale(vector.z);
-			}
-			else
-			{
-				inverseFovScale.z *= vector.z;
-			}
-			Matrix4x4 matrix = Matrix4x4.TRS(pos.SetToAltitude(AltitudeLayer.Silhouettes), Quaternion.AngleAxis(0f, Vector3.up), inverseFovScale);
-			GenDraw.DrawMeshNowOrLater(item, matrix, item2, false, cachedMaterialPropertyBlock);
+			inverseFovScale.x *= vector.x + AdjustScale(vector.x);
 		}
-
-		// Token: 0x060028C4 RID: 10436 RVA: 0x000D742F File Offset: 0x000D562F
-		public static bool ShouldDrawSilhouette(Thing thing)
+		else
 		{
-			return !WorldComponent_GravshipController.GravshipRenderInProgess && !Find.ScreenshotModeHandler.Active && Prefs.HighlightStyleMode == HighlightStyleMode.Silhouettes && thing.def.drawHighlight && SilhouetteUtility.ShouldHighlight(thing);
+			inverseFovScale.x *= vector.x;
 		}
-
-		// Token: 0x060028C5 RID: 10437 RVA: 0x000D746C File Offset: 0x000D566C
-		private static bool ShouldDrawPawnDotSilhouette(Thing thing)
+		if (vector.z < 2.5f)
 		{
-			return Prefs.HighlightStyleMode == HighlightStyleMode.Dots && thing.def.drawHighlight && SilhouetteUtility.ShouldHighlight(thing);
+			inverseFovScale.z *= vector.z + AdjustScale(vector.z);
 		}
-
-		// Token: 0x060028C6 RID: 10438 RVA: 0x000D748C File Offset: 0x000D568C
-		public static bool CanHighlightAny()
+		else
 		{
-			if (Prefs.DotHighlightDisplayMode == DotHighlightDisplayMode.None)
+			inverseFovScale.z *= vector.z;
+		}
+		Matrix4x4 matrix = Matrix4x4.TRS(pos.SetToAltitude(AltitudeLayer.Silhouettes), Quaternion.AngleAxis(0f, Vector3.up), inverseFovScale);
+		GenDraw.DrawMeshNowOrLater(item, matrix, item2, drawNow: false, cachedMaterialPropertyBlock);
+	}
+
+	public static bool ShouldDrawSilhouette(Thing thing)
+	{
+		if (WorldComponent_GravshipController.GravshipRenderInProgess)
+		{
+			return false;
+		}
+		if (Find.ScreenshotModeHandler.Active)
+		{
+			return false;
+		}
+		if (Prefs.HighlightStyleMode != HighlightStyleMode.Silhouettes)
+		{
+			return false;
+		}
+		if (!thing.def.drawHighlight)
+		{
+			return false;
+		}
+		if (!ShouldHighlight(thing))
+		{
+			return false;
+		}
+		return true;
+	}
+
+	private static bool ShouldDrawPawnDotSilhouette(Thing thing)
+	{
+		if (Prefs.HighlightStyleMode == HighlightStyleMode.Dots && thing.def.drawHighlight)
+		{
+			return ShouldHighlight(thing);
+		}
+		return false;
+	}
+
+	public static bool CanHighlightAny()
+	{
+		if (Prefs.DotHighlightDisplayMode == DotHighlightDisplayMode.None)
+		{
+			return false;
+		}
+		CameraDriver cameraDriver = Find.CameraDriver;
+		if (cameraDriver.ZoomRootSize < cameraDriver.config.sizeRange.max * 0.9f)
+		{
+			return false;
+		}
+		return true;
+	}
+
+	private static bool ShouldHighlight(Thing thing)
+	{
+		if (!CanHighlightAny())
+		{
+			return false;
+		}
+		if (!thing.Spawned)
+		{
+			return false;
+		}
+		if (thing.shouldHighlightCachedTick == GenTicks.TicksGame)
+		{
+			return thing.shouldHighlightCached;
+		}
+		thing.shouldHighlightCachedTick = GenTicks.TicksGame;
+		return thing.shouldHighlightCached = ShouldHighlightInt(thing);
+	}
+
+	private static bool ShouldHighlightInt(Thing thing)
+	{
+		if (thing is Pawn pawn)
+		{
+			if (!pawn.IsPlayerControlled && pawn.Fogged())
 			{
 				return false;
 			}
-			CameraDriver cameraDriver = Find.CameraDriver;
-			return cameraDriver.ZoomRootSize >= cameraDriver.config.sizeRange.max * 0.9f;
-		}
-
-		// Token: 0x060028C7 RID: 10439 RVA: 0x000D74CC File Offset: 0x000D56CC
-		private static bool ShouldHighlight(Thing thing)
-		{
-			if (!SilhouetteUtility.CanHighlightAny())
+			if (Prefs.DotHighlightDisplayMode == DotHighlightDisplayMode.HighlightHostiles && !pawn.HostileTo(Faction.OfPlayer))
 			{
 				return false;
 			}
-			if (!thing.Spawned)
+			if (pawn.IsHiddenFromPlayer())
 			{
 				return false;
 			}
-			if (thing.shouldHighlightCachedTick == GenTicks.TicksGame)
+			if (ModsConfig.AnomalyActive && pawn.Map.gameConditionManager.MapBrightness < 0.1f && thing.Map.glowGrid.GroundGlowAt(thing.Position) <= 0f && pawn.Faction != Faction.OfPlayer)
 			{
-				return thing.shouldHighlightCached;
+				return false;
 			}
-			thing.shouldHighlightCachedTick = GenTicks.TicksGame;
-			return thing.shouldHighlightCached = SilhouetteUtility.ShouldHighlightInt(thing);
 		}
-
-		// Token: 0x060028C8 RID: 10440 RVA: 0x000D751C File Offset: 0x000D571C
-		private static bool ShouldHighlightInt(Thing thing)
+		else
 		{
-			Pawn pawn = thing as Pawn;
-			if (pawn != null)
+			if (thing.Fogged())
 			{
-				if (!pawn.IsPlayerControlled && pawn.Fogged())
-				{
-					return false;
-				}
-				if (Prefs.DotHighlightDisplayMode == DotHighlightDisplayMode.HighlightHostiles && !pawn.HostileTo(Faction.OfPlayer))
-				{
-					return false;
-				}
-				if (pawn.IsHiddenFromPlayer())
-				{
-					return false;
-				}
-				if (ModsConfig.AnomalyActive && pawn.Map.gameConditionManager.MapBrightness < 0.1f && thing.Map.glowGrid.GroundGlowAt(thing.Position, false, false) <= 0f && pawn.Faction != Faction.OfPlayer)
-				{
-					return false;
-				}
+				return false;
 			}
-			else
+			if (thing.def.drawHighlightOnlyForHostile && !thing.HostileTo(Faction.OfPlayer))
 			{
-				if (thing.Fogged())
-				{
-					return false;
-				}
-				if (thing.def.drawHighlightOnlyForHostile && !thing.HostileTo(Faction.OfPlayer))
-				{
-					return false;
-				}
+				return false;
 			}
-			return true;
 		}
+		return true;
+	}
 
-		// Token: 0x060028C9 RID: 10441 RVA: 0x000D75DC File Offset: 0x000D57DC
-		private static MaterialPropertyBlock GetCachedMaterialPropertyBlock(Color color)
+	private static MaterialPropertyBlock GetCachedMaterialPropertyBlock(Color color)
+	{
+		float3 key = new float3(color.r, color.g, color.b);
+		color.a = GetAlpha();
+		if (materialPropertyBlockCache.TryGetValue(key, out var value))
 		{
-			float3 key = new float3(color.r, color.g, color.b);
-			color.a = SilhouetteUtility.GetAlpha();
-			MaterialPropertyBlock materialPropertyBlock;
-			if (SilhouetteUtility.materialPropertyBlockCache.TryGetValue(key, out materialPropertyBlock))
-			{
-				materialPropertyBlock.SetColor(ShaderPropertyIDs.Color, color);
-			}
-			else
-			{
-				materialPropertyBlock = new MaterialPropertyBlock();
-				materialPropertyBlock.SetColor(ShaderPropertyIDs.Color, color);
-				SilhouetteUtility.materialPropertyBlockCache[key] = materialPropertyBlock;
-			}
-			return materialPropertyBlock;
+			value.SetColor(ShaderPropertyIDs.Color, color);
 		}
-
-		// Token: 0x060028CA RID: 10442 RVA: 0x000D764C File Offset: 0x000D584C
-		private static Color GetColor(Thing thing)
+		else
 		{
-			if (thing.highlightColorCachedTick == GenTicks.TicksGame)
-			{
-				return thing.highlightColorCached;
-			}
-			thing.highlightColorCachedTick = GenTicks.TicksGame;
-			return thing.highlightColorCached = SilhouetteUtility.GetColorInt(thing);
+			value = new MaterialPropertyBlock();
+			value.SetColor(ShaderPropertyIDs.Color, color);
+			materialPropertyBlockCache[key] = value;
 		}
+		return value;
+	}
 
-		// Token: 0x060028CB RID: 10443 RVA: 0x000D7688 File Offset: 0x000D5888
-		private static Color GetColorInt(Thing thing)
+	private static Color GetColor(Thing thing)
+	{
+		if (thing.highlightColorCachedTick == GenTicks.TicksGame)
 		{
-			Color result;
-			if (thing.def.highlightColor != null)
-			{
-				result = thing.def.highlightColor.Value;
-			}
-			else
-			{
-				Pawn pawn = thing as Pawn;
-				if (pawn != null)
-				{
-					if (pawn.IsColonyMech && !pawn.IsColonyMechPlayerControlled)
-					{
-						result = SilhouetteUtility.UncontrolledMechDotColor;
-					}
-					else
-					{
-						result = PawnNameColorUtility.PawnNameColorOf(pawn);
-					}
-				}
-				else if (thing.HostileTo(Faction.OfPlayer))
-				{
-					result = PawnNameColorUtility.ColorBaseHostile;
-				}
-				else
-				{
-					result = SilhouetteUtility.ThingColor;
-				}
-			}
-			return result;
+			return thing.highlightColorCached;
 		}
+		thing.highlightColorCachedTick = GenTicks.TicksGame;
+		return thing.highlightColorCached = GetColorInt(thing);
+	}
 
-		// Token: 0x060028CC RID: 10444 RVA: 0x000D7704 File Offset: 0x000D5904
-		private static float GetAlpha()
+	private static Color GetColorInt(Thing thing)
+	{
+		if (thing.def.highlightColor.HasValue)
 		{
-			if (SilhouetteUtility.lastCachedAlphaFrame == RealTime.frameCount)
-			{
-				return SilhouetteUtility.lastCachedAlpha;
-			}
-			SilhouetteUtility.lastCachedAlphaFrame = RealTime.frameCount;
-			bool flag = Prefs.HighlightStyleMode == HighlightStyleMode.Silhouettes;
-			CameraDriver cameraDriver = Find.CameraDriver;
-			float num = Mathf.Clamp01(Mathf.InverseLerp(cameraDriver.config.sizeRange.max * 0.84999996f, cameraDriver.config.sizeRange.max, cameraDriver.ZoomRootSize));
-			if (flag)
-			{
-				return SilhouetteUtility.lastCachedAlpha = 0.9f * num;
-			}
-			return SilhouetteUtility.lastCachedAlpha = 0.75f * num;
+			return thing.def.highlightColor.Value;
 		}
-
-		// Token: 0x060028CD RID: 10445 RVA: 0x000D7790 File Offset: 0x000D5990
-		[return: TupleElementNames(new string[]
+		if (thing is Pawn pawn)
 		{
-			"mesh",
-			"material"
-		})]
-		private static ValueTuple<Mesh, Material> GetCachedSilhouetteData(Thing thing)
-		{
-			if (SilhouetteUtility.materialCache.Count > 512)
+			if (pawn.IsColonyMech && !pawn.IsColonyMechPlayerControlled)
 			{
-				SilhouetteUtility.materialCache.Clear();
+				return UncontrolledMechDotColor;
 			}
-			SilhouetteUtility.SilhouetteCacheKey silhouetteCacheKey = SilhouetteUtility.GetSilhouetteCacheKey(thing);
-			if (!SilhouetteUtility.materialCache.ContainsKey(silhouetteCacheKey))
-			{
-				Pawn pawn = thing as Pawn;
-				Graphic coloredVersion = ((pawn != null) ? pawn.Drawer.renderer.SilhouetteGraphic : thing.Graphic).GetColoredVersion(ShaderDatabase.Silhouette, Color.white, Color.white);
-				SilhouetteUtility.materialCache[silhouetteCacheKey] = new SilhouetteUtility.SilhouetteCacheValue(coloredVersion.MatEast, coloredVersion.MatWest);
-			}
-			Material item;
-			Mesh item2;
-			if (thing.Rotation == Rot4.West)
-			{
-				item = SilhouetteUtility.materialCache[silhouetteCacheKey].west;
-				item2 = MeshPool.GridPlaneFlip(Vector2.one);
-			}
-			else
-			{
-				item = SilhouetteUtility.materialCache[silhouetteCacheKey].east;
-				item2 = MeshPool.GridPlane(Vector2.one);
-			}
-			return new ValueTuple<Mesh, Material>(item2, item);
+			return PawnNameColorUtility.PawnNameColorOf(pawn);
 		}
-
-		// Token: 0x060028CE RID: 10446 RVA: 0x000D7875 File Offset: 0x000D5A75
-		public static float AdjustScale(float scale)
+		if (thing.HostileTo(Faction.OfPlayer))
 		{
-			return Mathf.InverseLerp(2.5f, 0f, scale) * 0.75f;
+			return PawnNameColorUtility.ColorBaseHostile;
 		}
+		return ThingColor;
+	}
 
-		// Token: 0x060028CF RID: 10447 RVA: 0x000D7890 File Offset: 0x000D5A90
-		public static Rect GetAdjustedScreenspaceRect(Thing thing, float screenSizeRatio = 0.01f)
+	private static float GetAlpha()
+	{
+		if (lastCachedAlphaFrame == RealTime.frameCount)
 		{
-			Vector2 vector = Find.Camera.WorldToScreenPoint(thing.DrawPos) / Prefs.UIScale;
-			vector.y = (float)UI.screenHeight - vector.y;
-			float num = screenSizeRatio * (float)Mathf.Min(Screen.width, Screen.height) / Prefs.UIScale;
-			return new Rect(vector.x - num, vector.y - num / 2f, num * 2f, num);
+			return lastCachedAlpha;
 		}
-
-		// Token: 0x0400217B RID: 8571
-		private static readonly Dictionary<SilhouetteUtility.SilhouetteCacheKey, SilhouetteUtility.SilhouetteCacheValue> materialCache = new Dictionary<SilhouetteUtility.SilhouetteCacheKey, SilhouetteUtility.SilhouetteCacheValue>(512);
-
-		// Token: 0x0400217C RID: 8572
-		private static readonly Dictionary<float3, MaterialPropertyBlock> materialPropertyBlockCache = new Dictionary<float3, MaterialPropertyBlock>();
-
-		// Token: 0x0400217D RID: 8573
-		private static int lastCachedAlphaFrame = -1;
-
-		// Token: 0x0400217E RID: 8574
-		private static float lastCachedAlpha = 0f;
-
-		// Token: 0x0400217F RID: 8575
-		private const float DotHighlightSizeRatio = 0.01f;
-
-		// Token: 0x04002180 RID: 8576
-		private const float DotAlpha = 0.75f;
-
-		// Token: 0x04002181 RID: 8577
-		private const float SilhouetteAlpha = 0.9f;
-
-		// Token: 0x04002182 RID: 8578
-		private static readonly Color ThingColor = new Color(0.56f, 0.62f, 0.9f);
-
-		// Token: 0x04002183 RID: 8579
-		private static readonly Color UncontrolledMechDotColor = new Color(0.8f, 0.55f, 0.17f, 0.75f);
-
-		// Token: 0x04002184 RID: 8580
-		public const float DotHighlightStartRange = 0.9f;
-
-		// Token: 0x04002185 RID: 8581
-		private const int MaximumMaterialCache = 512;
-
-		// Token: 0x02000654 RID: 1620
-		private readonly struct SilhouetteCacheKey
+		lastCachedAlphaFrame = RealTime.frameCount;
+		bool num = Prefs.HighlightStyleMode == HighlightStyleMode.Silhouettes;
+		CameraDriver cameraDriver = Find.CameraDriver;
+		float num2 = Mathf.Clamp01(Mathf.InverseLerp(cameraDriver.config.sizeRange.max * 0.84999996f, cameraDriver.config.sizeRange.max, cameraDriver.ZoomRootSize));
+		if (num)
 		{
-			// Token: 0x060028D1 RID: 10449 RVA: 0x000D7980 File Offset: 0x000D5B80
-			public SilhouetteCacheKey(Pawn pawn)
-			{
-				this.thingDef = pawn.def;
-				this.lifeStageDef = pawn.ageTracker.CurLifeStage;
-				this.graphicIndex = pawn.GetGraphicIndex();
-				this.gender = pawn.gender;
-				Pawn_MutantTracker mutant = pawn.mutant;
-				this.rotMode = ((mutant != null) ? mutant.rotStage : RotStage.Fresh);
-			}
-
-			// Token: 0x060028D2 RID: 10450 RVA: 0x000D79DC File Offset: 0x000D5BDC
-			public SilhouetteCacheKey(Thing thing)
-			{
-				this.thingDef = thing.def;
-				this.lifeStageDef = null;
-				this.graphicIndex = (thing.OverrideGraphicIndex ?? -1);
-				this.gender = Gender.None;
-				this.rotMode = RotStage.Fresh;
-			}
-
-			// Token: 0x060028D3 RID: 10451 RVA: 0x000D7A2C File Offset: 0x000D5C2C
-			public override int GetHashCode()
-			{
-				int seed = this.thingDef.GetHashCode();
-				if (this.lifeStageDef != null)
-				{
-					seed = Gen.HashCombineInt(seed, this.lifeStageDef.GetHashCode());
-				}
-				seed = Gen.HashCombineInt(seed, this.graphicIndex);
-				seed = Gen.HashCombineInt(seed, this.gender.GetHashCode());
-				return Gen.HashCombineInt(seed, this.rotMode.GetHashCode());
-			}
-
-			// Token: 0x04002186 RID: 8582
-			private readonly ThingDef thingDef;
-
-			// Token: 0x04002187 RID: 8583
-			private readonly LifeStageDef lifeStageDef;
-
-			// Token: 0x04002188 RID: 8584
-			private readonly int graphicIndex;
-
-			// Token: 0x04002189 RID: 8585
-			private readonly Gender gender;
-
-			// Token: 0x0400218A RID: 8586
-			private readonly RotStage rotMode;
+			return lastCachedAlpha = 0.9f * num2;
 		}
+		return lastCachedAlpha = 0.75f * num2;
+	}
 
-		// Token: 0x02000655 RID: 1621
-		private class SilhouetteCacheValue : IDisposable
+	private static (Mesh mesh, Material material) GetCachedSilhouetteData(Thing thing)
+	{
+		if (materialCache.Count > 512)
 		{
-			// Token: 0x060028D4 RID: 10452 RVA: 0x000D7A9D File Offset: 0x000D5C9D
-			public SilhouetteCacheValue(Material east, Material west)
-			{
-				this.east = east;
-				this.west = west;
-			}
-
-			// Token: 0x060028D5 RID: 10453 RVA: 0x000D7AB3 File Offset: 0x000D5CB3
-			public void Dispose()
-			{
-				UnityEngine.Object.Destroy(this.east);
-				UnityEngine.Object.Destroy(this.west);
-			}
-
-			// Token: 0x0400218B RID: 8587
-			public readonly Material east;
-
-			// Token: 0x0400218C RID: 8588
-			public readonly Material west;
+			materialCache.Clear();
 		}
+		SilhouetteCacheKey silhouetteCacheKey = GetSilhouetteCacheKey(thing);
+		if (!materialCache.ContainsKey(silhouetteCacheKey))
+		{
+			Graphic coloredVersion = ((thing is Pawn pawn) ? pawn.Drawer.renderer.SilhouetteGraphic : thing.Graphic).GetColoredVersion(ShaderDatabase.Silhouette, Color.white, Color.white);
+			materialCache[silhouetteCacheKey] = new SilhouetteCacheValue(coloredVersion.MatEast, coloredVersion.MatWest);
+		}
+		Material item;
+		Mesh item2;
+		if (thing.Rotation == Rot4.West)
+		{
+			item = materialCache[silhouetteCacheKey].west;
+			item2 = MeshPool.GridPlaneFlip(Vector2.one);
+		}
+		else
+		{
+			item = materialCache[silhouetteCacheKey].east;
+			item2 = MeshPool.GridPlane(Vector2.one);
+		}
+		return (mesh: item2, material: item);
+	}
+
+	public static float AdjustScale(float scale)
+	{
+		return Mathf.InverseLerp(2.5f, 0f, scale) * 0.75f;
+	}
+
+	public static Rect GetAdjustedScreenspaceRect(Thing thing, float screenSizeRatio = 0.01f)
+	{
+		Vector2 vector = (Vector2)Find.Camera.WorldToScreenPoint(thing.DrawPos) / Prefs.UIScale;
+		vector.y = (float)UI.screenHeight - vector.y;
+		float num = screenSizeRatio * (float)Mathf.Min(Screen.width, Screen.height) / Prefs.UIScale;
+		return new Rect(vector.x - num, vector.y - num / 2f, num * 2f, num);
 	}
 }

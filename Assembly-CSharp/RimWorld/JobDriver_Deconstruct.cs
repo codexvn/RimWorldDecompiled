@@ -1,77 +1,189 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_Deconstruct : JobDriver_RemoveBuilding
 {
-	// Token: 0x0200116E RID: 4462
-	public class JobDriver_Deconstruct : JobDriver_RemoveBuilding
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__8 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x170010DA RID: 4314
-		// (get) Token: 0x06006D28 RID: 27944 RVA: 0x00223A33 File Offset: 0x00221C33
-		protected override DesignationDef Designation
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_Deconstruct _003C_003E4__this;
+
+		private IEnumerator<Toil> _003C_003E7__wrap1;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return DesignationDefOf.Deconstruct;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170010DB RID: 4315
-		// (get) Token: 0x06006D29 RID: 27945 RVA: 0x00002C42 File Offset: 0x00000E42
-		protected override EffecterDef WorkEffecter
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return null;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170010DC RID: 4316
-		// (get) Token: 0x06006D2A RID: 27946 RVA: 0x00223A3A File Offset: 0x00221C3A
-		protected override float TotalNeededWork
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__8(int _003C_003E1__state)
 		{
-			get
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				return Mathf.Clamp(base.Building.GetStatValue(StatDefOf.WorkToBuild, true, -1), 20f, 3000f);
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
 			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x06006D2B RID: 27947 RVA: 0x00223A5D File Offset: 0x00221C5D
-		protected override IEnumerable<Toil> MakeNewToils()
+		private bool MoveNext()
 		{
-			this.FailOn(() => base.Building == null || !base.Building.DeconstructibleBy(this.pawn.Faction));
-			foreach (Toil toil in base.MakeNewToils())
+			try
 			{
-				yield return toil;
+				int num = _003C_003E1__state;
+				JobDriver_Deconstruct CS_0024_003C_003E8__locals5 = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					CS_0024_003C_003E8__locals5.FailOn(() => CS_0024_003C_003E8__locals5.Building == null || !CS_0024_003C_003E8__locals5.Building.DeconstructibleBy(CS_0024_003C_003E8__locals5.pawn.Faction));
+					_003C_003E7__wrap1 = ((JobDriver_RemoveBuilding)CS_0024_003C_003E8__locals5).MakeNewToils().GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 1:
+					_003C_003E1__state = -3;
+					break;
+				}
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					Toil current = _003C_003E7__wrap1.Current;
+					_003C_003E2__current = current;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = null;
+				return false;
 			}
-			IEnumerator<Toil> enumerator = null;
-			yield break;
-			yield break;
-		}
-
-		// Token: 0x06006D2C RID: 27948 RVA: 0x00223A6D File Offset: 0x00221C6D
-		protected override void FinishedRemoving()
-		{
-			base.Target.Destroy(DestroyMode.Deconstruct);
-			this.pawn.records.Increment(RecordDefOf.ThingsDeconstructed);
-		}
-
-		// Token: 0x06006D2D RID: 27949 RVA: 0x00223A90 File Offset: 0x00221C90
-		protected override void TickActionInterval(int delta)
-		{
-			if (this.pawn.skills != null && base.Building.def.CostListAdjusted(base.Building.Stuff, true).Count > 0)
+			catch
 			{
-				this.pawn.skills.Learn(SkillDefOf.Construction, 0.25f * (float)delta, false, false);
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x04004C84 RID: 19588
-		private const float MaxDeconstructWork = 3000f;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x04004C85 RID: 19589
-		private const float MinDeconstructWork = 20f;
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__8 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__8(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private const float MaxDeconstructWork = 3000f;
+
+	private const float MinDeconstructWork = 20f;
+
+	protected override DesignationDef Designation => DesignationDefOf.Deconstruct;
+
+	protected override EffecterDef WorkEffecter => null;
+
+	protected override float TotalNeededWork => Mathf.Clamp(base.Building.GetStatValue(StatDefOf.WorkToBuild), 20f, 3000f);
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__8))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__8(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	protected override void FinishedRemoving()
+	{
+		base.Target.Destroy(DestroyMode.Deconstruct);
+		pawn.records.Increment(RecordDefOf.ThingsDeconstructed);
+	}
+
+	protected override void TickActionInterval(int delta)
+	{
+		if (pawn.skills != null && base.Building.def.CostListAdjusted(base.Building.Stuff).Count > 0)
+		{
+			pawn.skills.Learn(SkillDefOf.Construction, 0.25f * (float)delta);
+		}
 	}
 }

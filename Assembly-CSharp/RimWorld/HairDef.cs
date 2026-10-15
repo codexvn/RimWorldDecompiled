@@ -1,22 +1,16 @@
-﻿using System;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class HairDef : StyleItemDef
 {
-	// Token: 0x02001AFE RID: 6910
-	public class HairDef : StyleItemDef
+	public override Graphic GraphicFor(Pawn pawn, Color color)
 	{
-		// Token: 0x06009A60 RID: 39520 RVA: 0x002CE37B File Offset: 0x002CC57B
-		public override Graphic GraphicFor(Pawn pawn, Color color)
+		if (noGraphic)
 		{
-			if (this.noGraphic)
-			{
-				return null;
-			}
-			string texPath = this.texPath;
-			ShaderTypeDef overrideShaderTypeDef = this.overrideShaderTypeDef;
-			return GraphicDatabase.Get<Graphic_Multi>(texPath, ((overrideShaderTypeDef != null) ? overrideShaderTypeDef.Shader : null) ?? ShaderDatabase.CutoutHair, Vector2.one, color);
+			return null;
 		}
+		return GraphicDatabase.Get<Graphic_Multi>(texPath, overrideShaderTypeDef?.Shader ?? ShaderDatabase.CutoutHair, Vector2.one, color);
 	}
 }

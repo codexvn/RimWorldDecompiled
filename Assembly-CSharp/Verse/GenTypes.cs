@@ -1,838 +1,890 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using RimWorld;
 using RimWorld.QuestGen;
 
-namespace Verse
+namespace Verse;
+
+public static class GenTypes
 {
-	// Token: 0x0200011A RID: 282
-	public static class GenTypes
+	private struct TypeCacheKey : IEquatable<TypeCacheKey>
 	{
-		// Token: 0x17000162 RID: 354
-		// (get) Token: 0x0600087E RID: 2174 RVA: 0x00027B47 File Offset: 0x00025D47
-		private static IEnumerable<Assembly> AllActiveAssemblies
+		public string typeName;
+
+		public string namespaceIfAmbiguous;
+
+		public override int GetHashCode()
 		{
+			if (namespaceIfAmbiguous == null)
+			{
+				return typeName.GetHashCode();
+			}
+			return (17 * 31 + typeName.GetHashCode()) * 31 + namespaceIfAmbiguous.GetHashCode();
+		}
+
+		public bool Equals(TypeCacheKey other)
+		{
+			if (string.Equals(typeName, other.typeName))
+			{
+				return string.Equals(namespaceIfAmbiguous, other.namespaceIfAmbiguous);
+			}
+			return false;
+		}
+
+		public override bool Equals(object obj)
+		{
+			if (obj is TypeCacheKey)
+			{
+				return Equals((TypeCacheKey)obj);
+			}
+			return false;
+		}
+
+		public TypeCacheKey(string typeName, string namespaceIfAmbigous = null)
+		{
+			this.typeName = typeName;
+			namespaceIfAmbiguous = namespaceIfAmbigous;
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CInstantiableDescendantsAndSelf_003Ed__19 : IEnumerable<Type>, IEnumerable, IEnumerator<Type>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Type _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private Type baseType;
+
+		public Type _003C_003E3__baseType;
+
+		private List<Type>.Enumerator _003C_003E7__wrap1;
+
+		Type IEnumerator<Type>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				yield return Assembly.GetExecutingAssembly();
-				foreach (ModContentPack mod in LoadedModManager.RunningMods)
-				{
-					int num;
-					for (int i = 0; i < mod.assemblies.loadedAssemblies.Count; i = num + 1)
-					{
-						yield return mod.assemblies.loadedAssemblies[i];
-						num = i;
-					}
-					mod = null;
-				}
-				IEnumerator<ModContentPack> enumerator = null;
-				yield break;
-				yield break;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17000163 RID: 355
-		// (get) Token: 0x0600087F RID: 2175 RVA: 0x00027B50 File Offset: 0x00025D50
-		public static List<Type> AllTypes
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (GenTypes.allTypesCached == null)
-				{
-					GenTypes.allTypesCached = new List<Type>();
-					GenTypes.tmpAllTypesHashSet.Clear();
-					foreach (Assembly assembly in GenTypes.AllActiveAssemblies)
-					{
-						Type[] array = null;
-						try
-						{
-							array = assembly.GetTypes();
-						}
-						catch (ReflectionTypeLoadException ex)
-						{
-							string str = "Exception getting types in assembly ";
-							string str2 = assembly.ToString();
-							string str3 = ". Some types may not work correctly. Exception: ";
-							ReflectionTypeLoadException ex2 = ex;
-							Log.Error(str + str2 + str3 + ((ex2 != null) ? ex2.ToString() : null));
-							try
-							{
-								Type[] types = ex.Types;
-								if (types != null)
-								{
-									array = (from x in types
-									where x != null && x.TypeInitializer != null
-									select x).ToArray<Type>();
-								}
-							}
-							catch (Exception ex3)
-							{
-								string str4 = "Could not resolve assembly types fallback. Exception: ";
-								Exception ex4 = ex3;
-								Log.Error(str4 + ((ex4 != null) ? ex4.ToString() : null));
-							}
-						}
-						if (array != null)
-						{
-							for (int i = 0; i < array.Length; i++)
-							{
-								if (array[i] != null && GenTypes.tmpAllTypesHashSet.Add(array[i]))
-								{
-									GenTypes.allTypesCached.Add(array[i]);
-								}
-							}
-						}
-					}
-					GenTypes.tmpAllTypesHashSet.Clear();
-				}
-				return GenTypes.allTypesCached;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06000880 RID: 2176 RVA: 0x00027CB4 File Offset: 0x00025EB4
-		public static List<Type> AllTypesWithAttribute<TAttr>() where TAttr : Attribute
+		[DebuggerHidden]
+		public _003CInstantiableDescendantsAndSelf_003Ed__19(int _003C_003E1__state)
 		{
-			List<Type> result;
-			if (GenTypes.cachedTypesWithAttribute.TryGetValue(typeof(TAttr), out result))
-			{
-				return result;
-			}
-			List<Type> list = (from x in GenTypes.AllTypes.AsParallel<Type>()
-			where x.HasAttribute<TAttr>()
-			select x).ToList<Type>();
-			GenTypes.cachedTypesWithAttribute.Add(typeof(TAttr), list);
-			return list;
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x06000881 RID: 2177 RVA: 0x00027D28 File Offset: 0x00025F28
-		public static List<Type> AllSubclasses(this Type baseType)
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			if (!GenTypes.cachedSubclasses.ContainsKey(baseType))
-			{
-				GenTypes.cachedSubclasses.Add(baseType, (from x in GenTypes.AllTypes.AsParallel<Type>()
-				where x.IsSubclassOf(baseType)
-				select x).ToList<Type>());
-			}
-			return GenTypes.cachedSubclasses[baseType];
-		}
-
-		// Token: 0x06000882 RID: 2178 RVA: 0x00027D94 File Offset: 0x00025F94
-		public static bool SameOrSubclassOf<T>(this Type baseType)
-		{
-			return baseType.SameOrSubclassOf(typeof(T));
-		}
-
-		// Token: 0x06000883 RID: 2179 RVA: 0x00027DA6 File Offset: 0x00025FA6
-		public static bool SameOrSubclassOf(this Type baseType, Type parentType)
-		{
-			return baseType == parentType || baseType.IsSubclassOf(parentType);
-		}
-
-		// Token: 0x06000884 RID: 2180 RVA: 0x00027DBC File Offset: 0x00025FBC
-		public static List<Type> AllSubclassesNonAbstract(this Type baseType)
-		{
-			if (!GenTypes.cachedSubclassesNonAbstract.ContainsKey(baseType))
-			{
-				GenTypes.cachedSubclassesNonAbstract.Add(baseType, (from x in GenTypes.AllTypes.AsParallel<Type>()
-				where x.IsSubclassOf(baseType) && !x.IsAbstract
-				select x).ToList<Type>());
-			}
-			return GenTypes.cachedSubclassesNonAbstract[baseType];
-		}
-
-		// Token: 0x06000885 RID: 2181 RVA: 0x00027E28 File Offset: 0x00026028
-		public static List<Type> AllAssignableOfNonAbstract(this Type baseType)
-		{
-			if (!GenTypes.cachedAssignableNonAbstract.ContainsKey(baseType))
-			{
-				GenTypes.cachedAssignableNonAbstract.Add(baseType, (from x in GenTypes.AllTypes.AsParallel<Type>()
-				where baseType.IsAssignableFrom(x) && !x.IsAbstract
-				select x).ToList<Type>());
-			}
-			return GenTypes.cachedAssignableNonAbstract[baseType];
-		}
-
-		// Token: 0x06000886 RID: 2182 RVA: 0x00027E94 File Offset: 0x00026094
-		public static void ClearCache()
-		{
-			GenTypes.cachedSubclasses.Clear();
-			GenTypes.cachedSubclassesNonAbstract.Clear();
-			GenTypes.cachedAssignableNonAbstract.Clear();
-			GenTypes.cachedTypesWithAttribute.Clear();
-			GenTypes.allTypesCached = null;
-			GenTypes.typesInIgnoredNamespacesByName.Clear();
-			GenTypes.isSealedCache.Clear();
-			GenTypes.initializedTypesInIgnoredNamespaces = false;
-			AlertsReadout.allAlertTypesCached = null;
-		}
-
-		// Token: 0x06000887 RID: 2183 RVA: 0x00027EEF File Offset: 0x000260EF
-		public static IEnumerable<Type> AllLeafSubclasses(this Type baseType)
-		{
-			return from type in baseType.AllSubclasses()
-			where !type.AllSubclasses().Any<Type>()
-			select type;
-		}
-
-		// Token: 0x06000888 RID: 2184 RVA: 0x00027F1B File Offset: 0x0002611B
-		public static IEnumerable<Type> InstantiableDescendantsAndSelf(this Type baseType)
-		{
-			if (!baseType.IsAbstract)
-			{
-				yield return baseType;
-			}
-			foreach (Type type in baseType.AllSubclasses())
-			{
-				if (!type.IsAbstract)
-				{
-					yield return type;
-				}
-			}
-			List<Type>.Enumerator enumerator = default(List<Type>.Enumerator);
-			yield break;
-			yield break;
-		}
-
-		// Token: 0x06000889 RID: 2185 RVA: 0x00027F2C File Offset: 0x0002612C
-		private static Type TryGetTypeInIgnoredNamespace(string typeName)
-		{
-			if (!GenTypes.initializedTypesInIgnoredNamespaces)
-			{
-				foreach (Type type in GenTypes.AllTypes)
-				{
-					if (type.Namespace == null || GenTypes.IgnoredNamespaceNames.Contains(type.Namespace))
-					{
-						GenTypes.typesInIgnoredNamespacesByName[type.Name] = type;
-					}
-				}
-				GenTypes.initializedTypesInIgnoredNamespaces = true;
-			}
-			Type result;
-			if (GenTypes.typesInIgnoredNamespacesByName.TryGetValue(typeName, out result))
-			{
-				return result;
-			}
-			return null;
-		}
-
-		// Token: 0x0600088A RID: 2186 RVA: 0x00027FC4 File Offset: 0x000261C4
-		public static Type GetTypeInAnyAssembly(string typeName, string namespaceIfAmbiguous = null)
-		{
-			if (namespaceIfAmbiguous == null || GenTypes.IgnoredNamespaceNames.Contains(namespaceIfAmbiguous))
-			{
-				Type type = GenTypes.TryGetTypeInIgnoredNamespace(typeName);
-				if (type != null)
-				{
-					return type;
-				}
-			}
-			GenTypes.TypeCacheKey key = new GenTypes.TypeCacheKey(typeName, namespaceIfAmbiguous);
-			Type type2 = null;
-			if (!GenTypes.typeCache.TryGetValue(key, out type2))
-			{
-				type2 = GenTypes.GetTypeInAnyAssemblyInt(typeName, namespaceIfAmbiguous);
-				GenTypes.typeCache.Add(key, type2);
-			}
-			return type2;
-		}
-
-		// Token: 0x0600088B RID: 2187 RVA: 0x00028024 File Offset: 0x00026224
-		public static bool HasFlagsAttribute(Type type)
-		{
-			bool result;
-			if (GenTypes.hasFlagsAttributeCache.TryGetValue(type, out result))
-			{
-				return result;
-			}
-			bool flag = Attribute.IsDefined(type, typeof(FlagsAttribute));
-			GenTypes.hasFlagsAttributeCache.Add(type, flag);
-			return flag;
-		}
-
-		// Token: 0x0600088C RID: 2188 RVA: 0x00028060 File Offset: 0x00026260
-		public static bool IsList(Type type)
-		{
-			bool result;
-			if (GenTypes.isListCache.TryGetValue(type, out result))
-			{
-				return result;
-			}
-			bool flag = type.HasGenericDefinition(typeof(List<>));
-			GenTypes.isListCache.Add(type, flag);
-			return flag;
-		}
-
-		// Token: 0x0600088D RID: 2189 RVA: 0x0002809C File Offset: 0x0002629C
-		public static bool IsDictionary(Type type)
-		{
-			bool result;
-			if (GenTypes.isDictionaryCache.TryGetValue(type, out result))
-			{
-				return result;
-			}
-			bool flag = type.HasGenericDefinition(typeof(Dictionary<, >));
-			GenTypes.isDictionaryCache.Add(type, flag);
-			return flag;
-		}
-
-		// Token: 0x0600088E RID: 2190 RVA: 0x000280D8 File Offset: 0x000262D8
-		public static bool IsSlateRef(Type type)
-		{
-			bool result;
-			if (GenTypes.isSlateRefCache.TryGetValue(type, out result))
-			{
-				return result;
-			}
-			bool flag = typeof(ISlateRef).IsAssignableFrom(type);
-			GenTypes.isSlateRefCache.Add(type, flag);
-			return flag;
-		}
-
-		// Token: 0x0600088F RID: 2191 RVA: 0x00028114 File Offset: 0x00026314
-		public static bool IsListHashSetOrDictionary(Type type)
-		{
-			bool result;
-			if (GenTypes.isListHashSetOrDictionaryCached.TryGetValue(type, out result))
-			{
-				return result;
-			}
-			bool flag = false;
-			if (type.IsGenericType)
-			{
-				Type genericTypeDefinition = type.GetGenericTypeDefinition();
-				if (genericTypeDefinition == typeof(List<>) || genericTypeDefinition == typeof(HashSet<>) || genericTypeDefinition == typeof(Dictionary<, >))
-				{
-					flag = true;
-				}
-			}
-			GenTypes.isListHashSetOrDictionaryCached.Add(type, flag);
-			return flag;
-		}
-
-		// Token: 0x06000890 RID: 2192 RVA: 0x00028188 File Offset: 0x00026388
-		public static bool IsDef(Type type)
-		{
-			bool result;
-			if (GenTypes.isDefCache.TryGetValue(type, out result))
-			{
-				return result;
-			}
-			bool flag = typeof(Def).IsAssignableFrom(type);
-			GenTypes.isDefCache.Add(type, flag);
-			return flag;
-		}
-
-		// Token: 0x06000891 RID: 2193 RVA: 0x000281C4 File Offset: 0x000263C4
-		public static bool IsDefThreaded(Type type)
-		{
-			object obj = GenTypes.isDefCacheLock;
-			bool result;
-			lock (obj)
-			{
-				result = GenTypes.IsDef(type);
-			}
-			return result;
-		}
-
-		// Token: 0x06000892 RID: 2194 RVA: 0x00028208 File Offset: 0x00026408
-		private static Type GetTypeInAnyAssemblyInt(string typeName, string namespaceIfAmbiguous = null)
-		{
-			Type typeInAnyAssemblyRaw = GenTypes.GetTypeInAnyAssemblyRaw(typeName);
-			if (typeInAnyAssemblyRaw != null)
-			{
-				return typeInAnyAssemblyRaw;
-			}
-			if (!namespaceIfAmbiguous.NullOrEmpty() && GenTypes.IgnoredNamespaceNames.Contains(namespaceIfAmbiguous))
-			{
-				typeInAnyAssemblyRaw = GenTypes.GetTypeInAnyAssemblyRaw(namespaceIfAmbiguous + "." + typeName);
-				if (typeInAnyAssemblyRaw != null)
-				{
-					return typeInAnyAssemblyRaw;
-				}
-			}
-			foreach (string str in GenTypes.IgnoredNamespaceNames)
-			{
-				typeInAnyAssemblyRaw = GenTypes.GetTypeInAnyAssemblyRaw(str + "." + typeName);
-				if (typeInAnyAssemblyRaw != null)
-				{
-					return typeInAnyAssemblyRaw;
-				}
-			}
-			if (GenTypes.TryGetMixedAssemblyGenericType(typeName, out typeInAnyAssemblyRaw))
-			{
-				return typeInAnyAssemblyRaw;
-			}
-			return null;
-		}
-
-		// Token: 0x06000893 RID: 2195 RVA: 0x000282C4 File Offset: 0x000264C4
-		private static bool TryGetMixedAssemblyGenericType(string typeName, out Type type)
-		{
-			type = GenTypes.GetTypeInAnyAssemblyRaw(typeName);
-			if (type == null && typeName.Contains("`"))
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 2)
 			{
 				try
 				{
-					Match match = Regex.Match(typeName, "(?<MainType>.+`(?<ParamCount>[0-9]+))(?<Types>\\[.*\\])");
-					if (match.Success)
-					{
-						int capacity = int.Parse(match.Groups["ParamCount"].Value);
-						string value = match.Groups["Types"].Value;
-						List<string> list = new List<string>(capacity);
-						foreach (object obj in Regex.Matches(value, "\\[(?<Type>.*?)\\],?"))
-						{
-							Match match2 = (Match)obj;
-							if (match2.Success)
-							{
-								list.Add(match2.Groups["Type"].Value.Trim());
-							}
-						}
-						Type[] array = new Type[list.Count];
-						for (int i = 0; i < list.Count; i++)
-						{
-							Type type2;
-							if (!GenTypes.TryGetMixedAssemblyGenericType(list[i], out type2))
-							{
-								return false;
-							}
-							array[i] = type2;
-						}
-						Type type3;
-						if (GenTypes.TryGetMixedAssemblyGenericType(match.Groups["MainType"].Value, out type3))
-						{
-							type = type3.MakeGenericType(array);
-						}
-					}
 				}
-				catch (Exception ex)
+				finally
 				{
-					string str = "Error in TryGetMixedAssemblyGenericType with typeName=";
-					string str2 = ": ";
-					Exception ex2 = ex;
-					Log.ErrorOnce(str + typeName + str2 + ((ex2 != null) ? ex2.ToString() : null), typeName.GetHashCode());
+					_003C_003Em__Finally1();
 				}
 			}
-			return type != null;
+			_003C_003E7__wrap1 = default(List<Type>.Enumerator);
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x06000894 RID: 2196 RVA: 0x00028484 File Offset: 0x00026684
-		private static Type GetTypeInAnyAssemblyRaw(string typeName)
+		private bool MoveNext()
 		{
-			uint num = <PrivateImplementationDetails>.ComputeStringHash(typeName);
-			if (num <= 2299065237U)
+			try
 			{
-				if (num <= 1092586446U)
+				switch (_003C_003E1__state)
 				{
-					if (num <= 431052896U)
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					if (!baseType.IsAbstract)
 					{
-						if (num != 296283782U)
-						{
-							if (num != 398550328U)
-							{
-								if (num == 431052896U)
-								{
-									if (typeName == "byte?")
-									{
-										return typeof(byte?);
-									}
-								}
-							}
-							else if (typeName == "string")
-							{
-								return typeof(string);
-							}
-						}
-						else if (typeName == "char?")
-						{
-							return typeof(char?);
-						}
+						_003C_003E2__current = baseType;
+						_003C_003E1__state = 1;
+						return true;
 					}
-					else if (num != 513669818U)
+					goto IL_0052;
+				case 1:
+					_003C_003E1__state = -1;
+					goto IL_0052;
+				case 2:
 					{
-						if (num != 520654156U)
-						{
-							if (num == 1092586446U)
-							{
-								if (typeName == "float?")
-								{
-									return typeof(float?);
-								}
-							}
-						}
-						else if (typeName == "decimal")
-						{
-							return typeof(decimal);
-						}
+						_003C_003E1__state = -3;
+						break;
 					}
-					else if (typeName == "uint?")
+					IL_0052:
+					_003C_003E7__wrap1 = baseType.AllSubclasses().GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				}
+				while (_003C_003E7__wrap1.MoveNext())
+				{
+					Type current = _003C_003E7__wrap1.Current;
+					if (!current.IsAbstract)
 					{
-						return typeof(uint?);
+						_003C_003E2__current = current;
+						_003C_003E1__state = 2;
+						return true;
 					}
 				}
-				else if (num <= 1454009365U)
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = default(List<Type>.Enumerator);
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap1/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Type> IEnumerable<Type>.GetEnumerator()
+		{
+			_003CInstantiableDescendantsAndSelf_003Ed__19 _003CInstantiableDescendantsAndSelf_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CInstantiableDescendantsAndSelf_003Ed__ = this;
+			}
+			else
+			{
+				_003CInstantiableDescendantsAndSelf_003Ed__ = new _003CInstantiableDescendantsAndSelf_003Ed__19(0);
+			}
+			_003CInstantiableDescendantsAndSelf_003Ed__.baseType = _003C_003E3__baseType;
+			return _003CInstantiableDescendantsAndSelf_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Type>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003Cget_AllActiveAssemblies_003Ed__2 : IEnumerable<Assembly>, IEnumerable, IEnumerator<Assembly>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Assembly _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private IEnumerator<ModContentPack> _003C_003E7__wrap1;
+
+		private ModContentPack _003Cmod_003E5__3;
+
+		private int _003Ci_003E5__4;
+
+		Assembly IEnumerator<Assembly>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003Cget_AllActiveAssemblies_003Ed__2(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 2)
+			{
+				try
 				{
-					if (num != 1189328644U)
-					{
-						if (num != 1299622921U)
-						{
-							if (num == 1454009365U)
-							{
-								if (typeName == "sbyte?")
-								{
-									return typeof(sbyte?);
-								}
-							}
-						}
-						else if (typeName == "decimal?")
-						{
-							return typeof(decimal?);
-						}
-					}
-					else if (typeName == "long?")
-					{
-						return typeof(long?);
-					}
 				}
-				else if (num <= 1630192034U)
+				finally
 				{
-					if (num != 1603400371U)
-					{
-						if (num == 1630192034U)
-						{
-							if (typeName == "ushort")
-							{
-								return typeof(ushort);
-							}
-						}
-					}
-					else if (typeName == "int?")
-					{
-						return typeof(int?);
-					}
-				}
-				else if (num != 1683620383U)
-				{
-					if (num == 2299065237U)
-					{
-						if (typeName == "double?")
-						{
-							return typeof(double?);
-						}
-					}
-				}
-				else if (typeName == "byte")
-				{
-					return typeof(byte);
+					_003C_003Em__Finally1();
 				}
 			}
-			else if (num <= 2823553821U)
+			_003C_003E7__wrap1 = null;
+			_003Cmod_003E5__3 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
 			{
-				if (num <= 2515107422U)
+				switch (_003C_003E1__state)
 				{
-					if (num != 2471414311U)
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E2__current = Assembly.GetExecutingAssembly();
+					_003C_003E1__state = 1;
+					return true;
+				case 1:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = LoadedModManager.RunningMods.GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_00e6;
+				case 2:
 					{
-						if (num != 2508976771U)
+						_003C_003E1__state = -3;
+						_003Ci_003E5__4++;
+						goto IL_00c2;
+					}
+					IL_00e6:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						_003Cmod_003E5__3 = _003C_003E7__wrap1.Current;
+						_003Ci_003E5__4 = 0;
+						goto IL_00c2;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					return false;
+					IL_00c2:
+					if (_003Ci_003E5__4 < _003Cmod_003E5__3.assemblies.loadedAssemblies.Count)
+					{
+						_003C_003E2__current = _003Cmod_003E5__3.assemblies.loadedAssemblies[_003Ci_003E5__4];
+						_003C_003E1__state = 2;
+						return true;
+					}
+					_003Cmod_003E5__3 = null;
+					goto IL_00e6;
+				}
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Assembly> IEnumerable<Assembly>.GetEnumerator()
+		{
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				return this;
+			}
+			return new _003Cget_AllActiveAssemblies_003Ed__2(0);
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Assembly>)this).GetEnumerator();
+		}
+	}
+
+	public static readonly HashSet<string> IgnoredNamespaceNames = new HashSet<string>
+	{
+		"RimWorld", "Verse", "LudeonTK", "Verse.AI", "Verse.AI.Group", "Verse.Sound", "Verse.Grammar", "RimWorld.Planet", "RimWorld.BaseGen", "RimWorld.QuestGen",
+		"RimWorld.SketchGen", "System"
+	};
+
+	private static List<Type> allTypesCached;
+
+	private static HashSet<Type> tmpAllTypesHashSet = new HashSet<Type>();
+
+	private static Dictionary<Type, List<Type>> cachedTypesWithAttribute = new Dictionary<Type, List<Type>>();
+
+	private static Dictionary<Type, List<Type>> cachedSubclasses = new Dictionary<Type, List<Type>>();
+
+	private static Dictionary<Type, List<Type>> cachedSubclassesNonAbstract = new Dictionary<Type, List<Type>>();
+
+	private static readonly Dictionary<Type, List<Type>> cachedAssignableNonAbstract = new Dictionary<Type, List<Type>>();
+
+	private static readonly Dictionary<string, Type> typesInIgnoredNamespacesByName = new Dictionary<string, Type>();
+
+	private static bool initializedTypesInIgnoredNamespaces = false;
+
+	private static Dictionary<TypeCacheKey, Type> typeCache = new Dictionary<TypeCacheKey, Type>(EqualityComparer<TypeCacheKey>.Default);
+
+	private static Dictionary<Type, bool> hasFlagsAttributeCache = new Dictionary<Type, bool>();
+
+	private static Dictionary<Type, bool> isListCache = new Dictionary<Type, bool>();
+
+	private static Dictionary<Type, bool> isDictionaryCache = new Dictionary<Type, bool>();
+
+	private static Dictionary<Type, bool> isSlateRefCache = new Dictionary<Type, bool>();
+
+	private static Dictionary<Type, bool> isListHashSetOrDictionaryCached = new Dictionary<Type, bool>();
+
+	private static Dictionary<Type, bool> isDefCache = new Dictionary<Type, bool>();
+
+	private static object isDefCacheLock = new object();
+
+	private static readonly Dictionary<Type, bool> isSealedCache = new Dictionary<Type, bool>();
+
+	private static IEnumerable<Assembly> AllActiveAssemblies
+	{
+		[IteratorStateMachine(typeof(_003Cget_AllActiveAssemblies_003Ed__2))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_AllActiveAssemblies_003Ed__2(-2);
+		}
+	}
+
+	public static List<Type> AllTypes
+	{
+		get
+		{
+			if (allTypesCached == null)
+			{
+				allTypesCached = new List<Type>();
+				tmpAllTypesHashSet.Clear();
+				foreach (Assembly allActiveAssembly in AllActiveAssemblies)
+				{
+					Type[] array = null;
+					try
+					{
+						array = allActiveAssembly.GetTypes();
+					}
+					catch (ReflectionTypeLoadException ex)
+					{
+						Log.Error("Exception getting types in assembly " + allActiveAssembly.ToString() + ". Some types may not work correctly. Exception: " + ex);
+						try
 						{
-							if (num == 2515107422U)
+							Type[] types = ex.Types;
+							if (types != null)
 							{
-								if (typeName == "int")
-								{
-									return typeof(int);
-								}
+								array = types.Where((Type x) => x != null && x.TypeInitializer != null).ToArray();
 							}
 						}
-						else if (typeName == "ulong?")
+						catch (Exception ex2)
 						{
-							return typeof(ulong?);
+							Log.Error("Could not resolve assembly types fallback. Exception: " + ex2);
 						}
 					}
-					else if (typeName == "ushort?")
+					if (array == null)
 					{
-						return typeof(ushort?);
+						continue;
 					}
-				}
-				else if (num <= 2699759368U)
-				{
-					if (num != 2667225454U)
+					for (int i = 0; i < array.Length; i++)
 					{
-						if (num == 2699759368U)
+						if (array[i] != null && tmpAllTypesHashSet.Add(array[i]))
 						{
-							if (typeName == "double")
-							{
-								return typeof(double);
-							}
-						}
-					}
-					else if (typeName == "ulong")
-					{
-						return typeof(ulong);
-					}
-				}
-				else if (num != 2797886853U)
-				{
-					if (num == 2823553821U)
-					{
-						if (typeName == "char")
-						{
-							return typeof(char);
+							allTypesCached.Add(array[i]);
 						}
 					}
 				}
-				else if (typeName == "float")
-				{
-					return typeof(float);
-				}
+				tmpAllTypesHashSet.Clear();
 			}
-			else if (num <= 3286667814U)
+			return allTypesCached;
+		}
+	}
+
+	public static List<Type> AllTypesWithAttribute<TAttr>() where TAttr : Attribute
+	{
+		if (cachedTypesWithAttribute.TryGetValue(typeof(TAttr), out var value))
+		{
+			return value;
+		}
+		List<Type> list = (from x in AllTypes.AsParallel()
+			where x.HasAttribute<TAttr>()
+			select x).ToList();
+		cachedTypesWithAttribute.Add(typeof(TAttr), list);
+		return list;
+	}
+
+	public static List<Type> AllSubclasses(this Type baseType)
+	{
+		if (!cachedSubclasses.ContainsKey(baseType))
+		{
+			cachedSubclasses.Add(baseType, (from x in AllTypes.AsParallel()
+				where x.IsSubclassOf(baseType)
+				select x).ToList());
+		}
+		return cachedSubclasses[baseType];
+	}
+
+	public static bool SameOrSubclassOf<T>(this Type baseType)
+	{
+		return baseType.SameOrSubclassOf(typeof(T));
+	}
+
+	public static bool SameOrSubclassOf(this Type baseType, Type parentType)
+	{
+		if (!(baseType == parentType))
+		{
+			return baseType.IsSubclassOf(parentType);
+		}
+		return true;
+	}
+
+	public static List<Type> AllSubclassesNonAbstract(this Type baseType)
+	{
+		if (!cachedSubclassesNonAbstract.ContainsKey(baseType))
+		{
+			cachedSubclassesNonAbstract.Add(baseType, (from x in AllTypes.AsParallel()
+				where x.IsSubclassOf(baseType) && !x.IsAbstract
+				select x).ToList());
+		}
+		return cachedSubclassesNonAbstract[baseType];
+	}
+
+	public static List<Type> AllAssignableOfNonAbstract(this Type baseType)
+	{
+		if (!cachedAssignableNonAbstract.ContainsKey(baseType))
+		{
+			cachedAssignableNonAbstract.Add(baseType, (from x in AllTypes.AsParallel()
+				where baseType.IsAssignableFrom(x) && !x.IsAbstract
+				select x).ToList());
+		}
+		return cachedAssignableNonAbstract[baseType];
+	}
+
+	public static void ClearCache()
+	{
+		cachedSubclasses.Clear();
+		cachedSubclassesNonAbstract.Clear();
+		cachedAssignableNonAbstract.Clear();
+		cachedTypesWithAttribute.Clear();
+		allTypesCached = null;
+		typesInIgnoredNamespacesByName.Clear();
+		isSealedCache.Clear();
+		initializedTypesInIgnoredNamespaces = false;
+		AlertsReadout.allAlertTypesCached = null;
+	}
+
+	public static IEnumerable<Type> AllLeafSubclasses(this Type baseType)
+	{
+		return from type in baseType.AllSubclasses()
+			where !type.AllSubclasses().Any()
+			select type;
+	}
+
+	[IteratorStateMachine(typeof(_003CInstantiableDescendantsAndSelf_003Ed__19))]
+	public static IEnumerable<Type> InstantiableDescendantsAndSelf(this Type baseType)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CInstantiableDescendantsAndSelf_003Ed__19(-2)
+		{
+			_003C_003E3__baseType = baseType
+		};
+	}
+
+	private static Type TryGetTypeInIgnoredNamespace(string typeName)
+	{
+		if (!initializedTypesInIgnoredNamespaces)
+		{
+			foreach (Type allType in AllTypes)
 			{
-				if (num != 3122818005U)
+				if (allType.Namespace == null || IgnoredNamespaceNames.Contains(allType.Namespace))
 				{
-					if (num != 3270303571U)
-					{
-						if (num == 3286667814U)
-						{
-							if (typeName == "bool?")
-							{
-								return typeof(bool?);
-							}
-						}
-					}
-					else if (typeName == "long")
-					{
-						return typeof(long);
-					}
-				}
-				else if (typeName == "short")
-				{
-					return typeof(short);
+					typesInIgnoredNamespacesByName[allType.Name] = allType;
 				}
 			}
-			else if (num <= 3415750305U)
-			{
-				if (num != 3365180733U)
-				{
-					if (num == 3415750305U)
-					{
-						if (typeName == "uint")
-						{
-							return typeof(uint);
-						}
-					}
-				}
-				else if (typeName == "bool")
-				{
-					return typeof(bool);
-				}
-			}
-			else if (num != 3996115294U)
-			{
-				if (num == 4088464520U)
-				{
-					if (typeName == "sbyte")
-					{
-						return typeof(sbyte);
-					}
-				}
-			}
-			else if (typeName == "short?")
-			{
-				return typeof(short?);
-			}
-			Type type = typeof(GenTypes).Assembly.GetType(typeName, false, true);
+			initializedTypesInIgnoredNamespaces = true;
+		}
+		if (typesInIgnoredNamespacesByName.TryGetValue(typeName, out var value))
+		{
+			return value;
+		}
+		return null;
+	}
+
+	public static Type GetTypeInAnyAssembly(string typeName, string namespaceIfAmbiguous = null)
+	{
+		if (namespaceIfAmbiguous == null || IgnoredNamespaceNames.Contains(namespaceIfAmbiguous))
+		{
+			Type type = TryGetTypeInIgnoredNamespace(typeName);
 			if (type != null)
 			{
 				return type;
 			}
-			foreach (Assembly assembly in GenTypes.AllActiveAssemblies)
+		}
+		TypeCacheKey key = new TypeCacheKey(typeName, namespaceIfAmbiguous);
+		Type value = null;
+		if (!typeCache.TryGetValue(key, out value))
+		{
+			value = GetTypeInAnyAssemblyInt(typeName, namespaceIfAmbiguous);
+			typeCache.Add(key, value);
+		}
+		return value;
+	}
+
+	public static bool HasFlagsAttribute(Type type)
+	{
+		if (hasFlagsAttributeCache.TryGetValue(type, out var value))
+		{
+			return value;
+		}
+		bool flag = Attribute.IsDefined(type, typeof(FlagsAttribute));
+		hasFlagsAttributeCache.Add(type, flag);
+		return flag;
+	}
+
+	public static bool IsList(Type type)
+	{
+		if (isListCache.TryGetValue(type, out var value))
+		{
+			return value;
+		}
+		bool flag = type.HasGenericDefinition(typeof(List<>));
+		isListCache.Add(type, flag);
+		return flag;
+	}
+
+	public static bool IsDictionary(Type type)
+	{
+		if (isDictionaryCache.TryGetValue(type, out var value))
+		{
+			return value;
+		}
+		bool flag = type.HasGenericDefinition(typeof(Dictionary<, >));
+		isDictionaryCache.Add(type, flag);
+		return flag;
+	}
+
+	public static bool IsSlateRef(Type type)
+	{
+		if (isSlateRefCache.TryGetValue(type, out var value))
+		{
+			return value;
+		}
+		bool flag = typeof(ISlateRef).IsAssignableFrom(type);
+		isSlateRefCache.Add(type, flag);
+		return flag;
+	}
+
+	public static bool IsListHashSetOrDictionary(Type type)
+	{
+		if (isListHashSetOrDictionaryCached.TryGetValue(type, out var value))
+		{
+			return value;
+		}
+		bool flag = false;
+		if (type.IsGenericType)
+		{
+			Type genericTypeDefinition = type.GetGenericTypeDefinition();
+			if (genericTypeDefinition == typeof(List<>) || genericTypeDefinition == typeof(HashSet<>) || genericTypeDefinition == typeof(Dictionary<, >))
 			{
-				Type type2 = assembly.GetType(typeName, false, true);
+				flag = true;
+			}
+		}
+		isListHashSetOrDictionaryCached.Add(type, flag);
+		return flag;
+	}
+
+	public static bool IsDef(Type type)
+	{
+		if (isDefCache.TryGetValue(type, out var value))
+		{
+			return value;
+		}
+		bool flag = typeof(Def).IsAssignableFrom(type);
+		isDefCache.Add(type, flag);
+		return flag;
+	}
+
+	public static bool IsDefThreaded(Type type)
+	{
+		lock (isDefCacheLock)
+		{
+			return IsDef(type);
+		}
+	}
+
+	private static Type GetTypeInAnyAssemblyInt(string typeName, string namespaceIfAmbiguous = null)
+	{
+		Type type = GetTypeInAnyAssemblyRaw(typeName);
+		if (type != null)
+		{
+			return type;
+		}
+		if (!namespaceIfAmbiguous.NullOrEmpty() && IgnoredNamespaceNames.Contains(namespaceIfAmbiguous))
+		{
+			type = GetTypeInAnyAssemblyRaw(namespaceIfAmbiguous + "." + typeName);
+			if (type != null)
+			{
+				return type;
+			}
+		}
+		foreach (string ignoredNamespaceName in IgnoredNamespaceNames)
+		{
+			type = GetTypeInAnyAssemblyRaw(ignoredNamespaceName + "." + typeName);
+			if (type != null)
+			{
+				return type;
+			}
+		}
+		if (TryGetMixedAssemblyGenericType(typeName, out type))
+		{
+			return type;
+		}
+		return null;
+	}
+
+	private static bool TryGetMixedAssemblyGenericType(string typeName, out Type type)
+	{
+		type = GetTypeInAnyAssemblyRaw(typeName);
+		if (type == null && typeName.Contains("`"))
+		{
+			try
+			{
+				Match match = Regex.Match(typeName, "(?<MainType>.+`(?<ParamCount>[0-9]+))(?<Types>\\[.*\\])");
+				if (match.Success)
+				{
+					int capacity = int.Parse(match.Groups["ParamCount"].Value);
+					string value = match.Groups["Types"].Value;
+					List<string> list = new List<string>(capacity);
+					foreach (Match item in Regex.Matches(value, "\\[(?<Type>.*?)\\],?"))
+					{
+						if (item.Success)
+						{
+							list.Add(item.Groups["Type"].Value.Trim());
+						}
+					}
+					Type[] array = new Type[list.Count];
+					for (int i = 0; i < list.Count; i++)
+					{
+						if (TryGetMixedAssemblyGenericType(list[i], out var type2))
+						{
+							array[i] = type2;
+							continue;
+						}
+						return false;
+					}
+					if (TryGetMixedAssemblyGenericType(match.Groups["MainType"].Value, out var type3))
+					{
+						type = type3.MakeGenericType(array);
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Log.ErrorOnce("Error in TryGetMixedAssemblyGenericType with typeName=" + typeName + ": " + ex, typeName.GetHashCode());
+			}
+		}
+		return type != null;
+	}
+
+	private static Type GetTypeInAnyAssemblyRaw(string typeName)
+	{
+		switch (typeName)
+		{
+		case "int":
+			return typeof(int);
+		case "uint":
+			return typeof(uint);
+		case "short":
+			return typeof(short);
+		case "ushort":
+			return typeof(ushort);
+		case "float":
+			return typeof(float);
+		case "double":
+			return typeof(double);
+		case "long":
+			return typeof(long);
+		case "ulong":
+			return typeof(ulong);
+		case "byte":
+			return typeof(byte);
+		case "sbyte":
+			return typeof(sbyte);
+		case "char":
+			return typeof(char);
+		case "bool":
+			return typeof(bool);
+		case "decimal":
+			return typeof(decimal);
+		case "string":
+			return typeof(string);
+		case "int?":
+			return typeof(int?);
+		case "uint?":
+			return typeof(uint?);
+		case "short?":
+			return typeof(short?);
+		case "ushort?":
+			return typeof(ushort?);
+		case "float?":
+			return typeof(float?);
+		case "double?":
+			return typeof(double?);
+		case "long?":
+			return typeof(long?);
+		case "ulong?":
+			return typeof(ulong?);
+		case "byte?":
+			return typeof(byte?);
+		case "sbyte?":
+			return typeof(sbyte?);
+		case "char?":
+			return typeof(char?);
+		case "bool?":
+			return typeof(bool?);
+		case "decimal?":
+			return typeof(decimal?);
+		default:
+		{
+			Type type = typeof(GenTypes).Assembly.GetType(typeName, throwOnError: false, ignoreCase: true);
+			if (type != null)
+			{
+				return type;
+			}
+			foreach (Assembly allActiveAssembly in AllActiveAssemblies)
+			{
+				Type type2 = allActiveAssembly.GetType(typeName, throwOnError: false, ignoreCase: true);
 				if (type2 != null)
 				{
 					return type2;
 				}
 			}
-			Type type3 = Type.GetType(typeName, false, true);
+			Type type3 = Type.GetType(typeName, throwOnError: false, ignoreCase: true);
 			if (type3 != null)
 			{
 				return type3;
 			}
 			return null;
 		}
+		}
+	}
 
-		// Token: 0x06000895 RID: 2197 RVA: 0x00028A34 File Offset: 0x00026C34
-		public static string GetTypeNameWithoutIgnoredNamespaces(Type type)
+	public static string GetTypeNameWithoutIgnoredNamespaces(Type type)
+	{
+		if (type.IsGenericType)
 		{
-			if (type.IsGenericType)
+			return type.ToString();
+		}
+		if (IgnoredNamespaceNames.Contains(type.Namespace))
+		{
+			return type.Name;
+		}
+		return type.FullName;
+	}
+
+	public static bool IsCustomType(Type type)
+	{
+		string @namespace = type.Namespace;
+		if (@namespace != null)
+		{
+			if (!@namespace.StartsWith("System") && !@namespace.StartsWith("UnityEngine"))
 			{
-				return type.ToString();
+				return !@namespace.StartsWith("Steamworks");
 			}
-			if (GenTypes.IgnoredNamespaceNames.Contains(type.Namespace))
+			return false;
+		}
+		return true;
+	}
+
+	public static bool Isnt<T>(this object obj)
+	{
+		return !(obj is T);
+	}
+
+	public static bool Isnt<T>(this object obj, out T casted) where T : class
+	{
+		casted = obj as T;
+		return casted == null;
+	}
+
+	public static bool IsSealedWithCache(this Type type)
+	{
+		lock (isSealedCache)
+		{
+			if (isSealedCache.TryGetValue(type, out var value))
 			{
-				return type.Name;
+				return value;
 			}
-			return type.FullName;
+			return isSealedCache[type] = type.IsSealed;
 		}
+	}
 
-		// Token: 0x06000896 RID: 2198 RVA: 0x00028A64 File Offset: 0x00026C64
-		public static bool IsCustomType(Type type)
+	public static bool IsMethodOverriden(this Type type, string method)
+	{
+		return type.GetMethod(method).IsOverriden();
+	}
+
+	public static bool IsOverriden(this MethodInfo method)
+	{
+		if (method.IsVirtual)
 		{
-			string @namespace = type.Namespace;
-			return @namespace == null || (!@namespace.StartsWith("System") && !@namespace.StartsWith("UnityEngine") && !@namespace.StartsWith("Steamworks"));
+			return method.DeclaringType != method.GetBaseDefinition().DeclaringType;
 		}
-
-		// Token: 0x06000897 RID: 2199 RVA: 0x00028AA7 File Offset: 0x00026CA7
-		public static bool Isnt<T>(this object obj)
-		{
-			return !(obj is T);
-		}
-
-		// Token: 0x06000898 RID: 2200 RVA: 0x00028AB5 File Offset: 0x00026CB5
-		public static bool Isnt<T>(this object obj, out T casted) where T : class
-		{
-			casted = (obj as T);
-			return casted == null;
-		}
-
-		// Token: 0x06000899 RID: 2201 RVA: 0x00028AD8 File Offset: 0x00026CD8
-		public static bool IsSealedWithCache(this Type type)
-		{
-			Dictionary<Type, bool> obj = GenTypes.isSealedCache;
-			bool result;
-			lock (obj)
-			{
-				bool flag2;
-				if (GenTypes.isSealedCache.TryGetValue(type, out flag2))
-				{
-					result = flag2;
-				}
-				else
-				{
-					result = (GenTypes.isSealedCache[type] = type.IsSealed);
-				}
-			}
-			return result;
-		}
-
-		// Token: 0x0600089A RID: 2202 RVA: 0x00028B3C File Offset: 0x00026D3C
-		public static bool IsMethodOverriden(this Type type, string method)
-		{
-			return type.GetMethod(method).IsOverriden();
-		}
-
-		// Token: 0x0600089B RID: 2203 RVA: 0x00028B4A File Offset: 0x00026D4A
-		public static bool IsOverriden(this MethodInfo method)
-		{
-			return method.IsVirtual && method.DeclaringType != method.GetBaseDefinition().DeclaringType;
-		}
-
-		// Token: 0x04000457 RID: 1111
-		public static readonly HashSet<string> IgnoredNamespaceNames = new HashSet<string>
-		{
-			"RimWorld",
-			"Verse",
-			"LudeonTK",
-			"Verse.AI",
-			"Verse.AI.Group",
-			"Verse.Sound",
-			"Verse.Grammar",
-			"RimWorld.Planet",
-			"RimWorld.BaseGen",
-			"RimWorld.QuestGen",
-			"RimWorld.SketchGen",
-			"System"
-		};
-
-		// Token: 0x04000458 RID: 1112
-		private static List<Type> allTypesCached;
-
-		// Token: 0x04000459 RID: 1113
-		private static HashSet<Type> tmpAllTypesHashSet = new HashSet<Type>();
-
-		// Token: 0x0400045A RID: 1114
-		private static Dictionary<Type, List<Type>> cachedTypesWithAttribute = new Dictionary<Type, List<Type>>();
-
-		// Token: 0x0400045B RID: 1115
-		private static Dictionary<Type, List<Type>> cachedSubclasses = new Dictionary<Type, List<Type>>();
-
-		// Token: 0x0400045C RID: 1116
-		private static Dictionary<Type, List<Type>> cachedSubclassesNonAbstract = new Dictionary<Type, List<Type>>();
-
-		// Token: 0x0400045D RID: 1117
-		private static readonly Dictionary<Type, List<Type>> cachedAssignableNonAbstract = new Dictionary<Type, List<Type>>();
-
-		// Token: 0x0400045E RID: 1118
-		private static readonly Dictionary<string, Type> typesInIgnoredNamespacesByName = new Dictionary<string, Type>();
-
-		// Token: 0x0400045F RID: 1119
-		private static bool initializedTypesInIgnoredNamespaces = false;
-
-		// Token: 0x04000460 RID: 1120
-		private static Dictionary<GenTypes.TypeCacheKey, Type> typeCache = new Dictionary<GenTypes.TypeCacheKey, Type>(EqualityComparer<GenTypes.TypeCacheKey>.Default);
-
-		// Token: 0x04000461 RID: 1121
-		private static Dictionary<Type, bool> hasFlagsAttributeCache = new Dictionary<Type, bool>();
-
-		// Token: 0x04000462 RID: 1122
-		private static Dictionary<Type, bool> isListCache = new Dictionary<Type, bool>();
-
-		// Token: 0x04000463 RID: 1123
-		private static Dictionary<Type, bool> isDictionaryCache = new Dictionary<Type, bool>();
-
-		// Token: 0x04000464 RID: 1124
-		private static Dictionary<Type, bool> isSlateRefCache = new Dictionary<Type, bool>();
-
-		// Token: 0x04000465 RID: 1125
-		private static Dictionary<Type, bool> isListHashSetOrDictionaryCached = new Dictionary<Type, bool>();
-
-		// Token: 0x04000466 RID: 1126
-		private static Dictionary<Type, bool> isDefCache = new Dictionary<Type, bool>();
-
-		// Token: 0x04000467 RID: 1127
-		private static object isDefCacheLock = new object();
-
-		// Token: 0x04000468 RID: 1128
-		private static readonly Dictionary<Type, bool> isSealedCache = new Dictionary<Type, bool>();
-
-		// Token: 0x0200011B RID: 283
-		private struct TypeCacheKey : IEquatable<GenTypes.TypeCacheKey>
-		{
-			// Token: 0x0600089D RID: 2205 RVA: 0x00028CB4 File Offset: 0x00026EB4
-			public override int GetHashCode()
-			{
-				if (this.namespaceIfAmbiguous == null)
-				{
-					return this.typeName.GetHashCode();
-				}
-				return (17 * 31 + this.typeName.GetHashCode()) * 31 + this.namespaceIfAmbiguous.GetHashCode();
-			}
-
-			// Token: 0x0600089E RID: 2206 RVA: 0x00028CEA File Offset: 0x00026EEA
-			public bool Equals(GenTypes.TypeCacheKey other)
-			{
-				return string.Equals(this.typeName, other.typeName) && string.Equals(this.namespaceIfAmbiguous, other.namespaceIfAmbiguous);
-			}
-
-			// Token: 0x0600089F RID: 2207 RVA: 0x00028D12 File Offset: 0x00026F12
-			public override bool Equals(object obj)
-			{
-				return obj is GenTypes.TypeCacheKey && this.Equals((GenTypes.TypeCacheKey)obj);
-			}
-
-			// Token: 0x060008A0 RID: 2208 RVA: 0x00028D2A File Offset: 0x00026F2A
-			public TypeCacheKey(string typeName, string namespaceIfAmbigous = null)
-			{
-				this.typeName = typeName;
-				this.namespaceIfAmbiguous = namespaceIfAmbigous;
-			}
-
-			// Token: 0x04000469 RID: 1129
-			public string typeName;
-
-			// Token: 0x0400046A RID: 1130
-			public string namespaceIfAmbiguous;
-		}
+		return false;
 	}
 }

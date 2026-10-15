@@ -1,65 +1,68 @@
-﻿using System;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobGiver_PlayWithGoldenCube : ThinkNode_JobGiver
 {
-	// Token: 0x020014B7 RID: 5303
-	public class JobGiver_PlayWithGoldenCube : ThinkNode_JobGiver
+	private const float SeverityToOverrideDrafted = 0.9f;
+
+	protected override Job TryGiveJob(Pawn pawn)
 	{
-		// Token: 0x06007F19 RID: 32537 RVA: 0x002646C4 File Offset: 0x002628C4
-		protected override Job TryGiveJob(Pawn pawn)
+		if (pawn.Downed || pawn.Drafted)
 		{
-			if (pawn.Downed || pawn.Drafted)
-			{
-				return null;
-			}
-			Hediff hediff;
-			if (!pawn.health.hediffSet.TryGetHediff(HediffDefOf.CubeWithdrawal, out hediff))
-			{
-				return null;
-			}
-			if (hediff.Severity < 0.9f && pawn.Drafted)
-			{
-				return null;
-			}
-			if (pawn.mindState.duty != null)
-			{
-				return null;
-			}
-			if (!pawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation))
-			{
-				return null;
-			}
-			Thing t;
-			if (!JobGiver_PlayWithGoldenCube.TryGetNearestCube(pawn, out t))
-			{
-				return null;
-			}
-			Job job = JobMaker.MakeJob(JobDefOf.GoldenCubePlay, t);
-			job.count = 1;
-			return job;
+			return null;
 		}
-
-		// Token: 0x06007F1A RID: 32538 RVA: 0x00264760 File Offset: 0x00262960
-		public static bool TryGetNearestCube(Pawn pawn, out Thing cube)
+		if (!pawn.health.hediffSet.TryGetHediff(HediffDefOf.CubeWithdrawal, out var hediff))
 		{
-			if (!pawn.Spawned)
-			{
-				cube = null;
-				return false;
-			}
-			cube = GenClosest.ClosestThingReachable(pawn.PositionHeld, pawn.MapHeld, ThingRequest.ForDef(ThingDefOf.GoldenCube), PathEndMode.ClosestTouch, TraverseParms.For(pawn, Danger.Deadly, TraverseMode.ByPawn, false, false, false, true), 9999f, (Thing t) => JobGiver_PlayWithGoldenCube.IsValid(t, pawn), null, 0, -1, false, RegionType.Set_Passable, false, false);
-			return cube != null;
+			return null;
 		}
-
-		// Token: 0x06007F1B RID: 32539 RVA: 0x002647E3 File Offset: 0x002629E3
-		private static bool IsValid(Thing thing, Pawn pawn)
+		if (hediff.Severity < 0.9f && pawn.Drafted)
 		{
-			return thing.def == ThingDefOf.GoldenCube && !thing.IsForbidden(pawn) && pawn.CanReserveAndReach(thing, PathEndMode.Touch, Danger.None, 1, -1, null, false);
+			return null;
 		}
+		if (pawn.mindState.duty != null)
+		{
+			return null;
+		}
+		if (!pawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation))
+		{
+			return null;
+		}
+		if (!TryGetNearestCube(pawn, out var cube))
+		{
+			return null;
+		}
+		Job job = JobMaker.MakeJob(JobDefOf.GoldenCubePlay, cube);
+		job.count = 1;
+		return job;
+	}
 
-		// Token: 0x04005528 RID: 21800
-		private const float SeverityToOverrideDrafted = 0.9f;
+	public static bool TryGetNearestCube(Pawn pawn, out Thing cube)
+	{
+		if (!pawn.Spawned)
+		{
+			cube = null;
+			return false;
+		}
+		cube = GenClosest.ClosestThingReachable(pawn.PositionHeld, pawn.MapHeld, ThingRequest.ForDef(ThingDefOf.GoldenCube), PathEndMode.ClosestTouch, TraverseParms.For(pawn), 9999f, (Thing t) => IsValid(t, pawn));
+		return cube != null;
+	}
+
+	private static bool IsValid(Thing thing, Pawn pawn)
+	{
+		if (thing.def != ThingDefOf.GoldenCube)
+		{
+			return false;
+		}
+		if (thing.IsForbidden(pawn))
+		{
+			return false;
+		}
+		if (!pawn.CanReserveAndReach(thing, PathEndMode.Touch, Danger.None))
+		{
+			return false;
+		}
+		return true;
 	}
 }

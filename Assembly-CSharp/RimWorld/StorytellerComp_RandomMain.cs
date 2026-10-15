@@ -1,86 +1,181 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class StorytellerComp_RandomMain : StorytellerComp
 {
-	// Token: 0x02001E5E RID: 7774
-	public class StorytellerComp_RandomMain : StorytellerComp
+	[CompilerGenerated]
+	private sealed class _003CMakeIntervalIncidents_003Ed__2 : IEnumerable<FiringIncident>, IEnumerable, IEnumerator<FiringIncident>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001A60 RID: 6752
-		// (get) Token: 0x0600ACCF RID: 44239 RVA: 0x00315637 File Offset: 0x00313837
-		protected StorytellerCompProperties_RandomMain Props
+		private int _003C_003E1__state;
+
+		private FiringIncident _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public StorytellerComp_RandomMain _003C_003E4__this;
+
+		private IIncidentTarget target;
+
+		public IIncidentTarget _003C_003E3__target;
+
+		FiringIncident IEnumerator<FiringIncident>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (StorytellerCompProperties_RandomMain)this.props;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600ACD0 RID: 44240 RVA: 0x00315644 File Offset: 0x00313844
-		public override IEnumerable<FiringIncident> MakeIntervalIncidents(IIncidentTarget target)
+		object IEnumerator.Current
 		{
-			float num = this.Props.mtbDays;
-			if (target.Tile.Valid && target.Tile.LayerDef.isSpace)
+			[DebuggerHidden]
+			get
 			{
-				num *= this.Props.spaceMtbDayFactor;
+				return _003C_003E2__current;
 			}
-			if (!Rand.MTBEventOccurs(num, 60000f, 1000f))
+		}
+
+		[DebuggerHidden]
+		public _003CMakeIntervalIncidents_003Ed__2(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			StorytellerComp_RandomMain storytellerComp_RandomMain = _003C_003E4__this;
+			switch (num)
 			{
-				yield break;
-			}
-			if (target.Tile.Valid && target.Tile.LayerDef.isSpace && GenTicks.TicksGame - Find.Storyteller.LastIncidentTick < GenDate.DaysToTicks(this.Props.spaceMinSpacingDays))
+			default:
+				return false;
+			case 0:
 			{
-				yield break;
-			}
-			bool flag = target.IncidentTargetTags().Contains(IncidentTargetTagDefOf.Map_RaidBeacon);
-			List<IncidentCategoryDef> list = new List<IncidentCategoryDef>();
-			IncidentParms parms;
-			IncidentDef incidentDef;
-			for (;;)
-			{
-				IncidentCategoryDef incidentCategoryDef = this.ChooseRandomCategory(target, list);
-				parms = this.GenerateParms(incidentCategoryDef, target);
-				if (base.TrySelectRandomIncident(base.UsableIncidentsInCategory(incidentCategoryDef, parms), out incidentDef, target))
+				_003C_003E1__state = -1;
+				float num2 = storytellerComp_RandomMain.Props.mtbDays;
+				if (target.Tile.Valid && target.Tile.LayerDef.isSpace)
 				{
-					break;
+					num2 *= storytellerComp_RandomMain.Props.spaceMtbDayFactor;
 				}
-				list.Add(incidentCategoryDef);
-				if (list.Count >= this.Props.categoryWeights.Count)
+				if (!Rand.MTBEventOccurs(num2, 60000f, 1000f))
 				{
-					goto IL_190;
+					return false;
 				}
+				if (target.Tile.Valid && target.Tile.LayerDef.isSpace && GenTicks.TicksGame - Find.Storyteller.LastIncidentTick < GenDate.DaysToTicks(storytellerComp_RandomMain.Props.spaceMinSpacingDays))
+				{
+					return false;
+				}
+				bool flag = target.IncidentTargetTags().Contains(IncidentTargetTagDefOf.Map_RaidBeacon);
+				List<IncidentCategoryDef> list = new List<IncidentCategoryDef>();
+				do
+				{
+					IncidentCategoryDef incidentCategoryDef = storytellerComp_RandomMain.ChooseRandomCategory(target, list);
+					IncidentParms parms = storytellerComp_RandomMain.GenerateParms(incidentCategoryDef, target);
+					if (storytellerComp_RandomMain.TrySelectRandomIncident(storytellerComp_RandomMain.UsableIncidentsInCategory(incidentCategoryDef, parms), out var foundDef, target))
+					{
+						if (storytellerComp_RandomMain.Props.skipThreatBigIfRaidBeacon && flag && foundDef.category == IncidentCategoryDefOf.ThreatBig)
+						{
+							break;
+						}
+						_003C_003E2__current = new FiringIncident(foundDef, storytellerComp_RandomMain, parms);
+						_003C_003E1__state = 1;
+						return true;
+					}
+					list.Add(incidentCategoryDef);
+				}
+				while (list.Count < storytellerComp_RandomMain.Props.categoryWeights.Count);
+				break;
 			}
-			if (!this.Props.skipThreatBigIfRaidBeacon || !flag || incidentDef.category != IncidentCategoryDefOf.ThreatBig)
-			{
-				yield return new FiringIncident(incidentDef, this, parms);
+			case 1:
+				_003C_003E1__state = -1;
+				break;
 			}
-			IL_190:
-			yield break;
+			return false;
 		}
 
-		// Token: 0x0600ACD1 RID: 44241 RVA: 0x0031565C File Offset: 0x0031385C
-		private IncidentCategoryDef ChooseRandomCategory(IIncidentTarget target, List<IncidentCategoryDef> skipCategories)
+		bool IEnumerator.MoveNext()
 		{
-			if (!skipCategories.Contains(IncidentCategoryDefOf.ThreatBig) && (float)(Find.TickManager.TicksGame - target.StoryState.LastThreatBigTick) > 60000f * this.Props.maxThreatBigIntervalDays)
-			{
-				return IncidentCategoryDefOf.ThreatBig;
-			}
-			return (from cw in this.Props.categoryWeights
-			where !skipCategories.Contains(cw.category)
-			select cw).RandomElementByWeight((IncidentCategoryEntry cw) => cw.weight).category;
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0600ACD2 RID: 44242 RVA: 0x00315700 File Offset: 0x00313900
-		public override IncidentParms GenerateParms(IncidentCategoryDef incCat, IIncidentTarget target)
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			IncidentParms incidentParms = StorytellerUtility.DefaultParmsNow(incCat, target);
-			if (incidentParms.points >= 0f)
-			{
-				incidentParms.points *= this.Props.randomPointsFactorRange.RandomInRange;
-			}
-			return incidentParms;
+			throw new NotSupportedException();
 		}
+
+		[DebuggerHidden]
+		IEnumerator<FiringIncident> IEnumerable<FiringIncident>.GetEnumerator()
+		{
+			_003CMakeIntervalIncidents_003Ed__2 _003CMakeIntervalIncidents_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CMakeIntervalIncidents_003Ed__ = this;
+			}
+			else
+			{
+				_003CMakeIntervalIncidents_003Ed__ = new _003CMakeIntervalIncidents_003Ed__2(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CMakeIntervalIncidents_003Ed__.target = _003C_003E3__target;
+			return _003CMakeIntervalIncidents_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<FiringIncident>)this).GetEnumerator();
+		}
+	}
+
+	protected StorytellerCompProperties_RandomMain Props => (StorytellerCompProperties_RandomMain)props;
+
+	[IteratorStateMachine(typeof(_003CMakeIntervalIncidents_003Ed__2))]
+	public override IEnumerable<FiringIncident> MakeIntervalIncidents(IIncidentTarget target)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeIntervalIncidents_003Ed__2(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__target = target
+		};
+	}
+
+	private IncidentCategoryDef ChooseRandomCategory(IIncidentTarget target, List<IncidentCategoryDef> skipCategories)
+	{
+		if (!skipCategories.Contains(IncidentCategoryDefOf.ThreatBig) && (float)(Find.TickManager.TicksGame - target.StoryState.LastThreatBigTick) > 60000f * Props.maxThreatBigIntervalDays)
+		{
+			return IncidentCategoryDefOf.ThreatBig;
+		}
+		return Props.categoryWeights.Where((IncidentCategoryEntry cw) => !skipCategories.Contains(cw.category)).RandomElementByWeight((IncidentCategoryEntry cw) => cw.weight).category;
+	}
+
+	public override IncidentParms GenerateParms(IncidentCategoryDef incCat, IIncidentTarget target)
+	{
+		IncidentParms incidentParms = StorytellerUtility.DefaultParmsNow(incCat, target);
+		if (incidentParms.points >= 0f)
+		{
+			incidentParms.points *= Props.randomPointsFactorRange.RandomInRange;
+		}
+		return incidentParms;
 	}
 }

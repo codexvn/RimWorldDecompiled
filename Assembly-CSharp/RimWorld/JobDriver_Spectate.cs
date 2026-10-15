@@ -1,50 +1,155 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_Spectate : JobDriver
 {
-	// Token: 0x020011BB RID: 4539
-	public class JobDriver_Spectate : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__4 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x06006EFF RID: 28415 RVA: 0x00229204 File Offset: 0x00227404
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
-		{
-			return this.pawn.ReserveSittableOrSpot(this.job.GetTarget(TargetIndex.A).Cell, this.job, errorOnFailed);
-		}
+		private int _003C_003E1__state;
 
-		// Token: 0x06006F00 RID: 28416 RVA: 0x00229237 File Offset: 0x00227437
-		protected override IEnumerable<Toil> MakeNewToils()
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_Spectate _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
 		{
-			if (this.job.GetTarget(TargetIndex.C).HasThing)
+			[DebuggerHidden]
+			get
 			{
-				this.EndOnDespawnedOrNull(TargetIndex.C, JobCondition.Incompletable);
+				return _003C_003E2__current;
 			}
-			yield return Toils_Goto.GotoCell(TargetIndex.A, PathEndMode.OnCell);
-			Toil toil = ToilMaker.MakeToil("MakeNewToils");
-			toil.tickIntervalAction = delegate(int delta)
-			{
-				this.pawn.rotationTracker.FaceCell(this.job.GetTarget(TargetIndex.B).Cell);
-				this.pawn.GainComfortFromCellIfPossible(delta, false);
-				if (this.pawn.IsHashIntervalTick(100, delta))
-				{
-					this.pawn.jobs.CheckForJobOverride(0f, true);
-				}
-			};
-			toil.defaultCompleteMode = ToilCompleteMode.Never;
-			toil.handlingFacing = true;
-			yield return toil;
-			yield break;
 		}
 
-		// Token: 0x04004D69 RID: 19817
-		private const TargetIndex MySpotOrChairInd = TargetIndex.A;
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
 
-		// Token: 0x04004D6A RID: 19818
-		private const TargetIndex WatchTargetInd = TargetIndex.B;
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__4(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
 
-		// Token: 0x04004D6B RID: 19819
-		private const TargetIndex ChairInd = TargetIndex.C;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_Spectate CS_0024_003C_003E8__locals7 = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (CS_0024_003C_003E8__locals7.job.GetTarget(TargetIndex.C).HasThing)
+				{
+					CS_0024_003C_003E8__locals7.EndOnDespawnedOrNull(TargetIndex.C);
+				}
+				_003C_003E2__current = Toils_Goto.GotoCell(TargetIndex.A, PathEndMode.OnCell);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+			{
+				_003C_003E1__state = -1;
+				Toil toil = ToilMaker.MakeToil("MakeNewToils");
+				toil.tickIntervalAction = delegate(int delta)
+				{
+					CS_0024_003C_003E8__locals7.pawn.rotationTracker.FaceCell(CS_0024_003C_003E8__locals7.job.GetTarget(TargetIndex.B).Cell);
+					CS_0024_003C_003E8__locals7.pawn.GainComfortFromCellIfPossible(delta);
+					if (CS_0024_003C_003E8__locals7.pawn.IsHashIntervalTick(100, delta))
+					{
+						CS_0024_003C_003E8__locals7.pawn.jobs.CheckForJobOverride();
+					}
+				};
+				toil.defaultCompleteMode = ToilCompleteMode.Never;
+				toil.handlingFacing = true;
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 2;
+				return true;
+			}
+			case 2:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__4 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__4(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private const TargetIndex MySpotOrChairInd = TargetIndex.A;
+
+	private const TargetIndex WatchTargetInd = TargetIndex.B;
+
+	private const TargetIndex ChairInd = TargetIndex.C;
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return pawn.ReserveSittableOrSpot(job.GetTarget(TargetIndex.A).Cell, job, errorOnFailed);
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__4))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__4(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

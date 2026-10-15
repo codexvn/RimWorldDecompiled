@@ -1,10 +1,8 @@
-﻿using System;
+using System;
 
-namespace Verse
+namespace Verse;
+
+[AttributeUsage(AttributeTargets.Field)]
+public class NoTranslateAttribute : Attribute
 {
-	// Token: 0x02000B51 RID: 2897
-	[AttributeUsage(AttributeTargets.Field)]
-	public class NoTranslateAttribute : Attribute
-	{
-	}
 }

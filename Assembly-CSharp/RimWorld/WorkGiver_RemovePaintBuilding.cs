@@ -1,77 +1,225 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class WorkGiver_RemovePaintBuilding : WorkGiver_Scanner
 {
-	// Token: 0x020015F3 RID: 5619
-	public class WorkGiver_RemovePaintBuilding : WorkGiver_Scanner
+	[CompilerGenerated]
+	private sealed class _003CPotentialWorkThingsGlobal_003Ed__3 : IEnumerable<Thing>, IEnumerable, IEnumerator<Thing>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001454 RID: 5204
-		// (get) Token: 0x060084A1 RID: 33953 RVA: 0x000E96BB File Offset: 0x000E78BB
-		public override PathEndMode PathEndMode
+		private int _003C_003E1__state;
+
+		private Thing _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private Pawn pawn;
+
+		public Pawn _003C_003E3__pawn;
+
+		private IEnumerator<Designation> _003C_003E7__wrap1;
+
+		Thing IEnumerator<Thing>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return PathEndMode.Touch;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x060084A2 RID: 33954 RVA: 0x0027BCD7 File Offset: 0x00279ED7
-		public override bool ShouldSkip(Pawn pawn, bool forced = false)
+		object IEnumerator.Current
 		{
-			return !pawn.Map.designationManager.AnySpawnedDesignationOfDef(DesignationDefOf.RemovePaintBuilding);
-		}
-
-		// Token: 0x060084A3 RID: 33955 RVA: 0x0027BCF1 File Offset: 0x00279EF1
-		public override IEnumerable<Thing> PotentialWorkThingsGlobal(Pawn pawn)
-		{
-			foreach (Designation designation in pawn.Map.designationManager.SpawnedDesignationsOfDef(DesignationDefOf.RemovePaintBuilding))
+			[DebuggerHidden]
+			get
 			{
-				yield return designation.target.Thing;
+				return _003C_003E2__current;
 			}
-			IEnumerator<Designation> enumerator = null;
-			yield break;
-			yield break;
 		}
 
-		// Token: 0x060084A4 RID: 33956 RVA: 0x0027BD04 File Offset: 0x00279F04
-		public override bool HasJobOnThing(Pawn pawn, Thing t, bool forced = false)
+		[DebuggerHidden]
+		public _003CPotentialWorkThingsGlobal_003Ed__3(int _003C_003E1__state)
 		{
-			return t.def.building != null && t.def.building.paintable && pawn.Map.designationManager.DesignationOn(t, DesignationDefOf.RemovePaintBuilding) != null && pawn.Map.designationManager.DesignationOn(t, DesignationDefOf.Deconstruct) == null && !t.IsBurning() && pawn.CanReserve(t, 1, -1, null, forced);
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x060084A5 RID: 33957 RVA: 0x0027BD88 File Offset: 0x00279F88
-		public override Job JobOnThing(Pawn pawn, Thing t, bool forced = false)
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			Job job = JobMaker.MakeJob(JobDefOf.RemovePaintBuilding);
-			job.AddQueuedTarget(TargetIndex.A, t);
-			for (int i = 0; i < 100; i++)
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				IntVec3 c = t.Position + GenRadial.RadialPattern[i];
-				if (c.InBounds(t.Map) && !c.Fogged(t.Map) && pawn.CanReach(c, PathEndMode.Touch, Danger.Deadly, false, false, TraverseMode.ByPawn))
+				try
 				{
-					List<Thing> thingList = c.GetThingList(t.Map);
-					for (int j = 0; j < thingList.Count; j++)
-					{
-						Thing thing = thingList[j];
-						if (!job.targetQueueA.Contains(thing) && thing != t && this.HasJobOnThing(pawn, thing, forced))
-						{
-							job.AddQueuedTarget(TargetIndex.A, thing);
-						}
-					}
-					if (job.GetTargetQueue(TargetIndex.A).Count >= 10)
-					{
-						break;
-					}
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
 				}
 			}
-			if (job.targetQueueA != null && job.targetQueueA.Count >= 5)
-			{
-				job.targetQueueA.SortBy((LocalTargetInfo targ) => targ.Cell.DistanceToSquared(pawn.Position));
-			}
-			return job;
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				switch (_003C_003E1__state)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = pawn.Map.designationManager.SpawnedDesignationsOfDef(DesignationDefOf.RemovePaintBuilding).GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 1:
+					_003C_003E1__state = -3;
+					break;
+				}
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					Designation current = _003C_003E7__wrap1.Current;
+					_003C_003E2__current = current.target.Thing;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = null;
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Thing> IEnumerable<Thing>.GetEnumerator()
+		{
+			_003CPotentialWorkThingsGlobal_003Ed__3 _003CPotentialWorkThingsGlobal_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CPotentialWorkThingsGlobal_003Ed__ = this;
+			}
+			else
+			{
+				_003CPotentialWorkThingsGlobal_003Ed__ = new _003CPotentialWorkThingsGlobal_003Ed__3(0);
+			}
+			_003CPotentialWorkThingsGlobal_003Ed__.pawn = _003C_003E3__pawn;
+			return _003CPotentialWorkThingsGlobal_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Thing>)this).GetEnumerator();
+		}
+	}
+
+	public override PathEndMode PathEndMode => PathEndMode.Touch;
+
+	public override bool ShouldSkip(Pawn pawn, bool forced = false)
+	{
+		return !pawn.Map.designationManager.AnySpawnedDesignationOfDef(DesignationDefOf.RemovePaintBuilding);
+	}
+
+	[IteratorStateMachine(typeof(_003CPotentialWorkThingsGlobal_003Ed__3))]
+	public override IEnumerable<Thing> PotentialWorkThingsGlobal(Pawn pawn)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CPotentialWorkThingsGlobal_003Ed__3(-2)
+		{
+			_003C_003E3__pawn = pawn
+		};
+	}
+
+	public override bool HasJobOnThing(Pawn pawn, Thing t, bool forced = false)
+	{
+		if (t.def.building == null || !t.def.building.paintable)
+		{
+			return false;
+		}
+		if (pawn.Map.designationManager.DesignationOn(t, DesignationDefOf.RemovePaintBuilding) == null)
+		{
+			return false;
+		}
+		if (pawn.Map.designationManager.DesignationOn(t, DesignationDefOf.Deconstruct) != null)
+		{
+			return false;
+		}
+		if (t.IsBurning())
+		{
+			return false;
+		}
+		if (!pawn.CanReserve(t, 1, -1, null, forced))
+		{
+			return false;
+		}
+		return true;
+	}
+
+	public override Job JobOnThing(Pawn pawn, Thing t, bool forced = false)
+	{
+		Job job = JobMaker.MakeJob(JobDefOf.RemovePaintBuilding);
+		job.AddQueuedTarget(TargetIndex.A, t);
+		for (int i = 0; i < 100; i++)
+		{
+			IntVec3 intVec = t.Position + GenRadial.RadialPattern[i];
+			if (!intVec.InBounds(t.Map) || intVec.Fogged(t.Map) || !pawn.CanReach(intVec, PathEndMode.Touch, Danger.Deadly))
+			{
+				continue;
+			}
+			List<Thing> thingList = intVec.GetThingList(t.Map);
+			for (int j = 0; j < thingList.Count; j++)
+			{
+				Thing thing = thingList[j];
+				if (!job.targetQueueA.Contains(thing) && thing != t && HasJobOnThing(pawn, thing, forced))
+				{
+					job.AddQueuedTarget(TargetIndex.A, thing);
+				}
+			}
+			if (job.GetTargetQueue(TargetIndex.A).Count >= 10)
+			{
+				break;
+			}
+		}
+		if (job.targetQueueA != null && job.targetQueueA.Count >= 5)
+		{
+			job.targetQueueA.SortBy((LocalTargetInfo targ) => targ.Cell.DistanceToSquared(pawn.Position));
+		}
+		return job;
 	}
 }

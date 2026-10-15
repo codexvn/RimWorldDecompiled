@@ -1,375 +1,513 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
-namespace Verse
+namespace Verse;
+
+public class SimpleCurve : IEnumerable<CurvePoint>, IEnumerable, IExposable
 {
-	// Token: 0x020000DC RID: 220
-	public class SimpleCurve : IEnumerable<CurvePoint>, IEnumerable, IExposable
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__32 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700011F RID: 287
-		// (get) Token: 0x060005FC RID: 1532 RVA: 0x0001DD13 File Offset: 0x0001BF13
-		public int PointsCount
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public SimpleCurve _003C_003E4__this;
+
+		private string prefix;
+
+		public string _003C_003E3__prefix;
+
+		string IEnumerator<string>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.points.Count;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17000120 RID: 288
-		// (get) Token: 0x060005FD RID: 1533 RVA: 0x0001DD20 File Offset: 0x0001BF20
-		public List<CurvePoint> Points
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.points;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17000121 RID: 289
-		// (get) Token: 0x060005FE RID: 1534 RVA: 0x0001DD28 File Offset: 0x0001BF28
-		public bool HasView
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__32(int _003C_003E1__state)
 		{
-			get
-			{
-				return this.view != null;
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x17000122 RID: 290
-		// (get) Token: 0x060005FF RID: 1535 RVA: 0x0001DD33 File Offset: 0x0001BF33
-		public SimpleCurveView View
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			get
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			SimpleCurve simpleCurve = _003C_003E4__this;
+			switch (num)
 			{
-				if (this.view == null)
+			default:
+				return false;
+			case 0:
+			{
+				_003C_003E1__state = -1;
+				for (int i = 0; i < simpleCurve.points.Count - 1; i++)
 				{
-					this.view = new SimpleCurveView();
-					this.view.SetViewRectAround(this);
+					if (simpleCurve.points[i + 1].x < simpleCurve.points[i].x)
+					{
+						_003C_003E2__current = prefix + ": points are out of order";
+						_003C_003E1__state = 1;
+						return true;
+					}
 				}
-				return this.view;
+				break;
 			}
+			case 1:
+				_003C_003E1__state = -1;
+				break;
+			}
+			return false;
 		}
 
-		// Token: 0x17000123 RID: 291
-		// (get) Token: 0x06000600 RID: 1536 RVA: 0x0001DD5A File Offset: 0x0001BF5A
-		public float MinY
+		bool IEnumerator.MoveNext()
 		{
-			get
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__32 _003CConfigErrors_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				return this.points.Min((CurvePoint point) => point.y);
+				_003C_003E1__state = 0;
+				_003CConfigErrors_003Ed__ = this;
 			}
-		}
-
-		// Token: 0x17000124 RID: 292
-		// (get) Token: 0x06000601 RID: 1537 RVA: 0x0001DD86 File Offset: 0x0001BF86
-		public float MaxY
-		{
-			get
+			else
 			{
-				return this.points.Max((CurvePoint point) => point.y);
+				_003CConfigErrors_003Ed__ = new _003CConfigErrors_003Ed__32(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
+			_003CConfigErrors_003Ed__.prefix = _003C_003E3__prefix;
+			return _003CConfigErrors_003Ed__;
 		}
 
-		// Token: 0x06000602 RID: 1538 RVA: 0x0001DDB2 File Offset: 0x0001BFB2
-		public SimpleCurve(IEnumerable<CurvePoint> points)
-		{
-			this.SetPoints(points);
-		}
-
-		// Token: 0x06000603 RID: 1539 RVA: 0x0001DDCC File Offset: 0x0001BFCC
-		public SimpleCurve()
-		{
-		}
-
-		// Token: 0x06000604 RID: 1540 RVA: 0x0001DDDF File Offset: 0x0001BFDF
-		public void ExposeData()
-		{
-			Scribe_Collections.Look<CurvePoint>(ref this.points, "points", LookMode.Value, Array.Empty<object>());
-		}
-
-		// Token: 0x06000605 RID: 1541 RVA: 0x0001DDF7 File Offset: 0x0001BFF7
+		[DebuggerHidden]
 		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return this.GetEnumerator();
+			return ((IEnumerable<string>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x06000606 RID: 1542 RVA: 0x0001DDFF File Offset: 0x0001BFFF
-		public IEnumerator<CurvePoint> GetEnumerator()
-		{
-			foreach (CurvePoint curvePoint in this.points)
-			{
-				yield return curvePoint;
-			}
-			List<CurvePoint>.Enumerator enumerator = default(List<CurvePoint>.Enumerator);
-			yield break;
-			yield break;
-		}
+	[CompilerGenerated]
+	private sealed class _003CGetEnumerator_003Ed__19 : IEnumerator<CurvePoint>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
 
-		// Token: 0x17000125 RID: 293
-		public CurvePoint this[int i]
+		private CurvePoint _003C_003E2__current;
+
+		public SimpleCurve _003C_003E4__this;
+
+		private List<CurvePoint>.Enumerator _003C_003E7__wrap1;
+
+		CurvePoint IEnumerator<CurvePoint>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.points[i];
-			}
-			set
-			{
-				this.points[i] = value;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06000609 RID: 1545 RVA: 0x0001DE2C File Offset: 0x0001C02C
-		public void SetPoints(IEnumerable<CurvePoint> newPoints)
+		object IEnumerator.Current
 		{
-			this.points.Clear();
-			foreach (CurvePoint item in newPoints)
+			[DebuggerHidden]
+			get
 			{
-				this.points.Add(item);
-			}
-			this.SortPoints();
-		}
-
-		// Token: 0x0600060A RID: 1546 RVA: 0x0001DE8C File Offset: 0x0001C08C
-		public void Add(float x, float y, bool sort = true)
-		{
-			CurvePoint newPoint = new CurvePoint(x, y);
-			this.Add(newPoint, sort);
-		}
-
-		// Token: 0x0600060B RID: 1547 RVA: 0x0001DEAA File Offset: 0x0001C0AA
-		public void Add(CurvePoint newPoint, bool sort = true)
-		{
-			this.points.Add(newPoint);
-			if (sort)
-			{
-				this.SortPoints();
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600060C RID: 1548 RVA: 0x0001DEC1 File Offset: 0x0001C0C1
-		public void SortPoints()
+		[DebuggerHidden]
+		public _003CGetEnumerator_003Ed__19(int _003C_003E1__state)
 		{
-			this.points.Sort(SimpleCurve.CurvePointsComparer);
+			this._003C_003E1__state = _003C_003E1__state;
 		}
 
-		// Token: 0x0600060D RID: 1549 RVA: 0x0001DED4 File Offset: 0x0001C0D4
-		public float ClampToCurve(float value)
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			if (this.points.Count == 0)
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				Log.Error("Clamping a value to an empty SimpleCurve.");
-				return value;
-			}
-			return Mathf.Clamp(value, this.points[0].y, this.points[this.points.Count - 1].y);
-		}
-
-		// Token: 0x0600060E RID: 1550 RVA: 0x0001DF34 File Offset: 0x0001C134
-		public void RemovePointNear(CurvePoint point)
-		{
-			for (int i = 0; i < this.points.Count; i++)
-			{
-				if ((this.points[i].Loc - point.Loc).sqrMagnitude < 0.001f)
+				try
 				{
-					this.points.RemoveAt(i);
-					return;
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
 				}
 			}
+			_003C_003E7__wrap1 = default(List<CurvePoint>.Enumerator);
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x0600060F RID: 1551 RVA: 0x0001DF94 File Offset: 0x0001C194
-		public float Evaluate(float x)
+		private bool MoveNext()
 		{
-			if (this.points.Count == 0)
+			try
 			{
-				Log.Error("Evaluating a SimpleCurve with no points.");
-				return 0f;
-			}
-			if (x <= this.points[0].x)
-			{
-				return this.points[0].y;
-			}
-			if (x >= this.points[this.points.Count - 1].x)
-			{
-				return this.points[this.points.Count - 1].y;
-			}
-			CurvePoint curvePoint = this.points[0];
-			CurvePoint curvePoint2 = this.points[this.points.Count - 1];
-			int i = 0;
-			while (i < this.points.Count)
-			{
-				if (x <= this.points[i].x)
+				int num = _003C_003E1__state;
+				SimpleCurve simpleCurve = _003C_003E4__this;
+				switch (num)
 				{
-					curvePoint2 = this.points[i];
-					if (i > 0)
-					{
-						curvePoint = this.points[i - 1];
-						break;
-					}
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = simpleCurve.points.GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 1:
+					_003C_003E1__state = -3;
 					break;
 				}
-				else
+				if (_003C_003E7__wrap1.MoveNext())
 				{
-					i++;
+					CurvePoint current = _003C_003E7__wrap1.Current;
+					_003C_003E2__current = current;
+					_003C_003E1__state = 1;
+					return true;
 				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = default(List<CurvePoint>.Enumerator);
+				return false;
 			}
-			float t = (x - curvePoint.x) / (curvePoint2.x - curvePoint.x);
-			return Mathf.Lerp(curvePoint.y, curvePoint2.y, t);
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
 		}
 
-		// Token: 0x06000610 RID: 1552 RVA: 0x0001E0DC File Offset: 0x0001C2DC
-		public float EvaluateInverted(float y)
+		bool IEnumerator.MoveNext()
 		{
-			if (this.points.Count == 0)
-			{
-				Log.Error("Evaluating a SimpleCurve with no points.");
-				return 0f;
-			}
-			if (this.points.Count == 1)
-			{
-				return this.points[0].x;
-			}
-			int i = 0;
-			while (i < this.points.Count - 1)
-			{
-				if ((y >= this.points[i].y && y <= this.points[i + 1].y) || (y <= this.points[i].y && y >= this.points[i + 1].y))
-				{
-					if (y == this.points[i].y)
-					{
-						return this.points[i].x;
-					}
-					if (y == this.points[i + 1].y)
-					{
-						return this.points[i + 1].x;
-					}
-					return GenMath.LerpDouble(this.points[i].y, this.points[i + 1].y, this.points[i].x, this.points[i + 1].x, y);
-				}
-				else
-				{
-					i++;
-				}
-			}
-			if (y < this.points[0].y)
-			{
-				float result = 0f;
-				float num = 0f;
-				for (int j = 0; j < this.points.Count; j++)
-				{
-					if (j == 0 || this.points[j].y < num)
-					{
-						num = this.points[j].y;
-						result = this.points[j].x;
-					}
-				}
-				return result;
-			}
-			float result2 = 0f;
-			float num2 = 0f;
-			for (int k = 0; k < this.points.Count; k++)
-			{
-				if (k == 0 || this.points[k].y > num2)
-				{
-					num2 = this.points[k].y;
-					result2 = this.points[k].x;
-				}
-			}
-			return result2;
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x06000611 RID: 1553 RVA: 0x0001E360 File Offset: 0x0001C560
-		public float PeriodProbabilityFromCumulative(float startX, float span)
+		private void _003C_003Em__Finally1()
 		{
-			if (this.points.Count < 2)
-			{
-				return 0f;
-			}
-			if (this.points[0].y != 0f)
-			{
-				Log.Warning("PeriodProbabilityFromCumulative should only run on curves whose first point is 0.");
-			}
-			float num = this.Evaluate(startX + span) - this.Evaluate(startX);
-			if (num < 0f)
-			{
-				Log.Error("PeriodicProbability got negative probability from " + ((this != null) ? this.ToString() : null) + ": slope should never be negative.");
-				num = 0f;
-			}
-			if (num > 1f)
-			{
-				num = 1f;
-			}
-			return num;
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap1/*cast due to .constrained prefix*/).Dispose();
 		}
 
-		// Token: 0x06000612 RID: 1554 RVA: 0x0001E3F6 File Offset: 0x0001C5F6
-		public IEnumerable<string> ConfigErrors(string prefix)
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			for (int i = 0; i < this.points.Count - 1; i++)
-			{
-				if (this.points[i + 1].x < this.points[i].x)
-				{
-					yield return prefix + ": points are out of order";
-					break;
-				}
-			}
-			yield break;
+			throw new NotSupportedException();
 		}
+	}
 
-		// Token: 0x06000613 RID: 1555 RVA: 0x0001E40D File Offset: 0x0001C60D
-		public static SimpleCurve Empty()
+	private List<CurvePoint> points = new List<CurvePoint>();
+
+	[Unsaved(false)]
+	private SimpleCurveView view;
+
+	private static Comparison<CurvePoint> CurvePointsComparer = delegate(CurvePoint a, CurvePoint b)
+	{
+		if (a.x < b.x)
 		{
-			return new SimpleCurve
-			{
-				{
-					new CurvePoint(0f, 0f),
-					true
-				}
-			};
+			return -1;
 		}
+		return (b.x < a.x) ? 1 : 0;
+	};
 
-		// Token: 0x06000614 RID: 1556 RVA: 0x0001E42C File Offset: 0x0001C62C
-		public AnimationCurve ToAnimationCurve()
+	public int PointsCount => points.Count;
+
+	public List<CurvePoint> Points => points;
+
+	public bool HasView => view != null;
+
+	public SimpleCurveView View
+	{
+		get
 		{
-			AnimationCurve animationCurve = new AnimationCurve();
-			foreach (CurvePoint curvePoint in this.Points)
+			if (view == null)
 			{
-				animationCurve.AddKey(curvePoint.x, curvePoint.y);
+				view = new SimpleCurveView();
+				view.SetViewRectAround(this);
 			}
-			return animationCurve;
+			return view;
 		}
+	}
 
-		// Token: 0x06000615 RID: 1557 RVA: 0x0001E494 File Offset: 0x0001C694
-		public static SimpleCurve FromAnimationCurve(AnimationCurve curve)
+	public float MinY => points.Min((CurvePoint point) => point.y);
+
+	public float MaxY => points.Max((CurvePoint point) => point.y);
+
+	public CurvePoint this[int i]
+	{
+		get
 		{
-			SimpleCurve simpleCurve = new SimpleCurve();
-			foreach (Keyframe keyframe in curve.keys)
-			{
-				simpleCurve.Points.Add(new CurvePoint(keyframe.time, keyframe.value));
-			}
-			return simpleCurve;
+			return points[i];
 		}
-
-		// Token: 0x04000315 RID: 789
-		private List<CurvePoint> points = new List<CurvePoint>();
-
-		// Token: 0x04000316 RID: 790
-		[Unsaved(false)]
-		private SimpleCurveView view;
-
-		// Token: 0x04000317 RID: 791
-		private static Comparison<CurvePoint> CurvePointsComparer = delegate(CurvePoint a, CurvePoint b)
+		set
 		{
-			if (a.x < b.x)
-			{
-				return -1;
-			}
-			if (b.x < a.x)
-			{
-				return 1;
-			}
-			return 0;
+			points[i] = value;
+		}
+	}
+
+	public SimpleCurve(IEnumerable<CurvePoint> points)
+	{
+		SetPoints(points);
+	}
+
+	public SimpleCurve()
+	{
+	}
+
+	public void ExposeData()
+	{
+		Scribe_Collections.Look(ref points, "points", LookMode.Value);
+	}
+
+	IEnumerator IEnumerable.GetEnumerator()
+	{
+		return GetEnumerator();
+	}
+
+	[IteratorStateMachine(typeof(_003CGetEnumerator_003Ed__19))]
+	public IEnumerator<CurvePoint> GetEnumerator()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetEnumerator_003Ed__19(0)
+		{
+			_003C_003E4__this = this
 		};
+	}
+
+	public void SetPoints(IEnumerable<CurvePoint> newPoints)
+	{
+		points.Clear();
+		foreach (CurvePoint newPoint in newPoints)
+		{
+			points.Add(newPoint);
+		}
+		SortPoints();
+	}
+
+	public void Add(float x, float y, bool sort = true)
+	{
+		CurvePoint newPoint = new CurvePoint(x, y);
+		Add(newPoint, sort);
+	}
+
+	public void Add(CurvePoint newPoint, bool sort = true)
+	{
+		points.Add(newPoint);
+		if (sort)
+		{
+			SortPoints();
+		}
+	}
+
+	public void SortPoints()
+	{
+		points.Sort(CurvePointsComparer);
+	}
+
+	public float ClampToCurve(float value)
+	{
+		if (points.Count == 0)
+		{
+			Log.Error("Clamping a value to an empty SimpleCurve.");
+			return value;
+		}
+		return Mathf.Clamp(value, points[0].y, points[points.Count - 1].y);
+	}
+
+	public void RemovePointNear(CurvePoint point)
+	{
+		for (int i = 0; i < points.Count; i++)
+		{
+			if ((points[i].Loc - point.Loc).sqrMagnitude < 0.001f)
+			{
+				points.RemoveAt(i);
+				break;
+			}
+		}
+	}
+
+	public float Evaluate(float x)
+	{
+		if (points.Count == 0)
+		{
+			Log.Error("Evaluating a SimpleCurve with no points.");
+			return 0f;
+		}
+		if (x <= points[0].x)
+		{
+			return points[0].y;
+		}
+		if (x >= points[points.Count - 1].x)
+		{
+			return points[points.Count - 1].y;
+		}
+		CurvePoint curvePoint = points[0];
+		CurvePoint curvePoint2 = points[points.Count - 1];
+		for (int i = 0; i < points.Count; i++)
+		{
+			if (x <= points[i].x)
+			{
+				curvePoint2 = points[i];
+				if (i > 0)
+				{
+					curvePoint = points[i - 1];
+				}
+				break;
+			}
+		}
+		float t = (x - curvePoint.x) / (curvePoint2.x - curvePoint.x);
+		return Mathf.Lerp(curvePoint.y, curvePoint2.y, t);
+	}
+
+	public float EvaluateInverted(float y)
+	{
+		if (points.Count == 0)
+		{
+			Log.Error("Evaluating a SimpleCurve with no points.");
+			return 0f;
+		}
+		if (points.Count == 1)
+		{
+			return points[0].x;
+		}
+		for (int i = 0; i < points.Count - 1; i++)
+		{
+			if ((y >= points[i].y && y <= points[i + 1].y) || (y <= points[i].y && y >= points[i + 1].y))
+			{
+				if (y == points[i].y)
+				{
+					return points[i].x;
+				}
+				if (y == points[i + 1].y)
+				{
+					return points[i + 1].x;
+				}
+				return GenMath.LerpDouble(points[i].y, points[i + 1].y, points[i].x, points[i + 1].x, y);
+			}
+		}
+		if (y < points[0].y)
+		{
+			float result = 0f;
+			float num = 0f;
+			for (int j = 0; j < points.Count; j++)
+			{
+				if (j == 0 || points[j].y < num)
+				{
+					num = points[j].y;
+					result = points[j].x;
+				}
+			}
+			return result;
+		}
+		float result2 = 0f;
+		float num2 = 0f;
+		for (int k = 0; k < points.Count; k++)
+		{
+			if (k == 0 || points[k].y > num2)
+			{
+				num2 = points[k].y;
+				result2 = points[k].x;
+			}
+		}
+		return result2;
+	}
+
+	public float PeriodProbabilityFromCumulative(float startX, float span)
+	{
+		if (points.Count < 2)
+		{
+			return 0f;
+		}
+		if (points[0].y != 0f)
+		{
+			Log.Warning("PeriodProbabilityFromCumulative should only run on curves whose first point is 0.");
+		}
+		float num = Evaluate(startX + span) - Evaluate(startX);
+		if (num < 0f)
+		{
+			Log.Error("PeriodicProbability got negative probability from " + this?.ToString() + ": slope should never be negative.");
+			num = 0f;
+		}
+		if (num > 1f)
+		{
+			num = 1f;
+		}
+		return num;
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__32))]
+	public IEnumerable<string> ConfigErrors(string prefix)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__32(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__prefix = prefix
+		};
+	}
+
+	public static SimpleCurve Empty()
+	{
+		return new SimpleCurve { new CurvePoint(0f, 0f) };
+	}
+
+	public AnimationCurve ToAnimationCurve()
+	{
+		AnimationCurve animationCurve = new AnimationCurve();
+		foreach (CurvePoint point in Points)
+		{
+			animationCurve.AddKey(point.x, point.y);
+		}
+		return animationCurve;
+	}
+
+	public static SimpleCurve FromAnimationCurve(AnimationCurve curve)
+	{
+		SimpleCurve simpleCurve = new SimpleCurve();
+		UnityEngine.Keyframe[] keys = curve.keys;
+		for (int i = 0; i < keys.Length; i++)
+		{
+			UnityEngine.Keyframe keyframe = keys[i];
+			simpleCurve.Points.Add(new CurvePoint(keyframe.time, keyframe.value));
+		}
+		return simpleCurve;
 	}
 }

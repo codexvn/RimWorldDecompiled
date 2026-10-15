@@ -1,289 +1,250 @@
-﻿using System;
 using System.Collections.Generic;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class TradeDeal
 {
-	// Token: 0x02002FAF RID: 12207
-	public class TradeDeal
+	private List<Tradeable> tradeables = new List<Tradeable>();
+
+	public List<string> cannotSellReasons = new List<string>();
+
+	public int TradeableCount => tradeables.Count;
+
+	public Tradeable CurrencyTradeable
 	{
-		// Token: 0x17002C88 RID: 11400
-		// (get) Token: 0x06011319 RID: 70425 RVA: 0x004ED759 File Offset: 0x004EB959
-		public int TradeableCount
+		get
 		{
-			get
+			for (int i = 0; i < tradeables.Count; i++)
 			{
-				return this.tradeables.Count;
-			}
-		}
-
-		// Token: 0x17002C89 RID: 11401
-		// (get) Token: 0x0601131A RID: 70426 RVA: 0x004ED768 File Offset: 0x004EB968
-		public Tradeable CurrencyTradeable
-		{
-			get
-			{
-				for (int i = 0; i < this.tradeables.Count; i++)
+				if ((TradeSession.TradeCurrency == TradeCurrency.Favor) ? tradeables[i].IsFavor : (tradeables[i].ThingDef == ThingDefOf.Silver))
 				{
-					if ((TradeSession.TradeCurrency == TradeCurrency.Favor) ? this.tradeables[i].IsFavor : (this.tradeables[i].ThingDef == ThingDefOf.Silver))
-					{
-						return this.tradeables[i];
-					}
-				}
-				return null;
-			}
-		}
-
-		// Token: 0x17002C8A RID: 11402
-		// (get) Token: 0x0601131B RID: 70427 RVA: 0x004ED7CE File Offset: 0x004EB9CE
-		public List<Tradeable> AllTradeables
-		{
-			get
-			{
-				return this.tradeables;
-			}
-		}
-
-		// Token: 0x0601131C RID: 70428 RVA: 0x004ED7D6 File Offset: 0x004EB9D6
-		public TradeDeal()
-		{
-			this.Reset();
-		}
-
-		// Token: 0x0601131D RID: 70429 RVA: 0x004ED7FA File Offset: 0x004EB9FA
-		public void Reset()
-		{
-			this.tradeables.Clear();
-			this.cannotSellReasons.Clear();
-			this.AddAllTradeables();
-		}
-
-		// Token: 0x0601131E RID: 70430 RVA: 0x004ED818 File Offset: 0x004EBA18
-		private void AddAllTradeables()
-		{
-			foreach (Thing t in TradeSession.trader.ColonyThingsWillingToBuy(TradeSession.playerNegotiator))
-			{
-				if (TradeUtility.PlayerSellableNow(t, TradeSession.trader))
-				{
-					string text;
-					if (!TradeSession.playerNegotiator.IsWorldPawn() && !this.InSellablePosition(t, out text))
-					{
-						if (text != null && !this.cannotSellReasons.Contains(text))
-						{
-							this.cannotSellReasons.Add(text);
-						}
-					}
-					else
-					{
-						this.AddToTradeables(t, Transactor.Colony);
-					}
+					return tradeables[i];
 				}
 			}
-			if (!TradeSession.giftMode)
+			return null;
+		}
+	}
+
+	public List<Tradeable> AllTradeables => tradeables;
+
+	public TradeDeal()
+	{
+		Reset();
+	}
+
+	public void Reset()
+	{
+		tradeables.Clear();
+		cannotSellReasons.Clear();
+		AddAllTradeables();
+	}
+
+	private void AddAllTradeables()
+	{
+		foreach (Thing item in TradeSession.trader.ColonyThingsWillingToBuy(TradeSession.playerNegotiator))
+		{
+			if (!TradeUtility.PlayerSellableNow(item, TradeSession.trader))
 			{
-				foreach (Thing t2 in TradeSession.trader.Goods)
+				continue;
+			}
+			if (!TradeSession.playerNegotiator.IsWorldPawn() && !InSellablePosition(item, out var reason))
+			{
+				if (reason != null && !cannotSellReasons.Contains(reason))
 				{
-					this.AddToTradeables(t2, Transactor.Trader);
+					cannotSellReasons.Add(reason);
 				}
 			}
-			if (!TradeSession.giftMode)
+			else
 			{
-				if (this.tradeables.Find((Tradeable x) => x.IsCurrency) == null)
-				{
-					Thing thing = ThingMaker.MakeThing(ThingDefOf.Silver, null);
-					thing.stackCount = 0;
-					this.AddToTradeables(thing, Transactor.Trader);
-				}
-			}
-			if (TradeSession.TradeCurrency == TradeCurrency.Favor)
-			{
-				this.tradeables.Add(new Tradeable_RoyalFavor());
+				AddToTradeables(item, Transactor.Colony);
 			}
 		}
-
-		// Token: 0x0601131F RID: 70431 RVA: 0x004ED964 File Offset: 0x004EBB64
-		private bool InSellablePosition(Thing t, out string reason)
+		if (!TradeSession.giftMode)
 		{
-			if (!t.Spawned && (!ModsConfig.BiotechActive || t.def != ThingDefOf.Genepack || !(t.ParentHolder is CompGenepackContainer)) && (!(t is Book) || !(t.ParentHolder is Building_Bookcase)) && (!(t is Apparel) || !(t.ParentHolder is Building_OutfitStand)))
+			foreach (Thing good in TradeSession.trader.Goods)
 			{
-				reason = null;
-				return false;
+				AddToTradeables(good, Transactor.Trader);
 			}
-			IntVec3 positionHeld = t.PositionHeld;
-			Room room = t.SpawnedParentOrMe.GetRoom(RegionType.Set_All);
-			if (positionHeld.Fogged(t.MapHeld))
-			{
-				reason = null;
-				return false;
-			}
-			if (room != null)
-			{
-				int num = GenRadial.NumCellsInRadius(6.9f);
-				for (int i = 0; i < num; i++)
-				{
-					IntVec3 intVec = positionHeld + GenRadial.RadialPattern[i];
-					if (intVec.InBounds(t.MapHeld) && intVec.GetRoom(t.MapHeld) == room)
-					{
-						List<Thing> thingList = intVec.GetThingList(t.MapHeld);
-						for (int j = 0; j < thingList.Count; j++)
-						{
-							if (thingList[j].PreventPlayerSellingThingsNearby(out reason))
-							{
-								return false;
-							}
-						}
-					}
-				}
-			}
+		}
+		if (!TradeSession.giftMode && tradeables.Find((Tradeable x) => x.IsCurrency) == null)
+		{
+			Thing thing = ThingMaker.MakeThing(ThingDefOf.Silver);
+			thing.stackCount = 0;
+			AddToTradeables(thing, Transactor.Trader);
+		}
+		if (TradeSession.TradeCurrency == TradeCurrency.Favor)
+		{
+			tradeables.Add(new Tradeable_RoyalFavor());
+		}
+	}
+
+	private bool InSellablePosition(Thing t, out string reason)
+	{
+		if (!t.Spawned && (!ModsConfig.BiotechActive || t.def != ThingDefOf.Genepack || !(t.ParentHolder is CompGenepackContainer)) && (!(t is Book) || !(t.ParentHolder is Building_Bookcase)) && !(t.ParentHolder is Building_OutfitStand))
+		{
 			reason = null;
+			return false;
+		}
+		IntVec3 positionHeld = t.PositionHeld;
+		Room room = t.SpawnedParentOrMe.GetRoom();
+		if (positionHeld.Fogged(t.MapHeld))
+		{
+			reason = null;
+			return false;
+		}
+		if (room != null)
+		{
+			int num = GenRadial.NumCellsInRadius(6.9f);
+			for (int i = 0; i < num; i++)
+			{
+				IntVec3 intVec = positionHeld + GenRadial.RadialPattern[i];
+				if (!intVec.InBounds(t.MapHeld) || intVec.GetRoom(t.MapHeld) != room)
+				{
+					continue;
+				}
+				List<Thing> thingList = intVec.GetThingList(t.MapHeld);
+				for (int j = 0; j < thingList.Count; j++)
+				{
+					if (thingList[j].PreventPlayerSellingThingsNearby(out reason))
+					{
+						return false;
+					}
+				}
+			}
+		}
+		reason = null;
+		return true;
+	}
+
+	private void AddToTradeables(Thing t, Transactor trans)
+	{
+		Tradeable tradeable = TransferableUtility.TradeableMatching(t, tradeables);
+		if (tradeable == null)
+		{
+			tradeable = ((!(t is Pawn)) ? new Tradeable() : new Tradeable_Pawn());
+			tradeables.Add(tradeable);
+		}
+		tradeable.AddThing(t, trans);
+	}
+
+	public void UpdateCurrencyCount()
+	{
+		if (CurrencyTradeable == null || TradeSession.giftMode)
+		{
+			return;
+		}
+		float num = 0f;
+		for (int i = 0; i < tradeables.Count; i++)
+		{
+			Tradeable tradeable = tradeables[i];
+			if (!tradeable.IsCurrency)
+			{
+				num += tradeable.CurTotalCurrencyCostForSource;
+			}
+		}
+		CurrencyTradeable.ForceToSource(-CurrencyTradeable.CostToInt(num));
+	}
+
+	public bool TryExecute(out bool actuallyTraded)
+	{
+		if (TradeSession.giftMode)
+		{
+			UpdateCurrencyCount();
+			LimitCurrencyCountToFunds();
+			int goodwillChange = FactionGiftUtility.GetGoodwillChange(tradeables, TradeSession.trader.Faction);
+			FactionGiftUtility.GiveGift(tradeables, TradeSession.trader.Faction, TradeSession.playerNegotiator);
+			actuallyTraded = (float)goodwillChange > 0f;
 			return true;
 		}
-
-		// Token: 0x06011320 RID: 70432 RVA: 0x004EDA7C File Offset: 0x004EBC7C
-		private void AddToTradeables(Thing t, Transactor trans)
+		if (CurrencyTradeable == null || CurrencyTradeable.CountPostDealFor(Transactor.Colony) < 0)
 		{
-			Tradeable tradeable = TransferableUtility.TradeableMatching(t, this.tradeables);
-			if (tradeable == null)
-			{
-				if (t is Pawn)
-				{
-					tradeable = new Tradeable_Pawn();
-				}
-				else
-				{
-					tradeable = new Tradeable();
-				}
-				this.tradeables.Add(tradeable);
-			}
-			tradeable.AddThing(t, trans);
-		}
-
-		// Token: 0x06011321 RID: 70433 RVA: 0x004EDAC4 File Offset: 0x004EBCC4
-		public void UpdateCurrencyCount()
-		{
-			if (this.CurrencyTradeable == null || TradeSession.giftMode)
-			{
-				return;
-			}
-			float num = 0f;
-			for (int i = 0; i < this.tradeables.Count; i++)
-			{
-				Tradeable tradeable = this.tradeables[i];
-				if (!tradeable.IsCurrency)
-				{
-					num += tradeable.CurTotalCurrencyCostForSource;
-				}
-			}
-			this.CurrencyTradeable.ForceToSource(-this.CurrencyTradeable.CostToInt(num));
-		}
-
-		// Token: 0x06011322 RID: 70434 RVA: 0x004EDB34 File Offset: 0x004EBD34
-		public bool TryExecute(out bool actuallyTraded)
-		{
-			if (TradeSession.giftMode)
-			{
-				this.UpdateCurrencyCount();
-				this.LimitCurrencyCountToFunds();
-				int goodwillChange = FactionGiftUtility.GetGoodwillChange(this.tradeables, TradeSession.trader.Faction);
-				FactionGiftUtility.GiveGift(this.tradeables, TradeSession.trader.Faction, TradeSession.playerNegotiator);
-				actuallyTraded = ((float)goodwillChange > 0f);
-				return true;
-			}
-			if (this.CurrencyTradeable == null || this.CurrencyTradeable.CountPostDealFor(Transactor.Colony) < 0)
-			{
-				Find.WindowStack.WindowOfType<Dialog_Trade>().FlashSilver();
-				Messages.Message("MessageColonyCannotAfford".Translate(), MessageTypeDefOf.RejectInput, false);
-				actuallyTraded = false;
-				return false;
-			}
-			if (ModsConfig.IdeologyActive)
-			{
-				if (this.tradeables.Any((Tradeable x) => x.ActionToDo != TradeAction.None && x.ThingDef != null && x.ThingDef.IsNaturalOrgan))
-				{
-					HistoryEvent historyEvent = new HistoryEvent(HistoryEventDefOf.TradedOrgan, TradeSession.playerNegotiator.Named(HistoryEventArgsNames.Doer));
-					if (!historyEvent.Notify_PawnAboutToDo("MessagePawnUnwillingToDoDueToIdeo"))
-					{
-						actuallyTraded = false;
-						return false;
-					}
-					Find.HistoryEventsManager.RecordEvent(historyEvent, true);
-				}
-				if (this.tradeables.Any((Tradeable x) => x.ActionToDo == TradeAction.PlayerSells && x.ThingDef != null && x.ThingDef.IsNaturalOrgan))
-				{
-					HistoryEvent historyEvent2 = new HistoryEvent(HistoryEventDefOf.SoldOrgan, TradeSession.playerNegotiator.Named(HistoryEventArgsNames.Doer));
-					if (!historyEvent2.Notify_PawnAboutToDo("MessagePawnUnwillingToDoDueToIdeo"))
-					{
-						actuallyTraded = false;
-						return false;
-					}
-					Find.HistoryEventsManager.RecordEvent(historyEvent2, true);
-				}
-			}
-			this.UpdateCurrencyCount();
-			this.LimitCurrencyCountToFunds();
+			Find.WindowStack.WindowOfType<Dialog_Trade>().FlashSilver();
+			Messages.Message("MessageColonyCannotAfford".Translate(), MessageTypeDefOf.RejectInput, historical: false);
 			actuallyTraded = false;
-			float num = 0f;
-			foreach (Tradeable tradeable in this.tradeables)
+			return false;
+		}
+		if (ModsConfig.IdeologyActive)
+		{
+			if (tradeables.Any((Tradeable x) => x.ActionToDo != 0 && x.ThingDef != null && x.ThingDef.IsNaturalOrgan))
 			{
-				if (tradeable.ActionToDo != TradeAction.None)
+				HistoryEvent historyEvent = new HistoryEvent(HistoryEventDefOf.TradedOrgan, TradeSession.playerNegotiator.Named(HistoryEventArgsNames.Doer));
+				if (!historyEvent.Notify_PawnAboutToDo())
 				{
-					actuallyTraded = true;
+					actuallyTraded = false;
+					return false;
 				}
-				if (tradeable.ActionToDo == TradeAction.PlayerSells)
+				Find.HistoryEventsManager.RecordEvent(historyEvent);
+			}
+			if (tradeables.Any((Tradeable x) => x.ActionToDo == TradeAction.PlayerSells && x.ThingDef != null && x.ThingDef.IsNaturalOrgan))
+			{
+				HistoryEvent historyEvent2 = new HistoryEvent(HistoryEventDefOf.SoldOrgan, TradeSession.playerNegotiator.Named(HistoryEventArgsNames.Doer));
+				if (!historyEvent2.Notify_PawnAboutToDo())
 				{
-					num += tradeable.CurTotalCurrencyCostForDestination;
+					actuallyTraded = false;
+					return false;
 				}
-				tradeable.ResolveTrade();
+				Find.HistoryEventsManager.RecordEvent(historyEvent2);
 			}
-			this.Reset();
-			if (TradeSession.trader.Faction != null)
+		}
+		UpdateCurrencyCount();
+		LimitCurrencyCountToFunds();
+		actuallyTraded = false;
+		float num = 0f;
+		foreach (Tradeable tradeable in tradeables)
+		{
+			if (tradeable.ActionToDo != 0)
 			{
-				TradeSession.trader.Faction.Notify_PlayerTraded(num, TradeSession.playerNegotiator);
+				actuallyTraded = true;
 			}
-			Pawn pawn = TradeSession.trader as Pawn;
-			if (pawn != null)
+			if (tradeable.ActionToDo == TradeAction.PlayerSells)
 			{
-				TaleRecorder.RecordTale(TaleDefOf.TradedWith, new object[]
-				{
-					TradeSession.playerNegotiator,
-					pawn
-				});
+				num += tradeable.CurTotalCurrencyCostForDestination;
 			}
-			if (actuallyTraded)
-			{
-				TradeSession.playerNegotiator.mindState.inspirationHandler.EndInspiration(InspirationDefOf.Inspired_Trade);
-			}
+			tradeable.ResolveTrade();
+		}
+		Reset();
+		if (TradeSession.trader.Faction != null)
+		{
+			TradeSession.trader.Faction.Notify_PlayerTraded(num, TradeSession.playerNegotiator);
+		}
+		if (TradeSession.trader is Pawn pawn)
+		{
+			TaleRecorder.RecordTale(TaleDefOf.TradedWith, TradeSession.playerNegotiator, pawn);
+		}
+		if (actuallyTraded)
+		{
+			TradeSession.playerNegotiator.mindState.inspirationHandler.EndInspiration(InspirationDefOf.Inspired_Trade);
+		}
+		return true;
+	}
+
+	public bool DoesTraderHaveEnoughSilver()
+	{
+		if (TradeSession.giftMode)
+		{
 			return true;
 		}
-
-		// Token: 0x06011323 RID: 70435 RVA: 0x004EDDA0 File Offset: 0x004EBFA0
-		public bool DoesTraderHaveEnoughSilver()
+		if (CurrencyTradeable == null)
 		{
-			return TradeSession.giftMode || (this.CurrencyTradeable != null && this.CurrencyTradeable.CountPostDealFor(Transactor.Trader) >= 0);
+			return false;
 		}
+		return CurrencyTradeable.CountPostDealFor(Transactor.Trader) >= 0;
+	}
 
-		// Token: 0x06011324 RID: 70436 RVA: 0x004EDDC8 File Offset: 0x004EBFC8
-		private void LimitCurrencyCountToFunds()
+	private void LimitCurrencyCountToFunds()
+	{
+		if (CurrencyTradeable != null)
 		{
-			if (this.CurrencyTradeable == null)
+			if (CurrencyTradeable.CountToTransferToSource > CurrencyTradeable.CountHeldBy(Transactor.Trader))
 			{
-				return;
+				CurrencyTradeable.ForceToSource(CurrencyTradeable.CountHeldBy(Transactor.Trader));
 			}
-			if (this.CurrencyTradeable.CountToTransferToSource > this.CurrencyTradeable.CountHeldBy(Transactor.Trader))
+			if (CurrencyTradeable.CountToTransferToDestination > CurrencyTradeable.CountHeldBy(Transactor.Colony))
 			{
-				this.CurrencyTradeable.ForceToSource(this.CurrencyTradeable.CountHeldBy(Transactor.Trader));
-			}
-			if (this.CurrencyTradeable.CountToTransferToDestination > this.CurrencyTradeable.CountHeldBy(Transactor.Colony))
-			{
-				this.CurrencyTradeable.ForceToDestination(this.CurrencyTradeable.CountHeldBy(Transactor.Colony));
+				CurrencyTradeable.ForceToDestination(CurrencyTradeable.CountHeldBy(Transactor.Colony));
 			}
 		}
-
-		// Token: 0x0400B273 RID: 45683
-		private List<Tradeable> tradeables = new List<Tradeable>();
-
-		// Token: 0x0400B274 RID: 45684
-		public List<string> cannotSellReasons = new List<string>();
 	}
 }

@@ -1,43 +1,157 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_GetNeuralSupercharge : JobDriver
 {
-	// Token: 0x02001390 RID: 5008
-	public class JobDriver_GetNeuralSupercharge : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__2 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x06007AB0 RID: 31408 RVA: 0x0024F558 File Offset: 0x0024D758
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
-		{
-			return this.pawn.Reserve(this.job.GetTarget(TargetIndex.A).Thing, this.job, 1, -1, null, errorOnFailed, false);
-		}
+		private int _003C_003E1__state;
 
-		// Token: 0x06007AB1 RID: 31409 RVA: 0x0024F594 File Offset: 0x0024D794
-		protected override IEnumerable<Toil> MakeNewToils()
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_GetNeuralSupercharge _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
 		{
-			this.FailOnDespawnedNullOrForbidden(TargetIndex.A);
-			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.InteractionCell, false);
-			yield return Toils_General.Wait(0.55f.SecondsToTicks(), TargetIndex.None);
-			Toil toil = Toils_General.Wait(1.5f.SecondsToTicks(), TargetIndex.None);
-			toil.WithEffect(() => EffecterDefOf.NeuralSuperchargerUse, this.job.GetTarget(TargetIndex.A).Thing, null);
-			yield return toil;
-			yield return Toils_General.Do(delegate
+			[DebuggerHidden]
+			get
 			{
-				Thing thing = this.job.GetTarget(TargetIndex.A).Thing;
-				CompRechargeable compRechargeable = (thing != null) ? thing.TryGetComp<CompRechargeable>() : null;
-				if (compRechargeable != null)
-				{
-					compRechargeable.Discharge();
-				}
-				this.pawn.health.AddHediff(HediffDefOf.NeuralSupercharge, this.pawn.health.hediffSet.GetBrain(), null, null);
-			});
-			yield return Toils_General.Wait(0.35f.SecondsToTicks(), TargetIndex.None);
-			yield break;
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x04005305 RID: 21253
-		private const TargetIndex ChargerInd = TargetIndex.A;
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__2(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_GetNeuralSupercharge CS_0024_003C_003E8__locals5 = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				CS_0024_003C_003E8__locals5.FailOnDespawnedNullOrForbidden(TargetIndex.A);
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.InteractionCell);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.Wait(0.55f.SecondsToTicks());
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+			{
+				_003C_003E1__state = -1;
+				Toil toil = Toils_General.Wait(1.5f.SecondsToTicks());
+				toil.WithEffect(() => EffecterDefOf.NeuralSuperchargerUse, CS_0024_003C_003E8__locals5.job.GetTarget(TargetIndex.A).Thing, null);
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 3;
+				return true;
+			}
+			case 3:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.Do(delegate
+				{
+					(CS_0024_003C_003E8__locals5.job.GetTarget(TargetIndex.A).Thing?.TryGetComp<CompRechargeable>())?.Discharge();
+					CS_0024_003C_003E8__locals5.pawn.health.AddHediff(HediffDefOf.NeuralSupercharge, CS_0024_003C_003E8__locals5.pawn.health.hediffSet.GetBrain(), null);
+				});
+				_003C_003E1__state = 4;
+				return true;
+			case 4:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.Wait(0.35f.SecondsToTicks());
+				_003C_003E1__state = 5;
+				return true;
+			case 5:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__2 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__2(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private const TargetIndex ChargerInd = TargetIndex.A;
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return pawn.Reserve(job.GetTarget(TargetIndex.A).Thing, job, 1, -1, null, errorOnFailed);
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__2))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__2(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

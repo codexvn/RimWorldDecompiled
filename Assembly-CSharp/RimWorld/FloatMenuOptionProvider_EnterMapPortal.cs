@@ -1,112 +1,73 @@
-﻿using System;
 using System.Collections.Generic;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class FloatMenuOptionProvider_EnterMapPortal : FloatMenuOptionProvider
 {
-	// Token: 0x020032F9 RID: 13049
-	public class FloatMenuOptionProvider_EnterMapPortal : FloatMenuOptionProvider
+	private static List<Pawn> tmpPortalEnteringPawns = new List<Pawn>();
+
+	protected override bool Drafted => true;
+
+	protected override bool Undrafted => true;
+
+	protected override bool Multiselect => true;
+
+	protected override bool MechanoidCanDo => true;
+
+	protected override FloatMenuOption GetSingleOptionFor(Thing clickedThing, FloatMenuContext context)
 	{
-		// Token: 0x17002F95 RID: 12181
-		// (get) Token: 0x060125B2 RID: 75186 RVA: 0x000028E7 File Offset: 0x00000AE7
-		protected override bool Drafted
+		MapPortal portal = clickedThing as MapPortal;
+		if (portal == null)
 		{
-			get
+			return null;
+		}
+		if (!portal.IsEnterable(out var reason))
+		{
+			return new FloatMenuOption("CannotEnterPortal".Translate(portal.Label) + ": " + reason, null);
+		}
+		if (!context.IsMultiselect)
+		{
+			AcceptanceReport acceptanceReport = CanEnterPortal(context.FirstSelectedPawn, portal);
+			if (!acceptanceReport.Accepted)
 			{
-				return true;
+				return new FloatMenuOption("CannotEnterPortal".Translate(portal.Label) + ": " + acceptanceReport.Reason, null);
 			}
 		}
-
-		// Token: 0x17002F96 RID: 12182
-		// (get) Token: 0x060125B3 RID: 75187 RVA: 0x000028E7 File Offset: 0x00000AE7
-		protected override bool Undrafted
+		tmpPortalEnteringPawns.Clear();
+		foreach (Pawn validSelectedPawn in context.ValidSelectedPawns)
 		{
-			get
+			if ((bool)CanEnterPortal(context.FirstSelectedPawn, portal))
 			{
-				return true;
+				tmpPortalEnteringPawns.Add(validSelectedPawn);
 			}
 		}
-
-		// Token: 0x17002F97 RID: 12183
-		// (get) Token: 0x060125B4 RID: 75188 RVA: 0x000028E7 File Offset: 0x00000AE7
-		protected override bool Multiselect
+		if (tmpPortalEnteringPawns.NullOrEmpty())
 		{
-			get
-			{
-				return true;
-			}
+			return null;
 		}
-
-		// Token: 0x17002F98 RID: 12184
-		// (get) Token: 0x060125B5 RID: 75189 RVA: 0x000028E7 File Offset: 0x00000AE7
-		protected override bool MechanoidCanDo
+		return new FloatMenuOption(portal.EnterString, delegate
 		{
-			get
+			foreach (Pawn tmpPortalEnteringPawn in tmpPortalEnteringPawns)
 			{
-				return true;
+				Job job = JobMaker.MakeJob(JobDefOf.EnterPortal, portal);
+				job.playerForced = true;
+				tmpPortalEnteringPawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
 			}
-		}
+		}, MenuOptionPriority.High);
+	}
 
-		// Token: 0x060125B6 RID: 75190 RVA: 0x00568EF4 File Offset: 0x005670F4
-		protected override FloatMenuOption GetSingleOptionFor(Thing clickedThing, FloatMenuContext context)
+	private static AcceptanceReport CanEnterPortal(Pawn pawn, MapPortal portal)
+	{
+		if (!pawn.CanReach(portal, PathEndMode.ClosestTouch, Danger.Deadly))
 		{
-			MapPortal portal = clickedThing as MapPortal;
-			if (portal == null)
-			{
-				return null;
-			}
-			string t;
-			if (!portal.IsEnterable(out t))
-			{
-				return new FloatMenuOption("CannotEnterPortal".Translate(portal.Label) + ": " + t, null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-			}
-			if (!context.IsMultiselect)
-			{
-				AcceptanceReport acceptanceReport = FloatMenuOptionProvider_EnterMapPortal.CanEnterPortal(context.FirstSelectedPawn, portal);
-				if (!acceptanceReport.Accepted)
-				{
-					return new FloatMenuOption("CannotEnterPortal".Translate(portal.Label) + ": " + acceptanceReport.Reason, null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-				}
-			}
-			FloatMenuOptionProvider_EnterMapPortal.tmpPortalEnteringPawns.Clear();
-			foreach (Pawn item in context.ValidSelectedPawns)
-			{
-				if (FloatMenuOptionProvider_EnterMapPortal.CanEnterPortal(context.FirstSelectedPawn, portal))
-				{
-					FloatMenuOptionProvider_EnterMapPortal.tmpPortalEnteringPawns.Add(item);
-				}
-			}
-			if (FloatMenuOptionProvider_EnterMapPortal.tmpPortalEnteringPawns.NullOrEmpty<Pawn>())
-			{
-				return null;
-			}
-			return new FloatMenuOption(portal.EnterString, delegate()
-			{
-				foreach (Pawn pawn in FloatMenuOptionProvider_EnterMapPortal.tmpPortalEnteringPawns)
-				{
-					Job job = JobMaker.MakeJob(JobDefOf.EnterPortal, portal);
-					job.playerForced = true;
-					pawn.jobs.TryTakeOrderedJob(job, new JobTag?(JobTag.Misc), false);
-				}
-			}, MenuOptionPriority.High, null, null, 0f, null, null, true, 0);
+			return "NoPath".Translate();
 		}
-
-		// Token: 0x060125B7 RID: 75191 RVA: 0x00569078 File Offset: 0x00567278
-		private static AcceptanceReport CanEnterPortal(Pawn pawn, MapPortal portal)
+		if (!pawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation))
 		{
-			if (!pawn.CanReach(portal, PathEndMode.ClosestTouch, Danger.Deadly, false, false, TraverseMode.ByPawn))
-			{
-				return "NoPath".Translate();
-			}
-			if (!pawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation))
-			{
-				return "Incapable".Translate();
-			}
-			return true;
+			return "Incapable".Translate();
 		}
-
-		// Token: 0x0400BEDD RID: 48861
-		private static List<Pawn> tmpPortalEnteringPawns = new List<Pawn>();
+		return true;
 	}
 }

@@ -1,93 +1,172 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompSpawnerItems : ThingComp
 {
-	// Token: 0x02002E35 RID: 11829
-	public class CompSpawnerItems : ThingComp
+	[CompilerGenerated]
+	private sealed class _003CCompGetGizmosExtra_003Ed__5 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x17002AAB RID: 10923
-		// (get) Token: 0x06010A77 RID: 68215 RVA: 0x004CD453 File Offset: 0x004CB653
-		public CompProperties_SpawnerItems Props
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompSpawnerItems _003C_003E4__this;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (CompProperties_SpawnerItems)this.props;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002AAC RID: 10924
-		// (get) Token: 0x06010A78 RID: 68216 RVA: 0x004CD460 File Offset: 0x004CB660
-		public bool Active
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				CompCanBeDormant comp = this.parent.GetComp<CompCanBeDormant>();
-				return comp == null || comp.Awake;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06010A79 RID: 68217 RVA: 0x004CD484 File Offset: 0x004CB684
-		public override IEnumerable<Gizmo> CompGetGizmosExtra()
+		[DebuggerHidden]
+		public _003CCompGetGizmosExtra_003Ed__5(int _003C_003E1__state)
 		{
-			yield return new Command_Action
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			CompSpawnerItems CS_0024_003C_003E8__locals1 = _003C_003E4__this;
+			switch (num)
 			{
-				defaultLabel = "DEV: Spawn items",
-				action = delegate()
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = new Command_Action
 				{
-					this.SpawnItems();
-				}
-			};
-			yield break;
-		}
-
-		// Token: 0x06010A7A RID: 68218 RVA: 0x004CD494 File Offset: 0x004CB694
-		private void SpawnItems()
-		{
-			ThingDef thingDef;
-			if (this.Props.MatchingItems.TryRandomElement(out thingDef))
-			{
-				int stackCount = Mathf.CeilToInt(this.Props.approxMarketValuePerDay / thingDef.BaseMarketValue);
-				Thing thing = ThingMaker.MakeThing(thingDef, null);
-				thing.stackCount = stackCount;
-				GenPlace.TryPlaceThing(thing, this.parent.Position, this.parent.Map, ThingPlaceMode.Near, null, null, null, 1);
+					defaultLabel = "DEV: Spawn items",
+					action = delegate
+					{
+						CS_0024_003C_003E8__locals1.SpawnItems();
+					}
+				};
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				return false;
 			}
 		}
 
-		// Token: 0x06010A7B RID: 68219 RVA: 0x004CD504 File Offset: 0x004CB704
-		public override void CompTickRare()
+		bool IEnumerator.MoveNext()
 		{
-			if (!this.Active)
-			{
-				return;
-			}
-			this.ticksPassed += 250;
-			if (this.ticksPassed >= this.Props.spawnInterval)
-			{
-				this.SpawnItems();
-				this.ticksPassed -= this.Props.spawnInterval;
-			}
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x06010A7C RID: 68220 RVA: 0x004CD55D File Offset: 0x004CB75D
-		public override void PostExposeData()
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			Scribe_Values.Look<int>(ref this.ticksPassed, "ticksPassed", 0, false);
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x06010A7D RID: 68221 RVA: 0x004CD574 File Offset: 0x004CB774
-		public override string CompInspectStringExtra()
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
 		{
-			if (this.Active)
+			_003CCompGetGizmosExtra_003Ed__5 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				return "NextSpawnedResourceIn".Translate() + ": " + (this.Props.spawnInterval - this.ticksPassed).ToStringTicksToPeriod(true, false, true, true, false);
+				_003C_003E1__state = 0;
+				result = this;
 			}
-			return null;
+			else
+			{
+				result = new _003CCompGetGizmosExtra_003Ed__5(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
 		}
 
-		// Token: 0x0400AD91 RID: 44433
-		private int ticksPassed;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	private int ticksPassed;
+
+	public CompProperties_SpawnerItems Props => (CompProperties_SpawnerItems)props;
+
+	public bool Active => parent.GetComp<CompCanBeDormant>()?.Awake ?? true;
+
+	[IteratorStateMachine(typeof(_003CCompGetGizmosExtra_003Ed__5))]
+	public override IEnumerable<Gizmo> CompGetGizmosExtra()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CCompGetGizmosExtra_003Ed__5(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	private void SpawnItems()
+	{
+		if (Props.MatchingItems.TryRandomElement(out var result))
+		{
+			int stackCount = Mathf.CeilToInt(Props.approxMarketValuePerDay / result.BaseMarketValue);
+			Thing thing = ThingMaker.MakeThing(result);
+			thing.stackCount = stackCount;
+			GenPlace.TryPlaceThing(thing, parent.Position, parent.Map, ThingPlaceMode.Near, null, null, null);
+		}
+	}
+
+	public override void CompTickRare()
+	{
+		if (Active)
+		{
+			ticksPassed += 250;
+			if (ticksPassed >= Props.spawnInterval)
+			{
+				SpawnItems();
+				ticksPassed -= Props.spawnInterval;
+			}
+		}
+	}
+
+	public override void PostExposeData()
+	{
+		Scribe_Values.Look(ref ticksPassed, "ticksPassed", 0);
+	}
+
+	public override string CompInspectStringExtra()
+	{
+		if (Active)
+		{
+			return "NextSpawnedResourceIn".Translate() + ": " + (Props.spawnInterval - ticksPassed).ToStringTicksToPeriod();
+		}
+		return null;
 	}
 }

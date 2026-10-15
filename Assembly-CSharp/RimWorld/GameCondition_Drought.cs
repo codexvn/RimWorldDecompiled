@@ -1,29 +1,23 @@
-﻿using System;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class GameCondition_Drought : GameCondition
 {
-	// Token: 0x02001D3A RID: 7482
-	public class GameCondition_Drought : GameCondition
+	public const float PlantGrowthRateFactor = 0.3f;
+
+	public override void GameConditionTick()
 	{
-		// Token: 0x0600A7A5 RID: 42917 RVA: 0x003007C6 File Offset: 0x002FE9C6
-		public override void GameConditionTick()
-		{
-			this.HandleEndDueToRain();
-		}
+		HandleEndDueToRain();
+	}
 
-		// Token: 0x0600A7A6 RID: 42918 RVA: 0x003007CF File Offset: 0x002FE9CF
-		protected bool HandleEndDueToRain()
+	protected bool HandleEndDueToRain()
+	{
+		if (GenTicks.IsTickInterval(60) && base.SingleMap.weatherManager.curWeather.rainRate > 0f)
 		{
-			if (GenTicks.IsTickInterval(60) && base.SingleMap.weatherManager.curWeather.rainRate > 0f)
-			{
-				this.End();
-				return true;
-			}
-			return false;
+			End();
+			return true;
 		}
-
-		// Token: 0x0400740D RID: 29709
-		public const float PlantGrowthRateFactor = 0.3f;
+		return false;
 	}
 }

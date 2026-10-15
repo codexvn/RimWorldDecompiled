@@ -1,198 +1,305 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompCauseGameCondition_TemperatureOffset : CompCauseGameCondition
 {
-	// Token: 0x02002BC1 RID: 11201
-	public class CompCauseGameCondition_TemperatureOffset : CompCauseGameCondition
+	[CompilerGenerated]
+	private sealed class _003CCompGetGizmosExtra_003Ed__7 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x17002745 RID: 10053
-		// (get) Token: 0x0600FA7F RID: 64127 RVA: 0x0048C99F File Offset: 0x0048AB9F
-		public new CompProperties_CausesGameCondition_ClimateAdjuster Props
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompCauseGameCondition_TemperatureOffset _003C_003E4__this;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (CompProperties_CausesGameCondition_ClimateAdjuster)this.props;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600FA80 RID: 64128 RVA: 0x0048C9AC File Offset: 0x0048ABAC
-		public override void Initialize(CompProperties props)
+		object IEnumerator.Current
 		{
-			base.Initialize(props);
-			this.temperatureOffset = this.Props.temperatureOffsetRange.min;
-		}
-
-		// Token: 0x0600FA81 RID: 64129 RVA: 0x0048C9CB File Offset: 0x0048ABCB
-		public override void PostExposeData()
-		{
-			base.PostExposeData();
-			Scribe_Values.Look<float>(ref this.temperatureOffset, "temperatureOffset", 0f, false);
-		}
-
-		// Token: 0x0600FA82 RID: 64130 RVA: 0x0048C9E9 File Offset: 0x0048ABE9
-		private string GetFloatStringWithSign(float val)
-		{
-			if (val < 0f)
+			[DebuggerHidden]
+			get
 			{
-				return val.ToString("0");
+				return _003C_003E2__current;
 			}
-			return "+" + val.ToString("0");
 		}
 
-		// Token: 0x0600FA83 RID: 64131 RVA: 0x0048CA16 File Offset: 0x0048AC16
-		public void SetTemperatureOffset(float offset)
+		[DebuggerHidden]
+		public _003CCompGetGizmosExtra_003Ed__7(int _003C_003E1__state)
 		{
-			this.temperatureOffset = this.Props.temperatureOffsetRange.ClampToRange(offset);
-			base.ReSetupAllConditions();
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x0600FA84 RID: 64132 RVA: 0x0048CA35 File Offset: 0x0048AC35
-		public override IEnumerable<Gizmo> CompGetGizmosExtra()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			if (!Prefs.DevMode || !DebugSettings.godMode)
-			{
-				yield break;
-			}
-			Command_Action command_Action = new Command_Action();
-			command_Action.defaultLabel = "-10";
-			Command_Action command_Action2 = command_Action;
-			command_Action2.action = (Action)Delegate.Combine(command_Action2.action, new Action(delegate()
-			{
-				this.SetTemperatureOffset(this.temperatureOffset - 10f);
-			}));
-			command_Action.hotKey = KeyBindingDefOf.Misc1;
-			yield return command_Action;
-			Command_Action command_Action3 = new Command_Action();
-			command_Action3.defaultLabel = "-1";
-			Command_Action command_Action4 = command_Action3;
-			command_Action4.action = (Action)Delegate.Combine(command_Action4.action, new Action(delegate()
-			{
-				this.SetTemperatureOffset(this.temperatureOffset - 1f);
-			}));
-			command_Action3.hotKey = KeyBindingDefOf.Misc2;
-			yield return command_Action3;
-			Command_Action command_Action5 = new Command_Action();
-			command_Action5.defaultLabel = "+1";
-			Command_Action command_Action6 = command_Action5;
-			command_Action6.action = (Action)Delegate.Combine(command_Action6.action, new Action(delegate()
-			{
-				this.SetTemperatureOffset(this.temperatureOffset + 1f);
-			}));
-			command_Action5.hotKey = KeyBindingDefOf.Misc3;
-			yield return command_Action5;
-			Command_Action command_Action7 = new Command_Action();
-			command_Action7.defaultLabel = "+10";
-			Command_Action command_Action8 = command_Action7;
-			command_Action8.action = (Action)Delegate.Combine(command_Action8.action, new Action(delegate()
-			{
-				this.SetTemperatureOffset(this.temperatureOffset + 10f);
-			}));
-			command_Action7.hotKey = KeyBindingDefOf.Misc4;
-			yield return command_Action7;
-			yield break;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x0600FA85 RID: 64133 RVA: 0x0048CA48 File Offset: 0x0048AC48
-		public override string CompInspectStringExtra()
+		private bool MoveNext()
 		{
-			string text = base.CompInspectStringExtra();
-			if (!text.NullOrEmpty())
+			int num = _003C_003E1__state;
+			CompCauseGameCondition_TemperatureOffset CS_0024_003C_003E8__locals8 = _003C_003E4__this;
+			switch (num)
 			{
-				text += "\n";
-			}
-			return text + ("Temperature".Translate() + ": " + this.GetFloatStringWithSign(this.temperatureOffset));
-		}
-
-		// Token: 0x0600FA86 RID: 64134 RVA: 0x0048CAA2 File Offset: 0x0048ACA2
-		protected override void SetupCondition(GameCondition condition, Map map)
-		{
-			base.SetupCondition(condition, map);
-			((GameCondition_TemperatureOffset)condition).tempOffset = this.temperatureOffset;
-		}
-
-		// Token: 0x0600FA87 RID: 64135 RVA: 0x0048CAC0 File Offset: 0x0048ACC0
-		public override void RandomizeSettings(Site site)
-		{
-			bool flag = false;
-			bool flag2 = false;
-			foreach (WorldObject worldObject in Find.WorldObjects.AllWorldObjects)
+			default:
+				return false;
+			case 0:
 			{
-				Settlement settlement = worldObject as Settlement;
-				if (settlement != null && settlement.Faction == Faction.OfPlayer)
+				_003C_003E1__state = -1;
+				if (!Prefs.DevMode || !DebugSettings.godMode)
 				{
-					if (settlement.Map != null)
+					return false;
+				}
+				Command_Action command_Action4 = new Command_Action
+				{
+					defaultLabel = "-10"
+				};
+				command_Action4.action = (Action)Delegate.Combine(command_Action4.action, (Action)delegate
+				{
+					CS_0024_003C_003E8__locals8.SetTemperatureOffset(CS_0024_003C_003E8__locals8.temperatureOffset - 10f);
+				});
+				command_Action4.hotKey = KeyBindingDefOf.Misc1;
+				_003C_003E2__current = command_Action4;
+				_003C_003E1__state = 1;
+				return true;
+			}
+			case 1:
+			{
+				_003C_003E1__state = -1;
+				Command_Action command_Action3 = new Command_Action
+				{
+					defaultLabel = "-1"
+				};
+				command_Action3.action = (Action)Delegate.Combine(command_Action3.action, (Action)delegate
+				{
+					CS_0024_003C_003E8__locals8.SetTemperatureOffset(CS_0024_003C_003E8__locals8.temperatureOffset - 1f);
+				});
+				command_Action3.hotKey = KeyBindingDefOf.Misc2;
+				_003C_003E2__current = command_Action3;
+				_003C_003E1__state = 2;
+				return true;
+			}
+			case 2:
+			{
+				_003C_003E1__state = -1;
+				Command_Action command_Action2 = new Command_Action
+				{
+					defaultLabel = "+1"
+				};
+				command_Action2.action = (Action)Delegate.Combine(command_Action2.action, (Action)delegate
+				{
+					CS_0024_003C_003E8__locals8.SetTemperatureOffset(CS_0024_003C_003E8__locals8.temperatureOffset + 1f);
+				});
+				command_Action2.hotKey = KeyBindingDefOf.Misc3;
+				_003C_003E2__current = command_Action2;
+				_003C_003E1__state = 3;
+				return true;
+			}
+			case 3:
+			{
+				_003C_003E1__state = -1;
+				Command_Action command_Action = new Command_Action
+				{
+					defaultLabel = "+10"
+				};
+				command_Action.action = (Action)Delegate.Combine(command_Action.action, (Action)delegate
+				{
+					CS_0024_003C_003E8__locals8.SetTemperatureOffset(CS_0024_003C_003E8__locals8.temperatureOffset + 10f);
+				});
+				command_Action.hotKey = KeyBindingDefOf.Misc4;
+				_003C_003E2__current = command_Action;
+				_003C_003E1__state = 4;
+				return true;
+			}
+			case 4:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CCompGetGizmosExtra_003Ed__7 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CCompGetGizmosExtra_003Ed__7(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	public float temperatureOffset;
+
+	private const float MaxTempForMinOffset = -5f;
+
+	private const float MinTempForMaxOffset = 20f;
+
+	public new CompProperties_CausesGameCondition_ClimateAdjuster Props => (CompProperties_CausesGameCondition_ClimateAdjuster)props;
+
+	public override void Initialize(CompProperties props)
+	{
+		base.Initialize(props);
+		temperatureOffset = Props.temperatureOffsetRange.min;
+	}
+
+	public override void PostExposeData()
+	{
+		base.PostExposeData();
+		Scribe_Values.Look(ref temperatureOffset, "temperatureOffset", 0f);
+	}
+
+	private string GetFloatStringWithSign(float val)
+	{
+		if (val < 0f)
+		{
+			return val.ToString("0");
+		}
+		return "+" + val.ToString("0");
+	}
+
+	public void SetTemperatureOffset(float offset)
+	{
+		temperatureOffset = Props.temperatureOffsetRange.ClampToRange(offset);
+		ReSetupAllConditions();
+	}
+
+	[IteratorStateMachine(typeof(_003CCompGetGizmosExtra_003Ed__7))]
+	public override IEnumerable<Gizmo> CompGetGizmosExtra()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CCompGetGizmosExtra_003Ed__7(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override string CompInspectStringExtra()
+	{
+		string text = base.CompInspectStringExtra();
+		if (!text.NullOrEmpty())
+		{
+			text += "\n";
+		}
+		return text + ("Temperature".Translate() + ": " + GetFloatStringWithSign(temperatureOffset));
+	}
+
+	protected override void SetupCondition(GameCondition condition, Map map)
+	{
+		base.SetupCondition(condition, map);
+		((GameCondition_TemperatureOffset)condition).tempOffset = temperatureOffset;
+	}
+
+	public override void RandomizeSettings(Site site)
+	{
+		bool flag = false;
+		bool flag2 = false;
+		foreach (WorldObject allWorldObject in Find.WorldObjects.AllWorldObjects)
+		{
+			if (!(allWorldObject is Settlement settlement) || settlement.Faction != Faction.OfPlayer)
+			{
+				continue;
+			}
+			if (settlement.Map != null)
+			{
+				bool flag3 = false;
+				foreach (GameCondition activeCondition in settlement.Map.GameConditionManager.ActiveConditions)
+				{
+					if (activeCondition is GameCondition_TemperatureOffset)
 					{
-						bool flag3 = false;
-						foreach (GameCondition gameCondition in settlement.Map.GameConditionManager.ActiveConditions)
+						float num = activeCondition.TemperatureOffset();
+						if (num > 0f)
 						{
-							if (gameCondition is GameCondition_TemperatureOffset)
-							{
-								float num = gameCondition.TemperatureOffset();
-								if (num > 0f)
-								{
-									flag3 = true;
-									flag = true;
-									flag2 = false;
-								}
-								else if (num < 0f)
-								{
-									flag3 = true;
-									flag2 = true;
-									flag = false;
-								}
-								if (flag3)
-								{
-									break;
-								}
-							}
+							flag3 = true;
+							flag = true;
+							flag2 = false;
+						}
+						else if (num < 0f)
+						{
+							flag3 = true;
+							flag2 = true;
+							flag = false;
 						}
 						if (flag3)
 						{
 							break;
 						}
 					}
-					PlanetTile tile = worldObject.Tile;
-					if ((float)Find.WorldGrid.TraversalDistanceBetween(site.Tile, tile, true, this.Props.worldRange + 1, false) <= (float)this.Props.worldRange)
-					{
-						float num2 = GenTemperature.MinTemperatureAtTile(tile);
-						float num3 = GenTemperature.MaxTemperatureAtTile(tile);
-						if (num2 < -5f)
-						{
-							flag2 = true;
-						}
-						if (num3 > 20f)
-						{
-							flag = true;
-						}
-					}
+				}
+				if (flag3)
+				{
+					break;
 				}
 			}
-			if (flag2 == flag)
+			PlanetTile tile = allWorldObject.Tile;
+			if ((float)Find.WorldGrid.TraversalDistanceBetween(site.Tile, tile, passImpassable: true, Props.worldRange + 1) <= (float)Props.worldRange)
 			{
-				this.temperatureOffset = (Rand.Bool ? this.Props.temperatureOffsetRange.min : this.Props.temperatureOffsetRange.max);
-				return;
-			}
-			if (flag2)
-			{
-				this.temperatureOffset = this.Props.temperatureOffsetRange.min;
-				return;
-			}
-			if (flag)
-			{
-				this.temperatureOffset = this.Props.temperatureOffsetRange.max;
+				float num2 = GenTemperature.MinTemperatureAtTile(tile);
+				float num3 = GenTemperature.MaxTemperatureAtTile(tile);
+				if (num2 < -5f)
+				{
+					flag2 = true;
+				}
+				if (num3 > 20f)
+				{
+					flag = true;
+				}
 			}
 		}
-
-		// Token: 0x0400A48F RID: 42127
-		public float temperatureOffset;
-
-		// Token: 0x0400A490 RID: 42128
-		private const float MaxTempForMinOffset = -5f;
-
-		// Token: 0x0400A491 RID: 42129
-		private const float MinTempForMaxOffset = 20f;
+		if (flag2 == flag)
+		{
+			temperatureOffset = (Rand.Bool ? Props.temperatureOffsetRange.min : Props.temperatureOffsetRange.max);
+		}
+		else if (flag2)
+		{
+			temperatureOffset = Props.temperatureOffsetRange.min;
+		}
+		else if (flag)
+		{
+			temperatureOffset = Props.temperatureOffsetRange.max;
+		}
 	}
 }

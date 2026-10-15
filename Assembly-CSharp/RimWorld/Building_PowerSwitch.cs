@@ -1,102 +1,81 @@
-﻿using System;
 using System.Text;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+[StaticConstructorOnStartup]
+public class Building_PowerSwitch : Building
 {
-	// Token: 0x02002972 RID: 10610
-	[StaticConstructorOnStartup]
-	public class Building_PowerSwitch : Building
+	private bool wantsOnOld = true;
+
+	private CompFlickable flickableComp;
+
+	public override bool TransmitsPowerNow => FlickUtility.WantsToBeOn(this);
+
+	public override Graphic Graphic => flickableComp.CurrentGraphic;
+
+	public override void SpawnSetup(Map map, bool respawningAfterLoad)
 	{
-		// Token: 0x17002381 RID: 9089
-		// (get) Token: 0x0600E8FF RID: 59647 RVA: 0x0043D7D9 File Offset: 0x0043B9D9
-		public override bool TransmitsPowerNow
+		base.SpawnSetup(map, respawningAfterLoad);
+		flickableComp = GetComp<CompFlickable>();
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		if (Scribe.mode == LoadSaveMode.PostLoadInit)
 		{
-			get
+			if (flickableComp == null)
 			{
-				return FlickUtility.WantsToBeOn(this);
+				flickableComp = GetComp<CompFlickable>();
 			}
+			wantsOnOld = !FlickUtility.WantsToBeOn(this);
+			UpdatePowerGrid();
 		}
+	}
 
-		// Token: 0x17002382 RID: 9090
-		// (get) Token: 0x0600E900 RID: 59648 RVA: 0x0043D7E1 File Offset: 0x0043B9E1
-		public override Graphic Graphic
+	protected override void ReceiveCompSignal(string signal)
+	{
+		switch (signal)
 		{
-			get
-			{
-				return this.flickableComp.CurrentGraphic;
-			}
+		case "FlickedOff":
+		case "FlickedOn":
+		case "ScheduledOn":
+		case "ScheduledOff":
+			UpdatePowerGrid();
+			break;
 		}
+	}
 
-		// Token: 0x0600E901 RID: 59649 RVA: 0x0043D7EE File Offset: 0x0043B9EE
-		public override void SpawnSetup(Map map, bool respawningAfterLoad)
+	public override string GetInspectString()
+	{
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.Append(base.GetInspectString());
+		if (stringBuilder.Length != 0)
 		{
-			base.SpawnSetup(map, respawningAfterLoad);
-			this.flickableComp = base.GetComp<CompFlickable>();
+			stringBuilder.AppendLine();
 		}
-
-		// Token: 0x0600E902 RID: 59650 RVA: 0x0043D804 File Offset: 0x0043BA04
-		public override void ExposeData()
+		stringBuilder.Append("PowerSwitch_Power".Translate() + ": ");
+		if (FlickUtility.WantsToBeOn(this))
 		{
-			base.ExposeData();
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
-			{
-				if (this.flickableComp == null)
-				{
-					this.flickableComp = base.GetComp<CompFlickable>();
-				}
-				this.wantsOnOld = !FlickUtility.WantsToBeOn(this);
-				this.UpdatePowerGrid();
-			}
+			stringBuilder.Append("On".Translate().ToLower());
 		}
-
-		// Token: 0x0600E903 RID: 59651 RVA: 0x0043D83D File Offset: 0x0043BA3D
-		protected override void ReceiveCompSignal(string signal)
+		else
 		{
-			if (signal == "FlickedOff" || signal == "FlickedOn" || signal == "ScheduledOn" || signal == "ScheduledOff")
-			{
-				this.UpdatePowerGrid();
-			}
+			stringBuilder.Append("Off".Translate().ToLower());
 		}
+		return stringBuilder.ToString();
+	}
 
-		// Token: 0x0600E904 RID: 59652 RVA: 0x0043D87C File Offset: 0x0043BA7C
-		public override string GetInspectString()
+	private void UpdatePowerGrid()
+	{
+		if (FlickUtility.WantsToBeOn(this) != wantsOnOld)
 		{
-			StringBuilder stringBuilder = new StringBuilder();
-			stringBuilder.Append(base.GetInspectString());
-			if (stringBuilder.Length != 0)
+			if (base.Spawned)
 			{
-				stringBuilder.AppendLine();
+				base.Map.powerNetManager.Notfiy_TransmitterTransmitsPowerNowChanged(base.PowerComp);
 			}
-			stringBuilder.Append("PowerSwitch_Power".Translate() + ": ");
-			if (FlickUtility.WantsToBeOn(this))
-			{
-				stringBuilder.Append("On".Translate().ToLower());
-			}
-			else
-			{
-				stringBuilder.Append("Off".Translate().ToLower());
-			}
-			return stringBuilder.ToString();
+			wantsOnOld = FlickUtility.WantsToBeOn(this);
 		}
-
-		// Token: 0x0600E905 RID: 59653 RVA: 0x0043D917 File Offset: 0x0043BB17
-		private void UpdatePowerGrid()
-		{
-			if (FlickUtility.WantsToBeOn(this) != this.wantsOnOld)
-			{
-				if (base.Spawned)
-				{
-					base.Map.powerNetManager.Notfiy_TransmitterTransmitsPowerNowChanged(base.PowerComp);
-				}
-				this.wantsOnOld = FlickUtility.WantsToBeOn(this);
-			}
-		}
-
-		// Token: 0x04009B3C RID: 39740
-		private bool wantsOnOld = true;
-
-		// Token: 0x04009B3D RID: 39741
-		private CompFlickable flickableComp;
 	}
 }

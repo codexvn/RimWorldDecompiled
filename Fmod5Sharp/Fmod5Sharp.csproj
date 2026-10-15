@@ -17,10 +17,10 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="NAudio.Core">
-      <HintPath>NAudio.Core.dll</HintPath>
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\NAudio.Core.dll</HintPath>
     </Reference>
     <Reference Include="OggVorbisEncoder">
-      <HintPath>OggVorbisEncoder.dll</HintPath>
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\OggVorbisEncoder.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>

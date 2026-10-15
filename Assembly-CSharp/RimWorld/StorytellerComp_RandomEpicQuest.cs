@@ -1,45 +1,189 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class StorytellerComp_RandomEpicQuest : StorytellerComp_OnOffCycle
 {
-	// Token: 0x02001E5B RID: 7771
-	public class StorytellerComp_RandomEpicQuest : StorytellerComp_OnOffCycle
+	[CompilerGenerated]
+	private sealed class _003CMakeIntervalIncidents_003Ed__0 : IEnumerable<FiringIncident>, IEnumerable, IEnumerator<FiringIncident>, IEnumerator, IDisposable
 	{
-		// Token: 0x0600ACC0 RID: 44224 RVA: 0x003153B3 File Offset: 0x003135B3
-		public override IEnumerable<FiringIncident> MakeIntervalIncidents(IIncidentTarget target)
+		private int _003C_003E1__state;
+
+		private FiringIncident _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public StorytellerComp_RandomEpicQuest _003C_003E4__this;
+
+		private IIncidentTarget target;
+
+		public IIncidentTarget _003C_003E3__target;
+
+		private IEnumerator<FiringIncident> _003C_003E7__wrap1;
+
+		FiringIncident IEnumerator<FiringIncident>.Current
 		{
-			List<Quest> questsListForReading = Find.QuestManager.QuestsListForReading;
-			for (int i = 0; i < questsListForReading.Count; i++)
+			[DebuggerHidden]
+			get
 			{
-				if (questsListForReading[i].root.IsEpic && (questsListForReading[i].State == QuestState.NotYetAccepted || questsListForReading[i].State == QuestState.Ongoing))
-				{
-					yield break;
-				}
+				return _003C_003E2__current;
 			}
-			foreach (FiringIncident firingIncident in base.MakeIntervalIncidents(target))
-			{
-				yield return firingIncident;
-			}
-			IEnumerator<FiringIncident> enumerator = null;
-			yield break;
-			yield break;
 		}
 
-		// Token: 0x0600ACC1 RID: 44225 RVA: 0x003153CC File Offset: 0x003135CC
-		public override IncidentParms GenerateParms(IncidentCategoryDef incCat, IIncidentTarget target)
+		object IEnumerator.Current
 		{
-			IncidentParms parms = base.GenerateParms(incCat, target);
-			QuestScriptDef questScriptDef;
-			if ((from x in DefDatabase<QuestScriptDef>.AllDefs
-			where x.IsEpic && x.CanRun(parms.points, target)
-			select x).TryRandomElement(out questScriptDef))
+			[DebuggerHidden]
+			get
 			{
-				parms.questScriptDef = questScriptDef;
+				return _003C_003E2__current;
 			}
-			return parms;
 		}
+
+		[DebuggerHidden]
+		public _003CMakeIntervalIncidents_003Ed__0(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				StorytellerComp_RandomEpicQuest storytellerComp_RandomEpicQuest = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+				{
+					_003C_003E1__state = -1;
+					List<Quest> questsListForReading = Find.QuestManager.QuestsListForReading;
+					for (int i = 0; i < questsListForReading.Count; i++)
+					{
+						if (questsListForReading[i].root.IsEpic && (questsListForReading[i].State == QuestState.NotYetAccepted || questsListForReading[i].State == QuestState.Ongoing))
+						{
+							return false;
+						}
+					}
+					_003C_003E7__wrap1 = ((StorytellerComp_OnOffCycle)storytellerComp_RandomEpicQuest).MakeIntervalIncidents(target).GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				}
+				case 1:
+					_003C_003E1__state = -3;
+					break;
+				}
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					FiringIncident current = _003C_003E7__wrap1.Current;
+					_003C_003E2__current = current;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = null;
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<FiringIncident> IEnumerable<FiringIncident>.GetEnumerator()
+		{
+			_003CMakeIntervalIncidents_003Ed__0 _003CMakeIntervalIncidents_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CMakeIntervalIncidents_003Ed__ = this;
+			}
+			else
+			{
+				_003CMakeIntervalIncidents_003Ed__ = new _003CMakeIntervalIncidents_003Ed__0(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CMakeIntervalIncidents_003Ed__.target = _003C_003E3__target;
+			return _003CMakeIntervalIncidents_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<FiringIncident>)this).GetEnumerator();
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeIntervalIncidents_003Ed__0))]
+	public override IEnumerable<FiringIncident> MakeIntervalIncidents(IIncidentTarget target)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeIntervalIncidents_003Ed__0(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__target = target
+		};
+	}
+
+	public override IncidentParms GenerateParms(IncidentCategoryDef incCat, IIncidentTarget target)
+	{
+		IncidentParms parms = base.GenerateParms(incCat, target);
+		if (DefDatabase<QuestScriptDef>.AllDefs.Where((QuestScriptDef x) => x.IsEpic && x.CanRun(parms.points, target)).TryRandomElement(out var result))
+		{
+			parms.questScriptDef = result;
+		}
+		return parms;
 	}
 }

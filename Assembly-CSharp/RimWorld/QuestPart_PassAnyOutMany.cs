@@ -1,50 +1,42 @@
-﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class QuestPart_PassAnyOutMany : QuestPart
 {
-	// Token: 0x02001B8D RID: 7053
-	public class QuestPart_PassAnyOutMany : QuestPart
+	public List<string> inSignals = new List<string>();
+
+	public List<string> outSignals = new List<string>();
+
+	public override void Notify_QuestSignalReceived(Signal signal)
 	{
-		// Token: 0x06009D77 RID: 40311 RVA: 0x002DA3AC File Offset: 0x002D85AC
-		public override void Notify_QuestSignalReceived(Signal signal)
+		base.Notify_QuestSignalReceived(signal);
+		if (inSignals.Contains(signal.tag))
 		{
-			base.Notify_QuestSignalReceived(signal);
-			if (this.inSignals.Contains(signal.tag))
+			for (int i = 0; i < outSignals.Count; i++)
 			{
-				for (int i = 0; i < this.outSignals.Count; i++)
-				{
-					Find.SignalManager.SendSignal(new Signal(this.outSignals[i], signal.args, false));
-				}
+				Find.SignalManager.SendSignal(new Signal(outSignals[i], signal.args));
 			}
 		}
+	}
 
-		// Token: 0x06009D78 RID: 40312 RVA: 0x002DA40B File Offset: 0x002D860B
-		public override void ExposeData()
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Collections.Look(ref inSignals, "inSignals", LookMode.Value);
+		Scribe_Collections.Look(ref outSignals, "outSignals", LookMode.Value);
+	}
+
+	public override void AssignDebugData()
+	{
+		base.AssignDebugData();
+		inSignals.Clear();
+		outSignals.Clear();
+		for (int i = 0; i < 3; i++)
 		{
-			base.ExposeData();
-			Scribe_Collections.Look<string>(ref this.inSignals, "inSignals", LookMode.Value, Array.Empty<object>());
-			Scribe_Collections.Look<string>(ref this.outSignals, "outSignals", LookMode.Value, Array.Empty<object>());
+			inSignals.Add("DebugSignal" + Rand.Int);
+			outSignals.Add("DebugSignal" + Rand.Int);
 		}
-
-		// Token: 0x06009D79 RID: 40313 RVA: 0x002DA440 File Offset: 0x002D8640
-		public override void AssignDebugData()
-		{
-			base.AssignDebugData();
-			this.inSignals.Clear();
-			this.outSignals.Clear();
-			for (int i = 0; i < 3; i++)
-			{
-				this.inSignals.Add("DebugSignal" + Rand.Int.ToString());
-				this.outSignals.Add("DebugSignal" + Rand.Int.ToString());
-			}
-		}
-
-		// Token: 0x04006D22 RID: 27938
-		public List<string> inSignals = new List<string>();
-
-		// Token: 0x04006D23 RID: 27939
-		public List<string> outSignals = new List<string>();
 	}
 }

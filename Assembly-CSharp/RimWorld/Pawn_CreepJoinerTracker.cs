@@ -1,719 +1,785 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Pawn_CreepJoinerTracker : IExposable
 {
-	// Token: 0x020024B4 RID: 9396
-	public class Pawn_CreepJoinerTracker : IExposable
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass63_0
 	{
-		// Token: 0x17001F1B RID: 7963
-		// (get) Token: 0x0600CC13 RID: 52243 RVA: 0x003BC923 File Offset: 0x003BAB23
-		private BaseCreepJoinerWorker DownsideWorker
+		public Pawn_CreepJoinerTracker _003C_003E4__this;
+
+		public Pawn selPawn;
+
+		internal void _003CGetFloatMenuOptions_003Eb__0()
 		{
+			Job job = JobMaker.MakeJob(JobDefOf.TalkCreepJoiner, _003C_003E4__this.Pawn);
+			job.playerForced = true;
+			selPawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGetFloatMenuOptions_003Ed__63 : IEnumerable<FloatMenuOption>, IEnumerable, IEnumerator<FloatMenuOption>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private FloatMenuOption _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Pawn_CreepJoinerTracker _003C_003E4__this;
+
+		private Pawn selPawn;
+
+		public Pawn _003C_003E3__selPawn;
+
+		FloatMenuOption IEnumerator<FloatMenuOption>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				return this.GetWorker<BaseCreepJoinerWorker>(this.downside.workerType, ref this.downsideWorkerInt);
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001F1C RID: 7964
-		// (get) Token: 0x0600CC14 RID: 52244 RVA: 0x003BC93C File Offset: 0x003BAB3C
-		private BaseCreepJoinerWorker RejectionWorker
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.GetWorker<BaseCreepJoinerWorker>(this.rejection.workerType, ref this.rejectionWorkerInt);
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001F1D RID: 7965
-		// (get) Token: 0x0600CC15 RID: 52245 RVA: 0x003BC955 File Offset: 0x003BAB55
-		private BaseCreepJoinerWorker AggressiveWorker
+		[DebuggerHidden]
+		public _003CGetFloatMenuOptions_003Ed__63(int _003C_003E1__state)
 		{
-			get
-			{
-				return this.GetWorker<BaseCreepJoinerWorker>(this.aggressive.workerType, ref this.aggressiveWorkerInt);
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x17001F1E RID: 7966
-		// (get) Token: 0x0600CC16 RID: 52246 RVA: 0x003BC970 File Offset: 0x003BAB70
-		public bool IsOnEntryLord
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			get
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			Pawn_CreepJoinerTracker pawn_CreepJoinerTracker = _003C_003E4__this;
+			switch (num)
 			{
-				if (this.entryLordEnded)
+			default:
+				return false;
+			case 0:
+			{
+				_003C_003E1__state = -1;
+				_003C_003Ec__DisplayClass63_0 CS_0024_003C_003E8__locals5 = new _003C_003Ec__DisplayClass63_0
+				{
+					_003C_003E4__this = _003C_003E4__this,
+					selPawn = selPawn
+				};
+				if (pawn_CreepJoinerTracker.Disabled || !pawn_CreepJoinerTracker.IsOnEntryLord)
 				{
 					return false;
 				}
-				Lord lord = this.Pawn.GetLord();
-				return lord != null && lord.LordJob is LordJob_CreepJoiner;
+				FloatMenuOption floatMenuOption = ((!CS_0024_003C_003E8__locals5.selPawn.CanReach(pawn_CreepJoinerTracker.Pawn, PathEndMode.OnCell, Danger.Deadly)) ? new FloatMenuOption("CannotTalkTo".Translate(pawn_CreepJoinerTracker.Pawn) + ": " + "NoPath".Translate().CapitalizeFirst(), null) : (CS_0024_003C_003E8__locals5.selPawn.health.capacities.CapableOf(PawnCapacityDefOf.Talking) ? FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("TalkTo".Translate(pawn_CreepJoinerTracker.Pawn), delegate
+				{
+					Job job = JobMaker.MakeJob(JobDefOf.TalkCreepJoiner, CS_0024_003C_003E8__locals5._003C_003E4__this.Pawn);
+					job.playerForced = true;
+					CS_0024_003C_003E8__locals5.selPawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
+				}), CS_0024_003C_003E8__locals5.selPawn, pawn_CreepJoinerTracker.Pawn) : new FloatMenuOption("CannotTalkTo".Translate(pawn_CreepJoinerTracker.Pawn) + ": " + "Incapable".Translate().CapitalizeFirst(), null)));
+				_003C_003E2__current = floatMenuOption;
+				_003C_003E1__state = 1;
+				return true;
+			}
+			case 1:
+				_003C_003E1__state = -1;
+				return false;
 			}
 		}
 
-		// Token: 0x17001F1F RID: 7967
-		// (get) Token: 0x0600CC17 RID: 52247 RVA: 0x003BC9A6 File Offset: 0x003BABA6
-		public bool Disabled
+		bool IEnumerator.MoveNext()
 		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<FloatMenuOption> IEnumerable<FloatMenuOption>.GetEnumerator()
+		{
+			_003CGetFloatMenuOptions_003Ed__63 _003CGetFloatMenuOptions_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CGetFloatMenuOptions_003Ed__ = this;
+			}
+			else
+			{
+				_003CGetFloatMenuOptions_003Ed__ = new _003CGetFloatMenuOptions_003Ed__63(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CGetFloatMenuOptions_003Ed__.selPawn = _003C_003E3__selPawn;
+			return _003CGetFloatMenuOptions_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<FloatMenuOption>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGetGizmos_003Ed__50 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Pawn_CreepJoinerTracker _003C_003E4__this;
+
+		Gizmo IEnumerator<Gizmo>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				return this.duplicated || this.Pawn.everLostEgo || !this.Pawn.SpawnedOrAnyParentSpawned;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001F20 RID: 7968
-		// (get) Token: 0x0600CC18 RID: 52248 RVA: 0x003BC9CD File Offset: 0x003BABCD
-		public Pawn Pawn { get; }
-
-		// Token: 0x0600CC19 RID: 52249 RVA: 0x000024DF File Offset: 0x000006DF
-		public Pawn_CreepJoinerTracker()
+		object IEnumerator.Current
 		{
-		}
-
-		// Token: 0x0600CC1A RID: 52250 RVA: 0x003BC9D5 File Offset: 0x003BABD5
-		public Pawn_CreepJoinerTracker(Pawn pawn)
-		{
-			this.Pawn = pawn;
-		}
-
-		// Token: 0x0600CC1B RID: 52251 RVA: 0x003BC9E4 File Offset: 0x003BABE4
-		public void Notify_Created()
-		{
-			this.ResolveGraphics();
-			BaseCreepJoinerWorker downsideWorker = this.DownsideWorker;
-			if (downsideWorker != null)
+			[DebuggerHidden]
+			get
 			{
-				downsideWorker.OnCreated();
-			}
-			BaseCreepJoinerWorker aggressiveWorker = this.AggressiveWorker;
-			if (aggressiveWorker != null)
-			{
-				aggressiveWorker.OnCreated();
-			}
-			BaseCreepJoinerWorker rejectionWorker = this.RejectionWorker;
-			if (rejectionWorker == null)
-			{
-				return;
-			}
-			rejectionWorker.OnCreated();
-		}
-
-		// Token: 0x0600CC1C RID: 52252 RVA: 0x003BCA1E File Offset: 0x003BAC1E
-		public void TickInterval(int delta)
-		{
-			if (this.Disabled)
-			{
-				return;
-			}
-			if (this.Pawn.IsColonist)
-			{
-				this.ColonistTickInterval(delta);
-				return;
-			}
-			this.CheckTriggersTickInterval(delta);
-		}
-
-		// Token: 0x0600CC1D RID: 52253 RVA: 0x003BCA48 File Offset: 0x003BAC48
-		private void CheckTriggersTickInterval(int delta)
-		{
-			if (this.triggerPrisonerAggressiveAt != 0 && GenTicks.TicksGame >= this.triggerPrisonerAggressiveAt && !this.triggeredAggressive)
-			{
-				this.DoAggressive();
-			}
-			else if (this.triggerPrisonerRejectionAt != 0 && GenTicks.TicksGame >= this.triggerPrisonerRejectionAt && !this.triggeredRejection)
-			{
-				this.DoRejection();
-			}
-			if (this.triggerPrisonerAggressiveAt == 0 && this.triggerPrisonerRejectionAt == 0 && this.downside.canOccurWhenImprisoned && this.Pawn.IsPrisonerOfColony && this.Pawn.IsHashIntervalTick(15000, delta))
-			{
-				this.CheckDownsideOccurs();
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600CC1E RID: 52254 RVA: 0x003BCAE0 File Offset: 0x003BACE0
-		private void ColonistTickInterval(int delta)
+		[DebuggerHidden]
+		public _003CGetGizmos_003Ed__50(int _003C_003E1__state)
 		{
-			if (this.Pawn.IsHashIntervalTick(15000, delta))
-			{
-				this.CheckDownsideOccurs();
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x0600CC1F RID: 52255 RVA: 0x003BCAFC File Offset: 0x003BACFC
-		private void CheckDownsideOccurs()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			if (this.downside == null)
-			{
-				return;
-			}
-			if (!this.downside.repeats && this.triggeredDownside)
-			{
-				return;
-			}
-			if (!this.downside.canOccurWhenImprisoned && (this.Pawn.IsPrisoner || this.Pawn.IsSlave))
-			{
-				return;
-			}
-			if (this.downside.triggerMinDays != FloatRange.Zero && GenTicks.TicksGame < this.canTriggerDownsideAfter)
-			{
-				return;
-			}
-			if (!this.downside.canOccurWhileDowned && this.Pawn.Downed)
-			{
-				return;
-			}
-			if (!this.Pawn.SpawnedOrAnyParentSpawned)
-			{
-				return;
-			}
-			if (this.downside.mustBeConscious && !this.Pawn.health.capacities.CanBeAwake)
-			{
-				return;
-			}
-			bool flag = this.downside.triggerMtbDays != 0f && Rand.MTBEventOccurs(this.downside.triggerMtbDays, 60000f, 15000f);
-			bool flag2 = this.downsideTriggersAt != 0 && GenTicks.TicksGame >= this.downsideTriggersAt;
-			if (flag || flag2)
-			{
-				this.DoDownside();
-			}
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x0600CC20 RID: 52256 RVA: 0x003BCC18 File Offset: 0x003BAE18
-		public void Notify_ChangedFaction()
+		private bool MoveNext()
 		{
-			if (this.Pawn.IsColonist)
+			int num = _003C_003E1__state;
+			Pawn_CreepJoinerTracker CS_0024_003C_003E8__locals17 = _003C_003E4__this;
+			switch (num)
 			{
-				this.ClearLord();
-				this.joinedTick = GenTicks.TicksGame;
-				if (this.downside.triggersAfterDays != FloatRange.Zero)
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (!DebugSettings.ShowDevGizmos || !CS_0024_003C_003E8__locals17.Pawn.IsColonist)
 				{
-					this.downsideTriggersAt = GenTicks.TicksGame + (int)(this.downside.triggersAfterDays.RandomInRange * 60000f);
+					return false;
 				}
-				if (this.downside.triggerMinDays != FloatRange.Zero)
+				if (CS_0024_003C_003E8__locals17.canTriggerDownsideAfter != 0 && !CS_0024_003C_003E8__locals17.triggeredDownside && GenTicks.TicksGame < CS_0024_003C_003E8__locals17.canTriggerDownsideAfter && (CS_0024_003C_003E8__locals17.downside.canOccurWhenImprisoned || !CS_0024_003C_003E8__locals17.Pawn.IsPrisoner))
 				{
-					this.canTriggerDownsideAfter = GenTicks.TicksGame + (int)(this.downside.triggerMinDays.RandomInRange * 60000f);
-				}
-			}
-		}
-
-		// Token: 0x0600CC21 RID: 52257 RVA: 0x003BCCBA File Offset: 0x003BAEBA
-		public void Notify_DuplicatedFrom(Pawn _)
-		{
-			this.duplicated = true;
-		}
-
-		// Token: 0x0600CC22 RID: 52258 RVA: 0x003BCCC3 File Offset: 0x003BAEC3
-		public void Notify_Arrested(bool succeeded)
-		{
-			if (this.duplicated)
-			{
-				return;
-			}
-			if (!succeeded)
-			{
-				this.DoAggressive();
-				return;
-			}
-			this.ClearLord();
-		}
-
-		// Token: 0x0600CC23 RID: 52259 RVA: 0x003BCCE0 File Offset: 0x003BAEE0
-		public void Notify_Released()
-		{
-			if (this.duplicated)
-			{
-				return;
-			}
-			this.triggerPrisonerRejectionAt = GenTicks.TicksGame + Pawn_CreepJoinerTracker.ReleaseRejectionDelayTicks.RandomInRange;
-		}
-
-		// Token: 0x0600CC24 RID: 52260 RVA: 0x003BCD10 File Offset: 0x003BAF10
-		public void Notify_PrisonBreakout()
-		{
-			if (this.duplicated)
-			{
-				return;
-			}
-			this.triggerPrisonerAggressiveAt = GenTicks.TicksGame + Pawn_CreepJoinerTracker.ReleaseRejectionDelayTicks.RandomInRange;
-		}
-
-		// Token: 0x0600CC25 RID: 52261 RVA: 0x003BCD3F File Offset: 0x003BAF3F
-		public IEnumerable<Gizmo> GetGizmos()
-		{
-			if (!DebugSettings.ShowDevGizmos || !this.Pawn.IsColonist)
-			{
-				yield break;
-			}
-			if (this.canTriggerDownsideAfter != 0 && !this.triggeredDownside && GenTicks.TicksGame < this.canTriggerDownsideAfter && (this.downside.canOccurWhenImprisoned || !this.Pawn.IsPrisoner))
-			{
-				yield return new Command_Action
-				{
-					defaultLabel = "DEV: Unlock downside trigger",
-					action = delegate()
+					_003C_003E2__current = new Command_Action
 					{
-						this.canTriggerDownsideAfter = GenTicks.TicksGame;
+						defaultLabel = "DEV: Unlock downside trigger",
+						action = delegate
+						{
+							CS_0024_003C_003E8__locals17.canTriggerDownsideAfter = GenTicks.TicksGame;
+						}
+					};
+					_003C_003E1__state = 1;
+					return true;
+				}
+				if ((CS_0024_003C_003E8__locals17.downsideTriggersAt != 0 || CS_0024_003C_003E8__locals17.downside.triggerMtbDays != 0f) && (!CS_0024_003C_003E8__locals17.triggeredDownside || CS_0024_003C_003E8__locals17.downside.repeats) && (CS_0024_003C_003E8__locals17.downside.canOccurWhenImprisoned || !CS_0024_003C_003E8__locals17.Pawn.IsPrisoner))
+				{
+					Command_Action command_Action = new Command_Action
+					{
+						defaultLabel = "DEV: Trigger timed downside",
+						action = CS_0024_003C_003E8__locals17.DoDownside
+					};
+					BaseCreepJoinerWorker downsideWorker = CS_0024_003C_003E8__locals17.DownsideWorker;
+					if (downsideWorker != null && !downsideWorker.CanDoResponse())
+					{
+						command_Action.Disable("Worker is blocking this trigger from occuring.");
 					}
-				};
-			}
-			else if ((this.downsideTriggersAt != 0 || this.downside.triggerMtbDays != 0f) && (!this.triggeredDownside || this.downside.repeats) && (this.downside.canOccurWhenImprisoned || !this.Pawn.IsPrisoner))
-			{
-				Command_Action command_Action = new Command_Action
-				{
-					defaultLabel = "DEV: Trigger timed downside",
-					action = new Action(this.DoDownside)
-				};
-				BaseCreepJoinerWorker downsideWorker = this.DownsideWorker;
-				if (downsideWorker != null && !downsideWorker.CanDoResponse())
-				{
-					command_Action.Disable("Worker is blocking this trigger from occuring.");
+					_003C_003E2__current = command_Action;
+					_003C_003E1__state = 2;
+					return true;
 				}
-				yield return command_Action;
-			}
-			yield return new Command_Action
-			{
-				defaultLabel = "DEV: Do aggressive",
-				action = new Action(this.DoAggressive)
-			};
-			yield return new Command_Action
-			{
-				defaultLabel = "DEV: Do rejection",
-				action = new Action(this.DoRejection)
-			};
-			yield break;
-		}
-
-		// Token: 0x0600CC26 RID: 52262 RVA: 0x003BCD50 File Offset: 0x003BAF50
-		public string GetInspectString()
-		{
-			if (!DebugSettings.godMode || this.Disabled)
-			{
-				return null;
-			}
-			StringBuilder stringBuilder = new StringBuilder();
-			string text = "DEV Downside: " + this.downside.label;
-			if (this.canTriggerDownsideAfter != 0 && !this.triggeredDownside && GenTicks.TicksGame < this.canTriggerDownsideAfter && (this.downside.canOccurWhenImprisoned || !this.Pawn.IsPrisoner))
-			{
-				text = text + " (can after: " + (this.canTriggerDownsideAfter - GenTicks.TicksGame).ToStringTicksToPeriod(true, false, true, true, false) + ")";
-			}
-			else if (this.downsideTriggersAt != 0 && !this.triggeredDownside && (this.downside.canOccurWhenImprisoned || !this.Pawn.IsPrisoner))
-			{
-				text = text + " (triggers: " + (this.downsideTriggersAt - GenTicks.TicksGame).ToStringTicksToPeriod(true, false, true, true, false) + ")";
-			}
-			string str = "DEV Benefit: ";
-			CreepJoinerBenefitDef creepJoinerBenefitDef = this.benefit;
-			stringBuilder.AppendLine(str + ((creepJoinerBenefitDef != null) ? creepJoinerBenefitDef.label : null));
-			stringBuilder.AppendLine(text);
-			string str2 = "DEV Rejection: ";
-			CreepJoinerRejectionDef creepJoinerRejectionDef = this.rejection;
-			stringBuilder.AppendLine(str2 + ((creepJoinerRejectionDef != null) ? creepJoinerRejectionDef.label : null));
-			string str3 = "DEV Aggressive: ";
-			CreepJoinerAggressiveDef creepJoinerAggressiveDef = this.aggressive;
-			stringBuilder.Append(str3 + ((creepJoinerAggressiveDef != null) ? creepJoinerAggressiveDef.label : null));
-			return stringBuilder.ToString();
-		}
-
-		// Token: 0x0600CC27 RID: 52263 RVA: 0x003BCEB0 File Offset: 0x003BB0B0
-		public void Notify_CreepJoinerSpokenTo(Pawn speaker)
-		{
-			if (this.Disabled)
-			{
-				return;
-			}
-			this.speaker = speaker;
-			Find.SignalManager.SendSignal(new Signal(this.spokeToSignal, false));
-		}
-
-		// Token: 0x0600CC28 RID: 52264 RVA: 0x003BCED8 File Offset: 0x003BB0D8
-		public void Notify_CreepJoinerAttacked(Pawn instigatorPawn)
-		{
-			if (this.Disabled)
-			{
-				return;
-			}
-			if (instigatorPawn == null)
-			{
-				return;
-			}
-			if (instigatorPawn.CurJobDef == JobDefOf.SocialFight)
-			{
-				return;
-			}
-			this.DoAggressive();
-		}
-
-		// Token: 0x0600CC29 RID: 52265 RVA: 0x003BCEFB File Offset: 0x003BB0FB
-		public void Notify_CreepJoinerKilled()
-		{
-			if (this.Disabled)
-			{
-				return;
-			}
-			if (this.AggressiveWorker.CanOccurOnDeath)
-			{
-				this.DoAggressive();
-			}
-		}
-
-		// Token: 0x0600CC2A RID: 52266 RVA: 0x003BCF19 File Offset: 0x003BB119
-		public void Notify_CreepJoinerRejected()
-		{
-			this.DoRejection();
-		}
-
-		// Token: 0x0600CC2B RID: 52267 RVA: 0x003BCF24 File Offset: 0x003BB124
-		public void DoDownside()
-		{
-			if (this.Disabled)
-			{
-				return;
-			}
-			if (this.DownsideWorker != null && !this.DownsideWorker.CanDoResponse())
-			{
-				return;
-			}
-			this.ClearLord();
-			this.triggeredDownside = true;
-			if (this.downside.triggersAfterDays != FloatRange.Zero)
-			{
-				this.downsideTriggersAt = GenTicks.TicksGame + (int)(this.downside.triggersAfterDays.RandomInRange * 60000f);
-			}
-			if (this.downside.triggerMinDays != FloatRange.Zero)
-			{
-				this.canTriggerDownsideAfter = GenTicks.TicksGame + (int)(this.downside.triggerMinDays.RandomInRange * 60000f);
-			}
-			List<TargetInfo> list = new List<TargetInfo>
-			{
-				this.Pawn
-			};
-			List<NamedArgument> list2 = new List<NamedArgument>
-			{
-				this.Pawn.Named("PAWN")
-			};
-			foreach (HediffDef def in this.downside.hediffs)
-			{
-				Hediff hd;
-				HediffComp_ReplaceHediff hediffComp_ReplaceHediff;
-				if (this.Pawn.health.hediffSet.TryGetHediff(def, out hd) && hd.TryGetComp(out hediffComp_ReplaceHediff))
+				goto IL_0163;
+			case 1:
+				_003C_003E1__state = -1;
+				goto IL_0163;
+			case 2:
+				_003C_003E1__state = -1;
+				goto IL_0163;
+			case 3:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = new Command_Action
 				{
-					hediffComp_ReplaceHediff.Trigger();
+					defaultLabel = "DEV: Do rejection",
+					action = CS_0024_003C_003E8__locals17.DoRejection
+				};
+				_003C_003E1__state = 4;
+				return true;
+			case 4:
+				{
+					_003C_003E1__state = -1;
+					return false;
 				}
-			}
-			BaseCreepJoinerWorker downsideWorker = this.DownsideWorker;
-			if (downsideWorker != null)
-			{
-				downsideWorker.DoResponse(list, list2);
-			}
-			if (this.downside.hasLetter)
-			{
-				TaggedString label = this.downside.letterLabel.Formatted(list2);
-				TaggedString text = this.downside.letterDesc.Formatted(list2);
-				Find.LetterStack.ReceiveLetter(label, text, this.downside.letterDef, list, null, null, null, null, 0, true);
+				IL_0163:
+				_003C_003E2__current = new Command_Action
+				{
+					defaultLabel = "DEV: Do aggressive",
+					action = CS_0024_003C_003E8__locals17.DoAggressive
+				};
+				_003C_003E1__state = 3;
+				return true;
 			}
 		}
 
-		// Token: 0x0600CC2C RID: 52268 RVA: 0x003BD0E0 File Offset: 0x003BB2E0
-		public void DoRejection()
+		bool IEnumerator.MoveNext()
 		{
-			if (this.Disabled || this.triggeredRejection || this.triggeredAggressive || this.hasLeft)
-			{
-				return;
-			}
-			if (this.RejectionWorker != null && !this.RejectionWorker.CanDoResponse())
-			{
-				return;
-			}
-			this.triggeredRejection = true;
-			this.ClearLord();
-			List<TargetInfo> list = new List<TargetInfo>
-			{
-				this.Pawn
-			};
-			List<NamedArgument> list2 = new List<NamedArgument>
-			{
-				this.Pawn.Named("PAWN")
-			};
-			BaseCreepJoinerWorker rejectionWorker = this.RejectionWorker;
-			if (rejectionWorker != null)
-			{
-				rejectionWorker.DoResponse(list, list2);
-			}
-			if (this.rejection.hasLetter)
-			{
-				TaggedString label = this.rejection.letterLabel.Formatted(list2);
-				TaggedString text = this.rejection.letterDesc.Formatted(list2);
-				Find.LetterStack.ReceiveLetter(label, text, this.rejection.letterDef, list, null, null, null, null, 0, true);
-			}
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x17001F21 RID: 7969
-		// (get) Token: 0x0600CC2D RID: 52269 RVA: 0x003BD1CB File Offset: 0x003BB3CB
-		public bool CanTriggerAggressive
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			get
-			{
-				return !this.Disabled && !this.triggeredAggressive && (this.AggressiveWorker == null || this.AggressiveWorker.CanDoResponse());
-			}
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x0600CC2E RID: 52270 RVA: 0x003BD1F4 File Offset: 0x003BB3F4
-		public void DoAggressive()
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
 		{
-			if (!this.CanTriggerAggressive)
+			_003CGetGizmos_003Ed__50 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				return;
+				_003C_003E1__state = 0;
+				result = this;
 			}
-			this.triggeredAggressive = true;
-			this.ClearLord();
-			List<TargetInfo> list = new List<TargetInfo>
+			else
 			{
-				this.Pawn
-			};
-			List<NamedArgument> list2 = new List<NamedArgument>
-			{
-				this.Pawn.Named("PAWN")
-			};
-			BaseCreepJoinerWorker aggressiveWorker = this.AggressiveWorker;
-			if (aggressiveWorker != null)
-			{
-				aggressiveWorker.DoResponse(list, list2);
-			}
-			if (this.aggressive.hasMessage)
-			{
-				Messages.Message(this.aggressive.message.Formatted(list2), list, MessageTypeDefOf.NegativeEvent, true);
-			}
-			if (this.aggressive.hasLetter)
-			{
-				TaggedString label = this.aggressive.letterLabel.Formatted(list2);
-				TaggedString text = this.aggressive.letterDesc.Formatted(list2);
-				Find.LetterStack.ReceiveLetter(label, text, this.aggressive.letterDef, list, null, null, null, null, 0, true);
-			}
-		}
-
-		// Token: 0x0600CC2F RID: 52271 RVA: 0x003BD2E8 File Offset: 0x003BB4E8
-		public void DoLeave()
-		{
-			if (this.Disabled || this.hasLeft)
-			{
-				return;
-			}
-			this.ClearLord();
-			if (this.Pawn.Faction != null && this.Pawn.Faction.IsPlayer)
-			{
-				this.Pawn.SetFaction(null, null);
-			}
-			LordMaker.MakeNewLord(this.Pawn.Faction, new LordJob_ExitMapBest(LocomotionUrgency.Jog, false, false), this.Pawn.Map, null).AddPawn(this.Pawn);
-			this.hasLeft = true;
-		}
-
-		// Token: 0x0600CC30 RID: 52272 RVA: 0x003BD370 File Offset: 0x003BB570
-		public bool DoSurgicalInspection(Pawn surgeon, StringBuilder sb)
-		{
-			bool result = false;
-			if (!this.benefit.surgicalInspectionLetterExtra.NullOrEmpty())
-			{
-				sb.Append("\n\n" + this.benefit.surgicalInspectionLetterExtra.Formatted(this.Pawn.Named("PAWN"), surgeon.Named("SURGEON")));
-				result = true;
-			}
-			if (!this.downside.surgicalInspectionLetterExtra.NullOrEmpty())
-			{
-				sb.Append("\n\n" + this.downside.surgicalInspectionLetterExtra.Formatted(this.Pawn.Named("PAWN"), surgeon.Named("SURGEON")));
-				result = true;
-			}
-			if (!this.aggressive.surgicalInspectionLetterExtra.NullOrEmpty())
-			{
-				sb.Append("\n\n" + this.aggressive.surgicalInspectionLetterExtra.Formatted(this.Pawn.Named("PAWN"), surgeon.Named("SURGEON")));
-				result = true;
-			}
-			if (!this.rejection.surgicalInspectionLetterExtra.NullOrEmpty())
-			{
-				sb.Append("\n\n" + this.rejection.surgicalInspectionLetterExtra.Formatted(this.Pawn.Named("PAWN"), surgeon.Named("SURGEON")));
-				result = true;
+				result = new _003CGetGizmos_003Ed__50(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
 			return result;
 		}
 
-		// Token: 0x0600CC31 RID: 52273 RVA: 0x003BD4D4 File Offset: 0x003BB6D4
-		public IEnumerable<FloatMenuOption> GetFloatMenuOptions(Pawn selPawn)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			if (this.Disabled || !this.IsOnEntryLord)
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	private static readonly IntRange ReleaseRejectionDelayTicks = new IntRange(60, 180);
+
+	private const int CheckDownsideInterval = 15000;
+
+	public CreepJoinerFormKindDef form;
+
+	public CreepJoinerBenefitDef benefit;
+
+	public CreepJoinerDownsideDef downside;
+
+	public CreepJoinerAggressiveDef aggressive;
+
+	public CreepJoinerRejectionDef rejection;
+
+	public Pawn speaker;
+
+	public Quest quest;
+
+	public string spokeToSignal;
+
+	public int timeoutAt;
+
+	public int joinedTick;
+
+	private int downsideTriggersAt;
+
+	private int canTriggerDownsideAfter;
+
+	private bool triggeredDownside;
+
+	private bool triggeredAggressive;
+
+	private bool triggeredRejection;
+
+	private bool hasLeft;
+
+	private bool entryLordEnded;
+
+	private int triggerPrisonerRejectionAt;
+
+	private int triggerPrisonerAggressiveAt;
+
+	private bool duplicated;
+
+	private BaseCreepJoinerWorker downsideWorkerInt;
+
+	private BaseCreepJoinerWorker rejectionWorkerInt;
+
+	private BaseCreepJoinerWorker aggressiveWorkerInt;
+
+	private BaseCreepJoinerWorker DownsideWorker => GetWorker(downside.workerType, ref downsideWorkerInt);
+
+	private BaseCreepJoinerWorker RejectionWorker => GetWorker(rejection.workerType, ref rejectionWorkerInt);
+
+	private BaseCreepJoinerWorker AggressiveWorker => GetWorker(aggressive.workerType, ref aggressiveWorkerInt);
+
+	public bool IsOnEntryLord
+	{
+		get
+		{
+			if (entryLordEnded)
 			{
-				yield break;
+				return false;
 			}
-			FloatMenuOption floatMenuOption;
-			if (!selPawn.CanReach(this.Pawn, PathEndMode.OnCell, Danger.Deadly, false, false, TraverseMode.ByPawn))
+			Lord lord = Pawn.GetLord();
+			if (lord == null)
 			{
-				floatMenuOption = new FloatMenuOption("CannotTalkTo".Translate(this.Pawn) + ": " + "NoPath".Translate().CapitalizeFirst(), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
+				return false;
 			}
-			else if (!selPawn.health.capacities.CapableOf(PawnCapacityDefOf.Talking))
+			return lord.LordJob is LordJob_CreepJoiner;
+		}
+	}
+
+	public bool Disabled
+	{
+		get
+		{
+			if (!duplicated && !Pawn.everLostEgo)
 			{
-				floatMenuOption = new FloatMenuOption("CannotTalkTo".Translate(this.Pawn) + ": " + "Incapable".Translate().CapitalizeFirst(), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
+				return !Pawn.SpawnedOrAnyParentSpawned;
+			}
+			return true;
+		}
+	}
+
+	public Pawn Pawn { get; }
+
+	public bool CanTriggerAggressive
+	{
+		get
+		{
+			if (!Disabled && !triggeredAggressive)
+			{
+				if (AggressiveWorker != null)
+				{
+					return AggressiveWorker.CanDoResponse();
+				}
+				return true;
+			}
+			return false;
+		}
+	}
+
+	public Pawn_CreepJoinerTracker()
+	{
+	}
+
+	public Pawn_CreepJoinerTracker(Pawn pawn)
+	{
+		Pawn = pawn;
+	}
+
+	public void Notify_Created()
+	{
+		ResolveGraphics();
+		DownsideWorker?.OnCreated();
+		AggressiveWorker?.OnCreated();
+		RejectionWorker?.OnCreated();
+	}
+
+	public void TickInterval(int delta)
+	{
+		if (!Disabled)
+		{
+			if (Pawn.IsColonist)
+			{
+				ColonistTickInterval(delta);
 			}
 			else
 			{
-				floatMenuOption = FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("TalkTo".Translate(this.Pawn), delegate()
-				{
-					Job job = JobMaker.MakeJob(JobDefOf.TalkCreepJoiner, this.Pawn);
-					job.playerForced = true;
-					selPawn.jobs.TryTakeOrderedJob(job, new JobTag?(JobTag.Misc), false);
-				}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0), selPawn, this.Pawn, "ReservedBy", null);
+				CheckTriggersTickInterval(delta);
 			}
-			yield return floatMenuOption;
-			yield break;
 		}
+	}
 
-		// Token: 0x0600CC32 RID: 52274 RVA: 0x003BD4EC File Offset: 0x003BB6EC
-		private void ResolveGraphics()
+	private void CheckTriggersTickInterval(int delta)
+	{
+		if (triggerPrisonerAggressiveAt != 0 && GenTicks.TicksGame >= triggerPrisonerAggressiveAt && !triggeredAggressive)
 		{
-			if (!this.form.forcedHeadTypes.NullOrEmpty<HeadTypeDef>())
-			{
-				this.Pawn.story.TryGetRandomHeadFromSet(this.form.forcedHeadTypes);
-			}
-			if (this.form.hairTagFilter != null)
-			{
-				this.Pawn.story.hairDef = PawnStyleItemChooser.RandomHairFor(this.Pawn);
-			}
-			if (this.form.beardTagFilter != null)
-			{
-				this.Pawn.style.beardDef = PawnStyleItemChooser.RandomBeardFor(this.Pawn);
-			}
-			if (this.form.hairColorOverride != null)
-			{
-				this.Pawn.story.HairColor = this.form.hairColorOverride.Value;
-			}
-			this.Pawn.Drawer.renderer.SetAllGraphicsDirty();
+			DoAggressive();
 		}
-
-		// Token: 0x0600CC33 RID: 52275 RVA: 0x003BD5C0 File Offset: 0x003BB7C0
-		private void ClearLord()
+		else if (triggerPrisonerRejectionAt != 0 && GenTicks.TicksGame >= triggerPrisonerRejectionAt && !triggeredRejection)
 		{
-			if (this.IsOnEntryLord)
-			{
-				this.entryLordEnded = true;
-			}
-			Lord lord = this.Pawn.GetLord();
-			if (lord == null)
-			{
-				return;
-			}
-			lord.Notify_PawnLost(this.Pawn, PawnLostCondition.Undefined, null);
+			DoRejection();
 		}
-
-		// Token: 0x0600CC34 RID: 52276 RVA: 0x003BD604 File Offset: 0x003BB804
-		private T GetWorker<T>(Type type, ref T worker) where T : BaseCreepJoinerWorker
+		if (triggerPrisonerAggressiveAt == 0 && triggerPrisonerRejectionAt == 0 && downside.canOccurWhenImprisoned && Pawn.IsPrisonerOfColony && Pawn.IsHashIntervalTick(15000, delta))
 		{
-			if (worker != null)
+			CheckDownsideOccurs();
+		}
+	}
+
+	private void ColonistTickInterval(int delta)
+	{
+		if (Pawn.IsHashIntervalTick(15000, delta))
+		{
+			CheckDownsideOccurs();
+		}
+	}
+
+	private void CheckDownsideOccurs()
+	{
+		if (downside != null && (downside.repeats || !triggeredDownside) && (downside.canOccurWhenImprisoned || (!Pawn.IsPrisoner && !Pawn.IsSlave)) && (!(downside.triggerMinDays != FloatRange.Zero) || GenTicks.TicksGame >= canTriggerDownsideAfter) && (downside.canOccurWhileDowned || !Pawn.Downed) && Pawn.SpawnedOrAnyParentSpawned && (!downside.mustBeConscious || Pawn.health.capacities.CanBeAwake))
+		{
+			bool num = downside.triggerMtbDays != 0f && Rand.MTBEventOccurs(downside.triggerMtbDays, 60000f, 15000f);
+			bool flag = downsideTriggersAt != 0 && GenTicks.TicksGame >= downsideTriggersAt;
+			if (num || flag)
 			{
-				return worker;
+				DoDownside();
 			}
-			if (type == null)
+		}
+	}
+
+	public void Notify_ChangedFaction()
+	{
+		if (Pawn.IsColonist)
+		{
+			ClearLord();
+			joinedTick = GenTicks.TicksGame;
+			if (downside.triggersAfterDays != FloatRange.Zero)
 			{
-				return default(T);
+				downsideTriggersAt = GenTicks.TicksGame + (int)(downside.triggersAfterDays.RandomInRange * 60000f);
 			}
-			worker = (T)((object)Activator.CreateInstance(type));
-			worker.Tracker = this;
+			if (downside.triggerMinDays != FloatRange.Zero)
+			{
+				canTriggerDownsideAfter = GenTicks.TicksGame + (int)(downside.triggerMinDays.RandomInRange * 60000f);
+			}
+		}
+	}
+
+	public void Notify_DuplicatedFrom(Pawn _)
+	{
+		duplicated = true;
+	}
+
+	public void Notify_Arrested(bool succeeded)
+	{
+		if (!duplicated)
+		{
+			if (!succeeded)
+			{
+				DoAggressive();
+			}
+			else
+			{
+				ClearLord();
+			}
+		}
+	}
+
+	public void Notify_Released()
+	{
+		if (!duplicated)
+		{
+			triggerPrisonerRejectionAt = GenTicks.TicksGame + ReleaseRejectionDelayTicks.RandomInRange;
+		}
+	}
+
+	public void Notify_PrisonBreakout()
+	{
+		if (!duplicated)
+		{
+			triggerPrisonerAggressiveAt = GenTicks.TicksGame + ReleaseRejectionDelayTicks.RandomInRange;
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CGetGizmos_003Ed__50))]
+	public IEnumerable<Gizmo> GetGizmos()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetGizmos_003Ed__50(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public string GetInspectString()
+	{
+		if (!DebugSettings.godMode || Disabled)
+		{
+			return null;
+		}
+		StringBuilder stringBuilder = new StringBuilder();
+		string text = "DEV Downside: " + downside.label;
+		if (canTriggerDownsideAfter != 0 && !triggeredDownside && GenTicks.TicksGame < canTriggerDownsideAfter && (downside.canOccurWhenImprisoned || !Pawn.IsPrisoner))
+		{
+			text = text + " (can after: " + (canTriggerDownsideAfter - GenTicks.TicksGame).ToStringTicksToPeriod() + ")";
+		}
+		else if (downsideTriggersAt != 0 && !triggeredDownside && (downside.canOccurWhenImprisoned || !Pawn.IsPrisoner))
+		{
+			text = text + " (triggers: " + (downsideTriggersAt - GenTicks.TicksGame).ToStringTicksToPeriod() + ")";
+		}
+		stringBuilder.AppendLine("DEV Benefit: " + benefit?.label);
+		stringBuilder.AppendLine(text);
+		stringBuilder.AppendLine("DEV Rejection: " + rejection?.label);
+		stringBuilder.Append("DEV Aggressive: " + aggressive?.label);
+		return stringBuilder.ToString();
+	}
+
+	public void Notify_CreepJoinerSpokenTo(Pawn speaker)
+	{
+		if (!Disabled)
+		{
+			this.speaker = speaker;
+			Find.SignalManager.SendSignal(new Signal(spokeToSignal));
+		}
+	}
+
+	public void Notify_CreepJoinerAttacked(Pawn instigatorPawn)
+	{
+		if (!Disabled && instigatorPawn != null && instigatorPawn.CurJobDef != JobDefOf.SocialFight)
+		{
+			DoAggressive();
+		}
+	}
+
+	public void Notify_CreepJoinerKilled()
+	{
+		if (!Disabled && AggressiveWorker.CanOccurOnDeath)
+		{
+			DoAggressive();
+		}
+	}
+
+	public void Notify_CreepJoinerRejected()
+	{
+		DoRejection();
+	}
+
+	public void DoDownside()
+	{
+		if (Disabled || (DownsideWorker != null && !DownsideWorker.CanDoResponse()))
+		{
+			return;
+		}
+		ClearLord();
+		triggeredDownside = true;
+		if (downside.triggersAfterDays != FloatRange.Zero)
+		{
+			downsideTriggersAt = GenTicks.TicksGame + (int)(downside.triggersAfterDays.RandomInRange * 60000f);
+		}
+		if (downside.triggerMinDays != FloatRange.Zero)
+		{
+			canTriggerDownsideAfter = GenTicks.TicksGame + (int)(downside.triggerMinDays.RandomInRange * 60000f);
+		}
+		List<TargetInfo> list = new List<TargetInfo> { Pawn };
+		List<NamedArgument> list2 = new List<NamedArgument> { Pawn.Named("PAWN") };
+		foreach (HediffDef hediff2 in downside.hediffs)
+		{
+			if (Pawn.health.hediffSet.TryGetHediff(hediff2, out var hediff) && hediff.TryGetComp<HediffComp_ReplaceHediff>(out var comp))
+			{
+				comp.Trigger();
+			}
+		}
+		DownsideWorker?.DoResponse(list, list2);
+		if (downside.hasLetter)
+		{
+			TaggedString label = downside.letterLabel.Formatted(list2);
+			TaggedString text = downside.letterDesc.Formatted(list2);
+			Find.LetterStack.ReceiveLetter(label, text, downside.letterDef, list);
+		}
+	}
+
+	public void DoRejection()
+	{
+		if (!Disabled && !triggeredRejection && !triggeredAggressive && !hasLeft && (RejectionWorker == null || RejectionWorker.CanDoResponse()))
+		{
+			triggeredRejection = true;
+			ClearLord();
+			List<TargetInfo> list = new List<TargetInfo> { Pawn };
+			List<NamedArgument> list2 = new List<NamedArgument> { Pawn.Named("PAWN") };
+			RejectionWorker?.DoResponse(list, list2);
+			if (rejection.hasLetter)
+			{
+				TaggedString label = rejection.letterLabel.Formatted(list2);
+				TaggedString text = rejection.letterDesc.Formatted(list2);
+				Find.LetterStack.ReceiveLetter(label, text, rejection.letterDef, list);
+			}
+		}
+	}
+
+	public void DoAggressive()
+	{
+		if (CanTriggerAggressive)
+		{
+			triggeredAggressive = true;
+			ClearLord();
+			List<TargetInfo> list = new List<TargetInfo> { Pawn };
+			List<NamedArgument> list2 = new List<NamedArgument> { Pawn.Named("PAWN") };
+			AggressiveWorker?.DoResponse(list, list2);
+			if (aggressive.hasMessage)
+			{
+				Messages.Message(aggressive.message.Formatted(list2), list, MessageTypeDefOf.NegativeEvent);
+			}
+			if (aggressive.hasLetter)
+			{
+				TaggedString label = aggressive.letterLabel.Formatted(list2);
+				TaggedString text = aggressive.letterDesc.Formatted(list2);
+				Find.LetterStack.ReceiveLetter(label, text, aggressive.letterDef, list);
+			}
+		}
+	}
+
+	public void DoLeave()
+	{
+		if (!Disabled && !hasLeft)
+		{
+			ClearLord();
+			if (Pawn.Faction != null && Pawn.Faction.IsPlayer)
+			{
+				Pawn.SetFaction(null);
+			}
+			LordMaker.MakeNewLord(Pawn.Faction, new LordJob_ExitMapBest(LocomotionUrgency.Jog), Pawn.Map).AddPawn(Pawn);
+			hasLeft = true;
+		}
+	}
+
+	public bool DoSurgicalInspection(Pawn surgeon, StringBuilder sb)
+	{
+		bool result = false;
+		if (!benefit.surgicalInspectionLetterExtra.NullOrEmpty())
+		{
+			sb.Append("\n\n" + benefit.surgicalInspectionLetterExtra.Formatted(Pawn.Named("PAWN"), surgeon.Named("SURGEON")));
+			result = true;
+		}
+		if (!downside.surgicalInspectionLetterExtra.NullOrEmpty())
+		{
+			sb.Append("\n\n" + downside.surgicalInspectionLetterExtra.Formatted(Pawn.Named("PAWN"), surgeon.Named("SURGEON")));
+			result = true;
+		}
+		if (!aggressive.surgicalInspectionLetterExtra.NullOrEmpty())
+		{
+			sb.Append("\n\n" + aggressive.surgicalInspectionLetterExtra.Formatted(Pawn.Named("PAWN"), surgeon.Named("SURGEON")));
+			result = true;
+		}
+		if (!rejection.surgicalInspectionLetterExtra.NullOrEmpty())
+		{
+			sb.Append("\n\n" + rejection.surgicalInspectionLetterExtra.Formatted(Pawn.Named("PAWN"), surgeon.Named("SURGEON")));
+			result = true;
+		}
+		return result;
+	}
+
+	[IteratorStateMachine(typeof(_003CGetFloatMenuOptions_003Ed__63))]
+	public IEnumerable<FloatMenuOption> GetFloatMenuOptions(Pawn selPawn)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetFloatMenuOptions_003Ed__63(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__selPawn = selPawn
+		};
+	}
+
+	private void ResolveGraphics()
+	{
+		if (!form.forcedHeadTypes.NullOrEmpty())
+		{
+			Pawn.story.TryGetRandomHeadFromSet(form.forcedHeadTypes);
+		}
+		if (form.hairTagFilter != null)
+		{
+			Pawn.story.hairDef = PawnStyleItemChooser.RandomHairFor(Pawn);
+		}
+		if (form.beardTagFilter != null)
+		{
+			Pawn.style.beardDef = PawnStyleItemChooser.RandomBeardFor(Pawn);
+		}
+		if (form.hairColorOverride.HasValue)
+		{
+			Pawn.story.HairColor = form.hairColorOverride.Value;
+		}
+		Pawn.Drawer.renderer.SetAllGraphicsDirty();
+	}
+
+	private void ClearLord()
+	{
+		if (IsOnEntryLord)
+		{
+			entryLordEnded = true;
+		}
+		Pawn.GetLord()?.Notify_PawnLost(Pawn, PawnLostCondition.Undefined, null);
+	}
+
+	private T GetWorker<T>(Type type, ref T worker) where T : BaseCreepJoinerWorker
+	{
+		if (worker != null)
+		{
 			return worker;
 		}
-
-		// Token: 0x0600CC35 RID: 52277 RVA: 0x003BD65C File Offset: 0x003BB85C
-		public void ExposeData()
+		if (type == null)
 		{
-			Scribe_Defs.Look<CreepJoinerFormKindDef>(ref this.form, "form");
-			Scribe_Defs.Look<CreepJoinerBenefitDef>(ref this.benefit, "benefit");
-			Scribe_Defs.Look<CreepJoinerDownsideDef>(ref this.downside, "downside");
-			Scribe_Defs.Look<CreepJoinerRejectionDef>(ref this.rejection, "rejection");
-			Scribe_Defs.Look<CreepJoinerAggressiveDef>(ref this.aggressive, "aggressive");
-			Scribe_Values.Look<int>(ref this.timeoutAt, "timeoutAt", 0, false);
-			Scribe_Values.Look<bool>(ref this.duplicated, "duplicated", false, false);
-			Scribe_Values.Look<int>(ref this.joinedTick, "joinedTick", 0, false);
-			Scribe_Values.Look<string>(ref this.spokeToSignal, "spokeToSignal", null, false);
-			Scribe_Values.Look<bool>(ref this.triggeredDownside, "triggeredDownside", false, false);
-			Scribe_Values.Look<bool>(ref this.triggeredAggressive, "triggeredAggressive", false, false);
-			Scribe_Values.Look<bool>(ref this.triggeredRejection, "triggeredRejection", false, false);
-			Scribe_Values.Look<bool>(ref this.hasLeft, "hasLeft", false, false);
-			Scribe_Values.Look<int>(ref this.canTriggerDownsideAfter, "canTriggerDownsideAfter", 0, false);
-			Scribe_Values.Look<int>(ref this.downsideTriggersAt, "downsideTriggersAt", 0, false);
-			Scribe_Values.Look<bool>(ref this.entryLordEnded, "entryLordEnded", false, false);
-			Scribe_References.Look<Quest>(ref this.quest, "quest", false);
-			Scribe_References.Look<Pawn>(ref this.speaker, "speaker", false);
+			return null;
 		}
+		worker = (T)Activator.CreateInstance(type);
+		worker.Tracker = this;
+		return worker;
+	}
 
-		// Token: 0x04008B1B RID: 35611
-		private static readonly IntRange ReleaseRejectionDelayTicks = new IntRange(60, 180);
-
-		// Token: 0x04008B1C RID: 35612
-		private const int CheckDownsideInterval = 15000;
-
-		// Token: 0x04008B1D RID: 35613
-		public CreepJoinerFormKindDef form;
-
-		// Token: 0x04008B1E RID: 35614
-		public CreepJoinerBenefitDef benefit;
-
-		// Token: 0x04008B1F RID: 35615
-		public CreepJoinerDownsideDef downside;
-
-		// Token: 0x04008B20 RID: 35616
-		public CreepJoinerAggressiveDef aggressive;
-
-		// Token: 0x04008B21 RID: 35617
-		public CreepJoinerRejectionDef rejection;
-
-		// Token: 0x04008B22 RID: 35618
-		public Pawn speaker;
-
-		// Token: 0x04008B23 RID: 35619
-		public Quest quest;
-
-		// Token: 0x04008B24 RID: 35620
-		public string spokeToSignal;
-
-		// Token: 0x04008B25 RID: 35621
-		public int timeoutAt;
-
-		// Token: 0x04008B26 RID: 35622
-		public int joinedTick;
-
-		// Token: 0x04008B27 RID: 35623
-		private int downsideTriggersAt;
-
-		// Token: 0x04008B28 RID: 35624
-		private int canTriggerDownsideAfter;
-
-		// Token: 0x04008B29 RID: 35625
-		private bool triggeredDownside;
-
-		// Token: 0x04008B2A RID: 35626
-		private bool triggeredAggressive;
-
-		// Token: 0x04008B2B RID: 35627
-		private bool triggeredRejection;
-
-		// Token: 0x04008B2C RID: 35628
-		private bool hasLeft;
-
-		// Token: 0x04008B2D RID: 35629
-		private bool entryLordEnded;
-
-		// Token: 0x04008B2E RID: 35630
-		private int triggerPrisonerRejectionAt;
-
-		// Token: 0x04008B2F RID: 35631
-		private int triggerPrisonerAggressiveAt;
-
-		// Token: 0x04008B30 RID: 35632
-		private bool duplicated;
-
-		// Token: 0x04008B31 RID: 35633
-		private BaseCreepJoinerWorker downsideWorkerInt;
-
-		// Token: 0x04008B32 RID: 35634
-		private BaseCreepJoinerWorker rejectionWorkerInt;
-
-		// Token: 0x04008B33 RID: 35635
-		private BaseCreepJoinerWorker aggressiveWorkerInt;
+	public void ExposeData()
+	{
+		Scribe_Defs.Look(ref form, "form");
+		Scribe_Defs.Look(ref benefit, "benefit");
+		Scribe_Defs.Look(ref downside, "downside");
+		Scribe_Defs.Look(ref rejection, "rejection");
+		Scribe_Defs.Look(ref aggressive, "aggressive");
+		Scribe_Values.Look(ref timeoutAt, "timeoutAt", 0);
+		Scribe_Values.Look(ref duplicated, "duplicated", defaultValue: false);
+		Scribe_Values.Look(ref joinedTick, "joinedTick", 0);
+		Scribe_Values.Look(ref spokeToSignal, "spokeToSignal");
+		Scribe_Values.Look(ref triggeredDownside, "triggeredDownside", defaultValue: false);
+		Scribe_Values.Look(ref triggeredAggressive, "triggeredAggressive", defaultValue: false);
+		Scribe_Values.Look(ref triggeredRejection, "triggeredRejection", defaultValue: false);
+		Scribe_Values.Look(ref hasLeft, "hasLeft", defaultValue: false);
+		Scribe_Values.Look(ref canTriggerDownsideAfter, "canTriggerDownsideAfter", 0);
+		Scribe_Values.Look(ref downsideTriggersAt, "downsideTriggersAt", 0);
+		Scribe_Values.Look(ref entryLordEnded, "entryLordEnded", defaultValue: false);
+		Scribe_References.Look(ref quest, "quest");
+		Scribe_References.Look(ref speaker, "speaker");
 	}
 }

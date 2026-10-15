@@ -1,10 +1,8 @@
-﻿using System;
+using System;
 
-namespace LudeonTK
+namespace LudeonTK;
+
+[AttributeUsage(AttributeTargets.Method)]
+public class DebugActionYielderAttribute : Attribute
 {
-	// Token: 0x0200006E RID: 110
-	[AttributeUsage(AttributeTargets.Method)]
-	public class DebugActionYielderAttribute : Attribute
-	{
-	}
 }

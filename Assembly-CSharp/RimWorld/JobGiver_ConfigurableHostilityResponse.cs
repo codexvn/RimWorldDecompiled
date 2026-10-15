@@ -1,158 +1,137 @@
-﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobGiver_ConfigurableHostilityResponse : ThinkNode_JobGiver
 {
-	// Token: 0x020013DA RID: 5082
-	public class JobGiver_ConfigurableHostilityResponse : ThinkNode_JobGiver
+	private static List<Thing> tmpThreats = new List<Thing>();
+
+	protected override Job TryGiveJob(Pawn pawn)
 	{
-		// Token: 0x06007C37 RID: 31799 RVA: 0x0025678C File Offset: 0x0025498C
-		protected override Job TryGiveJob(Pawn pawn)
+		if (pawn.playerSettings == null || !pawn.playerSettings.UsesConfigurableHostilityResponse)
 		{
-			if (pawn.playerSettings == null || !pawn.playerSettings.UsesConfigurableHostilityResponse)
+			return null;
+		}
+		if (PawnUtility.PlayerForcedJobNowOrSoon(pawn))
+		{
+			return null;
+		}
+		if (pawn.Downed)
+		{
+			return null;
+		}
+		if (ModsConfig.AnomalyActive && pawn.GetLord()?.LordJob is LordJob_PsychicRitual)
+		{
+			return null;
+		}
+		return pawn.playerSettings.hostilityResponse switch
+		{
+			HostilityResponseMode.Ignore => null, 
+			HostilityResponseMode.Attack => TryGetAttackNearbyEnemyJob(pawn), 
+			HostilityResponseMode.Flee => TryGetFleeJob(pawn), 
+			_ => null, 
+		};
+	}
+
+	private Job TryGetAttackNearbyEnemyJob(Pawn pawn)
+	{
+		if (pawn.WorkTagIsDisabled(WorkTags.Violent))
+		{
+			return null;
+		}
+		bool isMeleeAttack = pawn.CurrentEffectiveVerb.IsMeleeAttack;
+		float maxDist = 8f;
+		if (!isMeleeAttack)
+		{
+			maxDist = Mathf.Clamp(pawn.CurrentEffectiveVerb.EffectiveRange * 0.66f, 2f, 20f);
+		}
+		Thing thing = (Thing)AttackTargetFinder.BestAttackTarget(pawn, TargetScanFlags.NeedLOSToAll | TargetScanFlags.NeedReachableIfCantHitFromMyPos | TargetScanFlags.NeedThreat | TargetScanFlags.NeedAutoTargetable, null, 0f, maxDist);
+		if (thing == null)
+		{
+			return null;
+		}
+		if (isMeleeAttack || pawn.CanReachImmediate(thing, PathEndMode.Touch))
+		{
+			return JobMaker.MakeJob(JobDefOf.AttackMelee, thing);
+		}
+		Verb verb = pawn.TryGetAttackVerb(thing, !pawn.IsColonist);
+		if (verb == null || verb.ApparelPreventsShooting())
+		{
+			return null;
+		}
+		Job job = JobMaker.MakeJob(JobDefOf.AttackStatic, thing);
+		job.maxNumStaticAttacks = 2;
+		job.expiryInterval = 2000;
+		job.endIfCantShootTargetFromCurPos = true;
+		return job;
+	}
+
+	private Job TryGetFleeJob(Pawn pawn)
+	{
+		if (!SelfDefenseUtility.ShouldStartFleeing(pawn))
+		{
+			return null;
+		}
+		IntVec3 intVec;
+		if (pawn.CurJob != null && pawn.CurJob.def == JobDefOf.FleeAndCower)
+		{
+			intVec = pawn.CurJob.targetA.Cell;
+		}
+		else
+		{
+			tmpThreats.Clear();
+			List<IAttackTarget> potentialTargetsFor = pawn.Map.attackTargetsCache.GetPotentialTargetsFor(pawn);
+			for (int i = 0; i < potentialTargetsFor.Count; i++)
 			{
-				return null;
+				Thing thing = potentialTargetsFor[i].Thing;
+				if (FleeUtility.ShouldFleeFrom(thing, pawn, checkDistance: false, checkLOS: false))
+				{
+					tmpThreats.Add(thing);
+				}
 			}
-			if (PawnUtility.PlayerForcedJobNowOrSoon(pawn))
+			List<Thing> list = pawn.Map.listerThings.ThingsInGroup(ThingRequestGroup.AlwaysFlee);
+			for (int j = 0; j < list.Count; j++)
 			{
-				return null;
+				Thing thing2 = list[j];
+				if (FleeUtility.ShouldFleeFrom(thing2, pawn, checkDistance: false, checkLOS: false))
+				{
+					tmpThreats.Add(thing2);
+				}
 			}
-			if (pawn.Downed)
+			if (!tmpThreats.Any())
 			{
-				return null;
-			}
-			if (ModsConfig.AnomalyActive)
-			{
-				Lord lord = pawn.GetLord();
-				if (((lord != null) ? lord.LordJob : null) is LordJob_PsychicRitual)
+				Log.Error(pawn.LabelShort + " decided to flee but there is not any threat around.");
+				Region region = pawn.GetRegion();
+				if (region == null)
+				{
+					return null;
+				}
+				RegionTraverser.BreadthFirstTraverse(region, (Region from, Region reg) => reg.door == null || reg.door.Open, delegate(Region reg)
+				{
+					List<Thing> list2 = reg.ListerThings.ThingsInGroup(ThingRequestGroup.AttackTarget);
+					for (int k = 0; k < list2.Count; k++)
+					{
+						Thing thing3 = list2[k];
+						if (FleeUtility.ShouldFleeFrom(thing3, pawn, checkDistance: false, checkLOS: false))
+						{
+							tmpThreats.Add(thing3);
+							Log.Warning($"  Found a viable threat {thing3.LabelShort}; tests are {thing3.Map.attackTargetsCache.Debug_CheckIfInAllTargets(thing3 as IAttackTarget)}, {thing3.Map.attackTargetsCache.Debug_CheckIfHostileToFaction(pawn.Faction, thing3 as IAttackTarget)}, {thing3 is IAttackTarget}");
+						}
+					}
+					return false;
+				}, 9);
+				if (!tmpThreats.Any())
 				{
 					return null;
 				}
 			}
-			switch (pawn.playerSettings.hostilityResponse)
-			{
-			case HostilityResponseMode.Ignore:
-				return null;
-			case HostilityResponseMode.Attack:
-				return this.TryGetAttackNearbyEnemyJob(pawn);
-			case HostilityResponseMode.Flee:
-				return this.TryGetFleeJob(pawn);
-			default:
-				return null;
-			}
+			intVec = CellFinderLoose.GetFleeDest(pawn, tmpThreats);
+			tmpThreats.Clear();
 		}
-
-		// Token: 0x06007C38 RID: 31800 RVA: 0x0025681C File Offset: 0x00254A1C
-		private Job TryGetAttackNearbyEnemyJob(Pawn pawn)
-		{
-			if (pawn.WorkTagIsDisabled(WorkTags.Violent))
-			{
-				return null;
-			}
-			bool isMeleeAttack = pawn.CurrentEffectiveVerb.IsMeleeAttack;
-			float maxDist = 8f;
-			if (!isMeleeAttack)
-			{
-				maxDist = Mathf.Clamp(pawn.CurrentEffectiveVerb.EffectiveRange * 0.66f, 2f, 20f);
-			}
-			Thing thing = (Thing)AttackTargetFinder.BestAttackTarget(pawn, TargetScanFlags.NeedLOSToPawns | TargetScanFlags.NeedLOSToNonPawns | TargetScanFlags.NeedReachableIfCantHitFromMyPos | TargetScanFlags.NeedThreat | TargetScanFlags.NeedAutoTargetable, null, 0f, maxDist, default(IntVec3), float.MaxValue, false, true, false, false);
-			if (thing == null)
-			{
-				return null;
-			}
-			if (isMeleeAttack || pawn.CanReachImmediate(thing, PathEndMode.Touch))
-			{
-				return JobMaker.MakeJob(JobDefOf.AttackMelee, thing);
-			}
-			Verb verb = pawn.TryGetAttackVerb(thing, !pawn.IsColonist, false);
-			if (verb == null || verb.ApparelPreventsShooting())
-			{
-				return null;
-			}
-			Job job = JobMaker.MakeJob(JobDefOf.AttackStatic, thing);
-			job.maxNumStaticAttacks = 2;
-			job.expiryInterval = 2000;
-			job.endIfCantShootTargetFromCurPos = true;
-			return job;
-		}
-
-		// Token: 0x06007C39 RID: 31801 RVA: 0x00256908 File Offset: 0x00254B08
-		private Job TryGetFleeJob(Pawn pawn)
-		{
-			if (!SelfDefenseUtility.ShouldStartFleeing(pawn))
-			{
-				return null;
-			}
-			IntVec3 c;
-			if (pawn.CurJob != null && pawn.CurJob.def == JobDefOf.FleeAndCower)
-			{
-				c = pawn.CurJob.targetA.Cell;
-			}
-			else
-			{
-				JobGiver_ConfigurableHostilityResponse.tmpThreats.Clear();
-				List<IAttackTarget> potentialTargetsFor = pawn.Map.attackTargetsCache.GetPotentialTargetsFor(pawn);
-				for (int i = 0; i < potentialTargetsFor.Count; i++)
-				{
-					Thing thing = potentialTargetsFor[i].Thing;
-					if (FleeUtility.ShouldFleeFrom(thing, pawn, false, false))
-					{
-						JobGiver_ConfigurableHostilityResponse.tmpThreats.Add(thing);
-					}
-				}
-				List<Thing> list = pawn.Map.listerThings.ThingsInGroup(ThingRequestGroup.AlwaysFlee);
-				for (int j = 0; j < list.Count; j++)
-				{
-					Thing thing2 = list[j];
-					if (FleeUtility.ShouldFleeFrom(thing2, pawn, false, false))
-					{
-						JobGiver_ConfigurableHostilityResponse.tmpThreats.Add(thing2);
-					}
-				}
-				if (!JobGiver_ConfigurableHostilityResponse.tmpThreats.Any<Thing>())
-				{
-					Log.Error(pawn.LabelShort + " decided to flee but there is not any threat around.");
-					Region region = pawn.GetRegion(RegionType.Set_Passable);
-					if (region == null)
-					{
-						return null;
-					}
-					RegionTraverser.BreadthFirstTraverse(region, (Region from, Region reg) => reg.door == null || reg.door.Open, delegate(Region reg)
-					{
-						List<Thing> list2 = reg.ListerThings.ThingsInGroup(ThingRequestGroup.AttackTarget);
-						for (int k = 0; k < list2.Count; k++)
-						{
-							Thing thing3 = list2[k];
-							if (FleeUtility.ShouldFleeFrom(thing3, pawn, false, false))
-							{
-								JobGiver_ConfigurableHostilityResponse.tmpThreats.Add(thing3);
-								Log.Warning(string.Format("  Found a viable threat {0}; tests are {1}, {2}, {3}", new object[]
-								{
-									thing3.LabelShort,
-									thing3.Map.attackTargetsCache.Debug_CheckIfInAllTargets(thing3 as IAttackTarget),
-									thing3.Map.attackTargetsCache.Debug_CheckIfHostileToFaction(pawn.Faction, thing3 as IAttackTarget),
-									thing3 is IAttackTarget
-								}));
-							}
-						}
-						return false;
-					}, 9, RegionType.Set_Passable);
-					if (!JobGiver_ConfigurableHostilityResponse.tmpThreats.Any<Thing>())
-					{
-						return null;
-					}
-				}
-				c = CellFinderLoose.GetFleeDest(pawn, JobGiver_ConfigurableHostilityResponse.tmpThreats, 23f);
-				JobGiver_ConfigurableHostilityResponse.tmpThreats.Clear();
-			}
-			return JobMaker.MakeJob(JobDefOf.FleeAndCower, c);
-		}
-
-		// Token: 0x040053D3 RID: 21459
-		private static List<Thing> tmpThreats = new List<Thing>();
+		return JobMaker.MakeJob(JobDefOf.FleeAndCower, intVec);
 	}
 }

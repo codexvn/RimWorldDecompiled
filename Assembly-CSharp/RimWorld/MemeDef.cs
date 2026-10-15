@@ -1,322 +1,516 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.Grammar;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class MemeDef : Def
 {
-	// Token: 0x02001A96 RID: 6806
-	public class MemeDef : Def
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__52 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001757 RID: 5975
-		// (get) Token: 0x0600986A RID: 39018 RVA: 0x002C75BF File Offset: 0x002C57BF
-		public Texture2D Icon
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public MemeDef _003C_003E4__this;
+
+		private IEnumerator<string> _003C_003E7__wrap1;
+
+		private List<ThingStyleCategoryWithPriority>.Enumerator _003C_003E7__wrap2;
+
+		private List<IdeoDescriptionMaker.PatternEntry>.Enumerator _003C_003E7__wrap3;
+
+		string IEnumerator<string>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (!ModLister.CheckIdeology("Memes"))
-				{
-					return BaseContent.BadTex;
-				}
-				if (this.icon == null)
-				{
-					this.icon = ContentFinder<Texture2D>.Get(this.iconPath, true);
-				}
-				return this.icon;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001758 RID: 5976
-		// (get) Token: 0x0600986B RID: 39019 RVA: 0x002C75FC File Offset: 0x002C57FC
-		public List<BuildableDef> AllDesignatorBuildables
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.cachedAllDesignatorBuildables == null)
-				{
-					this.cachedAllDesignatorBuildables = new List<BuildableDef>();
-					if (this.addDesignators != null)
-					{
-						foreach (BuildableDef item in this.addDesignators)
-						{
-							this.cachedAllDesignatorBuildables.Add(item);
-						}
-					}
-					if (this.addDesignatorGroups != null)
-					{
-						foreach (DesignatorDropdownGroupDef designatorDropdownGroupDef in this.addDesignatorGroups)
-						{
-							this.cachedAllDesignatorBuildables.AddRange(designatorDropdownGroupDef.BuildablesWithoutDefaultDesignators());
-						}
-					}
-				}
-				return this.cachedAllDesignatorBuildables;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600986C RID: 39020 RVA: 0x002C76CC File Offset: 0x002C58CC
-		public List<string> UnlockedRoles(Ideo ideo)
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__52(int _003C_003E1__state)
 		{
-			if (this.unlockedRoles == null || ideo != this.unlockedRolesCachedFor)
-			{
-				this.unlockedRoles = new List<string>();
-				foreach (PreceptDef preceptDef in DefDatabase<PreceptDef>.AllDefsListForReading)
-				{
-					if (typeof(Precept_Role).IsAssignableFrom(preceptDef.preceptClass) && !preceptDef.requiredMemes.NullOrEmpty<MemeDef>() && preceptDef.requiredMemes.Contains(this))
-					{
-						this.unlockedRoles.Add(preceptDef.LabelCap.Resolve());
-					}
-				}
-				this.unlockedRolesCachedFor = ideo;
-			}
-			return this.unlockedRoles;
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x0600986D RID: 39021 RVA: 0x002C7790 File Offset: 0x002C5990
-		public List<string> UnlockedRituals()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			if (this.unlockedRituals == null)
+			switch (_003C_003E1__state)
 			{
-				this.unlockedRituals = new List<string>();
-				if (this.consumableBuildings != null)
+			case -3:
+			case 1:
+				try
 				{
-					using (List<RitualPatternDef>.Enumerator enumerator = DefDatabase<RitualPatternDef>.AllDefsListForReading.GetEnumerator())
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+				break;
+			case -4:
+			case 4:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally2();
+				}
+				break;
+			case -5:
+			case 10:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally3();
+				}
+				break;
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E7__wrap2 = default(List<ThingStyleCategoryWithPriority>.Enumerator);
+			_003C_003E7__wrap3 = default(List<IdeoDescriptionMaker.PatternEntry>.Enumerator);
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				MemeDef memeDef = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((Def)memeDef).ConfigErrors().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0092;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0092;
+				case 2:
+					_003C_003E1__state = -1;
+					goto IL_00e2;
+				case 3:
+					_003C_003E1__state = -1;
+					goto IL_0113;
+				case 4:
+					_003C_003E1__state = -4;
+					goto IL_019a;
+				case 5:
+					_003C_003E1__state = -1;
+					goto IL_01f5;
+				case 6:
+					_003C_003E1__state = -1;
+					goto IL_0269;
+				case 7:
+					_003C_003E1__state = -1;
+					goto IL_02c1;
+				case 8:
+					_003C_003E1__state = -1;
+					break;
+				case 9:
+					_003C_003E1__state = -1;
+					goto IL_032d;
+				case 10:
 					{
-						while (enumerator.MoveNext())
+						_003C_003E1__state = -5;
+						goto IL_037e;
+					}
+					IL_0092:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (memeDef.category == MemeCategory.Structure && string.IsNullOrWhiteSpace(memeDef.worshipRoomLabel))
+					{
+						_003C_003E2__current = "Structure meme has empty worshipRoomLabel";
+						_003C_003E1__state = 2;
+						return true;
+					}
+					goto IL_00e2;
+					IL_01b9:
+					if (memeDef.category == MemeCategory.Structure && memeDef.impact != 0)
+					{
+						_003C_003E2__current = memeDef.defName + " structure meme impact must be 0.";
+						_003C_003E1__state = 5;
+						return true;
+					}
+					goto IL_01f5;
+					IL_01f5:
+					if (memeDef.category != MemeCategory.Structure && (memeDef.impact < 1 || memeDef.impact > 3))
+					{
+						_003C_003E2__current = $"{memeDef.defName} normal meme impact must be between 1 and {3}.";
+						_003C_003E1__state = 6;
+						return true;
+					}
+					goto IL_0269;
+					IL_00e2:
+					if (memeDef.fixedDeityNameTypes != null && memeDef.category != MemeCategory.Structure)
+					{
+						_003C_003E2__current = "fixedDeityNameTypes can only be used in structure memes.";
+						_003C_003E1__state = 3;
+						return true;
+					}
+					goto IL_0113;
+					IL_037e:
+					while (_003C_003E7__wrap3.MoveNext())
+					{
+						if (_003C_003E7__wrap3.Current.def == null)
 						{
-							RitualPatternDef p = enumerator.Current;
-							if (!p.ignoreConsumableBuildingRequirement && p.ritualObligationTargetFilter != null && !p.ritualObligationTargetFilter.thingDefs.NullOrEmpty<ThingDef>() && p.ritualObligationTargetFilter.thingDefs.Any((ThingDef td) => this.consumableBuildings.Contains(td)))
-							{
-								string text;
-								if ((text = p.shortDescOverride.CapitalizeFirst()) == null)
-								{
-									PreceptDef preceptDef = DefDatabase<PreceptDef>.AllDefsListForReading.FirstOrDefault((PreceptDef pr) => pr.ritualPatternBase == p);
-									TaggedString? taggedString = (preceptDef != null) ? new TaggedString?(preceptDef.LabelCap) : null;
-									text = ((taggedString != null) ? taggedString.GetValueOrDefault() : null);
-								}
-								string text2 = text;
-								if (text2 != null)
-								{
-									this.unlockedRituals.Add(text2);
-								}
-							}
+							_003C_003E2__current = "descriptionMaker pattern has null def.";
+							_003C_003E1__state = 10;
+							return true;
 						}
 					}
-				}
-			}
-			return this.unlockedRituals;
-		}
-
-		// Token: 0x0600986E RID: 39022 RVA: 0x002C78E0 File Offset: 0x002C5AE0
-		public override IEnumerable<string> ConfigErrors()
-		{
-			foreach (string text in base.ConfigErrors())
-			{
-				yield return text;
-			}
-			IEnumerator<string> enumerator = null;
-			if (this.category == MemeCategory.Structure && string.IsNullOrWhiteSpace(this.worshipRoomLabel))
-			{
-				yield return "Structure meme has empty worshipRoomLabel";
-			}
-			if (this.fixedDeityNameTypes != null && this.category != MemeCategory.Structure)
-			{
-				yield return "fixedDeityNameTypes can only be used in structure memes.";
-			}
-			if (!this.thingStyleCategories.NullOrEmpty<ThingStyleCategoryWithPriority>())
-			{
-				foreach (ThingStyleCategoryWithPriority thingStyleCategoryWithPriority in this.thingStyleCategories)
-				{
-					if (thingStyleCategoryWithPriority.priority <= 0f)
+					_003C_003Em__Finally3();
+					_003C_003E7__wrap3 = default(List<IdeoDescriptionMaker.PatternEntry>.Enumerator);
+					break;
+					IL_032d:
+					_003C_003E7__wrap3 = memeDef.descriptionMaker.patterns.GetEnumerator();
+					_003C_003E1__state = -5;
+					goto IL_037e;
+					IL_0113:
+					if (!memeDef.thingStyleCategories.NullOrEmpty())
 					{
-						yield return "style category " + thingStyleCategoryWithPriority.category.LabelCap + " has <= 0 priority. It must be positive.";
+						_003C_003E7__wrap2 = memeDef.thingStyleCategories.GetEnumerator();
+						_003C_003E1__state = -4;
+						goto IL_019a;
 					}
-				}
-				List<ThingStyleCategoryWithPriority>.Enumerator enumerator2 = default(List<ThingStyleCategoryWithPriority>.Enumerator);
-			}
-			if (this.category == MemeCategory.Structure && this.impact != 0)
-			{
-				yield return this.defName + " structure meme impact must be 0.";
-			}
-			if (this.category != MemeCategory.Structure && (this.impact < 1 || this.impact > 3))
-			{
-				yield return string.Format("{0} normal meme impact must be between 1 and {1}.", this.defName, 3);
-			}
-			if (!this.agreeableTraits.NullOrEmpty<TraitRequirement>() && !this.disagreeableTraits.NullOrEmpty<TraitRequirement>() && this.agreeableTraits.SharesElementWith(this.disagreeableTraits))
-			{
-				yield return this.defName + " agreeableTraits and disagreeableTraits share one or more values.";
-			}
-			if (this.category == MemeCategory.Structure)
-			{
-				if (this.descriptionMaker == null)
-				{
-					yield return "descriptionMaker is required for structure memes.";
-				}
-				else
-				{
-					if (this.descriptionMaker.patterns.NullOrEmpty<IdeoDescriptionMaker.PatternEntry>())
+					goto IL_01b9;
+					IL_02c1:
+					if (memeDef.category != MemeCategory.Structure)
 					{
-						yield return "descriptionMaker must define at least one pattern for structure memes.";
+						break;
 					}
-					using (List<IdeoDescriptionMaker.PatternEntry>.Enumerator enumerator3 = this.descriptionMaker.patterns.GetEnumerator())
+					if (memeDef.descriptionMaker == null)
 					{
-						while (enumerator3.MoveNext())
+						_003C_003E2__current = "descriptionMaker is required for structure memes.";
+						_003C_003E1__state = 8;
+						return true;
+					}
+					if (memeDef.descriptionMaker.patterns.NullOrEmpty())
+					{
+						_003C_003E2__current = "descriptionMaker must define at least one pattern for structure memes.";
+						_003C_003E1__state = 9;
+						return true;
+					}
+					goto IL_032d;
+					IL_019a:
+					while (_003C_003E7__wrap2.MoveNext())
+					{
+						ThingStyleCategoryWithPriority current2 = _003C_003E7__wrap2.Current;
+						if (current2.priority <= 0f)
 						{
-							if (enumerator3.Current.def == null)
-							{
-								yield return "descriptionMaker pattern has null def.";
-							}
+							_003C_003E2__current = "style category " + current2.category.LabelCap + " has <= 0 priority. It must be positive.";
+							_003C_003E1__state = 4;
+							return true;
 						}
 					}
-					List<IdeoDescriptionMaker.PatternEntry>.Enumerator enumerator3 = default(List<IdeoDescriptionMaker.PatternEntry>.Enumerator);
+					_003C_003Em__Finally2();
+					_003C_003E7__wrap2 = default(List<ThingStyleCategoryWithPriority>.Enumerator);
+					goto IL_01b9;
+					IL_0269:
+					if (!memeDef.agreeableTraits.NullOrEmpty() && !memeDef.disagreeableTraits.NullOrEmpty() && memeDef.agreeableTraits.SharesElementWith(memeDef.disagreeableTraits))
+					{
+						_003C_003E2__current = memeDef.defName + " agreeableTraits and disagreeableTraits share one or more values.";
+						_003C_003E1__state = 7;
+						return true;
+					}
+					goto IL_02c1;
 				}
+				return false;
 			}
-			yield break;
-			yield break;
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
 		}
 
-		// Token: 0x0400667B RID: 26235
-		public string iconPath;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x0400667C RID: 26236
-		public int renderOrder;
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
 
-		// Token: 0x0400667D RID: 26237
-		public int impact = -999;
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap2/*cast due to .constrained prefix*/).Dispose();
+		}
 
-		// Token: 0x0400667E RID: 26238
-		public MemeCategory category;
+		private void _003C_003Em__Finally3()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap3/*cast due to .constrained prefix*/).Dispose();
+		}
 
-		// Token: 0x0400667F RID: 26239
-		public MemeGroupDef groupDef;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04006680 RID: 26240
-		[NoTranslate]
-		public List<string> exclusionTags = new List<string>();
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__52 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__52(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x04006681 RID: 26241
-		public List<List<PreceptDef>> requireOne;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x04006682 RID: 26242
-		public PreceptsWithNoneChance selectOneOrNone;
+	public string iconPath;
 
-		// Token: 0x04006683 RID: 26243
-		public List<RequiredRitualAndBuilding> requiredRituals;
+	public int renderOrder;
 
-		// Token: 0x04006684 RID: 26244
-		public IdeoWeaponClassPair preferredWeaponClasses;
+	public int impact = -999;
 
-		// Token: 0x04006685 RID: 26245
-		public float randomizationSelectionWeightFactor = 1f;
+	public MemeCategory category;
 
-		// Token: 0x04006686 RID: 26246
-		public List<ThingDef> requireAnyRitualSeat;
+	public MemeGroupDef groupDef;
 
-		// Token: 0x04006687 RID: 26247
-		public IntRange deityCount = new IntRange(-1, -1);
+	[NoTranslate]
+	public List<string> exclusionTags = new List<string>();
 
-		// Token: 0x04006688 RID: 26248
-		public bool allowDuringTutorial;
+	public List<List<PreceptDef>> requireOne;
 
-		// Token: 0x04006689 RID: 26249
-		public List<FactionDef> factionWhitelist;
+	public PreceptsWithNoneChance selectOneOrNone;
 
-		// Token: 0x0400668A RID: 26250
-		public bool hiddenInChooseMemes;
+	public List<RequiredRitualAndBuilding> requiredRituals;
 
-		// Token: 0x0400668B RID: 26251
-		public RulePack generalRules;
+	public IdeoWeaponClassPair preferredWeaponClasses;
 
-		// Token: 0x0400668C RID: 26252
-		public IdeoDescriptionMaker descriptionMaker;
+	public float randomizationSelectionWeightFactor = 1f;
 
-		// Token: 0x0400668D RID: 26253
-		public RulePackDef deityNameMakerOverride;
+	public List<ThingDef> requireAnyRitualSeat;
 
-		// Token: 0x0400668E RID: 26254
-		public RulePackDef deityTypeMakerOverride;
+	public IntRange deityCount = new IntRange(-1, -1);
 
-		// Token: 0x0400668F RID: 26255
-		public bool allowSymbolsFromDeity = true;
+	public bool allowDuringTutorial;
 
-		// Token: 0x04006690 RID: 26256
-		public bool symbolPackOverride;
+	public List<FactionDef> factionWhitelist;
 
-		// Token: 0x04006691 RID: 26257
-		[MustTranslate]
-		public List<IdeoSymbolPack> symbolPacks;
+	public bool hiddenInChooseMemes;
 
-		// Token: 0x04006692 RID: 26258
-		public List<DeityNameType> fixedDeityNameTypes;
+	public RulePack generalRules;
 
-		// Token: 0x04006693 RID: 26259
-		public List<ThingStyleCategoryWithPriority> thingStyleCategories;
+	public IdeoDescriptionMaker descriptionMaker;
 
-		// Token: 0x04006694 RID: 26260
-		public IntRange ritualsToMake = IntRange.Zero;
+	public RulePackDef deityNameMakerOverride;
 
-		// Token: 0x04006695 RID: 26261
-		public List<string> replaceRitualsWithTags = new List<string>();
+	public RulePackDef deityTypeMakerOverride;
 
-		// Token: 0x04006696 RID: 26262
-		public List<RitualPatternDef> replacementPatterns;
+	public bool allowSymbolsFromDeity = true;
 
-		// Token: 0x04006697 RID: 26263
-		public List<ThingDef> consumableBuildings;
+	public bool symbolPackOverride;
 
-		// Token: 0x04006698 RID: 26264
-		public int veneratedAnimalsCountOffset;
+	[MustTranslate]
+	public List<IdeoSymbolPack> symbolPacks;
 
-		// Token: 0x04006699 RID: 26265
-		public int veneratedAnimalsCountOverride = -1;
+	public List<DeityNameType> fixedDeityNameTypes;
 
-		// Token: 0x0400669A RID: 26266
-		public List<StyleItemTagWeighted> styleItemTags;
+	public List<ThingStyleCategoryWithPriority> thingStyleCategories;
 
-		// Token: 0x0400669B RID: 26267
-		[MustTranslate]
-		public string worshipRoomLabel;
+	public IntRange ritualsToMake = IntRange.Zero;
 
-		// Token: 0x0400669C RID: 26268
-		public List<ResearchProjectDef> startingResearchProjects = new List<ResearchProjectDef>();
+	public List<string> replaceRitualsWithTags = new List<string>();
 
-		// Token: 0x0400669D RID: 26269
-		public List<BuildableDef> addDesignators;
+	public List<RitualPatternDef> replacementPatterns;
 
-		// Token: 0x0400669E RID: 26270
-		public List<DesignatorDropdownGroupDef> addDesignatorGroups;
+	public List<ThingDef> consumableBuildings;
 
-		// Token: 0x0400669F RID: 26271
-		public List<PreceptApparelRequirement> apparelRequirements;
+	public int veneratedAnimalsCountOffset;
 
-		// Token: 0x040066A0 RID: 26272
-		[XmlInheritanceAllowDuplicateNodes]
-		public List<TraitRequirement> agreeableTraits;
+	public int veneratedAnimalsCountOverride = -1;
 
-		// Token: 0x040066A1 RID: 26273
-		[XmlInheritanceAllowDuplicateNodes]
-		public List<TraitRequirement> disagreeableTraits;
+	public List<StyleItemTagWeighted> styleItemTags;
 
-		// Token: 0x040066A2 RID: 26274
-		public bool preventApparelRequirements;
+	[MustTranslate]
+	public string worshipRoomLabel;
 
-		// Token: 0x040066A3 RID: 26275
-		public XenotypeSet xenotypeSet;
+	public List<ResearchProjectDef> startingResearchProjects = new List<ResearchProjectDef>();
 
-		// Token: 0x040066A4 RID: 26276
-		private Texture2D icon;
+	public List<BuildableDef> addDesignators;
 
-		// Token: 0x040066A5 RID: 26277
-		private List<BuildableDef> cachedAllDesignatorBuildables;
+	public List<DesignatorDropdownGroupDef> addDesignatorGroups;
 
-		// Token: 0x040066A6 RID: 26278
-		private List<string> unlockedRoles;
+	public List<PreceptApparelRequirement> apparelRequirements;
 
-		// Token: 0x040066A7 RID: 26279
-		private List<string> unlockedRituals;
+	[XmlInheritanceAllowDuplicateNodes]
+	public List<TraitRequirement> agreeableTraits;
 
-		// Token: 0x040066A8 RID: 26280
-		private Ideo unlockedRolesCachedFor;
+	[XmlInheritanceAllowDuplicateNodes]
+	public List<TraitRequirement> disagreeableTraits;
+
+	public bool preventApparelRequirements;
+
+	public XenotypeSet xenotypeSet;
+
+	private Texture2D icon;
+
+	private List<BuildableDef> cachedAllDesignatorBuildables;
+
+	private List<string> unlockedRoles;
+
+	private List<string> unlockedRituals;
+
+	private Ideo unlockedRolesCachedFor;
+
+	public Texture2D Icon
+	{
+		get
+		{
+			if (!ModLister.CheckIdeology("Memes"))
+			{
+				return BaseContent.BadTex;
+			}
+			if (icon == null)
+			{
+				icon = ContentFinder<Texture2D>.Get(iconPath);
+			}
+			return icon;
+		}
+	}
+
+	public List<BuildableDef> AllDesignatorBuildables
+	{
+		get
+		{
+			if (cachedAllDesignatorBuildables == null)
+			{
+				cachedAllDesignatorBuildables = new List<BuildableDef>();
+				if (addDesignators != null)
+				{
+					foreach (BuildableDef addDesignator in addDesignators)
+					{
+						cachedAllDesignatorBuildables.Add(addDesignator);
+					}
+				}
+				if (addDesignatorGroups != null)
+				{
+					foreach (DesignatorDropdownGroupDef addDesignatorGroup in addDesignatorGroups)
+					{
+						cachedAllDesignatorBuildables.AddRange(addDesignatorGroup.BuildablesWithoutDefaultDesignators());
+					}
+				}
+			}
+			return cachedAllDesignatorBuildables;
+		}
+	}
+
+	public List<string> UnlockedRoles(Ideo ideo)
+	{
+		if (unlockedRoles == null || ideo != unlockedRolesCachedFor)
+		{
+			unlockedRoles = new List<string>();
+			foreach (PreceptDef item in DefDatabase<PreceptDef>.AllDefsListForReading)
+			{
+				if (typeof(Precept_Role).IsAssignableFrom(item.preceptClass) && !item.requiredMemes.NullOrEmpty() && item.requiredMemes.Contains(this))
+				{
+					unlockedRoles.Add(item.LabelCap.Resolve());
+				}
+			}
+			unlockedRolesCachedFor = ideo;
+		}
+		return unlockedRoles;
+	}
+
+	public List<string> UnlockedRituals()
+	{
+		if (unlockedRituals == null)
+		{
+			unlockedRituals = new List<string>();
+			if (consumableBuildings != null)
+			{
+				foreach (RitualPatternDef p in DefDatabase<RitualPatternDef>.AllDefsListForReading)
+				{
+					if (p.ignoreConsumableBuildingRequirement || p.ritualObligationTargetFilter == null || p.ritualObligationTargetFilter.thingDefs.NullOrEmpty() || !p.ritualObligationTargetFilter.thingDefs.Any((ThingDef td) => consumableBuildings.Contains(td)))
+					{
+						continue;
+					}
+					object obj = p.shortDescOverride.CapitalizeFirst();
+					if (obj == null)
+					{
+						TaggedString? taggedString = DefDatabase<PreceptDef>.AllDefsListForReading.FirstOrDefault((PreceptDef pr) => pr.ritualPatternBase == p)?.LabelCap;
+						obj = (taggedString.HasValue ? ((string)taggedString.GetValueOrDefault()) : null);
+					}
+					string text = (string)obj;
+					if (text != null)
+					{
+						unlockedRituals.Add(text);
+					}
+				}
+			}
+		}
+		return unlockedRituals;
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__52))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__52(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

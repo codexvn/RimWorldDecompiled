@@ -1,352 +1,407 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompCanBeDormant : ThingComp
 {
-	// Token: 0x02002C37 RID: 11319
-	public class CompCanBeDormant : ThingComp
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass20_0
 	{
-		// Token: 0x170027EC RID: 10220
-		// (get) Token: 0x0600FDC6 RID: 64966 RVA: 0x00499987 File Offset: 0x00497B87
-		public CompProperties_CanBeDormant Props
+		public int delayTicks;
+
+		public CompCanBeDormant _003C_003E4__this;
+
+		internal void _003CCompGetGizmosExtra_003Eb__1()
 		{
+			_003C_003E4__this.wakeUpOnTick = Find.TickManager.TicksGame + delayTicks;
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CCompGetGizmosExtra_003Ed__20 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompCanBeDormant _003C_003E4__this;
+
+		Gizmo IEnumerator<Gizmo>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				return (CompProperties_CanBeDormant)this.props;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170027ED RID: 10221
-		// (get) Token: 0x0600FDC7 RID: 64967 RVA: 0x00499994 File Offset: 0x00497B94
-		private bool WaitingToWakeUp
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.wakeUpOnTick != int.MinValue;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170027EE RID: 10222
-		// (get) Token: 0x0600FDC8 RID: 64968 RVA: 0x004999A6 File Offset: 0x00497BA6
-		protected virtual JobDef SleepJob
+		[DebuggerHidden]
+		public _003CCompGetGizmosExtra_003Ed__20(int _003C_003E1__state)
 		{
-			get
-			{
-				return JobDefOf.Wait_AsleepDormancy;
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x170027EF RID: 10223
-		// (get) Token: 0x0600FDC9 RID: 64969 RVA: 0x004999B0 File Offset: 0x00497BB0
-		public virtual bool Awake
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			get
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			CompCanBeDormant CS_0024_003C_003E8__locals10 = _003C_003E4__this;
+			switch (num)
 			{
-				if (this.wokeUpTick == -2147483648 || this.wokeUpTick > Find.TickManager.TicksGame)
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (!Prefs.DevMode || !DebugSettings.godMode || CS_0024_003C_003E8__locals10.Props.dontShowDevGizmos)
 				{
-					if (this.parent.Spawned && this.Props.jobDormancy)
-					{
-						Pawn pawn = this.parent as Pawn;
-						if (pawn != null)
-						{
-							return pawn.CurJobDef != this.SleepJob;
-						}
-					}
 					return false;
 				}
-				return true;
-			}
-		}
-
-		// Token: 0x170027F0 RID: 10224
-		// (get) Token: 0x0600FDCA RID: 64970 RVA: 0x00499A1A File Offset: 0x00497C1A
-		protected virtual bool ShowZs
-		{
-			get
-			{
-				return !(this.parent is Pawn) && this.Props.showSleepingZs && (this.Props.delayedWakeUpDoesZs || this.wakeUpOnTick == int.MinValue);
-			}
-		}
-
-		// Token: 0x0600FDCB RID: 64971 RVA: 0x00499A56 File Offset: 0x00497C56
-		public override void PostPostMake()
-		{
-			base.PostPostMake();
-			this.makeTick = GenTicks.TicksGame;
-			if (!this.Props.startsDormant)
-			{
-				this.WakeUp();
-			}
-		}
-
-		// Token: 0x0600FDCC RID: 64972 RVA: 0x00499A7C File Offset: 0x00497C7C
-		public override void Initialize(CompProperties props)
-		{
-			base.Initialize(props);
-			this.wakeUpSignalTag = this.Props.wakeUpSignalTag;
-		}
-
-		// Token: 0x0600FDCD RID: 64973 RVA: 0x00499A96 File Offset: 0x00497C96
-		public override IEnumerable<Gizmo> CompGetGizmosExtra()
-		{
-			if (!Prefs.DevMode || !DebugSettings.godMode || this.Props.dontShowDevGizmos)
-			{
-				yield break;
-			}
-			if (!this.Awake)
-			{
-				yield return new Command_Action
+				if (!CS_0024_003C_003E8__locals10.Awake)
 				{
-					defaultLabel = "DEV: Wake Up",
-					action = new Action(this.WakeUp)
-				};
-				yield return new Command_Action
+					_003C_003E2__current = new Command_Action
+					{
+						defaultLabel = "DEV: Wake Up",
+						action = CS_0024_003C_003E8__locals10.WakeUp
+					};
+					_003C_003E1__state = 1;
+					return true;
+				}
+				if (CS_0024_003C_003E8__locals10.Props.jobDormancy)
 				{
-					action = delegate()
+					_003C_003E2__current = new Command_Action
+					{
+						defaultLabel = "DEV: To Sleep",
+						action = CS_0024_003C_003E8__locals10.ToSleep
+					};
+					_003C_003E1__state = 3;
+					return true;
+				}
+				break;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = new Command_Action
+				{
+					action = delegate
 					{
 						List<FloatMenuOption> list = new List<FloatMenuOption>();
 						for (int i = 0; i < 10; i++)
 						{
-							float num = (float)i * 0.5f;
-							int delayTicks = Mathf.RoundToInt(num * 60f);
-							string label = num.ToString("F1") + "s";
-							list.Add(new FloatMenuOption(label, delegate()
+							_003C_003Ec__DisplayClass20_0 CS_0024_003C_003E8__locals5 = new _003C_003Ec__DisplayClass20_0
 							{
-								this.wakeUpOnTick = Find.TickManager.TicksGame + delayTicks;
-							}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0));
+								_003C_003E4__this = CS_0024_003C_003E8__locals10
+							};
+							float num2 = (float)i * 0.5f;
+							CS_0024_003C_003E8__locals5.delayTicks = Mathf.RoundToInt(num2 * 60f);
+							string label = num2.ToString("F1") + "s";
+							list.Add(new FloatMenuOption(label, delegate
+							{
+								CS_0024_003C_003E8__locals5._003C_003E4__this.wakeUpOnTick = Find.TickManager.TicksGame + CS_0024_003C_003E8__locals5.delayTicks;
+							}));
 						}
 						Find.WindowStack.Add(new FloatMenu(list));
 					},
 					defaultLabel = "DEV: Wake up after...",
 					defaultDesc = "DEV: Wake up after a delay"
 				};
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				break;
+			case 3:
+				_003C_003E1__state = -1;
+				break;
 			}
-			else if (this.Props.jobDormancy)
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CCompGetGizmosExtra_003Ed__20 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				yield return new Command_Action
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CCompGetGizmosExtra_003Ed__20(0)
 				{
-					defaultLabel = "DEV: To Sleep",
-					action = new Action(this.ToSleep)
+					_003C_003E4__this = _003C_003E4__this
 				};
 			}
-			yield break;
+			return result;
 		}
 
-		// Token: 0x0600FDCE RID: 64974 RVA: 0x00499AA8 File Offset: 0x00497CA8
-		public override string CompInspectStringExtra()
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			Pawn pawn = this.parent as Pawn;
-			if (pawn != null && (pawn.IsSelfShutdown() || pawn.IsDeactivated() || pawn.Awake()))
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	private int makeTick;
+
+	public int wokeUpTick = int.MinValue;
+
+	public int wakeUpOnTick = int.MinValue;
+
+	private int repeatWakeUpSignalOnTick = int.MaxValue;
+
+	private Effecter wakeUpEffect;
+
+	public string wakeUpSignalTag;
+
+	public List<string> wakeUpSignalTags;
+
+	public const string DefaultWakeUpSignal = "CompCanBeDormant.WakeUp";
+
+	public CompProperties_CanBeDormant Props => (CompProperties_CanBeDormant)props;
+
+	private bool WaitingToWakeUp => wakeUpOnTick != int.MinValue;
+
+	protected virtual JobDef SleepJob => JobDefOf.Wait_AsleepDormancy;
+
+	public virtual bool Awake
+	{
+		get
+		{
+			if (wokeUpTick == int.MinValue || wokeUpTick > Find.TickManager.TicksGame)
 			{
-				return null;
-			}
-			if (this.Awake)
-			{
-				if (this.parent.Faction != Faction.OfPlayer && this.makeTick != this.wokeUpTick)
+				if (parent.Spawned && Props.jobDormancy && parent is Pawn pawn)
 				{
-					Pawn pawn2 = this.parent as Pawn;
-					if (pawn2 == null || !pawn2.Downed)
-					{
-						return this.Props.awakeStateLabelKey.Translate((GenTicks.TicksGame - this.wokeUpTick).TicksToDays().ToString("0.#"));
-					}
+					return pawn.CurJobDef != SleepJob;
 				}
-				return null;
+				return false;
 			}
-			if (!this.Props.wakeUpDelayStateLabelKey.NullOrEmpty() && this.wakeUpOnTick != -2147483648)
-			{
-				return this.Props.wakeUpDelayStateLabelKey.Translate();
-			}
-			return this.Props.dormantStateLabelKey.Translate();
+			return true;
 		}
+	}
 
-		// Token: 0x0600FDCF RID: 64975 RVA: 0x00499BA4 File Offset: 0x00497DA4
-		public void WakeUpWithDelay()
+	protected virtual bool ShowZs
+	{
+		get
 		{
-			if (!this.Awake)
+			if (parent is Pawn)
 			{
-				this.wakeUpOnTick = Find.TickManager.TicksGame + this.Props.wakeUpDelayRange.RandomInRange;
-				this.repeatWakeUpSignalOnTick = ((this.Props.wakeUpRepeatSignalDelayRange != null) ? (Find.TickManager.TicksGame + this.Props.wakeUpRepeatSignalDelayRange.Value.RandomInRange) : int.MinValue);
+				return false;
+			}
+			if (!Props.showSleepingZs)
+			{
+				return false;
+			}
+			if (!Props.delayedWakeUpDoesZs)
+			{
+				return wakeUpOnTick == int.MinValue;
+			}
+			return true;
+		}
+	}
+
+	public override void PostPostMake()
+	{
+		base.PostPostMake();
+		makeTick = GenTicks.TicksGame;
+		if (!Props.startsDormant)
+		{
+			WakeUp();
+		}
+	}
+
+	public override void Initialize(CompProperties props)
+	{
+		base.Initialize(props);
+		wakeUpSignalTag = Props.wakeUpSignalTag;
+	}
+
+	[IteratorStateMachine(typeof(_003CCompGetGizmosExtra_003Ed__20))]
+	public override IEnumerable<Gizmo> CompGetGizmosExtra()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CCompGetGizmosExtra_003Ed__20(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override string CompInspectStringExtra()
+	{
+		if (parent is Pawn p && (p.IsSelfShutdown() || p.IsDeactivated() || p.Awake()))
+		{
+			return null;
+		}
+		if (Awake)
+		{
+			if (parent.Faction != Faction.OfPlayer && makeTick != wokeUpTick && !(parent is Pawn { Downed: not false }))
+			{
+				return Props.awakeStateLabelKey.Translate((GenTicks.TicksGame - wokeUpTick).TicksToDays().ToString("0.#"));
+			}
+			return null;
+		}
+		if (!Props.wakeUpDelayStateLabelKey.NullOrEmpty() && wakeUpOnTick != int.MinValue)
+		{
+			return Props.wakeUpDelayStateLabelKey.Translate();
+		}
+		return Props.dormantStateLabelKey.Translate();
+	}
+
+	public void WakeUpWithDelay()
+	{
+		if (!Awake)
+		{
+			wakeUpOnTick = Find.TickManager.TicksGame + Props.wakeUpDelayRange.RandomInRange;
+			repeatWakeUpSignalOnTick = (Props.wakeUpRepeatSignalDelayRange.HasValue ? (Find.TickManager.TicksGame + Props.wakeUpRepeatSignalDelayRange.Value.RandomInRange) : int.MinValue);
+		}
+	}
+
+	public virtual void WakeUp()
+	{
+		if (Awake)
+		{
+			return;
+		}
+		wokeUpTick = GenTicks.TicksGame;
+		wakeUpOnTick = int.MinValue;
+		Pawn obj = parent as Pawn;
+		Building building = parent as Building;
+		(obj?.GetLord() ?? building?.GetLord())?.Notify_DormancyWakeup();
+		if (parent.Spawned)
+		{
+			if (parent is IAttackTarget t)
+			{
+				parent.Map.attackTargetsCache.UpdateTarget(t);
+			}
+			if (Props.jobDormancy && parent is Pawn pawn && pawn.CurJobDef == SleepJob)
+			{
+				pawn.jobs.EndCurrentJob(JobCondition.InterruptForced);
 			}
 		}
+	}
 
-		// Token: 0x0600FDD0 RID: 64976 RVA: 0x00499C1C File Offset: 0x00497E1C
-		public virtual void WakeUp()
+	public virtual void ToSleep()
+	{
+		if (!Awake)
 		{
-			if (this.Awake)
+			return;
+		}
+		wokeUpTick = int.MinValue;
+		if (parent.Spawned)
+		{
+			if (parent is IAttackTarget t)
 			{
-				return;
+				parent.Map.attackTargetsCache.UpdateTarget(t);
 			}
-			this.wokeUpTick = GenTicks.TicksGame;
-			this.wakeUpOnTick = int.MinValue;
-			Pawn pawn = this.parent as Pawn;
-			Building building = this.parent as Building;
-			Lord lord = ((pawn != null) ? pawn.GetLord() : null) ?? ((building != null) ? building.GetLord() : null);
-			if (lord != null)
+			if (Props.jobDormancy && parent is Pawn pawn)
 			{
-				lord.Notify_DormancyWakeup();
+				Job job = JobMaker.MakeJob(SleepJob, pawn.Position);
+				job.forceSleep = true;
+				pawn.jobs.StartJob(job, JobCondition.InterruptForced, null, resumeCurJobAfterwards: false, cancelBusyStances: true, null, null, fromQueue: false, canReturnCurJobToPool: false, null);
 			}
-			if (this.parent.Spawned)
+		}
+	}
+
+	public override void CompTickRare()
+	{
+		base.CompTickRare();
+		if (wakeUpOnTick != int.MinValue && Find.TickManager.TicksGame >= wakeUpOnTick)
+		{
+			WakeUp();
+		}
+		TickRareWorker();
+	}
+
+	public override void CompTick()
+	{
+		base.CompTick();
+		if (wakeUpOnTick != int.MinValue)
+		{
+			if (Find.TickManager.TicksGame >= wakeUpOnTick)
 			{
-				IAttackTarget attackTarget = this.parent as IAttackTarget;
-				if (attackTarget != null)
+				WakeUp();
+				wakeUpEffect?.Cleanup();
+				wakeUpEffect = null;
+			}
+			else
+			{
+				if (Props.wakeUpEffect != null && wakeUpEffect == null)
 				{
-					this.parent.Map.attackTargetsCache.UpdateTarget(attackTarget);
+					wakeUpEffect = Props.wakeUpEffect.SpawnAttached(parent, parent.Map);
 				}
-				if (this.Props.jobDormancy)
+				wakeUpEffect?.EffectTick(parent, parent);
+				if (repeatWakeUpSignalOnTick != int.MinValue && Find.TickManager.TicksGame == repeatWakeUpSignalOnTick)
 				{
-					Pawn pawn2 = this.parent as Pawn;
-					if (pawn2 != null && pawn2.CurJobDef == this.SleepJob)
-					{
-						pawn2.jobs.EndCurrentJob(JobCondition.InterruptForced, true, true);
-					}
+					Find.SignalManager.SendSignal(new Signal(wakeUpSignalTag, parent.Named("SUBJECT")));
 				}
 			}
 		}
-
-		// Token: 0x0600FDD1 RID: 64977 RVA: 0x00499CF4 File Offset: 0x00497EF4
-		public virtual void ToSleep()
+		if (parent.IsHashIntervalTick(250))
 		{
-			if (!this.Awake)
-			{
-				return;
-			}
-			this.wokeUpTick = int.MinValue;
-			if (this.parent.Spawned)
-			{
-				IAttackTarget attackTarget = this.parent as IAttackTarget;
-				if (attackTarget != null)
-				{
-					this.parent.Map.attackTargetsCache.UpdateTarget(attackTarget);
-				}
-				if (this.Props.jobDormancy)
-				{
-					Pawn pawn = this.parent as Pawn;
-					if (pawn != null)
-					{
-						Job job = JobMaker.MakeJob(this.SleepJob, pawn.Position);
-						job.forceSleep = true;
-						pawn.jobs.StartJob(job, JobCondition.InterruptForced, null, false, true, null, null, false, false, null, false, true, false);
-					}
-				}
-			}
+			TickRareWorker();
 		}
+	}
 
-		// Token: 0x0600FDD2 RID: 64978 RVA: 0x00499DAE File Offset: 0x00497FAE
-		public override void CompTickRare()
+	public void TickRareWorker()
+	{
+		if (parent.Spawned && !Awake && ShowZs && !parent.Position.Fogged(parent.Map))
 		{
-			base.CompTickRare();
-			if (this.wakeUpOnTick != -2147483648 && Find.TickManager.TicksGame >= this.wakeUpOnTick)
-			{
-				this.WakeUp();
-			}
-			this.TickRareWorker();
+			FleckMaker.ThrowMetaIcon(parent.Position, parent.Map, FleckDefOf.SleepZ);
 		}
+	}
 
-		// Token: 0x0600FDD3 RID: 64979 RVA: 0x00499DE4 File Offset: 0x00497FE4
-		public override void CompTick()
+	public override void Notify_SignalReceived(Signal signal)
+	{
+		if (!string.IsNullOrEmpty(wakeUpSignalTag) && !Awake && (signal.tag == wakeUpSignalTag || (wakeUpSignalTags != null && wakeUpSignalTags.Contains(signal.tag))) && signal.args.TryGetArg("SUBJECT", out Thing arg) && arg != parent && arg != null && arg.Map == parent.Map && parent.Position.DistanceTo(arg.Position) <= Props.maxDistAwakenByOther && (!signal.args.TryGetArg("FACTION", out Faction arg2) || arg2 == null || arg2 == parent.Faction) && (Props.canWakeUpFogged || !parent.Fogged()) && !WaitingToWakeUp)
 		{
-			base.CompTick();
-			if (this.wakeUpOnTick != -2147483648)
-			{
-				if (Find.TickManager.TicksGame >= this.wakeUpOnTick)
-				{
-					this.WakeUp();
-					Effecter effecter = this.wakeUpEffect;
-					if (effecter != null)
-					{
-						effecter.Cleanup();
-					}
-					this.wakeUpEffect = null;
-				}
-				else
-				{
-					if (this.Props.wakeUpEffect != null && this.wakeUpEffect == null)
-					{
-						this.wakeUpEffect = this.Props.wakeUpEffect.SpawnAttached(this.parent, this.parent.Map, 1f);
-					}
-					Effecter effecter2 = this.wakeUpEffect;
-					if (effecter2 != null)
-					{
-						effecter2.EffectTick(this.parent, this.parent);
-					}
-					if (this.repeatWakeUpSignalOnTick != -2147483648 && Find.TickManager.TicksGame == this.repeatWakeUpSignalOnTick)
-					{
-						Find.SignalManager.SendSignal(new Signal(this.wakeUpSignalTag, this.parent.Named("SUBJECT")));
-					}
-				}
-			}
-			if (this.parent.IsHashIntervalTick(250))
-			{
-				this.TickRareWorker();
-			}
+			WakeUpWithDelay();
 		}
+	}
 
-		// Token: 0x0600FDD4 RID: 64980 RVA: 0x00499F00 File Offset: 0x00498100
-		public void TickRareWorker()
-		{
-			if (!this.parent.Spawned || this.Awake)
-			{
-				return;
-			}
-			if (this.ShowZs && !this.parent.Position.Fogged(this.parent.Map))
-			{
-				FleckMaker.ThrowMetaIcon(this.parent.Position, this.parent.Map, FleckDefOf.SleepZ, 0.42f);
-			}
-		}
-
-		// Token: 0x0600FDD5 RID: 64981 RVA: 0x00499F70 File Offset: 0x00498170
-		public override void Notify_SignalReceived(Signal signal)
-		{
-			if (string.IsNullOrEmpty(this.wakeUpSignalTag) || this.Awake)
-			{
-				return;
-			}
-			Thing thing;
-			Faction faction;
-			if ((signal.tag == this.wakeUpSignalTag || (this.wakeUpSignalTags != null && this.wakeUpSignalTags.Contains(signal.tag))) && signal.args.TryGetArg<Thing>("SUBJECT", out thing) && thing != this.parent && thing != null && thing.Map == this.parent.Map && this.parent.Position.DistanceTo(thing.Position) <= this.Props.maxDistAwakenByOther && (!signal.args.TryGetArg<Faction>("FACTION", out faction) || faction == null || faction == this.parent.Faction) && (this.Props.canWakeUpFogged || !this.parent.Fogged()) && !this.WaitingToWakeUp)
-			{
-				this.WakeUpWithDelay();
-			}
-		}
-
-		// Token: 0x0600FDD6 RID: 64982 RVA: 0x0049A078 File Offset: 0x00498278
-		public override void PostExposeData()
-		{
-			base.PostExposeData();
-			Scribe_Values.Look<int>(ref this.wokeUpTick, "wokeUpTick", int.MinValue, false);
-			Scribe_Values.Look<int>(ref this.wakeUpOnTick, "wakeUpOnTick", int.MinValue, false);
-			Scribe_Values.Look<string>(ref this.wakeUpSignalTag, "wakeUpSignalTag", null, false);
-			Scribe_Collections.Look<string>(ref this.wakeUpSignalTags, "wakeUpSignalTags", LookMode.Value, Array.Empty<object>());
-			Scribe_Values.Look<int>(ref this.makeTick, "makeTick", 0, false);
-			Scribe_Values.Look<int>(ref this.repeatWakeUpSignalOnTick, "repeatWakeUpSignalOnTick", int.MinValue, false);
-		}
-
-		// Token: 0x0400A65A RID: 42586
-		private int makeTick;
-
-		// Token: 0x0400A65B RID: 42587
-		public int wokeUpTick = int.MinValue;
-
-		// Token: 0x0400A65C RID: 42588
-		public int wakeUpOnTick = int.MinValue;
-
-		// Token: 0x0400A65D RID: 42589
-		private int repeatWakeUpSignalOnTick = int.MaxValue;
-
-		// Token: 0x0400A65E RID: 42590
-		private Effecter wakeUpEffect;
-
-		// Token: 0x0400A65F RID: 42591
-		public string wakeUpSignalTag;
-
-		// Token: 0x0400A660 RID: 42592
-		public List<string> wakeUpSignalTags;
-
-		// Token: 0x0400A661 RID: 42593
-		public const string DefaultWakeUpSignal = "CompCanBeDormant.WakeUp";
+	public override void PostExposeData()
+	{
+		base.PostExposeData();
+		Scribe_Values.Look(ref wokeUpTick, "wokeUpTick", int.MinValue);
+		Scribe_Values.Look(ref wakeUpOnTick, "wakeUpOnTick", int.MinValue);
+		Scribe_Values.Look(ref wakeUpSignalTag, "wakeUpSignalTag");
+		Scribe_Collections.Look(ref wakeUpSignalTags, "wakeUpSignalTags", LookMode.Value);
+		Scribe_Values.Look(ref makeTick, "makeTick", 0);
+		Scribe_Values.Look(ref repeatWakeUpSignalOnTick, "repeatWakeUpSignalOnTick", int.MinValue);
 	}
 }

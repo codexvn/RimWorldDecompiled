@@ -1,383 +1,399 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Text;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public sealed class CompActivity : ThingComp
 {
-	// Token: 0x02002BA6 RID: 11174
-	public sealed class CompActivity : ThingComp
+	[CompilerGenerated]
+	private sealed class _003CCompGetGizmosExtra_003Ed__28 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x17002712 RID: 10002
-		// (get) Token: 0x0600F9AD RID: 63917 RVA: 0x00489F50 File Offset: 0x00488150
-		public CompProperties_Activity Props
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompActivity _003C_003E4__this;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (CompProperties_Activity)this.props;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002713 RID: 10003
-		// (get) Token: 0x0600F9AE RID: 63918 RVA: 0x00489F5D File Offset: 0x0048815D
-		public float ActivityLevel
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.activityLevelPercent;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002714 RID: 10004
-		// (get) Token: 0x0600F9AF RID: 63919 RVA: 0x00489F65 File Offset: 0x00488165
-		public bool IsActive
+		[DebuggerHidden]
+		public _003CCompGetGizmosExtra_003Ed__28(int _003C_003E1__state)
 		{
-			get
-			{
-				return this.state == ActivityState.Active;
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x17002715 RID: 10005
-		// (get) Token: 0x0600F9B0 RID: 63920 RVA: 0x00489F70 File Offset: 0x00488170
-		public bool IsDormant
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			get
-			{
-				return this.state == ActivityState.Passive;
-			}
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x17002716 RID: 10006
-		// (get) Token: 0x0600F9B1 RID: 63921 RVA: 0x00489F7B File Offset: 0x0048817B
-		public bool Deactivated
+		private bool MoveNext()
 		{
-			get
+			int num = _003C_003E1__state;
+			CompActivity CS_0024_003C_003E8__locals11 = _003C_003E4__this;
+			switch (num)
 			{
-				return this.deactivated;
-			}
-		}
-
-		// Token: 0x17002717 RID: 10007
-		// (get) Token: 0x0600F9B2 RID: 63922 RVA: 0x00489F83 File Offset: 0x00488183
-		public ActivityState State
-		{
-			get
-			{
-				return this.state;
-			}
-		}
-
-		// Token: 0x17002718 RID: 10008
-		// (get) Token: 0x0600F9B3 RID: 63923 RVA: 0x00489F8B File Offset: 0x0048818B
-		public float ActivityResearchFactor
-		{
-			get
-			{
-				return this.Props.activityResearchFactorCurve.Evaluate(this.ActivityLevel);
-			}
-		}
-
-		// Token: 0x17002719 RID: 10009
-		// (get) Token: 0x0600F9B4 RID: 63924 RVA: 0x00489FA4 File Offset: 0x004881A4
-		public bool CanBeSuppressed
-		{
-			get
-			{
-				using (IEnumerator<IActivity> enumerator = this.parent.GetComps<IActivity>().GetEnumerator())
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (CS_0024_003C_003E8__locals11.Deactivated)
 				{
-					while (enumerator.MoveNext())
-					{
-						if (!enumerator.Current.CanBeSuppressed())
-						{
-							return false;
-						}
-					}
+					return false;
 				}
+				if (CS_0024_003C_003E8__locals11.gizmo == null)
+				{
+					CS_0024_003C_003E8__locals11.gizmo = new ActivityGizmo(CS_0024_003C_003E8__locals11.parent);
+				}
+				if (Find.Selector.SelectedObjects.Count == 1 && CS_0024_003C_003E8__locals11.IsDormant)
+				{
+					_003C_003E2__current = CS_0024_003C_003E8__locals11.gizmo;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				goto IL_008a;
+			case 1:
+				_003C_003E1__state = -1;
+				goto IL_008a;
+			case 2:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = new Command_Action
+				{
+					defaultLabel = "DEV: Activity +5%",
+					action = delegate
+					{
+						CS_0024_003C_003E8__locals11.AdjustActivity(0.05f);
+					}
+				};
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = new Command_Action
+				{
+					defaultLabel = "DEV: " + (CS_0024_003C_003E8__locals11.IsDormant ? "Go active" : "Go passive"),
+					action = delegate
+					{
+						CS_0024_003C_003E8__locals11.activityLevelPercent = (CS_0024_003C_003E8__locals11.IsDormant ? 1f : 0f);
+					}
+				};
+				_003C_003E1__state = 4;
+				return true;
+			case 4:
+				{
+					_003C_003E1__state = -1;
+					return false;
+				}
+				IL_008a:
+				if (!DebugSettings.godMode)
+				{
+					return false;
+				}
+				_003C_003E2__current = new Command_Action
+				{
+					defaultLabel = "DEV: Activity -5%",
+					action = delegate
+					{
+						CS_0024_003C_003E8__locals11.AdjustActivity(-0.05f);
+					}
+				};
+				_003C_003E1__state = 2;
 				return true;
 			}
 		}
 
-		// Token: 0x0600F9B5 RID: 63925 RVA: 0x00489FFC File Offset: 0x004881FC
-		public override void Initialize(CompProperties props)
+		bool IEnumerator.MoveNext()
 		{
-			base.Initialize(props);
-			this.SetActivity(this.Props.startingRange.RandomInRange, true);
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0600F9B6 RID: 63926 RVA: 0x0048A01C File Offset: 0x0048821C
-		public override void PostSpawnSetup(bool respawningAfterLoad)
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			base.PostSpawnSetup(respawningAfterLoad);
-			LessonAutoActivator.TeachOpportunity(ConceptDefOf.SuppressingEntities, OpportunityType.Important);
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x0600F9B7 RID: 63927 RVA: 0x0048A030 File Offset: 0x00488230
-		public override void CompTick()
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
 		{
-			this.AdjustActivity(this.Props.Worker.GetChangeRatePerDay(this.parent) / 60000f);
-		}
-
-		// Token: 0x0600F9B8 RID: 63928 RVA: 0x0048A054 File Offset: 0x00488254
-		public override string CompInspectStringExtra()
-		{
-			if (this.Deactivated)
+			_003CCompGetGizmosExtra_003Ed__28 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				return "Deactivated".Translate() + ".";
+				_003C_003E1__state = 0;
+				result = this;
 			}
-			if (this.IsActive)
+			else
 			{
-				return null;
-			}
-			StringBuilder stringBuilder = new StringBuilder();
-			this.Props.Worker.GetInspectString(this.parent, stringBuilder);
-			return stringBuilder.ToString();
-		}
-
-		// Token: 0x0600F9B9 RID: 63929 RVA: 0x0048A0B0 File Offset: 0x004882B0
-		public override IEnumerable<Gizmo> CompGetGizmosExtra()
-		{
-			if (this.Deactivated)
-			{
-				yield break;
-			}
-			if (this.gizmo == null)
-			{
-				this.gizmo = new ActivityGizmo(this.parent);
-			}
-			if (Find.Selector.SelectedObjects.Count == 1 && this.IsDormant)
-			{
-				yield return this.gizmo;
-			}
-			if (!DebugSettings.godMode)
-			{
-				yield break;
-			}
-			yield return new Command_Action
-			{
-				defaultLabel = "DEV: Activity -5%",
-				action = delegate()
+				result = new _003CCompGetGizmosExtra_003Ed__28(0)
 				{
-					this.AdjustActivity(-0.05f);
-				}
-			};
-			yield return new Command_Action
-			{
-				defaultLabel = "DEV: Activity +5%",
-				action = delegate()
-				{
-					this.AdjustActivity(0.05f);
-				}
-			};
-			yield return new Command_Action
-			{
-				defaultLabel = "DEV: " + (this.IsDormant ? "Go active" : "Go passive"),
-				action = delegate()
-				{
-					this.activityLevelPercent = (this.IsDormant ? 1f : 0f);
-				}
-			};
-			yield break;
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
 		}
 
-		// Token: 0x0600F9BA RID: 63930 RVA: 0x0048A0C0 File Offset: 0x004882C0
-		public void AdjustActivity(float delta)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			this.SetActivity(this.activityLevelPercent + delta, false);
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x0600F9BB RID: 63931 RVA: 0x0048A0D4 File Offset: 0x004882D4
-		public void SetActivity(float activity, bool dontDirtyGraphic = false)
-		{
-			if (this.Deactivated)
-			{
-				return;
-			}
-			this.activityLevelPercent = Mathf.Clamp01(activity);
-			if (this.activityLevelPercent >= 1f && this.state != ActivityState.Active && this.CanActivate())
-			{
-				this.EnterActiveState();
-			}
-			else if (this.activityLevelPercent <= 0f && this.state != ActivityState.Passive)
-			{
-				this.EnterPassiveState();
-			}
-			if (!dontDirtyGraphic && this.Props.dirtyGraphicsOnActivityChange)
-			{
-				Pawn pawn = this.parent as Pawn;
-				if (pawn != null && Mathf.Abs(this.activityLevelPercent - this.lastGraphicDirtyPercent) > 0.01f)
-				{
-					this.lastGraphicDirtyPercent = this.activityLevelPercent;
-					pawn.Drawer.renderer.SetAllGraphicsDirty();
-				}
-			}
-		}
+	private float activityLevelPercent;
 
-		// Token: 0x0600F9BC RID: 63932 RVA: 0x0048A18C File Offset: 0x0048838C
-		private bool CanActivate()
+	private ActivityState state;
+
+	private bool triggeredNaturally;
+
+	private bool deactivated;
+
+	public bool suppressionEnabled;
+
+	public float suppressIfAbove = 0.4f;
+
+	private float lastGraphicDirtyPercent;
+
+	private Gizmo gizmo;
+
+	public CompProperties_Activity Props => (CompProperties_Activity)props;
+
+	public float ActivityLevel => activityLevelPercent;
+
+	public bool IsActive => state == ActivityState.Active;
+
+	public bool IsDormant => state == ActivityState.Passive;
+
+	public bool Deactivated => deactivated;
+
+	public ActivityState State => state;
+
+	public float ActivityResearchFactor => Props.activityResearchFactorCurve.Evaluate(ActivityLevel);
+
+	public bool CanBeSuppressed
+	{
+		get
 		{
-			using (IEnumerator<IActivity> enumerator = this.parent.GetComps<IActivity>().GetEnumerator())
+			foreach (IActivity comp in parent.GetComps<IActivity>())
 			{
-				while (enumerator.MoveNext())
+				if (!comp.CanBeSuppressed())
 				{
-					if (!enumerator.Current.CanActivate())
-					{
-						return false;
-					}
+					return false;
 				}
 			}
 			return true;
 		}
+	}
 
-		// Token: 0x0600F9BD RID: 63933 RVA: 0x0048A1E4 File Offset: 0x004883E4
-		public bool ShouldGoPassive()
+	public override void Initialize(CompProperties props)
+	{
+		base.Initialize(props);
+		SetActivity(Props.startingRange.RandomInRange, dontDirtyGraphic: true);
+	}
+
+	public override void PostSpawnSetup(bool respawningAfterLoad)
+	{
+		base.PostSpawnSetup(respawningAfterLoad);
+		LessonAutoActivator.TeachOpportunity(ConceptDefOf.SuppressingEntities, OpportunityType.Important);
+	}
+
+	public override void CompTick()
+	{
+		AdjustActivity(Props.Worker.GetChangeRatePerDay(parent) / 60000f);
+	}
+
+	public override string CompInspectStringExtra()
+	{
+		if (Deactivated)
 		{
-			if (this.Deactivated)
+			return "Deactivated".Translate() + ".";
+		}
+		if (IsActive)
+		{
+			return null;
+		}
+		StringBuilder stringBuilder = new StringBuilder();
+		Props.Worker.GetInspectString(parent, stringBuilder);
+		return stringBuilder.ToString();
+	}
+
+	[IteratorStateMachine(typeof(_003CCompGetGizmosExtra_003Ed__28))]
+	public override IEnumerable<Gizmo> CompGetGizmosExtra()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CCompGetGizmosExtra_003Ed__28(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public void AdjustActivity(float delta)
+	{
+		SetActivity(activityLevelPercent + delta);
+	}
+
+	public void SetActivity(float activity, bool dontDirtyGraphic = false)
+	{
+		if (!Deactivated)
+		{
+			activityLevelPercent = Mathf.Clamp01(activity);
+			if (activityLevelPercent >= 1f && state != ActivityState.Active && CanActivate())
+			{
+				EnterActiveState();
+			}
+			else if (activityLevelPercent <= 0f && state != 0)
+			{
+				EnterPassiveState();
+			}
+			if (!dontDirtyGraphic && Props.dirtyGraphicsOnActivityChange && parent is Pawn pawn && Mathf.Abs(activityLevelPercent - lastGraphicDirtyPercent) > 0.01f)
+			{
+				lastGraphicDirtyPercent = activityLevelPercent;
+				pawn.Drawer.renderer.SetAllGraphicsDirty();
+			}
+		}
+	}
+
+	private bool CanActivate()
+	{
+		foreach (IActivity comp in parent.GetComps<IActivity>())
+		{
+			if (!comp.CanActivate())
 			{
 				return false;
 			}
-			using (IEnumerator<IActivity> enumerator = this.parent.GetComps<IActivity>().GetEnumerator())
-			{
-				while (enumerator.MoveNext())
-				{
-					if (enumerator.Current.ShouldGoPassive())
-					{
-						return true;
-					}
-				}
-			}
+		}
+		return true;
+	}
+
+	public bool ShouldGoPassive()
+	{
+		if (Deactivated)
+		{
 			return false;
 		}
-
-		// Token: 0x0600F9BE RID: 63934 RVA: 0x0048A248 File Offset: 0x00488448
-		public void EnterActiveState()
+		foreach (IActivity comp in parent.GetComps<IActivity>())
 		{
-			if (this.Deactivated)
+			if (comp.ShouldGoPassive())
 			{
-				return;
-			}
-			this.triggeredNaturally = (this.activityLevelPercent >= 1f);
-			this.activityLevelPercent = 1f;
-			this.state = ActivityState.Active;
-			foreach (IActivity activity in this.parent.GetComps<IActivity>())
-			{
-				activity.OnActivityActivated();
-			}
-			if ((this.triggeredNaturally || this.Props.showLetterOnManualActivation) && this.Props.showLetterOnActivated)
-			{
-				Find.LetterStack.ReceiveLetter(this.Props.letterTitle, this.Props.letterDesc, this.Props.letterDef, this.parent, null, null, null, null, 0, true);
+				return true;
 			}
 		}
+		return false;
+	}
 
-		// Token: 0x0600F9BF RID: 63935 RVA: 0x0048A330 File Offset: 0x00488530
-		public void EnterPassiveState()
+	public void EnterActiveState()
+	{
+		if (Deactivated)
 		{
-			if (this.Deactivated)
+			return;
+		}
+		triggeredNaturally = activityLevelPercent >= 1f;
+		activityLevelPercent = 1f;
+		state = ActivityState.Active;
+		foreach (IActivity comp in parent.GetComps<IActivity>())
+		{
+			comp.OnActivityActivated();
+		}
+		if ((triggeredNaturally || Props.showLetterOnManualActivation) && Props.showLetterOnActivated)
+		{
+			Find.LetterStack.ReceiveLetter(Props.letterTitle, Props.letterDesc, Props.letterDef, parent);
+		}
+	}
+
+	public void EnterPassiveState()
+	{
+		if (Deactivated)
+		{
+			return;
+		}
+		activityLevelPercent = 0f;
+		state = ActivityState.Passive;
+		foreach (IActivity comp in parent.GetComps<IActivity>())
+		{
+			comp.OnPassive();
+		}
+	}
+
+	public void Deactivate()
+	{
+		if (IsActive)
+		{
+			EnterPassiveState();
+		}
+		activityLevelPercent = 0f;
+		deactivated = true;
+		suppressionEnabled = false;
+		suppressIfAbove = 0.5f;
+		gizmo = null;
+		parent.GetComp<CompStudiable>()?.Notify_ActivityDeactivated();
+	}
+
+	public override void PostPostApplyDamage(DamageInfo dinfo, float totalDamageDealt)
+	{
+		if (Deactivated || !(totalDamageDealt > 0f) || !IsDormant || !(Props.changePerDamage > 0f))
+		{
+			return;
+		}
+		float x = 1f;
+		if (parent is Pawn pawn)
+		{
+			x = pawn.health.summaryHealth.SummaryHealthPercent;
+		}
+		else if (parent.def.useHitPoints)
+		{
+			x = (float)parent.HitPoints / (float)parent.MaxHitPoints;
+		}
+		float num = Props.changePerDamage * totalDamageDealt * Props.damagedActivityMultiplierCurve.Evaluate(x);
+		SetActivity(activityLevelPercent + num);
+		if (!IsActive)
+		{
+			TaggedString taggedString = "MessageActivityRisingDamage".Translate(parent.LabelNoParenthesis);
+			if (MessagesRepeatAvoider.MessageShowAllowed(taggedString, 15f))
 			{
-				return;
-			}
-			this.activityLevelPercent = 0f;
-			this.state = ActivityState.Passive;
-			foreach (IActivity activity in this.parent.GetComps<IActivity>())
-			{
-				activity.OnPassive();
+				Messages.Message(taggedString, parent, MessageTypeDefOf.CautionInput);
 			}
 		}
+	}
 
-		// Token: 0x0600F9C0 RID: 63936 RVA: 0x0048A39C File Offset: 0x0048859C
-		public void Deactivate()
-		{
-			if (this.IsActive)
-			{
-				this.EnterPassiveState();
-			}
-			this.activityLevelPercent = 0f;
-			this.deactivated = true;
-			this.suppressionEnabled = false;
-			this.suppressIfAbove = 0.5f;
-			this.gizmo = null;
-			CompStudiable comp = this.parent.GetComp<CompStudiable>();
-			if (comp == null)
-			{
-				return;
-			}
-			comp.Notify_ActivityDeactivated();
-		}
+	public void Notify_HeldOnPlatform()
+	{
+		suppressionEnabled = true;
+	}
 
-		// Token: 0x0600F9C1 RID: 63937 RVA: 0x0048A3F8 File Offset: 0x004885F8
-		public override void PostPostApplyDamage(DamageInfo dinfo, float totalDamageDealt)
-		{
-			if (this.Deactivated)
-			{
-				return;
-			}
-			if (totalDamageDealt > 0f && this.IsDormant && this.Props.changePerDamage > 0f)
-			{
-				float x = 1f;
-				Pawn pawn = this.parent as Pawn;
-				if (pawn != null)
-				{
-					x = pawn.health.summaryHealth.SummaryHealthPercent;
-				}
-				else if (this.parent.def.useHitPoints)
-				{
-					x = (float)this.parent.HitPoints / (float)this.parent.MaxHitPoints;
-				}
-				float num = this.Props.changePerDamage * totalDamageDealt * this.Props.damagedActivityMultiplierCurve.Evaluate(x);
-				this.SetActivity(this.activityLevelPercent + num, false);
-				if (this.IsActive)
-				{
-					return;
-				}
-				TaggedString taggedString = "MessageActivityRisingDamage".Translate(this.parent.LabelNoParenthesis);
-				if (MessagesRepeatAvoider.MessageShowAllowed(taggedString, 15f))
-				{
-					Messages.Message(taggedString, this.parent, MessageTypeDefOf.CautionInput, true);
-				}
-			}
-		}
-
-		// Token: 0x0600F9C2 RID: 63938 RVA: 0x0048A50E File Offset: 0x0048870E
-		public void Notify_HeldOnPlatform()
-		{
-			this.suppressionEnabled = true;
-		}
-
-		// Token: 0x0600F9C3 RID: 63939 RVA: 0x0048A518 File Offset: 0x00488718
-		public override void PostExposeData()
-		{
-			Scribe_Values.Look<float>(ref this.activityLevelPercent, "activityPercent", 0f, false);
-			Scribe_Values.Look<ActivityState>(ref this.state, "state", ActivityState.Passive, false);
-			Scribe_Values.Look<float>(ref this.suppressIfAbove, "suppressIfAbove", 0f, false);
-			Scribe_Values.Look<bool>(ref this.suppressionEnabled, "suppressionEnabled", false, false);
-			Scribe_Values.Look<bool>(ref this.triggeredNaturally, "triggeredNaturally", false, false);
-			Scribe_Values.Look<float>(ref this.lastGraphicDirtyPercent, "lastGraphicDirtyPercent", 0f, false);
-			Scribe_Values.Look<bool>(ref this.deactivated, "deactivated", false, false);
-		}
-
-		// Token: 0x0400A436 RID: 42038
-		private float activityLevelPercent;
-
-		// Token: 0x0400A437 RID: 42039
-		private ActivityState state;
-
-		// Token: 0x0400A438 RID: 42040
-		private bool triggeredNaturally;
-
-		// Token: 0x0400A439 RID: 42041
-		private bool deactivated;
-
-		// Token: 0x0400A43A RID: 42042
-		public bool suppressionEnabled;
-
-		// Token: 0x0400A43B RID: 42043
-		public float suppressIfAbove = 0.4f;
-
-		// Token: 0x0400A43C RID: 42044
-		private float lastGraphicDirtyPercent;
-
-		// Token: 0x0400A43D RID: 42045
-		private Gizmo gizmo;
+	public override void PostExposeData()
+	{
+		Scribe_Values.Look(ref activityLevelPercent, "activityPercent", 0f);
+		Scribe_Values.Look(ref state, "state", ActivityState.Passive);
+		Scribe_Values.Look(ref suppressIfAbove, "suppressIfAbove", 0f);
+		Scribe_Values.Look(ref suppressionEnabled, "suppressionEnabled", defaultValue: false);
+		Scribe_Values.Look(ref triggeredNaturally, "triggeredNaturally", defaultValue: false);
+		Scribe_Values.Look(ref lastGraphicDirtyPercent, "lastGraphicDirtyPercent", 0f);
+		Scribe_Values.Look(ref deactivated, "deactivated", defaultValue: false);
 	}
 }

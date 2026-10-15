@@ -1,43 +1,37 @@
-﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class ThoughtWorker_ApparelDamaged : ThoughtWorker
 {
-	// Token: 0x0200187E RID: 6270
-	public class ThoughtWorker_ApparelDamaged : ThoughtWorker
+	public const float MinForFrayed = 0.5f;
+
+	public const float MinForTattered = 0.2f;
+
+	protected override ThoughtState CurrentStateInternal(Pawn p)
 	{
-		// Token: 0x06008FE8 RID: 36840 RVA: 0x002A77A0 File Offset: 0x002A59A0
-		protected override ThoughtState CurrentStateInternal(Pawn p)
+		float num = 999f;
+		List<Apparel> wornApparel = p.apparel.WornApparel;
+		for (int i = 0; i < wornApparel.Count; i++)
 		{
-			float num = 999f;
-			List<Apparel> wornApparel = p.apparel.WornApparel;
-			for (int i = 0; i < wornApparel.Count; i++)
+			if (wornApparel[i].def.useHitPoints && !p.apparel.IsLocked(wornApparel[i]) && wornApparel[i].def.apparel.careIfDamaged)
 			{
-				if (wornApparel[i].def.useHitPoints && !p.apparel.IsLocked(wornApparel[i]) && wornApparel[i].def.apparel.careIfDamaged)
+				float num2 = (float)wornApparel[i].HitPoints / (float)wornApparel[i].MaxHitPoints;
+				if (num2 < num)
 				{
-					float num2 = (float)wornApparel[i].HitPoints / (float)wornApparel[i].MaxHitPoints;
-					if (num2 < num)
-					{
-						num = num2;
-					}
-					if (num < 0.2f)
-					{
-						return ThoughtState.ActiveAtStage(1);
-					}
+					num = num2;
+				}
+				if (num < 0.2f)
+				{
+					return ThoughtState.ActiveAtStage(1);
 				}
 			}
-			if (num < 0.5f)
-			{
-				return ThoughtState.ActiveAtStage(0);
-			}
-			return ThoughtState.Inactive;
 		}
-
-		// Token: 0x04005C33 RID: 23603
-		public const float MinForFrayed = 0.5f;
-
-		// Token: 0x04005C34 RID: 23604
-		public const float MinForTattered = 0.2f;
+		if (num < 0.5f)
+		{
+			return ThoughtState.ActiveAtStage(0);
+		}
+		return ThoughtState.Inactive;
 	}
 }

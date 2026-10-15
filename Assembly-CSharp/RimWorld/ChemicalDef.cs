@@ -1,59 +1,197 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class ChemicalDef : Def
 {
-	// Token: 0x02001A12 RID: 6674
-	public class ChemicalDef : Def
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__11 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x06009680 RID: 38528 RVA: 0x002C09A0 File Offset: 0x002BEBA0
-		public override IEnumerable<string> ConfigErrors()
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public ChemicalDef _003C_003E4__this;
+
+		private IEnumerator<string> _003C_003E7__wrap1;
+
+		string IEnumerator<string>.Current
 		{
-			foreach (string text in base.ConfigErrors())
+			[DebuggerHidden]
+			get
 			{
-				yield return text;
+				return _003C_003E2__current;
 			}
-			IEnumerator<string> enumerator = null;
-			if (this.canBeAddicted && this.addictionHediff == null)
-			{
-				yield return "addictionHediff is null";
-			}
-			yield break;
-			yield break;
 		}
 
-		// Token: 0x040062C3 RID: 25283
-		public HediffDef addictionHediff;
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
 
-		// Token: 0x040062C4 RID: 25284
-		public HediffDef toleranceHediff;
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__11(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
 
-		// Token: 0x040062C5 RID: 25285
-		public bool canBinge = true;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
 
-		// Token: 0x040062C6 RID: 25286
-		public bool canBeAddicted = true;
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				ChemicalDef chemicalDef = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((Def)chemicalDef).ConfigErrors().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_006f:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (chemicalDef.canBeAddicted && chemicalDef.addictionHediff == null)
+					{
+						_003C_003E2__current = "addictionHediff is null";
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
 
-		// Token: 0x040062C7 RID: 25287
-		public bool generateAddictionGenes = true;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x040062C8 RID: 25288
-		public float geneOverdoseChanceFactorResist = 1f;
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
 
-		// Token: 0x040062C9 RID: 25289
-		public float geneOverdoseChanceFactorImmune = 1f;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x040062CA RID: 25290
-		public float geneToleranceBuildupFactorResist = 1f;
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__11 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__11(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x040062CB RID: 25291
-		public float geneToleranceBuildupFactorImmune = 1f;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x040062CC RID: 25292
-		public float onGeneratedAddictedToleranceChance;
+	public HediffDef addictionHediff;
 
-		// Token: 0x040062CD RID: 25293
-		public List<HediffGiver_Event> onGeneratedAddictedEvents;
+	public HediffDef toleranceHediff;
+
+	public bool canBinge = true;
+
+	public bool canBeAddicted = true;
+
+	public bool generateAddictionGenes = true;
+
+	public float geneOverdoseChanceFactorResist = 1f;
+
+	public float geneOverdoseChanceFactorImmune = 1f;
+
+	public float geneToleranceBuildupFactorResist = 1f;
+
+	public float geneToleranceBuildupFactorImmune = 1f;
+
+	public float onGeneratedAddictedToleranceChance;
+
+	public List<HediffGiver_Event> onGeneratedAddictedEvents;
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__11))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__11(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

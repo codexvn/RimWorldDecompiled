@@ -1,220 +1,313 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+[StaticConstructorOnStartup]
+public abstract class ShipJob_Wait : ShipJob
 {
-	// Token: 0x0200177D RID: 6013
-	[StaticConstructorOnStartup]
-	public abstract class ShipJob_Wait : ShipJob
+	[CompilerGenerated]
+	private sealed class _003CGetJobGizmos_003Ed__12 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x170015AD RID: 5549
-		// (get) Token: 0x06008D17 RID: 36119 RVA: 0x0029F885 File Offset: 0x0029DA85
-		public override bool ShowGizmos
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public ShipJob_Wait _003C_003E4__this;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.showGizmos;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170015AE RID: 5550
-		// (get) Token: 0x06008D18 RID: 36120 RVA: 0x0029F88D File Offset: 0x0029DA8D
-		private int MaxLaunchDistance
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.transportShip.def.maxLaunchDistance;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06008D19 RID: 36121 RVA: 0x0029F89F File Offset: 0x0029DA9F
-		public override IEnumerable<Gizmo> GetJobGizmos()
+		[DebuggerHidden]
+		public _003CGetJobGizmos_003Ed__12(int _003C_003E1__state)
 		{
-			if (this.transportShip.ShuttleComp.permitShuttle)
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			ShipJob_Wait CS_0024_003C_003E8__locals9 = _003C_003E4__this;
+			Command_Action command_Action2;
+			switch (num)
 			{
-				if (this.transportShip.TransporterComp.LoadingInProgressOrReadyToLaunch && this.transportShip.TransporterComp.innerContainer.Any<Thing>())
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (CS_0024_003C_003E8__locals9.transportShip.ShuttleComp.permitShuttle)
 				{
-					yield return this.LaunchAction();
+					if (CS_0024_003C_003E8__locals9.transportShip.TransporterComp.LoadingInProgressOrReadyToLaunch && CS_0024_003C_003E8__locals9.transportShip.TransporterComp.innerContainer.Any())
+					{
+						_003C_003E2__current = CS_0024_003C_003E8__locals9.LaunchAction();
+						_003C_003E1__state = 1;
+						return true;
+					}
+					goto IL_0087;
 				}
-				Command_Action command_Action = new Command_Action
+				if (!CS_0024_003C_003E8__locals9.leaveImmediatelyWhenSatisfied)
+				{
+					Command_Action command_Action = new Command_Action
+					{
+						defaultLabel = "CommandSendShuttle".Translate(),
+						defaultDesc = "CommandSendShuttleDesc".Translate(),
+						icon = SendCommandTex,
+						alsoClickIfOtherInGroupClicked = false,
+						action = delegate
+						{
+							CS_0024_003C_003E8__locals9.transportShip.ForceJob(ShipJobDefOf.FlyAway);
+						}
+					};
+					if (!CS_0024_003C_003E8__locals9.transportShip.ShuttleComp.AllRequiredThingsLoaded)
+					{
+						command_Action.Disable("CommandSendShuttleFailMissingRequiredThing".Translate());
+					}
+					_003C_003E2__current = command_Action;
+					_003C_003E1__state = 3;
+					return true;
+				}
+				break;
+			case 1:
+				_003C_003E1__state = -1;
+				goto IL_0087;
+			case 2:
+				_003C_003E1__state = -1;
+				break;
+			case 3:
+				{
+					_003C_003E1__state = -1;
+					break;
+				}
+				IL_0087:
+				command_Action2 = new Command_Action
 				{
 					defaultLabel = "CommandShuttleDismiss".Translate(),
 					defaultDesc = "CommandShuttleDismissDesc".Translate(),
-					icon = ShipJob_Wait.DismissTex,
+					icon = DismissTex,
 					alsoClickIfOtherInGroupClicked = false,
-					action = delegate()
+					action = delegate
 					{
-						this.transportShip.ForceJob(ShipJobDefOf.Unload);
-						this.transportShip.AddJob(ShipJobDefOf.FlyAway);
+						CS_0024_003C_003E8__locals9.transportShip.ForceJob(ShipJobDefOf.Unload);
+						CS_0024_003C_003E8__locals9.transportShip.AddJob(ShipJobDefOf.FlyAway);
 					}
 				};
-				yield return command_Action;
+				_003C_003E2__current = command_Action2;
+				_003C_003E1__state = 2;
+				return true;
 			}
-			else if (!this.leaveImmediatelyWhenSatisfied)
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CGetJobGizmos_003Ed__12 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				Command_Action command_Action2 = new Command_Action();
-				command_Action2.defaultLabel = "CommandSendShuttle".Translate();
-				command_Action2.defaultDesc = "CommandSendShuttleDesc".Translate();
-				command_Action2.icon = ShipJob_Wait.SendCommandTex;
-				command_Action2.alsoClickIfOtherInGroupClicked = false;
-				command_Action2.action = delegate()
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CGetJobGizmos_003Ed__12(0)
 				{
-					this.transportShip.ForceJob(ShipJobDefOf.FlyAway);
+					_003C_003E4__this = _003C_003E4__this
 				};
-				if (!this.transportShip.ShuttleComp.AllRequiredThingsLoaded)
-				{
-					command_Action2.Disable("CommandSendShuttleFailMissingRequiredThing".Translate());
-				}
-				yield return command_Action2;
 			}
-			yield break;
+			return result;
 		}
 
-		// Token: 0x06008D1A RID: 36122 RVA: 0x0029F8B0 File Offset: 0x0029DAB0
-		private Command_Action LaunchAction()
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return new Command_Action
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	public bool leaveImmediatelyWhenSatisfied;
+
+	public bool showGizmos = true;
+
+	public bool targetPlayerSettlement;
+
+	public List<Thing> sendAwayIfAllDespawned;
+
+	public List<Thing> sendAwayIfAnyDespawnedDownedOrDead;
+
+	private static readonly Texture2D DismissTex = ContentFinder<Texture2D>.Get("UI/Commands/DismissShuttle");
+
+	protected static readonly Texture2D SendCommandTex = CompLaunchable.LaunchCommandTex;
+
+	private const int CheckAllDespawnedInterval = 60;
+
+	public override bool ShowGizmos => showGizmos;
+
+	private int MaxLaunchDistance => transportShip.def.maxLaunchDistance;
+
+	[IteratorStateMachine(typeof(_003CGetJobGizmos_003Ed__12))]
+	public override IEnumerable<Gizmo> GetJobGizmos()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetJobGizmos_003Ed__12(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	private Command_Action LaunchAction()
+	{
+		return new Command_Action
+		{
+			defaultLabel = "CommandLaunchGroup".Translate(),
+			defaultDesc = "CommandLaunchGroupDesc".Translate(),
+			icon = CompLaunchable.LaunchCommandTex,
+			alsoClickIfOtherInGroupClicked = false,
+			action = delegate
 			{
-				defaultLabel = "CommandLaunchGroup".Translate(),
-				defaultDesc = "CommandLaunchGroupDesc".Translate(),
-				icon = CompLaunchable.LaunchCommandTex,
-				alsoClickIfOtherInGroupClicked = false,
-				action = delegate()
+				CameraJumper.TryJump(CameraJumper.GetWorldTarget(transportShip.shipThing));
+				Find.WorldSelector.ClearSelection();
+				PlanetTile tile = transportShip.shipThing.Map.Tile;
+				Find.WorldTargeter.BeginTargeting(ChoseWorldTarget, canTargetTiles: true, CompLaunchable.TargeterMouseAttachment, closeWorldTabWhenFinished: true, delegate
 				{
-					CameraJumper.TryJump(CameraJumper.GetWorldTarget(this.transportShip.shipThing), CameraJumper.MovementMode.Pan);
-					Find.WorldSelector.ClearSelection();
-					PlanetTile tile = this.transportShip.shipThing.Map.Tile;
-					Find.WorldTargeter.BeginTargeting(new Func<GlobalTargetInfo, bool>(this.ChoseWorldTarget), true, CompLaunchable.TargeterMouseAttachment, true, delegate
+					PlanetTile planetTile = tile;
+					if (planetTile.Layer != Find.WorldSelector.SelectedLayer)
 					{
-						GenDraw.DrawWorldRadiusRing(tile, this.MaxLaunchDistance, null);
-					}, (GlobalTargetInfo target) => CompLaunchable.TargetingLabelGetter(target, tile, this.MaxLaunchDistance, Gen.YieldSingle<IThingHolder>(this.transportShip.TransporterComp), new Action<PlanetTile, TransportersArrivalAction>(this.Launch), null, null), null, null, false);
-				}
-			};
-		}
-
-		// Token: 0x06008D1B RID: 36123 RVA: 0x0029F910 File Offset: 0x0029DB10
-		private bool ChoseWorldTarget(GlobalTargetInfo target)
-		{
-			PlanetTile tile = this.transportShip.shipThing.Map.Tile;
-			return CompLaunchable.ChoseWorldTarget(target, tile, Gen.YieldSingle<IThingHolder>(this.transportShip.TransporterComp), this.MaxLaunchDistance, new Action<PlanetTile, TransportersArrivalAction>(this.Launch), null, null);
-		}
-
-		// Token: 0x06008D1C RID: 36124 RVA: 0x0029F968 File Offset: 0x0029DB68
-		private void Launch(PlanetTile destinationTile, TransportersArrivalAction arrivalAction)
-		{
-			ShipJob_FlyAway shipJob_FlyAway = (ShipJob_FlyAway)ShipJobMaker.MakeShipJob(ShipJobDefOf.FlyAway);
-			shipJob_FlyAway.destinationTile = destinationTile;
-			shipJob_FlyAway.arrivalAction = arrivalAction;
-			this.transportShip.SetNextJob(shipJob_FlyAway);
-			this.transportShip.TryGetNextJob();
-			CameraJumper.TryHideWorld();
-		}
-
-		// Token: 0x06008D1D RID: 36125 RVA: 0x0029F9B0 File Offset: 0x0029DBB0
-		public override void TickInterval(int delta)
-		{
-			base.TickInterval(delta);
-			if (this.transportShip.ShipExistsAndIsSpawned)
-			{
-				if (this.leaveImmediatelyWhenSatisfied && this.transportShip.ShuttleComp.AllRequiredThingsLoaded)
-				{
-					this.SendAway();
-					return;
-				}
-				if (this.transportShip.shipThing.IsHashIntervalTick(60, delta))
-				{
-					bool flag = false;
-					if (!this.sendAwayIfAnyDespawnedDownedOrDead.NullOrEmpty<Thing>())
-					{
-						foreach (Thing thing in this.sendAwayIfAnyDespawnedDownedOrDead)
-						{
-							Pawn pawn = thing as Pawn;
-							if ((!thing.Spawned || (pawn != null && (pawn.Dead || pawn.Downed))) && !this.transportShip.TransporterComp.innerContainer.Contains(thing))
-							{
-								flag = true;
-								this.SendAway();
-								break;
-							}
-						}
+						planetTile = Find.WorldSelector.SelectedLayer.GetClosestTile_NewTemp(planetTile);
 					}
-					if (!flag && !this.sendAwayIfAllDespawned.NullOrEmpty<Thing>())
+					GenDraw.DrawWorldRadiusRing(planetTile, MaxLaunchDistance);
+				}, (GlobalTargetInfo target) => CompLaunchable.TargetingLabelGetter(target, tile, MaxLaunchDistance, Gen.YieldSingle((IThingHolder)transportShip.TransporterComp), Launch, null, null), null, null);
+			}
+		};
+	}
+
+	private bool ChoseWorldTarget(GlobalTargetInfo target)
+	{
+		PlanetTile tile = transportShip.shipThing.Map.Tile;
+		return CompLaunchable.ChoseWorldTarget(target, tile, Gen.YieldSingle((IThingHolder)transportShip.TransporterComp), MaxLaunchDistance, Launch, null, null);
+	}
+
+	private void Launch(PlanetTile destinationTile, TransportersArrivalAction arrivalAction)
+	{
+		ShipJob_FlyAway shipJob_FlyAway = (ShipJob_FlyAway)ShipJobMaker.MakeShipJob(ShipJobDefOf.FlyAway);
+		shipJob_FlyAway.destinationTile = destinationTile;
+		shipJob_FlyAway.arrivalAction = arrivalAction;
+		transportShip.SetNextJob(shipJob_FlyAway);
+		transportShip.TryGetNextJob();
+		CameraJumper.TryHideWorld();
+	}
+
+	public override void TickInterval(int delta)
+	{
+		base.TickInterval(delta);
+		if (!transportShip.ShipExistsAndIsSpawned)
+		{
+			return;
+		}
+		if (leaveImmediatelyWhenSatisfied && transportShip.ShuttleComp.AllRequiredThingsLoaded)
+		{
+			SendAway();
+		}
+		else
+		{
+			if (!transportShip.shipThing.IsHashIntervalTick(60, delta))
+			{
+				return;
+			}
+			bool flag = false;
+			if (!sendAwayIfAnyDespawnedDownedOrDead.NullOrEmpty())
+			{
+				foreach (Thing item in sendAwayIfAnyDespawnedDownedOrDead)
+				{
+					Pawn pawn = item as Pawn;
+					if ((!item.Spawned || (pawn != null && (pawn.Dead || pawn.Downed))) && !transportShip.TransporterComp.innerContainer.Contains(item))
 					{
-						bool flag2 = false;
-						foreach (Thing thing2 in this.sendAwayIfAllDespawned)
-						{
-							if (thing2.MapHeld == this.transportShip.shipThing.Map || thing2.MapHeld.PocketMapParent.sourceMap == this.transportShip.shipThing.Map || this.transportShip.TransporterComp.innerContainer.Contains(thing2))
-							{
-								flag2 = true;
-								break;
-							}
-						}
-						if (!flag2)
-						{
-							this.SendAway();
-						}
+						flag = true;
+						SendAway();
+						break;
 					}
 				}
 			}
-		}
-
-		// Token: 0x06008D1E RID: 36126 RVA: 0x0029FB58 File Offset: 0x0029DD58
-		protected virtual void SendAway()
-		{
-			this.transportShip.SetNextJob(ShipJobMaker.MakeShipJob(ShipJobDefOf.FlyAway));
-			this.End();
-		}
-
-		// Token: 0x06008D1F RID: 36127 RVA: 0x0029FB78 File Offset: 0x0029DD78
-		public override void ExposeData()
-		{
-			base.ExposeData();
-			Scribe_Values.Look<bool>(ref this.leaveImmediatelyWhenSatisfied, "leaveImmediatelyWhenSatisfied", false, false);
-			Scribe_Values.Look<bool>(ref this.showGizmos, "showGizmos", true, false);
-			Scribe_Values.Look<bool>(ref this.targetPlayerSettlement, "targetPlayerSettlement", false, false);
-			Scribe_Collections.Look<Thing>(ref this.sendAwayIfAllDespawned, "sendAwayIfAllDespawned", LookMode.Reference, Array.Empty<object>());
-			Scribe_Collections.Look<Thing>(ref this.sendAwayIfAnyDespawnedDownedOrDead, "sendAwayIfAnyDespawned", LookMode.Reference, Array.Empty<object>());
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+			if (flag || sendAwayIfAllDespawned.NullOrEmpty())
 			{
-				List<Thing> list = this.sendAwayIfAllDespawned;
-				if (list != null)
+				return;
+			}
+			bool flag2 = false;
+			foreach (Thing item2 in sendAwayIfAllDespawned)
+			{
+				if (item2.MapHeld == transportShip.shipThing.Map || item2.MapHeld.PocketMapParent.sourceMap == transportShip.shipThing.Map || transportShip.TransporterComp.innerContainer.Contains(item2))
 				{
-					list.RemoveAll((Thing x) => x == null);
+					flag2 = true;
+					break;
 				}
-				List<Thing> list2 = this.sendAwayIfAnyDespawnedDownedOrDead;
-				if (list2 == null)
-				{
-					return;
-				}
-				list2.RemoveAll((Thing x) => x == null);
+			}
+			if (!flag2)
+			{
+				SendAway();
 			}
 		}
+	}
 
-		// Token: 0x04005BB2 RID: 23474
-		public bool leaveImmediatelyWhenSatisfied;
+	protected virtual void SendAway()
+	{
+		transportShip.SetNextJob(ShipJobMaker.MakeShipJob(ShipJobDefOf.FlyAway));
+		End();
+	}
 
-		// Token: 0x04005BB3 RID: 23475
-		public bool showGizmos = true;
-
-		// Token: 0x04005BB4 RID: 23476
-		public bool targetPlayerSettlement;
-
-		// Token: 0x04005BB5 RID: 23477
-		public List<Thing> sendAwayIfAllDespawned;
-
-		// Token: 0x04005BB6 RID: 23478
-		public List<Thing> sendAwayIfAnyDespawnedDownedOrDead;
-
-		// Token: 0x04005BB7 RID: 23479
-		private static readonly Texture2D DismissTex = ContentFinder<Texture2D>.Get("UI/Commands/DismissShuttle", true);
-
-		// Token: 0x04005BB8 RID: 23480
-		protected static readonly Texture2D SendCommandTex = CompLaunchable.LaunchCommandTex;
-
-		// Token: 0x04005BB9 RID: 23481
-		private const int CheckAllDespawnedInterval = 60;
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref leaveImmediatelyWhenSatisfied, "leaveImmediatelyWhenSatisfied", defaultValue: false);
+		Scribe_Values.Look(ref showGizmos, "showGizmos", defaultValue: true);
+		Scribe_Values.Look(ref targetPlayerSettlement, "targetPlayerSettlement", defaultValue: false);
+		Scribe_Collections.Look(ref sendAwayIfAllDespawned, "sendAwayIfAllDespawned", LookMode.Reference);
+		Scribe_Collections.Look(ref sendAwayIfAnyDespawnedDownedOrDead, "sendAwayIfAnyDespawned", LookMode.Reference);
+		if (Scribe.mode == LoadSaveMode.PostLoadInit)
+		{
+			sendAwayIfAllDespawned?.RemoveAll((Thing x) => x == null);
+			sendAwayIfAnyDespawnedDownedOrDead?.RemoveAll((Thing x) => x == null);
+		}
 	}
 }

@@ -1,68 +1,161 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_ControlMech : JobDriver
 {
-	// Token: 0x02001246 RID: 4678
-	public class JobDriver_ControlMech : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__6 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x170011D1 RID: 4561
-		// (get) Token: 0x0600726D RID: 29293 RVA: 0x00234A00 File Offset: 0x00232C00
-		private Pawn Mech
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_ControlMech _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (Pawn)this.job.GetTarget(TargetIndex.A).Thing;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170011D2 RID: 4562
-		// (get) Token: 0x0600726E RID: 29294 RVA: 0x00234A26 File Offset: 0x00232C26
-		private int MechControlTime
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return Mathf.RoundToInt(this.Mech.GetStatValue(StatDefOf.ControlTakingTime, true, -1) * 60f);
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600726F RID: 29295 RVA: 0x00234A45 File Offset: 0x00232C45
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__6(int _003C_003E1__state)
 		{
-			return this.pawn.Reserve(this.Mech, this.job, 1, -1, null, errorOnFailed, false);
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x06007270 RID: 29296 RVA: 0x00234A68 File Offset: 0x00232C68
-		protected override IEnumerable<Toil> MakeNewToils()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			if (!ModLister.CheckBiotech("Control mech"))
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_ControlMech CS_0024_003C_003E8__locals9 = _003C_003E4__this;
+			switch (num)
 			{
-				yield break;
-			}
-			this.FailOnDestroyedNullOrForbidden(TargetIndex.A);
-			this.FailOn(() => !MechanitorUtility.CanControlMech(this.pawn, this.Mech));
-			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch, false);
-			Toil toil = Toils_General.WaitWith(TargetIndex.A, this.MechControlTime, true, true, false, TargetIndex.A, PathEndMode.Touch).WithEffect(EffecterDefOf.ControlMech, TargetIndex.A, null);
-			yield return toil;
-			Toil toil2 = ToilMaker.MakeToil("MakeNewToils");
-			toil2.initAction = delegate()
-			{
-				Pawn overseer = this.Mech.GetOverseer();
-				if (overseer != null)
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (!ModLister.CheckBiotech("Control mech"))
 				{
-					overseer.relations.RemoveDirectRelation(PawnRelationDefOf.Overseer, this.Mech);
+					return false;
 				}
-				this.pawn.relations.AddDirectRelation(PawnRelationDefOf.Overseer, this.Mech);
-			};
-			toil2.PlaySoundAtEnd(SoundDefOf.ControlMech_Complete);
-			yield return toil2;
-			yield break;
+				CS_0024_003C_003E8__locals9.FailOnDestroyedNullOrForbidden(TargetIndex.A);
+				CS_0024_003C_003E8__locals9.FailOn(() => !MechanitorUtility.CanControlMech(CS_0024_003C_003E8__locals9.pawn, CS_0024_003C_003E8__locals9.Mech));
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+			{
+				_003C_003E1__state = -1;
+				Toil toil2 = Toils_General.WaitWith(TargetIndex.A, CS_0024_003C_003E8__locals9.MechControlTime, useProgressBar: true, maintainPosture: true, maintainSleep: false, TargetIndex.A).WithEffect(EffecterDefOf.ControlMech, TargetIndex.A, null);
+				_003C_003E2__current = toil2;
+				_003C_003E1__state = 2;
+				return true;
+			}
+			case 2:
+			{
+				_003C_003E1__state = -1;
+				Toil toil = ToilMaker.MakeToil("MakeNewToils");
+				toil.initAction = delegate
+				{
+					CS_0024_003C_003E8__locals9.Mech.GetOverseer()?.relations.RemoveDirectRelation(PawnRelationDefOf.Overseer, CS_0024_003C_003E8__locals9.Mech);
+					CS_0024_003C_003E8__locals9.pawn.relations.AddDirectRelation(PawnRelationDefOf.Overseer, CS_0024_003C_003E8__locals9.Mech);
+				};
+				toil.PlaySoundAtEnd(SoundDefOf.ControlMech_Complete);
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 3;
+				return true;
+			}
+			case 3:
+				_003C_003E1__state = -1;
+				return false;
+			}
 		}
 
-		// Token: 0x04004F1E RID: 20254
-		private const TargetIndex MechInd = TargetIndex.A;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__6 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__6(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private const TargetIndex MechInd = TargetIndex.A;
+
+	private Pawn Mech => (Pawn)job.GetTarget(TargetIndex.A).Thing;
+
+	private int MechControlTime => Mathf.RoundToInt(Mech.GetStatValue(StatDefOf.ControlTakingTime) * 60f);
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return pawn.Reserve(Mech, job, 1, -1, null, errorOnFailed);
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__6))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__6(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

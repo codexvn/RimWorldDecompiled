@@ -1,296 +1,369 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompAtomizer : CompThingContainer, INotifyHauledTo
 {
-	// Token: 0x02002BF9 RID: 11257
-	public class CompAtomizer : CompThingContainer, INotifyHauledTo
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass22_0
 	{
-		// Token: 0x1700279C RID: 10140
-		// (get) Token: 0x0600FC3B RID: 64571 RVA: 0x0049280A File Offset: 0x00490A0A
-		public new CompProperties_Atomizer Props
+		public int ticks;
+
+		public CompAtomizer _003C_003E4__this;
+
+		internal void _003CCompGetGizmosExtra_003Eb__3()
 		{
+			_003C_003E4__this.ticksAtomized = _003C_003E4__this.TicksPerAtomize - ticks;
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CCompGetGizmosExtra_003Ed__22 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompAtomizer _003C_003E4__this;
+
+		Gizmo IEnumerator<Gizmo>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				return (CompProperties_Atomizer)this.props;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700279D RID: 10141
-		// (get) Token: 0x0600FC3C RID: 64572 RVA: 0x00492817 File Offset: 0x00490A17
-		public bool AutoLoad
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.autoLoad;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700279E RID: 10142
-		// (get) Token: 0x0600FC3D RID: 64573 RVA: 0x0049281F File Offset: 0x00490A1F
-		public int SpaceLeft
+		[DebuggerHidden]
+		public _003CCompGetGizmosExtra_003Ed__22(int _003C_003E1__state)
 		{
-			get
-			{
-				return this.Props.stackLimit - base.TotalStackCount;
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x1700279F RID: 10143
-		// (get) Token: 0x0600FC3E RID: 64574 RVA: 0x00492833 File Offset: 0x00490A33
-		public int TicksPerAtomize
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			get
-			{
-				return this.Props.ticksPerAtomize;
-			}
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x170027A0 RID: 10144
-		// (get) Token: 0x0600FC3F RID: 64575 RVA: 0x00492840 File Offset: 0x00490A40
-		public int TicksLeftUntilAllAtomized
+		private bool MoveNext()
 		{
-			get
+			int num = _003C_003E1__state;
+			CompAtomizer CS_0024_003C_003E8__locals20 = _003C_003E4__this;
+			switch (num)
 			{
-				return base.TotalStackCount * this.TicksPerAtomize - this.ticksAtomized;
-			}
-		}
-
-		// Token: 0x170027A1 RID: 10145
-		// (get) Token: 0x0600FC40 RID: 64576 RVA: 0x00492856 File Offset: 0x00490A56
-		public float FillPercent
-		{
-			get
-			{
-				return (float)base.TotalStackCount / (float)this.Props.stackLimit;
-			}
-		}
-
-		// Token: 0x170027A2 RID: 10146
-		// (get) Token: 0x0600FC41 RID: 64577 RVA: 0x0049286C File Offset: 0x00490A6C
-		private Graphic ContentsGraphic
-		{
-			get
-			{
-				if (this.contentsGraphic == null)
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (CS_0024_003C_003E8__locals20.parent.Faction == Faction.OfPlayer)
 				{
-					ThingDef thingDef = this.Props.thingDef;
-					this.contentsGraphic = thingDef.graphic.GetColoredVersion(thingDef.graphic.Shader, thingDef.graphic.color, thingDef.graphic.colorTwo);
+					Command_Toggle command_Toggle = new Command_Toggle
+					{
+						defaultLabel = "CommandAutoLoad".Translate(Find.ActiveLanguageWorker.Pluralize(CS_0024_003C_003E8__locals20.Props.thingDef.label)),
+						defaultDesc = "CommandAutoLoadDesc".Translate(Find.ActiveLanguageWorker.Pluralize(CS_0024_003C_003E8__locals20.Props.thingDef.label)),
+						icon = (CS_0024_003C_003E8__locals20.autoLoad ? TexCommand.ForbidOff : TexCommand.ForbidOn),
+						hotKey = KeyBindingDefOf.Command_ItemForbid,
+						isActive = () => CS_0024_003C_003E8__locals20.autoLoad
+					};
+					command_Toggle.toggleAction = (Action)Delegate.Combine(command_Toggle.toggleAction, (Action)delegate
+					{
+						CS_0024_003C_003E8__locals20.autoLoad = !CS_0024_003C_003E8__locals20.autoLoad;
+					});
+					_003C_003E2__current = command_Toggle;
+					_003C_003E1__state = 1;
+					return true;
 				}
-				return this.contentsGraphic;
-			}
-		}
-
-		// Token: 0x0600FC42 RID: 64578 RVA: 0x004928C5 File Offset: 0x00490AC5
-		public override void PostSpawnSetup(bool respawningAfterLoad)
-		{
-			if (!ModLister.CheckBiotech("Atomizer"))
+				goto IL_01cc;
+			case 1:
 			{
-				this.parent.Destroy(DestroyMode.Vanish);
-				return;
-			}
-			base.PostSpawnSetup(respawningAfterLoad);
-			this.powerComp = this.parent.TryGetComp<CompPowerTrader>();
-		}
-
-		// Token: 0x0600FC43 RID: 64579 RVA: 0x004928F8 File Offset: 0x00490AF8
-		public override bool Accepts(Thing thing)
-		{
-			return base.Accepts(thing) && thing.def == this.Props.thingDef;
-		}
-
-		// Token: 0x0600FC44 RID: 64580 RVA: 0x00492918 File Offset: 0x00490B18
-		public override IEnumerable<Gizmo> CompGetGizmosExtra()
-		{
-			if (this.parent.Faction == Faction.OfPlayer)
-			{
-				Command_Toggle command_Toggle = new Command_Toggle();
-				command_Toggle.defaultLabel = "CommandAutoLoad".Translate(Find.ActiveLanguageWorker.Pluralize(this.Props.thingDef.label, -1));
-				command_Toggle.defaultDesc = "CommandAutoLoadDesc".Translate(Find.ActiveLanguageWorker.Pluralize(this.Props.thingDef.label, -1));
-				command_Toggle.icon = (this.autoLoad ? TexCommand.ForbidOff : TexCommand.ForbidOn);
-				command_Toggle.hotKey = KeyBindingDefOf.Command_ItemForbid;
-				command_Toggle.isActive = (() => this.autoLoad);
-				Command_Toggle command_Toggle2 = command_Toggle;
-				command_Toggle2.toggleAction = (Action)Delegate.Combine(command_Toggle2.toggleAction, new Action(delegate()
+				_003C_003E1__state = -1;
+				Command_Action command_Action = new Command_Action
 				{
-					this.autoLoad = !this.autoLoad;
-				}));
-				yield return command_Toggle;
-				Command_Action command_Action = new Command_Action();
-				command_Action.defaultLabel = "CommandEjectContents".Translate();
-				command_Action.defaultDesc = "CommandEjectContentsDesc".Translate(Find.ActiveLanguageWorker.Pluralize(this.Props.thingDef.label, -1));
-				command_Action.icon = this.EjectContentsIcon.Texture;
-				command_Action.Disabled = base.Empty;
-				Command_Action command_Action2 = command_Action;
-				command_Action2.action = (Action)Delegate.Combine(command_Action2.action, new Action(this.EjectContents));
-				yield return command_Action;
+					defaultLabel = "CommandEjectContents".Translate(),
+					defaultDesc = "CommandEjectContentsDesc".Translate(Find.ActiveLanguageWorker.Pluralize(CS_0024_003C_003E8__locals20.Props.thingDef.label)),
+					icon = CS_0024_003C_003E8__locals20.EjectContentsIcon.Texture,
+					Disabled = CS_0024_003C_003E8__locals20.Empty
+				};
+				command_Action.action = (Action)Delegate.Combine(command_Action.action, new Action(CS_0024_003C_003E8__locals20.EjectContents));
+				_003C_003E2__current = command_Action;
+				_003C_003E1__state = 2;
+				return true;
 			}
-			if (DebugSettings.ShowDevGizmos)
-			{
-				Command_Action command_Action3 = new Command_Action();
-				command_Action3.defaultLabel = "DEV: Atomize";
-				command_Action3.Disabled = base.Empty;
-				Command_Action command_Action4 = command_Action3;
-				command_Action4.action = (Action)Delegate.Combine(command_Action4.action, new Action(this.DoAtomize));
-				yield return command_Action3;
-				yield return new Command_Action
+			case 2:
+				_003C_003E1__state = -1;
+				goto IL_01cc;
+			case 3:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = new Command_Action
 				{
 					defaultLabel = "DEV: Set next atomization",
-					action = delegate()
+					action = delegate
 					{
 						List<FloatMenuOption> list = new List<FloatMenuOption>();
-						int[] array = new int[]
+						int[] array = new int[11]
 						{
-							60,
-							120,
-							180,
-							240,
-							300,
-							600,
-							900,
-							1200,
-							1500,
-							1800,
+							60, 120, 180, 240, 300, 600, 900, 1200, 1500, 1800,
 							3600
 						};
 						for (int i = 0; i < array.Length; i++)
 						{
-							int ticks = array[i];
-							list.Add(new FloatMenuOption(ticks.ToStringSecondsFromTicks("F0"), delegate()
+							_003C_003Ec__DisplayClass22_0 CS_0024_003C_003E8__locals6 = new _003C_003Ec__DisplayClass22_0
 							{
-								this.ticksAtomized = this.TicksPerAtomize - ticks;
-							}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0));
+								_003C_003E4__this = CS_0024_003C_003E8__locals20,
+								ticks = array[i]
+							};
+							list.Add(new FloatMenuOption(CS_0024_003C_003E8__locals6.ticks.ToStringSecondsFromTicks("F0"), delegate
+							{
+								CS_0024_003C_003E8__locals6._003C_003E4__this.ticksAtomized = CS_0024_003C_003E8__locals6._003C_003E4__this.TicksPerAtomize - CS_0024_003C_003E8__locals6.ticks;
+							}));
 						}
 						Find.WindowStack.Add(new FloatMenu(list));
 					},
-					Disabled = base.Empty
+					Disabled = CS_0024_003C_003E8__locals20.Empty
+				};
+				_003C_003E1__state = 4;
+				return true;
+			case 4:
+				{
+					_003C_003E1__state = -1;
+					break;
+				}
+				IL_01cc:
+				if (DebugSettings.ShowDevGizmos)
+				{
+					Command_Action command_Action2 = new Command_Action
+					{
+						defaultLabel = "DEV: Atomize",
+						Disabled = CS_0024_003C_003E8__locals20.Empty
+					};
+					command_Action2.action = (Action)Delegate.Combine(command_Action2.action, new Action(CS_0024_003C_003E8__locals20.DoAtomize));
+					_003C_003E2__current = command_Action2;
+					_003C_003E1__state = 3;
+					return true;
+				}
+				break;
+			}
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CCompGetGizmosExtra_003Ed__22 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CCompGetGizmosExtra_003Ed__22(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
 				};
 			}
-			yield break;
+			return result;
 		}
 
-		// Token: 0x0600FC45 RID: 64581 RVA: 0x00492928 File Offset: 0x00490B28
-		private void DoAtomize()
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			Thing containedThing = base.ContainedThing;
-			containedThing.stackCount--;
-			if (this.Props.resolveEffecter != null)
-			{
-				this.parent.MapHeld.effecterMaintainer.AddEffecterToMaintain(this.Props.resolveEffecter.Spawn(this.parent, this.parent.MapHeld, 1f), this.parent, this.Props.resolveEffecterTicks);
-			}
-			if (containedThing.stackCount <= 0)
-			{
-				this.innerContainer.Remove(containedThing);
-				containedThing.Destroy(DestroyMode.Vanish);
-			}
-			this.ticksAtomized = 0;
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x0600FC46 RID: 64582 RVA: 0x004929C7 File Offset: 0x00490BC7
-		private void EjectContents()
+	private CachedTexture EjectContentsIcon = new CachedTexture("UI/Icons/EjectContentFromAtomizer");
+
+	private bool autoLoad = true;
+
+	private int ticksAtomized;
+
+	private CompPowerTrader powerComp;
+
+	private Effecter workingEffecter;
+
+	private Graphic contentsGraphic;
+
+	public new CompProperties_Atomizer Props => (CompProperties_Atomizer)props;
+
+	public bool AutoLoad => autoLoad;
+
+	public int SpaceLeft => Props.stackLimit - base.TotalStackCount;
+
+	public int TicksPerAtomize => Props.ticksPerAtomize;
+
+	public int TicksLeftUntilAllAtomized => base.TotalStackCount * TicksPerAtomize - ticksAtomized;
+
+	public float FillPercent => (float)base.TotalStackCount / (float)Props.stackLimit;
+
+	private Graphic ContentsGraphic
+	{
+		get
 		{
-			this.innerContainer.TryDropAll(this.parent.InteractionCell, this.parent.Map, ThingPlaceMode.Near, null, null, true);
-			this.ticksAtomized = 0;
-		}
-
-		// Token: 0x0600FC47 RID: 64583 RVA: 0x004929F6 File Offset: 0x00490BF6
-		public void Notify_HauledTo(Pawn hauler, Thing thing, int count)
-		{
-			this.Props.materialsAddedSound.PlayOneShot(this.parent);
-		}
-
-		// Token: 0x0600FC48 RID: 64584 RVA: 0x00492A14 File Offset: 0x00490C14
-		public override void PostDraw()
-		{
-			base.PostDraw();
-			if (!this.autoLoad)
+			if (contentsGraphic == null)
 			{
-				this.parent.Map.overlayDrawer.DrawOverlay(this.parent, OverlayTypes.ForbiddenAtomizer);
+				ThingDef thingDef = Props.thingDef;
+				contentsGraphic = thingDef.graphic.GetColoredVersion(thingDef.graphic.Shader, thingDef.graphic.color, thingDef.graphic.colorTwo);
 			}
-			if (!base.Empty)
-			{
-				Vector3 loc = this.parent.DrawPos + this.Props.contentsDrawOffset;
-				loc.y -= 0.03658537f;
-				Graphic_StackCount graphic_StackCount = this.ContentsGraphic as Graphic_StackCount;
-				if (graphic_StackCount != null)
-				{
-					graphic_StackCount.SubGraphicForStackCount(Mathf.Min(base.TotalStackCount, this.Props.thingDef.stackLimit), this.Props.thingDef).Draw(loc, Rot4.North, this.parent, 0f);
-					return;
-				}
-				this.ContentsGraphic.Draw(loc, Rot4.North, this.parent, 0f);
-			}
+			return contentsGraphic;
 		}
+	}
 
-		// Token: 0x0600FC49 RID: 64585 RVA: 0x00492AF4 File Offset: 0x00490CF4
-		public override void CompTick()
+	public override void PostSpawnSetup(bool respawningAfterLoad)
+	{
+		if (!ModLister.CheckBiotech("Atomizer"))
 		{
-			base.CompTick();
-			if (!base.Empty && this.powerComp.PowerOn)
-			{
-				this.ticksAtomized++;
-				if (this.ticksAtomized >= this.TicksPerAtomize)
-				{
-					this.DoAtomize();
-				}
-				if (this.workingEffecter == null)
-				{
-					this.workingEffecter = this.Props.workingEffecter.Spawn(this.parent, this.parent.Map, 1f);
-				}
-				this.workingEffecter.EffectTick(this.parent, this.parent);
-				return;
-			}
-			Effecter effecter = this.workingEffecter;
-			if (effecter != null)
-			{
-				effecter.Cleanup();
-			}
-			this.workingEffecter = null;
+			parent.Destroy();
+			return;
 		}
+		base.PostSpawnSetup(respawningAfterLoad);
+		powerComp = parent.TryGetComp<CompPowerTrader>();
+	}
 
-		// Token: 0x0600FC4A RID: 64586 RVA: 0x00492BAF File Offset: 0x00490DAF
-		public override void PostExposeData()
+	public override bool Accepts(Thing thing)
+	{
+		if (base.Accepts(thing))
 		{
-			base.PostExposeData();
-			Scribe_Values.Look<bool>(ref this.autoLoad, "autoLoad", true, false);
-			Scribe_Values.Look<int>(ref this.ticksAtomized, "ticksAtomized", 0, false);
+			return thing.def == Props.thingDef;
 		}
+		return false;
+	}
 
-		// Token: 0x0600FC4B RID: 64587 RVA: 0x00492BDC File Offset: 0x00490DDC
-		public override string CompInspectStringExtra()
+	[IteratorStateMachine(typeof(_003CCompGetGizmosExtra_003Ed__22))]
+	public override IEnumerable<Gizmo> CompGetGizmosExtra()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CCompGetGizmosExtra_003Ed__22(-2)
 		{
-			TaggedString t = "";
-			if (!base.Empty)
-			{
-				t += "ContainedThings".Translate(this.Props.thingDef) + ": " + base.TotalStackCount.ToString() + " / " + this.Props.stackLimit.ToString();
-				t += "\n" + "FinishesIn".Translate() + ": " + "PeriodDays".Translate(((float)this.TicksLeftUntilAllAtomized / 60000f).ToString("F1"));
-				t += "\n" + "DurationUntilNextAtomization".Translate() + ": " + (this.TicksPerAtomize - this.ticksAtomized).ToStringTicksToPeriod(true, false, true, true, false);
-				if (!this.powerComp.PowerOn)
-				{
-					t += " (" + "Paused".Translate() + ")";
-				}
-			}
-			return t.Resolve();
+			_003C_003E4__this = this
+		};
+	}
+
+	private void DoAtomize()
+	{
+		Thing containedThing = base.ContainedThing;
+		containedThing.stackCount--;
+		if (Props.resolveEffecter != null)
+		{
+			parent.MapHeld.effecterMaintainer.AddEffecterToMaintain(Props.resolveEffecter.Spawn(parent, parent.MapHeld), parent, Props.resolveEffecterTicks);
 		}
+		if (containedThing.stackCount <= 0)
+		{
+			innerContainer.Remove(containedThing);
+			containedThing.Destroy();
+		}
+		ticksAtomized = 0;
+	}
 
-		// Token: 0x0400A542 RID: 42306
-		private CachedTexture EjectContentsIcon = new CachedTexture("UI/Icons/EjectContentFromAtomizer");
+	private void EjectContents()
+	{
+		innerContainer.TryDropAll(parent.InteractionCell, parent.Map, ThingPlaceMode.Near);
+		ticksAtomized = 0;
+	}
 
-		// Token: 0x0400A543 RID: 42307
-		private bool autoLoad = true;
+	public void Notify_HauledTo(Pawn hauler, Thing thing, int count)
+	{
+		Props.materialsAddedSound.PlayOneShot(parent);
+	}
 
-		// Token: 0x0400A544 RID: 42308
-		private int ticksAtomized;
+	public override void PostDraw()
+	{
+		base.PostDraw();
+		if (!autoLoad)
+		{
+			parent.Map.overlayDrawer.DrawOverlay(parent, OverlayTypes.ForbiddenAtomizer);
+		}
+		if (!base.Empty)
+		{
+			Vector3 loc = parent.DrawPos + Props.contentsDrawOffset;
+			loc.y -= 0.03658537f;
+			if (ContentsGraphic is Graphic_StackCount graphic_StackCount)
+			{
+				graphic_StackCount.SubGraphicForStackCount(Mathf.Min(base.TotalStackCount, Props.thingDef.stackLimit), Props.thingDef).Draw(loc, Rot4.North, parent);
+			}
+			else
+			{
+				ContentsGraphic.Draw(loc, Rot4.North, parent);
+			}
+		}
+	}
 
-		// Token: 0x0400A545 RID: 42309
-		private CompPowerTrader powerComp;
+	public override void CompTick()
+	{
+		base.CompTick();
+		if (!base.Empty && powerComp.PowerOn)
+		{
+			ticksAtomized++;
+			if (ticksAtomized >= TicksPerAtomize)
+			{
+				DoAtomize();
+			}
+			if (workingEffecter == null)
+			{
+				workingEffecter = Props.workingEffecter.Spawn(parent, parent.Map);
+			}
+			workingEffecter.EffectTick(parent, parent);
+		}
+		else
+		{
+			workingEffecter?.Cleanup();
+			workingEffecter = null;
+		}
+	}
 
-		// Token: 0x0400A546 RID: 42310
-		private Effecter workingEffecter;
+	public override void PostExposeData()
+	{
+		base.PostExposeData();
+		Scribe_Values.Look(ref autoLoad, "autoLoad", defaultValue: true);
+		Scribe_Values.Look(ref ticksAtomized, "ticksAtomized", 0);
+	}
 
-		// Token: 0x0400A547 RID: 42311
-		private Graphic contentsGraphic;
+	public override string CompInspectStringExtra()
+	{
+		TaggedString taggedString = "";
+		if (!base.Empty)
+		{
+			taggedString += string.Concat("ContainedThings".Translate(Props.thingDef) + ": ", base.TotalStackCount.ToString(), " / ", Props.stackLimit.ToString());
+			taggedString += "\n" + "FinishesIn".Translate() + ": " + "PeriodDays".Translate(((float)TicksLeftUntilAllAtomized / 60000f).ToString("F1"));
+			taggedString += "\n" + "DurationUntilNextAtomization".Translate() + ": " + (TicksPerAtomize - ticksAtomized).ToStringTicksToPeriod();
+			if (!powerComp.PowerOn)
+			{
+				taggedString += " (" + "Paused".Translate() + ")";
+			}
+		}
+		return taggedString.Resolve();
 	}
 }

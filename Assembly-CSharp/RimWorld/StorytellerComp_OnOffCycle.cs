@@ -1,120 +1,226 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class StorytellerComp_OnOffCycle : StorytellerComp
 {
-	// Token: 0x02001E57 RID: 7767
-	public class StorytellerComp_OnOffCycle : StorytellerComp
+	[CompilerGenerated]
+	private sealed class _003CMakeIntervalIncidents_003Ed__2 : IEnumerable<FiringIncident>, IEnumerable, IEnumerator<FiringIncident>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001A5B RID: 6747
-		// (get) Token: 0x0600ACB0 RID: 44208 RVA: 0x00314F4F File Offset: 0x0031314F
-		protected StorytellerCompProperties_OnOffCycle Props
+		private int _003C_003E1__state;
+
+		private FiringIncident _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public StorytellerComp_OnOffCycle _003C_003E4__this;
+
+		private IIncidentTarget target;
+
+		public IIncidentTarget _003C_003E3__target;
+
+		private int _003CincCount_003E5__2;
+
+		private int _003Ci_003E5__3;
+
+		FiringIncident IEnumerator<FiringIncident>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (StorytellerCompProperties_OnOffCycle)this.props;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600ACB1 RID: 44209 RVA: 0x00314F5C File Offset: 0x0031315C
-		public override IEnumerable<FiringIncident> MakeIntervalIncidents(IIncidentTarget target)
+		object IEnumerator.Current
 		{
-			float num = 1f;
-			if (this.Props.acceptFractionByDaysPassedCurve != null)
+			[DebuggerHidden]
+			get
 			{
-				num *= this.Props.acceptFractionByDaysPassedCurve.Evaluate(GenDate.DaysPassedSinceSettleFloat);
+				return _003C_003E2__current;
 			}
-			if (this.Props.acceptPercentFactorPerThreatPointsCurve != null)
+		}
+
+		[DebuggerHidden]
+		public _003CMakeIntervalIncidents_003Ed__2(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			StorytellerComp_OnOffCycle storytellerComp_OnOffCycle = _003C_003E4__this;
+			if (num != 0)
 			{
-				num *= this.Props.acceptPercentFactorPerThreatPointsCurve.Evaluate(StorytellerUtility.DefaultThreatPointsNow(target));
+				if (num != 1)
+				{
+					return false;
+				}
+				_003C_003E1__state = -1;
+				goto IL_020a;
 			}
-			if (this.Props.acceptPercentFactorPerProgressScoreCurve != null)
+			_003C_003E1__state = -1;
+			float num2 = 1f;
+			if (storytellerComp_OnOffCycle.Props.acceptFractionByDaysPassedCurve != null)
 			{
-				num *= this.Props.acceptPercentFactorPerProgressScoreCurve.Evaluate(StorytellerUtility.GetProgressScore(target));
+				num2 *= storytellerComp_OnOffCycle.Props.acceptFractionByDaysPassedCurve.Evaluate(GenDate.DaysPassedSinceSettleFloat);
 			}
-			float onDays = this.Props.onDays;
-			float offDays = this.Props.offDays;
-			if ((this.Props.onDaysNoTreeConnectors != 0f || this.Props.offDaysNoTreeConnectors != 0f) && Faction.OfPlayer.ideos != null)
+			if (storytellerComp_OnOffCycle.Props.acceptPercentFactorPerThreatPointsCurve != null)
+			{
+				num2 *= storytellerComp_OnOffCycle.Props.acceptPercentFactorPerThreatPointsCurve.Evaluate(StorytellerUtility.DefaultThreatPointsNow(target));
+			}
+			if (storytellerComp_OnOffCycle.Props.acceptPercentFactorPerProgressScoreCurve != null)
+			{
+				num2 *= storytellerComp_OnOffCycle.Props.acceptPercentFactorPerProgressScoreCurve.Evaluate(StorytellerUtility.GetProgressScore(target));
+			}
+			float onDays = storytellerComp_OnOffCycle.Props.onDays;
+			float offDays = storytellerComp_OnOffCycle.Props.offDays;
+			if ((storytellerComp_OnOffCycle.Props.onDaysNoTreeConnectors != 0f || storytellerComp_OnOffCycle.Props.offDaysNoTreeConnectors != 0f) && Faction.OfPlayer.ideos != null)
 			{
 				bool flag = false;
-				using (IEnumerator<Ideo> enumerator = Faction.OfPlayer.ideos.AllIdeos.GetEnumerator())
+				foreach (Ideo allIdeo in Faction.OfPlayer.ideos.AllIdeos)
 				{
-					while (enumerator.MoveNext())
+					if (allIdeo.HasMeme(MemeDefOf.TreeConnection))
 					{
-						if (enumerator.Current.HasMeme(MemeDefOf.TreeConnection))
-						{
-							flag = true;
-							break;
-						}
+						flag = true;
+						break;
 					}
 				}
 				if (!flag)
 				{
-					if (this.Props.onDaysNoTreeConnectors != 0f)
+					if (storytellerComp_OnOffCycle.Props.onDaysNoTreeConnectors != 0f)
 					{
-						onDays = this.Props.onDaysNoTreeConnectors;
+						onDays = storytellerComp_OnOffCycle.Props.onDaysNoTreeConnectors;
 					}
-					if (this.Props.offDaysNoTreeConnectors != 0f)
+					if (storytellerComp_OnOffCycle.Props.offDaysNoTreeConnectors != 0f)
 					{
-						offDays = this.Props.offDaysNoTreeConnectors;
+						offDays = storytellerComp_OnOffCycle.Props.offDaysNoTreeConnectors;
 					}
 				}
 			}
-			int incCount = IncidentCycleUtility.IncidentCountThisInterval(target, Find.Storyteller.storytellerComps.IndexOf(this), this.Props.minDaysPassed, onDays, offDays, this.Props.minSpacingDays, this.Props.numIncidentsRange.min, this.Props.numIncidentsRange.max, num);
-			int num2;
-			for (int i = 0; i < incCount; i = num2 + 1)
+			_003CincCount_003E5__2 = IncidentCycleUtility.IncidentCountThisInterval(target, Find.Storyteller.storytellerComps.IndexOf(storytellerComp_OnOffCycle), storytellerComp_OnOffCycle.Props.minDaysPassed, onDays, offDays, storytellerComp_OnOffCycle.Props.minSpacingDays, storytellerComp_OnOffCycle.Props.numIncidentsRange.min, storytellerComp_OnOffCycle.Props.numIncidentsRange.max, num2);
+			_003Ci_003E5__3 = 0;
+			goto IL_021c;
+			IL_021c:
+			if (_003Ci_003E5__3 < _003CincCount_003E5__2)
 			{
-				FiringIncident firingIncident = this.GenerateIncident(target);
+				FiringIncident firingIncident = storytellerComp_OnOffCycle.GenerateIncident(target);
 				if (firingIncident != null)
 				{
-					yield return firingIncident;
+					_003C_003E2__current = firingIncident;
+					_003C_003E1__state = 1;
+					return true;
 				}
-				num2 = i;
+				goto IL_020a;
 			}
-			yield break;
+			return false;
+			IL_020a:
+			_003Ci_003E5__3++;
+			goto IL_021c;
 		}
 
-		// Token: 0x0600ACB2 RID: 44210 RVA: 0x00314F74 File Offset: 0x00313174
-		private FiringIncident GenerateIncident(IIncidentTarget target)
+		bool IEnumerator.MoveNext()
 		{
-			if (this.Props.IncidentCategory == null)
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<FiringIncident> IEnumerable<FiringIncident>.GetEnumerator()
+		{
+			_003CMakeIntervalIncidents_003Ed__2 _003CMakeIntervalIncidents_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CMakeIntervalIncidents_003Ed__ = this;
+			}
+			else
+			{
+				_003CMakeIntervalIncidents_003Ed__ = new _003CMakeIntervalIncidents_003Ed__2(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CMakeIntervalIncidents_003Ed__.target = _003C_003E3__target;
+			return _003CMakeIntervalIncidents_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<FiringIncident>)this).GetEnumerator();
+		}
+	}
+
+	protected StorytellerCompProperties_OnOffCycle Props => (StorytellerCompProperties_OnOffCycle)props;
+
+	[IteratorStateMachine(typeof(_003CMakeIntervalIncidents_003Ed__2))]
+	public override IEnumerable<FiringIncident> MakeIntervalIncidents(IIncidentTarget target)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeIntervalIncidents_003Ed__2(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__target = target
+		};
+	}
+
+	private FiringIncident GenerateIncident(IIncidentTarget target)
+	{
+		if (Props.IncidentCategory == null)
+		{
+			return null;
+		}
+		IncidentParms parms = GenerateParms(Props.IncidentCategory, target);
+		IncidentDef result;
+		if ((float)GenDate.DaysPassedSinceSettle < Props.forceRaidEnemyBeforeDaysPassed)
+		{
+			if (!IncidentDefOf.RaidEnemy.Worker.CanFireNow(parms))
 			{
 				return null;
 			}
-			IncidentParms parms = this.GenerateParms(this.Props.IncidentCategory, target);
-			IncidentDef def2;
-			if ((float)GenDate.DaysPassedSinceSettle < this.Props.forceRaidEnemyBeforeDaysPassed)
-			{
-				if (!IncidentDefOf.RaidEnemy.Worker.CanFireNow(parms))
-				{
-					return null;
-				}
-				def2 = IncidentDefOf.RaidEnemy;
-			}
-			else if (this.Props.incident != null)
-			{
-				if (!this.Props.incident.Worker.CanFireNow(parms))
-				{
-					return null;
-				}
-				def2 = this.Props.incident;
-			}
-			else if (!base.UsableIncidentsInCategory(this.Props.IncidentCategory, parms).TryRandomElementByWeight((IncidentDef def) => this.IncidentChanceFinal(def, target), out def2))
+			result = IncidentDefOf.RaidEnemy;
+		}
+		else if (Props.incident != null)
+		{
+			if (!Props.incident.Worker.CanFireNow(parms))
 			{
 				return null;
 			}
-			return new FiringIncident(def2, this, parms);
+			result = Props.incident;
 		}
-
-		// Token: 0x0600ACB3 RID: 44211 RVA: 0x00315054 File Offset: 0x00313254
-		public override string ToString()
+		else if (!UsableIncidentsInCategory(Props.IncidentCategory, parms).TryRandomElementByWeight((IncidentDef def) => IncidentChanceFinal(def, target), out result))
 		{
-			if (this.Props.incident == null && this.Props.IncidentCategory == null)
-			{
-				return "";
-			}
-			return base.ToString() + " (" + ((this.Props.incident != null) ? this.Props.incident.defName : this.Props.IncidentCategory.defName) + ")";
+			return null;
 		}
+		return new FiringIncident(result, this, parms);
+	}
+
+	public override string ToString()
+	{
+		if (Props.incident == null && Props.IncidentCategory == null)
+		{
+			return "";
+		}
+		return base.ToString() + " (" + ((Props.incident != null) ? Props.incident.defName : Props.IncidentCategory.defName) + ")";
 	}
 }

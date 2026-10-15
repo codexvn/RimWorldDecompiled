@@ -1,124 +1,231 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_GiveToPackAnimal : JobDriver
 {
-	// Token: 0x0200113D RID: 4413
-	public class JobDriver_GiveToPackAnimal : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__7 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700109D RID: 4253
-		// (get) Token: 0x06006BAF RID: 27567 RVA: 0x0021DBF0 File Offset: 0x0021BDF0
-		private Thing Item
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_GiveToPackAnimal _003C_003E4__this;
+
+		private Toil _003CfindNearestCarrier_003E5__2;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.job.GetTarget(TargetIndex.A).Thing;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700109E RID: 4254
-		// (get) Token: 0x06006BB0 RID: 27568 RVA: 0x0021DC14 File Offset: 0x0021BE14
-		private Pawn Animal
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (Pawn)this.job.GetTarget(TargetIndex.B).Thing;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06006BB1 RID: 27569 RVA: 0x0021DC3A File Offset: 0x0021BE3A
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__7(int _003C_003E1__state)
 		{
-			return this.pawn.Reserve(this.Item, this.job, 1, -1, null, errorOnFailed, false);
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x06006BB2 RID: 27570 RVA: 0x0021DC5D File Offset: 0x0021BE5D
-		protected override IEnumerable<Toil> MakeNewToils()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.ClosestTouch, false);
-			yield return Toils_Haul.StartCarryThing(TargetIndex.A, false, false, false, true, false);
-			Toil findNearestCarrier = this.FindCarrierToil();
-			yield return findNearestCarrier;
-			yield return Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.Touch, false).FailOnDespawnedNullOrForbidden(TargetIndex.B).JumpIf(() => !this.CanCarryAtLeastOne(this.Animal), findNearestCarrier);
-			yield return this.GiveToCarrierAsMuchAsPossibleToil();
-			yield return Toils_Jump.JumpIf(findNearestCarrier, () => this.pawn.carryTracker.CarriedThing != null);
-			yield break;
+			_003CfindNearestCarrier_003E5__2 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x06006BB3 RID: 27571 RVA: 0x0021DC6D File Offset: 0x0021BE6D
-		private Toil FindCarrierToil()
+		private bool MoveNext()
 		{
-			Toil toil = ToilMaker.MakeToil("FindCarrierToil");
-			toil.initAction = delegate()
+			int num = _003C_003E1__state;
+			JobDriver_GiveToPackAnimal CS_0024_003C_003E8__locals5 = _003C_003E4__this;
+			switch (num)
 			{
-				Pawn pawn = this.FindCarrier();
-				if (pawn == null)
-				{
-					this.pawn.jobs.EndCurrentJob(JobCondition.Incompletable, true, true);
-					return;
-				}
-				this.job.SetTarget(TargetIndex.B, pawn);
-			};
-			return toil;
-		}
-
-		// Token: 0x06006BB4 RID: 27572 RVA: 0x0021DC8C File Offset: 0x0021BE8C
-		private Pawn FindCarrier()
-		{
-			IEnumerable<Pawn> enumerable = GiveToPackAnimalUtility.CarrierCandidatesFor(this.pawn);
-			Pawn animal = this.Animal;
-			if (animal != null && enumerable.Contains(animal) && animal.RaceProps.packAnimal && this.CanCarryAtLeastOne(animal))
-			{
-				return animal;
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.ClosestTouch);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Haul.StartCarryThing(TargetIndex.A);
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				_003CfindNearestCarrier_003E5__2 = CS_0024_003C_003E8__locals5.FindCarrierToil();
+				_003C_003E2__current = _003CfindNearestCarrier_003E5__2;
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.Touch).FailOnDespawnedNullOrForbidden(TargetIndex.B).JumpIf(() => !CS_0024_003C_003E8__locals5.CanCarryAtLeastOne(CS_0024_003C_003E8__locals5.Animal), _003CfindNearestCarrier_003E5__2);
+				_003C_003E1__state = 4;
+				return true;
+			case 4:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = CS_0024_003C_003E8__locals5.GiveToCarrierAsMuchAsPossibleToil();
+				_003C_003E1__state = 5;
+				return true;
+			case 5:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Jump.JumpIf(_003CfindNearestCarrier_003E5__2, () => CS_0024_003C_003E8__locals5.pawn.carryTracker.CarriedThing != null);
+				_003C_003E1__state = 6;
+				return true;
+			case 6:
+				_003C_003E1__state = -1;
+				return false;
 			}
-			Pawn pawn = null;
-			float num = -1f;
-			foreach (Pawn pawn2 in enumerable)
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__7 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				if (pawn2.RaceProps.packAnimal && this.CanCarryAtLeastOne(pawn2))
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__7(0)
 				{
-					float num2 = (float)pawn2.Position.DistanceToSquared(this.pawn.Position);
-					if (pawn == null || num2 < num)
-					{
-						pawn = pawn2;
-						num = num2;
-					}
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private const TargetIndex ItemInd = TargetIndex.A;
+
+	private const TargetIndex AnimalInd = TargetIndex.B;
+
+	private Thing Item => job.GetTarget(TargetIndex.A).Thing;
+
+	private Pawn Animal => (Pawn)job.GetTarget(TargetIndex.B).Thing;
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return pawn.Reserve(Item, job, 1, -1, null, errorOnFailed);
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__7))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__7(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	private Toil FindCarrierToil()
+	{
+		Toil toil = ToilMaker.MakeToil("FindCarrierToil");
+		toil.initAction = delegate
+		{
+			Pawn pawn = FindCarrier();
+			if (pawn == null)
+			{
+				base.pawn.jobs.EndCurrentJob(JobCondition.Incompletable);
+			}
+			else
+			{
+				job.SetTarget(TargetIndex.B, pawn);
+			}
+		};
+		return toil;
+	}
+
+	private Pawn FindCarrier()
+	{
+		IEnumerable<Pawn> enumerable = GiveToPackAnimalUtility.CarrierCandidatesFor(base.pawn);
+		Pawn animal = Animal;
+		if (animal != null && enumerable.Contains(animal) && animal.RaceProps.packAnimal && CanCarryAtLeastOne(animal))
+		{
+			return animal;
+		}
+		Pawn pawn = null;
+		float num = -1f;
+		foreach (Pawn item in enumerable)
+		{
+			if (item.RaceProps.packAnimal && CanCarryAtLeastOne(item))
+			{
+				float num2 = item.Position.DistanceToSquared(base.pawn.Position);
+				if (pawn == null || num2 < num)
+				{
+					pawn = item;
+					num = num2;
 				}
 			}
-			return pawn;
 		}
+		return pawn;
+	}
 
-		// Token: 0x06006BB5 RID: 27573 RVA: 0x0021DD54 File Offset: 0x0021BF54
-		private bool CanCarryAtLeastOne(Pawn carrier)
-		{
-			return !MassUtility.WillBeOverEncumberedAfterPickingUp(carrier, this.Item, 1);
-		}
+	private bool CanCarryAtLeastOne(Pawn carrier)
+	{
+		return !MassUtility.WillBeOverEncumberedAfterPickingUp(carrier, Item, 1);
+	}
 
-		// Token: 0x06006BB6 RID: 27574 RVA: 0x0021DD66 File Offset: 0x0021BF66
-		private Toil GiveToCarrierAsMuchAsPossibleToil()
+	private Toil GiveToCarrierAsMuchAsPossibleToil()
+	{
+		Toil toil = ToilMaker.MakeToil("GiveToCarrierAsMuchAsPossibleToil");
+		toil.initAction = delegate
 		{
-			Toil toil = ToilMaker.MakeToil("GiveToCarrierAsMuchAsPossibleToil");
-			toil.initAction = delegate()
+			if (Item == null)
 			{
-				if (this.Item == null)
-				{
-					this.pawn.jobs.EndCurrentJob(JobCondition.Incompletable, true, true);
-					return;
-				}
-				int count = Mathf.Min(MassUtility.CountToPickUpUntilOverEncumbered(this.Animal, this.Item), this.Item.stackCount);
-				this.pawn.carryTracker.innerContainer.TryTransferToContainer(this.Item, this.Animal.inventory.innerContainer, count, true);
-			};
-			return toil;
-		}
-
-		// Token: 0x04004BB4 RID: 19380
-		private const TargetIndex ItemInd = TargetIndex.A;
-
-		// Token: 0x04004BB5 RID: 19381
-		private const TargetIndex AnimalInd = TargetIndex.B;
+				pawn.jobs.EndCurrentJob(JobCondition.Incompletable);
+			}
+			else
+			{
+				int count = Mathf.Min(MassUtility.CountToPickUpUntilOverEncumbered(Animal, Item), Item.stackCount);
+				pawn.carryTracker.innerContainer.TryTransferToContainer(Item, Animal.inventory.innerContainer, count);
+			}
+		};
+		return toil;
 	}
 }

@@ -1,384 +1,432 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class LayoutRoom : IExposable, ILoadReferenceable
 {
-	// Token: 0x02001EB7 RID: 7863
-	public class LayoutRoom : IExposable, ILoadReferenceable
+	[CompilerGenerated]
+	private sealed class _003Cget_Cells_003Ed__24 : IEnumerable<IntVec3>, IEnumerable, IEnumerator<IntVec3>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001AA8 RID: 6824
-		// (get) Token: 0x0600AE52 RID: 44626 RVA: 0x0031BA11 File Offset: 0x00319C11
-		public int Area
+		private int _003C_003E1__state;
+
+		private IntVec3 _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public LayoutRoom _003C_003E4__this;
+
+		private int _003Ci_003E5__2;
+
+		private IEnumerator<IntVec3> _003C_003E7__wrap2;
+
+		IntVec3 IEnumerator<IntVec3>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.rects.Sum((CellRect r) => r.Area);
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001AA9 RID: 6825
-		// (get) Token: 0x0600AE53 RID: 44627 RVA: 0x0031BA40 File Offset: 0x00319C40
-		public CellRect Boundary
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				CellRect result = this.rects[0];
-				for (int i = 1; i < this.rects.Count; i++)
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003Cget_Cells_003Ed__24(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
 				{
-					result.Encapsulate(this.rects[i]);
 				}
-				return result;
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
 			}
+			_003C_003E7__wrap2 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x17001AAA RID: 6826
-		// (get) Token: 0x0600AE54 RID: 44628 RVA: 0x0031BA85 File Offset: 0x00319C85
-		public bool DontDestroyWallsDoors
+		private bool MoveNext()
 		{
-			get
+			try
 			{
-				if (!this.defs.NullOrEmpty<LayoutRoomDef>())
+				int num = _003C_003E1__state;
+				LayoutRoom layoutRoom = _003C_003E4__this;
+				if (num != 0)
 				{
-					return this.defs.Any((LayoutRoomDef d) => d.dontDestroyWallsDoors);
+					if (num != 1)
+					{
+						return false;
+					}
+					_003C_003E1__state = -3;
+					goto IL_0085;
+				}
+				_003C_003E1__state = -1;
+				_003Ci_003E5__2 = 0;
+				goto IL_00b1;
+				IL_0085:
+				if (_003C_003E7__wrap2.MoveNext())
+				{
+					IntVec3 current = _003C_003E7__wrap2.Current;
+					_003C_003E2__current = current;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap2 = null;
+				_003Ci_003E5__2++;
+				goto IL_00b1;
+				IL_00b1:
+				if (_003Ci_003E5__2 < layoutRoom.rects.Count)
+				{
+					_003C_003E7__wrap2 = layoutRoom.rects[_003Ci_003E5__2].Cells.GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0085;
 				}
 				return false;
 			}
-		}
-
-		// Token: 0x17001AAB RID: 6827
-		// (get) Token: 0x0600AE55 RID: 44629 RVA: 0x0031BAC0 File Offset: 0x00319CC0
-		public IEnumerable<IntVec3> Corners
-		{
-			get
+			catch
 			{
-				return this.rects.SelectMany((CellRect r) => r.Corners);
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x17001AAC RID: 6828
-		// (get) Token: 0x0600AE56 RID: 44630 RVA: 0x0031BAEC File Offset: 0x00319CEC
-		public string ThreatSignal
+		bool IEnumerator.MoveNext()
 		{
-			get
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap2 != null)
 			{
-				return this.threatSignal;
+				_003C_003E7__wrap2.Dispose();
 			}
 		}
 
-		// Token: 0x0600AE57 RID: 44631 RVA: 0x0031BAF4 File Offset: 0x00319CF4
-		public LayoutRoom()
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x0600AE58 RID: 44632 RVA: 0x0031BB20 File Offset: 0x00319D20
-		public LayoutRoom(LayoutStructureSketch sketch, List<CellRect> rects)
+		[DebuggerHidden]
+		IEnumerator<IntVec3> IEnumerable<IntVec3>.GetEnumerator()
 		{
-			this.rects = rects;
-			this.sketch = sketch;
-			this.threatSignal = "RoomThreat" + Find.UniqueIDsManager.GetNextSignalTagID().ToString();
-			this.loadId = Find.UniqueIDsManager.GetNextRoomID();
-		}
-
-		// Token: 0x17001AAD RID: 6829
-		// (get) Token: 0x0600AE59 RID: 44633 RVA: 0x0031BB94 File Offset: 0x00319D94
-		public IEnumerable<IntVec3> Cells
-		{
-			get
+			_003Cget_Cells_003Ed__24 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				int num;
-				for (int i = 0; i < this.rects.Count; i = num + 1)
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_Cells_003Ed__24(0)
 				{
-					foreach (IntVec3 intVec in this.rects[i].Cells)
-					{
-						yield return intVec;
-					}
-					IEnumerator<IntVec3> enumerator = null;
-					num = i;
-				}
-				yield break;
-				yield break;
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
+			return result;
 		}
 
-		// Token: 0x0600AE5A RID: 44634 RVA: 0x0031BBA4 File Offset: 0x00319DA4
-		public bool TryGetRectOfSize(int minWidth, int minHeight, out CellRect rect)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			foreach (CellRect cellRect in this.rects)
+			return ((IEnumerable<IntVec3>)this).GetEnumerator();
+		}
+	}
+
+	public List<CellRect> rects;
+
+	public List<LayoutRoomDef> defs = new List<LayoutRoomDef>();
+
+	public List<LayoutRoom> merged = new List<LayoutRoom>();
+
+	public List<IntVec3> entryCells;
+
+	public LayoutRoomDef requiredDef;
+
+	public LayoutStructureSketch sketch;
+
+	public bool noExteriorDoors;
+
+	private string threatSignal;
+
+	public int loadId;
+
+	public int id;
+
+	public readonly List<LayoutRoom> connections = new List<LayoutRoom>();
+
+	private static readonly HashSet<IntVec3> cells = new HashSet<IntVec3>();
+
+	public int Area => rects.Sum((CellRect r) => r.Area);
+
+	public CellRect Boundary
+	{
+		get
+		{
+			CellRect result = rects[0];
+			for (int i = 1; i < rects.Count; i++)
 			{
-				if (cellRect.AreSidesEqualOrGreater(minWidth, minHeight))
+				result.Encapsulate(rects[i]);
+			}
+			return result;
+		}
+	}
+
+	public bool DontDestroyWallsDoors
+	{
+		get
+		{
+			if (!defs.NullOrEmpty())
+			{
+				return defs.Any((LayoutRoomDef d) => d.dontDestroyWallsDoors);
+			}
+			return false;
+		}
+	}
+
+	public IEnumerable<IntVec3> Corners => rects.SelectMany((CellRect r) => r.Corners);
+
+	public string ThreatSignal => threatSignal;
+
+	public IEnumerable<IntVec3> Cells
+	{
+		[IteratorStateMachine(typeof(_003Cget_Cells_003Ed__24))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_Cells_003Ed__24(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public LayoutRoom()
+	{
+	}
+
+	public LayoutRoom(LayoutStructureSketch sketch, List<CellRect> rects)
+	{
+		this.rects = rects;
+		this.sketch = sketch;
+		threatSignal = "RoomThreat" + Find.UniqueIDsManager.GetNextSignalTagID();
+		loadId = Find.UniqueIDsManager.GetNextRoomID();
+	}
+
+	public bool TryGetRectOfSize(int minWidth, int minHeight, out CellRect rect)
+	{
+		foreach (CellRect rect2 in rects)
+		{
+			if (rect2.AreSidesEqualOrGreater(minWidth, minHeight))
+			{
+				rect = rect2;
+				return true;
+			}
+		}
+		rect = default(CellRect);
+		return false;
+	}
+
+	public bool IsCorner(IntVec3 position)
+	{
+		for (int i = 0; i < rects.Count; i++)
+		{
+			if (rects[i].IsCorner(position))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public bool HasLayoutDef(LayoutRoomDef def)
+	{
+		return defs.Contains(def);
+	}
+
+	public bool IsAdjacentTo(LayoutRoom room, int minAdjacencyScore = 1)
+	{
+		foreach (CellRect rect in rects)
+		{
+			foreach (CellRect rect2 in room.rects)
+			{
+				if (rect.ContractedBy(1).GetAdjacencyScore(rect2) >= minAdjacencyScore)
 				{
-					rect = cellRect;
 					return true;
 				}
 			}
-			rect = default(CellRect);
-			return false;
 		}
+		return false;
+	}
 
-		// Token: 0x0600AE5B RID: 44635 RVA: 0x0031BC10 File Offset: 0x00319E10
-		public bool IsCorner(IntVec3 position)
+	public bool Contains(IntVec3 position, int contractedBy = 0)
+	{
+		foreach (CellRect rect in rects)
 		{
-			for (int i = 0; i < this.rects.Count; i++)
+			if (rect.ContractedBy(contractedBy).Contains(position))
 			{
-				if (this.rects[i].IsCorner(position))
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public void SpawnRectTriggersForAction(SignalAction action, Map map)
+	{
+		foreach (CellRect rect in rects)
+		{
+			RectTrigger obj = (RectTrigger)ThingMaker.MakeThing(ThingDefOf.RectTrigger);
+			obj.signalTag = action.signalTag;
+			obj.Rect = rect;
+			GenSpawn.Spawn(obj, rect.CenterCell, map);
+		}
+	}
+
+	public bool TryGetRandomCellInRoom(ThingDef def, Map map, out IntVec3 cell, Rot4? rot = null, int contractedBy = 0, int padding = 0, Func<IntVec3, bool> validator = null, bool ignoreBuildings = false)
+	{
+		Rot4 rot2 = rot ?? Rot4.North;
+		foreach (CellRect item in rects.InRandomOrder())
+		{
+			foreach (IntVec3 item2 in item.ContractedBy(contractedBy).Cells.InRandomOrder())
+			{
+				CellRect cellRect = item2.RectAbout(def.size, rot2);
+				if (!GenSpawn.CanSpawnAt(def, item2, map, rot, ignoreBuildings) || (def.hasInteractionCell && !ThingUtility.InteractionCellWhenAt(def, item2, rot2, map).Standable(map)))
 				{
+					continue;
+				}
+				bool flag = false;
+				foreach (IntVec3 item3 in cellRect.ExpandedBy(padding))
+				{
+					flag = false;
+					if (!item3.InBounds(map) || !Contains(item3) || (!ignoreBuildings && item3.GetEdifice(map) != null) || (!ignoreBuildings && item3.GetFirstBuilding(map) != null) || (!ignoreBuildings && def.passability != 0 && RoomGenUtility.IsDoorAdjacentTo(item3, map)) || item3.GetFirstPawn(map) != null || (validator != null && !validator(item3)))
+					{
+						break;
+					}
+					flag = true;
+				}
+				if (flag)
+				{
+					cell = item2;
 					return true;
 				}
 			}
-			return false;
 		}
+		cell = IntVec3.Invalid;
+		return false;
+	}
 
-		// Token: 0x0600AE5C RID: 44636 RVA: 0x0031BC4D File Offset: 0x00319E4D
-		public bool HasLayoutDef(LayoutRoomDef def)
+	public bool TryGetRandomCellInRoom(Map map, out IntVec3 cell, int contractedBy = 0, int padding = 0, Func<IntVec3, bool> validator = null, bool ignoreBuildings = false)
+	{
+		foreach (CellRect item in rects.InRandomOrder())
 		{
-			return this.defs.Contains(def);
-		}
-
-		// Token: 0x0600AE5D RID: 44637 RVA: 0x0031BC5C File Offset: 0x00319E5C
-		public bool IsAdjacentTo(LayoutRoom room, int minAdjacencyScore = 1)
-		{
-			foreach (CellRect cellRect in this.rects)
+			foreach (IntVec3 item2 in item.ContractedBy(contractedBy).Cells.InRandomOrder())
 			{
-				foreach (CellRect other in room.rects)
+				bool flag = false;
+				foreach (IntVec3 item3 in CellRect.FromCell(item2).ExpandedBy(padding).ExpandedBy(padding))
 				{
-					if (cellRect.ContractedBy(1).GetAdjacencyScore(other) >= minAdjacencyScore)
+					flag = false;
+					if (!item3.InBounds(map) || !Contains(item3) || (!ignoreBuildings && item3.GetEdifice(map) != null) || (!ignoreBuildings && item3.GetFirstBuilding(map) != null) || item3.GetFirstPawn(map) != null || (validator != null && !validator(item3)))
 					{
-						return true;
+						break;
 					}
+					flag = true;
 				}
-			}
-			return false;
-		}
-
-		// Token: 0x0600AE5E RID: 44638 RVA: 0x0031BD00 File Offset: 0x00319F00
-		public bool Contains(IntVec3 position, int contractedBy = 0)
-		{
-			foreach (CellRect cellRect in this.rects)
-			{
-				if (cellRect.ContractedBy(contractedBy).Contains(position))
+				if (flag)
 				{
+					cell = item2;
 					return true;
 				}
 			}
-			return false;
 		}
+		cell = IntVec3.Invalid;
+		return false;
+	}
 
-		// Token: 0x0600AE5F RID: 44639 RVA: 0x0031BD68 File Offset: 0x00319F68
-		public void SpawnRectTriggersForAction(SignalAction action, Map map)
+	public bool TryGetRectContainingCell(IntVec3 cell, out CellRect rect)
+	{
+		foreach (CellRect rect2 in rects)
 		{
-			foreach (CellRect rect in this.rects)
+			if (rect2.Contains(cell))
 			{
-				RectTrigger rectTrigger = (RectTrigger)ThingMaker.MakeThing(ThingDefOf.RectTrigger, null);
-				rectTrigger.signalTag = action.signalTag;
-				rectTrigger.Rect = rect;
-				GenSpawn.Spawn(rectTrigger, rect.CenterCell, map, WipeMode.Vanish);
+				rect = rect2;
+				return true;
 			}
 		}
+		rect = CellRect.Empty;
+		return false;
+	}
 
-		// Token: 0x0600AE60 RID: 44640 RVA: 0x0031BDE8 File Offset: 0x00319FE8
-		public bool TryGetRandomCellInRoom(ThingDef def, Map map, out IntVec3 cell, Rot4? rot = null, int contractedBy = 0, int padding = 0, Func<IntVec3, bool> validator = null, bool ignoreBuildings = false)
+	public bool TryGetRandomCellInRoom(out IntVec3 cell, int contractedBy = 0, Func<IntVec3, bool> validator = null)
+	{
+		for (int i = 0; i < rects.Count; i++)
 		{
-			Rot4 rot2 = rot ?? Rot4.North;
-			foreach (CellRect cellRect in this.rects.InRandomOrder(null))
+			foreach (IntVec3 cell2 in rects[i].ContractedBy(contractedBy).Cells)
 			{
-				foreach (IntVec3 intVec in cellRect.ContractedBy(contractedBy).Cells.InRandomOrder(null))
+				if (validator == null || validator(cell2))
 				{
-					CellRect cellRect2 = intVec.RectAbout(def.size, rot2);
-					if (GenSpawn.CanSpawnAt(def, intVec, map, rot, ignoreBuildings) && (!def.hasInteractionCell || ThingUtility.InteractionCellWhenAt(def, intVec, rot2, map).Standable(map)))
-					{
-						bool flag = false;
-						foreach (IntVec3 intVec2 in cellRect2.ExpandedBy(padding))
-						{
-							flag = false;
-							if (!intVec2.InBounds(map))
-							{
-								break;
-							}
-							if (!this.Contains(intVec2, 0))
-							{
-								break;
-							}
-							if (!ignoreBuildings && intVec2.GetEdifice(map) != null)
-							{
-								break;
-							}
-							if (!ignoreBuildings && intVec2.GetFirstBuilding(map) != null)
-							{
-								break;
-							}
-							if (!ignoreBuildings && def.passability != Traversability.Standable && RoomGenUtility.IsDoorAdjacentTo(intVec2, map, true))
-							{
-								break;
-							}
-							if (intVec2.GetFirstPawn(map) != null)
-							{
-								break;
-							}
-							if (validator != null && !validator(intVec2))
-							{
-								break;
-							}
-							flag = true;
-						}
-						if (flag)
-						{
-							cell = intVec;
-							return true;
-						}
-					}
+					cells.Add(cell2);
 				}
 			}
+		}
+		if (cells.Count == 0)
+		{
 			cell = IntVec3.Invalid;
 			return false;
 		}
+		cell = cells.RandomElement();
+		cells.Clear();
+		return true;
+	}
 
-		// Token: 0x0600AE61 RID: 44641 RVA: 0x0031BFF0 File Offset: 0x0031A1F0
-		public bool TryGetRandomCellInRoom(Map map, out IntVec3 cell, int contractedBy = 0, int padding = 0, Func<IntVec3, bool> validator = null, bool ignoreBuildings = false)
+	public void ExposeData()
+	{
+		Scribe_Values.Look(ref noExteriorDoors, "noExteriorDoors", defaultValue: false);
+		Scribe_Values.Look(ref loadId, "loadId", 0);
+		Scribe_Values.Look(ref id, "id", 0);
+		Scribe_Values.Look(ref threatSignal, "threatSignal");
+		Scribe_Defs.Look(ref requiredDef, "requiredDef");
+		Scribe_References.Look(ref sketch, "sketch");
+		Scribe_Collections.Look(ref defs, "defs", LookMode.Def);
+		Scribe_Collections.Look(ref merged, "merged", LookMode.Reference);
+		Scribe_Collections.Look(ref rects, "rects", LookMode.Value);
+		Scribe_Collections.Look(ref entryCells, "entryCells", LookMode.Value);
+		if (Scribe.mode == LoadSaveMode.LoadingVars && loadId == 0)
 		{
-			foreach (CellRect cellRect in this.rects.InRandomOrder(null))
-			{
-				foreach (IntVec3 intVec in cellRect.ContractedBy(contractedBy).Cells.InRandomOrder(null))
-				{
-					bool flag = false;
-					foreach (IntVec3 intVec2 in CellRect.FromCell(intVec).ExpandedBy(padding).ExpandedBy(padding))
-					{
-						flag = false;
-						if (!intVec2.InBounds(map))
-						{
-							break;
-						}
-						if (!this.Contains(intVec2, 0))
-						{
-							break;
-						}
-						if (!ignoreBuildings && intVec2.GetEdifice(map) != null)
-						{
-							break;
-						}
-						if (!ignoreBuildings && intVec2.GetFirstBuilding(map) != null)
-						{
-							break;
-						}
-						if (intVec2.GetFirstPawn(map) != null)
-						{
-							break;
-						}
-						if (validator != null && !validator(intVec2))
-						{
-							break;
-						}
-						flag = true;
-					}
-					if (flag)
-					{
-						cell = intVec;
-						return true;
-					}
-				}
-			}
-			cell = IntVec3.Invalid;
-			return false;
+			loadId = Rand.Int;
 		}
+	}
 
-		// Token: 0x0600AE62 RID: 44642 RVA: 0x0031C188 File Offset: 0x0031A388
-		public bool TryGetRectContainingCell(IntVec3 cell, out CellRect rect)
-		{
-			foreach (CellRect cellRect in this.rects)
-			{
-				if (cellRect.Contains(cell))
-				{
-					rect = cellRect;
-					return true;
-				}
-			}
-			rect = CellRect.Empty;
-			return false;
-		}
-
-		// Token: 0x0600AE63 RID: 44643 RVA: 0x0031C1F8 File Offset: 0x0031A3F8
-		public bool TryGetRandomCellInRoom(out IntVec3 cell, int contractedBy = 0, Func<IntVec3, bool> validator = null)
-		{
-			for (int i = 0; i < this.rects.Count; i++)
-			{
-				foreach (IntVec3 intVec in this.rects[i].ContractedBy(contractedBy).Cells)
-				{
-					if (validator == null || validator(intVec))
-					{
-						LayoutRoom.cells.Add(intVec);
-					}
-				}
-			}
-			if (LayoutRoom.cells.Count == 0)
-			{
-				cell = IntVec3.Invalid;
-				return false;
-			}
-			cell = LayoutRoom.cells.RandomElement<IntVec3>();
-			LayoutRoom.cells.Clear();
-			return true;
-		}
-
-		// Token: 0x0600AE64 RID: 44644 RVA: 0x0031C2B8 File Offset: 0x0031A4B8
-		public void ExposeData()
-		{
-			Scribe_Values.Look<bool>(ref this.noExteriorDoors, "noExteriorDoors", false, false);
-			Scribe_Values.Look<int>(ref this.loadId, "loadId", 0, false);
-			Scribe_Values.Look<int>(ref this.id, "id", 0, false);
-			Scribe_Values.Look<string>(ref this.threatSignal, "threatSignal", null, false);
-			Scribe_Defs.Look<LayoutRoomDef>(ref this.requiredDef, "requiredDef");
-			Scribe_References.Look<LayoutStructureSketch>(ref this.sketch, "sketch", false);
-			Scribe_Collections.Look<LayoutRoomDef>(ref this.defs, "defs", LookMode.Def, Array.Empty<object>());
-			Scribe_Collections.Look<LayoutRoom>(ref this.merged, "merged", LookMode.Reference, Array.Empty<object>());
-			Scribe_Collections.Look<CellRect>(ref this.rects, "rects", LookMode.Value, Array.Empty<object>());
-			Scribe_Collections.Look<IntVec3>(ref this.entryCells, "entryCells", LookMode.Value, Array.Empty<object>());
-			if (Scribe.mode == LoadSaveMode.LoadingVars && this.loadId == 0)
-			{
-				this.loadId = Rand.Int;
-			}
-		}
-
-		// Token: 0x0600AE65 RID: 44645 RVA: 0x0031C3A1 File Offset: 0x0031A5A1
-		public string GetUniqueLoadID()
-		{
-			return string.Format("LayoutRoom_{0}", this.loadId);
-		}
-
-		// Token: 0x040077DF RID: 30687
-		public List<CellRect> rects;
-
-		// Token: 0x040077E0 RID: 30688
-		public List<LayoutRoomDef> defs = new List<LayoutRoomDef>();
-
-		// Token: 0x040077E1 RID: 30689
-		public List<LayoutRoom> merged = new List<LayoutRoom>();
-
-		// Token: 0x040077E2 RID: 30690
-		public List<IntVec3> entryCells;
-
-		// Token: 0x040077E3 RID: 30691
-		public LayoutRoomDef requiredDef;
-
-		// Token: 0x040077E4 RID: 30692
-		public LayoutStructureSketch sketch;
-
-		// Token: 0x040077E5 RID: 30693
-		public bool noExteriorDoors;
-
-		// Token: 0x040077E6 RID: 30694
-		private string threatSignal;
-
-		// Token: 0x040077E7 RID: 30695
-		public int loadId;
-
-		// Token: 0x040077E8 RID: 30696
-		public int id;
-
-		// Token: 0x040077E9 RID: 30697
-		public readonly List<LayoutRoom> connections = new List<LayoutRoom>();
-
-		// Token: 0x040077EA RID: 30698
-		private static readonly HashSet<IntVec3> cells = new HashSet<IntVec3>();
+	public string GetUniqueLoadID()
+	{
+		return $"LayoutRoom_{loadId}";
 	}
 }

@@ -1,89 +1,172 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.AI;
 using Verse.Sound;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_LinkPsylinkable : JobDriver
 {
-	// Token: 0x020012B2 RID: 4786
-	public class JobDriver_LinkPsylinkable : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__11 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001261 RID: 4705
-		// (get) Token: 0x06007541 RID: 30017 RVA: 0x0023D050 File Offset: 0x0023B250
-		private Thing PsylinkableThing
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_LinkPsylinkable _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return base.TargetA.Thing;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001262 RID: 4706
-		// (get) Token: 0x06007542 RID: 30018 RVA: 0x0023D06B File Offset: 0x0023B26B
-		private CompPsylinkable Psylinkable
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.PsylinkableThing.TryGetComp<CompPsylinkable>();
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001263 RID: 4707
-		// (get) Token: 0x06007543 RID: 30019 RVA: 0x001E5D15 File Offset: 0x001E3F15
-		private LocalTargetInfo LinkSpot
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__11(int _003C_003E1__state)
 		{
-			get
-			{
-				return this.job.targetB;
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x06007544 RID: 30020 RVA: 0x0023D078 File Offset: 0x0023B278
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			return this.pawn.Reserve(this.PsylinkableThing, this.job, 1, -1, null, errorOnFailed, false) && this.pawn.Reserve(this.LinkSpot, this.job, 1, -1, null, errorOnFailed, false);
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x06007545 RID: 30021 RVA: 0x0023D0C6 File Offset: 0x0023B2C6
-		protected override IEnumerable<Toil> MakeNewToils()
+		private bool MoveNext()
 		{
-			if (!ModLister.CheckRoyalty("Psylinkable"))
+			int num = _003C_003E1__state;
+			JobDriver_LinkPsylinkable CS_0024_003C_003E8__locals12 = _003C_003E4__this;
+			switch (num)
 			{
-				yield break;
-			}
-			base.AddFailCondition(() => !this.Psylinkable.CanPsylink(this.pawn, new LocalTargetInfo?(this.LinkSpot), true).Accepted);
-			yield return Toils_Goto.GotoCell(TargetIndex.B, PathEndMode.OnCell);
-			Toil toil = Toils_General.Wait(15000, TargetIndex.None);
-			toil.tickIntervalAction = delegate(int delta)
-			{
-				this.pawn.rotationTracker.FaceTarget(this.PsylinkableThing);
-				if (!this.pawn.IsHashIntervalTick(720, delta))
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (!ModLister.CheckRoyalty("Psylinkable"))
 				{
-					return;
+					return false;
 				}
-				Vector3 vector = this.pawn.TrueCenter();
-				vector += (this.PsylinkableThing.TrueCenter() - vector) * Rand.Value;
-				FleckMaker.Static(vector, this.pawn.Map, FleckDefOf.PsycastAreaEffect, 0.5f);
-				this.Psylinkable.Props.linkSound.PlayOneShot(SoundInfo.InMap(new TargetInfo(this.PsylinkableThing), MaintenanceType.None));
-			};
-			toil.handlingFacing = false;
-			toil.socialMode = RandomSocialMode.Off;
-			yield return toil;
-			yield break;
+				CS_0024_003C_003E8__locals12.AddFailCondition(() => !CS_0024_003C_003E8__locals12.Psylinkable.CanPsylink(CS_0024_003C_003E8__locals12.pawn, CS_0024_003C_003E8__locals12.LinkSpot).Accepted);
+				_003C_003E2__current = Toils_Goto.GotoCell(TargetIndex.B, PathEndMode.OnCell);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+			{
+				_003C_003E1__state = -1;
+				Toil toil = Toils_General.Wait(15000);
+				toil.tickIntervalAction = delegate(int delta)
+				{
+					CS_0024_003C_003E8__locals12.pawn.rotationTracker.FaceTarget(CS_0024_003C_003E8__locals12.PsylinkableThing);
+					if (CS_0024_003C_003E8__locals12.pawn.IsHashIntervalTick(720, delta))
+					{
+						Vector3 vector = CS_0024_003C_003E8__locals12.pawn.TrueCenter();
+						vector += (CS_0024_003C_003E8__locals12.PsylinkableThing.TrueCenter() - vector) * Rand.Value;
+						FleckMaker.Static(vector, CS_0024_003C_003E8__locals12.pawn.Map, FleckDefOf.PsycastAreaEffect, 0.5f);
+						CS_0024_003C_003E8__locals12.Psylinkable.Props.linkSound.PlayOneShot(SoundInfo.InMap(new TargetInfo(CS_0024_003C_003E8__locals12.PsylinkableThing)));
+					}
+				};
+				toil.handlingFacing = false;
+				toil.socialMode = RandomSocialMode.Off;
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 2;
+				return true;
+			}
+			case 2:
+				_003C_003E1__state = -1;
+				return false;
+			}
 		}
 
-		// Token: 0x04005050 RID: 20560
-		public const int LinkTimeTicks = 15000;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x04005051 RID: 20561
-		public const int EffectsTickInterval = 720;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04005052 RID: 20562
-		protected const TargetIndex PsylinkableInd = TargetIndex.A;
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__11 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__11(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x04005053 RID: 20563
-		protected const TargetIndex LinkSpotInd = TargetIndex.B;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	public const int LinkTimeTicks = 15000;
+
+	public const int EffectsTickInterval = 720;
+
+	protected const TargetIndex PsylinkableInd = TargetIndex.A;
+
+	protected const TargetIndex LinkSpotInd = TargetIndex.B;
+
+	private Thing PsylinkableThing => base.TargetA.Thing;
+
+	private CompPsylinkable Psylinkable => PsylinkableThing.TryGetComp<CompPsylinkable>();
+
+	private LocalTargetInfo LinkSpot => job.targetB;
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		if (pawn.Reserve(PsylinkableThing, job, 1, -1, null, errorOnFailed))
+		{
+			return pawn.Reserve(LinkSpot, job, 1, -1, null, errorOnFailed);
+		}
+		return false;
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__11))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__11(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

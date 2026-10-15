@@ -1,139 +1,251 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class QuestPart_Alert : QuestPartActivable
 {
-	// Token: 0x02001C10 RID: 7184
-	public class QuestPart_Alert : QuestPartActivable
+	[CompilerGenerated]
+	private sealed class _003Cget_QuestLookTargets_003Ed__9 : IEnumerable<GlobalTargetInfo>, IEnumerable, IEnumerator<GlobalTargetInfo>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001895 RID: 6293
-		// (get) Token: 0x06009FFD RID: 40957 RVA: 0x002E2239 File Offset: 0x002E0439
-		public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+		private int _003C_003E1__state;
+
+		private GlobalTargetInfo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public QuestPart_Alert _003C_003E4__this;
+
+		private IEnumerator<GlobalTargetInfo> _003C_003E7__wrap1;
+
+		GlobalTargetInfo IEnumerator<GlobalTargetInfo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				foreach (GlobalTargetInfo globalTargetInfo in base.QuestLookTargets)
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003Cget_QuestLookTargets_003Ed__9(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
 				{
-					yield return globalTargetInfo;
 				}
-				IEnumerator<GlobalTargetInfo> enumerator = null;
-				GlobalTargetInfo globalTargetInfo2 = this.lookTargets.TryGetPrimaryTarget();
-				if (globalTargetInfo2.IsValid)
+				finally
 				{
-					yield return globalTargetInfo2;
+					_003C_003Em__Finally1();
 				}
-				yield break;
-				yield break;
 			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x17001896 RID: 6294
-		// (get) Token: 0x06009FFE RID: 40958 RVA: 0x002E2249 File Offset: 0x002E0449
-		public override string AlertLabel
+		private bool MoveNext()
 		{
-			get
+			try
 			{
-				return this.resolvedLabel;
-			}
-		}
-
-		// Token: 0x17001897 RID: 6295
-		// (get) Token: 0x06009FFF RID: 40959 RVA: 0x002E2251 File Offset: 0x002E0451
-		public override string AlertExplanation
-		{
-			get
-			{
-				return this.resolvedExplanation;
-			}
-		}
-
-		// Token: 0x17001898 RID: 6296
-		// (get) Token: 0x0600A000 RID: 40960 RVA: 0x002E2259 File Offset: 0x002E0459
-		public override bool AlertCritical
-		{
-			get
-			{
-				return this.critical;
-			}
-		}
-
-		// Token: 0x17001899 RID: 6297
-		// (get) Token: 0x0600A001 RID: 40961 RVA: 0x002E2261 File Offset: 0x002E0461
-		public override AlertReport AlertReport
-		{
-			get
-			{
-				if (base.State != QuestPartState.Enabled)
+				int num = _003C_003E1__state;
+				QuestPart_Alert questPart_Alert = _003C_003E4__this;
+				GlobalTargetInfo globalTargetInfo;
+				switch (num)
 				{
-					return AlertReport.Inactive;
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((QuestPart)questPart_Alert).QuestLookTargets.GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0071;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0071;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_0071:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						GlobalTargetInfo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					globalTargetInfo = questPart_Alert.lookTargets.TryGetPrimaryTarget();
+					if (globalTargetInfo.IsValid)
+					{
+						_003C_003E2__current = globalTargetInfo;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
 				}
-				if (this.resolvedLookTargets.IsValid())
-				{
-					return AlertReport.CulpritsAre(this.resolvedLookTargets.targets);
-				}
-				return AlertReport.Active;
+				return false;
 			}
-		}
-
-		// Token: 0x0600A002 RID: 40962 RVA: 0x002E2298 File Offset: 0x002E0498
-		protected override void Enable(SignalArgs receivedArgs)
-		{
-			base.Enable(receivedArgs);
-			this.resolvedLabel = receivedArgs.GetFormattedText(this.label);
-			this.resolvedExplanation = receivedArgs.GetFormattedText(this.explanation);
-			this.resolvedLookTargets = this.lookTargets;
-			if (this.getLookTargetsFromSignal && !this.resolvedLookTargets.IsValid())
+			catch
 			{
-				SignalArgsUtility.TryGetLookTargets(receivedArgs, "SUBJECT", out this.resolvedLookTargets);
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x0600A003 RID: 40963 RVA: 0x002E231C File Offset: 0x002E051C
-		public override void ExposeData()
+		bool IEnumerator.MoveNext()
 		{
-			base.ExposeData();
-			Scribe_Values.Look<string>(ref this.label, "label", null, false);
-			Scribe_Values.Look<string>(ref this.explanation, "explanation", null, false);
-			Scribe_Deep.Look<LookTargets>(ref this.lookTargets, "lookTargets", Array.Empty<object>());
-			Scribe_Values.Look<bool>(ref this.critical, "critical", false, false);
-			Scribe_Values.Look<bool>(ref this.getLookTargetsFromSignal, "getLookTargetsFromSignal", false, false);
-			Scribe_Values.Look<string>(ref this.resolvedLabel, "resolvedLabel", null, false);
-			Scribe_Values.Look<string>(ref this.resolvedExplanation, "resolvedExplanation", null, false);
-			Scribe_Deep.Look<LookTargets>(ref this.resolvedLookTargets, "resolvedLookTargets", Array.Empty<object>());
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0600A004 RID: 40964 RVA: 0x002E23C5 File Offset: 0x002E05C5
-		public override void AssignDebugData()
+		private void _003C_003Em__Finally1()
 		{
-			base.AssignDebugData();
-			this.label = "DEV: Test";
-			this.explanation = "Test text";
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
 		}
 
-		// Token: 0x04006EA5 RID: 28325
-		public string label;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04006EA6 RID: 28326
-		public string explanation;
+		[DebuggerHidden]
+		IEnumerator<GlobalTargetInfo> IEnumerable<GlobalTargetInfo>.GetEnumerator()
+		{
+			_003Cget_QuestLookTargets_003Ed__9 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_QuestLookTargets_003Ed__9(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x04006EA7 RID: 28327
-		public LookTargets lookTargets;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<GlobalTargetInfo>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x04006EA8 RID: 28328
-		public bool critical;
+	public string label;
 
-		// Token: 0x04006EA9 RID: 28329
-		public bool getLookTargetsFromSignal;
+	public string explanation;
 
-		// Token: 0x04006EAA RID: 28330
-		private string resolvedLabel;
+	public LookTargets lookTargets;
 
-		// Token: 0x04006EAB RID: 28331
-		private string resolvedExplanation;
+	public bool critical;
 
-		// Token: 0x04006EAC RID: 28332
-		private LookTargets resolvedLookTargets;
+	public bool getLookTargetsFromSignal;
+
+	private string resolvedLabel;
+
+	private string resolvedExplanation;
+
+	private LookTargets resolvedLookTargets;
+
+	public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+	{
+		[IteratorStateMachine(typeof(_003Cget_QuestLookTargets_003Ed__9))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_QuestLookTargets_003Ed__9(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public override string AlertLabel => resolvedLabel;
+
+	public override string AlertExplanation => resolvedExplanation;
+
+	public override bool AlertCritical => critical;
+
+	public override AlertReport AlertReport
+	{
+		get
+		{
+			if (base.State != QuestPartState.Enabled)
+			{
+				return AlertReport.Inactive;
+			}
+			if (resolvedLookTargets.IsValid())
+			{
+				return AlertReport.CulpritsAre(resolvedLookTargets.targets);
+			}
+			return AlertReport.Active;
+		}
+	}
+
+	protected override void Enable(SignalArgs receivedArgs)
+	{
+		base.Enable(receivedArgs);
+		resolvedLabel = receivedArgs.GetFormattedText(label);
+		resolvedExplanation = receivedArgs.GetFormattedText(explanation);
+		resolvedLookTargets = lookTargets;
+		if (getLookTargetsFromSignal && !resolvedLookTargets.IsValid())
+		{
+			SignalArgsUtility.TryGetLookTargets(receivedArgs, "SUBJECT", out resolvedLookTargets);
+		}
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref label, "label");
+		Scribe_Values.Look(ref explanation, "explanation");
+		Scribe_Deep.Look(ref lookTargets, "lookTargets");
+		Scribe_Values.Look(ref critical, "critical", defaultValue: false);
+		Scribe_Values.Look(ref getLookTargetsFromSignal, "getLookTargetsFromSignal", defaultValue: false);
+		Scribe_Values.Look(ref resolvedLabel, "resolvedLabel");
+		Scribe_Values.Look(ref resolvedExplanation, "resolvedExplanation");
+		Scribe_Deep.Look(ref resolvedLookTargets, "resolvedLookTargets");
+	}
+
+	public override void AssignDebugData()
+	{
+		base.AssignDebugData();
+		label = "DEV: Test";
+		explanation = "Test text";
 	}
 }

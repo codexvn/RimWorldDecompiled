@@ -1,23 +1,21 @@
-﻿using System;
-using RimWorld;
+namespace Verse;
 
-namespace Verse
+public class PawnRenderNodeWorker_Tattoo_Head : PawnRenderNodeWorker_FlipWhenCrawling
 {
-	// Token: 0x02000640 RID: 1600
-	public class PawnRenderNodeWorker_Tattoo_Head : PawnRenderNodeWorker_FlipWhenCrawling
+	public override bool CanDrawNow(PawnRenderNode node, PawnDrawParms parms)
 	{
-		// Token: 0x0600286B RID: 10347 RVA: 0x000D5FC8 File Offset: 0x000D41C8
-		public override bool CanDrawNow(PawnRenderNode node, PawnDrawParms parms)
+		if (!ModsConfig.IdeologyActive || parms.pawn.style?.FaceTattoo == null)
 		{
-			if (ModsConfig.IdeologyActive)
-			{
-				Pawn_StyleTracker style = parms.pawn.style;
-				if (((style != null) ? style.FaceTattoo : null) != null)
-				{
-					return base.CanDrawNow(node, parms) && (parms.pawn.style.FaceTattoo.visibleNorth || !(parms.facing == Rot4.North));
-				}
-			}
 			return false;
 		}
+		if (!base.CanDrawNow(node, parms))
+		{
+			return false;
+		}
+		if (!parms.pawn.style.FaceTattoo.visibleNorth && parms.facing == Rot4.North)
+		{
+			return false;
+		}
+		return true;
 	}
 }

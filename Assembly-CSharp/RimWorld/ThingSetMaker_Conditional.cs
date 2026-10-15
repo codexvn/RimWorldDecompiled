@@ -1,60 +1,204 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public abstract class ThingSetMaker_Conditional : ThingSetMaker
 {
-	// Token: 0x02002B5A RID: 11098
-	public abstract class ThingSetMaker_Conditional : ThingSetMaker
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__6 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x0600F82E RID: 63534 RVA: 0x004831A4 File Offset: 0x004813A4
-		protected override bool CanGenerateSub(ThingSetMakerParams parms)
-		{
-			return this.Condition(parms) && this.thingSetMaker.CanGenerate(parms);
-		}
+		private int _003C_003E1__state;
 
-		// Token: 0x0600F82F RID: 63535 RVA: 0x004831BD File Offset: 0x004813BD
-		protected override void Generate(ThingSetMakerParams parms, List<Thing> outThings)
-		{
-			outThings.AddRange(this.thingSetMaker.Generate(parms));
-		}
+		private string _003C_003E2__current;
 
-		// Token: 0x0600F830 RID: 63536 RVA: 0x004831D1 File Offset: 0x004813D1
-		protected override IEnumerable<ThingDef> AllGeneratableThingsDebugSub(ThingSetMakerParams parms)
-		{
-			return this.thingSetMaker.AllGeneratableThingsDebug(parms);
-		}
+		private int _003C_003El__initialThreadId;
 
-		// Token: 0x0600F831 RID: 63537 RVA: 0x004831DF File Offset: 0x004813DF
-		public override void ResolveReferences()
-		{
-			base.ResolveReferences();
-			this.thingSetMaker.ResolveReferences();
-		}
+		public ThingSetMaker_Conditional _003C_003E4__this;
 
-		// Token: 0x0600F832 RID: 63538
-		protected abstract bool Condition(ThingSetMakerParams parms);
+		private IEnumerator<string> _003C_003E7__wrap1;
 
-		// Token: 0x0600F833 RID: 63539 RVA: 0x004831F2 File Offset: 0x004813F2
-		public override IEnumerable<string> ConfigErrors()
+		string IEnumerator<string>.Current
 		{
-			if (this.thingSetMaker == null)
+			[DebuggerHidden]
+			get
 			{
-				yield return "thingSetMaker is null.";
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__6(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 2)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				ThingSetMaker_Conditional thingSetMaker_Conditional = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					if (thingSetMaker_Conditional.thingSetMaker == null)
+					{
+						_003C_003E2__current = "thingSetMaker is null.";
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003E7__wrap1 = thingSetMaker_Conditional.thingSetMaker.ConfigErrors().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_009b;
+				case 1:
+					_003C_003E1__state = -1;
+					break;
+				case 2:
+					{
+						_003C_003E1__state = -3;
+						goto IL_009b;
+					}
+					IL_009b:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__6 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
 			}
 			else
 			{
-				foreach (string text in this.thingSetMaker.ConfigErrors())
+				result = new _003CConfigErrors_003Ed__6(0)
 				{
-					yield return text;
-				}
-				IEnumerator<string> enumerator = null;
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
-			yield break;
-			yield break;
+			return result;
 		}
 
-		// Token: 0x0400A332 RID: 41778
-		public ThingSetMaker thingSetMaker;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	public ThingSetMaker thingSetMaker;
+
+	protected override bool CanGenerateSub(ThingSetMakerParams parms)
+	{
+		if (Condition(parms))
+		{
+			return thingSetMaker.CanGenerate(parms);
+		}
+		return false;
+	}
+
+	protected override void Generate(ThingSetMakerParams parms, List<Thing> outThings)
+	{
+		outThings.AddRange(thingSetMaker.Generate(parms));
+	}
+
+	protected override IEnumerable<ThingDef> AllGeneratableThingsDebugSub(ThingSetMakerParams parms)
+	{
+		return thingSetMaker.AllGeneratableThingsDebug(parms);
+	}
+
+	public override void ResolveReferences()
+	{
+		base.ResolveReferences();
+		thingSetMaker.ResolveReferences();
+	}
+
+	protected abstract bool Condition(ThingSetMakerParams parms);
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__6))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__6(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

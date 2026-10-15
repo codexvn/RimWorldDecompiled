@@ -1,94 +1,207 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Gene_HemogenDrain : Gene, IGeneResourceDrain
 {
-	// Token: 0x02003845 RID: 14405
-	public class Gene_HemogenDrain : Gene, IGeneResourceDrain
+	[CompilerGenerated]
+	private sealed class _003CGetGizmos_003Ed__13 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x170032D6 RID: 13014
-		// (get) Token: 0x06013EB9 RID: 81593 RVA: 0x005E92EF File Offset: 0x005E74EF
-		public Gene_Resource Resource
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Gene_HemogenDrain _003C_003E4__this;
+
+		private IEnumerator<Gizmo> _003C_003E7__wrap1;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.cachedHemogenGene == null || !this.cachedHemogenGene.Active)
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetGizmos_003Ed__13(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
 				{
-					this.cachedHemogenGene = this.pawn.genes.GetFirstGeneOfType<Gene_Hemogen>();
 				}
-				return this.cachedHemogenGene;
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
 			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x170032D7 RID: 13015
-		// (get) Token: 0x06013EBA RID: 81594 RVA: 0x005E8C5B File Offset: 0x005E6E5B
-		public bool CanOffset
+		private bool MoveNext()
 		{
-			get
+			try
 			{
-				return this.Active && !this.pawn.Deathresting;
+				int num = _003C_003E1__state;
+				Gene_HemogenDrain gene_HemogenDrain = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					if (!gene_HemogenDrain.Active)
+					{
+						return false;
+					}
+					_003C_003E7__wrap1 = GeneResourceDrainUtility.GetResourceDrainGizmos(gene_HemogenDrain).GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 1:
+					_003C_003E1__state = -3;
+					break;
+				}
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					Gizmo current = _003C_003E7__wrap1.Current;
+					_003C_003E2__current = current;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = null;
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x170032D8 RID: 13016
-		// (get) Token: 0x06013EBB RID: 81595 RVA: 0x005E8CA5 File Offset: 0x005E6EA5
-		public float ResourceLossPerDay
+		bool IEnumerator.MoveNext()
 		{
-			get
-			{
-				return this.def.resourceLossPerDay;
-			}
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x170032D9 RID: 13017
-		// (get) Token: 0x06013EBC RID: 81596 RVA: 0x005E8C53 File Offset: 0x005E6E53
-		public Pawn Pawn
+		private void _003C_003Em__Finally1()
 		{
-			get
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				return this.pawn;
+				_003C_003E7__wrap1.Dispose();
 			}
 		}
 
-		// Token: 0x170032DA RID: 13018
-		// (get) Token: 0x06013EBD RID: 81597 RVA: 0x005E8C75 File Offset: 0x005E6E75
-		public string DisplayLabel
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			get
-			{
-				return this.Label + " (" + "Gene".Translate() + ")";
-			}
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x06013EBE RID: 81598 RVA: 0x005E8DAF File Offset: 0x005E6FAF
-		public override void TickInterval(int delta)
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
 		{
-			base.TickInterval(delta);
-			GeneResourceDrainUtility.TickResourceDrainInterval(this, delta);
+			_003CGetGizmos_003Ed__13 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CGetGizmos_003Ed__13(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
 		}
 
-		// Token: 0x06013EBF RID: 81599 RVA: 0x005E9322 File Offset: 0x005E7522
-		public override IEnumerable<Gizmo> GetGizmos()
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			if (!this.Active)
-			{
-				yield break;
-			}
-			foreach (Gizmo gizmo in GeneResourceDrainUtility.GetResourceDrainGizmos(this))
-			{
-				yield return gizmo;
-			}
-			IEnumerator<Gizmo> enumerator = null;
-			yield break;
-			yield break;
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x0400DC11 RID: 56337
-		[Unsaved(false)]
-		private Gene_Hemogen cachedHemogenGene;
+	[Unsaved(false)]
+	private Gene_Hemogen cachedHemogenGene;
 
-		// Token: 0x0400DC12 RID: 56338
-		private const float MinAgeForDrain = 3f;
+	private const float MinAgeForDrain = 3f;
+
+	public Gene_Resource Resource
+	{
+		get
+		{
+			if (cachedHemogenGene == null || !cachedHemogenGene.Active)
+			{
+				cachedHemogenGene = pawn.genes.GetFirstGeneOfType<Gene_Hemogen>();
+			}
+			return cachedHemogenGene;
+		}
+	}
+
+	public bool CanOffset
+	{
+		get
+		{
+			if (Active)
+			{
+				return !pawn.Deathresting;
+			}
+			return false;
+		}
+	}
+
+	public float ResourceLossPerDay => def.resourceLossPerDay;
+
+	public Pawn Pawn => pawn;
+
+	public string DisplayLabel => Label + " (" + "Gene".Translate() + ")";
+
+	public override void TickInterval(int delta)
+	{
+		base.TickInterval(delta);
+		GeneResourceDrainUtility.TickResourceDrainInterval(this, delta);
+	}
+
+	[IteratorStateMachine(typeof(_003CGetGizmos_003Ed__13))]
+	public override IEnumerable<Gizmo> GetGizmos()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetGizmos_003Ed__13(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

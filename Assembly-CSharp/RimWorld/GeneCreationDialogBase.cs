@@ -1,4 +1,3 @@
-﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -6,475 +5,404 @@ using UnityEngine;
 using Verse;
 using Verse.Sound;
 
-namespace RimWorld
+namespace RimWorld;
+
+[StaticConstructorOnStartup]
+public abstract class GeneCreationDialogBase : Window
 {
-	// Token: 0x020031E2 RID: 12770
-	[StaticConstructorOnStartup]
-	public abstract class GeneCreationDialogBase : Window
+	protected int gcx;
+
+	protected int met;
+
+	protected int arc;
+
+	protected string xenotypeName;
+
+	protected bool xenotypeNameLocked;
+
+	protected float scrollHeight;
+
+	protected Vector2 scrollPosition;
+
+	protected float selectedHeight;
+
+	protected float unselectedHeight;
+
+	protected bool ignoreRestrictions;
+
+	protected float postXenotypeHeight;
+
+	protected bool alwaysUseFullBiostatsTableHeight;
+
+	protected int maxGCX = -1;
+
+	protected float searchWidgetOffsetX;
+
+	protected QuickSearchWidget quickSearchWidget = new QuickSearchWidget();
+
+	protected HashSet<GeneDef> matchingGenes = new HashSet<GeneDef>();
+
+	protected Dictionary<GeneDef, List<GeneDef>> randomChosenGroups = new Dictionary<GeneDef, List<GeneDef>>();
+
+	protected List<GeneLeftChosenGroup> leftChosenGroups = new List<GeneLeftChosenGroup>();
+
+	protected List<GeneDef> cachedOverriddenGenes = new List<GeneDef>();
+
+	protected List<GeneDef> cachedUnoverriddenGenes = new List<GeneDef>();
+
+	protected List<GeneDefWithType> tmpGenesWithType = new List<GeneDefWithType>();
+
+	protected XenotypeIconDef iconDef;
+
+	protected static readonly Vector2 ButSize = new Vector2(150f, 38f);
+
+	protected const float HeaderHeight = 35f;
+
+	protected const float GeneGap = 4f;
+
+	private const int MaxNameLength = 40;
+
+	private const int NumCharsTypedBeforeAutoLockingName = 3;
+
+	private const int MaxTriesToGenerateUniqueXenotypeNames = 1000;
+
+	private const float TextFieldWidthPct = 0.25f;
+
+	private static readonly Regex ValidSymbolRegex = new Regex("^[\\p{L}0-9 '\\-]*$");
+
+	public static readonly Texture2D UnlockedTex = ContentFinder<Texture2D>.Get("UI/Overlays/LockedMonochrome");
+
+	public static readonly Texture2D LockedTex = ContentFinder<Texture2D>.Get("UI/Overlays/Locked");
+
+	protected const float BiostatsWidth = 38f;
+
+	public static readonly Vector2 GeneSize = new Vector2(87f, 68f);
+
+	protected static readonly Color OutlineColorUnselected = new Color(1f, 1f, 1f, 0.1f);
+
+	protected const float GenepackGap = 14f;
+
+	protected const float QuickSearchFilterWidth = 300f;
+
+	protected abstract List<GeneDef> SelectedGenes { get; }
+
+	protected abstract string Header { get; }
+
+	protected abstract string AcceptButtonLabel { get; }
+
+	public override void PreOpen()
 	{
-		// Token: 0x17002E99 RID: 11929
-		// (get) Token: 0x06011F3E RID: 73534
-		protected abstract List<GeneDef> SelectedGenes { get; }
+		base.PreOpen();
+		iconDef = XenotypeIconDefOf.Basic;
+		UpdateSearchResults();
+		OnGenesChanged();
+	}
 
-		// Token: 0x17002E9A RID: 11930
-		// (get) Token: 0x06011F3F RID: 73535
-		protected abstract string Header { get; }
-
-		// Token: 0x17002E9B RID: 11931
-		// (get) Token: 0x06011F40 RID: 73536
-		protected abstract string AcceptButtonLabel { get; }
-
-		// Token: 0x06011F41 RID: 73537 RVA: 0x00539DB3 File Offset: 0x00537FB3
-		public override void PreOpen()
+	public override void DoWindowContents(Rect rect)
+	{
+		Rect rect2 = rect;
+		rect2.yMax -= ButSize.y + 4f;
+		Rect rect3 = new Rect(rect2.x, rect2.y, rect2.width, 35f);
+		Text.Font = GameFont.Medium;
+		Widgets.Label(rect3, Header);
+		Text.Font = GameFont.Small;
+		DrawSearchRect(rect);
+		rect2.yMin += 39f;
+		float num = rect.width * 0.25f - Margin - 10f;
+		float num2 = num - 24f - 10f;
+		float num3 = Mathf.Max(BiostatsTable.HeightForBiostats(alwaysUseFullBiostatsTableHeight ? 1 : arc), postXenotypeHeight);
+		Rect rect4 = new Rect(rect2.x + Margin, rect2.y, rect2.width - Margin * 2f, rect2.height - num3 - 8f);
+		DrawGenes(rect4);
+		float num4 = rect4.yMax + 4f;
+		Rect rect5 = new Rect(rect2.x + Margin + 10f, num4, rect.width * 0.75f - Margin * 3f - 10f, num3);
+		rect5.yMax = rect4.yMax + num3 + 4f;
+		BiostatsTable.Draw(rect5, gcx, met, arc, drawMax: true, ignoreRestrictions, maxGCX);
+		string text = "XenotypeName".Translate().CapitalizeFirst() + ":";
+		Rect rect6 = new Rect(rect5.xMax + Margin, num4, Text.CalcSize(text).x, Text.LineHeight);
+		Widgets.Label(rect6, text);
+		Rect rect7 = new Rect(rect6.xMin, rect6.y + Text.LineHeight, num, Text.LineHeight);
+		rect7.xMax = rect2.xMax - Margin - 17f - num2 * 0.25f;
+		string text2 = xenotypeName;
+		xenotypeName = Widgets.TextField(rect7, xenotypeName, 40, ValidSymbolRegex);
+		if (text2 != xenotypeName)
 		{
-			base.PreOpen();
-			this.iconDef = XenotypeIconDefOf.Basic;
-			this.UpdateSearchResults();
-			this.OnGenesChanged();
+			if (xenotypeName.Length > text2.Length && xenotypeName.Length > 3)
+			{
+				xenotypeNameLocked = true;
+			}
+			else if (xenotypeName.Length == 0)
+			{
+				xenotypeNameLocked = false;
+			}
 		}
-
-		// Token: 0x06011F42 RID: 73538 RVA: 0x00539DD4 File Offset: 0x00537FD4
-		public override void DoWindowContents(Rect rect)
+		Rect rect8 = new Rect(rect7.xMax + 4f, rect7.yMax - 35f, 35f, 35f);
+		DrawIconSelector(rect8);
+		Rect rect9 = new Rect(rect7.x, rect7.yMax + 4f, num2 * 0.75f - 4f, 24f);
+		if (Widgets.ButtonText(rect9, "Randomize".Translate(), drawBackground: true, doMouseoverSound: true, active: true, null))
 		{
-			Rect rect2 = rect;
-			rect2.yMax -= GeneCreationDialogBase.ButSize.y + 4f;
-			Rect rect3 = new Rect(rect2.x, rect2.y, rect2.width, 35f);
-			Text.Font = GameFont.Medium;
-			Widgets.Label(rect3, this.Header);
-			Text.Font = GameFont.Small;
-			this.DrawSearchRect(rect);
-			rect2.yMin += 39f;
-			float num = rect.width * 0.25f - this.Margin - 10f;
-			float num2 = num - 24f - 10f;
-			float num3 = Mathf.Max(BiostatsTable.HeightForBiostats(this.alwaysUseFullBiostatsTableHeight ? 1 : this.arc), this.postXenotypeHeight);
-			Rect rect4 = new Rect(rect2.x + this.Margin, rect2.y, rect2.width - this.Margin * 2f, rect2.height - num3 - 8f);
-			this.DrawGenes(rect4);
-			float num4 = rect4.yMax + 4f;
-			Rect rect5 = new Rect(rect2.x + this.Margin + 10f, num4, rect.width * 0.75f - this.Margin * 3f - 10f, num3)
+			if (SelectedGenes.Count == 0)
 			{
-				yMax = rect4.yMax + num3 + 4f
-			};
-			BiostatsTable.Draw(rect5, this.gcx, this.met, this.arc, true, this.ignoreRestrictions, this.maxGCX);
-			string text = "XenotypeName".Translate().CapitalizeFirst() + ":";
-			Rect rect6 = new Rect(rect5.xMax + this.Margin, num4, Text.CalcSize(text).x, Text.LineHeight);
-			Widgets.Label(rect6, text);
-			Rect rect7 = new Rect(rect6.xMin, rect6.y + Text.LineHeight, num, Text.LineHeight);
-			rect7.xMax = rect2.xMax - this.Margin - 17f - num2 * 0.25f;
-			string text2 = this.xenotypeName;
-			this.xenotypeName = Widgets.TextField(rect7, this.xenotypeName, 40, GeneCreationDialogBase.ValidSymbolRegex);
-			if (text2 != this.xenotypeName)
-			{
-				if (this.xenotypeName.Length > text2.Length && this.xenotypeName.Length > 3)
-				{
-					this.xenotypeNameLocked = true;
-				}
-				else if (this.xenotypeName.Length == 0)
-				{
-					this.xenotypeNameLocked = false;
-				}
+				Messages.Message("SelectAGeneToRandomizeName".Translate(), MessageTypeDefOf.RejectInput, historical: false);
 			}
-			Rect rect8 = new Rect(rect7.xMax + 4f, rect7.yMax - 35f, 35f, 35f);
-			this.DrawIconSelector(rect8);
-			Rect rect9 = new Rect(rect7.x, rect7.yMax + 4f, num2 * 0.75f - 4f, 24f);
-			if (Widgets.ButtonText(rect9, "Randomize".Translate(), true, true, true, null))
+			else
 			{
-				if (this.SelectedGenes.Count == 0)
-				{
-					Messages.Message("SelectAGeneToRandomizeName".Translate(), MessageTypeDefOf.RejectInput, false);
-				}
-				else
-				{
-					GUI.FocusControl(null);
-					SoundDefOf.Tick_High.PlayOneShotOnCamera(null);
-					this.xenotypeName = GeneUtility.GenerateXenotypeNameFromGenes(this.SelectedGenes);
-				}
+				GUI.FocusControl(null);
+				SoundDefOf.Tick_High.PlayOneShotOnCamera();
+				xenotypeName = GeneUtility.GenerateXenotypeNameFromGenes(SelectedGenes);
 			}
-			Rect rect10 = new Rect(rect9.xMax + 4f, rect9.y, num2 * 0.25f, 24f);
-			if (Widgets.ButtonText(rect10, "...", true, true, true, null))
+		}
+		Rect rect10 = new Rect(rect9.xMax + 4f, rect9.y, num2 * 0.25f, 24f);
+		if (Widgets.ButtonText(rect10, "...", drawBackground: true, doMouseoverSound: true, active: true, null))
+		{
+			if (SelectedGenes.Count > 0)
 			{
-				if (this.SelectedGenes.Count > 0)
+				List<string> list = new List<string>();
+				int num5 = 0;
+				while (list.Count < 20)
 				{
-					List<string> list = new List<string>();
-					int num5 = 0;
-					while (list.Count < 20)
+					string text3 = GeneUtility.GenerateXenotypeNameFromGenes(SelectedGenes);
+					if (text3.NullOrEmpty())
 					{
-						string text3 = GeneUtility.GenerateXenotypeNameFromGenes(this.SelectedGenes);
-						if (text3.NullOrEmpty())
+						break;
+					}
+					if (list.Contains(text3) || text3 == xenotypeName)
+					{
+						num5++;
+						if (num5 >= 1000)
 						{
 							break;
 						}
-						if (list.Contains(text3) || text3 == this.xenotypeName)
-						{
-							num5++;
-							if (num5 >= 1000)
-							{
-								break;
-							}
-						}
-						else
-						{
-							list.Add(text3);
-						}
 					}
-					List<FloatMenuOption> list2 = new List<FloatMenuOption>();
-					for (int i = 0; i < list.Count; i++)
+					else
 					{
-						string n = list[i];
-						list2.Add(new FloatMenuOption(n, delegate()
-						{
-							this.xenotypeName = n;
-						}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0));
+						list.Add(text3);
 					}
-					if (list2.Any<FloatMenuOption>())
+				}
+				List<FloatMenuOption> list2 = new List<FloatMenuOption>();
+				for (int i = 0; i < list.Count; i++)
+				{
+					string n = list[i];
+					list2.Add(new FloatMenuOption(n, delegate
 					{
-						Find.WindowStack.Add(new FloatMenu(list2));
-					}
+						xenotypeName = n;
+					}));
 				}
-				else
+				if (list2.Any())
 				{
-					Messages.Message("SelectAGeneToChooseAName".Translate(), MessageTypeDefOf.RejectInput, false);
+					Find.WindowStack.Add(new FloatMenu(list2));
 				}
 			}
-			Rect rect11 = new Rect(rect10.xMax + 10f, rect9.y, 24f, 24f);
-			if (Widgets.ButtonImage(rect11, this.xenotypeNameLocked ? GeneCreationDialogBase.LockedTex : GeneCreationDialogBase.UnlockedTex, true, null))
+			else
 			{
-				this.xenotypeNameLocked = !this.xenotypeNameLocked;
-				if (this.xenotypeNameLocked)
-				{
-					SoundDefOf.Checkbox_TurnedOn.PlayOneShotOnCamera(null);
-				}
-				else
-				{
-					SoundDefOf.Checkbox_TurnedOff.PlayOneShotOnCamera(null);
-				}
+				Messages.Message("SelectAGeneToChooseAName".Translate(), MessageTypeDefOf.RejectInput, historical: false);
 			}
-			if (Mouse.IsOver(rect11))
-			{
-				string str = "LockNameButtonDesc".Translate() + "\n\n" + (this.xenotypeNameLocked ? "LockNameOn" : "LockNameOff").Translate();
-				TooltipHandler.TipRegion(rect11, str);
-			}
-			this.postXenotypeHeight = rect11.yMax - num4;
-			this.PostXenotypeOnGUI(rect6.xMin, rect9.y + 24f);
-			Rect rect12 = rect;
-			rect12.yMin = rect12.yMax - GeneCreationDialogBase.ButSize.y;
-			this.DoBottomButtons(rect12);
 		}
-
-		// Token: 0x06011F43 RID: 73539 RVA: 0x0053A3AC File Offset: 0x005385AC
-		protected virtual void DrawSearchRect(Rect rect)
+		Rect rect11 = new Rect(rect10.xMax + 10f, rect9.y, 24f, 24f);
+		if (Widgets.ButtonImage(rect11, xenotypeNameLocked ? LockedTex : UnlockedTex))
 		{
-			Rect rect2 = new Rect(rect.width - 300f - this.searchWidgetOffsetX, 11f, 300f, 24f);
-			this.quickSearchWidget.OnGUI(rect2, new Action(this.UpdateSearchResults), null);
+			xenotypeNameLocked = !xenotypeNameLocked;
+			if (xenotypeNameLocked)
+			{
+				SoundDefOf.Checkbox_TurnedOn.PlayOneShotOnCamera();
+			}
+			else
+			{
+				SoundDefOf.Checkbox_TurnedOff.PlayOneShotOnCamera();
+			}
 		}
-
-		// Token: 0x06011F44 RID: 73540 RVA: 0x0053A400 File Offset: 0x00538600
-		protected virtual bool WithinAcceptableBiostatLimits(bool showMessage)
+		if (Mouse.IsOver(rect11))
 		{
-			if (this.ignoreRestrictions)
-			{
-				return true;
-			}
-			if (this.met < GeneTuning.BiostatRange.TrueMin)
-			{
-				if (showMessage)
-				{
-					Messages.Message("MetabolismTooLowToCreateXenogerm".Translate(this.met.Named("AMOUNT"), GeneTuning.BiostatRange.TrueMin.Named("MIN")), null, MessageTypeDefOf.RejectInput, false);
-				}
-				return false;
-			}
+			string text4 = "LockNameButtonDesc".Translate() + "\n\n" + (xenotypeNameLocked ? "LockNameOn" : "LockNameOff").Translate();
+			TooltipHandler.TipRegion(rect11, text4);
+		}
+		postXenotypeHeight = rect11.yMax - num4;
+		PostXenotypeOnGUI(rect6.xMin, rect9.y + 24f);
+		Rect rect12 = rect;
+		rect12.yMin = rect12.yMax - ButSize.y;
+		DoBottomButtons(rect12);
+	}
+
+	protected virtual void DrawSearchRect(Rect rect)
+	{
+		Rect rect2 = new Rect(rect.width - 300f - searchWidgetOffsetX, 11f, 300f, 24f);
+		quickSearchWidget.OnGUI(rect2, UpdateSearchResults);
+	}
+
+	protected virtual bool WithinAcceptableBiostatLimits(bool showMessage)
+	{
+		if (ignoreRestrictions)
+		{
 			return true;
 		}
-
-		// Token: 0x06011F45 RID: 73541 RVA: 0x0053A480 File Offset: 0x00538680
-		protected virtual bool CanAccept()
+		if (met < GeneTuning.BiostatRange.TrueMin)
 		{
-			string text = this.xenotypeName;
-			if (text != null && text.Trim().Length == 0)
+			if (showMessage)
 			{
-				Messages.Message("XenotypeNameCannotBeEmpty".Translate(), MessageTypeDefOf.RejectInput, false);
-				return false;
+				Messages.Message("MetabolismTooLowToCreateXenogerm".Translate(met.Named("AMOUNT"), GeneTuning.BiostatRange.TrueMin.Named("MIN")), null, MessageTypeDefOf.RejectInput, historical: false);
 			}
-			if (!this.WithinAcceptableBiostatLimits(true))
-			{
-				return false;
-			}
-			List<GeneDef> selectedGenes = this.SelectedGenes;
-			foreach (GeneDef geneDef in this.SelectedGenes)
-			{
-				if (geneDef.prerequisite != null && !selectedGenes.Contains(geneDef.prerequisite))
-				{
-					Messages.Message("MessageGeneMissingPrerequisite".Translate(geneDef.label).CapitalizeFirst() + ": " + geneDef.prerequisite.LabelCap, null, MessageTypeDefOf.RejectInput, false);
-					return false;
-				}
-			}
-			return true;
+			return false;
 		}
+		return true;
+	}
 
-		// Token: 0x06011F46 RID: 73542 RVA: 0x0053A580 File Offset: 0x00538780
-		private void DrawIconSelector(Rect rect)
+	protected virtual bool CanAccept()
+	{
+		string text = xenotypeName;
+		if (text != null && text.Trim().Length == 0)
+		{
+			Messages.Message("XenotypeNameCannotBeEmpty".Translate(), MessageTypeDefOf.RejectInput, historical: false);
+			return false;
+		}
+		if (!WithinAcceptableBiostatLimits(showMessage: true))
+		{
+			return false;
+		}
+		List<GeneDef> selectedGenes = SelectedGenes;
+		foreach (GeneDef selectedGene in SelectedGenes)
+		{
+			if (selectedGene.prerequisite != null && !selectedGenes.Contains(selectedGene.prerequisite))
+			{
+				Messages.Message("MessageGeneMissingPrerequisite".Translate(selectedGene.label).CapitalizeFirst() + ": " + selectedGene.prerequisite.LabelCap, null, MessageTypeDefOf.RejectInput, historical: false);
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private void DrawIconSelector(Rect rect)
+	{
+		Widgets.DrawHighlight(rect);
+		if (Widgets.ButtonImage(rect, iconDef.Icon, XenotypeDef.IconColor))
+		{
+			Find.WindowStack.Add(new Dialog_SelectXenotypeIcon(iconDef, delegate(XenotypeIconDef i)
+			{
+				iconDef = i;
+			}));
+		}
+		if (Mouse.IsOver(rect))
 		{
 			Widgets.DrawHighlight(rect);
-			if (Widgets.ButtonImage(rect, this.iconDef.Icon, XenotypeDef.IconColor, true, null))
-			{
-				Find.WindowStack.Add(new Dialog_SelectXenotypeIcon(this.iconDef, delegate(XenotypeIconDef i)
-				{
-					this.iconDef = i;
-				}));
-			}
-			if (Mouse.IsOver(rect))
-			{
-				Widgets.DrawHighlight(rect);
-				TooltipHandler.TipRegion(rect, "SelectIconDesc".Translate() + "\n\n" + "ClickToEdit".Translate().Colorize(ColoredText.SubtleGrayColor));
-			}
+			TooltipHandler.TipRegion(rect, "SelectIconDesc".Translate() + "\n\n" + "ClickToEdit".Translate().Colorize(ColoredText.SubtleGrayColor));
 		}
+	}
 
-		// Token: 0x06011F47 RID: 73543 RVA: 0x000026EA File Offset: 0x000008EA
-		protected virtual void PostXenotypeOnGUI(float curX, float curY)
+	protected virtual void PostXenotypeOnGUI(float curX, float curY)
+	{
+	}
+
+	protected abstract void Accept();
+
+	protected abstract void DrawGenes(Rect rect);
+
+	protected virtual void OnGenesChanged()
+	{
+		randomChosenGroups.Clear();
+		leftChosenGroups.Clear();
+		cachedOverriddenGenes.Clear();
+		cachedUnoverriddenGenes.Clear();
+		tmpGenesWithType.Clear();
+		gcx = 0;
+		met = 0;
+		arc = 0;
+		List<GeneDef> selectedGenes = SelectedGenes;
+		for (int i = 0; i < selectedGenes.Count; i++)
 		{
-		}
-
-		// Token: 0x06011F48 RID: 73544
-		protected abstract void Accept();
-
-		// Token: 0x06011F49 RID: 73545
-		protected abstract void DrawGenes(Rect rect);
-
-		// Token: 0x06011F4A RID: 73546 RVA: 0x0053A614 File Offset: 0x00538814
-		protected virtual void OnGenesChanged()
-		{
-			this.randomChosenGroups.Clear();
-			this.leftChosenGroups.Clear();
-			this.cachedOverriddenGenes.Clear();
-			this.cachedUnoverriddenGenes.Clear();
-			this.tmpGenesWithType.Clear();
-			this.gcx = 0;
-			this.met = 0;
-			this.arc = 0;
-			List<GeneDef> selectedGenes = this.SelectedGenes;
-			for (int i = 0; i < selectedGenes.Count; i++)
+			if (!selectedGenes[i].RandomChosen)
 			{
-				if (selectedGenes[i].RandomChosen)
+				continue;
+			}
+			for (int j = i + 1; j < selectedGenes.Count; j++)
+			{
+				if (selectedGenes[i].ConflictsWith(selectedGenes[j]))
 				{
-					for (int j = i + 1; j < selectedGenes.Count; j++)
+					if (!randomChosenGroups.ContainsKey(selectedGenes[i]))
 					{
-						if (selectedGenes[i].ConflictsWith(selectedGenes[j]))
+						randomChosenGroups.Add(selectedGenes[i], new List<GeneDef> { selectedGenes[i] });
+					}
+					randomChosenGroups[selectedGenes[i]].Add(selectedGenes[j]);
+				}
+			}
+		}
+		for (int k = 0; k < selectedGenes.Count; k++)
+		{
+			if (selectedGenes[k].RandomChosen)
+			{
+				continue;
+			}
+			for (int l = k + 1; l < selectedGenes.Count; l++)
+			{
+				if (selectedGenes[l].RandomChosen || !selectedGenes[k].ConflictsWith(selectedGenes[l]))
+				{
+					continue;
+				}
+				int num = GeneUtility.GenesInOrder.IndexOf(selectedGenes[k]);
+				int num2 = GeneUtility.GenesInOrder.IndexOf(selectedGenes[l]);
+				GeneDef leftMost = ((num < num2) ? selectedGenes[k] : selectedGenes[l]);
+				GeneDef rightMost = ((num >= num2) ? selectedGenes[k] : selectedGenes[l]);
+				GeneLeftChosenGroup geneLeftChosenGroup = leftChosenGroups.FirstOrDefault((GeneLeftChosenGroup x) => x.leftChosen == leftMost);
+				GeneLeftChosenGroup geneLeftChosenGroup2 = leftChosenGroups.FirstOrDefault((GeneLeftChosenGroup x) => x.leftChosen == rightMost);
+				if (geneLeftChosenGroup == null)
+				{
+					geneLeftChosenGroup = new GeneLeftChosenGroup(leftMost);
+					leftChosenGroups.Add(geneLeftChosenGroup);
+				}
+				if (geneLeftChosenGroup2 != null)
+				{
+					foreach (GeneDef overriddenGene in geneLeftChosenGroup2.overriddenGenes)
+					{
+						if (!geneLeftChosenGroup.overriddenGenes.Contains(overriddenGene))
 						{
-							if (!this.randomChosenGroups.ContainsKey(selectedGenes[i]))
-							{
-								this.randomChosenGroups.Add(selectedGenes[i], new List<GeneDef>
-								{
-									selectedGenes[i]
-								});
-							}
-							this.randomChosenGroups[selectedGenes[i]].Add(selectedGenes[j]);
+							geneLeftChosenGroup.overriddenGenes.Add(overriddenGene);
+						}
+						if (!cachedOverriddenGenes.Contains(overriddenGene))
+						{
+							cachedOverriddenGenes.Add(overriddenGene);
 						}
 					}
+					leftChosenGroups.Remove(geneLeftChosenGroup2);
 				}
-			}
-			for (int k = 0; k < selectedGenes.Count; k++)
-			{
-				if (!selectedGenes[k].RandomChosen)
+				if (!geneLeftChosenGroup.overriddenGenes.Contains(rightMost))
 				{
-					for (int l = k + 1; l < selectedGenes.Count; l++)
-					{
-						if (!selectedGenes[l].RandomChosen && selectedGenes[k].ConflictsWith(selectedGenes[l]))
-						{
-							int num = GeneUtility.GenesInOrder.IndexOf(selectedGenes[k]);
-							int num2 = GeneUtility.GenesInOrder.IndexOf(selectedGenes[l]);
-							GeneDef leftMost = (num < num2) ? selectedGenes[k] : selectedGenes[l];
-							GeneDef rightMost = (num >= num2) ? selectedGenes[k] : selectedGenes[l];
-							GeneLeftChosenGroup geneLeftChosenGroup = this.leftChosenGroups.FirstOrDefault((GeneLeftChosenGroup x) => x.leftChosen == leftMost);
-							GeneLeftChosenGroup geneLeftChosenGroup2 = this.leftChosenGroups.FirstOrDefault((GeneLeftChosenGroup x) => x.leftChosen == rightMost);
-							if (geneLeftChosenGroup == null)
-							{
-								geneLeftChosenGroup = new GeneLeftChosenGroup(leftMost);
-								this.leftChosenGroups.Add(geneLeftChosenGroup);
-							}
-							if (geneLeftChosenGroup2 != null)
-							{
-								foreach (GeneDef item in geneLeftChosenGroup2.overriddenGenes)
-								{
-									if (!geneLeftChosenGroup.overriddenGenes.Contains(item))
-									{
-										geneLeftChosenGroup.overriddenGenes.Add(item);
-									}
-									if (!this.cachedOverriddenGenes.Contains(item))
-									{
-										this.cachedOverriddenGenes.Add(item);
-									}
-								}
-								this.leftChosenGroups.Remove(geneLeftChosenGroup2);
-							}
-							if (!geneLeftChosenGroup.overriddenGenes.Contains(rightMost))
-							{
-								geneLeftChosenGroup.overriddenGenes.Add(rightMost);
-							}
-							if (!this.cachedOverriddenGenes.Contains(rightMost))
-							{
-								this.cachedOverriddenGenes.Add(rightMost);
-							}
-						}
-					}
+					geneLeftChosenGroup.overriddenGenes.Add(rightMost);
 				}
-			}
-			Func<GeneDef, int> <>9__2;
-			foreach (GeneLeftChosenGroup geneLeftChosenGroup3 in this.leftChosenGroups)
-			{
-				List<GeneDef> overriddenGenes = geneLeftChosenGroup3.overriddenGenes;
-				Func<GeneDef, int> selector;
-				if ((selector = <>9__2) == null)
+				if (!cachedOverriddenGenes.Contains(rightMost))
 				{
-					selector = (<>9__2 = ((GeneDef x) => selectedGenes.IndexOf(x)));
+					cachedOverriddenGenes.Add(rightMost);
 				}
-				overriddenGenes.SortBy(selector);
-			}
-			this.cachedUnoverriddenGenes.AddRange(this.SelectedGenes);
-			foreach (GeneDef item2 in this.cachedOverriddenGenes)
-			{
-				this.cachedUnoverriddenGenes.Remove(item2);
-			}
-			for (int m = 0; m < selectedGenes.Count; m++)
-			{
-				this.tmpGenesWithType.Add(new GeneDefWithType(selectedGenes[m], true));
-			}
-			foreach (GeneDef geneDef in this.tmpGenesWithType.NonOverriddenGenes().Distinct<GeneDef>())
-			{
-				this.gcx += geneDef.biostatCpx;
-				this.met += geneDef.biostatMet;
-				this.arc += geneDef.biostatArc;
 			}
 		}
-
-		// Token: 0x06011F4B RID: 73547
-		protected abstract void UpdateSearchResults();
-
-		// Token: 0x06011F4C RID: 73548 RVA: 0x0053AB20 File Offset: 0x00538D20
-		protected virtual void DoBottomButtons(Rect rect)
+		foreach (GeneLeftChosenGroup leftChosenGroup in leftChosenGroups)
 		{
-			if (Widgets.ButtonText(new Rect(rect.xMax - GeneCreationDialogBase.ButSize.x, rect.y, GeneCreationDialogBase.ButSize.x, GeneCreationDialogBase.ButSize.y), this.AcceptButtonLabel, true, true, true, null) && this.CanAccept())
-			{
-				this.Accept();
-			}
-			if (Widgets.ButtonText(new Rect(rect.x, rect.y, GeneCreationDialogBase.ButSize.x, GeneCreationDialogBase.ButSize.y), "Close".Translate(), true, true, true, null))
-			{
-				this.Close(true);
-			}
+			leftChosenGroup.overriddenGenes.SortBy((GeneDef x) => selectedGenes.IndexOf(x));
 		}
-
-		// Token: 0x06011F4D RID: 73549 RVA: 0x0053ABD8 File Offset: 0x00538DD8
-		protected GeneCreationDialogBase() : base(null)
+		cachedUnoverriddenGenes.AddRange(SelectedGenes);
+		foreach (GeneDef cachedOverriddenGene in cachedOverriddenGenes)
 		{
+			cachedUnoverriddenGenes.Remove(cachedOverriddenGene);
 		}
+		for (int m = 0; m < selectedGenes.Count; m++)
+		{
+			tmpGenesWithType.Add(new GeneDefWithType(selectedGenes[m], xenogene: true));
+		}
+		foreach (GeneDef item in tmpGenesWithType.NonOverriddenGenes().Distinct())
+		{
+			gcx += item.biostatCpx;
+			met += item.biostatMet;
+			arc += item.biostatArc;
+		}
+	}
 
-		// Token: 0x0400B9E6 RID: 47590
-		protected int gcx;
+	protected abstract void UpdateSearchResults();
 
-		// Token: 0x0400B9E7 RID: 47591
-		protected int met;
-
-		// Token: 0x0400B9E8 RID: 47592
-		protected int arc;
-
-		// Token: 0x0400B9E9 RID: 47593
-		protected string xenotypeName;
-
-		// Token: 0x0400B9EA RID: 47594
-		protected bool xenotypeNameLocked;
-
-		// Token: 0x0400B9EB RID: 47595
-		protected float scrollHeight;
-
-		// Token: 0x0400B9EC RID: 47596
-		protected Vector2 scrollPosition;
-
-		// Token: 0x0400B9ED RID: 47597
-		protected float selectedHeight;
-
-		// Token: 0x0400B9EE RID: 47598
-		protected float unselectedHeight;
-
-		// Token: 0x0400B9EF RID: 47599
-		protected bool ignoreRestrictions;
-
-		// Token: 0x0400B9F0 RID: 47600
-		protected float postXenotypeHeight;
-
-		// Token: 0x0400B9F1 RID: 47601
-		protected bool alwaysUseFullBiostatsTableHeight;
-
-		// Token: 0x0400B9F2 RID: 47602
-		protected int maxGCX = -1;
-
-		// Token: 0x0400B9F3 RID: 47603
-		protected float searchWidgetOffsetX;
-
-		// Token: 0x0400B9F4 RID: 47604
-		protected QuickSearchWidget quickSearchWidget = new QuickSearchWidget();
-
-		// Token: 0x0400B9F5 RID: 47605
-		protected HashSet<GeneDef> matchingGenes = new HashSet<GeneDef>();
-
-		// Token: 0x0400B9F6 RID: 47606
-		protected Dictionary<GeneDef, List<GeneDef>> randomChosenGroups = new Dictionary<GeneDef, List<GeneDef>>();
-
-		// Token: 0x0400B9F7 RID: 47607
-		protected List<GeneLeftChosenGroup> leftChosenGroups = new List<GeneLeftChosenGroup>();
-
-		// Token: 0x0400B9F8 RID: 47608
-		protected List<GeneDef> cachedOverriddenGenes = new List<GeneDef>();
-
-		// Token: 0x0400B9F9 RID: 47609
-		protected List<GeneDef> cachedUnoverriddenGenes = new List<GeneDef>();
-
-		// Token: 0x0400B9FA RID: 47610
-		protected List<GeneDefWithType> tmpGenesWithType = new List<GeneDefWithType>();
-
-		// Token: 0x0400B9FB RID: 47611
-		protected XenotypeIconDef iconDef;
-
-		// Token: 0x0400B9FC RID: 47612
-		protected static readonly Vector2 ButSize = new Vector2(150f, 38f);
-
-		// Token: 0x0400B9FD RID: 47613
-		protected const float HeaderHeight = 35f;
-
-		// Token: 0x0400B9FE RID: 47614
-		protected const float GeneGap = 4f;
-
-		// Token: 0x0400B9FF RID: 47615
-		private const int MaxNameLength = 40;
-
-		// Token: 0x0400BA00 RID: 47616
-		private const int NumCharsTypedBeforeAutoLockingName = 3;
-
-		// Token: 0x0400BA01 RID: 47617
-		private const int MaxTriesToGenerateUniqueXenotypeNames = 1000;
-
-		// Token: 0x0400BA02 RID: 47618
-		private const float TextFieldWidthPct = 0.25f;
-
-		// Token: 0x0400BA03 RID: 47619
-		private static readonly Regex ValidSymbolRegex = new Regex("^[\\p{L}0-9 '\\-]*$");
-
-		// Token: 0x0400BA04 RID: 47620
-		public static readonly Texture2D UnlockedTex = ContentFinder<Texture2D>.Get("UI/Overlays/LockedMonochrome", true);
-
-		// Token: 0x0400BA05 RID: 47621
-		public static readonly Texture2D LockedTex = ContentFinder<Texture2D>.Get("UI/Overlays/Locked", true);
-
-		// Token: 0x0400BA06 RID: 47622
-		protected const float BiostatsWidth = 38f;
-
-		// Token: 0x0400BA07 RID: 47623
-		public static readonly Vector2 GeneSize = new Vector2(87f, 68f);
-
-		// Token: 0x0400BA08 RID: 47624
-		protected static readonly Color OutlineColorUnselected = new Color(1f, 1f, 1f, 0.1f);
-
-		// Token: 0x0400BA09 RID: 47625
-		protected const float GenepackGap = 14f;
-
-		// Token: 0x0400BA0A RID: 47626
-		protected const float QuickSearchFilterWidth = 300f;
+	protected virtual void DoBottomButtons(Rect rect)
+	{
+		if (Widgets.ButtonText(new Rect(rect.xMax - ButSize.x, rect.y, ButSize.x, ButSize.y), AcceptButtonLabel, drawBackground: true, doMouseoverSound: true, active: true, null) && CanAccept())
+		{
+			Accept();
+		}
+		if (Widgets.ButtonText(new Rect(rect.x, rect.y, ButSize.x, ButSize.y), "Close".Translate(), drawBackground: true, doMouseoverSound: true, active: true, null))
+		{
+			Close();
+		}
 	}
 }

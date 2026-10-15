@@ -1,53 +1,222 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public static class ReadingColumnUIUtility
 {
-	// Token: 0x02003474 RID: 13428
-	public static class ReadingColumnUIUtility
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass2_0
 	{
-		// Token: 0x06012E20 RID: 77344 RVA: 0x00597DC0 File Offset: 0x00595FC0
-		public static void DoAssignReadingButtons(Rect rect, Pawn pawn)
+		public Pawn pawn;
+
+		internal void _003CButton_GenerateMenu_003Eb__1()
 		{
-			Rect rect2 = rect.ContractedBy(0f, 2f);
-			string label = pawn.reading.CurrentPolicy.label;
-			Widgets.Dropdown<Pawn, ReadingPolicy>(rect2, pawn, (Pawn p) => p.reading.CurrentPolicy, new Func<Pawn, IEnumerable<Widgets.DropdownMenuElement<ReadingPolicy>>>(ReadingColumnUIUtility.Button_GenerateMenu), label.Truncate(rect2.width, null), null, pawn.reading.CurrentPolicy.label, null, null, true);
-			UIHighlighter.HighlightOpportunity(rect2, "ReadingAssignPolicy");
+			Find.WindowStack.Add(new Dialog_ManageReadingPolicies(pawn.reading.CurrentPolicy));
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass2_1
+	{
+		public ReadingPolicy policy;
+
+		public _003C_003Ec__DisplayClass2_0 CS_0024_003C_003E8__locals1;
+
+		internal void _003CButton_GenerateMenu_003Eb__0()
+		{
+			CS_0024_003C_003E8__locals1.pawn.reading.CurrentPolicy = policy;
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CButton_GenerateMenu_003Ed__2 : IEnumerable<Widgets.DropdownMenuElement<ReadingPolicy>>, IEnumerable, IEnumerator<Widgets.DropdownMenuElement<ReadingPolicy>>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Widgets.DropdownMenuElement<ReadingPolicy> _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private Pawn pawn;
+
+		public Pawn _003C_003E3__pawn;
+
+		private _003C_003Ec__DisplayClass2_0 _003C_003E8__1;
+
+		private List<ReadingPolicy>.Enumerator _003C_003E7__wrap1;
+
+		Widgets.DropdownMenuElement<ReadingPolicy> IEnumerator<Widgets.DropdownMenuElement<ReadingPolicy>>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x06012E21 RID: 77345 RVA: 0x00597E4E File Offset: 0x0059604E
-		private static IEnumerable<Widgets.DropdownMenuElement<ReadingPolicy>> Button_GenerateMenu(Pawn pawn)
+		object IEnumerator.Current
 		{
-			using (List<ReadingPolicy>.Enumerator enumerator = Current.Game.readingPolicyDatabase.AllReadingPolicies.GetEnumerator())
+			[DebuggerHidden]
+			get
 			{
-				while (enumerator.MoveNext())
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CButton_GenerateMenu_003Ed__2(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
 				{
-					ReadingPolicy policy = enumerator.Current;
-					yield return new Widgets.DropdownMenuElement<ReadingPolicy>
-					{
-						option = new FloatMenuOption(policy.label, delegate()
-						{
-							pawn.reading.CurrentPolicy = policy;
-						}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0),
-						payload = policy
-					};
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
 				}
 			}
-			List<ReadingPolicy>.Enumerator enumerator = default(List<ReadingPolicy>.Enumerator);
-			yield return new Widgets.DropdownMenuElement<ReadingPolicy>
-			{
-				option = new FloatMenuOption(string.Format("{0}...", "AssignTabEdit".Translate()), delegate()
-				{
-					Find.WindowStack.Add(new Dialog_ManageReadingPolicies(pawn.reading.CurrentPolicy));
-				}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0)
-			};
-			yield break;
-			yield break;
+			_003C_003E8__1 = null;
+			_003C_003E7__wrap1 = default(List<ReadingPolicy>.Enumerator);
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x0400C3C1 RID: 50113
-		public const string ReadingAssigningTutorHighlightTag = "ReadingAssignPolicy";
+		private bool MoveNext()
+		{
+			try
+			{
+				switch (_003C_003E1__state)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E8__1 = new _003C_003Ec__DisplayClass2_0();
+					_003C_003E8__1.pawn = pawn;
+					_003C_003E7__wrap1 = Current.Game.readingPolicyDatabase.AllReadingPolicies.GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_00ee;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_00ee;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						return false;
+					}
+					IL_00ee:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						_003C_003Ec__DisplayClass2_1 CS_0024_003C_003E8__locals4 = new _003C_003Ec__DisplayClass2_1
+						{
+							CS_0024_003C_003E8__locals1 = _003C_003E8__1,
+							policy = _003C_003E7__wrap1.Current
+						};
+						_003C_003E2__current = new Widgets.DropdownMenuElement<ReadingPolicy>
+						{
+							option = new FloatMenuOption(CS_0024_003C_003E8__locals4.policy.label, delegate
+							{
+								CS_0024_003C_003E8__locals4.CS_0024_003C_003E8__locals1.pawn.reading.CurrentPolicy = CS_0024_003C_003E8__locals4.policy;
+							}),
+							payload = CS_0024_003C_003E8__locals4.policy
+						};
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = default(List<ReadingPolicy>.Enumerator);
+					_003C_003E2__current = new Widgets.DropdownMenuElement<ReadingPolicy>
+					{
+						option = new FloatMenuOption($"{"AssignTabEdit".Translate()}...", delegate
+						{
+							Find.WindowStack.Add(new Dialog_ManageReadingPolicies(_003C_003E8__1.pawn.reading.CurrentPolicy));
+						})
+					};
+					_003C_003E1__state = 2;
+					return true;
+				}
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap1/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Widgets.DropdownMenuElement<ReadingPolicy>> IEnumerable<Widgets.DropdownMenuElement<ReadingPolicy>>.GetEnumerator()
+		{
+			_003CButton_GenerateMenu_003Ed__2 _003CButton_GenerateMenu_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CButton_GenerateMenu_003Ed__ = this;
+			}
+			else
+			{
+				_003CButton_GenerateMenu_003Ed__ = new _003CButton_GenerateMenu_003Ed__2(0);
+			}
+			_003CButton_GenerateMenu_003Ed__.pawn = _003C_003E3__pawn;
+			return _003CButton_GenerateMenu_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Widgets.DropdownMenuElement<ReadingPolicy>>)this).GetEnumerator();
+		}
+	}
+
+	public const string ReadingAssigningTutorHighlightTag = "ReadingAssignPolicy";
+
+	public static void DoAssignReadingButtons(Rect rect, Pawn pawn)
+	{
+		Rect rect2 = rect.ContractedBy(0f, 2f);
+		string label = pawn.reading.CurrentPolicy.label;
+		Widgets.Dropdown(rect2, pawn, (Pawn p) => p.reading.CurrentPolicy, Button_GenerateMenu, label.Truncate(rect2.width), null, pawn.reading.CurrentPolicy.label, null, null, paintable: true);
+		UIHighlighter.HighlightOpportunity(rect2, "ReadingAssignPolicy");
+	}
+
+	[IteratorStateMachine(typeof(_003CButton_GenerateMenu_003Ed__2))]
+	private static IEnumerable<Widgets.DropdownMenuElement<ReadingPolicy>> Button_GenerateMenu(Pawn pawn)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CButton_GenerateMenu_003Ed__2(-2)
+		{
+			_003C_003E3__pawn = pawn
+		};
 	}
 }

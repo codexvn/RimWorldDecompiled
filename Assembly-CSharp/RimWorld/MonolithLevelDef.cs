@@ -1,176 +1,278 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class MonolithLevelDef : Def
 {
-	// Token: 0x02001A9B RID: 6811
-	public class MonolithLevelDef : Def
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__41 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700175C RID: 5980
-		// (get) Token: 0x06009882 RID: 39042 RVA: 0x002C7E8F File Offset: 0x002C608F
-		public Texture2D UIIcon
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public MonolithLevelDef _003C_003E4__this;
+
+		private IEnumerator<string> _003C_003E7__wrap1;
+
+		string IEnumerator<string>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.uiIcon;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06009883 RID: 39043 RVA: 0x002C7E97 File Offset: 0x002C6097
-		public override void PostLoad()
+		object IEnumerator.Current
 		{
-			LongEventHandler.ExecuteWhenFinished(delegate
+			[DebuggerHidden]
+			get
 			{
-				if (!this.uiIconPath.NullOrEmpty())
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__41(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
 				{
-					this.uiIcon = ContentFinder<Texture2D>.Get(this.uiIconPath, true);
 				}
-			});
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x06009884 RID: 39044 RVA: 0x002C7EAA File Offset: 0x002C60AA
-		public override IEnumerable<string> ConfigErrors()
+		private bool MoveNext()
 		{
-			foreach (string text in base.ConfigErrors())
+			try
 			{
-				yield return text;
+				int num = _003C_003E1__state;
+				MonolithLevelDef monolithLevelDef = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((Def)monolithLevelDef).ConfigErrors().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_006f:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (monolithLevelDef.entityCatagoryCompletionRequired != null && monolithLevelDef.entityCountCompletionRequired <= 0)
+					{
+						_003C_003E2__current = "entityCatagoryCompletionRequired is set but entityCountCompletionRequired is not";
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
+				}
+				return false;
 			}
-			IEnumerator<string> enumerator = null;
-			if (this.entityCatagoryCompletionRequired != null && this.entityCountCompletionRequired <= 0)
+			catch
 			{
-				yield return "entityCatagoryCompletionRequired is set but entityCountCompletionRequired is not";
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
-			yield break;
-			yield break;
 		}
 
-		// Token: 0x040066B9 RID: 26297
-		public int level;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x040066BA RID: 26298
-		public int graphicIndex;
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
 
-		// Token: 0x040066BB RID: 26299
-		public bool monolithGlows;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x040066BC RID: 26300
-		public int anomalyThreatTier;
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__41 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__41(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x040066BD RID: 26301
-		public bool useInactiveAnomalyThreatFraction;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x040066BE RID: 26302
-		public bool useActiveAnomalyThreatFraction;
+	public int level;
 
-		// Token: 0x040066BF RID: 26303
-		public float anomalyThreatFractionFactor = 1f;
+	public int graphicIndex;
 
-		// Token: 0x040066C0 RID: 26304
-		public float anomalyThreatFraction;
+	public bool monolithGlows;
 
-		// Token: 0x040066C1 RID: 26305
-		public List<IncidentDef> incidentsOnReached;
+	public int anomalyThreatTier;
 
-		// Token: 0x040066C2 RID: 26306
-		public bool triggersGrayPall;
+	public bool useInactiveAnomalyThreatFraction;
 
-		// Token: 0x040066C3 RID: 26307
-		public List<GameConditionDef> unreachableDuringConditions;
+	public bool useActiveAnomalyThreatFraction;
 
-		// Token: 0x040066C4 RID: 26308
-		public bool advanceThroughActivation;
+	public float anomalyThreatFractionFactor = 1f;
 
-		// Token: 0x040066C5 RID: 26309
-		public int desiredHarbingerTreeCount;
+	public float anomalyThreatFraction;
 
-		// Token: 0x040066C6 RID: 26310
-		public bool postEndgame;
+	public List<IncidentDef> incidentsOnReached;
 
-		// Token: 0x040066C7 RID: 26311
-		public int monolithGlowRadiusOverride = -1;
+	public bool triggersGrayPall;
 
-		// Token: 0x040066C8 RID: 26312
-		public KnowledgeCategoryDef monolithStudyCategory;
+	public List<GameConditionDef> unreachableDuringConditions;
 
-		// Token: 0x040066C9 RID: 26313
-		public EntityCategoryDef entityCatagoryCompletionRequired;
+	public bool advanceThroughActivation;
 
-		// Token: 0x040066CA RID: 26314
-		public int entityCountCompletionRequired;
+	public int desiredHarbingerTreeCount;
 
-		// Token: 0x040066CB RID: 26315
-		public float anomalyMentalBreakChance;
+	public bool postEndgame;
 
-		// Token: 0x040066CC RID: 26316
-		public SoundDef activateSound;
+	public int monolithGlowRadiusOverride = -1;
 
-		// Token: 0x040066CD RID: 26317
-		public SoundDef activatedSound;
+	public KnowledgeCategoryDef monolithStudyCategory;
 
-		// Token: 0x040066CE RID: 26318
-		public List<MonolithAttachment> attachments;
+	public EntityCategoryDef entityCatagoryCompletionRequired;
 
-		// Token: 0x040066CF RID: 26319
-		public IntVec2? sizeIncludingAttachments;
+	public int entityCountCompletionRequired;
 
-		// Token: 0x040066D0 RID: 26320
-		public string uiIconPath;
+	public float anomalyMentalBreakChance;
 
-		// Token: 0x040066D1 RID: 26321
-		[MustTranslate]
-		public string monolithLabel;
+	public SoundDef activateSound;
 
-		// Token: 0x040066D2 RID: 26322
-		[MustTranslate]
-		public string monolithDescription;
+	public SoundDef activatedSound;
 
-		// Token: 0x040066D3 RID: 26323
-		[MustTranslate]
-		public string levelInspectText;
+	public List<MonolithAttachment> attachments;
 
-		// Token: 0x040066D4 RID: 26324
-		[MustTranslate]
-		public string extraQuestDescription;
+	public IntVec2? sizeIncludingAttachments;
 
-		// Token: 0x040066D5 RID: 26325
-		[MustTranslate]
-		public string activateGizmoText;
+	public string uiIconPath;
 
-		// Token: 0x040066D6 RID: 26326
-		[MustTranslate]
-		public string activateFloatMenuText;
+	[MustTranslate]
+	public string monolithLabel;
 
-		// Token: 0x040066D7 RID: 26327
-		[MustTranslate]
-		public string activateGizmoDescription;
+	[MustTranslate]
+	public string monolithDescription;
 
-		// Token: 0x040066D8 RID: 26328
-		[MustTranslate]
-		public string pawnSentToActivateMessage;
+	[MustTranslate]
+	public string levelInspectText;
 
-		// Token: 0x040066D9 RID: 26329
-		[MustTranslate]
-		public string monolithCanBeActivatedText;
+	[MustTranslate]
+	public string extraQuestDescription;
 
-		// Token: 0x040066DA RID: 26330
-		[MustTranslate]
-		public string activateQuestText;
+	[MustTranslate]
+	public string activateGizmoText;
 
-		// Token: 0x040066DB RID: 26331
-		[MustTranslate]
-		public string activatableLetterLabel;
+	[MustTranslate]
+	public string activateFloatMenuText;
 
-		// Token: 0x040066DC RID: 26332
-		[MustTranslate]
-		public string activatableLetterText;
+	[MustTranslate]
+	public string activateGizmoDescription;
 
-		// Token: 0x040066DD RID: 26333
-		[MustTranslate]
-		public string activatedLetterText;
+	[MustTranslate]
+	public string pawnSentToActivateMessage;
 
-		// Token: 0x040066DE RID: 26334
-		private Texture2D uiIcon;
+	[MustTranslate]
+	public string monolithCanBeActivatedText;
+
+	[MustTranslate]
+	public string activateQuestText;
+
+	[MustTranslate]
+	public string activatableLetterLabel;
+
+	[MustTranslate]
+	public string activatableLetterText;
+
+	[MustTranslate]
+	public string activatedLetterText;
+
+	private Texture2D uiIcon;
+
+	public Texture2D UIIcon => uiIcon;
+
+	public override void PostLoad()
+	{
+		LongEventHandler.ExecuteWhenFinished(delegate
+		{
+			if (!uiIconPath.NullOrEmpty())
+			{
+				uiIcon = ContentFinder<Texture2D>.Get(uiIconPath);
+			}
+		});
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__41))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__41(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

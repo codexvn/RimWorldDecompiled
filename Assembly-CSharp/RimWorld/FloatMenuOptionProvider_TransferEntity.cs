@@ -1,93 +1,220 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class FloatMenuOptionProvider_TransferEntity : FloatMenuOptionProvider
 {
-	// Token: 0x02003343 RID: 13123
-	public class FloatMenuOptionProvider_TransferEntity : FloatMenuOptionProvider
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass9_0
 	{
-		// Token: 0x1700300B RID: 12299
-		// (get) Token: 0x06012717 RID: 75543 RVA: 0x000028E7 File Offset: 0x00000AE7
-		protected override bool Drafted
-		{
-			get
-			{
-				return true;
-			}
-		}
+		public FloatMenuContext context;
 
-		// Token: 0x1700300C RID: 12300
-		// (get) Token: 0x06012718 RID: 75544 RVA: 0x000028E7 File Offset: 0x00000AE7
-		protected override bool Undrafted
-		{
-			get
-			{
-				return true;
-			}
-		}
+		public Pawn heldPawn;
 
-		// Token: 0x1700300D RID: 12301
-		// (get) Token: 0x06012719 RID: 75545 RVA: 0x00002501 File Offset: 0x00000701
-		protected override bool Multiselect
+		public Thing clickedThing;
+
+		internal bool _003CGetOptionsFor_003Eb__0(Thing b)
 		{
-			get
+			if (!(b is Building_HoldingPlatform building_HoldingPlatform))
 			{
 				return false;
 			}
+			if (building_HoldingPlatform.Occupied)
+			{
+				return false;
+			}
+			if (!context.FirstSelectedPawn.CanReserve(building_HoldingPlatform))
+			{
+				return false;
+			}
+			return true;
 		}
 
-		// Token: 0x1700300E RID: 12302
-		// (get) Token: 0x0601271A RID: 75546 RVA: 0x000028E7 File Offset: 0x00000AE7
-		protected override bool RequiresManipulation
+		internal float _003CGetOptionsFor_003Eb__1(Thing t)
 		{
+			CompEntityHolder compEntityHolder = t.TryGetComp<CompEntityHolder>();
+			if (compEntityHolder != null && compEntityHolder.ContainmentStrength >= heldPawn.GetStatValue(StatDefOf.MinimumContainmentStrength))
+			{
+				return compEntityHolder.ContainmentStrength / Mathf.Max(heldPawn.PositionHeld.DistanceTo(t.Position), 1f);
+			}
+			return 0f;
+		}
+
+		internal void _003CGetOptionsFor_003Eb__2()
+		{
+			StudyUtility.TargetHoldingPlatformForEntity(context.FirstSelectedPawn, heldPawn, transferBetweenPlatforms: true, clickedThing);
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGetOptionsFor_003Ed__9 : IEnumerable<FloatMenuOption>, IEnumerable, IEnumerator<FloatMenuOption>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private FloatMenuOption _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private FloatMenuContext context;
+
+		public FloatMenuContext _003C_003E3__context;
+
+		private Thing clickedThing;
+
+		public Thing _003C_003E3__clickedThing;
+
+		FloatMenuOption IEnumerator<FloatMenuOption>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				return true;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0601271B RID: 75547 RVA: 0x005631A8 File Offset: 0x005613A8
-		protected override bool AppliesInt(FloatMenuContext context)
+		object IEnumerator.Current
 		{
-			return ModsConfig.AnomalyActive;
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x0601271C RID: 75548 RVA: 0x0056F837 File Offset: 0x0056DA37
-		public override IEnumerable<FloatMenuOption> GetOptionsFor(Thing clickedThing, FloatMenuContext context)
+		[DebuggerHidden]
+		public _003CGetOptionsFor_003Ed__9(int _003C_003E1__state)
 		{
-			CompEntityHolder compEntityHolder;
-			if (!clickedThing.TryGetComp(out compEntityHolder) || compEntityHolder.HeldPawn == null)
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			switch (_003C_003E1__state)
 			{
-				yield break;
-			}
-			if (!context.FirstSelectedPawn.CanReserveAndReach(clickedThing, PathEndMode.OnCell, Danger.Deadly, 1, -1, null, true))
+			default:
+				return false;
+			case 0:
 			{
-				yield break;
-			}
-			Pawn heldPawn = compEntityHolder.HeldPawn;
-			if (GenClosest.ClosestThing_Global_Reachable(context.FirstSelectedPawn.Position, context.FirstSelectedPawn.Map, context.FirstSelectedPawn.Map.listerBuildings.AllBuildingsColonistOfClass<Building_HoldingPlatform>(), PathEndMode.ClosestTouch, TraverseParms.For(context.FirstSelectedPawn, Danger.Some, TraverseMode.ByPawn, false, false, false, true), 9999f, delegate(Thing b)
-			{
-				Building_HoldingPlatform building_HoldingPlatform = b as Building_HoldingPlatform;
-				return building_HoldingPlatform != null && !building_HoldingPlatform.Occupied && context.FirstSelectedPawn.CanReserve(building_HoldingPlatform, 1, -1, null, false);
-			}, delegate(Thing t)
-			{
-				CompEntityHolder compEntityHolder2 = t.TryGetComp<CompEntityHolder>();
-				if (compEntityHolder2 != null && compEntityHolder2.ContainmentStrength >= heldPawn.GetStatValue(StatDefOf.MinimumContainmentStrength, true, -1))
+				_003C_003E1__state = -1;
+				_003C_003Ec__DisplayClass9_0 CS_0024_003C_003E8__locals17 = new _003C_003Ec__DisplayClass9_0
 				{
-					return compEntityHolder2.ContainmentStrength / Mathf.Max(heldPawn.PositionHeld.DistanceTo(t.Position), 1f);
+					context = context,
+					clickedThing = clickedThing
+				};
+				if (!CS_0024_003C_003E8__locals17.clickedThing.TryGetComp(out CompEntityHolder comp) || comp.HeldPawn == null)
+				{
+					return false;
 				}
-				return 0f;
-			}, false) != null)
-			{
-				yield return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("TransferEntity".Translate(heldPawn) + " (" + "ChooseEntityHolder".Translate() + "...)", delegate()
+				if (!CS_0024_003C_003E8__locals17.context.FirstSelectedPawn.CanReserveAndReach(CS_0024_003C_003E8__locals17.clickedThing, PathEndMode.OnCell, Danger.Deadly, 1, -1, null, ignoreOtherReservations: true))
 				{
-					StudyUtility.TargetHoldingPlatformForEntity(context.FirstSelectedPawn, heldPawn, true, clickedThing);
-				}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0), context.FirstSelectedPawn, clickedThing, "ReservedBy", null);
+					return false;
+				}
+				CS_0024_003C_003E8__locals17.heldPawn = comp.HeldPawn;
+				if (GenClosest.ClosestThing_Global_Reachable(CS_0024_003C_003E8__locals17.context.FirstSelectedPawn.Position, CS_0024_003C_003E8__locals17.context.FirstSelectedPawn.Map, CS_0024_003C_003E8__locals17.context.FirstSelectedPawn.Map.listerBuildings.AllBuildingsColonistOfClass<Building_HoldingPlatform>(), PathEndMode.ClosestTouch, TraverseParms.For(CS_0024_003C_003E8__locals17.context.FirstSelectedPawn, Danger.Some), 9999f, delegate(Thing b)
+				{
+					if (!(b is Building_HoldingPlatform building_HoldingPlatform))
+					{
+						return false;
+					}
+					if (building_HoldingPlatform.Occupied)
+					{
+						return false;
+					}
+					return CS_0024_003C_003E8__locals17.context.FirstSelectedPawn.CanReserve(building_HoldingPlatform) ? true : false;
+				}, delegate(Thing t)
+				{
+					CompEntityHolder compEntityHolder = t.TryGetComp<CompEntityHolder>();
+					return (compEntityHolder != null && compEntityHolder.ContainmentStrength >= CS_0024_003C_003E8__locals17.heldPawn.GetStatValue(StatDefOf.MinimumContainmentStrength)) ? (compEntityHolder.ContainmentStrength / Mathf.Max(CS_0024_003C_003E8__locals17.heldPawn.PositionHeld.DistanceTo(t.Position), 1f)) : 0f;
+				}) != null)
+				{
+					_003C_003E2__current = FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("TransferEntity".Translate(CS_0024_003C_003E8__locals17.heldPawn) + " (" + "ChooseEntityHolder".Translate() + "...)", delegate
+					{
+						StudyUtility.TargetHoldingPlatformForEntity(CS_0024_003C_003E8__locals17.context.FirstSelectedPawn, CS_0024_003C_003E8__locals17.heldPawn, transferBetweenPlatforms: true, CS_0024_003C_003E8__locals17.clickedThing);
+					}), CS_0024_003C_003E8__locals17.context.FirstSelectedPawn, CS_0024_003C_003E8__locals17.clickedThing);
+					_003C_003E1__state = 1;
+					return true;
+				}
+				break;
 			}
-			yield break;
+			case 1:
+				_003C_003E1__state = -1;
+				break;
+			}
+			return false;
 		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<FloatMenuOption> IEnumerable<FloatMenuOption>.GetEnumerator()
+		{
+			_003CGetOptionsFor_003Ed__9 _003CGetOptionsFor_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CGetOptionsFor_003Ed__ = this;
+			}
+			else
+			{
+				_003CGetOptionsFor_003Ed__ = new _003CGetOptionsFor_003Ed__9(0);
+			}
+			_003CGetOptionsFor_003Ed__.clickedThing = _003C_003E3__clickedThing;
+			_003CGetOptionsFor_003Ed__.context = _003C_003E3__context;
+			return _003CGetOptionsFor_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<FloatMenuOption>)this).GetEnumerator();
+		}
+	}
+
+	protected override bool Drafted => true;
+
+	protected override bool Undrafted => true;
+
+	protected override bool Multiselect => false;
+
+	protected override bool RequiresManipulation => true;
+
+	protected override bool AppliesInt(FloatMenuContext context)
+	{
+		return ModsConfig.AnomalyActive;
+	}
+
+	[IteratorStateMachine(typeof(_003CGetOptionsFor_003Ed__9))]
+	public override IEnumerable<FloatMenuOption> GetOptionsFor(Thing clickedThing, FloatMenuContext context)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetOptionsFor_003Ed__9(-2)
+		{
+			_003C_003E3__clickedThing = clickedThing,
+			_003C_003E3__context = context
+		};
 	}
 }

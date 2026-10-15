@@ -1,59 +1,79 @@
-﻿using System;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class ITab_Pawn_Health : ITab
 {
-	// Token: 0x020033B7 RID: 13239
-	public class ITab_Pawn_Health : ITab
+	public const float Width = 630f;
+
+	private Pawn PawnForHealth
 	{
-		// Token: 0x170030AB RID: 12459
-		// (get) Token: 0x060129BA RID: 76218 RVA: 0x005817E8 File Offset: 0x0057F9E8
-		private Pawn PawnForHealth
+		get
 		{
-			get
+			if (SelPawn != null)
 			{
-				if (this.SelPawn != null)
-				{
-					return this.SelPawn;
-				}
-				Corpse corpse = base.SelThing as Corpse;
-				if (corpse != null)
-				{
-					return corpse.InnerPawn;
-				}
-				return null;
+				return SelPawn;
 			}
-		}
-
-		// Token: 0x060129BB RID: 76219 RVA: 0x0058181B File Offset: 0x0057FA1B
-		public ITab_Pawn_Health()
-		{
-			this.size = new Vector2(630f, 430f);
-			this.labelKey = "TabHealth";
-			this.tutorTag = "Health";
-		}
-
-		// Token: 0x060129BC RID: 76220 RVA: 0x00581850 File Offset: 0x0057FA50
-		protected override void FillTab()
-		{
-			Pawn pawnForHealth = this.PawnForHealth;
-			if (pawnForHealth == null)
+			if (base.SelThing is Corpse corpse)
 			{
-				Log.Error("Health tab found no selected pawn to display.");
-				return;
+				return corpse.InnerPawn;
 			}
-			HealthCardUtility.DrawPawnHealthCard(new Rect(Vector2.zero, this.size), pawnForHealth, this.ShouldAllowOperations(), HealthCardUtility.ShowBloodLoss(base.SelThing), base.SelThing);
+			return null;
 		}
+	}
 
-		// Token: 0x060129BD RID: 76221 RVA: 0x005818A0 File Offset: 0x0057FAA0
-		private bool ShouldAllowOperations()
+	public ITab_Pawn_Health()
+	{
+		size = new Vector2(630f, 430f);
+		labelKey = "TabHealth";
+		tutorTag = "Health";
+	}
+
+	protected override void FillTab()
+	{
+		Pawn pawnForHealth = PawnForHealth;
+		if (pawnForHealth == null)
 		{
-			Pawn pawn = this.PawnForHealth;
-			return !pawn.Dead && base.SelThing.def.AllRecipes.Any((RecipeDef x) => x.AvailableNow && x.AvailableOnNow(pawn, null)) && (!pawn.IsMutant || pawn.mutant.Def.entitledToMedicalCare) && (pawn.Faction == Faction.OfPlayer || (pawn.IsPrisonerOfColony || (pawn.HostFaction == Faction.OfPlayer && !pawn.health.capacities.CapableOf(PawnCapacityDefOf.Moving))) || ((!pawn.RaceProps.IsFlesh || pawn.Faction == null || !pawn.Faction.HostileTo(Faction.OfPlayer)) && (!pawn.RaceProps.Humanlike && pawn.Downed)));
+			Log.Error("Health tab found no selected pawn to display.");
 		}
+		else
+		{
+			HealthCardUtility.DrawPawnHealthCard(new Rect(Vector2.zero, size), pawnForHealth, ShouldAllowOperations(), HealthCardUtility.ShowBloodLoss(base.SelThing), base.SelThing);
+		}
+	}
 
-		// Token: 0x0400C140 RID: 49472
-		public const float Width = 630f;
+	private bool ShouldAllowOperations()
+	{
+		Pawn pawn = PawnForHealth;
+		if (pawn.Dead)
+		{
+			return false;
+		}
+		if (!base.SelThing.def.AllRecipes.Any((RecipeDef x) => x.AvailableNow && x.AvailableOnNow(pawn)))
+		{
+			return false;
+		}
+		if (pawn.IsMutant && !pawn.mutant.Def.entitledToMedicalCare)
+		{
+			return false;
+		}
+		if (pawn.Faction == Faction.OfPlayer)
+		{
+			return true;
+		}
+		if (pawn.IsPrisonerOfColony || (pawn.HostFaction == Faction.OfPlayer && !pawn.health.capacities.CapableOf(PawnCapacityDefOf.Moving)))
+		{
+			return true;
+		}
+		if (pawn.RaceProps.IsFlesh && pawn.Faction != null && pawn.Faction.HostileTo(Faction.OfPlayer))
+		{
+			return false;
+		}
+		if (!pawn.RaceProps.Humanlike && pawn.Downed)
+		{
+			return true;
+		}
+		return false;
 	}
 }

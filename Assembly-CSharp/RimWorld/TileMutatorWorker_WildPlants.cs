@@ -1,56 +1,161 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class TileMutatorWorker_WildPlants : TileMutatorWorker
 {
-	// Token: 0x02002126 RID: 8486
-	public class TileMutatorWorker_WildPlants : TileMutatorWorker
+	[CompilerGenerated]
+	private sealed class _003CAdditionalWildPlants_003Ed__4 : IEnumerable<BiomePlantRecord>, IEnumerable, IEnumerator<BiomePlantRecord>, IEnumerator, IDisposable
 	{
-		// Token: 0x0600B90E RID: 47374 RVA: 0x0034CD7F File Offset: 0x0034AF7F
-		public TileMutatorWorker_WildPlants(TileMutatorDef def) : base(def)
-		{
-		}
+		private int _003C_003E1__state;
 
-		// Token: 0x0600B90F RID: 47375 RVA: 0x00356DF4 File Offset: 0x00354FF4
-		public override string GetLabel(PlanetTile tile)
-		{
-			return "WildPlants".Translate(this.GetPlantKind(tile).label);
-		}
+		private BiomePlantRecord _003C_003E2__current;
 
-		// Token: 0x0600B910 RID: 47376 RVA: 0x00356E16 File Offset: 0x00355016
-		public override string GetDescription(PlanetTile tile)
-		{
-			return this.def.description.Formatted(this.GetPlantKind(tile).label);
-		}
+		private int _003C_003El__initialThreadId;
 
-		// Token: 0x0600B911 RID: 47377 RVA: 0x00356E3E File Offset: 0x0035503E
-		public override IEnumerable<BiomePlantRecord> AdditionalWildPlants(PlanetTile tile)
+		public TileMutatorWorker_WildPlants _003C_003E4__this;
+
+		private PlanetTile tile;
+
+		public PlanetTile _003C_003E3__tile;
+
+		BiomePlantRecord IEnumerator<BiomePlantRecord>.Current
 		{
-			if (!ModsConfig.OdysseyActive)
+			[DebuggerHidden]
+			get
 			{
-				yield break;
+				return _003C_003E2__current;
 			}
-			yield return new BiomePlantRecord
-			{
-				plant = this.GetPlantKind(tile),
-				commonality = 0.1f
-			};
-			yield break;
 		}
 
-		// Token: 0x0600B912 RID: 47378 RVA: 0x00356E55 File Offset: 0x00355055
-		private ThingDef GetPlantKind(PlanetTile tile)
+		object IEnumerator.Current
 		{
-			Rand.PushState();
-			Rand.Seed = tile.GetHashCode();
-			ThingDef result = this.def.plantKinds.RandomElement<ThingDef>();
-			Rand.PopState();
-			return result;
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x04007FAF RID: 32687
-		private const float PlantCommonality = 0.1f;
+		[DebuggerHidden]
+		public _003CAdditionalWildPlants_003Ed__4(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			TileMutatorWorker_WildPlants tileMutatorWorker_WildPlants = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (!ModsConfig.OdysseyActive)
+				{
+					return false;
+				}
+				_003C_003E2__current = new BiomePlantRecord
+				{
+					plant = tileMutatorWorker_WildPlants.GetPlantKind(tile),
+					commonality = 0.1f
+				};
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<BiomePlantRecord> IEnumerable<BiomePlantRecord>.GetEnumerator()
+		{
+			_003CAdditionalWildPlants_003Ed__4 _003CAdditionalWildPlants_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CAdditionalWildPlants_003Ed__ = this;
+			}
+			else
+			{
+				_003CAdditionalWildPlants_003Ed__ = new _003CAdditionalWildPlants_003Ed__4(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CAdditionalWildPlants_003Ed__.tile = _003C_003E3__tile;
+			return _003CAdditionalWildPlants_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<BiomePlantRecord>)this).GetEnumerator();
+		}
+	}
+
+	private const float PlantCommonality = 0.1f;
+
+	public TileMutatorWorker_WildPlants(TileMutatorDef def)
+		: base(def)
+	{
+	}
+
+	public override string GetLabel(PlanetTile tile)
+	{
+		return "WildPlants".Translate(GetPlantKind(tile).label);
+	}
+
+	public override string GetDescription(PlanetTile tile)
+	{
+		return def.description.Formatted(GetPlantKind(tile).label);
+	}
+
+	[IteratorStateMachine(typeof(_003CAdditionalWildPlants_003Ed__4))]
+	public override IEnumerable<BiomePlantRecord> AdditionalWildPlants(PlanetTile tile)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CAdditionalWildPlants_003Ed__4(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__tile = tile
+		};
+	}
+
+	private ThingDef GetPlantKind(PlanetTile tile)
+	{
+		Rand.PushState();
+		Rand.Seed = tile.GetHashCode();
+		ThingDef result = def.plantKinds.RandomElement();
+		Rand.PopState();
+		return result;
 	}
 }

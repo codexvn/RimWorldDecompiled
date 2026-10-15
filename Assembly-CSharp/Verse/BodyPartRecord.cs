@@ -1,245 +1,754 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
-namespace Verse
+namespace Verse;
+
+public class BodyPartRecord
 {
-	// Token: 0x02000208 RID: 520
-	public class BodyPartRecord
+	[CompilerGenerated]
+	private sealed class _003CGetChildParts_003Ed__31 : IEnumerable<BodyPartRecord>, IEnumerable, IEnumerator<BodyPartRecord>, IEnumerator, IDisposable
 	{
-		// Token: 0x17000220 RID: 544
-		// (get) Token: 0x06000DCB RID: 3531 RVA: 0x00041A53 File Offset: 0x0003FC53
-		public bool IsCorePart
+		private int _003C_003E1__state;
+
+		private BodyPartRecord _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public BodyPartRecord _003C_003E4__this;
+
+		private BodyPartTagDef tag;
+
+		public BodyPartTagDef _003C_003E3__tag;
+
+		private int _003Ci_003E5__2;
+
+		private IEnumerator<BodyPartRecord> _003C_003E7__wrap2;
+
+		BodyPartRecord IEnumerator<BodyPartRecord>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.parent == null;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17000221 RID: 545
-		// (get) Token: 0x06000DCC RID: 3532 RVA: 0x00041A5E File Offset: 0x0003FC5E
-		public string Label
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (!this.customLabel.NullOrEmpty())
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetChildParts_003Ed__31(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 2)
+			{
+				try
 				{
-					return this.customLabel;
 				}
-				return this.def.label;
-			}
-		}
-
-		// Token: 0x17000222 RID: 546
-		// (get) Token: 0x06000DCD RID: 3533 RVA: 0x00041A7F File Offset: 0x0003FC7F
-		public string LabelCap
-		{
-			get
-			{
-				if (this.customLabel.NullOrEmpty())
+				finally
 				{
-					return this.def.LabelCap;
+					_003C_003Em__Finally1();
 				}
-				if (this.cachedCustomLabelCap == null)
+			}
+			_003C_003E7__wrap2 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				BodyPartRecord bodyPartRecord = _003C_003E4__this;
+				int num2;
+				switch (num)
 				{
-					this.cachedCustomLabelCap = this.customLabel.CapitalizeFirst();
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					if (bodyPartRecord.def.tags.Contains(tag))
+					{
+						_003C_003E2__current = bodyPartRecord;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					goto IL_0062;
+				case 1:
+					_003C_003E1__state = -1;
+					goto IL_0062;
+				case 2:
+					{
+						_003C_003E1__state = -3;
+						goto IL_00c5;
+					}
+					IL_0062:
+					_003Ci_003E5__2 = 0;
+					goto IL_00f1;
+					IL_00f1:
+					if (_003Ci_003E5__2 < bodyPartRecord.parts.Count)
+					{
+						_003C_003E7__wrap2 = bodyPartRecord.parts[_003Ci_003E5__2].GetChildParts(tag).GetEnumerator();
+						_003C_003E1__state = -3;
+						goto IL_00c5;
+					}
+					return false;
+					IL_00c5:
+					if (_003C_003E7__wrap2.MoveNext())
+					{
+						BodyPartRecord current = _003C_003E7__wrap2.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap2 = null;
+					num2 = _003Ci_003E5__2 + 1;
+					_003Ci_003E5__2 = num2;
+					goto IL_00f1;
 				}
-				return this.cachedCustomLabelCap;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x17000223 RID: 547
-		// (get) Token: 0x06000DCE RID: 3534 RVA: 0x00041ABE File Offset: 0x0003FCBE
-		public string LabelShort
+		bool IEnumerator.MoveNext()
 		{
-			get
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap2 != null)
 			{
-				return this.def.LabelShort;
+				_003C_003E7__wrap2.Dispose();
 			}
 		}
 
-		// Token: 0x17000224 RID: 548
-		// (get) Token: 0x06000DCF RID: 3535 RVA: 0x00041ACB File Offset: 0x0003FCCB
-		public string LabelShortCap
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			get
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<BodyPartRecord> IEnumerable<BodyPartRecord>.GetEnumerator()
+		{
+			_003CGetChildParts_003Ed__31 _003CGetChildParts_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				return this.def.LabelShortCap;
+				_003C_003E1__state = 0;
+				_003CGetChildParts_003Ed__ = this;
 			}
-		}
-
-		// Token: 0x17000225 RID: 549
-		// (get) Token: 0x06000DD0 RID: 3536 RVA: 0x00041AD8 File Offset: 0x0003FCD8
-		public int Index
-		{
-			get
+			else
 			{
-				return this.body.GetIndexOfPart(this);
-			}
-		}
-
-		// Token: 0x06000DD1 RID: 3537 RVA: 0x00041AE8 File Offset: 0x0003FCE8
-		public override string ToString()
-		{
-			return string.Concat(new string[]
-			{
-				"BodyPartRecord(",
-				(this.def != null) ? this.def.defName : "NULL_DEF",
-				" parts.Count=",
-				this.parts.Count.ToString(),
-				")"
-			});
-		}
-
-		// Token: 0x06000DD2 RID: 3538 RVA: 0x00041B4B File Offset: 0x0003FD4B
-		public void PostLoad()
-		{
-			this.untranslatedCustomLabel = this.customLabel;
-		}
-
-		// Token: 0x06000DD3 RID: 3539 RVA: 0x00041B5C File Offset: 0x0003FD5C
-		public bool IsInGroup(BodyPartGroupDef group)
-		{
-			for (int i = 0; i < this.groups.Count; i++)
-			{
-				if (this.groups[i] == group)
+				_003CGetChildParts_003Ed__ = new _003CGetChildParts_003Ed__31(0)
 				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CGetChildParts_003Ed__.tag = _003C_003E3__tag;
+			return _003CGetChildParts_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<BodyPartRecord>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGetConnectedParts_003Ed__35 : IEnumerable<BodyPartRecord>, IEnumerable, IEnumerator<BodyPartRecord>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private BodyPartRecord _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public BodyPartRecord _003C_003E4__this;
+
+		private BodyPartTagDef tag;
+
+		public BodyPartTagDef _003C_003E3__tag;
+
+		private IEnumerator<BodyPartRecord> _003C_003E7__wrap1;
+
+		BodyPartRecord IEnumerator<BodyPartRecord>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetConnectedParts_003Ed__35(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				BodyPartRecord bodyPartRecord = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+				{
+					_003C_003E1__state = -1;
+					BodyPartRecord bodyPartRecord2 = bodyPartRecord;
+					while (bodyPartRecord2.parent != null && bodyPartRecord2.parent.def.tags.Contains(tag))
+					{
+						bodyPartRecord2 = bodyPartRecord2.parent;
+					}
+					_003C_003E7__wrap1 = bodyPartRecord2.GetChildParts(tag).GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				}
+				case 1:
+					_003C_003E1__state = -3;
+					break;
+				}
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					BodyPartRecord current = _003C_003E7__wrap1.Current;
+					_003C_003E2__current = current;
+					_003C_003E1__state = 1;
 					return true;
 				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = null;
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<BodyPartRecord> IEnumerable<BodyPartRecord>.GetEnumerator()
+		{
+			_003CGetConnectedParts_003Ed__35 _003CGetConnectedParts_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CGetConnectedParts_003Ed__ = this;
+			}
+			else
+			{
+				_003CGetConnectedParts_003Ed__ = new _003CGetConnectedParts_003Ed__35(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CGetConnectedParts_003Ed__.tag = _003C_003E3__tag;
+			return _003CGetConnectedParts_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<BodyPartRecord>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGetDirectChildParts_003Ed__33 : IEnumerable<BodyPartRecord>, IEnumerable, IEnumerator<BodyPartRecord>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private BodyPartRecord _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public BodyPartRecord _003C_003E4__this;
+
+		private int _003Ci_003E5__2;
+
+		BodyPartRecord IEnumerator<BodyPartRecord>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetDirectChildParts_003Ed__33(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			BodyPartRecord bodyPartRecord = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003Ci_003E5__2 = 0;
+				break;
+			case 1:
+			{
+				_003C_003E1__state = -1;
+				int num2 = _003Ci_003E5__2 + 1;
+				_003Ci_003E5__2 = num2;
+				break;
+			}
+			}
+			if (_003Ci_003E5__2 < bodyPartRecord.parts.Count)
+			{
+				_003C_003E2__current = bodyPartRecord.parts[_003Ci_003E5__2];
+				_003C_003E1__state = 1;
+				return true;
 			}
 			return false;
 		}
 
-		// Token: 0x06000DD4 RID: 3540 RVA: 0x00041B91 File Offset: 0x0003FD91
-		public IEnumerable<BodyPartRecord> GetChildParts(BodyPartTagDef tag)
+		bool IEnumerator.MoveNext()
 		{
-			if (this.def.tags.Contains(tag))
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<BodyPartRecord> IEnumerable<BodyPartRecord>.GetEnumerator()
+		{
+			_003CGetDirectChildParts_003Ed__33 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				yield return this;
+				_003C_003E1__state = 0;
+				result = this;
 			}
-			int num;
-			for (int i = 0; i < this.parts.Count; i = num)
+			else
 			{
-				foreach (BodyPartRecord bodyPartRecord in this.parts[i].GetChildParts(tag))
+				result = new _003CGetDirectChildParts_003Ed__33(0)
 				{
-					yield return bodyPartRecord;
-				}
-				IEnumerator<BodyPartRecord> enumerator = null;
-				num = i + 1;
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
-			yield break;
-			yield break;
+			return result;
 		}
 
-		// Token: 0x06000DD5 RID: 3541 RVA: 0x00041BA8 File Offset: 0x0003FDA8
-		public IEnumerable<BodyPartRecord> GetPartAndAllChildParts()
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			yield return this;
-			int num;
-			for (int i = 0; i < this.parts.Count; i = num)
+			return ((IEnumerable<BodyPartRecord>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGetPartAndAllChildParts_003Ed__32 : IEnumerable<BodyPartRecord>, IEnumerable, IEnumerator<BodyPartRecord>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private BodyPartRecord _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public BodyPartRecord _003C_003E4__this;
+
+		private int _003Ci_003E5__2;
+
+		private IEnumerator<BodyPartRecord> _003C_003E7__wrap2;
+
+		BodyPartRecord IEnumerator<BodyPartRecord>.Current
+		{
+			[DebuggerHidden]
+			get
 			{
-				foreach (BodyPartRecord bodyPartRecord in this.parts[i].GetPartAndAllChildParts())
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetPartAndAllChildParts_003Ed__32(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 2)
+			{
+				try
 				{
-					yield return bodyPartRecord;
 				}
-				IEnumerator<BodyPartRecord> enumerator = null;
-				num = i + 1;
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
 			}
-			yield break;
-			yield break;
+			_003C_003E7__wrap2 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x06000DD6 RID: 3542 RVA: 0x00041BB8 File Offset: 0x0003FDB8
-		public IEnumerable<BodyPartRecord> GetDirectChildParts()
+		private bool MoveNext()
 		{
-			int num;
-			for (int i = 0; i < this.parts.Count; i = num)
+			try
 			{
-				yield return this.parts[i];
-				num = i + 1;
+				int num = _003C_003E1__state;
+				BodyPartRecord bodyPartRecord = _003C_003E4__this;
+				int num2;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E2__current = bodyPartRecord;
+					_003C_003E1__state = 1;
+					return true;
+				case 1:
+					_003C_003E1__state = -1;
+					_003Ci_003E5__2 = 0;
+					goto IL_00d0;
+				case 2:
+					{
+						_003C_003E1__state = -3;
+						goto IL_00a4;
+					}
+					IL_00d0:
+					if (_003Ci_003E5__2 < bodyPartRecord.parts.Count)
+					{
+						_003C_003E7__wrap2 = bodyPartRecord.parts[_003Ci_003E5__2].GetPartAndAllChildParts().GetEnumerator();
+						_003C_003E1__state = -3;
+						goto IL_00a4;
+					}
+					return false;
+					IL_00a4:
+					if (_003C_003E7__wrap2.MoveNext())
+					{
+						BodyPartRecord current = _003C_003E7__wrap2.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap2 = null;
+					num2 = _003Ci_003E5__2 + 1;
+					_003Ci_003E5__2 = num2;
+					goto IL_00d0;
+				}
 			}
-			yield break;
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
 		}
 
-		// Token: 0x06000DD7 RID: 3543 RVA: 0x00041BC8 File Offset: 0x0003FDC8
-		public bool HasChildParts(BodyPartTagDef tag)
+		bool IEnumerator.MoveNext()
 		{
-			return this.GetChildParts(tag).Any<BodyPartRecord>();
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x06000DD8 RID: 3544 RVA: 0x00041BD6 File Offset: 0x0003FDD6
-		public IEnumerable<BodyPartRecord> GetConnectedParts(BodyPartTagDef tag)
+		private void _003C_003Em__Finally1()
 		{
-			BodyPartRecord bodyPartRecord = this;
-			while (bodyPartRecord.parent != null && bodyPartRecord.parent.def.tags.Contains(tag))
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap2 != null)
 			{
-				bodyPartRecord = bodyPartRecord.parent;
+				_003C_003E7__wrap2.Dispose();
 			}
-			foreach (BodyPartRecord bodyPartRecord2 in bodyPartRecord.GetChildParts(tag))
-			{
-				yield return bodyPartRecord2;
-			}
-			IEnumerator<BodyPartRecord> enumerator = null;
-			yield break;
-			yield break;
 		}
 
-		// Token: 0x04000823 RID: 2083
-		public BodyDef body;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04000824 RID: 2084
-		[TranslationHandle]
-		public BodyPartDef def;
+		[DebuggerHidden]
+		IEnumerator<BodyPartRecord> IEnumerable<BodyPartRecord>.GetEnumerator()
+		{
+			_003CGetPartAndAllChildParts_003Ed__32 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CGetPartAndAllChildParts_003Ed__32(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x04000825 RID: 2085
-		[MustTranslate]
-		public string customLabel;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<BodyPartRecord>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x04000826 RID: 2086
-		[Unsaved(false)]
-		[TranslationHandle(Priority = 100)]
-		public string untranslatedCustomLabel;
+	public BodyDef body;
 
-		// Token: 0x04000827 RID: 2087
-		public List<BodyPartRecord> parts = new List<BodyPartRecord>();
+	[TranslationHandle]
+	public BodyPartDef def;
 
-		// Token: 0x04000828 RID: 2088
-		public BodyPartHeight height;
+	[MustTranslate]
+	public string customLabel;
 
-		// Token: 0x04000829 RID: 2089
-		public BodyPartDepth depth;
+	[Unsaved(false)]
+	[TranslationHandle(Priority = 100)]
+	public string untranslatedCustomLabel;
 
-		// Token: 0x0400082A RID: 2090
-		public float coverage = 1f;
+	public List<BodyPartRecord> parts = new List<BodyPartRecord>();
 
-		// Token: 0x0400082B RID: 2091
-		public List<BodyPartGroupDef> groups = new List<BodyPartGroupDef>();
+	public BodyPartHeight height;
 
-		// Token: 0x0400082C RID: 2092
-		[NoTranslate]
-		public string woundAnchorTag;
+	public BodyPartDepth depth;
 
-		// Token: 0x0400082D RID: 2093
-		public bool flipGraphic;
+	public float coverage = 1f;
 
-		// Token: 0x0400082E RID: 2094
-		public List<Rot4> visibleHediffRots;
+	public List<BodyPartGroupDef> groups = new List<BodyPartGroupDef>();
 
-		// Token: 0x0400082F RID: 2095
-		[Unsaved(false)]
-		public BodyPartRecord parent;
+	[NoTranslate]
+	public string woundAnchorTag;
 
-		// Token: 0x04000830 RID: 2096
-		[Unsaved(false)]
-		public float coverageAbsWithChildren;
+	public bool flipGraphic;
 
-		// Token: 0x04000831 RID: 2097
-		[Unsaved(false)]
-		public float coverageAbs;
+	public List<Rot4> visibleHediffRots;
 
-		// Token: 0x04000832 RID: 2098
-		[Unsaved(false)]
-		private string cachedCustomLabelCap;
+	[Unsaved(false)]
+	public BodyPartRecord parent;
+
+	[Unsaved(false)]
+	public float coverageAbsWithChildren;
+
+	[Unsaved(false)]
+	public float coverageAbs;
+
+	[Unsaved(false)]
+	private string cachedCustomLabelCap;
+
+	public bool IsCorePart => parent == null;
+
+	public string Label
+	{
+		get
+		{
+			if (!customLabel.NullOrEmpty())
+			{
+				return customLabel;
+			}
+			return def.label;
+		}
+	}
+
+	public string LabelCap
+	{
+		get
+		{
+			if (customLabel.NullOrEmpty())
+			{
+				return def.LabelCap;
+			}
+			if (cachedCustomLabelCap == null)
+			{
+				cachedCustomLabelCap = customLabel.CapitalizeFirst();
+			}
+			return cachedCustomLabelCap;
+		}
+	}
+
+	public string LabelShort => def.LabelShort;
+
+	public string LabelShortCap => def.LabelShortCap;
+
+	public int Index => body.GetIndexOfPart(this);
+
+	public override string ToString()
+	{
+		return "BodyPartRecord(" + ((def != null) ? def.defName : "NULL_DEF") + " parts.Count=" + parts.Count + ")";
+	}
+
+	public void PostLoad()
+	{
+		untranslatedCustomLabel = customLabel;
+	}
+
+	public bool IsInGroup(BodyPartGroupDef group)
+	{
+		for (int i = 0; i < groups.Count; i++)
+		{
+			if (groups[i] == group)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	[IteratorStateMachine(typeof(_003CGetChildParts_003Ed__31))]
+	public IEnumerable<BodyPartRecord> GetChildParts(BodyPartTagDef tag)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetChildParts_003Ed__31(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__tag = tag
+		};
+	}
+
+	[IteratorStateMachine(typeof(_003CGetPartAndAllChildParts_003Ed__32))]
+	public IEnumerable<BodyPartRecord> GetPartAndAllChildParts()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetPartAndAllChildParts_003Ed__32(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	[IteratorStateMachine(typeof(_003CGetDirectChildParts_003Ed__33))]
+	public IEnumerable<BodyPartRecord> GetDirectChildParts()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetDirectChildParts_003Ed__33(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public bool HasChildParts(BodyPartTagDef tag)
+	{
+		return GetChildParts(tag).Any();
+	}
+
+	[IteratorStateMachine(typeof(_003CGetConnectedParts_003Ed__35))]
+	public IEnumerable<BodyPartRecord> GetConnectedParts(BodyPartTagDef tag)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetConnectedParts_003Ed__35(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__tag = tag
+		};
 	}
 }

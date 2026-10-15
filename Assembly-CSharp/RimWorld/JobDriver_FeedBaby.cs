@@ -1,156 +1,287 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public abstract class JobDriver_FeedBaby : JobDriver
 {
-	// Token: 0x02001155 RID: 4437
-	public abstract class JobDriver_FeedBaby : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__13 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x170010B9 RID: 4281
-		// (get) Token: 0x06006C8D RID: 27789 RVA: 0x000024E7 File Offset: 0x000006E7
-		protected Pawn Baby
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_FeedBaby _003C_003E4__this;
+
+		private IEnumerator<Toil> _003CfeedBabyEnumerator_003E5__2;
+
+		private Toil _003CfirstFeedingToil_003E5__3;
+
+		private Toil _003CjumpIfDownedOrDrafted_003E5__4;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (Pawn)base.TargetThingA;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06006C8E RID: 27790 RVA: 0x00221CD7 File Offset: 0x0021FED7
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		object IEnumerator.Current
 		{
-			return this.pawn.Reserve(this.Baby, this.job, 1, -1, null, errorOnFailed, false);
-		}
-
-		// Token: 0x06006C8F RID: 27791
-		protected abstract IEnumerable<Toil> FeedBaby();
-
-		// Token: 0x170010BA RID: 4282
-		// (get) Token: 0x06006C90 RID: 27792
-		// (set) Token: 0x06006C91 RID: 27793
-		protected abstract Toil FeedingToil { get; set; }
-
-		// Token: 0x170010BB RID: 4283
-		// (get) Token: 0x06006C92 RID: 27794 RVA: 0x00221CFA File Offset: 0x0021FEFA
-		public bool Feeding
-		{
+			[DebuggerHidden]
 			get
 			{
-				return base.CurToil == this.FeedingToil;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06006C93 RID: 27795 RVA: 0x00221D0A File Offset: 0x0021FF0A
-		protected override IEnumerable<Toil> MakeNewToils()
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__13(int _003C_003E1__state)
 		{
-			this.FailOnDestroyedOrNull(TargetIndex.A);
-			base.AddFailCondition(delegate
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003CfeedBabyEnumerator_003E5__2 = null;
+			_003CfirstFeedingToil_003E5__3 = null;
+			_003CjumpIfDownedOrDrafted_003E5__4 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_FeedBaby CS_0024_003C_003E8__locals21 = _003C_003E4__this;
+			switch (num)
 			{
-				ChildcareUtility.BreastfeedFailReason? breastfeedFailReason;
-				return !ChildcareUtility.CanSuckle(this.Baby, out breastfeedFailReason);
-			});
-			base.SetFinalizerJob(delegate(JobCondition _)
+			default:
+				return false;
+			case 0:
 			{
-				if (!this.pawn.IsCarryingPawn(this.Baby))
+				_003C_003E1__state = -1;
+				CS_0024_003C_003E8__locals21.FailOnDestroyedOrNull(TargetIndex.A);
+				CS_0024_003C_003E8__locals21.AddFailCondition(() => !ChildcareUtility.CanSuckle(CS_0024_003C_003E8__locals21.Baby, out var _));
+				CS_0024_003C_003E8__locals21.SetFinalizerJob((JobCondition _) => (!CS_0024_003C_003E8__locals21.pawn.IsCarryingPawn(CS_0024_003C_003E8__locals21.Baby)) ? null : ChildcareUtility.MakeBringBabyToSafetyJob(CS_0024_003C_003E8__locals21.pawn, CS_0024_003C_003E8__locals21.Baby));
+				_003CfeedBabyEnumerator_003E5__2 = CS_0024_003C_003E8__locals21.FeedBaby().GetEnumerator();
+				if (!_003CfeedBabyEnumerator_003E5__2.MoveNext())
 				{
-					return null;
+					throw new InvalidOperationException("There must be at least one toil in FeedBaby.");
 				}
-				return ChildcareUtility.MakeBringBabyToSafetyJob(this.pawn, this.Baby);
-			});
-			IEnumerator<Toil> feedBabyEnumerator = this.FeedBaby().GetEnumerator();
-			if (!feedBabyEnumerator.MoveNext())
-			{
-				throw new InvalidOperationException("There must be at least one toil in FeedBaby.");
+				_003CfirstFeedingToil_003E5__3 = _003CfeedBabyEnumerator_003E5__2.Current;
+				_003CjumpIfDownedOrDrafted_003E5__4 = Toils_Jump.JumpIf(_003CfirstFeedingToil_003E5__3, () => CS_0024_003C_003E8__locals21.pawn.Downed || CS_0024_003C_003E8__locals21.pawn.Drafted).FailOn(() => !CS_0024_003C_003E8__locals21.pawn.IsCarryingPawn(CS_0024_003C_003E8__locals21.Baby));
+				_003C_003E2__current = Toils_Jump.JumpIf(_003CjumpIfDownedOrDrafted_003E5__4, () => CS_0024_003C_003E8__locals21.pawn.IsCarryingPawn(CS_0024_003C_003E8__locals21.Baby)).FailOn(() => !CS_0024_003C_003E8__locals21.pawn.IsCarryingPawn(CS_0024_003C_003E8__locals21.Baby) && (CS_0024_003C_003E8__locals21.pawn.Downed || CS_0024_003C_003E8__locals21.pawn.Drafted));
+				_003C_003E1__state = 1;
+				return true;
 			}
-			Toil firstFeedingToil = feedBabyEnumerator.Current;
-			Toil jumpIfDownedOrDrafted = Toils_Jump.JumpIf(firstFeedingToil, () => this.pawn.Downed || this.pawn.Drafted).FailOn(() => !this.pawn.IsCarryingPawn(this.Baby));
-			yield return Toils_Jump.JumpIf(jumpIfDownedOrDrafted, () => this.pawn.IsCarryingPawn(this.Baby)).FailOn(() => !this.pawn.IsCarryingPawn(this.Baby) && (this.pawn.Downed || this.pawn.Drafted));
-			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.OnCell, false).FailOnDestroyedNullOrForbidden(TargetIndex.A).FailOnSomeonePhysicallyInteracting(TargetIndex.A);
-			yield return Toils_Haul.StartCarryThing(TargetIndex.A, false, false, false, true, false);
-			yield return jumpIfDownedOrDrafted;
-			yield return this.GoToChair();
-			yield return this.SitInChair();
-			yield return firstFeedingToil;
-			while (feedBabyEnumerator.MoveNext())
-			{
-				Toil toil = feedBabyEnumerator.Current;
-				yield return toil;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.OnCell).FailOnDestroyedNullOrForbidden(TargetIndex.A).FailOnSomeonePhysicallyInteracting(TargetIndex.A);
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Haul.StartCarryThing(TargetIndex.A);
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = _003CjumpIfDownedOrDrafted_003E5__4;
+				_003C_003E1__state = 4;
+				return true;
+			case 4:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = CS_0024_003C_003E8__locals21.GoToChair();
+				_003C_003E1__state = 5;
+				return true;
+			case 5:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = CS_0024_003C_003E8__locals21.SitInChair();
+				_003C_003E1__state = 6;
+				return true;
+			case 6:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = _003CfirstFeedingToil_003E5__3;
+				_003C_003E1__state = 7;
+				return true;
+			case 7:
+				_003C_003E1__state = -1;
+				break;
+			case 8:
+				_003C_003E1__state = -1;
+				break;
 			}
-			feedBabyEnumerator.Dispose();
-			yield break;
+			if (_003CfeedBabyEnumerator_003E5__2.MoveNext())
+			{
+				_003C_003E2__current = _003CfeedBabyEnumerator_003E5__2.Current;
+				_003C_003E1__state = 8;
+				return true;
+			}
+			_003CfeedBabyEnumerator_003E5__2.Dispose();
+			return false;
 		}
 
-		// Token: 0x06006C94 RID: 27796 RVA: 0x00221D1C File Offset: 0x0021FF1C
-		private Toil GoToChair()
+		bool IEnumerator.MoveNext()
 		{
-			Toil toil = ToilMaker.MakeToil("GoToChair");
-			toil.initAction = delegate()
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__13 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				IntVec3 breastfeedSpot = RCellFinder.SpotToStandDuringJob(this.pawn, null, null);
-				Thing thing = GenClosest.ClosestThingReachable(this.pawn.Position, this.pawn.Map, ThingRequest.ForGroup(ThingRequestGroup.BuildingArtificial), PathEndMode.OnCell, TraverseParms.For(this.pawn, Danger.Deadly, TraverseMode.ByPawn, false, false, false, true), 32f, (Thing t) => this.IsValidBreastfeedChair(t) && t.Position.GetDangerFor(this.pawn, t.Map) <= breastfeedSpot.GetDangerFor(this.pawn, this.pawn.Map), null, 0, -1, false, RegionType.Set_Passable, false, false);
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__13(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	public const float BabyFedMemoryFoodNeedIncrease = 0.6f;
+
+	protected const TargetIndex BabyInd = TargetIndex.A;
+
+	private const int ChairSearchRadius = 32;
+
+	protected float initialFoodPercentage;
+
+	protected Pawn Baby => (Pawn)base.TargetThingA;
+
+	protected abstract Toil FeedingToil { get; set; }
+
+	public bool Feeding => base.CurToil == FeedingToil;
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return pawn.Reserve(Baby, job, 1, -1, null, errorOnFailed);
+	}
+
+	protected abstract IEnumerable<Toil> FeedBaby();
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__13))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__13(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	private Toil GoToChair()
+	{
+		Toil toil = ToilMaker.MakeToil("GoToChair");
+		toil.initAction = delegate
+		{
+			IntVec3 breastfeedSpot = RCellFinder.SpotToStandDuringJob(pawn);
+			Thing thing = GenClosest.ClosestThingReachable(pawn.Position, pawn.Map, ThingRequest.ForGroup(ThingRequestGroup.BuildingArtificial), PathEndMode.OnCell, TraverseParms.For(pawn), 32f, (Thing t) => IsValidBreastfeedChair(t) && (int)t.Position.GetDangerFor(pawn, t.Map) <= (int)breastfeedSpot.GetDangerFor(pawn, pawn.Map));
+			if (thing != null)
+			{
+				Toils_Ingest.TryFindFreeSittingSpotOnThing(thing, pawn, out breastfeedSpot);
+			}
+			if (!breastfeedSpot.IsValid)
+			{
+				pawn.pather.StartPath(pawn.Position, PathEndMode.OnCell);
+			}
+			else
+			{
+				pawn.ReserveSittableOrSpot(breastfeedSpot, toil.actor.CurJob);
+				pawn.Map.pawnDestinationReservationManager.Reserve(pawn, pawn.CurJob, breastfeedSpot);
+				pawn.pather.StartPath(breastfeedSpot, PathEndMode.OnCell);
+			}
+		};
+		toil.defaultCompleteMode = ToilCompleteMode.PatherArrival;
+		return toil;
+	}
+
+	private Toil SitInChair()
+	{
+		Toil toil = ToilMaker.MakeToil("SitInChair");
+		toil.initAction = delegate
+		{
+			if (pawn.Spawned)
+			{
+				Thing thing = pawn.Position.GetThingList(pawn.Map).FirstOrDefault(IsValidBreastfeedChair);
 				if (thing != null)
 				{
-					Toils_Ingest.TryFindFreeSittingSpotOnThing(thing, this.pawn, out breastfeedSpot);
+					pawn.Rotation = thing.Rotation;
 				}
-				if (!breastfeedSpot.IsValid)
-				{
-					this.pawn.pather.StartPath(this.pawn.Position, PathEndMode.OnCell);
-					return;
-				}
-				this.pawn.ReserveSittableOrSpot(breastfeedSpot, toil.actor.CurJob, true);
-				this.pawn.Map.pawnDestinationReservationManager.Reserve(this.pawn, this.pawn.CurJob, breastfeedSpot);
-				this.pawn.pather.StartPath(breastfeedSpot, PathEndMode.OnCell);
-			};
-			toil.defaultCompleteMode = ToilCompleteMode.PatherArrival;
-			return toil;
-		}
+			}
+		};
+		toil.defaultCompleteMode = ToilCompleteMode.Instant;
+		return toil;
+	}
 
-		// Token: 0x06006C95 RID: 27797 RVA: 0x00221D6F File Offset: 0x0021FF6F
-		private Toil SitInChair()
+	private bool IsValidBreastfeedChair(Thing t)
+	{
+		if (t.def.building == null || !t.def.building.isSittable)
 		{
-			Toil toil = ToilMaker.MakeToil("SitInChair");
-			toil.initAction = delegate()
-			{
-				if (!this.pawn.Spawned)
-				{
-					return;
-				}
-				Thing thing = this.pawn.Position.GetThingList(this.pawn.Map).FirstOrDefault(new Predicate<Thing>(this.IsValidBreastfeedChair));
-				if (thing != null)
-				{
-					this.pawn.Rotation = thing.Rotation;
-				}
-			};
-			toil.defaultCompleteMode = ToilCompleteMode.Instant;
-			return toil;
+			return false;
 		}
-
-		// Token: 0x06006C96 RID: 27798 RVA: 0x00221D94 File Offset: 0x0021FF94
-		private bool IsValidBreastfeedChair(Thing t)
+		if (!Toils_Ingest.TryFindFreeSittingSpotOnThing(t, pawn, out var _))
 		{
-			IntVec3 intVec;
-			return t.def.building != null && t.def.building.isSittable && Toils_Ingest.TryFindFreeSittingSpotOnThing(t, this.pawn, out intVec) && !t.IsForbidden(this.pawn) && this.pawn.CanReserve(t, 1, -1, null, false) && t.IsSociallyProper(this.pawn) && !t.IsBurning() && !t.HostileTo(this.pawn);
+			return false;
 		}
-
-		// Token: 0x06006C97 RID: 27799 RVA: 0x00221E28 File Offset: 0x00220028
-		public override void ExposeData()
+		if (t.IsForbidden(pawn))
 		{
-			base.ExposeData();
-			Scribe_Values.Look<float>(ref this.initialFoodPercentage, "initialFoodPercentage", 0f, false);
+			return false;
 		}
+		if (!pawn.CanReserve(t))
+		{
+			return false;
+		}
+		if (!t.IsSociallyProper(pawn))
+		{
+			return false;
+		}
+		if (t.IsBurning())
+		{
+			return false;
+		}
+		if (t.HostileTo(pawn))
+		{
+			return false;
+		}
+		return true;
+	}
 
-		// Token: 0x04004C40 RID: 19520
-		public const float BabyFedMemoryFoodNeedIncrease = 0.6f;
-
-		// Token: 0x04004C41 RID: 19521
-		protected const TargetIndex BabyInd = TargetIndex.A;
-
-		// Token: 0x04004C42 RID: 19522
-		private const int ChairSearchRadius = 32;
-
-		// Token: 0x04004C43 RID: 19523
-		protected float initialFoodPercentage;
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref initialFoodPercentage, "initialFoodPercentage", 0f);
 	}
 }

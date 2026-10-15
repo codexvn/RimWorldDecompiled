@@ -1,48 +1,39 @@
-﻿using System;
+using System;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public static class PawnOrCorpseStatUtility
 {
-	// Token: 0x020036EB RID: 14059
-	public static class PawnOrCorpseStatUtility
+	public static bool TryGetPawnOrCorpseStat(StatRequest req, Func<Pawn, float> pawnStatGetter, Func<ThingDef, float> pawnDefStatGetter, out float stat)
 	{
-		// Token: 0x0601380B RID: 79883 RVA: 0x005C9E54 File Offset: 0x005C8054
-		public static bool TryGetPawnOrCorpseStat(StatRequest req, Func<Pawn, float> pawnStatGetter, Func<ThingDef, float> pawnDefStatGetter, out float stat)
+		if (req.HasThing)
 		{
-			if (req.HasThing)
+			if (req.Thing is Pawn arg)
 			{
-				Pawn pawn = req.Thing as Pawn;
-				if (pawn != null)
-				{
-					stat = pawnStatGetter(pawn);
-					return true;
-				}
-				Corpse corpse = req.Thing as Corpse;
-				if (corpse != null)
-				{
-					stat = pawnStatGetter(corpse.InnerPawn);
-					return true;
-				}
+				stat = pawnStatGetter(arg);
+				return true;
 			}
-			else
+			if (req.Thing is Corpse corpse)
 			{
-				ThingDef thingDef = req.Def as ThingDef;
-				if (thingDef != null)
-				{
-					if (thingDef.category == ThingCategory.Pawn)
-					{
-						stat = pawnDefStatGetter(thingDef);
-						return true;
-					}
-					if (thingDef.IsCorpse)
-					{
-						stat = pawnDefStatGetter(thingDef.ingestible.sourceDef);
-						return true;
-					}
-				}
+				stat = pawnStatGetter(corpse.InnerPawn);
+				return true;
 			}
-			stat = 0f;
-			return false;
 		}
+		else if (req.Def is ThingDef thingDef)
+		{
+			if (thingDef.category == ThingCategory.Pawn)
+			{
+				stat = pawnDefStatGetter(thingDef);
+				return true;
+			}
+			if (thingDef.IsCorpse)
+			{
+				stat = pawnDefStatGetter(thingDef.ingestible.sourceDef);
+				return true;
+			}
+		}
+		stat = 0f;
+		return false;
 	}
 }

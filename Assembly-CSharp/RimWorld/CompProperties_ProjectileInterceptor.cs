@@ -1,109 +1,238 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompProperties_ProjectileInterceptor : CompProperties
 {
-	// Token: 0x02002DBB RID: 11707
-	public class CompProperties_ProjectileInterceptor : CompProperties
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__26 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x0601074E RID: 67406 RVA: 0x004BF1EC File Offset: 0x004BD3EC
-		public CompProperties_ProjectileInterceptor()
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompProperties_ProjectileInterceptor _003C_003E4__this;
+
+		private ThingDef parentDef;
+
+		public ThingDef _003C_003E3__parentDef;
+
+		private IEnumerator<string> _003C_003E7__wrap1;
+
+		string IEnumerator<string>.Current
 		{
-			this.compClass = typeof(CompProjectileInterceptor);
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x0601074F RID: 67407 RVA: 0x004BF249 File Offset: 0x004BD449
-		public override IEnumerable<string> ConfigErrors(ThingDef parentDef)
+		object IEnumerator.Current
 		{
-			foreach (string text in base.ConfigErrors(parentDef))
+			[DebuggerHidden]
+			get
 			{
-				yield return text;
+				return _003C_003E2__current;
 			}
-			IEnumerator<string> enumerator = null;
-			if (this.hitPoints > 0 && this.chargeIntervalTicks > 0)
-			{
-				yield return "Cannot set both hitpoints and charge interval ticks.";
-			}
-			yield break;
-			yield break;
 		}
 
-		// Token: 0x0400AB9D RID: 43933
-		public float radius;
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__26(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
 
-		// Token: 0x0400AB9E RID: 43934
-		public int cooldownTicks;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
 
-		// Token: 0x0400AB9F RID: 43935
-		public int disarmedByEmpForTicks;
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				CompProperties_ProjectileInterceptor compProperties_ProjectileInterceptor = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((CompProperties)compProperties_ProjectileInterceptor).ConfigErrors(parentDef).GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0075;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0075;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_0075:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (compProperties_ProjectileInterceptor.hitPoints > 0 && compProperties_ProjectileInterceptor.chargeIntervalTicks > 0)
+					{
+						_003C_003E2__current = "Cannot set both hitpoints and charge interval ticks.";
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
 
-		// Token: 0x0400ABA0 RID: 43936
-		public bool interceptGroundProjectiles;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x0400ABA1 RID: 43937
-		public bool interceptAirProjectiles;
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
 
-		// Token: 0x0400ABA2 RID: 43938
-		public bool interceptNonHostileProjectiles;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x0400ABA3 RID: 43939
-		public bool interceptOutgoingProjectiles;
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__26 _003CConfigErrors_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CConfigErrors_003Ed__ = this;
+			}
+			else
+			{
+				_003CConfigErrors_003Ed__ = new _003CConfigErrors_003Ed__26(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CConfigErrors_003Ed__.parentDef = _003C_003E3__parentDef;
+			return _003CConfigErrors_003Ed__;
+		}
 
-		// Token: 0x0400ABA4 RID: 43940
-		public bool drawWithNoSelection;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x0400ABA5 RID: 43941
-		public int chargeIntervalTicks;
+	public float radius;
 
-		// Token: 0x0400ABA6 RID: 43942
-		public int chargeDurationTicks;
+	public int cooldownTicks;
 
-		// Token: 0x0400ABA7 RID: 43943
-		public float minAlpha;
+	public int disarmedByEmpForTicks;
 
-		// Token: 0x0400ABA8 RID: 43944
-		public float idlePulseSpeed = 0.7f;
+	public bool interceptGroundProjectiles;
 
-		// Token: 0x0400ABA9 RID: 43945
-		public float minIdleAlpha = -1.7f;
+	public bool interceptAirProjectiles;
 
-		// Token: 0x0400ABAA RID: 43946
-		public int hitPoints = -1;
+	public bool interceptNonHostileProjectiles;
 
-		// Token: 0x0400ABAB RID: 43947
-		public int rechargeHitPointsIntervalTicks = 240;
+	public bool interceptOutgoingProjectiles;
 
-		// Token: 0x0400ABAC RID: 43948
-		[NoTranslate]
-		public string gizmoTipKey;
+	public bool drawWithNoSelection;
 
-		// Token: 0x0400ABAD RID: 43949
-		public bool hitPointsRestoreInstantlyAfterCharge;
+	public int chargeIntervalTicks;
 
-		// Token: 0x0400ABAE RID: 43950
-		public bool startWithMaxHitPoints = true;
+	public int chargeDurationTicks;
 
-		// Token: 0x0400ABAF RID: 43951
-		public bool alwaysShowHitpointsGizmo;
+	public float minAlpha;
 
-		// Token: 0x0400ABB0 RID: 43952
-		public bool activated;
+	public float idlePulseSpeed = 0.7f;
 
-		// Token: 0x0400ABB1 RID: 43953
-		public int activeDuration;
+	public float minIdleAlpha = -1.7f;
 
-		// Token: 0x0400ABB2 RID: 43954
-		public Color color = Color.white;
+	public int hitPoints = -1;
 
-		// Token: 0x0400ABB3 RID: 43955
-		public EffecterDef reactivateEffect;
+	public int rechargeHitPointsIntervalTicks = 240;
 
-		// Token: 0x0400ABB4 RID: 43956
-		public EffecterDef interceptEffect;
+	[NoTranslate]
+	public string gizmoTipKey;
 
-		// Token: 0x0400ABB5 RID: 43957
-		public SoundDef activeSound;
+	public bool hitPointsRestoreInstantlyAfterCharge;
+
+	public bool startWithMaxHitPoints = true;
+
+	public bool alwaysShowHitpointsGizmo;
+
+	public bool activated;
+
+	public int activeDuration;
+
+	public Color color = Color.white;
+
+	public EffecterDef reactivateEffect;
+
+	public EffecterDef interceptEffect;
+
+	public SoundDef activeSound;
+
+	public CompProperties_ProjectileInterceptor()
+	{
+		compClass = typeof(CompProjectileInterceptor);
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__26))]
+	public override IEnumerable<string> ConfigErrors(ThingDef parentDef)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__26(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__parentDef = parentDef
+		};
 	}
 }

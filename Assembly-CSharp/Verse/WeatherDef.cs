@@ -1,154 +1,217 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld;
 
-namespace Verse
+namespace Verse;
+
+public class WeatherDef : Def
 {
-	// Token: 0x02000315 RID: 789
-	public class WeatherDef : Def
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__38 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x170003CE RID: 974
-		// (get) Token: 0x060013B1 RID: 5041 RVA: 0x0005D526 File Offset: 0x0005B726
-		public WeatherWorker Worker
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public WeatherDef _003C_003E4__this;
+
+		string IEnumerator<string>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.workerInt == null)
-				{
-					this.workerInt = (WeatherWorker)Activator.CreateInstance(this.workerClass, new object[]
-					{
-						this
-					});
-				}
-				return this.workerInt;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x060013B2 RID: 5042 RVA: 0x0005D556 File Offset: 0x0005B756
-		public override IEnumerable<string> ConfigErrors()
+		object IEnumerator.Current
 		{
-			if (this.skyColorsDay.saturation == 0f || this.skyColorsDusk.saturation == 0f || this.skyColorsNightMid.saturation == 0f || this.skyColorsNightEdge.saturation == 0f)
+			[DebuggerHidden]
+			get
 			{
-				yield return "a sky color has saturation of 0";
+				return _003C_003E2__current;
 			}
-			yield break;
 		}
 
-		// Token: 0x060013B3 RID: 5043 RVA: 0x0005D566 File Offset: 0x0005B766
-		public static WeatherDef Named(string defName)
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__38(int _003C_003E1__state)
 		{
-			return DefDatabase<WeatherDef>.GetNamed(defName, true);
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x0400128E RID: 4750
-		public IntRange durationRange = new IntRange(16000, 160000);
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
 
-		// Token: 0x0400128F RID: 4751
-		public bool repeatable;
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			WeatherDef weatherDef = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (weatherDef.skyColorsDay.saturation == 0f || weatherDef.skyColorsDusk.saturation == 0f || weatherDef.skyColorsNightMid.saturation == 0f || weatherDef.skyColorsNightEdge.saturation == 0f)
+				{
+					_003C_003E2__current = "a sky color has saturation of 0";
+					_003C_003E1__state = 1;
+					return true;
+				}
+				break;
+			case 1:
+				_003C_003E1__state = -1;
+				break;
+			}
+			return false;
+		}
 
-		// Token: 0x04001290 RID: 4752
-		public bool isBad;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x04001291 RID: 4753
-		public bool canOccurAsRandomForcedEvent = true;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04001292 RID: 4754
-		public Favorability favorability = Favorability.Neutral;
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__38 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__38(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x04001293 RID: 4755
-		public FloatRange temperatureRange = new FloatRange(-999f, 999f);
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x04001294 RID: 4756
-		public SimpleCurve commonalityRainfallFactor;
+	public IntRange durationRange = new IntRange(16000, 160000);
 
-		// Token: 0x04001295 RID: 4757
-		public int transitionTicksOverride = int.MaxValue;
+	public bool repeatable;
 
-		// Token: 0x04001296 RID: 4758
-		public int minMonolithLevel;
+	public bool isBad;
 
-		// Token: 0x04001297 RID: 4759
-		public bool canOccurInAmbientHorror;
+	public bool canOccurAsRandomForcedEvent = true;
 
-		// Token: 0x04001298 RID: 4760
-		[MustTranslate]
-		public string letterText;
+	public Favorability favorability = Favorability.Neutral;
 
-		// Token: 0x04001299 RID: 4761
-		[MustTranslate]
-		public string letterLabel;
+	public FloatRange temperatureRange = new FloatRange(-999f, 999f);
 
-		// Token: 0x0400129A RID: 4762
-		public LetterDef letterDef;
+	public SimpleCurve commonalityRainfallFactor;
 
-		// Token: 0x0400129B RID: 4763
-		public float rainRate;
+	public int transitionTicksOverride = int.MaxValue;
 
-		// Token: 0x0400129C RID: 4764
-		public float snowRate;
+	public int minMonolithLevel;
 
-		// Token: 0x0400129D RID: 4765
-		public float sandRate;
+	public bool canOccurInAmbientHorror;
 
-		// Token: 0x0400129E RID: 4766
-		public float windSpeedFactor = 1f;
+	[MustTranslate]
+	public string letterText;
 
-		// Token: 0x0400129F RID: 4767
-		public float windSpeedOffset;
+	[MustTranslate]
+	public string letterLabel;
 
-		// Token: 0x040012A0 RID: 4768
-		public float moveSpeedMultiplier = 1f;
+	public LetterDef letterDef;
 
-		// Token: 0x040012A1 RID: 4769
-		public float accuracyMultiplier = 1f;
+	public float rainRate;
 
-		// Token: 0x040012A2 RID: 4770
-		public float maxRangeCap = -1f;
+	public float snowRate;
 
-		// Token: 0x040012A3 RID: 4771
-		public float perceivePriority;
+	public float sandRate;
 
-		// Token: 0x040012A4 RID: 4772
-		public bool doToxicBuildup;
+	public float windSpeedFactor = 1f;
 
-		// Token: 0x040012A5 RID: 4773
-		public ThoughtDef weatherThought;
+	public float windSpeedOffset;
 
-		// Token: 0x040012A6 RID: 4774
-		public float maxGlow = 1f;
+	public float moveSpeedMultiplier = 1f;
 
-		// Token: 0x040012A7 RID: 4775
-		public bool preventSkygaze;
+	public float accuracyMultiplier = 1f;
 
-		// Token: 0x040012A8 RID: 4776
-		public bool preventsShuttleLaunch;
+	public float maxRangeCap = -1f;
 
-		// Token: 0x040012A9 RID: 4777
-		public List<SoundDef> ambientSounds = new List<SoundDef>();
+	public float perceivePriority;
 
-		// Token: 0x040012AA RID: 4778
-		public List<WeatherEventMaker> eventMakers = new List<WeatherEventMaker>();
+	public bool doToxicBuildup;
 
-		// Token: 0x040012AB RID: 4779
-		public List<Type> overlayClasses = new List<Type>();
+	public ThoughtDef weatherThought;
 
-		// Token: 0x040012AC RID: 4780
-		public SkyColorSet skyColorsNightMid;
+	public float maxGlow = 1f;
 
-		// Token: 0x040012AD RID: 4781
-		public SkyColorSet skyColorsNightEdge;
+	public bool preventSkygaze;
 
-		// Token: 0x040012AE RID: 4782
-		public SkyColorSet skyColorsDay;
+	public bool preventsShuttleLaunch;
 
-		// Token: 0x040012AF RID: 4783
-		public SkyColorSet skyColorsDusk;
+	public List<SoundDef> ambientSounds = new List<SoundDef>();
 
-		// Token: 0x040012B0 RID: 4784
-		public Type workerClass = typeof(WeatherWorker);
+	public List<WeatherEventMaker> eventMakers = new List<WeatherEventMaker>();
 
-		// Token: 0x040012B1 RID: 4785
-		[Unsaved(false)]
-		private WeatherWorker workerInt;
+	public List<Type> overlayClasses = new List<Type>();
+
+	public SkyColorSet skyColorsNightMid;
+
+	public SkyColorSet skyColorsNightEdge;
+
+	public SkyColorSet skyColorsDay;
+
+	public SkyColorSet skyColorsDusk;
+
+	public Type workerClass = typeof(WeatherWorker);
+
+	[Unsaved(false)]
+	private WeatherWorker workerInt;
+
+	public WeatherWorker Worker
+	{
+		get
+		{
+			if (workerInt == null)
+			{
+				workerInt = (WeatherWorker)Activator.CreateInstance(workerClass, this);
+			}
+			return workerInt;
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__38))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__38(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public static WeatherDef Named(string defName)
+	{
+		return DefDatabase<WeatherDef>.GetNamed(defName);
 	}
 }

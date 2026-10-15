@@ -1,134 +1,522 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public static class ScenarioLister
 {
-	// Token: 0x02002869 RID: 10345
-	public static class ScenarioLister
+	[CompilerGenerated]
+	private sealed class _003CAllScenarios_003Ed__1 : IEnumerable<Scenario>, IEnumerable, IEnumerator<Scenario>, IEnumerator, IDisposable
 	{
-		// Token: 0x0600E25B RID: 57947 RVA: 0x00424BE2 File Offset: 0x00422DE2
-		public static IEnumerable<Scenario> AllScenarios()
+		private int _003C_003E1__state;
+
+		private Scenario _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private IEnumerator<ScenarioDef> _003C_003E7__wrap1;
+
+		private IEnumerator<Scenario> _003C_003E7__wrap2;
+
+		Scenario IEnumerator<Scenario>.Current
 		{
-			ScenarioLister.RecacheIfDirty();
-			foreach (ScenarioDef scenarioDef in DefDatabase<ScenarioDef>.AllDefs)
+			[DebuggerHidden]
+			get
 			{
-				yield return scenarioDef.scenario;
+				return _003C_003E2__current;
 			}
-			IEnumerator<ScenarioDef> enumerator = null;
-			foreach (Scenario scenario in ScenarioFiles.AllScenariosLocal)
-			{
-				yield return scenario;
-			}
-			IEnumerator<Scenario> enumerator2 = null;
-			foreach (Scenario scenario2 in ScenarioFiles.AllScenariosWorkshop)
-			{
-				yield return scenario2;
-			}
-			enumerator2 = null;
-			yield break;
-			yield break;
 		}
 
-		// Token: 0x0600E25C RID: 57948 RVA: 0x00424BEB File Offset: 0x00422DEB
-		public static IEnumerable<Scenario> ScenariosInCategory(ScenarioCategory cat)
+		object IEnumerator.Current
 		{
-			ScenarioLister.RecacheIfDirty();
-			if (cat == ScenarioCategory.FromDef)
+			[DebuggerHidden]
+			get
 			{
-				foreach (ScenarioDef scenarioDef in DefDatabase<ScenarioDef>.AllDefs)
-				{
-					yield return scenarioDef.scenario;
-				}
-				IEnumerator<ScenarioDef> enumerator = null;
+				return _003C_003E2__current;
 			}
-			else if (cat == ScenarioCategory.CustomLocal)
-			{
-				foreach (Scenario scenario in ScenarioFiles.AllScenariosLocal)
-				{
-					yield return scenario;
-				}
-				IEnumerator<Scenario> enumerator2 = null;
-			}
-			else if (cat == ScenarioCategory.SteamWorkshop)
-			{
-				foreach (Scenario scenario2 in ScenarioFiles.AllScenariosWorkshop)
-				{
-					yield return scenario2;
-				}
-				IEnumerator<Scenario> enumerator2 = null;
-			}
-			yield break;
-			yield break;
 		}
 
-		// Token: 0x0600E25D RID: 57949 RVA: 0x00424BFC File Offset: 0x00422DFC
-		public static bool ScenarioIsListedAnywhere(Scenario scen)
+		[DebuggerHidden]
+		public _003CAllScenarios_003Ed__1(int _003C_003E1__state)
 		{
-			ScenarioLister.RecacheIfDirty();
-			using (IEnumerator<ScenarioDef> enumerator = DefDatabase<ScenarioDef>.AllDefs.GetEnumerator())
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			switch (_003C_003E1__state)
 			{
-				while (enumerator.MoveNext())
+			case -3:
+			case 1:
+				try
 				{
-					if (enumerator.Current.scenario == scen)
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+				break;
+			case -4:
+			case 2:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally2();
+				}
+				break;
+			case -5:
+			case 3:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally3();
+				}
+				break;
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E7__wrap2 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				switch (_003C_003E1__state)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					RecacheIfDirty();
+					_003C_003E7__wrap1 = DefDatabase<ScenarioDef>.AllDefs.GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0078;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0078;
+				case 2:
+					_003C_003E1__state = -4;
+					goto IL_00d5;
+				case 3:
 					{
+						_003C_003E1__state = -5;
+						break;
+					}
+					IL_0078:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						ScenarioDef current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current.scenario;
+						_003C_003E1__state = 1;
 						return true;
 					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					_003C_003E7__wrap2 = ScenarioFiles.AllScenariosLocal.GetEnumerator();
+					_003C_003E1__state = -4;
+					goto IL_00d5;
+					IL_00d5:
+					if (_003C_003E7__wrap2.MoveNext())
+					{
+						Scenario current2 = _003C_003E7__wrap2.Current;
+						_003C_003E2__current = current2;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					_003C_003Em__Finally2();
+					_003C_003E7__wrap2 = null;
+					_003C_003E7__wrap2 = ScenarioFiles.AllScenariosWorkshop.GetEnumerator();
+					_003C_003E1__state = -5;
+					break;
 				}
-			}
-			foreach (Scenario scenario in ScenarioFiles.AllScenariosLocal)
-			{
-				if (scen == scenario)
+				if (_003C_003E7__wrap2.MoveNext())
 				{
+					Scenario current3 = _003C_003E7__wrap2.Current;
+					_003C_003E2__current = current3;
+					_003C_003E1__state = 3;
 					return true;
 				}
+				_003C_003Em__Finally3();
+				_003C_003E7__wrap2 = null;
+				return false;
 			}
-			return false;
-		}
-
-		// Token: 0x0600E25E RID: 57950 RVA: 0x00424C90 File Offset: 0x00422E90
-		public static void MarkDirty()
-		{
-			ScenarioLister.dirty = true;
-		}
-
-		// Token: 0x0600E25F RID: 57951 RVA: 0x00424C98 File Offset: 0x00422E98
-		private static void RecacheIfDirty()
-		{
-			if (ScenarioLister.dirty)
+			catch
 			{
-				ScenarioLister.RecacheData();
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x0600E260 RID: 57952 RVA: 0x00424CA8 File Offset: 0x00422EA8
-		private static void RecacheData()
+		bool IEnumerator.MoveNext()
 		{
-			ScenarioLister.dirty = false;
-			int num = ScenarioLister.ScenarioListHash();
-			ScenarioFiles.RecacheData();
-			if (ScenarioLister.ScenarioListHash() != num && !LongEventHandler.ShouldWaitForEvent)
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				Page_SelectScenario page_SelectScenario = Find.WindowStack.WindowOfType<Page_SelectScenario>();
-				if (page_SelectScenario != null)
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap2 != null)
+			{
+				_003C_003E7__wrap2.Dispose();
+			}
+		}
+
+		private void _003C_003Em__Finally3()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap2 != null)
+			{
+				_003C_003E7__wrap2.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Scenario> IEnumerable<Scenario>.GetEnumerator()
+		{
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				return this;
+			}
+			return new _003CAllScenarios_003Ed__1(0);
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Scenario>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CScenariosInCategory_003Ed__2 : IEnumerable<Scenario>, IEnumerable, IEnumerator<Scenario>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Scenario _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private ScenarioCategory cat;
+
+		public ScenarioCategory _003C_003E3__cat;
+
+		private IEnumerator<ScenarioDef> _003C_003E7__wrap1;
+
+		private IEnumerator<Scenario> _003C_003E7__wrap2;
+
+		Scenario IEnumerator<Scenario>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CScenariosInCategory_003Ed__2(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			switch (_003C_003E1__state)
+			{
+			case -3:
+			case 1:
+				try
 				{
-					page_SelectScenario.Notify_ScenarioListChanged();
 				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+				break;
+			case -4:
+			case 2:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally2();
+				}
+				break;
+			case -5:
+			case 3:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally3();
+				}
+				break;
 			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E7__wrap2 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x0600E261 RID: 57953 RVA: 0x00424CEC File Offset: 0x00422EEC
-		public static int ScenarioListHash()
+		private bool MoveNext()
 		{
-			int num = 9826121;
-			foreach (Scenario scenario in ScenarioLister.AllScenarios())
+			try
 			{
-				num ^= 791 * scenario.GetHashCode() * 6121;
+				switch (_003C_003E1__state)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					RecacheIfDirty();
+					if (cat == ScenarioCategory.FromDef)
+					{
+						_003C_003E7__wrap1 = DefDatabase<ScenarioDef>.AllDefs.GetEnumerator();
+						_003C_003E1__state = -3;
+						goto IL_0081;
+					}
+					if (cat == ScenarioCategory.CustomLocal)
+					{
+						_003C_003E7__wrap2 = ScenarioFiles.AllScenariosLocal.GetEnumerator();
+						_003C_003E1__state = -4;
+						goto IL_00ec;
+					}
+					if (cat != ScenarioCategory.SteamWorkshop)
+					{
+						break;
+					}
+					_003C_003E7__wrap2 = ScenarioFiles.AllScenariosWorkshop.GetEnumerator();
+					_003C_003E1__state = -5;
+					goto IL_0153;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0081;
+				case 2:
+					_003C_003E1__state = -4;
+					goto IL_00ec;
+				case 3:
+					{
+						_003C_003E1__state = -5;
+						goto IL_0153;
+					}
+					IL_00ec:
+					if (_003C_003E7__wrap2.MoveNext())
+					{
+						Scenario current = _003C_003E7__wrap2.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					_003C_003Em__Finally2();
+					_003C_003E7__wrap2 = null;
+					break;
+					IL_0081:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						ScenarioDef current2 = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current2.scenario;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					break;
+					IL_0153:
+					if (_003C_003E7__wrap2.MoveNext())
+					{
+						Scenario current3 = _003C_003E7__wrap2.Current;
+						_003C_003E2__current = current3;
+						_003C_003E1__state = 3;
+						return true;
+					}
+					_003C_003Em__Finally3();
+					_003C_003E7__wrap2 = null;
+					break;
+				}
+				return false;
 			}
-			return num;
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
 		}
 
-		// Token: 0x040097E4 RID: 38884
-		private static bool dirty = true;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap2 != null)
+			{
+				_003C_003E7__wrap2.Dispose();
+			}
+		}
+
+		private void _003C_003Em__Finally3()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap2 != null)
+			{
+				_003C_003E7__wrap2.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Scenario> IEnumerable<Scenario>.GetEnumerator()
+		{
+			_003CScenariosInCategory_003Ed__2 _003CScenariosInCategory_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CScenariosInCategory_003Ed__ = this;
+			}
+			else
+			{
+				_003CScenariosInCategory_003Ed__ = new _003CScenariosInCategory_003Ed__2(0);
+			}
+			_003CScenariosInCategory_003Ed__.cat = _003C_003E3__cat;
+			return _003CScenariosInCategory_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Scenario>)this).GetEnumerator();
+		}
+	}
+
+	private static bool dirty = true;
+
+	[IteratorStateMachine(typeof(_003CAllScenarios_003Ed__1))]
+	public static IEnumerable<Scenario> AllScenarios()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CAllScenarios_003Ed__1(-2);
+	}
+
+	[IteratorStateMachine(typeof(_003CScenariosInCategory_003Ed__2))]
+	public static IEnumerable<Scenario> ScenariosInCategory(ScenarioCategory cat)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CScenariosInCategory_003Ed__2(-2)
+		{
+			_003C_003E3__cat = cat
+		};
+	}
+
+	public static bool ScenarioIsListedAnywhere(Scenario scen)
+	{
+		RecacheIfDirty();
+		foreach (ScenarioDef allDef in DefDatabase<ScenarioDef>.AllDefs)
+		{
+			if (allDef.scenario == scen)
+			{
+				return true;
+			}
+		}
+		foreach (Scenario item in ScenarioFiles.AllScenariosLocal)
+		{
+			if (scen == item)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static void MarkDirty()
+	{
+		dirty = true;
+	}
+
+	private static void RecacheIfDirty()
+	{
+		if (dirty)
+		{
+			RecacheData();
+		}
+	}
+
+	private static void RecacheData()
+	{
+		dirty = false;
+		int num = ScenarioListHash();
+		ScenarioFiles.RecacheData();
+		if (ScenarioListHash() != num && !LongEventHandler.ShouldWaitForEvent)
+		{
+			Find.WindowStack.WindowOfType<Page_SelectScenario>()?.Notify_ScenarioListChanged();
+		}
+	}
+
+	public static int ScenarioListHash()
+	{
+		int num = 9826121;
+		foreach (Scenario item in AllScenarios())
+		{
+			num ^= 791 * item.GetHashCode() * 6121;
+		}
+		return num;
 	}
 }

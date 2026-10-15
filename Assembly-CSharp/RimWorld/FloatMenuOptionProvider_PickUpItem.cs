@@ -1,147 +1,324 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using UnityEngine;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class FloatMenuOptionProvider_PickUpItem : FloatMenuOptionProvider
 {
-	// Token: 0x0200331D RID: 13085
-	public class FloatMenuOptionProvider_PickUpItem : FloatMenuOptionProvider
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass7_0
 	{
-		// Token: 0x17002FD6 RID: 12246
-		// (get) Token: 0x06012669 RID: 75369 RVA: 0x000028E7 File Offset: 0x00000AE7
-		protected override bool Drafted
+		public Thing clickedThing;
+
+		public FloatMenuContext context;
+
+		public Action<int> _003C_003E9__3;
+
+		internal void _003CGetOptionsFor_003Eb__0()
 		{
+			clickedThing.SetForbidden(value: false, warnOnFail: false);
+			Job job = JobMaker.MakeJob(JobDefOf.TakeInventory, clickedThing);
+			job.count = 1;
+			job.checkEncumbrance = true;
+			job.takeInventoryDelay = 120;
+			context.FirstSelectedPawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
+		}
+
+		internal void _003CGetOptionsFor_003Eb__1()
+		{
+			clickedThing.SetForbidden(value: false, warnOnFail: false);
+			Job job = JobMaker.MakeJob(JobDefOf.TakeInventory, clickedThing);
+			job.count = clickedThing.stackCount;
+			job.checkEncumbrance = true;
+			job.takeInventoryDelay = 120;
+			context.FirstSelectedPawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
+		}
+
+		internal void _003CGetOptionsFor_003Eb__3(int count)
+		{
+			clickedThing.SetForbidden(value: false, warnOnFail: false);
+			Job job = JobMaker.MakeJob(JobDefOf.TakeInventory, clickedThing);
+			job.count = count;
+			job.checkEncumbrance = true;
+			job.takeInventoryDelay = 120;
+			context.FirstSelectedPawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass7_1
+	{
+		public int maxAllowedToPickUp;
+
+		public _003C_003Ec__DisplayClass7_0 CS_0024_003C_003E8__locals1;
+
+		internal void _003CGetOptionsFor_003Eb__2()
+		{
+			int b = Mathf.Min(MassUtility.CountToPickUpUntilOverEncumbered(CS_0024_003C_003E8__locals1.context.FirstSelectedPawn, CS_0024_003C_003E8__locals1.clickedThing), CS_0024_003C_003E8__locals1.clickedThing.stackCount);
+			int to = Mathf.Min(maxAllowedToPickUp, b);
+			Dialog_Slider window = new Dialog_Slider("PickUpCount".Translate(CS_0024_003C_003E8__locals1.clickedThing.LabelNoCount, CS_0024_003C_003E8__locals1.clickedThing), 1, to, delegate(int count)
+			{
+				CS_0024_003C_003E8__locals1.clickedThing.SetForbidden(value: false, warnOnFail: false);
+				Job job = JobMaker.MakeJob(JobDefOf.TakeInventory, CS_0024_003C_003E8__locals1.clickedThing);
+				job.count = count;
+				job.checkEncumbrance = true;
+				job.takeInventoryDelay = 120;
+				CS_0024_003C_003E8__locals1.context.FirstSelectedPawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
+			});
+			Find.WindowStack.Add(window);
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGetOptionsFor_003Ed__7 : IEnumerable<FloatMenuOption>, IEnumerable, IEnumerator<FloatMenuOption>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private FloatMenuOption _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private Thing clickedThing;
+
+		public Thing _003C_003E3__clickedThing;
+
+		private FloatMenuContext context;
+
+		public FloatMenuContext _003C_003E3__context;
+
+		private _003C_003Ec__DisplayClass7_1 _003C_003E8__1;
+
+		FloatMenuOption IEnumerator<FloatMenuOption>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				return true;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002FD7 RID: 12247
-		// (get) Token: 0x0601266A RID: 75370 RVA: 0x000028E7 File Offset: 0x00000AE7
-		protected override bool Undrafted
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return true;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002FD8 RID: 12248
-		// (get) Token: 0x0601266B RID: 75371 RVA: 0x00002501 File Offset: 0x00000701
-		protected override bool Multiselect
+		[DebuggerHidden]
+		public _003CGetOptionsFor_003Ed__7(int _003C_003E1__state)
 		{
-			get
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E8__1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			switch (_003C_003E1__state)
 			{
+			default:
 				return false;
+			case 0:
+			{
+				_003C_003E1__state = -1;
+				_003C_003Ec__DisplayClass7_0 _003C_003Ec__DisplayClass7_ = new _003C_003Ec__DisplayClass7_0
+				{
+					clickedThing = clickedThing,
+					context = context
+				};
+				if (_003C_003Ec__DisplayClass7_.clickedThing.def.category != ThingCategory.Item)
+				{
+					return false;
+				}
+				if (!_003C_003Ec__DisplayClass7_.clickedThing.def.EverHaulable || !PawnUtility.CanPickUp(_003C_003Ec__DisplayClass7_.context.FirstSelectedPawn, _003C_003Ec__DisplayClass7_.clickedThing.def))
+				{
+					return false;
+				}
+				if (_003C_003Ec__DisplayClass7_.context.FirstSelectedPawn.Map.IsPlayerHome && !JobGiver_DropUnusedInventory.ShouldKeepDrugInInventory(_003C_003Ec__DisplayClass7_.context.FirstSelectedPawn, _003C_003Ec__DisplayClass7_.clickedThing))
+				{
+					return false;
+				}
+				if (!_003C_003Ec__DisplayClass7_.context.FirstSelectedPawn.CanReach(_003C_003Ec__DisplayClass7_.clickedThing, PathEndMode.ClosestTouch, Danger.Deadly))
+				{
+					_003C_003E2__current = new FloatMenuOption("CannotPickUp".Translate(_003C_003Ec__DisplayClass7_.clickedThing.Label, _003C_003Ec__DisplayClass7_.clickedThing) + ": " + "NoPath".Translate().CapitalizeFirst(), null);
+					_003C_003E1__state = 1;
+					return true;
+				}
+				if (MassUtility.WillBeOverEncumberedAfterPickingUp(_003C_003Ec__DisplayClass7_.context.FirstSelectedPawn, _003C_003Ec__DisplayClass7_.clickedThing, 1))
+				{
+					_003C_003E2__current = new FloatMenuOption("CannotPickUp".Translate(_003C_003Ec__DisplayClass7_.clickedThing.Label, _003C_003Ec__DisplayClass7_.clickedThing) + ": " + "TooHeavy".Translate(), null);
+					_003C_003E1__state = 2;
+					return true;
+				}
+				_003C_003E8__1 = new _003C_003Ec__DisplayClass7_1();
+				_003C_003E8__1.CS_0024_003C_003E8__locals1 = _003C_003Ec__DisplayClass7_;
+				_003C_003E8__1.maxAllowedToPickUp = PawnUtility.GetMaxAllowedToPickUp(_003C_003E8__1.CS_0024_003C_003E8__locals1.context.FirstSelectedPawn, _003C_003E8__1.CS_0024_003C_003E8__locals1.clickedThing.def);
+				if (_003C_003E8__1.maxAllowedToPickUp == 0)
+				{
+					_003C_003E2__current = new FloatMenuOption("CannotPickUp".Translate(_003C_003E8__1.CS_0024_003C_003E8__locals1.clickedThing.Label, _003C_003E8__1.CS_0024_003C_003E8__locals1.clickedThing) + ": " + "MaxPickUpAllowed".Translate(_003C_003E8__1.CS_0024_003C_003E8__locals1.clickedThing.def.orderedTakeGroup.max, _003C_003E8__1.CS_0024_003C_003E8__locals1.clickedThing.def.orderedTakeGroup.label), null);
+					_003C_003E1__state = 3;
+					return true;
+				}
+				if (_003C_003E8__1.CS_0024_003C_003E8__locals1.clickedThing.stackCount == 1 || _003C_003E8__1.maxAllowedToPickUp == 1)
+				{
+					_003C_003E2__current = FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("PickUpOne".Translate(_003C_003E8__1.CS_0024_003C_003E8__locals1.clickedThing.LabelNoCount, _003C_003E8__1.CS_0024_003C_003E8__locals1.clickedThing), delegate
+					{
+						_003C_003E8__1.CS_0024_003C_003E8__locals1.clickedThing.SetForbidden(value: false, warnOnFail: false);
+						Job job2 = JobMaker.MakeJob(JobDefOf.TakeInventory, _003C_003E8__1.CS_0024_003C_003E8__locals1.clickedThing);
+						job2.count = 1;
+						job2.checkEncumbrance = true;
+						job2.takeInventoryDelay = 120;
+						_003C_003E8__1.CS_0024_003C_003E8__locals1.context.FirstSelectedPawn.jobs.TryTakeOrderedJob(job2, JobTag.Misc);
+					}, MenuOptionPriority.High), _003C_003E8__1.CS_0024_003C_003E8__locals1.context.FirstSelectedPawn, _003C_003E8__1.CS_0024_003C_003E8__locals1.clickedThing);
+					_003C_003E1__state = 4;
+					return true;
+				}
+				if (_003C_003E8__1.maxAllowedToPickUp < _003C_003E8__1.CS_0024_003C_003E8__locals1.clickedThing.stackCount)
+				{
+					_003C_003E2__current = new FloatMenuOption("CannotPickUpAll".Translate(_003C_003E8__1.CS_0024_003C_003E8__locals1.clickedThing.Label, _003C_003E8__1.CS_0024_003C_003E8__locals1.clickedThing) + ": " + "MaxPickUpAllowed".Translate(_003C_003E8__1.CS_0024_003C_003E8__locals1.clickedThing.def.orderedTakeGroup.max, _003C_003E8__1.CS_0024_003C_003E8__locals1.clickedThing.def.orderedTakeGroup.label), null);
+					_003C_003E1__state = 5;
+					return true;
+				}
+				if (MassUtility.WillBeOverEncumberedAfterPickingUp(_003C_003E8__1.CS_0024_003C_003E8__locals1.context.FirstSelectedPawn, _003C_003E8__1.CS_0024_003C_003E8__locals1.clickedThing, _003C_003E8__1.CS_0024_003C_003E8__locals1.clickedThing.stackCount))
+				{
+					_003C_003E2__current = new FloatMenuOption("CannotPickUpAll".Translate(_003C_003E8__1.CS_0024_003C_003E8__locals1.clickedThing.Label, _003C_003E8__1.CS_0024_003C_003E8__locals1.clickedThing) + ": " + "TooHeavy".Translate(), null);
+					_003C_003E1__state = 6;
+					return true;
+				}
+				_003C_003E2__current = FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("PickUpAll".Translate(_003C_003E8__1.CS_0024_003C_003E8__locals1.clickedThing.Label, _003C_003E8__1.CS_0024_003C_003E8__locals1.clickedThing), delegate
+				{
+					_003C_003E8__1.CS_0024_003C_003E8__locals1.clickedThing.SetForbidden(value: false, warnOnFail: false);
+					Job job3 = JobMaker.MakeJob(JobDefOf.TakeInventory, _003C_003E8__1.CS_0024_003C_003E8__locals1.clickedThing);
+					job3.count = _003C_003E8__1.CS_0024_003C_003E8__locals1.clickedThing.stackCount;
+					job3.checkEncumbrance = true;
+					job3.takeInventoryDelay = 120;
+					_003C_003E8__1.CS_0024_003C_003E8__locals1.context.FirstSelectedPawn.jobs.TryTakeOrderedJob(job3, JobTag.Misc);
+				}, MenuOptionPriority.High), _003C_003E8__1.CS_0024_003C_003E8__locals1.context.FirstSelectedPawn, _003C_003E8__1.CS_0024_003C_003E8__locals1.clickedThing);
+				_003C_003E1__state = 7;
+				return true;
 			}
+			case 1:
+				_003C_003E1__state = -1;
+				break;
+			case 2:
+				_003C_003E1__state = -1;
+				break;
+			case 3:
+				_003C_003E1__state = -1;
+				goto IL_0711;
+			case 4:
+				_003C_003E1__state = -1;
+				goto IL_0711;
+			case 5:
+				_003C_003E1__state = -1;
+				goto IL_0666;
+			case 6:
+				_003C_003E1__state = -1;
+				goto IL_0666;
+			case 7:
+				_003C_003E1__state = -1;
+				goto IL_0666;
+			case 8:
+				{
+					_003C_003E1__state = -1;
+					goto IL_0711;
+				}
+				IL_0666:
+				_003C_003E2__current = FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("PickUpSome".Translate(_003C_003E8__1.CS_0024_003C_003E8__locals1.clickedThing.LabelNoCount, _003C_003E8__1.CS_0024_003C_003E8__locals1.clickedThing), delegate
+				{
+					int b = Mathf.Min(MassUtility.CountToPickUpUntilOverEncumbered(_003C_003E8__1.CS_0024_003C_003E8__locals1.context.FirstSelectedPawn, _003C_003E8__1.CS_0024_003C_003E8__locals1.clickedThing), _003C_003E8__1.CS_0024_003C_003E8__locals1.clickedThing.stackCount);
+					int to = Mathf.Min(_003C_003E8__1.maxAllowedToPickUp, b);
+					Dialog_Slider window = new Dialog_Slider("PickUpCount".Translate(_003C_003E8__1.CS_0024_003C_003E8__locals1.clickedThing.LabelNoCount, _003C_003E8__1.CS_0024_003C_003E8__locals1.clickedThing), 1, to, delegate(int count)
+					{
+						_003C_003E8__1.CS_0024_003C_003E8__locals1.clickedThing.SetForbidden(value: false, warnOnFail: false);
+						Job job = JobMaker.MakeJob(JobDefOf.TakeInventory, _003C_003E8__1.CS_0024_003C_003E8__locals1.clickedThing);
+						job.count = count;
+						job.checkEncumbrance = true;
+						job.takeInventoryDelay = 120;
+						_003C_003E8__1.CS_0024_003C_003E8__locals1.context.FirstSelectedPawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
+					});
+					Find.WindowStack.Add(window);
+				}, MenuOptionPriority.High), _003C_003E8__1.CS_0024_003C_003E8__locals1.context.FirstSelectedPawn, _003C_003E8__1.CS_0024_003C_003E8__locals1.clickedThing);
+				_003C_003E1__state = 8;
+				return true;
+				IL_0711:
+				_003C_003E8__1 = null;
+				break;
+			}
+			return false;
 		}
 
-		// Token: 0x0601266C RID: 75372 RVA: 0x0056C494 File Offset: 0x0056A694
-		protected override bool AppliesInt(FloatMenuContext context)
+		bool IEnumerator.MoveNext()
 		{
-			return !context.FirstSelectedPawn.IsFormingCaravan();
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0601266D RID: 75373 RVA: 0x0056C4A4 File Offset: 0x0056A6A4
-		public override IEnumerable<FloatMenuOption> GetOptionsFor(Thing clickedThing, FloatMenuContext context)
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			FloatMenuOptionProvider_PickUpItem.<>c__DisplayClass7_0 CS$<>8__locals1 = new FloatMenuOptionProvider_PickUpItem.<>c__DisplayClass7_0();
-			CS$<>8__locals1.clickedThing = clickedThing;
-			CS$<>8__locals1.context = context;
-			if (CS$<>8__locals1.clickedThing.def.category != ThingCategory.Item)
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<FloatMenuOption> IEnumerable<FloatMenuOption>.GetEnumerator()
+		{
+			_003CGetOptionsFor_003Ed__7 _003CGetOptionsFor_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				yield break;
-			}
-			if (!CS$<>8__locals1.clickedThing.def.EverHaulable || !PawnUtility.CanPickUp(CS$<>8__locals1.context.FirstSelectedPawn, CS$<>8__locals1.clickedThing.def))
-			{
-				yield break;
-			}
-			if (CS$<>8__locals1.context.FirstSelectedPawn.Map.IsPlayerHome && !JobGiver_DropUnusedInventory.ShouldKeepDrugInInventory(CS$<>8__locals1.context.FirstSelectedPawn, CS$<>8__locals1.clickedThing))
-			{
-				yield break;
-			}
-			if (!CS$<>8__locals1.context.FirstSelectedPawn.CanReach(CS$<>8__locals1.clickedThing, PathEndMode.ClosestTouch, Danger.Deadly, false, false, TraverseMode.ByPawn))
-			{
-				yield return new FloatMenuOption("CannotPickUp".Translate(CS$<>8__locals1.clickedThing.Label, CS$<>8__locals1.clickedThing) + ": " + "NoPath".Translate().CapitalizeFirst(), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-			}
-			else if (MassUtility.WillBeOverEncumberedAfterPickingUp(CS$<>8__locals1.context.FirstSelectedPawn, CS$<>8__locals1.clickedThing, 1))
-			{
-				yield return new FloatMenuOption("CannotPickUp".Translate(CS$<>8__locals1.clickedThing.Label, CS$<>8__locals1.clickedThing) + ": " + "TooHeavy".Translate(), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
+				_003C_003E1__state = 0;
+				_003CGetOptionsFor_003Ed__ = this;
 			}
 			else
 			{
-				FloatMenuOptionProvider_PickUpItem.<>c__DisplayClass7_1 CS$<>8__locals2 = new FloatMenuOptionProvider_PickUpItem.<>c__DisplayClass7_1();
-				CS$<>8__locals2.CS$<>8__locals1 = CS$<>8__locals1;
-				CS$<>8__locals2.maxAllowedToPickUp = PawnUtility.GetMaxAllowedToPickUp(CS$<>8__locals2.CS$<>8__locals1.context.FirstSelectedPawn, CS$<>8__locals2.CS$<>8__locals1.clickedThing.def);
-				if (CS$<>8__locals2.maxAllowedToPickUp == 0)
-				{
-					yield return new FloatMenuOption("CannotPickUp".Translate(CS$<>8__locals2.CS$<>8__locals1.clickedThing.Label, CS$<>8__locals2.CS$<>8__locals1.clickedThing) + ": " + "MaxPickUpAllowed".Translate(CS$<>8__locals2.CS$<>8__locals1.clickedThing.def.orderedTakeGroup.max, CS$<>8__locals2.CS$<>8__locals1.clickedThing.def.orderedTakeGroup.label), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-				}
-				else if (CS$<>8__locals2.CS$<>8__locals1.clickedThing.stackCount == 1 || CS$<>8__locals2.maxAllowedToPickUp == 1)
-				{
-					yield return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("PickUpOne".Translate(CS$<>8__locals2.CS$<>8__locals1.clickedThing.LabelNoCount, CS$<>8__locals2.CS$<>8__locals1.clickedThing), delegate()
-					{
-						CS$<>8__locals2.CS$<>8__locals1.clickedThing.SetForbidden(false, false);
-						Job job = JobMaker.MakeJob(JobDefOf.TakeInventory, CS$<>8__locals2.CS$<>8__locals1.clickedThing);
-						job.count = 1;
-						job.checkEncumbrance = true;
-						job.takeInventoryDelay = 120;
-						CS$<>8__locals2.CS$<>8__locals1.context.FirstSelectedPawn.jobs.TryTakeOrderedJob(job, new JobTag?(JobTag.Misc), false);
-					}, MenuOptionPriority.High, null, null, 0f, null, null, true, 0), CS$<>8__locals2.CS$<>8__locals1.context.FirstSelectedPawn, CS$<>8__locals2.CS$<>8__locals1.clickedThing, "ReservedBy", null);
-				}
-				else
-				{
-					if (CS$<>8__locals2.maxAllowedToPickUp < CS$<>8__locals2.CS$<>8__locals1.clickedThing.stackCount)
-					{
-						yield return new FloatMenuOption("CannotPickUpAll".Translate(CS$<>8__locals2.CS$<>8__locals1.clickedThing.Label, CS$<>8__locals2.CS$<>8__locals1.clickedThing) + ": " + "MaxPickUpAllowed".Translate(CS$<>8__locals2.CS$<>8__locals1.clickedThing.def.orderedTakeGroup.max, CS$<>8__locals2.CS$<>8__locals1.clickedThing.def.orderedTakeGroup.label), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-					}
-					else if (MassUtility.WillBeOverEncumberedAfterPickingUp(CS$<>8__locals2.CS$<>8__locals1.context.FirstSelectedPawn, CS$<>8__locals2.CS$<>8__locals1.clickedThing, CS$<>8__locals2.CS$<>8__locals1.clickedThing.stackCount))
-					{
-						yield return new FloatMenuOption("CannotPickUpAll".Translate(CS$<>8__locals2.CS$<>8__locals1.clickedThing.Label, CS$<>8__locals2.CS$<>8__locals1.clickedThing) + ": " + "TooHeavy".Translate(), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-					}
-					else
-					{
-						yield return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("PickUpAll".Translate(CS$<>8__locals2.CS$<>8__locals1.clickedThing.Label, CS$<>8__locals2.CS$<>8__locals1.clickedThing), delegate()
-						{
-							CS$<>8__locals2.CS$<>8__locals1.clickedThing.SetForbidden(false, false);
-							Job job = JobMaker.MakeJob(JobDefOf.TakeInventory, CS$<>8__locals2.CS$<>8__locals1.clickedThing);
-							job.count = CS$<>8__locals2.CS$<>8__locals1.clickedThing.stackCount;
-							job.checkEncumbrance = true;
-							job.takeInventoryDelay = 120;
-							CS$<>8__locals2.CS$<>8__locals1.context.FirstSelectedPawn.jobs.TryTakeOrderedJob(job, new JobTag?(JobTag.Misc), false);
-						}, MenuOptionPriority.High, null, null, 0f, null, null, true, 0), CS$<>8__locals2.CS$<>8__locals1.context.FirstSelectedPawn, CS$<>8__locals2.CS$<>8__locals1.clickedThing, "ReservedBy", null);
-					}
-					yield return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("PickUpSome".Translate(CS$<>8__locals2.CS$<>8__locals1.clickedThing.LabelNoCount, CS$<>8__locals2.CS$<>8__locals1.clickedThing), delegate()
-					{
-						int b = Mathf.Min(MassUtility.CountToPickUpUntilOverEncumbered(CS$<>8__locals2.CS$<>8__locals1.context.FirstSelectedPawn, CS$<>8__locals2.CS$<>8__locals1.clickedThing), CS$<>8__locals2.CS$<>8__locals1.clickedThing.stackCount);
-						int num = Mathf.Min(CS$<>8__locals2.maxAllowedToPickUp, b);
-						string text = "PickUpCount".Translate(CS$<>8__locals2.CS$<>8__locals1.clickedThing.LabelNoCount, CS$<>8__locals2.CS$<>8__locals1.clickedThing);
-						int from = 1;
-						int to = num;
-						Action<int> confirmAction;
-						if ((confirmAction = CS$<>8__locals2.CS$<>8__locals1.<>9__3) == null)
-						{
-							confirmAction = (CS$<>8__locals2.CS$<>8__locals1.<>9__3 = delegate(int count)
-							{
-								CS$<>8__locals2.CS$<>8__locals1.clickedThing.SetForbidden(false, false);
-								Job job = JobMaker.MakeJob(JobDefOf.TakeInventory, CS$<>8__locals2.CS$<>8__locals1.clickedThing);
-								job.count = count;
-								job.checkEncumbrance = true;
-								job.takeInventoryDelay = 120;
-								CS$<>8__locals2.CS$<>8__locals1.context.FirstSelectedPawn.jobs.TryTakeOrderedJob(job, new JobTag?(JobTag.Misc), false);
-							});
-						}
-						Dialog_Slider window = new Dialog_Slider(text, from, to, confirmAction, int.MinValue, 1f);
-						Find.WindowStack.Add(window);
-					}, MenuOptionPriority.High, null, null, 0f, null, null, true, 0), CS$<>8__locals2.CS$<>8__locals1.context.FirstSelectedPawn, CS$<>8__locals2.CS$<>8__locals1.clickedThing, "ReservedBy", null);
-				}
-				CS$<>8__locals2 = null;
+				_003CGetOptionsFor_003Ed__ = new _003CGetOptionsFor_003Ed__7(0);
 			}
-			yield break;
+			_003CGetOptionsFor_003Ed__.clickedThing = _003C_003E3__clickedThing;
+			_003CGetOptionsFor_003Ed__.context = _003C_003E3__context;
+			return _003CGetOptionsFor_003Ed__;
 		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<FloatMenuOption>)this).GetEnumerator();
+		}
+	}
+
+	protected override bool Drafted => true;
+
+	protected override bool Undrafted => true;
+
+	protected override bool Multiselect => false;
+
+	protected override bool AppliesInt(FloatMenuContext context)
+	{
+		return !context.FirstSelectedPawn.IsFormingCaravan();
+	}
+
+	[IteratorStateMachine(typeof(_003CGetOptionsFor_003Ed__7))]
+	public override IEnumerable<FloatMenuOption> GetOptionsFor(Thing clickedThing, FloatMenuContext context)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetOptionsFor_003Ed__7(-2)
+		{
+			_003C_003E3__clickedThing = clickedThing,
+			_003C_003E3__context = context
+		};
 	}
 }

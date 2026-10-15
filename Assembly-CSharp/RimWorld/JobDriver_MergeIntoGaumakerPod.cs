@@ -1,55 +1,148 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_MergeIntoGaumakerPod : JobDriver
 {
-	// Token: 0x0200157C RID: 5500
-	public class JobDriver_MergeIntoGaumakerPod : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__6 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x170013F6 RID: 5110
-		// (get) Token: 0x06008268 RID: 33384 RVA: 0x00272D86 File Offset: 0x00270F86
-		private CompTreeConnection TreeComp
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_MergeIntoGaumakerPod _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.job.targetA.Thing.TryGetComp<CompTreeConnection>();
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170013F7 RID: 5111
-		// (get) Token: 0x06008269 RID: 33385 RVA: 0x00273104 File Offset: 0x00271304
-		private CompGaumakerPod GaumakerPod
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.job.targetB.Thing.TryGetComp<CompGaumakerPod>();
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600826A RID: 33386 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__6(int _003C_003E1__state)
 		{
-			return true;
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x0600826B RID: 33387 RVA: 0x0027311B File Offset: 0x0027131B
-		protected override IEnumerable<Toil> MakeNewToils()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			this.FailOnDespawnedOrNull(TargetIndex.A);
-			this.FailOnDespawnedOrNull(TargetIndex.B);
-			this.FailOn(() => this.GaumakerPod.Full);
-			yield return Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.Touch, false);
-			yield return Toils_General.WaitWith(TargetIndex.B, 120, true, false, false, TargetIndex.None, PathEndMode.Touch);
-			yield return Toils_General.Do(delegate
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_MergeIntoGaumakerPod CS_0024_003C_003E8__locals6 = _003C_003E4__this;
+			switch (num)
 			{
-				this.GaumakerPod.TryAcceptPawn(this.pawn);
-			});
-			yield break;
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				CS_0024_003C_003E8__locals6.FailOnDespawnedOrNull(TargetIndex.A);
+				CS_0024_003C_003E8__locals6.FailOnDespawnedOrNull(TargetIndex.B);
+				CS_0024_003C_003E8__locals6.FailOn(() => CS_0024_003C_003E8__locals6.GaumakerPod.Full);
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.Touch);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.WaitWith(TargetIndex.B, 120, useProgressBar: true);
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.Do(delegate
+				{
+					CS_0024_003C_003E8__locals6.GaumakerPod.TryAcceptPawn(CS_0024_003C_003E8__locals6.pawn);
+				});
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+				_003C_003E1__state = -1;
+				return false;
+			}
 		}
 
-		// Token: 0x04005692 RID: 22162
-		private const int WaitTicks = 120;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__6 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__6(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private const int WaitTicks = 120;
+
+	private CompTreeConnection TreeComp => job.targetA.Thing.TryGetComp<CompTreeConnection>();
+
+	private CompGaumakerPod GaumakerPod => job.targetB.Thing.TryGetComp<CompGaumakerPod>();
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return true;
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__6))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__6(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

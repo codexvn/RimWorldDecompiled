@@ -1,60 +1,153 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompProperties_ThrownMoteEmitter : CompProperties
 {
-	// Token: 0x02002E95 RID: 11925
-	public class CompProperties_ThrownMoteEmitter : CompProperties
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__12 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x06010CBC RID: 68796 RVA: 0x004D5F10 File Offset: 0x004D4110
-		public CompProperties_ThrownMoteEmitter()
-		{
-			this.compClass = typeof(CompThrownMoteEmitter);
-		}
+		private int _003C_003E1__state;
 
-		// Token: 0x06010CBD RID: 68797 RVA: 0x004D5F62 File Offset: 0x004D4162
-		public override IEnumerable<string> ConfigErrors(ThingDef parentDef)
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompProperties_ThrownMoteEmitter _003C_003E4__this;
+
+		string IEnumerator<string>.Current
 		{
-			if (this.mote == null)
+			[DebuggerHidden]
+			get
 			{
-				yield return "CompThrownMoteEmitter must have a mote assigned.";
+				return _003C_003E2__current;
 			}
-			yield break;
 		}
 
-		// Token: 0x0400AEDB RID: 44763
-		public ThingDef mote;
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
 
-		// Token: 0x0400AEDC RID: 44764
-		public Vector3 offsetMin;
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__12(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
 
-		// Token: 0x0400AEDD RID: 44765
-		public Vector3 offsetMax;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
 
-		// Token: 0x0400AEDE RID: 44766
-		public int emissionInterval = -1;
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			CompProperties_ThrownMoteEmitter compProperties_ThrownMoteEmitter = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (compProperties_ThrownMoteEmitter.mote == null)
+				{
+					_003C_003E2__current = "CompThrownMoteEmitter must have a mote assigned.";
+					_003C_003E1__state = 1;
+					return true;
+				}
+				break;
+			case 1:
+				_003C_003E1__state = -1;
+				break;
+			}
+			return false;
+		}
 
-		// Token: 0x0400AEDF RID: 44767
-		public int burstCount = 1;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x0400AEE0 RID: 44768
-		public Color colorA = Color.white;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x0400AEE1 RID: 44769
-		public Color colorB = Color.white;
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__12 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__12(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x0400AEE2 RID: 44770
-		public FloatRange scale = FloatRange.One;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x0400AEE3 RID: 44771
-		public FloatRange rotationRate;
+	public ThingDef mote;
 
-		// Token: 0x0400AEE4 RID: 44772
-		public FloatRange velocityX;
+	public Vector3 offsetMin;
 
-		// Token: 0x0400AEE5 RID: 44773
-		public FloatRange velocityY;
+	public Vector3 offsetMax;
+
+	public int emissionInterval = -1;
+
+	public int burstCount = 1;
+
+	public Color colorA = Color.white;
+
+	public Color colorB = Color.white;
+
+	public FloatRange scale = FloatRange.One;
+
+	public FloatRange rotationRate;
+
+	public FloatRange velocityX;
+
+	public FloatRange velocityY;
+
+	public CompProperties_ThrownMoteEmitter()
+	{
+		compClass = typeof(CompThrownMoteEmitter);
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__12))]
+	public override IEnumerable<string> ConfigErrors(ThingDef parentDef)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__12(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

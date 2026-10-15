@@ -1,22 +1,44 @@
-﻿using System;
 using Verse;
 
-namespace RimWorld
-{
-	// Token: 0x0200160D RID: 5645
-	public static class RepairUtility
-	{
-		// Token: 0x0600852F RID: 34095 RVA: 0x0027DA78 File Offset: 0x0027BC78
-		public static bool PawnCanRepairEver(Pawn pawn, Thing t)
-		{
-			Building building = t as Building;
-			return building != null && t.def.useHitPoints && building.def.building.repairable && t.Faction == pawn.Faction;
-		}
+namespace RimWorld;
 
-		// Token: 0x06008530 RID: 34096 RVA: 0x0027DAC5 File Offset: 0x0027BCC5
-		public static bool PawnCanRepairNow(Pawn pawn, Thing t)
+public static class RepairUtility
+{
+	public static bool PawnCanRepairEver(Pawn pawn, Thing t)
+	{
+		if (!(t is Building building))
 		{
-			return RepairUtility.PawnCanRepairEver(pawn, t) && pawn.Map.listerBuildingsRepairable.Contains(pawn.Faction, (Building)t) && t.HitPoints != t.MaxHitPoints;
+			return false;
 		}
+		if (!t.def.useHitPoints)
+		{
+			return false;
+		}
+		if (!building.def.building.repairable)
+		{
+			return false;
+		}
+		if (t.Faction != pawn.Faction)
+		{
+			return false;
+		}
+		return true;
+	}
+
+	public static bool PawnCanRepairNow(Pawn pawn, Thing t)
+	{
+		if (!PawnCanRepairEver(pawn, t))
+		{
+			return false;
+		}
+		if (!pawn.Map.listerBuildingsRepairable.Contains(pawn.Faction, (Building)t))
+		{
+			return false;
+		}
+		if (t.HitPoints == t.MaxHitPoints)
+		{
+			return false;
+		}
+		return true;
 	}
 }

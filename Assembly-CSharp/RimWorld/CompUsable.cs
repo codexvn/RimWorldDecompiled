@@ -1,6 +1,9 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using RimWorld.Planet;
 using UnityEngine;
@@ -8,439 +11,536 @@ using Verse;
 using Verse.AI;
 using Verse.Sound;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompUsable : ThingComp, ITargetingSource
 {
-	// Token: 0x02002EBC RID: 11964
-	public class CompUsable : ThingComp, ITargetingSource
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass31_0
 	{
-		// Token: 0x17002B83 RID: 11139
-		// (get) Token: 0x06010E28 RID: 69160 RVA: 0x004DCCAB File Offset: 0x004DAEAB
-		public CompProperties_Usable Props
-		{
-			get
-			{
-				return (CompProperties_Usable)this.props;
-			}
-		}
+		public CompUsable _003C_003E4__this;
 
-		// Token: 0x17002B84 RID: 11140
-		// (get) Token: 0x06010E29 RID: 69161 RVA: 0x004DCCB8 File Offset: 0x004DAEB8
-		private Texture2D Icon
+		public Pawn myPawn;
+
+		internal void _003CCompFloatMenuOptions_003Eb__0()
 		{
-			get
+			foreach (CompUseEffect comp in _003C_003E4__this.parent.GetComps<CompUseEffect>())
 			{
-				if (this.icon == null && this.Props.floatMenuFactionIcon != null)
+				if (comp.SelectedUseOption(myPawn))
 				{
-					Faction faction = Find.FactionManager.FirstFactionOfDef(this.Props.floatMenuFactionIcon);
-					Texture2D texture2D;
-					if (faction == null)
-					{
-						texture2D = null;
-					}
-					else
-					{
-						FactionDef def = faction.def;
-						texture2D = ((def != null) ? def.FactionIcon : null);
-					}
-					this.icon = texture2D;
+					return;
 				}
-				return this.icon;
+			}
+			_003C_003E4__this.TryStartUseJob(myPawn, _003C_003E4__this.GetExtraTarget(myPawn), _003C_003E4__this.Props.ignoreOtherReservations);
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CCompFloatMenuOptions_003Ed__31 : IEnumerable<FloatMenuOption>, IEnumerable, IEnumerator<FloatMenuOption>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private FloatMenuOption _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompUsable _003C_003E4__this;
+
+		private Pawn myPawn;
+
+		public Pawn _003C_003E3__myPawn;
+
+		FloatMenuOption IEnumerator<FloatMenuOption>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002B85 RID: 11141
-		// (get) Token: 0x06010E2A RID: 69162 RVA: 0x004DCD1C File Offset: 0x004DAF1C
-		private Color IconColor
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.iconColor == null && this.Props.floatMenuFactionIcon != null)
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CCompFloatMenuOptions_003Ed__31(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			CompUsable compUsable = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+			{
+				_003C_003E1__state = -1;
+				_003C_003Ec__DisplayClass31_0 CS_0024_003C_003E8__locals10 = new _003C_003Ec__DisplayClass31_0
 				{
-					Faction faction = Find.FactionManager.FirstFactionOfDef(this.Props.floatMenuFactionIcon);
-					this.iconColor = ((faction != null) ? new Color?(faction.Color) : null);
+					_003C_003E4__this = _003C_003E4__this,
+					myPawn = myPawn
+				};
+				if (compUsable.Props.useJob == null)
+				{
+					return false;
 				}
-				Color? color = this.iconColor;
-				if (color == null)
+				AcceptanceReport acceptanceReport = compUsable.CanBeUsedBy(CS_0024_003C_003E8__locals10.myPawn, compUsable.Props.ignoreOtherReservations);
+				FloatMenuOption floatMenuOption = FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption(compUsable.FloatMenuOptionLabel(CS_0024_003C_003E8__locals10.myPawn), delegate
 				{
-					return Color.white;
-				}
-				return color.GetValueOrDefault();
-			}
-		}
-
-		// Token: 0x17002B86 RID: 11142
-		// (get) Token: 0x06010E2B RID: 69163 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public bool CasterIsPawn
-		{
-			get
-			{
-				return true;
-			}
-		}
-
-		// Token: 0x17002B87 RID: 11143
-		// (get) Token: 0x06010E2C RID: 69164 RVA: 0x00002501 File Offset: 0x00000701
-		public bool IsMeleeAttack
-		{
-			get
-			{
-				return false;
-			}
-		}
-
-		// Token: 0x17002B88 RID: 11144
-		// (get) Token: 0x06010E2D RID: 69165 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public bool Targetable
-		{
-			get
-			{
-				return true;
-			}
-		}
-
-		// Token: 0x17002B89 RID: 11145
-		// (get) Token: 0x06010E2E RID: 69166 RVA: 0x00002501 File Offset: 0x00000701
-		public bool MultiSelect
-		{
-			get
-			{
-				return false;
-			}
-		}
-
-		// Token: 0x17002B8A RID: 11146
-		// (get) Token: 0x06010E2F RID: 69167 RVA: 0x00002501 File Offset: 0x00000701
-		public bool HidePawnTooltips
-		{
-			get
-			{
-				return false;
-			}
-		}
-
-		// Token: 0x17002B8B RID: 11147
-		// (get) Token: 0x06010E30 RID: 69168 RVA: 0x0048FDB8 File Offset: 0x0048DFB8
-		public Thing Caster
-		{
-			get
-			{
-				return this.parent;
-			}
-		}
-
-		// Token: 0x17002B8C RID: 11148
-		// (get) Token: 0x06010E31 RID: 69169 RVA: 0x00002C42 File Offset: 0x00000E42
-		public Pawn CasterPawn
-		{
-			get
-			{
-				return null;
-			}
-		}
-
-		// Token: 0x17002B8D RID: 11149
-		// (get) Token: 0x06010E32 RID: 69170 RVA: 0x00002C42 File Offset: 0x00000E42
-		public Verb GetVerb
-		{
-			get
-			{
-				return null;
-			}
-		}
-
-		// Token: 0x17002B8E RID: 11150
-		// (get) Token: 0x06010E33 RID: 69171 RVA: 0x004DCD94 File Offset: 0x004DAF94
-		public TargetingParameters targetParams
-		{
-			get
-			{
-				return TargetingParameters.ForPawns();
-			}
-		}
-
-		// Token: 0x17002B8F RID: 11151
-		// (get) Token: 0x06010E34 RID: 69172 RVA: 0x00002C42 File Offset: 0x00000E42
-		public virtual ITargetingSource DestinationSelector
-		{
-			get
-			{
-				return null;
-			}
-		}
-
-		// Token: 0x17002B90 RID: 11152
-		// (get) Token: 0x06010E35 RID: 69173 RVA: 0x00002C42 File Offset: 0x00000E42
-		public Texture2D UIIcon
-		{
-			get
-			{
-				return null;
-			}
-		}
-
-		// Token: 0x06010E36 RID: 69174 RVA: 0x004DCD9B File Offset: 0x004DAF9B
-		protected virtual string FloatMenuOptionLabel(Pawn pawn)
-		{
-			return this.Props.useLabel.Formatted(this.parent);
-		}
-
-		// Token: 0x06010E37 RID: 69175 RVA: 0x004DCDBD File Offset: 0x004DAFBD
-		public override IEnumerable<FloatMenuOption> CompFloatMenuOptions(Pawn myPawn)
-		{
-			if (this.Props.useJob == null)
-			{
-				yield break;
-			}
-			AcceptanceReport acceptanceReport = this.CanBeUsedBy(myPawn, this.Props.ignoreOtherReservations, false);
-			string label = this.FloatMenuOptionLabel(myPawn);
-			Action action = delegate()
-			{
-				using (IEnumerator<CompUseEffect> enumerator = this.parent.GetComps<CompUseEffect>().GetEnumerator())
-				{
-					while (enumerator.MoveNext())
+					foreach (CompUseEffect comp in CS_0024_003C_003E8__locals10._003C_003E4__this.parent.GetComps<CompUseEffect>())
 					{
-						if (enumerator.Current.SelectedUseOption(myPawn))
+						if (comp.SelectedUseOption(CS_0024_003C_003E8__locals10.myPawn))
 						{
 							return;
 						}
 					}
-				}
-				this.TryStartUseJob(myPawn, this.GetExtraTarget(myPawn), this.Props.ignoreOtherReservations);
-			};
-			MenuOptionPriority floatMenuOptionPriority = this.Props.floatMenuOptionPriority;
-			FloatMenuOption floatMenuOption = FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption(label, action, this.Icon, this.IconColor, floatMenuOptionPriority, null, null, 0f, null, null, true, 0, HorizontalJustification.Left, false), myPawn, this.parent, "ReservedBy", null);
-			if (!acceptanceReport.Accepted)
-			{
-				floatMenuOption.Disabled = true;
-				FloatMenuOption floatMenuOption2 = floatMenuOption;
-				floatMenuOption2.Label = floatMenuOption2.Label + " (" + acceptanceReport.Reason + ")";
-			}
-			yield return floatMenuOption;
-			yield break;
-		}
-
-		// Token: 0x06010E38 RID: 69176 RVA: 0x0047604F File Offset: 0x0047424F
-		public virtual LocalTargetInfo GetExtraTarget(Pawn pawn)
-		{
-			return LocalTargetInfo.Invalid;
-		}
-
-		// Token: 0x06010E39 RID: 69177 RVA: 0x004DCDD4 File Offset: 0x004DAFD4
-		public virtual void TryStartUseJob(Pawn pawn, LocalTargetInfo extraTarget, bool forced = false)
-		{
-			CompUsable.<>c__DisplayClass33_0 CS$<>8__locals1 = new CompUsable.<>c__DisplayClass33_0();
-			CS$<>8__locals1.extraTarget = extraTarget;
-			CS$<>8__locals1.pawn = pawn;
-			CS$<>8__locals1.<>4__this = this;
-			if (this.Props.useJob == null)
-			{
-				return;
-			}
-			if (!this.CanBeUsedBy(CS$<>8__locals1.pawn, forced, false))
-			{
-				return;
-			}
-			StringBuilder stringBuilder = new StringBuilder();
-			foreach (CompUseEffect compUseEffect in this.parent.GetComps<CompUseEffect>())
-			{
-				TaggedString taggedString = compUseEffect.ConfirmMessage(CS$<>8__locals1.pawn);
-				if (!taggedString.NullOrEmpty())
+					CS_0024_003C_003E8__locals10._003C_003E4__this.TryStartUseJob(CS_0024_003C_003E8__locals10.myPawn, CS_0024_003C_003E8__locals10._003C_003E4__this.GetExtraTarget(CS_0024_003C_003E8__locals10.myPawn), CS_0024_003C_003E8__locals10._003C_003E4__this.Props.ignoreOtherReservations);
+				}, priority: compUsable.Props.floatMenuOptionPriority, iconTex: compUsable.Icon, iconColor: compUsable.IconColor), CS_0024_003C_003E8__locals10.myPawn, compUsable.parent);
+				if (!acceptanceReport.Accepted)
 				{
-					if (stringBuilder.Length != 0)
-					{
-						stringBuilder.AppendLine();
-					}
-					stringBuilder.AppendTagged(taggedString);
+					floatMenuOption.Disabled = true;
+					floatMenuOption.Label = floatMenuOption.Label + " (" + acceptanceReport.Reason + ")";
 				}
+				_003C_003E2__current = floatMenuOption;
+				_003C_003E1__state = 1;
+				return true;
 			}
-			string str = stringBuilder.ToString();
-			if (str.NullOrEmpty())
-			{
-				CS$<>8__locals1.<TryStartUseJob>g__StartJob|0();
-				return;
-			}
-			Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation(str, new Action(CS$<>8__locals1.<TryStartUseJob>g__StartJob|0), false, null, WindowLayer.Dialog));
-		}
-
-		// Token: 0x06010E3A RID: 69178 RVA: 0x004DCECC File Offset: 0x004DB0CC
-		public override IEnumerable<Gizmo> CompGetGizmosExtra()
-		{
-			if (!this.Props.showUseGizmo)
-			{
-				yield break;
-			}
-			yield return new Command_Action
-			{
-				icon = this.parent.def.uiIcon,
-				defaultLabel = string.Format("{0} {1}...", "UseGizmo".Translate(), this.parent.def.label),
-				defaultDesc = "UseGizmoTooltip".Translate(this.parent.def.label),
-				action = delegate()
-				{
-					SoundDefOf.Tick_Tiny.PlayOneShotOnCamera(null);
-					Find.Targeter.BeginTargeting(this, null, false, null, null, true);
-				}
-			};
-			yield break;
-		}
-
-		// Token: 0x06010E3B RID: 69179 RVA: 0x004DCEDC File Offset: 0x004DB0DC
-		public virtual void UsedBy(Pawn p)
-		{
-			if (!this.CanBeUsedBy(p, false, true))
-			{
-				return;
-			}
-			foreach (CompUseEffect compUseEffect in from x in this.parent.GetComps<CompUseEffect>()
-			orderby x.OrderPriority descending
-			select x)
-			{
-				try
-				{
-					compUseEffect.DoEffect(p);
-				}
-				catch (Exception ex)
-				{
-					string str = "Error in CompUseEffect: ";
-					Exception ex2 = ex;
-					Log.Error(str + ((ex2 != null) ? ex2.ToString() : null));
-				}
-			}
-			if (this.Props.useMessage != null)
-			{
-				Messages.Message(this.Props.useMessage.Formatted(p.Named("PAWN"), this.parent), this.parent, MessageTypeDefOf.NeutralEvent, true);
-			}
-		}
-
-		// Token: 0x06010E3C RID: 69180 RVA: 0x004DCFE0 File Offset: 0x004DB1E0
-		public virtual AcceptanceReport CanBeUsedBy(Pawn p, bool forced = false, bool ignoreReserveAndReachable = false)
-		{
-			if (p.IsMutant && !this.Props.allowedMutants.Contains(p.mutant.Def))
-			{
+			case 1:
+				_003C_003E1__state = -1;
 				return false;
 			}
-			PlanetTile tile = p.MapHeld.Tile;
-			if (tile.Valid && !this.Props.layerWhitelist.NullOrEmpty<PlanetLayerDef>() && !this.Props.layerWhitelist.Contains(tile.LayerDef))
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<FloatMenuOption> IEnumerable<FloatMenuOption>.GetEnumerator()
+		{
+			_003CCompFloatMenuOptions_003Ed__31 _003CCompFloatMenuOptions_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				return "CannotPerformPlanetLayer".Translate(tile.LayerDef.gerundLabel.Named("GERUND"), tile.LayerDef.label.Named("LAYER")).Resolve();
-			}
-			if (tile.Valid && !this.Props.layerBlacklist.NullOrEmpty<PlanetLayerDef>() && this.Props.layerBlacklist.Contains(tile.LayerDef))
-			{
-				return "CannotPerformPlanetLayer".Translate(tile.LayerDef.gerundLabel.Named("GERUND"), tile.LayerDef.label.Named("LAYER")).Resolve();
-			}
-			CompPowerTrader compPowerTrader;
-			if (this.parent.TryGetComp(out compPowerTrader) && !compPowerTrader.PowerOn)
-			{
-				return "NoPower".Translate();
-			}
-			if (!ignoreReserveAndReachable && !p.CanReach(this.parent, PathEndMode.Touch, Danger.Deadly, false, false, TraverseMode.ByPawn))
-			{
-				return "NoPath".Translate();
-			}
-			if (!ignoreReserveAndReachable && !p.CanReserve(this.parent, 1, -1, null, forced))
-			{
-				Pawn pawn = p.Map.reservationManager.FirstRespectedReserver(this.parent, p, null) ?? p.Map.physicalInteractionReservationManager.FirstReserverOf(this.parent);
-				if (pawn != null)
-				{
-					return "ReservedBy".Translate(pawn.LabelShort, pawn);
-				}
-				return "Reserved".Translate();
+				_003C_003E1__state = 0;
+				_003CCompFloatMenuOptions_003Ed__ = this;
 			}
 			else
 			{
-				if (this.Props.userMustHaveHediff != null && !p.health.hediffSet.HasHediff(this.Props.userMustHaveHediff, false))
+				_003CCompFloatMenuOptions_003Ed__ = new _003CCompFloatMenuOptions_003Ed__31(0)
 				{
-					return "MustHaveHediff".Translate(this.Props.userMustHaveHediff);
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CCompFloatMenuOptions_003Ed__.myPawn = _003C_003E3__myPawn;
+			return _003CCompFloatMenuOptions_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<FloatMenuOption>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CCompGetGizmosExtra_003Ed__34 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompUsable _003C_003E4__this;
+
+		Gizmo IEnumerator<Gizmo>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CCompGetGizmosExtra_003Ed__34(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			CompUsable CS_0024_003C_003E8__locals5 = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (!CS_0024_003C_003E8__locals5.Props.showUseGizmo)
+				{
+					return false;
 				}
-				List<ThingComp> allComps = this.parent.AllComps;
-				for (int i = 0; i < allComps.Count; i++)
+				_003C_003E2__current = new Command_Action
 				{
-					CompUseEffect compUseEffect = allComps[i] as CompUseEffect;
-					if (compUseEffect != null)
+					icon = CS_0024_003C_003E8__locals5.parent.def.uiIcon,
+					defaultLabel = $"{"UseGizmo".Translate()} {CS_0024_003C_003E8__locals5.parent.def.label}...",
+					defaultDesc = "UseGizmoTooltip".Translate(CS_0024_003C_003E8__locals5.parent.def.label),
+					action = delegate
 					{
-						AcceptanceReport result = compUseEffect.CanBeUsedBy(p);
-						if (!result.Accepted)
-						{
-							return result;
-						}
+						SoundDefOf.Tick_Tiny.PlayOneShotOnCamera();
+						Find.Targeter.BeginTargeting(CS_0024_003C_003E8__locals5);
 					}
-				}
+				};
+				_003C_003E1__state = 1;
 				return true;
-			}
-		}
-
-		// Token: 0x06010E3D RID: 69181 RVA: 0x004DD294 File Offset: 0x004DB494
-		public bool CanHitTarget(LocalTargetInfo target)
-		{
-			return this.ValidateTarget(target, false);
-		}
-
-		// Token: 0x06010E3E RID: 69182 RVA: 0x004DD2A0 File Offset: 0x004DB4A0
-		public bool ValidateTarget(LocalTargetInfo target, bool showMessages = true)
-		{
-			Pawn pawn;
-			if (!target.IsValid || !target.TryGetPawn(out pawn) || !pawn.IsPlayerControlled)
-			{
+			case 1:
+				_003C_003E1__state = -1;
 				return false;
 			}
-			AcceptanceReport acceptanceReport = this.CanBeUsedBy(pawn, this.Props.ignoreOtherReservations, false);
-			if (!acceptanceReport.Accepted)
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CCompGetGizmosExtra_003Ed__34 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				if (showMessages && !acceptanceReport.Reason.NullOrEmpty())
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CCompGetGizmosExtra_003Ed__34(0)
 				{
-					this.SendCannotUseMessage(pawn, acceptanceReport.Reason);
-				}
-				return false;
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
-			return true;
+			return result;
 		}
 
-		// Token: 0x06010E3F RID: 69183 RVA: 0x004DD30A File Offset: 0x004DB50A
-		public void SendCannotUseMessage(Pawn pawn, string reason)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			Messages.Message(string.Format("{0}: {1}", "CannotGenericWorkCustom".Translate(this.FloatMenuOptionLabel(pawn)), reason.CapitalizeFirst()), pawn, MessageTypeDefOf.RejectInput, false);
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x06010E40 RID: 69184 RVA: 0x0045EA21 File Offset: 0x0045CC21
-		public void DrawHighlight(LocalTargetInfo target)
+	private Texture2D icon;
+
+	private Color? iconColor;
+
+	public CompProperties_Usable Props => (CompProperties_Usable)props;
+
+	private Texture2D Icon
+	{
+		get
 		{
-			if (target.IsValid)
+			if (icon == null && Props.floatMenuFactionIcon != null)
 			{
-				GenDraw.DrawTargetHighlight(target);
+				icon = Find.FactionManager.FirstFactionOfDef(Props.floatMenuFactionIcon)?.def?.FactionIcon;
 			}
+			return icon;
 		}
+	}
 
-		// Token: 0x06010E41 RID: 69185 RVA: 0x004DD348 File Offset: 0x004DB548
-		public void OrderForceTarget(LocalTargetInfo target)
+	private Color IconColor
+	{
+		get
 		{
-			using (IEnumerator<CompUseEffect> enumerator = this.parent.GetComps<CompUseEffect>().GetEnumerator())
+			if (!iconColor.HasValue && Props.floatMenuFactionIcon != null)
 			{
-				while (enumerator.MoveNext())
+				iconColor = Find.FactionManager.FirstFactionOfDef(Props.floatMenuFactionIcon)?.Color;
+			}
+			return iconColor ?? Color.white;
+		}
+	}
+
+	public bool CasterIsPawn => true;
+
+	public bool IsMeleeAttack => false;
+
+	public bool Targetable => true;
+
+	public bool MultiSelect => false;
+
+	public bool HidePawnTooltips => false;
+
+	public Thing Caster => parent;
+
+	public Pawn CasterPawn => null;
+
+	public Verb GetVerb => null;
+
+	public TargetingParameters targetParams => TargetingParameters.ForPawns();
+
+	public virtual ITargetingSource DestinationSelector => null;
+
+	public Texture2D UIIcon => null;
+
+	protected virtual string FloatMenuOptionLabel(Pawn pawn)
+	{
+		return Props.useLabel.Formatted(parent);
+	}
+
+	[IteratorStateMachine(typeof(_003CCompFloatMenuOptions_003Ed__31))]
+	public override IEnumerable<FloatMenuOption> CompFloatMenuOptions(Pawn myPawn)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CCompFloatMenuOptions_003Ed__31(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__myPawn = myPawn
+		};
+	}
+
+	public virtual LocalTargetInfo GetExtraTarget(Pawn pawn)
+	{
+		return LocalTargetInfo.Invalid;
+	}
+
+	public virtual void TryStartUseJob(Pawn pawn, LocalTargetInfo extraTarget, bool forced = false)
+	{
+		if (Props.useJob == null || !CanBeUsedBy(pawn, forced))
+		{
+			return;
+		}
+		StringBuilder stringBuilder = new StringBuilder();
+		foreach (CompUseEffect comp in parent.GetComps<CompUseEffect>())
+		{
+			TaggedString taggedString = comp.ConfirmMessage(pawn);
+			if (!taggedString.NullOrEmpty())
+			{
+				if (stringBuilder.Length != 0)
 				{
-					if (enumerator.Current.SelectedUseOption(target.Pawn))
-					{
-						return;
-					}
+					stringBuilder.AppendLine();
+				}
+				stringBuilder.AppendTagged(taggedString);
+			}
+		}
+		string text = stringBuilder.ToString();
+		if (text.NullOrEmpty())
+		{
+			StartJob();
+		}
+		else
+		{
+			Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation(text, StartJob));
+		}
+		void StartJob()
+		{
+			if (extraTarget == pawn)
+			{
+				extraTarget = LocalTargetInfo.Invalid;
+			}
+			Job job = (extraTarget.IsValid ? JobMaker.MakeJob(Props.useJob, parent, extraTarget) : JobMaker.MakeJob(Props.useJob, parent));
+			job.count = 1;
+			pawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CCompGetGizmosExtra_003Ed__34))]
+	public override IEnumerable<Gizmo> CompGetGizmosExtra()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CCompGetGizmosExtra_003Ed__34(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public virtual void UsedBy(Pawn p)
+	{
+		if (!CanBeUsedBy(p, forced: false, ignoreReserveAndReachable: true))
+		{
+			return;
+		}
+		foreach (CompUseEffect item in from x in parent.GetComps<CompUseEffect>()
+			orderby x.OrderPriority descending
+			select x)
+		{
+			try
+			{
+				item.DoEffect(p);
+			}
+			catch (Exception ex)
+			{
+				Log.Error("Error in CompUseEffect: " + ex);
+			}
+		}
+		if (Props.useMessage != null)
+		{
+			Messages.Message(Props.useMessage.Formatted(p.Named("PAWN"), parent), parent, MessageTypeDefOf.NeutralEvent);
+		}
+	}
+
+	public virtual AcceptanceReport CanBeUsedBy(Pawn p, bool forced = false, bool ignoreReserveAndReachable = false)
+	{
+		if (!p.RaceProps.IsFlesh)
+		{
+			return false;
+		}
+		if (p.IsMutant && !Props.allowedMutants.Contains(p.mutant.Def))
+		{
+			return false;
+		}
+		PlanetTile tile = p.MapHeld.Tile;
+		if (tile.Valid && !Props.layerWhitelist.NullOrEmpty() && !Props.layerWhitelist.Contains(tile.LayerDef))
+		{
+			return "CannotPerformPlanetLayer".Translate(tile.LayerDef.gerundLabel.Named("GERUND"), tile.LayerDef.label.Named("LAYER")).Resolve();
+		}
+		if (tile.Valid && !Props.layerBlacklist.NullOrEmpty() && Props.layerBlacklist.Contains(tile.LayerDef))
+		{
+			return "CannotPerformPlanetLayer".Translate(tile.LayerDef.gerundLabel.Named("GERUND"), tile.LayerDef.label.Named("LAYER")).Resolve();
+		}
+		if (parent.TryGetComp<CompPowerTrader>(out var comp) && !comp.PowerOn)
+		{
+			return "NoPower".Translate();
+		}
+		if (!ignoreReserveAndReachable && !p.CanReach(parent, PathEndMode.Touch, Danger.Deadly))
+		{
+			return "NoPath".Translate();
+		}
+		if (!ignoreReserveAndReachable && !p.CanReserve(parent, 1, -1, null, forced))
+		{
+			Pawn pawn = p.Map.reservationManager.FirstRespectedReserver(parent, p) ?? p.Map.physicalInteractionReservationManager.FirstReserverOf(parent);
+			if (pawn != null)
+			{
+				return "ReservedBy".Translate(pawn.LabelShort, pawn);
+			}
+			return "Reserved".Translate();
+		}
+		if (Props.userMustHaveHediff != null && !p.health.hediffSet.HasHediff(Props.userMustHaveHediff))
+		{
+			return "MustHaveHediff".Translate(Props.userMustHaveHediff);
+		}
+		List<ThingComp> allComps = parent.AllComps;
+		for (int i = 0; i < allComps.Count; i++)
+		{
+			if (allComps[i] is CompUseEffect compUseEffect)
+			{
+				AcceptanceReport result = compUseEffect.CanBeUsedBy(p);
+				if (!result.Accepted)
+				{
+					return result;
 				}
 			}
-			this.TryStartUseJob(target.Pawn, this.GetExtraTarget(target.Pawn), this.Props.ignoreOtherReservations);
 		}
+		return true;
+	}
 
-		// Token: 0x06010E42 RID: 69186 RVA: 0x004DD3C8 File Offset: 0x004DB5C8
-		public void OnGUI(LocalTargetInfo target)
+	public bool CanHitTarget(LocalTargetInfo target)
+	{
+		return ValidateTarget(target, showMessages: false);
+	}
+
+	public bool ValidateTarget(LocalTargetInfo target, bool showMessages = true)
+	{
+		if (!target.IsValid || !target.TryGetPawn(out var pawn) || !pawn.IsPlayerControlled)
 		{
-			Widgets.MouseAttachedLabel("UseGizmoMouse".Translate(), 0f, 0f, null);
-			if (this.ValidateTarget(target, false))
+			return false;
+		}
+		AcceptanceReport acceptanceReport = CanBeUsedBy(pawn, Props.ignoreOtherReservations);
+		if (!acceptanceReport.Accepted)
+		{
+			if (showMessages && !acceptanceReport.Reason.NullOrEmpty())
 			{
-				GenUI.DrawMouseAttachment(TexCommand.Attack);
+				SendCannotUseMessage(pawn, acceptanceReport.Reason);
+			}
+			return false;
+		}
+		return true;
+	}
+
+	public void SendCannotUseMessage(Pawn pawn, string reason)
+	{
+		Messages.Message($"{"CannotGenericWorkCustom".Translate(FloatMenuOptionLabel(pawn))}: {reason.CapitalizeFirst()}", pawn, MessageTypeDefOf.RejectInput, historical: false);
+	}
+
+	public void DrawHighlight(LocalTargetInfo target)
+	{
+		if (target.IsValid)
+		{
+			GenDraw.DrawTargetHighlight(target);
+		}
+	}
+
+	public void OrderForceTarget(LocalTargetInfo target)
+	{
+		foreach (CompUseEffect comp in parent.GetComps<CompUseEffect>())
+		{
+			if (comp.SelectedUseOption(target.Pawn))
+			{
 				return;
 			}
+		}
+		TryStartUseJob(target.Pawn, GetExtraTarget(target.Pawn), Props.ignoreOtherReservations);
+	}
+
+	public void OnGUI(LocalTargetInfo target)
+	{
+		Widgets.MouseAttachedLabel("UseGizmoMouse".Translate(), 0f, 0f, null);
+		if (ValidateTarget(target, showMessages: false))
+		{
+			GenUI.DrawMouseAttachment(TexCommand.Attack);
+		}
+		else
+		{
 			GenUI.DrawMouseAttachment(TexCommand.CannotShoot);
 		}
-
-		// Token: 0x0400AFBB RID: 44987
-		private Texture2D icon;
-
-		// Token: 0x0400AFBC RID: 44988
-		private Color? iconColor;
 	}
 }

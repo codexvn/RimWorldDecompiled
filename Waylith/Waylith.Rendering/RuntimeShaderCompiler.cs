@@ -63,6 +63,10 @@ public static class RuntimeShaderCompiler
 
 	private static AssetPack? Pack;
 
+	public const string DefaultTargetProfile = "spirv_1_3";
+
+	private static string TargetProfile = "spirv_1_3";
+
 	private static readonly (string Name, string Value)[] HlslCompatibilityDefines = new(string, string)[12]
 	{
 		("min16float", "float"),
@@ -100,6 +104,11 @@ public static class RuntimeShaderCompiler
 	public static void UseAssetPack(AssetPack? pack)
 	{
 		Pack = pack;
+	}
+
+	public static void ConfigureTargetProfile(string profile)
+	{
+		TargetProfile = profile;
 	}
 
 	public static string PackEntryName(byte[] keyHash)
@@ -319,7 +328,7 @@ public static class RuntimeShaderCompiler
 	private static int ConfigureRequest(ICompileRequest request, IGlobalSession session, string source, string sourceName, RuntimeShaderLanguage language, EmitSpirvMethod emitMethod, OptimizationLevel optimizationLevel, DebugInfoLevel debugInfoLevel)
 	{
 		request.SetCodeGenTarget(CompileTarget.Spirv);
-		request.SetTargetProfile(0, FindProfile(session, "spirv_1_3"));
+		request.SetTargetProfile(0, FindProfile(session, TargetProfile));
 		request.SetMatrixLayoutMode(MatrixLayoutMode.ColumnMajor);
 		request.SetOptimizationLevel(optimizationLevel);
 		request.SetDebugInfoLevel(debugInfoLevel);
@@ -445,7 +454,7 @@ public static class RuntimeShaderCompiler
 		InlineArray12<object> buffer = default(InlineArray12<object>);
 		global::_003CPrivateImplementationDetails_003E.InlineArrayElementRef<InlineArray12<object>, object>(ref buffer, 0) = 4;
 		global::_003CPrivateImplementationDetails_003E.InlineArrayElementRef<InlineArray12<object>, object>(ref buffer, 1) = CompilerVersion.Value;
-		global::_003CPrivateImplementationDetails_003E.InlineArrayElementRef<InlineArray12<object>, object>(ref buffer, 2) = "spirv_1_3";
+		global::_003CPrivateImplementationDetails_003E.InlineArrayElementRef<InlineArray12<object>, object>(ref buffer, 2) = TargetProfile;
 		global::_003CPrivateImplementationDetails_003E.InlineArrayElementRef<InlineArray12<object>, object>(ref buffer, 3) = emitMethod;
 		global::_003CPrivateImplementationDetails_003E.InlineArrayElementRef<InlineArray12<object>, object>(ref buffer, 4) = MatrixLayoutMode.ColumnMajor;
 		global::_003CPrivateImplementationDetails_003E.InlineArrayElementRef<InlineArray12<object>, object>(ref buffer, 5) = optimizationLevel;

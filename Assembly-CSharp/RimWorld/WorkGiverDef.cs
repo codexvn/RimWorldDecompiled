@@ -1,145 +1,267 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class WorkGiverDef : Def
 {
-	// Token: 0x020037CF RID: 14287
-	public class WorkGiverDef : Def
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__34 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x17003287 RID: 12935
-		// (get) Token: 0x06013C90 RID: 81040 RVA: 0x005DEADA File Offset: 0x005DCCDA
-		public WorkGiver Worker
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public WorkGiverDef _003C_003E4__this;
+
+		private IEnumerator<string> _003C_003E7__wrap1;
+
+		string IEnumerator<string>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.workerInt == null)
-				{
-					this.workerInt = (WorkGiver)Activator.CreateInstance(this.giverClass);
-					this.workerInt.def = this;
-				}
-				return this.workerInt;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06013C91 RID: 81041 RVA: 0x005DEB0C File Offset: 0x005DCD0C
-		public override IEnumerable<string> ConfigErrors()
+		object IEnumerator.Current
 		{
-			foreach (string text in base.ConfigErrors())
+			[DebuggerHidden]
+			get
 			{
-				yield return text;
+				return _003C_003E2__current;
 			}
-			IEnumerator<string> enumerator = null;
-			if (this.verb.NullOrEmpty())
-			{
-				yield return this.defName + " lacks a verb.";
-			}
-			if (this.gerund.NullOrEmpty())
-			{
-				yield return this.defName + " lacks a gerund.";
-			}
-			yield break;
-			yield break;
 		}
 
-		// Token: 0x0400DB0C RID: 56076
-		public Type giverClass;
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__34(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
 
-		// Token: 0x0400DB0D RID: 56077
-		public WorkTypeDef workType;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
 
-		// Token: 0x0400DB0E RID: 56078
-		public WorkTags workTags;
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				WorkGiverDef workGiverDef = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((Def)workGiverDef).ConfigErrors().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0076;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0076;
+				case 2:
+					_003C_003E1__state = -1;
+					goto IL_00c5;
+				case 3:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_0076:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (workGiverDef.verb.NullOrEmpty())
+					{
+						_003C_003E2__current = workGiverDef.defName + " lacks a verb.";
+						_003C_003E1__state = 2;
+						return true;
+					}
+					goto IL_00c5;
+					IL_00c5:
+					if (workGiverDef.gerund.NullOrEmpty())
+					{
+						_003C_003E2__current = workGiverDef.defName + " lacks a gerund.";
+						_003C_003E1__state = 3;
+						return true;
+					}
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
 
-		// Token: 0x0400DB0F RID: 56079
-		public int priorityInType;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x0400DB10 RID: 56080
-		[MustTranslate]
-		public string verb;
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
 
-		// Token: 0x0400DB11 RID: 56081
-		[MustTranslate]
-		public string gerund;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x0400DB12 RID: 56082
-		public bool scanThings = true;
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__34 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__34(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x0400DB13 RID: 56083
-		public bool scanCells;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x0400DB14 RID: 56084
-		public bool emergency;
+	public Type giverClass;
 
-		// Token: 0x0400DB15 RID: 56085
-		public List<PawnCapacityDef> requiredCapacities = new List<PawnCapacityDef>();
+	public WorkTypeDef workType;
 
-		// Token: 0x0400DB16 RID: 56086
-		public bool directOrderable = true;
+	public WorkTags workTags;
 
-		// Token: 0x0400DB17 RID: 56087
-		public bool prioritizeSustains;
+	public int priorityInType;
 
-		// Token: 0x0400DB18 RID: 56088
-		public bool nonColonistsCanDo;
+	[MustTranslate]
+	public string verb;
 
-		// Token: 0x0400DB19 RID: 56089
-		public JobTag tagToGive = JobTag.MiscWork;
+	[MustTranslate]
+	public string gerund;
 
-		// Token: 0x0400DB1A RID: 56090
-		public WorkGiverEquivalenceGroupDef equivalenceGroup;
+	public bool scanThings = true;
 
-		// Token: 0x0400DB1B RID: 56091
-		public bool canBeDoneWhileDrafted;
+	public bool scanCells;
 
-		// Token: 0x0400DB1C RID: 56092
-		public int autoTakeablePriorityDrafted = -1;
+	public bool emergency;
 
-		// Token: 0x0400DB1D RID: 56093
-		public ThingDef forceMote;
+	public List<PawnCapacityDef> requiredCapacities = new List<PawnCapacityDef>();
 
-		// Token: 0x0400DB1E RID: 56094
-		public FleckDef forceFleck;
+	public bool directOrderable = true;
 
-		// Token: 0x0400DB1F RID: 56095
-		public bool canBeDoneByMechs = true;
+	public bool prioritizeSustains;
 
-		// Token: 0x0400DB20 RID: 56096
-		public List<ThingDef> fixedBillGiverDefs;
+	public bool nonColonistsCanDo;
 
-		// Token: 0x0400DB21 RID: 56097
-		public bool billGiversAllHumanlikes;
+	public JobTag tagToGive = JobTag.MiscWork;
 
-		// Token: 0x0400DB22 RID: 56098
-		public bool billGiversAllHumanlikesCorpses;
+	public WorkGiverEquivalenceGroupDef equivalenceGroup;
 
-		// Token: 0x0400DB23 RID: 56099
-		public bool billGiversAllMechanoids;
+	public bool canBeDoneWhileDrafted;
 
-		// Token: 0x0400DB24 RID: 56100
-		public bool billGiversAllMechanoidsCorpses;
+	public int autoTakeablePriorityDrafted = -1;
 
-		// Token: 0x0400DB25 RID: 56101
-		public bool billGiversAllAnimals;
+	public ThingDef forceMote;
 
-		// Token: 0x0400DB26 RID: 56102
-		public bool billGiversAllAnimalsCorpses;
+	public FleckDef forceFleck;
 
-		// Token: 0x0400DB27 RID: 56103
-		public bool feedHumanlikesOnly;
+	public bool canBeDoneByMechs = true;
 
-		// Token: 0x0400DB28 RID: 56104
-		public bool feedAnimalsOnly;
+	public List<ThingDef> fixedBillGiverDefs;
 
-		// Token: 0x0400DB29 RID: 56105
-		public bool doesSmoothing;
+	public bool billGiversAllHumanlikes;
 
-		// Token: 0x0400DB2A RID: 56106
-		public ThingDef scannerDef;
+	public bool billGiversAllHumanlikesCorpses;
 
-		// Token: 0x0400DB2B RID: 56107
-		[Unsaved(false)]
-		private WorkGiver workerInt;
+	public bool billGiversAllMechanoids;
+
+	public bool billGiversAllMechanoidsCorpses;
+
+	public bool billGiversAllAnimals;
+
+	public bool billGiversAllAnimalsCorpses;
+
+	public bool feedHumanlikesOnly;
+
+	public bool feedAnimalsOnly;
+
+	public bool doesSmoothing;
+
+	public ThingDef scannerDef;
+
+	[Unsaved(false)]
+	private WorkGiver workerInt;
+
+	public WorkGiver Worker
+	{
+		get
+		{
+			if (workerInt == null)
+			{
+				workerInt = (WorkGiver)Activator.CreateInstance(giverClass);
+				workerInt.def = this;
+			}
+			return workerInt;
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__34))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__34(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

@@ -1,433 +1,472 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Trait : IExposable
 {
-	// Token: 0x0200254B RID: 9547
-	public class Trait : IExposable
+	[CompilerGenerated]
+	private sealed class _003CGetPermaThoughts_003Ed__27 : IEnumerable<ThoughtDef>, IEnumerable, IEnumerator<ThoughtDef>, IEnumerator, IDisposable
 	{
-		// Token: 0x17002035 RID: 8245
-		// (get) Token: 0x0600D0F1 RID: 53489 RVA: 0x003D6A54 File Offset: 0x003D4C54
-		public int Degree
+		private int _003C_003E1__state;
+
+		private ThoughtDef _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Trait _003C_003E4__this;
+
+		private TraitDegreeData _003Cdegree_003E5__2;
+
+		private List<ThoughtDef> _003CallThoughts_003E5__3;
+
+		private int _003Ci_003E5__4;
+
+		ThoughtDef IEnumerator<ThoughtDef>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.degree;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002036 RID: 8246
-		// (get) Token: 0x0600D0F2 RID: 53490 RVA: 0x003D6A5C File Offset: 0x003D4C5C
-		public TraitDegreeData CurrentData
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.def.DataAtDegree(this.degree);
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002037 RID: 8247
-		// (get) Token: 0x0600D0F3 RID: 53491 RVA: 0x003D6A6F File Offset: 0x003D4C6F
-		public string Label
+		[DebuggerHidden]
+		public _003CGetPermaThoughts_003Ed__27(int _003C_003E1__state)
 		{
-			get
-			{
-				return this.CurrentData.GetLabelFor(this.pawn);
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x17002038 RID: 8248
-		// (get) Token: 0x0600D0F4 RID: 53492 RVA: 0x003D6A82 File Offset: 0x003D4C82
-		public string LabelCap
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			get
-			{
-				return this.CurrentData.GetLabelCapFor(this.pawn);
-			}
+			_003Cdegree_003E5__2 = null;
+			_003CallThoughts_003E5__3 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x17002039 RID: 8249
-		// (get) Token: 0x0600D0F5 RID: 53493 RVA: 0x003D6A95 File Offset: 0x003D4C95
-		public bool ScenForced
+		private bool MoveNext()
 		{
-			get
+			int num = _003C_003E1__state;
+			Trait trait = _003C_003E4__this;
+			if (num != 0)
 			{
-				return this.scenForced;
+				if (num != 1)
+				{
+					return false;
+				}
+				_003C_003E1__state = -1;
+				goto IL_011f;
 			}
+			_003C_003E1__state = -1;
+			_003Cdegree_003E5__2 = trait.CurrentData;
+			_003CallThoughts_003E5__3 = DefDatabase<ThoughtDef>.AllDefsListForReading;
+			_003Ci_003E5__4 = 0;
+			goto IL_012f;
+			IL_011f:
+			_003Ci_003E5__4++;
+			goto IL_012f;
+			IL_012f:
+			if (_003Ci_003E5__4 < _003CallThoughts_003E5__3.Count)
+			{
+				if (_003CallThoughts_003E5__3[_003Ci_003E5__4].IsSituational && _003CallThoughts_003E5__3[_003Ci_003E5__4].Worker is ThoughtWorker_AlwaysActive && _003CallThoughts_003E5__3[_003Ci_003E5__4].requiredTraits != null && _003CallThoughts_003E5__3[_003Ci_003E5__4].requiredTraits.Contains(trait.def) && (!_003CallThoughts_003E5__3[_003Ci_003E5__4].RequiresSpecificTraitsDegree || _003CallThoughts_003E5__3[_003Ci_003E5__4].requiredTraitsDegree == _003Cdegree_003E5__2.degree))
+				{
+					_003C_003E2__current = _003CallThoughts_003E5__3[_003Ci_003E5__4];
+					_003C_003E1__state = 1;
+					return true;
+				}
+				goto IL_011f;
+			}
+			return false;
 		}
 
-		// Token: 0x1700203A RID: 8250
-		// (get) Token: 0x0600D0F6 RID: 53494 RVA: 0x003D6AA0 File Offset: 0x003D4CA0
-		public bool Suppressed
+		bool IEnumerator.MoveNext()
 		{
-			get
-			{
-				if (ModsConfig.BiotechActive)
-				{
-					if (this.suppressedByTrait || this.suppressedByGene != null)
-					{
-						return true;
-					}
-					if (this.sourceGene != null && this.sourceGene.Overridden && this.sourceGene.overriddenByGene.def != this.sourceGene.def)
-					{
-						return true;
-					}
-				}
-				return false;
-			}
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0600D0F7 RID: 53495 RVA: 0x003D6AFB File Offset: 0x003D4CFB
-		public Trait()
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x0600D0F8 RID: 53496 RVA: 0x003D6B0E File Offset: 0x003D4D0E
-		public Trait(TraitDef def, int degree = 0, bool forced = false)
+		[DebuggerHidden]
+		IEnumerator<ThoughtDef> IEnumerable<ThoughtDef>.GetEnumerator()
 		{
-			this.def = def;
-			this.degree = degree;
-			this.scenForced = forced;
+			_003CGetPermaThoughts_003Ed__27 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CGetPermaThoughts_003Ed__27(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
 		}
 
-		// Token: 0x0600D0F9 RID: 53497 RVA: 0x003D6B38 File Offset: 0x003D4D38
-		public void ExposeData()
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			Scribe_Defs.Look<TraitDef>(ref this.def, "def");
-			Scribe_References.Look<Gene>(ref this.sourceGene, "sourceGene", false);
-			Scribe_Values.Look<int>(ref this.degree, "degree", 0, false);
-			Scribe_Values.Look<bool>(ref this.scenForced, "scenForced", false, false);
-			Scribe_Values.Look<bool>(ref this.suppressedByTrait, "suppressedByTrait", false, false);
-			Scribe_References.Look<Gene>(ref this.suppressedByGene, "suppressedBy", false);
-			if (Scribe.mode == LoadSaveMode.ResolvingCrossRefs && this.def == null)
-			{
-				this.def = DefDatabase<TraitDef>.GetRandom();
-				this.degree = PawnGenerator.RandomTraitDegree(this.def);
-			}
+			return ((IEnumerable<ThoughtDef>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x0600D0FA RID: 53498 RVA: 0x003D6BDC File Offset: 0x003D4DDC
-		public float OffsetOfStat(StatDef stat)
-		{
-			if (this.Suppressed)
-			{
-				return 0f;
-			}
-			float num = 0f;
-			TraitDegreeData currentData = this.CurrentData;
-			if (currentData.statOffsets != null)
-			{
-				for (int i = 0; i < currentData.statOffsets.Count; i++)
-				{
-					if (currentData.statOffsets[i].stat == stat)
-					{
-						num += currentData.statOffsets[i].value;
-					}
-				}
-			}
-			return num;
-		}
+	public Pawn pawn;
 
-		// Token: 0x0600D0FB RID: 53499 RVA: 0x003D6C4C File Offset: 0x003D4E4C
-		public float MultiplierOfStat(StatDef stat)
-		{
-			if (this.Suppressed)
-			{
-				return 1f;
-			}
-			float num = 1f;
-			TraitDegreeData currentData = this.CurrentData;
-			if (currentData.statFactors != null)
-			{
-				for (int i = 0; i < currentData.statFactors.Count; i++)
-				{
-					if (currentData.statFactors[i].stat == stat)
-					{
-						num *= currentData.statFactors[i].value;
-					}
-				}
-			}
-			return num;
-		}
+	public Gene sourceGene;
 
-		// Token: 0x0600D0FC RID: 53500 RVA: 0x003D6CBC File Offset: 0x003D4EBC
-		public string TipString(Pawn pawn)
+	public Gene suppressedByGene;
+
+	public TraitDef def;
+
+	private int degree;
+
+	private bool scenForced;
+
+	[LoadAlias("suppressed")]
+	public bool suppressedByTrait;
+
+	private List<string> suppressedReasons = new List<string>();
+
+	private static List<WorkTypeDef> tmpDisabledWorktypes = new List<WorkTypeDef>();
+
+	public int Degree => degree;
+
+	public TraitDegreeData CurrentData => def.DataAtDegree(degree);
+
+	public string Label => CurrentData.GetLabelFor(pawn);
+
+	public string LabelCap => CurrentData.GetLabelCapFor(pawn);
+
+	public bool ScenForced => scenForced;
+
+	public bool Suppressed
+	{
+		get
 		{
-			StringBuilder stringBuilder = new StringBuilder();
-			this.suppressedReasons.Clear();
-			TraitDegreeData currentData = this.CurrentData;
-			stringBuilder.AppendLine(currentData.description.Formatted(pawn.Named("PAWN")).AdjustedFor(pawn, "PAWN", true).Resolve());
-			bool flag = this.CurrentData.skillGains.Count > 0;
-			bool flag2 = this.GetPermaThoughts().Any<ThoughtDef>();
-			bool flag3 = currentData.statOffsets != null;
-			bool flag4 = currentData.statFactors != null;
-			if (flag || flag2 || flag3 || flag4 || !Mathf.Approximately(currentData.painFactor, 1f) || currentData.painOffset != 0f || !currentData.aptitudes.NullOrEmpty<Aptitude>())
-			{
-				stringBuilder.AppendLine();
-			}
-			if (flag)
-			{
-				foreach (SkillGain skillGain in this.CurrentData.skillGains)
-				{
-					if (skillGain.amount != 0)
-					{
-						stringBuilder.AppendLine("    " + skillGain.skill.skillLabel.CapitalizeFirst() + ":   " + skillGain.amount.ToString("+##;-##"));
-					}
-				}
-			}
-			if (flag2)
-			{
-				foreach (ThoughtDef thoughtDef in this.GetPermaThoughts())
-				{
-					stringBuilder.AppendLine("    " + "PermanentMoodEffect".Translate() + " " + thoughtDef.stages[0].baseMoodEffect.ToStringByStyle(ToStringStyle.Integer, ToStringNumberSense.Offset));
-				}
-			}
-			if (flag3)
-			{
-				for (int i = 0; i < currentData.statOffsets.Count; i++)
-				{
-					StatModifier statModifier = currentData.statOffsets[i];
-					string valueToStringAsOffset = statModifier.ValueToStringAsOffset;
-					string value = "    " + statModifier.stat.LabelCap + " " + valueToStringAsOffset;
-					stringBuilder.AppendLine(value);
-				}
-			}
-			if (currentData.painOffset != 0f)
-			{
-				stringBuilder.AppendLine("    " + "Pain".Translate() + " " + currentData.painOffset.ToStringByStyle(ToStringStyle.PercentOne, ToStringNumberSense.Offset));
-			}
-			if (flag4)
-			{
-				for (int j = 0; j < currentData.statFactors.Count; j++)
-				{
-					StatModifier statModifier2 = currentData.statFactors[j];
-					string toStringAsFactor = statModifier2.ToStringAsFactor;
-					string value2 = "    " + statModifier2.stat.LabelCap + " " + toStringAsFactor;
-					stringBuilder.AppendLine(value2);
-				}
-			}
-			if (!Mathf.Approximately(currentData.hungerRateFactor, 1f))
-			{
-				string t = currentData.hungerRateFactor.ToStringByStyle(ToStringStyle.PercentOne, ToStringNumberSense.Factor);
-				string value3 = "    " + "HungerRate".Translate() + " " + t;
-				stringBuilder.AppendLine(value3);
-			}
-			if (!Mathf.Approximately(currentData.painFactor, 1f))
-			{
-				stringBuilder.AppendLine("    " + "Pain".Translate() + " " + currentData.painFactor.ToStringByStyle(ToStringStyle.PercentOne, ToStringNumberSense.Factor));
-			}
-			if (!currentData.aptitudes.NullOrEmpty<Aptitude>())
-			{
-				stringBuilder.AppendLine().AppendLineTagged(("Aptitudes".Translate().CapitalizeFirst() + ":").AsTipTitle());
-				stringBuilder.AppendLine((from x in currentData.aptitudes
-				select x.skill.LabelCap.ToString() + " " + x.level.ToStringWithSign()).ToLineList("  - ", true));
-			}
-			if (!currentData.enablesNeeds.NullOrEmpty<NeedDef>())
-			{
-				stringBuilder.AppendLine().AppendLineTagged(("AddsNeeds".Translate().CapitalizeFirst() + ":").AsTipTitle());
-				stringBuilder.AppendLine((from x in currentData.enablesNeeds
-				select x.LabelCap.ToString()).ToLineList("  - ", true));
-			}
-			if (!currentData.disablesNeeds.NullOrEmpty<NeedDef>())
-			{
-				stringBuilder.AppendLine().AppendLineTagged(("DisablesNeeds".Translate().CapitalizeFirst() + ":").AsTipTitle());
-				stringBuilder.AppendLine((from x in currentData.disablesNeeds
-				select x.LabelCap.ToString()).ToLineList("  - ", true));
-			}
-			if (ModsConfig.RoyaltyActive)
-			{
-				List<MeditationFocusDef> allowedMeditationFocusTypes = this.CurrentData.allowedMeditationFocusTypes;
-				if (!allowedMeditationFocusTypes.NullOrEmpty<MeditationFocusDef>())
-				{
-					stringBuilder.AppendLine();
-					stringBuilder.AppendLine("EnablesMeditationFocusType".Translate().Colorize(ColoredText.TipSectionTitleColor) + ":\n" + (from f in allowedMeditationFocusTypes
-					select f.LabelCap.Resolve()).ToLineList("  - ", false));
-				}
-			}
-			if (ModsConfig.IdeologyActive)
-			{
-				List<IssueDef> affectedIssues = this.CurrentData.GetAffectedIssues(this.def);
-				if (affectedIssues.Count != 0)
-				{
-					stringBuilder.AppendLine();
-					stringBuilder.AppendLine("OverridesSomePrecepts".Translate().Colorize(ColoredText.TipSectionTitleColor) + ":\n" + (from x in affectedIssues
-					select x.LabelCap.Resolve()).ToLineList("  - ", false));
-				}
-				List<MemeDef> affectedMemes = this.CurrentData.GetAffectedMemes(this.def, true);
-				if (affectedMemes.Count > 0)
-				{
-					stringBuilder.AppendLine();
-					stringBuilder.AppendLine("AgreeableMemes".Translate().Colorize(ColoredText.TipSectionTitleColor) + ":\n" + (from x in affectedMemes
-					select x.LabelCap.Resolve()).ToLineList("  - ", false));
-				}
-				List<MemeDef> affectedMemes2 = this.CurrentData.GetAffectedMemes(this.def, false);
-				if (affectedMemes2.Count > 0)
-				{
-					stringBuilder.AppendLine();
-					stringBuilder.AppendLine("DisagreeableMemes".Translate().Colorize(ColoredText.TipSectionTitleColor) + ":\n" + (from x in affectedMemes2
-					select x.LabelCap.Resolve()).ToLineList("  - ", false));
-				}
-			}
 			if (ModsConfig.BiotechActive)
 			{
-				if (this.sourceGene != null)
+				if (suppressedByTrait || suppressedByGene != null)
 				{
-					stringBuilder.AppendLine().AppendLine(("AddedByGene".Translate() + ": " + this.sourceGene.LabelCap).Colorize(ColoredText.GeneColor));
+					return true;
 				}
-				if (this.Suppressed)
+				if (sourceGene != null && sourceGene.Overridden && sourceGene.overriddenByGene.def != sourceGene.def)
 				{
-					foreach (Trait trait in pawn.story.traits.allTraits)
-					{
-						if (trait != this && trait.def.CanSuppress(this))
-						{
-							this.suppressedReasons.Add(string.Format("{0} ({1})", trait.Label, "Trait".Translate()));
-						}
-					}
-					if (this.sourceGene != null && this.sourceGene.Overridden && this.sourceGene.overriddenByGene.def != this.sourceGene.def)
-					{
-						this.suppressedReasons.Add(string.Format("{0} ({1})", this.sourceGene.overriddenByGene.Label, "Gene".Translate()));
-					}
-					if (this.suppressedByGene != null)
-					{
-						this.suppressedReasons.Add(string.Format("{0} ({1})", this.suppressedByGene.Label, "Gene".Translate()));
-					}
-					if (this.suppressedReasons.Any<string>())
-					{
-						stringBuilder.AppendLine().AppendLine(("Suppressed".Translate().CapitalizeFirst() + ": " + "SuppressedDesc".Translate() + ":\n" + this.suppressedReasons.ToLineList("  - ", true)).Colorize(ColoredText.SubtleGrayColor));
-					}
+					return true;
 				}
 			}
-			if (stringBuilder.Length > 0)
+			return false;
+		}
+	}
+
+	public Trait()
+	{
+	}
+
+	public Trait(TraitDef def, int degree = 0, bool forced = false)
+	{
+		this.def = def;
+		this.degree = degree;
+		scenForced = forced;
+	}
+
+	public void ExposeData()
+	{
+		Scribe_Defs.Look(ref def, "def");
+		Scribe_References.Look(ref sourceGene, "sourceGene");
+		Scribe_Values.Look(ref degree, "degree", 0);
+		Scribe_Values.Look(ref scenForced, "scenForced", defaultValue: false);
+		Scribe_Values.Look(ref suppressedByTrait, "suppressedByTrait", defaultValue: false);
+		Scribe_References.Look(ref suppressedByGene, "suppressedBy");
+		if (Scribe.mode == LoadSaveMode.ResolvingCrossRefs && def == null)
+		{
+			def = DefDatabase<TraitDef>.GetRandom();
+			degree = PawnGenerator.RandomTraitDegree(def);
+		}
+	}
+
+	public float OffsetOfStat(StatDef stat)
+	{
+		if (Suppressed)
+		{
+			return 0f;
+		}
+		float num = 0f;
+		TraitDegreeData currentData = CurrentData;
+		if (currentData.statOffsets != null)
+		{
+			for (int i = 0; i < currentData.statOffsets.Count; i++)
 			{
-				StringBuilder stringBuilder2 = stringBuilder;
-				if (stringBuilder2[stringBuilder2.Length - 1] == '\n')
+				if (currentData.statOffsets[i].stat == stat)
 				{
-					if (stringBuilder.Length > 1)
+					num += currentData.statOffsets[i].value;
+				}
+			}
+		}
+		return num;
+	}
+
+	public float MultiplierOfStat(StatDef stat)
+	{
+		if (Suppressed)
+		{
+			return 1f;
+		}
+		float num = 1f;
+		TraitDegreeData currentData = CurrentData;
+		if (currentData.statFactors != null)
+		{
+			for (int i = 0; i < currentData.statFactors.Count; i++)
+			{
+				if (currentData.statFactors[i].stat == stat)
+				{
+					num *= currentData.statFactors[i].value;
+				}
+			}
+		}
+		return num;
+	}
+
+	public string TipString(Pawn pawn)
+	{
+		StringBuilder stringBuilder = new StringBuilder();
+		suppressedReasons.Clear();
+		TraitDegreeData currentData = CurrentData;
+		stringBuilder.AppendLine(currentData.description.Formatted(pawn.Named("PAWN")).AdjustedFor(pawn).Resolve());
+		bool num = CurrentData.skillGains.Count > 0;
+		bool flag = GetPermaThoughts().Any();
+		bool flag2 = currentData.statOffsets != null;
+		bool flag3 = currentData.statFactors != null;
+		if (num || flag || flag2 || flag3 || !Mathf.Approximately(currentData.painFactor, 1f) || currentData.painOffset != 0f || !currentData.aptitudes.NullOrEmpty())
+		{
+			stringBuilder.AppendLine();
+		}
+		if (num)
+		{
+			foreach (SkillGain skillGain in CurrentData.skillGains)
+			{
+				if (skillGain.amount != 0)
+				{
+					stringBuilder.AppendLine("    " + skillGain.skill.skillLabel.CapitalizeFirst() + ":   " + skillGain.amount.ToString("+##;-##"));
+				}
+			}
+		}
+		if (flag)
+		{
+			foreach (ThoughtDef permaThought in GetPermaThoughts())
+			{
+				stringBuilder.AppendLine("    " + "PermanentMoodEffect".Translate() + " " + permaThought.stages[0].baseMoodEffect.ToStringByStyle(ToStringStyle.Integer, ToStringNumberSense.Offset));
+			}
+		}
+		if (flag2)
+		{
+			for (int i = 0; i < currentData.statOffsets.Count; i++)
+			{
+				StatModifier statModifier = currentData.statOffsets[i];
+				string valueToStringAsOffset = statModifier.ValueToStringAsOffset;
+				string value = "    " + statModifier.stat.LabelCap + " " + valueToStringAsOffset;
+				stringBuilder.AppendLine(value);
+			}
+		}
+		if (currentData.painOffset != 0f)
+		{
+			stringBuilder.AppendLine("    " + "Pain".Translate() + " " + currentData.painOffset.ToStringByStyle(ToStringStyle.PercentOne, ToStringNumberSense.Offset));
+		}
+		if (flag3)
+		{
+			for (int j = 0; j < currentData.statFactors.Count; j++)
+			{
+				StatModifier statModifier2 = currentData.statFactors[j];
+				string toStringAsFactor = statModifier2.ToStringAsFactor;
+				string value2 = "    " + statModifier2.stat.LabelCap + " " + toStringAsFactor;
+				stringBuilder.AppendLine(value2);
+			}
+		}
+		if (!Mathf.Approximately(currentData.hungerRateFactor, 1f))
+		{
+			string text = currentData.hungerRateFactor.ToStringByStyle(ToStringStyle.PercentOne, ToStringNumberSense.Factor);
+			string value3 = "    " + "HungerRate".Translate() + " " + text;
+			stringBuilder.AppendLine(value3);
+		}
+		if (!Mathf.Approximately(currentData.painFactor, 1f))
+		{
+			stringBuilder.AppendLine("    " + "Pain".Translate() + " " + currentData.painFactor.ToStringByStyle(ToStringStyle.PercentOne, ToStringNumberSense.Factor));
+		}
+		if (!currentData.aptitudes.NullOrEmpty())
+		{
+			stringBuilder.AppendLine().AppendLineTagged(("Aptitudes".Translate().CapitalizeFirst() + ":").AsTipTitle());
+			stringBuilder.AppendLine(currentData.aptitudes.Select((Aptitude x) => x.skill.LabelCap.ToString() + " " + x.level.ToStringWithSign()).ToLineList("  - ", capitalizeItems: true));
+		}
+		if (!currentData.enablesNeeds.NullOrEmpty())
+		{
+			stringBuilder.AppendLine().AppendLineTagged(("AddsNeeds".Translate().CapitalizeFirst() + ":").AsTipTitle());
+			stringBuilder.AppendLine(currentData.enablesNeeds.Select((NeedDef x) => x.LabelCap.ToString()).ToLineList("  - ", capitalizeItems: true));
+		}
+		if (!currentData.disablesNeeds.NullOrEmpty())
+		{
+			stringBuilder.AppendLine().AppendLineTagged(("DisablesNeeds".Translate().CapitalizeFirst() + ":").AsTipTitle());
+			stringBuilder.AppendLine(currentData.disablesNeeds.Select((NeedDef x) => x.LabelCap.ToString()).ToLineList("  - ", capitalizeItems: true));
+		}
+		if (ModsConfig.RoyaltyActive)
+		{
+			List<MeditationFocusDef> allowedMeditationFocusTypes = CurrentData.allowedMeditationFocusTypes;
+			if (!allowedMeditationFocusTypes.NullOrEmpty())
+			{
+				stringBuilder.AppendLine();
+				stringBuilder.AppendLine("EnablesMeditationFocusType".Translate().Colorize(ColoredText.TipSectionTitleColor) + ":\n" + allowedMeditationFocusTypes.Select((MeditationFocusDef f) => f.LabelCap.Resolve()).ToLineList("  - "));
+			}
+		}
+		if (ModsConfig.IdeologyActive)
+		{
+			List<IssueDef> affectedIssues = CurrentData.GetAffectedIssues(def);
+			if (affectedIssues.Count != 0)
+			{
+				stringBuilder.AppendLine();
+				stringBuilder.AppendLine("OverridesSomePrecepts".Translate().Colorize(ColoredText.TipSectionTitleColor) + ":\n" + affectedIssues.Select((IssueDef x) => x.LabelCap.Resolve()).ToLineList("  - "));
+			}
+			List<MemeDef> affectedMemes = CurrentData.GetAffectedMemes(def, agreeable: true);
+			if (affectedMemes.Count > 0)
+			{
+				stringBuilder.AppendLine();
+				stringBuilder.AppendLine("AgreeableMemes".Translate().Colorize(ColoredText.TipSectionTitleColor) + ":\n" + affectedMemes.Select((MemeDef x) => x.LabelCap.Resolve()).ToLineList("  - "));
+			}
+			List<MemeDef> affectedMemes2 = CurrentData.GetAffectedMemes(def, agreeable: false);
+			if (affectedMemes2.Count > 0)
+			{
+				stringBuilder.AppendLine();
+				stringBuilder.AppendLine("DisagreeableMemes".Translate().Colorize(ColoredText.TipSectionTitleColor) + ":\n" + affectedMemes2.Select((MemeDef x) => x.LabelCap.Resolve()).ToLineList("  - "));
+			}
+		}
+		if (ModsConfig.BiotechActive)
+		{
+			if (sourceGene != null)
+			{
+				stringBuilder.AppendLine().AppendLine(("AddedByGene".Translate() + ": " + sourceGene.LabelCap).Colorize(ColoredText.GeneColor));
+			}
+			if (Suppressed)
+			{
+				foreach (Trait allTrait in pawn.story.traits.allTraits)
+				{
+					if (allTrait != this && allTrait.def.CanSuppress(this))
 					{
-						StringBuilder stringBuilder3 = stringBuilder;
-						if (stringBuilder3[stringBuilder3.Length - 2] == '\r')
-						{
-							stringBuilder.Remove(stringBuilder.Length - 2, 2);
-							goto IL_919;
-						}
+						suppressedReasons.Add($"{allTrait.Label} ({"Trait".Translate()})");
 					}
-					stringBuilder.Remove(stringBuilder.Length - 1, 1);
 				}
-			}
-			IL_919:
-			return stringBuilder.ToString();
-		}
-
-		// Token: 0x0600D0FD RID: 53501 RVA: 0x003D7610 File Offset: 0x003D5810
-		public override string ToString()
-		{
-			if (this.def == null)
-			{
-				return "Trait(null)";
-			}
-			return string.Concat(new string[]
-			{
-				"Trait(",
-				this.def.ToString(),
-				"-",
-				this.degree.ToString(),
-				")"
-			});
-		}
-
-		// Token: 0x0600D0FE RID: 53502 RVA: 0x003D766A File Offset: 0x003D586A
-		private IEnumerable<ThoughtDef> GetPermaThoughts()
-		{
-			TraitDegreeData degree = this.CurrentData;
-			List<ThoughtDef> allThoughts = DefDatabase<ThoughtDef>.AllDefsListForReading;
-			int num;
-			for (int i = 0; i < allThoughts.Count; i = num + 1)
-			{
-				if (allThoughts[i].IsSituational && allThoughts[i].Worker is ThoughtWorker_AlwaysActive && allThoughts[i].requiredTraits != null && allThoughts[i].requiredTraits.Contains(this.def) && (!allThoughts[i].RequiresSpecificTraitsDegree || allThoughts[i].requiredTraitsDegree == degree.degree))
+				if (sourceGene != null && sourceGene.Overridden && sourceGene.overriddenByGene.def != sourceGene.def)
 				{
-					yield return allThoughts[i];
+					suppressedReasons.Add($"{sourceGene.overriddenByGene.Label} ({"Gene".Translate()})");
 				}
-				num = i;
-			}
-			yield break;
-		}
-
-		// Token: 0x0600D0FF RID: 53503 RVA: 0x003D767A File Offset: 0x003D587A
-		private bool AllowsWorkType(WorkTypeDef workDef)
-		{
-			return (this.def.disabledWorkTags & workDef.workTags) == WorkTags.None;
-		}
-
-		// Token: 0x0600D100 RID: 53504 RVA: 0x003D7691 File Offset: 0x003D5891
-		public void Notify_MentalStateEndedOn(Pawn pawn, bool causedByMood)
-		{
-			if (causedByMood)
-			{
-				this.Notify_MentalStateEndedOn(pawn);
-			}
-		}
-
-		// Token: 0x0600D101 RID: 53505 RVA: 0x003D76A0 File Offset: 0x003D58A0
-		public void Notify_MentalStateEndedOn(Pawn pawn)
-		{
-			TraitDegreeData currentData = this.CurrentData;
-			if (currentData.mentalBreakInspirationGainSet.NullOrEmpty<InspirationDef>() || Rand.Value > currentData.mentalBreakInspirationGainChance)
-			{
-				return;
-			}
-			pawn.mindState.inspirationHandler.TryStartInspiration(currentData.mentalBreakInspirationGainSet.RandomElement<InspirationDef>(), currentData.mentalBreakInspirationGainReasonText, true);
-		}
-
-		// Token: 0x0600D102 RID: 53506 RVA: 0x003D76F4 File Offset: 0x003D58F4
-		public List<WorkTypeDef> GetDisabledWorkTypes()
-		{
-			Trait.tmpDisabledWorktypes.Clear();
-			for (int i = 0; i < this.def.disabledWorkTypes.Count; i++)
-			{
-				Trait.tmpDisabledWorktypes.Add(this.def.disabledWorkTypes[i]);
-			}
-			List<WorkTypeDef> allDefsListForReading = DefDatabase<WorkTypeDef>.AllDefsListForReading;
-			for (int j = 0; j < allDefsListForReading.Count; j++)
-			{
-				WorkTypeDef workTypeDef = allDefsListForReading[j];
-				if (!this.AllowsWorkType(workTypeDef))
+				if (suppressedByGene != null)
 				{
-					Trait.tmpDisabledWorktypes.Add(workTypeDef);
+					suppressedReasons.Add($"{suppressedByGene.Label} ({"Gene".Translate()})");
+				}
+				if (suppressedReasons.Any())
+				{
+					stringBuilder.AppendLine().AppendLine(("Suppressed".Translate().CapitalizeFirst() + ": " + "SuppressedDesc".Translate() + ":\n" + suppressedReasons.ToLineList("  - ", capitalizeItems: true)).Colorize(ColoredText.SubtleGrayColor));
 				}
 			}
-			return Trait.tmpDisabledWorktypes;
 		}
+		if (stringBuilder.Length > 0)
+		{
+			if (stringBuilder[stringBuilder.Length - 1] == '\n')
+			{
+				if (stringBuilder.Length > 1)
+				{
+					if (stringBuilder[stringBuilder.Length - 2] == '\r')
+					{
+						stringBuilder.Remove(stringBuilder.Length - 2, 2);
+						goto IL_0991;
+					}
+				}
+				stringBuilder.Remove(stringBuilder.Length - 1, 1);
+			}
+		}
+		goto IL_0991;
+		IL_0991:
+		return stringBuilder.ToString();
+	}
 
-		// Token: 0x04008DEE RID: 36334
-		public Pawn pawn;
+	public override string ToString()
+	{
+		if (def == null)
+		{
+			return "Trait(null)";
+		}
+		return "Trait(" + def.ToString() + "-" + degree + ")";
+	}
 
-		// Token: 0x04008DEF RID: 36335
-		public Gene sourceGene;
+	[IteratorStateMachine(typeof(_003CGetPermaThoughts_003Ed__27))]
+	private IEnumerable<ThoughtDef> GetPermaThoughts()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetPermaThoughts_003Ed__27(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
 
-		// Token: 0x04008DF0 RID: 36336
-		public Gene suppressedByGene;
+	private bool AllowsWorkType(WorkTypeDef workDef)
+	{
+		return (def.disabledWorkTags & workDef.workTags) == 0;
+	}
 
-		// Token: 0x04008DF1 RID: 36337
-		public TraitDef def;
+	public void Notify_MentalStateEndedOn(Pawn pawn, bool causedByMood)
+	{
+		if (causedByMood)
+		{
+			Notify_MentalStateEndedOn(pawn);
+		}
+	}
 
-		// Token: 0x04008DF2 RID: 36338
-		private int degree;
+	public void Notify_MentalStateEndedOn(Pawn pawn)
+	{
+		TraitDegreeData currentData = CurrentData;
+		if (!currentData.mentalBreakInspirationGainSet.NullOrEmpty() && !(Rand.Value > currentData.mentalBreakInspirationGainChance))
+		{
+			pawn.mindState.inspirationHandler.TryStartInspiration(currentData.mentalBreakInspirationGainSet.RandomElement(), currentData.mentalBreakInspirationGainReasonText);
+		}
+	}
 
-		// Token: 0x04008DF3 RID: 36339
-		private bool scenForced;
-
-		// Token: 0x04008DF4 RID: 36340
-		[LoadAlias("suppressed")]
-		public bool suppressedByTrait;
-
-		// Token: 0x04008DF5 RID: 36341
-		private List<string> suppressedReasons = new List<string>();
-
-		// Token: 0x04008DF6 RID: 36342
-		private static List<WorkTypeDef> tmpDisabledWorktypes = new List<WorkTypeDef>();
+	public List<WorkTypeDef> GetDisabledWorkTypes()
+	{
+		tmpDisabledWorktypes.Clear();
+		for (int i = 0; i < def.disabledWorkTypes.Count; i++)
+		{
+			tmpDisabledWorktypes.Add(def.disabledWorkTypes[i]);
+		}
+		List<WorkTypeDef> allDefsListForReading = DefDatabase<WorkTypeDef>.AllDefsListForReading;
+		for (int j = 0; j < allDefsListForReading.Count; j++)
+		{
+			WorkTypeDef workTypeDef = allDefsListForReading[j];
+			if (!AllowsWorkType(workTypeDef))
+			{
+				tmpDisabledWorktypes.Add(workTypeDef);
+			}
+		}
+		return tmpDisabledWorktypes;
 	}
 }

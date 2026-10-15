@@ -1,263 +1,542 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Precept_Building : Precept_ThingStyle
 {
-	// Token: 0x02002650 RID: 9808
-	public class Precept_Building : Precept_ThingStyle
+	[CompilerGenerated]
+	private sealed class _003CEditFloatMenuOptions_003Ed__12 : IEnumerable<FloatMenuOption>, IEnumerable, IEnumerator<FloatMenuOption>, IEnumerator, IDisposable
 	{
-		// Token: 0x170020DE RID: 8414
-		// (get) Token: 0x0600D6E0 RID: 55008 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public override bool CanRegenerate
+		private int _003C_003E1__state;
+
+		private FloatMenuOption _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Precept_Building _003C_003E4__this;
+
+		FloatMenuOption IEnumerator<FloatMenuOption>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CEditFloatMenuOptions_003Ed__12(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			Precept_Building precept_Building = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = precept_Building.EditFloatMenuOption();
+				_003C_003E1__state = 1;
 				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				return false;
 			}
 		}
 
-		// Token: 0x170020DF RID: 8415
-		// (get) Token: 0x0600D6E1 RID: 55009 RVA: 0x003FB8D0 File Offset: 0x003F9AD0
-		protected override string NameRootSymbol
+		bool IEnumerator.MoveNext()
 		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<FloatMenuOption> IEnumerable<FloatMenuOption>.GetEnumerator()
+		{
+			_003CEditFloatMenuOptions_003Ed__12 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CEditFloatMenuOptions_003Ed__12(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<FloatMenuOption>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGetAlerts_003Ed__13 : IEnumerable<Alert>, IEnumerable, IEnumerator<Alert>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Alert _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Precept_Building _003C_003E4__this;
+
+		Alert IEnumerator<Alert>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				return "r_ideoBuildingName";
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600D6E2 RID: 55010 RVA: 0x003FB8D7 File Offset: 0x003F9AD7
-		public override void Init(Ideo ideo, FactionDef generatingFor = null)
+		object IEnumerator.Current
 		{
-			base.Init(ideo, null);
-			if (!ModLister.CheckIdeology("Ideology building"))
+			[DebuggerHidden]
+			get
 			{
-				return;
+				return _003C_003E2__current;
 			}
-			this.GeneratePresenceDemand();
 		}
 
-		// Token: 0x0600D6E3 RID: 55011 RVA: 0x003FB8F4 File Offset: 0x003F9AF4
-		public override void Regenerate(Ideo ideo, FactionDef generatingFor = null)
+		[DebuggerHidden]
+		public _003CGetAlerts_003Ed__13(int _003C_003E1__state)
 		{
-			this.GeneratePresenceDemand();
-			if (this.UsesGeneratedName)
-			{
-				base.RegenerateName();
-			}
-			this.ClearTipCache();
-			this.Notify_ThingDefSet();
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x0600D6E4 RID: 55012 RVA: 0x003FB918 File Offset: 0x003F9B18
-		protected void GeneratePresenceDemand()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			this.presenceDemand = new IdeoBuildingPresenceDemand(this);
-			this.presenceDemand.minExpectation = this.def.buildingMinExpectations.RandomElement<ExpectationDef>();
-			int num = Mathf.CeilToInt(this.def.roomRequirementCountCurve.Evaluate(Rand.Value));
-			if ((base.ThingDef.ritualFocus == null || !base.ThingDef.ritualFocus.consumable) && num > 0)
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			Precept_Building precept_Building = _003C_003E4__this;
+			switch (num)
 			{
-				this.presenceDemand.roomRequirements = new List<RoomRequirement>();
-				List<RoomRequirement> list = this.def.buildingRoomRequirements.ToList<RoomRequirement>();
-				list.Shuffle<RoomRequirement>();
-				for (int i = 0; i < num; i++)
+			default:
+				return false;
+			case 0:
+			{
+				_003C_003E1__state = -1;
+				Map currentMap = Find.CurrentMap;
+				if (currentMap == null || !precept_Building.presenceDemand.AppliesTo(currentMap))
 				{
-					this.presenceDemand.roomRequirements.Add(list[i]);
+					return false;
 				}
-				this.presenceDemand.roomRequirements.AddRange(this.def.buildingRoomRequirementsFixed);
+				if (!precept_Building.presenceDemand.BuildingPresent(currentMap))
+				{
+					_003C_003E2__current = precept_Building.presenceDemand.AlertCachedMissingMissing;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				if (!precept_Building.presenceDemand.roomRequirements.NullOrEmpty())
+				{
+					_003C_003E2__current = precept_Building.presenceDemand.AlertCachedMissingDisrespected;
+					_003C_003E1__state = 2;
+					return true;
+				}
+				break;
+			}
+			case 1:
+				_003C_003E1__state = -1;
+				break;
+			case 2:
+				_003C_003E1__state = -1;
+				break;
+			}
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Alert> IEnumerable<Alert>.GetEnumerator()
+		{
+			_003CGetAlerts_003Ed__13 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CGetAlerts_003Ed__13(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Alert>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CSpecialDisplayStats_003Ed__17 : IEnumerable<StatDrawEntry>, IEnumerable, IEnumerator<StatDrawEntry>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private StatDrawEntry _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Precept_Building _003C_003E4__this;
+
+		StatDrawEntry IEnumerator<StatDrawEntry>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600D6E5 RID: 55013 RVA: 0x003FB9EF File Offset: 0x003F9BEF
-		public override string TransformThingLabel(string label)
+		object IEnumerator.Current
 		{
-			return label + " (" + base.LabelCap + ")";
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x0600D6E6 RID: 55014 RVA: 0x003FBA08 File Offset: 0x003F9C08
-		private string CostListString()
+		[DebuggerHidden]
+		public _003CSpecialDisplayStats_003Ed__17(int _003C_003E1__state)
 		{
-			List<string> list = new List<string>();
-			if (!base.ThingDef.CostList.NullOrEmpty<ThingDefCountClass>())
-			{
-				for (int i = 0; i < base.ThingDef.CostList.Count; i++)
-				{
-					list.Add(base.ThingDef.CostList[i].thingDef.LabelCap + " x" + base.ThingDef.CostList[i].count.ToString());
-				}
-			}
-			if (!base.ThingDef.stuffCategories.NullOrEmpty<StuffCategoryDef>())
-			{
-				string text = "";
-				for (int j = 0; j < base.ThingDef.stuffCategories.Count; j++)
-				{
-					if (j > 0)
-					{
-						text += "/";
-					}
-					text += base.ThingDef.stuffCategories[j].label;
-				}
-				list.Add(text.CapitalizeFirst() + " x" + base.ThingDef.CostStuffCount.ToString());
-			}
-			return list.ToCommaList(false, false).CapitalizeFirst();
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x0600D6E7 RID: 55015 RVA: 0x003FBB30 File Offset: 0x003F9D30
-		public override string GetTip()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			if (this.tipCached.NullOrEmpty())
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			Precept_Building precept_Building = _003C_003E4__this;
+			switch (num)
 			{
-				Precept.tmpCompsDesc.Clear();
-				ThingDef thingDef = base.ThingDef;
-				if (((thingDef != null) ? thingDef.description : null) != null)
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.BasicsImportant, "Stat_Thing_RelatedToIdeos_Name".Translate(), precept_Building.ideo.name.ApplyTag(precept_Building.ideo).Resolve(), "Stat_Thing_RelatedToIdeos_Desc".Translate(), 1110, null, new Dialog_InfoCard.Hyperlink[1]
 				{
-					Precept.tmpCompsDesc.Append(base.ThingDef.description);
-				}
-				else if (!base.Description.NullOrEmpty())
+					new Dialog_InfoCard.Hyperlink(precept_Building.ideo)
+				});
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<StatDrawEntry> IEnumerable<StatDrawEntry>.GetEnumerator()
+		{
+			_003CSpecialDisplayStats_003Ed__17 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CSpecialDisplayStats_003Ed__17(0)
 				{
-					Precept.tmpCompsDesc.Append(base.Description);
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<StatDrawEntry>)this).GetEnumerator();
+		}
+	}
+
+	public IdeoBuildingPresenceDemand presenceDemand;
+
+	public override bool CanRegenerate => true;
+
+	protected override string NameRootSymbol => "r_ideoBuildingName";
+
+	public override void Init(Ideo ideo, FactionDef generatingFor = null)
+	{
+		base.Init(ideo, (FactionDef)null);
+		if (ModLister.CheckIdeology("Ideology building"))
+		{
+			GeneratePresenceDemand();
+		}
+	}
+
+	public override void Regenerate(Ideo ideo, FactionDef generatingFor = null)
+	{
+		GeneratePresenceDemand();
+		if (UsesGeneratedName)
+		{
+			RegenerateName();
+		}
+		ClearTipCache();
+		Notify_ThingDefSet();
+	}
+
+	protected void GeneratePresenceDemand()
+	{
+		presenceDemand = new IdeoBuildingPresenceDemand(this);
+		presenceDemand.minExpectation = def.buildingMinExpectations.RandomElement();
+		int num = Mathf.CeilToInt(def.roomRequirementCountCurve.Evaluate(Rand.Value));
+		if ((base.ThingDef.ritualFocus == null || !base.ThingDef.ritualFocus.consumable) && num > 0)
+		{
+			presenceDemand.roomRequirements = new List<RoomRequirement>();
+			List<RoomRequirement> list = def.buildingRoomRequirements.ToList();
+			list.Shuffle();
+			for (int i = 0; i < num; i++)
+			{
+				presenceDemand.roomRequirements.Add(list[i]);
+			}
+			presenceDemand.roomRequirements.AddRange(def.buildingRoomRequirementsFixed);
+		}
+	}
+
+	public override string TransformThingLabel(string label)
+	{
+		return label + " (" + base.LabelCap + ")";
+	}
+
+	private string CostListString()
+	{
+		List<string> list = new List<string>();
+		if (!base.ThingDef.CostList.NullOrEmpty())
+		{
+			for (int i = 0; i < base.ThingDef.CostList.Count; i++)
+			{
+				list.Add(string.Concat(base.ThingDef.CostList[i].thingDef.LabelCap + " x", base.ThingDef.CostList[i].count.ToString()));
+			}
+		}
+		if (!base.ThingDef.stuffCategories.NullOrEmpty())
+		{
+			string text = "";
+			for (int j = 0; j < base.ThingDef.stuffCategories.Count; j++)
+			{
+				if (j > 0)
+				{
+					text += "/";
 				}
+				text += base.ThingDef.stuffCategories[j].label;
+			}
+			list.Add(text.CapitalizeFirst() + " x" + base.ThingDef.CostStuffCount);
+		}
+		return list.ToCommaList().CapitalizeFirst();
+	}
+
+	public override string GetTip()
+	{
+		if (tipCached.NullOrEmpty())
+		{
+			Precept.tmpCompsDesc.Clear();
+			if (base.ThingDef?.description != null)
+			{
+				Precept.tmpCompsDesc.Append(base.ThingDef.description);
+			}
+			else if (!base.Description.NullOrEmpty())
+			{
+				Precept.tmpCompsDesc.Append(base.Description);
+			}
+			Precept.tmpCompsDesc.AppendLine();
+			Precept.tmpCompsDesc.AppendInNewLine(ColorizeDescTitle("IdeoBuildingVariationOf".Translate() + ": "));
+			Precept.tmpCompsDesc.AppendInNewLine(base.ThingDef.LabelCap.Resolve().Indented());
+			Precept.tmpCompsDesc.AppendInNewLine(ColorizeDescTitle("Size".Translate().CapitalizeFirst() + ": ").Indented());
+			Precept.tmpCompsDesc.Append(base.ThingDef.size.x + "x" + base.ThingDef.size.z);
+			Precept.tmpCompsDesc.AppendInNewLine(ColorizeDescTitle("Cost".Translate().CapitalizeFirst() + ": ").Indented());
+			Precept.tmpCompsDesc.Append(CostListString());
+			if (base.ThingDef.ritualFocus == null || !base.ThingDef.ritualFocus.consumable)
+			{
 				Precept.tmpCompsDesc.AppendLine();
-				Precept.tmpCompsDesc.AppendInNewLine(base.ColorizeDescTitle("IdeoBuildingVariationOf".Translate() + ": "));
-				Precept.tmpCompsDesc.AppendInNewLine(base.ThingDef.LabelCap.Resolve().Indented("    "));
-				Precept.tmpCompsDesc.AppendInNewLine(base.ColorizeDescTitle("Size".Translate().CapitalizeFirst() + ": ").Indented("    "));
-				Precept.tmpCompsDesc.Append(base.ThingDef.size.x.ToString() + "x" + base.ThingDef.size.z.ToString());
-				Precept.tmpCompsDesc.AppendInNewLine(base.ColorizeDescTitle("Cost".Translate().CapitalizeFirst() + ": ").Indented("    "));
-				Precept.tmpCompsDesc.Append(this.CostListString());
-				if (base.ThingDef.ritualFocus == null || !base.ThingDef.ritualFocus.consumable)
+				Precept.tmpCompsDesc.AppendInNewLine(ColorizeDescTitle("IdeoBuildingMinimumExpectations".Translate() + ": "));
+				Precept.tmpCompsDesc.Append(presenceDemand.minExpectation.LabelCap);
+				if (!presenceDemand.roomRequirements.NullOrEmpty())
 				{
 					Precept.tmpCompsDesc.AppendLine();
-					Precept.tmpCompsDesc.AppendInNewLine(base.ColorizeDescTitle("IdeoBuildingMinimumExpectations".Translate() + ": "));
-					Precept.tmpCompsDesc.Append(this.presenceDemand.minExpectation.LabelCap);
-					if (!this.presenceDemand.roomRequirements.NullOrEmpty<RoomRequirement>())
-					{
-						Precept.tmpCompsDesc.AppendLine();
-						Precept.tmpCompsDesc.AppendInNewLine(base.ColorizeDescTitle("RoomRequirements".Translate() + ":"));
-						Precept.tmpCompsDesc.AppendInNewLine(this.presenceDemand.RoomRequirementsInfo.ToLineList(" -  ", true));
-					}
+					Precept.tmpCompsDesc.AppendInNewLine(ColorizeDescTitle("RoomRequirements".Translate() + ":"));
+					Precept.tmpCompsDesc.AppendInNewLine(presenceDemand.RoomRequirementsInfo.ToLineList(" -  ", capitalizeItems: true));
 				}
-				this.tipCached = Precept.tmpCompsDesc.ToString();
 			}
-			return this.tipCached;
+			tipCached = Precept.tmpCompsDesc.ToString();
 		}
+		return tipCached;
+	}
 
-		// Token: 0x0600D6E8 RID: 55016 RVA: 0x003FBDA4 File Offset: 0x003F9FA4
-		public override List<Thought_Situational> SituationThoughtsToAdd(Pawn pawn, List<Thought_Situational> activeThoughts)
+	public override List<Thought_Situational> SituationThoughtsToAdd(Pawn pawn, List<Thought_Situational> activeThoughts)
+	{
+		tmpSituationalThoughts.Clear();
+		if (!pawn.IsFreeColonist)
 		{
-			this.tmpSituationalThoughts.Clear();
-			if (!pawn.IsFreeColonist)
+			return tmpSituationalThoughts;
+		}
+		Map mapHeld = pawn.MapHeld;
+		if (mapHeld != null)
+		{
+			if (!presenceDemand.AppliesTo(mapHeld))
 			{
-				return this.tmpSituationalThoughts;
+				return tmpSituationalThoughts;
 			}
-			Map mapHeld = pawn.MapHeld;
-			if (mapHeld != null)
+			if (!presenceDemand.BuildingPresent(mapHeld))
 			{
-				if (!this.presenceDemand.AppliesTo(mapHeld))
+				if (!activeThoughts.Any((Thought_Situational t) => t is Thought_IdeoMissingBuilding thought_IdeoMissingBuilding && thought_IdeoMissingBuilding.demand == presenceDemand))
 				{
-					return this.tmpSituationalThoughts;
-				}
-				if (!this.presenceDemand.BuildingPresent(mapHeld))
-				{
-					if (!activeThoughts.Any(delegate(Thought_Situational t)
+					Thought_IdeoMissingBuilding thought_IdeoMissingBuilding2 = (Thought_IdeoMissingBuilding)ThoughtMaker.MakeThought(ThoughtDefOf.IdeoBuildingMissing);
+					if (thought_IdeoMissingBuilding2 != null)
 					{
-						Thought_IdeoMissingBuilding thought_IdeoMissingBuilding2 = t as Thought_IdeoMissingBuilding;
-						return thought_IdeoMissingBuilding2 != null && thought_IdeoMissingBuilding2.demand == this.presenceDemand;
-					}))
-					{
-						Thought_IdeoMissingBuilding thought_IdeoMissingBuilding = (Thought_IdeoMissingBuilding)ThoughtMaker.MakeThought(ThoughtDefOf.IdeoBuildingMissing);
-						if (thought_IdeoMissingBuilding != null)
-						{
-							thought_IdeoMissingBuilding.pawn = pawn;
-							thought_IdeoMissingBuilding.demand = this.presenceDemand;
-							thought_IdeoMissingBuilding.sourcePrecept = this;
-							this.tmpSituationalThoughts.Add(thought_IdeoMissingBuilding);
-						}
-					}
-				}
-				else if (!this.presenceDemand.RequirementsSatisfied(mapHeld) && !activeThoughts.Any(delegate(Thought_Situational t)
-				{
-					Thought_IdeoDisrespectedBuilding thought_IdeoDisrespectedBuilding2 = t as Thought_IdeoDisrespectedBuilding;
-					return thought_IdeoDisrespectedBuilding2 != null && thought_IdeoDisrespectedBuilding2.demand == this.presenceDemand;
-				}))
-				{
-					Thought_IdeoDisrespectedBuilding thought_IdeoDisrespectedBuilding = (Thought_IdeoDisrespectedBuilding)ThoughtMaker.MakeThought(ThoughtDefOf.IdeoBuildingDisrespected);
-					if (thought_IdeoDisrespectedBuilding != null)
-					{
-						thought_IdeoDisrespectedBuilding.pawn = pawn;
-						thought_IdeoDisrespectedBuilding.demand = this.presenceDemand;
-						thought_IdeoDisrespectedBuilding.sourcePrecept = this;
-						this.tmpSituationalThoughts.Add(thought_IdeoDisrespectedBuilding);
+						thought_IdeoMissingBuilding2.pawn = pawn;
+						thought_IdeoMissingBuilding2.demand = presenceDemand;
+						thought_IdeoMissingBuilding2.sourcePrecept = this;
+						tmpSituationalThoughts.Add(thought_IdeoMissingBuilding2);
 					}
 				}
 			}
-			return this.tmpSituationalThoughts;
-		}
-
-		// Token: 0x0600D6E9 RID: 55017 RVA: 0x003FBEB1 File Offset: 0x003FA0B1
-		public override IEnumerable<FloatMenuOption> EditFloatMenuOptions()
-		{
-			yield return base.EditFloatMenuOption();
-			yield break;
-		}
-
-		// Token: 0x0600D6EA RID: 55018 RVA: 0x003FBEC1 File Offset: 0x003FA0C1
-		public override IEnumerable<Alert> GetAlerts()
-		{
-			Map currentMap = Find.CurrentMap;
-			if (currentMap == null || !this.presenceDemand.AppliesTo(currentMap))
+			else if (!presenceDemand.RequirementsSatisfied(mapHeld) && !activeThoughts.Any((Thought_Situational t) => t is Thought_IdeoDisrespectedBuilding thought_IdeoDisrespectedBuilding && thought_IdeoDisrespectedBuilding.demand == presenceDemand))
 			{
-				yield break;
-			}
-			if (!this.presenceDemand.BuildingPresent(currentMap))
-			{
-				yield return this.presenceDemand.AlertCachedMissingMissing;
-			}
-			else if (!this.presenceDemand.roomRequirements.NullOrEmpty<RoomRequirement>())
-			{
-				yield return this.presenceDemand.AlertCachedMissingDisrespected;
-			}
-			yield break;
-		}
-
-		// Token: 0x0600D6EB RID: 55019 RVA: 0x003FBED1 File Offset: 0x003FA0D1
-		public override void ExposeData()
-		{
-			base.ExposeData();
-			Scribe_Deep.Look<IdeoBuildingPresenceDemand>(ref this.presenceDemand, "presenceDemand", Array.Empty<object>());
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
-			{
-				this.presenceDemand.parent = this;
+				Thought_IdeoDisrespectedBuilding thought_IdeoDisrespectedBuilding2 = (Thought_IdeoDisrespectedBuilding)ThoughtMaker.MakeThought(ThoughtDefOf.IdeoBuildingDisrespected);
+				if (thought_IdeoDisrespectedBuilding2 != null)
+				{
+					thought_IdeoDisrespectedBuilding2.pawn = pawn;
+					thought_IdeoDisrespectedBuilding2.demand = presenceDemand;
+					thought_IdeoDisrespectedBuilding2.sourcePrecept = this;
+					tmpSituationalThoughts.Add(thought_IdeoDisrespectedBuilding2);
+				}
 			}
 		}
+		return tmpSituationalThoughts;
+	}
 
-		// Token: 0x0600D6EC RID: 55020 RVA: 0x003FBF04 File Offset: 0x003FA104
-		public override void CopyTo(Precept precept)
+	[IteratorStateMachine(typeof(_003CEditFloatMenuOptions_003Ed__12))]
+	public override IEnumerable<FloatMenuOption> EditFloatMenuOptions()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CEditFloatMenuOptions_003Ed__12(-2)
 		{
-			base.CopyTo(precept);
-			Precept_Building precept_Building = (Precept_Building)precept;
-			precept_Building.presenceDemand = this.presenceDemand.Copy();
-			precept_Building.presenceDemand.parent = precept_Building;
-		}
+			_003C_003E4__this = this
+		};
+	}
 
-		// Token: 0x0600D6ED RID: 55021 RVA: 0x003FBF3C File Offset: 0x003FA13C
-		public override string InspectStringExtra(Thing thing)
+	[IteratorStateMachine(typeof(_003CGetAlerts_003Ed__13))]
+	public override IEnumerable<Alert> GetAlerts()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetAlerts_003Ed__13(-2)
 		{
-			return ("Stat_Thing_RelatedToIdeos_Name".Translate() + ": " + this.ideo.name.ApplyTag(this.ideo)).Resolve();
-		}
+			_003C_003E4__this = this
+		};
+	}
 
-		// Token: 0x0600D6EE RID: 55022 RVA: 0x003FBF80 File Offset: 0x003FA180
-		public override IEnumerable<StatDrawEntry> SpecialDisplayStats(Thing thing)
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Deep.Look(ref presenceDemand, "presenceDemand");
+		if (Scribe.mode == LoadSaveMode.PostLoadInit)
 		{
-			yield return new StatDrawEntry(StatCategoryDefOf.BasicsImportant, "Stat_Thing_RelatedToIdeos_Name".Translate(), this.ideo.name.ApplyTag(this.ideo).Resolve(), "Stat_Thing_RelatedToIdeos_Desc".Translate(), 1110, null, new Dialog_InfoCard.Hyperlink[]
-			{
-				new Dialog_InfoCard.Hyperlink(this.ideo)
-			}, false, false);
-			yield break;
+			presenceDemand.parent = this;
 		}
+	}
 
-		// Token: 0x04009205 RID: 37381
-		public IdeoBuildingPresenceDemand presenceDemand;
+	public override void CopyTo(Precept precept)
+	{
+		base.CopyTo(precept);
+		Precept_Building precept_Building = (Precept_Building)precept;
+		precept_Building.presenceDemand = presenceDemand.Copy();
+		precept_Building.presenceDemand.parent = precept_Building;
+	}
+
+	public override string InspectStringExtra(Thing thing)
+	{
+		return ("Stat_Thing_RelatedToIdeos_Name".Translate() + ": " + ideo.name.ApplyTag(ideo)).Resolve();
+	}
+
+	[IteratorStateMachine(typeof(_003CSpecialDisplayStats_003Ed__17))]
+	public override IEnumerable<StatDrawEntry> SpecialDisplayStats(Thing thing)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CSpecialDisplayStats_003Ed__17(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

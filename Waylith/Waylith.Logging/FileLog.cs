@@ -30,6 +30,8 @@ public static class FileLog
 
 	private static StreamWriter? _writer;
 
+	private static string? _path;
+
 	private static List<string>? _backlog = new List<string>();
 
 	private static int _droppedBacklog;
@@ -43,6 +45,8 @@ public static class FileLog
 	private static bool _processExitHooked;
 
 	private static int _failSafeReported;
+
+	public static string? StartedRoot { get; private set; }
 
 	public static bool Disabled { get; set; }
 
@@ -157,6 +161,42 @@ public static class FileLog
 		}
 	}
 
+	internal static void CopyLogTo(TextWriter writer)
+	{
+		string path;
+		using (_lock.EnterScope())
+		{
+			_writer?.Flush();
+			path = _path;
+			if (path == null)
+			{
+				List<string> backlog = _backlog;
+				if (backlog == null || backlog.Count <= 0)
+				{
+					writer.WriteLine(Disabled ? "N/A (file logging disabled)" : "N/A (nothing logged yet)");
+					return;
+				}
+				foreach (string item in _backlog)
+				{
+					writer.Write(item);
+				}
+				if (_droppedBacklog > 0)
+				{
+					writer.WriteLine($"({_droppedBacklog} earlier log line(s) were dropped, pre-init backlog overflow)");
+				}
+				return;
+			}
+		}
+		using FileStream stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+		using StreamReader streamReader = new StreamReader(stream, Encoding.UTF8);
+		char[] array = new char[16384];
+		int count;
+		while ((count = streamReader.Read(array, 0, array.Length)) > 0)
+		{
+			writer.Write(array, 0, count);
+		}
+	}
+
 	private static void Flush()
 	{
 		if (Disabled)
@@ -251,6 +291,8 @@ public static class FileLog
 				AutoFlush = false
 			};
 			_started = true;
+			_path = text2;
+			StartedRoot = persistentDataPath;
 			WriteHeaderLocked(text2);
 			if (_backlog != null)
 			{
@@ -284,7 +326,7 @@ public static class FileLog
 			_writer.Write(" log ===");
 			_writer.Write("\n");
 			_writer.Write($"Started:   {DateTimeOffset.Now:yyyy-MM-dd HH:mm:ss.fff zzz}\n");
-			_writer.Write("Version:   " + (waylithAppState?.Version ?? "unknown") + "\n");
+			_writer.Write("Version:   " + (waylithAppState?.Version ?? Assembly.GetEntryAssembly()?.GetName().Version?.ToString() ?? "unknown") + "\n");
 			_writer.Write($"OS:        {RuntimeInformation.OSDescription} ({RuntimeInformation.OSArchitecture})\n");
 			_writer.Write("Runtime:   " + RuntimeInformation.FrameworkDescription + "\n");
 			_writer.Write($"Process:   pid {Environment.ProcessId}\n");

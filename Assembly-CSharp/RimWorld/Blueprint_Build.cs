@@ -1,241 +1,471 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Text;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Blueprint_Build : Blueprint, IHaulEnroute, ILoadReferenceable
 {
-	// Token: 0x0200294C RID: 10572
-	public class Blueprint_Build : Blueprint, IHaulEnroute, ILoadReferenceable
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass17_0
 	{
-		// Token: 0x17002332 RID: 9010
-		// (get) Token: 0x0600E7AB RID: 59307 RVA: 0x00437E44 File Offset: 0x00436044
-		public override string Label
+		public ThingDef thingDef;
+
+		public Color stuffColor;
+
+		public Blueprint_Build _003C_003E4__this;
+
+		internal void _003CGetGizmos_003Eb__0()
 		{
-			get
+			List<FloatMenuOption> list = new List<FloatMenuOption>
 			{
-				string text = this.def.entityDefToBuild.label;
-				if (base.StyleSourcePrecept != null)
+				new FloatMenuOption("Basic".Translate().CapitalizeFirst(), delegate
 				{
-					text = base.StyleSourcePrecept.TransformThingLabel(text);
-				}
-				if (this.stuffToUse != null)
+					_003C_003E4__this.ChangeStyleOfAllSelected(_003C_003E4__this.def.entityDefToBuild, null);
+				}, Widgets.GetIconFor(thingDef, _003C_003E4__this.Stuff, null, null), stuffColor)
+			};
+			foreach (StyleCategoryDef relevantStyleCategory in thingDef.RelevantStyleCategories)
+			{
+				foreach (ThingDefStyle thingDefStyle in relevantStyleCategory.thingDefStyles)
 				{
-					return "ThingMadeOfStuffLabel".Translate(this.stuffToUse.LabelAsStuff, text) + "BlueprintLabelExtra".Translate();
-				}
-				return text + "BlueprintLabelExtra".Translate();
-			}
-		}
-
-		// Token: 0x17002333 RID: 9011
-		// (get) Token: 0x0600E7AC RID: 59308 RVA: 0x00437EC9 File Offset: 0x004360C9
-		protected override float WorkTotal
-		{
-			get
-			{
-				return this.def.entityDefToBuild.GetStatValueAbstract(StatDefOf.WorkToBuild, this.stuffToUse);
-			}
-		}
-
-		// Token: 0x17002334 RID: 9012
-		// (get) Token: 0x0600E7AD RID: 59309 RVA: 0x00437EE6 File Offset: 0x004360E6
-		public ThingDef BuildDef
-		{
-			get
-			{
-				return this.def.entityDefToBuild as ThingDef;
-			}
-		}
-
-		// Token: 0x0600E7AE RID: 59310 RVA: 0x00437EF8 File Offset: 0x004360F8
-		public override void ExposeData()
-		{
-			base.ExposeData();
-			Scribe_Defs.Look<ThingDef>(ref this.stuffToUse, "stuffToUse");
-			Scribe_Defs.Look<ThingStyleDef>(ref this.selectedStyleDef, "selectedStyleDef");
-			Scribe_Values.Look<bool>(ref this.styleOverridden, "styleOverridden", false, false);
-			Scribe_Values.Look<ColorInt?>(ref this.glowerColorOverride, "glowerColorOverride", null, false);
-		}
-
-		// Token: 0x0600E7AF RID: 59311 RVA: 0x00437F57 File Offset: 0x00436157
-		public override ThingStyleDef EntityToBuildStyle()
-		{
-			return this.selectedStyleDef ?? this.StyleDef;
-		}
-
-		// Token: 0x0600E7B0 RID: 59312 RVA: 0x00437F69 File Offset: 0x00436169
-		public override BuildableDef EntityToBuild()
-		{
-			return this.def.entityDefToBuild;
-		}
-
-		// Token: 0x0600E7B1 RID: 59313 RVA: 0x00437F76 File Offset: 0x00436176
-		public override ThingDef EntityToBuildStuff()
-		{
-			return this.stuffToUse;
-		}
-
-		// Token: 0x0600E7B2 RID: 59314 RVA: 0x00437F7E File Offset: 0x0043617E
-		public override List<ThingDefCountClass> TotalMaterialCost()
-		{
-			return this.def.entityDefToBuild.CostListAdjusted(this.stuffToUse, true);
-		}
-
-		// Token: 0x0600E7B3 RID: 59315 RVA: 0x00437F98 File Offset: 0x00436198
-		protected override Thing MakeSolidThing(out bool shouldSelect)
-		{
-			Frame frame = (Frame)ThingMaker.MakeThing(this.def.entityDefToBuild.frameDef, this.stuffToUse);
-			frame.StyleSourcePrecept = base.StyleSourcePrecept;
-			frame.StyleDef = this.StyleDef;
-			frame.glowerColorOverride = this.glowerColorOverride;
-			shouldSelect = false;
-			base.Map.enrouteManager.SendReservations(this, frame);
-			return frame;
-		}
-
-		// Token: 0x0600E7B4 RID: 59316 RVA: 0x00438000 File Offset: 0x00436200
-		public override IEnumerable<Gizmo> GetGizmos()
-		{
-			foreach (Gizmo gizmo in base.GetGizmos())
-			{
-				yield return gizmo;
-			}
-			IEnumerator<Gizmo> enumerator = null;
-			Command command = BuildCopyCommandUtility.BuildCopyCommand(this.def.entityDefToBuild, this.stuffToUse, base.StyleSourcePrecept as Precept_Building, this.selectedStyleDef ?? this.StyleDef, this.styleOverridden, this.glowerColorOverride);
-			if (command != null)
-			{
-				yield return command;
-			}
-			if (base.Faction == Faction.OfPlayer)
-			{
-				if (ModsConfig.IdeologyActive && Find.IdeoManager.classicMode)
-				{
-					BuildableDef entityDefToBuild = this.def.entityDefToBuild;
-					ThingDef thingDef = entityDefToBuild as ThingDef;
-					if (thingDef != null && thingDef.CanBeStyled())
+					if (thingDefStyle.ThingDef == thingDef)
 					{
-						Color stuffColor = (this.stuffToUse == null) ? Color.white : this.def.entityDefToBuild.GetColorForStuff(this.stuffToUse);
-						Command_Action command_Action = new Command_Action
+						_003C_003Ec__DisplayClass17_1 CS_0024_003C_003E8__locals4 = new _003C_003Ec__DisplayClass17_1
 						{
-							defaultLabel = "ChangeStyle".Translate().CapitalizeFirst(),
-							defaultDesc = "ChangeStyleDesc".Translate(),
-							icon = Blueprint_Build.ChangeStyleTex.Texture,
-							Order = 15f,
-							action = delegate()
-							{
-								List<FloatMenuOption> list = new List<FloatMenuOption>();
-								list.Add(new FloatMenuOption("Basic".Translate().CapitalizeFirst(), delegate()
-								{
-									this.ChangeStyleOfAllSelected(this.def.entityDefToBuild, null);
-								}, Widgets.GetIconFor(thingDef, this.Stuff, null, null), stuffColor, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0, HorizontalJustification.Left, false));
-								foreach (StyleCategoryDef styleCategoryDef in thingDef.RelevantStyleCategories)
-								{
-									foreach (ThingDefStyle thingDefStyle in styleCategoryDef.thingDefStyles)
-									{
-										if (thingDefStyle.ThingDef == thingDef)
-										{
-											ThingDefStyle tdStyle = thingDefStyle;
-											list.Add(new FloatMenuOption(styleCategoryDef.LabelCap, delegate()
-											{
-												this.ChangeStyleOfAllSelected(this.def.entityDefToBuild, tdStyle.StyleDef);
-											}, Widgets.GetIconFor(thingDef, this.Stuff, tdStyle.StyleDef, null), stuffColor, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0, HorizontalJustification.Left, false));
-											break;
-										}
-									}
-								}
-								if (list.Any<FloatMenuOption>())
-								{
-									Find.WindowStack.Add(new FloatMenu(list));
-								}
-							}
+							CS_0024_003C_003E8__locals1 = this,
+							tdStyle = thingDefStyle
 						};
-						if (!thingDef.RelevantStyleCategories.Any<StyleCategoryDef>())
+						list.Add(new FloatMenuOption(relevantStyleCategory.LabelCap, delegate
 						{
-							command_Action.Disable("ChangeStyleDisabledNoCategories".Translate());
-						}
-						yield return command_Action;
+							CS_0024_003C_003E8__locals4.CS_0024_003C_003E8__locals1._003C_003E4__this.ChangeStyleOfAllSelected(CS_0024_003C_003E8__locals4.CS_0024_003C_003E8__locals1._003C_003E4__this.def.entityDefToBuild, CS_0024_003C_003E8__locals4.tdStyle.StyleDef);
+						}, Widgets.GetIconFor(thingDef, _003C_003E4__this.Stuff, CS_0024_003C_003E8__locals4.tdStyle.StyleDef, null), stuffColor));
+						break;
 					}
 				}
-				foreach (Command command2 in BuildRelatedCommandUtility.RelatedBuildCommands(this.def.entityDefToBuild))
-				{
-					yield return command2;
-				}
-				IEnumerator<Command> enumerator2 = null;
 			}
-			yield break;
-			yield break;
-		}
-
-		// Token: 0x0600E7B5 RID: 59317 RVA: 0x00438010 File Offset: 0x00436210
-		private void ChangeStyleOfAllSelected(BuildableDef buildable, ThingStyleDef styleDef)
-		{
-			foreach (object obj in Find.Selector.SelectedObjects)
+			if (list.Any())
 			{
-				Blueprint_Build blueprint_Build = obj as Blueprint_Build;
-				if (blueprint_Build != null && blueprint_Build.def.entityDefToBuild == buildable)
-				{
-					blueprint_Build.StyleDef = styleDef;
-					blueprint_Build.styleOverridden = true;
-					blueprint_Build.DirtyMapMesh(blueprint_Build.Map);
-				}
+				Find.WindowStack.Add(new FloatMenu(list));
 			}
 		}
+	}
 
-		// Token: 0x0600E7B6 RID: 59318 RVA: 0x00438090 File Offset: 0x00436290
-		public override void DeSpawn(DestroyMode mode = DestroyMode.Vanish)
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass17_1
+	{
+		public ThingDefStyle tdStyle;
+
+		public _003C_003Ec__DisplayClass17_0 CS_0024_003C_003E8__locals1;
+
+		internal void _003CGetGizmos_003Eb__2()
 		{
-			if (mode != DestroyMode.Vanish && !this.def.IsBlueprint)
+			CS_0024_003C_003E8__locals1._003C_003E4__this.ChangeStyleOfAllSelected(CS_0024_003C_003E8__locals1._003C_003E4__this.def.entityDefToBuild, tdStyle.StyleDef);
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGetGizmos_003Ed__17 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Blueprint_Build _003C_003E4__this;
+
+		private IEnumerator<Gizmo> _003C_003E7__wrap1;
+
+		private IEnumerator<Command> _003C_003E7__wrap2;
+
+		Gizmo IEnumerator<Gizmo>.Current
+		{
+			[DebuggerHidden]
+			get
 			{
-				foreach (Thing thing in GenConstruct.GetAttachedBuildings(this))
-				{
-					thing.DeSpawn(mode);
-				}
+				return _003C_003E2__current;
 			}
-			base.DeSpawn(mode);
 		}
 
-		// Token: 0x0600E7B7 RID: 59319 RVA: 0x004380F8 File Offset: 0x004362F8
-		public override string GetInspectString()
+		object IEnumerator.Current
 		{
-			StringBuilder stringBuilder = new StringBuilder();
-			stringBuilder.Append(base.GetInspectString());
-			if (stringBuilder.Length > 0)
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetGizmos_003Ed__17(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			switch (_003C_003E1__state)
+			{
+			case -3:
+			case 1:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+				break;
+			case -4:
+			case 4:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally2();
+				}
+				break;
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E7__wrap2 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				Blueprint_Build blueprint_Build = _003C_003E4__this;
+				Command command;
+				_003C_003Ec__DisplayClass17_0 CS_0024_003C_003E8__locals21;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((Blueprint)blueprint_Build).GetGizmos().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_007c;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_007c;
+				case 2:
+					_003C_003E1__state = -1;
+					goto IL_00f3;
+				case 3:
+					_003C_003E1__state = -1;
+					goto IL_023a;
+				case 4:
+					{
+						_003C_003E1__state = -4;
+						goto IL_0287;
+					}
+					IL_007c:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Gizmo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					command = BuildCopyCommandUtility.BuildCopyCommand(blueprint_Build.def.entityDefToBuild, blueprint_Build.stuffToUse, blueprint_Build.StyleSourcePrecept as Precept_Building, blueprint_Build.selectedStyleDef ?? blueprint_Build.StyleDef, blueprint_Build.styleOverridden, blueprint_Build.glowerColorOverride);
+					if (command != null)
+					{
+						_003C_003E2__current = command;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					goto IL_00f3;
+					IL_00f3:
+					if (blueprint_Build.Faction != Faction.OfPlayer)
+					{
+						break;
+					}
+					CS_0024_003C_003E8__locals21 = new _003C_003Ec__DisplayClass17_0
+					{
+						_003C_003E4__this = blueprint_Build
+					};
+					if (ModsConfig.IdeologyActive && Find.IdeoManager.classicMode)
+					{
+						BuildableDef entityDefToBuild = blueprint_Build.def.entityDefToBuild;
+						CS_0024_003C_003E8__locals21.thingDef = entityDefToBuild as ThingDef;
+						if (CS_0024_003C_003E8__locals21.thingDef != null && CS_0024_003C_003E8__locals21.thingDef.CanBeStyled())
+						{
+							CS_0024_003C_003E8__locals21.stuffColor = ((blueprint_Build.stuffToUse == null) ? Color.white : blueprint_Build.def.entityDefToBuild.GetColorForStuff(blueprint_Build.stuffToUse));
+							Command_Action command_Action = new Command_Action
+							{
+								defaultLabel = "ChangeStyle".Translate().CapitalizeFirst(),
+								defaultDesc = "ChangeStyleDesc".Translate(),
+								icon = ChangeStyleTex.Texture,
+								Order = 15f,
+								action = delegate
+								{
+									List<FloatMenuOption> list = new List<FloatMenuOption>
+									{
+										new FloatMenuOption("Basic".Translate().CapitalizeFirst(), delegate
+										{
+											CS_0024_003C_003E8__locals21._003C_003E4__this.ChangeStyleOfAllSelected(CS_0024_003C_003E8__locals21._003C_003E4__this.def.entityDefToBuild, null);
+										}, Widgets.GetIconFor(CS_0024_003C_003E8__locals21.thingDef, CS_0024_003C_003E8__locals21._003C_003E4__this.Stuff, null, null), CS_0024_003C_003E8__locals21.stuffColor)
+									};
+									foreach (StyleCategoryDef relevantStyleCategory in CS_0024_003C_003E8__locals21.thingDef.RelevantStyleCategories)
+									{
+										foreach (ThingDefStyle thingDefStyle in relevantStyleCategory.thingDefStyles)
+										{
+											if (thingDefStyle.ThingDef == CS_0024_003C_003E8__locals21.thingDef)
+											{
+												_003C_003Ec__DisplayClass17_1 CS_0024_003C_003E8__locals19 = new _003C_003Ec__DisplayClass17_1
+												{
+													CS_0024_003C_003E8__locals1 = CS_0024_003C_003E8__locals21,
+													tdStyle = thingDefStyle
+												};
+												list.Add(new FloatMenuOption(relevantStyleCategory.LabelCap, delegate
+												{
+													CS_0024_003C_003E8__locals19.CS_0024_003C_003E8__locals1._003C_003E4__this.ChangeStyleOfAllSelected(CS_0024_003C_003E8__locals19.CS_0024_003C_003E8__locals1._003C_003E4__this.def.entityDefToBuild, CS_0024_003C_003E8__locals19.tdStyle.StyleDef);
+												}, Widgets.GetIconFor(CS_0024_003C_003E8__locals21.thingDef, CS_0024_003C_003E8__locals21._003C_003E4__this.Stuff, CS_0024_003C_003E8__locals19.tdStyle.StyleDef, null), CS_0024_003C_003E8__locals21.stuffColor));
+												break;
+											}
+										}
+									}
+									if (list.Any())
+									{
+										Find.WindowStack.Add(new FloatMenu(list));
+									}
+								}
+							};
+							if (!CS_0024_003C_003E8__locals21.thingDef.RelevantStyleCategories.Any())
+							{
+								command_Action.Disable("ChangeStyleDisabledNoCategories".Translate());
+							}
+							_003C_003E2__current = command_Action;
+							_003C_003E1__state = 3;
+							return true;
+						}
+					}
+					goto IL_023a;
+					IL_0287:
+					if (_003C_003E7__wrap2.MoveNext())
+					{
+						Command current4 = _003C_003E7__wrap2.Current;
+						_003C_003E2__current = current4;
+						_003C_003E1__state = 4;
+						return true;
+					}
+					_003C_003Em__Finally2();
+					_003C_003E7__wrap2 = null;
+					break;
+					IL_023a:
+					_003C_003E7__wrap2 = BuildRelatedCommandUtility.RelatedBuildCommands(blueprint_Build.def.entityDefToBuild).GetEnumerator();
+					_003C_003E1__state = -4;
+					goto IL_0287;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap2 != null)
+			{
+				_003C_003E7__wrap2.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CGetGizmos_003Ed__17 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CGetGizmos_003Ed__17(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	public ThingDef stuffToUse;
+
+	public ThingStyleDef selectedStyleDef;
+
+	public bool styleOverridden;
+
+	public ColorInt? glowerColorOverride;
+
+	private static readonly CachedTexture ChangeStyleTex = new CachedTexture("UI/Gizmos/ChangeStyle");
+
+	public override string Label
+	{
+		get
+		{
+			string text = def.entityDefToBuild.label;
+			if (base.StyleSourcePrecept != null)
+			{
+				text = base.StyleSourcePrecept.TransformThingLabel(text);
+			}
+			if (stuffToUse != null)
+			{
+				return "ThingMadeOfStuffLabel".Translate(stuffToUse.LabelAsStuff, text) + "BlueprintLabelExtra".Translate();
+			}
+			return text + "BlueprintLabelExtra".Translate();
+		}
+	}
+
+	protected override float WorkTotal => def.entityDefToBuild.GetStatValueAbstract(StatDefOf.WorkToBuild, stuffToUse);
+
+	public ThingDef BuildDef => def.entityDefToBuild as ThingDef;
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Defs.Look(ref stuffToUse, "stuffToUse");
+		Scribe_Defs.Look(ref selectedStyleDef, "selectedStyleDef");
+		Scribe_Values.Look(ref styleOverridden, "styleOverridden", defaultValue: false);
+		Scribe_Values.Look(ref glowerColorOverride, "glowerColorOverride", null);
+	}
+
+	public override ThingStyleDef EntityToBuildStyle()
+	{
+		return selectedStyleDef ?? StyleDef;
+	}
+
+	public override BuildableDef EntityToBuild()
+	{
+		return def.entityDefToBuild;
+	}
+
+	public override ThingDef EntityToBuildStuff()
+	{
+		return stuffToUse;
+	}
+
+	public override List<ThingDefCountClass> TotalMaterialCost()
+	{
+		return def.entityDefToBuild.CostListAdjusted(stuffToUse);
+	}
+
+	protected override Thing MakeSolidThing(out bool shouldSelect)
+	{
+		Frame frame = (Frame)ThingMaker.MakeThing(def.entityDefToBuild.frameDef, stuffToUse);
+		frame.StyleSourcePrecept = base.StyleSourcePrecept;
+		frame.StyleDef = StyleDef;
+		frame.glowerColorOverride = glowerColorOverride;
+		shouldSelect = false;
+		base.Map.enrouteManager.SendReservations(this, frame);
+		return frame;
+	}
+
+	[IteratorStateMachine(typeof(_003CGetGizmos_003Ed__17))]
+	public override IEnumerable<Gizmo> GetGizmos()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetGizmos_003Ed__17(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	private void ChangeStyleOfAllSelected(BuildableDef buildable, ThingStyleDef styleDef)
+	{
+		foreach (object selectedObject in Find.Selector.SelectedObjects)
+		{
+			if (selectedObject is Blueprint_Build blueprint_Build && blueprint_Build.def.entityDefToBuild == buildable)
+			{
+				blueprint_Build.StyleDef = styleDef;
+				blueprint_Build.styleOverridden = true;
+				blueprint_Build.DirtyMapMesh(blueprint_Build.Map);
+			}
+		}
+	}
+
+	public override void DeSpawn(DestroyMode mode = DestroyMode.Vanish)
+	{
+		Building edifice = base.Position.GetEdifice(base.Map);
+		if ((edifice == null || edifice.def.building?.supportsWallAttachments != true) && (mode == DestroyMode.Cancel || (mode != 0 && !def.IsBlueprint)))
+		{
+			foreach (Thing attachedBuilding in GenConstruct.GetAttachedBuildings(this))
+			{
+				attachedBuilding.DeSpawn(mode);
+			}
+		}
+		base.DeSpawn(mode);
+	}
+
+	public override string GetInspectString()
+	{
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.Append(base.GetInspectString());
+		if (stringBuilder.Length > 0)
+		{
+			stringBuilder.AppendLine();
+		}
+		stringBuilder.AppendLine("ContainedResources".Translate() + ":");
+		bool flag = true;
+		foreach (ThingDefCountClass item in TotalMaterialCost())
+		{
+			if (!flag)
 			{
 				stringBuilder.AppendLine();
 			}
-			stringBuilder.AppendLine("ContainedResources".Translate() + ":");
-			bool flag = true;
-			foreach (ThingDefCountClass thingDefCountClass in this.TotalMaterialCost())
-			{
-				if (!flag)
-				{
-					stringBuilder.AppendLine();
-				}
-				stringBuilder.Append(thingDefCountClass.thingDef.LabelCap + ": 0 / " + thingDefCountClass.count.ToString());
-				flag = false;
-			}
-			ThingStyleDef styleDef = this.StyleDef;
-			if (((styleDef != null) ? styleDef.Category : null) != null && base.StyleSourcePrecept == null)
-			{
-				stringBuilder.AppendInNewLine("Style".Translate() + ": " + this.StyleDef.Category.LabelCap);
-			}
-			return stringBuilder.ToString().Trim();
+			stringBuilder.Append(string.Concat(item.thingDef.LabelCap + ": 0 / ", item.count.ToString()));
+			flag = false;
 		}
-
-		// Token: 0x04009AA3 RID: 39587
-		public ThingDef stuffToUse;
-
-		// Token: 0x04009AA4 RID: 39588
-		public ThingStyleDef selectedStyleDef;
-
-		// Token: 0x04009AA5 RID: 39589
-		public bool styleOverridden;
-
-		// Token: 0x04009AA6 RID: 39590
-		public ColorInt? glowerColorOverride;
-
-		// Token: 0x04009AA7 RID: 39591
-		private static readonly CachedTexture ChangeStyleTex = new CachedTexture("UI/Gizmos/ChangeStyle");
+		if (StyleDef?.Category != null && base.StyleSourcePrecept == null)
+		{
+			stringBuilder.AppendInNewLine("Style".Translate() + ": " + StyleDef.Category.LabelCap);
+		}
+		return stringBuilder.ToString().Trim();
 	}
 }

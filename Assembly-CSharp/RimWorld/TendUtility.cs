@@ -1,219 +1,183 @@
-﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
 
-namespace RimWorld
+namespace RimWorld;
+
+public static class TendUtility
 {
-	// Token: 0x020011CC RID: 4556
-	public static class TendUtility
+	public const float NoMedicinePotency = 0.3f;
+
+	public const float NoMedicineQualityMax = 0.7f;
+
+	public const float NoDoctorTendQuality = 0.75f;
+
+	public const float SelfTendQualityFactor = 0.7f;
+
+	private const float ChanceToDevelopBondRelationOnTended = 0.004f;
+
+	private static List<Hediff> tmpHediffsToTend = new List<Hediff>();
+
+	private static List<Hediff> tmpHediffs = new List<Hediff>();
+
+	private static List<Pair<Hediff, float>> tmpHediffsWithTendPriority = new List<Pair<Hediff, float>>();
+
+	public static void DoTend(Pawn doctor, Pawn patient, Medicine medicine)
 	{
-		// Token: 0x06006F64 RID: 28516 RVA: 0x0022AB14 File Offset: 0x00228D14
-		public static void DoTend(Pawn doctor, Pawn patient, Medicine medicine)
+		if (!patient.health.HasHediffsNeedingTend())
 		{
-			if (!patient.health.HasHediffsNeedingTend(false))
+			return;
+		}
+		if (medicine != null && medicine.Destroyed)
+		{
+			Log.Warning("Tried to use destroyed medicine.");
+			medicine = null;
+		}
+		float quality = CalculateBaseTendQuality(doctor, patient, medicine?.def);
+		GetOptimalHediffsToTendWithSingleTreatment(patient, medicine != null, tmpHediffsToTend);
+		float maxQuality = medicine?.def.GetStatValueAbstract(StatDefOf.MedicalQualityMax) ?? 0.7f;
+		for (int i = 0; i < tmpHediffsToTend.Count; i++)
+		{
+			tmpHediffsToTend[i].Tended(quality, maxQuality, i);
+		}
+		if (doctor != null && doctor.Faction == Faction.OfPlayer && patient.Faction != doctor.Faction && !patient.IsPrisoner && patient.Faction != null)
+		{
+			patient.mindState.timesGuestTendedToByPlayer++;
+		}
+		if (doctor != null && doctor.RaceProps.Humanlike && patient.RaceProps.Animal && patient.RaceProps.playerCanChangeMaster && RelationsUtility.TryDevelopBondRelation(doctor, patient, 0.004f) && doctor.Faction != null && doctor.Faction != patient.Faction)
+		{
+			InteractionWorker_RecruitAttempt.DoRecruit(doctor, patient, useAudiovisualEffects: false);
+		}
+		patient.records.Increment(RecordDefOf.TimesTendedTo);
+		doctor?.records.Increment(RecordDefOf.TimesTendedOther);
+		if (doctor == patient && !doctor.Dead)
+		{
+			doctor.mindState.Notify_SelfTended();
+		}
+		if (medicine != null)
+		{
+			if ((patient.Spawned || (doctor != null && doctor.Spawned)) && medicine.GetStatValue(StatDefOf.MedicalPotency) > ThingDefOf.MedicineIndustrial.GetStatValueAbstract(StatDefOf.MedicalPotency))
 			{
-				return;
+				SoundDefOf.TechMedicineUsed.PlayOneShot(new TargetInfo(patient.Position, patient.Map));
 			}
-			if (medicine != null && medicine.Destroyed)
+			if (medicine.stackCount > 1)
 			{
-				Log.Warning("Tried to use destroyed medicine.");
-				medicine = null;
+				medicine.stackCount--;
 			}
-			float quality = TendUtility.CalculateBaseTendQuality(doctor, patient, (medicine != null) ? medicine.def : null);
-			TendUtility.GetOptimalHediffsToTendWithSingleTreatment(patient, medicine != null, TendUtility.tmpHediffsToTend, null);
-			float maxQuality = (medicine != null) ? medicine.def.GetStatValueAbstract(StatDefOf.MedicalQualityMax, null) : 0.7f;
-			for (int i = 0; i < TendUtility.tmpHediffsToTend.Count; i++)
+			else if (!medicine.Destroyed)
 			{
-				TendUtility.tmpHediffsToTend[i].Tended(quality, maxQuality, i);
-			}
-			if (doctor != null && doctor.Faction == Faction.OfPlayer && patient.Faction != doctor.Faction && !patient.IsPrisoner && patient.Faction != null)
-			{
-				patient.mindState.timesGuestTendedToByPlayer++;
-			}
-			if (doctor != null && doctor.RaceProps.Humanlike && patient.RaceProps.Animal && patient.RaceProps.playerCanChangeMaster && RelationsUtility.TryDevelopBondRelation(doctor, patient, 0.004f) && doctor.Faction != null && doctor.Faction != patient.Faction)
-			{
-				InteractionWorker_RecruitAttempt.DoRecruit(doctor, patient, false);
-			}
-			patient.records.Increment(RecordDefOf.TimesTendedTo);
-			if (doctor != null)
-			{
-				doctor.records.Increment(RecordDefOf.TimesTendedOther);
-			}
-			if (doctor == patient && !doctor.Dead)
-			{
-				doctor.mindState.Notify_SelfTended();
-			}
-			if (medicine != null)
-			{
-				if ((patient.Spawned || (doctor != null && doctor.Spawned)) && medicine.GetStatValue(StatDefOf.MedicalPotency, true, -1) > ThingDefOf.MedicineIndustrial.GetStatValueAbstract(StatDefOf.MedicalPotency, null))
-				{
-					SoundDefOf.TechMedicineUsed.PlayOneShot(new TargetInfo(patient.Position, patient.Map, false));
-				}
-				if (medicine.stackCount > 1)
-				{
-					medicine.stackCount--;
-				}
-				else if (!medicine.Destroyed)
-				{
-					medicine.Destroy(DestroyMode.Vanish);
-				}
-			}
-			if (ModsConfig.IdeologyActive && ((doctor != null) ? doctor.Ideo : null) != null)
-			{
-				Precept_Role role = doctor.Ideo.GetRole(doctor);
-				if (((role != null) ? role.def.roleEffects : null) != null)
-				{
-					foreach (RoleEffect roleEffect in role.def.roleEffects)
-					{
-						roleEffect.Notify_Tended(doctor, patient);
-					}
-				}
-			}
-			if (doctor != null && doctor.Faction == Faction.OfPlayer && doctor != patient)
-			{
-				QuestUtility.SendQuestTargetSignals(patient.questTags, "PlayerTended", patient.Named("SUBJECT"));
+				medicine.Destroy();
 			}
 		}
-
-		// Token: 0x06006F65 RID: 28517 RVA: 0x0022ADB0 File Offset: 0x00228FB0
-		public static float CalculateBaseTendQuality(Pawn doctor, Pawn patient, ThingDef medicine)
+		if (ModsConfig.IdeologyActive && doctor?.Ideo != null)
 		{
-			float medicinePotency = (medicine != null) ? medicine.GetStatValueAbstract(StatDefOf.MedicalPotency, null) : 0.3f;
-			float medicineQualityMax = (medicine != null) ? medicine.GetStatValueAbstract(StatDefOf.MedicalQualityMax, null) : 0.7f;
-			return TendUtility.CalculateBaseTendQuality(doctor, patient, medicinePotency, medicineQualityMax);
-		}
-
-		// Token: 0x06006F66 RID: 28518 RVA: 0x0022ADF4 File Offset: 0x00228FF4
-		public static float CalculateBaseTendQuality(Pawn doctor, Pawn patient, float medicinePotency, float medicineQualityMax)
-		{
-			float num;
-			if (doctor != null)
+			Precept_Role role = doctor.Ideo.GetRole(doctor);
+			if (role?.def.roleEffects != null)
 			{
-				num = doctor.GetStatValue(StatDefOf.MedicalTendQuality, true, -1);
-			}
-			else
-			{
-				num = 0.75f;
-			}
-			num *= medicinePotency;
-			Building_Bed building_Bed = (patient != null) ? patient.CurrentBed() : null;
-			if (building_Bed != null)
-			{
-				num += building_Bed.GetStatValue(StatDefOf.MedicalTendQualityOffset, true, -1);
-			}
-			if (doctor == patient && doctor != null)
-			{
-				num *= 0.7f;
-			}
-			return Mathf.Clamp(num, 0f, medicineQualityMax);
-		}
-
-		// Token: 0x06006F67 RID: 28519 RVA: 0x0022AE5C File Offset: 0x0022905C
-		public static void GetOptimalHediffsToTendWithSingleTreatment(Pawn patient, bool usingMedicine, List<Hediff> outHediffsToTend, List<Hediff> tendableHediffsInTendPriorityOrder = null)
-		{
-			outHediffsToTend.Clear();
-			TendUtility.tmpHediffs.Clear();
-			if (tendableHediffsInTendPriorityOrder != null)
-			{
-				TendUtility.tmpHediffs.AddRange(tendableHediffsInTendPriorityOrder);
-			}
-			else
-			{
-				List<Hediff> hediffs = patient.health.hediffSet.hediffs;
-				for (int i = 0; i < hediffs.Count; i++)
+				foreach (RoleEffect roleEffect in role.def.roleEffects)
 				{
-					if (hediffs[i].TendableNow(false))
-					{
-						TendUtility.tmpHediffs.Add(hediffs[i]);
-					}
-				}
-				TendUtility.SortByTendPriority(TendUtility.tmpHediffs);
-			}
-			if (!TendUtility.tmpHediffs.Any<Hediff>())
-			{
-				return;
-			}
-			Hediff hediff = TendUtility.tmpHediffs[0];
-			outHediffsToTend.Add(hediff);
-			HediffCompProperties_TendDuration hediffCompProperties_TendDuration = hediff.def.CompProps<HediffCompProperties_TendDuration>();
-			if (hediffCompProperties_TendDuration != null && hediffCompProperties_TendDuration.tendAllAtOnce)
-			{
-				for (int j = 0; j < TendUtility.tmpHediffs.Count; j++)
-				{
-					if (TendUtility.tmpHediffs[j] != hediff && TendUtility.tmpHediffs[j].def == hediff.def)
-					{
-						outHediffsToTend.Add(TendUtility.tmpHediffs[j]);
-					}
+					roleEffect.Notify_Tended(doctor, patient);
 				}
 			}
-			else if (hediff is Hediff_Injury && usingMedicine)
-			{
-				float num = hediff.Severity;
-				for (int k = 0; k < TendUtility.tmpHediffs.Count; k++)
-				{
-					if (TendUtility.tmpHediffs[k] != hediff)
-					{
-						Hediff_Injury hediff_Injury = TendUtility.tmpHediffs[k] as Hediff_Injury;
-						if (hediff_Injury != null)
-						{
-							float severity = hediff_Injury.Severity;
-							if (num + severity <= 20f)
-							{
-								num += severity;
-								outHediffsToTend.Add(hediff_Injury);
-							}
-						}
-					}
-				}
-			}
-			TendUtility.tmpHediffs.Clear();
 		}
-
-		// Token: 0x06006F68 RID: 28520 RVA: 0x0022AFE4 File Offset: 0x002291E4
-		public static void SortByTendPriority(List<Hediff> hediffs)
+		if (doctor != null && doctor.Faction == Faction.OfPlayer && doctor != patient)
 		{
-			if (hediffs.Count <= 1)
-			{
-				return;
-			}
-			TendUtility.tmpHediffsWithTendPriority.Clear();
+			QuestUtility.SendQuestTargetSignals(patient.questTags, "PlayerTended", patient.Named("SUBJECT"));
+		}
+	}
+
+	public static float CalculateBaseTendQuality(Pawn doctor, Pawn patient, ThingDef medicine)
+	{
+		float medicinePotency = medicine?.GetStatValueAbstract(StatDefOf.MedicalPotency) ?? 0.3f;
+		float medicineQualityMax = medicine?.GetStatValueAbstract(StatDefOf.MedicalQualityMax) ?? 0.7f;
+		return CalculateBaseTendQuality(doctor, patient, medicinePotency, medicineQualityMax);
+	}
+
+	public static float CalculateBaseTendQuality(Pawn doctor, Pawn patient, float medicinePotency, float medicineQualityMax)
+	{
+		float num = doctor?.GetStatValue(StatDefOf.MedicalTendQuality) ?? 0.75f;
+		num *= medicinePotency;
+		Building_Bed building_Bed = patient?.CurrentBed();
+		if (building_Bed != null)
+		{
+			num += building_Bed.GetStatValue(StatDefOf.MedicalTendQualityOffset);
+		}
+		if (doctor == patient && doctor != null)
+		{
+			num *= 0.7f;
+		}
+		return Mathf.Clamp(num, 0f, medicineQualityMax);
+	}
+
+	public static void GetOptimalHediffsToTendWithSingleTreatment(Pawn patient, bool usingMedicine, List<Hediff> outHediffsToTend, List<Hediff> tendableHediffsInTendPriorityOrder = null)
+	{
+		outHediffsToTend.Clear();
+		tmpHediffs.Clear();
+		if (tendableHediffsInTendPriorityOrder != null)
+		{
+			tmpHediffs.AddRange(tendableHediffsInTendPriorityOrder);
+		}
+		else
+		{
+			List<Hediff> hediffs = patient.health.hediffSet.hediffs;
 			for (int i = 0; i < hediffs.Count; i++)
 			{
-				TendUtility.tmpHediffsWithTendPriority.Add(new Pair<Hediff, float>(hediffs[i], hediffs[i].TendPriority));
+				if (hediffs[i].TendableNow())
+				{
+					tmpHediffs.Add(hediffs[i]);
+				}
 			}
-			TendUtility.tmpHediffsWithTendPriority.SortByDescending((Pair<Hediff, float> x) => x.Second, (Pair<Hediff, float> x) => x.First.Severity);
-			hediffs.Clear();
-			for (int j = 0; j < TendUtility.tmpHediffsWithTendPriority.Count; j++)
-			{
-				hediffs.Add(TendUtility.tmpHediffsWithTendPriority[j].First);
-			}
-			TendUtility.tmpHediffsWithTendPriority.Clear();
+			SortByTendPriority(tmpHediffs);
 		}
+		if (!tmpHediffs.Any())
+		{
+			return;
+		}
+		Hediff hediff = tmpHediffs[0];
+		outHediffsToTend.Add(hediff);
+		HediffCompProperties_TendDuration hediffCompProperties_TendDuration = hediff.def.CompProps<HediffCompProperties_TendDuration>();
+		if (hediffCompProperties_TendDuration != null && hediffCompProperties_TendDuration.tendAllAtOnce)
+		{
+			for (int j = 0; j < tmpHediffs.Count; j++)
+			{
+				if (tmpHediffs[j] != hediff && tmpHediffs[j].def == hediff.def)
+				{
+					outHediffsToTend.Add(tmpHediffs[j]);
+				}
+			}
+		}
+		else if (hediff is Hediff_Injury && usingMedicine)
+		{
+			float num = hediff.Severity;
+			for (int k = 0; k < tmpHediffs.Count; k++)
+			{
+				if (tmpHediffs[k] != hediff && tmpHediffs[k] is Hediff_Injury { Severity: var severity } hediff_Injury && num + severity <= 20f)
+				{
+					num += severity;
+					outHediffsToTend.Add(hediff_Injury);
+				}
+			}
+		}
+		tmpHediffs.Clear();
+	}
 
-		// Token: 0x04004DA7 RID: 19879
-		public const float NoMedicinePotency = 0.3f;
-
-		// Token: 0x04004DA8 RID: 19880
-		public const float NoMedicineQualityMax = 0.7f;
-
-		// Token: 0x04004DA9 RID: 19881
-		public const float NoDoctorTendQuality = 0.75f;
-
-		// Token: 0x04004DAA RID: 19882
-		public const float SelfTendQualityFactor = 0.7f;
-
-		// Token: 0x04004DAB RID: 19883
-		private const float ChanceToDevelopBondRelationOnTended = 0.004f;
-
-		// Token: 0x04004DAC RID: 19884
-		private static List<Hediff> tmpHediffsToTend = new List<Hediff>();
-
-		// Token: 0x04004DAD RID: 19885
-		private static List<Hediff> tmpHediffs = new List<Hediff>();
-
-		// Token: 0x04004DAE RID: 19886
-		private static List<Pair<Hediff, float>> tmpHediffsWithTendPriority = new List<Pair<Hediff, float>>();
+	public static void SortByTendPriority(List<Hediff> hediffs)
+	{
+		if (hediffs.Count > 1)
+		{
+			tmpHediffsWithTendPriority.Clear();
+			for (int i = 0; i < hediffs.Count; i++)
+			{
+				tmpHediffsWithTendPriority.Add(new Pair<Hediff, float>(hediffs[i], hediffs[i].TendPriority));
+			}
+			tmpHediffsWithTendPriority.SortByDescending((Pair<Hediff, float> x) => x.Second, (Pair<Hediff, float> x) => x.First.Severity);
+			hediffs.Clear();
+			for (int j = 0; j < tmpHediffsWithTendPriority.Count; j++)
+			{
+				hediffs.Add(tmpHediffsWithTendPriority[j].First);
+			}
+			tmpHediffsWithTendPriority.Clear();
+		}
 	}
 }

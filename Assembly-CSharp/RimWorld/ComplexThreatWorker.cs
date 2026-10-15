@@ -1,200 +1,165 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public abstract class ComplexThreatWorker
 {
-	// Token: 0x02001EA8 RID: 7848
-	public abstract class ComplexThreatWorker
+	public ComplexThreatDef def;
+
+	private const string ThreatTriggerSignal = "ThreatTriggerSignal";
+
+	public void Resolve(ComplexResolveParams parms, ref float threatPointsUsed, List<Thing> outSpawnedThings, StringBuilder debug = null)
 	{
-		// Token: 0x0600AE17 RID: 44567 RVA: 0x0031A59C File Offset: 0x0031879C
-		public void Resolve(ComplexResolveParams parms, ref float threatPointsUsed, List<Thing> outSpawnedThings, StringBuilder debug = null)
+		try
 		{
-			try
+			bool flag = false;
+			if (parms.triggerSignal.NullOrEmpty())
 			{
-				bool flag = false;
-				if (parms.triggerSignal.NullOrEmpty())
+				if (TryGetThingTriggerSignal(parms, out var triggerSignal))
 				{
-					string triggerSignal;
-					if (this.TryGetThingTriggerSignal(parms, out triggerSignal))
-					{
-						parms.triggerSignal = triggerSignal;
-						if (debug != null)
-						{
-							debug.AppendLine("--> Threat trigger: Existing thing");
-						}
-					}
-					else if (this.def.fallbackToRoomEnteredTrigger)
-					{
-						parms.triggerSignal = ComplexUtility.SpawnRoomEnteredTrigger(parms.room, parms.map);
-						flag = true;
-						if (debug != null)
-						{
-							debug.AppendLine("--> Threat trigger: Room entry");
-						}
-					}
-					else
-					{
-						if (!this.def.allowPassive)
-						{
-							Log.Warning("Unable to generate a trigger for threat " + this.def.defName);
-							return;
-						}
-						parms.triggerSignal = this.def.defName + Find.UniqueIDsManager.GetNextSignalTagID().ToString();
-						parms.passive = true;
-						if (debug != null)
-						{
-							debug.AppendLine("--> Threat trigger: None. Passive threat.");
-						}
-					}
+					parms.triggerSignal = triggerSignal;
+					debug?.AppendLine("--> Threat trigger: Existing thing");
 				}
-				float points = parms.points;
-				if (!parms.passive && Rand.Chance(this.def.delayChance))
+				else if (def.fallbackToRoomEnteredTrigger)
 				{
-					int num = this.def.delayTickOptions.RandomElement<int>();
-					parms.points = points;
-					parms.delayTicks = new int?(num);
-					float num2 = this.def.threatFactorOverDelayTicksCurve.Evaluate((float)num);
-					parms.points *= num2;
-					if (debug != null)
-					{
-						debug.AppendLine(string.Format("--> Threat delay ticks: {0}", num));
-						debug.AppendLine(string.Format("--> Threat delay points factor: {0}", num2));
-						debug.AppendLine(string.Format("--> Threat points post delay factor: {0}", parms.points));
-					}
+					parms.triggerSignal = ComplexUtility.SpawnRoomEnteredTrigger(parms.room, parms.map);
+					flag = true;
+					debug?.AppendLine("--> Threat trigger: Room entry");
 				}
-				if (!parms.passive && !flag && Rand.Chance(this.def.spawnInOtherRoomChance))
+				else
 				{
-					ComplexResolveParams parms2 = parms;
-					foreach (LayoutRoom room in parms.allRooms.InRandomOrder(null))
+					if (!def.allowPassive)
 					{
-						parms2.room = room;
-						if (this.def.Worker.CanResolve(parms2))
-						{
-							parms.room = room;
-							break;
-						}
+						Log.Warning("Unable to generate a trigger for threat " + def.defName);
+						return;
 					}
+					parms.triggerSignal = def.defName + Find.UniqueIDsManager.GetNextSignalTagID();
+					parms.passive = true;
+					debug?.AppendLine("--> Threat trigger: None. Passive threat.");
 				}
-				float num3 = 0f;
-				this.ResolveInt(parms, ref num3, outSpawnedThings);
-				if (parms.passive)
-				{
-					num3 *= this.def.postSpawnPassiveThreatFactor;
-					if (debug != null)
-					{
-						debug.AppendLine(string.Format("--> Threat post spawn passive factor: {0}", this.def.postSpawnPassiveThreatFactor));
-					}
-				}
+			}
+			float points = parms.points;
+			if (!parms.passive && Rand.Chance(def.delayChance))
+			{
+				int num = def.delayTickOptions.RandomElement();
+				parms.points = points;
+				parms.delayTicks = num;
+				float num2 = def.threatFactorOverDelayTicksCurve.Evaluate(num);
+				parms.points *= num2;
 				if (debug != null)
 				{
-					debug.AppendLine(string.Format("--> Total points used: {0}", num3));
+					debug.AppendLine($"--> Threat delay ticks: {num}");
+					debug.AppendLine($"--> Threat delay points factor: {num2}");
+					debug.AppendLine($"--> Threat points post delay factor: {parms.points}");
 				}
-				threatPointsUsed += num3;
 			}
-			catch (Exception ex)
+			if (!parms.passive && !flag && Rand.Chance(def.spawnInOtherRoomChance))
 			{
-				string str = "Exception resolving ";
-				string name = base.GetType().Name;
-				string str2 = ": ";
-				Exception ex2 = ex;
-				Log.Error(str + name + str2 + ((ex2 != null) ? ex2.ToString() : null));
-			}
-		}
-
-		// Token: 0x0600AE18 RID: 44568 RVA: 0x0031A8B0 File Offset: 0x00318AB0
-		private bool TryGetThingTriggerSignal(ComplexResolveParams threatParams, out string triggerSignal)
-		{
-			if (threatParams.room == null || threatParams.spawnedThings.NullOrEmpty<Thing>())
-			{
-				triggerSignal = null;
-				return false;
-			}
-			LayoutRoom room = threatParams.room;
-			for (int i = 0; i < threatParams.spawnedThings.Count; i++)
-			{
-				Thing thing = threatParams.spawnedThings[i];
-				if (room.rects.Any((CellRect r) => r.Contains(thing.Position)))
+				ComplexResolveParams parms2 = parms;
+				foreach (LayoutRoom item in parms.allRooms.InRandomOrder())
 				{
-					CompHackable compHackable = thing.TryGetComp<CompHackable>();
-					if (compHackable != null && !compHackable.IsHacked)
+					LayoutRoom room = (parms2.room = item);
+					if (def.Worker.CanResolve(parms2))
 					{
-						if (Rand.Bool)
-						{
-							if (compHackable.hackingStartedSignal == null)
-							{
-								compHackable.hackingStartedSignal = "ThreatTriggerSignal" + Find.UniqueIDsManager.GetNextSignalTagID().ToString();
-							}
-							triggerSignal = compHackable.hackingStartedSignal;
-						}
-						else
-						{
-							if (compHackable.hackingCompletedSignal == null)
-							{
-								compHackable.hackingCompletedSignal = "ThreatTriggerSignal" + Find.UniqueIDsManager.GetNextSignalTagID().ToString();
-							}
-							triggerSignal = compHackable.hackingCompletedSignal;
-						}
-						return true;
-					}
-					Building_Casket building_Casket = thing as Building_Casket;
-					if (building_Casket != null && building_Casket.CanOpen)
-					{
-						if (building_Casket.openedSignal.NullOrEmpty())
-						{
-							building_Casket.openedSignal = "ThreatTriggerSignal" + Find.UniqueIDsManager.GetNextSignalTagID().ToString();
-						}
-						triggerSignal = building_Casket.openedSignal;
-						return true;
+						parms.room = room;
+						break;
 					}
 				}
 			}
+			float threatPointsUsed2 = 0f;
+			ResolveInt(parms, ref threatPointsUsed2, outSpawnedThings);
+			if (parms.passive)
+			{
+				threatPointsUsed2 *= def.postSpawnPassiveThreatFactor;
+				debug?.AppendLine($"--> Threat post spawn passive factor: {def.postSpawnPassiveThreatFactor}");
+			}
+			debug?.AppendLine($"--> Total points used: {threatPointsUsed2}");
+			threatPointsUsed += threatPointsUsed2;
+		}
+		catch (Exception ex)
+		{
+			Log.Error("Exception resolving " + GetType().Name + ": " + ex);
+		}
+	}
+
+	private bool TryGetThingTriggerSignal(ComplexResolveParams threatParams, out string triggerSignal)
+	{
+		if (threatParams.room == null || threatParams.spawnedThings.NullOrEmpty())
+		{
 			triggerSignal = null;
 			return false;
 		}
-
-		// Token: 0x0600AE19 RID: 44569 RVA: 0x0031AA14 File Offset: 0x00318C14
-		public bool CanResolve(ComplexResolveParams parms)
+		LayoutRoom room = threatParams.room;
+		for (int i = 0; i < threatParams.spawnedThings.Count; i++)
 		{
-			bool result;
-			try
+			Thing thing = threatParams.spawnedThings[i];
+			if (!room.rects.Any((CellRect r) => r.Contains(thing.Position)))
 			{
-				result = this.CanResolveInt(parms);
+				continue;
 			}
-			catch (Exception ex)
+			CompHackable compHackable = thing.TryGetComp<CompHackable>();
+			if (compHackable != null && !compHackable.IsHacked)
 			{
-				string str = "Exception test running ";
-				string name = base.GetType().Name;
-				string str2 = ": ";
-				Exception ex2 = ex;
-				Log.Error(str + name + str2 + ((ex2 != null) ? ex2.ToString() : null));
-				result = false;
-			}
-			return result;
-		}
-
-		// Token: 0x0600AE1A RID: 44570
-		protected abstract void ResolveInt(ComplexResolveParams parms, ref float threatPointsUsed, List<Thing> spawnedThings);
-
-		// Token: 0x0600AE1B RID: 44571 RVA: 0x0031AA70 File Offset: 0x00318C70
-		protected virtual bool CanResolveInt(ComplexResolveParams parms)
-		{
-			if ((float)this.def.minPoints <= parms.points)
-			{
-				LayoutRoom room = parms.room;
-				if (((room != null) ? room.requiredDef : null) == null)
+				if (Rand.Bool)
 				{
-					return this.def.allowPassive || this.def.fallbackToRoomEnteredTrigger || !parms.triggerSignal.NullOrEmpty();
+					if (compHackable.hackingStartedSignal == null)
+					{
+						compHackable.hackingStartedSignal = "ThreatTriggerSignal" + Find.UniqueIDsManager.GetNextSignalTagID();
+					}
+					triggerSignal = compHackable.hackingStartedSignal;
 				}
+				else
+				{
+					if (compHackable.hackingCompletedSignal == null)
+					{
+						compHackable.hackingCompletedSignal = "ThreatTriggerSignal" + Find.UniqueIDsManager.GetNextSignalTagID();
+					}
+					triggerSignal = compHackable.hackingCompletedSignal;
+				}
+				return true;
 			}
+			if (thing is Building_Casket { CanOpen: not false } building_Casket)
+			{
+				if (building_Casket.openedSignal.NullOrEmpty())
+				{
+					building_Casket.openedSignal = "ThreatTriggerSignal" + Find.UniqueIDsManager.GetNextSignalTagID();
+				}
+				triggerSignal = building_Casket.openedSignal;
+				return true;
+			}
+		}
+		triggerSignal = null;
+		return false;
+	}
+
+	public bool CanResolve(ComplexResolveParams parms)
+	{
+		try
+		{
+			return CanResolveInt(parms);
+		}
+		catch (Exception ex)
+		{
+			Log.Error("Exception test running " + GetType().Name + ": " + ex);
 			return false;
 		}
+	}
 
-		// Token: 0x040077C6 RID: 30662
-		public ComplexThreatDef def;
+	protected abstract void ResolveInt(ComplexResolveParams parms, ref float threatPointsUsed, List<Thing> spawnedThings);
 
-		// Token: 0x040077C7 RID: 30663
-		private const string ThreatTriggerSignal = "ThreatTriggerSignal";
+	protected virtual bool CanResolveInt(ComplexResolveParams parms)
+	{
+		if ((float)def.minPoints <= parms.points && parms.room?.requiredDef == null)
+		{
+			if (!def.allowPassive && !def.fallbackToRoomEnteredTrigger)
+			{
+				return !parms.triggerSignal.NullOrEmpty();
+			}
+			return true;
+		}
+		return false;
 	}
 }

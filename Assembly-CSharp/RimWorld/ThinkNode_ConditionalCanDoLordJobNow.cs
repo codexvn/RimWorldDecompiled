@@ -1,16 +1,32 @@
-﻿using System;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class ThinkNode_ConditionalCanDoLordJobNow : ThinkNode_Conditional
 {
-	// Token: 0x020017B4 RID: 6068
-	public class ThinkNode_ConditionalCanDoLordJobNow : ThinkNode_Conditional
+	protected override bool Satisfied(Pawn pawn)
 	{
-		// Token: 0x06008DB6 RID: 36278 RVA: 0x002A1173 File Offset: 0x0029F373
-		protected override bool Satisfied(Pawn pawn)
+		if (pawn.IsBurning())
 		{
-			return !pawn.IsBurning() && !pawn.InMentalState && !pawn.Drafted && pawn.Awake() && (!pawn.Downed || pawn.DutyActiveWhenDown(false));
+			return false;
 		}
+		if (pawn.InMentalState)
+		{
+			return false;
+		}
+		if (pawn.Drafted)
+		{
+			return false;
+		}
+		if (!pawn.Awake())
+		{
+			return false;
+		}
+		if (pawn.Downed && !pawn.DutyActiveWhenDown())
+		{
+			return false;
+		}
+		return true;
 	}
 }

@@ -1,67 +1,95 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
-namespace Verse
+namespace Verse;
+
+public static class GenDefDatabase
 {
-	// Token: 0x020001EE RID: 494
-	public static class GenDefDatabase
+	[CompilerGenerated]
+	private sealed class _003CAllDefTypesWithDatabases_003Ed__7 : IEnumerable<Type>, IEnumerable, IEnumerator<Type>, IEnumerator, IDisposable
 	{
-		// Token: 0x06000D49 RID: 3401 RVA: 0x0003EF9C File Offset: 0x0003D19C
-		public static Def GetDef(Type defType, string defName, bool errorOnFail = true)
+		private int _003C_003E1__state;
+
+		private Type _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private List<Type>.Enumerator _003C_003E7__wrap1;
+
+		Type IEnumerator<Type>.Current
 		{
-			object obj = GenDefDatabase.cachedGetNamedLock;
-			Func<string, bool, Def> func;
-			lock (obj)
+			[DebuggerHidden]
+			get
 			{
-				if (!GenDefDatabase.cachedGetNamed.TryGetValue(defType, out func))
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CAllDefTypesWithDatabases_003Ed__7(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
 				{
-					MethodInfo method = GenGeneric.MethodOnGenericType(typeof(DefDatabase<>), defType, "GetNamed");
-					func = (Func<string, bool, Def>)Delegate.CreateDelegate(typeof(Func<string, bool, Def>), method);
-					GenDefDatabase.cachedGetNamed.Add(defType, func);
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
 				}
 			}
-			return func(defName, errorOnFail);
+			_003C_003E7__wrap1 = default(List<Type>.Enumerator);
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x06000D4A RID: 3402 RVA: 0x0003F024 File Offset: 0x0003D224
-		public static Def GetDefSilentFail(Type type, string targetDefName, bool specialCaseForSoundDefs = true)
+		private bool MoveNext()
 		{
-			if (specialCaseForSoundDefs && type == typeof(SoundDef))
+			try
 			{
-				return SoundDef.Named(targetDefName);
-			}
-			object obj = GenDefDatabase.cachedGetNamedSilentFailLock;
-			Func<string, Def> func;
-			lock (obj)
-			{
-				if (!GenDefDatabase.cachedGetNamedSilentFail.TryGetValue(type, out func))
+				switch (_003C_003E1__state)
 				{
-					MethodInfo method = GenGeneric.MethodOnGenericType(typeof(DefDatabase<>), type, "GetNamedSilentFail");
-					func = (Func<string, Def>)Delegate.CreateDelegate(typeof(Func<string, Def>), method);
-					GenDefDatabase.cachedGetNamedSilentFail.Add(type, func);
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = typeof(Def).AllSubclasses().GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 1:
+					_003C_003E1__state = -3;
+					break;
 				}
-			}
-			return func(targetDefName);
-		}
-
-		// Token: 0x06000D4B RID: 3403 RVA: 0x0003F0C8 File Offset: 0x0003D2C8
-		public static IEnumerable<Def> GetAllDefsInDatabaseForDef(Type defType)
-		{
-			return ((IEnumerable)GenGeneric.GetStaticPropertyOnGenericType(typeof(DefDatabase<>), defType, "AllDefs")).Cast<Def>();
-		}
-
-		// Token: 0x06000D4C RID: 3404 RVA: 0x0003F0E9 File Offset: 0x0003D2E9
-		public static IEnumerable<Type> AllDefTypesWithDatabases()
-		{
-			foreach (Type type in typeof(Def).AllSubclasses())
-			{
-				if (!type.IsAbstract && !(type == typeof(Def)))
+				while (_003C_003E7__wrap1.MoveNext())
 				{
+					Type current = _003C_003E7__wrap1.Current;
+					if (current.IsAbstract || current == typeof(Def))
+					{
+						continue;
+					}
 					bool flag = false;
-					Type baseType = type.BaseType;
+					Type baseType = current.BaseType;
 					while (baseType != null && baseType != typeof(Def))
 					{
 						if (!baseType.IsAbstract)
@@ -73,31 +101,115 @@ namespace Verse
 					}
 					if (!flag)
 					{
-						yield return type;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
 					}
 				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = default(List<Type>.Enumerator);
+				return false;
 			}
-			List<Type>.Enumerator enumerator = default(List<Type>.Enumerator);
-			yield break;
-			yield break;
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
 		}
 
-		// Token: 0x06000D4D RID: 3405 RVA: 0x0003F0F2 File Offset: 0x0003D2F2
-		public static IEnumerable<T> DefsToGoInDatabase<T>(ModContentPack mod)
+		bool IEnumerator.MoveNext()
 		{
-			return mod.AllDefs.OfType<T>();
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x040007B0 RID: 1968
-		private static readonly Dictionary<Type, Func<string, bool, Def>> cachedGetNamed = new Dictionary<Type, Func<string, bool, Def>>();
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap1/*cast due to .constrained prefix*/).Dispose();
+		}
 
-		// Token: 0x040007B1 RID: 1969
-		private static readonly object cachedGetNamedLock = new object();
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x040007B2 RID: 1970
-		private static readonly Dictionary<Type, Func<string, Def>> cachedGetNamedSilentFail = new Dictionary<Type, Func<string, Def>>();
+		[DebuggerHidden]
+		IEnumerator<Type> IEnumerable<Type>.GetEnumerator()
+		{
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				return this;
+			}
+			return new _003CAllDefTypesWithDatabases_003Ed__7(0);
+		}
 
-		// Token: 0x040007B3 RID: 1971
-		private static readonly object cachedGetNamedSilentFailLock = new object();
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Type>)this).GetEnumerator();
+		}
+	}
+
+	private static readonly Dictionary<Type, Func<string, bool, Def>> cachedGetNamed = new Dictionary<Type, Func<string, bool, Def>>();
+
+	private static readonly object cachedGetNamedLock = new object();
+
+	private static readonly Dictionary<Type, Func<string, Def>> cachedGetNamedSilentFail = new Dictionary<Type, Func<string, Def>>();
+
+	private static readonly object cachedGetNamedSilentFailLock = new object();
+
+	public static Def GetDef(Type defType, string defName, bool errorOnFail = true)
+	{
+		Func<string, bool, Def> value;
+		lock (cachedGetNamedLock)
+		{
+			if (!cachedGetNamed.TryGetValue(defType, out value))
+			{
+				MethodInfo method = GenGeneric.MethodOnGenericType(typeof(DefDatabase<>), defType, "GetNamed");
+				value = (Func<string, bool, Def>)Delegate.CreateDelegate(typeof(Func<string, bool, Def>), method);
+				cachedGetNamed.Add(defType, value);
+			}
+		}
+		return value(defName, errorOnFail);
+	}
+
+	public static Def GetDefSilentFail(Type type, string targetDefName, bool specialCaseForSoundDefs = true)
+	{
+		if (specialCaseForSoundDefs && type == typeof(SoundDef))
+		{
+			return SoundDef.Named(targetDefName);
+		}
+		Func<string, Def> value;
+		lock (cachedGetNamedSilentFailLock)
+		{
+			if (!cachedGetNamedSilentFail.TryGetValue(type, out value))
+			{
+				MethodInfo method = GenGeneric.MethodOnGenericType(typeof(DefDatabase<>), type, "GetNamedSilentFail");
+				value = (Func<string, Def>)Delegate.CreateDelegate(typeof(Func<string, Def>), method);
+				cachedGetNamedSilentFail.Add(type, value);
+			}
+		}
+		return value(targetDefName);
+	}
+
+	public static IEnumerable<Def> GetAllDefsInDatabaseForDef(Type defType)
+	{
+		return ((IEnumerable)GenGeneric.GetStaticPropertyOnGenericType(typeof(DefDatabase<>), defType, "AllDefs")).Cast<Def>();
+	}
+
+	[IteratorStateMachine(typeof(_003CAllDefTypesWithDatabases_003Ed__7))]
+	public static IEnumerable<Type> AllDefTypesWithDatabases()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CAllDefTypesWithDatabases_003Ed__7(-2);
+	}
+
+	public static IEnumerable<T> DefsToGoInDatabase<T>(ModContentPack mod)
+	{
+		return mod.AllDefs.OfType<T>();
 	}
 }

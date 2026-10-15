@@ -1,46 +1,144 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
-namespace Verse
+namespace Verse;
+
+public class HediffCompProperties_MessageAfterTicks : HediffCompProperties
 {
-	// Token: 0x020006E0 RID: 1760
-	public class HediffCompProperties_MessageAfterTicks : HediffCompProperties
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__7 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x06002B8F RID: 11151 RVA: 0x000E38AC File Offset: 0x000E1AAC
-		public HediffCompProperties_MessageAfterTicks()
-		{
-			this.compClass = typeof(HediffComp_MessageAfterTicks);
-		}
+		private int _003C_003E1__state;
 
-		// Token: 0x06002B90 RID: 11152 RVA: 0x000E38C4 File Offset: 0x000E1AC4
-		public override IEnumerable<string> ConfigErrors(HediffDef parentDef)
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public HediffCompProperties_MessageAfterTicks _003C_003E4__this;
+
+		string IEnumerator<string>.Current
 		{
-			if (this.ticks <= 0)
+			[DebuggerHidden]
+			get
 			{
-				yield return "ticks must be a positive value";
+				return _003C_003E2__current;
 			}
-			yield break;
 		}
 
-		// Token: 0x0400230F RID: 8975
-		public int ticks;
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
 
-		// Token: 0x04002310 RID: 8976
-		public MessageTypeDef messageType;
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__7(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
 
-		// Token: 0x04002311 RID: 8977
-		public LetterDef letterType;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
 
-		// Token: 0x04002312 RID: 8978
-		[MustTranslate]
-		public string message;
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			HediffCompProperties_MessageAfterTicks hediffCompProperties_MessageAfterTicks = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (hediffCompProperties_MessageAfterTicks.ticks <= 0)
+				{
+					_003C_003E2__current = "ticks must be a positive value";
+					_003C_003E1__state = 1;
+					return true;
+				}
+				break;
+			case 1:
+				_003C_003E1__state = -1;
+				break;
+			}
+			return false;
+		}
 
-		// Token: 0x04002313 RID: 8979
-		[MustTranslate]
-		public string letterLabel;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x04002314 RID: 8980
-		[MustTranslate]
-		public string letterText;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__7 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__7(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	public int ticks;
+
+	public MessageTypeDef messageType;
+
+	public LetterDef letterType;
+
+	[MustTranslate]
+	public string message;
+
+	[MustTranslate]
+	public string letterLabel;
+
+	[MustTranslate]
+	public string letterText;
+
+	public HediffCompProperties_MessageAfterTicks()
+	{
+		compClass = typeof(HediffComp_MessageAfterTicks);
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__7))]
+	public override IEnumerable<string> ConfigErrors(HediffDef parentDef)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__7(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

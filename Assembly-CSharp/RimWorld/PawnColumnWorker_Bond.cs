@@ -1,82 +1,67 @@
-﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+[StaticConstructorOnStartup]
+public class PawnColumnWorker_Bond : PawnColumnWorker_Icon
 {
-	// Token: 0x02003439 RID: 13369
-	[StaticConstructorOnStartup]
-	public class PawnColumnWorker_Bond : PawnColumnWorker_Icon
+	private static readonly Texture2D BondIcon = ContentFinder<Texture2D>.Get("UI/Icons/Animal/Bond");
+
+	private static readonly Texture2D BondBrokenIcon = ContentFinder<Texture2D>.Get("UI/Icons/Animal/BondBroken");
+
+	protected override Texture2D GetIconFor(Pawn pawn)
 	{
-		// Token: 0x06012CF3 RID: 77043 RVA: 0x00594DD0 File Offset: 0x00592FD0
-		protected override Texture2D GetIconFor(Pawn pawn)
+		IEnumerable<Pawn> allColonistBondsFor = TrainableUtility.GetAllColonistBondsFor(pawn);
+		if (!allColonistBondsFor.Any())
 		{
-			IEnumerable<Pawn> allColonistBondsFor = TrainableUtility.GetAllColonistBondsFor(pawn);
-			if (!allColonistBondsFor.Any<Pawn>())
-			{
-				return null;
-			}
-			if (allColonistBondsFor.Any((Pawn bond) => bond == pawn.playerSettings.Master))
-			{
-				return PawnColumnWorker_Bond.BondIcon;
-			}
-			return PawnColumnWorker_Bond.BondBrokenIcon;
+			return null;
 		}
-
-		// Token: 0x06012CF4 RID: 77044 RVA: 0x00594E1F File Offset: 0x0059301F
-		protected override string GetIconTip(Pawn pawn)
+		if (allColonistBondsFor.Any((Pawn bond) => bond == pawn.playerSettings.Master))
 		{
-			return TrainableUtility.GetIconTooltipText(pawn);
+			return BondIcon;
 		}
+		return BondBrokenIcon;
+	}
 
-		// Token: 0x06012CF5 RID: 77045 RVA: 0x00594E28 File Offset: 0x00593028
-		public override int Compare(Pawn a, Pawn b)
-		{
-			return this.GetCompareValueFor(a).CompareTo(this.GetCompareValueFor(b));
-		}
+	protected override string GetIconTip(Pawn pawn)
+	{
+		return TrainableUtility.GetIconTooltipText(pawn);
+	}
 
-		// Token: 0x06012CF6 RID: 77046 RVA: 0x00594E4C File Offset: 0x0059304C
-		public int GetCompareValueFor(Pawn a)
+	public override int Compare(Pawn a, Pawn b)
+	{
+		return GetCompareValueFor(a).CompareTo(GetCompareValueFor(b));
+	}
+
+	public int GetCompareValueFor(Pawn a)
+	{
+		Texture2D iconFor = GetIconFor(a);
+		if (iconFor == null)
 		{
-			Texture2D iconFor = this.GetIconFor(a);
-			if (iconFor == null)
-			{
-				return 0;
-			}
-			if (iconFor == PawnColumnWorker_Bond.BondBrokenIcon)
-			{
-				return 1;
-			}
-			if (iconFor == PawnColumnWorker_Bond.BondIcon)
-			{
-				return 2;
-			}
-			Log.ErrorOnce("Unknown bond type when trying to sort", 20536378);
 			return 0;
 		}
-
-		// Token: 0x06012CF7 RID: 77047 RVA: 0x00594E9C File Offset: 0x0059309C
-		protected override void PaintedIcon(Pawn pawn)
+		if (iconFor == BondBrokenIcon)
 		{
-			if (this.GetIconFor(pawn) != PawnColumnWorker_Bond.BondBrokenIcon)
-			{
-				return;
-			}
-			if (!pawn.training.HasLearned(TrainableDefOf.Obedience))
-			{
-				return;
-			}
-			pawn.playerSettings.Master = (from master in TrainableUtility.GetAllColonistBondsFor(pawn)
-			where TrainableUtility.CanBeMaster(master, pawn, true)
-			select master).FirstOrDefault<Pawn>();
+			return 1;
 		}
+		if (iconFor == BondIcon)
+		{
+			return 2;
+		}
+		Log.ErrorOnce("Unknown bond type when trying to sort", 20536378);
+		return 0;
+	}
 
-		// Token: 0x0400C350 RID: 50000
-		private static readonly Texture2D BondIcon = ContentFinder<Texture2D>.Get("UI/Icons/Animal/Bond", true);
-
-		// Token: 0x0400C351 RID: 50001
-		private static readonly Texture2D BondBrokenIcon = ContentFinder<Texture2D>.Get("UI/Icons/Animal/BondBroken", true);
+	protected override void PaintedIcon(Pawn pawn)
+	{
+		if (!(GetIconFor(pawn) != BondBrokenIcon) && pawn.training.HasLearned(TrainableDefOf.Obedience))
+		{
+			pawn.playerSettings.Master = (from master in TrainableUtility.GetAllColonistBondsFor(pawn)
+				where TrainableUtility.CanBeMaster(master, pawn)
+				select master).FirstOrDefault();
+		}
 	}
 }

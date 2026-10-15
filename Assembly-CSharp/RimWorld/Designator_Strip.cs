@@ -1,105 +1,204 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Designator_Strip : Designator
 {
-	// Token: 0x020030C5 RID: 12485
-	public class Designator_Strip : Designator
+	[CompilerGenerated]
+	private sealed class _003CStrippablesInCell_003Ed__9 : IEnumerable<Thing>, IEnumerable, IEnumerator<Thing>, IEnumerator, IDisposable
 	{
-		// Token: 0x17002D69 RID: 11625
-		// (get) Token: 0x06011875 RID: 71797 RVA: 0x00508A96 File Offset: 0x00506C96
-		protected override DesignationDef Designation
+		private int _003C_003E1__state;
+
+		private Thing _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private IntVec3 c;
+
+		public IntVec3 _003C_003E3__c;
+
+		public Designator_Strip _003C_003E4__this;
+
+		private List<Thing> _003CthingList_003E5__2;
+
+		private int _003Ci_003E5__3;
+
+		Thing IEnumerator<Thing>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return DesignationDefOf.Strip;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002D6A RID: 11626
-		// (get) Token: 0x06011876 RID: 71798 RVA: 0x00501A2B File Offset: 0x004FFC2B
-		public override DrawStyleCategoryDef DrawStyleCategory
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return DrawStyleCategoryDefOf.FilledRectangle;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06011877 RID: 71799 RVA: 0x00508AA0 File Offset: 0x00506CA0
-		public Designator_Strip()
+		[DebuggerHidden]
+		public _003CStrippablesInCell_003Ed__9(int _003C_003E1__state)
 		{
-			this.defaultLabel = "DesignatorStrip".Translate();
-			this.defaultDesc = "DesignatorStripDesc".Translate();
-			this.icon = ContentFinder<Texture2D>.Get("UI/Designators/Strip", true);
-			this.soundDragSustain = SoundDefOf.Designate_DragStandard;
-			this.soundDragChanged = SoundDefOf.Designate_DragStandard_Changed;
-			this.useMouseIcon = true;
-			this.soundSucceeded = SoundDefOf.Designate_Claim;
-			this.hotKey = KeyBindingDefOf.Misc11;
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x06011878 RID: 71800 RVA: 0x00508B21 File Offset: 0x00506D21
-		public override AcceptanceReport CanDesignateCell(IntVec3 c)
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			if (!c.InBounds(base.Map))
-			{
-				return false;
-			}
-			if (!this.StrippablesInCell(c).Any<Thing>())
-			{
-				return "MessageMustDesignateStrippable".Translate();
-			}
-			return true;
+			_003CthingList_003E5__2 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x06011879 RID: 71801 RVA: 0x00508B5C File Offset: 0x00506D5C
-		public override void DesignateSingleCell(IntVec3 c)
+		private bool MoveNext()
 		{
-			foreach (Thing t in this.StrippablesInCell(c))
+			int num = _003C_003E1__state;
+			Designator_Strip designator_Strip = _003C_003E4__this;
+			if (num != 0)
 			{
-				this.DesignateThing(t);
-			}
-		}
-
-		// Token: 0x0601187A RID: 71802 RVA: 0x00508BAC File Offset: 0x00506DAC
-		public override AcceptanceReport CanDesignateThing(Thing t)
-		{
-			if (base.Map.designationManager.DesignationOn(t, this.Designation) != null)
-			{
-				return false;
-			}
-			return StrippableUtility.CanBeStrippedByColony(t);
-		}
-
-		// Token: 0x0601187B RID: 71803 RVA: 0x00508BD9 File Offset: 0x00506DD9
-		public override void DesignateThing(Thing t)
-		{
-			base.Map.designationManager.AddDesignation(new Designation(t, this.Designation, null));
-			StrippableUtility.CheckSendStrippingImpactsGoodwillMessage(t);
-		}
-
-		// Token: 0x0601187C RID: 71804 RVA: 0x00508C03 File Offset: 0x00506E03
-		private IEnumerable<Thing> StrippablesInCell(IntVec3 c)
-		{
-			if (c.Fogged(base.Map))
-			{
-				yield break;
-			}
-			List<Thing> thingList = c.GetThingList(base.Map);
-			int num;
-			for (int i = 0; i < thingList.Count; i = num + 1)
-			{
-				if (this.CanDesignateThing(thingList[i]).Accepted)
+				if (num != 1)
 				{
-					yield return thingList[i];
+					return false;
 				}
-				num = i;
+				_003C_003E1__state = -1;
+				goto IL_009b;
 			}
-			yield break;
+			_003C_003E1__state = -1;
+			if (c.Fogged(designator_Strip.Map))
+			{
+				return false;
+			}
+			_003CthingList_003E5__2 = c.GetThingList(designator_Strip.Map);
+			_003Ci_003E5__3 = 0;
+			goto IL_00ab;
+			IL_00ab:
+			if (_003Ci_003E5__3 < _003CthingList_003E5__2.Count)
+			{
+				if (designator_Strip.CanDesignateThing(_003CthingList_003E5__2[_003Ci_003E5__3]).Accepted)
+				{
+					_003C_003E2__current = _003CthingList_003E5__2[_003Ci_003E5__3];
+					_003C_003E1__state = 1;
+					return true;
+				}
+				goto IL_009b;
+			}
+			return false;
+			IL_009b:
+			_003Ci_003E5__3++;
+			goto IL_00ab;
 		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Thing> IEnumerable<Thing>.GetEnumerator()
+		{
+			_003CStrippablesInCell_003Ed__9 _003CStrippablesInCell_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CStrippablesInCell_003Ed__ = this;
+			}
+			else
+			{
+				_003CStrippablesInCell_003Ed__ = new _003CStrippablesInCell_003Ed__9(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CStrippablesInCell_003Ed__.c = _003C_003E3__c;
+			return _003CStrippablesInCell_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Thing>)this).GetEnumerator();
+		}
+	}
+
+	protected override DesignationDef Designation => DesignationDefOf.Strip;
+
+	public override DrawStyleCategoryDef DrawStyleCategory => DrawStyleCategoryDefOf.FilledRectangle;
+
+	public Designator_Strip()
+	{
+		defaultLabel = "DesignatorStrip".Translate();
+		defaultDesc = "DesignatorStripDesc".Translate();
+		icon = ContentFinder<Texture2D>.Get("UI/Designators/Strip");
+		soundDragSustain = SoundDefOf.Designate_DragStandard;
+		soundDragChanged = SoundDefOf.Designate_DragStandard_Changed;
+		useMouseIcon = true;
+		soundSucceeded = SoundDefOf.Designate_Claim;
+		hotKey = KeyBindingDefOf.Misc11;
+	}
+
+	public override AcceptanceReport CanDesignateCell(IntVec3 c)
+	{
+		if (!c.InBounds(base.Map))
+		{
+			return false;
+		}
+		if (!StrippablesInCell(c).Any())
+		{
+			return "MessageMustDesignateStrippable".Translate();
+		}
+		return true;
+	}
+
+	public override void DesignateSingleCell(IntVec3 c)
+	{
+		foreach (Thing item in StrippablesInCell(c))
+		{
+			DesignateThing(item);
+		}
+	}
+
+	public override AcceptanceReport CanDesignateThing(Thing t)
+	{
+		if (base.Map.designationManager.DesignationOn(t, Designation) != null)
+		{
+			return false;
+		}
+		return StrippableUtility.CanBeStrippedByColony(t);
+	}
+
+	public override void DesignateThing(Thing t)
+	{
+		base.Map.designationManager.AddDesignation(new Designation(t, Designation));
+		StrippableUtility.CheckSendStrippingImpactsGoodwillMessage(t);
+	}
+
+	[IteratorStateMachine(typeof(_003CStrippablesInCell_003Ed__9))]
+	private IEnumerable<Thing> StrippablesInCell(IntVec3 c)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CStrippablesInCell_003Ed__9(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__c = c
+		};
 	}
 }

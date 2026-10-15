@@ -1,101 +1,70 @@
-﻿using System;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class MusicManagerEntry
 {
-	// Token: 0x02002901 RID: 10497
-	public class MusicManagerEntry
+	private AudioSource audioSource;
+
+	private int silentTillFrame = -1;
+
+	private float silenceMultiplier = 1f;
+
+	private const string SourceGameObjectName = "MusicAudioSourceDummy";
+
+	private const float SilenceMultiplierChangePerSecond = 1.75f;
+
+	private float CurVolume => Prefs.VolumeMusic * SongDefOf.EntrySong.volume;
+
+	public float CurSanitizedVolume => AudioSourceUtility.GetSanitizedVolume(CurVolume, "MusicManagerEntry");
+
+	public void MusicManagerEntryUpdate()
 	{
-		// Token: 0x170022D5 RID: 8917
-		// (get) Token: 0x0600E587 RID: 58759 RVA: 0x0042F773 File Offset: 0x0042D973
-		private float CurVolume
+		if (audioSource == null || !audioSource.isPlaying)
 		{
-			get
-			{
-				return Prefs.VolumeMusic * SongDefOf.EntrySong.volume;
-			}
+			StartPlaying();
 		}
-
-		// Token: 0x170022D6 RID: 8918
-		// (get) Token: 0x0600E588 RID: 58760 RVA: 0x0042F785 File Offset: 0x0042D985
-		public float CurSanitizedVolume
+		float curSanitizedVolume = CurSanitizedVolume;
+		if (Time.frameCount > silentTillFrame)
 		{
-			get
-			{
-				return AudioSourceUtility.GetSanitizedVolume(this.CurVolume, "MusicManagerEntry");
-			}
+			silenceMultiplier = Mathf.Clamp01(silenceMultiplier + 1.75f * Time.deltaTime);
 		}
-
-		// Token: 0x0600E589 RID: 58761 RVA: 0x0042F798 File Offset: 0x0042D998
-		public void MusicManagerEntryUpdate()
+		else if (Time.frameCount <= silentTillFrame)
 		{
-			if (this.audioSource == null || !this.audioSource.isPlaying)
-			{
-				this.StartPlaying();
-			}
-			float curSanitizedVolume = this.CurSanitizedVolume;
-			if (Time.frameCount > this.silentTillFrame)
-			{
-				this.silenceMultiplier = Mathf.Clamp01(this.silenceMultiplier + 1.75f * Time.deltaTime);
-			}
-			else if (Time.frameCount <= this.silentTillFrame)
-			{
-				this.silenceMultiplier = Mathf.Clamp01(this.silenceMultiplier - 1.75f * Time.deltaTime);
-			}
-			this.audioSource.volume = curSanitizedVolume * this.silenceMultiplier;
+			silenceMultiplier = Mathf.Clamp01(silenceMultiplier - 1.75f * Time.deltaTime);
 		}
+		audioSource.volume = curSanitizedVolume * silenceMultiplier;
+	}
 
-		// Token: 0x0600E58A RID: 58762 RVA: 0x0042F838 File Offset: 0x0042DA38
-		private void StartPlaying()
+	private void StartPlaying()
+	{
+		if (audioSource != null && !audioSource.isPlaying)
 		{
-			if (this.audioSource != null && !this.audioSource.isPlaying)
-			{
-				this.audioSource.Play();
-				return;
-			}
-			if (GameObject.Find("MusicAudioSourceDummy") != null)
-			{
-				Log.Error("MusicManagerEntry did StartPlaying but there is already a music source GameObject.");
-				return;
-			}
-			this.audioSource = new GameObject("MusicAudioSourceDummy")
-			{
-				transform = 
-				{
-					parent = Camera.main.transform
-				}
-			}.AddComponent<AudioSource>();
-			this.audioSource.bypassEffects = true;
-			this.audioSource.bypassListenerEffects = true;
-			this.audioSource.bypassReverbZones = true;
-			this.audioSource.priority = 0;
-			this.audioSource.clip = SongDefOf.EntrySong.clip;
-			this.audioSource.volume = this.CurSanitizedVolume;
-			this.audioSource.loop = true;
-			this.audioSource.spatialBlend = 0f;
-			this.audioSource.Play();
+			audioSource.Play();
+			return;
 		}
-
-		// Token: 0x0600E58B RID: 58763 RVA: 0x0042F932 File Offset: 0x0042DB32
-		public void MaintainSilence()
+		if (GameObject.Find("MusicAudioSourceDummy") != null)
 		{
-			this.silentTillFrame = Time.frameCount + 1;
+			Log.Error("MusicManagerEntry did StartPlaying but there is already a music source GameObject.");
+			return;
 		}
+		GameObject gameObject = new GameObject("MusicAudioSourceDummy");
+		gameObject.transform.parent = Camera.main.transform;
+		audioSource = gameObject.AddComponent<AudioSource>();
+		audioSource.bypassEffects = true;
+		audioSource.bypassListenerEffects = true;
+		audioSource.bypassReverbZones = true;
+		audioSource.priority = 0;
+		audioSource.clip = SongDefOf.EntrySong.clip;
+		audioSource.volume = CurSanitizedVolume;
+		audioSource.loop = true;
+		audioSource.spatialBlend = 0f;
+		audioSource.Play();
+	}
 
-		// Token: 0x0400998B RID: 39307
-		private AudioSource audioSource;
-
-		// Token: 0x0400998C RID: 39308
-		private int silentTillFrame = -1;
-
-		// Token: 0x0400998D RID: 39309
-		private float silenceMultiplier = 1f;
-
-		// Token: 0x0400998E RID: 39310
-		private const string SourceGameObjectName = "MusicAudioSourceDummy";
-
-		// Token: 0x0400998F RID: 39311
-		private const float SilenceMultiplierChangePerSecond = 1.75f;
+	public void MaintainSilence()
+	{
+		silentTillFrame = Time.frameCount + 1;
 	}
 }

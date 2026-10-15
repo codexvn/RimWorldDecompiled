@@ -1,216 +1,152 @@
-﻿using System;
+using System;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class StorageSettings : IExposable
 {
-	// Token: 0x020029C1 RID: 10689
-	public class StorageSettings : IExposable
+	private static StorageSettings cachedEverStorableFixedSettings;
+
+	public IStoreSettingsParent owner;
+
+	public ThingFilter filter;
+
+	[LoadAlias("priority")]
+	private StoragePriority priorityInt = StoragePriority.Normal;
+
+	private IHaulDestination HaulDestinationOwner => owner as IHaulDestination;
+
+	private IHaulSource HaulSourceOwner => owner as IHaulSource;
+
+	private ISlotGroupParent SlotGroupParentOwner => owner as ISlotGroupParent;
+
+	public StoragePriority Priority
 	{
-		// Token: 0x17002450 RID: 9296
-		// (get) Token: 0x0600EBA3 RID: 60323 RVA: 0x00447247 File Offset: 0x00445447
-		private IHaulDestination HaulDestinationOwner
+		get
 		{
-			get
-			{
-				return this.owner as IHaulDestination;
-			}
+			return priorityInt;
 		}
-
-		// Token: 0x17002451 RID: 9297
-		// (get) Token: 0x0600EBA4 RID: 60324 RVA: 0x00447254 File Offset: 0x00445454
-		private IHaulSource HaulSourceOwner
+		set
 		{
-			get
-			{
-				return this.owner as IHaulSource;
-			}
-		}
-
-		// Token: 0x17002452 RID: 9298
-		// (get) Token: 0x0600EBA5 RID: 60325 RVA: 0x00447261 File Offset: 0x00445461
-		private ISlotGroupParent SlotGroupParentOwner
-		{
-			get
-			{
-				return this.owner as ISlotGroupParent;
-			}
-		}
-
-		// Token: 0x17002453 RID: 9299
-		// (get) Token: 0x0600EBA6 RID: 60326 RVA: 0x0044726E File Offset: 0x0044546E
-		// (set) Token: 0x0600EBA7 RID: 60327 RVA: 0x00447278 File Offset: 0x00445478
-		public StoragePriority Priority
-		{
-			get
-			{
-				return this.priorityInt;
-			}
-			set
-			{
-				this.priorityInt = value;
-				if (Current.ProgramState != ProgramState.Playing)
-				{
-					return;
-				}
-				StorageGroup storageGroup = this.owner as StorageGroup;
-				if (storageGroup == null)
-				{
-					if (this.HaulDestinationOwner != null && this.HaulDestinationOwner.Map != null)
-					{
-						this.HaulDestinationOwner.Map.haulDestinationManager.Notify_HaulDestinationChangedPriority();
-					}
-					if (this.HaulSourceOwner != null && this.HaulSourceOwner.Map != null)
-					{
-						this.HaulSourceOwner.Map.haulDestinationManager.Notify_HaulDestinationChangedPriority();
-						this.HaulSourceOwner.Map.listerHaulables.RecalculateAllInHaulSource(this.HaulSourceOwner);
-					}
-					if (this.SlotGroupParentOwner != null && this.SlotGroupParentOwner.Map != null)
-					{
-						this.SlotGroupParentOwner.Map.listerHaulables.RecalcAllInCells(this.SlotGroupParentOwner.AllSlotCells());
-					}
-					return;
-				}
-				Map map = storageGroup.Map;
-				if (map != null)
-				{
-					map.haulDestinationManager.Notify_HaulDestinationChangedPriority();
-				}
-				Map map2 = storageGroup.Map;
-				if (map2 != null)
-				{
-					map2.listerHaulables.RecalcAllInCells(storageGroup.CellsList);
-				}
-				Map map3 = storageGroup.Map;
-				if (map3 == null)
-				{
-					return;
-				}
-				map3.listerHaulables.RecalculateAllInHaulSources(storageGroup.HaulSourcesList);
-			}
-		}
-
-		// Token: 0x0600EBA8 RID: 60328 RVA: 0x00447396 File Offset: 0x00445596
-		public StorageSettings()
-		{
-			this.filter = new ThingFilter(new Action(this.TryNotifyChanged));
-		}
-
-		// Token: 0x0600EBA9 RID: 60329 RVA: 0x004473BC File Offset: 0x004455BC
-		public StorageSettings(IStoreSettingsParent owner) : this()
-		{
-			this.owner = owner;
-			if (owner != null)
-			{
-				StorageSettings parentStoreSettings = owner.GetParentStoreSettings();
-				if (parentStoreSettings != null)
-				{
-					this.priorityInt = parentStoreSettings.priorityInt;
-				}
-			}
-		}
-
-		// Token: 0x0600EBAA RID: 60330 RVA: 0x004473EF File Offset: 0x004455EF
-		public void ExposeData()
-		{
-			Scribe_Values.Look<StoragePriority>(ref this.priorityInt, "priority", StoragePriority.Unstored, false);
-			Scribe_Deep.Look<ThingFilter>(ref this.filter, "filter", new object[]
-			{
-				new Action(this.TryNotifyChanged)
-			});
-		}
-
-		// Token: 0x0600EBAB RID: 60331 RVA: 0x00447428 File Offset: 0x00445628
-		public void SetFromPreset(StorageSettingsPreset preset)
-		{
-			this.filter.SetFromPreset(preset);
-			this.TryNotifyChanged();
-		}
-
-		// Token: 0x0600EBAC RID: 60332 RVA: 0x0044743C File Offset: 0x0044563C
-		public void CopyFrom(StorageSettings other)
-		{
-			this.Priority = other.Priority;
-			this.filter.CopyAllowancesFrom(other.filter);
-			this.TryNotifyChanged();
-		}
-
-		// Token: 0x0600EBAD RID: 60333 RVA: 0x00447464 File Offset: 0x00445664
-		public bool AllowedToAccept(Thing t)
-		{
-			if (!this.filter.Allows(t))
-			{
-				return false;
-			}
-			if (this.owner != null)
-			{
-				StorageSettings parentStoreSettings = this.owner.GetParentStoreSettings();
-				if (parentStoreSettings != null && !parentStoreSettings.AllowedToAccept(t))
-				{
-					return false;
-				}
-			}
-			return true;
-		}
-
-		// Token: 0x0600EBAE RID: 60334 RVA: 0x004474A4 File Offset: 0x004456A4
-		public bool AllowedToAccept(ThingDef t)
-		{
-			if (!this.filter.Allows(t))
-			{
-				return false;
-			}
-			if (this.owner != null)
-			{
-				StorageSettings parentStoreSettings = this.owner.GetParentStoreSettings();
-				if (parentStoreSettings != null && !parentStoreSettings.AllowedToAccept(t))
-				{
-					return false;
-				}
-			}
-			return true;
-		}
-
-		// Token: 0x0600EBAF RID: 60335 RVA: 0x004474E4 File Offset: 0x004456E4
-		private void TryNotifyChanged()
-		{
-			IStoreSettingsParent storeSettingsParent = this.owner;
-			if (storeSettingsParent == null)
+			priorityInt = value;
+			if (Current.ProgramState != ProgramState.Playing)
 			{
 				return;
 			}
-			storeSettingsParent.Notify_SettingsChanged();
-		}
-
-		// Token: 0x0600EBB0 RID: 60336 RVA: 0x004474F6 File Offset: 0x004456F6
-		public static StorageSettings EverStorableFixedSettings()
-		{
-			if (StorageSettings.cachedEverStorableFixedSettings == null)
+			if (owner is StorageGroup storageGroup)
 			{
-				StorageSettings.cachedEverStorableFixedSettings = new StorageSettings(null)
-				{
-					filter = ThingFilter.CreateOnlyEverStorableThingFilter()
-				};
+				storageGroup.Map?.haulDestinationManager.Notify_HaulDestinationChangedPriority();
+				storageGroup.Map?.listerHaulables.RecalcAllInCells(storageGroup.CellsList);
+				storageGroup.Map?.listerHaulables.RecalculateAllInHaulSources(storageGroup.HaulSourcesList);
+				return;
 			}
-			return StorageSettings.cachedEverStorableFixedSettings;
+			if (HaulDestinationOwner != null && HaulDestinationOwner.Map != null)
+			{
+				HaulDestinationOwner.Map.haulDestinationManager.Notify_HaulDestinationChangedPriority();
+			}
+			if (HaulSourceOwner != null && HaulSourceOwner.Map != null)
+			{
+				HaulSourceOwner.Map.haulDestinationManager.Notify_HaulDestinationChangedPriority();
+				HaulSourceOwner.Map.listerHaulables.RecalculateAllInHaulSource(HaulSourceOwner);
+			}
+			if (SlotGroupParentOwner != null && SlotGroupParentOwner.Map != null)
+			{
+				SlotGroupParentOwner.Map.listerHaulables.RecalcAllInCells(SlotGroupParentOwner.AllSlotCells());
+			}
 		}
+	}
 
-		// Token: 0x0600EBB1 RID: 60337 RVA: 0x0044751A File Offset: 0x0044571A
-		public static void ResetStaticData()
+	public StorageSettings()
+	{
+		filter = new ThingFilter(TryNotifyChanged);
+	}
+
+	public StorageSettings(IStoreSettingsParent owner)
+		: this()
+	{
+		this.owner = owner;
+		if (owner != null)
 		{
-			StorageSettings.cachedEverStorableFixedSettings = null;
+			StorageSettings parentStoreSettings = owner.GetParentStoreSettings();
+			if (parentStoreSettings != null)
+			{
+				priorityInt = parentStoreSettings.priorityInt;
+			}
 		}
+	}
 
-		// Token: 0x04009C62 RID: 40034
-		private static StorageSettings cachedEverStorableFixedSettings;
+	public void ExposeData()
+	{
+		Scribe_Values.Look(ref priorityInt, "priority", StoragePriority.Unstored);
+		Scribe_Deep.Look(ref filter, "filter", new Action(TryNotifyChanged));
+	}
 
-		// Token: 0x04009C63 RID: 40035
-		public IStoreSettingsParent owner;
+	public void SetFromPreset(StorageSettingsPreset preset)
+	{
+		filter.SetFromPreset(preset);
+		TryNotifyChanged();
+	}
 
-		// Token: 0x04009C64 RID: 40036
-		public ThingFilter filter;
+	public void CopyFrom(StorageSettings other)
+	{
+		Priority = other.Priority;
+		filter.CopyAllowancesFrom(other.filter);
+		TryNotifyChanged();
+	}
 
-		// Token: 0x04009C65 RID: 40037
-		[LoadAlias("priority")]
-		private StoragePriority priorityInt = StoragePriority.Normal;
+	public bool AllowedToAccept(Thing t)
+	{
+		if (!filter.Allows(t))
+		{
+			return false;
+		}
+		if (owner != null)
+		{
+			StorageSettings parentStoreSettings = owner.GetParentStoreSettings();
+			if (parentStoreSettings != null && !parentStoreSettings.AllowedToAccept(t))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public bool AllowedToAccept(ThingDef t)
+	{
+		if (!filter.Allows(t))
+		{
+			return false;
+		}
+		if (owner != null)
+		{
+			StorageSettings parentStoreSettings = owner.GetParentStoreSettings();
+			if (parentStoreSettings != null && !parentStoreSettings.AllowedToAccept(t))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private void TryNotifyChanged()
+	{
+		owner?.Notify_SettingsChanged();
+	}
+
+	public static StorageSettings EverStorableFixedSettings()
+	{
+		if (cachedEverStorableFixedSettings == null)
+		{
+			cachedEverStorableFixedSettings = new StorageSettings(null)
+			{
+				filter = ThingFilter.CreateOnlyEverStorableThingFilter()
+			};
+		}
+		return cachedEverStorableFixedSettings;
+	}
+
+	public static void ResetStaticData()
+	{
+		cachedEverStorableFixedSettings = null;
 	}
 }

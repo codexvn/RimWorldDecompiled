@@ -1,91 +1,66 @@
-﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public sealed class RelationshipRecords : IExposable
 {
-	// Token: 0x02001D15 RID: 7445
-	public sealed class RelationshipRecords : IExposable
+	private Dictionary<int, RelationshipRecord> records = new Dictionary<int, RelationshipRecord>();
+
+	private static readonly HashSet<int> toRemove = new HashSet<int>();
+
+	private List<int> tmpKeys;
+
+	private List<RelationshipRecord> tmpValues;
+
+	public IReadOnlyDictionary<int, RelationshipRecord> Records => records;
+
+	public RelationshipRecord GetOrCreateRecord(Pawn pawn)
 	{
-		// Token: 0x170019B2 RID: 6578
-		// (get) Token: 0x0600A682 RID: 42626 RVA: 0x002FA917 File Offset: 0x002F8B17
-		public IReadOnlyDictionary<int, RelationshipRecord> Records
+		if (records.TryGetValue(pawn.thingIDNumber, out var value))
 		{
-			get
+			return value;
+		}
+		return CreateRecord(pawn);
+	}
+
+	public RelationshipRecord CreateRecord(Pawn pawn)
+	{
+		RelationshipRecord relationshipRecord = new RelationshipRecord(pawn.thingIDNumber, pawn.gender, pawn.Name.ToStringShort);
+		records.Add(relationshipRecord.ID, relationshipRecord);
+		return relationshipRecord;
+	}
+
+	public RelationshipRecord GetRecord(int id)
+	{
+		return records[id];
+	}
+
+	public int CleanupUnusedRecords()
+	{
+		toRemove.Clear();
+		foreach (var (item, relationshipRecord2) in records)
+		{
+			if (relationshipRecord2.References.Count <= 1)
 			{
-				return this.records;
+				toRemove.Add(item);
 			}
 		}
-
-		// Token: 0x0600A683 RID: 42627 RVA: 0x002FA920 File Offset: 0x002F8B20
-		public RelationshipRecord GetOrCreateRecord(Pawn pawn)
+		foreach (int item2 in toRemove)
 		{
-			RelationshipRecord result;
-			if (this.records.TryGetValue(pawn.thingIDNumber, out result))
+			foreach (Pawn reference in records[item2].References)
 			{
-				return result;
+				reference.relations.RemoveRelation(records[item2]);
 			}
-			return this.CreateRecord(pawn);
+			records.Remove(item2);
 		}
+		int count = toRemove.Count;
+		toRemove.Clear();
+		return count;
+	}
 
-		// Token: 0x0600A684 RID: 42628 RVA: 0x002FA94C File Offset: 0x002F8B4C
-		public RelationshipRecord CreateRecord(Pawn pawn)
-		{
-			RelationshipRecord relationshipRecord = new RelationshipRecord(pawn.thingIDNumber, pawn.gender, pawn.Name.ToStringShort);
-			this.records.Add(relationshipRecord.ID, relationshipRecord);
-			return relationshipRecord;
-		}
-
-		// Token: 0x0600A685 RID: 42629 RVA: 0x002FA989 File Offset: 0x002F8B89
-		public RelationshipRecord GetRecord(int id)
-		{
-			return this.records[id];
-		}
-
-		// Token: 0x0600A686 RID: 42630 RVA: 0x002FA998 File Offset: 0x002F8B98
-		public int CleanupUnusedRecords()
-		{
-			RelationshipRecords.toRemove.Clear();
-			foreach (KeyValuePair<int, RelationshipRecord> keyValuePair in this.records)
-			{
-				int num;
-				RelationshipRecord relationshipRecord;
-				keyValuePair.Deconstruct(out num, out relationshipRecord);
-				int item = num;
-				if (relationshipRecord.References.Count <= 1)
-				{
-					RelationshipRecords.toRemove.Add(item);
-				}
-			}
-			foreach (int key in RelationshipRecords.toRemove)
-			{
-				foreach (Pawn pawn in this.records[key].References)
-				{
-					pawn.relations.RemoveRelation(this.records[key]);
-				}
-				this.records.Remove(key);
-			}
-			int count = RelationshipRecords.toRemove.Count;
-			RelationshipRecords.toRemove.Clear();
-			return count;
-		}
-
-		// Token: 0x0600A687 RID: 42631 RVA: 0x002FAAD0 File Offset: 0x002F8CD0
-		public void ExposeData()
-		{
-			Scribe_Collections.Look<int, RelationshipRecord>(ref this.records, "records", LookMode.Value, LookMode.Deep, ref this.tmpKeys, ref this.tmpValues, true, false, false);
-		}
-
-		// Token: 0x0400734C RID: 29516
-		private Dictionary<int, RelationshipRecord> records = new Dictionary<int, RelationshipRecord>();
-
-		// Token: 0x0400734D RID: 29517
-		private static readonly HashSet<int> toRemove = new HashSet<int>();
-
-		// Token: 0x0400734E RID: 29518
-		private List<int> tmpKeys;
-
-		// Token: 0x0400734F RID: 29519
-		private List<RelationshipRecord> tmpValues;
+	public void ExposeData()
+	{
+		Scribe_Collections.Look(ref records, "records", LookMode.Value, LookMode.Deep, ref tmpKeys, ref tmpValues);
 	}
 }

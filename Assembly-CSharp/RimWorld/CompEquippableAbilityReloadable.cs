@@ -1,375 +1,582 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld.Utility;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompEquippableAbilityReloadable : CompEquippableAbility, IReloadableComp, ICompWithCharges
 {
-	// Token: 0x02002C78 RID: 11384
-	public class CompEquippableAbilityReloadable : CompEquippableAbility, IReloadableComp, ICompWithCharges
+	[CompilerGenerated]
+	private sealed class _003CCompGetEquippedGizmosExtra_003Ed__24 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x17002843 RID: 10307
-		// (get) Token: 0x0600FF51 RID: 65361 RVA: 0x0049FCB7 File Offset: 0x0049DEB7
-		public CompProperties_EquippableAbilityReloadable Props
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompEquippableAbilityReloadable _003C_003E4__this;
+
+		private IEnumerator<Gizmo> _003C_003E7__wrap1;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.props as CompProperties_EquippableAbilityReloadable;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002844 RID: 10308
-		// (get) Token: 0x0600FF52 RID: 65362 RVA: 0x0048FDB8 File Offset: 0x0048DFB8
-		public Thing ReloadableThing
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.parent;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002845 RID: 10309
-		// (get) Token: 0x0600FF53 RID: 65363 RVA: 0x0049FCC4 File Offset: 0x0049DEC4
-		public ThingDef AmmoDef
+		[DebuggerHidden]
+		public _003CCompGetEquippedGizmosExtra_003Ed__24(int _003C_003E1__state)
 		{
-			get
-			{
-				return this.Props.ammoDef;
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x17002846 RID: 10310
-		// (get) Token: 0x0600FF54 RID: 65364 RVA: 0x0049FCD1 File Offset: 0x0049DED1
-		public int MaxCharges
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			get
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				return this.Props.maxCharges;
-			}
-		}
-
-		// Token: 0x17002847 RID: 10311
-		// (get) Token: 0x0600FF55 RID: 65365 RVA: 0x0049FCDE File Offset: 0x0049DEDE
-		public int BaseReloadTicks
-		{
-			get
-			{
-				return this.Props.baseReloadTicks;
-			}
-		}
-
-		// Token: 0x17002848 RID: 10312
-		// (get) Token: 0x0600FF56 RID: 65366 RVA: 0x0049FCEB File Offset: 0x0049DEEB
-		public string LabelRemaining
-		{
-			get
-			{
-				return string.Format("{0} / {1}", this.RemainingCharges, this.MaxCharges);
-			}
-		}
-
-		// Token: 0x17002849 RID: 10313
-		// (get) Token: 0x0600FF57 RID: 65367 RVA: 0x0049FD0D File Offset: 0x0049DF0D
-		public bool AbilityUsesCharges
-		{
-			get
-			{
-				Ability abilityForReading = base.AbilityForReading;
-				return abilityForReading != null && abilityForReading.UsesCharges;
-			}
-		}
-
-		// Token: 0x1700284A RID: 10314
-		// (get) Token: 0x0600FF58 RID: 65368 RVA: 0x0049FD20 File Offset: 0x0049DF20
-		// (set) Token: 0x0600FF59 RID: 65369 RVA: 0x0049FD33 File Offset: 0x0049DF33
-		public int RemainingCharges
-		{
-			get
-			{
-				Ability abilityForReading = base.AbilityForReading;
-				if (abilityForReading == null)
+				try
 				{
-					return 0;
 				}
-				return abilityForReading.RemainingCharges;
-			}
-			set
-			{
-				if (base.AbilityForReading != null)
+				finally
 				{
-					base.AbilityForReading.RemainingCharges = value;
+					_003C_003Em__Finally1();
 				}
 			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x0600FF5A RID: 65370 RVA: 0x0049FD49 File Offset: 0x0049DF49
-		public override void PostExposeData()
+		private bool MoveNext()
 		{
-			base.PostExposeData();
-			Scribe_Values.Look<int>(ref this.replenishInTicks, "replenishInTicks", -1, false);
-		}
-
-		// Token: 0x0600FF5B RID: 65371 RVA: 0x0049FD63 File Offset: 0x0049DF63
-		public override void PostPostMake()
-		{
-			base.PostPostMake();
-			this.Notify_PropsChanged();
-		}
-
-		// Token: 0x0600FF5C RID: 65372 RVA: 0x0049FD71 File Offset: 0x0049DF71
-		public void Notify_PropsChanged()
-		{
-			if (base.AbilityForReading == null)
+			try
 			{
-				return;
-			}
-			base.AbilityForReading.maxCharges = this.MaxCharges;
-			this.RemainingCharges = this.MaxCharges;
-		}
-
-		// Token: 0x0600FF5D RID: 65373 RVA: 0x0049FD9C File Offset: 0x0049DF9C
-		public override void CompTick()
-		{
-			base.CompTick();
-			if (base.AbilityForReading == null)
-			{
-				return;
-			}
-			if (this.Props.replenishAfterCooldown && this.RemainingCharges == 0)
-			{
-				if (this.replenishInTicks > 0)
+				int num = _003C_003E1__state;
+				CompEquippableAbilityReloadable CS_0024_003C_003E8__locals5 = _003C_003E4__this;
+				switch (num)
 				{
-					this.replenishInTicks--;
-					return;
-				}
-				this.RemainingCharges = this.MaxCharges;
-			}
-		}
-
-		// Token: 0x0600FF5E RID: 65374 RVA: 0x0049FDF4 File Offset: 0x0049DFF4
-		public override string CompInspectStringExtra()
-		{
-			if (base.AbilityForReading == null)
-			{
-				return null;
-			}
-			if (!this.AbilityUsesCharges)
-			{
-				return null;
-			}
-			return "ChargesRemaining".Translate(this.Props.ChargeNounArgument) + ": " + this.LabelRemaining;
-		}
-
-		// Token: 0x0600FF5F RID: 65375 RVA: 0x0049FE44 File Offset: 0x0049E044
-		public override IEnumerable<StatDrawEntry> SpecialDisplayStats()
-		{
-			IEnumerable<StatDrawEntry> enumerable = base.SpecialDisplayStats();
-			if (enumerable != null)
-			{
-				foreach (StatDrawEntry statDrawEntry in enumerable)
-				{
-					yield return statDrawEntry;
-				}
-				IEnumerator<StatDrawEntry> enumerator = null;
-			}
-			if (base.AbilityForReading == null)
-			{
-				yield break;
-			}
-			if (base.AbilityForReading.UsesCharges)
-			{
-				yield return new StatDrawEntry(StatCategoryDefOf.Weapon, "Stat_Thing_ReloadChargesRemaining_Name".Translate(this.Props.ChargeNounArgument), this.LabelRemaining, "Stat_Thing_ReloadChargesRemaining_Desc".Translate(this.Props.ChargeNounArgument), 5440, null, null, false, false);
-			}
-			yield break;
-			yield break;
-		}
-
-		// Token: 0x0600FF60 RID: 65376 RVA: 0x0049FE54 File Offset: 0x0049E054
-		public override IEnumerable<Gizmo> CompGetEquippedGizmosExtra()
-		{
-			foreach (Gizmo gizmo in base.CompGetEquippedGizmosExtra())
-			{
-				yield return gizmo;
-			}
-			IEnumerator<Gizmo> enumerator = null;
-			if (base.AbilityForReading == null)
-			{
-				yield break;
-			}
-			if (DebugSettings.ShowDevGizmos && this.NeedsReload(false))
-			{
-				yield return new Command_Action
-				{
-					defaultLabel = "DEV: Reload to full",
-					action = delegate()
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((CompEquippable)CS_0024_003C_003E8__locals5).CompGetEquippedGizmosExtra().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0072;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0072;
+				case 2:
 					{
-						this.RemainingCharges = this.MaxCharges;
+						_003C_003E1__state = -1;
+						break;
 					}
+					IL_0072:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Gizmo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (CS_0024_003C_003E8__locals5.AbilityForReading == null)
+					{
+						return false;
+					}
+					if (DebugSettings.ShowDevGizmos && CS_0024_003C_003E8__locals5.NeedsReload(allowForcedReload: false))
+					{
+						_003C_003E2__current = new Command_Action
+						{
+							defaultLabel = "DEV: Reload to full",
+							action = delegate
+							{
+								CS_0024_003C_003E8__locals5.RemainingCharges = CS_0024_003C_003E8__locals5.MaxCharges;
+							}
+						};
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CCompGetEquippedGizmosExtra_003Ed__24 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CCompGetEquippedGizmosExtra_003Ed__24(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
 				};
 			}
-			yield break;
-			yield break;
+			return result;
 		}
 
-		// Token: 0x0600FF61 RID: 65377 RVA: 0x0049FE64 File Offset: 0x0049E064
-		public bool NeedsReload(bool allowForcedReload)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			if (base.AbilityForReading == null)
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CSpecialDisplayStats_003Ed__23 : IEnumerable<StatDrawEntry>, IEnumerable, IEnumerator<StatDrawEntry>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private StatDrawEntry _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompEquippableAbilityReloadable _003C_003E4__this;
+
+		private IEnumerator<StatDrawEntry> _003C_003E7__wrap1;
+
+		StatDrawEntry IEnumerator<StatDrawEntry>.Current
+		{
+			[DebuggerHidden]
+			get
 			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CSpecialDisplayStats_003Ed__23(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				CompEquippableAbilityReloadable compEquippableAbilityReloadable = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+				{
+					_003C_003E1__state = -1;
+					IEnumerable<StatDrawEntry> enumerable = ((ThingComp)compEquippableAbilityReloadable).SpecialDisplayStats();
+					if (enumerable != null)
+					{
+						_003C_003E7__wrap1 = enumerable.GetEnumerator();
+						_003C_003E1__state = -3;
+						goto IL_0079;
+					}
+					goto IL_0093;
+				}
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0079;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_0079:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						StatDrawEntry current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					goto IL_0093;
+					IL_0093:
+					if (compEquippableAbilityReloadable.AbilityForReading == null)
+					{
+						return false;
+					}
+					if (compEquippableAbilityReloadable.AbilityForReading.UsesCharges)
+					{
+						_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.Weapon, "Stat_Thing_ReloadChargesRemaining_Name".Translate(compEquippableAbilityReloadable.Props.ChargeNounArgument), compEquippableAbilityReloadable.LabelRemaining, "Stat_Thing_ReloadChargesRemaining_Desc".Translate(compEquippableAbilityReloadable.Props.ChargeNounArgument), 5440);
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
+				}
 				return false;
 			}
-			if (this.Props.ammoDef == null)
+			catch
 			{
-				return false;
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
-			if (this.Props.ammoCountToRefill == 0)
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				return this.RemainingCharges != this.MaxCharges;
+				_003C_003E7__wrap1.Dispose();
 			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<StatDrawEntry> IEnumerable<StatDrawEntry>.GetEnumerator()
+		{
+			_003CSpecialDisplayStats_003Ed__23 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CSpecialDisplayStats_003Ed__23(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<StatDrawEntry>)this).GetEnumerator();
+		}
+	}
+
+	private int replenishInTicks = -1;
+
+	public CompProperties_EquippableAbilityReloadable Props => props as CompProperties_EquippableAbilityReloadable;
+
+	public Thing ReloadableThing => parent;
+
+	public ThingDef AmmoDef => Props.ammoDef;
+
+	public int MaxCharges => Props.maxCharges;
+
+	public int BaseReloadTicks => Props.baseReloadTicks;
+
+	public string LabelRemaining => $"{RemainingCharges} / {MaxCharges}";
+
+	public bool AbilityUsesCharges => base.AbilityForReading?.UsesCharges ?? false;
+
+	public int RemainingCharges
+	{
+		get
+		{
+			return base.AbilityForReading?.RemainingCharges ?? 0;
+		}
+		set
+		{
+			if (base.AbilityForReading != null)
+			{
+				base.AbilityForReading.RemainingCharges = value;
+			}
+		}
+	}
+
+	public override void PostExposeData()
+	{
+		base.PostExposeData();
+		Scribe_Values.Look(ref replenishInTicks, "replenishInTicks", -1);
+	}
+
+	public override void PostPostMake()
+	{
+		base.PostPostMake();
+		Notify_PropsChanged();
+	}
+
+	public void Notify_PropsChanged()
+	{
+		if (base.AbilityForReading != null)
+		{
+			base.AbilityForReading.maxCharges = MaxCharges;
+			RemainingCharges = MaxCharges;
+		}
+	}
+
+	public override void CompTick()
+	{
+		base.CompTick();
+		if (base.AbilityForReading != null && Props.replenishAfterCooldown && RemainingCharges == 0)
+		{
+			if (replenishInTicks > 0)
+			{
+				replenishInTicks--;
+			}
+			else
+			{
+				RemainingCharges = MaxCharges;
+			}
+		}
+	}
+
+	public override string CompInspectStringExtra()
+	{
+		if (base.AbilityForReading == null)
+		{
+			return null;
+		}
+		if (!AbilityUsesCharges)
+		{
+			return null;
+		}
+		return "ChargesRemaining".Translate(Props.ChargeNounArgument) + ": " + LabelRemaining;
+	}
+
+	[IteratorStateMachine(typeof(_003CSpecialDisplayStats_003Ed__23))]
+	public override IEnumerable<StatDrawEntry> SpecialDisplayStats()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CSpecialDisplayStats_003Ed__23(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	[IteratorStateMachine(typeof(_003CCompGetEquippedGizmosExtra_003Ed__24))]
+	public override IEnumerable<Gizmo> CompGetEquippedGizmosExtra()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CCompGetEquippedGizmosExtra_003Ed__24(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public bool NeedsReload(bool allowForcedReload)
+	{
+		if (base.AbilityForReading == null)
+		{
+			return false;
+		}
+		if (Props.ammoDef == null)
+		{
+			return false;
+		}
+		if (Props.ammoCountToRefill != 0)
+		{
 			if (!allowForcedReload)
 			{
-				return this.RemainingCharges == 0;
+				return RemainingCharges == 0;
 			}
-			return this.RemainingCharges != this.MaxCharges;
+			return RemainingCharges != MaxCharges;
 		}
+		return RemainingCharges != MaxCharges;
+	}
 
-		// Token: 0x0600FF62 RID: 65378 RVA: 0x0049FEC8 File Offset: 0x0049E0C8
-		public void ReloadFrom(Thing ammo)
+	public void ReloadFrom(Thing ammo)
+	{
+		if (!NeedsReload(allowForcedReload: true))
 		{
-			if (!this.NeedsReload(true))
+			return;
+		}
+		if (Props.ammoCountToRefill != 0)
+		{
+			if (ammo.stackCount < Props.ammoCountToRefill)
 			{
 				return;
 			}
-			if (this.Props.ammoCountToRefill != 0)
-			{
-				if (ammo.stackCount < this.Props.ammoCountToRefill)
-				{
-					return;
-				}
-				ammo.SplitOff(this.Props.ammoCountToRefill).Destroy(DestroyMode.Vanish);
-				this.RemainingCharges = this.MaxCharges;
-			}
-			else
-			{
-				if (ammo.stackCount < this.Props.ammoCountPerCharge)
-				{
-					return;
-				}
-				int num = Mathf.Clamp(ammo.stackCount / this.Props.ammoCountPerCharge, 0, this.MaxCharges - this.RemainingCharges);
-				ammo.SplitOff(num * this.Props.ammoCountPerCharge).Destroy(DestroyMode.Vanish);
-				this.RemainingCharges += num;
-			}
-			if (this.Props.soundReload != null)
-			{
-				this.Props.soundReload.PlayOneShot(new TargetInfo(this.parent.PositionHeld, this.parent.MapHeld, false));
-			}
+			ammo.SplitOff(Props.ammoCountToRefill).Destroy();
+			RemainingCharges = MaxCharges;
 		}
-
-		// Token: 0x0600FF63 RID: 65379 RVA: 0x0049FFC4 File Offset: 0x0049E1C4
-		public int MinAmmoNeeded(bool allowForcedReload)
+		else
 		{
-			if (!this.NeedsReload(allowForcedReload))
-			{
-				return 0;
-			}
-			if (this.Props.ammoCountToRefill != 0)
-			{
-				return this.Props.ammoCountToRefill;
-			}
-			return this.Props.ammoCountPerCharge;
-		}
-
-		// Token: 0x0600FF64 RID: 65380 RVA: 0x0049FFF5 File Offset: 0x0049E1F5
-		public int MaxAmmoNeeded(bool allowForcedReload)
-		{
-			if (!this.NeedsReload(allowForcedReload))
-			{
-				return 0;
-			}
-			if (this.Props.ammoCountToRefill != 0)
-			{
-				return this.Props.ammoCountToRefill;
-			}
-			return this.Props.ammoCountPerCharge * (this.MaxCharges - this.RemainingCharges);
-		}
-
-		// Token: 0x0600FF65 RID: 65381 RVA: 0x004A0034 File Offset: 0x0049E234
-		public int MaxAmmoAmount()
-		{
-			if (base.AbilityForReading == null)
-			{
-				return 0;
-			}
-			if (this.Props.ammoDef == null)
-			{
-				return 0;
-			}
-			if (this.Props.ammoCountToRefill == 0)
-			{
-				return this.Props.ammoCountPerCharge * this.MaxCharges;
-			}
-			return this.Props.ammoCountToRefill;
-		}
-
-		// Token: 0x0600FF66 RID: 65382 RVA: 0x004A0085 File Offset: 0x0049E285
-		public override void UsedOnce()
-		{
-			if (base.AbilityForReading == null)
+			if (ammo.stackCount < Props.ammoCountPerCharge)
 			{
 				return;
 			}
-			if (this.Props.replenishAfterCooldown && this.RemainingCharges == 0)
-			{
-				this.replenishInTicks = this.Props.baseReloadTicks;
-			}
+			int num = Mathf.Clamp(ammo.stackCount / Props.ammoCountPerCharge, 0, MaxCharges - RemainingCharges);
+			ammo.SplitOff(num * Props.ammoCountPerCharge).Destroy();
+			RemainingCharges += num;
 		}
-
-		// Token: 0x0600FF67 RID: 65383 RVA: 0x004A00B6 File Offset: 0x0049E2B6
-		public bool CanBeUsed(out string reason)
+		if (Props.soundReload != null)
 		{
-			reason = null;
-			if (base.AbilityForReading == null)
-			{
-				return false;
-			}
-			if (this.RemainingCharges <= 0)
-			{
-				reason = this.DisabledReason(this.MinAmmoNeeded(false), this.MaxAmmoNeeded(false));
-				return false;
-			}
-			return true;
+			Props.soundReload.PlayOneShot(new TargetInfo(parent.PositionHeld, parent.MapHeld));
 		}
+	}
 
-		// Token: 0x0600FF68 RID: 65384 RVA: 0x004A00E8 File Offset: 0x0049E2E8
-		public string DisabledReason(int minNeeded, int maxNeeded)
+	public int MinAmmoNeeded(bool allowForcedReload)
+	{
+		if (!NeedsReload(allowForcedReload))
 		{
-			if (base.AbilityForReading == null)
-			{
-				return null;
-			}
-			if (this.Props.replenishAfterCooldown)
-			{
-				return "CommandReload_Cooldown".Translate(this.Props.CooldownVerbArgument, this.replenishInTicks.ToStringTicksToPeriod(true, false, true, true, false).Named("TIME"));
-			}
-			if (this.Props.ammoDef == null)
-			{
-				return "CommandReload_NoCharges".Translate(this.Props.ChargeNounArgument);
-			}
-			string arg;
-			if (this.Props.ammoCountToRefill != 0)
-			{
-				arg = this.Props.ammoCountToRefill.ToString();
-			}
-			else
-			{
-				arg = ((minNeeded == maxNeeded) ? minNeeded.ToString() : string.Format("{0}-{1}", minNeeded, maxNeeded));
-			}
-			return "CommandReload_NoAmmo".Translate(this.Props.ChargeNounArgument, this.Props.ammoDef.Named("AMMO"), arg.Named("COUNT"));
+			return 0;
 		}
+		if (Props.ammoCountToRefill != 0)
+		{
+			return Props.ammoCountToRefill;
+		}
+		return Props.ammoCountPerCharge;
+	}
 
-		// Token: 0x0400A725 RID: 42789
-		private int replenishInTicks = -1;
+	public int MaxAmmoNeeded(bool allowForcedReload)
+	{
+		if (!NeedsReload(allowForcedReload))
+		{
+			return 0;
+		}
+		if (Props.ammoCountToRefill != 0)
+		{
+			return Props.ammoCountToRefill;
+		}
+		return Props.ammoCountPerCharge * (MaxCharges - RemainingCharges);
+	}
+
+	public int MaxAmmoAmount()
+	{
+		if (base.AbilityForReading == null)
+		{
+			return 0;
+		}
+		if (Props.ammoDef == null)
+		{
+			return 0;
+		}
+		if (Props.ammoCountToRefill == 0)
+		{
+			return Props.ammoCountPerCharge * MaxCharges;
+		}
+		return Props.ammoCountToRefill;
+	}
+
+	public override void UsedOnce()
+	{
+		if (base.AbilityForReading != null && Props.replenishAfterCooldown && RemainingCharges == 0)
+		{
+			replenishInTicks = Props.baseReloadTicks;
+		}
+	}
+
+	public bool CanBeUsed(out string reason)
+	{
+		reason = null;
+		if (base.AbilityForReading == null)
+		{
+			return false;
+		}
+		if (RemainingCharges <= 0)
+		{
+			reason = DisabledReason(MinAmmoNeeded(allowForcedReload: false), MaxAmmoNeeded(allowForcedReload: false));
+			return false;
+		}
+		return true;
+	}
+
+	public string DisabledReason(int minNeeded, int maxNeeded)
+	{
+		if (base.AbilityForReading == null)
+		{
+			return null;
+		}
+		if (Props.replenishAfterCooldown)
+		{
+			return "CommandReload_Cooldown".Translate(Props.CooldownVerbArgument, replenishInTicks.ToStringTicksToPeriod().Named("TIME"));
+		}
+		if (Props.ammoDef == null)
+		{
+			return "CommandReload_NoCharges".Translate(Props.ChargeNounArgument);
+		}
+		return TranslatorFormattedStringExtensions.Translate(arg3: ((Props.ammoCountToRefill == 0) ? ((minNeeded == maxNeeded) ? minNeeded.ToString() : $"{minNeeded}-{maxNeeded}") : Props.ammoCountToRefill.ToString()).Named("COUNT"), key: "CommandReload_NoAmmo", arg1: Props.ChargeNounArgument, arg2: NamedArgumentUtility.Named(Props.ammoDef, "AMMO"));
 	}
 }

@@ -1,436 +1,656 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld;
 using UnityEngine;
 using Verse.Sound;
 
-namespace Verse
+namespace Verse;
+
+public class CompGlower : ThingComp
 {
-	// Token: 0x02000413 RID: 1043
-	public class CompGlower : ThingComp
+	private enum GlowerColorChangeType
 	{
-		// Token: 0x170004B9 RID: 1209
-		// (get) Token: 0x06001A63 RID: 6755 RVA: 0x0008583F File Offset: 0x00083A3F
-		public CompProperties_Glower Props
+		None,
+		ColorPickerEnabled,
+		DarklightToggle,
+		AllGlowers
+	}
+
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass34_0
+	{
+		public CompGlower _003C_003E4__this;
+
+		public List<CompGlower> extraGlowers;
+
+		internal void _003CCompGetGizmosExtra_003Eb__0()
 		{
+			Widgets.ColorComponents visibleTextfields = (DebugSettings.editableGlowerColors ? visibleDebugColorTextfields : visibleColorTextfields);
+			Widgets.ColorComponents editableTextfields = (DebugSettings.editableGlowerColors ? editableDebugColorTextfields : editableColorTextfields);
+			Dialog_GlowerColorPicker window = new Dialog_GlowerColorPicker(_003C_003E4__this, extraGlowers, visibleTextfields, editableTextfields);
+			Find.WindowStack.Add(window);
+		}
+
+		internal void _003CCompGetGizmosExtra_003Eb__1()
+		{
+			ColorClipboard = _003C_003E4__this.GlowColor;
+			Messages.Message("ColorCopiedSuccessfully".Translate(), MessageTypeDefOf.PositiveEvent, historical: false);
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass34_1
+	{
+		public float hue;
+
+		public float sat;
+
+		public _003C_003Ec__DisplayClass34_0 CS_0024_003C_003E8__locals1;
+
+		internal void _003CCompGetGizmosExtra_003Eb__2()
+		{
+			try
+			{
+				SoundDefOf.Tick_High.PlayOneShotOnCamera();
+				ColorInt glowColor = CS_0024_003C_003E8__locals1._003C_003E4__this.GlowColor;
+				glowColor.SetHueSaturation(hue, sat);
+				CS_0024_003C_003E8__locals1._003C_003E4__this.GlowColor = glowColor;
+				foreach (CompGlower item in CS_0024_003C_003E8__locals1.extraGlowers)
+				{
+					glowColor = item.GlowColor;
+					glowColor.SetHueSaturation(hue, sat);
+					item.GlowColor = glowColor;
+				}
+				Messages.Message("ColorPastedSuccessfully".Translate(), MessageTypeDefOf.PositiveEvent, historical: false);
+			}
+			catch (Exception)
+			{
+				Messages.Message("ClipboardInvalidColor".Translate(), MessageTypeDefOf.RejectInput, historical: false);
+			}
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass34_2
+	{
+		public bool darklight;
+
+		public _003C_003Ec__DisplayClass34_0 CS_0024_003C_003E8__locals2;
+
+		internal void _003CCompGetGizmosExtra_003Eb__3()
+		{
+			SoundDefOf.Tick_High.PlayOneShotOnCamera();
+			if (darklight)
+			{
+				CS_0024_003C_003E8__locals2._003C_003E4__this.SetGlowColorInternal(null);
+			}
+			else
+			{
+				CS_0024_003C_003E8__locals2._003C_003E4__this.GlowColor = new ColorInt(DarklightUtility.DefaultDarklight);
+			}
+			foreach (CompGlower item in CS_0024_003C_003E8__locals2._003C_003E4__this.ExtraSelectedGlowers(GlowerColorChangeType.DarklightToggle))
+			{
+				if (darklight)
+				{
+					item.SetGlowColorInternal(null);
+				}
+				else
+				{
+					item.GlowColor = new ColorInt(DarklightUtility.DefaultDarklight);
+				}
+			}
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CCompGetGizmosExtra_003Ed__34 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompGlower _003C_003E4__this;
+
+		private _003C_003Ec__DisplayClass34_0 _003C_003E8__1;
+
+		private bool _003CdoCopyPasteGizmos_003E5__2;
+
+		private IEnumerator<Gizmo> _003C_003E7__wrap2;
+
+		Gizmo IEnumerator<Gizmo>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				return (CompProperties_Glower)this.props;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170004BA RID: 1210
-		// (get) Token: 0x06001A64 RID: 6756 RVA: 0x0008584C File Offset: 0x00083A4C
-		// (set) Token: 0x06001A65 RID: 6757 RVA: 0x0008587C File Offset: 0x00083A7C
-		public virtual ColorInt GlowColor
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				ColorInt? colorInt = this.glowColorOverride;
-				if (colorInt == null)
-				{
-					return this.Props.glowColor;
-				}
-				return colorInt.GetValueOrDefault();
-			}
-			set
-			{
-				this.SetGlowColorInternal(new ColorInt?(value));
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170004BB RID: 1211
-		// (get) Token: 0x06001A66 RID: 6758 RVA: 0x0008588C File Offset: 0x00083A8C
-		// (set) Token: 0x06001A67 RID: 6759 RVA: 0x000858BC File Offset: 0x00083ABC
-		public virtual float GlowRadius
+		[DebuggerHidden]
+		public _003CCompGetGizmosExtra_003Ed__34(int _003C_003E1__state)
 		{
-			get
-			{
-				float? num = this.glowRadiusOverride;
-				if (num == null)
-				{
-					return this.Props.glowRadius;
-				}
-				return num.GetValueOrDefault();
-			}
-			set
-			{
-				this.glowRadiusOverride = new float?(value);
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x170004BC RID: 1212
-		// (get) Token: 0x06001A68 RID: 6760 RVA: 0x000858CC File Offset: 0x00083ACC
-		protected virtual bool ShouldBeLitNow
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			get
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				if (!this.parent.Spawned)
+				try
 				{
-					return false;
 				}
-				if (!FlickUtility.WantsToBeOn(this.parent))
+				finally
 				{
-					return false;
+					_003C_003Em__Finally1();
 				}
-				IThingGlower thingGlower = this.parent as IThingGlower;
-				if (thingGlower != null && !thingGlower.ShouldBeLitNow())
+			}
+			_003C_003E8__1 = null;
+			_003C_003E7__wrap2 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				CompGlower compGlower = _003C_003E4__this;
+				GlowerColorChangeType type;
+				Color32 value;
+				Color32? color;
+				Command_ColorIcon command_ColorIcon2;
+				_003C_003Ec__DisplayClass34_2 CS_0024_003C_003E8__locals22;
+				switch (num)
 				{
+				default:
 					return false;
-				}
-				ThingWithComps parent = this.parent;
-				if (parent != null)
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E8__1 = new _003C_003Ec__DisplayClass34_0();
+					_003C_003E8__1._003C_003E4__this = _003C_003E4__this;
+					_003C_003E7__wrap2 = ((ThingComp)compGlower).CompGetGizmosExtra().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_00a0;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_00a0;
+				case 2:
+					_003C_003E1__state = -1;
+					goto IL_0286;
+				case 3:
+					_003C_003E1__state = -1;
+					goto IL_0286;
+				case 4:
 				{
-					foreach (ThingComp thingComp in parent.AllComps)
+					_003C_003E1__state = -1;
+					_003C_003Ec__DisplayClass34_1 CS_0024_003C_003E8__locals13 = new _003C_003Ec__DisplayClass34_1
 					{
-						IThingGlower thingGlower2 = thingComp as IThingGlower;
-						if (thingGlower2 != null && !thingGlower2.ShouldBeLitNow())
-						{
-							return false;
-						}
+						CS_0024_003C_003E8__locals1 = _003C_003E8__1
+					};
+					bool flag = true;
+					CS_0024_003C_003E8__locals13.hue = 0f;
+					CS_0024_003C_003E8__locals13.sat = 0f;
+					if (ColorClipboard.HasValue)
+					{
+						Color.RGBToHSV(ColorClipboard.Value.ProjectToColor32(), out CS_0024_003C_003E8__locals13.hue, out CS_0024_003C_003E8__locals13.sat, out var _);
+						flag = false;
 					}
+					Command_ColorIcon command_ColorIcon = new Command_ColorIcon
+					{
+						icon = ContentFinder<Texture2D>.Get("UI/Commands/PasteColor"),
+						defaultLabel = "CommandPasteColorLabel".Translate(),
+						defaultDesc = "CommandPasteColorDesc".Translate()
+					};
+					if (!flag)
+					{
+						command_ColorIcon.color = Color.HSVToRGB(CS_0024_003C_003E8__locals13.hue, CS_0024_003C_003E8__locals13.sat, 1f);
+					}
+					command_ColorIcon.Disabled = flag;
+					command_ColorIcon.disabledReason = "ClipboardInvalidColor".Translate();
+					command_ColorIcon.action = delegate
+					{
+						try
+						{
+							SoundDefOf.Tick_High.PlayOneShotOnCamera();
+							ColorInt glowColor = CS_0024_003C_003E8__locals13.CS_0024_003C_003E8__locals1._003C_003E4__this.GlowColor;
+							glowColor.SetHueSaturation(CS_0024_003C_003E8__locals13.hue, CS_0024_003C_003E8__locals13.sat);
+							CS_0024_003C_003E8__locals13.CS_0024_003C_003E8__locals1._003C_003E4__this.GlowColor = glowColor;
+							foreach (CompGlower item in CS_0024_003C_003E8__locals13.CS_0024_003C_003E8__locals1.extraGlowers)
+							{
+								glowColor = item.GlowColor;
+								glowColor.SetHueSaturation(CS_0024_003C_003E8__locals13.hue, CS_0024_003C_003E8__locals13.sat);
+								item.GlowColor = glowColor;
+							}
+							Messages.Message("ColorPastedSuccessfully".Translate(), MessageTypeDefOf.PositiveEvent, historical: false);
+						}
+						catch (Exception)
+						{
+							Messages.Message("ClipboardInvalidColor".Translate(), MessageTypeDefOf.RejectInput, historical: false);
+						}
+					};
+					command_ColorIcon.hotKey = KeyBindingDefOf.Misc5;
+					_003C_003E2__current = command_ColorIcon;
+					_003C_003E1__state = 5;
 					return true;
 				}
-				return true;
-			}
-		}
-
-		// Token: 0x170004BD RID: 1213
-		// (get) Token: 0x06001A69 RID: 6761 RVA: 0x00085974 File Offset: 0x00083B74
-		public bool Glows
-		{
-			get
-			{
-				return this.glowOnInt;
-			}
-		}
-
-		// Token: 0x170004BE RID: 1214
-		// (get) Token: 0x06001A6A RID: 6762 RVA: 0x0008597C File Offset: 0x00083B7C
-		public bool HasGlowColorOverride
-		{
-			get
-			{
-				return this.glowColorOverride != null;
-			}
-		}
-
-		// Token: 0x06001A6B RID: 6763 RVA: 0x0008598C File Offset: 0x00083B8C
-		public void UpdateLit(Map map)
-		{
-			bool shouldBeLitNow = this.ShouldBeLitNow;
-			if (this.glowOnInt == shouldBeLitNow)
-			{
-				return;
-			}
-			this.glowOnInt = shouldBeLitNow;
-			if (!this.glowOnInt)
-			{
-				map.mapDrawer.MapMeshDirty(this.parent.Position, MapMeshFlagDefOf.Things);
-				map.glowGrid.DeRegisterGlower(this);
-				return;
-			}
-			map.mapDrawer.MapMeshDirty(this.parent.Position, MapMeshFlagDefOf.Things);
-			map.glowGrid.RegisterGlower(this);
-		}
-
-		// Token: 0x06001A6C RID: 6764 RVA: 0x00085A12 File Offset: 0x00083C12
-		public void ForceRegister(Map map)
-		{
-			map.glowGrid.DeRegisterGlower(this);
-			map.mapDrawer.MapMeshDirty(this.parent.Position, MapMeshFlagDefOf.Things);
-			map.glowGrid.RegisterGlower(this);
-		}
-
-		// Token: 0x06001A6D RID: 6765 RVA: 0x00085A4C File Offset: 0x00083C4C
-		public override void PostSpawnSetup(bool respawningAfterLoad)
-		{
-			if (!this.parent.BeingTransportedOnGravship)
-			{
-				this.RefreshGlower();
-			}
-		}
-
-		// Token: 0x06001A6E RID: 6766 RVA: 0x00085A61 File Offset: 0x00083C61
-		public override void PostSwapMap()
-		{
-			this.RefreshGlower();
-		}
-
-		// Token: 0x06001A6F RID: 6767 RVA: 0x00085A61 File Offset: 0x00083C61
-		public override void PostMapInit()
-		{
-			this.RefreshGlower();
-		}
-
-		// Token: 0x06001A70 RID: 6768 RVA: 0x00085A69 File Offset: 0x00083C69
-		private void RefreshGlower()
-		{
-			this.UpdateLit(this.parent.Map);
-			if (this.ShouldBeLitNow)
-			{
-				this.parent.Map.glowGrid.RegisterGlower(this);
-			}
-		}
-
-		// Token: 0x06001A71 RID: 6769 RVA: 0x00085A9C File Offset: 0x00083C9C
-		public override void ReceiveCompSignal(string signal)
-		{
-			if (signal == "PowerTurnedOn" || signal == "PowerTurnedOff" || signal == "FlickedOn" || signal == "FlickedOff" || signal == "Refueled" || signal == "RanOutOfFuel" || signal == "ScheduledOn" || signal == "ScheduledOff" || signal == "MechClusterDefeated" || signal == "Hacked" || signal == "RitualTargetChanged" || signal == "CrateContentsChanged" || signal == "Vacuum")
-			{
-				this.UpdateLit(this.parent.Map);
-			}
-		}
-
-		// Token: 0x06001A72 RID: 6770 RVA: 0x00085B6C File Offset: 0x00083D6C
-		public override void PostExposeData()
-		{
-			Scribe_Values.Look<bool>(ref this.glowOnInt, "glowOn", false, false);
-			Scribe_Values.Look<ColorInt?>(ref this.glowColorOverride, "glowColorOverride", null, false);
-		}
-
-		// Token: 0x06001A73 RID: 6771 RVA: 0x00085BA5 File Offset: 0x00083DA5
-		public override void PostDeSpawn(Map map, DestroyMode mode = DestroyMode.Vanish)
-		{
-			base.PostDeSpawn(map, mode);
-			this.UpdateLit(map);
-		}
-
-		// Token: 0x06001A74 RID: 6772 RVA: 0x00085BB8 File Offset: 0x00083DB8
-		private List<CompGlower> ExtraSelectedGlowers(CompGlower.GlowerColorChangeType type)
-		{
-			CompGlower.tmpExtraGlowers.Clear();
-			foreach (object obj in Find.Selector.SelectedObjectsListForReading)
-			{
-				if (obj != this)
-				{
-					ThingWithComps thingWithComps = obj as ThingWithComps;
-					if (thingWithComps != null)
+				case 5:
+					_003C_003E1__state = -1;
+					goto IL_047b;
+				case 6:
 					{
-						foreach (CompGlower compGlower in thingWithComps.GetComps<CompGlower>())
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_00a0:
+					if (_003C_003E7__wrap2.MoveNext())
+					{
+						Gizmo current2 = _003C_003E7__wrap2.Current;
+						_003C_003E2__current = current2;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap2 = null;
+					if (compGlower.parent.Faction != Faction.OfPlayer)
+					{
+						return false;
+					}
+					_003CdoCopyPasteGizmos_003E5__2 = false;
+					type = GlowerColorChangeType.None;
+					if (compGlower.Props.colorPickerEnabled)
+					{
+						type = GlowerColorChangeType.ColorPickerEnabled;
+					}
+					else if (DebugSettings.editableGlowerColors)
+					{
+						type = GlowerColorChangeType.AllGlowers;
+					}
+					_003C_003E8__1.extraGlowers = compGlower.ExtraSelectedGlowers(type);
+					value = compGlower.GlowColor.ProjectToColor32();
+					value.a = byte.MaxValue;
+					color = value;
+					foreach (CompGlower item2 in _003C_003E8__1.extraGlowers)
+					{
+						if (item2.GlowColor != compGlower.GlowColor)
 						{
-							if (type == CompGlower.GlowerColorChangeType.AllGlowers || (type == CompGlower.GlowerColorChangeType.ColorPickerEnabled && compGlower.Props.colorPickerEnabled) || (type == CompGlower.GlowerColorChangeType.DarklightToggle && compGlower.Props.darklightToggle))
+							color = null;
+						}
+					}
+					command_ColorIcon2 = new Command_ColorIcon
+					{
+						defaultLabel = "GlowerChangeColor".Translate(),
+						defaultDesc = "GlowerChangeColorDescription".Translate(),
+						icon = ContentFinder<Texture2D>.Get("UI/Commands/ChangeColor"),
+						color = color,
+						action = delegate
+						{
+							Widgets.ColorComponents visibleTextfields = (DebugSettings.editableGlowerColors ? visibleDebugColorTextfields : visibleColorTextfields);
+							Widgets.ColorComponents editableTextfields = (DebugSettings.editableGlowerColors ? editableDebugColorTextfields : editableColorTextfields);
+							Dialog_GlowerColorPicker window = new Dialog_GlowerColorPicker(_003C_003E8__1._003C_003E4__this, _003C_003E8__1.extraGlowers, visibleTextfields, editableTextfields);
+							Find.WindowStack.Add(window);
+						}
+					};
+					if (compGlower.Props.colorPickerEnabled)
+					{
+						command_ColorIcon2.Disabled = !(_003CdoCopyPasteGizmos_003E5__2 = DebugSettings.editableGlowerColors || ResearchProjectDefOf.ColoredLights.IsFinished);
+						command_ColorIcon2.disabledReason = "GlowerChangeColorNeedsResearch".Translate(ResearchProjectDefOf.ColoredLights.label);
+						_003C_003E2__current = command_ColorIcon2;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					if (DebugSettings.editableGlowerColors)
+					{
+						_003CdoCopyPasteGizmos_003E5__2 = true;
+						_003C_003E2__current = command_ColorIcon2;
+						_003C_003E1__state = 3;
+						return true;
+					}
+					goto IL_0286;
+					IL_0286:
+					if (_003CdoCopyPasteGizmos_003E5__2)
+					{
+						Command_ColorIcon command_ColorIcon3 = new Command_ColorIcon
+						{
+							icon = ContentFinder<Texture2D>.Get("UI/Commands/CopyColor"),
+							defaultLabel = "CommandCopyColorLabel".Translate(),
+							defaultDesc = "CommandCopyColorDesc".Translate()
+						};
+						Color32 value2 = compGlower.GlowColor.ProjectToColor32();
+						value2.a = byte.MaxValue;
+						command_ColorIcon3.color = value2;
+						command_ColorIcon3.action = delegate
+						{
+							ColorClipboard = _003C_003E8__1._003C_003E4__this.GlowColor;
+							Messages.Message("ColorCopiedSuccessfully".Translate(), MessageTypeDefOf.PositiveEvent, historical: false);
+						};
+						command_ColorIcon3.hotKey = KeyBindingDefOf.Misc4;
+						_003C_003E2__current = command_ColorIcon3;
+						_003C_003E1__state = 4;
+						return true;
+					}
+					goto IL_047b;
+					IL_047b:
+					if (!ModsConfig.IdeologyActive || !compGlower.Props.darklightToggle)
+					{
+						break;
+					}
+					CS_0024_003C_003E8__locals22 = new _003C_003Ec__DisplayClass34_2
+					{
+						CS_0024_003C_003E8__locals2 = _003C_003E8__1,
+						darklight = DarklightUtility.IsDarklight(compGlower.GlowColor.ToColor)
+					};
+					_003C_003E2__current = new Command_Action
+					{
+						icon = ContentFinder<Texture2D>.Get(CS_0024_003C_003E8__locals22.darklight ? "UI/Commands/SetNormalLight" : "UI/Commands/SetDarklight"),
+						defaultLabel = (CS_0024_003C_003E8__locals22.darklight ? "ToggleDarklightOff" : "ToggleDarklightOn").Translate(),
+						defaultDesc = (CS_0024_003C_003E8__locals22.darklight ? "ToggleDarklightOffDesc" : "ToggleDarklightOnDesc").Translate(),
+						action = delegate
+						{
+							SoundDefOf.Tick_High.PlayOneShotOnCamera();
+							if (CS_0024_003C_003E8__locals22.darklight)
 							{
-								CompGlower.tmpExtraGlowers.Add(compGlower);
-							}
-						}
-					}
-				}
-			}
-			return CompGlower.tmpExtraGlowers;
-		}
-
-		// Token: 0x06001A75 RID: 6773 RVA: 0x00085C90 File Offset: 0x00083E90
-		public override IEnumerable<Gizmo> CompGetGizmosExtra()
-		{
-			foreach (Gizmo gizmo in base.CompGetGizmosExtra())
-			{
-				yield return gizmo;
-			}
-			IEnumerator<Gizmo> enumerator = null;
-			if (this.parent.Faction != Faction.OfPlayer)
-			{
-				yield break;
-			}
-			bool doCopyPasteGizmos = false;
-			CompGlower.GlowerColorChangeType type = CompGlower.GlowerColorChangeType.None;
-			if (this.Props.colorPickerEnabled)
-			{
-				type = CompGlower.GlowerColorChangeType.ColorPickerEnabled;
-			}
-			else if (DebugSettings.editableGlowerColors)
-			{
-				type = CompGlower.GlowerColorChangeType.AllGlowers;
-			}
-			List<CompGlower> extraGlowers = this.ExtraSelectedGlowers(type);
-			Color32 value = this.GlowColor.ProjectToColor32();
-			value.a = byte.MaxValue;
-			Color32? color = new Color32?(value);
-			using (List<CompGlower>.Enumerator enumerator2 = extraGlowers.GetEnumerator())
-			{
-				while (enumerator2.MoveNext())
-				{
-					if (enumerator2.Current.GlowColor != this.GlowColor)
-					{
-						color = null;
-					}
-				}
-			}
-			Command_ColorIcon command_ColorIcon = new Command_ColorIcon
-			{
-				defaultLabel = "GlowerChangeColor".Translate(),
-				defaultDesc = "GlowerChangeColorDescription".Translate(),
-				icon = ContentFinder<Texture2D>.Get("UI/Commands/ChangeColor", true),
-				color = color,
-				action = delegate()
-				{
-					Widgets.ColorComponents visibleTextfields = DebugSettings.editableGlowerColors ? CompGlower.visibleDebugColorTextfields : CompGlower.visibleColorTextfields;
-					Widgets.ColorComponents editableTextfields = DebugSettings.editableGlowerColors ? CompGlower.editableDebugColorTextfields : CompGlower.editableColorTextfields;
-					Dialog_GlowerColorPicker window = new Dialog_GlowerColorPicker(this, extraGlowers, visibleTextfields, editableTextfields);
-					Find.WindowStack.Add(window);
-				}
-			};
-			if (this.Props.colorPickerEnabled)
-			{
-				bool flag = DebugSettings.editableGlowerColors || ResearchProjectDefOf.ColoredLights.IsFinished;
-				doCopyPasteGizmos = flag;
-				command_ColorIcon.Disabled = !flag;
-				command_ColorIcon.disabledReason = "GlowerChangeColorNeedsResearch".Translate(ResearchProjectDefOf.ColoredLights.label);
-				yield return command_ColorIcon;
-			}
-			else if (DebugSettings.editableGlowerColors)
-			{
-				doCopyPasteGizmos = true;
-				yield return command_ColorIcon;
-			}
-			if (doCopyPasteGizmos)
-			{
-				Command_ColorIcon command_ColorIcon2 = new Command_ColorIcon();
-				command_ColorIcon2.icon = ContentFinder<Texture2D>.Get("UI/Commands/CopyColor", true);
-				command_ColorIcon2.defaultLabel = "CommandCopyColorLabel".Translate();
-				command_ColorIcon2.defaultDesc = "CommandCopyColorDesc".Translate();
-				Color32 value2 = this.GlowColor.ProjectToColor32();
-				value2.a = byte.MaxValue;
-				command_ColorIcon2.color = new Color32?(value2);
-				command_ColorIcon2.action = delegate()
-				{
-					CompGlower.ColorClipboard = new ColorInt?(this.GlowColor);
-					Messages.Message("ColorCopiedSuccessfully".Translate(), MessageTypeDefOf.PositiveEvent, false);
-				};
-				command_ColorIcon2.hotKey = KeyBindingDefOf.Misc4;
-				yield return command_ColorIcon2;
-				bool flag2 = true;
-				float hue = 0f;
-				float sat = 0f;
-				if (CompGlower.ColorClipboard != null)
-				{
-					float num;
-					Color.RGBToHSV(CompGlower.ColorClipboard.Value.ProjectToColor32(), out hue, out sat, out num);
-					flag2 = false;
-				}
-				Command_ColorIcon command_ColorIcon3 = new Command_ColorIcon();
-				command_ColorIcon3.icon = ContentFinder<Texture2D>.Get("UI/Commands/PasteColor", true);
-				command_ColorIcon3.defaultLabel = "CommandPasteColorLabel".Translate();
-				command_ColorIcon3.defaultDesc = "CommandPasteColorDesc".Translate();
-				if (!flag2)
-				{
-					command_ColorIcon3.color = new Color32?(Color.HSVToRGB(hue, sat, 1f));
-				}
-				command_ColorIcon3.Disabled = flag2;
-				command_ColorIcon3.disabledReason = "ClipboardInvalidColor".Translate();
-				command_ColorIcon3.action = delegate()
-				{
-					try
-					{
-						SoundDefOf.Tick_High.PlayOneShotOnCamera(null);
-						ColorInt glowColor = this.GlowColor;
-						glowColor.SetHueSaturation(hue, sat);
-						this.GlowColor = glowColor;
-						foreach (CompGlower compGlower in extraGlowers)
-						{
-							glowColor = compGlower.GlowColor;
-							glowColor.SetHueSaturation(hue, sat);
-							compGlower.GlowColor = glowColor;
-						}
-						Messages.Message("ColorPastedSuccessfully".Translate(), MessageTypeDefOf.PositiveEvent, false);
-					}
-					catch (Exception)
-					{
-						Messages.Message("ClipboardInvalidColor".Translate(), MessageTypeDefOf.RejectInput, false);
-					}
-				};
-				command_ColorIcon3.hotKey = KeyBindingDefOf.Misc5;
-				yield return command_ColorIcon3;
-			}
-			if (ModsConfig.IdeologyActive && this.Props.darklightToggle)
-			{
-				bool darklight = DarklightUtility.IsDarklight(this.GlowColor.ToColor);
-				yield return new Command_Action
-				{
-					icon = ContentFinder<Texture2D>.Get(darklight ? "UI/Commands/SetNormalLight" : "UI/Commands/SetDarklight", true),
-					defaultLabel = (darklight ? "ToggleDarklightOff" : "ToggleDarklightOn").Translate(),
-					defaultDesc = (darklight ? "ToggleDarklightOffDesc" : "ToggleDarklightOnDesc").Translate(),
-					action = delegate()
-					{
-						SoundDefOf.Tick_High.PlayOneShotOnCamera(null);
-						if (darklight)
-						{
-							this.SetGlowColorInternal(null);
-						}
-						else
-						{
-							this.GlowColor = new ColorInt(DarklightUtility.DefaultDarklight);
-						}
-						foreach (CompGlower compGlower in this.ExtraSelectedGlowers(CompGlower.GlowerColorChangeType.DarklightToggle))
-						{
-							if (darklight)
-							{
-								compGlower.SetGlowColorInternal(null);
+								CS_0024_003C_003E8__locals22.CS_0024_003C_003E8__locals2._003C_003E4__this.SetGlowColorInternal(null);
 							}
 							else
 							{
-								compGlower.GlowColor = new ColorInt(DarklightUtility.DefaultDarklight);
+								CS_0024_003C_003E8__locals22.CS_0024_003C_003E8__locals2._003C_003E4__this.GlowColor = new ColorInt(DarklightUtility.DefaultDarklight);
+							}
+							foreach (CompGlower item3 in CS_0024_003C_003E8__locals22.CS_0024_003C_003E8__locals2._003C_003E4__this.ExtraSelectedGlowers(GlowerColorChangeType.DarklightToggle))
+							{
+								if (CS_0024_003C_003E8__locals22.darklight)
+								{
+									item3.SetGlowColorInternal(null);
+								}
+								else
+								{
+									item3.GlowColor = new ColorInt(DarklightUtility.DefaultDarklight);
+								}
 							}
 						}
-					}
+					};
+					_003C_003E1__state = 6;
+					return true;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap2 != null)
+			{
+				_003C_003E7__wrap2.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CCompGetGizmosExtra_003Ed__34 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CCompGetGizmosExtra_003Ed__34(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
 				};
 			}
-			yield break;
-			yield break;
+			return result;
 		}
 
-		// Token: 0x06001A76 RID: 6774 RVA: 0x00085CA0 File Offset: 0x00083EA0
-		protected virtual void SetGlowColorInternal(ColorInt? color)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			if (this.ShouldBeLitNow)
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	public static Widgets.ColorComponents visibleColorTextfields = Widgets.ColorComponents.Hue | Widgets.ColorComponents.Sat;
+
+	public static Widgets.ColorComponents editableColorTextfields = Widgets.ColorComponents.Hue | Widgets.ColorComponents.Sat;
+
+	public static Widgets.ColorComponents visibleDebugColorTextfields = Widgets.ColorComponents.All;
+
+	public static Widgets.ColorComponents editableDebugColorTextfields = Widgets.ColorComponents.Red | Widgets.ColorComponents.Green | Widgets.ColorComponents.Blue | Widgets.ColorComponents.Hue | Widgets.ColorComponents.Sat;
+
+	public static ColorInt? ColorClipboard;
+
+	private bool glowOnInt;
+
+	private ColorInt? glowColorOverride;
+
+	private float? glowRadiusOverride;
+
+	private static List<CompGlower> tmpExtraGlowers = new List<CompGlower>(64);
+
+	public CompProperties_Glower Props => (CompProperties_Glower)props;
+
+	public virtual ColorInt GlowColor
+	{
+		get
+		{
+			return glowColorOverride ?? Props.glowColor;
+		}
+		set
+		{
+			SetGlowColorInternal(value);
+		}
+	}
+
+	public virtual float GlowRadius
+	{
+		get
+		{
+			return glowRadiusOverride ?? Props.glowRadius;
+		}
+		set
+		{
+			glowRadiusOverride = value;
+		}
+	}
+
+	protected virtual bool ShouldBeLitNow
+	{
+		get
+		{
+			if (!parent.Spawned)
 			{
-				this.parent.MapHeld.glowGrid.DeRegisterGlower(this);
+				return false;
 			}
-			this.glowColorOverride = color;
-			if (this.ShouldBeLitNow)
+			if (!FlickUtility.WantsToBeOn(parent))
 			{
-				this.parent.MapHeld.glowGrid.RegisterGlower(this);
+				return false;
+			}
+			if (parent is IThingGlower thingGlower && !thingGlower.ShouldBeLitNow())
+			{
+				return false;
+			}
+			ThingWithComps thingWithComps = parent;
+			if (thingWithComps != null)
+			{
+				foreach (ThingComp allComp in thingWithComps.AllComps)
+				{
+					if (allComp is IThingGlower thingGlower2 && !thingGlower2.ShouldBeLitNow())
+					{
+						return false;
+					}
+				}
+			}
+			return true;
+		}
+	}
+
+	public bool Glows => glowOnInt;
+
+	public bool HasGlowColorOverride => glowColorOverride.HasValue;
+
+	public void UpdateLit(Map map)
+	{
+		bool shouldBeLitNow = ShouldBeLitNow;
+		if (glowOnInt != shouldBeLitNow)
+		{
+			glowOnInt = shouldBeLitNow;
+			if (!glowOnInt)
+			{
+				map.mapDrawer.MapMeshDirty(parent.Position, MapMeshFlagDefOf.Things);
+				map.glowGrid.DeRegisterGlower(this);
+			}
+			else
+			{
+				map.mapDrawer.MapMeshDirty(parent.Position, MapMeshFlagDefOf.Things);
+				map.glowGrid.RegisterGlower(this);
 			}
 		}
+	}
 
-		// Token: 0x0400174C RID: 5964
-		public static Widgets.ColorComponents visibleColorTextfields = Widgets.ColorComponents.Hue | Widgets.ColorComponents.Sat;
+	public void ForceRegister(Map map)
+	{
+		map.glowGrid.DeRegisterGlower(this);
+		map.mapDrawer.MapMeshDirty(parent.Position, MapMeshFlagDefOf.Things);
+		map.glowGrid.RegisterGlower(this);
+	}
 
-		// Token: 0x0400174D RID: 5965
-		public static Widgets.ColorComponents editableColorTextfields = Widgets.ColorComponents.Hue | Widgets.ColorComponents.Sat;
-
-		// Token: 0x0400174E RID: 5966
-		public static Widgets.ColorComponents visibleDebugColorTextfields = Widgets.ColorComponents.All;
-
-		// Token: 0x0400174F RID: 5967
-		public static Widgets.ColorComponents editableDebugColorTextfields = Widgets.ColorComponents.Red | Widgets.ColorComponents.Green | Widgets.ColorComponents.Blue | Widgets.ColorComponents.Hue | Widgets.ColorComponents.Sat;
-
-		// Token: 0x04001750 RID: 5968
-		public static ColorInt? ColorClipboard;
-
-		// Token: 0x04001751 RID: 5969
-		private bool glowOnInt;
-
-		// Token: 0x04001752 RID: 5970
-		private ColorInt? glowColorOverride;
-
-		// Token: 0x04001753 RID: 5971
-		private float? glowRadiusOverride;
-
-		// Token: 0x04001754 RID: 5972
-		private static List<CompGlower> tmpExtraGlowers = new List<CompGlower>(64);
-
-		// Token: 0x02000414 RID: 1044
-		private enum GlowerColorChangeType
+	public override void PostSpawnSetup(bool respawningAfterLoad)
+	{
+		if (!parent.BeingTransportedOnGravship)
 		{
-			// Token: 0x04001756 RID: 5974
-			None,
-			// Token: 0x04001757 RID: 5975
-			ColorPickerEnabled,
-			// Token: 0x04001758 RID: 5976
-			DarklightToggle,
-			// Token: 0x04001759 RID: 5977
-			AllGlowers
+			RefreshGlower();
+		}
+	}
+
+	public override void PostSwapMap()
+	{
+		RefreshGlower();
+	}
+
+	public override void PostMapInit()
+	{
+		RefreshGlower();
+	}
+
+	private void RefreshGlower()
+	{
+		UpdateLit(parent.Map);
+		if (ShouldBeLitNow)
+		{
+			parent.Map.glowGrid.RegisterGlower(this);
+		}
+	}
+
+	public override void ReceiveCompSignal(string signal)
+	{
+		switch (signal)
+		{
+		case "PowerTurnedOn":
+		case "PowerTurnedOff":
+		case "FlickedOn":
+		case "FlickedOff":
+		case "Refueled":
+		case "RanOutOfFuel":
+		case "ScheduledOn":
+		case "ScheduledOff":
+		case "MechClusterDefeated":
+		case "Hacked":
+		case "RitualTargetChanged":
+		case "CrateContentsChanged":
+		case "Vacuum":
+			UpdateLit(parent.Map);
+			break;
+		}
+	}
+
+	public override void PostExposeData()
+	{
+		Scribe_Values.Look(ref glowOnInt, "glowOn", defaultValue: false);
+		Scribe_Values.Look(ref glowColorOverride, "glowColorOverride", null);
+	}
+
+	public override void PostDeSpawn(Map map, DestroyMode mode = DestroyMode.Vanish)
+	{
+		base.PostDeSpawn(map, mode);
+		UpdateLit(map);
+	}
+
+	private List<CompGlower> ExtraSelectedGlowers(GlowerColorChangeType type)
+	{
+		tmpExtraGlowers.Clear();
+		foreach (object item in Find.Selector.SelectedObjectsListForReading)
+		{
+			if (item == this || !(item is ThingWithComps thingWithComps))
+			{
+				continue;
+			}
+			foreach (CompGlower comp in thingWithComps.GetComps<CompGlower>())
+			{
+				if (type == GlowerColorChangeType.AllGlowers || (type == GlowerColorChangeType.ColorPickerEnabled && comp.Props.colorPickerEnabled) || (type == GlowerColorChangeType.DarklightToggle && comp.Props.darklightToggle))
+				{
+					tmpExtraGlowers.Add(comp);
+				}
+			}
+		}
+		return tmpExtraGlowers;
+	}
+
+	[IteratorStateMachine(typeof(_003CCompGetGizmosExtra_003Ed__34))]
+	public override IEnumerable<Gizmo> CompGetGizmosExtra()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CCompGetGizmosExtra_003Ed__34(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	protected virtual void SetGlowColorInternal(ColorInt? color)
+	{
+		if (ShouldBeLitNow)
+		{
+			parent.MapHeld.glowGrid.DeRegisterGlower(this);
+		}
+		glowColorOverride = color;
+		if (ShouldBeLitNow)
+		{
+			parent.MapHeld.glowGrid.RegisterGlower(this);
 		}
 	}
 }

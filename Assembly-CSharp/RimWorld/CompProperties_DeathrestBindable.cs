@@ -1,61 +1,164 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompProperties_DeathrestBindable : CompProperties
 {
-	// Token: 0x02002A62 RID: 10850
-	public class CompProperties_DeathrestBindable : CompProperties
+	[CompilerGenerated]
+	private sealed class _003CSpecialDisplayStats_003Ed__11 : IEnumerable<StatDrawEntry>, IEnumerable, IEnumerator<StatDrawEntry>, IEnumerator, IDisposable
 	{
-		// Token: 0x0600F134 RID: 61748 RVA: 0x0045F837 File Offset: 0x0045DA37
-		public CompProperties_DeathrestBindable()
+		private int _003C_003E1__state;
+
+		private StatDrawEntry _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompProperties_DeathrestBindable _003C_003E4__this;
+
+		StatDrawEntry IEnumerator<StatDrawEntry>.Current
 		{
-			this.compClass = typeof(CompDeathrestBindable);
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x0600F135 RID: 61749 RVA: 0x0045F868 File Offset: 0x0045DA68
-		public override IEnumerable<StatDrawEntry> SpecialDisplayStats(StatRequest req)
+		object IEnumerator.Current
 		{
-			if (!Mathf.Approximately(this.deathrestEffectivenessFactor, 1f))
+			[DebuggerHidden]
+			get
 			{
-				yield return new StatDrawEntry(StatCategoryDefOf.Building, "StatsReport_DeathrestEffectiveness".Translate(), this.deathrestEffectivenessFactor.ToStringPercent(), "StatsReport_DeathrestEffectiveness_Desc".Translate(), 900, null, null, false, false);
+				return _003C_003E2__current;
 			}
-			if (!this.mustBeLayingInToBind)
-			{
-				yield return new StatDrawEntry(StatCategoryDefOf.Building, "StatsReport_DeathrestConnectionLimit".Translate(), (this.stackLimit <= 0) ? "Unlimited".Translate().ToString() : this.stackLimit.ToString(), "StatsReport_DeathrestConnectionLimit_Desc".Translate(), 910, null, null, false, false);
-			}
-			yield break;
 		}
 
-		// Token: 0x04009F18 RID: 40728
-		public int stackLimit;
+		[DebuggerHidden]
+		public _003CSpecialDisplayStats_003Ed__11(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
 
-		// Token: 0x04009F19 RID: 40729
-		public bool countsTowardsBuildingLimit = true;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
 
-		// Token: 0x04009F1A RID: 40730
-		public bool displayTimeActive = true;
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			CompProperties_DeathrestBindable compProperties_DeathrestBindable = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (!Mathf.Approximately(compProperties_DeathrestBindable.deathrestEffectivenessFactor, 1f))
+				{
+					_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.Building, "StatsReport_DeathrestEffectiveness".Translate(), compProperties_DeathrestBindable.deathrestEffectivenessFactor.ToStringPercent(), "StatsReport_DeathrestEffectiveness_Desc".Translate(), 900);
+					_003C_003E1__state = 1;
+					return true;
+				}
+				goto IL_008d;
+			case 1:
+				_003C_003E1__state = -1;
+				goto IL_008d;
+			case 2:
+				{
+					_003C_003E1__state = -1;
+					break;
+				}
+				IL_008d:
+				if (!compProperties_DeathrestBindable.mustBeLayingInToBind)
+				{
+					_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.Building, "StatsReport_DeathrestConnectionLimit".Translate(), (compProperties_DeathrestBindable.stackLimit <= 0) ? "Unlimited".Translate().ToString() : compProperties_DeathrestBindable.stackLimit.ToString(), "StatsReport_DeathrestConnectionLimit_Desc".Translate(), 910);
+					_003C_003E1__state = 2;
+					return true;
+				}
+				break;
+			}
+			return false;
+		}
 
-		// Token: 0x04009F1B RID: 40731
-		public float deathrestEffectivenessFactor = 1f;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x04009F1C RID: 40732
-		public bool mustBeLayingInToBind;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04009F1D RID: 40733
-		public float hemogenLimitOffset;
+		[DebuggerHidden]
+		IEnumerator<StatDrawEntry> IEnumerable<StatDrawEntry>.GetEnumerator()
+		{
+			_003CSpecialDisplayStats_003Ed__11 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CSpecialDisplayStats_003Ed__11(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x04009F1E RID: 40734
-		public HediffDef hediffToApply;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<StatDrawEntry>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x04009F1F RID: 40735
-		public SoundDef soundWorking;
+	public int stackLimit;
 
-		// Token: 0x04009F20 RID: 40736
-		public SoundDef soundStart;
+	public bool countsTowardsBuildingLimit = true;
 
-		// Token: 0x04009F21 RID: 40737
-		public SoundDef soundEnd;
+	public bool displayTimeActive = true;
+
+	public float deathrestEffectivenessFactor = 1f;
+
+	public bool mustBeLayingInToBind;
+
+	public float hemogenLimitOffset;
+
+	public HediffDef hediffToApply;
+
+	public SoundDef soundWorking;
+
+	public SoundDef soundStart;
+
+	public SoundDef soundEnd;
+
+	public CompProperties_DeathrestBindable()
+	{
+		compClass = typeof(CompDeathrestBindable);
+	}
+
+	[IteratorStateMachine(typeof(_003CSpecialDisplayStats_003Ed__11))]
+	public override IEnumerable<StatDrawEntry> SpecialDisplayStats(StatRequest req)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CSpecialDisplayStats_003Ed__11(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

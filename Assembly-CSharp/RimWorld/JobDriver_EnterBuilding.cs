@@ -1,47 +1,152 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_EnterBuilding : JobDriver
 {
-	// Token: 0x0200125F RID: 4703
-	public class JobDriver_EnterBuilding : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__4 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x170011F0 RID: 4592
-		// (get) Token: 0x0600730E RID: 29454 RVA: 0x0023695B File Offset: 0x00234B5B
-		private Building_Enterable Building
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_EnterBuilding _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (Building_Enterable)this.job.targetA.Thing;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600730F RID: 29455 RVA: 0x001E06E3 File Offset: 0x001DE8E3
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		object IEnumerator.Current
 		{
-			return this.pawn.Reserve(this.job.targetA, this.job, 1, -1, null, errorOnFailed, false);
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x06007310 RID: 29456 RVA: 0x00236972 File Offset: 0x00234B72
-		protected override IEnumerable<Toil> MakeNewToils()
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__4(int _003C_003E1__state)
 		{
-			this.FailOnDespawnedOrNull(TargetIndex.A);
-			this.FailOn(() => !this.Building.CanAcceptPawn(this.pawn));
-			yield return Toils_General.Do(delegate
-			{
-				this.Building.SelectedPawn = this.pawn;
-			});
-			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.InteractionCell, false);
-			yield return Toils_General.WaitWith(TargetIndex.A, 60, true, false, false, TargetIndex.None, PathEndMode.Touch);
-			yield return Toils_General.Do(delegate
-			{
-				this.Building.TryAcceptPawn(this.pawn);
-			});
-			yield break;
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x04004F6B RID: 20331
-		public const int EnterDelay = 60;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_EnterBuilding CS_0024_003C_003E8__locals8 = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				CS_0024_003C_003E8__locals8.FailOnDespawnedOrNull(TargetIndex.A);
+				CS_0024_003C_003E8__locals8.FailOn(() => !CS_0024_003C_003E8__locals8.Building.CanAcceptPawn(CS_0024_003C_003E8__locals8.pawn));
+				_003C_003E2__current = Toils_General.Do(delegate
+				{
+					CS_0024_003C_003E8__locals8.Building.SelectedPawn = CS_0024_003C_003E8__locals8.pawn;
+				});
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.InteractionCell);
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.WaitWith(TargetIndex.A, 60, useProgressBar: true);
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.Do(delegate
+				{
+					CS_0024_003C_003E8__locals8.Building.TryAcceptPawn(CS_0024_003C_003E8__locals8.pawn);
+				});
+				_003C_003E1__state = 4;
+				return true;
+			case 4:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__4 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__4(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	public const int EnterDelay = 60;
+
+	private Building_Enterable Building => (Building_Enterable)job.targetA.Thing;
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return pawn.Reserve(job.targetA, job, 1, -1, null, errorOnFailed);
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__4))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__4(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

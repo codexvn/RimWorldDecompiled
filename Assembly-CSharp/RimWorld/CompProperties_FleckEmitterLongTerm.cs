@@ -1,66 +1,157 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompProperties_FleckEmitterLongTerm : CompProperties
 {
-	// Token: 0x02002D1E RID: 11550
-	public class CompProperties_FleckEmitterLongTerm : CompProperties
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__14 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x060103A7 RID: 66471 RVA: 0x004B1694 File Offset: 0x004AF894
-		public CompProperties_FleckEmitterLongTerm()
-		{
-			this.compClass = typeof(CompFleckEmitterLongTerm);
-		}
+		private int _003C_003E1__state;
 
-		// Token: 0x060103A8 RID: 66472 RVA: 0x004B16E3 File Offset: 0x004AF8E3
-		public override IEnumerable<string> ConfigErrors(ThingDef parentDef)
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompProperties_FleckEmitterLongTerm _003C_003E4__this;
+
+		string IEnumerator<string>.Current
 		{
-			if (this.fleckDef == null)
+			[DebuggerHidden]
+			get
 			{
-				yield return "CompLongTermFleckEmitter must have a fleck assigned.";
+				return _003C_003E2__current;
 			}
-			yield break;
 		}
 
-		// Token: 0x0400A97A RID: 43386
-		public FleckDef fleckDef;
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
 
-		// Token: 0x0400A97B RID: 43387
-		public float spawnRadius;
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__14(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
 
-		// Token: 0x0400A97C RID: 43388
-		public float spawnChance;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
 
-		// Token: 0x0400A97D RID: 43389
-		public Vector3 spawnOffsetFromCenter = Vector3.zero;
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			CompProperties_FleckEmitterLongTerm compProperties_FleckEmitterLongTerm = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (compProperties_FleckEmitterLongTerm.fleckDef == null)
+				{
+					_003C_003E2__current = "CompLongTermFleckEmitter must have a fleck assigned.";
+					_003C_003E1__state = 1;
+					return true;
+				}
+				break;
+			case 1:
+				_003C_003E1__state = -1;
+				break;
+			}
+			return false;
+		}
 
-		// Token: 0x0400A97E RID: 43390
-		public float prewarmCycles;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x0400A97F RID: 43391
-		public float fleckScale = 1f;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x0400A980 RID: 43392
-		public float minRotationRate;
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__14 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__14(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x0400A981 RID: 43393
-		public float maxRotationRate;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x0400A982 RID: 43394
-		public float minVelocityAngle;
+	public FleckDef fleckDef;
 
-		// Token: 0x0400A983 RID: 43395
-		public float maxVelocityAngle;
+	public float spawnRadius;
 
-		// Token: 0x0400A984 RID: 43396
-		public float minVelocitySpeed = 1f;
+	public float spawnChance;
 
-		// Token: 0x0400A985 RID: 43397
-		public float maxVelocitySpeed = 1f;
+	public Vector3 spawnOffsetFromCenter = Vector3.zero;
 
-		// Token: 0x0400A986 RID: 43398
-		public bool forceEnabled;
+	public float prewarmCycles;
+
+	public float fleckScale = 1f;
+
+	public float minRotationRate;
+
+	public float maxRotationRate;
+
+	public float minVelocityAngle;
+
+	public float maxVelocityAngle;
+
+	public float minVelocitySpeed = 1f;
+
+	public float maxVelocitySpeed = 1f;
+
+	public bool forceEnabled;
+
+	public CompProperties_FleckEmitterLongTerm()
+	{
+		compClass = typeof(CompFleckEmitterLongTerm);
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__14))]
+	public override IEnumerable<string> ConfigErrors(ThingDef parentDef)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__14(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

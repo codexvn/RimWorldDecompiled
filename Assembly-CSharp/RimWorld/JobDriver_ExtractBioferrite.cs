@@ -1,97 +1,187 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_ExtractBioferrite : JobDriver
 {
-	// Token: 0x0200126F RID: 4719
-	public class JobDriver_ExtractBioferrite : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__9 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001203 RID: 4611
-		// (get) Token: 0x0600736E RID: 29550 RVA: 0x00229653 File Offset: 0x00227853
-		private Thing Platform
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_ExtractBioferrite _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return base.TargetThingA;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001204 RID: 4612
-		// (get) Token: 0x0600736F RID: 29551 RVA: 0x00237823 File Offset: 0x00235A23
-		private Pawn InnerPawn
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				Building_HoldingPlatform building_HoldingPlatform = this.Platform as Building_HoldingPlatform;
-				if (building_HoldingPlatform == null)
-				{
-					return null;
-				}
-				return building_HoldingPlatform.HeldPawn;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06007370 RID: 29552 RVA: 0x0023783B File Offset: 0x00235A3B
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__9(int _003C_003E1__state)
 		{
-			return this.pawn.Reserve(this.Platform, this.job, 1, -1, null, errorOnFailed, false);
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x06007371 RID: 29553 RVA: 0x00237863 File Offset: 0x00235A63
-		protected override IEnumerable<Toil> MakeNewToils()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			this.FailOnDespawnedNullOrForbidden(TargetIndex.A);
-			this.FailOn(delegate()
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_ExtractBioferrite CS_0024_003C_003E8__locals7 = _003C_003E4__this;
+			switch (num)
 			{
-				Pawn innerPawn = this.InnerPawn;
-				if (innerPawn == null || innerPawn.Destroyed)
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				CS_0024_003C_003E8__locals7.FailOnDespawnedNullOrForbidden(TargetIndex.A);
+				CS_0024_003C_003E8__locals7.FailOn(delegate
 				{
-					return true;
-				}
-				CompHoldingPlatformTarget compHoldingPlatformTarget = innerPawn.TryGetComp<CompHoldingPlatformTarget>();
-				return compHoldingPlatformTarget != null && (compHoldingPlatformTarget.containmentMode == EntityContainmentMode.Release || !compHoldingPlatformTarget.extractBioferrite);
-			});
-			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.ClosestTouch, false).FailOnSomeonePhysicallyInteracting(TargetIndex.A);
-			int ticks = (int)(1f / this.pawn.GetStatValue(StatDefOf.MedicalTendSpeed, true, -1) * 2000f);
-			Toil toil = Toils_General.WaitWith(TargetIndex.A, ticks, true, false, false, TargetIndex.A, PathEndMode.Touch);
-			toil.activeSkill = (() => SkillDefOf.Medicine);
-			toil.FailOnCannotTouch(TargetIndex.A, PathEndMode.ClosestTouch).WithProgressBarToilDelay(TargetIndex.A, false, -0.5f).PlaySustainerOrSound(SoundDefOf.Recipe_Surgery, 1f);
-			yield return toil;
-			yield return Toils_General.Do(delegate
+					Pawn innerPawn2 = CS_0024_003C_003E8__locals7.InnerPawn;
+					if (innerPawn2 == null || innerPawn2.Destroyed)
+					{
+						return true;
+					}
+					CompHoldingPlatformTarget compHoldingPlatformTarget = innerPawn2.TryGetComp<CompHoldingPlatformTarget>();
+					return (compHoldingPlatformTarget != null && (compHoldingPlatformTarget.containmentMode == EntityContainmentMode.Release || !compHoldingPlatformTarget.extractBioferrite)) ? true : false;
+				});
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.ClosestTouch).FailOnSomeonePhysicallyInteracting(TargetIndex.A);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
 			{
-				Pawn innerPawn = this.InnerPawn;
-				int num = Mathf.FloorToInt(CompProducesBioferrite.BioferritePerDay(innerPawn) * 4f);
-				if (num > 0)
+				_003C_003E1__state = -1;
+				int ticks = (int)(1f / CS_0024_003C_003E8__locals7.pawn.GetStatValue(StatDefOf.MedicalTendSpeed) * 2000f);
+				Toil toil = Toils_General.WaitWith(TargetIndex.A, ticks, useProgressBar: true, maintainPosture: false, maintainSleep: false, TargetIndex.A);
+				toil.activeSkill = () => SkillDefOf.Medicine;
+				toil.FailOnCannotTouch(TargetIndex.A, PathEndMode.ClosestTouch).WithProgressBarToilDelay(TargetIndex.A).PlaySustainerOrSound(SoundDefOf.Recipe_Surgery);
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 2;
+				return true;
+			}
+			case 2:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.Do(delegate
 				{
-					Thing thing = ThingMaker.MakeThing(ThingDefOf.Bioferrite, null);
-					thing.stackCount = num;
-					GenPlace.TryPlaceThing(thing, this.pawn.Position, this.pawn.Map, ThingPlaceMode.Near, null, null, null, 1);
-				}
-				innerPawn.TakeDamage(new DamageInfo(DamageDefOf.SurgicalCut, 4f, 0f, -1f, null, null, null, DamageInfo.SourceCategory.ThingOrUnknown, null, true, true, QualityCategory.Normal, true, false));
-				innerPawn.health.AddHediff(HediffDefOf.BioferriteExtracted, null, null, null);
-			});
-			yield break;
+					Pawn innerPawn = CS_0024_003C_003E8__locals7.InnerPawn;
+					int num2 = Mathf.FloorToInt(CompProducesBioferrite.BioferritePerDay(innerPawn) * 4f);
+					if (num2 > 0)
+					{
+						Thing thing = ThingMaker.MakeThing(ThingDefOf.Bioferrite);
+						thing.stackCount = num2;
+						GenPlace.TryPlaceThing(thing, CS_0024_003C_003E8__locals7.pawn.Position, CS_0024_003C_003E8__locals7.pawn.Map, ThingPlaceMode.Near, null, null, null);
+					}
+					innerPawn.TakeDamage(new DamageInfo(DamageDefOf.SurgicalCut, 4f));
+					innerPawn.health.AddHediff(HediffDefOf.BioferriteExtracted, null, null);
+				});
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+				_003C_003E1__state = -1;
+				return false;
+			}
 		}
 
-		// Token: 0x06007372 RID: 29554 RVA: 0x00237873 File Offset: 0x00235A73
-		public override string GetReport()
+		bool IEnumerator.MoveNext()
 		{
-			return JobUtility.GetResolvedJobReport(this.job.def.reportString, this.InnerPawn, this.job.targetB, this.job.targetC);
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x04004F91 RID: 20369
-		private const TargetIndex PlatformIndex = TargetIndex.A;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04004F92 RID: 20370
-		private const int ExtractDuration = 2000;
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__9 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__9(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x04004F93 RID: 20371
-		private const int CutDamage = 4;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x04004F94 RID: 20372
-		private const int BioferriteModifier = 4;
+	private const TargetIndex PlatformIndex = TargetIndex.A;
+
+	private const int ExtractDuration = 2000;
+
+	private const int CutDamage = 4;
+
+	private const int BioferriteModifier = 4;
+
+	private Thing Platform => base.TargetThingA;
+
+	private Pawn InnerPawn => (Platform as Building_HoldingPlatform)?.HeldPawn;
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		if (!pawn.Reserve(Platform, job, 1, -1, null, errorOnFailed))
+		{
+			return false;
+		}
+		return true;
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__9))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__9(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override string GetReport()
+	{
+		return JobUtility.GetResolvedJobReport(job.def.reportString, InnerPawn, job.targetB, job.targetC);
 	}
 }

@@ -1,141 +1,104 @@
-﻿using System;
+using System;
 using UnityEngine;
 using Verse;
 using Verse.Grammar;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class InteractionDef : Def
 {
-	// Token: 0x02001A5A RID: 6746
-	public class InteractionDef : Def
+	private Type workerClass = typeof(InteractionWorker);
+
+	public ThingDef interactionMote;
+
+	public float socialFightBaseChance;
+
+	public ThoughtDef initiatorThought;
+
+	public SkillDef initiatorXpGainSkill;
+
+	public int initiatorXpGainAmount;
+
+	public ThoughtDef recipientThought;
+
+	public SkillDef recipientXpGainSkill;
+
+	public int recipientXpGainAmount;
+
+	public bool ignoreTimeSinceLastInteraction;
+
+	[NoTranslate]
+	private string symbol;
+
+	public InteractionSymbolSource symbolSource;
+
+	public RulePack logRulesInitiator;
+
+	public RulePack logRulesRecipient;
+
+	[Unsaved(false)]
+	private InteractionWorker workerInt;
+
+	[Unsaved(false)]
+	private Texture2D symbolTex;
+
+	public InteractionWorker Worker
 	{
-		// Token: 0x1700172D RID: 5933
-		// (get) Token: 0x0600979C RID: 38812 RVA: 0x002C494F File Offset: 0x002C2B4F
-		public InteractionWorker Worker
+		get
 		{
-			get
+			if (workerInt == null)
 			{
-				if (this.workerInt == null)
-				{
-					this.workerInt = (InteractionWorker)Activator.CreateInstance(this.workerClass);
-					this.workerInt.interaction = this;
-				}
-				return this.workerInt;
+				workerInt = (InteractionWorker)Activator.CreateInstance(workerClass);
+				workerInt.interaction = this;
 			}
+			return workerInt;
 		}
+	}
 
-		// Token: 0x1700172E RID: 5934
-		// (get) Token: 0x0600979D RID: 38813 RVA: 0x002C4981 File Offset: 0x002C2B81
-		private Texture2D Symbol
+	private Texture2D Symbol
+	{
+		get
 		{
-			get
+			if (symbolTex == null)
 			{
-				if (this.symbolTex == null)
-				{
-					this.symbolTex = ContentFinder<Texture2D>.Get(this.symbol, true);
-				}
-				return this.symbolTex;
+				symbolTex = ContentFinder<Texture2D>.Get(symbol);
 			}
+			return symbolTex;
 		}
+	}
 
-		// Token: 0x0600979E RID: 38814 RVA: 0x002C49AC File Offset: 0x002C2BAC
-		public Texture2D GetSymbol(Faction initiatorFaction = null, Ideo initatorIdeo = null)
+	public Texture2D GetSymbol(Faction initiatorFaction = null, Ideo initatorIdeo = null)
+	{
+		switch (symbolSource)
 		{
-			InteractionSymbolSource interactionSymbolSource = this.symbolSource;
-			if (interactionSymbolSource != InteractionSymbolSource.InitiatorIdeo)
+		case InteractionSymbolSource.InitiatorIdeo:
+			if (Find.IdeoManager.classicMode)
 			{
-				if (interactionSymbolSource != InteractionSymbolSource.InitiatorFaction)
-				{
-					return this.Symbol;
-				}
-				if (initiatorFaction == null)
-				{
-					return null;
-				}
-				return initiatorFaction.def.FactionIcon;
+				return Symbol;
 			}
-			else
-			{
-				if (Find.IdeoManager.classicMode)
-				{
-					return this.Symbol;
-				}
-				if (initatorIdeo == null)
-				{
-					return null;
-				}
-				return initatorIdeo.Icon;
-			}
+			return initatorIdeo?.Icon;
+		case InteractionSymbolSource.InitiatorFaction:
+			return initiatorFaction?.def.FactionIcon;
+		default:
+			return Symbol;
 		}
+	}
 
-		// Token: 0x0600979F RID: 38815 RVA: 0x002C4A00 File Offset: 0x002C2C00
-		public Color? GetSymbolColor(Faction initiatorFaction = null)
+	public Color? GetSymbolColor(Faction initiatorFaction = null)
+	{
+		if (initiatorFaction != null && symbolSource == InteractionSymbolSource.InitiatorFaction)
 		{
-			if (initiatorFaction != null && this.symbolSource == InteractionSymbolSource.InitiatorFaction)
-			{
-				return new Color?(initiatorFaction.Color);
-			}
-			return null;
+			return initiatorFaction.Color;
 		}
+		return null;
+	}
 
-		// Token: 0x060097A0 RID: 38816 RVA: 0x002C4A2E File Offset: 0x002C2C2E
-		public override void ResolveReferences()
+	public override void ResolveReferences()
+	{
+		base.ResolveReferences();
+		if (interactionMote == null)
 		{
-			base.ResolveReferences();
-			if (this.interactionMote == null)
-			{
-				this.interactionMote = ThingDefOf.Mote_Speech;
-			}
+			interactionMote = ThingDefOf.Mote_Speech;
 		}
-
-		// Token: 0x040064EA RID: 25834
-		private Type workerClass = typeof(InteractionWorker);
-
-		// Token: 0x040064EB RID: 25835
-		public ThingDef interactionMote;
-
-		// Token: 0x040064EC RID: 25836
-		public float socialFightBaseChance;
-
-		// Token: 0x040064ED RID: 25837
-		public ThoughtDef initiatorThought;
-
-		// Token: 0x040064EE RID: 25838
-		public SkillDef initiatorXpGainSkill;
-
-		// Token: 0x040064EF RID: 25839
-		public int initiatorXpGainAmount;
-
-		// Token: 0x040064F0 RID: 25840
-		public ThoughtDef recipientThought;
-
-		// Token: 0x040064F1 RID: 25841
-		public SkillDef recipientXpGainSkill;
-
-		// Token: 0x040064F2 RID: 25842
-		public int recipientXpGainAmount;
-
-		// Token: 0x040064F3 RID: 25843
-		public bool ignoreTimeSinceLastInteraction;
-
-		// Token: 0x040064F4 RID: 25844
-		[NoTranslate]
-		private string symbol;
-
-		// Token: 0x040064F5 RID: 25845
-		public InteractionSymbolSource symbolSource;
-
-		// Token: 0x040064F6 RID: 25846
-		public RulePack logRulesInitiator;
-
-		// Token: 0x040064F7 RID: 25847
-		public RulePack logRulesRecipient;
-
-		// Token: 0x040064F8 RID: 25848
-		[Unsaved(false)]
-		private InteractionWorker workerInt;
-
-		// Token: 0x040064F9 RID: 25849
-		[Unsaved(false)]
-		private Texture2D symbolTex;
 	}
 }

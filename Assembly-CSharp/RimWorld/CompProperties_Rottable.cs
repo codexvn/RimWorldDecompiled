@@ -1,85 +1,208 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompProperties_Rottable : CompProperties
 {
-	// Token: 0x02001980 RID: 6528
-	public class CompProperties_Rottable : CompProperties
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__12 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700167D RID: 5757
-		// (get) Token: 0x0600941E RID: 37918 RVA: 0x002B867B File Offset: 0x002B687B
-		public int TicksToRotStart
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompProperties_Rottable _003C_003E4__this;
+
+		private ThingDef parentDef;
+
+		public ThingDef _003C_003E3__parentDef;
+
+		private IEnumerator<string> _003C_003E7__wrap1;
+
+		string IEnumerator<string>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return Mathf.RoundToInt(this.daysToRotStart * 60000f);
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700167E RID: 5758
-		// (get) Token: 0x0600941F RID: 37919 RVA: 0x002B868E File Offset: 0x002B688E
-		public int TicksToDessicated
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return Mathf.RoundToInt(this.daysToDessicated * 60000f);
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06009420 RID: 37920 RVA: 0x002B86A1 File Offset: 0x002B68A1
-		public CompProperties_Rottable()
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__12(int _003C_003E1__state)
 		{
-			this.compClass = typeof(CompRottable);
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x06009421 RID: 37921 RVA: 0x002B86DA File Offset: 0x002B68DA
-		public CompProperties_Rottable(float daysToRotStart)
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			this.daysToRotStart = daysToRotStart;
-		}
-
-		// Token: 0x06009422 RID: 37922 RVA: 0x002B870A File Offset: 0x002B690A
-		public override IEnumerable<string> ConfigErrors(ThingDef parentDef)
-		{
-			foreach (string text in base.ConfigErrors(parentDef))
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				yield return text;
-			}
-			IEnumerator<string> enumerator = null;
-			if (parentDef.tickerType != TickerType.Normal && parentDef.tickerType != TickerType.Rare)
-			{
-				yield return string.Concat(new string[]
+				try
 				{
-					"CompRottable needs tickerType ",
-					TickerType.Rare.ToString(),
-					" or ",
-					TickerType.Normal.ToString(),
-					", has ",
-					parentDef.tickerType.ToString()
-				});
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
 			}
-			yield break;
-			yield break;
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x04005FA5 RID: 24485
-		public float daysToRotStart = 2f;
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				CompProperties_Rottable compProperties_Rottable = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((CompProperties)compProperties_Rottable).ConfigErrors(parentDef).GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0078;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0078;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_0078:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (parentDef.tickerType != TickerType.Normal && parentDef.tickerType != TickerType.Rare)
+					{
+						_003C_003E2__current = "CompRottable needs tickerType " + TickerType.Rare.ToString() + " or " + TickerType.Normal.ToString() + ", has " + parentDef.tickerType;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
 
-		// Token: 0x04005FA6 RID: 24486
-		public bool rotDestroys;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x04005FA7 RID: 24487
-		public float rotDamagePerDay = 40f;
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
 
-		// Token: 0x04005FA8 RID: 24488
-		public float daysToDessicated = 999f;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04005FA9 RID: 24489
-		public float dessicatedDamagePerDay;
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__12 _003CConfigErrors_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CConfigErrors_003Ed__ = this;
+			}
+			else
+			{
+				_003CConfigErrors_003Ed__ = new _003CConfigErrors_003Ed__12(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CConfigErrors_003Ed__.parentDef = _003C_003E3__parentDef;
+			return _003CConfigErrors_003Ed__;
+		}
 
-		// Token: 0x04005FAA RID: 24490
-		public bool disableIfHatcher;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	public float daysToRotStart = 2f;
+
+	public bool rotDestroys;
+
+	public float rotDamagePerDay = 40f;
+
+	public float daysToDessicated = 999f;
+
+	public float dessicatedDamagePerDay;
+
+	public bool disableIfHatcher;
+
+	public int TicksToRotStart => Mathf.RoundToInt(daysToRotStart * 60000f);
+
+	public int TicksToDessicated => Mathf.RoundToInt(daysToDessicated * 60000f);
+
+	public CompProperties_Rottable()
+	{
+		compClass = typeof(CompRottable);
+	}
+
+	public CompProperties_Rottable(float daysToRotStart)
+	{
+		this.daysToRotStart = daysToRotStart;
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__12))]
+	public override IEnumerable<string> ConfigErrors(ThingDef parentDef)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__12(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__parentDef = parentDef
+		};
 	}
 }

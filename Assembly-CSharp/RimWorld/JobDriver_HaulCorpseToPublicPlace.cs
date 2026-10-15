@@ -1,175 +1,279 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_HaulCorpseToPublicPlace : JobDriver
 {
-	// Token: 0x0200128D RID: 4749
-	public class JobDriver_HaulCorpseToPublicPlace : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__13 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001225 RID: 4645
-		// (get) Token: 0x06007440 RID: 29760 RVA: 0x00239FF4 File Offset: 0x002381F4
-		private Corpse Corpse
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_HaulCorpseToPublicPlace _003C_003E4__this;
+
+		private Toil _003CgotoCorpse_003E5__2;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (Corpse)this.job.GetTarget(TargetIndex.A).Thing;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001226 RID: 4646
-		// (get) Token: 0x06007441 RID: 29761 RVA: 0x0023A01C File Offset: 0x0023821C
-		private Building_Grave Grave
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (Building_Grave)this.job.GetTarget(TargetIndex.B).Thing;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001227 RID: 4647
-		// (get) Token: 0x06007442 RID: 29762 RVA: 0x0023A042 File Offset: 0x00238242
-		private bool InGrave
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__13(int _003C_003E1__state)
 		{
-			get
-			{
-				return this.Grave != null;
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x17001228 RID: 4648
-		// (get) Token: 0x06007443 RID: 29763 RVA: 0x0023A04D File Offset: 0x0023824D
-		private Thing Target
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			get
-			{
-				return this.Grave ?? this.Corpse;
-			}
+			_003CgotoCorpse_003E5__2 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x06007444 RID: 29764 RVA: 0x0023A05F File Offset: 0x0023825F
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		private bool MoveNext()
 		{
-			return this.pawn.Reserve(this.Target, this.job, 1, -1, null, errorOnFailed, false);
-		}
-
-		// Token: 0x06007445 RID: 29765 RVA: 0x0023A082 File Offset: 0x00238282
-		public override string GetReport()
-		{
-			if (this.InGrave && this.Grave.def == ThingDefOf.Grave)
+			int num = _003C_003E1__state;
+			JobDriver_HaulCorpseToPublicPlace jobDriver_HaulCorpseToPublicPlace = _003C_003E4__this;
+			switch (num)
 			{
-				return "ReportDiggingUpCorpse".Translate();
-			}
-			return base.GetReport();
-		}
-
-		// Token: 0x06007446 RID: 29766 RVA: 0x0023A0B4 File Offset: 0x002382B4
-		protected override IEnumerable<Toil> MakeNewToils()
-		{
-			this.FailOnDestroyedOrNull(TargetIndex.A);
-			Toil gotoCorpse = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch, false).FailOnDespawnedOrNull(TargetIndex.A);
-			yield return Toils_Jump.JumpIfTargetInvalid(TargetIndex.B, gotoCorpse);
-			yield return Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.InteractionCell, false).FailOnDespawnedOrNull(TargetIndex.B);
-			Building_Grave grave = this.Grave;
-			yield return Toils_General.Wait((grave != null) ? grave.OpenTicks : 60, TargetIndex.None).WithProgressBarToilDelay(TargetIndex.B, false, -0.5f).FailOnDespawnedOrNull(TargetIndex.B).FailOnCannotTouch(TargetIndex.B, PathEndMode.InteractionCell);
-			yield return Toils_General.Open(TargetIndex.B);
-			yield return Toils_Reserve.Reserve(TargetIndex.A, 1, -1, null, false);
-			yield return gotoCorpse;
-			yield return Toils_Haul.StartCarryThing(TargetIndex.A, false, false, false, true, false);
-			yield return this.FindCellToDropCorpseToil();
-			yield return Toils_Reserve.Reserve(TargetIndex.C, 1, -1, null, false);
-			yield return Toils_Goto.GotoCell(TargetIndex.C, PathEndMode.Touch);
-			yield return Toils_Haul.PlaceHauledThingInCell(TargetIndex.C, null, false, false);
-			yield return this.ForbidAndNotifyMentalStateToil();
-			yield break;
-		}
-
-		// Token: 0x06007447 RID: 29767 RVA: 0x0023A0C4 File Offset: 0x002382C4
-		private Toil FindCellToDropCorpseToil()
-		{
-			Toil toil = ToilMaker.MakeToil("FindCellToDropCorpseToil");
-			toil.initAction = delegate()
-			{
-				IntVec3 c = IntVec3.Invalid;
-				if (!Rand.Chance(0.8f) || !this.TryFindTableCell(out c))
-				{
-					bool flag = false;
-					IntVec3 root;
-					if (RCellFinder.TryFindRandomSpotJustOutsideColony(this.pawn, out root) && CellFinder.TryRandomClosewalkCellNear(root, this.pawn.Map, 5, out c, (IntVec3 x) => this.pawn.CanReserve(x, 1, -1, null, false) && x.GetFirstItem(this.pawn.Map) == null))
-					{
-						flag = true;
-					}
-					if (!flag)
-					{
-						c = CellFinder.RandomClosewalkCellNear(this.pawn.Position, this.pawn.Map, 10, (IntVec3 x) => this.pawn.CanReserve(x, 1, -1, null, false) && x.GetFirstItem(this.pawn.Map) == null);
-					}
-				}
-				this.job.SetTarget(TargetIndex.C, c);
-			};
-			toil.atomicWithPrevious = true;
-			return toil;
-		}
-
-		// Token: 0x06007448 RID: 29768 RVA: 0x0023A0E9 File Offset: 0x002382E9
-		private Toil ForbidAndNotifyMentalStateToil()
-		{
-			Toil toil = ToilMaker.MakeToil("ForbidAndNotifyMentalStateToil");
-			toil.initAction = delegate()
-			{
-				Corpse corpse = this.Corpse;
-				if (corpse != null)
-				{
-					corpse.SetForbidden(true, true);
-				}
-				MentalState_CorpseObsession mentalState_CorpseObsession = this.pawn.MentalState as MentalState_CorpseObsession;
-				if (mentalState_CorpseObsession != null)
-				{
-					mentalState_CorpseObsession.Notify_CorpseHauled();
-				}
-			};
-			toil.atomicWithPrevious = true;
-			return toil;
-		}
-
-		// Token: 0x06007449 RID: 29769 RVA: 0x0023A110 File Offset: 0x00238310
-		private bool TryFindTableCell(out IntVec3 cell)
-		{
-			JobDriver_HaulCorpseToPublicPlace.tmpCells.Clear();
-			List<Building> allBuildingsColonist = this.pawn.Map.listerBuildings.allBuildingsColonist;
-			for (int i = 0; i < allBuildingsColonist.Count; i++)
-			{
-				Building building = allBuildingsColonist[i];
-				if (building.def.IsTable)
-				{
-					foreach (IntVec3 intVec in building.OccupiedRect())
-					{
-						if (this.pawn.CanReserveAndReach(intVec, PathEndMode.OnCell, Danger.Deadly, 1, -1, null, false) && intVec.GetFirstItem(this.pawn.Map) == null)
-						{
-							JobDriver_HaulCorpseToPublicPlace.tmpCells.Add(intVec);
-						}
-					}
-				}
-			}
-			if (!JobDriver_HaulCorpseToPublicPlace.tmpCells.Any<IntVec3>())
-			{
-				cell = IntVec3.Invalid;
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				jobDriver_HaulCorpseToPublicPlace.FailOnDestroyedOrNull(TargetIndex.A);
+				_003CgotoCorpse_003E5__2 = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch).FailOnDespawnedOrNull(TargetIndex.A);
+				_003C_003E2__current = Toils_Jump.JumpIfTargetInvalid(TargetIndex.B, _003CgotoCorpse_003E5__2);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.InteractionCell).FailOnDespawnedOrNull(TargetIndex.B);
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.Wait(jobDriver_HaulCorpseToPublicPlace.Grave?.OpenTicks ?? 60).WithProgressBarToilDelay(TargetIndex.B).FailOnDespawnedOrNull(TargetIndex.B)
+					.FailOnCannotTouch(TargetIndex.B, PathEndMode.InteractionCell);
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.Open(TargetIndex.B);
+				_003C_003E1__state = 4;
+				return true;
+			case 4:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Reserve.Reserve(TargetIndex.A);
+				_003C_003E1__state = 5;
+				return true;
+			case 5:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = _003CgotoCorpse_003E5__2;
+				_003C_003E1__state = 6;
+				return true;
+			case 6:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Haul.StartCarryThing(TargetIndex.A);
+				_003C_003E1__state = 7;
+				return true;
+			case 7:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = jobDriver_HaulCorpseToPublicPlace.FindCellToDropCorpseToil();
+				_003C_003E1__state = 8;
+				return true;
+			case 8:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Reserve.Reserve(TargetIndex.C);
+				_003C_003E1__state = 9;
+				return true;
+			case 9:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Goto.GotoCell(TargetIndex.C, PathEndMode.Touch);
+				_003C_003E1__state = 10;
+				return true;
+			case 10:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Haul.PlaceHauledThingInCell(TargetIndex.C, null, storageMode: false);
+				_003C_003E1__state = 11;
+				return true;
+			case 11:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = jobDriver_HaulCorpseToPublicPlace.ForbidAndNotifyMentalStateToil();
+				_003C_003E1__state = 12;
+				return true;
+			case 12:
+				_003C_003E1__state = -1;
 				return false;
 			}
-			cell = JobDriver_HaulCorpseToPublicPlace.tmpCells.RandomElement<IntVec3>();
-			return true;
 		}
 
-		// Token: 0x04004FEE RID: 20462
-		private const TargetIndex CorpseInd = TargetIndex.A;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x04004FEF RID: 20463
-		private const TargetIndex GraveInd = TargetIndex.B;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04004FF0 RID: 20464
-		private const TargetIndex CellInd = TargetIndex.C;
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__13 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__13(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x04004FF1 RID: 20465
-		private static List<IntVec3> tmpCells = new List<IntVec3>();
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private const TargetIndex CorpseInd = TargetIndex.A;
+
+	private const TargetIndex GraveInd = TargetIndex.B;
+
+	private const TargetIndex CellInd = TargetIndex.C;
+
+	private static List<IntVec3> tmpCells = new List<IntVec3>();
+
+	private Corpse Corpse => (Corpse)job.GetTarget(TargetIndex.A).Thing;
+
+	private Building_Grave Grave => (Building_Grave)job.GetTarget(TargetIndex.B).Thing;
+
+	private bool InGrave => Grave != null;
+
+	private Thing Target => (Thing)(((object)Grave) ?? ((object)Corpse));
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return pawn.Reserve(Target, job, 1, -1, null, errorOnFailed);
+	}
+
+	public override string GetReport()
+	{
+		if (InGrave && Grave.def == ThingDefOf.Grave)
+		{
+			return "ReportDiggingUpCorpse".Translate();
+		}
+		return base.GetReport();
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__13))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__13(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	private Toil FindCellToDropCorpseToil()
+	{
+		Toil toil = ToilMaker.MakeToil("FindCellToDropCorpseToil");
+		toil.initAction = delegate
+		{
+			IntVec3 result = IntVec3.Invalid;
+			if (!Rand.Chance(0.8f) || !TryFindTableCell(out result))
+			{
+				bool flag = false;
+				if (RCellFinder.TryFindRandomSpotJustOutsideColony(pawn, out var result2) && CellFinder.TryRandomClosewalkCellNear(result2, pawn.Map, 5, out result, (IntVec3 x) => pawn.CanReserve(x) && x.GetFirstItem(pawn.Map) == null))
+				{
+					flag = true;
+				}
+				if (!flag)
+				{
+					result = CellFinder.RandomClosewalkCellNear(pawn.Position, pawn.Map, 10, (IntVec3 x) => pawn.CanReserve(x) && x.GetFirstItem(pawn.Map) == null);
+				}
+			}
+			job.SetTarget(TargetIndex.C, result);
+		};
+		toil.atomicWithPrevious = true;
+		return toil;
+	}
+
+	private Toil ForbidAndNotifyMentalStateToil()
+	{
+		Toil toil = ToilMaker.MakeToil("ForbidAndNotifyMentalStateToil");
+		toil.initAction = delegate
+		{
+			Corpse?.SetForbidden(value: true);
+			if (pawn.MentalState is MentalState_CorpseObsession mentalState_CorpseObsession)
+			{
+				mentalState_CorpseObsession.Notify_CorpseHauled();
+			}
+		};
+		toil.atomicWithPrevious = true;
+		return toil;
+	}
+
+	private bool TryFindTableCell(out IntVec3 cell)
+	{
+		tmpCells.Clear();
+		List<Building> allBuildingsColonist = pawn.Map.listerBuildings.allBuildingsColonist;
+		for (int i = 0; i < allBuildingsColonist.Count; i++)
+		{
+			Building building = allBuildingsColonist[i];
+			if (!building.def.IsTable)
+			{
+				continue;
+			}
+			foreach (IntVec3 item in building.OccupiedRect())
+			{
+				if (pawn.CanReserveAndReach(item, PathEndMode.OnCell, Danger.Deadly) && item.GetFirstItem(pawn.Map) == null)
+				{
+					tmpCells.Add(item);
+				}
+			}
+		}
+		if (!tmpCells.Any())
+		{
+			cell = IntVec3.Invalid;
+			return false;
+		}
+		cell = tmpCells.RandomElement();
+		return true;
 	}
 }

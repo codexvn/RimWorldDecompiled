@@ -1,121 +1,295 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class RoyalTitlePermitWorker_CallAid : RoyalTitlePermitWorker_Targeted
 {
-	// Token: 0x020023D2 RID: 9170
-	public class RoyalTitlePermitWorker_CallAid : RoyalTitlePermitWorker_Targeted
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass2_0
 	{
-		// Token: 0x0600C6DA RID: 50906 RVA: 0x0039F1B1 File Offset: 0x0039D3B1
-		public override IEnumerable<FloatMenuOption> GetRoyalAidOptions(Map map, Pawn pawn, Faction faction)
+		public RoyalTitlePermitWorker_CallAid _003C_003E4__this;
+
+		public Pawn pawn;
+
+		public Map map;
+
+		public Faction faction;
+
+		public bool free;
+
+		internal void _003CGetRoyalAidOptions_003Eb__0()
 		{
-			string t;
-			if (this.AidDisabled_NewTemp(map, pawn, faction, out t, true))
+			_003C_003E4__this.BeginCallAid(pawn, map, faction, free);
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGetRoyalAidOptions_003Ed__2 : IEnumerable<FloatMenuOption>, IEnumerable, IEnumerator<FloatMenuOption>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private FloatMenuOption _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public RoyalTitlePermitWorker_CallAid _003C_003E4__this;
+
+		private Pawn pawn;
+
+		public Pawn _003C_003E3__pawn;
+
+		private Map map;
+
+		public Map _003C_003E3__map;
+
+		private Faction faction;
+
+		public Faction _003C_003E3__faction;
+
+		FloatMenuOption IEnumerator<FloatMenuOption>.Current
+		{
+			[DebuggerHidden]
+			get
 			{
-				yield return new FloatMenuOption(this.def.LabelCap + ": " + t, null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-				yield break;
+				return _003C_003E2__current;
 			}
-			if (NeutralGroupIncidentUtility.AnyBlockingHostileLord(pawn.MapHeld, faction))
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
 			{
-				yield return new FloatMenuOption(this.def.LabelCap + ": " + "HostileVisitorsPresent".Translate(), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-				yield break;
+				return _003C_003E2__current;
 			}
-			Action action = null;
-			string label = this.def.LabelCap + ": ";
-			bool free;
-			if (base.FillAidOption(pawn, faction, ref label, out free))
+		}
+
+		[DebuggerHidden]
+		public _003CGetRoyalAidOptions_003Ed__2(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			RoyalTitlePermitWorker_CallAid royalTitlePermitWorker_CallAid = _003C_003E4__this;
+			switch (num)
 			{
-				action = delegate()
+			default:
+				return false;
+			case 0:
+			{
+				_003C_003E1__state = -1;
+				_003C_003Ec__DisplayClass2_0 CS_0024_003C_003E8__locals15 = new _003C_003Ec__DisplayClass2_0
 				{
-					this.BeginCallAid(pawn, map, faction, free, 1f);
+					_003C_003E4__this = _003C_003E4__this,
+					pawn = pawn,
+					map = map,
+					faction = faction
 				};
+				if (royalTitlePermitWorker_CallAid.AidDisabled_NewTemp(CS_0024_003C_003E8__locals15.map, CS_0024_003C_003E8__locals15.pawn, CS_0024_003C_003E8__locals15.faction, out var reason))
+				{
+					_003C_003E2__current = new FloatMenuOption(royalTitlePermitWorker_CallAid.def.LabelCap + ": " + reason, null);
+					_003C_003E1__state = 1;
+					return true;
+				}
+				if (NeutralGroupIncidentUtility.AnyBlockingHostileLord(CS_0024_003C_003E8__locals15.pawn.MapHeld, CS_0024_003C_003E8__locals15.faction))
+				{
+					_003C_003E2__current = new FloatMenuOption(royalTitlePermitWorker_CallAid.def.LabelCap + ": " + "HostileVisitorsPresent".Translate(), null);
+					_003C_003E1__state = 2;
+					return true;
+				}
+				Action action = null;
+				string description = royalTitlePermitWorker_CallAid.def.LabelCap + ": ";
+				if (royalTitlePermitWorker_CallAid.FillAidOption(CS_0024_003C_003E8__locals15.pawn, CS_0024_003C_003E8__locals15.faction, ref description, out CS_0024_003C_003E8__locals15.free))
+				{
+					action = delegate
+					{
+						CS_0024_003C_003E8__locals15._003C_003E4__this.BeginCallAid(CS_0024_003C_003E8__locals15.pawn, CS_0024_003C_003E8__locals15.map, CS_0024_003C_003E8__locals15.faction, CS_0024_003C_003E8__locals15.free);
+					};
+				}
+				_003C_003E2__current = new FloatMenuOption(description, action, CS_0024_003C_003E8__locals15.faction.def.FactionIcon, CS_0024_003C_003E8__locals15.faction.Color);
+				_003C_003E1__state = 3;
+				return true;
 			}
-			yield return new FloatMenuOption(label, action, faction.def.FactionIcon, faction.Color, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0, HorizontalJustification.Left, false);
-			yield break;
-		}
-
-		// Token: 0x0600C6DB RID: 50907 RVA: 0x0039F1D8 File Offset: 0x0039D3D8
-		private void BeginCallAid(Pawn caller, Map map, Faction faction, bool free, float biocodeChance = 1f)
-		{
-			RoyalTitlePermitWorker_CallAid.<>c__DisplayClass3_0 CS$<>8__locals1 = new RoyalTitlePermitWorker_CallAid.<>c__DisplayClass3_0();
-			CS$<>8__locals1.<>4__this = this;
-			CS$<>8__locals1.caller = caller;
-			CS$<>8__locals1.map = map;
-			CS$<>8__locals1.faction = faction;
-			CS$<>8__locals1.free = free;
-			CS$<>8__locals1.biocodeChance = biocodeChance;
-			IEnumerable<Faction> source = from f in (from p in CS$<>8__locals1.map.mapPawns.AllPawnsSpawned
-			where p.Faction != null && !p.Faction.IsPlayer && p.Faction != CS$<>8__locals1.faction && !p.IsPrisonerOfColony
-			select p.Faction).Distinct<Faction>()
-			where f.HostileTo(Faction.OfPlayer) && !CS$<>8__locals1.faction.HostileTo(f)
-			select f;
-			if (source.Any<Faction>())
-			{
-				Find.WindowStack.Add(new Dialog_MessageBox("CommandCallRoyalAidWarningNonHostileFactions".Translate(CS$<>8__locals1.faction, (from f in source
-				select f.NameColored.Resolve()).ToCommaList(false, false)), "Confirm".Translate(), new Action(CS$<>8__locals1.<BeginCallAid>g__Call|0), "GoBack".Translate(), null, null, false, null, null, WindowLayer.Dialog));
-				return;
+			case 1:
+				_003C_003E1__state = -1;
+				return false;
+			case 2:
+				_003C_003E1__state = -1;
+				return false;
+			case 3:
+				_003C_003E1__state = -1;
+				return false;
 			}
-			CS$<>8__locals1.<BeginCallAid>g__Call|0();
 		}
 
-		// Token: 0x0600C6DC RID: 50908 RVA: 0x0039F30A File Offset: 0x0039D50A
-		public override void OrderForceTarget(LocalTargetInfo target)
+		bool IEnumerator.MoveNext()
 		{
-			this.CallAid(this.caller, this.map, target.Cell, this.calledFaction, this.free, this.biocodeChance);
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0600C6DD RID: 50909 RVA: 0x0039F338 File Offset: 0x0039D538
-		private void CallAid(Pawn caller, Map map, IntVec3 spawnPos, Faction faction, bool free, float biocodeChance = 1f)
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			IncidentParms incidentParms = new IncidentParms();
-			incidentParms.target = map;
-			incidentParms.faction = faction;
-			incidentParms.raidArrivalModeForQuickMilitaryAid = true;
-			incidentParms.biocodeApparelChance = biocodeChance;
-			incidentParms.biocodeWeaponsChance = biocodeChance;
-			incidentParms.spawnCenter = spawnPos;
-			if (this.def.royalAid.pawnKindDef != null)
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<FloatMenuOption> IEnumerable<FloatMenuOption>.GetEnumerator()
+		{
+			_003CGetRoyalAidOptions_003Ed__2 _003CGetRoyalAidOptions_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				incidentParms.pawnKind = this.def.royalAid.pawnKindDef;
-				incidentParms.pawnCount = this.def.royalAid.pawnCount;
+				_003C_003E1__state = 0;
+				_003CGetRoyalAidOptions_003Ed__ = this;
 			}
 			else
 			{
-				incidentParms.points = (float)this.def.royalAid.points;
-			}
-			faction.lastMilitaryAidRequestTick = Find.TickManager.TicksGame;
-			if (IncidentDefOf.RaidFriendly.Worker.TryExecute(incidentParms))
-			{
-				if (!free)
+				_003CGetRoyalAidOptions_003Ed__ = new _003CGetRoyalAidOptions_003Ed__2(0)
 				{
-					caller.royalty.TryRemoveFavor(faction, this.def.royalAid.favorCost);
-				}
-				caller.royalty.GetPermit(this.def, faction).Notify_Used();
-				return;
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
-			Log.Error("Could not send aid to map " + ((map != null) ? map.ToString() : null) + " from faction " + ((faction != null) ? faction.ToString() : null));
+			_003CGetRoyalAidOptions_003Ed__.map = _003C_003E3__map;
+			_003CGetRoyalAidOptions_003Ed__.pawn = _003C_003E3__pawn;
+			_003CGetRoyalAidOptions_003Ed__.faction = _003C_003E3__faction;
+			return _003CGetRoyalAidOptions_003Ed__;
 		}
 
-		// Token: 0x0600C6DE RID: 50910 RVA: 0x0039F45C File Offset: 0x0039D65C
-		protected override bool TemperatureIsAcceptable(Map map, Faction faction)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			if (this.def.royalAid.pawnKindDef == null)
-			{
-				return base.TemperatureIsAcceptable(map, faction);
-			}
-			if (this.def.royalAid.overrideAcceptableTemperatureRange == null)
-			{
-				return base.TemperatureIsAcceptable(map, faction);
-			}
-			return this.def.royalAid.overrideAcceptableTemperatureRange.Value.Includes(map.mapTemperature.SeasonalTemp);
+			return ((IEnumerable<FloatMenuOption>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x04008777 RID: 34679
-		private Faction calledFaction;
+	private Faction calledFaction;
 
-		// Token: 0x04008778 RID: 34680
-		private float biocodeChance;
+	private float biocodeChance;
+
+	[IteratorStateMachine(typeof(_003CGetRoyalAidOptions_003Ed__2))]
+	public override IEnumerable<FloatMenuOption> GetRoyalAidOptions(Map map, Pawn pawn, Faction faction)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetRoyalAidOptions_003Ed__2(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__map = map,
+			_003C_003E3__pawn = pawn,
+			_003C_003E3__faction = faction
+		};
+	}
+
+	private void BeginCallAid(Pawn caller, Map map, Faction faction, bool free, float biocodeChance = 1f)
+	{
+		IEnumerable<Faction> source = from f in (from p in map.mapPawns.AllPawnsSpawned
+				where p.Faction != null && !p.Faction.IsPlayer && p.Faction != faction && !p.IsPrisonerOfColony
+				select p.Faction).Distinct()
+			where f.HostileTo(Faction.OfPlayer) && !faction.HostileTo(f)
+			select f;
+		if (source.Any())
+		{
+			Find.WindowStack.Add(new Dialog_MessageBox("CommandCallRoyalAidWarningNonHostileFactions".Translate(faction, source.Select((Faction f) => f.NameColored.Resolve()).ToCommaList()), "Confirm".Translate(), Call, "GoBack".Translate()));
+		}
+		else
+		{
+			Call();
+		}
+		void Call()
+		{
+			targetingParameters = new TargetingParameters();
+			targetingParameters.canTargetLocations = true;
+			targetingParameters.canTargetSelf = false;
+			targetingParameters.canTargetPawns = false;
+			targetingParameters.canTargetFires = false;
+			targetingParameters.canTargetBuildings = false;
+			targetingParameters.canTargetItems = false;
+			base.caller = caller;
+			base.map = map;
+			calledFaction = faction;
+			base.free = free;
+			this.biocodeChance = biocodeChance;
+			float rangeActual = base.RangeClamped;
+			targetingParameters.validator = delegate(TargetInfo target)
+			{
+				if (rangeActual > 0f && target.Cell.DistanceTo(caller.Position) > rangeActual)
+				{
+					return false;
+				}
+				if (target.Cell.Fogged(map) || !DropCellFinder.CanPhysicallyDropInto(target.Cell, map, canRoofPunch: true))
+				{
+					return false;
+				}
+				return target.Cell.GetEdifice(map) == null && !target.Cell.Impassable(map);
+			};
+			Find.Targeter.BeginTargeting(this);
+		}
+	}
+
+	public override void OrderForceTarget(LocalTargetInfo target)
+	{
+		CallAid(caller, map, target.Cell, calledFaction, free, biocodeChance);
+	}
+
+	private void CallAid(Pawn caller, Map map, IntVec3 spawnPos, Faction faction, bool free, float biocodeChance = 1f)
+	{
+		IncidentParms incidentParms = new IncidentParms();
+		incidentParms.target = map;
+		incidentParms.faction = faction;
+		incidentParms.raidArrivalModeForQuickMilitaryAid = true;
+		incidentParms.biocodeApparelChance = biocodeChance;
+		incidentParms.biocodeWeaponsChance = biocodeChance;
+		incidentParms.spawnCenter = spawnPos;
+		if (def.royalAid.pawnKindDef != null)
+		{
+			incidentParms.pawnKind = def.royalAid.pawnKindDef;
+			incidentParms.pawnCount = def.royalAid.pawnCount;
+		}
+		else
+		{
+			incidentParms.points = def.royalAid.points;
+		}
+		faction.lastMilitaryAidRequestTick = Find.TickManager.TicksGame;
+		if (IncidentDefOf.RaidFriendly.Worker.TryExecute(incidentParms))
+		{
+			if (!free)
+			{
+				caller.royalty.TryRemoveFavor(faction, def.royalAid.favorCost);
+			}
+			caller.royalty.GetPermit(def, faction).Notify_Used();
+		}
+		else
+		{
+			Log.Error("Could not send aid to map " + map?.ToString() + " from faction " + faction);
+		}
+	}
+
+	protected override bool TemperatureIsAcceptable(Map map, Faction faction)
+	{
+		if (def.royalAid.pawnKindDef == null)
+		{
+			return base.TemperatureIsAcceptable(map, faction);
+		}
+		if (!def.royalAid.overrideAcceptableTemperatureRange.HasValue)
+		{
+			return base.TemperatureIsAcceptable(map, faction);
+		}
+		return def.royalAid.overrideAcceptableTemperatureRange.Value.Includes(map.mapTemperature.SeasonalTemp);
 	}
 }

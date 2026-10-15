@@ -1,138 +1,323 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Building_CommsConsole : Building
 {
-	// Token: 0x020029E7 RID: 10727
-	public class Building_CommsConsole : Building
+	[CompilerGenerated]
+	private sealed class _003CGetFloatMenuOptions_003Ed__7 : IEnumerable<FloatMenuOption>, IEnumerable, IEnumerator<FloatMenuOption>, IEnumerator, IDisposable
 	{
-		// Token: 0x17002488 RID: 9352
-		// (get) Token: 0x0600ECB9 RID: 60601 RVA: 0x0044B863 File Offset: 0x00449A63
-		public bool CanUseCommsNow
+		private int _003C_003E1__state;
+
+		private FloatMenuOption _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Building_CommsConsole _003C_003E4__this;
+
+		private Pawn myPawn;
+
+		public Pawn _003C_003E3__myPawn;
+
+		private IEnumerator<ICommunicable> _003C_003E7__wrap1;
+
+		private IEnumerator<FloatMenuOption> _003C_003E7__wrap2;
+
+		FloatMenuOption IEnumerator<FloatMenuOption>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (!base.Spawned || !base.Map.gameConditionManager.ElectricityDisabled(base.Map)) && (this.powerComp == null || this.powerComp.PowerOn);
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600ECBA RID: 60602 RVA: 0x0044B89C File Offset: 0x00449A9C
-		public override void SpawnSetup(Map map, bool respawningAfterLoad)
+		object IEnumerator.Current
 		{
-			base.SpawnSetup(map, respawningAfterLoad);
-			this.powerComp = base.GetComp<CompPowerTrader>();
-			LessonAutoActivator.TeachOpportunity(ConceptDefOf.BuildOrbitalTradeBeacon, OpportunityType.GoodToKnow);
-			LessonAutoActivator.TeachOpportunity(ConceptDefOf.OpeningComms, OpportunityType.GoodToKnow);
-			if (this.CanUseCommsNow)
+			[DebuggerHidden]
+			get
 			{
-				LongEventHandler.ExecuteWhenFinished(new Action(this.AnnounceTradeShips));
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600ECBB RID: 60603 RVA: 0x0044B8EC File Offset: 0x00449AEC
-		private void UseAct(Pawn myPawn, ICommunicable commTarget)
+		[DebuggerHidden]
+		public _003CGetFloatMenuOptions_003Ed__7(int _003C_003E1__state)
 		{
-			Job job = JobMaker.MakeJob(JobDefOf.UseCommsConsole, this);
-			job.commTarget = commTarget;
-			myPawn.jobs.TryTakeOrderedJob(job, new JobTag?(JobTag.Misc), false);
-			PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.OpeningComms, KnowledgeAmount.Total);
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x0600ECBC RID: 60604 RVA: 0x0044B930 File Offset: 0x00449B30
-		private FloatMenuOption GetFailureReason(Pawn myPawn)
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			if (!myPawn.CanReach(this, PathEndMode.InteractionCell, Danger.Some, false, false, TraverseMode.ByPawn))
+			switch (_003C_003E1__state)
 			{
-				return new FloatMenuOption("CannotUseNoPath".Translate(), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
+			case -3:
+			case 2:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+				break;
+			case -4:
+			case 3:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally2();
+				}
+				break;
 			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E7__wrap2 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				Building_CommsConsole building_CommsConsole = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+				{
+					_003C_003E1__state = -1;
+					FloatMenuOption failureReason = building_CommsConsole.GetFailureReason(myPawn);
+					if (failureReason != null)
+					{
+						_003C_003E2__current = failureReason;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003E7__wrap1 = building_CommsConsole.GetCommTargets(myPawn).GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_00c1;
+				}
+				case 1:
+					_003C_003E1__state = -1;
+					return false;
+				case 2:
+					_003C_003E1__state = -3;
+					goto IL_00c1;
+				case 3:
+					{
+						_003C_003E1__state = -4;
+						break;
+					}
+					IL_00c1:
+					while (_003C_003E7__wrap1.MoveNext())
+					{
+						FloatMenuOption floatMenuOption = _003C_003E7__wrap1.Current.CommFloatMenuOption(building_CommsConsole, myPawn);
+						if (floatMenuOption != null)
+						{
+							_003C_003E2__current = floatMenuOption;
+							_003C_003E1__state = 2;
+							return true;
+						}
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					_003C_003E7__wrap2 = ((ThingWithComps)building_CommsConsole).GetFloatMenuOptions(myPawn).GetEnumerator();
+					_003C_003E1__state = -4;
+					break;
+				}
+				if (_003C_003E7__wrap2.MoveNext())
+				{
+					FloatMenuOption current = _003C_003E7__wrap2.Current;
+					_003C_003E2__current = current;
+					_003C_003E1__state = 3;
+					return true;
+				}
+				_003C_003Em__Finally2();
+				_003C_003E7__wrap2 = null;
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap2 != null)
+			{
+				_003C_003E7__wrap2.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<FloatMenuOption> IEnumerable<FloatMenuOption>.GetEnumerator()
+		{
+			_003CGetFloatMenuOptions_003Ed__7 _003CGetFloatMenuOptions_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CGetFloatMenuOptions_003Ed__ = this;
+			}
+			else
+			{
+				_003CGetFloatMenuOptions_003Ed__ = new _003CGetFloatMenuOptions_003Ed__7(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CGetFloatMenuOptions_003Ed__.myPawn = _003C_003E3__myPawn;
+			return _003CGetFloatMenuOptions_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<FloatMenuOption>)this).GetEnumerator();
+		}
+	}
+
+	private CompPowerTrader powerComp;
+
+	public bool CanUseCommsNow
+	{
+		get
+		{
 			if (base.Spawned && base.Map.gameConditionManager.ElectricityDisabled(base.Map))
 			{
-				return new FloatMenuOption("CannotUseSolarFlare".Translate(), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
+				return false;
 			}
-			if (this.powerComp != null && !this.powerComp.PowerOn)
+			if (powerComp != null)
 			{
-				return new FloatMenuOption("CannotUseNoPower".Translate(), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
+				return powerComp.PowerOn;
 			}
-			if (!myPawn.health.capacities.CapableOf(PawnCapacityDefOf.Talking))
-			{
-				return new FloatMenuOption("CannotUseReason".Translate("IncapableOfCapacity".Translate(PawnCapacityDefOf.Talking.label, myPawn.Named("PAWN"))), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-			}
-			if (!this.GetCommTargets(myPawn).Any<ICommunicable>())
-			{
-				return new FloatMenuOption("CannotUseReason".Translate("NoCommsTarget".Translate()), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-			}
-			if (!this.CanUseCommsNow)
-			{
-				Log.Error(((myPawn != null) ? myPawn.ToString() : null) + " could not use comm console for unknown reason.");
-				return new FloatMenuOption("Cannot use now", null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-			}
-			return null;
+			return true;
 		}
+	}
 
-		// Token: 0x0600ECBD RID: 60605 RVA: 0x0044BACC File Offset: 0x00449CCC
-		public IEnumerable<ICommunicable> GetCommTargets(Pawn myPawn)
+	public override void SpawnSetup(Map map, bool respawningAfterLoad)
+	{
+		base.SpawnSetup(map, respawningAfterLoad);
+		powerComp = GetComp<CompPowerTrader>();
+		LessonAutoActivator.TeachOpportunity(ConceptDefOf.BuildOrbitalTradeBeacon, OpportunityType.GoodToKnow);
+		LessonAutoActivator.TeachOpportunity(ConceptDefOf.OpeningComms, OpportunityType.GoodToKnow);
+		if (CanUseCommsNow)
 		{
-			return myPawn.Map.passingShipManager.passingShips.Cast<ICommunicable>().Concat((from f in Find.FactionManager.AllFactionsVisibleInViewOrder
-			where !f.temporary && !f.IsPlayer
-			select f).Cast<ICommunicable>());
+			LongEventHandler.ExecuteWhenFinished(AnnounceTradeShips);
 		}
+	}
 
-		// Token: 0x0600ECBE RID: 60606 RVA: 0x0044BB26 File Offset: 0x00449D26
-		public override IEnumerable<FloatMenuOption> GetFloatMenuOptions(Pawn myPawn)
+	private void UseAct(Pawn myPawn, ICommunicable commTarget)
+	{
+		Job job = JobMaker.MakeJob(JobDefOf.UseCommsConsole, this);
+		job.commTarget = commTarget;
+		myPawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
+		PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.OpeningComms, KnowledgeAmount.Total);
+	}
+
+	private FloatMenuOption GetFailureReason(Pawn myPawn)
+	{
+		if (!myPawn.CanReach(this, PathEndMode.InteractionCell, Danger.Some))
 		{
-			FloatMenuOption failureReason = this.GetFailureReason(myPawn);
-			if (failureReason != null)
-			{
-				yield return failureReason;
-				yield break;
-			}
-			foreach (ICommunicable communicable in this.GetCommTargets(myPawn))
-			{
-				FloatMenuOption floatMenuOption = communicable.CommFloatMenuOption(this, myPawn);
-				if (floatMenuOption != null)
-				{
-					yield return floatMenuOption;
-				}
-			}
-			IEnumerator<ICommunicable> enumerator = null;
-			foreach (FloatMenuOption floatMenuOption2 in base.GetFloatMenuOptions(myPawn))
-			{
-				yield return floatMenuOption2;
-			}
-			IEnumerator<FloatMenuOption> enumerator2 = null;
-			yield break;
-			yield break;
+			return new FloatMenuOption("CannotUseNoPath".Translate(), null);
 		}
-
-		// Token: 0x0600ECBF RID: 60607 RVA: 0x0044BB40 File Offset: 0x00449D40
-		public void GiveUseCommsJob(Pawn negotiator, ICommunicable target)
+		if (base.Spawned && base.Map.gameConditionManager.ElectricityDisabled(base.Map))
 		{
-			Job job = JobMaker.MakeJob(JobDefOf.UseCommsConsole, this);
-			job.commTarget = target;
-			negotiator.jobs.TryTakeOrderedJob(job, new JobTag?(JobTag.Misc), false);
-			PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.OpeningComms, KnowledgeAmount.Total);
+			return new FloatMenuOption("CannotUseSolarFlare".Translate(), null);
 		}
-
-		// Token: 0x0600ECC0 RID: 60608 RVA: 0x0044BB84 File Offset: 0x00449D84
-		private void AnnounceTradeShips()
+		if (powerComp != null && !powerComp.PowerOn)
 		{
-			foreach (TradeShip tradeShip in from s in base.Map.passingShipManager.passingShips.OfType<TradeShip>()
+			return new FloatMenuOption("CannotUseNoPower".Translate(), null);
+		}
+		if (!myPawn.health.capacities.CapableOf(PawnCapacityDefOf.Talking))
+		{
+			return new FloatMenuOption("CannotUseReason".Translate("IncapableOfCapacity".Translate(PawnCapacityDefOf.Talking.label, myPawn.Named("PAWN"))), null);
+		}
+		if (!GetCommTargets(myPawn).Any())
+		{
+			return new FloatMenuOption("CannotUseReason".Translate("NoCommsTarget".Translate()), null);
+		}
+		if (!CanUseCommsNow)
+		{
+			Log.Error(myPawn?.ToString() + " could not use comm console for unknown reason.");
+			return new FloatMenuOption("Cannot use now", null);
+		}
+		return null;
+	}
+
+	public IEnumerable<ICommunicable> GetCommTargets(Pawn myPawn)
+	{
+		return myPawn.Map.passingShipManager.passingShips.Cast<ICommunicable>().Concat(Find.FactionManager.AllFactionsVisibleInViewOrder.Where((Faction f) => !f.temporary && !f.IsPlayer).Cast<ICommunicable>());
+	}
+
+	[IteratorStateMachine(typeof(_003CGetFloatMenuOptions_003Ed__7))]
+	public override IEnumerable<FloatMenuOption> GetFloatMenuOptions(Pawn myPawn)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetFloatMenuOptions_003Ed__7(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__myPawn = myPawn
+		};
+	}
+
+	public void GiveUseCommsJob(Pawn negotiator, ICommunicable target)
+	{
+		Job job = JobMaker.MakeJob(JobDefOf.UseCommsConsole, this);
+		job.commTarget = target;
+		negotiator.jobs.TryTakeOrderedJob(job, JobTag.Misc);
+		PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.OpeningComms, KnowledgeAmount.Total);
+	}
+
+	private void AnnounceTradeShips()
+	{
+		foreach (TradeShip item in from s in base.Map.passingShipManager.passingShips.OfType<TradeShip>()
 			where !s.WasAnnounced
 			select s)
-			{
-				TaggedString baseLetterText = "TraderArrival".Translate(tradeShip.name, tradeShip.def.label, (tradeShip.Faction == null) ? "TraderArrivalNoFaction".Translate() : "TraderArrivalFromFaction".Translate(tradeShip.Faction.Named("FACTION")));
-				IncidentParms incidentParms = new IncidentParms();
-				incidentParms.target = base.Map;
-				incidentParms.traderKind = tradeShip.TraderKind;
-				IncidentWorker.SendIncidentLetter(tradeShip.def.LabelCap, baseLetterText, LetterDefOf.PositiveEvent, incidentParms, LookTargets.Invalid, null, Array.Empty<NamedArgument>());
-				tradeShip.WasAnnounced = true;
-			}
+		{
+			TaggedString baseLetterText = "TraderArrival".Translate(item.name, item.def.label, (item.Faction == null) ? "TraderArrivalNoFaction".Translate() : "TraderArrivalFromFaction".Translate(item.Faction.Named("FACTION")));
+			IncidentParms incidentParms = new IncidentParms();
+			incidentParms.target = base.Map;
+			incidentParms.traderKind = item.TraderKind;
+			IncidentWorker.SendIncidentLetter(item.def.LabelCap, baseLetterText, LetterDefOf.PositiveEvent, incidentParms, LookTargets.Invalid, null);
+			item.WasAnnounced = true;
 		}
-
-		// Token: 0x04009CDC RID: 40156
-		private CompPowerTrader powerComp;
 	}
 }

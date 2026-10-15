@@ -1,41 +1,150 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
-namespace Verse
+namespace Verse;
+
+public class DeathActionProperties_Divide : DeathActionProperties
 {
-	// Token: 0x02000191 RID: 401
-	public class DeathActionProperties_Divide : DeathActionProperties
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__5 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x06000B5A RID: 2906 RVA: 0x00035D72 File Offset: 0x00033F72
-		public DeathActionProperties_Divide()
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public DeathActionProperties_Divide _003C_003E4__this;
+
+		string IEnumerator<string>.Current
 		{
-			this.workerClass = typeof(DeathActionWorker_Divide);
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x06000B5B RID: 2907 RVA: 0x00035DA0 File Offset: 0x00033FA0
-		public override IEnumerable<string> ConfigErrors()
+		object IEnumerator.Current
 		{
-			if (this.dividePawnCount <= 0 && this.dividePawnKindAdditionalForced.NullOrEmpty<PawnKindDef>())
+			[DebuggerHidden]
+			get
 			{
-				yield return "deathActionWorkerClass is DeathActionWorker_Divide or subclass, but dividePawnCount <= 0.";
+				return _003C_003E2__current;
 			}
-			if (this.dividePawnKindOptions.NullOrEmpty<PawnKindDef>() && this.dividePawnKindAdditionalForced.NullOrEmpty<PawnKindDef>())
-			{
-				yield return "deathActionWorkerClass is DeathActionWorker_Divide or subclass, but dividePawnKindOptions is null or empty.";
-			}
-			yield break;
 		}
 
-		// Token: 0x04000680 RID: 1664
-		public List<PawnKindDef> dividePawnKindOptions = new List<PawnKindDef>();
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__5(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
 
-		// Token: 0x04000681 RID: 1665
-		public int dividePawnCount;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
 
-		// Token: 0x04000682 RID: 1666
-		public List<PawnKindDef> dividePawnKindAdditionalForced = new List<PawnKindDef>();
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			DeathActionProperties_Divide deathActionProperties_Divide = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (deathActionProperties_Divide.dividePawnCount <= 0 && deathActionProperties_Divide.dividePawnKindAdditionalForced.NullOrEmpty())
+				{
+					_003C_003E2__current = "deathActionWorkerClass is DeathActionWorker_Divide or subclass, but dividePawnCount <= 0.";
+					_003C_003E1__state = 1;
+					return true;
+				}
+				goto IL_005a;
+			case 1:
+				_003C_003E1__state = -1;
+				goto IL_005a;
+			case 2:
+				{
+					_003C_003E1__state = -1;
+					break;
+				}
+				IL_005a:
+				if (deathActionProperties_Divide.dividePawnKindOptions.NullOrEmpty() && deathActionProperties_Divide.dividePawnKindAdditionalForced.NullOrEmpty())
+				{
+					_003C_003E2__current = "deathActionWorkerClass is DeathActionWorker_Divide or subclass, but dividePawnKindOptions is null or empty.";
+					_003C_003E1__state = 2;
+					return true;
+				}
+				break;
+			}
+			return false;
+		}
 
-		// Token: 0x04000683 RID: 1667
-		public IntRange divideBloodFilthCountRange;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__5 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__5(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	public List<PawnKindDef> dividePawnKindOptions = new List<PawnKindDef>();
+
+	public int dividePawnCount;
+
+	public List<PawnKindDef> dividePawnKindAdditionalForced = new List<PawnKindDef>();
+
+	public IntRange divideBloodFilthCountRange;
+
+	public DeathActionProperties_Divide()
+	{
+		workerClass = typeof(DeathActionWorker_Divide);
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__5))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__5(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

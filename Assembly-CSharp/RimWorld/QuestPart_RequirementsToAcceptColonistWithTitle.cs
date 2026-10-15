@@ -1,69 +1,162 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class QuestPart_RequirementsToAcceptColonistWithTitle : QuestPart_RequirementsToAccept
 {
-	// Token: 0x02001C8A RID: 7306
-	public class QuestPart_RequirementsToAcceptColonistWithTitle : QuestPart_RequirementsToAccept
+	[CompilerGenerated]
+	private sealed class _003Cget_Hyperlinks_003Ed__8 : IEnumerable<Dialog_InfoCard.Hyperlink>, IEnumerable, IEnumerator<Dialog_InfoCard.Hyperlink>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001902 RID: 6402
-		// (get) Token: 0x0600A2CB RID: 41675 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public override bool RequiresAccepter
+		private int _003C_003E1__state;
+
+		private Dialog_InfoCard.Hyperlink _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public QuestPart_RequirementsToAcceptColonistWithTitle _003C_003E4__this;
+
+		Dialog_InfoCard.Hyperlink IEnumerator<Dialog_InfoCard.Hyperlink>.Current
 		{
+			[DebuggerHidden]
 			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003Cget_Hyperlinks_003Ed__8(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			QuestPart_RequirementsToAcceptColonistWithTitle questPart_RequirementsToAcceptColonistWithTitle = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = new Dialog_InfoCard.Hyperlink(questPart_RequirementsToAcceptColonistWithTitle.minimumTitle, questPart_RequirementsToAcceptColonistWithTitle.faction);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Dialog_InfoCard.Hyperlink> IEnumerable<Dialog_InfoCard.Hyperlink>.GetEnumerator()
+		{
+			_003Cget_Hyperlinks_003Ed__8 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_Hyperlinks_003Ed__8(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Dialog_InfoCard.Hyperlink>)this).GetEnumerator();
+		}
+	}
+
+	public RoyalTitleDef minimumTitle;
+
+	public Faction faction;
+
+	public override bool RequiresAccepter => true;
+
+	public override IEnumerable<Dialog_InfoCard.Hyperlink> Hyperlinks
+	{
+		[IteratorStateMachine(typeof(_003Cget_Hyperlinks_003Ed__8))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_Hyperlinks_003Ed__8(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public override AcceptanceReport CanAccept()
+	{
+		foreach (Pawn allMapsCaravansAndTravellingTransporters_Alive_Colonist in PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_Colonists)
+		{
+			if (CanPawnAccept(allMapsCaravansAndTravellingTransporters_Alive_Colonist))
 			{
 				return true;
 			}
 		}
+		return new AcceptanceReport("QuestNoColonistWithTitle".Translate(minimumTitle.GetLabelCapForBothGenders()));
+	}
 
-		// Token: 0x0600A2CC RID: 41676 RVA: 0x002ECBF8 File Offset: 0x002EADF8
-		public override AcceptanceReport CanAccept()
+	public override bool CanPawnAccept(Pawn p)
+	{
+		if (p.royalty == null)
 		{
-			foreach (Pawn p in PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_Colonists)
-			{
-				if (this.CanPawnAccept(p))
-				{
-					return true;
-				}
-			}
-			return new AcceptanceReport("QuestNoColonistWithTitle".Translate(this.minimumTitle.GetLabelCapForBothGenders()));
+			return false;
 		}
-
-		// Token: 0x0600A2CD RID: 41677 RVA: 0x002ECC7C File Offset: 0x002EAE7C
-		public override bool CanPawnAccept(Pawn p)
+		RoyalTitleDef currentTitle = p.royalty.GetCurrentTitle(faction);
+		if (currentTitle == null)
 		{
-			if (p.royalty == null)
-			{
-				return false;
-			}
-			RoyalTitleDef currentTitle = p.royalty.GetCurrentTitle(this.faction);
-			return currentTitle != null && this.faction.def.RoyalTitlesAwardableInSeniorityOrderForReading.IndexOf(currentTitle) >= this.faction.def.RoyalTitlesAwardableInSeniorityOrderForReading.IndexOf(this.minimumTitle);
+			return false;
 		}
+		return faction.def.RoyalTitlesAwardableInSeniorityOrderForReading.IndexOf(currentTitle) >= faction.def.RoyalTitlesAwardableInSeniorityOrderForReading.IndexOf(minimumTitle);
+	}
 
-		// Token: 0x0600A2CE RID: 41678 RVA: 0x002ECCE0 File Offset: 0x002EAEE0
-		public override void ExposeData()
-		{
-			base.ExposeData();
-			Scribe_Defs.Look<RoyalTitleDef>(ref this.minimumTitle, "minimumTitle");
-			Scribe_References.Look<Faction>(ref this.faction, "faction", false);
-		}
-
-		// Token: 0x17001903 RID: 6403
-		// (get) Token: 0x0600A2CF RID: 41679 RVA: 0x002ECD09 File Offset: 0x002EAF09
-		public override IEnumerable<Dialog_InfoCard.Hyperlink> Hyperlinks
-		{
-			get
-			{
-				yield return new Dialog_InfoCard.Hyperlink(this.minimumTitle, this.faction, -1);
-				yield break;
-			}
-		}
-
-		// Token: 0x04007097 RID: 28823
-		public RoyalTitleDef minimumTitle;
-
-		// Token: 0x04007098 RID: 28824
-		public Faction faction;
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Defs.Look(ref minimumTitle, "minimumTitle");
+		Scribe_References.Look(ref faction, "faction");
 	}
 }

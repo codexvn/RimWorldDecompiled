@@ -1,120 +1,268 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class QuestPart_DropMonumentMarkerCopy : QuestPart
 {
-	// Token: 0x02001C3C RID: 7228
-	public class QuestPart_DropMonumentMarkerCopy : QuestPart
+	[CompilerGenerated]
+	private sealed class _003Cget_QuestLookTargets_003Ed__6 : IEnumerable<GlobalTargetInfo>, IEnumerable, IEnumerator<GlobalTargetInfo>, IEnumerator, IDisposable
 	{
-		// Token: 0x170018BE RID: 6334
-		// (get) Token: 0x0600A0EB RID: 41195 RVA: 0x002E4FA7 File Offset: 0x002E31A7
-		public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+		private int _003C_003E1__state;
+
+		private GlobalTargetInfo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public QuestPart_DropMonumentMarkerCopy _003C_003E4__this;
+
+		private IEnumerator<GlobalTargetInfo> _003C_003E7__wrap1;
+
+		GlobalTargetInfo IEnumerator<GlobalTargetInfo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				foreach (GlobalTargetInfo globalTargetInfo in base.QuestLookTargets)
-				{
-					yield return globalTargetInfo;
-				}
-				IEnumerator<GlobalTargetInfo> enumerator = null;
-				if (this.mapParent != null)
-				{
-					yield return this.mapParent;
-				}
-				if (this.copy != null)
-				{
-					yield return this.copy;
-				}
-				yield break;
-				yield break;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600A0EC RID: 41196 RVA: 0x002E4FB8 File Offset: 0x002E31B8
-		public override void Notify_QuestSignalReceived(Signal signal)
+		object IEnumerator.Current
 		{
-			base.Notify_QuestSignalReceived(signal);
-			if (signal.tag == this.inSignal)
+			[DebuggerHidden]
+			get
 			{
-				this.copy = null;
-				MonumentMarker arg = signal.args.GetArg<MonumentMarker>("SUBJECT");
-				if (this.mapParent == null || !this.mapParent.HasMap)
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003Cget_QuestLookTargets_003Ed__6(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
 				{
-					Map anyPlayerHomeMap = Find.AnyPlayerHomeMap;
-					this.mapParent = ((anyPlayerHomeMap != null) ? anyPlayerHomeMap.Parent : null);
 				}
-				if (arg != null && this.mapParent != null && this.mapParent.HasMap)
+				finally
 				{
-					Map map = this.mapParent.Map;
-					IntVec3 dropCenter = DropCellFinder.RandomDropSpot(map, true);
-					this.copy = (MonumentMarker)ThingMaker.MakeThing(ThingDefOf.MonumentMarker, null);
-					this.copy.sketch = arg.sketch.DeepCopy();
-					if (!arg.questTags.NullOrEmpty<string>())
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				QuestPart_DropMonumentMarkerCopy questPart_DropMonumentMarkerCopy = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((QuestPart)questPart_DropMonumentMarkerCopy).QuestLookTargets.GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0076;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0076;
+				case 2:
+					_003C_003E1__state = -1;
+					goto IL_00bb;
+				case 3:
 					{
-						this.copy.questTags = new List<string>();
-						this.copy.questTags.AddRange(arg.questTags);
+						_003C_003E1__state = -1;
+						break;
 					}
-					DropPodUtility.DropThingsNear(dropCenter, map, Gen.YieldSingle<Thing>(this.copy.MakeMinified(DestroyMode.Vanish)), 110, false, false, true, false, true, null);
-				}
-				if (!this.outSignalResult.NullOrEmpty())
-				{
-					if (this.copy != null)
+					IL_0076:
+					if (_003C_003E7__wrap1.MoveNext())
 					{
-						Find.SignalManager.SendSignal(new Signal(this.outSignalResult, this.copy.Named("SUBJECT")));
-						return;
+						GlobalTargetInfo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
 					}
-					Find.SignalManager.SendSignal(new Signal(this.outSignalResult, false));
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (questPart_DropMonumentMarkerCopy.mapParent != null)
+					{
+						_003C_003E2__current = questPart_DropMonumentMarkerCopy.mapParent;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					goto IL_00bb;
+					IL_00bb:
+					if (questPart_DropMonumentMarkerCopy.copy != null)
+					{
+						_003C_003E2__current = questPart_DropMonumentMarkerCopy.copy;
+						_003C_003E1__state = 3;
+						return true;
+					}
+					break;
 				}
+				return false;
 			}
-		}
-
-		// Token: 0x0600A0ED RID: 41197 RVA: 0x002E512A File Offset: 0x002E332A
-		public override void Cleanup()
-		{
-			base.Cleanup();
-			if (this.destroyOrPassToWorldOnCleanup && this.copy != null)
+			catch
 			{
-				QuestPart_DestroyThingsOrPassToWorld.Destroy(this.copy);
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x0600A0EE RID: 41198 RVA: 0x002E5150 File Offset: 0x002E3350
-		public override void ExposeData()
+		bool IEnumerator.MoveNext()
 		{
-			base.ExposeData();
-			Scribe_Values.Look<string>(ref this.inSignal, "inSignal", null, false);
-			Scribe_Values.Look<string>(ref this.outSignalResult, "outSignalResult", null, false);
-			Scribe_References.Look<MapParent>(ref this.mapParent, "mapParent", false);
-			Scribe_References.Look<MonumentMarker>(ref this.copy, "copy", false);
-			Scribe_Values.Look<bool>(ref this.destroyOrPassToWorldOnCleanup, "destroyOrPassToWorldOnCleanup", false, false);
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0600A0EF RID: 41199 RVA: 0x002E51BC File Offset: 0x002E33BC
-		public override void AssignDebugData()
+		private void _003C_003Em__Finally1()
 		{
-			base.AssignDebugData();
-			this.inSignal = "DebugSignal" + Rand.Int.ToString();
-			if (Find.AnyPlayerHomeMap != null)
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				this.mapParent = Find.RandomPlayerHomeMap.Parent;
+				_003C_003E7__wrap1.Dispose();
 			}
 		}
 
-		// Token: 0x04006F3C RID: 28476
-		public MapParent mapParent;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04006F3D RID: 28477
-		public string inSignal;
+		[DebuggerHidden]
+		IEnumerator<GlobalTargetInfo> IEnumerable<GlobalTargetInfo>.GetEnumerator()
+		{
+			_003Cget_QuestLookTargets_003Ed__6 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_QuestLookTargets_003Ed__6(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x04006F3E RID: 28478
-		public string outSignalResult;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<GlobalTargetInfo>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x04006F3F RID: 28479
-		public bool destroyOrPassToWorldOnCleanup;
+	public MapParent mapParent;
 
-		// Token: 0x04006F40 RID: 28480
-		private MonumentMarker copy;
+	public string inSignal;
+
+	public string outSignalResult;
+
+	public bool destroyOrPassToWorldOnCleanup;
+
+	private MonumentMarker copy;
+
+	public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+	{
+		[IteratorStateMachine(typeof(_003Cget_QuestLookTargets_003Ed__6))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_QuestLookTargets_003Ed__6(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public override void Notify_QuestSignalReceived(Signal signal)
+	{
+		base.Notify_QuestSignalReceived(signal);
+		if (!(signal.tag == inSignal))
+		{
+			return;
+		}
+		copy = null;
+		MonumentMarker arg = signal.args.GetArg<MonumentMarker>("SUBJECT");
+		if (mapParent == null || !mapParent.HasMap || !quest.IsParentSuitableForQuest(mapParent))
+		{
+			mapParent = quest.TryFindNewSuitableMapParentForRetarget();
+		}
+		if (arg != null && mapParent != null && mapParent.HasMap)
+		{
+			Map map = mapParent.Map;
+			IntVec3 dropCenter = DropCellFinder.RandomDropSpot(map);
+			copy = (MonumentMarker)ThingMaker.MakeThing(ThingDefOf.MonumentMarker);
+			copy.sketch = arg.sketch.DeepCopy();
+			if (!arg.questTags.NullOrEmpty())
+			{
+				copy.questTags = new List<string>();
+				copy.questTags.AddRange(arg.questTags);
+			}
+			DropPodUtility.DropThingsNear(dropCenter, map, Gen.YieldSingle((Thing)copy.MakeMinified()), 110, canInstaDropDuringInit: false, leaveSlag: false, canRoofPunch: true, forbid: false);
+		}
+		if (!outSignalResult.NullOrEmpty())
+		{
+			if (copy != null)
+			{
+				Find.SignalManager.SendSignal(new Signal(outSignalResult, copy.Named("SUBJECT")));
+			}
+			else
+			{
+				Find.SignalManager.SendSignal(new Signal(outSignalResult));
+			}
+		}
+	}
+
+	public override void Cleanup()
+	{
+		base.Cleanup();
+		if (destroyOrPassToWorldOnCleanup && copy != null)
+		{
+			QuestPart_DestroyThingsOrPassToWorld.Destroy(copy);
+		}
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref inSignal, "inSignal");
+		Scribe_Values.Look(ref outSignalResult, "outSignalResult");
+		Scribe_References.Look(ref mapParent, "mapParent");
+		Scribe_References.Look(ref copy, "copy");
+		Scribe_Values.Look(ref destroyOrPassToWorldOnCleanup, "destroyOrPassToWorldOnCleanup", defaultValue: false);
+	}
+
+	public override void AssignDebugData()
+	{
+		base.AssignDebugData();
+		inSignal = "DebugSignal" + Rand.Int;
+		if (Find.AnyPlayerHomeMap != null)
+		{
+			mapParent = Find.RandomPlayerHomeMap.Parent;
+		}
 	}
 }

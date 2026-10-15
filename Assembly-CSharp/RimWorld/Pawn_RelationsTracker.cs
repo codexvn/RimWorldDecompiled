@@ -1,1387 +1,1765 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Pawn_RelationsTracker : IExposable
 {
-	// Token: 0x0200251F RID: 9503
-	public class Pawn_RelationsTracker : IExposable
+	[CompilerGenerated]
+	private sealed class _003Cget_Children_003Ed__27 : IEnumerable<Pawn>, IEnumerable, IEnumerator<Pawn>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001FE2 RID: 8162
-		// (get) Token: 0x0600CFA1 RID: 53153 RVA: 0x003CF733 File Offset: 0x003CD933
-		public List<DirectPawnRelation> DirectRelations
+		private int _003C_003E1__state;
+
+		private Pawn _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Pawn_RelationsTracker _003C_003E4__this;
+
+		private HashSet<Pawn>.Enumerator _003C_003E7__wrap1;
+
+		Pawn IEnumerator<Pawn>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.directRelations;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001FE3 RID: 8163
-		// (get) Token: 0x0600CFA2 RID: 53154 RVA: 0x003CF73B File Offset: 0x003CD93B
-		public List<VirtualPawnRelation> VirtualRelations
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.virtualRelations;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001FE4 RID: 8164
-		// (get) Token: 0x0600CFA3 RID: 53155 RVA: 0x003CF743 File Offset: 0x003CD943
-		public IEnumerable<Pawn> Children
+		[DebuggerHidden]
+		public _003Cget_Children_003Ed__27(int _003C_003E1__state)
 		{
-			get
-			{
-				foreach (Pawn pawn in this.pawnsWithDirectRelationsWithMe)
-				{
-					List<DirectPawnRelation> list = pawn.relations.directRelations;
-					for (int i = 0; i < list.Count; i++)
-					{
-						if (list[i].otherPawn == this.pawn && list[i].def == PawnRelationDefOf.Parent)
-						{
-							yield return pawn;
-							break;
-						}
-					}
-				}
-				HashSet<Pawn>.Enumerator enumerator = default(HashSet<Pawn>.Enumerator);
-				yield break;
-				yield break;
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x17001FE5 RID: 8165
-		// (get) Token: 0x0600CFA4 RID: 53156 RVA: 0x003CF753 File Offset: 0x003CD953
-		public int ChildrenCount
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			get
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				return this.Children.Count<Pawn>();
-			}
-		}
-
-		// Token: 0x17001FE6 RID: 8166
-		// (get) Token: 0x0600CFA5 RID: 53157 RVA: 0x003CF760 File Offset: 0x003CD960
-		public bool IsTryRomanceOnCooldown
-		{
-			get
-			{
-				return this.romanceEnableTick > Find.TickManager.TicksGame;
-			}
-		}
-
-		// Token: 0x17001FE7 RID: 8167
-		// (get) Token: 0x0600CFA6 RID: 53158 RVA: 0x003CF774 File Offset: 0x003CD974
-		public bool RelatedToAnyoneOrAnyoneRelatedToMe
-		{
-			get
-			{
-				return this.directRelations.Any<DirectPawnRelation>() || this.virtualRelations.Any<VirtualPawnRelation>() || this.pawnsWithDirectRelationsWithMe.Any<Pawn>();
-			}
-		}
-
-		// Token: 0x17001FE8 RID: 8168
-		// (get) Token: 0x0600CFA7 RID: 53159 RVA: 0x003CF7A0 File Offset: 0x003CD9A0
-		public IEnumerable<Pawn> FamilyByBlood
-		{
-			get
-			{
-				if (this.canCacheFamilyByBlood)
-				{
-					if (!this.familyByBloodIsCached)
-					{
-						this.cachedFamilyByBlood.Clear();
-						foreach (Pawn item in this.FamilyByBlood_Internal)
-						{
-							this.cachedFamilyByBlood.Add(item);
-						}
-						this.familyByBloodIsCached = true;
-					}
-					return this.cachedFamilyByBlood;
-				}
-				return this.FamilyByBlood_Internal;
-			}
-		}
-
-		// Token: 0x17001FE9 RID: 8169
-		// (get) Token: 0x0600CFA8 RID: 53160 RVA: 0x003CF824 File Offset: 0x003CDA24
-		private IEnumerable<Pawn> FamilyByBlood_Internal
-		{
-			get
-			{
-				if (!this.RelatedToAnyoneOrAnyoneRelatedToMe)
-				{
-					yield break;
-				}
-				List<Pawn> familyStack = null;
-				List<Pawn> familyChildrenStack = null;
-				HashSet<Pawn> familyVisited = null;
 				try
 				{
-					familyStack = SimplePool<List<Pawn>>.Get();
-					familyChildrenStack = SimplePool<List<Pawn>>.Get();
-					familyVisited = SimplePool<HashSet<Pawn>>.Get();
-					familyStack.Add(this.pawn);
-					familyVisited.Add(this.pawn);
-					while (familyStack.Any<Pawn>())
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = default(HashSet<Pawn>.Enumerator);
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				Pawn_RelationsTracker pawn_RelationsTracker = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = pawn_RelationsTracker.pawnsWithDirectRelationsWithMe.GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 1:
+					_003C_003E1__state = -3;
+					break;
+				}
+				while (_003C_003E7__wrap1.MoveNext())
+				{
+					Pawn current = _003C_003E7__wrap1.Current;
+					List<DirectPawnRelation> directRelations = current.relations.directRelations;
+					for (int i = 0; i < directRelations.Count; i++)
 					{
-						Pawn p = familyStack[familyStack.Count - 1];
-						familyStack.RemoveLast<Pawn>();
-						if (p != this.pawn)
+						if (directRelations[i].otherPawn == pawn_RelationsTracker.pawn && directRelations[i].def == PawnRelationDefOf.Parent)
 						{
-							yield return p;
+							_003C_003E2__current = current;
+							_003C_003E1__state = 1;
+							return true;
 						}
-						Pawn father = p.GetFather();
-						if (father != null && !familyVisited.Contains(father))
+					}
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = default(HashSet<Pawn>.Enumerator);
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap1/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Pawn> IEnumerable<Pawn>.GetEnumerator()
+		{
+			_003Cget_Children_003Ed__27 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_Children_003Ed__27(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Pawn>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003Cget_FamilyByBlood_Internal_003Ed__37 : IEnumerable<Pawn>, IEnumerable, IEnumerator<Pawn>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Pawn _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Pawn_RelationsTracker _003C_003E4__this;
+
+		private List<Pawn> _003CfamilyStack_003E5__2;
+
+		private List<Pawn> _003CfamilyChildrenStack_003E5__3;
+
+		private HashSet<Pawn> _003CfamilyVisited_003E5__4;
+
+		private Pawn _003Cp_003E5__5;
+
+		private Pawn _003Cchild_003E5__6;
+
+		Pawn IEnumerator<Pawn>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003Cget_FamilyByBlood_Internal_003Ed__37(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || (uint)(num - 1) <= 1u)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003CfamilyStack_003E5__2 = null;
+			_003CfamilyChildrenStack_003E5__3 = null;
+			_003CfamilyVisited_003E5__4 = null;
+			_003Cp_003E5__5 = null;
+			_003Cchild_003E5__6 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				Pawn_RelationsTracker pawn_RelationsTracker = _003C_003E4__this;
+				Pawn father;
+				Pawn mother;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					if (!pawn_RelationsTracker.RelatedToAnyoneOrAnyoneRelatedToMe)
+					{
+						return false;
+					}
+					_003CfamilyStack_003E5__2 = null;
+					_003CfamilyChildrenStack_003E5__3 = null;
+					_003CfamilyVisited_003E5__4 = null;
+					_003C_003E1__state = -3;
+					_003CfamilyStack_003E5__2 = SimplePool<List<Pawn>>.Get();
+					_003CfamilyChildrenStack_003E5__3 = SimplePool<List<Pawn>>.Get();
+					_003CfamilyVisited_003E5__4 = SimplePool<HashSet<Pawn>>.Get();
+					_003CfamilyStack_003E5__2.Add(pawn_RelationsTracker.pawn);
+					_003CfamilyVisited_003E5__4.Add(pawn_RelationsTracker.pawn);
+					goto IL_0276;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_00fc;
+				case 2:
+					{
+						_003C_003E1__state = -3;
+						goto IL_01f5;
+					}
+					IL_01f5:
+					foreach (Pawn child in _003Cchild_003E5__6.relations.Children)
+					{
+						if (!_003CfamilyVisited_003E5__4.Contains(child))
 						{
-							familyStack.Add(father);
-							familyVisited.Add(father);
+							_003CfamilyChildrenStack_003E5__3.Add(child);
+							_003CfamilyVisited_003E5__4.Add(child);
 						}
-						Pawn mother = p.GetMother();
-						if (mother != null && !familyVisited.Contains(mother))
+					}
+					_003Cchild_003E5__6 = null;
+					goto IL_025f;
+					IL_00fc:
+					father = _003Cp_003E5__5.GetFather();
+					if (father != null && !_003CfamilyVisited_003E5__4.Contains(father))
+					{
+						_003CfamilyStack_003E5__2.Add(father);
+						_003CfamilyVisited_003E5__4.Add(father);
+					}
+					mother = _003Cp_003E5__5.GetMother();
+					if (mother != null && !_003CfamilyVisited_003E5__4.Contains(mother))
+					{
+						_003CfamilyStack_003E5__2.Add(mother);
+						_003CfamilyVisited_003E5__4.Add(mother);
+					}
+					_003CfamilyChildrenStack_003E5__3.Clear();
+					_003CfamilyChildrenStack_003E5__3.Add(_003Cp_003E5__5);
+					goto IL_025f;
+					IL_0276:
+					if (_003CfamilyStack_003E5__2.Any())
+					{
+						_003Cp_003E5__5 = _003CfamilyStack_003E5__2[_003CfamilyStack_003E5__2.Count - 1];
+						_003CfamilyStack_003E5__2.RemoveLast();
+						if (_003Cp_003E5__5 != pawn_RelationsTracker.pawn)
 						{
-							familyStack.Add(mother);
-							familyVisited.Add(mother);
+							_003C_003E2__current = _003Cp_003E5__5;
+							_003C_003E1__state = 1;
+							return true;
 						}
-						familyChildrenStack.Clear();
-						familyChildrenStack.Add(p);
-						while (familyChildrenStack.Any<Pawn>())
+						goto IL_00fc;
+					}
+					_003C_003Em__Finally1();
+					return false;
+					IL_025f:
+					if (_003CfamilyChildrenStack_003E5__3.Any())
+					{
+						_003Cchild_003E5__6 = _003CfamilyChildrenStack_003E5__3[_003CfamilyChildrenStack_003E5__3.Count - 1];
+						_003CfamilyChildrenStack_003E5__3.RemoveLast();
+						if (_003Cchild_003E5__6 != _003Cp_003E5__5 && _003Cchild_003E5__6 != pawn_RelationsTracker.pawn)
 						{
-							Pawn child = familyChildrenStack[familyChildrenStack.Count - 1];
-							familyChildrenStack.RemoveLast<Pawn>();
-							if (child != p && child != this.pawn)
-							{
-								yield return child;
-							}
-							foreach (Pawn item in child.relations.Children)
-							{
-								if (!familyVisited.Contains(item))
-								{
-									familyChildrenStack.Add(item);
-									familyVisited.Add(item);
-								}
-							}
-							child = null;
+							_003C_003E2__current = _003Cchild_003E5__6;
+							_003C_003E1__state = 2;
+							return true;
 						}
-						p = null;
+						goto IL_01f5;
+					}
+					_003Cp_003E5__5 = null;
+					goto IL_0276;
+				}
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			_003CfamilyStack_003E5__2.Clear();
+			SimplePool<List<Pawn>>.Return(_003CfamilyStack_003E5__2);
+			_003CfamilyChildrenStack_003E5__3.Clear();
+			SimplePool<List<Pawn>>.Return(_003CfamilyChildrenStack_003E5__3);
+			_003CfamilyVisited_003E5__4.Clear();
+			SimplePool<HashSet<Pawn>>.Return(_003CfamilyVisited_003E5__4);
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Pawn> IEnumerable<Pawn>.GetEnumerator()
+		{
+			_003Cget_FamilyByBlood_Internal_003Ed__37 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_FamilyByBlood_Internal_003Ed__37(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Pawn>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003Cget_PotentiallyRelatedPawns_003Ed__39 : IEnumerable<Pawn>, IEnumerable, IEnumerator<Pawn>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Pawn _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Pawn_RelationsTracker _003C_003E4__this;
+
+		private List<Pawn> _003Cstack_003E5__2;
+
+		private HashSet<Pawn> _003Cvisited_003E5__3;
+
+		private Pawn _003Cp_003E5__4;
+
+		Pawn IEnumerator<Pawn>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003Cget_PotentiallyRelatedPawns_003Ed__39(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003Cstack_003E5__2 = null;
+			_003Cvisited_003E5__3 = null;
+			_003Cp_003E5__4 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				Pawn_RelationsTracker pawn_RelationsTracker = _003C_003E4__this;
+				if (num != 0)
+				{
+					if (num != 1)
+					{
+						return false;
+					}
+					_003C_003E1__state = -3;
+					goto IL_00e2;
+				}
+				_003C_003E1__state = -1;
+				if (!pawn_RelationsTracker.RelatedToAnyoneOrAnyoneRelatedToMe)
+				{
+					return false;
+				}
+				_003Cstack_003E5__2 = null;
+				_003Cvisited_003E5__3 = null;
+				_003C_003E1__state = -3;
+				_003Cstack_003E5__2 = SimplePool<List<Pawn>>.Get();
+				_003Cvisited_003E5__3 = SimplePool<HashSet<Pawn>>.Get();
+				_003Cstack_003E5__2.Add(pawn_RelationsTracker.pawn);
+				_003Cvisited_003E5__3.Add(pawn_RelationsTracker.pawn);
+				goto IL_025d;
+				IL_025d:
+				if (_003Cstack_003E5__2.Any())
+				{
+					_003Cp_003E5__4 = _003Cstack_003E5__2[_003Cstack_003E5__2.Count - 1];
+					_003Cstack_003E5__2.RemoveLast();
+					if (_003Cp_003E5__4 != pawn_RelationsTracker.pawn)
+					{
+						_003C_003E2__current = _003Cp_003E5__4;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					goto IL_00e2;
+				}
+				_003C_003Em__Finally1();
+				return false;
+				IL_00e2:
+				for (int i = 0; i < _003Cp_003E5__4.relations.directRelations.Count; i++)
+				{
+					Pawn otherPawn = _003Cp_003E5__4.relations.directRelations[i].otherPawn;
+					if (otherPawn != null && !_003Cvisited_003E5__3.Contains(otherPawn))
+					{
+						_003Cstack_003E5__2.Add(otherPawn);
+						_003Cvisited_003E5__3.Add(otherPawn);
+					}
+				}
+				foreach (VirtualPawnRelation virtualRelation in _003Cp_003E5__4.relations.VirtualRelations)
+				{
+					foreach (Pawn reference in virtualRelation.record.References)
+					{
+						if (reference != pawn_RelationsTracker.pawn && reference != null && !_003Cvisited_003E5__3.Contains(reference))
+						{
+							_003Cstack_003E5__2.Add(reference);
+							_003Cvisited_003E5__3.Add(reference);
+						}
+					}
+				}
+				foreach (Pawn item in _003Cp_003E5__4.relations.pawnsWithDirectRelationsWithMe)
+				{
+					if (!_003Cvisited_003E5__3.Contains(item))
+					{
+						_003Cstack_003E5__2.Add(item);
+						_003Cvisited_003E5__3.Add(item);
+					}
+				}
+				_003Cp_003E5__4 = null;
+				goto IL_025d;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			_003Cstack_003E5__2.Clear();
+			SimplePool<List<Pawn>>.Return(_003Cstack_003E5__2);
+			_003Cvisited_003E5__3.Clear();
+			SimplePool<HashSet<Pawn>>.Return(_003Cvisited_003E5__3);
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Pawn> IEnumerable<Pawn>.GetEnumerator()
+		{
+			_003Cget_PotentiallyRelatedPawns_003Ed__39 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_PotentiallyRelatedPawns_003Ed__39(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Pawn>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003Cget_RelatedPawns_003Ed__41 : IEnumerable<Pawn>, IEnumerable, IEnumerator<Pawn>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Pawn _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Pawn_RelationsTracker _003C_003E4__this;
+
+		private IEnumerator<Pawn> _003C_003E7__wrap1;
+
+		Pawn IEnumerator<Pawn>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003Cget_RelatedPawns_003Ed__41(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if ((uint)(num - -4) <= 1u || num == 1)
+			{
+				try
+				{
+					if (num == -4 || num == 1)
+					{
+						try
+						{
+						}
+						finally
+						{
+							_003C_003Em__Finally2();
+						}
 					}
 				}
 				finally
 				{
-					familyStack.Clear();
-					SimplePool<List<Pawn>>.Return(familyStack);
-					familyChildrenStack.Clear();
-					SimplePool<List<Pawn>>.Return(familyChildrenStack);
-					familyVisited.Clear();
-					SimplePool<HashSet<Pawn>>.Return(familyVisited);
+					_003C_003Em__Finally1();
 				}
-				yield break;
-				yield break;
 			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x17001FEA RID: 8170
-		// (get) Token: 0x0600CFA9 RID: 53161 RVA: 0x003CF834 File Offset: 0x003CDA34
-		public IEnumerable<Pawn> PotentiallyRelatedPawns
+		private bool MoveNext()
 		{
-			get
+			try
 			{
-				if (!this.RelatedToAnyoneOrAnyoneRelatedToMe)
+				int num = _003C_003E1__state;
+				Pawn_RelationsTracker pawn_RelationsTracker = _003C_003E4__this;
+				switch (num)
 				{
-					yield break;
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					pawn_RelationsTracker.canCacheFamilyByBlood = true;
+					pawn_RelationsTracker.familyByBloodIsCached = false;
+					pawn_RelationsTracker.cachedFamilyByBlood.Clear();
+					_003C_003E1__state = -3;
+					_003C_003E7__wrap1 = pawn_RelationsTracker.PotentiallyRelatedPawns.GetEnumerator();
+					_003C_003E1__state = -4;
+					break;
+				case 1:
+					_003C_003E1__state = -4;
+					break;
 				}
-				List<Pawn> stack = null;
-				HashSet<Pawn> visited = null;
-				try
+				while (_003C_003E7__wrap1.MoveNext())
 				{
-					stack = SimplePool<List<Pawn>>.Get();
-					visited = SimplePool<HashSet<Pawn>>.Get();
-					stack.Add(this.pawn);
-					visited.Add(this.pawn);
-					while (stack.Any<Pawn>())
+					Pawn current = _003C_003E7__wrap1.Current;
+					if ((pawn_RelationsTracker.familyByBloodIsCached && pawn_RelationsTracker.cachedFamilyByBlood.Contains(current)) || pawn_RelationsTracker.pawn.GetRelations(current).Any())
 					{
-						Pawn p = stack[stack.Count - 1];
-						stack.RemoveLast<Pawn>();
-						if (p != this.pawn)
-						{
-							yield return p;
-						}
-						for (int i = 0; i < p.relations.directRelations.Count; i++)
-						{
-							Pawn otherPawn = p.relations.directRelations[i].otherPawn;
-							if (otherPawn != null && !visited.Contains(otherPawn))
-							{
-								stack.Add(otherPawn);
-								visited.Add(otherPawn);
-							}
-						}
-						foreach (VirtualPawnRelation virtualPawnRelation in p.relations.VirtualRelations)
-						{
-							foreach (Pawn pawn in virtualPawnRelation.record.References)
-							{
-								if (pawn != this.pawn && pawn != null && !visited.Contains(pawn))
-								{
-									stack.Add(pawn);
-									visited.Add(pawn);
-								}
-							}
-						}
-						foreach (Pawn item in p.relations.pawnsWithDirectRelationsWithMe)
-						{
-							if (!visited.Contains(item))
-							{
-								stack.Add(item);
-								visited.Add(item);
-							}
-						}
-						p = null;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
 					}
 				}
-				finally
-				{
-					stack.Clear();
-					SimplePool<List<Pawn>>.Return(stack);
-					visited.Clear();
-					SimplePool<HashSet<Pawn>>.Return(visited);
-				}
-				yield break;
-				yield break;
+				_003C_003Em__Finally2();
+				_003C_003E7__wrap1 = null;
+				_003C_003Em__Finally1();
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x17001FEB RID: 8171
-		// (get) Token: 0x0600CFAA RID: 53162 RVA: 0x003CF844 File Offset: 0x003CDA44
-		public IEnumerable<Pawn> RelatedPawns
+		bool IEnumerator.MoveNext()
 		{
-			get
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			Pawn_RelationsTracker pawn_RelationsTracker = _003C_003E4__this;
+			pawn_RelationsTracker.canCacheFamilyByBlood = false;
+			pawn_RelationsTracker.familyByBloodIsCached = false;
+			pawn_RelationsTracker.cachedFamilyByBlood.Clear();
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -3;
+			if (_003C_003E7__wrap1 != null)
 			{
-				this.canCacheFamilyByBlood = true;
-				this.familyByBloodIsCached = false;
-				this.cachedFamilyByBlood.Clear();
-				try
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Pawn> IEnumerable<Pawn>.GetEnumerator()
+		{
+			_003Cget_RelatedPawns_003Ed__41 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_RelatedPawns_003Ed__41(0)
 				{
-					foreach (Pawn pawn in this.PotentiallyRelatedPawns)
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Pawn>)this).GetEnumerator();
+		}
+	}
+
+	private Pawn pawn;
+
+	private List<DirectPawnRelation> directRelations = new List<DirectPawnRelation>();
+
+	private List<VirtualPawnRelation> virtualRelations = new List<VirtualPawnRelation>();
+
+	public bool everSeenByPlayer;
+
+	public bool canGetRescuedThought = true;
+
+	public Pawn relativeInvolvedInRescueQuest;
+
+	public MarriageNameChange nextMarriageNameChange;
+
+	public bool hidePawnRelations;
+
+	[LoadAlias("rhythmModes")]
+	private Dictionary<Pawn, PregnancyApproach> pregnancyApproaches = new Dictionary<Pawn, PregnancyApproach>();
+
+	public int romanceEnableTick = -1;
+
+	private HashSet<Pawn> pawnsWithDirectRelationsWithMe = new HashSet<Pawn>();
+
+	private HashSet<Pawn> cachedFamilyByBlood = new HashSet<Pawn>();
+
+	private bool familyByBloodIsCached;
+
+	private bool canCacheFamilyByBlood;
+
+	private const int CheckDevelopBondRelationIntervalTicks = 2500;
+
+	private const float MaxBondRelationCheckDist = 12f;
+
+	private const float BondRelationPerIntervalChance = 0.001f;
+
+	public const int FriendOpinionThreshold = 20;
+
+	public const int RivalOpinionThreshold = -20;
+
+	public const int MinLovinAge = 16;
+
+	private const float MinAgeFactor = 0.2f;
+
+	public const float PsychicLoveFactor = 10f;
+
+	private List<Pawn> tmpPawns = new List<Pawn>();
+
+	private List<PregnancyApproach> tmpPregnancyApproaches = new List<PregnancyApproach>();
+
+	private static List<ISocialThought> tmpSocialThoughts = new List<ISocialThought>();
+
+	public List<DirectPawnRelation> DirectRelations => directRelations;
+
+	public List<VirtualPawnRelation> VirtualRelations => virtualRelations;
+
+	public IEnumerable<Pawn> Children
+	{
+		[IteratorStateMachine(typeof(_003Cget_Children_003Ed__27))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_Children_003Ed__27(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public int ChildrenCount => Children.Count();
+
+	public bool IsTryRomanceOnCooldown => romanceEnableTick > Find.TickManager.TicksGame;
+
+	public bool RelatedToAnyoneOrAnyoneRelatedToMe
+	{
+		get
+		{
+			if (!directRelations.Any() && !virtualRelations.Any())
+			{
+				return pawnsWithDirectRelationsWithMe.Any();
+			}
+			return true;
+		}
+	}
+
+	public IEnumerable<Pawn> FamilyByBlood
+	{
+		get
+		{
+			if (canCacheFamilyByBlood)
+			{
+				if (!familyByBloodIsCached)
+				{
+					cachedFamilyByBlood.Clear();
+					foreach (Pawn item in FamilyByBlood_Internal)
 					{
-						if ((this.familyByBloodIsCached && this.cachedFamilyByBlood.Contains(pawn)) || this.pawn.GetRelations(pawn).Any<PawnRelationDef>())
-						{
-							yield return pawn;
-						}
+						cachedFamilyByBlood.Add(item);
 					}
-					IEnumerator<Pawn> enumerator = null;
+					familyByBloodIsCached = true;
 				}
-				finally
-				{
-					this.canCacheFamilyByBlood = false;
-					this.familyByBloodIsCached = false;
-					this.cachedFamilyByBlood.Clear();
-				}
-				yield break;
-				yield break;
+				return cachedFamilyByBlood;
+			}
+			return FamilyByBlood_Internal;
+		}
+	}
+
+	private IEnumerable<Pawn> FamilyByBlood_Internal
+	{
+		[IteratorStateMachine(typeof(_003Cget_FamilyByBlood_Internal_003Ed__37))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_FamilyByBlood_Internal_003Ed__37(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public IEnumerable<Pawn> PotentiallyRelatedPawns
+	{
+		[IteratorStateMachine(typeof(_003Cget_PotentiallyRelatedPawns_003Ed__39))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_PotentiallyRelatedPawns_003Ed__39(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public IEnumerable<Pawn> RelatedPawns
+	{
+		[IteratorStateMachine(typeof(_003Cget_RelatedPawns_003Ed__41))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_RelatedPawns_003Ed__41(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public Pawn_RelationsTracker(Pawn pawn)
+	{
+		this.pawn = pawn;
+	}
+
+	public void ExposeData()
+	{
+		Scribe_Collections.Look(ref directRelations, "directRelations", LookMode.Deep);
+		Scribe_Collections.Look(ref virtualRelations, "virtualRelations", LookMode.Deep);
+		if (Scribe.mode == LoadSaveMode.ResolvingCrossRefs)
+		{
+			if (virtualRelations == null)
+			{
+				virtualRelations = new List<VirtualPawnRelation>();
 			}
 		}
-
-		// Token: 0x0600CFAB RID: 53163 RVA: 0x003CF854 File Offset: 0x003CDA54
-		public Pawn_RelationsTracker(Pawn pawn)
+		else if (Scribe.mode == LoadSaveMode.PostLoadInit)
 		{
-			this.pawn = pawn;
+			for (int i = 0; i < directRelations.Count; i++)
+			{
+				if (directRelations[i].otherPawn == null)
+				{
+					Log.Warning("Pawn " + pawn?.ToString() + " has relation \"" + directRelations[i].def.defName + "\" with null pawn after loading. This means that we forgot to serialize pawns somewhere (e.g. pawns from passing trade ships).");
+				}
+			}
+			directRelations.RemoveAll((DirectPawnRelation x) => x.otherPawn == null);
+			for (int j = 0; j < directRelations.Count; j++)
+			{
+				directRelations[j].otherPawn.relations.pawnsWithDirectRelationsWithMe.Add(pawn);
+			}
+			if (pregnancyApproaches == null)
+			{
+				pregnancyApproaches = new Dictionary<Pawn, PregnancyApproach>();
+			}
+			pregnancyApproaches.RemoveAll((KeyValuePair<Pawn, PregnancyApproach> x) => x.Key == null);
+			for (int num = virtualRelations.Count - 1; num >= 0; num--)
+			{
+				if (virtualRelations[num].record == null)
+				{
+					virtualRelations.RemoveAt(num);
+				}
+			}
 		}
+		Scribe_Values.Look(ref everSeenByPlayer, "everSeenByPlayer", defaultValue: true);
+		Scribe_Values.Look(ref canGetRescuedThought, "canGetRescuedThought", defaultValue: true);
+		Scribe_Values.Look(ref nextMarriageNameChange, "nextMarriageNameChange", MarriageNameChange.NoChange);
+		Scribe_References.Look(ref relativeInvolvedInRescueQuest, "relativeInvolvedInRescueQuest");
+		Scribe_Values.Look(ref hidePawnRelations, "hidePawnRelations", defaultValue: false);
+		Scribe_Collections.Look(ref pregnancyApproaches, "pregnancyApproaches", LookMode.Reference, LookMode.Value, ref tmpPawns, ref tmpPregnancyApproaches, logNullErrors: false);
+		Scribe_Values.Look(ref romanceEnableTick, "romanceEnableTick", 0);
+	}
 
-		// Token: 0x0600CFAC RID: 53164 RVA: 0x003CF8CC File Offset: 0x003CDACC
-		public void ExposeData()
+	public PregnancyApproach GetPregnancyApproachForPartner(Pawn partner)
+	{
+		if (!pregnancyApproaches.ContainsKey(partner))
 		{
-			Scribe_Collections.Look<DirectPawnRelation>(ref this.directRelations, "directRelations", LookMode.Deep, Array.Empty<object>());
-			Scribe_Collections.Look<VirtualPawnRelation>(ref this.virtualRelations, "virtualRelations", LookMode.Deep, Array.Empty<object>());
-			if (Scribe.mode == LoadSaveMode.ResolvingCrossRefs)
+			if (partner.relations.pregnancyApproaches.TryGetValue(pawn, out var value))
 			{
-				if (this.virtualRelations == null)
-				{
-					this.virtualRelations = new List<VirtualPawnRelation>();
-				}
+				pregnancyApproaches.Add(partner, value);
 			}
-			else if (Scribe.mode == LoadSaveMode.PostLoadInit)
+			else
 			{
-				for (int i = 0; i < this.directRelations.Count; i++)
-				{
-					if (this.directRelations[i].otherPawn == null)
-					{
-						string[] array = new string[5];
-						array[0] = "Pawn ";
-						int num = 1;
-						Pawn pawn = this.pawn;
-						array[num] = ((pawn != null) ? pawn.ToString() : null);
-						array[2] = " has relation \"";
-						array[3] = this.directRelations[i].def.defName;
-						array[4] = "\" with null pawn after loading. This means that we forgot to serialize pawns somewhere (e.g. pawns from passing trade ships).";
-						Log.Warning(string.Concat(array));
-					}
-				}
-				this.directRelations.RemoveAll((DirectPawnRelation x) => x.otherPawn == null);
-				for (int j = 0; j < this.directRelations.Count; j++)
-				{
-					this.directRelations[j].otherPawn.relations.pawnsWithDirectRelationsWithMe.Add(this.pawn);
-				}
-				if (this.pregnancyApproaches == null)
-				{
-					this.pregnancyApproaches = new Dictionary<Pawn, PregnancyApproach>();
-				}
-				this.pregnancyApproaches.RemoveAll((KeyValuePair<Pawn, PregnancyApproach> x) => x.Key == null);
-				for (int k = this.virtualRelations.Count - 1; k >= 0; k--)
-				{
-					if (this.virtualRelations[k].record == null)
-					{
-						this.virtualRelations.RemoveAt(k);
-					}
-				}
+				SetPregnancyApproach(partner, PregnancyApproach.Normal);
 			}
-			Scribe_Values.Look<bool>(ref this.everSeenByPlayer, "everSeenByPlayer", true, false);
-			Scribe_Values.Look<bool>(ref this.canGetRescuedThought, "canGetRescuedThought", true, false);
-			Scribe_Values.Look<MarriageNameChange>(ref this.nextMarriageNameChange, "nextMarriageNameChange", MarriageNameChange.NoChange, false);
-			Scribe_References.Look<Pawn>(ref this.relativeInvolvedInRescueQuest, "relativeInvolvedInRescueQuest", false);
-			Scribe_Values.Look<bool>(ref this.hidePawnRelations, "hidePawnRelations", false, false);
-			Scribe_Collections.Look<Pawn, PregnancyApproach>(ref this.pregnancyApproaches, "pregnancyApproaches", LookMode.Reference, LookMode.Value, ref this.tmpPawns, ref this.tmpPregnancyApproaches, false, false, false);
-			Scribe_Values.Look<int>(ref this.romanceEnableTick, "romanceEnableTick", 0, false);
 		}
+		return pregnancyApproaches[partner];
+	}
 
-		// Token: 0x0600CFAD RID: 53165 RVA: 0x003CFB1C File Offset: 0x003CDD1C
-		public PregnancyApproach GetPregnancyApproachForPartner(Pawn partner)
+	public void SetPregnancyApproach(Pawn partner, PregnancyApproach mode)
+	{
+		pregnancyApproaches[partner] = mode;
+		partner.relations.pregnancyApproaches[pawn] = mode;
+	}
+
+	public void RelationsTrackerTickInterval(int delta)
+	{
+		if (!pawn.Dead)
 		{
-			if (!this.pregnancyApproaches.ContainsKey(partner))
-			{
-				PregnancyApproach value;
-				if (partner.relations.pregnancyApproaches.TryGetValue(this.pawn, out value))
-				{
-					this.pregnancyApproaches.Add(partner, value);
-				}
-				else
-				{
-					this.SetPregnancyApproach(partner, PregnancyApproach.Normal);
-				}
-			}
-			return this.pregnancyApproaches[partner];
+			Tick_CheckStartMarriageCeremony(delta);
+			Tick_CheckDevelopBondRelation(delta);
 		}
+	}
 
-		// Token: 0x0600CFAE RID: 53166 RVA: 0x003CFB74 File Offset: 0x003CDD74
-		public void SetPregnancyApproach(Pawn partner, PregnancyApproach mode)
+	public DirectPawnRelation GetDirectRelation(PawnRelationDef def, Pawn otherPawn)
+	{
+		if (def.implied)
 		{
-			this.pregnancyApproaches[partner] = mode;
-			partner.relations.pregnancyApproaches[this.pawn] = mode;
-		}
-
-		// Token: 0x0600CFAF RID: 53167 RVA: 0x003CFB9A File Offset: 0x003CDD9A
-		public void RelationsTrackerTickInterval(int delta)
-		{
-			if (this.pawn.Dead)
-			{
-				return;
-			}
-			this.Tick_CheckStartMarriageCeremony(delta);
-			this.Tick_CheckDevelopBondRelation(delta);
-		}
-
-		// Token: 0x0600CFB0 RID: 53168 RVA: 0x003CFBB8 File Offset: 0x003CDDB8
-		public DirectPawnRelation GetDirectRelation(PawnRelationDef def, Pawn otherPawn)
-		{
-			if (def.implied)
-			{
-				Log.Warning(((def != null) ? def.ToString() : null) + " is not a direct relation.");
-				return null;
-			}
-			foreach (DirectPawnRelation directPawnRelation in this.directRelations)
-			{
-				if (directPawnRelation.def == def && directPawnRelation.otherPawn == otherPawn)
-				{
-					return directPawnRelation;
-				}
-			}
+			Log.Warning(def?.ToString() + " is not a direct relation.");
 			return null;
 		}
-
-		// Token: 0x0600CFB1 RID: 53169 RVA: 0x003CFC44 File Offset: 0x003CDE44
-		public Pawn GetFirstDirectRelationPawn(PawnRelationDef def, Predicate<Pawn> predicate = null)
+		foreach (DirectPawnRelation directRelation in directRelations)
 		{
-			if (def.implied)
+			if (directRelation.def == def && directRelation.otherPawn == otherPawn)
 			{
-				Log.Warning(((def != null) ? def.ToString() : null) + " is not a direct relation.");
-				return null;
+				return directRelation;
 			}
-			for (int i = 0; i < this.directRelations.Count; i++)
-			{
-				DirectPawnRelation directPawnRelation = this.directRelations[i];
-				if (directPawnRelation.def == def && (predicate == null || predicate(directPawnRelation.otherPawn)))
-				{
-					return directPawnRelation.otherPawn;
-				}
-			}
+		}
+		return null;
+	}
+
+	public Pawn GetFirstDirectRelationPawn(PawnRelationDef def, Predicate<Pawn> predicate = null)
+	{
+		if (def.implied)
+		{
+			Log.Warning(def?.ToString() + " is not a direct relation.");
 			return null;
 		}
-
-		// Token: 0x0600CFB2 RID: 53170 RVA: 0x003CFCBC File Offset: 0x003CDEBC
-		public int GetDirectRelationsCount(PawnRelationDef def, Predicate<Pawn> predicate = null)
+		for (int i = 0; i < directRelations.Count; i++)
 		{
-			int num = 0;
-			if (def.implied)
+			DirectPawnRelation directPawnRelation = directRelations[i];
+			if (directPawnRelation.def == def && (predicate == null || predicate(directPawnRelation.otherPawn)))
 			{
-				Log.Warning(((def != null) ? def.ToString() : null) + " is not a direct relation.");
-				return num;
+				return directPawnRelation.otherPawn;
 			}
-			for (int i = 0; i < this.directRelations.Count; i++)
-			{
-				DirectPawnRelation directPawnRelation = this.directRelations[i];
-				if (directPawnRelation.def == def && (predicate == null || predicate(directPawnRelation.otherPawn)))
-				{
-					num++;
-				}
-			}
+		}
+		return null;
+	}
+
+	public int GetDirectRelationsCount(PawnRelationDef def, Predicate<Pawn> predicate = null)
+	{
+		int num = 0;
+		if (def.implied)
+		{
+			Log.Warning(def?.ToString() + " is not a direct relation.");
 			return num;
 		}
-
-		// Token: 0x0600CFB3 RID: 53171 RVA: 0x003CFD34 File Offset: 0x003CDF34
-		public bool DirectRelationExists(PawnRelationDef def, Pawn otherPawn)
+		for (int i = 0; i < directRelations.Count; i++)
 		{
-			if (def.implied)
+			DirectPawnRelation directPawnRelation = directRelations[i];
+			if (directPawnRelation.def == def && (predicate == null || predicate(directPawnRelation.otherPawn)))
 			{
-				Log.Warning(((def != null) ? def.ToString() : null) + " is not a direct relation.");
-				return false;
+				num++;
 			}
-			for (int i = 0; i < this.directRelations.Count; i++)
-			{
-				DirectPawnRelation directPawnRelation = this.directRelations[i];
-				if (directPawnRelation.def == def && directPawnRelation.otherPawn == otherPawn)
-				{
-					return true;
-				}
-			}
+		}
+		return num;
+	}
+
+	public bool DirectRelationExists(PawnRelationDef def, Pawn otherPawn)
+	{
+		if (def.implied)
+		{
+			Log.Warning(def?.ToString() + " is not a direct relation.");
 			return false;
 		}
-
-		// Token: 0x0600CFB4 RID: 53172 RVA: 0x003CFDA0 File Offset: 0x003CDFA0
-		public bool VirtualRelationExists(PawnRelationDef def, RelationshipRecord record)
+		for (int i = 0; i < directRelations.Count; i++)
 		{
-			if (def.implied)
+			DirectPawnRelation directPawnRelation = directRelations[i];
+			if (directPawnRelation.def == def && directPawnRelation.otherPawn == otherPawn)
 			{
-				Log.Warning(((def != null) ? def.ToString() : null) + " is not a direct relation.");
-				return false;
+				return true;
 			}
-			for (int i = 0; i < this.virtualRelations.Count; i++)
-			{
-				VirtualPawnRelation virtualPawnRelation = this.virtualRelations[i];
-				if (virtualPawnRelation.def == def && virtualPawnRelation.record.ID == record.ID)
-				{
-					return true;
-				}
-			}
+		}
+		return false;
+	}
+
+	public bool VirtualRelationExists(PawnRelationDef def, RelationshipRecord record)
+	{
+		if (def.implied)
+		{
+			Log.Warning(def?.ToString() + " is not a direct relation.");
 			return false;
 		}
-
-		// Token: 0x0600CFB5 RID: 53173 RVA: 0x003CFE18 File Offset: 0x003CE018
-		public void GetDirectRelations(PawnRelationDef def, ref List<Pawn> list, Predicate<Pawn> predicate = null)
+		for (int i = 0; i < virtualRelations.Count; i++)
 		{
-			if (def.implied)
+			VirtualPawnRelation virtualPawnRelation = virtualRelations[i];
+			if (virtualPawnRelation.def == def && virtualPawnRelation.record.ID == record.ID)
 			{
-				Log.Warning(((def != null) ? def.ToString() : null) + " is not a direct relation.");
-				return;
-			}
-			for (int i = 0; i < this.directRelations.Count; i++)
-			{
-				DirectPawnRelation directPawnRelation = this.directRelations[i];
-				if (directPawnRelation.def == def && (predicate == null || predicate(directPawnRelation.otherPawn)))
-				{
-					list.Add(directPawnRelation.otherPawn);
-				}
+				return true;
 			}
 		}
+		return false;
+	}
 
-		// Token: 0x0600CFB6 RID: 53174 RVA: 0x003CFE94 File Offset: 0x003CE094
-		public void ElevateToVirtualRelation(DirectPawnRelation relation)
+	public void GetDirectRelations(PawnRelationDef def, ref List<Pawn> list, Predicate<Pawn> predicate = null)
+	{
+		if (def.implied)
 		{
-			RelationshipRecord orCreateRecord = Find.RelationshipRecords.GetOrCreateRecord(relation.otherPawn);
-			this.virtualRelations.Add(new VirtualPawnRelation(relation.def, orCreateRecord, relation.startTicks));
-			orCreateRecord.AddReference(this.pawn);
-			this.directRelations.Remove(relation);
+			Log.Warning(def?.ToString() + " is not a direct relation.");
+			return;
 		}
-
-		// Token: 0x0600CFB7 RID: 53175 RVA: 0x003CFEE8 File Offset: 0x003CE0E8
-		public void AddDirectRelation(PawnRelationDef def, Pawn otherPawn)
+		for (int i = 0; i < directRelations.Count; i++)
 		{
-			if (def.implied)
+			DirectPawnRelation directPawnRelation = directRelations[i];
+			if (directPawnRelation.def == def && (predicate == null || predicate(directPawnRelation.otherPawn)))
 			{
-				string[] array = new string[6];
-				array[0] = "Tried to directly add implied pawn relation ";
-				array[1] = ((def != null) ? def.ToString() : null);
-				array[2] = ", pawn=";
-				int num = 3;
-				Pawn pawn = this.pawn;
-				array[num] = ((pawn != null) ? pawn.ToString() : null);
-				array[4] = ", otherPawn=";
-				array[5] = ((otherPawn != null) ? otherPawn.ToString() : null);
-				Log.Warning(string.Concat(array));
-				return;
+				list.Add(directPawnRelation.otherPawn);
 			}
-			if (otherPawn == this.pawn)
+		}
+	}
+
+	public void ElevateToVirtualRelation(DirectPawnRelation relation)
+	{
+		RelationshipRecord orCreateRecord = Find.RelationshipRecords.GetOrCreateRecord(relation.otherPawn);
+		virtualRelations.Add(new VirtualPawnRelation(relation.def, orCreateRecord, relation.startTicks));
+		orCreateRecord.AddReference(pawn);
+		directRelations.Remove(relation);
+	}
+
+	public void AddDirectRelation(PawnRelationDef def, Pawn otherPawn)
+	{
+		if (def.implied)
+		{
+			Log.Warning("Tried to directly add implied pawn relation " + def?.ToString() + ", pawn=" + pawn?.ToString() + ", otherPawn=" + otherPawn);
+			return;
+		}
+		if (otherPawn == pawn)
+		{
+			Log.Warning("Tried to add pawn relation " + def?.ToString() + " with self, pawn=" + pawn);
+			return;
+		}
+		if (DirectRelationExists(def, otherPawn))
+		{
+			Log.Warning("Tried to add the same relation twice: " + def?.ToString() + ", pawn=" + pawn?.ToString() + ", otherPawn=" + otherPawn);
+			return;
+		}
+		int startTicks = ((Current.ProgramState == ProgramState.Playing) ? Find.TickManager.TicksGame : 0);
+		def.Worker.OnRelationCreated(pawn, otherPawn);
+		directRelations.Add(new DirectPawnRelation(def, otherPawn, startTicks));
+		otherPawn.relations.pawnsWithDirectRelationsWithMe.Add(pawn);
+		if (def.reflexive)
+		{
+			otherPawn.relations.directRelations.Add(new DirectPawnRelation(def, pawn, startTicks));
+			pawnsWithDirectRelationsWithMe.Add(otherPawn);
+		}
+		GainedOrLostDirectRelation();
+		otherPawn.relations.GainedOrLostDirectRelation();
+		if (Current.ProgramState != ProgramState.Playing)
+		{
+			return;
+		}
+		if (!pawn.Dead && pawn.health != null)
+		{
+			for (int num = pawn.health.hediffSet.hediffs.Count - 1; num >= 0; num--)
 			{
-				string str = "Tried to add pawn relation ";
-				string str2 = (def != null) ? def.ToString() : null;
-				string str3 = " with self, pawn=";
-				Pawn pawn2 = this.pawn;
-				Log.Warning(str + str2 + str3 + ((pawn2 != null) ? pawn2.ToString() : null));
-				return;
+				pawn.health.hediffSet.hediffs[num].Notify_RelationAdded(otherPawn, def);
 			}
-			if (this.DirectRelationExists(def, otherPawn))
+		}
+		if (!otherPawn.Dead && otherPawn.health != null)
+		{
+			for (int num2 = otherPawn.health.hediffSet.hediffs.Count - 1; num2 >= 0; num2--)
 			{
-				string[] array2 = new string[6];
-				array2[0] = "Tried to add the same relation twice: ";
-				array2[1] = ((def != null) ? def.ToString() : null);
-				array2[2] = ", pawn=";
-				int num2 = 3;
-				Pawn pawn3 = this.pawn;
-				array2[num2] = ((pawn3 != null) ? pawn3.ToString() : null);
-				array2[4] = ", otherPawn=";
-				array2[5] = ((otherPawn != null) ? otherPawn.ToString() : null);
-				Log.Warning(string.Concat(array2));
-				return;
+				otherPawn.health.hediffSet.hediffs[num2].Notify_RelationAdded(pawn, def);
 			}
-			int startTicks = (Current.ProgramState == ProgramState.Playing) ? Find.TickManager.TicksGame : 0;
-			def.Worker.OnRelationCreated(this.pawn, otherPawn);
-			this.directRelations.Add(new DirectPawnRelation(def, otherPawn, startTicks));
-			otherPawn.relations.pawnsWithDirectRelationsWithMe.Add(this.pawn);
+		}
+	}
+
+	public void RemoveRelation(RelationshipRecord record)
+	{
+		for (int num = virtualRelations.Count - 1; num >= 0; num--)
+		{
+			if (virtualRelations[num].record == record)
+			{
+				virtualRelations.RemoveAt(num);
+			}
+		}
+	}
+
+	public void RemoveDirectRelation(DirectPawnRelation relation)
+	{
+		RemoveDirectRelation(relation.def, relation.otherPawn);
+	}
+
+	public void RemoveDirectRelation(PawnRelationDef def, Pawn otherPawn)
+	{
+		if (!TryRemoveDirectRelation(def, otherPawn))
+		{
+			Log.Warning("Could not remove relation " + def?.ToString() + " because it's not here. pawn=" + pawn?.ToString() + ", otherPawn=" + otherPawn);
+		}
+	}
+
+	public bool TryRemoveDirectRelation(PawnRelationDef def, Pawn otherPawn)
+	{
+		if (def.implied)
+		{
+			Log.Warning("Tried to remove implied pawn relation " + def?.ToString() + ", pawn=" + pawn?.ToString() + ", otherPawn=" + otherPawn);
+			return false;
+		}
+		for (int i = 0; i < directRelations.Count; i++)
+		{
+			if (directRelations[i].def != def || directRelations[i].otherPawn != otherPawn)
+			{
+				continue;
+			}
 			if (def.reflexive)
 			{
-				otherPawn.relations.directRelations.Add(new DirectPawnRelation(def, this.pawn, startTicks));
-				this.pawnsWithDirectRelationsWithMe.Add(otherPawn);
+				List<DirectPawnRelation> list = otherPawn.relations.directRelations;
+				DirectPawnRelation directPawnRelation = list.Find((DirectPawnRelation x) => x.def == def && x.otherPawn == pawn);
+				directPawnRelation.def.Worker.OnRelationRemoved(otherPawn, pawn);
+				list.Remove(directPawnRelation);
+				if (list.Find((DirectPawnRelation x) => x.otherPawn == pawn) == null)
+				{
+					pawnsWithDirectRelationsWithMe.Remove(otherPawn);
+				}
 			}
-			this.GainedOrLostDirectRelation();
+			directRelations[i].def.Worker.OnRelationRemoved(pawn, otherPawn);
+			directRelations.RemoveAt(i);
+			if (directRelations.Find((DirectPawnRelation x) => x.otherPawn == otherPawn) == null)
+			{
+				otherPawn.relations.pawnsWithDirectRelationsWithMe.Remove(pawn);
+			}
+			GainedOrLostDirectRelation();
 			otherPawn.relations.GainedOrLostDirectRelation();
-			if (Current.ProgramState == ProgramState.Playing)
-			{
-				if (!this.pawn.Dead && this.pawn.health != null)
-				{
-					for (int i = this.pawn.health.hediffSet.hediffs.Count - 1; i >= 0; i--)
-					{
-						this.pawn.health.hediffSet.hediffs[i].Notify_RelationAdded(otherPawn, def);
-					}
-				}
-				if (!otherPawn.Dead && otherPawn.health != null)
-				{
-					for (int j = otherPawn.health.hediffSet.hediffs.Count - 1; j >= 0; j--)
-					{
-						otherPawn.health.hediffSet.hediffs[j].Notify_RelationAdded(this.pawn, def);
-					}
-				}
-			}
+			return true;
 		}
+		return false;
+	}
 
-		// Token: 0x0600CFB8 RID: 53176 RVA: 0x003D0158 File Offset: 0x003CE358
-		public void RemoveRelation(RelationshipRecord record)
+	public int OpinionOf(Pawn other)
+	{
+		if (!other.RaceProps.Humanlike || pawn == other)
 		{
-			for (int i = this.virtualRelations.Count - 1; i >= 0; i--)
+			return 0;
+		}
+		if (pawn.Dead)
+		{
+			return 0;
+		}
+		int num = 0;
+		foreach (PawnRelationDef relation in pawn.GetRelations(other))
+		{
+			num += relation.opinionOffset;
+		}
+		if (pawn.RaceProps.Humanlike && pawn.needs.mood != null)
+		{
+			num += pawn.needs.mood.thoughts.TotalOpinionOffset(other);
+		}
+		if (num != 0)
+		{
+			float num2 = 1f;
+			List<Hediff> hediffs = pawn.health.hediffSet.hediffs;
+			for (int i = 0; i < hediffs.Count; i++)
 			{
-				if (this.virtualRelations[i].record == record)
+				if (hediffs[i].CurStage != null)
 				{
-					this.virtualRelations.RemoveAt(i);
-				}
-			}
-		}
-
-		// Token: 0x0600CFB9 RID: 53177 RVA: 0x003D019D File Offset: 0x003CE39D
-		public void RemoveDirectRelation(DirectPawnRelation relation)
-		{
-			this.RemoveDirectRelation(relation.def, relation.otherPawn);
-		}
-
-		// Token: 0x0600CFBA RID: 53178 RVA: 0x003D01B4 File Offset: 0x003CE3B4
-		public void RemoveDirectRelation(PawnRelationDef def, Pawn otherPawn)
-		{
-			if (!this.TryRemoveDirectRelation(def, otherPawn))
-			{
-				string[] array = new string[6];
-				array[0] = "Could not remove relation ";
-				array[1] = ((def != null) ? def.ToString() : null);
-				array[2] = " because it's not here. pawn=";
-				int num = 3;
-				Pawn pawn = this.pawn;
-				array[num] = ((pawn != null) ? pawn.ToString() : null);
-				array[4] = ", otherPawn=";
-				array[5] = ((otherPawn != null) ? otherPawn.ToString() : null);
-				Log.Warning(string.Concat(array));
-			}
-		}
-
-		// Token: 0x0600CFBB RID: 53179 RVA: 0x003D0228 File Offset: 0x003CE428
-		public bool TryRemoveDirectRelation(PawnRelationDef def, Pawn otherPawn)
-		{
-			if (def.implied)
-			{
-				string[] array = new string[6];
-				array[0] = "Tried to remove implied pawn relation ";
-				int num = 1;
-				PawnRelationDef def2 = def;
-				array[num] = ((def2 != null) ? def2.ToString() : null);
-				array[2] = ", pawn=";
-				int num2 = 3;
-				Pawn pawn = this.pawn;
-				array[num2] = ((pawn != null) ? pawn.ToString() : null);
-				array[4] = ", otherPawn=";
-				int num3 = 5;
-				Pawn otherPawn2 = otherPawn;
-				array[num3] = ((otherPawn2 != null) ? otherPawn2.ToString() : null);
-				Log.Warning(string.Concat(array));
-				return false;
-			}
-			Predicate<DirectPawnRelation> <>9__1;
-			Predicate<DirectPawnRelation> <>9__2;
-			Predicate<DirectPawnRelation> <>9__0;
-			for (int i = 0; i < this.directRelations.Count; i++)
-			{
-				if (this.directRelations[i].def == def && this.directRelations[i].otherPawn == otherPawn)
-				{
-					if (def.reflexive)
-					{
-						List<DirectPawnRelation> list = otherPawn.relations.directRelations;
-						Predicate<DirectPawnRelation> match;
-						if ((match = <>9__1) == null)
-						{
-							match = (<>9__1 = ((DirectPawnRelation x) => x.def == def && x.otherPawn == this.pawn));
-						}
-						DirectPawnRelation directPawnRelation = list.Find(match);
-						directPawnRelation.def.Worker.OnRelationRemoved(otherPawn, this.pawn);
-						list.Remove(directPawnRelation);
-						Predicate<DirectPawnRelation> match2;
-						if ((match2 = <>9__2) == null)
-						{
-							match2 = (<>9__2 = ((DirectPawnRelation x) => x.otherPawn == this.pawn));
-						}
-						if (list.Find(match2) == null)
-						{
-							this.pawnsWithDirectRelationsWithMe.Remove(otherPawn);
-						}
-					}
-					this.directRelations[i].def.Worker.OnRelationRemoved(this.pawn, otherPawn);
-					this.directRelations.RemoveAt(i);
-					List<DirectPawnRelation> list2 = this.directRelations;
-					Predicate<DirectPawnRelation> match3;
-					if ((match3 = <>9__0) == null)
-					{
-						match3 = (<>9__0 = ((DirectPawnRelation x) => x.otherPawn == otherPawn));
-					}
-					if (list2.Find(match3) == null)
-					{
-						otherPawn.relations.pawnsWithDirectRelationsWithMe.Remove(this.pawn);
-					}
-					this.GainedOrLostDirectRelation();
-					otherPawn.relations.GainedOrLostDirectRelation();
-					return true;
+					num2 *= hediffs[i].CurStage.opinionOfOthersFactor;
 				}
 			}
-			return false;
+			num = Mathf.RoundToInt((float)num * num2);
 		}
-
-		// Token: 0x0600CFBC RID: 53180 RVA: 0x003D0450 File Offset: 0x003CE650
-		public int OpinionOf(Pawn other)
+		if (num > 0 && pawn.HostileTo(other))
 		{
-			if (!other.RaceProps.Humanlike || this.pawn == other)
-			{
-				return 0;
-			}
-			if (this.pawn.Dead)
-			{
-				return 0;
-			}
-			int num = 0;
-			foreach (PawnRelationDef pawnRelationDef in this.pawn.GetRelations(other))
-			{
-				num += pawnRelationDef.opinionOffset;
-			}
-			if (this.pawn.RaceProps.Humanlike && this.pawn.needs.mood != null)
-			{
-				num += this.pawn.needs.mood.thoughts.TotalOpinionOffset(other);
-			}
-			if (num != 0)
-			{
-				float num2 = 1f;
-				List<Hediff> hediffs = this.pawn.health.hediffSet.hediffs;
-				for (int i = 0; i < hediffs.Count; i++)
-				{
-					if (hediffs[i].CurStage != null)
-					{
-						num2 *= hediffs[i].CurStage.opinionOfOthersFactor;
-					}
-				}
-				num = Mathf.RoundToInt((float)num * num2);
-			}
-			if (num > 0 && this.pawn.HostileTo(other))
-			{
-				num = 0;
-			}
-			return Mathf.Clamp(num, -100, 100);
+			num = 0;
 		}
+		return Mathf.Clamp(num, -100, 100);
+	}
 
-		// Token: 0x0600CFBD RID: 53181 RVA: 0x003D0594 File Offset: 0x003CE794
-		public string OpinionExplanation(Pawn other)
+	public string OpinionExplanation(Pawn other)
+	{
+		if (!other.RaceProps.Humanlike || pawn == other)
 		{
-			if (!other.RaceProps.Humanlike || this.pawn == other)
+			return "";
+		}
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.Append("OpinionOf".Translate(other.LabelShort).Colorize(ColoredText.TipSectionTitleColor) + ": " + OpinionOf(other).ToStringWithSign());
+		string pawnSituationLabel = SocialCardUtility.GetPawnSituationLabel(other, pawn);
+		if (!pawnSituationLabel.NullOrEmpty())
+		{
+			stringBuilder.AppendLine(" (" + pawnSituationLabel + ")");
+		}
+		else
+		{
+			stringBuilder.AppendLine();
+		}
+		bool flag = false;
+		if (pawn.Dead)
+		{
+			stringBuilder.AppendLine(" - " + "IAmDead".Translate());
+			flag = true;
+		}
+		else
+		{
+			foreach (PawnRelationDef relation in pawn.GetRelations(other))
 			{
-				return "";
-			}
-			StringBuilder stringBuilder = new StringBuilder();
-			stringBuilder.Append("OpinionOf".Translate(other.LabelShort).Colorize(ColoredText.TipSectionTitleColor) + ": " + this.OpinionOf(other).ToStringWithSign());
-			string pawnSituationLabel = SocialCardUtility.GetPawnSituationLabel(other, this.pawn);
-			if (!pawnSituationLabel.NullOrEmpty())
-			{
-				stringBuilder.AppendLine(" (" + pawnSituationLabel + ")");
-			}
-			else
-			{
-				stringBuilder.AppendLine();
-			}
-			bool flag = false;
-			if (this.pawn.Dead)
-			{
-				stringBuilder.AppendLine(" - " + "IAmDead".Translate());
+				stringBuilder.AppendLine(" - " + relation.GetGenderSpecificLabelCap(other) + ": " + relation.opinionOffset.ToStringWithSign());
 				flag = true;
 			}
-			else
+			if (pawn.RaceProps.Humanlike && pawn.needs.mood != null)
 			{
-				foreach (PawnRelationDef pawnRelationDef in this.pawn.GetRelations(other))
+				ThoughtHandler thoughts = pawn.needs.mood.thoughts;
+				thoughts.GetDistinctSocialThoughtGroups(other, tmpSocialThoughts);
+				for (int i = 0; i < tmpSocialThoughts.Count; i++)
 				{
-					stringBuilder.AppendLine(" - " + pawnRelationDef.GetGenderSpecificLabelCap(other) + ": " + pawnRelationDef.opinionOffset.ToStringWithSign());
+					ISocialThought socialThought = tmpSocialThoughts[i];
+					int num = 1;
+					Thought thought = (Thought)socialThought;
+					if (thought.def.IsMemory)
+					{
+						num = thoughts.memories.NumMemoriesInGroup((Thought_MemorySocial)socialThought);
+					}
+					stringBuilder.Append(" - " + thought.LabelCapSocial);
+					if (num != 1)
+					{
+						stringBuilder.Append(" x" + num);
+					}
+					stringBuilder.AppendLine(": " + thoughts.OpinionOffsetOfGroup(socialThought, other).ToStringWithSign());
 					flag = true;
 				}
-				if (this.pawn.RaceProps.Humanlike && this.pawn.needs.mood != null)
-				{
-					ThoughtHandler thoughts = this.pawn.needs.mood.thoughts;
-					thoughts.GetDistinctSocialThoughtGroups(other, Pawn_RelationsTracker.tmpSocialThoughts);
-					for (int i = 0; i < Pawn_RelationsTracker.tmpSocialThoughts.Count; i++)
-					{
-						ISocialThought socialThought = Pawn_RelationsTracker.tmpSocialThoughts[i];
-						int num = 1;
-						Thought thought = (Thought)socialThought;
-						if (thought.def.IsMemory)
-						{
-							num = thoughts.memories.NumMemoriesInGroup((Thought_MemorySocial)socialThought);
-						}
-						stringBuilder.Append(" - " + thought.LabelCapSocial);
-						if (num != 1)
-						{
-							stringBuilder.Append(" x" + num.ToString());
-						}
-						stringBuilder.AppendLine(": " + thoughts.OpinionOffsetOfGroup(socialThought, other).ToStringWithSign());
-						flag = true;
-					}
-				}
-				List<Hediff> hediffs = this.pawn.health.hediffSet.hediffs;
-				for (int j = 0; j < hediffs.Count; j++)
-				{
-					HediffStage curStage = hediffs[j].CurStage;
-					if (curStage != null && curStage.opinionOfOthersFactor != 1f)
-					{
-						stringBuilder.Append(" - " + hediffs[j].LabelBaseCap);
-						if (curStage.opinionOfOthersFactor != 0f)
-						{
-							stringBuilder.AppendLine(": x" + curStage.opinionOfOthersFactor.ToStringPercent());
-						}
-						else
-						{
-							stringBuilder.AppendLine();
-						}
-						flag = true;
-					}
-				}
 			}
-			if (!flag)
+			List<Hediff> hediffs = pawn.health.hediffSet.hediffs;
+			for (int j = 0; j < hediffs.Count; j++)
 			{
-				stringBuilder.AppendLine(" - " + "NoneBrackets".Translate());
+				HediffStage curStage = hediffs[j].CurStage;
+				if (curStage != null && curStage.opinionOfOthersFactor != 1f)
+				{
+					stringBuilder.Append(" - " + hediffs[j].LabelBaseCap);
+					if (curStage.opinionOfOthersFactor != 0f)
+					{
+						stringBuilder.AppendLine(": x" + curStage.opinionOfOthersFactor.ToStringPercent());
+					}
+					else
+					{
+						stringBuilder.AppendLine();
+					}
+					flag = true;
+				}
 			}
-			return stringBuilder.ToString().TrimEndNewlines();
 		}
-
-		// Token: 0x0600CFBE RID: 53182 RVA: 0x003D08B0 File Offset: 0x003CEAB0
-		public float SecondaryLovinChanceFactor(Pawn otherPawn)
+		if (!flag)
 		{
-			if (this.pawn.def != otherPawn.def || this.pawn == otherPawn)
+			stringBuilder.AppendLine(" - " + "NoneBrackets".Translate());
+		}
+		return stringBuilder.ToString().TrimEndNewlines();
+	}
+
+	public float SecondaryLovinChanceFactor(Pawn otherPawn)
+	{
+		if (pawn.def != otherPawn.def || pawn == otherPawn)
+		{
+			return 0f;
+		}
+		if (pawn.story != null && pawn.story.traits != null)
+		{
+			if (pawn.story.traits.HasTrait(TraitDefOf.Asexual))
 			{
 				return 0f;
 			}
-			if (this.pawn.story != null && this.pawn.story.traits != null)
+			if (!pawn.story.traits.HasTrait(TraitDefOf.Bisexual))
 			{
-				if (this.pawn.story.traits.HasTrait(TraitDefOf.Asexual))
+				if (pawn.story.traits.HasTrait(TraitDefOf.Gay))
 				{
-					return 0f;
-				}
-				if (!this.pawn.story.traits.HasTrait(TraitDefOf.Bisexual))
-				{
-					if (this.pawn.story.traits.HasTrait(TraitDefOf.Gay))
-					{
-						if (otherPawn.gender != this.pawn.gender)
-						{
-							return 0f;
-						}
-					}
-					else if (otherPawn.gender == this.pawn.gender)
+					if (otherPawn.gender != pawn.gender)
 					{
 						return 0f;
 					}
 				}
-			}
-			if (this.pawn.ageTracker.AgeBiologicalYearsFloat < 16f || otherPawn.ageTracker.AgeBiologicalYearsFloat < 16f)
-			{
-				return 0f;
-			}
-			return this.LovinAgeFactor(otherPawn) * this.PrettinessFactor(otherPawn);
-		}
-
-		// Token: 0x0600CFBF RID: 53183 RVA: 0x003D09D0 File Offset: 0x003CEBD0
-		public float PrettinessFactor(Pawn otherPawn)
-		{
-			float num = 0f;
-			if (otherPawn.RaceProps.Humanlike)
-			{
-				num = otherPawn.GetStatValue(StatDefOf.PawnBeauty, true, -1);
-			}
-			if (num < 0f)
-			{
-				return 0.3f;
-			}
-			if (num > 0f)
-			{
-				return 2.3f;
-			}
-			return 1f;
-		}
-
-		// Token: 0x0600CFC0 RID: 53184 RVA: 0x003D0A20 File Offset: 0x003CEC20
-		public float LovinAgeFactor(Pawn otherPawn)
-		{
-			float num = 1f;
-			float ageBiologicalYearsFloat = this.pawn.ageTracker.AgeBiologicalYearsFloat;
-			float ageBiologicalYearsFloat2 = otherPawn.ageTracker.AgeBiologicalYearsFloat;
-			if (this.pawn.gender == Gender.Male)
-			{
-				float min = ageBiologicalYearsFloat - 30f;
-				float lower = ageBiologicalYearsFloat - 10f;
-				float upper = ageBiologicalYearsFloat + 3f;
-				float max = ageBiologicalYearsFloat + 10f;
-				num = GenMath.FlatHill(0.2f, min, lower, upper, max, 0.2f, ageBiologicalYearsFloat2);
-			}
-			else if (this.pawn.gender == Gender.Female)
-			{
-				float min2 = ageBiologicalYearsFloat - 10f;
-				float lower2 = ageBiologicalYearsFloat - 3f;
-				float upper2 = ageBiologicalYearsFloat + 10f;
-				float max2 = ageBiologicalYearsFloat + 30f;
-				num = GenMath.FlatHill(0.2f, min2, lower2, upper2, max2, 0.2f, ageBiologicalYearsFloat2);
-			}
-			float num2 = Mathf.InverseLerp(16f, 18f, ageBiologicalYearsFloat);
-			float num3 = Mathf.InverseLerp(16f, 18f, ageBiologicalYearsFloat2);
-			return num * num2 * num3;
-		}
-
-		// Token: 0x0600CFC1 RID: 53185 RVA: 0x003D0B14 File Offset: 0x003CED14
-		public float SecondaryRomanceChanceFactor(Pawn otherPawn)
-		{
-			float num = 1f;
-			foreach (PawnRelationDef pawnRelationDef in this.pawn.GetRelations(otherPawn))
-			{
-				num *= pawnRelationDef.romanceChanceFactor;
-			}
-			float num2 = 1f;
-			HediffWithTarget hediffWithTarget = (HediffWithTarget)this.pawn.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.PsychicLove, false);
-			if (hediffWithTarget != null && hediffWithTarget.target == otherPawn)
-			{
-				num2 = 10f;
-			}
-			float num3 = 1f;
-			if (ModsConfig.BiotechActive && this.pawn.genes != null)
-			{
-				Pawn_StoryTracker story = otherPawn.story;
-				if (((story != null) ? story.traits : null) == null || !otherPawn.story.traits.HasTrait(TraitDefOf.Kind))
+				else if (otherPawn.gender == pawn.gender)
 				{
-					List<Gene> genesListForReading = this.pawn.genes.GenesListForReading;
-					for (int i = 0; i < genesListForReading.Count; i++)
-					{
-						if (genesListForReading[i].def.missingGeneRomanceChanceFactor != 1f && (otherPawn.genes == null || !otherPawn.genes.HasActiveGene(genesListForReading[i].def)))
-						{
-							num3 *= genesListForReading[i].def.missingGeneRomanceChanceFactor;
-						}
-					}
-				}
-			}
-			return this.SecondaryLovinChanceFactor(otherPawn) * num * num2 * num3;
-		}
-
-		// Token: 0x0600CFC2 RID: 53186 RVA: 0x003D0C84 File Offset: 0x003CEE84
-		public float CompatibilityWith(Pawn otherPawn)
-		{
-			if (this.pawn.def != otherPawn.def || this.pawn == otherPawn)
-			{
-				return 0f;
-			}
-			float x = Mathf.Abs(this.pawn.ageTracker.AgeBiologicalYearsFloat - otherPawn.ageTracker.AgeBiologicalYearsFloat);
-			float num = Mathf.Clamp(GenMath.LerpDouble(0f, 20f, 0.45f, -0.45f, x), -0.45f, 0.45f);
-			float num2 = this.ConstantPerPawnsPairCompatibilityOffset(otherPawn.thingIDNumber);
-			return num + num2;
-		}
-
-		// Token: 0x0600CFC3 RID: 53187 RVA: 0x003D0D0D File Offset: 0x003CEF0D
-		public float ConstantPerPawnsPairCompatibilityOffset(int otherPawnID)
-		{
-			Rand.PushState();
-			Rand.Seed = (this.pawn.thingIDNumber ^ otherPawnID) * 37;
-			float result = Rand.GaussianAsymmetric(0.3f, 1f, 1.4f);
-			Rand.PopState();
-			return result;
-		}
-
-		// Token: 0x0600CFC4 RID: 53188 RVA: 0x003D0D44 File Offset: 0x003CEF44
-		public void ClearAllRelations()
-		{
-			this.CleanupVirtualRelationReferences();
-			List<DirectPawnRelation> list = this.directRelations.ToList<DirectPawnRelation>();
-			for (int i = 0; i < list.Count; i++)
-			{
-				this.RemoveDirectRelation(list[i]);
-			}
-			List<Pawn> list2 = this.pawnsWithDirectRelationsWithMe.ToList<Pawn>();
-			for (int j = 0; j < list2.Count; j++)
-			{
-				List<DirectPawnRelation> list3 = list2[j].relations.directRelations.ToList<DirectPawnRelation>();
-				for (int k = 0; k < list3.Count; k++)
-				{
-					if (list3[k].otherPawn == this.pawn)
-					{
-						list2[j].relations.RemoveDirectRelation(list3[k]);
-					}
+					return 0f;
 				}
 			}
 		}
-
-		// Token: 0x0600CFC5 RID: 53189 RVA: 0x003D0DFC File Offset: 0x003CEFFC
-		private void CleanupVirtualRelationReferences()
+		if (pawn.ageTracker.AgeBiologicalYearsFloat < 16f || otherPawn.ageTracker.AgeBiologicalYearsFloat < 16f)
 		{
-			foreach (VirtualPawnRelation virtualPawnRelation in this.virtualRelations)
-			{
-				virtualPawnRelation.record.RemoveReference(this.pawn);
-			}
-			this.virtualRelations.Clear();
+			return 0f;
 		}
+		return LovinAgeFactor(otherPawn) * PrettinessFactor(otherPawn);
+	}
 
-		// Token: 0x0600CFC6 RID: 53190 RVA: 0x003D0E64 File Offset: 0x003CF064
-		public void ClearAllNonBloodRelations()
+	public float PrettinessFactor(Pawn otherPawn)
+	{
+		float num = 0f;
+		if (otherPawn.RaceProps.Humanlike)
 		{
-			List<DirectPawnRelation> list = this.directRelations.ToList<DirectPawnRelation>();
-			for (int i = 0; i < list.Count; i++)
+			num = otherPawn.GetStatValue(StatDefOf.PawnBeauty);
+		}
+		if (num < 0f)
+		{
+			return 0.3f;
+		}
+		if (num > 0f)
+		{
+			return 2.3f;
+		}
+		return 1f;
+	}
+
+	public float LovinAgeFactor(Pawn otherPawn)
+	{
+		float num = 1f;
+		float ageBiologicalYearsFloat = pawn.ageTracker.AgeBiologicalYearsFloat;
+		float ageBiologicalYearsFloat2 = otherPawn.ageTracker.AgeBiologicalYearsFloat;
+		if (pawn.gender == Gender.Male)
+		{
+			float min = ageBiologicalYearsFloat - 30f;
+			float lower = ageBiologicalYearsFloat - 10f;
+			float upper = ageBiologicalYearsFloat + 3f;
+			float max = ageBiologicalYearsFloat + 10f;
+			num = GenMath.FlatHill(0.2f, min, lower, upper, max, 0.2f, ageBiologicalYearsFloat2);
+		}
+		else if (pawn.gender == Gender.Female)
+		{
+			float min2 = ageBiologicalYearsFloat - 10f;
+			float lower2 = ageBiologicalYearsFloat - 3f;
+			float upper2 = ageBiologicalYearsFloat + 10f;
+			float max2 = ageBiologicalYearsFloat + 30f;
+			num = GenMath.FlatHill(0.2f, min2, lower2, upper2, max2, 0.2f, ageBiologicalYearsFloat2);
+		}
+		float num2 = Mathf.InverseLerp(16f, 18f, ageBiologicalYearsFloat);
+		float num3 = Mathf.InverseLerp(16f, 18f, ageBiologicalYearsFloat2);
+		return num * num2 * num3;
+	}
+
+	public float SecondaryRomanceChanceFactor(Pawn otherPawn)
+	{
+		float num = 1f;
+		foreach (PawnRelationDef relation in pawn.GetRelations(otherPawn))
+		{
+			num *= relation.romanceChanceFactor;
+		}
+		float num2 = 1f;
+		HediffWithTarget hediffWithTarget = (HediffWithTarget)pawn.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.PsychicLove);
+		if (hediffWithTarget != null && hediffWithTarget.target == otherPawn)
+		{
+			num2 = 10f;
+		}
+		float num3 = 1f;
+		if (ModsConfig.BiotechActive && pawn.genes != null && (otherPawn.story?.traits == null || !otherPawn.story.traits.HasTrait(TraitDefOf.Kind)))
+		{
+			List<Gene> genesListForReading = pawn.genes.GenesListForReading;
+			for (int i = 0; i < genesListForReading.Count; i++)
 			{
-				if (!list[i].def.familyByBloodRelation)
+				if (genesListForReading[i].def.missingGeneRomanceChanceFactor != 1f && (otherPawn.genes == null || !otherPawn.genes.HasActiveGene(genesListForReading[i].def)))
 				{
-					this.RemoveDirectRelation(list[i]);
-				}
-			}
-			List<Pawn> list2 = this.pawnsWithDirectRelationsWithMe.ToList<Pawn>();
-			for (int j = 0; j < list2.Count; j++)
-			{
-				List<DirectPawnRelation> list3 = list2[j].relations.directRelations.ToList<DirectPawnRelation>();
-				for (int k = 0; k < list3.Count; k++)
-				{
-					if (list3[k].otherPawn == this.pawn && !list3[j].def.familyByBloodRelation)
-					{
-						list2[j].relations.RemoveDirectRelation(list3[k]);
-					}
-				}
-			}
-		}
-
-		// Token: 0x0600CFC7 RID: 53191 RVA: 0x003D0F40 File Offset: 0x003CF140
-		internal void Notify_PawnKilled(DamageInfo? dinfo, Map mapBeforeDeath)
-		{
-			foreach (Pawn pawn in this.PotentiallyRelatedPawns)
-			{
-				if (!pawn.Dead && pawn.needs.mood != null)
-				{
-					pawn.needs.mood.thoughts.situational.Notify_SituationalThoughtsDirty();
-				}
-			}
-			this.RemoveMySpouseMarriageRelatedThoughts();
-			this.RemoveRelationsOnDeath();
-			if (this.everSeenByPlayer && !PawnGenerator.IsBeingGenerated(this.pawn) && !this.pawn.RaceProps.Animal)
-			{
-				this.AffectBondedAnimalsOnMyDeath();
-			}
-			this.Notify_FailedRescueQuest();
-		}
-
-		// Token: 0x0600CFC8 RID: 53192 RVA: 0x003D0FF4 File Offset: 0x003CF1F4
-		public void Notify_PawnDestroyed(DestroyMode mode)
-		{
-			this.RemoveRelationsOnDeath();
-		}
-
-		// Token: 0x0600CFC9 RID: 53193 RVA: 0x003D0FFC File Offset: 0x003CF1FC
-		public void Notify_PassedToWorld()
-		{
-			if (!this.pawn.Dead)
-			{
-				this.relativeInvolvedInRescueQuest = null;
-			}
-		}
-
-		// Token: 0x0600CFCA RID: 53194 RVA: 0x003D1012 File Offset: 0x003CF212
-		public void Notify_PawnLeftBehind()
-		{
-			this.RemoveRelationsOnLeftBehind();
-		}
-
-		// Token: 0x0600CFCB RID: 53195 RVA: 0x003D101A File Offset: 0x003CF21A
-		public void Notify_ExitedMap()
-		{
-			this.CheckRescued();
-		}
-
-		// Token: 0x0600CFCC RID: 53196 RVA: 0x003D1022 File Offset: 0x003CF222
-		public void Notify_ChangedFaction()
-		{
-			if (this.pawn.Faction == Faction.OfPlayer)
-			{
-				this.CheckRescued();
-			}
-		}
-
-		// Token: 0x0600CFCD RID: 53197 RVA: 0x003D103C File Offset: 0x003CF23C
-		public void Notify_PawnSold(Pawn playerNegotiator)
-		{
-			foreach (Pawn pawn in this.PotentiallyRelatedPawns)
-			{
-				if (!pawn.Dead && pawn.needs.mood != null)
-				{
-					PawnRelationDef mostImportantRelation = pawn.GetMostImportantRelation(this.pawn);
-					if (mostImportantRelation != null && mostImportantRelation.soldThoughts != null)
-					{
-						if (mostImportantRelation == PawnRelationDefOf.Bond)
-						{
-							this.pawn.relations.RemoveDirectRelation(mostImportantRelation, pawn);
-						}
-						foreach (ThoughtDef def in mostImportantRelation.soldThoughts)
-						{
-							pawn.needs.mood.thoughts.memories.TryGainMemory(def, playerNegotiator, null);
-						}
-					}
-				}
-			}
-			this.RemoveMySpouseMarriageRelatedThoughts();
-		}
-
-		// Token: 0x0600CFCE RID: 53198 RVA: 0x003D1138 File Offset: 0x003CF338
-		public void Notify_PawnKidnapped()
-		{
-			this.RemoveMySpouseMarriageRelatedThoughts();
-		}
-
-		// Token: 0x0600CFCF RID: 53199 RVA: 0x003D1140 File Offset: 0x003CF340
-		public void Notify_RescuedBy(Pawn rescuer)
-		{
-			if (rescuer.RaceProps.Humanlike && this.pawn.needs.mood != null && this.canGetRescuedThought)
-			{
-				this.pawn.needs.mood.thoughts.memories.TryGainMemory(ThoughtDefOf.RescuedMe, rescuer, null);
-				this.canGetRescuedThought = false;
-			}
-		}
-
-		// Token: 0x0600CFD0 RID: 53200 RVA: 0x003D11A4 File Offset: 0x003CF3A4
-		public void Notify_FailedRescueQuest()
-		{
-			if (this.relativeInvolvedInRescueQuest != null && !this.relativeInvolvedInRescueQuest.Dead && this.relativeInvolvedInRescueQuest.needs.mood != null)
-			{
-				Messages.Message("MessageFailedToRescueRelative".Translate(this.pawn.LabelShort, this.relativeInvolvedInRescueQuest.LabelShort, this.pawn.Named("PAWN"), this.relativeInvolvedInRescueQuest.Named("RELATIVE")), this.relativeInvolvedInRescueQuest, MessageTypeDefOf.PawnDeath, true);
-				this.relativeInvolvedInRescueQuest.needs.mood.thoughts.memories.TryGainMemory(ThoughtDefOf.FailedToRescueRelative, this.pawn, null);
-			}
-			this.relativeInvolvedInRescueQuest = null;
-		}
-
-		// Token: 0x0600CFD1 RID: 53201 RVA: 0x003D1278 File Offset: 0x003CF478
-		private void CheckRescued()
-		{
-			if (this.relativeInvolvedInRescueQuest != null && !this.relativeInvolvedInRescueQuest.Dead && this.relativeInvolvedInRescueQuest.needs.mood != null)
-			{
-				Messages.Message("MessageRescuedRelative".Translate(this.pawn.LabelShort, this.relativeInvolvedInRescueQuest.LabelShort, this.pawn.Named("PAWN"), this.relativeInvolvedInRescueQuest.Named("RELATIVE")), this.relativeInvolvedInRescueQuest, MessageTypeDefOf.PositiveEvent, true);
-				this.relativeInvolvedInRescueQuest.needs.mood.thoughts.memories.TryGainMemory(ThoughtDefOf.RescuedRelative, this.pawn, null);
-			}
-			this.relativeInvolvedInRescueQuest = null;
-		}
-
-		// Token: 0x0600CFD2 RID: 53202 RVA: 0x003D134C File Offset: 0x003CF54C
-		public float GetFriendDiedThoughtPowerFactor(int opinion)
-		{
-			return Mathf.Lerp(0.15f, 1f, Mathf.InverseLerp(20f, 100f, (float)opinion));
-		}
-
-		// Token: 0x0600CFD3 RID: 53203 RVA: 0x003D136E File Offset: 0x003CF56E
-		public float GetRivalDiedThoughtPowerFactor(int opinion)
-		{
-			return Mathf.Lerp(0.15f, 1f, Mathf.InverseLerp(-20f, -100f, (float)opinion));
-		}
-
-		// Token: 0x0600CFD4 RID: 53204 RVA: 0x003D1390 File Offset: 0x003CF590
-		private void RemoveMySpouseMarriageRelatedThoughts()
-		{
-			foreach (Pawn pawn in this.pawn.GetSpouses(false))
-			{
-				if (pawn.needs.mood != null)
-				{
-					MemoryThoughtHandler memories = pawn.needs.mood.thoughts.memories;
-					memories.RemoveMemoriesOfDef(ThoughtDefOf.GotMarried);
-					memories.RemoveMemoriesOfDef(ThoughtDefOf.HoneymoonPhase);
+					num3 *= genesListForReading[i].def.missingGeneRomanceChanceFactor;
 				}
 			}
 		}
+		return SecondaryLovinChanceFactor(otherPawn) * num * num2 * num3;
+	}
 
-		// Token: 0x0600CFD5 RID: 53205 RVA: 0x003D141C File Offset: 0x003CF61C
-		private void RemoveRelationsOnDeath()
+	public float CompatibilityWith(Pawn otherPawn)
+	{
+		if (pawn.def != otherPawn.def || pawn == otherPawn)
 		{
-			for (int i = this.directRelations.Count - 1; i >= 0; i--)
+			return 0f;
+		}
+		float x = Mathf.Abs(pawn.ageTracker.AgeBiologicalYearsFloat - otherPawn.ageTracker.AgeBiologicalYearsFloat);
+		float num = Mathf.Clamp(GenMath.LerpDouble(0f, 20f, 0.45f, -0.45f, x), -0.45f, 0.45f);
+		float num2 = ConstantPerPawnsPairCompatibilityOffset(otherPawn.thingIDNumber);
+		return num + num2;
+	}
+
+	public float ConstantPerPawnsPairCompatibilityOffset(int otherPawnID)
+	{
+		Rand.PushState();
+		Rand.Seed = (pawn.thingIDNumber ^ otherPawnID) * 37;
+		float result = Rand.GaussianAsymmetric(0.3f, 1f, 1.4f);
+		Rand.PopState();
+		return result;
+	}
+
+	public void ClearAllRelations()
+	{
+		CleanupVirtualRelationReferences();
+		List<DirectPawnRelation> list = directRelations.ToList();
+		for (int i = 0; i < list.Count; i++)
+		{
+			RemoveDirectRelation(list[i]);
+		}
+		List<Pawn> list2 = pawnsWithDirectRelationsWithMe.ToList();
+		for (int j = 0; j < list2.Count; j++)
+		{
+			List<DirectPawnRelation> list3 = list2[j].relations.directRelations.ToList();
+			for (int k = 0; k < list3.Count; k++)
 			{
-				if (this.directRelations[i].def.removeOnDeath)
+				if (list3[k].otherPawn == pawn)
 				{
-					DirectPawnRelation directPawnRelation = this.directRelations[i];
-					Pawn otherPawn = directPawnRelation.otherPawn;
-					this.RemoveDirectRelation(this.directRelations[i]);
-					directPawnRelation.def.Worker.Notify_PostRemovedByDeath(this.pawn, otherPawn);
+					list2[j].relations.RemoveDirectRelation(list3[k]);
 				}
 			}
 		}
+	}
 
-		// Token: 0x0600CFD6 RID: 53206 RVA: 0x003D1494 File Offset: 0x003CF694
-		private void RemoveRelationsOnLeftBehind()
+	private void CleanupVirtualRelationReferences()
+	{
+		foreach (VirtualPawnRelation virtualRelation in virtualRelations)
 		{
-			for (int i = this.directRelations.Count - 1; i >= 0; i--)
+			virtualRelation.record.RemoveReference(pawn);
+		}
+		virtualRelations.Clear();
+	}
+
+	public void ClearAllNonBloodRelations()
+	{
+		List<DirectPawnRelation> list = directRelations.ToList();
+		for (int i = 0; i < list.Count; i++)
+		{
+			if (!list[i].def.familyByBloodRelation)
 			{
-				if (this.directRelations[i].def.removeOnLeftBehind)
+				RemoveDirectRelation(list[i]);
+			}
+		}
+		List<Pawn> list2 = pawnsWithDirectRelationsWithMe.ToList();
+		for (int j = 0; j < list2.Count; j++)
+		{
+			List<DirectPawnRelation> list3 = list2[j].relations.directRelations.ToList();
+			for (int k = 0; k < list3.Count; k++)
+			{
+				if (list3[k].otherPawn == pawn && !list3[j].def.familyByBloodRelation)
 				{
-					DirectPawnRelation directPawnRelation = this.directRelations[i];
-					Pawn otherPawn = directPawnRelation.otherPawn;
-					this.RemoveDirectRelation(this.directRelations[i]);
-					directPawnRelation.def.Worker.Notify_PostRemovedLeftBehind(this.pawn, otherPawn);
+					list2[j].relations.RemoveDirectRelation(list3[k]);
 				}
 			}
 		}
+	}
 
-		// Token: 0x0600CFD7 RID: 53207 RVA: 0x003D150C File Offset: 0x003CF70C
-		public void CheckAppendBondedAnimalDiedInfo(ref TaggedString letter, ref TaggedString label)
+	internal void Notify_PawnKilled(DamageInfo? dinfo, Map mapBeforeDeath)
+	{
+		foreach (Pawn potentiallyRelatedPawn in PotentiallyRelatedPawns)
 		{
-			if (!this.pawn.RaceProps.Animal || !this.everSeenByPlayer || PawnGenerator.IsBeingGenerated(this.pawn))
+			if (!potentiallyRelatedPawn.Dead && potentiallyRelatedPawn.needs.mood != null)
 			{
-				return;
-			}
-			Predicate<Pawn> isAffected = (Pawn x) => !x.Dead && (!x.RaceProps.Humanlike || !x.story.traits.HasTrait(TraitDefOf.Psychopath));
-			int num = 0;
-			for (int i = 0; i < this.directRelations.Count; i++)
-			{
-				if (this.directRelations[i].def == PawnRelationDefOf.Bond && isAffected(this.directRelations[i].otherPawn))
-				{
-					num++;
-				}
-			}
-			if (num == 0)
-			{
-				return;
-			}
-			TaggedString t;
-			if (num == 1)
-			{
-				Pawn firstDirectRelationPawn = this.GetFirstDirectRelationPawn(PawnRelationDefOf.Bond, (Pawn x) => isAffected(x));
-				t = "LetterPartBondedAnimalDied".Translate(this.pawn.LabelDefinite(), firstDirectRelationPawn.LabelShort, this.pawn.Named("ANIMAL"), firstDirectRelationPawn.Named("HUMAN")).CapitalizeFirst();
-			}
-			else
-			{
-				StringBuilder stringBuilder = new StringBuilder();
-				for (int j = 0; j < this.directRelations.Count; j++)
-				{
-					if (this.directRelations[j].def == PawnRelationDefOf.Bond && isAffected(this.directRelations[j].otherPawn))
-					{
-						stringBuilder.AppendLine("  - " + this.directRelations[j].otherPawn.LabelShort);
-					}
-				}
-				t = "LetterPartBondedAnimalDiedMulti".Translate(stringBuilder.ToString().TrimEndNewlines());
-			}
-			label += " (" + "LetterLabelSuffixBondedAnimalDied".Translate() + ")";
-			if (!letter.NullOrEmpty())
-			{
-				letter += "\n\n";
-			}
-			letter += t;
-		}
-
-		// Token: 0x0600CFD8 RID: 53208 RVA: 0x003D1730 File Offset: 0x003CF930
-		private void AffectBondedAnimalsOnMyDeath()
-		{
-			int num = 0;
-			Pawn pawn = null;
-			for (int i = 0; i < this.directRelations.Count; i++)
-			{
-				if (this.directRelations[i].def == PawnRelationDefOf.Bond && this.directRelations[i].otherPawn.Spawned)
-				{
-					pawn = this.directRelations[i].otherPawn;
-					num++;
-					float value = Rand.Value;
-					MentalStateDef stateDef;
-					if (value < 0.25f)
-					{
-						stateDef = MentalStateDefOf.Wander_Sad;
-					}
-					else if (value < 0.5f)
-					{
-						stateDef = MentalStateDefOf.Wander_Psychotic;
-					}
-					else if (value < 0.75f)
-					{
-						stateDef = MentalStateDefOf.Berserk;
-					}
-					else
-					{
-						stateDef = MentalStateDefOf.Manhunter;
-					}
-					this.directRelations[i].otherPawn.mindState.mentalStateHandler.TryStartMentalState(stateDef, "MentalStateReason_BondedHumanDeath".Translate(this.pawn).Resolve(), false, true, false, null, false, false, false);
-				}
-			}
-			if (num == 1)
-			{
-				TaggedString taggedString;
-				if (pawn.Name != null && !pawn.Name.Numerical)
-				{
-					taggedString = "MessageNamedBondedAnimalMentalBreak".Translate(pawn.KindLabelIndefinite(), pawn.Name.ToStringShort, this.pawn.LabelShort, pawn.Named("ANIMAL"), this.pawn.Named("HUMAN"));
-				}
-				else
-				{
-					taggedString = "MessageBondedAnimalMentalBreak".Translate(pawn.LabelIndefinite(), this.pawn.LabelShort, pawn.Named("ANIMAL"), this.pawn.Named("HUMAN"));
-				}
-				Messages.Message(taggedString.CapitalizeFirst(), pawn, MessageTypeDefOf.ThreatSmall, true);
-				return;
-			}
-			if (num > 1)
-			{
-				Messages.Message("MessageBondedAnimalsMentalBreak".Translate(num, this.pawn.LabelShort, this.pawn.Named("HUMAN")), pawn, MessageTypeDefOf.ThreatSmall, true);
+				potentiallyRelatedPawn.needs.mood.thoughts.situational.Notify_SituationalThoughtsDirty();
 			}
 		}
-
-		// Token: 0x0600CFD9 RID: 53209 RVA: 0x003D194C File Offset: 0x003CFB4C
-		private void Tick_CheckStartMarriageCeremony(int delta)
+		RemoveMySpouseMarriageRelatedThoughts();
+		RemoveRelationsOnDeath();
+		if (everSeenByPlayer && !PawnGenerator.IsBeingGenerated(pawn) && !pawn.RaceProps.Animal)
 		{
-			if (!this.pawn.Spawned || this.pawn.RaceProps.Animal)
+			AffectBondedAnimalsOnMyDeath();
+		}
+		Notify_FailedRescueQuest();
+	}
+
+	public void Notify_PawnDestroyed(DestroyMode mode)
+	{
+		RemoveRelationsOnDeath();
+	}
+
+	public void Notify_PassedToWorld()
+	{
+		if (!pawn.Dead)
+		{
+			relativeInvolvedInRescueQuest = null;
+		}
+	}
+
+	public void Notify_PawnLeftBehind()
+	{
+		RemoveRelationsOnLeftBehind();
+	}
+
+	public void Notify_ExitedMap()
+	{
+		CheckRescued();
+	}
+
+	public void Notify_ChangedFaction()
+	{
+		if (pawn.Faction == Faction.OfPlayer)
+		{
+			CheckRescued();
+		}
+	}
+
+	public void Notify_PawnSold(Pawn playerNegotiator)
+	{
+		foreach (Pawn potentiallyRelatedPawn in PotentiallyRelatedPawns)
+		{
+			if (potentiallyRelatedPawn.Dead || potentiallyRelatedPawn.needs.mood == null)
 			{
-				return;
+				continue;
 			}
-			if (this.pawn.IsHashIntervalTick(1017, delta))
+			PawnRelationDef mostImportantRelation = potentiallyRelatedPawn.GetMostImportantRelation(pawn);
+			if (mostImportantRelation == null || mostImportantRelation.soldThoughts == null)
 			{
-				int ticksGame = Find.TickManager.TicksGame;
-				for (int i = 0; i < this.directRelations.Count; i++)
+				continue;
+			}
+			if (mostImportantRelation == PawnRelationDefOf.Bond)
+			{
+				pawn.relations.RemoveDirectRelation(mostImportantRelation, potentiallyRelatedPawn);
+			}
+			foreach (ThoughtDef soldThought in mostImportantRelation.soldThoughts)
+			{
+				potentiallyRelatedPawn.needs.mood.thoughts.memories.TryGainMemory(soldThought, playerNegotiator);
+			}
+		}
+		RemoveMySpouseMarriageRelatedThoughts();
+	}
+
+	public void Notify_PawnKidnapped()
+	{
+		RemoveMySpouseMarriageRelatedThoughts();
+	}
+
+	public void Notify_RescuedBy(Pawn rescuer)
+	{
+		if (rescuer.RaceProps.Humanlike && pawn.needs.mood != null && canGetRescuedThought)
+		{
+			pawn.needs.mood.thoughts.memories.TryGainMemory(ThoughtDefOf.RescuedMe, rescuer);
+			canGetRescuedThought = false;
+		}
+	}
+
+	public void Notify_FailedRescueQuest()
+	{
+		if (relativeInvolvedInRescueQuest != null && !relativeInvolvedInRescueQuest.Dead && relativeInvolvedInRescueQuest.needs.mood != null)
+		{
+			Messages.Message("MessageFailedToRescueRelative".Translate(pawn.LabelShort, relativeInvolvedInRescueQuest.LabelShort, pawn.Named("PAWN"), relativeInvolvedInRescueQuest.Named("RELATIVE")), relativeInvolvedInRescueQuest, MessageTypeDefOf.PawnDeath);
+			relativeInvolvedInRescueQuest.needs.mood.thoughts.memories.TryGainMemory(ThoughtDefOf.FailedToRescueRelative, pawn);
+		}
+		relativeInvolvedInRescueQuest = null;
+	}
+
+	private void CheckRescued()
+	{
+		if (relativeInvolvedInRescueQuest != null && !relativeInvolvedInRescueQuest.Dead && relativeInvolvedInRescueQuest.needs.mood != null)
+		{
+			Messages.Message("MessageRescuedRelative".Translate(pawn.LabelShort, relativeInvolvedInRescueQuest.LabelShort, pawn.Named("PAWN"), relativeInvolvedInRescueQuest.Named("RELATIVE")), relativeInvolvedInRescueQuest, MessageTypeDefOf.PositiveEvent);
+			relativeInvolvedInRescueQuest.needs.mood.thoughts.memories.TryGainMemory(ThoughtDefOf.RescuedRelative, pawn);
+		}
+		relativeInvolvedInRescueQuest = null;
+	}
+
+	public float GetFriendDiedThoughtPowerFactor(int opinion)
+	{
+		return Mathf.Lerp(0.15f, 1f, Mathf.InverseLerp(20f, 100f, opinion));
+	}
+
+	public float GetRivalDiedThoughtPowerFactor(int opinion)
+	{
+		return Mathf.Lerp(0.15f, 1f, Mathf.InverseLerp(-20f, -100f, opinion));
+	}
+
+	private void RemoveMySpouseMarriageRelatedThoughts()
+	{
+		foreach (Pawn spouse in pawn.GetSpouses(includeDead: false))
+		{
+			if (spouse.needs.mood != null)
+			{
+				MemoryThoughtHandler memories = spouse.needs.mood.thoughts.memories;
+				memories.RemoveMemoriesOfDef(ThoughtDefOf.GotMarried);
+				memories.RemoveMemoriesOfDef(ThoughtDefOf.HoneymoonPhase);
+			}
+		}
+	}
+
+	private void RemoveRelationsOnDeath()
+	{
+		for (int num = directRelations.Count - 1; num >= 0; num--)
+		{
+			if (directRelations[num].def.removeOnDeath)
+			{
+				DirectPawnRelation directPawnRelation = directRelations[num];
+				Pawn otherPawn = directPawnRelation.otherPawn;
+				RemoveDirectRelation(directRelations[num]);
+				directPawnRelation.def.Worker.Notify_PostRemovedByDeath(pawn, otherPawn);
+			}
+		}
+	}
+
+	private void RemoveRelationsOnLeftBehind()
+	{
+		for (int num = directRelations.Count - 1; num >= 0; num--)
+		{
+			if (directRelations[num].def.removeOnLeftBehind)
+			{
+				DirectPawnRelation directPawnRelation = directRelations[num];
+				Pawn otherPawn = directPawnRelation.otherPawn;
+				RemoveDirectRelation(directRelations[num]);
+				directPawnRelation.def.Worker.Notify_PostRemovedLeftBehind(pawn, otherPawn);
+			}
+		}
+	}
+
+	public void CheckAppendBondedAnimalDiedInfo(ref TaggedString letter, ref TaggedString label)
+	{
+		if (!pawn.RaceProps.Animal || !everSeenByPlayer || PawnGenerator.IsBeingGenerated(pawn))
+		{
+			return;
+		}
+		Predicate<Pawn> isAffected = delegate(Pawn x)
+		{
+			if (x.Dead)
+			{
+				return false;
+			}
+			return (!x.RaceProps.Humanlike || !x.story.traits.HasTrait(TraitDefOf.Psychopath)) ? true : false;
+		};
+		int num = 0;
+		for (int i = 0; i < directRelations.Count; i++)
+		{
+			if (directRelations[i].def == PawnRelationDefOf.Bond && isAffected(directRelations[i].otherPawn))
+			{
+				num++;
+			}
+		}
+		TaggedString taggedString;
+		switch (num)
+		{
+		case 0:
+			return;
+		case 1:
+		{
+			Pawn firstDirectRelationPawn = GetFirstDirectRelationPawn(PawnRelationDefOf.Bond, (Pawn x) => isAffected(x));
+			taggedString = "LetterPartBondedAnimalDied".Translate(pawn.LabelDefinite(), firstDirectRelationPawn.LabelShort, pawn.Named("ANIMAL"), firstDirectRelationPawn.Named("HUMAN")).CapitalizeFirst();
+			break;
+		}
+		default:
+		{
+			StringBuilder stringBuilder = new StringBuilder();
+			for (int j = 0; j < directRelations.Count; j++)
+			{
+				if (directRelations[j].def == PawnRelationDefOf.Bond && isAffected(directRelations[j].otherPawn))
 				{
-					float num = (float)(ticksGame - this.directRelations[i].startTicks) / 60000f;
-					if (this.directRelations[i].def == PawnRelationDefOf.Fiance && this.pawn.thingIDNumber < this.directRelations[i].otherPawn.thingIDNumber && num > 10f && Rand.MTBEventOccurs(2f, 60000f, 1017f) && this.pawn.Map == this.directRelations[i].otherPawn.Map && this.pawn.Map.IsPlayerHome && MarriageCeremonyUtility.AcceptableGameConditionsToStartCeremony(this.pawn.Map) && MarriageCeremonyUtility.FianceReadyToStartCeremony(this.pawn, this.directRelations[i].otherPawn) && MarriageCeremonyUtility.FianceReadyToStartCeremony(this.directRelations[i].otherPawn, this.pawn))
-					{
-						this.pawn.Map.lordsStarter.TryStartMarriageCeremony(this.pawn, this.directRelations[i].otherPawn);
-					}
+					stringBuilder.AppendLine("  - " + directRelations[j].otherPawn.LabelShort);
 				}
 			}
+			taggedString = "LetterPartBondedAnimalDiedMulti".Translate(stringBuilder.ToString().TrimEndNewlines());
+			break;
 		}
-
-		// Token: 0x0600CFDA RID: 53210 RVA: 0x003D1AEC File Offset: 0x003CFCEC
-		private void Tick_CheckDevelopBondRelation(int delta)
+		}
+		label += " (" + "LetterLabelSuffixBondedAnimalDied".Translate() + ")";
+		if (!letter.NullOrEmpty())
 		{
-			if (!this.pawn.Spawned || !this.pawn.IsAnimal || this.pawn.Faction != Faction.OfPlayer || this.pawn.playerSettings.RespectedMaster == null)
-			{
-				return;
-			}
-			Pawn respectedMaster = this.pawn.playerSettings.RespectedMaster;
-			if (this.pawn.IsHashIntervalTick(2500, delta) && this.pawn.Map == respectedMaster.Map && this.pawn.Position.InHorDistOf(respectedMaster.Position, 12f) && GenSight.LineOfSight(this.pawn.Position, respectedMaster.Position, this.pawn.Map))
-			{
-				RelationsUtility.TryDevelopBondRelation(respectedMaster, this.pawn, 0.001f);
-			}
+			letter += "\n\n";
 		}
+		letter += taggedString;
+	}
 
-		// Token: 0x0600CFDB RID: 53211 RVA: 0x003D1BC4 File Offset: 0x003CFDC4
-		private void GainedOrLostDirectRelation()
+	private void AffectBondedAnimalsOnMyDeath()
+	{
+		int num = 0;
+		Pawn pawn = null;
+		for (int i = 0; i < directRelations.Count; i++)
 		{
-			if (Current.ProgramState == ProgramState.Playing && !this.pawn.Dead && this.pawn.needs.mood != null)
+			if (directRelations[i].def == PawnRelationDefOf.Bond && directRelations[i].otherPawn.Spawned)
 			{
-				this.pawn.needs.mood.thoughts.situational.Notify_SituationalThoughtsDirty();
+				pawn = directRelations[i].otherPawn;
+				num++;
+				float value = Rand.Value;
+				MentalStateDef stateDef = ((value < 0.25f) ? MentalStateDefOf.Wander_Sad : ((value < 0.5f) ? MentalStateDefOf.Wander_Psychotic : ((!(value < 0.75f)) ? MentalStateDefOf.Manhunter : MentalStateDefOf.Berserk)));
+				directRelations[i].otherPawn.mindState.mentalStateHandler.TryStartMentalState(stateDef, "MentalStateReason_BondedHumanDeath".Translate(this.pawn).Resolve(), forced: false, forceWake: true);
 			}
 		}
+		if (num == 1)
+		{
+			Messages.Message(((pawn.Name == null || pawn.Name.Numerical) ? "MessageBondedAnimalMentalBreak".Translate(pawn.LabelIndefinite(), this.pawn.LabelShort, pawn.Named("ANIMAL"), this.pawn.Named("HUMAN")) : "MessageNamedBondedAnimalMentalBreak".Translate(pawn.KindLabelIndefinite(), pawn.Name.ToStringShort, this.pawn.LabelShort, pawn.Named("ANIMAL"), this.pawn.Named("HUMAN"))).CapitalizeFirst(), pawn, MessageTypeDefOf.ThreatSmall);
+		}
+		else if (num > 1)
+		{
+			Messages.Message("MessageBondedAnimalsMentalBreak".Translate(num, this.pawn.LabelShort, this.pawn.Named("HUMAN")), pawn, MessageTypeDefOf.ThreatSmall);
+		}
+	}
 
-		// Token: 0x04008D63 RID: 36195
-		private Pawn pawn;
+	private void Tick_CheckStartMarriageCeremony(int delta)
+	{
+		if (!pawn.Spawned || pawn.RaceProps.Animal || !pawn.IsHashIntervalTick(1017, delta))
+		{
+			return;
+		}
+		int ticksGame = Find.TickManager.TicksGame;
+		for (int i = 0; i < directRelations.Count; i++)
+		{
+			float num = (float)(ticksGame - directRelations[i].startTicks) / 60000f;
+			if (directRelations[i].def == PawnRelationDefOf.Fiance && pawn.thingIDNumber < directRelations[i].otherPawn.thingIDNumber && num > 10f && Rand.MTBEventOccurs(2f, 60000f, 1017f) && pawn.Map == directRelations[i].otherPawn.Map && pawn.Map.IsPlayerHome && MarriageCeremonyUtility.AcceptableGameConditionsToStartCeremony(pawn.Map) && MarriageCeremonyUtility.FianceReadyToStartCeremony(pawn, directRelations[i].otherPawn) && MarriageCeremonyUtility.FianceReadyToStartCeremony(directRelations[i].otherPawn, pawn))
+			{
+				pawn.Map.lordsStarter.TryStartMarriageCeremony(pawn, directRelations[i].otherPawn);
+			}
+		}
+	}
 
-		// Token: 0x04008D64 RID: 36196
-		private List<DirectPawnRelation> directRelations = new List<DirectPawnRelation>();
+	private void Tick_CheckDevelopBondRelation(int delta)
+	{
+		if (pawn.Spawned && pawn.IsAnimal && pawn.Faction == Faction.OfPlayer && pawn.playerSettings.RespectedMaster != null)
+		{
+			Pawn respectedMaster = pawn.playerSettings.RespectedMaster;
+			if (pawn.IsHashIntervalTick(2500, delta) && pawn.Map == respectedMaster.Map && pawn.Position.InHorDistOf(respectedMaster.Position, 12f) && GenSight.LineOfSight(pawn.Position, respectedMaster.Position, pawn.Map))
+			{
+				RelationsUtility.TryDevelopBondRelation(respectedMaster, pawn, 0.001f);
+			}
+		}
+	}
 
-		// Token: 0x04008D65 RID: 36197
-		private List<VirtualPawnRelation> virtualRelations = new List<VirtualPawnRelation>();
-
-		// Token: 0x04008D66 RID: 36198
-		public bool everSeenByPlayer;
-
-		// Token: 0x04008D67 RID: 36199
-		public bool canGetRescuedThought = true;
-
-		// Token: 0x04008D68 RID: 36200
-		public Pawn relativeInvolvedInRescueQuest;
-
-		// Token: 0x04008D69 RID: 36201
-		public MarriageNameChange nextMarriageNameChange;
-
-		// Token: 0x04008D6A RID: 36202
-		public bool hidePawnRelations;
-
-		// Token: 0x04008D6B RID: 36203
-		[LoadAlias("rhythmModes")]
-		private Dictionary<Pawn, PregnancyApproach> pregnancyApproaches = new Dictionary<Pawn, PregnancyApproach>();
-
-		// Token: 0x04008D6C RID: 36204
-		public int romanceEnableTick = -1;
-
-		// Token: 0x04008D6D RID: 36205
-		private HashSet<Pawn> pawnsWithDirectRelationsWithMe = new HashSet<Pawn>();
-
-		// Token: 0x04008D6E RID: 36206
-		private HashSet<Pawn> cachedFamilyByBlood = new HashSet<Pawn>();
-
-		// Token: 0x04008D6F RID: 36207
-		private bool familyByBloodIsCached;
-
-		// Token: 0x04008D70 RID: 36208
-		private bool canCacheFamilyByBlood;
-
-		// Token: 0x04008D71 RID: 36209
-		private const int CheckDevelopBondRelationIntervalTicks = 2500;
-
-		// Token: 0x04008D72 RID: 36210
-		private const float MaxBondRelationCheckDist = 12f;
-
-		// Token: 0x04008D73 RID: 36211
-		private const float BondRelationPerIntervalChance = 0.001f;
-
-		// Token: 0x04008D74 RID: 36212
-		public const int FriendOpinionThreshold = 20;
-
-		// Token: 0x04008D75 RID: 36213
-		public const int RivalOpinionThreshold = -20;
-
-		// Token: 0x04008D76 RID: 36214
-		public const int MinLovinAge = 16;
-
-		// Token: 0x04008D77 RID: 36215
-		private const float MinAgeFactor = 0.2f;
-
-		// Token: 0x04008D78 RID: 36216
-		public const float PsychicLoveFactor = 10f;
-
-		// Token: 0x04008D79 RID: 36217
-		private List<Pawn> tmpPawns = new List<Pawn>();
-
-		// Token: 0x04008D7A RID: 36218
-		private List<PregnancyApproach> tmpPregnancyApproaches = new List<PregnancyApproach>();
-
-		// Token: 0x04008D7B RID: 36219
-		private static List<ISocialThought> tmpSocialThoughts = new List<ISocialThought>();
+	private void GainedOrLostDirectRelation()
+	{
+		if (Current.ProgramState == ProgramState.Playing && !pawn.Dead && pawn.needs.mood != null)
+		{
+			pawn.needs.mood.thoughts.situational.Notify_SituationalThoughtsDirty();
+		}
 	}
 }

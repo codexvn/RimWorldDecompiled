@@ -1,9 +1,11 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using RimWorld;
@@ -11,1837 +13,1610 @@ using UnityEngine;
 using Verse.Grammar;
 using Verse.Steam;
 
-namespace Verse
+namespace Verse;
+
+public static class GenText
 {
-	// Token: 0x02000125 RID: 293
-	public static class GenText
+	[CompilerGenerated]
+	private sealed class _003CLinesFromString_003Ed__24 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x060008C0 RID: 2240 RVA: 0x00029163 File Offset: 0x00027363
-		public static string Possessive(this Pawn p)
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private string text;
+
+		public string _003C_003E3__text;
+
+		private string[] _003C_003E7__wrap1;
+
+		private int _003C_003E7__wrap2;
+
+		string IEnumerator<string>.Current
 		{
-			if (p.gender == Gender.Female)
+			[DebuggerHidden]
+			get
 			{
-				return "Proher".Translate();
+				return _003C_003E2__current;
 			}
-			return "Prohis".Translate();
 		}
 
-		// Token: 0x060008C1 RID: 2241 RVA: 0x0002918D File Offset: 0x0002738D
-		public static string PossessiveCap(this Pawn p)
+		object IEnumerator.Current
 		{
-			if (p.gender == Gender.Female)
+			[DebuggerHidden]
+			get
 			{
-				return "ProherCap".Translate();
+				return _003C_003E2__current;
 			}
-			return "ProhisCap".Translate();
 		}
 
-		// Token: 0x060008C2 RID: 2242 RVA: 0x000291B7 File Offset: 0x000273B7
-		public static string ProObj(this Pawn p)
+		[DebuggerHidden]
+		public _003CLinesFromString_003Ed__24(int _003C_003E1__state)
 		{
-			if (p.gender == Gender.Female)
-			{
-				return "ProherObj".Translate();
-			}
-			return "ProhimObj".Translate();
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x060008C3 RID: 2243 RVA: 0x000291E1 File Offset: 0x000273E1
-		public static string ProObjCap(this Pawn p)
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			if (p.gender == Gender.Female)
-			{
-				return "ProherObjCap".Translate();
-			}
-			return "ProhimObjCap".Translate();
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x060008C4 RID: 2244 RVA: 0x0002920B File Offset: 0x0002740B
-		public static string ProSubj(this Pawn p)
+		private bool MoveNext()
 		{
-			if (p.gender == Gender.Female)
+			int num = _003C_003E1__state;
+			if (num != 0)
 			{
-				return "Proshe".Translate();
-			}
-			return "Prohe".Translate();
-		}
-
-		// Token: 0x060008C5 RID: 2245 RVA: 0x00029235 File Offset: 0x00027435
-		public static string ProSubjCap(this Pawn p)
-		{
-			if (p.gender == Gender.Female)
-			{
-				return "ProsheCap".Translate();
-			}
-			return "ProheCap".Translate();
-		}
-
-		// Token: 0x060008C6 RID: 2246 RVA: 0x00029260 File Offset: 0x00027460
-		public static string AdjustedFor(this string text, Pawn p, string pawnSymbol = "PAWN", bool addRelationInfoSymbol = true)
-		{
-			GrammarRequest request = default(GrammarRequest);
-			request.Includes.Add(RulePackDefOf.DynamicWrapper);
-			request.Rules.Add(new Rule_String("RULE", text));
-			request.Rules.AddRange(GrammarUtility.RulesForPawn(pawnSymbol, p, null, addRelationInfoSymbol, true));
-			return GrammarResolver.Resolve("r_root", request, null, false, null, null, null, true);
-		}
-
-		// Token: 0x060008C7 RID: 2247 RVA: 0x000292C4 File Offset: 0x000274C4
-		public static string AdjustedForKeys(this string text, List<string> outErrors = null, bool resolveKeys = true)
-		{
-			if (outErrors != null)
-			{
-				outErrors.Clear();
-			}
-			if (text.NullOrEmpty())
-			{
-				return text;
-			}
-			int num = 0;
-			for (;;)
-			{
-				num++;
-				if (num > 500000)
+				if (num != 1)
 				{
-					break;
+					return false;
 				}
-				int num2 = text.IndexOf("{Key:");
-				if (num2 < 0)
+				_003C_003E1__state = -1;
+				goto IL_00a4;
+			}
+			_003C_003E1__state = -1;
+			string[] separator = new string[2] { "\r\n", "\n" };
+			_003C_003E7__wrap1 = this.text.Split(separator, StringSplitOptions.RemoveEmptyEntries);
+			_003C_003E7__wrap2 = 0;
+			goto IL_00b2;
+			IL_00a4:
+			_003C_003E7__wrap2++;
+			goto IL_00b2;
+			IL_00b2:
+			if (_003C_003E7__wrap2 < _003C_003E7__wrap1.Length)
+			{
+				string text = _003C_003E7__wrap1[_003C_003E7__wrap2].Trim();
+				if (!text.StartsWith("//"))
 				{
-					return text;
-				}
-				int num3 = num2;
-				while (text[num3] != '}')
-				{
-					num3++;
-					if (num3 >= text.Length)
+					text = text.Split(new string[1] { "//" }, StringSplitOptions.None)[0];
+					if (text.Length != 0)
 					{
-						goto Block_6;
+						_003C_003E2__current = text;
+						_003C_003E1__state = 1;
+						return true;
 					}
 				}
-				string text2 = text.Substring(num2 + 5, num3 - (num2 + 5));
-				KeyBindingDef namedSilentFail = DefDatabase<KeyBindingDef>.GetNamedSilentFail(text2);
-				string text3 = text.Substring(0, num2);
-				if (namedSilentFail != null)
-				{
-					if (resolveKeys)
-					{
-						if (SteamDeck.IsSteamDeckInNonKeyboardMode)
-						{
-							text3 += SteamDeck.GetKeyBindingLabel(namedSilentFail);
-						}
-						else
-						{
-							text3 += namedSilentFail.MainKeyLabel;
-						}
-					}
-					else
-					{
-						text3 += "placeholder";
-					}
-				}
-				else
-				{
-					text3 += "error";
-					if (outErrors != null)
-					{
-						string text4 = "Could not find key '" + text2 + "'";
-						string text5 = BackCompatibility.BackCompatibleDefName(typeof(KeyBindingDef), text2, false, null);
-						if (text5 != text2)
-						{
-							text4 = text4 + " (hint: it was renamed to '" + text5 + "')";
-						}
-						outErrors.Add(text4);
-					}
-				}
-				text3 += text.Substring(num3 + 1);
-				text = text3;
+				goto IL_00a4;
 			}
-			Log.Error("Too many iterations.");
-			if (outErrors != null)
-			{
-				outErrors.Add("The parsed string caused an infinite loop");
-				return text;
-			}
-			return text;
-			Block_6:
-			if (outErrors != null)
-			{
-				outErrors.Add("Mismatched braces");
-			}
-			return text;
-		}
-
-		// Token: 0x060008C8 RID: 2248 RVA: 0x00029431 File Offset: 0x00027631
-		public static string LabelIndefinite(this Pawn pawn)
-		{
-			if (pawn.Name != null && !pawn.Name.Numerical)
-			{
-				return pawn.LabelShort;
-			}
-			return pawn.KindLabelIndefinite();
-		}
-
-		// Token: 0x060008C9 RID: 2249 RVA: 0x00029455 File Offset: 0x00027655
-		public static string LabelDefinite(this Pawn pawn)
-		{
-			if (pawn.Name != null && !pawn.Name.Numerical)
-			{
-				return pawn.LabelShort;
-			}
-			return pawn.KindLabelDefinite();
-		}
-
-		// Token: 0x060008CA RID: 2250 RVA: 0x0002947C File Offset: 0x0002767C
-		public static string KindLabelIndefinite(this Pawn pawn)
-		{
-			string kindLabel = pawn.KindLabel;
-			Gender gender = LanguageDatabase.activeLanguage.ResolveGender(kindLabel, null, pawn.gender);
-			return Find.ActiveLanguageWorker.WithIndefiniteArticlePostProcessed(kindLabel, gender, false, false);
-		}
-
-		// Token: 0x060008CB RID: 2251 RVA: 0x000294B4 File Offset: 0x000276B4
-		public static string KindLabelDefinite(this Pawn pawn)
-		{
-			string kindLabel = pawn.KindLabel;
-			Gender gender = LanguageDatabase.activeLanguage.ResolveGender(kindLabel, null, pawn.gender);
-			return Find.ActiveLanguageWorker.WithDefiniteArticlePostProcessed(kindLabel, gender, false, false);
-		}
-
-		// Token: 0x060008CC RID: 2252 RVA: 0x000294EC File Offset: 0x000276EC
-		public static string RandomSeedString()
-		{
-			return GrammarResolver.Resolve("r_seed", new GrammarRequest
-			{
-				Includes = 
-				{
-					RulePackDefOf.SeedGenerator
-				}
-			}, null, false, null, null, null, true).ToLower();
-		}
-
-		// Token: 0x060008CD RID: 2253 RVA: 0x00029528 File Offset: 0x00027728
-		public static string Shorten(this string s)
-		{
-			if (s.NullOrEmpty() || s.Length <= 4)
-			{
-				return s;
-			}
-			s = s.Trim();
-			string[] array = s.Split(' ', StringSplitOptions.None);
-			string text = "";
-			for (int i = 0; i < array.Length; i++)
-			{
-				if (i > 0)
-				{
-					text += " ";
-				}
-				if (array[i].Length > 2)
-				{
-					text = text + array[i].Substring(0, 1) + array[i].Substring(1, array[i].Length - 2).WithoutVowels() + array[i].Substring(array[i].Length - 1, 1);
-				}
-			}
-			return text;
-		}
-
-		// Token: 0x060008CE RID: 2254 RVA: 0x000295C8 File Offset: 0x000277C8
-		private static string WithoutVowels(this string s)
-		{
-			string vowels = "aeiouy";
-			return new string((from c in s
-			where !vowels.Contains(c)
-			select c).ToArray<char>());
-		}
-
-		// Token: 0x060008CF RID: 2255 RVA: 0x00029604 File Offset: 0x00027804
-		public static string MarchingEllipsis(float offset = 0f)
-		{
-			switch (Mathf.FloorToInt(Time.realtimeSinceStartup + offset) % 3)
-			{
-			case 0:
-				return ".";
-			case 1:
-				return "..";
-			case 2:
-				return "...";
-			default:
-				throw new Exception();
-			}
-		}
-
-		// Token: 0x060008D0 RID: 2256 RVA: 0x0002964B File Offset: 0x0002784B
-		public static void SetTextSizeToFit(string text, Rect r)
-		{
-			Text.Font = GameFont.Small;
-			if (Text.CalcHeight(text, r.width) > r.height)
-			{
-				Text.Font = GameFont.Tiny;
-			}
-		}
-
-		// Token: 0x060008D1 RID: 2257 RVA: 0x0002966F File Offset: 0x0002786F
-		public static string TrimEndNewlines(this string s)
-		{
-			return s.TrimEnd(new char[]
-			{
-				'\r',
-				'\n'
-			});
-		}
-
-		// Token: 0x060008D2 RID: 2258 RVA: 0x00029687 File Offset: 0x00027887
-		public static string Indented(this string s, string indentation = "    ")
-		{
-			if (s.NullOrEmpty())
-			{
-				return s;
-			}
-			return indentation + s.Replace("\r", "").Replace("\n", "\n" + indentation);
-		}
-
-		// Token: 0x060008D3 RID: 2259 RVA: 0x000296C0 File Offset: 0x000278C0
-		public static string ReplaceFirst(this string source, string key, string replacement)
-		{
-			int num = source.IndexOf(key);
-			if (num < 0)
-			{
-				return source;
-			}
-			return source.Substring(0, num) + replacement + source.Substring(num + key.Length);
-		}
-
-		// Token: 0x060008D4 RID: 2260 RVA: 0x000296F8 File Offset: 0x000278F8
-		public static int StableStringHash(string str)
-		{
-			if (str == null)
-			{
-				return 0;
-			}
-			int num = 23;
-			int length = str.Length;
-			for (int i = 0; i < length; i++)
-			{
-				num = num * 31 + (int)str[i];
-			}
-			return num;
-		}
-
-		// Token: 0x060008D5 RID: 2261 RVA: 0x00029730 File Offset: 0x00027930
-		public static string StringFromEnumerable(IEnumerable source)
-		{
-			StringBuilder stringBuilder = new StringBuilder();
-			foreach (object obj in source)
-			{
-				stringBuilder.AppendLine("• " + obj.ToString());
-			}
-			return stringBuilder.ToString();
-		}
-
-		// Token: 0x060008D6 RID: 2262 RVA: 0x0002979C File Offset: 0x0002799C
-		public static IEnumerable<string> LinesFromString(string text)
-		{
-			string[] separator = new string[]
-			{
-				"\r\n",
-				"\n"
-			};
-			string[] array = text.Split(separator, StringSplitOptions.RemoveEmptyEntries);
-			for (int i = 0; i < array.Length; i++)
-			{
-				string text2 = array[i].Trim();
-				if (!text2.StartsWith("//"))
-				{
-					text2 = text2.Split(new string[]
-					{
-						"//"
-					}, StringSplitOptions.None)[0];
-					if (text2.Length != 0)
-					{
-						yield return text2;
-					}
-				}
-			}
-			array = null;
-			yield break;
-		}
-
-		// Token: 0x060008D7 RID: 2263 RVA: 0x000297AC File Offset: 0x000279AC
-		public static string GetInvalidFilenameCharacters()
-		{
-			return new string(Path.GetInvalidFileNameChars()) + "/\\{}<>:*|!@#$%^&*?";
-		}
-
-		// Token: 0x060008D8 RID: 2264 RVA: 0x000297C2 File Offset: 0x000279C2
-		public static bool IsValidFilename(string str)
-		{
-			return str.Length <= 40 && !new Regex("[" + Regex.Escape(GenText.GetInvalidFilenameCharacters()) + "]").IsMatch(str);
-		}
-
-		// Token: 0x060008D9 RID: 2265 RVA: 0x000297F7 File Offset: 0x000279F7
-		public static string SanitizeFilename(string str)
-		{
-			return string.Join("_", str.Split(GenText.GetInvalidFilenameCharacters().ToArray<char>(), StringSplitOptions.RemoveEmptyEntries)).TrimEnd('.');
-		}
-
-		// Token: 0x060008DA RID: 2266 RVA: 0x0002981B File Offset: 0x00027A1B
-		public static bool NullOrEmpty(this string str)
-		{
-			return string.IsNullOrEmpty(str);
-		}
-
-		// Token: 0x060008DB RID: 2267 RVA: 0x00029823 File Offset: 0x00027A23
-		public static string SplitCamelCase(string Str)
-		{
-			return Regex.Replace(Str, "(\\B[A-Z]+?(?=[A-Z][^A-Z])|\\B[A-Z]+?(?=[^A-Z]))", " $1");
-		}
-
-		// Token: 0x060008DC RID: 2268 RVA: 0x00029838 File Offset: 0x00027A38
-		public static string CapitalizedNoSpaces(string s)
-		{
-			string[] array = s.Split(' ', StringSplitOptions.None);
-			StringBuilder stringBuilder = new StringBuilder();
-			foreach (string text in array)
-			{
-				if (text.Length > 0)
-				{
-					stringBuilder.Append(char.ToUpper(text[0]));
-				}
-				if (text.Length > 1)
-				{
-					stringBuilder.Append(text.Substring(1));
-				}
-			}
-			return stringBuilder.ToString();
-		}
-
-		// Token: 0x060008DD RID: 2269 RVA: 0x000298A0 File Offset: 0x00027AA0
-		public static string RemoveNonAlphanumeric(string s)
-		{
-			GenText.tmpSb.Length = 0;
-			for (int i = 0; i < s.Length; i++)
-			{
-				if (char.IsLetterOrDigit(s[i]))
-				{
-					GenText.tmpSb.Append(s[i]);
-				}
-			}
-			return GenText.tmpSb.ToString();
-		}
-
-		// Token: 0x060008DE RID: 2270 RVA: 0x000298F3 File Offset: 0x00027AF3
-		public static bool EqualsIgnoreCase(this string A, string B)
-		{
-			return string.Compare(A, B, true) == 0;
-		}
-
-		// Token: 0x060008DF RID: 2271 RVA: 0x00029900 File Offset: 0x00027B00
-		public static string WithoutByteOrderMark(this string str)
-		{
-			return str.Trim().Trim(new char[]
-			{
-				'﻿'
-			});
-		}
-
-		// Token: 0x060008E0 RID: 2272 RVA: 0x0002991C File Offset: 0x00027B1C
-		public static bool NamesOverlap(string A, string B)
-		{
-			A = A.ToLower();
-			B = B.ToLower();
-			string[] array = A.Split(' ', StringSplitOptions.None);
-			string[] source = B.Split(' ', StringSplitOptions.None);
-			foreach (string text in array)
-			{
-				if (TitleCaseHelper.IsUppercaseTitleWord(text) && source.Contains(text))
-				{
-					return true;
-				}
-			}
+			_003C_003E7__wrap1 = null;
 			return false;
 		}
 
-		// Token: 0x060008E1 RID: 2273 RVA: 0x00029974 File Offset: 0x00027B74
-		public static int FirstLetterBetweenTags(this string str)
+		bool IEnumerator.MoveNext()
 		{
-			int num = 0;
-			if (str[num] == '<' && str.IndexOf('>') > num && num < str.Length - 1 && str[num + 1] != '/')
-			{
-				num = str.IndexOf('>') + 1;
-			}
-			return num;
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x060008E2 RID: 2274 RVA: 0x000299C0 File Offset: 0x00027BC0
-		public static string CapitalizeFirst(this string str)
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			if (str.NullOrEmpty())
-			{
-				return str;
-			}
-			if (char.IsUpper(str[0]))
-			{
-				return str;
-			}
-			if (str.Length == 1)
-			{
-				return str.ToUpper();
-			}
-			int num = str.FirstLetterBetweenTags();
-			if (num == 0)
-			{
-				return char.ToUpper(str[num]).ToString() + str.Substring(num + 1);
-			}
-			return str.Substring(0, num) + char.ToUpper(str[num]).ToString() + str.Substring(num + 1);
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x060008E3 RID: 2275 RVA: 0x00029A4E File Offset: 0x00027C4E
-		public static string EndWithPeriod(this string str)
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
 		{
-			if (str.NullOrEmpty())
+			_003CLinesFromString_003Ed__24 _003CLinesFromString_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				return str;
+				_003C_003E1__state = 0;
+				_003CLinesFromString_003Ed__ = this;
 			}
-			if (str[str.Length - 1] == '.')
+			else
 			{
-				return str;
+				_003CLinesFromString_003Ed__ = new _003CLinesFromString_003Ed__24(0);
 			}
-			return str + ".";
+			_003CLinesFromString_003Ed__.text = _003C_003E3__text;
+			return _003CLinesFromString_003Ed__;
 		}
 
-		// Token: 0x060008E4 RID: 2276 RVA: 0x00029A79 File Offset: 0x00027C79
-		public static string CapitalizeFirst(this string str, Def possibleDef)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			if (possibleDef != null && str == possibleDef.label)
-			{
-				return possibleDef.LabelCap;
-			}
-			return str.CapitalizeFirst();
+			return ((IEnumerable<string>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x060008E5 RID: 2277 RVA: 0x00029AA0 File Offset: 0x00027CA0
-		public static string UncapitalizeFirst(this string str)
+	private const int SaveNameMaxLength = 40;
+
+	private const char DegreeSymbol = '°';
+
+	private static StringBuilder tmpSb = new StringBuilder();
+
+	private static string[] tmpSeparators = new string[1];
+
+	private static StringBuilder tmpSbForCapitalizedSentences = new StringBuilder();
+
+	private static StringBuilder tmpStringBuilder = new StringBuilder();
+
+	private static string[] eventTypesCached;
+
+	private static readonly char[] separatorArrayTmp = new char[1] { ' ' };
+
+	public static string Possessive(this Pawn p)
+	{
+		if (p.gender == Gender.Female)
 		{
-			if (str.NullOrEmpty())
-			{
-				return str;
-			}
-			if (char.IsLower(str[0]))
-			{
-				return str;
-			}
-			if (str.Length == 1)
-			{
-				return str.ToLower();
-			}
-			int num = str.FirstLetterBetweenTags();
-			if (num == 0)
-			{
-				return char.ToLower(str[num]).ToString() + str.Substring(num + 1);
-			}
-			return str.Substring(0, num) + char.ToLower(str[num]).ToString() + str.Substring(num + 1);
+			return "Proher".Translate();
 		}
+		return "Prohis".Translate();
+	}
 
-		// Token: 0x060008E6 RID: 2278 RVA: 0x00029B30 File Offset: 0x00027D30
-		public static string ToNewsCase(string str)
+	public static string PossessiveCap(this Pawn p)
+	{
+		if (p.gender == Gender.Female)
 		{
-			string[] array = str.Split(' ', StringSplitOptions.None);
-			for (int i = 0; i < array.Length; i++)
+			return "ProherCap".Translate();
+		}
+		return "ProhisCap".Translate();
+	}
+
+	public static string ProObj(this Pawn p)
+	{
+		if (p.gender == Gender.Female)
+		{
+			return "ProherObj".Translate();
+		}
+		return "ProhimObj".Translate();
+	}
+
+	public static string ProObjCap(this Pawn p)
+	{
+		if (p.gender == Gender.Female)
+		{
+			return "ProherObjCap".Translate();
+		}
+		return "ProhimObjCap".Translate();
+	}
+
+	public static string ProSubj(this Pawn p)
+	{
+		if (p.gender == Gender.Female)
+		{
+			return "Proshe".Translate();
+		}
+		return "Prohe".Translate();
+	}
+
+	public static string ProSubjCap(this Pawn p)
+	{
+		if (p.gender == Gender.Female)
+		{
+			return "ProsheCap".Translate();
+		}
+		return "ProheCap".Translate();
+	}
+
+	public static string AdjustedFor(this string text, Pawn p, string pawnSymbol = "PAWN", bool addRelationInfoSymbol = true)
+	{
+		GrammarRequest request = default(GrammarRequest);
+		request.Includes.Add(RulePackDefOf.DynamicWrapper);
+		request.Rules.Add(new Rule_String("RULE", text));
+		request.Rules.AddRange(GrammarUtility.RulesForPawn(pawnSymbol, p, null, addRelationInfoSymbol));
+		return GrammarResolver.Resolve("r_root", request);
+	}
+
+	public static string AdjustedForKeys(this string text, List<string> outErrors = null, bool resolveKeys = true)
+	{
+		outErrors?.Clear();
+		if (text.NullOrEmpty())
+		{
+			return text;
+		}
+		int num = 0;
+		while (true)
+		{
+			num++;
+			if (num > 500000)
 			{
-				string text = array[i];
-				if (text.Length >= 2)
+				Log.Error("Too many iterations.");
+				outErrors?.Add("The parsed string caused an infinite loop");
+				break;
+			}
+			int num2 = text.IndexOf("{Key:");
+			if (num2 < 0)
+			{
+				break;
+			}
+			int num3 = num2;
+			while (text[num3] != '}')
+			{
+				num3++;
+				if (num3 >= text.Length)
 				{
-					if (i == 0)
-					{
-						array[i] = text[0].ToString().ToUpper() + text.Substring(1);
-					}
-					else
-					{
-						array[i] = text.ToLower();
-					}
+					outErrors?.Add("Mismatched braces");
+					return text;
 				}
 			}
-			return string.Join(" ", array);
-		}
-
-		// Token: 0x060008E7 RID: 2279 RVA: 0x00029B9E File Offset: 0x00027D9E
-		public static string ToTitleCaseSmart(string str)
-		{
-			if (str.NullOrEmpty())
+			string text2 = text.Substring(num2 + 5, num3 - (num2 + 5));
+			KeyBindingDef namedSilentFail = DefDatabase<KeyBindingDef>.GetNamedSilentFail(text2);
+			string text3 = text.Substring(0, num2);
+			if (namedSilentFail != null)
 			{
-				return str;
+				text3 = ((!resolveKeys) ? (text3 + "placeholder") : ((!SteamDeck.IsSteamDeckInNonKeyboardMode) ? (text3 + namedSilentFail.MainKeyLabel) : (text3 + SteamDeck.GetKeyBindingLabel(namedSilentFail))));
 			}
-			return GenText.CapitalizeFirstLetterAfterSeparator(GenText.CapitalizeFirstLetterAfterSeparator(GenText.CapitalizeFirstLetterAfterSeparator(str.MergeMultipleSpaces(false).Trim(), " "), "-"), " '");
-		}
-
-		// Token: 0x060008E8 RID: 2280 RVA: 0x00029BD4 File Offset: 0x00027DD4
-		private static string CapitalizeFirstLetterAfterSeparator(string str, string separator)
-		{
-			GenText.tmpSeparators[0] = separator;
-			string[] array = str.Split(GenText.tmpSeparators, StringSplitOptions.None);
-			for (int i = 0; i < array.Length; i++)
+			else
 			{
-				string text = array[i];
-				if ((i == 0 || i == array.Length - 1 || TitleCaseHelper.IsUppercaseTitleWord(text)) && !text.NullOrEmpty())
+				text3 += "error";
+				if (outErrors != null)
 				{
-					int num = text.FirstLetterBetweenTags();
-					string str2 = (num == 0) ? text[num].ToString().ToUpper() : (text.Substring(0, num) + char.ToUpper(text[num]).ToString());
-					string str3 = text.Substring(num + 1);
-					array[i] = str2 + str3;
+					string text4 = "Could not find key '" + text2 + "'";
+					string text5 = BackCompatibility.BackCompatibleDefName(typeof(KeyBindingDef), text2);
+					if (text5 != text2)
+					{
+						text4 = text4 + " (hint: it was renamed to '" + text5 + "')";
+					}
+					outErrors.Add(text4);
 				}
 			}
-			return string.Join(separator, array);
+			text3 += text.Substring(num3 + 1);
+			text = text3;
 		}
+		return text;
+	}
 
-		// Token: 0x060008E9 RID: 2281 RVA: 0x00029C8C File Offset: 0x00027E8C
-		public static string CapitalizeSentences(string input, bool capitalizeFirstSentence = true)
+	public static string LabelIndefinite(this Pawn pawn)
+	{
+		if (pawn.Name != null && !pawn.Name.Numerical)
 		{
-			if (input.NullOrEmpty())
+			return pawn.LabelShort;
+		}
+		return pawn.KindLabelIndefinite();
+	}
+
+	public static string LabelDefinite(this Pawn pawn)
+	{
+		if (pawn.Name != null && !pawn.Name.Numerical)
+		{
+			return pawn.LabelShort;
+		}
+		return pawn.KindLabelDefinite();
+	}
+
+	public static string KindLabelIndefinite(this Pawn pawn)
+	{
+		string kindLabel = pawn.KindLabel;
+		Gender gender = LanguageDatabase.activeLanguage.ResolveGender(kindLabel, null, pawn.gender);
+		return Find.ActiveLanguageWorker.WithIndefiniteArticlePostProcessed(kindLabel, gender);
+	}
+
+	public static string KindLabelDefinite(this Pawn pawn)
+	{
+		string kindLabel = pawn.KindLabel;
+		Gender gender = LanguageDatabase.activeLanguage.ResolveGender(kindLabel, null, pawn.gender);
+		return Find.ActiveLanguageWorker.WithDefiniteArticlePostProcessed(kindLabel, gender);
+	}
+
+	public static string RandomSeedString()
+	{
+		GrammarRequest request = default(GrammarRequest);
+		request.Includes.Add(RulePackDefOf.SeedGenerator);
+		return GrammarResolver.Resolve("r_seed", request).ToLower();
+	}
+
+	public static string Shorten(this string s)
+	{
+		if (s.NullOrEmpty() || s.Length <= 4)
+		{
+			return s;
+		}
+		s = s.Trim();
+		string[] array = s.Split(' ');
+		string text = "";
+		for (int i = 0; i < array.Length; i++)
+		{
+			if (i > 0)
 			{
-				return input;
+				text += " ";
 			}
-			if (input.Length != 1)
+			if (array[i].Length > 2)
 			{
-				bool flag = capitalizeFirstSentence;
-				bool flag2 = false;
-				bool flag3 = false;
-				bool flag4 = false;
-				GenText.tmpSbForCapitalizedSentences.Length = 0;
-				for (int i = 0; i < input.Length; i++)
+				text = text + array[i].Substring(0, 1) + array[i].Substring(1, array[i].Length - 2).WithoutVowels() + array[i].Substring(array[i].Length - 1, 1);
+			}
+		}
+		return text;
+	}
+
+	private static string WithoutVowels(this string s)
+	{
+		string vowels = "aeiouy";
+		return new string(s.Where((char c) => !vowels.Contains(c)).ToArray());
+	}
+
+	public static string MarchingEllipsis(float offset = 0f)
+	{
+		return (Mathf.FloorToInt(Time.realtimeSinceStartup + offset) % 3) switch
+		{
+			0 => ".", 
+			1 => "..", 
+			2 => "...", 
+			_ => throw new Exception(), 
+		};
+	}
+
+	public static void SetTextSizeToFit(string text, Rect r)
+	{
+		Text.Font = GameFont.Small;
+		if (Text.CalcHeight(text, r.width) > r.height)
+		{
+			Text.Font = GameFont.Tiny;
+		}
+	}
+
+	public static string TrimEndNewlines(this string s)
+	{
+		return s.TrimEnd('\r', '\n');
+	}
+
+	public static string Indented(this string s, string indentation = "    ")
+	{
+		if (s.NullOrEmpty())
+		{
+			return s;
+		}
+		return indentation + s.Replace("\r", "").Replace("\n", "\n" + indentation);
+	}
+
+	public static string ReplaceFirst(this string source, string key, string replacement)
+	{
+		int num = source.IndexOf(key);
+		if (num < 0)
+		{
+			return source;
+		}
+		return source.Substring(0, num) + replacement + source.Substring(num + key.Length);
+	}
+
+	public static int StableStringHash(string str)
+	{
+		if (str == null)
+		{
+			return 0;
+		}
+		int num = 23;
+		int length = str.Length;
+		for (int i = 0; i < length; i++)
+		{
+			num = num * 31 + str[i];
+		}
+		return num;
+	}
+
+	public static string StringFromEnumerable(IEnumerable source)
+	{
+		StringBuilder stringBuilder = new StringBuilder();
+		foreach (object item in source)
+		{
+			stringBuilder.AppendLine("• " + item.ToString());
+		}
+		return stringBuilder.ToString();
+	}
+
+	[IteratorStateMachine(typeof(_003CLinesFromString_003Ed__24))]
+	public static IEnumerable<string> LinesFromString(string text)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CLinesFromString_003Ed__24(-2)
+		{
+			_003C_003E3__text = text
+		};
+	}
+
+	public static string GetInvalidFilenameCharacters()
+	{
+		return new string(Path.GetInvalidFileNameChars()) + "/\\{}<>:*|!@#$%^&*?";
+	}
+
+	public static bool IsValidFilename(string str)
+	{
+		if (str.Length > 40)
+		{
+			return false;
+		}
+		return !new Regex("[" + Regex.Escape(GetInvalidFilenameCharacters()) + "]").IsMatch(str);
+	}
+
+	public static string SanitizeFilename(string str)
+	{
+		return string.Join("_", str.Split(GetInvalidFilenameCharacters().ToArray(), StringSplitOptions.RemoveEmptyEntries)).TrimEnd('.');
+	}
+
+	public static bool NullOrEmpty(this string str)
+	{
+		return string.IsNullOrEmpty(str);
+	}
+
+	public static string SplitCamelCase(string Str)
+	{
+		return Regex.Replace(Str, "(\\B[A-Z]+?(?=[A-Z][^A-Z])|\\B[A-Z]+?(?=[^A-Z]))", " $1");
+	}
+
+	public static string CapitalizedNoSpaces(string s)
+	{
+		string[] array = s.Split(' ');
+		StringBuilder stringBuilder = new StringBuilder();
+		string[] array2 = array;
+		foreach (string text in array2)
+		{
+			if (text.Length > 0)
+			{
+				stringBuilder.Append(char.ToUpper(text[0]));
+			}
+			if (text.Length > 1)
+			{
+				stringBuilder.Append(text.Substring(1));
+			}
+		}
+		return stringBuilder.ToString();
+	}
+
+	public static string RemoveNonAlphanumeric(string s)
+	{
+		tmpSb.Length = 0;
+		for (int i = 0; i < s.Length; i++)
+		{
+			if (char.IsLetterOrDigit(s[i]))
+			{
+				tmpSb.Append(s[i]);
+			}
+		}
+		return tmpSb.ToString();
+	}
+
+	public static bool EqualsIgnoreCase(this string A, string B)
+	{
+		return string.Compare(A, B, ignoreCase: true) == 0;
+	}
+
+	public static string WithoutByteOrderMark(this string str)
+	{
+		return str.Trim().Trim(new char[1] { '\ufeff' });
+	}
+
+	public static bool NamesOverlap(string A, string B)
+	{
+		A = A.ToLower();
+		B = B.ToLower();
+		string[] array = A.Split(' ');
+		string[] source = B.Split(' ');
+		string[] array2 = array;
+		foreach (string text in array2)
+		{
+			if (TitleCaseHelper.IsUppercaseTitleWord(text) && source.Contains(text))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static int FirstLetterBetweenTags(this string str)
+	{
+		int num = 0;
+		if (str[num] == '<' && str.IndexOf('>') > num && num < str.Length - 1 && str[num + 1] != '/')
+		{
+			num = str.IndexOf('>') + 1;
+		}
+		return num;
+	}
+
+	public static string CapitalizeFirst(this string str)
+	{
+		if (str.NullOrEmpty())
+		{
+			return str;
+		}
+		if (char.IsUpper(str[0]))
+		{
+			return str;
+		}
+		if (str.Length == 1)
+		{
+			return str.ToUpper();
+		}
+		int num = str.FirstLetterBetweenTags();
+		if (num == 0)
+		{
+			return char.ToUpper(str[num]) + str.Substring(num + 1);
+		}
+		return str.Substring(0, num) + char.ToUpper(str[num]) + str.Substring(num + 1);
+	}
+
+	public static string EndWithPeriod(this string str)
+	{
+		if (str.NullOrEmpty())
+		{
+			return str;
+		}
+		if (str[str.Length - 1] == '.')
+		{
+			return str;
+		}
+		return str + ".";
+	}
+
+	public static string CapitalizeFirst(this string str, Def possibleDef)
+	{
+		if (possibleDef != null && str == possibleDef.label)
+		{
+			return possibleDef.LabelCap;
+		}
+		return str.CapitalizeFirst();
+	}
+
+	public static string UncapitalizeFirst(this string str)
+	{
+		if (str.NullOrEmpty())
+		{
+			return str;
+		}
+		if (char.IsLower(str[0]))
+		{
+			return str;
+		}
+		if (str.Length == 1)
+		{
+			return str.ToLower();
+		}
+		int num = str.FirstLetterBetweenTags();
+		if (num == 0)
+		{
+			return char.ToLower(str[num]) + str.Substring(num + 1);
+		}
+		return str.Substring(0, num) + char.ToLower(str[num]) + str.Substring(num + 1);
+	}
+
+	public static string ToNewsCase(string str)
+	{
+		string[] array = str.Split(' ');
+		for (int i = 0; i < array.Length; i++)
+		{
+			string text = array[i];
+			if (text.Length >= 2)
+			{
+				if (i == 0)
 				{
-					if (flag && char.IsLetterOrDigit(input[i]) && !flag2 && !flag3 && !flag4)
-					{
-						GenText.tmpSbForCapitalizedSentences.Append(char.ToUpper(input[i]));
-						flag = false;
-					}
-					else
-					{
-						GenText.tmpSbForCapitalizedSentences.Append(input[i]);
-					}
-					if (input[i] == '\r' || input[i] == '\n' || (input[i] == '.' && i < input.Length - 1 && input[i + 1] == ' ') || input[i] == '!' || input[i] == '?' || input[i] == ':')
-					{
-						flag = true;
-					}
-					else if (input[i] == '<' && i < input.Length - 1 && input[i + 1] != '/')
-					{
-						flag2 = true;
-					}
-					else if (flag2 && input[i] == '>')
-					{
-						flag2 = false;
-					}
-					else if (input[i] == '(' && i < input.Length - 1 && input[i + 1] == '*')
-					{
-						flag4 = true;
-					}
-					else if (flag4 && input[i] == ')')
-					{
-						flag4 = false;
-					}
-					else if (input[i] == '{')
-					{
-						flag3 = true;
-						flag = false;
-					}
-					else if (flag3 && input[i] == '}')
-					{
-						flag3 = false;
-						flag = false;
-					}
+					array[i] = text[0].ToString().ToUpper() + text.Substring(1);
 				}
-				return GenText.tmpSbForCapitalizedSentences.ToString();
+				else
+				{
+					array[i] = text.ToLower();
+				}
 			}
+		}
+		return string.Join(" ", array);
+	}
+
+	public static string ToTitleCaseSmart(string str)
+	{
+		if (str.NullOrEmpty())
+		{
+			return str;
+		}
+		return CapitalizeFirstLetterAfterSeparator(CapitalizeFirstLetterAfterSeparator(CapitalizeFirstLetterAfterSeparator(str.MergeMultipleSpaces(leaveMultipleSpacesAtLineBeginning: false).Trim(), " "), "-"), " '");
+	}
+
+	private static string CapitalizeFirstLetterAfterSeparator(string str, string separator)
+	{
+		tmpSeparators[0] = separator;
+		string[] array = str.Split(tmpSeparators, StringSplitOptions.None);
+		for (int i = 0; i < array.Length; i++)
+		{
+			string text = array[i];
+			if ((i == 0 || i == array.Length - 1 || TitleCaseHelper.IsUppercaseTitleWord(text)) && !text.NullOrEmpty())
+			{
+				int num = text.FirstLetterBetweenTags();
+				string text2 = ((num == 0) ? text[num].ToString().ToUpper() : (text.Substring(0, num) + char.ToUpper(text[num])));
+				string text3 = text.Substring(num + 1);
+				array[i] = text2 + text3;
+			}
+		}
+		return string.Join(separator, array);
+	}
+
+	public static string CapitalizeSentences(string input, bool capitalizeFirstSentence = true)
+	{
+		if (input.NullOrEmpty())
+		{
+			return input;
+		}
+		if (input.Length == 1)
+		{
 			if (capitalizeFirstSentence)
 			{
 				return input.ToUpper();
 			}
 			return input;
 		}
-
-		// Token: 0x060008EA RID: 2282 RVA: 0x00029E42 File Offset: 0x00028042
-		public static string CapitalizeAsTitle(string str)
+		bool flag = capitalizeFirstSentence;
+		bool flag2 = false;
+		bool flag3 = false;
+		bool flag4 = false;
+		tmpSbForCapitalizedSentences.Length = 0;
+		for (int i = 0; i < input.Length; i++)
 		{
-			return Find.ActiveLanguageWorker.ToTitleCase(str);
-		}
-
-		// Token: 0x060008EB RID: 2283 RVA: 0x00029E50 File Offset: 0x00028050
-		public static string ToCommaList(this IEnumerable<string> items, bool useAnd = false, bool emptyIfNone = false)
-		{
-			if (items == null)
+			if (flag && char.IsLetterOrDigit(input[i]) && !flag2 && !flag3 && !flag4)
 			{
-				return "";
-			}
-			string value;
-			string text;
-			int num;
-			StringBuilder stringBuilder = GenText.ToCommaListInner(items, out value, out text, out num);
-			if (num == 0)
-			{
-				return emptyIfNone ? "" : "NoneLower".Translate();
-			}
-			if (num == 1)
-			{
-				return text;
-			}
-			if (!useAnd)
-			{
-				stringBuilder.Append(text);
-				return stringBuilder.ToString();
-			}
-			if (num == 2)
-			{
-				return "ToCommaListAnd".Translate(value, text).Resolve();
-			}
-			stringBuilder.Remove(stringBuilder.Length - 2, 2);
-			return "ToCommaListAnd".Translate(stringBuilder.ToString(), text).Resolve();
-		}
-
-		// Token: 0x060008EC RID: 2284 RVA: 0x00029F08 File Offset: 0x00028108
-		public static string ToCommaListOr(this IEnumerable<string> items, bool emptyIfNone = false)
-		{
-			if (items == null)
-			{
-				return "";
-			}
-			string value;
-			string text;
-			int num;
-			StringBuilder stringBuilder = GenText.ToCommaListInner(items, out value, out text, out num);
-			if (num == 0)
-			{
-				return emptyIfNone ? "" : "NoneLower".Translate();
-			}
-			if (num == 1)
-			{
-				return text;
-			}
-			if (num == 2)
-			{
-				return "ToCommaListOr".Translate(value, text).Resolve();
-			}
-			stringBuilder.Remove(stringBuilder.Length - 2, 2);
-			return "ToCommaListOr".Translate(stringBuilder.ToString(), text).Resolve();
-		}
-
-		// Token: 0x060008ED RID: 2285 RVA: 0x00029FAC File Offset: 0x000281AC
-		private static StringBuilder ToCommaListInner(IEnumerable<string> items, out string first, out string last, out int count)
-		{
-			first = null;
-			last = null;
-			count = 0;
-			StringBuilder stringBuilder = new StringBuilder();
-			IList<string> list = items as IList<string>;
-			if (list != null)
-			{
-				for (int i = 0; i < list.Count; i++)
-				{
-					string text = list[i];
-					if (!text.NullOrEmpty())
-					{
-						if (first == null)
-						{
-							first = text;
-						}
-						if (last != null)
-						{
-							stringBuilder.Append(last + ", ");
-						}
-						last = text;
-						count++;
-					}
-				}
+				tmpSbForCapitalizedSentences.Append(char.ToUpper(input[i]));
+				flag = false;
 			}
 			else
 			{
-				foreach (string text2 in items)
-				{
-					if (!text2.NullOrEmpty())
-					{
-						if (first == null)
-						{
-							first = text2;
-						}
-						if (last != null)
-						{
-							stringBuilder.Append(last + ", ");
-						}
-						last = text2;
-						count++;
-					}
-				}
+				tmpSbForCapitalizedSentences.Append(input[i]);
 			}
-			return stringBuilder;
-		}
-
-		// Token: 0x060008EE RID: 2286 RVA: 0x0002A08C File Offset: 0x0002828C
-		public static TaggedString ToClauseSequence(this List<string> entries)
-		{
-			switch (entries.Count)
+			if (input[i] == '\r' || input[i] == '\n' || (input[i] == '.' && i < input.Length - 1 && input[i + 1] == ' ') || input[i] == '!' || input[i] == '?' || input[i] == ':')
 			{
-			case 0:
-				return "None".Translate() + ".";
-			case 1:
-				return entries[0] + ".";
-			case 2:
-				return "ClauseSequence2".Translate(entries[0], entries[1]);
-			case 3:
-				return "ClauseSequence3".Translate(entries[0], entries[1], entries[2]);
-			case 4:
-				return "ClauseSequence4".Translate(entries[0], entries[1], entries[2], entries[3]);
-			case 5:
-				return "ClauseSequence5".Translate(entries[0], entries[1], entries[2], entries[3], entries[4]);
-			case 6:
-				return "ClauseSequence6".Translate(entries[0], entries[1], entries[2], entries[3], entries[4], entries[5]);
-			case 7:
-				return "ClauseSequence7".Translate(entries[0], entries[1], entries[2], entries[3], entries[4], entries[5], entries[6]);
-			case 8:
-				return "ClauseSequence8".Translate(entries[0], entries[1], entries[2], entries[3], entries[4], entries[5], entries[6], entries[7]);
-			default:
-				return entries.ToCommaList(true, false);
+				flag = true;
 			}
-		}
-
-		// Token: 0x060008EF RID: 2287 RVA: 0x0002A2FC File Offset: 0x000284FC
-		public static string ToLineList(this IList<string> entries, string prefix = null)
-		{
-			StringBuilder stringBuilder = new StringBuilder();
-			for (int i = 0; i < entries.Count; i++)
+			else if (input[i] == '<' && i < input.Length - 1 && input[i + 1] != '/')
 			{
-				if (i != 0)
-				{
-					stringBuilder.Append("\n");
-				}
-				if (prefix != null)
-				{
-					stringBuilder.Append(prefix);
-				}
-				stringBuilder.Append(entries[i]);
+				flag2 = true;
 			}
-			return stringBuilder.ToString();
-		}
-
-		// Token: 0x060008F0 RID: 2288 RVA: 0x0002A350 File Offset: 0x00028550
-		public static string ToLineList(this IList<string> entries, Color color, string prefix = null)
-		{
-			StringBuilder stringBuilder = new StringBuilder();
-			for (int i = 0; i < entries.Count; i++)
+			else if (flag2 && input[i] == '>')
 			{
-				if (i != 0)
-				{
-					stringBuilder.Append("\n");
-				}
-				if (prefix != null)
-				{
-					stringBuilder.Append(prefix);
-				}
-				stringBuilder.Append(entries[i].Colorize(color));
+				flag2 = false;
 			}
-			return stringBuilder.ToString();
-		}
-
-		// Token: 0x060008F1 RID: 2289 RVA: 0x0002A3A8 File Offset: 0x000285A8
-		public static string ToLineList(this IEnumerable<string> entries, string prefix = null, bool capitalizeItems = false)
-		{
-			StringBuilder stringBuilder = new StringBuilder();
-			bool flag = true;
-			foreach (string text in entries)
+			else if (input[i] == '(' && i < input.Length - 1 && input[i + 1] == '*')
 			{
-				if (!flag)
-				{
-					stringBuilder.Append("\n");
-				}
-				if (prefix != null)
-				{
-					stringBuilder.Append(prefix);
-				}
-				stringBuilder.Append(capitalizeItems ? text.CapitalizeFirst() : text);
+				flag4 = true;
+			}
+			else if (flag4 && input[i] == ')')
+			{
+				flag4 = false;
+			}
+			else if (input[i] == '{')
+			{
+				flag3 = true;
 				flag = false;
 			}
-			return stringBuilder.ToString();
-		}
-
-		// Token: 0x060008F2 RID: 2290 RVA: 0x0002A428 File Offset: 0x00028628
-		public static string ToSpaceList(IEnumerable<string> entries)
-		{
-			StringBuilder stringBuilder = new StringBuilder();
-			bool flag = true;
-			foreach (string value in entries)
+			else if (flag3 && input[i] == '}')
 			{
-				if (!flag)
-				{
-					stringBuilder.Append(" ");
-				}
-				stringBuilder.Append(value);
+				flag3 = false;
 				flag = false;
 			}
-			return stringBuilder.ToString();
 		}
+		return tmpSbForCapitalizedSentences.ToString();
+	}
 
-		// Token: 0x060008F3 RID: 2291 RVA: 0x0002A490 File Offset: 0x00028690
-		public static string ToStringList(this IEnumerable<string> items, string seperator)
-		{
-			StringBuilder stringBuilder = new StringBuilder();
-			string text = null;
-			string text2 = null;
-			IList<string> list = items as IList<string>;
-			if (list != null)
-			{
-				for (int i = 0; i < list.Count; i++)
-				{
-					string text3 = list[i];
-					if (!text3.NullOrEmpty())
-					{
-						if (text == null)
-						{
-							text = text3;
-						}
-						if (text2 != null)
-						{
-							stringBuilder.Append(text2 + seperator);
-						}
-						text2 = text3;
-					}
-				}
-			}
-			else
-			{
-				foreach (string text4 in items)
-				{
-					if (text != null)
-					{
-						stringBuilder.Append(seperator);
-					}
-					stringBuilder.Append(text4);
-					if (text == null)
-					{
-						text = text4;
-					}
-				}
-			}
-			return stringBuilder.ToString();
-		}
+	public static string CapitalizeAsTitle(string str)
+	{
+		return Find.ActiveLanguageWorker.ToTitleCase(str);
+	}
 
-		// Token: 0x060008F4 RID: 2292 RVA: 0x0002A550 File Offset: 0x00028750
-		public static string ToCamelCase(string str)
+	public static string ToCommaList(this IEnumerable<string> items, bool useAnd = false, bool emptyIfNone = false)
+	{
+		if (items == null)
 		{
-			string text = "";
-			foreach (string str2 in str.Split(' ', StringSplitOptions.None))
-			{
-				if (text.Length == 0)
-				{
-					text += str2.UncapitalizeFirst();
-				}
-				else
-				{
-					text += str2.CapitalizeFirst();
-				}
-			}
-			return text;
-		}
-
-		// Token: 0x060008F5 RID: 2293 RVA: 0x0002A5A4 File Offset: 0x000287A4
-		public static string Truncate(this string str, float width, Dictionary<string, string> cache = null)
-		{
-			string text;
-			if (cache != null && cache.TryGetValue(str, out text))
-			{
-				return text;
-			}
-			if (Text.CalcSize(str).x <= width)
-			{
-				if (cache != null)
-				{
-					cache.Add(str, str);
-				}
-				return str;
-			}
-			text = str;
-			do
-			{
-				text = text.Substring(0, text.Length - 1);
-			}
-			while (text.Length > 0 && Text.CalcSize(text + "...").x > width);
-			text += "...";
-			if (cache != null)
-			{
-				cache.Add(str, text);
-			}
-			return text;
-		}
-
-		// Token: 0x060008F6 RID: 2294 RVA: 0x0002A628 File Offset: 0x00028828
-		public static TaggedString Truncate(this TaggedString str, float width, Dictionary<string, TaggedString> cache = null)
-		{
-			TaggedString taggedString;
-			if (cache != null && cache.TryGetValue(str.RawText, out taggedString))
-			{
-				return taggedString;
-			}
-			if (Text.CalcSize(str.RawText.StripTags()).x < width)
-			{
-				if (cache != null)
-				{
-					cache.Add(str.RawText, str);
-				}
-				return str;
-			}
-			taggedString = str;
-			do
-			{
-				taggedString = taggedString.RawText.Substring(0, taggedString.RawText.Length - 1);
-			}
-			while (taggedString.RawText.StripTags().Length > 0 && Text.CalcSize(GenText.AddEllipses(taggedString.RawText.StripTags())).x > width);
-			taggedString = GenText.AddEllipses(taggedString);
-			if (cache != null)
-			{
-				cache.Add(str.RawText, str);
-			}
-			return taggedString;
-		}
-
-		// Token: 0x060008F7 RID: 2295 RVA: 0x0002A6F0 File Offset: 0x000288F0
-		public static string TruncateHeight(this string str, float width, float height, Dictionary<string, string> cache = null)
-		{
-			string text;
-			if (cache != null && cache.TryGetValue(str, out text))
-			{
-				return text;
-			}
-			if (Text.CalcHeight(str, width) <= height)
-			{
-				if (cache != null)
-				{
-					cache.Add(str, str);
-				}
-				return str;
-			}
-			text = str;
-			do
-			{
-				text = text.Substring(0, text.Length - 1);
-			}
-			while (text.Length > 0 && Text.CalcHeight(GenText.AddEllipses(text), width) > height);
-			text = GenText.AddEllipses(text);
-			if (cache != null)
-			{
-				cache.Add(str, text);
-			}
-			return text;
-		}
-
-		// Token: 0x060008F8 RID: 2296 RVA: 0x0002A764 File Offset: 0x00028964
-		public static TaggedString TruncateHeight(this TaggedString str, float width, float height, Dictionary<string, TaggedString> cache = null)
-		{
-			TaggedString taggedString;
-			if (cache != null && cache.TryGetValue(str.RawText, out taggedString))
-			{
-				return taggedString;
-			}
-			if (Text.CalcHeight(str.RawText.StripTags(), width) <= height)
-			{
-				if (cache != null)
-				{
-					cache.Add(str.RawText, str);
-				}
-				return str;
-			}
-			taggedString = str;
-			do
-			{
-				taggedString = taggedString.RawText.Substring(0, taggedString.RawText.Length - 1);
-			}
-			while (taggedString.RawText.StripTags().Length > 0 && Text.CalcHeight(GenText.AddEllipses(taggedString.RawText.StripTags()), width) > height);
-			taggedString = GenText.AddEllipses(taggedString);
-			if (cache != null)
-			{
-				cache.Add(str.RawText, taggedString);
-			}
-			return taggedString;
-		}
-
-		// Token: 0x060008F9 RID: 2297 RVA: 0x0002A823 File Offset: 0x00028A23
-		public static string AddEllipses(string s)
-		{
-			if (s.Length > 0 && s[s.Length - 1] == '.')
-			{
-				return s + " ...";
-			}
-			return s + "...";
-		}
-
-		// Token: 0x060008FA RID: 2298 RVA: 0x0002A858 File Offset: 0x00028A58
-		public static string Flatten(this string str)
-		{
-			if (str.NullOrEmpty())
-			{
-				return str;
-			}
-			if (str.Contains("\n"))
-			{
-				str = str.Replace("\n", " ");
-			}
-			if (str.Contains("\r"))
-			{
-				str = str.Replace("\r", "");
-			}
-			str = str.MergeMultipleSpaces(false);
-			return str.Trim(new char[]
-			{
-				' ',
-				'\n',
-				'\r',
-				'\t'
-			});
-		}
-
-		// Token: 0x060008FB RID: 2299 RVA: 0x0002A8D0 File Offset: 0x00028AD0
-		public static string MergeMultipleSpaces(this string str, bool leaveMultipleSpacesAtLineBeginning = true)
-		{
-			if (str.NullOrEmpty())
-			{
-				return str;
-			}
-			if (!str.Contains("  "))
-			{
-				return str;
-			}
-			bool flag = true;
-			GenText.tmpStringBuilder.Length = 0;
-			for (int i = 0; i < str.Length; i++)
-			{
-				if (str[i] == '\r' || str[i] == '\n')
-				{
-					flag = true;
-				}
-				if ((leaveMultipleSpacesAtLineBeginning && flag) || str[i] != ' ' || i == 0 || str[i - 1] != ' ')
-				{
-					GenText.tmpStringBuilder.Append(str[i]);
-				}
-				if (!char.IsWhiteSpace(str[i]))
-				{
-					flag = false;
-				}
-			}
-			return GenText.tmpStringBuilder.ToString();
-		}
-
-		// Token: 0x060008FC RID: 2300 RVA: 0x0002A978 File Offset: 0x00028B78
-		public static string TrimmedToLength(this string str, int length)
-		{
-			if (str == null || str.Length <= length)
-			{
-				return str;
-			}
-			return str.Substring(0, length);
-		}
-
-		// Token: 0x060008FD RID: 2301 RVA: 0x0002A990 File Offset: 0x00028B90
-		public static bool ContainsEmptyLines(string str)
-		{
-			return str.NullOrEmpty() || (str[0] == '\n' || str[0] == '\r') || (str[str.Length - 1] == '\n' || str[str.Length - 1] == '\r') || (str.Contains("\n\n") || str.Contains("\r\n\r\n") || str.Contains("\r\r"));
-		}
-
-		// Token: 0x060008FE RID: 2302 RVA: 0x0002AA10 File Offset: 0x00028C10
-		public static string ToStringByStyle(this float f, ToStringStyle style, ToStringNumberSense numberSense = ToStringNumberSense.Absolute)
-		{
-			if (style == ToStringStyle.Temperature && numberSense == ToStringNumberSense.Offset)
-			{
-				style = ToStringStyle.TemperatureOffset;
-			}
-			if (numberSense == ToStringNumberSense.Factor)
-			{
-				if (f >= 10f)
-				{
-					style = ToStringStyle.FloatMaxTwo;
-				}
-				else
-				{
-					style = ToStringStyle.PercentZero;
-				}
-			}
-			string text;
-			switch (style)
-			{
-			case ToStringStyle.Integer:
-				text = Mathf.RoundToInt(f).ToString();
-				break;
-			case ToStringStyle.FloatOne:
-				text = f.ToString("F1");
-				break;
-			case ToStringStyle.FloatTwo:
-				text = f.ToString("F2");
-				break;
-			case ToStringStyle.FloatThree:
-				text = f.ToString("F3");
-				break;
-			case ToStringStyle.FloatMaxOne:
-				text = f.ToString("0.#");
-				break;
-			case ToStringStyle.FloatMaxTwo:
-				text = f.ToString("0.##");
-				break;
-			case ToStringStyle.FloatMaxThree:
-				text = f.ToString("0.###");
-				break;
-			case ToStringStyle.FloatTwoOrThree:
-				text = f.ToString((f == 0f || Mathf.Abs(f) >= 0.01f) ? "F2" : "F3");
-				break;
-			case ToStringStyle.PercentZero:
-				text = f.ToStringPercent();
-				break;
-			case ToStringStyle.PercentOne:
-				text = f.ToStringPercent("F1");
-				break;
-			case ToStringStyle.PercentTwo:
-				text = f.ToStringPercent("F2");
-				break;
-			case ToStringStyle.Temperature:
-				text = f.ToStringTemperature("F1");
-				break;
-			case ToStringStyle.TemperatureOffset:
-				text = f.ToStringTemperatureOffset("F1");
-				break;
-			case ToStringStyle.WorkAmount:
-				text = f.ToStringWorkAmount();
-				break;
-			case ToStringStyle.Money:
-				text = f.ToStringMoney(null);
-				break;
-			default:
-				Log.Error("Unknown ToStringStyle " + style.ToString());
-				text = f.ToString();
-				break;
-			}
-			if (numberSense == ToStringNumberSense.Offset)
-			{
-				if (f >= 0f)
-				{
-					text = "+" + text;
-				}
-			}
-			else if (numberSense == ToStringNumberSense.Factor)
-			{
-				text = "x" + text;
-			}
-			return text;
-		}
-
-		// Token: 0x060008FF RID: 2303 RVA: 0x0002ABD4 File Offset: 0x00028DD4
-		public static string ToStringDecimalIfSmall(this float f)
-		{
-			if (Mathf.Abs(f) < 1f)
-			{
-				return Math.Round((double)f, 2).ToString("0.##");
-			}
-			if (Mathf.Abs(f) < 10f)
-			{
-				return Math.Round((double)f, 1).ToString("0.#");
-			}
-			return Mathf.RoundToInt(f).ToStringCached();
-		}
-
-		// Token: 0x06000900 RID: 2304 RVA: 0x0002AC32 File Offset: 0x00028E32
-		public static string ToStringPercent(this float f)
-		{
-			return (f * 100f).ToStringDecimalIfSmall() + "%";
-		}
-
-		// Token: 0x06000901 RID: 2305 RVA: 0x0002AC4C File Offset: 0x00028E4C
-		public static string ToStringPercent(this float f, string format)
-		{
-			return ((f + 1E-05f) * 100f).ToString(format) + "%";
-		}
-
-		// Token: 0x06000902 RID: 2306 RVA: 0x0002AC7C File Offset: 0x00028E7C
-		public static string ToStringPercentSigned(this float f)
-		{
-			return ((Mathf.Sign(f) > 0f) ? "+" : ((Mathf.Sign(f) < 0f) ? "-" : "")) + (Mathf.Abs(f) * 100f).ToStringDecimalIfSmall() + "%";
-		}
-
-		// Token: 0x06000903 RID: 2307 RVA: 0x0002ACD4 File Offset: 0x00028ED4
-		public static string ToStringPercentSigned(this float f, string format)
-		{
-			return ((Mathf.Sign(f) > 0f) ? "+" : ((Mathf.Sign(f) < 0f) ? "-" : "")) + ((Mathf.Abs(f) + 1E-05f) * 100f).ToString(format) + "%";
-		}
-
-		// Token: 0x06000904 RID: 2308 RVA: 0x0002AD34 File Offset: 0x00028F34
-		public static string ToStringMoney(this float f, string format = null)
-		{
-			if (format == null)
-			{
-				if (f >= 10f || f == 0f)
-				{
-					format = "F0";
-				}
-				else
-				{
-					format = "F2";
-				}
-			}
-			return "MoneyFormat".Translate(f.ToString(format));
-		}
-
-		// Token: 0x06000905 RID: 2309 RVA: 0x0002AD80 File Offset: 0x00028F80
-		public static string ToStringMoneyOffset(this float f, string format = null)
-		{
-			string text = Mathf.Abs(f).ToStringMoney(format);
-			if (f > 0f && text != "$0")
-			{
-				return "+" + text;
-			}
-			if (f < 0f)
-			{
-				return "-" + text;
-			}
-			return text;
-		}
-
-		// Token: 0x06000906 RID: 2310 RVA: 0x0002ADD0 File Offset: 0x00028FD0
-		public static string ToStringWithSign(this int i)
-		{
-			return i.ToString("+#;-#;0");
-		}
-
-		// Token: 0x06000907 RID: 2311 RVA: 0x0002ADDE File Offset: 0x00028FDE
-		public static string ToStringWithSign(this float f, string format = "0.##")
-		{
-			if (f > 0f)
-			{
-				return "+" + f.ToString(format);
-			}
-			return f.ToString(format);
-		}
-
-		// Token: 0x06000908 RID: 2312 RVA: 0x0002AE04 File Offset: 0x00029004
-		public static string ToStringKilobytes(this int bytes, string format = "F2")
-		{
-			return ((float)bytes / 1024f).ToString(format) + "Kb";
-		}
-
-		// Token: 0x06000909 RID: 2313 RVA: 0x0002AE2C File Offset: 0x0002902C
-		public static string ToStringYesNo(this bool b)
-		{
-			return b ? "Yes".Translate() : "No".Translate();
-		}
-
-		// Token: 0x0600090A RID: 2314 RVA: 0x0002AE4C File Offset: 0x0002904C
-		public static string ToStringLongitude(this float longitude)
-		{
-			bool flag = longitude < 0f;
-			if (flag)
-			{
-				longitude = -longitude;
-			}
-			return longitude.ToString("F2") + "°" + (flag ? "W" : "E");
-		}
-
-		// Token: 0x0600090B RID: 2315 RVA: 0x0002AE90 File Offset: 0x00029090
-		public static string ToStringLatitude(this float latitude)
-		{
-			bool flag = latitude < 0f;
-			if (flag)
-			{
-				latitude = -latitude;
-			}
-			return latitude.ToString("F2") + "°" + (flag ? "S" : "N");
-		}
-
-		// Token: 0x0600090C RID: 2316 RVA: 0x0002AED4 File Offset: 0x000290D4
-		public static string ToStringMass(this float mass)
-		{
-			if (mass == 0f)
-			{
-				return "0 g";
-			}
-			float num = Mathf.Abs(mass);
-			if (num >= 100f)
-			{
-				return mass.ToString("F0") + " kg";
-			}
-			if (num >= 10f)
-			{
-				return mass.ToString("0.#") + " kg";
-			}
-			if (num >= 0.1f)
-			{
-				return mass.ToString("0.##") + " kg";
-			}
-			float num2 = mass * 1000f;
-			if (num >= 0.01f)
-			{
-				return num2.ToString("F0") + " g";
-			}
-			if (num >= 0.001f)
-			{
-				return num2.ToString("0.#") + " g";
-			}
-			return num2.ToString("0.##") + " g";
-		}
-
-		// Token: 0x0600090D RID: 2317 RVA: 0x0002AFB0 File Offset: 0x000291B0
-		public static string ToStringMassOffset(this float mass)
-		{
-			string text = mass.ToStringMass();
-			if (mass > 0f)
-			{
-				return "+" + text;
-			}
-			return text;
-		}
-
-		// Token: 0x0600090E RID: 2318 RVA: 0x0002AFD9 File Offset: 0x000291D9
-		public static string ToStringSign(this float val)
-		{
-			if (val >= 0f)
-			{
-				return "+";
-			}
 			return "";
 		}
-
-		// Token: 0x0600090F RID: 2319 RVA: 0x0002AFF0 File Offset: 0x000291F0
-		public static string ToStringEnsureThreshold(this float value, float threshold, int decimalPlaces)
+		string first;
+		string last;
+		int count;
+		StringBuilder stringBuilder = ToCommaListInner(items, out first, out last, out count);
+		switch (count)
 		{
-			if (value > threshold && Math.Round((double)value, decimalPlaces) <= Math.Round((double)threshold, decimalPlaces))
+		case 0:
+			return emptyIfNone ? ((TaggedString)"") : "NoneLower".Translate();
+		case 1:
+			return last;
+		default:
+			if (useAnd)
 			{
-				return (value + 1f / Mathf.Pow(10f, (float)decimalPlaces)).ToString("F" + decimalPlaces.ToString());
-			}
-			return value.ToString("F" + decimalPlaces.ToString());
-		}
-
-		// Token: 0x06000910 RID: 2320 RVA: 0x0002B059 File Offset: 0x00029259
-		public static string ToStringTemperature(this float celsiusTemp, string format = "F1")
-		{
-			celsiusTemp = GenTemperature.CelsiusTo(celsiusTemp, Prefs.TemperatureMode);
-			return celsiusTemp.ToStringTemperatureRaw(format);
-		}
-
-		// Token: 0x06000911 RID: 2321 RVA: 0x0002B06F File Offset: 0x0002926F
-		public static string ToStringTemperatureOffset(this float celsiusTemp, string format = "F1")
-		{
-			celsiusTemp = GenTemperature.CelsiusToOffset(celsiusTemp, Prefs.TemperatureMode);
-			return celsiusTemp.ToStringTemperatureRaw(format);
-		}
-
-		// Token: 0x06000912 RID: 2322 RVA: 0x0002B088 File Offset: 0x00029288
-		public static string ToStringTemperatureRaw(this float temp, string format = "F1")
-		{
-			switch (Prefs.TemperatureMode)
-			{
-			case TemperatureDisplayMode.Celsius:
-				return temp.ToString(format) + "C";
-			case TemperatureDisplayMode.Fahrenheit:
-				return temp.ToString(format) + "F";
-			case TemperatureDisplayMode.Kelvin:
-				return temp.ToString(format) + "K";
-			default:
-				throw new InvalidOperationException();
-			}
-		}
-
-		// Token: 0x06000913 RID: 2323 RVA: 0x0002B0F0 File Offset: 0x000292F0
-		public static string ToStringTwoDigits(this Vector2 v)
-		{
-			return string.Concat(new string[]
-			{
-				"(",
-				v.x.ToString("F2"),
-				", ",
-				v.y.ToString("F2"),
-				")"
-			});
-		}
-
-		// Token: 0x06000914 RID: 2324 RVA: 0x0002B148 File Offset: 0x00029348
-		public static string ToStringWorkAmount(this float workAmount)
-		{
-			return Mathf.CeilToInt(workAmount / 60f).ToString();
-		}
-
-		// Token: 0x06000915 RID: 2325 RVA: 0x0002B16C File Offset: 0x0002936C
-		public static string ToStringBytes(this int b, string format = "F2")
-		{
-			return ((float)b / 8f / 1024f).ToString(format) + "kb";
-		}
-
-		// Token: 0x06000916 RID: 2326 RVA: 0x0002B19C File Offset: 0x0002939C
-		public static string ToStringBytes(this uint b, string format = "F2")
-		{
-			return (b / 8f / 1024f).ToString(format) + "kb";
-		}
-
-		// Token: 0x06000917 RID: 2327 RVA: 0x0002B1CC File Offset: 0x000293CC
-		public static string ToStringBytes(this long b, string format = "F2")
-		{
-			return ((float)b / 8f / 1024f).ToString(format) + "kb";
-		}
-
-		// Token: 0x06000918 RID: 2328 RVA: 0x0002B1FC File Offset: 0x000293FC
-		public static string ToStringBytes(this ulong b, string format = "F2")
-		{
-			return (b / 8f / 1024f).ToString(format) + "kb";
-		}
-
-		// Token: 0x06000919 RID: 2329 RVA: 0x0002B22C File Offset: 0x0002942C
-		public static string ToStringReadable(this KeyCode k)
-		{
-			if (k <= KeyCode.BackQuote)
-			{
-				switch (k)
+				if (count == 2)
 				{
-				case KeyCode.Backspace:
-					return "Bksp";
-				case KeyCode.Tab:
-				case (KeyCode)10:
-				case (KeyCode)11:
-				case (KeyCode)14:
-				case (KeyCode)15:
-				case (KeyCode)16:
-				case (KeyCode)17:
-				case (KeyCode)18:
-				case KeyCode.Pause:
-				case (KeyCode)20:
-				case (KeyCode)21:
-				case (KeyCode)22:
-				case (KeyCode)23:
-				case (KeyCode)24:
-				case (KeyCode)25:
-				case (KeyCode)26:
-				case (KeyCode)28:
-				case (KeyCode)29:
-				case (KeyCode)30:
-				case (KeyCode)31:
-				case KeyCode.Space:
-				case KeyCode.Percent:
-				case KeyCode.Equals:
-					break;
-				case KeyCode.Clear:
-					return "Clr";
-				case KeyCode.Return:
-					return "Ent";
-				case KeyCode.Escape:
-					return "Esc";
-				case KeyCode.Exclaim:
-					return "!";
-				case KeyCode.DoubleQuote:
-					return "\"";
-				case KeyCode.Hash:
-					return "#";
-				case KeyCode.Dollar:
-					return "$";
-				case KeyCode.Ampersand:
-					return "&";
-				case KeyCode.Quote:
-					return "'";
-				case KeyCode.LeftParen:
-					return "(";
-				case KeyCode.RightParen:
-					return ")";
-				case KeyCode.Asterisk:
-					return "*";
-				case KeyCode.Plus:
-					return "+";
-				case KeyCode.Comma:
-					return ",";
-				case KeyCode.Minus:
-					return "-";
-				case KeyCode.Period:
-					return ".";
-				case KeyCode.Slash:
-					return "/";
-				case KeyCode.Alpha0:
-					return "0";
-				case KeyCode.Alpha1:
-					return "1";
-				case KeyCode.Alpha2:
-					return "2";
-				case KeyCode.Alpha3:
-					return "3";
-				case KeyCode.Alpha4:
-					return "4";
-				case KeyCode.Alpha5:
-					return "5";
-				case KeyCode.Alpha6:
-					return "6";
-				case KeyCode.Alpha7:
-					return "7";
-				case KeyCode.Alpha8:
-					return "8";
-				case KeyCode.Alpha9:
-					return "9";
-				case KeyCode.Colon:
-					return ":";
-				case KeyCode.Semicolon:
-					return ";";
-				case KeyCode.Less:
-					return "<";
-				case KeyCode.Greater:
-					return ">";
-				case KeyCode.Question:
-					return "?";
-				case KeyCode.At:
-					return "@";
-				default:
-					switch (k)
+					return "ToCommaListAnd".Translate(first, last).Resolve();
+				}
+				stringBuilder.Remove(stringBuilder.Length - 2, 2);
+				return "ToCommaListAnd".Translate(stringBuilder.ToString(), last).Resolve();
+			}
+			stringBuilder.Append(last);
+			return stringBuilder.ToString();
+		}
+	}
+
+	public static string ToCommaListOr(this IEnumerable<string> items, bool emptyIfNone = false)
+	{
+		if (items == null)
+		{
+			return "";
+		}
+		string first;
+		string last;
+		int count;
+		StringBuilder stringBuilder = ToCommaListInner(items, out first, out last, out count);
+		switch (count)
+		{
+		case 0:
+			return emptyIfNone ? ((TaggedString)"") : "NoneLower".Translate();
+		case 1:
+			return last;
+		case 2:
+			return "ToCommaListOr".Translate(first, last).Resolve();
+		default:
+			stringBuilder.Remove(stringBuilder.Length - 2, 2);
+			return "ToCommaListOr".Translate(stringBuilder.ToString(), last).Resolve();
+		}
+	}
+
+	private static StringBuilder ToCommaListInner(IEnumerable<string> items, out string first, out string last, out int count)
+	{
+		first = null;
+		last = null;
+		count = 0;
+		StringBuilder stringBuilder = new StringBuilder();
+		if (items is IList<string> list)
+		{
+			for (int i = 0; i < list.Count; i++)
+			{
+				string text = list[i];
+				if (!text.NullOrEmpty())
+				{
+					if (first == null)
 					{
-					case KeyCode.LeftBracket:
-						return "[";
-					case KeyCode.Backslash:
-						return "\\";
-					case KeyCode.RightBracket:
-						return "]";
-					case KeyCode.Caret:
-						return "^";
-					case KeyCode.Underscore:
-						return "_";
-					case KeyCode.BackQuote:
-						return "`";
+						first = text;
 					}
-					break;
+					if (last != null)
+					{
+						stringBuilder.Append(last + ", ");
+					}
+					last = text;
+					count++;
 				}
 			}
-			else
+		}
+		else
+		{
+			foreach (string item in items)
 			{
-				if (k == KeyCode.Delete)
+				if (!item.NullOrEmpty())
 				{
-					return "Del";
-				}
-				switch (k)
-				{
-				case KeyCode.Keypad0:
-					return "Kp0";
-				case KeyCode.Keypad1:
-					return "Kp1";
-				case KeyCode.Keypad2:
-					return "Kp2";
-				case KeyCode.Keypad3:
-					return "Kp3";
-				case KeyCode.Keypad4:
-					return "Kp4";
-				case KeyCode.Keypad5:
-					return "Kp5";
-				case KeyCode.Keypad6:
-					return "Kp6";
-				case KeyCode.Keypad7:
-					return "Kp7";
-				case KeyCode.Keypad8:
-					return "Kp8";
-				case KeyCode.Keypad9:
-					return "Kp9";
-				case KeyCode.KeypadPeriod:
-					return "Kp.";
-				case KeyCode.KeypadDivide:
-					return "Kp/";
-				case KeyCode.KeypadMultiply:
-					return "Kp*";
-				case KeyCode.KeypadMinus:
-					return "Kp-";
-				case KeyCode.KeypadPlus:
-					return "Kp+";
-				case KeyCode.KeypadEnter:
-					return "KpEnt";
-				case KeyCode.KeypadEquals:
-					return "Kp=";
-				case KeyCode.UpArrow:
-					return "Up";
-				case KeyCode.DownArrow:
-					return "Down";
-				case KeyCode.RightArrow:
-					return "Right";
-				case KeyCode.LeftArrow:
-					return "Left";
-				case KeyCode.Insert:
-					return "Ins";
-				case KeyCode.Home:
-					return "Home";
-				case KeyCode.End:
-					return "End";
-				case KeyCode.PageUp:
-					return "PgUp";
-				case KeyCode.PageDown:
-					return "PgDn";
-				case KeyCode.Numlock:
-					return "NumL";
-				case KeyCode.CapsLock:
-					return "CapL";
-				case KeyCode.ScrollLock:
-					return "ScrL";
-				case KeyCode.RightShift:
-					return "RShf";
-				case KeyCode.LeftShift:
-					return "LShf";
-				case KeyCode.RightControl:
-					return "RCtrl";
-				case KeyCode.LeftControl:
-					return "LCtrl";
-				case KeyCode.RightAlt:
-					return "RAlt";
-				case KeyCode.LeftAlt:
-					return "LAlt";
-				case KeyCode.RightMeta:
-					return "Appl";
-				case KeyCode.LeftMeta:
-					return "Cmd";
-				case KeyCode.LeftWindows:
-					return "Win";
-				case KeyCode.RightWindows:
-					return "Win";
-				case KeyCode.AltGr:
-					return "AltGr";
-				case KeyCode.Help:
-					return "Help";
-				case KeyCode.Print:
-					return "Prnt";
-				case KeyCode.SysReq:
-					return "SysReq";
-				case KeyCode.Break:
-					return "Brk";
-				case KeyCode.Menu:
-					return "Menu";
+					if (first == null)
+					{
+						first = item;
+					}
+					if (last != null)
+					{
+						stringBuilder.Append(last + ", ");
+					}
+					last = item;
+					count++;
 				}
 			}
-			return k.ToString();
 		}
+		return stringBuilder;
+	}
 
-		// Token: 0x0600091A RID: 2330 RVA: 0x0002B67D File Offset: 0x0002987D
-		public static void AppendWithComma(this StringBuilder sb, string text)
+	public static TaggedString ToClauseSequence(this List<string> entries)
+	{
+		return entries.Count switch
 		{
-			sb.AppendWithSeparator(text, ", ");
-		}
+			0 => "None".Translate() + ".", 
+			1 => entries[0] + ".", 
+			2 => "ClauseSequence2".Translate(entries[0], entries[1]), 
+			3 => "ClauseSequence3".Translate(entries[0], entries[1], entries[2]), 
+			4 => "ClauseSequence4".Translate(entries[0], entries[1], entries[2], entries[3]), 
+			5 => "ClauseSequence5".Translate(entries[0], entries[1], entries[2], entries[3], entries[4]), 
+			6 => "ClauseSequence6".Translate(entries[0], entries[1], entries[2], entries[3], entries[4], entries[5]), 
+			7 => "ClauseSequence7".Translate(entries[0], entries[1], entries[2], entries[3], entries[4], entries[5], entries[6]), 
+			8 => "ClauseSequence8".Translate(entries[0], entries[1], entries[2], entries[3], entries[4], entries[5], entries[6], entries[7]), 
+			_ => entries.ToCommaList(useAnd: true), 
+		};
+	}
 
-		// Token: 0x0600091B RID: 2331 RVA: 0x0002B68B File Offset: 0x0002988B
-		public static StringBuilder AppendInNewLine(this StringBuilder sb, string text)
+	public static string ToLineList(this IList<string> entries, string prefix = null)
+	{
+		StringBuilder stringBuilder = new StringBuilder();
+		for (int i = 0; i < entries.Count; i++)
 		{
-			sb.AppendWithSeparator(text, "\n");
-			return sb;
-		}
-
-		// Token: 0x0600091C RID: 2332 RVA: 0x0002B69A File Offset: 0x0002989A
-		public static void AppendWithSeparator(this StringBuilder sb, string text, string separator)
-		{
-			if (text.NullOrEmpty())
+			if (i != 0)
 			{
-				return;
+				stringBuilder.Append("\n");
 			}
+			if (prefix != null)
+			{
+				stringBuilder.Append(prefix);
+			}
+			stringBuilder.Append(entries[i]);
+		}
+		return stringBuilder.ToString();
+	}
+
+	public static string ToLineList(this IList<string> entries, Color color, string prefix = null)
+	{
+		StringBuilder stringBuilder = new StringBuilder();
+		for (int i = 0; i < entries.Count; i++)
+		{
+			if (i != 0)
+			{
+				stringBuilder.Append("\n");
+			}
+			if (prefix != null)
+			{
+				stringBuilder.Append(prefix);
+			}
+			stringBuilder.Append(entries[i].Colorize(color));
+		}
+		return stringBuilder.ToString();
+	}
+
+	public static string ToLineList(this IEnumerable<string> entries, string prefix = null, bool capitalizeItems = false)
+	{
+		StringBuilder stringBuilder = new StringBuilder();
+		bool flag = true;
+		foreach (string entry in entries)
+		{
+			if (!flag)
+			{
+				stringBuilder.Append("\n");
+			}
+			if (prefix != null)
+			{
+				stringBuilder.Append(prefix);
+			}
+			stringBuilder.Append(capitalizeItems ? entry.CapitalizeFirst() : entry);
+			flag = false;
+		}
+		return stringBuilder.ToString();
+	}
+
+	public static string ToSpaceList(IEnumerable<string> entries)
+	{
+		StringBuilder stringBuilder = new StringBuilder();
+		bool flag = true;
+		foreach (string entry in entries)
+		{
+			if (!flag)
+			{
+				stringBuilder.Append(" ");
+			}
+			stringBuilder.Append(entry);
+			flag = false;
+		}
+		return stringBuilder.ToString();
+	}
+
+	public static string ToStringList(this IEnumerable<string> items, string seperator)
+	{
+		StringBuilder stringBuilder = new StringBuilder();
+		string text = null;
+		string text2 = null;
+		if (items is IList<string> list)
+		{
+			for (int i = 0; i < list.Count; i++)
+			{
+				string text3 = list[i];
+				if (!text3.NullOrEmpty())
+				{
+					if (text == null)
+					{
+						text = text3;
+					}
+					if (text2 != null)
+					{
+						stringBuilder.Append(text2 + seperator);
+					}
+					text2 = text3;
+				}
+			}
+		}
+		else
+		{
+			foreach (string item in items)
+			{
+				if (text != null)
+				{
+					stringBuilder.Append(seperator);
+				}
+				stringBuilder.Append(item);
+				if (text == null)
+				{
+					text = item;
+				}
+			}
+		}
+		return stringBuilder.ToString();
+	}
+
+	public static string ToCamelCase(string str)
+	{
+		string text = "";
+		string[] array = str.Split(' ');
+		foreach (string str2 in array)
+		{
+			text = ((text.Length != 0) ? (text + str2.CapitalizeFirst()) : (text + str2.UncapitalizeFirst()));
+		}
+		return text;
+	}
+
+	public static string Truncate(this string str, float width, Dictionary<string, string> cache = null)
+	{
+		if (cache != null && cache.TryGetValue(str, out var value))
+		{
+			return value;
+		}
+		if (Text.CalcSize(str).x <= width)
+		{
+			cache?.Add(str, str);
+			return str;
+		}
+		value = str;
+		do
+		{
+			value = value.Substring(0, value.Length - 1);
+		}
+		while (value.Length > 0 && Text.CalcSize(value + "...").x > width);
+		value += "...";
+		cache?.Add(str, value);
+		return value;
+	}
+
+	public static TaggedString Truncate(this TaggedString str, float width, Dictionary<string, TaggedString> cache = null)
+	{
+		if (cache != null && cache.TryGetValue(str.RawText, out var value))
+		{
+			return value;
+		}
+		if (Text.CalcSize(str.RawText.StripTags()).x < width)
+		{
+			cache?.Add(str.RawText, str);
+			return str;
+		}
+		value = str;
+		do
+		{
+			value = value.RawText.Substring(0, value.RawText.Length - 1);
+		}
+		while (value.RawText.StripTags().Length > 0 && Text.CalcSize(AddEllipses(value.RawText.StripTags())).x > width);
+		value = AddEllipses(value);
+		cache?.Add(str.RawText, str);
+		return value;
+	}
+
+	public static string TruncateHeight(this string str, float width, float height, Dictionary<string, string> cache = null)
+	{
+		if (cache != null && cache.TryGetValue(str, out var value))
+		{
+			return value;
+		}
+		if (Text.CalcHeight(str, width) <= height)
+		{
+			cache?.Add(str, str);
+			return str;
+		}
+		value = str;
+		do
+		{
+			value = value.Substring(0, value.Length - 1);
+		}
+		while (value.Length > 0 && Text.CalcHeight(AddEllipses(value), width) > height);
+		value = AddEllipses(value);
+		cache?.Add(str, value);
+		return value;
+	}
+
+	public static TaggedString TruncateHeight(this TaggedString str, float width, float height, Dictionary<string, TaggedString> cache = null)
+	{
+		if (cache != null && cache.TryGetValue(str.RawText, out var value))
+		{
+			return value;
+		}
+		if (Text.CalcHeight(str.RawText.StripTags(), width) <= height)
+		{
+			cache?.Add(str.RawText, str);
+			return str;
+		}
+		value = str;
+		do
+		{
+			value = value.RawText.Substring(0, value.RawText.Length - 1);
+		}
+		while (value.RawText.StripTags().Length > 0 && Text.CalcHeight(AddEllipses(value.RawText.StripTags()), width) > height);
+		value = AddEllipses(value);
+		cache?.Add(str.RawText, value);
+		return value;
+	}
+
+	public static string AddEllipses(string s)
+	{
+		if (s.Length > 0 && s[s.Length - 1] == '.')
+		{
+			return s + " ...";
+		}
+		return s + "...";
+	}
+
+	public static string Flatten(this string str)
+	{
+		if (str.NullOrEmpty())
+		{
+			return str;
+		}
+		if (str.Contains("\n"))
+		{
+			str = str.Replace("\n", " ");
+		}
+		if (str.Contains("\r"))
+		{
+			str = str.Replace("\r", "");
+		}
+		str = str.MergeMultipleSpaces(leaveMultipleSpacesAtLineBeginning: false);
+		return str.Trim(' ', '\n', '\r', '\t');
+	}
+
+	public static string MergeMultipleSpaces(this string str, bool leaveMultipleSpacesAtLineBeginning = true)
+	{
+		if (str.NullOrEmpty())
+		{
+			return str;
+		}
+		if (!str.Contains("  "))
+		{
+			return str;
+		}
+		bool flag = true;
+		tmpStringBuilder.Length = 0;
+		for (int i = 0; i < str.Length; i++)
+		{
+			if (str[i] == '\r' || str[i] == '\n')
+			{
+				flag = true;
+			}
+			if ((leaveMultipleSpacesAtLineBeginning && flag) || str[i] != ' ' || i == 0 || str[i - 1] != ' ')
+			{
+				tmpStringBuilder.Append(str[i]);
+			}
+			if (!char.IsWhiteSpace(str[i]))
+			{
+				flag = false;
+			}
+		}
+		return tmpStringBuilder.ToString();
+	}
+
+	public static string TrimmedToLength(this string str, int length)
+	{
+		if (str == null || str.Length <= length)
+		{
+			return str;
+		}
+		return str.Substring(0, length);
+	}
+
+	public static bool ContainsEmptyLines(string str)
+	{
+		if (str.NullOrEmpty())
+		{
+			return true;
+		}
+		if (str[0] == '\n' || str[0] == '\r')
+		{
+			return true;
+		}
+		if (str[str.Length - 1] == '\n' || str[str.Length - 1] == '\r')
+		{
+			return true;
+		}
+		if (str.Contains("\n\n") || str.Contains("\r\n\r\n") || str.Contains("\r\r"))
+		{
+			return true;
+		}
+		return false;
+	}
+
+	public static string ToStringByStyle(this float f, ToStringStyle style, ToStringNumberSense numberSense = ToStringNumberSense.Absolute)
+	{
+		if (style == ToStringStyle.Temperature && numberSense == ToStringNumberSense.Offset)
+		{
+			style = ToStringStyle.TemperatureOffset;
+		}
+		if (numberSense == ToStringNumberSense.Factor)
+		{
+			style = ((!(f >= 10f)) ? ToStringStyle.PercentZero : ToStringStyle.FloatMaxTwo);
+		}
+		string text;
+		switch (style)
+		{
+		case ToStringStyle.Integer:
+			text = Mathf.RoundToInt(f).ToString();
+			break;
+		case ToStringStyle.FloatOne:
+			text = f.ToString("F1");
+			break;
+		case ToStringStyle.FloatTwo:
+			text = f.ToString("F2");
+			break;
+		case ToStringStyle.FloatThree:
+			text = f.ToString("F3");
+			break;
+		case ToStringStyle.FloatMaxOne:
+			text = f.ToString("0.#");
+			break;
+		case ToStringStyle.FloatMaxTwo:
+			text = f.ToString("0.##");
+			break;
+		case ToStringStyle.FloatMaxThree:
+			text = f.ToString("0.###");
+			break;
+		case ToStringStyle.FloatTwoOrThree:
+			text = f.ToString((f == 0f || Mathf.Abs(f) >= 0.01f) ? "F2" : "F3");
+			break;
+		case ToStringStyle.PercentZero:
+			text = f.ToStringPercent();
+			break;
+		case ToStringStyle.PercentOne:
+			text = f.ToStringPercent("F1");
+			break;
+		case ToStringStyle.PercentTwo:
+			text = f.ToStringPercent("F2");
+			break;
+		case ToStringStyle.Temperature:
+			text = f.ToStringTemperature();
+			break;
+		case ToStringStyle.TemperatureOffset:
+			text = f.ToStringTemperatureOffset();
+			break;
+		case ToStringStyle.WorkAmount:
+			text = f.ToStringWorkAmount();
+			break;
+		case ToStringStyle.Money:
+			text = f.ToStringMoney();
+			break;
+		default:
+			Log.Error("Unknown ToStringStyle " + style);
+			text = f.ToString();
+			break;
+		}
+		switch (numberSense)
+		{
+		case ToStringNumberSense.Offset:
+			if (f >= 0f)
+			{
+				text = "+" + text;
+			}
+			break;
+		case ToStringNumberSense.Factor:
+			text = "x" + text;
+			break;
+		}
+		return text;
+	}
+
+	public static string ToStringDecimalIfSmall(this float f)
+	{
+		if (Mathf.Abs(f) < 1f)
+		{
+			return Math.Round(f, 2).ToString("0.##");
+		}
+		if (Mathf.Abs(f) < 10f)
+		{
+			return Math.Round(f, 1).ToString("0.#");
+		}
+		return Mathf.RoundToInt(f).ToStringCached();
+	}
+
+	public static string ToStringPercent(this float f)
+	{
+		return (f * 100f).ToStringDecimalIfSmall() + "%";
+	}
+
+	public static string ToStringPercent(this float f, string format)
+	{
+		return ((f + 1E-05f) * 100f).ToString(format) + "%";
+	}
+
+	public static string ToStringPercentSigned(this float f)
+	{
+		return ((Mathf.Sign(f) > 0f) ? "+" : ((Mathf.Sign(f) < 0f) ? "-" : "")) + (Mathf.Abs(f) * 100f).ToStringDecimalIfSmall() + "%";
+	}
+
+	public static string ToStringPercentSigned(this float f, string format)
+	{
+		return ((Mathf.Sign(f) > 0f) ? "+" : ((Mathf.Sign(f) < 0f) ? "-" : "")) + ((Mathf.Abs(f) + 1E-05f) * 100f).ToString(format) + "%";
+	}
+
+	public static string ToStringMoney(this float f, string format = null)
+	{
+		if (format == null)
+		{
+			format = ((!(f >= 10f) && f != 0f) ? "F2" : "F0");
+		}
+		return "MoneyFormat".Translate(f.ToString(format));
+	}
+
+	public static string ToStringMoneyOffset(this float f, string format = null)
+	{
+		string text = Mathf.Abs(f).ToStringMoney(format);
+		if (f > 0f && text != "$0")
+		{
+			return "+" + text;
+		}
+		if (f < 0f)
+		{
+			return "-" + text;
+		}
+		return text;
+	}
+
+	public static string ToStringWithSign(this int i)
+	{
+		return i.ToString("+#;-#;0");
+	}
+
+	public static string ToStringWithSign(this float f, string format = "0.##")
+	{
+		if (f > 0f)
+		{
+			return "+" + f.ToString(format);
+		}
+		return f.ToString(format);
+	}
+
+	public static string ToStringKilobytes(this int bytes, string format = "F2")
+	{
+		return ((float)bytes / 1024f).ToString(format) + "Kb";
+	}
+
+	public static string ToStringYesNo(this bool b)
+	{
+		return b ? "Yes".Translate() : "No".Translate();
+	}
+
+	public static string ToStringLongitude(this float longitude)
+	{
+		bool flag = longitude < 0f;
+		if (flag)
+		{
+			longitude = 0f - longitude;
+		}
+		return longitude.ToString("F2") + "°" + (flag ? "W" : "E");
+	}
+
+	public static string ToStringLatitude(this float latitude)
+	{
+		bool flag = latitude < 0f;
+		if (flag)
+		{
+			latitude = 0f - latitude;
+		}
+		return latitude.ToString("F2") + "°" + (flag ? "S" : "N");
+	}
+
+	public static string ToStringMass(this float mass)
+	{
+		if (mass == 0f)
+		{
+			return "0 g";
+		}
+		float num = Mathf.Abs(mass);
+		if (num >= 100f)
+		{
+			return mass.ToString("F0") + " kg";
+		}
+		if (num >= 10f)
+		{
+			return mass.ToString("0.#") + " kg";
+		}
+		if (num >= 0.1f)
+		{
+			return mass.ToString("0.##") + " kg";
+		}
+		float num2 = mass * 1000f;
+		if (num >= 0.01f)
+		{
+			return num2.ToString("F0") + " g";
+		}
+		if (num >= 0.001f)
+		{
+			return num2.ToString("0.#") + " g";
+		}
+		return num2.ToString("0.##") + " g";
+	}
+
+	public static string ToStringMassOffset(this float mass)
+	{
+		string text = mass.ToStringMass();
+		if (mass > 0f)
+		{
+			return "+" + text;
+		}
+		return text;
+	}
+
+	public static string ToStringSign(this float val)
+	{
+		if (val >= 0f)
+		{
+			return "+";
+		}
+		return "";
+	}
+
+	public static string ToStringEnsureThreshold(this float value, float threshold, int decimalPlaces)
+	{
+		if (value > threshold && Math.Round(value, decimalPlaces) <= Math.Round(threshold, decimalPlaces))
+		{
+			return (value + 1f / Mathf.Pow(10f, decimalPlaces)).ToString("F" + decimalPlaces);
+		}
+		return value.ToString("F" + decimalPlaces);
+	}
+
+	public static string ToStringTemperature(this float celsiusTemp, string format = "F1")
+	{
+		celsiusTemp = GenTemperature.CelsiusTo(celsiusTemp, Prefs.TemperatureMode);
+		return celsiusTemp.ToStringTemperatureRaw(format);
+	}
+
+	public static string ToStringTemperatureOffset(this float celsiusTemp, string format = "F1")
+	{
+		celsiusTemp = GenTemperature.CelsiusToOffset(celsiusTemp, Prefs.TemperatureMode);
+		return celsiusTemp.ToStringTemperatureRaw(format);
+	}
+
+	public static string ToStringTemperatureRaw(this float temp, string format = "F1")
+	{
+		return Prefs.TemperatureMode switch
+		{
+			TemperatureDisplayMode.Celsius => temp.ToString(format) + "C", 
+			TemperatureDisplayMode.Fahrenheit => temp.ToString(format) + "F", 
+			TemperatureDisplayMode.Kelvin => temp.ToString(format) + "K", 
+			_ => throw new InvalidOperationException(), 
+		};
+	}
+
+	public static string ToStringTwoDigits(this Vector2 v)
+	{
+		return "(" + v.x.ToString("F2") + ", " + v.y.ToString("F2") + ")";
+	}
+
+	public static string ToStringWorkAmount(this float workAmount)
+	{
+		return Mathf.CeilToInt(workAmount / 60f).ToString();
+	}
+
+	public static string ToStringBytes(this int b, string format = "F2")
+	{
+		return ((float)b / 8f / 1024f).ToString(format) + "kb";
+	}
+
+	public static string ToStringBytes(this uint b, string format = "F2")
+	{
+		return ((float)b / 8f / 1024f).ToString(format) + "kb";
+	}
+
+	public static string ToStringBytes(this long b, string format = "F2")
+	{
+		return ((float)b / 8f / 1024f).ToString(format) + "kb";
+	}
+
+	public static string ToStringBytes(this ulong b, string format = "F2")
+	{
+		return ((float)b / 8f / 1024f).ToString(format) + "kb";
+	}
+
+	public static string ToStringReadable(this KeyCode k)
+	{
+		return k switch
+		{
+			KeyCode.Keypad0 => "Kp0", 
+			KeyCode.Keypad1 => "Kp1", 
+			KeyCode.Keypad2 => "Kp2", 
+			KeyCode.Keypad3 => "Kp3", 
+			KeyCode.Keypad4 => "Kp4", 
+			KeyCode.Keypad5 => "Kp5", 
+			KeyCode.Keypad6 => "Kp6", 
+			KeyCode.Keypad7 => "Kp7", 
+			KeyCode.Keypad8 => "Kp8", 
+			KeyCode.Keypad9 => "Kp9", 
+			KeyCode.KeypadDivide => "Kp/", 
+			KeyCode.KeypadEnter => "KpEnt", 
+			KeyCode.KeypadEquals => "Kp=", 
+			KeyCode.KeypadMinus => "Kp-", 
+			KeyCode.KeypadMultiply => "Kp*", 
+			KeyCode.KeypadPeriod => "Kp.", 
+			KeyCode.KeypadPlus => "Kp+", 
+			KeyCode.Alpha0 => "0", 
+			KeyCode.Alpha1 => "1", 
+			KeyCode.Alpha2 => "2", 
+			KeyCode.Alpha3 => "3", 
+			KeyCode.Alpha4 => "4", 
+			KeyCode.Alpha5 => "5", 
+			KeyCode.Alpha6 => "6", 
+			KeyCode.Alpha7 => "7", 
+			KeyCode.Alpha8 => "8", 
+			KeyCode.Alpha9 => "9", 
+			KeyCode.Clear => "Clr", 
+			KeyCode.Backspace => "Bksp", 
+			KeyCode.Return => "Ent", 
+			KeyCode.Escape => "Esc", 
+			KeyCode.DoubleQuote => "\"", 
+			KeyCode.Exclaim => "!", 
+			KeyCode.Hash => "#", 
+			KeyCode.Dollar => "$", 
+			KeyCode.Ampersand => "&", 
+			KeyCode.Quote => "'", 
+			KeyCode.LeftParen => "(", 
+			KeyCode.RightParen => ")", 
+			KeyCode.Asterisk => "*", 
+			KeyCode.Plus => "+", 
+			KeyCode.Minus => "-", 
+			KeyCode.Comma => ",", 
+			KeyCode.Period => ".", 
+			KeyCode.Slash => "/", 
+			KeyCode.Colon => ":", 
+			KeyCode.Semicolon => ";", 
+			KeyCode.Less => "<", 
+			KeyCode.Greater => ">", 
+			KeyCode.Question => "?", 
+			KeyCode.At => "@", 
+			KeyCode.LeftBracket => "[", 
+			KeyCode.RightBracket => "]", 
+			KeyCode.Backslash => "\\", 
+			KeyCode.Caret => "^", 
+			KeyCode.Underscore => "_", 
+			KeyCode.BackQuote => "`", 
+			KeyCode.Delete => "Del", 
+			KeyCode.UpArrow => "Up", 
+			KeyCode.DownArrow => "Down", 
+			KeyCode.LeftArrow => "Left", 
+			KeyCode.RightArrow => "Right", 
+			KeyCode.Insert => "Ins", 
+			KeyCode.Home => "Home", 
+			KeyCode.End => "End", 
+			KeyCode.PageDown => "PgDn", 
+			KeyCode.PageUp => "PgUp", 
+			KeyCode.Numlock => "NumL", 
+			KeyCode.CapsLock => "CapL", 
+			KeyCode.ScrollLock => "ScrL", 
+			KeyCode.RightShift => "RShf", 
+			KeyCode.LeftShift => "LShf", 
+			KeyCode.RightControl => "RCtrl", 
+			KeyCode.LeftControl => "LCtrl", 
+			KeyCode.RightAlt => "RAlt", 
+			KeyCode.LeftAlt => "LAlt", 
+			KeyCode.RightApple => "Appl", 
+			KeyCode.LeftApple => "Cmd", 
+			KeyCode.LeftWindows => "Win", 
+			KeyCode.RightWindows => "Win", 
+			KeyCode.AltGr => "AltGr", 
+			KeyCode.Help => "Help", 
+			KeyCode.Print => "Prnt", 
+			KeyCode.SysReq => "SysReq", 
+			KeyCode.Break => "Brk", 
+			KeyCode.Menu => "Menu", 
+			_ => k.ToString(), 
+		};
+	}
+
+	public static void AppendWithComma(this StringBuilder sb, string text)
+	{
+		sb.AppendWithSeparator(text, ", ");
+	}
+
+	public static StringBuilder AppendInNewLine(this StringBuilder sb, string text)
+	{
+		sb.AppendWithSeparator(text, "\n");
+		return sb;
+	}
+
+	public static void AppendWithSeparator(this StringBuilder sb, string text, string separator)
+	{
+		if (!text.NullOrEmpty())
+		{
 			if (sb.Length > 0)
 			{
 				sb.Append(separator);
 			}
 			sb.Append(text);
 		}
+	}
 
-		// Token: 0x0600091D RID: 2333 RVA: 0x0002B6C0 File Offset: 0x000298C0
-		public static string WordWrapAt(this string text, float length)
+	public static string WordWrapAt(this string text, float length)
+	{
+		Text.Font = GameFont.Medium;
+		if (text.GetWidthCached() < length)
 		{
-			Text.Font = GameFont.Medium;
-			if (text.GetWidthCached() < length)
-			{
-				return text;
-			}
-			IEnumerable<Pair<char, int>> source = from p in text.Select((char c, int idx) => new Pair<char, int>(c, idx))
+			return text;
+		}
+		IEnumerable<Pair<char, int>> source = from p in text.Select((char c, int idx) => new Pair<char, int>(c, idx))
 			where p.First == ' '
 			select p;
-			if (!source.Any<Pair<char, int>>())
-			{
-				return text;
-			}
-			Pair<char, int> pair = source.MinBy((Pair<char, int> p) => Mathf.Abs(text.Substring(0, p.Second).GetWidthCached() - text.Substring(p.Second + 1).GetWidthCached()));
-			return text.Substring(0, pair.Second) + "\n" + text.Substring(pair.Second + 1);
-		}
-
-		// Token: 0x0600091E RID: 2334 RVA: 0x0002B798 File Offset: 0x00029998
-		public static string EventTypeToStringCached(EventType eventType)
+		if (!source.Any())
 		{
-			if (GenText.eventTypesCached == null)
-			{
-				int num = 0;
-				foreach (object obj in Enum.GetValues(typeof(EventType)))
-				{
-					num = Mathf.Max(num, (int)obj);
-				}
-				GenText.eventTypesCached = new string[num + 1];
-				foreach (object obj2 in Enum.GetValues(typeof(EventType)))
-				{
-					GenText.eventTypesCached[(int)obj2] = obj2.ToString();
-				}
-			}
-			if (eventType >= EventType.MouseDown && eventType < (EventType)GenText.eventTypesCached.Length)
-			{
-				return GenText.eventTypesCached[(int)eventType];
-			}
-			return "Unknown";
+			return text;
 		}
+		Pair<char, int> pair = source.MinBy((Pair<char, int> p) => Mathf.Abs(text.Substring(0, p.Second).GetWidthCached() - text.Substring(p.Second + 1).GetWidthCached()));
+		return text.Substring(0, pair.Second) + "\n" + text.Substring(pair.Second + 1);
+	}
 
-		// Token: 0x0600091F RID: 2335 RVA: 0x0002B88C File Offset: 0x00029A8C
-		public static string FieldsToString<T>(T obj)
+	public static string EventTypeToStringCached(EventType eventType)
+	{
+		if (eventTypesCached == null)
 		{
-			if (obj == null)
+			int num = 0;
+			foreach (object value in Enum.GetValues(typeof(EventType)))
 			{
-				return "";
+				num = Mathf.Max(num, (int)value);
 			}
-			StringBuilder stringBuilder = new StringBuilder();
-			foreach (FieldInfo fieldInfo in typeof(T).GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
+			eventTypesCached = new string[num + 1];
+			foreach (object value2 in Enum.GetValues(typeof(EventType)))
 			{
-				if (stringBuilder.Length != 0)
-				{
-					stringBuilder.Append(", ");
-				}
-				stringBuilder.Append(fieldInfo.Name);
-				stringBuilder.Append("=");
-				object value = fieldInfo.GetValue(obj);
-				if (value == null)
-				{
-					stringBuilder.Append("null");
-				}
-				else
-				{
-					stringBuilder.Append(value.ToString());
-				}
+				eventTypesCached[(int)value2] = value2.ToString();
 			}
-			return stringBuilder.ToString();
 		}
-
-		// Token: 0x06000920 RID: 2336 RVA: 0x0002B934 File Offset: 0x00029B34
-		public static bool TryGetSeparatedValues(string str, char separator, out string[] output)
+		if (eventType >= EventType.mouseDown && (int)eventType < eventTypesCached.Length)
 		{
-			if (str.NullOrEmpty() || !str.Contains(separator))
-			{
-				output = null;
-				return false;
-			}
-			GenText.separatorArrayTmp[0] = separator;
-			output = str.Split(GenText.separatorArrayTmp, StringSplitOptions.RemoveEmptyEntries);
-			for (int i = 0; i < output.Length; i++)
-			{
-				output[i] = output[i].Trim();
-			}
-			return true;
+			return eventTypesCached[(int)eventType];
 		}
+		return "Unknown";
+	}
 
-		// Token: 0x04000494 RID: 1172
-		private const int SaveNameMaxLength = 40;
-
-		// Token: 0x04000495 RID: 1173
-		private const char DegreeSymbol = '°';
-
-		// Token: 0x04000496 RID: 1174
-		private static StringBuilder tmpSb = new StringBuilder();
-
-		// Token: 0x04000497 RID: 1175
-		private static string[] tmpSeparators = new string[1];
-
-		// Token: 0x04000498 RID: 1176
-		private static StringBuilder tmpSbForCapitalizedSentences = new StringBuilder();
-
-		// Token: 0x04000499 RID: 1177
-		private static StringBuilder tmpStringBuilder = new StringBuilder();
-
-		// Token: 0x0400049A RID: 1178
-		private static string[] eventTypesCached;
-
-		// Token: 0x0400049B RID: 1179
-		private static readonly char[] separatorArrayTmp = new char[]
+	public static string FieldsToString<T>(T obj)
+	{
+		if (obj == null)
 		{
-			' '
-		};
+			return "";
+		}
+		StringBuilder stringBuilder = new StringBuilder();
+		FieldInfo[] fields = typeof(T).GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+		foreach (FieldInfo fieldInfo in fields)
+		{
+			if (stringBuilder.Length != 0)
+			{
+				stringBuilder.Append(", ");
+			}
+			stringBuilder.Append(fieldInfo.Name);
+			stringBuilder.Append("=");
+			object value = fieldInfo.GetValue(obj);
+			if (value == null)
+			{
+				stringBuilder.Append("null");
+			}
+			else
+			{
+				stringBuilder.Append(value.ToString());
+			}
+		}
+		return stringBuilder.ToString();
+	}
+
+	public static bool TryGetSeparatedValues(string str, char separator, out string[] output)
+	{
+		if (str.NullOrEmpty() || !str.Contains(separator))
+		{
+			output = null;
+			return false;
+		}
+		separatorArrayTmp[0] = separator;
+		output = str.Split(separatorArrayTmp, StringSplitOptions.RemoveEmptyEntries);
+		for (int i = 0; i < output.Length; i++)
+		{
+			output[i] = output[i].Trim();
+		}
+		return true;
 	}
 }

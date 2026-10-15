@@ -1,61 +1,236 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.Grammar;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Tale_DoublePawnAndDef : Tale_DoublePawn
 {
-	// Token: 0x0200292F RID: 10543
-	public class Tale_DoublePawnAndDef : Tale_DoublePawn
+	[CompilerGenerated]
+	private sealed class _003CSpecialTextGenerationRules_003Ed__4 : IEnumerable<Rule>, IEnumerable, IEnumerator<Rule>, IEnumerator, IDisposable
 	{
-		// Token: 0x0600E6C6 RID: 59078 RVA: 0x004349FF File Offset: 0x00432BFF
-		public Tale_DoublePawnAndDef()
-		{
-		}
+		private int _003C_003E1__state;
 
-		// Token: 0x0600E6C7 RID: 59079 RVA: 0x00434A07 File Offset: 0x00432C07
-		public Tale_DoublePawnAndDef(Pawn firstPawn, Pawn secondPawn, Def def) : base(firstPawn, secondPawn)
-		{
-			this.defData = TaleData_Def.GenerateFrom(def);
-		}
+		private Rule _003C_003E2__current;
 
-		// Token: 0x0600E6C8 RID: 59080 RVA: 0x00434A1D File Offset: 0x00432C1D
-		public override void ExposeData()
-		{
-			base.ExposeData();
-			Scribe_Deep.Look<TaleData_Def>(ref this.defData, "defData", Array.Empty<object>());
-		}
+		private int _003C_003El__initialThreadId;
 
-		// Token: 0x0600E6C9 RID: 59081 RVA: 0x00434A3A File Offset: 0x00432C3A
-		protected override IEnumerable<Rule> SpecialTextGenerationRules(Dictionary<string, string> outConstants)
+		public Tale_DoublePawnAndDef _003C_003E4__this;
+
+		private Dictionary<string, string> outConstants;
+
+		public Dictionary<string, string> _003C_003E3__outConstants;
+
+		private IEnumerator<Rule> _003C_003E7__wrap1;
+
+		Rule IEnumerator<Rule>.Current
 		{
-			if (this.def.defSymbol.NullOrEmpty())
+			[DebuggerHidden]
+			get
 			{
-				TaleDef def = this.def;
-				Log.Error(((def != null) ? def.ToString() : null) + " uses tale type with def but defSymbol is not set.");
+				return _003C_003E2__current;
 			}
-			foreach (Rule rule in base.SpecialTextGenerationRules(outConstants))
-			{
-				yield return rule;
-			}
-			IEnumerator<Rule> enumerator = null;
-			foreach (Rule rule2 in this.defData.GetRules(this.def.defSymbol, null))
-			{
-				yield return rule2;
-			}
-			enumerator = null;
-			yield break;
-			yield break;
 		}
 
-		// Token: 0x0600E6CA RID: 59082 RVA: 0x00434A51 File Offset: 0x00432C51
-		public override void GenerateTestData()
+		object IEnumerator.Current
 		{
-			base.GenerateTestData();
-			this.defData = TaleData_Def.GenerateFrom((Def)GenGeneric.InvokeStaticMethodOnGenericType(typeof(DefDatabase<>), this.def.defType, "GetRandom"));
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x04009A49 RID: 39497
-		public TaleData_Def defData;
+		[DebuggerHidden]
+		public _003CSpecialTextGenerationRules_003Ed__4(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			switch (_003C_003E1__state)
+			{
+			case -3:
+			case 1:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+				break;
+			case -4:
+			case 2:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally2();
+				}
+				break;
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				Tale_DoublePawnAndDef tale_DoublePawnAndDef = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					if (tale_DoublePawnAndDef.def.defSymbol.NullOrEmpty())
+					{
+						Log.Error(tale_DoublePawnAndDef.def?.ToString() + " uses tale type with def but defSymbol is not set.");
+					}
+					_003C_003E7__wrap1 = ((Tale_DoublePawn)tale_DoublePawnAndDef).SpecialTextGenerationRules(outConstants).GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_00ab;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_00ab;
+				case 2:
+					{
+						_003C_003E1__state = -4;
+						break;
+					}
+					IL_00ab:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Rule current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					_003C_003E7__wrap1 = tale_DoublePawnAndDef.defData.GetRules(tale_DoublePawnAndDef.def.defSymbol).GetEnumerator();
+					_003C_003E1__state = -4;
+					break;
+				}
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					Rule current2 = _003C_003E7__wrap1.Current;
+					_003C_003E2__current = current2;
+					_003C_003E1__state = 2;
+					return true;
+				}
+				_003C_003Em__Finally2();
+				_003C_003E7__wrap1 = null;
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Rule> IEnumerable<Rule>.GetEnumerator()
+		{
+			_003CSpecialTextGenerationRules_003Ed__4 _003CSpecialTextGenerationRules_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CSpecialTextGenerationRules_003Ed__ = this;
+			}
+			else
+			{
+				_003CSpecialTextGenerationRules_003Ed__ = new _003CSpecialTextGenerationRules_003Ed__4(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CSpecialTextGenerationRules_003Ed__.outConstants = _003C_003E3__outConstants;
+			return _003CSpecialTextGenerationRules_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Rule>)this).GetEnumerator();
+		}
+	}
+
+	public TaleData_Def defData;
+
+	public Tale_DoublePawnAndDef()
+	{
+	}
+
+	public Tale_DoublePawnAndDef(Pawn firstPawn, Pawn secondPawn, Def def)
+		: base(firstPawn, secondPawn)
+	{
+		defData = TaleData_Def.GenerateFrom(def);
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Deep.Look(ref defData, "defData");
+	}
+
+	[IteratorStateMachine(typeof(_003CSpecialTextGenerationRules_003Ed__4))]
+	protected override IEnumerable<Rule> SpecialTextGenerationRules(Dictionary<string, string> outConstants)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CSpecialTextGenerationRules_003Ed__4(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__outConstants = outConstants
+		};
+	}
+
+	public override void GenerateTestData()
+	{
+		base.GenerateTestData();
+		defData = TaleData_Def.GenerateFrom((Def)GenGeneric.InvokeStaticMethodOnGenericType(typeof(DefDatabase<>), def.defType, "GetRandom"));
 	}
 }

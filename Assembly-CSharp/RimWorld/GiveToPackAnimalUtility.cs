@@ -1,4 +1,3 @@
-﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using RimWorld.Planet;
@@ -6,46 +5,38 @@ using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 
-namespace RimWorld
-{
-	// Token: 0x0200113F RID: 4415
-	public static class GiveToPackAnimalUtility
-	{
-		// Token: 0x06006BC4 RID: 27588 RVA: 0x0021E008 File Offset: 0x0021C208
-		public static IEnumerable<Pawn> CarrierCandidatesFor(Pawn pawn)
-		{
-			IEnumerable<Pawn> enumerable = pawn.IsFormingCaravan() ? pawn.GetLord().ownedPawns : pawn.Map.mapPawns.SpawnedPawnsInFaction(pawn.Faction);
-			enumerable = from x in enumerable
-			where x.RaceProps.packAnimal && !x.inventory.UnloadEverything
-			select x;
-			if (pawn.Map.IsPlayerHome)
-			{
-				enumerable = from x in enumerable
-				where x.IsFormingCaravan()
-				select x;
-			}
-			return enumerable;
-		}
+namespace RimWorld;
 
-		// Token: 0x06006BC5 RID: 27589 RVA: 0x0021E09C File Offset: 0x0021C29C
-		public static Pawn UsablePackAnimalWithTheMostFreeSpace(Pawn pawn)
+public static class GiveToPackAnimalUtility
+{
+	public static IEnumerable<Pawn> CarrierCandidatesFor(Pawn pawn)
+	{
+		IEnumerable<Pawn> source = (pawn.IsFormingCaravan() ? pawn.GetLord().ownedPawns : pawn.Map.mapPawns.SpawnedPawnsInFaction(pawn.Faction));
+		source = source.Where((Pawn x) => x.RaceProps.packAnimal && !x.inventory.UnloadEverything);
+		if (pawn.Map.IsPlayerHome)
 		{
-			IEnumerable<Pawn> enumerable = GiveToPackAnimalUtility.CarrierCandidatesFor(pawn);
-			Pawn pawn2 = null;
-			float num = 0f;
-			foreach (Pawn pawn3 in enumerable)
+			source = source.Where((Pawn x) => x.IsFormingCaravan());
+		}
+		return source;
+	}
+
+	public static Pawn UsablePackAnimalWithTheMostFreeSpace(Pawn pawn)
+	{
+		IEnumerable<Pawn> enumerable = CarrierCandidatesFor(pawn);
+		Pawn pawn2 = null;
+		float num = 0f;
+		foreach (Pawn item in enumerable)
+		{
+			if (item.RaceProps.packAnimal && item != pawn && pawn.CanReach(item, PathEndMode.Touch, Danger.Deadly))
 			{
-				if (pawn3.RaceProps.packAnimal && pawn3 != pawn && pawn.CanReach(pawn3, PathEndMode.Touch, Danger.Deadly, false, false, TraverseMode.ByPawn))
+				float num2 = MassUtility.FreeSpace(item);
+				if (pawn2 == null || num2 > num)
 				{
-					float num2 = MassUtility.FreeSpace(pawn3);
-					if (pawn2 == null || num2 > num)
-					{
-						pawn2 = pawn3;
-						num = num2;
-					}
+					pawn2 = item;
+					num = num2;
 				}
 			}
-			return pawn2;
 		}
+		return pawn2;
 	}
 }

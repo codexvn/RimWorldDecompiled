@@ -1,115 +1,101 @@
-﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using RimWorld.BaseGen;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class GenStep_MechanoidRelay : GenStep
 {
-	// Token: 0x0200206E RID: 8302
-	public class GenStep_MechanoidRelay : GenStep
+	public override int SeedPart => 583937484;
+
+	public override void Generate(Map map, GenStepParams parms)
 	{
-		// Token: 0x17001BD3 RID: 7123
-		// (get) Token: 0x0600B622 RID: 46626 RVA: 0x003450B7 File Offset: 0x003432B7
-		public override int SeedPart
+		List<CellRect> usedRects = MapGenerator.GetOrGenerateVar<List<CellRect>>("UsedRects");
+		foreach (Thing thing in (IEnumerable<Thing>)parms.sitePart.things)
 		{
-			get
+			ResolveParams resolveParams = default(ResolveParams);
+			resolveParams.singleThingToSpawn = thing;
+			if (thing.def != ThingDefOf.MechRelay || !RCellFinder.TryFindRandomCellNearTheCenterOfTheMapWith((IntVec3 x) => CellValid(x, map, thing.def.Size, usedRects), map, out var result))
 			{
-				return 583937484;
+				result = CellFinderLoose.RandomCellWith((IntVec3 x) => CellValid(x, map, thing.def.Size, usedRects), map);
 			}
+			if (!result.IsValid)
+			{
+				Log.Warning("Could not find valid cell for MechRelay/Stabilizer.");
+			}
+			resolveParams.rect = GenAdj.OccupiedRect(result, thing.def.defaultPlacingRot, thing.def.size);
+			ChangeTerrainAround(resolveParams, map, thing, usedRects);
+			RimWorld.BaseGen.BaseGen.symbolStack.Push("thing", resolveParams);
 		}
+		RimWorld.BaseGen.BaseGen.globalSettings.map = map;
+		RimWorld.BaseGen.BaseGen.Generate();
+	}
 
-		// Token: 0x0600B623 RID: 46627 RVA: 0x003450C0 File Offset: 0x003432C0
-		public override void Generate(Map map, GenStepParams parms)
+	private void ChangeTerrainAround(ResolveParams thingParms, Map map, Thing thing, List<CellRect> usedRects)
+	{
+		CellRect cellRect = thingParms.rect.ExpandedBy(1);
+		foreach (IntVec3 item2 in cellRect)
 		{
-			List<CellRect> usedRects = MapGenerator.GetOrGenerateVar<List<CellRect>>("UsedRects");
-			using (IEnumerator<Thing> enumerator = ((IEnumerable<Thing>)parms.sitePart.things).GetEnumerator())
+			if (map.terrainGrid.TerrainAt(item2).changeable)
 			{
-				while (enumerator.MoveNext())
-				{
-					Thing thing = enumerator.Current;
-					ResolveParams resolveParams = default(ResolveParams);
-					resolveParams.singleThingToSpawn = thing;
-					IntVec3 center;
-					if (thing.def != ThingDefOf.MechRelay || !RCellFinder.TryFindRandomCellNearTheCenterOfTheMapWith((IntVec3 x) => this.CellValid(x, map, thing.def.Size, usedRects), map, out center))
-					{
-						center = CellFinderLoose.RandomCellWith((IntVec3 x) => this.CellValid(x, map, thing.def.Size, usedRects), map, 1000);
-					}
-					if (!center.IsValid)
-					{
-						Log.Warning("Could not find valid cell for MechRelay/Stabilizer.");
-					}
-					resolveParams.rect = GenAdj.OccupiedRect(center, thing.def.defaultPlacingRot, thing.def.size);
-					this.ChangeTerrainAround(resolveParams, map, thing, usedRects);
-					BaseGen.symbolStack.Push("thing", resolveParams, null);
-				}
+				map.terrainGrid.SetTerrain(item2, TerrainDefOf.AncientConcrete);
 			}
-			BaseGen.globalSettings.map = map;
-			BaseGen.Generate();
 		}
+		CellRect item = cellRect.ExpandedBy(1);
+		bool flag = thing.def == ThingDefOf.MechRelay;
+		IEnumerable<IntVec3> corners = item.Corners;
+		foreach (IntVec3 edgeCell in item.EdgeCells)
+		{
+			if ((flag || !corners.Contains(edgeCell)) && map.terrainGrid.TerrainAt(edgeCell).changeable)
+			{
+				map.terrainGrid.SetTerrain(edgeCell, TerrainDefOf.AncientTile);
+			}
+		}
+		usedRects.Add(item);
+		if (!flag)
+		{
+			return;
+		}
+		foreach (IntVec3 item3 in corners)
+		{
+			if (GenConstruct.TerrainCanSupport(CellRect.CenteredOn(item3, 1), map, ThingDefOf.AncientMechDropBeacon))
+			{
+				GenSpawn.Spawn(ThingMaker.MakeThing(ThingDefOf.AncientMechDropBeacon), item3, map, ThingDefOf.AncientMechDropBeacon.defaultPlacingRot);
+			}
+		}
+	}
 
-		// Token: 0x0600B624 RID: 46628 RVA: 0x00345248 File Offset: 0x00343448
-		private void ChangeTerrainAround(ResolveParams thingParms, Map map, Thing thing, List<CellRect> usedRects)
+	private bool CellValid(IntVec3 cell, Map map, IntVec2 size, List<CellRect> usedRects)
+	{
+		CellRect other = CellRect.CenteredOn(cell, Mathf.Max(size.x, size.z)).ExpandedBy(2);
+		foreach (CellRect usedRect in usedRects)
 		{
-			CellRect cellRect = thingParms.rect.ExpandedBy(1);
-			foreach (IntVec3 c in cellRect)
+			if (usedRect.Overlaps(other))
 			{
-				if (map.terrainGrid.TerrainAt(c).changeable)
-				{
-					map.terrainGrid.SetTerrain(c, TerrainDefOf.AncientConcrete);
-				}
-			}
-			CellRect item = cellRect.ExpandedBy(1);
-			bool flag = thing.def == ThingDefOf.MechRelay;
-			IEnumerable<IntVec3> corners = item.Corners;
-			foreach (IntVec3 intVec in item.EdgeCells)
-			{
-				if ((flag || !corners.Contains(intVec)) && map.terrainGrid.TerrainAt(intVec).changeable)
-				{
-					map.terrainGrid.SetTerrain(intVec, TerrainDefOf.AncientTile);
-				}
-			}
-			usedRects.Add(item);
-			if (flag)
-			{
-				foreach (IntVec3 intVec2 in corners)
-				{
-					if (GenConstruct.TerrainCanSupport(CellRect.CenteredOn(intVec2, 1), map, ThingDefOf.AncientMechDropBeacon))
-					{
-						GenSpawn.Spawn(ThingMaker.MakeThing(ThingDefOf.AncientMechDropBeacon, null), intVec2, map, ThingDefOf.AncientMechDropBeacon.defaultPlacingRot, WipeMode.Vanish, false, false);
-					}
-				}
+				return false;
 			}
 		}
-
-		// Token: 0x0600B625 RID: 46629 RVA: 0x003453CC File Offset: 0x003435CC
-		private bool CellValid(IntVec3 cell, Map map, IntVec2 size, List<CellRect> usedRects)
+		foreach (IntVec3 item in other)
 		{
-			CellRect other = CellRect.CenteredOn(cell, Mathf.Max(size.x, size.z)).ExpandedBy(2);
-			foreach (CellRect cellRect in usedRects)
+			if (!item.InBounds(map))
 			{
-				if (cellRect.Overlaps(other))
-				{
-					return false;
-				}
+				return false;
 			}
-			foreach (IntVec3 c in other)
+			if (item.Fogged(map))
 			{
-				if (!c.InBounds(map))
-				{
-					return false;
-				}
-				if (c.Fogged(map))
-				{
-					return false;
-				}
-				if (!c.Walkable(map))
-				{
-					return false;
-				}
+				return false;
 			}
-			return cell.GetAffordances(map).Contains(TerrainAffordanceDefOf.Heavy);
+			if (!item.Walkable(map))
+			{
+				return false;
+			}
 		}
+		if (!cell.GetAffordances(map).Contains(TerrainAffordanceDefOf.Heavy))
+		{
+			return false;
+		}
+		return true;
 	}
 }

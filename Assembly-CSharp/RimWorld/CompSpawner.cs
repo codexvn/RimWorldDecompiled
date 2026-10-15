@@ -1,236 +1,301 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompSpawner : ThingComp
 {
-	// Token: 0x02002E25 RID: 11813
-	public class CompSpawner : ThingComp
+	[CompilerGenerated]
+	private sealed class _003CCompGetGizmosExtra_003Ed__14 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x17002A9D RID: 10909
-		// (get) Token: 0x06010A20 RID: 68128 RVA: 0x004CC0AE File Offset: 0x004CA2AE
-		public CompProperties_Spawner PropsSpawner
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompSpawner _003C_003E4__this;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (CompProperties_Spawner)this.props;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002A9E RID: 10910
-		// (get) Token: 0x06010A21 RID: 68129 RVA: 0x004CC0BC File Offset: 0x004CA2BC
-		private bool PowerOn
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				CompPowerTrader comp = this.parent.GetComp<CompPowerTrader>();
-				return comp != null && comp.PowerOn;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06010A22 RID: 68130 RVA: 0x004CC0E0 File Offset: 0x004CA2E0
-		public override void PostSpawnSetup(bool respawningAfterLoad)
+		[DebuggerHidden]
+		public _003CCompGetGizmosExtra_003Ed__14(int _003C_003E1__state)
 		{
-			if (!respawningAfterLoad && !this.parent.BeingTransportedOnGravship)
-			{
-				this.ResetCountdown();
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x06010A23 RID: 68131 RVA: 0x004CC0F8 File Offset: 0x004CA2F8
-		public override void CompTick()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			this.TickIntervalDelta(1);
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x06010A24 RID: 68132 RVA: 0x004CC101 File Offset: 0x004CA301
-		public override void CompTickRare()
+		private bool MoveNext()
 		{
-			this.TickIntervalDelta(250);
-		}
-
-		// Token: 0x06010A25 RID: 68133 RVA: 0x004CC110 File Offset: 0x004CA310
-		private void TickIntervalDelta(int interval)
-		{
-			if (!this.parent.Spawned)
+			int num = _003C_003E1__state;
+			CompSpawner CS_0024_003C_003E8__locals3 = _003C_003E4__this;
+			switch (num)
 			{
-				return;
-			}
-			CompCanBeDormant comp = this.parent.GetComp<CompCanBeDormant>();
-			if (comp != null)
-			{
-				if (!comp.Awake)
-				{
-					return;
-				}
-			}
-			else if (this.parent.Position.Fogged(this.parent.Map))
-			{
-				return;
-			}
-			if (this.PropsSpawner.requiresPower && !this.PowerOn)
-			{
-				return;
-			}
-			this.ticksUntilSpawn -= interval;
-			this.CheckShouldSpawn();
-		}
-
-		// Token: 0x06010A26 RID: 68134 RVA: 0x004CC18B File Offset: 0x004CA38B
-		private void CheckShouldSpawn()
-		{
-			if (this.ticksUntilSpawn <= 0)
-			{
-				this.ResetCountdown();
-				this.TryDoSpawn();
-			}
-		}
-
-		// Token: 0x06010A27 RID: 68135 RVA: 0x004CC1A4 File Offset: 0x004CA3A4
-		public bool TryDoSpawn()
-		{
-			if (!this.parent.Spawned)
-			{
+			default:
 				return false;
-			}
-			if (this.PropsSpawner.spawnMaxAdjacent >= 0)
-			{
-				int num = 0;
-				for (int i = 0; i < 9; i++)
+			case 0:
+				_003C_003E1__state = -1;
+				if (DebugSettings.ShowDevGizmos)
 				{
-					IntVec3 c = this.parent.Position + GenAdj.AdjacentCellsAndInside[i];
-					if (c.InBounds(this.parent.Map))
+					_003C_003E2__current = new Command_Action
 					{
-						List<Thing> thingList = c.GetThingList(this.parent.Map);
-						for (int j = 0; j < thingList.Count; j++)
+						defaultLabel = "DEV: Spawn " + CS_0024_003C_003E8__locals3.PropsSpawner.thingToSpawn.label,
+						icon = TexCommand.DesirePower,
+						action = delegate
 						{
-							if (thingList[j].def == this.PropsSpawner.thingToSpawn)
-							{
-								num += thingList[j].stackCount;
-								if (num >= this.PropsSpawner.spawnMaxAdjacent)
-								{
-									return false;
-								}
-							}
+							CS_0024_003C_003E8__locals3.ResetCountdown();
+							CS_0024_003C_003E8__locals3.TryDoSpawn();
 						}
-					}
+					};
+					_003C_003E1__state = 1;
+					return true;
 				}
+				break;
+			case 1:
+				_003C_003E1__state = -1;
+				break;
 			}
-			IntVec3 center;
-			if (!CompSpawner.TryFindSpawnCell(this.parent, this.PropsSpawner.thingToSpawn, this.PropsSpawner.spawnCount, out center))
-			{
-				return false;
-			}
-			Thing thing = ThingMaker.MakeThing(this.PropsSpawner.thingToSpawn, null);
-			thing.stackCount = this.PropsSpawner.spawnCount;
-			if (this.PropsSpawner.inheritFaction && thing.Faction != this.parent.Faction)
-			{
-				thing.SetFaction(this.parent.Faction, null);
-			}
-			Thing t;
-			if (!GenPlace.TryPlaceThing(thing, center, this.parent.Map, ThingPlaceMode.Direct, out t, null, null, null, 1))
-			{
-				return false;
-			}
-			if (this.PropsSpawner.spawnForbidden)
-			{
-				t.SetForbidden(true, true);
-			}
-			if (this.PropsSpawner.showMessageIfOwned && this.parent.Faction == Faction.OfPlayer)
-			{
-				Messages.Message("MessageCompSpawnerSpawnedItem".Translate(this.PropsSpawner.thingToSpawn.LabelCap), thing, MessageTypeDefOf.PositiveEvent, true);
-			}
-			return true;
-		}
-
-		// Token: 0x06010A28 RID: 68136 RVA: 0x004CC390 File Offset: 0x004CA590
-		public static bool TryFindSpawnCell(Thing parent, ThingDef thingToSpawn, int spawnCount, out IntVec3 result)
-		{
-			foreach (IntVec3 intVec in GenAdj.CellsAdjacent8Way(parent).InRandomOrder(null))
-			{
-				if (intVec.Walkable(parent.Map))
-				{
-					Building edifice = intVec.GetEdifice(parent.Map);
-					if (edifice != null)
-					{
-						if (thingToSpawn.IsEdifice() || edifice is IHaulDestination)
-						{
-							continue;
-						}
-						Building_Door building_Door = edifice as Building_Door;
-						if (building_Door != null && !building_Door.FreePassage)
-						{
-							continue;
-						}
-					}
-					if (parent.def.passability == Traversability.Impassable || GenSight.LineOfSight(parent.Position, intVec, parent.Map))
-					{
-						bool flag = false;
-						List<Thing> thingList = intVec.GetThingList(parent.Map);
-						for (int i = 0; i < thingList.Count; i++)
-						{
-							Thing thing = thingList[i];
-							if (thing.def.category == ThingCategory.Item && (thing.def != thingToSpawn || thing.stackCount > thingToSpawn.stackLimit - spawnCount))
-							{
-								flag = true;
-								break;
-							}
-						}
-						if (!flag)
-						{
-							result = intVec;
-							return true;
-						}
-					}
-				}
-			}
-			result = IntVec3.Invalid;
 			return false;
 		}
 
-		// Token: 0x06010A29 RID: 68137 RVA: 0x004CC4D0 File Offset: 0x004CA6D0
-		private void ResetCountdown()
+		bool IEnumerator.MoveNext()
 		{
-			this.ticksUntilSpawn = this.PropsSpawner.spawnIntervalRange.RandomInRange;
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x06010A2A RID: 68138 RVA: 0x004CC4E8 File Offset: 0x004CA6E8
-		public override void PostExposeData()
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			string str = this.PropsSpawner.saveKeysPrefix.NullOrEmpty() ? null : (this.PropsSpawner.saveKeysPrefix + "_");
-			Scribe_Values.Look<int>(ref this.ticksUntilSpawn, str + "ticksUntilSpawn", 0, false);
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x06010A2B RID: 68139 RVA: 0x004CC538 File Offset: 0x004CA738
-		public override IEnumerable<Gizmo> CompGetGizmosExtra()
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
 		{
-			if (DebugSettings.ShowDevGizmos)
+			_003CCompGetGizmosExtra_003Ed__14 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				yield return new Command_Action
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CCompGetGizmosExtra_003Ed__14(0)
 				{
-					defaultLabel = "DEV: Spawn " + this.PropsSpawner.thingToSpawn.label,
-					icon = TexCommand.DesirePower,
-					action = delegate()
-					{
-						this.ResetCountdown();
-						this.TryDoSpawn();
-					}
+					_003C_003E4__this = _003C_003E4__this
 				};
 			}
-			yield break;
+			return result;
 		}
 
-		// Token: 0x06010A2C RID: 68140 RVA: 0x004CC548 File Offset: 0x004CA748
-		public override string CompInspectStringExtra()
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			if (this.PropsSpawner.writeTimeLeftToSpawn && (!this.PropsSpawner.requiresPower || this.PowerOn))
-			{
-				return "NextSpawnedItemIn".Translate(GenLabel.ThingLabel(this.PropsSpawner.thingToSpawn, null, this.PropsSpawner.spawnCount)).Resolve() + ": " + this.ticksUntilSpawn.ToStringTicksToPeriod(true, false, true, true, false).Colorize(ColoredText.DateTimeColor);
-			}
-			return null;
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x0400AD61 RID: 44385
-		private int ticksUntilSpawn;
+	private int ticksUntilSpawn;
+
+	public CompProperties_Spawner PropsSpawner => (CompProperties_Spawner)props;
+
+	private bool PowerOn => parent.GetComp<CompPowerTrader>()?.PowerOn ?? false;
+
+	public override void PostSpawnSetup(bool respawningAfterLoad)
+	{
+		if (!respawningAfterLoad && !parent.BeingTransportedOnGravship)
+		{
+			ResetCountdown();
+		}
+	}
+
+	public override void CompTick()
+	{
+		TickIntervalDelta(1);
+	}
+
+	public override void CompTickRare()
+	{
+		TickIntervalDelta(250);
+	}
+
+	private void TickIntervalDelta(int interval)
+	{
+		if (!parent.Spawned)
+		{
+			return;
+		}
+		CompCanBeDormant comp = parent.GetComp<CompCanBeDormant>();
+		if (comp != null)
+		{
+			if (!comp.Awake)
+			{
+				return;
+			}
+		}
+		else if (parent.Position.Fogged(parent.Map))
+		{
+			return;
+		}
+		if (!PropsSpawner.requiresPower || PowerOn)
+		{
+			ticksUntilSpawn -= interval;
+			CheckShouldSpawn();
+		}
+	}
+
+	private void CheckShouldSpawn()
+	{
+		if (ticksUntilSpawn <= 0)
+		{
+			ResetCountdown();
+			TryDoSpawn();
+		}
+	}
+
+	public bool TryDoSpawn()
+	{
+		if (!parent.Spawned)
+		{
+			return false;
+		}
+		if (PropsSpawner.spawnMaxAdjacent >= 0)
+		{
+			int num = 0;
+			for (int i = 0; i < 9; i++)
+			{
+				IntVec3 c = parent.Position + GenAdj.AdjacentCellsAndInside[i];
+				if (!c.InBounds(parent.Map))
+				{
+					continue;
+				}
+				List<Thing> thingList = c.GetThingList(parent.Map);
+				for (int j = 0; j < thingList.Count; j++)
+				{
+					if (thingList[j].def == PropsSpawner.thingToSpawn)
+					{
+						num += thingList[j].stackCount;
+						if (num >= PropsSpawner.spawnMaxAdjacent)
+						{
+							return false;
+						}
+					}
+				}
+			}
+		}
+		if (TryFindSpawnCell(parent, PropsSpawner.thingToSpawn, PropsSpawner.spawnCount, out var result))
+		{
+			Thing thing = ThingMaker.MakeThing(PropsSpawner.thingToSpawn);
+			thing.stackCount = PropsSpawner.spawnCount;
+			if (PropsSpawner.inheritFaction && thing.Faction != parent.Faction)
+			{
+				thing.SetFaction(parent.Faction);
+			}
+			if (!GenPlace.TryPlaceThing(thing, result, parent.Map, ThingPlaceMode.Direct, out var lastResultingThing, null, null, null))
+			{
+				return false;
+			}
+			if (PropsSpawner.spawnForbidden)
+			{
+				lastResultingThing.SetForbidden(value: true);
+			}
+			if (PropsSpawner.showMessageIfOwned && parent.Faction == Faction.OfPlayer)
+			{
+				Messages.Message("MessageCompSpawnerSpawnedItem".Translate(PropsSpawner.thingToSpawn.LabelCap), thing, MessageTypeDefOf.PositiveEvent);
+			}
+			return true;
+		}
+		return false;
+	}
+
+	public static bool TryFindSpawnCell(Thing parent, ThingDef thingToSpawn, int spawnCount, out IntVec3 result)
+	{
+		foreach (IntVec3 item in GenAdj.CellsAdjacent8Way(parent).InRandomOrder())
+		{
+			if (!item.Walkable(parent.Map))
+			{
+				continue;
+			}
+			Building edifice = item.GetEdifice(parent.Map);
+			if ((edifice != null && (thingToSpawn.IsEdifice() || edifice is IHaulDestination || edifice is Building_Door { FreePassage: false })) || (parent.def.passability != Traversability.Impassable && !GenSight.LineOfSight(parent.Position, item, parent.Map)))
+			{
+				continue;
+			}
+			bool flag = false;
+			List<Thing> thingList = item.GetThingList(parent.Map);
+			for (int i = 0; i < thingList.Count; i++)
+			{
+				Thing thing = thingList[i];
+				if (thing.def.category == ThingCategory.Item && (thing.def != thingToSpawn || thing.stackCount > thingToSpawn.stackLimit - spawnCount))
+				{
+					flag = true;
+					break;
+				}
+			}
+			if (!flag)
+			{
+				result = item;
+				return true;
+			}
+		}
+		result = IntVec3.Invalid;
+		return false;
+	}
+
+	private void ResetCountdown()
+	{
+		ticksUntilSpawn = PropsSpawner.spawnIntervalRange.RandomInRange;
+	}
+
+	public override void PostExposeData()
+	{
+		string text = (PropsSpawner.saveKeysPrefix.NullOrEmpty() ? null : (PropsSpawner.saveKeysPrefix + "_"));
+		Scribe_Values.Look(ref ticksUntilSpawn, text + "ticksUntilSpawn", 0);
+	}
+
+	[IteratorStateMachine(typeof(_003CCompGetGizmosExtra_003Ed__14))]
+	public override IEnumerable<Gizmo> CompGetGizmosExtra()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CCompGetGizmosExtra_003Ed__14(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override string CompInspectStringExtra()
+	{
+		if (PropsSpawner.writeTimeLeftToSpawn && (!PropsSpawner.requiresPower || PowerOn))
+		{
+			return "NextSpawnedItemIn".Translate(GenLabel.ThingLabel(PropsSpawner.thingToSpawn, null, PropsSpawner.spawnCount)).Resolve() + ": " + ticksUntilSpawn.ToStringTicksToPeriod().Colorize(ColoredText.DateTimeColor);
+		}
+		return null;
 	}
 }

@@ -1,124 +1,243 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Runtime.CompilerServices;
 using KTrie;
-using RimWorld.IO;
 using UnityEngine;
 
-namespace Verse
+namespace Verse;
+
+public class ModContentHolder<T> where T : class
 {
-	// Token: 0x0200056A RID: 1386
-	public class ModContentHolder<T> where T : class
+	[CompilerGenerated]
+	private sealed class _003CGetAllUnderPath_003Ed__8 : IEnumerable<T>, IEnumerable, IEnumerator<T>, IEnumerator, IDisposable
 	{
-		// Token: 0x060023F7 RID: 9207 RVA: 0x000BAE30 File Offset: 0x000B9030
-		public ModContentHolder(ModContentPack mod)
-		{
-			this.mod = mod;
-		}
+		private int _003C_003E1__state;
 
-		// Token: 0x060023F8 RID: 9208 RVA: 0x000BAE60 File Offset: 0x000B9060
-		public void ClearDestroy()
-		{
-			if (typeof(UnityEngine.Object).IsAssignableFrom(typeof(T)))
-			{
-				foreach (T localObj2 in this.contentList.Values)
-				{
-					T localObj = localObj2;
-					LongEventHandler.ExecuteWhenFinished(delegate
-					{
-						UnityEngine.Object.Destroy((UnityEngine.Object)((object)localObj));
-					});
-				}
-			}
-			for (int i = 0; i < this.extraDisposables.Count; i++)
-			{
-				this.extraDisposables[i].Dispose();
-			}
-			this.extraDisposables.Clear();
-			this.contentList.Clear();
-			this.contentListTrie.Clear();
-		}
+		private T _003C_003E2__current;
 
-		// Token: 0x060023F9 RID: 9209 RVA: 0x000BAF30 File Offset: 0x000B9130
-		public void ReloadAll(bool hotReload = false)
+		private int _003C_003El__initialThreadId;
+
+		private string pathRoot;
+
+		public string _003C_003E3__pathRoot;
+
+		public ModContentHolder<T> _003C_003E4__this;
+
+		private IEnumerator<string> _003C_003E7__wrap1;
+
+		T IEnumerator<T>.Current
 		{
-			foreach (Pair<string, LoadedContentItem<T>> pair in ModContentLoader<T>.LoadAllForMod(this.mod))
+			[DebuggerHidden]
+			get
 			{
-				string text = pair.First;
-				text = text.Replace('\\', '/');
-				string text2 = GenFilePaths.ContentPath<T>();
-				if (text.StartsWith(text2))
-				{
-					text = text.Substring(text2.Length);
-				}
-				if (text.EndsWith(Path.GetExtension(text)))
-				{
-					text = text.Substring(0, text.Length - Path.GetExtension(text).Length);
-				}
-				if (this.contentList.ContainsKey(text))
-				{
-					if (!hotReload)
-					{
-						string[] array = new string[6];
-						array[0] = "Tried to load duplicate ";
-						int num = 1;
-						Type typeFromHandle = typeof(T);
-						array[num] = ((typeFromHandle != null) ? typeFromHandle.ToString() : null);
-						array[2] = " with path: ";
-						int num2 = 3;
-						VirtualFile internalFile = pair.Second.internalFile;
-						array[num2] = ((internalFile != null) ? internalFile.ToString() : null);
-						array[4] = " and internal path: ";
-						array[5] = text;
-						Log.Warning(string.Concat(array));
-					}
-				}
-				else
-				{
-					this.contentList.Add(text, pair.Second.contentItem);
-					this.contentListTrie.Add(text);
-					if (pair.Second.extraDisposable != null)
-					{
-						this.extraDisposables.Add(pair.Second.extraDisposable);
-					}
-				}
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x060023FA RID: 9210 RVA: 0x000BB0A4 File Offset: 0x000B92A4
-		public T Get(string path)
+		object IEnumerator.Current
 		{
-			T result;
-			if (this.contentList.TryGetValue(path, out result))
+			[DebuggerHidden]
+			get
 			{
-				return result;
+				return _003C_003E2__current;
 			}
-			return default(T);
 		}
 
-		// Token: 0x060023FB RID: 9211 RVA: 0x000BB0CC File Offset: 0x000B92CC
-		public IEnumerable<T> GetAllUnderPath(string pathRoot)
+		[DebuggerHidden]
+		public _003CGetAllUnderPath_003Ed__8(int _003C_003E1__state)
 		{
-			string prefix = (pathRoot.NullOrEmpty() || pathRoot[pathRoot.Length - 1] == '/') ? pathRoot : (pathRoot + "/");
-			foreach (string key in this.contentListTrie.GetByPrefix(prefix))
-			{
-				yield return this.contentList[key];
-			}
-			IEnumerator<string> enumerator = null;
-			yield break;
-			yield break;
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x04001DCA RID: 7626
-		private ModContentPack mod;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
 
-		// Token: 0x04001DCB RID: 7627
-		public Dictionary<string, T> contentList = new Dictionary<string, T>();
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				ModContentHolder<T> modContentHolder = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+				{
+					_003C_003E1__state = -1;
+					string prefix = ((pathRoot.NullOrEmpty() || pathRoot[pathRoot.Length - 1] == '/') ? pathRoot : (pathRoot + "/"));
+					_003C_003E7__wrap1 = modContentHolder.contentListTrie.GetByPrefix(prefix).GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				}
+				case 1:
+					_003C_003E1__state = -3;
+					break;
+				}
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					string current = _003C_003E7__wrap1.Current;
+					_003C_003E2__current = modContentHolder.contentList[current];
+					_003C_003E1__state = 1;
+					return true;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = null;
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
 
-		// Token: 0x04001DCC RID: 7628
-		public List<IDisposable> extraDisposables = new List<IDisposable>();
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x04001DCD RID: 7629
-		private StringTrieSet contentListTrie = new StringTrieSet();
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<T> IEnumerable<T>.GetEnumerator()
+		{
+			_003CGetAllUnderPath_003Ed__8 _003CGetAllUnderPath_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CGetAllUnderPath_003Ed__ = this;
+			}
+			else
+			{
+				_003CGetAllUnderPath_003Ed__ = new _003CGetAllUnderPath_003Ed__8(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CGetAllUnderPath_003Ed__.pathRoot = _003C_003E3__pathRoot;
+			return _003CGetAllUnderPath_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<T>)this).GetEnumerator();
+		}
+	}
+
+	private ModContentPack mod;
+
+	public Dictionary<string, T> contentList = new Dictionary<string, T>();
+
+	private StringTrieSet contentListTrie = new StringTrieSet();
+
+	internal static bool anyReloaded;
+
+	public ModContentHolder(ModContentPack mod)
+	{
+		this.mod = mod;
+	}
+
+	public void ClearDestroy()
+	{
+		if (typeof(UnityEngine.Object).IsAssignableFrom(typeof(T)))
+		{
+			foreach (T value in contentList.Values)
+			{
+				T localObj = value;
+				LongEventHandler.ExecuteWhenFinished(delegate
+				{
+					UnityEngine.Object.Destroy((UnityEngine.Object)(object)localObj);
+				});
+			}
+		}
+		contentList.Clear();
+		contentListTrie.Clear();
+	}
+
+	public void ReloadAll(bool hotReload = false)
+	{
+		anyReloaded = true;
+		foreach (Pair<string, LoadedContentItem<T>> item in ModContentLoader<T>.LoadAllForMod(mod))
+		{
+			string first = item.First;
+			first = first.Replace('\\', '/');
+			string text = GenFilePaths.ContentPath<T>();
+			if (first.StartsWith(text))
+			{
+				first = first.Substring(text.Length);
+			}
+			if (first.EndsWith(Path.GetExtension(first)))
+			{
+				first = first.Substring(0, first.Length - Path.GetExtension(first).Length);
+			}
+			if (contentList.ContainsKey(first))
+			{
+				if (!hotReload)
+				{
+					Log.Warning("Tried to load duplicate " + typeof(T)?.ToString() + " with path: " + item.Second.internalFile?.ToString() + " and internal path: " + first);
+				}
+			}
+			else
+			{
+				contentList.Add(first, item.Second.contentItem);
+				contentListTrie.Add(first);
+			}
+		}
+	}
+
+	public T Get(string path)
+	{
+		if (contentList.TryGetValue(path, out var value))
+		{
+			return value;
+		}
+		return null;
+	}
+
+	[IteratorStateMachine(typeof(ModContentHolder<>._003CGetAllUnderPath_003Ed__8))]
+	public IEnumerable<T> GetAllUnderPath(string pathRoot)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetAllUnderPath_003Ed__8(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__pathRoot = pathRoot
+		};
 	}
 }

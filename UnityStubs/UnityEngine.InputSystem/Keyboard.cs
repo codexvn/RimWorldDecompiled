@@ -58,6 +58,8 @@ public class Keyboard : InputDevice, ITextInputReceiver, IEventPreProcessor
 
 	public KeyControl rightShiftKey => this[Key.RightShift];
 
+	public event Action<IMECompositionString> onIMECompositionChange;
+
 	public event Action<char> onTextInput;
 
 	public Keyboard()
@@ -238,7 +240,7 @@ public class Keyboard : InputDevice, ITextInputReceiver, IEventPreProcessor
 
 	public void OnIMECompositionChanged(IMECompositionString compositionString)
 	{
-		StubWarner.LogStub("OnIMECompositionChanged", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\Keyboard.cs", 192);
+		this.onIMECompositionChange?.Invoke(compositionString);
 	}
 
 	public void OnTextInput(char character)
@@ -258,7 +260,7 @@ public class Keyboard : InputDevice, ITextInputReceiver, IEventPreProcessor
 
 	public new unsafe void ReadValueFromStateIntoBuffer(void* statePtr, void* bufferPtr, int bufferSize)
 	{
-		StubWarner.LogStub("ReadValueFromStateIntoBuffer", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\Keyboard.cs", 203);
+		StubWarner.LogStub("ReadValueFromStateIntoBuffer", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\Keyboard.cs", 208);
 	}
 
 	public bool PreProcessEvent(InputEventPtr currentEventPtr)

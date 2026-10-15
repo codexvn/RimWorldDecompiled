@@ -1,120 +1,211 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class IncidentQueue : IExposable
 {
-	// Token: 0x02001D5D RID: 7517
-	public class IncidentQueue : IExposable
+	[CompilerGenerated]
+	private sealed class _003CGetEnumerator_003Ed__5 : IEnumerator<object>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001A0E RID: 6670
-		// (get) Token: 0x0600A87F RID: 43135 RVA: 0x0030393B File Offset: 0x00301B3B
-		public int Count
+		private int _003C_003E1__state;
+
+		private object _003C_003E2__current;
+
+		public IncidentQueue _003C_003E4__this;
+
+		private List<QueuedIncident>.Enumerator _003C_003E7__wrap1;
+
+		object IEnumerator<object>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.queuedIncidents.Count;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001A0F RID: 6671
-		// (get) Token: 0x0600A880 RID: 43136 RVA: 0x00303948 File Offset: 0x00301B48
-		public string DebugQueueReadout
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				StringBuilder stringBuilder = new StringBuilder();
-				foreach (QueuedIncident queuedIncident in this.queuedIncidents)
-				{
-					stringBuilder.AppendLine(queuedIncident.ToString() + " (in " + (queuedIncident.FireTick - Find.TickManager.TicksGame).ToString() + " ticks)");
-				}
-				return stringBuilder.ToString();
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600A881 RID: 43137 RVA: 0x003039D8 File Offset: 0x00301BD8
-		public IEnumerator GetEnumerator()
+		[DebuggerHidden]
+		public _003CGetEnumerator_003Ed__5(int _003C_003E1__state)
 		{
-			foreach (QueuedIncident queuedIncident in this.queuedIncidents)
+			this._003C_003E1__state = _003C_003E1__state;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				yield return queuedIncident;
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
 			}
-			List<QueuedIncident>.Enumerator enumerator = default(List<QueuedIncident>.Enumerator);
-			yield break;
-			yield break;
+			_003C_003E7__wrap1 = default(List<QueuedIncident>.Enumerator);
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x0600A882 RID: 43138 RVA: 0x003039E7 File Offset: 0x00301BE7
-		public void Clear()
+		private bool MoveNext()
 		{
-			this.queuedIncidents.Clear();
-		}
-
-		// Token: 0x0600A883 RID: 43139 RVA: 0x003039F4 File Offset: 0x00301BF4
-		public void ExposeData()
-		{
-			Scribe_Collections.Look<QueuedIncident>(ref this.queuedIncidents, "queuedIncidents", LookMode.Deep, Array.Empty<object>());
-		}
-
-		// Token: 0x0600A884 RID: 43140 RVA: 0x00303A0C File Offset: 0x00301C0C
-		public bool Add(QueuedIncident qi)
-		{
-			this.queuedIncidents.Add(qi);
-			this.queuedIncidents.Sort((QueuedIncident a, QueuedIncident b) => a.FireTick.CompareTo(b.FireTick));
-			return true;
-		}
-
-		// Token: 0x0600A885 RID: 43141 RVA: 0x00303A48 File Offset: 0x00301C48
-		public bool Add(IncidentDef def, int fireTick, IncidentParms parms = null, int retryDurationTicks = 0)
-		{
-			QueuedIncident qi = new QueuedIncident(new FiringIncident(def, null, parms), fireTick, retryDurationTicks);
-			this.Add(qi);
-			return true;
-		}
-
-		// Token: 0x0600A886 RID: 43142 RVA: 0x00303A70 File Offset: 0x00301C70
-		public void IncidentQueueTick()
-		{
-			for (int i = this.queuedIncidents.Count - 1; i >= 0; i--)
+			try
 			{
-				QueuedIncident queuedIncident = this.queuedIncidents[i];
-				if (!queuedIncident.TriedToFire)
+				int num = _003C_003E1__state;
+				IncidentQueue incidentQueue = _003C_003E4__this;
+				switch (num)
 				{
-					if (queuedIncident.FireTick <= Find.TickManager.TicksGame)
-					{
-						bool flag = Find.Storyteller.TryFire(queuedIncident.FiringIncident, true);
-						queuedIncident.Notify_TriedToFire();
-						if (flag || queuedIncident.RetryDurationTicks == 0)
-						{
-							this.queuedIncidents.Remove(queuedIncident);
-						}
-					}
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = incidentQueue.queuedIncidents.GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 1:
+					_003C_003E1__state = -3;
+					break;
 				}
-				else if (queuedIncident.FireTick + queuedIncident.RetryDurationTicks <= Find.TickManager.TicksGame)
+				if (_003C_003E7__wrap1.MoveNext())
 				{
-					this.queuedIncidents.Remove(queuedIncident);
+					QueuedIncident current = _003C_003E7__wrap1.Current;
+					_003C_003E2__current = current;
+					_003C_003E1__state = 1;
+					return true;
 				}
-				else if (Find.TickManager.TicksGame % 833 == Rand.RangeSeeded(0, 833, queuedIncident.FireTick))
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = default(List<QueuedIncident>.Enumerator);
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap1/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+	}
+
+	private List<QueuedIncident> queuedIncidents = new List<QueuedIncident>();
+
+	public int Count => queuedIncidents.Count;
+
+	public string DebugQueueReadout
+	{
+		get
+		{
+			StringBuilder stringBuilder = new StringBuilder();
+			foreach (QueuedIncident queuedIncident in queuedIncidents)
+			{
+				stringBuilder.AppendLine(queuedIncident.ToString() + " (in " + (queuedIncident.FireTick - Find.TickManager.TicksGame) + " ticks)");
+			}
+			return stringBuilder.ToString();
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CGetEnumerator_003Ed__5))]
+	public IEnumerator GetEnumerator()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetEnumerator_003Ed__5(0)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public void Clear()
+	{
+		queuedIncidents.Clear();
+	}
+
+	public void ExposeData()
+	{
+		Scribe_Collections.Look(ref queuedIncidents, "queuedIncidents", LookMode.Deep);
+	}
+
+	public bool Add(QueuedIncident qi)
+	{
+		queuedIncidents.Add(qi);
+		queuedIncidents.Sort((QueuedIncident a, QueuedIncident b) => a.FireTick.CompareTo(b.FireTick));
+		return true;
+	}
+
+	public bool Add(IncidentDef def, int fireTick, IncidentParms parms = null, int retryDurationTicks = 0)
+	{
+		QueuedIncident qi = new QueuedIncident(new FiringIncident(def, null, parms), fireTick, retryDurationTicks);
+		Add(qi);
+		return true;
+	}
+
+	public void IncidentQueueTick()
+	{
+		for (int num = queuedIncidents.Count - 1; num >= 0; num--)
+		{
+			QueuedIncident queuedIncident = queuedIncidents[num];
+			if (!queuedIncident.TriedToFire)
+			{
+				if (queuedIncident.FireTick <= Find.TickManager.TicksGame)
 				{
-					bool flag2 = Find.Storyteller.TryFire(queuedIncident.FiringIncident, true);
+					bool num2 = Find.Storyteller.TryFire(queuedIncident.FiringIncident, queued: true);
 					queuedIncident.Notify_TriedToFire();
-					if (flag2)
+					if (num2 || queuedIncident.RetryDurationTicks == 0)
 					{
-						this.queuedIncidents.Remove(queuedIncident);
+						queuedIncidents.Remove(queuedIncident);
 					}
 				}
 			}
+			else if (queuedIncident.FireTick + queuedIncident.RetryDurationTicks <= Find.TickManager.TicksGame)
+			{
+				queuedIncidents.Remove(queuedIncident);
+			}
+			else if (Find.TickManager.TicksGame % 833 == Rand.RangeSeeded(0, 833, queuedIncident.FireTick))
+			{
+				bool num3 = Find.Storyteller.TryFire(queuedIncident.FiringIncident, queued: true);
+				queuedIncident.Notify_TriedToFire();
+				if (num3)
+				{
+					queuedIncidents.Remove(queuedIncident);
+				}
+			}
 		}
+	}
 
-		// Token: 0x0600A887 RID: 43143 RVA: 0x00303B6C File Offset: 0x00301D6C
-		public void Notify_MapRemoved(Map map)
-		{
-			this.queuedIncidents.RemoveAll((QueuedIncident x) => x.FiringIncident.parms.target == map);
-		}
-
-		// Token: 0x040074B2 RID: 29874
-		private List<QueuedIncident> queuedIncidents = new List<QueuedIncident>();
+	public void Notify_MapRemoved(Map map)
+	{
+		queuedIncidents.RemoveAll((QueuedIncident x) => x.FiringIncident.parms.target == map);
 	}
 }

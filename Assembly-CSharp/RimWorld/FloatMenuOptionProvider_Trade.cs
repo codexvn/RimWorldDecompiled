@@ -1,97 +1,235 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class FloatMenuOptionProvider_Trade : FloatMenuOptionProvider
 {
-	// Token: 0x02003340 RID: 13120
-	public class FloatMenuOptionProvider_Trade : FloatMenuOptionProvider
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass6_0
 	{
-		// Token: 0x17003006 RID: 12294
-		// (get) Token: 0x06012707 RID: 75527 RVA: 0x000028E7 File Offset: 0x00000AE7
-		protected override bool Drafted
+		public Pawn clickedPawn;
+
+		public FloatMenuContext context;
+
+		internal void _003CGetOptionsFor_003Eb__0()
 		{
+			Job job = JobMaker.MakeJob(JobDefOf.TradeWithPawn, clickedPawn);
+			job.playerForced = true;
+			context.FirstSelectedPawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
+			PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.InteractingWithTraders, KnowledgeAmount.Total);
+		}
+
+		internal void _003CGetOptionsFor_003Eb__1()
+		{
+			Job job = JobMaker.MakeJob(JobDefOf.DismissTrader, clickedPawn);
+			job.playerForced = true;
+			context.FirstSelectedPawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGetOptionsFor_003Ed__6 : IEnumerable<FloatMenuOption>, IEnumerable, IEnumerator<FloatMenuOption>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private FloatMenuOption _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private Pawn clickedPawn;
+
+		public Pawn _003C_003E3__clickedPawn;
+
+		private FloatMenuContext context;
+
+		public FloatMenuContext _003C_003E3__context;
+
+		private _003C_003Ec__DisplayClass6_0 _003C_003E8__1;
+
+		FloatMenuOption IEnumerator<FloatMenuOption>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				return true;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17003007 RID: 12295
-		// (get) Token: 0x06012708 RID: 75528 RVA: 0x000028E7 File Offset: 0x00000AE7
-		protected override bool Undrafted
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return true;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17003008 RID: 12296
-		// (get) Token: 0x06012709 RID: 75529 RVA: 0x00002501 File Offset: 0x00000701
-		protected override bool Multiselect
+		[DebuggerHidden]
+		public _003CGetOptionsFor_003Ed__6(int _003C_003E1__state)
 		{
-			get
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E8__1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			switch (_003C_003E1__state)
 			{
+			default:
 				return false;
+			case 0:
+			{
+				_003C_003E1__state = -1;
+				_003C_003E8__1 = new _003C_003Ec__DisplayClass6_0();
+				_003C_003E8__1.clickedPawn = clickedPawn;
+				_003C_003E8__1.context = context;
+				if (_003C_003E8__1.clickedPawn == null || !((ITrader)_003C_003E8__1.clickedPawn).CanTradeNow)
+				{
+					return false;
+				}
+				if (!_003C_003E8__1.context.FirstSelectedPawn.CanReach(_003C_003E8__1.clickedPawn, PathEndMode.OnCell, Danger.Deadly))
+				{
+					_003C_003E2__current = new FloatMenuOption("CannotTrade".Translate() + ": " + "NoPath".Translate().CapitalizeFirst(), null);
+					_003C_003E1__state = 1;
+					return true;
+				}
+				if (_003C_003E8__1.context.FirstSelectedPawn.skills.GetSkill(SkillDefOf.Social).TotallyDisabled)
+				{
+					_003C_003E2__current = new FloatMenuOption("CannotPrioritizeWorkTypeDisabled".Translate(SkillDefOf.Social.LabelCap), null);
+					_003C_003E1__state = 2;
+					return true;
+				}
+				if (_003C_003E8__1.clickedPawn.mindState.traderDismissed)
+				{
+					_003C_003E2__current = new FloatMenuOption("TraderDismissed".Translate(), null);
+					_003C_003E1__state = 3;
+					return true;
+				}
+				if (!_003C_003E8__1.context.FirstSelectedPawn.CanTradeWith(_003C_003E8__1.clickedPawn.Faction, _003C_003E8__1.clickedPawn.TraderKind).Accepted)
+				{
+					_003C_003E2__current = new FloatMenuOption("CannotTrade".Translate() + ": " + "MissingTitleAbility".Translate().CapitalizeFirst(), null);
+					_003C_003E1__state = 4;
+					return true;
+				}
+				Action action2 = delegate
+				{
+					Job job2 = JobMaker.MakeJob(JobDefOf.TradeWithPawn, _003C_003E8__1.clickedPawn);
+					job2.playerForced = true;
+					_003C_003E8__1.context.FirstSelectedPawn.jobs.TryTakeOrderedJob(job2, JobTag.Misc);
+					PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.InteractingWithTraders, KnowledgeAmount.Total);
+				};
+				string text = "";
+				if (_003C_003E8__1.clickedPawn.Faction != null)
+				{
+					text = " (" + _003C_003E8__1.clickedPawn.Faction.Name + ")";
+				}
+				_003C_003E2__current = FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("TradeWith".Translate(_003C_003E8__1.clickedPawn.LabelShort + ", " + _003C_003E8__1.clickedPawn.TraderKind.label) + text, action2, MenuOptionPriority.InitiateSocial, null, _003C_003E8__1.clickedPawn), _003C_003E8__1.context.FirstSelectedPawn, _003C_003E8__1.clickedPawn);
+				_003C_003E1__state = 5;
+				return true;
 			}
+			case 1:
+				_003C_003E1__state = -1;
+				return false;
+			case 2:
+				_003C_003E1__state = -1;
+				return false;
+			case 3:
+				_003C_003E1__state = -1;
+				return false;
+			case 4:
+				_003C_003E1__state = -1;
+				goto IL_0358;
+			case 5:
+				_003C_003E1__state = -1;
+				goto IL_0358;
+			case 6:
+				{
+					_003C_003E1__state = -1;
+					break;
+				}
+				IL_0358:
+				if (_003C_003E8__1.clickedPawn.GetLord().LordJob is LordJob_TradeWithColony && !_003C_003E8__1.clickedPawn.mindState.traderDismissed)
+				{
+					Action action = delegate
+					{
+						Job job = JobMaker.MakeJob(JobDefOf.DismissTrader, _003C_003E8__1.clickedPawn);
+						job.playerForced = true;
+						_003C_003E8__1.context.FirstSelectedPawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
+					};
+					_003C_003E2__current = FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("DismissTrader".Translate(), action, MenuOptionPriority.InitiateSocial, null, _003C_003E8__1.clickedPawn), _003C_003E8__1.context.FirstSelectedPawn, _003C_003E8__1.clickedPawn);
+					_003C_003E1__state = 6;
+					return true;
+				}
+				break;
+			}
+			return false;
 		}
 
-		// Token: 0x0601270A RID: 75530 RVA: 0x0056F2E7 File Offset: 0x0056D4E7
-		public override IEnumerable<FloatMenuOption> GetOptionsFor(Pawn clickedPawn, FloatMenuContext context)
+		bool IEnumerator.MoveNext()
 		{
-			if (clickedPawn == null || !((ITrader)clickedPawn).CanTradeNow)
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<FloatMenuOption> IEnumerable<FloatMenuOption>.GetEnumerator()
+		{
+			_003CGetOptionsFor_003Ed__6 _003CGetOptionsFor_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				yield break;
-			}
-			if (!context.FirstSelectedPawn.CanReach(clickedPawn, PathEndMode.OnCell, Danger.Deadly, false, false, TraverseMode.ByPawn))
-			{
-				yield return new FloatMenuOption("CannotTrade".Translate() + ": " + "NoPath".Translate().CapitalizeFirst(), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-				yield break;
-			}
-			if (context.FirstSelectedPawn.skills.GetSkill(SkillDefOf.Social).TotallyDisabled)
-			{
-				yield return new FloatMenuOption("CannotPrioritizeWorkTypeDisabled".Translate(SkillDefOf.Social.LabelCap), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-				yield break;
-			}
-			if (clickedPawn.mindState.traderDismissed)
-			{
-				yield return new FloatMenuOption("TraderDismissed".Translate(), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-				yield break;
-			}
-			if (!context.FirstSelectedPawn.CanTradeWith(clickedPawn.Faction, clickedPawn.TraderKind).Accepted)
-			{
-				yield return new FloatMenuOption("CannotTrade".Translate() + ": " + "MissingTitleAbility".Translate().CapitalizeFirst(), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
+				_003C_003E1__state = 0;
+				_003CGetOptionsFor_003Ed__ = this;
 			}
 			else
 			{
-				Action action = delegate()
-				{
-					Job job = JobMaker.MakeJob(JobDefOf.TradeWithPawn, clickedPawn);
-					job.playerForced = true;
-					context.FirstSelectedPawn.jobs.TryTakeOrderedJob(job, new JobTag?(JobTag.Misc), false);
-					PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.InteractingWithTraders, KnowledgeAmount.Total);
-				};
-				string t = "";
-				if (clickedPawn.Faction != null)
-				{
-					t = " (" + clickedPawn.Faction.Name + ")";
-				}
-				yield return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("TradeWith".Translate(clickedPawn.LabelShort + ", " + clickedPawn.TraderKind.label) + t, action, MenuOptionPriority.InitiateSocial, null, clickedPawn, 0f, null, null, true, 0), context.FirstSelectedPawn, clickedPawn, "ReservedBy", null);
+				_003CGetOptionsFor_003Ed__ = new _003CGetOptionsFor_003Ed__6(0);
 			}
-			if (clickedPawn.GetLord().LordJob is LordJob_TradeWithColony && !clickedPawn.mindState.traderDismissed)
-			{
-				Action action2 = delegate()
-				{
-					Job job = JobMaker.MakeJob(JobDefOf.DismissTrader, clickedPawn);
-					job.playerForced = true;
-					context.FirstSelectedPawn.jobs.TryTakeOrderedJob(job, new JobTag?(JobTag.Misc), false);
-				};
-				yield return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("DismissTrader".Translate(), action2, MenuOptionPriority.InitiateSocial, null, clickedPawn, 0f, null, null, true, 0), context.FirstSelectedPawn, clickedPawn, "ReservedBy", null);
-			}
-			yield break;
+			_003CGetOptionsFor_003Ed__.clickedPawn = _003C_003E3__clickedPawn;
+			_003CGetOptionsFor_003Ed__.context = _003C_003E3__context;
+			return _003CGetOptionsFor_003Ed__;
 		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<FloatMenuOption>)this).GetEnumerator();
+		}
+	}
+
+	protected override bool Drafted => true;
+
+	protected override bool Undrafted => true;
+
+	protected override bool Multiselect => false;
+
+	[IteratorStateMachine(typeof(_003CGetOptionsFor_003Ed__6))]
+	public override IEnumerable<FloatMenuOption> GetOptionsFor(Pawn clickedPawn, FloatMenuContext context)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetOptionsFor_003Ed__6(-2)
+		{
+			_003C_003E3__clickedPawn = clickedPawn,
+			_003C_003E3__context = context
+		};
 	}
 }

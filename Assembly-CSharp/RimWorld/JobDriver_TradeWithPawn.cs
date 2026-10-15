@@ -1,45 +1,170 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_TradeWithPawn : JobDriver
 {
-	// Token: 0x02001334 RID: 4916
-	public class JobDriver_TradeWithPawn : JobDriver
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass3_0
 	{
-		// Token: 0x1700130F RID: 4879
-		// (get) Token: 0x060078CC RID: 30924 RVA: 0x000024E7 File Offset: 0x000006E7
-		private Pawn Trader
+		public JobDriver_TradeWithPawn _003C_003E4__this;
+
+		public Toil trade;
+
+		internal bool _003CMakeNewToils_003Eb__0()
 		{
+			return !_003C_003E4__this.Trader.CanTradeNow;
+		}
+
+		internal void _003CMakeNewToils_003Eb__1()
+		{
+			Pawn actor = trade.actor;
+			if (_003C_003E4__this.Trader.CanTradeNow)
+			{
+				Find.WindowStack.Add(new Dialog_Trade(actor, _003C_003E4__this.Trader));
+			}
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__3 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_TradeWithPawn _003C_003E4__this;
+
+		private _003C_003Ec__DisplayClass3_0 _003C_003E8__1;
+
+		Toil IEnumerator<Toil>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				return (Pawn)base.TargetThingA;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x060078CD RID: 30925 RVA: 0x00248D0B File Offset: 0x00246F0B
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		object IEnumerator.Current
 		{
-			return this.pawn.Reserve(this.Trader, this.job, 1, -1, null, errorOnFailed, false);
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x060078CE RID: 30926 RVA: 0x00248D2E File Offset: 0x00246F2E
-		protected override IEnumerable<Toil> MakeNewToils()
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__3(int _003C_003E1__state)
 		{
-			this.FailOnDespawnedOrNull(TargetIndex.A);
-			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch, false).FailOn(() => !this.Trader.CanTradeNow);
-			Toil trade = ToilMaker.MakeToil("MakeNewToils");
-			trade.initAction = delegate()
-			{
-				Pawn actor = trade.actor;
-				if (this.Trader.CanTradeNow)
-				{
-					Find.WindowStack.Add(new Dialog_Trade(actor, this.Trader, false));
-				}
-			};
-			yield return trade;
-			yield break;
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E8__1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_TradeWithPawn f = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E8__1 = new _003C_003Ec__DisplayClass3_0();
+				_003C_003E8__1._003C_003E4__this = _003C_003E4__this;
+				f.FailOnDespawnedOrNull(TargetIndex.A);
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch).FailOn(() => !_003C_003E8__1._003C_003E4__this.Trader.CanTradeNow);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E8__1.trade = ToilMaker.MakeToil("MakeNewToils");
+				_003C_003E8__1.trade.initAction = delegate
+				{
+					Pawn actor = _003C_003E8__1.trade.actor;
+					if (_003C_003E8__1._003C_003E4__this.Trader.CanTradeNow)
+					{
+						Find.WindowStack.Add(new Dialog_Trade(actor, _003C_003E8__1._003C_003E4__this.Trader));
+					}
+				};
+				_003C_003E2__current = _003C_003E8__1.trade;
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__3 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__3(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private Pawn Trader => (Pawn)base.TargetThingA;
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return pawn.Reserve(Trader, job, 1, -1, null, errorOnFailed);
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__3))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__3(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

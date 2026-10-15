@@ -1,410 +1,805 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using LudeonTK;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Apparel : ThingWithComps
 {
-	// Token: 0x02002AF8 RID: 11000
-	public class Apparel : ThingWithComps
+	[CompilerGenerated]
+	private sealed class _003CGetWornGizmos_003Ed__30 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700265F RID: 9823
-		// (get) Token: 0x0600F573 RID: 62835 RVA: 0x00475054 File Offset: 0x00473254
-		public Pawn Wearer
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Apparel _003C_003E4__this;
+
+		private List<ThingComp> _003Ccomps_003E5__2;
+
+		private int _003Ci_003E5__3;
+
+		private IEnumerator<Gizmo> _003C_003E7__wrap3;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				Pawn_ApparelTracker pawn_ApparelTracker = base.ParentHolder as Pawn_ApparelTracker;
-				if (pawn_ApparelTracker == null)
-				{
-					return null;
-				}
-				return pawn_ApparelTracker.pawn;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002660 RID: 9824
-		// (get) Token: 0x0600F574 RID: 62836 RVA: 0x00475078 File Offset: 0x00473278
-		// (set) Token: 0x0600F575 RID: 62837 RVA: 0x00475080 File Offset: 0x00473280
-		public bool WornByCorpse
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.wornByCorpseInt;
-			}
-			set
-			{
-				this.wornByCorpseInt = value;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002661 RID: 9825
-		// (get) Token: 0x0600F576 RID: 62838 RVA: 0x0047508C File Offset: 0x0047328C
-		public string WornGraphicPath
+		[DebuggerHidden]
+		public _003CGetWornGizmos_003Ed__30(int _003C_003E1__state)
 		{
-			get
-			{
-				if (this.StyleDef != null && !this.StyleDef.wornGraphicPath.NullOrEmpty())
-				{
-					return this.StyleDef.wornGraphicPath;
-				}
-				if (!this.def.apparel.wornGraphicPaths.NullOrEmpty<string>())
-				{
-					return this.def.apparel.wornGraphicPaths[this.thingIDNumber % this.def.apparel.wornGraphicPaths.Count];
-				}
-				return this.def.apparel.wornGraphicPath;
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x17002662 RID: 9826
-		// (get) Token: 0x0600F577 RID: 62839 RVA: 0x00475118 File Offset: 0x00473318
-		public override string DescriptionDetailed
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			get
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				string text = base.DescriptionDetailed;
-				if (this.WornByCorpse)
+				try
 				{
-					text += "\n" + "WasWornByCorpse".Translate();
 				}
-				return text;
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
 			}
+			_003Ccomps_003E5__2 = null;
+			_003C_003E7__wrap3 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x17002663 RID: 9827
-		// (get) Token: 0x0600F578 RID: 62840 RVA: 0x00475158 File Offset: 0x00473358
-		public override Color DrawColor
+		private bool MoveNext()
 		{
-			get
+			try
 			{
-				Color color;
-				if (this.StyleDef != null && this.StyleDef.color != default(Color))
+				int num = _003C_003E1__state;
+				Apparel apparel = _003C_003E4__this;
+				if (num != 0)
 				{
-					color = this.StyleDef.color;
-				}
-				else
-				{
-					color = base.DrawColor;
-				}
-				if (this.WornByCorpse)
-				{
-					color = PawnRenderUtility.GetRottenColor(color);
-				}
-				Pawn wearer = this.Wearer;
-				if (wearer != null)
-				{
-					Pawn_DrawTracker drawer = wearer.Drawer;
-					if (drawer != null)
+					if (num != 1)
 					{
-						PawnRenderer renderer = drawer.renderer;
-						if (renderer != null)
+						return false;
+					}
+					_003C_003E1__state = -3;
+					goto IL_0090;
+				}
+				_003C_003E1__state = -1;
+				_003Ccomps_003E5__2 = apparel.AllComps;
+				_003Ci_003E5__3 = 0;
+				goto IL_00bc;
+				IL_0090:
+				if (_003C_003E7__wrap3.MoveNext())
+				{
+					Gizmo current = _003C_003E7__wrap3.Current;
+					_003C_003E2__current = current;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap3 = null;
+				_003Ci_003E5__3++;
+				goto IL_00bc;
+				IL_00bc:
+				if (_003Ci_003E5__3 < _003Ccomps_003E5__2.Count)
+				{
+					ThingComp thingComp = _003Ccomps_003E5__2[_003Ci_003E5__3];
+					_003C_003E7__wrap3 = thingComp.CompGetWornGizmosExtra().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0090;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap3 != null)
+			{
+				_003C_003E7__wrap3.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CGetWornGizmos_003Ed__30 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CGetWornGizmos_003Ed__30(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CSpecialDisplayStats_003Ed__31 : IEnumerable<StatDrawEntry>, IEnumerable, IEnumerator<StatDrawEntry>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private StatDrawEntry _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Apparel _003C_003E4__this;
+
+		private IEnumerator<StatDrawEntry> _003C_003E7__wrap1;
+
+		StatDrawEntry IEnumerator<StatDrawEntry>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CSpecialDisplayStats_003Ed__31(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				Apparel CS_0024_003C_003E8__locals2 = _003C_003E4__this;
+				RoyalTitleDef royalTitleDef;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((ThingWithComps)CS_0024_003C_003E8__locals2).SpecialDisplayStats().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0074;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0074;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_0074:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						StatDrawEntry current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					royalTitleDef = (from t in DefDatabase<FactionDef>.AllDefsListForReading.SelectMany((FactionDef f) => f.RoyalTitlesAwardableInSeniorityOrderForReading)
+						where t.requiredApparel != null && t.requiredApparel.Any((ApparelRequirement req) => req.ApparelMeetsRequirement(CS_0024_003C_003E8__locals2.def, allowUnmatched: false))
+						orderby t.seniority descending
+						select t).FirstOrDefault();
+					if (royalTitleDef != null)
+					{
+						_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.Apparel, "Stat_Thing_Apparel_MaxSatisfiedTitle".Translate(), royalTitleDef.GetLabelCapForBothGenders(), "Stat_Thing_Apparel_MaxSatisfiedTitle_Desc".Translate(), 2752, null, new Dialog_InfoCard.Hyperlink[1]
 						{
-							Color? statueColor = renderer.StatueColor;
-							if (statueColor != null)
-							{
-								Color valueOrDefault = statueColor.GetValueOrDefault();
-								color = valueOrDefault;
-							}
+							new Dialog_InfoCard.Hyperlink(royalTitleDef)
+						});
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<StatDrawEntry> IEnumerable<StatDrawEntry>.GetEnumerator()
+		{
+			_003CSpecialDisplayStats_003Ed__31 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CSpecialDisplayStats_003Ed__31(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<StatDrawEntry>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003Cget_AllAbilitiesForReading_003Ed__17 : IEnumerable<Ability>, IEnumerable, IEnumerator<Ability>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Ability _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Apparel _003C_003E4__this;
+
+		private List<Ability>.Enumerator _003C_003E7__wrap1;
+
+		Ability IEnumerator<Ability>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003Cget_AllAbilitiesForReading_003Ed__17(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = default(List<Ability>.Enumerator);
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				Apparel apparel = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					if (apparel.abilities == null && apparel.def.apparel.abilities != null)
+					{
+						apparel.FillOrUpdateAbilities();
+					}
+					if (apparel.abilities == null)
+					{
+						return false;
+					}
+					_003C_003E7__wrap1 = apparel.abilities.GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 1:
+					_003C_003E1__state = -3;
+					break;
+				}
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					Ability current = _003C_003E7__wrap1.Current;
+					_003C_003E2__current = current;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = default(List<Ability>.Enumerator);
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap1/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Ability> IEnumerable<Ability>.GetEnumerator()
+		{
+			_003Cget_AllAbilitiesForReading_003Ed__17 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_AllAbilitiesForReading_003Ed__17(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Ability>)this).GetEnumerator();
+		}
+	}
+
+	private bool wornByCorpseInt;
+
+	private List<Ability> abilities;
+
+	public Pawn Wearer
+	{
+		get
+		{
+			if (!(base.ParentHolder is Pawn_ApparelTracker pawn_ApparelTracker))
+			{
+				return null;
+			}
+			return pawn_ApparelTracker.pawn;
+		}
+	}
+
+	public bool WornByCorpse
+	{
+		get
+		{
+			return wornByCorpseInt;
+		}
+		set
+		{
+			wornByCorpseInt = value;
+		}
+	}
+
+	public string WornGraphicPath
+	{
+		get
+		{
+			if (StyleDef != null && !StyleDef.wornGraphicPath.NullOrEmpty())
+			{
+				return StyleDef.wornGraphicPath;
+			}
+			if (!def.apparel.wornGraphicPaths.NullOrEmpty())
+			{
+				return def.apparel.wornGraphicPaths[thingIDNumber % def.apparel.wornGraphicPaths.Count];
+			}
+			return def.apparel.wornGraphicPath;
+		}
+	}
+
+	public override string DescriptionDetailed
+	{
+		get
+		{
+			string text = base.DescriptionDetailed;
+			if (WornByCorpse)
+			{
+				text += "\n" + "WasWornByCorpse".Translate();
+			}
+			return text;
+		}
+	}
+
+	public override Color DrawColor
+	{
+		get
+		{
+			Color color = ((StyleDef == null || !(StyleDef.color != default(Color))) ? base.DrawColor : StyleDef.color);
+			if (WornByCorpse)
+			{
+				color = PawnRenderUtility.GetRottenColor(color);
+			}
+			Pawn wearer = Wearer;
+			if (wearer != null)
+			{
+				Pawn_DrawTracker drawer = wearer.Drawer;
+				if (drawer != null)
+				{
+					PawnRenderer renderer = drawer.renderer;
+					if (renderer != null)
+					{
+						Color? statueColor = renderer.StatueColor;
+						if (statueColor.HasValue)
+						{
+							Color valueOrDefault = statueColor.GetValueOrDefault();
+							color = valueOrDefault;
 						}
 					}
 				}
-				return color;
 			}
+			return color;
 		}
+	}
 
-		// Token: 0x17002664 RID: 9828
-		// (get) Token: 0x0600F579 RID: 62841 RVA: 0x004751EC File Offset: 0x004733EC
-		// (set) Token: 0x0600F57A RID: 62842 RVA: 0x00475214 File Offset: 0x00473414
-		public Color? DesiredColor
+	public Color? DesiredColor
+	{
+		get
 		{
-			get
+			return GetComp<CompColorable>()?.DesiredColor;
+		}
+		set
+		{
+			CompColorable comp = GetComp<CompColorable>();
+			if (comp != null)
 			{
-				CompColorable comp = base.GetComp<CompColorable>();
-				if (comp == null)
-				{
-					return null;
-				}
-				return comp.DesiredColor;
+				comp.DesiredColor = value;
 			}
-			set
+			else
 			{
-				CompColorable comp = base.GetComp<CompColorable>();
-				if (comp != null)
-				{
-					comp.DesiredColor = value;
-					return;
-				}
 				Log.Error("Tried setting Apparel.DesiredColor without having CompColorable comp!");
 			}
 		}
+	}
 
-		// Token: 0x17002665 RID: 9829
-		// (get) Token: 0x0600F57B RID: 62843 RVA: 0x0047523D File Offset: 0x0047343D
-		public IEnumerable<Ability> AllAbilitiesForReading
+	public IEnumerable<Ability> AllAbilitiesForReading
+	{
+		[IteratorStateMachine(typeof(_003Cget_AllAbilitiesForReading_003Ed__17))]
+		get
 		{
-			get
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_AllAbilitiesForReading_003Ed__17(-2)
 			{
-				if (this.abilities == null && this.def.apparel.abilities != null)
-				{
-					this.FillOrUpdateAbilities();
-				}
-				if (this.abilities == null)
-				{
-					yield break;
-				}
-				foreach (Ability ability in this.abilities)
-				{
-					yield return ability;
-				}
-				List<Ability>.Enumerator enumerator = default(List<Ability>.Enumerator);
-				yield break;
-				yield break;
-			}
+				_003C_003E4__this = this
+			};
 		}
+	}
 
-		// Token: 0x0600F57C RID: 62844 RVA: 0x00475250 File Offset: 0x00473450
-		public override string GetInspectStringLowPriority()
+	public override string GetInspectStringLowPriority()
+	{
+		string text = base.GetInspectStringLowPriority();
+		if (StyleDef != null)
 		{
-			string text = base.GetInspectStringLowPriority();
-			if (this.StyleDef != null)
+			if (!text.NullOrEmpty())
 			{
-				if (!text.NullOrEmpty())
-				{
-					text += "\n";
-				}
-				text += "VariantOf".Translate().CapitalizeFirst() + ": " + this.def.LabelCap;
+				text += "\n";
 			}
-			if (ModsConfig.BiotechActive)
-			{
-				if (!text.NullOrEmpty())
-				{
-					text += "\n";
-				}
-				text += "WearableBy".Translate() + ": " + this.def.apparel.developmentalStageFilter.ToCommaList(false).CapitalizeFirst();
-			}
-			return text;
+			text += "VariantOf".Translate().CapitalizeFirst() + ": " + def.LabelCap;
 		}
-
-		// Token: 0x0600F57D RID: 62845 RVA: 0x00475314 File Offset: 0x00473514
-		public bool PawnCanWear(Pawn pawn, bool ignoreGender = false)
+		if (ModsConfig.BiotechActive)
 		{
-			return this.def.IsApparel && this.def.apparel.PawnCanWear(pawn, ignoreGender);
+			if (!text.NullOrEmpty())
+			{
+				text += "\n";
+			}
+			text += "WearableBy".Translate() + ": " + def.apparel.developmentalStageFilter.ToCommaList().CapitalizeFirst();
 		}
+		return text;
+	}
 
-		// Token: 0x0600F57E RID: 62846 RVA: 0x0047533C File Offset: 0x0047353C
-		public Color GetColorIgnoringTainted()
+	public bool PawnCanWear(Pawn pawn, bool ignoreGender = false)
+	{
+		if (!def.IsApparel)
 		{
-			if (this.StyleDef != null && this.StyleDef.color != default(Color))
-			{
-				return this.StyleDef.color;
-			}
-			return base.DrawColor;
-		}
-
-		// Token: 0x0600F57F RID: 62847 RVA: 0x00475380 File Offset: 0x00473580
-		public void Notify_PawnKilled()
-		{
-			if (this.def.apparel.careIfWornByCorpse)
-			{
-				this.wornByCorpseInt = true;
-			}
-			foreach (ThingComp thingComp in base.AllComps)
-			{
-				thingComp.Notify_WearerDied();
-			}
-		}
-
-		// Token: 0x0600F580 RID: 62848 RVA: 0x004753EC File Offset: 0x004735EC
-		public void Notify_PawnResurrected(Pawn pawn)
-		{
-			if (pawn.IsMutant && pawn.mutant.Def.isConsideredCorpse)
-			{
-				return;
-			}
-			this.wornByCorpseInt = false;
-		}
-
-		// Token: 0x0600F581 RID: 62849 RVA: 0x00475410 File Offset: 0x00473610
-		public override void Notify_ColorChanged()
-		{
-			if (this.Wearer != null)
-			{
-				this.Wearer.apparel.Notify_ApparelChanged();
-			}
-			base.Notify_ColorChanged();
-		}
-
-		// Token: 0x0600F582 RID: 62850 RVA: 0x00475430 File Offset: 0x00473630
-		public override void Notify_Equipped(Pawn pawn)
-		{
-			base.Notify_Equipped(pawn);
-			foreach (Ability ability in this.AllAbilitiesForReading)
-			{
-				ability.pawn = pawn;
-			}
-		}
-
-		// Token: 0x0600F583 RID: 62851 RVA: 0x00475484 File Offset: 0x00473684
-		public override void ExposeData()
-		{
-			base.ExposeData();
-			Scribe_Values.Look<bool>(ref this.wornByCorpseInt, "wornByCorpse", false, false);
-			Scribe_Collections.Look<Ability>(ref this.abilities, "abilities", LookMode.Deep, Array.Empty<object>());
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
-			{
-				this.FillOrUpdateAbilities();
-			}
-		}
-
-		// Token: 0x0600F584 RID: 62852 RVA: 0x004754C4 File Offset: 0x004736C4
-		public void FillOrUpdateAbilities()
-		{
-			if (this.def.apparel.abilities == null)
-			{
-				return;
-			}
-			if (this.abilities == null)
-			{
-				this.abilities = new List<Ability>();
-				foreach (AbilityDef def in this.def.apparel.abilities)
-				{
-					this.abilities.Add(AbilityUtility.MakeAbility(def, this.Wearer));
-				}
-			}
-			foreach (Ability ability in this.abilities)
-			{
-				ability.pawn = this.Wearer;
-				ability.verb.caster = this.Wearer;
-			}
-		}
-
-		// Token: 0x0600F585 RID: 62853 RVA: 0x004755B0 File Offset: 0x004737B0
-		public virtual void DrawWornExtras()
-		{
-			List<ThingComp> allComps = base.AllComps;
-			for (int i = 0; i < allComps.Count; i++)
-			{
-				allComps[i].CompDrawWornExtras();
-			}
-		}
-
-		// Token: 0x0600F586 RID: 62854 RVA: 0x004755E4 File Offset: 0x004737E4
-		public virtual bool CheckPreAbsorbDamage(DamageInfo dinfo)
-		{
-			List<ThingComp> allComps = base.AllComps;
-			for (int i = 0; i < allComps.Count; i++)
-			{
-				bool flag;
-				allComps[i].PostPreApplyDamage(ref dinfo, out flag);
-				if (flag)
-				{
-					return true;
-				}
-			}
 			return false;
 		}
-
-		// Token: 0x0600F587 RID: 62855 RVA: 0x00475620 File Offset: 0x00473820
-		public virtual bool AllowVerbCast(Verb verb)
+		if (!def.apparel.PawnCanWear(pawn, ignoreGender))
 		{
-			List<ThingComp> allComps = base.AllComps;
-			for (int i = 0; i < allComps.Count; i++)
-			{
-				if (!allComps[i].CompAllowVerbCast(verb))
-				{
-					return false;
-				}
-			}
-			return true;
+			return false;
 		}
+		return true;
+	}
 
-		// Token: 0x0600F588 RID: 62856 RVA: 0x00475657 File Offset: 0x00473857
-		public virtual IEnumerable<Gizmo> GetWornGizmos()
+	public Color GetColorIgnoringTainted()
+	{
+		if (StyleDef != null && StyleDef.color != default(Color))
 		{
-			List<ThingComp> comps = base.AllComps;
-			int num;
-			for (int i = 0; i < comps.Count; i = num + 1)
-			{
-				ThingComp thingComp = comps[i];
-				foreach (Gizmo gizmo in thingComp.CompGetWornGizmosExtra())
-				{
-					yield return gizmo;
-				}
-				IEnumerator<Gizmo> enumerator = null;
-				num = i;
-			}
-			yield break;
-			yield break;
+			return StyleDef.color;
 		}
+		return base.DrawColor;
+	}
 
-		// Token: 0x0600F589 RID: 62857 RVA: 0x00475667 File Offset: 0x00473867
-		public override IEnumerable<StatDrawEntry> SpecialDisplayStats()
+	public void Notify_PawnKilled()
+	{
+		if (def.apparel.careIfWornByCorpse)
 		{
-			foreach (StatDrawEntry statDrawEntry in base.SpecialDisplayStats())
-			{
-				yield return statDrawEntry;
-			}
-			IEnumerator<StatDrawEntry> enumerator = null;
-			RoyalTitleDef royalTitleDef = (from t in DefDatabase<FactionDef>.AllDefsListForReading.SelectMany((FactionDef f) => f.RoyalTitlesAwardableInSeniorityOrderForReading)
-			where t.requiredApparel != null && t.requiredApparel.Any((ApparelRequirement req) => req.ApparelMeetsRequirement(this.def, false))
-			orderby t.seniority descending
-			select t).FirstOrDefault<RoyalTitleDef>();
-			if (royalTitleDef != null)
-			{
-				yield return new StatDrawEntry(StatCategoryDefOf.Apparel, "Stat_Thing_Apparel_MaxSatisfiedTitle".Translate(), royalTitleDef.GetLabelCapForBothGenders(), "Stat_Thing_Apparel_MaxSatisfiedTitle_Desc".Translate(), 2752, null, new Dialog_InfoCard.Hyperlink[]
-				{
-					new Dialog_InfoCard.Hyperlink(royalTitleDef, -1)
-				}, false, false);
-			}
-			yield break;
-			yield break;
+			wornByCorpseInt = true;
 		}
-
-		// Token: 0x0600F58A RID: 62858 RVA: 0x00475678 File Offset: 0x00473878
-		public override string GetInspectString()
+		foreach (ThingComp allComp in base.AllComps)
 		{
-			string text = base.GetInspectString();
-			if (this.WornByCorpse)
-			{
-				if (text.Length > 0)
-				{
-					text += "\n";
-				}
-				text += "WasWornByCorpse".Translate();
-			}
-			return text;
+			allComp.Notify_WearerDied();
 		}
+	}
 
-		// Token: 0x0600F58B RID: 62859 RVA: 0x004756C0 File Offset: 0x004738C0
-		public virtual float GetSpecialApparelScoreOffset()
+	public void Notify_PawnResurrected(Pawn pawn)
+	{
+		if (!pawn.IsMutant || !pawn.mutant.Def.isConsideredCorpse)
 		{
-			float num = 0f;
-			List<ThingComp> allComps = base.AllComps;
-			for (int i = 0; i < allComps.Count; i++)
-			{
-				num += allComps[i].CompGetSpecialApparelScoreOffset();
-			}
-			return num;
+			wornByCorpseInt = false;
 		}
+	}
 
-		// Token: 0x0600F58C RID: 62860 RVA: 0x004756FC File Offset: 0x004738FC
-		[DebugOutput]
-		private static void ApparelValidLifeStages()
+	public override void Notify_ColorChanged()
+	{
+		if (Wearer != null)
 		{
-			List<TableDataGetter<ThingDef>> list = new List<TableDataGetter<ThingDef>>();
-			list.Add(new TableDataGetter<ThingDef>("name", (ThingDef t) => t.LabelCap));
-			list.Add(new TableDataGetter<ThingDef>("valid life stage", (ThingDef t) => t.apparel.developmentalStageFilter.ToCommaList(false)));
-			DebugTables.MakeTablesDialog<ThingDef>(from t in DefDatabase<ThingDef>.AllDefs
-			where t.IsApparel
-			select t, list.ToArray());
+			Wearer.apparel.Notify_ApparelChanged();
 		}
+		base.Notify_ColorChanged();
+	}
 
-		// Token: 0x0400A1A9 RID: 41385
-		private bool wornByCorpseInt;
+	public override void Notify_Equipped(Pawn pawn)
+	{
+		base.Notify_Equipped(pawn);
+		foreach (Ability item in AllAbilitiesForReading)
+		{
+			item.pawn = pawn;
+			item.verb.caster = pawn;
+		}
+	}
 
-		// Token: 0x0400A1AA RID: 41386
-		private List<Ability> abilities;
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref wornByCorpseInt, "wornByCorpse", defaultValue: false);
+		Scribe_Collections.Look(ref abilities, "abilities", LookMode.Deep);
+		if (Scribe.mode == LoadSaveMode.PostLoadInit)
+		{
+			FillOrUpdateAbilities();
+		}
+	}
+
+	public void FillOrUpdateAbilities()
+	{
+		if (def.apparel.abilities == null)
+		{
+			return;
+		}
+		if (abilities == null)
+		{
+			abilities = new List<Ability>();
+			foreach (AbilityDef ability in def.apparel.abilities)
+			{
+				abilities.Add(AbilityUtility.MakeAbility(ability, Wearer));
+			}
+		}
+		foreach (Ability ability2 in abilities)
+		{
+			ability2.pawn = Wearer;
+			ability2.verb.caster = Wearer;
+		}
+	}
+
+	public virtual void DrawWornExtras()
+	{
+		List<ThingComp> allComps = base.AllComps;
+		for (int i = 0; i < allComps.Count; i++)
+		{
+			allComps[i].CompDrawWornExtras();
+		}
+	}
+
+	public virtual bool CheckPreAbsorbDamage(DamageInfo dinfo)
+	{
+		List<ThingComp> allComps = base.AllComps;
+		for (int i = 0; i < allComps.Count; i++)
+		{
+			allComps[i].PostPreApplyDamage(ref dinfo, out var absorbed);
+			if (absorbed)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public virtual bool AllowVerbCast(Verb verb)
+	{
+		List<ThingComp> allComps = base.AllComps;
+		for (int i = 0; i < allComps.Count; i++)
+		{
+			if (!allComps[i].CompAllowVerbCast(verb))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	[IteratorStateMachine(typeof(_003CGetWornGizmos_003Ed__30))]
+	public virtual IEnumerable<Gizmo> GetWornGizmos()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetWornGizmos_003Ed__30(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	[IteratorStateMachine(typeof(_003CSpecialDisplayStats_003Ed__31))]
+	public override IEnumerable<StatDrawEntry> SpecialDisplayStats()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CSpecialDisplayStats_003Ed__31(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override string GetInspectString()
+	{
+		string text = base.GetInspectString();
+		if (WornByCorpse)
+		{
+			if (text.Length > 0)
+			{
+				text += "\n";
+			}
+			text += "WasWornByCorpse".Translate();
+		}
+		return text;
+	}
+
+	public virtual float GetSpecialApparelScoreOffset()
+	{
+		float num = 0f;
+		List<ThingComp> allComps = base.AllComps;
+		for (int i = 0; i < allComps.Count; i++)
+		{
+			num += allComps[i].CompGetSpecialApparelScoreOffset();
+		}
+		return num;
+	}
+
+	[DebugOutput]
+	private static void ApparelValidLifeStages()
+	{
+		List<TableDataGetter<ThingDef>> list = new List<TableDataGetter<ThingDef>>();
+		list.Add(new TableDataGetter<ThingDef>("name", (ThingDef t) => t.LabelCap));
+		list.Add(new TableDataGetter<ThingDef>("valid life stage", (ThingDef t) => t.apparel.developmentalStageFilter.ToCommaList()));
+		DebugTables.MakeTablesDialog(DefDatabase<ThingDef>.AllDefs.Where((ThingDef t) => t.IsApparel), list.ToArray());
 	}
 }

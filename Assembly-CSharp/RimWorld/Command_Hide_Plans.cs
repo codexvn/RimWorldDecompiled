@@ -1,48 +1,146 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+[StaticConstructorOnStartup]
+public class Command_Hide_Plans : Command_Hide
 {
-	// Token: 0x020030E0 RID: 12512
-	[StaticConstructorOnStartup]
-	public class Command_Hide_Plans : Command_Hide
+	[CompilerGenerated]
+	private sealed class _003CGetHideOptions_003Ed__3 : IEnumerable<FloatMenuOption>, IEnumerable, IEnumerator<FloatMenuOption>, IEnumerator, IDisposable
 	{
-		// Token: 0x06011936 RID: 71990 RVA: 0x0050C61B File Offset: 0x0050A81B
-		public Command_Hide_Plans(IHideable hideable) : base(hideable)
+		private int _003C_003E1__state;
+
+		private FloatMenuOption _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		FloatMenuOption IEnumerator<FloatMenuOption>.Current
 		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x06011937 RID: 71991 RVA: 0x0050C624 File Offset: 0x0050A824
-		protected override IEnumerable<FloatMenuOption> GetOptions()
+		object IEnumerator.Current
 		{
-			return Command_Hide_Plans.GetHideOptions();
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x06011938 RID: 71992 RVA: 0x0050C62B File Offset: 0x0050A82B
-		public static IEnumerable<FloatMenuOption> GetHideOptions()
+		[DebuggerHidden]
+		public _003CGetHideOptions_003Ed__3(int _003C_003E1__state)
 		{
-			yield return new FloatMenuOption("ShowAllZones".Translate(), delegate()
-			{
-				Command_Hide.ToggleAll(false);
-			}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-			yield return new FloatMenuOption("HideAllZones".Translate(), delegate()
-			{
-				Command_Hide.ToggleAll(true);
-			}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-			yield return new FloatMenuOption("ShowAllZoneTypes".Translate("Planning".Translate()), delegate()
-			{
-				Command_Hide.TogglePlans(false);
-			}, Command_Hide_Plans.PlanTex, Color.white, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0, HorizontalJustification.Left, false);
-			yield return new FloatMenuOption("HideAllZoneTypes".Translate("Planning".Translate()), delegate()
-			{
-				Command_Hide.TogglePlans(true);
-			}, Command_Hide_Plans.PlanTex, Color.gray, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0, HorizontalJustification.Left, false);
-			yield break;
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x0400B53E RID: 46398
-		private static readonly Texture2D PlanTex = ContentFinder<Texture2D>.Get("UI/Designators/PlanOn", true);
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			switch (_003C_003E1__state)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = new FloatMenuOption("ShowAllZones".Translate(), delegate
+				{
+					Command_Hide.ToggleAll(hidden: false);
+				});
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = new FloatMenuOption("HideAllZones".Translate(), delegate
+				{
+					Command_Hide.ToggleAll(hidden: true);
+				});
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = new FloatMenuOption("ShowAllZoneTypes".Translate("Planning".Translate()), delegate
+				{
+					Command_Hide.TogglePlans(hidden: false);
+				}, PlanTex, Color.white);
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = new FloatMenuOption("HideAllZoneTypes".Translate("Planning".Translate()), delegate
+				{
+					Command_Hide.TogglePlans(hidden: true);
+				}, PlanTex, Color.gray);
+				_003C_003E1__state = 4;
+				return true;
+			case 4:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<FloatMenuOption> IEnumerable<FloatMenuOption>.GetEnumerator()
+		{
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				return this;
+			}
+			return new _003CGetHideOptions_003Ed__3(0);
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<FloatMenuOption>)this).GetEnumerator();
+		}
+	}
+
+	private static readonly Texture2D PlanTex = ContentFinder<Texture2D>.Get("UI/Designators/PlanOn");
+
+	public Command_Hide_Plans(IHideable hideable)
+		: base(hideable)
+	{
+	}
+
+	protected override IEnumerable<FloatMenuOption> GetOptions()
+	{
+		return GetHideOptions();
+	}
+
+	[IteratorStateMachine(typeof(_003CGetHideOptions_003Ed__3))]
+	public static IEnumerable<FloatMenuOption> GetHideOptions()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetHideOptions_003Ed__3(-2);
 	}
 }

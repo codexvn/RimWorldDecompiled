@@ -1,97 +1,258 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
-{
-	// Token: 0x020015E6 RID: 5606
-	public class WorkGiver_HunterHunt : WorkGiver_Scanner
-	{
-		// Token: 0x0600844D RID: 33869 RVA: 0x0027A93D File Offset: 0x00278B3D
-		public override IEnumerable<Thing> PotentialWorkThingsGlobal(Pawn pawn)
-		{
-			foreach (Designation designation in pawn.Map.designationManager.SpawnedDesignationsOfDef(DesignationDefOf.Hunt))
-			{
-				yield return designation.target.Thing;
-			}
-			IEnumerator<Designation> enumerator = null;
-			yield break;
-			yield break;
-		}
+namespace RimWorld;
 
-		// Token: 0x17001445 RID: 5189
-		// (get) Token: 0x0600844E RID: 33870 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public override PathEndMode PathEndMode
+public class WorkGiver_HunterHunt : WorkGiver_Scanner
+{
+	[CompilerGenerated]
+	private sealed class _003CPotentialWorkThingsGlobal_003Ed__0 : IEnumerable<Thing>, IEnumerable, IEnumerator<Thing>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Thing _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private Pawn pawn;
+
+		public Pawn _003C_003E3__pawn;
+
+		private IEnumerator<Designation> _003C_003E7__wrap1;
+
+		Thing IEnumerator<Thing>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return PathEndMode.OnCell;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600844F RID: 33871 RVA: 0x00075162 File Offset: 0x00073362
-		public override Danger MaxPathDanger(Pawn pawn)
+		object IEnumerator.Current
 		{
-			return Danger.Deadly;
-		}
-
-		// Token: 0x06008450 RID: 33872 RVA: 0x0027A94D File Offset: 0x00278B4D
-		public override bool ShouldSkip(Pawn pawn, bool forced = false)
-		{
-			return !WorkGiver_HunterHunt.HasHuntingWeapon(pawn) || WorkGiver_HunterHunt.HasShieldAndRangedWeapon(pawn) || !pawn.Map.designationManager.AnySpawnedDesignationOfDef(DesignationDefOf.Hunt);
-		}
-
-		// Token: 0x06008451 RID: 33873 RVA: 0x0027A980 File Offset: 0x00278B80
-		public override bool HasJobOnThing(Pawn pawn, Thing t, bool forced = false)
-		{
-			Pawn pawn2 = t as Pawn;
-			return pawn2 != null && pawn2.AnimalOrWildMan() && pawn.CanReserve(t, 1, -1, null, forced) && pawn.Map.designationManager.DesignationOn(t, DesignationDefOf.Hunt) != null && (!HistoryEventUtility.IsKillingInnocentAnimal(pawn, pawn2) || new HistoryEvent(HistoryEventDefOf.KilledInnocentAnimal, pawn.Named(HistoryEventArgsNames.Doer)).Notify_PawnAboutToDo_Job()) && (pawn.Ideo == null || !pawn.Ideo.IsVeneratedAnimal(pawn2) || new HistoryEvent(HistoryEventDefOf.HuntedVeneratedAnimal, pawn.Named(HistoryEventArgsNames.Doer)).Notify_PawnAboutToDo_Job()) && this.CanFindHuntingPosition(pawn, pawn2);
-		}
-
-		// Token: 0x06008452 RID: 33874 RVA: 0x0027AA37 File Offset: 0x00278C37
-		public override Job JobOnThing(Pawn pawn, Thing t, bool forced = false)
-		{
-			return JobMaker.MakeJob(JobDefOf.Hunt, t);
-		}
-
-		// Token: 0x06008453 RID: 33875 RVA: 0x0027AA4C File Offset: 0x00278C4C
-		public static bool HasHuntingWeapon(Pawn p)
-		{
-			return p.equipment.Primary != null && p.equipment.Primary.def.IsRangedWeapon && p.equipment.PrimaryEq.PrimaryVerb.HarmsHealth() && !p.equipment.PrimaryEq.PrimaryVerb.UsesExplosiveProjectiles();
-		}
-
-		// Token: 0x06008454 RID: 33876 RVA: 0x0027AAB0 File Offset: 0x00278CB0
-		private bool CanFindHuntingPosition(Pawn hunter, Pawn animal)
-		{
-			CastPositionRequest castPositionRequest = new CastPositionRequest
+			[DebuggerHidden]
+			get
 			{
-				caster = hunter,
-				target = animal,
-				verb = hunter.TryGetAttackVerb(animal, false, false),
-				wantCoverFromTarget = false
-			};
-			castPositionRequest.maxRangeFromTarget = (animal.Downed ? Mathf.Min(castPositionRequest.verb.EffectiveRange, (float)animal.RaceProps.executionRange) : Mathf.Max(castPositionRequest.verb.EffectiveRange * 0.95f, 1.42f));
-			IntVec3 intVec;
-			return CastPositionFinder.TryFindCastPosition(castPositionRequest, out intVec);
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x06008455 RID: 33877 RVA: 0x0027AB40 File Offset: 0x00278D40
-		public static bool HasShieldAndRangedWeapon(Pawn p)
+		[DebuggerHidden]
+		public _003CPotentialWorkThingsGlobal_003Ed__0(int _003C_003E1__state)
 		{
-			if (p.equipment.Primary != null && p.equipment.Primary.def.IsWeaponUsingProjectiles)
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				List<Apparel> wornApparel = p.apparel.WornApparel;
-				for (int i = 0; i < wornApparel.Count; i++)
+				try
 				{
-					if (wornApparel[i].def.IsShieldThatBlocksRanged)
-					{
-						return true;
-					}
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
 				}
 			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				switch (_003C_003E1__state)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = pawn.Map.designationManager.SpawnedDesignationsOfDef(DesignationDefOf.Hunt).GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 1:
+					_003C_003E1__state = -3;
+					break;
+				}
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					Designation current = _003C_003E7__wrap1.Current;
+					_003C_003E2__current = current.target.Thing;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = null;
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Thing> IEnumerable<Thing>.GetEnumerator()
+		{
+			_003CPotentialWorkThingsGlobal_003Ed__0 _003CPotentialWorkThingsGlobal_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CPotentialWorkThingsGlobal_003Ed__ = this;
+			}
+			else
+			{
+				_003CPotentialWorkThingsGlobal_003Ed__ = new _003CPotentialWorkThingsGlobal_003Ed__0(0);
+			}
+			_003CPotentialWorkThingsGlobal_003Ed__.pawn = _003C_003E3__pawn;
+			return _003CPotentialWorkThingsGlobal_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Thing>)this).GetEnumerator();
+		}
+	}
+
+	public override PathEndMode PathEndMode => PathEndMode.OnCell;
+
+	[IteratorStateMachine(typeof(_003CPotentialWorkThingsGlobal_003Ed__0))]
+	public override IEnumerable<Thing> PotentialWorkThingsGlobal(Pawn pawn)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CPotentialWorkThingsGlobal_003Ed__0(-2)
+		{
+			_003C_003E3__pawn = pawn
+		};
+	}
+
+	public override Danger MaxPathDanger(Pawn pawn)
+	{
+		return Danger.Deadly;
+	}
+
+	public override bool ShouldSkip(Pawn pawn, bool forced = false)
+	{
+		if (!HasHuntingWeapon(pawn))
+		{
+			return true;
+		}
+		if (HasShieldAndRangedWeapon(pawn))
+		{
+			return true;
+		}
+		if (!pawn.Map.designationManager.AnySpawnedDesignationOfDef(DesignationDefOf.Hunt))
+		{
+			return true;
+		}
+		return false;
+	}
+
+	public override bool HasJobOnThing(Pawn pawn, Thing t, bool forced = false)
+	{
+		if (!(t is Pawn pawn2) || !pawn2.AnimalOrWildMan())
+		{
 			return false;
 		}
+		if (!pawn.CanReserve(t, 1, -1, null, forced))
+		{
+			return false;
+		}
+		if (pawn.Map.designationManager.DesignationOn(t, DesignationDefOf.Hunt) == null)
+		{
+			return false;
+		}
+		if (HistoryEventUtility.IsKillingInnocentAnimal(pawn, pawn2) && !new HistoryEvent(HistoryEventDefOf.KilledInnocentAnimal, pawn.Named(HistoryEventArgsNames.Doer)).Notify_PawnAboutToDo_Job())
+		{
+			return false;
+		}
+		if (pawn.Ideo != null && pawn.Ideo.IsVeneratedAnimal(pawn2) && !new HistoryEvent(HistoryEventDefOf.HuntedVeneratedAnimal, pawn.Named(HistoryEventArgsNames.Doer)).Notify_PawnAboutToDo_Job())
+		{
+			return false;
+		}
+		if (!CanFindHuntingPosition(pawn, pawn2))
+		{
+			return false;
+		}
+		return true;
+	}
+
+	public override Job JobOnThing(Pawn pawn, Thing t, bool forced = false)
+	{
+		return JobMaker.MakeJob(JobDefOf.Hunt, t);
+	}
+
+	public static bool HasHuntingWeapon(Pawn p)
+	{
+		if (p.equipment.Primary != null && p.equipment.Primary.def.IsRangedWeapon && p.equipment.PrimaryEq.PrimaryVerb.HarmsHealth() && !p.equipment.PrimaryEq.PrimaryVerb.UsesExplosiveProjectiles())
+		{
+			return true;
+		}
+		return false;
+	}
+
+	private bool CanFindHuntingPosition(Pawn hunter, Pawn animal)
+	{
+		CastPositionRequest castPositionRequest = default(CastPositionRequest);
+		castPositionRequest.caster = hunter;
+		castPositionRequest.target = animal;
+		castPositionRequest.verb = hunter.TryGetAttackVerb(animal);
+		castPositionRequest.wantCoverFromTarget = false;
+		CastPositionRequest newReq = castPositionRequest;
+		newReq.maxRangeFromTarget = (animal.Downed ? Mathf.Min(newReq.verb.EffectiveRange, animal.RaceProps.executionRange) : Mathf.Max(newReq.verb.EffectiveRange * 0.95f, 1.42f));
+		IntVec3 dest;
+		return CastPositionFinder.TryFindCastPosition(newReq, out dest);
+	}
+
+	public static bool HasShieldAndRangedWeapon(Pawn p)
+	{
+		if (p.equipment.Primary != null && p.equipment.Primary.def.IsWeaponUsingProjectiles)
+		{
+			List<Apparel> wornApparel = p.apparel.WornApparel;
+			for (int i = 0; i < wornApparel.Count; i++)
+			{
+				if (wornApparel[i].def.IsShieldThatBlocksRanged)
+				{
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 }

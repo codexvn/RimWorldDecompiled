@@ -1,43 +1,142 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompProperties_FleckEmitter : CompProperties
 {
-	// Token: 0x02002C8C RID: 11404
-	public class CompProperties_FleckEmitter : CompProperties
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__6 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x0600FFF2 RID: 65522 RVA: 0x004A2427 File Offset: 0x004A0627
-		public CompProperties_FleckEmitter()
-		{
-			this.compClass = typeof(CompFleckEmitter);
-		}
+		private int _003C_003E1__state;
 
-		// Token: 0x0600FFF3 RID: 65523 RVA: 0x004A2446 File Offset: 0x004A0646
-		public override IEnumerable<string> ConfigErrors(ThingDef parentDef)
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompProperties_FleckEmitter _003C_003E4__this;
+
+		string IEnumerator<string>.Current
 		{
-			if (this.fleck == null)
+			[DebuggerHidden]
+			get
 			{
-				yield return "CompFleckEmitter must have a fleck assigned.";
+				return _003C_003E2__current;
 			}
-			yield break;
 		}
 
-		// Token: 0x0400A75C RID: 42844
-		public FleckDef fleck;
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
 
-		// Token: 0x0400A75D RID: 42845
-		public Vector3 offset;
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__6(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
 
-		// Token: 0x0400A75E RID: 42846
-		public int emissionInterval = -1;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
 
-		// Token: 0x0400A75F RID: 42847
-		public SoundDef soundOnEmission;
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			CompProperties_FleckEmitter compProperties_FleckEmitter = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (compProperties_FleckEmitter.fleck == null)
+				{
+					_003C_003E2__current = "CompFleckEmitter must have a fleck assigned.";
+					_003C_003E1__state = 1;
+					return true;
+				}
+				break;
+			case 1:
+				_003C_003E1__state = -1;
+				break;
+			}
+			return false;
+		}
 
-		// Token: 0x0400A760 RID: 42848
-		[NoTranslate]
-		public string saveKeysPrefix;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__6 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__6(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	public FleckDef fleck;
+
+	public Vector3 offset;
+
+	public int emissionInterval = -1;
+
+	public SoundDef soundOnEmission;
+
+	[NoTranslate]
+	public string saveKeysPrefix;
+
+	public CompProperties_FleckEmitter()
+	{
+		compClass = typeof(CompFleckEmitter);
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__6))]
+	public override IEnumerable<string> ConfigErrors(ThingDef parentDef)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__6(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

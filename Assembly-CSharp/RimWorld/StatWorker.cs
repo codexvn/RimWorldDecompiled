@@ -1,1557 +1,1815 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
-{
-	// Token: 0x02003736 RID: 14134
-	public class StatWorker
-	{
-		// Token: 0x06013976 RID: 80246 RVA: 0x005CE898 File Offset: 0x005CCA98
-		public void InitSetStat(StatDef newStat)
-		{
-			this.stat = newStat;
-		}
+namespace RimWorld;
 
-		// Token: 0x06013977 RID: 80247 RVA: 0x005CE8A1 File Offset: 0x005CCAA1
-		public void SetCacheability(bool immutable)
+public class StatWorker
+{
+	[CompilerGenerated]
+	private sealed class _003CGetInfoCardHyperlinks_003Ed__29 : IEnumerable<Dialog_InfoCard.Hyperlink>, IEnumerable, IEnumerator<Dialog_InfoCard.Hyperlink>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Dialog_InfoCard.Hyperlink _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private StatRequest statRequest;
+
+		public StatRequest _003C_003E3__statRequest;
+
+		public StatWorker _003C_003E4__this;
+
+		private Pawn _003Cpawn_003E5__2;
+
+		private List<Hediff> _003Chediffs_003E5__3;
+
+		private int _003Ci_003E5__4;
+
+		private IEnumerator<Thing> _003C_003E7__wrap4;
+
+		private List<StatPart>.Enumerator _003C_003E7__wrap5;
+
+		private IEnumerator<Dialog_InfoCard.Hyperlink> _003C_003E7__wrap6;
+
+		Dialog_InfoCard.Hyperlink IEnumerator<Dialog_InfoCard.Hyperlink>.Current
 		{
-			this.immutableStatCache = (immutable ? new ConcurrentDictionary<Thing, float>() : null);
-			if (this.stat.cacheable)
+			[DebuggerHidden]
+			get
 			{
-				this.temporaryStatCache = new Dictionary<Thing, StatCacheEntry>();
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06013978 RID: 80248 RVA: 0x005CE8CC File Offset: 0x005CCACC
-		public float GetValue(Thing thing, bool applyPostProcess = true, int cacheStaleAfterTicks = -1)
+		object IEnumerator.Current
 		{
-			if (this.stat.immutable)
+			[DebuggerHidden]
+			get
 			{
-				float result;
-				if (this.immutableStatCache.TryGetValue(thing, out result))
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetInfoCardHyperlinks_003Ed__29(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			switch (num)
+			{
+			case -3:
+			case 2:
+				try
 				{
-					return result;
 				}
-				float value = this.GetValue(StatRequest.For(thing), applyPostProcess);
-				this.immutableStatCache[thing] = value;
-				return value;
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+				break;
+			case -5:
+			case -4:
+			case 3:
+				try
+				{
+					if (num == -5 || num == 3)
+					{
+						try
+						{
+						}
+						finally
+						{
+							_003C_003Em__Finally3();
+						}
+					}
+				}
+				finally
+				{
+					_003C_003Em__Finally2();
+				}
+				break;
+			}
+			_003Cpawn_003E5__2 = null;
+			_003Chediffs_003E5__3 = null;
+			_003C_003E7__wrap4 = null;
+			_003C_003E7__wrap5 = default(List<StatPart>.Enumerator);
+			_003C_003E7__wrap6 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				StatWorker statWorker = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+				{
+					_003C_003E1__state = -1;
+					Thing thing = statRequest.Thing;
+					_003Cpawn_003E5__2 = thing as Pawn;
+					if (_003Cpawn_003E5__2 == null)
+					{
+						break;
+					}
+					_003Chediffs_003E5__3 = _003Cpawn_003E5__2.health.hediffSet.hediffs;
+					_003Ci_003E5__4 = 0;
+					goto IL_0193;
+				}
+				case 1:
+					_003C_003E1__state = -1;
+					goto IL_0181;
+				case 2:
+					_003C_003E1__state = -3;
+					goto IL_0201;
+				case 3:
+					{
+						_003C_003E1__state = -5;
+						goto IL_02a2;
+					}
+					IL_0193:
+					if (_003Ci_003E5__4 < _003Chediffs_003E5__3.Count)
+					{
+						HediffStage curStage = _003Chediffs_003E5__3[_003Ci_003E5__4].CurStage;
+						if (curStage != null)
+						{
+							float num2 = curStage.statOffsets.GetStatOffsetFromList(statWorker.stat);
+							if (num2 != 0f && curStage.statOffsetEffectMultiplier != null)
+							{
+								num2 *= _003Cpawn_003E5__2.GetStatValue(curStage.statOffsetEffectMultiplier);
+							}
+							float num3 = curStage.statFactors.GetStatFactorFromList(statWorker.stat);
+							if (Math.Abs(num3 - 1f) > float.Epsilon && curStage.statFactorEffectMultiplier != null)
+							{
+								num3 = ScaleFactor(num3, _003Cpawn_003E5__2.GetStatValue(curStage.statFactorEffectMultiplier));
+							}
+							if (Mathf.Abs(num2) > 0f || Math.Abs(num3 - 1f) > float.Epsilon)
+							{
+								_003C_003E2__current = new Dialog_InfoCard.Hyperlink(_003Chediffs_003E5__3[_003Ci_003E5__4].def);
+								_003C_003E1__state = 1;
+								return true;
+							}
+						}
+						goto IL_0181;
+					}
+					_003C_003E7__wrap4 = RelevantGear(_003Cpawn_003E5__2, statWorker.stat).GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0201;
+					IL_02db:
+					_003Chediffs_003E5__3 = null;
+					break;
+					IL_0201:
+					if (_003C_003E7__wrap4.MoveNext())
+					{
+						Thing current = _003C_003E7__wrap4.Current;
+						_003C_003E2__current = new Dialog_InfoCard.Hyperlink(current);
+						_003C_003E1__state = 2;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap4 = null;
+					if (statWorker.stat.parts != null)
+					{
+						_003C_003E7__wrap5 = statWorker.stat.parts.GetEnumerator();
+						_003C_003E1__state = -4;
+						goto IL_02bc;
+					}
+					goto IL_02db;
+					IL_0181:
+					_003Ci_003E5__4++;
+					goto IL_0193;
+					IL_02a2:
+					if (_003C_003E7__wrap6.MoveNext())
+					{
+						Dialog_InfoCard.Hyperlink current2 = _003C_003E7__wrap6.Current;
+						_003C_003E2__current = current2;
+						_003C_003E1__state = 3;
+						return true;
+					}
+					_003C_003Em__Finally3();
+					_003C_003E7__wrap6 = null;
+					goto IL_02bc;
+					IL_02bc:
+					if (_003C_003E7__wrap5.MoveNext())
+					{
+						StatPart current3 = _003C_003E7__wrap5.Current;
+						_003C_003E7__wrap6 = current3.GetInfoCardHyperlinks(statRequest).GetEnumerator();
+						_003C_003E1__state = -5;
+						goto IL_02a2;
+					}
+					_003C_003Em__Finally2();
+					_003C_003E7__wrap5 = default(List<StatPart>.Enumerator);
+					goto IL_02db;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap4 != null)
+			{
+				_003C_003E7__wrap4.Dispose();
+			}
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap5/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		private void _003C_003Em__Finally3()
+		{
+			_003C_003E1__state = -4;
+			if (_003C_003E7__wrap6 != null)
+			{
+				_003C_003E7__wrap6.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Dialog_InfoCard.Hyperlink> IEnumerable<Dialog_InfoCard.Hyperlink>.GetEnumerator()
+		{
+			_003CGetInfoCardHyperlinks_003Ed__29 _003CGetInfoCardHyperlinks_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CGetInfoCardHyperlinks_003Ed__ = this;
 			}
 			else
 			{
-				int ticksGame = Find.TickManager.TicksGame;
-				StatCacheEntry statCacheEntry;
-				if (cacheStaleAfterTicks != -1 && this.temporaryStatCache != null && this.temporaryStatCache.TryGetValue(thing, out statCacheEntry) && ticksGame - statCacheEntry.gameTick < cacheStaleAfterTicks)
+				_003CGetInfoCardHyperlinks_003Ed__ = new _003CGetInfoCardHyperlinks_003Ed__29(0)
 				{
-					return statCacheEntry.statValue;
-				}
-				float value2 = this.GetValue(StatRequest.For(thing), true);
-				if (this.temporaryStatCache != null)
-				{
-					if (!this.temporaryStatCache.ContainsKey(thing))
-					{
-						this.temporaryStatCache[thing] = new StatCacheEntry(value2, ticksGame);
-					}
-					else
-					{
-						statCacheEntry = this.temporaryStatCache[thing];
-						statCacheEntry.statValue = value2;
-						statCacheEntry.gameTick = ticksGame;
-						this.temporaryStatCache[thing] = statCacheEntry;
-					}
-				}
-				return value2;
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
+			_003CGetInfoCardHyperlinks_003Ed__.statRequest = _003C_003E3__statRequest;
+			return _003CGetInfoCardHyperlinks_003Ed__;
 		}
 
-		// Token: 0x06013979 RID: 80249 RVA: 0x005CE9B6 File Offset: 0x005CCBB6
-		public float GetValue(Thing thing, Pawn pawn, bool applyPostProcess = true)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return this.GetValue(StatRequest.For(thing, pawn), applyPostProcess);
+			return ((IEnumerable<Dialog_InfoCard.Hyperlink>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x0601397A RID: 80250 RVA: 0x005CE9C8 File Offset: 0x005CCBC8
-		public float GetValue(StatRequest req, bool applyPostProcess = true)
+	[CompilerGenerated]
+	private sealed class _003CRelevantGear_003Ed__23 : IEnumerable<Thing>, IEnumerable, IEnumerator<Thing>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Thing _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private Pawn pawn;
+
+		public Pawn _003C_003E3__pawn;
+
+		private StatDef stat;
+
+		public StatDef _003C_003E3__stat;
+
+		private List<Apparel>.Enumerator _003C_003E7__wrap1;
+
+		private List<ThingWithComps>.Enumerator _003C_003E7__wrap2;
+
+		Thing IEnumerator<Thing>.Current
 		{
-			if (this.stat.minifiedThingInherits)
+			[DebuggerHidden]
+			get
 			{
-				MinifiedThing minifiedThing = req.Thing as MinifiedThing;
-				if (minifiedThing != null)
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CRelevantGear_003Ed__23(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			switch (_003C_003E1__state)
+			{
+			case -3:
+			case 1:
+				try
 				{
-					if (minifiedThing.InnerThing != null)
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+				break;
+			case -4:
+			case 2:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally2();
+				}
+				break;
+			}
+			_003C_003E7__wrap1 = default(List<Apparel>.Enumerator);
+			_003C_003E7__wrap2 = default(List<ThingWithComps>.Enumerator);
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				switch (_003C_003E1__state)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					if (pawn.apparel != null)
 					{
-						return minifiedThing.InnerThing.GetStatValue(this.stat, applyPostProcess, -1);
+						_003C_003E7__wrap1 = pawn.apparel.WornApparel.GetEnumerator();
+						_003C_003E1__state = -3;
+						goto IL_0098;
 					}
-					Log.Error("MinifiedThing's inner thing is null.");
+					goto IL_00b7;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0098;
+				case 2:
+					{
+						_003C_003E1__state = -4;
+						goto IL_0133;
+					}
+					IL_0098:
+					while (_003C_003E7__wrap1.MoveNext())
+					{
+						Apparel current = _003C_003E7__wrap1.Current;
+						if (GearAffectsStat(current.def, stat))
+						{
+							_003C_003E2__current = current;
+							_003C_003E1__state = 1;
+							return true;
+						}
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = default(List<Apparel>.Enumerator);
+					goto IL_00b7;
+					IL_0133:
+					while (_003C_003E7__wrap2.MoveNext())
+					{
+						ThingWithComps current2 = _003C_003E7__wrap2.Current;
+						if (GearAffectsStat(current2.def, stat) || GearHasCompsThatAffectStat(current2, stat))
+						{
+							_003C_003E2__current = current2;
+							_003C_003E1__state = 2;
+							return true;
+						}
+					}
+					_003C_003Em__Finally2();
+					_003C_003E7__wrap2 = default(List<ThingWithComps>.Enumerator);
+					break;
+					IL_00b7:
+					if (pawn.equipment == null)
+					{
+						break;
+					}
+					_003C_003E7__wrap2 = pawn.equipment.AllEquipmentListForReading.GetEnumerator();
+					_003C_003E1__state = -4;
+					goto IL_0133;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap1/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap2/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Thing> IEnumerable<Thing>.GetEnumerator()
+		{
+			_003CRelevantGear_003Ed__23 _003CRelevantGear_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CRelevantGear_003Ed__ = this;
+			}
+			else
+			{
+				_003CRelevantGear_003Ed__ = new _003CRelevantGear_003Ed__23(0);
+			}
+			_003CRelevantGear_003Ed__.pawn = _003C_003E3__pawn;
+			_003CRelevantGear_003Ed__.stat = _003C_003E3__stat;
+			return _003CRelevantGear_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Thing>)this).GetEnumerator();
+		}
+	}
+
+	public const int IGNORE_CACHE = -1;
+
+	private Dictionary<Thing, StatCacheEntry> temporaryStatCache;
+
+	private ConcurrentDictionary<Thing, float> immutableStatCache;
+
+	protected StatDef stat;
+
+	public void InitSetStat(StatDef newStat)
+	{
+		stat = newStat;
+	}
+
+	public void SetCacheability(bool immutable)
+	{
+		immutableStatCache = (immutable ? new ConcurrentDictionary<Thing, float>() : null);
+		if (stat.cacheable)
+		{
+			temporaryStatCache = new Dictionary<Thing, StatCacheEntry>();
+		}
+	}
+
+	public float GetValue(Thing thing, bool applyPostProcess = true, int cacheStaleAfterTicks = -1)
+	{
+		if (stat.immutable)
+		{
+			if (immutableStatCache.TryGetValue(thing, out var value))
+			{
+				return value;
+			}
+			float value2 = GetValue(StatRequest.For(thing), applyPostProcess);
+			immutableStatCache[thing] = value2;
+			return value2;
+		}
+		int ticksGame = Find.TickManager.TicksGame;
+		if (cacheStaleAfterTicks != -1 && temporaryStatCache != null && temporaryStatCache.TryGetValue(thing, out var value3) && ticksGame - value3.gameTick < cacheStaleAfterTicks)
+		{
+			return value3.statValue;
+		}
+		float value4 = GetValue(StatRequest.For(thing));
+		if (temporaryStatCache != null)
+		{
+			if (!temporaryStatCache.ContainsKey(thing))
+			{
+				temporaryStatCache[thing] = new StatCacheEntry(value4, ticksGame);
+			}
+			else
+			{
+				value3 = temporaryStatCache[thing];
+				value3.statValue = value4;
+				value3.gameTick = ticksGame;
+				temporaryStatCache[thing] = value3;
+			}
+		}
+		return value4;
+	}
+
+	public float GetValue(Thing thing, Pawn pawn, bool applyPostProcess = true)
+	{
+		return GetValue(StatRequest.For(thing, pawn), applyPostProcess);
+	}
+
+	public float GetValue(StatRequest req, bool applyPostProcess = true)
+	{
+		if (stat.minifiedThingInherits && req.Thing is MinifiedThing minifiedThing)
+		{
+			if (minifiedThing.InnerThing != null)
+			{
+				return minifiedThing.InnerThing.GetStatValue(stat, applyPostProcess);
+			}
+			Log.Error("MinifiedThing's inner thing is null.");
+		}
+		float val = GetValueUnfinalized(req, applyPostProcess);
+		FinalizeValue(req, ref val, applyPostProcess);
+		return val;
+	}
+
+	public float GetValueAbstract(BuildableDef def, ThingDef stuffDef = null)
+	{
+		return GetValue(StatRequest.For(def, stuffDef));
+	}
+
+	public float GetValueAbstract(AbilityDef def, Pawn forPawn = null)
+	{
+		return GetValue(StatRequest.For(def, forPawn));
+	}
+
+	public virtual float GetValueUnfinalized(StatRequest req, bool applyPostProcess = true)
+	{
+		if (!stat.supressDisabledError && Prefs.DevMode && IsDisabledFor(req.Thing))
+		{
+			Log.ErrorOnce($"Attempted to calculate value for disabled stat {stat}; this is meant as a consistency check, either set the stat to neverDisabled or ensure this pawn cannot accidentally use this stat (thing={req.Thing.ToStringSafe()})", 75193282 + stat.index);
+		}
+		float num = GetBaseValueFor(req);
+		Pawn pawn = req.Thing as Pawn;
+		if (pawn != null)
+		{
+			if (pawn.skills != null)
+			{
+				if (stat.skillNeedOffsets != null)
+				{
+					for (int i = 0; i < stat.skillNeedOffsets.Count; i++)
+					{
+						num += stat.skillNeedOffsets[i].ValueFor(pawn);
+					}
 				}
 			}
-			float valueUnfinalized = this.GetValueUnfinalized(req, applyPostProcess);
-			this.FinalizeValue(req, ref valueUnfinalized, applyPostProcess);
-			return valueUnfinalized;
-		}
-
-		// Token: 0x0601397B RID: 80251 RVA: 0x005CEA2C File Offset: 0x005CCC2C
-		public float GetValueAbstract(BuildableDef def, ThingDef stuffDef = null)
-		{
-			return this.GetValue(StatRequest.For(def, stuffDef, QualityCategory.Normal), true);
-		}
-
-		// Token: 0x0601397C RID: 80252 RVA: 0x005CEA3D File Offset: 0x005CCC3D
-		public float GetValueAbstract(AbilityDef def, Pawn forPawn = null)
-		{
-			return this.GetValue(StatRequest.For(def, forPawn), true);
-		}
-
-		// Token: 0x0601397D RID: 80253 RVA: 0x005CEA50 File Offset: 0x005CCC50
-		public virtual float GetValueUnfinalized(StatRequest req, bool applyPostProcess = true)
-		{
-			if (!this.stat.supressDisabledError && Prefs.DevMode && this.IsDisabledFor(req.Thing))
+			else
 			{
-				Log.ErrorOnce(string.Format("Attempted to calculate value for disabled stat {0}; this is meant as a consistency check, either set the stat to neverDisabled or ensure this pawn cannot accidentally use this stat (thing={1})", this.stat, req.Thing.ToStringSafe<Thing>()), 75193282 + (int)this.stat.index);
+				num += stat.noSkillOffset;
 			}
-			float num = this.GetBaseValueFor(req);
-			Pawn pawn = req.Thing as Pawn;
+			if (stat.capacityOffsets != null)
+			{
+				for (int j = 0; j < stat.capacityOffsets.Count; j++)
+				{
+					PawnCapacityOffset pawnCapacityOffset = stat.capacityOffsets[j];
+					num += pawnCapacityOffset.GetOffset(pawn.health.capacities.GetLevel(pawnCapacityOffset.capacity));
+				}
+			}
+			if (pawn.story != null)
+			{
+				for (int k = 0; k < pawn.story.traits.allTraits.Count; k++)
+				{
+					if (!pawn.story.traits.allTraits[k].Suppressed)
+					{
+						num += pawn.story.traits.allTraits[k].OffsetOfStat(stat);
+					}
+				}
+			}
+			List<Hediff> hediffs = pawn.health.hediffSet.hediffs;
+			for (int l = 0; l < hediffs.Count; l++)
+			{
+				HediffStage curStage = hediffs[l].CurStage;
+				if (curStage != null)
+				{
+					num += HediffStatsUtility.GetStatOffsetForSeverity(stat, curStage, pawn, hediffs[l].Severity);
+				}
+			}
+			if (pawn.Ideo != null)
+			{
+				List<Precept> preceptsListForReading = pawn.Ideo.PreceptsListForReading;
+				for (int m = 0; m < preceptsListForReading.Count; m++)
+				{
+					if (preceptsListForReading[m].def.statOffsets != null)
+					{
+						num += preceptsListForReading[m].def.statOffsets.GetStatOffsetFromList(stat);
+					}
+					if (preceptsListForReading[m].def.conditionalStatAffecters == null)
+					{
+						continue;
+					}
+					for (int n = 0; n < preceptsListForReading[m].def.conditionalStatAffecters.Count; n++)
+					{
+						ConditionalStatAffecter conditionalStatAffecter = preceptsListForReading[m].def.conditionalStatAffecters[n];
+						if (conditionalStatAffecter.statOffsets != null && conditionalStatAffecter.Applies(req))
+						{
+							num += conditionalStatAffecter.statOffsets.GetStatOffsetFromList(stat);
+						}
+					}
+				}
+				Precept_Role role = pawn.Ideo.GetRole(pawn);
+				if (role?.def.roleEffects != null)
+				{
+					foreach (RoleEffect roleEffect in role.def.roleEffects)
+					{
+						if (roleEffect is RoleEffect_PawnStatOffset roleEffect_PawnStatOffset && roleEffect_PawnStatOffset.statDef == stat)
+						{
+							num += roleEffect_PawnStatOffset.modifier;
+						}
+					}
+				}
+			}
+			if (ModsConfig.BiotechActive && pawn.genes != null)
+			{
+				List<Gene> genesListForReading = pawn.genes.GenesListForReading;
+				for (int num2 = 0; num2 < genesListForReading.Count; num2++)
+				{
+					if (!genesListForReading[num2].Active)
+					{
+						continue;
+					}
+					num += genesListForReading[num2].def.statOffsets.GetStatOffsetFromList(stat);
+					if (genesListForReading[num2].def.conditionalStatAffecters == null)
+					{
+						continue;
+					}
+					for (int num3 = 0; num3 < genesListForReading[num2].def.conditionalStatAffecters.Count; num3++)
+					{
+						ConditionalStatAffecter conditionalStatAffecter2 = genesListForReading[num2].def.conditionalStatAffecters[num3];
+						if (conditionalStatAffecter2.Applies(req))
+						{
+							num += conditionalStatAffecter2.statOffsets.GetStatOffsetFromList(stat);
+						}
+					}
+				}
+			}
+			num += pawn.ageTracker.CurLifeStage.statOffsets.GetStatOffsetFromList(stat);
+			if (pawn.apparel != null)
+			{
+				for (int num4 = 0; num4 < pawn.apparel.WornApparel.Count; num4++)
+				{
+					num += StatOffsetFromGear(pawn.apparel.WornApparel[num4], stat);
+				}
+			}
+			if (pawn.equipment?.Primary != null)
+			{
+				num += StatOffsetFromGear(pawn.equipment.Primary, stat);
+			}
+			if (pawn.story != null)
+			{
+				for (int num5 = 0; num5 < pawn.story.traits.allTraits.Count; num5++)
+				{
+					if (!pawn.story.traits.allTraits[num5].Suppressed)
+					{
+						num *= pawn.story.traits.allTraits[num5].MultiplierOfStat(stat);
+					}
+				}
+			}
+			for (int num6 = 0; num6 < hediffs.Count; num6++)
+			{
+				HediffStage curStage2 = hediffs[num6].CurStage;
+				if (curStage2 != null)
+				{
+					num *= HediffStatsUtility.GetStatFactorForSeverity(stat, curStage2, pawn, hediffs[num6].Severity);
+				}
+			}
+			if (pawn.Ideo != null)
+			{
+				List<Precept> preceptsListForReading2 = pawn.Ideo.PreceptsListForReading;
+				for (int num7 = 0; num7 < preceptsListForReading2.Count; num7++)
+				{
+					if (preceptsListForReading2[num7].def.statFactors != null)
+					{
+						num *= preceptsListForReading2[num7].def.statFactors.GetStatFactorFromList(stat);
+					}
+					if (preceptsListForReading2[num7].def.conditionalStatAffecters == null)
+					{
+						continue;
+					}
+					for (int num8 = 0; num8 < preceptsListForReading2[num7].def.conditionalStatAffecters.Count; num8++)
+					{
+						ConditionalStatAffecter conditionalStatAffecter3 = preceptsListForReading2[num7].def.conditionalStatAffecters[num8];
+						if (conditionalStatAffecter3.statFactors != null && conditionalStatAffecter3.Applies(req))
+						{
+							num *= conditionalStatAffecter3.statFactors.GetStatFactorFromList(stat);
+						}
+					}
+				}
+				Precept_Role role2 = pawn.Ideo.GetRole(pawn);
+				if (role2?.def.roleEffects != null)
+				{
+					foreach (RoleEffect roleEffect2 in role2.def.roleEffects)
+					{
+						if (roleEffect2 is RoleEffect_PawnStatFactor roleEffect_PawnStatFactor && roleEffect_PawnStatFactor.statDef == stat)
+						{
+							num *= roleEffect_PawnStatFactor.modifier;
+						}
+					}
+				}
+			}
+			if (ModsConfig.BiotechActive && pawn.genes != null)
+			{
+				List<Gene> genesListForReading2 = pawn.genes.GenesListForReading;
+				for (int num9 = 0; num9 < genesListForReading2.Count; num9++)
+				{
+					if (!genesListForReading2[num9].Active)
+					{
+						continue;
+					}
+					num *= genesListForReading2[num9].def.statFactors.GetStatFactorFromList(stat);
+					if (genesListForReading2[num9].def.conditionalStatAffecters == null)
+					{
+						continue;
+					}
+					for (int num10 = 0; num10 < genesListForReading2[num9].def.conditionalStatAffecters.Count; num10++)
+					{
+						ConditionalStatAffecter conditionalStatAffecter4 = genesListForReading2[num9].def.conditionalStatAffecters[num10];
+						if (conditionalStatAffecter4.Applies(req))
+						{
+							num *= conditionalStatAffecter4.statFactors.GetStatFactorFromList(stat);
+						}
+					}
+				}
+			}
+			num *= pawn.ageTracker.CurLifeStage.statFactors.GetStatFactorFromList(stat);
+		}
+		if (req.StuffDef != null)
+		{
+			if (num > 0f || stat.applyFactorsIfNegative)
+			{
+				num *= req.StuffDef.stuffProps.statFactors.GetStatFactorFromList(stat);
+				if (req.Thing.TryGetQuality(out var qc))
+				{
+					num *= req.StuffDef.stuffProps.statFactorsQuality.GetStatFactorFromList(stat, qc);
+				}
+			}
+			num += req.StuffDef.stuffProps.statOffsets.GetStatOffsetFromList(stat);
+			if (req.Thing.TryGetQuality(out var qc2))
+			{
+				num += req.StuffDef.stuffProps.statOffsetsQuality.GetStatOffsetFromList(stat, qc2);
+			}
+		}
+		if (req.ForAbility)
+		{
+			if (stat.statFactors != null)
+			{
+				for (int num11 = 0; num11 < stat.statFactors.Count; num11++)
+				{
+					num *= req.AbilityDef.statBases.GetStatValueFromList(stat.statFactors[num11], 1f);
+				}
+			}
+			Pawn pawn2 = req.Pawn;
+			if (pawn2?.Ideo != null)
+			{
+				List<Precept> preceptsListForReading3 = pawn2.Ideo.PreceptsListForReading;
+				for (int num12 = 0; num12 < preceptsListForReading3.Count; num12++)
+				{
+					if (preceptsListForReading3[num12].def.statFactors != null)
+					{
+						num *= preceptsListForReading3[num12].def.statFactors.GetStatFactorFromList(stat);
+					}
+					if (preceptsListForReading3[num12].def.abilityStatFactors == null)
+					{
+						continue;
+					}
+					foreach (AbilityStatModifiers abilityStatFactor in preceptsListForReading3[num12].def.abilityStatFactors)
+					{
+						if (abilityStatFactor.ability == req.AbilityDef)
+						{
+							num *= abilityStatFactor.modifiers.GetStatFactorFromList(stat);
+						}
+					}
+				}
+			}
+		}
+		if (req.HasThing)
+		{
+			if (req.Thing is ThingWithComps { AllComps: var allComps })
+			{
+				for (int num13 = 0; num13 < allComps.Count; num13++)
+				{
+					num += allComps[num13].GetStatOffset(stat);
+				}
+				for (int num14 = 0; num14 < allComps.Count; num14++)
+				{
+					num *= allComps[num14].GetStatFactor(stat);
+				}
+			}
+			if (stat.statFactors != null)
+			{
+				for (int num15 = 0; num15 < stat.statFactors.Count; num15++)
+				{
+					num *= req.Thing.GetStatValue(stat.statFactors[num15]);
+				}
+			}
 			if (pawn != null)
 			{
 				if (pawn.skills != null)
 				{
-					if (this.stat.skillNeedOffsets != null)
+					if (stat.skillNeedFactors != null)
 					{
-						for (int i = 0; i < this.stat.skillNeedOffsets.Count; i++)
+						for (int num16 = 0; num16 < stat.skillNeedFactors.Count; num16++)
 						{
-							num += this.stat.skillNeedOffsets[i].ValueFor(pawn);
+							num *= stat.skillNeedFactors[num16].ValueFor(pawn);
 						}
 					}
 				}
 				else
 				{
-					num += this.stat.noSkillOffset;
+					num *= stat.noSkillFactor;
 				}
-				if (this.stat.capacityOffsets != null)
+				if (stat.capacityFactors != null)
 				{
-					for (int j = 0; j < this.stat.capacityOffsets.Count; j++)
+					for (int num17 = 0; num17 < stat.capacityFactors.Count; num17++)
 					{
-						PawnCapacityOffset pawnCapacityOffset = this.stat.capacityOffsets[j];
-						num += pawnCapacityOffset.GetOffset(pawn.health.capacities.GetLevel(pawnCapacityOffset.capacity));
-					}
-				}
-				if (pawn.story != null)
-				{
-					for (int k = 0; k < pawn.story.traits.allTraits.Count; k++)
-					{
-						if (!pawn.story.traits.allTraits[k].Suppressed)
-						{
-							num += pawn.story.traits.allTraits[k].OffsetOfStat(this.stat);
-						}
-					}
-				}
-				List<Hediff> hediffs = pawn.health.hediffSet.hediffs;
-				for (int l = 0; l < hediffs.Count; l++)
-				{
-					HediffStage curStage = hediffs[l].CurStage;
-					if (curStage != null)
-					{
-						num += HediffStatsUtility.GetStatOffsetForSeverity(this.stat, curStage, pawn, hediffs[l].Severity);
-					}
-				}
-				if (pawn.Ideo != null)
-				{
-					List<Precept> preceptsListForReading = pawn.Ideo.PreceptsListForReading;
-					for (int m = 0; m < preceptsListForReading.Count; m++)
-					{
-						if (preceptsListForReading[m].def.statOffsets != null)
-						{
-							num += preceptsListForReading[m].def.statOffsets.GetStatOffsetFromList(this.stat);
-						}
-						if (preceptsListForReading[m].def.conditionalStatAffecters != null)
-						{
-							for (int n = 0; n < preceptsListForReading[m].def.conditionalStatAffecters.Count; n++)
-							{
-								ConditionalStatAffecter conditionalStatAffecter = preceptsListForReading[m].def.conditionalStatAffecters[n];
-								if (conditionalStatAffecter.statOffsets != null && conditionalStatAffecter.Applies(req))
-								{
-									num += conditionalStatAffecter.statOffsets.GetStatOffsetFromList(this.stat);
-								}
-							}
-						}
-					}
-					Precept_Role role = pawn.Ideo.GetRole(pawn);
-					if (((role != null) ? role.def.roleEffects : null) != null)
-					{
-						foreach (RoleEffect roleEffect in role.def.roleEffects)
-						{
-							RoleEffect_PawnStatOffset roleEffect_PawnStatOffset = roleEffect as RoleEffect_PawnStatOffset;
-							if (roleEffect_PawnStatOffset != null && roleEffect_PawnStatOffset.statDef == this.stat)
-							{
-								num += roleEffect_PawnStatOffset.modifier;
-							}
-						}
-					}
-				}
-				if (ModsConfig.BiotechActive && pawn.genes != null)
-				{
-					List<Gene> genesListForReading = pawn.genes.GenesListForReading;
-					for (int num2 = 0; num2 < genesListForReading.Count; num2++)
-					{
-						if (genesListForReading[num2].Active)
-						{
-							num += genesListForReading[num2].def.statOffsets.GetStatOffsetFromList(this.stat);
-							if (genesListForReading[num2].def.conditionalStatAffecters != null)
-							{
-								for (int num3 = 0; num3 < genesListForReading[num2].def.conditionalStatAffecters.Count; num3++)
-								{
-									ConditionalStatAffecter conditionalStatAffecter2 = genesListForReading[num2].def.conditionalStatAffecters[num3];
-									if (conditionalStatAffecter2.Applies(req))
-									{
-										num += conditionalStatAffecter2.statOffsets.GetStatOffsetFromList(this.stat);
-									}
-								}
-							}
-						}
-					}
-				}
-				num += pawn.ageTracker.CurLifeStage.statOffsets.GetStatOffsetFromList(this.stat);
-				if (pawn.apparel != null)
-				{
-					for (int num4 = 0; num4 < pawn.apparel.WornApparel.Count; num4++)
-					{
-						num += StatWorker.StatOffsetFromGear(pawn.apparel.WornApparel[num4], this.stat);
-					}
-				}
-				Pawn_EquipmentTracker equipment = pawn.equipment;
-				if (((equipment != null) ? equipment.Primary : null) != null)
-				{
-					num += StatWorker.StatOffsetFromGear(pawn.equipment.Primary, this.stat);
-				}
-				if (pawn.story != null)
-				{
-					for (int num5 = 0; num5 < pawn.story.traits.allTraits.Count; num5++)
-					{
-						if (!pawn.story.traits.allTraits[num5].Suppressed)
-						{
-							num *= pawn.story.traits.allTraits[num5].MultiplierOfStat(this.stat);
-						}
-					}
-				}
-				for (int num6 = 0; num6 < hediffs.Count; num6++)
-				{
-					HediffStage curStage2 = hediffs[num6].CurStage;
-					if (curStage2 != null)
-					{
-						num *= HediffStatsUtility.GetStatFactorForSeverity(this.stat, curStage2, pawn, hediffs[num6].Severity);
-					}
-				}
-				if (pawn.Ideo != null)
-				{
-					List<Precept> preceptsListForReading2 = pawn.Ideo.PreceptsListForReading;
-					for (int num7 = 0; num7 < preceptsListForReading2.Count; num7++)
-					{
-						if (preceptsListForReading2[num7].def.statFactors != null)
-						{
-							num *= preceptsListForReading2[num7].def.statFactors.GetStatFactorFromList(this.stat);
-						}
-						if (preceptsListForReading2[num7].def.conditionalStatAffecters != null)
-						{
-							for (int num8 = 0; num8 < preceptsListForReading2[num7].def.conditionalStatAffecters.Count; num8++)
-							{
-								ConditionalStatAffecter conditionalStatAffecter3 = preceptsListForReading2[num7].def.conditionalStatAffecters[num8];
-								if (conditionalStatAffecter3.statFactors != null && conditionalStatAffecter3.Applies(req))
-								{
-									num *= conditionalStatAffecter3.statFactors.GetStatFactorFromList(this.stat);
-								}
-							}
-						}
-					}
-					Precept_Role role2 = pawn.Ideo.GetRole(pawn);
-					if (((role2 != null) ? role2.def.roleEffects : null) != null)
-					{
-						foreach (RoleEffect roleEffect2 in role2.def.roleEffects)
-						{
-							RoleEffect_PawnStatFactor roleEffect_PawnStatFactor = roleEffect2 as RoleEffect_PawnStatFactor;
-							if (roleEffect_PawnStatFactor != null && roleEffect_PawnStatFactor.statDef == this.stat)
-							{
-								num *= roleEffect_PawnStatFactor.modifier;
-							}
-						}
-					}
-				}
-				if (ModsConfig.BiotechActive && pawn.genes != null)
-				{
-					List<Gene> genesListForReading2 = pawn.genes.GenesListForReading;
-					for (int num9 = 0; num9 < genesListForReading2.Count; num9++)
-					{
-						if (genesListForReading2[num9].Active)
-						{
-							num *= genesListForReading2[num9].def.statFactors.GetStatFactorFromList(this.stat);
-							if (genesListForReading2[num9].def.conditionalStatAffecters != null)
-							{
-								for (int num10 = 0; num10 < genesListForReading2[num9].def.conditionalStatAffecters.Count; num10++)
-								{
-									ConditionalStatAffecter conditionalStatAffecter4 = genesListForReading2[num9].def.conditionalStatAffecters[num10];
-									if (conditionalStatAffecter4.Applies(req))
-									{
-										num *= conditionalStatAffecter4.statFactors.GetStatFactorFromList(this.stat);
-									}
-								}
-							}
-						}
-					}
-				}
-				num *= pawn.ageTracker.CurLifeStage.statFactors.GetStatFactorFromList(this.stat);
-			}
-			if (req.StuffDef != null)
-			{
-				if (num > 0f || this.stat.applyFactorsIfNegative)
-				{
-					num *= req.StuffDef.stuffProps.statFactors.GetStatFactorFromList(this.stat);
-					QualityCategory qc;
-					if (req.Thing.TryGetQuality(out qc))
-					{
-						num *= req.StuffDef.stuffProps.statFactorsQuality.GetStatFactorFromList(this.stat, qc);
-					}
-				}
-				num += req.StuffDef.stuffProps.statOffsets.GetStatOffsetFromList(this.stat);
-				QualityCategory qc2;
-				if (req.Thing.TryGetQuality(out qc2))
-				{
-					num += req.StuffDef.stuffProps.statOffsetsQuality.GetStatOffsetFromList(this.stat, qc2);
-				}
-			}
-			if (req.ForAbility)
-			{
-				if (this.stat.statFactors != null)
-				{
-					for (int num11 = 0; num11 < this.stat.statFactors.Count; num11++)
-					{
-						num *= req.AbilityDef.statBases.GetStatValueFromList(this.stat.statFactors[num11], 1f);
-					}
-				}
-				Pawn pawn2 = req.Pawn;
-				if (((pawn2 != null) ? pawn2.Ideo : null) != null)
-				{
-					List<Precept> preceptsListForReading3 = pawn2.Ideo.PreceptsListForReading;
-					for (int num12 = 0; num12 < preceptsListForReading3.Count; num12++)
-					{
-						if (preceptsListForReading3[num12].def.statFactors != null)
-						{
-							num *= preceptsListForReading3[num12].def.statFactors.GetStatFactorFromList(this.stat);
-						}
-						if (preceptsListForReading3[num12].def.abilityStatFactors != null)
-						{
-							foreach (AbilityStatModifiers abilityStatModifiers in preceptsListForReading3[num12].def.abilityStatFactors)
-							{
-								if (abilityStatModifiers.ability == req.AbilityDef)
-								{
-									num *= abilityStatModifiers.modifiers.GetStatFactorFromList(this.stat);
-								}
-							}
-						}
-					}
-				}
-			}
-			if (req.HasThing)
-			{
-				ThingWithComps thingWithComps = req.Thing as ThingWithComps;
-				if (thingWithComps != null)
-				{
-					List<ThingComp> allComps = thingWithComps.AllComps;
-					for (int num13 = 0; num13 < allComps.Count; num13++)
-					{
-						num += allComps[num13].GetStatOffset(this.stat);
-					}
-					for (int num14 = 0; num14 < allComps.Count; num14++)
-					{
-						num *= allComps[num14].GetStatFactor(this.stat);
-					}
-				}
-				if (this.stat.statFactors != null)
-				{
-					for (int num15 = 0; num15 < this.stat.statFactors.Count; num15++)
-					{
-						num *= req.Thing.GetStatValue(this.stat.statFactors[num15], true, -1);
-					}
-				}
-				if (pawn != null)
-				{
-					if (pawn.skills != null)
-					{
-						if (this.stat.skillNeedFactors != null)
-						{
-							for (int num16 = 0; num16 < this.stat.skillNeedFactors.Count; num16++)
-							{
-								num *= this.stat.skillNeedFactors[num16].ValueFor(pawn);
-							}
-						}
-					}
-					else
-					{
-						num *= this.stat.noSkillFactor;
-					}
-					if (this.stat.capacityFactors != null)
-					{
-						for (int num17 = 0; num17 < this.stat.capacityFactors.Count; num17++)
-						{
-							PawnCapacityFactor pawnCapacityFactor = this.stat.capacityFactors[num17];
-							float factor = pawnCapacityFactor.GetFactor(pawn.health.capacities.GetLevel(pawnCapacityFactor.capacity));
-							num = Mathf.Lerp(num, num * factor, pawnCapacityFactor.weight);
-						}
-					}
-					if (pawn.Inspired)
-					{
-						num += pawn.InspirationDef.statOffsets.GetStatOffsetFromList(this.stat);
-						num *= pawn.InspirationDef.statFactors.GetStatFactorFromList(this.stat);
-					}
-				}
-			}
-			return num;
-		}
-
-		// Token: 0x0601397E RID: 80254 RVA: 0x005CF674 File Offset: 0x005CD874
-		public virtual string GetExplanationUnfinalized(StatRequest req, ToStringNumberSense numberSense)
-		{
-			StringBuilder stringBuilder = new StringBuilder();
-			float baseValueFor = this.GetBaseValueFor(req);
-			if (baseValueFor != 0f || this.stat.showZeroBaseValue)
-			{
-				stringBuilder.AppendLine("StatsReport_BaseValue".Translate() + ": " + this.stat.ValueToString(baseValueFor, numberSense, true));
-			}
-			this.GetOffsetsAndFactorsExplanation(req, stringBuilder, baseValueFor, "");
-			return stringBuilder.ToString();
-		}
-
-		// Token: 0x0601397F RID: 80255 RVA: 0x005CF6EC File Offset: 0x005CD8EC
-		public void GetOffsetsAndFactorsExplanation(StatRequest req, StringBuilder sb, float baseValue, string whitespace = "")
-		{
-			Pawn pawn = req.Thing as Pawn;
-			if (pawn != null)
-			{
-				if (pawn.skills != null)
-				{
-					if (this.stat.skillNeedOffsets != null)
-					{
-						sb.AppendLine(whitespace + "StatsReport_Skills".Translate());
-						for (int i = 0; i < this.stat.skillNeedOffsets.Count; i++)
-						{
-							SkillNeed skillNeed = this.stat.skillNeedOffsets[i];
-							int level = pawn.skills.GetSkill(skillNeed.skill).Level;
-							float val = skillNeed.ValueFor(pawn);
-							sb.AppendLine(string.Concat(new string[]
-							{
-								"    " + skillNeed.skill.LabelCap + " (",
-								level.ToString(),
-								"): ",
-								val.ToStringSign(),
-								this.ValueToString(val, false, ToStringNumberSense.Absolute)
-							}));
-						}
-					}
-				}
-				else if (this.stat.noSkillOffset != 0f)
-				{
-					sb.AppendLine(whitespace + "StatsReport_Skills".Translate());
-					sb.AppendLine(whitespace + "    " + "default".Translate().CapitalizeFirst() + " : " + this.stat.noSkillOffset.ToStringSign() + this.ValueToString(this.stat.noSkillOffset, false, ToStringNumberSense.Absolute));
-				}
-				if (this.stat.capacityOffsets != null)
-				{
-					sb.AppendLine(whitespace + ("StatsReport_Health".CanTranslate() ? "StatsReport_Health".Translate() : "StatsReport_HealthFactors".Translate()));
-					foreach (PawnCapacityOffset pawnCapacityOffset in from hfa in this.stat.capacityOffsets
-					orderby hfa.capacity.listOrder
-					select hfa)
-					{
-						string text = pawnCapacityOffset.capacity.GetLabelFor(pawn).CapitalizeFirst();
-						float level2 = pawn.health.capacities.GetLevel(pawnCapacityOffset.capacity);
-						float offset = pawnCapacityOffset.GetOffset(pawn.health.capacities.GetLevel(pawnCapacityOffset.capacity));
-						string text2 = this.ValueToString(offset, false, ToStringNumberSense.Absolute);
-						string text3 = Mathf.Min(level2, pawnCapacityOffset.max).ToStringPercent() + ", " + "HealthOffsetScale".Translate(pawnCapacityOffset.scale.ToString() + "x");
-						if (pawnCapacityOffset.max < 999f)
-						{
-							text3 += ", " + "HealthFactorMaxImpact".Translate(pawnCapacityOffset.max.ToStringPercent());
-						}
-						sb.AppendLine(string.Concat(new string[]
-						{
-							whitespace,
-							"    ",
-							text,
-							": ",
-							offset.ToStringSign(),
-							text2,
-							" (",
-							text3,
-							")"
-						}));
-					}
-				}
-				if (pawn.RaceProps.intelligence >= Intelligence.ToolUser)
-				{
-					Pawn_StoryTracker story = pawn.story;
-					if (((story != null) ? story.traits : null) != null)
-					{
-						List<Trait> list = (from tr in pawn.story.traits.allTraits
-						where !tr.Suppressed && tr.CurrentData.statOffsets != null && tr.CurrentData.statOffsets.Any((StatModifier se) => se.stat == this.stat)
-						select tr).ToList<Trait>();
-						List<Trait> list2 = (from tr in pawn.story.traits.allTraits
-						where !tr.Suppressed && tr.CurrentData.statFactors != null && tr.CurrentData.statFactors.Any((StatModifier se) => se.stat == this.stat)
-						select tr).ToList<Trait>();
-						if (list.Count > 0 || list2.Count > 0)
-						{
-							sb.AppendLine(whitespace + "StatsReport_RelevantTraits".Translate());
-							for (int j = 0; j < list.Count; j++)
-							{
-								Trait trait = list[j];
-								string valueToStringAsOffset = trait.CurrentData.statOffsets.First((StatModifier se) => se.stat == this.stat).ValueToStringAsOffset;
-								sb.AppendLine(string.Concat(new string[]
-								{
-									whitespace,
-									"    ",
-									trait.LabelCap,
-									": ",
-									valueToStringAsOffset
-								}));
-							}
-							for (int k = 0; k < list2.Count; k++)
-							{
-								Trait trait2 = list2[k];
-								string toStringAsFactor = trait2.CurrentData.statFactors.First((StatModifier se) => se.stat == this.stat).ToStringAsFactor;
-								sb.AppendLine(string.Concat(new string[]
-								{
-									whitespace,
-									"    ",
-									trait2.LabelCap,
-									": ",
-									toStringAsFactor
-								}));
-							}
-						}
-					}
-					if (StatWorker.RelevantGear(pawn, this.stat).Any<Thing>())
-					{
-						sb.AppendLine(whitespace + "StatsReport_RelevantGear".Translate());
-						if (pawn.apparel != null)
-						{
-							for (int l = 0; l < pawn.apparel.WornApparel.Count; l++)
-							{
-								Apparel apparel = pawn.apparel.WornApparel[l];
-								if (StatWorker.GearAffectsStat(apparel.def, this.stat))
-								{
-									sb.AppendLine(whitespace + StatWorker.InfoTextLineFromGear(apparel, this.stat));
-								}
-							}
-						}
-						Pawn_EquipmentTracker equipment = pawn.equipment;
-						if (((equipment != null) ? equipment.Primary : null) != null && (StatWorker.GearAffectsStat(pawn.equipment.Primary.def, this.stat) || StatWorker.GearHasCompsThatAffectStat(pawn.equipment.Primary, this.stat)))
-						{
-							sb.AppendLine(whitespace + StatWorker.InfoTextLineFromGear(pawn.equipment.Primary, this.stat));
-						}
-					}
-				}
-				bool flag = false;
-				List<Hediff> hediffs = pawn.health.hediffSet.hediffs;
-				for (int m = 0; m < hediffs.Count; m++)
-				{
-					HediffStage curStage = hediffs[m].CurStage;
-					if (curStage != null)
-					{
-						float num = curStage.statOffsets.GetStatOffsetFromList(this.stat);
-						if (num != 0f)
-						{
-							float val2 = num;
-							if (curStage.statOffsetEffectMultiplier != null)
-							{
-								num *= pawn.GetStatValue(curStage.statOffsetEffectMultiplier, true, -1);
-							}
-							if (curStage.multiplyStatChangesBySeverity)
-							{
-								num *= hediffs[m].Severity;
-							}
-							if (!flag)
-							{
-								sb.AppendLine(whitespace + "StatsReport_RelevantHediffs".Translate());
-								flag = true;
-							}
-							sb.Append(string.Concat(new string[]
-							{
-								whitespace,
-								"    ",
-								hediffs[m].LabelBaseCap,
-								": ",
-								this.ValueToString(num, false, ToStringNumberSense.Offset)
-							}));
-							if (curStage.statOffsetEffectMultiplier != null)
-							{
-								sb.Append(string.Concat(new string[]
-								{
-									whitespace,
-									" (",
-									this.ValueToString(val2, false, ToStringNumberSense.Offset),
-									" x ",
-									this.ValueToString(pawn.GetStatValue(curStage.statOffsetEffectMultiplier, true, -1), true, curStage.statOffsetEffectMultiplier.toStringNumberSense),
-									" "
-								}) + curStage.statOffsetEffectMultiplier.LabelCap + ")");
-							}
-							sb.AppendLine();
-						}
-						float num2 = curStage.statFactors.GetStatFactorFromList(this.stat);
-						if (Math.Abs(num2 - 1f) > 1E-45f)
-						{
-							float val3 = num2;
-							if (curStage.multiplyStatChangesBySeverity)
-							{
-								num2 = StatWorker.ScaleFactor(num2, hediffs[m].Severity);
-							}
-							if (curStage.statFactorEffectMultiplier != null)
-							{
-								num2 = StatWorker.ScaleFactor(num2, pawn.GetStatValue(curStage.statFactorEffectMultiplier, true, -1));
-							}
-							if (!flag)
-							{
-								sb.AppendLine(whitespace + "StatsReport_RelevantHediffs".Translate());
-								flag = true;
-							}
-							sb.Append("    " + hediffs[m].LabelBaseCap + ": " + this.ValueToString(num2, false, ToStringNumberSense.Factor));
-							if (curStage.statFactorEffectMultiplier != null)
-							{
-								sb.Append(string.Concat(new string[]
-								{
-									whitespace,
-									" (",
-									this.ValueToString(val3, false, ToStringNumberSense.Factor),
-									" x ",
-									this.ValueToString(pawn.GetStatValue(curStage.statFactorEffectMultiplier, true, -1), false, ToStringNumberSense.Absolute),
-									" "
-								}) + curStage.statFactorEffectMultiplier.LabelCap + ")");
-							}
-							sb.AppendLine();
-						}
-					}
-				}
-				if (pawn.Ideo != null)
-				{
-					List<Precept> preceptsListForReading = pawn.Ideo.PreceptsListForReading;
-					for (int n = 0; n < preceptsListForReading.Count; n++)
-					{
-						float statOffsetFromList = preceptsListForReading[n].def.statOffsets.GetStatOffsetFromList(this.stat);
-						if (statOffsetFromList != 0f)
-						{
-							sb.AppendLine(whitespace + "StatsReport_Ideoligion".Translate() + ": " + this.ValueToString(statOffsetFromList, false, ToStringNumberSense.Offset));
-						}
-						float statFactorFromList = preceptsListForReading[n].def.statFactors.GetStatFactorFromList(this.stat);
-						if (Math.Abs(statFactorFromList - 1f) > 1E-45f)
-						{
-							sb.AppendLine(whitespace + "StatsReport_Ideoligion".Translate() + ": " + this.ValueToString(statFactorFromList, false, ToStringNumberSense.Factor));
-						}
-						if (preceptsListForReading[n].def.conditionalStatAffecters != null)
-						{
-							for (int num3 = 0; num3 < preceptsListForReading[n].def.conditionalStatAffecters.Count; num3++)
-							{
-								ConditionalStatAffecter conditionalStatAffecter = preceptsListForReading[n].def.conditionalStatAffecters[num3];
-								if (conditionalStatAffecter.Applies(req))
-								{
-									float statOffsetFromList2 = conditionalStatAffecter.statOffsets.GetStatOffsetFromList(this.stat);
-									if (statOffsetFromList2 != 0f)
-									{
-										sb.AppendLine(whitespace + "StatsReport_Ideoligion".Translate() + ": " + this.ValueToString(statOffsetFromList2, false, ToStringNumberSense.Offset));
-									}
-									float statFactorFromList2 = conditionalStatAffecter.statFactors.GetStatFactorFromList(this.stat);
-									if (statFactorFromList2 != 1f)
-									{
-										sb.AppendLine(whitespace + "StatsReport_Ideoligion".Translate() + ": " + this.ValueToString(statFactorFromList2, false, ToStringNumberSense.Factor));
-									}
-								}
-							}
-						}
-					}
-					Precept_Role role = pawn.Ideo.GetRole(pawn);
-					if (((role != null) ? role.def.roleEffects : null) != null)
-					{
-						foreach (RoleEffect roleEffect in role.def.roleEffects)
-						{
-							RoleEffect_PawnStatOffset roleEffect_PawnStatOffset = roleEffect as RoleEffect_PawnStatOffset;
-							if (roleEffect_PawnStatOffset != null)
-							{
-								if (roleEffect_PawnStatOffset.statDef == this.stat)
-								{
-									sb.AppendLine(whitespace + role.LabelCap + ": " + this.ValueToString(roleEffect_PawnStatOffset.modifier, false, ToStringNumberSense.Offset));
-								}
-							}
-							else
-							{
-								RoleEffect_PawnStatFactor roleEffect_PawnStatFactor = roleEffect as RoleEffect_PawnStatFactor;
-								if (roleEffect_PawnStatFactor != null && roleEffect_PawnStatFactor.statDef == this.stat)
-								{
-									sb.AppendLine(whitespace + role.LabelCap + ": " + this.ValueToString(roleEffect_PawnStatFactor.modifier, false, ToStringNumberSense.Factor));
-								}
-							}
-						}
-					}
-				}
-				if (ModsConfig.BiotechActive && pawn.genes != null)
-				{
-					bool flag2 = false;
-					List<Gene> genesListForReading = pawn.genes.GenesListForReading;
-					for (int num4 = 0; num4 < genesListForReading.Count; num4++)
-					{
-						if (genesListForReading[num4].Active)
-						{
-							float statOffsetFromList3 = genesListForReading[num4].def.statOffsets.GetStatOffsetFromList(this.stat);
-							if (statOffsetFromList3 != 0f)
-							{
-								if (!flag2)
-								{
-									sb.AppendLine(whitespace + "StatsReport_Genes".Translate());
-									flag2 = true;
-								}
-								sb.AppendLine(string.Concat(new string[]
-								{
-									whitespace,
-									"    ",
-									genesListForReading[num4].LabelCap,
-									": ",
-									this.ValueToString(statOffsetFromList3, false, ToStringNumberSense.Offset)
-								}));
-							}
-							float statFactorFromList3 = genesListForReading[num4].def.statFactors.GetStatFactorFromList(this.stat);
-							if (statFactorFromList3 != 1f)
-							{
-								if (!flag2)
-								{
-									sb.AppendLine(whitespace + "StatsReport_Genes".Translate());
-									flag2 = true;
-								}
-								sb.AppendLine(string.Concat(new string[]
-								{
-									whitespace,
-									"    ",
-									genesListForReading[num4].LabelCap,
-									": ",
-									this.ValueToString(statFactorFromList3, false, ToStringNumberSense.Factor)
-								}));
-							}
-							if (genesListForReading[num4].def.conditionalStatAffecters != null)
-							{
-								for (int num5 = 0; num5 < genesListForReading[num4].def.conditionalStatAffecters.Count; num5++)
-								{
-									ConditionalStatAffecter conditionalStatAffecter2 = genesListForReading[num4].def.conditionalStatAffecters[num5];
-									if (conditionalStatAffecter2.Applies(req))
-									{
-										float statOffsetFromList4 = conditionalStatAffecter2.statOffsets.GetStatOffsetFromList(this.stat);
-										if (statOffsetFromList4 != 0f)
-										{
-											if (!flag2)
-											{
-												sb.AppendLine(whitespace + "StatsReport_Genes".Translate());
-												flag2 = true;
-											}
-											sb.AppendLine(string.Concat(new string[]
-											{
-												whitespace,
-												"    ",
-												genesListForReading[num4].LabelCap,
-												" (",
-												conditionalStatAffecter2.Label,
-												"): ",
-												this.ValueToString(statOffsetFromList4, false, ToStringNumberSense.Offset)
-											}));
-										}
-										float statFactorFromList4 = conditionalStatAffecter2.statFactors.GetStatFactorFromList(this.stat);
-										if (statFactorFromList4 != 1f)
-										{
-											if (!flag2)
-											{
-												sb.AppendLine(whitespace + "StatsReport_Genes".Translate());
-												flag2 = true;
-											}
-											sb.AppendLine(string.Concat(new string[]
-											{
-												whitespace,
-												"    ",
-												genesListForReading[num4].LabelCap,
-												" (",
-												conditionalStatAffecter2.Label,
-												"): ",
-												this.ValueToString(statFactorFromList4, false, ToStringNumberSense.Factor)
-											}));
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-				float statOffsetFromList5 = pawn.ageTracker.CurLifeStage.statOffsets.GetStatOffsetFromList(this.stat);
-				if (statOffsetFromList5 != 0f)
-				{
-					sb.AppendLine(whitespace + "StatsReport_LifeStage".Translate() + " (" + pawn.ageTracker.CurLifeStage.label + "): " + statOffsetFromList5.ToStringByStyle(this.stat.toStringStyle, ToStringNumberSense.Offset));
-				}
-				float statFactorFromList5 = pawn.ageTracker.CurLifeStage.statFactors.GetStatFactorFromList(this.stat);
-				if (statFactorFromList5 != 1f)
-				{
-					sb.AppendLine(whitespace + "StatsReport_LifeStage".Translate() + " (" + pawn.ageTracker.CurLifeStage.label + "): " + statFactorFromList5.ToStringByStyle(ToStringStyle.PercentZero, ToStringNumberSense.Factor));
-				}
-			}
-			if (req.StuffDef != null)
-			{
-				if (baseValue > 0f || this.stat.applyFactorsIfNegative)
-				{
-					float statFactorFromList6 = req.StuffDef.stuffProps.statFactors.GetStatFactorFromList(this.stat);
-					if (statFactorFromList6 != 1f)
-					{
-						sb.AppendLine(whitespace + "StatsReport_Material".Translate() + " (" + req.StuffDef.LabelCap + "): " + statFactorFromList6.ToStringByStyle(ToStringStyle.PercentZero, ToStringNumberSense.Factor));
-					}
-					FloatRange floatRange;
-					if (req.StuffDef.stuffProps.statFactorsQuality != null && req.StuffDef.stuffProps.statFactorsQuality.TryGetStatFactorRangeFromList(this.stat, out floatRange))
-					{
-						string text4 = floatRange.min.ToStringByStyle(ToStringStyle.PercentZero, ToStringNumberSense.Factor);
-						string text5 = floatRange.max.ToStringByStyle(ToStringStyle.PercentZero, ToStringNumberSense.Factor);
-						sb.AppendLine(whitespace + string.Format("{0} ({1}): {2} ~ {3}", new object[]
-						{
-							"StatsReport_Material".Translate(),
-							req.StuffDef.LabelCap,
-							text4,
-							text5
-						}));
-					}
-				}
-				float statOffsetFromList6 = req.StuffDef.stuffProps.statOffsets.GetStatOffsetFromList(this.stat);
-				if (statOffsetFromList6 != 0f)
-				{
-					sb.AppendLine(whitespace + "StatsReport_Material".Translate() + " (" + req.StuffDef.LabelCap + "): " + statOffsetFromList6.ToStringByStyle(this.stat.toStringStyle, ToStringNumberSense.Offset));
-				}
-				FloatRange floatRange2;
-				if (req.StuffDef.stuffProps.statOffsetsQuality != null && req.StuffDef.stuffProps.statOffsetsQuality.TryGetStatOffsetRangeFromList(this.stat, out floatRange2))
-				{
-					string text6 = floatRange2.min.ToStringByStyle(this.stat.toStringStyle, ToStringNumberSense.Offset);
-					string text7 = floatRange2.max.ToStringByStyle(this.stat.toStringStyle, ToStringNumberSense.Offset);
-					sb.AppendLine(whitespace + string.Format("{0} ({1}): {2} ~ {3}", new object[]
-					{
-						"StatsReport_Material".Translate(),
-						req.StuffDef.LabelCap,
-						text6,
-						text7
-					}));
-				}
-			}
-			ThingWithComps thingWithComps = req.Thing as ThingWithComps;
-			if (thingWithComps != null)
-			{
-				List<ThingComp> allComps = thingWithComps.AllComps;
-				for (int num6 = 0; num6 < allComps.Count; num6++)
-				{
-					allComps[num6].GetStatsExplanation(this.stat, sb, whitespace);
-				}
-			}
-			if (this.stat.statFactors != null)
-			{
-				sb.AppendLine(whitespace + this.stat.statFactorsExplanationHeader);
-				for (int num7 = 0; num7 < this.stat.statFactors.Count; num7++)
-				{
-					StatDef statDef = this.stat.statFactors[num7];
-					sb.AppendLine(whitespace + "    " + statDef.LabelCap + ": x" + statDef.Worker.GetValue(req, true).ToStringPercent());
-				}
-			}
-			if (pawn != null)
-			{
-				if (pawn.skills != null)
-				{
-					if (this.stat.skillNeedFactors != null)
-					{
-						sb.AppendLine(whitespace + "StatsReport_Skills".Translate());
-						for (int num8 = 0; num8 < this.stat.skillNeedFactors.Count; num8++)
-						{
-							SkillNeed skillNeed2 = this.stat.skillNeedFactors[num8];
-							int level3 = pawn.skills.GetSkill(skillNeed2.skill).Level;
-							sb.AppendLine(whitespace + "    " + skillNeed2.skill.LabelCap + " (" + level3.ToString() + "): x" + skillNeed2.ValueFor(pawn).ToStringPercent());
-						}
-					}
-				}
-				else if (this.stat.noSkillFactor != 1f)
-				{
-					sb.AppendLine(whitespace + "StatsReport_Skills".Translate());
-					sb.AppendLine(whitespace + "    " + "default".Translate().CapitalizeFirst() + " : x" + this.stat.noSkillFactor.ToStringPercent());
-				}
-				if (this.stat.capacityFactors != null)
-				{
-					sb.AppendLine(whitespace + ("StatsReport_Health".CanTranslate() ? "StatsReport_Health".Translate() : "StatsReport_HealthFactors".Translate()));
-					if (this.stat.capacityFactors != null)
-					{
-						foreach (PawnCapacityFactor pawnCapacityFactor in from hfa in this.stat.capacityFactors
-						orderby hfa.capacity.listOrder
-						select hfa)
-						{
-							string text8 = pawnCapacityFactor.capacity.GetLabelFor(pawn).CapitalizeFirst();
-							string text9 = pawnCapacityFactor.GetFactor(pawn.health.capacities.GetLevel(pawnCapacityFactor.capacity)).ToStringPercent();
-							string text10 = "HealthFactorPercentImpact".Translate(pawnCapacityFactor.weight.ToStringPercent());
-							if (pawnCapacityFactor.max < 999f)
-							{
-								text10 += ", " + "HealthFactorMaxImpact".Translate(pawnCapacityFactor.max.ToStringPercent());
-							}
-							if (pawnCapacityFactor.allowedDefect != 0f)
-							{
-								text10 += ", " + "HealthFactorAllowedDefect".Translate((1f - pawnCapacityFactor.allowedDefect).ToStringPercent());
-							}
-							sb.AppendLine(string.Concat(new string[]
-							{
-								whitespace,
-								"    ",
-								text8,
-								": x",
-								text9,
-								" (",
-								text10,
-								")"
-							}));
-						}
+						PawnCapacityFactor pawnCapacityFactor = stat.capacityFactors[num17];
+						float factor = pawnCapacityFactor.GetFactor(pawn.health.capacities.GetLevel(pawnCapacityFactor.capacity));
+						num = Mathf.Lerp(num, num * factor, pawnCapacityFactor.weight);
 					}
 				}
 				if (pawn.Inspired)
 				{
-					float statOffsetFromList7 = pawn.InspirationDef.statOffsets.GetStatOffsetFromList(this.stat);
-					if (statOffsetFromList7 != 0f)
-					{
-						sb.AppendLine(whitespace + "StatsReport_Inspiration".Translate(pawn.Inspiration.def.LabelCap) + ": " + this.ValueToString(statOffsetFromList7, false, ToStringNumberSense.Offset));
-					}
-					float statFactorFromList7 = pawn.InspirationDef.statFactors.GetStatFactorFromList(this.stat);
-					if (statFactorFromList7 != 1f)
-					{
-						sb.AppendLine(whitespace + "StatsReport_Inspiration".Translate(pawn.Inspiration.def.LabelCap) + ": " + statFactorFromList7.ToStringByStyle(ToStringStyle.PercentZero, ToStringNumberSense.Factor));
-					}
+					num += pawn.InspirationDef.statOffsets.GetStatOffsetFromList(stat);
+					num *= pawn.InspirationDef.statFactors.GetStatFactorFromList(stat);
 				}
 			}
 		}
+		return num;
+	}
 
-		// Token: 0x06013980 RID: 80256 RVA: 0x005D0EE8 File Offset: 0x005CF0E8
-		public virtual void FinalizeValue(StatRequest req, ref float val, bool applyPostProcess)
+	public virtual string GetExplanationUnfinalized(StatRequest req, ToStringNumberSense numberSense)
+	{
+		StringBuilder stringBuilder = new StringBuilder();
+		float baseValueFor = GetBaseValueFor(req);
+		if (baseValueFor != 0f || stat.showZeroBaseValue)
 		{
-			if (this.stat.parts != null)
+			stringBuilder.AppendLine("StatsReport_BaseValue".Translate() + ": " + stat.ValueToString(baseValueFor, numberSense));
+		}
+		GetOffsetsAndFactorsExplanation(req, stringBuilder, baseValueFor);
+		return stringBuilder.ToString();
+	}
+
+	public void GetOffsetsAndFactorsExplanation(StatRequest req, StringBuilder sb, float baseValue, string whitespace = "")
+	{
+		Pawn pawn = req.Thing as Pawn;
+		if (pawn != null)
+		{
+			if (pawn.skills != null)
 			{
-				for (int i = 0; i < this.stat.parts.Count; i++)
+				if (stat.skillNeedOffsets != null)
 				{
-					this.stat.parts[i].TransformValue(req, ref val);
+					sb.AppendLine(whitespace + "StatsReport_Skills".Translate());
+					for (int i = 0; i < stat.skillNeedOffsets.Count; i++)
+					{
+						SkillNeed skillNeed = stat.skillNeedOffsets[i];
+						int level = pawn.skills.GetSkill(skillNeed.skill).Level;
+						float val = skillNeed.ValueFor(pawn);
+						sb.AppendLine(string.Concat("    " + skillNeed.skill.LabelCap + " (", level.ToString(), "): ", val.ToStringSign(), ValueToString(val, finalized: false)));
+					}
 				}
 			}
-			if (applyPostProcess && this.stat.postProcessCurve != null)
+			else if (stat.noSkillOffset != 0f)
 			{
-				val = this.stat.postProcessCurve.Evaluate(val);
+				sb.AppendLine(whitespace + "StatsReport_Skills".Translate());
+				sb.AppendLine(whitespace + "    " + "default".Translate().CapitalizeFirst() + " : " + stat.noSkillOffset.ToStringSign() + ValueToString(stat.noSkillOffset, finalized: false));
 			}
-			if (applyPostProcess && !this.stat.postProcessStatFactors.NullOrEmpty<StatDef>() && req.HasThing)
+			if (stat.capacityOffsets != null)
 			{
-				for (int j = 0; j < this.stat.postProcessStatFactors.Count; j++)
+				sb.AppendLine(whitespace + ("StatsReport_Health".CanTranslate() ? "StatsReport_Health".Translate() : "StatsReport_HealthFactors".Translate()));
+				foreach (PawnCapacityOffset item in stat.capacityOffsets.OrderBy((PawnCapacityOffset hfa) => hfa.capacity.listOrder))
 				{
-					val *= req.Thing.GetStatValue(this.stat.postProcessStatFactors[j], true, -1);
+					string text = item.capacity.GetLabelFor(pawn).CapitalizeFirst();
+					float level2 = pawn.health.capacities.GetLevel(item.capacity);
+					float offset = item.GetOffset(pawn.health.capacities.GetLevel(item.capacity));
+					string text2 = ValueToString(offset, finalized: false);
+					string text3 = Mathf.Min(level2, item.max).ToStringPercent() + ", " + "HealthOffsetScale".Translate(item.scale + "x");
+					if (item.max < 999f)
+					{
+						text3 += ", " + "HealthFactorMaxImpact".Translate(item.max.ToStringPercent());
+					}
+					sb.AppendLine(whitespace + "    " + text + ": " + offset.ToStringSign() + text2 + " (" + text3 + ")");
 				}
 			}
-			if (Find.Scenario != null)
+			if ((int)pawn.RaceProps.intelligence >= 1)
 			{
-				val *= Find.Scenario.GetStatFactor(this.stat);
+				if (pawn.story?.traits != null)
+				{
+					List<Trait> list = pawn.story.traits.allTraits.Where((Trait tr) => !tr.Suppressed && tr.CurrentData.statOffsets != null && tr.CurrentData.statOffsets.Any((StatModifier se) => se.stat == stat)).ToList();
+					List<Trait> list2 = pawn.story.traits.allTraits.Where((Trait tr) => !tr.Suppressed && tr.CurrentData.statFactors != null && tr.CurrentData.statFactors.Any((StatModifier se) => se.stat == stat)).ToList();
+					if (list.Count > 0 || list2.Count > 0)
+					{
+						sb.AppendLine(whitespace + "StatsReport_RelevantTraits".Translate());
+						for (int j = 0; j < list.Count; j++)
+						{
+							Trait trait = list[j];
+							string valueToStringAsOffset = trait.CurrentData.statOffsets.First((StatModifier se) => se.stat == stat).ValueToStringAsOffset;
+							sb.AppendLine(whitespace + "    " + trait.LabelCap + ": " + valueToStringAsOffset);
+						}
+						for (int k = 0; k < list2.Count; k++)
+						{
+							Trait trait2 = list2[k];
+							string toStringAsFactor = trait2.CurrentData.statFactors.First((StatModifier se) => se.stat == stat).ToStringAsFactor;
+							sb.AppendLine(whitespace + "    " + trait2.LabelCap + ": " + toStringAsFactor);
+						}
+					}
+				}
+				if (RelevantGear(pawn, stat).Any())
+				{
+					sb.AppendLine(whitespace + "StatsReport_RelevantGear".Translate());
+					if (pawn.apparel != null)
+					{
+						for (int l = 0; l < pawn.apparel.WornApparel.Count; l++)
+						{
+							Apparel apparel = pawn.apparel.WornApparel[l];
+							if (GearAffectsStat(apparel.def, stat))
+							{
+								sb.AppendLine(whitespace + InfoTextLineFromGear(apparel, stat));
+							}
+						}
+					}
+					if (pawn.equipment?.Primary != null && (GearAffectsStat(pawn.equipment.Primary.def, stat) || GearHasCompsThatAffectStat(pawn.equipment.Primary, stat)))
+					{
+						sb.AppendLine(whitespace + InfoTextLineFromGear(pawn.equipment.Primary, stat));
+					}
+				}
 			}
-			if (Mathf.Abs(val) > this.stat.roundToFiveOver)
+			bool flag = false;
+			List<Hediff> hediffs = pawn.health.hediffSet.hediffs;
+			for (int m = 0; m < hediffs.Count; m++)
 			{
-				val = Mathf.Round(val / 5f) * 5f;
+				HediffStage curStage = hediffs[m].CurStage;
+				if (curStage == null)
+				{
+					continue;
+				}
+				float num = curStage.statOffsets.GetStatOffsetFromList(stat);
+				if (num != 0f)
+				{
+					float val2 = num;
+					if (curStage.statOffsetEffectMultiplier != null)
+					{
+						num *= pawn.GetStatValue(curStage.statOffsetEffectMultiplier);
+					}
+					if (curStage.multiplyStatChangesBySeverity)
+					{
+						num *= hediffs[m].Severity;
+					}
+					if (!flag)
+					{
+						sb.AppendLine(whitespace + "StatsReport_RelevantHediffs".Translate());
+						flag = true;
+					}
+					sb.Append(whitespace + "    " + hediffs[m].LabelBaseCap + ": " + ValueToString(num, finalized: false, ToStringNumberSense.Offset));
+					if (curStage.statOffsetEffectMultiplier != null)
+					{
+						sb.Append(whitespace + " (" + ValueToString(val2, finalized: false, ToStringNumberSense.Offset) + " x " + ValueToString(pawn.GetStatValue(curStage.statOffsetEffectMultiplier), finalized: true, curStage.statOffsetEffectMultiplier.toStringNumberSense) + " " + curStage.statOffsetEffectMultiplier.LabelCap + ")");
+					}
+					sb.AppendLine();
+				}
+				float num2 = curStage.statFactors.GetStatFactorFromList(stat);
+				if (Math.Abs(num2 - 1f) > float.Epsilon)
+				{
+					float val3 = num2;
+					if (curStage.multiplyStatChangesBySeverity)
+					{
+						num2 = ScaleFactor(num2, hediffs[m].Severity);
+					}
+					if (curStage.statFactorEffectMultiplier != null)
+					{
+						num2 = ScaleFactor(num2, pawn.GetStatValue(curStage.statFactorEffectMultiplier));
+					}
+					if (!flag)
+					{
+						sb.AppendLine(whitespace + "StatsReport_RelevantHediffs".Translate());
+						flag = true;
+					}
+					sb.Append("    " + hediffs[m].LabelBaseCap + ": " + ValueToString(num2, finalized: false, ToStringNumberSense.Factor));
+					if (curStage.statFactorEffectMultiplier != null)
+					{
+						sb.Append(whitespace + " (" + ValueToString(val3, finalized: false, ToStringNumberSense.Factor) + " x " + ValueToString(pawn.GetStatValue(curStage.statFactorEffectMultiplier), finalized: false) + " " + curStage.statFactorEffectMultiplier.LabelCap + ")");
+					}
+					sb.AppendLine();
+				}
 			}
-			if (this.stat.roundValue)
+			if (pawn.Ideo != null)
 			{
-				val = (float)Mathf.RoundToInt(val);
+				List<Precept> preceptsListForReading = pawn.Ideo.PreceptsListForReading;
+				for (int n = 0; n < preceptsListForReading.Count; n++)
+				{
+					float statOffsetFromList = preceptsListForReading[n].def.statOffsets.GetStatOffsetFromList(stat);
+					if (statOffsetFromList != 0f)
+					{
+						sb.AppendLine(whitespace + "StatsReport_Ideoligion".Translate() + ": " + ValueToString(statOffsetFromList, finalized: false, ToStringNumberSense.Offset));
+					}
+					float statFactorFromList = preceptsListForReading[n].def.statFactors.GetStatFactorFromList(stat);
+					if (Math.Abs(statFactorFromList - 1f) > float.Epsilon)
+					{
+						sb.AppendLine(whitespace + "StatsReport_Ideoligion".Translate() + ": " + ValueToString(statFactorFromList, finalized: false, ToStringNumberSense.Factor));
+					}
+					if (preceptsListForReading[n].def.conditionalStatAffecters == null)
+					{
+						continue;
+					}
+					for (int num3 = 0; num3 < preceptsListForReading[n].def.conditionalStatAffecters.Count; num3++)
+					{
+						ConditionalStatAffecter conditionalStatAffecter = preceptsListForReading[n].def.conditionalStatAffecters[num3];
+						if (conditionalStatAffecter.Applies(req))
+						{
+							float statOffsetFromList2 = conditionalStatAffecter.statOffsets.GetStatOffsetFromList(stat);
+							if (statOffsetFromList2 != 0f)
+							{
+								sb.AppendLine(whitespace + "StatsReport_Ideoligion".Translate() + ": " + ValueToString(statOffsetFromList2, finalized: false, ToStringNumberSense.Offset));
+							}
+							float statFactorFromList2 = conditionalStatAffecter.statFactors.GetStatFactorFromList(stat);
+							if (statFactorFromList2 != 1f)
+							{
+								sb.AppendLine(whitespace + "StatsReport_Ideoligion".Translate() + ": " + ValueToString(statFactorFromList2, finalized: false, ToStringNumberSense.Factor));
+							}
+						}
+					}
+				}
+				Precept_Role role = pawn.Ideo.GetRole(pawn);
+				if (role?.def.roleEffects != null)
+				{
+					foreach (RoleEffect roleEffect in role.def.roleEffects)
+					{
+						if (roleEffect is RoleEffect_PawnStatOffset roleEffect_PawnStatOffset)
+						{
+							if (roleEffect_PawnStatOffset.statDef == stat)
+							{
+								sb.AppendLine(whitespace + role.LabelCap + ": " + ValueToString(roleEffect_PawnStatOffset.modifier, finalized: false, ToStringNumberSense.Offset));
+							}
+						}
+						else if (roleEffect is RoleEffect_PawnStatFactor roleEffect_PawnStatFactor && roleEffect_PawnStatFactor.statDef == stat)
+						{
+							sb.AppendLine(whitespace + role.LabelCap + ": " + ValueToString(roleEffect_PawnStatFactor.modifier, finalized: false, ToStringNumberSense.Factor));
+						}
+					}
+				}
 			}
-			if (applyPostProcess)
+			if (ModsConfig.BiotechActive && pawn.genes != null)
 			{
-				val = Mathf.Clamp(val, this.stat.minValue, this.stat.maxValue);
+				bool flag2 = false;
+				List<Gene> genesListForReading = pawn.genes.GenesListForReading;
+				for (int num4 = 0; num4 < genesListForReading.Count; num4++)
+				{
+					if (!genesListForReading[num4].Active)
+					{
+						continue;
+					}
+					float statOffsetFromList3 = genesListForReading[num4].def.statOffsets.GetStatOffsetFromList(stat);
+					if (statOffsetFromList3 != 0f)
+					{
+						if (!flag2)
+						{
+							sb.AppendLine(whitespace + "StatsReport_Genes".Translate());
+							flag2 = true;
+						}
+						sb.AppendLine(whitespace + "    " + genesListForReading[num4].LabelCap + ": " + ValueToString(statOffsetFromList3, finalized: false, ToStringNumberSense.Offset));
+					}
+					float statFactorFromList3 = genesListForReading[num4].def.statFactors.GetStatFactorFromList(stat);
+					if (statFactorFromList3 != 1f)
+					{
+						if (!flag2)
+						{
+							sb.AppendLine(whitespace + "StatsReport_Genes".Translate());
+							flag2 = true;
+						}
+						sb.AppendLine(whitespace + "    " + genesListForReading[num4].LabelCap + ": " + ValueToString(statFactorFromList3, finalized: false, ToStringNumberSense.Factor));
+					}
+					if (genesListForReading[num4].def.conditionalStatAffecters == null)
+					{
+						continue;
+					}
+					for (int num5 = 0; num5 < genesListForReading[num4].def.conditionalStatAffecters.Count; num5++)
+					{
+						ConditionalStatAffecter conditionalStatAffecter2 = genesListForReading[num4].def.conditionalStatAffecters[num5];
+						if (!conditionalStatAffecter2.Applies(req))
+						{
+							continue;
+						}
+						float statOffsetFromList4 = conditionalStatAffecter2.statOffsets.GetStatOffsetFromList(stat);
+						if (statOffsetFromList4 != 0f)
+						{
+							if (!flag2)
+							{
+								sb.AppendLine(whitespace + "StatsReport_Genes".Translate());
+								flag2 = true;
+							}
+							sb.AppendLine(whitespace + "    " + genesListForReading[num4].LabelCap + " (" + conditionalStatAffecter2.Label + "): " + ValueToString(statOffsetFromList4, finalized: false, ToStringNumberSense.Offset));
+						}
+						float statFactorFromList4 = conditionalStatAffecter2.statFactors.GetStatFactorFromList(stat);
+						if (statFactorFromList4 != 1f)
+						{
+							if (!flag2)
+							{
+								sb.AppendLine(whitespace + "StatsReport_Genes".Translate());
+								flag2 = true;
+							}
+							sb.AppendLine(whitespace + "    " + genesListForReading[num4].LabelCap + " (" + conditionalStatAffecter2.Label + "): " + ValueToString(statFactorFromList4, finalized: false, ToStringNumberSense.Factor));
+						}
+					}
+				}
+			}
+			float statOffsetFromList5 = pawn.ageTracker.CurLifeStage.statOffsets.GetStatOffsetFromList(stat);
+			if (statOffsetFromList5 != 0f)
+			{
+				sb.AppendLine(whitespace + "StatsReport_LifeStage".Translate() + " (" + pawn.ageTracker.CurLifeStage.label + "): " + statOffsetFromList5.ToStringByStyle(stat.toStringStyle, ToStringNumberSense.Offset));
+			}
+			float statFactorFromList5 = pawn.ageTracker.CurLifeStage.statFactors.GetStatFactorFromList(stat);
+			if (statFactorFromList5 != 1f)
+			{
+				sb.AppendLine(whitespace + "StatsReport_LifeStage".Translate() + " (" + pawn.ageTracker.CurLifeStage.label + "): " + statFactorFromList5.ToStringByStyle(ToStringStyle.PercentZero, ToStringNumberSense.Factor));
 			}
 		}
+		if (req.StuffDef != null)
+		{
+			if (baseValue > 0f || stat.applyFactorsIfNegative)
+			{
+				float statFactorFromList6 = req.StuffDef.stuffProps.statFactors.GetStatFactorFromList(stat);
+				if (statFactorFromList6 != 1f)
+				{
+					sb.AppendLine(whitespace + "StatsReport_Material".Translate() + " (" + req.StuffDef.LabelCap + "): " + statFactorFromList6.ToStringByStyle(ToStringStyle.PercentZero, ToStringNumberSense.Factor));
+				}
+				if (req.StuffDef.stuffProps.statFactorsQuality != null && req.StuffDef.stuffProps.statFactorsQuality.TryGetStatFactorRangeFromList(stat, out var range))
+				{
+					string value = range.min.ToStringByStyle(ToStringStyle.PercentZero, ToStringNumberSense.Factor);
+					string value2 = range.max.ToStringByStyle(ToStringStyle.PercentZero, ToStringNumberSense.Factor);
+					sb.AppendLine(whitespace + $"{"StatsReport_Material".Translate()} ({req.StuffDef.LabelCap}): {value} ~ {value2}");
+				}
+			}
+			float statOffsetFromList6 = req.StuffDef.stuffProps.statOffsets.GetStatOffsetFromList(stat);
+			if (statOffsetFromList6 != 0f)
+			{
+				sb.AppendLine(whitespace + "StatsReport_Material".Translate() + " (" + req.StuffDef.LabelCap + "): " + statOffsetFromList6.ToStringByStyle(stat.toStringStyle, ToStringNumberSense.Offset));
+			}
+			if (req.StuffDef.stuffProps.statOffsetsQuality != null && req.StuffDef.stuffProps.statOffsetsQuality.TryGetStatOffsetRangeFromList(stat, out var range2))
+			{
+				string value3 = range2.min.ToStringByStyle(stat.toStringStyle, ToStringNumberSense.Offset);
+				string value4 = range2.max.ToStringByStyle(stat.toStringStyle, ToStringNumberSense.Offset);
+				sb.AppendLine(whitespace + $"{"StatsReport_Material".Translate()} ({req.StuffDef.LabelCap}): {value3} ~ {value4}");
+			}
+		}
+		if (req.Thing is ThingWithComps { AllComps: var allComps })
+		{
+			for (int num6 = 0; num6 < allComps.Count; num6++)
+			{
+				allComps[num6].GetStatsExplanation(stat, sb, whitespace);
+			}
+		}
+		if (stat.statFactors != null)
+		{
+			sb.AppendLine(whitespace + stat.statFactorsExplanationHeader);
+			for (int num7 = 0; num7 < stat.statFactors.Count; num7++)
+			{
+				StatDef statDef = stat.statFactors[num7];
+				sb.AppendLine(whitespace + "    " + statDef.LabelCap + ": x" + statDef.Worker.GetValue(req).ToStringPercent());
+			}
+		}
+		if (pawn == null)
+		{
+			return;
+		}
+		if (pawn.skills != null)
+		{
+			if (stat.skillNeedFactors != null)
+			{
+				sb.AppendLine(whitespace + "StatsReport_Skills".Translate());
+				for (int num8 = 0; num8 < stat.skillNeedFactors.Count; num8++)
+				{
+					SkillNeed skillNeed2 = stat.skillNeedFactors[num8];
+					int level3 = pawn.skills.GetSkill(skillNeed2.skill).Level;
+					sb.AppendLine(string.Concat(whitespace + "    " + skillNeed2.skill.LabelCap + " (", level3.ToString(), "): x", skillNeed2.ValueFor(pawn).ToStringPercent()));
+				}
+			}
+		}
+		else if (stat.noSkillFactor != 1f)
+		{
+			sb.AppendLine(whitespace + "StatsReport_Skills".Translate());
+			sb.AppendLine(whitespace + "    " + "default".Translate().CapitalizeFirst() + " : x" + stat.noSkillFactor.ToStringPercent());
+		}
+		if (stat.capacityFactors != null)
+		{
+			sb.AppendLine(whitespace + ("StatsReport_Health".CanTranslate() ? "StatsReport_Health".Translate() : "StatsReport_HealthFactors".Translate()));
+			if (stat.capacityFactors != null)
+			{
+				foreach (PawnCapacityFactor item2 in stat.capacityFactors.OrderBy((PawnCapacityFactor hfa) => hfa.capacity.listOrder))
+				{
+					string text4 = item2.capacity.GetLabelFor(pawn).CapitalizeFirst();
+					string text5 = item2.GetFactor(pawn.health.capacities.GetLevel(item2.capacity)).ToStringPercent();
+					string text6 = "HealthFactorPercentImpact".Translate(item2.weight.ToStringPercent());
+					if (item2.max < 999f)
+					{
+						text6 += ", " + "HealthFactorMaxImpact".Translate(item2.max.ToStringPercent());
+					}
+					if (item2.allowedDefect != 0f)
+					{
+						text6 += ", " + "HealthFactorAllowedDefect".Translate((1f - item2.allowedDefect).ToStringPercent());
+					}
+					sb.AppendLine(whitespace + "    " + text4 + ": x" + text5 + " (" + text6 + ")");
+				}
+			}
+		}
+		if (pawn.Inspired)
+		{
+			float statOffsetFromList7 = pawn.InspirationDef.statOffsets.GetStatOffsetFromList(stat);
+			if (statOffsetFromList7 != 0f)
+			{
+				sb.AppendLine(whitespace + "StatsReport_Inspiration".Translate(pawn.Inspiration.def.LabelCap) + ": " + ValueToString(statOffsetFromList7, finalized: false, ToStringNumberSense.Offset));
+			}
+			float statFactorFromList7 = pawn.InspirationDef.statFactors.GetStatFactorFromList(stat);
+			if (statFactorFromList7 != 1f)
+			{
+				sb.AppendLine(whitespace + "StatsReport_Inspiration".Translate(pawn.Inspiration.def.LabelCap) + ": " + statFactorFromList7.ToStringByStyle(ToStringStyle.PercentZero, ToStringNumberSense.Factor));
+			}
+		}
+	}
 
-		// Token: 0x06013981 RID: 80257 RVA: 0x005D1034 File Offset: 0x005CF234
-		public virtual string GetExplanationFinalizePart(StatRequest req, ToStringNumberSense numberSense, float finalVal)
+	public virtual void FinalizeValue(StatRequest req, ref float val, bool applyPostProcess)
+	{
+		if (stat.parts != null)
+		{
+			for (int i = 0; i < stat.parts.Count; i++)
+			{
+				stat.parts[i].TransformValue(req, ref val);
+			}
+		}
+		if (applyPostProcess && stat.postProcessCurve != null)
+		{
+			val = stat.postProcessCurve.Evaluate(val);
+		}
+		if (applyPostProcess && !stat.postProcessStatFactors.NullOrEmpty() && req.HasThing)
+		{
+			for (int j = 0; j < stat.postProcessStatFactors.Count; j++)
+			{
+				val *= req.Thing.GetStatValue(stat.postProcessStatFactors[j]);
+			}
+		}
+		if (Find.Scenario != null)
+		{
+			val *= Find.Scenario.GetStatFactor(stat);
+		}
+		if (Mathf.Abs(val) > stat.roundToFiveOver)
+		{
+			val = Mathf.Round(val / 5f) * 5f;
+		}
+		if (stat.roundValue)
+		{
+			val = Mathf.RoundToInt(val);
+		}
+		if (applyPostProcess)
+		{
+			val = Mathf.Clamp(val, stat.minValue, stat.maxValue);
+		}
+	}
+
+	public virtual string GetExplanationFinalizePart(StatRequest req, ToStringNumberSense numberSense, float finalVal)
+	{
+		StringBuilder stringBuilder = new StringBuilder();
+		GetAdditionalOffsetsAndFactorsExplanation(req, numberSense, stringBuilder);
+		stringBuilder.Append("StatsReport_FinalValue".Translate() + ": " + stat.ValueToString(finalVal, stat.toStringNumberSense));
+		if (stat.displayMaxWhenAboveOrEqual && finalVal >= stat.maxValue)
+		{
+			stringBuilder.AppendInNewLine("StatsReport_MaxValue".Translate() + ": " + stat.ValueToString(stat.maxValue, stat.toStringNumberSense));
+		}
+		return stringBuilder.ToString();
+	}
+
+	public void GetAdditionalOffsetsAndFactorsExplanation(StatRequest req, ToStringNumberSense numberSense, StringBuilder sb, string whitespace = "")
+	{
+		if (stat.parts != null)
+		{
+			for (int i = 0; i < stat.parts.Count; i++)
+			{
+				string text = stat.parts[i].ExplanationPart(req);
+				if (!text.NullOrEmpty())
+				{
+					sb.AppendLine(whitespace + text);
+				}
+			}
+		}
+		if (stat.postProcessCurve != null)
+		{
+			float value = GetValue(req, applyPostProcess: false);
+			float num = stat.postProcessCurve.Evaluate(value);
+			if (!Mathf.Approximately(value, num))
+			{
+				string text2 = ValueToString(value, finalized: false);
+				string text3 = stat.ValueToString(num, numberSense);
+				sb.AppendLine(whitespace + "StatsReport_PostProcessed".Translate() + ": " + text2 + " => " + text3);
+			}
+		}
+		if (stat.postProcessStatFactors != null)
 		{
 			StringBuilder stringBuilder = new StringBuilder();
-			this.GetAdditionalOffsetsAndFactorsExplanation(req, numberSense, stringBuilder, "");
-			stringBuilder.Append("StatsReport_FinalValue".Translate() + ": " + this.stat.ValueToString(finalVal, this.stat.toStringNumberSense, true));
-			if (this.stat.displayMaxWhenAboveOrEqual && finalVal >= this.stat.maxValue)
+			for (int j = 0; j < stat.postProcessStatFactors.Count; j++)
 			{
-				stringBuilder.AppendInNewLine("StatsReport_MaxValue".Translate() + ": " + this.stat.ValueToString(this.stat.maxValue, this.stat.toStringNumberSense, true));
-			}
-			return stringBuilder.ToString();
-		}
-
-		// Token: 0x06013982 RID: 80258 RVA: 0x005D10FC File Offset: 0x005CF2FC
-		public void GetAdditionalOffsetsAndFactorsExplanation(StatRequest req, ToStringNumberSense numberSense, StringBuilder sb, string whitespace = "")
-		{
-			if (this.stat.parts != null)
-			{
-				for (int i = 0; i < this.stat.parts.Count; i++)
+				if (stat.postProcessStatFactors[j].Worker.ShouldShowFor(req))
 				{
-					string text = this.stat.parts[i].ExplanationPart(req);
-					if (!text.NullOrEmpty())
-					{
-						sb.AppendLine(whitespace + text);
-					}
+					StatDef statDef = stat.postProcessStatFactors[j];
+					stringBuilder.AppendLine(whitespace + $"    {statDef.LabelCap}: x{statDef.Worker.GetValue(req).ToStringPercent()}");
 				}
 			}
-			if (this.stat.postProcessCurve != null)
+			if (stringBuilder.Length > 0)
 			{
-				float value = this.GetValue(req, false);
-				float num = this.stat.postProcessCurve.Evaluate(value);
-				if (!Mathf.Approximately(value, num))
-				{
-					string t = this.ValueToString(value, false, ToStringNumberSense.Absolute);
-					string t2 = this.stat.ValueToString(num, numberSense, true);
-					sb.AppendLine(whitespace + "StatsReport_PostProcessed".Translate() + ": " + t + " => " + t2);
-				}
-			}
-			if (this.stat.postProcessStatFactors != null)
-			{
-				StringBuilder stringBuilder = new StringBuilder();
-				for (int j = 0; j < this.stat.postProcessStatFactors.Count; j++)
-				{
-					if (this.stat.postProcessStatFactors[j].Worker.ShouldShowFor(req))
-					{
-						StatDef statDef = this.stat.postProcessStatFactors[j];
-						stringBuilder.AppendLine(whitespace + string.Format("    {0}: x{1}", statDef.LabelCap, statDef.Worker.GetValue(req, true).ToStringPercent()));
-					}
-				}
-				if (stringBuilder.Length > 0)
-				{
-					sb.AppendLine(whitespace + "StatsReport_OtherStats".Translate());
-					sb.AppendLine(stringBuilder.ToString());
-				}
-			}
-			float statFactor = Find.Scenario.GetStatFactor(this.stat);
-			if (statFactor != 1f)
-			{
-				sb.AppendLine(whitespace + "StatsReport_ScenarioFactor".Translate() + ": " + statFactor.ToStringPercent());
+				sb.AppendLine(whitespace + "StatsReport_OtherStats".Translate());
+				sb.AppendLine(stringBuilder.ToString());
 			}
 		}
-
-		// Token: 0x06013983 RID: 80259 RVA: 0x005D1318 File Offset: 0x005CF518
-		public string GetExplanationFull(StatRequest req, ToStringNumberSense numberSense, float value)
+		float statFactor = Find.Scenario.GetStatFactor(stat);
+		if (statFactor != 1f)
 		{
-			if (this.IsDisabledFor(req.Thing))
-			{
-				return "StatsReport_PermanentlyDisabled".Translate();
-			}
-			string text = this.stat.Worker.GetExplanationUnfinalized(req, numberSense).TrimEndNewlines();
-			if (!text.NullOrEmpty())
-			{
-				text += "\n\n";
-			}
-			return text + this.stat.Worker.GetExplanationFinalizePart(req, numberSense, value);
+			sb.AppendLine(whitespace + "StatsReport_ScenarioFactor".Translate() + ": " + statFactor.ToStringPercent());
 		}
+	}
 
-		// Token: 0x06013984 RID: 80260 RVA: 0x005D138C File Offset: 0x005CF58C
-		public virtual bool ShouldShowFor(StatRequest req)
+	public string GetExplanationFull(StatRequest req, ToStringNumberSense numberSense, float value)
+	{
+		if (IsDisabledFor(req.Thing))
 		{
-			if (this.stat.alwaysHide)
+			return "StatsReport_PermanentlyDisabled".Translate();
+		}
+		string text = stat.Worker.GetExplanationUnfinalized(req, numberSense).TrimEndNewlines();
+		if (!text.NullOrEmpty())
+		{
+			text += "\n\n";
+		}
+		return text + stat.Worker.GetExplanationFinalizePart(req, numberSense, value);
+	}
+
+	public virtual bool ShouldShowFor(StatRequest req)
+	{
+		if (stat.alwaysHide)
+		{
+			return false;
+		}
+		Def def = req.Def;
+		if (!stat.showIfUndefined && !req.StatBases.StatListContains(stat))
+		{
+			return false;
+		}
+		if (!stat.CanShowWithLoadedMods())
+		{
+			return false;
+		}
+		if (stat.hideInClassicMode && Find.IdeoManager.classicMode)
+		{
+			return false;
+		}
+		if (stat.parts != null)
+		{
+			foreach (StatPart part in stat.parts)
 			{
-				return false;
-			}
-			Def def = req.Def;
-			if (!this.stat.showIfUndefined && !req.StatBases.StatListContains(this.stat))
-			{
-				return false;
-			}
-			if (!this.stat.CanShowWithLoadedMods())
-			{
-				return false;
-			}
-			if (this.stat.hideInClassicMode && Find.IdeoManager.classicMode)
-			{
-				return false;
-			}
-			if (this.stat.parts != null)
-			{
-				using (List<StatPart>.Enumerator enumerator = this.stat.parts.GetEnumerator())
+				if (part.ForceShow(req))
 				{
-					while (enumerator.MoveNext())
+					return true;
+				}
+			}
+		}
+		if (req.Thing is Pawn pawn)
+		{
+			if (pawn.health != null && !stat.showIfHediffsPresent.NullOrEmpty())
+			{
+				for (int i = 0; i < stat.showIfHediffsPresent.Count; i++)
+				{
+					if (!pawn.health.hediffSet.HasHediff(stat.showIfHediffsPresent[i]))
 					{
-						if (enumerator.Current.ForceShow(req))
-						{
-							return true;
-						}
+						return false;
 					}
 				}
 			}
-			Pawn pawn = req.Thing as Pawn;
-			if (pawn != null)
+			if (stat.showOnSlavesOnly && !pawn.IsSlave)
 			{
-				if (pawn.health != null && !this.stat.showIfHediffsPresent.NullOrEmpty<HediffDef>())
+				return false;
+			}
+		}
+		if (stat == StatDefOf.MaxHitPoints && req.HasThing)
+		{
+			return false;
+		}
+		if (!stat.showOnUntradeables && !DisplayTradeStats(req))
+		{
+			return false;
+		}
+		ThingDef thingDef = def as ThingDef;
+		if (thingDef != null)
+		{
+			if (thingDef.category == ThingCategory.Pawn)
+			{
+				if (!stat.showOnPawns)
 				{
-					for (int i = 0; i < this.stat.showIfHediffsPresent.Count; i++)
-					{
-						if (!pawn.health.hediffSet.HasHediff(this.stat.showIfHediffsPresent[i], false))
-						{
-							return false;
-						}
-					}
+					return false;
 				}
-				if (this.stat.showOnSlavesOnly && !pawn.IsSlave)
+				if (!stat.showOnHumanlikes && thingDef.race.Humanlike)
+				{
+					return false;
+				}
+				if (!stat.showOnNonWildManHumanlikes && thingDef.race.Humanlike && (!(req.Thing is Pawn p) || !p.IsWildMan()))
+				{
+					return false;
+				}
+				if (!stat.showOnAnimals && thingDef.race.Animal)
+				{
+					return false;
+				}
+				if (!stat.showOnEntities && thingDef.race.IsAnomalyEntity)
+				{
+					return false;
+				}
+				if (!stat.showOnMechanoids && thingDef.race.IsMechanoid)
+				{
+					return false;
+				}
+				if (!stat.showOnDrones && thingDef.race.IsDrone)
+				{
+					return false;
+				}
+				if (req.Thing is Pawn pawn2 && !stat.showDevelopmentalStageFilter.Has(pawn2.DevelopmentalStage))
 				{
 					return false;
 				}
 			}
-			if (this.stat == StatDefOf.MaxHitPoints && req.HasThing)
+			if (!stat.showOnUnhaulables && !thingDef.EverHaulable && !thingDef.Minifiable)
 			{
 				return false;
 			}
-			if (!this.stat.showOnUntradeables && !StatWorker.DisplayTradeStats(req))
-			{
-				return false;
-			}
-			ThingDef thingDef = def as ThingDef;
+		}
+		if (stat.category == StatCategoryDefOf.BasicsPawn || stat.category == StatCategoryDefOf.BasicsPawnImportant || stat.category == StatCategoryDefOf.PawnCombat || stat.category == StatCategoryDefOf.Animals || stat.category == StatCategoryDefOf.PawnResistances || stat.category == StatCategoryDefOf.PawnHealth || stat.category == StatCategoryDefOf.PawnFood || stat.category == StatCategoryDefOf.PawnPsyfocus)
+		{
 			if (thingDef != null)
 			{
-				if (thingDef.category == ThingCategory.Pawn)
-				{
-					if (!this.stat.showOnPawns)
-					{
-						return false;
-					}
-					if (!this.stat.showOnHumanlikes && thingDef.race.Humanlike)
-					{
-						return false;
-					}
-					if (!this.stat.showOnNonWildManHumanlikes && thingDef.race.Humanlike)
-					{
-						Pawn pawn2 = req.Thing as Pawn;
-						if (pawn2 == null || !pawn2.IsWildMan())
-						{
-							return false;
-						}
-					}
-					if (!this.stat.showOnAnimals && thingDef.race.Animal)
-					{
-						return false;
-					}
-					if (!this.stat.showOnEntities && thingDef.race.IsAnomalyEntity)
-					{
-						return false;
-					}
-					if (!this.stat.showOnMechanoids && thingDef.race.IsMechanoid)
-					{
-						return false;
-					}
-					if (!this.stat.showOnDrones && thingDef.race.IsDrone)
-					{
-						return false;
-					}
-					Pawn pawn3 = req.Thing as Pawn;
-					if (pawn3 != null && !this.stat.showDevelopmentalStageFilter.Has(pawn3.DevelopmentalStage))
-					{
-						return false;
-					}
-				}
-				if (!this.stat.showOnUnhaulables && !thingDef.EverHaulable && !thingDef.Minifiable)
-				{
-					return false;
-				}
+				return thingDef.category == ThingCategory.Pawn;
 			}
-			if (this.stat.category == StatCategoryDefOf.BasicsPawn || this.stat.category == StatCategoryDefOf.BasicsPawnImportant || this.stat.category == StatCategoryDefOf.PawnCombat || this.stat.category == StatCategoryDefOf.Animals || this.stat.category == StatCategoryDefOf.PawnResistances || this.stat.category == StatCategoryDefOf.PawnHealth || this.stat.category == StatCategoryDefOf.PawnFood || this.stat.category == StatCategoryDefOf.PawnPsyfocus)
+			return false;
+		}
+		if (stat.category == StatCategoryDefOf.PawnMisc || stat.category == StatCategoryDefOf.PawnSocial || stat.category == StatCategoryDefOf.PawnWork)
+		{
+			if (thingDef == null || thingDef.category != ThingCategory.Pawn)
 			{
-				return thingDef != null && thingDef.category == ThingCategory.Pawn;
+				return false;
 			}
-			if (this.stat.category == StatCategoryDefOf.PawnMisc || this.stat.category == StatCategoryDefOf.PawnSocial || this.stat.category == StatCategoryDefOf.PawnWork)
+			if (req.Thing is Pawn pawn3)
 			{
-				if (thingDef == null || thingDef.category != ThingCategory.Pawn)
-				{
-					return false;
-				}
-				Pawn pawn4 = req.Thing as Pawn;
-				if (pawn4 != null)
-				{
-					if (pawn4.IsColonyMech && this.stat.showOnPlayerMechanoids)
-					{
-						return true;
-					}
-					if (this.stat.showOnPawnKind.NotNullAndContains(pawn4.kindDef))
-					{
-						return true;
-					}
-				}
-				return thingDef.race.Humanlike;
-			}
-			else if (this.stat.category == StatCategoryDefOf.Building)
-			{
-				if (thingDef == null)
-				{
-					return false;
-				}
-				if (this.stat == StatDefOf.DoorOpenSpeed)
-				{
-					return thingDef.IsDoor;
-				}
-				return (this.stat.showOnNonWorkTables || thingDef.IsWorkTable) && (this.stat.showOnNonPowerPlants || thingDef.HasAssignableCompFrom(typeof(CompPowerPlant))) && thingDef.category == ThingCategory.Building;
-			}
-			else
-			{
-				if (this.stat.category == StatCategoryDefOf.Apparel)
-				{
-					return thingDef != null && (thingDef.IsApparel || thingDef.category == ThingCategory.Pawn);
-				}
-				if (this.stat.category == StatCategoryDefOf.Weapon)
-				{
-					return thingDef != null && (thingDef.IsMeleeWeapon || thingDef.IsRangedWeapon);
-				}
-				if (this.stat.category == StatCategoryDefOf.Weapon_Ranged)
-				{
-					return thingDef != null && thingDef.IsRangedWeapon;
-				}
-				if (this.stat.category == StatCategoryDefOf.Weapon_Melee)
-				{
-					return thingDef != null && thingDef.IsMeleeWeapon;
-				}
-				if (this.stat.category == StatCategoryDefOf.BasicsNonPawn || this.stat.category == StatCategoryDefOf.BasicsNonPawnImportant)
-				{
-					return (thingDef == null || thingDef.category != ThingCategory.Pawn) && !req.ForAbility;
-				}
-				if (this.stat.category == StatCategoryDefOf.Terrain)
-				{
-					return def is TerrainDef;
-				}
-				if (ModsConfig.AnomalyActive && this.stat.category == StatCategoryDefOf.PsychicRituals)
-				{
-					return false;
-				}
-				if (req.ForAbility)
-				{
-					return this.stat.category == StatCategoryDefOf.Ability;
-				}
-				if (this.stat.category.displayAllByDefault)
+				if (pawn3.IsColonyMech && stat.showOnPlayerMechanoids)
 				{
 					return true;
 				}
-				string str = "Unhandled case: ";
-				StatDef statDef = this.stat;
-				string str2 = (statDef != null) ? statDef.ToString() : null;
-				string str3 = ", ";
-				Def def2 = def;
-				Log.Error(str + str2 + str3 + ((def2 != null) ? def2.ToString() : null));
-				return false;
-			}
-		}
-
-		// Token: 0x06013985 RID: 80261 RVA: 0x005D1958 File Offset: 0x005CFB58
-		public virtual bool IsDisabledFor(Thing thing)
-		{
-			if (this.stat.neverDisabled)
-			{
-				return false;
-			}
-			if (this.stat.skillNeedFactors.NullOrEmpty<SkillNeed>() && this.stat.skillNeedOffsets.NullOrEmpty<SkillNeed>() && this.stat.disableIfSkillDisabled == null)
-			{
-				return false;
-			}
-			Pawn pawn = thing as Pawn;
-			if (pawn != null && pawn.story != null)
-			{
-				if (this.stat.skillNeedFactors != null)
-				{
-					foreach (SkillNeed skillNeed in this.stat.skillNeedFactors)
-					{
-						if (skillNeed.required && pawn.skills.GetSkill(skillNeed.skill).TotallyDisabled)
-						{
-							return true;
-						}
-					}
-				}
-				if (this.stat.skillNeedOffsets != null)
-				{
-					foreach (SkillNeed skillNeed2 in this.stat.skillNeedOffsets)
-					{
-						if (skillNeed2.required && pawn.skills.GetSkill(skillNeed2.skill).TotallyDisabled)
-						{
-							return true;
-						}
-					}
-				}
-				if (this.stat.disableIfSkillDisabled != null && pawn.skills.GetSkill(this.stat.disableIfSkillDisabled).TotallyDisabled)
+				if (stat.showOnPawnKind.NotNullAndContains(pawn3.kindDef))
 				{
 					return true;
 				}
-				return false;
 			}
-			return false;
+			return thingDef.race.Humanlike;
 		}
-
-		// Token: 0x06013986 RID: 80262 RVA: 0x005D1ADC File Offset: 0x005CFCDC
-		public virtual string GetStatDrawEntryLabel(StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized = true)
+		if (stat.category == StatCategoryDefOf.Building)
 		{
-			return stat.ValueToString(value, numberSense, finalized);
-		}
-
-		// Token: 0x06013987 RID: 80263 RVA: 0x005D1AE8 File Offset: 0x005CFCE8
-		private static string InfoTextLineFromGear(Thing gear, StatDef stat)
-		{
-			float f = StatWorker.StatOffsetFromGear(gear, stat);
-			return "    " + gear.LabelCap + ": " + f.ToStringByStyle(stat.finalizeEquippedStatOffset ? stat.toStringStyle : stat.ToStringStyleUnfinalized, ToStringNumberSense.Offset);
-		}
-
-		// Token: 0x06013988 RID: 80264 RVA: 0x005D1B30 File Offset: 0x005CFD30
-		public static float StatOffsetFromGear(Thing gear, StatDef stat)
-		{
-			float num = gear.def.equippedStatOffsets.GetStatOffsetFromList(stat);
-			CompBladelinkWeapon compBladelinkWeapon = gear.TryGetComp<CompBladelinkWeapon>();
-			if (compBladelinkWeapon != null)
-			{
-				List<WeaponTraitDef> traitsListForReading = compBladelinkWeapon.TraitsListForReading;
-				for (int i = 0; i < traitsListForReading.Count; i++)
-				{
-					num += traitsListForReading[i].equippedStatOffsets.GetStatOffsetFromList(stat);
-				}
-			}
-			if (Math.Abs(num) > 1E-45f && !stat.parts.NullOrEmpty<StatPart>())
-			{
-				foreach (StatPart statPart in stat.parts)
-				{
-					statPart.TransformValue(StatRequest.For(gear), ref num);
-				}
-			}
-			return num;
-		}
-
-		// Token: 0x06013989 RID: 80265 RVA: 0x005D1BF0 File Offset: 0x005CFDF0
-		private static IEnumerable<Thing> RelevantGear(Pawn pawn, StatDef stat)
-		{
-			if (pawn.apparel != null)
-			{
-				foreach (Apparel apparel in pawn.apparel.WornApparel)
-				{
-					if (StatWorker.GearAffectsStat(apparel.def, stat))
-					{
-						yield return apparel;
-					}
-				}
-				List<Apparel>.Enumerator enumerator = default(List<Apparel>.Enumerator);
-			}
-			if (pawn.equipment != null)
-			{
-				foreach (ThingWithComps thingWithComps in pawn.equipment.AllEquipmentListForReading)
-				{
-					if (StatWorker.GearAffectsStat(thingWithComps.def, stat) || StatWorker.GearHasCompsThatAffectStat(thingWithComps, stat))
-					{
-						yield return thingWithComps;
-					}
-				}
-				List<ThingWithComps>.Enumerator enumerator2 = default(List<ThingWithComps>.Enumerator);
-			}
-			yield break;
-			yield break;
-		}
-
-		// Token: 0x0601398A RID: 80266 RVA: 0x005D1C08 File Offset: 0x005CFE08
-		private static bool GearAffectsStat(ThingDef gearDef, StatDef stat)
-		{
-			if (gearDef.equippedStatOffsets != null)
-			{
-				for (int i = 0; i < gearDef.equippedStatOffsets.Count; i++)
-				{
-					if (gearDef.equippedStatOffsets[i].stat == stat && gearDef.equippedStatOffsets[i].value != 0f)
-					{
-						return true;
-					}
-				}
-			}
-			return false;
-		}
-
-		// Token: 0x0601398B RID: 80267 RVA: 0x005D1C64 File Offset: 0x005CFE64
-		private static bool GearHasCompsThatAffectStat(Thing gear, StatDef stat)
-		{
-			CompBladelinkWeapon compBladelinkWeapon = gear.TryGetComp<CompBladelinkWeapon>();
-			if (compBladelinkWeapon == null)
-			{
-				return false;
-			}
-			List<WeaponTraitDef> traitsListForReading = compBladelinkWeapon.TraitsListForReading;
-			for (int i = 0; i < traitsListForReading.Count; i++)
-			{
-				if (!traitsListForReading[i].equippedStatOffsets.NullOrEmpty<StatModifier>())
-				{
-					for (int j = 0; j < traitsListForReading[i].equippedStatOffsets.Count; j++)
-					{
-						StatModifier statModifier = traitsListForReading[i].equippedStatOffsets[j];
-						if (statModifier.stat == stat && statModifier.value != 0f)
-						{
-							return true;
-						}
-					}
-				}
-			}
-			return false;
-		}
-
-		// Token: 0x0601398C RID: 80268 RVA: 0x005D1CF4 File Offset: 0x005CFEF4
-		public virtual float GetBaseValueFor(StatRequest request)
-		{
-			float result = this.stat.defaultBaseValue;
-			if (request.StatBases != null)
-			{
-				for (int i = 0; i < request.StatBases.Count; i++)
-				{
-					if (request.StatBases[i].stat == this.stat)
-					{
-						result = request.StatBases[i].value;
-						break;
-					}
-				}
-			}
-			return result;
-		}
-
-		// Token: 0x0601398D RID: 80269 RVA: 0x005D1D5D File Offset: 0x005CFF5D
-		public virtual string ValueToStringFor(Thing thing)
-		{
-			return this.ValueToString(thing.GetStatValue(this.stat, true, -1), true, ToStringNumberSense.Absolute);
-		}
-
-		// Token: 0x0601398E RID: 80270 RVA: 0x005D1D78 File Offset: 0x005CFF78
-		public virtual string ValueToString(float val, bool finalized, ToStringNumberSense numberSense = ToStringNumberSense.Absolute)
-		{
-			if (!finalized)
-			{
-				string text = val.ToStringByStyle(this.stat.ToStringStyleUnfinalized, numberSense);
-				if (numberSense != ToStringNumberSense.Factor && !this.stat.formatStringUnfinalized.NullOrEmpty())
-				{
-					text = string.Format(this.stat.formatStringUnfinalized, text);
-				}
-				return text;
-			}
-			string text2 = val.ToStringByStyle(this.stat.toStringStyle, numberSense);
-			if (numberSense != ToStringNumberSense.Factor && !this.stat.formatString.NullOrEmpty())
-			{
-				text2 = string.Format(this.stat.formatString, text2);
-			}
-			return text2;
-		}
-
-		// Token: 0x0601398F RID: 80271 RVA: 0x005D1E01 File Offset: 0x005D0001
-		public virtual IEnumerable<Dialog_InfoCard.Hyperlink> GetInfoCardHyperlinks(StatRequest statRequest)
-		{
-			Thing thing = statRequest.Thing;
-			Pawn pawn = thing as Pawn;
-			if (pawn != null)
-			{
-				List<Hediff> hediffs = pawn.health.hediffSet.hediffs;
-				int num3;
-				for (int i = 0; i < hediffs.Count; i = num3 + 1)
-				{
-					HediffStage curStage = hediffs[i].CurStage;
-					if (curStage != null)
-					{
-						float num = curStage.statOffsets.GetStatOffsetFromList(this.stat);
-						if (num != 0f && curStage.statOffsetEffectMultiplier != null)
-						{
-							num *= pawn.GetStatValue(curStage.statOffsetEffectMultiplier, true, -1);
-						}
-						float num2 = curStage.statFactors.GetStatFactorFromList(this.stat);
-						if (Math.Abs(num2 - 1f) > 1E-45f && curStage.statFactorEffectMultiplier != null)
-						{
-							num2 = StatWorker.ScaleFactor(num2, pawn.GetStatValue(curStage.statFactorEffectMultiplier, true, -1));
-						}
-						if (Mathf.Abs(num) > 0f || Math.Abs(num2 - 1f) > 1E-45f)
-						{
-							yield return new Dialog_InfoCard.Hyperlink(hediffs[i].def, -1);
-						}
-					}
-					num3 = i;
-				}
-				foreach (Thing thing2 in StatWorker.RelevantGear(pawn, this.stat))
-				{
-					yield return new Dialog_InfoCard.Hyperlink(thing2, -1, false);
-				}
-				IEnumerator<Thing> enumerator = null;
-				if (this.stat.parts != null)
-				{
-					foreach (StatPart statPart in this.stat.parts)
-					{
-						foreach (Dialog_InfoCard.Hyperlink hyperlink in statPart.GetInfoCardHyperlinks(statRequest))
-						{
-							yield return hyperlink;
-						}
-						IEnumerator<Dialog_InfoCard.Hyperlink> enumerator3 = null;
-					}
-					List<StatPart>.Enumerator enumerator2 = default(List<StatPart>.Enumerator);
-				}
-				hediffs = null;
-			}
-			yield break;
-			yield break;
-		}
-
-		// Token: 0x06013990 RID: 80272 RVA: 0x005D1E18 File Offset: 0x005D0018
-		public static float ScaleFactor(float factor, float scale)
-		{
-			return 1f - (1f - factor) * scale;
-		}
-
-		// Token: 0x06013991 RID: 80273 RVA: 0x005D1E2C File Offset: 0x005D002C
-		private static bool DisplayTradeStats(StatRequest req)
-		{
-			ThingDef thingDef = req.Def as ThingDef;
 			if (thingDef == null)
 			{
 				return false;
 			}
-			if (ModsConfig.BiotechActive && req.HasThing)
+			if (stat == StatDefOf.DoorOpenSpeed)
 			{
-				Pawn pawn = req.Thing as Pawn;
-				if (pawn != null && pawn.IsColonyMech)
+				return thingDef.IsDoor;
+			}
+			if (!stat.showOnNonWorkTables && !thingDef.IsWorkTable)
+			{
+				return false;
+			}
+			if (!stat.showOnNonPowerPlants && !thingDef.HasAssignableCompFrom(typeof(CompPowerPlant)))
+			{
+				return false;
+			}
+			return thingDef.category == ThingCategory.Building;
+		}
+		if (stat.category == StatCategoryDefOf.Apparel)
+		{
+			if (thingDef != null)
+			{
+				if (!thingDef.IsApparel)
+				{
+					return thingDef.category == ThingCategory.Pawn;
+				}
+				return true;
+			}
+			return false;
+		}
+		if (stat.category == StatCategoryDefOf.Weapon)
+		{
+			if (thingDef != null)
+			{
+				if (!thingDef.IsMeleeWeapon)
+				{
+					return thingDef.IsRangedWeapon;
+				}
+				return true;
+			}
+			return false;
+		}
+		if (stat.category == StatCategoryDefOf.Weapon_Ranged)
+		{
+			return thingDef?.IsRangedWeapon ?? false;
+		}
+		if (stat.category == StatCategoryDefOf.Weapon_Melee)
+		{
+			return thingDef?.IsMeleeWeapon ?? false;
+		}
+		if (stat.category == StatCategoryDefOf.BasicsNonPawn || stat.category == StatCategoryDefOf.BasicsNonPawnImportant)
+		{
+			if (thingDef == null || thingDef.category != ThingCategory.Pawn)
+			{
+				return !req.ForAbility;
+			}
+			return false;
+		}
+		if (stat.category == StatCategoryDefOf.Terrain)
+		{
+			return def is TerrainDef;
+		}
+		if (ModsConfig.AnomalyActive && stat.category == StatCategoryDefOf.PsychicRituals)
+		{
+			return false;
+		}
+		if (req.ForAbility)
+		{
+			return stat.category == StatCategoryDefOf.Ability;
+		}
+		if (stat.category.displayAllByDefault)
+		{
+			return true;
+		}
+		Log.Error("Unhandled case: " + stat?.ToString() + ", " + def);
+		return false;
+	}
+
+	public virtual bool IsDisabledFor(Thing thing)
+	{
+		if (stat.neverDisabled)
+		{
+			return false;
+		}
+		if (stat.skillNeedFactors.NullOrEmpty() && stat.skillNeedOffsets.NullOrEmpty() && stat.disableIfSkillDisabled == null)
+		{
+			return false;
+		}
+		if (thing is Pawn { story: not null } pawn)
+		{
+			if (stat.skillNeedFactors != null)
+			{
+				foreach (SkillNeed skillNeedFactor in stat.skillNeedFactors)
+				{
+					if (skillNeedFactor.required && pawn.skills.GetSkill(skillNeedFactor.skill).TotallyDisabled)
+					{
+						return true;
+					}
+				}
+			}
+			if (stat.skillNeedOffsets != null)
+			{
+				foreach (SkillNeed skillNeedOffset in stat.skillNeedOffsets)
+				{
+					if (skillNeedOffset.required && pawn.skills.GetSkill(skillNeedOffset.skill).TotallyDisabled)
+					{
+						return true;
+					}
+				}
+			}
+			if (stat.disableIfSkillDisabled != null && pawn.skills.GetSkill(stat.disableIfSkillDisabled).TotallyDisabled)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public virtual string GetStatDrawEntryLabel(StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized = true)
+	{
+		return stat.ValueToString(value, numberSense, finalized);
+	}
+
+	private static string InfoTextLineFromGear(Thing gear, StatDef stat)
+	{
+		float f = StatOffsetFromGear(gear, stat);
+		return "    " + gear.LabelCap + ": " + f.ToStringByStyle(stat.finalizeEquippedStatOffset ? stat.toStringStyle : stat.ToStringStyleUnfinalized, ToStringNumberSense.Offset);
+	}
+
+	public static float StatOffsetFromGear(Thing gear, StatDef stat)
+	{
+		float val = gear.def.equippedStatOffsets.GetStatOffsetFromList(stat);
+		CompBladelinkWeapon compBladelinkWeapon = gear.TryGetComp<CompBladelinkWeapon>();
+		if (compBladelinkWeapon != null)
+		{
+			List<WeaponTraitDef> traitsListForReading = compBladelinkWeapon.TraitsListForReading;
+			for (int i = 0; i < traitsListForReading.Count; i++)
+			{
+				val += traitsListForReading[i].equippedStatOffsets.GetStatOffsetFromList(stat);
+			}
+		}
+		if (Math.Abs(val) > float.Epsilon && !stat.parts.NullOrEmpty())
+		{
+			foreach (StatPart part in stat.parts)
+			{
+				part.TransformValue(StatRequest.For(gear), ref val);
+			}
+		}
+		return val;
+	}
+
+	[IteratorStateMachine(typeof(_003CRelevantGear_003Ed__23))]
+	private static IEnumerable<Thing> RelevantGear(Pawn pawn, StatDef stat)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CRelevantGear_003Ed__23(-2)
+		{
+			_003C_003E3__pawn = pawn,
+			_003C_003E3__stat = stat
+		};
+	}
+
+	private static bool GearAffectsStat(ThingDef gearDef, StatDef stat)
+	{
+		if (gearDef.equippedStatOffsets != null)
+		{
+			for (int i = 0; i < gearDef.equippedStatOffsets.Count; i++)
+			{
+				if (gearDef.equippedStatOffsets[i].stat == stat && gearDef.equippedStatOffsets[i].value != 0f)
 				{
 					return true;
 				}
 			}
-			return (!req.HasThing || !CompBiocodable.IsBiocoded(req.Thing)) && ((thingDef.category == ThingCategory.Building && thingDef.Minifiable) || TradeUtility.EverPlayerSellable(thingDef) || (thingDef.tradeability.TraderCanSell() && (thingDef.category == ThingCategory.Item || thingDef.category == ThingCategory.Pawn)));
 		}
+		return false;
+	}
 
-		// Token: 0x06013992 RID: 80274 RVA: 0x005D1ECD File Offset: 0x005D00CD
-		public void TryClearCache()
+	private static bool GearHasCompsThatAffectStat(Thing gear, StatDef stat)
+	{
+		CompBladelinkWeapon compBladelinkWeapon = gear.TryGetComp<CompBladelinkWeapon>();
+		if (compBladelinkWeapon == null)
 		{
-			Dictionary<Thing, StatCacheEntry> dictionary = this.temporaryStatCache;
-			if (dictionary != null)
-			{
-				dictionary.Clear();
-			}
-			ConcurrentDictionary<Thing, float> concurrentDictionary = this.immutableStatCache;
-			if (concurrentDictionary == null)
-			{
-				return;
-			}
-			concurrentDictionary.Clear();
+			return false;
 		}
-
-		// Token: 0x06013993 RID: 80275 RVA: 0x005D1EF0 File Offset: 0x005D00F0
-		public void ClearCacheForThing(Thing thing)
+		List<WeaponTraitDef> traitsListForReading = compBladelinkWeapon.TraitsListForReading;
+		for (int i = 0; i < traitsListForReading.Count; i++)
 		{
-			Dictionary<Thing, StatCacheEntry> dictionary = this.temporaryStatCache;
-			if (dictionary != null)
+			if (traitsListForReading[i].equippedStatOffsets.NullOrEmpty())
 			{
-				dictionary.Remove(thing);
+				continue;
 			}
-			ConcurrentDictionary<Thing, float> concurrentDictionary = this.immutableStatCache;
-			if (concurrentDictionary == null)
+			for (int j = 0; j < traitsListForReading[i].equippedStatOffsets.Count; j++)
 			{
-				return;
+				StatModifier statModifier = traitsListForReading[i].equippedStatOffsets[j];
+				if (statModifier.stat == stat && statModifier.value != 0f)
+				{
+					return true;
+				}
 			}
-			float num;
-			concurrentDictionary.Remove(thing, out num);
 		}
+		return false;
+	}
 
-		// Token: 0x06013994 RID: 80276 RVA: 0x005D1F24 File Offset: 0x005D0124
-		public void DeleteStatCache()
+	public virtual float GetBaseValueFor(StatRequest request)
+	{
+		float result = stat.defaultBaseValue;
+		if (request.StatBases != null)
 		{
-			this.temporaryStatCache = null;
-			this.immutableStatCache = null;
+			for (int i = 0; i < request.StatBases.Count; i++)
+			{
+				if (request.StatBases[i].stat == stat)
+				{
+					result = request.StatBases[i].value;
+					break;
+				}
+			}
 		}
+		return result;
+	}
 
-		// Token: 0x0400D91F RID: 55583
-		public const int IGNORE_CACHE = -1;
+	public virtual string ValueToStringFor(Thing thing)
+	{
+		return ValueToString(thing.GetStatValue(stat), finalized: true);
+	}
 
-		// Token: 0x0400D920 RID: 55584
-		private Dictionary<Thing, StatCacheEntry> temporaryStatCache;
+	public virtual string ValueToString(float val, bool finalized, ToStringNumberSense numberSense = ToStringNumberSense.Absolute)
+	{
+		if (!finalized)
+		{
+			string text = val.ToStringByStyle(stat.ToStringStyleUnfinalized, numberSense);
+			if (numberSense != ToStringNumberSense.Factor && !stat.formatStringUnfinalized.NullOrEmpty())
+			{
+				text = string.Format(stat.formatStringUnfinalized, text);
+			}
+			return text;
+		}
+		string text2 = val.ToStringByStyle(stat.toStringStyle, numberSense);
+		if (numberSense != ToStringNumberSense.Factor && !stat.formatString.NullOrEmpty())
+		{
+			text2 = string.Format(stat.formatString, text2);
+		}
+		return text2;
+	}
 
-		// Token: 0x0400D921 RID: 55585
-		private ConcurrentDictionary<Thing, float> immutableStatCache;
+	[IteratorStateMachine(typeof(_003CGetInfoCardHyperlinks_003Ed__29))]
+	public virtual IEnumerable<Dialog_InfoCard.Hyperlink> GetInfoCardHyperlinks(StatRequest statRequest)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetInfoCardHyperlinks_003Ed__29(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__statRequest = statRequest
+		};
+	}
 
-		// Token: 0x0400D922 RID: 55586
-		protected StatDef stat;
+	public static float ScaleFactor(float factor, float scale)
+	{
+		return 1f - (1f - factor) * scale;
+	}
+
+	private static bool DisplayTradeStats(StatRequest req)
+	{
+		if (!(req.Def is ThingDef thingDef))
+		{
+			return false;
+		}
+		if (ModsConfig.BiotechActive && req.HasThing && req.Thing is Pawn { IsColonyMech: not false })
+		{
+			return true;
+		}
+		if (req.HasThing && CompBiocodable.IsBiocoded(req.Thing))
+		{
+			return false;
+		}
+		if (thingDef.category == ThingCategory.Building && thingDef.Minifiable)
+		{
+			return true;
+		}
+		if (TradeUtility.EverPlayerSellable(thingDef))
+		{
+			return true;
+		}
+		if (thingDef.tradeability.TraderCanSell() && (thingDef.category == ThingCategory.Item || thingDef.category == ThingCategory.Pawn))
+		{
+			return true;
+		}
+		return false;
+	}
+
+	public void TryClearCache()
+	{
+		temporaryStatCache?.Clear();
+		immutableStatCache?.Clear();
+	}
+
+	public void ClearCacheForThing(Thing thing)
+	{
+		temporaryStatCache?.Remove(thing);
+		immutableStatCache?.Remove(thing, out var _);
+	}
+
+	public void DeleteStatCache()
+	{
+		temporaryStatCache = null;
+		immutableStatCache = null;
 	}
 }

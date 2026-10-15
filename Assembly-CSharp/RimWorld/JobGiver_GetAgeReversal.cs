@@ -1,55 +1,49 @@
-﻿using System;
 using System.Collections.Generic;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobGiver_GetAgeReversal : ThinkNode_JobGiver
 {
-	// Token: 0x0200148E RID: 5262
-	public class JobGiver_GetAgeReversal : ThinkNode_JobGiver
+	public CompBiosculpterPod GetBiosculpterPod(Pawn pawn)
 	{
-		// Token: 0x06007E84 RID: 32388 RVA: 0x00261288 File Offset: 0x0025F488
-		public CompBiosculpterPod GetBiosculpterPod(Pawn pawn)
+		List<CompBiosculpterPod> list = CompBiosculpterPod.BiotunedPods(pawn);
+		if (list != null && CompBiosculpterPod.CanAgeReverse(pawn) && pawn.ageTracker.AgeReversalDemandedDeadlineTicks <= 0)
 		{
-			List<CompBiosculpterPod> list = CompBiosculpterPod.BiotunedPods(pawn);
-			if (list != null && CompBiosculpterPod.CanAgeReverse(pawn) && pawn.ageTracker.AgeReversalDemandedDeadlineTicks <= 0L)
+			foreach (CompBiosculpterPod item in list)
 			{
-				foreach (CompBiosculpterPod compBiosculpterPod in list)
+				if (item.parent.Spawned && item.AutoAgeReversal && item.CanAcceptOnceCycleChosen(pawn) && item.PawnCanUseNow(pawn, item.GetCycle(item.AgeReversalCycleKey)))
 				{
-					if (compBiosculpterPod.parent.Spawned && compBiosculpterPod.AutoAgeReversal && compBiosculpterPod.CanAcceptOnceCycleChosen(pawn) && compBiosculpterPod.PawnCanUseNow(pawn, compBiosculpterPod.GetCycle(compBiosculpterPod.AgeReversalCycleKey)))
-					{
-						return compBiosculpterPod;
-					}
+					return item;
 				}
 			}
-			return null;
 		}
+		return null;
+	}
 
-		// Token: 0x06007E85 RID: 32389 RVA: 0x0026132C File Offset: 0x0025F52C
-		public override float GetPriority(Pawn pawn)
+	public override float GetPriority(Pawn pawn)
+	{
+		if (!ModsConfig.IdeologyActive)
 		{
-			if (!ModsConfig.IdeologyActive)
-			{
-				return 0f;
-			}
-			if (this.GetBiosculpterPod(pawn) != null)
-			{
-				return 7.4f;
-			}
 			return 0f;
 		}
-
-		// Token: 0x06007E86 RID: 32390 RVA: 0x00261350 File Offset: 0x0025F550
-		protected override Job TryGiveJob(Pawn pawn)
+		if (GetBiosculpterPod(pawn) != null)
 		{
-			CompBiosculpterPod biosculpterPod = this.GetBiosculpterPod(pawn);
-			if (biosculpterPod == null || !pawn.CanReserve(biosculpterPod.parent, 1, -1, null, false))
-			{
-				return null;
-			}
-			Job job = biosculpterPod.EnterBiosculpterJob();
-			biosculpterPod.ConfigureJobForCycle(job, biosculpterPod.GetCycle(biosculpterPod.AgeReversalCycleKey), null);
-			return job;
+			return 7.4f;
 		}
+		return 0f;
+	}
+
+	protected override Job TryGiveJob(Pawn pawn)
+	{
+		CompBiosculpterPod biosculpterPod = GetBiosculpterPod(pawn);
+		if (biosculpterPod == null || !pawn.CanReserve(biosculpterPod.parent))
+		{
+			return null;
+		}
+		Job job = biosculpterPod.EnterBiosculpterJob();
+		biosculpterPod.ConfigureJobForCycle(job, biosculpterPod.GetCycle(biosculpterPod.AgeReversalCycleKey), null);
+		return job;
 	}
 }

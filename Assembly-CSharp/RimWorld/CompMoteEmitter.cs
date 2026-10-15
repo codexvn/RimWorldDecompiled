@@ -1,152 +1,136 @@
-﻿using System;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompMoteEmitter : ThingComp
 {
-	// Token: 0x02002D68 RID: 11624
-	public class CompMoteEmitter : ThingComp
+	public int ticksSinceLastEmitted;
+
+	protected Mote mote;
+
+	private CompProperties_MoteEmitter Props => (CompProperties_MoteEmitter)props;
+
+	public bool MoteLive
 	{
-		// Token: 0x1700298D RID: 10637
-		// (get) Token: 0x06010551 RID: 66897 RVA: 0x004B6E3F File Offset: 0x004B503F
-		private CompProperties_MoteEmitter Props
+		get
 		{
-			get
+			if (mote != null)
 			{
-				return (CompProperties_MoteEmitter)this.props;
+				return !mote.Destroyed;
 			}
+			return false;
 		}
+	}
 
-		// Token: 0x1700298E RID: 10638
-		// (get) Token: 0x06010552 RID: 66898 RVA: 0x004B6E4C File Offset: 0x004B504C
-		public bool MoteLive
+	public override void Initialize(CompProperties props)
+	{
+		base.Initialize(props);
+		if (Props.ticksSinceLastEmittedMaxOffset > 0)
 		{
-			get
-			{
-				return this.mote != null && !this.mote.Destroyed;
-			}
+			ticksSinceLastEmitted = Rand.Range(0, Props.ticksSinceLastEmittedMaxOffset);
 		}
+	}
 
-		// Token: 0x06010553 RID: 66899 RVA: 0x004B6E66 File Offset: 0x004B5066
-		public override void Initialize(CompProperties props)
+	public override void CompTick()
+	{
+		if (!parent.Spawned)
 		{
-			base.Initialize(props);
-			if (this.Props.ticksSinceLastEmittedMaxOffset > 0)
-			{
-				this.ticksSinceLastEmitted = Rand.Range(0, this.Props.ticksSinceLastEmittedMaxOffset);
-			}
+			return;
 		}
-
-		// Token: 0x06010554 RID: 66900 RVA: 0x004B6E94 File Offset: 0x004B5094
-		public override void CompTick()
+		CompPowerTrader comp = parent.GetComp<CompPowerTrader>();
+		if (comp != null && !comp.PowerOn)
 		{
-			if (!this.parent.Spawned)
-			{
-				return;
-			}
-			CompPowerTrader comp = this.parent.GetComp<CompPowerTrader>();
-			if (comp != null && !comp.PowerOn)
-			{
-				return;
-			}
-			CompSendSignalOnCountdown comp2 = this.parent.GetComp<CompSendSignalOnCountdown>();
-			if (comp2 != null && comp2.ticksLeft <= 0)
-			{
-				return;
-			}
-			CompInitiatable comp3 = this.parent.GetComp<CompInitiatable>();
-			if (comp3 != null && !comp3.Initiated)
-			{
-				return;
-			}
-			Skyfaller skyfaller = this.parent as Skyfaller;
-			if (skyfaller != null && skyfaller.FadingOut)
-			{
-				return;
-			}
-			if (this.Props.emissionInterval != -1 && !this.Props.maintain)
-			{
-				if (this.ticksSinceLastEmitted >= this.Props.emissionInterval)
-				{
-					this.Emit();
-					this.ticksSinceLastEmitted = 0;
-				}
-				else
-				{
-					this.ticksSinceLastEmitted++;
-				}
-			}
-			else if (this.mote == null || this.mote.Destroyed)
-			{
-				this.Emit();
-			}
-			if (this.mote != null && !this.mote.Destroyed)
-			{
-				if (typeof(MoteAttached).IsAssignableFrom(this.Props.mote.thingClass) && skyfaller != null)
-				{
-					this.mote.exactRotation = skyfaller.DrawAngle();
-				}
-				if (this.Props.maintain)
-				{
-					this.Maintain();
-				}
-			}
+			return;
 		}
-
-		// Token: 0x06010555 RID: 66901 RVA: 0x004B6FD5 File Offset: 0x004B51D5
-		public void Maintain()
+		CompSendSignalOnCountdown comp2 = parent.GetComp<CompSendSignalOnCountdown>();
+		if (comp2 != null && comp2.ticksLeft <= 0)
 		{
-			this.mote.Maintain();
+			return;
 		}
-
-		// Token: 0x06010556 RID: 66902 RVA: 0x004B6FE4 File Offset: 0x004B51E4
-		public virtual void Emit()
+		CompInitiatable comp3 = parent.GetComp<CompInitiatable>();
+		if (comp3 != null && !comp3.Initiated)
 		{
-			if (!this.parent.Spawned)
+			return;
+		}
+		Skyfaller skyfaller = parent as Skyfaller;
+		if (skyfaller != null && skyfaller.FadingOut)
+		{
+			return;
+		}
+		if (Props.emissionInterval != -1 && !Props.maintain)
+		{
+			if (ticksSinceLastEmitted >= Props.emissionInterval)
 			{
-				Log.Error("Thing tried spawning mote without being spawned!");
-				return;
-			}
-			Vector3 vector = this.Props.offset + this.Props.RotationOffset(this.parent.Rotation);
-			if (this.Props.offsetMin != Vector3.zero || this.Props.offsetMax != Vector3.zero)
-			{
-				vector = this.Props.EmissionOffset;
-			}
-			ThingDef thingDef = this.Props.RotationMote(this.parent.Rotation) ?? this.Props.mote;
-			if (typeof(MoteAttached).IsAssignableFrom(thingDef.thingClass))
-			{
-				this.mote = MoteMaker.MakeAttachedOverlay(this.parent, thingDef, vector, 1f, -1f);
+				Emit();
+				ticksSinceLastEmitted = 0;
 			}
 			else
 			{
-				Vector3 vector2 = this.parent.DrawPos + vector;
-				if (vector2.InBounds(this.parent.Map))
-				{
-					this.mote = MoteMaker.MakeStaticMote(vector2, this.parent.Map, thingDef, 1f, false, 0f);
-				}
-			}
-			if (this.mote != null && this.Props.useParentRotation)
-			{
-				this.mote.exactRotation = this.parent.Rotation.AsAngle;
-			}
-			if (!this.Props.soundOnEmission.NullOrUndefined())
-			{
-				this.Props.soundOnEmission.PlayOneShot(SoundInfo.InMap(this.parent, MaintenanceType.None));
+				ticksSinceLastEmitted++;
 			}
 		}
-
-		// Token: 0x06010557 RID: 66903 RVA: 0x004B7174 File Offset: 0x004B5374
-		public override void PostExposeData()
+		else if (mote == null || mote.Destroyed)
 		{
-			base.PostExposeData();
-			Scribe_Values.Look<int>(ref this.ticksSinceLastEmitted, ((this.Props.saveKeysPrefix != null) ? (this.Props.saveKeysPrefix + "_") : "") + "ticksSinceLastEmitted", 0, false);
+			Emit();
 		}
+		if (mote != null && !mote.Destroyed)
+		{
+			if (typeof(MoteAttached).IsAssignableFrom(Props.mote.thingClass) && skyfaller != null)
+			{
+				mote.exactRotation = skyfaller.DrawAngle();
+			}
+			if (Props.maintain)
+			{
+				Maintain();
+			}
+		}
+	}
 
-		// Token: 0x0400AA63 RID: 43619
-		public int ticksSinceLastEmitted;
+	public void Maintain()
+	{
+		mote.Maintain();
+	}
 
-		// Token: 0x0400AA64 RID: 43620
-		protected Mote mote;
+	public virtual void Emit()
+	{
+		if (!parent.Spawned)
+		{
+			Log.Error("Thing tried spawning mote without being spawned!");
+			return;
+		}
+		Vector3 vector = Props.offset + Props.RotationOffset(parent.Rotation);
+		if (Props.offsetMin != Vector3.zero || Props.offsetMax != Vector3.zero)
+		{
+			vector = Props.EmissionOffset;
+		}
+		ThingDef thingDef = Props.RotationMote(parent.Rotation) ?? Props.mote;
+		if (typeof(MoteAttached).IsAssignableFrom(thingDef.thingClass))
+		{
+			mote = MoteMaker.MakeAttachedOverlay(parent, thingDef, vector);
+		}
+		else
+		{
+			Vector3 vector2 = parent.DrawPos + vector;
+			if (vector2.InBounds(parent.Map))
+			{
+				mote = MoteMaker.MakeStaticMote(vector2, parent.Map, thingDef);
+			}
+		}
+		if (mote != null && Props.useParentRotation)
+		{
+			mote.exactRotation = parent.Rotation.AsAngle;
+		}
+		if (!Props.soundOnEmission.NullOrUndefined())
+		{
+			Props.soundOnEmission.PlayOneShot(SoundInfo.InMap(parent));
+		}
+	}
+
+	public override void PostExposeData()
+	{
+		base.PostExposeData();
+		Scribe_Values.Look(ref ticksSinceLastEmitted, ((Props.saveKeysPrefix != null) ? (Props.saveKeysPrefix + "_") : "") + "ticksSinceLastEmitted", 0);
 	}
 }

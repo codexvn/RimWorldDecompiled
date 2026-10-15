@@ -1,85 +1,176 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_Dance : JobDriver
 {
-	// Token: 0x0200119F RID: 4511
-	public class JobDriver_Dance : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__8 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001116 RID: 4374
-		// (get) Token: 0x06006E4B RID: 28235 RVA: 0x00226FF7 File Offset: 0x002251F7
-		public int AgeTicks
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_Dance _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return Find.TickManager.TicksGame - this.startTick;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001117 RID: 4375
-		// (get) Token: 0x06006E4C RID: 28236 RVA: 0x0022700C File Offset: 0x0022520C
-		public override Vector3 ForcedBodyOffset
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				float num = Mathf.Sin((float)this.AgeTicks / 60f * 8f);
-				if (this.jumping)
-				{
-					float z = Mathf.Max(Mathf.Pow((num + 1f) * 0.5f, 2f) * 0.2f - 0.06f, 0f);
-					return new Vector3(0f, 0f, z);
-				}
-				float num2 = Mathf.Sign(num);
-				return new Vector3(EasingFunctions.EaseInOutQuad(Mathf.Abs(num) * 0.6f) * 0.09f * num2, 0f, 0f);
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06006E4D RID: 28237 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__8(int _003C_003E1__state)
 		{
-			return true;
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x06006E4E RID: 28238 RVA: 0x002270A8 File Offset: 0x002252A8
-		public override void Notify_Starting()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			base.Notify_Starting();
-			this.pawn.Rotation = Rot4.Random;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x06006E4F RID: 28239 RVA: 0x002270C0 File Offset: 0x002252C0
-		protected override IEnumerable<Toil> MakeNewToils()
+		private bool MoveNext()
 		{
-			if (!ModLister.CheckIdeology("Dance job"))
+			int num = _003C_003E1__state;
+			JobDriver_Dance CS_0024_003C_003E8__locals8 = _003C_003E4__this;
+			switch (num)
 			{
-				yield break;
+			default:
+				return false;
+			case 0:
+			{
+				_003C_003E1__state = -1;
+				if (!ModLister.CheckIdeology("Dance job"))
+				{
+					return false;
+				}
+				Toil toil = ToilMaker.MakeToil("MakeNewToils");
+				CS_0024_003C_003E8__locals8.jumping = Rand.Bool;
+				toil.tickIntervalAction = delegate
+				{
+					if (CS_0024_003C_003E8__locals8.AgeTicks % CS_0024_003C_003E8__locals8.moveChangeInterval == 0)
+					{
+						CS_0024_003C_003E8__locals8.jumping = !CS_0024_003C_003E8__locals8.jumping;
+					}
+					if (CS_0024_003C_003E8__locals8.AgeTicks % 120 == 0 && !CS_0024_003C_003E8__locals8.jumping)
+					{
+						CS_0024_003C_003E8__locals8.pawn.Rotation = Rot4.Random;
+					}
+				};
+				toil.socialMode = RandomSocialMode.SuperActive;
+				toil.defaultCompleteMode = ToilCompleteMode.Never;
+				toil.handlingFacing = true;
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 1;
+				return true;
 			}
-			Toil toil = ToilMaker.MakeToil("MakeNewToils");
-			this.jumping = Rand.Bool;
-			toil.tickIntervalAction = delegate(int delta)
-			{
-				if (this.AgeTicks % this.moveChangeInterval == 0)
-				{
-					this.jumping = !this.jumping;
-				}
-				if (this.AgeTicks % 120 == 0 && !this.jumping)
-				{
-					this.pawn.Rotation = Rot4.Random;
-				}
-			};
-			toil.socialMode = RandomSocialMode.SuperActive;
-			toil.defaultCompleteMode = ToilCompleteMode.Never;
-			toil.handlingFacing = true;
-			yield return toil;
-			yield break;
+			case 1:
+				_003C_003E1__state = -1;
+				return false;
+			}
 		}
 
-		// Token: 0x04004D0B RID: 19723
-		private bool jumping;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x04004D0C RID: 19724
-		private int moveChangeInterval = 240;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__8 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__8(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private bool jumping;
+
+	private int moveChangeInterval = 240;
+
+	public int AgeTicks => Find.TickManager.TicksGame - startTick;
+
+	public override Vector3 ForcedBodyOffset
+	{
+		get
+		{
+			float num = Mathf.Sin((float)AgeTicks / 60f * 8f);
+			if (jumping)
+			{
+				float z = Mathf.Max(Mathf.Pow((num + 1f) * 0.5f, 2f) * 0.2f - 0.06f, 0f);
+				return new Vector3(0f, 0f, z);
+			}
+			float num2 = Mathf.Sign(num);
+			return new Vector3(EasingFunctions.EaseInOutQuad(Mathf.Abs(num) * 0.6f) * 0.09f * num2, 0f, 0f);
+		}
+	}
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return true;
+	}
+
+	public override void Notify_Starting()
+	{
+		base.Notify_Starting();
+		pawn.Rotation = Rot4.Random;
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__8))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__8(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

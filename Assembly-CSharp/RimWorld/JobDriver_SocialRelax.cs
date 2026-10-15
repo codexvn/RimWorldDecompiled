@@ -1,118 +1,217 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_SocialRelax : JobDriver
 {
-	// Token: 0x020011F0 RID: 4592
-	public class JobDriver_SocialRelax : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__12 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001164 RID: 4452
-		// (get) Token: 0x06007030 RID: 28720 RVA: 0x0022D6BC File Offset: 0x0022B8BC
-		private Thing GatherSpotParent
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_SocialRelax _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.job.GetTarget(TargetIndex.A).Thing;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001165 RID: 4453
-		// (get) Token: 0x06007031 RID: 28721 RVA: 0x0022D6E0 File Offset: 0x0022B8E0
-		private bool HasChair
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.job.GetTarget(TargetIndex.B).HasThing;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001166 RID: 4454
-		// (get) Token: 0x06007032 RID: 28722 RVA: 0x0022D704 File Offset: 0x0022B904
-		private bool HasDrink
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__12(int _003C_003E1__state)
 		{
-			get
-			{
-				return this.job.GetTarget(TargetIndex.C).HasThing;
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x17001167 RID: 4455
-		// (get) Token: 0x06007033 RID: 28723 RVA: 0x0022D728 File Offset: 0x0022B928
-		private IntVec3 ClosestGatherSpotParentCell
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			get
-			{
-				return this.GatherSpotParent.OccupiedRect().ClosestCellTo(this.pawn.Position);
-			}
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x06007034 RID: 28724 RVA: 0x0022D754 File Offset: 0x0022B954
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		private bool MoveNext()
 		{
-			IntVec3 cell;
-			if (!this.HasChair || !Toils_Ingest.TryFindFreeSittingSpotOnThing(this.job.GetTarget(TargetIndex.B).Thing, this.pawn, out cell))
+			int num = _003C_003E1__state;
+			JobDriver_SocialRelax CS_0024_003C_003E8__locals14 = _003C_003E4__this;
+			switch (num)
 			{
-				cell = this.job.GetTarget(TargetIndex.B).Cell;
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				CS_0024_003C_003E8__locals14.EndOnDespawnedOrNull(TargetIndex.A);
+				if (CS_0024_003C_003E8__locals14.HasChair)
+				{
+					CS_0024_003C_003E8__locals14.EndOnDespawnedOrNull(TargetIndex.B);
+				}
+				if (CS_0024_003C_003E8__locals14.HasDrink)
+				{
+					CS_0024_003C_003E8__locals14.FailOnDestroyedNullOrForbidden(TargetIndex.C);
+					_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.C, PathEndMode.OnCell).FailOnSomeonePhysicallyInteracting(TargetIndex.C);
+					_003C_003E1__state = 1;
+					return true;
+				}
+				goto IL_00a4;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Haul.StartCarryThing(TargetIndex.C);
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				goto IL_00a4;
+			case 3:
+			{
+				_003C_003E1__state = -1;
+				Toil toil = ToilMaker.MakeToil("MakeNewToils");
+				toil.tickIntervalAction = delegate(int delta)
+				{
+					CS_0024_003C_003E8__locals14.pawn.rotationTracker.FaceCell(CS_0024_003C_003E8__locals14.ClosestGatherSpotParentCell);
+					CS_0024_003C_003E8__locals14.pawn.GainComfortFromCellIfPossible(delta);
+					JoyUtility.JoyTickCheckEnd(CS_0024_003C_003E8__locals14.pawn, delta, JoyTickFullJoyAction.GoToNextToil);
+				};
+				toil.handlingFacing = true;
+				toil.defaultCompleteMode = ToilCompleteMode.Delay;
+				toil.defaultDuration = CS_0024_003C_003E8__locals14.job.def.joyDuration;
+				toil.AddFinishAction(delegate
+				{
+					JoyUtility.TryGainRecRoomThought(CS_0024_003C_003E8__locals14.pawn);
+				});
+				toil.socialMode = RandomSocialMode.SuperActive;
+				Toils_Ingest.AddIngestionEffects(toil, CS_0024_003C_003E8__locals14.pawn, TargetIndex.C, TargetIndex.None);
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 4;
+				return true;
 			}
-			return this.pawn.ReserveSittableOrSpot(cell, this.pawn.CurJob, true) && (!this.HasDrink || this.pawn.Reserve(this.job.GetTarget(TargetIndex.C), this.job, 1, -1, null, errorOnFailed, false));
+			case 4:
+				_003C_003E1__state = -1;
+				if (CS_0024_003C_003E8__locals14.HasDrink)
+				{
+					_003C_003E2__current = Toils_Ingest.FinalizeIngest(CS_0024_003C_003E8__locals14.pawn, TargetIndex.C);
+					_003C_003E1__state = 5;
+					return true;
+				}
+				break;
+			case 5:
+				{
+					_003C_003E1__state = -1;
+					break;
+				}
+				IL_00a4:
+				_003C_003E2__current = Toils_Goto.GotoCell(TargetIndex.B, PathEndMode.OnCell);
+				_003C_003E1__state = 3;
+				return true;
+			}
+			return false;
 		}
 
-		// Token: 0x06007035 RID: 28725 RVA: 0x0022D7EC File Offset: 0x0022B9EC
-		protected override IEnumerable<Toil> MakeNewToils()
+		bool IEnumerator.MoveNext()
 		{
-			this.EndOnDespawnedOrNull(TargetIndex.A, JobCondition.Incompletable);
-			if (this.HasChair)
-			{
-				this.EndOnDespawnedOrNull(TargetIndex.B, JobCondition.Incompletable);
-			}
-			if (this.HasDrink)
-			{
-				this.FailOnDestroyedNullOrForbidden(TargetIndex.C);
-				yield return Toils_Goto.GotoThing(TargetIndex.C, PathEndMode.OnCell, false).FailOnSomeonePhysicallyInteracting(TargetIndex.C);
-				yield return Toils_Haul.StartCarryThing(TargetIndex.C, false, false, false, true, false);
-			}
-			yield return Toils_Goto.GotoCell(TargetIndex.B, PathEndMode.OnCell);
-			Toil toil = ToilMaker.MakeToil("MakeNewToils");
-			toil.tickIntervalAction = delegate(int delta)
-			{
-				this.pawn.rotationTracker.FaceCell(this.ClosestGatherSpotParentCell);
-				this.pawn.GainComfortFromCellIfPossible(delta, false);
-				JoyUtility.JoyTickCheckEnd(this.pawn, delta, JoyTickFullJoyAction.GoToNextToil, 1f, null);
-			};
-			toil.handlingFacing = true;
-			toil.defaultCompleteMode = ToilCompleteMode.Delay;
-			toil.defaultDuration = this.job.def.joyDuration;
-			toil.AddFinishAction(delegate
-			{
-				JoyUtility.TryGainRecRoomThought(this.pawn);
-			});
-			toil.socialMode = RandomSocialMode.SuperActive;
-			Toils_Ingest.AddIngestionEffects(toil, this.pawn, TargetIndex.C, TargetIndex.None);
-			yield return toil;
-			if (this.HasDrink)
-			{
-				yield return Toils_Ingest.FinalizeIngest(this.pawn, TargetIndex.C);
-			}
-			yield break;
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x06007036 RID: 28726 RVA: 0x0022D7FC File Offset: 0x0022B9FC
-		public override bool ModifyCarriedThingDrawPos(ref Vector3 drawPos, ref bool flip)
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			IntVec3 closestGatherSpotParentCell = this.ClosestGatherSpotParentCell;
-			return JobDriver_Ingest.ModifyCarriedThingDrawPosWorker(ref drawPos, ref flip, closestGatherSpotParentCell, this.pawn);
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x04004E0F RID: 19983
-		private const TargetIndex GatherSpotParentInd = TargetIndex.A;
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__12 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__12(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x04004E10 RID: 19984
-		private const TargetIndex ChairOrSpotInd = TargetIndex.B;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x04004E11 RID: 19985
-		private const TargetIndex OptionalIngestibleInd = TargetIndex.C;
+	private const TargetIndex GatherSpotParentInd = TargetIndex.A;
+
+	private const TargetIndex ChairOrSpotInd = TargetIndex.B;
+
+	private const TargetIndex OptionalIngestibleInd = TargetIndex.C;
+
+	private Thing GatherSpotParent => job.GetTarget(TargetIndex.A).Thing;
+
+	private bool HasChair => job.GetTarget(TargetIndex.B).HasThing;
+
+	private bool HasDrink => job.GetTarget(TargetIndex.C).HasThing;
+
+	private IntVec3 ClosestGatherSpotParentCell => GatherSpotParent.OccupiedRect().ClosestCellTo(pawn.Position);
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		if (!HasChair || !Toils_Ingest.TryFindFreeSittingSpotOnThing(job.GetTarget(TargetIndex.B).Thing, pawn, out var cell))
+		{
+			cell = job.GetTarget(TargetIndex.B).Cell;
+		}
+		if (!pawn.ReserveSittableOrSpot(cell, pawn.CurJob))
+		{
+			return false;
+		}
+		job.SetTarget(TargetIndex.B, cell);
+		if (HasDrink && !pawn.Reserve(job.GetTarget(TargetIndex.C), job, 1, -1, null, errorOnFailed))
+		{
+			return false;
+		}
+		return true;
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__12))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__12(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override bool ModifyCarriedThingDrawPos(ref Vector3 drawPos, ref bool flip)
+	{
+		IntVec3 closestGatherSpotParentCell = ClosestGatherSpotParentCell;
+		return JobDriver_Ingest.ModifyCarriedThingDrawPosWorker(ref drawPos, ref flip, closestGatherSpotParentCell, pawn);
 	}
 }

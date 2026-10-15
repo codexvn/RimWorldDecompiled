@@ -1,76 +1,235 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_WatchBuilding : JobDriver
 {
-	// Token: 0x020011F8 RID: 4600
-	public class JobDriver_WatchBuilding : JobDriver
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass2_0
 	{
-		// Token: 0x06007065 RID: 28773 RVA: 0x0022E090 File Offset: 0x0022C290
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		public Toil watch;
+
+		public JobDriver_WatchBuilding _003C_003E4__this;
+
+		internal bool _003CMakeNewToils_003Eb__0()
 		{
-			return this.pawn.Reserve(this.job.targetA, this.job, this.job.def.joyMaxParticipants, 0, null, errorOnFailed, false) && this.pawn.ReserveSittableOrSpot(this.job.targetB.Cell, this.job, errorOnFailed) && (!base.TargetC.HasThing || !(base.TargetC.Thing is Building_Bed) || this.pawn.Reserve(this.job.targetC, this.job, ((Building_Bed)base.TargetC.Thing).SleepingSlotsCount, 0, null, errorOnFailed, false));
+			return !watch.actor.Awake();
 		}
 
-		// Token: 0x06007066 RID: 28774 RVA: 0x0022E15C File Offset: 0x0022C35C
-		public override bool CanBeginNowWhileLyingDown()
+		internal void _003CMakeNewToils_003Eb__1()
 		{
-			return base.TargetC.HasThing && base.TargetC.Thing is Building_Bed && JobInBedUtility.InBedOrRestSpotNow(this.pawn, base.TargetC);
+			JoyUtility.TryGainRecRoomThought(_003C_003E4__this.pawn);
 		}
 
-		// Token: 0x06007067 RID: 28775 RVA: 0x0022E1A1 File Offset: 0x0022C3A1
-		protected override IEnumerable<Toil> MakeNewToils()
+		internal EffecterDef _003CMakeNewToils_003Eb__3()
 		{
-			JobDriver_WatchBuilding.<>c__DisplayClass2_0 CS$<>8__locals1 = new JobDriver_WatchBuilding.<>c__DisplayClass2_0();
-			CS$<>8__locals1.<>4__this = this;
-			this.EndOnDespawnedOrNull(TargetIndex.A, JobCondition.Incompletable);
-			if (base.TargetC.HasThing && base.TargetC.Thing is Building_Bed)
+			return _003C_003E4__this.TargetA.Thing.def.building.effectWatching;
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__2 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_WatchBuilding _003C_003E4__this;
+
+		private _003C_003Ec__DisplayClass2_0 _003C_003E8__1;
+
+		Toil IEnumerator<Toil>.Current
+		{
+			[DebuggerHidden]
+			get
 			{
-				this.KeepLyingDown(TargetIndex.C);
-				yield return Toils_Bed.ClaimBedIfNonMedical(TargetIndex.C, TargetIndex.None);
-				yield return Toils_Bed.GotoBed(TargetIndex.C);
-				CS$<>8__locals1.watch = Toils_LayDown.LayDown(TargetIndex.C, true, false, true, true, PawnPosture.LayingOnGroundNormal, false);
-				CS$<>8__locals1.watch.AddFailCondition(() => !CS$<>8__locals1.watch.actor.Awake());
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__2(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E8__1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_WatchBuilding jobDriver_WatchBuilding = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E8__1 = new _003C_003Ec__DisplayClass2_0();
+				_003C_003E8__1._003C_003E4__this = _003C_003E4__this;
+				jobDriver_WatchBuilding.EndOnDespawnedOrNull(TargetIndex.A);
+				if (jobDriver_WatchBuilding.TargetC.HasThing && jobDriver_WatchBuilding.TargetC.Thing is Building_Bed)
+				{
+					jobDriver_WatchBuilding.KeepLyingDown(TargetIndex.C);
+					_003C_003E2__current = Toils_Bed.ClaimBedIfNonMedical(TargetIndex.C);
+					_003C_003E1__state = 1;
+					return true;
+				}
+				_003C_003E2__current = Toils_Goto.GotoCell(TargetIndex.B, PathEndMode.OnCell);
+				_003C_003E1__state = 3;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Bed.GotoBed(TargetIndex.C);
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				_003C_003E8__1.watch = Toils_LayDown.LayDown(TargetIndex.C, hasBed: true, lookForOtherJobs: false);
+				_003C_003E8__1.watch.AddFailCondition(() => !_003C_003E8__1.watch.actor.Awake());
+				goto IL_012d;
+			case 3:
+				_003C_003E1__state = -1;
+				_003C_003E8__1.watch = ToilMaker.MakeToil("MakeNewToils");
+				goto IL_012d;
+			case 4:
+				{
+					_003C_003E1__state = -1;
+					return false;
+				}
+				IL_012d:
+				_003C_003E8__1.watch.AddPreTickIntervalAction(jobDriver_WatchBuilding.WatchTickAction);
+				_003C_003E8__1.watch.AddFinishAction(delegate
+				{
+					JoyUtility.TryGainRecRoomThought(_003C_003E8__1._003C_003E4__this.pawn);
+				});
+				_003C_003E8__1.watch.defaultCompleteMode = ToilCompleteMode.Delay;
+				_003C_003E8__1.watch.defaultDuration = jobDriver_WatchBuilding.job.def.joyDuration;
+				_003C_003E8__1.watch.handlingFacing = true;
+				if (jobDriver_WatchBuilding.TargetA.Thing.def.building != null && jobDriver_WatchBuilding.TargetA.Thing.def.building.effectWatching != null)
+				{
+					_003C_003E8__1.watch.WithEffect(() => _003C_003E8__1._003C_003E4__this.TargetA.Thing.def.building.effectWatching, EffectTargetGetter, null);
+				}
+				_003C_003E2__current = _003C_003E8__1.watch;
+				_003C_003E1__state = 4;
+				return true;
+			}
+			LocalTargetInfo EffectTargetGetter()
+			{
+				return ((_003C_003Ec__DisplayClass2_0)this)._003C_003E4__this.TargetA.Thing.OccupiedRect().RandomCell + IntVec3.North.RotatedBy(((_003C_003Ec__DisplayClass2_0)this)._003C_003E4__this.TargetA.Thing.Rotation);
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__2 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
 			}
 			else
 			{
-				yield return Toils_Goto.GotoCell(TargetIndex.B, PathEndMode.OnCell);
-				CS$<>8__locals1.watch = ToilMaker.MakeToil("MakeNewToils");
+				result = new _003CMakeNewToils_003Ed__2(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
-			CS$<>8__locals1.watch.AddPreTickIntervalAction(new Action<int>(this.WatchTickAction));
-			CS$<>8__locals1.watch.AddFinishAction(delegate
-			{
-				JoyUtility.TryGainRecRoomThought(CS$<>8__locals1.<>4__this.pawn);
-			});
-			CS$<>8__locals1.watch.defaultCompleteMode = ToilCompleteMode.Delay;
-			CS$<>8__locals1.watch.defaultDuration = this.job.def.joyDuration;
-			CS$<>8__locals1.watch.handlingFacing = true;
-			if (base.TargetA.Thing.def.building != null && base.TargetA.Thing.def.building.effectWatching != null)
-			{
-				CS$<>8__locals1.watch.WithEffect(() => CS$<>8__locals1.<>4__this.TargetA.Thing.def.building.effectWatching, new Func<LocalTargetInfo>(CS$<>8__locals1.<MakeNewToils>g__EffectTargetGetter|2), null);
-			}
-			yield return CS$<>8__locals1.watch;
-			yield break;
+			return result;
 		}
 
-		// Token: 0x06007068 RID: 28776 RVA: 0x0022E1B4 File Offset: 0x0022C3B4
-		protected virtual void WatchTickAction(int delta)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			this.pawn.rotationTracker.FaceCell(base.TargetA.Cell);
-			this.pawn.GainComfortFromCellIfPossible(delta, false);
-			JoyUtility.JoyTickCheckEnd(this.pawn, delta, JoyTickFullJoyAction.EndJob, 1f, (Building)base.TargetThingA);
+			return ((IEnumerable<Toil>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x06007069 RID: 28777 RVA: 0x0022E20C File Offset: 0x0022C40C
-		public override object[] TaleParameters()
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		if (!pawn.Reserve(job.targetA, job, job.def.joyMaxParticipants, 0, null, errorOnFailed))
 		{
-			return new object[]
-			{
-				this.pawn,
-				base.TargetA.Thing.def
-			};
+			return false;
 		}
+		if (!pawn.ReserveSittableOrSpot(job.targetB.Cell, job, errorOnFailed))
+		{
+			return false;
+		}
+		if (base.TargetC.HasThing && base.TargetC.Thing is Building_Bed && !pawn.Reserve(job.targetC, job, ((Building_Bed)base.TargetC.Thing).SleepingSlotsCount, 0, null, errorOnFailed))
+		{
+			return false;
+		}
+		return true;
+	}
+
+	public override bool CanBeginNowWhileLyingDown()
+	{
+		if (base.TargetC.HasThing && base.TargetC.Thing is Building_Bed)
+		{
+			return JobInBedUtility.InBedOrRestSpotNow(pawn, base.TargetC);
+		}
+		return false;
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__2))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__2(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	protected virtual void WatchTickAction(int delta)
+	{
+		pawn.rotationTracker.FaceCell(base.TargetA.Cell);
+		pawn.GainComfortFromCellIfPossible(delta);
+		JoyUtility.JoyTickCheckEnd(pawn, delta, JoyTickFullJoyAction.EndJob, 1f, (Building)base.TargetThingA);
+	}
+
+	public override object[] TaleParameters()
+	{
+		return new object[2]
+		{
+			pawn,
+			base.TargetA.Thing.def
+		};
 	}
 }

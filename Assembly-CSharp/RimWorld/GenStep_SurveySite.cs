@@ -1,56 +1,45 @@
-﻿using System;
-using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class GenStep_SurveySite : GenStep
 {
-	// Token: 0x02002082 RID: 8322
-	public class GenStep_SurveySite : GenStep
+	public override int SeedPart => 3615199;
+
+	public override void Generate(Map map, GenStepParams parms)
 	{
-		// Token: 0x17001BDB RID: 7131
-		// (get) Token: 0x0600B666 RID: 46694 RVA: 0x003468C1 File Offset: 0x00344AC1
-		public override int SeedPart
+		if (!ModsConfig.OdysseyActive)
 		{
-			get
-			{
-				return 3615199;
-			}
+			return;
 		}
-
-		// Token: 0x0600B667 RID: 46695 RVA: 0x003468C8 File Offset: 0x00344AC8
-		public override void Generate(Map map, GenStepParams parms)
+		CellRect rect;
+		IntVec3 intVec = (MapGenUtility.TryGetRandomClearRect(20, 20, out rect, -1, -1, RectValidator, -1f, 0.7f, MapGenUtility.SearchWeightMode.Center) ? (rect.CenterCell + IntVec3.SouthEast) : map.Center);
+		PrefabDef surveyScanner = PrefabDefOf.SurveyScanner;
+		CellRect rect2 = intVec.RectAbout(surveyScanner.size);
+		MapGenerator.UsedRects.Add(rect2.ExpandedBy(8));
+		foreach (IntVec3 cell in rect2.Cells)
 		{
-			GenStep_SurveySite.<>c__DisplayClass2_0 CS$<>8__locals1 = new GenStep_SurveySite.<>c__DisplayClass2_0();
-			CS$<>8__locals1.map = map;
-			if (!ModsConfig.OdysseyActive)
-			{
-				return;
-			}
-			CellRect cellRect;
-			IntVec3 intVec = MapGenUtility.TryGetRandomClearRect(20, 20, out cellRect, -1, -1, new Predicate<CellRect>(CS$<>8__locals1.<Generate>g__RectValidator|0), -1f, 0.7f, MapGenUtility.SearchWeightMode.Center, 1) ? (cellRect.CenterCell + IntVec3.SouthEast) : CS$<>8__locals1.map.Center;
-			PrefabDef surveyScanner = PrefabDefOf.SurveyScanner;
-			CellRect cellRect2 = intVec.RectAbout(surveyScanner.size);
-			MapGenerator.UsedRects.Add(cellRect2.ExpandedBy(8));
-			foreach (IntVec3 c in cellRect2.Cells)
-			{
-				Building edifice = c.GetEdifice(CS$<>8__locals1.map);
-				if (edifice != null)
-				{
-					edifice.Destroy(DestroyMode.Vanish);
-				}
-			}
-			MapGenUtility.DoRectEdgeLumps(CS$<>8__locals1.map, null, ref cellRect2, IntRange.Between(2, 4), IntRange.Between(2, 1), null);
-			PrefabUtility.SpawnPrefab(PrefabDefOf.SurveyScanner, CS$<>8__locals1.map, intVec, Rot4.North, null, null, null, new Action<Thing>(GenStep_SurveySite.<Generate>g__OnSpawned|2_1), false);
+			cell.GetEdifice(map)?.Destroy();
 		}
-
-		// Token: 0x0600B669 RID: 46697 RVA: 0x003469F4 File Offset: 0x00344BF4
-		[CompilerGenerated]
-		internal static void <Generate>g__OnSpawned|2_1(Thing thing)
+		MapGenUtility.DoRectEdgeLumps(map, null, ref rect2, IntRange.Between(2, 4), IntRange.Between(2, 1));
+		PrefabUtility.SpawnPrefab(PrefabDefOf.SurveyScanner, map, intVec, Rot4.North, null, null, null, OnSpawned);
+		static void OnSpawned(Thing thing)
 		{
 			if (thing.def == ThingDefOf.SurveyScanner)
 			{
-				thing.SetFaction(Find.FactionManager.OfPlayer, null);
+				thing.SetFaction(Find.FactionManager.OfPlayer);
 			}
+		}
+		bool RectValidator(CellRect r)
+		{
+			foreach (IntVec3 cell2 in r.Cells)
+			{
+				if (cell2.GetEdifice(map) != null || !cell2.GetAffordances(map).Contains(TerrainAffordanceDefOf.Medium) || MapGenerator.UsedRects.Any((CellRect a) => a.Overlaps(r)))
+				{
+					return false;
+				}
+			}
+			return true;
 		}
 	}
 }

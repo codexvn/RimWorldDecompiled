@@ -1,274 +1,536 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompAbilityEffect_Farskip : CompAbilityEffect
 {
-	// Token: 0x0200221E RID: 8734
-	public class CompAbilityEffect_Farskip : CompAbilityEffect
+	[CompilerGenerated]
+	private sealed class _003CGetPreCastActions_003Ed__3 : IEnumerable<PreCastAction>, IEnumerable, IEnumerator<PreCastAction>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001D24 RID: 7460
-		// (get) Token: 0x0600BEED RID: 48877 RVA: 0x00375E9A File Offset: 0x0037409A
-		private new CompProperties_AbilityFarskip Props
+		private int _003C_003E1__state;
+
+		private PreCastAction _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompAbilityEffect_Farskip _003C_003E4__this;
+
+		PreCastAction IEnumerator<PreCastAction>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (CompProperties_AbilityFarskip)this.props;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600BEEE RID: 48878 RVA: 0x00375EA8 File Offset: 0x003740A8
-		public override void Apply(GlobalTargetInfo target)
+		object IEnumerator.Current
 		{
-			Caravan caravan = this.parent.pawn.GetCaravan();
-			MapParent mapParent = target.WorldObject as MapParent;
-			Map targetMap = (mapParent != null) ? mapParent.Map : null;
-			IntVec3 targetCell = IntVec3.Invalid;
-			List<Pawn> list = this.PawnsToSkip().ToList<Pawn>();
-			if (this.parent.pawn.Spawned)
+			[DebuggerHidden]
+			get
 			{
-				foreach (Pawn pawn in list)
-				{
-					this.parent.AddEffecterToMaintain(EffecterDefOf.Skip_Entry.Spawn(pawn, pawn.Map, 1f), pawn.Position, 60, null);
-				}
-				SoundDefOf.Psycast_Skip_Pulse.PlayOneShot(new TargetInfo(target.Cell, this.parent.pawn.Map, false));
+				return _003C_003E2__current;
 			}
-			if (this.ShouldEnterMap(target))
+		}
+
+		[DebuggerHidden]
+		public _003CGetPreCastActions_003Ed__3(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			CompAbilityEffect_Farskip CS_0024_003C_003E8__locals1 = _003C_003E4__this;
+			switch (num)
 			{
-				Pawn pawn2 = this.AlliedPawnOnMap(targetMap);
-				if (pawn2 != null)
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = new PreCastAction
 				{
-					targetCell = pawn2.Position;
-				}
-				else
-				{
-					targetCell = this.parent.pawn.Position;
-				}
+					action = delegate
+					{
+						foreach (Pawn item in CS_0024_003C_003E8__locals1.PawnsToSkip())
+						{
+							FleckCreationData dataAttachedOverlay = FleckMaker.GetDataAttachedOverlay(item, FleckDefOf.PsycastSkipFlashEntry, new Vector3(-0.5f, 0f, -0.5f));
+							dataAttachedOverlay.link.detachAfterTicks = 5;
+							item.Map.flecks.CreateFleck(dataAttachedOverlay);
+						}
+					},
+					ticksAwayFromCast = 5
+				};
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				return false;
 			}
-			if (targetCell.IsValid)
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<PreCastAction> IEnumerable<PreCastAction>.GetEnumerator()
+		{
+			_003CGetPreCastActions_003Ed__3 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				Predicate<IntVec3> <>9__0;
-				foreach (Pawn pawn3 in list)
-				{
-					if (pawn3.Spawned)
-					{
-						pawn3.teleporting = true;
-						pawn3.ExitMap(false, Rot4.Invalid);
-						AbilityUtility.DoClamor(pawn3.Position, (float)this.Props.clamorRadius, this.parent.pawn, this.Props.clamorType);
-						pawn3.teleporting = false;
-					}
-					IntVec3 targetCell2 = targetCell;
-					Map targetMap2 = targetMap;
-					int firstTryWithRadius = 4;
-					Predicate<IntVec3> extraValidator;
-					if ((extraValidator = <>9__0) == null)
-					{
-						extraValidator = (<>9__0 = ((IntVec3 cell) => cell != targetCell && cell.GetRoom(targetMap) == targetCell.GetRoom(targetMap)));
-					}
-					IntVec3 intVec;
-					CellFinder.TryFindRandomSpawnCellForPawnNear(targetCell2, targetMap2, out intVec, firstTryWithRadius, extraValidator);
-					GenSpawn.Spawn(pawn3, intVec, targetMap, WipeMode.Vanish);
-					if (pawn3.drafter != null && pawn3.IsColonistPlayerControlled && !pawn3.Downed)
-					{
-						pawn3.drafter.Drafted = true;
-					}
-					pawn3.stances.stunner.StunFor(this.Props.stunTicks.RandomInRange, this.parent.pawn, false, true, false);
-					pawn3.Notify_Teleported(true, true);
-					CompAbilityEffect_Teleport.SendSkipUsedSignal(pawn3, this.parent.pawn);
-					if (pawn3.IsPrisoner)
-					{
-						pawn3.guest.WaitInsteadOfEscapingForDefaultTicks();
-					}
-					this.parent.AddEffecterToMaintain(EffecterDefOf.Skip_ExitNoDelay.Spawn(pawn3, pawn3.Map, 1f), pawn3.Position, 60, targetMap);
-					SoundDefOf.Psycast_Skip_Exit.PlayOneShot(new TargetInfo(intVec, pawn3.Map, false));
-					if ((pawn3.IsColonist || pawn3.RaceProps.packAnimal || pawn3.IsColonyMech) && pawn3.Map.IsPlayerHome)
-					{
-						pawn3.inventory.UnloadEverything = true;
-					}
-				}
-				if (caravan != null)
-				{
-					caravan.Destroy();
-					return;
-				}
+				_003C_003E1__state = 0;
+				result = this;
 			}
 			else
 			{
-				Caravan caravan2 = target.WorldObject as Caravan;
-				if (caravan2 != null && caravan2.Faction == this.parent.pawn.Faction)
+				result = new _003CGetPreCastActions_003Ed__3(0)
 				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<PreCastAction>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CPawnsToSkip_003Ed__4 : IEnumerable<Pawn>, IEnumerable, IEnumerator<Pawn>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Pawn _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompAbilityEffect_Farskip _003C_003E4__this;
+
+		private List<Pawn>.Enumerator _003C_003E7__wrap1;
+
+		private bool _003ChomeMap_003E5__3;
+
+		private bool _003CsentLodgerMessage_003E5__4;
+
+		private IEnumerator<Thing> _003C_003E7__wrap4;
+
+		Pawn IEnumerator<Pawn>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CPawnsToSkip_003Ed__4(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			switch (_003C_003E1__state)
+			{
+			case -3:
+			case 1:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+				break;
+			case -4:
+			case 2:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally2();
+				}
+				break;
+			}
+			_003C_003E7__wrap1 = default(List<Pawn>.Enumerator);
+			_003C_003E7__wrap4 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				CompAbilityEffect_Farskip compAbilityEffect_Farskip = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+				{
+					_003C_003E1__state = -1;
+					Caravan caravan = compAbilityEffect_Farskip.parent.pawn.GetCaravan();
 					if (caravan != null)
 					{
-						caravan.pawns.TryTransferAllToContainer(caravan2.pawns, true);
-						caravan2.Notify_Merged(new List<Caravan>
-						{
-							caravan
-						});
-						caravan.Destroy();
-						return;
+						_003C_003E7__wrap1 = caravan.pawns.GetEnumerator();
+						_003C_003E1__state = -3;
+						goto IL_0088;
 					}
-					using (List<Pawn>.Enumerator enumerator = list.GetEnumerator())
+					_003ChomeMap_003E5__3 = compAbilityEffect_Farskip.parent.pawn.Map.IsPlayerHome;
+					_003CsentLodgerMessage_003E5__4 = false;
+					_003C_003E7__wrap4 = GenRadial.RadialDistinctThingsAround(compAbilityEffect_Farskip.parent.pawn.Position, compAbilityEffect_Farskip.parent.pawn.Map, compAbilityEffect_Farskip.parent.def.EffectRadius, useCenter: true).GetEnumerator();
+					_003C_003E1__state = -4;
+					goto IL_01d7;
+				}
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0088;
+				case 2:
 					{
-						while (enumerator.MoveNext())
-						{
-							Pawn pawn4 = enumerator.Current;
-							caravan2.AddPawn(pawn4, true);
-							pawn4.ExitMap(false, Rot4.Invalid);
-							AbilityUtility.DoClamor(pawn4.Position, (float)this.Props.clamorRadius, this.parent.pawn, this.Props.clamorType);
-						}
-						return;
+						_003C_003E1__state = -4;
+						goto IL_01d7;
 					}
+					IL_0088:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Pawn current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = default(List<Pawn>.Enumerator);
+					break;
+					IL_01d7:
+					while (_003C_003E7__wrap4.MoveNext())
+					{
+						if (!(_003C_003E7__wrap4.Current is Pawn pawn))
+						{
+							continue;
+						}
+						if (pawn.IsQuestLodger())
+						{
+							if (!_003CsentLodgerMessage_003E5__4)
+							{
+								Messages.Message("MessageLodgersCantFarskip".Translate(), pawn, MessageTypeDefOf.NegativeEvent, historical: false);
+							}
+							_003CsentLodgerMessage_003E5__4 = true;
+						}
+						else if (!pawn.Dead && (pawn.IsColonist || pawn.IsPrisonerOfColony || (!_003ChomeMap_003E5__3 && pawn.IsAnimal && pawn.Faction != null && pawn.Faction.IsPlayer) || pawn.IsColonySubhuman))
+						{
+							_003C_003E2__current = pawn;
+							_003C_003E1__state = 2;
+							return true;
+						}
+					}
+					_003C_003Em__Finally2();
+					_003C_003E7__wrap4 = null;
+					break;
 				}
-				if (caravan != null)
-				{
-					caravan.Tile = target.Tile;
-					caravan.pather.StopDead();
-					return;
-				}
-				CaravanMaker.MakeCaravan(list, this.parent.pawn.Faction, target.Tile, false);
-				foreach (Pawn pawn5 in list)
-				{
-					pawn5.ExitMap(false, Rot4.Invalid);
-				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x0600BEEF RID: 48879 RVA: 0x00376388 File Offset: 0x00374588
-		public override IEnumerable<PreCastAction> GetPreCastActions()
+		bool IEnumerator.MoveNext()
 		{
-			yield return new PreCastAction
-			{
-				action = delegate(LocalTargetInfo t, LocalTargetInfo d)
-				{
-					foreach (Pawn pawn in this.PawnsToSkip())
-					{
-						FleckCreationData dataAttachedOverlay = FleckMaker.GetDataAttachedOverlay(pawn, FleckDefOf.PsycastSkipFlashEntry, new Vector3(-0.5f, 0f, -0.5f), 1f, -1f);
-						dataAttachedOverlay.link.detachAfterTicks = 5;
-						pawn.Map.flecks.CreateFleck(dataAttachedOverlay);
-					}
-				},
-				ticksAwayFromCast = 5
-			};
-			yield break;
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0600BEF0 RID: 48880 RVA: 0x00376398 File Offset: 0x00374598
-		private IEnumerable<Pawn> PawnsToSkip()
+		private void _003C_003Em__Finally1()
 		{
-			Caravan caravan = this.parent.pawn.GetCaravan();
-			if (caravan != null)
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap1/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap4 != null)
 			{
-				foreach (Pawn pawn in caravan.pawns)
-				{
-					yield return pawn;
-				}
-				List<Pawn>.Enumerator enumerator = default(List<Pawn>.Enumerator);
+				_003C_003E7__wrap4.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Pawn> IEnumerable<Pawn>.GetEnumerator()
+		{
+			_003CPawnsToSkip_003Ed__4 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
 			}
 			else
 			{
-				bool homeMap = this.parent.pawn.Map.IsPlayerHome;
-				bool sentLodgerMessage = false;
-				foreach (Thing thing in GenRadial.RadialDistinctThingsAround(this.parent.pawn.Position, this.parent.pawn.Map, this.parent.def.EffectRadius, true))
+				result = new _003CPawnsToSkip_003Ed__4(0)
 				{
-					Pawn pawn2 = thing as Pawn;
-					if (pawn2 != null)
-					{
-						if (pawn2.IsQuestLodger())
-						{
-							if (!sentLodgerMessage)
-							{
-								Messages.Message("MessageLodgersCantFarskip".Translate(), pawn2, MessageTypeDefOf.NegativeEvent, false);
-							}
-							sentLodgerMessage = true;
-						}
-						else if (!pawn2.Dead && (pawn2.IsColonist || pawn2.IsPrisonerOfColony || (!homeMap && pawn2.IsAnimal && pawn2.Faction != null && pawn2.Faction.IsPlayer) || pawn2.IsColonySubhuman))
-						{
-							yield return pawn2;
-						}
-					}
-				}
-				IEnumerator<Thing> enumerator2 = null;
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
-			yield break;
-			yield break;
+			return result;
 		}
 
-		// Token: 0x0600BEF1 RID: 48881 RVA: 0x003763A8 File Offset: 0x003745A8
-		private Pawn AlliedPawnOnMap(Map targetMap)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return targetMap.mapPawns.AllPawnsSpawned.FirstOrDefault((Pawn p) => !p.NonHumanlikeOrWildMan() && p.IsColonist && p.HomeFaction == Faction.OfPlayer && !this.PawnsToSkip().Contains(p));
+			return ((IEnumerable<Pawn>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x0600BEF2 RID: 48882 RVA: 0x003763C8 File Offset: 0x003745C8
-		private bool ShouldEnterMap(GlobalTargetInfo target)
+	private new CompProperties_AbilityFarskip Props => (CompProperties_AbilityFarskip)props;
+
+	public override void Apply(GlobalTargetInfo target)
+	{
+		Caravan caravan = parent.pawn.GetCaravan();
+		Map targetMap = (target.WorldObject as MapParent)?.Map;
+		IntVec3 targetCell = IntVec3.Invalid;
+		List<Pawn> list = PawnsToSkip().ToList();
+		if (parent.pawn.Spawned)
 		{
-			Caravan caravan = target.WorldObject as Caravan;
-			if (caravan != null && caravan.Faction == this.parent.pawn.Faction)
+			foreach (Pawn item in list)
 			{
-				return false;
+				parent.AddEffecterToMaintain(EffecterDefOf.Skip_Entry.Spawn(item, item.Map), item.Position, 60);
 			}
-			MapParent mapParent = target.WorldObject as MapParent;
-			return mapParent != null && mapParent.HasMap && (this.AlliedPawnOnMap(mapParent.Map) != null || mapParent.Map == this.parent.pawn.Map);
+			SoundDefOf.Psycast_Skip_Pulse.PlayOneShot(new TargetInfo(target.Cell, parent.pawn.Map));
 		}
-
-		// Token: 0x0600BEF3 RID: 48883 RVA: 0x00376444 File Offset: 0x00374644
-		private bool ShouldJoinCaravan(GlobalTargetInfo target)
+		if (ShouldEnterMap(target))
 		{
-			Caravan caravan = target.WorldObject as Caravan;
-			return caravan != null && caravan.Faction == this.parent.pawn.Faction;
-		}
-
-		// Token: 0x0600BEF4 RID: 48884 RVA: 0x0037647C File Offset: 0x0037467C
-		public override bool Valid(GlobalTargetInfo target, bool throwMessages = false)
-		{
-			Caravan caravan = this.parent.pawn.GetCaravan();
-			if (caravan != null && caravan.ImmobilizedByMass)
-			{
-				return false;
-			}
-			Caravan caravan2 = target.WorldObject as Caravan;
-			return (caravan == null || caravan != caravan2) && (this.ShouldEnterMap(target) || this.ShouldJoinCaravan(target)) && base.Valid(target, throwMessages);
-		}
-
-		// Token: 0x0600BEF5 RID: 48885 RVA: 0x003764DC File Offset: 0x003746DC
-		public override bool CanApplyOn(GlobalTargetInfo target)
-		{
-			MapParent mapParent = target.WorldObject as MapParent;
-			return (mapParent == null || mapParent.Map == null || this.AlliedPawnOnMap(mapParent.Map) != null) && base.CanApplyOn(target);
-		}
-
-		// Token: 0x0600BEF6 RID: 48886 RVA: 0x00376518 File Offset: 0x00374718
-		public override Window ConfirmationDialog(GlobalTargetInfo target, Action confirmAction)
-		{
-			Pawn pawn = this.PawnsToSkip().FirstOrDefault((Pawn p) => p.IsQuestLodger());
+			Pawn pawn = AlliedPawnOnMap(targetMap);
 			if (pawn != null)
 			{
-				return Dialog_MessageBox.CreateConfirmation("FarskipConfirmTeleportingLodger".Translate(pawn.Named("PAWN")), confirmAction, false, null, WindowLayer.Dialog);
+				targetCell = pawn.Position;
 			}
-			return null;
+			else
+			{
+				targetCell = parent.pawn.Position;
+			}
 		}
-
-		// Token: 0x0600BEF7 RID: 48887 RVA: 0x00376574 File Offset: 0x00374774
-		public override string WorldMapExtraLabel(GlobalTargetInfo target)
+		if (targetCell.IsValid)
 		{
-			Caravan caravan = this.parent.pawn.GetCaravan();
-			if (caravan != null && caravan.ImmobilizedByMass)
+			foreach (Pawn item2 in list)
 			{
-				return "CaravanImmobilizedByMass".Translate();
+				if (item2.Spawned)
+				{
+					item2.teleporting = true;
+					item2.ExitMap(allowedToJoinOrCreateCaravan: false, Rot4.Invalid);
+					AbilityUtility.DoClamor(item2.Position, Props.clamorRadius, parent.pawn, Props.clamorType);
+					item2.teleporting = false;
+				}
+				CellFinder.TryFindRandomSpawnCellForPawnNear(targetCell, targetMap, out var result, 4, (IntVec3 cell) => cell != targetCell && cell.GetRoom(targetMap) == targetCell.GetRoom(targetMap));
+				GenSpawn.Spawn(item2, result, targetMap);
+				if (item2.drafter != null && item2.IsColonistPlayerControlled && !item2.Downed)
+				{
+					item2.drafter.Drafted = true;
+				}
+				item2.stances.stunner.StunFor(Props.stunTicks.RandomInRange, parent.pawn, addBattleLog: false);
+				item2.Notify_Teleported();
+				CompAbilityEffect_Teleport.SendSkipUsedSignal(item2, parent.pawn);
+				if (item2.IsPrisoner)
+				{
+					item2.guest.WaitInsteadOfEscapingForDefaultTicks();
+				}
+				parent.AddEffecterToMaintain(EffecterDefOf.Skip_ExitNoDelay.Spawn(item2, item2.Map), item2.Position, 60, targetMap);
+				SoundDefOf.Psycast_Skip_Exit.PlayOneShot(new TargetInfo(result, item2.Map));
+				if ((item2.IsColonist || item2.RaceProps.packAnimal || item2.IsColonyMech) && item2.Map.IsPlayerHome)
+				{
+					item2.inventory.UnloadEverything = true;
+				}
 			}
-			if (!this.Valid(target, false))
-			{
-				return "AbilityNeedAllyToSkip".Translate();
-			}
-			if (this.ShouldJoinCaravan(target))
-			{
-				return "AbilitySkipToJoinCaravan".Translate();
-			}
-			return "AbilitySkipToRandomAlly".Translate();
+			caravan?.Destroy();
+			return;
 		}
+		if (target.WorldObject is Caravan caravan2 && caravan2.Faction == parent.pawn.Faction)
+		{
+			if (caravan != null)
+			{
+				caravan.pawns.TryTransferAllToContainer(caravan2.pawns);
+				caravan2.Notify_Merged(new List<Caravan> { caravan });
+				caravan.Destroy();
+				return;
+			}
+			{
+				foreach (Pawn item3 in list)
+				{
+					caravan2.AddPawn(item3, addCarriedPawnToWorldPawnsIfAny: true);
+					item3.ExitMap(allowedToJoinOrCreateCaravan: false, Rot4.Invalid);
+					AbilityUtility.DoClamor(item3.Position, Props.clamorRadius, parent.pawn, Props.clamorType);
+				}
+				return;
+			}
+		}
+		if (caravan != null)
+		{
+			caravan.Tile = target.Tile;
+			caravan.pather.StopDead();
+			return;
+		}
+		CaravanMaker.MakeCaravan(list, parent.pawn.Faction, target.Tile, addToWorldPawnsIfNotAlready: false);
+		foreach (Pawn item4 in list)
+		{
+			item4.ExitMap(allowedToJoinOrCreateCaravan: false, Rot4.Invalid);
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CGetPreCastActions_003Ed__3))]
+	public override IEnumerable<PreCastAction> GetPreCastActions()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetPreCastActions_003Ed__3(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	[IteratorStateMachine(typeof(_003CPawnsToSkip_003Ed__4))]
+	private IEnumerable<Pawn> PawnsToSkip()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CPawnsToSkip_003Ed__4(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	private Pawn AlliedPawnOnMap(Map targetMap)
+	{
+		return targetMap.mapPawns.AllPawnsSpawned.FirstOrDefault((Pawn p) => !p.NonHumanlikeOrWildMan() && p.IsColonist && p.HomeFaction == Faction.OfPlayer && !PawnsToSkip().Contains(p));
+	}
+
+	private bool ShouldEnterMap(GlobalTargetInfo target)
+	{
+		if (target.WorldObject is Caravan caravan && caravan.Faction == parent.pawn.Faction)
+		{
+			return false;
+		}
+		if (target.WorldObject is MapParent { HasMap: not false } mapParent)
+		{
+			if (AlliedPawnOnMap(mapParent.Map) == null)
+			{
+				return mapParent.Map == parent.pawn.Map;
+			}
+			return true;
+		}
+		return false;
+	}
+
+	private bool ShouldJoinCaravan(GlobalTargetInfo target)
+	{
+		if (target.WorldObject is Caravan caravan)
+		{
+			return caravan.Faction == parent.pawn.Faction;
+		}
+		return false;
+	}
+
+	public override bool Valid(GlobalTargetInfo target, bool throwMessages = false)
+	{
+		Caravan caravan = parent.pawn.GetCaravan();
+		if (caravan != null && caravan.ImmobilizedByMass)
+		{
+			return false;
+		}
+		Caravan caravan2 = target.WorldObject as Caravan;
+		if (caravan != null && caravan == caravan2)
+		{
+			return false;
+		}
+		if (!ShouldEnterMap(target) && !ShouldJoinCaravan(target))
+		{
+			return false;
+		}
+		return base.Valid(target, throwMessages);
+	}
+
+	public override bool CanApplyOn(GlobalTargetInfo target)
+	{
+		if (target.WorldObject is MapParent { Map: not null } mapParent && AlliedPawnOnMap(mapParent.Map) == null)
+		{
+			return false;
+		}
+		return base.CanApplyOn(target);
+	}
+
+	public override Window ConfirmationDialog(GlobalTargetInfo target, Action confirmAction)
+	{
+		Pawn pawn = PawnsToSkip().FirstOrDefault((Pawn p) => p.IsQuestLodger());
+		if (pawn != null)
+		{
+			return Dialog_MessageBox.CreateConfirmation("FarskipConfirmTeleportingLodger".Translate(pawn.Named("PAWN")), confirmAction);
+		}
+		return null;
+	}
+
+	public override string WorldMapExtraLabel(GlobalTargetInfo target)
+	{
+		Caravan caravan = parent.pawn.GetCaravan();
+		if (caravan != null && caravan.ImmobilizedByMass)
+		{
+			return "CaravanImmobilizedByMass".Translate();
+		}
+		if (!Valid(target))
+		{
+			return "AbilityNeedAllyToSkip".Translate();
+		}
+		if (ShouldJoinCaravan(target))
+		{
+			return "AbilitySkipToJoinCaravan".Translate();
+		}
+		return "AbilitySkipToRandomAlly".Translate();
 	}
 }

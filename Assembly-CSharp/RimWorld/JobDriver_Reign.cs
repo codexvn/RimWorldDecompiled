@@ -1,97 +1,190 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_Reign : JobDriver_Meditate
 {
-	// Token: 0x0200139E RID: 5022
-	public class JobDriver_Reign : JobDriver_Meditate
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__7 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001370 RID: 4976
-		// (get) Token: 0x06007B2B RID: 31531 RVA: 0x00251463 File Offset: 0x0024F663
-		private Building_Throne Throne
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_Reign _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return base.TargetThingA as Building_Throne;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06007B2C RID: 31532 RVA: 0x00251470 File Offset: 0x0024F670
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		object IEnumerator.Current
 		{
-			return this.pawn.Reserve(this.Throne, this.job, 1, -1, null, errorOnFailed, false);
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x06007B2D RID: 31533 RVA: 0x00251494 File Offset: 0x0024F694
-		public override string GetReport()
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__7(int _003C_003E1__state)
 		{
-			return string.Concat(new string[]
-			{
-				this.ReportStringProcessed(this.job.def.reportString),
-				": ",
-				this.Throne.LabelShort.CapitalizeFirst(),
-				".",
-				base.PsyfocusPerDayReport()
-			});
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x06007B2E RID: 31534 RVA: 0x00002501 File Offset: 0x00000701
-		public override bool CanBeginNowWhileLyingDown()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			return false;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x06007B2F RID: 31535 RVA: 0x002514F1 File Offset: 0x0024F6F1
-		protected override IEnumerable<Toil> MakeNewToils()
+		private bool MoveNext()
 		{
-			this.FailOnDespawnedNullOrForbidden(TargetIndex.A);
-			yield return Toils_General.Do(delegate
+			int num = _003C_003E1__state;
+			JobDriver_Reign CS_0024_003C_003E8__locals19 = _003C_003E4__this;
+			switch (num)
 			{
-				this.job.SetTarget(TargetIndex.B, this.Throne.InteractionCell + this.Throne.Rotation.FacingCell);
-			});
-			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.InteractionCell, false);
-			Toil toil = ToilMaker.MakeToil("MakeNewToils");
-			toil.FailOnCannotTouch(TargetIndex.A, PathEndMode.InteractionCell);
-			toil.FailOn(() => RoomRoleWorker_ThroneRoom.Validate(this.Throne.GetRoom(RegionType.Set_All)) != null);
-			toil.FailOn(() => !MeditationUtility.CanMeditateNow(this.pawn) || !MeditationUtility.SafeEnvironmentalConditions(this.pawn, base.TargetLocA, base.Map));
-			toil.defaultCompleteMode = ToilCompleteMode.Delay;
-			toil.defaultDuration = this.job.def.joyDuration;
-			toil.tickAction = delegate()
-			{
-				if (this.pawn.mindState.applyThroneThoughtsTick == 0)
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				CS_0024_003C_003E8__locals19.FailOnDespawnedNullOrForbidden(TargetIndex.A);
+				_003C_003E2__current = Toils_General.Do(delegate
 				{
-					this.pawn.mindState.applyThroneThoughtsTick = Find.TickManager.TicksGame + 10000;
-				}
-				else if (this.pawn.mindState.applyThroneThoughtsTick <= Find.TickManager.TicksGame)
+					CS_0024_003C_003E8__locals19.job.SetTarget(TargetIndex.B, CS_0024_003C_003E8__locals19.Throne.InteractionCell + CS_0024_003C_003E8__locals19.Throne.Rotation.FacingCell);
+				});
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.InteractionCell);
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+			{
+				_003C_003E1__state = -1;
+				Toil toil = ToilMaker.MakeToil("MakeNewToils");
+				toil.FailOnCannotTouch(TargetIndex.A, PathEndMode.InteractionCell);
+				toil.FailOn(() => RoomRoleWorker_ThroneRoom.Validate(CS_0024_003C_003E8__locals19.Throne.GetRoom()) != null);
+				toil.FailOn(() => !MeditationUtility.CanMeditateNow(CS_0024_003C_003E8__locals19.pawn) || !MeditationUtility.SafeEnvironmentalConditions(CS_0024_003C_003E8__locals19.pawn, CS_0024_003C_003E8__locals19.TargetLocA, CS_0024_003C_003E8__locals19.Map));
+				toil.defaultCompleteMode = ToilCompleteMode.Delay;
+				toil.defaultDuration = CS_0024_003C_003E8__locals19.job.def.joyDuration;
+				toil.tickAction = delegate
 				{
-					this.pawn.mindState.applyThroneThoughtsTick = Find.TickManager.TicksGame + 60000;
-					ThoughtDef thoughtDef = null;
-					if (this.Throne.GetRoom(RegionType.Set_All).Role == RoomRoleDefOf.ThroneRoom)
+					if (CS_0024_003C_003E8__locals19.pawn.mindState.applyThroneThoughtsTick == 0)
 					{
-						thoughtDef = ThoughtDefOf.ReignedInThroneroom;
+						CS_0024_003C_003E8__locals19.pawn.mindState.applyThroneThoughtsTick = Find.TickManager.TicksGame + 10000;
 					}
-					if (thoughtDef != null)
+					else if (CS_0024_003C_003E8__locals19.pawn.mindState.applyThroneThoughtsTick <= Find.TickManager.TicksGame)
 					{
-						int scoreStageIndex = RoomStatDefOf.Impressiveness.GetScoreStageIndex(this.Throne.GetRoom(RegionType.Set_All).GetStat(RoomStatDefOf.Impressiveness));
-						if (thoughtDef.stages[scoreStageIndex] != null)
+						CS_0024_003C_003E8__locals19.pawn.mindState.applyThroneThoughtsTick = Find.TickManager.TicksGame + 60000;
+						ThoughtDef thoughtDef = null;
+						if (CS_0024_003C_003E8__locals19.Throne.GetRoom().Role == RoomRoleDefOf.ThroneRoom)
 						{
-							this.pawn.needs.mood.thoughts.memories.TryGainMemory(ThoughtMaker.MakeThought(thoughtDef, scoreStageIndex), null);
+							thoughtDef = ThoughtDefOf.ReignedInThroneroom;
+						}
+						if (thoughtDef != null)
+						{
+							int scoreStageIndex = RoomStatDefOf.Impressiveness.GetScoreStageIndex(CS_0024_003C_003E8__locals19.Throne.GetRoom().GetStat(RoomStatDefOf.Impressiveness));
+							if (thoughtDef.stages[scoreStageIndex] != null)
+							{
+								CS_0024_003C_003E8__locals19.pawn.needs.mood.thoughts.memories.TryGainMemory(ThoughtMaker.MakeThought(thoughtDef, scoreStageIndex));
+							}
 						}
 					}
-				}
-				this.rotateToFace = TargetIndex.B;
-				base.MeditationTick();
-			};
-			yield return toil;
-			yield break;
+					CS_0024_003C_003E8__locals19.rotateToFace = TargetIndex.B;
+					CS_0024_003C_003E8__locals19.MeditationTick();
+				};
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 3;
+				return true;
+			}
+			case 3:
+				_003C_003E1__state = -1;
+				return false;
+			}
 		}
 
-		// Token: 0x04005344 RID: 21316
-		protected const TargetIndex FacingInd = TargetIndex.B;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x04005345 RID: 21317
-		protected const int ApplyThoughtInitialTicks = 10000;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__7 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__7(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	protected const TargetIndex FacingInd = TargetIndex.B;
+
+	protected const int ApplyThoughtInitialTicks = 10000;
+
+	private Building_Throne Throne => base.TargetThingA as Building_Throne;
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return pawn.Reserve(Throne, job, 1, -1, null, errorOnFailed);
+	}
+
+	public override string GetReport()
+	{
+		return ReportStringProcessed(job.def.reportString) + ": " + Throne.LabelShort.CapitalizeFirst() + "." + PsyfocusPerDayReport();
+	}
+
+	public override bool CanBeginNowWhileLyingDown()
+	{
+		return false;
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__7))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__7(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

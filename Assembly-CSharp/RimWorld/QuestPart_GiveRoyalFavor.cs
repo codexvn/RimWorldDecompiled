@@ -1,103 +1,234 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class QuestPart_GiveRoyalFavor : QuestPart
 {
-	// Token: 0x02001CEA RID: 7402
-	public class QuestPart_GiveRoyalFavor : QuestPart
+	[CompilerGenerated]
+	private sealed class _003Cget_InvolvedFactions_003Ed__8 : IEnumerable<Faction>, IEnumerable, IEnumerator<Faction>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700197C RID: 6524
-		// (get) Token: 0x0600A53B RID: 42299 RVA: 0x002F540B File Offset: 0x002F360B
-		public override bool RequiresAccepter
+		private int _003C_003E1__state;
+
+		private Faction _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public QuestPart_GiveRoyalFavor _003C_003E4__this;
+
+		private IEnumerator<Faction> _003C_003E7__wrap1;
+
+		Faction IEnumerator<Faction>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.giveToAccepter;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700197D RID: 6525
-		// (get) Token: 0x0600A53C RID: 42300 RVA: 0x002F5413 File Offset: 0x002F3613
-		public override IEnumerable<Faction> InvolvedFactions
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				foreach (Faction faction in base.InvolvedFactions)
-				{
-					yield return faction;
-				}
-				IEnumerator<Faction> enumerator = null;
-				if (this.faction != null)
-				{
-					yield return this.faction;
-				}
-				yield break;
-				yield break;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600A53D RID: 42301 RVA: 0x002F5424 File Offset: 0x002F3624
-		public override void Notify_QuestSignalReceived(Signal signal)
+		[DebuggerHidden]
+		public _003Cget_InvolvedFactions_003Ed__8(int _003C_003E1__state)
 		{
-			base.Notify_QuestSignalReceived(signal);
-			if (signal.tag == this.inSignal)
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				Pawn pawn = this.giveToAccepter ? this.quest.AccepterPawn : this.giveTo;
-				if (pawn == null)
+				try
 				{
-					signal.args.TryGetArg<Pawn>("CHOSEN", out pawn);
 				}
-				if (pawn != null && pawn.royalty != null)
+				finally
 				{
-					pawn.royalty.GainFavor(this.faction, this.amount);
+					_003C_003Em__Finally1();
 				}
 			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x0600A53E RID: 42302 RVA: 0x002F54A0 File Offset: 0x002F36A0
-		public override void AssignDebugData()
+		private bool MoveNext()
 		{
-			base.AssignDebugData();
-			this.giveTo = PawnsFinder.AllMaps_FreeColonists.RandomElement<Pawn>();
-			this.inSignal = "DebugSignal" + Rand.Int.ToString();
-			this.faction = Find.FactionManager.RandomEnemyFaction(false, false, true, TechLevel.Undefined);
-			this.amount = 10;
-		}
-
-		// Token: 0x0600A53F RID: 42303 RVA: 0x002F54FC File Offset: 0x002F36FC
-		public override void ExposeData()
-		{
-			base.ExposeData();
-			Scribe_References.Look<Pawn>(ref this.giveTo, "giveTo", false);
-			Scribe_Values.Look<bool>(ref this.giveToAccepter, "giveToAccepter", false, false);
-			Scribe_Values.Look<string>(ref this.inSignal, "inSignal", null, false);
-			Scribe_References.Look<Faction>(ref this.faction, "faction", false);
-			Scribe_Values.Look<int>(ref this.amount, "amount", 0, false);
-		}
-
-		// Token: 0x0600A540 RID: 42304 RVA: 0x002F5567 File Offset: 0x002F3767
-		public override void ReplacePawnReferences(Pawn replace, Pawn with)
-		{
-			if (this.giveTo == replace)
+			try
 			{
-				this.giveTo = with;
+				int num = _003C_003E1__state;
+				QuestPart_GiveRoyalFavor questPart_GiveRoyalFavor = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((QuestPart)questPart_GiveRoyalFavor).InvolvedFactions.GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_006f:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Faction current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (questPart_GiveRoyalFavor.faction != null)
+					{
+						_003C_003E2__current = questPart_GiveRoyalFavor.faction;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x04007228 RID: 29224
-		public Pawn giveTo;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x04007229 RID: 29225
-		public bool giveToAccepter;
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
 
-		// Token: 0x0400722A RID: 29226
-		public string inSignal;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x0400722B RID: 29227
-		public int amount;
+		[DebuggerHidden]
+		IEnumerator<Faction> IEnumerable<Faction>.GetEnumerator()
+		{
+			_003Cget_InvolvedFactions_003Ed__8 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_InvolvedFactions_003Ed__8(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x0400722C RID: 29228
-		public Faction faction;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Faction>)this).GetEnumerator();
+		}
+	}
+
+	public Pawn giveTo;
+
+	public bool giveToAccepter;
+
+	public string inSignal;
+
+	public int amount;
+
+	public Faction faction;
+
+	public override bool RequiresAccepter => giveToAccepter;
+
+	public override IEnumerable<Faction> InvolvedFactions
+	{
+		[IteratorStateMachine(typeof(_003Cget_InvolvedFactions_003Ed__8))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_InvolvedFactions_003Ed__8(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public override void Notify_QuestSignalReceived(Signal signal)
+	{
+		base.Notify_QuestSignalReceived(signal);
+		if (signal.tag == inSignal)
+		{
+			Pawn arg = (giveToAccepter ? quest.AccepterPawn : giveTo);
+			if (arg == null)
+			{
+				signal.args.TryGetArg("CHOSEN", out arg);
+			}
+			if (arg != null && arg.royalty != null)
+			{
+				arg.royalty.GainFavor(faction, amount);
+			}
+		}
+	}
+
+	public override void AssignDebugData()
+	{
+		base.AssignDebugData();
+		giveTo = PawnsFinder.AllMaps_FreeColonists.RandomElement();
+		inSignal = "DebugSignal" + Rand.Int;
+		faction = Find.FactionManager.RandomEnemyFaction();
+		amount = 10;
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_References.Look(ref giveTo, "giveTo");
+		Scribe_Values.Look(ref giveToAccepter, "giveToAccepter", defaultValue: false);
+		Scribe_Values.Look(ref inSignal, "inSignal");
+		Scribe_References.Look(ref faction, "faction");
+		Scribe_Values.Look(ref amount, "amount", 0);
+	}
+
+	public override void ReplacePawnReferences(Pawn replace, Pawn with)
+	{
+		if (giveTo == replace)
+		{
+			giveTo = with;
+		}
 	}
 }

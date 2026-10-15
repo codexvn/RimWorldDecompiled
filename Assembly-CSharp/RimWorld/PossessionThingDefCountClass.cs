@@ -1,28 +1,24 @@
-﻿using System;
 using System.Xml;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class PossessionThingDefCountClass
 {
-	// Token: 0x020019ED RID: 6637
-	public class PossessionThingDefCountClass
+	public ThingDef key;
+
+	public IntRange value = IntRange.One;
+
+	public void LoadDataFromXmlCustom(XmlNode xmlRoot)
 	{
-		// Token: 0x060095D6 RID: 38358 RVA: 0x002BDF2D File Offset: 0x002BC12D
-		public void LoadDataFromXmlCustom(XmlNode xmlRoot)
+		DirectXmlCrossRefLoader.RegisterObjectWantsCrossRef(this, "key", xmlRoot.Name);
+		if (xmlRoot.HasChildNodes)
 		{
-			DirectXmlCrossRefLoader.RegisterObjectWantsCrossRef(this, "key", xmlRoot.Name, null, null, null);
-			if (xmlRoot.HasChildNodes)
-			{
-				this.value = ParseHelper.FromString<IntRange>(xmlRoot.FirstChild.Value);
-				return;
-			}
-			this.value = IntRange.One;
+			value = ParseHelper.FromString<IntRange>(xmlRoot.FirstChild.Value);
 		}
-
-		// Token: 0x040061DF RID: 25055
-		public ThingDef key;
-
-		// Token: 0x040061E0 RID: 25056
-		public IntRange value = IntRange.One;
+		else
+		{
+			value = IntRange.One;
+		}
 	}
 }

@@ -1,93 +1,73 @@
-﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Instruction_BuildRoomWalls : Lesson_Instruction
 {
-	// Token: 0x020034CD RID: 13517
-	public class Instruction_BuildRoomWalls : Lesson_Instruction
+	private List<IntVec3> cachedEdgeCells = new List<IntVec3>();
+
+	private CellRect RoomRect
 	{
-		// Token: 0x1700317A RID: 12666
-		// (get) Token: 0x06012FEF RID: 77807 RVA: 0x005A24BC File Offset: 0x005A06BC
-		// (set) Token: 0x06012FF0 RID: 77808 RVA: 0x005A2645 File Offset: 0x005A0845
-		private CellRect RoomRect
+		get
 		{
-			get
-			{
-				return Find.TutorialState.roomRect;
-			}
-			set
-			{
-				Find.TutorialState.roomRect = value;
-			}
+			return Find.TutorialState.roomRect;
 		}
-
-		// Token: 0x1700317B RID: 12667
-		// (get) Token: 0x06012FF1 RID: 77809 RVA: 0x005A2654 File Offset: 0x005A0854
-		protected override float ProgressPercent
+		set
 		{
-			get
+			Find.TutorialState.roomRect = value;
+		}
+	}
+
+	protected override float ProgressPercent
+	{
+		get
+		{
+			int num = 0;
+			int num2 = 0;
+			foreach (IntVec3 edgeCell in RoomRect.EdgeCells)
 			{
-				int num = 0;
-				int num2 = 0;
-				using (IEnumerator<IntVec3> enumerator = this.RoomRect.EdgeCells.GetEnumerator())
+				if (TutorUtility.BuildingOrBlueprintOrFrameCenterExists(edgeCell, base.Map, ThingDefOf.Wall))
 				{
-					while (enumerator.MoveNext())
-					{
-						if (TutorUtility.BuildingOrBlueprintOrFrameCenterExists(enumerator.Current, base.Map, ThingDefOf.Wall))
-						{
-							num2++;
-						}
-						num++;
-					}
+					num2++;
 				}
-				return (float)num2 / (float)num;
+				num++;
 			}
+			return (float)num2 / (float)num;
 		}
+	}
 
-		// Token: 0x06012FF2 RID: 77810 RVA: 0x005A26C4 File Offset: 0x005A08C4
-		public override void OnActivated()
+	public override void OnActivated()
+	{
+		base.OnActivated();
+		RoomRect = TutorUtility.FindUsableRect(12, 8, base.Map);
+	}
+
+	public override void LessonOnGUI()
+	{
+		TutorUtility.DrawCellRectOnGUI(RoomRect, def.onMapInstruction);
+		base.LessonOnGUI();
+	}
+
+	public override void LessonUpdate()
+	{
+		cachedEdgeCells.Clear();
+		cachedEdgeCells.AddRange(RoomRect.EdgeCells.Where((IntVec3 c) => !TutorUtility.BuildingOrBlueprintOrFrameCenterExists(c, base.Map, ThingDefOf.Wall)).ToList());
+		GenDraw.DrawFieldEdges(cachedEdgeCells.Where((IntVec3 c) => c.GetEdifice(base.Map) == null).ToList());
+		GenDraw.DrawArrowPointingAt(RoomRect.CenterVector3);
+		if (ProgressPercent > 0.9999f)
 		{
-			base.OnActivated();
-			this.RoomRect = TutorUtility.FindUsableRect(12, 8, base.Map, 0f, false);
+			Find.ActiveLesson.Deactivate();
 		}
+	}
 
-		// Token: 0x06012FF3 RID: 77811 RVA: 0x005A26E6 File Offset: 0x005A08E6
-		public override void LessonOnGUI()
+	public override AcceptanceReport AllowAction(EventPack ep)
+	{
+		if (ep.Tag == "Designate-Wall")
 		{
-			TutorUtility.DrawCellRectOnGUI(this.RoomRect, this.def.onMapInstruction);
-			base.LessonOnGUI();
+			return TutorUtility.EventCellsAreWithin(ep, cachedEdgeCells);
 		}
-
-		// Token: 0x06012FF4 RID: 77812 RVA: 0x005A2704 File Offset: 0x005A0904
-		public override void LessonUpdate()
-		{
-			this.cachedEdgeCells.Clear();
-			this.cachedEdgeCells.AddRange((from c in this.RoomRect.EdgeCells
-			where !TutorUtility.BuildingOrBlueprintOrFrameCenterExists(c, base.Map, ThingDefOf.Wall)
-			select c).ToList<IntVec3>());
-			GenDraw.DrawFieldEdges((from c in this.cachedEdgeCells
-			where c.GetEdifice(base.Map) == null
-			select c).ToList<IntVec3>(), 2900);
-			GenDraw.DrawArrowPointingAt(this.RoomRect.CenterVector3, false);
-			if (this.ProgressPercent > 0.9999f)
-			{
-				Find.ActiveLesson.Deactivate();
-			}
-		}
-
-		// Token: 0x06012FF5 RID: 77813 RVA: 0x005A279C File Offset: 0x005A099C
-		public override AcceptanceReport AllowAction(EventPack ep)
-		{
-			if (ep.Tag == "Designate-Wall")
-			{
-				return TutorUtility.EventCellsAreWithin(ep, this.cachedEdgeCells);
-			}
-			return base.AllowAction(ep);
-		}
-
-		// Token: 0x0400C507 RID: 50439
-		private List<IntVec3> cachedEdgeCells = new List<IntVec3>();
+		return base.AllowAction(ep);
 	}
 }

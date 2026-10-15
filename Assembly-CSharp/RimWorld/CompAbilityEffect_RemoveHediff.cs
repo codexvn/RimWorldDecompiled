@@ -1,43 +1,30 @@
-﻿using System;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompAbilityEffect_RemoveHediff : CompAbilityEffect
 {
-	// Token: 0x0200226B RID: 8811
-	public class CompAbilityEffect_RemoveHediff : CompAbilityEffect
+	public new CompProperties_AbilityRemoveHediff Props => (CompProperties_AbilityRemoveHediff)props;
+
+	public override void Apply(LocalTargetInfo target, LocalTargetInfo dest)
 	{
-		// Token: 0x17001D57 RID: 7511
-		// (get) Token: 0x0600C00C RID: 49164 RVA: 0x0037A605 File Offset: 0x00378805
-		public new CompProperties_AbilityRemoveHediff Props
+		base.Apply(target, dest);
+		if (Props.applyToSelf)
 		{
-			get
-			{
-				return (CompProperties_AbilityRemoveHediff)this.props;
-			}
+			RemoveHediff(parent.pawn);
 		}
-
-		// Token: 0x0600C00D RID: 49165 RVA: 0x0037A614 File Offset: 0x00378814
-		public override void Apply(LocalTargetInfo target, LocalTargetInfo dest)
+		if (target.Pawn != null && Props.applyToTarget && target.Pawn != parent.pawn)
 		{
-			base.Apply(target, dest);
-			if (this.Props.applyToSelf)
-			{
-				this.RemoveHediff(this.parent.pawn);
-			}
-			if (target.Pawn != null && this.Props.applyToTarget && target.Pawn != this.parent.pawn)
-			{
-				this.RemoveHediff(target.Pawn);
-			}
+			RemoveHediff(target.Pawn);
 		}
+	}
 
-		// Token: 0x0600C00E RID: 49166 RVA: 0x0037A680 File Offset: 0x00378880
-		private void RemoveHediff(Pawn pawn)
+	private void RemoveHediff(Pawn pawn)
+	{
+		Hediff firstHediffOfDef = pawn.health.hediffSet.GetFirstHediffOfDef(Props.hediffDef);
+		if (firstHediffOfDef != null)
 		{
-			Hediff firstHediffOfDef = pawn.health.hediffSet.GetFirstHediffOfDef(this.Props.hediffDef, false);
-			if (firstHediffOfDef != null)
-			{
-				pawn.health.RemoveHediff(firstHediffOfDef);
-			}
+			pawn.health.RemoveHediff(firstHediffOfDef);
 		}
 	}
 }

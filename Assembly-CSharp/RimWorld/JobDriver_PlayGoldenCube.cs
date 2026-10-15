@@ -1,145 +1,299 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_PlayGoldenCube : JobDriver
 {
-	// Token: 0x020011E1 RID: 4577
-	public class JobDriver_PlayGoldenCube : JobDriver
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass13_0
 	{
-		// Token: 0x06006FD7 RID: 28631 RVA: 0x0022C53B File Offset: 0x0022A73B
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		public JobDriver_PlayGoldenCube _003C_003E4__this;
+
+		public Toil toil;
+
+		internal bool _003CMakeNewToils_003Eb__0()
 		{
-			return this.pawn.Reserve(this.job.targetA, this.job, 1, 1, null, errorOnFailed, false);
+			return !_003C_003E4__this.pawn.health.hediffSet.HasHediff(HediffDefOf.CubeInterest);
 		}
 
-		// Token: 0x06006FD8 RID: 28632 RVA: 0x0022C55E File Offset: 0x0022A75E
-		protected override IEnumerable<Toil> MakeNewToils()
+		internal bool _003CMakeNewToils_003Eb__1()
 		{
-			this.FailOnDestroyedOrNull(TargetIndex.A);
-			this.FailOn(() => !this.pawn.health.hediffSet.HasHediff(HediffDefOf.CubeInterest, false));
-			this.FailOn(() => !this.pawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation));
-			yield return Toils_Goto.GotoCell(TargetIndex.A, PathEndMode.Touch).FailOnSomeonePhysicallyInteracting(TargetIndex.A);
-			Toil toil4 = Toils_Haul.StartCarryThing(TargetIndex.A, false, false, false, true, false);
-			toil4.AddPreInitAction(delegate
-			{
-				this.position = this.TargetThingA.PositionHeld;
-			});
-			yield return toil4;
-			Toil toil = ToilMaker.MakeToil("MakeNewToils");
-			toil.defaultCompleteMode = ToilCompleteMode.Delay;
-			toil.defaultDuration = this.job.def.joyDuration;
-			Toil toil2 = toil;
-			toil2.initAction = (Action)Delegate.Combine(toil2.initAction, new Action(delegate()
-			{
-				this.job.locomotionUrgency = LocomotionUrgency.Walk;
-			}));
-			Toil toil3 = toil;
-			toil3.tickIntervalAction = (Action<int>)Delegate.Combine(toil3.tickIntervalAction, new Action<int>(delegate(int delta)
-			{
-				Pawn actor = toil.actor;
-				if (GenTicks.TicksGame >= this.nextMoveTick && !actor.pather.Moving && this.TryGetNextCell(out this.nextGoal))
-				{
-					actor.pather.StartPath(this.nextGoal, PathEndMode.OnCell);
-					this.nextMoveTick = GenTicks.TicksGame + JobDriver_PlayGoldenCube.WaitTimeTicksRange.RandomInRange;
-				}
-			}));
-			toil.AddFinishAction(delegate
-			{
-				Pawn_NeedsTracker needs = this.pawn.needs;
-				if (((needs != null) ? needs.joy : null) != null)
-				{
-					this.pawn.needs.joy.CurLevelPercentage = 1f;
-					JoyUtility.TryGainRecRoomThought(this.pawn);
-				}
-				this.pawn.health.hediffSet.GetFirstHediff<Hediff_CubeInterest>().Notify_PlayedWith();
-			});
-			yield return toil;
-			yield return Toils_Haul.DropCarriedThing();
-			yield break;
+			return !_003C_003E4__this.pawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation);
 		}
 
-		// Token: 0x06006FD9 RID: 28633 RVA: 0x0022C570 File Offset: 0x0022A770
-		private bool TryGetNextCell(out IntVec3 dest)
+		internal void _003CMakeNewToils_003Eb__2()
 		{
-			dest = IntVec3.Invalid;
-			IntVec3 a = this.position;
-			int num = 0;
-			int num2 = 0;
-			if (this.stepsTillRotSwitch <= 0)
+			_003C_003E4__this.position = _003C_003E4__this.TargetThingA.PositionHeld;
+		}
+
+		internal void _003CMakeNewToils_003Eb__4()
+		{
+			_003C_003E4__this.job.locomotionUrgency = LocomotionUrgency.Walk;
+		}
+
+		internal void _003CMakeNewToils_003Eb__5(int delta)
+		{
+			Pawn actor = toil.actor;
+			if (GenTicks.TicksGame >= _003C_003E4__this.nextMoveTick && !actor.pather.Moving && _003C_003E4__this.TryGetNextCell(out _003C_003E4__this.nextGoal))
 			{
-				this.stepsTillRotSwitch = JobDriver_PlayGoldenCube.SwitchDirStepsRange.RandomInRange;
-				this.clockwise = !this.clockwise;
+				actor.pather.StartPath(_003C_003E4__this.nextGoal, PathEndMode.OnCell);
+				_003C_003E4__this.nextMoveTick = GenTicks.TicksGame + WaitTimeTicksRange.RandomInRange;
 			}
-			do
+		}
+
+		internal void _003CMakeNewToils_003Eb__3()
+		{
+			if (_003C_003E4__this.pawn.needs?.joy != null)
 			{
-				this.angle = (this.angle + Rand.Range(45f, 90f) * (float)(this.clockwise ? 1 : -1)) % 360f;
-				int num3 = 1;
-				while (num3 <= 3 && (a + IntVec3.FromPolar(this.angle, (float)num3)).Walkable(this.pawn.Map))
+				_003C_003E4__this.pawn.needs.joy.CurLevelPercentage = 1f;
+				JoyUtility.TryGainRecRoomThought(_003C_003E4__this.pawn);
+			}
+			_003C_003E4__this.pawn.health.hediffSet.GetFirstHediff<Hediff_CubeInterest>().Notify_PlayedWith();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__13 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_PlayGoldenCube _003C_003E4__this;
+
+		private _003C_003Ec__DisplayClass13_0 _003C_003E8__1;
+
+		Toil IEnumerator<Toil>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__13(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E8__1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_PlayGoldenCube jobDriver_PlayGoldenCube = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E8__1 = new _003C_003Ec__DisplayClass13_0();
+				_003C_003E8__1._003C_003E4__this = _003C_003E4__this;
+				jobDriver_PlayGoldenCube.FailOnDestroyedOrNull(TargetIndex.A);
+				jobDriver_PlayGoldenCube.FailOn(() => !_003C_003E8__1._003C_003E4__this.pawn.health.hediffSet.HasHediff(HediffDefOf.CubeInterest));
+				jobDriver_PlayGoldenCube.FailOn(() => !_003C_003E8__1._003C_003E4__this.pawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation));
+				_003C_003E2__current = Toils_Goto.GotoCell(TargetIndex.A, PathEndMode.Touch).FailOnSomeonePhysicallyInteracting(TargetIndex.A);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+			{
+				_003C_003E1__state = -1;
+				Toil toil3 = Toils_Haul.StartCarryThing(TargetIndex.A);
+				toil3.AddPreInitAction(delegate
 				{
-					num = num3;
-					num3++;
-				}
+					_003C_003E8__1._003C_003E4__this.position = _003C_003E8__1._003C_003E4__this.TargetThingA.PositionHeld;
+				});
+				_003C_003E2__current = toil3;
+				_003C_003E1__state = 2;
+				return true;
 			}
-			while (num == 0 && num2++ < 10);
-			if (num2 >= 10 || num == 0)
+			case 2:
 			{
+				_003C_003E1__state = -1;
+				_003C_003E8__1.toil = ToilMaker.MakeToil("MakeNewToils");
+				_003C_003E8__1.toil.defaultCompleteMode = ToilCompleteMode.Delay;
+				_003C_003E8__1.toil.defaultDuration = jobDriver_PlayGoldenCube.job.def.joyDuration;
+				Toil toil = _003C_003E8__1.toil;
+				toil.initAction = (Action)Delegate.Combine(toil.initAction, (Action)delegate
+				{
+					_003C_003E8__1._003C_003E4__this.job.locomotionUrgency = LocomotionUrgency.Walk;
+				});
+				Toil toil2 = _003C_003E8__1.toil;
+				toil2.tickIntervalAction = (Action<int>)Delegate.Combine(toil2.tickIntervalAction, (Action<int>)delegate
+				{
+					Pawn actor = _003C_003E8__1.toil.actor;
+					if (GenTicks.TicksGame >= _003C_003E8__1._003C_003E4__this.nextMoveTick && !actor.pather.Moving && _003C_003E8__1._003C_003E4__this.TryGetNextCell(out _003C_003E8__1._003C_003E4__this.nextGoal))
+					{
+						actor.pather.StartPath(_003C_003E8__1._003C_003E4__this.nextGoal, PathEndMode.OnCell);
+						_003C_003E8__1._003C_003E4__this.nextMoveTick = GenTicks.TicksGame + WaitTimeTicksRange.RandomInRange;
+					}
+				});
+				_003C_003E8__1.toil.AddFinishAction(delegate
+				{
+					if (_003C_003E8__1._003C_003E4__this.pawn.needs?.joy != null)
+					{
+						_003C_003E8__1._003C_003E4__this.pawn.needs.joy.CurLevelPercentage = 1f;
+						JoyUtility.TryGainRecRoomThought(_003C_003E8__1._003C_003E4__this.pawn);
+					}
+					_003C_003E8__1._003C_003E4__this.pawn.health.hediffSet.GetFirstHediff<Hediff_CubeInterest>().Notify_PlayedWith();
+				});
+				_003C_003E2__current = _003C_003E8__1.toil;
+				_003C_003E1__state = 3;
+				return true;
+			}
+			case 3:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Haul.DropCarriedThing();
+				_003C_003E1__state = 4;
+				return true;
+			case 4:
+				_003C_003E1__state = -1;
 				return false;
 			}
-			int num4 = Rand.Range(1, num + 1);
-			dest = a + IntVec3.FromPolar(this.angle, (float)num4);
-			this.lastDist = num4;
-			this.stepsTillRotSwitch--;
-			return true;
 		}
 
-		// Token: 0x06006FDA RID: 28634 RVA: 0x0022C678 File Offset: 0x0022A878
-		public override void ExposeData()
+		bool IEnumerator.MoveNext()
 		{
-			base.ExposeData();
-			Scribe_Values.Look<IntVec3>(ref this.position, "position", default(IntVec3), false);
-			Scribe_Values.Look<IntVec3>(ref this.nextGoal, "nextGoal", default(IntVec3), false);
-			Scribe_Values.Look<int>(ref this.lastDist, "lastDist", 0, false);
-			Scribe_Values.Look<int>(ref this.stepsTillRotSwitch, "stepsTillSwitch", 0, false);
-			Scribe_Values.Look<float>(ref this.angle, "angle", 0f, false);
-			Scribe_Values.Look<bool>(ref this.clockwise, "clockwise", false, false);
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x04004DE5 RID: 19941
-		private IntVec3 nextGoal;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04004DE6 RID: 19942
-		private IntVec3 position;
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__13 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__13(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x04004DE7 RID: 19943
-		private int lastDist;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x04004DE8 RID: 19944
-		private int nextMoveTick;
+	private IntVec3 nextGoal;
 
-		// Token: 0x04004DE9 RID: 19945
-		private int stepsTillRotSwitch = JobDriver_PlayGoldenCube.SwitchDirStepsRange.RandomInRange;
+	private IntVec3 position;
 
-		// Token: 0x04004DEA RID: 19946
-		private bool clockwise;
+	private int lastDist;
 
-		// Token: 0x04004DEB RID: 19947
-		private float angle;
+	private int nextMoveTick;
 
-		// Token: 0x04004DEC RID: 19948
-		private const int MinCircleDist = 1;
+	private int stepsTillRotSwitch = SwitchDirStepsRange.RandomInRange;
 
-		// Token: 0x04004DED RID: 19949
-		private const int MaxCircleDist = 3;
+	private bool clockwise;
 
-		// Token: 0x04004DEE RID: 19950
-		private static readonly IntRange SwitchDirStepsRange = new IntRange(6, 12);
+	private float angle;
 
-		// Token: 0x04004DEF RID: 19951
-		private static readonly IntRange WaitTimeTicksRange = new IntRange(180, 360);
+	private const int MinCircleDist = 1;
 
-		// Token: 0x04004DF0 RID: 19952
-		private const TargetIndex CubeIndex = TargetIndex.A;
+	private const int MaxCircleDist = 3;
+
+	private static readonly IntRange SwitchDirStepsRange = new IntRange(6, 12);
+
+	private static readonly IntRange WaitTimeTicksRange = new IntRange(180, 360);
+
+	private const TargetIndex CubeIndex = TargetIndex.A;
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return pawn.Reserve(job.targetA, job, 1, 1, null, errorOnFailed);
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__13))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__13(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	private bool TryGetNextCell(out IntVec3 dest)
+	{
+		dest = IntVec3.Invalid;
+		IntVec3 intVec = position;
+		int num = 0;
+		int num2 = 0;
+		if (stepsTillRotSwitch <= 0)
+		{
+			stepsTillRotSwitch = SwitchDirStepsRange.RandomInRange;
+			clockwise = !clockwise;
+		}
+		do
+		{
+			angle = (angle + Rand.Range(45f, 90f) * (float)(clockwise ? 1 : (-1))) % 360f;
+			for (int i = 1; i <= 3 && (intVec + IntVec3.FromPolar(angle, i)).Walkable(pawn.Map); i++)
+			{
+				num = i;
+			}
+		}
+		while (num == 0 && num2++ < 10);
+		if (num2 >= 10 || num == 0)
+		{
+			return false;
+		}
+		int num3 = Rand.Range(1, num + 1);
+		dest = intVec + IntVec3.FromPolar(angle, num3);
+		lastDist = num3;
+		stepsTillRotSwitch--;
+		return true;
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref position, "position");
+		Scribe_Values.Look(ref nextGoal, "nextGoal");
+		Scribe_Values.Look(ref lastDist, "lastDist", 0);
+		Scribe_Values.Look(ref stepsTillRotSwitch, "stepsTillSwitch", 0);
+		Scribe_Values.Look(ref angle, "angle", 0f);
+		Scribe_Values.Look(ref clockwise, "clockwise", defaultValue: false);
 	}
 }

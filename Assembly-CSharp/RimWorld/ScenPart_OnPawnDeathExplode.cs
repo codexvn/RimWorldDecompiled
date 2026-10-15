@@ -1,78 +1,162 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class ScenPart_OnPawnDeathExplode : ScenPart
 {
-	// Token: 0x02002881 RID: 10369
-	public class ScenPart_OnPawnDeathExplode : ScenPart
+	[CompilerGenerated]
+	private sealed class _003CPossibleDamageDefs_003Ed__8 : IEnumerable<DamageDef>, IEnumerable, IEnumerator<DamageDef>, IEnumerator, IDisposable
 	{
-		// Token: 0x0600E2E8 RID: 58088 RVA: 0x004269EF File Offset: 0x00424BEF
-		public override void Randomize()
-		{
-			this.radius = (float)Rand.RangeInclusive(3, 8) - 0.1f;
-			this.damage = this.PossibleDamageDefs().RandomElement<DamageDef>();
-		}
+		private int _003C_003E1__state;
 
-		// Token: 0x0600E2E9 RID: 58089 RVA: 0x00426A16 File Offset: 0x00424C16
-		public override void ExposeData()
-		{
-			base.ExposeData();
-			Scribe_Values.Look<float>(ref this.radius, "radius", 0f, false);
-			Scribe_Defs.Look<DamageDef>(ref this.damage, "damage");
-		}
+		private DamageDef _003C_003E2__current;
 
-		// Token: 0x0600E2EA RID: 58090 RVA: 0x00426A44 File Offset: 0x00424C44
-		public override string Summary(Scenario scen)
-		{
-			return "ScenPart_OnPawnDeathExplode".Translate(this.damage.label, this.radius.ToString());
-		}
+		private int _003C_003El__initialThreadId;
 
-		// Token: 0x0600E2EB RID: 58091 RVA: 0x00426A78 File Offset: 0x00424C78
-		public override void DoEditInterface(Listing_ScenEdit listing)
+		DamageDef IEnumerator<DamageDef>.Current
 		{
-			Rect scenPartRect = listing.GetScenPartRect(this, ScenPart.RowHeight * 2f);
-			Widgets.TextFieldNumericLabeled<float>(scenPartRect.TopHalf(), "radius".Translate(), ref this.radius, ref this.radiusBuf, 0f, 1E+09f);
-			if (Widgets.ButtonText(scenPartRect.BottomHalf(), this.damage.LabelCap, true, true, true, null))
+			[DebuggerHidden]
+			get
 			{
-				FloatMenuUtility.MakeMenu<DamageDef>(this.PossibleDamageDefs(), (DamageDef d) => d.LabelCap, (DamageDef d) => delegate()
-				{
-					this.damage = d;
-				});
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600E2EC RID: 58092 RVA: 0x00426B28 File Offset: 0x00424D28
-		public override void Notify_PawnDied(Corpse corpse)
+		object IEnumerator.Current
 		{
-			if (corpse.Spawned)
+			[DebuggerHidden]
+			get
 			{
-				GenExplosion.DoExplosion(corpse.Position, corpse.Map, this.radius, this.damage, null, -1, -1f, null, null, null, null, null, 0f, 1, null, null, 255, false, null, 0f, 1, 0f, false, null, null, null, true, 1f, 0f, true, null, 1f, null, null, null, null);
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600E2ED RID: 58093 RVA: 0x00426BBA File Offset: 0x00424DBA
-		private IEnumerable<DamageDef> PossibleDamageDefs()
+		[DebuggerHidden]
+		public _003CPossibleDamageDefs_003Ed__8(int _003C_003E1__state)
 		{
-			yield return DamageDefOf.Bomb;
-			yield return DamageDefOf.Flame;
-			yield break;
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x0600E2EE RID: 58094 RVA: 0x00426BC3 File Offset: 0x00424DC3
-		public override int GetHashCode()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			return base.GetHashCode() ^ ((this.damage != null) ? this.damage.GetHashCode() : 0) ^ this.radius.GetHashCode();
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x04009824 RID: 38948
-		private float radius = 5.9f;
+		private bool MoveNext()
+		{
+			switch (_003C_003E1__state)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = DamageDefOf.Bomb;
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = DamageDefOf.Flame;
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
 
-		// Token: 0x04009825 RID: 38949
-		private DamageDef damage;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x04009826 RID: 38950
-		private string radiusBuf;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<DamageDef> IEnumerable<DamageDef>.GetEnumerator()
+		{
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				return this;
+			}
+			return new _003CPossibleDamageDefs_003Ed__8(0);
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<DamageDef>)this).GetEnumerator();
+		}
+	}
+
+	private float radius = 5.9f;
+
+	private DamageDef damage;
+
+	private string radiusBuf;
+
+	public override void Randomize()
+	{
+		radius = (float)Rand.RangeInclusive(3, 8) - 0.1f;
+		damage = PossibleDamageDefs().RandomElement();
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref radius, "radius", 0f);
+		Scribe_Defs.Look(ref damage, "damage");
+	}
+
+	public override string Summary(Scenario scen)
+	{
+		return "ScenPart_OnPawnDeathExplode".Translate(damage.label, radius.ToString());
+	}
+
+	public override void DoEditInterface(Listing_ScenEdit listing)
+	{
+		Rect scenPartRect = listing.GetScenPartRect(this, ScenPart.RowHeight * 2f);
+		Widgets.TextFieldNumericLabeled(scenPartRect.TopHalf(), "radius".Translate(), ref radius, ref radiusBuf);
+		if (!Widgets.ButtonText(scenPartRect.BottomHalf(), damage.LabelCap, drawBackground: true, doMouseoverSound: true, active: true, null))
+		{
+			return;
+		}
+		FloatMenuUtility.MakeMenu(PossibleDamageDefs(), (DamageDef d) => d.LabelCap, (DamageDef d) => delegate
+		{
+			damage = d;
+		});
+	}
+
+	public override void Notify_PawnDied(Corpse corpse)
+	{
+		if (corpse.Spawned)
+		{
+			GenExplosion.DoExplosion(corpse.Position, corpse.Map, radius, damage, null, -1, -1f, null, null, null, null, null, 0f, 1, null, null, 255, applyDamageToExplosionCellsNeighbors: false, null, 0f, 1, 0f, damageFalloff: false, null, null, null);
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CPossibleDamageDefs_003Ed__8))]
+	private IEnumerable<DamageDef> PossibleDamageDefs()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CPossibleDamageDefs_003Ed__8(-2);
+	}
+
+	public override int GetHashCode()
+	{
+		return base.GetHashCode() ^ ((damage != null) ? damage.GetHashCode() : 0) ^ radius.GetHashCode();
 	}
 }

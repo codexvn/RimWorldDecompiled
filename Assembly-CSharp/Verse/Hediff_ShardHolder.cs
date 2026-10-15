@@ -1,45 +1,36 @@
-﻿using System;
 using RimWorld;
 
-namespace Verse
+namespace Verse;
+
+public class Hediff_ShardHolder : HediffWithComps
 {
-	// Token: 0x0200076D RID: 1901
-	public class Hediff_ShardHolder : HediffWithComps
+	public override void PostAdd(DamageInfo? dinfo)
 	{
-		// Token: 0x06002EAC RID: 11948 RVA: 0x000F0287 File Offset: 0x000EE487
-		public override void PostAdd(DamageInfo? dinfo)
+		if (!ModLister.CheckAnomaly("Shard holder"))
 		{
-			if (!ModLister.CheckAnomaly("Shard holder"))
-			{
-				this.pawn.health.RemoveHediff(this);
-				return;
-			}
+			pawn.health.RemoveHediff(this);
+		}
+		else
+		{
 			base.PostAdd(dinfo);
 		}
+	}
 
-		// Token: 0x06002EAD RID: 11949 RVA: 0x000F02B0 File Offset: 0x000EE4B0
-		public override void Notify_PawnKilled()
+	public override void Notify_PawnKilled()
+	{
+		if (pawn.SpawnedOrAnyParentSpawned && GenDrop.TryDropSpawn(ThingMaker.MakeThing(ThingDefOf.Shard), pawn.PositionHeld, pawn.MapHeld, ThingPlaceMode.Near, out var resultingThing))
 		{
-			if (!this.pawn.SpawnedOrAnyParentSpawned)
+			resultingThing.SetForbidden(!resultingThing.MapHeld.areaManager.Home[resultingThing.PositionHeld]);
+			string text = pawn.LabelShort;
+			if (pawn.IsMutant)
 			{
-				return;
+				text = Find.ActiveLanguageWorker.WithDefiniteArticle(pawn.mutant.Def.label);
 			}
-			Thing thing;
-			if (!GenDrop.TryDropSpawn(ThingMaker.MakeThing(ThingDefOf.Shard, null), this.pawn.PositionHeld, this.pawn.MapHeld, ThingPlaceMode.Near, out thing, null, null, true))
+			else if (pawn.Name == null)
 			{
-				return;
+				text = Find.ActiveLanguageWorker.WithDefiniteArticle(text);
 			}
-			thing.SetForbidden(!thing.MapHeld.areaManager.Home[thing.PositionHeld], true);
-			string text = this.pawn.LabelShort;
-			if (this.pawn.IsMutant)
-			{
-				text = Find.ActiveLanguageWorker.WithDefiniteArticle(this.pawn.mutant.Def.label, false, false);
-			}
-			else if (this.pawn.Name == null)
-			{
-				text = Find.ActiveLanguageWorker.WithDefiniteArticle(text, false, false);
-			}
-			Messages.Message("MessageShardDropped".Translate(text).CapitalizeFirst(), thing, MessageTypeDefOf.NeutralEvent, true);
+			Messages.Message("MessageShardDropped".Translate(text).CapitalizeFirst(), resultingThing, MessageTypeDefOf.NeutralEvent);
 		}
 	}
 }

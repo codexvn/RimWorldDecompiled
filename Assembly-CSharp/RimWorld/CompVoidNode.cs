@@ -1,215 +1,484 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld.Utility;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompVoidNode : CompInteractable
 {
-	// Token: 0x02002EC8 RID: 11976
-	public class CompVoidNode : CompInteractable
+	[CompilerGenerated]
+	private sealed class _003CCompFloatMenuOptions_003Ed__18 : IEnumerable<FloatMenuOption>, IEnumerable, IEnumerator<FloatMenuOption>, IEnumerator, IDisposable
 	{
-		// Token: 0x06010E6D RID: 69229 RVA: 0x004DDB9B File Offset: 0x004DBD9B
-		private float AgeSecs()
-		{
-			return (float)(Find.TickManager.TicksGame - this.parent.TickSpawned) / 60f;
-		}
+		private int _003C_003E1__state;
 
-		// Token: 0x06010E6E RID: 69230 RVA: 0x004DDBBA File Offset: 0x004DBDBA
-		public override void PostSpawnSetup(bool respawningAfterLoad)
-		{
-			if (!ModLister.CheckAnomaly("Void node"))
-			{
-				this.parent.Destroy(DestroyMode.Vanish);
-				return;
-			}
-			base.PostSpawnSetup(respawningAfterLoad);
-			LongEventHandler.ExecuteWhenFinished(delegate
-			{
-				this.parent.Graphic.MatSingle.SetFloat(ShaderPropertyIDs.VoidNodeDestructionStartAge, float.MaxValue);
-				this.ambientSustainer = SoundDefOf.VoidNode_Ambient.TrySpawnSustainer(SoundInfo.InMap(this.parent, MaintenanceType.None));
-			});
-		}
+		private FloatMenuOption _003C_003E2__current;
 
-		// Token: 0x06010E6F RID: 69231 RVA: 0x004DDBF0 File Offset: 0x004DBDF0
-		public override void CompTick()
+		private int _003C_003El__initialThreadId;
+
+		public CompVoidNode _003C_003E4__this;
+
+		private Pawn selPawn;
+
+		public Pawn _003C_003E3__selPawn;
+
+		private IEnumerator<FloatMenuOption> _003C_003E7__wrap1;
+
+		FloatMenuOption IEnumerator<FloatMenuOption>.Current
 		{
-			base.CompTick();
-			if (this.closeTick > 0)
+			[DebuggerHidden]
+			get
 			{
-				this.ambientSustainer.End();
-				if (Find.TickManager.TicksGame + 260 == this.closeTick)
-				{
-					Find.MusicManagerPlay.ForcePlaySong(SongDefOf.AnomalyCreditsSong, false);
-				}
-				if (Find.TickManager.TicksGame == this.closeTick)
-				{
-					Find.TickManager.Pause();
-					Thing.allowDestroyNonDestroyable = true;
-					this.parent.Destroy(DestroyMode.Vanish);
-					Thing.allowDestroyNonDestroyable = false;
-					CameraJumper.TryJump(Find.Anomaly.monolith, CameraJumper.MovementMode.Cut);
-					if (this.embracing)
-					{
-						VoidAwakeningUtility.EmbraceTheVoid(this.interactedPawn);
-						return;
-					}
-					VoidAwakeningUtility.DisruptTheLink(this.interactedPawn);
-				}
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06010E70 RID: 69232 RVA: 0x004DDCAC File Offset: 0x004DBEAC
-		private void OpenDialog(Pawn pawn)
+		object IEnumerator.Current
 		{
-			Dialog_NodeTree dialog_NodeTree = new Dialog_NodeTree(new DiaNode("VoidNodeLetter".Translate(pawn.Named("PAWN")))
+			[DebuggerHidden]
+			get
 			{
-				options = 
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CCompFloatMenuOptions_003Ed__18(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
 				{
-					new DiaOption("VoidNodeDisrupt".Translate())
-					{
-						action = new Action(this.DisruptNode),
-						resolveTree = true
-					},
-					new DiaOption("VoidNodeEmbrace".Translate())
-					{
-						action = delegate()
-						{
-							this.CloseNode(true, 300, 0);
-						},
-						resolveTree = true
-					},
-					new DiaOption("VoidNodePostpone".Translate())
-					{
-						resolveTree = true
-					}
 				}
-			}, false, false, null);
-			dialog_NodeTree.forcePause = true;
-			Find.WindowStack.Add(dialog_NodeTree);
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x06010E71 RID: 69233 RVA: 0x004DDD84 File Offset: 0x004DBF84
-		private void DisruptNode()
+		private bool MoveNext()
 		{
-			SoundDefOf.VoidNode_Explode.PlayOneShotOnCamera(null);
-			EffecterDefOf.VoidNodeDisrupted.SpawnMaintained(this.parent, this.parent.Map, 1f);
-			EffecterDefOf.VoidNodeDisruptedFlashes.SpawnMaintained(this.parent, this.parent.Map, 1f);
-			this.parent.Graphic.MatSingle.SetFloat(ShaderPropertyIDs.VoidNodeDestructionStartAge, this.AgeSecs());
-			this.CloseNode(false, 24, 600);
-		}
-
-		// Token: 0x06010E72 RID: 69234 RVA: 0x004DDE0C File Offset: 0x004DC00C
-		private void CloseNode(bool embraceVoid, int fadeTimeTicks, int fadeDelayTicks)
-		{
-			this.closeTick = Find.TickManager.TicksGame + fadeTimeTicks + fadeDelayTicks;
-			this.embracing = embraceVoid;
-			this.activated = true;
-			QuestUtility.SendQuestTargetSignals(this.parent.questTags, "NodeClosed");
-			Find.TickManager.slower.SignalForceNormalSpeed();
-			Find.MusicManagerPlay.ForceSilenceFor(999f);
-			CameraJumper.TryJump(this.parent, CameraJumper.MovementMode.Cut);
-			ScreenFader.StartFade(Color.white, (float)(fadeTimeTicks - 5) / 60f, (float)fadeDelayTicks / 60f);
-		}
-
-		// Token: 0x06010E73 RID: 69235 RVA: 0x004DDE9B File Offset: 0x004DC09B
-		protected override void OnInteracted(Pawn caster)
-		{
-			this.interactedPawn = caster;
-			this.OpenDialog(caster);
-		}
-
-		// Token: 0x06010E74 RID: 69236 RVA: 0x004DDEAB File Offset: 0x004DC0AB
-		public override AcceptanceReport CanInteract(Pawn activateBy = null, bool checkOptionalItems = true)
-		{
-			if (this.activated)
+			try
 			{
+				int num = _003C_003E1__state;
+				CompVoidNode compVoidNode = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					if (compVoidNode.activated)
+					{
+						return false;
+					}
+					_003C_003E7__wrap1 = ((CompInteractable)compVoidNode).CompFloatMenuOptions(selPawn).GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 1:
+					_003C_003E1__state = -3;
+					break;
+				}
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					FloatMenuOption current = _003C_003E7__wrap1.Current;
+					_003C_003E2__current = current;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = null;
 				return false;
 			}
-			return base.CanInteract(activateBy, checkOptionalItems);
-		}
-
-		// Token: 0x06010E75 RID: 69237 RVA: 0x004DDEC4 File Offset: 0x004DC0C4
-		public void Reset()
-		{
-			this.activated = false;
-		}
-
-		// Token: 0x06010E76 RID: 69238 RVA: 0x004DDECD File Offset: 0x004DC0CD
-		public override string CompInspectStringExtra()
-		{
-			if (this.activated)
+			catch
 			{
-				return "";
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
-			return base.CompInspectStringExtra();
 		}
 
-		// Token: 0x06010E77 RID: 69239 RVA: 0x004DDEE3 File Offset: 0x004DC0E3
-		public override IEnumerable<FloatMenuOption> CompFloatMenuOptions(Pawn selPawn)
+		bool IEnumerator.MoveNext()
 		{
-			if (this.activated)
-			{
-				yield break;
-			}
-			foreach (FloatMenuOption floatMenuOption in base.CompFloatMenuOptions(selPawn))
-			{
-				yield return floatMenuOption;
-			}
-			IEnumerator<FloatMenuOption> enumerator = null;
-			yield break;
-			yield break;
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x06010E78 RID: 69240 RVA: 0x004DDEFA File Offset: 0x004DC0FA
-		public override IEnumerable<Gizmo> CompGetGizmosExtra()
+		private void _003C_003Em__Finally1()
 		{
-			if (this.activated)
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				yield break;
+				_003C_003E7__wrap1.Dispose();
 			}
-			foreach (Gizmo gizmo in base.CompGetGizmosExtra())
-			{
-				yield return gizmo;
-			}
-			IEnumerator<Gizmo> enumerator = null;
-			yield break;
-			yield break;
 		}
 
-		// Token: 0x06010E79 RID: 69241 RVA: 0x004DDF0C File Offset: 0x004DC10C
-		public override void PostExposeData()
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			base.PostExposeData();
-			Scribe_Values.Look<bool>(ref this.activated, "activated", false, false);
-			Scribe_References.Look<Pawn>(ref this.interactedPawn, "interactedPawn", false);
-			Scribe_Values.Look<bool>(ref this.embracing, "embracing", false, false);
-			Scribe_Values.Look<int>(ref this.closeTick, "closeTick", 0, false);
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x0400AFD3 RID: 45011
-		private const int SlowFade = 300;
+		[DebuggerHidden]
+		IEnumerator<FloatMenuOption> IEnumerable<FloatMenuOption>.GetEnumerator()
+		{
+			_003CCompFloatMenuOptions_003Ed__18 _003CCompFloatMenuOptions_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CCompFloatMenuOptions_003Ed__ = this;
+			}
+			else
+			{
+				_003CCompFloatMenuOptions_003Ed__ = new _003CCompFloatMenuOptions_003Ed__18(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CCompFloatMenuOptions_003Ed__.selPawn = _003C_003E3__selPawn;
+			return _003CCompFloatMenuOptions_003Ed__;
+		}
 
-		// Token: 0x0400AFD4 RID: 45012
-		private const int QuickFade = 24;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<FloatMenuOption>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x0400AFD5 RID: 45013
-		private const int MusicIntroLengthTicks = 260;
+	[CompilerGenerated]
+	private sealed class _003CCompGetGizmosExtra_003Ed__19 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
 
-		// Token: 0x0400AFD6 RID: 45014
-		private bool activated;
+		private Gizmo _003C_003E2__current;
 
-		// Token: 0x0400AFD7 RID: 45015
-		private Pawn interactedPawn;
+		private int _003C_003El__initialThreadId;
 
-		// Token: 0x0400AFD8 RID: 45016
-		private bool embracing;
+		public CompVoidNode _003C_003E4__this;
 
-		// Token: 0x0400AFD9 RID: 45017
-		private int closeTick = -99999;
+		private IEnumerator<Gizmo> _003C_003E7__wrap1;
 
-		// Token: 0x0400AFDA RID: 45018
-		private Sustainer ambientSustainer;
+		Gizmo IEnumerator<Gizmo>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CCompGetGizmosExtra_003Ed__19(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				CompVoidNode compVoidNode = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					if (compVoidNode.activated)
+					{
+						return false;
+					}
+					_003C_003E7__wrap1 = ((CompInteractable)compVoidNode).CompGetGizmosExtra().GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 1:
+					_003C_003E1__state = -3;
+					break;
+				}
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					Gizmo current = _003C_003E7__wrap1.Current;
+					_003C_003E2__current = current;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = null;
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CCompGetGizmosExtra_003Ed__19 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CCompGetGizmosExtra_003Ed__19(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	private const int SlowFade = 300;
+
+	private const int QuickFade = 24;
+
+	private const int MusicIntroLengthTicks = 260;
+
+	private bool activated;
+
+	private Pawn interactedPawn;
+
+	private bool embracing;
+
+	private int closeTick = -99999;
+
+	private Sustainer ambientSustainer;
+
+	private float AgeSecs()
+	{
+		return (float)(Find.TickManager.TicksGame - parent.TickSpawned) / 60f;
+	}
+
+	public override void PostSpawnSetup(bool respawningAfterLoad)
+	{
+		if (!ModLister.CheckAnomaly("Void node"))
+		{
+			parent.Destroy();
+			return;
+		}
+		base.PostSpawnSetup(respawningAfterLoad);
+		LongEventHandler.ExecuteWhenFinished(delegate
+		{
+			parent.Graphic.MatSingle.SetFloat(ShaderPropertyIDs.VoidNodeDestructionStartAge, float.MaxValue);
+			ambientSustainer = SoundDefOf.VoidNode_Ambient.TrySpawnSustainer(SoundInfo.InMap(parent));
+		});
+	}
+
+	public override void CompTick()
+	{
+		base.CompTick();
+		if (closeTick <= 0)
+		{
+			return;
+		}
+		ambientSustainer.End();
+		if (Find.TickManager.TicksGame + 260 == closeTick)
+		{
+			Find.MusicManagerPlay.ForcePlaySong(SongDefOf.AnomalyCreditsSong, ignorePrefsVolume: false);
+		}
+		if (Find.TickManager.TicksGame == closeTick)
+		{
+			Find.TickManager.Pause();
+			Thing.allowDestroyNonDestroyable = true;
+			parent.Destroy();
+			Thing.allowDestroyNonDestroyable = false;
+			CameraJumper.TryJump(Find.Anomaly.monolith, CameraJumper.MovementMode.Cut);
+			if (embracing)
+			{
+				VoidAwakeningUtility.EmbraceTheVoid(interactedPawn);
+			}
+			else
+			{
+				VoidAwakeningUtility.DisruptTheLink(interactedPawn);
+			}
+		}
+	}
+
+	private void OpenDialog(Pawn pawn)
+	{
+		Dialog_NodeTree dialog_NodeTree = new Dialog_NodeTree(new DiaNode("VoidNodeLetter".Translate(pawn.Named("PAWN")))
+		{
+			options = 
+			{
+				new DiaOption("VoidNodeDisrupt".Translate())
+				{
+					action = DisruptNode,
+					resolveTree = true
+				},
+				new DiaOption("VoidNodeEmbrace".Translate())
+				{
+					action = delegate
+					{
+						CloseNode(embraceVoid: true, 300, 0);
+					},
+					resolveTree = true
+				},
+				new DiaOption("VoidNodePostpone".Translate())
+				{
+					resolveTree = true
+				}
+			}
+		});
+		dialog_NodeTree.forcePause = true;
+		Find.WindowStack.Add(dialog_NodeTree);
+	}
+
+	private void DisruptNode()
+	{
+		SoundDefOf.VoidNode_Explode.PlayOneShotOnCamera();
+		EffecterDefOf.VoidNodeDisrupted.SpawnMaintained(parent, parent.Map);
+		EffecterDefOf.VoidNodeDisruptedFlashes.SpawnMaintained(parent, parent.Map);
+		parent.Graphic.MatSingle.SetFloat(ShaderPropertyIDs.VoidNodeDestructionStartAge, AgeSecs());
+		CloseNode(embraceVoid: false, 24, 600);
+	}
+
+	private void CloseNode(bool embraceVoid, int fadeTimeTicks, int fadeDelayTicks)
+	{
+		closeTick = Find.TickManager.TicksGame + fadeTimeTicks + fadeDelayTicks;
+		embracing = embraceVoid;
+		activated = true;
+		QuestUtility.SendQuestTargetSignals(parent.questTags, "NodeClosed");
+		Find.TickManager.slower.SignalForceNormalSpeed();
+		Find.MusicManagerPlay.ForceSilenceFor(999f);
+		CameraJumper.TryJump(parent, CameraJumper.MovementMode.Cut);
+		ScreenFader.StartFade(Color.white, (float)(fadeTimeTicks - 5) / 60f, (float)fadeDelayTicks / 60f);
+	}
+
+	protected override void OnInteracted(Pawn caster)
+	{
+		interactedPawn = caster;
+		OpenDialog(caster);
+	}
+
+	public override AcceptanceReport CanInteract(Pawn activateBy = null, bool checkOptionalItems = true)
+	{
+		if (activated)
+		{
+			return false;
+		}
+		return base.CanInteract(activateBy, checkOptionalItems);
+	}
+
+	public void Reset()
+	{
+		activated = false;
+	}
+
+	public override string CompInspectStringExtra()
+	{
+		if (activated)
+		{
+			return "";
+		}
+		return base.CompInspectStringExtra();
+	}
+
+	[IteratorStateMachine(typeof(_003CCompFloatMenuOptions_003Ed__18))]
+	public override IEnumerable<FloatMenuOption> CompFloatMenuOptions(Pawn selPawn)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CCompFloatMenuOptions_003Ed__18(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__selPawn = selPawn
+		};
+	}
+
+	[IteratorStateMachine(typeof(_003CCompGetGizmosExtra_003Ed__19))]
+	public override IEnumerable<Gizmo> CompGetGizmosExtra()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CCompGetGizmosExtra_003Ed__19(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override void PostExposeData()
+	{
+		base.PostExposeData();
+		Scribe_Values.Look(ref activated, "activated", defaultValue: false);
+		Scribe_References.Look(ref interactedPawn, "interactedPawn");
+		Scribe_Values.Look(ref embracing, "embracing", defaultValue: false);
+		Scribe_Values.Look(ref closeTick, "closeTick", 0);
 	}
 }

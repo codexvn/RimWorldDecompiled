@@ -1,30 +1,132 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse.Grammar;
 
-namespace Verse
+namespace Verse;
+
+public class IdeoStoryPatternDef : Def
 {
-	// Token: 0x02000293 RID: 659
-	public class IdeoStoryPatternDef : Def
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__3 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x06001077 RID: 4215 RVA: 0x0004E4BB File Offset: 0x0004C6BB
-		public override IEnumerable<string> ConfigErrors()
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public IdeoStoryPatternDef _003C_003E4__this;
+
+		string IEnumerator<string>.Current
 		{
-			if (!this.segments.Any<string>())
+			[DebuggerHidden]
+			get
 			{
-				yield return "Pattern must have at least one segment";
+				return _003C_003E2__current;
 			}
-			yield break;
 		}
 
-		// Token: 0x04000D8C RID: 3468
-		[NoTranslate]
-		public List<string> segments = new List<string>();
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
 
-		// Token: 0x04000D8D RID: 3469
-		public List<string> noCapitalizeFirstSentence = new List<string>();
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__3(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
 
-		// Token: 0x04000D8E RID: 3470
-		public RulePack rules;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			IdeoStoryPatternDef ideoStoryPatternDef = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (!ideoStoryPatternDef.segments.Any())
+				{
+					_003C_003E2__current = "Pattern must have at least one segment";
+					_003C_003E1__state = 1;
+					return true;
+				}
+				break;
+			case 1:
+				_003C_003E1__state = -1;
+				break;
+			}
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__3 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__3(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	[NoTranslate]
+	public List<string> segments = new List<string>();
+
+	public List<string> noCapitalizeFirstSentence = new List<string>();
+
+	public RulePack rules;
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__3))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__3(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

@@ -1,54 +1,155 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_TalkCreepJoiner : JobDriver
 {
-	// Token: 0x02001332 RID: 4914
-	public class JobDriver_TalkCreepJoiner : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__2 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x060078BE RID: 30910 RVA: 0x0022F6AD File Offset: 0x0022D8AD
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_TalkCreepJoiner _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
 		{
-			return this.pawn.Reserve(base.TargetA, this.job, 1, -1, null, errorOnFailed, false);
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x060078BF RID: 30911 RVA: 0x00248B7F File Offset: 0x00246D7F
-		protected override IEnumerable<Toil> MakeNewToils()
+		object IEnumerator.Current
 		{
-			this.FailOnDespawnedOrNull(TargetIndex.A);
-			Toil toil = ToilMaker.MakeToil("MakeNewToils");
-			toil.initAction = (Action)Delegate.Combine(toil.initAction, new Action(delegate()
+			[DebuggerHidden]
+			get
 			{
-				if (!this.notified)
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__2(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_TalkCreepJoiner CS_0024_003C_003E8__locals6 = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+			{
+				_003C_003E1__state = -1;
+				CS_0024_003C_003E8__locals6.FailOnDespawnedOrNull(TargetIndex.A);
+				Toil toil = ToilMaker.MakeToil("MakeNewToils");
+				toil.initAction = (Action)Delegate.Combine(toil.initAction, (Action)delegate
 				{
-					this.notified = true;
-					Lord lord = base.TargetPawnA.GetLord();
-					if (lord == null)
+					if (!CS_0024_003C_003E8__locals6.notified)
 					{
-						return;
+						CS_0024_003C_003E8__locals6.notified = true;
+						CS_0024_003C_003E8__locals6.TargetPawnA.GetLord()?.ReceiveMemo("SpokenTo");
 					}
-					lord.ReceiveMemo("SpokenTo");
-				}
-			}));
-			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch, false);
-			yield return Toils_General.Do(delegate
-			{
-				base.TargetPawnA.creepjoiner.Notify_CreepJoinerSpokenTo(this.pawn);
-			});
-			yield break;
+				});
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch);
+				_003C_003E1__state = 1;
+				return true;
+			}
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.Do(delegate
+				{
+					CS_0024_003C_003E8__locals6.TargetPawnA.creepjoiner.Notify_CreepJoinerSpokenTo(CS_0024_003C_003E8__locals6.pawn);
+				});
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				return false;
+			}
 		}
 
-		// Token: 0x060078C0 RID: 30912 RVA: 0x00248B8F File Offset: 0x00246D8F
-		public override void ExposeData()
+		bool IEnumerator.MoveNext()
 		{
-			base.ExposeData();
-			Scribe_Values.Look<bool>(ref this.notified, "notified", false, false);
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x04005207 RID: 20999
-		private bool notified;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__2 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__2(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private bool notified;
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return pawn.Reserve(base.TargetA, job, 1, -1, null, errorOnFailed);
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__2))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__2(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref notified, "notified", defaultValue: false);
 	}
 }

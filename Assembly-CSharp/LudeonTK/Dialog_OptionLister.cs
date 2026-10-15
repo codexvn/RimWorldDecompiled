@@ -1,161 +1,130 @@
-﻿using System;
+using System;
 using RimWorld;
 using UnityEngine;
 using Verse;
 
-namespace LudeonTK
+namespace LudeonTK;
+
+public abstract class Dialog_OptionLister : Window_Dev
 {
-	// Token: 0x02000095 RID: 149
-	public abstract class Dialog_OptionLister : Window_Dev
+	protected Vector2 scrollPosition;
+
+	protected string filter = "";
+
+	protected float totalOptionsHeight;
+
+	protected bool focusOnFilterOnOpen = true;
+
+	private bool focusFilter;
+
+	protected float curY;
+
+	protected float curX;
+
+	private int boundingRectCachedForFrame = -1;
+
+	private Rect? boundingRectCached;
+
+	private Rect? boundingRect;
+
+	public float verticalSpacing = 2f;
+
+	protected const string FilterControlName = "DebugFilter";
+
+	public override Vector2 InitialSize => new Vector2(UI.screenWidth, UI.screenHeight);
+
+	public override bool IsDebug => true;
+
+	public Rect? BoundingRectCached
 	{
-		// Token: 0x1700008E RID: 142
-		// (get) Token: 0x0600032E RID: 814 RVA: 0x0000940B File Offset: 0x0000760B
-		public override Vector2 InitialSize
+		get
 		{
-			get
+			if (boundingRectCachedForFrame != Time.frameCount)
 			{
-				return new Vector2((float)UI.screenWidth, (float)UI.screenHeight);
-			}
-		}
-
-		// Token: 0x1700008F RID: 143
-		// (get) Token: 0x0600032F RID: 815 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public override bool IsDebug
-		{
-			get
-			{
-				return true;
-			}
-		}
-
-		// Token: 0x17000090 RID: 144
-		// (get) Token: 0x06000330 RID: 816 RVA: 0x00011A9C File Offset: 0x0000FC9C
-		public Rect? BoundingRectCached
-		{
-			get
-			{
-				if (this.boundingRectCachedForFrame != Time.frameCount)
+				if (boundingRect.HasValue)
 				{
-					if (this.boundingRect != null)
-					{
-						Rect value = this.boundingRect.Value;
-						Vector2 vector = this.scrollPosition;
-						value.x += vector.x;
-						value.y += vector.y;
-						this.boundingRectCached = new Rect?(value);
-					}
-					this.boundingRectCachedForFrame = Time.frameCount;
+					Rect value = boundingRect.Value;
+					Vector2 vector = scrollPosition;
+					value.x += vector.x;
+					value.y += vector.y;
+					boundingRectCached = value;
 				}
-				return this.boundingRectCached;
+				boundingRectCachedForFrame = Time.frameCount;
 			}
+			return boundingRectCached;
 		}
+	}
 
-		// Token: 0x06000331 RID: 817 RVA: 0x00011B1C File Offset: 0x0000FD1C
-		public Dialog_OptionLister()
+	public Dialog_OptionLister()
+	{
+		doCloseX = true;
+		onlyOneOfTypeAllowed = true;
+		absorbInputAroundWindow = true;
+	}
+
+	public override void PostOpen()
+	{
+		base.PostOpen();
+		if (focusOnFilterOnOpen)
 		{
-			this.doCloseX = true;
-			this.onlyOneOfTypeAllowed = true;
-			this.absorbInputAroundWindow = true;
+			focusFilter = true;
 		}
+	}
 
-		// Token: 0x06000332 RID: 818 RVA: 0x00011B68 File Offset: 0x0000FD68
-		public override void PostOpen()
+	public override void DoWindowContents(Rect inRect)
+	{
+		GUI.SetNextControlName("DebugFilter");
+		if (Event.current.type != EventType.keyDown || (!KeyBindingDefOf.Dev_ToggleDebugSettingsMenu.KeyDownEvent && !KeyBindingDefOf.Dev_ToggleDebugActionsMenu.KeyDownEvent))
 		{
-			base.PostOpen();
-			if (this.focusOnFilterOnOpen)
-			{
-				this.focusFilter = true;
-			}
-		}
-
-		// Token: 0x06000333 RID: 819 RVA: 0x00011B80 File Offset: 0x0000FD80
-		public override void DoWindowContents(Rect inRect)
-		{
-			GUI.SetNextControlName("DebugFilter");
-			if (Event.current.type == EventType.KeyDown && (KeyBindingDefOf.Dev_ToggleDebugSettingsMenu.KeyDownEvent || KeyBindingDefOf.Dev_ToggleDebugActionsMenu.KeyDownEvent))
-			{
-				return;
-			}
-			this.filter = DevGUI.TextField(new Rect(0f, 0f, 200f, 30f), this.filter);
-			if ((Event.current.type == EventType.KeyDown || Event.current.type == EventType.Repaint) && this.focusFilter)
+			filter = DevGUI.TextField(new Rect(0f, 0f, 200f, 30f), filter);
+			if ((Event.current.type == EventType.keyDown || Event.current.type == EventType.repaint) && focusFilter)
 			{
 				GUI.FocusControl("DebugFilter");
-				this.filter = "";
-				this.focusFilter = false;
+				filter = "";
+				focusFilter = false;
 			}
-			if (Event.current.type == EventType.Layout)
+			if (Event.current.type == EventType.layout)
 			{
-				this.totalOptionsHeight = 0f;
+				totalOptionsHeight = 0f;
 			}
 			Rect outRect = new Rect(inRect);
 			outRect.yMin += 35f;
-			int num = (int)(this.InitialSize.x / 200f);
-			float num2 = (this.totalOptionsHeight + 24f * (float)(num - 1)) / (float)num;
+			int num = (int)(InitialSize.x / 200f);
+			float num2 = (totalOptionsHeight + 24f * (float)(num - 1)) / (float)num;
 			if (num2 < outRect.height)
 			{
 				num2 = outRect.height;
 			}
-			this.curX = 0f;
-			this.curY = 0f;
+			curX = 0f;
+			curY = 0f;
 			Rect viewRect = new Rect(0f, 0f, outRect.width - 16f, num2);
-			DevGUI.BeginScrollView(outRect, ref this.scrollPosition, viewRect, true);
+			DevGUI.BeginScrollView(outRect, ref scrollPosition, viewRect);
 			DevGUI.BeginGroup(inRect);
 			float columnWidth = (viewRect.width - 17f * (float)(num - 1)) / (float)num;
-			this.DoListingItems(inRect.AtZero(), columnWidth);
+			DoListingItems(inRect.AtZero(), columnWidth);
 			DevGUI.EndGroup();
 			DevGUI.EndScrollView();
 		}
+	}
 
-		// Token: 0x06000334 RID: 820 RVA: 0x00011D0A File Offset: 0x0000FF0A
-		public override void PostClose()
+	public override void PostClose()
+	{
+		base.PostClose();
+		UI.UnfocusCurrentControl();
+	}
+
+	protected abstract void DoListingItems(Rect inRect, float columnWidth);
+
+	protected bool FilterAllows(string label)
+	{
+		if (filter.NullOrEmpty())
 		{
-			base.PostClose();
-			UI.UnfocusCurrentControl();
+			return true;
 		}
-
-		// Token: 0x06000335 RID: 821
-		protected abstract void DoListingItems(Rect inRect, float columnWidth);
-
-		// Token: 0x06000336 RID: 822 RVA: 0x00011D17 File Offset: 0x0000FF17
-		protected bool FilterAllows(string label)
+		if (label.NullOrEmpty())
 		{
-			return this.filter.NullOrEmpty() || label.NullOrEmpty() || label.IndexOf(this.filter, StringComparison.OrdinalIgnoreCase) >= 0;
+			return true;
 		}
-
-		// Token: 0x040001E9 RID: 489
-		protected Vector2 scrollPosition;
-
-		// Token: 0x040001EA RID: 490
-		protected string filter = "";
-
-		// Token: 0x040001EB RID: 491
-		protected float totalOptionsHeight;
-
-		// Token: 0x040001EC RID: 492
-		protected bool focusOnFilterOnOpen = true;
-
-		// Token: 0x040001ED RID: 493
-		private bool focusFilter;
-
-		// Token: 0x040001EE RID: 494
-		protected float curY;
-
-		// Token: 0x040001EF RID: 495
-		protected float curX;
-
-		// Token: 0x040001F0 RID: 496
-		private int boundingRectCachedForFrame = -1;
-
-		// Token: 0x040001F1 RID: 497
-		private Rect? boundingRectCached;
-
-		// Token: 0x040001F2 RID: 498
-		private Rect? boundingRect;
-
-		// Token: 0x040001F3 RID: 499
-		public float verticalSpacing = 2f;
-
-		// Token: 0x040001F4 RID: 500
-		protected const string FilterControlName = "DebugFilter";
+		return label.IndexOf(filter, StringComparison.OrdinalIgnoreCase) >= 0;
 	}
 }

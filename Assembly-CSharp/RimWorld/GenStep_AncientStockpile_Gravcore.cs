@@ -1,77 +1,75 @@
-﻿using System;
 using System.Collections.Generic;
 using RimWorld.SketchGen;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class GenStep_AncientStockpile_Gravcore : GenStep
 {
-	// Token: 0x02002050 RID: 8272
-	public class GenStep_AncientStockpile_Gravcore : GenStep
+	private List<Thing> hatches = new List<Thing>();
+
+	private const int NumHatches = 3;
+
+	private const int MinDistanceBetweenHatches = 20;
+
+	private static List<Thing> spawnedThings = new List<Thing>();
+
+	public override int SeedPart => 341298741;
+
+	public override void Generate(Map map, GenStepParams parms)
 	{
-		// Token: 0x17001BBE RID: 7102
-		// (get) Token: 0x0600B5BB RID: 46523 RVA: 0x00343779 File Offset: 0x00341979
-		public override int SeedPart
+		for (int i = 0; i < 3; i++)
 		{
-			get
-			{
-				return 341298741;
-			}
+			GenerateHatch(map, i == 0);
 		}
+	}
 
-		// Token: 0x0600B5BC RID: 46524 RVA: 0x00343780 File Offset: 0x00341980
-		public override void Generate(Map map, GenStepParams parms)
+	private void GenerateHatch(Map map, bool spawnGravcore = false)
+	{
+		List<CellRect> usedRects = MapGenerator.GetOrGenerateVar<List<CellRect>>("UsedRects");
+		SketchResolveParams parms = default(SketchResolveParams);
+		parms.sketch = new Sketch();
+		Sketch sketch = RimWorld.SketchGen.SketchGen.Generate(SketchResolverDefOf.AncientHatch, parms);
+		if (!MapGenUtility.TryGetRandomClearRect(sketch.OccupiedSize.x, sketch.OccupiedSize.z, out var rect, -1, -1, Validator))
 		{
-			for (int i = 0; i < 3; i++)
+			if (!CellFinder.TryFindRandomCell(map, (IntVec3 cell) => Validator(CellRect.CenteredOn(cell, sketch.OccupiedSize)), out var result))
 			{
-				this.GenerateHatch(map, i == 0);
+				return;
 			}
+			rect = CellRect.CenteredOn(result, sketch.OccupiedSize);
 		}
-
-		// Token: 0x0600B5BD RID: 46525 RVA: 0x003437A4 File Offset: 0x003419A4
-		private void GenerateHatch(Map map, bool spawnGravcore = false)
+		spawnedThings.Clear();
+		sketch.Spawn(map, rect.Min, null, Sketch.SpawnPosType.Unchanged, Sketch.SpawnMode.Normal, wipeIfCollides: true, forceTerrainAffordance: false, clearEdificeWhereFloor: true, spawnedThings);
+		usedRects.Add(rect);
+		AncientHatch ancientHatch = spawnedThings.FirstOrDefault((Thing t) => t.def == ThingDefOf.AncientHatch) as AncientHatch;
+		if (spawnGravcore)
 		{
-			GenStep_AncientStockpile_Gravcore.<>c__DisplayClass7_0 CS$<>8__locals1 = new GenStep_AncientStockpile_Gravcore.<>c__DisplayClass7_0();
-			CS$<>8__locals1.<>4__this = this;
-			CS$<>8__locals1.map = map;
-			CS$<>8__locals1.usedRects = MapGenerator.GetOrGenerateVar<List<CellRect>>("UsedRects");
-			SketchResolveParams parms = default(SketchResolveParams);
-			parms.sketch = new Sketch();
-			CS$<>8__locals1.sketch = SketchGen.Generate(SketchResolverDefOf.AncientHatch, parms);
-			CellRect item;
-			if (!MapGenUtility.TryGetRandomClearRect(CS$<>8__locals1.sketch.OccupiedSize.x, CS$<>8__locals1.sketch.OccupiedSize.z, out item, -1, -1, new Predicate<CellRect>(CS$<>8__locals1.<GenerateHatch>g__Validator|0), -1f, 0.7f, MapGenUtility.SearchWeightMode.Largest, 1))
-			{
-				IntVec3 center;
-				if (!CellFinder.TryFindRandomCell(CS$<>8__locals1.map, (IntVec3 cell) => base.<GenerateHatch>g__Validator|0(CellRect.CenteredOn(cell, CS$<>8__locals1.sketch.OccupiedSize)), out center))
-				{
-					return;
-				}
-				item = CellRect.CenteredOn(center, CS$<>8__locals1.sketch.OccupiedSize);
-			}
-			GenStep_AncientStockpile_Gravcore.spawnedThings.Clear();
-			CS$<>8__locals1.sketch.Spawn(CS$<>8__locals1.map, item.Min, null, Sketch.SpawnPosType.Unchanged, Sketch.SpawnMode.Normal, true, false, true, GenStep_AncientStockpile_Gravcore.spawnedThings, false, false, null, null, null);
-			CS$<>8__locals1.usedRects.Add(item);
-			AncientHatch ancientHatch = GenStep_AncientStockpile_Gravcore.spawnedThings.FirstOrDefault((Thing t) => t.def == ThingDefOf.AncientHatch) as AncientHatch;
-			if (spawnGravcore)
-			{
-				ancientHatch.stockpileType = TileMutatorWorker_Stockpile.StockpileType.Gravcore;
-			}
-			else
-			{
-				ancientHatch.layout = LayoutDefOf.AncientStockpileFake;
-			}
-			this.hatches.Add(ancientHatch);
+			ancientHatch.stockpileType = TileMutatorWorker_Stockpile.StockpileType.Gravcore;
 		}
-
-		// Token: 0x04007CAE RID: 31918
-		private List<Thing> hatches = new List<Thing>();
-
-		// Token: 0x04007CAF RID: 31919
-		private const int NumHatches = 3;
-
-		// Token: 0x04007CB0 RID: 31920
-		private const int MinDistanceBetweenHatches = 20;
-
-		// Token: 0x04007CB1 RID: 31921
-		private static List<Thing> spawnedThings = new List<Thing>();
+		else
+		{
+			ancientHatch.layout = LayoutDefOf.AncientStockpileFake;
+		}
+		hatches.Add(ancientHatch);
+		bool Validator(CellRect r)
+		{
+			if (hatches.Any((Thing h) => r.CenterCell.InHorDistOf(h.Position, 20f)))
+			{
+				return false;
+			}
+			if (usedRects.Any((CellRect ur) => ur.Overlaps(r)))
+			{
+				return false;
+			}
+			if (sketch.IsSpawningBlocked(map, r.Min, null))
+			{
+				return false;
+			}
+			if (r.CenterCell.Fogged(map))
+			{
+				return false;
+			}
+			return true;
+		}
 	}
 }

@@ -1,211 +1,321 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class ExpansionDef : Def
 {
-	// Token: 0x02001A20 RID: 6688
-	public class ExpansionDef : Def
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__30 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x170016FE RID: 5886
-		// (get) Token: 0x060096BB RID: 38587 RVA: 0x002C165B File Offset: 0x002BF85B
-		public Texture2D IconFromStatus
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public ExpansionDef _003C_003E4__this;
+
+		private IEnumerator<string> _003C_003E7__wrap1;
+
+		string IEnumerator<string>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.Status != ExpansionStatus.NotInstalled)
-				{
-					return this.Icon;
-				}
-				return this.NotOwnedIcon;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170016FF RID: 5887
-		// (get) Token: 0x060096BC RID: 38588 RVA: 0x002C1673 File Offset: 0x002BF873
-		public Texture2D Icon
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.cachedIcon == null)
-				{
-					this.cachedIcon = ContentFinder<Texture2D>.Get(this.iconPath, true);
-				}
-				return this.cachedIcon;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001700 RID: 5888
-		// (get) Token: 0x060096BD RID: 38589 RVA: 0x002C169B File Offset: 0x002BF89B
-		private Texture2D NotOwnedIcon
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__30(int _003C_003E1__state)
 		{
-			get
-			{
-				if (this.notOwnedIconPath.NullOrEmpty())
-				{
-					return this.Icon;
-				}
-				if (this.cachedNotOwnedIcon == null)
-				{
-					this.cachedNotOwnedIcon = ContentFinder<Texture2D>.Get(this.notOwnedIconPath, true);
-				}
-				return this.cachedNotOwnedIcon;
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x17001701 RID: 5889
-		// (get) Token: 0x060096BE RID: 38590 RVA: 0x002C16D7 File Offset: 0x002BF8D7
-		public Texture2D BackgroundImage
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			get
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				if (this.cachedBG == null)
+				try
 				{
-					this.cachedBG = ContentFinder<Texture2D>.Get(this.backgroundPath, true);
 				}
-				return this.cachedBG;
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
 			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x17001702 RID: 5890
-		// (get) Token: 0x060096BF RID: 38591 RVA: 0x002C16FF File Offset: 0x002BF8FF
-		public List<Texture2D> PreviewImages
+		private bool MoveNext()
 		{
-			get
+			try
 			{
-				if (this.cachedPreviewImages.NullOrEmpty<Texture2D>())
+				int num = _003C_003E1__state;
+				ExpansionDef expansionDef = _003C_003E4__this;
+				ModMetaData modWithIdentifier;
+				switch (num)
 				{
-					if (this.previewImagesFolderPath.NullOrEmpty())
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((Def)expansionDef).ConfigErrors().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0071;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0071;
+				case 2:
 					{
-						return null;
+						_003C_003E1__state = -1;
+						break;
 					}
-					this.cachedPreviewImages = new List<Texture2D>(ContentFinder<Texture2D>.GetAllInFolder(this.previewImagesFolderPath));
+					IL_0071:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					modWithIdentifier = ModLister.GetModWithIdentifier(expansionDef.linkedMod);
+					if (modWithIdentifier != null && !modWithIdentifier.Official)
+					{
+						_003C_003E2__current = modWithIdentifier.Name + " - ExpansionDefs are used for official content. For mods, you should define ModMetaData in About.xml.";
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
 				}
-				return this.cachedPreviewImages;
+				return false;
 			}
-		}
-
-		// Token: 0x17001703 RID: 5891
-		// (get) Token: 0x060096C0 RID: 38592 RVA: 0x002C1739 File Offset: 0x002BF939
-		public string StoreURL
-		{
-			get
+			catch
 			{
-				if (!this.steamUrl.NullOrEmpty())
-				{
-					return this.steamUrl;
-				}
-				return this.siteUrl;
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x17001704 RID: 5892
-		// (get) Token: 0x060096C1 RID: 38593 RVA: 0x002C1755 File Offset: 0x002BF955
-		public ExpansionStatus Status
+		bool IEnumerator.MoveNext()
 		{
-			get
-			{
-				if (ModsConfig.IsActive(this.linkedMod))
-				{
-					return ExpansionStatus.Active;
-				}
-				if (ModLister.AllInstalledMods.Any((ModMetaData m) => m.SamePackageId(this.linkedMod, false)))
-				{
-					return ExpansionStatus.Installed;
-				}
-				return ExpansionStatus.NotInstalled;
-			}
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x17001705 RID: 5893
-		// (get) Token: 0x060096C2 RID: 38594 RVA: 0x002C1784 File Offset: 0x002BF984
-		public string StatusDescription
+		private void _003C_003Em__Finally1()
 		{
-			get
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				ExpansionStatus status = this.Status;
-				if (status == ExpansionStatus.Active)
-				{
-					return "ContentActive".Translate();
-				}
-				if (status != ExpansionStatus.Installed)
-				{
-					return "ContentNotInstalled".Translate();
-				}
-				return "ContentInstalledButNotActive".Translate();
+				_003C_003E7__wrap1.Dispose();
 			}
 		}
 
-		// Token: 0x060096C3 RID: 38595 RVA: 0x002C17D0 File Offset: 0x002BF9D0
-		public override void PostLoad()
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			base.PostLoad();
-			this.linkedMod = this.linkedMod.ToLower();
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x060096C4 RID: 38596 RVA: 0x002C17E9 File Offset: 0x002BF9E9
-		public override IEnumerable<string> ConfigErrors()
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
 		{
-			foreach (string text in base.ConfigErrors())
+			_003CConfigErrors_003Ed__30 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				yield return text;
+				_003C_003E1__state = 0;
+				result = this;
 			}
-			IEnumerator<string> enumerator = null;
-			ModMetaData modWithIdentifier = ModLister.GetModWithIdentifier(this.linkedMod, false);
-			if (modWithIdentifier != null && !modWithIdentifier.Official)
+			else
 			{
-				yield return modWithIdentifier.Name + " - ExpansionDefs are used for official content. For mods, you should define ModMetaData in About.xml.";
+				result = new _003CConfigErrors_003Ed__30(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
-			yield break;
-			yield break;
+			return result;
 		}
 
-		// Token: 0x04006347 RID: 25415
-		[NoTranslate]
-		public string iconPath;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x04006348 RID: 25416
-		[NoTranslate]
-		public string notOwnedIconPath;
+	[NoTranslate]
+	public string iconPath;
 
-		// Token: 0x04006349 RID: 25417
-		[NoTranslate]
-		public string backgroundPath;
+	[NoTranslate]
+	public string notOwnedIconPath;
 
-		// Token: 0x0400634A RID: 25418
-		[NoTranslate]
-		public string linkedMod;
+	[NoTranslate]
+	public string backgroundPath;
 
-		// Token: 0x0400634B RID: 25419
-		[NoTranslate]
-		public string steamUrl;
+	[NoTranslate]
+	public string linkedMod;
 
-		// Token: 0x0400634C RID: 25420
-		[NoTranslate]
-		public string siteUrl;
+	[NoTranslate]
+	public string steamUrl;
 
-		// Token: 0x0400634D RID: 25421
-		[NoTranslate]
-		public string previewImagesFolderPath;
+	[NoTranslate]
+	public string siteUrl;
 
-		// Token: 0x0400634E RID: 25422
-		public bool isCore;
+	[NoTranslate]
+	public string previewImagesFolderPath;
 
-		// Token: 0x0400634F RID: 25423
-		public Color primaryColor = Color.white;
+	public bool isCore;
 
-		// Token: 0x04006350 RID: 25424
-		private Texture2D cachedIcon;
+	public Color primaryColor = Color.white;
 
-		// Token: 0x04006351 RID: 25425
-		private Texture2D cachedNotOwnedIcon;
+	private Texture2D cachedIcon;
 
-		// Token: 0x04006352 RID: 25426
-		private Texture2D cachedBG;
+	private Texture2D cachedNotOwnedIcon;
 
-		// Token: 0x04006353 RID: 25427
-		private List<Texture2D> cachedPreviewImages;
+	private Texture2D cachedBG;
+
+	private List<Texture2D> cachedPreviewImages;
+
+	public Texture2D IconFromStatus
+	{
+		get
+		{
+			if (Status != ExpansionStatus.NotInstalled)
+			{
+				return Icon;
+			}
+			return NotOwnedIcon;
+		}
+	}
+
+	public Texture2D Icon
+	{
+		get
+		{
+			if (cachedIcon == null)
+			{
+				cachedIcon = ContentFinder<Texture2D>.Get(iconPath);
+			}
+			return cachedIcon;
+		}
+	}
+
+	private Texture2D NotOwnedIcon
+	{
+		get
+		{
+			if (notOwnedIconPath.NullOrEmpty())
+			{
+				return Icon;
+			}
+			if (cachedNotOwnedIcon == null)
+			{
+				cachedNotOwnedIcon = ContentFinder<Texture2D>.Get(notOwnedIconPath);
+			}
+			return cachedNotOwnedIcon;
+		}
+	}
+
+	public Texture2D BackgroundImage
+	{
+		get
+		{
+			if (cachedBG == null)
+			{
+				cachedBG = ContentFinder<Texture2D>.Get(backgroundPath);
+			}
+			return cachedBG;
+		}
+	}
+
+	public List<Texture2D> PreviewImages
+	{
+		get
+		{
+			if (cachedPreviewImages.NullOrEmpty())
+			{
+				if (previewImagesFolderPath.NullOrEmpty())
+				{
+					return null;
+				}
+				cachedPreviewImages = new List<Texture2D>(ContentFinder<Texture2D>.GetAllInFolder(previewImagesFolderPath));
+			}
+			return cachedPreviewImages;
+		}
+	}
+
+	public string StoreURL
+	{
+		get
+		{
+			if (!steamUrl.NullOrEmpty())
+			{
+				return steamUrl;
+			}
+			return siteUrl;
+		}
+	}
+
+	public ExpansionStatus Status
+	{
+		get
+		{
+			if (ModsConfig.IsActive(linkedMod))
+			{
+				return ExpansionStatus.Active;
+			}
+			if (ModLister.AllInstalledMods.Any((ModMetaData m) => m.SamePackageId(linkedMod)))
+			{
+				return ExpansionStatus.Installed;
+			}
+			return ExpansionStatus.NotInstalled;
+		}
+	}
+
+	public string StatusDescription => Status switch
+	{
+		ExpansionStatus.Active => "ContentActive".Translate(), 
+		ExpansionStatus.Installed => "ContentInstalledButNotActive".Translate(), 
+		_ => "ContentNotInstalled".Translate(), 
+	};
+
+	public override void PostLoad()
+	{
+		base.PostLoad();
+		linkedMod = linkedMod.ToLower();
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__30))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__30(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

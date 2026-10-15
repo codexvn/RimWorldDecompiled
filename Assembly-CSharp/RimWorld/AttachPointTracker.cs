@@ -1,167 +1,437 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class AttachPointTracker
 {
-	// Token: 0x02002C00 RID: 11264
-	public class AttachPointTracker
+	[CompilerGenerated]
+	private sealed class _003CPointTypes_003Ed__11 : IEnumerable<AttachPointType>, IEnumerable, IEnumerator<AttachPointType>, IEnumerator, IDisposable
 	{
-		// Token: 0x170027A6 RID: 10150
-		// (get) Token: 0x0600FC5F RID: 64607 RVA: 0x0049313D File Offset: 0x0049133D
-		public string ThingId
+		private int _003C_003E1__state;
+
+		private AttachPointType _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public AttachPointTracker _003C_003E4__this;
+
+		private int min;
+
+		public int _003C_003E3__min;
+
+		private int max;
+
+		public int _003C_003E3__max;
+
+		private Dictionary<AttachPointType, AttachPoint>.Enumerator _003C_003E7__wrap1;
+
+		AttachPointType IEnumerator<AttachPointType>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.parent.ThingID;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600FC60 RID: 64608 RVA: 0x0049314C File Offset: 0x0049134C
-		public AttachPointTracker(List<AttachPoint> points, ThingWithComps parent)
+		object IEnumerator.Current
 		{
-			this.parent = parent;
-			this.cache = new Dictionary<AttachPointType, AttachPoint>();
-			foreach (AttachPoint attachPoint in points)
+			[DebuggerHidden]
+			get
 			{
-				this.cache[attachPoint.type] = attachPoint;
+				return _003C_003E2__current;
 			}
-			this.cache[AttachPointType.RootNone] = new AttachPoint
-			{
-				offset = Vector3.zero,
-				type = AttachPointType.RootNone
-			};
 		}
 
-		// Token: 0x0600FC61 RID: 64609 RVA: 0x004931E0 File Offset: 0x004913E0
-		public void Add(AttachPointTracker other, bool overwrite = true)
+		[DebuggerHidden]
+		public _003CPointTypes_003Ed__11(int _003C_003E1__state)
 		{
-			foreach (KeyValuePair<AttachPointType, AttachPoint> keyValuePair in other.cache)
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				if (overwrite || !this.cache.ContainsKey(keyValuePair.Key))
+				try
 				{
-					this.cache[keyValuePair.Key] = keyValuePair.Value;
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
 				}
 			}
+			_003C_003E7__wrap1 = default(Dictionary<AttachPointType, AttachPoint>.Enumerator);
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x0600FC62 RID: 64610 RVA: 0x0049325C File Offset: 0x0049145C
-		private void TryCacheKindDefOverrides()
+		private bool MoveNext()
 		{
-			if (!this.didReadOverrides)
+			try
 			{
-				Pawn pawn = this.parent as Pawn;
-				if (pawn != null)
+				int num = _003C_003E1__state;
+				AttachPointTracker attachPointTracker = _003C_003E4__this;
+				switch (num)
 				{
-					AlternateGraphic alternateGraphic;
-					int num;
-					if (pawn.TryGetAlternate(out alternateGraphic, out num) && alternateGraphic.attachPoints != null)
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					attachPointTracker.TryCacheKindDefOverrides();
+					_003C_003E7__wrap1 = attachPointTracker.cache.GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 1:
+					_003C_003E1__state = -3;
+					break;
+				}
+				while (_003C_003E7__wrap1.MoveNext())
+				{
+					KeyValuePair<AttachPointType, AttachPoint> current = _003C_003E7__wrap1.Current;
+					int key = (int)current.Key;
+					if (key >= min && key <= max)
 					{
-						foreach (AttachPoint attachPoint in alternateGraphic.attachPoints)
-						{
-							this.cache[attachPoint.type] = attachPoint;
-						}
+						_003C_003E2__current = current.Key;
+						_003C_003E1__state = 1;
+						return true;
 					}
-					Graphic bodyGraphic = pawn.Drawer.renderer.BodyGraphic;
-					GraphicData graphicData = (bodyGraphic != null) ? bodyGraphic.data : null;
-					if (graphicData == null)
-					{
-						return;
-					}
-					if (graphicData.attachPoints != null && graphicData.attachPoints.Count > 0)
-					{
-						foreach (AttachPoint attachPoint2 in graphicData.attachPoints)
-						{
-							this.cache[attachPoint2.type] = attachPoint2;
-						}
-					}
-					this.didReadOverrides = true;
 				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = default(Dictionary<AttachPointType, AttachPoint>.Enumerator);
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x0600FC63 RID: 64611 RVA: 0x00493380 File Offset: 0x00491580
-		public Vector3 GetRotatedOffset(AttachPointType type)
+		bool IEnumerator.MoveNext()
 		{
-			return this.GetRotatedOffset(type, this.parent.Rotation);
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0600FC64 RID: 64612 RVA: 0x00493394 File Offset: 0x00491594
-		public Vector3 GetRotatedOffset(AttachPointType type, Rot4 rot)
+		private void _003C_003Em__Finally1()
 		{
-			Vector3 vector = this.GetPointOrDefault(type).offset;
-			Pawn pawn = this.parent as Pawn;
-			if (pawn != null)
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap1/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<AttachPointType> IEnumerable<AttachPointType>.GetEnumerator()
+		{
+			_003CPointTypes_003Ed__11 _003CPointTypes_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				vector *= pawn.ageTracker.CurLifeStage.attachPointScaleFactor;
+				_003C_003E1__state = 0;
+				_003CPointTypes_003Ed__ = this;
 			}
-			return vector.RotatedBy(rot);
-		}
-
-		// Token: 0x0600FC65 RID: 64613 RVA: 0x004933DB File Offset: 0x004915DB
-		public Vector3 GetWorldPos(AttachPointType type)
-		{
-			return this.parent.DrawPos + this.GetRotatedOffset(type);
-		}
-
-		// Token: 0x0600FC66 RID: 64614 RVA: 0x004933F4 File Offset: 0x004915F4
-		public IEnumerable<AttachPointType> PointTypes(int min = 0, int max = 2147483647)
-		{
-			this.TryCacheKindDefOverrides();
-			foreach (KeyValuePair<AttachPointType, AttachPoint> keyValuePair in this.cache)
+			else
 			{
-				int key = (int)keyValuePair.Key;
-				if (key >= min && key <= max)
+				_003CPointTypes_003Ed__ = new _003CPointTypes_003Ed__11(0)
 				{
-					yield return keyValuePair.Key;
-				}
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
-			Dictionary<AttachPointType, AttachPoint>.Enumerator enumerator = default(Dictionary<AttachPointType, AttachPoint>.Enumerator);
-			yield break;
-			yield break;
+			_003CPointTypes_003Ed__.min = _003C_003E3__min;
+			_003CPointTypes_003Ed__.max = _003C_003E3__max;
+			return _003CPointTypes_003Ed__;
 		}
 
-		// Token: 0x0600FC67 RID: 64615 RVA: 0x00493412 File Offset: 0x00491612
-		public IEnumerable<AttachPoint> Points(int min = 0, int max = 2147483647)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			foreach (KeyValuePair<AttachPointType, AttachPoint> keyValuePair in this.cache)
+			return ((IEnumerable<AttachPointType>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CPoints_003Ed__12 : IEnumerable<AttachPoint>, IEnumerable, IEnumerator<AttachPoint>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private AttachPoint _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public AttachPointTracker _003C_003E4__this;
+
+		private int min;
+
+		public int _003C_003E3__min;
+
+		private int max;
+
+		public int _003C_003E3__max;
+
+		private Dictionary<AttachPointType, AttachPoint>.Enumerator _003C_003E7__wrap1;
+
+		AttachPoint IEnumerator<AttachPoint>.Current
+		{
+			[DebuggerHidden]
+			get
 			{
-				int key = (int)keyValuePair.Key;
-				if (key >= min && key <= max)
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CPoints_003Ed__12(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
 				{
-					yield return keyValuePair.Value;
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
 				}
 			}
-			Dictionary<AttachPointType, AttachPoint>.Enumerator enumerator = default(Dictionary<AttachPointType, AttachPoint>.Enumerator);
-			yield break;
-			yield break;
+			_003C_003E7__wrap1 = default(Dictionary<AttachPointType, AttachPoint>.Enumerator);
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x0600FC68 RID: 64616 RVA: 0x00493430 File Offset: 0x00491630
-		public AttachPoint GetPointOrDefault(AttachPointType type)
+		private bool MoveNext()
 		{
-			AttachPoint result;
-			if (this.TryGetPoint(type, out result))
+			try
 			{
-				return result;
+				int num = _003C_003E1__state;
+				AttachPointTracker attachPointTracker = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = attachPointTracker.cache.GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 1:
+					_003C_003E1__state = -3;
+					break;
+				}
+				while (_003C_003E7__wrap1.MoveNext())
+				{
+					KeyValuePair<AttachPointType, AttachPoint> current = _003C_003E7__wrap1.Current;
+					int key = (int)current.Key;
+					if (key >= min && key <= max)
+					{
+						_003C_003E2__current = current.Value;
+						_003C_003E1__state = 1;
+						return true;
+					}
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = default(Dictionary<AttachPointType, AttachPoint>.Enumerator);
+				return false;
 			}
-			return this.cache[AttachPointType.RootNone];
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
 		}
 
-		// Token: 0x0600FC69 RID: 64617 RVA: 0x00493456 File Offset: 0x00491656
-		public bool TryGetPoint(AttachPointType type, out AttachPoint pt)
+		bool IEnumerator.MoveNext()
 		{
-			return this.cache.TryGetValue(type, out pt);
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0400A55D RID: 42333
-		private ThingWithComps parent;
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap1/*cast due to .constrained prefix*/).Dispose();
+		}
 
-		// Token: 0x0400A55E RID: 42334
-		private Dictionary<AttachPointType, AttachPoint> cache;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x0400A55F RID: 42335
-		private bool didReadOverrides;
+		[DebuggerHidden]
+		IEnumerator<AttachPoint> IEnumerable<AttachPoint>.GetEnumerator()
+		{
+			_003CPoints_003Ed__12 _003CPoints_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CPoints_003Ed__ = this;
+			}
+			else
+			{
+				_003CPoints_003Ed__ = new _003CPoints_003Ed__12(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CPoints_003Ed__.min = _003C_003E3__min;
+			_003CPoints_003Ed__.max = _003C_003E3__max;
+			return _003CPoints_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<AttachPoint>)this).GetEnumerator();
+		}
+	}
+
+	private ThingWithComps parent;
+
+	private Dictionary<AttachPointType, AttachPoint> cache;
+
+	private bool didReadOverrides;
+
+	public string ThingId => parent.ThingID;
+
+	public AttachPointTracker(List<AttachPoint> points, ThingWithComps parent)
+	{
+		this.parent = parent;
+		cache = new Dictionary<AttachPointType, AttachPoint>();
+		foreach (AttachPoint point in points)
+		{
+			cache[point.type] = point;
+		}
+		cache[AttachPointType.RootNone] = new AttachPoint
+		{
+			offset = Vector3.zero,
+			type = AttachPointType.RootNone
+		};
+	}
+
+	public void Add(AttachPointTracker other, bool overwrite = true)
+	{
+		foreach (KeyValuePair<AttachPointType, AttachPoint> item in other.cache)
+		{
+			if (overwrite || !cache.ContainsKey(item.Key))
+			{
+				cache[item.Key] = item.Value;
+			}
+		}
+	}
+
+	private void TryCacheKindDefOverrides()
+	{
+		if (didReadOverrides || !(parent is Pawn pawn))
+		{
+			return;
+		}
+		if (pawn.TryGetAlternate(out var ag, out var _) && ag.attachPoints != null)
+		{
+			foreach (AttachPoint attachPoint in ag.attachPoints)
+			{
+				cache[attachPoint.type] = attachPoint;
+			}
+		}
+		GraphicData graphicData = pawn.Drawer.renderer.BodyGraphic?.data;
+		if (graphicData == null)
+		{
+			return;
+		}
+		if (graphicData.attachPoints != null && graphicData.attachPoints.Count > 0)
+		{
+			foreach (AttachPoint attachPoint2 in graphicData.attachPoints)
+			{
+				cache[attachPoint2.type] = attachPoint2;
+			}
+		}
+		didReadOverrides = true;
+	}
+
+	public Vector3 GetRotatedOffset(AttachPointType type)
+	{
+		return GetRotatedOffset(type, parent.Rotation);
+	}
+
+	public Vector3 GetRotatedOffset(AttachPointType type, Rot4 rot)
+	{
+		Vector3 offset = GetPointOrDefault(type).offset;
+		if (parent is Pawn pawn)
+		{
+			offset *= pawn.ageTracker.CurLifeStage.attachPointScaleFactor;
+		}
+		return offset.RotatedBy(rot);
+	}
+
+	public Vector3 GetWorldPos(AttachPointType type)
+	{
+		return parent.DrawPos + GetRotatedOffset(type);
+	}
+
+	[IteratorStateMachine(typeof(_003CPointTypes_003Ed__11))]
+	public IEnumerable<AttachPointType> PointTypes(int min = 0, int max = int.MaxValue)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CPointTypes_003Ed__11(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__min = min,
+			_003C_003E3__max = max
+		};
+	}
+
+	[IteratorStateMachine(typeof(_003CPoints_003Ed__12))]
+	public IEnumerable<AttachPoint> Points(int min = 0, int max = int.MaxValue)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CPoints_003Ed__12(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__min = min,
+			_003C_003E3__max = max
+		};
+	}
+
+	public AttachPoint GetPointOrDefault(AttachPointType type)
+	{
+		if (TryGetPoint(type, out var pt))
+		{
+			return pt;
+		}
+		return cache[AttachPointType.RootNone];
+	}
+
+	public bool TryGetPoint(AttachPointType type, out AttachPoint pt)
+	{
+		return cache.TryGetValue(type, out pt);
 	}
 }

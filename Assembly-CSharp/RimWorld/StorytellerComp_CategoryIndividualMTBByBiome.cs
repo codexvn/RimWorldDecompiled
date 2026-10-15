@@ -1,85 +1,202 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class StorytellerComp_CategoryIndividualMTBByBiome : StorytellerComp
 {
-	// Token: 0x02001E2C RID: 7724
-	public class StorytellerComp_CategoryIndividualMTBByBiome : StorytellerComp
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass2_0
 	{
-		// Token: 0x17001A32 RID: 6706
-		// (get) Token: 0x0600AC01 RID: 44033 RVA: 0x003132F0 File Offset: 0x003114F0
-		protected StorytellerCompProperties_CategoryIndividualMTBByBiome Props
+		public BiomeDef biome;
+
+		internal bool _003CMakeIntervalIncidents_003Eb__0(MTBByBiome x)
 		{
+			return x.biome == biome;
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CMakeIntervalIncidents_003Ed__2 : IEnumerable<FiringIncident>, IEnumerable, IEnumerator<FiringIncident>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private FiringIncident _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private IIncidentTarget target;
+
+		public IIncidentTarget _003C_003E3__target;
+
+		public StorytellerComp_CategoryIndividualMTBByBiome _003C_003E4__this;
+
+		private List<IncidentDef> _003CallIncidents_003E5__2;
+
+		private int _003Ci_003E5__3;
+
+		FiringIncident IEnumerator<FiringIncident>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				return (StorytellerCompProperties_CategoryIndividualMTBByBiome)this.props;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600AC02 RID: 44034 RVA: 0x003132FD File Offset: 0x003114FD
-		public override IEnumerable<FiringIncident> MakeIntervalIncidents(IIncidentTarget target)
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CMakeIntervalIncidents_003Ed__2(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003CallIncidents_003E5__2 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			StorytellerComp_CategoryIndividualMTBByBiome storytellerComp_CategoryIndividualMTBByBiome = _003C_003E4__this;
+			if (num != 0)
+			{
+				if (num != 1)
+				{
+					return false;
+				}
+				_003C_003E1__state = -1;
+				goto IL_01a0;
+			}
+			_003C_003E1__state = -1;
 			if (target is World)
 			{
-				yield break;
+				return false;
 			}
-			List<IncidentDef> allIncidents = DefDatabase<IncidentDef>.AllDefsListForReading;
-			int num2;
-			for (int i = 0; i < allIncidents.Count; i = num2 + 1)
+			_003CallIncidents_003E5__2 = DefDatabase<IncidentDef>.AllDefsListForReading;
+			_003Ci_003E5__3 = 0;
+			goto IL_01b2;
+			IL_01b2:
+			if (_003Ci_003E5__3 < _003CallIncidents_003E5__2.Count)
 			{
-				IncidentDef incidentDef = allIncidents[i];
-				if (incidentDef.category == this.Props.category)
+				IncidentDef incidentDef = _003CallIncidents_003E5__2[_003Ci_003E5__3];
+				if (incidentDef.category == storytellerComp_CategoryIndividualMTBByBiome.Props.category)
 				{
-					BiomeDef biome = Find.WorldGrid[target.Tile].PrimaryBiome;
+					_003C_003Ec__DisplayClass2_0 CS_0024_003C_003E8__locals1 = new _003C_003Ec__DisplayClass2_0
+					{
+						biome = Find.WorldGrid[target.Tile].PrimaryBiome
+					};
 					if (incidentDef.mtbDaysByBiome != null)
 					{
-						MTBByBiome mtbbyBiome = incidentDef.mtbDaysByBiome.Find((MTBByBiome x) => x.biome == biome);
-						if (mtbbyBiome != null)
+						MTBByBiome mTBByBiome = incidentDef.mtbDaysByBiome.Find((MTBByBiome x) => x.biome == CS_0024_003C_003E8__locals1.biome);
+						if (mTBByBiome != null)
 						{
-							float num = mtbbyBiome.mtbDays;
-							if (this.Props.applyCaravanVisibility)
+							float num2 = mTBByBiome.mtbDays;
+							if (storytellerComp_CategoryIndividualMTBByBiome.Props.applyCaravanVisibility)
 							{
-								Caravan caravan = target as Caravan;
-								if (caravan != null)
+								if (target is Caravan caravan)
 								{
-									num /= caravan.Visibility;
+									num2 /= caravan.Visibility;
 								}
-								else
+								else if (target is Map map && map.Parent.def.isTempIncidentMapOwner)
 								{
-									Map map = target as Map;
-									if (map != null && map.Parent.def.isTempIncidentMapOwner)
-									{
-										IEnumerable<Pawn> pawns = map.mapPawns.SpawnedPawnsInFaction(Faction.OfPlayer).Concat(map.mapPawns.PrisonersOfColonySpawned);
-										num /= CaravanVisibilityCalculator.Visibility(pawns, false, null);
-									}
+									IEnumerable<Pawn> pawns = map.mapPawns.SpawnedPawnsInFaction(Faction.OfPlayer).Concat(map.mapPawns.PrisonersOfColonySpawned);
+									num2 /= CaravanVisibilityCalculator.Visibility(pawns, caravanMovingNow: false);
 								}
 							}
-							if (Rand.MTBEventOccurs(num, 60000f, 1000f))
+							if (Rand.MTBEventOccurs(num2, 60000f, 1000f))
 							{
-								IncidentParms parms = this.GenerateParms(incidentDef.category, target);
+								IncidentParms parms = storytellerComp_CategoryIndividualMTBByBiome.GenerateParms(incidentDef.category, target);
 								if (incidentDef.Worker.CanFireNow(parms))
 								{
-									yield return new FiringIncident(incidentDef, this, parms);
+									_003C_003E2__current = new FiringIncident(incidentDef, storytellerComp_CategoryIndividualMTBByBiome, parms);
+									_003C_003E1__state = 1;
+									return true;
 								}
 							}
 						}
 					}
 				}
-				num2 = i;
+				goto IL_01a0;
 			}
-			yield break;
+			return false;
+			IL_01a0:
+			_003Ci_003E5__3++;
+			goto IL_01b2;
 		}
 
-		// Token: 0x0600AC03 RID: 44035 RVA: 0x00313314 File Offset: 0x00311514
-		public override string ToString()
+		bool IEnumerator.MoveNext()
 		{
-			string str = base.ToString();
-			string str2 = " ";
-			IncidentCategoryDef category = this.Props.category;
-			return str + str2 + ((category != null) ? category.ToString() : null);
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<FiringIncident> IEnumerable<FiringIncident>.GetEnumerator()
+		{
+			_003CMakeIntervalIncidents_003Ed__2 _003CMakeIntervalIncidents_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CMakeIntervalIncidents_003Ed__ = this;
+			}
+			else
+			{
+				_003CMakeIntervalIncidents_003Ed__ = new _003CMakeIntervalIncidents_003Ed__2(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CMakeIntervalIncidents_003Ed__.target = _003C_003E3__target;
+			return _003CMakeIntervalIncidents_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<FiringIncident>)this).GetEnumerator();
+		}
+	}
+
+	protected StorytellerCompProperties_CategoryIndividualMTBByBiome Props => (StorytellerCompProperties_CategoryIndividualMTBByBiome)props;
+
+	[IteratorStateMachine(typeof(_003CMakeIntervalIncidents_003Ed__2))]
+	public override IEnumerable<FiringIncident> MakeIntervalIncidents(IIncidentTarget target)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeIntervalIncidents_003Ed__2(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__target = target
+		};
+	}
+
+	public override string ToString()
+	{
+		return base.ToString() + " " + Props.category;
 	}
 }

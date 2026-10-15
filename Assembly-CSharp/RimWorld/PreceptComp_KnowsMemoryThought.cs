@@ -1,95 +1,67 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class PreceptComp_KnowsMemoryThought : PreceptComp_Thought
 {
-	// Token: 0x0200263C RID: 9788
-	public class PreceptComp_KnowsMemoryThought : PreceptComp_Thought
+	public HistoryEventDef eventDef;
+
+	public bool? doerMustBeMyFaction;
+
+	public ThoughtDef removesThought;
+
+	public bool onlyForNonSlaves;
+
+	public bool doerMustBeMyIdeo;
+
+	public override IEnumerable<TraitRequirement> TraitsAffecting => ThoughtUtility.GetNullifyingTraits(thought);
+
+	public override void Notify_MemberWitnessedAction(HistoryEvent ev, Precept precept, Pawn member)
 	{
-		// Token: 0x170020CA RID: 8394
-		// (get) Token: 0x0600D678 RID: 54904 RVA: 0x003FA1CB File Offset: 0x003F83CB
-		public override IEnumerable<TraitRequirement> TraitsAffecting
+		if (ev.def != eventDef || (!precept.def.enabledForNPCFactions && !member.CountsAsNonNPCForPrecepts()))
 		{
-			get
-			{
-				return ThoughtUtility.GetNullifyingTraits(this.thought);
-			}
+			return;
 		}
-
-		// Token: 0x0600D679 RID: 54905 RVA: 0x003FA1D8 File Offset: 0x003F83D8
-		public override void Notify_MemberWitnessedAction(HistoryEvent ev, Precept precept, Pawn member)
+		Pawn arg;
+		bool flag = ev.args.TryGetArg(HistoryEventArgsNames.Doer, out arg);
+		bool flag2 = false;
+		if (doerMustBeMyFaction.HasValue)
 		{
-			if (ev.def != this.eventDef)
+			flag2 = doerMustBeMyFaction.Value;
+		}
+		else if (flag)
+		{
+			foreach (ThoughtStage stage in thought.stages)
 			{
-				return;
-			}
-			if (!precept.def.enabledForNPCFactions && !member.CountsAsNonNPCForPrecepts())
-			{
-				return;
-			}
-			Pawn pawn;
-			bool flag = ev.args.TryGetArg<Pawn>(HistoryEventArgsNames.Doer, out pawn);
-			bool flag2 = false;
-			if (this.doerMustBeMyFaction != null)
-			{
-				flag2 = this.doerMustBeMyFaction.Value;
-			}
-			else
-			{
-				if (flag)
+				if (stage.baseMoodEffect != 0f)
 				{
-					using (List<ThoughtStage>.Enumerator enumerator = this.thought.stages.GetEnumerator())
-					{
-						while (enumerator.MoveNext())
-						{
-							if (enumerator.Current.baseMoodEffect != 0f)
-							{
-								flag2 = true;
-								break;
-							}
-						}
-						goto IL_9E;
-					}
-				}
-				flag2 = false;
-			}
-			IL_9E:
-			if (member.needs != null && member.needs.mood != null && (!flag2 || (flag && pawn.Faction == member.Faction)) && (!this.doerMustBeMyIdeo || pawn.Ideo == member.Ideo) && (!this.onlyForNonSlaves || !member.IsSlave) && (!typeof(Thought_MemorySocial).IsAssignableFrom(this.thought.thoughtClass) || flag))
-			{
-				Thought_Memory thought_Memory = ThoughtMaker.MakeThought(this.thought, precept);
-				int val;
-				if (ev.args.TryGetArg<int>(HistoryEventArgsNames.ExecutionThoughtStage, out val))
-				{
-					thought_Memory.SetForcedStage(Math.Min(val, this.thought.stages.Count - 1));
-				}
-				Thought_KilledInnocentAnimal thought_KilledInnocentAnimal = thought_Memory as Thought_KilledInnocentAnimal;
-				Pawn animal;
-				if (thought_KilledInnocentAnimal != null && ev.args.TryGetArg<Pawn>(HistoryEventArgsNames.Victim, out animal))
-				{
-					thought_KilledInnocentAnimal.SetAnimal(animal);
-				}
-				member.needs.mood.thoughts.memories.TryGainMemory(thought_Memory, pawn);
-				if (this.removesThought != null)
-				{
-					member.needs.mood.thoughts.memories.RemoveMemoriesOfDef(this.removesThought);
+					flag2 = true;
+					break;
 				}
 			}
 		}
-
-		// Token: 0x040091C6 RID: 37318
-		public HistoryEventDef eventDef;
-
-		// Token: 0x040091C7 RID: 37319
-		public bool? doerMustBeMyFaction;
-
-		// Token: 0x040091C8 RID: 37320
-		public ThoughtDef removesThought;
-
-		// Token: 0x040091C9 RID: 37321
-		public bool onlyForNonSlaves;
-
-		// Token: 0x040091CA RID: 37322
-		public bool doerMustBeMyIdeo;
+		else
+		{
+			flag2 = false;
+		}
+		if (member.needs != null && member.needs.mood != null && (!flag2 || (flag && arg.Faction == member.Faction)) && (!doerMustBeMyIdeo || arg.Ideo == member.Ideo) && (!onlyForNonSlaves || !member.IsSlave) && (!typeof(Thought_MemorySocial).IsAssignableFrom(thought.thoughtClass) || flag))
+		{
+			Thought_Memory thought_Memory = ThoughtMaker.MakeThought(thought, precept);
+			if (ev.args.TryGetArg(HistoryEventArgsNames.ExecutionThoughtStage, out int arg2))
+			{
+				thought_Memory.SetForcedStage(Math.Min(arg2, thought.stages.Count - 1));
+			}
+			if (thought_Memory is Thought_KilledInnocentAnimal thought_KilledInnocentAnimal && ev.args.TryGetArg(HistoryEventArgsNames.Victim, out Pawn arg3))
+			{
+				thought_KilledInnocentAnimal.SetAnimal(arg3);
+			}
+			member.needs.mood.thoughts.memories.TryGainMemory(thought_Memory, arg);
+			if (removesThought != null)
+			{
+				member.needs.mood.thoughts.memories.RemoveMemoriesOfDef(removesThought);
+			}
+		}
 	}
 }

@@ -1,55 +1,60 @@
-﻿using System;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class GoodwillSituationWorker_MemeCompatibility : GoodwillSituationWorker
 {
-	// Token: 0x0200259C RID: 9628
-	public class GoodwillSituationWorker_MemeCompatibility : GoodwillSituationWorker
+	public override string GetPostProcessedLabel(Faction other)
 	{
-		// Token: 0x0600D309 RID: 54025 RVA: 0x003E2908 File Offset: 0x003E0B08
-		public override string GetPostProcessedLabel(Faction other)
+		if (def.otherMeme == null)
 		{
-			if (this.def.otherMeme != null)
-			{
-				return base.GetPostProcessedLabel(other);
-			}
-			if (this.Applies(Faction.OfPlayer, other))
+			if (Applies(Faction.OfPlayer, other))
 			{
 				return "MemeGoodwillImpact_Player".Translate(base.GetPostProcessedLabel(other));
 			}
 			return "MemeGoodwillImpact_Other".Translate(base.GetPostProcessedLabel(other));
 		}
+		return base.GetPostProcessedLabel(other);
+	}
 
-		// Token: 0x0600D30A RID: 54026 RVA: 0x003E296F File Offset: 0x003E0B6F
-		public override int GetNaturalGoodwillOffset(Faction other)
+	public override int GetNaturalGoodwillOffset(Faction other)
+	{
+		if (!Applies(other))
 		{
-			if (!this.Applies(other))
-			{
-				return 0;
-			}
-			return this.def.naturalGoodwillOffset;
+			return 0;
 		}
+		return def.naturalGoodwillOffset;
+	}
 
-		// Token: 0x0600D30B RID: 54027 RVA: 0x003E2987 File Offset: 0x003E0B87
-		private bool Applies(Faction other)
+	private bool Applies(Faction other)
+	{
+		if (!Applies(Faction.OfPlayer, other))
 		{
-			return this.Applies(Faction.OfPlayer, other) || this.Applies(other, Faction.OfPlayer);
+			return Applies(other, Faction.OfPlayer);
 		}
+		return true;
+	}
 
-		// Token: 0x0600D30C RID: 54028 RVA: 0x003E29A8 File Offset: 0x003E0BA8
-		private bool Applies(Faction a, Faction b)
+	private bool Applies(Faction a, Faction b)
+	{
+		Ideo primaryIdeo = a.ideos.PrimaryIdeo;
+		if (primaryIdeo == null)
 		{
-			Ideo primaryIdeo = a.ideos.PrimaryIdeo;
-			if (primaryIdeo == null)
-			{
-				return false;
-			}
-			if (this.def.versusAll)
-			{
-				return primaryIdeo.memes.Contains(this.def.meme);
-			}
-			Ideo primaryIdeo2 = b.ideos.PrimaryIdeo;
-			return primaryIdeo2 != null && primaryIdeo.memes.Contains(this.def.meme) && primaryIdeo2.memes.Contains(this.def.otherMeme);
+			return false;
 		}
+		if (def.versusAll)
+		{
+			return primaryIdeo.memes.Contains(def.meme);
+		}
+		Ideo primaryIdeo2 = b.ideos.PrimaryIdeo;
+		if (primaryIdeo2 == null)
+		{
+			return false;
+		}
+		if (primaryIdeo.memes.Contains(def.meme))
+		{
+			return primaryIdeo2.memes.Contains(def.otherMeme);
+		}
+		return false;
 	}
 }

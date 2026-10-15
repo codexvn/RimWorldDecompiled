@@ -1,138 +1,87 @@
-﻿using System;
 using RimWorld;
 using UnityEngine;
 
-namespace Verse
+namespace Verse;
+
+public class PawnRenderNode_AnimalPart : PawnRenderNode
 {
-	// Token: 0x02000600 RID: 1536
-	public class PawnRenderNode_AnimalPart : PawnRenderNode
+	public PawnRenderNode_AnimalPart(Pawn pawn, PawnRenderNodeProperties props, PawnRenderTree tree)
+		: base(pawn, props, tree)
 	{
-		// Token: 0x06002754 RID: 10068 RVA: 0x000D1894 File Offset: 0x000CFA94
-		public PawnRenderNode_AnimalPart(Pawn pawn, PawnRenderNodeProperties props, PawnRenderTree tree) : base(pawn, props, tree)
-		{
-		}
+	}
 
-		// Token: 0x06002755 RID: 10069 RVA: 0x000D18A0 File Offset: 0x000CFAA0
-		public override GraphicMeshSet MeshSetFor(Pawn pawn)
+	public override GraphicMeshSet MeshSetFor(Pawn pawn)
+	{
+		Graphic graphic = GraphicFor(pawn);
+		if (graphic != null)
 		{
-			Graphic graphic = this.GraphicFor(pawn);
-			if (graphic != null)
-			{
-				return MeshPool.GetMeshSetForSize(graphic.drawSize.x, graphic.drawSize.y);
-			}
-			return null;
+			return MeshPool.GetMeshSetForSize(graphic.drawSize.x, graphic.drawSize.y);
 		}
+		return null;
+	}
 
-		// Token: 0x06002756 RID: 10070 RVA: 0x000D18D8 File Offset: 0x000CFAD8
-		public override Graphic GraphicFor(Pawn pawn)
+	public override Graphic GraphicFor(Pawn pawn)
+	{
+		PawnKindLifeStage curKindLifeStage = pawn.ageTracker.CurKindLifeStage;
+		AlternateGraphic ag;
+		int index;
+		Graphic graphic = (pawn.TryGetAlternate(out ag, out index) ? ag.GetGraphic(curKindLifeStage.bodyGraphicData.Graphic) : ((pawn.gender == Gender.Female && curKindLifeStage.femaleGraphicData != null) ? curKindLifeStage.femaleGraphicData.Graphic : curKindLifeStage.bodyGraphicData.Graphic));
+		if ((pawn.Dead || (pawn.IsMutant && pawn.mutant.Def.useCorpseGraphics)) && curKindLifeStage.corpseGraphicData != null)
 		{
-			PawnKindLifeStage curKindLifeStage = pawn.ageTracker.CurKindLifeStage;
-			AlternateGraphic alternateGraphic;
-			int num;
-			Graphic graphic;
-			if (pawn.TryGetAlternate(out alternateGraphic, out num))
+			graphic = ((pawn.gender == Gender.Female && curKindLifeStage.femaleCorpseGraphicData != null) ? curKindLifeStage.femaleCorpseGraphicData.Graphic.GetColoredVersion(curKindLifeStage.femaleCorpseGraphicData.Graphic.Shader, graphic.Color, graphic.ColorTwo) : curKindLifeStage.corpseGraphicData.Graphic.GetColoredVersion(curKindLifeStage.corpseGraphicData.Graphic.Shader, graphic.Color, graphic.ColorTwo));
+		}
+		Color baseColor = graphic.Color;
+		Color baseColor2 = graphic.ColorTwo;
+		switch (pawn.Drawer.renderer.CurRotDrawMode)
+		{
+		case RotDrawMode.Fresh:
+			if (pawn.IsMutant)
 			{
-				graphic = alternateGraphic.GetGraphic(curKindLifeStage.bodyGraphicData.Graphic);
+				baseColor = MutantUtility.GetMutantSkinColor(pawn, baseColor);
+				baseColor2 = MutantUtility.GetMutantSkinColor(pawn, baseColor2);
 			}
-			else if (pawn.gender != Gender.Female || curKindLifeStage.femaleGraphicData == null)
+			baseColor = pawn.health.hediffSet.GetSkinColor(baseColor);
+			baseColor2 = pawn.health.hediffSet.GetSkinColor(baseColor2);
+			return graphic.GetColoredVersion(graphic.Shader, baseColor, baseColor2);
+		case RotDrawMode.Rotting:
+		{
+			baseColor = pawn.health.hediffSet.GetSkinColor(baseColor);
+			baseColor2 = pawn.health.hediffSet.GetSkinColor(baseColor2);
+			baseColor = PawnRenderUtility.GetRottenColor(baseColor);
+			baseColor2 = PawnRenderUtility.GetRottenColor(baseColor2);
+			Graphic graphic3 = ((ag != null) ? ag.GetRottingGraphic(graphic) : ((curKindLifeStage.femaleRottingGraphicData != null && pawn.gender == Gender.Female) ? curKindLifeStage.femaleRottingGraphicData.Graphic : ((curKindLifeStage.rottingGraphicData == null) ? graphic : curKindLifeStage.rottingGraphicData.Graphic)));
+			Shader newShader = graphic3.Shader;
+			if (graphic3.Shader == ShaderDatabase.CutoutComplex)
 			{
-				graphic = curKindLifeStage.bodyGraphicData.Graphic;
+				newShader = ShaderDatabase.Cutout;
 			}
-			else
+			return graphic3.GetColoredVersion(newShader, baseColor, baseColor2);
+		}
+		case RotDrawMode.Dessicated:
+			if (curKindLifeStage.dessicatedBodyGraphicData != null)
 			{
-				graphic = curKindLifeStage.femaleGraphicData.Graphic;
-			}
-			if ((pawn.Dead || (pawn.IsMutant && pawn.mutant.Def.useCorpseGraphics)) && curKindLifeStage.corpseGraphicData != null)
-			{
-				if (pawn.gender != Gender.Female || curKindLifeStage.femaleCorpseGraphicData == null)
-				{
-					graphic = curKindLifeStage.corpseGraphicData.Graphic.GetColoredVersion(curKindLifeStage.corpseGraphicData.Graphic.Shader, graphic.Color, graphic.ColorTwo);
-				}
-				else
-				{
-					graphic = curKindLifeStage.femaleCorpseGraphicData.Graphic.GetColoredVersion(curKindLifeStage.femaleCorpseGraphicData.Graphic.Shader, graphic.Color, graphic.ColorTwo);
-				}
-			}
-			Color color = graphic.Color;
-			Color color2 = graphic.ColorTwo;
-			switch (pawn.Drawer.renderer.CurRotDrawMode)
-			{
-			case RotDrawMode.Fresh:
-				if (pawn.IsMutant)
-				{
-					color = MutantUtility.GetMutantSkinColor(pawn, color);
-					color2 = MutantUtility.GetMutantSkinColor(pawn, color2);
-				}
-				color = pawn.health.hediffSet.GetSkinColor(color);
-				color2 = pawn.health.hediffSet.GetSkinColor(color2);
-				return graphic.GetColoredVersion(graphic.Shader, color, color2);
-			case RotDrawMode.Rotting:
-			{
-				color = pawn.health.hediffSet.GetSkinColor(color);
-				color2 = pawn.health.hediffSet.GetSkinColor(color2);
-				color = PawnRenderUtility.GetRottenColor(color);
-				color2 = PawnRenderUtility.GetRottenColor(color2);
 				Graphic graphic2;
-				if (alternateGraphic != null)
+				if (pawn.RaceProps.FleshType != FleshTypeDefOf.Insectoid)
 				{
-					graphic2 = alternateGraphic.GetRottingGraphic(graphic);
-				}
-				else if (curKindLifeStage.femaleRottingGraphicData != null && pawn.gender == Gender.Female)
-				{
-					graphic2 = curKindLifeStage.femaleRottingGraphicData.Graphic;
-				}
-				else if (curKindLifeStage.rottingGraphicData != null)
-				{
-					graphic2 = curKindLifeStage.rottingGraphicData.Graphic;
+					graphic2 = ((pawn.gender == Gender.Female && curKindLifeStage.femaleDessicatedBodyGraphicData != null) ? curKindLifeStage.femaleDessicatedBodyGraphicData.GraphicColoredFor(pawn) : curKindLifeStage.dessicatedBodyGraphicData.GraphicColoredFor(pawn));
 				}
 				else
 				{
-					graphic2 = graphic;
+					Color dessicatedColorInsect = PawnRenderUtility.DessicatedColorInsect;
+					graphic2 = ((pawn.gender == Gender.Female && curKindLifeStage.femaleDessicatedBodyGraphicData != null) ? curKindLifeStage.femaleDessicatedBodyGraphicData.Graphic.GetColoredVersion(graphic.Shader, dessicatedColorInsect, dessicatedColorInsect) : curKindLifeStage.dessicatedBodyGraphicData.Graphic.GetColoredVersion(ShaderDatabase.Cutout, dessicatedColorInsect, dessicatedColorInsect));
 				}
-				Shader newShader = graphic2.Shader;
-				if (graphic2.Shader == ShaderDatabase.CutoutComplex)
+				if (pawn.IsShambler)
 				{
-					newShader = ShaderDatabase.Cutout;
+					graphic2.ShadowGraphic = graphic.ShadowGraphic;
 				}
-				return graphic2.GetColoredVersion(newShader, color, color2);
-			}
-			case RotDrawMode.Dessicated:
-				if (curKindLifeStage.dessicatedBodyGraphicData != null)
+				if (ag != null)
 				{
-					Graphic graphic3;
-					if (pawn.RaceProps.FleshType == FleshTypeDefOf.Insectoid)
-					{
-						Color dessicatedColorInsect = PawnRenderUtility.DessicatedColorInsect;
-						if (pawn.gender != Gender.Female || curKindLifeStage.femaleDessicatedBodyGraphicData == null)
-						{
-							graphic3 = curKindLifeStage.dessicatedBodyGraphicData.Graphic.GetColoredVersion(ShaderDatabase.Cutout, dessicatedColorInsect, dessicatedColorInsect);
-						}
-						else
-						{
-							graphic3 = curKindLifeStage.femaleDessicatedBodyGraphicData.Graphic.GetColoredVersion(graphic.Shader, dessicatedColorInsect, dessicatedColorInsect);
-						}
-					}
-					else if (pawn.gender != Gender.Female || curKindLifeStage.femaleDessicatedBodyGraphicData == null)
-					{
-						graphic3 = curKindLifeStage.dessicatedBodyGraphicData.GraphicColoredFor(pawn);
-					}
-					else
-					{
-						graphic3 = curKindLifeStage.femaleDessicatedBodyGraphicData.GraphicColoredFor(pawn);
-					}
-					if (pawn.IsShambler)
-					{
-						graphic3.ShadowGraphic = graphic.ShadowGraphic;
-					}
-					if (alternateGraphic != null)
-					{
-						graphic3 = alternateGraphic.GetDessicatedGraphic(graphic3);
-					}
-					return graphic3;
+					graphic2 = ag.GetDessicatedGraphic(graphic2);
 				}
-				break;
+				return graphic2;
 			}
-			return null;
+			break;
 		}
+		return null;
 	}
 }

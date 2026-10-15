@@ -1,737 +1,788 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class FactionDef : Def
 {
-	// Token: 0x02001A29 RID: 6697
-	public class FactionDef : Def
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__150 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001710 RID: 5904
-		// (get) Token: 0x060096E9 RID: 38633 RVA: 0x002C1BF4 File Offset: 0x002BFDF4
-		public List<RoyalTitleDef> RoyalTitlesAwardableInSeniorityOrderForReading
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public FactionDef _003C_003E4__this;
+
+		private IEnumerator<string> _003C_003E7__wrap1;
+
+		string IEnumerator<string>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.royalTitlesAwardableInSeniorityOrderForReading == null)
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__150(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
 				{
-					this.royalTitlesAwardableInSeniorityOrderForReading = new List<RoyalTitleDef>();
-					if (this.royalTitleTags != null && ModLister.RoyaltyInstalled)
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				FactionDef CS_0024_003C_003E8__locals18 = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((Def)CS_0024_003C_003E8__locals18).ConfigErrors().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_008e;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_008e;
+				case 2:
+					_003C_003E1__state = -1;
+					goto IL_00d8;
+				case 3:
+					_003C_003E1__state = -1;
+					goto IL_010b;
+				case 4:
+					_003C_003E1__state = -1;
+					goto IL_014b;
+				case 5:
+					_003C_003E1__state = -1;
+					goto IL_017b;
+				case 6:
+					_003C_003E1__state = -1;
+					goto IL_01ab;
+				case 7:
+					_003C_003E1__state = -1;
+					goto IL_01f9;
+				case 8:
+					_003C_003E1__state = -1;
+					goto IL_021e;
+				case 9:
 					{
-						foreach (RoyalTitleDef royalTitleDef in DefDatabase<RoyalTitleDef>.AllDefsListForReading)
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_008e:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (CS_0024_003C_003E8__locals18.pawnGroupMakers != null && CS_0024_003C_003E8__locals18.maxPawnCostPerTotalPointsCurve == null)
+					{
+						_003C_003E2__current = "has pawnGroupMakers but missing maxPawnCostPerTotalPointsCurve";
+						_003C_003E1__state = 2;
+						return true;
+					}
+					goto IL_00d8;
+					IL_014b:
+					if (CS_0024_003C_003E8__locals18.permanentEnemy && CS_0024_003C_003E8__locals18.mustStartOneEnemy)
+					{
+						_003C_003E2__current = "permanentEnemy has mustStartOneEnemy = true, which is redundant";
+						_003C_003E1__state = 5;
+						return true;
+					}
+					goto IL_017b;
+					IL_017b:
+					if (CS_0024_003C_003E8__locals18.disallowedMemes != null && CS_0024_003C_003E8__locals18.allowedMemes != null)
+					{
+						_003C_003E2__current = "both disallowedMemes (black list) and allowedMemes (white list) are defined";
+						_003C_003E1__state = 6;
+						return true;
+					}
+					goto IL_01ab;
+					IL_00d8:
+					if (CS_0024_003C_003E8__locals18.techLevel == TechLevel.Undefined)
+					{
+						_003C_003E2__current = CS_0024_003C_003E8__locals18.defName + " has no tech level.";
+						_003C_003E1__state = 3;
+						return true;
+					}
+					goto IL_010b;
+					IL_01f9:
+					if (CS_0024_003C_003E8__locals18.raidLootValueFromPointsCurve == null)
+					{
+						_003C_003E2__current = "raidLootValueFromPointsCurve must be defined";
+						_003C_003E1__state = 8;
+						return true;
+					}
+					goto IL_021e;
+					IL_010b:
+					if (CS_0024_003C_003E8__locals18.humanlikeFaction && CS_0024_003C_003E8__locals18.backstoryFilters.NullOrEmpty())
+					{
+						_003C_003E2__current = CS_0024_003C_003E8__locals18.defName + " is humanlikeFaction but has no backstory categories.";
+						_003C_003E1__state = 4;
+						return true;
+					}
+					goto IL_014b;
+					IL_021e:
+					if (CS_0024_003C_003E8__locals18.dropPodActive == null != (CS_0024_003C_003E8__locals18.dropPodIncoming == null))
+					{
+						_003C_003E2__current = "Both drop pod and drop pod incoming must be defined or both must be undefined";
+						_003C_003E1__state = 9;
+						return true;
+					}
+					break;
+					IL_01ab:
+					if (CS_0024_003C_003E8__locals18.requiredMemes != null)
+					{
+						MemeDef memeDef = CS_0024_003C_003E8__locals18.requiredMemes.FirstOrDefault((MemeDef x) => !IdeoUtility.IsMemeAllowedFor(x, CS_0024_003C_003E8__locals18));
+						if (memeDef != null)
 						{
-							if (royalTitleDef.Awardable && royalTitleDef.tags.SharesElementWith(this.royalTitleTags))
+							_003C_003E2__current = "has a required meme which is not allowed: " + memeDef.defName;
+							_003C_003E1__state = 7;
+							return true;
+						}
+					}
+					goto IL_01f9;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__150 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__150(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	public bool isPlayer;
+
+	public RulePackDef factionNameMaker;
+
+	public RulePackDef settlementNameMaker;
+
+	public RulePackDef playerInitialSettlementNameMaker;
+
+	[MustTranslate]
+	public string fixedName;
+
+	public bool humanlikeFaction = true;
+
+	public bool hidden;
+
+	public float listOrderPriority;
+
+	public List<PawnGroupMaker> pawnGroupMakers;
+
+	public SimpleCurve raidCommonalityFromPointsCurve;
+
+	public bool autoFlee = true;
+
+	public FloatRange attackersDownPercentageRangeForAutoFlee = new FloatRange(0.4f, 0.7f);
+
+	public bool canSiege;
+
+	public bool canStageAttacks;
+
+	public bool canUseAvoidGrid = true;
+
+	public bool canPsychicRitualSiege;
+
+	public float earliestRaidDays;
+
+	public FloatRange allowedArrivalTemperatureRange = new FloatRange(-1000f, 1000f);
+
+	public SimpleCurve minSettlementTemperatureChanceCurve;
+
+	public PawnKindDef basicMemberKind;
+
+	public List<ResearchProjectTagDef> startingResearchTags;
+
+	public List<ResearchProjectTagDef> startingTechprintsResearchTags;
+
+	[NoTranslate]
+	public List<string> recipePrerequisiteTags;
+
+	public bool rescueesCanJoin;
+
+	[MustTranslate]
+	public string pawnSingular = "member";
+
+	[MustTranslate]
+	public string pawnsPlural = "members";
+
+	[MustTranslate]
+	public string leaderTitle = "leader";
+
+	[MustTranslate]
+	public string leaderTitleFemale;
+
+	[MustTranslate]
+	public string royalFavorLabel;
+
+	[NoTranslate]
+	public string royalFavorIconPath;
+
+	public List<PawnKindDef> fixedLeaderKinds;
+
+	public bool leaderForceGenerateNewPawn;
+
+	public float forageabilityFactor = 1f;
+
+	public SimpleCurve maxPawnCostPerTotalPointsCurve;
+
+	public List<string> royalTitleTags;
+
+	[NoTranslate]
+	public string categoryTag;
+
+	public bool hostileToFactionlessHumanlikes;
+
+	public ThingDef dropPodActive;
+
+	public ThingDef dropPodIncoming;
+
+	public bool raidsForbidden;
+
+	public bool animalsFleeDanger = true;
+
+	private PawnGroupKindDef defaultSettlementGroupKindDef;
+
+	public bool canRequestTraders = true;
+
+	public bool canRequestMilitaryAid = true;
+
+	public bool canRequestOrbitalTrader;
+
+	public bool canGenerateQuestSites = true;
+
+	public bool hideGiftingInHostilityText;
+
+	public List<PawnsArrivalModeDef> arrivalModeWhitelist = new List<PawnsArrivalModeDef>();
+
+	public List<PawnsArrivalModeDef> arrivalModeBlacklist = new List<PawnsArrivalModeDef>();
+
+	public List<PlanetLayerDef> layerWhitelist = new List<PlanetLayerDef>();
+
+	public List<PlanetLayerDef> layerBlacklist = new List<PlanetLayerDef>();
+
+	public List<PlanetLayerDef> arrivalLayerWhitelist = new List<PlanetLayerDef>();
+
+	public List<PlanetLayerDef> arrivalLayerBlacklist = new List<PlanetLayerDef>();
+
+	public List<PlanetLayerDef> neutralArrivalLayerWhitelist = new List<PlanetLayerDef>();
+
+	public List<PlanetLayerDef> neutralArrivalLayerBlacklist = new List<PlanetLayerDef>();
+
+	public List<PlanetLayerDef> raidArrivalLayerWhitelist = new List<PlanetLayerDef>();
+
+	public List<PlanetLayerDef> raidArrivalLayerBlacklist = new List<PlanetLayerDef>();
+
+	public int requiredCountAtGameStart;
+
+	public float settlementGenerationWeight;
+
+	public bool generateNewLeaderFromMapMembersOnly;
+
+	public int maxConfigurableAtWorldCreation = -1;
+
+	public int startingCountAtWorldCreation = 1;
+
+	public int configurationListOrderPriority;
+
+	public FactionDef replacesFaction;
+
+	public bool displayInFactionSelection = true;
+
+	public TechLevel techLevel;
+
+	[NoTranslate]
+	public List<BackstoryCategoryFilter> backstoryFilters;
+
+	[NoTranslate]
+	private List<string> backstoryCategories;
+
+	public ThingFilter apparelStuffFilter;
+
+	public ThingSetMakerDef settlementLootMaker;
+
+	public ThingSetMakerDef raidLootMaker;
+
+	public SimpleCurve raidLootValueFromPointsCurve;
+
+	public List<TraderKindDef> caravanTraderKinds = new List<TraderKindDef>();
+
+	public List<TraderKindDef> orbitalTraderKinds = new List<TraderKindDef>();
+
+	public List<TraderKindDef> visitorTraderKinds = new List<TraderKindDef>();
+
+	public List<TraderKindDef> baseTraderKinds = new List<TraderKindDef>();
+
+	public XenotypeSet xenotypeSet;
+
+	public FloatRange melaninRange = FloatRange.ZeroToOne;
+
+	public List<RaidStrategyDef> disallowedRaidStrategies;
+
+	public List<RaidAgeRestrictionDef> disallowedRaidAgeRestrictions;
+
+	public bool mustStartOneEnemy;
+
+	public bool naturalEnemy;
+
+	public bool permanentEnemy;
+
+	public bool permanentEnemyToEveryoneExceptPlayer;
+
+	public List<FactionDef> permanentEnemyToEveryoneExcept;
+
+	[NoTranslate]
+	public string settlementTexturePath;
+
+	[NoTranslate]
+	public string factionIconPath;
+
+	public List<Color> colorSpectrum;
+
+	public List<PawnRelationDef> royalTitleInheritanceRelations;
+
+	public Type royalTitleInheritanceWorkerClass;
+
+	public List<RoyalImplantRule> royalImplantRules;
+
+	public string renounceTitleMessage;
+
+	public List<CultureDef> allowedCultures;
+
+	public List<MemeDef> requiredMemes;
+
+	public List<MemeDef> allowedMemes;
+
+	public List<MemeDef> disallowedMemes;
+
+	public List<PreceptDef> disallowedPrecepts;
+
+	public List<MemeWeight> structureMemeWeights;
+
+	public bool classicIdeo;
+
+	public bool fixedIdeo;
+
+	public string ideoName;
+
+	public bool hiddenIdeo;
+
+	[MustTranslate]
+	public string ideoDescription;
+
+	public List<StyleCategoryDef> styles;
+
+	public List<DeityPreset> deityPresets;
+
+	public List<MemeDef> forcedMemes;
+
+	public bool requiredPreceptsOnly;
+
+	[Obsolete("Will be removed in future version.")]
+	public int maxCountAtGameStart;
+
+	[Obsolete("Will be removed in future version.")]
+	public bool canMakeRandomly;
+
+	[MayTranslate]
+	public string dialogFactionGreetingHostile;
+
+	[MayTranslate]
+	public string dialogFactionGreetingHostileAppreciative;
+
+	[MayTranslate]
+	public string dialogFactionGreetingWary;
+
+	[MayTranslate]
+	public string dialogFactionGreetingWarm;
+
+	[MayTranslate]
+	public string dialogMilitaryAidSent;
+
+	[MustTranslate]
+	public string messageDefendersAttacking;
+
+	[Unsaved(false)]
+	private Texture2D factionIcon;
+
+	[Unsaved(false)]
+	private Texture2D settlementTexture;
+
+	[Unsaved(false)]
+	private Texture2D royalFavorIcon;
+
+	[Unsaved(false)]
+	private string cachedDescription;
+
+	[Unsaved(false)]
+	private List<RoyalTitleDef> royalTitlesAwardableInSeniorityOrderForReading;
+
+	[Unsaved(false)]
+	private List<RoyalTitleDef> royalTitlesAllInSeniorityOrderForReading;
+
+	[Unsaved(false)]
+	private RoyalTitleInheritanceWorker royalTitleInheritanceWorker;
+
+	public List<RoyalTitleDef> RoyalTitlesAwardableInSeniorityOrderForReading
+	{
+		get
+		{
+			if (royalTitlesAwardableInSeniorityOrderForReading == null)
+			{
+				royalTitlesAwardableInSeniorityOrderForReading = new List<RoyalTitleDef>();
+				if (royalTitleTags != null && ModLister.RoyaltyInstalled)
+				{
+					foreach (RoyalTitleDef item in DefDatabase<RoyalTitleDef>.AllDefsListForReading)
+					{
+						if (item.Awardable && item.tags.SharesElementWith(royalTitleTags))
+						{
+							royalTitlesAwardableInSeniorityOrderForReading.Add(item);
+						}
+					}
+					royalTitlesAwardableInSeniorityOrderForReading.SortBy((RoyalTitleDef t) => t.seniority);
+				}
+			}
+			return royalTitlesAwardableInSeniorityOrderForReading;
+		}
+	}
+
+	public List<RoyalTitleDef> RoyalTitlesAllInSeniorityOrderForReading
+	{
+		get
+		{
+			if (royalTitlesAllInSeniorityOrderForReading == null)
+			{
+				royalTitlesAllInSeniorityOrderForReading = new List<RoyalTitleDef>();
+				if (royalTitleTags != null && ModLister.RoyaltyInstalled)
+				{
+					foreach (RoyalTitleDef item in DefDatabase<RoyalTitleDef>.AllDefsListForReading)
+					{
+						if (item.tags.SharesElementWith(royalTitleTags))
+						{
+							royalTitlesAllInSeniorityOrderForReading.Add(item);
+						}
+					}
+					royalTitlesAllInSeniorityOrderForReading.SortBy((RoyalTitleDef t) => t.seniority);
+				}
+			}
+			return royalTitlesAllInSeniorityOrderForReading;
+		}
+	}
+
+	public RoyalTitleInheritanceWorker RoyalTitleInheritanceWorker
+	{
+		get
+		{
+			if (royalTitleInheritanceWorker == null && royalTitleInheritanceWorkerClass != null)
+			{
+				royalTitleInheritanceWorker = (RoyalTitleInheritanceWorker)Activator.CreateInstance(royalTitleInheritanceWorkerClass);
+			}
+			return royalTitleInheritanceWorker;
+		}
+	}
+
+	public bool CanEverBeNonHostile => !permanentEnemy;
+
+	public Texture2D SettlementTexture
+	{
+		get
+		{
+			if (settlementTexture == null)
+			{
+				if (!settlementTexturePath.NullOrEmpty())
+				{
+					settlementTexture = ContentFinder<Texture2D>.Get(settlementTexturePath);
+				}
+				else
+				{
+					settlementTexture = BaseContent.BadTex;
+				}
+			}
+			return settlementTexture;
+		}
+	}
+
+	public Texture2D FactionIcon
+	{
+		get
+		{
+			if (factionIcon == null)
+			{
+				if (!factionIconPath.NullOrEmpty())
+				{
+					factionIcon = ContentFinder<Texture2D>.Get(factionIconPath);
+				}
+				else
+				{
+					factionIcon = BaseContent.BadTex;
+				}
+			}
+			return factionIcon;
+		}
+	}
+
+	public Texture2D RoyalFavorIcon
+	{
+		get
+		{
+			if (royalFavorIcon == null && !royalFavorIconPath.NullOrEmpty())
+			{
+				royalFavorIcon = ContentFinder<Texture2D>.Get(royalFavorIconPath);
+			}
+			return royalFavorIcon;
+		}
+	}
+
+	public bool HasRoyalTitles => RoyalTitlesAwardableInSeniorityOrderForReading.Count > 0;
+
+	public Color DefaultColor
+	{
+		get
+		{
+			if (colorSpectrum.NullOrEmpty())
+			{
+				return Color.white;
+			}
+			return colorSpectrum[0];
+		}
+	}
+
+	public float BaselinerChance
+	{
+		get
+		{
+			if (xenotypeSet != null)
+			{
+				return xenotypeSet.BaselinerChance;
+			}
+			return 1f;
+		}
+	}
+
+	public string Description
+	{
+		get
+		{
+			if (cachedDescription == null)
+			{
+				if (description.NullOrEmpty())
+				{
+					description = string.Empty;
+				}
+				else
+				{
+					cachedDescription = description;
+				}
+				if (ModsConfig.BiotechActive && humanlikeFaction)
+				{
+					List<XenotypeChance> list = new List<XenotypeChance>();
+					cachedDescription = cachedDescription + "\n\n" + ("MemberXenotypeChances".Translate() + ":").AsTipTitle() + "\n";
+					if (BaselinerChance > 0f)
+					{
+						list.Add(new XenotypeChance(XenotypeDefOf.Baseliner, BaselinerChance));
+					}
+					if (xenotypeSet != null)
+					{
+						for (int i = 0; i < xenotypeSet.Count; i++)
+						{
+							if (xenotypeSet[i].xenotype != XenotypeDefOf.Baseliner)
 							{
-								this.royalTitlesAwardableInSeniorityOrderForReading.Add(royalTitleDef);
+								list.Add(xenotypeSet[i]);
 							}
 						}
-						this.royalTitlesAwardableInSeniorityOrderForReading.SortBy((RoyalTitleDef t) => t.seniority);
 					}
-				}
-				return this.royalTitlesAwardableInSeniorityOrderForReading;
-			}
-		}
-
-		// Token: 0x17001711 RID: 5905
-		// (get) Token: 0x060096EA RID: 38634 RVA: 0x002C1CC0 File Offset: 0x002BFEC0
-		public List<RoyalTitleDef> RoyalTitlesAllInSeniorityOrderForReading
-		{
-			get
-			{
-				if (this.royalTitlesAllInSeniorityOrderForReading == null)
-				{
-					this.royalTitlesAllInSeniorityOrderForReading = new List<RoyalTitleDef>();
-					if (this.royalTitleTags != null && ModLister.RoyaltyInstalled)
+					if (list.Any())
 					{
-						foreach (RoyalTitleDef royalTitleDef in DefDatabase<RoyalTitleDef>.AllDefsListForReading)
-						{
-							if (royalTitleDef.tags.SharesElementWith(this.royalTitleTags))
-							{
-								this.royalTitlesAllInSeniorityOrderForReading.Add(royalTitleDef);
-							}
-						}
-						this.royalTitlesAllInSeniorityOrderForReading.SortBy((RoyalTitleDef t) => t.seniority);
+						list.SortBy((XenotypeChance x) => 0f - x.chance);
+						cachedDescription += list.Select((XenotypeChance x) => $"{x.xenotype.LabelCap}: {Mathf.Min(x.chance, 1f).ToStringPercent()}").ToLineList("  - ");
 					}
 				}
-				return this.royalTitlesAllInSeniorityOrderForReading;
 			}
+			return cachedDescription;
 		}
+	}
 
-		// Token: 0x17001712 RID: 5906
-		// (get) Token: 0x060096EB RID: 38635 RVA: 0x002C1D80 File Offset: 0x002BFF80
-		public RoyalTitleInheritanceWorker RoyalTitleInheritanceWorker
+	public bool PermanentlyHostileTo(FactionDef otherFactionDef)
+	{
+		if (permanentEnemy)
 		{
-			get
-			{
-				if (this.royalTitleInheritanceWorker == null && this.royalTitleInheritanceWorkerClass != null)
-				{
-					this.royalTitleInheritanceWorker = (RoyalTitleInheritanceWorker)Activator.CreateInstance(this.royalTitleInheritanceWorkerClass);
-				}
-				return this.royalTitleInheritanceWorker;
-			}
+			return true;
 		}
-
-		// Token: 0x17001713 RID: 5907
-		// (get) Token: 0x060096EC RID: 38636 RVA: 0x002C1DB4 File Offset: 0x002BFFB4
-		public bool CanEverBeNonHostile
+		if (permanentEnemyToEveryoneExcept != null && !permanentEnemyToEveryoneExcept.Contains(otherFactionDef))
 		{
-			get
-			{
-				return !this.permanentEnemy;
-			}
+			return true;
 		}
-
-		// Token: 0x17001714 RID: 5908
-		// (get) Token: 0x060096ED RID: 38637 RVA: 0x002C1DC0 File Offset: 0x002BFFC0
-		public Texture2D SettlementTexture
+		if (permanentEnemyToEveryoneExceptPlayer && !otherFactionDef.isPlayer)
 		{
-			get
-			{
-				if (this.settlementTexture == null)
-				{
-					if (!this.settlementTexturePath.NullOrEmpty())
-					{
-						this.settlementTexture = ContentFinder<Texture2D>.Get(this.settlementTexturePath, true);
-					}
-					else
-					{
-						this.settlementTexture = BaseContent.BadTex;
-					}
-				}
-				return this.settlementTexture;
-			}
+			return true;
 		}
+		return false;
+	}
 
-		// Token: 0x17001715 RID: 5909
-		// (get) Token: 0x060096EE RID: 38638 RVA: 0x002C1E10 File Offset: 0x002C0010
-		public Texture2D FactionIcon
+	public float MinPointsToGeneratePawnGroup(PawnGroupKindDef groupKind, PawnGroupMakerParms parms = null)
+	{
+		if (pawnGroupMakers == null)
 		{
-			get
-			{
-				if (this.factionIcon == null)
-				{
-					if (!this.factionIconPath.NullOrEmpty())
-					{
-						this.factionIcon = ContentFinder<Texture2D>.Get(this.factionIconPath, true);
-					}
-					else
-					{
-						this.factionIcon = BaseContent.BadTex;
-					}
-				}
-				return this.factionIcon;
-			}
+			return 0f;
 		}
-
-		// Token: 0x17001716 RID: 5910
-		// (get) Token: 0x060096EF RID: 38639 RVA: 0x002C1E5D File Offset: 0x002C005D
-		public Texture2D RoyalFavorIcon
+		IEnumerable<PawnGroupMaker> source = pawnGroupMakers.Where((PawnGroupMaker x) => x.kindDef == groupKind);
+		if (!source.Any())
 		{
-			get
-			{
-				if (this.royalFavorIcon == null && !this.royalFavorIconPath.NullOrEmpty())
-				{
-					this.royalFavorIcon = ContentFinder<Texture2D>.Get(this.royalFavorIconPath, true);
-				}
-				return this.royalFavorIcon;
-			}
+			return 0f;
 		}
+		return source.Min((PawnGroupMaker pgm) => pgm.MinPointsToGenerateAnything(this, parms));
+	}
 
-		// Token: 0x17001717 RID: 5911
-		// (get) Token: 0x060096F0 RID: 38640 RVA: 0x002C1E92 File Offset: 0x002C0092
-		public bool HasRoyalTitles
+	public bool CanUseStuffForApparel(ThingDef stuffDef)
+	{
+		if (apparelStuffFilter == null)
 		{
-			get
-			{
-				return this.RoyalTitlesAwardableInSeniorityOrderForReading.Count > 0;
-			}
+			return true;
 		}
+		return apparelStuffFilter.Allows(stuffDef);
+	}
 
-		// Token: 0x17001718 RID: 5912
-		// (get) Token: 0x060096F1 RID: 38641 RVA: 0x002C1EA2 File Offset: 0x002C00A2
-		public Color DefaultColor
+	public float RaidCommonalityFromPoints(float points)
+	{
+		if (points < 0f || raidCommonalityFromPointsCurve == null)
 		{
-			get
-			{
-				if (this.colorSpectrum.NullOrEmpty<Color>())
-				{
-					return Color.white;
-				}
-				return this.colorSpectrum[0];
-			}
+			return 1f;
 		}
+		return raidCommonalityFromPointsCurve.Evaluate(points);
+	}
 
-		// Token: 0x17001719 RID: 5913
-		// (get) Token: 0x060096F2 RID: 38642 RVA: 0x002C1EC3 File Offset: 0x002C00C3
-		public float BaselinerChance
+	public override void ResolveReferences()
+	{
+		base.ResolveReferences();
+		if (apparelStuffFilter != null)
 		{
-			get
-			{
-				if (this.xenotypeSet != null)
-				{
-					return this.xenotypeSet.BaselinerChance;
-				}
-				return 1f;
-			}
+			apparelStuffFilter.ResolveReferences();
 		}
+	}
 
-		// Token: 0x1700171A RID: 5914
-		// (get) Token: 0x060096F3 RID: 38643 RVA: 0x002C1EE0 File Offset: 0x002C00E0
-		public string Description
+	public override void PostLoad()
+	{
+		if (backstoryCategories != null && backstoryCategories.Count > 0)
 		{
-			get
+			if (backstoryFilters == null)
 			{
-				if (this.cachedDescription == null)
-				{
-					if (this.description.NullOrEmpty())
-					{
-						this.description = string.Empty;
-					}
-					else
-					{
-						this.cachedDescription = this.description;
-					}
-					if (ModsConfig.BiotechActive && this.humanlikeFaction)
-					{
-						List<XenotypeChance> list = new List<XenotypeChance>();
-						this.cachedDescription = this.cachedDescription + "\n\n" + ("MemberXenotypeChances".Translate() + ":").AsTipTitle() + "\n";
-						if (this.BaselinerChance > 0f)
-						{
-							list.Add(new XenotypeChance(XenotypeDefOf.Baseliner, this.BaselinerChance));
-						}
-						if (this.xenotypeSet != null)
-						{
-							for (int i = 0; i < this.xenotypeSet.Count; i++)
-							{
-								if (this.xenotypeSet[i].xenotype != XenotypeDefOf.Baseliner)
-								{
-									list.Add(this.xenotypeSet[i]);
-								}
-							}
-						}
-						if (list.Any<XenotypeChance>())
-						{
-							list.SortBy((XenotypeChance x) => -x.chance);
-							this.cachedDescription += (from x in list
-							select string.Format("{0}: {1}", x.xenotype.LabelCap, Mathf.Min(x.chance, 1f).ToStringPercent())).ToLineList("  - ", false);
-						}
-					}
-				}
-				return this.cachedDescription;
+				backstoryFilters = new List<BackstoryCategoryFilter>();
 			}
+			backstoryFilters.Add(new BackstoryCategoryFilter
+			{
+				categories = backstoryCategories
+			});
 		}
+	}
 
-		// Token: 0x060096F4 RID: 38644 RVA: 0x002C204C File Offset: 0x002C024C
-		public bool PermanentlyHostileTo(FactionDef otherFactionDef)
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__150))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__150(-2)
 		{
-			return this.permanentEnemy || (this.permanentEnemyToEveryoneExcept != null && !this.permanentEnemyToEveryoneExcept.Contains(otherFactionDef)) || (this.permanentEnemyToEveryoneExceptPlayer && !otherFactionDef.isPlayer);
-		}
-
-		// Token: 0x060096F5 RID: 38645 RVA: 0x002C2084 File Offset: 0x002C0284
-		public float MinPointsToGeneratePawnGroup(PawnGroupKindDef groupKind, PawnGroupMakerParms parms = null)
-		{
-			if (this.pawnGroupMakers == null)
-			{
-				return 0f;
-			}
-			IEnumerable<PawnGroupMaker> source = from x in this.pawnGroupMakers
-			where x.kindDef == groupKind
-			select x;
-			if (!source.Any<PawnGroupMaker>())
-			{
-				return 0f;
-			}
-			return source.Min((PawnGroupMaker pgm) => pgm.MinPointsToGenerateAnything(this, parms));
-		}
-
-		// Token: 0x060096F6 RID: 38646 RVA: 0x002C20F2 File Offset: 0x002C02F2
-		public bool CanUseStuffForApparel(ThingDef stuffDef)
-		{
-			return this.apparelStuffFilter == null || this.apparelStuffFilter.Allows(stuffDef);
-		}
-
-		// Token: 0x060096F7 RID: 38647 RVA: 0x002C210A File Offset: 0x002C030A
-		public float RaidCommonalityFromPoints(float points)
-		{
-			if (points < 0f || this.raidCommonalityFromPointsCurve == null)
-			{
-				return 1f;
-			}
-			return this.raidCommonalityFromPointsCurve.Evaluate(points);
-		}
-
-		// Token: 0x060096F8 RID: 38648 RVA: 0x002C212E File Offset: 0x002C032E
-		public override void ResolveReferences()
-		{
-			base.ResolveReferences();
-			if (this.apparelStuffFilter != null)
-			{
-				this.apparelStuffFilter.ResolveReferences();
-			}
-		}
-
-		// Token: 0x060096F9 RID: 38649 RVA: 0x002C214C File Offset: 0x002C034C
-		public override void PostLoad()
-		{
-			if (this.backstoryCategories != null && this.backstoryCategories.Count > 0)
-			{
-				if (this.backstoryFilters == null)
-				{
-					this.backstoryFilters = new List<BackstoryCategoryFilter>();
-				}
-				this.backstoryFilters.Add(new BackstoryCategoryFilter
-				{
-					categories = this.backstoryCategories
-				});
-			}
-		}
-
-		// Token: 0x060096FA RID: 38650 RVA: 0x002C219E File Offset: 0x002C039E
-		public override IEnumerable<string> ConfigErrors()
-		{
-			foreach (string text in base.ConfigErrors())
-			{
-				yield return text;
-			}
-			IEnumerator<string> enumerator = null;
-			if (this.pawnGroupMakers != null && this.maxPawnCostPerTotalPointsCurve == null)
-			{
-				yield return "has pawnGroupMakers but missing maxPawnCostPerTotalPointsCurve";
-			}
-			if (this.techLevel == TechLevel.Undefined)
-			{
-				yield return this.defName + " has no tech level.";
-			}
-			if (this.humanlikeFaction && this.backstoryFilters.NullOrEmpty<BackstoryCategoryFilter>())
-			{
-				yield return this.defName + " is humanlikeFaction but has no backstory categories.";
-			}
-			if (this.permanentEnemy && this.mustStartOneEnemy)
-			{
-				yield return "permanentEnemy has mustStartOneEnemy = true, which is redundant";
-			}
-			if (this.disallowedMemes != null && this.allowedMemes != null)
-			{
-				yield return "both disallowedMemes (black list) and allowedMemes (white list) are defined";
-			}
-			if (this.requiredMemes != null)
-			{
-				MemeDef memeDef = this.requiredMemes.FirstOrDefault((MemeDef x) => !IdeoUtility.IsMemeAllowedFor(x, this));
-				if (memeDef != null)
-				{
-					yield return "has a required meme which is not allowed: " + memeDef.defName;
-				}
-			}
-			if (this.raidLootValueFromPointsCurve == null)
-			{
-				yield return "raidLootValueFromPointsCurve must be defined";
-			}
-			if (this.dropPodActive == null != (this.dropPodIncoming == null))
-			{
-				yield return "Both drop pod and drop pod incoming must be defined or both must be undefined";
-			}
-			yield break;
-			yield break;
-		}
-
-		// Token: 0x060096FB RID: 38651 RVA: 0x002C21AE File Offset: 0x002C03AE
-		public static FactionDef Named(string defName)
-		{
-			return DefDatabase<FactionDef>.GetNamed(defName, true);
-		}
-
-		// Token: 0x04006371 RID: 25457
-		public bool isPlayer;
-
-		// Token: 0x04006372 RID: 25458
-		public RulePackDef factionNameMaker;
-
-		// Token: 0x04006373 RID: 25459
-		public RulePackDef settlementNameMaker;
-
-		// Token: 0x04006374 RID: 25460
-		public RulePackDef playerInitialSettlementNameMaker;
-
-		// Token: 0x04006375 RID: 25461
-		[MustTranslate]
-		public string fixedName;
-
-		// Token: 0x04006376 RID: 25462
-		public bool humanlikeFaction = true;
-
-		// Token: 0x04006377 RID: 25463
-		public bool hidden;
-
-		// Token: 0x04006378 RID: 25464
-		public float listOrderPriority;
-
-		// Token: 0x04006379 RID: 25465
-		public List<PawnGroupMaker> pawnGroupMakers;
-
-		// Token: 0x0400637A RID: 25466
-		public SimpleCurve raidCommonalityFromPointsCurve;
-
-		// Token: 0x0400637B RID: 25467
-		public bool autoFlee = true;
-
-		// Token: 0x0400637C RID: 25468
-		public FloatRange attackersDownPercentageRangeForAutoFlee = new FloatRange(0.4f, 0.7f);
-
-		// Token: 0x0400637D RID: 25469
-		public bool canSiege;
-
-		// Token: 0x0400637E RID: 25470
-		public bool canStageAttacks;
-
-		// Token: 0x0400637F RID: 25471
-		public bool canUseAvoidGrid = true;
-
-		// Token: 0x04006380 RID: 25472
-		public bool canPsychicRitualSiege;
-
-		// Token: 0x04006381 RID: 25473
-		public float earliestRaidDays;
-
-		// Token: 0x04006382 RID: 25474
-		public FloatRange allowedArrivalTemperatureRange = new FloatRange(-1000f, 1000f);
-
-		// Token: 0x04006383 RID: 25475
-		public SimpleCurve minSettlementTemperatureChanceCurve;
-
-		// Token: 0x04006384 RID: 25476
-		public PawnKindDef basicMemberKind;
-
-		// Token: 0x04006385 RID: 25477
-		public List<ResearchProjectTagDef> startingResearchTags;
-
-		// Token: 0x04006386 RID: 25478
-		public List<ResearchProjectTagDef> startingTechprintsResearchTags;
-
-		// Token: 0x04006387 RID: 25479
-		[NoTranslate]
-		public List<string> recipePrerequisiteTags;
-
-		// Token: 0x04006388 RID: 25480
-		public bool rescueesCanJoin;
-
-		// Token: 0x04006389 RID: 25481
-		[MustTranslate]
-		public string pawnSingular = "member";
-
-		// Token: 0x0400638A RID: 25482
-		[MustTranslate]
-		public string pawnsPlural = "members";
-
-		// Token: 0x0400638B RID: 25483
-		[MustTranslate]
-		public string leaderTitle = "leader";
-
-		// Token: 0x0400638C RID: 25484
-		[MustTranslate]
-		public string leaderTitleFemale;
-
-		// Token: 0x0400638D RID: 25485
-		[MustTranslate]
-		public string royalFavorLabel;
-
-		// Token: 0x0400638E RID: 25486
-		[NoTranslate]
-		public string royalFavorIconPath;
-
-		// Token: 0x0400638F RID: 25487
-		public List<PawnKindDef> fixedLeaderKinds;
-
-		// Token: 0x04006390 RID: 25488
-		public bool leaderForceGenerateNewPawn;
-
-		// Token: 0x04006391 RID: 25489
-		public float forageabilityFactor = 1f;
-
-		// Token: 0x04006392 RID: 25490
-		public SimpleCurve maxPawnCostPerTotalPointsCurve;
-
-		// Token: 0x04006393 RID: 25491
-		public List<string> royalTitleTags;
-
-		// Token: 0x04006394 RID: 25492
-		[NoTranslate]
-		public string categoryTag;
-
-		// Token: 0x04006395 RID: 25493
-		public bool hostileToFactionlessHumanlikes;
-
-		// Token: 0x04006396 RID: 25494
-		public ThingDef dropPodActive;
-
-		// Token: 0x04006397 RID: 25495
-		public ThingDef dropPodIncoming;
-
-		// Token: 0x04006398 RID: 25496
-		public bool raidsForbidden;
-
-		// Token: 0x04006399 RID: 25497
-		public bool animalsFleeDanger = true;
-
-		// Token: 0x0400639A RID: 25498
-		private PawnGroupKindDef defaultSettlementGroupKindDef;
-
-		// Token: 0x0400639B RID: 25499
-		public bool canRequestTraders = true;
-
-		// Token: 0x0400639C RID: 25500
-		public bool canRequestMilitaryAid = true;
-
-		// Token: 0x0400639D RID: 25501
-		public bool canRequestOrbitalTrader;
-
-		// Token: 0x0400639E RID: 25502
-		public bool canGenerateQuestSites = true;
-
-		// Token: 0x0400639F RID: 25503
-		public List<PawnsArrivalModeDef> arrivalModeWhitelist = new List<PawnsArrivalModeDef>();
-
-		// Token: 0x040063A0 RID: 25504
-		public List<PawnsArrivalModeDef> arrivalModeBlacklist = new List<PawnsArrivalModeDef>();
-
-		// Token: 0x040063A1 RID: 25505
-		public List<PlanetLayerDef> layerWhitelist = new List<PlanetLayerDef>();
-
-		// Token: 0x040063A2 RID: 25506
-		public List<PlanetLayerDef> layerBlacklist = new List<PlanetLayerDef>();
-
-		// Token: 0x040063A3 RID: 25507
-		public List<PlanetLayerDef> arrivalLayerWhitelist = new List<PlanetLayerDef>();
-
-		// Token: 0x040063A4 RID: 25508
-		public List<PlanetLayerDef> arrivalLayerBlacklist = new List<PlanetLayerDef>();
-
-		// Token: 0x040063A5 RID: 25509
-		public List<PlanetLayerDef> neutralArrivalLayerWhitelist = new List<PlanetLayerDef>();
-
-		// Token: 0x040063A6 RID: 25510
-		public List<PlanetLayerDef> neutralArrivalLayerBlacklist = new List<PlanetLayerDef>();
-
-		// Token: 0x040063A7 RID: 25511
-		public List<PlanetLayerDef> raidArrivalLayerWhitelist = new List<PlanetLayerDef>();
-
-		// Token: 0x040063A8 RID: 25512
-		public List<PlanetLayerDef> raidArrivalLayerBlacklist = new List<PlanetLayerDef>();
-
-		// Token: 0x040063A9 RID: 25513
-		public int requiredCountAtGameStart;
-
-		// Token: 0x040063AA RID: 25514
-		public float settlementGenerationWeight;
-
-		// Token: 0x040063AB RID: 25515
-		public bool generateNewLeaderFromMapMembersOnly;
-
-		// Token: 0x040063AC RID: 25516
-		public int maxConfigurableAtWorldCreation = -1;
-
-		// Token: 0x040063AD RID: 25517
-		public int startingCountAtWorldCreation = 1;
-
-		// Token: 0x040063AE RID: 25518
-		public int configurationListOrderPriority;
-
-		// Token: 0x040063AF RID: 25519
-		public FactionDef replacesFaction;
-
-		// Token: 0x040063B0 RID: 25520
-		public bool displayInFactionSelection = true;
-
-		// Token: 0x040063B1 RID: 25521
-		public TechLevel techLevel;
-
-		// Token: 0x040063B2 RID: 25522
-		[NoTranslate]
-		public List<BackstoryCategoryFilter> backstoryFilters;
-
-		// Token: 0x040063B3 RID: 25523
-		[NoTranslate]
-		private List<string> backstoryCategories;
-
-		// Token: 0x040063B4 RID: 25524
-		public ThingFilter apparelStuffFilter;
-
-		// Token: 0x040063B5 RID: 25525
-		public ThingSetMakerDef settlementLootMaker;
-
-		// Token: 0x040063B6 RID: 25526
-		public ThingSetMakerDef raidLootMaker;
-
-		// Token: 0x040063B7 RID: 25527
-		public SimpleCurve raidLootValueFromPointsCurve;
-
-		// Token: 0x040063B8 RID: 25528
-		public List<TraderKindDef> caravanTraderKinds = new List<TraderKindDef>();
-
-		// Token: 0x040063B9 RID: 25529
-		public List<TraderKindDef> orbitalTraderKinds = new List<TraderKindDef>();
-
-		// Token: 0x040063BA RID: 25530
-		public List<TraderKindDef> visitorTraderKinds = new List<TraderKindDef>();
-
-		// Token: 0x040063BB RID: 25531
-		public List<TraderKindDef> baseTraderKinds = new List<TraderKindDef>();
-
-		// Token: 0x040063BC RID: 25532
-		public XenotypeSet xenotypeSet;
-
-		// Token: 0x040063BD RID: 25533
-		public FloatRange melaninRange = FloatRange.ZeroToOne;
-
-		// Token: 0x040063BE RID: 25534
-		public List<RaidStrategyDef> disallowedRaidStrategies;
-
-		// Token: 0x040063BF RID: 25535
-		public List<RaidAgeRestrictionDef> disallowedRaidAgeRestrictions;
-
-		// Token: 0x040063C0 RID: 25536
-		public bool mustStartOneEnemy;
-
-		// Token: 0x040063C1 RID: 25537
-		public bool naturalEnemy;
-
-		// Token: 0x040063C2 RID: 25538
-		public bool permanentEnemy;
-
-		// Token: 0x040063C3 RID: 25539
-		public bool permanentEnemyToEveryoneExceptPlayer;
-
-		// Token: 0x040063C4 RID: 25540
-		public List<FactionDef> permanentEnemyToEveryoneExcept;
-
-		// Token: 0x040063C5 RID: 25541
-		[NoTranslate]
-		public string settlementTexturePath;
-
-		// Token: 0x040063C6 RID: 25542
-		[NoTranslate]
-		public string factionIconPath;
-
-		// Token: 0x040063C7 RID: 25543
-		public List<Color> colorSpectrum;
-
-		// Token: 0x040063C8 RID: 25544
-		public List<PawnRelationDef> royalTitleInheritanceRelations;
-
-		// Token: 0x040063C9 RID: 25545
-		public Type royalTitleInheritanceWorkerClass;
-
-		// Token: 0x040063CA RID: 25546
-		public List<RoyalImplantRule> royalImplantRules;
-
-		// Token: 0x040063CB RID: 25547
-		public string renounceTitleMessage;
-
-		// Token: 0x040063CC RID: 25548
-		public List<CultureDef> allowedCultures;
-
-		// Token: 0x040063CD RID: 25549
-		public List<MemeDef> requiredMemes;
-
-		// Token: 0x040063CE RID: 25550
-		public List<MemeDef> allowedMemes;
-
-		// Token: 0x040063CF RID: 25551
-		public List<MemeDef> disallowedMemes;
-
-		// Token: 0x040063D0 RID: 25552
-		public List<PreceptDef> disallowedPrecepts;
-
-		// Token: 0x040063D1 RID: 25553
-		public List<MemeWeight> structureMemeWeights;
-
-		// Token: 0x040063D2 RID: 25554
-		public bool classicIdeo;
-
-		// Token: 0x040063D3 RID: 25555
-		public bool fixedIdeo;
-
-		// Token: 0x040063D4 RID: 25556
-		public string ideoName;
-
-		// Token: 0x040063D5 RID: 25557
-		public bool hiddenIdeo;
-
-		// Token: 0x040063D6 RID: 25558
-		[MustTranslate]
-		public string ideoDescription;
-
-		// Token: 0x040063D7 RID: 25559
-		public List<StyleCategoryDef> styles;
-
-		// Token: 0x040063D8 RID: 25560
-		public List<DeityPreset> deityPresets;
-
-		// Token: 0x040063D9 RID: 25561
-		public List<MemeDef> forcedMemes;
-
-		// Token: 0x040063DA RID: 25562
-		public bool requiredPreceptsOnly;
-
-		// Token: 0x040063DB RID: 25563
-		[Obsolete("Will be removed in future version.")]
-		public int maxCountAtGameStart;
-
-		// Token: 0x040063DC RID: 25564
-		[Obsolete("Will be removed in future version.")]
-		public bool canMakeRandomly;
-
-		// Token: 0x040063DD RID: 25565
-		[MayTranslate]
-		public string dialogFactionGreetingHostile;
-
-		// Token: 0x040063DE RID: 25566
-		[MayTranslate]
-		public string dialogFactionGreetingHostileAppreciative;
-
-		// Token: 0x040063DF RID: 25567
-		[MayTranslate]
-		public string dialogFactionGreetingWary;
-
-		// Token: 0x040063E0 RID: 25568
-		[MayTranslate]
-		public string dialogFactionGreetingWarm;
-
-		// Token: 0x040063E1 RID: 25569
-		[MayTranslate]
-		public string dialogMilitaryAidSent;
-
-		// Token: 0x040063E2 RID: 25570
-		[MustTranslate]
-		public string messageDefendersAttacking;
-
-		// Token: 0x040063E3 RID: 25571
-		[Unsaved(false)]
-		private Texture2D factionIcon;
-
-		// Token: 0x040063E4 RID: 25572
-		[Unsaved(false)]
-		private Texture2D settlementTexture;
-
-		// Token: 0x040063E5 RID: 25573
-		[Unsaved(false)]
-		private Texture2D royalFavorIcon;
-
-		// Token: 0x040063E6 RID: 25574
-		[Unsaved(false)]
-		private string cachedDescription;
-
-		// Token: 0x040063E7 RID: 25575
-		[Unsaved(false)]
-		private List<RoyalTitleDef> royalTitlesAwardableInSeniorityOrderForReading;
-
-		// Token: 0x040063E8 RID: 25576
-		[Unsaved(false)]
-		private List<RoyalTitleDef> royalTitlesAllInSeniorityOrderForReading;
-
-		// Token: 0x040063E9 RID: 25577
-		[Unsaved(false)]
-		private RoyalTitleInheritanceWorker royalTitleInheritanceWorker;
+			_003C_003E4__this = this
+		};
+	}
+
+	public static FactionDef Named(string defName)
+	{
+		return DefDatabase<FactionDef>.GetNamed(defName);
 	}
 }

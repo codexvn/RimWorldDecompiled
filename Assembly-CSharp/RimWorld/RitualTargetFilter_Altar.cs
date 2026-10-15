@@ -1,104 +1,357 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class RitualTargetFilter_Altar : RitualTargetFilter
 {
-	// Token: 0x020027DC RID: 10204
-	public class RitualTargetFilter_Altar : RitualTargetFilter
+	[CompilerGenerated]
+	private sealed class _003CCandidateBuildings_003Ed__5 : IEnumerable<Building>, IEnumerable, IEnumerator<Building>, IEnumerator, IDisposable
 	{
-		// Token: 0x0600DF58 RID: 57176 RVA: 0x00419458 File Offset: 0x00417658
-		public RitualTargetFilter_Altar()
-		{
-		}
+		private int _003C_003E1__state;
 
-		// Token: 0x0600DF59 RID: 57177 RVA: 0x00419460 File Offset: 0x00417660
-		public RitualTargetFilter_Altar(RitualTargetFilterDef def) : base(def)
-		{
-		}
+		private Building _003C_003E2__current;
 
-		// Token: 0x0600DF5A RID: 57178 RVA: 0x00419C48 File Offset: 0x00417E48
-		public override bool CanStart(TargetInfo initiator, TargetInfo selectedTarget, out string rejectionReason)
+		private int _003C_003El__initialThreadId;
+
+		private Map map;
+
+		public Map _003C_003E3__map;
+
+		private Ideo ideo;
+
+		public Ideo _003C_003E3__ideo;
+
+		private IEnumerator<Precept_Building> _003C_003E7__wrap1;
+
+		private List<Building>.Enumerator _003C_003E7__wrap2;
+
+		Building IEnumerator<Building>.Current
 		{
-			TargetInfo targetInfo = this.BestTarget(initiator, selectedTarget);
-			rejectionReason = "";
-			if (!targetInfo.IsValid)
+			[DebuggerHidden]
+			get
 			{
-				rejectionReason = "AbilityDisabledNoAltarOrRitualsSpot".Translate();
-				return false;
+				return _003C_003E2__current;
 			}
-			return true;
 		}
 
-		// Token: 0x0600DF5B RID: 57179 RVA: 0x00419C84 File Offset: 0x00417E84
-		public override TargetInfo BestTarget(TargetInfo initiator, TargetInfo selectedTarget)
+		object IEnumerator.Current
 		{
-			Pawn pawn = initiator.Thing as Pawn;
-			if (pawn == null)
+			[DebuggerHidden]
+			get
 			{
-				return null;
+				return _003C_003E2__current;
 			}
-			Thing thing = null;
-			float num = 99999f;
-			foreach (Building building in this.CandidateBuildings(pawn.Ideo, initiator.Thing.Map))
+		}
+
+		[DebuggerHidden]
+		public _003CCandidateBuildings_003Ed__5(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if ((uint)(num - -4) <= 1u || num == 1)
 			{
-				if (building.def.isAltar && pawn.CanReach(building, PathEndMode.Touch, pawn.NormalMaxDanger(), false, false, TraverseMode.ByPawn))
+				try
 				{
-					int lengthHorizontalSquared = (pawn.Position - building.Position).LengthHorizontalSquared;
-					if ((float)lengthHorizontalSquared < num)
+					if (num == -4 || num == 1)
 					{
-						thing = building;
-						num = (float)lengthHorizontalSquared;
-					}
-				}
-			}
-			if (thing == null && this.def.fallbackToRitualSpot && pawn.Map != null)
-			{
-				foreach (Thing thing2 in pawn.Map.listerThings.ThingsOfDef(ThingDefOf.RitualSpot))
-				{
-					if (pawn.CanReach(thing2, PathEndMode.Touch, pawn.NormalMaxDanger(), false, false, TraverseMode.ByPawn))
-					{
-						int lengthHorizontalSquared2 = (pawn.Position - thing2.Position).LengthHorizontalSquared;
-						if ((float)lengthHorizontalSquared2 < num)
+						try
 						{
-							thing = thing2;
-							num = (float)lengthHorizontalSquared2;
+						}
+						finally
+						{
+							_003C_003Em__Finally2();
 						}
 					}
 				}
-			}
-			return thing;
-		}
-
-		// Token: 0x0600DF5C RID: 57180 RVA: 0x00419E04 File Offset: 0x00418004
-		public override IEnumerable<string> GetTargetInfos(TargetInfo initiator)
-		{
-			yield return "RitualTargetGatherAltarOrRitualSpotInfo".Translate();
-			yield break;
-		}
-
-		// Token: 0x0600DF5D RID: 57181 RVA: 0x00419E0D File Offset: 0x0041800D
-		protected virtual IEnumerable<Building> CandidateBuildings(Ideo ideo, Map map)
-		{
-			if (map == null)
-			{
-				yield break;
-			}
-			foreach (Precept_Building precept_Building in from b in ideo.cachedPossibleBuildings
-			where b.ThingDef.isAltar
-			select b)
-			{
-				foreach (Building building in map.listerBuildings.AllBuildingsColonistOfDef(precept_Building.ThingDef))
+				finally
 				{
-					yield return building;
+					_003C_003Em__Finally1();
 				}
-				List<Building>.Enumerator enumerator2 = default(List<Building>.Enumerator);
 			}
-			IEnumerator<Precept_Building> enumerator = null;
-			yield break;
-			yield break;
+			_003C_003E7__wrap1 = null;
+			_003C_003E7__wrap2 = default(List<Building>.Enumerator);
+			_003C_003E1__state = -2;
 		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				if (num != 0)
+				{
+					if (num != 1)
+					{
+						return false;
+					}
+					_003C_003E1__state = -4;
+					goto IL_00cf;
+				}
+				_003C_003E1__state = -1;
+				if (map == null)
+				{
+					return false;
+				}
+				_003C_003E7__wrap1 = ideo.cachedPossibleBuildings.Where((Precept_Building b) => b.ThingDef.isAltar).GetEnumerator();
+				_003C_003E1__state = -3;
+				goto IL_00ee;
+				IL_00ee:
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					Precept_Building current = _003C_003E7__wrap1.Current;
+					_003C_003E7__wrap2 = map.listerBuildings.AllBuildingsColonistOfDef(current.ThingDef).GetEnumerator();
+					_003C_003E1__state = -4;
+					goto IL_00cf;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = null;
+				return false;
+				IL_00cf:
+				if (_003C_003E7__wrap2.MoveNext())
+				{
+					Building current2 = _003C_003E7__wrap2.Current;
+					_003C_003E2__current = current2;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				_003C_003Em__Finally2();
+				_003C_003E7__wrap2 = default(List<Building>.Enumerator);
+				goto IL_00ee;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -3;
+			((IDisposable)_003C_003E7__wrap2/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Building> IEnumerable<Building>.GetEnumerator()
+		{
+			_003CCandidateBuildings_003Ed__5 _003CCandidateBuildings_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CCandidateBuildings_003Ed__ = this;
+			}
+			else
+			{
+				_003CCandidateBuildings_003Ed__ = new _003CCandidateBuildings_003Ed__5(0);
+			}
+			_003CCandidateBuildings_003Ed__.ideo = _003C_003E3__ideo;
+			_003CCandidateBuildings_003Ed__.map = _003C_003E3__map;
+			return _003CCandidateBuildings_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Building>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGetTargetInfos_003Ed__4 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		string IEnumerator<string>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetTargetInfos_003Ed__4(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			switch (_003C_003E1__state)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = "RitualTargetGatherAltarOrRitualSpotInfo".Translate();
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				return this;
+			}
+			return new _003CGetTargetInfos_003Ed__4(0);
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	public RitualTargetFilter_Altar()
+	{
+	}
+
+	public RitualTargetFilter_Altar(RitualTargetFilterDef def)
+		: base(def)
+	{
+	}
+
+	public override bool CanStart(TargetInfo initiator, TargetInfo selectedTarget, out string rejectionReason)
+	{
+		TargetInfo targetInfo = BestTarget(initiator, selectedTarget);
+		rejectionReason = "";
+		if (!targetInfo.IsValid)
+		{
+			rejectionReason = "AbilityDisabledNoAltarOrRitualsSpot".Translate();
+			return false;
+		}
+		return true;
+	}
+
+	public override TargetInfo BestTarget(TargetInfo initiator, TargetInfo selectedTarget)
+	{
+		if (!(initiator.Thing is Pawn pawn))
+		{
+			return null;
+		}
+		Thing thing = null;
+		float num = 99999f;
+		foreach (Building item in CandidateBuildings(pawn.Ideo, initiator.Thing.Map))
+		{
+			if (item.def.isAltar && pawn.CanReach(item, PathEndMode.Touch, pawn.NormalMaxDanger()))
+			{
+				int lengthHorizontalSquared = (pawn.Position - item.Position).LengthHorizontalSquared;
+				if ((float)lengthHorizontalSquared < num)
+				{
+					thing = item;
+					num = lengthHorizontalSquared;
+				}
+			}
+		}
+		if (thing == null && def.fallbackToRitualSpot && pawn.Map != null)
+		{
+			foreach (Thing item2 in pawn.Map.listerThings.ThingsOfDef(ThingDefOf.RitualSpot))
+			{
+				if (pawn.CanReach(item2, PathEndMode.Touch, pawn.NormalMaxDanger()))
+				{
+					int lengthHorizontalSquared2 = (pawn.Position - item2.Position).LengthHorizontalSquared;
+					if ((float)lengthHorizontalSquared2 < num)
+					{
+						thing = item2;
+						num = lengthHorizontalSquared2;
+					}
+				}
+			}
+		}
+		return thing;
+	}
+
+	[IteratorStateMachine(typeof(_003CGetTargetInfos_003Ed__4))]
+	public override IEnumerable<string> GetTargetInfos(TargetInfo initiator)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetTargetInfos_003Ed__4(-2);
+	}
+
+	[IteratorStateMachine(typeof(_003CCandidateBuildings_003Ed__5))]
+	protected virtual IEnumerable<Building> CandidateBuildings(Ideo ideo, Map map)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CCandidateBuildings_003Ed__5(-2)
+		{
+			_003C_003E3__ideo = ideo,
+			_003C_003E3__map = map
+		};
 	}
 }

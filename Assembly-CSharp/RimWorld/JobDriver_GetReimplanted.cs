@@ -1,49 +1,147 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_GetReimplanted : JobDriver
 {
-	// Token: 0x02001212 RID: 4626
-	public class JobDriver_GetReimplanted : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__3 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700118B RID: 4491
-		// (get) Token: 0x06007103 RID: 28931 RVA: 0x001E5D9E File Offset: 0x001E3F9E
-		public Pawn Target
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_GetReimplanted _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.job.targetA.Thing as Pawn;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06007104 RID: 28932 RVA: 0x0022FF57 File Offset: 0x0022E157
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		object IEnumerator.Current
 		{
-			return this.pawn.Reserve(this.Target, this.job, 1, -1, null, errorOnFailed, false);
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x06007105 RID: 28933 RVA: 0x0022FF7A File Offset: 0x0022E17A
-		protected override IEnumerable<Toil> MakeNewToils()
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__3(int _003C_003E1__state)
 		{
-			if (!ModLister.CheckBiotech("xenogerm reimplanting"))
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_GetReimplanted CS_0024_003C_003E8__locals11 = _003C_003E4__this;
+			switch (num)
 			{
-				yield break;
-			}
-			this.FailOnDespawnedNullOrForbidden(TargetIndex.A);
-			this.FailOnDowned(TargetIndex.A);
-			this.FailOn(() => this.pawn.genes == null || this.Target.genes == null || GeneUtility.SameXenotype(this.Target, this.pawn));
-			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch, false);
-			yield return Toils_General.Do(delegate
-			{
-				Ability ability = this.Target.abilities.abilities.FirstOrFallback((Ability x) => x.def == AbilityDefOf.ReimplantXenogerm, null);
-				if (ability != null)
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (!ModLister.CheckBiotech("xenogerm reimplanting"))
 				{
-					this.Target.jobs.TryTakeOrderedJob(ability.GetJob(this.pawn, this.pawn), new JobTag?(JobTag.Misc), false);
+					return false;
 				}
-			});
-			yield break;
+				CS_0024_003C_003E8__locals11.FailOnDespawnedNullOrForbidden(TargetIndex.A);
+				CS_0024_003C_003E8__locals11.FailOnDowned(TargetIndex.A);
+				CS_0024_003C_003E8__locals11.FailOn(() => CS_0024_003C_003E8__locals11.pawn.genes == null || CS_0024_003C_003E8__locals11.Target.genes == null || GeneUtility.SameXenotype(CS_0024_003C_003E8__locals11.Target, CS_0024_003C_003E8__locals11.pawn));
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.Do(delegate
+				{
+					Ability ability = CS_0024_003C_003E8__locals11.Target.abilities.abilities.FirstOrFallback((Ability x) => x.def == AbilityDefOf.ReimplantXenogerm);
+					if (ability != null)
+					{
+						CS_0024_003C_003E8__locals11.Target.jobs.TryTakeOrderedJob(ability.GetJob(CS_0024_003C_003E8__locals11.pawn, CS_0024_003C_003E8__locals11.pawn), JobTag.Misc);
+					}
+				});
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				return false;
+			}
 		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__3 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__3(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	public Pawn Target => job.targetA.Thing as Pawn;
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return pawn.Reserve(Target, job, 1, -1, null, errorOnFailed);
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__3))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__3(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

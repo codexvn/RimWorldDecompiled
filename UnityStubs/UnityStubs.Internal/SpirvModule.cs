@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Waylith.Graphics;
 
 namespace UnityStubs.Internal;
 
@@ -282,9 +283,15 @@ internal sealed class SpirvModule
 			failure = "malformed SPIR-V";
 			return null;
 		}
-		if ((spirvModule.words[1] & 0xFFFFFF) >= 66560)
+		uint num = spirvModule.words[1] & 0xFFFFFF;
+		if (num >= 66560)
 		{
 			failure = "SPIR-V 1.4+ interface rules are not handled";
+			return null;
+		}
+		if (num > GpuInfo.MaxSpirvVersion)
+		{
+			failure = "SPIR-V " + VulkanVersion.FormatSpirv(num) + " needs a newer Vulkan than this device's " + VulkanVersion.Format(GpuInfo.ApiVersion);
 			return null;
 		}
 		if (!spirvModule.Rewrite(stage, pass, plan, out failure))

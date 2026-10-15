@@ -1,59 +1,55 @@
-﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld
-{
-	// Token: 0x02002FFB RID: 12283
-	public class Alert_ColonistLeftUnburied : Alert
-	{
-		// Token: 0x060114B2 RID: 70834 RVA: 0x004F5034 File Offset: 0x004F3234
-		public static bool IsCorpseOfColonist(Corpse corpse)
-		{
-			return corpse.InnerPawn.Faction == Faction.OfPlayer && corpse.InnerPawn.def.race.Humanlike && !corpse.InnerPawn.IsQuestLodger() && !corpse.InnerPawn.IsSlave && !corpse.InnerPawn.IsSubhuman && !corpse.InnerPawn.IsShambler && corpse.Spawned;
-		}
+namespace RimWorld;
 
-		// Token: 0x17002CCE RID: 11470
-		// (get) Token: 0x060114B3 RID: 70835 RVA: 0x004F50A8 File Offset: 0x004F32A8
-		private List<Thing> UnburiedColonistCorpses
+public class Alert_ColonistLeftUnburied : Alert
+{
+	private List<Thing> unburiedColonistCorpsesResult = new List<Thing>();
+
+	private List<Thing> UnburiedColonistCorpses
+	{
+		get
 		{
-			get
+			unburiedColonistCorpsesResult.Clear();
+			foreach (Map map in Find.Maps)
 			{
-				this.unburiedColonistCorpsesResult.Clear();
-				foreach (Map map in Find.Maps)
+				if (!map.mapPawns.AnyFreeColonistSpawned)
 				{
-					if (map.mapPawns.AnyFreeColonistSpawned)
+					continue;
+				}
+				List<Thing> list = map.listerThings.ThingsMatching(ThingRequest.ForGroup(ThingRequestGroup.Corpse));
+				for (int i = 0; i < list.Count; i++)
+				{
+					Corpse corpse = (Corpse)list[i];
+					if (IsCorpseOfColonist(corpse))
 					{
-						List<Thing> list = map.listerThings.ThingsMatching(ThingRequest.ForGroup(ThingRequestGroup.Corpse));
-						for (int i = 0; i < list.Count; i++)
-						{
-							Corpse corpse = (Corpse)list[i];
-							if (Alert_ColonistLeftUnburied.IsCorpseOfColonist(corpse))
-							{
-								this.unburiedColonistCorpsesResult.Add(corpse);
-							}
-						}
+						unburiedColonistCorpsesResult.Add(corpse);
 					}
 				}
-				return this.unburiedColonistCorpsesResult;
 			}
+			return unburiedColonistCorpsesResult;
 		}
+	}
 
-		// Token: 0x060114B4 RID: 70836 RVA: 0x004F5158 File Offset: 0x004F3358
-		public Alert_ColonistLeftUnburied()
+	public static bool IsCorpseOfColonist(Corpse corpse)
+	{
+		if (corpse.InnerPawn.Faction == Faction.OfPlayer && corpse.InnerPawn.def.race.Humanlike && !corpse.InnerPawn.IsQuestLodger() && !corpse.InnerPawn.IsSlave && !corpse.InnerPawn.IsSubhuman && !corpse.InnerPawn.IsShambler)
 		{
-			this.defaultLabel = "AlertColonistLeftUnburied".Translate();
-			this.defaultExplanation = "AlertColonistLeftUnburiedDesc".Translate();
-			this.defaultPriority = AlertPriority.High;
+			return corpse.Spawned;
 		}
+		return false;
+	}
 
-		// Token: 0x060114B5 RID: 70837 RVA: 0x004F51A7 File Offset: 0x004F33A7
-		public override AlertReport GetReport()
-		{
-			return AlertReport.CulpritsAre(this.UnburiedColonistCorpses);
-		}
+	public Alert_ColonistLeftUnburied()
+	{
+		defaultLabel = "AlertColonistLeftUnburied".Translate();
+		defaultExplanation = "AlertColonistLeftUnburiedDesc".Translate();
+		defaultPriority = AlertPriority.High;
+	}
 
-		// Token: 0x0400B349 RID: 45897
-		private List<Thing> unburiedColonistCorpsesResult = new List<Thing>();
+	public override AlertReport GetReport()
+	{
+		return AlertReport.CulpritsAre(UnburiedColonistCorpses);
 	}
 }

@@ -1,43 +1,160 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompProperties_Toxifier : CompProperties
 {
-	// Token: 0x02002E9B RID: 11931
-	public class CompProperties_Toxifier : CompProperties
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__4 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x06010CE0 RID: 68832 RVA: 0x004D64D3 File Offset: 0x004D46D3
-		public CompProperties_Toxifier()
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompProperties_Toxifier _003C_003E4__this;
+
+		string IEnumerator<string>.Current
 		{
-			this.compClass = typeof(CompToxifier);
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x06010CE1 RID: 68833 RVA: 0x004D6508 File Offset: 0x004D4708
-		public override IEnumerable<string> ConfigErrors(ThingDef parentDef)
+		object IEnumerator.Current
 		{
-			if (this.pollutionIntervalTicks <= 0)
+			[DebuggerHidden]
+			get
 			{
-				yield return "Pollution interval ticks must be greater than zero.";
+				return _003C_003E2__current;
 			}
-			if (this.cellsToPollute <= 0)
-			{
-				yield return "Cells to pollute must be greater than zero.";
-			}
-			if (this.radius <= 0f)
-			{
-				yield return "Radius to pollute must be greater than zero.";
-			}
-			yield break;
 		}
 
-		// Token: 0x0400AEF3 RID: 44787
-		public float radius = 5.9f;
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__4(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
 
-		// Token: 0x0400AEF4 RID: 44788
-		public int pollutionIntervalTicks = 60000;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
 
-		// Token: 0x0400AEF5 RID: 44789
-		public int cellsToPollute = 6;
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			CompProperties_Toxifier compProperties_Toxifier = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (compProperties_Toxifier.pollutionIntervalTicks <= 0)
+				{
+					_003C_003E2__current = "Pollution interval ticks must be greater than zero.";
+					_003C_003E1__state = 1;
+					return true;
+				}
+				goto IL_0051;
+			case 1:
+				_003C_003E1__state = -1;
+				goto IL_0051;
+			case 2:
+				_003C_003E1__state = -1;
+				goto IL_0075;
+			case 3:
+				{
+					_003C_003E1__state = -1;
+					break;
+				}
+				IL_0075:
+				if (compProperties_Toxifier.radius <= 0f)
+				{
+					_003C_003E2__current = "Radius to pollute must be greater than zero.";
+					_003C_003E1__state = 3;
+					return true;
+				}
+				break;
+				IL_0051:
+				if (compProperties_Toxifier.cellsToPollute <= 0)
+				{
+					_003C_003E2__current = "Cells to pollute must be greater than zero.";
+					_003C_003E1__state = 2;
+					return true;
+				}
+				goto IL_0075;
+			}
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__4 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__4(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	public float radius = 5.9f;
+
+	public int pollutionIntervalTicks = 60000;
+
+	public int cellsToPollute = 6;
+
+	public CompProperties_Toxifier()
+	{
+		compClass = typeof(CompToxifier);
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__4))]
+	public override IEnumerable<string> ConfigErrors(ThingDef parentDef)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__4(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

@@ -1,151 +1,419 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using RimWorld.QuestGen;
 using Verse;
 using Verse.Grammar;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Reward_Pawn : Reward
 {
-	// Token: 0x02003694 RID: 13972
-	public class Reward_Pawn : Reward
+	public enum ArrivalMode
 	{
-		// Token: 0x170031FB RID: 12795
-		// (get) Token: 0x06013661 RID: 79457 RVA: 0x005C45BF File Offset: 0x005C27BF
-		public override IEnumerable<GenUI.AnonymousStackElement> StackElements
+		WalkIn,
+		DropPod
+	}
+
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass8_0
+	{
+		public QuestPart_PawnsArrive pawnsArrive;
+
+		internal void _003CGenerateQuestParts_003Eb__0(string x)
 		{
+			pawnsArrive.customLetterLabel = x;
+		}
+
+		internal void _003CGenerateQuestParts_003Eb__1(string x)
+		{
+			pawnsArrive.customLetterText = x;
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGenerateQuestParts_003Ed__8 : IEnumerable<QuestPart>, IEnumerable, IEnumerator<QuestPart>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private QuestPart _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Reward_Pawn _003C_003E4__this;
+
+		private RewardsGeneratorParams parms;
+
+		public RewardsGeneratorParams _003C_003E3__parms;
+
+		private string customLetterLabel;
+
+		public string _003C_003E3__customLetterLabel;
+
+		private RulePack customLetterLabelRules;
+
+		public RulePack _003C_003E3__customLetterLabelRules;
+
+		private string customLetterText;
+
+		public string _003C_003E3__customLetterText;
+
+		private RulePack customLetterTextRules;
+
+		public RulePack _003C_003E3__customLetterTextRules;
+
+		QuestPart IEnumerator<QuestPart>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.pawn == null)
-				{
-					yield break;
-				}
-				foreach (GenUI.AnonymousStackElement anonymousStackElement in QuestPartUtility.GetRewardStackElementsForThings(Gen.YieldSingle<Pawn>(this.pawn), this.detailsHidden))
-				{
-					yield return anonymousStackElement;
-				}
-				IEnumerator<GenUI.AnonymousStackElement> enumerator = null;
-				yield break;
-				yield break;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06013662 RID: 79458 RVA: 0x005C45D0 File Offset: 0x005C27D0
-		public override void InitFromValue(float rewardValue, RewardsGeneratorParams parms, out float valueActuallyUsed)
+		object IEnumerator.Current
 		{
-			PawnGenerationRequest request = new PawnGenerationRequest(PawnKindDefOf.SpaceRefugee, null, PawnGenerationContext.NonPlayer, null, false, false, false, true, false, 1f, false, true, false, true, true, false, false, false, false, 0f, 0f, null, 1f, null, null, null, null, null, null, null, null, null, null, null, null, false, false, false, false, null, null, null, null, null, 0f, DevelopmentalStage.Adult, null, null, null, true, false, false, -1, 0, false);
-			this.pawn = PawnGenerator.GeneratePawn(request);
-			this.arrivalMode = (Rand.Bool ? Reward_Pawn.ArrivalMode.WalkIn : Reward_Pawn.ArrivalMode.DropPod);
-			valueActuallyUsed = rewardValue;
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x06013663 RID: 79459 RVA: 0x005C468D File Offset: 0x005C288D
-		public override IEnumerable<QuestPart> GenerateQuestParts(int index, RewardsGeneratorParams parms, string customLetterLabel, string customLetterText, RulePack customLetterLabelRules, RulePack customLetterTextRules)
+		[DebuggerHidden]
+		public _003CGenerateQuestParts_003Ed__8(int _003C_003E1__state)
 		{
-			Slate slate = QuestGen.slate;
-			QuestGen.AddToGeneratedPawns(this.pawn);
-			if (!this.pawn.IsWorldPawn())
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			Reward_Pawn reward_Pawn = _003C_003E4__this;
+			switch (num)
 			{
-				Find.WorldPawns.PassToWorld(this.pawn, PawnDiscardDecideMode.Decide);
-			}
-			if (parms.giveToCaravan)
+			default:
+				return false;
+			case 0:
 			{
-				yield return new QuestPart_GiveToCaravan
+				_003C_003E1__state = -1;
+				Slate slate = RimWorld.QuestGen.QuestGen.slate;
+				RimWorld.QuestGen.QuestGen.AddToGeneratedPawns(reward_Pawn.pawn);
+				if (!reward_Pawn.pawn.IsWorldPawn())
 				{
-					inSignal = slate.Get<string>("inSignal", null, false),
-					Things = Gen.YieldSingle<Pawn>(this.pawn)
-				};
-			}
-			else
-			{
-				QuestPart_PawnsArrive pawnsArrive = new QuestPart_PawnsArrive();
-				pawnsArrive.inSignal = slate.Get<string>("inSignal", null, false);
-				pawnsArrive.pawns.Add(this.pawn);
-				pawnsArrive.arrivalMode = ((this.arrivalMode == Reward_Pawn.ArrivalMode.DropPod) ? PawnsArrivalModeDefOf.CenterDrop : PawnsArrivalModeDefOf.EdgeWalkIn);
-				pawnsArrive.joinPlayer = true;
-				pawnsArrive.mapParent = slate.Get<Map>("map", null, false).Parent;
+					Find.WorldPawns.PassToWorld(reward_Pawn.pawn);
+				}
+				if (parms.giveToCaravan)
+				{
+					_003C_003E2__current = new QuestPart_GiveToCaravan
+					{
+						inSignal = slate.Get<string>("inSignal"),
+						Things = Gen.YieldSingle(reward_Pawn.pawn)
+					};
+					_003C_003E1__state = 1;
+					return true;
+				}
+				_003C_003Ec__DisplayClass8_0 CS_0024_003C_003E8__locals9 = new _003C_003Ec__DisplayClass8_0();
+				CS_0024_003C_003E8__locals9.pawnsArrive = new QuestPart_PawnsArrive();
+				CS_0024_003C_003E8__locals9.pawnsArrive.inSignal = slate.Get<string>("inSignal");
+				CS_0024_003C_003E8__locals9.pawnsArrive.pawns.Add(reward_Pawn.pawn);
+				CS_0024_003C_003E8__locals9.pawnsArrive.arrivalMode = ((reward_Pawn.arrivalMode == ArrivalMode.DropPod) ? PawnsArrivalModeDefOf.CenterDrop : PawnsArrivalModeDefOf.EdgeWalkIn);
+				CS_0024_003C_003E8__locals9.pawnsArrive.joinPlayer = true;
+				CS_0024_003C_003E8__locals9.pawnsArrive.mapParent = slate.Get<Map>("map").Parent;
 				if (!customLetterLabel.NullOrEmpty() || customLetterLabelRules != null)
 				{
-					QuestGen.AddTextRequest("root", delegate(string x)
+					RimWorld.QuestGen.QuestGen.AddTextRequest("root", delegate(string x)
 					{
-						pawnsArrive.customLetterLabel = x;
+						CS_0024_003C_003E8__locals9.pawnsArrive.customLetterLabel = x;
 					}, QuestGenUtility.MergeRules(customLetterLabelRules, customLetterLabel, "root"));
 				}
 				if (!customLetterText.NullOrEmpty() || customLetterTextRules != null)
 				{
-					QuestGen.AddTextRequest("root", delegate(string x)
+					RimWorld.QuestGen.QuestGen.AddTextRequest("root", delegate(string x)
 					{
-						pawnsArrive.customLetterText = x;
+						CS_0024_003C_003E8__locals9.pawnsArrive.customLetterText = x;
 					}, QuestGenUtility.MergeRules(customLetterTextRules, customLetterText, "root"));
 				}
-				yield return pawnsArrive;
+				_003C_003E2__current = CS_0024_003C_003E8__locals9.pawnsArrive;
+				_003C_003E1__state = 2;
+				return true;
 			}
-			yield break;
-		}
-
-		// Token: 0x06013664 RID: 79460 RVA: 0x005C46C4 File Offset: 0x005C28C4
-		public override string GetDescription(RewardsGeneratorParams parms)
-		{
-			if (parms.giveToCaravan)
-			{
-				return "Reward_Pawn_Caravan".Translate(this.pawn);
+			case 1:
+				_003C_003E1__state = -1;
+				break;
+			case 2:
+				_003C_003E1__state = -1;
+				break;
 			}
-			Reward_Pawn.ArrivalMode arrivalMode = this.arrivalMode;
-			if (arrivalMode == Reward_Pawn.ArrivalMode.WalkIn)
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<QuestPart> IEnumerable<QuestPart>.GetEnumerator()
+		{
+			_003CGenerateQuestParts_003Ed__8 _003CGenerateQuestParts_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				return "Reward_Pawn_WalkIn".Translate(this.pawn);
+				_003C_003E1__state = 0;
+				_003CGenerateQuestParts_003Ed__ = this;
 			}
-			if (arrivalMode != Reward_Pawn.ArrivalMode.DropPod)
+			else
 			{
-				throw new Exception("Unknown arrival mode: " + this.arrivalMode.ToString());
+				_003CGenerateQuestParts_003Ed__ = new _003CGenerateQuestParts_003Ed__8(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
-			return "Reward_Pawn_DropPod".Translate(this.pawn);
+			_003CGenerateQuestParts_003Ed__.parms = _003C_003E3__parms;
+			_003CGenerateQuestParts_003Ed__.customLetterLabel = _003C_003E3__customLetterLabel;
+			_003CGenerateQuestParts_003Ed__.customLetterText = _003C_003E3__customLetterText;
+			_003CGenerateQuestParts_003Ed__.customLetterLabelRules = _003C_003E3__customLetterLabelRules;
+			_003CGenerateQuestParts_003Ed__.customLetterTextRules = _003C_003E3__customLetterTextRules;
+			return _003CGenerateQuestParts_003Ed__;
 		}
 
-		// Token: 0x06013665 RID: 79461 RVA: 0x005C475C File Offset: 0x005C295C
-		public override string ToString()
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return string.Concat(new string[]
+			return ((IEnumerable<QuestPart>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003Cget_StackElements_003Ed__6 : IEnumerable<GenUI.AnonymousStackElement>, IEnumerable, IEnumerator<GenUI.AnonymousStackElement>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private GenUI.AnonymousStackElement _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Reward_Pawn _003C_003E4__this;
+
+		private IEnumerator<GenUI.AnonymousStackElement> _003C_003E7__wrap1;
+
+		GenUI.AnonymousStackElement IEnumerator<GenUI.AnonymousStackElement>.Current
+		{
+			[DebuggerHidden]
+			get
 			{
-				base.GetType().Name,
-				" (",
-				this.pawn.MarketValue.ToStringMoney(null),
-				" pawn=",
-				this.pawn.ToStringSafe<Pawn>(),
-				", arrivalMode=",
-				this.arrivalMode.ToString(),
-				")"
-			});
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x06013666 RID: 79462 RVA: 0x005C47D8 File Offset: 0x005C29D8
-		public override void ExposeData()
+		object IEnumerator.Current
 		{
-			base.ExposeData();
-			Scribe_References.Look<Pawn>(ref this.pawn, "pawn", true);
-			Scribe_Values.Look<Reward_Pawn.ArrivalMode>(ref this.arrivalMode, "arrivalMode", Reward_Pawn.ArrivalMode.WalkIn, false);
-			Scribe_Values.Look<bool>(ref this.detailsHidden, "detailsHidden", false, false);
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x0400D712 RID: 55058
-		public Pawn pawn;
-
-		// Token: 0x0400D713 RID: 55059
-		public Reward_Pawn.ArrivalMode arrivalMode;
-
-		// Token: 0x0400D714 RID: 55060
-		public bool detailsHidden;
-
-		// Token: 0x0400D715 RID: 55061
-		private const string RootSymbol = "root";
-
-		// Token: 0x02003695 RID: 13973
-		public enum ArrivalMode
+		[DebuggerHidden]
+		public _003Cget_StackElements_003Ed__6(int _003C_003E1__state)
 		{
-			// Token: 0x0400D717 RID: 55063
-			WalkIn,
-			// Token: 0x0400D718 RID: 55064
-			DropPod
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				Reward_Pawn reward_Pawn = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					if (reward_Pawn.pawn == null)
+					{
+						return false;
+					}
+					_003C_003E7__wrap1 = QuestPartUtility.GetRewardStackElementsForThings(Gen.YieldSingle(reward_Pawn.pawn), reward_Pawn.detailsHidden).GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 1:
+					_003C_003E1__state = -3;
+					break;
+				}
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					GenUI.AnonymousStackElement current = _003C_003E7__wrap1.Current;
+					_003C_003E2__current = current;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = null;
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<GenUI.AnonymousStackElement> IEnumerable<GenUI.AnonymousStackElement>.GetEnumerator()
+		{
+			_003Cget_StackElements_003Ed__6 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_StackElements_003Ed__6(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<GenUI.AnonymousStackElement>)this).GetEnumerator();
+		}
+	}
+
+	public Pawn pawn;
+
+	public ArrivalMode arrivalMode;
+
+	public bool detailsHidden;
+
+	private const string RootSymbol = "root";
+
+	public override IEnumerable<GenUI.AnonymousStackElement> StackElements
+	{
+		[IteratorStateMachine(typeof(_003Cget_StackElements_003Ed__6))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_StackElements_003Ed__6(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public override void InitFromValue(float rewardValue, RewardsGeneratorParams parms, out float valueActuallyUsed)
+	{
+		PawnGenerationRequest request = new PawnGenerationRequest(PawnKindDefOf.SpaceRefugee, null, PawnGenerationContext.NonPlayer, null, forceGenerateNewPawn: false, allowDead: false, allowDowned: false, canGeneratePawnRelations: true, mustBeCapableOfViolence: false, 1f, forceAddFreeWarmLayerIfNeeded: false, allowGay: true, allowPregnant: false, allowFood: true, allowAddictions: true, inhabitant: false, certainlyBeenInCryptosleep: false, forceRedressWorldPawnIfFormerColonist: false, worldPawnFactionDoesntMatter: false, 0f, 0f, null, 1f, null, null, null, null, null, null, null, null, null, null, null, null, forceNoIdeo: false, forceNoBackstory: false, forbidAnyTitle: false, forceDead: false, null, null, null, null, null, 0f, DevelopmentalStage.Adult, null, null, null, forceRecruitable: true);
+		pawn = PawnGenerator.GeneratePawn(request);
+		arrivalMode = ((!Rand.Bool) ? ArrivalMode.DropPod : ArrivalMode.WalkIn);
+		valueActuallyUsed = rewardValue;
+	}
+
+	[IteratorStateMachine(typeof(_003CGenerateQuestParts_003Ed__8))]
+	public override IEnumerable<QuestPart> GenerateQuestParts(int index, RewardsGeneratorParams parms, string customLetterLabel, string customLetterText, RulePack customLetterLabelRules, RulePack customLetterTextRules)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGenerateQuestParts_003Ed__8(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__parms = parms,
+			_003C_003E3__customLetterLabel = customLetterLabel,
+			_003C_003E3__customLetterText = customLetterText,
+			_003C_003E3__customLetterLabelRules = customLetterLabelRules,
+			_003C_003E3__customLetterTextRules = customLetterTextRules
+		};
+	}
+
+	public override string GetDescription(RewardsGeneratorParams parms)
+	{
+		if (parms.giveToCaravan)
+		{
+			return "Reward_Pawn_Caravan".Translate(pawn);
+		}
+		return arrivalMode switch
+		{
+			ArrivalMode.WalkIn => "Reward_Pawn_WalkIn".Translate(pawn), 
+			ArrivalMode.DropPod => "Reward_Pawn_DropPod".Translate(pawn), 
+			_ => throw new Exception("Unknown arrival mode: " + arrivalMode), 
+		};
+	}
+
+	public override string ToString()
+	{
+		return GetType().Name + " (" + pawn.MarketValue.ToStringMoney() + " pawn=" + pawn.ToStringSafe() + ", arrivalMode=" + arrivalMode.ToString() + ")";
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_References.Look(ref pawn, "pawn", saveDestroyedThings: true);
+		Scribe_Values.Look(ref arrivalMode, "arrivalMode", ArrivalMode.WalkIn);
+		Scribe_Values.Look(ref detailsHidden, "detailsHidden", defaultValue: false);
 	}
 }

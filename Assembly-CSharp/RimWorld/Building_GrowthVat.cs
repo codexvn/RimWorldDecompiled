@@ -1,429 +1,1078 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Text;
 using UnityEngine;
 using Verse;
 using Verse.AI;
 using Verse.Sound;
 
-namespace RimWorld
+namespace RimWorld;
+
+[StaticConstructorOnStartup]
+public class Building_GrowthVat : Building_Enterable, IStoreSettingsParent, IThingHolderWithDrawnPawn, IThingHolder
 {
-	// Token: 0x02002A1C RID: 10780
-	[StaticConstructorOnStartup]
-	public class Building_GrowthVat : Building_Enterable, IStoreSettingsParent, IThingHolderWithDrawnPawn, IThingHolder
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass86_0
 	{
-		// Token: 0x1700250A RID: 9482
-		// (get) Token: 0x0600EEBD RID: 61117 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public bool StorageTabVisible
+		public Pawn pawn;
+
+		public Building_GrowthVat _003C_003E4__this;
+
+		internal void _003CGetGizmos_003Eb__8()
 		{
+			_003C_003E4__this.SelectPawn(pawn);
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass86_1
+	{
+		public List<FloatMenuOption> opts;
+
+		public Building_GrowthVat _003C_003E4__this;
+
+		internal void _003CGetGizmos_003Eb__9()
+		{
+			Find.WindowStack.Add(new FloatMenu(opts));
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass86_2
+	{
+		public Thing embryo;
+
+		public _003C_003Ec__DisplayClass86_1 CS_0024_003C_003E8__locals1;
+
+		internal void _003CGetGizmos_003Eb__10()
+		{
+			CS_0024_003C_003E8__locals1._003C_003E4__this.SelectEmbryo(embryo as HumanEmbryo);
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass93_0
+	{
+		public Building_GrowthVat _003C_003E4__this;
+
+		public Pawn selPawn;
+
+		internal void _003CGetFloatMenuOptions_003Eb__0()
+		{
+			_003C_003E4__this.SelectPawn(selPawn);
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGetFloatMenuOptions_003Ed__93 : IEnumerable<FloatMenuOption>, IEnumerable, IEnumerator<FloatMenuOption>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private FloatMenuOption _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Building_GrowthVat _003C_003E4__this;
+
+		private Pawn selPawn;
+
+		public Pawn _003C_003E3__selPawn;
+
+		private _003C_003Ec__DisplayClass93_0 _003C_003E8__1;
+
+		private IEnumerator<FloatMenuOption> _003C_003E7__wrap1;
+
+		FloatMenuOption IEnumerator<FloatMenuOption>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				return true;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700250B RID: 9483
-		// (get) Token: 0x0600EEBE RID: 61118 RVA: 0x004508A5 File Offset: 0x0044EAA5
-		public float HeldPawnDrawPos_Y
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.DrawPos.y + 0.03658537f;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700250C RID: 9484
-		// (get) Token: 0x0600EEBF RID: 61119 RVA: 0x004543B8 File Offset: 0x004525B8
-		public float HeldPawnBodyAngle
+		[DebuggerHidden]
+		public _003CGetFloatMenuOptions_003Ed__93(int _003C_003E1__state)
 		{
-			get
-			{
-				return base.Rotation.AsAngle;
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x1700250D RID: 9485
-		// (get) Token: 0x0600EEC0 RID: 61120 RVA: 0x00075162 File Offset: 0x00073362
-		public PawnPosture HeldPawnPosture
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			get
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				return PawnPosture.LayingOnGroundFaceUp;
-			}
-		}
-
-		// Token: 0x1700250E RID: 9486
-		// (get) Token: 0x0600EEC1 RID: 61121 RVA: 0x004543D3 File Offset: 0x004525D3
-		public bool PowerOn
-		{
-			get
-			{
-				return this.PowerTraderComp.PowerOn;
-			}
-		}
-
-		// Token: 0x1700250F RID: 9487
-		// (get) Token: 0x0600EEC2 RID: 61122 RVA: 0x004543E0 File Offset: 0x004525E0
-		public override Vector3 PawnDrawOffset
-		{
-			get
-			{
-				return CompBiosculpterPod.FloatingOffset((float)Find.TickManager.TicksGame);
-			}
-		}
-
-		// Token: 0x17002510 RID: 9488
-		// (get) Token: 0x0600EEC3 RID: 61123 RVA: 0x004543F2 File Offset: 0x004525F2
-		private CompPowerTrader PowerTraderComp
-		{
-			get
-			{
-				if (this.cachedPowerComp == null)
+				try
 				{
-					this.cachedPowerComp = this.TryGetComp<CompPowerTrader>();
 				}
-				return this.cachedPowerComp;
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
 			}
+			_003C_003E8__1 = null;
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x17002511 RID: 9489
-		// (get) Token: 0x0600EEC4 RID: 61124 RVA: 0x0045440E File Offset: 0x0045260E
-		public float BiostarvationDailyOffset
+		private bool MoveNext()
 		{
-			get
+			try
 			{
-				if (!base.Working)
+				int num = _003C_003E1__state;
+				Building_GrowthVat building_GrowthVat = _003C_003E4__this;
+				AcceptanceReport acceptanceReport;
+				switch (num)
 				{
-					return 0f;
-				}
-				if (!this.PowerOn || this.containedNutrition <= 0f)
-				{
-					return 0.5f;
-				}
-				return -0.1f;
-			}
-		}
-
-		// Token: 0x17002512 RID: 9490
-		// (get) Token: 0x0600EEC5 RID: 61125 RVA: 0x00454440 File Offset: 0x00452640
-		private float BiostarvationSeverityPercent
-		{
-			get
-			{
-				if (this.selectedEmbryo != null)
-				{
-					return this.embryoStarvation;
-				}
-				if (this.selectedPawn != null)
-				{
-					Hediff firstHediffOfDef = this.selectedPawn.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.BioStarvation, false);
-					if (firstHediffOfDef != null)
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E8__1 = new _003C_003Ec__DisplayClass93_0();
+					_003C_003E8__1._003C_003E4__this = _003C_003E4__this;
+					_003C_003E8__1.selPawn = selPawn;
+					_003C_003E7__wrap1 = ((ThingWithComps)building_GrowthVat).GetFloatMenuOptions(_003C_003E8__1.selPawn).GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_00b2;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_00b2;
+				case 2:
+					_003C_003E1__state = -1;
+					break;
+				case 3:
+					_003C_003E1__state = -1;
+					break;
+				case 4:
 					{
-						return firstHediffOfDef.Severity / HediffDefOf.BioStarvation.maxSeverity;
+						_003C_003E1__state = -1;
+						break;
 					}
-				}
-				return 0f;
-			}
-		}
-
-		// Token: 0x17002513 RID: 9491
-		// (get) Token: 0x0600EEC6 RID: 61126 RVA: 0x0045449C File Offset: 0x0045269C
-		public float NutritionConsumedPerDay
-		{
-			get
-			{
-				float num = (this.selectedEmbryo != null) ? 6f : 3f;
-				if (this.BiostarvationSeverityPercent > 0f)
-				{
-					float num2 = 1.1f;
-					num *= num2;
-				}
-				return num;
-			}
-		}
-
-		// Token: 0x17002514 RID: 9492
-		// (get) Token: 0x0600EEC7 RID: 61127 RVA: 0x004544D8 File Offset: 0x004526D8
-		public float NutritionStored
-		{
-			get
-			{
-				float num = this.containedNutrition;
-				for (int i = 0; i < this.innerContainer.Count; i++)
-				{
-					Thing thing = this.innerContainer[i];
-					num += (float)thing.stackCount * thing.GetStatValue(StatDefOf.Nutrition, true, -1);
-				}
-				return num;
-			}
-		}
-
-		// Token: 0x17002515 RID: 9493
-		// (get) Token: 0x0600EEC8 RID: 61128 RVA: 0x00454528 File Offset: 0x00452728
-		public float NutritionNeeded
-		{
-			get
-			{
-				if (this.selectedPawn == null && this.selectedEmbryo == null)
-				{
-					return 0f;
-				}
-				return 10f - this.NutritionStored;
-			}
-		}
-
-		// Token: 0x17002516 RID: 9494
-		// (get) Token: 0x0600EEC9 RID: 61129 RVA: 0x0045454C File Offset: 0x0045274C
-		public int EmbryoGestationTicksRemaining
-		{
-			get
-			{
-				return this.startTick - Find.TickManager.TicksGame;
-			}
-		}
-
-		// Token: 0x17002517 RID: 9495
-		// (get) Token: 0x0600EECA RID: 61130 RVA: 0x0045455F File Offset: 0x0045275F
-		public float EmbryoGestationPct
-		{
-			get
-			{
-				return 1f - Mathf.Clamp01((float)this.EmbryoGestationTicksRemaining / 540000f);
-			}
-		}
-
-		// Token: 0x17002518 RID: 9496
-		// (get) Token: 0x0600EECB RID: 61131 RVA: 0x00454579 File Offset: 0x00452779
-		private Graphic TopGraphic
-		{
-			get
-			{
-				if (this.cachedTopGraphic == null)
-				{
-					this.cachedTopGraphic = GraphicDatabase.Get<Graphic_Multi>("Things/Building/Misc/GrowthVat/GrowthVatTop", ShaderDatabase.Transparent, this.def.graphicData.drawSize, Color.white);
-				}
-				return this.cachedTopGraphic;
-			}
-		}
-
-		// Token: 0x17002519 RID: 9497
-		// (get) Token: 0x0600EECC RID: 61132 RVA: 0x004545B3 File Offset: 0x004527B3
-		private Graphic FetusEarlyStage
-		{
-			get
-			{
-				if (this.fetusEarlyStageGraphic == null)
-				{
-					this.fetusEarlyStageGraphic = GraphicDatabase.Get<Graphic_Single>("Other/VatGrownFetus_EarlyStage", ShaderDatabase.Cutout, Vector2.one, Color.white);
-				}
-				return this.fetusEarlyStageGraphic;
-			}
-		}
-
-		// Token: 0x1700251A RID: 9498
-		// (get) Token: 0x0600EECD RID: 61133 RVA: 0x004545E2 File Offset: 0x004527E2
-		private Graphic FetusLateStage
-		{
-			get
-			{
-				if (this.fetusLateStageGraphic == null)
-				{
-					this.fetusLateStageGraphic = GraphicDatabase.Get<Graphic_Single>("Other/VatGrownFetus_LateStage", ShaderDatabase.Cutout, Vector2.one, Color.white);
-				}
-				return this.fetusLateStageGraphic;
-			}
-		}
-
-		// Token: 0x1700251B RID: 9499
-		// (get) Token: 0x0600EECE RID: 61134 RVA: 0x00454614 File Offset: 0x00452814
-		private Hediff VatLearning
-		{
-			get
-			{
-				if (this.cachedVatLearning == null)
-				{
-					Hediff hediff;
-					if ((hediff = this.selectedPawn.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.VatLearning, false)) == null)
+					IL_00b2:
+					if (_003C_003E7__wrap1.MoveNext())
 					{
-						hediff = this.selectedPawn.health.AddHediff(HediffDefOf.VatLearning, null, null, null);
+						FloatMenuOption current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
 					}
-					this.cachedVatLearning = hediff;
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (!_003C_003E8__1.selPawn.CanReach(building_GrowthVat, PathEndMode.InteractionCell, Danger.Deadly))
+					{
+						_003C_003E2__current = new FloatMenuOption("CannotEnterBuilding".Translate(building_GrowthVat) + ": " + "NoPath".Translate().CapitalizeFirst(), null);
+						_003C_003E1__state = 2;
+						return true;
+					}
+					acceptanceReport = building_GrowthVat.CanAcceptPawn(_003C_003E8__1.selPawn);
+					if (acceptanceReport.Accepted)
+					{
+						_003C_003E2__current = FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("EnterBuilding".Translate(building_GrowthVat), delegate
+						{
+							_003C_003E8__1._003C_003E4__this.SelectPawn(_003C_003E8__1.selPawn);
+						}), _003C_003E8__1.selPawn, building_GrowthVat);
+						_003C_003E1__state = 3;
+						return true;
+					}
+					if (!acceptanceReport.Reason.NullOrEmpty())
+					{
+						_003C_003E2__current = new FloatMenuOption("CannotEnterBuilding".Translate(building_GrowthVat) + ": " + acceptanceReport.Reason.CapitalizeFirst(), null);
+						_003C_003E1__state = 4;
+						return true;
+					}
+					break;
 				}
-				return this.cachedVatLearning;
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x0600EECF RID: 61135 RVA: 0x00454674 File Offset: 0x00452874
-		public override void PostMake()
+		bool IEnumerator.MoveNext()
 		{
-			base.PostMake();
-			this.allowedNutritionSettings = new StorageSettings(this);
-			if (this.def.building.defaultStorageSettings != null)
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				this.allowedNutritionSettings.CopyFrom(this.def.building.defaultStorageSettings);
+				_003C_003E7__wrap1.Dispose();
 			}
 		}
 
-		// Token: 0x0600EED0 RID: 61136 RVA: 0x004546C0 File Offset: 0x004528C0
-		public override void SpawnSetup(Map map, bool respawningAfterLoad)
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			base.SpawnSetup(map, respawningAfterLoad);
-			if (respawningAfterLoad && this.selectedEmbryo != null && this.innerContainer.Contains(this.selectedEmbryo))
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<FloatMenuOption> IEnumerable<FloatMenuOption>.GetEnumerator()
+		{
+			_003CGetFloatMenuOptions_003Ed__93 _003CGetFloatMenuOptions_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				LongEventHandler.ExecuteWhenFinished(delegate
+				_003C_003E1__state = 0;
+				_003CGetFloatMenuOptions_003Ed__ = this;
+			}
+			else
+			{
+				_003CGetFloatMenuOptions_003Ed__ = new _003CGetFloatMenuOptions_003Ed__93(0)
 				{
-					Color color = this.EmbryoColor();
-					this.fetusEarlyStageGraphic = this.FetusEarlyStage.GetColoredVersion(ShaderDatabase.Cutout, color, color);
-					this.fetusLateStageGraphic = this.FetusLateStage.GetColoredVersion(ShaderDatabase.Cutout, color, color);
-				});
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CGetFloatMenuOptions_003Ed__.selPawn = _003C_003E3__selPawn;
+			return _003CGetFloatMenuOptions_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<FloatMenuOption>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGetGizmos_003Ed__86 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Building_GrowthVat _003C_003E4__this;
+
+		private IEnumerator<Gizmo> _003C_003E7__wrap1;
+
+		Gizmo IEnumerator<Gizmo>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600EED1 RID: 61137 RVA: 0x004546FC File Offset: 0x004528FC
-		public override void DeSpawn(DestroyMode mode = DestroyMode.Vanish)
+		object IEnumerator.Current
 		{
-			if (mode != DestroyMode.WillReplace)
+			[DebuggerHidden]
+			get
 			{
-				if (this.selectedPawn != null && this.innerContainer.Contains(this.selectedPawn))
-				{
-					this.Notify_PawnRemoved();
-				}
-				this.DestroyEmbryo(false);
-			}
-			this.sustainerWorking = null;
-			this.cachedVatLearning = null;
-			base.DeSpawn(mode);
-		}
-
-		// Token: 0x0600EED2 RID: 61138 RVA: 0x0045474C File Offset: 0x0045294C
-		protected override void TickInterval(int delta)
-		{
-			base.TickInterval(delta);
-			if (base.Working && this.selectedPawn != null && this.innerContainer.Contains(this.selectedPawn))
-			{
-				Hediff vatLearning = this.VatLearning;
-				if (vatLearning != null)
-				{
-					vatLearning.TickInterval(delta);
-				}
-				Hediff vatLearning2 = this.VatLearning;
-				if (vatLearning2 == null)
-				{
-					return;
-				}
-				vatLearning2.PostTickInterval(delta);
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600EED3 RID: 61139 RVA: 0x004547A8 File Offset: 0x004529A8
-		protected override void Tick()
+		[DebuggerHidden]
+		public _003CGetGizmos_003Ed__86(int _003C_003E1__state)
 		{
-			base.Tick();
-			if (this.IsHashIntervalTick(250))
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			switch (_003C_003E1__state)
 			{
-				this.PowerTraderComp.PowerOutput = (base.Working ? (-base.PowerComp.Props.PowerConsumption) : (-base.PowerComp.Props.idlePowerDraw));
-			}
-			Pawn selectedPawn = this.selectedPawn;
-			if (selectedPawn == null || !selectedPawn.Destroyed)
-			{
-				HumanEmbryo humanEmbryo = this.selectedEmbryo;
-				if (humanEmbryo == null || !humanEmbryo.Destroyed)
+			case -3:
+			case 1:
+				try
 				{
-					goto IL_78;
 				}
-			}
-			this.OnStop();
-			IL_78:
-			foreach (Thing thing in ((IEnumerable<Thing>)this.innerContainer))
-			{
-				HumanEmbryo humanEmbryo2 = thing as HumanEmbryo;
-				if (humanEmbryo2 != null && humanEmbryo2 != this.selectedEmbryo)
+				finally
 				{
-					Thing thing2;
-					this.innerContainer.TryDrop(thing, this.InteractionCell, base.Map, ThingPlaceMode.Near, 1, out thing2, null, null);
+					_003C_003Em__Finally1();
 				}
+				break;
+			case -4:
+			case 2:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally2();
+				}
+				break;
 			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				Building_GrowthVat CS_0024_003C_003E8__locals67 = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((Building_Enterable)CS_0024_003C_003E8__locals67).GetGizmos().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_009e;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_009e;
+				case 2:
+					_003C_003E1__state = -4;
+					goto IL_0103;
+				case 3:
+					_003C_003E1__state = -1;
+					if (CS_0024_003C_003E8__locals67.selectedEmbryo != null)
+					{
+						_003C_003E2__current = new Command_Action
+						{
+							defaultLabel = "InspectGenes".Translate() + "...",
+							defaultDesc = "InspectGenesEmbryoDesc".Translate(),
+							icon = GeneSetHolderBase.GeneticInfoTex.Texture,
+							action = delegate
+							{
+								InspectPaneUtility.OpenTab(typeof(ITab_Genes));
+							}
+						};
+						_003C_003E1__state = 4;
+						return true;
+					}
+					goto IL_0237;
+				case 4:
+					_003C_003E1__state = -1;
+					goto IL_0237;
+				case 5:
+					_003C_003E1__state = -1;
+					_003C_003E2__current = new Command_Action
+					{
+						defaultLabel = "DEV: Learn",
+						action = ((Hediff_VatLearning)CS_0024_003C_003E8__locals67.VatLearning).Learn
+					};
+					_003C_003E1__state = 6;
+					return true;
+				case 6:
+					_003C_003E1__state = -1;
+					goto IL_02e6;
+				case 7:
+					_003C_003E1__state = -1;
+					_003C_003E2__current = new Command_Action
+					{
+						defaultLabel = "DEV: Embryo birth now",
+						action = delegate
+						{
+							CS_0024_003C_003E8__locals67.startTick = Find.TickManager.TicksGame;
+							CS_0024_003C_003E8__locals67.Finish();
+						}
+					};
+					_003C_003E1__state = 8;
+					return true;
+				case 8:
+					_003C_003E1__state = -1;
+					goto IL_0723;
+				case 9:
+					_003C_003E1__state = -1;
+					goto IL_0412;
+				case 10:
+					_003C_003E1__state = -1;
+					goto IL_0520;
+				case 11:
+					_003C_003E1__state = -1;
+					goto IL_0723;
+				case 12:
+					_003C_003E1__state = -1;
+					_003C_003E2__current = new Command_Action
+					{
+						defaultLabel = "DEV: Empty nutrition",
+						action = delegate
+						{
+							CS_0024_003C_003E8__locals67.containedNutrition = 0f;
+						}
+					};
+					_003C_003E1__state = 13;
+					return true;
+				case 13:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_009e:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Gizmo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					_003C_003E7__wrap1 = StorageSettingsClipboard.CopyPasteGizmosFor(CS_0024_003C_003E8__locals67.allowedNutritionSettings).GetEnumerator();
+					_003C_003E1__state = -4;
+					goto IL_0103;
+					IL_0237:
+					if (DebugSettings.ShowDevGizmos)
+					{
+						if (CS_0024_003C_003E8__locals67.selectedPawn != null && CS_0024_003C_003E8__locals67.innerContainer.Contains(CS_0024_003C_003E8__locals67.selectedPawn))
+						{
+							_003C_003E2__current = new Command_Action
+							{
+								defaultLabel = "DEV: Advance 1 year",
+								action = delegate
+								{
+									CS_0024_003C_003E8__locals67.selectedPawn.ageTracker.Notify_TickedInGrowthVat(3600000);
+								}
+							};
+							_003C_003E1__state = 5;
+							return true;
+						}
+						goto IL_02e6;
+					}
+					goto IL_0723;
+					IL_0103:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Gizmo current2 = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current2;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					_003C_003Em__Finally2();
+					_003C_003E7__wrap1 = null;
+					if (CS_0024_003C_003E8__locals67.Working)
+					{
+						_003C_003E2__current = new Command_Action
+						{
+							defaultLabel = "CommandCancelGrowth".Translate(),
+							defaultDesc = "CommandCancelGrowthDesc".Translate(),
+							icon = CancelLoadingIcon,
+							activateSound = SoundDefOf.Designate_Cancel,
+							action = delegate
+							{
+								Action action = delegate
+								{
+									CS_0024_003C_003E8__locals67.Finish();
+									CS_0024_003C_003E8__locals67.innerContainer.TryDropAll(CS_0024_003C_003E8__locals67.InteractionCell, CS_0024_003C_003E8__locals67.Map, ThingPlaceMode.Near);
+								};
+								if (CS_0024_003C_003E8__locals67.startTick > Find.TickManager.TicksGame && CS_0024_003C_003E8__locals67.selectedEmbryo != null && CS_0024_003C_003E8__locals67.innerContainer.Contains(CS_0024_003C_003E8__locals67.selectedEmbryo))
+								{
+									Dialog_MessageBox window = Dialog_MessageBox.CreateConfirmation("ImplantEmbryoCancelVat".Translate(CS_0024_003C_003E8__locals67.selectedEmbryo.Label), action, destructive: true);
+									Find.WindowStack.Add(window);
+								}
+								else
+								{
+									action();
+								}
+							}
+						};
+						_003C_003E1__state = 3;
+						return true;
+					}
+					if (CS_0024_003C_003E8__locals67.selectedPawn != null || CS_0024_003C_003E8__locals67.selectedEmbryo != null)
+					{
+						_003C_003E2__current = new Command_Action
+						{
+							defaultLabel = "CommandCancelLoad".Translate(),
+							defaultDesc = "CommandCancelLoadDesc".Translate(),
+							icon = CancelLoadingIcon,
+							activateSound = SoundDefOf.Designate_Cancel,
+							action = delegate
+							{
+								CS_0024_003C_003E8__locals67.DestroyEmbryo();
+								CS_0024_003C_003E8__locals67.innerContainer.TryDropAll(CS_0024_003C_003E8__locals67.InteractionCell, CS_0024_003C_003E8__locals67.Map, ThingPlaceMode.Near);
+								if (CS_0024_003C_003E8__locals67.innerContainer.Contains(CS_0024_003C_003E8__locals67.selectedPawn))
+								{
+									CS_0024_003C_003E8__locals67.Notify_PawnRemoved();
+								}
+								if (CS_0024_003C_003E8__locals67.selectedPawn?.CurJobDef == JobDefOf.EnterBuilding)
+								{
+									CS_0024_003C_003E8__locals67.selectedPawn.jobs.EndCurrentJob(JobCondition.InterruptForced);
+								}
+								CS_0024_003C_003E8__locals67.OnStop();
+							}
+						};
+						_003C_003E1__state = 9;
+						return true;
+					}
+					goto IL_0412;
+					IL_0520:
+					if (CS_0024_003C_003E8__locals67.selectedEmbryo == null && Find.Storyteller.difficulty.ChildrenAllowed)
+					{
+						_003C_003Ec__DisplayClass86_1 CS_0024_003C_003E8__locals48 = new _003C_003Ec__DisplayClass86_1
+						{
+							_003C_003E4__this = CS_0024_003C_003E8__locals67
+						};
+						List<Thing> list = CS_0024_003C_003E8__locals67.Map.listerThings.ThingsOfDef(ThingDefOf.HumanEmbryo);
+						CS_0024_003C_003E8__locals48.opts = new List<FloatMenuOption>();
+						using (List<Thing>.Enumerator enumerator = list.GetEnumerator())
+						{
+							while (enumerator.MoveNext())
+							{
+								_003C_003Ec__DisplayClass86_2 CS_0024_003C_003E8__locals46 = new _003C_003Ec__DisplayClass86_2
+								{
+									CS_0024_003C_003E8__locals1 = CS_0024_003C_003E8__locals48,
+									embryo = enumerator.Current
+								};
+								if (!CS_0024_003C_003E8__locals46.embryo.IsForbidden(Faction.OfPlayer))
+								{
+									CS_0024_003C_003E8__locals46.CS_0024_003C_003E8__locals1.opts.Add(new FloatMenuOption(CS_0024_003C_003E8__locals46.embryo.LabelCap, delegate
+									{
+										CS_0024_003C_003E8__locals46.CS_0024_003C_003E8__locals1._003C_003E4__this.SelectEmbryo(CS_0024_003C_003E8__locals46.embryo as HumanEmbryo);
+									}, CS_0024_003C_003E8__locals46.embryo, Color.white));
+								}
+							}
+						}
+						Command_Action command_Action = new Command_Action
+						{
+							defaultLabel = "ImplantEmbryo".Translate() + "...",
+							defaultDesc = "InsertEmbryoGrowthVatDesc".Translate(540000.ToStringTicksToPeriod()).Resolve(),
+							icon = InsertEmbryoIcon.Texture,
+							action = delegate
+							{
+								Find.WindowStack.Add(new FloatMenu(CS_0024_003C_003E8__locals48.opts));
+							}
+						};
+						if (CS_0024_003C_003E8__locals48.opts.NullOrEmpty())
+						{
+							command_Action.Disable("ImplantNoEmbryos".Translate().CapitalizeFirst());
+						}
+						else if (CS_0024_003C_003E8__locals67.selectedPawn != null)
+						{
+							command_Action.Disable("PersonSelected".Translate().CapitalizeFirst());
+						}
+						else if (!CS_0024_003C_003E8__locals67.PowerOn)
+						{
+							command_Action.Disable("NoPower".Translate().CapitalizeFirst());
+						}
+						_003C_003E2__current = command_Action;
+						_003C_003E1__state = 11;
+						return true;
+					}
+					goto IL_0723;
+					IL_02e6:
+					if (CS_0024_003C_003E8__locals67.selectedEmbryo != null && CS_0024_003C_003E8__locals67.innerContainer.Contains(CS_0024_003C_003E8__locals67.selectedEmbryo))
+					{
+						_003C_003E2__current = new Command_Action
+						{
+							defaultLabel = "DEV: Advance gestation 1 day",
+							action = delegate
+							{
+								CS_0024_003C_003E8__locals67.startTick = Mathf.Max(0, CS_0024_003C_003E8__locals67.startTick - 60000);
+							}
+						};
+						_003C_003E1__state = 7;
+						return true;
+					}
+					goto IL_0723;
+					IL_0723:
+					if (DebugSettings.ShowDevGizmos)
+					{
+						_003C_003E2__current = new Command_Action
+						{
+							defaultLabel = "DEV: Fill nutrition",
+							action = delegate
+							{
+								CS_0024_003C_003E8__locals67.containedNutrition = 10f;
+							}
+						};
+						_003C_003E1__state = 12;
+						return true;
+					}
+					break;
+					IL_0412:
+					if (CS_0024_003C_003E8__locals67.selectedPawn == null)
+					{
+						Command_Action command_Action2 = new Command_Action
+						{
+							defaultLabel = "InsertPerson".Translate() + "...",
+							defaultDesc = "InsertPersonGrowthVatDesc".Translate(),
+							icon = InsertPawnIcon.Texture,
+							action = delegate
+							{
+								List<FloatMenuOption> list2 = new List<FloatMenuOption>();
+								foreach (Pawn item in CS_0024_003C_003E8__locals67.Map.mapPawns.AllPawnsSpawned)
+								{
+									_003C_003Ec__DisplayClass86_0 CS_0024_003C_003E8__locals64 = new _003C_003Ec__DisplayClass86_0
+									{
+										_003C_003E4__this = CS_0024_003C_003E8__locals67,
+										pawn = item
+									};
+									if ((bool)CS_0024_003C_003E8__locals67.CanAcceptPawn(item))
+									{
+										list2.Add(new FloatMenuOption(item.LabelCap, delegate
+										{
+											CS_0024_003C_003E8__locals64._003C_003E4__this.SelectPawn(CS_0024_003C_003E8__locals64.pawn);
+										}, CS_0024_003C_003E8__locals64.pawn, Color.white));
+									}
+								}
+								if (!list2.Any())
+								{
+									list2.Add(new FloatMenuOption("NoViablePawns".Translate(), null));
+								}
+								Find.WindowStack.Add(new FloatMenu(list2));
+							}
+						};
+						if (CS_0024_003C_003E8__locals67.selectedEmbryo != null)
+						{
+							command_Action2.Disable("EmbryoSelected".Translate().CapitalizeFirst());
+						}
+						else if (!CS_0024_003C_003E8__locals67.PowerOn)
+						{
+							command_Action2.Disable("NoPower".Translate().CapitalizeFirst());
+						}
+						else if (!CS_0024_003C_003E8__locals67.AnyAcceptablePawns)
+						{
+							command_Action2.Disable("NoPawnsCanEnterGrowthVat".Translate(18f).ToString());
+						}
+						_003C_003E2__current = command_Action2;
+						_003C_003E1__state = 10;
+						return true;
+					}
+					goto IL_0520;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CGetGizmos_003Ed__86 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CGetGizmos_003Ed__86(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	public HumanEmbryo selectedEmbryo;
+
+	private float embryoStarvation;
+
+	private float containedNutrition;
+
+	private StorageSettings allowedNutritionSettings;
+
+	[Unsaved(false)]
+	private CompPowerTrader cachedPowerComp;
+
+	[Unsaved(false)]
+	private Graphic cachedTopGraphic;
+
+	[Unsaved(false)]
+	private Graphic fetusEarlyStageGraphic;
+
+	[Unsaved(false)]
+	private Graphic fetusLateStageGraphic;
+
+	[Unsaved(false)]
+	private Sustainer sustainerWorking;
+
+	[Unsaved(false)]
+	private Hediff cachedVatLearning;
+
+	[Unsaved(false)]
+	private Effecter bubbleEffecter;
+
+	private static readonly Texture2D CancelLoadingIcon = ContentFinder<Texture2D>.Get("UI/Designators/Cancel");
+
+	public static readonly CachedTexture InsertPawnIcon = new CachedTexture("UI/Gizmos/InsertPawn");
+
+	public static readonly CachedTexture InsertEmbryoIcon = new CachedTexture("UI/Gizmos/InsertEmbryo");
+
+	private const float BiostarvationGainPerDayNoFoodOrPower = 0.5f;
+
+	private const float BiostarvationFallPerDayPoweredAndFed = 0.1f;
+
+	private const float BasePawnConsumedNutritionPerDay = 3f;
+
+	private const float BaseEmbryoConsumedNutritionPerDay = 6f;
+
+	private const float AgeToEject = 18f;
+
+	public const float NutritionBuffer = 10f;
+
+	public const int AgeTicksPerTickInGrowthVat = 20;
+
+	private const float EmbryoBirthQuality = 0.7f;
+
+	public const int EmbryoGestationTicks = 540000;
+
+	private const int EmbryoLateStageGraphicTicksRemaining = 540000;
+
+	private const float FetusMinSize = 0.4f;
+
+	private const float FetusMaxSize = 0.95f;
+
+	private const int GlowIntervalTicks = 132;
+
+	private static Dictionary<Rot4, ThingDef> GlowMotePerRotation;
+
+	private static Dictionary<Rot4, EffecterDef> BubbleEffecterPerRotation;
+
+	public bool StorageTabVisible => true;
+
+	public float HeldPawnDrawPos_Y => DrawPos.y + 0.03658537f;
+
+	public float HeldPawnBodyAngle => base.Rotation.AsAngle;
+
+	public PawnPosture HeldPawnPosture => PawnPosture.LayingOnGroundFaceUp;
+
+	public bool PowerOn => PowerTraderComp.PowerOn;
+
+	public override Vector3 PawnDrawOffset => CompBiosculpterPod.FloatingOffset(Find.TickManager.TicksGame);
+
+	private CompPowerTrader PowerTraderComp
+	{
+		get
+		{
+			if (cachedPowerComp == null)
+			{
+				cachedPowerComp = this.TryGetComp<CompPowerTrader>();
+			}
+			return cachedPowerComp;
+		}
+	}
+
+	public float BiostarvationDailyOffset
+	{
+		get
+		{
 			if (!base.Working)
 			{
-				this.TryGrowEmbryo();
-				Effecter effecter = this.bubbleEffecter;
-				if (effecter != null)
-				{
-					effecter.Cleanup();
-				}
-				this.bubbleEffecter = null;
-				return;
+				return 0f;
 			}
-			if (this.selectedPawn != null)
+			if (!PowerOn || containedNutrition <= 0f)
 			{
-				if (this.selectedPawn.ageTracker.AgeBiologicalYearsFloat >= 18f)
+				return 0.5f;
+			}
+			return -0.1f;
+		}
+	}
+
+	private float BiostarvationSeverityPercent
+	{
+		get
+		{
+			if (selectedEmbryo != null)
+			{
+				return embryoStarvation;
+			}
+			if (selectedPawn != null)
+			{
+				Hediff firstHediffOfDef = selectedPawn.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.BioStarvation);
+				if (firstHediffOfDef != null)
 				{
-					Messages.Message("OccupantEjectedFromGrowthVat".Translate(this.selectedPawn.Named("PAWN")) + ": " + "PawnIsTooOld".Translate(this.selectedPawn.Named("PAWN")), this.selectedPawn, MessageTypeDefOf.NeutralEvent, true);
-					this.Finish();
+					return firstHediffOfDef.Severity / HediffDefOf.BioStarvation.maxSeverity;
+				}
+			}
+			return 0f;
+		}
+	}
+
+	public float NutritionConsumedPerDay
+	{
+		get
+		{
+			float num = ((selectedEmbryo != null) ? 6f : 3f);
+			if (BiostarvationSeverityPercent > 0f)
+			{
+				float num2 = 1.1f;
+				num *= num2;
+			}
+			return num;
+		}
+	}
+
+	public float NutritionStored
+	{
+		get
+		{
+			float num = containedNutrition;
+			for (int i = 0; i < innerContainer.Count; i++)
+			{
+				Thing thing = innerContainer[i];
+				num += (float)thing.stackCount * thing.GetStatValue(StatDefOf.Nutrition);
+			}
+			return num;
+		}
+	}
+
+	public float NutritionNeeded
+	{
+		get
+		{
+			if (selectedPawn == null && selectedEmbryo == null)
+			{
+				return 0f;
+			}
+			return 10f - NutritionStored;
+		}
+	}
+
+	public int EmbryoGestationTicksRemaining => startTick - Find.TickManager.TicksGame;
+
+	public float EmbryoGestationPct => 1f - Mathf.Clamp01((float)EmbryoGestationTicksRemaining / 540000f);
+
+	private Graphic TopGraphic
+	{
+		get
+		{
+			if (cachedTopGraphic == null)
+			{
+				cachedTopGraphic = GraphicDatabase.Get<Graphic_Multi>("Things/Building/Misc/GrowthVat/GrowthVatTop", ShaderDatabase.Transparent, def.graphicData.drawSize, Color.white);
+			}
+			return cachedTopGraphic;
+		}
+	}
+
+	private Graphic FetusEarlyStage
+	{
+		get
+		{
+			if (fetusEarlyStageGraphic == null)
+			{
+				fetusEarlyStageGraphic = GraphicDatabase.Get<Graphic_Single>("Other/VatGrownFetus_EarlyStage", ShaderDatabase.Cutout, Vector2.one, Color.white);
+			}
+			return fetusEarlyStageGraphic;
+		}
+	}
+
+	private Graphic FetusLateStage
+	{
+		get
+		{
+			if (fetusLateStageGraphic == null)
+			{
+				fetusLateStageGraphic = GraphicDatabase.Get<Graphic_Single>("Other/VatGrownFetus_LateStage", ShaderDatabase.Cutout, Vector2.one, Color.white);
+			}
+			return fetusLateStageGraphic;
+		}
+	}
+
+	private Hediff VatLearning
+	{
+		get
+		{
+			if (cachedVatLearning == null)
+			{
+				cachedVatLearning = selectedPawn.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.VatLearning) ?? selectedPawn.health.AddHediff(HediffDefOf.VatLearning, null, null);
+			}
+			return cachedVatLearning;
+		}
+	}
+
+	public override void PostMake()
+	{
+		base.PostMake();
+		allowedNutritionSettings = new StorageSettings(this);
+		if (def.building.defaultStorageSettings != null)
+		{
+			allowedNutritionSettings.CopyFrom(def.building.defaultStorageSettings);
+		}
+	}
+
+	public override void SpawnSetup(Map map, bool respawningAfterLoad)
+	{
+		base.SpawnSetup(map, respawningAfterLoad);
+		if (respawningAfterLoad && selectedEmbryo != null && innerContainer.Contains(selectedEmbryo))
+		{
+			LongEventHandler.ExecuteWhenFinished(delegate
+			{
+				Color color = EmbryoColor();
+				fetusEarlyStageGraphic = FetusEarlyStage.GetColoredVersion(ShaderDatabase.Cutout, color, color);
+				fetusLateStageGraphic = FetusLateStage.GetColoredVersion(ShaderDatabase.Cutout, color, color);
+			});
+		}
+	}
+
+	public override void DeSpawn(DestroyMode mode = DestroyMode.Vanish)
+	{
+		if (mode != DestroyMode.WillReplace)
+		{
+			if (selectedPawn != null && innerContainer.Contains(selectedPawn))
+			{
+				Notify_PawnRemoved();
+			}
+			DestroyEmbryo();
+		}
+		sustainerWorking = null;
+		cachedVatLearning = null;
+		base.DeSpawn(mode);
+	}
+
+	protected override void TickInterval(int delta)
+	{
+		base.TickInterval(delta);
+		if (base.Working && selectedPawn != null && innerContainer.Contains(selectedPawn))
+		{
+			VatLearning?.TickInterval(delta);
+			VatLearning?.PostTickInterval(delta);
+		}
+	}
+
+	protected override void Tick()
+	{
+		base.Tick();
+		if (this.IsHashIntervalTick(250))
+		{
+			PowerTraderComp.PowerOutput = (base.Working ? (0f - base.PowerComp.Props.PowerConsumption) : (0f - base.PowerComp.Props.idlePowerDraw));
+		}
+		Pawn pawn = selectedPawn;
+		if (pawn == null || !pawn.Destroyed)
+		{
+			HumanEmbryo humanEmbryo = selectedEmbryo;
+			if (humanEmbryo == null || !humanEmbryo.Destroyed)
+			{
+				goto IL_0078;
+			}
+		}
+		OnStop();
+		goto IL_0078;
+		IL_0078:
+		foreach (Thing item in (IEnumerable<Thing>)innerContainer)
+		{
+			if (item is HumanEmbryo humanEmbryo2 && humanEmbryo2 != selectedEmbryo)
+			{
+				innerContainer.TryDrop(item, InteractionCell, base.Map, ThingPlaceMode.Near, 1, out var _);
+			}
+		}
+		if (base.Working)
+		{
+			if (selectedPawn != null)
+			{
+				if (selectedPawn.ageTracker.AgeBiologicalYearsFloat >= 18f)
+				{
+					Messages.Message("OccupantEjectedFromGrowthVat".Translate(selectedPawn.Named("PAWN")) + ": " + "PawnIsTooOld".Translate(selectedPawn.Named("PAWN")), selectedPawn, MessageTypeDefOf.NeutralEvent);
+					Finish();
 					return;
 				}
-				if (this.innerContainer.Contains(this.selectedPawn))
+				if (innerContainer.Contains(selectedPawn))
 				{
-					int ticks = Mathf.RoundToInt(20f * this.selectedPawn.GetStatValue(StatDefOf.GrowthVatOccupantSpeed, true, -1));
-					this.selectedPawn.ageTracker.Notify_TickedInGrowthVat(ticks);
-					Hediff vatLearning = this.VatLearning;
-					if (vatLearning != null)
-					{
-						vatLearning.Tick();
-					}
-					Hediff vatLearning2 = this.VatLearning;
-					if (vatLearning2 != null)
-					{
-						vatLearning2.PostTick();
-					}
+					int ticks = Mathf.RoundToInt(20f * selectedPawn.GetStatValue(StatDefOf.GrowthVatOccupantSpeed));
+					selectedPawn.ageTracker.Notify_TickedInGrowthVat(ticks);
+					VatLearning?.Tick();
+					VatLearning?.PostTick();
 				}
-				float num = this.BiostarvationDailyOffset / 60000f * HediffDefOf.BioStarvation.maxSeverity;
-				Hediff firstHediffOfDef = this.selectedPawn.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.BioStarvation, false);
+				float num = BiostarvationDailyOffset / 60000f * HediffDefOf.BioStarvation.maxSeverity;
+				Hediff firstHediffOfDef = selectedPawn.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.BioStarvation);
 				if (firstHediffOfDef != null)
 				{
 					firstHediffOfDef.Severity += num;
 					if (firstHediffOfDef.ShouldRemove)
 					{
-						this.selectedPawn.health.RemoveHediff(firstHediffOfDef);
+						selectedPawn.health.RemoveHediff(firstHediffOfDef);
 					}
 				}
 				else if (num > 0f)
 				{
-					Hediff hediff = HediffMaker.MakeHediff(HediffDefOf.BioStarvation, this.selectedPawn, null);
+					Hediff hediff = HediffMaker.MakeHediff(HediffDefOf.BioStarvation, selectedPawn);
 					hediff.Severity = num;
-					this.selectedPawn.health.AddHediff(hediff, null, null, null);
+					selectedPawn.health.AddHediff(hediff, null, null);
 				}
 			}
-			else if (this.selectedEmbryo != null)
+			else if (selectedEmbryo != null)
 			{
-				if (this.EmbryoGestationTicksRemaining <= 0)
+				if (EmbryoGestationTicksRemaining <= 0)
 				{
-					this.Finish();
+					Finish();
 					return;
 				}
-				this.embryoStarvation = Mathf.Clamp01(this.embryoStarvation + this.BiostarvationDailyOffset / 60000f);
+				embryoStarvation = Mathf.Clamp01(embryoStarvation + BiostarvationDailyOffset / 60000f);
 			}
-			if (this.BiostarvationSeverityPercent >= 1f)
+			if (BiostarvationSeverityPercent >= 1f)
 			{
-				this.Fail();
+				Fail();
 				return;
 			}
-			if (this.sustainerWorking == null || this.sustainerWorking.Ended)
+			if (sustainerWorking == null || sustainerWorking.Ended)
 			{
-				this.sustainerWorking = SoundDefOf.GrowthVat_Working.TrySpawnSustainer(SoundInfo.InMap(this, MaintenanceType.PerTick));
+				sustainerWorking = SoundDefOf.GrowthVat_Working.TrySpawnSustainer(SoundInfo.InMap(this, MaintenanceType.PerTick));
 			}
 			else
 			{
-				this.sustainerWorking.Maintain();
+				sustainerWorking.Maintain();
 			}
-			this.containedNutrition = Mathf.Clamp(this.containedNutrition - this.NutritionConsumedPerDay / 60000f, 0f, 2.1474836E+09f);
-			if (this.containedNutrition <= 0f)
+			containedNutrition = Mathf.Clamp(containedNutrition - NutritionConsumedPerDay / 60000f, 0f, 2.1474836E+09f);
+			if (containedNutrition <= 0f)
 			{
-				this.TryAbsorbNutritiousThing();
+				TryAbsorbNutritiousThing();
 			}
-			if (Building_GrowthVat.GlowMotePerRotation == null)
+			if (GlowMotePerRotation == null)
 			{
-				Building_GrowthVat.GlowMotePerRotation = new Dictionary<Rot4, ThingDef>
+				GlowMotePerRotation = new Dictionary<Rot4, ThingDef>
 				{
 					{
 						Rot4.South,
@@ -442,7 +1091,7 @@ namespace RimWorld
 						ThingDefOf.Mote_VatGlowVertical
 					}
 				};
-				Building_GrowthVat.BubbleEffecterPerRotation = new Dictionary<Rot4, EffecterDef>
+				BubbleEffecterPerRotation = new Dictionary<Rot4, EffecterDef>
 				{
 					{
 						Rot4.South,
@@ -464,727 +1113,364 @@ namespace RimWorld
 			}
 			if (this.IsHashIntervalTick(132))
 			{
-				MoteMaker.MakeStaticMote(this.DrawPos, base.MapHeld, Building_GrowthVat.GlowMotePerRotation[base.Rotation], 1f, false, 0f);
+				MoteMaker.MakeStaticMote(DrawPos, base.MapHeld, GlowMotePerRotation[base.Rotation]);
 			}
-			if (this.bubbleEffecter == null)
+			if (bubbleEffecter == null)
 			{
-				this.bubbleEffecter = Building_GrowthVat.BubbleEffecterPerRotation[base.Rotation].SpawnAttached(this, base.MapHeld, 1f);
+				bubbleEffecter = BubbleEffecterPerRotation[base.Rotation].SpawnAttached(this, base.MapHeld);
 			}
-			this.bubbleEffecter.EffectTick(this, this);
+			bubbleEffecter.EffectTick(this, this);
 		}
-
-		// Token: 0x0600EED4 RID: 61140 RVA: 0x00454C40 File Offset: 0x00452E40
-		public override AcceptanceReport CanAcceptPawn(Pawn pawn)
+		else
 		{
-			if (base.Working)
-			{
-				return "Occupied".Translate();
-			}
-			if (!this.PowerOn)
-			{
-				return "NoPower".Translate().CapitalizeFirst();
-			}
-			if (this.selectedEmbryo != null)
-			{
-				return "EmbryoSelected".Translate();
-			}
-			if (pawn.ageTracker.AgeBiologicalYearsFloat >= 18f)
-			{
-				return "TooOld".Translate(pawn.Named("PAWN"), 18f.Named("AGEYEARS"));
-			}
-			if (this.selectedPawn != null && this.selectedPawn != pawn)
-			{
-				return "WaitingForPawn".Translate(this.selectedPawn.Named("PAWN"));
-			}
-			if (pawn.health.hediffSet.HasHediff(HediffDefOf.BioStarvation, false))
-			{
-				return "PawnBiostarving".Translate(pawn.Named("PAWN"));
-			}
-			return pawn.IsColonist && !pawn.IsQuestLodger();
+			TryGrowEmbryo();
+			bubbleEffecter?.Cleanup();
+			bubbleEffecter = null;
 		}
+	}
 
-		// Token: 0x0600EED5 RID: 61141 RVA: 0x00454D5C File Offset: 0x00452F5C
-		public override void TryAcceptPawn(Pawn pawn)
+	public override AcceptanceReport CanAcceptPawn(Pawn pawn)
+	{
+		if (base.Working)
 		{
-			if (this.selectedPawn != null && this.CanAcceptPawn(pawn))
-			{
-				this.selectedPawn = pawn;
-				bool flag = pawn.DeSpawnOrDeselect(DestroyMode.Vanish);
-				if (this.innerContainer.TryAddOrTransfer(pawn, true))
-				{
-					SoundDefOf.GrowthVat_Close.PlayOneShot(SoundInfo.InMap(this, MaintenanceType.None));
-					this.startTick = Find.TickManager.TicksGame;
-					if (!pawn.health.hediffSet.HasHediff(HediffDefOf.VatLearning, false))
-					{
-						pawn.health.AddHediff(HediffDefOf.VatLearning, null, null, null);
-					}
-					if (!pawn.health.hediffSet.HasHediff(HediffDefOf.VatGrowing, false))
-					{
-						pawn.health.AddHediff(HediffDefOf.VatGrowing, null, null, null);
-					}
-				}
-				if (flag)
-				{
-					Find.Selector.Select(pawn, false, false);
-				}
-			}
+			return "Occupied".Translate();
 		}
-
-		// Token: 0x0600EED6 RID: 61142 RVA: 0x00454E44 File Offset: 0x00453044
-		private void TryGrowEmbryo()
+		if (!PowerOn)
 		{
-			if (base.Working || !this.PowerOn)
+			return "NoPower".Translate().CapitalizeFirst();
+		}
+		if (selectedEmbryo != null)
+		{
+			return "EmbryoSelected".Translate();
+		}
+		if (pawn.ageTracker.AgeBiologicalYearsFloat >= 18f)
+		{
+			return "TooOld".Translate(pawn.Named("PAWN"), 18f.Named("AGEYEARS"));
+		}
+		if (selectedPawn != null && selectedPawn != pawn)
+		{
+			return "WaitingForPawn".Translate(selectedPawn.Named("PAWN"));
+		}
+		if (pawn.health.hediffSet.HasHediff(HediffDefOf.BioStarvation))
+		{
+			return "PawnBiostarving".Translate(pawn.Named("PAWN"));
+		}
+		return pawn.IsColonist && !pawn.IsQuestLodger();
+	}
+
+	public override void TryAcceptPawn(Pawn pawn)
+	{
+		if (selectedPawn == null || !CanAcceptPawn(pawn))
+		{
+			return;
+		}
+		selectedPawn = pawn;
+		bool num = pawn.DeSpawnOrDeselect();
+		if (innerContainer.TryAddOrTransfer(pawn))
+		{
+			SoundDefOf.GrowthVat_Close.PlayOneShot(SoundInfo.InMap(this));
+			startTick = Find.TickManager.TicksGame;
+			if (!pawn.health.hediffSet.HasHediff(HediffDefOf.VatLearning))
 			{
-				return;
+				pawn.health.AddHediff(HediffDefOf.VatLearning, null, null);
 			}
-			if (this.selectedEmbryo != null && this.innerContainer.Contains(this.selectedEmbryo))
+			if (!pawn.health.hediffSet.HasHediff(HediffDefOf.VatGrowing))
 			{
-				SoundDefOf.GrowthVat_Close.PlayOneShot(SoundInfo.InMap(this, MaintenanceType.None));
-				this.startTick = Find.TickManager.TicksGame + 540000;
-				LongEventHandler.ExecuteWhenFinished(delegate
-				{
-					Color color = this.EmbryoColor();
-					this.fetusEarlyStageGraphic = this.FetusEarlyStage.GetColoredVersion(ShaderDatabase.Cutout, color, color);
-					this.fetusLateStageGraphic = this.FetusLateStage.GetColoredVersion(ShaderDatabase.Cutout, color, color);
-				});
-				if (this.selectedPawn != null)
-				{
-					Log.Error("Growing embryo while pawn was somehow marked as selected");
-					this.selectedPawn = null;
-				}
+				pawn.health.AddHediff(HediffDefOf.VatGrowing, null, null);
 			}
 		}
-
-		// Token: 0x0600EED7 RID: 61143 RVA: 0x00454ED4 File Offset: 0x004530D4
-		private void TryAbsorbNutritiousThing()
+		if (num)
 		{
-			for (int i = 0; i < this.innerContainer.Count; i++)
-			{
-				if (this.innerContainer[i] != this.selectedPawn && this.innerContainer[i].def != ThingDefOf.Xenogerm && this.innerContainer[i].def != ThingDefOf.HumanEmbryo)
-				{
-					float statValue = this.innerContainer[i].GetStatValue(StatDefOf.Nutrition, true, -1);
-					if (statValue > 0f)
-					{
-						this.containedNutrition += statValue;
-						this.innerContainer[i].SplitOff(1).Destroy(DestroyMode.Vanish);
-						return;
-					}
-				}
-			}
+			Find.Selector.Select(pawn, playSound: false, forceDesignatorDeselect: false);
 		}
+	}
 
-		// Token: 0x0600EED8 RID: 61144 RVA: 0x00454F89 File Offset: 0x00453189
-		private void Finish()
+	private void TryGrowEmbryo()
+	{
+		if (!base.Working && PowerOn && selectedEmbryo != null && innerContainer.Contains(selectedEmbryo))
 		{
-			if (this.selectedPawn != null)
+			SoundDefOf.GrowthVat_Close.PlayOneShot(SoundInfo.InMap(this));
+			startTick = Find.TickManager.TicksGame + 540000;
+			LongEventHandler.ExecuteWhenFinished(delegate
 			{
-				this.FinishPawn();
-				return;
-			}
-			if (this.selectedEmbryo != null)
-			{
-				this.FinishEmbryo();
-			}
-		}
-
-		// Token: 0x0600EED9 RID: 61145 RVA: 0x00454FA8 File Offset: 0x004531A8
-		private void FinishEmbryo()
-		{
-			this.EmbryoBirth();
-			this.DestroyEmbryo(false);
-			this.OnStop();
-		}
-
-		// Token: 0x0600EEDA RID: 61146 RVA: 0x00454FC0 File Offset: 0x004531C0
-		private void FinishPawn()
-		{
-			if (this.selectedPawn == null || !this.innerContainer.Contains(this.selectedPawn))
-			{
-				return;
-			}
-			this.Notify_PawnRemoved();
-			Thing thing;
-			this.innerContainer.TryDrop(this.selectedPawn, this.InteractionCell, base.Map, ThingPlaceMode.Near, 1, out thing, null, null);
-			this.OnStop();
-		}
-
-		// Token: 0x0600EEDB RID: 61147 RVA: 0x0045501C File Offset: 0x0045321C
-		private void Fail()
-		{
-			if (this.innerContainer.Contains(this.selectedPawn))
-			{
-				this.Notify_PawnRemoved();
-				Thing thing;
-				this.innerContainer.TryDrop(this.selectedPawn, this.InteractionCell, base.Map, ThingPlaceMode.Near, 1, out thing, null, null);
-				Hediff firstHediffOfDef = this.selectedPawn.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.BioStarvation, false);
-				this.selectedPawn.Kill(null, firstHediffOfDef);
-			}
-			this.DestroyEmbryo(true);
-			this.OnStop();
-		}
-
-		// Token: 0x0600EEDC RID: 61148 RVA: 0x004550A4 File Offset: 0x004532A4
-		private void OnStop()
-		{
-			this.selectedPawn = null;
-			this.selectedEmbryo = null;
-			this.startTick = -1;
-			this.embryoStarvation = 0f;
-			this.sustainerWorking = null;
-			this.cachedVatLearning = null;
-		}
-
-		// Token: 0x0600EEDD RID: 61149 RVA: 0x004550D4 File Offset: 0x004532D4
-		private void DestroyEmbryo(bool biostarvation = false)
-		{
-			if (this.startTick >= 0 && this.selectedEmbryo != null && this.innerContainer.Contains(this.selectedEmbryo))
-			{
-				if (this.startTick > Find.TickManager.TicksGame)
-				{
-					if (biostarvation)
-					{
-						Messages.Message("EmbryoEjectedFromGrowthVatBiostarvation".Translate(this.selectedEmbryo.Label), this, MessageTypeDefOf.NegativeEvent, true);
-					}
-					else
-					{
-						Messages.Message("EmbryoEjectedFromGrowthVat".Translate(this.selectedEmbryo.Label), this, MessageTypeDefOf.NegativeEvent, true);
-					}
-				}
-				this.innerContainer.Remove(this.selectedEmbryo);
-				this.selectedEmbryo.Destroy(DestroyMode.Vanish);
-				this.selectedEmbryo = null;
-			}
-		}
-
-		// Token: 0x0600EEDE RID: 61150 RVA: 0x004551AC File Offset: 0x004533AC
-		private void EmbryoBirth()
-		{
-			if (this.selectedEmbryo != null && this.innerContainer.Contains(this.selectedEmbryo) && this.startTick <= Find.TickManager.TicksGame)
-			{
-				Precept_Ritual precept_Ritual = Faction.OfPlayer.ideos.PrimaryIdeo.GetPrecept(PreceptDefOf.ChildBirth) as Precept_Ritual;
-				RitualOutcomePossibility outcome = ((RitualOutcomeEffectWorker_ChildBirth)RitualOutcomeEffectDefOf.ChildBirth.GetInstance()).GetOutcome(0.7f, null);
-				float quality = 0.7f;
-				Precept_Ritual ritual = precept_Ritual;
-				HumanEmbryo humanEmbryo = this.selectedEmbryo;
-				List<GeneDef> genes;
-				if (humanEmbryo == null)
-				{
-					genes = null;
-				}
-				else
-				{
-					GeneSet geneSet = humanEmbryo.GeneSet;
-					genes = ((geneSet != null) ? geneSet.GenesListForReading : null);
-				}
-				Thing thing = PregnancyUtility.ApplyBirthOutcome(outcome, quality, ritual, genes, this.selectedEmbryo.Mother, this, this.selectedEmbryo.Father, null, null, null, false);
-				if (thing != null && this.embryoStarvation > 0f)
-				{
-					Corpse corpse = thing as Corpse;
-					Pawn pawn = (corpse != null) ? corpse.InnerPawn : ((Pawn)thing);
-					Hediff hediff = HediffMaker.MakeHediff(HediffDefOf.BioStarvation, pawn, null);
-					hediff.Severity = Mathf.Lerp(0f, HediffDefOf.BioStarvation.maxSeverity, this.embryoStarvation);
-					pawn.health.AddHediff(hediff, null, null, null);
-				}
-			}
-		}
-
-		// Token: 0x0600EEDF RID: 61151 RVA: 0x004552DE File Offset: 0x004534DE
-		private void Notify_PawnRemoved()
-		{
-			SoundDefOf.GrowthVat_Open.PlayOneShot(SoundInfo.InMap(this, MaintenanceType.None));
-		}
-
-		// Token: 0x0600EEE0 RID: 61152 RVA: 0x004552F6 File Offset: 0x004534F6
-		public bool CanAcceptNutrition(Thing thing)
-		{
-			return this.allowedNutritionSettings.AllowedToAccept(thing);
-		}
-
-		// Token: 0x0600EEE1 RID: 61153 RVA: 0x00455304 File Offset: 0x00453504
-		public StorageSettings GetStoreSettings()
-		{
-			return this.allowedNutritionSettings;
-		}
-
-		// Token: 0x0600EEE2 RID: 61154 RVA: 0x00440EF5 File Offset: 0x0043F0F5
-		public StorageSettings GetParentStoreSettings()
-		{
-			return this.def.building.fixedStorageSettings;
-		}
-
-		// Token: 0x0600EEE3 RID: 61155 RVA: 0x000026EA File Offset: 0x000008EA
-		public void Notify_SettingsChanged()
-		{
-		}
-
-		// Token: 0x0600EEE4 RID: 61156 RVA: 0x0045530C File Offset: 0x0045350C
-		public override IEnumerable<Gizmo> GetGizmos()
-		{
-			foreach (Gizmo gizmo in base.GetGizmos())
-			{
-				yield return gizmo;
-			}
-			IEnumerator<Gizmo> enumerator = null;
-			foreach (Gizmo gizmo2 in StorageSettingsClipboard.CopyPasteGizmosFor(this.allowedNutritionSettings))
-			{
-				yield return gizmo2;
-			}
-			enumerator = null;
-			if (base.Working)
-			{
-				yield return new Command_Action
-				{
-					defaultLabel = "CommandCancelGrowth".Translate(),
-					defaultDesc = "CommandCancelGrowthDesc".Translate(),
-					icon = Building_GrowthVat.CancelLoadingIcon,
-					activateSound = SoundDefOf.Designate_Cancel,
-					action = delegate()
-					{
-						Action action = delegate()
-						{
-							this.Finish();
-							this.innerContainer.TryDropAll(this.InteractionCell, base.Map, ThingPlaceMode.Near, null, null, true);
-						};
-						if (this.startTick > Find.TickManager.TicksGame && this.selectedEmbryo != null && this.innerContainer.Contains(this.selectedEmbryo))
-						{
-							Dialog_MessageBox window = Dialog_MessageBox.CreateConfirmation("ImplantEmbryoCancelVat".Translate(this.selectedEmbryo.Label), action, true, null, WindowLayer.Dialog);
-							Find.WindowStack.Add(window);
-							return;
-						}
-						action();
-					}
-				};
-				if (this.selectedEmbryo != null)
-				{
-					Command_Action command_Action = new Command_Action();
-					command_Action.defaultLabel = "InspectGenes".Translate() + "...";
-					command_Action.defaultDesc = "InspectGenesEmbryoDesc".Translate();
-					command_Action.icon = GeneSetHolderBase.GeneticInfoTex.Texture;
-					command_Action.action = delegate()
-					{
-						InspectPaneUtility.OpenTab(typeof(ITab_Genes));
-					};
-					yield return command_Action;
-				}
-				if (DebugSettings.ShowDevGizmos)
-				{
-					if (this.selectedPawn != null && this.innerContainer.Contains(this.selectedPawn))
-					{
-						yield return new Command_Action
-						{
-							defaultLabel = "DEV: Advance 1 year",
-							action = delegate()
-							{
-								this.selectedPawn.ageTracker.Notify_TickedInGrowthVat(3600000);
-							}
-						};
-						yield return new Command_Action
-						{
-							defaultLabel = "DEV: Learn",
-							action = new Action(((Hediff_VatLearning)this.VatLearning).Learn)
-						};
-					}
-					if (this.selectedEmbryo != null && this.innerContainer.Contains(this.selectedEmbryo))
-					{
-						yield return new Command_Action
-						{
-							defaultLabel = "DEV: Advance gestation 1 day",
-							action = delegate()
-							{
-								this.startTick = Mathf.Max(0, this.startTick - 60000);
-							}
-						};
-						yield return new Command_Action
-						{
-							defaultLabel = "DEV: Embryo birth now",
-							action = delegate()
-							{
-								this.startTick = Find.TickManager.TicksGame;
-								this.Finish();
-							}
-						};
-					}
-				}
-			}
-			else
-			{
-				if (this.selectedPawn != null || this.selectedEmbryo != null)
-				{
-					yield return new Command_Action
-					{
-						defaultLabel = "CommandCancelLoad".Translate(),
-						defaultDesc = "CommandCancelLoadDesc".Translate(),
-						icon = Building_GrowthVat.CancelLoadingIcon,
-						activateSound = SoundDefOf.Designate_Cancel,
-						action = delegate()
-						{
-							this.DestroyEmbryo(false);
-							this.innerContainer.TryDropAll(this.InteractionCell, base.Map, ThingPlaceMode.Near, null, null, true);
-							if (this.innerContainer.Contains(this.selectedPawn))
-							{
-								this.Notify_PawnRemoved();
-							}
-							Pawn selectedPawn = this.selectedPawn;
-							if (((selectedPawn != null) ? selectedPawn.CurJobDef : null) == JobDefOf.EnterBuilding)
-							{
-								this.selectedPawn.jobs.EndCurrentJob(JobCondition.InterruptForced, true, true);
-							}
-							this.OnStop();
-						}
-					};
-				}
-				if (this.selectedPawn == null)
-				{
-					Command_Action command_Action2 = new Command_Action();
-					command_Action2.defaultLabel = "InsertPerson".Translate() + "...";
-					command_Action2.defaultDesc = "InsertPersonGrowthVatDesc".Translate();
-					command_Action2.icon = Building_GrowthVat.InsertPawnIcon.Texture;
-					command_Action2.action = delegate()
-					{
-						List<FloatMenuOption> list = new List<FloatMenuOption>();
-						foreach (Pawn pawn2 in base.Map.mapPawns.AllPawnsSpawned)
-						{
-							Pawn pawn = pawn2;
-							if (this.CanAcceptPawn(pawn2))
-							{
-								list.Add(new FloatMenuOption(pawn2.LabelCap, delegate()
-								{
-									this.SelectPawn(pawn);
-								}, pawn, Color.white, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0));
-							}
-						}
-						if (!list.Any<FloatMenuOption>())
-						{
-							list.Add(new FloatMenuOption("NoViablePawns".Translate(), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0));
-						}
-						Find.WindowStack.Add(new FloatMenu(list));
-					};
-					if (this.selectedEmbryo != null)
-					{
-						command_Action2.Disable("EmbryoSelected".Translate().CapitalizeFirst());
-					}
-					else if (!this.PowerOn)
-					{
-						command_Action2.Disable("NoPower".Translate().CapitalizeFirst());
-					}
-					else if (!base.AnyAcceptablePawns)
-					{
-						command_Action2.Disable("NoPawnsCanEnterGrowthVat".Translate(18f).ToString());
-					}
-					yield return command_Action2;
-				}
-				if (this.selectedEmbryo == null && Find.Storyteller.difficulty.ChildrenAllowed)
-				{
-					List<Thing> embryos = base.Map.listerThings.ThingsOfDef(ThingDefOf.HumanEmbryo);
-					Command_Action command_Action3 = new Command_Action();
-					command_Action3.defaultLabel = "ImplantEmbryo".Translate() + "...";
-					command_Action3.defaultDesc = "InsertEmbryoGrowthVatDesc".Translate(540000.ToStringTicksToPeriod(true, false, true, true, false)).Resolve();
-					command_Action3.icon = Building_GrowthVat.InsertEmbryoIcon.Texture;
-					command_Action3.action = delegate()
-					{
-						List<FloatMenuOption> list = new List<FloatMenuOption>();
-						using (List<Thing>.Enumerator enumerator2 = embryos.GetEnumerator())
-						{
-							while (enumerator2.MoveNext())
-							{
-								Thing embryo = enumerator2.Current;
-								list.Add(new FloatMenuOption(embryo.LabelCap, delegate()
-								{
-									this.SelectEmbryo(embryo as HumanEmbryo);
-								}, embryo, Color.white, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0));
-							}
-						}
-						Find.WindowStack.Add(new FloatMenu(list));
-					};
-					if (embryos.NullOrEmpty<Thing>())
-					{
-						command_Action3.Disable("ImplantNoEmbryos".Translate().CapitalizeFirst());
-					}
-					else if (this.selectedPawn != null)
-					{
-						command_Action3.Disable("PersonSelected".Translate().CapitalizeFirst());
-					}
-					else if (!this.PowerOn)
-					{
-						command_Action3.Disable("NoPower".Translate().CapitalizeFirst());
-					}
-					yield return command_Action3;
-				}
-			}
-			if (DebugSettings.ShowDevGizmos)
-			{
-				yield return new Command_Action
-				{
-					defaultLabel = "DEV: Fill nutrition",
-					action = delegate()
-					{
-						this.containedNutrition = 10f;
-					}
-				};
-				yield return new Command_Action
-				{
-					defaultLabel = "DEV: Empty nutrition",
-					action = delegate()
-					{
-						this.containedNutrition = 0f;
-					}
-				};
-			}
-			yield break;
-			yield break;
-		}
-
-		// Token: 0x0600EEE5 RID: 61157 RVA: 0x0045531C File Offset: 0x0045351C
-		public void SelectEmbryo(HumanEmbryo embryo)
-		{
-			this.selectedEmbryo = embryo;
-			embryo.implantTarget = this;
-		}
-
-		// Token: 0x0600EEE6 RID: 61158 RVA: 0x0045532C File Offset: 0x0045352C
-		public override void DynamicDrawPhaseAt(DrawPhase phase, Vector3 drawLoc, bool flip = false)
-		{
-			if (base.Working && this.selectedPawn != null && this.innerContainer.Contains(this.selectedPawn))
-			{
-				this.selectedPawn.Drawer.renderer.DynamicDrawPhaseAt(phase, drawLoc + this.PawnDrawOffset, null, true);
-			}
-			base.DynamicDrawPhaseAt(phase, drawLoc, flip);
-		}
-
-		// Token: 0x0600EEE7 RID: 61159 RVA: 0x00455394 File Offset: 0x00453594
-		protected override void DrawAt(Vector3 drawLoc, bool flip = false)
-		{
-			base.DrawAt(drawLoc, flip);
-			if (base.Working && this.selectedPawn == null && this.selectedEmbryo != null && this.innerContainer.Contains(this.selectedEmbryo))
-			{
-				Vector2 drawSize = Vector2.one * Mathf.Lerp(0.4f, 0.95f, this.EmbryoGestationPct);
-				if (this.EmbryoGestationTicksRemaining > 540000)
-				{
-					this.FetusEarlyStage.drawSize = drawSize;
-					this.FetusEarlyStage.DrawFromDef(this.DrawPos + this.PawnDrawOffset + Altitudes.AltIncVect * 0.25f, base.Rotation, null, 0f);
-				}
-				else
-				{
-					this.FetusLateStage.drawSize = drawSize;
-					this.FetusLateStage.DrawFromDef(this.DrawPos + this.PawnDrawOffset + Altitudes.AltIncVect * 0.25f, base.Rotation, null, 0f);
-				}
-			}
-			this.TopGraphic.Draw(this.DrawPos + Altitudes.AltIncVect * 2f, base.Rotation, this, 0f);
-		}
-
-		// Token: 0x0600EEE8 RID: 61160 RVA: 0x004554D0 File Offset: 0x004536D0
-		private Color EmbryoColor()
-		{
-			Color result = PawnSkinColors.GetSkinColor(0.5f);
-			HumanEmbryo humanEmbryo = this.selectedEmbryo;
-			if (((humanEmbryo != null) ? humanEmbryo.GeneSet : null) != null)
-			{
-				foreach (GeneDef geneDef in this.selectedEmbryo.GeneSet.GenesListForReading)
-				{
-					if (geneDef.skinColorOverride != null)
-					{
-						return geneDef.skinColorOverride.Value;
-					}
-					if (geneDef.skinColorBase != null)
-					{
-						result = geneDef.skinColorBase.Value;
-					}
-				}
-				return result;
-			}
-			return result;
-		}
-
-		// Token: 0x0600EEE9 RID: 61161 RVA: 0x0045557C File Offset: 0x0045377C
-		public override void DrawExtraSelectionOverlays()
-		{
-			base.DrawExtraSelectionOverlays();
-			if (this.selectedEmbryo != null && this.selectedEmbryo.Map == base.Map)
-			{
-				GenDraw.DrawLineBetween(this.TrueCenter(), this.selectedEmbryo.TrueCenter());
-			}
-		}
-
-		// Token: 0x0600EEEA RID: 61162 RVA: 0x004555B8 File Offset: 0x004537B8
-		public override string GetInspectString()
-		{
-			StringBuilder stringBuilder = new StringBuilder();
-			stringBuilder.Append(base.GetInspectString());
-			if (base.Working)
-			{
-				if (this.selectedPawn != null && this.innerContainer.Contains(this.selectedPawn))
-				{
-					stringBuilder.AppendLineIfNotEmpty().Append(string.Format("{0}: {1}, {2}", "CasketContains".Translate().ToString(), this.selectedPawn.NameShortColored.Resolve(), this.selectedPawn.ageTracker.AgeBiologicalYears));
-				}
-				if (this.selectedEmbryo != null && this.innerContainer.Contains(this.selectedEmbryo))
-				{
-					stringBuilder.AppendLineIfNotEmpty().AppendLine("Gestating".Translate() + ": " + this.selectedEmbryo.Label.CapitalizeFirst());
-					stringBuilder.AppendLineTagged("EmbryoTimeUntilBirth".Translate() + ": " + this.EmbryoGestationTicksRemaining.ToStringTicksToDays("F1").Colorize(ColoredText.DateTimeColor));
-					stringBuilder.Append("EmbryoBirthQuality".Translate() + ": " + 0.7f.ToStringPercent());
-				}
-				float biostarvationSeverityPercent = this.BiostarvationSeverityPercent;
-				if (biostarvationSeverityPercent > 0f)
-				{
-					string str = (this.BiostarvationDailyOffset >= 0f) ? "+" : string.Empty;
-					stringBuilder.AppendLineIfNotEmpty().Append(string.Format("{0}: {1} ({2})", "Biostarvation".Translate(), biostarvationSeverityPercent.ToStringPercent(), "PerDay".Translate(str + this.BiostarvationDailyOffset.ToStringPercent())));
-				}
-			}
-			else if (this.selectedPawn != null)
-			{
-				stringBuilder.AppendLineIfNotEmpty().Append("WaitingForPawn".Translate(this.selectedPawn.Named("PAWN")).Resolve());
-			}
-			stringBuilder.AppendLineIfNotEmpty().Append("Nutrition".Translate()).Append(": ").Append(this.NutritionStored.ToStringByStyle(ToStringStyle.FloatMaxOne, ToStringNumberSense.Absolute));
-			if (base.Working)
-			{
-				stringBuilder.Append(" (-").Append("PerDay".Translate(this.NutritionConsumedPerDay.ToString("F1"))).Append(")");
-			}
-			return stringBuilder.ToString();
-		}
-
-		// Token: 0x0600EEEB RID: 61163 RVA: 0x00455854 File Offset: 0x00453A54
-		public override IEnumerable<FloatMenuOption> GetFloatMenuOptions(Pawn selPawn)
-		{
-			foreach (FloatMenuOption floatMenuOption in base.GetFloatMenuOptions(selPawn))
-			{
-				yield return floatMenuOption;
-			}
-			IEnumerator<FloatMenuOption> enumerator = null;
-			if (!selPawn.CanReach(this, PathEndMode.InteractionCell, Danger.Deadly, false, false, TraverseMode.ByPawn))
-			{
-				yield return new FloatMenuOption("CannotEnterBuilding".Translate(this) + ": " + "NoPath".Translate().CapitalizeFirst(), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-			}
-			else
-			{
-				AcceptanceReport acceptanceReport = this.CanAcceptPawn(selPawn);
-				if (acceptanceReport.Accepted)
-				{
-					yield return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("EnterBuilding".Translate(this), delegate()
-					{
-						this.SelectPawn(selPawn);
-					}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0), selPawn, this, "ReservedBy", null);
-				}
-				else if (!acceptanceReport.Reason.NullOrEmpty())
-				{
-					yield return new FloatMenuOption("CannotEnterBuilding".Translate(this) + ": " + acceptanceReport.Reason.CapitalizeFirst(), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-				}
-			}
-			yield break;
-			yield break;
-		}
-
-		// Token: 0x0600EEEC RID: 61164 RVA: 0x0045586C File Offset: 0x00453A6C
-		public override void ExposeData()
-		{
-			base.ExposeData();
-			Scribe_References.Look<HumanEmbryo>(ref this.selectedEmbryo, "selectedEmbryo", false);
-			Scribe_Values.Look<float>(ref this.embryoStarvation, "embryoStarvation", 0f, false);
-			Scribe_Values.Look<float>(ref this.containedNutrition, "containedNutrition", 0f, false);
-			Scribe_Deep.Look<StorageSettings>(ref this.allowedNutritionSettings, "allowedNutritionSettings", new object[]
-			{
-				this
+				Color color = EmbryoColor();
+				fetusEarlyStageGraphic = FetusEarlyStage.GetColoredVersion(ShaderDatabase.Cutout, color, color);
+				fetusLateStageGraphic = FetusLateStage.GetColoredVersion(ShaderDatabase.Cutout, color, color);
 			});
-			if (this.allowedNutritionSettings == null)
+			if (selectedPawn != null)
 			{
-				this.allowedNutritionSettings = new StorageSettings(this);
-				if (this.def.building.defaultStorageSettings != null)
+				Log.Error("Growing embryo while pawn was somehow marked as selected");
+				selectedPawn = null;
+			}
+		}
+	}
+
+	private void TryAbsorbNutritiousThing()
+	{
+		for (int i = 0; i < innerContainer.Count; i++)
+		{
+			if (innerContainer[i] != selectedPawn && innerContainer[i].def != ThingDefOf.Xenogerm && innerContainer[i].def != ThingDefOf.HumanEmbryo)
+			{
+				float statValue = innerContainer[i].GetStatValue(StatDefOf.Nutrition);
+				if (statValue > 0f)
 				{
-					this.allowedNutritionSettings.CopyFrom(this.def.building.defaultStorageSettings);
+					containedNutrition += statValue;
+					innerContainer[i].SplitOff(1).Destroy();
+					break;
 				}
 			}
 		}
+	}
 
-		// Token: 0x04009DDB RID: 40411
-		public HumanEmbryo selectedEmbryo;
+	private void Finish()
+	{
+		if (selectedPawn != null)
+		{
+			FinishPawn();
+		}
+		else if (selectedEmbryo != null)
+		{
+			FinishEmbryo();
+		}
+	}
 
-		// Token: 0x04009DDC RID: 40412
-		private float embryoStarvation;
+	private void FinishEmbryo()
+	{
+		EmbryoBirth();
+		DestroyEmbryo();
+		OnStop();
+	}
 
-		// Token: 0x04009DDD RID: 40413
-		private float containedNutrition;
+	private void FinishPawn()
+	{
+		if (selectedPawn != null && innerContainer.Contains(selectedPawn))
+		{
+			Notify_PawnRemoved();
+			innerContainer.TryDrop(selectedPawn, InteractionCell, base.Map, ThingPlaceMode.Near, 1, out var _);
+			OnStop();
+		}
+	}
 
-		// Token: 0x04009DDE RID: 40414
-		private StorageSettings allowedNutritionSettings;
+	private void Fail()
+	{
+		if (innerContainer.Contains(selectedPawn))
+		{
+			Notify_PawnRemoved();
+			innerContainer.TryDrop(selectedPawn, InteractionCell, base.Map, ThingPlaceMode.Near, 1, out var _);
+			Hediff firstHediffOfDef = selectedPawn.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.BioStarvation);
+			selectedPawn.Kill(null, firstHediffOfDef);
+		}
+		DestroyEmbryo(biostarvation: true);
+		OnStop();
+	}
 
-		// Token: 0x04009DDF RID: 40415
-		[Unsaved(false)]
-		private CompPowerTrader cachedPowerComp;
+	private void OnStop()
+	{
+		selectedPawn = null;
+		selectedEmbryo = null;
+		startTick = -1;
+		embryoStarvation = 0f;
+		sustainerWorking = null;
+		cachedVatLearning = null;
+	}
 
-		// Token: 0x04009DE0 RID: 40416
-		[Unsaved(false)]
-		private Graphic cachedTopGraphic;
+	private void DestroyEmbryo(bool biostarvation = false)
+	{
+		if (startTick < 0 || selectedEmbryo == null || !innerContainer.Contains(selectedEmbryo))
+		{
+			return;
+		}
+		if (startTick > Find.TickManager.TicksGame)
+		{
+			if (biostarvation)
+			{
+				Messages.Message("EmbryoEjectedFromGrowthVatBiostarvation".Translate(selectedEmbryo.Label), this, MessageTypeDefOf.NegativeEvent);
+			}
+			else
+			{
+				Messages.Message("EmbryoEjectedFromGrowthVat".Translate(selectedEmbryo.Label), this, MessageTypeDefOf.NegativeEvent);
+			}
+		}
+		innerContainer.Remove(selectedEmbryo);
+		selectedEmbryo.Destroy();
+		selectedEmbryo = null;
+	}
 
-		// Token: 0x04009DE1 RID: 40417
-		[Unsaved(false)]
-		private Graphic fetusEarlyStageGraphic;
+	private void EmbryoBirth()
+	{
+		if (selectedEmbryo != null && innerContainer.Contains(selectedEmbryo) && startTick <= Find.TickManager.TicksGame)
+		{
+			Precept_Ritual ritual = Faction.OfPlayer.ideos.PrimaryIdeo.GetPrecept(PreceptDefOf.ChildBirth) as Precept_Ritual;
+			Thing thing = PregnancyUtility.ApplyBirthOutcome(((RitualOutcomeEffectWorker_ChildBirth)RitualOutcomeEffectDefOf.ChildBirth.GetInstance()).GetOutcome(0.7f, null), 0.7f, ritual, selectedEmbryo?.GeneSet?.GenesListForReading, selectedEmbryo.Mother, this, selectedEmbryo.Father);
+			if (thing != null && embryoStarvation > 0f)
+			{
+				Pawn pawn = ((thing is Corpse corpse) ? corpse.InnerPawn : ((Pawn)thing));
+				Hediff hediff = HediffMaker.MakeHediff(HediffDefOf.BioStarvation, pawn);
+				hediff.Severity = Mathf.Lerp(0f, HediffDefOf.BioStarvation.maxSeverity, embryoStarvation);
+				pawn.health.AddHediff(hediff, null, null);
+			}
+		}
+	}
 
-		// Token: 0x04009DE2 RID: 40418
-		[Unsaved(false)]
-		private Graphic fetusLateStageGraphic;
+	private void Notify_PawnRemoved()
+	{
+		SoundDefOf.GrowthVat_Open.PlayOneShot(SoundInfo.InMap(this));
+	}
 
-		// Token: 0x04009DE3 RID: 40419
-		[Unsaved(false)]
-		private Sustainer sustainerWorking;
+	public bool CanAcceptNutrition(Thing thing)
+	{
+		return allowedNutritionSettings.AllowedToAccept(thing);
+	}
 
-		// Token: 0x04009DE4 RID: 40420
-		[Unsaved(false)]
-		private Hediff cachedVatLearning;
+	public StorageSettings GetStoreSettings()
+	{
+		return allowedNutritionSettings;
+	}
 
-		// Token: 0x04009DE5 RID: 40421
-		[Unsaved(false)]
-		private Effecter bubbleEffecter;
+	public StorageSettings GetParentStoreSettings()
+	{
+		return def.building.fixedStorageSettings;
+	}
 
-		// Token: 0x04009DE6 RID: 40422
-		private static readonly Texture2D CancelLoadingIcon = ContentFinder<Texture2D>.Get("UI/Designators/Cancel", true);
+	public void Notify_SettingsChanged()
+	{
+	}
 
-		// Token: 0x04009DE7 RID: 40423
-		public static readonly CachedTexture InsertPawnIcon = new CachedTexture("UI/Gizmos/InsertPawn");
+	[IteratorStateMachine(typeof(_003CGetGizmos_003Ed__86))]
+	public override IEnumerable<Gizmo> GetGizmos()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetGizmos_003Ed__86(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
 
-		// Token: 0x04009DE8 RID: 40424
-		public static readonly CachedTexture InsertEmbryoIcon = new CachedTexture("UI/Gizmos/InsertEmbryo");
+	public void SelectEmbryo(HumanEmbryo embryo)
+	{
+		selectedEmbryo = embryo;
+		embryo.implantTarget = this;
+	}
 
-		// Token: 0x04009DE9 RID: 40425
-		private const float BiostarvationGainPerDayNoFoodOrPower = 0.5f;
+	public override void DynamicDrawPhaseAt(DrawPhase phase, Vector3 drawLoc, bool flip = false)
+	{
+		if (base.Working && selectedPawn != null && innerContainer.Contains(selectedPawn))
+		{
+			selectedPawn.Drawer.renderer.DynamicDrawPhaseAt(phase, drawLoc + PawnDrawOffset, null, neverAimWeapon: true);
+		}
+		base.DynamicDrawPhaseAt(phase, drawLoc, flip);
+	}
 
-		// Token: 0x04009DEA RID: 40426
-		private const float BiostarvationFallPerDayPoweredAndFed = 0.1f;
+	protected override void DrawAt(Vector3 drawLoc, bool flip = false)
+	{
+		base.DrawAt(drawLoc, flip);
+		if (base.Working && selectedPawn == null && selectedEmbryo != null && innerContainer.Contains(selectedEmbryo))
+		{
+			Vector2 drawSize = Vector2.one * Mathf.Lerp(0.4f, 0.95f, EmbryoGestationPct);
+			if (EmbryoGestationTicksRemaining > 540000)
+			{
+				FetusEarlyStage.drawSize = drawSize;
+				FetusEarlyStage.DrawFromDef(DrawPos + PawnDrawOffset + Altitudes.AltIncVect * 0.25f, base.Rotation, null);
+			}
+			else
+			{
+				FetusLateStage.drawSize = drawSize;
+				FetusLateStage.DrawFromDef(DrawPos + PawnDrawOffset + Altitudes.AltIncVect * 0.25f, base.Rotation, null);
+			}
+		}
+		TopGraphic.Draw(DrawPos + Altitudes.AltIncVect * 2f, base.Rotation, this);
+	}
 
-		// Token: 0x04009DEB RID: 40427
-		private const float BasePawnConsumedNutritionPerDay = 3f;
+	private Color EmbryoColor()
+	{
+		Color result = PawnSkinColors.GetSkinColor(0.5f);
+		if (selectedEmbryo?.GeneSet != null)
+		{
+			foreach (GeneDef item in selectedEmbryo.GeneSet.GenesListForReading)
+			{
+				if (item.skinColorOverride.HasValue)
+				{
+					return item.skinColorOverride.Value;
+				}
+				if (item.skinColorBase.HasValue)
+				{
+					result = item.skinColorBase.Value;
+				}
+			}
+		}
+		return result;
+	}
 
-		// Token: 0x04009DEC RID: 40428
-		private const float BaseEmbryoConsumedNutritionPerDay = 6f;
+	public override void DrawExtraSelectionOverlays()
+	{
+		base.DrawExtraSelectionOverlays();
+		if (selectedEmbryo != null && selectedEmbryo.Map == base.Map)
+		{
+			GenDraw.DrawLineBetween(this.TrueCenter(), selectedEmbryo.TrueCenter());
+		}
+	}
 
-		// Token: 0x04009DED RID: 40429
-		private const float AgeToEject = 18f;
+	public override string GetInspectString()
+	{
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.Append(base.GetInspectString());
+		if (base.Working)
+		{
+			if (selectedPawn != null && innerContainer.Contains(selectedPawn))
+			{
+				stringBuilder.AppendLineIfNotEmpty().Append($"{"CasketContains".Translate().ToString()}: {selectedPawn.NameShortColored.Resolve()}, {selectedPawn.ageTracker.AgeBiologicalYears}");
+			}
+			if (selectedEmbryo != null && innerContainer.Contains(selectedEmbryo))
+			{
+				stringBuilder.AppendLineIfNotEmpty().AppendLine("Gestating".Translate() + ": " + selectedEmbryo.Label.CapitalizeFirst());
+				stringBuilder.AppendLineTagged("EmbryoTimeUntilBirth".Translate() + ": " + EmbryoGestationTicksRemaining.ToStringTicksToDays().Colorize(ColoredText.DateTimeColor));
+				stringBuilder.Append("EmbryoBirthQuality".Translate() + ": " + 0.7f.ToStringPercent());
+			}
+			float biostarvationSeverityPercent = BiostarvationSeverityPercent;
+			if (biostarvationSeverityPercent > 0f)
+			{
+				string text = ((BiostarvationDailyOffset >= 0f) ? "+" : string.Empty);
+				stringBuilder.AppendLineIfNotEmpty().Append($"{"Biostarvation".Translate()}: {biostarvationSeverityPercent.ToStringPercent()} ({"PerDay".Translate(text + BiostarvationDailyOffset.ToStringPercent())})");
+			}
+		}
+		else if (selectedPawn != null)
+		{
+			stringBuilder.AppendLineIfNotEmpty().Append("WaitingForPawn".Translate(selectedPawn.Named("PAWN")).Resolve());
+		}
+		stringBuilder.AppendLineIfNotEmpty().Append("Nutrition".Translate()).Append(": ")
+			.Append(NutritionStored.ToStringByStyle(ToStringStyle.FloatMaxOne));
+		if (base.Working)
+		{
+			stringBuilder.Append(" (-").Append("PerDay".Translate(NutritionConsumedPerDay.ToString("F1"))).Append(")");
+		}
+		return stringBuilder.ToString();
+	}
 
-		// Token: 0x04009DEE RID: 40430
-		public const float NutritionBuffer = 10f;
+	[IteratorStateMachine(typeof(_003CGetFloatMenuOptions_003Ed__93))]
+	public override IEnumerable<FloatMenuOption> GetFloatMenuOptions(Pawn selPawn)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetFloatMenuOptions_003Ed__93(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__selPawn = selPawn
+		};
+	}
 
-		// Token: 0x04009DEF RID: 40431
-		public const int AgeTicksPerTickInGrowthVat = 20;
-
-		// Token: 0x04009DF0 RID: 40432
-		private const float EmbryoBirthQuality = 0.7f;
-
-		// Token: 0x04009DF1 RID: 40433
-		public const int EmbryoGestationTicks = 540000;
-
-		// Token: 0x04009DF2 RID: 40434
-		private const int EmbryoLateStageGraphicTicksRemaining = 540000;
-
-		// Token: 0x04009DF3 RID: 40435
-		private const float FetusMinSize = 0.4f;
-
-		// Token: 0x04009DF4 RID: 40436
-		private const float FetusMaxSize = 0.95f;
-
-		// Token: 0x04009DF5 RID: 40437
-		private const int GlowIntervalTicks = 132;
-
-		// Token: 0x04009DF6 RID: 40438
-		private static Dictionary<Rot4, ThingDef> GlowMotePerRotation;
-
-		// Token: 0x04009DF7 RID: 40439
-		private static Dictionary<Rot4, EffecterDef> BubbleEffecterPerRotation;
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_References.Look(ref selectedEmbryo, "selectedEmbryo");
+		Scribe_Values.Look(ref embryoStarvation, "embryoStarvation", 0f);
+		Scribe_Values.Look(ref containedNutrition, "containedNutrition", 0f);
+		Scribe_Deep.Look(ref allowedNutritionSettings, "allowedNutritionSettings", this);
+		if (allowedNutritionSettings == null)
+		{
+			allowedNutritionSettings = new StorageSettings(this);
+			if (def.building.defaultStorageSettings != null)
+			{
+				allowedNutritionSettings.CopyFrom(def.building.defaultStorageSettings);
+			}
+		}
 	}
 }

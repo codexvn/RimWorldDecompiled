@@ -1,61 +1,163 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_DisassembleMech : JobDriver
 {
-	// Token: 0x0200124D RID: 4685
-	public class JobDriver_DisassembleMech : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__5 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x170011DC RID: 4572
-		// (get) Token: 0x060072A0 RID: 29344 RVA: 0x002352F8 File Offset: 0x002334F8
-		private Pawn Mech
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_DisassembleMech _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (Pawn)this.job.GetTarget(TargetIndex.A).Thing;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x060072A1 RID: 29345 RVA: 0x0023531E File Offset: 0x0023351E
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		object IEnumerator.Current
 		{
-			return this.pawn.Reserve(this.Mech, this.job, 1, -1, null, errorOnFailed, false);
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x060072A2 RID: 29346 RVA: 0x00235341 File Offset: 0x00233541
-		protected override IEnumerable<Toil> MakeNewToils()
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__5(int _003C_003E1__state)
 		{
-			if (!ModLister.CheckBiotech("Disassemble mech"))
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_DisassembleMech CS_0024_003C_003E8__locals10 = _003C_003E4__this;
+			switch (num)
 			{
-				yield break;
-			}
-			this.FailOnDestroyedNullOrForbidden(TargetIndex.A);
-			this.FailOn(() => this.Mech.IsFighting());
-			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch, false);
-			yield return Toils_General.WaitWith(TargetIndex.A, 300, true, true, false, TargetIndex.A, PathEndMode.Touch).WithEffect(EffecterDefOf.ControlMech, TargetIndex.A, null);
-			Toil toil = Toils_General.Do(delegate
-			{
-				foreach (ThingDefCountClass thingDefCountClass in MechanitorUtility.IngredientsFromDisassembly(this.Mech.def))
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (!ModLister.CheckBiotech("Disassemble mech"))
 				{
-					Thing thing = ThingMaker.MakeThing(thingDefCountClass.thingDef, null);
-					thing.stackCount = thingDefCountClass.count;
-					GenPlace.TryPlaceThing(thing, this.Mech.Position, this.Mech.Map, ThingPlaceMode.Near, null, null, null, 1);
+					return false;
 				}
-				this.Mech.forceNoDeathNotification = true;
-				this.Mech.Kill(null, null);
-				this.Mech.forceNoDeathNotification = false;
-				this.Mech.Corpse.Destroy(DestroyMode.Vanish);
-			}).WithEffect(EffecterDefOf.ButcherMechanoid, TargetIndex.A, null).PlaySustainerOrSound(SoundDefOf.Recipe_ButcherCorpseMechanoid, 1f);
-			yield return toil;
-			yield break;
+				CS_0024_003C_003E8__locals10.FailOnDestroyedNullOrForbidden(TargetIndex.A);
+				CS_0024_003C_003E8__locals10.FailOn(() => CS_0024_003C_003E8__locals10.Mech.IsFighting());
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.WaitWith(TargetIndex.A, 300, useProgressBar: true, maintainPosture: true, maintainSleep: false, TargetIndex.A).WithEffect(EffecterDefOf.ControlMech, TargetIndex.A, null);
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+			{
+				_003C_003E1__state = -1;
+				Toil toil = Toils_General.Do(delegate
+				{
+					foreach (ThingDefCountClass item in MechanitorUtility.IngredientsFromDisassembly(CS_0024_003C_003E8__locals10.Mech.def))
+					{
+						Thing thing = ThingMaker.MakeThing(item.thingDef);
+						thing.stackCount = item.count;
+						GenPlace.TryPlaceThing(thing, CS_0024_003C_003E8__locals10.Mech.Position, CS_0024_003C_003E8__locals10.Mech.Map, ThingPlaceMode.Near, null, null, null);
+					}
+					CS_0024_003C_003E8__locals10.Mech.forceNoDeathNotification = true;
+					CS_0024_003C_003E8__locals10.Mech.Kill(null);
+					CS_0024_003C_003E8__locals10.Mech.forceNoDeathNotification = false;
+					CS_0024_003C_003E8__locals10.Mech.Corpse.Destroy();
+				}).WithEffect(EffecterDefOf.ButcherMechanoid, TargetIndex.A, null).PlaySustainerOrSound(SoundDefOf.Recipe_ButcherCorpseMechanoid);
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 3;
+				return true;
+			}
+			case 3:
+				_003C_003E1__state = -1;
+				return false;
+			}
 		}
 
-		// Token: 0x04004F31 RID: 20273
-		private const TargetIndex MechInd = TargetIndex.A;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x04004F32 RID: 20274
-		private const int DisassemblyTime = 300;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__5 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__5(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private const TargetIndex MechInd = TargetIndex.A;
+
+	private const int DisassemblyTime = 300;
+
+	private Pawn Mech => (Pawn)job.GetTarget(TargetIndex.A).Thing;
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return pawn.Reserve(Mech, job, 1, -1, null, errorOnFailed);
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__5))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__5(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

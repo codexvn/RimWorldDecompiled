@@ -1,171 +1,451 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_EnterBiosculpterPod : JobDriver
 {
-	// Token: 0x02001259 RID: 4697
-	public class JobDriver_EnterBiosculpterPod : JobDriver
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass7_0
 	{
-		// Token: 0x170011EB RID: 4587
-		// (get) Token: 0x060072EA RID: 29418 RVA: 0x00236133 File Offset: 0x00234333
-		private CompBiosculpterPod BiosculpterPod
+		public Toil enter;
+
+		public JobDriver_EnterBiosculpterPod _003C_003E4__this;
+
+		internal void _003CMakeNewToils_003Eb__4()
 		{
+			_003C_003E4__this.BiosculpterPod.TryAcceptPawn(enter.actor, _003C_003E4__this.job.biosculpterCycleKey);
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CCollectIngredientsToilsHelper_003Ed__9 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private TargetIndex ingredientIndex;
+
+		public TargetIndex _003C_003E3__ingredientIndex;
+
+		private Pawn carrier;
+
+		public Pawn _003C_003E3__carrier;
+
+		private List<Thing> pickedUpIngredients;
+
+		public List<Thing> _003C_003E3__pickedUpIngredients;
+
+		private Toil _003Cextract_003E5__2;
+
+		Toil IEnumerator<Toil>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				return this.job.targetA.Thing.TryGetComp<CompBiosculpterPod>();
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x060072EB RID: 29419 RVA: 0x0023614C File Offset: 0x0023434C
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		object IEnumerator.Current
 		{
-			if (!this.pawn.Reserve(this.job.targetA, this.job, 1, -1, null, errorOnFailed, false))
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CCollectIngredientsToilsHelper_003Ed__9(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003Cextract_003E5__2 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			switch (_003C_003E1__state)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003Cextract_003E5__2 = Toils_JobTransforms.ExtractNextTargetFromQueue(ingredientIndex);
+				_003C_003E2__current = _003Cextract_003E5__2;
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+			{
+				_003C_003E1__state = -1;
+				Toil toil = Toils_Goto.GotoThing(ingredientIndex, PathEndMode.ClosestTouch).FailOnDespawnedNullOrForbidden(ingredientIndex).FailOnSomeonePhysicallyInteracting(ingredientIndex);
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 2;
+				return true;
+			}
+			case 2:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Haul.StartCarryThing(ingredientIndex, putRemainderInQueue: true, subtractNumTakenFromJobCount: false, failIfStackCountLessThanJobCount: true);
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = HaulBiosculpterIngredientInInventory(carrier, pickedUpIngredients);
+				_003C_003E1__state = 4;
+				return true;
+			case 4:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Jump.JumpIfHaveTargetInQueue(ingredientIndex, _003Cextract_003E5__2);
+				_003C_003E1__state = 5;
+				return true;
+			case 5:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CCollectIngredientsToilsHelper_003Ed__9 _003CCollectIngredientsToilsHelper_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CCollectIngredientsToilsHelper_003Ed__ = this;
+			}
+			else
+			{
+				_003CCollectIngredientsToilsHelper_003Ed__ = new _003CCollectIngredientsToilsHelper_003Ed__9(0);
+			}
+			_003CCollectIngredientsToilsHelper_003Ed__.ingredientIndex = _003C_003E3__ingredientIndex;
+			_003CCollectIngredientsToilsHelper_003Ed__.carrier = _003C_003E3__carrier;
+			_003CCollectIngredientsToilsHelper_003Ed__.pickedUpIngredients = _003C_003E3__pickedUpIngredients;
+			return _003CCollectIngredientsToilsHelper_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__7 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_EnterBiosculpterPod _003C_003E4__this;
+
+		private Toil _003CgoToPod_003E5__2;
+
+		private IEnumerator<Toil> _003C_003E7__wrap2;
+
+		Toil IEnumerator<Toil>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__7(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 2)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003CgoToPod_003E5__2 = null;
+			_003C_003E7__wrap2 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				JobDriver_EnterBiosculpterPod CS_0024_003C_003E8__locals31 = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					if (!ModLister.CheckIdeology("Biosculpting"))
+					{
+						return false;
+					}
+					CS_0024_003C_003E8__locals31.AddFinishAction(delegate
+					{
+						if (CS_0024_003C_003E8__locals31.BiosculpterPod != null)
+						{
+							if (CS_0024_003C_003E8__locals31.BiosculpterPod.queuedEnterJob == CS_0024_003C_003E8__locals31.job)
+							{
+								CS_0024_003C_003E8__locals31.BiosculpterPod.ClearQueuedInformation();
+							}
+							if (CS_0024_003C_003E8__locals31.BiosculpterPod.Occupant != CS_0024_003C_003E8__locals31.GetActor())
+							{
+								foreach (Thing pickedUpIngredient in CS_0024_003C_003E8__locals31.pickedUpIngredients)
+								{
+									if (CS_0024_003C_003E8__locals31.pawn.inventory.Contains(pickedUpIngredient))
+									{
+										CS_0024_003C_003E8__locals31.pawn.inventory.innerContainer.TryDrop(pickedUpIngredient, ThingPlaceMode.Near, out var _);
+									}
+								}
+							}
+						}
+					});
+					CS_0024_003C_003E8__locals31.FailOnDespawnedOrNull(TargetIndex.A);
+					CS_0024_003C_003E8__locals31.FailOn(() => CS_0024_003C_003E8__locals31.job.biosculpterCycleKey == null || !CS_0024_003C_003E8__locals31.BiosculpterPod.CanAcceptOnceCycleChosen(CS_0024_003C_003E8__locals31.GetActor()));
+					_003CgoToPod_003E5__2 = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.InteractionCell);
+					_003C_003E2__current = Toils_Jump.JumpIf(_003CgoToPod_003E5__2, () => CS_0024_003C_003E8__locals31.job.GetTargetQueue(TargetIndex.B).NullOrEmpty());
+					_003C_003E1__state = 1;
+					return true;
+				case 1:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap2 = CollectIngredientsToilsHelper(TargetIndex.B, CS_0024_003C_003E8__locals31.pawn, CS_0024_003C_003E8__locals31.pickedUpIngredients).GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_010a;
+				case 2:
+					_003C_003E1__state = -3;
+					goto IL_010a;
+				case 3:
+					_003C_003E1__state = -1;
+					_003C_003E2__current = PrepareToEnterToil(TargetIndex.A);
+					_003C_003E1__state = 4;
+					return true;
+				case 4:
+				{
+					_003C_003E1__state = -1;
+					_003C_003Ec__DisplayClass7_0 CS_0024_003C_003E8__locals10 = new _003C_003Ec__DisplayClass7_0();
+					CS_0024_003C_003E8__locals10._003C_003E4__this = CS_0024_003C_003E8__locals31;
+					CS_0024_003C_003E8__locals10.enter = ToilMaker.MakeToil("MakeNewToils");
+					CS_0024_003C_003E8__locals10.enter.initAction = delegate
+					{
+						CS_0024_003C_003E8__locals10._003C_003E4__this.BiosculpterPod.TryAcceptPawn(CS_0024_003C_003E8__locals10.enter.actor, CS_0024_003C_003E8__locals10._003C_003E4__this.job.biosculpterCycleKey);
+					};
+					CS_0024_003C_003E8__locals10.enter.defaultCompleteMode = ToilCompleteMode.Instant;
+					_003C_003E2__current = CS_0024_003C_003E8__locals10.enter;
+					_003C_003E1__state = 5;
+					return true;
+				}
+				case 5:
+					{
+						_003C_003E1__state = -1;
+						return false;
+					}
+					IL_010a:
+					if (_003C_003E7__wrap2.MoveNext())
+					{
+						Toil current = _003C_003E7__wrap2.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap2 = null;
+					_003C_003E2__current = _003CgoToPod_003E5__2.FailOn(() => !CS_0024_003C_003E8__locals31.BiosculpterPod.PawnCarryingExtraCycleIngredients(CS_0024_003C_003E8__locals31.pawn, CS_0024_003C_003E8__locals31.job.biosculpterCycleKey));
+					_003C_003E1__state = 3;
+					return true;
+				}
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap2 != null)
+			{
+				_003C_003E7__wrap2.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__7 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__7(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	public const int EnterPodDelay = 70;
+
+	private List<Thing> pickedUpIngredients = new List<Thing>();
+
+	private const TargetIndex BiosculpterIndex = TargetIndex.A;
+
+	private const TargetIndex IngredientInd = TargetIndex.B;
+
+	private CompBiosculpterPod BiosculpterPod => job.targetA.Thing.TryGetComp<CompBiosculpterPod>();
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		if (!pawn.Reserve(job.targetA, job, 1, -1, null, errorOnFailed))
+		{
+			return false;
+		}
+		List<LocalTargetInfo> targetQueue = job.GetTargetQueue(TargetIndex.B);
+		for (int i = 0; i < targetQueue.Count; i++)
+		{
+			if (!pawn.Reserve(targetQueue[i], job, 1, -1, null, errorOnFailed))
 			{
 				return false;
 			}
-			List<LocalTargetInfo> targetQueue = this.job.GetTargetQueue(TargetIndex.B);
-			for (int i = 0; i < targetQueue.Count; i++)
+		}
+		return true;
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__7))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__7(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override string GetReport()
+	{
+		if (!BiosculpterPod.PawnCarryingExtraCycleIngredients(pawn, job.biosculpterCycleKey))
+		{
+			return "BiosculpterJobReportCollectIngredients".Translate();
+		}
+		return base.GetReport();
+	}
+
+	[IteratorStateMachine(typeof(_003CCollectIngredientsToilsHelper_003Ed__9))]
+	public static IEnumerable<Toil> CollectIngredientsToilsHelper(TargetIndex ingredientIndex, Pawn carrier, List<Thing> pickedUpIngredients)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CCollectIngredientsToilsHelper_003Ed__9(-2)
+		{
+			_003C_003E3__ingredientIndex = ingredientIndex,
+			_003C_003E3__carrier = carrier,
+			_003C_003E3__pickedUpIngredients = pickedUpIngredients
+		};
+	}
+
+	private static Toil HaulBiosculpterIngredientInInventory(Pawn carrier, List<Thing> pickedUpIngredients)
+	{
+		Toil toil = ToilMaker.MakeToil("HaulBiosculpterIngredientInInventory");
+		toil.initAction = delegate
+		{
+			Thing carriedThing = carrier.carryTracker.CarriedThing;
+			carrier.carryTracker.innerContainer.TryTransferToContainer(carriedThing, carrier.inventory.innerContainer, carriedThing.stackCount, out var resultingTransferredItem);
+			if (resultingTransferredItem != null)
 			{
-				if (!this.pawn.Reserve(targetQueue[i], this.job, 1, -1, null, errorOnFailed, false))
-				{
-					return false;
-				}
+				pickedUpIngredients.Add(resultingTransferredItem);
 			}
-			return true;
-		}
+		};
+		return toil;
+	}
 
-		// Token: 0x060072EC RID: 29420 RVA: 0x002361BE File Offset: 0x002343BE
-		protected override IEnumerable<Toil> MakeNewToils()
-		{
-			if (!ModLister.CheckIdeology("Biosculpting"))
-			{
-				yield break;
-			}
-			base.AddFinishAction(delegate(JobCondition jobCondition)
-			{
-				if (this.BiosculpterPod != null)
-				{
-					if (this.BiosculpterPod.queuedEnterJob == this.job)
-					{
-						this.BiosculpterPod.ClearQueuedInformation();
-					}
-					if (this.BiosculpterPod.Occupant != base.GetActor())
-					{
-						foreach (Thing thing in this.pickedUpIngredients)
-						{
-							if (this.pawn.inventory.Contains(thing))
-							{
-								Thing thing2;
-								this.pawn.inventory.innerContainer.TryDrop(thing, ThingPlaceMode.Near, out thing2, null, null);
-							}
-						}
-					}
-				}
-			});
-			this.FailOnDespawnedOrNull(TargetIndex.A);
-			this.FailOn(() => this.job.biosculpterCycleKey == null || !this.BiosculpterPod.CanAcceptOnceCycleChosen(base.GetActor()));
-			Toil goToPod = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.InteractionCell, false);
-			yield return Toils_Jump.JumpIf(goToPod, () => this.job.GetTargetQueue(TargetIndex.B).NullOrEmpty<LocalTargetInfo>());
-			foreach (Toil toil in JobDriver_EnterBiosculpterPod.CollectIngredientsToilsHelper(TargetIndex.B, this.pawn, this.pickedUpIngredients))
-			{
-				yield return toil;
-			}
-			IEnumerator<Toil> enumerator = null;
-			yield return goToPod.FailOn(() => !this.BiosculpterPod.PawnCarryingExtraCycleIngredients(this.pawn, this.job.biosculpterCycleKey, false));
-			yield return JobDriver_EnterBiosculpterPod.PrepareToEnterToil(TargetIndex.A);
-			Toil enter = ToilMaker.MakeToil("MakeNewToils");
-			enter.initAction = delegate()
-			{
-				this.BiosculpterPod.TryAcceptPawn(enter.actor, this.job.biosculpterCycleKey);
-			};
-			enter.defaultCompleteMode = ToilCompleteMode.Instant;
-			yield return enter;
-			yield break;
-			yield break;
-		}
+	public static Toil PrepareToEnterToil(TargetIndex podIndex)
+	{
+		Toil prepare = Toils_General.Wait(70);
+		prepare.FailOnCannotTouch(podIndex, PathEndMode.InteractionCell);
+		prepare.WithProgressBarToilDelay(podIndex);
+		prepare.PlaySustainerOrSound(() => prepare.actor.CurJob.GetTarget(podIndex).Thing?.TryGetComp<CompBiosculpterPod>()?.Props.enterSound);
+		return prepare;
+	}
 
-		// Token: 0x060072ED RID: 29421 RVA: 0x002361CE File Offset: 0x002343CE
-		public override string GetReport()
-		{
-			if (!this.BiosculpterPod.PawnCarryingExtraCycleIngredients(this.pawn, this.job.biosculpterCycleKey, false))
-			{
-				return "BiosculpterJobReportCollectIngredients".Translate();
-			}
-			return base.GetReport();
-		}
-
-		// Token: 0x060072EE RID: 29422 RVA: 0x00236205 File Offset: 0x00234405
-		public static IEnumerable<Toil> CollectIngredientsToilsHelper(TargetIndex ingredientIndex, Pawn carrier, List<Thing> pickedUpIngredients)
-		{
-			Toil extract = Toils_JobTransforms.ExtractNextTargetFromQueue(ingredientIndex, true);
-			yield return extract;
-			Toil toil = Toils_Goto.GotoThing(ingredientIndex, PathEndMode.ClosestTouch, false).FailOnDespawnedNullOrForbidden(ingredientIndex).FailOnSomeonePhysicallyInteracting(ingredientIndex);
-			yield return toil;
-			yield return Toils_Haul.StartCarryThing(ingredientIndex, true, false, true, true, false);
-			yield return JobDriver_EnterBiosculpterPod.HaulBiosculpterIngredientInInventory(carrier, pickedUpIngredients);
-			yield return Toils_Jump.JumpIfHaveTargetInQueue(ingredientIndex, extract);
-			yield break;
-		}
-
-		// Token: 0x060072EF RID: 29423 RVA: 0x00236224 File Offset: 0x00234424
-		private static Toil HaulBiosculpterIngredientInInventory(Pawn carrier, List<Thing> pickedUpIngredients)
-		{
-			Toil toil = ToilMaker.MakeToil("HaulBiosculpterIngredientInInventory");
-			toil.initAction = delegate()
-			{
-				Thing carriedThing = carrier.carryTracker.CarriedThing;
-				Thing thing;
-				carrier.carryTracker.innerContainer.TryTransferToContainer(carriedThing, carrier.inventory.innerContainer, carriedThing.stackCount, out thing, true);
-				if (thing != null)
-				{
-					pickedUpIngredients.Add(thing);
-				}
-			};
-			return toil;
-		}
-
-		// Token: 0x060072F0 RID: 29424 RVA: 0x00236264 File Offset: 0x00234464
-		public static Toil PrepareToEnterToil(TargetIndex podIndex)
-		{
-			Toil prepare = Toils_General.Wait(70, TargetIndex.None);
-			prepare.FailOnCannotTouch(podIndex, PathEndMode.InteractionCell);
-			prepare.WithProgressBarToilDelay(podIndex, false, -0.5f);
-			prepare.PlaySustainerOrSound(delegate()
-			{
-				Thing thing = prepare.actor.CurJob.GetTarget(podIndex).Thing;
-				if (thing == null)
-				{
-					return null;
-				}
-				CompBiosculpterPod compBiosculpterPod = thing.TryGetComp<CompBiosculpterPod>();
-				if (compBiosculpterPod == null)
-				{
-					return null;
-				}
-				return compBiosculpterPod.Props.enterSound;
-			}, 1f);
-			return prepare;
-		}
-
-		// Token: 0x060072F1 RID: 29425 RVA: 0x002362DA File Offset: 0x002344DA
-		public override void ExposeData()
-		{
-			base.ExposeData();
-			Scribe_Collections.Look<Thing>(ref this.pickedUpIngredients, "pickedUpIngredients", LookMode.Reference, Array.Empty<object>());
-		}
-
-		// Token: 0x04004F51 RID: 20305
-		public const int EnterPodDelay = 70;
-
-		// Token: 0x04004F52 RID: 20306
-		private List<Thing> pickedUpIngredients = new List<Thing>();
-
-		// Token: 0x04004F53 RID: 20307
-		private const TargetIndex BiosculpterIndex = TargetIndex.A;
-
-		// Token: 0x04004F54 RID: 20308
-		private const TargetIndex IngredientInd = TargetIndex.B;
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Collections.Look(ref pickedUpIngredients, "pickedUpIngredients", LookMode.Reference);
 	}
 }

@@ -1,158 +1,129 @@
-﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using RimWorld.Planet;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class QuestPart_NewColony : QuestPart
 {
-	// Token: 0x02001C67 RID: 7271
-	public class QuestPart_NewColony : QuestPart
+	public string inSignal;
+
+	public Faction otherFaction;
+
+	public string outSignalCompleted;
+
+	public string outSignalCancelled;
+
+	public WorldObjectDef worldObjectDef;
+
+	public int maxRelics = 1;
+
+	private List<Pawn> tmpPawns = new List<Pawn>();
+
+	public static bool IsGeneratingNewColony { get; private set; }
+
+	public override void Notify_QuestSignalReceived(Signal signal)
 	{
-		// Token: 0x170018EC RID: 6380
-		// (get) Token: 0x0600A20A RID: 41482 RVA: 0x002E8F37 File Offset: 0x002E7137
-		// (set) Token: 0x0600A20B RID: 41483 RVA: 0x002E8F3E File Offset: 0x002E713E
-		public static bool IsGeneratingNewColony { get; private set; }
-
-		// Token: 0x0600A20C RID: 41484 RVA: 0x002E8F48 File Offset: 0x002E7148
-		public override void Notify_QuestSignalReceived(Signal signal)
+		base.Notify_QuestSignalReceived(signal);
+		if (!(signal.tag == inSignal))
 		{
-			base.Notify_QuestSignalReceived(signal);
-			if (signal.tag == this.inSignal)
+			return;
+		}
+		Find.MainTabsRoot.EscapeCurrentTab(playSound: false);
+		Find.World.renderer.RegenerateLayersIfDirtyInLongEvent();
+		Find.WindowStack.Add(new Dialog_ChooseThingsForNewColony(PostThingsSelected, 5, 5, maxRelics, 7, delegate
+		{
+			if (!outSignalCancelled.NullOrEmpty())
 			{
-				Find.MainTabsRoot.EscapeCurrentTab(false);
-				Find.World.renderer.RegenerateLayersIfDirtyInLongEvent();
-				Find.WindowStack.Add(new Dialog_ChooseThingsForNewColony(new Action<List<Thing>>(this.PostThingsSelected), 5, 5, this.maxRelics, 7, delegate()
-				{
-					if (!this.outSignalCancelled.NullOrEmpty())
-					{
-						Find.SignalManager.SendSignal(new Signal(this.outSignalCancelled, false));
-					}
-				}));
+				Find.SignalManager.SendSignal(new Signal(outSignalCancelled));
 			}
-		}
+		}));
+	}
 
-		// Token: 0x0600A20D RID: 41485 RVA: 0x002E8FBC File Offset: 0x002E71BC
-		private void PostThingsSelected(List<Thing> allThings)
+	private void PostThingsSelected(List<Thing> allThings)
+	{
+		Find.WindowStack.Add(new Screen_ArchonexusSettlementCinematics(delegate
 		{
-			Action<PlanetTile> <>9__3;
-			Action <>9__4;
-			Find.WindowStack.Add(new Screen_ArchonexusSettlementCinematics(delegate()
+			CameraJumper.TryJump(CameraJumper.GetWorldTarget(allThings.First((Thing t) => t is Pawn)));
+		}, delegate
+		{
+			MoveColonyUtility.PickNewColonyTile(delegate(PlanetTile choseTile)
 			{
-				CameraJumper.TryJump(CameraJumper.GetWorldTarget(allThings.First((Thing t) => t is Pawn)), CameraJumper.MovementMode.Pan);
-			}, delegate()
+				TileChosen(choseTile, allThings);
+			}, delegate
 			{
-				Action<PlanetTile> targetChosen;
-				if ((targetChosen = <>9__3) == null)
+				if (!outSignalCancelled.NullOrEmpty())
 				{
-					targetChosen = (<>9__3 = delegate(PlanetTile choseTile)
-					{
-						this.TileChosen(choseTile, allThings);
-					});
+					Find.SignalManager.SendSignal(new Signal(outSignalCancelled));
 				}
-				Action noTileChosen;
-				if ((noTileChosen = <>9__4) == null)
-				{
-					noTileChosen = (<>9__4 = delegate()
-					{
-						if (!this.outSignalCancelled.NullOrEmpty())
-						{
-							Find.SignalManager.SendSignal(new Signal(this.outSignalCancelled, false));
-						}
-					});
-				}
-				MoveColonyUtility.PickNewColonyTile(targetChosen, noTileChosen);
-				ScreenFader.StartFade(Color.clear, 2f);
-			}));
-		}
+			});
+			ScreenFader.StartFade(Color.clear, 2f);
+		}));
+	}
 
-		// Token: 0x0600A20E RID: 41486 RVA: 0x002E9004 File Offset: 0x002E7204
-		private void TileChosen(PlanetTile chosenTile, List<Thing> allThings)
+	private void TileChosen(PlanetTile chosenTile, List<Thing> allThings)
+	{
+		if (ModsConfig.IdeologyActive && !Find.IdeoManager.classicMode)
 		{
-			if (ModsConfig.IdeologyActive && !Find.IdeoManager.classicMode)
+			tmpPawns.Clear();
+			for (int i = 0; i < allThings.Count; i++)
 			{
-				this.tmpPawns.Clear();
-				for (int i = 0; i < allThings.Count; i++)
+				if (allThings[i] is Pawn { IsColonist: not false } pawn)
 				{
-					Pawn pawn = allThings[i] as Pawn;
-					if (pawn != null && pawn.IsColonist)
-					{
-						this.tmpPawns.Add(pawn);
-					}
+					tmpPawns.Add(pawn);
 				}
-				Find.WindowStack.Add(new Dialog_ConfigureIdeo(this.tmpPawns, delegate()
-				{
-					this.InitMoveColony(allThings, chosenTile);
-				}, true));
-				this.tmpPawns.Clear();
-				return;
 			}
-			this.InitMoveColony(allThings, chosenTile);
-		}
-
-		// Token: 0x0600A20F RID: 41487 RVA: 0x002E90CC File Offset: 0x002E72CC
-		private void InitMoveColony(List<Thing> things, PlanetTile choseTile)
-		{
-			LongEventHandler.QueueLongEvent(delegate()
+			Find.WindowStack.Add(new Dialog_ConfigureIdeo(tmpPawns, delegate
 			{
-				Find.MusicManagerPlay.ForceFadeoutAndSilenceFor(120f, 10f, false);
-				List<Thing> list = new List<Thing>();
-				list.AddRange(MoveColonyUtility.GetStartingThingsForNewColony());
-				list.AddRange(things);
-				QuestPart_NewColony.IsGeneratingNewColony = true;
-				Settlement settlement = MoveColonyUtility.MoveColonyAndReset(choseTile, list, this.otherFaction, this.worldObjectDef);
-				QuestPart_NewColony.IsGeneratingNewColony = false;
-				CameraJumper.TryJump(MapGenerator.PlayerStartSpot, settlement.Map, CameraJumper.MovementMode.Pan);
-				Find.TickManager.CurTimeSpeed = TimeSpeed.Normal;
-				if (!this.outSignalCompleted.NullOrEmpty())
-				{
-					Find.SignalManager.SendSignal(new Signal(this.outSignalCompleted, false));
-				}
-			}, "GeneratingMap", false, null, true, false, null);
+				InitMoveColony(allThings, chosenTile);
+			}, forArchonexusRestart: true));
+			tmpPawns.Clear();
 		}
-
-		// Token: 0x0600A210 RID: 41488 RVA: 0x002E9102 File Offset: 0x002E7302
-		public override void Notify_FactionRemoved(Faction f)
+		else
 		{
-			base.Notify_FactionRemoved(f);
-			if (this.otherFaction == f)
+			InitMoveColony(allThings, chosenTile);
+		}
+	}
+
+	private void InitMoveColony(List<Thing> things, PlanetTile choseTile)
+	{
+		LongEventHandler.QueueLongEvent(delegate
+		{
+			Find.MusicManagerPlay.ForceFadeoutAndSilenceFor(120f);
+			List<Thing> list = new List<Thing>();
+			list.AddRange(MoveColonyUtility.GetStartingThingsForNewColony());
+			list.AddRange(things);
+			IsGeneratingNewColony = true;
+			Settlement settlement = MoveColonyUtility.MoveColonyAndReset(choseTile, list, otherFaction, worldObjectDef);
+			IsGeneratingNewColony = false;
+			CameraJumper.TryJump(MapGenerator.PlayerStartSpot, settlement.Map);
+			Find.TickManager.CurTimeSpeed = TimeSpeed.Normal;
+			if (!outSignalCompleted.NullOrEmpty())
 			{
-				this.otherFaction = null;
+				Find.SignalManager.SendSignal(new Signal(outSignalCompleted));
 			}
-		}
+		}, "GeneratingMap", doAsynchronously: false, null);
+	}
 
-		// Token: 0x0600A211 RID: 41489 RVA: 0x002E911C File Offset: 0x002E731C
-		public override void ExposeData()
+	public override void Notify_FactionRemoved(Faction f)
+	{
+		base.Notify_FactionRemoved(f);
+		if (otherFaction == f)
 		{
-			base.ExposeData();
-			Scribe_Values.Look<string>(ref this.inSignal, "inSignal", null, false);
-			Scribe_References.Look<Faction>(ref this.otherFaction, "otherFaction", false);
-			Scribe_Values.Look<string>(ref this.outSignalCompleted, "outSignalCompleted", null, false);
-			Scribe_Values.Look<string>(ref this.outSignalCancelled, "outSignalCancelled", null, false);
-			Scribe_Defs.Look<WorldObjectDef>(ref this.worldObjectDef, "worldObjecctDef");
-			Scribe_Values.Look<int>(ref this.maxRelics, "maxRelics", 0, false);
+			otherFaction = null;
 		}
+	}
 
-		// Token: 0x04006FF8 RID: 28664
-		public string inSignal;
-
-		// Token: 0x04006FF9 RID: 28665
-		public Faction otherFaction;
-
-		// Token: 0x04006FFA RID: 28666
-		public string outSignalCompleted;
-
-		// Token: 0x04006FFB RID: 28667
-		public string outSignalCancelled;
-
-		// Token: 0x04006FFC RID: 28668
-		public WorldObjectDef worldObjectDef;
-
-		// Token: 0x04006FFD RID: 28669
-		public int maxRelics = 1;
-
-		// Token: 0x04006FFE RID: 28670
-		private List<Pawn> tmpPawns = new List<Pawn>();
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref inSignal, "inSignal");
+		Scribe_References.Look(ref otherFaction, "otherFaction");
+		Scribe_Values.Look(ref outSignalCompleted, "outSignalCompleted");
+		Scribe_Values.Look(ref outSignalCancelled, "outSignalCancelled");
+		Scribe_Defs.Look(ref worldObjectDef, "worldObjecctDef");
+		Scribe_Values.Look(ref maxRelics, "maxRelics", 0);
 	}
 }

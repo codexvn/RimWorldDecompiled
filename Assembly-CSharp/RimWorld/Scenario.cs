@@ -1,658 +1,1000 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Steamworks;
 using Verse;
 using Verse.Steam;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Scenario : IExposable, WorkshopUploadable
 {
-	// Token: 0x02002863 RID: 10339
-	public class Scenario : IExposable, WorkshopUploadable
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__31 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x17002274 RID: 8820
-		// (get) Token: 0x0600E209 RID: 57865 RVA: 0x004237B7 File Offset: 0x004219B7
-		public IEnumerable<System.Version> SupportedVersions
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Scenario _003C_003E4__this;
+
+		private IEnumerator<ScenPart> _003C_003E7__wrap1;
+
+		private IEnumerator<string> _003C_003E7__wrap2;
+
+		string IEnumerator<string>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				yield return new System.Version(VersionControl.CurrentMajor, VersionControl.CurrentMinor);
-				yield break;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002275 RID: 8821
-		// (get) Token: 0x0600E20A RID: 57866 RVA: 0x004237C0 File Offset: 0x004219C0
-		public FileInfo File
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return new FileInfo(GenFilePaths.AbsPathForScenario(this.fileName));
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002276 RID: 8822
-		// (get) Token: 0x0600E20B RID: 57867 RVA: 0x004237D2 File Offset: 0x004219D2
-		public IEnumerable<ScenPart> AllParts
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__31(int _003C_003E1__state)
 		{
-			get
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if ((uint)(num - -4) <= 1u || (uint)(num - 6) <= 1u)
 			{
-				yield return this.playerFaction;
-				yield return this.surfaceLayer;
-				int num;
-				for (int i = 0; i < this.parts.Count; i = num + 1)
+				try
 				{
-					yield return this.parts[i];
-					num = i;
-				}
-				yield break;
-			}
-		}
-
-		// Token: 0x17002277 RID: 8823
-		// (get) Token: 0x0600E20C RID: 57868 RVA: 0x004237E2 File Offset: 0x004219E2
-		// (set) Token: 0x0600E20D RID: 57869 RVA: 0x0042380E File Offset: 0x00421A0E
-		public ScenarioCategory Category
-		{
-			get
-			{
-				if (this.categoryInt == ScenarioCategory.Undefined)
-				{
-					Log.Error("Category is Undefined on Scenario " + ((this != null) ? this.ToString() : null));
-				}
-				return this.categoryInt;
-			}
-			set
-			{
-				this.categoryInt = value;
-			}
-		}
-
-		// Token: 0x17002278 RID: 8824
-		// (get) Token: 0x0600E20E RID: 57870 RVA: 0x00423818 File Offset: 0x00421A18
-		public bool OverrideDangerMusic
-		{
-			get
-			{
-				using (IEnumerator<ScenPart> enumerator = this.AllParts.GetEnumerator())
-				{
-					while (enumerator.MoveNext())
+					if (num == -4 || num == 7)
 					{
-						if (enumerator.Current.OverrideDangerMusic)
+						try
 						{
-							return true;
+						}
+						finally
+						{
+							_003C_003Em__Finally2();
 						}
 					}
 				}
-				return false;
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
 			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E7__wrap2 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x0600E210 RID: 57872 RVA: 0x004238A0 File Offset: 0x00421AA0
-		public void ExposeData()
+		private bool MoveNext()
 		{
-			Scribe_Values.Look<string>(ref this.name, "name", null, false);
-			Scribe_Values.Look<string>(ref this.summary, "summary", null, false);
-			Scribe_Values.Look<string>(ref this.description, "description", null, false);
-			Scribe_Values.Look<PublishedFileId_t>(ref this.publishedFileIdInt, "publishedFileId", PublishedFileId_t.Invalid, false);
-			Scribe_Deep.Look<ScenPart_PlayerFaction>(ref this.playerFaction, "playerFaction", Array.Empty<object>());
-			Scribe_Deep.Look<ScenPart_PlanetLayer>(ref this.surfaceLayer, "surfaceLayer", Array.Empty<object>());
-			Scribe_Collections.Look<ScenPart>(ref this.parts, "parts", LookMode.Deep, Array.Empty<object>());
-			if (Scribe.mode == LoadSaveMode.LoadingVars)
-			{
-				if (this.surfaceLayer == null)
-				{
-					this.surfaceLayer = new ScenPart_PlanetLayer
-					{
-						def = ScenPartDefOf.PlanetLayerFixed,
-						layer = PlanetLayerDefOf.Surface,
-						settingsDef = PlanetLayerSettingsDefOf.Surface,
-						hide = true,
-						tag = "Surface"
-					};
-				}
-				if (ModsConfig.OdysseyActive)
-				{
-					if (!this.parts.Any(delegate(ScenPart p)
-					{
-						ScenPart_PlanetLayer scenPart_PlanetLayer2 = p as ScenPart_PlanetLayer;
-						return scenPart_PlanetLayer2 != null && scenPart_PlanetLayer2.tag == "Orbit";
-					}))
-					{
-						ScenPart_PlanetLayer scenPart_PlanetLayer = new ScenPart_PlanetLayer
-						{
-							def = ScenPartDefOf.PlanetLayerFixed,
-							layer = PlanetLayerDefOf.Orbit,
-							settingsDef = PlanetLayerSettingsDefOf.Orbit,
-							hide = true,
-							tag = "Orbit"
-						};
-						this.parts.Add(scenPart_PlanetLayer);
-						this.surfaceLayer.connections.Add(new LayerConnection
-						{
-							tag = scenPart_PlanetLayer.tag,
-							zoomMode = LayerConnection.ZoomMode.ZoomOut
-						});
-						scenPart_PlanetLayer.connections.Add(new LayerConnection
-						{
-							tag = this.surfaceLayer.tag,
-							zoomMode = LayerConnection.ZoomMode.ZoomIn
-						});
-					}
-				}
-			}
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
-			{
-				for (int i = this.parts.Count - 1; i >= 0; i--)
-				{
-					if (!this.parts[i].Valid())
-					{
-						this.parts.RemoveAt(i);
-					}
-				}
-			}
-			BackCompatibility.PostExposeData(this);
-		}
-
-		// Token: 0x0600E211 RID: 57873 RVA: 0x00423A9D File Offset: 0x00421C9D
-		public IEnumerable<string> ConfigErrors()
-		{
-			if (this.name.NullOrEmpty())
-			{
-				yield return "no title";
-			}
-			if (this.parts.NullOrEmpty<ScenPart>())
-			{
-				yield return "no parts";
-			}
-			if (this.playerFaction == null)
-			{
-				yield return "no playerFaction";
-			}
-			if (this.surfaceLayer == null)
-			{
-				yield return "no surfaceLayer";
-			}
-			else if (!this.surfaceLayer.layer.layerType.SameOrSubclassOf<SurfaceLayer>())
-			{
-				yield return "surfaceLayer layer type " + this.surfaceLayer.layer.layerType.Name + " is not the same or a subclass of SurfaceLayer";
-			}
-			foreach (ScenPart scenPart in this.AllParts)
-			{
-				if (scenPart == null)
-				{
-					yield return "scenario has null part";
-				}
-				else
-				{
-					foreach (string text in scenPart.ConfigErrors())
-					{
-						yield return text;
-					}
-					IEnumerator<string> enumerator2 = null;
-				}
-			}
-			IEnumerator<ScenPart> enumerator = null;
-			yield break;
-			yield break;
-		}
-
-		// Token: 0x0600E212 RID: 57874 RVA: 0x00423AB0 File Offset: 0x00421CB0
-		public string GetFullInformationText()
-		{
-			string result;
 			try
 			{
-				StringBuilder stringBuilder = new StringBuilder();
-				stringBuilder.AppendLine(this.description);
-				stringBuilder.AppendLine();
-				foreach (ScenPart scenPart in this.AllParts)
+				int num = _003C_003E1__state;
+				Scenario scenario = _003C_003E4__this;
+				switch (num)
 				{
-					scenPart.summarized = false;
-				}
-				foreach (ScenPart scenPart2 in from p in this.AllParts
-				orderby p.def.summaryPriority descending, p.def.defName
-				where p.visible
-				select p)
-				{
-					string text = scenPart2.Summary(this);
-					if (!text.NullOrEmpty())
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					if (scenario.name.NullOrEmpty())
 					{
-						stringBuilder.AppendLine(text);
+						_003C_003E2__current = "no title";
+						_003C_003E1__state = 1;
+						return true;
 					}
+					goto IL_006f;
+				case 1:
+					_003C_003E1__state = -1;
+					goto IL_006f;
+				case 2:
+					_003C_003E1__state = -1;
+					goto IL_009c;
+				case 3:
+					_003C_003E1__state = -1;
+					goto IL_00c4;
+				case 4:
+					_003C_003E1__state = -1;
+					goto IL_0144;
+				case 5:
+					_003C_003E1__state = -1;
+					goto IL_0144;
+				case 6:
+					_003C_003E1__state = -3;
+					goto IL_01f1;
+				case 7:
+					{
+						_003C_003E1__state = -4;
+						goto IL_01d7;
+					}
+					IL_01d7:
+					if (_003C_003E7__wrap2.MoveNext())
+					{
+						string current = _003C_003E7__wrap2.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 7;
+						return true;
+					}
+					_003C_003Em__Finally2();
+					_003C_003E7__wrap2 = null;
+					goto IL_01f1;
+					IL_006f:
+					if (scenario.parts.NullOrEmpty())
+					{
+						_003C_003E2__current = "no parts";
+						_003C_003E1__state = 2;
+						return true;
+					}
+					goto IL_009c;
+					IL_009c:
+					if (scenario.playerFaction == null)
+					{
+						_003C_003E2__current = "no playerFaction";
+						_003C_003E1__state = 3;
+						return true;
+					}
+					goto IL_00c4;
+					IL_0144:
+					_003C_003E7__wrap1 = scenario.AllParts.GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_01f1;
+					IL_00c4:
+					if (scenario.surfaceLayer == null)
+					{
+						_003C_003E2__current = "no surfaceLayer";
+						_003C_003E1__state = 4;
+						return true;
+					}
+					if (!scenario.surfaceLayer.layer.layerType.SameOrSubclassOf<SurfaceLayer>())
+					{
+						_003C_003E2__current = "surfaceLayer layer type " + scenario.surfaceLayer.layer.layerType.Name + " is not the same or a subclass of SurfaceLayer";
+						_003C_003E1__state = 5;
+						return true;
+					}
+					goto IL_0144;
+					IL_01f1:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						ScenPart current2 = _003C_003E7__wrap1.Current;
+						if (current2 == null)
+						{
+							_003C_003E2__current = "scenario has null part";
+							_003C_003E1__state = 6;
+							return true;
+						}
+						_003C_003E7__wrap2 = current2.ConfigErrors().GetEnumerator();
+						_003C_003E1__state = -4;
+						goto IL_01d7;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					return false;
 				}
-				result = stringBuilder.ToString().TrimEndNewlines();
 			}
-			catch (Exception ex)
+			catch
 			{
-				Log.ErrorOnce("Exception in Scenario.GetFullInformationText():\n" + ex.ToString(), 10395878);
-				result = "Cannot read data.";
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -3;
+			if (_003C_003E7__wrap2 != null)
+			{
+				_003C_003E7__wrap2.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__31 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__31(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
 			return result;
 		}
 
-		// Token: 0x0600E213 RID: 57875 RVA: 0x00423C30 File Offset: 0x00421E30
-		public string GetSummary()
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return this.summary;
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003Cget_AllParts_003Ed__23 : IEnumerable<ScenPart>, IEnumerable, IEnumerator<ScenPart>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private ScenPart _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Scenario _003C_003E4__this;
+
+		private int _003Ci_003E5__2;
+
+		ScenPart IEnumerator<ScenPart>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x0600E214 RID: 57876 RVA: 0x00423C38 File Offset: 0x00421E38
-		public Scenario CopyForEditing()
+		object IEnumerator.Current
 		{
-			Scenario scenario = new Scenario();
-			scenario.name = this.name;
-			scenario.summary = this.summary;
-			scenario.description = this.description;
-			scenario.playerFaction = (ScenPart_PlayerFaction)this.playerFaction.CopyForEditing();
-			scenario.surfaceLayer = (ScenPart_PlanetLayer)this.surfaceLayer.CopyForEditing();
-			scenario.parts.AddRange(from p in this.parts
-			select p.CopyForEditing());
-			scenario.categoryInt = ScenarioCategory.CustomLocal;
-			return scenario;
-		}
-
-		// Token: 0x0600E215 RID: 57877 RVA: 0x00423CD8 File Offset: 0x00421ED8
-		public void PreConfigure()
-		{
-			foreach (ScenPart scenPart in this.AllParts)
+			[DebuggerHidden]
+			get
 			{
-				scenPart.PreConfigure();
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600E216 RID: 57878 RVA: 0x00423D24 File Offset: 0x00421F24
-		public virtual Page GetFirstConfigPage()
+		[DebuggerHidden]
+		public _003Cget_AllParts_003Ed__23(int _003C_003E1__state)
 		{
-			List<Page> list = new List<Page>();
-			list.Add(new Page_SelectStoryteller());
-			list.Add(new Page_CreateWorldParams());
-			if (!this.parts.Any((ScenPart p) => p is ScenPart_ForcedMap))
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			Scenario scenario = _003C_003E4__this;
+			switch (num)
 			{
-				list.Add(new Page_SelectStartingSite());
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = scenario.playerFaction;
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = scenario.surfaceLayer;
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				_003Ci_003E5__2 = 0;
+				break;
+			case 3:
+				_003C_003E1__state = -1;
+				_003Ci_003E5__2++;
+				break;
 			}
-			if (ModsConfig.IdeologyActive)
+			if (_003Ci_003E5__2 < scenario.parts.Count)
 			{
-				list.Add(new Page_ChooseIdeoPreset());
+				_003C_003E2__current = scenario.parts[_003Ci_003E5__2];
+				_003C_003E1__state = 3;
+				return true;
 			}
-			foreach (Page item in this.parts.SelectMany((ScenPart p) => p.GetConfigPages()))
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<ScenPart> IEnumerable<ScenPart>.GetEnumerator()
+		{
+			_003Cget_AllParts_003Ed__23 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				list.Add(item);
+				_003C_003E1__state = 0;
+				result = this;
 			}
-			Page page = PageUtility.StitchedPages(list);
-			if (page != null)
+			else
 			{
-				Page page2 = page;
-				while (page2.next != null)
+				result = new _003Cget_AllParts_003Ed__23(0)
 				{
-					page2 = page2.next;
-				}
-				page2.nextAct = new Action(PageUtility.InitGameStart);
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
-			return page;
+			return result;
 		}
 
-		// Token: 0x0600E217 RID: 57879 RVA: 0x00423E30 File Offset: 0x00422030
-		public bool AllowPlayerStartingPawn(Pawn pawn, bool tryingToRedress, PawnGenerationRequest req)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			using (IEnumerator<ScenPart> enumerator = this.AllParts.GetEnumerator())
+			return ((IEnumerable<ScenPart>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003Cget_SupportedVersions_003Ed__16 : IEnumerable<System.Version>, IEnumerable, IEnumerator<System.Version>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private System.Version _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		System.Version IEnumerator<System.Version>.Current
+		{
+			[DebuggerHidden]
+			get
 			{
-				while (enumerator.MoveNext())
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003Cget_SupportedVersions_003Ed__16(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			switch (_003C_003E1__state)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = new System.Version(VersionControl.CurrentMajor, VersionControl.CurrentMinor);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<System.Version> IEnumerable<System.Version>.GetEnumerator()
+		{
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				return this;
+			}
+			return new _003Cget_SupportedVersions_003Ed__16(0);
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<System.Version>)this).GetEnumerator();
+		}
+	}
+
+	[MustTranslate]
+	public string name;
+
+	[MustTranslate]
+	public string summary;
+
+	[MustTranslate]
+	public string description;
+
+	internal ScenPart_PlayerFaction playerFaction;
+
+	internal ScenPart_PlanetLayer surfaceLayer;
+
+	internal List<ScenPart> parts = new List<ScenPart>();
+
+	private PublishedFileId_t publishedFileIdInt = PublishedFileId_t.Invalid;
+
+	private ScenarioCategory categoryInt;
+
+	[NoTranslate]
+	public string fileName;
+
+	private WorkshopItemHook workshopHookInt;
+
+	[NoTranslate]
+	private string tempUploadDir;
+
+	public bool enabled = true;
+
+	public bool showInUI = true;
+
+	public bool valid = true;
+
+	public bool standardAnomalyPlaystyleOnly;
+
+	public const int NameMaxLength = 55;
+
+	public const int SummaryMaxLength = 300;
+
+	public const int DescriptionMaxLength = 1000;
+
+	public IEnumerable<System.Version> SupportedVersions
+	{
+		[IteratorStateMachine(typeof(_003Cget_SupportedVersions_003Ed__16))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_SupportedVersions_003Ed__16(-2);
+		}
+	}
+
+	public FileInfo File => new FileInfo(GenFilePaths.AbsPathForScenario(fileName));
+
+	public IEnumerable<ScenPart> AllParts
+	{
+		[IteratorStateMachine(typeof(_003Cget_AllParts_003Ed__23))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_AllParts_003Ed__23(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public ScenarioCategory Category
+	{
+		get
+		{
+			if (categoryInt == ScenarioCategory.Undefined)
+			{
+				Log.Error("Category is Undefined on Scenario " + this);
+			}
+			return categoryInt;
+		}
+		set
+		{
+			categoryInt = value;
+		}
+	}
+
+	public bool OverrideDangerMusic
+	{
+		get
+		{
+			foreach (ScenPart allPart in AllParts)
+			{
+				if (allPart.OverrideDangerMusic)
 				{
-					if (!enumerator.Current.AllowPlayerStartingPawn(pawn, tryingToRedress, req))
-					{
-						return false;
-					}
+					return true;
 				}
 			}
-			return true;
+			return false;
 		}
+	}
 
-		// Token: 0x0600E218 RID: 57880 RVA: 0x00423E88 File Offset: 0x00422088
-		public void Notify_NewPawnGenerating(Pawn pawn, PawnGenerationContext context)
+	public void ExposeData()
+	{
+		Scribe_Values.Look(ref name, "name");
+		Scribe_Values.Look(ref summary, "summary");
+		Scribe_Values.Look(ref description, "description");
+		Scribe_Values.Look(ref publishedFileIdInt, "publishedFileId", PublishedFileId_t.Invalid);
+		Scribe_Deep.Look(ref playerFaction, "playerFaction");
+		Scribe_Deep.Look(ref surfaceLayer, "surfaceLayer");
+		Scribe_Collections.Look(ref parts, "parts", LookMode.Deep);
+		if (Scribe.mode == LoadSaveMode.LoadingVars)
 		{
-			foreach (ScenPart scenPart in this.AllParts)
+			if (surfaceLayer == null)
 			{
-				scenPart.Notify_NewPawnGenerating(pawn, context);
-			}
-		}
-
-		// Token: 0x0600E219 RID: 57881 RVA: 0x00423ED4 File Offset: 0x004220D4
-		public void Notify_PawnGenerated(Pawn pawn, PawnGenerationContext context, bool redressed)
-		{
-			foreach (ScenPart scenPart in this.AllParts)
-			{
-				scenPart.Notify_PawnGenerated(pawn, context, redressed);
-			}
-		}
-
-		// Token: 0x0600E21A RID: 57882 RVA: 0x00423F24 File Offset: 0x00422124
-		public void Notify_PawnDied(Corpse corpse)
-		{
-			for (int i = 0; i < this.parts.Count; i++)
-			{
-				this.parts[i].Notify_PawnDied(corpse);
-			}
-		}
-
-		// Token: 0x0600E21B RID: 57883 RVA: 0x00423F5C File Offset: 0x0042215C
-		public void PostWorldGenerate()
-		{
-			foreach (ScenPart scenPart in this.AllParts)
-			{
-				scenPart.PostWorldGenerate();
-			}
-		}
-
-		// Token: 0x0600E21C RID: 57884 RVA: 0x00423FA8 File Offset: 0x004221A8
-		public void PostIdeoChosen()
-		{
-			foreach (ScenPart scenPart in this.AllParts)
-			{
-				scenPart.PostIdeoChosen();
-			}
-		}
-
-		// Token: 0x0600E21D RID: 57885 RVA: 0x00423FF4 File Offset: 0x004221F4
-		public void PreMapGenerate()
-		{
-			foreach (ScenPart scenPart in this.AllParts)
-			{
-				scenPart.PreMapGenerate();
-			}
-		}
-
-		// Token: 0x0600E21E RID: 57886 RVA: 0x00424040 File Offset: 0x00422240
-		public void GenerateIntoMap(Map map)
-		{
-			foreach (ScenPart scenPart in this.AllParts)
-			{
-				scenPart.GenerateIntoMap(map);
-			}
-		}
-
-		// Token: 0x0600E21F RID: 57887 RVA: 0x0042408C File Offset: 0x0042228C
-		public void PostMapGenerate(Map map)
-		{
-			foreach (ScenPart scenPart in this.AllParts)
-			{
-				scenPart.PostMapGenerate(map);
-			}
-		}
-
-		// Token: 0x0600E220 RID: 57888 RVA: 0x004240D8 File Offset: 0x004222D8
-		public void MapRemoved(Map map)
-		{
-			foreach (ScenPart scenPart in this.AllParts)
-			{
-				scenPart.MapRemoved(map);
-			}
-		}
-
-		// Token: 0x0600E221 RID: 57889 RVA: 0x00424124 File Offset: 0x00422324
-		public void PostGameStart()
-		{
-			foreach (ScenPart scenPart in this.AllParts)
-			{
-				scenPart.PostGameStart();
-			}
-		}
-
-		// Token: 0x0600E222 RID: 57890 RVA: 0x00424170 File Offset: 0x00422370
-		public float GetStatFactor(StatDef stat)
-		{
-			float num = 1f;
-			for (int i = 0; i < this.parts.Count; i++)
-			{
-				ScenPart_StatFactor scenPart_StatFactor = this.parts[i] as ScenPart_StatFactor;
-				if (scenPart_StatFactor != null)
+				surfaceLayer = new ScenPart_PlanetLayer
 				{
-					num *= scenPart_StatFactor.GetStatFactor(stat);
+					def = ScenPartDefOf.PlanetLayerFixed,
+					layer = PlanetLayerDefOf.Surface,
+					settingsDef = PlanetLayerSettingsDefOf.Surface,
+					hide = true,
+					tag = "Surface"
+				};
+			}
+			if (ModsConfig.OdysseyActive && !parts.Any((ScenPart p) => p is ScenPart_PlanetLayer scenPart_PlanetLayer && scenPart_PlanetLayer.tag == "Orbit"))
+			{
+				ScenPart_PlanetLayer scenPart_PlanetLayer2 = new ScenPart_PlanetLayer
+				{
+					def = ScenPartDefOf.PlanetLayerFixed,
+					layer = PlanetLayerDefOf.Orbit,
+					settingsDef = PlanetLayerSettingsDefOf.Orbit,
+					hide = true,
+					tag = "Orbit"
+				};
+				parts.Add(scenPart_PlanetLayer2);
+				surfaceLayer.connections.Add(new LayerConnection
+				{
+					tag = scenPart_PlanetLayer2.tag,
+					zoomMode = LayerConnection.ZoomMode.ZoomOut
+				});
+				scenPart_PlanetLayer2.connections.Add(new LayerConnection
+				{
+					tag = surfaceLayer.tag,
+					zoomMode = LayerConnection.ZoomMode.ZoomIn
+				});
+			}
+		}
+		if (Scribe.mode == LoadSaveMode.PostLoadInit && parts.RemoveAll((ScenPart p) => p == null || !p.Valid()) != 0)
+		{
+			Log.Warning("Some scenario parts were null or invalid after loading");
+		}
+		BackCompatibility.PostExposeData(this);
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__31))]
+	public IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__31(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public string GetFullInformationText()
+	{
+		try
+		{
+			StringBuilder stringBuilder = new StringBuilder();
+			stringBuilder.AppendLine(description);
+			stringBuilder.AppendLine();
+			foreach (ScenPart allPart in AllParts)
+			{
+				allPart.summarized = false;
+			}
+			foreach (ScenPart item in from p in AllParts
+				orderby p.def.summaryPriority descending, p.def.defName
+				where p.visible
+				select p)
+			{
+				string text = item.Summary(this);
+				if (!text.NullOrEmpty())
+				{
+					stringBuilder.AppendLine(text);
 				}
 			}
-			return num;
+			return stringBuilder.ToString().TrimEndNewlines();
 		}
-
-		// Token: 0x0600E223 RID: 57891 RVA: 0x004241BC File Offset: 0x004223BC
-		public void TickScenario()
+		catch (Exception ex)
 		{
-			for (int i = 0; i < this.parts.Count; i++)
+			Log.ErrorOnce("Exception in Scenario.GetFullInformationText():\n" + ex.ToString(), 10395878);
+			return "Cannot read data.";
+		}
+	}
+
+	public string GetSummary()
+	{
+		return summary;
+	}
+
+	public Scenario CopyForEditing()
+	{
+		Scenario scenario = new Scenario();
+		scenario.name = name;
+		scenario.summary = summary;
+		scenario.description = description;
+		scenario.playerFaction = (ScenPart_PlayerFaction)playerFaction.CopyForEditing();
+		scenario.surfaceLayer = (ScenPart_PlanetLayer)surfaceLayer.CopyForEditing();
+		scenario.parts.AddRange(parts.Select((ScenPart p) => p.CopyForEditing()));
+		scenario.categoryInt = ScenarioCategory.CustomLocal;
+		return scenario;
+	}
+
+	public void PreConfigure()
+	{
+		foreach (ScenPart allPart in AllParts)
+		{
+			allPart.PreConfigure();
+		}
+	}
+
+	public virtual Page GetFirstConfigPage()
+	{
+		List<Page> list = new List<Page>();
+		list.Add(new Page_SelectStoryteller());
+		list.Add(new Page_CreateWorldParams());
+		if (!parts.Any((ScenPart p) => p is ScenPart_ForcedMap))
+		{
+			list.Add(new Page_SelectStartingSite());
+		}
+		if (ModsConfig.IdeologyActive)
+		{
+			list.Add(new Page_ChooseIdeoPreset());
+		}
+		foreach (Page item in parts.SelectMany((ScenPart p) => p.GetConfigPages()))
+		{
+			list.Add(item);
+		}
+		Page page = PageUtility.StitchedPages(list);
+		if (page != null)
+		{
+			Page page2 = page;
+			while (page2.next != null)
 			{
-				this.parts[i].Tick();
+				page2 = page2.next;
 			}
+			page2.nextAct = PageUtility.InitGameStart;
 		}
+		return page;
+	}
 
-		// Token: 0x0600E224 RID: 57892 RVA: 0x004241F0 File Offset: 0x004223F0
-		public void RemovePart(ScenPart part)
+	public bool AllowPlayerStartingPawn(Pawn pawn, bool tryingToRedress, PawnGenerationRequest req)
+	{
+		foreach (ScenPart allPart in AllParts)
 		{
-			if (!this.parts.Contains(part))
-			{
-				Log.Error("Cannot remove: " + ((part != null) ? part.ToString() : null));
-			}
-			this.parts.Remove(part);
-		}
-
-		// Token: 0x0600E225 RID: 57893 RVA: 0x0042422C File Offset: 0x0042242C
-		public bool CanReorder(ScenPart part, ReorderDirection dir)
-		{
-			if (!part.def.PlayerAddRemovable)
+			if (!allPart.AllowPlayerStartingPawn(pawn, tryingToRedress, req))
 			{
 				return false;
 			}
-			int num = this.parts.IndexOf(part);
-			if (dir == ReorderDirection.Up)
+		}
+		return true;
+	}
+
+	public void Notify_NewPawnGenerating(Pawn pawn, PawnGenerationContext context)
+	{
+		foreach (ScenPart allPart in AllParts)
+		{
+			allPart.Notify_NewPawnGenerating(pawn, context);
+		}
+	}
+
+	public void Notify_PawnGenerated(Pawn pawn, PawnGenerationContext context, bool redressed)
+	{
+		foreach (ScenPart allPart in AllParts)
+		{
+			allPart.Notify_PawnGenerated(pawn, context, redressed);
+		}
+	}
+
+	public void Notify_PawnDied(Corpse corpse)
+	{
+		for (int i = 0; i < parts.Count; i++)
+		{
+			parts[i].Notify_PawnDied(corpse);
+		}
+	}
+
+	public void PostWorldGenerate()
+	{
+		foreach (ScenPart allPart in AllParts)
+		{
+			allPart.PostWorldGenerate();
+		}
+	}
+
+	public void PostIdeoChosen()
+	{
+		foreach (ScenPart allPart in AllParts)
+		{
+			allPart.PostIdeoChosen();
+		}
+	}
+
+	public void PreMapGenerate()
+	{
+		foreach (ScenPart allPart in AllParts)
+		{
+			allPart.PreMapGenerate();
+		}
+	}
+
+	public void GenerateIntoMap(Map map)
+	{
+		foreach (ScenPart allPart in AllParts)
+		{
+			allPart.GenerateIntoMap(map);
+		}
+	}
+
+	public void PostMapGenerate(Map map)
+	{
+		foreach (ScenPart allPart in AllParts)
+		{
+			allPart.PostMapGenerate(map);
+		}
+	}
+
+	public void PostGravshipLanded(Map map)
+	{
+		foreach (ScenPart allPart in AllParts)
+		{
+			allPart.PostGravshipLanded(map);
+		}
+	}
+
+	public void MapRemoved(Map map)
+	{
+		foreach (ScenPart allPart in AllParts)
+		{
+			allPart.MapRemoved(map);
+		}
+	}
+
+	public void PostGameStart()
+	{
+		foreach (ScenPart allPart in AllParts)
+		{
+			allPart.PostGameStart();
+		}
+	}
+
+	public float GetStatFactor(StatDef stat)
+	{
+		float num = 1f;
+		for (int i = 0; i < parts.Count; i++)
+		{
+			if (parts[i] is ScenPart_StatFactor scenPart_StatFactor)
 			{
-				return num != 0 && (num <= 0 || this.parts[num - 1].def.PlayerAddRemovable);
+				num *= scenPart_StatFactor.GetStatFactor(stat);
 			}
-			if (dir == ReorderDirection.Down)
+		}
+		return num;
+	}
+
+	public void TickScenario()
+	{
+		for (int i = 0; i < parts.Count; i++)
+		{
+			parts[i].Tick();
+		}
+	}
+
+	public void RemovePart(ScenPart part)
+	{
+		if (!parts.Contains(part))
+		{
+			Log.Error("Cannot remove: " + part);
+		}
+		parts.Remove(part);
+	}
+
+	public bool CanReorder(ScenPart part, ReorderDirection dir)
+	{
+		if (!part.def.PlayerAddRemovable)
+		{
+			return false;
+		}
+		int num = parts.IndexOf(part);
+		switch (dir)
+		{
+		case ReorderDirection.Up:
+			if (num == 0)
 			{
-				return num != this.parts.Count - 1;
+				return false;
 			}
+			if (num > 0 && !parts[num - 1].def.PlayerAddRemovable)
+			{
+				return false;
+			}
+			return true;
+		case ReorderDirection.Down:
+			return num != parts.Count - 1;
+		default:
 			throw new NotImplementedException();
 		}
+	}
 
-		// Token: 0x0600E226 RID: 57894 RVA: 0x0042429C File Offset: 0x0042249C
-		public void Reorder(ScenPart part, ReorderDirection dir)
+	public void Reorder(ScenPart part, ReorderDirection dir)
+	{
+		int num = parts.IndexOf(part);
+		parts.RemoveAt(num);
+		if (dir == ReorderDirection.Up)
 		{
-			int num = this.parts.IndexOf(part);
-			this.parts.RemoveAt(num);
-			if (dir == ReorderDirection.Up)
+			parts.Insert(num - 1, part);
+		}
+		if (dir == ReorderDirection.Down)
+		{
+			parts.Insert(num + 1, part);
+		}
+	}
+
+	public bool CanToUploadToWorkshop()
+	{
+		if (Category == ScenarioCategory.FromDef)
+		{
+			return false;
+		}
+		if (!TryUploadReport().Accepted)
+		{
+			return false;
+		}
+		if (GetWorkshopItemHook().MayHaveAuthorNotCurrentUser)
+		{
+			return false;
+		}
+		return true;
+	}
+
+	public void PrepareForWorkshopUpload()
+	{
+		string path = name + Rand.RangeInclusive(100, 999);
+		tempUploadDir = Path.Combine(GenFilePaths.TempFolderPath, path);
+		DirectoryInfo directoryInfo = new DirectoryInfo(tempUploadDir);
+		if (directoryInfo.Exists)
+		{
+			directoryInfo.Delete();
+		}
+		directoryInfo.Create();
+		string text = Path.Combine(tempUploadDir, name);
+		text += ".rsc";
+		GameDataSaveLoader.SaveScenario(this, text);
+	}
+
+	public AcceptanceReport TryUploadReport()
+	{
+		if (name == null || name.Length < 3 || summary == null || summary.Length < 3 || description == null || description.Length < 3)
+		{
+			return "TextFieldsMustBeFilled".TranslateSimple();
+		}
+		return AcceptanceReport.WasAccepted;
+	}
+
+	public PublishedFileId_t GetPublishedFileId()
+	{
+		return publishedFileIdInt;
+	}
+
+	public void SetPublishedFileId(PublishedFileId_t newPfid)
+	{
+		publishedFileIdInt = newPfid;
+		if (Category == ScenarioCategory.CustomLocal && !fileName.NullOrEmpty())
+		{
+			GameDataSaveLoader.SaveScenario(this, GenFilePaths.AbsPathForScenario(fileName));
+		}
+	}
+
+	public string GetWorkshopName()
+	{
+		return name;
+	}
+
+	public string GetWorkshopDescription()
+	{
+		return GetFullInformationText();
+	}
+
+	public string GetWorkshopPreviewImagePath()
+	{
+		return GenFilePaths.ScenarioPreviewImagePath;
+	}
+
+	public IList<string> GetWorkshopTags()
+	{
+		return new List<string> { "Scenario" };
+	}
+
+	public DirectoryInfo GetWorkshopUploadDirectory()
+	{
+		return new DirectoryInfo(tempUploadDir);
+	}
+
+	public WorkshopItemHook GetWorkshopItemHook()
+	{
+		if (workshopHookInt == null)
+		{
+			workshopHookInt = new WorkshopItemHook(this);
+		}
+		return workshopHookInt;
+	}
+
+	public override string ToString()
+	{
+		if (name.NullOrEmpty())
+		{
+			return "LabellessScenario";
+		}
+		return name;
+	}
+
+	public override int GetHashCode()
+	{
+		int num = 6126121;
+		if (name != null)
+		{
+			num ^= name.GetHashCode();
+		}
+		if (summary != null)
+		{
+			num ^= summary.GetHashCode();
+		}
+		if (description != null)
+		{
+			num ^= description.GetHashCode();
+		}
+		num ^= publishedFileIdInt.GetHashCode();
+		for (int i = 0; i < parts.Count; i++)
+		{
+			if (parts[i] != null)
 			{
-				this.parts.Insert(num - 1, part);
+				num ^= parts[i].GetHashCode() + i;
 			}
-			if (dir == ReorderDirection.Down)
-			{
-				this.parts.Insert(num + 1, part);
-			}
 		}
-
-		// Token: 0x0600E227 RID: 57895 RVA: 0x004242E8 File Offset: 0x004224E8
-		public bool CanToUploadToWorkshop()
-		{
-			return this.Category != ScenarioCategory.FromDef && this.TryUploadReport().Accepted && !this.GetWorkshopItemHook().MayHaveAuthorNotCurrentUser;
-		}
-
-		// Token: 0x0600E228 RID: 57896 RVA: 0x00424324 File Offset: 0x00422524
-		public void PrepareForWorkshopUpload()
-		{
-			string path = this.name + Rand.RangeInclusive(100, 999).ToString();
-			this.tempUploadDir = Path.Combine(GenFilePaths.TempFolderPath, path);
-			DirectoryInfo directoryInfo = new DirectoryInfo(this.tempUploadDir);
-			if (directoryInfo.Exists)
-			{
-				directoryInfo.Delete();
-			}
-			directoryInfo.Create();
-			string text = Path.Combine(this.tempUploadDir, this.name);
-			text += ".rsc";
-			GameDataSaveLoader.SaveScenario(this, text);
-		}
-
-		// Token: 0x0600E229 RID: 57897 RVA: 0x004243A8 File Offset: 0x004225A8
-		public AcceptanceReport TryUploadReport()
-		{
-			if (this.name == null || this.name.Length < 3 || this.summary == null || this.summary.Length < 3 || this.description == null || this.description.Length < 3)
-			{
-				return "TextFieldsMustBeFilled".TranslateSimple();
-			}
-			return AcceptanceReport.WasAccepted;
-		}
-
-		// Token: 0x0600E22A RID: 57898 RVA: 0x0042440C File Offset: 0x0042260C
-		public PublishedFileId_t GetPublishedFileId()
-		{
-			return this.publishedFileIdInt;
-		}
-
-		// Token: 0x0600E22B RID: 57899 RVA: 0x00424414 File Offset: 0x00422614
-		public void SetPublishedFileId(PublishedFileId_t newPfid)
-		{
-			this.publishedFileIdInt = newPfid;
-			if (this.Category == ScenarioCategory.CustomLocal && !this.fileName.NullOrEmpty())
-			{
-				GameDataSaveLoader.SaveScenario(this, GenFilePaths.AbsPathForScenario(this.fileName));
-			}
-		}
-
-		// Token: 0x0600E22C RID: 57900 RVA: 0x00424444 File Offset: 0x00422644
-		public string GetWorkshopName()
-		{
-			return this.name;
-		}
-
-		// Token: 0x0600E22D RID: 57901 RVA: 0x0042444C File Offset: 0x0042264C
-		public string GetWorkshopDescription()
-		{
-			return this.GetFullInformationText();
-		}
-
-		// Token: 0x0600E22E RID: 57902 RVA: 0x00424454 File Offset: 0x00422654
-		public string GetWorkshopPreviewImagePath()
-		{
-			return GenFilePaths.ScenarioPreviewImagePath;
-		}
-
-		// Token: 0x0600E22F RID: 57903 RVA: 0x0042445B File Offset: 0x0042265B
-		public IList<string> GetWorkshopTags()
-		{
-			return new List<string>
-			{
-				"Scenario"
-			};
-		}
-
-		// Token: 0x0600E230 RID: 57904 RVA: 0x0042446D File Offset: 0x0042266D
-		public DirectoryInfo GetWorkshopUploadDirectory()
-		{
-			return new DirectoryInfo(this.tempUploadDir);
-		}
-
-		// Token: 0x0600E231 RID: 57905 RVA: 0x0042447A File Offset: 0x0042267A
-		public WorkshopItemHook GetWorkshopItemHook()
-		{
-			if (this.workshopHookInt == null)
-			{
-				this.workshopHookInt = new WorkshopItemHook(this);
-			}
-			return this.workshopHookInt;
-		}
-
-		// Token: 0x0600E232 RID: 57906 RVA: 0x00424496 File Offset: 0x00422696
-		public override string ToString()
-		{
-			if (this.name.NullOrEmpty())
-			{
-				return "LabellessScenario";
-			}
-			return this.name;
-		}
-
-		// Token: 0x0600E233 RID: 57907 RVA: 0x004244B4 File Offset: 0x004226B4
-		public override int GetHashCode()
-		{
-			int num = 6126121;
-			if (this.name != null)
-			{
-				num ^= this.name.GetHashCode();
-			}
-			if (this.summary != null)
-			{
-				num ^= this.summary.GetHashCode();
-			}
-			if (this.description != null)
-			{
-				num ^= this.description.GetHashCode();
-			}
-			num ^= this.publishedFileIdInt.GetHashCode();
-			for (int i = 0; i < this.parts.Count; i++)
-			{
-				if (this.parts[i] != null)
-				{
-					num ^= this.parts[i].GetHashCode() + i;
-				}
-			}
-			return num;
-		}
-
-		// Token: 0x040097BA RID: 38842
-		[MustTranslate]
-		public string name;
-
-		// Token: 0x040097BB RID: 38843
-		[MustTranslate]
-		public string summary;
-
-		// Token: 0x040097BC RID: 38844
-		[MustTranslate]
-		public string description;
-
-		// Token: 0x040097BD RID: 38845
-		internal ScenPart_PlayerFaction playerFaction;
-
-		// Token: 0x040097BE RID: 38846
-		internal ScenPart_PlanetLayer surfaceLayer;
-
-		// Token: 0x040097BF RID: 38847
-		internal List<ScenPart> parts = new List<ScenPart>();
-
-		// Token: 0x040097C0 RID: 38848
-		private PublishedFileId_t publishedFileIdInt = PublishedFileId_t.Invalid;
-
-		// Token: 0x040097C1 RID: 38849
-		private ScenarioCategory categoryInt;
-
-		// Token: 0x040097C2 RID: 38850
-		[NoTranslate]
-		public string fileName;
-
-		// Token: 0x040097C3 RID: 38851
-		private WorkshopItemHook workshopHookInt;
-
-		// Token: 0x040097C4 RID: 38852
-		[NoTranslate]
-		private string tempUploadDir;
-
-		// Token: 0x040097C5 RID: 38853
-		public bool enabled = true;
-
-		// Token: 0x040097C6 RID: 38854
-		public bool showInUI = true;
-
-		// Token: 0x040097C7 RID: 38855
-		public bool valid = true;
-
-		// Token: 0x040097C8 RID: 38856
-		public bool standardAnomalyPlaystyleOnly;
-
-		// Token: 0x040097C9 RID: 38857
-		public const int NameMaxLength = 55;
-
-		// Token: 0x040097CA RID: 38858
-		public const int SummaryMaxLength = 300;
-
-		// Token: 0x040097CB RID: 38859
-		public const int DescriptionMaxLength = 1000;
+		return num;
 	}
 }

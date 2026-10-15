@@ -1533,7 +1533,7 @@ public static class GpuTextureService
 					PreferredProperties = VkMemoryPropertyFlags.DeviceLocalBit,
 					Priority = 1f
 				};
-				allocation = allocator.AllocateImageChecked(debugLabel, in imageCreateInfo, in allocateCreateInfo);
+				allocation = allocator.AllocateImageChecked(debugLabel, in imageCreateInfo, in allocateCreateInfo, 0u, anyMemoryOnRefusal: false);
 			}
 			catch (VmaAllocationException)
 			{

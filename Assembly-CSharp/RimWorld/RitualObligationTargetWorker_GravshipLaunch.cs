@@ -1,64 +1,284 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class RitualObligationTargetWorker_GravshipLaunch : RitualObligationTargetFilter
 {
-	// Token: 0x0200271C RID: 10012
-	public class RitualObligationTargetWorker_GravshipLaunch : RitualObligationTargetFilter
+	[CompilerGenerated]
+	private sealed class _003CGetTargetInfos_003Ed__4 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x0600DBC9 RID: 56265 RVA: 0x00408B0F File Offset: 0x00406D0F
-		public RitualObligationTargetWorker_GravshipLaunch()
-		{
-		}
+		private int _003C_003E1__state;
 
-		// Token: 0x0600DBCA RID: 56266 RVA: 0x00408B17 File Offset: 0x00406D17
-		public RitualObligationTargetWorker_GravshipLaunch(RitualObligationTargetFilterDef def) : base(def)
-		{
-		}
+		private string _003C_003E2__current;
 
-		// Token: 0x0600DBCB RID: 56267 RVA: 0x0040CBE7 File Offset: 0x0040ADE7
-		public override IEnumerable<TargetInfo> GetTargets(RitualObligation obligation, Map map)
+		private int _003C_003El__initialThreadId;
+
+		string IEnumerator<string>.Current
 		{
-			List<Thing> list = map.listerThings.ThingsOfDef(ThingDefOf.PilotConsole);
-			foreach (Thing thing in list)
+			[DebuggerHidden]
+			get
 			{
-				CompPilotConsole compPilotConsole;
-				if (thing.TryGetComp(out compPilotConsole) && compPilotConsole.CanUseNow())
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetTargetInfos_003Ed__4(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			switch (_003C_003E1__state)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = "RitualTargetPilotConsole".Translate();
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				return this;
+			}
+			return new _003CGetTargetInfos_003Ed__4(0);
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGetTargets_003Ed__2 : IEnumerable<TargetInfo>, IEnumerable, IEnumerator<TargetInfo>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private TargetInfo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private Map map;
+
+		public Map _003C_003E3__map;
+
+		private List<Thing>.Enumerator _003C_003E7__wrap1;
+
+		TargetInfo IEnumerator<TargetInfo>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetTargets_003Ed__2(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
 				{
-					yield return thing;
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
 				}
 			}
-			List<Thing>.Enumerator enumerator = default(List<Thing>.Enumerator);
-			yield break;
-			yield break;
+			_003C_003E7__wrap1 = default(List<Thing>.Enumerator);
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x0600DBCC RID: 56268 RVA: 0x0040CBF8 File Offset: 0x0040ADF8
-		protected override RitualTargetUseReport CanUseTargetInternal(TargetInfo target, RitualObligation obligation)
+		private bool MoveNext()
 		{
-			if (!target.HasThing)
+			try
 			{
+				switch (_003C_003E1__state)
+				{
+				default:
+					return false;
+				case 0:
+				{
+					_003C_003E1__state = -1;
+					List<Thing> list = map.listerThings.ThingsOfDef(ThingDefOf.PilotConsole);
+					_003C_003E7__wrap1 = list.GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				}
+				case 1:
+					_003C_003E1__state = -3;
+					break;
+				}
+				while (_003C_003E7__wrap1.MoveNext())
+				{
+					Thing current = _003C_003E7__wrap1.Current;
+					if (current.TryGetComp(out CompPilotConsole comp) && (bool)comp.CanUseNow())
+					{
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = default(List<Thing>.Enumerator);
 				return false;
 			}
-			CompPilotConsole compPilotConsole;
-			if (!target.Thing.TryGetComp(out compPilotConsole))
+			catch
 			{
-				return false;
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
-			AcceptanceReport acceptanceReport = compPilotConsole.CanUseNow();
-			if (!acceptanceReport.Accepted)
-			{
-				return acceptanceReport.Reason;
-			}
-			return true;
 		}
 
-		// Token: 0x0600DBCD RID: 56269 RVA: 0x0040CC4F File Offset: 0x0040AE4F
-		public override IEnumerable<string> GetTargetInfos(RitualObligation obligation)
+		bool IEnumerator.MoveNext()
 		{
-			yield return "RitualTargetPilotConsole".Translate();
-			yield break;
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap1/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<TargetInfo> IEnumerable<TargetInfo>.GetEnumerator()
+		{
+			_003CGetTargets_003Ed__2 _003CGetTargets_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CGetTargets_003Ed__ = this;
+			}
+			else
+			{
+				_003CGetTargets_003Ed__ = new _003CGetTargets_003Ed__2(0);
+			}
+			_003CGetTargets_003Ed__.map = _003C_003E3__map;
+			return _003CGetTargets_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<TargetInfo>)this).GetEnumerator();
+		}
+	}
+
+	public RitualObligationTargetWorker_GravshipLaunch()
+	{
+	}
+
+	public RitualObligationTargetWorker_GravshipLaunch(RitualObligationTargetFilterDef def)
+		: base(def)
+	{
+	}
+
+	[IteratorStateMachine(typeof(_003CGetTargets_003Ed__2))]
+	public override IEnumerable<TargetInfo> GetTargets(RitualObligation obligation, Map map)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetTargets_003Ed__2(-2)
+		{
+			_003C_003E3__map = map
+		};
+	}
+
+	protected override RitualTargetUseReport CanUseTargetInternal(TargetInfo target, RitualObligation obligation)
+	{
+		if (!target.HasThing)
+		{
+			return false;
+		}
+		if (!target.Thing.TryGetComp(out CompPilotConsole comp))
+		{
+			return false;
+		}
+		AcceptanceReport acceptanceReport = comp.CanUseNow();
+		if (!acceptanceReport.Accepted)
+		{
+			return acceptanceReport.Reason;
+		}
+		return true;
+	}
+
+	[IteratorStateMachine(typeof(_003CGetTargetInfos_003Ed__4))]
+	public override IEnumerable<string> GetTargetInfos(RitualObligation obligation)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetTargetInfos_003Ed__4(-2);
 	}
 }

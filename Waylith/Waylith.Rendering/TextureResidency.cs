@@ -264,7 +264,7 @@ public static class TextureResidency
 		{
 			AllocationInfo.CreateInfo allocateCreateInfo = new AllocationInfo.CreateInfo
 			{
-				Preference = MemoryPreference.PreferGpu
+				Preference = MemoryPreference.None
 			};
 			allocation = allocator.AllocateImageChecked(label, in createInfo, in allocateCreateInfo, systemMemoryTypeBits);
 		}
@@ -312,36 +312,71 @@ public static class TextureResidency
 		}
 	}
 
-	private static bool ReclaimForOutOfMemory(long bytes, int attempt)
+	private static bool ReclaimForOutOfMemory(long bytes, int attempt, bool deviceLocal)
 	{
 		if (!GpuTextureService.CanRunResidencyWork)
 		{
 			return false;
 		}
 		bool flag = GpuTextureService.TryRetireDeferredDisposalsAfterIdle(0L);
+		bool shouldAppend;
+		LogCategory logger;
+		LogString<Warning> message;
+		if (!deviceLocal && OffloadSupported)
+		{
+			if (_busy)
+			{
+				return flag;
+			}
+			int evicted;
+			long num = EvictHostResident((attempt == 0) ? System.Math.Max(bytes * 4, 134217728L) : long.MaxValue, allowUsed: true, attempt > 0, out evicted);
+			if (num > 0)
+			{
+				GpuTextureService.TryRetireDeferredDisposalsAfterIdle(0L);
+			}
+			logger = Logger;
+			LogCategory logCategory = logger;
+			message = new LogString<Warning>(109, 6, logger, out shouldAppend);
+			if (shouldAppend)
+			{
+				message.AppendLiteral("System memory refused a ");
+				message.AppendFormatted(GpuMemoryReport.FormatBytes(bytes));
+				message.AppendLiteral(" allocation. Evicted ");
+				message.AppendFormatted(evicted);
+				message.AppendLiteral(" offloaded textures (");
+				message.AppendFormatted(GpuMemoryReport.FormatBytes(num));
+				message.AppendLiteral(") to the disk cache to retry it (attempt ");
+				message.AppendFormatted(attempt + 1);
+				message.AppendLiteral(").");
+				message.AppendFormatted(Environment.NewLine);
+				message.AppendFormatted(GpuMemoryReport.BuildCompactSummary().TrimEnd());
+			}
+			logCategory.Warning(message, "ReclaimForOutOfMemory", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\TextureResidency.cs", 268);
+			return num > 0 || flag;
+		}
 		TrimHostResident(attempt > 0);
-		long num = Offload((attempt == 0) ? System.Math.Max(bytes * 4, 134217728L) : long.MaxValue, allowEviction: true);
-		if (num > 0)
+		long num2 = Offload((attempt == 0) ? System.Math.Max(bytes * 4, 134217728L) : long.MaxValue, allowEviction: true, attempt > 0 && !OffloadSupported);
+		if (num2 > 0)
 		{
 			GpuTextureService.TryRetireDeferredDisposalsAfterIdle(0L);
 		}
-		LogCategory logger = Logger;
-		bool shouldAppend;
-		LogString<Warning> message = new LogString<Warning>(89, 5, logger, out shouldAppend);
+		logger = Logger;
+		LogCategory logCategory2 = logger;
+		message = new LogString<Warning>(89, 5, logger, out shouldAppend);
 		if (shouldAppend)
 		{
 			message.AppendLiteral("Device-local memory refused a ");
 			message.AppendFormatted(GpuMemoryReport.FormatBytes(bytes));
 			message.AppendLiteral(" allocation, moved ");
-			message.AppendFormatted(GpuMemoryReport.FormatBytes(num));
+			message.AppendFormatted(GpuMemoryReport.FormatBytes(num2));
 			message.AppendLiteral(" of textures out to retry it (attempt ");
 			message.AppendFormatted(attempt + 1);
 			message.AppendLiteral(").");
 			message.AppendFormatted(Environment.NewLine);
 			message.AppendFormatted(GpuMemoryReport.BuildCompactSummary().TrimEnd());
 		}
-		logger.Warning(message, "ReclaimForOutOfMemory", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\TextureResidency.cs", 264);
-		return num > 0 || flag;
+		logCategory2.Warning(message, "ReclaimForOutOfMemory", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\TextureResidency.cs", 276);
+		return num2 > 0 || flag;
 	}
 
 	public static void Update()
@@ -382,7 +417,7 @@ public static class TextureResidency
 		if (offloadedBytes > HostHighWatermark(budget) && (offloadedBytes >= Volatile.Read(in _hostTrimRetryAtBytes) || _frameIndex >= _hostTrimRetryFrame))
 		{
 			int evicted;
-			long num = EvictHostResident(offloadedBytes - HostLowWatermark(budget), allowUsed, out evicted);
+			long num = EvictHostResident(offloadedBytes - HostLowWatermark(budget), allowUsed, allowRecent: false, out evicted);
 			Volatile.Write(ref _hostTrimRetryAtBytes, offloadedBytes - num + 268435456);
 			_hostTrimRetryFrame = _frameIndex + 300;
 			if (num > 0 && Interlocked.Exchange(ref _hostEvictionLogged, 1) == 0)
@@ -392,7 +427,7 @@ public static class TextureResidency
 		}
 	}
 
-	private static long EvictHostResident(long targetBytes, bool allowUsed, out int evicted)
+	private static long EvictHostResident(long targetBytes, bool allowUsed, bool allowRecent, out int evicted)
 	{
 		evicted = 0;
 		_busy = true;
@@ -411,7 +446,7 @@ public static class TextureResidency
 				}
 				return (item.LastUseOrder != 0L) ? item.LastUseOrder.CompareTo(item2.LastUseOrder) : item2.AllocatedBytes.CompareTo(item.AllocatedBytes);
 			});
-			long num2 = GpuTextureService.RenderFrameSerial - 600;
+			long num2 = (allowRecent ? long.MaxValue : (GpuTextureService.RenderFrameSerial - 600));
 			long num3 = 0L;
 			foreach (var (texture, gpuTextureAllocation) in Candidates)
 			{
@@ -434,7 +469,7 @@ public static class TextureResidency
 		}
 	}
 
-	private static long Offload(long targetBytes, bool allowEviction)
+	private static long Offload(long targetBytes, bool allowEviction, bool evictUsed = false)
 	{
 		if (_busy)
 		{
@@ -469,7 +504,7 @@ public static class TextureResidency
 					break;
 				}
 				long allocatedBytes = gpuTextureAllocation.AllocatedBytes;
-				if (allowEviction && gpuTextureAllocation.LastUseOrder == 0L && texture.TryEvictForResidency())
+				if (allowEviction && (gpuTextureAllocation.LastUseOrder == 0 || evictUsed) && texture.TryEvictForResidency())
 				{
 					num3 += allocatedBytes;
 				}

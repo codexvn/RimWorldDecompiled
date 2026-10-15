@@ -1,131 +1,261 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class TorrentialRainFlood : Flood
 {
-	// Token: 0x02002A9B RID: 10907
-	public class TorrentialRainFlood : Flood
+	[CompilerGenerated]
+	private sealed class _003CGetInitialCells_003Ed__8 : IEnumerable<(IntVec3, int)>, IEnumerable, IEnumerator<(IntVec3, int)>, IEnumerator, IDisposable
 	{
-		// Token: 0x170025F3 RID: 9715
-		// (get) Token: 0x0600F2E2 RID: 62178 RVA: 0x0046861B File Offset: 0x0046681B
-		protected override int StartDelayTicks
+		private int _003C_003E1__state;
+
+		private (IntVec3, int) _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private Map map;
+
+		public Map _003C_003E3__map;
+
+		public TorrentialRainFlood _003C_003E4__this;
+
+		private List<IntVec3>.Enumerator _003C_003E7__wrap1;
+
+		(IntVec3, int) IEnumerator<(IntVec3, int)>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return 4000;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600F2E3 RID: 62179 RVA: 0x00468624 File Offset: 0x00466824
-		public override void ExposeData()
+		object IEnumerator.Current
 		{
-			base.ExposeData();
-			Scribe_Collections.Look<IntVec3, int>(ref this.floodedCells, "floodedCells", LookMode.Value, LookMode.Value, ref this.tmpKeys, ref this.tmpValues, true, false, false);
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x0600F2E4 RID: 62180 RVA: 0x00468658 File Offset: 0x00466858
-		protected override IEnumerable<ValueTuple<IntVec3, int>> GetInitialCells(Map map)
+		[DebuggerHidden]
+		public _003CGetInitialCells_003Ed__8(int _003C_003E1__state)
 		{
-			if (!ModsConfig.OdysseyActive)
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				yield break;
-			}
-			List<IntVec3> list = new List<IntVec3>();
-			foreach (WaterBody waterBody in map.waterBodyTracker.Bodies)
-			{
-				if (waterBody.waterBodyType != WaterBodyType.Saltwater)
+				try
 				{
-					bool flag = false;
-					using (HashSet<IntVec3>.Enumerator enumerator2 = waterBody.cells.GetEnumerator())
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = default(List<IntVec3>.Enumerator);
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				TorrentialRainFlood torrentialRainFlood = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+				{
+					_003C_003E1__state = -1;
+					if (!ModsConfig.OdysseyActive)
 					{
-						while (enumerator2.MoveNext())
+						return false;
+					}
+					List<IntVec3> list = new List<IntVec3>();
+					foreach (WaterBody body in map.waterBodyTracker.Bodies)
+					{
+						if (body.waterBodyType == WaterBodyType.Saltwater)
 						{
-							if (!enumerator2.Current.Roofed(map))
+							continue;
+						}
+						bool flag = false;
+						foreach (IntVec3 cell in body.cells)
+						{
+							if (!cell.Roofed(map))
 							{
 								flag = true;
 								break;
 							}
 						}
+						if (!flag)
+						{
+							continue;
+						}
+						foreach (IntVec3 cell2 in body.cells)
+						{
+							if (cell2.GetTerrain(map).IsWater && !torrentialRainFlood.floodedCells.ContainsKey(cell2))
+							{
+								list.Add(cell2);
+							}
+						}
 					}
-					if (flag)
+					if (list.Count == 0)
 					{
-						list.AddRange(waterBody.cells);
+						return false;
 					}
-				}
-			}
-			if (list.Count == 0)
-			{
-				yield break;
-			}
-			foreach (IntVec3 intVec in list.ToList<IntVec3>())
-			{
-				bool flag2 = false;
-				foreach (IntVec3 b in GenAdj.CardinalDirections)
-				{
-					IntVec3 c = intVec + b;
-					if (c.InBounds(base.Map) && !c.GetTerrain(map).IsWater)
+					foreach (IntVec3 item in list.ToList())
 					{
-						flag2 = true;
-						break;
+						bool flag2 = false;
+						IntVec3[] cardinalDirections = GenAdj.CardinalDirections;
+						foreach (IntVec3 intVec in cardinalDirections)
+						{
+							IntVec3 c = item + intVec;
+							if (c.InBounds(torrentialRainFlood.Map) && !c.GetTerrain(map).IsWater)
+							{
+								flag2 = true;
+								break;
+							}
+						}
+						if (!flag2)
+						{
+							list.Remove(item);
+						}
 					}
+					list.Shuffle();
+					_003C_003E7__wrap1 = list.GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
 				}
-				if (!flag2)
+				case 1:
+					_003C_003E1__state = -3;
+					break;
+				}
+				if (_003C_003E7__wrap1.MoveNext())
 				{
-					list.Remove(intVec);
+					IntVec3 current4 = _003C_003E7__wrap1.Current;
+					_003C_003E2__current = (current4, Flood.FloodWidthRange.RandomInRange);
+					_003C_003E1__state = 1;
+					return true;
 				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = default(List<IntVec3>.Enumerator);
+				return false;
 			}
-			list.Shuffle<IntVec3>();
-			foreach (IntVec3 item in list)
+			catch
 			{
-				yield return new ValueTuple<IntVec3, int>(item, Flood.FloodWidthRange.RandomInRange);
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
-			List<IntVec3>.Enumerator enumerator4 = default(List<IntVec3>.Enumerator);
-			yield break;
-			yield break;
 		}
 
-		// Token: 0x0600F2E5 RID: 62181 RVA: 0x00468670 File Offset: 0x00466870
-		protected override void SpreadFlood(IntVec3 cell, TerrainDef sourceTerrain)
+		bool IEnumerator.MoveNext()
 		{
-			int value = (this.estimatedFloodedTiles - this.floodedTileCount) * 10;
-			base.Map.terrainGrid.SetTempTerrain(cell, sourceTerrain.floodTerrain);
-			this.floodedCells[cell] = value;
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0600F2E6 RID: 62182 RVA: 0x004686B4 File Offset: 0x004668B4
-		public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
+		private void _003C_003Em__Finally1()
 		{
-			if (this.floodedCells.Any<KeyValuePair<IntVec3, int>>())
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap1/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<(IntVec3, int)> IEnumerable<(IntVec3, int)>.GetEnumerator()
+		{
+			_003CGetInitialCells_003Ed__8 _003CGetInitialCells_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				int num = this.floodedCells.Values.Min();
-				foreach (KeyValuePair<IntVec3, int> keyValuePair in this.floodedCells)
+				_003C_003E1__state = 0;
+				_003CGetInitialCells_003Ed__ = this;
+			}
+			else
+			{
+				_003CGetInitialCells_003Ed__ = new _003CGetInitialCells_003Ed__8(0)
 				{
-					IntVec3 intVec;
-					int num2;
-					keyValuePair.Deconstruct(out intVec, out num2);
-					IntVec3 c = intVec;
-					int num3 = num2;
-					base.Map.tempTerrain.QueueRemoveTerrain(c, Find.TickManager.TicksGame + 2000 + num3 - num);
-				}
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
-			base.Destroy(mode);
+			_003CGetInitialCells_003Ed__.map = _003C_003E3__map;
+			return _003CGetInitialCells_003Ed__;
 		}
 
-		// Token: 0x04009FFC RID: 40956
-		private const int RecedeIntervalTicks = 10;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<(IntVec3, int)>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x04009FFD RID: 40957
-		private Dictionary<IntVec3, int> floodedCells = new Dictionary<IntVec3, int>();
+	private const int RecedeIntervalTicks = 10;
 
-		// Token: 0x04009FFE RID: 40958
-		private const int EndDelayTicks = 2000;
+	private Dictionary<IntVec3, int> floodedCells = new Dictionary<IntVec3, int>();
 
-		// Token: 0x04009FFF RID: 40959
-		private List<IntVec3> tmpKeys;
+	private const int EndDelayTicks = 2000;
 
-		// Token: 0x0400A000 RID: 40960
-		private List<int> tmpValues;
+	private List<IntVec3> tmpKeys;
+
+	private List<int> tmpValues;
+
+	protected override int StartDelayTicks => 4000;
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Collections.Look(ref floodedCells, "floodedCells", LookMode.Value, LookMode.Value, ref tmpKeys, ref tmpValues);
+	}
+
+	[IteratorStateMachine(typeof(_003CGetInitialCells_003Ed__8))]
+	protected override IEnumerable<(IntVec3, int)> GetInitialCells(Map map)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetInitialCells_003Ed__8(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__map = map
+		};
+	}
+
+	protected override void SpreadFlood(IntVec3 cell, TerrainDef sourceTerrain)
+	{
+		int value = (estimatedFloodedTiles - floodedTileCount) * 10;
+		base.Map.terrainGrid.SetTempTerrain(cell, sourceTerrain.floodTerrain);
+		floodedCells[cell] = value;
+	}
+
+	public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
+	{
+		if (floodedCells.Any())
+		{
+			int num = floodedCells.Values.Min();
+			foreach (var (c, num3) in floodedCells)
+			{
+				base.Map.tempTerrain.QueueRemoveTerrain(c, Find.TickManager.TicksGame + 2000 + num3 - num);
+			}
+		}
+		base.Destroy(mode);
 	}
 }

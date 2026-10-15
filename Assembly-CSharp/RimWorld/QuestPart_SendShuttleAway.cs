@@ -1,73 +1,168 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class QuestPart_SendShuttleAway : QuestPart
 {
-	// Token: 0x02001CA0 RID: 7328
-	public class QuestPart_SendShuttleAway : QuestPart
+	[CompilerGenerated]
+	private sealed class _003Cget_QuestLookTargets_003Ed__4 : IEnumerable<GlobalTargetInfo>, IEnumerable, IEnumerator<GlobalTargetInfo>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001919 RID: 6425
-		// (get) Token: 0x0600A33D RID: 41789 RVA: 0x002EDE97 File Offset: 0x002EC097
-		public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+		private int _003C_003E1__state;
+
+		private GlobalTargetInfo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public QuestPart_SendShuttleAway _003C_003E4__this;
+
+		GlobalTargetInfo IEnumerator<GlobalTargetInfo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				yield return this.shuttle;
-				yield break;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600A33E RID: 41790 RVA: 0x002EDEA7 File Offset: 0x002EC0A7
-		public override void Notify_QuestSignalReceived(Signal signal)
+		object IEnumerator.Current
 		{
-			base.Notify_QuestSignalReceived(signal);
-			if (signal.tag == this.inSignal && this.shuttle != null)
+			[DebuggerHidden]
+			get
 			{
-				SendShuttleAwayQuestPartUtility.SendAway(this.shuttle, this.dropEverything);
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600A33F RID: 41791 RVA: 0x002EDEDC File Offset: 0x002EC0DC
-		public override void ExposeData()
+		[DebuggerHidden]
+		public _003Cget_QuestLookTargets_003Ed__4(int _003C_003E1__state)
 		{
-			base.ExposeData();
-			Scribe_Values.Look<string>(ref this.inSignal, "inSignal", null, false);
-			Scribe_References.Look<Thing>(ref this.shuttle, "shuttle", false);
-			Scribe_Values.Look<bool>(ref this.dropEverything, "dropEverything", false, false);
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x0600A340 RID: 41792 RVA: 0x002EDF1C File Offset: 0x002EC11C
-		public override void AssignDebugData()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			base.AssignDebugData();
-			this.inSignal = "DebugSignal" + Rand.Int.ToString();
-			if (Find.AnyPlayerHomeMap != null)
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			QuestPart_SendShuttleAway questPart_SendShuttleAway = _003C_003E4__this;
+			switch (num)
 			{
-				Map randomPlayerHomeMap = Find.RandomPlayerHomeMap;
-				IntVec3 center = DropCellFinder.RandomDropSpot(randomPlayerHomeMap, true);
-				this.shuttle = ThingMaker.MakeThing(ThingDefOf.Shuttle, null);
-				GenPlace.TryPlaceThing(SkyfallerMaker.MakeSkyfaller(ThingDefOf.ShuttleIncoming, this.shuttle), center, randomPlayerHomeMap, ThingPlaceMode.Near, null, null, null, 1);
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = questPart_SendShuttleAway.shuttle;
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				return false;
 			}
 		}
 
-		// Token: 0x0600A341 RID: 41793 RVA: 0x002EDF97 File Offset: 0x002EC197
-		public override void ReplacePawnReferences(Pawn replace, Pawn with)
+		bool IEnumerator.MoveNext()
 		{
-			if (this.shuttle != null)
-			{
-				this.shuttle.TryGetComp<CompShuttle>().requiredPawns.Replace(replace, with);
-			}
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x040070CF RID: 28879
-		public string inSignal;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x040070D0 RID: 28880
-		public Thing shuttle;
+		[DebuggerHidden]
+		IEnumerator<GlobalTargetInfo> IEnumerable<GlobalTargetInfo>.GetEnumerator()
+		{
+			_003Cget_QuestLookTargets_003Ed__4 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_QuestLookTargets_003Ed__4(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x040070D1 RID: 28881
-		public bool dropEverything;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<GlobalTargetInfo>)this).GetEnumerator();
+		}
+	}
+
+	public string inSignal;
+
+	public Thing shuttle;
+
+	public bool dropEverything;
+
+	public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+	{
+		[IteratorStateMachine(typeof(_003Cget_QuestLookTargets_003Ed__4))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_QuestLookTargets_003Ed__4(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public override void Notify_QuestSignalReceived(Signal signal)
+	{
+		base.Notify_QuestSignalReceived(signal);
+		if (signal.tag == inSignal && shuttle != null)
+		{
+			SendShuttleAwayQuestPartUtility.SendAway(shuttle, dropEverything);
+		}
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref inSignal, "inSignal");
+		Scribe_References.Look(ref shuttle, "shuttle");
+		Scribe_Values.Look(ref dropEverything, "dropEverything", defaultValue: false);
+	}
+
+	public override void AssignDebugData()
+	{
+		base.AssignDebugData();
+		inSignal = "DebugSignal" + Rand.Int;
+		if (Find.AnyPlayerHomeMap != null)
+		{
+			Map randomPlayerHomeMap = Find.RandomPlayerHomeMap;
+			IntVec3 center = DropCellFinder.RandomDropSpot(randomPlayerHomeMap);
+			shuttle = ThingMaker.MakeThing(ThingDefOf.Shuttle);
+			GenPlace.TryPlaceThing(SkyfallerMaker.MakeSkyfaller(ThingDefOf.ShuttleIncoming, shuttle), center, randomPlayerHomeMap, ThingPlaceMode.Near, null, null, null);
+		}
+	}
+
+	public override void ReplacePawnReferences(Pawn replace, Pawn with)
+	{
+		if (shuttle != null)
+		{
+			shuttle.TryGetComp<CompShuttle>().requiredPawns.Replace(replace, with);
+		}
 	}
 }

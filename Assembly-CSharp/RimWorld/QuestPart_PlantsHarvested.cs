@@ -1,85 +1,216 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class QuestPart_PlantsHarvested : QuestPartActivable
 {
-	// Token: 0x02001C76 RID: 7286
-	public class QuestPart_PlantsHarvested : QuestPartActivable
+	[CompilerGenerated]
+	private sealed class _003Cget_Hyperlinks_003Ed__6 : IEnumerable<Dialog_InfoCard.Hyperlink>, IEnumerable, IEnumerator<Dialog_InfoCard.Hyperlink>, IEnumerator, IDisposable
 	{
-		// Token: 0x170018F5 RID: 6389
-		// (get) Token: 0x0600A264 RID: 41572 RVA: 0x002EAD7C File Offset: 0x002E8F7C
-		public override string DescriptionPart
+		private int _003C_003E1__state;
+
+		private Dialog_InfoCard.Hyperlink _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public QuestPart_PlantsHarvested _003C_003E4__this;
+
+		private IEnumerator<Dialog_InfoCard.Hyperlink> _003C_003E7__wrap1;
+
+		Dialog_InfoCard.Hyperlink IEnumerator<Dialog_InfoCard.Hyperlink>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return "PlantsHarvested".Translate().CapitalizeFirst() + ": " + this.harvested.ToString() + " / " + this.count.ToString();
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170018F6 RID: 6390
-		// (get) Token: 0x0600A265 RID: 41573 RVA: 0x002EADCA File Offset: 0x002E8FCA
-		public override IEnumerable<Dialog_InfoCard.Hyperlink> Hyperlinks
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				foreach (Dialog_InfoCard.Hyperlink hyperlink in base.Hyperlinks)
-				{
-					yield return hyperlink;
-				}
-				IEnumerator<Dialog_InfoCard.Hyperlink> enumerator = null;
-				yield return new Dialog_InfoCard.Hyperlink(this.plant, -1);
-				yield break;
-				yield break;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600A266 RID: 41574 RVA: 0x002EADDA File Offset: 0x002E8FDA
-		protected override void Enable(SignalArgs receivedArgs)
+		[DebuggerHidden]
+		public _003Cget_Hyperlinks_003Ed__6(int _003C_003E1__state)
 		{
-			base.Enable(receivedArgs);
-			this.harvested = 0;
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x0600A267 RID: 41575 RVA: 0x002EADEC File Offset: 0x002E8FEC
-		public override void Notify_PlantHarvested(Pawn actor, Thing harvested)
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			base.Notify_PlantHarvested(actor, harvested);
-			if (base.State == QuestPartState.Enabled && harvested.def == this.plant)
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				this.harvested += harvested.stackCount;
-				if (this.harvested >= this.count)
+				try
 				{
-					this.harvested = this.count;
-					base.Complete();
 				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				QuestPart_PlantsHarvested questPart_PlantsHarvested = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((QuestPart)questPart_PlantsHarvested).Hyperlinks.GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_006f;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						return false;
+					}
+					IL_006f:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Dialog_InfoCard.Hyperlink current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					_003C_003E2__current = new Dialog_InfoCard.Hyperlink(questPart_PlantsHarvested.plant);
+					_003C_003E1__state = 2;
+					return true;
+				}
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x0600A268 RID: 41576 RVA: 0x002EAE4B File Offset: 0x002E904B
-		public override void ExposeData()
+		bool IEnumerator.MoveNext()
 		{
-			base.ExposeData();
-			Scribe_Defs.Look<ThingDef>(ref this.plant, "plant");
-			Scribe_Values.Look<int>(ref this.count, "count", 0, false);
-			Scribe_Values.Look<int>(ref this.harvested, "harvested", 0, false);
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0600A269 RID: 41577 RVA: 0x002EAE87 File Offset: 0x002E9087
-		public override void AssignDebugData()
+		private void _003C_003Em__Finally1()
 		{
-			base.AssignDebugData();
-			this.plant = ThingDefOf.RawPotatoes;
-			this.count = 10;
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
 		}
 
-		// Token: 0x04007038 RID: 28728
-		public ThingDef plant;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04007039 RID: 28729
-		public int count;
+		[DebuggerHidden]
+		IEnumerator<Dialog_InfoCard.Hyperlink> IEnumerable<Dialog_InfoCard.Hyperlink>.GetEnumerator()
+		{
+			_003Cget_Hyperlinks_003Ed__6 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_Hyperlinks_003Ed__6(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x0400703A RID: 28730
-		private int harvested;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Dialog_InfoCard.Hyperlink>)this).GetEnumerator();
+		}
+	}
+
+	public ThingDef plant;
+
+	public int count;
+
+	private int harvested;
+
+	public override string DescriptionPart => string.Concat("PlantsHarvested".Translate().CapitalizeFirst() + ": ", harvested.ToString(), " / ", count.ToString());
+
+	public override IEnumerable<Dialog_InfoCard.Hyperlink> Hyperlinks
+	{
+		[IteratorStateMachine(typeof(_003Cget_Hyperlinks_003Ed__6))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_Hyperlinks_003Ed__6(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	protected override void Enable(SignalArgs receivedArgs)
+	{
+		base.Enable(receivedArgs);
+		harvested = 0;
+	}
+
+	public override void Notify_PlantHarvested(Pawn actor, Thing harvested)
+	{
+		base.Notify_PlantHarvested(actor, harvested);
+		if (base.State == QuestPartState.Enabled && harvested.def == plant)
+		{
+			this.harvested += harvested.stackCount;
+			if (this.harvested >= count)
+			{
+				this.harvested = count;
+				Complete();
+			}
+		}
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Defs.Look(ref plant, "plant");
+		Scribe_Values.Look(ref count, "count", 0);
+		Scribe_Values.Look(ref harvested, "harvested", 0);
+	}
+
+	public override void AssignDebugData()
+	{
+		base.AssignDebugData();
+		plant = ThingDefOf.RawPotatoes;
+		count = 10;
 	}
 }

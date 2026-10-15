@@ -1,180 +1,144 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Need_Outdoors : Need
 {
-	// Token: 0x0200248A RID: 9354
-	public class Need_Outdoors : Need
+	private const float Delta_IndoorsThickRoof = -0.45f;
+
+	private const float Delta_OutdoorsThickRoof = -0.4f;
+
+	private const float Delta_IndoorsThinRoof = -0.32f;
+
+	private const float Minimum_IndoorsThinRoof = 0.2f;
+
+	private const float Delta_OutdoorsThinRoof = 1f;
+
+	private const float Delta_IndoorsNoRoof = 5f;
+
+	private const float Delta_OutdoorsNoRoof = 8f;
+
+	private const float DeltaFactor_InBed = 0.2f;
+
+	private float lastEffectiveDelta;
+
+	public override int GUIChangeArrow
 	{
-		// Token: 0x17001EDD RID: 7901
-		// (get) Token: 0x0600CAE5 RID: 51941 RVA: 0x003B6FD7 File Offset: 0x003B51D7
-		public override int GUIChangeArrow
+		get
 		{
-			get
+			if (IsFrozen)
 			{
-				if (this.IsFrozen)
-				{
-					return 0;
-				}
-				return Math.Sign(this.lastEffectiveDelta);
+				return 0;
 			}
+			return Math.Sign(lastEffectiveDelta);
 		}
+	}
 
-		// Token: 0x17001EDE RID: 7902
-		// (get) Token: 0x0600CAE6 RID: 51942 RVA: 0x003B6FF0 File Offset: 0x003B51F0
-		public OutdoorsCategory CurCategory
+	public OutdoorsCategory CurCategory
+	{
+		get
 		{
-			get
+			if (CurLevel > 0.8f)
 			{
-				if (this.CurLevel > 0.8f)
-				{
-					return OutdoorsCategory.Free;
-				}
-				if (this.CurLevel > 0.6f)
-				{
-					return OutdoorsCategory.NeedFreshAir;
-				}
-				if (this.CurLevel > 0.4f)
-				{
-					return OutdoorsCategory.CabinFeverLight;
-				}
-				if (this.CurLevel >= 0.2f)
-				{
-					return OutdoorsCategory.CabinFeverSevere;
-				}
-				if (this.CurLevel > 0.05f)
-				{
-					return OutdoorsCategory.Trapped;
-				}
-				return OutdoorsCategory.Entombed;
+				return OutdoorsCategory.Free;
 			}
-		}
-
-		// Token: 0x17001EDF RID: 7903
-		// (get) Token: 0x0600CAE7 RID: 51943 RVA: 0x003B7049 File Offset: 0x003B5249
-		public override bool ShowOnNeedList
-		{
-			get
+			if (CurLevel > 0.6f)
 			{
-				return !this.Disabled;
+				return OutdoorsCategory.NeedFreshAir;
 			}
-		}
-
-		// Token: 0x17001EE0 RID: 7904
-		// (get) Token: 0x0600CAE8 RID: 51944 RVA: 0x003B7054 File Offset: 0x003B5254
-		private bool Disabled
-		{
-			get
+			if (CurLevel > 0.4f)
 			{
-				return this.pawn.Dead || this.pawn.needs.PrefersIndoors;
+				return OutdoorsCategory.CabinFeverLight;
 			}
-		}
-
-		// Token: 0x0600CAE9 RID: 51945 RVA: 0x003B7078 File Offset: 0x003B5278
-		public Need_Outdoors(Pawn pawn) : base(pawn)
-		{
-			this.threshPercents = new List<float>();
-			this.threshPercents.Add(0.8f);
-			this.threshPercents.Add(0.6f);
-			this.threshPercents.Add(0.4f);
-			this.threshPercents.Add(0.2f);
-			this.threshPercents.Add(0.05f);
-		}
-
-		// Token: 0x0600CAEA RID: 51946 RVA: 0x003B5485 File Offset: 0x003B3685
-		public override void SetInitialLevel()
-		{
-			this.CurLevel = 1f;
-		}
-
-		// Token: 0x0600CAEB RID: 51947 RVA: 0x003B70E8 File Offset: 0x003B52E8
-		public override void NeedInterval()
-		{
-			if (this.Disabled)
+			if (CurLevel >= 0.2f)
 			{
-				this.CurLevel = 1f;
-				return;
+				return OutdoorsCategory.CabinFeverSevere;
 			}
-			if (this.IsFrozen)
+			if (CurLevel > 0.05f)
 			{
-				return;
+				return OutdoorsCategory.Trapped;
 			}
+			return OutdoorsCategory.Entombed;
+		}
+	}
+
+	public override bool ShowOnNeedList => !Disabled;
+
+	private bool Disabled
+	{
+		get
+		{
+			if (!pawn.Dead)
+			{
+				return pawn.needs.PrefersIndoors;
+			}
+			return true;
+		}
+	}
+
+	public Need_Outdoors(Pawn pawn)
+		: base(pawn)
+	{
+		threshPercents = new List<float>();
+		threshPercents.Add(0.8f);
+		threshPercents.Add(0.6f);
+		threshPercents.Add(0.4f);
+		threshPercents.Add(0.2f);
+		threshPercents.Add(0.05f);
+	}
+
+	public override void SetInitialLevel()
+	{
+		CurLevel = 1f;
+	}
+
+	public override void NeedInterval()
+	{
+		if (Disabled)
+		{
+			CurLevel = 1f;
+		}
+		else if (!IsFrozen)
+		{
 			float b = 0.2f;
-			bool flag = !this.pawn.Spawned || this.pawn.Position.UsesOutdoorTemperature(this.pawn.Map);
-			RoofDef roofDef = this.pawn.Spawned ? this.pawn.Position.GetRoof(this.pawn.Map) : null;
-			float num;
-			if (!flag)
+			float num = 0f;
+			bool num2 = !pawn.Spawned || pawn.Position.UsesOutdoorTemperature(pawn.Map);
+			RoofDef roofDef = (pawn.Spawned ? pawn.Position.GetRoof(pawn.Map) : null);
+			if (num2)
 			{
-				if (roofDef == null)
-				{
-					num = 5f;
-				}
-				else if (!roofDef.isThickRoof)
-				{
-					num = -0.32f;
-				}
-				else
-				{
-					num = -0.45f;
-					b = 0f;
-				}
+				num = ((roofDef == null) ? 8f : ((!roofDef.isThickRoof) ? 1f : (-0.4f)));
 			}
 			else if (roofDef == null)
 			{
-				num = 8f;
+				num = 5f;
 			}
-			else if (roofDef.isThickRoof)
+			else if (!roofDef.isThickRoof)
 			{
-				num = -0.4f;
+				num = -0.32f;
 			}
 			else
 			{
-				num = 1f;
+				num = -0.45f;
+				b = 0f;
 			}
-			if (this.pawn.InBed() && num < 0f)
+			if (pawn.InBed() && num < 0f)
 			{
 				num *= 0.2f;
 			}
 			num *= 0.0025f;
-			float curLevel = this.CurLevel;
+			float curLevel = CurLevel;
 			if (num < 0f)
 			{
-				this.CurLevel = Mathf.Min(this.CurLevel, Mathf.Max(this.CurLevel + num, b));
+				CurLevel = Mathf.Min(CurLevel, Mathf.Max(CurLevel + num, b));
 			}
 			else
 			{
-				this.CurLevel = Mathf.Min(this.CurLevel + num, 1f);
+				CurLevel = Mathf.Min(CurLevel + num, 1f);
 			}
-			this.lastEffectiveDelta = this.CurLevel - curLevel;
+			lastEffectiveDelta = CurLevel - curLevel;
 		}
-
-		// Token: 0x04008A52 RID: 35410
-		private const float Delta_IndoorsThickRoof = -0.45f;
-
-		// Token: 0x04008A53 RID: 35411
-		private const float Delta_OutdoorsThickRoof = -0.4f;
-
-		// Token: 0x04008A54 RID: 35412
-		private const float Delta_IndoorsThinRoof = -0.32f;
-
-		// Token: 0x04008A55 RID: 35413
-		private const float Minimum_IndoorsThinRoof = 0.2f;
-
-		// Token: 0x04008A56 RID: 35414
-		private const float Delta_OutdoorsThinRoof = 1f;
-
-		// Token: 0x04008A57 RID: 35415
-		private const float Delta_IndoorsNoRoof = 5f;
-
-		// Token: 0x04008A58 RID: 35416
-		private const float Delta_OutdoorsNoRoof = 8f;
-
-		// Token: 0x04008A59 RID: 35417
-		private const float DeltaFactor_InBed = 0.2f;
-
-		// Token: 0x04008A5A RID: 35418
-		private float lastEffectiveDelta;
 	}
 }

@@ -1,105 +1,483 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld.Utility;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_Reload : JobDriver
 {
-	// Token: 0x020012F0 RID: 4848
-	public class JobDriver_Reload : JobDriver
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass5_0
 	{
-		// Token: 0x170012B1 RID: 4785
-		// (get) Token: 0x060076EC RID: 30444 RVA: 0x00242EB0 File Offset: 0x002410B0
-		private Thing Gear
+		public IReloadableComp reloadable;
+
+		public JobDriver_Reload _003C_003E4__this;
+
+		internal bool _003CMakeNewToils_003Eb__0()
 		{
-			get
-			{
-				return this.job.GetTarget(TargetIndex.A).Thing;
-			}
+			return reloadable == null;
 		}
 
-		// Token: 0x060076ED RID: 30445 RVA: 0x00242ED1 File Offset: 0x002410D1
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		internal bool _003CMakeNewToils_003Eb__1()
 		{
-			this.pawn.ReserveAsManyAsPossible(this.job.GetTargetQueue(TargetIndex.B), this.job, 1, -1, null);
+			return ReloadableUtility.OwnerOf(reloadable) != _003C_003E4__this.pawn;
+		}
+
+		internal bool _003CMakeNewToils_003Eb__2()
+		{
+			return !reloadable.NeedsReload(allowForceReload: true);
+		}
+
+		internal bool _003CMakeNewToils_003Eb__3()
+		{
+			return !_003C_003E4__this.job.GetTargetQueue(TargetIndex.B).NullOrEmpty();
+		}
+
+		internal void _003CMakeNewToils_003Eb__4()
+		{
+			Thing carriedThing = _003C_003E4__this.pawn.carryTracker.CarriedThing;
+			if (carriedThing != null && !carriedThing.Destroyed)
+			{
+				_003C_003E4__this.pawn.carryTracker.TryDropCarriedThing(_003C_003E4__this.pawn.Position, ThingPlaceMode.Near, out var _);
+			}
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass6_0
+	{
+		public JobDriver_Reload _003C_003E4__this;
+
+		public IReloadableComp reloadable;
+
+		internal bool _003CReloadAsMuchAsPossible_003Eb__0()
+		{
+			if (_003C_003E4__this.pawn.carryTracker.CarriedThing != null)
+			{
+				return _003C_003E4__this.pawn.carryTracker.CarriedThing.stackCount < reloadable.MinAmmoNeeded(allowForcedReload: true);
+			}
 			return true;
 		}
 
-		// Token: 0x060076EE RID: 30446 RVA: 0x00242EF4 File Offset: 0x002410F4
-		protected override IEnumerable<Toil> MakeNewToils()
+		internal void _003CReloadAsMuchAsPossible_003Eb__1()
 		{
-			JobDriver_Reload.<>c__DisplayClass5_0 CS$<>8__locals1 = new JobDriver_Reload.<>c__DisplayClass5_0();
-			CS$<>8__locals1.<>4__this = this;
-			JobDriver_Reload.<>c__DisplayClass5_0 CS$<>8__locals2 = CS$<>8__locals1;
-			Thing gear = this.Gear;
-			IReloadableComp reloadableComp = (gear != null) ? gear.TryGetComp<CompApparelReloadable>() : null;
-			IReloadableComp reloadable;
-			if ((reloadable = reloadableComp) == null)
+			Thing carriedThing = _003C_003E4__this.pawn.carryTracker.CarriedThing;
+			reloadable.ReloadFrom(carriedThing);
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__5 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_Reload _003C_003E4__this;
+
+		private _003C_003Ec__DisplayClass5_0 _003C_003E8__1;
+
+		private Toil _003CgetNextIngredient_003E5__2;
+
+		private IEnumerator<Toil> _003C_003E7__wrap2;
+
+		Toil IEnumerator<Toil>.Current
+		{
+			[DebuggerHidden]
+			get
 			{
-				Thing gear2 = this.Gear;
-				reloadable = ((gear2 != null) ? gear2.TryGetComp<CompEquippableAbilityReloadable>() : null);
+				return _003C_003E2__current;
 			}
-			CS$<>8__locals2.reloadable = reloadable;
-			this.FailOn(() => CS$<>8__locals1.reloadable == null);
-			this.FailOn(() => ReloadableUtility.OwnerOf(CS$<>8__locals1.reloadable) != CS$<>8__locals1.<>4__this.pawn);
-			this.FailOn(() => !CS$<>8__locals1.reloadable.NeedsReload(true));
-			this.FailOnDestroyedOrNull(TargetIndex.A);
-			this.FailOnIncapable(PawnCapacityDefOf.Manipulation);
-			Toil getNextIngredient = Toils_General.Label();
-			yield return getNextIngredient;
-			foreach (Toil toil in this.ReloadAsMuchAsPossible(CS$<>8__locals1.reloadable))
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
 			{
-				yield return toil;
+				return _003C_003E2__current;
 			}
-			IEnumerator<Toil> enumerator = null;
-			yield return Toils_JobTransforms.ExtractNextTargetFromQueue(TargetIndex.B, true);
-			yield return Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.ClosestTouch, false).FailOnDespawnedNullOrForbidden(TargetIndex.B).FailOnSomeonePhysicallyInteracting(TargetIndex.B);
-			yield return Toils_Haul.StartCarryThing(TargetIndex.B, false, true, false, true, false).FailOnDestroyedNullOrForbidden(TargetIndex.B);
-			yield return Toils_Jump.JumpIf(getNextIngredient, () => !CS$<>8__locals1.<>4__this.job.GetTargetQueue(TargetIndex.B).NullOrEmpty<LocalTargetInfo>());
-			foreach (Toil toil2 in this.ReloadAsMuchAsPossible(CS$<>8__locals1.reloadable))
+		}
+
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__5(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			switch (_003C_003E1__state)
 			{
-				yield return toil2;
-			}
-			enumerator = null;
-			Toil toil3 = ToilMaker.MakeToil("MakeNewToils");
-			toil3.initAction = delegate()
-			{
-				Thing carriedThing = CS$<>8__locals1.<>4__this.pawn.carryTracker.CarriedThing;
-				if (carriedThing != null && !carriedThing.Destroyed)
+			case -3:
+			case 2:
+				try
 				{
-					Thing thing;
-					CS$<>8__locals1.<>4__this.pawn.carryTracker.TryDropCarriedThing(CS$<>8__locals1.<>4__this.pawn.Position, ThingPlaceMode.Near, out thing, null);
 				}
-			};
-			toil3.defaultCompleteMode = ToilCompleteMode.Instant;
-			yield return toil3;
-			yield break;
-			yield break;
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+				break;
+			case -4:
+			case 7:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally2();
+				}
+				break;
+			}
+			_003C_003E8__1 = null;
+			_003CgetNextIngredient_003E5__2 = null;
+			_003C_003E7__wrap2 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x060076EF RID: 30447 RVA: 0x00242F04 File Offset: 0x00241104
-		private IEnumerable<Toil> ReloadAsMuchAsPossible(IReloadableComp reloadable)
+		private bool MoveNext()
 		{
-			Toil done = Toils_General.Label();
-			yield return Toils_Jump.JumpIf(done, () => this.pawn.carryTracker.CarriedThing == null || this.pawn.carryTracker.CarriedThing.stackCount < reloadable.MinAmmoNeeded(true));
-			yield return Toils_General.Wait(reloadable.BaseReloadTicks, TargetIndex.None).WithProgressBarToilDelay(TargetIndex.A, false, -0.5f);
-			Toil toil = ToilMaker.MakeToil("ReloadAsMuchAsPossible");
-			toil.initAction = delegate()
+			try
 			{
-				Thing carriedThing = this.pawn.carryTracker.CarriedThing;
-				reloadable.ReloadFrom(carriedThing);
-			};
-			toil.defaultCompleteMode = ToilCompleteMode.Instant;
-			yield return toil;
-			yield return done;
-			yield break;
+				int num = _003C_003E1__state;
+				JobDriver_Reload jobDriver_Reload = _003C_003E4__this;
+				Toil toil;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+				{
+					_003C_003E1__state = -1;
+					_003C_003E8__1 = new _003C_003Ec__DisplayClass5_0();
+					_003C_003E8__1._003C_003E4__this = _003C_003E4__this;
+					_003C_003Ec__DisplayClass5_0 _003C_003Ec__DisplayClass5_ = _003C_003E8__1;
+					IReloadableComp reloadableComp = jobDriver_Reload.Gear?.TryGetComp<CompApparelReloadable>();
+					_003C_003Ec__DisplayClass5_.reloadable = reloadableComp ?? jobDriver_Reload.Gear?.TryGetComp<CompEquippableAbilityReloadable>();
+					jobDriver_Reload.FailOn(() => _003C_003E8__1.reloadable == null);
+					jobDriver_Reload.FailOn(() => ReloadableUtility.OwnerOf(_003C_003E8__1.reloadable) != _003C_003E8__1._003C_003E4__this.pawn);
+					jobDriver_Reload.FailOn(() => !_003C_003E8__1.reloadable.NeedsReload(allowForceReload: true));
+					jobDriver_Reload.FailOnDestroyedOrNull(TargetIndex.A);
+					jobDriver_Reload.FailOnIncapable(PawnCapacityDefOf.Manipulation);
+					_003CgetNextIngredient_003E5__2 = Toils_General.Label();
+					_003C_003E2__current = _003CgetNextIngredient_003E5__2;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				case 1:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap2 = jobDriver_Reload.ReloadAsMuchAsPossible(_003C_003E8__1.reloadable).GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0172;
+				case 2:
+					_003C_003E1__state = -3;
+					goto IL_0172;
+				case 3:
+					_003C_003E1__state = -1;
+					_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.ClosestTouch).FailOnDespawnedNullOrForbidden(TargetIndex.B).FailOnSomeonePhysicallyInteracting(TargetIndex.B);
+					_003C_003E1__state = 4;
+					return true;
+				case 4:
+					_003C_003E1__state = -1;
+					_003C_003E2__current = Toils_Haul.StartCarryThing(TargetIndex.B, putRemainderInQueue: false, subtractNumTakenFromJobCount: true).FailOnDestroyedNullOrForbidden(TargetIndex.B);
+					_003C_003E1__state = 5;
+					return true;
+				case 5:
+					_003C_003E1__state = -1;
+					_003C_003E2__current = Toils_Jump.JumpIf(_003CgetNextIngredient_003E5__2, () => !_003C_003E8__1._003C_003E4__this.job.GetTargetQueue(TargetIndex.B).NullOrEmpty());
+					_003C_003E1__state = 6;
+					return true;
+				case 6:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap2 = jobDriver_Reload.ReloadAsMuchAsPossible(_003C_003E8__1.reloadable).GetEnumerator();
+					_003C_003E1__state = -4;
+					goto IL_028e;
+				case 7:
+					_003C_003E1__state = -4;
+					goto IL_028e;
+				case 8:
+					{
+						_003C_003E1__state = -1;
+						return false;
+					}
+					IL_028e:
+					if (_003C_003E7__wrap2.MoveNext())
+					{
+						Toil current = _003C_003E7__wrap2.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 7;
+						return true;
+					}
+					_003C_003Em__Finally2();
+					_003C_003E7__wrap2 = null;
+					toil = ToilMaker.MakeToil("MakeNewToils");
+					toil.initAction = delegate
+					{
+						Thing carriedThing = _003C_003E8__1._003C_003E4__this.pawn.carryTracker.CarriedThing;
+						if (carriedThing != null && !carriedThing.Destroyed)
+						{
+							_003C_003E8__1._003C_003E4__this.pawn.carryTracker.TryDropCarriedThing(_003C_003E8__1._003C_003E4__this.pawn.Position, ThingPlaceMode.Near, out var _);
+						}
+					};
+					toil.defaultCompleteMode = ToilCompleteMode.Instant;
+					_003C_003E2__current = toil;
+					_003C_003E1__state = 8;
+					return true;
+					IL_0172:
+					if (_003C_003E7__wrap2.MoveNext())
+					{
+						Toil current2 = _003C_003E7__wrap2.Current;
+						_003C_003E2__current = current2;
+						_003C_003E1__state = 2;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap2 = null;
+					_003C_003E2__current = Toils_JobTransforms.ExtractNextTargetFromQueue(TargetIndex.B);
+					_003C_003E1__state = 3;
+					return true;
+				}
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
 		}
 
-		// Token: 0x0400512A RID: 20778
-		private const TargetIndex GearInd = TargetIndex.A;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x0400512B RID: 20779
-		private const TargetIndex AmmoInd = TargetIndex.B;
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap2 != null)
+			{
+				_003C_003E7__wrap2.Dispose();
+			}
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap2 != null)
+			{
+				_003C_003E7__wrap2.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__5 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__5(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CReloadAsMuchAsPossible_003Ed__6 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_Reload _003C_003E4__this;
+
+		private IReloadableComp reloadable;
+
+		public IReloadableComp _003C_003E3__reloadable;
+
+		private _003C_003Ec__DisplayClass6_0 _003C_003E8__1;
+
+		private Toil _003Cdone_003E5__2;
+
+		Toil IEnumerator<Toil>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CReloadAsMuchAsPossible_003Ed__6(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E8__1 = null;
+			_003Cdone_003E5__2 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			switch (_003C_003E1__state)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E8__1 = new _003C_003Ec__DisplayClass6_0();
+				_003C_003E8__1._003C_003E4__this = _003C_003E4__this;
+				_003C_003E8__1.reloadable = reloadable;
+				_003Cdone_003E5__2 = Toils_General.Label();
+				_003C_003E2__current = Toils_Jump.JumpIf(_003Cdone_003E5__2, () => _003C_003E8__1._003C_003E4__this.pawn.carryTracker.CarriedThing == null || _003C_003E8__1._003C_003E4__this.pawn.carryTracker.CarriedThing.stackCount < _003C_003E8__1.reloadable.MinAmmoNeeded(allowForcedReload: true));
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.Wait(_003C_003E8__1.reloadable.BaseReloadTicks).WithProgressBarToilDelay(TargetIndex.A);
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+			{
+				_003C_003E1__state = -1;
+				Toil toil = ToilMaker.MakeToil("ReloadAsMuchAsPossible");
+				toil.initAction = delegate
+				{
+					Thing carriedThing = _003C_003E8__1._003C_003E4__this.pawn.carryTracker.CarriedThing;
+					_003C_003E8__1.reloadable.ReloadFrom(carriedThing);
+				};
+				toil.defaultCompleteMode = ToilCompleteMode.Instant;
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 3;
+				return true;
+			}
+			case 3:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = _003Cdone_003E5__2;
+				_003C_003E1__state = 4;
+				return true;
+			case 4:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CReloadAsMuchAsPossible_003Ed__6 _003CReloadAsMuchAsPossible_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CReloadAsMuchAsPossible_003Ed__ = this;
+			}
+			else
+			{
+				_003CReloadAsMuchAsPossible_003Ed__ = new _003CReloadAsMuchAsPossible_003Ed__6(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CReloadAsMuchAsPossible_003Ed__.reloadable = _003C_003E3__reloadable;
+			return _003CReloadAsMuchAsPossible_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private const TargetIndex GearInd = TargetIndex.A;
+
+	private const TargetIndex AmmoInd = TargetIndex.B;
+
+	private Thing Gear => job.GetTarget(TargetIndex.A).Thing;
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		pawn.ReserveAsManyAsPossible(job.GetTargetQueue(TargetIndex.B), job);
+		return true;
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__5))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__5(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	[IteratorStateMachine(typeof(_003CReloadAsMuchAsPossible_003Ed__6))]
+	private IEnumerable<Toil> ReloadAsMuchAsPossible(IReloadableComp reloadable)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CReloadAsMuchAsPossible_003Ed__6(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__reloadable = reloadable
+		};
 	}
 }

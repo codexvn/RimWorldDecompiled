@@ -1,125 +1,230 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public abstract class JobDriver_RemoveBuilding : JobDriver
 {
-	// Token: 0x02001177 RID: 4471
-	public abstract class JobDriver_RemoveBuilding : JobDriver
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass14_0
 	{
-		// Token: 0x170010E9 RID: 4329
-		// (get) Token: 0x06006D5D RID: 27997 RVA: 0x001E5D2F File Offset: 0x001E3F2F
-		protected Thing Target
+		public Toil doWork;
+
+		public JobDriver_RemoveBuilding _003C_003E4__this;
+
+		internal void _003CMakeNewToils_003Eb__2(int delta)
 		{
+			_003C_003E4__this.workLeft -= _003C_003E4__this.pawn.GetStatValue(StatDefOf.ConstructionSpeed) * 1.7f * (float)delta;
+			_003C_003E4__this.TickActionInterval(delta);
+			if (_003C_003E4__this.workLeft <= 0f)
+			{
+				doWork.actor.jobs.curDriver.ReadyForNextToil();
+			}
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__14 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_RemoveBuilding _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				return this.job.targetA.Thing;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170010EA RID: 4330
-		// (get) Token: 0x06006D5E RID: 27998 RVA: 0x00224153 File Offset: 0x00222353
-		protected Building Building
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (Building)this.Target.GetInnerIfMinified();
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170010EB RID: 4331
-		// (get) Token: 0x06006D5F RID: 27999
-		protected abstract DesignationDef Designation { get; }
-
-		// Token: 0x170010EC RID: 4332
-		// (get) Token: 0x06006D60 RID: 28000
-		protected abstract float TotalNeededWork { get; }
-
-		// Token: 0x170010ED RID: 4333
-		// (get) Token: 0x06006D61 RID: 28001
-		protected abstract EffecterDef WorkEffecter { get; }
-
-		// Token: 0x06006D62 RID: 28002 RVA: 0x00224165 File Offset: 0x00222365
-		public override void ExposeData()
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__14(int _003C_003E1__state)
 		{
-			base.ExposeData();
-			Scribe_Values.Look<float>(ref this.workLeft, "workLeft", 0f, false);
-			Scribe_Values.Look<float>(ref this.totalNeededWork, "totalNeededWork", 0f, false);
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x06006D63 RID: 28003 RVA: 0x00224199 File Offset: 0x00222399
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			return this.pawn.Reserve(this.Target, this.job, 1, -1, null, errorOnFailed, false);
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x06006D64 RID: 28004 RVA: 0x002241BC File Offset: 0x002223BC
-		protected override IEnumerable<Toil> MakeNewToils()
+		private bool MoveNext()
 		{
-			if (this.Designation != null)
+			int num = _003C_003E1__state;
+			JobDriver_RemoveBuilding CS_0024_003C_003E8__locals39 = _003C_003E4__this;
+			switch (num)
 			{
-				this.FailOnThingMissingDesignation(TargetIndex.A, this.Designation);
-			}
-			this.FailOnForbidden(TargetIndex.A);
-			this.FailOn(delegate()
+			default:
+				return false;
+			case 0:
 			{
-				CompExplosive compExplosive;
-				return this.Building.TryGetComp(out compExplosive) && compExplosive.wickStarted;
-			});
-			yield return Toils_Goto.GotoThing(TargetIndex.A, (this.Target is Building_Trap) ? PathEndMode.OnCell : PathEndMode.Touch, false);
-			Toil doWork = ToilMaker.MakeToil("MakeNewToils").FailOnDestroyedNullOrForbidden(TargetIndex.A).FailOnCannotTouch(TargetIndex.A, PathEndMode.Touch);
-			doWork.initAction = delegate()
-			{
-				this.totalNeededWork = this.TotalNeededWork;
-				this.workLeft = this.totalNeededWork;
-			};
-			doWork.tickIntervalAction = delegate(int delta)
-			{
-				this.workLeft -= this.pawn.GetStatValue(StatDefOf.ConstructionSpeed, true, -1) * 1.7f * (float)delta;
-				this.TickActionInterval(delta);
-				if (this.workLeft <= 0f)
+				_003C_003E1__state = -1;
+				if (CS_0024_003C_003E8__locals39.Designation != null)
 				{
-					doWork.actor.jobs.curDriver.ReadyForNextToil();
+					CS_0024_003C_003E8__locals39.FailOnThingMissingDesignation(TargetIndex.A, CS_0024_003C_003E8__locals39.Designation);
 				}
-			};
-			doWork.defaultCompleteMode = ToilCompleteMode.Never;
-			if (this.WorkEffecter != null)
-			{
-				doWork.WithEffect(this.WorkEffecter, TargetIndex.A, null);
+				CS_0024_003C_003E8__locals39.FailOnForbidden(TargetIndex.A);
+				CS_0024_003C_003E8__locals39.FailOn(() => CS_0024_003C_003E8__locals39.Building.TryGetComp<CompExplosive>(out var comp) && comp.wickStarted);
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.A, (CS_0024_003C_003E8__locals39.Target is Building_Trap) ? PathEndMode.OnCell : PathEndMode.Touch);
+				_003C_003E1__state = 1;
+				return true;
 			}
-			doWork.WithProgressBar(TargetIndex.A, () => 1f - this.workLeft / this.totalNeededWork, false, -0.5f, false);
-			doWork.activeSkill = (() => SkillDefOf.Construction);
-			yield return doWork;
-			Toil toil = ToilMaker.MakeToil("MakeNewToils");
-			toil.initAction = delegate()
+			case 1:
 			{
-				if (this.Target.Faction != null)
+				_003C_003E1__state = -1;
+				_003C_003Ec__DisplayClass14_0 CS_0024_003C_003E8__locals32 = new _003C_003Ec__DisplayClass14_0();
+				CS_0024_003C_003E8__locals32._003C_003E4__this = CS_0024_003C_003E8__locals39;
+				CS_0024_003C_003E8__locals32.doWork = ToilMaker.MakeToil("MakeNewToils").FailOnDestroyedNullOrForbidden(TargetIndex.A).FailOnCannotTouch(TargetIndex.A, PathEndMode.Touch);
+				CS_0024_003C_003E8__locals32.doWork.initAction = delegate
 				{
-					this.Target.Faction.Notify_BuildingRemoved(this.Building, this.pawn);
+					CS_0024_003C_003E8__locals39.totalNeededWork = CS_0024_003C_003E8__locals39.TotalNeededWork;
+					CS_0024_003C_003E8__locals39.workLeft = CS_0024_003C_003E8__locals39.totalNeededWork;
+				};
+				CS_0024_003C_003E8__locals32.doWork.tickIntervalAction = delegate(int delta)
+				{
+					CS_0024_003C_003E8__locals32._003C_003E4__this.workLeft = CS_0024_003C_003E8__locals32._003C_003E4__this.workLeft - CS_0024_003C_003E8__locals32._003C_003E4__this.pawn.GetStatValue(StatDefOf.ConstructionSpeed) * 1.7f * (float)delta;
+					CS_0024_003C_003E8__locals32._003C_003E4__this.TickActionInterval(delta);
+					if (CS_0024_003C_003E8__locals32._003C_003E4__this.workLeft <= 0f)
+					{
+						CS_0024_003C_003E8__locals32.doWork.actor.jobs.curDriver.ReadyForNextToil();
+					}
+				};
+				CS_0024_003C_003E8__locals32.doWork.defaultCompleteMode = ToilCompleteMode.Never;
+				if (CS_0024_003C_003E8__locals39.WorkEffecter != null)
+				{
+					CS_0024_003C_003E8__locals32.doWork.WithEffect(CS_0024_003C_003E8__locals39.WorkEffecter, TargetIndex.A, null);
 				}
-				this.FinishedRemoving();
-				base.Map.designationManager.RemoveAllDesignationsOn(this.Target, false);
-			};
-			toil.defaultCompleteMode = ToilCompleteMode.Instant;
-			yield return toil;
-			yield break;
+				CS_0024_003C_003E8__locals32.doWork.WithProgressBar(TargetIndex.A, () => 1f - CS_0024_003C_003E8__locals39.workLeft / CS_0024_003C_003E8__locals39.totalNeededWork);
+				CS_0024_003C_003E8__locals32.doWork.activeSkill = () => SkillDefOf.Construction;
+				_003C_003E2__current = CS_0024_003C_003E8__locals32.doWork;
+				_003C_003E1__state = 2;
+				return true;
+			}
+			case 2:
+			{
+				_003C_003E1__state = -1;
+				Toil toil = ToilMaker.MakeToil("MakeNewToils");
+				toil.initAction = delegate
+				{
+					if (CS_0024_003C_003E8__locals39.Target.Faction != null)
+					{
+						CS_0024_003C_003E8__locals39.Target.Faction.Notify_BuildingRemoved(CS_0024_003C_003E8__locals39.Building, CS_0024_003C_003E8__locals39.pawn);
+					}
+					CS_0024_003C_003E8__locals39.FinishedRemoving();
+					CS_0024_003C_003E8__locals39.Map.designationManager.RemoveAllDesignationsOn(CS_0024_003C_003E8__locals39.Target);
+				};
+				toil.defaultCompleteMode = ToilCompleteMode.Instant;
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 3;
+				return true;
+			}
+			case 3:
+				_003C_003E1__state = -1;
+				return false;
+			}
 		}
 
-		// Token: 0x06006D65 RID: 28005 RVA: 0x000026EA File Offset: 0x000008EA
-		protected virtual void FinishedRemoving()
+		bool IEnumerator.MoveNext()
 		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x06006D66 RID: 28006 RVA: 0x000026EA File Offset: 0x000008EA
-		protected virtual void TickActionInterval(int delta)
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x04004C98 RID: 19608
-		private float workLeft;
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__14 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__14(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x04004C99 RID: 19609
-		private float totalNeededWork;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private float workLeft;
+
+	private float totalNeededWork;
+
+	protected Thing Target => job.targetA.Thing;
+
+	protected Building Building => (Building)Target.GetInnerIfMinified();
+
+	protected abstract DesignationDef Designation { get; }
+
+	protected abstract float TotalNeededWork { get; }
+
+	protected abstract EffecterDef WorkEffecter { get; }
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref workLeft, "workLeft", 0f);
+		Scribe_Values.Look(ref totalNeededWork, "totalNeededWork", 0f);
+	}
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return pawn.Reserve(Target, job, 1, -1, null, errorOnFailed);
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__14))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__14(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	protected virtual void FinishedRemoving()
+	{
+	}
+
+	protected virtual void TickActionInterval(int delta)
+	{
 	}
 }

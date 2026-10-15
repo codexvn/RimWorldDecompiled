@@ -1,34 +1,36 @@
-﻿using System;
 using System.Collections.Generic;
 using Verse;
 using Verse.AI.Group;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class RaidStrategyWorker_StageThenAttack : RaidStrategyWorker
 {
-	// Token: 0x02001752 RID: 5970
-	public class RaidStrategyWorker_StageThenAttack : RaidStrategyWorker
+	protected override LordJob MakeLordJob(IncidentParms parms, Map map, List<Pawn> pawns, int raidSeed)
 	{
-		// Token: 0x06008C1D RID: 35869 RVA: 0x0029B4A8 File Offset: 0x002996A8
-		protected override LordJob MakeLordJob(IncidentParms parms, Map map, List<Pawn> pawns, int raidSeed)
+		IntVec3 stageLoc = RCellFinder.FindSiegePositionFrom(parms.spawnCenter.IsValid ? parms.spawnCenter : pawns[0].PositionHeld, map, allowRoofed: true, errorOnFail: false);
+		if (!stageLoc.IsValid)
 		{
-			IntVec3 stageLoc = RCellFinder.FindSiegePositionFrom(parms.spawnCenter.IsValid ? parms.spawnCenter : pawns[0].PositionHeld, map, true, false, null, true);
-			if (!stageLoc.IsValid)
-			{
-				stageLoc = pawns[0].PositionHeld;
-			}
-			return new LordJob_StageThenAttack(parms.faction, stageLoc, raidSeed, true, true, true, null);
+			stageLoc = pawns[0].PositionHeld;
 		}
+		return new LordJob_StageThenAttack(parms.faction, stageLoc, raidSeed, canTimeoutFlee: true, canKidnap: true, canSteal: true, null);
+	}
 
-		// Token: 0x06008C1E RID: 35870 RVA: 0x0029B511 File Offset: 0x00299711
-		public override bool CanUseWith(IncidentParms parms, PawnGroupKindDef groupKind)
+	public override bool CanUseWith(IncidentParms parms, PawnGroupKindDef groupKind)
+	{
+		if (!base.CanUseWith(parms, groupKind))
 		{
-			return base.CanUseWith(parms, groupKind) && parms.faction.def.canStageAttacks;
+			return false;
 		}
+		return parms.faction.def.canStageAttacks;
+	}
 
-		// Token: 0x06008C1F RID: 35871 RVA: 0x0029B52F File Offset: 0x0029972F
-		public override bool CanUsePawnGenOption(float pointsTotal, PawnGenOption g, List<PawnGenOptionWithXenotype> chosenGroups, Faction faction = null)
+	public override bool CanUsePawnGenOption(float pointsTotal, PawnGenOption g, List<PawnGenOptionWithXenotype> chosenGroups, Faction faction = null)
+	{
+		if (g.kind.RaceProps.Animal)
 		{
-			return !g.kind.RaceProps.Animal && base.CanUsePawnGenOption(pointsTotal, g, chosenGroups, faction);
+			return false;
 		}
+		return base.CanUsePawnGenOption(pointsTotal, g, chosenGroups, faction);
 	}
 }

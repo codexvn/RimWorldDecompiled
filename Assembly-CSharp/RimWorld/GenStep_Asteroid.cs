@@ -1,7 +1,5 @@
-﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Xml;
 using RimWorld.Planet;
 using RimWorld.SketchGen;
@@ -9,269 +7,304 @@ using UnityEngine;
 using Verse;
 using Verse.Noise;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class GenStep_Asteroid : GenStep
 {
-	// Token: 0x02001F96 RID: 8086
-	public class GenStep_Asteroid : GenStep
+	public class MineableCountConfig
 	{
-		// Token: 0x17001B2C RID: 6956
-		// (get) Token: 0x0600B29A RID: 45722 RVA: 0x003322A8 File Offset: 0x003304A8
-		public override int SeedPart
-		{
-			get
-			{
-				return 1929282;
-			}
-		}
+		public ThingDef mineable;
 
-		// Token: 0x17001B2D RID: 6957
-		// (get) Token: 0x0600B29B RID: 45723 RVA: 0x003322AF File Offset: 0x003304AF
-		protected virtual float Radius
-		{
-			get
-			{
-				return 0.224f;
-			}
-		}
+		public IntRange countRange;
 
-		// Token: 0x0600B29C RID: 45724 RVA: 0x003322B8 File Offset: 0x003304B8
-		public override void Generate(Map map, GenStepParams parms)
+		public void LoadDataFromXmlCustom(XmlNode xmlRoot)
 		{
-			if (!ModLister.CheckOdyssey("Asteroid"))
+			DirectXmlCrossRefLoader.RegisterObjectWantsCrossRef(this, "mineable", xmlRoot.Name);
+			countRange = IntRange.FromString(xmlRoot.FirstChild.Value);
+		}
+	}
+
+	public List<MineableCountConfig> mineableCounts;
+
+	public IntRange numChunks;
+
+	public float ruinsChance;
+
+	public float archeanTreeChance;
+
+	private const float FloorThreshold = 0.5f;
+
+	private const float RuinsRadius = 0.2f;
+
+	private const float MacroFrequency = 0.006f;
+
+	private const float MicroFrequency = 0.05f;
+
+	private const float MacroBlend = 0.8f;
+
+	private const float MicroBlend = 0.85f;
+
+	private const float SquashScale = 0.65f;
+
+	private const float Exponent = 0.2f;
+
+	private const float CaveBranchChance = 0.05f;
+
+	private const float CaveWidthOffsetPerCell = 0.015f;
+
+	private const float CaveMinTunnelWidth = 0.5f;
+
+	private const int TreeAreaRadiusSize = 11;
+
+	private const float CaveDirectionNoiseFrequency = 0.002f;
+
+	private static readonly IntRange RuinsSize = new IntRange(6, 10);
+
+	private ModuleBase innerNoise;
+
+	public override int SeedPart => 1929282;
+
+	protected virtual float Radius => 0.224f;
+
+	public override void Generate(Map map, GenStepParams parms)
+	{
+		if (ModLister.CheckOdyssey("Asteroid"))
+		{
+			GenerateAsteroidElevation(map, parms);
+			GenerateCaveElevation(map, parms);
+			SpawnAsteroid(map);
+			SpawnOres(map, parms);
+			if (Rand.Chance(ruinsChance))
 			{
-				return;
+				GenerateRuins(map, parms);
 			}
-			this.GenerateAsteroidElevation(map, parms);
-			this.GenerateCaveElevation(map, parms);
-			GenStep_Asteroid.SpawnAsteroid(map);
-			this.SpawnOres(map, parms);
-			if (Rand.Chance(this.ruinsChance))
+			if (Rand.Chance(archeanTreeChance))
 			{
-				GenStep_Asteroid.GenerateRuins(map, parms);
-			}
-			if (Rand.Chance(this.archeanTreeChance))
-			{
-				GenStep_Asteroid.GenerateArcheanTree(map, parms);
+				GenerateArcheanTree(map, parms);
 			}
 			map.OrbitalDebris = OrbitalDebrisDefOf.Asteroid;
 		}
+	}
 
-		// Token: 0x0600B29D RID: 45725 RVA: 0x00332324 File Offset: 0x00330524
-		private static void SpawnAsteroid(Map map)
+	private static void SpawnAsteroid(Map map)
+	{
+		using (map.pathing.DisableIncrementalScope())
 		{
-			using (map.pathing.DisableIncrementalScope())
+			foreach (IntVec3 allCell in map.AllCells)
 			{
-				foreach (IntVec3 intVec in map.AllCells)
+				float num = MapGenerator.Elevation[allCell];
+				float num2 = MapGenerator.Caves[allCell];
+				if (num > 0.5f)
 				{
-					float num = MapGenerator.Elevation[intVec];
-					float num2 = MapGenerator.Caves[intVec];
-					if (num > 0.5f)
-					{
-						map.terrainGrid.SetTerrain(intVec, ThingDefOf.Vacstone.building.naturalTerrain);
-					}
-					if (num > 0.7f && num2 == 0f)
-					{
-						GenSpawn.Spawn(ThingDefOf.Vacstone, intVec, map, WipeMode.Vanish);
-					}
-					if (num > 0.7f)
-					{
-						map.roofGrid.SetRoof(intVec, RoofDefOf.RoofRockThin);
-					}
+					map.terrainGrid.SetTerrain(allCell, ThingDefOf.Vacstone.building.naturalTerrain);
 				}
-				HashSet<IntVec3> mainIsland = new HashSet<IntVec3>();
-				map.floodFiller.FloodFill(map.Center, (IntVec3 x) => x.GetTerrain(map) != TerrainDefOf.Space, delegate(IntVec3 x)
+				if (num > 0.7f && num2 == 0f)
 				{
-					mainIsland.Add(x);
-				}, int.MaxValue, false, null);
-				foreach (IntVec3 intVec2 in map.AllCells)
+					GenSpawn.Spawn(ThingDefOf.Vacstone, allCell, map);
+				}
+				if (num > 0.7f)
 				{
-					if (!mainIsland.Contains(intVec2))
-					{
-						map.terrainGrid.SetTerrain(intVec2, TerrainDefOf.Space);
-						map.roofGrid.SetRoof(intVec2, null);
-						foreach (Thing thing in intVec2.GetThingList(map).ToList<Thing>())
-						{
-							thing.Destroy(DestroyMode.Vanish);
-						}
-					}
+					map.roofGrid.SetRoof(allCell, RoofDefOf.RoofRockThin);
+				}
+			}
+			HashSet<IntVec3> mainIsland = new HashSet<IntVec3>();
+			map.floodFiller.FloodFill(map.Center, (IntVec3 x) => x.GetTerrain(map) != TerrainDefOf.Space, delegate(IntVec3 x)
+			{
+				mainIsland.Add(x);
+			});
+			foreach (IntVec3 allCell2 in map.AllCells)
+			{
+				if (mainIsland.Contains(allCell2))
+				{
+					continue;
+				}
+				map.terrainGrid.SetTerrain(allCell2, TerrainDefOf.Space);
+				map.roofGrid.SetRoof(allCell2, null);
+				foreach (Thing item in allCell2.GetThingList(map).ToList())
+				{
+					item.Destroy();
 				}
 			}
 		}
+	}
 
-		// Token: 0x0600B29E RID: 45726 RVA: 0x00332568 File Offset: 0x00330768
-		private void GenerateAsteroidElevation(Map map, GenStepParams parms)
+	private void GenerateAsteroidElevation(Map map, GenStepParams parms)
+	{
+		innerNoise = ConfigureNoise(map, parms);
+		foreach (IntVec3 allCell in map.AllCells)
 		{
-			this.innerNoise = this.ConfigureNoise(map, parms);
-			foreach (IntVec3 intVec in map.AllCells)
+			MapGenerator.Elevation[allCell] = innerNoise.GetValue(allCell);
+		}
+	}
+
+	protected virtual ModuleBase ConfigureNoise(Map map, GenStepParams parms)
+	{
+		ModuleBase input = new DistFromPoint((float)map.Size.x * Radius);
+		input = new ScaleBias(-1.0, 1.0, input);
+		input = new Scale(0.6499999761581421, 1.0, 1.0, input);
+		input = new Rotate(0.0, Rand.Range(0f, 360f), 0.0, input);
+		input = new Translate(-map.Center.x, 0.0, -map.Center.z, input);
+		NoiseDebugUI.StoreNoiseRender(input, "Base asteroid shape");
+		input = new Blend(new Perlin(0.006000000052154064, 2.0, 2.0, 3, Rand.Int, QualityMode.Medium), input, new Const(0.800000011920929));
+		input = new Blend(new Perlin(0.05000000074505806, 2.0, 0.5, 6, Rand.Int, QualityMode.Medium), input, new Const(0.8500000238418579));
+		input = new Power(input, new Const(0.20000000298023224));
+		NoiseDebugUI.StoreNoiseRender(input, "Asteroid");
+		return input;
+	}
+
+	private void SpawnOres(Map map, GenStepParams parms)
+	{
+		ThingDef thingDef = ((SpaceMapParent)map.ParentHolder).preciousResource ?? mineableCounts.RandomElement().mineable;
+		int num = 0;
+		for (int i = 0; i < mineableCounts.Count; i++)
+		{
+			if (mineableCounts[i].mineable == thingDef)
 			{
-				MapGenerator.Elevation[intVec] = this.innerNoise.GetValue(intVec);
+				num = mineableCounts[i].countRange.RandomInRange;
+				break;
 			}
 		}
-
-		// Token: 0x0600B29F RID: 45727 RVA: 0x003325D4 File Offset: 0x003307D4
-		protected virtual ModuleBase ConfigureNoise(Map map, GenStepParams parms)
+		if (num == 0)
 		{
-			ModuleBase moduleBase = new DistFromPoint((float)map.Size.x * this.Radius);
-			moduleBase = new ScaleBias(-1.0, 1.0, moduleBase);
-			moduleBase = new Scale(0.6499999761581421, 1.0, 1.0, moduleBase);
-			moduleBase = new Rotate(0.0, (double)Rand.Range(0f, 360f), 0.0, moduleBase);
-			moduleBase = new Translate((double)(-(double)map.Center.x), 0.0, (double)(-(double)map.Center.z), moduleBase);
-			NoiseDebugUI.StoreNoiseRender(moduleBase, "Base asteroid shape");
-			moduleBase = new Blend(new Perlin(0.006000000052154064, 2.0, 2.0, 3, Rand.Int, QualityMode.Medium), moduleBase, new Const(0.800000011920929));
-			moduleBase = new Blend(new Perlin(0.05000000074505806, 2.0, 0.5, 6, Rand.Int, QualityMode.Medium), moduleBase, new Const(0.8500000238418579));
-			moduleBase = new Power(moduleBase, new Const(0.20000000298023224));
-			NoiseDebugUI.StoreNoiseRender(moduleBase, "Asteroid");
-			return moduleBase;
+			Debug.LogError("No count found for resource " + thingDef);
+			return;
 		}
+		int randomInRange = numChunks.RandomInRange;
+		int forcedLumpSize = num / randomInRange;
+		GenStep_ScatterLumpsMineable genStep_ScatterLumpsMineable = new GenStep_ScatterLumpsMineable();
+		genStep_ScatterLumpsMineable.count = randomInRange;
+		genStep_ScatterLumpsMineable.forcedDefToScatter = thingDef;
+		genStep_ScatterLumpsMineable.forcedLumpSize = forcedLumpSize;
+		genStep_ScatterLumpsMineable.Generate(map, parms);
+	}
 
-		// Token: 0x0600B2A0 RID: 45728 RVA: 0x0033272C File Offset: 0x0033092C
-		private void SpawnOres(Map map, GenStepParams parms)
+	private void GenerateCaveElevation(Map map, GenStepParams parms)
+	{
+		Perlin directionNoise = new Perlin(0.0020000000949949026, 2.0, 0.5, 4, Rand.Int, QualityMode.Medium);
+		MapGenFloatGrid elevation = MapGenerator.Elevation;
+		BoolGrid visited = new BoolGrid(map);
+		List<IntVec3> group = new List<IntVec3>();
+		MapGenCavesUtility.CaveGenParms @default = MapGenCavesUtility.CaveGenParms.Default;
+		@default.widthOffsetPerCell = 0.015f;
+		@default.minTunnelWidth = 0.5f;
+		@default.branchChance = 0.05f;
+		@default.maxOpenTunnelsPerRockGroup = 2;
+		@default.maxClosedTunnelsPerRockGroup = 2;
+		@default.minTunnelWidth = 0.25f;
+		@default.branchChance = 0.05f;
+		@default.openTunnelsPer10k = 4f;
+		@default.tunnelsWidthPerRockCount = new SimpleCurve
 		{
-			ThingDef thingDef = ((SpaceMapParent)map.ParentHolder).preciousResource ?? this.mineableCounts.RandomElement<GenStep_Asteroid.MineableCountConfig>().mineable;
-			int num = 0;
-			for (int i = 0; i < this.mineableCounts.Count; i++)
+			new CurvePoint(100f, 1f),
+			new CurvePoint(300f, 1.5f),
+			new CurvePoint(3000f, 1.9f)
+		};
+		MapGenCavesUtility.GenerateCaves(map, visited, group, directionNoise, @default, Rock);
+		bool Rock(IntVec3 cell)
+		{
+			return IsRock(cell, elevation, map);
+		}
+	}
+
+	private bool IsRock(IntVec3 c, MapGenFloatGrid elevation, Map map)
+	{
+		if (c.InBounds(map))
+		{
+			return elevation[c] > 0.7f;
+		}
+		return false;
+	}
+
+	private static void GenerateArcheanTree(Map map, GenStepParams parms)
+	{
+		if (!MapGenUtility.TryGetRandomClearRect(23, 23, out var rect, -1, -1, RectValidator, 0.59999996f, float.MaxValue) && !MapGenUtility.TryGetRandomClearRect(23, 23, out rect, -1, -1, RectValidator, -1f, float.MaxValue))
+		{
+			return;
+		}
+		int num = 5;
+		foreach (IntVec3 cell in rect.Cells)
+		{
+			float magnitude = (cell - rect.CenterCell).Magnitude;
+			if (magnitude < 8f || (magnitude < 9f && Rand.Chance(0.25f)))
 			{
-				if (this.mineableCounts[i].mineable == thingDef)
+				cell.GetEdifice(map)?.Destroy();
+				map.roofGrid.SetRoof(cell, null);
+			}
+			if (magnitude < (float)num || (magnitude < (float)num + 1.9f && Rand.Chance(0.25f)))
+			{
+				map.terrainGrid.SetTerrain(cell, TerrainDefOf.SoilRich);
+			}
+		}
+		WildPlantSpawner.SpawnPlant(ThingDefOf.Plant_TreeArchean, map, rect.CenterCell, setRandomGrowth: false).Growth = 1f;
+		RCellFinder.TryFindRandomCellsNear(rect.CenterCell, 6, map, Validator, out var cells, 4, 7);
+		for (int i = 0; i < cells.Count; i++)
+		{
+			IntVec3 intVec = cells[i];
+			if (i == 0)
+			{
+				RoomGenUtility.SpawnCrate(ThingDefOf.SealedCrate, intVec, map, Rot4.North, ThingSetMakerDefOf.Reward_ArcheanSeed);
+			}
+			else
+			{
+				GenSpawn.Spawn(ThingDefOf.AncientSpacerCrate, intVec, map, Rot4.North);
+			}
+		}
+		bool RectValidator(CellRect r)
+		{
+			for (int j = 0; j < map.layoutStructureSketches.Count; j++)
+			{
+				CellRect container = map.layoutStructureSketches[j].structureLayout.container;
+				if (container.ExpandedBy(5).Overlaps(r))
 				{
-					num = this.mineableCounts[i].countRange.RandomInRange;
+					return false;
+				}
+			}
+			foreach (IntVec3 cell2 in r.Cells)
+			{
+				if (!cell2.GetTerrain(map).affordances.Contains(TerrainAffordanceDefOf.Medium))
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+		bool Validator(IntVec3 cell)
+		{
+			if (rect.Contains(cell) && cell.GetEdifice(map) == null && cell.GetPlant(map) == null)
+			{
+				return (cell - rect.CenterCell).Magnitude >= 2.9f;
+			}
+			return false;
+		}
+	}
+
+	private static void GenerateRuins(Map map, GenStepParams parms)
+	{
+		IntVec2 size = new IntVec2(RuinsSize.RandomInRange, RuinsSize.RandomInRange);
+		IntVec3 intVec = IntVec3.Invalid;
+		Rot4 rot2 = Rot4.North;
+		for (int i = 0; i < 10; i++)
+		{
+			float num = Rand.Range(0f, 0.2f);
+			Vector3 vect = new Vector3(Mathf.RoundToInt((float)map.Size.x * num), 0f, 0f).RotatedBy(Rand.Range(0f, 360f));
+			IntVec3 intVec2 = map.Center + vect.ToIntVec3();
+			rot2 = Rot4.Random;
+			for (int j = 0; j < 2; j++)
+			{
+				if (i == 1)
+				{
+					rot2 = rot2.Rotated(RotationDirection.Clockwise);
+				}
+				if (IsValidPoint(intVec2, rot2))
+				{
+					intVec = intVec2;
 					break;
 				}
 			}
-			if (num == 0)
-			{
-				string str = "No count found for resource ";
-				ThingDef thingDef2 = thingDef;
-				Debug.LogError(str + ((thingDef2 != null) ? thingDef2.ToString() : null));
-				return;
-			}
-			int randomInRange = this.numChunks.RandomInRange;
-			int forcedLumpSize = num / randomInRange;
-			new GenStep_ScatterLumpsMineable
-			{
-				count = randomInRange,
-				forcedDefToScatter = thingDef,
-				forcedLumpSize = forcedLumpSize
-			}.Generate(map, parms);
 		}
-
-		// Token: 0x0600B2A1 RID: 45729 RVA: 0x003327FC File Offset: 0x003309FC
-		private void GenerateCaveElevation(Map map, GenStepParams parms)
+		if (!(intVec == IntVec3.Invalid))
 		{
-			GenStep_Asteroid.<>c__DisplayClass29_0 CS$<>8__locals1 = new GenStep_Asteroid.<>c__DisplayClass29_0();
-			CS$<>8__locals1.<>4__this = this;
-			CS$<>8__locals1.map = map;
-			Perlin directionNoise = new Perlin(0.0020000000949949026, 2.0, 0.5, 4, Rand.Int, QualityMode.Medium);
-			CS$<>8__locals1.elevation = MapGenerator.Elevation;
-			BoolGrid visited = new BoolGrid(CS$<>8__locals1.map);
-			List<IntVec3> group = new List<IntVec3>();
-			MapGenCavesUtility.CaveGenParms @default = MapGenCavesUtility.CaveGenParms.Default;
-			@default.widthOffsetPerCell = 0.015f;
-			@default.minTunnelWidth = 0.5f;
-			@default.branchChance = 0.05f;
-			@default.maxOpenTunnelsPerRockGroup = 2;
-			@default.maxClosedTunnelsPerRockGroup = 2;
-			@default.minTunnelWidth = 0.25f;
-			@default.branchChance = 0.05f;
-			@default.openTunnelsPer10k = 4f;
-			@default.tunnelsWidthPerRockCount = new SimpleCurve
-			{
-				{
-					new CurvePoint(100f, 1f),
-					true
-				},
-				{
-					new CurvePoint(300f, 1.5f),
-					true
-				},
-				{
-					new CurvePoint(3000f, 1.9f),
-					true
-				}
-			};
-			MapGenCavesUtility.GenerateCaves(CS$<>8__locals1.map, visited, group, directionNoise, @default, new Predicate<IntVec3>(CS$<>8__locals1.<GenerateCaveElevation>g__Rock|0));
-		}
-
-		// Token: 0x0600B2A2 RID: 45730 RVA: 0x0033292B File Offset: 0x00330B2B
-		private bool IsRock(IntVec3 c, MapGenFloatGrid elevation, Map map)
-		{
-			return c.InBounds(map) && elevation[c] > 0.7f;
-		}
-
-		// Token: 0x0600B2A3 RID: 45731 RVA: 0x00332948 File Offset: 0x00330B48
-		private static void GenerateArcheanTree(Map map, GenStepParams parms)
-		{
-			GenStep_Asteroid.<>c__DisplayClass31_0 CS$<>8__locals1 = new GenStep_Asteroid.<>c__DisplayClass31_0();
-			CS$<>8__locals1.map = map;
-			if (!MapGenUtility.TryGetRandomClearRect(23, 23, out CS$<>8__locals1.rect, -1, -1, new Predicate<CellRect>(CS$<>8__locals1.<GenerateArcheanTree>g__RectValidator|0), 0.59999996f, 3.4028235E+38f, MapGenUtility.SearchWeightMode.Largest, 1) && !MapGenUtility.TryGetRandomClearRect(23, 23, out CS$<>8__locals1.rect, -1, -1, new Predicate<CellRect>(CS$<>8__locals1.<GenerateArcheanTree>g__RectValidator|0), -1f, 3.4028235E+38f, MapGenUtility.SearchWeightMode.Largest, 1))
-			{
-				return;
-			}
-			int num = 5;
-			foreach (IntVec3 intVec in CS$<>8__locals1.rect.Cells)
-			{
-				float magnitude = (intVec - CS$<>8__locals1.rect.CenterCell).Magnitude;
-				if (magnitude < 8f || (magnitude < 9f && Rand.Chance(0.25f)))
-				{
-					Building edifice = intVec.GetEdifice(CS$<>8__locals1.map);
-					if (edifice != null)
-					{
-						edifice.Destroy(DestroyMode.Vanish);
-					}
-					CS$<>8__locals1.map.roofGrid.SetRoof(intVec, null);
-				}
-				if (magnitude < (float)num || (magnitude < (float)num + 1.9f && Rand.Chance(0.25f)))
-				{
-					CS$<>8__locals1.map.terrainGrid.SetTerrain(intVec, TerrainDefOf.SoilRich);
-				}
-			}
-			WildPlantSpawner.SpawnPlant(ThingDefOf.Plant_TreeArchean, CS$<>8__locals1.map, CS$<>8__locals1.rect.CenterCell, false).Growth = 1f;
-			List<IntVec3> list;
-			RCellFinder.TryFindRandomCellsNear(CS$<>8__locals1.rect.CenterCell, 6, CS$<>8__locals1.map, new Predicate<IntVec3>(CS$<>8__locals1.<GenerateArcheanTree>g__Validator|1), out list, 4, 7);
-			for (int i = 0; i < list.Count; i++)
-			{
-				IntVec3 intVec2 = list[i];
-				if (i == 0)
-				{
-					RoomGenUtility.SpawnCrate(ThingDefOf.SealedCrate, intVec2, CS$<>8__locals1.map, Rot4.North, ThingSetMakerDefOf.Reward_ArcheanSeed, true, null);
-				}
-				else
-				{
-					GenSpawn.Spawn(ThingDefOf.AncientSpacerCrate, intVec2, CS$<>8__locals1.map, Rot4.North, WipeMode.Vanish);
-				}
-			}
-		}
-
-		// Token: 0x0600B2A4 RID: 45732 RVA: 0x00332B4C File Offset: 0x00330D4C
-		private static void GenerateRuins(Map map, GenStepParams parms)
-		{
-			GenStep_Asteroid.<>c__DisplayClass32_0 CS$<>8__locals1;
-			CS$<>8__locals1.size = new IntVec2(GenStep_Asteroid.RuinsSize.RandomInRange, GenStep_Asteroid.RuinsSize.RandomInRange);
-			IntVec3 intVec = IntVec3.Invalid;
-			Rot4 rot = Rot4.North;
-			for (int i = 0; i < 10; i++)
-			{
-				float num = Rand.Range(0f, 0.2f);
-				Vector3 vect = new Vector3((float)Mathf.RoundToInt((float)map.Size.x * num), 0f, 0f).RotatedBy(Rand.Range(0f, 360f));
-				IntVec3 intVec2 = map.Center + vect.ToIntVec3();
-				rot = Rot4.Random;
-				for (int j = 0; j < 2; j++)
-				{
-					if (i == 1)
-					{
-						rot = rot.Rotated(RotationDirection.Clockwise);
-					}
-					if (GenStep_Asteroid.<GenerateRuins>g__IsValidPoint|32_0(intVec2, rot, ref CS$<>8__locals1))
-					{
-						intVec = intVec2;
-						break;
-					}
-				}
-			}
-			if (intVec == IntVec3.Invalid)
-			{
-				return;
-			}
-			CellRect cellRect = intVec.RectAbout(CS$<>8__locals1.size, rot);
+			CellRect cellRect = intVec.RectAbout(size, rot2);
 			StructureGenParams parms2 = new StructureGenParams
 			{
 				size = cellRect.Size
@@ -281,99 +314,22 @@ namespace RimWorld
 			SketchResolveParams parms3 = new SketchResolveParams
 			{
 				sketch = layoutStructureSketch.layoutSketch,
-				destroyChanceExp = new float?(1.5f)
+				destroyChanceExp = 1.5f
 			};
 			SketchResolverDefOf.DamageBuildingsLight.Resolve(parms3);
 			map.layoutStructureSketches.Add(layoutStructureSketch);
-			worker.Spawn(layoutStructureSketch, map, cellRect.Min, null, null, true, false, null);
+			worker.Spawn(layoutStructureSketch, map, cellRect.Min, null);
 		}
-
-		// Token: 0x0600B2A7 RID: 45735 RVA: 0x00332CEC File Offset: 0x00330EEC
-		[CompilerGenerated]
-		internal static bool <GenerateRuins>g__IsValidPoint|32_0(IntVec3 p, Rot4 rot, ref GenStep_Asteroid.<>c__DisplayClass32_0 A_2)
+		bool IsValidPoint(IntVec3 p, Rot4 rot)
 		{
-			foreach (IntVec3 c in p.RectAbout(A_2.size, rot))
+			foreach (IntVec3 item in p.RectAbout(size, rot))
 			{
-				if (MapGenerator.Elevation[c] < 0.7f)
+				if (MapGenerator.Elevation[item] < 0.7f)
 				{
 					return false;
 				}
 			}
 			return true;
-		}
-
-		// Token: 0x04007A4D RID: 31309
-		public List<GenStep_Asteroid.MineableCountConfig> mineableCounts;
-
-		// Token: 0x04007A4E RID: 31310
-		public IntRange numChunks;
-
-		// Token: 0x04007A4F RID: 31311
-		public float ruinsChance;
-
-		// Token: 0x04007A50 RID: 31312
-		public float archeanTreeChance;
-
-		// Token: 0x04007A51 RID: 31313
-		private const float FloorThreshold = 0.5f;
-
-		// Token: 0x04007A52 RID: 31314
-		private const float RuinsRadius = 0.2f;
-
-		// Token: 0x04007A53 RID: 31315
-		private const float MacroFrequency = 0.006f;
-
-		// Token: 0x04007A54 RID: 31316
-		private const float MicroFrequency = 0.05f;
-
-		// Token: 0x04007A55 RID: 31317
-		private const float MacroBlend = 0.8f;
-
-		// Token: 0x04007A56 RID: 31318
-		private const float MicroBlend = 0.85f;
-
-		// Token: 0x04007A57 RID: 31319
-		private const float SquashScale = 0.65f;
-
-		// Token: 0x04007A58 RID: 31320
-		private const float Exponent = 0.2f;
-
-		// Token: 0x04007A59 RID: 31321
-		private const float CaveBranchChance = 0.05f;
-
-		// Token: 0x04007A5A RID: 31322
-		private const float CaveWidthOffsetPerCell = 0.015f;
-
-		// Token: 0x04007A5B RID: 31323
-		private const float CaveMinTunnelWidth = 0.5f;
-
-		// Token: 0x04007A5C RID: 31324
-		private const int TreeAreaRadiusSize = 11;
-
-		// Token: 0x04007A5D RID: 31325
-		private const float CaveDirectionNoiseFrequency = 0.002f;
-
-		// Token: 0x04007A5E RID: 31326
-		private static readonly IntRange RuinsSize = new IntRange(6, 10);
-
-		// Token: 0x04007A5F RID: 31327
-		private ModuleBase innerNoise;
-
-		// Token: 0x02001F97 RID: 8087
-		public class MineableCountConfig
-		{
-			// Token: 0x0600B2A8 RID: 45736 RVA: 0x00332D5C File Offset: 0x00330F5C
-			public void LoadDataFromXmlCustom(XmlNode xmlRoot)
-			{
-				DirectXmlCrossRefLoader.RegisterObjectWantsCrossRef(this, "mineable", xmlRoot.Name, null, null, null);
-				this.countRange = IntRange.FromString(xmlRoot.FirstChild.Value);
-			}
-
-			// Token: 0x04007A60 RID: 31328
-			public ThingDef mineable;
-
-			// Token: 0x04007A61 RID: 31329
-			public IntRange countRange;
 		}
 	}
 }

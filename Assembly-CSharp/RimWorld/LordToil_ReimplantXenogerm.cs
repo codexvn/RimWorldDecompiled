@@ -1,138 +1,264 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class LordToil_ReimplantXenogerm : LordToil
 {
-	// Token: 0x02001715 RID: 5909
-	public class LordToil_ReimplantXenogerm : LordToil
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass11_0
 	{
-		// Token: 0x17001566 RID: 5478
-		// (get) Token: 0x06008B26 RID: 35622 RVA: 0x0029757C File Offset: 0x0029577C
-		public override bool ShouldFail
+		public Pawn current;
+
+		public Pawn requester;
+
+		internal void _003CExtraFloatMenuOptions_003Eb__0()
 		{
+			current.jobs.TryTakeOrderedJob(JobMaker.MakeJob(JobDefOf.GetReimplanted, requester), JobTag.Misc);
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CExtraFloatMenuOptions_003Ed__11 : IEnumerable<FloatMenuOption>, IEnumerable, IEnumerator<FloatMenuOption>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private FloatMenuOption _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private Pawn current;
+
+		public Pawn _003C_003E3__current;
+
+		private Pawn requester;
+
+		public Pawn _003C_003E3__requester;
+
+		public LordToil_ReimplantXenogerm _003C_003E4__this;
+
+		FloatMenuOption IEnumerator<FloatMenuOption>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				return this.Data.target == null;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001567 RID: 5479
-		// (get) Token: 0x06008B27 RID: 35623 RVA: 0x0029758C File Offset: 0x0029578C
-		public LordToilData_ReimplantXenogerm Data
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (LordToilData_ReimplantXenogerm)this.data;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06008B28 RID: 35624 RVA: 0x00297599 File Offset: 0x00295799
-		public LordToil_ReimplantXenogerm(IntVec3 spot)
+		[DebuggerHidden]
+		public _003CExtraFloatMenuOptions_003Ed__11(int _003C_003E1__state)
 		{
-			this.data = new LordToilData_ReimplantXenogerm
-			{
-				waitSpot = spot
-			};
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x06008B29 RID: 35625 RVA: 0x002975B3 File Offset: 0x002957B3
-		public override void Init()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			this.SetTarget();
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x06008B2A RID: 35626 RVA: 0x002975BC File Offset: 0x002957BC
-		private void SetTarget()
+		private bool MoveNext()
 		{
-			LordToilData_ReimplantXenogerm data = this.Data;
-			if (!this.lord.ownedPawns.TryRandomElementByWeight((Pawn x) => (float)((!x.Destroyed && !x.Downed && !x.health.hediffSet.HasHediff(HediffDefOf.XenogermReplicating, false)) ? 1 : 0), out data.target))
+			int num = _003C_003E1__state;
+			LordToil_ReimplantXenogerm lordToil_ReimplantXenogerm = _003C_003E4__this;
+			switch (num)
 			{
-				this.lord.ownedPawns.TryRandomElementByWeight((Pawn x) => (float)((!x.Destroyed && !x.Downed) ? 1 : 0), out data.target);
-			}
-			if (data.target != null)
+			default:
+				return false;
+			case 0:
 			{
-				Hediff firstHediffOfDef = data.target.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.XenogermReplicating, false);
-				if (firstHediffOfDef != null)
+				_003C_003E1__state = -1;
+				_003C_003Ec__DisplayClass11_0 CS_0024_003C_003E8__locals10 = new _003C_003Ec__DisplayClass11_0
 				{
-					data.target.health.RemoveHediff(firstHediffOfDef);
-				}
-				Find.LetterStack.ReceiveLetter("LetterLabelSanguophageWaitingToReimplant".Translate(), "LetterTextSanguophageWaitingToReimplant".Translate(data.target.Named("PAWN"), 15000.ToStringTicksToPeriod(true, false, true, true, false).Named("DURATION")), LetterDefOf.PositiveEvent, data.target, null, null, null, null, 0, true);
-			}
-		}
-
-		// Token: 0x06008B2B RID: 35627 RVA: 0x002976D8 File Offset: 0x002958D8
-		public override void UpdateAllDuties()
-		{
-			LordToilData_ReimplantXenogerm data = this.Data;
-			for (int i = 0; i < this.lord.ownedPawns.Count; i++)
-			{
-				if (this.lord.ownedPawns[i] == data.target)
+					current = current,
+					requester = requester
+				};
+				LordToilData_ReimplantXenogerm data = lordToil_ReimplantXenogerm.Data;
+				if (data.target == CS_0024_003C_003E8__locals10.requester)
 				{
-					this.lord.ownedPawns[i].mindState.duty = new PawnDuty(DutyDefOf.Idle, data.waitSpot, -1f);
-				}
-				else
-				{
-					this.lord.ownedPawns[i].mindState.duty = new PawnDuty(DutyDefOf.WanderClose_NoNeeds, data.waitSpot, 10f);
-				}
-			}
-		}
-
-		// Token: 0x06008B2C RID: 35628 RVA: 0x00297792 File Offset: 0x00295992
-		public override void DrawPawnGUIOverlay(Pawn pawn)
-		{
-			if (pawn == this.Data.target)
-			{
-				pawn.Map.overlayDrawer.DrawOverlay(pawn, OverlayTypes.QuestionMark);
-			}
-		}
-
-		// Token: 0x06008B2D RID: 35629 RVA: 0x002977B5 File Offset: 0x002959B5
-		public override void Notify_PawnLost(Pawn p, PawnLostCondition condition)
-		{
-			if (p == this.Data.target)
-			{
-				this.SetTarget();
-			}
-		}
-
-		// Token: 0x06008B2E RID: 35630 RVA: 0x002977CB File Offset: 0x002959CB
-		public override IEnumerable<FloatMenuOption> ExtraFloatMenuOptions(Pawn requester, Pawn current)
-		{
-			LordToilData_ReimplantXenogerm data = this.Data;
-			if (data.target == requester)
-			{
-				if (requester.genes == null || current.genes == null)
-				{
-					yield break;
-				}
-				string text = "AcceptXenogerm".Translate(requester);
-				if (!current.CanReach(data.target, PathEndMode.ClosestTouch, Danger.Deadly, false, false, TraverseMode.ByPawn))
-				{
-					yield return new FloatMenuOption(text + ": " + "CannotReach".Translate().CapitalizeFirst(), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-				}
-				else if (current.IsQuestLodger())
-				{
-					yield return new FloatMenuOption(text + ": " + "MessageCannotImplantInTempFactionMembers".Translate(), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-				}
-				else if (GeneUtility.SameXenotype(current, data.target))
-				{
-					yield return new FloatMenuOption(text + ": " + "MessageCannotUseOnSameXenotype".Translate(current), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-				}
-				else
-				{
-					yield return new FloatMenuOption(text, delegate()
+					if (CS_0024_003C_003E8__locals10.requester.genes == null || CS_0024_003C_003E8__locals10.current.genes == null)
 					{
-						current.jobs.TryTakeOrderedJob(JobMaker.MakeJob(JobDefOf.GetReimplanted, requester), new JobTag?(JobTag.Misc), false);
-					}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
+						return false;
+					}
+					string text = "AcceptXenogerm".Translate(CS_0024_003C_003E8__locals10.requester);
+					if (!CS_0024_003C_003E8__locals10.current.CanReach(data.target, PathEndMode.ClosestTouch, Danger.Deadly))
+					{
+						_003C_003E2__current = new FloatMenuOption(text + ": " + "CannotReach".Translate().CapitalizeFirst(), null);
+						_003C_003E1__state = 1;
+						return true;
+					}
+					if (CS_0024_003C_003E8__locals10.current.IsQuestLodger())
+					{
+						_003C_003E2__current = new FloatMenuOption(text + ": " + "MessageCannotImplantInTempFactionMembers".Translate(), null);
+						_003C_003E1__state = 2;
+						return true;
+					}
+					if (GeneUtility.SameXenotype(CS_0024_003C_003E8__locals10.current, data.target))
+					{
+						_003C_003E2__current = new FloatMenuOption(text + ": " + "MessageCannotUseOnSameXenotype".Translate(CS_0024_003C_003E8__locals10.current), null);
+						_003C_003E1__state = 3;
+						return true;
+					}
+					_003C_003E2__current = new FloatMenuOption(text, delegate
+					{
+						CS_0024_003C_003E8__locals10.current.jobs.TryTakeOrderedJob(JobMaker.MakeJob(JobDefOf.GetReimplanted, CS_0024_003C_003E8__locals10.requester), JobTag.Misc);
+					});
+					_003C_003E1__state = 4;
+					return true;
 				}
+				break;
 			}
-			yield break;
+			case 1:
+				_003C_003E1__state = -1;
+				break;
+			case 2:
+				_003C_003E1__state = -1;
+				break;
+			case 3:
+				_003C_003E1__state = -1;
+				break;
+			case 4:
+				_003C_003E1__state = -1;
+				break;
+			}
+			return false;
 		}
 
-		// Token: 0x04005A6C RID: 23148
-		private const float WanderRadius = 10f;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<FloatMenuOption> IEnumerable<FloatMenuOption>.GetEnumerator()
+		{
+			_003CExtraFloatMenuOptions_003Ed__11 _003CExtraFloatMenuOptions_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CExtraFloatMenuOptions_003Ed__ = this;
+			}
+			else
+			{
+				_003CExtraFloatMenuOptions_003Ed__ = new _003CExtraFloatMenuOptions_003Ed__11(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CExtraFloatMenuOptions_003Ed__.requester = _003C_003E3__requester;
+			_003CExtraFloatMenuOptions_003Ed__.current = _003C_003E3__current;
+			return _003CExtraFloatMenuOptions_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<FloatMenuOption>)this).GetEnumerator();
+		}
+	}
+
+	private const float WanderRadius = 10f;
+
+	public override bool ShouldFail => Data.target == null;
+
+	public LordToilData_ReimplantXenogerm Data => (LordToilData_ReimplantXenogerm)data;
+
+	public LordToil_ReimplantXenogerm(IntVec3 spot)
+	{
+		data = new LordToilData_ReimplantXenogerm
+		{
+			waitSpot = spot
+		};
+	}
+
+	public override void Init()
+	{
+		SetTarget();
+	}
+
+	private void SetTarget()
+	{
+		LordToilData_ReimplantXenogerm lordToilData_ReimplantXenogerm = Data;
+		if (!lord.ownedPawns.TryRandomElementByWeight((Pawn x) => (!x.Destroyed && !x.Downed && !x.health.hediffSet.HasHediff(HediffDefOf.XenogermReplicating)) ? 1 : 0, out lordToilData_ReimplantXenogerm.target))
+		{
+			lord.ownedPawns.TryRandomElementByWeight((Pawn x) => (!x.Destroyed && !x.Downed) ? 1 : 0, out lordToilData_ReimplantXenogerm.target);
+		}
+		if (lordToilData_ReimplantXenogerm.target != null)
+		{
+			Hediff firstHediffOfDef = lordToilData_ReimplantXenogerm.target.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.XenogermReplicating);
+			if (firstHediffOfDef != null)
+			{
+				lordToilData_ReimplantXenogerm.target.health.RemoveHediff(firstHediffOfDef);
+			}
+			Find.LetterStack.ReceiveLetter("LetterLabelSanguophageWaitingToReimplant".Translate(), "LetterTextSanguophageWaitingToReimplant".Translate(lordToilData_ReimplantXenogerm.target.Named("PAWN"), 15000.ToStringTicksToPeriod().Named("DURATION")), LetterDefOf.PositiveEvent, lordToilData_ReimplantXenogerm.target);
+		}
+	}
+
+	public override void UpdateAllDuties()
+	{
+		LordToilData_ReimplantXenogerm lordToilData_ReimplantXenogerm = Data;
+		for (int i = 0; i < lord.ownedPawns.Count; i++)
+		{
+			if (lord.ownedPawns[i] == lordToilData_ReimplantXenogerm.target)
+			{
+				lord.ownedPawns[i].mindState.duty = new PawnDuty(DutyDefOf.Idle, lordToilData_ReimplantXenogerm.waitSpot);
+			}
+			else
+			{
+				lord.ownedPawns[i].mindState.duty = new PawnDuty(DutyDefOf.WanderClose_NoNeeds, lordToilData_ReimplantXenogerm.waitSpot, 10f);
+			}
+		}
+	}
+
+	public override void DrawPawnGUIOverlay(Pawn pawn)
+	{
+		if (pawn == Data.target)
+		{
+			pawn.Map.overlayDrawer.DrawOverlay(pawn, OverlayTypes.QuestionMark);
+		}
+	}
+
+	public override void Notify_PawnLost(Pawn p, PawnLostCondition condition)
+	{
+		if (p == Data.target)
+		{
+			SetTarget();
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CExtraFloatMenuOptions_003Ed__11))]
+	public override IEnumerable<FloatMenuOption> ExtraFloatMenuOptions(Pawn requester, Pawn current)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CExtraFloatMenuOptions_003Ed__11(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__requester = requester,
+			_003C_003E3__current = current
+		};
 	}
 }

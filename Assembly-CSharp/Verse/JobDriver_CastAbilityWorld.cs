@@ -1,49 +1,147 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
-using RimWorld;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse.AI;
 
-namespace Verse
+namespace Verse;
+
+public class JobDriver_CastAbilityWorld : JobDriver
 {
-	// Token: 0x020001C3 RID: 451
-	public class JobDriver_CastAbilityWorld : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__1 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x06000C68 RID: 3176 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
-		{
-			return true;
-		}
+		private int _003C_003E1__state;
 
-		// Token: 0x06000C69 RID: 3177 RVA: 0x0003A988 File Offset: 0x00038B88
-		protected override IEnumerable<Toil> MakeNewToils()
-		{
-			yield return Toils_General.Do(delegate
-			{
-				this.pawn.stances.SetStance(new Stance_WarmupAbilityWorld(this.job.ability.def.verbProperties.warmupTime.SecondsToTicks(), null, this.job.ability.verb));
-			});
-			yield return Toils_General.Do(delegate
-			{
-				this.job.ability.Activate(this.job.globalTarget);
-			});
-			yield break;
-		}
+		private Toil _003C_003E2__current;
 
-		// Token: 0x06000C6A RID: 3178 RVA: 0x0003A998 File Offset: 0x00038B98
-		public override string GetReport()
-		{
-			return "UsingVerb".Translate(this.job.ability.def.label, this.job.globalTarget.Label);
-		}
+		private int _003C_003El__initialThreadId;
 
-		// Token: 0x06000C6B RID: 3179 RVA: 0x0003A9D8 File Offset: 0x00038BD8
-		public override void Notify_Starting()
+		public JobDriver_CastAbilityWorld _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
 		{
-			base.Notify_Starting();
-			Ability ability = this.job.ability;
-			if (ability == null)
+			[DebuggerHidden]
+			get
 			{
-				return;
+				return _003C_003E2__current;
 			}
-			ability.Notify_StartedCasting();
 		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__1(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_CastAbilityWorld CS_0024_003C_003E8__locals5 = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.Do(delegate
+				{
+					CS_0024_003C_003E8__locals5.pawn.stances.SetStance(new Stance_WarmupAbilityWorld(CS_0024_003C_003E8__locals5.job.ability.def.verbProperties.warmupTime.SecondsToTicks(), null, CS_0024_003C_003E8__locals5.job.ability.verb));
+				});
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.Do(delegate
+				{
+					CS_0024_003C_003E8__locals5.job.ability.Activate(CS_0024_003C_003E8__locals5.job.globalTarget);
+				});
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__1 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__1(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return true;
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__1))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__1(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override string GetReport()
+	{
+		return "UsingVerb".Translate(job.ability.def.label, job.globalTarget.Label);
+	}
+
+	public override void Notify_Starting()
+	{
+		base.Notify_Starting();
+		job.ability?.Notify_StartedCasting();
 	}
 }

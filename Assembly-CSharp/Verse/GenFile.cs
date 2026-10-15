@@ -1,140 +1,272 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
-namespace Verse
+namespace Verse;
+
+public static class GenFile
 {
-	// Token: 0x02000109 RID: 265
-	public static class GenFile
+	[CompilerGenerated]
+	private sealed class _003CLinesFromFile_003Ed__3 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x060007CA RID: 1994 RVA: 0x00025070 File Offset: 0x00023270
-		public static string TextFromRawFile(string filePath)
-		{
-			return File.ReadAllText(filePath);
-		}
+		private int _003C_003E1__state;
 
-		// Token: 0x060007CB RID: 1995 RVA: 0x00025078 File Offset: 0x00023278
-		public static string TextFromResourceFile(string filePath)
-		{
-			TextAsset textAsset = Resources.Load("Text/" + filePath) as TextAsset;
-			if (textAsset == null)
-			{
-				Log.Message("Found no text asset in resources at " + filePath);
-				return null;
-			}
-			return GenFile.GetTextWithoutBOM(textAsset);
-		}
+		private string _003C_003E2__current;
 
-		// Token: 0x060007CC RID: 1996 RVA: 0x000250BC File Offset: 0x000232BC
-		public static string GetTextWithoutBOM(TextAsset textAsset)
-		{
-			string result = null;
-			using (MemoryStream memoryStream = new MemoryStream(textAsset.bytes))
-			{
-				using (StreamReader streamReader = new StreamReader(memoryStream, true))
-				{
-					result = streamReader.ReadToEnd();
-				}
-			}
-			return result;
-		}
+		private int _003C_003El__initialThreadId;
 
-		// Token: 0x060007CD RID: 1997 RVA: 0x0002511C File Offset: 0x0002331C
-		public static IEnumerable<string> LinesFromFile(string filePath)
-		{
-			string text = GenFile.TextFromResourceFile(filePath);
-			foreach (string text2 in GenText.LinesFromString(text))
-			{
-				yield return text2;
-			}
-			IEnumerator<string> enumerator = null;
-			yield break;
-			yield break;
-		}
+		private string filePath;
 
-		// Token: 0x060007CE RID: 1998 RVA: 0x0002512C File Offset: 0x0002332C
-		public static void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs, bool useLinuxLineEndings = false, Func<string, string> destFileNameGetter = null)
+		public string _003C_003E3__filePath;
+
+		private IEnumerator<string> _003C_003E7__wrap1;
+
+		string IEnumerator<string>.Current
 		{
-			DirectoryInfo directoryInfo = new DirectoryInfo(sourceDirName);
-			DirectoryInfo[] directories = directoryInfo.GetDirectories();
-			if (!directoryInfo.Exists)
+			[DebuggerHidden]
+			get
 			{
-				throw new DirectoryNotFoundException("Source directory does not exist or could not be found: " + sourceDirName);
-			}
-			if (!Directory.Exists(destDirName))
-			{
-				Directory.CreateDirectory(destDirName);
-			}
-			foreach (FileInfo fileInfo in directoryInfo.GetFiles())
-			{
-				string text = fileInfo.Name;
-				if (destFileNameGetter != null)
-				{
-					text = destFileNameGetter(text);
-				}
-				string text2 = Path.Combine(destDirName, text);
-				if (useLinuxLineEndings && (fileInfo.Extension == ".sh" || fileInfo.Extension == ".txt"))
-				{
-					if (!File.Exists(text2))
-					{
-						File.WriteAllText(text2, File.ReadAllText(fileInfo.FullName).Replace("\r\n", "\n").Replace("\r", "\n"));
-					}
-				}
-				else
-				{
-					fileInfo.CopyTo(text2, false);
-				}
-			}
-			if (copySubDirs)
-			{
-				foreach (DirectoryInfo directoryInfo2 in directories)
-				{
-					string destDirName2 = Path.Combine(destDirName, directoryInfo2.Name);
-					GenFile.DirectoryCopy(directoryInfo2.FullName, destDirName2, copySubDirs, useLinuxLineEndings, null);
-				}
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x060007CF RID: 1999 RVA: 0x00025254 File Offset: 0x00023454
-		public static string SanitizedFileName(string fileName)
+		object IEnumerator.Current
 		{
-			char[] invalidFileNameChars = Path.GetInvalidFileNameChars();
-			string text = "";
-			for (int i = 0; i < fileName.Length; i++)
+			[DebuggerHidden]
+			get
 			{
-				if (!invalidFileNameChars.Contains(fileName[i]))
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CLinesFromFile_003Ed__3(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
 				{
-					text += fileName[i].ToString();
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
 				}
 			}
-			if (text.Length == 0)
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
 			{
-				text = "unnamed";
+				switch (_003C_003E1__state)
+				{
+				default:
+					return false;
+				case 0:
+				{
+					_003C_003E1__state = -1;
+					string text = TextFromResourceFile(filePath);
+					_003C_003E7__wrap1 = GenText.LinesFromString(text).GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				}
+				case 1:
+					_003C_003E1__state = -3;
+					break;
+				}
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					string current = _003C_003E7__wrap1.Current;
+					_003C_003E2__current = current;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = null;
+				return false;
 			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CLinesFromFile_003Ed__3 _003CLinesFromFile_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CLinesFromFile_003Ed__ = this;
+			}
+			else
+			{
+				_003CLinesFromFile_003Ed__ = new _003CLinesFromFile_003Ed__3(0);
+			}
+			_003CLinesFromFile_003Ed__.filePath = _003C_003E3__filePath;
+			return _003CLinesFromFile_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	public static string TextFromRawFile(string filePath)
+	{
+		return File.ReadAllText(filePath);
+	}
+
+	public static string TextFromResourceFile(string filePath)
+	{
+		TextAsset textAsset = Resources.Load<TextAsset>("Text/" + filePath);
+		if (textAsset == null)
+		{
+			Log.Message("Found no text asset in resources at " + filePath);
+			return null;
+		}
+		return GetTextWithoutBOM(textAsset);
+	}
+
+	public static string GetTextWithoutBOM(TextAsset textAsset)
+	{
+		string text = null;
+		using MemoryStream stream = new MemoryStream(textAsset.bytes);
+		using StreamReader streamReader = new StreamReader(stream, detectEncodingFromByteOrderMarks: true);
+		return streamReader.ReadToEnd();
+	}
+
+	[IteratorStateMachine(typeof(_003CLinesFromFile_003Ed__3))]
+	public static IEnumerable<string> LinesFromFile(string filePath)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CLinesFromFile_003Ed__3(-2)
+		{
+			_003C_003E3__filePath = filePath
+		};
+	}
+
+	public static void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs, bool useLinuxLineEndings = false, Func<string, string> destFileNameGetter = null)
+	{
+		DirectoryInfo directoryInfo = new DirectoryInfo(sourceDirName);
+		DirectoryInfo[] directories = directoryInfo.GetDirectories();
+		if (!directoryInfo.Exists)
+		{
+			throw new DirectoryNotFoundException("Source directory does not exist or could not be found: " + sourceDirName);
+		}
+		if (!Directory.Exists(destDirName))
+		{
+			Directory.CreateDirectory(destDirName);
+		}
+		FileInfo[] files = directoryInfo.GetFiles();
+		foreach (FileInfo fileInfo in files)
+		{
+			string text = fileInfo.Name;
+			if (destFileNameGetter != null)
+			{
+				text = destFileNameGetter(text);
+			}
+			string text2 = Path.Combine(destDirName, text);
+			if (useLinuxLineEndings && (fileInfo.Extension == ".sh" || fileInfo.Extension == ".txt"))
+			{
+				if (!File.Exists(text2))
+				{
+					File.WriteAllText(text2, File.ReadAllText(fileInfo.FullName).Replace("\r\n", "\n").Replace("\r", "\n"));
+				}
+			}
+			else
+			{
+				fileInfo.CopyTo(text2, overwrite: false);
+			}
+		}
+		if (copySubDirs)
+		{
+			DirectoryInfo[] array = directories;
+			foreach (DirectoryInfo directoryInfo2 in array)
+			{
+				string destDirName2 = Path.Combine(destDirName, directoryInfo2.Name);
+				DirectoryCopy(directoryInfo2.FullName, destDirName2, copySubDirs, useLinuxLineEndings);
+			}
+		}
+	}
+
+	public static string SanitizedFileName(string fileName)
+	{
+		char[] invalidFileNameChars = Path.GetInvalidFileNameChars();
+		string text = "";
+		for (int i = 0; i < fileName.Length; i++)
+		{
+			if (!invalidFileNameChars.Contains(fileName[i]))
+			{
+				text += fileName[i];
+			}
+		}
+		if (text.Length == 0)
+		{
+			text = "unnamed";
+		}
+		return text;
+	}
+
+	public static string ResolveCaseInsensitiveFilePath(string dir, string targetFileName)
+	{
+		string text = Path.Combine(dir, targetFileName);
+		if (File.Exists(text))
+		{
 			return text;
 		}
-
-		// Token: 0x060007D0 RID: 2000 RVA: 0x000252B4 File Offset: 0x000234B4
-		public static string ResolveCaseInsensitiveFilePath(string dir, string targetFileName)
+		if (Directory.Exists(dir))
 		{
-			string text = Path.Combine(dir, targetFileName);
-			if (File.Exists(text))
+			string[] files = Directory.GetFiles(dir);
+			foreach (string path in files)
 			{
-				return text;
-			}
-			if (Directory.Exists(dir))
-			{
-				foreach (string path in Directory.GetFiles(dir))
+				if (string.Compare(Path.GetFileName(path), targetFileName, StringComparison.CurrentCultureIgnoreCase) == 0)
 				{
-					if (string.Compare(Path.GetFileName(path), targetFileName, StringComparison.CurrentCultureIgnoreCase) == 0)
-					{
-						return dir + Path.DirectorySeparatorChar.ToString() + Path.GetFileName(path);
-					}
+					return dir + Path.DirectorySeparatorChar + Path.GetFileName(path);
 				}
 			}
-			return dir + Path.DirectorySeparatorChar.ToString() + targetFileName;
 		}
+		return dir + Path.DirectorySeparatorChar + targetFileName;
 	}
 }

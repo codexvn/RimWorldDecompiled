@@ -1,123 +1,201 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.Sound;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompInteractable_GravshipShieldGenerator : CompInteractable
 {
-	// Token: 0x02002CC3 RID: 11459
-	public class CompInteractable_GravshipShieldGenerator : CompInteractable
+	[CompilerGenerated]
+	private sealed class _003CCompGetGizmosExtra_003Ed__11 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x170028B4 RID: 10420
-		// (get) Token: 0x0601015C RID: 65884 RVA: 0x004A7551 File Offset: 0x004A5751
-		private CompProjectileInterceptor Shield
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompInteractable_GravshipShieldGenerator _003C_003E4__this;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.shield ?? this.parent.TryGetComp<CompProjectileInterceptor>();
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170028B5 RID: 10421
-		// (get) Token: 0x0601015D RID: 65885 RVA: 0x004A7568 File Offset: 0x004A5768
-		private CompGravshipFacility Facility
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.facility ?? this.parent.TryGetComp<CompGravshipFacility>();
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170028B6 RID: 10422
-		// (get) Token: 0x0601015E RID: 65886 RVA: 0x004A757F File Offset: 0x004A577F
-		protected override string ActivateOptionLabel
+		[DebuggerHidden]
+		public _003CCompGetGizmosExtra_003Ed__11(int _003C_003E1__state)
 		{
-			get
-			{
-				return this.Shield.Active ? "Deactivate".Translate() : "Activate".Translate();
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x0601015F RID: 65887 RVA: 0x004A75AC File Offset: 0x004A57AC
-		public override AcceptanceReport CanInteract(Pawn activateBy = null, bool checkOptionalItems = true)
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			if (!ModsConfig.OdysseyActive)
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			CompInteractable_GravshipShieldGenerator CS_0024_003C_003E8__locals7 = _003C_003E4__this;
+			switch (num)
 			{
+			default:
+				return false;
+			case 0:
+			{
+				_003C_003E1__state = -1;
+				if (!CS_0024_003C_003E8__locals7.parent.SpawnedOrAnyParentSpawned)
+				{
+					return false;
+				}
+				string defaultLabel;
+				string defaultDesc;
+				if (!CS_0024_003C_003E8__locals7.Shield.Active)
+				{
+					defaultLabel = "GravshipShieldOrderActivation".Translate() + "...";
+					defaultDesc = "GravshipShieldOrderActivationDesc".Translate(CS_0024_003C_003E8__locals7.parent.Named("THING"));
+				}
+				else
+				{
+					defaultLabel = "GravshipShieldOrderDeactivation".Translate() + "...";
+					defaultDesc = "GravshipShieldOrderDeactivationDesc".Translate(CS_0024_003C_003E8__locals7.parent.Named("THING"));
+				}
+				Command_Action command_Action = new Command_Action
+				{
+					defaultLabel = defaultLabel,
+					defaultDesc = defaultDesc,
+					icon = CS_0024_003C_003E8__locals7.UIIcon,
+					groupable = false,
+					action = delegate
+					{
+						SoundDefOf.Tick_Tiny.PlayOneShotOnCamera();
+						Find.Targeter.BeginTargeting(CS_0024_003C_003E8__locals7);
+					}
+				};
+				AcceptanceReport acceptanceReport = CS_0024_003C_003E8__locals7.CanInteract();
+				if (!acceptanceReport.Accepted)
+				{
+					command_Action.Disable(acceptanceReport.Reason.CapitalizeFirst());
+				}
+				_003C_003E2__current = command_Action;
+				_003C_003E1__state = 1;
+				return true;
+			}
+			case 1:
+				_003C_003E1__state = -1;
 				return false;
 			}
-			if (this.Facility.LinkedBuildings.NullOrEmpty<Thing>())
-			{
-				return "ShieldNotConnectedToGravship".Translate();
-			}
-			if (this.Shield.Charging)
-			{
-				return "ShieldOnCooldown".Translate();
-			}
-			if (!this.Shield.Active && this.Shield.currentHitPoints < 100)
-			{
-				return "ShieldBelowMinHitpoints".Translate();
-			}
-			return base.CanInteract(activateBy, checkOptionalItems);
 		}
 
-		// Token: 0x06010160 RID: 65888 RVA: 0x004A763A File Offset: 0x004A583A
-		protected override void OnInteracted(Pawn caster)
+		bool IEnumerator.MoveNext()
 		{
-			if (!this.Shield.Active)
-			{
-				this.Shield.Activate();
-				return;
-			}
-			this.Shield.Deactivate();
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x06010161 RID: 65889 RVA: 0x004A7660 File Offset: 0x004A5860
-		public override IEnumerable<Gizmo> CompGetGizmosExtra()
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			if (!this.parent.SpawnedOrAnyParentSpawned)
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CCompGetGizmosExtra_003Ed__11 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				yield break;
-			}
-			string defaultLabel;
-			string defaultDesc;
-			if (!this.Shield.Active)
-			{
-				defaultLabel = "GravshipShieldOrderActivation".Translate() + "...";
-				defaultDesc = "GravshipShieldOrderActivationDesc".Translate(this.parent.Named("THING"));
+				_003C_003E1__state = 0;
+				result = this;
 			}
 			else
 			{
-				defaultLabel = "GravshipShieldOrderDeactivation".Translate() + "...";
-				defaultDesc = "GravshipShieldOrderDeactivationDesc".Translate(this.parent.Named("THING"));
-			}
-			Command_Action command_Action = new Command_Action
-			{
-				defaultLabel = defaultLabel,
-				defaultDesc = defaultDesc,
-				icon = base.UIIcon,
-				groupable = false,
-				action = delegate()
+				result = new _003CCompGetGizmosExtra_003Ed__11(0)
 				{
-					SoundDefOf.Tick_Tiny.PlayOneShotOnCamera(null);
-					Find.Targeter.BeginTargeting(this, null, false, null, null, true);
-				}
-			};
-			AcceptanceReport acceptanceReport = this.CanInteract(null, true);
-			if (!acceptanceReport.Accepted)
-			{
-				command_Action.Disable(acceptanceReport.Reason.CapitalizeFirst());
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
-			yield return command_Action;
-			yield break;
+			return result;
 		}
 
-		// Token: 0x0400A80C RID: 43020
-		private const int MinHitPointsToActivate = 100;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x0400A80D RID: 43021
-		private CompProjectileInterceptor shield;
+	private const int MinHitPointsToActivate = 100;
 
-		// Token: 0x0400A80E RID: 43022
-		private CompGravshipFacility facility;
+	private CompProjectileInterceptor shield;
+
+	private CompGravshipFacility facility;
+
+	private CompProjectileInterceptor Shield => shield ?? parent.TryGetComp<CompProjectileInterceptor>();
+
+	private CompGravshipFacility Facility => facility ?? parent.TryGetComp<CompGravshipFacility>();
+
+	protected override string ActivateOptionLabel => Shield.Active ? "Deactivate".Translate() : "Activate".Translate();
+
+	public override AcceptanceReport CanInteract(Pawn activateBy = null, bool checkOptionalItems = true)
+	{
+		if (!ModsConfig.OdysseyActive)
+		{
+			return false;
+		}
+		if (Facility.LinkedBuildings.NullOrEmpty())
+		{
+			return "ShieldNotConnectedToGravship".Translate();
+		}
+		if (Shield.Charging)
+		{
+			return "ShieldOnCooldown".Translate();
+		}
+		if (!Shield.Active && Shield.currentHitPoints < 100)
+		{
+			return "ShieldBelowMinHitpoints".Translate();
+		}
+		return base.CanInteract(activateBy, checkOptionalItems);
+	}
+
+	protected override void OnInteracted(Pawn caster)
+	{
+		if (!Shield.Active)
+		{
+			Shield.Activate();
+		}
+		else
+		{
+			Shield.Deactivate();
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CCompGetGizmosExtra_003Ed__11))]
+	public override IEnumerable<Gizmo> CompGetGizmosExtra()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CCompGetGizmosExtra_003Ed__11(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

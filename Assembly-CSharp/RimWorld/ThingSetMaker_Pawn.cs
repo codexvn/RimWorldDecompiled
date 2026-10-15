@@ -1,58 +1,262 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class ThingSetMaker_Pawn : ThingSetMaker
 {
-	// Token: 0x02002B73 RID: 11123
-	public class ThingSetMaker_Pawn : ThingSetMaker
+	[CompilerGenerated]
+	private sealed class _003CAllGeneratableThingsDebugSub_003Ed__4 : IEnumerable<ThingDef>, IEnumerable, IEnumerator<ThingDef>, IEnumerator, IDisposable
 	{
-		// Token: 0x0600F8BF RID: 63679 RVA: 0x00485488 File Offset: 0x00483688
-		protected override void Generate(ThingSetMakerParams parms, List<Thing> outThings)
+		private int _003C_003E1__state;
+
+		private ThingDef _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public ThingSetMaker_Pawn _003C_003E4__this;
+
+		ThingDef IEnumerator<ThingDef>.Current
 		{
-			Pawn pawn = PawnGenerator.GeneratePawn(new PawnGenerationRequest(this.pawnKind, null, PawnGenerationContext.NonPlayer, null, false, false, false, true, false, 1f, false, true, false, true, true, false, false, false, false, 0f, 0f, null, 1f, null, null, null, null, null, null, null, null, null, null, null, null, false, false, false, false, null, null, null, null, null, 0f, DevelopmentalStage.Adult, null, null, null, false, false, false, -1, 0, false));
-			outThings.Add(pawn);
-			if (this.alive != null && !this.alive.Value)
+			[DebuggerHidden]
+			get
 			{
-				pawn.Kill(null, null);
-				if (this.corpseAgeRangeDays != null)
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CAllGeneratableThingsDebugSub_003Ed__4(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			ThingSetMaker_Pawn thingSetMaker_Pawn = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = thingSetMaker_Pawn.pawnKind.race;
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<ThingDef> IEnumerable<ThingDef>.GetEnumerator()
+		{
+			_003CAllGeneratableThingsDebugSub_003Ed__4 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CAllGeneratableThingsDebugSub_003Ed__4(0)
 				{
-					int num = Mathf.RoundToInt(this.corpseAgeRangeDays.Value.RandomInRange * 60000f);
-					pawn.Corpse.timeOfDeath = Find.TickManager.TicksGame - num;
-					CompRottable compRottable = pawn.Corpse.TryGetComp<CompRottable>();
-					if (compRottable != null)
-					{
-						compRottable.RotProgress += (float)num;
-					}
-				}
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
+			return result;
 		}
 
-		// Token: 0x0600F8C0 RID: 63680 RVA: 0x004855C7 File Offset: 0x004837C7
-		protected override IEnumerable<ThingDef> AllGeneratableThingsDebugSub(ThingSetMakerParams parms)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			yield return this.pawnKind.race;
-			yield break;
+			return ((IEnumerable<ThingDef>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x0600F8C1 RID: 63681 RVA: 0x004855D7 File Offset: 0x004837D7
-		public override IEnumerable<string> ConfigErrors()
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__5 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public ThingSetMaker_Pawn _003C_003E4__this;
+
+		string IEnumerator<string>.Current
 		{
-			if (this.pawnKind == null)
+			[DebuggerHidden]
+			get
 			{
-				yield return "pawnKind is null.";
+				return _003C_003E2__current;
 			}
-			yield break;
 		}
 
-		// Token: 0x0400A397 RID: 41879
-		public PawnKindDef pawnKind;
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
 
-		// Token: 0x0400A398 RID: 41880
-		public bool? alive;
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__5(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
 
-		// Token: 0x0400A399 RID: 41881
-		public FloatRange? corpseAgeRangeDays;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			ThingSetMaker_Pawn thingSetMaker_Pawn = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (thingSetMaker_Pawn.pawnKind == null)
+				{
+					_003C_003E2__current = "pawnKind is null.";
+					_003C_003E1__state = 1;
+					return true;
+				}
+				break;
+			case 1:
+				_003C_003E1__state = -1;
+				break;
+			}
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__5 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__5(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	public PawnKindDef pawnKind;
+
+	public bool? alive;
+
+	public FloatRange? corpseAgeRangeDays;
+
+	protected override void Generate(ThingSetMakerParams parms, List<Thing> outThings)
+	{
+		Pawn pawn = PawnGenerator.GeneratePawn(new PawnGenerationRequest(pawnKind, null, PawnGenerationContext.NonPlayer, parms.tile, forceGenerateNewPawn: false, allowDead: false, allowDowned: false, canGeneratePawnRelations: true, mustBeCapableOfViolence: false, 1f, forceAddFreeWarmLayerIfNeeded: false, allowGay: true, allowPregnant: false, allowFood: true, allowAddictions: true, inhabitant: false, certainlyBeenInCryptosleep: false, forceRedressWorldPawnIfFormerColonist: false, worldPawnFactionDoesntMatter: false, 0f, 0f, null, 1f, null, null, null, null, null, null, null, null, null, null, null, null, forceNoIdeo: false, forceNoBackstory: false, forbidAnyTitle: false, forceDead: false, null, null, null, null, null, 0f, DevelopmentalStage.Adult, null, null, null));
+		outThings.Add(pawn);
+		if (!alive.HasValue || alive.Value)
+		{
+			return;
+		}
+		pawn.Kill(null);
+		if (corpseAgeRangeDays.HasValue)
+		{
+			int num = Mathf.RoundToInt(corpseAgeRangeDays.Value.RandomInRange * 60000f);
+			pawn.Corpse.timeOfDeath = Find.TickManager.TicksGame - num;
+			CompRottable compRottable = pawn.Corpse.TryGetComp<CompRottable>();
+			if (compRottable != null)
+			{
+				compRottable.RotProgress += num;
+			}
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CAllGeneratableThingsDebugSub_003Ed__4))]
+	protected override IEnumerable<ThingDef> AllGeneratableThingsDebugSub(ThingSetMakerParams parms)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CAllGeneratableThingsDebugSub_003Ed__4(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__5))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__5(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

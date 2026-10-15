@@ -1,57 +1,188 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Xml;
 using System.Xml.Linq;
 using RimWorld.IO;
 
-namespace Verse
+namespace Verse;
+
+public static class DirectXmlLoaderSimple
 {
-	// Token: 0x02000827 RID: 2087
-	public static class DirectXmlLoaderSimple
+	public struct XmlKeyValuePair
 	{
-		// Token: 0x06003506 RID: 13574 RVA: 0x00116B6B File Offset: 0x00114D6B
-		public static IEnumerable<DirectXmlLoaderSimple.XmlKeyValuePair> ValuesFromXmlFile(string fileContents)
-		{
-			return DirectXmlLoaderSimple.ValuesFromXmlFile(VirtualFileInfoExt.LoadAsXDocument(fileContents));
-		}
+		public string key;
 
-		// Token: 0x06003507 RID: 13575 RVA: 0x00116B78 File Offset: 0x00114D78
-		public static IEnumerable<DirectXmlLoaderSimple.XmlKeyValuePair> ValuesFromXmlFile(VirtualFile file)
-		{
-			return DirectXmlLoaderSimple.ValuesFromXmlFile(file.LoadAsXDocument());
-		}
+		public string value;
 
-		// Token: 0x06003508 RID: 13576 RVA: 0x00116B85 File Offset: 0x00114D85
-		public static IEnumerable<DirectXmlLoaderSimple.XmlKeyValuePair> ValuesFromXmlFile(XDocument doc)
+		public int lineNumber;
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CValuesFromXmlFile_003Ed__3 : IEnumerable<XmlKeyValuePair>, IEnumerable, IEnumerator<XmlKeyValuePair>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private XmlKeyValuePair _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private XDocument doc;
+
+		public XDocument _003C_003E3__doc;
+
+		private IEnumerator<XElement> _003C_003E7__wrap1;
+
+		XmlKeyValuePair IEnumerator<XmlKeyValuePair>.Current
 		{
-			foreach (XElement xelement in doc.Root.Elements())
+			[DebuggerHidden]
+			get
 			{
-				string key = xelement.Name.ToString();
-				string text = xelement.Value;
-				text = text.Replace("\\n", "\n");
-				yield return new DirectXmlLoaderSimple.XmlKeyValuePair
-				{
-					key = key,
-					value = text,
-					lineNumber = ((IXmlLineInfo)xelement).LineNumber
-				};
+				return _003C_003E2__current;
 			}
-			IEnumerator<XElement> enumerator = null;
-			yield break;
-			yield break;
 		}
 
-		// Token: 0x02000828 RID: 2088
-		public struct XmlKeyValuePair
+		object IEnumerator.Current
 		{
-			// Token: 0x040027F2 RID: 10226
-			public string key;
-
-			// Token: 0x040027F3 RID: 10227
-			public string value;
-
-			// Token: 0x040027F4 RID: 10228
-			public int lineNumber;
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
+
+		[DebuggerHidden]
+		public _003CValuesFromXmlFile_003Ed__3(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				switch (_003C_003E1__state)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = doc.Root.Elements().GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 1:
+					_003C_003E1__state = -3;
+					break;
+				}
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					XElement current = _003C_003E7__wrap1.Current;
+					string key = current.Name.ToString();
+					string value = current.Value;
+					value = value.Replace("\\n", "\n");
+					XmlKeyValuePair xmlKeyValuePair = default(XmlKeyValuePair);
+					xmlKeyValuePair.key = key;
+					xmlKeyValuePair.value = value;
+					xmlKeyValuePair.lineNumber = ((IXmlLineInfo)current).LineNumber;
+					_003C_003E2__current = xmlKeyValuePair;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = null;
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<XmlKeyValuePair> IEnumerable<XmlKeyValuePair>.GetEnumerator()
+		{
+			_003CValuesFromXmlFile_003Ed__3 _003CValuesFromXmlFile_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CValuesFromXmlFile_003Ed__ = this;
+			}
+			else
+			{
+				_003CValuesFromXmlFile_003Ed__ = new _003CValuesFromXmlFile_003Ed__3(0);
+			}
+			_003CValuesFromXmlFile_003Ed__.doc = _003C_003E3__doc;
+			return _003CValuesFromXmlFile_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<XmlKeyValuePair>)this).GetEnumerator();
+		}
+	}
+
+	public static IEnumerable<XmlKeyValuePair> ValuesFromXmlFile(string fileContents)
+	{
+		return ValuesFromXmlFile(VirtualFileInfoExt.LoadAsXDocument(fileContents));
+	}
+
+	public static IEnumerable<XmlKeyValuePair> ValuesFromXmlFile(VirtualFile file)
+	{
+		return ValuesFromXmlFile(file.LoadAsXDocument());
+	}
+
+	[IteratorStateMachine(typeof(_003CValuesFromXmlFile_003Ed__3))]
+	public static IEnumerable<XmlKeyValuePair> ValuesFromXmlFile(XDocument doc)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CValuesFromXmlFile_003Ed__3(-2)
+		{
+			_003C_003E3__doc = doc
+		};
 	}
 }

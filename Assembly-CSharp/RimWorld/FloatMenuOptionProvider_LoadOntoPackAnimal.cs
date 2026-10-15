@@ -1,124 +1,279 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using UnityEngine;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class FloatMenuOptionProvider_LoadOntoPackAnimal : FloatMenuOptionProvider
 {
-	// Token: 0x02003312 RID: 13074
-	public class FloatMenuOptionProvider_LoadOntoPackAnimal : FloatMenuOptionProvider
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass7_0
 	{
-		// Token: 0x17002FC5 RID: 12229
-		// (get) Token: 0x06012630 RID: 75312 RVA: 0x000028E7 File Offset: 0x00000AE7
-		protected override bool Drafted
+		public Thing clickedThing;
+
+		public FloatMenuContext context;
+
+		public Pawn bestPackAnimal;
+
+		public Action<int> _003C_003E9__3;
+
+		internal void _003CGetOptionsFor_003Eb__0()
 		{
+			clickedThing.SetForbidden(value: false, warnOnFail: false);
+			Job job = JobMaker.MakeJob(JobDefOf.GiveToPackAnimal, clickedThing);
+			job.count = 1;
+			context.FirstSelectedPawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
+		}
+
+		internal void _003CGetOptionsFor_003Eb__1()
+		{
+			clickedThing.SetForbidden(value: false, warnOnFail: false);
+			Job job = JobMaker.MakeJob(JobDefOf.GiveToPackAnimal, clickedThing);
+			job.count = clickedThing.stackCount;
+			context.FirstSelectedPawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
+		}
+
+		internal void _003CGetOptionsFor_003Eb__2()
+		{
+			int to = Mathf.Min(MassUtility.CountToPickUpUntilOverEncumbered(bestPackAnimal, clickedThing), clickedThing.stackCount);
+			Dialog_Slider window = new Dialog_Slider("GiveToPackAnimalCount".Translate(clickedThing.LabelNoCount, clickedThing), 1, to, delegate(int count)
+			{
+				clickedThing.SetForbidden(value: false, warnOnFail: false);
+				Job job = JobMaker.MakeJob(JobDefOf.GiveToPackAnimal, clickedThing);
+				job.count = count;
+				context.FirstSelectedPawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
+			});
+			Find.WindowStack.Add(window);
+		}
+
+		internal void _003CGetOptionsFor_003Eb__3(int count)
+		{
+			clickedThing.SetForbidden(value: false, warnOnFail: false);
+			Job job = JobMaker.MakeJob(JobDefOf.GiveToPackAnimal, clickedThing);
+			job.count = count;
+			context.FirstSelectedPawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGetOptionsFor_003Ed__7 : IEnumerable<FloatMenuOption>, IEnumerable, IEnumerator<FloatMenuOption>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private FloatMenuOption _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private Thing clickedThing;
+
+		public Thing _003C_003E3__clickedThing;
+
+		private FloatMenuContext context;
+
+		public FloatMenuContext _003C_003E3__context;
+
+		private _003C_003Ec__DisplayClass7_0 _003C_003E8__1;
+
+		FloatMenuOption IEnumerator<FloatMenuOption>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				return true;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002FC6 RID: 12230
-		// (get) Token: 0x06012631 RID: 75313 RVA: 0x000028E7 File Offset: 0x00000AE7
-		protected override bool Undrafted
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return true;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002FC7 RID: 12231
-		// (get) Token: 0x06012632 RID: 75314 RVA: 0x00002501 File Offset: 0x00000701
-		protected override bool Multiselect
+		[DebuggerHidden]
+		public _003CGetOptionsFor_003Ed__7(int _003C_003E1__state)
 		{
-			get
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E8__1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			switch (_003C_003E1__state)
 			{
+			default:
 				return false;
-			}
-		}
-
-		// Token: 0x06012633 RID: 75315 RVA: 0x0056B2CF File Offset: 0x005694CF
-		protected override bool AppliesInt(FloatMenuContext context)
-		{
-			return !context.FirstSelectedPawn.IsFormingCaravan() && !context.map.IsPlayerHome;
-		}
-
-		// Token: 0x06012634 RID: 75316 RVA: 0x0056B2EE File Offset: 0x005694EE
-		public override IEnumerable<FloatMenuOption> GetOptionsFor(Thing clickedThing, FloatMenuContext context)
-		{
-			if (clickedThing.def.category != ThingCategory.Item)
-			{
-				yield break;
-			}
-			if (!clickedThing.def.EverHaulable)
-			{
-				yield break;
-			}
-			Pawn bestPackAnimal = GiveToPackAnimalUtility.UsablePackAnimalWithTheMostFreeSpace(context.FirstSelectedPawn);
-			if (bestPackAnimal == null)
-			{
-				yield break;
-			}
-			if (!context.FirstSelectedPawn.CanReach(clickedThing, PathEndMode.ClosestTouch, Danger.Deadly, false, false, TraverseMode.ByPawn))
-			{
-				yield return new FloatMenuOption("CannotGiveToPackAnimal".Translate(clickedThing.Label, clickedThing) + ": " + "NoPath".Translate().CapitalizeFirst(), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-			}
-			else if (MassUtility.WillBeOverEncumberedAfterPickingUp(bestPackAnimal, clickedThing, 1))
-			{
-				yield return new FloatMenuOption("CannotGiveToPackAnimal".Translate(clickedThing.Label, clickedThing) + ": " + "TooHeavy".Translate(), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-			}
-			else if (clickedThing.stackCount == 1)
-			{
-				yield return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("GiveToPackAnimal".Translate(clickedThing.Label, clickedThing), delegate()
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E8__1 = new _003C_003Ec__DisplayClass7_0();
+				_003C_003E8__1.clickedThing = clickedThing;
+				_003C_003E8__1.context = context;
+				if (_003C_003E8__1.clickedThing.def.category != ThingCategory.Item)
 				{
-					clickedThing.SetForbidden(false, false);
-					Job job = JobMaker.MakeJob(JobDefOf.GiveToPackAnimal, clickedThing);
-					job.count = 1;
-					context.FirstSelectedPawn.jobs.TryTakeOrderedJob(job, new JobTag?(JobTag.Misc), false);
-				}, MenuOptionPriority.High, null, null, 0f, null, null, true, 0), context.FirstSelectedPawn, clickedThing, "ReservedBy", null);
+					return false;
+				}
+				if (!_003C_003E8__1.clickedThing.def.EverHaulable)
+				{
+					return false;
+				}
+				_003C_003E8__1.bestPackAnimal = GiveToPackAnimalUtility.UsablePackAnimalWithTheMostFreeSpace(_003C_003E8__1.context.FirstSelectedPawn);
+				if (_003C_003E8__1.bestPackAnimal == null)
+				{
+					return false;
+				}
+				if (!_003C_003E8__1.context.FirstSelectedPawn.CanReach(_003C_003E8__1.clickedThing, PathEndMode.ClosestTouch, Danger.Deadly))
+				{
+					_003C_003E2__current = new FloatMenuOption("CannotGiveToPackAnimal".Translate(_003C_003E8__1.clickedThing.Label, _003C_003E8__1.clickedThing) + ": " + "NoPath".Translate().CapitalizeFirst(), null);
+					_003C_003E1__state = 1;
+					return true;
+				}
+				if (MassUtility.WillBeOverEncumberedAfterPickingUp(_003C_003E8__1.bestPackAnimal, _003C_003E8__1.clickedThing, 1))
+				{
+					_003C_003E2__current = new FloatMenuOption("CannotGiveToPackAnimal".Translate(_003C_003E8__1.clickedThing.Label, _003C_003E8__1.clickedThing) + ": " + "TooHeavy".Translate(), null);
+					_003C_003E1__state = 2;
+					return true;
+				}
+				if (_003C_003E8__1.clickedThing.stackCount == 1)
+				{
+					_003C_003E2__current = FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("GiveToPackAnimal".Translate(_003C_003E8__1.clickedThing.Label, _003C_003E8__1.clickedThing), delegate
+					{
+						_003C_003E8__1.clickedThing.SetForbidden(value: false, warnOnFail: false);
+						Job job2 = JobMaker.MakeJob(JobDefOf.GiveToPackAnimal, _003C_003E8__1.clickedThing);
+						job2.count = 1;
+						_003C_003E8__1.context.FirstSelectedPawn.jobs.TryTakeOrderedJob(job2, JobTag.Misc);
+					}, MenuOptionPriority.High), _003C_003E8__1.context.FirstSelectedPawn, _003C_003E8__1.clickedThing);
+					_003C_003E1__state = 3;
+					return true;
+				}
+				if (MassUtility.WillBeOverEncumberedAfterPickingUp(_003C_003E8__1.bestPackAnimal, _003C_003E8__1.clickedThing, _003C_003E8__1.clickedThing.stackCount))
+				{
+					_003C_003E2__current = new FloatMenuOption("CannotGiveToPackAnimalAll".Translate(_003C_003E8__1.clickedThing.Label, _003C_003E8__1.clickedThing) + ": " + "TooHeavy".Translate(), null);
+					_003C_003E1__state = 4;
+					return true;
+				}
+				_003C_003E2__current = FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("GiveToPackAnimalAll".Translate(_003C_003E8__1.clickedThing.Label, _003C_003E8__1.clickedThing), delegate
+				{
+					_003C_003E8__1.clickedThing.SetForbidden(value: false, warnOnFail: false);
+					Job job3 = JobMaker.MakeJob(JobDefOf.GiveToPackAnimal, _003C_003E8__1.clickedThing);
+					job3.count = _003C_003E8__1.clickedThing.stackCount;
+					_003C_003E8__1.context.FirstSelectedPawn.jobs.TryTakeOrderedJob(job3, JobTag.Misc);
+				}, MenuOptionPriority.High), _003C_003E8__1.context.FirstSelectedPawn, _003C_003E8__1.clickedThing);
+				_003C_003E1__state = 5;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				break;
+			case 2:
+				_003C_003E1__state = -1;
+				break;
+			case 3:
+				_003C_003E1__state = -1;
+				break;
+			case 4:
+				_003C_003E1__state = -1;
+				goto IL_03fa;
+			case 5:
+				_003C_003E1__state = -1;
+				goto IL_03fa;
+			case 6:
+				{
+					_003C_003E1__state = -1;
+					break;
+				}
+				IL_03fa:
+				_003C_003E2__current = FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("GiveToPackAnimalSome".Translate(_003C_003E8__1.clickedThing.LabelNoCount, _003C_003E8__1.clickedThing), delegate
+				{
+					int to = Mathf.Min(MassUtility.CountToPickUpUntilOverEncumbered(_003C_003E8__1.bestPackAnimal, _003C_003E8__1.clickedThing), _003C_003E8__1.clickedThing.stackCount);
+					Dialog_Slider window = new Dialog_Slider("GiveToPackAnimalCount".Translate(_003C_003E8__1.clickedThing.LabelNoCount, _003C_003E8__1.clickedThing), 1, to, delegate(int count)
+					{
+						_003C_003E8__1.clickedThing.SetForbidden(value: false, warnOnFail: false);
+						Job job = JobMaker.MakeJob(JobDefOf.GiveToPackAnimal, _003C_003E8__1.clickedThing);
+						job.count = count;
+						_003C_003E8__1.context.FirstSelectedPawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
+					});
+					Find.WindowStack.Add(window);
+				}, MenuOptionPriority.High), _003C_003E8__1.context.FirstSelectedPawn, _003C_003E8__1.clickedThing);
+				_003C_003E1__state = 6;
+				return true;
+			}
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<FloatMenuOption> IEnumerable<FloatMenuOption>.GetEnumerator()
+		{
+			_003CGetOptionsFor_003Ed__7 _003CGetOptionsFor_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CGetOptionsFor_003Ed__ = this;
 			}
 			else
 			{
-				if (MassUtility.WillBeOverEncumberedAfterPickingUp(bestPackAnimal, clickedThing, clickedThing.stackCount))
-				{
-					yield return new FloatMenuOption("CannotGiveToPackAnimalAll".Translate(clickedThing.Label, clickedThing) + ": " + "TooHeavy".Translate(), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-				}
-				else
-				{
-					yield return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("GiveToPackAnimalAll".Translate(clickedThing.Label, clickedThing), delegate()
-					{
-						clickedThing.SetForbidden(false, false);
-						Job job = JobMaker.MakeJob(JobDefOf.GiveToPackAnimal, clickedThing);
-						job.count = clickedThing.stackCount;
-						context.FirstSelectedPawn.jobs.TryTakeOrderedJob(job, new JobTag?(JobTag.Misc), false);
-					}, MenuOptionPriority.High, null, null, 0f, null, null, true, 0), context.FirstSelectedPawn, clickedThing, "ReservedBy", null);
-				}
-				Action<int> <>9__3;
-				yield return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("GiveToPackAnimalSome".Translate(clickedThing.LabelNoCount, clickedThing), delegate()
-				{
-					int num = Mathf.Min(MassUtility.CountToPickUpUntilOverEncumbered(bestPackAnimal, clickedThing), clickedThing.stackCount);
-					string text = "GiveToPackAnimalCount".Translate(clickedThing.LabelNoCount, clickedThing);
-					int from = 1;
-					int to = num;
-					Action<int> confirmAction;
-					if ((confirmAction = <>9__3) == null)
-					{
-						confirmAction = (<>9__3 = delegate(int count)
-						{
-							clickedThing.SetForbidden(false, false);
-							Job job = JobMaker.MakeJob(JobDefOf.GiveToPackAnimal, clickedThing);
-							job.count = count;
-							context.FirstSelectedPawn.jobs.TryTakeOrderedJob(job, new JobTag?(JobTag.Misc), false);
-						});
-					}
-					Dialog_Slider window = new Dialog_Slider(text, from, to, confirmAction, int.MinValue, 1f);
-					Find.WindowStack.Add(window);
-				}, MenuOptionPriority.High, null, null, 0f, null, null, true, 0), context.FirstSelectedPawn, clickedThing, "ReservedBy", null);
+				_003CGetOptionsFor_003Ed__ = new _003CGetOptionsFor_003Ed__7(0);
 			}
-			yield break;
+			_003CGetOptionsFor_003Ed__.clickedThing = _003C_003E3__clickedThing;
+			_003CGetOptionsFor_003Ed__.context = _003C_003E3__context;
+			return _003CGetOptionsFor_003Ed__;
 		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<FloatMenuOption>)this).GetEnumerator();
+		}
+	}
+
+	protected override bool Drafted => true;
+
+	protected override bool Undrafted => true;
+
+	protected override bool Multiselect => false;
+
+	protected override bool AppliesInt(FloatMenuContext context)
+	{
+		if (!context.FirstSelectedPawn.IsFormingCaravan())
+		{
+			return !context.map.IsPlayerHome;
+		}
+		return false;
+	}
+
+	[IteratorStateMachine(typeof(_003CGetOptionsFor_003Ed__7))]
+	public override IEnumerable<FloatMenuOption> GetOptionsFor(Thing clickedThing, FloatMenuContext context)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetOptionsFor_003Ed__7(-2)
+		{
+			_003C_003E3__clickedThing = clickedThing,
+			_003C_003E3__context = context
+		};
 	}
 }

@@ -1,253 +1,348 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using UnityEngine;
 using Verse;
 using Verse.Grammar;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class ReadingOutcomeDoerGainResearch : BookOutcomeDoer
 {
-	// Token: 0x0200192E RID: 6446
-	public class ReadingOutcomeDoerGainResearch : BookOutcomeDoer
+	[CompilerGenerated]
+	private sealed class _003CGetHyperlinks_003Ed__14 : IEnumerable<Dialog_InfoCard.Hyperlink>, IEnumerable, IEnumerator<Dialog_InfoCard.Hyperlink>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001633 RID: 5683
-		// (get) Token: 0x0600928E RID: 37518 RVA: 0x002B2926 File Offset: 0x002B0B26
-		public new BookOutcomeProperties_GainResearch Props
+		private int _003C_003E1__state;
+
+		private Dialog_InfoCard.Hyperlink _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public ReadingOutcomeDoerGainResearch _003C_003E4__this;
+
+		private Dictionary<ResearchProjectDef, float>.Enumerator _003C_003E7__wrap1;
+
+		Dialog_InfoCard.Hyperlink IEnumerator<Dialog_InfoCard.Hyperlink>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (BookOutcomeProperties_GainResearch)this.props;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001634 RID: 5684
-		// (get) Token: 0x0600928F RID: 37519 RVA: 0x002B2933 File Offset: 0x002B0B33
-		public virtual int RoundTo { get; } = 10;
-
-		// Token: 0x06009290 RID: 37520 RVA: 0x002B293C File Offset: 0x002B0B3C
-		private bool IsValid(ResearchProjectDef project)
+		object IEnumerator.Current
 		{
-			return project.generalRules != null && (this.Props.exclude.Count <= 0 || !this.Props.exclude.ContainsAny((BookOutcomeProperties_GainResearch.BookResearchItem i) => i.project == project)) && ((!this.Props.ignoreZeroBaseCost || project.baseCost != 0f) && (this.Props.tabs.NullOrEmpty<BookOutcomeProperties_GainResearch.BookTabItem>() || this.Props.tabs.Exists((BookOutcomeProperties_GainResearch.BookTabItem x) => x.tab == project.tab))) && project.TechprintCount == 0;
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x06009291 RID: 37521 RVA: 0x002B29F8 File Offset: 0x002B0BF8
-		public override bool BenefitDetailsCanChange(Pawn reader = null)
+		[DebuggerHidden]
+		public _003CGetHyperlinks_003Ed__14(int _003C_003E1__state)
 		{
-			foreach (KeyValuePair<ResearchProjectDef, float> keyValuePair in this.values)
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				ResearchProjectDef researchProjectDef;
-				float num;
-				keyValuePair.Deconstruct(out researchProjectDef, out num);
-				ResearchProjectDef researchProjectDef2 = researchProjectDef;
-				if (researchProjectDef2.IsHidden)
+				try
 				{
-					return true;
 				}
-				if (!researchProjectDef2.IsFinished)
+				finally
 				{
-					return true;
+					_003C_003Em__Finally1();
 				}
 			}
-			return false;
+			_003C_003E7__wrap1 = default(Dictionary<ResearchProjectDef, float>.Enumerator);
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x06009292 RID: 37522 RVA: 0x002B2A70 File Offset: 0x002B0C70
-		public override void OnBookGenerated(Pawn author = null)
+		private bool MoveNext()
 		{
-			List<ResearchProjectDef> allDefsListForReading = DefDatabase<ResearchProjectDef>.AllDefsListForReading;
-			List<ResearchProjectDef> list = new List<ResearchProjectDef>(allDefsListForReading.Count);
-			if (this.Props.include.Count > 0)
+			try
 			{
-				for (int i = 0; i < this.Props.include.Count; i++)
+				int num = _003C_003E1__state;
+				ReadingOutcomeDoerGainResearch readingOutcomeDoerGainResearch = _003C_003E4__this;
+				switch (num)
 				{
-					ResearchProjectDef project = this.Props.include[i].project;
-					if (!project.IsFinished && this.IsValid(project))
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = readingOutcomeDoerGainResearch.values.GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 1:
+					_003C_003E1__state = -3;
+					break;
+				}
+				while (_003C_003E7__wrap1.MoveNext())
+				{
+					var (researchProjectDef2, _) = (KeyValuePair<ResearchProjectDef, float>)(ref _003C_003E7__wrap1.Current);
+					if (readingOutcomeDoerGainResearch.IsProjectVisible(researchProjectDef2))
 					{
-						list.Add(project);
+						_003C_003E2__current = new Dialog_InfoCard.Hyperlink(researchProjectDef2);
+						_003C_003E1__state = 1;
+						return true;
 					}
 				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = default(Dictionary<ResearchProjectDef, float>.Enumerator);
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap1/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Dialog_InfoCard.Hyperlink> IEnumerable<Dialog_InfoCard.Hyperlink>.GetEnumerator()
+		{
+			_003CGetHyperlinks_003Ed__14 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
 			}
 			else
 			{
-				for (int j = 0; j < allDefsListForReading.Count; j++)
+				result = new _003CGetHyperlinks_003Ed__14(0)
 				{
-					if (allDefsListForReading[j].PrerequisitesCompleted && !allDefsListForReading[j].IsFinished && this.IsValid(allDefsListForReading[j]))
-					{
-						list.Add(allDefsListForReading[j]);
-					}
-				}
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
-			if (list.Count == 0)
-			{
-				for (int k = 0; k < allDefsListForReading.Count; k++)
-				{
-					if (this.IsValid(allDefsListForReading[k]))
-					{
-						list.Add(allDefsListForReading[k]);
-					}
-				}
-			}
-			if (list.Empty<ResearchProjectDef>())
-			{
-				string[] array = new string[6];
-				array[0] = "Research book had no valid projects and failed to find any backup projects.\n";
-				array[1] = string.Format("ignoring zero base cost: {0}).\n", this.Props.ignoreZeroBaseCost);
-				array[2] = "tabs: ";
-				array[3] = (from x in this.Props.tabs
-				select x.tab.generalTitle).ToCommaList(false, false);
-				array[4] = ".\nexcludes: ";
-				int num = 5;
-				string text;
-				if (!this.Props.exclude.Empty<BookOutcomeProperties_GainResearch.BookResearchItem>())
-				{
-					text = (from x in this.Props.exclude
-					select x.project.label).ToCommaList(false, false);
-				}
-				else
-				{
-					text = "(none)";
-				}
-				array[num] = text;
-				Log.ErrorOnce(string.Concat(array), 15242436);
-				return;
-			}
-			int count = Rand.Chance(0.25f) ? 2 : 1;
-			List<ResearchProjectDef> list2 = list.TakeRandomDistinct(count);
-			float num2 = this.GetBaseValue();
-			if (list2.Count > 1)
-			{
-				num2 *= 1.25f;
-			}
-			float value = num2 / (float)list2.Count;
-			for (int l = 0; l < list2.Count; l++)
-			{
-				this.values[list2[l]] = value;
-			}
+			return result;
 		}
 
-		// Token: 0x06009293 RID: 37523 RVA: 0x002B2CCE File Offset: 0x002B0ECE
-		public override void Reset()
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			this.values.Clear();
+			return ((IEnumerable<Dialog_InfoCard.Hyperlink>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x06009294 RID: 37524 RVA: 0x002B2CDC File Offset: 0x002B0EDC
-		public override bool DoesProvidesOutcome(Pawn reader)
+	protected Dictionary<ResearchProjectDef, float> values = new Dictionary<ResearchProjectDef, float>();
+
+	private const float MultipleProjectFactor = 1.25f;
+
+	public new BookOutcomeProperties_GainResearch Props => (BookOutcomeProperties_GainResearch)props;
+
+	public virtual int RoundTo { get; } = 10;
+
+	private bool IsValid(ResearchProjectDef project)
+	{
+		if (project.generalRules == null)
 		{
-			foreach (KeyValuePair<ResearchProjectDef, float> keyValuePair in this.values)
-			{
-				ResearchProjectDef researchProjectDef;
-				float num;
-				keyValuePair.Deconstruct(out researchProjectDef, out num);
-				if (!researchProjectDef.IsFinished)
-				{
-					return true;
-				}
-			}
 			return false;
 		}
-
-		// Token: 0x06009295 RID: 37525 RVA: 0x002B2D44 File Offset: 0x002B0F44
-		protected virtual float GetBaseValue()
+		if (Props.exclude.Count > 0 && Props.exclude.ContainsAny((BookOutcomeProperties_GainResearch.BookResearchItem i) => i.project == project))
 		{
-			return BookUtility.GetResearchExpForQuality(base.Quality);
+			return false;
 		}
-
-		// Token: 0x06009296 RID: 37526 RVA: 0x002B2D54 File Offset: 0x002B0F54
-		public override void OnReadingTick(Pawn reader, float factor)
+		if ((!Props.ignoreZeroBaseCost || project.baseCost != 0f) && (Props.tabs.NullOrEmpty() || Props.tabs.Exists((BookOutcomeProperties_GainResearch.BookTabItem x) => x.tab == project.tab)))
 		{
-			foreach (KeyValuePair<ResearchProjectDef, float> keyValuePair in this.values)
+			return project.TechprintCount == 0;
+		}
+		return false;
+	}
+
+	public override bool BenefitDetailsCanChange(Pawn reader = null)
+	{
+		foreach (var (researchProjectDef2, _) in values)
+		{
+			if (researchProjectDef2.IsHidden)
 			{
-				ResearchProjectDef researchProjectDef;
-				float num;
-				keyValuePair.Deconstruct(out researchProjectDef, out num);
-				ResearchProjectDef researchProjectDef2 = researchProjectDef;
-				float num2 = num;
-				if (this.IsProjectVisible(researchProjectDef2) && !researchProjectDef2.IsFinished)
+				return true;
+			}
+			if (!researchProjectDef2.IsFinished)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public override void OnBookGenerated(Pawn author = null)
+	{
+		List<ResearchProjectDef> allDefsListForReading = DefDatabase<ResearchProjectDef>.AllDefsListForReading;
+		List<ResearchProjectDef> list = new List<ResearchProjectDef>(allDefsListForReading.Count);
+		if (Props.include.Count > 0)
+		{
+			for (int i = 0; i < Props.include.Count; i++)
+			{
+				ResearchProjectDef project = Props.include[i].project;
+				if (!project.IsFinished && IsValid(project))
 				{
-					Find.ResearchManager.AddProgress(researchProjectDef2, num2 * factor, null);
+					list.Add(project);
 				}
 			}
 		}
-
-		// Token: 0x06009297 RID: 37527 RVA: 0x002B2DD4 File Offset: 0x002B0FD4
-		public override IEnumerable<Dialog_InfoCard.Hyperlink> GetHyperlinks()
+		else
 		{
-			foreach (KeyValuePair<ResearchProjectDef, float> keyValuePair in this.values)
+			for (int j = 0; j < allDefsListForReading.Count; j++)
 			{
-				ResearchProjectDef researchProjectDef;
-				float num;
-				keyValuePair.Deconstruct(out researchProjectDef, out num);
-				ResearchProjectDef researchProjectDef2 = researchProjectDef;
-				if (this.IsProjectVisible(researchProjectDef2))
+				if (allDefsListForReading[j].PrerequisitesCompleted && !allDefsListForReading[j].IsFinished && IsValid(allDefsListForReading[j]))
 				{
-					yield return new Dialog_InfoCard.Hyperlink(researchProjectDef2);
+					list.Add(allDefsListForReading[j]);
 				}
 			}
-			Dictionary<ResearchProjectDef, float>.Enumerator enumerator = default(Dictionary<ResearchProjectDef, float>.Enumerator);
-			yield break;
-			yield break;
 		}
-
-		// Token: 0x06009298 RID: 37528 RVA: 0x002B2DE4 File Offset: 0x002B0FE4
-		public override string GetBenefitsString(Pawn reader = null)
+		if (list.Count == 0)
 		{
-			if (this.values.Count == 0)
+			for (int k = 0; k < allDefsListForReading.Count; k++)
 			{
-				return null;
+				if (IsValid(allDefsListForReading[k]))
+				{
+					list.Add(allDefsListForReading[k]);
+				}
 			}
-			StringBuilder stringBuilder = new StringBuilder();
-			foreach (KeyValuePair<ResearchProjectDef, float> keyValuePair in this.values)
+		}
+		if (list.Empty())
+		{
+			Log.ErrorOnce($"Research book had no valid projects and failed to find any backup projects.\nignoring zero base cost: {Props.ignoreZeroBaseCost}).\ntabs: {Props.tabs.Select((BookOutcomeProperties_GainResearch.BookTabItem x) => x.tab.generalTitle).ToCommaList()}.\nexcludes: {(Props.exclude.Empty() ? "(none)" : Props.exclude.Select((BookOutcomeProperties_GainResearch.BookResearchItem x) => x.project.label).ToCommaList())}", 15242436);
+		}
+		else
+		{
+			int count = ((!Rand.Chance(0.25f)) ? 1 : 2);
+			List<ResearchProjectDef> list2 = list.TakeRandomDistinct(count);
+			float num = GetBaseValue();
+			if (list2.Count > 1)
 			{
-				ResearchProjectDef researchProjectDef;
-				float num;
-				keyValuePair.Deconstruct(out researchProjectDef, out num);
-				ResearchProjectDef researchProjectDef2 = researchProjectDef;
-				float num2 = num * 2500f;
-				if (this.RoundTo != 0)
-				{
-					num2 = Mathf.Round(num2 / (float)this.RoundTo) * (float)this.RoundTo;
-				}
-				string text = string.Format("{0}: {1}", researchProjectDef2.LabelCap, "PerHour".Translate(num2.ToStringDecimalIfSmall()));
-				if (researchProjectDef2.IsFinished)
-				{
-					text += string.Format(" ({0})", "AlreadyUnlocked".Translate());
-					text = text.Colorize(Color.gray);
-				}
-				else if (!this.IsProjectVisible(researchProjectDef2))
-				{
-					text += string.Format(" ({0})", "WhenDiscovered".Translate());
-					text = text.Colorize(Color.gray);
-				}
-				stringBuilder.AppendLine(" - " + text);
+				num *= 1.25f;
 			}
-			return stringBuilder.ToString().TrimEndNewlines();
+			float value = num / (float)list2.Count;
+			for (int l = 0; l < list2.Count; l++)
+			{
+				values[list2[l]] = value;
+			}
 		}
+	}
 
-		// Token: 0x06009299 RID: 37529 RVA: 0x002B2F54 File Offset: 0x002B1154
-		private bool IsProjectVisible(ResearchProjectDef project)
+	public override void Reset()
+	{
+		values.Clear();
+	}
+
+	public override bool DoesProvidesOutcome(Pawn reader)
+	{
+		foreach (KeyValuePair<ResearchProjectDef, float> value2 in values)
 		{
-			return !this.Props.usesHiddenProjects || project.CanStartNow;
+			value2.Deconstruct(out var key, out var _);
+			if (!key.IsFinished)
+			{
+				return true;
+			}
 		}
+		return false;
+	}
 
-		// Token: 0x0600929A RID: 37530 RVA: 0x002B2F6B File Offset: 0x002B116B
-		public override IEnumerable<RulePack> GetTopicRulePacks()
+	protected virtual float GetBaseValue()
+	{
+		return BookUtility.GetResearchExpForQuality(base.Quality);
+	}
+
+	public override void OnReadingTick(Pawn reader, float factor)
+	{
+		foreach (var (researchProjectDef2, num2) in values)
 		{
-			return from x in this.values.Keys
-			select x.generalRules;
+			if (IsProjectVisible(researchProjectDef2) && !researchProjectDef2.IsFinished)
+			{
+				Find.ResearchManager.AddProgress(researchProjectDef2, num2 * factor);
+			}
 		}
+	}
 
-		// Token: 0x0600929B RID: 37531 RVA: 0x002B2F9C File Offset: 0x002B119C
-		public override void PostExposeData()
+	[IteratorStateMachine(typeof(_003CGetHyperlinks_003Ed__14))]
+	public override IEnumerable<Dialog_InfoCard.Hyperlink> GetHyperlinks()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetHyperlinks_003Ed__14(-2)
 		{
-			Scribe_Collections.Look<ResearchProjectDef, float>(ref this.values, "values", LookMode.Undefined, LookMode.Undefined);
+			_003C_003E4__this = this
+		};
+	}
+
+	public override string GetBenefitsString(Pawn reader = null)
+	{
+		if (values.Count == 0)
+		{
+			return null;
 		}
+		StringBuilder stringBuilder = new StringBuilder();
+		foreach (KeyValuePair<ResearchProjectDef, float> value2 in values)
+		{
+			value2.Deconstruct(out var key, out var value);
+			ResearchProjectDef researchProjectDef = key;
+			float num = value * 2500f;
+			if (RoundTo != 0)
+			{
+				num = Mathf.Round(num / (float)RoundTo) * (float)RoundTo;
+			}
+			string text = $"{researchProjectDef.LabelCap}: {"PerHour".Translate(num.ToStringDecimalIfSmall())}";
+			if (researchProjectDef.IsFinished)
+			{
+				text += $" ({"AlreadyUnlocked".Translate()})";
+				text = text.Colorize(Color.gray);
+			}
+			else if (!IsProjectVisible(researchProjectDef))
+			{
+				text += $" ({"WhenDiscovered".Translate()})";
+				text = text.Colorize(Color.gray);
+			}
+			stringBuilder.AppendLine(" - " + text);
+		}
+		return stringBuilder.ToString().TrimEndNewlines();
+	}
 
-		// Token: 0x04005D8B RID: 23947
-		protected Dictionary<ResearchProjectDef, float> values = new Dictionary<ResearchProjectDef, float>();
+	private bool IsProjectVisible(ResearchProjectDef project)
+	{
+		if (Props.usesHiddenProjects)
+		{
+			return project.CanStartNow;
+		}
+		return true;
+	}
 
-		// Token: 0x04005D8C RID: 23948
-		private const float MultipleProjectFactor = 1.25f;
+	public override IEnumerable<RulePack> GetTopicRulePacks()
+	{
+		return values.Keys.Select((ResearchProjectDef x) => x.generalRules);
+	}
+
+	public override void PostExposeData()
+	{
+		Scribe_Collections.Look(ref values, "values");
 	}
 }

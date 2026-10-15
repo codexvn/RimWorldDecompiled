@@ -1,146 +1,223 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class FloatMenuContext
 {
-	// Token: 0x020032B2 RID: 12978
-	public class FloatMenuContext
+	[CompilerGenerated]
+	private sealed class _003Cget_ValidSelectedPawns_003Ed__23 : IEnumerable<Pawn>, IEnumerable, IEnumerator<Pawn>, IEnumerator, IDisposable
 	{
-		// Token: 0x17002F19 RID: 12057
-		// (get) Token: 0x06012440 RID: 74816 RVA: 0x005620DD File Offset: 0x005602DD
-		public IntVec3 ClickedCell
+		private int _003C_003E1__state;
+
+		private Pawn _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public FloatMenuContext _003C_003E4__this;
+
+		private List<Pawn>.Enumerator _003C_003E7__wrap1;
+
+		Pawn IEnumerator<Pawn>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.cachedClickedCell;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002F1A RID: 12058
-		// (get) Token: 0x06012441 RID: 74817 RVA: 0x005620E5 File Offset: 0x005602E5
-		public Room ClickedRoom
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.cachedClickedRoom;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002F1B RID: 12059
-		// (get) Token: 0x06012442 RID: 74818 RVA: 0x005620ED File Offset: 0x005602ED
-		public Zone ClickedZone
+		[DebuggerHidden]
+		public _003Cget_ValidSelectedPawns_003Ed__23(int _003C_003E1__state)
 		{
-			get
-			{
-				return this.cachedClickedZone;
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x17002F1C RID: 12060
-		// (get) Token: 0x06012443 RID: 74819 RVA: 0x005620F5 File Offset: 0x005602F5
-		public List<Thing> ClickedThings
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			get
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				return this.cachedClickedThings;
-			}
-		}
-
-		// Token: 0x17002F1D RID: 12061
-		// (get) Token: 0x06012444 RID: 74820 RVA: 0x005620FD File Offset: 0x005602FD
-		public List<Pawn> ClickedPawns
-		{
-			get
-			{
-				return this.cachedClickedPawns;
-			}
-		}
-
-		// Token: 0x17002F1E RID: 12062
-		// (get) Token: 0x06012445 RID: 74821 RVA: 0x00562105 File Offset: 0x00560305
-		public bool IsMultiselect
-		{
-			get
-			{
-				return this.allSelectedPawns.Count > 1;
-			}
-		}
-
-		// Token: 0x17002F1F RID: 12063
-		// (get) Token: 0x06012446 RID: 74822 RVA: 0x00562118 File Offset: 0x00560318
-		public Pawn FirstSelectedPawn
-		{
-			get
-			{
-				foreach (Pawn pawn in this.allSelectedPawns)
+				try
 				{
-					if (FloatMenuMakerMap.currentProvider == null || FloatMenuMakerMap.currentProvider.SelectedPawnValid(pawn, this))
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = default(List<Pawn>.Enumerator);
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				FloatMenuContext floatMenuContext = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = floatMenuContext.allSelectedPawns.GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 1:
+					_003C_003E1__state = -3;
+					break;
+				}
+				while (_003C_003E7__wrap1.MoveNext())
+				{
+					Pawn current = _003C_003E7__wrap1.Current;
+					if (FloatMenuMakerMap.currentProvider == null || FloatMenuMakerMap.currentProvider.SelectedPawnValid(current, floatMenuContext))
 					{
-						return pawn;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
 					}
 				}
-				return null;
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = default(List<Pawn>.Enumerator);
+				return false;
 			}
-		}
-
-		// Token: 0x17002F20 RID: 12064
-		// (get) Token: 0x06012447 RID: 74823 RVA: 0x00562180 File Offset: 0x00560380
-		public IEnumerable<Pawn> ValidSelectedPawns
-		{
-			get
+			catch
 			{
-				foreach (Pawn pawn in this.allSelectedPawns)
-				{
-					if (FloatMenuMakerMap.currentProvider == null || FloatMenuMakerMap.currentProvider.SelectedPawnValid(pawn, this))
-					{
-						yield return pawn;
-					}
-				}
-				List<Pawn>.Enumerator enumerator = default(List<Pawn>.Enumerator);
-				yield break;
-				yield break;
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x06012448 RID: 74824 RVA: 0x00562190 File Offset: 0x00560390
-		public FloatMenuContext(List<Pawn> selectedPawns, Vector3 clickPosition, Map map)
+		bool IEnumerator.MoveNext()
 		{
-			this.allSelectedPawns = selectedPawns;
-			this.clickPosition = clickPosition;
-			this.map = map;
-			this.cachedClickedCell = IntVec3.FromVector3(clickPosition);
-			this.cachedClickedRoom = this.cachedClickedCell.GetRoom(map);
-			this.cachedClickedZone = this.cachedClickedCell.GetZone(map);
-			this.cachedClickedThings = GenUI.ThingsUnderMouse(clickPosition, 0.8f, TargetingParameters.ForThing(), null);
-			this.cachedClickedPawns = GenUI.ThingsUnderMouse(clickPosition, 0.8f, TargetingParameters.ForPawns(), null).OfType<Pawn>().ToList<Pawn>();
-			selectedPawns.RemoveAll((Pawn pawn) => !pawn.CanTakeOrder);
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0400BE20 RID: 48672
-		public List<Pawn> allSelectedPawns;
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap1/*cast due to .constrained prefix*/).Dispose();
+		}
 
-		// Token: 0x0400BE21 RID: 48673
-		public Vector3 clickPosition;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x0400BE22 RID: 48674
-		public Map map;
+		[DebuggerHidden]
+		IEnumerator<Pawn> IEnumerable<Pawn>.GetEnumerator()
+		{
+			_003Cget_ValidSelectedPawns_003Ed__23 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_ValidSelectedPawns_003Ed__23(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x0400BE23 RID: 48675
-		private IntVec3 cachedClickedCell;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Pawn>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x0400BE24 RID: 48676
-		private List<Thing> cachedClickedThings;
+	public List<Pawn> allSelectedPawns;
 
-		// Token: 0x0400BE25 RID: 48677
-		private List<Pawn> cachedClickedPawns;
+	public Vector3 clickPosition;
 
-		// Token: 0x0400BE26 RID: 48678
-		private Room cachedClickedRoom;
+	public Map map;
 
-		// Token: 0x0400BE27 RID: 48679
-		private Zone cachedClickedZone;
+	private IntVec3 cachedClickedCell;
+
+	private List<Thing> cachedClickedThings;
+
+	private List<Pawn> cachedClickedPawns;
+
+	private Room cachedClickedRoom;
+
+	private Zone cachedClickedZone;
+
+	public IntVec3 ClickedCell => cachedClickedCell;
+
+	public Room ClickedRoom => cachedClickedRoom;
+
+	public Zone ClickedZone => cachedClickedZone;
+
+	public List<Thing> ClickedThings => cachedClickedThings;
+
+	public List<Pawn> ClickedPawns => cachedClickedPawns;
+
+	public bool IsMultiselect => allSelectedPawns.Count > 1;
+
+	public Pawn FirstSelectedPawn
+	{
+		get
+		{
+			foreach (Pawn allSelectedPawn in allSelectedPawns)
+			{
+				if (FloatMenuMakerMap.currentProvider == null || FloatMenuMakerMap.currentProvider.SelectedPawnValid(allSelectedPawn, this))
+				{
+					return allSelectedPawn;
+				}
+			}
+			return null;
+		}
+	}
+
+	public IEnumerable<Pawn> ValidSelectedPawns
+	{
+		[IteratorStateMachine(typeof(_003Cget_ValidSelectedPawns_003Ed__23))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_ValidSelectedPawns_003Ed__23(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public FloatMenuContext(List<Pawn> selectedPawns, Vector3 clickPosition, Map map)
+	{
+		allSelectedPawns = selectedPawns;
+		this.clickPosition = clickPosition;
+		this.map = map;
+		cachedClickedCell = IntVec3.FromVector3(clickPosition);
+		cachedClickedRoom = cachedClickedCell.GetRoom(map);
+		cachedClickedZone = cachedClickedCell.GetZone(map);
+		cachedClickedThings = GenUI.ThingsUnderMouse(clickPosition, 0.8f, TargetingParameters.ForThing());
+		cachedClickedPawns = GenUI.ThingsUnderMouse(clickPosition, 0.8f, TargetingParameters.ForPawns()).OfType<Pawn>().ToList();
+		selectedPawns.RemoveAll((Pawn pawn) => !pawn.CanTakeOrder);
 	}
 }

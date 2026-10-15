@@ -1,78 +1,68 @@
-﻿using System;
+namespace Verse;
 
-namespace Verse
+public class LanguageWorker_Catalan : LanguageWorker
 {
-	// Token: 0x0200037E RID: 894
-	public class LanguageWorker_Catalan : LanguageWorker
+	public override string WithIndefiniteArticle(string str, Gender gender, bool plural = false, bool name = false)
 	{
-		// Token: 0x060016F6 RID: 5878 RVA: 0x00072C1B File Offset: 0x00070E1B
-		public override string WithIndefiniteArticle(string str, Gender gender, bool plural = false, bool name = false)
+		if (name)
 		{
-			if (name)
-			{
-				return this.WithElLaArticle(str, gender, true);
-			}
-			if (plural)
-			{
-				return ((gender == Gender.Female) ? "unes " : "uns ") + str;
-			}
-			return ((gender == Gender.Female) ? "una " : "un ") + str;
+			return WithElLaArticle(str, gender, name: true);
 		}
-
-		// Token: 0x060016F7 RID: 5879 RVA: 0x00072C5B File Offset: 0x00070E5B
-		public override string WithDefiniteArticle(string str, Gender gender, bool plural = false, bool name = false)
+		if (plural)
 		{
-			if (name)
-			{
-				return this.WithElLaArticle(str, gender, true);
-			}
-			if (plural)
-			{
-				return ((gender == Gender.Female) ? "les " : "els ") + str;
-			}
-			return this.WithElLaArticle(str, gender, false);
+			return ((gender == Gender.Female) ? "unes " : "uns ") + str;
 		}
+		return ((gender == Gender.Female) ? "una " : "un ") + str;
+	}
 
-		// Token: 0x060016F8 RID: 5880 RVA: 0x00072C90 File Offset: 0x00070E90
-		private string WithElLaArticle(string str, Gender gender, bool name)
+	public override string WithDefiniteArticle(string str, Gender gender, bool plural = false, bool name = false)
+	{
+		if (name)
 		{
-			if (str.Length == 0 || (!this.IsVowel(str[0]) && str[0] != 'h' && str[0] != 'H'))
-			{
-				return ((gender == Gender.Female) ? "la " : "el ") + str;
-			}
+			return WithElLaArticle(str, gender, name: true);
+		}
+		if (plural)
+		{
+			return ((gender == Gender.Female) ? "les " : "els ") + str;
+		}
+		return WithElLaArticle(str, gender, name: false);
+	}
+
+	private string WithElLaArticle(string str, Gender gender, bool name)
+	{
+		if (str.Length != 0 && (IsVowel(str[0]) || str[0] == 'h' || str[0] == 'H'))
+		{
 			if (name)
 			{
 				return ((gender == Gender.Female) ? "l'" : "n'") + str;
 			}
 			return "l'" + str;
 		}
+		return ((gender == Gender.Female) ? "la " : "el ") + str;
+	}
 
-		// Token: 0x060016F9 RID: 5881 RVA: 0x00072D08 File Offset: 0x00070F08
-		public override string OrdinalNumber(int number, Gender gender = Gender.None)
+	public override string OrdinalNumber(int number, Gender gender = Gender.None)
+	{
+		if (gender == Gender.Female)
 		{
-			if (gender == Gender.Female)
-			{
-				return number.ToString() + "a";
-			}
-			if (number == 1 || number == 3)
-			{
-				return number.ToString() + "r";
-			}
-			if (number == 2)
-			{
-				return number.ToString() + "n";
-			}
-			if (number == 4)
-			{
-				return number.ToString() + "t";
-			}
-			return number.ToString() + "è";
+			return number + "a";
 		}
+		switch (number)
+		{
+		case 1:
+		case 3:
+			return number + "r";
+		case 2:
+			return number + "n";
+		case 4:
+			return number + "t";
+		default:
+			return number + "è";
+		}
+	}
 
-		// Token: 0x060016FA RID: 5882 RVA: 0x00072D82 File Offset: 0x00070F82
-		public bool IsVowel(char ch)
-		{
-			return "ieɛaoɔuəuàêèéòóüúIEƐAOƆUƏUÀÊÈÉÒÓÜÚ".IndexOf(ch) >= 0;
-		}
+	public bool IsVowel(char ch)
+	{
+		return "ieɛaoɔuəuàêèéòóüúIEƐAOƆUƏUÀÊÈÉÒÓÜÚ".IndexOf(ch) >= 0;
 	}
 }

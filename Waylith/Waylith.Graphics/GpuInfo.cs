@@ -16,13 +16,19 @@ public static class GpuInfo
 
 	public static VkPhysicalDeviceType DeviceType { get; private set; }
 
+	public static int ApiVersion { get; private set; } = 4202496;
+
+	public static uint MaxSpirvVersion { get; private set; } = 66816u;
+
 	public static bool HostVisibleVram { get; private set; }
 
 	public static bool StageUploadsInVram { get; set; }
 
-	internal unsafe static void Configure(PhysicalDevice physicalDevice, long deviceLocalMemoryBytes)
+	internal unsafe static void Configure(PhysicalDevice physicalDevice, long deviceLocalMemoryBytes, int apiVersion)
 	{
 		VkPhysicalDeviceProperties properties = physicalDevice.GetProperties();
+		ApiVersion = apiVersion;
+		MaxSpirvVersion = VulkanVersion.MaxSpirvVersion(apiVersion);
 		DeviceName = Utf8.GetString(properties.DeviceName);
 		VendorId = properties.VendorID;
 		MaxTextureSize = properties.Limits.MaxImageDimension2D;

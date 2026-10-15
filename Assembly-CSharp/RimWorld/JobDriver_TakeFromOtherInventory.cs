@@ -1,56 +1,139 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_TakeFromOtherInventory : JobDriver
 {
-	// Token: 0x0200132E RID: 4910
-	public class JobDriver_TakeFromOtherInventory : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__7 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001304 RID: 4868
-		// (get) Token: 0x06007893 RID: 30867 RVA: 0x00248084 File Offset: 0x00246284
-		public Pawn ItemHoldingPawn
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_TakeFromOtherInventory _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.job.GetTarget(TargetIndex.B).Pawn;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001305 RID: 4869
-		// (get) Token: 0x06007894 RID: 30868 RVA: 0x002480A5 File Offset: 0x002462A5
-		public Pawn_InventoryTracker ItemHoldingInventory
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return base.TargetThingA.ParentHolder as Pawn_InventoryTracker;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06007895 RID: 30869 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__7(int _003C_003E1__state)
 		{
-			return true;
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x06007896 RID: 30870 RVA: 0x002480B7 File Offset: 0x002462B7
-		protected override IEnumerable<Toil> MakeNewToils()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			yield return Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.Touch, false).FailOn(delegate()
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_TakeFromOtherInventory CS_0024_003C_003E8__locals7 = _003C_003E4__this;
+			switch (num)
 			{
-				Pawn itemHoldingPawn = this.ItemHoldingPawn;
-				Pawn_InventoryTracker itemHoldingInventory = this.ItemHoldingInventory;
-				return itemHoldingPawn != ((itemHoldingInventory != null) ? itemHoldingInventory.pawn : null) || this.ItemHoldingPawn.IsForbidden(this.pawn);
-			});
-			yield return Toils_Haul.TakeFromOtherInventory(base.TargetThingA, this.pawn.inventory.innerContainer, this.ItemHoldingInventory.innerContainer, -1, TargetIndex.None);
-			yield break;
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.Touch).FailOn(() => CS_0024_003C_003E8__locals7.ItemHoldingPawn != CS_0024_003C_003E8__locals7.ItemHoldingInventory?.pawn || CS_0024_003C_003E8__locals7.ItemHoldingPawn.IsForbidden(CS_0024_003C_003E8__locals7.pawn));
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Haul.TakeFromOtherInventory(CS_0024_003C_003E8__locals7.TargetThingA, CS_0024_003C_003E8__locals7.pawn.inventory.innerContainer, CS_0024_003C_003E8__locals7.ItemHoldingInventory.innerContainer);
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				return false;
+			}
 		}
 
-		// Token: 0x040051F7 RID: 20983
-		public const TargetIndex ItemIndex = TargetIndex.A;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x040051F8 RID: 20984
-		public const TargetIndex ItemHolderIndex = TargetIndex.B;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__7 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__7(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	public const TargetIndex ItemIndex = TargetIndex.A;
+
+	public const TargetIndex ItemHolderIndex = TargetIndex.B;
+
+	public Pawn ItemHoldingPawn => job.GetTarget(TargetIndex.B).Pawn;
+
+	public Pawn_InventoryTracker ItemHoldingInventory => base.TargetThingA.ParentHolder as Pawn_InventoryTracker;
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return true;
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__7))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__7(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

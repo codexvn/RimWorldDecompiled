@@ -1,567 +1,623 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
 
-namespace RimWorld
+namespace RimWorld;
+
+[StaticConstructorOnStartup]
+public class Building_GeneAssembler : Building, IThingHolder
 {
-	// Token: 0x02002A01 RID: 10753
-	[StaticConstructorOnStartup]
-	public class Building_GeneAssembler : Building, IThingHolder
+	[CompilerGenerated]
+	private sealed class _003CGetGizmos_003Ed__49 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x170024CF RID: 9423
-		// (get) Token: 0x0600EDC0 RID: 60864 RVA: 0x0044F856 File Offset: 0x0044DA56
-		public float ProgressPercent
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Building_GeneAssembler _003C_003E4__this;
+
+		private IEnumerator<Gizmo> _003C_003E7__wrap1;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.workDone / this.totalWorkRequired;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170024D0 RID: 9424
-		// (get) Token: 0x0600EDC1 RID: 60865 RVA: 0x0044F865 File Offset: 0x0044DA65
-		public bool Working
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.workingInt;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170024D1 RID: 9425
-		// (get) Token: 0x0600EDC2 RID: 60866 RVA: 0x0044F870 File Offset: 0x0044DA70
-		private CompPowerTrader PowerTraderComp
+		[DebuggerHidden]
+		public _003CGetGizmos_003Ed__49(int _003C_003E1__state)
 		{
-			get
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				CompPowerTrader result;
-				if ((result = this.cachedPowerComp) == null)
+				try
 				{
-					result = (this.cachedPowerComp = this.TryGetComp<CompPowerTrader>());
 				}
-				return result;
-			}
-		}
-
-		// Token: 0x170024D2 RID: 9426
-		// (get) Token: 0x0600EDC3 RID: 60867 RVA: 0x0044F896 File Offset: 0x0044DA96
-		public bool PowerOn
-		{
-			get
-			{
-				return this.PowerTraderComp.PowerOn;
-			}
-		}
-
-		// Token: 0x170024D3 RID: 9427
-		// (get) Token: 0x0600EDC4 RID: 60868 RVA: 0x0044F8A3 File Offset: 0x0044DAA3
-		public List<Thing> ConnectedFacilities
-		{
-			get
-			{
-				return this.TryGetComp<CompAffectedByFacilities>().LinkedFacilitiesListForReading;
-			}
-		}
-
-		// Token: 0x170024D4 RID: 9428
-		// (get) Token: 0x0600EDC5 RID: 60869 RVA: 0x0044F8B0 File Offset: 0x0044DAB0
-		public int ArchitesCount
-		{
-			get
-			{
-				int num = 0;
-				for (int i = 0; i < this.innerContainer.Count; i++)
+				finally
 				{
-					if (this.innerContainer[i].def == ThingDefOf.ArchiteCapsule)
-					{
-						num += this.innerContainer[i].stackCount;
-					}
+					_003C_003Em__Finally1();
 				}
-				return num;
 			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x170024D5 RID: 9429
-		// (get) Token: 0x0600EDC6 RID: 60870 RVA: 0x0044F902 File Offset: 0x0044DB02
-		public int ArchitesRequiredNow
+		private bool MoveNext()
 		{
-			get
+			try
 			{
-				return this.architesRequired - this.ArchitesCount;
-			}
-		}
-
-		// Token: 0x170024D6 RID: 9430
-		// (get) Token: 0x0600EDC7 RID: 60871 RVA: 0x0044F914 File Offset: 0x0044DB14
-		private HashSet<Thing> UsedFacilities
-		{
-			get
-			{
-				this.tmpUsedFacilities.Clear();
-				if (!this.genepacksToRecombine.NullOrEmpty<Genepack>())
+				int num = _003C_003E1__state;
+				Building_GeneAssembler CS_0024_003C_003E8__locals9 = _003C_003E4__this;
+				Command_Action command_Action;
+				switch (num)
 				{
-					List<Thing> connectedFacilities = this.ConnectedFacilities;
-					for (int i = 0; i < this.genepacksToRecombine.Count; i++)
-					{
-						for (int j = 0; j < connectedFacilities.Count; j++)
-						{
-							if (!this.tmpUsedFacilities.Contains(connectedFacilities[j]))
-							{
-								CompGenepackContainer compGenepackContainer = connectedFacilities[j].TryGetComp<CompGenepackContainer>();
-								if (compGenepackContainer != null && compGenepackContainer.ContainedGenepacks.Contains(this.genepacksToRecombine[i]))
-								{
-									this.tmpUsedFacilities.Add(connectedFacilities[j]);
-									break;
-								}
-							}
-						}
-					}
-				}
-				return this.tmpUsedFacilities;
-			}
-		}
-
-		// Token: 0x170024D7 RID: 9431
-		// (get) Token: 0x0600EDC8 RID: 60872 RVA: 0x0044F9C4 File Offset: 0x0044DBC4
-		public AcceptanceReport CanBeWorkedOnNow
-		{
-			get
-			{
-				if (!this.Working)
-				{
+				default:
 					return false;
-				}
-				if (this.ArchitesRequiredNow > 0)
-				{
-					return false;
-				}
-				if (!this.PowerOn)
-				{
-					return "NoPower".Translate().CapitalizeFirst();
-				}
-				foreach (Thing thing in this.UsedFacilities)
-				{
-					CompPowerTrader compPowerTrader = thing.TryGetComp<CompPowerTrader>();
-					if (compPowerTrader != null && !compPowerTrader.PowerOn)
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((Building)CS_0024_003C_003E8__locals9).GetGizmos().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_007a;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_007a;
+				case 2:
+					_003C_003E1__state = -1;
+					if (CS_0024_003C_003E8__locals9.Working)
 					{
-						return "GenebankUnpowered".Translate();
-					}
-				}
-				if (this.MaxComplexity() < this.TotalGCX)
-				{
-					return "GeneProcessorUnpowered".Translate();
-				}
-				return true;
-			}
-		}
-
-		// Token: 0x170024D8 RID: 9432
-		// (get) Token: 0x0600EDC9 RID: 60873 RVA: 0x0044FA98 File Offset: 0x0044DC98
-		private int TotalGCX
-		{
-			get
-			{
-				if (!this.Working)
-				{
-					return 0;
-				}
-				if (this.cachedComplexity == null)
-				{
-					this.cachedComplexity = new int?(0);
-					if (!this.genepacksToRecombine.NullOrEmpty<Genepack>())
-					{
-						List<GeneDefWithType> list = new List<GeneDefWithType>();
-						for (int i = 0; i < this.genepacksToRecombine.Count; i++)
+						_003C_003E2__current = new Command_Action
 						{
-							if (this.genepacksToRecombine[i].GeneSet != null)
-							{
-								for (int j = 0; j < this.genepacksToRecombine[i].GeneSet.GenesListForReading.Count; j++)
-								{
-									list.Add(new GeneDefWithType(this.genepacksToRecombine[i].GeneSet.GenesListForReading[j], true));
-								}
-							}
-						}
-						List<GeneDef> list2 = list.NonOverriddenGenes();
-						for (int k = 0; k < list2.Count; k++)
-						{
-							this.cachedComplexity += list2[k].biostatCpx;
-						}
+							defaultLabel = "CancelXenogerm".Translate(),
+							defaultDesc = "CancelXenogermDesc".Translate(),
+							action = CS_0024_003C_003E8__locals9.Reset,
+							icon = CancelIcon
+						};
+						_003C_003E1__state = 3;
+						return true;
 					}
-				}
-				return this.cachedComplexity.Value;
-			}
-		}
-
-		// Token: 0x0600EDCA RID: 60874 RVA: 0x0044FBC0 File Offset: 0x0044DDC0
-		public override void PostPostMake()
-		{
-			if (!ModLister.CheckBiotech("Gene assembler"))
-			{
-				this.Destroy(DestroyMode.Vanish);
-				return;
-			}
-			base.PostPostMake();
-			this.innerContainer = new ThingOwner<Thing>(this);
-		}
-
-		// Token: 0x0600EDCB RID: 60875 RVA: 0x0044FBE8 File Offset: 0x0044DDE8
-		protected override void Tick()
-		{
-			base.Tick();
-			if (this.IsHashIntervalTick(250))
-			{
-				bool flag = this.lastWorkedTick + 250 + 2 >= Find.TickManager.TicksGame;
-				this.PowerTraderComp.PowerOutput = (flag ? (-base.PowerComp.Props.PowerConsumption) : (-base.PowerComp.Props.idlePowerDraw));
-			}
-			if (this.Working && this.IsHashIntervalTick(180))
-			{
-				this.CheckAllContainersValid();
-			}
-		}
-
-		// Token: 0x0600EDCC RID: 60876 RVA: 0x0044FC74 File Offset: 0x0044DE74
-		public void Start(List<Genepack> packs, int architesRequired, string xenotypeName, XenotypeIconDef iconDef)
-		{
-			this.Reset();
-			this.genepacksToRecombine = packs;
-			this.architesRequired = architesRequired;
-			this.xenotypeName = xenotypeName;
-			this.iconDef = iconDef;
-			this.workingInt = true;
-			this.totalWorkRequired = GeneTuning.ComplexityToCreationHoursCurve.Evaluate((float)this.TotalGCX) * 2500f;
-		}
-
-		// Token: 0x0600EDCD RID: 60877 RVA: 0x0044FCC8 File Offset: 0x0044DEC8
-		public void DoWork(float workAmount)
-		{
-			this.workDone += workAmount;
-			this.lastWorkAmount = workAmount;
-			this.lastWorkedTick = Find.TickManager.TicksGame;
-		}
-
-		// Token: 0x0600EDCE RID: 60878 RVA: 0x0044FCF0 File Offset: 0x0044DEF0
-		public void Finish()
-		{
-			if (!this.genepacksToRecombine.NullOrEmpty<Genepack>())
-			{
-				SoundDefOf.GeneAssembler_Complete.PlayOneShot(SoundInfo.InMap(this, MaintenanceType.None));
-				Xenogerm xenogerm = (Xenogerm)ThingMaker.MakeThing(ThingDefOf.Xenogerm, null);
-				xenogerm.Initialize(this.genepacksToRecombine, this.xenotypeName, this.iconDef);
-				if (GenPlace.TryPlaceThing(xenogerm, this.InteractionCell, base.Map, ThingPlaceMode.Near, null, null, null, 1))
-				{
-					Messages.Message("MessageXenogermCompleted".Translate(), xenogerm, MessageTypeDefOf.PositiveEvent, true);
-				}
-			}
-			if (this.architesRequired > 0)
-			{
-				for (int i = this.innerContainer.Count - 1; i >= 0; i--)
-				{
-					if (this.innerContainer[i].def == ThingDefOf.ArchiteCapsule)
+					break;
+				case 3:
+					_003C_003E1__state = -1;
+					if (DebugSettings.ShowDevGizmos)
 					{
-						Thing thing = this.innerContainer[i].SplitOff(Mathf.Min(this.innerContainer[i].stackCount, this.architesRequired));
-						this.architesRequired -= thing.stackCount;
-						thing.Destroy(DestroyMode.Vanish);
-						if (this.architesRequired <= 0)
+						_003C_003E2__current = new Command_Action
 						{
-							break;
-						}
+							defaultLabel = "DEV: Finish xenogerm",
+							action = CS_0024_003C_003E8__locals9.Finish
+						};
+						_003C_003E1__state = 4;
+						return true;
 					}
+					break;
+				case 4:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_007a:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Gizmo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					command_Action = new Command_Action
+					{
+						defaultLabel = "Recombine".Translate() + "...",
+						defaultDesc = "RecombineDesc".Translate(),
+						icon = RecombineIcon.Texture,
+						action = delegate
+						{
+							Find.WindowStack.Add(new Dialog_CreateXenogerm(CS_0024_003C_003E8__locals9));
+						}
+					};
+					if (!CS_0024_003C_003E8__locals9.def.IsResearchFinished)
+					{
+						command_Action.Disable("MissingRequiredResearch".Translate() + ": " + (from x in CS_0024_003C_003E8__locals9.def.researchPrerequisites
+							where !x.IsFinished
+							select x.label).ToCommaList(useAnd: true).CapitalizeFirst());
+					}
+					else if (!CS_0024_003C_003E8__locals9.PowerOn)
+					{
+						command_Action.Disable("CannotUseNoPower".Translate());
+					}
+					else if (!CS_0024_003C_003E8__locals9.GetGenepacks(includePowered: true, includeUnpowered: false).Any())
+					{
+						command_Action.Disable("CannotUseReason".Translate("NoGenepacksAvailable".Translate().CapitalizeFirst()));
+					}
+					_003C_003E2__current = command_Action;
+					_003C_003E1__state = 2;
+					return true;
 				}
+				return false;
 			}
-			this.Reset();
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
 		}
 
-		// Token: 0x0600EDCF RID: 60879 RVA: 0x0044FE20 File Offset: 0x0044E020
-		public List<Genepack> GetGenepacks(bool includePowered, bool includeUnpowered)
+		bool IEnumerator.MoveNext()
 		{
-			this.tmpGenepacks.Clear();
-			List<Thing> connectedFacilities = this.ConnectedFacilities;
-			if (connectedFacilities != null)
-			{
-				foreach (Thing thing in connectedFacilities)
-				{
-					CompGenepackContainer compGenepackContainer = thing.TryGetComp<CompGenepackContainer>();
-					if (compGenepackContainer != null)
-					{
-						CompPowerTrader compPowerTrader = thing.TryGetComp<CompPowerTrader>();
-						bool flag = compPowerTrader == null || compPowerTrader.PowerOn;
-						if ((includePowered && flag) || (includeUnpowered && !flag))
-						{
-							this.tmpGenepacks.AddRange(compGenepackContainer.ContainedGenepacks);
-						}
-					}
-				}
-			}
-			return this.tmpGenepacks;
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0600EDD0 RID: 60880 RVA: 0x0044FEC4 File Offset: 0x0044E0C4
-		public CompGenepackContainer GetGeneBankHoldingPack(Genepack pack)
+		private void _003C_003Em__Finally1()
 		{
-			List<Thing> connectedFacilities = this.ConnectedFacilities;
-			if (connectedFacilities != null)
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				foreach (Thing thing in connectedFacilities)
-				{
-					CompGenepackContainer compGenepackContainer = thing.TryGetComp<CompGenepackContainer>();
-					if (compGenepackContainer != null)
-					{
-						using (List<Genepack>.Enumerator enumerator2 = compGenepackContainer.ContainedGenepacks.GetEnumerator())
-						{
-							while (enumerator2.MoveNext())
-							{
-								if (enumerator2.Current == pack)
-								{
-									return compGenepackContainer;
-								}
-							}
-						}
-					}
-				}
+				_003C_003E7__wrap1.Dispose();
 			}
-			return null;
 		}
 
-		// Token: 0x0600EDD1 RID: 60881 RVA: 0x0044FF64 File Offset: 0x0044E164
-		public int MaxComplexity()
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			int num = 6;
-			List<Thing> connectedFacilities = this.ConnectedFacilities;
-			if (connectedFacilities != null)
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CGetGizmos_003Ed__49 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				foreach (Thing thing in connectedFacilities)
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CGetGizmos_003Ed__49(0)
 				{
-					CompPowerTrader compPowerTrader = thing.TryGetComp<CompPowerTrader>();
-					if (compPowerTrader == null || compPowerTrader.PowerOn)
-					{
-						num += (int)thing.GetStatValue(StatDefOf.GeneticComplexityIncrease, true, -1);
-					}
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	public ThingOwner innerContainer;
+
+	private List<Genepack> genepacksToRecombine;
+
+	private int architesRequired;
+
+	private bool workingInt;
+
+	private int lastWorkedTick = -999;
+
+	private float workDone;
+
+	private float totalWorkRequired;
+
+	public string xenotypeName;
+
+	public XenotypeIconDef iconDef;
+
+	[Unsaved(false)]
+	private float lastWorkAmount = -1f;
+
+	[Unsaved(false)]
+	private CompPowerTrader cachedPowerComp;
+
+	[Unsaved(false)]
+	private List<Genepack> tmpGenepacks = new List<Genepack>();
+
+	[Unsaved(false)]
+	private HashSet<Thing> tmpUsedFacilities = new HashSet<Thing>();
+
+	[Unsaved(false)]
+	private int? cachedComplexity;
+
+	private const int CheckContainersInterval = 180;
+
+	private static readonly Texture2D CancelIcon = ContentFinder<Texture2D>.Get("UI/Designators/Cancel");
+
+	private static readonly CachedTexture RecombineIcon = new CachedTexture("UI/Gizmos/RecombineGenes");
+
+	public float ProgressPercent => workDone / totalWorkRequired;
+
+	public bool Working => workingInt;
+
+	private CompPowerTrader PowerTraderComp => cachedPowerComp ?? (cachedPowerComp = this.TryGetComp<CompPowerTrader>());
+
+	public bool PowerOn => PowerTraderComp.PowerOn;
+
+	public List<Thing> ConnectedFacilities => this.TryGetComp<CompAffectedByFacilities>().LinkedFacilitiesListForReading;
+
+	public int ArchitesCount
+	{
+		get
+		{
+			int num = 0;
+			for (int i = 0; i < innerContainer.Count; i++)
+			{
+				if (innerContainer[i].def == ThingDefOf.ArchiteCapsule)
+				{
+					num += innerContainer[i].stackCount;
 				}
 			}
 			return num;
 		}
+	}
 
-		// Token: 0x0600EDD2 RID: 60882 RVA: 0x0044FFE0 File Offset: 0x0044E1E0
-		private void Reset()
-		{
-			this.workingInt = false;
-			this.genepacksToRecombine = null;
-			this.xenotypeName = null;
-			this.cachedComplexity = null;
-			this.iconDef = XenotypeIconDefOf.Basic;
-			this.workDone = 0f;
-			this.lastWorkedTick = -999;
-			this.architesRequired = 0;
-			this.innerContainer.TryDropAll(this.def.hasInteractionCell ? this.InteractionCell : base.Position, base.Map, ThingPlaceMode.Near, null, null, true);
-		}
+	public int ArchitesRequiredNow => architesRequired - ArchitesCount;
 
-		// Token: 0x0600EDD3 RID: 60883 RVA: 0x00450068 File Offset: 0x0044E268
-		private void CheckAllContainersValid()
+	private HashSet<Thing> UsedFacilities
+	{
+		get
 		{
-			if (this.genepacksToRecombine.NullOrEmpty<Genepack>())
+			tmpUsedFacilities.Clear();
+			if (!genepacksToRecombine.NullOrEmpty())
 			{
-				return;
-			}
-			List<Thing> connectedFacilities = this.ConnectedFacilities;
-			for (int i = 0; i < this.genepacksToRecombine.Count; i++)
-			{
-				bool flag = false;
-				for (int j = 0; j < connectedFacilities.Count; j++)
+				List<Thing> connectedFacilities = ConnectedFacilities;
+				for (int i = 0; i < genepacksToRecombine.Count; i++)
 				{
-					CompGenepackContainer compGenepackContainer = connectedFacilities[j].TryGetComp<CompGenepackContainer>();
-					if (compGenepackContainer != null && compGenepackContainer.ContainedGenepacks.Contains(this.genepacksToRecombine[i]))
+					for (int j = 0; j < connectedFacilities.Count; j++)
 					{
-						flag = true;
+						if (!tmpUsedFacilities.Contains(connectedFacilities[j]))
+						{
+							CompGenepackContainer compGenepackContainer = connectedFacilities[j].TryGetComp<CompGenepackContainer>();
+							if (compGenepackContainer != null && compGenepackContainer.ContainedGenepacks.Contains(genepacksToRecombine[i]))
+							{
+								tmpUsedFacilities.Add(connectedFacilities[j]);
+								break;
+							}
+						}
+					}
+				}
+			}
+			return tmpUsedFacilities;
+		}
+	}
+
+	public AcceptanceReport CanBeWorkedOnNow
+	{
+		get
+		{
+			if (!Working)
+			{
+				return false;
+			}
+			if (ArchitesRequiredNow > 0)
+			{
+				return false;
+			}
+			if (!PowerOn)
+			{
+				return "NoPower".Translate().CapitalizeFirst();
+			}
+			foreach (Thing usedFacility in UsedFacilities)
+			{
+				CompPowerTrader compPowerTrader = usedFacility.TryGetComp<CompPowerTrader>();
+				if (compPowerTrader != null && !compPowerTrader.PowerOn)
+				{
+					return "GenebankUnpowered".Translate();
+				}
+			}
+			if (MaxComplexity() < TotalGCX)
+			{
+				return "GeneProcessorUnpowered".Translate();
+			}
+			return true;
+		}
+	}
+
+	private int TotalGCX
+	{
+		get
+		{
+			if (!Working)
+			{
+				return 0;
+			}
+			if (!cachedComplexity.HasValue)
+			{
+				cachedComplexity = 0;
+				if (!genepacksToRecombine.NullOrEmpty())
+				{
+					List<GeneDefWithType> list = new List<GeneDefWithType>();
+					for (int i = 0; i < genepacksToRecombine.Count; i++)
+					{
+						if (genepacksToRecombine[i].GeneSet != null)
+						{
+							for (int j = 0; j < genepacksToRecombine[i].GeneSet.GenesListForReading.Count; j++)
+							{
+								list.Add(new GeneDefWithType(genepacksToRecombine[i].GeneSet.GenesListForReading[j], xenogene: true));
+							}
+						}
+					}
+					List<GeneDef> list2 = list.NonOverriddenGenes();
+					for (int k = 0; k < list2.Count; k++)
+					{
+						cachedComplexity += list2[k].biostatCpx;
+					}
+				}
+			}
+			return cachedComplexity.Value;
+		}
+	}
+
+	public override void PostPostMake()
+	{
+		if (!ModLister.CheckBiotech("Gene assembler"))
+		{
+			Destroy();
+			return;
+		}
+		base.PostPostMake();
+		innerContainer = new ThingOwner<Thing>(this);
+	}
+
+	protected override void Tick()
+	{
+		base.Tick();
+		if (this.IsHashIntervalTick(250))
+		{
+			bool flag = lastWorkedTick + 250 + 2 >= Find.TickManager.TicksGame;
+			PowerTraderComp.PowerOutput = (flag ? (0f - base.PowerComp.Props.PowerConsumption) : (0f - base.PowerComp.Props.idlePowerDraw));
+		}
+		if (Working && this.IsHashIntervalTick(180))
+		{
+			CheckAllContainersValid();
+		}
+	}
+
+	public void Start(List<Genepack> packs, int architesRequired, string xenotypeName, XenotypeIconDef iconDef)
+	{
+		Reset();
+		genepacksToRecombine = packs;
+		this.architesRequired = architesRequired;
+		this.xenotypeName = xenotypeName;
+		this.iconDef = iconDef;
+		workingInt = true;
+		totalWorkRequired = GeneTuning.ComplexityToCreationHoursCurve.Evaluate(TotalGCX) * 2500f;
+	}
+
+	public void DoWork(float workAmount)
+	{
+		workDone += workAmount;
+		lastWorkAmount = workAmount;
+		lastWorkedTick = Find.TickManager.TicksGame;
+	}
+
+	public void Finish()
+	{
+		if (!genepacksToRecombine.NullOrEmpty())
+		{
+			SoundDefOf.GeneAssembler_Complete.PlayOneShot(SoundInfo.InMap(this));
+			Xenogerm xenogerm = (Xenogerm)ThingMaker.MakeThing(ThingDefOf.Xenogerm);
+			xenogerm.Initialize(genepacksToRecombine, xenotypeName, iconDef);
+			if (GenPlace.TryPlaceThing(xenogerm, InteractionCell, base.Map, ThingPlaceMode.Near, null, null, null))
+			{
+				Messages.Message("MessageXenogermCompleted".Translate(), xenogerm, MessageTypeDefOf.PositiveEvent);
+			}
+		}
+		if (architesRequired > 0)
+		{
+			for (int num = innerContainer.Count - 1; num >= 0; num--)
+			{
+				if (innerContainer[num].def == ThingDefOf.ArchiteCapsule)
+				{
+					Thing thing = innerContainer[num].SplitOff(Mathf.Min(innerContainer[num].stackCount, architesRequired));
+					architesRequired -= thing.stackCount;
+					thing.Destroy();
+					if (architesRequired <= 0)
+					{
 						break;
 					}
 				}
-				if (!flag)
-				{
-					Messages.Message("MessageXenogermCancelledMissingPack".Translate(this), this, MessageTypeDefOf.NegativeEvent, true);
-					this.Reset();
-					return;
-				}
 			}
 		}
+		Reset();
+	}
 
-		// Token: 0x0600EDD4 RID: 60884 RVA: 0x00450116 File Offset: 0x0044E316
-		public void GetChildHolders(List<IThingHolder> outChildren)
+	public List<Genepack> GetGenepacks(bool includePowered, bool includeUnpowered)
+	{
+		tmpGenepacks.Clear();
+		List<Thing> connectedFacilities = ConnectedFacilities;
+		if (connectedFacilities != null)
 		{
-			ThingOwnerUtility.AppendThingHoldersFromThings(outChildren, this.GetDirectlyHeldThings());
-		}
-
-		// Token: 0x0600EDD5 RID: 60885 RVA: 0x00450124 File Offset: 0x0044E324
-		public ThingOwner GetDirectlyHeldThings()
-		{
-			return this.innerContainer;
-		}
-
-		// Token: 0x0600EDD6 RID: 60886 RVA: 0x0045012C File Offset: 0x0044E32C
-		public override IEnumerable<Gizmo> GetGizmos()
-		{
-			foreach (Gizmo gizmo in base.GetGizmos())
+			foreach (Thing item in connectedFacilities)
 			{
-				yield return gizmo;
-			}
-			IEnumerator<Gizmo> enumerator = null;
-			Command_Action command_Action = new Command_Action();
-			command_Action.defaultLabel = "Recombine".Translate() + "...";
-			command_Action.defaultDesc = "RecombineDesc".Translate();
-			command_Action.icon = Building_GeneAssembler.RecombineIcon.Texture;
-			command_Action.action = delegate()
-			{
-				Find.WindowStack.Add(new Dialog_CreateXenogerm(this));
-			};
-			if (!this.def.IsResearchFinished)
-			{
-				command_Action.Disable("MissingRequiredResearch".Translate() + ": " + (from x in this.def.researchPrerequisites
-				where !x.IsFinished
-				select x.label).ToCommaList(true, false).CapitalizeFirst());
-			}
-			else if (!this.PowerOn)
-			{
-				command_Action.Disable("CannotUseNoPower".Translate());
-			}
-			else if (!this.GetGenepacks(true, false).Any<Genepack>())
-			{
-				command_Action.Disable("CannotUseReason".Translate("NoGenepacksAvailable".Translate().CapitalizeFirst()));
-			}
-			yield return command_Action;
-			if (this.Working)
-			{
-				yield return new Command_Action
+				CompGenepackContainer compGenepackContainer = item.TryGetComp<CompGenepackContainer>();
+				if (compGenepackContainer != null)
 				{
-					defaultLabel = "CancelXenogerm".Translate(),
-					defaultDesc = "CancelXenogermDesc".Translate(),
-					action = new Action(this.Reset),
-					icon = Building_GeneAssembler.CancelIcon
-				};
-				if (DebugSettings.ShowDevGizmos)
-				{
-					yield return new Command_Action
+					bool flag = item.TryGetComp<CompPowerTrader>()?.PowerOn ?? true;
+					if ((includePowered && flag) || (includeUnpowered && !flag))
 					{
-						defaultLabel = "DEV: Finish xenogerm",
-						action = new Action(this.Finish)
-					};
+						tmpGenepacks.AddRange(compGenepackContainer.ContainedGenepacks);
+					}
 				}
 			}
-			yield break;
-			yield break;
 		}
+		return tmpGenepacks;
+	}
 
-		// Token: 0x0600EDD7 RID: 60887 RVA: 0x0045013C File Offset: 0x0044E33C
-		public override string GetInspectString()
+	public CompGenepackContainer GetGeneBankHoldingPack(Genepack pack)
+	{
+		List<Thing> connectedFacilities = ConnectedFacilities;
+		if (connectedFacilities != null)
 		{
-			string text = base.GetInspectString();
-			if (this.Working)
+			foreach (Thing item in connectedFacilities)
 			{
-				if (!text.NullOrEmpty())
+				CompGenepackContainer compGenepackContainer = item.TryGetComp<CompGenepackContainer>();
+				if (compGenepackContainer == null)
 				{
-					text += "\n";
+					continue;
 				}
-				text = text + ("CreatingXenogerm".Translate() + ": " + this.xenotypeName.CapitalizeFirst() + "\n" + "ComplexityTotal".Translate() + ": ") + this.TotalGCX.ToString();
-				text += "\n" + "Progress".Translate() + ": " + this.ProgressPercent.ToStringPercent();
-				int numTicks = Mathf.RoundToInt((this.totalWorkRequired - this.workDone) / ((this.lastWorkAmount > 0f) ? this.lastWorkAmount : this.GetStatValue(StatDefOf.AssemblySpeedFactor, true, -1)));
-				text = text + " (" + "DurationLeft".Translate(numTicks.ToStringTicksToPeriod(true, false, true, true, false)).Resolve() + ")";
-				AcceptanceReport canBeWorkedOnNow = this.CanBeWorkedOnNow;
-				if (!canBeWorkedOnNow.Accepted && !canBeWorkedOnNow.Reason.NullOrEmpty())
+				foreach (Genepack containedGenepack in compGenepackContainer.ContainedGenepacks)
 				{
-					text = text + "\n" + ("AssemblyPaused".Translate() + ": " + canBeWorkedOnNow.Reason).Colorize(ColorLibrary.RedReadable);
-				}
-				if (this.architesRequired > 0)
-				{
-					text = string.Concat(new string[]
+					if (containedGenepack == pack)
 					{
-						text,
-						"\n" + "ArchitesRequired".Translate() + ": ",
-						this.ArchitesCount.ToString(),
-						" / ",
-						this.architesRequired.ToString()
-					});
+						return compGenepackContainer;
+					}
 				}
 			}
-			return text;
 		}
+		return null;
+	}
 
-		// Token: 0x0600EDD8 RID: 60888 RVA: 0x00450330 File Offset: 0x0044E530
-		public override void ExposeData()
+	public int MaxComplexity()
+	{
+		int num = 6;
+		List<Thing> connectedFacilities = ConnectedFacilities;
+		if (connectedFacilities != null)
 		{
-			base.ExposeData();
-			Scribe_Deep.Look<ThingOwner>(ref this.innerContainer, "innerContainer", new object[]
+			foreach (Thing item in connectedFacilities)
 			{
-				this
-			});
-			Scribe_Collections.Look<Genepack>(ref this.genepacksToRecombine, "genepacksToRecombine", LookMode.Reference, Array.Empty<object>());
-			Scribe_Values.Look<bool>(ref this.workingInt, "workingInt", false, false);
-			Scribe_Values.Look<float>(ref this.workDone, "workDone", 0f, false);
-			Scribe_Values.Look<float>(ref this.totalWorkRequired, "totalWorkRequired", 0f, false);
-			Scribe_Values.Look<int>(ref this.lastWorkedTick, "lastWorkedTick", -999, false);
-			Scribe_Values.Look<int>(ref this.architesRequired, "architesRequired", 0, false);
-			Scribe_Values.Look<string>(ref this.xenotypeName, "xenotypeName", null, false);
-			Scribe_Defs.Look<XenotypeIconDef>(ref this.iconDef, "iconDef");
-			if (Scribe.mode == LoadSaveMode.PostLoadInit && this.iconDef == null)
-			{
-				this.iconDef = XenotypeIconDefOf.Basic;
+				CompPowerTrader compPowerTrader = item.TryGetComp<CompPowerTrader>();
+				if (compPowerTrader == null || compPowerTrader.PowerOn)
+				{
+					num += (int)item.GetStatValue(StatDefOf.GeneticComplexityIncrease);
+				}
 			}
 		}
+		return num;
+	}
 
-		// Token: 0x04009D50 RID: 40272
-		public ThingOwner innerContainer;
+	private void Reset()
+	{
+		workingInt = false;
+		genepacksToRecombine = null;
+		xenotypeName = null;
+		cachedComplexity = null;
+		iconDef = XenotypeIconDefOf.Basic;
+		workDone = 0f;
+		lastWorkedTick = -999;
+		architesRequired = 0;
+		innerContainer.TryDropAll(def.hasInteractionCell ? InteractionCell : base.Position, base.Map, ThingPlaceMode.Near);
+	}
 
-		// Token: 0x04009D51 RID: 40273
-		private List<Genepack> genepacksToRecombine;
+	private void CheckAllContainersValid()
+	{
+		if (genepacksToRecombine.NullOrEmpty())
+		{
+			return;
+		}
+		List<Thing> connectedFacilities = ConnectedFacilities;
+		for (int i = 0; i < genepacksToRecombine.Count; i++)
+		{
+			bool flag = false;
+			for (int j = 0; j < connectedFacilities.Count; j++)
+			{
+				CompGenepackContainer compGenepackContainer = connectedFacilities[j].TryGetComp<CompGenepackContainer>();
+				if (compGenepackContainer != null && compGenepackContainer.ContainedGenepacks.Contains(genepacksToRecombine[i]))
+				{
+					flag = true;
+					break;
+				}
+			}
+			if (!flag)
+			{
+				Messages.Message("MessageXenogermCancelledMissingPack".Translate(this), this, MessageTypeDefOf.NegativeEvent);
+				Reset();
+				break;
+			}
+		}
+	}
 
-		// Token: 0x04009D52 RID: 40274
-		private int architesRequired;
+	public void GetChildHolders(List<IThingHolder> outChildren)
+	{
+		ThingOwnerUtility.AppendThingHoldersFromThings(outChildren, GetDirectlyHeldThings());
+	}
 
-		// Token: 0x04009D53 RID: 40275
-		private bool workingInt;
+	public ThingOwner GetDirectlyHeldThings()
+	{
+		return innerContainer;
+	}
 
-		// Token: 0x04009D54 RID: 40276
-		private int lastWorkedTick = -999;
+	[IteratorStateMachine(typeof(_003CGetGizmos_003Ed__49))]
+	public override IEnumerable<Gizmo> GetGizmos()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetGizmos_003Ed__49(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
 
-		// Token: 0x04009D55 RID: 40277
-		private float workDone;
+	public override string GetInspectString()
+	{
+		string text = base.GetInspectString();
+		if (Working)
+		{
+			if (!text.NullOrEmpty())
+			{
+				text += "\n";
+			}
+			text = string.Concat(text, "CreatingXenogerm".Translate() + ": " + xenotypeName.CapitalizeFirst() + "\n" + "ComplexityTotal".Translate() + ": ", TotalGCX.ToString());
+			text += "\n" + "Progress".Translate() + ": " + ProgressPercent.ToStringPercent();
+			int numTicks = Mathf.RoundToInt((totalWorkRequired - workDone) / ((lastWorkAmount > 0f) ? lastWorkAmount : this.GetStatValue(StatDefOf.AssemblySpeedFactor)));
+			text = text + " (" + "DurationLeft".Translate(numTicks.ToStringTicksToPeriod()).Resolve() + ")";
+			AcceptanceReport canBeWorkedOnNow = CanBeWorkedOnNow;
+			if (!canBeWorkedOnNow.Accepted && !canBeWorkedOnNow.Reason.NullOrEmpty())
+			{
+				text = text + "\n" + ("AssemblyPaused".Translate() + ": " + canBeWorkedOnNow.Reason).Colorize(ColorLibrary.RedReadable);
+			}
+			if (architesRequired > 0)
+			{
+				text = string.Concat(text, "\n" + "ArchitesRequired".Translate() + ": ", ArchitesCount.ToString(), " / ", architesRequired.ToString());
+			}
+		}
+		return text;
+	}
 
-		// Token: 0x04009D56 RID: 40278
-		private float totalWorkRequired;
-
-		// Token: 0x04009D57 RID: 40279
-		public string xenotypeName;
-
-		// Token: 0x04009D58 RID: 40280
-		public XenotypeIconDef iconDef;
-
-		// Token: 0x04009D59 RID: 40281
-		[Unsaved(false)]
-		private float lastWorkAmount = -1f;
-
-		// Token: 0x04009D5A RID: 40282
-		[Unsaved(false)]
-		private CompPowerTrader cachedPowerComp;
-
-		// Token: 0x04009D5B RID: 40283
-		[Unsaved(false)]
-		private List<Genepack> tmpGenepacks = new List<Genepack>();
-
-		// Token: 0x04009D5C RID: 40284
-		[Unsaved(false)]
-		private HashSet<Thing> tmpUsedFacilities = new HashSet<Thing>();
-
-		// Token: 0x04009D5D RID: 40285
-		[Unsaved(false)]
-		private int? cachedComplexity;
-
-		// Token: 0x04009D5E RID: 40286
-		private const int CheckContainersInterval = 180;
-
-		// Token: 0x04009D5F RID: 40287
-		private static readonly Texture2D CancelIcon = ContentFinder<Texture2D>.Get("UI/Designators/Cancel", true);
-
-		// Token: 0x04009D60 RID: 40288
-		private static readonly CachedTexture RecombineIcon = new CachedTexture("UI/Gizmos/RecombineGenes");
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Deep.Look(ref innerContainer, "innerContainer", this);
+		Scribe_Collections.Look(ref genepacksToRecombine, "genepacksToRecombine", LookMode.Reference);
+		Scribe_Values.Look(ref workingInt, "workingInt", defaultValue: false);
+		Scribe_Values.Look(ref workDone, "workDone", 0f);
+		Scribe_Values.Look(ref totalWorkRequired, "totalWorkRequired", 0f);
+		Scribe_Values.Look(ref lastWorkedTick, "lastWorkedTick", -999);
+		Scribe_Values.Look(ref architesRequired, "architesRequired", 0);
+		Scribe_Values.Look(ref xenotypeName, "xenotypeName");
+		Scribe_Defs.Look(ref iconDef, "iconDef");
+		if (Scribe.mode == LoadSaveMode.PostLoadInit && iconDef == null)
+		{
+			iconDef = XenotypeIconDefOf.Basic;
+		}
 	}
 }

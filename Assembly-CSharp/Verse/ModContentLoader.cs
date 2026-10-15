@@ -1,239 +1,358 @@
-﻿using System;
+using System;
+using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Runtime.CompilerServices;
 using RimWorld.IO;
-using RuntimeAudioClipLoader;
 using UnityEngine;
+using UnityStubs;
 
-namespace Verse
+namespace Verse;
+
+public static class ModContentLoader<T> where T : class
 {
-	// Token: 0x0200056E RID: 1390
-	public static class ModContentLoader<T> where T : class
+	[CompilerGenerated]
+	private sealed class _003CLoadAllForMod_003Ed__4 : IEnumerable<Pair<string, LoadedContentItem<T>>>, IEnumerable, IEnumerator<Pair<string, LoadedContentItem<T>>>, IEnumerator, IDisposable
 	{
-		// Token: 0x06002408 RID: 9224 RVA: 0x000BB2F4 File Offset: 0x000B94F4
-		public static bool IsAcceptableExtension(string extension)
+		private int _003C_003E1__state;
+
+		private Pair<string, LoadedContentItem<T>> _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private ModContentPack mod;
+
+		public ModContentPack _003C_003E3__mod;
+
+		private HashSet<string> _003CddsFiles_003E5__2;
+
+		private Dictionary<string, FileInfo>.Enumerator _003C_003E7__wrap2;
+
+		Pair<string, LoadedContentItem<T>> IEnumerator<Pair<string, LoadedContentItem<T>>>.Current
 		{
-			string[] array;
-			if (typeof(T) == typeof(AudioClip))
+			[DebuggerHidden]
+			get
 			{
-				array = ModContentLoader<T>.AcceptableExtensionsAudio;
+				return _003C_003E2__current;
 			}
-			else if (typeof(T) == typeof(Texture2D))
-			{
-				array = ModContentLoader<T>.AcceptableExtensionsTexture;
-			}
-			else
-			{
-				if (!(typeof(T) == typeof(string)))
-				{
-					string str = "Unknown content type ";
-					Type typeFromHandle = typeof(T);
-					Log.Error(str + ((typeFromHandle != null) ? typeFromHandle.ToString() : null));
-					return false;
-				}
-				array = ModContentLoader<T>.AcceptableExtensionsString;
-			}
-			foreach (string b in array)
-			{
-				if (extension.ToLower() == b)
-				{
-					return true;
-				}
-			}
-			return false;
 		}
 
-		// Token: 0x06002409 RID: 9225 RVA: 0x000BB3B6 File Offset: 0x000B95B6
-		public static IEnumerable<Pair<string, LoadedContentItem<T>>> LoadAllForMod(ModContentPack mod)
+		object IEnumerator.Current
 		{
-			string str = "Loading assets of type ";
-			Type typeFromHandle = typeof(T);
-			DeepProfiler.Start(str + ((typeFromHandle != null) ? typeFromHandle.ToString() : null) + " for mod " + ((mod != null) ? mod.ToString() : null));
-			Dictionary<string, FileInfo> allFilesForMod = ModContentPack.GetAllFilesForMod(mod, GenFilePaths.ContentPath<T>(), new Func<string, bool>(ModContentLoader<T>.IsAcceptableExtension), null);
-			foreach (KeyValuePair<string, FileInfo> keyValuePair in allFilesForMod)
+			[DebuggerHidden]
+			get
 			{
-				LoadedContentItem<T> loadedContentItem = ModContentLoader<T>.LoadItem(keyValuePair.Value);
-				if (loadedContentItem != null)
-				{
-					yield return new Pair<string, LoadedContentItem<T>>(keyValuePair.Key, loadedContentItem);
-				}
+				return _003C_003E2__current;
 			}
-			Dictionary<string, FileInfo>.Enumerator enumerator = default(Dictionary<string, FileInfo>.Enumerator);
-			DeepProfiler.End();
-			yield break;
-			yield break;
 		}
 
-		// Token: 0x0600240A RID: 9226 RVA: 0x000BB3C8 File Offset: 0x000B95C8
-		public static LoadedContentItem<T> LoadItem(VirtualFile file)
+		[DebuggerHidden]
+		public _003CLoadAllForMod_003Ed__4(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003CddsFiles_003E5__2 = null;
+			_003C_003E7__wrap2 = default(Dictionary<string, FileInfo>.Enumerator);
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
 		{
 			try
 			{
-				if (typeof(T) == typeof(string))
+				switch (_003C_003E1__state)
 				{
-					return new LoadedContentItem<T>(file, (T)((object)file.ReadAllText()), null);
-				}
-				if (typeof(T) == typeof(Texture2D))
+				default:
+					return false;
+				case 0:
 				{
-					return new LoadedContentItem<T>(file, (T)((object)ModContentLoader<T>.LoadTexture(file)), null);
+					_003C_003E1__state = -1;
+					DeepProfiler.Start("Loading assets of type " + typeof(T)?.ToString() + " for mod " + mod);
+					if (!ModContentLoader<T>.prefetchScans.TryRemove(mod, out var value))
+					{
+						value = ModContentPack.GetAllFilesForMod(mod, GenFilePaths.ContentPath<T>(), ModContentLoader<T>.IsAcceptableExtension);
+					}
+					_003CddsFiles_003E5__2 = (from k in value.Keys
+						select k.ToLowerInvariant() into k
+						where k.EndsWith(".dds")
+						select k).ToHashSet();
+					_003C_003E7__wrap2 = value.GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
 				}
-				if (typeof(T) == typeof(AudioClip))
+				case 1:
+					_003C_003E1__state = -3;
+					break;
+				}
+				while (_003C_003E7__wrap2.MoveNext())
 				{
-					bool doStream = ModContentLoader<T>.ShouldStreamAudioClipFromFile(file);
-					Stream stream = file.CreateReadStream();
-					T t;
-					try
+					var (text2, fileInfo2) = (KeyValuePair<string, FileInfo>)(ref _003C_003E7__wrap2.Current);
+					if (!ModContentLoader<T>.ShadowedByDds(text2, _003CddsFiles_003E5__2))
 					{
-						t = (T)((object)Manager.Load(stream, ModContentLoader<T>.GetFormat(file.Name), file.Name, doStream, true, true));
+						LoadedContentItem<T> loadedContentItem = ModContentLoader<T>.LoadItem((VirtualFile)(FilesystemFile)fileInfo2);
+						if (loadedContentItem != null)
+						{
+							_003C_003E2__current = new Pair<string, LoadedContentItem<T>>(text2, loadedContentItem);
+							_003C_003E1__state = 1;
+							return true;
+						}
 					}
-					catch (Exception)
-					{
-						stream.Dispose();
-						throw;
-					}
-					IDisposable extraDisposable = stream;
-					UnityEngine.Object @object = t as UnityEngine.Object;
-					if (@object != null)
-					{
-						@object.name = Path.GetFileNameWithoutExtension(file.Name);
-					}
-					return new LoadedContentItem<T>(file, t, extraDisposable);
 				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap2 = default(Dictionary<string, FileInfo>.Enumerator);
+				DeepProfiler.End();
+				return false;
 			}
-			catch (Exception arg)
+			catch
 			{
-				Log.Error(string.Format("Exception loading {0} from file.\nabsFilePath: {1}\nException: {2}", typeof(T), file.FullPath, arg));
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap2/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Pair<string, LoadedContentItem<T>>> IEnumerable<Pair<string, LoadedContentItem<T>>>.GetEnumerator()
+		{
+			_003CLoadAllForMod_003Ed__4 _003CLoadAllForMod_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CLoadAllForMod_003Ed__ = this;
+			}
+			else
+			{
+				_003CLoadAllForMod_003Ed__ = new _003CLoadAllForMod_003Ed__4(0);
+			}
+			_003CLoadAllForMod_003Ed__.mod = _003C_003E3__mod;
+			return _003CLoadAllForMod_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Pair<string, LoadedContentItem<T>>>)this).GetEnumerator();
+		}
+	}
+
+	private static string[] AcceptableExtensionsAudio = new string[7] { ".wav", ".mp3", ".ogg", ".xm", ".it", ".mod", ".s3m" };
+
+	private static string[] AcceptableExtensionsTexture = new string[5] { ".png", ".jpg", ".jpeg", ".psd", ".dds" };
+
+	private static string[] AcceptableExtensionsString = new string[1] { ".txt" };
+
+	private static readonly ConcurrentDictionary<ModContentPack, Dictionary<string, FileInfo>> prefetchScans = new ConcurrentDictionary<ModContentPack, Dictionary<string, FileInfo>>();
+
+	public static bool IsAcceptableExtension(string extension)
+	{
+		string[] array;
+		if (typeof(T) == typeof(AudioClip))
+		{
+			array = AcceptableExtensionsAudio;
+		}
+		else if (typeof(T) == typeof(Texture2D))
+		{
+			array = AcceptableExtensionsTexture;
+		}
+		else
+		{
+			if (!(typeof(T) == typeof(string)))
+			{
+				Log.Error("Unknown content type " + typeof(T));
+				return false;
+			}
+			array = AcceptableExtensionsString;
+		}
+		string[] array2 = array;
+		foreach (string text in array2)
+		{
+			if (extension.ToLower() == text)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	[IteratorStateMachine(typeof(ModContentLoader<>._003CLoadAllForMod_003Ed__4))]
+	public static IEnumerable<Pair<string, LoadedContentItem<T>>> LoadAllForMod(ModContentPack mod)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CLoadAllForMod_003Ed__4(-2)
+		{
+			_003C_003E3__mod = mod
+		};
+	}
+
+	private static bool ShadowedByDds(string filename, HashSet<string> ddsFiles)
+	{
+		if (typeof(T) == typeof(Texture2D) && filename.Length > 4)
+		{
+			if (!filename.Substring(filename.Length - 4).Equals(".dds", StringComparison.OrdinalIgnoreCase))
+			{
+				string text = filename.ToLowerInvariant();
+				return ddsFiles.Contains(text.Substring(0, text.Length - 4) + ".dds");
+			}
+		}
+		return false;
+	}
+
+	public static List<string> PrefetchPaths(ModContentPack mod)
+	{
+		Dictionary<string, FileInfo> allFilesForMod = ModContentPack.GetAllFilesForMod(mod, GenFilePaths.ContentPath<T>(), IsAcceptableExtension);
+		prefetchScans[mod] = allFilesForMod;
+		HashSet<string> ddsFiles = (from k in allFilesForMod.Keys
+			select k.ToLowerInvariant() into k
+			where k.EndsWith(".dds")
+			select k).ToHashSet();
+		List<string> list = new List<string>(allFilesForMod.Count);
+		foreach (var (filename, fileInfo2) in allFilesForMod)
+		{
+			if (!ShadowedByDds(filename, ddsFiles))
+			{
+				list.Add(fileInfo2.FullName);
+			}
+		}
+		return list;
+	}
+
+	public static LoadedContentItem<T> LoadItem(VirtualFile file)
+	{
+		try
+		{
+			if (typeof(T) == typeof(string))
+			{
+				return new LoadedContentItem<T>(file, (T)(object)file.ReadAllText());
 			}
 			if (typeof(T) == typeof(Texture2D))
 			{
-				return (LoadedContentItem<T>)new LoadedContentItem<Texture2D>(file, BaseContent.BadTex, null);
+				return new LoadedContentItem<T>(file, (T)(object)LoadTexture(file));
 			}
+			if (typeof(T) == typeof(AudioClip))
+			{
+				T val = (T)(object)AudioClip.LoadFromFile(file.FullPath);
+				UnityEngine.Object @object = val as UnityEngine.Object;
+				if (@object != null)
+				{
+					@object.name = Path.GetFileNameWithoutExtension(file.Name);
+				}
+				return new LoadedContentItem<T>(file, val);
+			}
+		}
+		catch (Exception value)
+		{
+			Log.Error($"Exception loading {typeof(T)} from file.\nabsFilePath: {file.FullPath}\nException: {value}");
+		}
+		if (typeof(T) == typeof(Texture2D))
+		{
+			return (LoadedContentItem<T>)(object)new LoadedContentItem<Texture2D>(file, BaseContent.BadTex);
+		}
+		return null;
+	}
+
+	private static Texture2D LoadTexture(VirtualFile file)
+	{
+		if ((file is FilesystemFile filesystemFile) ? (!ContentPacks.FileExists(filesystemFile.FullPath)) : (!file.Exists))
+		{
 			return null;
 		}
-
-		// Token: 0x0600240B RID: 9227 RVA: 0x000BB544 File Offset: 0x000B9744
-		private static AudioFormat GetFormat(string filename)
+		if (file.Name.EndsWith(".dds", StringComparison.OrdinalIgnoreCase))
 		{
-			string extension = Path.GetExtension(filename);
-			if (extension == ".ogg")
-			{
-				return AudioFormat.ogg;
-			}
-			if (extension == ".mp3")
-			{
-				return AudioFormat.mp3;
-			}
-			if (extension == ".aiff" || extension == ".aif" || extension == ".aifc")
-			{
-				return AudioFormat.aiff;
-			}
-			if (!(extension == ".wav"))
-			{
-				return AudioFormat.unknown;
-			}
-			return AudioFormat.wav;
+			return ModDdsLoader.TryLoadDds(file);
 		}
+		Texture2D texture2D = LoadTextureViaImageConversion(file);
+		texture2D.name = Path.GetFileNameWithoutExtension(file.Name);
+		return texture2D;
+	}
 
-		// Token: 0x0600240C RID: 9228 RVA: 0x000BB5B1 File Offset: 0x000B97B1
-		private static AudioType GetAudioTypeFromURI(string uri)
+	private static Texture2D LoadTextureViaImageConversion(VirtualFile file)
+	{
+		Texture2D texture2D;
+		if (file is FilesystemFile filesystemFile)
 		{
-			if (uri.EndsWith(".ogg"))
-			{
-				return AudioType.OGGVORBIS;
-			}
-			return AudioType.WAV;
+			texture2D = Texture2D.LoadFromFile(filesystemFile.FullPath);
 		}
-
-		// Token: 0x0600240D RID: 9229 RVA: 0x000BB5C5 File Offset: 0x000B97C5
-		private static bool ShouldStreamAudioClipFromFile(VirtualFile file)
+		else
 		{
-			return file is FilesystemFile && file.Exists && file.Length > 307200L;
+			texture2D = new Texture2D(2, 2, TextureFormat.Alpha8, mipChain: true);
+			texture2D.LoadImage(file.ReadAllBytes());
 		}
-
-		// Token: 0x0600240E RID: 9230 RVA: 0x000BB5E8 File Offset: 0x000B97E8
-		private static Texture2D LoadTexture(VirtualFile file)
+		if ((texture2D.width < 4 || texture2D.height < 4 || !Mathf.IsPowerOfTwo(texture2D.width) || !Mathf.IsPowerOfTwo(texture2D.height)) && Prefs.TextureCompression)
 		{
-			if (!file.Exists)
+			int num = StaticTextureAtlas.CalculateMaxMipmapsForDxtSupport(texture2D);
+			if (Prefs.LogVerbose)
 			{
-				return null;
+				Log.Warning($"Texture {file.Name} is being reloaded with reduced mipmap count (clamped to {num}) due to non-power-of-two dimensions: ({texture2D.width}x{texture2D.height}). This will be slower to load, and will look worse when zoomed out. Consider using a power-of-two texture size instead.");
 			}
-			byte[] data = file.ReadAllBytes();
-			Texture2D texture2D = new Texture2D(2, 2, TextureFormat.Alpha8, true);
-			texture2D.LoadImage(data);
-			if ((texture2D.width < 4 || texture2D.height < 4 || !Mathf.IsPowerOfTwo(texture2D.width) || !Mathf.IsPowerOfTwo(texture2D.height)) && Prefs.TextureCompression)
+			if (!UnityData.ComputeShadersSupported && !(file is FilesystemFile))
 			{
-				int num = StaticTextureAtlas.CalculateMaxMipmapsForDxtSupport(texture2D);
-				if (Prefs.LogVerbose)
-				{
-					Log.Warning(string.Format("Texture {0} is being reloaded with reduced mipmap count (clamped to {1}) due to non-power-of-two dimensions: ({2}x{3}). This will be slower to load, and will look worse when zoomed out. Consider using a power-of-two texture size instead.", new object[]
-					{
-						file.Name,
-						num,
-						texture2D.width,
-						texture2D.height
-					}));
-				}
-				if (!UnityData.ComputeShadersSupported)
-				{
-					Texture2D texture2D2 = new Texture2D(texture2D.width, texture2D.height, TextureFormat.Alpha8, num, false);
-					UnityEngine.Object.DestroyImmediate(texture2D);
-					texture2D = texture2D2;
-					texture2D.LoadImage(data);
-				}
+				Texture2D texture2D2 = new Texture2D(texture2D.width, texture2D.height, TextureFormat.Alpha8, num, linear: false);
+				UnityEngine.Object.DestroyImmediate(texture2D);
+				texture2D = texture2D2;
+				texture2D.LoadImage(file.ReadAllBytes());
 			}
-			bool flag = texture2D.width % 4 == 0 && texture2D.height % 4 == 0;
-			if (Prefs.TextureCompression && flag)
+		}
+		bool flag = true;
+		if (Prefs.TextureCompression && flag)
+		{
+			if (!UnityData.ComputeShadersSupported)
 			{
-				if (!UnityData.ComputeShadersSupported)
-				{
-					texture2D.Compress(true);
-					texture2D.filterMode = FilterMode.Trilinear;
-					texture2D.anisoLevel = 2;
-					texture2D.Apply(true, true);
-				}
-				else
-				{
-					texture2D.filterMode = FilterMode.Trilinear;
-					texture2D.anisoLevel = 2;
-					texture2D.Apply(true, true);
-					texture2D = StaticTextureAtlas.FastCompressDXT(texture2D, true);
-				}
+				texture2D.Compress(_: true);
+				texture2D.filterMode = FilterMode.Trilinear;
+				texture2D.anisoLevel = 2;
+				texture2D.Apply(updateMipmaps: true, makeNoLongerReadable: true);
 			}
 			else
 			{
 				texture2D.filterMode = FilterMode.Trilinear;
 				texture2D.anisoLevel = 2;
-				texture2D.Apply(true, true);
+				texture2D.Apply(updateMipmaps: true, makeNoLongerReadable: true);
+				texture2D = StaticTextureAtlas.FastCompressDXT(texture2D, deleteOriginal: true);
 			}
-			texture2D.name = Path.GetFileNameWithoutExtension(file.Name);
-			return texture2D;
 		}
-
-		// Token: 0x04001DD9 RID: 7641
-		private static string[] AcceptableExtensionsAudio = new string[]
+		else
 		{
-			".wav",
-			".mp3",
-			".ogg",
-			".xm",
-			".it",
-			".mod",
-			".s3m"
-		};
-
-		// Token: 0x04001DDA RID: 7642
-		private static string[] AcceptableExtensionsTexture = new string[]
-		{
-			".png",
-			".jpg",
-			".jpeg",
-			".psd"
-		};
-
-		// Token: 0x04001DDB RID: 7643
-		private static string[] AcceptableExtensionsString = new string[]
-		{
-			".txt"
-		};
+			texture2D.filterMode = FilterMode.Trilinear;
+			texture2D.anisoLevel = 2;
+			texture2D.Apply(updateMipmaps: true, makeNoLongerReadable: true);
+		}
+		return texture2D;
 	}
 }

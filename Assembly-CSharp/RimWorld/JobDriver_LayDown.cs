@@ -1,171 +1,247 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_LayDown : JobDriver
 {
-	// Token: 0x020012A8 RID: 4776
-	public class JobDriver_LayDown : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__16 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700124B RID: 4683
-		// (get) Token: 0x06007502 RID: 29954 RVA: 0x0023C944 File Offset: 0x0023AB44
-		public Building_Bed Bed
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_LayDown _003C_003E4__this;
+
+		private bool _003ChasBed_003E5__2;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.job.GetTarget(TargetIndex.A).Thing as Building_Bed;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700124C RID: 4684
-		// (get) Token: 0x06007503 RID: 29955 RVA: 0x0023C96C File Offset: 0x0023AB6C
-		public IntVec3 Cell
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.job.GetTarget(TargetIndex.A).Cell;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700124D RID: 4685
-		// (get) Token: 0x06007504 RID: 29956 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public virtual bool CanSleep
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__16(int _003C_003E1__state)
 		{
-			get
-			{
-				return true;
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x1700124E RID: 4686
-		// (get) Token: 0x06007505 RID: 29957 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public virtual bool CanRest
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			get
-			{
-				return true;
-			}
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x1700124F RID: 4687
-		// (get) Token: 0x06007506 RID: 29958 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public virtual bool LookForOtherJobs
+		private bool MoveNext()
 		{
-			get
+			int num = _003C_003E1__state;
+			JobDriver_LayDown CS_0024_003C_003E8__locals11 = _003C_003E4__this;
+			switch (num)
 			{
-				return true;
-			}
-		}
-
-		// Token: 0x06007507 RID: 29959 RVA: 0x0023C990 File Offset: 0x0023AB90
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
-		{
-			if (this.Bed != null)
+			default:
+				return false;
+			case 0:
 			{
-				if (!this.pawn.Reserve(this.Bed, this.job, this.Bed.SleepingSlotsCount, 0, null, errorOnFailed, false))
+				_003C_003E1__state = -1;
+				_003ChasBed_003E5__2 = CS_0024_003C_003E8__locals11.Bed != null;
+				if (_003ChasBed_003E5__2)
 				{
+					_003C_003E2__current = Toils_Bed.ClaimBedIfNonMedical(TargetIndex.A);
+					_003C_003E1__state = 1;
+					return true;
+				}
+				Thing thing = CS_0024_003C_003E8__locals11.job.GetTarget(TargetIndex.A).Thing;
+				if ((thing == null || CS_0024_003C_003E8__locals11.pawn.SpawnedParentOrMe != thing) && CS_0024_003C_003E8__locals11.canMoveOrCrawl)
+				{
+					_003C_003E2__current = Toils_Goto.GotoCell(TargetIndex.A, PathEndMode.OnCell).FailOn(() => CS_0024_003C_003E8__locals11.pawn.Downed && !CS_0024_003C_003E8__locals11.pawn.health.CanCrawl);
+					_003C_003E1__state = 3;
+					return true;
+				}
+				goto IL_00f0;
+			}
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Bed.GotoBed(TargetIndex.A).FailOn(() => CS_0024_003C_003E8__locals11.pawn.Downed && !CS_0024_003C_003E8__locals11.pawn.health.CanCrawl && !CS_0024_003C_003E8__locals11.Bed.OccupiedRect().Contains(CS_0024_003C_003E8__locals11.pawn.Position));
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				goto IL_00f0;
+			case 3:
+				_003C_003E1__state = -1;
+				goto IL_00f0;
+			case 4:
+				{
+					_003C_003E1__state = -1;
 					return false;
 				}
+				IL_00f0:
+				_003C_003E2__current = CS_0024_003C_003E8__locals11.LayDownToil(_003ChasBed_003E5__2);
+				_003C_003E1__state = 4;
+				return true;
 			}
-			else if (this.job.targetA.Cell.IsValid && !this.pawn.ageTracker.CurLifeStage.alwaysDowned && !this.job.forceSleep && !this.pawn.Reserve(this.job.targetA.Cell, this.job, 1, -1, null, errorOnFailed, false))
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__16 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				return false;
-			}
-			return true;
-		}
-
-		// Token: 0x06007508 RID: 29960 RVA: 0x00234F9B File Offset: 0x0023319B
-		public override bool CanBeginNowWhileLyingDown()
-		{
-			return JobInBedUtility.InBedOrRestSpotNow(this.pawn, this.job.GetTarget(TargetIndex.A));
-		}
-
-		// Token: 0x06007509 RID: 29961 RVA: 0x0023CA45 File Offset: 0x0023AC45
-		public override void Notify_Starting()
-		{
-			base.Notify_Starting();
-			this.canMoveOrCrawl = (!this.pawn.Downed || this.pawn.health.CanCrawl);
-			this.hasSavedValues = true;
-		}
-
-		// Token: 0x0600750A RID: 29962 RVA: 0x0023CA7A File Offset: 0x0023AC7A
-		protected override IEnumerable<Toil> MakeNewToils()
-		{
-			bool hasBed = this.Bed != null;
-			if (hasBed)
-			{
-				yield return Toils_Bed.ClaimBedIfNonMedical(TargetIndex.A, TargetIndex.None);
-				yield return Toils_Bed.GotoBed(TargetIndex.A).FailOn(() => this.pawn.Downed && !this.pawn.health.CanCrawl && !this.Bed.OccupiedRect().Contains(this.pawn.Position));
+				_003C_003E1__state = 0;
+				result = this;
 			}
 			else
 			{
-				Thing thing = this.job.GetTarget(TargetIndex.A).Thing;
-				if ((thing == null || this.pawn.SpawnedParentOrMe != thing) && this.canMoveOrCrawl)
+				result = new _003CMakeNewToils_003Ed__16(0)
 				{
-					yield return Toils_Goto.GotoCell(TargetIndex.A, PathEndMode.OnCell).FailOn(() => this.pawn.Downed && !this.pawn.health.CanCrawl);
-				}
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
-			yield return this.LayDownToil(hasBed);
-			yield break;
+			return result;
 		}
 
-		// Token: 0x0600750B RID: 29963 RVA: 0x0023CA8A File Offset: 0x0023AC8A
-		public virtual Toil LayDownToil(bool hasBed)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return Toils_LayDown.LayDown(TargetIndex.A, hasBed, this.LookForOtherJobs, this.CanSleep, this.CanRest, PawnPosture.LayingOnGroundNormal, false);
+			return ((IEnumerable<Toil>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x0600750C RID: 29964 RVA: 0x0023CAA8 File Offset: 0x0023ACA8
-		public override string GetReport()
+	private bool canMoveOrCrawl;
+
+	private bool hasSavedValues;
+
+	public const TargetIndex BedOrRestSpotIndex = TargetIndex.A;
+
+	public Building_Bed Bed => job.GetTarget(TargetIndex.A).Thing as Building_Bed;
+
+	public IntVec3 Cell => job.GetTarget(TargetIndex.A).Cell;
+
+	public virtual bool CanSleep => true;
+
+	public virtual bool CanRest => true;
+
+	public virtual bool LookForOtherJobs => true;
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		if (Bed != null)
 		{
-			string reportStringOverride = base.GetReportStringOverride();
-			if (!reportStringOverride.NullOrEmpty())
+			if (!pawn.Reserve(Bed, job, Bed.SleepingSlotsCount, 0, null, errorOnFailed))
 			{
-				return reportStringOverride;
+				return false;
 			}
-			if (this.asleep)
-			{
-				return "ReportSleeping".Translate();
-			}
-			Thing spawnedParentOrMe = this.pawn.SpawnedParentOrMe;
-			if (spawnedParentOrMe != null && this.pawn != spawnedParentOrMe)
-			{
-				return JobDriver_Carried.GetReport(this.pawn, spawnedParentOrMe);
-			}
-			if (this.pawn.health.hediffSet.InLabor(false))
-			{
-				return "GivingBirth".Translate();
-			}
-			return "ReportResting".Translate();
 		}
-
-		// Token: 0x0600750D RID: 29965 RVA: 0x0023CB3A File Offset: 0x0023AD3A
-		public override bool IsContinuation(Job j)
+		else if (job.targetA.Cell.IsValid && !pawn.ageTracker.CurLifeStage.alwaysDowned && !job.forceSleep && !pawn.Reserve(job.targetA.Cell, job, 1, -1, null, errorOnFailed))
 		{
-			return !(this.job.GetTarget(TargetIndex.A) != j.GetTarget(TargetIndex.A)) && base.IsContinuation(j);
+			return false;
 		}
+		return true;
+	}
 
-		// Token: 0x0600750E RID: 29966 RVA: 0x0023CB60 File Offset: 0x0023AD60
-		public override void ExposeData()
+	public override bool CanBeginNowWhileLyingDown()
+	{
+		return JobInBedUtility.InBedOrRestSpotNow(pawn, job.GetTarget(TargetIndex.A));
+	}
+
+	public override void Notify_Starting()
+	{
+		base.Notify_Starting();
+		canMoveOrCrawl = !pawn.Downed || pawn.health.CanCrawl;
+		hasSavedValues = true;
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__16))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__16(-2)
 		{
-			Scribe_Values.Look<bool>(ref this.canMoveOrCrawl, "canMoveOrCrawl", false, false);
-			Scribe_Values.Look<bool>(ref this.hasSavedValues, "hasSavedValues", false, false);
-			if (Scribe.mode == LoadSaveMode.PostLoadInit && !this.hasSavedValues)
-			{
-				this.canMoveOrCrawl = (!this.pawn.Downed || this.pawn.health.CanCrawl);
-				this.hasSavedValues = true;
-			}
-			base.ExposeData();
+			_003C_003E4__this = this
+		};
+	}
+
+	public virtual Toil LayDownToil(bool hasBed)
+	{
+		return Toils_LayDown.LayDown(TargetIndex.A, hasBed, LookForOtherJobs, CanSleep, CanRest);
+	}
+
+	public override string GetReport()
+	{
+		string reportStringOverride = GetReportStringOverride();
+		if (!reportStringOverride.NullOrEmpty())
+		{
+			return reportStringOverride;
 		}
+		if (asleep)
+		{
+			return "ReportSleeping".Translate();
+		}
+		Thing spawnedParentOrMe = pawn.SpawnedParentOrMe;
+		if (spawnedParentOrMe != null && pawn != spawnedParentOrMe)
+		{
+			return JobDriver_Carried.GetReport(pawn, spawnedParentOrMe);
+		}
+		if (pawn.health.hediffSet.InLabor(includePostpartumExhaustion: false))
+		{
+			return "GivingBirth".Translate();
+		}
+		return "ReportResting".Translate();
+	}
 
-		// Token: 0x04005041 RID: 20545
-		private bool canMoveOrCrawl;
+	public override bool IsContinuation(Job j)
+	{
+		if (job.GetTarget(TargetIndex.A) != j.GetTarget(TargetIndex.A))
+		{
+			return false;
+		}
+		return base.IsContinuation(j);
+	}
 
-		// Token: 0x04005042 RID: 20546
-		private bool hasSavedValues;
-
-		// Token: 0x04005043 RID: 20547
-		public const TargetIndex BedOrRestSpotIndex = TargetIndex.A;
+	public override void ExposeData()
+	{
+		Scribe_Values.Look(ref canMoveOrCrawl, "canMoveOrCrawl", defaultValue: false);
+		Scribe_Values.Look(ref hasSavedValues, "hasSavedValues", defaultValue: false);
+		if (Scribe.mode == LoadSaveMode.PostLoadInit && !hasSavedValues)
+		{
+			canMoveOrCrawl = !pawn.Downed || pawn.health.CanCrawl;
+			hasSavedValues = true;
+		}
+		base.ExposeData();
 	}
 }

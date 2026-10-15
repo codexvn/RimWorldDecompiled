@@ -1,104 +1,243 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CultureDef : Def
 {
-	// Token: 0x02001A16 RID: 6678
-	public class CultureDef : Def
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__17 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x170016F4 RID: 5876
-		// (get) Token: 0x0600968D RID: 38541 RVA: 0x002C0BC8 File Offset: 0x002BEDC8
-		public Texture2D Icon
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CultureDef _003C_003E4__this;
+
+		private List<ThingStyleCategoryWithPriority>.Enumerator _003C_003E7__wrap1;
+
+		string IEnumerator<string>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.icon == null)
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__17(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
 				{
-					this.icon = ContentFinder<Texture2D>.Get(this.iconPath, true);
 				}
-				return this.icon;
-			}
-		}
-
-		// Token: 0x0600968E RID: 38542 RVA: 0x002C0BF0 File Offset: 0x002BEDF0
-		public RulePackDef GetPawnNameMaker(Gender gender)
-		{
-			if (gender == Gender.Female && this.pawnNameMakerFemale != null)
-			{
-				return this.pawnNameMakerFemale;
-			}
-			return this.pawnNameMaker;
-		}
-
-		// Token: 0x0600968F RID: 38543 RVA: 0x002C0C0B File Offset: 0x002BEE0B
-		public override IEnumerable<string> ConfigErrors()
-		{
-			if (!this.thingStyleCategories.NullOrEmpty<ThingStyleCategoryWithPriority>())
-			{
-				foreach (ThingStyleCategoryWithPriority thingStyleCategoryWithPriority in this.thingStyleCategories)
+				finally
 				{
-					if (thingStyleCategoryWithPriority.priority <= 0f)
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = default(List<ThingStyleCategoryWithPriority>.Enumerator);
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				CultureDef cultureDef = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					if (!cultureDef.thingStyleCategories.NullOrEmpty())
 					{
-						yield return "style category " + thingStyleCategoryWithPriority.category.LabelCap + " has <= 0 priority. It must be positive.";
+						_003C_003E7__wrap1 = cultureDef.thingStyleCategories.GetEnumerator();
+						_003C_003E1__state = -3;
+						goto IL_00b6;
 					}
+					goto IL_00d5;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_00b6;
+				case 2:
+					_003C_003E1__state = -1;
+					goto IL_00ff;
+				case 3:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_00b6:
+					while (_003C_003E7__wrap1.MoveNext())
+					{
+						ThingStyleCategoryWithPriority current = _003C_003E7__wrap1.Current;
+						if (current.priority <= 0f)
+						{
+							_003C_003E2__current = "style category " + current.category.LabelCap + " has <= 0 priority. It must be positive.";
+							_003C_003E1__state = 1;
+							return true;
+						}
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = default(List<ThingStyleCategoryWithPriority>.Enumerator);
+					goto IL_00d5;
+					IL_00ff:
+					if (ModsConfig.IdeologyActive && !cultureDef.allowedPlaceTags.Any())
+					{
+						_003C_003E2__current = "at least one allowedPlaceTags must be defined in ideology.";
+						_003C_003E1__state = 3;
+						return true;
+					}
+					break;
+					IL_00d5:
+					if (cultureDef.styleItemTags.NullOrEmpty())
+					{
+						_003C_003E2__current = "no style item tags defined.";
+						_003C_003E1__state = 2;
+						return true;
+					}
+					goto IL_00ff;
 				}
-				List<ThingStyleCategoryWithPriority>.Enumerator enumerator = default(List<ThingStyleCategoryWithPriority>.Enumerator);
+				return false;
 			}
-			if (this.styleItemTags.NullOrEmpty<StyleItemTagWeighted>())
+			catch
 			{
-				yield return "no style item tags defined.";
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
-			if (ModsConfig.IdeologyActive && !this.allowedPlaceTags.Any<string>())
-			{
-				yield return "at least one allowedPlaceTags must be defined in ideology.";
-			}
-			yield break;
-			yield break;
 		}
 
-		// Token: 0x040062DF RID: 25311
-		public RulePackDef pawnNameMaker;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x040062E0 RID: 25312
-		public RulePackDef pawnNameMakerFemale;
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap1/*cast due to .constrained prefix*/).Dispose();
+		}
 
-		// Token: 0x040062E1 RID: 25313
-		public RulePackDef ideoNameMaker;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x040062E2 RID: 25314
-		public RulePackDef deityNameMaker;
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__17 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__17(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x040062E3 RID: 25315
-		public RulePackDef deityTypeMaker;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x040062E4 RID: 25316
-		public RulePackDef leaderTitleMaker;
+	public RulePackDef pawnNameMaker;
 
-		// Token: 0x040062E5 RID: 25317
-		public RulePackDef festivalNameMaker;
+	public RulePackDef pawnNameMakerFemale;
 
-		// Token: 0x040062E6 RID: 25318
-		public List<ThingStyleCategoryWithPriority> thingStyleCategories;
+	public RulePackDef ideoNameMaker;
 
-		// Token: 0x040062E7 RID: 25319
-		public List<StyleItemTagWeighted> styleItemTags;
+	public RulePackDef deityNameMaker;
 
-		// Token: 0x040062E8 RID: 25320
-		public IdeoWeaponClassPair preferredWeaponClasses;
+	public RulePackDef deityTypeMaker;
 
-		// Token: 0x040062E9 RID: 25321
-		[NoTranslate]
-		public List<string> allowedPlaceTags = new List<string>();
+	public RulePackDef leaderTitleMaker;
 
-		// Token: 0x040062EA RID: 25322
-		public string iconPath;
+	public RulePackDef festivalNameMaker;
 
-		// Token: 0x040062EB RID: 25323
-		public Color iconColor = Color.white;
+	public List<ThingStyleCategoryWithPriority> thingStyleCategories;
 
-		// Token: 0x040062EC RID: 25324
-		private Texture2D icon;
+	public List<StyleItemTagWeighted> styleItemTags;
+
+	public IdeoWeaponClassPair preferredWeaponClasses;
+
+	[NoTranslate]
+	public List<string> allowedPlaceTags = new List<string>();
+
+	public string iconPath;
+
+	public Color iconColor = Color.white;
+
+	private Texture2D icon;
+
+	public Texture2D Icon
+	{
+		get
+		{
+			if (icon == null)
+			{
+				icon = ContentFinder<Texture2D>.Get(iconPath);
+			}
+			return icon;
+		}
+	}
+
+	public RulePackDef GetPawnNameMaker(Gender gender)
+	{
+		if (gender == Gender.Female && pawnNameMakerFemale != null)
+		{
+			return pawnNameMakerFemale;
+		}
+		return pawnNameMaker;
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__17))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__17(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

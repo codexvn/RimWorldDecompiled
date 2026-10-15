@@ -1,370 +1,257 @@
-﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using RimWorld;
 using UnityEngine;
 
-namespace Verse
+namespace Verse;
+
+public struct ShotReport
 {
-	// Token: 0x02000D5F RID: 3423
-	public struct ShotReport
+	private TargetInfo target;
+
+	private float distance;
+
+	private List<CoverInfo> covers;
+
+	private float coversOverallBlockChance;
+
+	private float factorFromShooterAndDist;
+
+	private float factorFromEquipment;
+
+	private float factorFromTargetSize;
+
+	private float factorFromWeather;
+
+	private float forcedMissRadius;
+
+	private float offsetFromDarkness;
+
+	private float factorFromCoveringGas;
+
+	private ShootLine shootLine;
+
+	private float FactorFromPosture
 	{
-		// Token: 0x17000DA6 RID: 3494
-		// (get) Token: 0x06005712 RID: 22290 RVA: 0x001C0300 File Offset: 0x001BE500
-		private float FactorFromPosture
+		get
 		{
-			get
+			if (target.HasThing && target.Thing is Pawn p && distance >= 4.5f && p.GetPosture() != 0)
 			{
-				if (this.target.HasThing)
+				return 0.5f;
+			}
+			return 1f;
+		}
+	}
+
+	private float FactorFromExecution
+	{
+		get
+		{
+			if (target.HasThing && target.Thing is Pawn p && distance <= 3.9f && p.GetPosture() != 0)
+			{
+				return 7.5f;
+			}
+			return 1f;
+		}
+	}
+
+	public float AimOnTargetChance_StandardTarget
+	{
+		get
+		{
+			float num = factorFromShooterAndDist * factorFromEquipment * factorFromWeather * factorFromCoveringGas * FactorFromExecution;
+			num += offsetFromDarkness;
+			if (num < 0.0201f)
+			{
+				num = 0.0201f;
+			}
+			return num;
+		}
+	}
+
+	public float AimOnTargetChance_IgnoringPosture => AimOnTargetChance_StandardTarget * factorFromTargetSize;
+
+	public float AimOnTargetChance => AimOnTargetChance_IgnoringPosture * FactorFromPosture;
+
+	public float PassCoverChance => 1f - coversOverallBlockChance;
+
+	public float TotalEstimatedHitChance => Mathf.Clamp01(AimOnTargetChance * PassCoverChance);
+
+	public ShootLine ShootLine => shootLine;
+
+	public static ShotReport HitReportFor(Thing caster, Verb verb, LocalTargetInfo target)
+	{
+		IntVec3 cell = target.Cell;
+		ShotReport result = default(ShotReport);
+		result.distance = (cell - caster.Position).LengthHorizontal;
+		result.target = target.ToTargetInfo(caster.Map);
+		CompUniqueWeapon comp;
+		bool flag = verb.EquipmentSource != null && verb.EquipmentSource.TryGetComp<CompUniqueWeapon>(out comp) && comp.IgnoreAccuracyMaluses;
+		if (verb.verbProps.canGoWild)
+		{
+			result.factorFromShooterAndDist = HitFactorFromShooter(caster, result.distance, null);
+		}
+		else
+		{
+			result.factorFromShooterAndDist = 1f;
+		}
+		result.factorFromEquipment = verb.verbProps.GetHitChanceFactor(verb.EquipmentSource, result.distance);
+		result.covers = CoverUtility.CalculateCoverGiverSet(target, caster.Position, caster.Map);
+		result.coversOverallBlockChance = CoverUtility.CalculateOverallBlockChance(target, caster.Position, caster.Map);
+		result.factorFromCoveringGas = 1f;
+		if (verb.TryFindShootLineFromTo(verb.caster.Position, target, out result.shootLine))
+		{
+			foreach (IntVec3 item in result.shootLine.Points())
+			{
+				if (!flag && item.AnyGas(caster.Map, GasType.BlindSmoke))
 				{
-					Pawn pawn = this.target.Thing as Pawn;
-					if (pawn != null && this.distance >= 4.5f && pawn.GetPosture() != PawnPosture.Standing)
-					{
-						return 0.5f;
-					}
+					result.factorFromCoveringGas = 0.7f;
+					break;
 				}
-				return 1f;
 			}
 		}
-
-		// Token: 0x17000DA7 RID: 3495
-		// (get) Token: 0x06005713 RID: 22291 RVA: 0x001C0350 File Offset: 0x001BE550
-		private float FactorFromExecution
+		else
 		{
-			get
-			{
-				if (this.target.HasThing)
-				{
-					Pawn pawn = this.target.Thing as Pawn;
-					if (pawn != null && this.distance <= 3.9f && pawn.GetPosture() != PawnPosture.Standing)
-					{
-						return 7.5f;
-					}
-				}
-				return 1f;
-			}
+			result.shootLine = new ShootLine(IntVec3.Invalid, IntVec3.Invalid);
 		}
-
-		// Token: 0x17000DA8 RID: 3496
-		// (get) Token: 0x06005714 RID: 22292 RVA: 0x001C03A0 File Offset: 0x001BE5A0
-		public float AimOnTargetChance_StandardTarget
+		if (!flag && (!caster.Position.Roofed(caster.Map) || !target.Cell.Roofed(caster.Map)))
 		{
-			get
-			{
-				float num = this.factorFromShooterAndDist * this.factorFromEquipment * this.factorFromWeather * this.factorFromCoveringGas * this.FactorFromExecution;
-				num += this.offsetFromDarkness;
-				if (num < 0.0201f)
-				{
-					num = 0.0201f;
-				}
-				return num;
-			}
+			result.factorFromWeather = caster.Map.weatherManager.CurWeatherAccuracyMultiplier;
 		}
-
-		// Token: 0x17000DA9 RID: 3497
-		// (get) Token: 0x06005715 RID: 22293 RVA: 0x001C03E8 File Offset: 0x001BE5E8
-		public float AimOnTargetChance_IgnoringPosture
+		else
 		{
-			get
-			{
-				return this.AimOnTargetChance_StandardTarget * this.factorFromTargetSize;
-			}
+			result.factorFromWeather = 1f;
 		}
-
-		// Token: 0x17000DAA RID: 3498
-		// (get) Token: 0x06005716 RID: 22294 RVA: 0x001C03F7 File Offset: 0x001BE5F7
-		public float AimOnTargetChance
+		if (target.HasThing)
 		{
-			get
+			if (target.Thing is Pawn pawn)
 			{
-				return this.AimOnTargetChance_IgnoringPosture * this.FactorFromPosture;
-			}
-		}
-
-		// Token: 0x17000DAB RID: 3499
-		// (get) Token: 0x06005717 RID: 22295 RVA: 0x001C0406 File Offset: 0x001BE606
-		public float PassCoverChance
-		{
-			get
-			{
-				return 1f - this.coversOverallBlockChance;
-			}
-		}
-
-		// Token: 0x17000DAC RID: 3500
-		// (get) Token: 0x06005718 RID: 22296 RVA: 0x001C0414 File Offset: 0x001BE614
-		public float TotalEstimatedHitChance
-		{
-			get
-			{
-				return Mathf.Clamp01(this.AimOnTargetChance * this.PassCoverChance);
-			}
-		}
-
-		// Token: 0x17000DAD RID: 3501
-		// (get) Token: 0x06005719 RID: 22297 RVA: 0x001C0428 File Offset: 0x001BE628
-		public ShootLine ShootLine
-		{
-			get
-			{
-				return this.shootLine;
-			}
-		}
-
-		// Token: 0x0600571A RID: 22298 RVA: 0x001C0430 File Offset: 0x001BE630
-		public static ShotReport HitReportFor(Thing caster, Verb verb, LocalTargetInfo target)
-		{
-			IntVec3 cell = target.Cell;
-			ShotReport shotReport;
-			shotReport.distance = (cell - caster.Position).LengthHorizontal;
-			shotReport.target = target.ToTargetInfo(caster.Map);
-			CompUniqueWeapon compUniqueWeapon;
-			bool flag = verb.EquipmentSource != null && verb.EquipmentSource.TryGetComp(out compUniqueWeapon) && compUniqueWeapon.IgnoreAccuracyMaluses;
-			if (verb.verbProps.canGoWild)
-			{
-				shotReport.factorFromShooterAndDist = ShotReport.HitFactorFromShooter(caster, shotReport.distance, null);
+				result.factorFromTargetSize = pawn.BodySize;
 			}
 			else
 			{
-				shotReport.factorFromShooterAndDist = 1f;
+				result.factorFromTargetSize = target.Thing.def.fillPercent * (float)target.Thing.def.size.x * (float)target.Thing.def.size.z * 2.5f;
 			}
-			shotReport.factorFromEquipment = verb.verbProps.GetHitChanceFactor(verb.EquipmentSource, shotReport.distance);
-			shotReport.covers = CoverUtility.CalculateCoverGiverSet(target, caster.Position, caster.Map);
-			shotReport.coversOverallBlockChance = CoverUtility.CalculateOverallBlockChance(target, caster.Position, caster.Map);
-			shotReport.factorFromCoveringGas = 1f;
-			if (verb.TryFindShootLineFromTo(verb.caster.Position, target, out shotReport.shootLine, false))
+			result.factorFromTargetSize = Mathf.Clamp(result.factorFromTargetSize, 0.5f, 2f);
+		}
+		else
+		{
+			result.factorFromTargetSize = 1f;
+		}
+		result.forcedMissRadius = verb.verbProps.ForcedMissRadius;
+		result.offsetFromDarkness = 0f;
+		if (ModsConfig.IdeologyActive && target.HasThing)
+		{
+			if (DarknessCombatUtility.IsOutdoorsAndLit(target.Thing))
 			{
-				using (IEnumerator<IntVec3> enumerator = shotReport.shootLine.Points().GetEnumerator())
-				{
-					while (enumerator.MoveNext())
-					{
-						IntVec3 cell2 = enumerator.Current;
-						if (!flag && cell2.AnyGas(caster.Map, GasType.BlindSmoke))
-						{
-							shotReport.factorFromCoveringGas = 0.7f;
-							break;
-						}
-					}
-					goto IL_175;
-				}
+				result.offsetFromDarkness = caster.GetStatValue(StatDefOf.ShootingAccuracyOutdoorsLitOffset);
 			}
-			shotReport.shootLine = new ShootLine(IntVec3.Invalid, IntVec3.Invalid);
-			IL_175:
-			if (!flag && (!caster.Position.Roofed(caster.Map) || !target.Cell.Roofed(caster.Map)))
+			else if (DarknessCombatUtility.IsOutdoorsAndDark(target.Thing))
 			{
-				shotReport.factorFromWeather = caster.Map.weatherManager.CurWeatherAccuracyMultiplier;
+				result.offsetFromDarkness = caster.GetStatValue(StatDefOf.ShootingAccuracyOutdoorsDarkOffset);
 			}
-			else
+			else if (DarknessCombatUtility.IsIndoorsAndDark(target.Thing))
 			{
-				shotReport.factorFromWeather = 1f;
+				result.offsetFromDarkness = caster.GetStatValue(StatDefOf.ShootingAccuracyIndoorsDarkOffset);
 			}
-			if (target.HasThing)
+			else if (DarknessCombatUtility.IsIndoorsAndLit(target.Thing))
 			{
-				Pawn pawn = target.Thing as Pawn;
-				if (pawn != null)
-				{
-					shotReport.factorFromTargetSize = pawn.BodySize;
-				}
-				else
-				{
-					shotReport.factorFromTargetSize = target.Thing.def.fillPercent * (float)target.Thing.def.size.x * (float)target.Thing.def.size.z * 2.5f;
-				}
-				shotReport.factorFromTargetSize = Mathf.Clamp(shotReport.factorFromTargetSize, 0.5f, 2f);
+				result.offsetFromDarkness = caster.GetStatValue(StatDefOf.ShootingAccuracyIndoorsLitOffset);
 			}
-			else
+		}
+		return result;
+	}
+
+	public static float HitFactorFromShooter(Thing caster, float distance, float? acc = null)
+	{
+		float f = (acc.HasValue ? acc.Value : ((caster is Pawn) ? caster.GetStatValue(StatDefOf.ShootingAccuracyPawn) : (caster?.GetStatValue(StatDefOf.ShootingAccuracyTurret) ?? 1f)));
+		float num = Mathf.Pow(f, distance);
+		if (caster is Pawn)
+		{
+			num = ((distance <= 3f) ? (num * caster.GetStatValue(StatDefOf.ShootingAccuracyFactor_Touch)) : ((distance <= 12f) ? (num * Mathf.Lerp(caster.GetStatValue(StatDefOf.ShootingAccuracyFactor_Touch), caster.GetStatValue(StatDefOf.ShootingAccuracyFactor_Short), (distance - 3f) / 9f)) : ((distance <= 25f) ? (num * Mathf.Lerp(caster.GetStatValue(StatDefOf.ShootingAccuracyFactor_Short), caster.GetStatValue(StatDefOf.ShootingAccuracyFactor_Medium), (distance - 12f) / 13f)) : ((!(distance <= 40f)) ? (num * caster.GetStatValue(StatDefOf.ShootingAccuracyFactor_Long)) : (num * Mathf.Lerp(caster.GetStatValue(StatDefOf.ShootingAccuracyFactor_Medium), caster.GetStatValue(StatDefOf.ShootingAccuracyFactor_Long), (distance - 25f) / 15f))))));
+		}
+		return Mathf.Max(num, 0.0201f);
+	}
+
+	public string GetTextReadout()
+	{
+		StringBuilder stringBuilder = new StringBuilder();
+		if (forcedMissRadius > 0.5f)
+		{
+			stringBuilder.AppendLine();
+			stringBuilder.AppendLine("WeaponMissRadius".Translate() + ": " + forcedMissRadius.ToString("F1"));
+			stringBuilder.AppendLine("DirectHitChance".Translate() + ": " + (1f / (float)GenRadial.NumCellsInRadius(forcedMissRadius)).ToStringPercent());
+		}
+		else
+		{
+			stringBuilder.AppendLine(TotalEstimatedHitChance.ToStringPercent());
+			stringBuilder.AppendLine("   " + "ShootReportShooterAbility".Translate() + ": " + factorFromShooterAndDist.ToStringPercent());
+			stringBuilder.AppendLine("   " + "ShootReportWeapon".Translate() + ": " + factorFromEquipment.ToStringPercent());
+			if (target.HasThing && factorFromTargetSize != 1f)
 			{
-				shotReport.factorFromTargetSize = 1f;
+				stringBuilder.AppendLine("   " + "TargetSize".Translate() + ": " + factorFromTargetSize.ToStringPercent());
 			}
-			shotReport.forcedMissRadius = verb.verbProps.ForcedMissRadius;
-			shotReport.offsetFromDarkness = 0f;
-			if (ModsConfig.IdeologyActive && target.HasThing)
+			if (factorFromWeather < 0.99f)
+			{
+				stringBuilder.AppendLine("   " + "Weather".Translate() + ": " + factorFromWeather.ToStringPercent());
+			}
+			if (factorFromCoveringGas < 0.99f)
+			{
+				stringBuilder.AppendLine("   " + "BlindSmoke".Translate().CapitalizeFirst() + ": " + factorFromCoveringGas.ToStringPercent());
+			}
+			if (FactorFromPosture < 0.9999f)
+			{
+				stringBuilder.AppendLine("   " + "TargetProne".Translate() + ": " + FactorFromPosture.ToStringPercent());
+			}
+			if (FactorFromExecution != 1f)
+			{
+				stringBuilder.AppendLine("   " + "Execution".Translate() + ": " + FactorFromExecution.ToStringPercent());
+			}
+			if (ModsConfig.IdeologyActive && target.HasThing && offsetFromDarkness != 0f)
 			{
 				if (DarknessCombatUtility.IsOutdoorsAndLit(target.Thing))
 				{
-					shotReport.offsetFromDarkness = caster.GetStatValue(StatDefOf.ShootingAccuracyOutdoorsLitOffset, true, -1);
+					stringBuilder.AppendLine("   " + StatDefOf.ShootingAccuracyOutdoorsLitOffset.LabelCap + ": " + offsetFromDarkness.ToStringPercent());
 				}
 				else if (DarknessCombatUtility.IsOutdoorsAndDark(target.Thing))
 				{
-					shotReport.offsetFromDarkness = caster.GetStatValue(StatDefOf.ShootingAccuracyOutdoorsDarkOffset, true, -1);
+					stringBuilder.AppendLine("   " + StatDefOf.ShootingAccuracyOutdoorsDarkOffset.LabelCap + ": " + offsetFromDarkness.ToStringPercent());
 				}
 				else if (DarknessCombatUtility.IsIndoorsAndDark(target.Thing))
 				{
-					shotReport.offsetFromDarkness = caster.GetStatValue(StatDefOf.ShootingAccuracyIndoorsDarkOffset, true, -1);
+					stringBuilder.AppendLine("   " + StatDefOf.ShootingAccuracyIndoorsDarkOffset.LabelCap + ": " + offsetFromDarkness.ToStringPercent());
 				}
 				else if (DarknessCombatUtility.IsIndoorsAndLit(target.Thing))
 				{
-					shotReport.offsetFromDarkness = caster.GetStatValue(StatDefOf.ShootingAccuracyIndoorsLitOffset, true, -1);
+					stringBuilder.AppendLine("   " + StatDefOf.ShootingAccuracyIndoorsLitOffset.LabelCap + "   " + offsetFromDarkness.ToStringPercent());
 				}
 			}
-			return shotReport;
-		}
-
-		// Token: 0x0600571B RID: 22299 RVA: 0x001C077C File Offset: 0x001BE97C
-		public static float HitFactorFromShooter(Thing caster, float distance, float? acc = null)
-		{
-			float f;
-			if (acc != null)
+			if (PassCoverChance < 1f)
 			{
-				f = acc.Value;
-			}
-			else if (caster is Pawn)
-			{
-				f = caster.GetStatValue(StatDefOf.ShootingAccuracyPawn, true, -1);
-			}
-			else if (caster != null)
-			{
-				f = caster.GetStatValue(StatDefOf.ShootingAccuracyTurret, true, -1);
+				stringBuilder.AppendLine("   " + "ShootingCover".Translate() + ": " + PassCoverChance.ToStringPercent());
+				for (int i = 0; i < covers.Count; i++)
+				{
+					CoverInfo coverInfo = covers[i];
+					if (coverInfo.BlockChance > 0f)
+					{
+						stringBuilder.AppendLine("     " + "CoverThingBlocksPercentOfShots".Translate(coverInfo.Thing.LabelCap, coverInfo.BlockChance.ToStringPercent(), new NamedArgument(coverInfo.Thing.def, "COVER")).CapitalizeFirst());
+					}
+				}
 			}
 			else
 			{
-				f = 1f;
+				stringBuilder.AppendLine("   (" + "NoCoverLower".Translate() + ")");
 			}
-			float num = Mathf.Pow(f, distance);
-			if (caster is Pawn)
-			{
-				if (distance <= 3f)
-				{
-					num *= caster.GetStatValue(StatDefOf.ShootingAccuracyFactor_Touch, true, -1);
-				}
-				else if (distance <= 12f)
-				{
-					num *= Mathf.Lerp(caster.GetStatValue(StatDefOf.ShootingAccuracyFactor_Touch, true, -1), caster.GetStatValue(StatDefOf.ShootingAccuracyFactor_Short, true, -1), (distance - 3f) / 12f - 3f);
-				}
-				else if (distance <= 25f)
-				{
-					num *= Mathf.Lerp(caster.GetStatValue(StatDefOf.ShootingAccuracyFactor_Short, true, -1), caster.GetStatValue(StatDefOf.ShootingAccuracyFactor_Medium, true, -1), (distance - 12f) / 25f - 12f);
-				}
-				else if (distance <= 40f)
-				{
-					num *= Mathf.Lerp(caster.GetStatValue(StatDefOf.ShootingAccuracyFactor_Medium, true, -1), caster.GetStatValue(StatDefOf.ShootingAccuracyFactor_Long, true, -1), (distance - 25f) / 40f - 25f);
-				}
-				else
-				{
-					num *= caster.GetStatValue(StatDefOf.ShootingAccuracyFactor_Long, true, -1);
-				}
-			}
-			return Mathf.Max(num, 0.0201f);
 		}
+		return stringBuilder.ToString();
+	}
 
-		// Token: 0x0600571C RID: 22300 RVA: 0x001C08DC File Offset: 0x001BEADC
-		public string GetTextReadout()
+	public Thing GetRandomCoverToMissInto()
+	{
+		if (covers.TryRandomElementByWeight((CoverInfo c) => c.BlockChance, out var result))
 		{
-			StringBuilder stringBuilder = new StringBuilder();
-			if (this.forcedMissRadius > 0.5f)
-			{
-				stringBuilder.AppendLine();
-				stringBuilder.AppendLine("WeaponMissRadius".Translate() + ": " + this.forcedMissRadius.ToString("F1"));
-				stringBuilder.AppendLine("DirectHitChance".Translate() + ": " + (1f / (float)GenRadial.NumCellsInRadius(this.forcedMissRadius)).ToStringPercent());
-			}
-			else
-			{
-				stringBuilder.AppendLine(this.TotalEstimatedHitChance.ToStringPercent());
-				stringBuilder.AppendLine("   " + "ShootReportShooterAbility".Translate() + ": " + this.factorFromShooterAndDist.ToStringPercent());
-				stringBuilder.AppendLine("   " + "ShootReportWeapon".Translate() + ": " + this.factorFromEquipment.ToStringPercent());
-				if (this.target.HasThing && this.factorFromTargetSize != 1f)
-				{
-					stringBuilder.AppendLine("   " + "TargetSize".Translate() + ": " + this.factorFromTargetSize.ToStringPercent());
-				}
-				if (this.factorFromWeather < 0.99f)
-				{
-					stringBuilder.AppendLine("   " + "Weather".Translate() + ": " + this.factorFromWeather.ToStringPercent());
-				}
-				if (this.factorFromCoveringGas < 0.99f)
-				{
-					stringBuilder.AppendLine("   " + "BlindSmoke".Translate().CapitalizeFirst() + ": " + this.factorFromCoveringGas.ToStringPercent());
-				}
-				if (this.FactorFromPosture < 0.9999f)
-				{
-					stringBuilder.AppendLine("   " + "TargetProne".Translate() + ": " + this.FactorFromPosture.ToStringPercent());
-				}
-				if (this.FactorFromExecution != 1f)
-				{
-					stringBuilder.AppendLine("   " + "Execution".Translate() + ": " + this.FactorFromExecution.ToStringPercent());
-				}
-				if (ModsConfig.IdeologyActive && this.target.HasThing && this.offsetFromDarkness != 0f)
-				{
-					if (DarknessCombatUtility.IsOutdoorsAndLit(this.target.Thing))
-					{
-						stringBuilder.AppendLine("   " + StatDefOf.ShootingAccuracyOutdoorsLitOffset.LabelCap + ": " + this.offsetFromDarkness.ToStringPercent());
-					}
-					else if (DarknessCombatUtility.IsOutdoorsAndDark(this.target.Thing))
-					{
-						stringBuilder.AppendLine("   " + StatDefOf.ShootingAccuracyOutdoorsDarkOffset.LabelCap + ": " + this.offsetFromDarkness.ToStringPercent());
-					}
-					else if (DarknessCombatUtility.IsIndoorsAndDark(this.target.Thing))
-					{
-						stringBuilder.AppendLine("   " + StatDefOf.ShootingAccuracyIndoorsDarkOffset.LabelCap + ": " + this.offsetFromDarkness.ToStringPercent());
-					}
-					else if (DarknessCombatUtility.IsIndoorsAndLit(this.target.Thing))
-					{
-						stringBuilder.AppendLine("   " + StatDefOf.ShootingAccuracyIndoorsLitOffset.LabelCap + "   " + this.offsetFromDarkness.ToStringPercent());
-					}
-				}
-				if (this.PassCoverChance < 1f)
-				{
-					stringBuilder.AppendLine("   " + "ShootingCover".Translate() + ": " + this.PassCoverChance.ToStringPercent());
-					for (int i = 0; i < this.covers.Count; i++)
-					{
-						CoverInfo coverInfo = this.covers[i];
-						if (coverInfo.BlockChance > 0f)
-						{
-							stringBuilder.AppendLine("     " + "CoverThingBlocksPercentOfShots".Translate(coverInfo.Thing.LabelCap, coverInfo.BlockChance.ToStringPercent(), new NamedArgument(coverInfo.Thing.def, "COVER")).CapitalizeFirst());
-						}
-					}
-				}
-				else
-				{
-					stringBuilder.AppendLine("   (" + "NoCoverLower".Translate() + ")");
-				}
-			}
-			return stringBuilder.ToString();
+			return result.Thing;
 		}
-
-		// Token: 0x0600571D RID: 22301 RVA: 0x001C0DF0 File Offset: 0x001BEFF0
-		public Thing GetRandomCoverToMissInto()
-		{
-			CoverInfo coverInfo;
-			if (this.covers.TryRandomElementByWeight((CoverInfo c) => c.BlockChance, out coverInfo))
-			{
-				return coverInfo.Thing;
-			}
-			return null;
-		}
-
-		// Token: 0x04003F75 RID: 16245
-		private TargetInfo target;
-
-		// Token: 0x04003F76 RID: 16246
-		private float distance;
-
-		// Token: 0x04003F77 RID: 16247
-		private List<CoverInfo> covers;
-
-		// Token: 0x04003F78 RID: 16248
-		private float coversOverallBlockChance;
-
-		// Token: 0x04003F79 RID: 16249
-		private float factorFromShooterAndDist;
-
-		// Token: 0x04003F7A RID: 16250
-		private float factorFromEquipment;
-
-		// Token: 0x04003F7B RID: 16251
-		private float factorFromTargetSize;
-
-		// Token: 0x04003F7C RID: 16252
-		private float factorFromWeather;
-
-		// Token: 0x04003F7D RID: 16253
-		private float forcedMissRadius;
-
-		// Token: 0x04003F7E RID: 16254
-		private float offsetFromDarkness;
-
-		// Token: 0x04003F7F RID: 16255
-		private float factorFromCoveringGas;
-
-		// Token: 0x04003F80 RID: 16256
-		private ShootLine shootLine;
+		return null;
 	}
 }

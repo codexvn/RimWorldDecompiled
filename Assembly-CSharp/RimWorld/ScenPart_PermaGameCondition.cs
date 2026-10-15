@@ -1,106 +1,204 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class ScenPart_PermaGameCondition : ScenPart
 {
-	// Token: 0x02002873 RID: 10355
-	public class ScenPart_PermaGameCondition : ScenPart
+	[CompilerGenerated]
+	private sealed class _003CGetSummaryListEntries_003Ed__9 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x17002289 RID: 8841
-		// (get) Token: 0x0600E29D RID: 58013 RVA: 0x00425C24 File Offset: 0x00423E24
-		public override string Label
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private string tag;
+
+		public string _003C_003E3__tag;
+
+		public ScenPart_PermaGameCondition _003C_003E4__this;
+
+		string IEnumerator<string>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return "Permanent".Translate().CapitalizeFirst() + ": " + this.gameCondition.label.CapitalizeFirst();
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600E29E RID: 58014 RVA: 0x00425C68 File Offset: 0x00423E68
-		public override void DoEditInterface(Listing_ScenEdit listing)
+		object IEnumerator.Current
 		{
-			if (Widgets.ButtonText(listing.GetScenPartRect(this, ScenPart.RowHeight), this.gameCondition.LabelCap, true, true, true, null))
+			[DebuggerHidden]
+			get
 			{
-				FloatMenuUtility.MakeMenu<GameConditionDef>(this.AllowedGameConditions(), (GameConditionDef d) => d.LabelCap, (GameConditionDef d) => delegate()
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetSummaryListEntries_003Ed__9(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			ScenPart_PermaGameCondition scenPart_PermaGameCondition = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (tag == "PermaGameCondition")
 				{
-					this.gameCondition = d;
-				});
+					_003C_003E2__current = scenPart_PermaGameCondition.gameCondition.LabelCap + ": " + scenPart_PermaGameCondition.gameCondition.description.CapitalizeFirst();
+					_003C_003E1__state = 1;
+					return true;
+				}
+				break;
+			case 1:
+				_003C_003E1__state = -1;
+				break;
 			}
+			return false;
 		}
 
-		// Token: 0x0600E29F RID: 58015 RVA: 0x00425CDA File Offset: 0x00423EDA
-		public override void ExposeData()
+		bool IEnumerator.MoveNext()
 		{
-			base.ExposeData();
-			Scribe_Defs.Look<GameConditionDef>(ref this.gameCondition, "gameCondition");
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0600E2A0 RID: 58016 RVA: 0x00425CF2 File Offset: 0x00423EF2
-		public override void Randomize()
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			this.gameCondition = this.AllowedGameConditions().RandomElement<GameConditionDef>();
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x0600E2A1 RID: 58017 RVA: 0x00425D05 File Offset: 0x00423F05
-		private IEnumerable<GameConditionDef> AllowedGameConditions()
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
 		{
-			return from d in DefDatabase<GameConditionDef>.AllDefs
-			where d.canBePermanent
-			select d;
-		}
-
-		// Token: 0x0600E2A2 RID: 58018 RVA: 0x00425D30 File Offset: 0x00423F30
-		public override string Summary(Scenario scen)
-		{
-			return ScenSummaryList.SummaryWithList(scen, "PermaGameCondition", "ScenPart_PermaGameCondition".Translate());
-		}
-
-		// Token: 0x0600E2A3 RID: 58019 RVA: 0x00425D4C File Offset: 0x00423F4C
-		public override IEnumerable<string> GetSummaryListEntries(string tag)
-		{
-			if (tag == "PermaGameCondition")
+			_003CGetSummaryListEntries_003Ed__9 _003CGetSummaryListEntries_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				yield return this.gameCondition.LabelCap + ": " + this.gameCondition.description.CapitalizeFirst();
+				_003C_003E1__state = 0;
+				_003CGetSummaryListEntries_003Ed__ = this;
 			}
-			yield break;
-		}
-
-		// Token: 0x0600E2A4 RID: 58020 RVA: 0x00425D64 File Offset: 0x00423F64
-		public override void GenerateIntoMap(Map map)
-		{
-			GameCondition cond = GameConditionMaker.MakeConditionPermanent(this.gameCondition);
-			map.gameConditionManager.RegisterCondition(cond);
-		}
-
-		// Token: 0x0600E2A5 RID: 58021 RVA: 0x00425D8C File Offset: 0x00423F8C
-		public override bool CanCoexistWith(ScenPart other)
-		{
-			if (this.gameCondition == null)
+			else
 			{
-				return true;
+				_003CGetSummaryListEntries_003Ed__ = new _003CGetSummaryListEntries_003Ed__9(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
-			ScenPart_PermaGameCondition scenPart_PermaGameCondition = other as ScenPart_PermaGameCondition;
-			return scenPart_PermaGameCondition == null || this.gameCondition.CanCoexistWith(scenPart_PermaGameCondition.gameCondition);
+			_003CGetSummaryListEntries_003Ed__.tag = _003C_003E3__tag;
+			return _003CGetSummaryListEntries_003Ed__;
 		}
 
-		// Token: 0x0600E2A6 RID: 58022 RVA: 0x00425DC3 File Offset: 0x00423FC3
-		public override bool HasNullDefs()
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return base.HasNullDefs() || this.gameCondition == null;
+			return ((IEnumerable<string>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x0600E2A7 RID: 58023 RVA: 0x00425DD8 File Offset: 0x00423FD8
-		public override int GetHashCode()
+	private GameConditionDef gameCondition;
+
+	public const string PermaGameConditionTag = "PermaGameCondition";
+
+	public override string Label => "Permanent".Translate().CapitalizeFirst() + ": " + gameCondition.label.CapitalizeFirst();
+
+	public override void DoEditInterface(Listing_ScenEdit listing)
+	{
+		if (!Widgets.ButtonText(listing.GetScenPartRect(this, ScenPart.RowHeight), gameCondition.LabelCap, drawBackground: true, doMouseoverSound: true, active: true, null))
 		{
-			return base.GetHashCode() ^ ((this.gameCondition != null) ? this.gameCondition.GetHashCode() : 0);
+			return;
 		}
+		FloatMenuUtility.MakeMenu(AllowedGameConditions(), (GameConditionDef d) => d.LabelCap, (GameConditionDef d) => delegate
+		{
+			gameCondition = d;
+		});
+	}
 
-		// Token: 0x04009806 RID: 38918
-		private GameConditionDef gameCondition;
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Defs.Look(ref gameCondition, "gameCondition");
+	}
 
-		// Token: 0x04009807 RID: 38919
-		public const string PermaGameConditionTag = "PermaGameCondition";
+	public override void Randomize()
+	{
+		gameCondition = AllowedGameConditions().RandomElement();
+	}
+
+	private IEnumerable<GameConditionDef> AllowedGameConditions()
+	{
+		return DefDatabase<GameConditionDef>.AllDefs.Where((GameConditionDef d) => d.canBePermanent);
+	}
+
+	public override string Summary(Scenario scen)
+	{
+		return ScenSummaryList.SummaryWithList(scen, "PermaGameCondition", "ScenPart_PermaGameCondition".Translate());
+	}
+
+	[IteratorStateMachine(typeof(_003CGetSummaryListEntries_003Ed__9))]
+	public override IEnumerable<string> GetSummaryListEntries(string tag)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetSummaryListEntries_003Ed__9(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__tag = tag
+		};
+	}
+
+	public override void GenerateIntoMap(Map map)
+	{
+		GameCondition cond = GameConditionMaker.MakeConditionPermanent(gameCondition);
+		map.gameConditionManager.RegisterCondition(cond);
+	}
+
+	public override bool CanCoexistWith(ScenPart other)
+	{
+		if (gameCondition == null)
+		{
+			return true;
+		}
+		if (other is ScenPart_PermaGameCondition scenPart_PermaGameCondition && !gameCondition.CanCoexistWith(scenPart_PermaGameCondition.gameCondition))
+		{
+			return false;
+		}
+		return true;
+	}
+
+	public override bool HasNullDefs()
+	{
+		if (!base.HasNullDefs())
+		{
+			return gameCondition == null;
+		}
+		return true;
+	}
+
+	public override int GetHashCode()
+	{
+		return base.GetHashCode() ^ ((gameCondition != null) ? gameCondition.GetHashCode() : 0);
 	}
 }

@@ -1,43 +1,52 @@
-﻿using System;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class StageEndTrigger_RoleArrivedAndSpectatorsOnSubstructure : StageEndTrigger_RolesArrived
 {
-	// Token: 0x0200269D RID: 9885
-	public class StageEndTrigger_RoleArrivedAndSpectatorsOnSubstructure : StageEndTrigger_RolesArrived
+	protected override bool ArrivedCheck(string r, LordJob_Ritual ritual)
 	{
-		// Token: 0x0600D906 RID: 55558 RVA: 0x00404BB0 File Offset: 0x00402DB0
-		protected override bool ArrivedCheck(string r, LordJob_Ritual ritual)
+		if (!base.ArrivedCheck(r, ritual))
 		{
-			if (!base.ArrivedCheck(r, ritual))
+			return false;
+		}
+		if (Find.TickManager.TicksGame % 60 != 0)
+		{
+			return false;
+		}
+		Building_GravEngine building_GravEngine = ritual.selectedTarget.Thing?.TryGetComp<CompPilotConsole>()?.engine;
+		if (building_GravEngine == null)
+		{
+			Log.Error("Engine could not be found in ritual end trigger");
+			return true;
+		}
+		foreach (Pawn item in ritual.assignments.SpectatorsForReading)
+		{
+			if (!building_GravEngine.ValidSubstructure.Contains(item.Position))
 			{
 				return false;
 			}
-			Thing thing = ritual.selectedTarget.Thing;
-			Building_GravEngine building_GravEngine;
-			if (thing == null)
+		}
+		if (building_GravEngine.pawnsToBoard != null)
+		{
+			foreach (Pawn item2 in building_GravEngine.pawnsToBoard)
 			{
-				building_GravEngine = null;
-			}
-			else
-			{
-				CompPilotConsole compPilotConsole = thing.TryGetComp<CompPilotConsole>();
-				building_GravEngine = ((compPilotConsole != null) ? compPilotConsole.engine : null);
-			}
-			Building_GravEngine building_GravEngine2 = building_GravEngine;
-			if (building_GravEngine2 == null)
-			{
-				Log.Error("Engine could not be found in ritual end trigger");
-				return true;
-			}
-			foreach (Pawn pawn in ritual.assignments.SpectatorsForReading)
-			{
-				if (!building_GravEngine2.ValidSubstructure.Contains(pawn.Position))
+				if (!building_GravEngine.ValidSubstructure.Contains(item2.Position))
 				{
 					return false;
 				}
 			}
-			return true;
 		}
+		if (building_GravEngine.pawnsToLeave != null)
+		{
+			foreach (Pawn item3 in building_GravEngine.pawnsToLeave)
+			{
+				if (building_GravEngine.ValidSubstructure.Contains(item3.Position))
+				{
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 }

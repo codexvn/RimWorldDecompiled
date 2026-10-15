@@ -1,164 +1,256 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompAbilityEffect_Chunkskip : CompAbilityEffect
 {
-	// Token: 0x020021FD RID: 8701
-	public class CompAbilityEffect_Chunkskip : CompAbilityEffect
+	[CompilerGenerated]
+	private sealed class _003CGetPreCastActions_003Ed__4 : IEnumerable<PreCastAction>, IEnumerable, IEnumerator<PreCastAction>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001D11 RID: 7441
-		// (get) Token: 0x0600BE80 RID: 48768 RVA: 0x00373C02 File Offset: 0x00371E02
-		public new CompProperties_AbilityChunkskip Props
+		private int _003C_003E1__state;
+
+		private PreCastAction _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompAbilityEffect_Chunkskip _003C_003E4__this;
+
+		PreCastAction IEnumerator<PreCastAction>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (CompProperties_AbilityChunkskip)this.props;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600BE81 RID: 48769 RVA: 0x00373C10 File Offset: 0x00371E10
-		public override void Apply(LocalTargetInfo target, LocalTargetInfo dest)
+		object IEnumerator.Current
 		{
-			IEnumerable<Thing> enumerable = this.FindClosestChunks(target);
-			Map map = this.parent.pawn.Map;
-			foreach (Thing thing in enumerable)
+			[DebuggerHidden]
+			get
 			{
-				IntVec3 intVec;
-				if (this.FindFreeCell(target.Cell, map, out intVec))
-				{
-					AbilityUtility.DoClamor(thing.Position, (float)this.Props.clamorRadius, this.parent.pawn, this.Props.clamorType);
-					AbilityUtility.DoClamor(intVec, (float)this.Props.clamorRadius, this.parent.pawn, this.Props.clamorType);
-					this.parent.AddEffecterToMaintain(EffecterDefOf.Skip_Entry.Spawn(thing.Position, map, 0.72f), thing.Position, 60, null);
-					this.parent.AddEffecterToMaintain(EffecterDefOf.Skip_ExitNoDelay.Spawn(intVec, map, 0.72f), intVec, 60, null);
-					FleckMaker.ThrowDustPuffThick(intVec.ToVector3(), map, Rand.Range(1.5f, 3f), CompAbilityEffect_Chunkskip.DustColor);
-					thing.Position = intVec;
-					CompAbilityEffect_Teleport.SendSkipUsedSignal(intVec, this.parent.pawn);
-				}
+				return _003C_003E2__current;
 			}
-			SoundDefOf.Psycast_Skip_Pulse.PlayOneShot(new TargetInfo(target.Cell, map, false));
-			base.Apply(target, dest);
 		}
 
-		// Token: 0x0600BE82 RID: 48770 RVA: 0x00373D94 File Offset: 0x00371F94
-		public override IEnumerable<PreCastAction> GetPreCastActions()
+		[DebuggerHidden]
+		public _003CGetPreCastActions_003Ed__4(int _003C_003E1__state)
 		{
-			yield return new PreCastAction
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			CompAbilityEffect_Chunkskip CS_0024_003C_003E8__locals2 = _003C_003E4__this;
+			switch (num)
 			{
-				action = delegate(LocalTargetInfo t, LocalTargetInfo d)
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = new PreCastAction
 				{
-					foreach (Thing t2 in this.FindClosestChunks(t))
+					action = delegate(LocalTargetInfo t, LocalTargetInfo d)
 					{
-						FleckMaker.Static(t2.TrueCenter(), this.parent.pawn.Map, FleckDefOf.PsycastSkipFlashEntry, 0.72f);
-					}
-				},
-				ticksAwayFromCast = 5
-			};
-			yield break;
+						foreach (Thing item in CS_0024_003C_003E8__locals2.FindClosestChunks(t))
+						{
+							FleckMaker.Static(item.TrueCenter(), CS_0024_003C_003E8__locals2.parent.pawn.Map, FleckDefOf.PsycastSkipFlashEntry, 0.72f);
+						}
+					},
+					ticksAwayFromCast = 5
+				};
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				return false;
+			}
 		}
 
-		// Token: 0x0600BE83 RID: 48771 RVA: 0x00373DA4 File Offset: 0x00371FA4
-		private IEnumerable<Thing> FindClosestChunks(LocalTargetInfo target)
+		bool IEnumerator.MoveNext()
 		{
-			if (this.lastChunkUpdateFrame == Time.frameCount && this.foundChunksTemp != null)
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<PreCastAction> IEnumerable<PreCastAction>.GetEnumerator()
+		{
+			_003CGetPreCastActions_003Ed__4 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				return this.foundChunksTemp;
+				_003C_003E1__state = 0;
+				result = this;
 			}
-			if (this.foundChunksTemp == null)
+			else
 			{
-				this.foundChunksTemp = new List<Thing>();
-			}
-			this.foundChunksTemp.Clear();
-			RegionTraverser.BreadthFirstTraverse(target.Cell, this.parent.pawn.Map, (Region from, Region to) => true, delegate(Region x)
-			{
-				List<Thing> list = x.ListerThings.ThingsInGroup(ThingRequestGroup.Chunk);
-				int num = 0;
-				while (num < list.Count && this.foundChunksTemp.Count < this.Props.chunkCount)
+				result = new _003CGetPreCastActions_003Ed__4(0)
 				{
-					Thing thing = list[num];
-					if (!thing.Fogged() && !this.foundChunksTemp.Contains(thing))
-					{
-						this.foundChunksTemp.Add(thing);
-					}
-					num++;
-				}
-				return this.foundChunksTemp.Count >= this.Props.chunkCount;
-			}, 999999, RegionType.Set_All);
-			this.lastChunkUpdateFrame = Time.frameCount;
-			return this.foundChunksTemp;
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
 		}
 
-		// Token: 0x0600BE84 RID: 48772 RVA: 0x00373E4C File Offset: 0x0037204C
-		private bool FindFreeCell(IntVec3 target, Map map, out IntVec3 result)
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return CellFinder.TryFindRandomCellNear(target, map, Mathf.RoundToInt(this.Props.scatterRadius) - 1, (IntVec3 cell) => CompAbilityEffect_WithDest.CanTeleportThingTo(cell, map) && GenSight.LineOfSight(cell, target, map, true, null, 0, 0), out result, -1);
+			return ((IEnumerable<PreCastAction>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x0600BE85 RID: 48773 RVA: 0x00373EA0 File Offset: 0x003720A0
-		public override void DrawEffectPreview(LocalTargetInfo target)
+	public static Color DustColor = new Color(0.55f, 0.55f, 0.55f, 3f);
+
+	private List<Thing> foundChunksTemp;
+
+	private int lastChunkUpdateFrame;
+
+	public new CompProperties_AbilityChunkskip Props => (CompProperties_AbilityChunkskip)props;
+
+	public override void Apply(LocalTargetInfo target, LocalTargetInfo dest)
+	{
+		IEnumerable<Thing> enumerable = FindClosestChunks(target);
+		Map map = parent.pawn.Map;
+		foreach (Thing item in enumerable)
 		{
-			foreach (Thing t in this.FindClosestChunks(target))
+			if (FindFreeCell(target.Cell, map, out var result))
 			{
-				GenDraw.DrawLineBetween(t.TrueCenter(), target.CenterVector3);
-				GenDraw.DrawTargetHighlight(t);
+				AbilityUtility.DoClamor(item.Position, Props.clamorRadius, parent.pawn, Props.clamorType);
+				AbilityUtility.DoClamor(result, Props.clamorRadius, parent.pawn, Props.clamorType);
+				parent.AddEffecterToMaintain(EffecterDefOf.Skip_Entry.Spawn(item.Position, map, 0.72f), item.Position, 60);
+				parent.AddEffecterToMaintain(EffecterDefOf.Skip_ExitNoDelay.Spawn(result, map, 0.72f), result, 60);
+				FleckMaker.ThrowDustPuffThick(result.ToVector3(), map, Rand.Range(1.5f, 3f), DustColor);
+				item.Position = result;
+				CompAbilityEffect_Teleport.SendSkipUsedSignal(result, parent.pawn);
 			}
-			GenDraw.DrawRadiusRing(target.Cell, this.Props.scatterRadius);
 		}
+		SoundDefOf.Psycast_Skip_Pulse.PlayOneShot(new TargetInfo(target.Cell, map));
+		base.Apply(target, dest);
+	}
 
-		// Token: 0x0600BE86 RID: 48774 RVA: 0x00373F1C File Offset: 0x0037211C
-		public override bool Valid(LocalTargetInfo target, bool throwMessages = false)
+	[IteratorStateMachine(typeof(_003CGetPreCastActions_003Ed__4))]
+	public override IEnumerable<PreCastAction> GetPreCastActions()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetPreCastActions_003Ed__4(-2)
 		{
-			if (!target.Cell.Standable(this.parent.pawn.Map))
+			_003C_003E4__this = this
+		};
+	}
+
+	private IEnumerable<Thing> FindClosestChunks(LocalTargetInfo target)
+	{
+		if (lastChunkUpdateFrame == Time.frameCount && foundChunksTemp != null)
+		{
+			return foundChunksTemp;
+		}
+		if (foundChunksTemp == null)
+		{
+			foundChunksTemp = new List<Thing>();
+		}
+		foundChunksTemp.Clear();
+		RegionTraverser.BreadthFirstTraverse(target.Cell, parent.pawn.Map, (Region from, Region to) => true, delegate(Region x)
+		{
+			List<Thing> list = x.ListerThings.ThingsInGroup(ThingRequestGroup.Chunk);
+			for (int i = 0; i < list.Count; i++)
 			{
-				return false;
-			}
-			if (target.Cell.Filled(this.parent.pawn.Map))
-			{
-				return false;
-			}
-			if (!this.FindClosestChunks(target).Any<Thing>())
-			{
-				return false;
-			}
-			IntVec3 intVec;
-			if (!this.FindFreeCell(target.Cell, this.parent.pawn.Map, out intVec))
-			{
-				if (throwMessages)
+				if (foundChunksTemp.Count >= Props.chunkCount)
 				{
-					Messages.Message("CannotUseAbility".Translate(this.parent.def.label) + ": " + "AbilityNotEnoughFreeSpace".Translate(), this.parent.pawn, MessageTypeDefOf.RejectInput, false);
+					break;
 				}
-				return false;
+				Thing thing = list[i];
+				if (!thing.Fogged() && !foundChunksTemp.Contains(thing))
+				{
+					foundChunksTemp.Add(thing);
+				}
 			}
-			return base.Valid(target, throwMessages);
-		}
+			return foundChunksTemp.Count >= Props.chunkCount;
+		}, 999999, RegionType.Set_All);
+		lastChunkUpdateFrame = Time.frameCount;
+		return foundChunksTemp;
+	}
 
-		// Token: 0x0600BE87 RID: 48775 RVA: 0x00374000 File Offset: 0x00372200
-		public override bool CanApplyOn(LocalTargetInfo target, LocalTargetInfo dest)
-		{
-			IntVec3 intVec;
-			return this.FindClosestChunks(target).Any<Thing>() && this.FindFreeCell(target.Cell, this.parent.pawn.Map, out intVec) && base.CanApplyOn(target, dest);
-		}
+	private bool FindFreeCell(IntVec3 target, Map map, out IntVec3 result)
+	{
+		return CellFinder.TryFindRandomCellNear(target, map, Mathf.RoundToInt(Props.scatterRadius) - 1, (IntVec3 cell) => CompAbilityEffect_WithDest.CanTeleportThingTo(cell, map) && GenSight.LineOfSight(cell, target, map, skipFirstCell: true), out result);
+	}
 
-		// Token: 0x0600BE88 RID: 48776 RVA: 0x00374048 File Offset: 0x00372248
-		public override string ExtraLabelMouseAttachment(LocalTargetInfo target)
+	public override void DrawEffectPreview(LocalTargetInfo target)
+	{
+		foreach (Thing item in FindClosestChunks(target))
 		{
-			if (target.IsValid && !target.Cell.Filled(this.parent.pawn.Map) && !this.FindClosestChunks(target).Any<Thing>())
+			GenDraw.DrawLineBetween(item.TrueCenter(), target.CenterVector3);
+			GenDraw.DrawTargetHighlight(item);
+		}
+		GenDraw.DrawRadiusRing(target.Cell, Props.scatterRadius);
+	}
+
+	public override bool Valid(LocalTargetInfo target, bool throwMessages = false)
+	{
+		if (!target.Cell.Standable(parent.pawn.Map))
+		{
+			return false;
+		}
+		if (target.Cell.Filled(parent.pawn.Map))
+		{
+			return false;
+		}
+		if (!FindClosestChunks(target).Any())
+		{
+			return false;
+		}
+		if (!FindFreeCell(target.Cell, parent.pawn.Map, out var _))
+		{
+			if (throwMessages)
 			{
-				return "AbilityNoChunkToSkip".Translate();
+				Messages.Message("CannotUseAbility".Translate(parent.def.label) + ": " + "AbilityNotEnoughFreeSpace".Translate(), parent.pawn, MessageTypeDefOf.RejectInput, historical: false);
 			}
-			return base.ExtraLabelMouseAttachment(target);
+			return false;
 		}
+		return base.Valid(target, throwMessages);
+	}
 
-		// Token: 0x040082DD RID: 33501
-		public static Color DustColor = new Color(0.55f, 0.55f, 0.55f, 3f);
+	public override bool CanApplyOn(LocalTargetInfo target, LocalTargetInfo dest)
+	{
+		if (!FindClosestChunks(target).Any())
+		{
+			return false;
+		}
+		if (!FindFreeCell(target.Cell, parent.pawn.Map, out var _))
+		{
+			return false;
+		}
+		return base.CanApplyOn(target, dest);
+	}
 
-		// Token: 0x040082DE RID: 33502
-		private List<Thing> foundChunksTemp;
-
-		// Token: 0x040082DF RID: 33503
-		private int lastChunkUpdateFrame;
+	public override string ExtraLabelMouseAttachment(LocalTargetInfo target)
+	{
+		if (target.IsValid && !target.Cell.Filled(parent.pawn.Map) && !FindClosestChunks(target).Any())
+		{
+			return "AbilityNoChunkToSkip".Translate();
+		}
+		return base.ExtraLabelMouseAttachment(target);
 	}
 }

@@ -1,223 +1,276 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public abstract class ScenPart : IExposable
 {
-	// Token: 0x02002893 RID: 10387
-	public abstract class ScenPart : IExposable
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__36 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x17002293 RID: 8851
-		// (get) Token: 0x0600E347 RID: 58183 RVA: 0x00427930 File Offset: 0x00425B30
-		public static float RowHeight
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public ScenPart _003C_003E4__this;
+
+		string IEnumerator<string>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return Text.LineHeight;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002294 RID: 8852
-		// (get) Token: 0x0600E348 RID: 58184 RVA: 0x00427937 File Offset: 0x00425B37
-		public virtual string Label
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.def.LabelCap;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002295 RID: 8853
-		// (get) Token: 0x0600E349 RID: 58185 RVA: 0x00002501 File Offset: 0x00000701
-		public virtual bool OverrideDangerMusic
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__36(int _003C_003E1__state)
 		{
-			get
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			ScenPart scenPart = _003C_003E4__this;
+			switch (num)
 			{
+			default:
 				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (scenPart.def == null)
+				{
+					_003C_003E2__current = scenPart.GetType()?.ToString() + " has null def.";
+					_003C_003E1__state = 1;
+					return true;
+				}
+				break;
+			case 1:
+				_003C_003E1__state = -1;
+				break;
 			}
-		}
-
-		// Token: 0x0600E34A RID: 58186 RVA: 0x00427949 File Offset: 0x00425B49
-		public virtual bool Valid()
-		{
-			return this.def != null;
-		}
-
-		// Token: 0x0600E34B RID: 58187 RVA: 0x00427954 File Offset: 0x00425B54
-		public virtual void ExposeData()
-		{
-			Scribe_Defs.Look<ScenPartDef>(ref this.def, "def");
-		}
-
-		// Token: 0x0600E34C RID: 58188 RVA: 0x00427966 File Offset: 0x00425B66
-		public ScenPart CopyForEditing()
-		{
-			ScenPart scenPart = this.CopyForEditingInner();
-			scenPart.def = this.def;
-			return scenPart;
-		}
-
-		// Token: 0x0600E34D RID: 58189 RVA: 0x0042797A File Offset: 0x00425B7A
-		protected virtual ScenPart CopyForEditingInner()
-		{
-			return (ScenPart)base.MemberwiseClone();
-		}
-
-		// Token: 0x0600E34E RID: 58190 RVA: 0x00427987 File Offset: 0x00425B87
-		public virtual void DoEditInterface(Listing_ScenEdit listing)
-		{
-			listing.GetScenPartRect(this, ScenPart.RowHeight);
-		}
-
-		// Token: 0x0600E34F RID: 58191 RVA: 0x00427996 File Offset: 0x00425B96
-		public virtual string Summary(Scenario scen)
-		{
-			return this.def.description;
-		}
-
-		// Token: 0x0600E350 RID: 58192 RVA: 0x00035AE5 File Offset: 0x00033CE5
-		public virtual IEnumerable<string> GetSummaryListEntries(string tag)
-		{
-			return Enumerable.Empty<string>();
-		}
-
-		// Token: 0x0600E351 RID: 58193 RVA: 0x000026EA File Offset: 0x000008EA
-		public virtual void Randomize()
-		{
-		}
-
-		// Token: 0x0600E352 RID: 58194 RVA: 0x00002501 File Offset: 0x00000701
-		public virtual bool TryMerge(ScenPart other)
-		{
 			return false;
 		}
 
-		// Token: 0x0600E353 RID: 58195 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public virtual bool CanCoexistWith(ScenPart other)
+		bool IEnumerator.MoveNext()
 		{
-			return true;
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0600E354 RID: 58196 RVA: 0x004279A3 File Offset: 0x00425BA3
-		public virtual IEnumerable<Page> GetConfigPages()
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			return Enumerable.Empty<Page>();
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x0600E355 RID: 58197 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public virtual bool AllowPlayerStartingPawn(Pawn pawn, bool tryingToRedress, PawnGenerationRequest req)
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
 		{
-			return true;
-		}
-
-		// Token: 0x0600E356 RID: 58198 RVA: 0x000026EA File Offset: 0x000008EA
-		public virtual void Notify_NewPawnGenerating(Pawn pawn, PawnGenerationContext context)
-		{
-		}
-
-		// Token: 0x0600E357 RID: 58199 RVA: 0x000026EA File Offset: 0x000008EA
-		public virtual void Notify_PawnGenerated(Pawn pawn, PawnGenerationContext context, bool redressed)
-		{
-		}
-
-		// Token: 0x0600E358 RID: 58200 RVA: 0x000026EA File Offset: 0x000008EA
-		public virtual void Notify_PawnDied(Corpse corpse)
-		{
-		}
-
-		// Token: 0x0600E359 RID: 58201 RVA: 0x000026EA File Offset: 0x000008EA
-		public virtual void PreConfigure()
-		{
-		}
-
-		// Token: 0x0600E35A RID: 58202 RVA: 0x000026EA File Offset: 0x000008EA
-		public virtual void PostWorldGenerate()
-		{
-		}
-
-		// Token: 0x0600E35B RID: 58203 RVA: 0x000026EA File Offset: 0x000008EA
-		public virtual void PostIdeoChosen()
-		{
-		}
-
-		// Token: 0x0600E35C RID: 58204 RVA: 0x000026EA File Offset: 0x000008EA
-		public virtual void PreMapGenerate()
-		{
-		}
-
-		// Token: 0x0600E35D RID: 58205 RVA: 0x00419816 File Offset: 0x00417A16
-		public virtual IEnumerable<Thing> PlayerStartingThings()
-		{
-			return Enumerable.Empty<Thing>();
-		}
-
-		// Token: 0x0600E35E RID: 58206 RVA: 0x000026EA File Offset: 0x000008EA
-		public virtual void GenerateIntoMap(Map map)
-		{
-		}
-
-		// Token: 0x0600E35F RID: 58207 RVA: 0x000026EA File Offset: 0x000008EA
-		public virtual void PostMapGenerate(Map map)
-		{
-		}
-
-		// Token: 0x0600E360 RID: 58208 RVA: 0x000026EA File Offset: 0x000008EA
-		public virtual void MapRemoved(Map map)
-		{
-		}
-
-		// Token: 0x0600E361 RID: 58209 RVA: 0x000026EA File Offset: 0x000008EA
-		public virtual void PostGameStart()
-		{
-		}
-
-		// Token: 0x0600E362 RID: 58210 RVA: 0x000026EA File Offset: 0x000008EA
-		public virtual void Tick()
-		{
-		}
-
-		// Token: 0x0600E363 RID: 58211 RVA: 0x003FD4A0 File Offset: 0x003FB6A0
-		public virtual IEnumerable<Alert> GetAlerts()
-		{
-			return Enumerable.Empty<Alert>();
-		}
-
-		// Token: 0x0600E364 RID: 58212 RVA: 0x004279AA File Offset: 0x00425BAA
-		public virtual IEnumerable<string> ConfigErrors()
-		{
-			if (this.def == null)
+			_003CConfigErrors_003Ed__36 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				Type type = base.GetType();
-				yield return ((type != null) ? type.ToString() : null) + " has null def.";
+				_003C_003E1__state = 0;
+				result = this;
 			}
-			yield break;
-		}
-
-		// Token: 0x0600E365 RID: 58213 RVA: 0x004279BA File Offset: 0x00425BBA
-		public virtual bool HasNullDefs()
-		{
-			return this.def == null;
-		}
-
-		// Token: 0x0600E366 RID: 58214 RVA: 0x004279C5 File Offset: 0x00425BC5
-		public override int GetHashCode()
-		{
-			if (this.def == null)
+			else
 			{
-				return 0;
+				result = new _003CConfigErrors_003Ed__36(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
-			return this.def.GetHashCode();
+			return result;
 		}
 
-		// Token: 0x0400984F RID: 38991
-		[TranslationHandle]
-		public ScenPartDef def;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x04009850 RID: 38992
-		public bool visible = true;
+	[TranslationHandle]
+	public ScenPartDef def;
 
-		// Token: 0x04009851 RID: 38993
-		public bool summarized;
+	public bool visible = true;
+
+	public bool summarized;
+
+	public static float RowHeight => Text.LineHeight;
+
+	public virtual string Label => def.LabelCap;
+
+	public virtual bool OverrideDangerMusic => false;
+
+	public virtual bool Valid()
+	{
+		return def != null;
+	}
+
+	public virtual void ExposeData()
+	{
+		Scribe_Defs.Look(ref def, "def");
+	}
+
+	public ScenPart CopyForEditing()
+	{
+		ScenPart scenPart = CopyForEditingInner();
+		scenPart.def = def;
+		return scenPart;
+	}
+
+	protected virtual ScenPart CopyForEditingInner()
+	{
+		return (ScenPart)MemberwiseClone();
+	}
+
+	public virtual void DoEditInterface(Listing_ScenEdit listing)
+	{
+		listing.GetScenPartRect(this, RowHeight);
+	}
+
+	public virtual string Summary(Scenario scen)
+	{
+		return def.description;
+	}
+
+	public virtual IEnumerable<string> GetSummaryListEntries(string tag)
+	{
+		return Enumerable.Empty<string>();
+	}
+
+	public virtual void Randomize()
+	{
+	}
+
+	public virtual bool TryMerge(ScenPart other)
+	{
+		return false;
+	}
+
+	public virtual bool CanCoexistWith(ScenPart other)
+	{
+		return true;
+	}
+
+	public virtual IEnumerable<Page> GetConfigPages()
+	{
+		return Enumerable.Empty<Page>();
+	}
+
+	public virtual bool AllowPlayerStartingPawn(Pawn pawn, bool tryingToRedress, PawnGenerationRequest req)
+	{
+		return true;
+	}
+
+	public virtual void Notify_NewPawnGenerating(Pawn pawn, PawnGenerationContext context)
+	{
+	}
+
+	public virtual void Notify_PawnGenerated(Pawn pawn, PawnGenerationContext context, bool redressed)
+	{
+	}
+
+	public virtual void Notify_PawnDied(Corpse corpse)
+	{
+	}
+
+	public virtual void PreConfigure()
+	{
+	}
+
+	public virtual void PostWorldGenerate()
+	{
+	}
+
+	public virtual void PostIdeoChosen()
+	{
+	}
+
+	public virtual void PreMapGenerate()
+	{
+	}
+
+	public virtual IEnumerable<Thing> PlayerStartingThings()
+	{
+		return Enumerable.Empty<Thing>();
+	}
+
+	public virtual void GenerateIntoMap(Map map)
+	{
+	}
+
+	public virtual void PostMapGenerate(Map map)
+	{
+	}
+
+	public virtual void PostGravshipLanded(Map map)
+	{
+	}
+
+	public virtual void MapRemoved(Map map)
+	{
+	}
+
+	public virtual void PostGameStart()
+	{
+	}
+
+	public virtual void Tick()
+	{
+	}
+
+	public virtual IEnumerable<Alert> GetAlerts()
+	{
+		return Enumerable.Empty<Alert>();
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__36))]
+	public virtual IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__36(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public virtual bool HasNullDefs()
+	{
+		return def == null;
+	}
+
+	public override int GetHashCode()
+	{
+		if (def == null)
+		{
+			return 0;
+		}
+		return def.GetHashCode();
 	}
 }

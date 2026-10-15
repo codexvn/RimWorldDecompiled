@@ -1,59 +1,158 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class RoomRequirement_Thing : RoomRequirement
 {
-	// Token: 0x020037A8 RID: 14248
-	public class RoomRequirement_Thing : RoomRequirement
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__4 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x06013BD8 RID: 80856 RVA: 0x005DCCAF File Offset: 0x005DAEAF
-		public override bool Met(Room r, Pawn p = null)
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public RoomRequirement_Thing _003C_003E4__this;
+
+		string IEnumerator<string>.Current
 		{
-			return r.ContainsThing(this.thingDef);
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x06013BD9 RID: 80857 RVA: 0x005DCCC0 File Offset: 0x005DAEC0
-		public override bool SameOrSubsetOf(RoomRequirement other)
+		object IEnumerator.Current
 		{
-			if (!base.SameOrSubsetOf(other))
+			[DebuggerHidden]
+			get
 			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__4(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			RoomRequirement_Thing roomRequirement_Thing = _003C_003E4__this;
+			switch (num)
+			{
+			default:
 				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (roomRequirement_Thing.thingDef == null)
+				{
+					_003C_003E2__current = "thingDef is null";
+					_003C_003E1__state = 1;
+					return true;
+				}
+				break;
+			case 1:
+				_003C_003E1__state = -1;
+				break;
 			}
-			RoomRequirement_Thing roomRequirement_Thing = (RoomRequirement_Thing)other;
-			return this.thingDef == roomRequirement_Thing.thingDef;
+			return false;
 		}
 
-		// Token: 0x06013BDA RID: 80858 RVA: 0x005DCCED File Offset: 0x005DAEED
-		public override string Label(Room r = null)
+		bool IEnumerator.MoveNext()
 		{
-			return ((!this.labelKey.NullOrEmpty()) ? this.labelKey.Translate() : this.thingDef.label) + ((r != null) ? " 0/1" : "");
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x06013BDB RID: 80859 RVA: 0x005DCD2D File Offset: 0x005DAF2D
-		public override IEnumerable<string> ConfigErrors()
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			if (this.thingDef == null)
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__4 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				yield return "thingDef is null";
+				_003C_003E1__state = 0;
+				result = this;
 			}
-			yield break;
+			else
+			{
+				result = new _003CConfigErrors_003Ed__4(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
 		}
 
-		// Token: 0x06013BDC RID: 80860 RVA: 0x005DCD3D File Offset: 0x005DAF3D
-		public override bool PlayerCanBuildNow()
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return this.thingDef.IsResearchFinished;
+			return ((IEnumerable<string>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x06013BDD RID: 80861 RVA: 0x005DCD4A File Offset: 0x005DAF4A
-		public override void ExposeData()
+	public ThingDef thingDef;
+
+	public override bool Met(Room r, Pawn p = null)
+	{
+		return r.ContainsThing(thingDef);
+	}
+
+	public override bool SameOrSubsetOf(RoomRequirement other)
+	{
+		if (!base.SameOrSubsetOf(other))
 		{
-			base.ExposeData();
-			Scribe_Defs.Look<ThingDef>(ref this.thingDef, "thingDef");
+			return false;
 		}
+		RoomRequirement_Thing roomRequirement_Thing = (RoomRequirement_Thing)other;
+		return thingDef == roomRequirement_Thing.thingDef;
+	}
 
-		// Token: 0x0400DAB4 RID: 55988
-		public ThingDef thingDef;
+	public override string Label(Room r = null)
+	{
+		return ((!labelKey.NullOrEmpty()) ? ((string)labelKey.Translate()) : thingDef.label) + ((r != null) ? " 0/1" : "");
+	}
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__4))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__4(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override bool PlayerCanBuildNow()
+	{
+		return thingDef.IsResearchFinished;
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Defs.Look(ref thingDef, "thingDef");
 	}
 }

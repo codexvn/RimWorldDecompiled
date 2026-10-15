@@ -17,6 +17,8 @@ internal static class CrashDialog
 {
 	private static int _shown;
 
+	private const string NoVulkanSupport = "No Vulkan support was found on this computer, which the game requires. Updating, repairing, or reinstalling the graphics driver (in that order) should fix it. If you have performed all these steps, and are still seeing this message, it is likely your GPU is not Vulkan capable, and you should switch back to RimWorld 1.6.";
+
 	private const uint MB_OK = 0u;
 
 	private const uint MB_YESNO = 4u;
@@ -60,6 +62,10 @@ internal static class CrashDialog
 		StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.Append(product).AppendLine(" has encountered an unrecoverable error and must shut down.").AppendLine();
 		stringBuilder.AppendLine(Describe(exception)).AppendLine();
+		if (VulkanStartup.InitializationPending && VulkanStartup.Stage < 3)
+		{
+			stringBuilder.AppendLine("Launching the game again will try a different Vulkan setup.").AppendLine();
+		}
 		if (reportPath != null)
 		{
 			stringBuilder.AppendLine("A crash report was written to:").AppendLine(reportPath).AppendLine();
@@ -97,7 +103,8 @@ internal static class CrashDialog
 		list.Reverse();
 		foreach (Exception item in list)
 		{
-			if (item is VkResultError vkResultError)
+			Exception ex4 = item;
+			if (ex4 is VkResultError vkResultError)
 			{
 				switch (vkResultError.Result)
 				{
@@ -106,47 +113,69 @@ internal static class CrashDialog
 				case VkResult.ErrorOutOfDeviceMemory:
 					break;
 				case VkResult.ErrorOutOfHostMemory:
-					goto IL_0149;
+					goto IL_0182;
 				case VkResult.ErrorIncompatibleDriver:
+					if (VulkanStartup.SystemLoaderMissing)
+					{
+						return "No Vulkan support was found on this computer, which the game requires. Updating, repairing, or reinstalling the graphics driver (in that order) should fix it. If you have performed all these steps, and are still seeing this message, it is likely your GPU is not Vulkan capable, and you should switch back to RimWorld 1.6.";
+					}
+					goto case VkResult.ErrorInitializationFailed;
 				case VkResult.ErrorInitializationFailed:
 					return "The graphics driver could not start Vulkan. The game requires a Vulkan capable GPU with an up-to-date driver.";
 				default:
 					return $"An unexpected graphics error occurred ({vkResultError.Result}). Make sure your graphics driver is up to date.";
 				}
-				goto IL_013d;
+				goto IL_0176;
 			}
-			if (item is VmaAllocationException { Result: var result } ex4)
+			if (ex4 is VmaAllocationException { Result: var result } ex5)
 			{
 				if (result == VkResult.ErrorOutOfDeviceMemory)
 				{
-					goto IL_013d;
+					goto IL_0176;
 				}
 				if (result != VkResult.ErrorOutOfHostMemory)
 				{
-					return $"A graphics memory allocation failed for an unknown reason ({ex4.Result}).";
+					return $"A graphics memory allocation failed for an unknown reason ({ex5.Result}).";
 				}
 			}
-			else if (!(item is OutOfMemoryException))
+			else if (!(ex4 is OutOfMemoryException))
 			{
-				if (!(item is DllNotFoundException) && !(item is BadImageFormatException) && !(item is EntryPointNotFoundException))
+				if (!(ex4 is DllNotFoundException ex6))
 				{
-					if (!(item is IOException) && !(item is UnauthorizedAccessException))
+					if (ex4 is TypeInitializationException ex7)
 					{
-						continue;
+						if (!(ex7.TypeName == "Brutal.VulkanApi.Vulkan"))
+						{
+							continue;
+						}
+						goto IL_023d;
 					}
-					return "A file operation failed: " + FirstLine(item.Message);
+					if (!(ex4 is BadImageFormatException) && !(ex4 is EntryPointNotFoundException))
+					{
+						if (!(ex4 is IOException) && !(ex4 is UnauthorizedAccessException))
+						{
+							continue;
+						}
+						return "A file operation failed: " + FirstLine(item.Message);
+					}
+				}
+				else if (ex6.Message.Contains("vulkan", StringComparison.OrdinalIgnoreCase))
+				{
+					goto IL_023d;
 				}
 				return "A required native library is missing or damaged. Verifying the game files should fix it. Otherwise, confirm that any antivirus software is not restricting the game.";
 			}
-			goto IL_0149;
-			IL_013d:
+			goto IL_0182;
+			IL_0176:
 			return "The game ran out of video memory (VRAM). If you're using texture mods, try removing (some of) them. Otherwise, trying a lower resolution, or closing other GPU heavy programs will help.";
-			IL_0149:
+			IL_0182:
 			return "The game ran out of system memory (RAM). If using mods, this may indicate your mod list is too large for your hardware, or one of the mods has a problem. Closing other programs or trimming the mod list will help.";
+			IL_023d:
+			return "No Vulkan support was found on this computer, which the game requires. Updating, repairing, or reinstalling the graphics driver (in that order) should fix it. If you have performed all these steps, and are still seeing this message, it is likely your GPU is not Vulkan capable, and you should switch back to RimWorld 1.6.";
 		}
-		Exception ex5 = list[0];
-		string text = ModAssembly(ex5);
-		string text2 = ex5.GetType().Name + ": " + FirstLine(ex5.Message);
+		Exception ex8 = list[0];
+		string text = ModAssembly(ex8);
+		string text2 = ex8.GetType().Name + ": " + FirstLine(ex8.Message);
 		if (text == null)
 		{
 			return "An unexpected error occurred. " + text2;

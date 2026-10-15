@@ -1,114 +1,218 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_Deathrest : JobDriver
 {
-	// Token: 0x0200124B RID: 4683
-	public class JobDriver_Deathrest : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__9 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x170011D8 RID: 4568
-		// (get) Token: 0x0600728E RID: 29326 RVA: 0x00234F20 File Offset: 0x00233120
-		private Building_Bed Bed
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_Deathrest _003C_003E4__this;
+
+		private bool _003ChasBed_003E5__2;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.job.GetTarget(TargetIndex.A).Thing as Building_Bed;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170011D9 RID: 4569
-		// (get) Token: 0x0600728F RID: 29327 RVA: 0x00234F46 File Offset: 0x00233146
-		public override bool PlayerInterruptable
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return !base.OnLastToil;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06007290 RID: 29328 RVA: 0x00234F51 File Offset: 0x00233151
-		public override string GetReport()
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__9(int _003C_003E1__state)
 		{
-			return this.ReportStringProcessed(SanguophageUtility.DeathrestJobReport(this.pawn));
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x06007291 RID: 29329 RVA: 0x00234F64 File Offset: 0x00233164
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			return this.Bed == null || this.pawn.Reserve(this.Bed, this.job, this.Bed.SleepingSlotsCount, 0, null, errorOnFailed, false);
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x06007292 RID: 29330 RVA: 0x00234F9B File Offset: 0x0023319B
-		public override bool CanBeginNowWhileLyingDown()
+		private bool MoveNext()
 		{
-			return JobInBedUtility.InBedOrRestSpotNow(this.pawn, this.job.GetTarget(TargetIndex.A));
-		}
-
-		// Token: 0x06007293 RID: 29331 RVA: 0x00234FB4 File Offset: 0x002331B4
-		protected override IEnumerable<Toil> MakeNewToils()
-		{
-			bool hasBed = this.Bed != null;
-			if (hasBed)
+			int num = _003C_003E1__state;
+			JobDriver_Deathrest CS_0024_003C_003E8__locals16 = _003C_003E4__this;
+			Toil toil;
+			switch (num)
 			{
-				yield return Toils_Bed.ClaimBedIfNonMedical(TargetIndex.A, TargetIndex.None);
-				Toil toil = Toils_Bed.GotoBed(TargetIndex.A);
-				toil.AddFailCondition(delegate
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003ChasBed_003E5__2 = CS_0024_003C_003E8__locals16.Bed != null;
+				if (_003ChasBed_003E5__2)
 				{
-					if (SanguophageUtility.ShouldBeDeathrestingOrInComaInsteadOfDead(this.pawn))
+					_003C_003E2__current = Toils_Bed.ClaimBedIfNonMedical(TargetIndex.A);
+					_003C_003E1__state = 1;
+					return true;
+				}
+				_003C_003E2__current = Toils_Goto.GotoCell(TargetIndex.A, PathEndMode.OnCell);
+				_003C_003E1__state = 3;
+				return true;
+			case 1:
+			{
+				_003C_003E1__state = -1;
+				Toil toil2 = Toils_Bed.GotoBed(TargetIndex.A);
+				toil2.AddFailCondition(delegate
+				{
+					if (CS_0024_003C_003E8__locals16.pawn.BeingTransportedOnGravship)
 					{
 						return false;
 					}
-					using (CellRect.Enumerator enumerator = this.Bed.OccupiedRect().GetEnumerator())
+					if (SanguophageUtility.ShouldBeDeathrestingOrInComaInsteadOfDead(CS_0024_003C_003E8__locals16.pawn))
 					{
-						while (enumerator.MoveNext())
+						return false;
+					}
+					foreach (IntVec3 item in CS_0024_003C_003E8__locals16.Bed.OccupiedRect())
+					{
+						if (item.InSunlight(CS_0024_003C_003E8__locals16.Bed.Map))
 						{
-							if (enumerator.Current.InSunlight(this.Bed.Map))
-							{
-								Messages.Message("MessageBedExposedToSunlight".Translate(this.pawn.Named("PAWN"), this.Bed.Named("BED")), this.Bed, MessageTypeDefOf.RejectInput, true);
-								return true;
-							}
+							Messages.Message("MessageBedExposedToSunlight".Translate(CS_0024_003C_003E8__locals16.pawn.Named("PAWN"), CS_0024_003C_003E8__locals16.Bed.Named("BED")), CS_0024_003C_003E8__locals16.Bed, MessageTypeDefOf.RejectInput);
+							return true;
 						}
 					}
 					return false;
 				});
-				yield return toil;
+				_003C_003E2__current = toil2;
+				_003C_003E1__state = 2;
+				return true;
+			}
+			case 2:
+				_003C_003E1__state = -1;
+				goto IL_00b4;
+			case 3:
+				_003C_003E1__state = -1;
+				goto IL_00b4;
+			case 4:
+				{
+					_003C_003E1__state = -1;
+					return false;
+				}
+				IL_00b4:
+				toil = Toils_LayDown.LayDown(TargetIndex.A, _003ChasBed_003E5__2, lookForOtherJobs: false, canSleep: true, gainRestAndHealth: true, PawnPosture.LayingOnGroundNormal, deathrest: true);
+				toil.initAction = (Action)Delegate.Combine(toil.initAction, (Action)delegate
+				{
+					if (CS_0024_003C_003E8__locals16.pawn.Drafted)
+					{
+						CS_0024_003C_003E8__locals16.pawn.drafter.Drafted = false;
+					}
+					if (!CS_0024_003C_003E8__locals16.pawn.health.hediffSet.HasHediff(HediffDefOf.Deathrest))
+					{
+						CS_0024_003C_003E8__locals16.pawn.health.AddHediff(HediffDefOf.Deathrest, null, null);
+					}
+				});
+				toil.tickIntervalAction = (Action<int>)Delegate.Combine(toil.tickIntervalAction, (Action<int>)delegate(int delta)
+				{
+					if (CS_0024_003C_003E8__locals16.pawn.IsHashIntervalTick(160, delta))
+					{
+						MoteMaker.MakeAttachedOverlay(CS_0024_003C_003E8__locals16.pawn, ThingDefOf.Mote_Deathresting, new Vector3(0f, CS_0024_003C_003E8__locals16.pawn.story.bodyType.bedOffset).RotatedBy(CS_0024_003C_003E8__locals16.pawn.Rotation));
+					}
+				});
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 4;
+				return true;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__9 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
 			}
 			else
 			{
-				yield return Toils_Goto.GotoCell(TargetIndex.A, PathEndMode.OnCell);
+				result = new _003CMakeNewToils_003Ed__9(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
-			Toil toil2 = Toils_LayDown.LayDown(TargetIndex.A, hasBed, false, true, true, PawnPosture.LayingOnGroundNormal, true);
-			Toil toil3 = toil2;
-			toil3.initAction = (Action)Delegate.Combine(toil3.initAction, new Action(delegate()
-			{
-				if (this.pawn.Drafted)
-				{
-					this.pawn.drafter.Drafted = false;
-				}
-				if (!this.pawn.health.hediffSet.HasHediff(HediffDefOf.Deathrest, false))
-				{
-					this.pawn.health.AddHediff(HediffDefOf.Deathrest, null, null, null);
-				}
-			}));
-			Toil toil4 = toil2;
-			toil4.tickIntervalAction = (Action<int>)Delegate.Combine(toil4.tickIntervalAction, new Action<int>(delegate(int delta)
-			{
-				if (this.pawn.IsHashIntervalTick(160, delta))
-				{
-					MoteMaker.MakeAttachedOverlay(this.pawn, ThingDefOf.Mote_Deathresting, new Vector3(0f, this.pawn.story.bodyType.bedOffset).RotatedBy(this.pawn.Rotation), 1f, -1f);
-				}
-			}));
-			yield return toil2;
-			yield break;
+			return result;
 		}
 
-		// Token: 0x04004F2A RID: 20266
-		private const TargetIndex BedIndex = TargetIndex.A;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x04004F2B RID: 20267
-		private const int MoteIntervalTicks = 160;
+	private const TargetIndex BedIndex = TargetIndex.A;
+
+	private const int MoteIntervalTicks = 160;
+
+	private Building_Bed Bed => job.GetTarget(TargetIndex.A).Thing as Building_Bed;
+
+	public override bool PlayerInterruptable => !base.OnLastToil;
+
+	public override string GetReport()
+	{
+		return ReportStringProcessed(SanguophageUtility.DeathrestJobReport(pawn));
+	}
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		if (Bed != null)
+		{
+			return pawn.Reserve(Bed, job, Bed.SleepingSlotsCount, 0, null, errorOnFailed);
+		}
+		return true;
+	}
+
+	public override bool CanBeginNowWhileLyingDown()
+	{
+		return JobInBedUtility.InBedOrRestSpotNow(pawn, job.GetTarget(TargetIndex.A));
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__9))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__9(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

@@ -1,64 +1,163 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_Open : JobDriver
 {
-	// Token: 0x020012C8 RID: 4808
-	public class JobDriver_Open : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__5 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001278 RID: 4728
-		// (get) Token: 0x060075C6 RID: 30150 RVA: 0x0023F2FF File Offset: 0x0023D4FF
-		private IOpenable Openable
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_Open _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (IOpenable)this.job.targetA.Thing;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001279 RID: 4729
-		// (get) Token: 0x060075C7 RID: 30151 RVA: 0x001E5D2F File Offset: 0x001E3F2F
-		private Thing Target
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.job.targetA.Thing;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x060075C8 RID: 30152 RVA: 0x001E06E3 File Offset: 0x001DE8E3
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__5(int _003C_003E1__state)
 		{
-			return this.pawn.Reserve(this.job.targetA, this.job, 1, -1, null, errorOnFailed, false);
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x060075C9 RID: 30153 RVA: 0x0023F316 File Offset: 0x0023D516
-		protected override IEnumerable<Toil> MakeNewToils()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			Toil toil = ToilMaker.MakeToil("MakeNewToils");
-			toil.initAction = delegate()
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_Open CS_0024_003C_003E8__locals7 = _003C_003E4__this;
+			switch (num)
 			{
-				if (!this.Openable.CanOpen)
+			default:
+				return false;
+			case 0:
+			{
+				_003C_003E1__state = -1;
+				Toil toil2 = ToilMaker.MakeToil("MakeNewToils");
+				toil2.initAction = delegate
 				{
-					Designation designation = base.Map.designationManager.DesignationOn(this.job.targetA.Thing, DesignationDefOf.Open);
-					if (designation != null)
+					if (!CS_0024_003C_003E8__locals7.Openable.CanOpen)
 					{
-						designation.Delete();
+						CS_0024_003C_003E8__locals7.Map.designationManager.DesignationOn(CS_0024_003C_003E8__locals7.job.targetA.Thing, DesignationDefOf.Open)?.Delete();
 					}
-				}
-			};
-			yield return toil.FailOnDespawnedOrNull(TargetIndex.A);
-			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.InteractionCell, false).FailOnThingMissingDesignation(TargetIndex.A, DesignationDefOf.Open).FailOnDespawnedOrNull(TargetIndex.A);
-			Toil toil2 = Toils_General.Wait(this.Openable.OpenTicks, TargetIndex.A).WithProgressBarToilDelay(TargetIndex.A, false, -0.5f).FailOnDespawnedOrNull(TargetIndex.A).FailOnCannotTouch(TargetIndex.A, PathEndMode.InteractionCell);
-			if (this.Target.def.building != null && this.Target.def.building.openingStartedSound != null)
-			{
-				toil2.PlaySoundAtStart(this.Target.def.building.openingStartedSound);
+				};
+				_003C_003E2__current = toil2.FailOnDespawnedOrNull(TargetIndex.A);
+				_003C_003E1__state = 1;
+				return true;
 			}
-			yield return toil2;
-			yield return Toils_General.Open(TargetIndex.A);
-			yield break;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.InteractionCell).FailOnThingMissingDesignation(TargetIndex.A, DesignationDefOf.Open).FailOnDespawnedOrNull(TargetIndex.A);
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+			{
+				_003C_003E1__state = -1;
+				Toil toil = Toils_General.Wait(CS_0024_003C_003E8__locals7.Openable.OpenTicks, TargetIndex.A).WithProgressBarToilDelay(TargetIndex.A).FailOnDespawnedOrNull(TargetIndex.A)
+					.FailOnCannotTouch(TargetIndex.A, PathEndMode.InteractionCell);
+				if (CS_0024_003C_003E8__locals7.Target.def.building != null && CS_0024_003C_003E8__locals7.Target.def.building.openingStartedSound != null)
+				{
+					toil.PlaySoundAtStart(CS_0024_003C_003E8__locals7.Target.def.building.openingStartedSound);
+				}
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 3;
+				return true;
+			}
+			case 3:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.Open(TargetIndex.A);
+				_003C_003E1__state = 4;
+				return true;
+			case 4:
+				_003C_003E1__state = -1;
+				return false;
+			}
 		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__5 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__5(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private IOpenable Openable => (IOpenable)job.targetA.Thing;
+
+	private Thing Target => job.targetA.Thing;
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return pawn.Reserve(job.targetA, job, 1, -1, null, errorOnFailed);
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__5))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__5(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

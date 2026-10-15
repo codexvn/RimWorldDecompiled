@@ -1,175 +1,308 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld;
 using UnityEngine;
 using Verse.AI.Group;
 
-namespace Verse
+namespace Verse;
+
+public class Hediff_LaborPushing : HediffWithParents
 {
-	// Token: 0x0200074D RID: 1869
-	public class Hediff_LaborPushing : HediffWithParents
+	[CompilerGenerated]
+	private sealed class _003CGetGizmos_003Ed__6 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700083A RID: 2106
-		// (get) Token: 0x06002DAB RID: 11691 RVA: 0x000EB3BC File Offset: 0x000E95BC
-		public float Progress
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Hediff_LaborPushing _003C_003E4__this;
+
+		private IEnumerator<Gizmo> _003C_003E7__wrap1;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				HediffComp_Disappears hediffComp_Disappears = this.TryGetComp<HediffComp_Disappears>();
-				return 1f - (float)hediffComp_Disappears.ticksToDisappear / (float)Mathf.Max(1, hediffComp_Disappears.disappearsAfterTicks + this.laborDuration);
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06002DAC RID: 11692 RVA: 0x000EB3F2 File Offset: 0x000E95F2
-		public override IEnumerable<Gizmo> GetGizmos()
+		object IEnumerator.Current
 		{
-			foreach (Gizmo gizmo in base.GetGizmos())
+			[DebuggerHidden]
+			get
 			{
-				yield return gizmo;
-			}
-			IEnumerator<Gizmo> enumerator = null;
-			if (DebugSettings.ShowDevGizmos)
-			{
-				yield return PregnancyUtility.BirthQualityGizmo(this.pawn);
-				yield return new Command_Action
-				{
-					defaultLabel = "DEV: Force stillborn",
-					action = delegate()
-					{
-						this.ForceBirth(-1, false);
-					}
-				};
-				yield return new Command_Action
-				{
-					defaultLabel = "DEV: Force infant illness",
-					action = delegate()
-					{
-						this.ForceBirth(0, false);
-					}
-				};
-				yield return new Command_Action
-				{
-					defaultLabel = "DEV: Force healthy",
-					action = delegate()
-					{
-						this.ForceBirth(1, false);
-					}
-				};
-				yield return new Command_Action
-				{
-					defaultLabel = "DEV: Force end",
-					action = delegate()
-					{
-						this.pawn.health.RemoveHediff(this);
-					}
-				};
-			}
-			yield break;
-			yield break;
-		}
-
-		// Token: 0x06002DAD RID: 11693 RVA: 0x000EB404 File Offset: 0x000E9604
-		public void ForceBirth(int positivityIndex, bool dontSendLetter = false)
-		{
-			Precept_Ritual precept_Ritual = (Precept_Ritual)this.pawn.Ideo.GetPrecept(PreceptDefOf.ChildBirth);
-			this.debugForceBirthOutcome = precept_Ritual.outcomeEffect.def.outcomeChances.FirstOrDefault((RitualOutcomePossibility o) => o.positivityIndex == positivityIndex);
-			this.preventLetter = dontSendLetter;
-			this.pawn.health.RemoveHediff(this);
-		}
-
-		// Token: 0x06002DAE RID: 11694 RVA: 0x000EB478 File Offset: 0x000E9678
-		public override void PreRemoved()
-		{
-			base.PreRemoved();
-			Lord lord = this.pawn.GetLord();
-			LordJob_Ritual lordJob_Ritual = ((lord != null) ? lord.LordJob : null) as LordJob_Ritual;
-			Precept_Ritual precept_Ritual = (Precept_Ritual)this.pawn.Ideo.GetPrecept(PreceptDefOf.ChildBirth);
-			if (((lordJob_Ritual != null) ? lordJob_Ritual.Ritual : null) == null || lordJob_Ritual.Ritual.def != PreceptDefOf.ChildBirth || lordJob_Ritual.assignments.FirstAssignedPawn("mother") != this.pawn)
-			{
-				float birthQualityFor = PregnancyUtility.GetBirthQualityFor(this.pawn);
-				RitualOutcomePossibility outcome = this.debugForceBirthOutcome ?? ((RitualOutcomeEffectWorker_ChildBirth)precept_Ritual.outcomeEffect).GetOutcome(birthQualityFor, null);
-				RitualRoleAssignments assignments = PregnancyUtility.RitualAssignmentsForBirth(precept_Ritual, this.pawn);
-				float quality = birthQualityFor;
-				Precept_Ritual ritual = precept_Ritual;
-				GeneSet geneSet = this.geneSet;
-				PregnancyUtility.ApplyBirthOutcome(outcome, quality, ritual, (geneSet != null) ? geneSet.GenesListForReading : null, base.Mother ?? this.pawn, this.pawn, base.Father, null, null, assignments, this.preventLetter);
-				return;
-			}
-			if (lordJob_Ritual != null)
-			{
-				lordJob_Ritual.ApplyOutcome(1f, true, true, false);
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06002DAF RID: 11695 RVA: 0x000EB584 File Offset: 0x000E9784
-		public override void TickInterval(int delta)
+		[DebuggerHidden]
+		public _003CGetGizmos_003Ed__6(int _003C_003E1__state)
 		{
-			if (this.pawn.SpawnedOrAnyParentSpawned)
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				if (this.progressBar == null)
+				try
 				{
-					this.progressBar = EffecterDefOf.ProgressBarAlwaysVisible.Spawn();
 				}
-				this.progressBar.EffectTick(this.pawn, TargetInfo.Invalid);
-				MoteProgressBar mote = ((SubEffecter_ProgressBar)this.progressBar.children[0]).mote;
-				if (mote != null)
+				finally
 				{
-					mote.progress = this.Progress;
-					return;
+					_003C_003Em__Finally1();
 				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				Hediff_LaborPushing CS_0024_003C_003E8__locals7 = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((HediffWithParents)CS_0024_003C_003E8__locals7).GetGizmos().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0082;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0082;
+				case 2:
+					_003C_003E1__state = -1;
+					_003C_003E2__current = new Command_Action
+					{
+						defaultLabel = "DEV: Force stillborn",
+						action = delegate
+						{
+							CS_0024_003C_003E8__locals7.ForceBirth(-1);
+						}
+					};
+					_003C_003E1__state = 3;
+					return true;
+				case 3:
+					_003C_003E1__state = -1;
+					_003C_003E2__current = new Command_Action
+					{
+						defaultLabel = "DEV: Force infant illness",
+						action = delegate
+						{
+							CS_0024_003C_003E8__locals7.ForceBirth(0);
+						}
+					};
+					_003C_003E1__state = 4;
+					return true;
+				case 4:
+					_003C_003E1__state = -1;
+					_003C_003E2__current = new Command_Action
+					{
+						defaultLabel = "DEV: Force healthy",
+						action = delegate
+						{
+							CS_0024_003C_003E8__locals7.ForceBirth(1);
+						}
+					};
+					_003C_003E1__state = 5;
+					return true;
+				case 5:
+					_003C_003E1__state = -1;
+					_003C_003E2__current = new Command_Action
+					{
+						defaultLabel = "DEV: Force end",
+						action = delegate
+						{
+							CS_0024_003C_003E8__locals7.pawn.health.RemoveHediff(CS_0024_003C_003E8__locals7);
+						}
+					};
+					_003C_003E1__state = 6;
+					return true;
+				case 6:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_0082:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Gizmo current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (DebugSettings.ShowDevGizmos)
+					{
+						_003C_003E2__current = PregnancyUtility.BirthQualityGizmo(CS_0024_003C_003E8__locals7.pawn);
+						_003C_003E1__state = 2;
+						return true;
+					}
+					break;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CGetGizmos_003Ed__6 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
 			}
 			else
 			{
-				Effecter effecter = this.progressBar;
-				if (effecter != null)
+				result = new _003CGetGizmos_003Ed__6(0)
 				{
-					effecter.Cleanup();
-				}
-				this.progressBar = null;
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
+			return result;
 		}
 
-		// Token: 0x06002DB0 RID: 11696 RVA: 0x000EB615 File Offset: 0x000E9815
-		public override void PostRemoved()
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			base.PostRemoved();
-			Effecter effecter = this.progressBar;
-			if (effecter != null)
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
+		}
+	}
+
+	public int laborDuration;
+
+	private Effecter progressBar;
+
+	private RitualOutcomePossibility debugForceBirthOutcome;
+
+	private bool preventLetter;
+
+	public float Progress
+	{
+		get
+		{
+			HediffComp_Disappears hediffComp_Disappears = this.TryGetComp<HediffComp_Disappears>();
+			return 1f - (float)hediffComp_Disappears.ticksToDisappear / (float)Mathf.Max(1, hediffComp_Disappears.disappearsAfterTicks + laborDuration);
+		}
+	}
+
+	[IteratorStateMachine(typeof(_003CGetGizmos_003Ed__6))]
+	public override IEnumerable<Gizmo> GetGizmos()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetGizmos_003Ed__6(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public void ForceBirth(int positivityIndex, bool dontSendLetter = false)
+	{
+		Precept_Ritual precept_Ritual = (Precept_Ritual)pawn.Ideo.GetPrecept(PreceptDefOf.ChildBirth);
+		debugForceBirthOutcome = precept_Ritual.outcomeEffect.def.outcomeChances.FirstOrDefault((RitualOutcomePossibility o) => o.positivityIndex == positivityIndex);
+		preventLetter = dontSendLetter;
+		pawn.health.RemoveHediff(this);
+	}
+
+	public override void PreRemoved()
+	{
+		base.PreRemoved();
+		LordJob_Ritual lordJob_Ritual = pawn.GetLord()?.LordJob as LordJob_Ritual;
+		Precept_Ritual precept_Ritual = (Precept_Ritual)pawn.Ideo.GetPrecept(PreceptDefOf.ChildBirth);
+		if (lordJob_Ritual?.Ritual == null || lordJob_Ritual.Ritual.def != PreceptDefOf.ChildBirth || lordJob_Ritual.assignments.FirstAssignedPawn("mother") != pawn)
+		{
+			float birthQualityFor = PregnancyUtility.GetBirthQualityFor(pawn);
+			PregnancyUtility.ApplyBirthOutcome(debugForceBirthOutcome ?? ((RitualOutcomeEffectWorker_ChildBirth)precept_Ritual.outcomeEffect).GetOutcome(birthQualityFor, null), assignments: PregnancyUtility.RitualAssignmentsForBirth(precept_Ritual, pawn), quality: birthQualityFor, ritual: precept_Ritual, genes: geneSet?.GenesListForReading, geneticMother: base.Mother ?? pawn, birtherThing: pawn, father: base.Father, doctor: null, lordJobRitual: null, preventLetter: preventLetter);
+		}
+		else
+		{
+			lordJob_Ritual?.ApplyOutcome(1f);
+		}
+	}
+
+	public override void TickInterval(int delta)
+	{
+		if (pawn.SpawnedOrAnyParentSpawned)
+		{
+			if (progressBar == null)
 			{
-				effecter.Cleanup();
+				progressBar = EffecterDefOf.ProgressBarAlwaysVisible.Spawn();
 			}
-			this.progressBar = null;
-		}
-
-		// Token: 0x06002DB1 RID: 11697 RVA: 0x000EB635 File Offset: 0x000E9835
-		public override void Notify_PawnDied(DamageInfo? dinfo, Hediff culprit = null)
-		{
-			base.Notify_PawnDied(dinfo, culprit);
-			Effecter effecter = this.progressBar;
-			if (effecter != null)
+			progressBar.EffectTick(pawn, TargetInfo.Invalid);
+			MoteProgressBar mote = ((SubEffecter_ProgressBar)progressBar.children[0]).mote;
+			if (mote != null)
 			{
-				effecter.Cleanup();
+				mote.progress = Progress;
 			}
-			this.progressBar = null;
 		}
-
-		// Token: 0x06002DB2 RID: 11698 RVA: 0x000EB657 File Offset: 0x000E9857
-		public override void ExposeData()
+		else
 		{
-			base.ExposeData();
-			Scribe_Values.Look<int>(ref this.laborDuration, "laborDuration", 0, false);
+			progressBar?.Cleanup();
+			progressBar = null;
 		}
+	}
 
-		// Token: 0x04002414 RID: 9236
-		public int laborDuration;
+	public override void PostRemoved()
+	{
+		base.PostRemoved();
+		progressBar?.Cleanup();
+		progressBar = null;
+	}
 
-		// Token: 0x04002415 RID: 9237
-		private Effecter progressBar;
+	public override void Notify_PawnDied(DamageInfo? dinfo, Hediff culprit = null)
+	{
+		base.Notify_PawnDied(dinfo, culprit);
+		progressBar?.Cleanup();
+		progressBar = null;
+	}
 
-		// Token: 0x04002416 RID: 9238
-		private RitualOutcomePossibility debugForceBirthOutcome;
-
-		// Token: 0x04002417 RID: 9239
-		private bool preventLetter;
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref laborDuration, "laborDuration", 0);
 	}
 }

@@ -1,166 +1,128 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml.Linq;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public static class PlayerKnowledgeDatabase
 {
-	// Token: 0x020034EC RID: 13548
-	public static class PlayerKnowledgeDatabase
+	private class ConceptKnowledge
 	{
-		// Token: 0x06013092 RID: 77970 RVA: 0x005A43BE File Offset: 0x005A25BE
-		static PlayerKnowledgeDatabase()
-		{
-			PlayerKnowledgeDatabase.ReloadAndRebind();
-		}
+		public Dictionary<string, float> knowledge = new Dictionary<string, float>();
 
-		// Token: 0x06013093 RID: 77971 RVA: 0x005A43C8 File Offset: 0x005A25C8
-		public static void ReloadAndRebind()
+		public ConceptKnowledge()
 		{
-			PlayerKnowledgeDatabase.data = DirectXmlLoader.ItemFromXmlFile<PlayerKnowledgeDatabase.ConceptKnowledge>(GenFilePaths.ConceptKnowledgeFilePath, true);
-			foreach (ConceptDef conceptDef in DefDatabase<ConceptDef>.AllDefs)
+			foreach (ConceptDef allDef in DefDatabase<ConceptDef>.AllDefs)
 			{
-				if (!PlayerKnowledgeDatabase.data.knowledge.ContainsKey(conceptDef.defName))
+				knowledge.Add(allDef.defName, 0f);
+			}
+		}
+	}
+
+	private static ConceptKnowledge data;
+
+	static PlayerKnowledgeDatabase()
+	{
+		ReloadAndRebind();
+	}
+
+	public static void ReloadAndRebind()
+	{
+		data = DirectXmlLoader.ItemFromXmlFile<ConceptKnowledge>(GenFilePaths.ConceptKnowledgeFilePath);
+		foreach (ConceptDef allDef in DefDatabase<ConceptDef>.AllDefs)
+		{
+			if (!data.knowledge.ContainsKey(allDef.defName))
+			{
+				if (allDef != ConceptDefOf.SteamDeckControlsGame && allDef != ConceptDefOf.SteamDeckControlsMainMenu)
 				{
-					if (conceptDef != ConceptDefOf.SteamDeckControlsGame && conceptDef != ConceptDefOf.SteamDeckControlsMainMenu)
-					{
-						string str = "Knowledge data was missing key ";
-						ConceptDef conceptDef2 = conceptDef;
-						Log.Warning(str + ((conceptDef2 != null) ? conceptDef2.ToString() : null) + ". Adding it...");
-					}
-					PlayerKnowledgeDatabase.data.knowledge.Add(conceptDef.defName, 0f);
+					Log.Warning("Knowledge data was missing key " + allDef?.ToString() + ". Adding it...");
 				}
+				data.knowledge.Add(allDef.defName, 0f);
 			}
 		}
+	}
 
-		// Token: 0x06013094 RID: 77972 RVA: 0x005A4480 File Offset: 0x005A2680
-		public static void ResetPersistent()
+	public static void ResetPersistent()
+	{
+		FileInfo fileInfo = new FileInfo(GenFilePaths.ConceptKnowledgeFilePath);
+		if (fileInfo.Exists)
 		{
-			FileInfo fileInfo = new FileInfo(GenFilePaths.ConceptKnowledgeFilePath);
-			if (fileInfo.Exists)
-			{
-				fileInfo.Delete();
-			}
-			PlayerKnowledgeDatabase.data = new PlayerKnowledgeDatabase.ConceptKnowledge();
+			fileInfo.Delete();
 		}
+		data = new ConceptKnowledge();
+	}
 
-		// Token: 0x06013095 RID: 77973 RVA: 0x005A44B0 File Offset: 0x005A26B0
-		public static void Save()
+	public static void Save()
+	{
+		try
 		{
-			try
-			{
-				XDocument xdocument = new XDocument();
-				XElement content = DirectXmlSaver.XElementFromObject(PlayerKnowledgeDatabase.data, typeof(PlayerKnowledgeDatabase.ConceptKnowledge));
-				xdocument.Add(content);
-				xdocument.Save(GenFilePaths.ConceptKnowledgeFilePath);
-			}
-			catch (Exception ex)
-			{
-				GenUI.ErrorDialog("ProblemSavingFile".Translate(GenFilePaths.ConceptKnowledgeFilePath, ex.ToString()));
-				string str = "Exception saving knowledge database: ";
-				Exception ex2 = ex;
-				Log.Error(str + ((ex2 != null) ? ex2.ToString() : null));
-			}
+			XDocument xDocument = new XDocument();
+			XElement content = DirectXmlSaver.XElementFromObject(data, typeof(ConceptKnowledge));
+			xDocument.Add(content);
+			xDocument.Save(GenFilePaths.ConceptKnowledgeFilePath);
 		}
-
-		// Token: 0x06013096 RID: 77974 RVA: 0x005A4544 File Offset: 0x005A2744
-		public static float GetKnowledge(ConceptDef def)
+		catch (Exception ex)
 		{
-			return PlayerKnowledgeDatabase.data.knowledge[def.defName];
+			GenUI.ErrorDialog("ProblemSavingFile".Translate(GenFilePaths.ConceptKnowledgeFilePath, ex.ToString()));
+			Log.Error("Exception saving knowledge database: " + ex);
 		}
+	}
 
-		// Token: 0x06013097 RID: 77975 RVA: 0x005A455C File Offset: 0x005A275C
-		public static void SetKnowledge(ConceptDef def, float value)
+	public static float GetKnowledge(ConceptDef def)
+	{
+		return data.knowledge[def.defName];
+	}
+
+	public static void SetKnowledge(ConceptDef def, float value)
+	{
+		float num = data.knowledge[def.defName];
+		float num2 = Mathf.Clamp01(value);
+		data.knowledge[def.defName] = num2;
+		if (num < 0.999f && num2 >= 0.999f)
 		{
-			float num = PlayerKnowledgeDatabase.data.knowledge[def.defName];
-			float num2 = Mathf.Clamp01(value);
-			PlayerKnowledgeDatabase.data.knowledge[def.defName] = num2;
-			if (num < 0.999f && num2 >= 0.999f)
-			{
-				PlayerKnowledgeDatabase.NewlyLearned(def);
-			}
+			NewlyLearned(def);
 		}
+	}
 
-		// Token: 0x06013098 RID: 77976 RVA: 0x005A45B0 File Offset: 0x005A27B0
-		public static bool IsComplete(ConceptDef conc)
+	public static bool IsComplete(ConceptDef conc)
+	{
+		return data.knowledge[conc.defName] > 0.999f;
+	}
+
+	private static void NewlyLearned(ConceptDef conc)
+	{
+		TutorSystem.Notify_Event("ConceptLearned-" + conc.defName);
+		if (Find.Tutor != null)
 		{
-			return PlayerKnowledgeDatabase.data.knowledge[conc.defName] > 0.999f;
+			Find.Tutor.learningReadout.Notify_ConceptNewlyLearned(conc);
 		}
+	}
 
-		// Token: 0x06013099 RID: 77977 RVA: 0x005A45CE File Offset: 0x005A27CE
-		private static void NewlyLearned(ConceptDef conc)
+	public static void KnowledgeDemonstrated(ConceptDef conc, KnowledgeAmount know)
+	{
+		float num = know switch
 		{
-			TutorSystem.Notify_Event("ConceptLearned-" + conc.defName);
-			if (Find.Tutor != null)
-			{
-				Find.Tutor.learningReadout.Notify_ConceptNewlyLearned(conc);
-			}
-		}
-
-		// Token: 0x0601309A RID: 77978 RVA: 0x005A4604 File Offset: 0x005A2804
-		public static void KnowledgeDemonstrated(ConceptDef conc, KnowledgeAmount know)
+			KnowledgeAmount.FrameDisplayed => (Event.current.type == EventType.repaint) ? 0.004f : 0f, 
+			KnowledgeAmount.FrameInteraction => 0.008f, 
+			KnowledgeAmount.TinyInteraction => 0.03f, 
+			KnowledgeAmount.SmallInteraction => 0.1f, 
+			KnowledgeAmount.SpecificInteraction => 0.4f, 
+			KnowledgeAmount.Total => 1f, 
+			KnowledgeAmount.NoteClosed => 0.5f, 
+			KnowledgeAmount.NoteTaught => 1f, 
+			_ => throw new NotImplementedException(), 
+		};
+		if (!(num <= 0f))
 		{
-			float num;
-			switch (know)
-			{
-			case KnowledgeAmount.FrameDisplayed:
-				num = ((Event.current.type == EventType.Repaint) ? 0.004f : 0f);
-				break;
-			case KnowledgeAmount.FrameInteraction:
-				num = 0.008f;
-				break;
-			case KnowledgeAmount.TinyInteraction:
-				num = 0.03f;
-				break;
-			case KnowledgeAmount.SmallInteraction:
-				num = 0.1f;
-				break;
-			case KnowledgeAmount.SpecificInteraction:
-				num = 0.4f;
-				break;
-			case KnowledgeAmount.Total:
-				num = 1f;
-				break;
-			case KnowledgeAmount.NoteClosed:
-				num = 0.5f;
-				break;
-			case KnowledgeAmount.NoteTaught:
-				num = 1f;
-				break;
-			default:
-				throw new NotImplementedException();
-			}
-			if (num <= 0f)
-			{
-				return;
-			}
-			PlayerKnowledgeDatabase.SetKnowledge(conc, PlayerKnowledgeDatabase.GetKnowledge(conc) + num);
+			SetKnowledge(conc, GetKnowledge(conc) + num);
 			LessonAutoActivator.Notify_KnowledgeDemonstrated(conc);
 			if (Find.ActiveLesson != null)
 			{
 				Find.ActiveLesson.Notify_KnowledgeDemonstrated(conc);
 			}
-		}
-
-		// Token: 0x0400C548 RID: 50504
-		private static PlayerKnowledgeDatabase.ConceptKnowledge data;
-
-		// Token: 0x020034ED RID: 13549
-		private class ConceptKnowledge
-		{
-			// Token: 0x0601309B RID: 77979 RVA: 0x005A46C4 File Offset: 0x005A28C4
-			public ConceptKnowledge()
-			{
-				foreach (ConceptDef conceptDef in DefDatabase<ConceptDef>.AllDefs)
-				{
-					this.knowledge.Add(conceptDef.defName, 0f);
-				}
-			}
-
-			// Token: 0x0400C549 RID: 50505
-			public Dictionary<string, float> knowledge = new Dictionary<string, float>();
 		}
 	}
 }

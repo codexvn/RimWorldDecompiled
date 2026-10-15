@@ -1,46 +1,39 @@
-﻿using System;
 using System.Collections.Generic;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Alert_InhibitorBlocked : Alert
 {
-	// Token: 0x0200305A RID: 12378
-	public class Alert_InhibitorBlocked : Alert
+	public readonly List<GlobalTargetInfo> targets = new List<GlobalTargetInfo>();
+
+	public Alert_InhibitorBlocked()
 	{
-		// Token: 0x06011626 RID: 71206 RVA: 0x004FCBCC File Offset: 0x004FADCC
-		public Alert_InhibitorBlocked()
-		{
-			this.defaultLabel = "AlertInhibitorBlocked".Translate();
-			this.defaultExplanation = "AlertInhibitorBlockedDesc".Translate();
-			this.requireAnomaly = true;
-		}
+		defaultLabel = "AlertInhibitorBlocked".Translate();
+		defaultExplanation = "AlertInhibitorBlockedDesc".Translate();
+		requireAnomaly = true;
+	}
 
-		// Token: 0x06011627 RID: 71207 RVA: 0x004FCC1B File Offset: 0x004FAE1B
-		public override AlertReport GetReport()
-		{
-			this.GetTargets();
-			return AlertReport.CulpritsAre(this.targets);
-		}
+	public override AlertReport GetReport()
+	{
+		GetTargets();
+		return AlertReport.CulpritsAre(targets);
+	}
 
-		// Token: 0x06011628 RID: 71208 RVA: 0x004FCC30 File Offset: 0x004FAE30
-		private void GetTargets()
+	private void GetTargets()
+	{
+		targets.Clear();
+		List<Map> maps = Find.Maps;
+		for (int i = 0; i < maps.Count; i++)
 		{
-			this.targets.Clear();
-			List<Map> maps = Find.Maps;
-			for (int i = 0; i < maps.Count; i++)
+			foreach (Building item in maps[i].listerBuildings.AllBuildingsColonistOfDef(ThingDefOf.ElectricInhibitor))
 			{
-				foreach (Building building in maps[i].listerBuildings.AllBuildingsColonistOfDef(ThingDefOf.ElectricInhibitor))
+				if (item.HasComp<CompFacility>() && ContainmentUtility.IsLinearBuildingBlocked(item.def, item.Position, item.Rotation, item.Map))
 				{
-					if (building.HasComp<CompFacility>() && ContainmentUtility.IsLinearBuildingBlocked(building.def, building.Position, building.Rotation, building.Map, null))
-					{
-						this.targets.Add(building);
-					}
+					targets.Add(item);
 				}
 			}
 		}
-
-		// Token: 0x0400B3F3 RID: 46067
-		public readonly List<GlobalTargetInfo> targets = new List<GlobalTargetInfo>();
 	}
 }

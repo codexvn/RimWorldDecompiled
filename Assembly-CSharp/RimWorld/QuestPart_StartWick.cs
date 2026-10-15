@@ -1,58 +1,157 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class QuestPart_StartWick : QuestPart
 {
-	// Token: 0x02001CB5 RID: 7349
-	public class QuestPart_StartWick : QuestPart
+	[CompilerGenerated]
+	private sealed class _003Cget_QuestLookTargets_003Ed__4 : IEnumerable<GlobalTargetInfo>, IEnumerable, IEnumerator<GlobalTargetInfo>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001931 RID: 6449
-		// (get) Token: 0x0600A3BE RID: 41918 RVA: 0x002EF7F7 File Offset: 0x002ED9F7
-		public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+		private int _003C_003E1__state;
+
+		private GlobalTargetInfo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public QuestPart_StartWick _003C_003E4__this;
+
+		GlobalTargetInfo IEnumerator<GlobalTargetInfo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				yield return this.explosiveThing;
-				if (this.initiator != null)
-				{
-					yield return this.initiator;
-				}
-				yield break;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600A3BF RID: 41919 RVA: 0x002EF808 File Offset: 0x002EDA08
-		public override void Notify_QuestSignalReceived(Signal signal)
+		object IEnumerator.Current
 		{
-			base.Notify_QuestSignalReceived(signal);
-			if (signal.tag == this.inSignal && this.explosiveThing != null)
+			[DebuggerHidden]
+			get
 			{
-				CompExplosive compExplosive = this.explosiveThing.TryGetComp<CompExplosive>();
-				if (compExplosive != null)
-				{
-					compExplosive.StartWick(this.initiator);
-				}
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600A3C0 RID: 41920 RVA: 0x002EF852 File Offset: 0x002EDA52
-		public override void ExposeData()
+		[DebuggerHidden]
+		public _003Cget_QuestLookTargets_003Ed__4(int _003C_003E1__state)
 		{
-			base.ExposeData();
-			Scribe_Values.Look<string>(ref this.inSignal, "inSignal", null, false);
-			Scribe_References.Look<Thing>(ref this.explosiveThing, "explosiveThing", false);
-			Scribe_References.Look<Thing>(ref this.initiator, "initiator", false);
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x0400711D RID: 28957
-		public string inSignal;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
 
-		// Token: 0x0400711E RID: 28958
-		public Thing explosiveThing;
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			QuestPart_StartWick questPart_StartWick = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = questPart_StartWick.explosiveThing;
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				if (questPart_StartWick.initiator != null)
+				{
+					_003C_003E2__current = questPart_StartWick.initiator;
+					_003C_003E1__state = 2;
+					return true;
+				}
+				break;
+			case 2:
+				_003C_003E1__state = -1;
+				break;
+			}
+			return false;
+		}
 
-		// Token: 0x0400711F RID: 28959
-		public Thing initiator;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<GlobalTargetInfo> IEnumerable<GlobalTargetInfo>.GetEnumerator()
+		{
+			_003Cget_QuestLookTargets_003Ed__4 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_QuestLookTargets_003Ed__4(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<GlobalTargetInfo>)this).GetEnumerator();
+		}
+	}
+
+	public string inSignal;
+
+	public Thing explosiveThing;
+
+	public Thing initiator;
+
+	public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+	{
+		[IteratorStateMachine(typeof(_003Cget_QuestLookTargets_003Ed__4))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_QuestLookTargets_003Ed__4(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public override void Notify_QuestSignalReceived(Signal signal)
+	{
+		base.Notify_QuestSignalReceived(signal);
+		if (signal.tag == inSignal && explosiveThing != null)
+		{
+			explosiveThing.TryGetComp<CompExplosive>()?.StartWick(initiator);
+		}
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref inSignal, "inSignal");
+		Scribe_References.Look(ref explosiveThing, "explosiveThing");
+		Scribe_References.Look(ref initiator, "initiator");
 	}
 }

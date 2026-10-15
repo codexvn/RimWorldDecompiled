@@ -1,128 +1,240 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Text;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class StatPart_GearStatFactor : StatPart
 {
-	// Token: 0x020036FC RID: 14076
-	public class StatPart_GearStatFactor : StatPart
+	[CompilerGenerated]
+	private sealed class _003CGetInfoCardHyperlinks_003Ed__6 : IEnumerable<Dialog_InfoCard.Hyperlink>, IEnumerable, IEnumerator<Dialog_InfoCard.Hyperlink>, IEnumerator, IDisposable
 	{
-		// Token: 0x06013849 RID: 79945 RVA: 0x005CA9C4 File Offset: 0x005C8BC4
-		public override void TransformValue(StatRequest req, ref float val)
+		private int _003C_003E1__state;
+
+		private Dialog_InfoCard.Hyperlink _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private StatRequest req;
+
+		public StatRequest _003C_003E3__req;
+
+		public StatPart_GearStatFactor _003C_003E4__this;
+
+		private Pawn _003Cpawn_003E5__2;
+
+		private int _003Ci_003E5__3;
+
+		Dialog_InfoCard.Hyperlink IEnumerator<Dialog_InfoCard.Hyperlink>.Current
 		{
-			if (!req.HasThing || req.Thing == null)
+			[DebuggerHidden]
+			get
 			{
-				return;
-			}
-			Pawn pawn = req.Thing as Pawn;
-			if (pawn == null)
-			{
-				return;
-			}
-			if (pawn.apparel != null)
-			{
-				for (int i = 0; i < pawn.apparel.WornApparel.Count; i++)
-				{
-					val *= pawn.apparel.WornApparel[i].GetStatValue(this.apparelStat, true, -1);
-				}
-			}
-			if (this.includeWeapon && pawn.equipment != null && pawn.equipment.Primary != null)
-			{
-				val *= pawn.equipment.Primary.GetStatValue(this.apparelStat, true, -1);
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0601384A RID: 79946 RVA: 0x005CAA78 File Offset: 0x005C8C78
-		public override string ExplanationPart(StatRequest req)
+		object IEnumerator.Current
 		{
-			if (!req.HasThing || req.Thing == null)
+			[DebuggerHidden]
+			get
 			{
-				return null;
+				return _003C_003E2__current;
 			}
-			Pawn pawn = req.Thing as Pawn;
-			if (pawn == null || !this.PawnWearingRelevantGear(pawn))
-			{
-				return null;
-			}
-			StringBuilder stringBuilder = new StringBuilder();
-			stringBuilder.AppendLine("StatsReport_RelevantGear".Translate());
-			if (pawn.apparel != null)
-			{
-				for (int i = 0; i < pawn.apparel.WornApparel.Count; i++)
-				{
-					Apparel apparel = pawn.apparel.WornApparel[i];
-					float statValue = apparel.GetStatValue(this.apparelStat, true, -1);
-					if (!Mathf.Approximately(statValue, 1f))
-					{
-						stringBuilder.AppendLine(this.InfoTextLineFrom(apparel, statValue));
-					}
-				}
-			}
-			if (this.includeWeapon && pawn.equipment != null && pawn.equipment.Primary != null)
-			{
-				float statValue2 = pawn.equipment.Primary.GetStatValue(this.apparelStat, true, -1);
-				if (!Mathf.Approximately(statValue2, 1f))
-				{
-					stringBuilder.AppendLine(this.InfoTextLineFrom(pawn.equipment.Primary, statValue2));
-				}
-			}
-			return stringBuilder.ToString();
 		}
 
-		// Token: 0x0601384B RID: 79947 RVA: 0x005CAB98 File Offset: 0x005C8D98
-		private string InfoTextLineFrom(Thing gear, float value)
+		[DebuggerHidden]
+		public _003CGetInfoCardHyperlinks_003Ed__6(int _003C_003E1__state)
 		{
-			return "    " + gear.LabelCap + ": " + value.ToStringByStyle(this.apparelStat.toStringStyle, ToStringNumberSense.Factor);
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x0601384C RID: 79948 RVA: 0x005CABC4 File Offset: 0x005C8DC4
-		private bool PawnWearingRelevantGear(Pawn pawn)
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			if (pawn.apparel != null)
+			_003Cpawn_003E5__2 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			StatPart_GearStatFactor statPart_GearStatFactor = _003C_003E4__this;
+			if (num != 0)
 			{
-				for (int i = 0; i < pawn.apparel.WornApparel.Count; i++)
+				if (num != 1)
 				{
-					if (!Mathf.Approximately(pawn.apparel.WornApparel[i].GetStatValue(this.apparelStat, true, -1), 1f))
-					{
-						return true;
-					}
+					return false;
 				}
+				_003C_003E1__state = -1;
+				goto IL_00af;
 			}
-			return this.includeWeapon && pawn.equipment != null && pawn.equipment.Primary != null && !Mathf.Approximately(pawn.equipment.Primary.GetStatValue(this.apparelStat, true, -1), 1f);
-		}
-
-		// Token: 0x0601384D RID: 79949 RVA: 0x005CAC64 File Offset: 0x005C8E64
-		public override IEnumerable<Dialog_InfoCard.Hyperlink> GetInfoCardHyperlinks(StatRequest req)
-		{
+			_003C_003E1__state = -1;
 			Thing thing = req.Thing;
-			Pawn pawn = thing as Pawn;
-			if (pawn == null)
+			_003Cpawn_003E5__2 = thing as Pawn;
+			if (_003Cpawn_003E5__2 == null)
 			{
-				yield break;
+				return false;
 			}
-			if (pawn.apparel == null)
+			if (_003Cpawn_003E5__2.apparel == null)
 			{
-				yield break;
+				return false;
 			}
-			int num;
-			for (int i = 0; i < pawn.apparel.WornApparel.Count; i = num + 1)
+			_003Ci_003E5__3 = 0;
+			goto IL_00c1;
+			IL_00c1:
+			if (_003Ci_003E5__3 < _003Cpawn_003E5__2.apparel.WornApparel.Count)
 			{
-				Apparel thing2 = pawn.apparel.WornApparel[i];
-				if (!Mathf.Approximately(thing2.GetStatValue(this.apparelStat, true, -1), 1f))
+				Apparel thing2 = _003Cpawn_003E5__2.apparel.WornApparel[_003Ci_003E5__3];
+				if (!Mathf.Approximately(thing2.GetStatValue(statPart_GearStatFactor.apparelStat), 1f))
 				{
-					yield return new Dialog_InfoCard.Hyperlink(thing2, -1, false);
+					_003C_003E2__current = new Dialog_InfoCard.Hyperlink(thing2);
+					_003C_003E1__state = 1;
+					return true;
 				}
-				num = i;
+				goto IL_00af;
 			}
-			yield break;
+			return false;
+			IL_00af:
+			_003Ci_003E5__3++;
+			goto IL_00c1;
 		}
 
-		// Token: 0x0400D8A7 RID: 55463
-		private StatDef apparelStat;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x0400D8A8 RID: 55464
-		private bool includeWeapon;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Dialog_InfoCard.Hyperlink> IEnumerable<Dialog_InfoCard.Hyperlink>.GetEnumerator()
+		{
+			_003CGetInfoCardHyperlinks_003Ed__6 _003CGetInfoCardHyperlinks_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CGetInfoCardHyperlinks_003Ed__ = this;
+			}
+			else
+			{
+				_003CGetInfoCardHyperlinks_003Ed__ = new _003CGetInfoCardHyperlinks_003Ed__6(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CGetInfoCardHyperlinks_003Ed__.req = _003C_003E3__req;
+			return _003CGetInfoCardHyperlinks_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Dialog_InfoCard.Hyperlink>)this).GetEnumerator();
+		}
+	}
+
+	private StatDef apparelStat;
+
+	private bool includeWeapon;
+
+	public override void TransformValue(StatRequest req, ref float val)
+	{
+		if (!req.HasThing || req.Thing == null || !(req.Thing is Pawn pawn))
+		{
+			return;
+		}
+		if (pawn.apparel != null)
+		{
+			for (int i = 0; i < pawn.apparel.WornApparel.Count; i++)
+			{
+				val *= pawn.apparel.WornApparel[i].GetStatValue(apparelStat);
+			}
+		}
+		if (includeWeapon && pawn.equipment != null && pawn.equipment.Primary != null)
+		{
+			val *= pawn.equipment.Primary.GetStatValue(apparelStat);
+		}
+	}
+
+	public override string ExplanationPart(StatRequest req)
+	{
+		if (!req.HasThing || req.Thing == null)
+		{
+			return null;
+		}
+		if (!(req.Thing is Pawn pawn) || !PawnWearingRelevantGear(pawn))
+		{
+			return null;
+		}
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.AppendLine("StatsReport_RelevantGear".Translate());
+		if (pawn.apparel != null)
+		{
+			for (int i = 0; i < pawn.apparel.WornApparel.Count; i++)
+			{
+				Apparel apparel = pawn.apparel.WornApparel[i];
+				float statValue = apparel.GetStatValue(apparelStat);
+				if (!Mathf.Approximately(statValue, 1f))
+				{
+					stringBuilder.AppendLine(InfoTextLineFrom(apparel, statValue));
+				}
+			}
+		}
+		if (includeWeapon && pawn.equipment != null && pawn.equipment.Primary != null)
+		{
+			float statValue2 = pawn.equipment.Primary.GetStatValue(apparelStat);
+			if (!Mathf.Approximately(statValue2, 1f))
+			{
+				stringBuilder.AppendLine(InfoTextLineFrom(pawn.equipment.Primary, statValue2));
+			}
+		}
+		return stringBuilder.ToString();
+	}
+
+	private string InfoTextLineFrom(Thing gear, float value)
+	{
+		return "    " + gear.LabelCap + ": " + value.ToStringByStyle(apparelStat.toStringStyle, ToStringNumberSense.Factor);
+	}
+
+	private bool PawnWearingRelevantGear(Pawn pawn)
+	{
+		if (pawn.apparel != null)
+		{
+			for (int i = 0; i < pawn.apparel.WornApparel.Count; i++)
+			{
+				if (!Mathf.Approximately(pawn.apparel.WornApparel[i].GetStatValue(apparelStat), 1f))
+				{
+					return true;
+				}
+			}
+		}
+		if (includeWeapon && pawn.equipment != null && pawn.equipment.Primary != null && !Mathf.Approximately(pawn.equipment.Primary.GetStatValue(apparelStat), 1f))
+		{
+			return true;
+		}
+		return false;
+	}
+
+	[IteratorStateMachine(typeof(_003CGetInfoCardHyperlinks_003Ed__6))]
+	public override IEnumerable<Dialog_InfoCard.Hyperlink> GetInfoCardHyperlinks(StatRequest req)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetInfoCardHyperlinks_003Ed__6(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__req = req
+		};
 	}
 }

@@ -1,218 +1,273 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
 
-namespace RimWorld
+namespace RimWorld;
+
+public abstract class CompAncientVent : ThingComp
 {
-	// Token: 0x02002BD5 RID: 11221
-	public abstract class CompAncientVent : ThingComp
+	[CompilerGenerated]
+	private sealed class _003CCompGetGizmosExtra_003Ed__16 : IEnumerable<Gizmo>, IEnumerable, IEnumerator<Gizmo>, IEnumerator, IDisposable
 	{
-		// Token: 0x17002754 RID: 10068
-		// (get) Token: 0x0600FAF7 RID: 64247 RVA: 0x0048E995 File Offset: 0x0048CB95
-		public CompProperties_AncientVentEmitter Props
+		private int _003C_003E1__state;
+
+		private Gizmo _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public CompAncientVent _003C_003E4__this;
+
+		Gizmo IEnumerator<Gizmo>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (CompProperties_AncientVentEmitter)this.props;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002755 RID: 10069
-		// (get) Token: 0x0600FAF8 RID: 64248 RVA: 0x00002501 File Offset: 0x00000701
-		protected virtual bool AppliesEffectsToPawns
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CCompGetGizmosExtra_003Ed__16(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			CompAncientVent @object = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (!DebugSettings.ShowDevGizmos)
+				{
+					return false;
+				}
+				_003C_003E2__current = new Command_Action
+				{
+					action = @object.DevToggleVent,
+					defaultLabel = "DEV: Toggle vents on map",
+					defaultDesc = "Toggles all vents on the map on or off"
+				};
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
 				return false;
 			}
 		}
 
-		// Token: 0x17002756 RID: 10070
-		// (get) Token: 0x0600FAF9 RID: 64249 RVA: 0x0048E9A2 File Offset: 0x0048CBA2
-		public bool VentOn
+		bool IEnumerator.MoveNext()
 		{
-			get
-			{
-				return this.ventOn;
-			}
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0600FAFA RID: 64250 RVA: 0x0048E9AC File Offset: 0x0048CBAC
-		public override void CompTick()
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			base.CompTick();
-			if (this.parent.Destroyed)
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Gizmo> IEnumerable<Gizmo>.GetEnumerator()
+		{
+			_003CCompGetGizmosExtra_003Ed__16 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				return;
+				_003C_003E1__state = 0;
+				result = this;
 			}
-			if (this.CheckShouldToggleAndHandleMapState())
+			else
 			{
-				this.ventOn = !this.ventOn;
-				this.ToggleIndividualVent(this.ventOn);
-			}
-			if (!this.ventOn)
-			{
-				Sustainer sustainer = this.sustainer;
-				if (sustainer != null)
+				result = new _003CCompGetGizmosExtra_003Ed__16(0)
 				{
-					sustainer.End();
-				}
-				this.sustainer = null;
-				return;
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
-			if (this.sustainer == null)
-			{
-				this.sustainer = this.Props.activeSound.TrySpawnSustainer(SoundInfo.InMap(this.parent, MaintenanceType.PerTick));
-			}
-			this.sustainer.Maintain();
-			if (this.parent.IsHashIntervalTick(20) && this.Props.heatToPush != 0)
-			{
-				GenTemperature.PushHeat(this.parent, (float)this.Props.heatToPush);
-			}
-			if (!this.AppliesEffectsToPawns)
-			{
-				return;
-			}
-			Map map = this.parent.Map;
-			IntVec3 position = this.parent.Position;
-			int num = Mathf.FloorToInt((float)this.parent.def.size.x / 2f);
-			for (int i = 0; i < map.mapPawns.AllPawnsSpawned.Count; i++)
-			{
-				Pawn pawn = map.mapPawns.AllPawnsSpawned[i];
-				if (pawn.Position.DistanceTo(position) <= (float)num)
-				{
-					this.ApplyPawnEffect(pawn, 1);
-				}
-			}
+			return result;
 		}
 
-		// Token: 0x0600FAFB RID: 64251 RVA: 0x0048EB09 File Offset: 0x0048CD09
-		public override void PostExposeData()
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			base.PostExposeData();
-			Scribe_Values.Look<bool>(ref this.ventOn, "ventOn", false, false);
+			return ((IEnumerable<Gizmo>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x0600FAFC RID: 64252 RVA: 0x0048EB24 File Offset: 0x0048CD24
-		private bool CheckShouldToggleAndHandleMapState()
+	private static Dictionary<int, int> sharedLastCheckMtbTickPerMap = new Dictionary<int, int>();
+
+	private static Dictionary<int, bool> sharedLastMtbCheckDidOccurPerMap = new Dictionary<int, bool>();
+
+	private const int PushHeatInterval = 20;
+
+	private bool ventOn;
+
+	private Sustainer sustainer;
+
+	public CompProperties_AncientVentEmitter Props => (CompProperties_AncientVentEmitter)props;
+
+	protected virtual bool AppliesEffectsToPawns => false;
+
+	public bool VentOn => ventOn;
+
+	public override void CompTick()
+	{
+		base.CompTick();
+		if (parent.Destroyed)
 		{
-			int num;
-			if ((CompAncientVent.sharedLastCheckMtbTickPerMap.TryGetValue(this.parent.Map.uniqueID, out num) ? num : 0) == GenTicks.TicksGame)
-			{
-				bool flag;
-				return CompAncientVent.sharedLastMtbCheckDidOccurPerMap.TryGetValue(this.parent.Map.uniqueID, out flag) && flag;
-			}
-			int num2 = this.ventOn ? this.Props.onDurationMtbDays : this.Props.offDurationMtbDays;
-			CompAncientVent.sharedLastCheckMtbTickPerMap[this.parent.Map.uniqueID] = GenTicks.TicksGame;
-			bool flag2 = CompAncientVent.sharedLastMtbCheckDidOccurPerMap[this.parent.Map.uniqueID] = Rand.MTBEventOccurs((float)num2, 60000f, 1f);
-			if (flag2)
-			{
-				this.ToggleMapState();
-			}
-			return flag2;
+			return;
 		}
-
-		// Token: 0x0600FAFD RID: 64253 RVA: 0x0048EBF0 File Offset: 0x0048CDF0
-		private void ToggleMapState()
+		if (CheckShouldToggleAndHandleMapState())
 		{
-			if (this.ventOn)
-			{
-				if (this.Props.conditionToCause != null)
-				{
-					GameCondition activeCondition = this.parent.Map.gameConditionManager.GetActiveCondition(this.Props.conditionToCause);
-					if (activeCondition != null)
-					{
-						activeCondition.End();
-					}
-				}
-				this.SendToggleAlert(false);
-				return;
-			}
-			if (this.Props.conditionToCause != null)
-			{
-				if (!this.parent.Map.gameConditionManager.ConditionIsActive(this.Props.conditionToCause))
-				{
-					GameCondition gameCondition = GameConditionMaker.MakeConditionPermanent(this.Props.conditionToCause);
-					gameCondition.suppressEndMessage = true;
-					gameCondition.conditionCauser = this.parent;
-					gameCondition.forceDisplayAsDuration = true;
-					this.parent.Map.gameConditionManager.RegisterCondition(gameCondition);
-				}
-				this.SendToggleAlert(true);
-			}
+			ventOn = !ventOn;
+			ToggleIndividualVent(ventOn);
 		}
-
-		// Token: 0x0600FAFE RID: 64254 RVA: 0x0048ECBC File Offset: 0x0048CEBC
-		public override string CompInspectStringExtra()
+		if (!ventOn)
 		{
-			if (!this.ventOn)
-			{
-				return "DormantCompInactive".Translate();
-			}
-			return this.Props.activeInspectStringKey.Translate().CapitalizeFirst();
+			sustainer?.End();
+			sustainer = null;
+			return;
 		}
-
-		// Token: 0x0600FAFF RID: 64255 RVA: 0x0048ECFE File Offset: 0x0048CEFE
-		public override IEnumerable<Gizmo> CompGetGizmosExtra()
+		if (sustainer == null)
 		{
-			if (!DebugSettings.ShowDevGizmos)
-			{
-				yield break;
-			}
-			yield return new Command_Action
-			{
-				action = new Action(this.DevToggleVent),
-				defaultLabel = "DEV: Toggle vents on map",
-				defaultDesc = "Toggles all vents on the map on or off"
-			};
-			yield break;
+			sustainer = Props.activeSound.TrySpawnSustainer(SoundInfo.InMap(parent, MaintenanceType.PerTick));
 		}
-
-		// Token: 0x0600FB00 RID: 64256 RVA: 0x0048ED10 File Offset: 0x0048CF10
-		private void DevToggleVent()
+		sustainer.Maintain();
+		if (parent.IsHashIntervalTick(20) && Props.heatToPush != 0)
 		{
-			this.ToggleMapState();
-			bool on = !this.ventOn;
-			foreach (Building thing in this.parent.Map.listerBuildings.AllBuildingsNonColonistOfDef(this.parent.def))
+			GenTemperature.PushHeat(parent, Props.heatToPush);
+		}
+		if (!AppliesEffectsToPawns)
+		{
+			return;
+		}
+		Map map = parent.Map;
+		IntVec3 position = parent.Position;
+		int num = Mathf.FloorToInt((float)parent.def.size.x / 2f);
+		for (int i = 0; i < map.mapPawns.AllPawnsSpawned.Count; i++)
+		{
+			Pawn pawn = map.mapPawns.AllPawnsSpawned[i];
+			if (!(pawn.Position.DistanceTo(position) > (float)num))
 			{
-				CompAncientVent compAncientVent = thing.TryGetComp<CompAncientVent>();
-				if (compAncientVent != null)
-				{
-					compAncientVent.ventOn = on;
-					compAncientVent.ToggleIndividualVent(on);
-				}
+				ApplyPawnEffect(pawn, 1);
 			}
 		}
+	}
 
-		// Token: 0x0600FB01 RID: 64257 RVA: 0x0048ED98 File Offset: 0x0048CF98
-		protected void SendToggleAlert(bool goingToBeOn)
+	public override void PostExposeData()
+	{
+		base.PostExposeData();
+		Scribe_Values.Look(ref ventOn, "ventOn", defaultValue: false);
+	}
+
+	private bool CheckShouldToggleAndHandleMapState()
+	{
+		bool value2;
+		if ((sharedLastCheckMtbTickPerMap.TryGetValue(parent.Map.uniqueID, out var value) ? value : 0) == GenTicks.TicksGame)
 		{
-			Messages.Message((goingToBeOn ? this.Props.startupMessageKey : this.Props.shutdownMessageKey).Translate(), new LookTargets(this.parent.Map.listerBuildings.AllBuildingsNonColonistOfDef(this.parent.def)), MessageTypeDefOf.NeutralEvent, false);
+			return sharedLastMtbCheckDidOccurPerMap.TryGetValue(parent.Map.uniqueID, out value2) && value2;
 		}
-
-		// Token: 0x0600FB02 RID: 64258
-		protected abstract void ToggleIndividualVent(bool on);
-
-		// Token: 0x0600FB03 RID: 64259 RVA: 0x000026EA File Offset: 0x000008EA
-		protected virtual void ApplyPawnEffect(Pawn pawn, int delta)
+		int num = (ventOn ? Props.onDurationMtbDays : Props.offDurationMtbDays);
+		sharedLastCheckMtbTickPerMap[parent.Map.uniqueID] = GenTicks.TicksGame;
+		bool flag2 = (sharedLastMtbCheckDidOccurPerMap[parent.Map.uniqueID] = Rand.MTBEventOccurs(num, 60000f, 1f));
+		if (flag2)
 		{
+			ToggleMapState();
 		}
+		return flag2;
+	}
 
-		// Token: 0x0400A4CB RID: 42187
-		private static Dictionary<int, int> sharedLastCheckMtbTickPerMap = new Dictionary<int, int>();
+	private void ToggleMapState()
+	{
+		if (ventOn)
+		{
+			if (Props.conditionToCause != null)
+			{
+				parent.Map.gameConditionManager.GetActiveCondition(Props.conditionToCause)?.End();
+			}
+			SendToggleAlert(goingToBeOn: false);
+		}
+		else if (Props.conditionToCause != null)
+		{
+			if (!parent.Map.gameConditionManager.ConditionIsActive(Props.conditionToCause))
+			{
+				GameCondition gameCondition = GameConditionMaker.MakeConditionPermanent(Props.conditionToCause);
+				gameCondition.suppressEndMessage = true;
+				gameCondition.conditionCauser = parent;
+				gameCondition.forceDisplayAsDuration = true;
+				parent.Map.gameConditionManager.RegisterCondition(gameCondition);
+			}
+			SendToggleAlert(goingToBeOn: true);
+		}
+	}
 
-		// Token: 0x0400A4CC RID: 42188
-		private static Dictionary<int, bool> sharedLastMtbCheckDidOccurPerMap = new Dictionary<int, bool>();
+	public override string CompInspectStringExtra()
+	{
+		if (!ventOn)
+		{
+			return "DormantCompInactive".Translate();
+		}
+		return Props.activeInspectStringKey.Translate().CapitalizeFirst();
+	}
 
-		// Token: 0x0400A4CD RID: 42189
-		private const int PushHeatInterval = 20;
+	[IteratorStateMachine(typeof(_003CCompGetGizmosExtra_003Ed__16))]
+	public override IEnumerable<Gizmo> CompGetGizmosExtra()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CCompGetGizmosExtra_003Ed__16(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
 
-		// Token: 0x0400A4CE RID: 42190
-		private bool ventOn;
+	private void DevToggleVent()
+	{
+		ToggleMapState();
+		bool on = !ventOn;
+		foreach (Building item in parent.Map.listerBuildings.AllBuildingsNonColonistOfDef(parent.def))
+		{
+			CompAncientVent compAncientVent = item.TryGetComp<CompAncientVent>();
+			if (compAncientVent != null)
+			{
+				compAncientVent.ventOn = on;
+				compAncientVent.ToggleIndividualVent(on);
+			}
+		}
+	}
 
-		// Token: 0x0400A4CF RID: 42191
-		private Sustainer sustainer;
+	protected void SendToggleAlert(bool goingToBeOn)
+	{
+		Messages.Message((goingToBeOn ? Props.startupMessageKey : Props.shutdownMessageKey).Translate(), new LookTargets(parent.Map.listerBuildings.AllBuildingsNonColonistOfDef(parent.def)), MessageTypeDefOf.NeutralEvent, historical: false);
+	}
+
+	protected abstract void ToggleIndividualVent(bool on);
+
+	protected virtual void ApplyPawnEffect(Pawn pawn, int delta)
+	{
 	}
 }

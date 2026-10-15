@@ -1,64 +1,176 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_FishAnimal : JobDriver
 {
-	// Token: 0x0200127A RID: 4730
-	public class JobDriver_FishAnimal : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__3 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x060073B8 RID: 29624 RVA: 0x0023881C File Offset: 0x00236A1C
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
-		{
-			return this.pawn.Reserve(this.job.GetTarget(TargetIndex.A), this.job, 1, -1, null, errorOnFailed, false) && this.pawn.Reserve(this.job.GetTarget(TargetIndex.B), this.job, 1, -1, null, errorOnFailed, false);
-		}
+		private int _003C_003E1__state;
 
-		// Token: 0x060073B9 RID: 29625 RVA: 0x00238871 File Offset: 0x00236A71
-		protected override IEnumerable<Toil> MakeNewToils()
-		{
-			yield return Toils_Goto.GotoCell(TargetIndex.B, PathEndMode.OnCell);
-			int ticks = Mathf.RoundToInt(1500f / this.pawn.GetStatValue(StatDefOf.FishingSpeed, true, -1));
-			Toil toil = Toils_General.WaitWith(TargetIndex.A, ticks, false, true, false, TargetIndex.A, PathEndMode.Touch);
-			toil.WithProgressBarToilDelay(TargetIndex.B, false, -0.5f);
-			yield return toil;
-			yield return this.CompleteFishingToil();
-			yield break;
-		}
+		private Toil _003C_003E2__current;
 
-		// Token: 0x060073BA RID: 29626 RVA: 0x00238881 File Offset: 0x00236A81
-		private Toil CompleteFishingToil()
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_FishAnimal _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
 		{
-			Toil toil = ToilMaker.MakeToil("CompleteFishingToil");
-			toil.initAction = delegate()
+			[DebuggerHidden]
+			get
 			{
-				IntVec3 cell = this.job.GetTarget(TargetIndex.A).Cell;
-				bool flag;
-				List<Thing> catchesFor = FishingUtility.GetCatchesFor(this.pawn, cell, true, out flag);
-				if (!catchesFor.Any<Thing>())
-				{
-					return;
-				}
-				bool flag2 = false;
-				int num = catchesFor.Sum((Thing x) => x.stackCount);
-				foreach (Thing thing in catchesFor)
-				{
-					flag2 |= GenPlace.TryPlaceThing(thing, this.pawn.Position, this.pawn.Map, ThingPlaceMode.Near, null, null, null, 1);
-				}
-				if (flag2)
-				{
-					this.pawn.Map.waterBodyTracker.Notify_Fished(cell, (float)num);
-				}
-			};
-			return toil;
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x04004FB4 RID: 20404
-		private const TargetIndex SpotInd = TargetIndex.A;
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
 
-		// Token: 0x04004FB5 RID: 20405
-		private const TargetIndex StandInd = TargetIndex.B;
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__3(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_FishAnimal jobDriver_FishAnimal = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Goto.GotoCell(TargetIndex.B, PathEndMode.OnCell);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+			{
+				_003C_003E1__state = -1;
+				int ticks = Mathf.RoundToInt(1500f / jobDriver_FishAnimal.pawn.GetStatValue(StatDefOf.FishingSpeed));
+				Toil toil = Toils_General.WaitWith(TargetIndex.A, ticks, useProgressBar: false, maintainPosture: true, maintainSleep: false, TargetIndex.A);
+				toil.WithProgressBarToilDelay(TargetIndex.B);
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 2;
+				return true;
+			}
+			case 2:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = jobDriver_FishAnimal.CompleteFishingToil();
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__3 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__3(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private const TargetIndex SpotInd = TargetIndex.A;
+
+	private const TargetIndex StandInd = TargetIndex.B;
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		if (pawn.Reserve(job.GetTarget(TargetIndex.A), job, 1, -1, null, errorOnFailed))
+		{
+			return pawn.Reserve(job.GetTarget(TargetIndex.B), job, 1, -1, null, errorOnFailed);
+		}
+		return false;
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__3))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__3(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	private Toil CompleteFishingToil()
+	{
+		Toil toil = ToilMaker.MakeToil("CompleteFishingToil");
+		toil.initAction = delegate
+		{
+			IntVec3 cell = job.GetTarget(TargetIndex.A).Cell;
+			bool rare;
+			List<Thing> catchesFor = FishingUtility.GetCatchesFor(pawn, cell, animalFishing: true, out rare);
+			if (catchesFor.Any())
+			{
+				bool flag = false;
+				int num = catchesFor.Sum((Thing x) => x.stackCount);
+				foreach (Thing item in catchesFor)
+				{
+					flag |= GenPlace.TryPlaceThing(item, pawn.Position, pawn.Map, ThingPlaceMode.Near, null, null, null);
+				}
+				if (flag)
+				{
+					pawn.Map.waterBodyTracker.Notify_Fished(cell, num);
+				}
+			}
+		};
+		return toil;
 	}
 }

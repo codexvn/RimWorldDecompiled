@@ -1,53 +1,154 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld.QuestGen;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class StorytellerComp_WorkSite : StorytellerComp
 {
-	// Token: 0x02001E78 RID: 7800
-	public class StorytellerComp_WorkSite : StorytellerComp
+	[CompilerGenerated]
+	private sealed class _003CMakeIntervalIncidents_003Ed__2 : IEnumerable<FiringIncident>, IEnumerable, IEnumerator<FiringIncident>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001A75 RID: 6773
-		// (get) Token: 0x0600AD30 RID: 44336 RVA: 0x003166F0 File Offset: 0x003148F0
-		public StorytellerCompProperties_WorkSite Props
+		private int _003C_003E1__state;
+
+		private FiringIncident _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public StorytellerComp_WorkSite _003C_003E4__this;
+
+		private IIncidentTarget target;
+
+		public IIncidentTarget _003C_003E3__target;
+
+		FiringIncident IEnumerator<FiringIncident>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (StorytellerCompProperties_WorkSite)this.props;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600AD31 RID: 44337 RVA: 0x003166FD File Offset: 0x003148FD
-		public override IEnumerable<FiringIncident> MakeIntervalIncidents(IIncidentTarget target)
+		object IEnumerator.Current
 		{
-			if (Find.TickManager.TicksGame < 600000)
+			[DebuggerHidden]
+			get
 			{
-				yield break;
+				return _003C_003E2__current;
 			}
-			float num = QuestNode_Root_WorkSite.BestAppearanceFrequency();
-			if (this.Props.incident == null || !this.Props.incident.TargetAllowed(target) || num <= 0f)
+		}
+
+		[DebuggerHidden]
+		public _003CMakeIntervalIncidents_003Ed__2(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			StorytellerComp_WorkSite storytellerComp_WorkSite = _003C_003E4__this;
+			switch (num)
 			{
-				yield break;
-			}
-			if (Rand.MTBEventOccurs(this.Props.baseMtbDays / num, 60000f, 1000f))
+			default:
+				return false;
+			case 0:
 			{
-				IncidentParms parms = this.GenerateParms(this.Props.incident.category, target);
-				if (this.Props.incident.Worker.CanFireNow(parms))
+				_003C_003E1__state = -1;
+				if (Find.TickManager.TicksGame < 600000)
 				{
-					yield return new FiringIncident(this.Props.incident, this, parms);
+					return false;
 				}
+				float num2 = QuestNode_Root_WorkSite.BestAppearanceFrequency();
+				if (storytellerComp_WorkSite.Props.incident == null || !storytellerComp_WorkSite.Props.incident.TargetAllowed(target) || num2 <= 0f)
+				{
+					return false;
+				}
+				if (Rand.MTBEventOccurs(storytellerComp_WorkSite.Props.baseMtbDays / num2, 60000f, 1000f))
+				{
+					IncidentParms parms = storytellerComp_WorkSite.GenerateParms(storytellerComp_WorkSite.Props.incident.category, target);
+					if (storytellerComp_WorkSite.Props.incident.Worker.CanFireNow(parms))
+					{
+						_003C_003E2__current = new FiringIncident(storytellerComp_WorkSite.Props.incident, storytellerComp_WorkSite, parms);
+						_003C_003E1__state = 1;
+						return true;
+					}
+				}
+				break;
 			}
-			yield break;
+			case 1:
+				_003C_003E1__state = -1;
+				break;
+			}
+			return false;
 		}
 
-		// Token: 0x0600AD32 RID: 44338 RVA: 0x00316714 File Offset: 0x00314914
-		public override string ToString()
+		bool IEnumerator.MoveNext()
 		{
-			string str = base.ToString();
-			string str2 = " ";
-			IncidentDef incident = this.Props.incident;
-			return str + str2 + ((incident != null) ? incident.ToString() : null);
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<FiringIncident> IEnumerable<FiringIncident>.GetEnumerator()
+		{
+			_003CMakeIntervalIncidents_003Ed__2 _003CMakeIntervalIncidents_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CMakeIntervalIncidents_003Ed__ = this;
+			}
+			else
+			{
+				_003CMakeIntervalIncidents_003Ed__ = new _003CMakeIntervalIncidents_003Ed__2(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CMakeIntervalIncidents_003Ed__.target = _003C_003E3__target;
+			return _003CMakeIntervalIncidents_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<FiringIncident>)this).GetEnumerator();
+		}
+	}
+
+	public StorytellerCompProperties_WorkSite Props => (StorytellerCompProperties_WorkSite)props;
+
+	[IteratorStateMachine(typeof(_003CMakeIntervalIncidents_003Ed__2))]
+	public override IEnumerable<FiringIncident> MakeIntervalIncidents(IIncidentTarget target)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeIntervalIncidents_003Ed__2(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__target = target
+		};
+	}
+
+	public override string ToString()
+	{
+		return base.ToString() + " " + Props.incident;
 	}
 }

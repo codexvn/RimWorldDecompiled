@@ -1,85 +1,60 @@
-﻿using System;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class PawnRelationWorker_Overseer : PawnRelationWorker
 {
-	// Token: 0x0200242A RID: 9258
-	public class PawnRelationWorker_Overseer : PawnRelationWorker
+	public override void OnRelationCreated(Pawn firstPawn, Pawn secondPawn)
 	{
-		// Token: 0x0600C861 RID: 51297 RVA: 0x003A82B1 File Offset: 0x003A64B1
-		public override void OnRelationCreated(Pawn firstPawn, Pawn secondPawn)
+		base.OnRelationCreated(firstPawn, secondPawn);
+		if (MechanitorUtility.IsMechanitor(firstPawn))
 		{
-			base.OnRelationCreated(firstPawn, secondPawn);
-			if (MechanitorUtility.IsMechanitor(firstPawn))
-			{
-				firstPawn.mechanitor.AssignPawnControlGroup(secondPawn, null);
-				return;
-			}
-			if (MechanitorUtility.IsMechanitor(secondPawn))
-			{
-				secondPawn.mechanitor.AssignPawnControlGroup(firstPawn, null);
-			}
+			firstPawn.mechanitor.AssignPawnControlGroup(secondPawn);
 		}
-
-		// Token: 0x0600C862 RID: 51298 RVA: 0x003A82E6 File Offset: 0x003A64E6
-		public override void OnRelationRemoved(Pawn firstPawn, Pawn secondPawn)
+		else if (MechanitorUtility.IsMechanitor(secondPawn))
 		{
-			base.OnRelationRemoved(firstPawn, secondPawn);
-			if (MechanitorUtility.IsMechanitor(firstPawn))
-			{
-				firstPawn.mechanitor.UnassignPawnFromAnyControlGroup(secondPawn);
-				return;
-			}
-			if (MechanitorUtility.IsMechanitor(secondPawn))
-			{
-				secondPawn.mechanitor.UnassignPawnFromAnyControlGroup(firstPawn);
-			}
+			secondPawn.mechanitor.AssignPawnControlGroup(firstPawn);
 		}
+	}
 
-		// Token: 0x0600C863 RID: 51299 RVA: 0x003A831C File Offset: 0x003A651C
-		public override void Notify_PostRemovedByDeath(Pawn firstPawn, Pawn secondPawn)
+	public override void OnRelationRemoved(Pawn firstPawn, Pawn secondPawn)
+	{
+		base.OnRelationRemoved(firstPawn, secondPawn);
+		if (MechanitorUtility.IsMechanitor(firstPawn))
 		{
-			Pawn pawn = MechanitorUtility.IsMechanitor(firstPawn) ? firstPawn : secondPawn;
-			Pawn pawn2 = (firstPawn == pawn) ? secondPawn : firstPawn;
-			if (!pawn2.Dead)
-			{
-				CompOverseerSubject overseerSubject = pawn2.OverseerSubject;
-				if (overseerSubject != null)
-				{
-					overseerSubject.Notify_DisconnectedFromOverseer();
-				}
-			}
-			if (pawn != null && !pawn.Dead)
-			{
-				Messages.Message(Find.ActiveLanguageWorker.PostProcessed("MessageMechanitorLostControlOfMech".Translate(pawn, pawn2) + ": " + pawn2.LabelShortCap), new LookTargets(new Thing[]
-				{
-					pawn,
-					pawn2
-				}), MessageTypeDefOf.NeutralEvent, true);
-			}
+			firstPawn.mechanitor.UnassignPawnFromAnyControlGroup(secondPawn);
 		}
-
-		// Token: 0x0600C864 RID: 51300 RVA: 0x003A83BC File Offset: 0x003A65BC
-		public override void Notify_PostRemovedLeftBehind(Pawn firstPawn, Pawn secondPawn)
+		else if (MechanitorUtility.IsMechanitor(secondPawn))
 		{
-			Pawn pawn = MechanitorUtility.IsMechanitor(firstPawn) ? firstPawn : secondPawn;
-			Pawn pawn2 = (firstPawn == pawn) ? secondPawn : firstPawn;
-			if (!pawn2.Dead)
-			{
-				CompOverseerSubject overseerSubject = pawn2.OverseerSubject;
-				if (overseerSubject != null)
-				{
-					overseerSubject.Notify_DisconnectedFromOverseer();
-				}
-			}
-			if (pawn != null && !pawn.Dead)
-			{
-				Messages.Message(Find.ActiveLanguageWorker.PostProcessed("MessageMechanitorLostControlOfMech".Translate(pawn, pawn2) + ": " + pawn2.LabelShortCap), new LookTargets(new Thing[]
-				{
-					pawn,
-					pawn2
-				}), MessageTypeDefOf.NeutralEvent, true);
-			}
+			secondPawn.mechanitor.UnassignPawnFromAnyControlGroup(firstPawn);
+		}
+	}
+
+	public override void Notify_PostRemovedByDeath(Pawn firstPawn, Pawn secondPawn)
+	{
+		Pawn pawn = (MechanitorUtility.IsMechanitor(firstPawn) ? firstPawn : secondPawn);
+		Pawn pawn2 = ((firstPawn == pawn) ? secondPawn : firstPawn);
+		if (!pawn2.Dead)
+		{
+			pawn2.OverseerSubject?.Notify_DisconnectedFromOverseer();
+		}
+		if (pawn != null && !pawn.Dead)
+		{
+			Messages.Message(Find.ActiveLanguageWorker.PostProcessed("MessageMechanitorLostControlOfMech".Translate(pawn, pawn2) + ": " + pawn2.LabelShortCap), new LookTargets(new Thing[2] { pawn, pawn2 }), MessageTypeDefOf.NeutralEvent);
+		}
+	}
+
+	public override void Notify_PostRemovedLeftBehind(Pawn firstPawn, Pawn secondPawn)
+	{
+		Pawn pawn = (MechanitorUtility.IsMechanitor(firstPawn) ? firstPawn : secondPawn);
+		Pawn pawn2 = ((firstPawn == pawn) ? secondPawn : firstPawn);
+		if (!pawn2.Dead)
+		{
+			pawn2.OverseerSubject?.Notify_DisconnectedFromOverseer();
+		}
+		if (pawn != null && !pawn.Dead)
+		{
+			Messages.Message(Find.ActiveLanguageWorker.PostProcessed("MessageMechanitorLostControlOfMech".Translate(pawn, pawn2) + ": " + pawn2.LabelShortCap), new LookTargets(new Thing[2] { pawn, pawn2 }), MessageTypeDefOf.NeutralEvent);
 		}
 	}
 }

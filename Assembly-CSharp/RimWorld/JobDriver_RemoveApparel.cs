@@ -1,95 +1,216 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_RemoveApparel : JobDriver
 {
-	// Token: 0x020013C3 RID: 5059
-	public class JobDriver_RemoveApparel : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__7 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001382 RID: 4994
-		// (get) Token: 0x06007BDC RID: 31708 RVA: 0x00254E44 File Offset: 0x00253044
-		private Apparel Apparel
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_RemoveApparel _003C_003E4__this;
+
+		private Toil _003CcarryToCell_003E5__2;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (Apparel)this.job.GetTarget(TargetIndex.A).Thing;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06007BDD RID: 31709 RVA: 0x00254E6A File Offset: 0x0025306A
-		public override void ExposeData()
+		object IEnumerator.Current
 		{
-			base.ExposeData();
-			Scribe_Values.Look<int>(ref this.duration, "duration", 0, false);
-		}
-
-		// Token: 0x06007BDE RID: 31710 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
-		{
-			return true;
-		}
-
-		// Token: 0x06007BDF RID: 31711 RVA: 0x00254E84 File Offset: 0x00253084
-		public override void Notify_Starting()
-		{
-			base.Notify_Starting();
-			this.duration = (int)(this.Apparel.GetStatValue(StatDefOf.EquipDelay, true, -1) * 60f);
-		}
-
-		// Token: 0x06007BE0 RID: 31712 RVA: 0x00254EAB File Offset: 0x002530AB
-		protected override IEnumerable<Toil> MakeNewToils()
-		{
-			this.FailOnDestroyedOrNull(TargetIndex.A);
-			yield return Toils_General.Wait(this.duration, TargetIndex.None).PlaySustainerOrSound(this.Apparel.def.apparel.soundRemove, 1f).WithProgressBarToilDelay(TargetIndex.A, false, -0.5f);
-			yield return Toils_General.Do(delegate
+			[DebuggerHidden]
+			get
 			{
-				if (!this.pawn.apparel.WornApparel.Contains(this.Apparel))
-				{
-					base.EndJobWith(JobCondition.Incompletable);
-					return;
-				}
-				Apparel apparel;
-				if (!this.pawn.apparel.TryDrop(this.Apparel, out apparel))
-				{
-					base.EndJobWith(JobCondition.Incompletable);
-					return;
-				}
-				this.job.targetA = apparel;
-				if (!this.job.haulDroppedApparel)
-				{
-					base.EndJobWith(JobCondition.Succeeded);
-					return;
-				}
-				apparel.SetForbidden(false, false);
-				StoragePriority currentPriority = StoreUtility.CurrentStoragePriorityOf(apparel, false);
-				IntVec3 c;
-				if (StoreUtility.TryFindBestBetterStoreCellFor(apparel, this.pawn, base.Map, currentPriority, this.pawn.Faction, out c, true))
-				{
-					this.job.count = apparel.stackCount;
-					this.job.targetB = c;
-					return;
-				}
-				base.EndJobWith(JobCondition.Incompletable);
-			});
-			if (!this.job.haulDroppedApparel)
-			{
-				yield break;
+				return _003C_003E2__current;
 			}
-			yield return Toils_Reserve.Reserve(TargetIndex.B, 1, -1, null, false);
-			yield return Toils_Reserve.Reserve(TargetIndex.A, 1, -1, null, false);
-			yield return Toils_Haul.StartCarryThing(TargetIndex.A, false, false, false, true, false).FailOn(() => !this.pawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation));
-			Toil carryToCell = Toils_Haul.CarryHauledThingToCell(TargetIndex.B, PathEndMode.ClosestTouch);
-			yield return carryToCell;
-			yield return Toils_Haul.PlaceHauledThingInCell(TargetIndex.B, carryToCell, true, false);
-			yield break;
 		}
 
-		// Token: 0x040053AD RID: 21421
-		private int duration;
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__7(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
 
-		// Token: 0x040053AE RID: 21422
-		private const TargetIndex ApparelInd = TargetIndex.A;
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003CcarryToCell_003E5__2 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_RemoveApparel CS_0024_003C_003E8__locals20 = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				CS_0024_003C_003E8__locals20.FailOnDestroyedOrNull(TargetIndex.A);
+				_003C_003E2__current = Toils_General.Wait(CS_0024_003C_003E8__locals20.duration).PlaySustainerOrSound(CS_0024_003C_003E8__locals20.Apparel.def.apparel.soundRemove).WithProgressBarToilDelay(TargetIndex.A);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.Do(delegate
+				{
+					Apparel resultingAp;
+					if (!CS_0024_003C_003E8__locals20.pawn.apparel.WornApparel.Contains(CS_0024_003C_003E8__locals20.Apparel))
+					{
+						CS_0024_003C_003E8__locals20.EndJobWith(JobCondition.Incompletable);
+					}
+					else if (!CS_0024_003C_003E8__locals20.pawn.apparel.TryDrop(CS_0024_003C_003E8__locals20.Apparel, out resultingAp))
+					{
+						CS_0024_003C_003E8__locals20.EndJobWith(JobCondition.Incompletable);
+					}
+					else
+					{
+						CS_0024_003C_003E8__locals20.job.targetA = resultingAp;
+						if (CS_0024_003C_003E8__locals20.job.haulDroppedApparel)
+						{
+							resultingAp.SetForbidden(value: false, warnOnFail: false);
+							StoragePriority currentPriority = StoreUtility.CurrentStoragePriorityOf(resultingAp);
+							if (StoreUtility.TryFindBestBetterStoreCellFor(resultingAp, CS_0024_003C_003E8__locals20.pawn, CS_0024_003C_003E8__locals20.Map, currentPriority, CS_0024_003C_003E8__locals20.pawn.Faction, out var foundCell))
+							{
+								CS_0024_003C_003E8__locals20.job.count = resultingAp.stackCount;
+								CS_0024_003C_003E8__locals20.job.targetB = foundCell;
+							}
+							else
+							{
+								CS_0024_003C_003E8__locals20.EndJobWith(JobCondition.Incompletable);
+							}
+						}
+						else
+						{
+							CS_0024_003C_003E8__locals20.EndJobWith(JobCondition.Succeeded);
+						}
+					}
+				});
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				if (!CS_0024_003C_003E8__locals20.job.haulDroppedApparel)
+				{
+					return false;
+				}
+				_003C_003E2__current = Toils_Reserve.Reserve(TargetIndex.B);
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Reserve.Reserve(TargetIndex.A);
+				_003C_003E1__state = 4;
+				return true;
+			case 4:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Haul.StartCarryThing(TargetIndex.A).FailOn(() => !CS_0024_003C_003E8__locals20.pawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation));
+				_003C_003E1__state = 5;
+				return true;
+			case 5:
+				_003C_003E1__state = -1;
+				_003CcarryToCell_003E5__2 = Toils_Haul.CarryHauledThingToCell(TargetIndex.B);
+				_003C_003E2__current = _003CcarryToCell_003E5__2;
+				_003C_003E1__state = 6;
+				return true;
+			case 6:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Haul.PlaceHauledThingInCell(TargetIndex.B, _003CcarryToCell_003E5__2, storageMode: true);
+				_003C_003E1__state = 7;
+				return true;
+			case 7:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__7 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__7(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private int duration;
+
+	private const TargetIndex ApparelInd = TargetIndex.A;
+
+	private Apparel Apparel => (Apparel)job.GetTarget(TargetIndex.A).Thing;
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref duration, "duration", 0);
+	}
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return true;
+	}
+
+	public override void Notify_Starting()
+	{
+		base.Notify_Starting();
+		duration = (int)(Apparel.GetStatValue(StatDefOf.EquipDelay) * 60f);
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__7))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__7(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

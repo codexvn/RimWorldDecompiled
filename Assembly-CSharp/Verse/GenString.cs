@@ -1,78 +1,183 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace Verse
+namespace Verse;
+
+public static class GenString
 {
-	// Token: 0x02000118 RID: 280
-	public static class GenString
+	[CompilerGenerated]
+	private sealed class _003CSplitBy_003Ed__3 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x06000871 RID: 2161 RVA: 0x0002794C File Offset: 0x00025B4C
-		static GenString()
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private string str;
+
+		public string _003C_003E3__str;
+
+		private int chunkLength;
+
+		public int _003C_003E3__chunkLength;
+
+		private int _003Ci_003E5__2;
+
+		string IEnumerator<string>.Current
 		{
-			for (int i = 0; i < 10000; i++)
+			[DebuggerHidden]
+			get
 			{
-				GenString.numberStrings[i] = (i - 5000).ToString();
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06000872 RID: 2162 RVA: 0x0002798E File Offset: 0x00025B8E
-		public static string ToStringCached(this int num)
+		object IEnumerator.Current
 		{
-			if (num < -4999)
+			[DebuggerHidden]
+			get
 			{
-				return num.ToString();
+				return _003C_003E2__current;
 			}
-			if (num > 4999)
-			{
-				return num.ToString();
-			}
-			return GenString.numberStrings[num + 5000];
 		}
 
-		// Token: 0x06000873 RID: 2163 RVA: 0x000279BD File Offset: 0x00025BBD
-		public static IEnumerable<string> SplitBy(this string str, int chunkLength)
+		[DebuggerHidden]
+		public _003CSplitBy_003Ed__3(int _003C_003E1__state)
 		{
-			if (str.NullOrEmpty())
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			switch (_003C_003E1__state)
 			{
-				yield break;
-			}
-			if (chunkLength < 1)
-			{
-				throw new ArgumentException();
-			}
-			for (int i = 0; i < str.Length; i += chunkLength)
-			{
-				if (chunkLength > str.Length - i)
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (str.NullOrEmpty())
 				{
-					chunkLength = str.Length - i;
+					return false;
 				}
-				yield return str.Substring(i, chunkLength);
+				if (chunkLength < 1)
+				{
+					throw new ArgumentException();
+				}
+				_003Ci_003E5__2 = 0;
+				break;
+			case 1:
+				_003C_003E1__state = -1;
+				_003Ci_003E5__2 += chunkLength;
+				break;
 			}
-			yield break;
-		}
-
-		// Token: 0x06000874 RID: 2164 RVA: 0x000279D4 File Offset: 0x00025BD4
-		public static StringBuilder AppendLineIfNotEmpty(this StringBuilder sb)
-		{
-			if (sb.Length > 0)
+			if (_003Ci_003E5__2 < str.Length)
 			{
-				sb.AppendLine();
+				if (chunkLength > str.Length - _003Ci_003E5__2)
+				{
+					chunkLength = str.Length - _003Ci_003E5__2;
+				}
+				_003C_003E2__current = str.Substring(_003Ci_003E5__2, chunkLength);
+				_003C_003E1__state = 1;
+				return true;
 			}
-			return sb;
+			return false;
 		}
 
-		// Token: 0x06000875 RID: 2165 RVA: 0x000279E7 File Offset: 0x00025BE7
-		public static int GetHashCodeSafe(this string val)
+		bool IEnumerator.MoveNext()
 		{
-			if (val == null)
-			{
-				return 0;
-			}
-			return val.GetHashCode();
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0400044E RID: 1102
-		private static string[] numberStrings = new string[10000];
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CSplitBy_003Ed__3 _003CSplitBy_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CSplitBy_003Ed__ = this;
+			}
+			else
+			{
+				_003CSplitBy_003Ed__ = new _003CSplitBy_003Ed__3(0);
+			}
+			_003CSplitBy_003Ed__.str = _003C_003E3__str;
+			_003CSplitBy_003Ed__.chunkLength = _003C_003E3__chunkLength;
+			return _003CSplitBy_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	private static string[] numberStrings;
+
+	static GenString()
+	{
+		numberStrings = new string[10000];
+		for (int i = 0; i < 10000; i++)
+		{
+			numberStrings[i] = (i - 5000).ToString();
+		}
+	}
+
+	public static string ToStringCached(this int num)
+	{
+		if (num < -4999)
+		{
+			return num.ToString();
+		}
+		if (num > 4999)
+		{
+			return num.ToString();
+		}
+		return numberStrings[num + 5000];
+	}
+
+	[IteratorStateMachine(typeof(_003CSplitBy_003Ed__3))]
+	public static IEnumerable<string> SplitBy(this string str, int chunkLength)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CSplitBy_003Ed__3(-2)
+		{
+			_003C_003E3__str = str,
+			_003C_003E3__chunkLength = chunkLength
+		};
+	}
+
+	public static StringBuilder AppendLineIfNotEmpty(this StringBuilder sb)
+	{
+		if (sb.Length > 0)
+		{
+			sb.AppendLine();
+		}
+		return sb;
+	}
+
+	public static int GetHashCodeSafe(this string val)
+	{
+		return val?.GetHashCode() ?? 0;
 	}
 }

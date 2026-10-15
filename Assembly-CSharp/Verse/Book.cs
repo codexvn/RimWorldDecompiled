@@ -1,521 +1,866 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Text;
 using RimWorld;
 using UnityEngine;
 using Verse.AI;
 using Verse.Grammar;
 
-namespace Verse
+namespace Verse;
+
+public class Book : ThingWithComps
 {
-	// Token: 0x020001A5 RID: 421
-	public class Book : ThingWithComps
+	private struct BookSubjectSymbol
 	{
-		// Token: 0x170001C9 RID: 457
-		// (get) Token: 0x06000BBB RID: 3003 RVA: 0x00038078 File Offset: 0x00036278
-		public CompBook BookComp
+		public string keyword;
+
+		public List<(string, string)> subSymbols;
+	}
+
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass50_0
+	{
+		public Book _003C_003E4__this;
+
+		public Pawn selPawn;
+
+		internal void _003CGetFloatMenuOptions_003Eb__0()
 		{
+			_003C_003E4__this.PawnReadNow(selPawn);
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGetFloatMenuOptions_003Ed__50 : IEnumerable<FloatMenuOption>, IEnumerable, IEnumerator<FloatMenuOption>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private FloatMenuOption _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Book _003C_003E4__this;
+
+		private Pawn selPawn;
+
+		public Pawn _003C_003E3__selPawn;
+
+		private _003C_003Ec__DisplayClass50_0 _003C_003E8__1;
+
+		private IEnumerator<FloatMenuOption> _003C_003E7__wrap1;
+
+		FloatMenuOption IEnumerator<FloatMenuOption>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				CompBook result;
-				if ((result = this.cachedComp) == null)
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetFloatMenuOptions_003Ed__50(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 2)
+			{
+				try
 				{
-					result = (this.cachedComp = base.GetComp<CompBook>());
 				}
-				return result;
-			}
-		}
-
-		// Token: 0x170001CA RID: 458
-		// (get) Token: 0x06000BBC RID: 3004 RVA: 0x000380A0 File Offset: 0x000362A0
-		private Graphic OpenGraphic
-		{
-			get
-			{
-				Graphic result;
-				if ((result = this.openGraphic) == null)
+				finally
 				{
-					result = (this.openGraphic = this.BookComp.Props.openGraphic.Graphic);
+					_003C_003Em__Finally1();
 				}
-				return result;
 			}
+			_003C_003E8__1 = null;
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x170001CB RID: 459
-		// (get) Token: 0x06000BBD RID: 3005 RVA: 0x000380D8 File Offset: 0x000362D8
-		public Graphic VerticalGraphic
+		private bool MoveNext()
 		{
-			get
+			try
 			{
-				Graphic result;
-				if ((result = this.verticalGraphic) == null)
+				int num = _003C_003E1__state;
+				Book book = _003C_003E4__this;
+				switch (num)
 				{
-					result = (this.verticalGraphic = this.BookComp.Props.verticalGraphic.Graphic);
+				default:
+					return false;
+				case 0:
+				{
+					_003C_003E1__state = -1;
+					_003C_003E8__1 = new _003C_003Ec__DisplayClass50_0();
+					_003C_003E8__1._003C_003E4__this = _003C_003E4__this;
+					_003C_003E8__1.selPawn = selPawn;
+					FloatMenuOption floatMenuOption = new FloatMenuOption("AssignReadNow".Translate(book.Label), delegate
+					{
+						_003C_003E8__1._003C_003E4__this.PawnReadNow(_003C_003E8__1.selPawn);
+					});
+					if (!BookUtility.CanReadBook(book, _003C_003E8__1.selPawn, out var reason))
+					{
+						floatMenuOption.Label = $"{"AssignCannotReadNow".Translate(book.Label)}: {reason}";
+						floatMenuOption.Disabled = true;
+					}
+					Pawn pawn = _003C_003E8__1.selPawn.Map.reservationManager.FirstRespectedReserver(book, _003C_003E8__1.selPawn) ?? _003C_003E8__1.selPawn.Map.physicalInteractionReservationManager.FirstReserverOf(book);
+					if (pawn != null)
+					{
+						floatMenuOption.Label += " (" + "ReservedBy".Translate(pawn.LabelShort, pawn) + ")";
+					}
+					floatMenuOption.iconThing = book;
+					_003C_003E2__current = floatMenuOption;
+					_003C_003E1__state = 1;
+					return true;
 				}
-				return result;
+				case 1:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((ThingWithComps)book).GetFloatMenuOptions(_003C_003E8__1.selPawn).GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 2:
+					_003C_003E1__state = -3;
+					break;
+				}
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					FloatMenuOption current = _003C_003E7__wrap1.Current;
+					current.iconThing = book;
+					_003C_003E2__current = current;
+					_003C_003E1__state = 2;
+					return true;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = null;
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x170001CC RID: 460
-		// (get) Token: 0x06000BBE RID: 3006 RVA: 0x0003810D File Offset: 0x0003630D
-		public override string LabelNoCount
+		bool IEnumerator.MoveNext()
 		{
-			get
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				return this.title + GenLabel.LabelExtras(this, true, true);
+				_003C_003E7__wrap1.Dispose();
 			}
 		}
 
-		// Token: 0x170001CD RID: 461
-		// (get) Token: 0x06000BBF RID: 3007 RVA: 0x00038122 File Offset: 0x00036322
-		public override string LabelNoParenthesis
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<FloatMenuOption> IEnumerable<FloatMenuOption>.GetEnumerator()
+		{
+			_003CGetFloatMenuOptions_003Ed__50 _003CGetFloatMenuOptions_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CGetFloatMenuOptions_003Ed__ = this;
+			}
+			else
+			{
+				_003CGetFloatMenuOptions_003Ed__ = new _003CGetFloatMenuOptions_003Ed__50(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CGetFloatMenuOptions_003Ed__.selPawn = _003C_003E3__selPawn;
+			return _003CGetFloatMenuOptions_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<FloatMenuOption>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGetHyperlinks_003Ed__49 : IEnumerable<Dialog_InfoCard.Hyperlink>, IEnumerable, IEnumerator<Dialog_InfoCard.Hyperlink>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Dialog_InfoCard.Hyperlink _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Book _003C_003E4__this;
+
+		private IEnumerator<BookOutcomeDoer> _003C_003E7__wrap1;
+
+		private IEnumerator<Dialog_InfoCard.Hyperlink> _003C_003E7__wrap2;
+
+		Dialog_InfoCard.Hyperlink IEnumerator<Dialog_InfoCard.Hyperlink>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				return this.title;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170001CE RID: 462
-		// (get) Token: 0x06000BC0 RID: 3008 RVA: 0x0003812A File Offset: 0x0003632A
-		public string FlavorUI
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.descriptionFlavor;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170001CF RID: 463
-		// (get) Token: 0x06000BC1 RID: 3009 RVA: 0x00038132 File Offset: 0x00036332
-		public float MentalBreakChancePerHour
+		[DebuggerHidden]
+		public _003CGetHyperlinks_003Ed__49(int _003C_003E1__state)
 		{
-			get
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if ((uint)(num - -4) <= 1u || num == 1)
 			{
-				return this.mentalBreakChancePerHour;
+				try
+				{
+					if (num == -4 || num == 1)
+					{
+						try
+						{
+						}
+						finally
+						{
+							_003C_003Em__Finally2();
+						}
+					}
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E7__wrap2 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				Book book = _003C_003E4__this;
+				if (num != 0)
+				{
+					if (num != 1)
+					{
+						return false;
+					}
+					_003C_003E1__state = -4;
+					goto IL_0092;
+				}
+				_003C_003E1__state = -1;
+				_003C_003E7__wrap1 = book.BookComp.Doers.GetEnumerator();
+				_003C_003E1__state = -3;
+				goto IL_00ac;
+				IL_0092:
+				if (_003C_003E7__wrap2.MoveNext())
+				{
+					Dialog_InfoCard.Hyperlink current = _003C_003E7__wrap2.Current;
+					_003C_003E2__current = current;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				_003C_003Em__Finally2();
+				_003C_003E7__wrap2 = null;
+				goto IL_00ac;
+				IL_00ac:
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					BookOutcomeDoer current2 = _003C_003E7__wrap1.Current;
+					_003C_003E7__wrap2 = current2.GetHyperlinks().GetEnumerator();
+					_003C_003E1__state = -4;
+					goto IL_0092;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = null;
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
 		}
 
-		// Token: 0x170001D0 RID: 464
-		// (get) Token: 0x06000BC2 RID: 3010 RVA: 0x0003813A File Offset: 0x0003633A
-		public float JoyFactor
+		bool IEnumerator.MoveNext()
 		{
-			get
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				return this.joyFactor;
+				_003C_003E7__wrap1.Dispose();
 			}
 		}
 
-		// Token: 0x170001D1 RID: 465
-		// (get) Token: 0x06000BC3 RID: 3011 RVA: 0x00038122 File Offset: 0x00036322
-		public string Title
+		private void _003C_003Em__Finally2()
 		{
-			get
+			_003C_003E1__state = -3;
+			if (_003C_003E7__wrap2 != null)
 			{
-				return this.title;
+				_003C_003E7__wrap2.Dispose();
 			}
 		}
 
-		// Token: 0x170001D2 RID: 466
-		// (get) Token: 0x06000BC4 RID: 3012 RVA: 0x00038142 File Offset: 0x00036342
-		// (set) Token: 0x06000BC5 RID: 3013 RVA: 0x0003814A File Offset: 0x0003634A
-		public bool IsOpen
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Dialog_InfoCard.Hyperlink> IEnumerable<Dialog_InfoCard.Hyperlink>.GetEnumerator()
+		{
+			_003CGetHyperlinks_003Ed__49 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CGetHyperlinks_003Ed__49(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Dialog_InfoCard.Hyperlink>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CSpecialDisplayStats_003Ed__51 : IEnumerable<StatDrawEntry>, IEnumerable, IEnumerator<StatDrawEntry>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private StatDrawEntry _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Book _003C_003E4__this;
+
+		private IEnumerator<StatDrawEntry> _003C_003E7__wrap1;
+
+		StatDrawEntry IEnumerator<StatDrawEntry>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				return this.isOpen;
-			}
-			set
-			{
-				this.isOpen = value;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170001D3 RID: 467
-		// (get) Token: 0x06000BC6 RID: 3014 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public virtual bool IsReadable
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CSpecialDisplayStats_003Ed__51(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				Book book = _003C_003E4__this;
+				StringBuilder stringBuilder;
+				JoyKindDef reading;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((ThingWithComps)book).SpecialDisplayStats().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0074;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0074;
+				case 2:
+					{
+						_003C_003E1__state = -1;
+						return false;
+					}
+					IL_0074:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						StatDrawEntry current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					stringBuilder = new StringBuilder();
+					stringBuilder.AppendLine();
+					stringBuilder.AppendLine("Stat_RecreationType_Desc".Translate());
+					stringBuilder.AppendLine();
+					foreach (JoyKindDef allDef in DefDatabase<JoyKindDef>.AllDefs)
+					{
+						stringBuilder.AppendLine("  - " + allDef.LabelCap);
+					}
+					reading = JoyKindDefOf.Reading;
+					_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.Basics, "StatsReport_JoyKind".Translate(), reading.LabelCap, stringBuilder.ToString(), 4750, reading.LabelCap);
+					_003C_003E1__state = 2;
+					return true;
+				}
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<StatDrawEntry> IEnumerable<StatDrawEntry>.GetEnumerator()
+		{
+			_003CSpecialDisplayStats_003Ed__51 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CSpecialDisplayStats_003Ed__51(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<StatDrawEntry>)this).GetEnumerator();
+		}
+	}
+
+	private string title;
+
+	private bool isOpen;
+
+	private bool descCanBeInvalidated;
+
+	private float mentalBreakChancePerHour;
+
+	private float joyFactor = 1f;
+
+	private string descriptionFlavor;
+
+	private string description;
+
+	private int generations;
+
+	private Graphic openGraphic;
+
+	private Graphic verticalGraphic;
+
+	private CompBook cachedComp;
+
+	private static List<BookSubjectSymbol> subjects = new List<BookSubjectSymbol>();
+
+	public CompBook BookComp => cachedComp ?? (cachedComp = GetComp<CompBook>());
+
+	private Graphic OpenGraphic => openGraphic ?? (openGraphic = BookComp.Props.openGraphic.Graphic);
+
+	public Graphic VerticalGraphic => verticalGraphic ?? (verticalGraphic = BookComp.Props.verticalGraphic.Graphic);
+
+	public override string LabelNoCount => title + GenLabel.LabelExtras(this, includeHp: true, includeQuality: true);
+
+	public override string LabelNoParenthesis => title;
+
+	public string FlavorUI => descriptionFlavor;
+
+	public float MentalBreakChancePerHour => mentalBreakChancePerHour;
+
+	public float JoyFactor => joyFactor;
+
+	public string Title => title;
+
+	public bool IsOpen
+	{
+		get
+		{
+			return isOpen;
+		}
+		set
+		{
+			isOpen = value;
+		}
+	}
+
+	public virtual bool IsReadable => true;
+
+	public override string DescriptionFlavor => DescriptionDetailed;
+
+	public override string DescriptionDetailed
+	{
+		get
+		{
+			EnsureDescriptionUpToDate();
+			return description;
+		}
+	}
+
+	public override void PostPostMake()
+	{
+		base.PostPostMake();
+		if (!this.HasComp<CompQuality>())
+		{
+			GenerateBook(null, null);
+		}
+	}
+
+	public override void SpawnSetup(Map map, bool respawningAfterLoad)
+	{
+		base.SpawnSetup(map, respawningAfterLoad);
+		LessonAutoActivator.TeachOpportunity(ConceptDefOf.Books, OpportunityType.GoodToKnow);
+	}
+
+	public override bool CanStackWith(Thing other)
+	{
+		return false;
+	}
+
+	protected override void DrawAt(Vector3 drawLoc, bool flip = false)
+	{
+		if (isOpen)
+		{
+			Rot4 rot = ((!(base.ParentHolder is Pawn_CarryTracker pawn_CarryTracker)) ? base.Rotation : pawn_CarryTracker.pawn.Rotation);
+			OpenGraphic.Draw(drawLoc, flip ? rot.Opposite : rot, this);
+		}
+		else
+		{
+			base.DrawAt(drawLoc, flip);
+		}
+	}
+
+	public void PawnReadNow(Pawn pawn)
+	{
+		Job job = JobMaker.MakeJob(JobDefOf.Reading, this);
+		pawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
+	}
+
+	public override void PostQualitySet()
+	{
+		base.PostQualitySet();
+		GenerateBook(null, null);
+	}
+
+	public void OnBookReadTick(Pawn pawn, int delta, float roomBonusFactor)
+	{
+		float factor = pawn.GetStatValue(StatDefOf.ReadingSpeed) * roomBonusFactor * (float)delta;
+		foreach (BookOutcomeDoer doer in BookComp.Doers)
+		{
+			doer.OnReadingTick(pawn, factor);
+		}
+		if (ModsConfig.AnomalyActive && MentalBreakChancePerHour > 0f && Rand.MTBEventOccurs(1f / MentalBreakChancePerHour, 2500f, delta) && pawn.mindState.mentalBreaker.TryGetRandomMentalBreak(BookComp.Props.mentalBreakIntensity, out var breakDef))
+		{
+			TaggedString taggedString = "BookMentalBreakMessage".Translate(Label);
+			pawn.mindState.mentalBreaker.TryDoMentalBreak(taggedString, breakDef);
+		}
+	}
+
+	public bool ProvidesOutcome(Pawn reader)
+	{
+		foreach (BookOutcomeDoer doer in BookComp.Doers)
+		{
+			if (doer.DoesProvidesOutcome(reader))
 			{
 				return true;
 			}
 		}
+		return false;
+	}
 
-		// Token: 0x170001D4 RID: 468
-		// (get) Token: 0x06000BC7 RID: 3015 RVA: 0x00038153 File Offset: 0x00036353
-		public override string DescriptionFlavor
-		{
-			get
-			{
-				return this.DescriptionDetailed;
-			}
-		}
+	public void SetMentalBreakChance(float chance)
+	{
+		mentalBreakChancePerHour = Mathf.Clamp01(chance);
+	}
 
-		// Token: 0x170001D5 RID: 469
-		// (get) Token: 0x06000BC8 RID: 3016 RVA: 0x0003815B File Offset: 0x0003635B
-		public override string DescriptionDetailed
-		{
-			get
-			{
-				this.EnsureDescriptionUpToDate();
-				return this.description;
-			}
-		}
+	public void SetJoyFactor(float factor)
+	{
+		joyFactor = factor;
+	}
 
-		// Token: 0x06000BC9 RID: 3017 RVA: 0x0003816C File Offset: 0x0003636C
-		public override void PostPostMake()
+	[IteratorStateMachine(typeof(_003CGetHyperlinks_003Ed__49))]
+	public virtual IEnumerable<Dialog_InfoCard.Hyperlink> GetHyperlinks()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetHyperlinks_003Ed__49(-2)
 		{
-			base.PostPostMake();
-			if (!this.HasComp<CompQuality>())
-			{
-				this.GenerateBook(null, null);
-			}
-		}
+			_003C_003E4__this = this
+		};
+	}
 
-		// Token: 0x06000BCA RID: 3018 RVA: 0x00038197 File Offset: 0x00036397
-		public override void SpawnSetup(Map map, bool respawningAfterLoad)
+	[IteratorStateMachine(typeof(_003CGetFloatMenuOptions_003Ed__50))]
+	public override IEnumerable<FloatMenuOption> GetFloatMenuOptions(Pawn selPawn)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetFloatMenuOptions_003Ed__50(-2)
 		{
-			base.SpawnSetup(map, respawningAfterLoad);
-			LessonAutoActivator.TeachOpportunity(ConceptDefOf.Books, OpportunityType.GoodToKnow);
-		}
+			_003C_003E4__this = this,
+			_003C_003E3__selPawn = selPawn
+		};
+	}
 
-		// Token: 0x06000BCB RID: 3019 RVA: 0x00002501 File Offset: 0x00000701
-		public override bool CanStackWith(Thing other)
+	[IteratorStateMachine(typeof(_003CSpecialDisplayStats_003Ed__51))]
+	public override IEnumerable<StatDrawEntry> SpecialDisplayStats()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CSpecialDisplayStats_003Ed__51(-2)
 		{
-			return false;
-		}
+			_003C_003E4__this = this
+		};
+	}
 
-		// Token: 0x06000BCC RID: 3020 RVA: 0x000381AC File Offset: 0x000363AC
-		protected override void DrawAt(Vector3 drawLoc, bool flip = false)
+	public virtual void GenerateBook(Pawn author = null, long? fixedDate = null)
+	{
+		using (Rand.Block(Gen.HashCombineInt(thingIDNumber, generations++)))
 		{
-			if (this.isOpen)
-			{
-				Pawn_CarryTracker pawn_CarryTracker = base.ParentHolder as Pawn_CarryTracker;
-				Rot4 rotation;
-				if (pawn_CarryTracker != null)
-				{
-					rotation = pawn_CarryTracker.pawn.Rotation;
-				}
-				else
-				{
-					rotation = base.Rotation;
-				}
-				this.OpenGraphic.Draw(drawLoc, flip ? rotation.Opposite : rotation, this, 0f);
-				return;
-			}
-			base.DrawAt(drawLoc, flip);
-		}
-
-		// Token: 0x06000BCD RID: 3021 RVA: 0x00038210 File Offset: 0x00036410
-		public void PawnReadNow(Pawn pawn)
-		{
-			Job job = JobMaker.MakeJob(JobDefOf.Reading, this);
-			pawn.jobs.TryTakeOrderedJob(job, new JobTag?(JobTag.Misc), false);
-		}
-
-		// Token: 0x06000BCE RID: 3022 RVA: 0x00038244 File Offset: 0x00036444
-		public override void PostQualitySet()
-		{
-			base.PostQualitySet();
-			this.GenerateBook(null, null);
-		}
-
-		// Token: 0x06000BCF RID: 3023 RVA: 0x00038268 File Offset: 0x00036468
-		public void OnBookReadTick(Pawn pawn, int delta, float roomBonusFactor)
-		{
-			float factor = pawn.GetStatValue(StatDefOf.ReadingSpeed, true, -1) * roomBonusFactor * (float)delta;
-			foreach (BookOutcomeDoer bookOutcomeDoer in this.BookComp.Doers)
-			{
-				bookOutcomeDoer.OnReadingTick(pawn, factor);
-			}
-			MentalBreakDef breakDef;
-			if (ModsConfig.AnomalyActive && this.MentalBreakChancePerHour > 0f && Rand.MTBEventOccurs(1f / this.MentalBreakChancePerHour, 2500f, (float)delta) && pawn.mindState.mentalBreaker.TryGetRandomMentalBreak(this.BookComp.Props.mentalBreakIntensity, out breakDef))
-			{
-				TaggedString taggedString = "BookMentalBreakMessage".Translate(this.Label);
-				pawn.mindState.mentalBreaker.TryDoMentalBreak(taggedString, breakDef);
-			}
-		}
-
-		// Token: 0x06000BD0 RID: 3024 RVA: 0x0003834C File Offset: 0x0003654C
-		public bool ProvidesOutcome(Pawn reader)
-		{
-			using (IEnumerator<BookOutcomeDoer> enumerator = this.BookComp.Doers.GetEnumerator())
-			{
-				while (enumerator.MoveNext())
-				{
-					if (enumerator.Current.DoesProvidesOutcome(reader))
-					{
-						return true;
-					}
-				}
-			}
-			return false;
-		}
-
-		// Token: 0x06000BD1 RID: 3025 RVA: 0x000383A8 File Offset: 0x000365A8
-		public void SetMentalBreakChance(float chance)
-		{
-			this.mentalBreakChancePerHour = Mathf.Clamp01(chance);
-		}
-
-		// Token: 0x06000BD2 RID: 3026 RVA: 0x000383B6 File Offset: 0x000365B6
-		public void SetJoyFactor(float factor)
-		{
-			this.joyFactor = factor;
-		}
-
-		// Token: 0x06000BD3 RID: 3027 RVA: 0x000383BF File Offset: 0x000365BF
-		public virtual IEnumerable<Dialog_InfoCard.Hyperlink> GetHyperlinks()
-		{
-			foreach (BookOutcomeDoer bookOutcomeDoer in this.BookComp.Doers)
-			{
-				foreach (Dialog_InfoCard.Hyperlink hyperlink in bookOutcomeDoer.GetHyperlinks())
-				{
-					yield return hyperlink;
-				}
-				IEnumerator<Dialog_InfoCard.Hyperlink> enumerator2 = null;
-			}
-			IEnumerator<BookOutcomeDoer> enumerator = null;
-			yield break;
-			yield break;
-		}
-
-		// Token: 0x06000BD4 RID: 3028 RVA: 0x000383CF File Offset: 0x000365CF
-		public override IEnumerable<FloatMenuOption> GetFloatMenuOptions(Pawn selPawn)
-		{
-			FloatMenuOption floatMenuOption = new FloatMenuOption("AssignReadNow".Translate(this.Label), delegate()
-			{
-				this.PawnReadNow(selPawn);
-			}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-			string arg;
-			if (!BookUtility.CanReadBook(this, selPawn, out arg))
-			{
-				floatMenuOption.Label = string.Format("{0}: {1}", "AssignCannotReadNow".Translate(this.Label), arg);
-				floatMenuOption.Disabled = true;
-			}
-			Pawn pawn = selPawn.Map.reservationManager.FirstRespectedReserver(this, selPawn, null) ?? selPawn.Map.physicalInteractionReservationManager.FirstReserverOf(this);
-			if (pawn != null)
-			{
-				FloatMenuOption floatMenuOption2 = floatMenuOption;
-				floatMenuOption2.Label += " (" + "ReservedBy".Translate(pawn.LabelShort, pawn) + ")";
-			}
-			floatMenuOption.iconThing = this;
-			yield return floatMenuOption;
-			foreach (FloatMenuOption floatMenuOption3 in base.GetFloatMenuOptions(selPawn))
-			{
-				floatMenuOption3.iconThing = this;
-				yield return floatMenuOption3;
-			}
-			IEnumerator<FloatMenuOption> enumerator = null;
-			yield break;
-			yield break;
-		}
-
-		// Token: 0x06000BD5 RID: 3029 RVA: 0x000383E6 File Offset: 0x000365E6
-		public override IEnumerable<StatDrawEntry> SpecialDisplayStats()
-		{
-			foreach (StatDrawEntry statDrawEntry in base.SpecialDisplayStats())
-			{
-				yield return statDrawEntry;
-			}
-			IEnumerator<StatDrawEntry> enumerator = null;
-			StringBuilder stringBuilder = new StringBuilder();
-			stringBuilder.AppendLine();
-			stringBuilder.AppendLine("Stat_RecreationType_Desc".Translate());
-			stringBuilder.AppendLine();
-			foreach (JoyKindDef joyKindDef in DefDatabase<JoyKindDef>.AllDefs)
-			{
-				stringBuilder.AppendLine("  - " + joyKindDef.LabelCap);
-			}
-			JoyKindDef reading = JoyKindDefOf.Reading;
-			yield return new StatDrawEntry(StatCategoryDefOf.Basics, "StatsReport_JoyKind".Translate(), reading.LabelCap, stringBuilder.ToString(), 4750, reading.LabelCap, null, false, false);
-			yield break;
-			yield break;
-		}
-
-		// Token: 0x06000BD6 RID: 3030 RVA: 0x000383F8 File Offset: 0x000365F8
-		public virtual void GenerateBook(Pawn author = null, long? fixedDate = null)
-		{
-			this.mentalBreakChancePerHour = 0f;
-			Book.subjects.Clear();
-			GrammarRequest grammarRequest = default(GrammarRequest);
-			long absTicks = fixedDate ?? ((long)GenTicks.TicksAbs - (long)(this.BookComp.Props.ageYearsRange.RandomInRange * 3600000f));
-			grammarRequest.Rules.Add(new Rule_String("date", GenDate.DateFullStringAt(absTicks, Vector2.zero)));
-			grammarRequest.Rules.Add(new Rule_String("date_season", GenDate.DateMonthYearStringAt(absTicks, Vector2.zero)));
+			mentalBreakChancePerHour = 0f;
+			subjects.Clear();
+			GrammarRequest common = default(GrammarRequest);
+			long absTicks = fixedDate ?? (GenTicks.TicksAbs - (long)(BookComp.Props.ageYearsRange.RandomInRange * 3600000f));
+			common.Rules.Add(new Rule_String("date", GenDate.DateFullStringAt(absTicks, Vector2.zero)));
+			common.Rules.Add(new Rule_String("date_season", GenDate.DateMonthYearStringAt(absTicks, Vector2.zero)));
 			if (this.HasComp<CompQuality>())
 			{
-				grammarRequest.Constants.Add("quality", ((int)base.GetComp<CompQuality>().Quality).ToString());
+				common.Constants.Add("quality", ((int)GetComp<CompQuality>().Quality).ToString());
 			}
-			foreach (Rule item in ((author == null) ? TaleData_Pawn.GenerateRandom(true) : TaleData_Pawn.GenerateFrom(author)).GetRules("ANYPAWN", grammarRequest.Constants))
+			foreach (Rule rule in ((author == null) ? TaleData_Pawn.GenerateRandom(humanLike: true) : TaleData_Pawn.GenerateFrom(author)).GetRules("ANYPAWN", common.Constants))
 			{
-				grammarRequest.Rules.Add(item);
+				common.Rules.Add(rule);
 			}
-			this.AppendDoerRules(author, ref grammarRequest);
-			Book.AppendRulesForSubject(Book.subjects, grammarRequest.Rules, grammarRequest.Constants, "primary", 0);
-			Book.AppendRulesForSubject(Book.subjects, grammarRequest.Rules, grammarRequest.Constants, "secondary", 1);
-			Book.AppendRulesForSubject(Book.subjects, grammarRequest.Rules, grammarRequest.Constants, "tertiary", 2);
-			GrammarRequest request = grammarRequest;
-			request.Includes.Add(this.BookComp.Props.nameMaker);
-			this.title = GenText.CapitalizeAsTitle(GrammarResolver.Resolve("title", request, null, false, null, null, null, true)).StripTags();
-			GrammarRequest request2 = grammarRequest;
-			request2.Includes.Add(this.BookComp.Props.descriptionMaker);
+			AppendDoerRules(author, ref common);
+			AppendRulesForSubject(subjects, common.Rules, common.Constants, "primary", 0);
+			AppendRulesForSubject(subjects, common.Rules, common.Constants, "secondary", 1);
+			AppendRulesForSubject(subjects, common.Rules, common.Constants, "tertiary", 2);
+			GrammarRequest request = common;
+			request.Includes.Add(BookComp.Props.nameMaker);
+			title = GenText.CapitalizeAsTitle(GrammarResolver.Resolve("title", request)).StripTags();
+			GrammarRequest request2 = common;
+			request2.Includes.Add(BookComp.Props.descriptionMaker);
 			request2.Includes.Add(RulePackDefOf.TalelessImages);
 			request2.Includes.Add(RulePackDefOf.ArtDescriptionRoot_Taleless);
 			request2.Includes.Add(RulePackDefOf.ArtDescriptionUtility_Global);
-			this.descriptionFlavor = GrammarResolver.Resolve("desc", request2, null, false, null, null, null, true).StripTags();
-			this.description = this.GenerateFullDescription();
-			Book.subjects.Clear();
+			descriptionFlavor = GrammarResolver.Resolve("desc", request2).StripTags();
+			description = GenerateFullDescription();
+			subjects.Clear();
 		}
+	}
 
-		// Token: 0x06000BD7 RID: 3031 RVA: 0x00038658 File Offset: 0x00036858
-		private void AppendDoerRules(Pawn author, ref GrammarRequest common)
+	private void AppendDoerRules(Pawn author, ref GrammarRequest common)
+	{
+		foreach (BookOutcomeDoer doer in BookComp.Doers)
 		{
-			foreach (BookOutcomeDoer bookOutcomeDoer in this.BookComp.Doers)
+			doer.Reset();
+			doer.OnBookGenerated(author);
+			IEnumerable<RulePack> topicRulePacks = doer.GetTopicRulePacks();
+			if (topicRulePacks != null)
 			{
-				bookOutcomeDoer.Reset();
-				bookOutcomeDoer.OnBookGenerated(author);
-				IEnumerable<RulePack> topicRulePacks = bookOutcomeDoer.GetTopicRulePacks();
-				if (topicRulePacks != null)
+				foreach (RulePack item in topicRulePacks)
 				{
-					foreach (RulePack rulePack in topicRulePacks)
+					common.IncludesBare.Add(item);
+					List<(string, string)> list = new List<(string, string)>();
+					foreach (Rule rule in item.Rules)
 					{
-						common.IncludesBare.Add(rulePack);
-						List<ValueTuple<string, string>> list = new List<ValueTuple<string, string>>();
-						foreach (Rule rule in rulePack.Rules)
+						if (rule.keyword.StartsWith("subject_"))
 						{
-							if (rule.keyword.StartsWith("subject_"))
-							{
-								list.Add(new ValueTuple<string, string>(rule.keyword.Substring("subject_".Length), GrammarResolver.Resolve(rule.keyword, common, null, false, null, null, null, false)));
-							}
+							list.Add((rule.keyword.Substring("subject_".Length), GrammarResolver.Resolve(rule.keyword, common, null, forceLog: false, null, null, null, capitalizeFirstSentence: false)));
 						}
-						Book.subjects.Add(new Book.BookSubjectSymbol
-						{
-							keyword = GrammarResolver.Resolve("subject", common, null, false, null, null, null, false),
-							subSymbols = list
-						});
 					}
-				}
-				IEnumerable<Rule_String> topicRuleStrings = bookOutcomeDoer.GetTopicRuleStrings();
-				if (topicRuleStrings != null)
-				{
-					foreach (Rule_String item in topicRuleStrings)
+					subjects.Add(new BookSubjectSymbol
 					{
-						common.Rules.Add(item);
-					}
+						keyword = GrammarResolver.Resolve("subject", common, null, forceLog: false, null, null, null, capitalizeFirstSentence: false),
+						subSymbols = list
+					});
 				}
 			}
-		}
-
-		// Token: 0x06000BD8 RID: 3032 RVA: 0x00038858 File Offset: 0x00036A58
-		private void EnsureDescriptionUpToDate()
-		{
-			if (this.descCanBeInvalidated)
+			IEnumerable<Rule_String> topicRuleStrings = doer.GetTopicRuleStrings();
+			if (topicRuleStrings == null)
 			{
-				this.description = this.GenerateFullDescription();
+				continue;
+			}
+			foreach (Rule_String item2 in topicRuleStrings)
+			{
+				common.Rules.Add(item2);
 			}
 		}
+	}
 
-		// Token: 0x06000BD9 RID: 3033 RVA: 0x00038870 File Offset: 0x00036A70
-		private string GenerateFullDescription()
+	private void EnsureDescriptionUpToDate()
+	{
+		if (descCanBeInvalidated)
+		{
+			description = GenerateFullDescription();
+		}
+	}
+
+	private string GenerateFullDescription()
+	{
+		using (Rand.Block(Gen.HashCombineInt(thingIDNumber, generations)))
 		{
 			StringBuilder stringBuilder = new StringBuilder();
-			this.descCanBeInvalidated = false;
-			stringBuilder.AppendLine(this.title.Colorize(ColoredText.TipSectionTitleColor) + GenLabel.LabelExtras(this, false, true) + "\n");
-			stringBuilder.AppendLine(this.descriptionFlavor + "\n");
-			if (this.MentalBreakChancePerHour > 0f)
+			descCanBeInvalidated = false;
+			stringBuilder.AppendLine(title.Colorize(ColoredText.TipSectionTitleColor) + GenLabel.LabelExtras(this, includeHp: false, includeQuality: true) + "\n");
+			stringBuilder.AppendLine(descriptionFlavor + "\n");
+			if (MentalBreakChancePerHour > 0f)
 			{
-				stringBuilder.AppendLine(string.Format(" - {0}: {1}", "BookMentalBreak".Translate(), "PerHour".Translate(this.MentalBreakChancePerHour.ToStringPercent("0.0"))));
+				stringBuilder.AppendLine($" - {"BookMentalBreak".Translate()}: {"PerHour".Translate(MentalBreakChancePerHour.ToStringPercent("0.0"))}");
 			}
-			foreach (BookOutcomeDoer bookOutcomeDoer in this.BookComp.Doers)
+			foreach (BookOutcomeDoer doer in BookComp.Doers)
 			{
-				string benefitsString = bookOutcomeDoer.GetBenefitsString(null);
+				string benefitsString = doer.GetBenefitsString();
 				if (!string.IsNullOrEmpty(benefitsString))
 				{
-					if (bookOutcomeDoer.BenefitDetailsCanChange(null))
+					if (doer.BenefitDetailsCanChange())
 					{
-						this.descCanBeInvalidated = true;
+						descCanBeInvalidated = true;
 					}
 					stringBuilder.AppendLine(benefitsString);
 				}
 			}
 			return stringBuilder.ToString().TrimEndNewlines();
 		}
+	}
 
-		// Token: 0x06000BDA RID: 3034 RVA: 0x0003898C File Offset: 0x00036B8C
-		private static void AppendRulesForSubject(List<Book.BookSubjectSymbol> subjects, List<Rule> rules, Dictionary<string, string> constants, string postfix, int i)
+	private static void AppendRulesForSubject(List<BookSubjectSymbol> subjects, List<Rule> rules, Dictionary<string, string> constants, string postfix, int i)
+	{
+		if (i < subjects.Count)
 		{
-			if (i < subjects.Count)
+			rules.Add(new Rule_String("subject_" + postfix, subjects[i].keyword));
+			constants.Add("length_subject_" + postfix, subjects[i].keyword.Length.ToString());
+			constants.Add("has_subject_" + postfix, "true");
 			{
-				rules.Add(new Rule_String("subject_" + postfix, subjects[i].keyword));
-				constants.Add("length_subject_" + postfix, subjects[i].keyword.Length.ToString());
-				constants.Add("has_subject_" + postfix, "true");
-				using (List<ValueTuple<string, string>>.Enumerator enumerator = subjects[i].subSymbols.GetEnumerator())
+				foreach (var subSymbol in subjects[i].subSymbols)
 				{
-					while (enumerator.MoveNext())
-					{
-						ValueTuple<string, string> valueTuple = enumerator.Current;
-						rules.Add(new Rule_String("subject_" + postfix + "_" + valueTuple.Item1, valueTuple.Item2));
-					}
-					return;
+					rules.Add(new Rule_String("subject_" + postfix + "_" + subSymbol.Item1, subSymbol.Item2));
 				}
+				return;
 			}
-			constants.Add("has_subject_" + postfix, "false");
 		}
+		constants.Add("has_subject_" + postfix, "false");
+	}
 
-		// Token: 0x06000BDB RID: 3035 RVA: 0x00038A90 File Offset: 0x00036C90
-		public override void ExposeData()
-		{
-			base.ExposeData();
-			Scribe_Values.Look<string>(ref this.title, "title", null, false);
-			Scribe_Values.Look<string>(ref this.descriptionFlavor, "descriptionFlavor", null, false);
-			Scribe_Values.Look<float>(ref this.mentalBreakChancePerHour, "mentalBreakChancePerHour", 0f, false);
-			Scribe_Values.Look<float>(ref this.joyFactor, "joyFactor", 0f, false);
-			Scribe_Values.Look<bool>(ref this.isOpen, "isOpen", false, false);
-			Scribe_Values.Look<bool>(ref this.descCanBeInvalidated, "descCanBeInvalidated", false, false);
-			Scribe_Values.Look<string>(ref this.description, "description", null, false);
-		}
-
-		// Token: 0x040006CD RID: 1741
-		private string title;
-
-		// Token: 0x040006CE RID: 1742
-		private bool isOpen;
-
-		// Token: 0x040006CF RID: 1743
-		private bool descCanBeInvalidated;
-
-		// Token: 0x040006D0 RID: 1744
-		private float mentalBreakChancePerHour;
-
-		// Token: 0x040006D1 RID: 1745
-		private float joyFactor = 1f;
-
-		// Token: 0x040006D2 RID: 1746
-		private string descriptionFlavor;
-
-		// Token: 0x040006D3 RID: 1747
-		private string description;
-
-		// Token: 0x040006D4 RID: 1748
-		private Graphic openGraphic;
-
-		// Token: 0x040006D5 RID: 1749
-		private Graphic verticalGraphic;
-
-		// Token: 0x040006D6 RID: 1750
-		private CompBook cachedComp;
-
-		// Token: 0x040006D7 RID: 1751
-		private static List<Book.BookSubjectSymbol> subjects = new List<Book.BookSubjectSymbol>();
-
-		// Token: 0x020001A6 RID: 422
-		private struct BookSubjectSymbol
-		{
-			// Token: 0x040006D8 RID: 1752
-			public string keyword;
-
-			// Token: 0x040006D9 RID: 1753
-			public List<ValueTuple<string, string>> subSymbols;
-		}
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref title, "title");
+		Scribe_Values.Look(ref descriptionFlavor, "descriptionFlavor");
+		Scribe_Values.Look(ref mentalBreakChancePerHour, "mentalBreakChancePerHour", 0f);
+		Scribe_Values.Look(ref joyFactor, "joyFactor", 0f);
+		Scribe_Values.Look(ref isOpen, "isOpen", defaultValue: false);
+		Scribe_Values.Look(ref descCanBeInvalidated, "descCanBeInvalidated", defaultValue: false);
+		Scribe_Values.Look(ref description, "description");
+		Scribe_Values.Look(ref generations, "generations", 0);
 	}
 }

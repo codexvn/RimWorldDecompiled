@@ -1,932 +1,1069 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class BuildingProperties
 {
-	// Token: 0x02001942 RID: 6466
-	public class BuildingProperties
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__215 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001649 RID: 5705
-		// (get) Token: 0x06009302 RID: 37634 RVA: 0x002B3DC1 File Offset: 0x002B1FC1
-		public bool SupportsPlants
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public BuildingProperties _003C_003E4__this;
+
+		private ThingDef parent;
+
+		public ThingDef _003C_003E3__parent;
+
+		string IEnumerator<string>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.sowTag != null;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700164A RID: 5706
-		// (get) Token: 0x06009303 RID: 37635 RVA: 0x002B3DCC File Offset: 0x002B1FCC
-		public int EffectiveMineableYield
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return Mathf.RoundToInt((float)this.mineableYield * Find.Storyteller.difficulty.mineYieldFactor);
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x1700164B RID: 5707
-		// (get) Token: 0x06009304 RID: 37636 RVA: 0x002B3DEA File Offset: 0x002B1FEA
-		public bool IsTurret
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__215(int _003C_003E1__state)
 		{
-			get
-			{
-				return this.turretGunDef != null;
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x1700164C RID: 5708
-		// (get) Token: 0x06009305 RID: 37637 RVA: 0x002B3DF5 File Offset: 0x002B1FF5
-		public bool IsDeconstructible
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			get
-			{
-				return this.alwaysDeconstructible || (!this.isNaturalRock && this.deconstructible);
-			}
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x1700164D RID: 5709
-		// (get) Token: 0x06009306 RID: 37638 RVA: 0x002B3E14 File Offset: 0x002B2014
-		public bool IsMortar
+		private bool MoveNext()
 		{
-			get
+			int num = _003C_003E1__state;
+			BuildingProperties buildingProperties = _003C_003E4__this;
+			switch (num)
 			{
-				if (!this.IsTurret)
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (buildingProperties.isTrap && !buildingProperties.isEdifice)
 				{
+					_003C_003E2__current = "isTrap but is not edifice. Code will break.";
+					_003C_003E1__state = 1;
+					return true;
+				}
+				goto IL_0070;
+			case 1:
+				_003C_003E1__state = -1;
+				goto IL_0070;
+			case 2:
+				_003C_003E1__state = -1;
+				goto IL_009b;
+			case 3:
+				_003C_003E1__state = -1;
+				goto IL_00cb;
+			case 4:
+				_003C_003E1__state = -1;
+				goto IL_0105;
+			case 5:
+				_003C_003E1__state = -1;
+				goto IL_0135;
+			case 6:
+				_003C_003E1__state = -1;
+				goto IL_0165;
+			case 7:
+				_003C_003E1__state = -1;
+				goto IL_0188;
+			case 8:
+				_003C_003E1__state = -1;
+				goto IL_01b8;
+			case 9:
+				{
+					_003C_003E1__state = -1;
+					break;
+				}
+				IL_0188:
+				if (buildingProperties.isInsectCocoon && buildingProperties.combatPower <= 0f)
+				{
+					_003C_003E2__current = "Insect cocoon requires combat power value > 0.";
+					_003C_003E1__state = 8;
+					return true;
+				}
+				goto IL_01b8;
+				IL_01b8:
+				if (typeof(BuildingGroundSpawner).IsAssignableFrom(parent.thingClass) && buildingProperties.groundSpawnerThingToSpawn == null)
+				{
+					_003C_003E2__current = "Building ground spawner must have thing to spawn.";
+					_003C_003E1__state = 9;
+					return true;
+				}
+				break;
+				IL_0070:
+				if (buildingProperties.alwaysDeconstructible && !buildingProperties.deconstructible)
+				{
+					_003C_003E2__current = "alwaysDeconstructible=true but deconstructible=false";
+					_003C_003E1__state = 2;
+					return true;
+				}
+				goto IL_009b;
+				IL_0105:
+				if (parent.IsGibbetCage && buildingProperties.gibbetCageTopGraphicData == null)
+				{
+					_003C_003E2__current = "Gibbet cage has no graphic data for gibbet cage top set.";
+					_003C_003E1__state = 5;
+					return true;
+				}
+				goto IL_0135;
+				IL_0165:
+				if (buildingProperties.mechGestatorTopGraphic == null)
+				{
+					_003C_003E2__current = "Mech gestator has no top graphic set.";
+					_003C_003E1__state = 7;
+					return true;
+				}
+				goto IL_0188;
+				IL_009b:
+				if (parent.holdsRoof && !buildingProperties.isEdifice)
+				{
+					_003C_003E2__current = "holds roof but is not an edifice.";
+					_003C_003E1__state = 3;
+					return true;
+				}
+				goto IL_00cb;
+				IL_0135:
+				if (parent.IsMechGestator)
+				{
+					if (buildingProperties.mechGestatorCylinderGraphic == null)
+					{
+						_003C_003E2__current = "Mech gestator has no cylinder graphic set.";
+						_003C_003E1__state = 6;
+						return true;
+					}
+					goto IL_0165;
+				}
+				goto IL_0188;
+				IL_00cb:
+				if (buildingProperties.buildingTags.Contains("MechClusterCombatThreat") && buildingProperties.combatPower <= 0f)
+				{
+					_003C_003E2__current = "has MechClusterCombatThreat tag but 0 combatPower and thus no points cost; this will make an infinite loop during mech cluster building selection";
+					_003C_003E1__state = 4;
+					return true;
+				}
+				goto IL_0105;
+			}
+			return false;
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__215 _003CConfigErrors_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CConfigErrors_003Ed__ = this;
+			}
+			else
+			{
+				_003CConfigErrors_003Ed__ = new _003CConfigErrors_003Ed__215(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CConfigErrors_003Ed__.parent = _003C_003E3__parent;
+			return _003CConfigErrors_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CSpecialDisplayStats_003Ed__220 : IEnumerable<StatDrawEntry>, IEnumerable, IEnumerator<StatDrawEntry>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private StatDrawEntry _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public BuildingProperties _003C_003E4__this;
+
+		private ThingDef parentDef;
+
+		public ThingDef _003C_003E3__parentDef;
+
+		private StatRequest req;
+
+		public StatRequest _003C_003E3__req;
+
+		private IEnumerator<Ideo> _003C_003E7__wrap1;
+
+		private Ideo _003Cideo_003E5__3;
+
+		private int _003Ci_003E5__4;
+
+		StatDrawEntry IEnumerator<StatDrawEntry>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CSpecialDisplayStats_003Ed__220(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 6)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003Cideo_003E5__3 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				BuildingProperties buildingProperties = _003C_003E4__this;
+				switch (num)
+				{
+				default:
 					return false;
-				}
-				List<VerbProperties> verbs = this.turretGunDef.Verbs;
-				for (int i = 0; i < verbs.Count; i++)
-				{
-					if (verbs[i].isPrimary && verbs[i].defaultProjectile != null && verbs[i].defaultProjectile.projectile.flyOverhead)
+				case 0:
+					_003C_003E1__state = -1;
+					if (buildingProperties.joyKind != null)
 					{
-						return true;
-					}
-				}
-				if (this.turretGunDef.HasComp(typeof(CompChangeableProjectile)))
-				{
-					if (this.turretGunDef.building.fixedStorageSettings.filter.Allows(ThingDefOf.Shell_HighExplosive))
-					{
-						return true;
-					}
-					foreach (ThingDef thingDef in this.turretGunDef.building.fixedStorageSettings.filter.AllowedThingDefs)
-					{
-						if (thingDef.projectileWhenLoaded != null && thingDef.projectileWhenLoaded.projectile.flyOverhead)
+						StringBuilder stringBuilder = new StringBuilder();
+						stringBuilder.AppendLine();
+						stringBuilder.AppendLine("Stat_RecreationType_Desc".Translate());
+						stringBuilder.AppendLine();
+						stringBuilder.AppendLine("Stat_JoyKind_AllTypes".Translate() + ":");
+						foreach (JoyKindDef allDef in DefDatabase<JoyKindDef>.AllDefs)
 						{
-							return true;
+							stringBuilder.AppendLine("  - " + allDef.LabelCap);
 						}
+						_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.Building, "StatsReport_JoyKind".Translate(), buildingProperties.joyKind.LabelCap, stringBuilder.ToString(), 4750, buildingProperties.joyKind.LabelCap);
+						_003C_003E1__state = 1;
+						return true;
 					}
-					return false;
+					goto IL_0144;
+				case 1:
+					_003C_003E1__state = -1;
+					goto IL_0144;
+				case 2:
+					_003C_003E1__state = -1;
+					goto IL_01a8;
+				case 3:
+					_003C_003E1__state = -1;
+					goto IL_0235;
+				case 4:
+					_003C_003E1__state = -1;
+					tmpFenceBlockedAnimals.Clear();
+					goto IL_0354;
+				case 5:
+					_003C_003E1__state = -1;
+					goto IL_03ca;
+				case 6:
+					_003C_003E1__state = -3;
+					goto IL_0527;
+				case 7:
+					{
+						_003C_003E1__state = -1;
+						return false;
+					}
+					IL_0527:
+					_003Ci_003E5__4++;
+					goto IL_0539;
+					IL_03ca:
+					if (ModsConfig.IdeologyActive)
+					{
+						_003C_003E7__wrap1 = Faction.OfPlayer.ideos.AllIdeos.GetEnumerator();
+						_003C_003E1__state = -3;
+						goto IL_055b;
+					}
+					goto IL_0578;
+					IL_0144:
+					if (parentDef.Minifiable)
+					{
+						_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.Building, "StatsReport_WorkToUninstall".Translate(), buildingProperties.uninstallWork.ToStringWorkAmount(), "Stat_Thing_WorkToUninstall_Desc".Translate(), 1102);
+						_003C_003E1__state = 2;
+						return true;
+					}
+					goto IL_01a8;
+					IL_0578:
+					_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.Building, "Stat_Building_Paintable".Translate(), buildingProperties.paintable.ToStringYesNo(), "Stat_Building_PaintableDesc".Translate(), 6000);
+					_003C_003E1__state = 7;
+					return true;
+					IL_01a8:
+					if (typeof(Building_TrapDamager).IsAssignableFrom(parentDef.thingClass))
+					{
+						float f = StatDefOf.TrapMeleeDamage.Worker.GetValue(req) * 0.015f;
+						_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.Building, "TrapArmorPenetration".Translate(), f.ToStringPercent(), "ArmorPenetrationExplanation".Translate(), 3000);
+						_003C_003E1__state = 3;
+						return true;
+					}
+					goto IL_0235;
+					IL_055b:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						_003Cideo_003E5__3 = _003C_003E7__wrap1.Current;
+						_003Ci_003E5__4 = 0;
+						goto IL_0539;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					goto IL_0578;
+					IL_0235:
+					if (buildingProperties.isFence)
+					{
+						TaggedString taggedString = "Stat_Thing_Fence_Desc".Translate();
+						tmpFenceBlockedAnimals.Clear();
+						tmpFenceBlockedAnimals.AddRange(from k in DefDatabase<PawnKindDef>.AllDefs
+							where k.RaceProps.Animal && k.RaceProps.FenceBlocked
+							select k into g
+							select g.LabelCap.Resolve() into s
+							orderby s
+							select s);
+						taggedString += ":\n\n";
+						taggedString += tmpFenceBlockedAnimals.ToLineList("- ");
+						_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.Building, "StatsReport_Fence".Translate(), "Yes".Translate(), taggedString, 4800);
+						_003C_003E1__state = 4;
+						return true;
+					}
+					goto IL_0354;
+					IL_0354:
+					if (buildingProperties.workTableRoomRole != null && !Mathf.Approximately(buildingProperties.workTableNotInRoomRoleFactor, 1f))
+					{
+						_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.Building, "StatsReport_OptimalRoom".Translate(), buildingProperties.workTableRoomRole.LabelCap, "Stat_Building_OptimalRoom_Desc".Translate(), 4850);
+						_003C_003E1__state = 5;
+						return true;
+					}
+					goto IL_03ca;
+					IL_0539:
+					if (_003Ci_003E5__4 < _003Cideo_003E5__3.PreceptsListForReading.Count)
+					{
+						if (_003Cideo_003E5__3.PreceptsListForReading[_003Ci_003E5__4] is Precept_Building precept_Building && precept_Building.ThingDef == parentDef && precept_Building.presenceDemand != null)
+						{
+							IdeoBuildingPresenceDemand presenceDemand = precept_Building.presenceDemand;
+							if (!presenceDemand.roomRequirements.NullOrEmpty())
+							{
+								string valueString = presenceDemand.roomRequirements.Select((RoomRequirement r) => r.Label()).ToCommaList().CapitalizeFirst();
+								string reportText = presenceDemand.roomRequirements.Select((RoomRequirement r) => r.LabelCap()).ToLineList("  - ");
+								_003C_003E2__current = new StatDrawEntry(StatCategoryDefOf.Building, "RoomRequirements".Translate(), valueString, reportText, 2101);
+								_003C_003E1__state = 6;
+								return true;
+							}
+						}
+						goto IL_0527;
+					}
+					_003Cideo_003E5__3 = null;
+					goto IL_055b;
+				}
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<StatDrawEntry> IEnumerable<StatDrawEntry>.GetEnumerator()
+		{
+			_003CSpecialDisplayStats_003Ed__220 _003CSpecialDisplayStats_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CSpecialDisplayStats_003Ed__ = this;
+			}
+			else
+			{
+				_003CSpecialDisplayStats_003Ed__ = new _003CSpecialDisplayStats_003Ed__220(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CSpecialDisplayStats_003Ed__.parentDef = _003C_003E3__parentDef;
+			_003CSpecialDisplayStats_003Ed__.req = _003C_003E3__req;
+			return _003CSpecialDisplayStats_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<StatDrawEntry>)this).GetEnumerator();
+		}
+	}
+
+	public bool isEdifice = true;
+
+	[NoTranslate]
+	public List<string> buildingTags = new List<string>();
+
+	public bool isInert;
+
+	public bool isTargetable = true;
+
+	private bool deconstructible = true;
+
+	public bool alwaysDeconstructible;
+
+	public bool alwaysUninstallable;
+
+	public List<ThingDef> leavingsBlacklist;
+
+	public List<ThingDef> forcedCostLeavings;
+
+	public bool claimable = true;
+
+	public bool isSittable;
+
+	public bool multiSittable;
+
+	public bool sitIgnoreOrientation;
+
+	public ConceptDef spawnedConceptLearnOpportunity;
+
+	public ConceptDef boughtConceptLearnOpportunity;
+
+	public bool expandHomeArea = true;
+
+	public Type blueprintClass = typeof(Blueprint_Build);
+
+	public GraphicData blueprintGraphicData;
+
+	public float uninstallWork = 200f;
+
+	public bool forceShowRoomStats;
+
+	public bool neverBuildable;
+
+	public bool isWall;
+
+	public bool alwaysExchangeVacuum;
+
+	public bool canExchangeVacuum;
+
+	public bool draftAttackNonDeconstructable = true;
+
+	public bool wantsHopperAdjacent;
+
+	public bool allowWireConnection = true;
+
+	public bool shipPart;
+
+	public bool canPlaceOverImpassablePlant = true;
+
+	public float heatPerTickWhileWorking;
+
+	public bool canBuildNonEdificesUnder = true;
+
+	public bool canPlaceOverWall;
+
+	public bool isPlaceOverableWall;
+
+	public bool allowAutoroof = true;
+
+	public bool preventDeteriorationOnTop;
+
+	public bool preventDeteriorationInside;
+
+	public bool isMealSource;
+
+	public bool isNaturalRock;
+
+	public bool isResourceRock;
+
+	public bool repairable = true;
+
+	public float roofCollapseDamageMultiplier = 1f;
+
+	public bool hasFuelingPort;
+
+	public ThingDef smoothedThing;
+
+	[Unsaved(false)]
+	public ThingDef unsmoothedThing;
+
+	public TerrainDef naturalTerrain;
+
+	public TerrainDef leaveTerrain;
+
+	public float combatPower;
+
+	public int minMechClusterPoints;
+
+	public float destroyShakeAmount = -1f;
+
+	public SoundDef destroySound;
+
+	public SoundDef soundMeleeHitOverride;
+
+	public EffecterDef destroyEffecter;
+
+	public BuildingSizeCategory buildingSizeCategory;
+
+	public bool isFence;
+
+	public List<ThingDef> relatedBuildCommands;
+
+	public List<TerrainDef> relatedTerrain;
+
+	public bool alwaysShowRelatedBuildCommands;
+
+	public bool useIdeoColor;
+
+	public bool wakeDormantPawnsOnConstruction = true;
+
+	public int maxItemsInCell = 1;
+
+	public bool paintable;
+
+	public bool canBeDamagedByAttacks = true;
+
+	public bool isHopper;
+
+	public bool quickTargetable;
+
+	public bool displayAttackToDestroyOnInspectPane;
+
+	public bool isEscapableContainer;
+
+	public bool isPowerConduit;
+
+	public bool biomeSpecific;
+
+	public bool crater;
+
+	public bool canLandGravshipOn;
+
+	public bool isAirtight;
+
+	public bool isStuffableAirtight;
+
+	public bool canConstructInCorner;
+
+	public bool isAttachment;
+
+	public bool supportsWallAttachments;
+
+	public bool isPlayerEjectable;
+
+	public SoundDef openingStartedSound;
+
+	public GraphicData fullGraveGraphicData;
+
+	public float bed_healPerDay;
+
+	public bool bed_defaultMedical;
+
+	public bool bed_showSleeperBody;
+
+	public bool bed_humanlike = true;
+
+	public float bed_maxBodySize = 9999f;
+
+	public bool bed_caravansCanUse;
+
+	public bool bed_slabBed;
+
+	public bool bed_crib;
+
+	public float bed_pawnDrawOffset;
+
+	public bool bed_canBeMedical = true;
+
+	public bool bed_DisplayOwnerType = true;
+
+	public bool bed_DisplayOwnersInInspectString = true;
+
+	public bool bed_countsForBedroomOrBarracks = true;
+
+	public bool bed_emptyCountsForBarracks = true;
+
+	public bool bed_UseSheetColor = true;
+
+	public float nutritionCostPerDispense;
+
+	public SoundDef soundDispense;
+
+	public ThingDef turretGunDef;
+
+	public FloatRange turretBurstWarmupTime = new FloatRange(0.25f, 0.75f);
+
+	public float turretBurstCooldownTime = -1f;
+
+	public float turretInitialCooldownTime;
+
+	[Unsaved(false)]
+	public Material turretTopMat;
+
+	[Unsaved(false)]
+	public Material turretTopLoadedMat;
+
+	public float turretTopDrawSize = 2f;
+
+	public Vector2 turretTopOffset;
+
+	public bool playTargetAcquiredSound = true;
+
+	public GraphicData turretTopLoadedGraphic;
+
+	public List<MechWeightClassDef> requiredMechWeightClasses;
+
+	public bool ai_combatDangerous;
+
+	public bool ai_chillDestination = true;
+
+	public bool ai_neverTrashThis;
+
+	public bool preferConnectingToFences;
+
+	public bool roamerCanOpen;
+
+	public SoundDef soundDoorOpenPowered;
+
+	public SoundDef soundDoorClosePowered;
+
+	public SoundDef soundDoorOpenManual;
+
+	public SoundDef soundDoorCloseManual;
+
+	public SoundDef soundDoorCloseEnd;
+
+	public float poweredDoorOpenSpeedFactor = 1f;
+
+	public float poweredDoorCloseSpeedFactor = 1f;
+
+	public float unpoweredDoorOpenSpeedFactor = 1f;
+
+	public float unpoweredDoorCloseSpeedFactor = 1f;
+
+	public int doorTempEqualizeIntervalClosed = 375;
+
+	public int doorTempEqualizeIntervalOpen = 34;
+
+	public float doorTempEqualizeRate = 1f;
+
+	[NoTranslate]
+	public string sowTag;
+
+	public ThingDef defaultPlantToGrow;
+
+	public ThingDef mineableThing;
+
+	public int mineableYield = 1;
+
+	public bool veinMineable;
+
+	public float mineableNonMinedEfficiency = 0.7f;
+
+	public float mineableDropChance = 1f;
+
+	public bool mineableYieldWasteable = true;
+
+	public float mineableScatterCommonality;
+
+	public IntRange mineableScatterLumpSizeRange = new IntRange(20, 40);
+
+	public bool mineablePreventMeteorite;
+
+	public bool mineablePreventNaturalRockOnSurface;
+
+	public StorageSettings fixedStorageSettings;
+
+	public StorageSettings defaultStorageSettings;
+
+	public bool ignoreStoredThingsBeauty;
+
+	public string storageGroupTag;
+
+	public string groupingLabel;
+
+	public int groupingOrder;
+
+	public bool isTrap;
+
+	public bool trapDestroyOnSpring;
+
+	public float trapPeacefulWildAnimalsSpringChanceFactor = 1f;
+
+	public DamageArmorCategoryDef trapDamageCategory;
+
+	public GraphicData trapUnarmedGraphicData;
+
+	[Unsaved(false)]
+	public Graphic trapUnarmedGraphic;
+
+	public RoomRoleDef workTableRoomRole;
+
+	public float workTableNotInRoomRoleFactor = 1f;
+
+	public float unpoweredWorkTableWorkSpeedFactor;
+
+	public SoundDef workTableCompleteSoundDef;
+
+	public IntRange watchBuildingStandDistanceRange = IntRange.One;
+
+	public int watchBuildingStandRectWidth = 3;
+
+	public bool watchBuildingInSameRoom;
+
+	public JoyKindDef joyKind;
+
+	public int haulToContainerDuration;
+
+	public float instrumentRange;
+
+	public int minDistanceToSameTypeOfBuilding;
+
+	public bool artificialForMeditationPurposes = true;
+
+	public EffecterDef effectWatching;
+
+	public GraphicData gibbetCageTopGraphicData;
+
+	public Vector3 gibbetCorposeDrawOffset;
+
+	public EffecterDef gibbetCagePlaceCorpseEffecter;
+
+	public EffecterDef openingEffect;
+
+	public FillableBarRequestWithRotation barDrawData;
+
+	public MoteForRotationData gestatorFormingMote;
+
+	public MoteForRotationData gestatorCycleCompleteMote;
+
+	public MoteForRotationData gestatorFormedMote;
+
+	public GraphicData mechGestatorCylinderGraphic;
+
+	public GraphicData mechGestatorTopGraphic;
+
+	public GraphicData formingGraphicData;
+
+	public float formingMechBobSpeed = 0.001f;
+
+	public float formingMechYBobDistance = 0.1f;
+
+	public List<Vector3> formingMechPerRotationOffset = new List<Vector3>();
+
+	public Vector2 maxFormedMechDrawSize = new Vector2(1.5f, 1.5f);
+
+	public List<IngredientCount> subcoreScannerFixedIngredients;
+
+	public int subcoreScannerTicks = 7500;
+
+	public HediffDef subcoreScannerHediff;
+
+	public bool destroyBrain;
+
+	public ThingDef subcoreScannerOutputDef;
+
+	public EffecterDef subcoreScannerStartEffect;
+
+	public SoundDef subcoreScannerWorking;
+
+	public SoundDef subcoreScannerComplete;
+
+	public bool isInsectCocoon;
+
+	public GraphicData wastepackAtomizerBottomGraphic;
+
+	public GraphicData wastepackAtomizerWindowGraphic;
+
+	public EffecterDef wastepackAtomizerOperationEffecter;
+
+	public GraphicData bookendGraphicEast;
+
+	public GraphicData bookendGraphicNorth;
+
+	public bool isSupportDoor;
+
+	public GraphicData doorTopGraphic;
+
+	public GraphicData doorSupportGraphic;
+
+	public GraphicData upperMoverGraphic;
+
+	public Vector3 doorTopGraphicOffset;
+
+	public Vector3 doorSupportGraphicOffset;
+
+	public Vector3 doorTopHorizontalOffset = new Vector3(0f, 0f, 0.1f);
+
+	public Vector3 doorTopVerticalOffset = new Vector3(0f, 0f, 0f);
+
+	public ThingDef groundSpawnerThingToSpawn;
+
+	public IntRange groundSpawnerSpawnDelay;
+
+	public bool groundSpawnerDestroyAdjacent;
+
+	public SoundDef groundSpawnerSustainerSound;
+
+	public EffecterDef groundSpawnerSustainedEffecter;
+
+	public EffecterDef groundSpawnerCompleteEffecter;
+
+	public string groundSpawnerLetterLabel;
+
+	public string groundSpawnerLetterText;
+
+	private static List<string> tmpFenceBlockedAnimals = new List<string>();
+
+	public bool SupportsPlants => sowTag != null;
+
+	public int EffectiveMineableYield => Mathf.RoundToInt((float)mineableYield * Find.Storyteller.difficulty.mineYieldFactor);
+
+	public bool IsTurret => turretGunDef != null;
+
+	public bool IsDeconstructible
+	{
+		get
+		{
+			if (!alwaysDeconstructible)
+			{
+				if (!isNaturalRock)
+				{
+					return deconstructible;
 				}
 				return false;
 			}
+			return true;
 		}
+	}
 
-		// Token: 0x06009307 RID: 37639 RVA: 0x002B3F28 File Offset: 0x002B2128
-		public IEnumerable<string> ConfigErrors(ThingDef parent)
+	public bool IsMortar
+	{
+		get
 		{
-			if (this.isTrap && !this.isEdifice)
+			if (!IsTurret)
 			{
-				yield return "isTrap but is not edifice. Code will break.";
+				return false;
 			}
-			if (this.alwaysDeconstructible && !this.deconstructible)
+			List<VerbProperties> verbs = turretGunDef.Verbs;
+			for (int i = 0; i < verbs.Count; i++)
 			{
-				yield return "alwaysDeconstructible=true but deconstructible=false";
-			}
-			if (parent.holdsRoof && !this.isEdifice)
-			{
-				yield return "holds roof but is not an edifice.";
-			}
-			if (this.buildingTags.Contains("MechClusterCombatThreat") && this.combatPower <= 0f)
-			{
-				yield return "has MechClusterCombatThreat tag but 0 combatPower and thus no points cost; this will make an infinite loop during mech cluster building selection";
-			}
-			if (parent.IsGibbetCage && this.gibbetCageTopGraphicData == null)
-			{
-				yield return "Gibbet cage has no graphic data for gibbet cage top set.";
-			}
-			if (parent.IsMechGestator)
-			{
-				if (this.mechGestatorCylinderGraphic == null)
+				if (verbs[i].isPrimary && verbs[i].defaultProjectile != null && verbs[i].defaultProjectile.projectile.flyOverhead)
 				{
-					yield return "Mech gestator has no cylinder graphic set.";
-				}
-				if (this.mechGestatorTopGraphic == null)
-				{
-					yield return "Mech gestator has no top graphic set.";
+					return true;
 				}
 			}
-			if (this.isInsectCocoon && this.combatPower <= 0f)
+			if (turretGunDef.HasComp(typeof(CompChangeableProjectile)))
 			{
-				yield return "Insect cocoon requires combat power value > 0.";
-			}
-			if (typeof(BuildingGroundSpawner).IsAssignableFrom(parent.thingClass) && this.groundSpawnerThingToSpawn == null)
-			{
-				yield return "Building ground spawner must have thing to spawn.";
-			}
-			yield break;
-		}
-
-		// Token: 0x06009308 RID: 37640 RVA: 0x000026EA File Offset: 0x000008EA
-		public void PostLoadSpecial(ThingDef parent)
-		{
-		}
-
-		// Token: 0x06009309 RID: 37641 RVA: 0x002B3F40 File Offset: 0x002B2140
-		public void ResolveReferencesSpecial()
-		{
-			if (this.soundDoorOpenPowered == null)
-			{
-				this.soundDoorOpenPowered = SoundDefOf.Door_OpenPowered;
-			}
-			if (this.soundDoorClosePowered == null)
-			{
-				this.soundDoorClosePowered = SoundDefOf.Door_ClosePowered;
-			}
-			if (this.soundDoorOpenManual == null)
-			{
-				this.soundDoorOpenManual = SoundDefOf.Door_OpenManual;
-			}
-			if (this.soundDoorCloseManual == null)
-			{
-				this.soundDoorCloseManual = SoundDefOf.Door_CloseManual;
-			}
-			if (this.turretGunDef != null)
-			{
-				LongEventHandler.ExecuteWhenFinished(delegate
+				if (turretGunDef.building.fixedStorageSettings.filter.Allows(ThingDefOf.Shell_HighExplosive))
 				{
-					this.turretTopMat = MaterialPool.MatFrom(this.turretGunDef.graphicData.texPath);
-				});
-			}
-			if (this.turretTopLoadedGraphic != null)
-			{
-				LongEventHandler.ExecuteWhenFinished(delegate
+					return true;
+				}
+				foreach (ThingDef allowedThingDef in turretGunDef.building.fixedStorageSettings.filter.AllowedThingDefs)
 				{
-					this.turretTopLoadedMat = MaterialPool.MatFrom(this.turretTopLoadedGraphic.texPath);
-				});
-			}
-			if (this.fixedStorageSettings != null)
-			{
-				this.fixedStorageSettings.filter.ResolveReferences();
-			}
-			if (this.defaultStorageSettings == null && this.fixedStorageSettings != null)
-			{
-				this.defaultStorageSettings = new StorageSettings();
-				this.defaultStorageSettings.CopyFrom(this.fixedStorageSettings);
-			}
-			if (this.defaultStorageSettings != null)
-			{
-				this.defaultStorageSettings.filter.ResolveReferences();
-			}
-		}
-
-		// Token: 0x0600930A RID: 37642 RVA: 0x002B4028 File Offset: 0x002B2228
-		public static void FinalizeInit()
-		{
-			List<ThingDef> allDefsListForReading = DefDatabase<ThingDef>.AllDefsListForReading;
-			for (int i = 0; i < allDefsListForReading.Count; i++)
-			{
-				ThingDef thingDef = allDefsListForReading[i];
-				BuildingProperties building = thingDef.building;
-				if (((building != null) ? building.smoothedThing : null) != null)
-				{
-					ThingDef thingDef2 = thingDef.building.smoothedThing;
-					if (thingDef2.building == null)
+					if (allowedThingDef.projectileWhenLoaded != null && allowedThingDef.projectileWhenLoaded.projectile.flyOverhead)
 					{
-						Log.Error(string.Format("{0} is smoothable to non-building {1}", thingDef, thingDef2));
-					}
-					else if (thingDef2.building.unsmoothedThing == null || thingDef2.building.unsmoothedThing == thingDef)
-					{
-						thingDef2.building.unsmoothedThing = thingDef;
-					}
-					else
-					{
-						Log.Error(string.Format("{0} and {1} both smooth to {2}", thingDef, thingDef2.building.unsmoothedThing, thingDef2));
+						return true;
 					}
 				}
 			}
+			return false;
 		}
+	}
 
-		// Token: 0x0600930B RID: 37643 RVA: 0x002B40DA File Offset: 0x002B22DA
-		public IEnumerable<StatDrawEntry> SpecialDisplayStats(ThingDef parentDef, StatRequest req)
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__215))]
+	public IEnumerable<string> ConfigErrors(ThingDef parent)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__215(-2)
 		{
-			if (this.joyKind != null)
-			{
-				StringBuilder stringBuilder = new StringBuilder();
-				stringBuilder.AppendLine();
-				stringBuilder.AppendLine("Stat_RecreationType_Desc".Translate());
-				stringBuilder.AppendLine();
-				stringBuilder.AppendLine("Stat_JoyKind_AllTypes".Translate() + ":");
-				foreach (JoyKindDef joyKindDef in DefDatabase<JoyKindDef>.AllDefs)
-				{
-					stringBuilder.AppendLine("  - " + joyKindDef.LabelCap);
-				}
-				yield return new StatDrawEntry(StatCategoryDefOf.Building, "StatsReport_JoyKind".Translate(), this.joyKind.LabelCap, stringBuilder.ToString(), 4750, this.joyKind.LabelCap, null, false, false);
-			}
-			if (parentDef.Minifiable)
-			{
-				yield return new StatDrawEntry(StatCategoryDefOf.Building, "StatsReport_WorkToUninstall".Translate(), this.uninstallWork.ToStringWorkAmount(), "Stat_Thing_WorkToUninstall_Desc".Translate(), 1102, null, null, false, false);
-			}
-			if (typeof(Building_TrapDamager).IsAssignableFrom(parentDef.thingClass))
-			{
-				float f = StatDefOf.TrapMeleeDamage.Worker.GetValue(req, true) * 0.015f;
-				yield return new StatDrawEntry(StatCategoryDefOf.Building, "TrapArmorPenetration".Translate(), f.ToStringPercent(), "ArmorPenetrationExplanation".Translate(), 3000, null, null, false, false);
-			}
-			if (this.isFence)
-			{
-				TaggedString taggedString = "Stat_Thing_Fence_Desc".Translate();
-				BuildingProperties.tmpFenceBlockedAnimals.Clear();
-				BuildingProperties.tmpFenceBlockedAnimals.AddRange(from k in DefDatabase<PawnKindDef>.AllDefs
-				where k.RaceProps.Animal && k.RaceProps.FenceBlocked
-				select k into g
-				select g.LabelCap.Resolve() into s
-				orderby s
-				select s);
-				taggedString += ":\n\n";
-				taggedString += BuildingProperties.tmpFenceBlockedAnimals.ToLineList("- ");
-				yield return new StatDrawEntry(StatCategoryDefOf.Building, "StatsReport_Fence".Translate(), "Yes".Translate(), taggedString, 4800, null, null, false, false);
-				BuildingProperties.tmpFenceBlockedAnimals.Clear();
-			}
-			if (this.workTableRoomRole != null && !Mathf.Approximately(this.workTableNotInRoomRoleFactor, 1f))
-			{
-				yield return new StatDrawEntry(StatCategoryDefOf.Building, "StatsReport_OptimalRoom".Translate(), this.workTableRoomRole.LabelCap, "Stat_Building_OptimalRoom_Desc".Translate(), 4850, null, null, false, false);
-			}
-			if (ModsConfig.IdeologyActive)
-			{
-				foreach (Ideo ideo in Faction.OfPlayer.ideos.AllIdeos)
-				{
-					int num;
-					for (int i = 0; i < ideo.PreceptsListForReading.Count; i = num + 1)
-					{
-						Precept_Building precept_Building = ideo.PreceptsListForReading[i] as Precept_Building;
-						if (precept_Building != null && precept_Building.ThingDef == parentDef && precept_Building.presenceDemand != null)
-						{
-							IdeoBuildingPresenceDemand presenceDemand = precept_Building.presenceDemand;
-							if (!presenceDemand.roomRequirements.NullOrEmpty<RoomRequirement>())
-							{
-								string valueString = (from r in presenceDemand.roomRequirements
-								select r.Label(null)).ToCommaList(false, false).CapitalizeFirst();
-								string reportText = (from r in presenceDemand.roomRequirements
-								select r.LabelCap(null)).ToLineList("  - ", false);
-								yield return new StatDrawEntry(StatCategoryDefOf.Building, "RoomRequirements".Translate(), valueString, reportText, 2101, null, null, false, false);
-							}
-						}
-						num = i;
-					}
-					ideo = null;
-				}
-				IEnumerator<Ideo> enumerator2 = null;
-			}
-			yield return new StatDrawEntry(StatCategoryDefOf.Building, "Stat_Building_Paintable".Translate(), this.paintable.ToStringYesNo(), "Stat_Building_PaintableDesc".Translate(), 6000, null, null, false, false);
-			yield break;
-			yield break;
-		}
+			_003C_003E4__this = this,
+			_003C_003E3__parent = parent
+		};
+	}
 
-		// Token: 0x0600930C RID: 37644 RVA: 0x002B40F8 File Offset: 0x002B22F8
-		public GenDraw.FillableBarRequest BarDrawDataFor(Rot4 rot)
+	public void PostLoadSpecial(ThingDef parent)
+	{
+	}
+
+	public void ResolveReferencesSpecial()
+	{
+		if (soundDoorOpenPowered == null)
 		{
-			switch (rot.AsInt)
+			soundDoorOpenPowered = SoundDefOf.Door_OpenPowered;
+		}
+		if (soundDoorClosePowered == null)
+		{
+			soundDoorClosePowered = SoundDefOf.Door_ClosePowered;
+		}
+		if (soundDoorOpenManual == null)
+		{
+			soundDoorOpenManual = SoundDefOf.Door_OpenManual;
+		}
+		if (soundDoorCloseManual == null)
+		{
+			soundDoorCloseManual = SoundDefOf.Door_CloseManual;
+		}
+		if (turretGunDef != null)
+		{
+			LongEventHandler.ExecuteWhenFinished(delegate
 			{
-			case 0:
-				return this.barDrawData.north;
-			case 1:
-				return this.barDrawData.east;
-			case 2:
-				return this.barDrawData.south;
-			case 3:
-				return this.barDrawData.west;
-			default:
-				return this.barDrawData.north;
+				turretTopMat = MaterialPool.MatFrom(turretGunDef.graphicData.texPath);
+			});
+		}
+		if (turretTopLoadedGraphic != null)
+		{
+			LongEventHandler.ExecuteWhenFinished(delegate
+			{
+				turretTopLoadedMat = MaterialPool.MatFrom(turretTopLoadedGraphic.texPath);
+			});
+		}
+		if (fixedStorageSettings != null)
+		{
+			fixedStorageSettings.filter.ResolveReferences();
+		}
+		if (defaultStorageSettings == null && fixedStorageSettings != null)
+		{
+			defaultStorageSettings = new StorageSettings();
+			defaultStorageSettings.CopyFrom(fixedStorageSettings);
+		}
+		if (defaultStorageSettings != null)
+		{
+			defaultStorageSettings.filter.ResolveReferences();
+		}
+	}
+
+	public static void FinalizeInit()
+	{
+		List<ThingDef> allDefsListForReading = DefDatabase<ThingDef>.AllDefsListForReading;
+		for (int i = 0; i < allDefsListForReading.Count; i++)
+		{
+			ThingDef thingDef = allDefsListForReading[i];
+			if (thingDef.building?.smoothedThing != null)
+			{
+				ThingDef thingDef2 = thingDef.building.smoothedThing;
+				if (thingDef2.building == null)
+				{
+					Log.Error($"{thingDef} is smoothable to non-building {thingDef2}");
+				}
+				else if (thingDef2.building.unsmoothedThing == null || thingDef2.building.unsmoothedThing == thingDef)
+				{
+					thingDef2.building.unsmoothedThing = thingDef;
+				}
+				else
+				{
+					Log.Error($"{thingDef} and {thingDef2.building.unsmoothedThing} both smooth to {thingDef2}");
+				}
 			}
 		}
-
-		// Token: 0x04005DBA RID: 23994
-		public bool isEdifice = true;
-
-		// Token: 0x04005DBB RID: 23995
-		[NoTranslate]
-		public List<string> buildingTags = new List<string>();
-
-		// Token: 0x04005DBC RID: 23996
-		public bool isInert;
-
-		// Token: 0x04005DBD RID: 23997
-		public bool isTargetable = true;
-
-		// Token: 0x04005DBE RID: 23998
-		private bool deconstructible = true;
-
-		// Token: 0x04005DBF RID: 23999
-		public bool alwaysDeconstructible;
-
-		// Token: 0x04005DC0 RID: 24000
-		public bool alwaysUninstallable;
-
-		// Token: 0x04005DC1 RID: 24001
-		public List<ThingDef> leavingsBlacklist;
-
-		// Token: 0x04005DC2 RID: 24002
-		public List<ThingDef> forcedCostLeavings;
-
-		// Token: 0x04005DC3 RID: 24003
-		public bool claimable = true;
-
-		// Token: 0x04005DC4 RID: 24004
-		public bool isSittable;
-
-		// Token: 0x04005DC5 RID: 24005
-		public bool multiSittable;
-
-		// Token: 0x04005DC6 RID: 24006
-		public bool sitIgnoreOrientation;
-
-		// Token: 0x04005DC7 RID: 24007
-		public ConceptDef spawnedConceptLearnOpportunity;
-
-		// Token: 0x04005DC8 RID: 24008
-		public ConceptDef boughtConceptLearnOpportunity;
-
-		// Token: 0x04005DC9 RID: 24009
-		public bool expandHomeArea = true;
-
-		// Token: 0x04005DCA RID: 24010
-		public Type blueprintClass = typeof(Blueprint_Build);
-
-		// Token: 0x04005DCB RID: 24011
-		public GraphicData blueprintGraphicData;
-
-		// Token: 0x04005DCC RID: 24012
-		public float uninstallWork = 200f;
-
-		// Token: 0x04005DCD RID: 24013
-		public bool forceShowRoomStats;
-
-		// Token: 0x04005DCE RID: 24014
-		public bool neverBuildable;
-
-		// Token: 0x04005DCF RID: 24015
-		public bool isWall;
-
-		// Token: 0x04005DD0 RID: 24016
-		public bool alwaysExchangeVacuum;
-
-		// Token: 0x04005DD1 RID: 24017
-		public bool canExchangeVacuum;
-
-		// Token: 0x04005DD2 RID: 24018
-		public bool draftAttackNonDeconstructable = true;
-
-		// Token: 0x04005DD3 RID: 24019
-		public bool wantsHopperAdjacent;
-
-		// Token: 0x04005DD4 RID: 24020
-		public bool allowWireConnection = true;
-
-		// Token: 0x04005DD5 RID: 24021
-		public bool shipPart;
-
-		// Token: 0x04005DD6 RID: 24022
-		public bool canPlaceOverImpassablePlant = true;
-
-		// Token: 0x04005DD7 RID: 24023
-		public float heatPerTickWhileWorking;
-
-		// Token: 0x04005DD8 RID: 24024
-		public bool canBuildNonEdificesUnder = true;
-
-		// Token: 0x04005DD9 RID: 24025
-		public bool canPlaceOverWall;
-
-		// Token: 0x04005DDA RID: 24026
-		public bool isPlaceOverableWall;
-
-		// Token: 0x04005DDB RID: 24027
-		public bool allowAutoroof = true;
-
-		// Token: 0x04005DDC RID: 24028
-		public bool preventDeteriorationOnTop;
-
-		// Token: 0x04005DDD RID: 24029
-		public bool preventDeteriorationInside;
-
-		// Token: 0x04005DDE RID: 24030
-		public bool isMealSource;
-
-		// Token: 0x04005DDF RID: 24031
-		public bool isNaturalRock;
-
-		// Token: 0x04005DE0 RID: 24032
-		public bool isResourceRock;
-
-		// Token: 0x04005DE1 RID: 24033
-		public bool repairable = true;
-
-		// Token: 0x04005DE2 RID: 24034
-		public float roofCollapseDamageMultiplier = 1f;
-
-		// Token: 0x04005DE3 RID: 24035
-		public bool hasFuelingPort;
-
-		// Token: 0x04005DE4 RID: 24036
-		public ThingDef smoothedThing;
-
-		// Token: 0x04005DE5 RID: 24037
-		[Unsaved(false)]
-		public ThingDef unsmoothedThing;
-
-		// Token: 0x04005DE6 RID: 24038
-		public TerrainDef naturalTerrain;
-
-		// Token: 0x04005DE7 RID: 24039
-		public TerrainDef leaveTerrain;
-
-		// Token: 0x04005DE8 RID: 24040
-		public float combatPower;
-
-		// Token: 0x04005DE9 RID: 24041
-		public int minMechClusterPoints;
-
-		// Token: 0x04005DEA RID: 24042
-		public float destroyShakeAmount = -1f;
-
-		// Token: 0x04005DEB RID: 24043
-		public SoundDef destroySound;
-
-		// Token: 0x04005DEC RID: 24044
-		public SoundDef soundMeleeHitOverride;
-
-		// Token: 0x04005DED RID: 24045
-		public EffecterDef destroyEffecter;
-
-		// Token: 0x04005DEE RID: 24046
-		public BuildingSizeCategory buildingSizeCategory;
-
-		// Token: 0x04005DEF RID: 24047
-		public bool isFence;
-
-		// Token: 0x04005DF0 RID: 24048
-		public List<ThingDef> relatedBuildCommands;
-
-		// Token: 0x04005DF1 RID: 24049
-		public List<TerrainDef> relatedTerrain;
-
-		// Token: 0x04005DF2 RID: 24050
-		public bool alwaysShowRelatedBuildCommands;
-
-		// Token: 0x04005DF3 RID: 24051
-		public bool useIdeoColor;
-
-		// Token: 0x04005DF4 RID: 24052
-		public bool wakeDormantPawnsOnConstruction = true;
-
-		// Token: 0x04005DF5 RID: 24053
-		public int maxItemsInCell = 1;
-
-		// Token: 0x04005DF6 RID: 24054
-		public bool paintable;
-
-		// Token: 0x04005DF7 RID: 24055
-		public bool canBeDamagedByAttacks = true;
-
-		// Token: 0x04005DF8 RID: 24056
-		public bool isHopper;
-
-		// Token: 0x04005DF9 RID: 24057
-		public bool quickTargetable;
-
-		// Token: 0x04005DFA RID: 24058
-		public bool displayAttackToDestroyOnInspectPane;
-
-		// Token: 0x04005DFB RID: 24059
-		public bool isEscapableContainer;
-
-		// Token: 0x04005DFC RID: 24060
-		public bool isPowerConduit;
-
-		// Token: 0x04005DFD RID: 24061
-		public bool biomeSpecific;
-
-		// Token: 0x04005DFE RID: 24062
-		public bool crater;
-
-		// Token: 0x04005DFF RID: 24063
-		public bool canLandGravshipOn;
-
-		// Token: 0x04005E00 RID: 24064
-		public bool isAirtight;
-
-		// Token: 0x04005E01 RID: 24065
-		public bool isStuffableAirtight;
-
-		// Token: 0x04005E02 RID: 24066
-		public bool canConstructInCorner;
-
-		// Token: 0x04005E03 RID: 24067
-		public bool isAttachment;
-
-		// Token: 0x04005E04 RID: 24068
-		public bool supportsWallAttachments;
-
-		// Token: 0x04005E05 RID: 24069
-		public bool isPlayerEjectable;
-
-		// Token: 0x04005E06 RID: 24070
-		public SoundDef openingStartedSound;
-
-		// Token: 0x04005E07 RID: 24071
-		public GraphicData fullGraveGraphicData;
-
-		// Token: 0x04005E08 RID: 24072
-		public float bed_healPerDay;
-
-		// Token: 0x04005E09 RID: 24073
-		public bool bed_defaultMedical;
-
-		// Token: 0x04005E0A RID: 24074
-		public bool bed_showSleeperBody;
-
-		// Token: 0x04005E0B RID: 24075
-		public bool bed_humanlike = true;
-
-		// Token: 0x04005E0C RID: 24076
-		public float bed_maxBodySize = 9999f;
-
-		// Token: 0x04005E0D RID: 24077
-		public bool bed_caravansCanUse;
-
-		// Token: 0x04005E0E RID: 24078
-		public bool bed_slabBed;
-
-		// Token: 0x04005E0F RID: 24079
-		public bool bed_crib;
-
-		// Token: 0x04005E10 RID: 24080
-		public float bed_pawnDrawOffset;
-
-		// Token: 0x04005E11 RID: 24081
-		public bool bed_canBeMedical = true;
-
-		// Token: 0x04005E12 RID: 24082
-		public bool bed_DisplayOwnerType = true;
-
-		// Token: 0x04005E13 RID: 24083
-		public bool bed_DisplayOwnersInInspectString = true;
-
-		// Token: 0x04005E14 RID: 24084
-		public bool bed_countsForBedroomOrBarracks = true;
-
-		// Token: 0x04005E15 RID: 24085
-		public bool bed_emptyCountsForBarracks = true;
-
-		// Token: 0x04005E16 RID: 24086
-		public bool bed_UseSheetColor = true;
-
-		// Token: 0x04005E17 RID: 24087
-		public float nutritionCostPerDispense;
-
-		// Token: 0x04005E18 RID: 24088
-		public SoundDef soundDispense;
-
-		// Token: 0x04005E19 RID: 24089
-		public ThingDef turretGunDef;
-
-		// Token: 0x04005E1A RID: 24090
-		public FloatRange turretBurstWarmupTime = new FloatRange(0.25f, 0.75f);
-
-		// Token: 0x04005E1B RID: 24091
-		public float turretBurstCooldownTime = -1f;
-
-		// Token: 0x04005E1C RID: 24092
-		public float turretInitialCooldownTime;
-
-		// Token: 0x04005E1D RID: 24093
-		[Unsaved(false)]
-		public Material turretTopMat;
-
-		// Token: 0x04005E1E RID: 24094
-		[Unsaved(false)]
-		public Material turretTopLoadedMat;
-
-		// Token: 0x04005E1F RID: 24095
-		public float turretTopDrawSize = 2f;
-
-		// Token: 0x04005E20 RID: 24096
-		public Vector2 turretTopOffset;
-
-		// Token: 0x04005E21 RID: 24097
-		public bool playTargetAcquiredSound = true;
-
-		// Token: 0x04005E22 RID: 24098
-		public GraphicData turretTopLoadedGraphic;
-
-		// Token: 0x04005E23 RID: 24099
-		public List<MechWeightClassDef> requiredMechWeightClasses;
-
-		// Token: 0x04005E24 RID: 24100
-		public bool ai_combatDangerous;
-
-		// Token: 0x04005E25 RID: 24101
-		public bool ai_chillDestination = true;
-
-		// Token: 0x04005E26 RID: 24102
-		public bool ai_neverTrashThis;
-
-		// Token: 0x04005E27 RID: 24103
-		public bool preferConnectingToFences;
-
-		// Token: 0x04005E28 RID: 24104
-		public bool roamerCanOpen;
-
-		// Token: 0x04005E29 RID: 24105
-		public SoundDef soundDoorOpenPowered;
-
-		// Token: 0x04005E2A RID: 24106
-		public SoundDef soundDoorClosePowered;
-
-		// Token: 0x04005E2B RID: 24107
-		public SoundDef soundDoorOpenManual;
-
-		// Token: 0x04005E2C RID: 24108
-		public SoundDef soundDoorCloseManual;
-
-		// Token: 0x04005E2D RID: 24109
-		public SoundDef soundDoorCloseEnd;
-
-		// Token: 0x04005E2E RID: 24110
-		public float poweredDoorOpenSpeedFactor = 1f;
-
-		// Token: 0x04005E2F RID: 24111
-		public float poweredDoorCloseSpeedFactor = 1f;
-
-		// Token: 0x04005E30 RID: 24112
-		public float unpoweredDoorOpenSpeedFactor = 1f;
-
-		// Token: 0x04005E31 RID: 24113
-		public float unpoweredDoorCloseSpeedFactor = 1f;
-
-		// Token: 0x04005E32 RID: 24114
-		public int doorTempEqualizeIntervalClosed = 375;
-
-		// Token: 0x04005E33 RID: 24115
-		public int doorTempEqualizeIntervalOpen = 34;
-
-		// Token: 0x04005E34 RID: 24116
-		public float doorTempEqualizeRate = 1f;
-
-		// Token: 0x04005E35 RID: 24117
-		[NoTranslate]
-		public string sowTag;
-
-		// Token: 0x04005E36 RID: 24118
-		public ThingDef defaultPlantToGrow;
-
-		// Token: 0x04005E37 RID: 24119
-		public ThingDef mineableThing;
-
-		// Token: 0x04005E38 RID: 24120
-		public int mineableYield = 1;
-
-		// Token: 0x04005E39 RID: 24121
-		public bool veinMineable;
-
-		// Token: 0x04005E3A RID: 24122
-		public float mineableNonMinedEfficiency = 0.7f;
-
-		// Token: 0x04005E3B RID: 24123
-		public float mineableDropChance = 1f;
-
-		// Token: 0x04005E3C RID: 24124
-		public bool mineableYieldWasteable = true;
-
-		// Token: 0x04005E3D RID: 24125
-		public float mineableScatterCommonality;
-
-		// Token: 0x04005E3E RID: 24126
-		public IntRange mineableScatterLumpSizeRange = new IntRange(20, 40);
-
-		// Token: 0x04005E3F RID: 24127
-		public bool mineablePreventMeteorite;
-
-		// Token: 0x04005E40 RID: 24128
-		public bool mineablePreventNaturalRockOnSurface;
-
-		// Token: 0x04005E41 RID: 24129
-		public StorageSettings fixedStorageSettings;
-
-		// Token: 0x04005E42 RID: 24130
-		public StorageSettings defaultStorageSettings;
-
-		// Token: 0x04005E43 RID: 24131
-		public bool ignoreStoredThingsBeauty;
-
-		// Token: 0x04005E44 RID: 24132
-		public string storageGroupTag;
-
-		// Token: 0x04005E45 RID: 24133
-		public string groupingLabel;
-
-		// Token: 0x04005E46 RID: 24134
-		public int groupingOrder;
-
-		// Token: 0x04005E47 RID: 24135
-		public bool isTrap;
-
-		// Token: 0x04005E48 RID: 24136
-		public bool trapDestroyOnSpring;
-
-		// Token: 0x04005E49 RID: 24137
-		public float trapPeacefulWildAnimalsSpringChanceFactor = 1f;
-
-		// Token: 0x04005E4A RID: 24138
-		public DamageArmorCategoryDef trapDamageCategory;
-
-		// Token: 0x04005E4B RID: 24139
-		public GraphicData trapUnarmedGraphicData;
-
-		// Token: 0x04005E4C RID: 24140
-		[Unsaved(false)]
-		public Graphic trapUnarmedGraphic;
-
-		// Token: 0x04005E4D RID: 24141
-		public RoomRoleDef workTableRoomRole;
-
-		// Token: 0x04005E4E RID: 24142
-		public float workTableNotInRoomRoleFactor = 1f;
-
-		// Token: 0x04005E4F RID: 24143
-		public float unpoweredWorkTableWorkSpeedFactor;
-
-		// Token: 0x04005E50 RID: 24144
-		public SoundDef workTableCompleteSoundDef;
-
-		// Token: 0x04005E51 RID: 24145
-		public IntRange watchBuildingStandDistanceRange = IntRange.One;
-
-		// Token: 0x04005E52 RID: 24146
-		public int watchBuildingStandRectWidth = 3;
-
-		// Token: 0x04005E53 RID: 24147
-		public bool watchBuildingInSameRoom;
-
-		// Token: 0x04005E54 RID: 24148
-		public JoyKindDef joyKind;
-
-		// Token: 0x04005E55 RID: 24149
-		public int haulToContainerDuration;
-
-		// Token: 0x04005E56 RID: 24150
-		public float instrumentRange;
-
-		// Token: 0x04005E57 RID: 24151
-		public int minDistanceToSameTypeOfBuilding;
-
-		// Token: 0x04005E58 RID: 24152
-		public bool artificialForMeditationPurposes = true;
-
-		// Token: 0x04005E59 RID: 24153
-		public EffecterDef effectWatching;
-
-		// Token: 0x04005E5A RID: 24154
-		public GraphicData gibbetCageTopGraphicData;
-
-		// Token: 0x04005E5B RID: 24155
-		public Vector3 gibbetCorposeDrawOffset;
-
-		// Token: 0x04005E5C RID: 24156
-		public EffecterDef gibbetCagePlaceCorpseEffecter;
-
-		// Token: 0x04005E5D RID: 24157
-		public EffecterDef openingEffect;
-
-		// Token: 0x04005E5E RID: 24158
-		public FillableBarRequestWithRotation barDrawData;
-
-		// Token: 0x04005E5F RID: 24159
-		public MoteForRotationData gestatorFormingMote;
-
-		// Token: 0x04005E60 RID: 24160
-		public MoteForRotationData gestatorCycleCompleteMote;
-
-		// Token: 0x04005E61 RID: 24161
-		public MoteForRotationData gestatorFormedMote;
-
-		// Token: 0x04005E62 RID: 24162
-		public GraphicData mechGestatorCylinderGraphic;
-
-		// Token: 0x04005E63 RID: 24163
-		public GraphicData mechGestatorTopGraphic;
-
-		// Token: 0x04005E64 RID: 24164
-		public GraphicData formingGraphicData;
-
-		// Token: 0x04005E65 RID: 24165
-		public float formingMechBobSpeed = 0.001f;
-
-		// Token: 0x04005E66 RID: 24166
-		public float formingMechYBobDistance = 0.1f;
-
-		// Token: 0x04005E67 RID: 24167
-		public List<Vector3> formingMechPerRotationOffset = new List<Vector3>();
-
-		// Token: 0x04005E68 RID: 24168
-		public Vector2 maxFormedMechDrawSize = new Vector2(1.5f, 1.5f);
-
-		// Token: 0x04005E69 RID: 24169
-		public List<IngredientCount> subcoreScannerFixedIngredients;
-
-		// Token: 0x04005E6A RID: 24170
-		public int subcoreScannerTicks = 7500;
-
-		// Token: 0x04005E6B RID: 24171
-		public HediffDef subcoreScannerHediff;
-
-		// Token: 0x04005E6C RID: 24172
-		public bool destroyBrain;
-
-		// Token: 0x04005E6D RID: 24173
-		public ThingDef subcoreScannerOutputDef;
-
-		// Token: 0x04005E6E RID: 24174
-		public EffecterDef subcoreScannerStartEffect;
-
-		// Token: 0x04005E6F RID: 24175
-		public SoundDef subcoreScannerWorking;
-
-		// Token: 0x04005E70 RID: 24176
-		public SoundDef subcoreScannerComplete;
-
-		// Token: 0x04005E71 RID: 24177
-		public bool isInsectCocoon;
-
-		// Token: 0x04005E72 RID: 24178
-		public GraphicData wastepackAtomizerBottomGraphic;
-
-		// Token: 0x04005E73 RID: 24179
-		public GraphicData wastepackAtomizerWindowGraphic;
-
-		// Token: 0x04005E74 RID: 24180
-		public EffecterDef wastepackAtomizerOperationEffecter;
-
-		// Token: 0x04005E75 RID: 24181
-		public GraphicData bookendGraphicEast;
-
-		// Token: 0x04005E76 RID: 24182
-		public GraphicData bookendGraphicNorth;
-
-		// Token: 0x04005E77 RID: 24183
-		public bool isSupportDoor;
-
-		// Token: 0x04005E78 RID: 24184
-		public GraphicData doorTopGraphic;
-
-		// Token: 0x04005E79 RID: 24185
-		public GraphicData doorSupportGraphic;
-
-		// Token: 0x04005E7A RID: 24186
-		public GraphicData upperMoverGraphic;
-
-		// Token: 0x04005E7B RID: 24187
-		public Vector3 doorTopGraphicOffset;
-
-		// Token: 0x04005E7C RID: 24188
-		public Vector3 doorSupportGraphicOffset;
-
-		// Token: 0x04005E7D RID: 24189
-		public Vector3 doorTopHorizontalOffset = new Vector3(0f, 0f, 0.1f);
-
-		// Token: 0x04005E7E RID: 24190
-		public Vector3 doorTopVerticalOffset = new Vector3(0f, 0f, 0f);
-
-		// Token: 0x04005E7F RID: 24191
-		public ThingDef groundSpawnerThingToSpawn;
-
-		// Token: 0x04005E80 RID: 24192
-		public IntRange groundSpawnerSpawnDelay;
-
-		// Token: 0x04005E81 RID: 24193
-		public bool groundSpawnerDestroyAdjacent;
-
-		// Token: 0x04005E82 RID: 24194
-		public SoundDef groundSpawnerSustainerSound;
-
-		// Token: 0x04005E83 RID: 24195
-		public EffecterDef groundSpawnerSustainedEffecter;
-
-		// Token: 0x04005E84 RID: 24196
-		public EffecterDef groundSpawnerCompleteEffecter;
-
-		// Token: 0x04005E85 RID: 24197
-		public string groundSpawnerLetterLabel;
-
-		// Token: 0x04005E86 RID: 24198
-		public string groundSpawnerLetterText;
-
-		// Token: 0x04005E87 RID: 24199
-		private static List<string> tmpFenceBlockedAnimals = new List<string>();
+	}
+
+	[IteratorStateMachine(typeof(_003CSpecialDisplayStats_003Ed__220))]
+	public IEnumerable<StatDrawEntry> SpecialDisplayStats(ThingDef parentDef, StatRequest req)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CSpecialDisplayStats_003Ed__220(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__parentDef = parentDef,
+			_003C_003E3__req = req
+		};
+	}
+
+	public GenDraw.FillableBarRequest BarDrawDataFor(Rot4 rot)
+	{
+		return rot.AsInt switch
+		{
+			0 => barDrawData.north, 
+			1 => barDrawData.east, 
+			2 => barDrawData.south, 
+			3 => barDrawData.west, 
+			_ => barDrawData.north, 
+		};
 	}
 }

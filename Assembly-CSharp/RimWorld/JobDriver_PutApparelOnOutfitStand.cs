@@ -1,139 +1,241 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_PutApparelOnOutfitStand : JobDriver
 {
-	// Token: 0x020012E0 RID: 4832
-	public class JobDriver_PutApparelOnOutfitStand : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__13 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001292 RID: 4754
-		// (get) Token: 0x06007662 RID: 30306 RVA: 0x00240F24 File Offset: 0x0023F124
-		private Apparel Apparel
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_PutApparelOnOutfitStand _003C_003E4__this;
+
+		private bool _003CusingSource_003E5__2;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.job.GetTarget(TargetIndex.A).Thing as Apparel;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001293 RID: 4755
-		// (get) Token: 0x06007663 RID: 30307 RVA: 0x00240F4C File Offset: 0x0023F14C
-		private Building_OutfitStand DestOutfitStand
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.job.GetTarget(TargetIndex.B).Thing as Building_OutfitStand;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001294 RID: 4756
-		// (get) Token: 0x06007664 RID: 30308 RVA: 0x00240F74 File Offset: 0x0023F174
-		private bool TargetIsOnApparelSource
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__13(int _003C_003E1__state)
 		{
-			get
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_PutApparelOnOutfitStand CS_0024_003C_003E8__locals14 = _003C_003E4__this;
+			switch (num)
 			{
-				Apparel apparel = this.Apparel;
-				if (apparel != null && !apparel.Spawned)
-				{
-					IApparelSource apparelSource = apparel.ParentHolder as IApparelSource;
-					if (apparelSource != null)
-					{
-						return apparelSource is Thing;
-					}
-				}
+			default:
 				return false;
-			}
-		}
-
-		// Token: 0x17001295 RID: 4757
-		// (get) Token: 0x06007665 RID: 30309 RVA: 0x00240FB0 File Offset: 0x0023F1B0
-		private IApparelSource ApparelSource
-		{
-			get
+			case 0:
+				_003C_003E1__state = -1;
+				CS_0024_003C_003E8__locals14.FailOnBurningImmobile(TargetIndex.A);
+				CS_0024_003C_003E8__locals14.FailOnBurningImmobile(TargetIndex.B);
+				_003CusingSource_003E5__2 = CS_0024_003C_003E8__locals14.TargetIsOnApparelSource;
+				if (_003CusingSource_003E5__2)
+				{
+					_003C_003E2__current = Toils_Goto.GotoCell(TargetIndex.C, PathEndMode.InteractionCell).FailOnDespawnedNullOrForbidden(TargetIndex.C);
+					_003C_003E1__state = 1;
+					return true;
+				}
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.ClosestTouch).FailOnDespawnedNullOrForbidden(TargetIndex.A);
+				_003C_003E1__state = 2;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				goto IL_00a6;
+			case 2:
+				_003C_003E1__state = -1;
+				goto IL_00a6;
+			case 3:
+				_003C_003E1__state = -1;
+				goto IL_0111;
+			case 4:
+				_003C_003E1__state = -1;
+				goto IL_0111;
+			case 5:
 			{
-				return (IApparelSource)this.job.GetTarget(TargetIndex.C).Thing;
-			}
-		}
-
-		// Token: 0x06007666 RID: 30310 RVA: 0x00240FD6 File Offset: 0x0023F1D6
-		public override void Notify_Starting()
-		{
-			base.Notify_Starting();
-			if (this.TargetIsOnApparelSource)
-			{
-				this.job.targetC = (Thing)this.Apparel.ParentHolder;
-			}
-		}
-
-		// Token: 0x06007667 RID: 30311 RVA: 0x00241008 File Offset: 0x0023F208
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
-		{
-			if (this.TargetIsOnApparelSource)
-			{
-				return this.pawn.Reserve((Thing)this.Apparel.ParentHolder, this.job, 1, -1, null, errorOnFailed, false) && this.pawn.Reserve(this.DestOutfitStand, this.job, 1, -1, null, errorOnFailed, false);
-			}
-			return this.pawn.Reserve(this.Apparel, this.job, 1, -1, null, errorOnFailed, false) && this.pawn.Reserve(this.DestOutfitStand, this.job, 1, -1, null, errorOnFailed, false);
-		}
-
-		// Token: 0x06007668 RID: 30312 RVA: 0x002410B4 File Offset: 0x0023F2B4
-		protected override IEnumerable<Toil> MakeNewToils()
-		{
-			this.FailOnBurningImmobile(TargetIndex.A);
-			this.FailOnBurningImmobile(TargetIndex.B);
-			bool usingSource = this.TargetIsOnApparelSource;
-			if (usingSource)
-			{
-				yield return Toils_Goto.GotoCell(TargetIndex.C, PathEndMode.InteractionCell).FailOnDespawnedNullOrForbidden(TargetIndex.C);
-			}
-			else
-			{
-				yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.ClosestTouch, false).FailOnDespawnedNullOrForbidden(TargetIndex.A);
-			}
-			if (usingSource)
-			{
+				_003C_003E1__state = -1;
 				Toil toil = ToilMaker.MakeToil("MakeNewToils");
-				toil.initAction = delegate()
+				toil.initAction = delegate
 				{
-					this.ApparelSource.RemoveApparel(this.Apparel);
-					this.pawn.carryTracker.TryStartCarry(this.Apparel);
+					if (CS_0024_003C_003E8__locals14.pawn.carryTracker.CarriedThing is Apparel apparel)
+					{
+						if (!CS_0024_003C_003E8__locals14.DestOutfitStand.HasRoomForApparelOfDef(apparel.def) && !CS_0024_003C_003E8__locals14.DestOutfitStand.TryDropThingsToMakeRoomForThingOfDef(apparel.def))
+						{
+							CS_0024_003C_003E8__locals14.EndJobWith(JobCondition.Errored);
+						}
+						else
+						{
+							CS_0024_003C_003E8__locals14.pawn.carryTracker.innerContainer.Remove(apparel);
+							CS_0024_003C_003E8__locals14.DestOutfitStand.AddApparel(apparel);
+						}
+					}
 				};
-				yield return toil;
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 6;
+				return true;
+			}
+			case 6:
+				{
+					_003C_003E1__state = -1;
+					return false;
+				}
+				IL_0111:
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.InteractionCell).FailOnDespawnedNullOrForbidden(TargetIndex.B);
+				_003C_003E1__state = 5;
+				return true;
+				IL_00a6:
+				if (_003CusingSource_003E5__2)
+				{
+					Toil toil2 = ToilMaker.MakeToil("MakeNewToils");
+					toil2.initAction = delegate
+					{
+						CS_0024_003C_003E8__locals14.ApparelSource.RemoveApparel(CS_0024_003C_003E8__locals14.Apparel);
+						CS_0024_003C_003E8__locals14.pawn.carryTracker.TryStartCarry(CS_0024_003C_003E8__locals14.Apparel);
+					};
+					_003C_003E2__current = toil2;
+					_003C_003E1__state = 3;
+					return true;
+				}
+				CS_0024_003C_003E8__locals14.job.count = 1;
+				_003C_003E2__current = Toils_Haul.StartCarryThing(TargetIndex.A);
+				_003C_003E1__state = 4;
+				return true;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__13 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
 			}
 			else
 			{
-				this.job.count = 1;
-				yield return Toils_Haul.StartCarryThing(TargetIndex.A, false, false, false, true, false);
+				result = new _003CMakeNewToils_003Ed__13(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
-			yield return Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.InteractionCell, false).FailOnDespawnedNullOrForbidden(TargetIndex.B);
-			Toil toil2 = ToilMaker.MakeToil("MakeNewToils");
-			toil2.initAction = delegate()
-			{
-				Apparel apparel = this.pawn.carryTracker.CarriedThing as Apparel;
-				if (apparel == null)
-				{
-					return;
-				}
-				if (!this.DestOutfitStand.HasRoomForApparelOfDef(apparel.def) && !this.DestOutfitStand.TryDropThingsToMakeRoomForThingOfDef(apparel.def))
-				{
-					base.EndJobWith(JobCondition.Errored);
-					return;
-				}
-				this.pawn.carryTracker.innerContainer.Remove(apparel);
-				this.DestOutfitStand.AddApparel(apparel);
-			};
-			yield return toil2;
-			yield break;
+			return result;
 		}
 
-		// Token: 0x040050E7 RID: 20711
-		private const TargetIndex ApparelInd = TargetIndex.A;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x040050E8 RID: 20712
-		private const TargetIndex OutfitStandInd = TargetIndex.B;
+	private const TargetIndex ApparelInd = TargetIndex.A;
 
-		// Token: 0x040050E9 RID: 20713
-		private const TargetIndex ApparelSourceIndex = TargetIndex.C;
+	private const TargetIndex OutfitStandInd = TargetIndex.B;
+
+	private const TargetIndex ApparelSourceIndex = TargetIndex.C;
+
+	private Apparel Apparel => job.GetTarget(TargetIndex.A).Thing as Apparel;
+
+	private Building_OutfitStand DestOutfitStand => job.GetTarget(TargetIndex.B).Thing as Building_OutfitStand;
+
+	private bool TargetIsOnApparelSource
+	{
+		get
+		{
+			Apparel apparel = Apparel;
+			if (apparel != null && !apparel.Spawned && apparel.ParentHolder is IApparelSource apparelSource)
+			{
+				return apparelSource is Thing;
+			}
+			return false;
+		}
+	}
+
+	private IApparelSource ApparelSource => (IApparelSource)job.GetTarget(TargetIndex.C).Thing;
+
+	public override void Notify_Starting()
+	{
+		base.Notify_Starting();
+		if (TargetIsOnApparelSource)
+		{
+			job.targetC = (Thing)Apparel.ParentHolder;
+		}
+	}
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		if (TargetIsOnApparelSource)
+		{
+			if (pawn.Reserve((Thing)Apparel.ParentHolder, job, 1, -1, null, errorOnFailed))
+			{
+				return pawn.Reserve(DestOutfitStand, job, 1, -1, null, errorOnFailed);
+			}
+			return false;
+		}
+		if (pawn.Reserve(Apparel, job, 1, -1, null, errorOnFailed))
+		{
+			return pawn.Reserve(DestOutfitStand, job, 1, -1, null, errorOnFailed);
+		}
+		return false;
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__13))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__13(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

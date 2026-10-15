@@ -1,107 +1,206 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld;
 using Verse;
 using Verse.AI;
 
-// Token: 0x02000008 RID: 8
 public class JobDriver_BreastfeedCarryToMom : JobDriver
 {
-	// Token: 0x17000009 RID: 9
-	// (get) Token: 0x0600001E RID: 30 RVA: 0x000024E7 File Offset: 0x000006E7
-	private Pawn Baby
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__9 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		get
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_BreastfeedCarryToMom _003C_003E4__this;
+
+		private Toil _003CcarryingBabyStart_003E5__2;
+
+		Toil IEnumerator<Toil>.Current
 		{
-			return (Pawn)base.TargetThingA;
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__9(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003CcarryingBabyStart_003E5__2 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_BreastfeedCarryToMom CS_0024_003C_003E8__locals16 = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+			{
+				_003C_003E1__state = -1;
+				CS_0024_003C_003E8__locals16.FailOnDestroyedNullOrForbidden(TargetIndex.A);
+				CS_0024_003C_003E8__locals16.FailOnDestroyedNullOrForbidden(TargetIndex.B);
+				CS_0024_003C_003E8__locals16.AddFailCondition(() => (CS_0024_003C_003E8__locals16.MomMustBeImmobile && !CS_0024_003C_003E8__locals16.Mom.Downed && !CS_0024_003C_003E8__locals16.Mom.IsPrisoner) || !ChildcareUtility.CanMomBreastfeedBaby(CS_0024_003C_003E8__locals16.Mom, CS_0024_003C_003E8__locals16.Baby, out var _));
+				CS_0024_003C_003E8__locals16.SetFinalizerJob((JobCondition condition) => (!CS_0024_003C_003E8__locals16.pawn.IsCarryingPawn(CS_0024_003C_003E8__locals16.Baby)) ? null : ChildcareUtility.MakeBringBabyToSafetyJob(CS_0024_003C_003E8__locals16.pawn, CS_0024_003C_003E8__locals16.Baby));
+				_003CcarryingBabyStart_003E5__2 = Toils_General.Label();
+				_003C_003E2__current = Toils_Jump.JumpIf(_003CcarryingBabyStart_003E5__2, () => CS_0024_003C_003E8__locals16.pawn.IsCarryingPawn(CS_0024_003C_003E8__locals16.Baby));
+				_003C_003E1__state = 1;
+				return true;
+			}
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.OnCell).FailOnDestroyedNullOrForbidden(TargetIndex.A).FailOnSomeonePhysicallyInteracting(TargetIndex.A);
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Haul.StartCarryThing(TargetIndex.A);
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = _003CcarryingBabyStart_003E5__2;
+				_003C_003E1__state = 4;
+				return true;
+			case 4:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.OnCell).FailOnDestroyedNullOrForbidden(TargetIndex.B).FailOnSomeonePhysicallyInteracting(TargetIndex.B);
+				_003C_003E1__state = 5;
+				return true;
+			case 5:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Reserve.Release(TargetIndex.A);
+				_003C_003E1__state = 6;
+				return true;
+			case 6:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Reserve.Release(TargetIndex.B);
+				_003C_003E1__state = 7;
+				return true;
+			case 7:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = CS_0024_003C_003E8__locals16.StartBreastfeedJobOnMom();
+				_003C_003E1__state = 8;
+				return true;
+			case 8:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__9 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__9(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
 		}
 	}
 
-	// Token: 0x1700000A RID: 10
-	// (get) Token: 0x0600001F RID: 31 RVA: 0x000024F4 File Offset: 0x000006F4
-	private Pawn Mom
-	{
-		get
-		{
-			return (Pawn)base.TargetThingB;
-		}
-	}
+	private const TargetIndex BabyInd = TargetIndex.A;
 
-	// Token: 0x1700000B RID: 11
-	// (get) Token: 0x06000020 RID: 32 RVA: 0x00002501 File Offset: 0x00000701
-	protected virtual bool MomMustBeImmobile
-	{
-		get
-		{
-			return false;
-		}
-	}
+	private const TargetIndex MomInd = TargetIndex.B;
 
-	// Token: 0x06000021 RID: 33 RVA: 0x00002504 File Offset: 0x00000704
+	private Pawn Baby => (Pawn)base.TargetThingA;
+
+	private Pawn Mom => (Pawn)base.TargetThingB;
+
+	protected virtual bool MomMustBeImmobile => false;
+
 	public override bool TryMakePreToilReservations(bool errorOnFailed)
 	{
-		return this.pawn.Reserve(this.Baby, this.job, 1, -1, null, errorOnFailed, false) && this.pawn.Reserve(this.Mom, this.job, 1, -1, null, errorOnFailed, false);
+		if (pawn.Reserve(Baby, job, 1, -1, null, errorOnFailed))
+		{
+			return pawn.Reserve(Mom, job, 1, -1, null, errorOnFailed);
+		}
+		return false;
 	}
 
-	// Token: 0x06000022 RID: 34 RVA: 0x00002557 File Offset: 0x00000757
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__9))]
 	protected override IEnumerable<Toil> MakeNewToils()
 	{
-		this.FailOnDestroyedNullOrForbidden(TargetIndex.A);
-		this.FailOnDestroyedNullOrForbidden(TargetIndex.B);
-		base.AddFailCondition(delegate
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__9(-2)
 		{
-			ChildcareUtility.BreastfeedFailReason? breastfeedFailReason;
-			return (this.MomMustBeImmobile && !this.Mom.Downed && !this.Mom.IsPrisoner) || !ChildcareUtility.CanMomBreastfeedBaby(this.Mom, this.Baby, out breastfeedFailReason);
-		});
-		base.SetFinalizerJob(delegate(JobCondition condition)
-		{
-			if (!this.pawn.IsCarryingPawn(this.Baby))
-			{
-				return null;
-			}
-			return ChildcareUtility.MakeBringBabyToSafetyJob(this.pawn, this.Baby);
-		});
-		Toil carryingBabyStart = Toils_General.Label();
-		yield return Toils_Jump.JumpIf(carryingBabyStart, () => this.pawn.IsCarryingPawn(this.Baby));
-		yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.OnCell, false).FailOnDestroyedNullOrForbidden(TargetIndex.A).FailOnSomeonePhysicallyInteracting(TargetIndex.A);
-		yield return Toils_Haul.StartCarryThing(TargetIndex.A, false, false, false, true, false);
-		yield return carryingBabyStart;
-		yield return Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.OnCell, false).FailOnDestroyedNullOrForbidden(TargetIndex.B).FailOnSomeonePhysicallyInteracting(TargetIndex.B);
-		yield return Toils_Reserve.Release(TargetIndex.A);
-		yield return Toils_Reserve.Release(TargetIndex.B);
-		yield return this.StartBreastfeedJobOnMom();
-		yield break;
+			_003C_003E4__this = this
+		};
 	}
 
-	// Token: 0x06000023 RID: 35 RVA: 0x00002567 File Offset: 0x00000767
 	private Toil StartBreastfeedJobOnMom()
 	{
 		Toil toil = ToilMaker.MakeToil("StartBreastfeedJobOnMom");
-		toil.initAction = delegate()
+		toil.initAction = delegate
 		{
-			this.Mom.jobs.SuspendCurrentJob(JobCondition.InterruptForced, true, new bool?(false));
-			if (!this.pawn.carryTracker.innerContainer.TryTransferToContainer(this.pawn.carryTracker.CarriedThing, this.Mom.carryTracker.innerContainer, true))
+			Mom.jobs.SuspendCurrentJob(JobCondition.InterruptForced, cancelBusyStances: true, false);
+			if (!pawn.carryTracker.innerContainer.TryTransferToContainer(pawn.carryTracker.CarriedThing, Mom.carryTracker.innerContainer))
 			{
-				this.Mom.jobs.EndCurrentJob(JobCondition.Incompletable, true, true);
-				base.EndJobWith(JobCondition.Incompletable);
-				return;
+				Mom.jobs.EndCurrentJob(JobCondition.Incompletable);
+				EndJobWith(JobCondition.Incompletable);
 			}
-			Pawn_JobTracker jobs = this.Mom.jobs;
-			Job newJob = ChildcareUtility.MakeBreastfeedJob(this.Baby, this.Mom.CurrentBed());
-			JobCondition lastJobEndCondition = JobCondition.InterruptForced;
-			ThinkNode jobGiver = null;
-			bool resumeCurJobAfterwards = false;
-			bool cancelBusyStances = true;
-			ThinkTreeDef thinkTree = null;
-			bool? keepCarryingThingOverride = new bool?(true);
-			jobs.StartJob(newJob, lastJobEndCondition, jobGiver, resumeCurJobAfterwards, cancelBusyStances, thinkTree, null, false, false, keepCarryingThingOverride, false, true, false);
+			else
+			{
+				Pawn_JobTracker jobs = Mom.jobs;
+				Job newJob = ChildcareUtility.MakeBreastfeedJob(Baby, Mom.CurrentBed());
+				bool? keepCarryingThingOverride = true;
+				jobs.StartJob(newJob, JobCondition.InterruptForced, null, resumeCurJobAfterwards: false, cancelBusyStances: true, null, null, fromQueue: false, canReturnCurJobToPool: false, keepCarryingThingOverride);
+			}
 		};
 		return toil;
 	}
-
-	// Token: 0x04000008 RID: 8
-	private const TargetIndex BabyInd = TargetIndex.A;
-
-	// Token: 0x04000009 RID: 9
-	private const TargetIndex MomInd = TargetIndex.B;
 }

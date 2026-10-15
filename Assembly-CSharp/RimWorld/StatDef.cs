@@ -1,551 +1,675 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class StatDef : Def
 {
-	// Token: 0x02001AEB RID: 6891
-	public class StatDef : Def
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__78 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700179D RID: 6045
-		// (get) Token: 0x060099F6 RID: 39414 RVA: 0x002CC9FC File Offset: 0x002CABFC
-		public StatWorker Worker
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public StatDef _003C_003E4__this;
+
+		private IEnumerator<string> _003C_003E7__wrap1;
+
+		private List<PawnCapacityFactor>.Enumerator _003C_003E7__wrap2;
+
+		private int _003Ci_003E5__4;
+
+		string IEnumerator<string>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.workerInt == null)
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__78(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			switch (_003C_003E1__state)
+			{
+			case -3:
+			case 1:
+				try
 				{
-					if (this.parts != null)
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+				break;
+			case -4:
+			case 2:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally2();
+				}
+				break;
+			case -5:
+			case 3:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally3();
+				}
+				break;
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E7__wrap2 = default(List<PawnCapacityFactor>.Enumerator);
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				StatDef statDef = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = ((Def)statDef).ConfigErrors().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0076;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0076;
+				case 2:
+					_003C_003E1__state = -4;
+					goto IL_00f6;
+				case 3:
 					{
-						for (int i = 0; i < this.parts.Count; i++)
-						{
-							this.parts[i].parentStat = this;
-						}
+						_003C_003E1__state = -5;
+						goto IL_01bf;
 					}
-					this.workerInt = (StatWorker)Activator.CreateInstance(this.workerClass);
-					this.workerInt.InitSetStat(this);
-				}
-				return this.workerInt;
-			}
-		}
-
-		// Token: 0x1700179E RID: 6046
-		// (get) Token: 0x060099F7 RID: 39415 RVA: 0x002CCA69 File Offset: 0x002CAC69
-		public ToStringStyle ToStringStyleUnfinalized
-		{
-			get
-			{
-				if (this.toStringStyleUnfinalized == null)
-				{
-					return this.toStringStyle;
-				}
-				return this.toStringStyleUnfinalized.Value;
-			}
-		}
-
-		// Token: 0x1700179F RID: 6047
-		// (get) Token: 0x060099F8 RID: 39416 RVA: 0x002CCA8A File Offset: 0x002CAC8A
-		public string LabelForFullStatList
-		{
-			get
-			{
-				if (!this.labelForFullStatList.NullOrEmpty())
-				{
-					return this.labelForFullStatList;
-				}
-				return this.label;
-			}
-		}
-
-		// Token: 0x170017A0 RID: 6048
-		// (get) Token: 0x060099F9 RID: 39417 RVA: 0x002CCAA6 File Offset: 0x002CACA6
-		public string LabelForFullStatListCap
-		{
-			get
-			{
-				return this.LabelForFullStatList.CapitalizeFirst(this);
-			}
-		}
-
-		// Token: 0x170017A1 RID: 6049
-		// (get) Token: 0x060099FA RID: 39418 RVA: 0x002CCAB4 File Offset: 0x002CACB4
-		public string OffsetLabel
-		{
-			get
-			{
-				return this.offsetLabel ?? this.label;
-			}
-		}
-
-		// Token: 0x170017A2 RID: 6050
-		// (get) Token: 0x060099FB RID: 39419 RVA: 0x002CCAC6 File Offset: 0x002CACC6
-		public string OffsetLabelCap
-		{
-			get
-			{
-				return this.OffsetLabel.CapitalizeFirst();
-			}
-		}
-
-		// Token: 0x060099FC RID: 39420 RVA: 0x002CCAD3 File Offset: 0x002CACD3
-		public override IEnumerable<string> ConfigErrors()
-		{
-			foreach (string text in base.ConfigErrors())
-			{
-				yield return text;
-			}
-			IEnumerator<string> enumerator = null;
-			if (this.capacityFactors != null)
-			{
-				using (List<PawnCapacityFactor>.Enumerator enumerator2 = this.capacityFactors.GetEnumerator())
-				{
-					while (enumerator2.MoveNext())
+					IL_0076:
+					if (_003C_003E7__wrap1.MoveNext())
 					{
-						if (enumerator2.Current.weight > 1f)
-						{
-							yield return this.defName + " has activity factor with weight > 1";
-						}
+						string current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
 					}
-				}
-				List<PawnCapacityFactor>.Enumerator enumerator2 = default(List<PawnCapacityFactor>.Enumerator);
-			}
-			if (this.parts != null)
-			{
-				int num;
-				for (int i = 0; i < this.parts.Count; i = num + 1)
-				{
-					foreach (string text2 in this.parts[i].ConfigErrors())
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = null;
+					if (statDef.capacityFactors != null)
 					{
-						yield return string.Concat(new string[]
-						{
-							this.defName,
-							" has error in StatPart ",
-							this.parts[i].ToString(),
-							": ",
-							text2
-						});
+						_003C_003E7__wrap2 = statDef.capacityFactors.GetEnumerator();
+						_003C_003E1__state = -4;
+						goto IL_00f6;
 					}
-					enumerator = null;
-					num = i;
-				}
-			}
-			yield break;
-			yield break;
-		}
-
-		// Token: 0x060099FD RID: 39421 RVA: 0x002CCAE3 File Offset: 0x002CACE3
-		public string ValueToString(float val, ToStringNumberSense numberSense = ToStringNumberSense.Absolute, bool finalized = true)
-		{
-			return this.Worker.ValueToString(val, finalized, numberSense);
-		}
-
-		// Token: 0x060099FE RID: 39422 RVA: 0x002CCAF3 File Offset: 0x002CACF3
-		public static StatDef Named(string defName)
-		{
-			return DefDatabase<StatDef>.GetNamed(defName, true);
-		}
-
-		// Token: 0x060099FF RID: 39423 RVA: 0x002CCAFC File Offset: 0x002CACFC
-		public override void PostLoad()
-		{
-			base.PostLoad();
-			if (this.parts != null)
-			{
-				List<StatPart> partsCopy = this.parts.ToList<StatPart>();
-				this.parts.SortBy((StatPart x) => -x.priority, (StatPart x) => partsCopy.IndexOf(x));
-			}
-		}
-
-		// Token: 0x06009A00 RID: 39424 RVA: 0x002CCB64 File Offset: 0x002CAD64
-		public T GetStatPart<T>() where T : StatPart
-		{
-			return this.parts.OfType<T>().FirstOrDefault<T>();
-		}
-
-		// Token: 0x06009A01 RID: 39425 RVA: 0x002CCB78 File Offset: 0x002CAD78
-		public bool CanShowWithLoadedMods()
-		{
-			if (!this.showIfModsLoaded.NullOrEmpty<string>())
-			{
-				for (int i = 0; i < this.showIfModsLoaded.Count; i++)
-				{
-					if (!ModsConfig.IsActive(this.showIfModsLoaded[i]))
+					goto IL_0115;
+					IL_01eb:
+					if (_003Ci_003E5__4 >= statDef.parts.Count)
 					{
-						return false;
-					}
-				}
-			}
-			if (!this.showIfModsLoadedAny.NullOrEmpty<string>())
-			{
-				bool result = false;
-				for (int j = 0; j < this.showIfModsLoadedAny.Count; j++)
-				{
-					if (ModsConfig.IsActive(this.showIfModsLoadedAny[j]))
-					{
-						result = true;
 						break;
 					}
+					_003C_003E7__wrap1 = statDef.parts[_003Ci_003E5__4].ConfigErrors().GetEnumerator();
+					_003C_003E1__state = -5;
+					goto IL_01bf;
+					IL_00f6:
+					while (_003C_003E7__wrap2.MoveNext())
+					{
+						if (_003C_003E7__wrap2.Current.weight > 1f)
+						{
+							_003C_003E2__current = statDef.defName + " has activity factor with weight > 1";
+							_003C_003E1__state = 2;
+							return true;
+						}
+					}
+					_003C_003Em__Finally2();
+					_003C_003E7__wrap2 = default(List<PawnCapacityFactor>.Enumerator);
+					goto IL_0115;
+					IL_01bf:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						string current2 = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = statDef.defName + " has error in StatPart " + statDef.parts[_003Ci_003E5__4].ToString() + ": " + current2;
+						_003C_003E1__state = 3;
+						return true;
+					}
+					_003C_003Em__Finally3();
+					_003C_003E7__wrap1 = null;
+					_003Ci_003E5__4++;
+					goto IL_01eb;
+					IL_0115:
+					if (statDef.parts == null)
+					{
+						break;
+					}
+					_003Ci_003E5__4 = 0;
+					goto IL_01eb;
 				}
-				return result;
+				return false;
 			}
-			return true;
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
 		}
 
-		// Token: 0x06009A02 RID: 39426 RVA: 0x002CCBFC File Offset: 0x002CADFC
-		private static void PopulateMutableStats()
+		bool IEnumerator.MoveNext()
 		{
-			StatDef.mutableStats = new HashSet<StatDef>();
-			foreach (TraitDef traitDef in DefDatabase<TraitDef>.AllDefsListForReading)
-			{
-				foreach (TraitDegreeData traitDegreeData in traitDef.degreeDatas)
-				{
-					StatDef.<PopulateMutableStats>g__AddStatsFromModifiers|84_0(traitDegreeData.statOffsets);
-					StatDef.<PopulateMutableStats>g__AddStatsFromModifiers|84_0(traitDegreeData.statFactors);
-				}
-			}
-			foreach (HediffDef hediffDef in DefDatabase<HediffDef>.AllDefsListForReading)
-			{
-				if (hediffDef.stages != null)
-				{
-					foreach (HediffStage hediffStage in hediffDef.stages)
-					{
-						StatDef.<PopulateMutableStats>g__AddStatsFromModifiers|84_0(hediffStage.statOffsets);
-						StatDef.<PopulateMutableStats>g__AddStatsFromModifiers|84_0(hediffStage.statFactors);
-						if (hediffStage.statOffsetEffectMultiplier != null)
-						{
-							StatDef.mutableStats.Add(hediffStage.statOffsetEffectMultiplier);
-						}
-						if (hediffStage.statFactorEffectMultiplier != null)
-						{
-							StatDef.mutableStats.Add(hediffStage.statFactorEffectMultiplier);
-						}
-						if (hediffStage.capacityFactorEffectMultiplier != null)
-						{
-							StatDef.mutableStats.Add(hediffStage.capacityFactorEffectMultiplier);
-						}
-					}
-				}
-			}
-			foreach (PreceptDef preceptDef in DefDatabase<PreceptDef>.AllDefsListForReading)
-			{
-				StatDef.<PopulateMutableStats>g__AddStatsFromModifiers|84_0(preceptDef.statOffsets);
-				StatDef.<PopulateMutableStats>g__AddStatsFromModifiers|84_0(preceptDef.statFactors);
-				if (preceptDef.roleEffects != null)
-				{
-					foreach (RoleEffect roleEffect in preceptDef.roleEffects)
-					{
-						RoleEffect_PawnStatOffset roleEffect_PawnStatOffset = roleEffect as RoleEffect_PawnStatOffset;
-						if (roleEffect_PawnStatOffset != null)
-						{
-							StatDef.mutableStats.Add(roleEffect_PawnStatOffset.statDef);
-						}
-						RoleEffect_PawnStatFactor roleEffect_PawnStatFactor = roleEffect as RoleEffect_PawnStatFactor;
-						if (roleEffect_PawnStatFactor != null)
-						{
-							StatDef.mutableStats.Add(roleEffect_PawnStatFactor.statDef);
-						}
-					}
-				}
-				if (preceptDef.abilityStatFactors != null)
-				{
-					foreach (AbilityStatModifiers abilityStatModifiers in preceptDef.abilityStatFactors)
-					{
-						StatDef.<PopulateMutableStats>g__AddStatsFromModifiers|84_0(abilityStatModifiers.modifiers);
-					}
-				}
-			}
-			foreach (GeneDef geneDef in DefDatabase<GeneDef>.AllDefsListForReading)
-			{
-				StatDef.<PopulateMutableStats>g__AddStatsFromModifiers|84_0(geneDef.statOffsets);
-				StatDef.<PopulateMutableStats>g__AddStatsFromModifiers|84_0(geneDef.statFactors);
-				if (geneDef.conditionalStatAffecters != null)
-				{
-					foreach (ConditionalStatAffecter conditionalStatAffecter in geneDef.conditionalStatAffecters)
-					{
-						StatDef.<PopulateMutableStats>g__AddStatsFromModifiers|84_0(conditionalStatAffecter.statOffsets);
-						StatDef.<PopulateMutableStats>g__AddStatsFromModifiers|84_0(conditionalStatAffecter.statFactors);
-					}
-				}
-			}
-			foreach (ThingDef thingDef in DefDatabase<ThingDef>.AllDefsListForReading)
-			{
-				StatDef.<PopulateMutableStats>g__AddStatsFromModifiers|84_0(thingDef.equippedStatOffsets);
-				if (thingDef.HasAssignableCompFrom(typeof(CompFacility)))
-				{
-					CompProperties_Facility compProperties = thingDef.GetCompProperties<CompProperties_Facility>();
-					if (((compProperties != null) ? compProperties.statOffsets : null) != null)
-					{
-						StatDef.<PopulateMutableStats>g__AddStatsFromModifiers|84_0(compProperties.statOffsets);
-					}
-					CompProperties_FacilityQualityBased compProperties_FacilityQualityBased = compProperties as CompProperties_FacilityQualityBased;
-					if (compProperties_FacilityQualityBased != null)
-					{
-						foreach (StatDef item in compProperties_FacilityQualityBased.statOffsetsPerQuality.Keys)
-						{
-							StatDef.mutableStats.Add(item);
-						}
-					}
-				}
-			}
-			foreach (WeaponTraitDef weaponTraitDef in DefDatabase<WeaponTraitDef>.AllDefsListForReading)
-			{
-				StatDef.<PopulateMutableStats>g__AddStatsFromModifiers|84_0(weaponTraitDef.equippedStatOffsets);
-			}
-			foreach (LifeStageDef lifeStageDef in DefDatabase<LifeStageDef>.AllDefsListForReading)
-			{
-				StatDef.<PopulateMutableStats>g__AddStatsFromModifiers|84_0(lifeStageDef.statFactors);
-				StatDef.<PopulateMutableStats>g__AddStatsFromModifiers|84_0(lifeStageDef.statOffsets);
-			}
-			foreach (InspirationDef inspirationDef in DefDatabase<InspirationDef>.AllDefsListForReading)
-			{
-				StatDef.<PopulateMutableStats>g__AddStatsFromModifiers|84_0(inspirationDef.statOffsets);
-				StatDef.<PopulateMutableStats>g__AddStatsFromModifiers|84_0(inspirationDef.statFactors);
-			}
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x06009A03 RID: 39427 RVA: 0x002CD12C File Offset: 0x002CB32C
-		public bool IsImmutable()
+		private void _003C_003Em__Finally1()
 		{
-			return !(this.workerClass != typeof(StatWorker)) && this.skillNeedOffsets.NullOrEmpty<SkillNeed>() && this.skillNeedFactors.NullOrEmpty<SkillNeed>() && this.capacityOffsets.NullOrEmpty<PawnCapacityOffset>() && this.capacityFactors.NullOrEmpty<PawnCapacityFactor>() && this.statFactors.NullOrEmpty<StatDef>() && this.parts.NullOrEmpty<StatPart>() && this.postProcessStatFactors.NullOrEmpty<StatDef>() && !StatDef.mutableStats.Contains(this);
-		}
-
-		// Token: 0x06009A04 RID: 39428 RVA: 0x002CD1C8 File Offset: 0x002CB3C8
-		public static void SetImmutability()
-		{
-			StatDef.PopulateMutableStats();
-			foreach (StatDef statDef in DefDatabase<StatDef>.AllDefsListForReading)
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				statDef.immutable = statDef.IsImmutable();
-				statDef.Worker.SetCacheability(statDef.immutable);
+				_003C_003E7__wrap1.Dispose();
 			}
 		}
 
-		// Token: 0x06009A05 RID: 39429 RVA: 0x002CD238 File Offset: 0x002CB438
-		public static void ResetStaticData()
+		private void _003C_003Em__Finally2()
 		{
-			StatDef.mutableStats = null;
-			foreach (StatDef statDef in DefDatabase<StatDef>.AllDefsListForReading)
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap2/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		private void _003C_003Em__Finally3()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
 			{
-				statDef.immutable = false;
-				statDef.Worker.DeleteStatCache();
+				_003C_003E7__wrap1.Dispose();
 			}
 		}
 
-		// Token: 0x06009A08 RID: 39432 RVA: 0x002CD380 File Offset: 0x002CB580
-		[CompilerGenerated]
-		internal static void <PopulateMutableStats>g__AddStatsFromModifiers|84_0(List<StatModifier> mods)
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__78 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CConfigErrors_003Ed__78(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	private static HashSet<StatDef> mutableStats;
+
+	public StatCategoryDef category;
+
+	public Type workerClass = typeof(StatWorker);
+
+	public string labelForFullStatList;
+
+	public bool forInformationOnly;
+
+	[MustTranslate]
+	private string offsetLabel;
+
+	public float hideAtValue = -2.1474836E+09f;
+
+	public bool alwaysHide;
+
+	public bool showNonAbstract = true;
+
+	public bool showIfUndefined = true;
+
+	public bool showOnPawns = true;
+
+	public bool showOnHumanlikes = true;
+
+	public bool showOnNonWildManHumanlikes = true;
+
+	public bool showOnAnimals = true;
+
+	public bool showOnMechanoids = true;
+
+	public bool showOnNonWorkTables = true;
+
+	public bool showOnEntities = true;
+
+	public bool showOnDrones = true;
+
+	public bool showOnNonPowerPlants = true;
+
+	public bool showOnDefaultValue = true;
+
+	public bool showOnUnhaulables = true;
+
+	public bool showOnUntradeables = true;
+
+	public List<string> showIfModsLoaded;
+
+	public List<string> showIfModsLoadedAny;
+
+	public List<HediffDef> showIfHediffsPresent;
+
+	public bool neverDisabled;
+
+	public bool showZeroBaseValue;
+
+	public bool showOnSlavesOnly;
+
+	public bool showOnPlayerMechanoids;
+
+	public DevelopmentalStage showDevelopmentalStageFilter = DevelopmentalStage.Baby | DevelopmentalStage.Child | DevelopmentalStage.Adult;
+
+	public bool hideInClassicMode;
+
+	public List<PawnKindDef> showOnPawnKind;
+
+	public bool overridesHideStats;
+
+	public int displayPriorityInCategory;
+
+	public ToStringNumberSense toStringNumberSense = ToStringNumberSense.Absolute;
+
+	public ToStringStyle toStringStyle;
+
+	private ToStringStyle? toStringStyleUnfinalized;
+
+	[MustTranslate]
+	public string formatString;
+
+	[MustTranslate]
+	public string formatStringUnfinalized;
+
+	public bool finalizeEquippedStatOffset = true;
+
+	[MustTranslate]
+	public string statFactorsExplanationHeader;
+
+	public float defaultBaseValue = 1f;
+
+	public List<SkillNeed> skillNeedOffsets;
+
+	public float noSkillOffset;
+
+	public List<PawnCapacityOffset> capacityOffsets;
+
+	public List<StatDef> statFactors;
+
+	public bool applyFactorsIfNegative = true;
+
+	public List<SkillNeed> skillNeedFactors;
+
+	public float noSkillFactor = 1f;
+
+	public List<PawnCapacityFactor> capacityFactors;
+
+	public SimpleCurve postProcessCurve;
+
+	public List<StatDef> postProcessStatFactors;
+
+	public float minValue = -9999999f;
+
+	public float maxValue = 9999999f;
+
+	public float valueIfMissing;
+
+	public bool roundValue;
+
+	public float roundToFiveOver = float.MaxValue;
+
+	public bool minifiedThingInherits;
+
+	public bool supressDisabledError;
+
+	public bool cacheable;
+
+	public bool displayMaxWhenAboveOrEqual;
+
+	public bool scenarioRandomizable;
+
+	public SkillDef disableIfSkillDisabled;
+
+	public List<StatPart> parts;
+
+	[Unsaved(false)]
+	private StatWorker workerInt;
+
+	[Unsaved(false)]
+	public bool immutable;
+
+	public StatWorker Worker
+	{
+		get
+		{
+			if (workerInt == null)
+			{
+				if (parts != null)
+				{
+					for (int i = 0; i < parts.Count; i++)
+					{
+						parts[i].parentStat = this;
+					}
+				}
+				workerInt = (StatWorker)Activator.CreateInstance(workerClass);
+				workerInt.InitSetStat(this);
+			}
+			return workerInt;
+		}
+	}
+
+	public ToStringStyle ToStringStyleUnfinalized
+	{
+		get
+		{
+			if (!toStringStyleUnfinalized.HasValue)
+			{
+				return toStringStyle;
+			}
+			return toStringStyleUnfinalized.Value;
+		}
+	}
+
+	public string LabelForFullStatList
+	{
+		get
+		{
+			if (!labelForFullStatList.NullOrEmpty())
+			{
+				return labelForFullStatList;
+			}
+			return label;
+		}
+	}
+
+	public string LabelForFullStatListCap => LabelForFullStatList.CapitalizeFirst(this);
+
+	public string OffsetLabel => offsetLabel ?? label;
+
+	public string OffsetLabelCap => OffsetLabel.CapitalizeFirst();
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__78))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__78(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public string ValueToString(float val, ToStringNumberSense numberSense = ToStringNumberSense.Absolute, bool finalized = true)
+	{
+		return Worker.ValueToString(val, finalized, numberSense);
+	}
+
+	public static StatDef Named(string defName)
+	{
+		return DefDatabase<StatDef>.GetNamed(defName);
+	}
+
+	public override void PostLoad()
+	{
+		base.PostLoad();
+		if (parts != null)
+		{
+			List<StatPart> partsCopy = parts.ToList();
+			parts.SortBy((StatPart x) => 0f - x.priority, (StatPart x) => partsCopy.IndexOf(x));
+		}
+	}
+
+	public T GetStatPart<T>() where T : StatPart
+	{
+		return parts.OfType<T>().FirstOrDefault();
+	}
+
+	public bool CanShowWithLoadedMods()
+	{
+		if (!showIfModsLoaded.NullOrEmpty())
+		{
+			for (int i = 0; i < showIfModsLoaded.Count; i++)
+			{
+				if (!ModsConfig.IsActive(showIfModsLoaded[i]))
+				{
+					return false;
+				}
+			}
+		}
+		if (!showIfModsLoadedAny.NullOrEmpty())
+		{
+			bool result = false;
+			for (int j = 0; j < showIfModsLoadedAny.Count; j++)
+			{
+				if (ModsConfig.IsActive(showIfModsLoadedAny[j]))
+				{
+					result = true;
+					break;
+				}
+			}
+			return result;
+		}
+		return true;
+	}
+
+	private static void PopulateMutableStats()
+	{
+		mutableStats = new HashSet<StatDef>();
+		foreach (TraitDef item in DefDatabase<TraitDef>.AllDefsListForReading)
+		{
+			foreach (TraitDegreeData degreeData in item.degreeDatas)
+			{
+				AddStatsFromModifiers(degreeData.statOffsets);
+				AddStatsFromModifiers(degreeData.statFactors);
+			}
+		}
+		foreach (HediffDef item2 in DefDatabase<HediffDef>.AllDefsListForReading)
+		{
+			if (item2.stages == null)
+			{
+				continue;
+			}
+			foreach (HediffStage stage in item2.stages)
+			{
+				AddStatsFromModifiers(stage.statOffsets);
+				AddStatsFromModifiers(stage.statFactors);
+				if (stage.statOffsetEffectMultiplier != null)
+				{
+					mutableStats.Add(stage.statOffsetEffectMultiplier);
+				}
+				if (stage.statFactorEffectMultiplier != null)
+				{
+					mutableStats.Add(stage.statFactorEffectMultiplier);
+				}
+				if (stage.capacityFactorEffectMultiplier != null)
+				{
+					mutableStats.Add(stage.capacityFactorEffectMultiplier);
+				}
+			}
+		}
+		foreach (PreceptDef item3 in DefDatabase<PreceptDef>.AllDefsListForReading)
+		{
+			AddStatsFromModifiers(item3.statOffsets);
+			AddStatsFromModifiers(item3.statFactors);
+			if (item3.roleEffects != null)
+			{
+				foreach (RoleEffect roleEffect in item3.roleEffects)
+				{
+					if (roleEffect is RoleEffect_PawnStatOffset roleEffect_PawnStatOffset)
+					{
+						mutableStats.Add(roleEffect_PawnStatOffset.statDef);
+					}
+					if (roleEffect is RoleEffect_PawnStatFactor roleEffect_PawnStatFactor)
+					{
+						mutableStats.Add(roleEffect_PawnStatFactor.statDef);
+					}
+				}
+			}
+			if (item3.abilityStatFactors == null)
+			{
+				continue;
+			}
+			foreach (AbilityStatModifiers abilityStatFactor in item3.abilityStatFactors)
+			{
+				AddStatsFromModifiers(abilityStatFactor.modifiers);
+			}
+		}
+		foreach (GeneDef item4 in DefDatabase<GeneDef>.AllDefsListForReading)
+		{
+			AddStatsFromModifiers(item4.statOffsets);
+			AddStatsFromModifiers(item4.statFactors);
+			if (item4.conditionalStatAffecters == null)
+			{
+				continue;
+			}
+			foreach (ConditionalStatAffecter conditionalStatAffecter in item4.conditionalStatAffecters)
+			{
+				AddStatsFromModifiers(conditionalStatAffecter.statOffsets);
+				AddStatsFromModifiers(conditionalStatAffecter.statFactors);
+			}
+		}
+		foreach (ThingDef item5 in DefDatabase<ThingDef>.AllDefsListForReading)
+		{
+			AddStatsFromModifiers(item5.equippedStatOffsets);
+			if (!item5.HasAssignableCompFrom(typeof(CompFacility)))
+			{
+				continue;
+			}
+			CompProperties_Facility compProperties = item5.GetCompProperties<CompProperties_Facility>();
+			if (compProperties?.statOffsets != null)
+			{
+				AddStatsFromModifiers(compProperties.statOffsets);
+			}
+			if (!(compProperties is CompProperties_FacilityQualityBased compProperties_FacilityQualityBased))
+			{
+				continue;
+			}
+			foreach (StatDef key in compProperties_FacilityQualityBased.statOffsetsPerQuality.Keys)
+			{
+				mutableStats.Add(key);
+			}
+		}
+		foreach (WeaponTraitDef item6 in DefDatabase<WeaponTraitDef>.AllDefsListForReading)
+		{
+			AddStatsFromModifiers(item6.equippedStatOffsets);
+		}
+		foreach (LifeStageDef item7 in DefDatabase<LifeStageDef>.AllDefsListForReading)
+		{
+			AddStatsFromModifiers(item7.statFactors);
+			AddStatsFromModifiers(item7.statOffsets);
+		}
+		foreach (InspirationDef item8 in DefDatabase<InspirationDef>.AllDefsListForReading)
+		{
+			AddStatsFromModifiers(item8.statOffsets);
+			AddStatsFromModifiers(item8.statFactors);
+		}
+		static void AddStatsFromModifiers(List<StatModifier> mods)
 		{
 			if (mods != null)
 			{
-				StatDef.mutableStats.AddRange(from mod in mods
-				select mod.stat);
+				mutableStats.AddRange(mods.Select((StatModifier mod) => mod.stat));
 			}
 		}
-
-		// Token: 0x040069B3 RID: 27059
-		private static HashSet<StatDef> mutableStats;
-
-		// Token: 0x040069B4 RID: 27060
-		public StatCategoryDef category;
-
-		// Token: 0x040069B5 RID: 27061
-		public Type workerClass = typeof(StatWorker);
-
-		// Token: 0x040069B6 RID: 27062
-		public string labelForFullStatList;
-
-		// Token: 0x040069B7 RID: 27063
-		public bool forInformationOnly;
-
-		// Token: 0x040069B8 RID: 27064
-		[MustTranslate]
-		private string offsetLabel;
-
-		// Token: 0x040069B9 RID: 27065
-		public float hideAtValue = -2.1474836E+09f;
-
-		// Token: 0x040069BA RID: 27066
-		public bool alwaysHide;
-
-		// Token: 0x040069BB RID: 27067
-		public bool showNonAbstract = true;
-
-		// Token: 0x040069BC RID: 27068
-		public bool showIfUndefined = true;
-
-		// Token: 0x040069BD RID: 27069
-		public bool showOnPawns = true;
-
-		// Token: 0x040069BE RID: 27070
-		public bool showOnHumanlikes = true;
-
-		// Token: 0x040069BF RID: 27071
-		public bool showOnNonWildManHumanlikes = true;
-
-		// Token: 0x040069C0 RID: 27072
-		public bool showOnAnimals = true;
-
-		// Token: 0x040069C1 RID: 27073
-		public bool showOnMechanoids = true;
-
-		// Token: 0x040069C2 RID: 27074
-		public bool showOnNonWorkTables = true;
-
-		// Token: 0x040069C3 RID: 27075
-		public bool showOnEntities = true;
-
-		// Token: 0x040069C4 RID: 27076
-		public bool showOnDrones = true;
-
-		// Token: 0x040069C5 RID: 27077
-		public bool showOnNonPowerPlants = true;
-
-		// Token: 0x040069C6 RID: 27078
-		public bool showOnDefaultValue = true;
-
-		// Token: 0x040069C7 RID: 27079
-		public bool showOnUnhaulables = true;
-
-		// Token: 0x040069C8 RID: 27080
-		public bool showOnUntradeables = true;
-
-		// Token: 0x040069C9 RID: 27081
-		public List<string> showIfModsLoaded;
-
-		// Token: 0x040069CA RID: 27082
-		public List<string> showIfModsLoadedAny;
-
-		// Token: 0x040069CB RID: 27083
-		public List<HediffDef> showIfHediffsPresent;
-
-		// Token: 0x040069CC RID: 27084
-		public bool neverDisabled;
-
-		// Token: 0x040069CD RID: 27085
-		public bool showZeroBaseValue;
-
-		// Token: 0x040069CE RID: 27086
-		public bool showOnSlavesOnly;
-
-		// Token: 0x040069CF RID: 27087
-		public bool showOnPlayerMechanoids;
-
-		// Token: 0x040069D0 RID: 27088
-		public DevelopmentalStage showDevelopmentalStageFilter = DevelopmentalStage.Baby | DevelopmentalStage.Child | DevelopmentalStage.Adult;
-
-		// Token: 0x040069D1 RID: 27089
-		public bool hideInClassicMode;
-
-		// Token: 0x040069D2 RID: 27090
-		public List<PawnKindDef> showOnPawnKind;
-
-		// Token: 0x040069D3 RID: 27091
-		public bool overridesHideStats;
-
-		// Token: 0x040069D4 RID: 27092
-		public int displayPriorityInCategory;
-
-		// Token: 0x040069D5 RID: 27093
-		public ToStringNumberSense toStringNumberSense = ToStringNumberSense.Absolute;
-
-		// Token: 0x040069D6 RID: 27094
-		public ToStringStyle toStringStyle;
-
-		// Token: 0x040069D7 RID: 27095
-		private ToStringStyle? toStringStyleUnfinalized;
-
-		// Token: 0x040069D8 RID: 27096
-		[MustTranslate]
-		public string formatString;
-
-		// Token: 0x040069D9 RID: 27097
-		[MustTranslate]
-		public string formatStringUnfinalized;
-
-		// Token: 0x040069DA RID: 27098
-		public bool finalizeEquippedStatOffset = true;
-
-		// Token: 0x040069DB RID: 27099
-		[MustTranslate]
-		public string statFactorsExplanationHeader;
-
-		// Token: 0x040069DC RID: 27100
-		public float defaultBaseValue = 1f;
-
-		// Token: 0x040069DD RID: 27101
-		public List<SkillNeed> skillNeedOffsets;
-
-		// Token: 0x040069DE RID: 27102
-		public float noSkillOffset;
-
-		// Token: 0x040069DF RID: 27103
-		public List<PawnCapacityOffset> capacityOffsets;
-
-		// Token: 0x040069E0 RID: 27104
-		public List<StatDef> statFactors;
-
-		// Token: 0x040069E1 RID: 27105
-		public bool applyFactorsIfNegative = true;
-
-		// Token: 0x040069E2 RID: 27106
-		public List<SkillNeed> skillNeedFactors;
-
-		// Token: 0x040069E3 RID: 27107
-		public float noSkillFactor = 1f;
-
-		// Token: 0x040069E4 RID: 27108
-		public List<PawnCapacityFactor> capacityFactors;
-
-		// Token: 0x040069E5 RID: 27109
-		public SimpleCurve postProcessCurve;
-
-		// Token: 0x040069E6 RID: 27110
-		public List<StatDef> postProcessStatFactors;
-
-		// Token: 0x040069E7 RID: 27111
-		public float minValue = -9999999f;
-
-		// Token: 0x040069E8 RID: 27112
-		public float maxValue = 9999999f;
-
-		// Token: 0x040069E9 RID: 27113
-		public float valueIfMissing;
-
-		// Token: 0x040069EA RID: 27114
-		public bool roundValue;
-
-		// Token: 0x040069EB RID: 27115
-		public float roundToFiveOver = float.MaxValue;
-
-		// Token: 0x040069EC RID: 27116
-		public bool minifiedThingInherits;
-
-		// Token: 0x040069ED RID: 27117
-		public bool supressDisabledError;
-
-		// Token: 0x040069EE RID: 27118
-		public bool cacheable;
-
-		// Token: 0x040069EF RID: 27119
-		public bool displayMaxWhenAboveOrEqual;
-
-		// Token: 0x040069F0 RID: 27120
-		public bool scenarioRandomizable;
-
-		// Token: 0x040069F1 RID: 27121
-		public SkillDef disableIfSkillDisabled;
-
-		// Token: 0x040069F2 RID: 27122
-		public List<StatPart> parts;
-
-		// Token: 0x040069F3 RID: 27123
-		[Unsaved(false)]
-		private StatWorker workerInt;
-
-		// Token: 0x040069F4 RID: 27124
-		[Unsaved(false)]
-		public bool immutable;
+	}
+
+	public bool IsImmutable()
+	{
+		if (workerClass != typeof(StatWorker))
+		{
+			return false;
+		}
+		if (!skillNeedOffsets.NullOrEmpty() || !skillNeedFactors.NullOrEmpty())
+		{
+			return false;
+		}
+		if (!capacityOffsets.NullOrEmpty() || !capacityFactors.NullOrEmpty())
+		{
+			return false;
+		}
+		if (!statFactors.NullOrEmpty())
+		{
+			return false;
+		}
+		if (!parts.NullOrEmpty())
+		{
+			return false;
+		}
+		if (!postProcessStatFactors.NullOrEmpty())
+		{
+			return false;
+		}
+		if (mutableStats.Contains(this))
+		{
+			return false;
+		}
+		return true;
+	}
+
+	public static void SetImmutability()
+	{
+		PopulateMutableStats();
+		foreach (StatDef item in DefDatabase<StatDef>.AllDefsListForReading)
+		{
+			item.immutable = item.IsImmutable();
+			item.Worker.SetCacheability(item.immutable);
+		}
+	}
+
+	public static void ResetStaticData()
+	{
+		mutableStats = null;
+		foreach (StatDef item in DefDatabase<StatDef>.AllDefsListForReading)
+		{
+			item.immutable = false;
+			item.Worker.DeleteStatCache();
+		}
 	}
 }

@@ -1,295 +1,466 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using LudeonTK;
 using RimWorld;
 using UnityEngine;
 
-namespace Verse
+namespace Verse;
+
+public static class DebugOutputsInfection
 {
-	// Token: 0x02000AB9 RID: 2745
-	public static class DebugOutputsInfection
+	private enum InfectionLuck
 	{
-		// Token: 0x060045D6 RID: 17878 RVA: 0x001669C8 File Offset: 0x00164BC8
-		private static List<Pawn> GenerateDoctorArray()
+		Bad,
+		Normal,
+		Good
+	}
+
+	private struct InfectionSimRow
+	{
+		public HediffDef illness;
+
+		public int skill;
+
+		public ThingDef medicine;
+
+		public float deathChance;
+
+		public float recoveryTimeDays;
+
+		public float medicineUsed;
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CInfectionSimulatorWorker_003Ed__6 : IEnumerable<object>, IEnumerable, IEnumerator<object>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private object _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private int _003Ctrials_003E5__2;
+
+		private List<Pawn> _003Cdoctors_003E5__3;
+
+		private List<int> _003CtestSkill_003E5__4;
+
+		private List<ThingDef> _003CtestMedicine_003E5__5;
+
+		private PawnGenerationRequest _003Cpawngen_003E5__6;
+
+		private int _003CoriginalTicks_003E5__7;
+
+		private List<InfectionSimRow> _003Cresults_003E5__8;
+
+		private int _003CtotalTests_003E5__9;
+
+		private int _003CcurrentTest_003E5__10;
+
+		private IEnumerator<HediffDef> _003C_003E7__wrap10;
+
+		private HediffDef _003Chediff_003E5__12;
+
+		private List<ThingDef>.Enumerator _003C_003E7__wrap12;
+
+		private ThingDef _003Cmeds_003E5__14;
+
+		private List<int>.Enumerator _003C_003E7__wrap14;
+
+		private InfectionSimRow _003Cresult_003E5__16;
+
+		private Pawn _003Cdoctor_003E5__17;
+
+		private int _003Ci_003E5__18;
+
+		private Pawn _003Cpatient_003E5__19;
+
+		private int _003CstartTicks_003E5__20;
+
+		private Hediff _003CactiveHediff_003E5__21;
+
+		object IEnumerator<object>.Current
 		{
-			PawnGenerationRequest request = new PawnGenerationRequest(PawnKindDefOf.Colonist, Faction.OfPlayer, PawnGenerationContext.NonPlayer, null, false, false, false, true, false, 1f, false, true, false, true, true, false, false, false, false, 0f, 0f, null, 1f, (Pawn p) => !p.WorkTypeIsDisabled(WorkTypeDefOf.Doctor) && p.health.hediffSet.hediffs.Count == 0, null, null, null, null, null, null, null, null, null, null, null, false, false, false, false, null, null, null, null, null, 0f, DevelopmentalStage.Adult, null, null, null, false, false, false, -1, 0, false);
-			List<Pawn> list = new List<Pawn>();
-			for (int i = 0; i <= 20; i++)
+			[DebuggerHidden]
+			get
 			{
-				Pawn pawn = PawnGenerator.GeneratePawn(request);
-				pawn.skills.GetSkill(SkillDefOf.Medicine).Level = i;
-				list.Add(pawn);
+				return _003C_003E2__current;
 			}
-			return list;
 		}
 
-		// Token: 0x060045D7 RID: 17879 RVA: 0x00166AC8 File Offset: 0x00164CC8
-		private static IEnumerable<HediffDef> InfectionList()
+		object IEnumerator.Current
 		{
-			return from hediff in DefDatabase<HediffDef>.AllDefs
-			where hediff.tendable && hediff.HasComp(typeof(HediffComp_TendDuration)) && hediff.HasComp(typeof(HediffComp_Immunizable)) && hediff.lethalSeverity > 0f
-			select hediff;
-		}
-
-		// Token: 0x060045D8 RID: 17880 RVA: 0x00166AF4 File Offset: 0x00164CF4
-		[DebugOutput]
-		public static void Infections()
-		{
-			DebugOutputsInfection.<>c__DisplayClass3_0 CS$<>8__locals1 = new DebugOutputsInfection.<>c__DisplayClass3_0();
-			CS$<>8__locals1.ilc = delegate(DebugOutputsInfection.InfectionLuck il)
+			[DebuggerHidden]
+			get
 			{
-				float result = 1f;
-				if (il == DebugOutputsInfection.InfectionLuck.Bad)
-				{
-					result = 0.8f;
-				}
-				if (il == DebugOutputsInfection.InfectionLuck.Good)
-				{
-					result = 1.2f;
-				}
-				return result;
-			};
-			CS$<>8__locals1.stringizeWithLuck = ((Func<DebugOutputsInfection.InfectionLuck, float> func) => string.Format("{0:F2} / {1:F2}", func(DebugOutputsInfection.InfectionLuck.Bad), func(DebugOutputsInfection.InfectionLuck.Good)));
-			CS$<>8__locals1.baseImmunityIncrease = ((HediffDef d, DebugOutputsInfection.InfectionLuck il) => d.CompProps<HediffCompProperties_Immunizable>().immunityPerDaySick * CS$<>8__locals1.ilc(il));
-			CS$<>8__locals1.tendedSeverityIncrease = ((HediffDef d, float tend) => DebugOutputsInfection.<Infections>g__baseSeverityIncrease|3_3(d) + d.CompProps<HediffCompProperties_TendDuration>().severityPerDayTended * tend);
-			CS$<>8__locals1.immunityIncrease = delegate(HediffDef d, DebugOutputsInfection.InfectionLuck il, bool bedridden)
-			{
-				float b = DebugOutputsInfection.<Infections>g__isAnimal|3_2(d) ? 1f : ThingDefOf.Bed.GetStatValueAbstract(StatDefOf.ImmunityGainSpeedFactor, null);
-				float num = Mathf.Lerp(1f, b, bedridden ? 1f : 0.3f) * StatDefOf.ImmunityGainSpeed.GetStatPart<StatPart_Resting>().factor;
-				return CS$<>8__locals1.baseImmunityIncrease(d, il) * num;
-			};
-			CS$<>8__locals1.immunityOnLethality = delegate(HediffDef d, DebugOutputsInfection.InfectionLuck il, float tend)
-			{
-				if (CS$<>8__locals1.tendedSeverityIncrease(d, tend) <= 0f)
-				{
-					return float.PositiveInfinity;
-				}
-				return d.lethalSeverity / CS$<>8__locals1.tendedSeverityIncrease(d, tend) * CS$<>8__locals1.immunityIncrease(d, il, true);
-			};
-			List<TableDataGetter<HediffDef>> list = new List<TableDataGetter<HediffDef>>();
-			list.Add(new TableDataGetter<HediffDef>("defName", (HediffDef d) => d.defName + (d.stages.Any((HediffStage stage) => stage.capMods.Any((PawnCapacityModifier cap) => cap.capacity == PawnCapacityDefOf.BloodFiltration)) ? " (inaccurate)" : "")));
-			list.Add(new TableDataGetter<HediffDef>("lethal\nseverity", (HediffDef d) => d.lethalSeverity.ToString("F2")));
-			list.Add(new TableDataGetter<HediffDef>("base\nseverity\nincrease", (HediffDef d) => DebugOutputsInfection.<Infections>g__baseSeverityIncrease|3_3(d).ToString("F2")));
-			list.Add(new TableDataGetter<HediffDef>("base\nimmunity\nincrease", (HediffDef d) => CS$<>8__locals1.stringizeWithLuck((DebugOutputsInfection.InfectionLuck il) => CS$<>8__locals1.baseImmunityIncrease(d, il))));
-			List<Pawn> source = DebugOutputsInfection.GenerateDoctorArray();
-			float tendquality;
-			for (tendquality = 0f; tendquality <= 1.01f; tendquality += 0.1f)
-			{
-				tendquality = Mathf.Clamp01(tendquality);
-				Pawn arg = source.FirstOrFallback((Pawn doc) => TendUtility.CalculateBaseTendQuality(doc, null, null) >= Mathf.Clamp01(tendquality - 0.25f), null);
-				Pawn arg2 = source.FirstOrFallback((Pawn doc) => TendUtility.CalculateBaseTendQuality(doc, null, ThingDefOf.MedicineHerbal) >= Mathf.Clamp01(tendquality - 0.25f), null);
-				Pawn arg3 = source.FirstOrFallback((Pawn doc) => TendUtility.CalculateBaseTendQuality(doc, null, ThingDefOf.MedicineIndustrial) >= Mathf.Clamp01(tendquality - 0.25f), null);
-				Pawn arg4 = source.FirstOrFallback((Pawn doc) => TendUtility.CalculateBaseTendQuality(doc, null, ThingDefOf.MedicineUltratech) >= Mathf.Clamp01(tendquality - 0.25f), null);
-				Pawn arg5 = source.FirstOrFallback((Pawn doc) => TendUtility.CalculateBaseTendQuality(doc, null, null) >= tendquality, null);
-				Pawn arg6 = source.FirstOrFallback((Pawn doc) => TendUtility.CalculateBaseTendQuality(doc, null, ThingDefOf.MedicineHerbal) >= tendquality, null);
-				Pawn arg7 = source.FirstOrFallback((Pawn doc) => TendUtility.CalculateBaseTendQuality(doc, null, ThingDefOf.MedicineIndustrial) >= tendquality, null);
-				Pawn arg8 = source.FirstOrFallback((Pawn doc) => TendUtility.CalculateBaseTendQuality(doc, null, ThingDefOf.MedicineUltratech) >= tendquality, null);
-				Pawn arg9 = source.FirstOrFallback((Pawn doc) => TendUtility.CalculateBaseTendQuality(doc, null, null) >= Mathf.Clamp01(tendquality + 0.25f), null);
-				Pawn arg10 = source.FirstOrFallback((Pawn doc) => TendUtility.CalculateBaseTendQuality(doc, null, ThingDefOf.MedicineHerbal) >= Mathf.Clamp01(tendquality + 0.25f), null);
-				Pawn arg11 = source.FirstOrFallback((Pawn doc) => TendUtility.CalculateBaseTendQuality(doc, null, ThingDefOf.MedicineIndustrial) >= Mathf.Clamp01(tendquality + 0.25f), null);
-				Pawn arg12 = source.FirstOrFallback((Pawn doc) => TendUtility.CalculateBaseTendQuality(doc, null, ThingDefOf.MedicineUltratech) >= Mathf.Clamp01(tendquality + 0.25f), null);
-				Func<Pawn, Pawn, Pawn, string> func2 = delegate(Pawn low, Pawn exp, Pawn high)
-				{
-					string arg13 = (low != null) ? low.skills.GetSkill(SkillDefOf.Medicine).Level.ToString() : "X";
-					string arg14 = (exp != null) ? exp.skills.GetSkill(SkillDefOf.Medicine).Level.ToString() : "X";
-					string arg15 = (high != null) ? high.skills.GetSkill(SkillDefOf.Medicine).Level.ToString() : "X";
-					return string.Format("{0}-{1}-{2}", arg13, arg14, arg15);
-				};
-				string text = func2(arg, arg5, arg9);
-				string text2 = func2(arg2, arg6, arg10);
-				string text3 = func2(arg3, arg7, arg11);
-				string text4 = func2(arg4, arg8, arg12);
-				float tq = tendquality;
-				list.Add(new TableDataGetter<HediffDef>(string.Format("survival chance at\ntend quality {0}\n\ndoc skill needed:\nno meds:  {1}\nherbal:  {2}\nnormal:  {3}\nglitter:  {4}", new object[]
-				{
-					tq.ToStringPercent(),
-					text,
-					text2,
-					text3,
-					text4
-				}), delegate(HediffDef d)
-				{
-					float num = CS$<>8__locals1.immunityOnLethality(d, DebugOutputsInfection.InfectionLuck.Bad, tq);
-					float num2 = CS$<>8__locals1.immunityOnLethality(d, DebugOutputsInfection.InfectionLuck.Good, tq);
-					if (num == float.PositiveInfinity)
-					{
-						return float.PositiveInfinity.ToString();
-					}
-					return Mathf.Clamp01((num2 - 1f) / (num2 - num)).ToStringPercent();
-				}));
+				return _003C_003E2__current;
 			}
-			DebugTables.MakeTablesDialog<HediffDef>(DebugOutputsInfection.InfectionList(), list.ToArray());
 		}
 
-		// Token: 0x060045D9 RID: 17881 RVA: 0x00166ED4 File Offset: 0x001650D4
-		[DebugOutput]
-		public static void InfectionSimulator()
+		[DebuggerHidden]
+		public _003CInfectionSimulatorWorker_003Ed__6(int _003C_003E1__state)
 		{
-			LongEventHandler.QueueLongEvent(DebugOutputsInfection.InfectionSimulatorWorker(), "Simulating . . .", null, true, false);
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x060045DA RID: 17882 RVA: 0x00166EE8 File Offset: 0x001650E8
-		private static IEnumerable InfectionSimulatorWorker()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			int trials = 2;
-			List<Pawn> doctors = DebugOutputsInfection.GenerateDoctorArray();
-			List<int> testSkill = new List<int>
+			int num = _003C_003E1__state;
+			if ((uint)(num - -5) <= 2u || (uint)(num - 1) <= 1u)
 			{
-				4,
-				10,
-				16
-			};
-			List<ThingDef> testMedicine = new List<ThingDef>
-			{
-				null,
-				ThingDefOf.MedicineHerbal,
-				ThingDefOf.MedicineIndustrial,
-				ThingDefOf.MedicineUltratech
-			};
-			PawnGenerationRequest pawngen = new PawnGenerationRequest(PawnKindDefOf.Colonist, Faction.OfPlayer, PawnGenerationContext.NonPlayer, null, false, false, false, true, false, 1f, false, true, false, true, true, false, false, false, false, 0f, 0f, null, 1f, null, null, null, null, null, null, null, null, null, null, null, null, false, false, false, false, null, null, null, null, null, 0f, DevelopmentalStage.Adult, null, null, null, false, false, false, -1, 0, false);
-			int originalTicks = Find.TickManager.TicksGame;
-			List<DebugOutputsInfection.InfectionSimRow> results = new List<DebugOutputsInfection.InfectionSimRow>();
-			int totalTests = DebugOutputsInfection.InfectionList().Count<HediffDef>() * testMedicine.Count<ThingDef>() * testSkill.Count<int>() * trials;
-			int currentTest = 0;
-			foreach (HediffDef hediff in DebugOutputsInfection.InfectionList())
-			{
-				foreach (ThingDef meds in testMedicine)
+				try
 				{
-					foreach (int num in testSkill)
+					if ((uint)(num - -5) <= 1u || (uint)(num - 1) <= 1u)
 					{
-						DebugOutputsInfection.InfectionSimRow result = new DebugOutputsInfection.InfectionSimRow
+						try
 						{
-							illness = hediff,
-							skill = num,
-							medicine = meds
-						};
-						Pawn doctor = doctors[num];
-						int num2;
-						for (int i = 0; i < trials; i = num2)
-						{
-							Pawn patient = PawnGenerator.GeneratePawn(pawngen);
-							int startTicks = Find.TickManager.TicksGame;
-							patient.health.AddHediff(result.illness, null, null, null);
-							Hediff activeHediff = patient.health.hediffSet.GetFirstHediffOfDef(result.illness, false);
-							while (!patient.Dead && patient.health.hediffSet.HasHediff(result.illness, false))
+							if (num == -5 || (uint)(num - 1) <= 1u)
 							{
-								ThingDef thingDef = meds;
-								float maxQuality = (thingDef != null) ? thingDef.GetStatValueAbstract(StatDefOf.MedicalQualityMax, null) : 0.7f;
-								if (activeHediff.TendableNow(false))
+								try
 								{
-									activeHediff.Tended(TendUtility.CalculateBaseTendQuality(doctor, patient, meds), maxQuality, 0);
-									result.medicineUsed += 1f;
 								}
-								foreach (Hediff hediff2 in patient.health.hediffSet.GetHediffsTendable())
+								finally
 								{
-									hediff2.Tended(TendUtility.CalculateBaseTendQuality(doctor, patient, meds), maxQuality, 0);
-								}
-								Find.TickManager.DebugSetTicksGame(Find.TickManager.TicksGame + 1);
-								patient.health.HealthTickInterval(1);
-								if (Find.TickManager.TicksGame % 900 == 0)
-								{
-									yield return null;
+									_003C_003Em__Finally3();
 								}
 							}
-							if (patient.Dead)
-							{
-								result.deathChance += 1f;
-							}
-							else
-							{
-								result.recoveryTimeDays += (Find.TickManager.TicksGame - startTicks).TicksToDays();
-							}
-							num2 = currentTest + 1;
-							currentTest = num2;
-							LongEventHandler.SetCurrentEventText(string.Format("Simulating ({0}/{1})", currentTest, totalTests));
-							yield return null;
-							patient = null;
-							activeHediff = null;
-							num2 = i + 1;
 						}
-						result.recoveryTimeDays /= (float)trials - result.deathChance;
-						result.deathChance /= (float)trials;
-						result.medicineUsed /= (float)trials;
-						results.Add(result);
-						result = default(DebugOutputsInfection.InfectionSimRow);
-						doctor = null;
+						finally
+						{
+							_003C_003Em__Finally2();
+						}
 					}
-					List<int>.Enumerator enumerator3 = default(List<int>.Enumerator);
-					meds = null;
 				}
-				List<ThingDef>.Enumerator enumerator2 = default(List<ThingDef>.Enumerator);
-				hediff = null;
-			}
-			IEnumerator<HediffDef> enumerator = null;
-			IEnumerable<DebugOutputsInfection.InfectionSimRow> dataSources = results;
-			TableDataGetter<DebugOutputsInfection.InfectionSimRow>[] array = new TableDataGetter<DebugOutputsInfection.InfectionSimRow>[6];
-			array[0] = new TableDataGetter<DebugOutputsInfection.InfectionSimRow>("defName", (DebugOutputsInfection.InfectionSimRow isr) => isr.illness.defName);
-			array[1] = new TableDataGetter<DebugOutputsInfection.InfectionSimRow>("meds", delegate(DebugOutputsInfection.InfectionSimRow isr)
-			{
-				if (isr.medicine == null)
+				finally
 				{
-					return "(none)";
+					_003C_003Em__Finally1();
 				}
-				return isr.medicine.defName;
-			});
-			array[2] = new TableDataGetter<DebugOutputsInfection.InfectionSimRow>("skill", (DebugOutputsInfection.InfectionSimRow isr) => isr.skill.ToString());
-			array[3] = new TableDataGetter<DebugOutputsInfection.InfectionSimRow>("death chance", (DebugOutputsInfection.InfectionSimRow isr) => isr.deathChance.ToStringPercent());
-			array[4] = new TableDataGetter<DebugOutputsInfection.InfectionSimRow>("recovery time (days)", (DebugOutputsInfection.InfectionSimRow isr) => isr.recoveryTimeDays.ToString("F1"));
-			array[5] = new TableDataGetter<DebugOutputsInfection.InfectionSimRow>("medicine used", (DebugOutputsInfection.InfectionSimRow isr) => isr.medicineUsed.ToString());
-			DebugTables.MakeTablesDialog<DebugOutputsInfection.InfectionSimRow>(dataSources, array);
-			Find.TickManager.DebugSetTicksGame(originalTicks);
-			yield break;
-			yield break;
+			}
+			_003Cdoctors_003E5__3 = null;
+			_003CtestSkill_003E5__4 = null;
+			_003CtestMedicine_003E5__5 = null;
+			_003Cpawngen_003E5__6 = default(PawnGenerationRequest);
+			_003Cresults_003E5__8 = null;
+			_003C_003E7__wrap10 = null;
+			_003Chediff_003E5__12 = null;
+			_003C_003E7__wrap12 = default(List<ThingDef>.Enumerator);
+			_003Cmeds_003E5__14 = null;
+			_003C_003E7__wrap14 = default(List<int>.Enumerator);
+			_003Cresult_003E5__16 = default(InfectionSimRow);
+			_003Cdoctor_003E5__17 = null;
+			_003Cpatient_003E5__19 = null;
+			_003CactiveHediff_003E5__21 = null;
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x060045DB RID: 17883 RVA: 0x00166EF1 File Offset: 0x001650F1
-		[CompilerGenerated]
-		internal static bool <Infections>g__isAnimal|3_2(HediffDef d)
+		private bool MoveNext()
 		{
-			return d.defName.Contains("Animal");
+			try
+			{
+				int num;
+				switch (_003C_003E1__state)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003Ctrials_003E5__2 = 2;
+					_003Cdoctors_003E5__3 = GenerateDoctorArray();
+					_003CtestSkill_003E5__4 = new List<int> { 4, 10, 16 };
+					_003CtestMedicine_003E5__5 = new List<ThingDef>
+					{
+						null,
+						ThingDefOf.MedicineHerbal,
+						ThingDefOf.MedicineIndustrial,
+						ThingDefOf.MedicineUltratech
+					};
+					_003Cpawngen_003E5__6 = new PawnGenerationRequest(PawnKindDefOf.Colonist, Faction.OfPlayer, PawnGenerationContext.NonPlayer, null, forceGenerateNewPawn: false, allowDead: false, allowDowned: false, canGeneratePawnRelations: true, mustBeCapableOfViolence: false, 1f, forceAddFreeWarmLayerIfNeeded: false, allowGay: true, allowPregnant: false, allowFood: true, allowAddictions: true, inhabitant: false, certainlyBeenInCryptosleep: false, forceRedressWorldPawnIfFormerColonist: false, worldPawnFactionDoesntMatter: false, 0f, 0f, null, 1f, null, null, null, null, null, null, null, null, null, null, null, null, forceNoIdeo: false, forceNoBackstory: false, forbidAnyTitle: false, forceDead: false, null, null, null, null, null, 0f, DevelopmentalStage.Adult, null, null, null);
+					_003CoriginalTicks_003E5__7 = Find.TickManager.TicksGame;
+					_003Cresults_003E5__8 = new List<InfectionSimRow>();
+					_003CtotalTests_003E5__9 = InfectionList().Count() * _003CtestMedicine_003E5__5.Count() * _003CtestSkill_003E5__4.Count() * _003Ctrials_003E5__2;
+					_003CcurrentTest_003E5__10 = 0;
+					_003C_003E7__wrap10 = InfectionList().GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_05d0;
+				case 1:
+					_003C_003E1__state = -5;
+					goto IL_03dd;
+				case 2:
+					{
+						_003C_003E1__state = -5;
+						_003Cpatient_003E5__19 = null;
+						_003CactiveHediff_003E5__21 = null;
+						num = _003Ci_003E5__18 + 1;
+						_003Ci_003E5__18 = num;
+						goto IL_04fb;
+					}
+					IL_05d0:
+					if (_003C_003E7__wrap10.MoveNext())
+					{
+						_003Chediff_003E5__12 = _003C_003E7__wrap10.Current;
+						_003C_003E7__wrap12 = _003CtestMedicine_003E5__5.GetEnumerator();
+						_003C_003E1__state = -4;
+						goto IL_05a7;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap10 = null;
+					DebugTables.MakeTablesDialog(_003Cresults_003E5__8, new TableDataGetter<InfectionSimRow>("defName", (InfectionSimRow isr) => isr.illness.defName), new TableDataGetter<InfectionSimRow>("meds", (InfectionSimRow isr) => (isr.medicine == null) ? "(none)" : isr.medicine.defName), new TableDataGetter<InfectionSimRow>("skill", (InfectionSimRow isr) => isr.skill.ToString()), new TableDataGetter<InfectionSimRow>("death chance", (InfectionSimRow isr) => isr.deathChance.ToStringPercent()), new TableDataGetter<InfectionSimRow>("recovery time (days)", (InfectionSimRow isr) => isr.recoveryTimeDays.ToString("F1")), new TableDataGetter<InfectionSimRow>("medicine used", (InfectionSimRow isr) => isr.medicineUsed.ToString()));
+					Find.TickManager.DebugSetTicksGame(_003CoriginalTicks_003E5__7);
+					return false;
+					IL_057e:
+					if (_003C_003E7__wrap14.MoveNext())
+					{
+						int current = _003C_003E7__wrap14.Current;
+						_003Cresult_003E5__16 = new InfectionSimRow
+						{
+							illness = _003Chediff_003E5__12,
+							skill = current,
+							medicine = _003Cmeds_003E5__14
+						};
+						_003Cdoctor_003E5__17 = _003Cdoctors_003E5__3[current];
+						_003Ci_003E5__18 = 0;
+						goto IL_04fb;
+					}
+					_003C_003Em__Finally3();
+					_003C_003E7__wrap14 = default(List<int>.Enumerator);
+					_003Cmeds_003E5__14 = null;
+					goto IL_05a7;
+					IL_03dd:
+					while (!_003Cpatient_003E5__19.Dead && _003Cpatient_003E5__19.health.hediffSet.HasHediff(_003Cresult_003E5__16.illness))
+					{
+						float maxQuality = _003Cmeds_003E5__14?.GetStatValueAbstract(StatDefOf.MedicalQualityMax) ?? 0.7f;
+						if (_003CactiveHediff_003E5__21.TendableNow())
+						{
+							_003CactiveHediff_003E5__21.Tended(TendUtility.CalculateBaseTendQuality(_003Cdoctor_003E5__17, _003Cpatient_003E5__19, _003Cmeds_003E5__14), maxQuality);
+							_003Cresult_003E5__16.medicineUsed += 1f;
+						}
+						foreach (Hediff item in _003Cpatient_003E5__19.health.hediffSet.GetHediffsTendable())
+						{
+							item.Tended(TendUtility.CalculateBaseTendQuality(_003Cdoctor_003E5__17, _003Cpatient_003E5__19, _003Cmeds_003E5__14), maxQuality);
+						}
+						Find.TickManager.DebugSetTicksGame(Find.TickManager.TicksGame + 1);
+						_003Cpatient_003E5__19.health.HealthTickInterval(1);
+						if (Find.TickManager.TicksGame % 900 == 0)
+						{
+							_003C_003E2__current = null;
+							_003C_003E1__state = 1;
+							return true;
+						}
+					}
+					if (_003Cpatient_003E5__19.Dead)
+					{
+						_003Cresult_003E5__16.deathChance += 1f;
+					}
+					else
+					{
+						_003Cresult_003E5__16.recoveryTimeDays += (Find.TickManager.TicksGame - _003CstartTicks_003E5__20).TicksToDays();
+					}
+					num = _003CcurrentTest_003E5__10 + 1;
+					_003CcurrentTest_003E5__10 = num;
+					LongEventHandler.SetCurrentEventText($"Simulating ({_003CcurrentTest_003E5__10}/{_003CtotalTests_003E5__9})");
+					_003C_003E2__current = null;
+					_003C_003E1__state = 2;
+					return true;
+					IL_05a7:
+					if (_003C_003E7__wrap12.MoveNext())
+					{
+						_003Cmeds_003E5__14 = _003C_003E7__wrap12.Current;
+						_003C_003E7__wrap14 = _003CtestSkill_003E5__4.GetEnumerator();
+						_003C_003E1__state = -5;
+						goto IL_057e;
+					}
+					_003C_003Em__Finally2();
+					_003C_003E7__wrap12 = default(List<ThingDef>.Enumerator);
+					_003Chediff_003E5__12 = null;
+					goto IL_05d0;
+					IL_04fb:
+					if (_003Ci_003E5__18 < _003Ctrials_003E5__2)
+					{
+						_003Cpatient_003E5__19 = PawnGenerator.GeneratePawn(_003Cpawngen_003E5__6);
+						_003CstartTicks_003E5__20 = Find.TickManager.TicksGame;
+						_003Cpatient_003E5__19.health.AddHediff(_003Cresult_003E5__16.illness, null, null);
+						_003CactiveHediff_003E5__21 = _003Cpatient_003E5__19.health.hediffSet.GetFirstHediffOfDef(_003Cresult_003E5__16.illness);
+						goto IL_03dd;
+					}
+					_003Cresult_003E5__16.recoveryTimeDays /= (float)_003Ctrials_003E5__2 - _003Cresult_003E5__16.deathChance;
+					_003Cresult_003E5__16.deathChance /= _003Ctrials_003E5__2;
+					_003Cresult_003E5__16.medicineUsed /= _003Ctrials_003E5__2;
+					_003Cresults_003E5__8.Add(_003Cresult_003E5__16);
+					_003Cresult_003E5__16 = default(InfectionSimRow);
+					_003Cdoctor_003E5__17 = null;
+					goto IL_057e;
+				}
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
 		}
 
-		// Token: 0x060045DC RID: 17884 RVA: 0x00166F03 File Offset: 0x00165103
-		[CompilerGenerated]
-		internal static float <Infections>g__baseSeverityIncrease|3_3(HediffDef d)
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap10 != null)
+			{
+				_003C_003E7__wrap10.Dispose();
+			}
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -3;
+			((IDisposable)_003C_003E7__wrap12/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		private void _003C_003Em__Finally3()
+		{
+			_003C_003E1__state = -4;
+			((IDisposable)_003C_003E7__wrap14/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<object> IEnumerable<object>.GetEnumerator()
+		{
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				return this;
+			}
+			return new _003CInfectionSimulatorWorker_003Ed__6(0);
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<object>)this).GetEnumerator();
+		}
+	}
+
+	private static List<Pawn> GenerateDoctorArray()
+	{
+		PawnGenerationRequest request = new PawnGenerationRequest(PawnKindDefOf.Colonist, Faction.OfPlayer, PawnGenerationContext.NonPlayer, null, forceGenerateNewPawn: false, allowDead: false, allowDowned: false, canGeneratePawnRelations: true, mustBeCapableOfViolence: false, 1f, forceAddFreeWarmLayerIfNeeded: false, allowGay: true, allowPregnant: false, allowFood: true, allowAddictions: true, inhabitant: false, certainlyBeenInCryptosleep: false, forceRedressWorldPawnIfFormerColonist: false, worldPawnFactionDoesntMatter: false, 0f, 0f, null, 1f, (Pawn p) => !p.WorkTypeIsDisabled(WorkTypeDefOf.Doctor) && p.health.hediffSet.hediffs.Count == 0, null, null, null, null, null, null, null, null, null, null, null, forceNoIdeo: false, forceNoBackstory: false, forbidAnyTitle: false, forceDead: false, null, null, null, null, null, 0f, DevelopmentalStage.Adult, null, null, null);
+		List<Pawn> list = new List<Pawn>();
+		for (int i = 0; i <= 20; i++)
+		{
+			Pawn pawn = PawnGenerator.GeneratePawn(request);
+			pawn.skills.GetSkill(SkillDefOf.Medicine).Level = i;
+			list.Add(pawn);
+		}
+		return list;
+	}
+
+	private static IEnumerable<HediffDef> InfectionList()
+	{
+		return DefDatabase<HediffDef>.AllDefs.Where((HediffDef hediff) => hediff.tendable && hediff.HasComp(typeof(HediffComp_TendDuration)) && hediff.HasComp(typeof(HediffComp_Immunizable)) && hediff.lethalSeverity > 0f);
+	}
+
+	[DebugOutput]
+	public static void Infections()
+	{
+		Func<InfectionLuck, float> ilc = delegate(InfectionLuck il)
+		{
+			float result = 1f;
+			if (il == InfectionLuck.Bad)
+			{
+				result = 0.8f;
+			}
+			if (il == InfectionLuck.Good)
+			{
+				result = 1.2f;
+			}
+			return result;
+		};
+		Func<Func<InfectionLuck, float>, string> stringizeWithLuck = (Func<InfectionLuck, float> func) => $"{func(InfectionLuck.Bad):F2} / {func(InfectionLuck.Good):F2}";
+		Func<HediffDef, InfectionLuck, float> baseImmunityIncrease = (HediffDef d, InfectionLuck il) => d.CompProps<HediffCompProperties_Immunizable>().immunityPerDaySick * ilc(il);
+		Func<HediffDef, float, float> tendedSeverityIncrease = (HediffDef d, float tend) => baseSeverityIncrease(d) + d.CompProps<HediffCompProperties_TendDuration>().severityPerDayTended * tend;
+		Func<HediffDef, InfectionLuck, bool, float> immunityIncrease = delegate(HediffDef d, InfectionLuck il, bool bedridden)
+		{
+			float b = (isAnimal(d) ? 1f : ThingDefOf.Bed.GetStatValueAbstract(StatDefOf.ImmunityGainSpeedFactor));
+			float num = Mathf.Lerp(1f, b, bedridden ? 1f : 0.3f) * StatDefOf.ImmunityGainSpeed.GetStatPart<StatPart_Resting>().factor;
+			return baseImmunityIncrease(d, il) * num;
+		};
+		Func<HediffDef, InfectionLuck, float, float> immunityOnLethality = (HediffDef d, InfectionLuck il, float tend) => (tendedSeverityIncrease(d, tend) <= 0f) ? float.PositiveInfinity : (d.lethalSeverity / tendedSeverityIncrease(d, tend) * immunityIncrease(d, il, arg3: true));
+		List<TableDataGetter<HediffDef>> list = new List<TableDataGetter<HediffDef>>();
+		list.Add(new TableDataGetter<HediffDef>("defName", (HediffDef d) => d.defName + (d.stages.Any((HediffStage stage) => stage.capMods.Any((PawnCapacityModifier cap) => cap.capacity == PawnCapacityDefOf.BloodFiltration)) ? " (inaccurate)" : "")));
+		list.Add(new TableDataGetter<HediffDef>("lethal\nseverity", (HediffDef d) => d.lethalSeverity.ToString("F2")));
+		list.Add(new TableDataGetter<HediffDef>("base\nseverity\nincrease", (HediffDef d) => baseSeverityIncrease(d).ToString("F2")));
+		list.Add(new TableDataGetter<HediffDef>("base\nimmunity\nincrease", (HediffDef d) => stringizeWithLuck((InfectionLuck il) => baseImmunityIncrease(d, il))));
+		List<Pawn> source = GenerateDoctorArray();
+		for (float tendquality = 0f; tendquality <= 1.01f; tendquality += 0.1f)
+		{
+			tendquality = Mathf.Clamp01(tendquality);
+			Pawn arg = source.FirstOrFallback((Pawn doc) => TendUtility.CalculateBaseTendQuality(doc, null, null) >= Mathf.Clamp01(tendquality - 0.25f));
+			Pawn arg2 = source.FirstOrFallback((Pawn doc) => TendUtility.CalculateBaseTendQuality(doc, null, ThingDefOf.MedicineHerbal) >= Mathf.Clamp01(tendquality - 0.25f));
+			Pawn arg3 = source.FirstOrFallback((Pawn doc) => TendUtility.CalculateBaseTendQuality(doc, null, ThingDefOf.MedicineIndustrial) >= Mathf.Clamp01(tendquality - 0.25f));
+			Pawn arg4 = source.FirstOrFallback((Pawn doc) => TendUtility.CalculateBaseTendQuality(doc, null, ThingDefOf.MedicineUltratech) >= Mathf.Clamp01(tendquality - 0.25f));
+			Pawn arg5 = source.FirstOrFallback((Pawn doc) => TendUtility.CalculateBaseTendQuality(doc, null, null) >= tendquality);
+			Pawn arg6 = source.FirstOrFallback((Pawn doc) => TendUtility.CalculateBaseTendQuality(doc, null, ThingDefOf.MedicineHerbal) >= tendquality);
+			Pawn arg7 = source.FirstOrFallback((Pawn doc) => TendUtility.CalculateBaseTendQuality(doc, null, ThingDefOf.MedicineIndustrial) >= tendquality);
+			Pawn arg8 = source.FirstOrFallback((Pawn doc) => TendUtility.CalculateBaseTendQuality(doc, null, ThingDefOf.MedicineUltratech) >= tendquality);
+			Pawn arg9 = source.FirstOrFallback((Pawn doc) => TendUtility.CalculateBaseTendQuality(doc, null, null) >= Mathf.Clamp01(tendquality + 0.25f));
+			Pawn arg10 = source.FirstOrFallback((Pawn doc) => TendUtility.CalculateBaseTendQuality(doc, null, ThingDefOf.MedicineHerbal) >= Mathf.Clamp01(tendquality + 0.25f));
+			Pawn arg11 = source.FirstOrFallback((Pawn doc) => TendUtility.CalculateBaseTendQuality(doc, null, ThingDefOf.MedicineIndustrial) >= Mathf.Clamp01(tendquality + 0.25f));
+			Pawn arg12 = source.FirstOrFallback((Pawn doc) => TendUtility.CalculateBaseTendQuality(doc, null, ThingDefOf.MedicineUltratech) >= Mathf.Clamp01(tendquality + 0.25f));
+			Func<Pawn, Pawn, Pawn, string> obj = delegate(Pawn low, Pawn exp, Pawn high)
+			{
+				string arg13 = ((low != null) ? low.skills.GetSkill(SkillDefOf.Medicine).Level.ToString() : "X");
+				string arg14 = ((exp != null) ? exp.skills.GetSkill(SkillDefOf.Medicine).Level.ToString() : "X");
+				string arg15 = ((high != null) ? high.skills.GetSkill(SkillDefOf.Medicine).Level.ToString() : "X");
+				return $"{arg13}-{arg14}-{arg15}";
+			};
+			string text = obj(arg, arg5, arg9);
+			string text2 = obj(arg2, arg6, arg10);
+			string text3 = obj(arg3, arg7, arg11);
+			string text4 = obj(arg4, arg8, arg12);
+			float tq = tendquality;
+			list.Add(new TableDataGetter<HediffDef>($"survival chance at\ntend quality {tq.ToStringPercent()}\n\ndoc skill needed:\nno meds:  {text}\nherbal:  {text2}\nnormal:  {text3}\nglitter:  {text4}", delegate(HediffDef d)
+			{
+				float num2 = immunityOnLethality(d, InfectionLuck.Bad, tq);
+				float num3 = immunityOnLethality(d, InfectionLuck.Good, tq);
+				return (num2 == float.PositiveInfinity) ? float.PositiveInfinity.ToString() : Mathf.Clamp01((num3 - 1f) / (num3 - num2)).ToStringPercent();
+			}));
+		}
+		DebugTables.MakeTablesDialog(InfectionList(), list.ToArray());
+		static float baseSeverityIncrease(HediffDef d)
 		{
 			return d.CompProps<HediffCompProperties_Immunizable>().severityPerDayNotImmune;
 		}
-
-		// Token: 0x02000ABA RID: 2746
-		private enum InfectionLuck
+		static bool isAnimal(HediffDef d)
 		{
-			// Token: 0x0400315F RID: 12639
-			Bad,
-			// Token: 0x04003160 RID: 12640
-			Normal,
-			// Token: 0x04003161 RID: 12641
-			Good
+			return d.defName.Contains("Animal");
 		}
+	}
 
-		// Token: 0x02000ABB RID: 2747
-		private struct InfectionSimRow
-		{
-			// Token: 0x04003162 RID: 12642
-			public HediffDef illness;
+	[DebugOutput]
+	public static void InfectionSimulator()
+	{
+		LongEventHandler.QueueLongEvent(InfectionSimulatorWorker(), "Simulating . . .");
+	}
 
-			// Token: 0x04003163 RID: 12643
-			public int skill;
-
-			// Token: 0x04003164 RID: 12644
-			public ThingDef medicine;
-
-			// Token: 0x04003165 RID: 12645
-			public float deathChance;
-
-			// Token: 0x04003166 RID: 12646
-			public float recoveryTimeDays;
-
-			// Token: 0x04003167 RID: 12647
-			public float medicineUsed;
-		}
+	[IteratorStateMachine(typeof(_003CInfectionSimulatorWorker_003Ed__6))]
+	private static IEnumerable InfectionSimulatorWorker()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CInfectionSimulatorWorker_003Ed__6(-2);
 	}
 }

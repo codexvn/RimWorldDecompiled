@@ -1,98 +1,75 @@
-﻿using System;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class CompUseEffect_DestroySelf : CompUseEffect
 {
-	// Token: 0x02002F5B RID: 12123
-	public class CompUseEffect_DestroySelf : CompUseEffect
+	private int delayTicks = -1;
+
+	private CompProperties_UseEffectDestroySelf Props => (CompProperties_UseEffectDestroySelf)props;
+
+	public override float OrderPriority => Props.orderPriority;
+
+	public override void DoEffect(Pawn usedBy)
 	{
-		// Token: 0x17002C31 RID: 11313
-		// (get) Token: 0x06011169 RID: 69993 RVA: 0x004E82EC File Offset: 0x004E64EC
-		private CompProperties_UseEffectDestroySelf Props
+		base.DoEffect(usedBy);
+		if (Props.delayTicks <= 0)
 		{
-			get
-			{
-				return (CompProperties_UseEffectDestroySelf)this.props;
-			}
+			DoDestroy();
 		}
-
-		// Token: 0x17002C32 RID: 11314
-		// (get) Token: 0x0601116A RID: 69994 RVA: 0x004E82F9 File Offset: 0x004E64F9
-		public override float OrderPriority
+		else
 		{
-			get
-			{
-				return this.Props.orderPriority;
-			}
+			delayTicks = Props.delayTicks;
 		}
+	}
 
-		// Token: 0x0601116B RID: 69995 RVA: 0x004E8306 File Offset: 0x004E6506
-		public override void DoEffect(Pawn usedBy)
+	private void DoDestroy()
+	{
+		if (Props.effecterDef != null)
 		{
-			base.DoEffect(usedBy);
-			if (this.Props.delayTicks <= 0)
-			{
-				this.DoDestroy();
-				return;
-			}
-			this.delayTicks = this.Props.delayTicks;
+			Effecter obj = new Effecter(Props.effecterDef);
+			obj.Trigger(new TargetInfo(parent.Position, parent.Map), TargetInfo.Invalid);
+			obj.Cleanup();
 		}
-
-		// Token: 0x0601116C RID: 69996 RVA: 0x004E8338 File Offset: 0x004E6538
-		private void DoDestroy()
+		if (Props.spawnKilledLeavings)
 		{
-			if (this.Props.effecterDef != null)
+			GenLeaving.DoLeavingsFor(parent, parent.MapHeld, DestroyMode.KillFinalizeLeavingsOnly);
+		}
+		if (!Props.leavings.NullOrEmpty())
+		{
+			Rand.PushState(parent.thingIDNumber);
+			for (int i = 0; i < Props.leavings.Count; i++)
 			{
-				Effecter effecter = new Effecter(this.Props.effecterDef);
-				effecter.Trigger(new TargetInfo(this.parent.Position, this.parent.Map, false), TargetInfo.Invalid, -1);
-				effecter.Cleanup();
-			}
-			if (this.Props.spawnKilledLeavings)
-			{
-				GenLeaving.DoLeavingsFor(this.parent, this.parent.MapHeld, DestroyMode.KillFinalizeLeavingsOnly, null);
-			}
-			if (!this.Props.leavings.NullOrEmpty<ThingDefCountClass>())
-			{
-				Rand.PushState(this.parent.thingIDNumber);
-				for (int i = 0; i < this.Props.leavings.Count; i++)
+				ThingDefCountClass thingDefCountClass = Props.leavings[i];
+				if (!thingDefCountClass.IsChanceBased || Rand.Chance(thingDefCountClass.DropChance))
 				{
-					ThingDefCountClass thingDefCountClass = this.Props.leavings[i];
-					if (!thingDefCountClass.IsChanceBased || Rand.Chance(thingDefCountClass.DropChance))
-					{
-						Thing thing = ThingMaker.MakeThing(this.Props.leavings[i].thingDef, null);
-						thing.stackCount = this.Props.leavings[i].count;
-						Thing thing2;
-						GenDrop.TryDropSpawn(thing, this.parent.PositionHeld, this.parent.MapHeld, ThingPlaceMode.Near, out thing2, null, null, true);
-					}
+					Thing thing = ThingMaker.MakeThing(Props.leavings[i].thingDef);
+					thing.stackCount = Props.leavings[i].count;
+					GenDrop.TryDropSpawn(thing, parent.PositionHeld, parent.MapHeld, ThingPlaceMode.Near, out var _);
 				}
-				Rand.PopState();
 			}
-			this.parent.SplitOff(1).Destroy(DestroyMode.Vanish);
+			Rand.PopState();
 		}
+		parent.SplitOff(1).Destroy();
+	}
 
-		// Token: 0x0601116D RID: 69997 RVA: 0x004E8493 File Offset: 0x004E6693
-		public override void PostExposeData()
+	public override void PostExposeData()
+	{
+		base.PostExposeData();
+		Scribe_Values.Look(ref delayTicks, "delayTicks", -1);
+	}
+
+	public override void CompTick()
+	{
+		base.CompTick();
+		if (delayTicks > 0)
 		{
-			base.PostExposeData();
-			Scribe_Values.Look<int>(ref this.delayTicks, "delayTicks", -1, false);
+			delayTicks--;
 		}
-
-		// Token: 0x0601116E RID: 69998 RVA: 0x004E84AD File Offset: 0x004E66AD
-		public override void CompTick()
+		if (delayTicks == 0)
 		{
-			base.CompTick();
-			if (this.delayTicks > 0)
-			{
-				this.delayTicks--;
-			}
-			if (this.delayTicks == 0)
-			{
-				this.DoDestroy();
-				this.delayTicks = -1;
-			}
+			DoDestroy();
+			delayTicks = -1;
 		}
-
-		// Token: 0x0400B16E RID: 45422
-		private int delayTicks = -1;
 	}
 }

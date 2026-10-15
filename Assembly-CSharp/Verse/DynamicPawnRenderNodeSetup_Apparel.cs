@@ -1,185 +1,519 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using RimWorld;
 
-namespace Verse
+namespace Verse;
+
+public class DynamicPawnRenderNodeSetup_Apparel : DynamicPawnRenderNodeSetup
 {
-	// Token: 0x02000608 RID: 1544
-	public class DynamicPawnRenderNodeSetup_Apparel : DynamicPawnRenderNodeSetup
+	[CompilerGenerated]
+	private sealed class _003CGetDynamicNodes_003Ed__3 : IEnumerable<(PawnRenderNode node, PawnRenderNode parent)>, IEnumerable, IEnumerator<(PawnRenderNode node, PawnRenderNode parent)>, IEnumerator, IDisposable
 	{
-		// Token: 0x170006FD RID: 1789
-		// (get) Token: 0x06002775 RID: 10101 RVA: 0x000028E7 File Offset: 0x00000AE7
-		public override bool HumanlikeOnly
+		private int _003C_003E1__state;
+
+		private (PawnRenderNode node, PawnRenderNode parent) _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private Pawn pawn;
+
+		public Pawn _003C_003E3__pawn;
+
+		private PawnRenderTree tree;
+
+		public PawnRenderTree _003C_003E3__tree;
+
+		private Dictionary<PawnRenderNode, int> _003ClayerOffsets_003E5__2;
+
+		private PawnRenderNode _003CheadApparelNode_003E5__3;
+
+		private PawnRenderNode _003CbodyApparelNode_003E5__4;
+
+		private List<Apparel>.Enumerator _003C_003E7__wrap4;
+
+		private IEnumerator<(PawnRenderNode node, PawnRenderNode parent)> _003C_003E7__wrap5;
+
+		private (PawnRenderNode node, PawnRenderNode parent) _003Cresult_003E5__7;
+
+		(PawnRenderNode node, PawnRenderNode parent) IEnumerator<(PawnRenderNode, PawnRenderNode)>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return true;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06002776 RID: 10102 RVA: 0x000D2297 File Offset: 0x000D0497
-		[return: TupleElementNames(new string[]
+		object IEnumerator.Current
 		{
-			"node",
-			"parent"
-		})]
-		public override IEnumerable<ValueTuple<PawnRenderNode, PawnRenderNode>> GetDynamicNodes(Pawn pawn, PawnRenderTree tree)
-		{
-			if (pawn.apparel == null || pawn.apparel.WornApparelCount == 0)
+			[DebuggerHidden]
+			get
 			{
-				yield break;
+				return _003C_003E2__current;
 			}
-			Dictionary<PawnRenderNode, int> layerOffsets = new Dictionary<PawnRenderNode, int>();
-			PawnRenderNode pawnRenderNode;
-			PawnRenderNode headApparelNode = tree.TryGetNodeByTag(PawnRenderNodeTagDefOf.ApparelHead, out pawnRenderNode) ? pawnRenderNode : null;
-			PawnRenderNode pawnRenderNode2;
-			PawnRenderNode bodyApparelNode = tree.TryGetNodeByTag(PawnRenderNodeTagDefOf.ApparelBody, out pawnRenderNode2) ? pawnRenderNode2 : null;
-			foreach (Apparel apparel in pawn.apparel.WornApparel)
+		}
+
+		[DebuggerHidden]
+		public _003CGetDynamicNodes_003Ed__3(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if ((uint)(num - -4) <= 1u || num == 1)
 			{
-				if (DynamicPawnRenderNodeSetup_Apparel.ShouldAddApparelNode(apparel))
+				try
 				{
-					foreach (ValueTuple<PawnRenderNode, PawnRenderNode> result in DynamicPawnRenderNodeSetup_Apparel.ProcessApparel(pawn, tree, apparel, headApparelNode, bodyApparelNode, layerOffsets))
+					if (num == -4 || num == 1)
 					{
-						if (result.Item1 != null)
+						try
 						{
-							yield return result;
 						}
-						if (result.Item2 != null && !layerOffsets.TryAdd(result.Item2, 1))
+						finally
 						{
-							Dictionary<PawnRenderNode, int> dictionary = layerOffsets;
-							PawnRenderNode item = result.Item2;
-							int num = dictionary[item];
-							dictionary[item] = num + 1;
+							_003C_003Em__Finally2();
 						}
-						result = default(ValueTuple<PawnRenderNode, PawnRenderNode>);
 					}
-					IEnumerator<ValueTuple<PawnRenderNode, PawnRenderNode>> enumerator2 = null;
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
 				}
 			}
-			List<Apparel>.Enumerator enumerator = default(List<Apparel>.Enumerator);
-			yield break;
-			yield break;
+			_003ClayerOffsets_003E5__2 = null;
+			_003CheadApparelNode_003E5__3 = null;
+			_003CbodyApparelNode_003E5__4 = null;
+			_003C_003E7__wrap4 = default(List<Apparel>.Enumerator);
+			_003C_003E7__wrap5 = null;
+			_003Cresult_003E5__7 = default((PawnRenderNode, PawnRenderNode));
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x06002777 RID: 10103 RVA: 0x000D22AE File Offset: 0x000D04AE
-		private static bool ShouldAddApparelNode(Apparel gear)
+		private bool MoveNext()
 		{
-			return !gear.def.IsWeapon;
+			try
+			{
+				int num = _003C_003E1__state;
+				if (num != 0)
+				{
+					if (num != 1)
+					{
+						return false;
+					}
+					_003C_003E1__state = -4;
+					goto IL_014a;
+				}
+				_003C_003E1__state = -1;
+				if (pawn.apparel == null || pawn.apparel.WornApparelCount == 0)
+				{
+					return false;
+				}
+				_003ClayerOffsets_003E5__2 = new Dictionary<PawnRenderNode, int>();
+				_003CheadApparelNode_003E5__3 = (tree.TryGetNodeByTag(PawnRenderNodeTagDefOf.ApparelHead, out var node) ? node : null);
+				_003CbodyApparelNode_003E5__4 = (tree.TryGetNodeByTag(PawnRenderNodeTagDefOf.ApparelBody, out var node2) ? node2 : null);
+				_003C_003E7__wrap4 = pawn.apparel.WornApparel.GetEnumerator();
+				_003C_003E1__state = -3;
+				goto IL_01c1;
+				IL_01c1:
+				Apparel current;
+				do
+				{
+					if (_003C_003E7__wrap4.MoveNext())
+					{
+						current = _003C_003E7__wrap4.Current;
+						continue;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap4 = default(List<Apparel>.Enumerator);
+					return false;
+				}
+				while (!ShouldAddApparelNode(current));
+				_003C_003E7__wrap5 = ProcessApparel(pawn, tree, current, _003CheadApparelNode_003E5__3, _003CbodyApparelNode_003E5__4, _003ClayerOffsets_003E5__2).GetEnumerator();
+				_003C_003E1__state = -4;
+				goto IL_01a4;
+				IL_014a:
+				if (_003Cresult_003E5__7.parent != null && !_003ClayerOffsets_003E5__2.TryAdd(_003Cresult_003E5__7.parent, 1))
+				{
+					_003ClayerOffsets_003E5__2[_003Cresult_003E5__7.parent]++;
+				}
+				_003Cresult_003E5__7 = default((PawnRenderNode, PawnRenderNode));
+				goto IL_01a4;
+				IL_01a4:
+				if (_003C_003E7__wrap5.MoveNext())
+				{
+					_003Cresult_003E5__7 = _003C_003E7__wrap5.Current;
+					if (_003Cresult_003E5__7.node != null)
+					{
+						_003C_003E2__current = _003Cresult_003E5__7;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					goto IL_014a;
+				}
+				_003C_003Em__Finally2();
+				_003C_003E7__wrap5 = null;
+				goto IL_01c1;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
 		}
 
-		// Token: 0x06002778 RID: 10104 RVA: 0x000D22BE File Offset: 0x000D04BE
-		[return: TupleElementNames(new string[]
+		bool IEnumerator.MoveNext()
 		{
-			"node",
-			"parent"
-		})]
-		private static IEnumerable<ValueTuple<PawnRenderNode, PawnRenderNode>> ProcessApparel(Pawn pawn, PawnRenderTree tree, Apparel ap, PawnRenderNode headApparelNode, PawnRenderNode bodyApparelNode, Dictionary<PawnRenderNode, int> layerOffsets)
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
 		{
-			if (ap.def.apparel.HasDefinedGraphicProperties)
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap4/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -3;
+			if (_003C_003E7__wrap5 != null)
 			{
-				foreach (PawnRenderNodeProperties pawnRenderNodeProperties in ap.def.apparel.RenderNodeProperties)
-				{
-					if (tree.ShouldAddNodeToTree(pawnRenderNodeProperties))
-					{
-						PawnRenderNode pawnRenderNode = (PawnRenderNode)Activator.CreateInstance(pawnRenderNodeProperties.nodeClass, new object[]
-						{
-							pawn,
-							pawnRenderNodeProperties,
-							tree
-						});
-						pawnRenderNode.apparel = ap;
-						yield return new ValueTuple<PawnRenderNode, PawnRenderNode>(pawnRenderNode, null);
-					}
-				}
-				List<PawnRenderNodeProperties>.Enumerator enumerator = default(List<PawnRenderNodeProperties>.Enumerator);
+				_003C_003E7__wrap5.Dispose();
 			}
-			ApparelGraphicRecord apparelGraphicRecord;
-			if (!ApparelGraphicRecordGetter.TryGetGraphicApparel(ap, pawn.story.bodyType, pawn.Drawer.renderer.StatueColor != null, out apparelGraphicRecord))
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<(PawnRenderNode node, PawnRenderNode parent)> IEnumerable<(PawnRenderNode, PawnRenderNode)>.GetEnumerator()
+		{
+			_003CGetDynamicNodes_003Ed__3 _003CGetDynamicNodes_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				yield break;
-			}
-			PawnRenderNodeProperties pawnRenderNodeProperties2 = null;
-			PawnRenderNode pawnRenderNode2 = null;
-			DrawData drawData = ap.def.apparel.drawData;
-			ApparelLayerDef lastLayer = ap.def.apparel.LastLayer;
-			bool flag = lastLayer == ApparelLayerDefOf.Overhead || lastLayer == ApparelLayerDefOf.EyeCover;
-			PawnRenderNode pawnRenderNode3;
-			if (ap.def.apparel.parentTagDef != null && tree.TryGetNodeByTag(ap.def.apparel.parentTagDef, out pawnRenderNode3))
-			{
-				pawnRenderNode2 = pawnRenderNode3;
-				if (headApparelNode != null && pawnRenderNode2 == headApparelNode)
-				{
-					flag = true;
-				}
-				else if (bodyApparelNode != null && pawnRenderNode2 == bodyApparelNode)
-				{
-					flag = false;
-				}
-			}
-			if (headApparelNode != null && flag)
-			{
-				if (pawnRenderNode2 == null)
-				{
-					pawnRenderNode2 = headApparelNode;
-				}
-				int valueOrDefault = layerOffsets.GetValueOrDefault(pawnRenderNode2, 0);
-				pawnRenderNodeProperties2 = new PawnRenderNodeProperties
-				{
-					debugLabel = ap.def.defName,
-					workerClass = typeof(PawnRenderNodeWorker_Apparel_Head),
-					baseLayer = pawnRenderNode2.Props.baseLayer + (float)valueOrDefault,
-					drawData = drawData,
-					parentTagDef = ap.def.apparel.parentTagDef
-				};
-			}
-			else if (bodyApparelNode != null)
-			{
-				if (pawnRenderNode2 == null)
-				{
-					pawnRenderNode2 = bodyApparelNode;
-				}
-				int valueOrDefault2 = layerOffsets.GetValueOrDefault(pawnRenderNode2, 0);
-				pawnRenderNodeProperties2 = new PawnRenderNodeProperties
-				{
-					debugLabel = ap.def.defName,
-					workerClass = typeof(PawnRenderNodeWorker_Apparel_Body),
-					baseLayer = pawnRenderNode2.Props.baseLayer + (float)valueOrDefault2,
-					drawData = drawData,
-					parentTagDef = ap.def.apparel.parentTagDef
-				};
-				if (drawData == null && !ap.def.apparel.shellRenderedBehindHead)
-				{
-					if (lastLayer == ApparelLayerDefOf.Shell)
-					{
-						pawnRenderNodeProperties2.drawData = DrawData.NewWithData(new DrawData.RotationalData[]
-						{
-							new DrawData.RotationalData(new Rot4?(Rot4.North), 88f)
-						});
-					}
-					else if (ap.RenderAsPack())
-					{
-						pawnRenderNodeProperties2.drawData = DrawData.NewWithData(new DrawData.RotationalData[]
-						{
-							new DrawData.RotationalData(new Rot4?(Rot4.North), 93f),
-							new DrawData.RotationalData(new Rot4?(Rot4.South), -3f)
-						});
-					}
-				}
-			}
-			if (tree.ShouldAddNodeToTree(pawnRenderNodeProperties2))
-			{
-				yield return new ValueTuple<PawnRenderNode, PawnRenderNode>(new PawnRenderNode_Apparel(pawn, pawnRenderNodeProperties2, tree, ap), pawnRenderNode2);
+				_003C_003E1__state = 0;
+				_003CGetDynamicNodes_003Ed__ = this;
 			}
 			else
 			{
-				yield return new ValueTuple<PawnRenderNode, PawnRenderNode>(null, pawnRenderNode2);
+				_003CGetDynamicNodes_003Ed__ = new _003CGetDynamicNodes_003Ed__3(0);
 			}
-			yield break;
-			yield break;
+			_003CGetDynamicNodes_003Ed__.pawn = _003C_003E3__pawn;
+			_003CGetDynamicNodes_003Ed__.tree = _003C_003E3__tree;
+			return _003CGetDynamicNodes_003Ed__;
 		}
 
-		// Token: 0x040020B0 RID: 8368
-		private const int ApparelLayerShellNorth = 88;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<(PawnRenderNode, PawnRenderNode)>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CProcessApparel_003Ed__5 : IEnumerable<(PawnRenderNode node, PawnRenderNode parent)>, IEnumerable, IEnumerator<(PawnRenderNode node, PawnRenderNode parent)>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private (PawnRenderNode node, PawnRenderNode parent) _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private Apparel ap;
+
+		public Apparel _003C_003E3__ap;
+
+		private PawnRenderTree tree;
+
+		public PawnRenderTree _003C_003E3__tree;
+
+		private Pawn pawn;
+
+		public Pawn _003C_003E3__pawn;
+
+		private PawnRenderNode headApparelNode;
+
+		public PawnRenderNode _003C_003E3__headApparelNode;
+
+		private PawnRenderNode bodyApparelNode;
+
+		public PawnRenderNode _003C_003E3__bodyApparelNode;
+
+		private Dictionary<PawnRenderNode, int> layerOffsets;
+
+		public Dictionary<PawnRenderNode, int> _003C_003E3__layerOffsets;
+
+		private List<PawnRenderNodeProperties>.Enumerator _003C_003E7__wrap1;
+
+		(PawnRenderNode node, PawnRenderNode parent) IEnumerator<(PawnRenderNode, PawnRenderNode)>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CProcessApparel_003Ed__5(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = default(List<PawnRenderNodeProperties>.Enumerator);
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				ApparelGraphicRecord rec;
+				PawnRenderNodeProperties pawnRenderNodeProperties;
+				PawnRenderNode pawnRenderNode;
+				DrawData drawData;
+				ApparelLayerDef lastLayer;
+				bool flag;
+				PawnRenderNode node;
+				switch (_003C_003E1__state)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					if (ap.def.apparel.HasDefinedGraphicProperties)
+					{
+						_003C_003E7__wrap1 = ap.def.apparel.RenderNodeProperties.GetEnumerator();
+						_003C_003E1__state = -3;
+						goto IL_00ec;
+					}
+					goto IL_010e;
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_00ec;
+				case 2:
+					_003C_003E1__state = -1;
+					break;
+				case 3:
+					{
+						_003C_003E1__state = -1;
+						break;
+					}
+					IL_010e:
+					if (!ApparelGraphicRecordGetter.TryGetGraphicApparel(ap, pawn.story.bodyType, pawn.Drawer.renderer.StatueColor.HasValue, out rec))
+					{
+						return false;
+					}
+					pawnRenderNodeProperties = null;
+					pawnRenderNode = null;
+					drawData = ap.def.apparel.drawData;
+					lastLayer = ap.def.apparel.LastLayer;
+					flag = lastLayer == ApparelLayerDefOf.Overhead || lastLayer == ApparelLayerDefOf.EyeCover;
+					if (ap.def.apparel.parentTagDef != null && tree.TryGetNodeByTag(ap.def.apparel.parentTagDef, out node))
+					{
+						pawnRenderNode = node;
+						if (headApparelNode != null && pawnRenderNode == headApparelNode)
+						{
+							flag = true;
+						}
+						else if (bodyApparelNode != null && pawnRenderNode == bodyApparelNode)
+						{
+							flag = false;
+						}
+					}
+					if (headApparelNode != null && flag)
+					{
+						if (pawnRenderNode == null)
+						{
+							pawnRenderNode = headApparelNode;
+						}
+						int valueOrDefault = layerOffsets.GetValueOrDefault(pawnRenderNode, 0);
+						pawnRenderNodeProperties = new PawnRenderNodeProperties
+						{
+							debugLabel = ap.def.defName,
+							workerClass = typeof(PawnRenderNodeWorker_Apparel_Head),
+							baseLayer = pawnRenderNode.Props.baseLayer + (float)valueOrDefault,
+							drawData = drawData,
+							parentTagDef = ap.def.apparel.parentTagDef
+						};
+					}
+					else if (bodyApparelNode != null)
+					{
+						if (pawnRenderNode == null)
+						{
+							pawnRenderNode = bodyApparelNode;
+						}
+						int valueOrDefault2 = layerOffsets.GetValueOrDefault(pawnRenderNode, 0);
+						pawnRenderNodeProperties = new PawnRenderNodeProperties
+						{
+							debugLabel = ap.def.defName,
+							workerClass = typeof(PawnRenderNodeWorker_Apparel_Body),
+							baseLayer = pawnRenderNode.Props.baseLayer + (float)valueOrDefault2,
+							drawData = drawData,
+							parentTagDef = ap.def.apparel.parentTagDef
+						};
+						if (drawData == null && !ap.def.apparel.shellRenderedBehindHead)
+						{
+							if (lastLayer == ApparelLayerDefOf.Shell)
+							{
+								pawnRenderNodeProperties.drawData = DrawData.NewWithData(new DrawData.RotationalData(Rot4.North, 88f));
+							}
+							else if (ap.RenderAsPack())
+							{
+								pawnRenderNodeProperties.drawData = DrawData.NewWithData(new DrawData.RotationalData(Rot4.North, 93f), new DrawData.RotationalData(Rot4.South, -3f));
+							}
+						}
+					}
+					if (tree.ShouldAddNodeToTree(pawnRenderNodeProperties))
+					{
+						_003C_003E2__current = (node: new PawnRenderNode_Apparel(pawn, pawnRenderNodeProperties, tree, ap), parent: pawnRenderNode);
+						_003C_003E1__state = 2;
+						return true;
+					}
+					_003C_003E2__current = (node: null, parent: pawnRenderNode);
+					_003C_003E1__state = 3;
+					return true;
+					IL_00ec:
+					while (_003C_003E7__wrap1.MoveNext())
+					{
+						PawnRenderNodeProperties current = _003C_003E7__wrap1.Current;
+						if (tree.ShouldAddNodeToTree(current))
+						{
+							PawnRenderNode pawnRenderNode2 = (PawnRenderNode)Activator.CreateInstance(current.nodeClass, pawn, current, tree);
+							pawnRenderNode2.apparel = ap;
+							_003C_003E2__current = (node: pawnRenderNode2, parent: null);
+							_003C_003E1__state = 1;
+							return true;
+						}
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = default(List<PawnRenderNodeProperties>.Enumerator);
+					goto IL_010e;
+				}
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap1/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<(PawnRenderNode node, PawnRenderNode parent)> IEnumerable<(PawnRenderNode, PawnRenderNode)>.GetEnumerator()
+		{
+			_003CProcessApparel_003Ed__5 _003CProcessApparel_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CProcessApparel_003Ed__ = this;
+			}
+			else
+			{
+				_003CProcessApparel_003Ed__ = new _003CProcessApparel_003Ed__5(0);
+			}
+			_003CProcessApparel_003Ed__.pawn = _003C_003E3__pawn;
+			_003CProcessApparel_003Ed__.tree = _003C_003E3__tree;
+			_003CProcessApparel_003Ed__.ap = _003C_003E3__ap;
+			_003CProcessApparel_003Ed__.headApparelNode = _003C_003E3__headApparelNode;
+			_003CProcessApparel_003Ed__.bodyApparelNode = _003C_003E3__bodyApparelNode;
+			_003CProcessApparel_003Ed__.layerOffsets = _003C_003E3__layerOffsets;
+			return _003CProcessApparel_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<(PawnRenderNode, PawnRenderNode)>)this).GetEnumerator();
+		}
+	}
+
+	private const int ApparelLayerShellNorth = 88;
+
+	public override bool HumanlikeOnly => true;
+
+	[IteratorStateMachine(typeof(_003CGetDynamicNodes_003Ed__3))]
+	public override IEnumerable<(PawnRenderNode node, PawnRenderNode parent)> GetDynamicNodes(Pawn pawn, PawnRenderTree tree)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetDynamicNodes_003Ed__3(-2)
+		{
+			_003C_003E3__pawn = pawn,
+			_003C_003E3__tree = tree
+		};
+	}
+
+	private static bool ShouldAddApparelNode(Apparel gear)
+	{
+		return !gear.def.IsWeapon;
+	}
+
+	[IteratorStateMachine(typeof(_003CProcessApparel_003Ed__5))]
+	private static IEnumerable<(PawnRenderNode node, PawnRenderNode parent)> ProcessApparel(Pawn pawn, PawnRenderTree tree, Apparel ap, PawnRenderNode headApparelNode, PawnRenderNode bodyApparelNode, Dictionary<PawnRenderNode, int> layerOffsets)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CProcessApparel_003Ed__5(-2)
+		{
+			_003C_003E3__pawn = pawn,
+			_003C_003E3__tree = tree,
+			_003C_003E3__ap = ap,
+			_003C_003E3__headApparelNode = headApparelNode,
+			_003C_003E3__bodyApparelNode = bodyApparelNode,
+			_003C_003E3__layerOffsets = layerOffsets
+		};
 	}
 }

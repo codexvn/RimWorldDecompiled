@@ -1,121 +1,430 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
-namespace Verse
+namespace Verse;
+
+public static class ZoneColorUtility
 {
-	// Token: 0x02000556 RID: 1366
-	public static class ZoneColorUtility
+	[CompilerGenerated]
+	private sealed class _003CFishingZoneColors_003Ed__13 : IEnumerable<Color>, IEnumerable, IEnumerator<Color>, IEnumerator, IDisposable
 	{
-		// Token: 0x06002380 RID: 9088 RVA: 0x000B7F2C File Offset: 0x000B612C
-		static ZoneColorUtility()
+		private int _003C_003E1__state;
+
+		private Color _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		Color IEnumerator<Color>.Current
 		{
-			foreach (Color color in ZoneColorUtility.GrowingZoneColors())
+			[DebuggerHidden]
+			get
 			{
-				Color item = new Color(color.r, color.g, color.b, 0.09f);
-				ZoneColorUtility.growingZoneColors.Add(item);
-			}
-			foreach (Color color2 in ZoneColorUtility.StorageZoneColors())
-			{
-				Color item2 = new Color(color2.r, color2.g, color2.b, 0.09f);
-				ZoneColorUtility.storageZoneColors.Add(item2);
-			}
-			foreach (Color color3 in ZoneColorUtility.FishingZoneColors())
-			{
-				Color item3 = new Color(color3.r, color3.g, color3.b, 0.09f);
-				ZoneColorUtility.fishingZoneColors.Add(item3);
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06002381 RID: 9089 RVA: 0x000B808C File Offset: 0x000B628C
-		public static Color NextGrowingZoneColor()
+		object IEnumerator.Current
 		{
-			Color result = ZoneColorUtility.growingZoneColors[ZoneColorUtility.nextGrowingZoneColorIndex];
-			ZoneColorUtility.nextGrowingZoneColorIndex++;
-			if (ZoneColorUtility.nextGrowingZoneColorIndex >= ZoneColorUtility.growingZoneColors.Count)
+			[DebuggerHidden]
+			get
 			{
-				ZoneColorUtility.nextGrowingZoneColorIndex = 0;
+				return _003C_003E2__current;
 			}
-			return result;
 		}
 
-		// Token: 0x06002382 RID: 9090 RVA: 0x000B80C0 File Offset: 0x000B62C0
-		public static Color NextStorageZoneColor()
+		[DebuggerHidden]
+		public _003CFishingZoneColors_003Ed__13(int _003C_003E1__state)
 		{
-			Color result = ZoneColorUtility.storageZoneColors[ZoneColorUtility.nextStorageZoneColorIndex];
-			ZoneColorUtility.nextStorageZoneColorIndex++;
-			if (ZoneColorUtility.nextStorageZoneColorIndex >= ZoneColorUtility.storageZoneColors.Count)
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			switch (_003C_003E1__state)
 			{
-				ZoneColorUtility.nextStorageZoneColorIndex = 0;
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Color.Lerp(new Color(1f, 0.8f, 0f), Color.gray, 0.25f);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Color.Lerp(new Color(1f, 41f / 85f, 0f), Color.gray, 0.25f);
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Color.Lerp(new Color(1f, 0.36862746f, 0f), Color.gray, 0.25f);
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Color.Lerp(new Color(1f, 0.96862745f, 0f), Color.gray, 0.25f);
+				_003C_003E1__state = 4;
+				return true;
+			case 4:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Color.Lerp(new Color(1f, 0.14901961f, 0f), Color.gray, 0.25f);
+				_003C_003E1__state = 5;
+				return true;
+			case 5:
+				_003C_003E1__state = -1;
+				return false;
 			}
-			return result;
 		}
 
-		// Token: 0x06002383 RID: 9091 RVA: 0x000B80F4 File Offset: 0x000B62F4
-		public static Color NextFishingZoneColor()
+		bool IEnumerator.MoveNext()
 		{
-			Color result = ZoneColorUtility.fishingZoneColors[ZoneColorUtility.nextFishingZoneColorIndex];
-			ZoneColorUtility.nextFishingZoneColorIndex++;
-			if (ZoneColorUtility.nextFishingZoneColorIndex >= ZoneColorUtility.fishingZoneColors.Count)
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Color> IEnumerable<Color>.GetEnumerator()
+		{
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				ZoneColorUtility.nextFishingZoneColorIndex = 0;
+				_003C_003E1__state = 0;
+				return this;
 			}
-			return result;
+			return new _003CFishingZoneColors_003Ed__13(0);
 		}
 
-		// Token: 0x06002384 RID: 9092 RVA: 0x000B8128 File Offset: 0x000B6328
-		public static IEnumerable<Color> GrowingZoneColors()
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			yield return Color.Lerp(new Color(0f, 1f, 0f), Color.gray, 0.5f);
-			yield return Color.Lerp(new Color(1f, 1f, 0f), Color.gray, 0.5f);
-			yield return Color.Lerp(new Color(0.5f, 1f, 0f), Color.gray, 0.5f);
-			yield return Color.Lerp(new Color(1f, 1f, 0.5f), Color.gray, 0.5f);
-			yield return Color.Lerp(new Color(0.5f, 1f, 0.5f), Color.gray, 0.5f);
-			yield break;
+			return ((IEnumerable<Color>)this).GetEnumerator();
 		}
+	}
 
-		// Token: 0x06002385 RID: 9093 RVA: 0x000B8131 File Offset: 0x000B6331
-		public static IEnumerable<Color> StorageZoneColors()
+	[CompilerGenerated]
+	private sealed class _003CGrowingZoneColors_003Ed__11 : IEnumerable<Color>, IEnumerable, IEnumerator<Color>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Color _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		Color IEnumerator<Color>.Current
 		{
-			yield return Color.Lerp(new Color(1f, 0f, 0f), Color.gray, 0.5f);
-			yield return Color.Lerp(new Color(1f, 0f, 1f), Color.gray, 0.5f);
-			yield return Color.Lerp(new Color(0f, 0f, 1f), Color.gray, 0.5f);
-			yield return Color.Lerp(new Color(1f, 0f, 0.5f), Color.gray, 0.5f);
-			yield return Color.Lerp(new Color(0f, 0.5f, 1f), Color.gray, 0.5f);
-			yield return Color.Lerp(new Color(0.5f, 0f, 1f), Color.gray, 0.5f);
-			yield break;
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x06002386 RID: 9094 RVA: 0x000B813A File Offset: 0x000B633A
-		public static IEnumerable<Color> FishingZoneColors()
+		object IEnumerator.Current
 		{
-			yield return Color.Lerp(new Color(1f, 0.8f, 0f), Color.gray, 0.25f);
-			yield return Color.Lerp(new Color(1f, 0.48235294f, 0f), Color.gray, 0.25f);
-			yield return Color.Lerp(new Color(1f, 0.36862746f, 0f), Color.gray, 0.25f);
-			yield return Color.Lerp(new Color(1f, 0.96862745f, 0f), Color.gray, 0.25f);
-			yield return Color.Lerp(new Color(1f, 0.14901961f, 0f), Color.gray, 0.25f);
-			yield break;
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x04001D86 RID: 7558
-		private static List<Color> growingZoneColors = new List<Color>();
+		[DebuggerHidden]
+		public _003CGrowingZoneColors_003Ed__11(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
 
-		// Token: 0x04001D87 RID: 7559
-		private static List<Color> storageZoneColors = new List<Color>();
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
 
-		// Token: 0x04001D88 RID: 7560
-		private static List<Color> fishingZoneColors = new List<Color>();
+		private bool MoveNext()
+		{
+			switch (_003C_003E1__state)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Color.Lerp(new Color(0f, 1f, 0f), Color.gray, 0.5f);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Color.Lerp(new Color(1f, 1f, 0f), Color.gray, 0.5f);
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Color.Lerp(new Color(0.5f, 1f, 0f), Color.gray, 0.5f);
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Color.Lerp(new Color(1f, 1f, 0.5f), Color.gray, 0.5f);
+				_003C_003E1__state = 4;
+				return true;
+			case 4:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Color.Lerp(new Color(0.5f, 1f, 0.5f), Color.gray, 0.5f);
+				_003C_003E1__state = 5;
+				return true;
+			case 5:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
 
-		// Token: 0x04001D89 RID: 7561
-		private static int nextGrowingZoneColorIndex = 0;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x04001D8A RID: 7562
-		private static int nextStorageZoneColorIndex = 0;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04001D8B RID: 7563
-		private static int nextFishingZoneColorIndex = 0;
+		[DebuggerHidden]
+		IEnumerator<Color> IEnumerable<Color>.GetEnumerator()
+		{
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				return this;
+			}
+			return new _003CGrowingZoneColors_003Ed__11(0);
+		}
 
-		// Token: 0x04001D8C RID: 7564
-		private const float ZoneOpacity = 0.09f;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Color>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CStorageZoneColors_003Ed__12 : IEnumerable<Color>, IEnumerable, IEnumerator<Color>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Color _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		Color IEnumerator<Color>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CStorageZoneColors_003Ed__12(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			switch (_003C_003E1__state)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Color.Lerp(new Color(1f, 0f, 0f), Color.gray, 0.5f);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Color.Lerp(new Color(1f, 0f, 1f), Color.gray, 0.5f);
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Color.Lerp(new Color(0f, 0f, 1f), Color.gray, 0.5f);
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Color.Lerp(new Color(1f, 0f, 0.5f), Color.gray, 0.5f);
+				_003C_003E1__state = 4;
+				return true;
+			case 4:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Color.Lerp(new Color(0f, 0.5f, 1f), Color.gray, 0.5f);
+				_003C_003E1__state = 5;
+				return true;
+			case 5:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Color.Lerp(new Color(0.5f, 0f, 1f), Color.gray, 0.5f);
+				_003C_003E1__state = 6;
+				return true;
+			case 6:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Color> IEnumerable<Color>.GetEnumerator()
+		{
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				return this;
+			}
+			return new _003CStorageZoneColors_003Ed__12(0);
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Color>)this).GetEnumerator();
+		}
+	}
+
+	private static List<Color> growingZoneColors;
+
+	private static List<Color> storageZoneColors;
+
+	private static List<Color> fishingZoneColors;
+
+	private static int nextGrowingZoneColorIndex;
+
+	private static int nextStorageZoneColorIndex;
+
+	private static int nextFishingZoneColorIndex;
+
+	private const float ZoneOpacity = 0.09f;
+
+	static ZoneColorUtility()
+	{
+		growingZoneColors = new List<Color>();
+		storageZoneColors = new List<Color>();
+		fishingZoneColors = new List<Color>();
+		nextGrowingZoneColorIndex = 0;
+		nextStorageZoneColorIndex = 0;
+		nextFishingZoneColorIndex = 0;
+		foreach (Color item4 in GrowingZoneColors())
+		{
+			Color item = new Color(item4.r, item4.g, item4.b, 0.09f);
+			growingZoneColors.Add(item);
+		}
+		foreach (Color item5 in StorageZoneColors())
+		{
+			Color item2 = new Color(item5.r, item5.g, item5.b, 0.09f);
+			storageZoneColors.Add(item2);
+		}
+		foreach (Color item6 in FishingZoneColors())
+		{
+			Color item3 = new Color(item6.r, item6.g, item6.b, 0.09f);
+			fishingZoneColors.Add(item3);
+		}
+	}
+
+	public static Color NextGrowingZoneColor()
+	{
+		Color result = growingZoneColors[nextGrowingZoneColorIndex];
+		nextGrowingZoneColorIndex++;
+		if (nextGrowingZoneColorIndex >= growingZoneColors.Count)
+		{
+			nextGrowingZoneColorIndex = 0;
+		}
+		return result;
+	}
+
+	public static Color NextStorageZoneColor()
+	{
+		Color result = storageZoneColors[nextStorageZoneColorIndex];
+		nextStorageZoneColorIndex++;
+		if (nextStorageZoneColorIndex >= storageZoneColors.Count)
+		{
+			nextStorageZoneColorIndex = 0;
+		}
+		return result;
+	}
+
+	public static Color NextFishingZoneColor()
+	{
+		Color result = fishingZoneColors[nextFishingZoneColorIndex];
+		nextFishingZoneColorIndex++;
+		if (nextFishingZoneColorIndex >= fishingZoneColors.Count)
+		{
+			nextFishingZoneColorIndex = 0;
+		}
+		return result;
+	}
+
+	[IteratorStateMachine(typeof(_003CGrowingZoneColors_003Ed__11))]
+	public static IEnumerable<Color> GrowingZoneColors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGrowingZoneColors_003Ed__11(-2);
+	}
+
+	[IteratorStateMachine(typeof(_003CStorageZoneColors_003Ed__12))]
+	public static IEnumerable<Color> StorageZoneColors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CStorageZoneColors_003Ed__12(-2);
+	}
+
+	[IteratorStateMachine(typeof(_003CFishingZoneColors_003Ed__13))]
+	public static IEnumerable<Color> FishingZoneColors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CFishingZoneColors_003Ed__13(-2);
 	}
 }

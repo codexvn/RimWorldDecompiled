@@ -1,61 +1,171 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_GotoAndStandSociallyActive : JobDriver
 {
-	// Token: 0x020011AB RID: 4523
-	public class JobDriver_GotoAndStandSociallyActive : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__1 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x06006E9E RID: 28318 RVA: 0x002281DB File Offset: 0x002263DB
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
-		{
-			return this.pawn.Reserve(this.job.targetA.Cell, this.job, 1, -1, null, true, false);
-		}
+		private int _003C_003E1__state;
 
-		// Token: 0x06006E9F RID: 28319 RVA: 0x00228208 File Offset: 0x00226408
-		protected override IEnumerable<Toil> MakeNewToils()
-		{
-			yield return Toils_Goto.GotoCell(TargetIndex.A, PathEndMode.OnCell);
-			Toil toil = ToilMaker.MakeToil("MakeNewToils");
-			toil.initAction = delegate()
-			{
-				if (this.pawn.mindState != null && this.pawn.mindState.forcedGotoPosition == base.TargetA.Cell)
-				{
-					this.pawn.mindState.forcedGotoPosition = IntVec3.Invalid;
-				}
-			};
-			toil.defaultCompleteMode = ToilCompleteMode.Instant;
-			yield return toil;
-			yield return this.StandToil;
-			yield break;
-		}
+		private Toil _003C_003E2__current;
 
-		// Token: 0x17001127 RID: 4391
-		// (get) Token: 0x06006EA0 RID: 28320 RVA: 0x00228218 File Offset: 0x00226418
-		public virtual Toil StandToil
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_GotoAndStandSociallyActive _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				Toil toil = ToilMaker.MakeToil("StandToil");
-				toil.tickIntervalAction = delegate(int delta)
-				{
-					if (!this.job.forceMaintainFacing)
-					{
-						Pawn pawn = JobDriver_StandAndBeSociallyActive.FindClosePawn(this.pawn);
-						if (pawn != null)
-						{
-							this.pawn.rotationTracker.FaceCell(pawn.Position);
-						}
-					}
-					this.pawn.GainComfortFromCellIfPossible(delta, false);
-				};
-				toil.socialMode = RandomSocialMode.SuperActive;
-				toil.defaultCompleteMode = ToilCompleteMode.Never;
-				toil.handlingFacing = true;
-				return toil;
+				return _003C_003E2__current;
 			}
 		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__1(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_GotoAndStandSociallyActive CS_0024_003C_003E8__locals5 = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Goto.GotoCell(TargetIndex.A, PathEndMode.OnCell);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+			{
+				_003C_003E1__state = -1;
+				Toil toil = ToilMaker.MakeToil("MakeNewToils");
+				toil.initAction = delegate
+				{
+					if (CS_0024_003C_003E8__locals5.pawn.mindState != null && CS_0024_003C_003E8__locals5.pawn.mindState.forcedGotoPosition == CS_0024_003C_003E8__locals5.TargetA.Cell)
+					{
+						CS_0024_003C_003E8__locals5.pawn.mindState.forcedGotoPosition = IntVec3.Invalid;
+					}
+				};
+				toil.defaultCompleteMode = ToilCompleteMode.Instant;
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 2;
+				return true;
+			}
+			case 2:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = CS_0024_003C_003E8__locals5.StandToil;
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__1 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__1(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	public virtual Toil StandToil
+	{
+		get
+		{
+			Toil toil = ToilMaker.MakeToil("StandToil");
+			toil.tickIntervalAction = delegate(int delta)
+			{
+				if (!job.forceMaintainFacing)
+				{
+					Pawn pawn = JobDriver_StandAndBeSociallyActive.FindClosePawn(base.pawn);
+					if (pawn != null)
+					{
+						base.pawn.rotationTracker.FaceCell(pawn.Position);
+					}
+				}
+				base.pawn.GainComfortFromCellIfPossible(delta);
+			};
+			toil.socialMode = RandomSocialMode.SuperActive;
+			toil.defaultCompleteMode = ToilCompleteMode.Never;
+			toil.handlingFacing = true;
+			return toil;
+		}
+	}
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return pawn.Reserve(job.targetA.Cell, job);
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__1))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__1(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

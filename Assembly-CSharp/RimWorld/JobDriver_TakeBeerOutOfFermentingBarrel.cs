@@ -1,84 +1,206 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_TakeBeerOutOfFermentingBarrel : JobDriver
 {
-	// Token: 0x02001328 RID: 4904
-	public class JobDriver_TakeBeerOutOfFermentingBarrel : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__9 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x170012FA RID: 4858
-		// (get) Token: 0x0600786A RID: 30826 RVA: 0x00247860 File Offset: 0x00245A60
-		protected Building_FermentingBarrel Barrel
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_TakeBeerOutOfFermentingBarrel _003C_003E4__this;
+
+		private Toil _003CcarryToCell_003E5__2;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (Building_FermentingBarrel)this.job.GetTarget(TargetIndex.A).Thing;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170012FB RID: 4859
-		// (get) Token: 0x0600786B RID: 30827 RVA: 0x00247888 File Offset: 0x00245A88
-		protected Thing Beer
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.job.GetTarget(TargetIndex.B).Thing;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600786C RID: 30828 RVA: 0x002478A9 File Offset: 0x00245AA9
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__9(int _003C_003E1__state)
 		{
-			return this.pawn.Reserve(this.Barrel, this.job, 1, -1, null, errorOnFailed, false);
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x0600786D RID: 30829 RVA: 0x002478CC File Offset: 0x00245ACC
-		protected override IEnumerable<Toil> MakeNewToils()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			this.FailOnDespawnedNullOrForbidden(TargetIndex.A);
-			this.FailOnBurningImmobile(TargetIndex.A);
-			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch, false);
-			yield return Toils_General.Wait(200, TargetIndex.None).FailOnDestroyedNullOrForbidden(TargetIndex.A).FailOnCannotTouch(TargetIndex.A, PathEndMode.Touch).FailOn(() => !this.Barrel.Fermented).WithProgressBarToilDelay(TargetIndex.A, false, -0.5f);
-			Toil toil = ToilMaker.MakeToil("MakeNewToils");
-			toil.initAction = delegate()
+			_003CcarryToCell_003E5__2 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_TakeBeerOutOfFermentingBarrel CS_0024_003C_003E8__locals13 = _003C_003E4__this;
+			switch (num)
 			{
-				Thing thing = this.Barrel.TakeOutBeer();
-				GenPlace.TryPlaceThing(thing, this.pawn.Position, base.Map, ThingPlaceMode.Near, null, null, null, 1);
-				StoragePriority currentPriority = StoreUtility.CurrentStoragePriorityOf(thing, false);
-				IntVec3 c;
-				if (StoreUtility.TryFindBestBetterStoreCellFor(thing, this.pawn, base.Map, currentPriority, this.pawn.Faction, out c, true))
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				CS_0024_003C_003E8__locals13.FailOnDespawnedNullOrForbidden(TargetIndex.A);
+				CS_0024_003C_003E8__locals13.FailOnBurningImmobile(TargetIndex.A);
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.Wait(200).FailOnDestroyedNullOrForbidden(TargetIndex.A).FailOnCannotTouch(TargetIndex.A, PathEndMode.Touch)
+					.FailOn(() => !CS_0024_003C_003E8__locals13.Barrel.Fermented)
+					.WithProgressBarToilDelay(TargetIndex.A);
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+			{
+				_003C_003E1__state = -1;
+				Toil toil = ToilMaker.MakeToil("MakeNewToils");
+				toil.initAction = delegate
 				{
-					this.job.SetTarget(TargetIndex.C, c);
-					this.job.SetTarget(TargetIndex.B, thing);
-					this.job.count = thing.stackCount;
-					return;
-				}
-				base.EndJobWith(JobCondition.Incompletable);
-			};
-			toil.defaultCompleteMode = ToilCompleteMode.Instant;
-			yield return toil;
-			yield return Toils_Reserve.Reserve(TargetIndex.B, 1, -1, null, false);
-			yield return Toils_Reserve.Reserve(TargetIndex.C, 1, -1, null, false);
-			yield return Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.ClosestTouch, false);
-			yield return Toils_Haul.StartCarryThing(TargetIndex.B, false, false, false, true, false);
-			Toil carryToCell = Toils_Haul.CarryHauledThingToCell(TargetIndex.C, PathEndMode.ClosestTouch);
-			yield return carryToCell;
-			yield return Toils_Haul.PlaceHauledThingInCell(TargetIndex.C, carryToCell, true, false);
-			yield break;
+					Thing thing = CS_0024_003C_003E8__locals13.Barrel.TakeOutBeer();
+					GenPlace.TryPlaceThing(thing, CS_0024_003C_003E8__locals13.pawn.Position, CS_0024_003C_003E8__locals13.Map, ThingPlaceMode.Near, null, null, null);
+					StoragePriority currentPriority = StoreUtility.CurrentStoragePriorityOf(thing);
+					if (StoreUtility.TryFindBestBetterStoreCellFor(thing, CS_0024_003C_003E8__locals13.pawn, CS_0024_003C_003E8__locals13.Map, currentPriority, CS_0024_003C_003E8__locals13.pawn.Faction, out var foundCell))
+					{
+						CS_0024_003C_003E8__locals13.job.SetTarget(TargetIndex.C, foundCell);
+						CS_0024_003C_003E8__locals13.job.SetTarget(TargetIndex.B, thing);
+						CS_0024_003C_003E8__locals13.job.count = thing.stackCount;
+					}
+					else
+					{
+						CS_0024_003C_003E8__locals13.EndJobWith(JobCondition.Incompletable);
+					}
+				};
+				toil.defaultCompleteMode = ToilCompleteMode.Instant;
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 3;
+				return true;
+			}
+			case 3:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Reserve.Reserve(TargetIndex.B);
+				_003C_003E1__state = 4;
+				return true;
+			case 4:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Reserve.Reserve(TargetIndex.C);
+				_003C_003E1__state = 5;
+				return true;
+			case 5:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.ClosestTouch);
+				_003C_003E1__state = 6;
+				return true;
+			case 6:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Haul.StartCarryThing(TargetIndex.B);
+				_003C_003E1__state = 7;
+				return true;
+			case 7:
+				_003C_003E1__state = -1;
+				_003CcarryToCell_003E5__2 = Toils_Haul.CarryHauledThingToCell(TargetIndex.C);
+				_003C_003E2__current = _003CcarryToCell_003E5__2;
+				_003C_003E1__state = 8;
+				return true;
+			case 8:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Haul.PlaceHauledThingInCell(TargetIndex.C, _003CcarryToCell_003E5__2, storageMode: true);
+				_003C_003E1__state = 9;
+				return true;
+			case 9:
+				_003C_003E1__state = -1;
+				return false;
+			}
 		}
 
-		// Token: 0x040051E1 RID: 20961
-		private const TargetIndex BarrelInd = TargetIndex.A;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x040051E2 RID: 20962
-		private const TargetIndex BeerToHaulInd = TargetIndex.B;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x040051E3 RID: 20963
-		private const TargetIndex StorageCellInd = TargetIndex.C;
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__9 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__9(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x040051E4 RID: 20964
-		private const int Duration = 200;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private const TargetIndex BarrelInd = TargetIndex.A;
+
+	private const TargetIndex BeerToHaulInd = TargetIndex.B;
+
+	private const TargetIndex StorageCellInd = TargetIndex.C;
+
+	private const int Duration = 200;
+
+	protected Building_FermentingBarrel Barrel => (Building_FermentingBarrel)job.GetTarget(TargetIndex.A).Thing;
+
+	protected Thing Beer => job.GetTarget(TargetIndex.B).Thing;
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return pawn.Reserve(Barrel, job, 1, -1, null, errorOnFailed);
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__9))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__9(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

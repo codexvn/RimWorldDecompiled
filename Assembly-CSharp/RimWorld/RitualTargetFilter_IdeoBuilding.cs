@@ -1,103 +1,239 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class RitualTargetFilter_IdeoBuilding : RitualTargetFilter
 {
-	// Token: 0x020027D6 RID: 10198
-	public class RitualTargetFilter_IdeoBuilding : RitualTargetFilter
+	[CompilerGenerated]
+	private sealed class _003CGetTargetInfos_003Ed__6 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x0600DF37 RID: 57143 RVA: 0x004195FF File Offset: 0x004177FF
-		public RitualTargetFilter_IdeoBuilding()
-		{
-		}
+		private int _003C_003E1__state;
 
-		// Token: 0x0600DF38 RID: 57144 RVA: 0x00419612 File Offset: 0x00417812
-		public RitualTargetFilter_IdeoBuilding(RitualTargetFilterDef def) : base(def)
-		{
-		}
+		private string _003C_003E2__current;
 
-		// Token: 0x0600DF39 RID: 57145 RVA: 0x00419628 File Offset: 0x00417828
-		public override bool CanStart(TargetInfo initiator, TargetInfo selectedTarget, out string rejectionReason)
+		private int _003C_003El__initialThreadId;
+
+		private TargetInfo initiator;
+
+		public TargetInfo _003C_003E3__initiator;
+
+		private HashSet<Precept_Building>.Enumerator _003C_003E7__wrap1;
+
+		string IEnumerator<string>.Current
 		{
-			TargetInfo targetInfo = this.BestTarget(initiator, selectedTarget);
-			rejectionReason = "";
-			if (!targetInfo.IsValid)
+			[DebuggerHidden]
+			get
 			{
-				rejectionReason = "AbilitySpeechDisabledNoSpot".Translate();
-				return false;
+				return _003C_003E2__current;
 			}
-			return true;
 		}
 
-		// Token: 0x0600DF3A RID: 57146 RVA: 0x00419664 File Offset: 0x00417864
-		public override TargetInfo BestTarget(TargetInfo initiator, TargetInfo selectedTarget)
+		object IEnumerator.Current
 		{
-			Pawn pawn = (Pawn)initiator.Thing;
-			Ideo ideo = pawn.Ideo;
-			this.candidateSpots.Clear();
-			for (int i = 0; i < ideo.PreceptsListForReading.Count; i++)
+			[DebuggerHidden]
+			get
 			{
-				Precept_Building precept_Building = ideo.PreceptsListForReading[i] as Precept_Building;
-				if (precept_Building != null)
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetTargetInfos_003Ed__6(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
 				{
-					Thing thing = precept_Building.presenceDemand.BestBuilding(pawn.Map, false);
-					if (thing != null && pawn.CanReach(thing, PathEndMode.Touch, pawn.NormalMaxDanger(), false, false, TraverseMode.ByPawn))
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = default(HashSet<Precept_Building>.Enumerator);
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				switch (_003C_003E1__state)
+				{
+				default:
+					return false;
+				case 0:
+				{
+					_003C_003E1__state = -1;
+					Ideo ideo = ((Pawn)initiator.Thing).Ideo;
+					_003C_003E7__wrap1 = ideo.cachedPossibleBuildings.GetEnumerator();
+					_003C_003E1__state = -3;
+					goto IL_0083;
+				}
+				case 1:
+					_003C_003E1__state = -3;
+					goto IL_0083;
+				case 2:
 					{
-						this.candidateSpots.Add(thing);
+						_003C_003E1__state = -1;
+						return false;
 					}
+					IL_0083:
+					if (_003C_003E7__wrap1.MoveNext())
+					{
+						Precept_Building current = _003C_003E7__wrap1.Current;
+						_003C_003E2__current = current.LabelCap;
+						_003C_003E1__state = 1;
+						return true;
+					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap1 = default(HashSet<Precept_Building>.Enumerator);
+					_003C_003E2__current = "RitualTargetGatherSpotInfo".Translate();
+					_003C_003E1__state = 2;
+					return true;
 				}
 			}
-			this.candidateSpots.AddRange(this.ExtraCandidates(initiator));
-			if (!this.candidateSpots.NullOrEmpty<Thing>())
+			catch
 			{
-				return this.candidateSpots.RandomElement<Thing>();
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
-			if (!this.def.fallBackToGatherSpot)
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap1/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CGetTargetInfos_003Ed__6 _003CGetTargetInfos_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				return TargetInfo.Invalid;
+				_003C_003E1__state = 0;
+				_003CGetTargetInfos_003Ed__ = this;
 			}
-			this.candidateSpots.Clear();
-			for (int j = 0; j < pawn.Map.gatherSpotLister.activeSpots.Count; j++)
+			else
 			{
-				ThingWithComps parent = pawn.Map.gatherSpotLister.activeSpots[j].parent;
-				if (pawn.CanReach(parent, PathEndMode.Touch, pawn.NormalMaxDanger(), false, false, TraverseMode.ByPawn))
+				_003CGetTargetInfos_003Ed__ = new _003CGetTargetInfos_003Ed__6(0);
+			}
+			_003CGetTargetInfos_003Ed__.initiator = _003C_003E3__initiator;
+			return _003CGetTargetInfos_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
+
+	private List<Thing> candidateSpots = new List<Thing>();
+
+	public RitualTargetFilter_IdeoBuilding()
+	{
+	}
+
+	public RitualTargetFilter_IdeoBuilding(RitualTargetFilterDef def)
+		: base(def)
+	{
+	}
+
+	public override bool CanStart(TargetInfo initiator, TargetInfo selectedTarget, out string rejectionReason)
+	{
+		TargetInfo targetInfo = BestTarget(initiator, selectedTarget);
+		rejectionReason = "";
+		if (!targetInfo.IsValid)
+		{
+			rejectionReason = "AbilitySpeechDisabledNoSpot".Translate();
+			return false;
+		}
+		return true;
+	}
+
+	public override TargetInfo BestTarget(TargetInfo initiator, TargetInfo selectedTarget)
+	{
+		Pawn pawn = (Pawn)initiator.Thing;
+		Ideo ideo = pawn.Ideo;
+		candidateSpots.Clear();
+		for (int i = 0; i < ideo.PreceptsListForReading.Count; i++)
+		{
+			if (ideo.PreceptsListForReading[i] is Precept_Building precept_Building)
+			{
+				Thing thing = precept_Building.presenceDemand.BestBuilding(pawn.Map);
+				if (thing != null && pawn.CanReach(thing, PathEndMode.Touch, pawn.NormalMaxDanger()))
 				{
-					this.candidateSpots.Add(parent);
+					candidateSpots.Add(thing);
 				}
 			}
-			if (!this.candidateSpots.NullOrEmpty<Thing>())
-			{
-				return (from s in this.candidateSpots
-				orderby s.Position.DistanceTo(pawn.Position)
-				select s).First<Thing>();
-			}
+		}
+		candidateSpots.AddRange(ExtraCandidates(initiator));
+		if (!candidateSpots.NullOrEmpty())
+		{
+			return candidateSpots.RandomElement();
+		}
+		if (!def.fallBackToGatherSpot)
+		{
 			return TargetInfo.Invalid;
 		}
-
-		// Token: 0x0600DF3B RID: 57147 RVA: 0x00419816 File Offset: 0x00417A16
-		protected virtual IEnumerable<Thing> ExtraCandidates(TargetInfo initiator)
+		candidateSpots.Clear();
+		for (int j = 0; j < pawn.Map.gatherSpotLister.activeSpots.Count; j++)
 		{
-			return Enumerable.Empty<Thing>();
-		}
-
-		// Token: 0x0600DF3C RID: 57148 RVA: 0x0041981D File Offset: 0x00417A1D
-		public override IEnumerable<string> GetTargetInfos(TargetInfo initiator)
-		{
-			Ideo ideo = ((Pawn)initiator.Thing).Ideo;
-			foreach (Precept_Building precept_Building in ideo.cachedPossibleBuildings)
+			ThingWithComps parent = pawn.Map.gatherSpotLister.activeSpots[j].parent;
+			if (pawn.CanReach(parent, PathEndMode.Touch, pawn.NormalMaxDanger()))
 			{
-				yield return precept_Building.LabelCap;
+				candidateSpots.Add(parent);
 			}
-			HashSet<Precept_Building>.Enumerator enumerator = default(HashSet<Precept_Building>.Enumerator);
-			yield return "RitualTargetGatherSpotInfo".Translate();
-			yield break;
-			yield break;
 		}
+		if (!candidateSpots.NullOrEmpty())
+		{
+			return candidateSpots.OrderBy((Thing s) => s.Position.DistanceTo(pawn.Position)).First();
+		}
+		return TargetInfo.Invalid;
+	}
 
-		// Token: 0x04009646 RID: 38470
-		private List<Thing> candidateSpots = new List<Thing>();
+	protected virtual IEnumerable<Thing> ExtraCandidates(TargetInfo initiator)
+	{
+		return Enumerable.Empty<Thing>();
+	}
+
+	[IteratorStateMachine(typeof(_003CGetTargetInfos_003Ed__6))]
+	public override IEnumerable<string> GetTargetInfos(TargetInfo initiator)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetTargetInfos_003Ed__6(-2)
+		{
+			_003C_003E3__initiator = initiator
+		};
 	}
 }

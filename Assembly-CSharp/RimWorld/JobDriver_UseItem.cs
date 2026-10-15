@@ -1,124 +1,221 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_UseItem : JobDriver
 {
-	// Token: 0x02001344 RID: 4932
-	public class JobDriver_UseItem : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__5 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x06007925 RID: 31013 RVA: 0x00249DA7 File Offset: 0x00247FA7
-		public override void ExposeData()
-		{
-			base.ExposeData();
-			Scribe_Values.Look<int>(ref this.useDuration, "useDuration", 0, false);
-		}
+		private int _003C_003E1__state;
 
-		// Token: 0x06007926 RID: 31014 RVA: 0x00249DC4 File Offset: 0x00247FC4
-		public override void Notify_Starting()
-		{
-			base.Notify_Starting();
-			this.useDuration = this.job.GetTarget(TargetIndex.A).Thing.TryGetComp<CompUsable>().Props.useDuration;
-		}
+		private Toil _003C_003E2__current;
 
-		// Token: 0x06007927 RID: 31015 RVA: 0x00249E00 File Offset: 0x00248000
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
-		{
-			return this.pawn.Reserve(this.job.targetA, this.job, 1, -1, null, errorOnFailed, false) && (!this.job.targetB.IsValid || this.pawn.Reserve(this.job.targetB, this.job, 1, -1, null, errorOnFailed, false));
-		}
+		private int _003C_003El__initialThreadId;
 
-		// Token: 0x06007928 RID: 31016 RVA: 0x00249E6A File Offset: 0x0024806A
-		protected override IEnumerable<Toil> MakeNewToils()
-		{
-			this.FailOnIncapable(PawnCapacityDefOf.Manipulation);
-			this.FailOn(() => !base.TargetThingA.TryGetComp<CompUsable>().CanBeUsedBy(this.pawn, false, false));
-			yield return Toils_Goto.GotoThing(TargetIndex.A, base.TargetThingA.def.hasInteractionCell ? PathEndMode.InteractionCell : PathEndMode.Touch, false);
-			yield return this.PrepareToUse();
-			yield return this.Use();
-			yield break;
-		}
+		public JobDriver_UseItem _003C_003E4__this;
 
-		// Token: 0x06007929 RID: 31017 RVA: 0x00249E7C File Offset: 0x0024807C
-		protected Toil PrepareToUse()
+		Toil IEnumerator<Toil>.Current
 		{
-			Toil toil = Toils_General.Wait(this.useDuration, TargetIndex.A);
-			toil.WithProgressBarToilDelay(TargetIndex.A, false, -0.5f);
-			toil.FailOnDespawnedNullOrForbidden(TargetIndex.A);
-			toil.FailOnCannotTouch(TargetIndex.A, base.TargetThingA.def.hasInteractionCell ? PathEndMode.InteractionCell : PathEndMode.Touch);
-			toil.handlingFacing = true;
-			toil.tickAction = delegate()
+			[DebuggerHidden]
+			get
 			{
-				ThingWithComps thingWithComps = this.job.GetTarget(TargetIndex.A).Thing as ThingWithComps;
-				if (thingWithComps != null)
-				{
-					using (IEnumerator<CompUseEffect> enumerator = thingWithComps.GetComps<CompUseEffect>().GetEnumerator())
-					{
-						while (enumerator.MoveNext())
-						{
-							CompUseEffect compUseEffect = enumerator.Current;
-							if (compUseEffect != null)
-							{
-								compUseEffect.PrepareTick();
-							}
-						}
-						goto IL_74;
-					}
-				}
-				CompUseEffect compUseEffect2 = this.job.GetTarget(TargetIndex.A).Thing.TryGetComp<CompUseEffect>();
-				if (compUseEffect2 != null)
-				{
-					compUseEffect2.PrepareTick();
-				}
-				IL_74:
-				CompUsable compUsable = this.job.GetTarget(TargetIndex.A).Thing.TryGetComp<CompUsable>();
-				if (compUsable != null && this.warmupMote == null && compUsable.Props.warmupMote != null)
-				{
-					this.warmupMote = MoteMaker.MakeAttachedOverlay(this.job.GetTarget(TargetIndex.B).Thing, compUsable.Props.warmupMote, Vector3.zero, 1f, -1f);
-				}
-				Mote mote = this.warmupMote;
-				if (mote != null)
-				{
-					mote.Maintain();
-				}
-				this.pawn.rotationTracker.FaceTarget(base.TargetA);
-			};
-			if (this.job.targetB.IsValid)
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
 			{
-				toil.FailOnDespawnedOrNull(TargetIndex.B);
-				CompTargetable compTargetable = this.job.GetTarget(TargetIndex.A).Thing.TryGetComp<CompTargetable>();
-				if (compTargetable != null && compTargetable.Props.nonDownedPawnOnly)
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__5(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_UseItem CS_0024_003C_003E8__locals7 = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				CS_0024_003C_003E8__locals7.FailOnIncapable(PawnCapacityDefOf.Manipulation);
+				CS_0024_003C_003E8__locals7.FailOn(() => !CS_0024_003C_003E8__locals7.TargetThingA.TryGetComp<CompUsable>().CanBeUsedBy(CS_0024_003C_003E8__locals7.pawn));
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.A, CS_0024_003C_003E8__locals7.TargetThingA.def.hasInteractionCell ? PathEndMode.InteractionCell : PathEndMode.Touch);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = CS_0024_003C_003E8__locals7.PrepareToUse();
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = CS_0024_003C_003E8__locals7.Use();
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__5 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__5(0)
 				{
-					toil.FailOnDestroyedOrNull(TargetIndex.B);
-					toil.FailOnDowned(TargetIndex.B);
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private int useDuration = -1;
+
+	private Mote warmupMote;
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref useDuration, "useDuration", 0);
+	}
+
+	public override void Notify_Starting()
+	{
+		base.Notify_Starting();
+		useDuration = job.GetTarget(TargetIndex.A).Thing.TryGetComp<CompUsable>().Props.useDuration;
+	}
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		if (!pawn.Reserve(job.targetA, job, 1, -1, null, errorOnFailed))
+		{
+			return false;
+		}
+		if (job.targetB.IsValid && !pawn.Reserve(job.targetB, job, 1, -1, null, errorOnFailed))
+		{
+			return false;
+		}
+		return true;
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__5))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__5(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	protected Toil PrepareToUse()
+	{
+		Toil toil = Toils_General.Wait(useDuration, TargetIndex.A);
+		toil.WithProgressBarToilDelay(TargetIndex.A);
+		toil.FailOnDespawnedNullOrForbidden(TargetIndex.A);
+		toil.FailOnCannotTouch(TargetIndex.A, base.TargetThingA.def.hasInteractionCell ? PathEndMode.InteractionCell : PathEndMode.Touch);
+		toil.handlingFacing = true;
+		toil.tickAction = delegate
+		{
+			if (job.GetTarget(TargetIndex.A).Thing is ThingWithComps thingWithComps)
+			{
+				foreach (CompUseEffect comp in thingWithComps.GetComps<CompUseEffect>())
+				{
+					comp?.PrepareTick();
 				}
 			}
-			return toil;
-		}
-
-		// Token: 0x0600792A RID: 31018 RVA: 0x00249F38 File Offset: 0x00248138
-		protected Toil Use()
-		{
-			Toil use = ToilMaker.MakeToil("Use");
-			use.initAction = delegate()
+			else
 			{
-				Pawn actor = use.actor;
-				CompUsable compUsable = actor.CurJob.targetA.Thing.TryGetComp<CompUsable>();
-				compUsable.UsedBy(actor);
-				if (compUsable.Props.finalizeMote != null)
-				{
-					MoteMaker.MakeAttachedOverlay(actor.CurJob.GetTarget(TargetIndex.A).Thing, compUsable.Props.finalizeMote, Vector3.zero, 1f, -1f);
-				}
-			};
-			use.defaultCompleteMode = ToilCompleteMode.Instant;
-			return use;
+				job.GetTarget(TargetIndex.A).Thing.TryGetComp<CompUseEffect>()?.PrepareTick();
+			}
+			CompUsable compUsable = job.GetTarget(TargetIndex.A).Thing.TryGetComp<CompUsable>();
+			if (compUsable != null && warmupMote == null && compUsable.Props.warmupMote != null)
+			{
+				warmupMote = MoteMaker.MakeAttachedOverlay(job.GetTarget(TargetIndex.B).Thing, compUsable.Props.warmupMote, Vector3.zero);
+			}
+			warmupMote?.Maintain();
+			pawn.rotationTracker.FaceTarget(base.TargetA);
+		};
+		if (job.targetB.IsValid)
+		{
+			toil.FailOnDespawnedOrNull(TargetIndex.B);
+			CompTargetable compTargetable = job.GetTarget(TargetIndex.A).Thing.TryGetComp<CompTargetable>();
+			if (compTargetable != null && compTargetable.Props.nonDownedPawnOnly)
+			{
+				toil.FailOnDestroyedOrNull(TargetIndex.B);
+				toil.FailOnDowned(TargetIndex.B);
+			}
 		}
+		return toil;
+	}
 
-		// Token: 0x0400523B RID: 21051
-		private int useDuration = -1;
-
-		// Token: 0x0400523C RID: 21052
-		private Mote warmupMote;
+	protected Toil Use()
+	{
+		Toil use = ToilMaker.MakeToil("Use");
+		use.initAction = delegate
+		{
+			Pawn actor = use.actor;
+			CompUsable compUsable = actor.CurJob.targetA.Thing.TryGetComp<CompUsable>();
+			compUsable.UsedBy(actor);
+			if (compUsable.Props.finalizeMote != null)
+			{
+				MoteMaker.MakeAttachedOverlay(actor.CurJob.GetTarget(TargetIndex.A).Thing, compUsable.Props.finalizeMote, Vector3.zero);
+			}
+		};
+		use.defaultCompleteMode = ToilCompleteMode.Instant;
+		return use;
 	}
 }

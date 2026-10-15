@@ -1,154 +1,236 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class GenStep_ScatterRoadDebris : GenStep_Scatterer
 {
-	// Token: 0x02002000 RID: 8192
-	public class GenStep_ScatterRoadDebris : GenStep_Scatterer
+	[CompilerGenerated]
+	private sealed class _003Cget_Debris_003Ed__11 : IEnumerable<ThingDef>, IEnumerable, IEnumerator<ThingDef>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001B7D RID: 7037
-		// (get) Token: 0x0600B477 RID: 46199 RVA: 0x0033C622 File Offset: 0x0033A822
-		public override int SeedPart
+		private int _003C_003E1__state;
+
+		private ThingDef _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		ThingDef IEnumerator<ThingDef>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return 765346456;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001B7E RID: 7038
-		// (get) Token: 0x0600B478 RID: 46200 RVA: 0x0033C629 File Offset: 0x0033A829
-		public IEnumerable<ThingDef> Debris
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				yield return ThingDefOf.AncientRustedCarFrame;
-				yield return ThingDefOf.AncientRustedJeep;
-				yield return ThingDefOf.AncientRustedCar;
-				yield return ThingDefOf.AncientTank;
-				yield return ThingDefOf.AncientPodCar;
-				yield return ThingDefOf.AncientHydrant;
-				yield break;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600B479 RID: 46201 RVA: 0x0033C634 File Offset: 0x0033A834
-		protected override float GetPlacementFactor(Map map)
+		[DebuggerHidden]
+		public _003Cget_Debris_003Ed__11(int _003C_003E1__state)
 		{
-			float num = 1f;
-			foreach (TileMutatorDef tileMutatorDef in map.TileInfo.Mutators)
-			{
-				num *= tileMutatorDef.junkDensityFactor;
-			}
-			return num;
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x0600B47A RID: 46202 RVA: 0x0033C690 File Offset: 0x0033A890
-		public override void Generate(Map map, GenStepParams parms)
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			if (!ModLister.CheckIdeology("Scatter road debris"))
-			{
-				return;
-			}
-			this.allowInWaterBiome = false;
-			this.mapHasRoads = this.HasAncientRoads(map);
-			this.count = (this.mapHasRoads ? GenStep_ScatterRoadDebris.VehicleRangeRoadMap : GenStep_ScatterRoadDebris.VehicleRangeNonRoadMap).RandomInRange;
-			this.thingToPlace = this.Debris.RandomElement<ThingDef>();
-			base.Generate(map, parms);
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x0600B47B RID: 46203 RVA: 0x0033C6FC File Offset: 0x0033A8FC
-		private bool HasAncientRoads(Map map)
+		private bool MoveNext()
 		{
-			SurfaceTile surfaceTile;
-			if (map.TileInfo.Isnt(out surfaceTile) || surfaceTile.Roads == null)
+			switch (_003C_003E1__state)
 			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = ThingDefOf.AncientRustedCarFrame;
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = ThingDefOf.AncientRustedJeep;
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = ThingDefOf.AncientRustedCar;
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = ThingDefOf.AncientTank;
+				_003C_003E1__state = 4;
+				return true;
+			case 4:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = ThingDefOf.AncientPodCar;
+				_003C_003E1__state = 5;
+				return true;
+			case 5:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = ThingDefOf.AncientHydrant;
+				_003C_003E1__state = 6;
+				return true;
+			case 6:
+				_003C_003E1__state = -1;
 				return false;
 			}
-			for (int i = 0; i < surfaceTile.Roads.Count; i++)
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<ThingDef> IEnumerable<ThingDef>.GetEnumerator()
+		{
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				if (surfaceTile.Roads[i].road == RoadDefOf.AncientAsphaltHighway || surfaceTile.Roads[i].road == RoadDefOf.AncientAsphaltRoad)
+				_003C_003E1__state = 0;
+				return this;
+			}
+			return new _003Cget_Debris_003Ed__11(0);
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<ThingDef>)this).GetEnumerator();
+		}
+	}
+
+	private const int EngineBlockMinDistance = 10;
+
+	private const float EngineBlockChance = 0.5f;
+
+	private const float OilSmearChance = 0.15f;
+
+	private static readonly IntRange VehicleRangeNonRoadMap = new IntRange(1, 2);
+
+	private static readonly IntRange VehicleRangeRoadMap = new IntRange(2, 3);
+
+	private ThingDef thingToPlace;
+
+	private Rot4 rotation;
+
+	private bool mapHasRoads;
+
+	public override int SeedPart => 765346456;
+
+	public IEnumerable<ThingDef> Debris
+	{
+		[IteratorStateMachine(typeof(_003Cget_Debris_003Ed__11))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_Debris_003Ed__11(-2);
+		}
+	}
+
+	protected override float GetPlacementFactor(Map map)
+	{
+		float num = 1f;
+		foreach (TileMutatorDef mutator in map.TileInfo.Mutators)
+		{
+			num *= mutator.junkDensityFactor;
+		}
+		return num;
+	}
+
+	public override void Generate(Map map, GenStepParams parms)
+	{
+		if (ModLister.CheckIdeology("Scatter road debris"))
+		{
+			allowInWaterBiome = false;
+			mapHasRoads = HasAncientRoads(map);
+			count = (mapHasRoads ? VehicleRangeRoadMap : VehicleRangeNonRoadMap).RandomInRange;
+			thingToPlace = Debris.RandomElement();
+			base.Generate(map, parms);
+		}
+	}
+
+	private bool HasAncientRoads(Map map)
+	{
+		if (map.TileInfo.Isnt<SurfaceTile>(out var casted) || casted.Roads == null)
+		{
+			return false;
+		}
+		for (int i = 0; i < casted.Roads.Count; i++)
+		{
+			if (casted.Roads[i].road == RoadDefOf.AncientAsphaltHighway || casted.Roads[i].road == RoadDefOf.AncientAsphaltRoad)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	protected override bool CanScatterAt(IntVec3 c, Map map)
+	{
+		if (!base.CanScatterAt(c, map))
+		{
+			return false;
+		}
+		if (mapHasRoads && !c.GetTerrain(map).IsRoad)
+		{
+			return false;
+		}
+		if (thingToPlace.rotatable)
+		{
+			int num = Rand.RangeInclusive(1, 4);
+			for (int i = 0; i < 4; i++)
+			{
+				rotation = new Rot4((i + num) % 4);
+				if (CanPlaceThingAt(c, rotation, map, thingToPlace))
 				{
 					return true;
 				}
 			}
 			return false;
 		}
+		rotation = thingToPlace.defaultPlacingRot;
+		return CanPlaceThingAt(c, rotation, map, thingToPlace);
+	}
 
-		// Token: 0x0600B47C RID: 46204 RVA: 0x0033C76C File Offset: 0x0033A96C
-		protected override bool CanScatterAt(IntVec3 c, Map map)
+	private bool CanPlaceThingAt(IntVec3 c, Rot4 rot, Map map, ThingDef thingDef)
+	{
+		return ScatterDebrisUtility.CanPlaceThingAt(c, rot, map, thingDef);
+	}
+
+	protected override void ScatterAt(IntVec3 loc, Map map, GenStepParams parms, int count = 1)
+	{
+		Thing thing = GenSpawn.Spawn(ThingMaker.MakeThing(thingToPlace), loc, map, rotation);
+		ScatterDebrisUtility.ScatterFilthAroundThing(thing, map, ThingDefOf.Filth_MachineBits, 0.75f);
+		ScatterDebrisUtility.ScatterFilthAroundThing(thing, map, ThingDefOf.Filth_OilSmear, 0.25f, 0);
+		ThingDef engineBlockDef = (Rand.Bool ? ThingDefOf.AncientRustedEngineBlock : ThingDefOf.AncientLargeRustedEngineBlock);
+		if (Rand.Chance(0.5f) && RCellFinder.TryFindRandomCellNearWith(loc, (IntVec3 c) => CanPlaceThingAt(c, Rot4.North, map, engineBlockDef), map, out var result, 10))
 		{
-			if (!base.CanScatterAt(c, map))
-			{
-				return false;
-			}
-			if (this.mapHasRoads && !c.GetTerrain(map).IsRoad)
-			{
-				return false;
-			}
-			if (this.thingToPlace.rotatable)
-			{
-				int num = Rand.RangeInclusive(1, 4);
-				for (int i = 0; i < 4; i++)
-				{
-					this.rotation = new Rot4((i + num) % 4);
-					if (this.CanPlaceThingAt(c, this.rotation, map, this.thingToPlace))
-					{
-						return true;
-					}
-				}
-				return false;
-			}
-			this.rotation = this.thingToPlace.defaultPlacingRot;
-			return this.CanPlaceThingAt(c, this.rotation, map, this.thingToPlace);
+			ScatterDebrisUtility.ScatterFilthAroundThing(GenSpawn.Spawn(ThingMaker.MakeThing(engineBlockDef), result, map, Rot4.North), map, ThingDefOf.Filth_MachineBits);
+			ScatterDebrisUtility.ScatterFilthAroundThing(thing, map, ThingDefOf.Filth_OilSmear, 0.15f, 0);
 		}
-
-		// Token: 0x0600B47D RID: 46205 RVA: 0x0033B0CF File Offset: 0x003392CF
-		private bool CanPlaceThingAt(IntVec3 c, Rot4 rot, Map map, ThingDef thingDef)
-		{
-			return ScatterDebrisUtility.CanPlaceThingAt(c, rot, map, thingDef);
-		}
-
-		// Token: 0x0600B47E RID: 46206 RVA: 0x0033C810 File Offset: 0x0033AA10
-		protected override void ScatterAt(IntVec3 loc, Map map, GenStepParams parms, int count = 1)
-		{
-			Thing thing = GenSpawn.Spawn(ThingMaker.MakeThing(this.thingToPlace, null), loc, map, this.rotation, WipeMode.Vanish, false, false);
-			ScatterDebrisUtility.ScatterFilthAroundThing(thing, map, ThingDefOf.Filth_MachineBits, 0.75f, 1, int.MaxValue, null);
-			ScatterDebrisUtility.ScatterFilthAroundThing(thing, map, ThingDefOf.Filth_OilSmear, 0.25f, 0, int.MaxValue, null);
-			ThingDef engineBlockDef = Rand.Bool ? ThingDefOf.AncientRustedEngineBlock : ThingDefOf.AncientLargeRustedEngineBlock;
-			IntVec3 loc2;
-			if (Rand.Chance(0.5f) && RCellFinder.TryFindRandomCellNearWith(loc, (IntVec3 c) => this.CanPlaceThingAt(c, Rot4.North, map, engineBlockDef), map, out loc2, 10, 2147483647))
-			{
-				ScatterDebrisUtility.ScatterFilthAroundThing(GenSpawn.Spawn(ThingMaker.MakeThing(engineBlockDef, null), loc2, map, Rot4.North, WipeMode.Vanish, false, false), map, ThingDefOf.Filth_MachineBits, 0.5f, 1, int.MaxValue, null);
-				ScatterDebrisUtility.ScatterFilthAroundThing(thing, map, ThingDefOf.Filth_OilSmear, 0.15f, 0, int.MaxValue, null);
-			}
-			this.thingToPlace = this.Debris.RandomElement<ThingDef>();
-		}
-
-		// Token: 0x04007BB9 RID: 31673
-		private const int EngineBlockMinDistance = 10;
-
-		// Token: 0x04007BBA RID: 31674
-		private const float EngineBlockChance = 0.5f;
-
-		// Token: 0x04007BBB RID: 31675
-		private const float OilSmearChance = 0.15f;
-
-		// Token: 0x04007BBC RID: 31676
-		private static readonly IntRange VehicleRangeNonRoadMap = new IntRange(1, 2);
-
-		// Token: 0x04007BBD RID: 31677
-		private static readonly IntRange VehicleRangeRoadMap = new IntRange(2, 3);
-
-		// Token: 0x04007BBE RID: 31678
-		private ThingDef thingToPlace;
-
-		// Token: 0x04007BBF RID: 31679
-		private Rot4 rotation;
-
-		// Token: 0x04007BC0 RID: 31680
-		private bool mapHasRoads;
+		thingToPlace = Debris.RandomElement();
 	}
 }

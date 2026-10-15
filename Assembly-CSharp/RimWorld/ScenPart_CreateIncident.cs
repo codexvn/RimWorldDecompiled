@@ -1,164 +1,227 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+internal class ScenPart_CreateIncident : ScenPart_IncidentBase
 {
-	// Token: 0x020028AA RID: 10410
-	internal class ScenPart_CreateIncident : ScenPart_IncidentBase
+	[CompilerGenerated]
+	private sealed class _003CRandomizableIncidents_003Ed__19 : IEnumerable<IncidentDef>, IEnumerable, IEnumerator<IncidentDef>, IEnumerator, IDisposable
 	{
-		// Token: 0x170022A7 RID: 8871
-		// (get) Token: 0x0600E3D6 RID: 58326 RVA: 0x00429739 File Offset: 0x00427939
-		protected override string IncidentTag
+		private int _003C_003E1__state;
+
+		private IncidentDef _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		IncidentDef IEnumerator<IncidentDef>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return "CreateIncident";
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170022A8 RID: 8872
-		// (get) Token: 0x0600E3D7 RID: 58327 RVA: 0x00429740 File Offset: 0x00427940
-		private float RandomInterval
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				float maxInclusive = (this.maxDays > 0f && this.maxDays > this.minDays) ? this.maxDays : this.minDays;
-				return Rand.Range(this.minDays, maxInclusive);
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x0600E3D8 RID: 58328 RVA: 0x00429784 File Offset: 0x00427984
-		public override void ExposeData()
+		[DebuggerHidden]
+		public _003CRandomizableIncidents_003Ed__19(int _003C_003E1__state)
 		{
-			base.ExposeData();
-			Scribe_Values.Look<float>(ref this.intervalDays, "intervalDays", 0f, false);
-			Scribe_Values.Look<float>(ref this.minDays, "minDays", this.intervalDays, false);
-			Scribe_Values.Look<float>(ref this.maxDays, "maxDays", 0f, false);
-			Scribe_Values.Look<bool>(ref this.repeat, "repeat", false, false);
-			Scribe_Values.Look<float>(ref this.occurTick, "occurTick", 0f, false);
-			Scribe_Values.Look<bool>(ref this.isFinished, "isFinished", false, false);
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x0600E3D9 RID: 58329 RVA: 0x00429814 File Offset: 0x00427A14
-		public override int GetHashCode()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			return base.GetHashCode() ^ this.intervalDays.GetHashCode() ^ (this.repeat ? 1 : 0) ^ this.occurTick.GetHashCode() ^ (this.isFinished ? 1 : 0);
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x0600E3DA RID: 58330 RVA: 0x00429850 File Offset: 0x00427A50
-		public override void DoEditInterface(Listing_ScenEdit listing)
+		private bool MoveNext()
 		{
-			Rect scenPartRect = listing.GetScenPartRect(this, ScenPart.RowHeight * 3f);
-			Rect rect = new Rect(scenPartRect.x, scenPartRect.y, scenPartRect.width, scenPartRect.height / 3f);
-			Rect rect2 = new Rect(scenPartRect.x, scenPartRect.y + scenPartRect.height / 3f, scenPartRect.width / 2f, scenPartRect.height / 3f);
-			Rect rect3 = new Rect(scenPartRect.x + scenPartRect.width / 2f, scenPartRect.y + scenPartRect.height / 3f, scenPartRect.width / 2f, scenPartRect.height / 3f);
-			Rect rect4 = new Rect(scenPartRect.x, scenPartRect.y + scenPartRect.height * 2f / 3f, scenPartRect.width, scenPartRect.height / 3f);
-			base.DoIncidentEditInterface(rect);
-			Widgets.TextFieldNumericLabeled<float>(rect2, "minDays".Translate(), ref this.minDays, ref this.minDaysBuffer, 0f, 1E+09f);
-			Widgets.TextFieldNumericLabeled<float>(rect3, "maxDays".Translate(), ref this.maxDays, ref this.maxDaysBuffer, 0f, 1E+09f);
-			Widgets.CheckboxLabeled(rect4, "repeat".Translate(), ref this.repeat, false, null, null, false, false);
-		}
-
-		// Token: 0x0600E3DB RID: 58331 RVA: 0x004299D8 File Offset: 0x00427BD8
-		public override void Randomize()
-		{
-			base.Randomize();
-			this.intervalDays = 15f * Rand.Gaussian(0f, 1f) + 30f;
-			if (this.intervalDays < 0f)
+			switch (_003C_003E1__state)
 			{
-				this.intervalDays = 0f;
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = IncidentDefOf.Eclipse;
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = IncidentDefOf.ToxicFallout;
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = IncidentDefOf.SolarFlare;
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+				_003C_003E1__state = -1;
+				return false;
 			}
-			this.minDays = this.intervalDays;
-			this.repeat = (Rand.Range(0, 100) < 50);
 		}
 
-		// Token: 0x0600E3DC RID: 58332 RVA: 0x00429A42 File Offset: 0x00427C42
-		protected override IEnumerable<IncidentDef> RandomizableIncidents()
+		bool IEnumerator.MoveNext()
 		{
-			yield return IncidentDefOf.Eclipse;
-			yield return IncidentDefOf.ToxicFallout;
-			yield return IncidentDefOf.SolarFlare;
-			yield break;
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0600E3DD RID: 58333 RVA: 0x00429A4B File Offset: 0x00427C4B
-		public override void PostGameStart()
+		[DebuggerHidden]
+		void IEnumerator.Reset()
 		{
-			base.PostGameStart();
-			this.occurTick = (float)Find.TickManager.TicksGame + 60000f * this.RandomInterval;
+			throw new NotSupportedException();
 		}
 
-		// Token: 0x0600E3DE RID: 58334 RVA: 0x00429A74 File Offset: 0x00427C74
-		public override void Tick()
+		[DebuggerHidden]
+		IEnumerator<IncidentDef> IEnumerable<IncidentDef>.GetEnumerator()
 		{
-			base.Tick();
-			if (Find.AnyPlayerHomeMap == null)
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				return;
+				_003C_003E1__state = 0;
+				return this;
 			}
-			if (this.isFinished)
-			{
-				return;
-			}
-			if (this.incident == null)
-			{
-				Log.Error("Trying to tick ScenPart_CreateIncident but the incident is null");
-				this.isFinished = true;
-				return;
-			}
-			if ((float)Find.TickManager.TicksGame >= this.occurTick)
-			{
-				IncidentParms parms = StorytellerUtility.DefaultParmsNow(this.incident.category, (from x in Find.Maps
-				where x.IsPlayerHome
-				select x).RandomElement<Map>());
-				if (!this.incident.Worker.TryExecute(parms))
-				{
-					this.isFinished = true;
-					return;
-				}
-				if (this.repeat && (this.minDays > 0f || this.maxDays > this.minDays))
-				{
-					this.occurTick += 60000f * this.RandomInterval;
-					return;
-				}
-				this.isFinished = true;
-			}
+			return new _003CRandomizableIncidents_003Ed__19(0);
 		}
 
-		// Token: 0x0400988A RID: 39050
-		private const float IntervalMidpoint = 30f;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<IncidentDef>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x0400988B RID: 39051
-		private const float IntervalDeviation = 15f;
+	private const float IntervalMidpoint = 30f;
 
-		// Token: 0x0400988C RID: 39052
-		private float intervalDays;
+	private const float IntervalDeviation = 15f;
 
-		// Token: 0x0400988D RID: 39053
-		private float minDays;
+	private float intervalDays;
 
-		// Token: 0x0400988E RID: 39054
-		private float maxDays;
+	private float minDays;
 
-		// Token: 0x0400988F RID: 39055
-		private bool repeat;
+	private float maxDays;
 
-		// Token: 0x04009890 RID: 39056
-		private string intervalDaysBuffer;
+	private bool repeat;
 
-		// Token: 0x04009891 RID: 39057
-		private string minDaysBuffer;
+	private string intervalDaysBuffer;
 
-		// Token: 0x04009892 RID: 39058
-		private string maxDaysBuffer;
+	private string minDaysBuffer;
 
-		// Token: 0x04009893 RID: 39059
-		private float occurTick;
+	private string maxDaysBuffer;
 
-		// Token: 0x04009894 RID: 39060
-		private bool isFinished;
+	private float occurTick;
+
+	private bool isFinished;
+
+	protected override string IncidentTag => "CreateIncident";
+
+	private float RandomInterval
+	{
+		get
+		{
+			float maxInclusive = ((maxDays > 0f && maxDays > minDays) ? maxDays : minDays);
+			return Rand.Range(minDays, maxInclusive);
+		}
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref intervalDays, "intervalDays", 0f);
+		Scribe_Values.Look(ref minDays, "minDays", intervalDays);
+		Scribe_Values.Look(ref maxDays, "maxDays", 0f);
+		Scribe_Values.Look(ref repeat, "repeat", defaultValue: false);
+		Scribe_Values.Look(ref occurTick, "occurTick", 0f);
+		Scribe_Values.Look(ref isFinished, "isFinished", defaultValue: false);
+	}
+
+	public override int GetHashCode()
+	{
+		return (int)((uint)(base.GetHashCode() ^ intervalDays.GetHashCode()) ^ (repeat ? 1u : 0u) ^ (uint)occurTick.GetHashCode()) ^ (isFinished ? 1 : 0);
+	}
+
+	public override void DoEditInterface(Listing_ScenEdit listing)
+	{
+		Rect scenPartRect = listing.GetScenPartRect(this, ScenPart.RowHeight * 3f);
+		Rect rect = new Rect(scenPartRect.x, scenPartRect.y, scenPartRect.width, scenPartRect.height / 3f);
+		Rect rect2 = new Rect(scenPartRect.x, scenPartRect.y + scenPartRect.height / 3f, scenPartRect.width / 2f, scenPartRect.height / 3f);
+		Rect rect3 = new Rect(scenPartRect.x + scenPartRect.width / 2f, scenPartRect.y + scenPartRect.height / 3f, scenPartRect.width / 2f, scenPartRect.height / 3f);
+		Rect rect4 = new Rect(scenPartRect.x, scenPartRect.y + scenPartRect.height * 2f / 3f, scenPartRect.width, scenPartRect.height / 3f);
+		DoIncidentEditInterface(rect);
+		Widgets.TextFieldNumericLabeled(rect2, "minDays".Translate(), ref minDays, ref minDaysBuffer);
+		Widgets.TextFieldNumericLabeled(rect3, "maxDays".Translate(), ref maxDays, ref maxDaysBuffer);
+		Widgets.CheckboxLabeled(rect4, "repeat".Translate(), ref repeat);
+	}
+
+	public override void Randomize()
+	{
+		base.Randomize();
+		intervalDays = 15f * Rand.Gaussian() + 30f;
+		if (intervalDays < 0f)
+		{
+			intervalDays = 0f;
+		}
+		minDays = intervalDays;
+		repeat = Rand.Range(0, 100) < 50;
+	}
+
+	[IteratorStateMachine(typeof(_003CRandomizableIncidents_003Ed__19))]
+	protected override IEnumerable<IncidentDef> RandomizableIncidents()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CRandomizableIncidents_003Ed__19(-2);
+	}
+
+	public override void PostGameStart()
+	{
+		base.PostGameStart();
+		occurTick = (float)Find.TickManager.TicksGame + 60000f * RandomInterval;
+	}
+
+	public override void Tick()
+	{
+		base.Tick();
+		if (Find.AnyPlayerHomeMap == null || isFinished)
+		{
+			return;
+		}
+		if (incident == null)
+		{
+			Log.Error("Trying to tick ScenPart_CreateIncident but the incident is null");
+			isFinished = true;
+		}
+		else if ((float)Find.TickManager.TicksGame >= occurTick)
+		{
+			IncidentParms parms = StorytellerUtility.DefaultParmsNow(incident.category, Find.Maps.Where((Map x) => x.IsPlayerHome).RandomElement());
+			if (!incident.Worker.TryExecute(parms))
+			{
+				isFinished = true;
+			}
+			else if (repeat && (minDays > 0f || maxDays > minDays))
+			{
+				occurTick += 60000f * RandomInterval;
+			}
+			else
+			{
+				isFinished = true;
+			}
+		}
 	}
 }

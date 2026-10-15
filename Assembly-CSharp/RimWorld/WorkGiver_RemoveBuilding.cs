@@ -1,73 +1,203 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public abstract class WorkGiver_RemoveBuilding : WorkGiver_Scanner
 {
-	// Token: 0x0200156E RID: 5486
-	public abstract class WorkGiver_RemoveBuilding : WorkGiver_Scanner
+	[CompilerGenerated]
+	private sealed class _003CPotentialWorkThingsGlobal_003Ed__6 : IEnumerable<Thing>, IEnumerable, IEnumerator<Thing>, IEnumerator, IDisposable
 	{
-		// Token: 0x170013E6 RID: 5094
-		// (get) Token: 0x06008224 RID: 33316
-		protected abstract DesignationDef Designation { get; }
+		private int _003C_003E1__state;
 
-		// Token: 0x170013E7 RID: 5095
-		// (get) Token: 0x06008225 RID: 33317
-		protected abstract JobDef RemoveBuildingJob { get; }
+		private Thing _003C_003E2__current;
 
-		// Token: 0x170013E8 RID: 5096
-		// (get) Token: 0x06008226 RID: 33318 RVA: 0x000E96BB File Offset: 0x000E78BB
-		public override PathEndMode PathEndMode
+		private int _003C_003El__initialThreadId;
+
+		private Pawn pawn;
+
+		public Pawn _003C_003E3__pawn;
+
+		public WorkGiver_RemoveBuilding _003C_003E4__this;
+
+		private IEnumerator<Designation> _003C_003E7__wrap1;
+
+		Thing IEnumerator<Thing>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return PathEndMode.Touch;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x06008227 RID: 33319 RVA: 0x0027264B File Offset: 0x0027084B
-		public override IEnumerable<Thing> PotentialWorkThingsGlobal(Pawn pawn)
+		object IEnumerator.Current
 		{
-			foreach (Designation designation in pawn.Map.designationManager.SpawnedDesignationsOfDef(this.Designation))
+			[DebuggerHidden]
+			get
 			{
-				yield return designation.target.Thing;
+				return _003C_003E2__current;
 			}
-			IEnumerator<Designation> enumerator = null;
-			yield break;
-			yield break;
 		}
 
-		// Token: 0x06008228 RID: 33320 RVA: 0x00272662 File Offset: 0x00270862
-		public override bool ShouldSkip(Pawn pawn, bool forced = false)
+		[DebuggerHidden]
+		public _003CPotentialWorkThingsGlobal_003Ed__6(int _003C_003E1__state)
 		{
-			return !pawn.Map.designationManager.AnySpawnedDesignationOfDef(this.Designation);
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x06008229 RID: 33321 RVA: 0x00272680 File Offset: 0x00270880
-		public override bool HasJobOnThing(Pawn pawn, Thing t, bool forced = false)
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			if (!pawn.CanReserve(t, 1, -1, null, forced))
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				WorkGiver_RemoveBuilding workGiver_RemoveBuilding = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = pawn.Map.designationManager.SpawnedDesignationsOfDef(workGiver_RemoveBuilding.Designation).GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 1:
+					_003C_003E1__state = -3;
+					break;
+				}
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					Designation current = _003C_003E7__wrap1.Current;
+					_003C_003E2__current = current.target.Thing;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = null;
 				return false;
 			}
-			if (pawn.Map.designationManager.DesignationOn(t, this.Designation) == null)
+			catch
 			{
-				return false;
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
 			}
-			CompExplosive compExplosive;
-			if (t.TryGetComp(out compExplosive) && compExplosive.wickStarted)
-			{
-				JobFailReason.Is("AboutToExplode".Translate(), null);
-				return false;
-			}
-			return true;
 		}
 
-		// Token: 0x0600822A RID: 33322 RVA: 0x002726E6 File Offset: 0x002708E6
-		public override Job JobOnThing(Pawn pawn, Thing t, bool forced = false)
+		bool IEnumerator.MoveNext()
 		{
-			return JobMaker.MakeJob(this.RemoveBuildingJob, t);
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Thing> IEnumerable<Thing>.GetEnumerator()
+		{
+			_003CPotentialWorkThingsGlobal_003Ed__6 _003CPotentialWorkThingsGlobal_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CPotentialWorkThingsGlobal_003Ed__ = this;
+			}
+			else
+			{
+				_003CPotentialWorkThingsGlobal_003Ed__ = new _003CPotentialWorkThingsGlobal_003Ed__6(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CPotentialWorkThingsGlobal_003Ed__.pawn = _003C_003E3__pawn;
+			return _003CPotentialWorkThingsGlobal_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Thing>)this).GetEnumerator();
+		}
+	}
+
+	protected abstract DesignationDef Designation { get; }
+
+	protected abstract JobDef RemoveBuildingJob { get; }
+
+	public override PathEndMode PathEndMode => PathEndMode.Touch;
+
+	[IteratorStateMachine(typeof(_003CPotentialWorkThingsGlobal_003Ed__6))]
+	public override IEnumerable<Thing> PotentialWorkThingsGlobal(Pawn pawn)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CPotentialWorkThingsGlobal_003Ed__6(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__pawn = pawn
+		};
+	}
+
+	public override bool ShouldSkip(Pawn pawn, bool forced = false)
+	{
+		return !pawn.Map.designationManager.AnySpawnedDesignationOfDef(Designation);
+	}
+
+	public override bool HasJobOnThing(Pawn pawn, Thing t, bool forced = false)
+	{
+		if (!pawn.CanReserve(t, 1, -1, null, forced))
+		{
+			return false;
+		}
+		if (pawn.Map.designationManager.DesignationOn(t, Designation) == null)
+		{
+			return false;
+		}
+		if (t.TryGetComp(out CompExplosive comp) && comp.wickStarted)
+		{
+			JobFailReason.Is("AboutToExplode".Translate());
+			return false;
+		}
+		return true;
+	}
+
+	public override Job JobOnThing(Pawn pawn, Thing t, bool forced = false)
+	{
+		return JobMaker.MakeJob(RemoveBuildingJob, t);
 	}
 }

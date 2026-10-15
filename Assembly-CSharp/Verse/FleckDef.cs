@@ -1,150 +1,238 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
-namespace Verse
+namespace Verse;
+
+public class FleckDef : Def
 {
-	// Token: 0x020003F9 RID: 1017
-	public class FleckDef : Def
+	[CompilerGenerated]
+	private sealed class _003CConfigErrors_003Ed__29 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700049D RID: 1181
-		// (get) Token: 0x060019D4 RID: 6612 RVA: 0x00082BD0 File Offset: 0x00080DD0
-		public float Lifetime
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public FleckDef _003C_003E4__this;
+
+		string IEnumerator<string>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.fadeInTime + this.solidTime + this.fadeOutTime;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x060019D5 RID: 6613 RVA: 0x00082BE6 File Offset: 0x00080DE6
-		public override IEnumerable<string> ConfigErrors()
+		object IEnumerator.Current
 		{
-			if (this.fleckSystemClass == null)
+			[DebuggerHidden]
+			get
 			{
-				yield return "FleckDef without system class type set!";
+				return _003C_003E2__current;
 			}
-			else if (!typeof(FleckSystem).IsAssignableFrom(this.fleckSystemClass))
+		}
+
+		[DebuggerHidden]
+		public _003CConfigErrors_003Ed__29(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			FleckDef fleckDef = _003C_003E4__this;
+			switch (num)
 			{
-				yield return "FleckDef has system class type assigned which is not assignable to FleckSystemBase!";
-			}
-			if (this.graphicData == null && this.randomGraphics.NullOrEmpty<GraphicData>())
-			{
-				yield return "Fleck graphic data and random graphics are null!";
-			}
-			else if (this.graphicData != null && !typeof(Graphic_Fleck).IsAssignableFrom(this.graphicData.graphicClass))
-			{
-				yield return "Fleck graphic class is not derived from Graphic_Fleck!";
-			}
-			else if (!this.randomGraphics.NullOrEmpty<GraphicData>())
-			{
-				if (this.randomGraphics.Any((GraphicData g) => !typeof(Graphic_Fleck).IsAssignableFrom(g.graphicClass)))
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (fleckDef.fleckSystemClass == null)
 				{
-					yield return "random fleck graphic class is not derived from Graphic_Fleck!";
+					_003C_003E2__current = "FleckDef without system class type set!";
+					_003C_003E1__state = 1;
+					return true;
 				}
+				if (!typeof(FleckSystem).IsAssignableFrom(fleckDef.fleckSystemClass))
+				{
+					_003C_003E2__current = "FleckDef has system class type assigned which is not assignable to FleckSystemBase!";
+					_003C_003E1__state = 2;
+					return true;
+				}
+				goto IL_0092;
+			case 1:
+				_003C_003E1__state = -1;
+				goto IL_0092;
+			case 2:
+				_003C_003E1__state = -1;
+				goto IL_0092;
+			case 3:
+				_003C_003E1__state = -1;
+				break;
+			case 4:
+				_003C_003E1__state = -1;
+				break;
+			case 5:
+				{
+					_003C_003E1__state = -1;
+					break;
+				}
+				IL_0092:
+				if (fleckDef.graphicData == null && fleckDef.randomGraphics.NullOrEmpty())
+				{
+					_003C_003E2__current = "Fleck graphic data and random graphics are null!";
+					_003C_003E1__state = 3;
+					return true;
+				}
+				if (fleckDef.graphicData != null && !typeof(Graphic_Fleck).IsAssignableFrom(fleckDef.graphicData.graphicClass))
+				{
+					_003C_003E2__current = "Fleck graphic class is not derived from Graphic_Fleck!";
+					_003C_003E1__state = 4;
+					return true;
+				}
+				if (!fleckDef.randomGraphics.NullOrEmpty() && fleckDef.randomGraphics.Any((GraphicData g) => !typeof(Graphic_Fleck).IsAssignableFrom(g.graphicClass)))
+				{
+					_003C_003E2__current = "random fleck graphic class is not derived from Graphic_Fleck!";
+					_003C_003E1__state = 5;
+					return true;
+				}
+				break;
 			}
-			yield break;
+			return false;
 		}
 
-		// Token: 0x060019D6 RID: 6614 RVA: 0x00082BF8 File Offset: 0x00080DF8
-		public GraphicData GetGraphicData(int id)
+		bool IEnumerator.MoveNext()
 		{
-			if (this.graphicData != null)
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CConfigErrors_003Ed__29 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
-				return this.graphicData;
+				_003C_003E1__state = 0;
+				result = this;
 			}
-			Rand.PushState(id);
-			GraphicData result;
-			try
+			else
 			{
-				result = this.randomGraphics.RandomElement<GraphicData>();
-			}
-			finally
-			{
-				Rand.PopState();
+				result = new _003CConfigErrors_003Ed__29(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
 			return result;
 		}
 
-		// Token: 0x040016C3 RID: 5827
-		public Type fleckSystemClass;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x040016C4 RID: 5828
-		public AltitudeLayer altitudeLayer;
+	public Type fleckSystemClass;
 
-		// Token: 0x040016C5 RID: 5829
-		public float altitudeLayerIncOffset;
+	public AltitudeLayer altitudeLayer;
 
-		// Token: 0x040016C6 RID: 5830
-		public bool drawGUIOverlay;
+	public float altitudeLayerIncOffset;
 
-		// Token: 0x040016C7 RID: 5831
-		public GraphicData graphicData;
+	public bool drawGUIOverlay;
 
-		// Token: 0x040016C8 RID: 5832
-		public List<GraphicData> randomGraphics;
+	public GraphicData graphicData;
 
-		// Token: 0x040016C9 RID: 5833
-		public bool realTime;
+	public List<GraphicData> randomGraphics;
 
-		// Token: 0x040016CA RID: 5834
-		public bool attachedToHead;
+	public bool realTime;
 
-		// Token: 0x040016CB RID: 5835
-		public bool useAttachLink;
+	public bool attachedToHead;
 
-		// Token: 0x040016CC RID: 5836
-		public float fadeInTime;
+	public bool useAttachLink;
 
-		// Token: 0x040016CD RID: 5837
-		public float solidTime = 1f;
+	public float fadeInTime;
 
-		// Token: 0x040016CE RID: 5838
-		public float fadeOutTime;
+	public float solidTime = 1f;
 
-		// Token: 0x040016CF RID: 5839
-		public Vector3 acceleration = Vector3.zero;
+	public float fadeOutTime;
 
-		// Token: 0x040016D0 RID: 5840
-		public FloatRange speedPerTime = FloatRange.Zero;
+	public Vector3 acceleration = Vector3.zero;
 
-		// Token: 0x040016D1 RID: 5841
-		public float growthRate;
+	public FloatRange speedPerTime = FloatRange.Zero;
 
-		// Token: 0x040016D2 RID: 5842
-		public List<CurvedScaler> scalers;
+	public float growthRate;
 
-		// Token: 0x040016D3 RID: 5843
-		public bool collide;
+	public List<CurvedScaler> scalers;
 
-		// Token: 0x040016D4 RID: 5844
-		public SoundDef landSound;
+	public bool collide;
 
-		// Token: 0x040016D5 RID: 5845
-		public Vector3 unattachedDrawOffset;
+	public SoundDef landSound;
 
-		// Token: 0x040016D6 RID: 5846
-		public Vector3 attachedDrawOffset;
+	public Vector3 unattachedDrawOffset;
 
-		// Token: 0x040016D7 RID: 5847
-		public bool rotateTowardsMoveDirection;
+	public Vector3 attachedDrawOffset;
 
-		// Token: 0x040016D8 RID: 5848
-		public float rotateTowardsMoveDirectionExtraAngle;
+	public bool rotateTowardsMoveDirection;
 
-		// Token: 0x040016D9 RID: 5849
-		public bool drawOffscreen;
+	public float rotateTowardsMoveDirectionExtraAngle;
 
-		// Token: 0x040016DA RID: 5850
-		public FloatRange archHeight = FloatRange.Zero;
+	public bool drawOffscreen;
 
-		// Token: 0x040016DB RID: 5851
-		public FloatRange archDuration;
+	public FloatRange archHeight = FloatRange.Zero;
 
-		// Token: 0x040016DC RID: 5852
-		public SimpleCurve archCurve;
+	public FloatRange archDuration;
 
-		// Token: 0x040016DD RID: 5853
-		public Vector3 scalingAnchor = Vector3.one * 0.5f;
+	public SimpleCurve archCurve;
+
+	public Vector3 scalingAnchor = Vector3.one * 0.5f;
+
+	public float Lifetime => fadeInTime + solidTime + fadeOutTime;
+
+	[IteratorStateMachine(typeof(_003CConfigErrors_003Ed__29))]
+	public override IEnumerable<string> ConfigErrors()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CConfigErrors_003Ed__29(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public GraphicData GetGraphicData(int id)
+	{
+		if (graphicData != null)
+		{
+			return graphicData;
+		}
+		Rand.PushState(id);
+		try
+		{
+			return randomGraphics.RandomElement();
+		}
+		finally
+		{
+			Rand.PopState();
+		}
 	}
 }

@@ -1,117 +1,282 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public abstract class PreceptComp_Thought : PreceptComp
 {
-	// Token: 0x02002641 RID: 9793
-	public abstract class PreceptComp_Thought : PreceptComp
+	[CompilerGenerated]
+	private sealed class _003CGetDescriptions_003Ed__6 : IEnumerable<string>, IEnumerable, IEnumerator<string>, IEnumerator, IDisposable
 	{
-		// Token: 0x170020CF RID: 8399
-		// (get) Token: 0x0600D68A RID: 54922 RVA: 0x003FA5A4 File Offset: 0x003F87A4
-		public bool AffectsMood
+		private int _003C_003E1__state;
+
+		private string _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public PreceptComp_Thought _003C_003E4__this;
+
+		private int _003Cstage_003E5__2;
+
+		private List<string>.Enumerator _003C_003E7__wrap2;
+
+		private IEnumerator<string> _003C_003E7__wrap3;
+
+		string IEnumerator<string>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				for (int i = 0; i < this.thought.stages.Count; i++)
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetDescriptions_003Ed__6(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			switch (_003C_003E1__state)
+			{
+			case -3:
+			case 1:
+				try
 				{
-					if (this.thought.stages[i].baseMoodEffect != 0f)
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+				break;
+			case -4:
+			case 2:
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally2();
+				}
+				break;
+			}
+			_003C_003E7__wrap2 = default(List<string>.Enumerator);
+			_003C_003E7__wrap3 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				int num = _003C_003E1__state;
+				PreceptComp_Thought preceptComp_Thought = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					if (!preceptComp_Thought.thoughtStageDescriptions.NullOrEmpty())
 					{
+						_003Cstage_003E5__2 = 0;
+						_003C_003E7__wrap2 = preceptComp_Thought.thoughtStageDescriptions.GetEnumerator();
+						_003C_003E1__state = -3;
+						goto IL_00a7;
+					}
+					_003C_003E7__wrap3 = ((PreceptComp)preceptComp_Thought).GetDescriptions().GetEnumerator();
+					_003C_003E1__state = -4;
+					goto IL_0112;
+				case 1:
+					_003C_003E1__state = -3;
+					_003Cstage_003E5__2++;
+					goto IL_00a7;
+				case 2:
+					{
+						_003C_003E1__state = -4;
+						goto IL_0112;
+					}
+					IL_00a7:
+					if (_003C_003E7__wrap2.MoveNext())
+					{
+						string current = _003C_003E7__wrap2.Current;
+						_003C_003E2__current = preceptComp_Thought.ParseDescription(current, _003Cstage_003E5__2);
+						_003C_003E1__state = 1;
 						return true;
 					}
+					_003C_003Em__Finally1();
+					_003C_003E7__wrap2 = default(List<string>.Enumerator);
+					break;
+					IL_0112:
+					if (_003C_003E7__wrap3.MoveNext())
+					{
+						string current2 = _003C_003E7__wrap3.Current;
+						_003C_003E2__current = preceptComp_Thought.ParseDescription(current2);
+						_003C_003E1__state = 2;
+						return true;
+					}
+					_003C_003Em__Finally2();
+					_003C_003E7__wrap3 = null;
+					break;
 				}
 				return false;
 			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
 		}
 
-		// Token: 0x0600D68B RID: 54923 RVA: 0x003FA5EC File Offset: 0x003F87EC
-		private string ParseDescription(string description, int thoughtStage = -1)
+		bool IEnumerator.MoveNext()
 		{
-			bool flag = thoughtStage != -1;
-			if (!flag)
-			{
-				thoughtStage = 0;
-			}
-			if (!description.NullOrEmpty())
-			{
-				IPreceptCompDescriptionArgs preceptCompDescriptionArgs = this.thought.Worker as IPreceptCompDescriptionArgs;
-				if (preceptCompDescriptionArgs != null)
-				{
-					description = description.Formatted(preceptCompDescriptionArgs.GetDescriptionArgs());
-				}
-			}
-			if (description.NullOrEmpty())
-			{
-				description = ((!this.thought.stages[thoughtStage].LabelAbstractCap.NullOrEmpty()) ? this.thought.stages[thoughtStage].LabelAbstractCap : this.thought.LabelCap.Resolve());
-				description = description.Formatted(Gender.Male.Named("PAWN_gender"));
-			}
-			if (this.AffectsMood)
-			{
-				ThoughtStage thoughtStage2 = this.thought.stages[thoughtStage];
-				if (this.thought.minExpectation != null)
-				{
-					description += " (" + "MinExpectation".Translate() + ": " + this.thought.minExpectation.LabelCap + ")";
-				}
-				else if (this.thought.minExpectationForNegativeThought != null && thoughtStage2.baseMoodEffect < 0f)
-				{
-					description += " (" + "MinExpectation".Translate() + ": " + this.thought.minExpectationForNegativeThought.LabelCap + ")";
-				}
-				string str;
-				if (this.tooltipShowMoodRange && !flag)
-				{
-					float num = float.PositiveInfinity;
-					float num2 = float.NegativeInfinity;
-					for (int i = 0; i < this.thought.stages.Count; i++)
-					{
-						num = Mathf.Min(num, this.thought.stages[i].baseMoodEffect);
-						num2 = Mathf.Max(num2, this.thought.stages[i].baseMoodEffect);
-					}
-					str = "PreceptThoughtMoodRange".Translate(num.ToStringWithSign("F0"), num2.ToStringWithSign("F0"));
-				}
-				else
-				{
-					str = thoughtStage2.baseMoodEffect.ToStringWithSign("F0");
-				}
-				return description + ": " + str;
-			}
-			return description + ": " + this.thought.stages[thoughtStage].baseOpinionOffset.ToStringWithSign("F0");
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0600D68C RID: 54924 RVA: 0x003FA884 File Offset: 0x003F8A84
-		public override IEnumerable<string> GetDescriptions()
+		private void _003C_003Em__Finally1()
 		{
-			if (!this.thoughtStageDescriptions.NullOrEmpty<string>())
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap2/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		private void _003C_003Em__Finally2()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap3 != null)
 			{
-				int stage = 0;
-				foreach (string description in this.thoughtStageDescriptions)
-				{
-					yield return this.ParseDescription(description, stage);
-					int num = stage;
-					stage = num + 1;
-				}
-				List<string>.Enumerator enumerator = default(List<string>.Enumerator);
+				_003C_003E7__wrap3.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<string> IEnumerable<string>.GetEnumerator()
+		{
+			_003CGetDescriptions_003Ed__6 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
 			}
 			else
 			{
-				foreach (string description2 in base.GetDescriptions())
+				result = new _003CGetDescriptions_003Ed__6(0)
 				{
-					yield return this.ParseDescription(description2, -1);
-				}
-				IEnumerator<string> enumerator2 = null;
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
-			yield break;
-			yield break;
+			return result;
 		}
 
-		// Token: 0x040091D2 RID: 37330
-		public ThoughtDef thought;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x040091D3 RID: 37331
-		[MustTranslate]
-		public List<string> thoughtStageDescriptions;
+	public ThoughtDef thought;
 
-		// Token: 0x040091D4 RID: 37332
-		public bool tooltipShowMoodRange;
+	[MustTranslate]
+	public List<string> thoughtStageDescriptions;
+
+	public bool tooltipShowMoodRange;
+
+	public bool AffectsMood
+	{
+		get
+		{
+			for (int i = 0; i < thought.stages.Count; i++)
+			{
+				if (thought.stages[i].baseMoodEffect != 0f)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+
+	private string ParseDescription(string description, int thoughtStage = -1)
+	{
+		bool flag = thoughtStage != -1;
+		if (!flag)
+		{
+			thoughtStage = 0;
+		}
+		if (!description.NullOrEmpty() && thought.Worker is IPreceptCompDescriptionArgs preceptCompDescriptionArgs)
+		{
+			description = description.Formatted(preceptCompDescriptionArgs.GetDescriptionArgs());
+		}
+		if (description.NullOrEmpty())
+		{
+			description = ((!thought.stages[thoughtStage].LabelAbstractCap.NullOrEmpty()) ? thought.stages[thoughtStage].LabelAbstractCap : thought.LabelCap.Resolve());
+			description = description.Formatted(Gender.Male.Named("PAWN_gender"));
+		}
+		if (AffectsMood)
+		{
+			ThoughtStage thoughtStage2 = thought.stages[thoughtStage];
+			if (thought.minExpectation != null)
+			{
+				description += " (" + "MinExpectation".Translate() + ": " + thought.minExpectation.LabelCap + ")";
+			}
+			else if (thought.minExpectationForNegativeThought != null && thoughtStage2.baseMoodEffect < 0f)
+			{
+				description += " (" + "MinExpectation".Translate() + ": " + thought.minExpectationForNegativeThought.LabelCap + ")";
+			}
+			string text = "";
+			if (tooltipShowMoodRange && !flag)
+			{
+				float num = float.PositiveInfinity;
+				float num2 = float.NegativeInfinity;
+				for (int i = 0; i < thought.stages.Count; i++)
+				{
+					num = Mathf.Min(num, thought.stages[i].baseMoodEffect);
+					num2 = Mathf.Max(num2, thought.stages[i].baseMoodEffect);
+				}
+				text = "PreceptThoughtMoodRange".Translate(num.ToStringWithSign("F0"), num2.ToStringWithSign("F0"));
+			}
+			else
+			{
+				text = thoughtStage2.baseMoodEffect.ToStringWithSign("F0");
+			}
+			return description + ": " + text;
+		}
+		return description + ": " + thought.stages[thoughtStage].baseOpinionOffset.ToStringWithSign("F0");
+	}
+
+	[IteratorStateMachine(typeof(_003CGetDescriptions_003Ed__6))]
+	public override IEnumerable<string> GetDescriptions()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetDescriptions_003Ed__6(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

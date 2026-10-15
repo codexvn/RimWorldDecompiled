@@ -1,138 +1,418 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 using Verse.Sound;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_Scarify : JobDriver
 {
-	// Token: 0x020011B6 RID: 4534
-	public class JobDriver_Scarify : JobDriver
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass9_0
 	{
-		// Token: 0x17001134 RID: 4404
-		// (get) Token: 0x06006EDF RID: 28383 RVA: 0x00228BC8 File Offset: 0x00226DC8
-		protected Pawn Target
+		public Pawn target;
+
+		public JobDriver_Scarify _003C_003E4__this;
+
+		public Func<BodyPartRecord, bool> _003C_003E9__1;
+
+		internal void _003CMakeNewToils_003Eb__0()
 		{
-			get
+			if (!(from part in GetPartsToApplyOn(target)
+				where AvailableOnNow(target, part)
+				select part).TryRandomElement(out var result) && !GetPartsToApplyOn(target).TryRandomElement(out result))
 			{
-				return (Pawn)this.job.GetTarget(TargetIndex.A).Thing;
+				_003C_003E4__this.pawn.jobs.EndCurrentJob(JobCondition.Errored);
+				Log.Error("Failed to find body part to scarify");
 			}
-		}
-
-		// Token: 0x06006EE0 RID: 28384 RVA: 0x00228BF0 File Offset: 0x00226DF0
-		public static bool AvailableOnNow(Pawn pawn, BodyPartRecord part = null)
-		{
-			return pawn.RaceProps.Humanlike && (Faction.OfPlayerSilentFail == null || Faction.OfPlayer.ideos.AnyPreceptWithRequiredScars()) && (part == null || (!pawn.health.WouldDieAfterAddingHediff(HediffDefOf.Scarification, part, 1f) && !pawn.health.WouldLosePartAfterAddingHediff(HediffDefOf.Scarification, part, 1f)));
-		}
-
-		// Token: 0x06006EE1 RID: 28385 RVA: 0x00228C5A File Offset: 0x00226E5A
-		public static IEnumerable<BodyPartRecord> GetPartsToApplyOn(Pawn pawn)
-		{
-			foreach (BodyPartRecord bodyPartRecord in pawn.health.hediffSet.GetNotMissingParts(BodyPartHeight.Undefined, BodyPartDepth.Undefined, null, null))
-			{
-				if (bodyPartRecord.def.canScarify)
-				{
-					yield return bodyPartRecord;
-				}
-			}
-			IEnumerator<BodyPartRecord> enumerator = null;
-			yield break;
-			yield break;
-		}
-
-		// Token: 0x06006EE2 RID: 28386 RVA: 0x00228C6C File Offset: 0x00226E6C
-		public static void Scarify(Pawn pawn, BodyPartRecord part)
-		{
-			if (!ModLister.CheckIdeology("Scarification"))
+			Scarify(target, result);
+			CreateHistoryEventDef(target);
+			SoundDefOf.Execute_Cut.PlayOneShot(target);
+			if (target.RaceProps.BloodDef == null)
 			{
 				return;
 			}
-			Lord lord = pawn.GetLord();
-			if (lord != null)
+			CellRect cellRect = new CellRect(target.PositionHeld.x - 1, target.PositionHeld.z - 1, 3, 3);
+			for (int i = 0; i < 3; i++)
 			{
-				LordJob_Ritual_Mutilation lordJob_Ritual_Mutilation = lord.LordJob as LordJob_Ritual_Mutilation;
-				if (lordJob_Ritual_Mutilation != null)
+				IntVec3 randomCell = cellRect.RandomCell;
+				if (randomCell.InBounds(_003C_003E4__this.Map) && GenSight.LineOfSight(randomCell, target.PositionHeld, _003C_003E4__this.Map))
 				{
-					lordJob_Ritual_Mutilation.mutilatedPawns.Add(pawn);
+					FilthMaker.TryMakeFilth(randomCell, target.MapHeld, target.RaceProps.BloodDef, target.LabelIndefinite());
 				}
+			}
+		}
+
+		internal bool _003CMakeNewToils_003Eb__1(BodyPartRecord part)
+		{
+			return AvailableOnNow(target, part);
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CGetPartsToApplyOn_003Ed__5 : IEnumerable<BodyPartRecord>, IEnumerable, IEnumerator<BodyPartRecord>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private BodyPartRecord _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private Pawn pawn;
+
+		public Pawn _003C_003E3__pawn;
+
+		private IEnumerator<BodyPartRecord> _003C_003E7__wrap1;
+
+		BodyPartRecord IEnumerator<BodyPartRecord>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CGetPartsToApplyOn_003Ed__5(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
+				{
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
+				}
+			}
+			_003C_003E7__wrap1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			try
+			{
+				switch (_003C_003E1__state)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					_003C_003E7__wrap1 = pawn.health.hediffSet.GetNotMissingParts().GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 1:
+					_003C_003E1__state = -3;
+					break;
+				}
+				while (_003C_003E7__wrap1.MoveNext())
+				{
+					BodyPartRecord current = _003C_003E7__wrap1.Current;
+					if (current.def.canScarify)
+					{
+						_003C_003E2__current = current;
+						_003C_003E1__state = 1;
+						return true;
+					}
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = null;
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			if (_003C_003E7__wrap1 != null)
+			{
+				_003C_003E7__wrap1.Dispose();
+			}
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<BodyPartRecord> IEnumerable<BodyPartRecord>.GetEnumerator()
+		{
+			_003CGetPartsToApplyOn_003Ed__5 _003CGetPartsToApplyOn_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CGetPartsToApplyOn_003Ed__ = this;
+			}
+			else
+			{
+				_003CGetPartsToApplyOn_003Ed__ = new _003CGetPartsToApplyOn_003Ed__5(0);
+			}
+			_003CGetPartsToApplyOn_003Ed__.pawn = _003C_003E3__pawn;
+			return _003CGetPartsToApplyOn_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<BodyPartRecord>)this).GetEnumerator();
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__9 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_Scarify _003C_003E4__this;
+
+		private _003C_003Ec__DisplayClass9_0 _003C_003E8__1;
+
+		Toil IEnumerator<Toil>.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__9(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E8__1 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_Scarify jobDriver_Scarify = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E8__1 = new _003C_003Ec__DisplayClass9_0();
+				_003C_003E8__1._003C_003E4__this = _003C_003E4__this;
+				if (!ModLister.CheckIdeology("Scarify"))
+				{
+					return false;
+				}
+				jobDriver_Scarify.FailOnDespawnedOrNull(TargetIndex.A);
+				_003C_003E8__1.target = jobDriver_Scarify.Target;
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.ClosestTouch);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.Wait(35);
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+			{
+				_003C_003E1__state = -1;
+				Toil toil = ToilMaker.MakeToil("MakeNewToils");
+				toil.initAction = delegate
+				{
+					if (!(from part in GetPartsToApplyOn(_003C_003E8__1.target)
+						where AvailableOnNow(_003C_003E8__1.target, part)
+						select part).TryRandomElement(out var result) && !GetPartsToApplyOn(_003C_003E8__1.target).TryRandomElement(out result))
+					{
+						_003C_003E8__1._003C_003E4__this.pawn.jobs.EndCurrentJob(JobCondition.Errored);
+						Log.Error("Failed to find body part to scarify");
+					}
+					Scarify(_003C_003E8__1.target, result);
+					CreateHistoryEventDef(_003C_003E8__1.target);
+					SoundDefOf.Execute_Cut.PlayOneShot(_003C_003E8__1.target);
+					if (_003C_003E8__1.target.RaceProps.BloodDef != null)
+					{
+						CellRect cellRect = new CellRect(_003C_003E8__1.target.PositionHeld.x - 1, _003C_003E8__1.target.PositionHeld.z - 1, 3, 3);
+						for (int i = 0; i < 3; i++)
+						{
+							IntVec3 randomCell = cellRect.RandomCell;
+							if (randomCell.InBounds(_003C_003E8__1._003C_003E4__this.Map) && GenSight.LineOfSight(randomCell, _003C_003E8__1.target.PositionHeld, _003C_003E8__1._003C_003E4__this.Map))
+							{
+								FilthMaker.TryMakeFilth(randomCell, _003C_003E8__1.target.MapHeld, _003C_003E8__1.target.RaceProps.BloodDef, _003C_003E8__1.target.LabelIndefinite());
+							}
+						}
+					}
+				};
+				toil.defaultCompleteMode = ToilCompleteMode.Instant;
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 3;
+				return true;
+			}
+			case 3:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__9 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__9(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private const TargetIndex TargetPawnIndex = TargetIndex.A;
+
+	public static readonly HealthTuning.PainCategoryWeighted[] InjuryPainCategories = new HealthTuning.PainCategoryWeighted[2]
+	{
+		new HealthTuning.PainCategoryWeighted(PainCategory.LowPain, 0.8f),
+		new HealthTuning.PainCategoryWeighted(PainCategory.MediumPain, 0.2f)
+	};
+
+	protected Pawn Target => (Pawn)job.GetTarget(TargetIndex.A).Thing;
+
+	public static bool AvailableOnNow(Pawn pawn, BodyPartRecord part = null)
+	{
+		if (!pawn.RaceProps.Humanlike || (Faction.OfPlayerSilentFail != null && !Faction.OfPlayer.ideos.AnyPreceptWithRequiredScars()))
+		{
+			return false;
+		}
+		if (part != null && (pawn.health.WouldDieAfterAddingHediff(HediffDefOf.Scarification, part, 1f) || pawn.health.WouldLosePartAfterAddingHediff(HediffDefOf.Scarification, part, 1f)))
+		{
+			return false;
+		}
+		return true;
+	}
+
+	[IteratorStateMachine(typeof(_003CGetPartsToApplyOn_003Ed__5))]
+	public static IEnumerable<BodyPartRecord> GetPartsToApplyOn(Pawn pawn)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetPartsToApplyOn_003Ed__5(-2)
+		{
+			_003C_003E3__pawn = pawn
+		};
+	}
+
+	public static void Scarify(Pawn pawn, BodyPartRecord part)
+	{
+		if (ModLister.CheckIdeology("Scarification"))
+		{
+			Lord lord = pawn.GetLord();
+			if (lord != null && lord.LordJob is LordJob_Ritual_Mutilation lordJob_Ritual_Mutilation)
+			{
+				lordJob_Ritual_Mutilation.mutilatedPawns.Add(pawn);
 			}
 			Hediff hediff = HediffMaker.MakeHediff(HediffDefOf.Scarification, pawn, part);
 			HediffComp_GetsPermanent hediffComp_GetsPermanent = hediff.TryGetComp<HediffComp_GetsPermanent>();
 			hediffComp_GetsPermanent.IsPermanent = true;
-			hediffComp_GetsPermanent.SetPainCategory(JobDriver_Scarify.InjuryPainCategories.RandomElementByWeight((HealthTuning.PainCategoryWeighted e) => e.weight).category);
-			pawn.health.AddHediff(hediff, null, null, null);
+			hediffComp_GetsPermanent.SetPainCategory(InjuryPainCategories.RandomElementByWeight((HealthTuning.PainCategoryWeighted e) => e.weight).category);
+			pawn.health.AddHediff(hediff, null, null);
 		}
+	}
 
-		// Token: 0x06006EE3 RID: 28387 RVA: 0x00228D0F File Offset: 0x00226F0F
-		public static void CreateHistoryEventDef(Pawn pawn)
+	public static void CreateHistoryEventDef(Pawn pawn)
+	{
+		Find.HistoryEventsManager.RecordEvent(new HistoryEvent(HistoryEventDefOf.GotScarified, pawn.Named(HistoryEventArgsNames.Doer)));
+	}
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return pawn.Reserve(Target, job, 1, -1, null, errorOnFailed);
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__9))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__9(-2)
 		{
-			Find.HistoryEventsManager.RecordEvent(new HistoryEvent(HistoryEventDefOf.GotScarified, pawn.Named(HistoryEventArgsNames.Doer)), true);
-		}
-
-		// Token: 0x06006EE4 RID: 28388 RVA: 0x00228D31 File Offset: 0x00226F31
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
-		{
-			return this.pawn.Reserve(this.Target, this.job, 1, -1, null, errorOnFailed, false);
-		}
-
-		// Token: 0x06006EE5 RID: 28389 RVA: 0x00228D54 File Offset: 0x00226F54
-		protected override IEnumerable<Toil> MakeNewToils()
-		{
-			if (!ModLister.CheckIdeology("Scarify"))
-			{
-				yield break;
-			}
-			this.FailOnDespawnedOrNull(TargetIndex.A);
-			Pawn target = this.Target;
-			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.ClosestTouch, false);
-			yield return Toils_General.Wait(35, TargetIndex.None);
-			Toil toil = ToilMaker.MakeToil("MakeNewToils");
-			Func<BodyPartRecord, bool> <>9__1;
-			toil.initAction = delegate()
-			{
-				IEnumerable<BodyPartRecord> partsToApplyOn = JobDriver_Scarify.GetPartsToApplyOn(target);
-				Func<BodyPartRecord, bool> predicate;
-				if ((predicate = <>9__1) == null)
-				{
-					predicate = (<>9__1 = ((BodyPartRecord part) => JobDriver_Scarify.AvailableOnNow(target, part)));
-				}
-				BodyPartRecord part2;
-				if (!partsToApplyOn.Where(predicate).TryRandomElement(out part2) && !JobDriver_Scarify.GetPartsToApplyOn(target).TryRandomElement(out part2))
-				{
-					this.pawn.jobs.EndCurrentJob(JobCondition.Errored, true, true);
-					Log.Error("Failed to find body part to scarify");
-				}
-				JobDriver_Scarify.Scarify(target, part2);
-				JobDriver_Scarify.CreateHistoryEventDef(target);
-				SoundDefOf.Execute_Cut.PlayOneShot(target);
-				if (target.RaceProps.BloodDef != null)
-				{
-					CellRect cellRect = new CellRect(target.PositionHeld.x - 1, target.PositionHeld.z - 1, 3, 3);
-					for (int i = 0; i < 3; i++)
-					{
-						IntVec3 randomCell = cellRect.RandomCell;
-						if (randomCell.InBounds(this.Map) && GenSight.LineOfSight(randomCell, target.PositionHeld, this.Map))
-						{
-							FilthMaker.TryMakeFilth(randomCell, target.MapHeld, target.RaceProps.BloodDef, target.LabelIndefinite(), 1, FilthSourceFlags.None);
-						}
-					}
-				}
-			};
-			toil.defaultCompleteMode = ToilCompleteMode.Instant;
-			yield return toil;
-			yield break;
-		}
-
-		// Token: 0x04004D57 RID: 19799
-		private const TargetIndex TargetPawnIndex = TargetIndex.A;
-
-		// Token: 0x04004D58 RID: 19800
-		public static readonly HealthTuning.PainCategoryWeighted[] InjuryPainCategories = new HealthTuning.PainCategoryWeighted[]
-		{
-			new HealthTuning.PainCategoryWeighted(PainCategory.LowPain, 0.8f),
-			new HealthTuning.PainCategoryWeighted(PainCategory.MediumPain, 0.2f)
+			_003C_003E4__this = this
 		};
 	}
 }

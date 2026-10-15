@@ -1,99 +1,225 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class Thought_Situational_WearingDesiredApparel : Thought_Situational
 {
-	// Token: 0x02001813 RID: 6163
-	public class Thought_Situational_WearingDesiredApparel : Thought_Situational
+	[CompilerGenerated]
+	private sealed class _003CMetApparelPrecepts_003Ed__8 : IEnumerable<Precept_Apparel>, IEnumerable, IEnumerator<Precept_Apparel>, IEnumerator, IDisposable
 	{
-		// Token: 0x170015C8 RID: 5576
-		// (get) Token: 0x06008ED4 RID: 36564 RVA: 0x002A423C File Offset: 0x002A243C
-		public override string LabelCap
+		private int _003C_003E1__state;
+
+		private Precept_Apparel _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Thought_Situational_WearingDesiredApparel _003C_003E4__this;
+
+		private List<Precept>.Enumerator _003C_003E7__wrap1;
+
+		Precept_Apparel IEnumerator<Precept_Apparel>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return base.CurStage.label.Formatted(this.multipleApparelItems ? "WearingDesiredApparelMulti".Translate().Named("APPAREL") : this.SourceApparelPrecept.apparelDef.label.Named("APPAREL")).CapitalizeFirst();
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170015C9 RID: 5577
-		// (get) Token: 0x06008ED5 RID: 36565 RVA: 0x002A42A4 File Offset: 0x002A24A4
-		public override string Description
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return base.CurStage.description.Formatted(this.multipleApparelItems ? "WearingDesiredApparelMulti".Translate().Named("APPAREL") : Find.ActiveLanguageWorker.WithIndefiniteArticlePostProcessed(this.SourceApparelPrecept.apparelDef.label, false, false).Named("APPAREL"), this.pawn.Named("PAWN")).CapitalizeFirst() + base.CausedByBeliefInPrecept;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x170015CA RID: 5578
-		// (get) Token: 0x06008ED6 RID: 36566 RVA: 0x002A4332 File Offset: 0x002A2532
-		private Precept_Apparel SourceApparelPrecept
+		[DebuggerHidden]
+		public _003CMetApparelPrecepts_003Ed__8(int _003C_003E1__state)
 		{
-			get
-			{
-				return (Precept_Apparel)this.sourcePrecept;
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x06008ED7 RID: 36567 RVA: 0x002A4340 File Offset: 0x002A2540
-		protected override ThoughtState CurrentStateInternal()
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			if (!ModsConfig.IdeologyActive || this.pawn.Ideo == null)
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
 			{
-				return ThoughtState.Inactive;
-			}
-			List<Precept> allPreceptsAllowingSituationalThought = this.pawn.Ideo.GetAllPreceptsAllowingSituationalThought(this.def);
-			if (allPreceptsAllowingSituationalThought.Count == 0)
-			{
-				return ThoughtState.Inactive;
-			}
-			int num = 0;
-			foreach (Precept precept in allPreceptsAllowingSituationalThought)
-			{
-				Precept_Apparel precept_Apparel = precept as Precept_Apparel;
-				if (precept_Apparel != null && (precept_Apparel.TargetGender == Gender.None || precept_Apparel.TargetGender == this.pawn.gender))
+				try
 				{
-					if (!this.HasApparel(precept_Apparel.apparelDef))
-					{
-						return ThoughtState.Inactive;
-					}
-					num++;
+				}
+				finally
+				{
+					_003C_003Em__Finally1();
 				}
 			}
-			this.multipleApparelItems = (num > 1);
-			if (num != 0)
-			{
-				return base.CurrentStateInternal();
-			}
-			return ThoughtState.Inactive;
+			_003C_003E7__wrap1 = default(List<Precept>.Enumerator);
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x06008ED8 RID: 36568 RVA: 0x002A4424 File Offset: 0x002A2624
-		private bool HasApparel(ThingDef thingDef)
+		private bool MoveNext()
 		{
-			using (List<Apparel>.Enumerator enumerator = this.pawn.apparel.WornApparel.GetEnumerator())
+			try
 			{
-				while (enumerator.MoveNext())
+				int num = _003C_003E1__state;
+				Thought_Situational_WearingDesiredApparel thought_Situational_WearingDesiredApparel = _003C_003E4__this;
+				switch (num)
 				{
-					if (enumerator.Current.def == thingDef)
+				default:
+					return false;
+				case 0:
+				{
+					_003C_003E1__state = -1;
+					if (!ModsConfig.IdeologyActive || thought_Situational_WearingDesiredApparel.pawn.Ideo == null)
 					{
+						return false;
+					}
+					List<Precept> allPreceptsAllowingSituationalThought = thought_Situational_WearingDesiredApparel.pawn.Ideo.GetAllPreceptsAllowingSituationalThought(thought_Situational_WearingDesiredApparel.def);
+					_003C_003E7__wrap1 = allPreceptsAllowingSituationalThought.GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				}
+				case 1:
+					_003C_003E1__state = -3;
+					break;
+				}
+				while (_003C_003E7__wrap1.MoveNext())
+				{
+					if (_003C_003E7__wrap1.Current is Precept_Apparel precept_Apparel && (precept_Apparel.TargetGender == Gender.None || precept_Apparel.TargetGender == thought_Situational_WearingDesiredApparel.pawn.gender) && thought_Situational_WearingDesiredApparel.HasApparel(precept_Apparel.apparelDef))
+					{
+						_003C_003E2__current = precept_Apparel;
+						_003C_003E1__state = 1;
 						return true;
 					}
 				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = default(List<Precept>.Enumerator);
+				return false;
 			}
-			return false;
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
 		}
 
-		// Token: 0x06008ED9 RID: 36569 RVA: 0x002A4488 File Offset: 0x002A2688
-		public override void ExposeData()
+		bool IEnumerator.MoveNext()
 		{
-			base.ExposeData();
-			Scribe_Values.Look<bool>(ref this.multipleApparelItems, "multipleApparelItems", false, false);
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x04005C18 RID: 23576
-		public bool multipleApparelItems;
+		private void _003C_003Em__Finally1()
+		{
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap1/*cast due to .constrained prefix*/).Dispose();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Precept_Apparel> IEnumerable<Precept_Apparel>.GetEnumerator()
+		{
+			_003CMetApparelPrecepts_003Ed__8 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMetApparelPrecepts_003Ed__8(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Precept_Apparel>)this).GetEnumerator();
+		}
+	}
+
+	public bool multipleApparelItems;
+
+	public override string LabelCap => base.CurStage.label.Formatted(multipleApparelItems ? "WearingDesiredApparelMulti".Translate().Named("APPAREL") : MetApparelPrecepts().FirstOrFallback(SourceApparelPrecept).apparelDef.label.Named("APPAREL")).CapitalizeFirst();
+
+	public override string Description => base.CurStage.description.Formatted(multipleApparelItems ? "WearingDesiredApparelMulti".Translate().Named("APPAREL") : Find.ActiveLanguageWorker.WithIndefiniteArticlePostProcessed(MetApparelPrecepts().FirstOrFallback(SourceApparelPrecept).apparelDef.label).Named("APPAREL"), pawn.Named("PAWN")).CapitalizeFirst() + base.CausedByBeliefInPrecept;
+
+	private Precept_Apparel SourceApparelPrecept => (Precept_Apparel)sourcePrecept;
+
+	protected override ThoughtState CurrentStateInternal()
+	{
+		if (!ModsConfig.IdeologyActive || pawn.Ideo == null)
+		{
+			return ThoughtState.Inactive;
+		}
+		List<Precept> allPreceptsAllowingSituationalThought = pawn.Ideo.GetAllPreceptsAllowingSituationalThought(def);
+		if (allPreceptsAllowingSituationalThought.Count == 0)
+		{
+			return ThoughtState.Inactive;
+		}
+		int num = 0;
+		foreach (Precept item in allPreceptsAllowingSituationalThought)
+		{
+			if (item is Precept_Apparel precept_Apparel && (precept_Apparel.TargetGender == Gender.None || precept_Apparel.TargetGender == pawn.gender))
+			{
+				if (!HasApparel(precept_Apparel.apparelDef))
+				{
+					return ThoughtState.Inactive;
+				}
+				num++;
+			}
+		}
+		multipleApparelItems = num > 1;
+		if (num != 0)
+		{
+			return base.CurrentStateInternal();
+		}
+		return ThoughtState.Inactive;
+	}
+
+	[IteratorStateMachine(typeof(_003CMetApparelPrecepts_003Ed__8))]
+	private IEnumerable<Precept_Apparel> MetApparelPrecepts()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMetApparelPrecepts_003Ed__8(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	private bool HasApparel(ThingDef thingDef)
+	{
+		foreach (Apparel item in pawn.apparel.WornApparel)
+		{
+			if (item.def == thingDef)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref multipleApparelItems, "multipleApparelItems", defaultValue: false);
 	}
 }

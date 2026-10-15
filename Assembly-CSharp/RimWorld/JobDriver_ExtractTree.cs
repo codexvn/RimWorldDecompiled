@@ -1,123 +1,225 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 using Verse.Sound;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_ExtractTree : JobDriver
 {
-	// Token: 0x02001355 RID: 4949
-	public class JobDriver_ExtractTree : JobDriver
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass13_0
 	{
-		// Token: 0x17001324 RID: 4900
-		// (get) Token: 0x0600796C RID: 31084 RVA: 0x0024ACE0 File Offset: 0x00248EE0
-		protected Thing Target
+		public Toil doWork;
+
+		public JobDriver_ExtractTree _003C_003E4__this;
+
+		internal void _003CMakeNewToils_003Eb__1(int delta)
 		{
+			_003C_003E4__this.workLeft -= JobDriver_PlantWork.WorkDonePerTick(_003C_003E4__this.pawn, _003C_003E4__this.Tree) * (float)delta;
+			if (_003C_003E4__this.pawn.skills != null)
+			{
+				_003C_003E4__this.pawn.skills.Learn(SkillDefOf.Plants, 0.085f * (float)delta);
+			}
+			if (_003C_003E4__this.workLeft <= 0f)
+			{
+				SoundDefOf.Finish_Wood.PlayOneShot(SoundInfo.InMap(_003C_003E4__this.Tree));
+				doWork.actor.jobs.curDriver.ReadyForNextToil();
+			}
+		}
+	}
+
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__13 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
+	{
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_ExtractTree _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
+		{
+			[DebuggerHidden]
 			get
 			{
-				return this.job.GetTarget(TargetIndex.A).Thing;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001325 RID: 4901
-		// (get) Token: 0x0600796D RID: 31085 RVA: 0x0024AD01 File Offset: 0x00248F01
-		protected Plant Tree
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return (Plant)this.Target.GetInnerIfMinified();
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001326 RID: 4902
-		// (get) Token: 0x0600796E RID: 31086 RVA: 0x0024AD13 File Offset: 0x00248F13
-		protected DesignationDef Designation
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__13(int _003C_003E1__state)
 		{
-			get
-			{
-				return DesignationDefOf.ExtractTree;
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x17001327 RID: 4903
-		// (get) Token: 0x0600796F RID: 31087 RVA: 0x0024AD1A File Offset: 0x00248F1A
-		protected float TotalNeededWork
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			get
-			{
-				return this.Tree.def.plant.harvestWork;
-			}
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x06007970 RID: 31088 RVA: 0x0024AD31 File Offset: 0x00248F31
-		public override void ExposeData()
+		private bool MoveNext()
 		{
-			base.ExposeData();
-			Scribe_Values.Look<float>(ref this.workLeft, "workLeft", 0f, false);
-			Scribe_Values.Look<float>(ref this.totalNeededWork, "totalNeededWork", 0f, false);
-		}
-
-		// Token: 0x06007971 RID: 31089 RVA: 0x0024AD65 File Offset: 0x00248F65
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
-		{
-			return this.pawn.Reserve(this.Target, this.job, 1, -1, null, errorOnFailed, false);
-		}
-
-		// Token: 0x06007972 RID: 31090 RVA: 0x0024AD88 File Offset: 0x00248F88
-		protected override IEnumerable<Toil> MakeNewToils()
-		{
-			this.FailOnThingMissingDesignation(TargetIndex.A, this.Designation);
-			this.FailOnForbidden(TargetIndex.A);
-			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch, false);
-			Toil doWork = ToilMaker.MakeToil("MakeNewToils").FailOnDestroyedNullOrForbidden(TargetIndex.A).FailOnCannotTouch(TargetIndex.A, PathEndMode.Touch);
-			doWork.initAction = delegate()
+			int num = _003C_003E1__state;
+			JobDriver_ExtractTree CS_0024_003C_003E8__locals36 = _003C_003E4__this;
+			switch (num)
 			{
-				this.totalNeededWork = this.TotalNeededWork;
-				this.workLeft = this.totalNeededWork;
-			};
-			doWork.tickIntervalAction = delegate(int delta)
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				CS_0024_003C_003E8__locals36.FailOnThingMissingDesignation(TargetIndex.A, CS_0024_003C_003E8__locals36.Designation);
+				CS_0024_003C_003E8__locals36.FailOnForbidden(TargetIndex.A);
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
 			{
-				this.workLeft -= JobDriver_PlantWork.WorkDonePerTick(this.pawn, this.Tree) * (float)delta;
-				if (this.pawn.skills != null)
+				_003C_003E1__state = -1;
+				_003C_003Ec__DisplayClass13_0 CS_0024_003C_003E8__locals33 = new _003C_003Ec__DisplayClass13_0();
+				CS_0024_003C_003E8__locals33._003C_003E4__this = CS_0024_003C_003E8__locals36;
+				CS_0024_003C_003E8__locals33.doWork = ToilMaker.MakeToil("MakeNewToils").FailOnDestroyedNullOrForbidden(TargetIndex.A).FailOnCannotTouch(TargetIndex.A, PathEndMode.Touch);
+				CS_0024_003C_003E8__locals33.doWork.initAction = delegate
 				{
-					this.pawn.skills.Learn(SkillDefOf.Plants, 0.085f * (float)delta, false, false);
-				}
-				if (this.workLeft <= 0f)
+					CS_0024_003C_003E8__locals36.totalNeededWork = CS_0024_003C_003E8__locals36.TotalNeededWork;
+					CS_0024_003C_003E8__locals36.workLeft = CS_0024_003C_003E8__locals36.totalNeededWork;
+				};
+				CS_0024_003C_003E8__locals33.doWork.tickIntervalAction = delegate(int delta)
 				{
-					SoundDefOf.Finish_Wood.PlayOneShot(SoundInfo.InMap(this.Tree, MaintenanceType.None));
-					doWork.actor.jobs.curDriver.ReadyForNextToil();
-				}
-			};
-			doWork.defaultCompleteMode = ToilCompleteMode.Never;
-			doWork.WithProgressBar(TargetIndex.A, () => 1f - this.workLeft / this.totalNeededWork, false, -0.5f, false);
-			doWork.WithEffect(EffecterDefOf.Harvest_Plant, TargetIndex.A, null);
-			doWork.PlaySustainerOrSound(() => SoundDefOf.Interact_ConstructDirt, 1f);
-			doWork.activeSkill = (() => SkillDefOf.Plants);
-			yield return doWork;
-			Toil toil = ToilMaker.MakeToil("MakeNewToils");
-			toil.initAction = delegate()
+					CS_0024_003C_003E8__locals33._003C_003E4__this.workLeft = CS_0024_003C_003E8__locals33._003C_003E4__this.workLeft - JobDriver_PlantWork.WorkDonePerTick(CS_0024_003C_003E8__locals33._003C_003E4__this.pawn, CS_0024_003C_003E8__locals33._003C_003E4__this.Tree) * (float)delta;
+					if (CS_0024_003C_003E8__locals33._003C_003E4__this.pawn.skills != null)
+					{
+						CS_0024_003C_003E8__locals33._003C_003E4__this.pawn.skills.Learn(SkillDefOf.Plants, 0.085f * (float)delta);
+					}
+					if (CS_0024_003C_003E8__locals33._003C_003E4__this.workLeft <= 0f)
+					{
+						SoundDefOf.Finish_Wood.PlayOneShot(SoundInfo.InMap(CS_0024_003C_003E8__locals33._003C_003E4__this.Tree));
+						CS_0024_003C_003E8__locals33.doWork.actor.jobs.curDriver.ReadyForNextToil();
+					}
+				};
+				CS_0024_003C_003E8__locals33.doWork.defaultCompleteMode = ToilCompleteMode.Never;
+				CS_0024_003C_003E8__locals33.doWork.WithProgressBar(TargetIndex.A, () => 1f - CS_0024_003C_003E8__locals36.workLeft / CS_0024_003C_003E8__locals36.totalNeededWork);
+				CS_0024_003C_003E8__locals33.doWork.WithEffect(EffecterDefOf.Harvest_Plant, TargetIndex.A, null);
+				CS_0024_003C_003E8__locals33.doWork.PlaySustainerOrSound(() => SoundDefOf.Interact_ConstructDirt);
+				CS_0024_003C_003E8__locals33.doWork.activeSkill = () => SkillDefOf.Plants;
+				_003C_003E2__current = CS_0024_003C_003E8__locals33.doWork;
+				_003C_003E1__state = 2;
+				return true;
+			}
+			case 2:
 			{
-				IntVec3 position = this.Tree.Position;
-				bool flag = Find.Selector.IsSelected(this.Tree);
-				Thing thing = GenSpawn.Spawn(this.Tree.MakeMinified(DestroyMode.Vanish), position, this.pawn.Map, WipeMode.Vanish);
-				if (flag && thing != null)
+				_003C_003E1__state = -1;
+				Toil toil = ToilMaker.MakeToil("MakeNewToils");
+				toil.initAction = delegate
 				{
-					Find.Selector.Select(thing, false, false);
-				}
-				base.Map.designationManager.RemoveAllDesignationsOn(this.Target, false);
-			};
-			toil.defaultCompleteMode = ToilCompleteMode.Instant;
-			yield return toil;
-			yield break;
+					IntVec3 position = CS_0024_003C_003E8__locals36.Tree.Position;
+					bool num2 = Find.Selector.IsSelected(CS_0024_003C_003E8__locals36.Tree);
+					Thing thing = GenSpawn.Spawn(CS_0024_003C_003E8__locals36.Tree.MakeMinified(), position, CS_0024_003C_003E8__locals36.pawn.Map);
+					if (num2 && thing != null)
+					{
+						Find.Selector.Select(thing, playSound: false, forceDesignatorDeselect: false);
+					}
+					CS_0024_003C_003E8__locals36.Map.designationManager.RemoveAllDesignationsOn(CS_0024_003C_003E8__locals36.Target);
+				};
+				toil.defaultCompleteMode = ToilCompleteMode.Instant;
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 3;
+				return true;
+			}
+			case 3:
+				_003C_003E1__state = -1;
+				return false;
+			}
 		}
 
-		// Token: 0x04005261 RID: 21089
-		private float workLeft;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
 
-		// Token: 0x04005262 RID: 21090
-		private float totalNeededWork;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04005263 RID: 21091
-		public const TargetIndex TreeInd = TargetIndex.A;
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__13 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__13(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private float workLeft;
+
+	private float totalNeededWork;
+
+	public const TargetIndex TreeInd = TargetIndex.A;
+
+	protected Thing Target => job.GetTarget(TargetIndex.A).Thing;
+
+	protected Plant Tree => (Plant)Target.GetInnerIfMinified();
+
+	protected DesignationDef Designation => DesignationDefOf.ExtractTree;
+
+	protected float TotalNeededWork => Tree.def.plant.harvestWork;
+
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref workLeft, "workLeft", 0f);
+		Scribe_Values.Look(ref totalNeededWork, "totalNeededWork", 0f);
+	}
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return pawn.Reserve(Target, job, 1, -1, null, errorOnFailed);
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__13))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__13(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

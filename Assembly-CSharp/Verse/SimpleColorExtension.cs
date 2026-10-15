@@ -1,35 +1,23 @@
-﻿using System;
+using System;
 using UnityEngine;
 
-namespace Verse
+namespace Verse;
+
+public static class SimpleColorExtension
 {
-	// Token: 0x02000CF3 RID: 3315
-	public static class SimpleColorExtension
+	public static Color ToUnityColor(this SimpleColor color)
 	{
-		// Token: 0x0600548D RID: 21645 RVA: 0x001B39A4 File Offset: 0x001B1BA4
-		public static Color ToUnityColor(this SimpleColor color)
+		return color switch
 		{
-			switch (color)
-			{
-			case SimpleColor.White:
-				return Color.white;
-			case SimpleColor.Red:
-				return Color.red;
-			case SimpleColor.Green:
-				return Color.green;
-			case SimpleColor.Blue:
-				return Color.blue;
-			case SimpleColor.Magenta:
-				return Color.magenta;
-			case SimpleColor.Yellow:
-				return Color.yellow;
-			case SimpleColor.Cyan:
-				return Color.cyan;
-			case SimpleColor.Orange:
-				return ColorLibrary.Orange;
-			default:
-				throw new ArgumentException();
-			}
-		}
+			SimpleColor.White => Color.white, 
+			SimpleColor.Red => Color.red, 
+			SimpleColor.Green => Color.green, 
+			SimpleColor.Blue => Color.blue, 
+			SimpleColor.Magenta => Color.magenta, 
+			SimpleColor.Yellow => Color.yellow, 
+			SimpleColor.Cyan => Color.cyan, 
+			SimpleColor.Orange => ColorLibrary.Orange, 
+			_ => throw new ArgumentException(), 
+		};
 	}
 }

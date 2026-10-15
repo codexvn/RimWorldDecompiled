@@ -276,6 +276,18 @@ public sealed class RenderThread : IDisposable
 		Interlocked.Exchange(ref _resizeRequested, 1);
 	}
 
+	public void RequeueRebuild(bool surfaceLost)
+	{
+		if (surfaceLost)
+		{
+			RequestSurfaceRecreate();
+		}
+		else
+		{
+			RequestResize();
+		}
+	}
+
 	private void RequestSurfaceRecreate()
 	{
 		Interlocked.Exchange(ref _surfaceRecreateRequested, 1);

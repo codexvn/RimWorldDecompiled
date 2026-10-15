@@ -1,72 +1,165 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.Grammar;
 
-namespace RimWorld
+namespace RimWorld;
+
+[StaticConstructorOnStartup]
+public class Reward_ArchonexusMap : Reward
 {
-	// Token: 0x0200367B RID: 13947
-	[StaticConstructorOnStartup]
-	public class Reward_ArchonexusMap : Reward
+	[CompilerGenerated]
+	private sealed class _003Cget_StackElements_003Ed__6 : IEnumerable<GenUI.AnonymousStackElement>, IEnumerable, IEnumerator<GenUI.AnonymousStackElement>, IEnumerator, IDisposable
 	{
-		// Token: 0x170031DA RID: 12762
-		// (get) Token: 0x060135B1 RID: 79281 RVA: 0x005C2B6A File Offset: 0x005C0D6A
-		private static Texture2D Icon
+		private int _003C_003E1__state;
+
+		private GenUI.AnonymousStackElement _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public Reward_ArchonexusMap _003C_003E4__this;
+
+		GenUI.AnonymousStackElement IEnumerator<GenUI.AnonymousStackElement>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (Reward_ArchonexusMap.icon == null)
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003Cget_StackElements_003Ed__6(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			Reward_ArchonexusMap CS_0024_003C_003E8__locals2 = _003C_003E4__this;
+			switch (num)
+			{
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = QuestPartUtility.GetStandardRewardStackElement("Reward_ArchonexusMapPartLabel".Translate(CS_0024_003C_003E8__locals2.currentPart, 3), Icon, () => CS_0024_003C_003E8__locals2.GetDescription(default(RewardsGeneratorParams)).CapitalizeFirst() + ".");
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				return false;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<GenUI.AnonymousStackElement> IEnumerable<GenUI.AnonymousStackElement>.GetEnumerator()
+		{
+			_003Cget_StackElements_003Ed__6 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_StackElements_003Ed__6(0)
 				{
-					Reward_ArchonexusMap.icon = ContentFinder<Texture2D>.Get("UI/Icons/ArchonexusMapPart", true);
-				}
-				return Reward_ArchonexusMap.icon;
+					_003C_003E4__this = _003C_003E4__this
+				};
 			}
+			return result;
 		}
 
-		// Token: 0x170031DB RID: 12763
-		// (get) Token: 0x060135B2 RID: 79282 RVA: 0x005C2B8E File Offset: 0x005C0D8E
-		public override IEnumerable<GenUI.AnonymousStackElement> StackElements
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			get
+			return ((IEnumerable<GenUI.AnonymousStackElement>)this).GetEnumerator();
+		}
+	}
+
+	public int currentPart = 1;
+
+	private const int totalParts = 3;
+
+	private static Texture2D icon;
+
+	private static Texture2D Icon
+	{
+		get
+		{
+			if (icon == null)
 			{
-				yield return QuestPartUtility.GetStandardRewardStackElement("Reward_ArchonexusMapPartLabel".Translate(this.currentPart, 3), Reward_ArchonexusMap.Icon, () => this.GetDescription(default(RewardsGeneratorParams)).CapitalizeFirst() + ".", null);
-				yield break;
+				icon = ContentFinder<Texture2D>.Get("UI/Icons/ArchonexusMapPart");
 			}
+			return icon;
 		}
+	}
 
-		// Token: 0x060135B3 RID: 79283 RVA: 0x00066B11 File Offset: 0x00064D11
-		public override void InitFromValue(float rewardValue, RewardsGeneratorParams parms, out float valueActuallyUsed)
+	public override IEnumerable<GenUI.AnonymousStackElement> StackElements
+	{
+		[IteratorStateMachine(typeof(_003Cget_StackElements_003Ed__6))]
+		get
 		{
-			throw new NotImplementedException();
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_StackElements_003Ed__6(-2)
+			{
+				_003C_003E4__this = this
+			};
 		}
+	}
 
-		// Token: 0x060135B4 RID: 79284 RVA: 0x00066B11 File Offset: 0x00064D11
-		public override IEnumerable<QuestPart> GenerateQuestParts(int index, RewardsGeneratorParams parms, string customLetterLabel, string customLetterText, RulePack customLetterLabelRules, RulePack customLetterTextRules)
-		{
-			throw new NotImplementedException();
-		}
+	public override void InitFromValue(float rewardValue, RewardsGeneratorParams parms, out float valueActuallyUsed)
+	{
+		throw new NotImplementedException();
+	}
 
-		// Token: 0x060135B5 RID: 79285 RVA: 0x005C2B9E File Offset: 0x005C0D9E
-		public override string GetDescription(RewardsGeneratorParams parms)
-		{
-			return "Reward_ArchonexusMapPart".Translate(this.currentPart, 3);
-		}
+	public override IEnumerable<QuestPart> GenerateQuestParts(int index, RewardsGeneratorParams parms, string customLetterLabel, string customLetterText, RulePack customLetterLabelRules, RulePack customLetterTextRules)
+	{
+		throw new NotImplementedException();
+	}
 
-		// Token: 0x060135B6 RID: 79286 RVA: 0x005C2BC0 File Offset: 0x005C0DC0
-		public override void ExposeData()
-		{
-			base.ExposeData();
-			Scribe_Values.Look<int>(ref this.currentPart, "currentPart", 0, false);
-		}
+	public override string GetDescription(RewardsGeneratorParams parms)
+	{
+		return "Reward_ArchonexusMapPart".Translate(currentPart, 3);
+	}
 
-		// Token: 0x0400D6BD RID: 54973
-		public int currentPart = 1;
-
-		// Token: 0x0400D6BE RID: 54974
-		private const int totalParts = 3;
-
-		// Token: 0x0400D6BF RID: 54975
-		private static Texture2D icon;
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref currentPart, "currentPart", 0);
 	}
 }

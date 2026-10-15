@@ -1,52 +1,153 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_AbsorbXenogerm : JobDriver
 {
-	// Token: 0x02001210 RID: 4624
-	public class JobDriver_AbsorbXenogerm : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__4 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x17001188 RID: 4488
-		// (get) Token: 0x060070F6 RID: 28918 RVA: 0x001E5D9E File Offset: 0x001E3F9E
-		public Pawn Target
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_AbsorbXenogerm _003C_003E4__this;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.job.targetA.Thing as Pawn;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x060070F7 RID: 28919 RVA: 0x0022FD5B File Offset: 0x0022DF5B
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		object IEnumerator.Current
 		{
-			return this.pawn.Reserve(this.Target, this.job, 1, -1, null, errorOnFailed, false);
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
 		}
 
-		// Token: 0x060070F8 RID: 28920 RVA: 0x0022FD7E File Offset: 0x0022DF7E
-		protected override IEnumerable<Toil> MakeNewToils()
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__4(int _003C_003E1__state)
 		{
-			if (!ModLister.CheckBiotech("xenogerm absorbing"))
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_AbsorbXenogerm CS_0024_003C_003E8__locals9 = _003C_003E4__this;
+			switch (num)
 			{
-				yield break;
-			}
-			this.FailOnDespawnedNullOrForbidden(TargetIndex.A);
-			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch, false);
-			yield return Toils_General.WaitWith(TargetIndex.A, 60, true, false, false, TargetIndex.None, PathEndMode.Touch);
-			yield return Toils_General.Do(delegate
-			{
-				if (this.Target.HomeFaction != null && this.pawn.Faction == Faction.OfPlayer)
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (!ModLister.CheckBiotech("xenogerm absorbing"))
 				{
-					Faction.OfPlayer.TryAffectGoodwillWith(this.Target.HomeFaction, -50, true, !this.Target.HomeFaction.temporary, HistoryEventDefOf.AbsorbedXenogerm, null);
+					return false;
 				}
-				QuestUtility.SendQuestTargetSignals(this.Target.questTags, "XenogermAbsorbed", this.Target.Named("SUBJECT"));
-				GeneUtility.ReimplantXenogerm(this.Target, this.pawn);
-			});
-			yield break;
+				CS_0024_003C_003E8__locals9.FailOnDespawnedNullOrForbidden(TargetIndex.A);
+				_003C_003E2__current = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch);
+				_003C_003E1__state = 1;
+				return true;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.WaitWith(TargetIndex.A, 60, useProgressBar: true);
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_General.Do(delegate
+				{
+					if (CS_0024_003C_003E8__locals9.Target.HomeFaction != null && CS_0024_003C_003E8__locals9.pawn.Faction == Faction.OfPlayer)
+					{
+						Faction.OfPlayer.TryAffectGoodwillWith(CS_0024_003C_003E8__locals9.Target.HomeFaction, -50, canSendMessage: true, !CS_0024_003C_003E8__locals9.Target.HomeFaction.temporary, HistoryEventDefOf.AbsorbedXenogerm, null);
+					}
+					QuestUtility.SendQuestTargetSignals(CS_0024_003C_003E8__locals9.Target.questTags, "XenogermAbsorbed", CS_0024_003C_003E8__locals9.Target.Named("SUBJECT"));
+					GeneUtility.ReimplantXenogerm(CS_0024_003C_003E8__locals9.Target, CS_0024_003C_003E8__locals9.pawn);
+				});
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+				_003C_003E1__state = -1;
+				return false;
+			}
 		}
 
-		// Token: 0x04004E65 RID: 20069
-		public const int TicksToAbsorb = 60;
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__4 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__4(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	public const int TicksToAbsorb = 60;
+
+	public Pawn Target => job.targetA.Thing as Pawn;
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		return pawn.Reserve(Target, job, 1, -1, null, errorOnFailed);
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__4))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__4(-2)
+		{
+			_003C_003E4__this = this
+		};
 	}
 }

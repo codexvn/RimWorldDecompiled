@@ -1,85 +1,59 @@
-﻿using System;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public abstract class ScenPart_ConfigPage_ConfigureStartingPawnsBase : ScenPart_ConfigPage
 {
-	// Token: 0x02002897 RID: 10391
-	public abstract class ScenPart_ConfigPage_ConfigureStartingPawnsBase : ScenPart_ConfigPage
+	public int pawnChoiceCount = 10;
+
+	protected const int MaxPawnCount = 10;
+
+	protected abstract int TotalPawnCount { get; }
+
+	protected abstract void GenerateStartingPawns();
+
+	public override void PostIdeoChosen()
 	{
-		// Token: 0x1700229A RID: 8858
-		// (get) Token: 0x0600E37B RID: 58235
-		protected abstract int TotalPawnCount { get; }
-
-		// Token: 0x0600E37C RID: 58236
-		protected abstract void GenerateStartingPawns();
-
-		// Token: 0x0600E37D RID: 58237 RVA: 0x00427B9C File Offset: 0x00425D9C
-		public override void PostIdeoChosen()
+		Find.GameInitData.startingPawnCount = TotalPawnCount;
+		if (ModsConfig.BiotechActive)
 		{
-			Find.GameInitData.startingPawnCount = this.TotalPawnCount;
-			if (ModsConfig.BiotechActive)
+			Current.Game.customXenotypeDatabase.customXenotypes.Clear();
+			foreach (Ideo item in Find.IdeoManager.IdeosListForReading)
 			{
-				Current.Game.customXenotypeDatabase.customXenotypes.Clear();
-				foreach (Ideo ideo in Find.IdeoManager.IdeosListForReading)
+				foreach (Precept item2 in item.PreceptsListForReading)
 				{
-					foreach (Precept precept in ideo.PreceptsListForReading)
+					if (item2 is Precept_Xenotype { customXenotype: not null } precept_Xenotype && !Current.Game.customXenotypeDatabase.customXenotypes.Contains(precept_Xenotype.customXenotype))
 					{
-						Precept_Xenotype precept_Xenotype = precept as Precept_Xenotype;
-						if (precept_Xenotype != null && precept_Xenotype.customXenotype != null && !Current.Game.customXenotypeDatabase.customXenotypes.Contains(precept_Xenotype.customXenotype))
-						{
-							Current.Game.customXenotypeDatabase.customXenotypes.Add(precept_Xenotype.customXenotype);
-						}
+						Current.Game.customXenotypeDatabase.customXenotypes.Add(precept_Xenotype.customXenotype);
 					}
 				}
 			}
-			if (ModsConfig.IdeologyActive)
+		}
+		if (ModsConfig.IdeologyActive && Faction.OfPlayerSilentFail?.ideos?.PrimaryIdeo != null)
+		{
+			foreach (Precept item3 in Faction.OfPlayerSilentFail.ideos.PrimaryIdeo.PreceptsListForReading)
 			{
-				Faction ofPlayerSilentFail = Faction.OfPlayerSilentFail;
-				bool flag;
-				if (ofPlayerSilentFail == null)
+				if (item3.def.defaultDrugPolicyOverride != null)
 				{
-					flag = (null != null);
-				}
-				else
-				{
-					FactionIdeosTracker ideos = ofPlayerSilentFail.ideos;
-					flag = (((ideos != null) ? ideos.PrimaryIdeo : null) != null);
-				}
-				if (flag)
-				{
-					foreach (Precept precept2 in Faction.OfPlayerSilentFail.ideos.PrimaryIdeo.PreceptsListForReading)
-					{
-						if (precept2.def.defaultDrugPolicyOverride != null)
-						{
-							Current.Game.drugPolicyDatabase.MakePolicyDefault(precept2.def.defaultDrugPolicyOverride);
-						}
-					}
+					Current.Game.drugPolicyDatabase.MakePolicyDefault(item3.def.defaultDrugPolicyOverride);
 				}
 			}
-			this.GenerateStartingPawns();
-			while (Find.GameInitData.startingAndOptionalPawns.Count < this.pawnChoiceCount)
-			{
-				StartingPawnUtility.AddNewPawn(-1);
-			}
 		}
-
-		// Token: 0x0600E37E RID: 58238 RVA: 0x00427D5C File Offset: 0x00425F5C
-		public override void ExposeData()
+		GenerateStartingPawns();
+		while (Find.GameInitData.startingAndOptionalPawns.Count < pawnChoiceCount)
 		{
-			base.ExposeData();
-			Scribe_Values.Look<int>(ref this.pawnChoiceCount, "pawnChoiceCount", 0, false);
+			StartingPawnUtility.AddNewPawn();
 		}
+	}
 
-		// Token: 0x0600E37F RID: 58239 RVA: 0x00427D76 File Offset: 0x00425F76
-		public override int GetHashCode()
-		{
-			return base.GetHashCode() ^ this.pawnChoiceCount;
-		}
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Values.Look(ref pawnChoiceCount, "pawnChoiceCount", 0);
+	}
 
-		// Token: 0x0400985A RID: 39002
-		public int pawnChoiceCount = 10;
-
-		// Token: 0x0400985B RID: 39003
-		protected const int MaxPawnCount = 10;
+	public override int GetHashCode()
+	{
+		return base.GetHashCode() ^ pawnChoiceCount;
 	}
 }

@@ -1,60 +1,53 @@
-﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class SurgeryOutcomeEffectDef : Def
 {
-	// Token: 0x020037BD RID: 14269
-	public class SurgeryOutcomeEffectDef : Def
+	public List<SurgeryOutcomeComp> comps;
+
+	public List<SurgeryOutcome> outcomes;
+
+	public float GetQuality(RecipeDef recipe, Pawn surgeon, Pawn patient, List<Thing> ingredients, BodyPartRecord part, Bill bill)
 	{
-		// Token: 0x06013C5F RID: 80991 RVA: 0x005DE51C File Offset: 0x005DC71C
-		public float GetQuality(RecipeDef recipe, Pawn surgeon, Pawn patient, List<Thing> ingredients, BodyPartRecord part, Bill bill)
+		float quality = 1f;
+		if (!comps.NullOrEmpty())
 		{
-			float result = 1f;
-			if (!this.comps.NullOrEmpty<SurgeryOutcomeComp>())
+			for (int i = 0; i < comps.Count; i++)
 			{
-				for (int i = 0; i < this.comps.Count; i++)
+				if (comps[i].Affects(recipe, surgeon, patient, part))
 				{
-					if (this.comps[i].Affects(recipe, surgeon, patient, part))
-					{
-						this.comps[i].AffectQuality(recipe, surgeon, patient, ingredients, part, bill, ref result);
-					}
+					comps[i].AffectQuality(recipe, surgeon, patient, ingredients, part, bill, ref quality);
 				}
 			}
-			return result;
 		}
+		return quality;
+	}
 
-		// Token: 0x06013C60 RID: 80992 RVA: 0x005DE588 File Offset: 0x005DC788
-		public SurgeryOutcome GetOutcome(RecipeDef recipe, Pawn surgeon, Pawn patient, List<Thing> ingredients, BodyPartRecord part, Bill bill)
+	public SurgeryOutcome GetOutcome(RecipeDef recipe, Pawn surgeon, Pawn patient, List<Thing> ingredients, BodyPartRecord part, Bill bill)
+	{
+		float quality = GetQuality(recipe, surgeon, patient, ingredients, part, bill);
+		if (!comps.NullOrEmpty())
 		{
-			float quality = this.GetQuality(recipe, surgeon, patient, ingredients, part, bill);
-			if (!this.comps.NullOrEmpty<SurgeryOutcomeComp>())
+			for (int i = 0; i < comps.Count; i++)
 			{
-				for (int i = 0; i < this.comps.Count; i++)
+				if (comps[i].Affects(recipe, surgeon, patient, part))
 				{
-					if (this.comps[i].Affects(recipe, surgeon, patient, part))
-					{
-						this.comps[i].PreApply(quality, recipe, surgeon, patient, ingredients, part, bill);
-					}
+					comps[i].PreApply(quality, recipe, surgeon, patient, ingredients, part, bill);
 				}
 			}
-			if (!this.outcomes.NullOrEmpty<SurgeryOutcome>())
-			{
-				for (int j = 0; j < this.outcomes.Count; j++)
-				{
-					if (this.outcomes[j].Apply(quality, recipe, surgeon, patient, part))
-					{
-						return this.outcomes[j];
-					}
-				}
-			}
-			return null;
 		}
-
-		// Token: 0x0400DAFC RID: 56060
-		public List<SurgeryOutcomeComp> comps;
-
-		// Token: 0x0400DAFD RID: 56061
-		public List<SurgeryOutcome> outcomes;
+		if (!outcomes.NullOrEmpty())
+		{
+			for (int j = 0; j < outcomes.Count; j++)
+			{
+				if (outcomes[j].Apply(quality, recipe, surgeon, patient, part))
+				{
+					return outcomes[j];
+				}
+			}
+		}
+		return null;
 	}
 }

@@ -1,198 +1,303 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class JobDriver_InteractThing : JobDriver
 {
-	// Token: 0x0200129F RID: 4767
-	public class JobDriver_InteractThing : JobDriver
+	[CompilerGenerated]
+	private sealed class _003CMakeNewToils_003Ed__12 : IEnumerable<Toil>, IEnumerable, IEnumerator<Toil>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700123F RID: 4671
-		// (get) Token: 0x060074C4 RID: 29892 RVA: 0x0023BCD0 File Offset: 0x00239ED0
-		private Thing InteractableThing
+		private int _003C_003E1__state;
+
+		private Toil _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public JobDriver_InteractThing _003C_003E4__this;
+
+		private Toil _003Copt_003E5__2;
+
+		Toil IEnumerator<Toil>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.job.GetTarget(TargetIndex.A).Thing;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001240 RID: 4672
-		// (get) Token: 0x060074C5 RID: 29893 RVA: 0x0023BCF4 File Offset: 0x00239EF4
-		private Thing OptionalThing
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return this.job.GetTarget(TargetIndex.B).Thing;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17001241 RID: 4673
-		// (get) Token: 0x060074C6 RID: 29894 RVA: 0x0023BD15 File Offset: 0x00239F15
-		private bool HasOptionalThing
+		[DebuggerHidden]
+		public _003CMakeNewToils_003Ed__12(int _003C_003E1__state)
 		{
-			get
-			{
-				return this.OptionalThing != null;
-			}
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
 		}
 
-		// Token: 0x17001242 RID: 4674
-		// (get) Token: 0x060074C7 RID: 29895 RVA: 0x0023BD20 File Offset: 0x00239F20
-		private CompInteractable Interactable
+		[DebuggerHidden]
+		void IDisposable.Dispose()
 		{
-			get
+			_003Copt_003E5__2 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			JobDriver_InteractThing CS_0024_003C_003E8__locals24 = _003C_003E4__this;
+			Toil toil;
+			switch (num)
 			{
-				if (this.job.interactableIndex == -1)
+			default:
+				return false;
+			case 0:
+				_003C_003E1__state = -1;
+				if (CS_0024_003C_003E8__locals24.job.GetTarget(TargetIndex.B).HasThing)
 				{
-					return this.job.GetTarget(TargetIndex.A).Thing.TryGetComp<CompInteractable>();
+					_003Copt_003E5__2 = Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.ClosestTouch, canGotoSpawnedParent: true).FailOnDespawnedNullOrForbidden(TargetIndex.B).FailOnSomeonePhysicallyInteracting(TargetIndex.B)
+						.FailOn(() => !CS_0024_003C_003E8__locals24.Interactable.CanInteract(CS_0024_003C_003E8__locals24.pawn));
+					_003C_003E2__current = _003Copt_003E5__2;
+					_003C_003E1__state = 1;
+					return true;
 				}
-				ThingWithComps thingWithComps = this.job.GetTarget(TargetIndex.A).Thing as ThingWithComps;
-				if (thingWithComps == null)
+				goto IL_00e3;
+			case 1:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Haul.StartCarryThing(TargetIndex.B, putRemainderInQueue: false, subtractNumTakenFromJobCount: true, failIfStackCountLessThanJobCount: false, reserve: true, canTakeFromInventory: true);
+				_003C_003E1__state = 2;
+				return true;
+			case 2:
+				_003C_003E1__state = -1;
+				_003C_003E2__current = Toils_Haul.JumpIfAlsoCollectingNextTargetInQueue(_003Copt_003E5__2, TargetIndex.B);
+				_003C_003E1__state = 3;
+				return true;
+			case 3:
+				_003C_003E1__state = -1;
+				_003Copt_003E5__2 = null;
+				goto IL_00e3;
+			case 4:
+				_003C_003E1__state = -1;
+				if (CS_0024_003C_003E8__locals24.Interactable.TicksToActivate != 0)
 				{
-					return null;
-				}
-				return thingWithComps.GetComps<CompInteractable>().ToList<CompInteractable>()[this.job.interactableIndex];
-			}
-		}
-
-		// Token: 0x060074C8 RID: 29896 RVA: 0x0023BD90 File Offset: 0x00239F90
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
-		{
-			if (base.TargetThingB != null)
-			{
-				this.pawn.ReserveAsManyAsPossible(this.job.GetTargetQueue(TargetIndex.B), this.job, 1, -1, null);
-			}
-			return (base.TargetThingB == null || this.pawn.Reserve(this.job.GetTarget(TargetIndex.B), this.job, 1, -1, null, errorOnFailed, false)) && this.pawn.Reserve(this.job.GetTarget(TargetIndex.A), this.job, 1, -1, null, errorOnFailed, false);
-		}
-
-		// Token: 0x060074C9 RID: 29897 RVA: 0x0023BE15 File Offset: 0x0023A015
-		protected override IEnumerable<Toil> MakeNewToils()
-		{
-			if (this.job.GetTarget(TargetIndex.B).HasThing)
-			{
-				Toil opt = Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.ClosestTouch, true).FailOnDespawnedNullOrForbidden(TargetIndex.B).FailOnSomeonePhysicallyInteracting(TargetIndex.B).FailOn(() => !this.Interactable.CanInteract(this.pawn, true));
-				yield return opt;
-				yield return Toils_Haul.StartCarryThing(TargetIndex.B, false, true, false, true, true);
-				yield return Toils_Haul.JumpIfAlsoCollectingNextTargetInQueue(opt, TargetIndex.B);
-				opt = null;
-			}
-			if (this.job.GetTarget(TargetIndex.A).Thing.SpawnedParentOrMe != null)
-			{
-				this.job.SetTarget(TargetIndex.C, this.job.GetTarget(TargetIndex.A).Thing.SpawnedParentOrMe);
-			}
-			Toil toil = Toils_Goto.GotoThing(TargetIndex.C, PathEndMode.Touch, false).FailOnDespawnedNullOrForbidden(TargetIndex.C).FailOnSomeonePhysicallyInteracting(TargetIndex.C).FailOn(() => !this.Interactable.CanInteract(this.pawn, true));
-			yield return toil;
-			if (this.Interactable.TicksToActivate != 0)
-			{
-				int num = this.Interactable.TicksToActivate;
-				if (this.Interactable.Props.activateStat != null && this.pawn.GetStatValue(this.Interactable.Props.activateStat, true, -1) > 0f)
-				{
-					num = Mathf.RoundToInt((float)num / this.pawn.GetStatValue(this.Interactable.Props.activateStat, true, -1));
-				}
-				int remainingTicks = Mathf.RoundToInt((float)num * (1f - this.Interactable.progress));
-				yield return this.WaitForActivate(remainingTicks, num);
-			}
-			yield return Toils_General.Do(delegate
-			{
-				if (this.HasOptionalThing)
-				{
-					if (!this.pawn.IsCarryingThing(this.OptionalThing))
+					int num2 = CS_0024_003C_003E8__locals24.Interactable.TicksToActivate;
+					if (CS_0024_003C_003E8__locals24.Interactable.Props.activateStat != null && CS_0024_003C_003E8__locals24.pawn.GetStatValue(CS_0024_003C_003E8__locals24.Interactable.Props.activateStat) > 0f)
 					{
-						Log.ErrorOnce("Interact driver required item (" + this.OptionalThing.Label + ") but was not carrying it.", 77979685);
-						return;
+						num2 = Mathf.RoundToInt((float)num2 / CS_0024_003C_003E8__locals24.pawn.GetStatValue(CS_0024_003C_003E8__locals24.Interactable.Props.activateStat));
 					}
-					this.pawn.carryTracker.DestroyCarriedThing();
+					int remainingTicks = Mathf.RoundToInt((float)num2 * (1f - CS_0024_003C_003E8__locals24.Interactable.progress));
+					_003C_003E2__current = CS_0024_003C_003E8__locals24.WaitForActivate(remainingTicks, num2);
+					_003C_003E1__state = 5;
+					return true;
 				}
-				this.Interactable.Interact(this.pawn, false);
+				goto IL_021c;
+			case 5:
+				_003C_003E1__state = -1;
+				goto IL_021c;
+			case 6:
+				{
+					_003C_003E1__state = -1;
+					return false;
+				}
+				IL_00e3:
+				if (CS_0024_003C_003E8__locals24.job.GetTarget(TargetIndex.A).Thing.SpawnedParentOrMe != null)
+				{
+					CS_0024_003C_003E8__locals24.job.SetTarget(TargetIndex.C, CS_0024_003C_003E8__locals24.job.GetTarget(TargetIndex.A).Thing.SpawnedParentOrMe);
+				}
+				toil = Toils_Goto.GotoThing(TargetIndex.C, PathEndMode.Touch).FailOnDespawnedNullOrForbidden(TargetIndex.C).FailOnSomeonePhysicallyInteracting(TargetIndex.C)
+					.FailOn(() => !CS_0024_003C_003E8__locals24.Interactable.CanInteract(CS_0024_003C_003E8__locals24.pawn));
+				_003C_003E2__current = toil;
+				_003C_003E1__state = 4;
+				return true;
+				IL_021c:
+				_003C_003E2__current = Toils_General.Do(delegate
+				{
+					if (CS_0024_003C_003E8__locals24.HasOptionalThing)
+					{
+						if (!CS_0024_003C_003E8__locals24.pawn.IsCarryingThing(CS_0024_003C_003E8__locals24.OptionalThing))
+						{
+							Log.ErrorOnce("Interact driver required item (" + CS_0024_003C_003E8__locals24.OptionalThing.Label + ") but was not carrying it.", 77979685);
+							return;
+						}
+						CS_0024_003C_003E8__locals24.pawn.carryTracker.DestroyCarriedThing();
+					}
+					CS_0024_003C_003E8__locals24.Interactable.Interact(CS_0024_003C_003E8__locals24.pawn);
+				});
+				_003C_003E1__state = 6;
+				return true;
+			}
+		}
+
+		bool IEnumerator.MoveNext()
+		{
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
+		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<Toil> IEnumerable<Toil>.GetEnumerator()
+		{
+			_003CMakeNewToils_003Ed__12 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003CMakeNewToils_003Ed__12(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<Toil>)this).GetEnumerator();
+		}
+	}
+
+	private const TargetIndex InteractableIndex = TargetIndex.A;
+
+	private const TargetIndex OptionalItemIndex = TargetIndex.B;
+
+	private const TargetIndex SpawnedOrParentIndex = TargetIndex.C;
+
+	private Thing InteractableThing => job.GetTarget(TargetIndex.A).Thing;
+
+	private Thing OptionalThing => job.GetTarget(TargetIndex.B).Thing;
+
+	private bool HasOptionalThing => OptionalThing != null;
+
+	private CompInteractable Interactable
+	{
+		get
+		{
+			if (job.interactableIndex == -1)
+			{
+				return job.GetTarget(TargetIndex.A).Thing.TryGetComp<CompInteractable>();
+			}
+			if (!(job.GetTarget(TargetIndex.A).Thing is ThingWithComps thingWithComps))
+			{
+				return null;
+			}
+			return thingWithComps.GetComps<CompInteractable>().ToList()[job.interactableIndex];
+		}
+	}
+
+	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	{
+		if (base.TargetThingB != null)
+		{
+			pawn.ReserveAsManyAsPossible(job.GetTargetQueue(TargetIndex.B), job);
+		}
+		if (base.TargetThingB != null && !pawn.Reserve(job.GetTarget(TargetIndex.B), job, 1, -1, null, errorOnFailed))
+		{
+			return false;
+		}
+		return pawn.Reserve(job.GetTarget(TargetIndex.A), job, 1, -1, null, errorOnFailed);
+	}
+
+	[IteratorStateMachine(typeof(_003CMakeNewToils_003Ed__12))]
+	protected override IEnumerable<Toil> MakeNewToils()
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CMakeNewToils_003Ed__12(-2)
+		{
+			_003C_003E4__this = this
+		};
+	}
+
+	public override string GetReport()
+	{
+		if (base.CurToilIndex != 1 || ticksLeftThisToil <= 0)
+		{
+			if (string.IsNullOrEmpty(Interactable.Props.activatingStringPending))
+			{
+				return base.GetReport();
+			}
+			return Interactable.Props.activatingStringPending.Formatted(Interactable.parent.LabelShort);
+		}
+		int ticksToActivate = Interactable.TicksToActivate;
+		int num = ((ticksLeftThisToil < 0) ? ticksToActivate : ticksLeftThisToil);
+		float num2 = (float)(ticksToActivate - (ticksToActivate - num)) / 60f;
+		if (string.IsNullOrEmpty(Interactable.Props.activatingString))
+		{
+			return base.GetReport();
+		}
+		return Interactable.Props.activatingString.Formatted(Interactable.parent.LabelShort, num2);
+	}
+
+	private Toil WaitForActivate(int remainingTicks, int totalTicks)
+	{
+		Toil toil = ToilMaker.MakeToil("WaitForActivate").FailOn(() => !Interactable.CanInteract(pawn));
+		if (Interactable.Props.maintainProgress)
+		{
+			toil.WithProgressBar(TargetIndex.A, () => Interactable.progress);
+		}
+		else
+		{
+			toil.WithProgressBarToilDelay(TargetIndex.A, remainingTicks);
+		}
+		Toil toil2 = toil;
+		toil2.initAction = (Action)Delegate.Combine(toil2.initAction, (Action)delegate
+		{
+			Interactable.Notify_InteractionStarted();
+			toil.actor.pather.StopDead();
+		});
+		Toil toil3 = toil;
+		toil3.tickIntervalAction = (Action<int>)Delegate.Combine(toil3.tickIntervalAction, (Action<int>)delegate
+		{
+			pawn.rotationTracker.FaceTarget(base.TargetA);
+		});
+		if (Interactable.Props.maintainProgress)
+		{
+			Toil toil4 = toil;
+			toil4.tickIntervalAction = (Action<int>)Delegate.Combine(toil4.tickIntervalAction, (Action<int>)delegate
+			{
+				Interactable.progress = 1f - (float)ticksLeftThisToil / (float)totalTicks;
 			});
-			yield break;
 		}
-
-		// Token: 0x060074CA RID: 29898 RVA: 0x0023BE28 File Offset: 0x0023A028
-		public override string GetReport()
+		if (Interactable.Props.forceNormalSpeedOnInteracting)
 		{
-			if (base.CurToilIndex != 1 || this.ticksLeftThisToil <= 0)
-			{
-				if (string.IsNullOrEmpty(this.Interactable.Props.activatingStringPending))
-				{
-					return base.GetReport();
-				}
-				return this.Interactable.Props.activatingStringPending.Formatted(this.Interactable.parent.LabelShort);
-			}
-			else
-			{
-				int ticksToActivate = this.Interactable.TicksToActivate;
-				int num = (this.ticksLeftThisToil < 0) ? ticksToActivate : this.ticksLeftThisToil;
-				float value = (float)(ticksToActivate - (ticksToActivate - num)) / 60f;
-				if (string.IsNullOrEmpty(this.Interactable.Props.activatingString))
-				{
-					return base.GetReport();
-				}
-				return this.Interactable.Props.activatingString.Formatted(this.Interactable.parent.LabelShort, value);
-			}
-		}
-
-		// Token: 0x060074CB RID: 29899 RVA: 0x0023BF14 File Offset: 0x0023A114
-		private Toil WaitForActivate(int remainingTicks, int totalTicks)
-		{
-			Toil toil = ToilMaker.MakeToil("WaitForActivate").FailOn(() => !this.Interactable.CanInteract(this.pawn, true));
-			if (this.Interactable.Props.maintainProgress)
-			{
-				toil.WithProgressBar(TargetIndex.A, () => this.Interactable.progress, false, -0.5f, false);
-			}
-			else
-			{
-				toil.WithProgressBarToilDelay(TargetIndex.A, remainingTicks, false, -0.5f);
-			}
 			Toil toil5 = toil;
-			toil5.initAction = (Action)Delegate.Combine(toil5.initAction, new Action(delegate()
+			toil5.tickAction = (Action)Delegate.Combine(toil5.tickAction, (Action)delegate
 			{
-				this.Interactable.Notify_InteractionStarted();
-				toil.actor.pather.StopDead();
-			}));
-			Toil toil2 = toil;
-			toil2.tickIntervalAction = (Action<int>)Delegate.Combine(toil2.tickIntervalAction, new Action<int>(delegate(int delta)
-			{
-				this.pawn.rotationTracker.FaceTarget(this.TargetA);
-			}));
-			if (this.Interactable.Props.maintainProgress)
-			{
-				Toil toil3 = toil;
-				toil3.tickIntervalAction = (Action<int>)Delegate.Combine(toil3.tickIntervalAction, new Action<int>(delegate(int delta)
-				{
-					this.Interactable.progress = 1f - (float)this.ticksLeftThisToil / (float)totalTicks * (float)delta;
-				}));
-			}
-			if (this.Interactable.Props.forceNormalSpeedOnInteracting)
-			{
-				Toil toil4 = toil;
-				toil4.tickAction = (Action)Delegate.Combine(toil4.tickAction, new Action(delegate()
-				{
-					Find.TickManager.slower.SignalForceNormalSpeed();
-				}));
-			}
-			toil.AddFinishAction(delegate
-			{
-				this.Interactable.Notify_InteractionEnded();
+				Find.TickManager.slower.SignalForceNormalSpeed();
 			});
-			toil.handlingFacing = true;
-			toil.defaultCompleteMode = ToilCompleteMode.Delay;
-			toil.socialMode = RandomSocialMode.Off;
-			toil.defaultDuration = remainingTicks;
-			return toil;
 		}
-
-		// Token: 0x04005028 RID: 20520
-		private const TargetIndex InteractableIndex = TargetIndex.A;
-
-		// Token: 0x04005029 RID: 20521
-		private const TargetIndex OptionalItemIndex = TargetIndex.B;
-
-		// Token: 0x0400502A RID: 20522
-		private const TargetIndex SpawnedOrParentIndex = TargetIndex.C;
+		toil.AddFinishAction(delegate
+		{
+			Interactable.Notify_InteractionEnded();
+		});
+		toil.handlingFacing = true;
+		toil.defaultCompleteMode = ToilCompleteMode.Delay;
+		toil.socialMode = RandomSocialMode.Off;
+		toil.defaultDuration = remainingTicks;
+		return toil;
 	}
 }

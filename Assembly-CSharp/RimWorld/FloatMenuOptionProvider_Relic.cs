@@ -1,163 +1,259 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using RimWorld.Planet;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld
+namespace RimWorld;
+
+public class FloatMenuOptionProvider_Relic : FloatMenuOptionProvider
 {
-	// Token: 0x02003325 RID: 13093
-	public class FloatMenuOptionProvider_Relic : FloatMenuOptionProvider
+	[CompilerGenerated]
+	private sealed class _003CGetOptionsFor_003Ed__9 : IEnumerable<FloatMenuOption>, IEnumerable, IEnumerator<FloatMenuOption>, IEnumerator, IDisposable
 	{
-		// Token: 0x17002FE1 RID: 12257
-		// (get) Token: 0x0601268C RID: 75404 RVA: 0x000028E7 File Offset: 0x00000AE7
-		protected override bool Drafted
+		private int _003C_003E1__state;
+
+		private FloatMenuOption _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		private Thing clickedThing;
+
+		public Thing _003C_003E3__clickedThing;
+
+		public FloatMenuOptionProvider_Relic _003C_003E4__this;
+
+		private FloatMenuContext context;
+
+		public FloatMenuContext _003C_003E3__context;
+
+		private CompRelicContainer _003Ccontainer_003E5__2;
+
+		FloatMenuOption IEnumerator<FloatMenuOption>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return true;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002FE2 RID: 12258
-		// (get) Token: 0x0601268D RID: 75405 RVA: 0x000028E7 File Offset: 0x00000AE7
-		protected override bool Undrafted
+		object IEnumerator.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				return true;
+				return _003C_003E2__current;
 			}
 		}
 
-		// Token: 0x17002FE3 RID: 12259
-		// (get) Token: 0x0601268E RID: 75406 RVA: 0x00002501 File Offset: 0x00000701
-		protected override bool Multiselect
+		[DebuggerHidden]
+		public _003CGetOptionsFor_003Ed__9(int _003C_003E1__state)
 		{
-			get
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			_003Ccontainer_003E5__2 = null;
+			_003C_003E1__state = -2;
+		}
+
+		private bool MoveNext()
+		{
+			int num = _003C_003E1__state;
+			FloatMenuOptionProvider_Relic floatMenuOptionProvider_Relic = _003C_003E4__this;
+			switch (num)
 			{
+			default:
 				return false;
-			}
-		}
-
-		// Token: 0x17002FE4 RID: 12260
-		// (get) Token: 0x0601268F RID: 75407 RVA: 0x000028E7 File Offset: 0x00000AE7
-		protected override bool RequiresManipulation
-		{
-			get
-			{
-				return true;
-			}
-		}
-
-		// Token: 0x06012690 RID: 75408 RVA: 0x00565319 File Offset: 0x00563519
-		protected override bool AppliesInt(FloatMenuContext context)
-		{
-			return ModsConfig.IdeologyActive;
-		}
-
-		// Token: 0x06012691 RID: 75409 RVA: 0x0056D26D File Offset: 0x0056B46D
-		public override IEnumerable<FloatMenuOption> GetOptionsFor(Thing clickedThing, FloatMenuContext context)
-		{
-			CompRelicContainer container;
-			if (clickedThing.TryGetComp(out container))
-			{
-				FloatMenuOption floatMenuOption;
-				if (container.Full)
+			case 0:
+				_003C_003E1__state = -1;
+				if (clickedThing.TryGetComp(out _003Ccontainer_003E5__2))
 				{
-					yield return this.ExtractRelic(container, context.FirstSelectedPawn);
-					if (!context.FirstSelectedPawn.Map.IsPlayerHome && !context.FirstSelectedPawn.IsFormingCaravan())
+					if (_003Ccontainer_003E5__2.Full)
 					{
-						yield return this.ExtractToInventory(container, context.FirstSelectedPawn);
+						_003C_003E2__current = floatMenuOptionProvider_Relic.ExtractRelic(_003Ccontainer_003E5__2, context.FirstSelectedPawn);
+						_003C_003E1__state = 1;
+						return true;
+					}
+					if (floatMenuOptionProvider_Relic.InstallRelicFromContainer(_003Ccontainer_003E5__2.parent, context.FirstSelectedPawn, out var option))
+					{
+						_003C_003E2__current = option;
+						_003C_003E1__state = 3;
+						return true;
 					}
 				}
-				else if (this.InstallRelicFromContainer(container.parent, context.FirstSelectedPawn, out floatMenuOption))
+				goto IL_0113;
+			case 1:
+				_003C_003E1__state = -1;
+				if (!context.FirstSelectedPawn.Map.IsPlayerHome && !context.FirstSelectedPawn.IsFormingCaravan())
 				{
-					yield return floatMenuOption;
-				}
-			}
-			if (CompRelicContainer.IsRelic(clickedThing) && clickedThing.Spawned)
-			{
-				yield return this.InstallRelic(clickedThing, context.FirstSelectedPawn);
-			}
-			yield break;
-		}
-
-		// Token: 0x06012692 RID: 75410 RVA: 0x0056D28C File Offset: 0x0056B48C
-		private FloatMenuOption InstallRelic(Thing containerThing, Pawn pawn)
-		{
-			IEnumerable<Thing> searchSet = from x in containerThing.Map.listerThings.ThingsOfDef(ThingDefOf.Reliquary)
-			where x.TryGetComp<CompRelicContainer>().ContainedThing == null
-			select x;
-			Thing thing = GenClosest.ClosestThing_Global_Reachable(containerThing.Position, containerThing.Map, searchSet, PathEndMode.Touch, TraverseParms.For(pawn, Danger.Deadly, TraverseMode.ByPawn, false, false, false, true), 9999f, (Thing t) => pawn.CanReserve(t, 1, -1, null, false), null, false);
-			if (thing == null)
-			{
-				return new FloatMenuOption("InstallInReliquary".Translate() + " (" + "NoEmptyReliquary".Translate() + ")", null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-			}
-			Job job = JobMaker.MakeJob(JobDefOf.InstallRelic, containerThing, thing, thing.InteractionCell);
-			job.count = 1;
-			return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("InstallInReliquary".Translate(), delegate()
-			{
-				pawn.jobs.TryTakeOrderedJob(job, new JobTag?(JobTag.Misc), false);
-			}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0), pawn, new LocalTargetInfo(containerThing), "ReservedBy", null);
-		}
-
-		// Token: 0x06012693 RID: 75411 RVA: 0x0056D3D8 File Offset: 0x0056B5D8
-		private FloatMenuOption ExtractRelic(CompRelicContainer container, Pawn pawn)
-		{
-			TaggedString taggedString = "ExtractRelic".Translate(container.ContainedThing.Label);
-			IntVec3 c;
-			IHaulDestination haulDestination;
-			if (!StoreUtility.TryFindBestBetterStorageFor(container.ContainedThing, pawn, pawn.Map, StoragePriority.Unstored, pawn.Faction, out c, out haulDestination, true))
-			{
-				return new FloatMenuOption(taggedString + " (" + HaulAIUtility.NoEmptyPlaceLowerTrans + ")", null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-			}
-			Job job = JobMaker.MakeJob(JobDefOf.ExtractRelic, container.parent, container.ContainedThing, c);
-			job.count = 1;
-			return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption(taggedString, delegate()
-			{
-				pawn.jobs.TryTakeOrderedJob(job, new JobTag?(JobTag.Misc), false);
-			}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0), pawn, new LocalTargetInfo(container.parent), "ReservedBy", null);
-		}
-
-		// Token: 0x06012694 RID: 75412 RVA: 0x0056D4EC File Offset: 0x0056B6EC
-		private bool InstallRelicFromContainer(Thing containerThing, Pawn pawn, out FloatMenuOption option)
-		{
-			option = null;
-			IEnumerable<Thing> enumerable = from x in pawn.Map.listerThings.AllThings
-			where CompRelicContainer.IsRelic(x) && pawn.CanReach(x, PathEndMode.ClosestTouch, Danger.Deadly, false, false, TraverseMode.ByPawn)
-			select x;
-			if (!enumerable.Any<Thing>())
-			{
-				option = new FloatMenuOption("NoRelicToInstall".Translate(), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
-				return true;
-			}
-			using (IEnumerator<Thing> enumerator = enumerable.GetEnumerator())
-			{
-				if (enumerator.MoveNext())
-				{
-					Thing thing = enumerator.Current;
-					Job job = JobMaker.MakeJob(JobDefOf.InstallRelic, thing, containerThing, containerThing.InteractionCell);
-					job.count = 1;
-					option = FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("InstallRelic".Translate(thing.Label), delegate()
-					{
-						pawn.jobs.TryTakeOrderedJob(job, new JobTag?(JobTag.Misc), false);
-					}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0), pawn, new LocalTargetInfo(containerThing), "ReservedBy", null);
+					_003C_003E2__current = floatMenuOptionProvider_Relic.ExtractToInventory(_003Ccontainer_003E5__2, context.FirstSelectedPawn);
+					_003C_003E1__state = 2;
 					return true;
 				}
+				goto IL_0113;
+			case 2:
+				_003C_003E1__state = -1;
+				goto IL_0113;
+			case 3:
+				_003C_003E1__state = -1;
+				goto IL_0113;
+			case 4:
+				{
+					_003C_003E1__state = -1;
+					break;
+				}
+				IL_0113:
+				if (CompRelicContainer.IsRelic(clickedThing) && clickedThing.Spawned)
+				{
+					_003C_003E2__current = floatMenuOptionProvider_Relic.InstallRelic(clickedThing, context.FirstSelectedPawn);
+					_003C_003E1__state = 4;
+					return true;
+				}
+				break;
 			}
 			return false;
 		}
 
-		// Token: 0x06012695 RID: 75413 RVA: 0x0056D63C File Offset: 0x0056B83C
-		private FloatMenuOption ExtractToInventory(CompRelicContainer container, Pawn pawn)
+		bool IEnumerator.MoveNext()
 		{
-			return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("ExtractRelicToInventory".Translate(container.ContainedThing.Label, 300.ToStringTicksToPeriod(true, false, true, true, false)), delegate()
-			{
-				Job job = JobMaker.MakeJob(JobDefOf.ExtractToInventory, container.parent, container.ContainedThing, container.parent.InteractionCell);
-				job.count = 1;
-				pawn.jobs.TryTakeOrderedJob(job, new JobTag?(JobTag.Misc), false);
-			}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0), pawn, new LocalTargetInfo(container.parent), "ReservedBy", null);
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
+
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
+
+		[DebuggerHidden]
+		IEnumerator<FloatMenuOption> IEnumerable<FloatMenuOption>.GetEnumerator()
+		{
+			_003CGetOptionsFor_003Ed__9 _003CGetOptionsFor_003Ed__;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				_003CGetOptionsFor_003Ed__ = this;
+			}
+			else
+			{
+				_003CGetOptionsFor_003Ed__ = new _003CGetOptionsFor_003Ed__9(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			_003CGetOptionsFor_003Ed__.clickedThing = _003C_003E3__clickedThing;
+			_003CGetOptionsFor_003Ed__.context = _003C_003E3__context;
+			return _003CGetOptionsFor_003Ed__;
+		}
+
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<FloatMenuOption>)this).GetEnumerator();
+		}
+	}
+
+	protected override bool Drafted => true;
+
+	protected override bool Undrafted => true;
+
+	protected override bool Multiselect => false;
+
+	protected override bool RequiresManipulation => true;
+
+	protected override bool AppliesInt(FloatMenuContext context)
+	{
+		return ModsConfig.IdeologyActive;
+	}
+
+	[IteratorStateMachine(typeof(_003CGetOptionsFor_003Ed__9))]
+	public override IEnumerable<FloatMenuOption> GetOptionsFor(Thing clickedThing, FloatMenuContext context)
+	{
+		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+		return new _003CGetOptionsFor_003Ed__9(-2)
+		{
+			_003C_003E4__this = this,
+			_003C_003E3__clickedThing = clickedThing,
+			_003C_003E3__context = context
+		};
+	}
+
+	private FloatMenuOption InstallRelic(Thing containerThing, Pawn pawn)
+	{
+		IEnumerable<Thing> searchSet = from x in containerThing.Map.listerThings.ThingsOfDef(ThingDefOf.Reliquary)
+			where x.TryGetComp<CompRelicContainer>().ContainedThing == null
+			select x;
+		Thing thing = GenClosest.ClosestThing_Global_Reachable(containerThing.Position, containerThing.Map, searchSet, PathEndMode.Touch, TraverseParms.For(pawn), 9999f, (Thing t) => pawn.CanReserve(t));
+		if (thing == null)
+		{
+			return new FloatMenuOption("InstallInReliquary".Translate() + " (" + "NoEmptyReliquary".Translate() + ")", null);
+		}
+		Job job = JobMaker.MakeJob(JobDefOf.InstallRelic, containerThing, thing, thing.InteractionCell);
+		job.count = 1;
+		return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("InstallInReliquary".Translate(), delegate
+		{
+			pawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
+		}), pawn, new LocalTargetInfo(containerThing));
+	}
+
+	private FloatMenuOption ExtractRelic(CompRelicContainer container, Pawn pawn)
+	{
+		TaggedString taggedString = "ExtractRelic".Translate(container.ContainedThing.Label);
+		if (!StoreUtility.TryFindBestBetterStorageFor(container.ContainedThing, pawn, pawn.Map, StoragePriority.Unstored, pawn.Faction, out var foundCell, out var _))
+		{
+			return new FloatMenuOption(taggedString + " (" + HaulAIUtility.NoEmptyPlaceLowerTrans + ")", null);
+		}
+		Job job = JobMaker.MakeJob(JobDefOf.ExtractRelic, container.parent, container.ContainedThing, foundCell);
+		job.count = 1;
+		return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption(taggedString, delegate
+		{
+			pawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
+		}), pawn, new LocalTargetInfo(container.parent));
+	}
+
+	private bool InstallRelicFromContainer(Thing containerThing, Pawn pawn, out FloatMenuOption option)
+	{
+		option = null;
+		IEnumerable<Thing> enumerable = pawn.Map.listerThings.AllThings.Where((Thing x) => CompRelicContainer.IsRelic(x) && pawn.CanReach(x, PathEndMode.ClosestTouch, Danger.Deadly));
+		if (!enumerable.Any())
+		{
+			option = new FloatMenuOption("NoRelicToInstall".Translate(), null);
+			return true;
+		}
+		using (IEnumerator<Thing> enumerator = enumerable.GetEnumerator())
+		{
+			if (enumerator.MoveNext())
+			{
+				Thing current = enumerator.Current;
+				Job job = JobMaker.MakeJob(JobDefOf.InstallRelic, current, containerThing, containerThing.InteractionCell);
+				job.count = 1;
+				option = FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("InstallRelic".Translate(current.Label), delegate
+				{
+					pawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
+				}), pawn, new LocalTargetInfo(containerThing));
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private FloatMenuOption ExtractToInventory(CompRelicContainer container, Pawn pawn)
+	{
+		return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("ExtractRelicToInventory".Translate(container.ContainedThing.Label, 300.ToStringTicksToPeriod()), delegate
+		{
+			Job job = JobMaker.MakeJob(JobDefOf.ExtractToInventory, container.parent, container.ContainedThing, container.parent.InteractionCell);
+			job.count = 1;
+			pawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
+		}), pawn, new LocalTargetInfo(container.parent));
 	}
 }

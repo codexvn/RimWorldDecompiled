@@ -1,98 +1,223 @@
-﻿using System;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
-namespace Verse
+namespace Verse;
+
+public class SimpleCurveView
 {
-	// Token: 0x020000E0 RID: 224
-	public class SimpleCurveView
+	[CompilerGenerated]
+	private sealed class _003Cget_DebugInputValues_003Ed__5 : IEnumerable<float>, IEnumerable, IEnumerator<float>, IEnumerator, IDisposable
 	{
-		// Token: 0x1700012A RID: 298
-		// (get) Token: 0x0600062B RID: 1579 RVA: 0x0001E76B File Offset: 0x0001C96B
-		public IEnumerable<float> DebugInputValues
+		private int _003C_003E1__state;
+
+		private float _003C_003E2__current;
+
+		private int _003C_003El__initialThreadId;
+
+		public SimpleCurveView _003C_003E4__this;
+
+		private Dictionary<object, float>.ValueCollection.Enumerator _003C_003E7__wrap1;
+
+		float IEnumerator<float>.Current
 		{
+			[DebuggerHidden]
 			get
 			{
-				if (this.debugInputValues == null)
+				return _003C_003E2__current;
+			}
+		}
+
+		object IEnumerator.Current
+		{
+			[DebuggerHidden]
+			get
+			{
+				return _003C_003E2__current;
+			}
+		}
+
+		[DebuggerHidden]
+		public _003Cget_DebugInputValues_003Ed__5(int _003C_003E1__state)
+		{
+			this._003C_003E1__state = _003C_003E1__state;
+			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
+		}
+
+		[DebuggerHidden]
+		void IDisposable.Dispose()
+		{
+			int num = _003C_003E1__state;
+			if (num == -3 || num == 1)
+			{
+				try
 				{
-					yield break;
 				}
-				foreach (float num in this.debugInputValues.Values)
+				finally
 				{
-					yield return num;
+					_003C_003Em__Finally1();
 				}
-				Dictionary<object, float>.ValueCollection.Enumerator enumerator = default(Dictionary<object, float>.ValueCollection.Enumerator);
-				yield break;
-				yield break;
 			}
+			_003C_003E7__wrap1 = default(Dictionary<object, float>.ValueCollection.Enumerator);
+			_003C_003E1__state = -2;
 		}
 
-		// Token: 0x0600062C RID: 1580 RVA: 0x0001E77B File Offset: 0x0001C97B
-		public void SetDebugInput(object key, float value)
+		private bool MoveNext()
 		{
-			this.debugInputValues[key] = value;
+			try
+			{
+				int num = _003C_003E1__state;
+				SimpleCurveView simpleCurveView = _003C_003E4__this;
+				switch (num)
+				{
+				default:
+					return false;
+				case 0:
+					_003C_003E1__state = -1;
+					if (simpleCurveView.debugInputValues == null)
+					{
+						return false;
+					}
+					_003C_003E7__wrap1 = simpleCurveView.debugInputValues.Values.GetEnumerator();
+					_003C_003E1__state = -3;
+					break;
+				case 1:
+					_003C_003E1__state = -3;
+					break;
+				}
+				if (_003C_003E7__wrap1.MoveNext())
+				{
+					float current = _003C_003E7__wrap1.Current;
+					_003C_003E2__current = current;
+					_003C_003E1__state = 1;
+					return true;
+				}
+				_003C_003Em__Finally1();
+				_003C_003E7__wrap1 = default(Dictionary<object, float>.ValueCollection.Enumerator);
+				return false;
+			}
+			catch
+			{
+				//try-fault
+				((IDisposable)this).Dispose();
+				throw;
+			}
 		}
 
-		// Token: 0x0600062D RID: 1581 RVA: 0x0001E78A File Offset: 0x0001C98A
-		public void ClearDebugInputFrom(object key)
+		bool IEnumerator.MoveNext()
 		{
-			if (this.debugInputValues.ContainsKey(key))
-			{
-				this.debugInputValues.Remove(key);
-			}
+			//ILSpy generated this explicit interface implementation from .override directive in MoveNext
+			return this.MoveNext();
 		}
 
-		// Token: 0x0600062E RID: 1582 RVA: 0x0001E7A8 File Offset: 0x0001C9A8
-		public void SetViewRectAround(SimpleCurve curve)
+		private void _003C_003Em__Finally1()
 		{
-			if (curve.PointsCount == 0)
-			{
-				this.rect = SimpleCurveView.identityRect;
-				return;
-			}
-			this.rect.xMin = (from pt in curve.Points
-			select pt.Loc.x).Min();
-			this.rect.xMax = (from pt in curve.Points
-			select pt.Loc.x).Max();
-			this.rect.yMin = (from pt in curve.Points
-			select pt.Loc.y).Min();
-			this.rect.yMax = (from pt in curve.Points
-			select pt.Loc.y).Max();
-			if (Mathf.Approximately(this.rect.width, 0f))
-			{
-				this.rect.width = this.rect.xMin * 2f;
-			}
-			if (Mathf.Approximately(this.rect.height, 0f))
-			{
-				this.rect.height = this.rect.yMin * 2f;
-			}
-			if (Mathf.Approximately(this.rect.width, 0f))
-			{
-				this.rect.width = 1f;
-			}
-			if (Mathf.Approximately(this.rect.height, 0f))
-			{
-				this.rect.height = 1f;
-			}
-			float width = this.rect.width;
-			float height = this.rect.height;
-			this.rect.xMin = this.rect.xMin - width * 0.1f;
-			this.rect.xMax = this.rect.xMax + width * 0.1f;
-			this.rect.yMin = this.rect.yMin - height * 0.1f;
-			this.rect.yMax = this.rect.yMax + height * 0.1f;
+			_003C_003E1__state = -1;
+			((IDisposable)_003C_003E7__wrap1/*cast due to .constrained prefix*/).Dispose();
 		}
 
-		// Token: 0x04000325 RID: 805
-		public Rect rect;
+		[DebuggerHidden]
+		void IEnumerator.Reset()
+		{
+			throw new NotSupportedException();
+		}
 
-		// Token: 0x04000326 RID: 806
-		private Dictionary<object, float> debugInputValues = new Dictionary<object, float>();
+		[DebuggerHidden]
+		IEnumerator<float> IEnumerable<float>.GetEnumerator()
+		{
+			_003Cget_DebugInputValues_003Ed__5 result;
+			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
+			{
+				_003C_003E1__state = 0;
+				result = this;
+			}
+			else
+			{
+				result = new _003Cget_DebugInputValues_003Ed__5(0)
+				{
+					_003C_003E4__this = _003C_003E4__this
+				};
+			}
+			return result;
+		}
 
-		// Token: 0x04000327 RID: 807
-		private const float ResetZoomBuffer = 0.1f;
+		[DebuggerHidden]
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<float>)this).GetEnumerator();
+		}
+	}
 
-		// Token: 0x04000328 RID: 808
-		private static Rect identityRect = new Rect(0f, 0f, 1f, 1f);
+	public Rect rect;
+
+	private Dictionary<object, float> debugInputValues = new Dictionary<object, float>();
+
+	private const float ResetZoomBuffer = 0.1f;
+
+	private static Rect identityRect = new Rect(0f, 0f, 1f, 1f);
+
+	public IEnumerable<float> DebugInputValues
+	{
+		[IteratorStateMachine(typeof(_003Cget_DebugInputValues_003Ed__5))]
+		get
+		{
+			//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
+			return new _003Cget_DebugInputValues_003Ed__5(-2)
+			{
+				_003C_003E4__this = this
+			};
+		}
+	}
+
+	public void SetDebugInput(object key, float value)
+	{
+		debugInputValues[key] = value;
+	}
+
+	public void ClearDebugInputFrom(object key)
+	{
+		if (debugInputValues.ContainsKey(key))
+		{
+			debugInputValues.Remove(key);
+		}
+	}
+
+	public void SetViewRectAround(SimpleCurve curve)
+	{
+		if (curve.PointsCount == 0)
+		{
+			rect = identityRect;
+			return;
+		}
+		rect.xMin = curve.Points.Select((CurvePoint pt) => pt.Loc.x).Min();
+		rect.xMax = curve.Points.Select((CurvePoint pt) => pt.Loc.x).Max();
+		rect.yMin = curve.Points.Select((CurvePoint pt) => pt.Loc.y).Min();
+		rect.yMax = curve.Points.Select((CurvePoint pt) => pt.Loc.y).Max();
+		if (Mathf.Approximately(rect.width, 0f))
+		{
+			rect.width = rect.xMin * 2f;
+		}
+		if (Mathf.Approximately(rect.height, 0f))
+		{
+			rect.height = rect.yMin * 2f;
+		}
+		if (Mathf.Approximately(rect.width, 0f))
+		{
+			rect.width = 1f;
+		}
+		if (Mathf.Approximately(rect.height, 0f))
+		{
+			rect.height = 1f;
+		}
+		float width = rect.width;
+		float height = rect.height;
+		rect.xMin -= width * 0.1f;
+		rect.xMax += width * 0.1f;
+		rect.yMin -= height * 0.1f;
+		rect.yMax += height * 0.1f;
 	}
 }
