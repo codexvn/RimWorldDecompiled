@@ -71,7 +71,9 @@ rm -rf .decomp_tmp
 
 游戏新增托管程序集时（游戏根目录出现新的非运行时 `.dll`），将其加入上面列表，并在「目录说明」表格补一行。
 
-### 3. 同步 Data 目录
+### 3. 同步 Data 目录（可选，不入库）
+
+`Data/` 始终被 `.gitignore` 忽略，不会出现在任何提交中（`git add -A` 自动跳过）；本步只为本地翻阅 XML Def 方便，不需要本地参考时可以跳过，已有副本也可以直接删除（约 700 MB）：
 
 ```powershell
 robocopy 'F:\SteamLibrary\steamapps\common\RimWorld\Data' '.\Data' /MIR
