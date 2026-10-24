@@ -42,8 +42,47 @@
 - Harmony 需使用创意工坊 1.7 版（Harmony 3.0.0-rc.2，net10.0）；引擎在 CLR 层为运行时 IL 补丁保留了 `JitPatchableAssemblies` 等开关。
 - `Unity.Newtonsoft.Json` 被重定向为空且游戏无 Newtonsoft 程序集，依赖它的代码无解析目标。
 
-## Data 目录复制示例
+## 反编译更新流程
+
+游戏版本更新后，按以下步骤重建仓库内容并提交。
+
+### 1. 确认版本信息
 
 ```powershell
-robocopy 'F:\SteamLibrary\steamapps\common\RimWorld\Data' '.\Data' /E
+Get-Content 'F:\SteamLibrary\steamapps\common\RimWorld\Version.txt'           # 形如 1.7.4985 rev1269
+Select-String 'buildid' 'F:\SteamLibrary\steamapps\appmanifest_294100.acf'    # Steam buildid，记入版本信息
+```
+
+### 2. 反编译程序集
+
+使用 dotnet 全局工具 `ilspycmd`（9.x，`dotnet tool install -g ilspycmd`）；`-p` 让每个程序集输出为带 `.csproj` 的项目结构。当前跟踪 11 个程序集：
+
+```bash
+cd <仓库根目录>
+G='F:/SteamLibrary/steamapps/common/RimWorld'
+for d in Assembly-CSharp RimWorld UnityStubs Waylith Waylith.UnityCompat \
+         Waylith.AssetBake Waylith.VideoDecode PsdSharp Fmod5Sharp \
+         AssetsTools.NET com.rlabrecque.steamworks.net; do
+    ilspycmd "$G/$d.dll" -p -o ".decomp_tmp/$d"
+    rm -rf "$d" && mv ".decomp_tmp/$d" "$d"
+done
+rm -rf .decomp_tmp
+```
+
+游戏新增托管程序集时（游戏根目录出现新的非运行时 `.dll`），将其加入上面列表，并在「目录说明」表格补一行。
+
+### 3. 同步 Data 目录
+
+```powershell
+robocopy 'F:\SteamLibrary\steamapps\common\RimWorld\Data' '.\Data' /MIR
+```
+
+### 4. 更新版本信息并提交
+
+将「版本信息」段落改为本次 Version.txt 的版本号与 buildid，然后提交到 `1.7` 分支、快进 `main` 并同时推送两个分支，保持同线：
+
+```bash
+git switch 1.7
+git add -A && git commit -m "chore: RimWorld <版本号> <rev> 反编译更新"
+git branch -f main 1.7 && git push origin 1.7 main
 ```
