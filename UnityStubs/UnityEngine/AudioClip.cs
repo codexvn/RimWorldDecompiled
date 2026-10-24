@@ -153,7 +153,7 @@ public class AudioClip : AudioResource
 			Packed = flag2,
 			BakedMono = (flag2 && importedByUnity),
 			ForceToMono = importedByUnity,
-			Bytes = (flag ? 0 : (audioSound2.LengthFrames * audioSound2.Channels * 2))
+			Bytes = audioSound2.ResidentBytes
 		};
 	}
 

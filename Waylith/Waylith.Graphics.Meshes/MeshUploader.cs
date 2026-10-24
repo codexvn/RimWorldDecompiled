@@ -147,7 +147,11 @@ public sealed class MeshUploader : IGpuMeshResourceOwner
 
 	private long hostFallbackUntilFrame = -1L;
 
-	private const int HostFallbackFrames = 600;
+	private int hostFallbackFrames = 600;
+
+	private const int HostFallbackFramesMin = 600;
+
+	private const int HostFallbackFramesMax = 38400;
 
 	private static int hostFallbackLogged;
 
@@ -573,10 +577,11 @@ public sealed class MeshUploader : IGpuMeshResourceOwner
 		vkBufferCreateInfo.SharingMode = VkSharingMode.Exclusive;
 		VkBufferCreateInfo bufferCreateInfo = vkBufferCreateInfo;
 		hostResident = renderFrameSerial < hostFallbackUntilFrame;
-		if (!hostResident && hostFallbackUntilFrame >= 0 && !DeviceLocalHasRoom(bytes))
+		bool flag = hostFallbackUntilFrame >= 0;
+		if (!hostResident && flag && !DeviceLocalHasRoom(bytes))
 		{
 			hostResident = true;
-			hostFallbackUntilFrame = renderFrameSerial + 600;
+			hostFallbackUntilFrame = renderFrameSerial + hostFallbackFrames;
 		}
 		if (!hostResident)
 		{
@@ -590,28 +595,40 @@ public sealed class MeshUploader : IGpuMeshResourceOwner
 					PreferredProperties = VkMemoryPropertyFlags.DeviceLocalBit,
 					Priority = 1f
 				};
-				return vmaAllocator.AllocateBufferChecked(label, in bufferCreateInfo, in allocateCreateInfo, anyMemoryOnRefusal: false);
+				BufferAllocationInfo result = vmaAllocator.AllocateBufferChecked(label, in bufferCreateInfo, in allocateCreateInfo, anyMemoryOnRefusal: false, !flag);
+				hostFallbackUntilFrame = -1L;
+				hostFallbackFrames = 600;
+				return result;
 			}
-			catch (VmaAllocationException ex) when (ex.Result == VkResult.ErrorOutOfDeviceMemory)
+			catch (VmaAllocationException ex) when (((Func<bool>)delegate
+			{
+				// Could not convert BlockContainer to single expression
+				VkResult result2 = ex.Result;
+				return ((result2 == VkResult.ErrorTooManyObjects || (uint)(result2 - -2) <= 1u) ? 1 : 0) != 0;
+			}).Invoke())
 			{
 				hostResident = true;
-				hostFallbackUntilFrame = renderFrameSerial + 600;
+				hostFallbackUntilFrame = renderFrameSerial + hostFallbackFrames;
+				if (flag)
+				{
+					hostFallbackFrames = System.Math.Min(hostFallbackFrames * 2, 38400);
+				}
 				if (Interlocked.Exchange(ref hostFallbackLogged, 1) == 0)
 				{
 					LogCategory logger = Logger;
 					bool shouldAppend;
-					LogString<Warning> message = new LogString<Warning>(156, 4, logger, out shouldAppend);
+					LogString<Warning> message = new LogString<Warning>(176, 4, logger, out shouldAppend);
 					if (shouldAppend)
 					{
 						message.AppendLiteral("Device-local memory refused a ");
 						message.AppendFormatted(GpuMemoryReport.FormatBytes(bytes));
 						message.AppendLiteral(" mesh buffer, mesh uploads go to system memory for the next ");
-						message.AppendFormatted(600);
-						message.AppendLiteral(" frames after each refusal. This message will only be logged once.");
+						message.AppendFormatted(hostFallbackFrames);
+						message.AppendLiteral(" frames (doubling after every further refusal). This message will only be logged once.");
 						message.AppendFormatted(Environment.NewLine);
 						message.AppendFormatted(GpuMemoryReport.BuildCompactSummary().TrimEnd());
 					}
-					logger.Warning(message, "AllocateMeshBuffer", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\Meshes\\MeshUploader.cs", 581);
+					logger.Warning(message, "AllocateMeshBuffer", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\Meshes\\MeshUploader.cs", 589);
 				}
 			}
 		}

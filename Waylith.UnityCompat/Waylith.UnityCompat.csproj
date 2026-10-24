@@ -12,11 +12,10 @@
   <ItemGroup />
   <ItemGroup>
     <Reference Include="Brutal.Core.Logging">
-      <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\Brutal.Core.Logging.dll</HintPath>
+      <HintPath>..\..\..\..\SteamLibrary\steamapps\common\RimWorld\Brutal.Core.Logging.dll</HintPath>
     </Reference>
     <Reference Include="Waylith">
-      <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\Waylith.dll</HintPath>
+      <HintPath>..\..\..\..\SteamLibrary\steamapps\common\RimWorld\Waylith.dll</HintPath>
     </Reference>
   </ItemGroup>
-</Project>
 </Project>

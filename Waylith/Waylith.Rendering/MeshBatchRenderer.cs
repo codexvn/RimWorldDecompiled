@@ -1398,7 +1398,7 @@ public sealed class MeshBatchRenderer : IDisposable
 				message2.AppendLiteral(" ");
 				message2.AppendFormatted(message);
 			}
-			log.Warning(message2, "LogDiagnostic", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\DrawCallCore\\MeshBatchRenderer.cs", 1512);
+			log.Warning(message2, "LogDiagnostic", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\DrawCallCore\\MeshBatchRenderer.cs", 1525);
 		}
 	}
 

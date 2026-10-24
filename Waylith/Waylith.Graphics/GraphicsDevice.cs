@@ -62,6 +62,8 @@ public sealed class GraphicsDevice : IDisposable
 
 	public VmaAllocator Allocator { get; }
 
+	public uint MaxDeviceMemoryCount { get; }
+
 	public Queue GraphicsQueue { get; }
 
 	public Queue PresentQueue { get; }
@@ -173,7 +175,8 @@ public sealed class GraphicsDevice : IDisposable
 		}
 		VramLimitBytes = ReadVramLimitOverride();
 		Allocator = CreateAllocator(instance, physicalDevice, device, ApiVersion, MemoryBudgetEnabled, VramLimitBytes);
-		Logger.Info(MemoryBudgetEnabled ? "VK_EXT_memory_budget enabled, VRAM budget figures are driver-reported." : "VK_EXT_memory_budget unavailable, VRAM budget figures are VMA estimates.", ".ctor", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 89);
+		MaxDeviceMemoryCount = (uint)physicalDevice.GetProperties().Limits.MaxMemoryAllocationCount;
+		Logger.Info(MemoryBudgetEnabled ? "VK_EXT_memory_budget enabled, VRAM budget figures are driver-reported." : "VK_EXT_memory_budget unavailable, VRAM budget figures are VMA estimates.", ".ctor", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 90);
 		MeshUploads = new MeshUploader(this, framesInFlight);
 		ShaderLayoutCache = new VulkanShaderLayoutCache(device);
 		GpuInfo.Configure(physicalDevice, GetDeviceLocalMemoryBytes(physicalDevice), ApiVersion);
@@ -202,14 +205,14 @@ public sealed class GraphicsDevice : IDisposable
 				message.AppendFormatted(VulkanVersion.Format(InstanceApiVersion));
 				message.AppendLiteral(" instance.");
 			}
-			logger.Warning(message, "CreateInstance", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 139);
+			logger.Warning(message, "CreateInstance", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 141);
 		}
 		HashSet<string> enabledInstanceExtensions = GetEnabledInstanceExtensions(disallowFullscreenExclusive);
 		HashSet<string> enabledInstanceLayers = GetEnabledInstanceLayers(out shouldAppend, emitUnsupportedWarning: true);
 		bool flag = enabledInstanceExtensions.Contains("VK_EXT_debug_utils");
 		if (!flag)
 		{
-			Logger.Warning("VK_EXT_debug_utils unavailable, running without Vulkan debug messages and object names.", "CreateInstance", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 144);
+			Logger.Warning("VK_EXT_debug_utils unavailable, running without Vulkan debug messages and object names.", "CreateInstance", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 146);
 		}
 		fixed (byte* applicationName2 = bytes)
 		{
@@ -237,7 +240,7 @@ public sealed class GraphicsDevice : IDisposable
 				void* next = (flag ? (&vkDebugUtilsMessengerCreateInfoEXT) : null);
 				if (Environment.CommandLine.Contains("-EnableVulkanValidation"))
 				{
-					RenderLog.Log.Info("Enabling vulkan validation features", "CreateInstance", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 178);
+					RenderLog.Log.Info("Enabling vulkan validation features", "CreateInstance", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 180);
 					if (flag)
 					{
 						vkDebugUtilsMessengerCreateInfoEXT.Next = &vkValidationFeaturesEXT2;
@@ -310,11 +313,11 @@ public sealed class GraphicsDevice : IDisposable
 		{
 			if (messageSeverity.HasFlag(VkDebugUtilsMessageSeverityFlagsEXT.InfoBitEXT))
 			{
-				RenderLog.Log.Info(text, "DebugUtilsCallback", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 267);
+				RenderLog.Log.Info(text, "DebugUtilsCallback", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 269);
 			}
 			else if (messageSeverity.HasFlag(VkDebugUtilsMessageSeverityFlagsEXT.VerboseBitEXT))
 			{
-				RenderLog.Log.Debug(text, "DebugUtilsCallback", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 269);
+				RenderLog.Log.Debug(text, "DebugUtilsCallback", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 271);
 			}
 		}
 		return false;
@@ -462,6 +465,7 @@ public sealed class GraphicsDevice : IDisposable
 			ShaderLayoutCache.Dispose();
 			TextureResourceManager.ProcessDeferredDisposals(long.MaxValue);
 			ComputeBufferResourceManager.DisposeAllImmediate();
+			VmaAllocationExtensions.DestroyPools(Allocator);
 			Device.DestroyVmaAllocator(Allocator);
 			Device.Dispose();
 			if (!_debugMessenger.IsNull())
@@ -596,7 +600,7 @@ public sealed class GraphicsDevice : IDisposable
 				message.AppendFormatted(VulkanVersion.Format(apiVersion));
 				message.AppendLiteral(" device does not expose the core 1.1 memory entry points. Making VMA fall back to the 1.0 ones.");
 			}
-			logger.Warning(message, "CreateAllocator", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 544);
+			logger.Warning(message, "CreateAllocator", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 547);
 			apiVersion = 4194304;
 		}
 		return device.CreateVmaAllocator(new VmaAllocatorCreateInfo
@@ -634,7 +638,7 @@ public sealed class GraphicsDevice : IDisposable
 				message.AppendFormatted(environmentVariable);
 				message.AppendLiteral("' is not a positive number of MB, ignoring it.");
 			}
-			logCategory.Warning(message, "ReadVramLimitOverride", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 570);
+			logCategory.Warning(message, "ReadVramLimitOverride", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 573);
 			return 0L;
 		}
 		log = RenderLog.Log;
@@ -647,7 +651,7 @@ public sealed class GraphicsDevice : IDisposable
 			message.AppendFormatted(result);
 			message.AppendLiteral(" MB.");
 		}
-		logCategory2.Warning(message, "ReadVramLimitOverride", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 574);
+		logCategory2.Warning(message, "ReadVramLimitOverride", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 577);
 		return result * 1024 * 1024;
 	}
 
@@ -695,13 +699,13 @@ public sealed class GraphicsDevice : IDisposable
 		{
 			if (VulkanHelpers.Validation.IsSupported)
 			{
-				RenderLog.Log.Info("Enabling vulkan validation layer", "GetEnabledInstanceLayers", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 617);
+				RenderLog.Log.Info("Enabling vulkan validation layer", "GetEnabledInstanceLayers", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 620);
 				VulkanHelpers.AddValidationLayers(hashSet);
 				validationEnabled = true;
 			}
 			else if (emitUnsupportedWarning)
 			{
-				RenderLog.Log.Warning("VK_LAYER_KHRONOS_validation is not available; Vulkan validation messages are disabled for this run.", "GetEnabledInstanceLayers", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 623);
+				RenderLog.Log.Warning("VK_LAYER_KHRONOS_validation is not available; Vulkan validation messages are disabled for this run.", "GetEnabledInstanceLayers", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 626);
 			}
 		}
 		return hashSet;
@@ -723,11 +727,12 @@ public sealed class GraphicsDevice : IDisposable
 			num++;
 			VkPhysicalDeviceProperties properties = physicalDevice.GetProperties();
 			string deviceName = GetDeviceName(properties);
-			string text = DescribeDriver(physicalDevice);
+			VkPhysicalDeviceDriverProperties resultDriverProps;
+			string text = DescribeDriver(physicalDevice, out resultDriverProps);
 			long deviceLocalMemoryBytes = GetDeviceLocalMemoryBytes(physicalDevice);
 			string deviceUuid = GetDeviceUuid(physicalDevice);
 			QueueSelection queueSelection = default(QueueSelection);
-			string text2 = ((!deviceExtensions.All(physicalDevice.SupportsExtension)) ? "missing a required device extension (e.g. swapchain)" : ((physicalDevice.GetSurfaceFormatsKHR_Count(surface) == 0) ? "no surface formats for this window" : ((physicalDevice.GetSurfacePresentModesKHR_Count(surface) == 0) ? "no present modes for this window" : (TrySelectQueueFamilies(physicalDevice, surface, num, out queueSelection) ? null : "no queue families for graphics and for presentation to this surface"))));
+			string text2 = ((!deviceExtensions.All(physicalDevice.SupportsExtension)) ? "missing a required device extension (e.g. swapchain)" : ((physicalDevice.GetSurfaceFormatsKHR_Count(surface) == 0) ? "no surface formats for this window" : ((physicalDevice.GetSurfacePresentModesKHR_Count(surface) == 0) ? "no present modes for this window" : ((!TrySelectQueueFamilies(physicalDevice, surface, num, out queueSelection)) ? "no queue families for graphics and for presentation to this surface" : ((resultDriverProps.DriverID == (VkDriverId)0 || resultDriverProps.DriverID != VkDriverId.MESADozen || instance.PhysicalDevices.Length <= 1) ? null : "Mesa Dozen driver is skipped because there's another driver, which probably works better")))));
 			GpuDescription gpuDescription = new GpuDescription
 			{
 				Index = num,
@@ -755,7 +760,7 @@ public sealed class GraphicsDevice : IDisposable
 					message.AppendFormatted(text2);
 					message.AppendLiteral(".");
 				}
-				logCategory.Info(message, "SelectQueueFamilies", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 693);
+				logCategory.Info(message, "SelectQueueFamilies", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 698);
 				if (flag3)
 				{
 					flag2 = true;
@@ -773,7 +778,7 @@ public sealed class GraphicsDevice : IDisposable
 					message.AppendFormatted(queueSelection.Score);
 					message.AppendLiteral(").");
 				}
-				logCategory2.Info(message, "SelectQueueFamilies", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 699);
+				logCategory2.Info(message, "SelectQueueFamilies", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 704);
 				list2.Add((gpuDescription, queueSelection));
 			}
 		}
@@ -811,7 +816,7 @@ public sealed class GraphicsDevice : IDisposable
 			}
 			else
 			{
-				RenderLog.Log.Warning("WAYLITH_VULKAN_DEVICE='" + environmentVariable + "' did not match any usable Vulkan device; falling back to automatic selection.", "SelectQueueFamilies", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 736);
+				RenderLog.Log.Warning("WAYLITH_VULKAN_DEVICE='" + environmentVariable + "' did not match any usable Vulkan device; falling back to automatic selection.", "SelectQueueFamilies", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 741);
 			}
 		}
 		if (preference.IsSet)
@@ -833,12 +838,16 @@ public sealed class GraphicsDevice : IDisposable
 			GpuDescription gpuDescription5 = list.FirstOrDefault((GpuDescription g) => !g.Usable && ((g.Uuid.Length > 0 && string.Equals(g.Uuid, preference.Uuid, StringComparison.OrdinalIgnoreCase)) || string.Equals(g.Name, preference.Name, StringComparison.OrdinalIgnoreCase)));
 			if (gpuDescription5 != null)
 			{
-				RenderLog.Log.Warning($"Preferred GPU '{gpuDescription5.Name}' is present but unusable ({gpuDescription5.RejectionReason}); " + "falling back to automatic selection.", "SelectQueueFamilies", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 762);
+				RenderLog.Log.Warning($"Preferred GPU '{gpuDescription5.Name}' is present but unusable ({gpuDescription5.RejectionReason}); " + "falling back to automatic selection.", "SelectQueueFamilies", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 767);
 			}
 			else
 			{
-				RenderLog.Log.Warning($"Preferred GPU '{preference.Name}' (uuid {preference.Uuid}) was not found; " + "falling back to automatic selection.", "SelectQueueFamilies", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 766);
+				RenderLog.Log.Warning($"Preferred GPU '{preference.Name}' (uuid {preference.Uuid}) was not found; " + "falling back to automatic selection.", "SelectQueueFamilies", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 771);
 			}
+		}
+		if (list2.Count > 1 && WindowsGpuPreference.IsExplicit())
+		{
+			return Finalize(list2[0].Item1, list2[0].Item2, "Windows graphics device override");
 		}
 		return Finalize(tuple.Item1, tuple.Item2, $"best automatic match of {list.Count} device(s)");
 		static QueueSelection Finalize(GpuDescription gpu, QueueSelection selection, string reason)
@@ -857,14 +866,14 @@ public sealed class GraphicsDevice : IDisposable
 				message2.AppendFormatted(reason);
 				message2.AppendLiteral(".");
 			}
-			logger2.Info(message2, "SelectQueueFamilies", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 776);
+			logger2.Info(message2, "SelectQueueFamilies", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 785);
 			return selection;
 		}
 	}
 
 	private static void WarnOverrideUnusable(string requestedDevice)
 	{
-		RenderLog.Log.Warning("WAYLITH_VULKAN_DEVICE='" + requestedDevice + "' matched a device that cannot render and present to this window, so it was ignored. On hybrid-GPU laptops the discrete GPU usually cannot present directly; launch through your platform's GPU offload mechanism (e.g. PRIME / DRI_PRIME / the NVIDIA control panel) to route the whole app onto it instead.", "WarnOverrideUnusable", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 783);
+		RenderLog.Log.Warning("WAYLITH_VULKAN_DEVICE='" + requestedDevice + "' matched a device that cannot render and present to this window, so it was ignored. On hybrid-GPU laptops the discrete GPU usually cannot present directly; launch through your platform's GPU offload mechanism (e.g. PRIME / DRI_PRIME / the NVIDIA control panel) to route the whole app onto it instead.", "WarnOverrideUnusable", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GraphicsDevice.cs", 792);
 	}
 
 	private static bool TrySelectQueueFamilies(PhysicalDevice physicalDevice, VkSurfaceKHR surface, int enumerationIndex, out QueueSelection queueSelection)
@@ -986,8 +995,9 @@ public sealed class GraphicsDevice : IDisposable
 		return Utf8.GetString(properties.DeviceName);
 	}
 
-	private unsafe static string DescribeDriver(PhysicalDevice physicalDevice)
+	private unsafe static string DescribeDriver(PhysicalDevice physicalDevice, out VkPhysicalDeviceDriverProperties resultDriverProps)
 	{
+		resultDriverProps = default(VkPhysicalDeviceDriverProperties);
 		VkPhysicalDeviceProperties properties = physicalDevice.GetProperties();
 		if (!VulkanVersion.AtLeast(properties.ApiVersion, 4202496) && !physicalDevice.SupportsExtension("VK_KHR_driver_properties"))
 		{
@@ -999,6 +1009,7 @@ public sealed class GraphicsDevice : IDisposable
 		VkPhysicalDeviceProperties2 properties2 = vkPhysicalDeviceProperties;
 		if (TryGetProperties2(physicalDevice, ref properties2))
 		{
+			resultDriverProps = vkPhysicalDeviceDriverProperties;
 			return $"{vkPhysicalDeviceDriverProperties.DriverID} '{Utf8.GetString(vkPhysicalDeviceDriverProperties.DriverName).TrimEnd('\0')}' '{Utf8.GetString(vkPhysicalDeviceDriverProperties.DriverInfo).TrimEnd('\0')}'";
 		}
 		return $"unknown (Vulkan {VulkanVersion.Format(properties.ApiVersion)}, driver version 0x{properties.DriverVersion:X})";

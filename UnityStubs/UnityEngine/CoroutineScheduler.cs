@@ -55,11 +55,17 @@ internal static class CoroutineScheduler
 			UnityWorld unityWorld = UnityRuntime.Current?.World;
 			if (unityWorld != null)
 			{
+				unityWorld.Updating += StepPreUpdate;
 				unityWorld.PostUpdate += StepPostUpdate;
 				unityWorld.PostLateUpdate += StepEndOfFrame;
 				_subscribed = true;
 			}
 		}
+	}
+
+	private static void StepPreUpdate(UnityFrame frame)
+	{
+		Step(endOfFrame: false, frame.ElapsedTime, fixedUpdate: true);
 	}
 
 	private static void StepPostUpdate(UnityFrame frame)
@@ -100,23 +106,27 @@ internal static class CoroutineScheduler
 		return false;
 	}
 
-	private static void Step(bool endOfFrame, float elapsed)
+	private static void Step(bool endOfFrame, float elapsed, bool fixedUpdate = false)
 	{
 		_scratch.Clear();
 		_scratch.AddRange(_handles);
 		foreach (CoroutineHandle item in _scratch)
 		{
-			if (!item.IsDone && item.SuspendKind switch
+			if (!item.IsDone)
 			{
-				CoroutineSuspendKind.NextFrame => !endOfFrame, 
-				CoroutineSuspendKind.EndOfFrame => endOfFrame, 
-				CoroutineSuspendKind.WaitSeconds => !endOfFrame && elapsed >= item.ResumeTime, 
-				CoroutineSuspendKind.AwaitCoroutine => !endOfFrame && (item.AwaitedHandle == null || item.AwaitedHandle.IsDone), 
-				CoroutineSuspendKind.AwaitOperation => !endOfFrame && item.AwaitedOperation.isDone, 
-				_ => false, 
-			})
-			{
-				Advance(item, elapsed);
+				CoroutineSuspendKind suspendKind = item.SuspendKind;
+				if ((suspendKind != CoroutineSuspendKind.FixedUpdate) ? (!fixedUpdate && suspendKind switch
+				{
+					CoroutineSuspendKind.NextFrame => !endOfFrame, 
+					CoroutineSuspendKind.EndOfFrame => endOfFrame, 
+					CoroutineSuspendKind.WaitSeconds => !endOfFrame && elapsed >= item.ResumeTime, 
+					CoroutineSuspendKind.AwaitCoroutine => !endOfFrame && (item.AwaitedHandle == null || item.AwaitedHandle.IsDone), 
+					CoroutineSuspendKind.AwaitOperation => !endOfFrame && item.AwaitedOperation.isDone, 
+					_ => false, 
+				}) : fixedUpdate)
+				{
+					Advance(item, elapsed);
+				}
 			}
 		}
 		_handles.RemoveAll((CoroutineHandle h) => h.IsDone);
@@ -153,32 +163,37 @@ internal static class CoroutineScheduler
 			{
 				if (!(current is WaitForEndOfFrame))
 				{
-					if (!(current is WaitForSeconds waitForSeconds))
+					if (!(current is WaitForFixedUpdate))
 					{
-						if (!(current is Coroutine coroutine))
+						if (!(current is WaitForSeconds waitForSeconds))
 						{
-							if (current is AsyncOperation asyncOperation)
+							if (!(current is Coroutine coroutine))
 							{
-								handle.SuspendKind = ((!asyncOperation.isDone) ? CoroutineSuspendKind.AwaitOperation : CoroutineSuspendKind.NextFrame);
-								handle.AwaitedOperation = asyncOperation;
+								if (current is AsyncOperation asyncOperation)
+								{
+									handle.SuspendKind = ((!asyncOperation.isDone) ? CoroutineSuspendKind.AwaitOperation : CoroutineSuspendKind.NextFrame);
+									handle.AwaitedOperation = asyncOperation;
+									return;
+								}
+								if (!(current is IEnumerator item))
+								{
+									break;
+								}
+								handle.Stack.Push(item);
+							}
+							else if (coroutine.Handle != null && !coroutine.Handle.IsDone)
+							{
+								handle.SuspendKind = CoroutineSuspendKind.AwaitCoroutine;
+								handle.AwaitedHandle = coroutine.Handle;
 								return;
 							}
-							if (!(current is IEnumerator item))
-							{
-								break;
-							}
-							handle.Stack.Push(item);
+							continue;
 						}
-						else if (coroutine.Handle != null && !coroutine.Handle.IsDone)
-						{
-							handle.SuspendKind = CoroutineSuspendKind.AwaitCoroutine;
-							handle.AwaitedHandle = coroutine.Handle;
-							return;
-						}
-						continue;
+						handle.SuspendKind = CoroutineSuspendKind.WaitSeconds;
+						handle.ResumeTime = elapsed + waitForSeconds.Seconds;
+						return;
 					}
-					handle.SuspendKind = CoroutineSuspendKind.WaitSeconds;
-					handle.ResumeTime = elapsed + waitForSeconds.Seconds;
+					handle.SuspendKind = CoroutineSuspendKind.FixedUpdate;
 					return;
 				}
 				handle.SuspendKind = CoroutineSuspendKind.EndOfFrame;

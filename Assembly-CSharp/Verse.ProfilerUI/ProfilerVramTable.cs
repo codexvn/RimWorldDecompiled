@@ -5,6 +5,8 @@ using System.IO;
 using System.Text;
 using RimWorld;
 using UnityEngine;
+using Waylith;
+using Waylith.Diagnostics;
 using Waylith.Graphics;
 using Waylith.Profiling;
 
@@ -467,6 +469,8 @@ public sealed class ProfilerVramTable : ProfilerRowSection
 		stringBuilder.Append("VRAM report ").Append(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")).AppendLine();
 		stringBuilder.AppendLine(GpuMemoryReport.BuildCompactSummary());
 		GpuMemoryHistory.AppendGrowthSummary(stringBuilder, 12, 1048576L);
+		stringBuilder.Append("Frame rate cap: ").AppendLine(EngineApplication.FrameRateCapDescription);
+		stringBuilder.Append("Foreign modules: ").AppendLine(string.Join(", ", ProcessModules.ForeignModuleLines()));
 		stringBuilder.AppendLine();
 		if (HasBaseline)
 		{

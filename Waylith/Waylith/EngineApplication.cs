@@ -101,7 +101,15 @@ public sealed class EngineApplication : IDisposable
 
 	private float? _noRenderSince;
 
-	public static EngineApplication Instance { get; private set; }
+	private int _frameRateCap;
+
+	private string? _frameRateCapKey;
+
+	private double _refreshRateCacheExpiry;
+
+	private int _refreshRateCache;
+
+	public static EngineApplication Instance { get; private set; } = null;
 
 	public EngineApplicationOptions Options { get; }
 
@@ -134,6 +142,8 @@ public sealed class EngineApplication : IDisposable
 	public int ExitCode { get; set; }
 
 	private static bool IsWayland => Glfw.PInvoke.GetPlatform() == 393219;
+
+	public static string FrameRateCapDescription { get; private set; } = "unresolved";
 
 	public event Action<EngineApplication>? PrePollEvents;
 
@@ -214,6 +224,11 @@ public sealed class EngineApplication : IDisposable
 			}
 			_glfwInitialized = true;
 			VerboseLog.Log("GLFW initialized.");
+			if (Platform.IsLinux && IsWayland && string.IsNullOrEmpty(Environment.GetEnvironmentVariable("GAMESCOPE_WAYLAND_DISPLAY")) && string.IsNullOrEmpty(Environment.GetEnvironmentVariable("SteamDeck")))
+			{
+				setenv("DISABLE_VK_LAYER_VALVE_steam_overlay_1", "1", 1);
+				RenderLog.Log.Info("Native Wayland session, the Steam overlay Vulkan layer is disabled for this process.", ".ctor", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\EngineApplication.cs", 225);
+			}
 			if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 			{
 				if (timeBeginPeriod(1u) == 0)
@@ -222,7 +237,7 @@ public sealed class EngineApplication : IDisposable
 				}
 				else
 				{
-					RenderLog.Log.Warning("timeBeginPeriod(1) failed, target framerate may not work.", ".ctor", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\EngineApplication.cs", 223);
+					RenderLog.Log.Warning("timeBeginPeriod(1) failed, target framerate may not work.", ".ctor", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\EngineApplication.cs", 233);
 				}
 			}
 			Vulkan.EnumerateInstanceExtensionProperties_Count(default(ReadOnlySpan<byte>));
@@ -286,10 +301,11 @@ public sealed class EngineApplication : IDisposable
 			EngineWindow.WindowHeight = size2.Y;
 			EngineWindow.AvailableResolutions = EnumerateMonitorResolutions();
 			ReadOnlySpan<GlfwMonitor> monitors = Glfw.GetMonitors();
+			string[] array = (OperatingSystem.IsWindows() ? WindowsMonitorNames.Resolve(monitors) : new string[monitors.Length]);
 			EngineWindow.MonitorNames = new string[monitors.Length];
 			for (int i = 0; i < monitors.Length; i++)
 			{
-				EngineWindow.MonitorNames[i] = monitors[i].Name ?? $"Monitor {i + 1}";
+				EngineWindow.MonitorNames[i] = array[i] ?? monitors[i].Name ?? $"Monitor {i + 1}";
 			}
 			EngineWindow.PreferredMonitorChanged += OnPreferredMonitorChanged;
 			EngineWindow.VSyncModeChanged += delegate(VSyncMode mode)
@@ -556,7 +572,7 @@ public sealed class EngineApplication : IDisposable
 							message.AppendFormatted(num2 - valueOrDefault2, 0, "F1");
 							message.AppendLiteral(" s idle");
 						}
-						logCategory.Info(message, "RunLoop", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\EngineApplication.cs", 597);
+						logCategory.Info(message, "RunLoop", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\EngineApplication.cs", 608);
 					}
 					bool flag4 = !RenderContext.IsFramebufferMinimized() && (!Options.HideWindow || !IsWayland);
 					if (!flag4)
@@ -586,7 +602,7 @@ public sealed class EngineApplication : IDisposable
 								message.AppendFormatted((double)TextureResourceManager.PendingDisposalBytes / 1048576.0, 0, "F1");
 								message.AppendLiteral(" MiB of texture disposals pending");
 							}
-							logCategory2.Info(message, "RunLoop", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\EngineApplication.cs", 608);
+							logCategory2.Info(message, "RunLoop", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\EngineApplication.cs", 619);
 						}
 					}
 					if (flag4)
@@ -685,7 +701,7 @@ public sealed class EngineApplication : IDisposable
 		}
 		catch (Exception source)
 		{
-			RenderLog.Log.Error("!!!CRASH!!!", "RunLoop", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\EngineApplication.cs", 714);
+			RenderLog.Log.Error("!!!CRASH!!!", "RunLoop", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\EngineApplication.cs", 725);
 			exceptionDispatchInfo = ExceptionDispatchInfo.Capture(source);
 		}
 		finally
@@ -1241,20 +1257,54 @@ public sealed class EngineApplication : IDisposable
 
 	private void ThrottleToTargetFrameRate(float frameStartElapsed)
 	{
-		int targetFrameRate = EngineWindow.TargetFrameRate;
-		if (targetFrameRate > 0)
+		_renderThread?.WaitForBacklogAtMost(1);
+		int num = ResolveFrameRateCap();
+		if (num > 0)
 		{
-			double num = 1.0 / (double)targetFrameRate;
-			double num2 = _stopwatch.Elapsed.TotalSeconds - (double)frameStartElapsed;
-			double num3 = num - num2;
-			if (num3 > 0.001)
+			double num2 = 1.0 / (double)num;
+			double num3 = _stopwatch.Elapsed.TotalSeconds - (double)frameStartElapsed;
+			double num4 = num2 - num3;
+			if (num4 > 0.001)
 			{
-				Thread.Sleep((int)((num3 - 0.001) * 1000.0));
+				Thread.Sleep((int)((num4 - 0.001) * 1000.0));
 			}
-			while (_stopwatch.Elapsed.TotalSeconds - (double)frameStartElapsed < num)
+			while (_stopwatch.Elapsed.TotalSeconds - (double)frameStartElapsed < num2)
 			{
 			}
 		}
+	}
+
+	private int ResolveFrameRateCap()
+	{
+		int targetFrameRate = EngineWindow.TargetFrameRate;
+		int num = EngineWindow.TargetFrameRateOverride ?? targetFrameRate;
+		string value = (EngineWindow.TargetFrameRateOverride.HasValue ? "command line" : "game");
+		VkPresentModeKHR? value2 = RenderContext?.PresentMode;
+		if (num <= 0 && !EngineWindow.TargetFrameRateOverride.HasValue)
+		{
+			num = CachedMonitorRefreshRate();
+			value = "monitor refresh";
+		}
+		string text = $"{num}|{value}|{targetFrameRate}|{value2}";
+		if (text != _frameRateCapKey)
+		{
+			_frameRateCapKey = text;
+			_frameRateCap = num;
+			FrameRateCapDescription = ((num > 0) ? $"{num} fps from {value} (game target {targetFrameRate}, present mode {value2})" : $"uncapped from {value} (game target {targetFrameRate}, present mode {value2})");
+			VerboseLog.Log("Frame rate cap: " + FrameRateCapDescription);
+		}
+		return _frameRateCap;
+	}
+
+	private int CachedMonitorRefreshRate()
+	{
+		double totalSeconds = _stopwatch.Elapsed.TotalSeconds;
+		if (totalSeconds >= _refreshRateCacheExpiry)
+		{
+			_refreshRateCache = (int)System.Math.Round(EngineWindow.CurrentResolution.RefreshRate);
+			_refreshRateCacheExpiry = totalSeconds + 2.0;
+		}
+		return _refreshRateCache;
 	}
 
 	private void ApplyPendingScreenSettings()
@@ -1279,7 +1329,7 @@ public sealed class EngineApplication : IDisposable
 				message.AppendLiteral("): ");
 				message.AppendFormatted(description);
 			}
-			log.Error(message, "OnGlfwError", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\EngineApplication.cs", 1328);
+			log.Error(message, "OnGlfwError", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\EngineApplication.cs", 1389);
 		}
 	}
 

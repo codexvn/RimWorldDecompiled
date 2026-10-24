@@ -212,6 +212,10 @@ internal static class TextureCacheStore
 
 		private SafeFileHandle? _handle;
 
+		private SafeFileHandle? _writerLock;
+
+		private readonly bool _readOnly;
+
 		private long _dataEnd;
 
 		private long _lastAppend;
@@ -226,43 +230,66 @@ internal static class TextureCacheStore
 
 		public string Root { get; }
 
-		private Pack(string path, string root, SafeFileHandle handle)
+		private Pack(string path, string root, SafeFileHandle handle, SafeFileHandle? writerLock)
 		{
 			Path = path;
 			Root = root;
 			_handle = handle;
+			_writerLock = writerLock;
+			_readOnly = writerLock == null;
 		}
 
 		private static SafeFileHandle OpenHandle(string path, FileMode mode)
 		{
-			return File.OpenHandle(path, mode, FileAccess.ReadWrite, FileShare.None, FileOptions.Asynchronous, 0L);
+			return File.OpenHandle(path, mode, FileAccess.ReadWrite, FileShare.Read, FileOptions.Asynchronous, 0L);
+		}
+
+		private static SafeFileHandle OpenReadOnlyHandle(string path)
+		{
+			return File.OpenHandle(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete, FileOptions.Asynchronous, 0L);
 		}
 
 		public static Pack? TryOpen(string path, string root)
 		{
+			SafeFileHandle safeFileHandle = null;
 			SafeFileHandle handle;
 			bool shouldAppend;
 			try
 			{
 				Directory.CreateDirectory(System.IO.Path.GetDirectoryName(path));
-				handle = OpenHandle(path, FileMode.OpenOrCreate);
+				safeFileHandle = TryAcquireWriterLock(path);
+				handle = ((safeFileHandle != null) ? OpenHandle(path, FileMode.OpenOrCreate) : OpenReadOnlyHandle(path));
+				if (safeFileHandle == null)
+				{
+					LogCategory log = RenderLog.Log;
+					LogCategory logCategory = log;
+					LogString<Information> message = new LogString<Information>(103, 1, log, out shouldAppend);
+					if (shouldAppend)
+					{
+						message.AppendLiteral("Texture cache pack '");
+						message.AppendFormatted(path);
+						message.AppendLiteral("' is held by another instance and opened read only, textures it lacks load uncached");
+					}
+					logCategory.Info(message, "TryOpen", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\TextureCacheStore.cs", 821);
+				}
 			}
 			catch (Exception ex)
 			{
+				safeFileHandle?.Dispose();
 				LogCategory log = RenderLog.Log;
-				LogCategory logCategory = log;
-				LogString<Warning> message = new LogString<Warning>(63, 2, log, out shouldAppend);
+				LogCategory logCategory2 = log;
+				LogString<Warning> message2 = new LogString<Warning>(63, 2, log, out shouldAppend);
 				if (shouldAppend)
 				{
-					message.AppendLiteral("Texture cache pack '");
-					message.AppendFormatted(path);
-					message.AppendLiteral("' unavailable, its textures load uncached: ");
-					message.AppendFormatted(ex.Message);
+					message2.AppendLiteral("Texture cache pack '");
+					message2.AppendFormatted(path);
+					message2.AppendLiteral("' unavailable, its textures load uncached: ");
+					message2.AppendFormatted(ex.Message);
 				}
-				logCategory.Warning(message, "TryOpen", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\TextureCacheStore.cs", 793);
+				logCategory2.Warning(message2, "TryOpen", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\TextureCacheStore.cs", 826);
 				return null;
 			}
-			Pack pack = new Pack(path, root, handle);
+			Pack pack = new Pack(path, root, handle, safeFileHandle);
 			try
 			{
 				using (pack._lock.EnterScope())
@@ -278,16 +305,16 @@ internal static class TextureCacheStore
 			catch (Exception ex2)
 			{
 				LogCategory log = RenderLog.Log;
-				LogCategory logCategory2 = log;
-				LogString<Warning> message = new LogString<Warning>(62, 2, log, out shouldAppend);
+				LogCategory logCategory3 = log;
+				LogString<Warning> message2 = new LogString<Warning>(62, 2, log, out shouldAppend);
 				if (shouldAppend)
 				{
-					message.AppendLiteral("Texture cache pack '");
-					message.AppendFormatted(path);
-					message.AppendLiteral("' unreadable, its textures load uncached: ");
-					message.AppendFormatted(ex2.Message);
+					message2.AppendLiteral("Texture cache pack '");
+					message2.AppendFormatted(path);
+					message2.AppendLiteral("' unreadable, its textures load uncached: ");
+					message2.AppendFormatted(ex2.Message);
 				}
-				logCategory2.Warning(message, "TryOpen", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\TextureCacheStore.cs", 810);
+				logCategory3.Warning(message2, "TryOpen", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\TextureCacheStore.cs", 843);
 				pack.Dispose();
 				return null;
 			}
@@ -331,7 +358,7 @@ internal static class TextureCacheStore
 			WriteMetaField(array.AsSpan(30 + bytes.Length), in meta);
 			using (_lock.EnterScope())
 			{
-				if (_handle != null)
+				if (_handle != null && !_readOnly)
 				{
 					RandomAccess.Write(_handle, new _003C_003Ez__ReadOnlyArray<ReadOnlyMemory<byte>>(new ReadOnlyMemory<byte>[2] { array, compressed }), _dataEnd);
 					Entry value = new Entry(_dataEnd, num, (uint)compressed.Length, uncompressedSize, crc, dosTime, codec, meta, WrittenThisRun: true);
@@ -369,7 +396,7 @@ internal static class TextureCacheStore
 						num++;
 					}
 				}
-				if (num > 0 && _handle != null)
+				if (num > 0 && _handle != null && !_readOnly)
 				{
 					WriteCentralDirectoryLocked();
 				}
@@ -410,6 +437,8 @@ internal static class TextureCacheStore
 			{
 				_handle?.Dispose();
 				_handle = null;
+				_writerLock?.Dispose();
+				_writerLock = null;
 			}
 		}
 
@@ -520,6 +549,13 @@ internal static class TextureCacheStore
 				dictionary[storedName] = value;
 				num += value.Span;
 			}
+			_entries = dictionary;
+			_liveBytes = num;
+			_dataEnd = num2;
+			if (_readOnly)
+			{
+				return;
+			}
 			if (length > 0)
 			{
 				LogCategory log = RenderLog.Log;
@@ -533,11 +569,8 @@ internal static class TextureCacheStore
 					message.AppendFormatted(dictionary.Count);
 					message.AppendLiteral(" entries from its local headers");
 				}
-				log.Warning(message, "RecoverLocked", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\TextureCacheStore.cs", 1013);
+				log.Warning(message, "RecoverLocked", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\TextureCacheStore.cs", 1053);
 			}
-			_entries = dictionary;
-			_liveBytes = num;
-			_dataEnd = num2;
 			RandomAccess.SetLength(_handle, num2);
 			_centralDirty = dictionary.Count > 0;
 		}
@@ -549,7 +582,7 @@ internal static class TextureCacheStore
 			long dataEnd;
 			using (_lock.EnterScope())
 			{
-				if (_handle == null || !IsMostlyGarbageLocked())
+				if (_handle == null || _readOnly || !IsMostlyGarbageLocked())
 				{
 					return 0L;
 				}
@@ -630,7 +663,7 @@ internal static class TextureCacheStore
 					message.AppendLiteral("' compaction failed: ");
 					message.AppendFormatted(ex.Message);
 				}
-				log.Warning(message, "CompactIfMostlyGarbage", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\TextureCacheStore.cs", 1094);
+				log.Warning(message, "CompactIfMostlyGarbage", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\TextureCacheStore.cs", 1131);
 				return 0L;
 			}
 			finally
@@ -647,6 +680,8 @@ internal static class TextureCacheStore
 	}
 
 	private const int CentralDirectoryEvery = 512;
+
+	private const string WriterLockSuffix = ".lock";
 
 	private const long IdleFlushTicks = 20000000L;
 
@@ -916,7 +951,7 @@ internal static class TextureCacheStore
 				message.AppendLiteral("': ");
 				message.AppendFormatted(ex.Message);
 			}
-			log.Warning(message, "Store", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\TextureCacheStore.cs", 262);
+			log.Warning(message, "Store", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\TextureCacheStore.cs", 263);
 		}
 		finally
 		{
@@ -1153,46 +1188,60 @@ internal static class TextureCacheStore
 						{
 							File.Delete(item);
 						}
-						continue;
-					}
-					bool flag = Path.GetDirectoryName(item) == Path.GetFullPath(textureCacheRoot);
-					string fileName = Path.GetFileName(item);
-					if (fileName == keyedPackFileName)
-					{
-						Pack pack2;
-						if (!flag)
-						{
-							ClosePack(item);
-							num2 += Delete(item, ref deleted);
-						}
-						else if (TryGetKeyedPack(out pack2))
-						{
-							num += pack2.RemoveWhere((string name) => !usedNames.Contains(name));
-						}
-						continue;
-					}
-					bool flag2;
-					string root2;
-					if (IsKeyedPackFile(fileName))
-					{
-						flag2 = hashSet.Contains(fileName);
-					}
-					else if ((dictionary.TryGetValue(item, out root2) || TryReadPackRoot(item, out root2)) && IsLive(root2, array))
-					{
-						if (flag && TryGetPack(root2, out Pack pack3))
-						{
-							num += pack3.RemoveWhere((string name) => !File.Exists(SourcePath(root2, name)));
-						}
-						flag2 = true;
 					}
 					else
 					{
-						flag2 = IsLive(root2, liveRoots);
-					}
-					if (!flag2)
-					{
-						ClosePack(item);
-						num2 += Delete(item, ref deleted);
+						if (item.EndsWith(".lock", StringComparison.Ordinal))
+						{
+							continue;
+						}
+						bool flag = Path.GetDirectoryName(item) == Path.GetFullPath(textureCacheRoot);
+						string fileName = Path.GetFileName(item);
+						if (fileName == keyedPackFileName)
+						{
+							Pack pack2;
+							if (!flag)
+							{
+								ClosePack(item);
+								num2 += Delete(item, ref deleted);
+							}
+							else if (TryGetKeyedPack(out pack2))
+							{
+								num += pack2.RemoveWhere((string name) => !usedNames.Contains(name));
+							}
+							continue;
+						}
+						bool flag2;
+						string root2;
+						if (IsKeyedPackFile(fileName))
+						{
+							flag2 = hashSet.Contains(fileName);
+						}
+						else if ((dictionary.TryGetValue(item, out root2) || TryReadPackRoot(item, out root2)) && IsLive(root2, array))
+						{
+							if (flag && TryGetPack(root2, out Pack pack3))
+							{
+								num += pack3.RemoveWhere((string name) => !File.Exists(SourcePath(root2, name)));
+							}
+							flag2 = true;
+						}
+						else
+						{
+							flag2 = IsLive(root2, liveRoots);
+						}
+						if (flag2)
+						{
+							continue;
+						}
+						using (SafeFileHandle safeFileHandle = TryAcquireWriterLock(item))
+						{
+							if (safeFileHandle != null)
+							{
+								ClosePack(item);
+								num2 += Delete(item, ref deleted);
+							}
+						}
+						continue;
 					}
 				}
 				catch (Exception ex) when (((ex is IOException || ex is UnauthorizedAccessException) ? 1 : 0) != 0)
@@ -1221,6 +1270,18 @@ internal static class TextureCacheStore
 	{
 		int num = name.IndexOf('#', name.LastIndexOf('.') + 1);
 		return Path.Combine(root, (num < 0) ? name : name.Substring(0, num));
+	}
+
+	private static SafeFileHandle? TryAcquireWriterLock(string packPath)
+	{
+		try
+		{
+			return File.OpenHandle(packPath + ".lock", FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None, FileOptions.None, 0L);
+		}
+		catch (IOException)
+		{
+			return null;
+		}
 	}
 
 	private static long Delete(string path, ref int deleted)

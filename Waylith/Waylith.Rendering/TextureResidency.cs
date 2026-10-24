@@ -39,6 +39,8 @@ public static class TextureResidency
 
 	private const long HostEvictColdFrames = 600L;
 
+	private const long OnDemandRecentFrames = 60L;
+
 	private const long HostTrimRetryBytes = 268435456L;
 
 	private const uint HostTrimRetryFrames = 300u;
@@ -82,6 +84,10 @@ public static class TextureResidency
 	private static long _hostTrimRetryAtBytes;
 
 	private static uint _hostTrimRetryFrame;
+
+	public static TextureResidencyPolicy Policy { get; set; } = TextureResidencyPolicy.OffloadUnderPressure;
+
+	public static bool OnDemand => Policy == TextureResidencyPolicy.OnDemand;
 
 	public static bool OffloadSupported => _systemMemoryTypeBits != 0;
 
@@ -134,7 +140,7 @@ public static class TextureResidency
 		VmaAllocationCreateInfo pAllocationCreateInfo = vmaAllocationCreateInfo;
 		if (allocator.FindMemoryTypeIndexForImageInfo(pImageCreateInfo, pAllocationCreateInfo, out var pMemoryTypeIndex) != 0)
 		{
-			Logger.Warning("No device-local memory type takes sampled textures, texture residency is off.", "Configure", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\TextureResidency.cs", 104);
+			Logger.Warning("No device-local memory type takes sampled textures, texture residency is off.", "Configure", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\TextureResidency.cs", 117);
 			return;
 		}
 		uint num = 0u;
@@ -168,7 +174,28 @@ public static class TextureResidency
 		}
 		VmaAllocationExtensions.OutOfDeviceMemoryHandler = ReclaimForOutOfMemory;
 		string value = GpuMemoryReport.FormatBytes(num2);
-		Logger.Info(flag ? $"Textures live in memory heap {heapIndex} ({value}). Under pressure GameTextures move to memory type {pMemoryTypeIndex2} (heap {global::_003CPrivateImplementationDetails_003E.InlineArrayAsSpan<VkMemoryType_32, VkMemoryType>(ref memoryProperties.MemoryTypes, 32)[(int)pMemoryTypeIndex2].HeapIndex})." : $"Textures live in memory heap {heapIndex} ({value}) and no system memory type takes them (unified memory), so under pressure only never used textures are evicted.", "Configure", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\TextureResidency.cs", 137);
+		string text = (flag ? $"memory type {pMemoryTypeIndex2} (heap {global::_003CPrivateImplementationDetails_003E.InlineArrayAsSpan<VkMemoryType_32, VkMemoryType>(ref memoryProperties.MemoryTypes, 32)[(int)pMemoryTypeIndex2].HeapIndex})" : null);
+		if (OnDemand)
+		{
+			LogCategory logger = Logger;
+			bool shouldAppend;
+			LogString<Information> message = new LogString<Information>(133, 3, logger, out shouldAppend);
+			if (shouldAppend)
+			{
+				message.AppendLiteral("Textures are uploaded to heap index ");
+				message.AppendFormatted(heapIndex);
+				message.AppendLiteral(" (");
+				message.AppendFormatted(value);
+				message.AppendLiteral(") and upload on-demand. Under pressure, least-recently used ones are evicted to the disk cache");
+				message.AppendFormatted((text != null) ? (", if possible, or get moved to " + text + " if not") : "");
+				message.AppendLiteral(".");
+			}
+			logger.Info(message, "Configure", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\TextureResidency.cs", 152);
+		}
+		else
+		{
+			Logger.Info((text != null) ? $"Textures are uploaded to heap index {heapIndex} ({value}). Under pressure GameTextures get moved to {text}." : $"Textures are uploaded to heap index {heapIndex} ({value}) and there is no system memory heap to offload into (unified memory?), so under pressure only never-used textures are evicted.", "Configure", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\TextureResidency.cs", 155);
+		}
 	}
 
 	internal static void Register(Texture texture)
@@ -285,7 +312,7 @@ public static class TextureResidency
 				message.AppendFormatted(Environment.NewLine);
 				message.AppendFormatted(GpuMemoryReport.BuildCompactSummary().TrimEnd());
 			}
-			logger.Info(message, "TryAllocateInSystemMemory", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\TextureResidency.cs", 229);
+			logger.Info(message, "TryAllocateInSystemMemory", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\TextureResidency.cs", 248);
 		}
 		TrimHostResident(allowUsed: false);
 		return true;
@@ -305,7 +332,7 @@ public static class TextureResidency
 		if (num > 0)
 		{
 			TrimHostResident(allowUsed: false);
-			if (Offload(num, allowEviction: false) > 0)
+			if (Offload(num, OnDemand) > 0)
 			{
 				GpuTextureService.TryRetireDeferredDisposalsAfterIdle(0L);
 			}
@@ -351,11 +378,11 @@ public static class TextureResidency
 				message.AppendFormatted(Environment.NewLine);
 				message.AppendFormatted(GpuMemoryReport.BuildCompactSummary().TrimEnd());
 			}
-			logCategory.Warning(message, "ReclaimForOutOfMemory", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\TextureResidency.cs", 268);
+			logCategory.Warning(message, "ReclaimForOutOfMemory", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\TextureResidency.cs", 287);
 			return num > 0 || flag;
 		}
 		TrimHostResident(attempt > 0);
-		long num2 = Offload((attempt == 0) ? System.Math.Max(bytes * 4, 134217728L) : long.MaxValue, allowEviction: true, attempt > 0 && !OffloadSupported);
+		long num2 = Offload((attempt == 0) ? System.Math.Max(bytes * 4, 134217728L) : long.MaxValue, allowEviction: true, attempt > 0 && (OnDemand || !OffloadSupported));
 		if (num2 > 0)
 		{
 			GpuTextureService.TryRetireDeferredDisposalsAfterIdle(0L);
@@ -375,7 +402,7 @@ public static class TextureResidency
 			message.AppendFormatted(Environment.NewLine);
 			message.AppendFormatted(GpuMemoryReport.BuildCompactSummary().TrimEnd());
 		}
-		logCategory2.Warning(message, "ReclaimForOutOfMemory", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\TextureResidency.cs", 276);
+		logCategory2.Warning(message, "ReclaimForOutOfMemory", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\TextureResidency.cs", 295);
 		return num2 > 0 || flag;
 	}
 
@@ -504,11 +531,11 @@ public static class TextureResidency
 					break;
 				}
 				long allocatedBytes = gpuTextureAllocation.AllocatedBytes;
-				if (allowEviction && (gpuTextureAllocation.LastUseOrder == 0 || evictUsed) && texture.TryEvictForResidency())
+				if (allowEviction && MayEvict(gpuTextureAllocation, evictUsed) && texture.TryEvictForResidency())
 				{
 					num3 += allocatedBytes;
 				}
-				else if (OffloadSupported)
+				else if (OffloadSupported && (!OnDemand || !texture.CanRehydrate))
 				{
 					Batch.Add(texture);
 					num4 += allocatedBytes;
@@ -532,6 +559,24 @@ public static class TextureResidency
 			Batch.Clear();
 			_busy = false;
 		}
+	}
+
+	private static bool MayEvict(GpuTextureAllocation allocation, bool evictUsed)
+	{
+		if (allocation.LastUseOrder == 0L)
+		{
+			return true;
+		}
+		if (!OnDemand)
+		{
+			return evictUsed;
+		}
+		long renderFrameSerial = GpuTextureService.RenderFrameSerial;
+		if (!evictUsed)
+		{
+			return allocation.LastUseFrame + 60 < renderFrameSerial;
+		}
+		return allocation.LastUseFrame < renderFrameSerial;
 	}
 
 	private static void Promote(long room)

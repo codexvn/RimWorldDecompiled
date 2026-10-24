@@ -88,6 +88,15 @@ public static class ContentPack
 		Unmount(contentRoot, dispose: true);
 	}
 
+	public static void DropResidentPages()
+	{
+		MountPoint[] array = mounts;
+		for (int i = 0; i < array.Length; i++)
+		{
+			array[i].Pack.DropResidentPages();
+		}
+	}
+
 	private static void Unmount(string contentRoot, bool dispose)
 	{
 		string root = NormalizeRoot(contentRoot);

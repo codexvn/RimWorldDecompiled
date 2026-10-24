@@ -474,6 +474,17 @@ public static class BackCompatibility
 		{
 			prefsData.debugActionPalette = new List<string>();
 		}
+		if (!prefsData.scaleRelativeToSystem)
+		{
+			prefsData.scaleRelativeToSystem = true;
+			prefsData.uiScale = Dialog_Options.UIScales.MinBy((float s) => Mathf.Abs(s - prefsData.uiScale / (Screen.dpi / 96f)));
+			if (!prefsData.fullscreen && prefsData.screenWidth > 0 && prefsData.screenHeight > 0 && Screen.width > 0)
+			{
+				float num = (float)Screen.windowWidth / (float)Screen.width;
+				prefsData.screenWidth = Mathf.RoundToInt((float)prefsData.screenWidth * num);
+				prefsData.screenHeight = Mathf.RoundToInt((float)prefsData.screenHeight * num);
+			}
+		}
 	}
 
 	private static bool CheckSaveIdenticalToCurrentEnvironment()

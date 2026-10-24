@@ -2,15 +2,51 @@ namespace UnityEngine;
 
 public class GUIContent
 {
+	private string m_Text = "";
+
+	private Texture m_Image;
+
+	private string m_Tooltip = "";
+
 	public static GUIContent none = new GUIContent("");
 
 	private static readonly GUIContent s_Text = new GUIContent();
 
-	public string tooltip { get; set; } = "";
+	public string tooltip
+	{
+		get
+		{
+			return m_Tooltip;
+		}
+		set
+		{
+			m_Tooltip = value;
+		}
+	}
 
-	public string text { get; set; } = "";
+	public string text
+	{
+		get
+		{
+			return m_Text;
+		}
+		set
+		{
+			m_Text = value;
+		}
+	}
 
-	public Texture image { get; set; }
+	public Texture image
+	{
+		get
+		{
+			return m_Image;
+		}
+		set
+		{
+			m_Image = value;
+		}
+	}
 
 	public GUIContent(string text, Texture image)
 	{

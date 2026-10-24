@@ -94,6 +94,7 @@ internal static class CrashReporter
 		AppendException(stringBuilder, exception);
 		AppendSystemInfo(stringBuilder);
 		AppendProcessInfo(stringBuilder, app);
+		AppendModules(stringBuilder);
 		AppendVulkanInfo(stringBuilder, app);
 		AppendGpuMemoryInfo(stringBuilder);
 		AppendThreadPoolInfo(stringBuilder);
@@ -207,34 +208,46 @@ internal static class CrashReporter
 		stringBuilder8.AppendLine(ref handler);
 		stringBuilder = report;
 		StringBuilder stringBuilder9 = stringBuilder;
-		handler = new StringBuilder.AppendInterpolatedStringHandler(16, 1, stringBuilder);
-		handler.AppendLiteral("64-bit Process: ");
-		handler.AppendFormatted(SafeGet(() => Environment.Is64BitProcess.ToString()) ?? "N/A");
+		handler = new StringBuilder.AppendInterpolatedStringHandler(5, 1, stringBuilder);
+		handler.AppendLiteral("CPU: ");
+		handler.AppendFormatted(SafeGet(() => HostHardwareInfo.CpuName) ?? "N/A");
 		stringBuilder9.AppendLine(ref handler);
 		stringBuilder = report;
 		StringBuilder stringBuilder10 = stringBuilder;
-		handler = new StringBuilder.AppendInterpolatedStringHandler(19, 1, stringBuilder);
-		handler.AppendLiteral("Current Directory: ");
-		handler.AppendFormatted(SafeGet(() => Environment.CurrentDirectory) ?? "N/A");
+		handler = new StringBuilder.AppendInterpolatedStringHandler(12, 1, stringBuilder);
+		handler.AppendLiteral("System RAM: ");
+		handler.AppendFormatted(SafeGet(() => FormatBytes(HostHardwareInfo.TotalPhysicalMemoryBytes)) ?? "N/A");
 		stringBuilder10.AppendLine(ref handler);
 		stringBuilder = report;
 		StringBuilder stringBuilder11 = stringBuilder;
-		handler = new StringBuilder.AppendInterpolatedStringHandler(14, 1, stringBuilder);
-		handler.AppendLiteral("Process Path: ");
-		handler.AppendFormatted(SafeGet(() => Environment.ProcessPath) ?? "N/A");
+		handler = new StringBuilder.AppendInterpolatedStringHandler(16, 1, stringBuilder);
+		handler.AppendLiteral("64-bit Process: ");
+		handler.AppendFormatted(SafeGet(() => Environment.Is64BitProcess.ToString()) ?? "N/A");
 		stringBuilder11.AppendLine(ref handler);
 		stringBuilder = report;
 		StringBuilder stringBuilder12 = stringBuilder;
-		handler = new StringBuilder.AppendInterpolatedStringHandler(16, 1, stringBuilder);
-		handler.AppendLiteral("Base Directory: ");
-		handler.AppendFormatted(SafeGet(() => AppContext.BaseDirectory) ?? "N/A");
+		handler = new StringBuilder.AppendInterpolatedStringHandler(19, 1, stringBuilder);
+		handler.AppendLiteral("Current Directory: ");
+		handler.AppendFormatted(SafeGet(() => Environment.CurrentDirectory) ?? "N/A");
 		stringBuilder12.AppendLine(ref handler);
 		stringBuilder = report;
 		StringBuilder stringBuilder13 = stringBuilder;
+		handler = new StringBuilder.AppendInterpolatedStringHandler(14, 1, stringBuilder);
+		handler.AppendLiteral("Process Path: ");
+		handler.AppendFormatted(SafeGet(() => Environment.ProcessPath) ?? "N/A");
+		stringBuilder13.AppendLine(ref handler);
+		stringBuilder = report;
+		StringBuilder stringBuilder14 = stringBuilder;
+		handler = new StringBuilder.AppendInterpolatedStringHandler(16, 1, stringBuilder);
+		handler.AppendLiteral("Base Directory: ");
+		handler.AppendFormatted(SafeGet(() => AppContext.BaseDirectory) ?? "N/A");
+		stringBuilder14.AppendLine(ref handler);
+		stringBuilder = report;
+		StringBuilder stringBuilder15 = stringBuilder;
 		handler = new StringBuilder.AppendInterpolatedStringHandler(18, 1, stringBuilder);
 		handler.AppendLiteral("Unload Requested: ");
 		handler.AppendFormatted(SafeGet(() => AssemblyLoadContext.Default.IsCollectible.ToString()) ?? "N/A");
-		stringBuilder13.AppendLine(ref handler);
+		stringBuilder15.AppendLine(ref handler);
 		report.AppendLine();
 	}
 
@@ -325,6 +338,10 @@ internal static class CrashReporter
 			handler2.AppendFormatted(FormatBytes(gCMemoryInfo.TotalAvailableMemoryBytes));
 			stringBuilder13.AppendLine(ref handler2);
 		});
+		SafeAppend(report, delegate
+		{
+			report.Append(ProcessMemoryReport.BuildReport());
+		});
 		report.AppendLine();
 		report.AppendLine("== App ==");
 		StringBuilder stringBuilder14 = report;
@@ -335,54 +352,60 @@ internal static class CrashReporter
 		stringBuilder15.AppendLine(ref handler3);
 		stringBuilder14 = report;
 		StringBuilder stringBuilder16 = stringBuilder14;
-		handler3 = new StringBuilder.AppendInterpolatedStringHandler(19, 1, stringBuilder14);
-		handler3.AppendLiteral("Stopwatch Elapsed: ");
-		handler3.AppendFormatted(SafeGet(() => app?.Elapsed.ToString()) ?? "N/A");
+		handler3 = new StringBuilder.AppendInterpolatedStringHandler(16, 1, stringBuilder14);
+		handler3.AppendLiteral("Frame Rate Cap: ");
+		handler3.AppendFormatted(EngineApplication.FrameRateCapDescription);
 		stringBuilder16.AppendLine(ref handler3);
 		stringBuilder14 = report;
 		StringBuilder stringBuilder17 = stringBuilder14;
+		handler3 = new StringBuilder.AppendInterpolatedStringHandler(19, 1, stringBuilder14);
+		handler3.AppendLiteral("Stopwatch Elapsed: ");
+		handler3.AppendFormatted(SafeGet(() => app?.Elapsed.ToString()) ?? "N/A");
+		stringBuilder17.AppendLine(ref handler3);
+		stringBuilder14 = report;
+		StringBuilder stringBuilder18 = stringBuilder14;
 		handler3 = new StringBuilder.AppendInterpolatedStringHandler(15, 1, stringBuilder14);
 		handler3.AppendLiteral("Options Title: ");
 		handler3.AppendFormatted(SafeGet(() => app?.Options.Title) ?? "N/A");
-		stringBuilder17.AppendLine(ref handler3);
+		stringBuilder18.AppendLine(ref handler3);
 		if (app != null)
 		{
 			SafeAppend(report, delegate
 			{
-				StringBuilder stringBuilder18 = report;
-				StringBuilder stringBuilder19 = stringBuilder18;
-				StringBuilder.AppendInterpolatedStringHandler handler4 = new StringBuilder.AppendInterpolatedStringHandler(13, 1, stringBuilder18);
+				StringBuilder stringBuilder19 = report;
+				StringBuilder stringBuilder20 = stringBuilder19;
+				StringBuilder.AppendInterpolatedStringHandler handler4 = new StringBuilder.AppendInterpolatedStringHandler(13, 1, stringBuilder19);
 				handler4.AppendLiteral("Frame Count: ");
 				handler4.AppendFormatted(Time.FrameCount);
-				stringBuilder19.AppendLine(ref handler4);
-				stringBuilder18 = report;
-				StringBuilder stringBuilder20 = stringBuilder18;
-				handler4 = new StringBuilder.AppendInterpolatedStringHandler(6, 1, stringBuilder18);
+				stringBuilder20.AppendLine(ref handler4);
+				stringBuilder19 = report;
+				StringBuilder stringBuilder21 = stringBuilder19;
+				handler4 = new StringBuilder.AppendInterpolatedStringHandler(6, 1, stringBuilder19);
 				handler4.AppendLiteral("Time: ");
 				handler4.AppendFormatted(Time.Elapsed);
-				stringBuilder20.AppendLine(ref handler4);
-				stringBuilder18 = report;
-				StringBuilder stringBuilder21 = stringBuilder18;
-				handler4 = new StringBuilder.AppendInterpolatedStringHandler(12, 1, stringBuilder18);
+				stringBuilder21.AppendLine(ref handler4);
+				stringBuilder19 = report;
+				StringBuilder stringBuilder22 = stringBuilder19;
+				handler4 = new StringBuilder.AppendInterpolatedStringHandler(12, 1, stringBuilder19);
 				handler4.AppendLiteral("Delta Time: ");
 				handler4.AppendFormatted(Time.DeltaTime);
-				stringBuilder21.AppendLine(ref handler4);
+				stringBuilder22.AppendLine(ref handler4);
 			});
 			SafeAppend(report, delegate
 			{
 				GlfwWindow window = app.Window;
-				StringBuilder stringBuilder22 = report;
-				StringBuilder stringBuilder23 = stringBuilder22;
-				StringBuilder.AppendInterpolatedStringHandler handler5 = new StringBuilder.AppendInterpolatedStringHandler(14, 1, stringBuilder22);
+				StringBuilder stringBuilder23 = report;
+				StringBuilder stringBuilder24 = stringBuilder23;
+				StringBuilder.AppendInterpolatedStringHandler handler5 = new StringBuilder.AppendInterpolatedStringHandler(14, 1, stringBuilder23);
 				handler5.AppendLiteral("Window Title: ");
 				handler5.AppendFormatted(window.Title);
-				stringBuilder23.AppendLine(ref handler5);
-				stringBuilder22 = report;
-				StringBuilder stringBuilder24 = stringBuilder22;
-				handler5 = new StringBuilder.AppendInterpolatedStringHandler(20, 1, stringBuilder22);
+				stringBuilder24.AppendLine(ref handler5);
+				stringBuilder23 = report;
+				StringBuilder stringBuilder25 = stringBuilder23;
+				handler5 = new StringBuilder.AppendInterpolatedStringHandler(20, 1, stringBuilder23);
 				handler5.AppendLiteral("Window ShouldClose: ");
 				handler5.AppendFormatted(window.ShouldClose);
-				stringBuilder24.AppendLine(ref handler5);
+				stringBuilder25.AppendLine(ref handler5);
 			});
 			Func<string>[] array = CrashDiagnostics.Snapshot();
 			foreach (Func<string?> provider in array)
@@ -399,8 +422,8 @@ internal static class CrashReporter
 			SafeAppend(report, delegate
 			{
 				WaylithJobRuntimeDiagnosticsSnapshot diagnosticsSnapshot = WaylithJobRuntime.GetDiagnosticsSnapshot();
-				StringBuilder stringBuilder25 = report;
-				StringBuilder.AppendInterpolatedStringHandler handler6 = new StringBuilder.AppendInterpolatedStringHandler(69, 6, stringBuilder25);
+				StringBuilder stringBuilder26 = report;
+				StringBuilder.AppendInterpolatedStringHandler handler6 = new StringBuilder.AppendInterpolatedStringHandler(69, 6, stringBuilder26);
 				handler6.AppendLiteral("WaylithJobs: frame=");
 				handler6.AppendFormatted(diagnosticsSnapshot.CurrentFrame);
 				handler6.AppendLiteral(", total=");
@@ -413,36 +436,36 @@ internal static class CrashReporter
 				handler6.AppendFormatted(diagnosticsSnapshot.CompletedHandles);
 				handler6.AppendLiteral(", faulted=");
 				handler6.AppendFormatted(diagnosticsSnapshot.FaultedHandles);
-				stringBuilder25.AppendLine(ref handler6);
+				stringBuilder26.AppendLine(ref handler6);
 			});
 			SafeAppend(report, delegate
 			{
 				NativeAllocationRuntimeDiagnosticsSnapshot diagnosticsSnapshot2 = NativeAllocationRuntime.GetDiagnosticsSnapshot();
-				StringBuilder stringBuilder26 = report;
-				StringBuilder stringBuilder27 = stringBuilder26;
-				StringBuilder.AppendInterpolatedStringHandler handler7 = new StringBuilder.AppendInterpolatedStringHandler(41, 3, stringBuilder26);
+				StringBuilder stringBuilder27 = report;
+				StringBuilder stringBuilder28 = stringBuilder27;
+				StringBuilder.AppendInterpolatedStringHandler handler7 = new StringBuilder.AppendInterpolatedStringHandler(41, 3, stringBuilder27);
 				handler7.AppendLiteral("NativeAllocations: frame=");
 				handler7.AppendFormatted(diagnosticsSnapshot2.CurrentFrame);
 				handler7.AppendLiteral(", count=");
 				handler7.AppendFormatted(diagnosticsSnapshot2.TotalCount);
 				handler7.AppendLiteral(", bytes=");
 				handler7.AppendFormatted(FormatBytes(diagnosticsSnapshot2.TotalBytes));
-				stringBuilder27.AppendLine(ref handler7);
+				stringBuilder28.AppendLine(ref handler7);
 				for (int j = 0; j < diagnosticsSnapshot2.Buckets.Length; j++)
 				{
 					UnityAllocationBucketDiagnostics unityAllocationBucketDiagnostics = diagnosticsSnapshot2.Buckets[j];
 					if (unityAllocationBucketDiagnostics.Count != 0)
 					{
-						stringBuilder26 = report;
-						StringBuilder stringBuilder28 = stringBuilder26;
-						handler7 = new StringBuilder.AppendInterpolatedStringHandler(18, 3, stringBuilder26);
+						stringBuilder27 = report;
+						StringBuilder stringBuilder29 = stringBuilder27;
+						handler7 = new StringBuilder.AppendInterpolatedStringHandler(18, 3, stringBuilder27);
 						handler7.AppendLiteral("  ");
 						handler7.AppendFormatted(unityAllocationBucketDiagnostics.Kind);
 						handler7.AppendLiteral(": count=");
 						handler7.AppendFormatted(unityAllocationBucketDiagnostics.Count);
 						handler7.AppendLiteral(", bytes=");
 						handler7.AppendFormatted(FormatBytes(unityAllocationBucketDiagnostics.Bytes));
-						stringBuilder28.AppendLine(ref handler7);
+						stringBuilder29.AppendLine(ref handler7);
 					}
 				}
 			});
@@ -576,6 +599,10 @@ internal static class CrashReporter
 		if (app?.GraphicsDevice == null)
 		{
 			AppendCollection(report, "Enumerated Devices", GraphicsDevice.EnumeratedGpus.Select((GpuDescription g) => $"[{g.Index}] '{g.Name}' ({g.DeviceType}, Vulkan {FormatApiVersion(g.ApiVersion)}, driver {g.Driver}, {g.VramBytes >> 20} MB): {g.RejectionReason ?? "usable"}").ToList());
+			SafeAppend(report, delegate
+			{
+				AppendInstalledDrivers(report);
+			});
 			return;
 		}
 		StringBuilder stringBuilder = report;
@@ -677,6 +704,10 @@ internal static class CrashReporter
 		handler.AppendLiteral("Driver Conformance: ");
 		handler.AppendFormatted(FormatConformanceVersion(properties.ConformanceVersion));
 		stringBuilder15.AppendLine(ref handler);
+		SafeAppend(report, delegate
+		{
+			AppendDriverDate(report, properties3.VendorID, properties3.DeviceID);
+		});
 		stringBuilder = report;
 		StringBuilder stringBuilder16 = stringBuilder;
 		handler = new StringBuilder.AppendInterpolatedStringHandler(13, 1, stringBuilder);
@@ -781,6 +812,51 @@ internal static class CrashReporter
 		stringBuilder32.AppendLine(ref handler);
 		AppendCollection(report, "Enabled Device Extensions", (IEnumerable<string>)(((object)app.GraphicsDevice?.DeviceEnabledExtensions) ?? ((object)Array.Empty<string>())));
 		AppendCollection(report, "Available Device Extensions", GetAvailableDeviceExtensionLines(app.PhysicalDevice));
+	}
+
+	private static void AppendDriverDate(StringBuilder report, long vendorId, long deviceId)
+	{
+		if (OperatingSystem.IsWindows())
+		{
+			IReadOnlyList<HostHardwareInfo.DisplayDriver> source = HostHardwareInfo.WindowsDisplayDrivers();
+			HostHardwareInfo.DisplayDriver displayDriver = source.FirstOrDefault((HostHardwareInfo.DisplayDriver d) => d.Matches(vendorId, deviceId));
+			report.AppendLine((displayDriver.Description != null) ? $"Driver Date: {displayDriver.Date} ({displayDriver.Description}, version {displayDriver.Version}, provider {displayDriver.Provider})" : "Driver Date: N/A (no display class entry found for this device)");
+			AppendCollection(report, "Installed Display Drivers", source.Select((HostHardwareInfo.DisplayDriver d) => d.ToString()));
+			return;
+		}
+		if (OperatingSystem.IsLinux())
+		{
+			string text = HostHardwareInfo.LinuxKernelGpuDriver();
+			if (text != null)
+			{
+				StringBuilder.AppendInterpolatedStringHandler handler = new StringBuilder.AppendInterpolatedStringHandler(15, 1, report);
+				handler.AppendLiteral("Kernel Driver: ");
+				handler.AppendFormatted(text);
+				report.AppendLine(ref handler);
+				return;
+			}
+		}
+		report.AppendLine("Driver Date: N/A (not exposed on this platform, see Driver Info)");
+	}
+
+	private static void AppendInstalledDrivers(StringBuilder report)
+	{
+		if (OperatingSystem.IsWindows())
+		{
+			AppendCollection(report, "Installed Display Drivers", from d in HostHardwareInfo.WindowsDisplayDrivers()
+				select d.ToString());
+		}
+		else if (OperatingSystem.IsLinux())
+		{
+			string text = HostHardwareInfo.LinuxKernelGpuDriver();
+			if (text != null)
+			{
+				StringBuilder.AppendInterpolatedStringHandler handler = new StringBuilder.AppendInterpolatedStringHandler(15, 1, report);
+				handler.AppendLiteral("Kernel Driver: ");
+				handler.AppendFormatted(text);
+				report.AppendLine(ref handler);
+			}
+		}
 	}
 
 	private static void AppendVulkanSurfaceInfo(StringBuilder report, EngineApplication app)
@@ -1071,6 +1147,16 @@ internal static class CrashReporter
 		{
 			AppendCollection(report, "Tool Properties", GetToolLines(app.PhysicalDevice));
 		}
+	}
+
+	private static void AppendModules(StringBuilder report)
+	{
+		report.AppendLine("== Modules ==");
+		SafeAppend(report, delegate
+		{
+			AppendCollection(report, "Foreign Modules (outside the game folder and the OS)", ProcessModules.ForeignModuleLines());
+		});
+		report.AppendLine();
 	}
 
 	private static void AppendGpuMemoryInfo(StringBuilder report)

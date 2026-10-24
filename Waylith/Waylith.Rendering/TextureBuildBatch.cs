@@ -224,6 +224,7 @@ public static class TextureBuildBatch
 			}
 		}
 		TextureCacheStore.FlushIfIdle();
+		Texture2D.DrainPendingEvictions();
 	}
 
 	private static void FlushLocked(bool wait)
@@ -327,7 +328,7 @@ public static class TextureBuildBatch
 				message.AppendLiteral(" textures failed, building them on the CPU: ");
 				message.AppendFormatted(ex.Message);
 			}
-			log.Error(message, "Submit", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\TextureBuildBatch.cs", 247);
+			log.Error(message, "Submit", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\TextureBuildBatch.cs", 248);
 			foreach (TextureBlockEncoder.BuildItem item2 in list2)
 			{
 				item2.Image.DisposeNow();
@@ -355,7 +356,7 @@ public static class TextureBuildBatch
 				message.AppendLiteral(" textures failed, building them on the CPU: ");
 				message.AppendFormatted(ex.Message);
 			}
-			log.Error(message, "Complete", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\TextureBuildBatch.cs", 263);
+			log.Error(message, "Complete", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\TextureBuildBatch.cs", 264);
 			List<Job> list = new List<Job>(batch.Built.Count);
 			foreach (var item4 in batch.Built)
 			{
@@ -387,6 +388,7 @@ public static class TextureBuildBatch
 				if (texture.SourcePath != null)
 				{
 					GpuTextureService.WriteTextureCache(texture.SourcePath, item2.Premultiplied, new LoadedTextureData(texture.width, texture.height, item3.Blocks.Length, format, item3.Blocks, texture.Opaque, texture.SourceStamp));
+					Texture2D.EvictWhenCached(texture);
 				}
 			}
 			else
@@ -397,6 +399,7 @@ public static class TextureBuildBatch
 				if (texture.SourcePath != null)
 				{
 					GpuTextureService.WriteTextureCache(texture.SourcePath, item2.Premultiplied, new LoadedTextureData(texture.width, texture.height, mipLevels.Length, LoadedTextureFormat.Rgba32, mipLevels, texture.Opaque, texture.SourceStamp));
+					Texture2D.EvictWhenCached(texture);
 				}
 			}
 		}
@@ -424,6 +427,10 @@ public static class TextureBuildBatch
 				if (!isReadable)
 				{
 					texture.ReleaseCpuData();
+				}
+				if (texture.SourcePath != null)
+				{
+					Texture2D.EvictWhenCached(texture);
 				}
 			}
 		}

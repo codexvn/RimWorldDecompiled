@@ -83,6 +83,16 @@ public class GUIUtility
 		return nextControlId++;
 	}
 
+	internal static bool HitTest(Rect rect, Event evt)
+	{
+		IGuiBackend current = GuiBackend.Current;
+		if (current == null || !current.InlineControlsObscured)
+		{
+			return rect.Contains(evt.mousePosition);
+		}
+		return false;
+	}
+
 	public static void ResetControlIds()
 	{
 		ResetControlIds(1000);
@@ -92,6 +102,11 @@ public class GUIUtility
 	{
 		nextControlId = firstControlId;
 		GUI.ResetNamedControlOccurrences();
+	}
+
+	public static void ResetGlobalState()
+	{
+		GUI.ResetGlobalState();
 	}
 
 	public static object GetStateObject(Type t, int controlID)

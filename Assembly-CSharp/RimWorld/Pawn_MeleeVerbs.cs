@@ -21,6 +21,10 @@ public class Pawn_MeleeVerbs : IExposable
 
 	private static List<Verb> verbsToAdd = new List<Verb>();
 
+	private static List<VerbSelectionCategory> verbCategories = new List<VerbSelectionCategory>();
+
+	private static List<float> initialWeights = new List<float>();
+
 	private const int BestMeleeVerbUpdateInterval = 60;
 
 	public const int TerrainBasedVerbUseDelay = 1200;
@@ -42,6 +46,10 @@ public class Pawn_MeleeVerbs : IExposable
 
 	public Verb TryGetMeleeVerb(Thing target)
 	{
+		if (target == null && curMeleeVerb != null && curMeleeVerb.IsStillUsableBy(pawn))
+		{
+			return curMeleeVerb;
+		}
 		if (curMeleeVerb == null || curMeleeVerbTarget != target || Find.TickManager.TicksGame >= curMeleeVerbUpdateTick + 60 || !curMeleeVerb.IsStillUsableBy(pawn) || !curMeleeVerb.IsUsableOn(target))
 		{
 			ChooseMeleeVerb(target);
@@ -191,17 +199,38 @@ public class Pawn_MeleeVerbs : IExposable
 			}
 		}
 		float num = 0f;
+		initialWeights.Clear();
 		foreach (Verb item in verbsToAdd)
 		{
 			float num2 = VerbUtility.InitialVerbWeight(item, pawn);
+			initialWeights.Add(num2);
 			if (num2 > num)
 			{
 				num = num2;
 			}
 		}
-		foreach (Verb item2 in verbsToAdd)
+		int num3 = 0;
+		int num4 = 0;
+		verbCategories.Clear();
+		for (int num5 = 0; num5 < verbsToAdd.Count; num5++)
 		{
-			meleeVerbs.Add(new VerbEntry(item2, pawn, verbsToAdd, num));
+			VerbSelectionCategory verbSelectionCategory = VerbUtility.SelectionCategoryForWeight(initialWeights[num5], num);
+			verbCategories.Add(verbSelectionCategory);
+			switch (verbSelectionCategory)
+			{
+			case VerbSelectionCategory.Best:
+				num3++;
+				break;
+			case VerbSelectionCategory.Mid:
+				num4++;
+				break;
+			}
+		}
+		for (int num6 = 0; num6 < verbsToAdd.Count; num6++)
+		{
+			VerbSelectionCategory verbSelectionCategory2 = verbCategories[num6];
+			int numInSameCategory = ((verbSelectionCategory2 == VerbSelectionCategory.Best) ? num3 : num4);
+			meleeVerbs.Add(new VerbEntry(verbsToAdd[num6], VerbUtility.FinalSelectionWeightFor(verbSelectionCategory2, numInSameCategory)));
 		}
 		return meleeVerbs;
 		bool IsUsableMeleeVerb(Verb v)

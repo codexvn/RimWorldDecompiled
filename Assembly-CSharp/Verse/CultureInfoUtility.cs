@@ -11,7 +11,7 @@ public static class CultureInfoUtility
 	{
 		if (Thread.CurrentThread.CurrentCulture.Name != "en-US")
 		{
-			Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("en-US");
+			Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US", useUserOverride: false);
 		}
 	}
 }

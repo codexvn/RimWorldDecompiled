@@ -19,7 +19,7 @@ public sealed class EngineApplicationOptions
 
 	public VkFormat DepthFormat { get; init; } = VkFormat.D32SFloatS8UInt;
 
-	public VkPresentModeKHR PreferredPresentMode { get; init; } = VkPresentModeKHR.MailboxKHR;
+	public VkPresentModeKHR PreferredPresentMode { get; init; } = VkPresentModeKHR.FifoKHR;
 
 	public VkSampleCountFlags SampleCount { get; init; } = VkSampleCountFlags._1Bit;
 

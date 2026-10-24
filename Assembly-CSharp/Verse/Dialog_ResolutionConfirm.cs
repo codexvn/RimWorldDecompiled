@@ -35,7 +35,7 @@ public class Dialog_ResolutionConfirm : Window
 		oldFullscreen = oldFullScreenMode != FullScreenMode.Windowed;
 		this.oldFullScreenMode = oldFullScreenMode;
 		this.oldRes = oldRes;
-		oldUIScale = Prefs.UIScale;
+		oldUIScale = Prefs.UIScalePreference;
 	}
 
 	public Dialog_ResolutionConfirm(bool oldFullscreen)
@@ -44,7 +44,7 @@ public class Dialog_ResolutionConfirm : Window
 		this.oldFullscreen = oldFullscreen;
 		oldFullScreenMode = (oldFullscreen ? FullScreenMode.FullScreenWindow : FullScreenMode.Windowed);
 		oldRes = new IntVec2(Screen.width, Screen.height);
-		oldUIScale = Prefs.UIScale;
+		oldUIScale = Prefs.UIScalePreference;
 	}
 
 	public Dialog_ResolutionConfirm(IntVec2 oldRes)
@@ -53,7 +53,7 @@ public class Dialog_ResolutionConfirm : Window
 		oldFullscreen = Screen.fullScreen;
 		oldFullScreenMode = Screen.fullScreenMode;
 		this.oldRes = oldRes;
-		oldUIScale = Prefs.UIScale;
+		oldUIScale = Prefs.UIScalePreference;
 	}
 
 	public Dialog_ResolutionConfirm(float oldUIScale)
@@ -91,7 +91,7 @@ public class Dialog_ResolutionConfirm : Window
 		Prefs.FullScreenMode = oldFullScreenMode;
 		Prefs.ScreenWidth = oldRes.x;
 		Prefs.ScreenHeight = oldRes.z;
-		Prefs.UIScale = oldUIScale;
+		Prefs.UIScalePreference = oldUIScale;
 		GenUI.ClearLabelWidthCache();
 	}
 

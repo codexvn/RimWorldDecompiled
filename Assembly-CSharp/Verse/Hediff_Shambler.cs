@@ -401,17 +401,22 @@ public class Hediff_Shambler : HediffWithComps
 	public override void Notify_PawnPostApplyDamage(DamageInfo dinfo, float totalDamageDealt)
 	{
 		base.Notify_PawnPostApplyDamage(dinfo, totalDamageDealt);
-		if (dinfo.Instigator != null && pawn.HostileTo(dinfo.Instigator))
+		if (dinfo.Instigator == null || !pawn.HostileTo(dinfo.Instigator))
 		{
-			if (pawn.Spawned && dinfo.Instigator != null && dinfo.Instigator is IAttackTarget && dinfo.Instigator.Spawned && pawn.HostileTo(dinfo.Instigator) && pawn.CanSee(dinfo.Instigator))
-			{
-				pawn.mindState.enemyTarget = dinfo.Instigator;
-				pawn.mindState.Notify_EngagedTarget();
-				pawn.jobs.EndCurrentJob(JobCondition.InterruptOptional);
-				pawn.GetLord()?.Notify_PawnAcquiredTarget(pawn, dinfo.Instigator);
-			}
-			MutantUtility.ActivateNearbyShamblers(pawn, dinfo.Instigator);
+			return;
 		}
+		if (pawn.Spawned && dinfo.Instigator != null && dinfo.Instigator is IAttackTarget && dinfo.Instigator.Spawned && pawn.HostileTo(dinfo.Instigator) && pawn.CanSee(dinfo.Instigator))
+		{
+			bool num = pawn.mindState.enemyTarget == dinfo.Instigator;
+			pawn.mindState.enemyTarget = dinfo.Instigator;
+			pawn.mindState.Notify_EngagedTarget();
+			if (!num)
+			{
+				pawn.jobs.EndCurrentJob(JobCondition.InterruptOptional);
+			}
+			pawn.GetLord()?.Notify_PawnAcquiredTarget(pawn, dinfo.Instigator);
+		}
+		MutantUtility.ActivateNearbyShamblers(pawn, dinfo.Instigator);
 	}
 
 	public void Notify_DelayedAlert(Thing target)

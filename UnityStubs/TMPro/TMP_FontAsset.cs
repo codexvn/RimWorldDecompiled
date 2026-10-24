@@ -50,12 +50,28 @@ public class TMP_FontAsset : TMP_Asset
 
 	public static TMP_FontAsset CreateFontAsset(Font font)
 	{
-		StubWarner.LogStub("CreateFontAsset", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\RimWorldPort\\TMPro.cs", 56);
-		return new TMP_FontAsset(font?.GameFontIndex ?? 2)
+		if (font == null)
+		{
+			StubWarner.LogStub("CreateFontAsset", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\RimWorldPort\\TMPro.cs", 59);
+		}
+		TMP_FontAsset tMP_FontAsset = new TMP_FontAsset(font?.GameFontIndex ?? 2)
 		{
 			sourceFontFile = font,
 			name = font?.name
 		};
+		FontFaceReader.FaceNames? faceNames = font?.FaceNames;
+		if (faceNames.HasValue)
+		{
+			FontFaceReader.FaceNames valueOrDefault = faceNames.GetValueOrDefault();
+			tMP_FontAsset.faceInfo = new FaceInfo
+			{
+				familyName = valueOrDefault.Family,
+				styleName = valueOrDefault.Style,
+				pointSize = font.fontSize,
+				scale = 1f
+			};
+		}
+		return tMP_FontAsset;
 	}
 
 	public static TMP_FontAsset CreateFontAsset(Font font, int samplingPointSize, int atlasPadding, GlyphRenderMode renderMode, int atlasWidth, int atlasHeight, AtlasPopulationMode atlasPopulationMode = AtlasPopulationMode.Dynamic, bool enableMultiAtlasSupport = true)

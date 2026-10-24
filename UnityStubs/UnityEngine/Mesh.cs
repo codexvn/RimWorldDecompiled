@@ -313,6 +313,8 @@ public class Mesh : Object, IDisposable
 
 	private volatile bool _compatCacheLoaded;
 
+	private volatile bool _compatDirty;
+
 	internal object RaycastBvh;
 
 	private Vector3[] _compatVertices = Array.Empty<Vector3>();
@@ -351,7 +353,14 @@ public class Mesh : Object, IDisposable
 
 	private NativeArray<byte> _nativeBonesPerVertex;
 
-	public Waylith.Graphics.Meshes.Mesh EngineMesh => _mesh;
+	public Waylith.Graphics.Meshes.Mesh EngineMesh
+	{
+		get
+		{
+			FlushCompat();
+			return _mesh;
+		}
+	}
 
 	public bool isReadable => _mesh.IsReadable;
 
@@ -359,10 +368,12 @@ public class Mesh : Object, IDisposable
 	{
 		get
 		{
+			FlushCompat();
 			return ToUnityBounds(_mesh.Bounds);
 		}
 		set
 		{
+			FlushCompat();
 			_mesh.Bounds = FromUnityBounds(value);
 		}
 	}
@@ -406,7 +417,11 @@ public class Mesh : Object, IDisposable
 	{
 		get
 		{
-			return ToUnityIndexFormat(_mesh.CpuStorage.IndexFormat);
+			if (!_compatCacheLoaded)
+			{
+				return ToUnityIndexFormat(_mesh.CpuStorage.IndexFormat);
+			}
+			return _compatIndexFormat;
 		}
 		set
 		{
@@ -450,10 +465,12 @@ public class Mesh : Object, IDisposable
 	{
 		get
 		{
+			FlushCompat();
 			return _mesh.SubMeshCount;
 		}
 		set
 		{
+			FlushCompat();
 			CpuMeshData cpuMeshData = _mesh.CpuStorage.Clone();
 			cpuMeshData.SetSubMeshCount(value);
 			_mesh.ReplaceCpuStorage(cpuMeshData);
@@ -549,7 +566,17 @@ public class Mesh : Object, IDisposable
 		}
 	}
 
-	public int vertexCount => _mesh.VertexCount;
+	public int vertexCount
+	{
+		get
+		{
+			if (!_compatCacheLoaded)
+			{
+				return _mesh.VertexCount;
+			}
+			return _compatVertices.Length;
+		}
+	}
 
 	internal Vector3[] verticesForReading
 	{
@@ -673,7 +700,7 @@ public class Mesh : Object, IDisposable
 		ReadOnlyMeshData[] array = new ReadOnlyMeshData[meshes.Count];
 		for (int i = 0; i < meshes.Count; i++)
 		{
-			array[i] = meshes[i]?._mesh?.CreateReadOnlySnapshot() ?? new ReadOnlyMeshData(new CpuMeshData());
+			array[i] = meshes[i]?.EngineMesh.CreateReadOnlySnapshot() ?? new ReadOnlyMeshData(new CpuMeshData());
 		}
 		return new MeshDataArray(array);
 	}
@@ -718,8 +745,9 @@ public class Mesh : Object, IDisposable
 
 	public void Clear()
 	{
-		_mesh.Clear();
-		ResetCompatCache();
+		ResetCompatCache(_compatCacheLoaded ? _compatIndexFormat : ToUnityIndexFormat(_mesh.CpuStorage.IndexFormat));
+		_compatCacheLoaded = true;
+		_compatDirty = true;
 	}
 
 	public void Clear(bool keepVertexLayout)
@@ -932,6 +960,7 @@ public class Mesh : Object, IDisposable
 	{
 		ArgumentNullException.ThrowIfNull(attributes, "attributes");
 		attributes.Clear();
+		FlushCompat();
 		ReadOnlySpan<Waylith.Graphics.Meshes.VertexAttribute> attributes2 = _mesh.CpuStorage.Layout.Attributes;
 		for (int i = 0; i < attributes2.Length; i++)
 		{
@@ -951,6 +980,7 @@ public class Mesh : Object, IDisposable
 
 	public bool HasVertexAttribute(UnityEngine.Rendering.VertexAttribute attr)
 	{
+		FlushCompat();
 		return _mesh.CpuStorage.Layout.HasAttribute(ToEngineSemantic(attr));
 	}
 
@@ -961,13 +991,16 @@ public class Mesh : Object, IDisposable
 
 	public void Optimize()
 	{
-		StubWarner.LogStub("Optimize", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\Mesh.cs", 533);
+		StubWarner.LogStub("Optimize", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\Mesh.cs", 557);
 	}
 
 	public void RecalculateBounds()
 	{
 		EnsureCompatCacheLoaded();
-		_mesh.Bounds = CalculateBounds(_compatVertices);
+		if (!_compatDirty)
+		{
+			_mesh.Bounds = CalculateBounds(_compatVertices);
+		}
 	}
 
 	public void RecalculateNormals()
@@ -1042,7 +1075,7 @@ public class Mesh : Object, IDisposable
 	{
 		if (topology != 0)
 		{
-			StubWarner.LogStub("SetIndices", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\Mesh.cs", 608);
+			StubWarner.LogStub("SetIndices", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\Mesh.cs", 634);
 		}
 		SetTriangles(indices, 0, (indices != null) ? indices.Length : 0, submesh, calculateBounds, baseVertex);
 	}
@@ -1359,6 +1392,7 @@ public class Mesh : Object, IDisposable
 
 	public void UploadMeshData(bool markNoLongerReadable)
 	{
+		FlushCompat();
 		UpdateDebugName();
 		_mesh.Upload(markNoLongerReadable);
 		if (markNoLongerReadable)
@@ -1387,7 +1421,13 @@ public class Mesh : Object, IDisposable
 
 	private void ResetCompatCache()
 	{
+		ResetCompatCache(ToUnityIndexFormat(_mesh.CpuStorage.IndexFormat));
+	}
+
+	private void ResetCompatCache(IndexFormat indexFormat)
+	{
 		_compatCacheLoaded = false;
+		_compatDirty = false;
 		_compatVertices = Array.Empty<Vector3>();
 		_compatNormals = Array.Empty<Vector3>();
 		_compatTangents = Array.Empty<Vector4>();
@@ -1397,12 +1437,13 @@ public class Mesh : Object, IDisposable
 		_compatUv2 = Array.Empty<Vector4>();
 		_compatUv3 = Array.Empty<Vector4>();
 		_compatTriangles = Array.Empty<int>();
-		_compatIndexFormat = ToUnityIndexFormat(_mesh.CpuStorage.IndexFormat);
+		_compatIndexFormat = indexFormat;
 	}
 
 	private void DiscardCompatCache()
 	{
 		_compatCacheLoaded = false;
+		_compatDirty = false;
 		_compatVertices = Array.Empty<Vector3>();
 		_compatNormals = Array.Empty<Vector3>();
 		_compatTangents = Array.Empty<Vector4>();
@@ -1442,7 +1483,22 @@ public class Mesh : Object, IDisposable
 		}
 	}
 
-	private unsafe void RebuildFromCompat()
+	private void RebuildFromCompat()
+	{
+		_compatCacheLoaded = true;
+		_compatDirty = true;
+	}
+
+	private void FlushCompat()
+	{
+		if (_compatDirty)
+		{
+			_compatDirty = false;
+			RebuildEngineStorage();
+		}
+	}
+
+	private unsafe void RebuildEngineStorage()
 	{
 		CpuMeshData cpuMeshData = new CpuMeshData();
 		int num = _compatVertices.Length;
@@ -1567,6 +1623,7 @@ public class Mesh : Object, IDisposable
 
 	private unsafe void ApplySingleSubMeshTriangles(int[] trianglesLocal, int submesh, int baseVertex)
 	{
+		FlushCompat();
 		CpuMeshData cpuMeshData = _mesh.CpuStorage.Clone();
 		int num = Math.Max(cpuMeshData.SubMeshes.Length, submesh + 1);
 		cpuMeshData.SetSubMeshCount(num);
@@ -1670,6 +1727,7 @@ public class Mesh : Object, IDisposable
 
 	private unsafe int[] GetSubMeshTriangles(int submesh)
 	{
+		FlushCompat();
 		CpuMeshData cpuStorage = _mesh.CpuStorage;
 		if ((uint)submesh >= (uint)cpuStorage.SubMeshes.Length)
 		{
@@ -1698,6 +1756,7 @@ public class Mesh : Object, IDisposable
 
 	private SubMesh GetSubMeshOrDefault(int submesh)
 	{
+		FlushCompat();
 		CpuMeshData cpuStorage = _mesh.CpuStorage;
 		if ((uint)submesh >= (uint)cpuStorage.SubMeshes.Length)
 		{
@@ -2242,6 +2301,7 @@ public class Mesh : Object, IDisposable
 
 	internal Mesh CloneForSkinning()
 	{
+		FlushCompat();
 		Mesh mesh = new Mesh(new Waylith.Graphics.Meshes.Mesh(_mesh.CpuStorage.Clone()));
 		mesh.name = base.name + " (skinned)";
 		mesh.MarkDynamic();
@@ -2250,6 +2310,7 @@ public class Mesh : Object, IDisposable
 
 	internal unsafe void WriteSkinned(Vector3[] positions, Vector3[] normals, Vector4[] tangents)
 	{
+		FlushCompat();
 		CpuMeshData cpuStorage = _mesh.CpuStorage;
 		VertexLayout layout = cpuStorage.Layout;
 		int num = Math.Min(positions.Length, cpuStorage.VertexCount);

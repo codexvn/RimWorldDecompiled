@@ -31,9 +31,11 @@ public class PostEffectPass : IRenderPass, IDisposable
 
 	private readonly int maxPassesPerFrame;
 
-	private readonly int uniformBinding;
+	private readonly bool writeDepth;
 
-	private readonly GpuTextureAllocation?[] inputTextures = new GpuTextureAllocation[16];
+	private readonly VkImageView[] inputViews = new VkImageView[16];
+
+	private readonly int uniformBinding;
 
 	private readonly VkSampler[] inputSamplers = new VkSampler[16];
 
@@ -91,7 +93,7 @@ public class PostEffectPass : IRenderPass, IDisposable
 
 	public virtual bool PreBackbuffer => true;
 
-	public PostEffectPass(string name, string fragmentShaderPath, ReadOnlySpan<int> bindings, BlendState blend = default(BlendState), int pushConstantSize = 0, int maxPassesPerFrame = 1, int uniformBinding = -1)
+	public PostEffectPass(string name, string fragmentShaderPath, ReadOnlySpan<int> bindings, BlendState blend = default(BlendState), int pushConstantSize = 0, int maxPassesPerFrame = 1, int uniformBinding = -1, bool writeDepth = false)
 	{
 		Name = name;
 		PassId = RenderPassRegistry.Register(name);
@@ -101,6 +103,7 @@ public class PostEffectPass : IRenderPass, IDisposable
 		this.pushConstantSize = pushConstantSize;
 		this.maxPassesPerFrame = System.Math.Max(1, maxPassesPerFrame);
 		this.uniformBinding = uniformBinding;
+		this.writeDepth = writeDepth;
 		using (gate.EnterScope())
 		{
 			live.Add(this);
@@ -114,7 +117,12 @@ public class PostEffectPass : IRenderPass, IDisposable
 
 	public void SetInput(int binding, GpuTextureAllocation texture, VkSampler sampler)
 	{
-		inputTextures[binding] = texture;
+		SetInput(binding, texture.ImageView, sampler);
+	}
+
+	public void SetInput(int binding, VkImageView view, VkSampler sampler)
+	{
+		inputViews[binding] = view;
 		inputSamplers[binding] = sampler;
 	}
 
@@ -266,7 +274,7 @@ public class PostEffectPass : IRenderPass, IDisposable
 		fragmentModule = PostFxPassHelpers.CompileFragment(device, fragmentShaderPath);
 		descriptorSetLayout = CreateDescriptorSetLayout();
 		pipelineLayout = CreatePipelineLayout();
-		pipeline = PostFxPassHelpers.CreateFullscreenPipeline(device, renderPass, sampleCount, vertexModule, fragmentModule, pipelineLayout, blend, "PostEffect." + Name);
+		pipeline = PostFxPassHelpers.CreateFullscreenPipeline(device, renderPass, sampleCount, vertexModule, fragmentModule, pipelineLayout, blend, "PostEffect." + Name, writeDepth);
 		descriptorPools = CreateDescriptorPools(ctx.RenderContext.FramesInFlight);
 		if (uniformBinding >= 0)
 		{
@@ -333,7 +341,7 @@ public class PostEffectPass : IRenderPass, IDisposable
 			ptr[i] = new VkDescriptorImageInfo
 			{
 				Sampler = inputSamplers[num2],
-				ImageView = inputTextures[num2].ImageView,
+				ImageView = inputViews[num2],
 				ImageLayout = VkImageLayout.ShaderReadOnlyOptimal
 			};
 			ptr2[i] = new VkWriteDescriptorSet

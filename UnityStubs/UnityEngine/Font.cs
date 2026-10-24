@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityStubs.Gui;
 using UnityStubs.Internal;
 using Waylith.UnityCompat;
@@ -37,6 +38,8 @@ public class Font : Object
 			_fontData = null;
 		}
 	}
+
+	internal FontFaceReader.FaceNames? FaceNames { get; private set; }
 
 	public bool dynamic => true;
 
@@ -115,6 +118,10 @@ public class Font : Object
 		_fontData = fontData;
 		_importSize = importSize;
 		_renderingMode = renderingMode;
+		if (FontFaceReader.TryReadFaces(fontData, out var faces))
+		{
+			FaceNames = faces[0];
+		}
 	}
 
 	private void TryRegisterFontData()
@@ -169,20 +176,27 @@ public class Font : Object
 			list.Add("/run/host/user-fonts");
 		}
 		List<string> list2 = new List<string>();
-		foreach (string item in list)
+		HashSet<string> hashSet = new HashSet<string>(StringComparer.Ordinal);
+		foreach (string item in LinuxFontconfig.FontFiles())
 		{
-			if (!Directory.Exists(item))
+			if (IsSfntFont(item) && hashSet.Add(item))
+			{
+				list2.Add(item);
+			}
+		}
+		foreach (string item2 in list)
+		{
+			if (!Directory.Exists(item2))
 			{
 				continue;
 			}
 			try
 			{
-				foreach (string item2 in Directory.EnumerateFiles(item, "*", SearchOption.AllDirectories))
+				foreach (string item3 in Directory.EnumerateFiles(item2, "*", SearchOption.AllDirectories))
 				{
-					string extension = Path.GetExtension(item2);
-					if (extension.Equals(".ttf", StringComparison.OrdinalIgnoreCase) || extension.Equals(".otf", StringComparison.OrdinalIgnoreCase) || extension.Equals(".ttc", StringComparison.OrdinalIgnoreCase))
+					if (IsSfntFont(item3) && hashSet.Add(item3))
 					{
-						list2.Add(item2);
+						list2.Add(item3);
 					}
 				}
 			}
@@ -193,28 +207,63 @@ public class Font : Object
 		return list2.ToArray();
 	}
 
+	private static bool IsSfntFont(string file)
+	{
+		string extension = Path.GetExtension(file);
+		if (!extension.Equals(".ttf", StringComparison.OrdinalIgnoreCase) && !extension.Equals(".otf", StringComparison.OrdinalIgnoreCase))
+		{
+			return extension.Equals(".ttc", StringComparison.OrdinalIgnoreCase);
+		}
+		return true;
+	}
+
 	public static Font CreateDynamicFontFromOSFont(string fontname, int size)
 	{
-		StubWarner.LogStub("CreateDynamicFontFromOSFont", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\Font.cs", 103);
-		return new Font
+		Font font = new Font
 		{
 			name = fontname
 		};
+		if (!FontFaceReader.TryFindOsFont(fontname, out var face))
+		{
+			Debug.LogWarning("Font '" + fontname + "' is not installed, using the default font.");
+			return font;
+		}
+		try
+		{
+			font.SetFontData(FontFaceReader.ExtractFace(File.ReadAllBytes(face.Path), face.FaceIndex), size, 0);
+		}
+		catch (Exception ex) when (((ex is IOException || ex is UnauthorizedAccessException) ? 1 : 0) != 0)
+		{
+			Debug.LogWarning($"Font '{fontname}' could not be read from '{face.Path}': {ex.Message}");
+		}
+		return font;
 	}
 
 	public static Font CreateDynamicFontFromOSFont(string[] fontnames, int size)
 	{
-		StubWarner.LogStub("CreateDynamicFontFromOSFont", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\Font.cs", 104);
-		return new Font
+		if (fontnames != null)
 		{
-			name = ((fontnames != null && fontnames.Length > 0) ? fontnames[0] : string.Empty)
-		};
+			foreach (string fontname in fontnames)
+			{
+				if (FontFaceReader.TryFindOsFont(fontname, out var _))
+				{
+					return CreateDynamicFontFromOSFont(fontname, size);
+				}
+			}
+		}
+		return CreateDynamicFontFromOSFont((fontnames != null && fontnames.Length > 0) ? fontnames[0] : string.Empty, size);
 	}
 
 	public static string[] GetOSInstalledFontNames()
 	{
-		StubWarner.LogStub("GetOSInstalledFontNames", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\Font.cs", 105);
-		return Array.Empty<string>();
+		HashSet<string> hashSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+		foreach (FontFaceReader.OsFace value in FontFaceReader.OsFonts.Values)
+		{
+			hashSet.Add(value.Names.FullName);
+		}
+		string[] array = hashSet.ToArray();
+		Array.Sort(array, (IComparer<string>?)StringComparer.OrdinalIgnoreCase);
+		return array;
 	}
 
 	private bool TryGetMetrics(out float importSize, out float ascent, out float lineSpacing)

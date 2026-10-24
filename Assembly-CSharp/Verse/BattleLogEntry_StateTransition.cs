@@ -254,7 +254,7 @@ public class BattleLogEntry_StateTransition : LogEntry
 		GrammarRequest result = base.GenerateGrammarRequest();
 		if (subjectPawn != null)
 		{
-			result.Rules.AddRange(GrammarUtility.RulesForPawn("SUBJECT", subjectPawn, result.Constants));
+			result.Rules.AddRange(GrammarUtility.RulesForPawn("SUBJECT", subjectPawn, result.Constants, addRelationInfoSymbol: false));
 		}
 		else if (subjectThing != null)
 		{
@@ -263,7 +263,7 @@ public class BattleLogEntry_StateTransition : LogEntry
 		result.Includes.Add(transitionDef);
 		if (initiator != null)
 		{
-			result.Rules.AddRange(GrammarUtility.RulesForPawn("INITIATOR", initiator, result.Constants));
+			result.Rules.AddRange(GrammarUtility.RulesForPawn("INITIATOR", initiator, result.Constants, addRelationInfoSymbol: false));
 		}
 		if (culpritHediffDef != null)
 		{

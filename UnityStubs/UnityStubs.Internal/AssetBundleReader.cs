@@ -2,6 +2,7 @@ using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using AssetsTools.NET;
 using AssetsTools.NET.Extra;
@@ -1269,21 +1270,21 @@ internal sealed class AssetBundleReader : IDisposable
 			AssetFileInfo assetInfo = asset.File.file.GetAssetInfo(asset.PathId);
 			if (assetInfo != null)
 			{
-				AssetTypeValueField baseField = Manager.GetBaseField(asset.File, assetInfo);
+				AssetTypeValueField bf = ((asset.Class == AssetClassID.Font) ? ReadFontBaseField(asset.File, assetInfo) : Manager.GetBaseField(asset.File, assetInfo));
 				@object = asset.Class switch
 				{
-					AssetClassID.Texture2D => BuildTexture(asset.File, baseField), 
-					AssetClassID.Sprite => BuildSprite(asset.File, baseField), 
-					AssetClassID.AudioClip => BuildAudioClip(baseField), 
-					AssetClassID.VideoClip => BuildVideoClip(baseField), 
-					AssetClassID.TextAsset => BuildTextAsset(baseField), 
-					AssetClassID.Shader => BuildShader(asset.PathId, baseField), 
-					AssetClassID.Material => BuildMaterial(asset.File, baseField), 
-					AssetClassID.Font => BuildFont(baseField), 
-					AssetClassID.Mesh => BuildMesh(baseField), 
-					AssetClassID.MonoBehaviour => BuildScriptObject(asset.File, baseField), 
-					AssetClassID.GameObject => BuildGameObject(asset.File, baseField), 
-					_ => Unsupported(asset.Class, baseField), 
+					AssetClassID.Texture2D => BuildTexture(asset.File, bf), 
+					AssetClassID.Sprite => BuildSprite(asset.File, bf), 
+					AssetClassID.AudioClip => BuildAudioClip(bf), 
+					AssetClassID.VideoClip => BuildVideoClip(bf), 
+					AssetClassID.TextAsset => BuildTextAsset(bf), 
+					AssetClassID.Shader => BuildShader(asset.PathId, bf), 
+					AssetClassID.Material => BuildMaterial(asset.File, bf), 
+					AssetClassID.Font => BuildFont(bf), 
+					AssetClassID.Mesh => BuildMesh(bf), 
+					AssetClassID.MonoBehaviour => BuildScriptObject(asset.File, bf), 
+					AssetClassID.GameObject => BuildGameObject(asset.File, bf), 
+					_ => Unsupported(asset.Class, bf), 
 				};
 			}
 		}
@@ -1312,22 +1313,48 @@ internal sealed class AssetBundleReader : IDisposable
 		return null;
 	}
 
-	private UnityEngine.Object BuildFont(AssetTypeValueField bf)
+	private AssetTypeValueField ReadFontBaseField(AssetsFileInstance file, AssetFileInfo info)
+	{
+		AssetTypeTemplateField templateBaseField = Manager.GetTemplateBaseField(file, info);
+		AssetTypeTemplateField assetTypeTemplateField = templateBaseField.Children.FirstOrDefault((AssetTypeTemplateField c) => c.Name == "m_FontData")?.Children.FirstOrDefault((AssetTypeTemplateField c) => c.IsArray);
+		if (assetTypeTemplateField != null && assetTypeTemplateField.ValueType == AssetValueType.Array && assetTypeTemplateField.Children[1].ValueType == AssetValueType.Int8)
+		{
+			assetTypeTemplateField.ValueType = AssetValueType.ByteArray;
+		}
+		return templateBaseField.MakeValue(file.file.Reader, info.GetAbsoluteByteOffset(file.file), Manager.GetRefTypeManager(file));
+	}
+
+	private static byte[] FontDataBytes(AssetTypeValueField bf)
 	{
 		AssetTypeValueField assetTypeValueField = bf["m_FontData.Array"];
-		if (assetTypeValueField.IsDummy || assetTypeValueField.Children.Count == 0)
+		if (assetTypeValueField.IsDummy)
 		{
-			return Unsupported(AssetClassID.Font, bf);
+			return Array.Empty<byte>();
+		}
+		AssetTypeValue value = assetTypeValueField.Value;
+		if (value != null && value.ValueType == AssetValueType.ByteArray)
+		{
+			return assetTypeValueField.AsByteArray;
 		}
 		byte[] array = new byte[assetTypeValueField.Children.Count];
 		for (int i = 0; i < array.Length; i++)
 		{
 			array[i] = (byte)assetTypeValueField.Children[i].AsSByte;
 		}
+		return array;
+	}
+
+	private UnityEngine.Object BuildFont(AssetTypeValueField bf)
+	{
+		byte[] array = FontDataBytes(bf);
+		if (array.Length == 0)
+		{
+			return Unsupported(AssetClassID.Font, bf);
+		}
 		Font font = new Font();
 		font.name = bf["m_Name"].AsString;
-		AssetTypeValueField assetTypeValueField2 = bf["m_FontRenderingMode"];
-		font.SetFontData(array, bf["m_FontSize"].AsFloat, (!assetTypeValueField2.IsDummy) ? assetTypeValueField2.AsInt : 0);
+		AssetTypeValueField assetTypeValueField = bf["m_FontRenderingMode"];
+		font.SetFontData(array, bf["m_FontSize"].AsFloat, (!assetTypeValueField.IsDummy) ? assetTypeValueField.AsInt : 0);
 		return font;
 	}
 
@@ -1826,16 +1853,16 @@ internal sealed class AssetBundleReader : IDisposable
 		{
 			foreach (AssetFileInfo item in file.file.GetAssetsOfType(AssetClassID.Font))
 			{
-				AssetTypeValueField baseField = Manager.GetBaseField(file, item);
-				bool flag = string.Equals(baseField["m_Name"].AsString, family, StringComparison.OrdinalIgnoreCase);
-				if (!flag && !baseField["m_FontNames.Array"].IsDummy)
+				AssetTypeValueField assetTypeValueField = ReadFontBaseField(file, item);
+				bool flag = string.Equals(assetTypeValueField["m_Name"].AsString, family, StringComparison.OrdinalIgnoreCase);
+				if (!flag && !assetTypeValueField["m_FontNames.Array"].IsDummy)
 				{
-					foreach (AssetTypeValueField child in baseField["m_FontNames.Array"].Children)
+					foreach (AssetTypeValueField child in assetTypeValueField["m_FontNames.Array"].Children)
 					{
 						flag |= string.Equals(child.AsString, family, StringComparison.OrdinalIgnoreCase);
 					}
 				}
-				if (flag && baseField["m_FontData.Array"].Children.Count > 0)
+				if (flag && FontDataBytes(assetTypeValueField).Length != 0)
 				{
 					return Materialize(new AssetRef(file, item.PathId, AssetClassID.Font)) as Font;
 				}

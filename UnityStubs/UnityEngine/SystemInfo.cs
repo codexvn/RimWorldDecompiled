@@ -2,6 +2,7 @@ using System;
 using System.Runtime.InteropServices;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
+using Waylith.Diagnostics;
 using Waylith.Graphics;
 
 namespace UnityEngine;
@@ -30,7 +31,7 @@ public class SystemInfo
 
 	public static string operatingSystem => RuntimeInformation.OSDescription;
 
-	public static int systemMemorySize => (int)(GC.GetGCMemoryInfo().TotalAvailableMemoryBytes / 1048576);
+	public static int systemMemorySize => (int)Math.Min(2147483647L, HostHardwareInfo.TotalPhysicalMemoryBytes / 1048576);
 
 	public static string deviceModel => "n/a";
 
@@ -64,7 +65,7 @@ public class SystemInfo
 		}
 	}
 
-	public static string processorType => RuntimeInformation.ProcessArchitecture.ToString();
+	public static string processorType => HostHardwareInfo.CpuName;
 
 	public static bool supportsComputeShaders => true;
 

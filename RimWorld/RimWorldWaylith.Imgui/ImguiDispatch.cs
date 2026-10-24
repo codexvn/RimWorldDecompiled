@@ -391,7 +391,9 @@ internal sealed class ImguiDispatch
 	private void Dispatch(Vector2 physMouse, bool drawing)
 	{
 		GUI.matrix = Matrix4x4.identity;
+		GUI.tooltip = "";
 		GUIUtility.ResetControlIds();
+		GUIUtility.ResetGlobalState();
 		backend.BeginPass(drawing, physMouse);
 		try
 		{

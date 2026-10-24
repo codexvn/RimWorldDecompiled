@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using Brutal;
@@ -30,13 +31,13 @@ public static class VmaAllocationExtensions
 		}
 
 		[ExtensionMarker("<M>$162DA75BC77B57F902F547955491F480")]
-		public BufferAllocationInfo AllocateBufferChecked(string name, in VkBufferCreateInfo bufferCreateInfo, in AllocationInfo.CreateInfo allocateCreateInfo, bool anyMemoryOnRefusal = true)
+		public BufferAllocationInfo AllocateBufferChecked(string name, in VkBufferCreateInfo bufferCreateInfo, in AllocationInfo.CreateInfo allocateCreateInfo, bool anyMemoryOnRefusal = true, bool reclaimOnRefusal = true)
 		{
 			throw new NotSupportedException();
 		}
 
 		[ExtensionMarker("<M>$162DA75BC77B57F902F547955491F480")]
-		public ImageAllocationInfo AllocateImageChecked(string name, in VkImageCreateInfo imageCreateInfo, in AllocationInfo.CreateInfo allocateCreateInfo, uint memoryTypeBits = 0u, bool anyMemoryOnRefusal = true)
+		public ImageAllocationInfo AllocateImageChecked(string name, in VkImageCreateInfo imageCreateInfo, in AllocationInfo.CreateInfo allocateCreateInfo, uint memoryTypeBits = 0u, bool anyMemoryOnRefusal = true, bool reclaimOnRefusal = true)
 		{
 			throw new NotSupportedException();
 		}
@@ -47,6 +48,16 @@ public static class VmaAllocationExtensions
 	private static int _anyMemoryLogged;
 
 	private const VmaAllocationCreateFlags HostAccessFlags = VmaAllocationCreateFlags.HostAccessSequentialWriteBit | VmaAllocationCreateFlags.HostAccessRandomBit;
+
+	private const long PooledMaxBytes = 33554432L;
+
+	private const long PoolBlockBytes = 67108864L;
+
+	private const uint DeviceMemoryCountMargin = 128u;
+
+	private static readonly Lock PoolGate = new Lock();
+
+	private static readonly Dictionary<VmaAllocator, Dictionary<uint, VmaPool>> Pools = new Dictionary<VmaAllocator, Dictionary<uint, VmaPool>>();
 
 	public static Func<long, int, bool, bool>? OutOfDeviceMemoryHandler { get; set; }
 
@@ -61,16 +72,16 @@ public static class VmaAllocationExtensions
 
 	private static bool IsOutOfMemory(VkResult result)
 	{
-		if ((uint)(result - -2) <= 1u)
+		if (result == VkResult.ErrorTooManyObjects || (uint)(result - -2) <= 1u)
 		{
 			return true;
 		}
 		return false;
 	}
 
-	private static bool TryReclaim(VkResult result, in AllocationInfo.CreateInfo info, long bytes, ref int attempt)
+	private static bool TryReclaim(VkResult result, in AllocationInfo.CreateInfo info, long bytes, bool reclaimOnRefusal, ref int attempt)
 	{
-		if (IsOutOfMemory(result) && attempt < 2)
+		if (reclaimOnRefusal && IsOutOfMemory(result) && attempt < 2)
 		{
 			return OutOfDeviceMemoryHandler?.Invoke(bytes, attempt++, WantsDeviceLocal(in info)) ?? false;
 		}
@@ -80,6 +91,10 @@ public static class VmaAllocationExtensions
 	private static bool TryRelax(VkResult result, bool anyMemoryOnRefusal, ref VmaAllocationCreateInfo vmaInfo, ref Relax relax)
 	{
 		if (!anyMemoryOnRefusal || !IsOutOfMemory(result) || relax == Relax.Dedicated)
+		{
+			return false;
+		}
+		if (relax == Relax.AnyType && !HasDeviceMemoryCountHeadroom())
 		{
 			return false;
 		}
@@ -101,8 +116,18 @@ public static class VmaAllocationExtensions
 			vmaInfo.MemoryTypeBits = 0u;
 			break;
 		case Relax.Dedicated:
+			vmaInfo.Pool = default(VmaPool);
 			vmaInfo.Flags |= VmaAllocationCreateFlags.DedicatedMemoryBit;
 			break;
+		}
+		return true;
+	}
+
+	private static bool HasDeviceMemoryCountHeadroom()
+	{
+		if (GpuMemoryReport.TryGetSummary(out var summary) && summary.MaxDeviceMemoryCount != 0)
+		{
+			return (long)summary.VmaBlockCount + 128L < summary.MaxDeviceMemoryCount;
 		}
 		return true;
 	}
@@ -126,25 +151,134 @@ public static class VmaAllocationExtensions
 				message.AppendFormatted(Environment.NewLine);
 				message.AppendFormatted(GpuMemoryReport.BuildCompactSummary().TrimEnd());
 			}
-			log.Warning(message, "LogRelaxed", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\VmaAllocationExtensions.cs", 65);
+			log.Warning(message, "LogRelaxed", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\VmaAllocationExtensions.cs", 81);
 		}
 	}
 
-	public static BufferAllocationInfo AllocateBufferChecked(this VmaAllocator allocator, string name, in VkBufferCreateInfo bufferCreateInfo, in AllocationInfo.CreateInfo allocateCreateInfo, bool anyMemoryOnRefusal = true)
+	public static void DestroyPools(VmaAllocator allocator)
+	{
+		using (PoolGate.EnterScope())
+		{
+			if (!Pools.Remove(allocator, out Dictionary<uint, VmaPool> value))
+			{
+				return;
+			}
+			foreach (VmaPool value2 in value.Values)
+			{
+				if (!value2.IsNull())
+				{
+					allocator.DestroyPool(value2);
+				}
+			}
+		}
+	}
+
+	private static VmaPool GetPool(VmaAllocator allocator, uint memoryType)
+	{
+		using (PoolGate.EnterScope())
+		{
+			if (!Pools.TryGetValue(allocator, out Dictionary<uint, VmaPool> value))
+			{
+				value = (Pools[allocator] = new Dictionary<uint, VmaPool>());
+			}
+			if (value.TryGetValue(memoryType, out var value2))
+			{
+				return value2;
+			}
+			if (allocator.CreatePool(new VmaPoolCreateInfo
+			{
+				MemoryTypeIndex = memoryType,
+				BlockSize = ByteSize.Of(67108864L),
+				Priority = 1f
+			}, out value2) != 0)
+			{
+				value2 = default(VmaPool);
+			}
+			value[memoryType] = value2;
+			return value2;
+		}
+	}
+
+	private static bool TryPickPool(VmaAllocator allocator, in VkBufferCreateInfo createInfo, ref VmaAllocationCreateInfo vmaInfo, uint refusedTypes, out uint memoryType)
+	{
+		VmaAllocationCreateInfo pAllocationCreateInfo = Probe(in vmaInfo, refusedTypes);
+		if (pAllocationCreateInfo.MemoryTypeBits == 0 || allocator.FindMemoryTypeIndexForBufferInfo(createInfo, pAllocationCreateInfo, out memoryType) != 0)
+		{
+			vmaInfo.Pool = default(VmaPool);
+			memoryType = 0u;
+			return false;
+		}
+		return SetPool(allocator, ref vmaInfo, memoryType);
+	}
+
+	private static bool TryPickPool(VmaAllocator allocator, in VkImageCreateInfo createInfo, ref VmaAllocationCreateInfo vmaInfo, uint refusedTypes, out uint memoryType)
+	{
+		VmaAllocationCreateInfo pAllocationCreateInfo = Probe(in vmaInfo, refusedTypes);
+		if (pAllocationCreateInfo.MemoryTypeBits == 0 || allocator.FindMemoryTypeIndexForImageInfo(createInfo, pAllocationCreateInfo, out memoryType) != 0)
+		{
+			vmaInfo.Pool = default(VmaPool);
+			memoryType = 0u;
+			return false;
+		}
+		return SetPool(allocator, ref vmaInfo, memoryType);
+	}
+
+	private static VmaAllocationCreateInfo Probe(in VmaAllocationCreateInfo vmaInfo, uint refusedTypes)
+	{
+		VmaAllocationCreateInfo result = vmaInfo;
+		result.Pool = default(VmaPool);
+		result.MemoryTypeBits = (uint)((vmaInfo.MemoryTypeBits == 0) ? (-1) : ((int)vmaInfo.MemoryTypeBits)) & ~refusedTypes;
+		return result;
+	}
+
+	private static bool SetPool(VmaAllocator allocator, ref VmaAllocationCreateInfo vmaInfo, uint memoryType)
+	{
+		vmaInfo.Pool = GetPool(allocator, memoryType);
+		return !vmaInfo.Pool.IsNull();
+	}
+
+	public static BufferAllocationInfo AllocateBufferChecked(this VmaAllocator allocator, string name, in VkBufferCreateInfo bufferCreateInfo, in AllocationInfo.CreateInfo allocateCreateInfo, bool anyMemoryOnRefusal = true, bool reclaimOnRefusal = true)
 	{
 		VmaAllocationCreateInfo vmaInfo = ConvertInfo(in allocateCreateInfo);
 		long value = (long)bufferCreateInfo.Size.Value;
 		int attempt = 0;
 		Relax relax = Relax.None;
+		bool flag = value <= 33554432;
+		uint num = 0u;
 		VkResult vkResult;
 		VkBuffer pBuffer;
 		VmaAllocation pAllocation;
 		VmaAllocationInfo pAllocationInfo;
-		do
+		while (true)
 		{
-			vkResult = allocator.CreateBuffer(bufferCreateInfo, vmaInfo, out pBuffer, out pAllocation, out pAllocationInfo);
+			uint memoryType = 0u;
+			if (flag && !TryPickPool(allocator, in bufferCreateInfo, ref vmaInfo, num, out memoryType))
+			{
+				vkResult = VkResult.ErrorOutOfDeviceMemory;
+				pBuffer = default(VkBuffer);
+				pAllocation = default(VmaAllocation);
+				pAllocationInfo = default(VmaAllocationInfo);
+			}
+			else
+			{
+				vkResult = allocator.CreateBuffer(bufferCreateInfo, vmaInfo, out pBuffer, out pAllocation, out pAllocationInfo);
+			}
+			if (vkResult == VkResult.Success)
+			{
+				break;
+			}
+			if (flag && !vmaInfo.Pool.IsNull() && IsOutOfMemory(vkResult))
+			{
+				num |= (uint)(1 << (int)memoryType);
+				continue;
+			}
+			if (!TryReclaim(vkResult, in allocateCreateInfo, value, reclaimOnRefusal, ref attempt) && !TryRelax(vkResult, anyMemoryOnRefusal, ref vmaInfo, ref relax))
+			{
+				break;
+			}
+			flag = value <= 33554432 && relax != Relax.Dedicated;
+			num = 0u;
 		}
-		while (TryReclaim(vkResult, in allocateCreateInfo, value, ref attempt) || TryRelax(vkResult, anyMemoryOnRefusal, ref vmaInfo, ref relax));
 		if (vkResult != 0)
 		{
 			throw VmaAllocationException.Buffer(name, in bufferCreateInfo, vkResult);
@@ -167,29 +301,56 @@ public static class VmaAllocationExtensions
 		return result;
 	}
 
-	public static ImageAllocationInfo AllocateImageChecked(this VmaAllocator allocator, string name, in VkImageCreateInfo imageCreateInfo, in AllocationInfo.CreateInfo allocateCreateInfo, uint memoryTypeBits = 0u, bool anyMemoryOnRefusal = true)
+	public static ImageAllocationInfo AllocateImageChecked(this VmaAllocator allocator, string name, in VkImageCreateInfo imageCreateInfo, in AllocationInfo.CreateInfo allocateCreateInfo, uint memoryTypeBits = 0u, bool anyMemoryOnRefusal = true, bool reclaimOnRefusal = true)
 	{
 		VmaAllocationCreateInfo vmaInfo = ConvertInfo(in allocateCreateInfo);
 		vmaInfo.MemoryTypeBits = memoryTypeBits;
-		long bytes = GpuTextureService.EstimateImageBytes(in imageCreateInfo);
+		long num = GpuTextureService.EstimateImageBytes(in imageCreateInfo);
 		int attempt = 0;
 		Relax relax = Relax.None;
+		bool flag = num <= 33554432;
+		uint num2 = 0u;
 		VkResult vkResult;
 		VkImage pImage;
 		VmaAllocation pAllocation;
 		VmaAllocationInfo pAllocationInfo;
-		do
+		while (true)
 		{
-			vkResult = allocator.CreateImage(imageCreateInfo, vmaInfo, out pImage, out pAllocation, out pAllocationInfo);
+			uint memoryType = 0u;
+			if (flag && !TryPickPool(allocator, in imageCreateInfo, ref vmaInfo, num2, out memoryType))
+			{
+				vkResult = VkResult.ErrorOutOfDeviceMemory;
+				pImage = default(VkImage);
+				pAllocation = default(VmaAllocation);
+				pAllocationInfo = default(VmaAllocationInfo);
+			}
+			else
+			{
+				vkResult = allocator.CreateImage(imageCreateInfo, vmaInfo, out pImage, out pAllocation, out pAllocationInfo);
+			}
+			if (vkResult == VkResult.Success)
+			{
+				break;
+			}
+			if (flag && !vmaInfo.Pool.IsNull() && IsOutOfMemory(vkResult))
+			{
+				num2 |= (uint)(1 << (int)memoryType);
+				continue;
+			}
+			if (!TryReclaim(vkResult, in allocateCreateInfo, num, reclaimOnRefusal, ref attempt) && !TryRelax(vkResult, anyMemoryOnRefusal, ref vmaInfo, ref relax))
+			{
+				break;
+			}
+			flag = num <= 33554432 && relax != Relax.Dedicated;
+			num2 = 0u;
 		}
-		while (TryReclaim(vkResult, in allocateCreateInfo, bytes, ref attempt) || TryRelax(vkResult, anyMemoryOnRefusal, ref vmaInfo, ref relax));
 		if (vkResult != 0)
 		{
 			throw VmaAllocationException.Image(name, in imageCreateInfo, vkResult);
 		}
 		if (relax != 0)
 		{
-			LogRelaxed(name, bytes, relax);
+			LogRelaxed(name, num, relax);
 		}
 		ImageAllocationInfo imageAllocationInfo = default(ImageAllocationInfo);
 		imageAllocationInfo.Image = pImage;

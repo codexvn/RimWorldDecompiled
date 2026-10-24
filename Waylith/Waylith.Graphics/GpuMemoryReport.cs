@@ -54,30 +54,34 @@ public static class GpuMemoryReport
 		long num5 = 0L;
 		long num6 = 0L;
 		int num7 = 0;
+		int num8 = 0;
 		for (int i = 0; i < memoryHeapCount; i++)
 		{
 			VkMemoryHeap vkMemoryHeap = global::_003CPrivateImplementationDetails_003E.InlineArrayAsSpan<VkMemoryHeap_16, VkMemoryHeap>(ref memoryProperties.MemoryHeaps, 16)[i];
 			VmaBudget vmaBudget = pBudgets[i];
 			bool flag = (vkMemoryHeap.Flags & VkMemoryHeapFlags.DeviceLocalBit) != 0;
-			long num8 = ((flag && vramLimitBytes > 0) ? System.Math.Min((long)vkMemoryHeap.Size.Value, vramLimitBytes) : ((long)vkMemoryHeap.Size.Value));
-			long num9 = (long)vmaBudget.Statistics.AllocationBytes;
-			long num10 = (long)vmaBudget.Statistics.BlockBytes;
+			long num9 = ((flag && vramLimitBytes > 0) ? System.Math.Min((long)vkMemoryHeap.Size.Value, vramLimitBytes) : ((long)vkMemoryHeap.Size.Value));
+			long num10 = (long)vmaBudget.Statistics.AllocationBytes;
+			long num11 = (long)vmaBudget.Statistics.BlockBytes;
 			int allocationCount = (int)vmaBudget.Statistics.AllocationCount;
-			array[i] = new GpuHeapInfo(i, flag, num8, (long)vmaBudget.Usage, (long)vmaBudget.Budget, num10, num9, (int)vmaBudget.Statistics.BlockCount, allocationCount);
-			num5 += num9;
-			num6 += num10;
+			array[i] = new GpuHeapInfo(i, flag, num9, (long)vmaBudget.Usage, (long)vmaBudget.Budget, num11, num10, (int)vmaBudget.Statistics.BlockCount, allocationCount);
+			num5 += num10;
+			num6 += num11;
 			num7 += allocationCount;
+			num8 += (int)vmaBudget.Statistics.BlockCount;
 			if (flag)
 			{
 				num += (long)vmaBudget.Usage;
 				num2 += (long)vmaBudget.Budget;
-				num3 += num8;
-				num4 += num9;
+				num3 += num9;
+				num4 += num10;
 			}
 		}
 		summary = new GpuMemorySummary(num, num2, num3, num4, num5, num6, num7, array)
 		{
-			DriverReported = graphicsDevice.MemoryBudgetEnabled
+			DriverReported = graphicsDevice.MemoryBudgetEnabled,
+			VmaBlockCount = num8,
+			MaxDeviceMemoryCount = graphicsDevice.MaxDeviceMemoryCount
 		};
 		return true;
 	}
@@ -132,7 +136,7 @@ public static class GpuMemoryReport
 					.AppendLine();
 				GpuMemoryHistory.AppendGrowthSummary(stringBuilder, 12, 1048576L);
 				stringBuilder.Append(BuildReport(includeVmaJson: false));
-				Logger.Error(stringBuilder.ToString(), "CheckUsageCap", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GpuMemoryReport.cs", 231);
+				Logger.Error(stringBuilder.ToString(), "CheckUsageCap", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Graphics\\GpuMemoryReport.cs", 239);
 			}
 		}
 	}
@@ -177,7 +181,14 @@ public static class GpuMemoryReport
 			{
 				sb.Append(" (").Append(((double)summary.VmaAllocationBytes / (double)summary.VmaBlockBytes * 100.0).ToString("0")).Append("% of reserved in use)");
 			}
-			sb.Append('.').AppendLine();
+			sb.Append(", ").Append(summary.VmaBlockCount).Append(" device memory objects of ")
+				.Append(summary.MaxDeviceMemoryCount)
+				.Append(" allowed.")
+				.AppendLine();
+			sb.Append("Awaiting deferred disposal: ").Append(FormatBytes(TextureResourceManager.PendingDisposalBytes)).Append(" in ")
+				.Append(TextureResourceManager.PendingDisposalCount)
+				.Append(" textures.")
+				.AppendLine();
 		}
 		else
 		{
@@ -288,18 +299,36 @@ public static class GpuMemoryReport
 				.AppendLine();
 		}
 		stringBuilder.AppendLine();
+		stringBuilder.AppendLine("Largest allocations:");
+		List<GpuMemoryTracker.TrackedAllocation> list2 = new List<GpuMemoryTracker.TrackedAllocation>();
+		GpuMemoryTracker.CollectAll(list2);
+		list2.Sort((GpuMemoryTracker.TrackedAllocation a, GpuMemoryTracker.TrackedAllocation b) => b.Bytes.CompareTo(a.Bytes));
+		for (int j = 0; j < System.Math.Min(40, list2.Count); j++)
+		{
+			GpuMemoryTracker.TrackedAllocation trackedAllocation = list2[j];
+			stringBuilder.Append("  ").Append(FormatBytes(trackedAllocation.Bytes)).Append("  ")
+				.Append(trackedAllocation.Category)
+				.Append("  ")
+				.Append(trackedAllocation.Name ?? "<unnamed>");
+			if (trackedAllocation.Detail != null)
+			{
+				stringBuilder.Append("  (").Append(trackedAllocation.Detail).Append(')');
+			}
+			stringBuilder.AppendLine();
+		}
+		stringBuilder.AppendLine();
 		allocator.CalculateStatistics(out var pStats);
 		stringBuilder.AppendLine("VMA totals (vmaCalculateStatistics):");
 		AppendDetailed(stringBuilder, "  Total", pStats.Total);
 		stringBuilder.AppendLine();
 		stringBuilder.AppendLine("By Vulkan memory type:");
-		for (int j = 0; j < memoryProperties.MemoryTypeCount; j++)
+		for (int k = 0; k < memoryProperties.MemoryTypeCount; k++)
 		{
-			VkMemoryType vkMemoryType = global::_003CPrivateImplementationDetails_003E.InlineArrayAsSpan<VkMemoryType_32, VkMemoryType>(ref memoryProperties.MemoryTypes, 32)[j];
-			VmaDetailedStatistics vmaDetailedStatistics = global::_003CPrivateImplementationDetails_003E.InlineArrayAsSpan<VmaDetailedStatistics_32, VmaDetailedStatistics>(ref pStats.MemoryType, 32)[j];
+			VkMemoryType vkMemoryType = global::_003CPrivateImplementationDetails_003E.InlineArrayAsSpan<VkMemoryType_32, VkMemoryType>(ref memoryProperties.MemoryTypes, 32)[k];
+			VmaDetailedStatistics vmaDetailedStatistics = global::_003CPrivateImplementationDetails_003E.InlineArrayAsSpan<VmaDetailedStatistics_32, VmaDetailedStatistics>(ref pStats.MemoryType, 32)[k];
 			if (vmaDetailedStatistics.Statistics.AllocationCount != 0 || vmaDetailedStatistics.Statistics.BlockCount != 0)
 			{
-				stringBuilder.Append("  Type ").Append(j).Append(" (heap ")
+				stringBuilder.Append("  Type ").Append(k).Append(" (heap ")
 					.Append(vkMemoryType.HeapIndex)
 					.Append(", ")
 					.Append(vkMemoryType.PropertyFlags)

@@ -28,11 +28,15 @@ public static class TextureResourceManager
 
 	private static long _pendingBytes;
 
+	private static int _pendingCount;
+
 	private static long _pendingMovedAwayDeviceBytes;
 
 	private static int _retirementHolds;
 
 	public static long PendingDisposalBytes => Volatile.Read(in _pendingBytes);
+
+	public static int PendingDisposalCount => Volatile.Read(in _pendingCount);
 
 	internal static long PendingMovedAwayDeviceBytes => Volatile.Read(in _pendingMovedAwayDeviceBytes);
 
@@ -67,6 +71,7 @@ public static class TextureResourceManager
 			long allocatedBytes = allocation.AllocatedBytes;
 			DeferredDisposals.Add(new DeferredGpuTextureDisposal(allocation, _lastSubmittedFrameNumber + 4, allocatedBytes, movedAway, minForcedRetireFrame));
 			Volatile.Write(ref _pendingBytes, _pendingBytes + allocatedBytes);
+			Volatile.Write(ref _pendingCount, _pendingCount + 1);
 			if (movedAway && !allocation.IsHostResident)
 			{
 				Volatile.Write(ref _pendingMovedAwayDeviceBytes, _pendingMovedAwayDeviceBytes + allocatedBytes);
@@ -102,6 +107,7 @@ public static class TextureResourceManager
 		}
 		DeferredDisposals.RemoveAt(index);
 		Volatile.Write(ref _pendingBytes, _pendingBytes - deferredGpuTextureDisposal.Bytes);
+		Volatile.Write(ref _pendingCount, _pendingCount - 1);
 		if (deferredGpuTextureDisposal.MovedAway && !deferredGpuTextureDisposal.Allocation.IsHostResident)
 		{
 			Volatile.Write(ref _pendingMovedAwayDeviceBytes, _pendingMovedAwayDeviceBytes - deferredGpuTextureDisposal.Bytes);

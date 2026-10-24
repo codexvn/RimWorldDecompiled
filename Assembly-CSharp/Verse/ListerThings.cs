@@ -616,7 +616,7 @@ public sealed class ListerThings
 		}
 		if (listsByDef.TryGetValue(t.def, out var value))
 		{
-			value.Remove(t);
+			RemoveSwap(value, t);
 		}
 		if (t is IHaulSource item)
 		{
@@ -628,11 +628,22 @@ public sealed class ListerThings
 			ThingRequestGroup thingRequestGroup = allGroups[i];
 			if ((use != ListerThingsUse.Region || thingRequestGroup.StoreInRegion()) && thingRequestGroup.Includes(t.def))
 			{
-				listsByGroup[i].Remove(t);
+				RemoveSwap(listsByGroup[i], t);
 				stateHashByGroup[(uint)thingRequestGroup]++;
 			}
 		}
 		thingListChangedCallbacks?.onThingRemoved?.Invoke(t);
+	}
+
+	private static void RemoveSwap(List<Thing> list, Thing t)
+	{
+		int num = list.IndexOf(t);
+		if (num >= 0)
+		{
+			int index = list.Count - 1;
+			list[num] = list[index];
+			list.RemoveAt(index);
+		}
 	}
 
 	public static bool EverListable(ThingDef def, ListerThingsUse use)

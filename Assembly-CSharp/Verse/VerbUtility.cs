@@ -368,12 +368,16 @@ public static class VerbUtility
 
 	public static VerbSelectionCategory GetSelectionCategory(this Verb v, Pawn p, float highestWeight)
 	{
-		float num = InitialVerbWeight(v, p);
-		if (num >= highestWeight * 0.95f)
+		return SelectionCategoryForWeight(InitialVerbWeight(v, p), highestWeight);
+	}
+
+	public static VerbSelectionCategory SelectionCategoryForWeight(float selWeight, float highestWeight)
+	{
+		if (selWeight >= highestWeight * 0.95f)
 		{
 			return VerbSelectionCategory.Best;
 		}
-		if (num < highestWeight * 0.25f)
+		if (selWeight < highestWeight * 0.25f)
 		{
 			return VerbSelectionCategory.Worst;
 		}
@@ -419,7 +423,16 @@ public static class VerbUtility
 				num++;
 			}
 		}
-		return 1f / (float)num * ((selectionCategory == VerbSelectionCategory.Mid) ? 0.25f : 0.75f);
+		return FinalSelectionWeightFor(selectionCategory, num);
+	}
+
+	public static float FinalSelectionWeightFor(VerbSelectionCategory category, int numInSameCategory)
+	{
+		if (category == VerbSelectionCategory.Worst)
+		{
+			return 0f;
+		}
+		return 1f / (float)numInSameCategory * ((category == VerbSelectionCategory.Mid) ? 0.25f : 0.75f);
 	}
 
 	public static List<Thing> ThingsToHit(IntVec3 cell, Map map, Func<Thing, bool> filter)

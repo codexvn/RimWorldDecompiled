@@ -117,9 +117,14 @@ public sealed class RenderTextureBatch
 
 	public void CopyTo(GpuTextureAllocation destination, in VkOffset2D dstOffset = default(VkOffset2D))
 	{
+		CopyTo(destination, default(VkOffset2D), in dstOffset, Target.Extent);
+	}
+
+	public void CopyTo(GpuTextureAllocation destination, in VkOffset2D srcOffset, in VkOffset2D dstOffset, in VkExtent2D extent)
+	{
 		ArgumentNullException.ThrowIfNull(destination, "destination");
 		destination.MarkWritten();
-		copies.Add(new CopyOp(destination, default(VkOffset2D), dstOffset, Target.Extent));
+		copies.Add(new CopyOp(destination, srcOffset, dstOffset, extent));
 	}
 
 	public void ExecuteNow()

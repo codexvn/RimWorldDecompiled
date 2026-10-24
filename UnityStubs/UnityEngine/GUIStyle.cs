@@ -88,6 +88,7 @@ public class GUIStyle
 	{
 		if (other != null)
 		{
+			name = other.name;
 			font = other.font;
 			alignment = other.alignment;
 			wordWrap = other.wordWrap;
@@ -135,6 +136,16 @@ public class GUIStyle
 	}
 
 	public void Draw(Rect position, GUIContent content, bool isHover, bool isActive, bool on, bool hasKeyboardFocus)
+	{
+		Internal_Draw_Injected(ref position, content, isHover, isActive, on, hasKeyboardFocus);
+	}
+
+	private void Internal_Draw(Rect screenRect, GUIContent content, bool isHover, bool isActive, bool on, bool hasKeyboardFocus)
+	{
+		Internal_Draw_Injected(ref screenRect, content, isHover, isActive, on, hasKeyboardFocus);
+	}
+
+	private void Internal_Draw_Injected(ref Rect position, GUIContent content, bool isHover, bool isActive, bool on, bool hasKeyboardFocus)
 	{
 		IGuiBackend current = GuiBackend.Current;
 		if (current != null)
@@ -199,7 +210,7 @@ public class GUIStyle
 		return new Vector2((float)image.width * num, (float)image.height * num);
 	}
 
-	private void DrawBackground(IGuiBackend be, Rect position, Texture background, Color color)
+	internal void DrawBackground(IGuiBackend be, Rect position, Texture background, Color color)
 	{
 		RectOffset rectOffset = border;
 		if (rectOffset == null || (rectOffset.horizontal == 0 && rectOffset.vertical == 0) || background.width <= rectOffset.horizontal || background.height <= rectOffset.vertical)

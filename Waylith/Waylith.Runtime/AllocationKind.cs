@@ -9,5 +9,6 @@ public enum AllocationKind
 	Persistent,
 	AudioKernel,
 	Domain,
-	MeshBacking
+	MeshBacking,
+	UI
 }

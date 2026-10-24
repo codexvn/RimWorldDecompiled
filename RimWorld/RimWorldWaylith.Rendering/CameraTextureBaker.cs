@@ -183,7 +183,6 @@ public sealed class CameraTextureBaker : ICameraTextureRenderer, IDisposable
 			int height = source.height;
 			long num = (long)width * (long)height * 4;
 			VmaAllocator allocator = _allocator;
-			string name = "ReadPixelsStaging";
 			VkBufferCreateInfo bufferCreateInfo = new VkBufferCreateInfo
 			{
 				Size = ByteSize.Of(num),
@@ -197,7 +196,7 @@ public sealed class CameraTextureBaker : ICameraTextureRenderer, IDisposable
 				PreferredProperties = (VkMemoryPropertyFlags.HostVisibleBit | VkMemoryPropertyFlags.HostCoherentBit),
 				Priority = 1f
 			};
-			BufferAllocationInfo inAllocation = allocator.AllocateBuffer(in name, in bufferCreateInfo, in allocateCreateInfo);
+			BufferAllocationInfo inAllocation = allocator.AllocateBufferChecked("ReadPixelsStaging", in bufferCreateInfo, in allocateCreateInfo);
 			try
 			{
 				VkImageSubresourceRange vkImageSubresourceRange = new VkImageSubresourceRange();
@@ -477,7 +476,7 @@ public sealed class CameraTextureBaker : ICameraTextureRenderer, IDisposable
 		int width = target.width;
 		int height = target.height;
 		string text = (string.IsNullOrWhiteSpace(target.name) ? "CameraTextureBake" : target.name);
-		ImageAllocationInfo allocation = _allocator.AllocateImage(text + ".Depth", new VkImageCreateInfo
+		ImageAllocationInfo allocation = _allocator.AllocateImageChecked(text + ".Depth", new VkImageCreateInfo
 		{
 			ImageType = VkImageType._2D,
 			Format = VkFormat.D32SFloatS8UInt,

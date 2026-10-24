@@ -25,6 +25,10 @@ public readonly record struct GpuMemorySummary
 
 	public bool DriverReported { get; init; }
 
+	public int VmaBlockCount { get; init; }
+
+	public uint MaxDeviceMemoryCount { get; init; }
+
 	public long DeviceLocalVmaBlockBytes
 	{
 		get
@@ -64,6 +68,8 @@ public readonly record struct GpuMemorySummary
 	public GpuMemorySummary(long DeviceLocalDriverUsageBytes, long DeviceLocalBudgetBytes, long DeviceLocalTotalBytes, long DeviceLocalVmaAllocationBytes, long VmaAllocationBytes, long VmaBlockBytes, int VmaAllocationCount, GpuHeapInfo[] Heaps)
 	{
 		DriverReported = false;
+		VmaBlockCount = 0;
+		MaxDeviceMemoryCount = 0u;
 		this.DeviceLocalDriverUsageBytes = DeviceLocalDriverUsageBytes;
 		this.DeviceLocalBudgetBytes = DeviceLocalBudgetBytes;
 		this.DeviceLocalTotalBytes = DeviceLocalTotalBytes;

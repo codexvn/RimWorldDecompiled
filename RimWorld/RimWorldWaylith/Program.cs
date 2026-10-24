@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using Brutal.Logging;
@@ -16,6 +17,10 @@ internal static class Program
 	private static int Main(string[] args)
 	{
 		WindowsConsole.OpenIfRequested(args);
+		CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
+		CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
+		CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
+		CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
 		InitLogger(args);
 		Environment.SetEnvironmentVariable("MONOMOD_DMDType", "dynamicmethod");
 		ConfigDependentCommandLine commandLine = new ConfigDependentCommandLine();
@@ -44,7 +49,9 @@ internal static class Program
 			BundledVulkanLoaderPath = (OperatingSystem.IsWindows() ? Path.Combine(AppContext.BaseDirectory, "vulkan", "vulkan-1.dll") : null),
 			ShowCrashDialog = !HasSwitch("NoCrashDialog"),
 			CrashReportInstructions = "Please report the crash to Ludeon Studios and attach the newest report from that folder together with the game log.",
-			AudioBackend = new MiniAudioBackend()
+			AudioBackend = new MiniAudioBackend(),
+			PreferredGpuName = EarlyPrefs.Read("preferredGpuName"),
+			PreferredGpuUuid = EarlyPrefs.Read("preferredGpuUuid")
 		}, Bootstrap.Initialize);
 		Environment.Exit(num);
 		return num;

@@ -207,7 +207,7 @@ public class BattleLogEntry_DamageTaken : LogEntry_DamageResult
 			Log.ErrorOnce("BattleLogEntry_DamageTaken has a null recipient.", 60465709);
 		}
 		result.Includes.Add(ruleDef);
-		result.Rules.AddRange(GrammarUtility.RulesForPawn("RECIPIENT", recipientPawn, result.Constants));
+		result.Rules.AddRange(GrammarUtility.RulesForPawn("RECIPIENT", recipientPawn, result.Constants, addRelationInfoSymbol: false));
 		return result;
 	}
 

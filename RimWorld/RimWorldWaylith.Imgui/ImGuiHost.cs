@@ -38,7 +38,7 @@ internal sealed class ImGuiHost : IDisposable
 
 	private readonly List<float> importSizes = new List<float>();
 
-	private readonly Dictionary<(string, int), int> registeredFonts = new Dictionary<(string, int), int>();
+	private readonly Dictionary<(string, int, float), int> registeredFonts = new Dictionary<(string, int, float), int>();
 
 	private readonly Dictionary<string, IReadOnlyList<FontFallbacks.Source>> fallbacksByLocale = new Dictionary<string, IReadOnlyList<FontFallbacks.Source>>();
 
@@ -176,6 +176,7 @@ internal sealed class ImGuiHost : IDisposable
 			src.Data.CopyTo(new Span<byte>(ptr, src.Data.Length));
 			imFontPtr = iO.Fonts.AddFontFromMemoryTTF(ptr, src.Data.Length, src.Size, new ImFontConfigPtr(&imFontConfig));
 		}
+		KeepFractionalAdvances(iO);
 		if (!imFontPtr.IsNull())
 		{
 			AddFallbacks(iO, imFontPtr, src.Size, Fallbacks(), styleFlags);
@@ -191,6 +192,7 @@ internal sealed class ImGuiHost : IDisposable
 	public ImGuiHost(EngineApplication app, int snapshotRingLength)
 	{
 		renderContext = app.RenderContext ?? throw new InvalidOperationException("ImGuiHost requires a render context (non-headless).");
+		ImGuiMemoryCounter.Install();
 		context = ImGui.CreateContext();
 		ImGui.SetCurrentContext(context);
 		ImGuiIOPtr iO = ImGui.GetIO();
@@ -280,7 +282,7 @@ internal sealed class ImGuiHost : IDisposable
 
 	public unsafe int RegisterFont(string name, byte[] fontData, float importSize, int renderingMode)
 	{
-		(string, int) key = (name, fontData.Length);
+		(string, int, float) key = (name, fontData.Length, importSize);
 		if (registeredFonts.TryGetValue(key, out var value))
 		{
 			return value;
@@ -296,6 +298,7 @@ internal sealed class ImGuiHost : IDisposable
 		ImFontConfig imFontConfig = NewFontConfig(loaderFlags);
 		ImGuiIOPtr iO = ImGui.GetIO();
 		ImFontPtr imFontPtr = iO.Fonts.AddFontFromMemoryTTF(ptr, fontData.Length, num, new ImFontConfigPtr(&imFontConfig));
+		KeepFractionalAdvances(iO);
 		if (imFontPtr.IsNull())
 		{
 			return -1;
@@ -355,6 +358,7 @@ internal sealed class ImGuiHost : IDisposable
 		}
 		ImFontConfig imFontConfig = NewFontConfig(loaderFlags);
 		ImFontPtr imFontPtr = io.Fonts.AddFontFromFileTTF(path, sizePixels, new ImFontConfigPtr(&imFontConfig));
+		KeepFractionalAdvances(io);
 		AddFallbacks(io, imFontPtr, sizePixels, fallbacks, 0u);
 		return imFontPtr;
 	}
@@ -365,6 +369,7 @@ internal sealed class ImGuiHost : IDisposable
 		void* ptr = ImGui.MemAlloc((nuint)fontData.Length);
 		fontData.CopyTo(new Span<byte>(ptr, fontData.Length));
 		ImFontPtr imFontPtr = io.Fonts.AddFontFromMemoryTTF(ptr, fontData.Length, sizePixels, new ImFontConfigPtr(&imFontConfig));
+		KeepFractionalAdvances(io);
 		AddFallbacks(io, imFontPtr, sizePixels, fallbacks, 0u);
 		return imFontPtr;
 	}
@@ -387,6 +392,7 @@ internal sealed class ImGuiHost : IDisposable
 				io.Fonts.AddFontFromMemoryTTF((void*)num, fontDataSize, sizePixels, new ImFontConfigPtr(&imFontConfig));
 			}
 		}
+		KeepFractionalAdvances(io);
 		uint[] missingGlyphChars = MissingGlyphChars;
 		foreach (uint num2 in missingGlyphChars)
 		{
@@ -425,15 +431,24 @@ internal sealed class ImGuiHost : IDisposable
 	{
 		ImFontConfig result = new ImFontConfig();
 		result.FontDataOwnedByAtlas = true;
-		result.OversampleH = 0;
-		result.OversampleV = 0;
 		result.GlyphMaxAdvanceX = float.MaxValue;
 		result.RasterizerMultiply = 1f;
 		result.RasterizerDensity = 1f;
 		result.EllipsisChar = 0u;
 		result.FontLoaderFlags = loaderFlags;
-		result.PixelSnapH = true;
+		result.OversampleH = 1;
+		result.OversampleV = 1;
+		result.PixelSnapH = false;
 		return result;
+	}
+
+	private static void KeepFractionalAdvances(ImGuiIOPtr io)
+	{
+		Span<ImFontConfig> span = io.Fonts.Sources.Span;
+		for (int i = 0; i < span.Length; i++)
+		{
+			span[i].PixelSnapH = false;
+		}
 	}
 
 	public ImGuiDrawSnapshot BeginFrame(int frameNumber, float deltaTime)

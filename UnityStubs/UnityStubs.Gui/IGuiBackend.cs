@@ -13,7 +13,7 @@ public interface IGuiBackend
 
 	bool InlineControlsObscured { get; }
 
-	Vector2 MeasureText(int fontIndex, float fontSize, FontStyle fontStyle, string text, float wrapWidth);
+	Vector2 MeasureText(int fontIndex, float fontSize, FontStyle fontStyle, string text, float wrapWidth, bool richText = true);
 
 	float LineSpacing(int fontIndex, float fontSize);
 
@@ -21,13 +21,13 @@ public interface IGuiBackend
 
 	int RegisterFont(string name, byte[] fontData, float importSize, int renderingMode);
 
-	int TextIndexAt(int fontIndex, float fontSize, FontStyle fontStyle, string text, float wrapWidth, Vector2 local);
+	int TextIndexAt(int fontIndex, float fontSize, FontStyle fontStyle, string text, float wrapWidth, Vector2 local, bool richText = true);
 
-	Vector2 TextCursorPos(int fontIndex, float fontSize, FontStyle fontStyle, string text, float wrapWidth, int index, out float lineHeight);
+	Vector2 TextCursorPos(int fontIndex, float fontSize, FontStyle fontStyle, string text, float wrapWidth, int index, out float lineHeight, bool richText = true);
 
-	void TextSelectionRects(int fontIndex, float fontSize, FontStyle fontStyle, string text, float wrapWidth, int from, int to, List<Rect> rects);
+	void TextSelectionRects(int fontIndex, float fontSize, FontStyle fontStyle, string text, float wrapWidth, int from, int to, List<Rect> rects, bool richText = true);
 
-	void DrawText(Rect rect, string text, int fontIndex, float fontSize, FontStyle fontStyle, TextAnchor anchor, bool wordWrap, Color color, Rect clipRect = default(Rect));
+	void DrawText(Rect rect, string text, int fontIndex, float fontSize, FontStyle fontStyle, TextAnchor anchor, bool wordWrap, Color color, Rect clipRect = default(Rect), bool richText = true);
 
 	void DrawTexture(Rect rect, UnityEngine.Texture image, ScaleMode scaleMode, Color color);
 

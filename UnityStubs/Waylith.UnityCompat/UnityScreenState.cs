@@ -15,7 +15,7 @@ public sealed class UnityScreenState
 
 	public bool FullScreen { get; internal set; }
 
-	public float Dpi { get; set; } = 96f;
+	public float Dpi => EngineWindow.Dpi;
 
 	public VSyncMode VSyncMode { get; set; } = VSyncMode.TripleBuffer;
 

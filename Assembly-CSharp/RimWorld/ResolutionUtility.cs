@@ -1,5 +1,6 @@
 using UnityEngine;
 using Verse;
+using Waylith;
 
 namespace RimWorld;
 
@@ -13,16 +14,28 @@ public static class ResolutionUtility
 
 	public const int MinRecommendedResolutionHeight = 910;
 
-	public static Resolution NativeResolution
+	public static float DpiScale
 	{
 		get
 		{
-			Resolution[] resolutions = Screen.resolutions;
+			if (!Prefs.RespectSystemScaling)
+			{
+				return 1f;
+			}
+			return Screen.dpi / 96f;
+		}
+	}
+
+	public static UnityEngine.Resolution NativeResolution
+	{
+		get
+		{
+			UnityEngine.Resolution[] resolutions = Screen.resolutions;
 			if (resolutions.Length == 0)
 			{
 				return Screen.currentResolution;
 			}
-			Resolution result = resolutions[0];
+			UnityEngine.Resolution result = resolutions[0];
 			for (int i = 1; i < resolutions.Length; i++)
 			{
 				if (resolutions[i].width > result.width || (resolutions[i].width == result.width && resolutions[i].height > result.height))
@@ -36,7 +49,13 @@ public static class ResolutionUtility
 
 	public static bool BorderlessFullscreen => false;
 
-	public static void SafeSetResolution(Resolution res)
+	public static float ResolveUIScale(float preference)
+	{
+		float b = Mathf.Min((float)Screen.width / 1024f, (float)Screen.height / 768f);
+		return Mathf.Min(preference * DpiScale, Mathf.Max(Dialog_Options.UIScales[0] * DpiScale, b));
+	}
+
+	public static void SafeSetResolution(UnityEngine.Resolution res)
 	{
 		if (Screen.width != res.width || Screen.height != res.height)
 		{
@@ -68,7 +87,7 @@ public static class ResolutionUtility
 			Screen.fullScreenMode = mode;
 			if (fullScreenMode == FullScreenMode.Windowed)
 			{
-				Resolution nativeResolution = NativeResolution;
+				UnityEngine.Resolution nativeResolution = NativeResolution;
 				SetResolutionRaw(nativeResolution.width, nativeResolution.height, mode);
 				Prefs.ScreenWidth = nativeResolution.width;
 				Prefs.ScreenHeight = nativeResolution.height;
@@ -80,17 +99,18 @@ public static class ResolutionUtility
 
 	public static void SafeSetUIScale(float newScale)
 	{
-		if (Prefs.UIScale != newScale)
+		if (Prefs.UIScalePreference != newScale)
 		{
-			float uIScale = Prefs.UIScale;
-			Prefs.UIScale = newScale;
+			float uIScalePreference = Prefs.UIScalePreference;
+			Prefs.UIScalePreference = newScale;
 			GenUI.ClearLabelWidthCache();
-			Find.WindowStack.Add(new Dialog_ResolutionConfirm(uIScale));
+			Find.WindowStack.Add(new Dialog_ResolutionConfirm(uIScalePreference));
 		}
 	}
 
 	public static bool UIScaleSafeWithResolution(float scale, int w, int h)
 	{
+		scale *= DpiScale;
 		if ((float)w / scale >= 1024f)
 		{
 			return (float)h / scale >= 768f;
@@ -130,7 +150,7 @@ public static class ResolutionUtility
 
 	public static void SetNativeResolutionRaw()
 	{
-		Resolution nativeResolution = NativeResolution;
+		UnityEngine.Resolution nativeResolution = NativeResolution;
 		SetResolutionRaw(nativeResolution.width, nativeResolution.height, !BorderlessFullscreen);
 	}
 
@@ -138,7 +158,7 @@ public static class ResolutionUtility
 	{
 		if (screenWidth == 0 || screenHeight == 0)
 		{
-			Resolution currentResolution = Screen.currentResolution;
+			UnityEngine.Resolution currentResolution = Screen.currentResolution;
 			screenWidth = currentResolution.width;
 			screenHeight = currentResolution.height;
 		}
@@ -146,14 +166,17 @@ public static class ResolutionUtility
 		{
 			return 1f;
 		}
-		for (int num = Dialog_Options.UIScales.Length - 1; num >= 0; num--)
+		int num = Dialog_Options.UIScales.Length - 1;
+		while (num >= 0 && Dialog_Options.UIScales[num] >= 1f)
 		{
-			int num2 = Mathf.FloorToInt((float)screenWidth / Dialog_Options.UIScales[num]);
-			int num3 = Mathf.FloorToInt((float)screenHeight / Dialog_Options.UIScales[num]);
-			if (num2 >= 1700 && num3 >= 910)
+			float num2 = Dialog_Options.UIScales[num] * DpiScale;
+			int num3 = Mathf.FloorToInt((float)screenWidth / num2);
+			int num4 = Mathf.FloorToInt((float)screenHeight / num2);
+			if (num3 >= 1700 && num4 >= 910)
 			{
 				return Dialog_Options.UIScales[num];
 			}
+			num--;
 		}
 		return 1f;
 	}
@@ -170,7 +193,7 @@ public static class ResolutionUtility
 			Prefs.FullScreenMode = Screen.fullScreenMode;
 			if (Screen.fullScreen)
 			{
-				Resolution nativeResolution = NativeResolution;
+				UnityEngine.Resolution nativeResolution = NativeResolution;
 				Prefs.ScreenWidth = nativeResolution.width;
 				Prefs.ScreenHeight = nativeResolution.height;
 			}
@@ -178,23 +201,23 @@ public static class ResolutionUtility
 		}
 		if (!Screen.fullScreen)
 		{
-			if (Screen.width != Prefs.ScreenWidth)
+			if (Screen.windowWidth != Prefs.ScreenWidth)
 			{
-				Prefs.ScreenWidth = Screen.width;
+				Prefs.ScreenWidth = Screen.windowWidth;
 				flag = true;
 			}
-			if (Screen.height != Prefs.ScreenHeight)
+			if (Screen.windowHeight != Prefs.ScreenHeight)
 			{
-				Prefs.ScreenHeight = Screen.height;
+				Prefs.ScreenHeight = Screen.windowHeight;
 				flag = true;
 			}
 		}
-		if (UI.screenWidth < 1024 && UI.screenHeight < 768 && !Prefs.DevMode)
+		if (!EngineApplication.Instance.Headless && UI.screenWidth < 1024 && UI.screenHeight < 768 && !Prefs.DevMode)
 		{
 			int screenWidth = UI.screenWidth;
 			int screenHeight = UI.screenHeight;
-			Prefs.UIScale = GetRecommendedUIScale(0, 0);
-			Log.ErrorOnce($"Resolution too small ({screenWidth}x{screenHeight}), resetting UI scale to {Prefs.UIScale}.", 72627836);
+			Prefs.UIScalePreference = GetRecommendedUIScale(0, 0);
+			Log.ErrorOnce($"Resolution too small ({screenWidth}x{screenHeight}), resetting UI scale to {Prefs.UIScalePreference}.", 72627836);
 			flag = true;
 		}
 		if (flag)

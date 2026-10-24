@@ -17,6 +17,12 @@ public struct VerbEntry
 		cachedSelectionWeight = VerbUtility.FinalSelectionWeight(verb, pawn, allVerbs, highestSelWeight);
 	}
 
+	public VerbEntry(Verb verb, float selectionWeight)
+	{
+		this.verb = verb;
+		cachedSelectionWeight = selectionWeight;
+	}
+
 	public float GetSelectionWeight(Thing target)
 	{
 		if (!verb.IsUsableOn(target))

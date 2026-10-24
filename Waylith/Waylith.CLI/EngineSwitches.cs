@@ -1,3 +1,4 @@
+using System;
 using Brutal.Numerics;
 using Waylith.Diagnostics;
 using Waylith.Graphics;
@@ -28,6 +29,11 @@ internal static class EngineSwitches
 				"lz4hc" => TextureCacheCodec.Lz4Hc, 
 				_ => TextureCacheCodec.Lz4, 
 			};
+		}
+		string value2 = commandLineAccessor.GetValue("TargetFrameRate");
+		if (value2 != null && int.TryParse(value2.Trim(), out var result))
+		{
+			EngineWindow.TargetFrameRateOverride = System.Math.Max(0, result);
 		}
 		int2? @int = commandLineAccessor.GetInt2("WindowSize");
 		if (@int.HasValue)

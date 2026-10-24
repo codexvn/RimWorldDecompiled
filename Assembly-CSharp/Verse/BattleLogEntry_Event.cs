@@ -226,7 +226,7 @@ public class BattleLogEntry_Event : LogEntry
 		result.Includes.Add(eventDef);
 		if (subjectPawn != null)
 		{
-			result.Rules.AddRange(GrammarUtility.RulesForPawn("SUBJECT", subjectPawn, result.Constants));
+			result.Rules.AddRange(GrammarUtility.RulesForPawn("SUBJECT", subjectPawn, result.Constants, addRelationInfoSymbol: false));
 		}
 		else if (subjectThing != null)
 		{
@@ -234,7 +234,7 @@ public class BattleLogEntry_Event : LogEntry
 		}
 		if (initiatorPawn != null)
 		{
-			result.Rules.AddRange(GrammarUtility.RulesForPawn("INITIATOR", initiatorPawn, result.Constants));
+			result.Rules.AddRange(GrammarUtility.RulesForPawn("INITIATOR", initiatorPawn, result.Constants, addRelationInfoSymbol: false));
 		}
 		else if (initiatorThing != null)
 		{

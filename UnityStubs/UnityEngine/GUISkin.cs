@@ -12,7 +12,7 @@ namespace UnityEngine;
 public class GUISkin : ScriptableObject
 {
 	[CompilerGenerated]
-	private sealed class _003CAllStyles_003Ed__82 : IEnumerable<(string name, GUIStyle style)>, IEnumerable, IEnumerator<(string name, GUIStyle style)>, IEnumerator, IDisposable
+	private sealed class _003CAllStyles_003Ed__84 : IEnumerable<(string name, GUIStyle style)>, IEnumerable, IEnumerator<(string name, GUIStyle style)>, IEnumerator, IDisposable
 	{
 		private int _003C_003E1__state;
 
@@ -47,7 +47,7 @@ public class GUISkin : ScriptableObject
 		}
 
 		[DebuggerHidden]
-		public _003CAllStyles_003Ed__82(int _003C_003E1__state)
+		public _003CAllStyles_003Ed__84(int _003C_003E1__state)
 		{
 			this._003C_003E1__state = _003C_003E1__state;
 			_003C_003El__initialThreadId = Environment.CurrentManagedThreadId;
@@ -136,7 +136,7 @@ public class GUISkin : ScriptableObject
 		[DebuggerHidden]
 		IEnumerator<(string name, GUIStyle style)> IEnumerable<(string, GUIStyle)>.GetEnumerator()
 		{
-			_003CAllStyles_003Ed__82 result;
+			_003CAllStyles_003Ed__84 result;
 			if (_003C_003E1__state == -2 && _003C_003El__initialThreadId == Environment.CurrentManagedThreadId)
 			{
 				_003C_003E1__state = 0;
@@ -144,7 +144,7 @@ public class GUISkin : ScriptableObject
 			}
 			else
 			{
-				result = new _003CAllStyles_003Ed__82(0)
+				result = new _003CAllStyles_003Ed__84(0)
 				{
 					_003C_003E4__this = _003C_003E4__this
 				};
@@ -160,7 +160,7 @@ public class GUISkin : ScriptableObject
 	}
 
 	[CompilerGenerated]
-	private sealed class _003CGetEnumerator_003Ed__85 : IEnumerator<object>, IEnumerator, IDisposable
+	private sealed class _003CGetEnumerator_003Ed__87 : IEnumerator<object>, IEnumerator, IDisposable
 	{
 		private int _003C_003E1__state;
 
@@ -189,7 +189,7 @@ public class GUISkin : ScriptableObject
 		}
 
 		[DebuggerHidden]
-		public _003CGetEnumerator_003Ed__85(int _003C_003E1__state)
+		public _003CGetEnumerator_003Ed__87(int _003C_003E1__state)
 		{
 			this._003C_003E1__state = _003C_003E1__state;
 		}
@@ -290,16 +290,7 @@ public class GUISkin : ScriptableObject
 
 	private readonly GUIStyle _button = CreateButtonStyle();
 
-	private readonly GUIStyle _box = new GUIStyle
-	{
-		name = "box",
-		padding = new RectOffset(4, 4, 4, 4),
-		margin = new RectOffset(4, 4, 4, 4),
-		border = new RectOffset(6, 6, 6, 6),
-		alignment = TextAnchor.UpperCenter,
-		richText = true,
-		clipping = TextClipping.Clip
-	};
+	private readonly GUIStyle _box = CreateBoxStyle();
 
 	private readonly GUIStyle _toggle = new GUIStyle
 	{
@@ -506,6 +497,44 @@ public class GUISkin : ScriptableObject
 		return new Texture2D(texture2D);
 	}
 
+	private static Texture2D CreateBoxBackground()
+	{
+		Waylith.Math.Color32[] array = new Waylith.Math.Color32[256];
+		for (int i = 0; i < 16; i++)
+		{
+			for (int j = 0; j < 16; j++)
+			{
+				float a = Mathf.Abs((float)j + 0.5f - 8f) - 4.5f;
+				float num = Mathf.Abs((float)i + 0.5f - 8f) - 4.5f;
+				float num2 = Mathf.Sqrt(Mathf.Max(a, 0f) * Mathf.Max(a, 0f) + Mathf.Max(num, 0f) * Mathf.Max(num, 0f)) + Mathf.Min(Mathf.Max(a, num), 0f) - 3.5f;
+				array[i * 16 + j] = new Waylith.Math.Color32(13, 15, 17, (byte)(Mathf.Clamp01(0.5f - num2) * 255f));
+			}
+		}
+		Waylith.Rendering.Texture2D texture2D = new Waylith.Rendering.Texture2D(16, 16, LoadedTextureFormat.Rgba32, linear: false, 1, createUninitialized: false);
+		texture2D.Name = "BoxBackground";
+		texture2D.CpuData.SetPixels32(array);
+		texture2D.Apply(updateMipmaps: false, makeNoLongerReadable: true);
+		return new Texture2D(texture2D);
+	}
+
+	private static GUIStyle CreateBoxStyle()
+	{
+		return new GUIStyle
+		{
+			name = "box",
+			padding = new RectOffset(4, 4, 4, 4),
+			margin = new RectOffset(4, 4, 4, 4),
+			border = new RectOffset(6, 6, 6, 6),
+			alignment = TextAnchor.UpperCenter,
+			richText = true,
+			clipping = TextClipping.Clip,
+			normal = 
+			{
+				background = CreateBoxBackground()
+			}
+		};
+	}
+
 	private static GUIStyle CreateButtonStyle()
 	{
 		GUIStyle gUIStyle = new GUIStyle
@@ -546,11 +575,11 @@ public class GUISkin : ScriptableObject
 		return gUIStyle;
 	}
 
-	[IteratorStateMachine(typeof(_003CAllStyles_003Ed__82))]
+	[IteratorStateMachine(typeof(_003CAllStyles_003Ed__84))]
 	private IEnumerable<(string name, GUIStyle style)> AllStyles()
 	{
 		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
-		return new _003CAllStyles_003Ed__82(-2)
+		return new _003CAllStyles_003Ed__84(-2)
 		{
 			_003C_003E4__this = this
 		};
@@ -582,11 +611,11 @@ public class GUISkin : ScriptableObject
 		};
 	}
 
-	[IteratorStateMachine(typeof(_003CGetEnumerator_003Ed__85))]
+	[IteratorStateMachine(typeof(_003CGetEnumerator_003Ed__87))]
 	public IEnumerator GetEnumerator()
 	{
 		//yield-return decompiler failed: Unexpected instruction in Iterator.Dispose()
-		return new _003CGetEnumerator_003Ed__85(0)
+		return new _003CGetEnumerator_003Ed__87(0)
 		{
 			_003C_003E4__this = this
 		};

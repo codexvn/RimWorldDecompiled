@@ -1554,7 +1554,7 @@ public sealed class UnityWorld
 	{
 		ParameterExpression parameterExpression = Expression.Parameter(typeof(object), "instance");
 		Expression expression = Expression.Call(Expression.Convert(parameterExpression, method.DeclaringType), method);
-		return Expression.Lambda<Func<object, object>>((method.ReturnType == typeof(void)) ? ((Expression)Expression.Block(expression, Expression.Constant(null, typeof(object)))) : ((Expression)Expression.Convert(expression, typeof(object))), new ParameterExpression[1] { parameterExpression }).Compile();
+		return Expression.Lambda<Func<object, object>>((method.ReturnType == typeof(void)) ? ((Expression)Expression.Block(expression, Expression.Constant(null, typeof(object)))) : ((Expression)Expression.Convert(expression, typeof(object))), "InvokeMessageMethod_" + method.DeclaringType.FullName + "." + method.Name, new global::_003C_003Ez__ReadOnlySingleElementList<ParameterExpression>(parameterExpression)).Compile();
 	}
 
 	private static bool IsAssignableToUnityType(Type type, string fullName)

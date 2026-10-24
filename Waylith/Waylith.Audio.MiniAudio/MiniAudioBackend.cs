@@ -67,6 +67,8 @@ public sealed class MiniAudioBackend : AudioBackend
 
 		public bool IsStream { get; }
 
+		public long ResidentBytes => (long)WaylithAudioNative.wa_sound_resident_bytes(Handle);
+
 		public bool InstancePerVoice => false;
 
 		public Sound(ulong handle, bool streaming)
@@ -501,14 +503,14 @@ public sealed class MiniAudioBackend : AudioBackend
 
 	private unsafe IAudioSound LoadSound(void* data, int length, bool streaming, bool mappedMemory)
 	{
-		ulong num = (streaming ? WaylithAudioNative.wa_sound_load_memory_stream(data, (nuint)length, (!mappedMemory) ? 1 : 0) : WaylithAudioNative.wa_sound_load_memory(data, (nuint)length));
+		ulong num = ((streaming || !IsWav(data, length)) ? WaylithAudioNative.wa_sound_load_memory_stream(data, (nuint)length, (!mappedMemory) ? 1 : 0) : WaylithAudioNative.wa_sound_load_memory(data, (nuint)length));
 		if (num == 0L)
 		{
 			if (OggVorbisDemuxer.TryExtractVorbisStream(new ReadOnlySpan<byte>(data, length), out byte[] vorbis))
 			{
 				fixed (byte* data2 = vorbis)
 				{
-					num = (streaming ? WaylithAudioNative.wa_sound_load_memory_stream(data2, (nuint)vorbis.Length, 1) : WaylithAudioNative.wa_sound_load_memory(data2, (nuint)vorbis.Length));
+					num = WaylithAudioNative.wa_sound_load_memory_stream(data2, (nuint)vorbis.Length, 1);
 				}
 			}
 			if (num == 0L)
@@ -517,6 +519,20 @@ public sealed class MiniAudioBackend : AudioBackend
 			}
 		}
 		return new Sound(num, streaming);
+	}
+
+	private unsafe static bool IsWav(void* data, int length)
+	{
+		if (length < 12)
+		{
+			return false;
+		}
+		ReadOnlySpan<byte> readOnlySpan = new ReadOnlySpan<byte>(data, 12);
+		if (readOnlySpan.Slice(0, 4).SequenceEqual("RIFF"u8))
+		{
+			return readOnlySpan.Slice(8).SequenceEqual("WAVE"u8);
+		}
+		return false;
 	}
 
 	public unsafe override IAudioSound LoadSoundFromPcm16(ReadOnlySpan<byte> pcm, int channels, int frequency)

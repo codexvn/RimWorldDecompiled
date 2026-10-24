@@ -7,6 +7,7 @@ using Verse;
 using Verse.Sound;
 using Verse.Steam;
 using Waylith;
+using Waylith.Graphics;
 
 namespace RimWorld;
 
@@ -49,7 +50,7 @@ public class Dialog_Options : Window
 
 	private static readonly Vector2 OkayButtonSize = new Vector2(160f, 40f);
 
-	public static readonly float[] UIScales = new float[9] { 1f, 1.25f, 1.5f, 1.75f, 2f, 2.5f, 3f, 3.5f, 4f };
+	public static readonly float[] UIScales = new float[10] { 0.75f, 1f, 1.25f, 1.5f, 1.75f, 2f, 2.5f, 3f, 3.5f, 4f };
 
 	public static readonly Texture2D RandomBackgroundTex = ContentFinder<Texture2D>.Get("UI/Icons/RandomBackground");
 
@@ -58,6 +59,8 @@ public class Dialog_Options : Window
 	private Dictionary<string, string> modOptionTruncationCache = new Dictionary<string, string>();
 
 	public override Vector2 InitialSize => new Vector2(650f, 600f);
+
+	private static List<GpuDescription> SelectableGpus => GraphicsDevice.EnumeratedGpus.Where((GpuDescription g) => g.Usable).ToList();
 
 	public Dialog_Options(OptionCategoryDef initialCategory)
 		: this()
@@ -339,6 +342,44 @@ public class Dialog_Options : Window
 		EngineWindow.SetPreferredMonitor(index);
 	}
 
+	private static string GpuLabel(GpuDescription gpu, List<GpuDescription> gpus)
+	{
+		if (gpu == null)
+		{
+			return "Gpu_Automatic".Translate();
+		}
+		string text = ((gpus.Count((GpuDescription g) => g.Name == gpu.Name) > 1) ? $"{gpu.Name} #{gpus.Where((GpuDescription g) => g.Name == gpu.Name).ToList().IndexOf(gpu) + 1}" : gpu.Name);
+		if (!gpu.IsActive)
+		{
+			return text;
+		}
+		return "Gpu_InUse".Translate(text);
+	}
+
+	private static GpuDescription PreferredGpu(List<GpuDescription> gpus)
+	{
+		if (Prefs.PreferredGpuUuid.NullOrEmpty() && Prefs.PreferredGpuName.NullOrEmpty())
+		{
+			return null;
+		}
+		return gpus.FirstOrDefault((GpuDescription g) => g.Uuid.EqualsIgnoreCase(Prefs.PreferredGpuUuid)) ?? gpus.FirstOrDefault((GpuDescription g) => g.Name.EqualsIgnoreCase(Prefs.PreferredGpuName));
+	}
+
+	private static void SetPreferredGpu(GpuDescription gpu, List<GpuDescription> gpus)
+	{
+		Prefs.PreferredGpuName = gpu?.Name ?? "";
+		Prefs.PreferredGpuUuid = gpu?.Uuid ?? "";
+		GpuDescription gpuDescription = gpu ?? gpus.FirstOrDefault((GpuDescription g) => g.IsAutomaticChoice);
+		if (gpuDescription != null && !gpuDescription.IsActive)
+		{
+			Find.WindowStack.Add(new Dialog_MessageBox("GpuChangedRestart".Translate(), "Yes".Translate(), delegate
+			{
+				Prefs.Save();
+				GenCommandLine.Restart();
+			}, "No".Translate()));
+		}
+	}
+
 	private static string DisplayModeLabel(FullScreenMode mode)
 	{
 		return mode switch
@@ -361,7 +402,7 @@ public class Dialog_Options : Window
 			{
 				list.Add(new FloatMenuOption(ResToString(res.width, res.height), delegate
 				{
-					if (!ResolutionUtility.UIScaleSafeWithResolution(Prefs.UIScale, res.width, res.height))
+					if (!ResolutionUtility.UIScaleSafeWithResolution(Prefs.UIScalePreference, res.width, res.height))
 					{
 						Messages.Message("MessageScreenResTooSmallForUIScale".Translate(), MessageTypeDefOf.RejectInput, historical: false);
 					}
@@ -413,6 +454,25 @@ public class Dialog_Options : Window
 				}));
 			}
 			Find.WindowStack.Add(new FloatMenu(list3));
+		}
+		List<GpuDescription> gpus = SelectableGpus;
+		if (gpus.Count > 1 && listing.ButtonTextLabeledPct("Gpu".Translate(), GpuLabel(PreferredGpu(gpus), gpus), 0.6f, TextAnchor.MiddleLeft))
+		{
+			List<FloatMenuOption> list4 = new List<FloatMenuOption>
+			{
+				new FloatMenuOption(GpuLabel(null, gpus), delegate
+				{
+					SetPreferredGpu(null, gpus);
+				})
+			};
+			foreach (GpuDescription gpu in gpus)
+			{
+				list4.Add(new FloatMenuOption(GpuLabel(gpu, gpus), delegate
+				{
+					SetPreferredGpu(gpu, gpus);
+				}));
+			}
+			Find.WindowStack.Add(new FloatMenu(list4));
 		}
 		Rect rect = listing.GetRect(30f, 0.6f);
 		rect.width = Math.Min(rect.width + 24f, listing.ColumnWidth);
@@ -539,7 +599,7 @@ public class Dialog_Options : Window
 
 	private void DoUIOptions(Listing_Standard listing)
 	{
-		if (listing.ButtonTextLabeledPct("UIScale".Translate(), Prefs.UIScale + "x", 0.6f, TextAnchor.MiddleLeft))
+		if (listing.ButtonTextLabeledPct("UIScale".Translate(), Prefs.UIScalePreference + "x", 0.6f, TextAnchor.MiddleLeft))
 		{
 			List<FloatMenuOption> list = new List<FloatMenuOption>();
 			for (int i = 0; i < UIScales.Length; i++)
@@ -547,7 +607,7 @@ public class Dialog_Options : Window
 				float scale = UIScales[i];
 				list.Add(new FloatMenuOption(UIScales[i] + "x", delegate
 				{
-					if (scale != 1f && !ResolutionUtility.UIScaleSafeWithResolution(scale, Screen.width, Screen.height))
+					if (scale > 1f && !ResolutionUtility.UIScaleSafeWithResolution(scale, Screen.width, Screen.height))
 					{
 						Messages.Message("MessageScreenResTooSmallForUIScale".Translate(), MessageTypeDefOf.RejectInput, historical: false);
 					}
@@ -559,6 +619,9 @@ public class Dialog_Options : Window
 			}
 			Find.WindowStack.Add(new FloatMenu(list));
 		}
+		bool checkOn = Prefs.RespectSystemScaling;
+		listing.CheckboxLabeled("RespectSystemScaling".Translate(), ref checkOn, "RespectSystemScaling_Tooltip".Translate(), 30f, 0.6f);
+		Prefs.RespectSystemScaling = checkOn;
 		if (listing.ButtonTextLabeledPct("TemperatureMode".Translate(), Prefs.TemperatureMode.ToStringHuman(), 0.6f, TextAnchor.MiddleLeft))
 		{
 			List<FloatMenuOption> list2 = new List<FloatMenuOption>();
@@ -671,26 +734,26 @@ public class Dialog_Options : Window
 			}, RandomBackgroundTex, Color.white));
 			Find.WindowStack.Add(new FloatMenu(list8));
 		}
-		bool checkOn = Prefs.ShowRealtimeClock;
-		listing.CheckboxLabeled("ShowRealtimeClock".Translate(), ref checkOn, null, 30f, 0.6f);
-		Prefs.ShowRealtimeClock = checkOn;
-		bool checkOn2 = Prefs.TwelveHourClockMode;
-		listing.CheckboxLabeled("TwelveHourClockMode".Translate(), ref checkOn2, null, 30f, 0.6f);
-		Prefs.TwelveHourClockMode = checkOn2;
-		bool checkOn3 = Prefs.HatsOnlyOnMap;
-		listing.CheckboxLabeled("HatsShownOnlyOnMap".Translate(), ref checkOn3, null, 30f, 0.6f);
-		if (checkOn3 != Prefs.HatsOnlyOnMap)
+		bool checkOn2 = Prefs.ShowRealtimeClock;
+		listing.CheckboxLabeled("ShowRealtimeClock".Translate(), ref checkOn2, null, 30f, 0.6f);
+		Prefs.ShowRealtimeClock = checkOn2;
+		bool checkOn3 = Prefs.TwelveHourClockMode;
+		listing.CheckboxLabeled("TwelveHourClockMode".Translate(), ref checkOn3, null, 30f, 0.6f);
+		Prefs.TwelveHourClockMode = checkOn3;
+		bool checkOn4 = Prefs.HatsOnlyOnMap;
+		listing.CheckboxLabeled("HatsShownOnlyOnMap".Translate(), ref checkOn4, null, 30f, 0.6f);
+		if (checkOn4 != Prefs.HatsOnlyOnMap)
 		{
 			PortraitsCache.Clear();
 		}
-		Prefs.HatsOnlyOnMap = checkOn3;
+		Prefs.HatsOnlyOnMap = checkOn4;
 		if (!SteamDeck.IsSteamDeck)
 		{
-			bool checkOn4 = Prefs.DisableTinyText;
-			listing.CheckboxLabeled("DisableTinyText".Translate(), ref checkOn4, null, 30f, 0.6f);
-			if (Prefs.DisableTinyText != checkOn4)
+			bool checkOn5 = Prefs.DisableTinyText;
+			listing.CheckboxLabeled("DisableTinyText".Translate(), ref checkOn5, null, 30f, 0.6f);
+			if (Prefs.DisableTinyText != checkOn5)
 			{
-				Prefs.DisableTinyText = checkOn4;
+				Prefs.DisableTinyText = checkOn5;
 				Widgets.ClearLabelCache();
 				GenUI.ClearLabelWidthCache();
 				if (Current.ProgramState == ProgramState.Playing)
@@ -699,12 +762,12 @@ public class Dialog_Options : Window
 				}
 			}
 		}
-		bool checkOn5 = !Prefs.CustomCursorEnabled;
-		listing.CheckboxLabeled("CustomCursor".Translate(), ref checkOn5, null, 30f, 0.6f);
-		Prefs.CustomCursorEnabled = !checkOn5;
-		bool checkOn6 = Prefs.VisibleMood;
-		listing.CheckboxLabeled("VisibleMood".Translate(), ref checkOn6, "VisibleMoodDesc".Translate(), 30f, 0.6f);
-		Prefs.VisibleMood = checkOn6;
+		bool checkOn6 = !Prefs.CustomCursorEnabled;
+		listing.CheckboxLabeled("CustomCursor".Translate(), ref checkOn6, null, 30f, 0.6f);
+		Prefs.CustomCursorEnabled = !checkOn6;
+		bool checkOn7 = Prefs.VisibleMood;
+		listing.CheckboxLabeled("VisibleMood".Translate(), ref checkOn7, "VisibleMoodDesc".Translate(), 30f, 0.6f);
+		Prefs.VisibleMood = checkOn7;
 	}
 
 	private void DoControlsOptions(Listing_Standard listing)

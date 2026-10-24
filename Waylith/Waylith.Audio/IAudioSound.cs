@@ -12,6 +12,8 @@ public interface IAudioSound
 
 	bool IsStream { get; }
 
+	long ResidentBytes { get; }
+
 	bool InstancePerVoice { get; }
 
 	bool TryReadPcm(Span<float> samples, long offsetFrames);

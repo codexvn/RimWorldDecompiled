@@ -139,7 +139,6 @@ public static class GlobalTextureAtlasManager
 				staticTextureAtlas.Insert(item3, value);
 			}
 			staticTextureAtlas.Bake();
-			CompressAtlas(staticTextureAtlas);
 			staticTextureAtlases.Add(staticTextureAtlas);
 			if (AtlasSourceEvictionEnabled)
 			{
@@ -169,7 +168,7 @@ public static class GlobalTextureAtlasManager
 		return false;
 	}
 
-	private static void CompressAtlas(StaticTextureAtlas atlas)
+	internal static void CompressAtlas(StaticTextureAtlas atlas)
 	{
 		if (!AtlasCompressionEnabled)
 		{
@@ -239,6 +238,7 @@ public static class GlobalTextureAtlasManager
 
 	private static void QueueCacheWrite(Task write)
 	{
+		pendingCacheWrites.RemoveAll((Task pending) => pending.IsCompleted);
 		if (!write.IsCompleted)
 		{
 			pendingCacheWrites.Add(write);

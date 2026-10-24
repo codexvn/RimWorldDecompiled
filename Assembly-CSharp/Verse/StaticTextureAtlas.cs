@@ -135,6 +135,7 @@ public class StaticTextureAtlas
 				{
 					BlitMaskAtlas(array);
 				}
+				GlobalTextureAtlasManager.CompressAtlas(this);
 			}
 		}
 	}

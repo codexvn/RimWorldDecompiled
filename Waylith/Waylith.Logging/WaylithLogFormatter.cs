@@ -13,6 +13,8 @@ public class WaylithLogFormatter : ConsoleFormatter
 {
 	public static bool EnableStackTraces = false;
 
+	public static bool SuppressConsoleOutput = false;
+
 	private const string ColorWhite = "\u001b[37m\u001b[22m";
 
 	private const string ColorGrey = "\u001b[90m\u001b[22m";
@@ -48,11 +50,14 @@ public class WaylithLogFormatter : ConsoleFormatter
 		};
 		string value2 = LogLevelNames[(int)logEntry.LogLevel];
 		string value3 = $"{"\u001b[90m\u001b[22m"}{DateTime.Now:HH:mm:ss}";
-		textWriter.Write($"{value3} {value}{value2} {"\u001b[37m\u001b[22m"}{text}");
-		textWriter.WriteLine();
+		if (!SuppressConsoleOutput)
+		{
+			textWriter.Write($"{value3} {value}{value2} {"\u001b[37m\u001b[22m"}{text}");
+			textWriter.WriteLine();
+		}
 		StackTrace stackTrace = ((EnableStackTraces || FileLog.IsCapturingStacks || LogStream.HasListeners) ? new StackTrace(7, fNeedFileInfo: true) : null);
 		string text2 = ((stackTrace != null) ? FileLog.FormatStack(stackTrace) : null);
-		if (EnableStackTraces && stackTrace != null)
+		if (EnableStackTraces && !SuppressConsoleOutput && stackTrace != null)
 		{
 			StackFrame[] frames = stackTrace.GetFrames();
 			foreach (StackFrame stackFrame in frames)

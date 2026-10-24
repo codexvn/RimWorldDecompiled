@@ -168,10 +168,11 @@ public class WorldFeatures : IExposable
 			texts[i].Destroy();
 		}
 		texts.Clear();
-		bool flag = LanguageDatabase.activeLanguage == LanguageDatabase.defaultLanguage;
+		_ = LanguageDatabase.activeLanguage;
+		_ = LanguageDatabase.defaultLanguage;
 		for (int j = 0; j < features.Count; j++)
 		{
-			WorldFeatureTextMesh worldFeatureTextMesh = ((!ForceLegacyText && (flag || !HasCharactersUnsupportedByTextMeshPro(features[j].name))) ? ((WorldFeatureTextMesh)new WorldFeatureTextMesh_TextMeshPro()) : ((WorldFeatureTextMesh)new WorldFeatureTextMesh_Legacy()));
+			WorldFeatureTextMesh worldFeatureTextMesh = new WorldFeatureTextMesh_TextMeshPro();
 			worldFeatureTextMesh.Init();
 			texts.Add(worldFeatureTextMesh);
 		}

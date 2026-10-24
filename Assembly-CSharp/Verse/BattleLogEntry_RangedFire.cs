@@ -268,7 +268,7 @@ public class BattleLogEntry_RangedFire : LogEntry
 		}
 		if (initiatorPawn != null)
 		{
-			result.Rules.AddRange(GrammarUtility.RulesForPawn("INITIATOR", initiatorPawn, result.Constants));
+			result.Rules.AddRange(GrammarUtility.RulesForPawn("INITIATOR", initiatorPawn, result.Constants, addRelationInfoSymbol: false));
 		}
 		else if (initiatorThing != null)
 		{
@@ -280,7 +280,7 @@ public class BattleLogEntry_RangedFire : LogEntry
 		}
 		if (recipientPawn != null)
 		{
-			result.Rules.AddRange(GrammarUtility.RulesForPawn("RECIPIENT", recipientPawn, result.Constants));
+			result.Rules.AddRange(GrammarUtility.RulesForPawn("RECIPIENT", recipientPawn, result.Constants, addRelationInfoSymbol: false));
 		}
 		else if (recipientThing != null)
 		{

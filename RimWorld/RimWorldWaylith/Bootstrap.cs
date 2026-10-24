@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Brutal.Numerics;
+using Brutal.VulkanApi;
 using RimWorld;
 using RimWorld.Planet;
 using RimWorldWaylith.Imgui;
@@ -25,6 +26,7 @@ using Waylith;
 using Waylith.Assets;
 using Waylith.Audio;
 using Waylith.CLI;
+using Waylith.Diagnostics;
 using Waylith.Graphics;
 using Waylith.Hardware;
 using Waylith.Jobs;
@@ -114,13 +116,18 @@ internal static class Bootstrap
 			}
 			else
 			{
+				if (!app.Options.Headless)
+				{
+					SyncWindowSizeIfChanged(app);
+				}
 				EndOfFrame.Run();
 				FrameStart.Run();
+				_unityRuntime.BeginFrame(Waylith.Time.DeltaTime, Waylith.Time.Elapsed);
 				if (_imguiHost != null)
 				{
 					_imguiDispatch?.DispatchInput(_imguiHost);
 				}
-				_unityRuntime.Step(Waylith.Time.DeltaTime, Waylith.Time.Elapsed);
+				_unityRuntime.Update(Waylith.Time.DeltaTime, Waylith.Time.Elapsed);
 				RaiseBootCompleteOnce();
 				if (_composite != null)
 				{
@@ -184,6 +191,10 @@ internal static class Bootstrap
 			{
 				ScreenCapture.CaptureScreenshot(Path.GetFullPath(value));
 			}
+			if (num == 120 && GenCommandLine.CommandLineArgPassed("MemoryReportAfterBoot"))
+			{
+				ProcessMemoryReport.Log();
+			}
 			if (num == 180 && GenCommandLine.CommandLineArgPassed("QuitAfterBoot"))
 			{
 				Root.Shutdown();
@@ -220,7 +231,6 @@ internal static class Bootstrap
 
 	private static void OnPrePollEvents(EngineApplication app)
 	{
-		SyncWindowSizeIfChanged(app);
 		WindowPlacement.Track();
 		app.GraphicsDevice.MeshUploads.BeginFrame(UnityEngine.Time.frameCount);
 		MeshDrawSubmission.BeginFrame(app.GraphicsDevice, app.RenderContext);
@@ -233,27 +243,27 @@ internal static class Bootstrap
 
 	private static void SyncWindowSizeIfChanged(EngineApplication app)
 	{
-		int2 framebufferSize = app.Window.FramebufferSize;
-		bool fullScreen = _unityRuntime.Screen.FullScreen;
-		if (framebufferSize.X > 0 && framebufferSize.Y > 0)
+		VkExtent2D extent = app.RenderContext.GetExtent();
+		(int, int) tuple = (extent.Width, extent.Height);
+		bool fullScreen = Screen.fullScreen;
+		if (tuple.Item1 > 0 && tuple.Item2 > 0)
 		{
 			(int, int) lastFramebufferSize = _lastFramebufferSize;
-			int x = framebufferSize.X;
-			int y = framebufferSize.Y;
-			if (lastFramebufferSize.Item1 != x || lastFramebufferSize.Item2 != y || _lastFullScreen != fullScreen)
+			(int, int) tuple2 = tuple;
+			if (lastFramebufferSize.Item1 != tuple2.Item1 || lastFramebufferSize.Item2 != tuple2.Item2 || _lastFullScreen != fullScreen)
 			{
-				_unityRuntime.ConfigureScreen(framebufferSize.X, framebufferSize.Y, fullScreen);
-				_lastFramebufferSize = (W: framebufferSize.X, H: framebufferSize.Y);
+				_unityRuntime.ConfigureScreen(tuple.Item1, tuple.Item2, fullScreen);
+				_lastFramebufferSize = tuple;
 				_lastFullScreen = fullScreen;
 			}
 		}
 		int2 size = app.Window.Size;
 		if (size.X > 0 && size.Y > 0)
 		{
-			(int, int) lastFramebufferSize = _lastWindowSize;
-			int y = size.X;
-			int x = size.Y;
-			if (lastFramebufferSize.Item1 != y || lastFramebufferSize.Item2 != x)
+			(int, int) tuple2 = _lastWindowSize;
+			int x = size.X;
+			int y = size.Y;
+			if (tuple2.Item1 != x || tuple2.Item2 != y)
 			{
 				_unityRuntime.ConfigureScreenWindow(size.X, size.Y);
 				_lastWindowSize = (W: size.X, H: size.Y);
@@ -361,10 +371,11 @@ internal static class Bootstrap
 		runtime.ConfigurePaths(Path.Combine(path, "RimWorld_Data"), ResolvePersistentDataRoot(), Path.GetTempPath(), ResolveLogDataRoot(), text);
 		DeleteOldUnityLogs();
 		RuntimeShaderCompiler.ConfigureCacheDirectory(Path.Combine(text ?? ResolvePersistentDataRoot(), runtime.App.IsEditor ? "ShaderCache-editor" : "ShaderCache"));
-		AssetPack assetPack = AssetPackBoot.Open(runtime.App.DataPath, options.CommandLineAccessor);
+		string text2 = Path.Combine(directoryName, "Assets.zip");
+		AssetPack assetPack = AssetPackBoot.Open(runtime.App.DataPath, options.CommandLineAccessor, text2);
 		if ((assetPack == null || assetPack.ContentHashes.Count == 0) && !options.CommandLineAccessor.HasSwitch("NoAssetPack") && !Directory.Exists(Path.Combine(runtime.App.DataPath, "Resources", "Textures")))
 		{
-			throw new InvalidOperationException("The game's asset pack (" + Path.Combine(AppContext.BaseDirectory, "Assets.zip") + ") is missing or damaged, so the game cannot start. Verify the game files in Steam to restore it.");
+			throw new InvalidOperationException("The game's asset pack (" + text2 + ") is missing or damaged, so the game cannot start. Verify the game files in Steam to restore it.");
 		}
 		AssetBakeHooks.BootComplete += delegate
 		{
@@ -520,6 +531,7 @@ internal static class Bootstrap
 		ComputeBufferResourceManager.Configure(app.RenderContext.FramesInFlight);
 		GpuMemoryReport.Configure(app.GraphicsDevice);
 		Waylith.Rendering.RenderTexture.Configure(app.GraphicsDevice);
+		TextureResidency.Policy = ((!GenCommandLine.CommandLineArgPassed("EagerTextureUpload")) ? TextureResidencyPolicy.OnDemand : TextureResidencyPolicy.OffloadUnderPressure);
 		GpuTextureService.Configure(app.GraphicsDevice, app.RenderContext.FramesInFlight);
 		TextureBlockEncoder.Configure(app.GraphicsDevice);
 		UnityMeshUploadService.Configure(app.GraphicsDevice);

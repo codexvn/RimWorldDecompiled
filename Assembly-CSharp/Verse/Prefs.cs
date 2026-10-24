@@ -620,11 +620,35 @@ public static class Prefs
 	{
 		get
 		{
+			return ResolutionUtility.ResolveUIScale(data.uiScale);
+		}
+		set
+		{
+			data.uiScale = value / ResolutionUtility.DpiScale;
+		}
+	}
+
+	public static float UIScalePreference
+	{
+		get
+		{
 			return data.uiScale;
 		}
 		set
 		{
 			data.uiScale = value;
+		}
+	}
+
+	public static bool RespectSystemScaling
+	{
+		get
+		{
+			return !data.ignoreSystemScaling;
+		}
+		set
+		{
+			data.ignoreSystemScaling = !value;
 		}
 	}
 
@@ -697,6 +721,30 @@ public static class Prefs
 		set
 		{
 			data.preferredMonitor = value;
+		}
+	}
+
+	public static string PreferredGpuName
+	{
+		get
+		{
+			return data.preferredGpuName;
+		}
+		set
+		{
+			data.preferredGpuName = value;
+		}
+	}
+
+	public static string PreferredGpuUuid
+	{
+		get
+		{
+			return data.preferredGpuUuid;
+		}
+		set
+		{
+			data.preferredGpuUuid = value;
 		}
 	}
 

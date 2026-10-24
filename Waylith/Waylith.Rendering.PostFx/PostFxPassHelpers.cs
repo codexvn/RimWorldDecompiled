@@ -111,23 +111,24 @@ public static class PostFxPassHelpers
 		}, device.VkAllocator);
 	}
 
-	public unsafe static VkRenderPass CreateMrtColorRenderPass(DeviceEx device, ReadOnlySpan<VkFormat> colorFormats, VkFormat depthFormat, bool loadFirstColor = false)
+	public unsafe static VkRenderPass CreateMrtColorRenderPass(DeviceEx device, ReadOnlySpan<VkFormat> colorFormats, VkFormat depthFormat, bool loadFirstColor = false, bool loadAll = false)
 	{
 		int length = colorFormats.Length;
+		bool flag = loadFirstColor || loadAll;
 		VkAttachmentDescription* ptr = stackalloc VkAttachmentDescription[length + 1];
 		VkAttachmentReference* ptr2 = stackalloc VkAttachmentReference[length];
 		for (int i = 0; i < length; i++)
 		{
-			bool flag = loadFirstColor && i == 0;
+			bool flag2 = loadAll || (loadFirstColor && i == 0);
 			ptr[i] = new VkAttachmentDescription
 			{
 				Format = colorFormats[i],
 				Samples = VkSampleCountFlags._1Bit,
-				LoadOp = ((!flag) ? VkAttachmentLoadOp.Clear : VkAttachmentLoadOp.Load),
+				LoadOp = ((!flag2) ? VkAttachmentLoadOp.Clear : VkAttachmentLoadOp.Load),
 				StoreOp = VkAttachmentStoreOp.Store,
 				StencilLoadOp = VkAttachmentLoadOp.DontCare,
 				StencilStoreOp = VkAttachmentStoreOp.DontCare,
-				InitialLayout = (flag ? VkImageLayout.ShaderReadOnlyOptimal : VkImageLayout.Undefined),
+				InitialLayout = (flag2 ? VkImageLayout.ShaderReadOnlyOptimal : VkImageLayout.Undefined),
 				FinalLayout = VkImageLayout.ShaderReadOnlyOptimal
 			};
 			ptr2[i] = new VkAttachmentReference
@@ -140,12 +141,12 @@ public static class PostFxPassHelpers
 		{
 			Format = depthFormat,
 			Samples = VkSampleCountFlags._1Bit,
-			LoadOp = VkAttachmentLoadOp.Clear,
+			LoadOp = ((!loadAll) ? VkAttachmentLoadOp.Clear : VkAttachmentLoadOp.Load),
 			StoreOp = VkAttachmentStoreOp.Store,
-			StencilLoadOp = VkAttachmentLoadOp.Clear,
+			StencilLoadOp = ((!loadAll) ? VkAttachmentLoadOp.Clear : VkAttachmentLoadOp.Load),
 			StencilStoreOp = VkAttachmentStoreOp.Store,
-			InitialLayout = VkImageLayout.Undefined,
-			FinalLayout = VkImageLayout.DepthStencilAttachmentOptimal
+			InitialLayout = (loadAll ? VkImageLayout.DepthStencilAttachmentOptimal : VkImageLayout.Undefined),
+			FinalLayout = (loadAll ? VkImageLayout.ShaderReadOnlyOptimal : VkImageLayout.DepthStencilAttachmentOptimal)
 		};
 		VkAttachmentReference vkAttachmentReference = new VkAttachmentReference();
 		vkAttachmentReference.Attachment = length;
@@ -162,10 +163,10 @@ public static class PostFxPassHelpers
 		{
 			SrcSubpass = -1,
 			DstSubpass = 0,
-			SrcStageMask = (VkPipelineStageFlags)(0x380 | (loadFirstColor ? 1024 : 0)),
+			SrcStageMask = (VkPipelineStageFlags)(0x380 | (flag ? 1024 : 0)),
 			DstStageMask = (VkPipelineStageFlags.EarlyFragmentTestsBit | VkPipelineStageFlags.LateFragmentTestsBit | VkPipelineStageFlags.ColorAttachmentOutputBit),
-			SrcAccessMask = (VkAccessFlags)(0x620 | (loadFirstColor ? 256 : 0)),
-			DstAccessMask = (VkAccessFlags)(0x500 | (loadFirstColor ? 128 : 0))
+			SrcAccessMask = (VkAccessFlags)(0x620 | (flag ? 256 : 0)),
+			DstAccessMask = (VkAccessFlags)(0x500 | (flag ? 128 : 0) | (loadAll ? 512 : 0))
 		};
 		ptr3[1] = new VkSubpassDependency
 		{
@@ -257,7 +258,7 @@ public static class PostFxPassHelpers
 		return device.CreateRenderPass(in pCreateInfo, device.VkAllocator);
 	}
 
-	public unsafe static VkPipeline CreateFullscreenPipeline(DeviceEx device, VkRenderPass renderPass, VkSampleCountFlags sampleCount, VkShaderModule vertex, VkShaderModule fragment, VkPipelineLayout layout, BlendState blend, string debugName)
+	public unsafe static VkPipeline CreateFullscreenPipeline(DeviceEx device, VkRenderPass renderPass, VkSampleCountFlags sampleCount, VkShaderModule vertex, VkShaderModule fragment, VkPipelineLayout layout, BlendState blend, string debugName, bool writeDepth = false)
 	{
 		byte* ptr = stackalloc byte[5];
 		*ptr = 109;
@@ -296,8 +297,9 @@ public static class PostFxPassHelpers
 		vkPipelineMultisampleStateCreateInfo.RasterizationSamples = sampleCount;
 		VkPipelineMultisampleStateCreateInfo vkPipelineMultisampleStateCreateInfo2 = vkPipelineMultisampleStateCreateInfo;
 		VkPipelineDepthStencilStateCreateInfo vkPipelineDepthStencilStateCreateInfo = new VkPipelineDepthStencilStateCreateInfo();
-		vkPipelineDepthStencilStateCreateInfo.DepthTestEnable = false;
-		vkPipelineDepthStencilStateCreateInfo.DepthWriteEnable = false;
+		vkPipelineDepthStencilStateCreateInfo.DepthTestEnable = writeDepth;
+		vkPipelineDepthStencilStateCreateInfo.DepthWriteEnable = writeDepth;
+		vkPipelineDepthStencilStateCreateInfo.DepthCompareOp = VkCompareOp.Always;
 		vkPipelineDepthStencilStateCreateInfo.StencilTestEnable = false;
 		VkPipelineDepthStencilStateCreateInfo vkPipelineDepthStencilStateCreateInfo2 = vkPipelineDepthStencilStateCreateInfo;
 		VkPipelineColorBlendAttachmentState vkPipelineColorBlendAttachmentState = new VkPipelineColorBlendAttachmentState();

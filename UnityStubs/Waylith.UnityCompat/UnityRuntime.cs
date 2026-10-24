@@ -54,9 +54,13 @@ public sealed class UnityRuntime
 		Screen.WindowHeight = windowHeight;
 	}
 
-	public void Step(float deltaTime, float elapsedTime)
+	public void BeginFrame(float deltaTime, float elapsedTime)
 	{
 		Time.BeginFrame(deltaTime, elapsedTime);
+	}
+
+	public void Update(float deltaTime, float elapsedTime)
+	{
 		SceneManager.ProcessPendingLoad();
 		UnityFrame frame = new UnityFrame(Time.FrameCount, deltaTime, elapsedTime);
 		World.Update(in frame);

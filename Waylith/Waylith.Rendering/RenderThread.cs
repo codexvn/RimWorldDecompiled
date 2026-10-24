@@ -125,6 +125,18 @@ public sealed class RenderThread : IDisposable
 		ThrowIfFaulted();
 	}
 
+	public void WaitForBacklogAtMost(int frames)
+	{
+		lock (_stateSync)
+		{
+			while (_pendingFrames > frames && _failure == null && !_stopped)
+			{
+				Monitor.Wait(_stateSync, 100);
+			}
+		}
+		ThrowIfFaulted();
+	}
+
 	internal static bool TryWaitUntilIdleFromProducer(TimeSpan timeout)
 	{
 		RenderThread renderThread = Volatile.Read(in _active);
@@ -314,6 +326,7 @@ public sealed class RenderThread : IDisposable
 			{
 				_idle.Set();
 			}
+			Monitor.PulseAll(_stateSync);
 		}
 	}
 

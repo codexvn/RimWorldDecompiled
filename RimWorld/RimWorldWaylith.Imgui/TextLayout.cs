@@ -71,7 +71,7 @@ internal sealed class TextLayout
 		}
 	}
 
-	private sealed class GlyphAdvances(ImFontPtr font, float sizePx)
+	private sealed class GlyphAdvances(ImFontPtr font, float sizePx, float scale)
 	{
 		private readonly float[] bmp = CreateTable();
 
@@ -114,7 +114,13 @@ internal sealed class TextLayout
 
 		private float MeasureRaw(ReadOnlySpan<char> text)
 		{
-			return font.CalcTextSizeA(sizePx, float.MaxValue, 0f, text).X;
+			uint c = (uint)((text.Length == 2) ? char.ConvertToUtf32(text[0], text[1]) : text[0]);
+			ImFontGlyphPtr imFontGlyphPtr = font.GetFontBaked(sizePx, scale).FindGlyph(c);
+			if (!imFontGlyphPtr.IsNull())
+			{
+				return MathF.Floor(imFontGlyphPtr.AdvanceX * scale + 0.5f) / scale;
+			}
+			return 0f;
 		}
 	}
 
@@ -122,11 +128,11 @@ internal sealed class TextLayout
 
 	private readonly ImGuiHost host;
 
-	private readonly List<GlyphAdvances> advances = new List<GlyphAdvances>();
-
 	private int fontGeneration;
 
-	private readonly Dictionary<(int font, float size, FontStyle style), GlyphAdvances> sizedAdvances = new Dictionary<(int, float, FontStyle), GlyphAdvances>();
+	private readonly Dictionary<float, GlyphAdvances[]> baseAdvances = new Dictionary<float, GlyphAdvances[]>();
+
+	private readonly Dictionary<(int font, float size, FontStyle style, float scale), GlyphAdvances> sizedAdvances = new Dictionary<(int, float, FontStyle, float), GlyphAdvances>();
 
 	private const int MaxSizedAdvances = 32;
 
@@ -192,6 +198,8 @@ internal sealed class TextLayout
 
 	public float Height { get; private set; }
 
+	public float Scale { get; set; } = 1f;
+
 	private FontStyle CurrentStyle => (FontStyle)((int)((uint)baseStyle | ((boldDepth > 0) ? 1u : 0u)) | ((italicDepth > 0) ? 2 : 0));
 
 	public TextLayout(ImGuiHost host)
@@ -204,26 +212,36 @@ internal sealed class TextLayout
 		if (fontGeneration != host.FontGeneration)
 		{
 			fontGeneration = host.FontGeneration;
-			advances.Clear();
+			baseAdvances.Clear();
 			sizedAdvances.Clear();
-		}
-		for (int i = advances.Count; i < host.Fonts.Count; i++)
-		{
-			advances.Add(new GlyphAdvances(host.Font(i), host.ImportSize(i)));
 		}
 		if (style == FontStyle.Normal && size == host.ImportSize(fontIndex))
 		{
-			return advances[fontIndex];
+			if (!baseAdvances.TryGetValue(Scale, out GlyphAdvances[] value) || value.Length < host.Fonts.Count)
+			{
+				if (baseAdvances.Count >= 32)
+				{
+					baseAdvances.Clear();
+				}
+				GlyphAdvances[] array = new GlyphAdvances[host.Fonts.Count];
+				value?.CopyTo(array, 0);
+				for (int i = ((value != null) ? value.Length : 0); i < array.Length; i++)
+				{
+					array[i] = new GlyphAdvances(host.Font(i), host.ImportSize(i), Scale);
+				}
+				value = (baseAdvances[Scale] = array);
+			}
+			return value[fontIndex];
 		}
-		if (!sizedAdvances.TryGetValue((fontIndex, size, style), out GlyphAdvances value))
+		if (!sizedAdvances.TryGetValue((fontIndex, size, style, Scale), out GlyphAdvances value2))
 		{
 			if (sizedAdvances.Count >= 32)
 			{
 				sizedAdvances.Clear();
 			}
-			value = (sizedAdvances[(fontIndex, size, style)] = new GlyphAdvances(host.StyledFont(fontIndex, style), size));
+			value2 = (sizedAdvances[(fontIndex, size, style, Scale)] = new GlyphAdvances(host.StyledFont(fontIndex, style), size, Scale));
 		}
-		return value;
+		return value2;
 	}
 
 	private GlyphAdvances AdvancesOf(in Piece piece)
@@ -256,7 +274,7 @@ internal sealed class TextLayout
 		return AdvancesOf(in piece).CodePoint(source, i, out width);
 	}
 
-	public void Layout(int fontIndex, float fontSize, FontStyle fontStyle, string text, float wrapWidth, Color baseColor)
+	public void Layout(int fontIndex, float fontSize, FontStyle fontStyle, string text, float wrapWidth, Color baseColor, bool richText = true)
 	{
 		source = text ?? string.Empty;
 		this.fontIndex = fontIndex;
@@ -285,7 +303,7 @@ internal sealed class TextLayout
 		while (num2 < length)
 		{
 			char c = source[num2];
-			if (c == '<')
+			if (c == '<' && richText)
 			{
 				int end2;
 				Color color2;

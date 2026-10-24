@@ -296,10 +296,10 @@ public class BattleLogEntry_MeleeCombat : LogEntry_DamageResult
 	protected override GrammarRequest GenerateGrammarRequest()
 	{
 		GrammarRequest result = base.GenerateGrammarRequest();
-		result.Rules.AddRange(GrammarUtility.RulesForPawn("INITIATOR", initiator, result.Constants));
+		result.Rules.AddRange(GrammarUtility.RulesForPawn("INITIATOR", initiator, result.Constants, addRelationInfoSymbol: false));
 		if (recipientPawn != null)
 		{
-			result.Rules.AddRange(GrammarUtility.RulesForPawn("RECIPIENT", recipientPawn, result.Constants));
+			result.Rules.AddRange(GrammarUtility.RulesForPawn("RECIPIENT", recipientPawn, result.Constants, addRelationInfoSymbol: false));
 		}
 		else if (recipientThing != null)
 		{

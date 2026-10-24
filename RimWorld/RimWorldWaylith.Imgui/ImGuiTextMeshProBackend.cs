@@ -17,6 +17,8 @@ internal sealed class ImGuiTextMeshProBackend : ITextMeshProBackend
 		public readonly Dictionary<char, TmpGlyphMetrics> glyphs = new Dictionary<char, TmpGlyphMetrics>();
 
 		public char sentinel;
+
+		public ImFontBakedPtr baked;
 	}
 
 	private const float BakeSize = 48f;
@@ -36,6 +38,8 @@ internal sealed class ImGuiTextMeshProBackend : ITextMeshProBackend
 	private Texture2D? atlasTexture;
 
 	private int atlasVersion;
+
+	private bool glyphsAdded;
 
 	private static readonly Lazy<string> AllCharacters = new Lazy<string>(delegate
 	{
@@ -65,12 +69,12 @@ internal sealed class ImGuiTextMeshProBackend : ITextMeshProBackend
 		bool result = fonts.Count < imFonts.Count;
 		for (int i = fonts.Count; i < imFonts.Count; i++)
 		{
-			fonts.Add(Bake(imFonts[i]));
+			fonts.Add(Bake(imFonts[i], null));
 		}
 		return result;
 	}
 
-	private static FontData Bake(ImFontPtr font)
+	private static FontData Bake(ImFontPtr font, FontData? previous)
 	{
 		FontData fontData = new FontData();
 		if (font.IsNull())
@@ -82,6 +86,7 @@ internal sealed class ImGuiTextMeshProBackend : ITextMeshProBackend
 		{
 			return fontData;
 		}
+		fontData.baked = fontBaked;
 		float ascent = fontBaked.Ascent;
 		float descent = fontBaked.Descent;
 		fontData.metrics = new TmpFontMetrics
@@ -92,43 +97,59 @@ internal sealed class ImGuiTextMeshProBackend : ITextMeshProBackend
 			descent = descent,
 			lineHeight = ascent - descent
 		};
-		BakeRange(fontBaked, fontData, 32, 126);
-		BakeRange(fontBaked, fontData, 160, 255);
+		for (int i = 32; i <= 126; i++)
+		{
+			BakeGlyph(fontData, (char)i);
+		}
+		for (int j = 160; j <= 255; j++)
+		{
+			BakeGlyph(fontData, (char)j);
+		}
+		if (previous != null)
+		{
+			foreach (char key in previous.glyphs.Keys)
+			{
+				BakeGlyph(fontData, key);
+			}
+		}
 		return fontData;
 	}
 
-	private static void BakeRange(ImFontBakedPtr baked, FontData data, int lo, int hi)
+	private static bool BakeGlyph(FontData data, char ch)
 	{
-		for (int i = lo; i <= hi; i++)
+		if (data.glyphs.TryGetValue(ch, out var value))
 		{
-			ImFontGlyphPtr imFontGlyphPtr = baked.FindGlyphNoFallback((uint)i);
-			if (!imFontGlyphPtr.IsNull())
-			{
-				float x = imFontGlyphPtr.X0;
-				float y = imFontGlyphPtr.Y0;
-				float x2 = imFontGlyphPtr.X1;
-				float y2 = imFontGlyphPtr.Y1;
-				char c = (char)i;
-				data.glyphs[c] = new TmpGlyphMetrics
-				{
-					found = true,
-					visible = (x2 > x && y2 > y),
-					advanceX = imFontGlyphPtr.AdvanceX,
-					x0 = x,
-					y0 = y,
-					x1 = x2,
-					y1 = y2,
-					u0 = imFontGlyphPtr.U0,
-					v0 = imFontGlyphPtr.V0,
-					u1 = imFontGlyphPtr.U1,
-					v1 = imFontGlyphPtr.V1
-				};
-				if (data.sentinel == '\0' && x2 > x && y2 > y)
-				{
-					data.sentinel = c;
-				}
-			}
+			return value.found;
 		}
+		ImFontGlyphPtr imFontGlyphPtr = (data.baked.IsNull() ? default(ImFontGlyphPtr) : data.baked.FindGlyphNoFallback(ch));
+		if (imFontGlyphPtr.IsNull())
+		{
+			data.glyphs[ch] = default(TmpGlyphMetrics);
+			return false;
+		}
+		float x = imFontGlyphPtr.X0;
+		float y = imFontGlyphPtr.Y0;
+		float x2 = imFontGlyphPtr.X1;
+		float y2 = imFontGlyphPtr.Y1;
+		data.glyphs[ch] = new TmpGlyphMetrics
+		{
+			found = true,
+			visible = (x2 > x && y2 > y),
+			advanceX = imFontGlyphPtr.AdvanceX,
+			x0 = x,
+			y0 = y,
+			x1 = x2,
+			y1 = y2,
+			u0 = imFontGlyphPtr.U0,
+			v0 = imFontGlyphPtr.V0,
+			u1 = imFontGlyphPtr.U1,
+			v1 = imFontGlyphPtr.V1
+		};
+		if (data.sentinel == '\0' && x2 > x && y2 > y)
+		{
+			data.sentinel = ch;
+		}
+		return true;
 	}
 
 	private FontData? Get(int fontIndex)
@@ -155,12 +176,17 @@ internal sealed class ImGuiTextMeshProBackend : ITextMeshProBackend
 	public bool TryGetGlyph(int fontIndex, char c, out TmpGlyphMetrics glyph)
 	{
 		FontData fontData = Get(fontIndex);
-		if (fontData != null && fontData.glyphs.TryGetValue(c, out glyph))
+		if (fontData == null)
 		{
-			return true;
+			glyph = default(TmpGlyphMetrics);
+			return false;
 		}
-		glyph = default(TmpGlyphMetrics);
-		return false;
+		if (!fontData.glyphs.ContainsKey(c) && BakeGlyph(fontData, c))
+		{
+			glyphsAdded = true;
+		}
+		glyph = fontData.glyphs[c];
+		return glyph.found;
 	}
 
 	public bool TryGetGlyphAtSize(int fontIndex, char c, float pixelSize, out TmpGlyphMetrics glyph, out float ascent)
@@ -217,16 +243,17 @@ internal sealed class ImGuiTextMeshProBackend : ITextMeshProBackend
 		}
 		bool flag = TouchBakes();
 		byte* ptr = (byte*)(void*)target.GetPixelsAt(0, 0);
-		if (ptr == null || (!flag && atlasRgba != null && ptr == (byte*)atlasPixels && target.Width == atlasWidth && target.Height == atlasHeight))
+		if (ptr == null || (!flag && !glyphsAdded && atlasRgba != null && ptr == (byte*)atlasPixels && target.Width == atlasWidth && target.Height == atlasHeight))
 		{
 			return;
 		}
+		glyphsAdded = false;
 		for (int i = 0; i < 4; i++)
 		{
 			BakeNewFonts();
 			for (int j = 0; j < fonts.Count; j++)
 			{
-				fonts[j] = Bake(imFonts[j]);
+				fonts[j] = Bake(imFonts[j], fonts[j]);
 			}
 			ImTextureDataPtr texData = atlas.TexData;
 			byte* ptr2 = (byte*)(texData.IsNull() ? null : ((void*)texData.GetPixelsAt(0, 0)));
@@ -258,7 +285,7 @@ internal sealed class ImGuiTextMeshProBackend : ITextMeshProBackend
 		}
 	}
 
-	private bool TouchBakes()
+	private unsafe bool TouchBakes()
 	{
 		bool result = BakeNewFonts();
 		for (int i = 0; i < fonts.Count; i++)
@@ -269,7 +296,7 @@ internal sealed class ImGuiTextMeshProBackend : ITextMeshProBackend
 				ImFontBakedPtr fontBaked = imFonts[i].GetFontBaked(48f);
 				ImFontGlyphPtr imFontGlyphPtr = (fontBaked.IsNull() ? default(ImFontGlyphPtr) : fontBaked.FindGlyphNoFallback(fontData.sentinel));
 				TmpGlyphMetrics tmpGlyphMetrics = fontData.glyphs[fontData.sentinel];
-				if (imFontGlyphPtr.IsNull() || imFontGlyphPtr.U0 != tmpGlyphMetrics.u0 || imFontGlyphPtr.V0 != tmpGlyphMetrics.v0 || imFontGlyphPtr.U1 != tmpGlyphMetrics.u1 || imFontGlyphPtr.V1 != tmpGlyphMetrics.v1)
+				if (imFontGlyphPtr.IsNull() || imFontGlyphPtr.U0 != tmpGlyphMetrics.u0 || imFontGlyphPtr.V0 != tmpGlyphMetrics.v0 || imFontGlyphPtr.U1 != tmpGlyphMetrics.u1 || imFontGlyphPtr.V1 != tmpGlyphMetrics.v1 || fontBaked.Ptr != fontData.baked.Ptr)
 				{
 					result = true;
 				}

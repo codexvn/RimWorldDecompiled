@@ -74,6 +74,24 @@ public class GUI
 
 	private static Material _blendMaterial;
 
+	private static Material _roundedRectMaterial;
+
+	private static Material _roundedRectWithColorPerBorderMaterial;
+
+	internal static readonly int s_ButonHash = "Button".GetHashCode();
+
+	internal static readonly int s_RepeatButtonHash = "repeatButton".GetHashCode();
+
+	internal static readonly int s_ToggleHash = "Toggle".GetHashCode();
+
+	internal static readonly int s_ButtonGridHash = "ButtonGrid".GetHashCode();
+
+	internal static readonly int s_SliderHash = "Slider".GetHashCode();
+
+	internal static readonly int s_BeginGroupHash = "BeginGroup".GetHashCode();
+
+	internal static readonly int s_ScrollviewHash = "scrollView".GetHashCode();
+
 	private const float ScrollWheelSpeed = 40f;
 
 	private static readonly List<ScrollViewState> _scrollViewStates = new List<ScrollViewState>();
@@ -111,6 +129,8 @@ public class GUI
 	private static float _textScrollX;
 
 	private static float _textScrollY;
+
+	private static bool _fieldRichText;
 
 	private static readonly Dictionary<int, string> _idToName = new Dictionary<int, string>();
 
@@ -267,6 +287,40 @@ public class GUI
 		}
 	}
 
+	internal static Material roundedRectMaterial
+	{
+		get
+		{
+			object obj = _roundedRectMaterial;
+			if (obj == null)
+			{
+				obj = new Material((Shader)null)
+				{
+					name = "Hidden/Internal-GUIRoundedRect"
+				};
+				_roundedRectMaterial = (Material)obj;
+			}
+			return (Material)obj;
+		}
+	}
+
+	internal static Material roundedRectWithColorPerBorderMaterial
+	{
+		get
+		{
+			object obj = _roundedRectWithColorPerBorderMaterial;
+			if (obj == null)
+			{
+				obj = new Material((Shader)null)
+				{
+					name = "Hidden/Internal-GUIRoundedRectWithColorPerBorder"
+				};
+				_roundedRectWithColorPerBorderMaterial = (Material)obj;
+			}
+			return (Material)obj;
+		}
+	}
+
 	public static int depth
 	{
 		get
@@ -282,6 +336,8 @@ public class GUI
 			}
 		}
 	}
+
+	public static string tooltip { get; set; } = "";
 
 	private static bool HasSelection => _selectAnchor != _caretIndex;
 
@@ -302,6 +358,28 @@ public class GUI
 	public static void DrawTexture(Rect position, Texture image, ScaleMode scaleMode)
 	{
 		DrawTextureImpl(position, image, scaleMode, color);
+	}
+
+	internal static void ResetGlobalState()
+	{
+		_color = (_contentColor = (backgroundColor = Color.white));
+		enabled = true;
+		changed = false;
+	}
+
+	internal static void GrabMouseControl(int id)
+	{
+		GUIUtility.hotControl = id;
+	}
+
+	internal static bool HasMouseControl(int id)
+	{
+		return GUIUtility.hotControl == id;
+	}
+
+	internal static void ReleaseMouseControl()
+	{
+		GUIUtility.hotControl = 0;
 	}
 
 	public static void BeginGroup(Rect position)
@@ -336,7 +414,7 @@ public class GUI
 
 	public static void BeginClip(Rect position, Vector2 scrollOffset, Vector2 renderOffset, bool resetOffset)
 	{
-		BeginClip(position);
+		GUIClip.Internal_Push(position, scrollOffset, renderOffset, resetOffset);
 	}
 
 	public static void EndClip()
@@ -548,6 +626,7 @@ public class GUI
 		if (content?.image == null)
 		{
 			Label(position, content?.text ?? "", style);
+			PublishTooltip(position, content);
 			return;
 		}
 		ConsumeNextControlName();
@@ -564,6 +643,7 @@ public class GUI
 				current.DrawTexture(position, texture2D, ScaleMode.StretchToFill, _color * backgroundColor);
 			}
 			style.DrawContent(current, position, content, ContentTint, ContentTint);
+			PublishTooltip(position, content);
 		}
 	}
 
@@ -692,10 +772,24 @@ public class GUI
 			}
 			else
 			{
-				current.DrawTexture(position, texture2D, ScaleMode.StretchToFill, color);
+				style.DrawBackground(current, position, texture2D, color);
 			}
 		}
 		(style ?? _skin.label).DrawContent(current, position, content, ContentTint, ContentTint);
+		PublishTooltip(position, content);
+	}
+
+	private static void PublishTooltip(Rect position, GUIContent content)
+	{
+		string text = content?.tooltip;
+		if (text != null && text.Length > 0)
+		{
+			Event current = Event.current;
+			if (current != null && current.type == EventType.repaint && position.Contains(current.mousePosition))
+			{
+				tooltip = text;
+			}
+		}
 	}
 
 	public static bool Button(Rect position, string text, GUIStyle style)
@@ -854,6 +948,10 @@ public class GUI
 		if (current.type == EventType.repaint)
 		{
 			style?.Draw(position, content, flag2, flag2 && _buttonDownActive && position == _buttonDownRect, on, hasKeyboardFocus: false);
+			if (flag2)
+			{
+				PublishTooltip(position, content);
+			}
 			return false;
 		}
 		if (flag)
@@ -1017,6 +1115,7 @@ public class GUI
 		TrackControlWindow(num2);
 		_fieldsDrawnThisPass.Add(num2);
 		int fontIndex = style?.FontIndex ?? 1;
+		_fieldRichText = style?.richText ?? false;
 		if (num || _selectAllOnFocusId == num2)
 		{
 			_selectAllOnFocusId = 0;
@@ -1070,12 +1169,19 @@ public class GUI
 			current2.Use();
 		}
 		bool flag = GUIUtility.keyboardControl == num2;
-		bool flag2 = multiline && style != null && style.normal.background == null && style.focused.background == null;
+		bool flag2 = multiline && style != null;
+		if (flag2)
+		{
+			string name = style.name;
+			bool flag3 = ((name == "textfield" || name == "textarea") ? true : false);
+			flag2 = flag3;
+		}
+		bool flag4 = flag2 && style.normal.background == null && style.focused.background == null;
 		if (flag)
 		{
-			TextFocus.ReadOnlyId = (flag2 ? num2 : 0);
+			TextFocus.ReadOnlyId = (flag4 ? num2 : 0);
 		}
-		if (flag && current2 != null && current2.type == EventType.keyDown && (!flag2 || TextFocus.ReadOnlyKeeps(current2.keyCode, (current2.modifiers & EventModifiers.Control) != 0)) && (!multiline || !ApplyTextAreaNavKey(rect, text, fontIndex, style, current2, current)))
+		if (flag && current2 != null && current2.type == EventType.keyDown && (!flag4 || TextFocus.ReadOnlyKeeps(current2.keyCode, (current2.modifiers & EventModifiers.Control) != 0)) && (!multiline || !ApplyTextAreaNavKey(rect, text, fontIndex, style, current2, current)))
 		{
 			text = ApplyTextKey(text, current2, multiline);
 		}
@@ -1100,7 +1206,7 @@ public class GUI
 		{
 			return CaretIndexAtX(text, fontIndex, mouse.x - area.x - AlignOffsetX(area.width, text, fontIndex, (style ?? _skin.textField).alignment, be) + _textScrollX, be);
 		}
-		return be.TextIndexAt(fontIndex, 0f, FontStyle.Normal, text, TextAreaWrapWidth(area, style), new Vector2(mouse.x - area.x + _textScrollX, mouse.y - area.y + _textScrollY));
+		return be.TextIndexAt(fontIndex, 0f, FontStyle.Normal, text, TextAreaWrapWidth(area, style), new Vector2(mouse.x - area.x + _textScrollX, mouse.y - area.y + _textScrollY), _fieldRichText);
 	}
 
 	private static void SelectWordAt(string text, int index)
@@ -1146,10 +1252,21 @@ public class GUI
 		{
 			return false;
 		}
+		flag = (e.modifiers & EventModifiers.Control) != 0;
+		if (flag)
+		{
+			KeyCode keyCode = e.keyCode;
+			bool flag2 = (uint)(keyCode - 278) <= 1u;
+			flag = flag2;
+		}
+		if (flag)
+		{
+			return false;
+		}
 		Rect area = TextFieldTextRect(rect, multiline: true, style);
 		float wrapWidth = TextAreaWrapWidth(area, style);
 		float lineHeight;
-		Vector2 vector = be.TextCursorPos(fontIndex, 0f, FontStyle.Normal, text, wrapWidth, Mathf.Clamp(_caretIndex, 0, text.Length), out lineHeight);
+		Vector2 vector = be.TextCursorPos(fontIndex, 0f, FontStyle.Normal, text, wrapWidth, Mathf.Clamp(_caretIndex, 0, text.Length), out lineHeight, _fieldRichText);
 		Vector2 local = e.keyCode switch
 		{
 			KeyCode.UpArrow => new Vector2(vector.x, vector.y - lineHeight * 0.5f), 
@@ -1161,7 +1278,7 @@ public class GUI
 		};
 		if (local.y >= 0f)
 		{
-			_caretIndex = be.TextIndexAt(fontIndex, 0f, FontStyle.Normal, text, wrapWidth, local);
+			_caretIndex = be.TextIndexAt(fontIndex, 0f, FontStyle.Normal, text, wrapWidth, local, _fieldRichText);
 		}
 		else
 		{
@@ -1193,7 +1310,9 @@ public class GUI
 		_caretIndex = Mathf.Clamp(_caretIndex, 0, text.Length);
 		_selectAnchor = Mathf.Clamp(_selectAnchor, 0, text.Length);
 		bool flag = (e.modifiers & EventModifiers.Shift) != 0;
-		if ((e.modifiers & EventModifiers.Control) != 0)
+		bool num = (e.modifiers & EventModifiers.Control) != 0;
+		bool flag2 = num || (OperatingSystem.IsMacOS() && (e.modifiers & EventModifiers.Alt) != 0);
+		if (num)
 		{
 			switch (e.keyCode)
 			{
@@ -1245,8 +1364,9 @@ public class GUI
 			}
 			else if (_caretIndex > 0)
 			{
-				text = text.Remove(_caretIndex - 1, 1);
-				_caretIndex--;
+				int num2 = (flag2 ? WordStart(text, _caretIndex) : (_caretIndex - 1));
+				text = text.Remove(num2, _caretIndex - num2);
+				_caretIndex = num2;
 			}
 			_selectAnchor = _caretIndex;
 			e.Use();
@@ -1258,13 +1378,17 @@ public class GUI
 			}
 			else if (_caretIndex < text.Length)
 			{
-				text = text.Remove(_caretIndex, 1);
+				text = text.Remove(_caretIndex, (flag2 ? WordEnd(text, _caretIndex) : (_caretIndex + 1)) - _caretIndex);
 			}
 			_selectAnchor = _caretIndex;
 			e.Use();
 			return text;
 		case KeyCode.LeftArrow:
-			if (HasSelection && !flag)
+			if (flag2)
+			{
+				_caretIndex = WordStart(text, (flag || !HasSelection) ? _caretIndex : SelMin);
+			}
+			else if (HasSelection && !flag)
 			{
 				_caretIndex = SelMin;
 			}
@@ -1279,7 +1403,11 @@ public class GUI
 			e.Use();
 			return text;
 		case KeyCode.RightArrow:
-			if (HasSelection && !flag)
+			if (flag2)
+			{
+				_caretIndex = WordEnd(text, (flag || !HasSelection) ? _caretIndex : SelMax);
+			}
+			else if (HasSelection && !flag)
 			{
 				_caretIndex = SelMax;
 			}
@@ -1336,6 +1464,39 @@ public class GUI
 		}
 	}
 
+	private static int WordStart(string text, int index)
+	{
+		int num = Mathf.Clamp(index, 0, text.Length);
+		while (num > 0 && char.IsWhiteSpace(text[num - 1]))
+		{
+			num--;
+		}
+		if (num > 0)
+		{
+			bool flag = char.IsLetterOrDigit(text[num - 1]);
+			while (num > 0 && !char.IsWhiteSpace(text[num - 1]) && char.IsLetterOrDigit(text[num - 1]) == flag)
+			{
+				num--;
+			}
+		}
+		return num;
+	}
+
+	private static int WordEnd(string text, int index)
+	{
+		int i = Mathf.Clamp(index, 0, text.Length);
+		if (i < text.Length && !char.IsWhiteSpace(text[i]))
+		{
+			for (bool flag = char.IsLetterOrDigit(text[i]); i < text.Length && !char.IsWhiteSpace(text[i]) && char.IsLetterOrDigit(text[i]) == flag; i++)
+			{
+			}
+		}
+		for (; i < text.Length && char.IsWhiteSpace(text[i]); i++)
+		{
+		}
+		return i;
+	}
+
 	private static int CaretIndexAtX(string text, int fontIndex, float localX, IGuiBackend be)
 	{
 		if (be == null || string.IsNullOrEmpty(text) || localX <= 0f)
@@ -1346,13 +1507,13 @@ public class GUI
 			}
 			return 0;
 		}
-		return be.TextIndexAt(fontIndex, 0f, FontStyle.Normal, text, -1f, new Vector2(localX, 0f));
+		return be.TextIndexAt(fontIndex, 0f, FontStyle.Normal, text, -1f, new Vector2(localX, 0f), _fieldRichText);
 	}
 
 	private static float CaretX(string text, int fontIndex, int index, IGuiBackend be)
 	{
 		float lineHeight;
-		return be.TextCursorPos(fontIndex, 0f, FontStyle.Normal, text, -1f, index, out lineHeight).x;
+		return be.TextCursorPos(fontIndex, 0f, FontStyle.Normal, text, -1f, index, out lineHeight, _fieldRichText).x;
 	}
 
 	private static float AlignOffsetX(float width, string text, int fontIndex, TextAnchor alignment, IGuiBackend be)
@@ -1434,7 +1595,10 @@ public class GUI
 			float num11 = CaretX(text, fontIndex, num3, be);
 			be.FillRect(new Rect(rect2.x + num7 + num10 - num8, rect.y + 3f, Mathf.Max(1f, num11 - num10), Mathf.Max(2f, rect.height - 6f)), new Color(0.3f, 0.45f, 0.75f, 0.55f));
 		}
-		be.DrawText(new Rect(rect2.x + num7 - num8, rect.y, rect2.width, rect.height), text, fontIndex, 0f, FontStyle.Normal, anchor, wordWrap: false, textColor);
+		Rect rect3 = new Rect(rect2.x + num7 - num8, rect.y, rect2.width, rect.height);
+		string text3 = text;
+		bool fieldRichText = _fieldRichText;
+		be.DrawText(rect3, text3, fontIndex, 0f, FontStyle.Normal, anchor, wordWrap: false, textColor, default(Rect), fieldRichText);
 		if (num5 > num4)
 		{
 			float num12 = CaretX(text, fontIndex, num4, be);
@@ -1459,7 +1623,7 @@ public class GUI
 		float lineHeight = 0f;
 		if (focused)
 		{
-			vector = be.TextCursorPos(fontIndex, 0f, FontStyle.Normal, text, num, caret, out lineHeight);
+			vector = be.TextCursorPos(fontIndex, 0f, FontStyle.Normal, text, num, caret, out lineHeight, _fieldRichText);
 			if (vector.y + lineHeight - _textScrollY > rect2.height)
 			{
 				_textScrollY = vector.y + lineHeight - rect2.height;
@@ -1487,16 +1651,19 @@ public class GUI
 		be.PushClipRect(rect2);
 		if (focused && selB > selA)
 		{
-			be.TextSelectionRects(fontIndex, 0f, FontStyle.Normal, text, num, selA, selB, _selectionRects);
+			be.TextSelectionRects(fontIndex, 0f, FontStyle.Normal, text, num, selA, selB, _selectionRects, _fieldRichText);
 			foreach (Rect selectionRect in _selectionRects)
 			{
 				be.FillRect(new Rect(rect2.x + selectionRect.x - num2, rect2.y + selectionRect.y - num3, selectionRect.width, selectionRect.height), new Color(0.3f, 0.45f, 0.75f, 0.55f));
 			}
 		}
-		be.DrawText(new Rect(rect2.x - num2, rect2.y - num3, rect2.width + num2, rect2.height + num3), text, fontIndex, 0f, FontStyle.Normal, TextAnchor.UpperLeft, num > 0f, textColor);
+		Rect rect3 = new Rect(rect2.x - num2, rect2.y - num3, rect2.width + num2, rect2.height + num3);
+		bool wordWrap = num > 0f;
+		bool fieldRichText = _fieldRichText;
+		be.DrawText(rect3, text, fontIndex, 0f, FontStyle.Normal, TextAnchor.UpperLeft, wordWrap, textColor, default(Rect), fieldRichText);
 		if (compB > compA)
 		{
-			be.TextSelectionRects(fontIndex, 0f, FontStyle.Normal, text, num, compA, compB, _selectionRects);
+			be.TextSelectionRects(fontIndex, 0f, FontStyle.Normal, text, num, compA, compB, _selectionRects, _fieldRichText);
 			foreach (Rect selectionRect2 in _selectionRects)
 			{
 				be.FillRect(new Rect(rect2.x + selectionRect2.x - num2, rect2.y + selectionRect2.y + selectionRect2.height - 1f - num3, selectionRect2.width, 1f), textColor);
@@ -2050,6 +2217,11 @@ public class GUI
 		{
 			GUILayoutUtility.BeginWindow(window.Id, GUIStyle.none, null);
 		}
+		Color color = _color;
+		Color color2 = _contentColor;
+		Color color3 = backgroundColor;
+		bool flag2 = enabled;
+		ResetGlobalState();
 		GuiBackend.Current?.BeginWindowContent(window.Rect);
 		GuiBackend.Current?.PushGroup(window.Rect);
 		try
@@ -2064,6 +2236,10 @@ public class GUI
 		{
 			GuiBackend.Current?.PopGroup();
 			GuiBackend.Current?.EndWindowContent();
+			_color = color;
+			_contentColor = color2;
+			backgroundColor = color3;
+			enabled = flag2;
 			_currentWindowId = currentWindowId;
 			_nameOccurrences.Clear();
 			GUIUtility.NextControlId = nextControlId;

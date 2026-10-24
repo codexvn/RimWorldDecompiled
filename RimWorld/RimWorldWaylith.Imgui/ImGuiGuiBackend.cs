@@ -196,6 +196,7 @@ internal sealed class ImGuiGuiBackend : IGuiBackend
 		m11 = 1f;
 		rotated = false;
 		scale = 1f;
+		textLayout.Scale = 1f;
 		translate = new float2(0f, 0f);
 		offset = new float2(0f, 0f);
 		offsetStack.Clear();
@@ -272,6 +273,7 @@ internal sealed class ImGuiGuiBackend : IGuiBackend
 			rotated = false;
 			scale = 1f;
 		}
+		textLayout.Scale = scale;
 		translate = new float2(matrix.m03, matrix.m13);
 		UpdateEventMouse();
 	}
@@ -659,10 +661,10 @@ internal sealed class ImGuiGuiBackend : IGuiBackend
 		}
 	}
 
-	public Vector2 MeasureText(int fontIndex, float fontSize, FontStyle fontStyle, string text, float wrapWidth)
+	public Vector2 MeasureText(int fontIndex, float fontSize, FontStyle fontStyle, string text, float wrapWidth, bool richText = true)
 	{
 		int fontIndex2 = Math.Clamp(fontIndex, 0, host.Fonts.Count - 1);
-		textLayout.Layout(fontIndex2, fontSize, fontStyle, text, wrapWidth, UnityEngine.Color.white);
+		textLayout.Layout(fontIndex2, fontSize, fontStyle, text, wrapWidth, UnityEngine.Color.white, richText);
 		return new Vector2(textLayout.Width, textLayout.Height);
 	}
 
@@ -685,18 +687,18 @@ internal sealed class ImGuiGuiBackend : IGuiBackend
 		return host.RegisterFont(name, fontData, importSize, renderingMode);
 	}
 
-	public int TextIndexAt(int fontIndex, float fontSize, FontStyle fontStyle, string text, float wrapWidth, Vector2 local)
+	public int TextIndexAt(int fontIndex, float fontSize, FontStyle fontStyle, string text, float wrapWidth, Vector2 local, bool richText = true)
 	{
 		if (string.IsNullOrEmpty(text))
 		{
 			return 0;
 		}
 		int fontIndex2 = Math.Clamp(fontIndex, 0, host.Fonts.Count - 1);
-		textLayout.Layout(fontIndex2, fontSize, fontStyle, text, wrapWidth, UnityEngine.Color.white);
+		textLayout.Layout(fontIndex2, fontSize, fontStyle, text, wrapWidth, UnityEngine.Color.white, richText);
 		return textLayout.IndexAt(local);
 	}
 
-	public Vector2 TextCursorPos(int fontIndex, float fontSize, FontStyle fontStyle, string text, float wrapWidth, int index, out float lineHeight)
+	public Vector2 TextCursorPos(int fontIndex, float fontSize, FontStyle fontStyle, string text, float wrapWidth, int index, out float lineHeight, bool richText = true)
 	{
 		int fontIndex2 = Math.Clamp(fontIndex, 0, host.Fonts.Count - 1);
 		lineHeight = host.LineMetricsFor(fontIndex2, fontSize).Pitch;
@@ -704,18 +706,18 @@ internal sealed class ImGuiGuiBackend : IGuiBackend
 		{
 			return Vector2.zero;
 		}
-		textLayout.Layout(fontIndex2, fontSize, fontStyle, text, wrapWidth, UnityEngine.Color.white);
+		textLayout.Layout(fontIndex2, fontSize, fontStyle, text, wrapWidth, UnityEngine.Color.white, richText);
 		lineHeight = textLayout.Lines[textLayout.LineOf(index)].Pitch;
 		return textLayout.PositionOf(index);
 	}
 
-	public void TextSelectionRects(int fontIndex, float fontSize, FontStyle fontStyle, string text, float wrapWidth, int from, int to, List<Rect> rects)
+	public void TextSelectionRects(int fontIndex, float fontSize, FontStyle fontStyle, string text, float wrapWidth, int from, int to, List<Rect> rects, bool richText = true)
 	{
 		rects.Clear();
 		if (!string.IsNullOrEmpty(text) && to > from)
 		{
 			int fontIndex2 = Math.Clamp(fontIndex, 0, host.Fonts.Count - 1);
-			textLayout.Layout(fontIndex2, fontSize, fontStyle, text, wrapWidth, UnityEngine.Color.white);
+			textLayout.Layout(fontIndex2, fontSize, fontStyle, text, wrapWidth, UnityEngine.Color.white, richText);
 			Vector2 vector = textLayout.PositionOf(from);
 			Vector2 vector2 = textLayout.PositionOf(to);
 			int num = textLayout.LineOf(from);
@@ -730,7 +732,7 @@ internal sealed class ImGuiGuiBackend : IGuiBackend
 		}
 	}
 
-	public void DrawText(Rect rect, string text, int fontIndex, float fontSize, FontStyle fontStyle, TextAnchor anchor, bool wordWrap, UnityEngine.Color color, Rect clipRect)
+	public void DrawText(Rect rect, string text, int fontIndex, float fontSize, FontStyle fontStyle, TextAnchor anchor, bool wordWrap, UnityEngine.Color color, Rect clipRect, bool richText = true)
 	{
 		if (!frameActive || !drawingEnabled || string.IsNullOrEmpty(text))
 		{
@@ -739,8 +741,8 @@ internal sealed class ImGuiGuiBackend : IGuiBackend
 		int fontIndex2 = Math.Clamp(fontIndex, 0, host.Fonts.Count - 1);
 		FontStyle fontStyle2 = FontStyle.Normal;
 		float num = 0f;
-		ImFontBakedPtr baked = default(ImFontBakedPtr);
-		textLayout.Layout(fontIndex2, fontSize, fontStyle, text, wordWrap ? rect.width : (-1f), color);
+		ImFontBakedPtr target = default(ImFontBakedPtr);
+		textLayout.Layout(fontIndex2, fontSize, fontStyle, text, wordWrap ? rect.width : (-1f), color, richText);
 		float num2 = ((int)anchor / 3) switch
 		{
 			1 => rect.y + (rect.height - textLayout.Height) * 0.5f, 
@@ -791,28 +793,35 @@ internal sealed class ImGuiGuiBackend : IGuiBackend
 			for (int j = line.PieceStart; j < num7; j++)
 			{
 				TextLayout.Piece piece = pieces[j];
-				if (!piece.IsSpace)
+				if (piece.IsSpace)
 				{
-					ImColor8 col = ToCol(in piece.Color);
-					float num8 = num4 + piece.X;
-					int k = piece.Start;
-					int num9 = piece.Start + piece.Length;
-					if (baked.IsNull() || piece.Style != fontStyle2 || piece.Size != num)
+					continue;
+				}
+				ImColor8 col = ToCol(in piece.Color);
+				float num8 = num4 + piece.X;
+				int k = piece.Start;
+				int num9 = piece.Start + piece.Length;
+				if (target.IsNull() || piece.Style != fontStyle2 || piece.Size != num)
+				{
+					fontStyle2 = piece.Style;
+					num = piece.Size;
+					target = host.StyledFont(fontIndex2, piece.Style).GetFontBaked(piece.Size, scale);
+				}
+				float y = num5 + line.Ascent - target.Ascent;
+				float y2 = float2.Y + num6 - target.Ascent * scale;
+				float num10 = float2.X + MathF.Floor(piece.X * scale + 0.5f);
+				int num11;
+				for (; k < num9; k += num11)
+				{
+					num11 = textLayout.CodePointAt(in piece, k, out var width);
+					uint c = (uint)((num11 == 2) ? char.ConvertToUtf32(text[k], text[k + 1]) : text[k]);
+					ImFontGlyphPtr g = target.FindGlyph(c);
+					if (!g.IsNull())
 					{
-						fontStyle2 = piece.Style;
-						num = piece.Size;
-						baked = host.StyledFont(fontIndex2, piece.Style).GetFontBaked(piece.Size, scale);
+						DrawGlyph(g, num8, y, new float2(num10, y2), col, flag, clipMin, clipMax);
+						num10 += MathF.Floor(g.AdvanceX * scale + 0.5f);
 					}
-					float y = num5 + line.Ascent - baked.Ascent;
-					float y2 = float2.Y + num6 - baked.Ascent * scale;
-					int num10;
-					for (; k < num9; k += num10)
-					{
-						num10 = textLayout.CodePointAt(in piece, k, out var width);
-						uint codePoint = (uint)((num10 == 2) ? char.ConvertToUtf32(text[k], text[k + 1]) : text[k]);
-						DrawGlyph(baked, codePoint, num8, y, new float2(float2.X + (num8 - num4) * scale, y2), col, flag, clipMin, clipMax);
-						num8 += width;
-					}
+					num8 += width;
 				}
 			}
 		}
@@ -822,28 +831,27 @@ internal sealed class ImGuiGuiBackend : IGuiBackend
 		}
 	}
 
-	private void DrawGlyph(ImFontBakedPtr baked, uint codePoint, float x, float y, float2 pen, ImColor8 col, bool fineClip, float2 clipMin, float2 clipMax)
+	private void DrawGlyph(ImFontGlyphPtr g, float x, float y, float2 pen, ImColor8 col, bool fineClip, float2 clipMin, float2 clipMax)
 	{
-		ImFontGlyphPtr imFontGlyphPtr = baked.FindGlyph(codePoint);
-		if (imFontGlyphPtr.IsNull() || (imFontGlyphPtr.Colored & 2) == 0)
+		if ((g.Colored & 2) == 0)
 		{
 			return;
 		}
-		if ((imFontGlyphPtr.Colored & 1) != 0)
+		if ((g.Colored & 1) != 0)
 		{
 			col = col.AsUint() | 0xFFFFFF;
 		}
-		float2 uvA = new float2(imFontGlyphPtr.U0, imFontGlyphPtr.V0);
-		float2 uvB = new float2(imFontGlyphPtr.U1, imFontGlyphPtr.V1);
+		float2 uvA = new float2(g.U0, g.V0);
+		float2 uvB = new float2(g.U1, g.V1);
 		if (rotated)
 		{
 			drawList.PrimReserve(6, 4);
-			drawList.PrimQuadUV(ToScreen(x + imFontGlyphPtr.X0, y + imFontGlyphPtr.Y0), ToScreen(x + imFontGlyphPtr.X1, y + imFontGlyphPtr.Y0), ToScreen(x + imFontGlyphPtr.X1, y + imFontGlyphPtr.Y1), ToScreen(x + imFontGlyphPtr.X0, y + imFontGlyphPtr.Y1), in uvA, new float2(uvB.X, uvA.Y), in uvB, new float2(uvA.X, uvB.Y), col);
+			drawList.PrimQuadUV(ToScreen(x + g.X0, y + g.Y0), ToScreen(x + g.X1, y + g.Y0), ToScreen(x + g.X1, y + g.Y1), ToScreen(x + g.X0, y + g.Y1), in uvA, new float2(uvB.X, uvA.Y), in uvB, new float2(uvA.X, uvB.Y), col);
 			return;
 		}
-		float2 @float = new float2(pen.X + imFontGlyphPtr.X0 * scale, pen.Y + imFontGlyphPtr.Y0 * scale);
+		float2 @float = new float2(pen.X + g.X0 * scale, pen.Y + g.Y0 * scale);
 		@float = new float2(MathF.Floor(@float.X + 0.5f), MathF.Floor(@float.Y + 0.5f));
-		float2 b = new float2(@float.X + (imFontGlyphPtr.X1 - imFontGlyphPtr.X0) * scale, @float.Y + (imFontGlyphPtr.Y1 - imFontGlyphPtr.Y0) * scale);
+		float2 b = new float2(@float.X + (g.X1 - g.X0) * scale, @float.Y + (g.Y1 - g.Y0) * scale);
 		if (fineClip)
 		{
 			if (@float.X >= clipMax.X || b.X <= clipMin.X)

@@ -37,7 +37,7 @@ public sealed class Window_FrameProfiler : Window
 
 	private static readonly string[] DisplayLabels = new string[2] { "Call tree", "Flamegraph" };
 
-	private static readonly string[] TabLabels = new string[3] { "CPU", "Alloc", "VRAM" };
+	private static readonly string[] TabLabels = new string[4] { "CPU", "Alloc", "VRAM", "RAM" };
 
 	private readonly ProfilerSession session;
 
@@ -48,6 +48,8 @@ public sealed class Window_FrameProfiler : Window
 	private readonly ProfilerAllocTable allocTable;
 
 	private readonly ProfilerVramTable vramTable;
+
+	private readonly ProfilerRamTable ramTable;
 
 	private ProfilerRowSection activeSection;
 
@@ -155,6 +157,8 @@ public sealed class Window_FrameProfiler : Window
 		allocTable.EnableTrackingRequested = EnableAllocTracking;
 		vramTable = new ProfilerVramTable(session);
 		vramTable.CopyViewRequested = CopyView;
+		ramTable = new ProfilerRamTable(session);
+		ramTable.CopyViewRequested = CopyView;
 		activeSection = callTree;
 		callTree.RowSelectedByUser = OnRowSelectedByUser;
 		flamechart = new ProfilerFlamechartWidget(session);
@@ -321,6 +325,10 @@ public sealed class Window_FrameProfiler : Window
 				if (activeSection == vramTable)
 				{
 					vramTable.Refresh();
+				}
+				if (activeSection == ramTable)
+				{
+					ramTable.Refresh();
 				}
 				if (hadData)
 				{
@@ -546,7 +554,7 @@ public sealed class Window_FrameProfiler : Window
 			num += 33f;
 			ProfilerGui.Fill(new Rect(inRect.x + 1f, num, inRect.width - 2f, 1f), ProfilerGui.Divider);
 			Rect rect = Rect.MinMaxRect(inRect.x + 1f, num + 1f, inRect.xMax - 1f, num2);
-			if (session.HasData || activeSection == vramTable)
+			if (session.HasData || activeSection == vramTable || activeSection == ramTable)
 			{
 				activeSection.Draw(rect);
 			}
@@ -727,14 +735,15 @@ public sealed class Window_FrameProfiler : Window
 	private void DrawTabStrip(Rect rect)
 	{
 		float x = rect.x;
-		int num = ProfilerGui.Segments(ref x, rect.y - 0.5f, TabLabels, (activeSection != callTree) ? ((activeSection == allocTable) ? 1 : 2) : 0, null);
+		int num = ProfilerGui.Segments(ref x, rect.y - 0.5f, TabLabels, (activeSection != callTree) ? ((activeSection == allocTable) ? 1 : ((activeSection == vramTable) ? 2 : 3)) : 0, null);
 		if (num >= 0)
 		{
 			SwitchSection(num switch
 			{
+				2 => vramTable, 
 				1 => allocTable, 
 				0 => callTree, 
-				_ => vramTable, 
+				_ => ramTable, 
 			});
 		}
 		x += 10f;
@@ -747,7 +756,7 @@ public sealed class Window_FrameProfiler : Window
 			}
 			x += 10f;
 		}
-		if (activeSection != vramTable)
+		if (activeSection != vramTable && activeSection != ramTable)
 		{
 			threadFilter.DrawButton(ref x, rect.y);
 		}
@@ -798,15 +807,23 @@ public sealed class Window_FrameProfiler : Window
 				vramTable.CaptureBaseline();
 			}
 		}
+		else if (activeSection == ramTable)
+		{
+			xMax = TabButton(xMax, rect.y, "Export", active: false, out var clicked5);
+			if (clicked5)
+			{
+				ramTable.Export();
+			}
+		}
 		else
 		{
 			bool active = ((activeSection == allocTable) ? allocTable.IsInverted : session.Tree.Inverted);
-			xMax = TabButton(xMax, rect.y, "↑↓ Invert", active, out var clicked5);
-			if (clicked5 && activeSection == allocTable)
+			xMax = TabButton(xMax, rect.y, "↑↓ Invert", active, out var clicked6);
+			if (clicked6 && activeSection == allocTable)
 			{
 				allocTable.IsInverted = !allocTable.IsInverted;
 			}
-			else if (clicked5)
+			else if (clicked6)
 			{
 				session.Tree.Inverted = !session.Tree.Inverted;
 				callTree.ResetSelection();
@@ -826,6 +843,7 @@ public sealed class Window_FrameProfiler : Window
 			callTree.Notify_SearchChanged();
 			allocTable.Notify_SearchChanged();
 			vramTable.Notify_SearchChanged();
+			ramTable.Notify_SearchChanged();
 		}
 		if (ProfilerGui.Painting)
 		{

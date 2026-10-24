@@ -58,7 +58,14 @@ internal sealed class GUIClip
 
 	internal static void Internal_Push(Rect screenRect, Vector2 scrollOffset, Vector2 renderOffset, bool resetOffset)
 	{
-		GuiBackend.Current?.PushGroup(screenRect);
+		if (scrollOffset == Vector2.zero)
+		{
+			GuiBackend.Current?.PushGroup(screenRect);
+		}
+		else
+		{
+			GuiBackend.Current?.PushScrollView(screenRect, screenRect.position + scrollOffset);
+		}
 	}
 
 	internal static void Internal_Pop()

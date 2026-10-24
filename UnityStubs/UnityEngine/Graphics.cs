@@ -63,11 +63,21 @@ public class Graphics
 
 	public static void Blit(Texture source, RenderTexture dest, Vector2 scale, Vector2 offset, int sourceDepthSlice, int destDepthSlice)
 	{
-		if (scale != Vector2.one || offset != Vector2.zero)
+		if (source != null && dest != null && (scale != Vector2.one || offset != Vector2.zero))
 		{
-			StubWarner.LogStub("Blit", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\Graphics.cs", 23);
+			if (TryGetGpuTexture(source, forSource: true, out var gpuTexture, out var width, out var height, out var surrogate))
+			{
+				using (surrogate)
+				{
+					BlitGpu(source, gpuTexture, width, height, dest, scale, offset);
+				}
+			}
+			RenderTexture.active = dest;
 		}
-		Blit(source, dest, null, 0);
+		else
+		{
+			Blit(source, dest, null, 0);
+		}
 	}
 
 	public static void DrawTexture(Rect screenRect, Texture texture)
@@ -159,6 +169,8 @@ public class Graphics
 	{
 		if (!(src == null) && !(dst == null))
 		{
+			srcY = Math.Max(1, src.height >> srcMip) - srcY - srcHeight;
+			dstY = Math.Max(1, dst.height >> dstMip) - dstY - srcHeight;
 			TryCopyTextureGpu(src, srcMip, srcX, srcY, srcWidth, srcHeight, dst, dstMip, dstX, dstY);
 		}
 	}
@@ -574,18 +586,18 @@ public class Graphics
 		}
 		else if (!TryDrawTextureGpu(active, texture, GL.TransformRectBounds(screenRect), sourceRect, color))
 		{
-			StubWarner.LogStub("DrawTexture", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\Graphics.cs", 434);
+			StubWarner.LogStub("DrawTexture", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\Graphics.cs", 442);
 		}
 	}
 
 	public static void ExecuteCommandBuffer(UnityEngine.Rendering.CommandBuffer buffer)
 	{
-		StubWarner.LogStub("ExecuteCommandBuffer", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\Graphics.cs", 436);
+		StubWarner.LogStub("ExecuteCommandBuffer", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\Graphics.cs", 444);
 	}
 
 	public static void ExecuteCommandBufferAsync(UnityEngine.Rendering.CommandBuffer buffer, ComputeQueueType queueType)
 	{
-		StubWarner.LogStub("ExecuteCommandBufferAsync", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\Graphics.cs", 437);
+		StubWarner.LogStub("ExecuteCommandBufferAsync", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\Graphics.cs", 445);
 	}
 
 	public static void RenderMesh(in RenderParams rparams, Mesh mesh, int submeshIndex, Matrix4x4 objectToWorld, Matrix4x4? prevObjectToWorld = null)
@@ -618,7 +630,21 @@ public class Graphics
 		}
 	}
 
+	private static int AtLeastOneTexel(float extent)
+	{
+		if (!(extent < 0f))
+		{
+			return Math.Max(1, (int)MathF.Round(extent));
+		}
+		return Math.Min(-1, (int)MathF.Round(extent));
+	}
+
 	private static bool BlitGpu(Texture source, GpuTextureAllocation sourceGpu, int sourceWidth, int sourceHeight, RenderTexture dest)
+	{
+		return BlitGpu(source, sourceGpu, sourceWidth, sourceHeight, dest, Vector2.one, Vector2.zero);
+	}
+
+	private static bool BlitGpu(Texture source, GpuTextureAllocation sourceGpu, int sourceWidth, int sourceHeight, RenderTexture dest, Vector2 scale, Vector2 offset)
 	{
 		if (!dest.TryEnsureGpuReady() || dest.GpuTexture == null)
 		{
@@ -627,7 +653,11 @@ public class Graphics
 		int num = ((source is Texture2D) ? BlitSourceMip(sourceGpu.MipCount, sourceWidth, sourceHeight, dest.width, dest.height) : 0);
 		int num2 = Math.Max(1, sourceWidth >> num);
 		int num3 = Math.Max(1, sourceHeight >> num);
-		GpuTextureService.BlitTexture(sourceGpu, num2, num3, num, 0, 0, num2, num3, dest.GpuTexture, 0, 0, 0, dest.width, dest.height, ToVkFilter(source.filterMode));
+		int srcX = (int)MathF.Round(offset.x * (float)num2);
+		int srcRectWidth = AtLeastOneTexel(scale.x * (float)num2);
+		int srcY = (int)MathF.Round((1f - offset.y - scale.y) * (float)num3);
+		int srcRectHeight = AtLeastOneTexel(scale.y * (float)num3);
+		GpuTextureService.BlitTexture(sourceGpu, num2, num3, num, srcX, srcY, srcRectWidth, srcRectHeight, dest.GpuTexture, 0, 0, 0, dest.width, dest.height, ToVkFilter(source.filterMode));
 		return true;
 	}
 

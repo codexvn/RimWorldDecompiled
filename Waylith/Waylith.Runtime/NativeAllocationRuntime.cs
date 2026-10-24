@@ -251,7 +251,7 @@ public static class NativeAllocationRuntime
 						message.AppendFormatted(currentManagedThreadId);
 						message.AppendLiteral(" without an active temp scope. It will remain live until explicitly freed or shutdown.");
 					}
-					logCategory.Warning(message, "Allocate", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Runtime\\NativeAllocationRuntime.cs", 97);
+					logCategory.Warning(message, "Allocate", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Runtime\\NativeAllocationRuntime.cs", 98);
 				}
 				else
 				{
@@ -309,7 +309,7 @@ public static class NativeAllocationRuntime
 					message.AppendFormatted(allocator);
 					message.AppendLiteral("'.");
 				}
-				logCategory2.Error(message, "Free", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Runtime\\NativeAllocationRuntime.cs", 148);
+				logCategory2.Error(message, "Free", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Runtime\\NativeAllocationRuntime.cs", 149);
 				return;
 			}
 			UntrackAllocationLocked(value, removeTempScopeMapping: true);
@@ -330,7 +330,7 @@ public static class NativeAllocationRuntime
 				message2.AppendFormatted(allocator);
 				message2.AppendLiteral("'.");
 			}
-			logCategory3.Warning(message2, "Free", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Runtime\\NativeAllocationRuntime.cs", 157);
+			logCategory3.Warning(message2, "Free", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Runtime\\NativeAllocationRuntime.cs", 158);
 		}
 		ReleaseMemory(value.Pointer);
 	}
@@ -419,7 +419,7 @@ public static class NativeAllocationRuntime
 				message.AppendFormatted(frameIndex - allocationRecord.FrameAllocated);
 				message.AppendLiteral(" frames.");
 			}
-			logCategory.Warning(message, "EndFrame", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Runtime\\NativeAllocationRuntime.cs", 236);
+			logCategory.Warning(message, "EndFrame", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Runtime\\NativeAllocationRuntime.cs", 237);
 		}
 	}
 
@@ -472,7 +472,7 @@ public static class NativeAllocationRuntime
 					message.AppendFormatted(allocationRecord.Alignment);
 					message.AppendLiteral(") was not freed before shutdown.");
 				}
-				logCategory3.Warning(message, "Shutdown", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Runtime\\NativeAllocationRuntime.cs", 282);
+				logCategory3.Warning(message, "Shutdown", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Runtime\\NativeAllocationRuntime.cs", 283);
 				break;
 			}
 			case AllocationKind.TempJob:
@@ -490,7 +490,7 @@ public static class NativeAllocationRuntime
 					message.AppendFormatted(allocationRecord.Alignment);
 					message.AppendLiteral(") was not freed before shutdown.");
 				}
-				logCategory2.Warning(message, "Shutdown", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Runtime\\NativeAllocationRuntime.cs", 290);
+				logCategory2.Warning(message, "Shutdown", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Runtime\\NativeAllocationRuntime.cs", 291);
 				break;
 			}
 			}
@@ -595,7 +595,7 @@ public static class NativeAllocationRuntime
 				message.AppendFormatted(scope.Kind);
 				message.AppendLiteral("'.");
 			}
-			logCategory2.Warning(message, "ExitTempScope", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Runtime\\NativeAllocationRuntime.cs", 372);
+			logCategory2.Warning(message, "ExitTempScope", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Runtime\\NativeAllocationRuntime.cs", 373);
 		}
 		else if (expectedKind == TempScopeKind.Job && scope.JobHandleId != expectedJobHandleId)
 		{
@@ -612,7 +612,7 @@ public static class NativeAllocationRuntime
 				message.AppendFormatted(scope.JobHandleId);
 				message.AppendLiteral(".");
 			}
-			logCategory3.Warning(message, "ExitTempScope", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Runtime\\NativeAllocationRuntime.cs", 378);
+			logCategory3.Warning(message, "ExitTempScope", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Runtime\\NativeAllocationRuntime.cs", 379);
 		}
 		else
 		{

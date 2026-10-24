@@ -1,4 +1,5 @@
 using System;
+using System.Buffers.Binary;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -43,7 +44,41 @@ public class Texture2D : Texture
 		get
 		{
 			CoreTexture?.FinishPendingBuild();
-			return (TextureFormat)(CoreTexture?.CpuData?.Format ?? LoadedTextureFormat.Rgba32);
+			TextureFormat textureFormat = (TextureFormat)(CoreTexture?.CpuData?.Format ?? LoadedTextureFormat.Rgba32);
+			TextureFormat? widenedFormat = WidenedFormat;
+			if (widenedFormat.HasValue)
+			{
+				TextureFormat valueOrDefault = widenedFormat.GetValueOrDefault();
+				if (textureFormat == TextureFormat.RGBA32)
+				{
+					return valueOrDefault;
+				}
+			}
+			return textureFormat;
+		}
+	}
+
+	private TextureFormat? WidenedFormat
+	{
+		get
+		{
+			bool flag;
+			switch (_requestedFormat)
+			{
+			case TextureFormat.RGB24:
+			case TextureFormat.RGB565:
+			case TextureFormat.RGB48:
+				flag = true;
+				break;
+			default:
+				flag = false;
+				break;
+			}
+			if (!flag)
+			{
+				return null;
+			}
+			return _requestedFormat;
 		}
 	}
 
@@ -263,11 +298,79 @@ public class Texture2D : Texture
 			return Array.Empty<byte>();
 		}
 		MemoryStream memoryStream = new MemoryStream();
-		for (int i = 0; i < texturePixelData.Levels.Length && texturePixelData.Levels[i] != null; i++)
+		byte[] array2;
+		for (int i = 0; i < texturePixelData.Levels.Length && texturePixelData.Levels[i] != null; memoryStream.Write(array2), i++)
 		{
-			memoryStream.Write(AssetBundleTextures.ToUnityOrder(texturePixelData.Levels[i], texturePixelData.Format, Math.Max(1, base.width >> i), Math.Max(1, base.height >> i)));
+			byte[] array = AssetBundleTextures.ToUnityOrder(texturePixelData.Levels[i], texturePixelData.Format, Math.Max(1, base.width >> i), Math.Max(1, base.height >> i));
+			TextureFormat? widenedFormat = WidenedFormat;
+			if (widenedFormat.HasValue)
+			{
+				TextureFormat valueOrDefault = widenedFormat.GetValueOrDefault();
+				if (texturePixelData.Format == LoadedTextureFormat.Rgba32)
+				{
+					array2 = PackRgba32(array, valueOrDefault);
+					continue;
+				}
+			}
+			array2 = array;
 		}
 		return memoryStream.ToArray();
+	}
+
+	private static byte[] PackRgba32(byte[] rgba, TextureFormat target)
+	{
+		int num = rgba.Length / 4;
+		switch (target)
+		{
+		case TextureFormat.RGB24:
+		{
+			byte[] array3 = new byte[num * 3];
+			int num6 = 0;
+			int num7 = 0;
+			int num8 = 0;
+			while (num6 < num)
+			{
+				array3[num8] = rgba[num7];
+				array3[num8 + 1] = rgba[num7 + 1];
+				array3[num8 + 2] = rgba[num7 + 2];
+				num6++;
+				num7 += 4;
+				num8 += 3;
+			}
+			return array3;
+		}
+		case TextureFormat.RGB565:
+		{
+			byte[] array2 = new byte[num * 2];
+			int num4 = 0;
+			int num5 = 0;
+			while (num4 < num)
+			{
+				BinaryPrimitives.WriteUInt16LittleEndian(array2.AsSpan(num4 * 2), (ushort)((rgba[num5] >> 3 << 11) | (rgba[num5 + 1] >> 2 << 5) | (rgba[num5 + 2] >> 3)));
+				num4++;
+				num5 += 4;
+			}
+			return array2;
+		}
+		case TextureFormat.RGB48:
+		{
+			byte[] array = new byte[num * 6];
+			int num2 = 0;
+			int num3 = 0;
+			while (num2 < num)
+			{
+				for (int i = 0; i < 3; i++)
+				{
+					BinaryPrimitives.WriteUInt16LittleEndian(array.AsSpan(num2 * 6 + i * 2), (ushort)(rgba[num3 + i] * 257));
+				}
+				num2++;
+				num3 += 4;
+			}
+			return array;
+		}
+		default:
+			return rgba;
+		}
 	}
 
 	public void LoadRawTextureData(byte[] data)
@@ -319,20 +422,43 @@ public class Texture2D : Texture
 		return new NativeArray<T>((array2 == null) ? Array.Empty<T>() : MemoryMarshal.Cast<byte, T>((ReadOnlySpan<byte>)array2).ToArray(), Allocator.Temp);
 	}
 
-	public void SetPixelData<T>(NativeArray<T> data, int mipLevel, int sourceDataStartIndex = 0) where T : struct
+	public unsafe void SetPixelData<T>(NativeArray<T> data, int mipLevel, int sourceDataStartIndex = 0) where T : struct
 	{
-		SetPixelData(data.ToArray(), mipLevel, sourceDataStartIndex);
+		int num = UnsafeUtility.SizeOf<T>();
+		SetPixelData(new ReadOnlySpan<byte>((byte*)data.GetUnsafeReadOnlyPtrInternal() + (long)sourceDataStartIndex * (long)num, (data.Length - sourceDataStartIndex) * num), mipLevel);
 	}
 
 	public void SetPixelData<T>(T[] data, int mipLevel, int sourceDataStartIndex = 0) where T : struct
 	{
-		if (mipLevel != 0)
+		SetPixelData(MemoryMarshal.AsBytes(data.AsSpan(sourceDataStartIndex)), mipLevel);
+	}
+
+	private void SetPixelData(ReadOnlySpan<byte> bytes, int mipLevel)
+	{
+		TexturePixelData texturePixelData = RequireCpuData();
+		TextureFormat value = _requestedFormat ?? format;
+		if ((uint)mipLevel >= (uint)Math.Max(1, texturePixelData.MipCount) || ToLoadedFormat(value) != texturePixelData.Format || AssetBundleTextures.NeedsDecode(texturePixelData.Format, base.height, mipLevel + 1))
 		{
-			StubWarner.LogStub("SetPixelData", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\Texture2D.cs", 215);
+			if (mipLevel != 0)
+			{
+				StubWarner.LogStub("SetPixelData", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\Texture2D.cs", 270);
+			}
+			else
+			{
+				LoadRawTextureData(bytes.ToArray());
+			}
+			return;
+		}
+		texturePixelData.EnsureWritableMipLevel(mipLevel);
+		byte[] array = texturePixelData.Levels[mipLevel];
+		if (bytes.Length < array.Length)
+		{
+			Debug.LogError($"SetPixelData: {bytes.Length} bytes do not fill mip {mipLevel} of texture '{base.name}' ({base.width}x{base.height} {value}, {array.Length} bytes).");
 		}
 		else
 		{
-			LoadRawTextureData(MemoryMarshal.AsBytes(data.AsSpan(sourceDataStartIndex)).ToArray());
+			bytes.Slice(0, array.Length).CopyTo(array);
+			AssetBundleTextures.FlipNative(array, texturePixelData.Format, Math.Max(1, base.width >> mipLevel), Math.Max(1, base.height >> mipLevel));
 		}
 	}
 
@@ -533,6 +659,16 @@ public class Texture2D : Texture
 		SetPixels32Region(0, x, y, blockWidth, blockHeight, colors);
 	}
 
+	public void SetPixels32(Color32[] colors, int miplevel)
+	{
+		SetPixels32Region(miplevel, 0, 0, Math.Max(1, base.width >> miplevel), Math.Max(1, base.height >> miplevel), colors);
+	}
+
+	public void SetPixels(Color[] colors, int miplevel)
+	{
+		SetPixels(0, 0, Math.Max(1, base.width >> miplevel), Math.Max(1, base.height >> miplevel), colors, miplevel);
+	}
+
 	public bool LoadImage(byte[] data)
 	{
 		return LoadEncodedImage(data);
@@ -572,7 +708,7 @@ public class Texture2D : Texture
 
 	public Rect[] PackTextures(Texture2D[] textures, int padding, int maximumAtlasSize, bool makeNoLongerReadable)
 	{
-		StubWarner.LogStub("PackTextures", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\Texture2D.cs", 391);
+		StubWarner.LogStub("PackTextures", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\Texture2D.cs", 460);
 		return null;
 	}
 
@@ -605,11 +741,12 @@ public class Texture2D : Texture
 			int num4 = Math.Min((int)source.height, Math.Min(active.height - num2, base.height - destY));
 			for (int i = 0; i < num4; i++)
 			{
-				int num5 = (num2 + i) * active.width;
+				int num5 = FlipRow(num2 + i, active.height) * active.width;
+				int y = FlipRow(destY + i, base.height);
 				for (int j = 0; j < num3; j++)
 				{
 					int num6 = (num5 + num + j) * 4;
-					texturePixelData.WritePixel(destX + j, destY + i, new Waylith.Math.Color((float)(int)rgbaTopDown[num6] / 255f, (float)(int)rgbaTopDown[num6 + 1] / 255f, (float)(int)rgbaTopDown[num6 + 2] / 255f, (float)(int)rgbaTopDown[num6 + 3] / 255f));
+					texturePixelData.WritePixel(destX + j, y, new Waylith.Math.Color((float)(int)rgbaTopDown[num6] / 255f, (float)(int)rgbaTopDown[num6 + 1] / 255f, (float)(int)rgbaTopDown[num6 + 2] / 255f, (float)(int)rgbaTopDown[num6 + 3] / 255f));
 				}
 			}
 		}

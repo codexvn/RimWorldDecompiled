@@ -71,7 +71,7 @@ internal static class AssetBundleTextures
 		return loaded != (LoadedTextureFormat)0;
 	}
 
-	private static bool NeedsDecode(LoadedTextureFormat format, int height, int mipCount)
+	internal static bool NeedsDecode(LoadedTextureFormat format, int height, int mipCount)
 	{
 		if (!TexturePixelData.IsBlockCompressed(format))
 		{
@@ -125,7 +125,7 @@ internal static class AssetBundleTextures
 		return list.ToArray();
 	}
 
-	private static void FlipNative(byte[] level, LoadedTextureFormat format, int w, int h)
+	internal static void FlipNative(byte[] level, LoadedTextureFormat format, int w, int h)
 	{
 		int num = TexturePixelData.BlockBytes(format);
 		if (num == 0)

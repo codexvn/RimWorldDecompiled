@@ -4,7 +4,7 @@
 
 ## 版本信息
 
-- 游戏版本：`1.7.4979 rev109`（程序集版本 1.7.4979，Steam buildid 25908500）
+- 游戏版本：`1.7.4985 rev1269`（程序集版本 1.7.4985，Steam buildid 26115268）
 - 来源目录：`F:\SteamLibrary\steamapps\common\RimWorld`
 - 反编译工具：`ilspycmd 9.x`
 - 运行时：.NET 10（自定义 CLR 构建 `waylithclr 10.0.10`）
@@ -14,22 +14,26 @@
 
 | 目录 | 内容 |
 |------|------|
-| `Assembly-CSharp/` | 游戏主逻辑（Verse / RimWorld 命名空间完整保留，约 9200 个源文件） |
+| `Assembly-CSharp/` | 游戏主逻辑（Verse / RimWorld 命名空间完整保留，约 9300 个源文件） |
 | `RimWorld/` | 新引擎引导入口程序集（RimWorldWaylith 命名空间：Bootstrap、Program、崩溃处理等） |
 | `UnityStubs/` | UnityEngine 兼容层程序集：原 UnityEngine.* 的类型（MonoBehaviour、Vector3、Texture2D 等）全部定义于此，运行时由 CLR 重定向（`UnityEngine*=UnityStubs`）承接旧引用 |
 | `Waylith/` | Waylith 引擎中间件核心（UnityStubs 的主要依赖） |
 | `Waylith.UnityCompat/` | Waylith 引擎与 Unity 兼容层之间的胶水程序集 |
+| `Waylith.AssetBake/` | Waylith 引擎资产烘焙程序集（1.7.4985 新增） |
+| `Waylith.VideoDecode/` | Waylith 引擎视频解码程序集（1.7.4985 新增） |
+| `PsdSharp/` | PSD 图像解析库（1.7.4985 新增，Assembly-CSharp 引用） |
 | `Fmod5Sharp/` | FMOD 音频封装（UnityStubs 依赖，Verse.Sound 音频 API 的底层） |
 | `AssetsTools.NET/` | Unity 资产文件读写库（UnityStubs 依赖） |
 | `com.rlabrecque.steamworks.net/` | Steamworks .NET 封装（Assembly-CSharp 直接引用，Verse.Steam 的底层） |
-| `Data/` | 官方 Core 与 DLC 的 XML Def、语言文件、贴图、音频和元数据资源。本目录被 `.gitignore` 忽略，不随仓库提交；需要完整资源参考时，从自己的 RimWorld 安装目录复制 `Data` 目录到仓库根目录（当前本地副本为 1.6 内容，1.7 需重新复制） |
+| `Data/` | 官方 Core 与 DLC 的 XML Def、语言文件、贴图、音频和元数据资源。本目录被 `.gitignore` 忽略，不随仓库提交；需要完整资源参考时，从自己的 RimWorld 安装目录复制 `Data` 目录到仓库根目录 |
 
 引擎本体（`Brutal.*`）、coreclr 与 `System.*` 运行时库、公开第三方库（NAudio、NVorbis、ISharpZipLib 等）不参与 mod 适配，未反编译。
 
 ## 版本线说明
 
-- `main` 分支：RimWorld 1.6 反编译。
+- `main` 分支：跟随最新 1.7 反编译。
 - `1.7` 分支：RimWorld 1.7 反编译（本分支）。
+- `1.6-archive` 分支：RimWorld 1.6 反编译归档。
 
 ## 1.7 mod 适配关键事实
 

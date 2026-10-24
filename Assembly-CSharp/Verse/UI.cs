@@ -8,6 +8,8 @@ public static class UI
 
 	public static int screenHeight;
 
+	private static float lastUIScale;
+
 	public static Vector2 MousePositionOnUI => Input.mousePosition / Prefs.UIScale;
 
 	public static Vector2 MousePositionOnUIInverted
@@ -34,6 +36,11 @@ public static class UI
 
 	public static void ApplyUIScale()
 	{
+		if (Prefs.UIScale != lastUIScale)
+		{
+			lastUIScale = Prefs.UIScale;
+			GenUI.ClearLabelWidthCache();
+		}
 		if (Prefs.UIScale == 1f)
 		{
 			screenWidth = Screen.width;

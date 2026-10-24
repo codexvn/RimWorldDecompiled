@@ -10,6 +10,7 @@ using RimWorld.Planet;
 using RimWorld.QuestGen;
 using UnityEngine;
 using Verse.AI;
+using Waylith.Assets;
 using Waylith.Rendering;
 
 namespace Verse;
@@ -381,8 +382,9 @@ public static class PlayDataLoader
 			try
 			{
 				AbstractFilesystem.ClearAllCache();
-				GC.Collect(int.MaxValue, GCCollectionMode.Forced);
+				GC.Collect(GC.MaxGeneration, GCCollectionMode.Aggressive, blocking: true, compacting: true);
 				Resources.UnloadUnusedAssets();
+				ContentPack.DropResidentPages();
 			}
 			finally
 			{

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Numerics;
 using Brutal;
@@ -29,6 +30,13 @@ public sealed class VulkanShaderLayoutCache : IDisposable
 			return _shader == shader;
 		}
 
+		public void Deconstruct(out Shader shader, out VkDescriptorSetLayout frameSetLayout, out VkDescriptorSetLayout globalTextureSetLayout)
+		{
+			shader = _shader;
+			frameSetLayout = _frameSetLayout;
+			globalTextureSetLayout = _globalTextureSetLayout;
+		}
+
 		public bool Equals(PipelineLayoutKey other)
 		{
 			if (_shader == other._shader && _frameSetLayout.VkHandle == other._frameSetLayout.VkHandle && _frameSetLayout.VkObjectType == other._frameSetLayout.VkObjectType && _globalTextureSetLayout.VkHandle == other._globalTextureSetLayout.VkHandle)
@@ -55,9 +63,9 @@ public sealed class VulkanShaderLayoutCache : IDisposable
 
 	private readonly DeviceEx _device;
 
-	private readonly Dictionary<Shader, VkDescriptorSetLayout> _materialSetLayouts = new Dictionary<Shader, VkDescriptorSetLayout>(ReferenceEqualityComparer.Instance);
+	private readonly ConcurrentDictionary<Shader, Lazy<VkDescriptorSetLayout>> _materialSetLayouts = new ConcurrentDictionary<Shader, Lazy<VkDescriptorSetLayout>>(ReferenceEqualityComparer.Instance);
 
-	private readonly Dictionary<PipelineLayoutKey, VkPipelineLayout> _pipelineLayouts = new Dictionary<PipelineLayoutKey, VkPipelineLayout>();
+	private readonly ConcurrentDictionary<PipelineLayoutKey, Lazy<VkPipelineLayout>> _pipelineLayouts = new ConcurrentDictionary<PipelineLayoutKey, Lazy<VkPipelineLayout>>();
 
 	private bool _disposed;
 
@@ -66,14 +74,15 @@ public sealed class VulkanShaderLayoutCache : IDisposable
 		_device = device;
 	}
 
-	public unsafe VkDescriptorSetLayout GetOrCreateMaterialSetLayout(Shader shader)
+	public VkDescriptorSetLayout GetOrCreateMaterialSetLayout(Shader shader)
 	{
 		ObjectDisposedException.ThrowIf(_disposed, this);
 		ArgumentNullException.ThrowIfNull(shader, "shader");
-		if (_materialSetLayouts.TryGetValue(shader, out var value))
-		{
-			return value;
-		}
+		return _materialSetLayouts.GetOrAdd(shader, (Shader s, VulkanShaderLayoutCache self) => new Lazy<VkDescriptorSetLayout>(() => self.CreateMaterialSetLayout(s)), this).Value;
+	}
+
+	private unsafe VkDescriptorSetLayout CreateMaterialSetLayout(Shader shader)
+	{
 		MaterialLayout materialLayout = shader.MaterialLayout;
 		int num = 1 + materialLayout.TextureSlots.Length + materialLayout.StorageBufferSlots.Length;
 		VkDescriptorSetLayoutBinding* ptr = stackalloc VkDescriptorSetLayoutBinding[num];
@@ -94,43 +103,49 @@ public sealed class VulkanShaderLayoutCache : IDisposable
 		{
 			ptr[num2++] = CreateBinding((uint)materialLayout.StorageBufferSlots[j].Binding, VkDescriptorType.StorageBuffer, VkShaderStageFlags.VertexBit | VkShaderStageFlags.FragmentBit);
 		}
-		VkDescriptorSetLayout vkDescriptorSetLayout = _device.CreateDescriptorSetLayout(new VkDescriptorSetLayoutCreateInfo
+		DeviceEx device = _device;
+		VkDescriptorSetLayoutCreateInfo pCreateInfo = new VkDescriptorSetLayoutCreateInfo
 		{
 			BindingCount = num,
 			Bindings = ptr
-		}, _device.VkAllocator);
-		_materialSetLayouts.Add(shader, vkDescriptorSetLayout);
-		return vkDescriptorSetLayout;
+		};
+		return device.CreateDescriptorSetLayout(in pCreateInfo, _device.VkAllocator);
 	}
 
-	public unsafe VkPipelineLayout GetOrCreatePipelineLayout(Shader shader, VkDescriptorSetLayout frameSetLayout, VkDescriptorSetLayout globalTextureSetLayout)
+	public VkPipelineLayout GetOrCreatePipelineLayout(Shader shader, VkDescriptorSetLayout frameSetLayout, VkDescriptorSetLayout globalTextureSetLayout)
 	{
 		ObjectDisposedException.ThrowIf(_disposed, this);
 		ArgumentNullException.ThrowIfNull(shader, "shader");
 		PipelineLayoutKey key = new PipelineLayoutKey(shader, frameSetLayout, globalTextureSetLayout);
-		if (_pipelineLayouts.TryGetValue(key, out var value))
-		{
-			return value;
-		}
-		VkDescriptorSetLayout orCreateMaterialSetLayout = GetOrCreateMaterialSetLayout(shader);
+		return _pipelineLayouts.GetOrAdd(key, (PipelineLayoutKey k, VulkanShaderLayoutCache self) => new Lazy<VkPipelineLayout>(() => self.CreatePipelineLayout(k)), this).Value;
+	}
+
+	private unsafe VkPipelineLayout CreatePipelineLayout(PipelineLayoutKey key)
+	{
+		PipelineLayoutKey pipelineLayoutKey = key;
+		pipelineLayoutKey.Deconstruct(out Shader shader, out VkDescriptorSetLayout frameSetLayout, out VkDescriptorSetLayout globalTextureSetLayout);
+		Shader shader2 = shader;
+		VkDescriptorSetLayout vkDescriptorSetLayout = frameSetLayout;
+		VkDescriptorSetLayout vkDescriptorSetLayout2 = globalTextureSetLayout;
+		VkDescriptorSetLayout orCreateMaterialSetLayout = GetOrCreateMaterialSetLayout(shader2);
 		VkDescriptorSetLayout* ptr = stackalloc VkDescriptorSetLayout[3];
-		*ptr = frameSetLayout;
-		ptr[1] = globalTextureSetLayout;
+		*ptr = vkDescriptorSetLayout;
+		ptr[1] = vkDescriptorSetLayout2;
 		ptr[2] = orCreateMaterialSetLayout;
 		VkPushConstantRange vkPushConstantRange = new VkPushConstantRange();
 		vkPushConstantRange.StageFlags = VkShaderStageFlags.VertexBit;
 		vkPushConstantRange.Offset = ByteSize.Zero;
 		vkPushConstantRange.Size = ByteSize.Of<Matrix4x4>();
 		VkPushConstantRange vkPushConstantRange2 = vkPushConstantRange;
-		VkPipelineLayout vkPipelineLayout = _device.CreatePipelineLayout(new VkPipelineLayoutCreateInfo
+		DeviceEx device = _device;
+		VkPipelineLayoutCreateInfo pCreateInfo = new VkPipelineLayoutCreateInfo
 		{
 			SetLayoutCount = 3,
 			SetLayouts = ptr,
 			PushConstantRangeCount = 1,
 			PushConstantRanges = &vkPushConstantRange2
-		}, _device.VkAllocator);
-		_pipelineLayouts.Add(key, vkPipelineLayout);
-		return vkPipelineLayout;
+		};
+		return device.CreatePipelineLayout(in pCreateInfo, _device.VkAllocator);
 	}
 
 	public void Invalidate(Shader shader)
@@ -139,26 +154,19 @@ public sealed class VulkanShaderLayoutCache : IDisposable
 		{
 			return;
 		}
-		if (_materialSetLayouts.Remove(shader, out var value))
+		if (_materialSetLayouts.TryRemove(shader, out Lazy<VkDescriptorSetLayout> value))
 		{
-			_device.DestroyDescriptorSetLayout(value, _device.VkAllocator);
+			DestroyIfCreated(value);
 		}
-		List<PipelineLayoutKey> list = null;
-		foreach (var (item, pipelineLayout) in _pipelineLayouts)
+		foreach (KeyValuePair<PipelineLayoutKey, Lazy<VkPipelineLayout>> pipelineLayout2 in _pipelineLayouts)
 		{
-			if (item.IsFor(shader))
+			pipelineLayout2.Deconstruct(out var key, out var value2);
+			PipelineLayoutKey key2 = key;
+			Lazy<VkPipelineLayout> pipelineLayout = value2;
+			if (key2.IsFor(shader) && _pipelineLayouts.TryRemove(key2, out value2))
 			{
-				_device.DestroyPipelineLayout(pipelineLayout, _device.VkAllocator);
-				(list ?? (list = new List<PipelineLayoutKey>())).Add(item);
+				DestroyIfCreated(pipelineLayout);
 			}
-		}
-		if (list == null)
-		{
-			return;
-		}
-		foreach (PipelineLayoutKey item2 in list)
-		{
-			_pipelineLayouts.Remove(item2);
 		}
 	}
 
@@ -169,16 +177,32 @@ public sealed class VulkanShaderLayoutCache : IDisposable
 			return;
 		}
 		_disposed = true;
-		foreach (VkPipelineLayout value in _pipelineLayouts.Values)
+		foreach (Lazy<VkPipelineLayout> value in _pipelineLayouts.Values)
 		{
-			_device.DestroyPipelineLayout(value, _device.VkAllocator);
+			DestroyIfCreated(value);
 		}
-		foreach (VkDescriptorSetLayout value2 in _materialSetLayouts.Values)
+		foreach (Lazy<VkDescriptorSetLayout> value2 in _materialSetLayouts.Values)
 		{
-			_device.DestroyDescriptorSetLayout(value2, _device.VkAllocator);
+			DestroyIfCreated(value2);
 		}
 		_pipelineLayouts.Clear();
 		_materialSetLayouts.Clear();
+	}
+
+	private void DestroyIfCreated(Lazy<VkPipelineLayout> pipelineLayout)
+	{
+		if (pipelineLayout.IsValueCreated)
+		{
+			_device.DestroyPipelineLayout(pipelineLayout.Value, _device.VkAllocator);
+		}
+	}
+
+	private void DestroyIfCreated(Lazy<VkDescriptorSetLayout> descriptorSetLayout)
+	{
+		if (descriptorSetLayout.IsValueCreated)
+		{
+			_device.DestroyDescriptorSetLayout(descriptorSetLayout.Value, _device.VkAllocator);
+		}
 	}
 
 	private static VkDescriptorSetLayoutBinding CreateBinding(uint binding, VkDescriptorType descriptorType, VkShaderStageFlags stageFlags)

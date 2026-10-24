@@ -166,6 +166,10 @@ internal static class WaylithAudioNative
 
 	[DllImport("waylithaudio", ExactSpelling = true)]
 	[LibraryImport("waylithaudio")]
+	public static extern ulong wa_sound_resident_bytes(ulong sound);
+
+	[DllImport("waylithaudio", ExactSpelling = true)]
+	[LibraryImport("waylithaudio")]
 	public static extern uint wa_sound_channels(ulong sound);
 
 	[DllImport("waylithaudio", ExactSpelling = true)]

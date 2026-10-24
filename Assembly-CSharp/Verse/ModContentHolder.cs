@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using KTrie;
 using UnityEngine;
@@ -11,6 +12,22 @@ namespace Verse;
 
 public class ModContentHolder<T> where T : class
 {
+	[CompilerGenerated]
+	private sealed class _003C_003Ec__DisplayClass8_0
+	{
+		public string prefix;
+
+		internal int _003CGetAllUnderPath_003Eb__0(string a, string b)
+		{
+			int num = (a.IndexOf('/', prefix.Length) >= 0).CompareTo(b.IndexOf('/', prefix.Length) >= 0);
+			if (num == 0)
+			{
+				return string.CompareOrdinal(a, b);
+			}
+			return num;
+		}
+	}
+
 	[CompilerGenerated]
 	private sealed class _003CGetAllUnderPath_003Ed__8 : IEnumerable<T>, IEnumerable, IEnumerator<T>, IEnumerator, IDisposable
 	{
@@ -26,7 +43,7 @@ public class ModContentHolder<T> where T : class
 
 		public ModContentHolder<T> _003C_003E4__this;
 
-		private IEnumerator<string> _003C_003E7__wrap1;
+		private List<string>.Enumerator _003C_003E7__wrap1;
 
 		T IEnumerator<T>.Current
 		{
@@ -67,7 +84,7 @@ public class ModContentHolder<T> where T : class
 					_003C_003Em__Finally1();
 				}
 			}
-			_003C_003E7__wrap1 = null;
+			_003C_003E7__wrap1 = default(List<string>.Enumerator);
 			_003C_003E1__state = -2;
 		}
 
@@ -84,8 +101,17 @@ public class ModContentHolder<T> where T : class
 				case 0:
 				{
 					_003C_003E1__state = -1;
-					string prefix = ((pathRoot.NullOrEmpty() || pathRoot[pathRoot.Length - 1] == '/') ? pathRoot : (pathRoot + "/"));
-					_003C_003E7__wrap1 = modContentHolder.contentListTrie.GetByPrefix(prefix).GetEnumerator();
+					_003C_003Ec__DisplayClass8_0 CS_0024_003C_003E8__locals3 = new _003C_003Ec__DisplayClass8_0
+					{
+						prefix = ((pathRoot.NullOrEmpty() || pathRoot[pathRoot.Length - 1] == '/') ? pathRoot : (pathRoot + "/"))
+					};
+					List<string> list = modContentHolder.contentListTrie.GetByPrefix(CS_0024_003C_003E8__locals3.prefix).ToList();
+					list.Sort(delegate(string a, string b)
+					{
+						int num2 = (a.IndexOf('/', CS_0024_003C_003E8__locals3.prefix.Length) >= 0).CompareTo(b.IndexOf('/', CS_0024_003C_003E8__locals3.prefix.Length) >= 0);
+						return (num2 == 0) ? string.CompareOrdinal(a, b) : num2;
+					});
+					_003C_003E7__wrap1 = list.GetEnumerator();
 					_003C_003E1__state = -3;
 					break;
 				}
@@ -101,7 +127,7 @@ public class ModContentHolder<T> where T : class
 					return true;
 				}
 				_003C_003Em__Finally1();
-				_003C_003E7__wrap1 = null;
+				_003C_003E7__wrap1 = default(List<string>.Enumerator);
 				return false;
 			}
 			catch
@@ -121,10 +147,7 @@ public class ModContentHolder<T> where T : class
 		private void _003C_003Em__Finally1()
 		{
 			_003C_003E1__state = -1;
-			if (_003C_003E7__wrap1 != null)
-			{
-				_003C_003E7__wrap1.Dispose();
-			}
+			((IDisposable)_003C_003E7__wrap1/*cast due to .constrained prefix*/).Dispose();
 		}
 
 		[DebuggerHidden]

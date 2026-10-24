@@ -159,10 +159,13 @@ public sealed class RenderTexture : IRenderTextureTarget, IDisposable
 		{
 			vkImageUsageFlags |= VkImageUsageFlags.StorageBit;
 		}
-		color = Allocate(Name + ".Color", ColorFormat, vkImageUsageFlags, VkImageAspectFlags.ColorBit);
+		if (ColorFormat != 0)
+		{
+			color = Allocate(Name + ".Color", ColorFormat, vkImageUsageFlags, VkImageAspectFlags.ColorBit);
+		}
 		if (HasDepth)
 		{
-			depth = Allocate(Name + ".Depth", DepthFormat, VkImageUsageFlags.SampledBit | VkImageUsageFlags.DepthStencilAttachmentBit, DepthAspect(DepthFormat));
+			depth = Allocate(Name + ".Depth", DepthFormat, VkImageUsageFlags.TransferSrcBit | VkImageUsageFlags.TransferDstBit | VkImageUsageFlags.SampledBit | VkImageUsageFlags.DepthStencilAttachmentBit, DepthAspect(DepthFormat));
 		}
 	}
 
@@ -305,7 +308,7 @@ public sealed class RenderTexture : IRenderTextureTarget, IDisposable
 		return handle.CreateImageView(in pCreateInfo, device.Device.VkAllocator);
 	}
 
-	private static VkImageAspectFlags DepthAspect(VkFormat format)
+	internal static VkImageAspectFlags DepthAspect(VkFormat format)
 	{
 		return format switch
 		{

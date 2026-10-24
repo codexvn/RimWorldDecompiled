@@ -20,7 +20,7 @@ internal static class WindowPlacement
 	{
 		try
 		{
-			string text = PrefsFilePath();
+			string text = EarlyPrefs.PrefsFilePath();
 			if (File.Exists(text))
 			{
 				XElement root = XDocument.Load(text).Root;
@@ -36,13 +36,6 @@ internal static class WindowPlacement
 		{
 			Debug.LogWarning("Could not restore the window position from prefs: " + ex.Message);
 		}
-	}
-
-	private static string PrefsFilePath()
-	{
-		string value;
-		string path = (GenCommandLine.TryGetCommandLineArg("savedatafolder", out value) ? ((value.Length == 0) ? Path.DirectorySeparatorChar.ToString() : value) : (Application.isEditor ? Path.Combine(Directory.GetParent(Application.dataPath).FullName, "SaveData") : ((!OperatingSystem.IsMacOS()) ? Application.persistentDataPath : Path.Combine(Directory.GetParent(Application.persistentDataPath).FullName, "RimWorld"))));
-		return Path.Combine(path, "Config", "Prefs.xml");
 	}
 
 	public static void Track()

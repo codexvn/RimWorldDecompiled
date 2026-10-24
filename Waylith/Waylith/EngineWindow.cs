@@ -40,6 +40,8 @@ public static class EngineWindow
 
 	public static int TargetFrameRate { get; set; } = -1;
 
+	public static int? TargetFrameRateOverride { get; set; }
+
 	public static int PreferredMonitor { get; private set; } = -1;
 
 	public static string[] MonitorNames { get; internal set; } = Array.Empty<string>();
@@ -104,18 +106,34 @@ public static class EngineWindow
 		}
 		if (Glfw.PInvoke.GetPlatform() == 393219)
 		{
-			double num = 0.0;
-			ReadOnlySpan<GlfwMonitor> monitors = Glfw.GetMonitors();
-			for (int i = 0; i < monitors.Length; i++)
-			{
-				num = System.Math.Max(num, monitors[i].VideoMode.RefreshRate);
-			}
+			double num = FastestMonitorRefreshRate();
 			if (num > 0.0)
 			{
 				return num;
 			}
 		}
 		GlfwMonitor glfwMonitor = instance.CurrentMonitor();
-		return (!glfwMonitor.IsNull()) ? glfwMonitor.VideoMode.RefreshRate : 0;
+		int num2 = ((!glfwMonitor.IsNull()) ? glfwMonitor.VideoMode.RefreshRate : 0);
+		if (num2 > 1)
+		{
+			return num2;
+		}
+		double num3 = FastestMonitorRefreshRate();
+		if (!(num3 > 1.0))
+		{
+			return 60.0;
+		}
+		return num3;
+	}
+
+	private static double FastestMonitorRefreshRate()
+	{
+		double num = 0.0;
+		ReadOnlySpan<GlfwMonitor> monitors = Glfw.GetMonitors();
+		for (int i = 0; i < monitors.Length; i++)
+		{
+			num = System.Math.Max(num, monitors[i].VideoMode.RefreshRate);
+		}
+		return num;
 	}
 }

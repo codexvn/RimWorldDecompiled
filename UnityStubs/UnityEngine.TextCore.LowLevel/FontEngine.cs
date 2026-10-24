@@ -1,92 +1,124 @@
+using System;
+using System.IO;
 using UnityStubs.Internal;
 
 namespace UnityEngine.TextCore.LowLevel;
 
 public static class FontEngine
 {
+	private static FontFaceReader.FaceNames? _loadedFace;
+
+	private static int _loadedPointSize;
+
 	public static FontEngineError InitializeFontEngine()
 	{
-		StubWarner.LogStub("InitializeFontEngine", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\TextCore.cs", 79);
-		return FontEngineError.Invalid_Library;
+		return FontEngineError.Success;
 	}
 
 	public static FontEngineError DestroyFontEngine()
 	{
-		StubWarner.LogStub("DestroyFontEngine", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\TextCore.cs", 80);
+		_loadedFace = null;
 		return FontEngineError.Success;
 	}
 
 	public static FontEngineError LoadFontFace(string filePath)
 	{
-		StubWarner.LogStub("LoadFontFace", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\TextCore.cs", 81);
-		return FontEngineError.Invalid_File_Path;
+		return LoadFontFace(filePath, 0);
 	}
 
 	public static FontEngineError LoadFontFace(string filePath, int pointSize)
 	{
-		StubWarner.LogStub("LoadFontFace", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\TextCore.cs", 82);
-		return FontEngineError.Invalid_File_Path;
+		if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath))
+		{
+			return FontEngineError.Invalid_File_Path;
+		}
+		try
+		{
+			return LoadFontFace(File.ReadAllBytes(filePath), pointSize);
+		}
+		catch (Exception ex) when (((ex is IOException || ex is UnauthorizedAccessException) ? 1 : 0) != 0)
+		{
+			return FontEngineError.Invalid_File_Path;
+		}
 	}
 
 	public static FontEngineError LoadFontFace(byte[] sourceFontFile)
 	{
-		StubWarner.LogStub("LoadFontFace", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\TextCore.cs", 83);
-		return FontEngineError.Invalid_File;
+		return LoadFontFace(sourceFontFile, 0);
 	}
 
 	public static FontEngineError LoadFontFace(byte[] sourceFontFile, int pointSize)
 	{
-		StubWarner.LogStub("LoadFontFace", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\TextCore.cs", 84);
-		return FontEngineError.Invalid_File;
+		if (sourceFontFile == null || !FontFaceReader.TryReadFaces(sourceFontFile, out var faces))
+		{
+			return FontEngineError.Invalid_File_Format;
+		}
+		_loadedFace = faces[0];
+		_loadedPointSize = pointSize;
+		return FontEngineError.Success;
 	}
 
 	public static FontEngineError LoadFontFace(Font font)
 	{
-		StubWarner.LogStub("LoadFontFace", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\TextCore.cs", 85);
-		return FontEngineError.Invalid_Face;
+		return LoadFontFace(font, 0);
 	}
 
 	public static FontEngineError LoadFontFace(Font font, int pointSize)
 	{
-		StubWarner.LogStub("LoadFontFace", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\TextCore.cs", 86);
-		return FontEngineError.Invalid_Face;
+		if ((object)font == null || !font.FaceNames.HasValue)
+		{
+			return FontEngineError.Invalid_Face;
+		}
+		_loadedFace = font.FaceNames;
+		_loadedPointSize = pointSize;
+		return FontEngineError.Success;
 	}
 
 	public static FontEngineError UnloadFontFace()
 	{
-		StubWarner.LogStub("UnloadFontFace", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\TextCore.cs", 87);
+		_loadedFace = null;
 		return FontEngineError.Success;
 	}
 
 	public static FaceInfo GetFaceInfo()
 	{
-		StubWarner.LogStub("GetFaceInfo", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\TextCore.cs", 88);
+		FontFaceReader.FaceNames? loadedFace = _loadedFace;
+		if (loadedFace.HasValue)
+		{
+			FontFaceReader.FaceNames valueOrDefault = loadedFace.GetValueOrDefault();
+			FaceInfo result = default(FaceInfo);
+			result.familyName = valueOrDefault.Family;
+			result.styleName = valueOrDefault.Style;
+			result.pointSize = _loadedPointSize;
+			result.scale = 1f;
+			return result;
+		}
 		return default(FaceInfo);
 	}
 
 	public static FontEngineError SetFaceSize(int pointSize)
 	{
-		StubWarner.LogStub("SetFaceSize", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\TextCore.cs", 89);
+		StubWarner.LogStub("SetFaceSize", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\TextCore.cs", 119);
 		return FontEngineError.Invalid_Face;
 	}
 
 	public static bool TryGetGlyphIndex(uint unicode, out uint glyphIndex)
 	{
-		StubWarner.LogStub("TryGetGlyphIndex", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\TextCore.cs", 90);
+		StubWarner.LogStub("TryGetGlyphIndex", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\TextCore.cs", 120);
 		glyphIndex = 0u;
 		return false;
 	}
 
 	public static bool TryGetGlyphWithIndexValue(uint glyphIndex, GlyphLoadFlags flags, out Glyph glyph)
 	{
-		StubWarner.LogStub("TryGetGlyphWithIndexValue", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\TextCore.cs", 91);
+		StubWarner.LogStub("TryGetGlyphWithIndexValue", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\TextCore.cs", 121);
 		glyph = null;
 		return false;
 	}
 
 	public static bool TryGetGlyphWithUnicodeValue(uint unicode, GlyphLoadFlags flags, out Glyph glyph)
 	{
-		StubWarner.LogStub("TryGetGlyphWithUnicodeValue", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\TextCore.cs", 92);
+		StubWarner.LogStub("TryGetGlyphWithUnicodeValue", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\UnityStubs\\TextCore.cs", 122);
 		glyph = null;
 		return false;
 	}

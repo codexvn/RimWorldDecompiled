@@ -93,7 +93,7 @@ public class Texture3D : Texture
 					message.AppendFormatted(loadedTexture.Height);
 					message.AppendLiteral("); cannot slice it.");
 				}
-				log.Error(message, "LoadLutFromFile", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\Texture2D.cs", 722);
+				log.Error(message, "LoadLutFromFile", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\Texture2D.cs", 793);
 				return null;
 			}
 			int num3 = num2;

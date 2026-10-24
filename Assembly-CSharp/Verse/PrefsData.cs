@@ -36,7 +36,18 @@ public class PrefsData
 	[DefaultValue(-1)]
 	public int preferredMonitor = -1;
 
+	[DefaultValue("")]
+	public string preferredGpuName = "";
+
+	[DefaultValue("")]
+	public string preferredGpuUuid = "";
+
+	public bool scaleRelativeToSystem;
+
 	public float uiScale = 1f;
+
+	[DefaultValue(false)]
+	public bool ignoreSystemScaling;
 
 	public bool customCursorEnabled = true;
 
@@ -152,27 +163,36 @@ public class PrefsData
 
 	public void Apply()
 	{
-		if (UnityData.IsInMainThread)
+		if (!UnityData.IsInMainThread)
 		{
-			if (customCursorEnabled)
+			return;
+		}
+		if (customCursorEnabled)
+		{
+			CustomCursor.Activate();
+		}
+		else
+		{
+			CustomCursor.Deactivate();
+		}
+		AudioListener.volume = volumeMaster;
+		Application.runInBackground = runInBackground;
+		EngineWindow.SetPreferredMonitor(preferredMonitor);
+		if (screenWidth == 0 || screenHeight == 0)
+		{
+			ResolutionUtility.SetNativeResolutionRaw();
+		}
+		else if (Prefs.FullScreenMode == FullScreenMode.Windowed)
+		{
+			if (!Application.isBatchMode)
 			{
-				CustomCursor.Activate();
+				Screen.fullScreenMode = FullScreenMode.Windowed;
+				EngineWindow.SetResolution(screenWidth, screenHeight);
 			}
-			else
-			{
-				CustomCursor.Deactivate();
-			}
-			AudioListener.volume = volumeMaster;
-			Application.runInBackground = runInBackground;
-			EngineWindow.SetPreferredMonitor(preferredMonitor);
-			if (screenWidth == 0 || screenHeight == 0)
-			{
-				ResolutionUtility.SetNativeResolutionRaw();
-			}
-			else
-			{
-				ResolutionUtility.SetResolutionRaw(screenWidth, screenHeight, Prefs.FullScreenMode);
-			}
+		}
+		else
+		{
+			ResolutionUtility.SetResolutionRaw(screenWidth, screenHeight, Prefs.FullScreenMode);
 		}
 	}
 }

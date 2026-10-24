@@ -1,6 +1,7 @@
 using System;
 using System.Buffers;
 using System.Buffers.Binary;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -49,14 +50,21 @@ public sealed class AssetPack : IDisposable
 
 	public static int CorruptEntries;
 
+	private const int MadvDontNeed = 4;
+
 	public IReadOnlyDictionary<string, string> ContentHashes { get; }
+
+	public string Path { get; }
+
+	public long MappedBytes => length;
 
 	public int Count => entries.Count;
 
 	public IReadOnlyCollection<string> Names => entries.Keys;
 
-	private unsafe AssetPack(SafeFileHandle handle, MemoryMappedFile map, SafeMemoryMappedViewHandle view, Dictionary<string, Entry> entries)
+	private unsafe AssetPack(string path, SafeFileHandle handle, MemoryMappedFile map, SafeMemoryMappedViewHandle view, Dictionary<string, Entry> entries)
 	{
+		Path = path;
 		this.handle = handle;
 		this.map = map;
 		this.view = view;
@@ -137,7 +145,7 @@ public sealed class AssetPack : IDisposable
 		{
 			memoryMappedFile = MemoryMappedFile.CreateFromFile(safeFileHandle, null, 0L, MemoryMappedFileAccess.Read, HandleInheritability.None, leaveOpen: true);
 			safeMemoryMappedViewHandle = memoryMappedFile.CreateViewAccessor(0L, 0L, MemoryMappedFileAccess.Read).SafeMemoryMappedViewHandle;
-			AssetPack assetPack = new AssetPack(safeFileHandle, memoryMappedFile, safeMemoryMappedViewHandle, ReadCentralDirectory(safeFileHandle));
+			AssetPack assetPack = new AssetPack(path, safeFileHandle, memoryMappedFile, safeMemoryMappedViewHandle, ReadCentralDirectory(safeFileHandle));
 			if (assetPack.Contains("bake.manifest") && assetPack.ContentHashes.Count == 0)
 			{
 				assetPack.Dispose();
@@ -318,7 +326,7 @@ public sealed class AssetPack : IDisposable
 					message.AppendFormatted(ex.Message);
 					message.AppendLiteral("); using it as if the pack did not have it.");
 				}
-				log.Error(message, "TryDecode", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Assets\\AssetPack.cs", 269);
+				log.Error(message, "TryDecode", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Assets\\AssetPack.cs", 275);
 			}
 			return false;
 		}
@@ -406,6 +414,50 @@ public sealed class AssetPack : IDisposable
 			dictionary[item.Name] = new Entry(item.LocalHeaderOffset, (int)item.CompressedLength, (int)item.Length, item.Crc, item.Codec);
 		}
 		return dictionary;
+	}
+
+	public unsafe void DropResidentPages()
+	{
+		if (bytes != null && length > 0)
+		{
+			if (OperatingSystem.IsWindows())
+			{
+				VirtualUnlock((nint)bytes, (nuint)length);
+			}
+			else
+			{
+				madvise((nint)bytes, (nuint)length, 4);
+			}
+		}
+	}
+
+	[LibraryImport("libc", SetLastError = true)]
+	[GeneratedCode("Microsoft.Interop.LibraryImportGenerator", "42.42.42.42")]
+	[SkipLocalsInit]
+	private static int madvise(nint address, nuint length, int advice)
+	{
+		Marshal.SetLastSystemError(0);
+		int result = __PInvoke(address, length, advice);
+		Marshal.SetLastPInvokeError(Marshal.GetLastSystemError());
+		return result;
+		[DllImport("libc", EntryPoint = "madvise", ExactSpelling = true)]
+		static extern int __PInvoke(nint __address_native, nuint __length_native, int __advice_native);
+	}
+
+	[LibraryImport("kernel32", SetLastError = true)]
+	[GeneratedCode("Microsoft.Interop.LibraryImportGenerator", "42.42.42.42")]
+	[SkipLocalsInit]
+	[return: MarshalAs(UnmanagedType.Bool)]
+	private static bool VirtualUnlock(nint address, nuint size)
+	{
+		Marshal.SetLastSystemError(0);
+		int num = __PInvoke(address, size);
+		int lastSystemError = Marshal.GetLastSystemError();
+		bool result = num != 0;
+		Marshal.SetLastPInvokeError(lastSystemError);
+		return result;
+		[DllImport("kernel32", EntryPoint = "VirtualUnlock", ExactSpelling = true)]
+		static extern int __PInvoke(nint __address_native, nuint __size_native);
 	}
 
 	public void Dispose()

@@ -11,13 +11,13 @@ namespace Waylith.Assets;
 
 public static class AssetPackBoot
 {
-	public static AssetPack? Open(string dataPath, ICommandLine commandLine)
+	public static AssetPack? Open(string dataPath, ICommandLine commandLine, string? defaultPackPath = null)
 	{
 		if (commandLine.HasSwitch("NoAssetPack"))
 		{
 			return null;
 		}
-		string text = commandLine.GetFollowingValue("AssetPack") ?? Path.Combine(AppContext.BaseDirectory, "Assets.zip");
+		string text = commandLine.GetFollowingValue("AssetPack") ?? defaultPackPath ?? Path.Combine(AppContext.BaseDirectory, "Assets.zip");
 		bool shouldAppend;
 		try
 		{
@@ -39,7 +39,7 @@ public static class AssetPackBoot
 					message.AppendFormatted(assetPack.Count);
 					message.AppendLiteral(" entries will be visible.");
 				}
-				logCategory.Warning(message, "Open", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Assets\\AssetPackBoot.cs", 28);
+				logCategory.Warning(message, "Open", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Assets\\AssetPackBoot.cs", 29);
 			}
 			ContentPack.Use(assetPack, dataPath, AssetPackManifest.ReadStamps(text));
 			RuntimeShaderCompiler.UseAssetPack(assetPack);
@@ -59,7 +59,7 @@ public static class AssetPackBoot
 				message2.AppendLiteral("': ");
 				message2.AppendFormatted(ex.Message);
 			}
-			logCategory2.Error(message2, "Open", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Assets\\AssetPackBoot.cs", 38);
+			logCategory2.Error(message2, "Open", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Assets\\AssetPackBoot.cs", 39);
 			return null;
 		}
 	}
@@ -81,7 +81,7 @@ public static class AssetPackBoot
 				message.AppendFormatted(AssetPack.CorruptEntries);
 				message.AppendLiteral(" damaged entries were skipped, verifying the game files should repair them.");
 			}
-			log.Warning(message, "LogUsage", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Assets\\AssetPackBoot.cs", 49);
+			log.Warning(message, "LogUsage", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Assets\\AssetPackBoot.cs", 50);
 		}
 		VerboseLog.Log($"Asset pack: {GpuTextureService.PackTextureHits} texture hits, {GpuTextureService.PackTextureMisses} misses, {AssetPack.CorruptEntries} damaged entries; decompressed {(double)AssetPack.DecodedBytes / 1048576.0:F0} MB in {(double)AssetPack.DecodeTicks * 1000.0 / (double)Stopwatch.Frequency:F0} ms CPU time over {(double)(AssetPack.DecodeLastTicks - AssetPack.DecodeFirstTicks) * 1000.0 / (double)Stopwatch.Frequency:F0} ms wall time");
 	}

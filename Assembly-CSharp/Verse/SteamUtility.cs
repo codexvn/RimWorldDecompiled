@@ -26,7 +26,7 @@ public static class SteamUtility
 
 	public static void OpenUrl(string url)
 	{
-		if (SteamManager.Initialized && SteamUtils.IsOverlayEnabled())
+		if (SteamManager.Initialized)
 		{
 			SteamFriends.ActivateGameOverlayToWebPage(url);
 		}
@@ -43,7 +43,7 @@ public static class SteamUtility
 
 	public static void OpenSteamWorkshopPage()
 	{
-		OpenUrl("http://steamcommunity.com/workshop/browse/?appid=" + SteamUtils.GetAppID().ToString());
+		OpenUrl("steam://url/SteamWorkshopPage/" + SteamUtils.GetAppID().ToString());
 	}
 
 	public static string SteamWorkshopPageUrl(PublishedFileId_t pfid)

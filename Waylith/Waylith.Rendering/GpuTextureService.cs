@@ -147,6 +147,18 @@ public static class GpuTextureService
 
 	private static readonly ConcurrentDictionary<string, byte> _keyedCacheUsed = new ConcurrentDictionary<string, byte>(StringComparer.Ordinal);
 
+	private const int MaxSampledBlitScratch = 8192;
+
+	private static readonly Lock _sampledBlitSync = new Lock();
+
+	private static RenderTextureDrawFeature? _sampledBlitFeature;
+
+	private static RenderTexture? _sampledBlitScratch;
+
+	private static RenderTextureBatch? _sampledBlitBatch;
+
+	private static readonly Dictionary<(VkFilter Filter, int Mip), VkSampler> _sampledBlitSamplers = new Dictionary<(VkFilter, int), VkSampler>();
+
 	public static bool IsConfigured => _device != null;
 
 	internal static long RenderFrameSerial => Interlocked.Read(in _renderFrameSerial);
@@ -1223,6 +1235,10 @@ public static class GpuTextureService
 
 	public static void RetireDeferredDisposalsAfterIdle()
 	{
+		if (RenderThread.IsProducerThread)
+		{
+			Texture2D.DrainPendingEvictions();
+		}
 		TryRetireDeferredDisposalsAfterIdle(RenderFrameSerial);
 	}
 
@@ -1283,11 +1299,11 @@ public static class GpuTextureService
 			{
 				return AllocateImageRetryingOnce(allocator, label, in createInfo, in allocationInfo);
 			}
-			if (flag && TextureResidency.TryAllocateInSystemMemory(allocator, label, in createInfo, out var allocation))
+			if (flag && !TextureResidency.OnDemand && TextureResidency.TryAllocateInSystemMemory(allocator, label, in createInfo, out var allocation))
 			{
 				return allocation;
 			}
-			if (!flag)
+			if (!flag || TextureResidency.OnDemand)
 			{
 				TextureResidency.MakeRoom(num);
 			}
@@ -1710,7 +1726,7 @@ public static class GpuTextureService
 						message.AppendFormatted(num);
 						message.AppendLiteral("); skipping its completion barrier.");
 					}
-					log.Error(message, "FlushPendingTextureCommandsLocked", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\GpuTextureService.cs", 1842);
+					log.Error(message, "FlushPendingTextureCommandsLocked", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\GpuTextureService.cs", 1847);
 				}
 				else
 				{
@@ -2094,49 +2110,52 @@ public static class GpuTextureService
 		{
 			LogCategory log = RenderLog.Log;
 			bool shouldAppend;
-			LogString<Warning> message = new LogString<Warning>(96, 2, log, out shouldAppend);
+			LogString<Warning> message = new LogString<Warning>(97, 2, log, out shouldAppend);
 			if (shouldAppend)
 			{
-				message.AppendLiteral("Blitting from '");
+				message.AppendLiteral("BlitTexture: source texture '");
 				message.AppendFormatted(source.DebugLabel);
-				message.AppendLiteral("' drops its view swizzle ");
+				message.AppendLiteral("' has a swizzle (");
 				message.AppendFormatted(source.Swizzle);
-				message.AppendLiteral(": image blits copy texels, not what a sampler would see.");
+				message.AppendLiteral("). Blits do not respect swizzles. Just so you know!");
 			}
-			log.Warning(message, "BlitTexture", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\GpuTextureService.cs", 2405);
+			log.Warning(message, "BlitTexture", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\GpuTextureService.cs", 2410);
 		}
-		ExecuteImageCommands(delegate(CommandBuffer commandBuffer)
+		if (FormatBlock(source.Format).Size <= 1 || !TryBlitSampled(source, srcWidth, srcHeight, srcMip, srcX, srcY, srcRectWidth, srcRectHeight, destination, dstMip, dstX, dstY, dstRectWidth, dstRectHeight, filter))
 		{
-			VkImageLayout mipLayout = source.GetMipLayout(srcMip);
-			VkImageLayout mipLayout2 = destination.GetMipLayout(dstMip);
-			TransitionSubresourceLayout(commandBuffer, source, srcMip, VkImageLayout.TransferSrcOptimal, GetTransferSourceAccessMask(mipLayout), VkAccessFlags.TransferReadBit, GetTransferSourceStageMask(mipLayout), VkPipelineStageFlags.TransferBit);
-			TransitionSubresourceLayout(commandBuffer, destination, dstMip, VkImageLayout.TransferDstOptimal, GetTransferSourceAccessMask(mipLayout2), VkAccessFlags.TransferWriteBit, GetTransferSourceStageMask(mipLayout2), VkPipelineStageFlags.TransferBit);
-			VkImageBlit vkImageBlit = new VkImageBlit
+			ExecuteImageCommands(delegate(CommandBuffer commandBuffer)
 			{
-				SrcSubresource = new VkImageSubresourceLayers
+				VkImageLayout mipLayout = source.GetMipLayout(srcMip);
+				VkImageLayout mipLayout2 = destination.GetMipLayout(dstMip);
+				TransitionSubresourceLayout(commandBuffer, source, srcMip, VkImageLayout.TransferSrcOptimal, GetTransferSourceAccessMask(mipLayout), VkAccessFlags.TransferReadBit, GetTransferSourceStageMask(mipLayout), VkPipelineStageFlags.TransferBit);
+				TransitionSubresourceLayout(commandBuffer, destination, dstMip, VkImageLayout.TransferDstOptimal, GetTransferSourceAccessMask(mipLayout2), VkAccessFlags.TransferWriteBit, GetTransferSourceStageMask(mipLayout2), VkPipelineStageFlags.TransferBit);
+				VkImageBlit vkImageBlit = new VkImageBlit
 				{
-					AspectMask = VkImageAspectFlags.ColorBit,
-					MipLevel = srcMip,
-					BaseArrayLayer = 0,
-					LayerCount = 1
-				},
-				DstSubresource = new VkImageSubresourceLayers
-				{
-					AspectMask = VkImageAspectFlags.ColorBit,
-					MipLevel = dstMip,
-					BaseArrayLayer = 0,
-					LayerCount = 1
-				}
-			};
-			global::_003CPrivateImplementationDetails_003E.InlineArrayFirstElementRef<VkOffset3D_2, VkOffset3D>(ref vkImageBlit.SrcOffsets) = new VkOffset3D(srcX, srcY, 0);
-			global::_003CPrivateImplementationDetails_003E.InlineArrayElementRef<VkOffset3D_2, VkOffset3D>(ref vkImageBlit.SrcOffsets, 1) = new VkOffset3D(srcX + srcRectWidth, srcY + srcRectHeight, 1);
-			global::_003CPrivateImplementationDetails_003E.InlineArrayFirstElementRef<VkOffset3D_2, VkOffset3D>(ref vkImageBlit.DstOffsets) = new VkOffset3D(dstX, dstY, 0);
-			global::_003CPrivateImplementationDetails_003E.InlineArrayElementRef<VkOffset3D_2, VkOffset3D>(ref vkImageBlit.DstOffsets, 1) = new VkOffset3D(dstX + dstRectWidth, dstY + dstRectHeight, 1);
-			VkImage image = source.Image;
-			VkImage image2 = destination.Image;
-			VkImageBlit reference = vkImageBlit;
-			commandBuffer.BlitImage(image, VkImageLayout.TransferSrcOptimal, image2, VkImageLayout.TransferDstOptimal, new ReadOnlySpan<VkImageBlit>(in reference), filter);
-		}, batch, (source, srcMip), (destination, dstMip));
+					SrcSubresource = new VkImageSubresourceLayers
+					{
+						AspectMask = VkImageAspectFlags.ColorBit,
+						MipLevel = srcMip,
+						BaseArrayLayer = 0,
+						LayerCount = 1
+					},
+					DstSubresource = new VkImageSubresourceLayers
+					{
+						AspectMask = VkImageAspectFlags.ColorBit,
+						MipLevel = dstMip,
+						BaseArrayLayer = 0,
+						LayerCount = 1
+					}
+				};
+				global::_003CPrivateImplementationDetails_003E.InlineArrayFirstElementRef<VkOffset3D_2, VkOffset3D>(ref vkImageBlit.SrcOffsets) = new VkOffset3D(srcX, srcY, 0);
+				global::_003CPrivateImplementationDetails_003E.InlineArrayElementRef<VkOffset3D_2, VkOffset3D>(ref vkImageBlit.SrcOffsets, 1) = new VkOffset3D(srcX + srcRectWidth, srcY + srcRectHeight, 1);
+				global::_003CPrivateImplementationDetails_003E.InlineArrayFirstElementRef<VkOffset3D_2, VkOffset3D>(ref vkImageBlit.DstOffsets) = new VkOffset3D(dstX, dstY, 0);
+				global::_003CPrivateImplementationDetails_003E.InlineArrayElementRef<VkOffset3D_2, VkOffset3D>(ref vkImageBlit.DstOffsets, 1) = new VkOffset3D(dstX + dstRectWidth, dstY + dstRectHeight, 1);
+				VkImage image = source.Image;
+				VkImage image2 = destination.Image;
+				VkImageBlit reference = vkImageBlit;
+				commandBuffer.BlitImage(image, VkImageLayout.TransferSrcOptimal, image2, VkImageLayout.TransferDstOptimal, new ReadOnlySpan<VkImageBlit>(in reference), filter);
+			}, batch, (source, srcMip), (destination, dstMip));
+		}
 	}
 
 	private static VkAccessFlags GetTransferSourceAccessMask(VkImageLayout layout)
@@ -2233,7 +2252,7 @@ public static class GpuTextureService
 				message.AppendFormatted(fullPath);
 				message.AppendLiteral(": the file's contents are not the format its extension names; rename it so the decoder meant for it reads it");
 			}
-			log.Error(message, "DecodeTextureFile", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\GpuTextureService.cs", 2552);
+			log.Error(message, "DecodeTextureFile", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\GpuTextureService.cs", 2560);
 		}
 		if (TryLoadTextureFromUnsupportedFile(fullPath, out var loadedTexture))
 		{
@@ -2435,7 +2454,7 @@ public static class GpuTextureService
 				message.AppendFormatted(loaded.Format);
 				message.AppendLiteral(", not RGBA32; cannot premultiply. It will render with incorrect alpha in Noesis.");
 			}
-			log.Warning(message, "PremultiplyAlphaInPlace", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\GpuTextureService.cs", 2717);
+			log.Warning(message, "PremultiplyAlphaInPlace", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\GpuTextureService.cs", 2725);
 			return;
 		}
 		byte[][] levels = loaded.Levels;
@@ -2528,7 +2547,7 @@ public static class GpuTextureService
 				message.AppendFormatted(ex.InnerException?.Message ?? ex.Message);
 				message.AppendLiteral(")");
 			}
-			log.Error(message, "TryLoadTextureWithPsdSharp", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\GpuTextureService.cs", 2795);
+			log.Error(message, "TryLoadTextureWithPsdSharp", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\GpuTextureService.cs", 2803);
 			return false;
 		}
 	}
@@ -2556,7 +2575,7 @@ public static class GpuTextureService
 					message.AppendLiteral(": ");
 					message.AppendFormatted(warning);
 				}
-				logCategory.Warning(message, "TryLoadTextureWithPsdSharp", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\GpuTextureService.cs", 2813);
+				logCategory.Warning(message, "TryLoadTextureWithPsdSharp", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\GpuTextureService.cs", 2821);
 			}
 			if (psdFile?.ImageData == null)
 			{
@@ -2617,7 +2636,7 @@ public static class GpuTextureService
 				message2.AppendFormatted(ex.InnerException?.Message ?? ex.Message);
 				message2.AppendLiteral(")");
 			}
-			logCategory2.Error(message2, "TryLoadTextureWithPsdSharp", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\GpuTextureService.cs", 2858);
+			logCategory2.Error(message2, "TryLoadTextureWithPsdSharp", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\GpuTextureService.cs", 2866);
 			shouldAppend = false;
 			return shouldAppend;
 		}
@@ -3152,7 +3171,12 @@ public static class GpuTextureService
 
 	public static bool WriteTextureCache(string sourcePath, Texture2D texture)
 	{
-		return TryWriteTextureCache(sourcePath, texture.GetLoadedTextureData(), texture.CpuData?.AlphaIsPremultiplied ?? false);
+		if (!TryWriteTextureCache(sourcePath, texture.GetLoadedTextureData(), texture.CpuData?.AlphaIsPremultiplied ?? false))
+		{
+			return false;
+		}
+		Texture2D.EvictWhenCached(texture);
+		return true;
 	}
 
 	internal static void WriteTextureCache(string sourcePath, bool premultiplied, in LoadedTextureData texture)
@@ -3231,7 +3255,7 @@ public static class GpuTextureService
 					message.AppendLiteral("Texture cache sweep failed: ");
 					message.AppendFormatted(ex.Message);
 				}
-				log.Warning(message, "BeginSweepCache", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\GpuTextureService.cs", 3437);
+				log.Warning(message, "BeginSweepCache", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\GpuTextureService.cs", 3450);
 			}
 		});
 	}
@@ -3532,5 +3556,79 @@ public static class GpuTextureService
 			TransitionLayout(commandBuffer, gpuTexture, VkImageLayout.ShaderReadOnlyOptimal, VkAccessFlags.TransferWriteBit, VkAccessFlags.ShaderReadBit, VkPipelineStageFlags.TransferBit, VkPipelineStageFlags.FragmentShaderBit);
 		}, false);
 		return gpuTexture;
+	}
+
+	private static bool TryBlitSampled(GpuTextureAllocation source, int srcWidth, int srcHeight, int srcMip, int srcX, int srcY, int srcRectWidth, int srcRectHeight, GpuTextureAllocation destination, int dstMip, int dstX, int dstY, int dstRectWidth, int dstRectHeight, VkFilter filter)
+	{
+		if (_graphicsDevice == null || dstMip != 0 || destination.Format != VkFormat.R8G8B8A8UNorm || srcWidth <= 0 || srcHeight <= 0)
+		{
+			return false;
+		}
+		if (dstRectWidth < 0)
+		{
+			dstX += dstRectWidth;
+			dstRectWidth = -dstRectWidth;
+			srcX += srcRectWidth;
+			srcRectWidth = -srcRectWidth;
+		}
+		if (dstRectHeight < 0)
+		{
+			dstY += dstRectHeight;
+			dstRectHeight = -dstRectHeight;
+			srcY += srcRectHeight;
+			srcRectHeight = -srcRectHeight;
+		}
+		if (dstRectWidth <= 0 || dstRectHeight <= 0 || dstRectWidth > 8192 || dstRectHeight > 8192)
+		{
+			return false;
+		}
+		using (_sampledBlitSync.EnterScope())
+		{
+			if (_sampledBlitFeature == null)
+			{
+				_sampledBlitFeature = new RenderTextureDrawFeature(_graphicsDevice, _deferredDisposalDelay);
+			}
+			RenderTextureDrawFeature sampledBlitFeature = _sampledBlitFeature;
+			if (_sampledBlitScratch == null || _sampledBlitScratch.Width < dstRectWidth || _sampledBlitScratch.Height < dstRectHeight)
+			{
+				_sampledBlitScratch?.Dispose();
+				RenderTexture.Configure(_graphicsDevice);
+				_sampledBlitScratch = new RenderTexture(System.Math.Max(dstRectWidth, _sampledBlitScratch?.Width ?? 0), System.Math.Max(dstRectHeight, _sampledBlitScratch?.Height ?? 0), VkFormat.R8G8B8A8UNorm, VkFormat.Undefined, RenderTextureFilter.Bilinear, RenderTextureWrap.Clamp, randomWrite: false, "GpuTextureService.SampledBlit");
+				_sampledBlitBatch = null;
+			}
+			RenderTextureBatch? obj = _sampledBlitBatch ?? (_sampledBlitBatch = sampledBlitFeature.CreateBatch(_sampledBlitScratch));
+			obj.Reset();
+			obj.ClearColor = default(float4);
+			obj.Blit(source, new float4((float)srcX / (float)srcWidth, (float)srcY / (float)srcHeight, (float)srcRectWidth / (float)srcWidth, (float)srcRectHeight / (float)srcHeight), new VkRect2D
+			{
+				Offset = new VkOffset2D(0, 0),
+				Extent = new VkExtent2D(dstRectWidth, dstRectHeight)
+			}, new float4(1f, 1f, 1f, 1f), GetSampledBlitSampler(filter, srcMip));
+			obj.CopyTo(destination, new VkOffset2D(0, 0), new VkOffset2D(dstX, dstY), new VkExtent2D(dstRectWidth, dstRectHeight));
+			obj.ExecuteNow();
+			return true;
+		}
+	}
+
+	private static VkSampler GetSampledBlitSampler(VkFilter filter, int mip)
+	{
+		if (_sampledBlitSamplers.TryGetValue((filter, mip), out var value))
+		{
+			return value;
+		}
+		value = _device.CreateSampler(new VkSamplerCreateInfo
+		{
+			MagFilter = filter,
+			MinFilter = filter,
+			MipmapMode = VkSamplerMipmapMode.Nearest,
+			AddressModeU = VkSamplerAddressMode.ClampToEdge,
+			AddressModeV = VkSamplerAddressMode.ClampToEdge,
+			AddressModeW = VkSamplerAddressMode.ClampToEdge,
+			MinLod = mip,
+			MaxLod = mip,
+			BorderColor = VkBorderColor.FloatTransparentBlack
+		}, _device.VkAllocator);
+		_sampledBlitSamplers[(filter, mip)] = value;
+		return value;
 	}
 }

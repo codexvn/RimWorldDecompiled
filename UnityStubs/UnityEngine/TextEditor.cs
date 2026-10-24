@@ -190,7 +190,7 @@ public class TextEditor
 		Rect rect = GUI.TextFieldTextRect(position, multiline, style);
 		Vector2 vector = guiPosition - rect.position + scrollOffset;
 		bool flag = style?.wordWrap ?? multiline;
-		return current.TextIndexAt(style?.FontIndex ?? 1, style?.fontSize ?? 0, style?.fontStyle ?? FontStyle.Normal, _text, flag ? rect.width : (-1f), multiline ? vector : new Vector2(vector.x, 0f));
+		return current.TextIndexAt(style?.FontIndex ?? 1, style?.fontSize ?? 0, style?.fontStyle ?? FontStyle.Normal, _text, flag ? rect.width : (-1f), multiline ? vector : new Vector2(vector.x, 0f), style?.richText ?? false);
 	}
 
 	public void OnFocus()

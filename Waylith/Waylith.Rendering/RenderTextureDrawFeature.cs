@@ -50,7 +50,7 @@ public sealed class RenderTextureDrawFeature : IRenderFeature, IRenderPass, IDis
 
 	private readonly IRenderPass[] passes;
 
-	private IRenderContext renderContext;
+	private IRenderContext? renderContext;
 
 	private VkRenderPass renderPass;
 
@@ -99,6 +99,16 @@ public sealed class RenderTextureDrawFeature : IRenderFeature, IRenderPass, IDis
 	public bool PreBackbuffer => true;
 
 	public RenderTextureDrawFeature(GraphicsDevice graphicsDevice, IRenderContext renderContext)
+		: this(graphicsDevice, renderContext, renderContext.FramesInFlight)
+	{
+	}
+
+	public RenderTextureDrawFeature(GraphicsDevice graphicsDevice, int framesInFlight)
+		: this(graphicsDevice, null, framesInFlight)
+	{
+	}
+
+	private RenderTextureDrawFeature(GraphicsDevice graphicsDevice, IRenderContext? renderContext, int framesInFlight)
 	{
 		this.graphicsDevice = graphicsDevice;
 		this.renderContext = renderContext;
@@ -113,9 +123,8 @@ public sealed class RenderTextureDrawFeature : IRenderFeature, IRenderPass, IDis
 			Flags = VkCommandPoolCreateFlags.ResetCommandBufferBit
 		};
 		immediateCommandPool = handle.CreateCommandPool(in pCreateInfo, device.VkAllocator);
-		int num = System.Math.Max(1, renderContext.FramesInFlight);
-		framePools = new VkDescriptorPool[num];
-		for (int i = 0; i < num; i++)
+		framePools = new VkDescriptorPool[System.Math.Max(1, framesInFlight)];
+		for (int i = 0; i < framePools.Length; i++)
 		{
 			framePools[i] = CreateDescriptorPool(1024);
 		}
@@ -349,6 +358,10 @@ public sealed class RenderTextureDrawFeature : IRenderFeature, IRenderPass, IDis
 	{
 		if (meshRenderer == null)
 		{
+			if (renderContext == null)
+			{
+				throw new InvalidOperationException("DrawMesh needs a RenderTextureDrawFeature registered with the frame renderer.");
+			}
 			meshRenderPass = PostFxPassHelpers.CreateColorRenderPass(device, VkFormat.R8G8B8A8UNorm, VkFormat.D32SFloat, VkAttachmentLoadOp.Clear);
 			meshRenderer = new MeshBatchRenderer(graphicsDevice, renderContext);
 		}

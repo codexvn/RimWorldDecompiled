@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -25,6 +26,14 @@ public class Texture2D : Texture
 	private static ConcurrentBag<Texture2D>? _deferredLoads;
 
 	private static readonly ReaderWriterLockSlim DeferredLoadsLock = new ReaderWriterLockSlim();
+
+	private static readonly Lock PendingEvictionsGate = new Lock();
+
+	private static List<(Texture2D Texture, int Attempts)> _pendingEvictions = new List<(Texture2D, int)>();
+
+	private const int MaxEvictionAttempts = 600;
+
+	private const int MaxEvictionsPerDrain = 8192;
 
 	public override int width
 	{
@@ -385,6 +394,65 @@ public class Texture2D : Texture
 		return base.GpuResource != null;
 	}
 
+	internal static void EvictWhenCached(Texture2D texture)
+	{
+		if (!TextureResidency.OnDemand || texture.SourcePath == null)
+		{
+			return;
+		}
+		using (PendingEvictionsGate.EnterScope())
+		{
+			_pendingEvictions.Add((texture, 0));
+		}
+	}
+
+	public static void DrainPendingEvictions()
+	{
+		if (_pendingEvictions.Count == 0)
+		{
+			return;
+		}
+		List<(Texture2D, int)> pendingEvictions;
+		using (PendingEvictionsGate.EnterScope())
+		{
+			pendingEvictions = _pendingEvictions;
+			_pendingEvictions = new List<(Texture2D, int)>();
+		}
+		int num = 0;
+		List<(Texture2D, int)> list = new List<(Texture2D, int)>();
+		foreach (var (texture2D, num2) in pendingEvictions)
+		{
+			if (texture2D.GpuResource == null || texture2D.CpuData == null || texture2D.SourcePath == null)
+			{
+				continue;
+			}
+			if (num >= 8192)
+			{
+				list.Add((texture2D, num2));
+			}
+			else if (!GpuTextureService.HasValidTextureCache(texture2D.SourcePath, texture2D.CpuData.AlphaIsPremultiplied, texture2D._width, texture2D._height))
+			{
+				if (num2 + 1 < 600)
+				{
+					list.Add((texture2D, num2 + 1));
+				}
+			}
+			else
+			{
+				texture2D.Evict();
+				num++;
+			}
+		}
+		if (list.Count == 0)
+		{
+			return;
+		}
+		using (PendingEvictionsGate.EnterScope())
+		{
+			_pendingEvictions.AddRange(list);
+		}
+	}
+
 	public static void BeginDeferredLoading()
 	{
 		_deferredLoads = new ConcurrentBag<Texture2D>();
@@ -403,8 +471,13 @@ public class Texture2D : Texture
 		{
 			DeferredLoadsLock.ExitWriteLock();
 		}
-		if (deferredLoads == null)
+		if (deferredLoads == null || !GpuTextureService.IsConfigured)
 		{
+			return;
+		}
+		if (TextureResidency.OnDemand)
+		{
+			VerboseLog.Log($"Deferred loading: {deferredLoads.Count} textures are metadata only, and will load on first use (texture policy is set to on-demand).");
 			return;
 		}
 		Texture2D[] pending = deferredLoads.Where((Texture2D texture) => texture.GpuResource == null && !stayEvicted(texture)).ToArray();
@@ -421,32 +494,39 @@ public class Texture2D : Texture
 				failed.Enqueue(pending[i]);
 			}
 		});
-		VerboseLog.Log($"Deferred loading: {deferredLoads.Count} textures described without pixels, {pending.Length - skipped} uploaded, {skipped} left to load at first use (device-local memory is at its watermark).");
+		VerboseLog.Log($"Deferred loading: {deferredLoads.Count} textures are metadata only, {pending.Length - skipped} uploaded, {skipped} will load on first use (device-local memory is high).");
 		if (failed.IsEmpty)
 		{
 			return;
 		}
 		LogCategory log = RenderLog.Log;
 		bool shouldAppend;
-		LogString<Warning> message = new LogString<Warning>(85, 2, log, out shouldAppend);
+		LogString<Warning> message = new LogString<Warning>(87, 2, log, out shouldAppend);
 		if (shouldAppend)
 		{
 			message.AppendLiteral("Deferred loading: ");
 			message.AppendFormatted(failed.Count);
-			message.AppendLiteral(" textures have no pixels, the pack or cache could not supply them: ");
+			message.AppendLiteral(" textures have no pixels, as they failed to load from pack or cache: ");
 			message.AppendFormatted(string.Join(", ", from texture in failed.Take(5)
 				select texture.SourcePath));
 		}
-		log.Warning(message, "EndDeferredLoading", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\Texture2D.cs", 374);
+		log.Warning(message, "EndDeferredLoading", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\Texture2D.cs", 436);
 	}
 
 	internal override bool TryEvictForResidency()
 	{
-		if (base.GpuResource == null || IsReadable || SourcePath == null || CpuData == null)
+		if (base.GpuResource == null || CpuData == null)
 		{
 			return false;
 		}
-		if (!GpuTextureService.HasValidTextureCache(SourcePath, CpuData.AlphaIsPremultiplied, _width, _height))
+		if (IsReadable)
+		{
+			if (!TextureResidency.OnDemand || CpuData.Dirty)
+			{
+				return false;
+			}
+		}
+		else if (SourcePath == null || !GpuTextureService.HasValidTextureCache(SourcePath, CpuData.AlphaIsPremultiplied, _width, _height))
 		{
 			return false;
 		}
@@ -572,12 +652,12 @@ public class Texture2D : Texture
 		try
 		{
 			ConcurrentBag<Texture2D> deferredLoads = _deferredLoads;
-			if (deferredLoads == null || !GpuTextureService.TryDescribeTexture(fullPath, premultiplyAlpha, out var info))
+			if ((deferredLoads == null && !TextureResidency.OnDemand) || !GpuTextureService.TryDescribeTexture(fullPath, premultiplyAlpha, out var info))
 			{
 				return null;
 			}
 			Texture2D texture2D = NewFileTexture(filePath, fullPath, info.Width, info.Height, info.Format, info.MipCount, info.Opaque, premultiplyAlpha, info.Swizzle);
-			deferredLoads.Add(texture2D);
+			deferredLoads?.Add(texture2D);
 			return texture2D;
 		}
 		finally
@@ -589,7 +669,7 @@ public class Texture2D : Texture
 	public static Texture2D LoadFromFile(string filePath, bool premultiplyAlpha = false)
 	{
 		string fullPath = Path.GetFullPath(filePath);
-		if (_deferredLoads != null)
+		if (_deferredLoads != null || TextureResidency.OnDemand)
 		{
 			Texture2D texture2D = TryLoadDeferred(filePath, fullPath, premultiplyAlpha);
 			if (texture2D != null)
@@ -643,6 +723,7 @@ public class Texture2D : Texture
 		if (cached)
 		{
 			texture2D3.ReleaseCpuLevels();
+			EvictWhenCached(texture2D3);
 		}
 		return texture2D3;
 	}
@@ -660,7 +741,7 @@ public class Texture2D : Texture
 			message.AppendFormatted(e.Message);
 			message.AppendLiteral(". Substituting magenta placeholder.");
 		}
-		log.Error(message, "DecodeFailurePlaceholder", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\Texture2D.cs", 579);
+		log.Error(message, "DecodeFailurePlaceholder", "D:\\Workspaces\\rimworld-builds\\RimWorldWaylith\\Engine\\Waylith\\Rendering\\Texture2D.cs", 650);
 		return CreatePlaceholder(Path.GetFileNameWithoutExtension(filePath), new Color32(byte.MaxValue, 0, byte.MaxValue, byte.MaxValue));
 	}
 
